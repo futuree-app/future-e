@@ -132,7 +132,53 @@ function buildTensions(catalog, categories) {
   return result.slice(0, 4);
 }
 
-function getPreviewCards(communeName, categories) {
+function formatIndicatorValue(value, digits = 0) {
+  if (value === null || value === undefined || Number.isNaN(value)) {
+    return null;
+  }
+
+  return new Intl.NumberFormat('fr-FR', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).format(value);
+}
+
+function getDriasCard(communeName, indicators) {
+  const summerTemp = indicators?.NORTMm_seas_JJA?.value_numeric;
+  const hotDays = indicators?.NORTX30D_yr?.value_numeric;
+  const tropicalNights = indicators?.NORTR_yr?.value_numeric;
+
+  if (hotDays !== null && hotDays !== undefined) {
+    return {
+      label: `Chaleur à ${communeName}`,
+      val: `${formatIndicatorValue(hotDays, 0)} jours > 30°C/an`,
+      col: C.red,
+      src: 'DRIAS / Météo-France',
+    };
+  }
+
+  if (tropicalNights !== null && tropicalNights !== undefined) {
+    return {
+      label: `Nuits tropicales à ${communeName}`,
+      val: `${formatIndicatorValue(tropicalNights, 0)} nuits/an`,
+      col: C.red,
+      src: 'DRIAS / Météo-France',
+    };
+  }
+
+  if (summerTemp !== null && summerTemp !== undefined) {
+    return {
+      label: `Été à ${communeName}`,
+      val: `${formatIndicatorValue(summerTemp, 1)}°C en moyenne`,
+      col: C.red,
+      src: 'DRIAS / Météo-France',
+    };
+  }
+
+  return null;
+}
+
+function getPreviewCards(communeName, categories, indicators) {
   const name = communeName || 'votre commune';
   const safeCategories =
     categories && categories.length > 0 ? categories : ['all'];
@@ -140,6 +186,11 @@ function getPreviewCards(communeName, categories) {
   const hasCategory = (category) => safeCategories.includes(category);
 
   const cards = [];
+  const driasCard = getDriasCard(name, indicators);
+
+  if (driasCard) {
+    cards.push(driasCard);
+  }
 
   if (hasCategory('littoral') || hasCategory('littoral_atlantique')) {
     cards.push({
@@ -173,12 +224,14 @@ function getPreviewCards(communeName, categories) {
     hasCategory('urbain_dense_nord') ||
     hasCategory('mediterranee')
   ) {
-    cards.push({
-      label: `Canicule à ${name}`,
-      val: '34 jours/an en 2050',
-      col: C.red,
-      src: 'DRIAS / Météo-France',
-    });
+    if (!driasCard) {
+      cards.push({
+        label: `Canicule à ${name}`,
+        val: '34 jours/an en 2050',
+        col: C.red,
+        src: 'DRIAS / Météo-France',
+      });
+    }
   }
 
   if (hasCategory('rural_agricole') || hasCategory('tension_hydrique_connue')) {
@@ -384,6 +437,7 @@ export default function FutureELanding() {
   const [catalogError, setCatalogError] = useState('');
   const [tensionsCatalog, setTensionsCatalog] = useState([]);
   const [communeMeta, setCommuneMeta] = useState(null);
+  const [communeIndicators, setCommuneIndicators] = useState({});
   const [tensions, setTensions] = useState([]);
   const [activeTension, setActiveTension] = useState(null);
   const [answer, setAnswer] = useState(null);
@@ -394,9 +448,21 @@ export default function FutureELanding() {
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
   const commune = selectedCommune?.name || '';
 
-  useEffect(() => {
-    supabase.current = createClient();
-  }, []);
+  function ensureSupabaseClient() {
+    if (supabase.current) {
+      return supabase.current;
+    }
+
+    try {
+      supabase.current = createClient();
+      return supabase.current;
+    } catch (error) {
+      const reason =
+        error instanceof Error ? error.message : 'Configuration Supabase absente.';
+      setCatalogError(`Supabase indisponible. Vérifiez les variables d'environnement. Détail : ${reason}`);
+      return null;
+    }
+  }
 
   useEffect(() => {
     const onMove = (event) =>
@@ -427,8 +493,11 @@ export default function FutureELanding() {
       setCatalogLoading(true);
       setCatalogError('');
 
-      const client = supabase.current ?? createClient();
-      supabase.current = client;
+      const client = ensureSupabaseClient();
+      if (!client) {
+        setCatalogLoading(false);
+        return;
+      }
 
       const { data, error } = await client
         .from('tensions_catalog')
@@ -522,13 +591,16 @@ export default function FutureELanding() {
     setAnswerError('');
     setAnswerSource('');
     setCommuneMeta(null);
+    setCommuneIndicators({});
 
     if (tensionsCatalog.length === 0) {
       return;
     }
 
-    const client = supabase.current ?? createClient();
-    supabase.current = client;
+    const client = ensureSupabaseClient();
+    if (!client) {
+      return;
+    }
 
     const queries = [];
 
@@ -571,6 +643,25 @@ export default function FutureELanding() {
       usedFallback: !matchedRow,
     });
 
+    const indicatorInseeCode = nextCommune.citycode || matchedRow?.insee_code;
+
+    if (indicatorInseeCode) {
+      const { data: indicatorRows } = await client
+        .from('commune_indicators')
+        .select('indicator_code, value_numeric, unit')
+        .eq('insee_code', indicatorInseeCode)
+        .eq('source_dataset_id', 'drias_tracc_indices')
+        .eq('scenario', 'median')
+        .eq('horizon', '2050')
+        .in('indicator_code', ['NORTMm_seas_JJA', 'NORTX30D_yr', 'NORTR_yr']);
+
+      const nextIndicators = Object.fromEntries(
+        (indicatorRows || []).map((row) => [row.indicator_code, row]),
+      );
+
+      setCommuneIndicators(nextIndicators);
+    }
+
     setTensions(buildTensions(tensionsCatalog, categories));
   }
 
@@ -587,6 +678,7 @@ export default function FutureELanding() {
     if (selectedCommune && value !== selectedCommune.name) {
       setSelectedCommune(null);
       setCommuneMeta(null);
+      setCommuneIndicators({});
       setTensions([]);
       setActiveTension(null);
       setAnswer(null);
@@ -600,8 +692,16 @@ export default function FutureELanding() {
     setAnswerError('');
     setAnswerSource('');
 
-    const client = supabase.current ?? createClient();
-    supabase.current = client;
+    const client = ensureSupabaseClient();
+    if (!client) {
+      setAnswer(getFallbackAnswer(tension.id));
+      setAnswerSource('fallback_local');
+      setAnswerError(
+        "Supabase indisponible. Réponse locale affichée. Vérifiez les variables d'environnement côté application.",
+      );
+      setLoading(false);
+      return;
+    }
 
     const { data } = await client
       .from('tension_answers')
@@ -1485,6 +1585,7 @@ export default function FutureELanding() {
   const previewCards = getPreviewCards(
     previewCommune,
     activeCategories,
+    communeIndicators,
   );
 
   return (
