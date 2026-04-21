@@ -211,6 +211,19 @@ function buildDriasContext(communeName, indicators) {
   return null;
 }
 
+function buildGeorisquesContext(georisques) {
+  if (!georisques) {
+    return null;
+  }
+
+  return {
+    commune: georisques.communeName || null,
+    official_risks: georisques.riskLabels || [],
+    flags: georisques.flags || {},
+    seismic: georisques.seismic || null,
+  };
+}
+
 function getDriasCard(communeName, indicators) {
   const hotDays = getLandingIndicatorValue(indicators, 'NORTX30D_yr');
   const tropicalNights = getLandingIndicatorValue(indicators, 'NORTR_yr');
@@ -246,7 +259,51 @@ function getDriasCard(communeName, indicators) {
   return null;
 }
 
-function getPreviewCards(communeName, categories, indicators) {
+function getGeorisquesCard(communeName, georisques) {
+  if (!georisques) {
+    return null;
+  }
+
+  if (georisques.flags?.marineSubmersion) {
+    return {
+      label: `Submersion à ${communeName}`,
+      val: 'Risque officiel recensé',
+      col: C.blue,
+      src: 'Géorisques / BRGM',
+    };
+  }
+
+  if (georisques.flags?.flood) {
+    return {
+      label: `Inondation à ${communeName}`,
+      val: 'Risque officiel recensé',
+      col: C.blue,
+      src: 'Géorisques / BRGM',
+    };
+  }
+
+  if (georisques.flags?.clay) {
+    return {
+      label: `Argiles à ${communeName}`,
+      val: 'Tassements différentiels recensés',
+      col: C.orange,
+      src: 'Géorisques / BRGM',
+    };
+  }
+
+  if (georisques.flags?.landslide) {
+    return {
+      label: `Terrain à ${communeName}`,
+      val: 'Mouvements de terrain recensés',
+      col: C.orange,
+      src: 'Géorisques / BRGM',
+    };
+  }
+
+  return null;
+}
+
+function getPreviewCards(communeName, categories, indicators, georisques) {
   const name = communeName || 'votre commune';
   const safeCategories =
     categories && categories.length > 0 ? categories : ['all'];
@@ -255,12 +312,15 @@ function getPreviewCards(communeName, categories, indicators) {
 
   const cards = [];
   const driasCard = getDriasCard(name, indicators);
+  const georisquesCard = getGeorisquesCard(name, georisques);
 
   if (driasCard) {
     cards.push(driasCard);
   }
 
-  if (hasCategory('littoral') || hasCategory('littoral_atlantique')) {
+  if (georisquesCard) {
+    cards.push(georisquesCard);
+  } else if (hasCategory('littoral') || hasCategory('littoral_atlantique')) {
     cards.push({
       label: `Submersion à ${name}`,
       val: '+31 % en scénario médian',
@@ -506,6 +566,7 @@ export default function FutureELanding() {
   const [tensionsCatalog, setTensionsCatalog] = useState([]);
   const [communeMeta, setCommuneMeta] = useState(null);
   const [communeIndicators, setCommuneIndicators] = useState({});
+  const [communeGeorisques, setCommuneGeorisques] = useState(null);
   const [tensions, setTensions] = useState([]);
   const [activeTension, setActiveTension] = useState(null);
   const [answer, setAnswer] = useState(null);
@@ -660,6 +721,7 @@ export default function FutureELanding() {
     setAnswerSource('');
     setCommuneMeta(null);
     setCommuneIndicators({});
+    setCommuneGeorisques(null);
 
     if (tensionsCatalog.length === 0) {
       return;
@@ -714,32 +776,51 @@ export default function FutureELanding() {
     const indicatorInseeCode = nextCommune.citycode || matchedRow?.insee_code;
 
     if (indicatorInseeCode) {
-      try {
-        const response = await fetch(`/api/drias?dataset=landing&insee=${indicatorInseeCode}`);
+      const [driasResult, georisquesResult] = await Promise.allSettled([
+        fetch(`/api/drias?dataset=landing&insee=${indicatorInseeCode}`),
+        fetch(`/api/georisques?insee=${indicatorInseeCode}`),
+      ]);
 
-        if (!response.ok) {
-          throw new Error(`DRIAS request failed with status ${response.status}`);
-        }
+      if (
+        driasResult.status === 'fulfilled' &&
+        driasResult.value.ok
+      ) {
+        try {
+          const payload = await driasResult.value.json();
+          const nextIndicators = {};
 
-        const payload = await response.json();
-        const nextIndicators = {};
+          for (const [scenarioId, scenarioPayload] of Object.entries(payload?.commune?.s || {})) {
+            nextIndicators[scenarioId] = {};
 
-        for (const [scenarioId, scenarioPayload] of Object.entries(payload?.commune?.s || {})) {
-          nextIndicators[scenarioId] = {};
-
-          for (const [indicatorCode, valueNumeric] of Object.entries(scenarioPayload?.v || {})) {
-            nextIndicators[scenarioId][indicatorCode] = {
-              indicator_code: indicatorCode,
-              value_numeric: valueNumeric,
-              scenario: scenarioId,
-              horizon: scenarioPayload.h,
-            };
+            for (const [indicatorCode, valueNumeric] of Object.entries(scenarioPayload?.v || {})) {
+              nextIndicators[scenarioId][indicatorCode] = {
+                indicator_code: indicatorCode,
+                value_numeric: valueNumeric,
+                scenario: scenarioId,
+                horizon: scenarioPayload.h,
+              };
+            }
           }
-        }
 
-        setCommuneIndicators(nextIndicators);
-      } catch {
+          setCommuneIndicators(nextIndicators);
+        } catch {
+          setCommuneIndicators({});
+        }
+      } else {
         setCommuneIndicators({});
+      }
+
+      if (
+        georisquesResult.status === 'fulfilled' &&
+        georisquesResult.value.ok
+      ) {
+        try {
+          setCommuneGeorisques(await georisquesResult.value.json());
+        } catch {
+          setCommuneGeorisques(null);
+        }
+      } else {
+        setCommuneGeorisques(null);
       }
     }
 
@@ -760,6 +841,7 @@ export default function FutureELanding() {
       setSelectedCommune(null);
       setCommuneMeta(null);
       setCommuneIndicators({});
+      setCommuneGeorisques(null);
       setTensions([]);
       setActiveTension(null);
       setAnswer(null);
@@ -812,6 +894,7 @@ export default function FutureELanding() {
           commune,
           categories: communeMeta?.categories || ['all'],
           driasContext: buildDriasContext(commune, communeIndicators),
+          georisquesContext: buildGeorisquesContext(communeGeorisques),
           tension,
           fallbackAnswer: supabaseAnswer,
         }),
@@ -1686,6 +1769,7 @@ export default function FutureELanding() {
     previewCommune,
     activeCategories,
     communeIndicators,
+    communeGeorisques,
   );
 
   return (

@@ -12,10 +12,12 @@ Ordre recommandé :
 6. Copier-coller le contenu de `03_init_indicators.sql`
 7. Lancer le script
 8. Vérifier que les tables `tensions_catalog`, `commune_categories`, `communes_categorization`, `tension_answers`, `source_datasets`, `indicator_definitions`, `drias_grid_points` et `commune_indicators` existent
+9. Optionnel mais recommandé pour `Quartier` : lancer `05_init_georisques.sql` pour préparer les datasets et indicateurs Géorisques dans la couche normalisée
 
 `01_init_catalog.sql` sert à sortir le catalogue et les communes de démo du code front.
 `02_init_qna.sql` sert à sortir les réponses Q&R de démo du code front.
 `03_init_indicators.sql` crée une couche de données normalisée pour brancher DRIAS puis d'autres sources.
+`05_init_georisques.sql` prépare la normalisation des signaux officiels Géorisques pour Quartier, Logement et Projets.
 
 Import DRIAS recommandé :
 

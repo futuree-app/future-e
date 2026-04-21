@@ -24,6 +24,24 @@ type DriasPayload = {
   };
 };
 
+type GeorisquesPayload = {
+  inseeCode: string;
+  communeName: string | null;
+  riskLabels: string[];
+  flags: {
+    flood: boolean;
+    marineSubmersion: boolean;
+    landslide: boolean;
+    clay: boolean;
+    storm: boolean;
+    seismic: boolean;
+  };
+  seismic: {
+    code: string | null;
+    label: string | null;
+  } | null;
+};
+
 const DEFAULT_INSEE = "17300";
 
 const SCENARIOS = {
@@ -61,13 +79,6 @@ function formatValue(value: number | null | undefined, digits = 0) {
   }).format(value);
 }
 
-function getConfidenceLabel(value: "h" | "m" | "l" | undefined) {
-  if (value === "h") return "Confiance élevée";
-  if (value === "m") return "Confiance moyenne";
-  if (value === "l") return "Confiance prudente";
-  return "Confiance non disponible";
-}
-
 function getHeatStatus(hotDays: number | null | undefined) {
   if (hotDays === null || hotDays === undefined) {
     return { badge: "À compléter", mobility: "À préciser", projects: "2", work: "Variable" };
@@ -91,29 +102,41 @@ export function DashboardExperience({
   const [scenario, setScenario] =
     useState<keyof typeof SCENARIOS>("median");
   const [payload, setPayload] = useState<DriasPayload | null>(null);
+  const [georisques, setGeorisques] = useState<GeorisquesPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadDrias() {
+    async function loadQuartierData() {
       setLoading(true);
       setError("");
 
       try {
-        const response = await fetch(
-          `/api/drias?dataset=dashboard&insee=${DEFAULT_INSEE}`,
-        );
+        const [driasResponse, georisquesResponse] = await Promise.all([
+          fetch(`/api/drias?dataset=dashboard&insee=${DEFAULT_INSEE}`),
+          fetch(`/api/georisques?insee=${DEFAULT_INSEE}`),
+        ]);
 
-        if (!response.ok) {
-          throw new Error(`DRIAS request failed with status ${response.status}`);
+        if (!driasResponse.ok) {
+          throw new Error(`DRIAS request failed with status ${driasResponse.status}`);
         }
 
-        const nextPayload = (await response.json()) as DriasPayload;
+        if (!georisquesResponse.ok) {
+          throw new Error(
+            `Géorisques request failed with status ${georisquesResponse.status}`,
+          );
+        }
+
+        const [nextPayload, nextGeorisques] = await Promise.all([
+          driasResponse.json() as Promise<DriasPayload>,
+          georisquesResponse.json() as Promise<GeorisquesPayload>,
+        ]);
 
         if (!cancelled) {
           setPayload(nextPayload);
+          setGeorisques(nextGeorisques);
         }
       } catch (caughtError) {
         if (!cancelled) {
@@ -130,7 +153,7 @@ export function DashboardExperience({
       }
     }
 
-    loadDrias();
+    loadQuartierData();
 
     return () => {
       cancelled = true;
@@ -147,20 +170,31 @@ export function DashboardExperience({
   const tropicalNights = availableScenario?.v?.NORTR_yr ?? null;
   const heatStatus = getHeatStatus(hotDays);
   const communeName = payload?.commune?.n || "La Rochelle";
+  const georisquesLines = georisques?.riskLabels?.slice(0, 2) || [];
+  const georisquesPrimary = georisques?.flags?.marineSubmersion
+    ? "Submersion marine recensée"
+    : georisques?.flags?.flood
+      ? "Inondation recensée"
+      : georisques?.flags?.clay
+        ? "Argiles recensées"
+        : georisques?.flags?.landslide
+          ? "Terrain recensé"
+          : "Pas de signal Géorisques mis en avant";
+  const seismicLabel = georisques?.seismic?.label || "Zone sismique non disponible";
 
   const modules = [
     {
       id: "quartier",
       title: "Ton quartier",
-      subtitle: `${communeName} · maille DRIAS`,
+      subtitle: `${communeName} · DRIAS + Géorisques`,
       badge: heatStatus.badge,
       color: "#60a5fa",
       main: `${formatValue(summerTemp, 1)}°C`,
       label: "température moyenne d'été",
       points: [
         `${formatValue(hotDays, 0)} jours > 30°C / an`,
-        `${formatValue(tropicalNights, 0)} nuits tropicales / an`,
-        `${getConfidenceLabel(availableScenario?.c)}`,
+        georisquesPrimary,
+        `${seismicLabel}`,
       ],
     },
     {
@@ -248,7 +282,11 @@ export function DashboardExperience({
         )} nuits tropicales et une température moyenne d'été de ${formatValue(
           summerTemp,
           1,
-        )}°C. La chaleur devient le signal le plus structurant pour le logement, la santé et les arbitrages de long terme.`;
+        )}°C. Côté risques officiels, ${
+          georisquesLines.length > 0
+            ? georisquesLines.join(" · ")
+            : "aucun signal Géorisques prioritaire n'est remonté ici"
+        }. La chaleur reste le signal le plus structurant, mais elle se lit désormais avec la trame territoriale réelle du quartier.`;
 
   return (
     <div className="proto-shell">
