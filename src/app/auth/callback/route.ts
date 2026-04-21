@@ -1,7 +1,8 @@
+import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const EMAIL_OTP_TYPES = new Set([
+const EMAIL_OTP_TYPES = new Set<EmailOtpType>([
   "signup",
   "invite",
   "magiclink",
@@ -14,7 +15,7 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
   const tokenHash = requestUrl.searchParams.get("token_hash");
-  const type = requestUrl.searchParams.get("type");
+  const type = requestUrl.searchParams.get("type") as EmailOtpType | null;
   const next = requestUrl.searchParams.get("next") || "/compte";
 
   if (tokenHash && type && EMAIL_OTP_TYPES.has(type)) {
