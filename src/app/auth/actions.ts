@@ -15,12 +15,27 @@ async function getBaseUrl() {
   const forwardedProto = headerStore.get("x-forwarded-proto");
   const forwardedHost = headerStore.get("x-forwarded-host");
   const host = forwardedHost || headerStore.get("host");
+  const envBaseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const productionHost =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+
+  if (host && !host.includes("localhost")) {
+    return `${forwardedProto || "https"}://${host}`;
+  }
+
+  if (productionHost) {
+    return `https://${productionHost}`;
+  }
+
+  if (envBaseUrl && !envBaseUrl.includes("localhost")) {
+    return envBaseUrl;
+  }
 
   if (host) {
     return `${forwardedProto || "http"}://${host}`;
   }
 
-  return process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  return envBaseUrl || "http://localhost:3000";
 }
 
 export async function sendMagicLinkAction(
