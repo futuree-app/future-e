@@ -78,6 +78,7 @@ export async function POST(request: Request) {
   const {
     commune,
     categories,
+    driasContext,
     tension,
     fallbackAnswer,
     questionType = "preset",
@@ -106,11 +107,12 @@ export async function POST(request: Request) {
     },
     available_context: {
       editorial_base_answer: fallbackAnswer ?? null,
+      drias_projection: driasContext ?? null,
       note:
-        "At this stage futur•e only has commune categories and a base editorial answer. Do not pretend to have address-level or household-level data.",
+        "futur•e may provide commune categories, a base editorial answer, and commune-level DRIAS projections across several warming scenarios. Use them when present, but do not pretend to have address-level or household-level data.",
     },
     objective:
-      "Generate a landing-page style direct answer that feels specific to the commune and the territorial categories, while staying honest about uncertainty.",
+      "Generate a landing-page style direct answer that feels specific to the commune, the territorial categories, and the available DRIAS projections, while staying honest about uncertainty.",
   };
 
   let lastErrorText = "No Anthropic model could be used.";

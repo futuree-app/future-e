@@ -2,6 +2,7 @@
 // @ts-nocheck
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
@@ -26,6 +27,13 @@ const FALLBACK_TENSION_IDS = [
   'valeur_immo',
   'retraite_ici',
 ];
+
+const LANDING_DRIAS_SCENARIO = {
+  id: 'gwl20_france_2_7c',
+  horizon: '2050',
+  shortLabel: '+2,7°C',
+  longLabel: 'réchauffement +2,7°C',
+};
 
 const STATIC_ANSWERS = {
   acheter_littoral: {
@@ -143,17 +151,77 @@ function formatIndicatorValue(value, digits = 0) {
   }).format(value);
 }
 
+function getLandingIndicatorValue(indicators, indicatorCode) {
+  return indicators?.[LANDING_DRIAS_SCENARIO.id]?.[indicatorCode]?.value_numeric ?? null;
+}
+
+function buildDriasContext(communeName, indicators) {
+  const hotDays = getLandingIndicatorValue(indicators, 'NORTX30D_yr');
+  const tropicalNights = getLandingIndicatorValue(indicators, 'NORTR_yr');
+  const summerTemp = getLandingIndicatorValue(indicators, 'NORTMm_seas_JJA');
+
+  if (hotDays !== null && hotDays !== undefined) {
+    return {
+      commune: communeName,
+      primary_signal: 'heat_days_over_30c',
+      summary: `${LANDING_DRIAS_SCENARIO.shortLabel} : ${formatIndicatorValue(hotDays, 0)} jours > 30°C/an`,
+      scenarios: [{
+        id: LANDING_DRIAS_SCENARIO.id,
+        horizon: LANDING_DRIAS_SCENARIO.horizon,
+        shortLabel: LANDING_DRIAS_SCENARIO.shortLabel,
+        longLabel: LANDING_DRIAS_SCENARIO.longLabel,
+        value: hotDays,
+        unit: 'jours/an',
+      }],
+    };
+  }
+
+  if (tropicalNights !== null && tropicalNights !== undefined) {
+    return {
+      commune: communeName,
+      primary_signal: 'tropical_nights',
+      summary: `${LANDING_DRIAS_SCENARIO.shortLabel} : ${formatIndicatorValue(tropicalNights, 0)} nuits tropicales/an`,
+      scenarios: [{
+        id: LANDING_DRIAS_SCENARIO.id,
+        horizon: LANDING_DRIAS_SCENARIO.horizon,
+        shortLabel: LANDING_DRIAS_SCENARIO.shortLabel,
+        longLabel: LANDING_DRIAS_SCENARIO.longLabel,
+        value: tropicalNights,
+        unit: 'nuits/an',
+      }],
+    };
+  }
+
+  if (summerTemp !== null && summerTemp !== undefined) {
+    return {
+      commune: communeName,
+      primary_signal: 'summer_mean_temperature',
+      summary: `${LANDING_DRIAS_SCENARIO.shortLabel} : ${formatIndicatorValue(summerTemp, 1)} °C en été`,
+      scenarios: [{
+        id: LANDING_DRIAS_SCENARIO.id,
+        horizon: LANDING_DRIAS_SCENARIO.horizon,
+        shortLabel: LANDING_DRIAS_SCENARIO.shortLabel,
+        longLabel: LANDING_DRIAS_SCENARIO.longLabel,
+        value: summerTemp,
+        unit: '°C',
+      }],
+    };
+  }
+
+  return null;
+}
+
 function getDriasCard(communeName, indicators) {
-  const summerTemp = indicators?.NORTMm_seas_JJA?.value_numeric;
-  const hotDays = indicators?.NORTX30D_yr?.value_numeric;
-  const tropicalNights = indicators?.NORTR_yr?.value_numeric;
+  const hotDays = getLandingIndicatorValue(indicators, 'NORTX30D_yr');
+  const tropicalNights = getLandingIndicatorValue(indicators, 'NORTR_yr');
+  const summerTemp = getLandingIndicatorValue(indicators, 'NORTMm_seas_JJA');
 
   if (hotDays !== null && hotDays !== undefined) {
     return {
       label: `Chaleur à ${communeName}`,
       val: `${formatIndicatorValue(hotDays, 0)} jours > 30°C/an`,
       col: C.red,
-      src: 'DRIAS / Météo-France',
+      src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
     };
   }
 
@@ -162,7 +230,7 @@ function getDriasCard(communeName, indicators) {
       label: `Nuits tropicales à ${communeName}`,
       val: `${formatIndicatorValue(tropicalNights, 0)} nuits/an`,
       col: C.red,
-      src: 'DRIAS / Météo-France',
+      src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
     };
   }
 
@@ -171,7 +239,7 @@ function getDriasCard(communeName, indicators) {
       label: `Été à ${communeName}`,
       val: `${formatIndicatorValue(summerTemp, 1)}°C en moyenne`,
       col: C.red,
-      src: 'DRIAS / Météo-France',
+      src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
     };
   }
 
@@ -646,20 +714,33 @@ export default function FutureELanding() {
     const indicatorInseeCode = nextCommune.citycode || matchedRow?.insee_code;
 
     if (indicatorInseeCode) {
-      const { data: indicatorRows } = await client
-        .from('commune_indicators')
-        .select('indicator_code, value_numeric, unit')
-        .eq('insee_code', indicatorInseeCode)
-        .eq('source_dataset_id', 'drias_tracc_indices')
-        .eq('scenario', 'median')
-        .eq('horizon', '2050')
-        .in('indicator_code', ['NORTMm_seas_JJA', 'NORTX30D_yr', 'NORTR_yr']);
+      try {
+        const response = await fetch(`/api/drias?dataset=landing&insee=${indicatorInseeCode}`);
 
-      const nextIndicators = Object.fromEntries(
-        (indicatorRows || []).map((row) => [row.indicator_code, row]),
-      );
+        if (!response.ok) {
+          throw new Error(`DRIAS request failed with status ${response.status}`);
+        }
 
-      setCommuneIndicators(nextIndicators);
+        const payload = await response.json();
+        const nextIndicators = {};
+
+        for (const [scenarioId, scenarioPayload] of Object.entries(payload?.commune?.s || {})) {
+          nextIndicators[scenarioId] = {};
+
+          for (const [indicatorCode, valueNumeric] of Object.entries(scenarioPayload?.v || {})) {
+            nextIndicators[scenarioId][indicatorCode] = {
+              indicator_code: indicatorCode,
+              value_numeric: valueNumeric,
+              scenario: scenarioId,
+              horizon: scenarioPayload.h,
+            };
+          }
+        }
+
+        setCommuneIndicators(nextIndicators);
+      } catch {
+        setCommuneIndicators({});
+      }
     }
 
     setTensions(buildTensions(tensionsCatalog, categories));
@@ -730,6 +811,7 @@ export default function FutureELanding() {
         body: JSON.stringify({
           commune,
           categories: communeMeta?.categories || ['all'],
+          driasContext: buildDriasContext(commune, communeIndicators),
           tension,
           fallbackAnswer: supabaseAnswer,
         }),
@@ -897,6 +979,23 @@ export default function FutureELanding() {
       textDecoration: 'none',
       cursor: 'pointer',
     },
+    navActions: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+    },
+    navSecondaryLink: {
+      padding: '8px 12px',
+      borderRadius: 999,
+      border: `1px solid ${C.border}`,
+      color: C.text,
+      textDecoration: 'none',
+      fontFamily: "'JetBrains Mono', monospace",
+      fontSize: 11,
+      letterSpacing: '0.08em',
+      textTransform: 'uppercase',
+      background: 'rgba(255,255,255,0.02)',
+    },
     navCta: {
       padding: '8px 20px',
       borderRadius: 6,
@@ -907,6 +1006,7 @@ export default function FutureELanding() {
       fontSize: 13,
       border: 'none',
       cursor: 'pointer',
+      textDecoration: 'none',
     },
     hero: {
       position: 'relative',
@@ -1637,7 +1737,17 @@ export default function FutureELanding() {
               Tarifs
             </a>
           </div>
-          <button style={styles.navCta}>Commencer</button>
+          <div style={styles.navActions}>
+            <Link style={styles.navSecondaryLink} href="/connexion">
+              Compte
+            </Link>
+            <Link style={styles.navSecondaryLink} href="/dashboard">
+              Dashboard
+            </Link>
+            <Link style={styles.navCta} href="/inscription">
+              Commencer
+            </Link>
+          </div>
         </div>
       </nav>
 
@@ -1992,9 +2102,13 @@ export default function FutureELanding() {
                 </div>
               ))}
             </div>
-            <button style={styles.planBtn(false)} className="plan-btn">
+            <Link
+              style={styles.planBtn(false)}
+              className="plan-btn"
+              href="/inscription"
+            >
               Commencer gratuitement
-            </button>
+            </Link>
           </div>
 
           <div style={styles.planCard(false)}>
@@ -2018,9 +2132,13 @@ export default function FutureELanding() {
                 </div>
               ))}
             </div>
-            <button style={styles.planBtn(false)} className="plan-btn">
+            <Link
+              style={styles.planBtn(false)}
+              className="plan-btn"
+              href="/connexion"
+            >
               Acheter le rapport
-            </button>
+            </Link>
           </div>
 
           <div
@@ -2056,9 +2174,13 @@ export default function FutureELanding() {
                 </div>
               ))}
             </div>
-            <button style={styles.planBtn(true)} className="plan-btn">
+            <Link
+              style={styles.planBtn(true)}
+              className="plan-btn"
+              href="/connexion"
+            >
               S&apos;abonner au Suivi
-            </button>
+            </Link>
           </div>
         </div>
       </section>
