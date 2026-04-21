@@ -11,7 +11,7 @@ export default function ConnexionPage() {
       <MagicLinkForm
         action={sendMagicLinkAction}
         title="Connexion"
-        subtitle="futur•e se connecte uniquement par magic link. Entrez votre email et ouvrez le lien reçu."
+        subtitle="Entrez l'email d'un compte existant. futur•e vous envoie un lien de connexion sans mot de passe."
         submitLabel="Recevoir un lien de connexion"
       />
     </AuthShell>

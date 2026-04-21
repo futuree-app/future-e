@@ -38,6 +38,48 @@ async function getBaseUrl() {
   return envBaseUrl || "http://localhost:3000";
 }
 
+async function requestMagicLink(
+  email: string,
+  shouldCreateUser: boolean,
+) {
+  const supabase = await createClient();
+  const baseUrl = await getBaseUrl();
+  const redirectTo = new URL("/auth/callback", baseUrl);
+  redirectTo.searchParams.set("next", "/compte");
+
+  return supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: redirectTo.toString(),
+      shouldCreateUser,
+    },
+  });
+}
+
+function getAuthErrorMessage(error: { message?: string; code?: string } | null) {
+  if (!error) {
+    return "Envoi du lien impossible. Réessayez dans un instant.";
+  }
+
+  if (error.code === "otp_disabled" || error.code === "email_provider_disabled") {
+    return "Le magic link n'est pas active dans Supabase Auth.";
+  }
+
+  if (error.code === "over_email_send_rate_limit" || error.code === "over_request_rate_limit") {
+    return "Trop de tentatives. Attendez un instant avant de redemander un lien.";
+  }
+
+  if (error.code === "user_not_found" || error.code === "email_not_confirmed") {
+    return "Aucun compte actif pour cet email. Creez d'abord votre compte.";
+  }
+
+  if (error.message?.toLowerCase().includes("user not found")) {
+    return "Aucun compte actif pour cet email. Creez d'abord votre compte.";
+  }
+
+  return "Envoi du lien impossible. Réessayez dans un instant.";
+}
+
 export async function sendMagicLinkAction(
   _prevState: AuthActionState,
   formData: FormData,
@@ -51,22 +93,11 @@ export async function sendMagicLinkAction(
     };
   }
 
-  const supabase = await createClient();
-  const baseUrl = await getBaseUrl();
-  const redirectTo = new URL("/auth/callback", baseUrl);
-  redirectTo.searchParams.set("next", "/compte");
-
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      emailRedirectTo: redirectTo.toString(),
-      shouldCreateUser: true,
-    },
-  });
+  const { error } = await requestMagicLink(email, false);
 
   if (error) {
     return {
-      error: "Envoi du lien impossible. Réessayez dans un instant.",
+      error: getAuthErrorMessage(error),
       message: null,
     };
   }
@@ -74,6 +105,35 @@ export async function sendMagicLinkAction(
   return {
     error: null,
     message: "Lien envoyé. Ouvrez votre email pour vous connecter.",
+  };
+}
+
+export async function createAccountAction(
+  _prevState: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
+  const email = getStringField(formData, "email").toLowerCase();
+
+  if (!email) {
+    return {
+      error: "Email requis.",
+      message: null,
+    };
+  }
+
+  const { error } = await requestMagicLink(email, true);
+
+  if (error) {
+    return {
+      error: getAuthErrorMessage(error),
+      message: null,
+    };
+  }
+
+  return {
+    error: null,
+    message:
+      "Compte cree ou retrouve. Ouvrez votre email pour confirmer puis entrer dans futur•e.",
   };
 }
 
