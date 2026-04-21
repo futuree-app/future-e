@@ -80,9 +80,9 @@ export function AuthShell({
   alternateText,
 }: {
   children: React.ReactNode;
-  alternateHref: string;
-  alternateLabel: string;
-  alternateText: string;
+  alternateHref?: string;
+  alternateLabel?: string;
+  alternateText?: string;
 }) {
   return (
     <div className="auth-shell">
@@ -127,12 +127,14 @@ export function AuthShell({
               Retour a l&apos;accueil
             </Link>
             {children}
-            <p className="auth-alt">
-              {alternateText}{" "}
-              <Link className="auth-link" href={alternateHref}>
-                {alternateLabel}
-              </Link>
-            </p>
+            {alternateHref && alternateLabel && alternateText ? (
+              <p className="auth-alt">
+                {alternateText}{" "}
+                <Link className="auth-link" href={alternateHref}>
+                  {alternateLabel}
+                </Link>
+              </p>
+            ) : null}
           </div>
         </div>
       </div>

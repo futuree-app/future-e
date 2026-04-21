@@ -80,35 +80,7 @@ function getAuthErrorMessage(error: { message?: string; code?: string } | null) 
   return "Envoi du lien impossible. Réessayez dans un instant.";
 }
 
-export async function sendMagicLinkAction(
-  _prevState: AuthActionState,
-  formData: FormData,
-): Promise<AuthActionState> {
-  const email = getStringField(formData, "email").toLowerCase();
-
-  if (!email) {
-    return {
-      error: "Email requis.",
-      message: null,
-    };
-  }
-
-  const { error } = await requestMagicLink(email, false);
-
-  if (error) {
-    return {
-      error: getAuthErrorMessage(error),
-      message: null,
-    };
-  }
-
-  return {
-    error: null,
-    message: "Lien envoyé. Ouvrez votre email pour vous connecter.",
-  };
-}
-
-export async function createAccountAction(
+export async function continueWithEmailAction(
   _prevState: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
@@ -133,7 +105,7 @@ export async function createAccountAction(
   return {
     error: null,
     message:
-      "Compte cree ou retrouve. Ouvrez votre email pour confirmer puis entrer dans futur•e.",
+      "Lien envoye. Ouvrez votre email pour entrer dans futur•e. Si c'est votre premiere visite, votre acces sera cree automatiquement.",
   };
 }
 
