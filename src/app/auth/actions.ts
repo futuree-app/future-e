@@ -38,62 +38,53 @@ async function getBaseUrl() {
   return envBaseUrl || "http://localhost:3000";
 }
 
-async function requestMagicLink(
-  email: string,
-  shouldCreateUser: boolean,
-) {
-  const supabase = await createClient();
-  const baseUrl = await getBaseUrl();
-  const redirectTo = new URL("/auth/callback", baseUrl);
-  redirectTo.searchParams.set("next", "/compte");
-
-  return supabase.auth.signInWithOtp({
-    email,
-    options: {
-      emailRedirectTo: redirectTo.toString(),
-      shouldCreateUser,
-    },
-  });
-}
-
 function getAuthErrorMessage(error: { message?: string; code?: string } | null) {
   if (!error) {
-    return "Envoi du lien impossible. Réessayez dans un instant.";
+    return "Action impossible. Réessayez dans un instant.";
   }
 
-  if (error.code === "otp_disabled" || error.code === "email_provider_disabled") {
-    return "Le magic link n'est pas active dans Supabase Auth.";
+  if (error.code === "email_provider_disabled") {
+    return "L'authentification email n'est pas active dans Supabase Auth.";
   }
 
-  if (error.code === "over_email_send_rate_limit" || error.code === "over_request_rate_limit") {
-    return "Trop de tentatives. Attendez un instant avant de redemander un lien.";
+  if (error.code === "invalid_credentials") {
+    return "Email ou mot de passe incorrect.";
   }
 
-  if (error.code === "user_not_found" || error.code === "email_not_confirmed") {
-    return "Aucun compte actif pour cet email. Creez d'abord votre compte.";
+  if (error.code === "email_exists" || error.code === "user_already_exists") {
+    return "Un compte existe deja avec cet email. Connectez-vous.";
   }
 
-  if (error.message?.toLowerCase().includes("user not found")) {
-    return "Aucun compte actif pour cet email. Creez d'abord votre compte.";
+  if (error.code === "weak_password") {
+    return "Choisissez un mot de passe plus robuste, au moins 8 caracteres.";
   }
 
-  return "Envoi du lien impossible. Réessayez dans un instant.";
+  if (error.code === "email_not_confirmed") {
+    return "Confirmez d'abord votre email avant de vous connecter.";
+  }
+
+  return "Action impossible. Réessayez dans un instant.";
 }
 
-export async function continueWithEmailAction(
+export async function signInWithPasswordAction(
   _prevState: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
   const email = getStringField(formData, "email").toLowerCase();
+  const password = getStringField(formData, "password");
 
-  if (!email) {
+  if (!email || !password) {
     return {
-      error: "Email requis.",
+      error: "Email et mot de passe requis.",
       message: null,
     };
   }
 
-  const { error } = await requestMagicLink(email, true);
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
   if (error) {
     return {
@@ -102,10 +93,58 @@ export async function continueWithEmailAction(
     };
   }
 
+  redirect("/compte");
+}
+
+export async function signUpWithPasswordAction(
+  _prevState: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
+  const email = getStringField(formData, "email").toLowerCase();
+  const password = getStringField(formData, "password");
+
+  if (!email || !password) {
+    return {
+      error: "Email et mot de passe requis.",
+      message: null,
+    };
+  }
+
+  if (password.length < 8) {
+    return {
+      error: "Mot de passe trop court. Utilisez au moins 8 caracteres.",
+      message: null,
+    };
+  }
+
+  const supabase = await createClient();
+  const baseUrl = await getBaseUrl();
+  const redirectTo = new URL("/auth/callback", baseUrl);
+  redirectTo.searchParams.set("next", "/compte");
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: redirectTo.toString(),
+    },
+  });
+
+  if (error) {
+    return {
+      error: getAuthErrorMessage(error),
+      message: null,
+    };
+  }
+
+  if (data.session) {
+    redirect("/compte");
+  }
+
   return {
     error: null,
     message:
-      "Lien envoye. Ouvrez votre email pour entrer dans futur•e. Si c'est votre premiere visite, votre acces sera cree automatiquement.",
+      "Compte cree. Verifiez votre email pour confirmer votre adresse puis connectez-vous.",
   };
 }
 

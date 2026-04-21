@@ -1,14 +1,20 @@
-import { AuthShell, MagicLinkForm } from "@/components/AuthForms";
-import { continueWithEmailAction } from "@/app/auth/actions";
+import { AuthShell, PasswordForm } from "@/components/AuthForms";
+import { signInWithPasswordAction } from "@/app/auth/actions";
 
 export default function ConnexionPage() {
   return (
-    <AuthShell>
-      <MagicLinkForm
-        action={continueWithEmailAction}
-        title="Continuer avec votre email"
-        subtitle="Entrez votre email. futur•e vous envoie un lien pour entrer dans votre espace. Si c'est votre premiere visite, votre acces sera cree automatiquement."
-        submitLabel="Recevoir mon lien"
+    <AuthShell
+      alternateHref="/inscription"
+      alternateLabel="Creer un compte"
+      alternateText="Pas encore de compte ?"
+    >
+      <PasswordForm
+        action={signInWithPasswordAction}
+        title="Connexion"
+        subtitle="Entrez votre email et votre mot de passe pour retrouver votre espace futur•e."
+        submitLabel="Se connecter"
+        pendingLabel="Connexion..."
+        passwordAutoComplete="current-password"
       />
     </AuthShell>
   );

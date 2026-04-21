@@ -73,6 +73,61 @@ export function MagicLinkForm({
   );
 }
 
+export function PasswordForm({
+  action,
+  title,
+  subtitle,
+  submitLabel,
+  pendingLabel,
+  passwordAutoComplete,
+}: {
+  action: ActionFn;
+  title: string;
+  subtitle: string;
+  submitLabel: string;
+  pendingLabel: string;
+  passwordAutoComplete: string;
+}) {
+  const [state, formAction] = useActionState(action, EMPTY_STATE);
+
+  return (
+    <section className="auth-panel">
+      <h1 className="auth-title">{title}</h1>
+      <p className="auth-subtitle">{subtitle}</p>
+      <form className="auth-form" action={formAction}>
+        <label className="auth-label" htmlFor={`${submitLabel}-email`}>
+          Email
+        </label>
+        <input
+          className="auth-input"
+          id={`${submitLabel}-email`}
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+        />
+
+        <label className="auth-label" htmlFor={`${submitLabel}-password`}>
+          Mot de passe
+        </label>
+        <input
+          className="auth-input"
+          id={`${submitLabel}-password`}
+          name="password"
+          type="password"
+          autoComplete={passwordAutoComplete}
+          minLength={8}
+          required
+        />
+
+        <AuthFeedback state={state} />
+
+        <SubmitButton label={submitLabel} pendingLabel={pendingLabel} />
+      </form>
+    </section>
+  );
+}
+
 export function AuthShell({
   children,
   alternateHref,
@@ -117,7 +172,7 @@ export function AuthShell({
               <ul className="auth-story-list">
                 <li>vos projections locales et leurs scenarios DRIAS</li>
                 <li>un acces direct au compte, au dashboard et au rapport</li>
-                <li>une connexion par lien magique, sans mot de passe a memoriser</li>
+                <li>un acces classique par email et mot de passe</li>
               </ul>
             </div>
           </section>
