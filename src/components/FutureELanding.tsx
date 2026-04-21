@@ -2048,7 +2048,7 @@ export default function FutureELanding() {
         </div>
       </section>
 
-      <section style={styles.pricingSection}>
+      <section id="pricing" style={styles.pricingSection}>
         <div style={{ textAlign: 'center', marginBottom: 0 }}>
           <div
             style={{
