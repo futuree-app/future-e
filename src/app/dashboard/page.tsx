@@ -17,12 +17,15 @@ export default async function DashboardPage() {
 
   return (
     <main className="account-shell">
-      <div className="account-card account-card-wide">
+      <div className="account-card account-card-wide account-card-stage">
         <p className="account-kicker">Dashboard</p>
-        <h1 className="account-title">{getPlanLabel(account.plan)}</h1>
-        <p className="account-copy">
-          Cette page sert de premier garde-fou produit. Elle montre deja ce que
-          le plan courant debloque reellement dans l&apos;app.
+        <h1 className="account-title">
+          {!hasDashboard ? "Le dashboard complet n&apos;est pas inclus dans votre formule." : getPlanLabel(account.plan)}
+        </h1>
+        <p className="account-copy account-copy-lead">
+          {!hasDashboard
+            ? "Le compte gratuit sert d'abord a sauvegarder le rapport partiel et a maintenir une continuite de lecture. Le dashboard reste un espace payant de consultation ponctuelle, pas une promesse partiellement tenue."
+            : "Le dashboard payant prolonge le rapport : comparaison de scenarios, lecture par module, details de facteurs et usage recurrent."}
         </p>
 
         <div className="gating-grid">
@@ -70,14 +73,60 @@ export default async function DashboardPage() {
         </div>
 
         {!hasDashboard ? (
-          <div className="gating-callout">
-            <p className="gating-callout-title">Acces limite</p>
-            <p className="account-copy">
-              Pour ce plan, le compte sert surtout a sauvegarder le rapport
-              partiel et a preparer la conversion vers le rapport complet ou un
-              abonnement.
-            </p>
-          </div>
+          <>
+            <div className="gating-callout">
+              <p className="gating-callout-title">Ce que le dashboard ajoute quand il s&apos;ouvre</p>
+              <p className="account-copy">
+                Le one-shot ouvre un dashboard simple en lecture seule. Les
+                plans Suivi et Foyer debloquent ensuite les scenarios, les
+                horizons, le detail de chaque facteur et les pistes d&apos;action.
+              </p>
+            </div>
+
+            <div className="dashboard-module-grid">
+              <section className="dashboard-module-card">
+                <p className="gating-label">One-shot 14€</p>
+                <h2 className="dashboard-module-title">Dashboard simple</h2>
+                <p className="account-copy">
+                  Les 6 modules apparaissent en lecture seule, sans switcher de
+                  scenarios, sans detail de facteurs, sans pistes d&apos;action.
+                </p>
+                <div className="dashboard-module-footer">
+                  <span className="dashboard-state">Lecture seule</span>
+                </div>
+              </section>
+
+              <section className="dashboard-module-card">
+                <p className="gating-label">Suivi 9€/mois</p>
+                <h2 className="dashboard-module-title">Dashboard complet</h2>
+                <p className="account-copy">
+                  Switcher scenarios et horizons, relire chaque module, suivre
+                  les mises a jour du rapport et recevoir la newsletter
+                  mensuelle personnalisee.
+                </p>
+                <div className="dashboard-module-footer">
+                  <span className="dashboard-state dashboard-state-live">
+                    Interactif
+                  </span>
+                </div>
+              </section>
+
+              <section className="dashboard-module-card">
+                <p className="gating-label">Foyer 15€/mois</p>
+                <h2 className="dashboard-module-title">Lecture collective</h2>
+                <p className="account-copy">
+                  Matrice d&apos;exposition partagee, timeline des decisions
+                  collectives, comparateur de villes et espace commun jusqu&apos;a
+                  6 membres.
+                </p>
+                <div className="dashboard-module-footer">
+                  <span className="dashboard-state dashboard-state-live">
+                    Mode foyer
+                  </span>
+                </div>
+              </section>
+            </div>
+          </>
         ) : (
           <>
             <DashboardExperience
@@ -99,10 +148,10 @@ export default async function DashboardPage() {
         )}
 
         <div className="account-actions">
-          <Link className="account-link" href="/rapport">
-            Voir mon rapport
+          <Link className="account-button" href="/rapport">
+            Relire mon rapport
           </Link>
-          <Link className="account-link" href="/compte">
+          <Link className="account-button account-button-secondary" href="/compte">
             Retour au compte
           </Link>
           <Link className="account-link" href="/">
