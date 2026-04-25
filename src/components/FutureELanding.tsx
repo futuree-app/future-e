@@ -777,8 +777,8 @@ export default function FutureELanding() {
 
     if (indicatorInseeCode) {
       const [driasResult, georisquesResult] = await Promise.allSettled([
-        fetch(`/api/drias?dataset=landing&insee=${indicatorInseeCode}`),
-        fetch(`/api/georisques?insee=${indicatorInseeCode}`),
+        fetch(`/drias?dataset=landing&insee=${indicatorInseeCode}`),
+        fetch(`/georisques?insee=${indicatorInseeCode}`),
       ]);
 
       if (
@@ -885,7 +885,7 @@ export default function FutureELanding() {
     let nextAnswerSource = data ? 'supabase' : 'fallback_local';
 
     try {
-      const response = await fetch('/api/qna', {
+      const response = await fetch('/qna', {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
