@@ -21,6 +21,12 @@ const C = {
   blue: '#60a5fa',
 };
 
+const PLM_CENTRAL_CODES: Record<string, { city: string; example: string }> = {
+  '75056': { city: 'Paris',     example: 'Paris 15e Arrondissement' },
+  '69123': { city: 'Lyon',      example: 'Lyon 6e Arrondissement' },
+  '13055': { city: 'Marseille', example: 'Marseille 7e Arrondissement' },
+};
+
 const FALLBACK_TENSION_IDS = [
   'enfants_sante',
   'metier_general',
@@ -29,10 +35,10 @@ const FALLBACK_TENSION_IDS = [
 ];
 
 const LANDING_DRIAS_SCENARIO = {
-  id: 'gwl20_france_2_7c',
+  id: 'gwl20',
   horizon: '2050',
-  shortLabel: '+2,7°C',
-  longLabel: 'réchauffement +2,7°C',
+  shortLabel: '+2°C',
+  longLabel: 'niveau de réchauffement +2°C',
 };
 
 const STATIC_ANSWERS = {
@@ -574,6 +580,7 @@ export default function FutureELanding() {
   const [answerError, setAnswerError] = useState('');
   const [answerSource, setAnswerSource] = useState('');
   const [freeText, setFreeText] = useState('');
+  const [plmHint, setPlmHint] = useState('');
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
   const commune = selectedCommune?.name || '';
 
@@ -711,6 +718,18 @@ export default function FutureELanding() {
   }, [inputValue, selectedCommune]);
 
   async function loadCommuneTensions(nextCommune) {
+    const plm = PLM_CENTRAL_CODES[nextCommune.citycode];
+    if (plm) {
+      setInputValue(`${plm.city} `);
+      setSelectedCommune(null);
+      setSuggestions([]);
+      setSuggestionsOpen(false);
+      setPlmHint(
+        `${plm.city} est découpée en arrondissements dans nos données. Précisez votre arrondissement, par ex. « ${plm.example} ».`,
+      );
+      return;
+    }
+
     setSelectedCommune(nextCommune);
     setInputValue(nextCommune.name);
     setSuggestions([]);
@@ -830,6 +849,7 @@ export default function FutureELanding() {
   const handleInputChange = (value) => {
     setInputValue(value);
     setSearchError('');
+    setPlmHint('');
 
     if (value.trim().length < 2) {
       setSuggestions([]);
@@ -1891,6 +1911,21 @@ export default function FutureELanding() {
               {!catalogLoading && !catalogError && searchLoading && 'Recherche en cours…'}
               {!catalogLoading && !catalogError && searchError && searchError}
             </div>
+
+            {plmHint && (
+              <div style={{
+                marginTop: 10,
+                padding: '10px 14px',
+                borderRadius: 8,
+                background: 'rgba(251,146,60,0.08)',
+                border: '1px solid rgba(251,146,60,0.25)',
+                fontSize: 13,
+                color: C.orange,
+                lineHeight: 1.5,
+              }}>
+                {plmHint}
+              </div>
+            )}
           </div>
 
           <div style={styles.heroRight} className="hero-right">
