@@ -1,13 +1,13 @@
-import { AuthShell, PasswordForm } from "@/components/AuthForms";
+import Link from "next/link";
+import { PasswordForm } from "@/components/AuthForms";
 import { signInWithPasswordAction } from "@/app/auth/actions";
 
 export default function ConnexionPage() {
   return (
-    <AuthShell
-      alternateHref="/inscription"
-      alternateLabel="Creer un compte"
-      alternateText="Pas encore de compte ?"
-    >
+    <div className="auth-card auth-card-wide">
+      <Link className="auth-back" href="/">
+        Retour à l&apos;accueil
+      </Link>
       <PasswordForm
         action={signInWithPasswordAction}
         title="Connexion"
@@ -16,6 +16,12 @@ export default function ConnexionPage() {
         pendingLabel="Connexion..."
         passwordAutoComplete="current-password"
       />
-    </AuthShell>
+      <p className="auth-alt">
+        Pas encore de compte ?{" "}
+        <Link className="auth-link" href="/inscription">
+          Créer un compte
+        </Link>
+      </p>
+    </div>
   );
 }
