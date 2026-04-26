@@ -635,10 +635,18 @@ export default function FutureELanding() {
 
   const wizardRef = useRef(null);
   const [wizardContext, setWizardContext] = useState(null);
+  const [wizardCommune, setWizardCommune] = useState<{ name: string; insee: string } | null>(null);
   const openWizard = useCallback((context) => {
     setWizardContext(context);
+    // Pré-remplir la commune si déjà sélectionnée dans le hero
+    setWizardCommune(
+      selectedCommune?.name && communeMeta?.inseeCode
+        ? { name: selectedCommune.name, insee: communeMeta.inseeCode }
+        : null,
+    );
     setTimeout(() => wizardRef.current?.showModal(), 0);
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCommune, communeMeta]);
 
   const commune = selectedCommune?.name || '';
 
@@ -2663,7 +2671,7 @@ export default function FutureELanding() {
       </footer>
 
       {/* Dialog Wizard — top-layer via showModal(), DOM position ne change pas le rendu */}
-      <ReportWizard ref={wizardRef} initialContext={wizardContext} />
+      <ReportWizard ref={wizardRef} initialContext={wizardContext} initialCommune={wizardCommune} />
     </div>
   );
 }

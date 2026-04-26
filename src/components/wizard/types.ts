@@ -10,6 +10,7 @@ export type WizardAnswers = {
 export type WizardState = {
   step: number;           // 0–5 = questions, 6 = teaser
   context: string | null; // slug module initial (ex : "logement")
+  inseeCode: string | null; // code INSEE de la commune (5 chiffres)
   answers: WizardAnswers;
 };
 

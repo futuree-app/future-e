@@ -32,6 +32,8 @@ type Action =
   | { type: "NEXT" }
   | { type: "PREV" }
   | { type: "SET_ANSWER"; key: keyof WizardAnswers; value: WizardAnswers[keyof WizardAnswers] }
+  | { type: "SET_INSEE"; insee: string }
+  | { type: "PRE_FILL_COMMUNE"; payload: { name: string; insee: string } }
   | { type: "RESET" }
   | { type: "RESTORE"; payload: Partial<WizardState> };
 
@@ -46,12 +48,25 @@ function reducer(state: WizardState, action: Action): WizardState {
         ...state,
         answers: { ...state.answers, [action.key]: action.value },
       };
+    case "SET_INSEE":
+      return { ...state, inseeCode: action.insee };
+    case "PRE_FILL_COMMUNE":
+      // Pré-remplit seulement si l'utilisateur n'a pas encore saisi de commune
+      if (state.answers.quartier === null) {
+        return {
+          ...state,
+          inseeCode: action.payload.insee,
+          answers: { ...state.answers, quartier: action.payload.name },
+        };
+      }
+      return state;
     case "RESET":
-      return { step: 0, context: state.context, answers: { ...WIZARD_INITIAL_ANSWERS } };
+      return { step: 0, context: state.context, inseeCode: null, answers: { ...WIZARD_INITIAL_ANSWERS } };
     case "RESTORE":
       return {
         ...state,
         step: action.payload.step ?? state.step,
+        inseeCode: action.payload.inseeCode ?? state.inseeCode,
         answers: action.payload.answers
           ? { ...WIZARD_INITIAL_ANSWERS, ...action.payload.answers }
           : state.answers,
@@ -61,77 +76,86 @@ function reducer(state: WizardState, action: Action): WizardState {
   }
 }
 
-export const ReportWizard = forwardRef<HTMLDialogElement, { initialContext?: string | null }>(
-  function ReportWizard({ initialContext = null }, ref) {
-    // Initialize with defaults — never read sessionStorage at render (SSR safety)
-    const [state, dispatch] = useReducer(reducer, {
-      step: 0,
-      context: initialContext ?? null,
-      answers: { ...WIZARD_INITIAL_ANSWERS },
-    });
+export const ReportWizard = forwardRef<
+  HTMLDialogElement,
+  { initialContext?: string | null; initialCommune?: { name: string; insee: string } | null }
+>(function ReportWizard({ initialContext = null, initialCommune = null }, ref) {
+  // Initialize with defaults — never read sessionStorage at render (SSR safety)
+  const [state, dispatch] = useReducer(reducer, {
+    step: 0,
+    context: initialContext ?? null,
+    inseeCode: null,
+    answers: { ...WIZARD_INITIAL_ANSWERS },
+  });
 
-    // Restore from sessionStorage after mount (client-only)
-    const [restored, setRestored] = useState(false);
-    useEffect(() => {
-      if (restored) return;
-      const stored = loadFromStorage();
-      if (stored.step !== undefined || stored.answers !== undefined) {
-        dispatch({ type: "RESTORE", payload: stored });
-      }
-      setRestored(true);
-    }, [restored]);
+  // Restore from sessionStorage after mount (client-only)
+  const [restored, setRestored] = useState(false);
+  useEffect(() => {
+    if (restored) return;
+    const stored = loadFromStorage();
+    if (stored.step !== undefined || stored.answers !== undefined) {
+      dispatch({ type: "RESTORE", payload: stored });
+    }
+    setRestored(true);
+  }, [restored]);
 
-    // Persist to sessionStorage on every state change (client-only)
-    useEffect(() => {
-      if (!restored) return;
-      saveToStorage(state);
-    }, [state, restored]);
+  // Persist to sessionStorage on every state change (client-only)
+  useEffect(() => {
+    if (!restored) return;
+    saveToStorage(state);
+  }, [state, restored]);
 
-    const handleClose = useCallback(() => {
-      if (ref && "current" in ref && ref.current) {
-        ref.current.close();
-      }
-    }, [ref]);
+  // Pre-fill commune from landing hero when wizard opens
+  useEffect(() => {
+    if (!initialCommune) return;
+    dispatch({ type: "PRE_FILL_COMMUNE", payload: initialCommune });
+  }, [initialCommune]);
 
-    // dialog is display:flex flex-direction:column via .wizard-dialog in globals.css
-    return (
-      <dialog
-        ref={ref}
-        className="wizard-dialog"
-        onClose={() => dispatch({ type: "RESET" })}
-      >
-        {/* Header — shrinks to content */}
-        <div className="flex items-center justify-between px-10 pt-8 pb-5 border-b border-white/[0.06] shrink-0">
-          <WizardStepper currentStep={state.step} totalSteps={6} />
-          <button
-            type="button"
-            onClick={handleClose}
-            className="p-1.5 rounded-lg font-mono text-[10px] tracking-[0.1em] uppercase text-ghost hover:text-label hover:bg-white/[0.06] transition-all duration-200"
-          >
-            esc ×
-          </button>
-        </div>
+  const handleClose = useCallback(() => {
+    if (ref && "current" in ref && ref.current) {
+      ref.current.close();
+    }
+  }, [ref]);
 
-        {/* Content — fills remaining height, scrollable */}
-        <div className="flex-1 overflow-y-auto min-h-0 px-10 py-9">
-          {state.step < 6 ? (
-            <WizardStep
-              key={state.step}
-              step={state.step}
-              answers={state.answers}
-              onAnswer={(key, value) => dispatch({ type: "SET_ANSWER", key, value })}
-              onNext={() => dispatch({ type: "NEXT" })}
-              onPrev={() => dispatch({ type: "PREV" })}
-            />
-          ) : (
-            <WizardTeaser
-              answers={state.answers}
-              context={state.context}
-              onRestart={() => dispatch({ type: "RESET" })}
-            />
-          )}
-        </div>
-      </dialog>
-    );
-  },
-);
+  return (
+    <dialog
+      ref={ref}
+      className="wizard-dialog"
+      onClose={() => dispatch({ type: "RESET" })}
+    >
+      {/* Header — shrinks to content */}
+      <div className="flex items-center justify-between px-10 pt-8 pb-5 border-b border-white/[0.06] shrink-0">
+        <WizardStepper currentStep={state.step} totalSteps={6} />
+        <button
+          type="button"
+          onClick={handleClose}
+          className="p-1.5 rounded-lg font-mono text-[10px] tracking-[0.1em] uppercase text-ghost hover:text-label hover:bg-white/[0.06] transition-all duration-200"
+        >
+          esc ×
+        </button>
+      </div>
+
+      {/* Content — fills remaining height, scrollable */}
+      <div className="flex-1 overflow-y-auto min-h-0 px-10 py-9">
+        {state.step < 6 ? (
+          <WizardStep
+            key={state.step}
+            step={state.step}
+            answers={state.answers}
+            onAnswer={(key, value) => dispatch({ type: "SET_ANSWER", key, value })}
+            onSetInsee={(insee) => dispatch({ type: "SET_INSEE", insee })}
+            onNext={() => dispatch({ type: "NEXT" })}
+            onPrev={() => dispatch({ type: "PREV" })}
+          />
+        ) : (
+          <WizardTeaser
+            answers={state.answers}
+            context={state.context}
+            inseeCode={state.inseeCode}
+            onRestart={() => dispatch({ type: "RESET" })}
+          />
+        )}
+      </div>
+    </dialog>
+  );
+});
