@@ -24,6 +24,17 @@ a {
   color: inherit;
 }
 
+/* Glassmorphism utilities — utilisées par LocalTensionContext et les pages hub/commune */
+.bg-glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.border-strong {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
 .auth-shell,
 .account-shell {
   min-height: 100vh;

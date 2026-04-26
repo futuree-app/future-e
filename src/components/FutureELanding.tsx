@@ -5,6 +5,8 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import Navbar from '@/components/Navbar';
+import { SAVOIR_HUB_ARTICLES } from '@/config/navigation';
 
 const C = {
   bg: '#060812',
@@ -1890,17 +1892,21 @@ export default function FutureELanding() {
         @media (prefers-reduced-motion: reduce) {
           .slot-spin, .slot-settle, .slot-card-spin, .slot-card-settle { animation: none; }
         }
+        .savoir-hub-card:hover { border-color: rgba(255,255,255,0.18) !important; background: rgba(255,255,255,0.055) !important; }
         @media (max-width:768px) {
           .hero-grid { grid-template-columns: 1fr !important; }
           .hero-right { display: none !important; }
           .modules-grid { grid-template-columns: 1fr !important; }
           .pricing-grid { grid-template-columns: 1fr !important; }
           .tensions-grid { grid-template-columns: 1fr !important; }
-          .nav-links { display: none !important; }
           .amnesie-inner { padding: 28px 24px !important; }
           .hero-section { padding: 60px 20px 40px !important; }
           .qr-section { padding: 60px 20px !important; }
           .free-wrap { flex-direction: column !important; }
+          .savoir-hub-grid { grid-template-columns: 1fr 1fr !important; }
+        }
+        @media (max-width:480px) {
+          .savoir-hub-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
 
@@ -1908,38 +1914,7 @@ export default function FutureELanding() {
       <div style={styles.orb2} className="orb2-anim" />
       <div style={styles.orb3} />
 
-      <nav style={styles.nav}>
-        <div style={styles.navInner}>
-          <a style={styles.brand} href="#">
-            futur<span style={styles.brandDot}>•</span>e
-          </a>
-          <div style={styles.navLinks} className="nav-links">
-            <a style={styles.navLink} href="#">
-              Le produit
-            </a>
-            <Link style={styles.navLink} href="/savoir/cadmium">
-              Cadmium
-            </Link>
-            <Link style={styles.navLink} href="/savoir/dependance-auto">
-              Mobilité
-            </Link>
-            <a style={styles.navLink} href="#">
-              Tarifs
-            </a>
-          </div>
-          <div style={styles.navActions}>
-            <Link style={styles.navSecondaryLink} href="/connexion">
-              Compte
-            </Link>
-            <Link style={styles.navSecondaryLink} href="/dashboard">
-              Dashboard
-            </Link>
-            <Link style={styles.navCta} href="/inscription">
-              Commencer
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <section style={{ position: 'relative', zIndex: 2 }}>
         <div style={styles.hero} className="hero-grid hero-section">
@@ -2218,6 +2193,175 @@ export default function FutureELanding() {
             intègre sa santé, ses finances, l&apos;éducation de ses enfants :
             sans obsession, sans oubli, avec continuité.
           </div>
+        </div>
+      </section>
+
+      {/* Hub Savoir */}
+      <section
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          maxWidth: 1100,
+          margin: '0 auto',
+          padding: '80px 28px',
+        }}
+      >
+        <div style={{ marginBottom: 48 }}>
+          <div
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 11,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: C.orange,
+              marginBottom: 14,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                background: C.orange,
+                display: 'inline-block',
+              }}
+            />
+            Hub · Articles publiés
+          </div>
+          <h2
+            style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: 'clamp(26px, 3vw, 38px)',
+              fontWeight: 400,
+              color: C.text,
+              margin: '0 0 12px',
+              lineHeight: 1.2,
+            }}
+          >
+            Comprendre les risques <em style={{ color: C.orange, fontStyle: 'italic' }}>de demain</em>
+          </h2>
+          <p
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 13,
+              color: C.dim,
+              margin: 0,
+              maxWidth: 540,
+            }}
+          >
+            Des analyses fondées sur des données publiques — DRIAS, GisSol, INSEE, Géorisques.
+          </p>
+        </div>
+
+        <div
+          className="savoir-hub-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: 16,
+          }}
+        >
+          {SAVOIR_HUB_ARTICLES.map((article) => (
+            <Link
+              key={article.slug}
+              href={article.href}
+              style={{ textDecoration: 'none' }}
+            >
+              <div
+                className="savoir-hub-card"
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 10,
+                  padding: '24px 22px',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 14,
+                  transition: 'border-color 0.2s, background 0.2s',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  boxSizing: 'border-box',
+                }}
+              >
+                {/* Category badge */}
+                <div
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: 9,
+                    letterSpacing: '0.14em',
+                    textTransform: 'uppercase',
+                    color: article.accent,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 5,
+                      height: 5,
+                      borderRadius: '50%',
+                      background: article.accent,
+                      display: 'inline-block',
+                      flexShrink: 0,
+                    }}
+                  />
+                  {article.category}
+                </div>
+
+                {/* Title */}
+                <div
+                  style={{
+                    fontFamily: "'Instrument Serif', serif",
+                    fontSize: 17,
+                    fontWeight: 400,
+                    color: C.text,
+                    lineHeight: 1.3,
+                    flex: 1,
+                  }}
+                >
+                  {article.title}
+                </div>
+
+                {/* Description */}
+                <p
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: 11,
+                    color: C.dim,
+                    margin: 0,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {article.description}
+                </p>
+
+                {/* CTA */}
+                <div
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: 11,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    color: article.accent,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    marginTop: 'auto',
+                  }}
+                >
+                  Lire
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M2.5 6H9.5M6.5 3L9.5 6L6.5 9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
 
