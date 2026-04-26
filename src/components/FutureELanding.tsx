@@ -3,7 +3,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ReportWizard } from '@/components/wizard/ReportWizard';
 import { createClient } from '@/lib/supabase/client';
 import Navbar from '@/components/Navbar';
 import { SAVOIR_HUB_ARTICLES } from '@/config/navigation';
@@ -631,6 +632,14 @@ export default function FutureELanding() {
   const [slotIndex, setSlotIndex] = useState(0);
   const [slotSettled, setSlotSettled] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+
+  const wizardRef = useRef(null);
+  const [wizardContext, setWizardContext] = useState(null);
+  const openWizard = useCallback((context) => {
+    setWizardContext(context);
+    setTimeout(() => wizardRef.current?.showModal(), 0);
+  }, []);
+
   const commune = selectedCommune?.name || '';
 
   function ensureSupabaseClient() {
@@ -1994,6 +2003,32 @@ export default function FutureELanding() {
                 {plmHint}
               </div>
             )}
+
+            {/* Questions de tension — Wizard trigger */}
+            <div className="mt-8 flex flex-col gap-3 max-w-lg">
+              <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-ghost mb-1">
+                Choisissez votre angle d&apos;entrée
+              </p>
+              {[
+                { label: "Mon logement est-il exposé au risque climatique ?", context: "logement" },
+                { label: "Quelle est la résilience de mon secteur professionnel ?", context: "metier" },
+                { label: "Mon territoire est-il vulnérable d'ici 2050 ?", context: "quartier" },
+              ].map((q) => (
+                <button
+                  key={q.context}
+                  type="button"
+                  onClick={() => openWizard(q.context)}
+                  className="w-full text-left px-5 py-3.5 rounded-xl glass border border-white/[0.08] hover:border-accent/30 transition-colors group"
+                >
+                  <span className="text-[14px] text-muted group-hover:text-label transition-colors">
+                    {q.label}
+                  </span>
+                  <span className="block mt-1 font-mono text-[10px] text-ghost tracking-[0.04em]">
+                    Évaluer mon exposition → Rapport personnalisé
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
 
           <div style={styles.heroRight} className="hero-right">
@@ -2570,6 +2605,8 @@ export default function FutureELanding() {
           </div>
         </div>
       </footer>
+
+      <ReportWizard ref={wizardRef} initialContext={wizardContext} />
     </div>
   );
 }
