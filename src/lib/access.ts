@@ -112,3 +112,7 @@ export function canAccessInteractiveDashboard(account: UserAccount) {
 export function canAccessHouseholdFeatures(account: UserAccount) {
   return account.householdModeEnabled;
 }
+
+export function canAccessActionPage(account: UserAccount) {
+  return account.plan === 'suivi' || account.plan === 'foyer';
+}

@@ -1917,9 +1917,12 @@ export default function FutureELanding() {
             <a style={styles.navLink} href="#">
               Le produit
             </a>
-            <a style={styles.navLink} href="#">
-              Pages Savoir
-            </a>
+            <Link style={styles.navLink} href="/savoir/cadmium">
+              Cadmium
+            </Link>
+            <Link style={styles.navLink} href="/savoir/dependance-auto">
+              Mobilité
+            </Link>
             <a style={styles.navLink} href="#">
               Tarifs
             </a>
