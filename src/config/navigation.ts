@@ -153,19 +153,17 @@ export const NAV_ITEMS: NavItem[] = [
           {
             label: 'Se préparer à la canicule',
             href: '/agir/canicule',
-            description: 'Logement, santé, habitudes',
+            description: 'Ventilation, hydratation, personnes vulnérables',
           },
           {
             label: 'Gérer le risque inondation',
-            href: '/agir/submersion',
-            description: 'Prévention et dispositifs',
-            badge: 'Bientôt',
+            href: '/agir/inondation',
+            description: 'PPRNi, batardeaux, catnat',
           },
           {
             label: 'Face aux feux de forêt',
-            href: '/agir/feux',
-            description: 'Zones à risque et mesures',
-            badge: 'Bientôt',
+            href: '/agir/feux-forets',
+            description: 'Débroussaillement, évacuation, OBD',
           },
         ],
       },
@@ -251,9 +249,9 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
 // ─── Agir guides registry (pour les liens contextuels depuis Territoires) ─────
 export const AGIR_GUIDES: Record<string, { label: string; href: string; available: boolean }> = {
   cadmium:          { label: 'Réduire son exposition au cadmium',    href: '/agir/cadmium',   available: true  },
-  canicule:         { label: 'Se préparer à la canicule',            href: '/agir/canicule',  available: false },
-  submersion:       { label: 'Gérer le risque inondation',           href: '/agir/submersion',available: false },
-  feux:             { label: 'Face aux feux de forêt',               href: '/agir/feux',      available: false },
+  canicule:         { label: 'Se préparer à la canicule',            href: '/agir/canicule',    available: true  },
+  submersion:       { label: 'Gérer le risque inondation',           href: '/agir/inondation',  available: true  },
+  feux:             { label: 'Face aux feux de forêt',               href: '/agir/feux-forets', available: true  },
   'dependance-auto':{ label: 'Réduire sa dépendance automobile',     href: '/agir/dependance-auto', available: true  },
   'voiture-electrique': { label: "Passer à l'électrique",            href: '/agir/voiture-electrique', available: true },
   secheresse:       { label: 'Adapter ses usages à la sécheresse',   href: '/agir/secheresse',available: false },
