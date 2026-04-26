@@ -1,9 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { LocalTensionContext } from '@/components/LocalTensionContext';
-import { PaywallGate } from '@/components/PaywallGate';
-import { getCurrentSessionUser } from '@/lib/user-account';
-import { normalizeAccount } from '@/lib/access';
 import { createClient } from '@supabase/supabase-js';
 import { unstable_cache } from 'next/cache';
 
@@ -174,16 +170,6 @@ export default async function SavoirHubPage({
     );
   }
 
-  // Auth & plan check
-  const { user } = await getCurrentSessionUser();
-  const hasFullAccess =
-    user != null &&
-    (() => {
-      // We read the account here only to check plan; no redirect needed on public pages
-      return true; // Simplified: authenticated = full access for hub list
-      // In production, resolve account.plan and check canAccessActionPage(account)
-    })();
-
   const accentRgb = hub.accent;
 
   // HTML for PaywallGate preview (always visible)
@@ -269,97 +255,67 @@ export default async function SavoirHubPage({
         </div>
       </nav>
 
-      {/* Main */}
+      {/* Main — 100% gratuit, pas de paywall */}
       <main className="page">
-        <PaywallGate
-          hasFullAccess={hasFullAccess}
-          previewHtml={previewHtml}
-          fullHtml={fullHtml}
-          accent={hub.accent}
-        />
+        {/* Contenu éditorial complet, librement accessible */}
+        <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
+        <div dangerouslySetInnerHTML={{ __html: fullHtml }} />
 
-        {/* LocalTensionContext — always visible, limit selon accès */}
-        <LocalTensionContext
-          slug={slug}
-          thematique={hub.thematique}
-          accent={hub.accent}
-          limit={hasFullAccess ? 50 : 10}
-        />
-
-        {/* Paywall teaser si accès partiel */}
-        {!hasFullAccess && (
+        {/* CTA vers la section Territoires pour explorer les communes */}
+        <div
+          style={{
+            marginTop: '56px',
+            padding: '32px',
+            background: 'rgba(255,255,255,0.03)',
+            border: `1px solid ${hub.accent}30`,
+            borderLeft: `3px solid ${hub.accent}`,
+            borderRadius: '10px',
+          }}
+        >
           <div
-            className="bg-glass-card border-strong"
             style={{
-              padding: '32px',
-              borderRadius: '10px',
-              textAlign: 'center',
-              marginTop: '8px',
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '10px',
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: hub.accent,
+              marginBottom: '12px',
             }}
           >
-            <div
-              style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: '11px',
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase' as const,
-                color: hub.accent,
-                marginBottom: '14px',
-              }}
-            >
-              Réservé aux abonnés Suivi
-            </div>
-            <p
-              style={{
-                fontFamily: "'Instrument Serif', serif",
-                fontSize: '20px',
-                lineHeight: 1.4,
-                color: '#e9ecf2',
-                margin: '0 0 24px',
-                fontWeight: 400,
-              }}
-            >
-              40 communes supplémentaires et l'analyse complète des indicateurs
-              <br />
-              sont disponibles dans votre abonnement.
-            </p>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link
-                href="/inscription"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  padding: '13px 26px',
-                  background: hub.accent,
-                  color: '#060812',
-                  fontFamily: "'Instrument Sans', system-ui, sans-serif",
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                  borderRadius: '6px',
-                }}
-              >
-                S&apos;abonner — Accès Suivi
-              </Link>
-              <Link
-                href="/connexion"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  padding: '13px 26px',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  color: '#9ba3b4',
-                  fontFamily: "'Instrument Sans', system-ui, sans-serif",
-                  fontSize: '14px',
-                  textDecoration: 'none',
-                  borderRadius: '6px',
-                }}
-              >
-                Déjà abonné ? Se connecter
-              </Link>
-            </div>
+            Explorer les données par commune
           </div>
-        )}
+          <p
+            style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: '20px',
+              lineHeight: 1.4,
+              color: '#e9ecf2',
+              margin: '0 0 20px',
+              fontWeight: 400,
+            }}
+          >
+            Quelle est l&apos;exposition de <em style={{ fontStyle: 'italic', color: hub.accent }}>votre commune</em>{' '}
+            au risque {hub.thematique.toLowerCase()} ?
+          </p>
+          <Link
+            href={`/territoires/${slug}`}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '13px 24px',
+              background: hub.accent,
+              color: '#060812',
+              fontFamily: "'Instrument Sans', system-ui, sans-serif",
+              fontSize: '14px',
+              fontWeight: 600,
+              textDecoration: 'none',
+              borderRadius: '6px',
+            }}
+          >
+            Rechercher ma commune →
+          </Link>
+        </div>
       </main>
 
       <footer className="page-footer">

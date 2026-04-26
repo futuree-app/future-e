@@ -3,7 +3,6 @@ export type NavLink = {
   href: string;
   description?: string;
   badge?: string;
-  category?: string;
 };
 
 export type NavGroup = {
@@ -28,6 +27,8 @@ export type NavItem = NavFlatItem | NavDropdownItem;
 
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Le produit', href: '#produit' },
+
+  // ─── Savoir — contenu éditorial gratuit ─────────────────────────────────────
   {
     label: 'Savoir',
     groups: [
@@ -39,14 +40,12 @@ export const NAV_ITEMS: NavItem[] = [
             label: 'Cadmium dans les sols',
             href: '/savoir/cadmium',
             description: 'Pollution naturelle et alimentation',
-            category: 'Santé',
           },
           {
             label: 'Pollens & allergies',
             href: '/savoir/pollens',
             description: 'Saison pollinique élargie en 2050',
             badge: 'Bientôt',
-            category: 'Santé',
           },
         ],
       },
@@ -58,7 +57,6 @@ export const NAV_ITEMS: NavItem[] = [
             label: 'Dépendance automobile',
             href: '/savoir/dependance-auto',
             description: 'Vulnérabilité des territoires ruraux',
-            category: 'Mobilité',
           },
         ],
       },
@@ -67,37 +65,132 @@ export const NAV_ITEMS: NavItem[] = [
         color: '#f87171',
         links: [
           {
-            label: 'Canicule',
+            label: 'Canicule en 2050',
             href: '/savoir/canicule',
-            description: 'Jours > 30 °C projetés en 2050',
-            category: 'Environnement',
+            description: 'Projections DRIAS pour les villes françaises',
           },
           {
-            label: 'Submersion',
+            label: 'Submersion côtière',
             href: '/savoir/submersion',
-            description: 'Risque inondation côtier et fluvial',
-            category: 'Environnement',
+            description: 'Risque inondation et littoral',
           },
           {
             label: 'Feux de forêt',
             href: '/savoir/feux',
-            description: "Exposition aux incendies estivaux",
-            category: 'Environnement',
+            description: 'Extension des zones à risque incendie',
           },
           {
             label: 'Sécheresse',
             href: '/savoir/secheresse',
             description: 'Stress hydrique des sols agricoles',
-            category: 'Environnement',
           },
         ],
       },
     ],
   },
+
+  // ─── Territoires — données communes, 100% gratuit ────────────────────────────
+  {
+    label: 'Territoires',
+    groups: [
+      {
+        groupLabel: 'Chercher ma commune',
+        color: '#60a5fa',
+        links: [
+          {
+            label: 'Communes exposées à la chaleur',
+            href: '/territoires/canicule',
+            description: 'Score de tension · Jours > 30 °C en 2050',
+          },
+          {
+            label: 'Communes en zone inondable',
+            href: '/territoires/submersion',
+            description: 'Score de tension · Littoral et cours d\'eau',
+          },
+          {
+            label: 'Communes en zone incendie',
+            href: '/territoires/feux',
+            description: 'Score de tension · Risque feux de forêt',
+          },
+          {
+            label: 'Communes à risque cadmium',
+            href: '/territoires/cadmium',
+            description: 'Score de tension · Sols et alimentation',
+          },
+          {
+            label: 'Communes sans alternative à la voiture',
+            href: '/territoires/dependance-auto',
+            description: 'Score de tension · Mobilité et carburant',
+          },
+        ],
+      },
+    ],
+  },
+
+  // ─── Agir — guides premium avec paywall ─────────────────────────────────────
+  {
+    label: 'Agir',
+    groups: [
+      {
+        groupLabel: 'Guides pratiques',
+        color: '#4ade80',
+        links: [
+          {
+            label: 'Réduire son exposition au cadmium',
+            href: '/agir/cadmium',
+            description: 'Leviers documentés · Étapes concrètes',
+          },
+          {
+            label: 'Se préparer à la canicule',
+            href: '/agir/canicule',
+            description: 'Logement, santé, habitudes',
+            badge: 'Bientôt',
+          },
+          {
+            label: 'Gérer le risque inondation',
+            href: '/agir/submersion',
+            description: 'Prévention et dispositifs',
+            badge: 'Bientôt',
+          },
+          {
+            label: 'Face aux feux de forêt',
+            href: '/agir/feux',
+            description: 'Zones à risque et mesures',
+            badge: 'Bientôt',
+          },
+        ],
+      },
+      {
+        groupLabel: 'Par profil',
+        color: '#fb923c',
+        links: [
+          {
+            label: 'Pour les propriétaires',
+            href: '/agir/proprietaire',
+            description: 'DPE, rénovation, assurances',
+            badge: 'Bientôt',
+          },
+          {
+            label: 'Pour les familles',
+            href: '/agir/famille',
+            description: 'Santé des enfants, mobilité, scolarité',
+            badge: 'Bientôt',
+          },
+          {
+            label: 'Pour les retraités',
+            href: '/agir/retraite',
+            description: 'Chaleur, dépendance, budget',
+            badge: 'Bientôt',
+          },
+        ],
+      },
+    ],
+  },
+
   { label: 'Tarifs', href: '#pricing' },
 ];
 
-/** Articles publiés dans la section Hub de la landing page */
+// ─── Hub articles landing page ────────────────────────────────────────────────
 export type HubArticle = {
   slug: string;
   title: string;
@@ -105,7 +198,6 @@ export type HubArticle = {
   category: string;
   accent: string;
   href: string;
-  published: boolean;
 };
 
 export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
@@ -117,7 +209,6 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     category: 'Santé',
     accent: '#4ade80',
     href: '/savoir/cadmium',
-    published: true,
   },
   {
     slug: 'dependance-auto',
@@ -127,7 +218,6 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     category: 'Mobilité',
     accent: '#60a5fa',
     href: '/savoir/dependance-auto',
-    published: true,
   },
   {
     slug: 'canicule',
@@ -137,7 +227,6 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     category: 'Environnement',
     accent: '#f87171',
     href: '/savoir/canicule',
-    published: true,
   },
   {
     slug: 'submersion',
@@ -147,6 +236,16 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     category: 'Environnement',
     accent: '#60a5fa',
     href: '/savoir/submersion',
-    published: true,
   },
 ];
+
+// ─── Agir guides registry (pour les liens contextuels depuis Territoires) ─────
+export const AGIR_GUIDES: Record<string, { label: string; href: string; available: boolean }> = {
+  cadmium:          { label: 'Réduire son exposition au cadmium',    href: '/agir/cadmium',   available: true  },
+  canicule:         { label: 'Se préparer à la canicule',            href: '/agir/canicule',  available: false },
+  submersion:       { label: 'Gérer le risque inondation',           href: '/agir/submersion',available: false },
+  feux:             { label: 'Face aux feux de forêt',               href: '/agir/feux',      available: false },
+  'dependance-auto':{ label: 'Réduire sa dépendance automobile',     href: '/agir/dependance-auto', available: false },
+  secheresse:       { label: 'Adapter ses usages à la sécheresse',   href: '/agir/secheresse',available: false },
+  pollens:          { label: 'Gérer les allergies polliniques',      href: '/agir/pollens',   available: false },
+};

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { signOutAction } from "@/app/auth/actions";
-import { QuartierWorkbook } from "@/app/compte/QuartierWorkbook";
+import { QuartierWorkbook } from "./QuartierWorkbook";
 import {
   canAccessDashboard,
   canAccessInteractiveDashboard,

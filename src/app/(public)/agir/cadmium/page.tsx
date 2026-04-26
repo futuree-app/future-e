@@ -4,6 +4,8 @@ import { PaywallGate } from '@/components/PaywallGate';
 import { getCurrentSessionUser } from '@/lib/user-account';
 import { canAccessActionPage, normalizeAccount } from '@/lib/access';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "Comment limiter votre exposition au cadmium alimentaire · futur•e",
   description:
@@ -144,7 +146,6 @@ const css = `
     .profile-card,.question-item,.not-todo-item{padding:16px 18px;}
     .dates{padding:14px 16px;gap:14px;}
     .context-link{padding:14px 16px;}
-    .nav-crumb .step-home,.nav-crumb .step-home+.sep{display:none;}
   }
 `;
 
@@ -343,7 +344,7 @@ const fullHtml = `
   <a href="/savoir/cadmium" class="back-link">← Comprendre le cadmium dans l'alimentation</a>
 `;
 
-export default async function CadmiumActionnablePage() {
+export default async function AgirCadmiumPage() {
   const { supabase, user } = await getCurrentSessionUser();
   let hasFullAccess = false;
 
@@ -375,11 +376,9 @@ export default async function CadmiumActionnablePage() {
             futur<span className="brand-dot">•</span>e
           </Link>
           <div className="nav-crumb">
-            <span className="step-home">Savoir</span>
+            <Link href="/agir/cadmium">Agir</Link>
             <span className="sep">/</span>
-            <Link href="/savoir/cadmium">Cadmium</Link>
-            <span className="sep">/</span>
-            Action
+            Cadmium
           </div>
         </div>
       </nav>
@@ -394,7 +393,7 @@ export default async function CadmiumActionnablePage() {
       </article>
 
       <footer className="page-footer">
-        <div>futur•e · Savoir / Santé</div>
+        <div>futur•e · Agir / Santé</div>
         <div>
           <a href="#">Signaler une imprécision</a> · <a href="#">Méthodologie</a>
         </div>

@@ -7,7 +7,7 @@ import {
   getPlanLabel,
 } from "@/lib/access";
 import { getCurrentUserAccount } from "@/lib/user-account";
-import { DashboardExperience } from "@/app/dashboard/DashboardExperience";
+import { DashboardExperience } from "./DashboardExperience";
 
 export default async function DashboardPage() {
   const account = await getCurrentUserAccount();
