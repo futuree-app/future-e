@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+@theme {
+  --color-canvas:  #060812;
+  --color-label:   #e9ecf2;
+  --color-muted:   #9ba3b4;
+  --color-ghost:   #6b7388;
+  --color-orange:  #fb923c;
+  --color-danger:  #f87171;
+  --color-violet:  #a78bfa;
+  --color-success: #4ade80;
+  --color-info:    #60a5fa;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -995,4 +1007,55 @@ a {
   .dashboard-module-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Design system CSS variables and utilities */
+:root {
+  --c-bg:          #060812;
+  --c-bg-elevated: rgba(255,255,255,0.03);
+  --c-border:      rgba(255,255,255,0.08);
+  --c-text:        #e9ecf2;
+  --c-muted:       #9ba3b4;
+  --c-dim:         #6b7388;
+  --c-orange:      #fb923c;
+  --c-red:         #f87171;
+  --c-violet:      #a78bfa;
+  --c-green:       #4ade80;
+  --c-blue:        #60a5fa;
+}
+
+/* Glassmorphism — remplace la fonction glass() inline dans les pages */
+.glass {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Wizard step animation */
+@keyframes step-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.wizard-step {
+  animation: step-enter 0.22s ease-out both;
+}
+
+/* Dialog natif — styles non reproductibles en Tailwind */
+dialog.wizard-dialog {
+  background: #0d1120;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 0;
+  width: min(680px, calc(100vw - 32px));
+  max-height: calc(100dvh - 64px);
+  overflow: hidden;
+}
+dialog.wizard-dialog::backdrop {
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(4px);
+}
+/* Scroll-lock quand dialog ouvert */
+body:has(dialog.wizard-dialog[open]) {
+  overflow: hidden;
 }
