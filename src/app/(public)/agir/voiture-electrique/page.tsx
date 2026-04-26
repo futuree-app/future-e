@@ -246,6 +246,14 @@ const fullHtml = `
         <div class="cond-src">Source : Avere-France · données GIREVE, décembre 2025</div>
       </div>
     </div>
+    <div class="cond-item yes">
+      <div class="cond-icon yes">✓</div>
+      <div class="cond-body">
+        <div class="cond-title">Vous circulez régulièrement dans une ville ayant mis en place une Zone à Faibles Émissions</div>
+        <p class="cond-desc">Paris, Lyon, Grenoble, Strasbourg, Montpellier et plusieurs autres agglomérations ont instauré des Zones à Faibles Émissions mobilité (ZFE-m) qui restreignent progressivement la circulation des véhicules les moins récents selon leur vignette Crit'Air. Un véhicule thermique Crit'Air 3 ou au-delà peut voir ses accès restreints à des horaires croissants d'ici 2025-2030 dans ces zones. Si votre travail ou vos déplacements réguliers se situent dans l'une de ces agglomérations, ce facteur réglementaire modifie l'équation dans la durée, indépendamment de l'usage ou du kilométrage.</p>
+        <div class="cond-src">Source : ADEME · Ministère de la Transition écologique, liste des ZFE-m et calendriers de restriction</div>
+      </div>
+    </div>
   </div>
 
   <h2>Comparer le coût total de possession, pas le prix d'achat</h2>
@@ -311,15 +319,23 @@ const fullHtml = `
       <div class="step-line"></div>
       <div class="step-content">
         <div class="step-title">Considérer le marché de l'occasion avant le neuf</div>
-        <p class="step-desc">Le marché de l'occasion électrique s'est structuré à partir de 2023-2024. Des modèles avec 50 000 à 80 000 km sont disponibles entre 15 000 et 25 000 euros. L'état de santé de la batterie (State of Health, SoH) est le point critique à vérifier lors d'un achat d'occasion : un SoH supérieur à 80 % est généralement acceptable. Certains constructeurs et revendeurs affichent ce chiffre, d'autres non — il peut être mesuré par un outil de diagnostic OBD2 accessible pour moins de 30 euros.</p>
+        <p class="step-desc">Le marché de l'occasion électrique s'est structuré à partir de 2023-2024. Des modèles avec 50 000 à 80 000 km sont disponibles entre 15 000 et 25 000 euros. L'état de santé de la batterie (State of Health, SoH) est le point critique : un SoH supérieur à 80 % est généralement acceptable. Certains constructeurs et revendeurs affichent ce chiffre, d'autres non. Il peut être mesuré par un outil de diagnostic OBD2 accessible pour moins de 30 euros. Pour les véhicules mis sur le marché depuis juillet 2024, le règlement européen sur les batteries (2023/1542) impose aux fabricants de garantir au minimum 70 % du SoH initial pendant 8 ans ou 160 000 kilomètres.</p>
       </div>
     </div>
     <div class="step">
       <div class="step-dot">5</div>
       <div class="step-line"></div>
       <div class="step-content">
-        <div class="step-title">Vérifier les aides disponibles au moment de votre achat</div>
-        <p class="step-desc">Le bonus écologique, la prime à la conversion et les aides régionales évoluent chaque année, parfois en cours d'année. Les montants et les plafonds de revenus conditionnant leur accès changent fréquemment. Vérifiez les conditions en vigueur sur le site du gouvernement au moment précis de votre projet, pas celles qui circulaient six mois auparavant.</p>
+        <div class="step-title">Comparer achat comptant, crédit et LOA selon votre kilométrage prévu</div>
+        <p class="step-desc">La location avec option d'achat (LOA) permet d'accéder à un véhicule électrique neuf avec une mensualité inférieure à un crédit classique, parce qu'une partie de la valeur du véhicule (la valeur résiduelle) n'est pas financée. À la fin du contrat, vous rachetez le véhicule à ce prix ou vous le restituez. La LOA ne génère pas de capital si vous restituez, mais elle peut être pertinente si vous n'êtes pas certain de vouloir conserver ce modèle plusieurs années : la technologie des batteries et des logiciels embarqués évolue vite, et la valeur résiduelle des véhicules électriques reste difficile à estimer sur 4 à 5 ans. Comparez le coût total (mensualités + option de rachat) au coût d'un achat avec crédit classique sur la même durée avant de choisir.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot">6</div>
+      <div class="step-line"></div>
+      <div class="step-content">
+        <div class="step-title">Vérifier les aides disponibles au moment précis de votre achat</div>
+        <p class="step-desc">Le bonus écologique, la prime à la conversion et les aides régionales évoluent chaque année, parfois en cours d'année. Les montants et les plafonds de revenus conditionnant leur accès changent fréquemment. Vérifiez les conditions en vigueur au moment précis de votre projet, pas celles qui circulaient six mois auparavant. Certaines aides régionales s'appliquent aussi aux véhicules d'occasion et à la LOA, ce que les comparateurs nationaux ne mentionnent pas toujours.</p>
         <a href="https://www.service-public.fr/particuliers/vosdroits/F36700" class="step-link" target="_blank" rel="noopener">service-public.fr · Bonus écologique et prime à la conversion ↗</a>
       </div>
     </div>
@@ -375,6 +391,9 @@ const fullHtml = `
   <p>
     Le passage à l'électrique réduit la sensibilité au prix du carburant fossile et les émissions de gaz à effet de serre à l'usage — c'est réel et documenté. Il ne réduit pas la dépendance structurelle à la voiture. Si votre trajet pivot vers votre lieu de travail n'a pas d'alternative crédible, avoir un véhicule électrique ne change pas votre fragilité face à une panne, à une perte de permis ou au vieillissement. La question de la motorisation et la question de la dépendance sont deux questions distinctes. Les traiter ensemble brouille les deux.
   </p>
+  <p>
+    Sur le plan du bilan carbone cycle de vie, l'ADEME estime que la fabrication d'un véhicule électrique génère davantage d'émissions qu'un thermique équivalent, en raison principalement de la batterie. Ce déficit initial est compensé à l'usage : pour un véhicule assemblé en Europe chargé avec le mix électrique français (faiblement carboné grâce au nucléaire), l'ADEME situe le point de bascule entre 2 et 3 ans d'usage typique. Au-delà, chaque kilomètre parcouru réduit l'écart d'empreinte carbone globale par rapport à un thermique équivalent. Ce calcul change selon le pays de fabrication, le mix électrique utilisé pour la charge et la durée de vie du véhicule.
+  </p>
 
   <h2>Ce que vous n'avez pas à faire</h2>
 
@@ -407,6 +426,13 @@ const fullHtml = `
         <p class="not-todo-reason">L'hybride non rechargeable (HEV) consomme moins qu'un thermique classique sur certains cycles urbains, mais ne se recharge pas sur secteur et ne réduit pas votre consommation de carburant fossile de façon structurelle. C'est une amélioration marginale d'un véhicule thermique, pas une étape vers l'électrique. L'hybride rechargeable (PHEV) est une catégorie différente, avec ses propres conditions d'usage pertinent.</p>
       </div>
     </div>
+    <div class="not-todo-item">
+      <div class="not-todo-cross">×</div>
+      <div class="not-todo-body">
+        <div class="not-todo-title">Confondre la LOA avec un abonnement sans engagement financier</div>
+        <p class="not-todo-reason">La LOA est un crédit. Si vous ne rachetez pas le véhicule à l'issue du contrat, vous n'avez pas constitué de capital et vous avez payé des intérêts. Les mensualités LOA paraissent basses parce qu'une partie de la valeur du véhicule (la valeur résiduelle) est reportée en option finale. Si vous pensez restituer le véhicule sans acheter, vérifiez que le coût total des mensualités reste inférieur à la valeur locative équivalente d'un véhicule d'occasion. La LOA est pertinente dans certaines configurations, pas universellement.</p>
+      </div>
+    </div>
   </div>
 
   <section class="sources">
@@ -419,6 +445,9 @@ const fullHtml = `
       <li><span class="src-tag">GIREVE</span><span>Données nationales sur les points de charge opérationnels et leur répartition géographique, <a href="https://www.gireve.com" target="_blank" rel="noopener">gireve.com</a>.</span></li>
       <li><span class="src-tag">Legifrance</span><span>Loi ELAN et décret sur le droit à la prise en copropriété et en location, conditions d'installation d'une borne de recharge en place privative.</span></li>
       <li><span class="src-tag">Service-public</span><span>Bonus écologique et prime à la conversion : conditions en vigueur, plafonds de revenus, montants, <a href="https://www.service-public.fr/particuliers/vosdroits/F36700" target="_blank" rel="noopener">service-public.fr</a>.</span></li>
+      <li><span class="src-tag">ADEME</span><span>Analyse du cycle de vie des véhicules électriques et thermiques, comparaison d'empreinte carbone selon le mix électrique et le kilométrage cumulé, <a href="https://librairie.ademe.fr" target="_blank" rel="noopener">librairie.ademe.fr</a>, édition 2024.</span></li>
+      <li><span class="src-tag">UE 2023/1542</span><span>Règlement européen sur les batteries, article 10 : durabilité minimale de la batterie de traction garantie à 70 % du SoH initial sur 8 ans ou 160 000 km pour les véhicules mis sur le marché depuis juillet 2024.</span></li>
+      <li><span class="src-tag">ADEME · ZFE</span><span>Zones à Faibles Émissions mobilité : liste des agglomérations, calendriers de restriction par vignette Crit'Air et carte interactive, <a href="https://www.ademe.fr/zfe" target="_blank" rel="noopener">ademe.fr</a>.</span></li>
     </ul>
   </section>
 

@@ -217,8 +217,8 @@ const fullHtml = `
       <div class="lever-num">03</div>
       <div class="lever-body">
         <div class="lever-title">Vérifier les alternatives effectives, pas les connexions théoriques</div>
-        <p class="lever-desc">Un transport en commun qui passe une fois par jour à 6h30 sans retour avant 18h n'est pas une alternative à un trajet domicile-travail à horaires variables. Les planificateurs d'itinéraires publics (SNCF, Navigo régional, Google Maps transports) donnent les connexions théoriques. L'alternative effective, c'est celle que vous pourriez utiliser demain sans réorganiser votre journée.</p>
-        <div class="lever-src">Source : Rapport Dumont, CGDD, 2023 · Méthode documentée</div>
+        <p class="lever-desc">Un transport en commun qui passe une fois par jour à 6h30 sans retour avant 18h n'est pas une alternative à un trajet domicile-travail à horaires variables. Les planificateurs d'itinéraires publics (SNCF, Navigo régional, Google Maps transports) donnent les connexions théoriques. L'alternative effective, c'est celle que vous pourriez utiliser demain sans réorganiser votre journée. Pour les trajets domicile-travail en zone périurbaine, les plateformes de covoiturage Klaxit et BlaBlaCar Daily se sont développées sur des axes spécifiques en dehors des grandes métropoles : elles permettent de vérifier si votre axe précis est couvert. Pour les trajets inférieurs à 15 kilomètres en zone périurbaine, le vélo à assistance électrique (VAE) est une alternative documentée par le Plan vélo national : à cette distance, le VAE est comparable en temps à la voiture en conditions normales de circulation, avec une disponibilité horaire totale.</p>
+        <div class="lever-src">Source : Rapport Dumont, CGDD, 2023 · Plan vélo et mobilités actives 2023-2027 · klaxit.com · blablacar.fr/daily</div>
       </div>
     </div>
   </div>
@@ -283,7 +283,7 @@ const fullHtml = `
   <div class="profiles">
     <div class="profile-card">
       <div class="profile-label">Actif travaillant hors de sa commune (cas majoritaire en zone dépendante)</div>
-      <p class="profile-body">Votre trajet domicile-travail est probablement votre trajet pivot principal. La question décisive est : existe-t-il une solution de covoiturage ou de transport collectif viable pour ce trajet précis ? Les plateformes comme Blabladay ou les lignes régionales de covoiturage organisé se développent sur certains axes. Vérifiez pour votre axe spécifique, pas pour votre commune en général.</p>
+      <p class="profile-body">Votre trajet domicile-travail est probablement votre trajet pivot principal. La question décisive est : existe-t-il une solution de covoiturage ou de transport collectif viable pour ce trajet précis ? Klaxit et BlaBlaCar Daily opèrent sur des axes périurbains spécifiques et permettent de vérifier directement si votre trajet est couvert. Si le trajet est inférieur à 15 kilomètres, un VAE subventionné (aides nationales et régionales cumulables) peut réduire significativement votre dépendance sur ce trajet unique, sans remettre en cause l'ensemble de votre usage automobile.</p>
     </div>
     <div class="profile-card">
       <div class="profile-label">Foyer à revenus modestes (transport représente plus de 20 % du budget)</div>
@@ -296,6 +296,10 @@ const fullHtml = `
     <div class="profile-card">
       <div class="profile-label">Foyer envisageant un déménagement en périphérie ou en zone rurale</div>
       <p class="profile-body">La différence de prix du logement entre le centre et la périphérie d'une agglomération est souvent absorbée en quelques années par le surcoût de mobilité. Pour un foyer passant de zéro à deux voitures nécessaires, le coût supplémentaire peut dépasser 8 000 euros par an. Ce calcul est rarement fait au moment de la décision résidentielle, et les données de l'ADEME et de l'Observatoire des inégalités permettent de le faire.</p>
+    </div>
+    <div class="profile-card">
+      <div class="profile-label">Personne dépendant de la voiture pour ses rendez-vous médicaux</div>
+      <p class="profile-body">En zone rurale ou périurbaine peu desservie, la capacité à accéder aux soins de santé repose souvent sur la possession d'un véhicule. Pour les personnes de plus de 70 ans ou celles dont la capacité à conduire peut évoluer, cette dépendance médicale est un trajet pivot distinct du trajet domicile-travail. Les transports sanitaires remboursés (VSL, ambulance) couvrent les trajets médicaux prescrits, mais pas les consultations de médecine générale courante. Les transports à la demande (TAD) conventionnés par les AOM ou les conseils départementaux couvrent parfois ce besoin dans certains territoires : votre médecin traitant ou votre CCAS peut vous indiquer ce qui existe dans votre zone.</p>
     </div>
   </div>
 
@@ -320,9 +324,12 @@ const fullHtml = `
     </div>
   </div>
 
-  <h2>Ce qui relève du collectif</h2>
+  <h2>Ce qui relève du collectif et ce qui relève de vous</h2>
   <p>
-    L'évaluation individuelle permet de savoir où vous en êtes. Elle ne résout pas les causes structurelles de la dépendance. Ces causes relèvent de décisions d'aménagement du territoire (densification, localisation des services et des emplois) et d'investissements dans les alternatives (transport à la demande, covoiturage organisé, voies cyclables sécurisées dans les zones périurbaines). La Loi d'orientation des mobilités de 2019 a posé des obligations légales pour couvrir tous les territoires, mais leur mise en œuvre reste très inégale. Les associations d'usagers des transports et les collectifs locaux de mobilité sont un levier pour accélérer le déploiement dans les zones encore insuffisamment couvertes.
+    L'évaluation individuelle permet de savoir où vous en êtes. Elle ne résout pas les causes structurelles de la dépendance. Ces causes relèvent de décisions d'aménagement du territoire (densification, localisation des services et des emplois) et d'investissements dans les alternatives (transport à la demande, covoiturage organisé, voies cyclables sécurisées dans les zones périurbaines). La Loi d'orientation des mobilités de 2019 a posé des obligations légales pour couvrir tous les territoires, mais leur mise en oeuvre reste très inégale. Les associations d'usagers des transports et les collectifs locaux de mobilité sont un levier documenté pour accélérer le déploiement dans les zones encore insuffisamment couvertes.
+  </p>
+  <p>
+    Ce qui relève de vous dans l'immédiat : vérifier si les alternatives qui existent sur votre axe spécifique sont effectivement connues de vous. Klaxit, BlaBlaCar Daily et les lignes régionales de covoiturage subventionné (certaines régions prennent en charge une partie du trajet) fonctionnent parfois sur des axes qui n'ont pas été publicisés localement. Le fait qu'une solution existe sans que vous en soyez informé est fréquent. Ce n'est pas un argument contre la démarche individuelle d'exploration, c'est un argument pour la faire concrètement.
   </p>
 
   <h2>Ce que vous n'avez pas à faire</h2>
@@ -368,6 +375,9 @@ const fullHtml = `
       <li><span class="src-tag">CGDD</span><span>Rapport Dumont sur les mobilités du quotidien dans les territoires ruraux et périurbains, 2023. Analyse des alternatives réelles et des freins à leur déploiement.</span></li>
       <li><span class="src-tag">Obs. inégalités</span><span>Part des dépenses de transport dans les budgets selon la localisation résidentielle et le revenu, <a href="https://www.inegalites.fr" target="_blank" rel="noopener">inegalites.fr</a>.</span></li>
       <li><span class="src-tag">LOM 2019</span><span>Loi d'orientation des mobilités, obligations des Autorités organisatrices de mobilité à couvrir l'ensemble du territoire national, Legifrance.</span></li>
+      <li><span class="src-tag">Klaxit</span><span>Plateforme de covoiturage domicile-travail subventionné, présente sur certains axes périurbains en partenariat avec les collectivités. Vérification de couverture par commune et axe sur <a href="https://www.klaxit.com" target="_blank" rel="noopener">klaxit.com</a>.</span></li>
+      <li><span class="src-tag">BlaBlaCar Daily</span><span>Covoiturage quotidien court trajet, notamment pour les zones périurbaines non desservies par les transports collectifs. <a href="https://www.blablacar.fr/daily" target="_blank" rel="noopener">blablacar.fr/daily</a>.</span></li>
+      <li><span class="src-tag">Plan vélo</span><span>Plan vélo et mobilités actives 2023-2027 : données sur le développement du VAE et les aides à l'achat (bonus vélo, aide des collectivités), Ministère des Transports.</span></li>
     </ul>
   </section>
 
