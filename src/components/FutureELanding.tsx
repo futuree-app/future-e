@@ -27,6 +27,51 @@ const PLM_CENTRAL_CODES: Record<string, { city: string; example: string }> = {
   '13055': { city: 'Marseille', example: 'Marseille 7e Arrondissement' },
 };
 
+const SLOT_CITIES = [
+  {
+    name: 'Lyon',
+    cards: [
+      { label: 'Canicule à Lyon',      val: '47 jours > 30°C/an en 2050',       col: C.red,    src: 'DRIAS · +2°C' },
+      { label: 'Air à Lyon',            val: 'Ozone estival en hausse',           col: C.orange, src: 'ATMO / Santé publique France' },
+      { label: 'Eau à Lyon',            val: 'Étiages sévères sur le Rhône',      col: C.blue,   src: 'BRGM / Agences de l\'eau' },
+      { label: 'Immobilier à Lyon',     val: 'DPE et chaleur pèseront davantage', col: C.orange, src: 'DVF / ADEME' },
+    ],
+  },
+  {
+    name: 'Marseille',
+    cards: [
+      { label: 'Chaleur à Marseille',   val: '63 jours > 30°C/an en 2050',         col: C.red,    src: 'DRIAS · +2°C' },
+      { label: 'Feux à Marseille',      val: 'Risque en hausse les étés secs',      col: C.red,    src: 'Prométhée / DREAL' },
+      { label: 'Submersion à Marseille',val: 'Calanques et zones basses exposées',  col: C.blue,   src: 'Géorisques / BRGM' },
+      { label: 'Immobilier à Marseille',val: 'Risque + DPE pèseront davantage',     col: C.orange, src: 'DVF / ADEME' },
+    ],
+  },
+  {
+    name: 'Vannes',
+    cards: [
+      { label: 'Littoral à Vannes',     val: 'Submersion et érosion en hausse',   col: C.blue,   src: 'Géorisques / BRGM' },
+      { label: 'Eau potable à Vannes',  val: 'Ressource sous tension l\'été',      col: C.blue,   src: 'BRGM / Agences de l\'eau' },
+      { label: 'Pollens à Vannes',      val: 'Saison allongée en Bretagne',        col: C.green,  src: 'RNSA / Copernicus' },
+      { label: 'Immobilier à Vannes',   val: 'Risque littoral pèse sur les prix',  col: C.orange, src: 'DVF / ADEME' },
+    ],
+  },
+  {
+    name: 'La Rochelle',
+    cards: [
+      { label: 'Submersion à La Rochelle', val: '+31 % en scénario médian',           col: C.blue,   src: 'Géorisques / BRGM' },
+      { label: 'Chaleur à La Rochelle',    val: '24 jours > 30°C/an en 2050',         col: C.red,    src: 'DRIAS · +2°C' },
+      { label: 'Pollens à La Rochelle',    val: 'Allongement de 28 jours en NA',      col: C.green,  src: 'RNSA / Copernicus' },
+      { label: 'Immobilier à La Rochelle', val: 'Risque + DPE pèseront davantage',    col: C.orange, src: 'DVF / ADEME' },
+    ],
+  },
+];
+
+const SLOT_SCHEDULE: [number, number][] = [
+  [1,  5000], // Marseille
+  [2, 10000], // Vannes
+  [3, 15000], // La Rochelle — atterrissage final
+];
+
 const FALLBACK_TENSION_IDS = [
   'enfants_sante',
   'metier_general',
@@ -581,6 +626,8 @@ export default function FutureELanding() {
   const [answerSource, setAnswerSource] = useState('');
   const [freeText, setFreeText] = useState('');
   const [plmHint, setPlmHint] = useState('');
+  const [slotIndex, setSlotIndex] = useState(0);
+  const [slotSettled, setSlotSettled] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
   const commune = selectedCommune?.name || '';
 
@@ -673,6 +720,17 @@ export default function FutureELanding() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = SLOT_SCHEDULE.map(
+      ([cityIdx, delay], i) =>
+        setTimeout(() => {
+          setSlotIndex(cityIdx);
+          if (i === SLOT_SCHEDULE.length - 1) setSlotSettled(true);
+        }, delay),
+    );
+    return () => timers.forEach(clearTimeout);
+  }, []); // runs once on mount
 
   useEffect(() => {
     if (selectedCommune || inputValue.trim().length < 2) {
@@ -1769,7 +1827,8 @@ export default function FutureELanding() {
     'INRAE',
   ];
 
-  const previewCommune = commune || 'La Rochelle';
+  const activeSlotCity = SLOT_CITIES[slotIndex];
+  const previewCommune = commune || activeSlotCity.name;
   const isDev = process.env.NODE_ENV !== 'production';
   const activeCategories = communeMeta?.categories || ['all'];
   const heroCopy = getHeroCopy(
@@ -1785,12 +1844,11 @@ export default function FutureELanding() {
     commune,
     communeMeta?.usedFallback,
   );
-  const previewCards = getPreviewCards(
-    previewCommune,
-    activeCategories,
-    communeIndicators,
-    communeGeorisques,
-  );
+  const previewCards = commune
+    ? getPreviewCards(commune, activeCategories, communeIndicators, communeGeorisques)
+    : activeSlotCity.cards;
+  // Clé d'animation : change à chaque étape du slot, puis à chaque sélection de commune
+  const slotAnimKey = commune ? `c-${commune}` : slotSettled ? 'settled' : `s-${slotIndex}`;
 
   return (
     <div style={styles.root}>
@@ -1807,6 +1865,31 @@ export default function FutureELanding() {
         .answer-anim { animation: fadeIn 0.4s ease; }
         .plan-btn:hover { opacity: 0.88; }
         .suggestion-row:last-child { border-bottom: none !important; }
+        @keyframes slot-spin-kf {
+          from { transform: translateY(-28px); filter: blur(10px); opacity: 0; }
+          to   { transform: translateY(0);     filter: blur(0);    opacity: 1; }
+        }
+        @keyframes slot-settle-kf {
+          0%   { transform: translateY(-32px); filter: blur(7px); opacity: 0; }
+          65%  { transform: translateY(5px);   filter: blur(0);   opacity: 1; }
+          100% { transform: translateY(0);     filter: blur(0);   opacity: 1; }
+        }
+        @keyframes slot-card-spin-kf {
+          from { transform: translateY(-20px); filter: blur(7px); opacity: 0; }
+          to   { transform: translateY(0);     filter: blur(0);   opacity: 1; }
+        }
+        @keyframes slot-card-settle-kf {
+          0%   { transform: translateY(-24px); filter: blur(5px); opacity: 0; }
+          65%  { transform: translateY(4px);   filter: blur(0);   opacity: 1; }
+          100% { transform: translateY(0);     filter: blur(0);   opacity: 1; }
+        }
+        .slot-spin         { display:inline-block; animation: slot-spin-kf      1.1s cubic-bezier(0.2,0,0.4,1) both; }
+        .slot-settle       { display:inline-block; animation: slot-settle-kf    1.3s cubic-bezier(0.2,0.8,0.3,1) both; }
+        .slot-card-spin    { animation: slot-card-spin-kf   1.1s cubic-bezier(0.2,0,0.4,1) both; }
+        .slot-card-settle  { animation: slot-card-settle-kf 1.3s cubic-bezier(0.2,0.8,0.3,1) both; }
+        @media (prefers-reduced-motion: reduce) {
+          .slot-spin, .slot-settle, .slot-card-spin, .slot-card-settle { animation: none; }
+        }
         @media (max-width:768px) {
           .hero-grid { grid-template-columns: 1fr !important; }
           .hero-right { display: none !important; }
@@ -1863,8 +1946,15 @@ export default function FutureELanding() {
               Données publiques · Lecture locale · Projection personnalisée
             </div>
             <h1 style={styles.h1}>
-              Votre vie à <span style={styles.h1Accent}>{previewCommune}</span> en
-              2050.
+              Votre vie à{' '}
+              <span
+                key={slotAnimKey}
+                style={styles.h1Accent}
+                className={commune || slotSettled ? 'slot-settle' : 'slot-spin'}
+              >
+                {previewCommune}
+              </span>
+              {' '}en 2050.
             </h1>
             <p style={styles.heroSub}>{heroCopy}</p>
 
@@ -1931,8 +2021,13 @@ export default function FutureELanding() {
           <div style={styles.heroRight} className="hero-right">
             {previewCards.map((item, index) => (
               <div
-                key={index}
-                style={{ ...styles.previewCard, opacity: 1 - index * 0.08 }}
+                key={`${slotAnimKey}-${index}`}
+                className={commune || slotSettled ? 'slot-card-settle' : 'slot-card-spin'}
+                style={{
+                  ...styles.previewCard,
+                  opacity: 1 - index * 0.08,
+                  animationDelay: `${index * 35}ms`,
+                }}
               >
                 <div style={styles.previewDot(item.col)} />
                 <div>
