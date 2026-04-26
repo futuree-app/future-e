@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --color-canvas:  #060812;
-  --color-label:   #e9ecf2;
-  --color-muted:   #9ba3b4;
-  --color-ghost:   #6b7388;
-  --color-orange:  #fb923c;
-  --color-danger:  #f87171;
-  --color-violet:  #a78bfa;
-  --color-success: #4ade80;
-  --color-info:    #60a5fa;
+  --color-canvas:    #060812;
+  --color-label:     #e9ecf2;
+  --color-muted:     #9ba3b4;
+  --color-ghost:     #6b7388;
+  --color-accent:    #fb923c;  /* safe name — no Tailwind built-in scale conflict */
+  --color-danger:    #f87171;
+  --color-amethyst:  #a78bfa;  /* safe name — no Tailwind built-in scale conflict */
+  --color-success:   #4ade80;
+  --color-info:      #60a5fa;
 }
 
 :root {
@@ -1009,7 +1009,8 @@ a {
   }
 }
 
-/* Design system CSS variables and utilities */
+/* Design system semantic tokens — used by .glass, wizard, and component CSS-vars.
+   Tailwind-facing tokens live in the @theme block at the top of this file. */
 :root {
   --c-bg:          #060812;
   --c-bg-elevated: rgba(255,255,255,0.03);
@@ -1026,10 +1027,10 @@ a {
 
 /* Glassmorphism — remplace la fonction glass() inline dans les pages */
 .glass {
-  background: rgba(255,255,255,0.03);
+  background: var(--c-bg-elevated);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--c-border);
 }
 
 /* Wizard step animation */
@@ -1044,7 +1045,7 @@ a {
 /* Dialog natif — styles non reproductibles en Tailwind */
 dialog.wizard-dialog {
   background: #0d1120;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--c-border);
   border-radius: 20px;
   padding: 0;
   width: min(680px, calc(100vw - 32px));
