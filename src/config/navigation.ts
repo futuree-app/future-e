@@ -154,7 +154,6 @@ export const NAV_ITEMS: NavItem[] = [
             label: 'Se préparer à la canicule',
             href: '/agir/canicule',
             description: 'Logement, santé, habitudes',
-            badge: 'Bientôt',
           },
           {
             label: 'Gérer le risque inondation',
