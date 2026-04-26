@@ -2118,9 +2118,22 @@ export default function FutureELanding() {
                     <>
                       <div style={styles.verdict}>« {answer.verdict} »</div>
                       <p style={styles.detail}>{answer.detail}</p>
-                      <a href={answer.href || '#'} style={styles.answerCta}>
-                        {answer.cta} →
-                      </a>
+                      <button
+                        type="button"
+                        style={{ ...styles.answerCta, border: 'none', cursor: 'pointer' }}
+                        onClick={() => {
+                          const cta = answer.cta || '';
+                          const ctx =
+                            cta.includes('Santé') ? 'sante' :
+                            cta.includes('Mobilité') ? 'mobilite' :
+                            cta.includes('Métier') ? 'metier' :
+                            cta.includes('Logement') ? 'logement' :
+                            cta.includes('Projets') ? 'projets' : 'quartier';
+                          openWizard(ctx);
+                        }}
+                      >
+                        Générer mon rapport personnalisé →
+                      </button>
                     </>
                   )
                 )}
@@ -2419,6 +2432,74 @@ export default function FutureELanding() {
         </div>
       </section>
 
+      {/* ── CTA Rapport personnalisé ── */}
+      <div style={{ position: 'relative', zIndex: 2, maxWidth: 1100, margin: '0 auto', padding: '0 28px 80px' }}>
+        <div style={{
+          ...glass({ borderRadius: 20, padding: '48px 52px' }),
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 40,
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            position: 'absolute', top: -70, right: -70,
+            width: 260, height: 260, borderRadius: '50%',
+            background: `radial-gradient(circle, ${C.orange}18 0%, transparent 70%)`,
+            pointerEvents: 'none',
+          }} />
+          <div style={{ maxWidth: 540 }}>
+            <div style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 10, letterSpacing: '0.14em',
+              textTransform: 'uppercase', color: C.orange, marginBottom: 10,
+            }}>
+              Rapport personnalisé
+            </div>
+            <h2 style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontWeight: 400,
+              fontSize: 'clamp(22px, 2.4vw, 30px)',
+              lineHeight: 1.2, letterSpacing: '-0.4px',
+              color: C.text, margin: '0 0 10px',
+            }}>
+              Six dimensions de votre vie
+              {commune ? ` à ${commune}` : ''}.{' '}
+              <span style={{ fontStyle: 'italic', color: C.orange }}>
+                Personnalisées. Sourcées. Actionnables.
+              </span>
+            </h2>
+            <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.65, margin: 0 }}>
+              Répondez à 6 questions. Obtenez un aperçu personnalisé de vos expositions climatiques — logement, métier, santé, mobilité, projets.
+            </p>
+          </div>
+          <div style={{ flexShrink: 0, textAlign: 'center' }}>
+            <button
+              type="button"
+              onClick={() => openWizard('quartier')}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                gap: 8, padding: '14px 28px', borderRadius: 12,
+                background: C.orange, color: C.bg,
+                fontFamily: "'Instrument Sans', sans-serif",
+                fontWeight: 600, fontSize: 15,
+                border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              Obtenir mon rapport personnalisé
+            </button>
+            <p style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 10, color: C.dim,
+              letterSpacing: '0.04em', marginTop: 10,
+            }}>
+              6 questions · 2 minutes · aperçu gratuit
+            </p>
+          </div>
+        </div>
+      </div>
+
       <section id="pricing" style={styles.pricingSection}>
         <div style={{ textAlign: 'center', marginBottom: 0 }}>
           <div
@@ -2581,6 +2662,7 @@ export default function FutureELanding() {
         </div>
       </footer>
 
+      {/* Dialog Wizard — top-layer via showModal(), DOM position ne change pas le rendu */}
       <ReportWizard ref={wizardRef} initialContext={wizardContext} />
     </div>
   );

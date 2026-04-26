@@ -1052,6 +1052,9 @@ dialog.wizard-dialog {
   width: min(680px, calc(100vw - 32px));
   max-height: calc(100dvh - 64px);
   overflow: hidden;
+}
+/* display:flex seulement quand le dialog est ouvert — évite d'écraser display:none UA */
+dialog.wizard-dialog[open] {
   display: flex;
   flex-direction: column;
 }
