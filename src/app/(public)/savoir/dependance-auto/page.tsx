@@ -237,8 +237,8 @@ const articleBody = `
   <div class="actions-card">
     <div class="actions-card-head">Pour aller plus loin</div>
     <ul class="actions-list">
-      <li><a href="#">Évaluer votre dépendance à la voiture et ses alternatives réelles<span class="arrow">→</span></a></li>
-      <li><a href="#">Passer à l'électrique : ce qui a du sens selon votre territoire<span class="arrow">→</span></a></li>
+      <li><a href="/agir/dependance-auto">Évaluer votre dépendance à la voiture et ses alternatives réelles<span class="arrow">→</span></a></li>
+      <li><a href="/agir/voiture-electrique">Passer à l'électrique : ce qui a du sens selon votre territoire<span class="arrow">→</span></a></li>
       <li><a href="#">Comment lire l'offre de transport collectif de votre commune<span class="arrow">→</span></a></li>
     </ul>
   </div>
