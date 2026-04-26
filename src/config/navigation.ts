@@ -141,6 +141,16 @@ export const NAV_ITEMS: NavItem[] = [
             description: 'Leviers documentés · Étapes concrètes',
           },
           {
+            label: 'Réduire sa dépendance automobile',
+            href: '/agir/dependance-auto',
+            description: 'Coût réel, alternatives, vulnérabilité mobilité',
+          },
+          {
+            label: "Passer à l'électrique",
+            href: '/agir/voiture-electrique',
+            description: 'Quand cela a du sens selon votre territoire',
+          },
+          {
             label: 'Se préparer à la canicule',
             href: '/agir/canicule',
             description: 'Logement, santé, habitudes',
@@ -245,7 +255,8 @@ export const AGIR_GUIDES: Record<string, { label: string; href: string; availabl
   canicule:         { label: 'Se préparer à la canicule',            href: '/agir/canicule',  available: false },
   submersion:       { label: 'Gérer le risque inondation',           href: '/agir/submersion',available: false },
   feux:             { label: 'Face aux feux de forêt',               href: '/agir/feux',      available: false },
-  'dependance-auto':{ label: 'Réduire sa dépendance automobile',     href: '/agir/dependance-auto', available: false },
+  'dependance-auto':{ label: 'Réduire sa dépendance automobile',     href: '/agir/dependance-auto', available: true  },
+  'voiture-electrique': { label: "Passer à l'électrique",            href: '/agir/voiture-electrique', available: true },
   secheresse:       { label: 'Adapter ses usages à la sécheresse',   href: '/agir/secheresse',available: false },
   pollens:          { label: 'Gérer les allergies polliniques',      href: '/agir/pollens',   available: false },
 };
