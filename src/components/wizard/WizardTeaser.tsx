@@ -46,33 +46,36 @@ export function WizardTeaser({
   const risks = computeRisks(answers, context);
 
   return (
-    <div className="wizard-step">
-      <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-2">
-        Aperçu personnalisé · {ville}
-      </p>
+    <div className="wizard-step flex flex-col gap-8">
 
-      <h2
-        className="font-normal text-[clamp(24px,3vw,36px)] leading-[1.1] tracking-[-0.5px] text-label mb-6"
-        style={{ fontFamily: "'Instrument Serif', serif" }}
-      >
-        Votre profil présente{" "}
-        <span className="italic text-accent">
-          {risks.length > 1 ? `${risks.length} expositions` : "une exposition"}
-        </span>{" "}
-        identifiées.
-      </h2>
+      {/* Headline */}
+      <div>
+        <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent mb-3">
+          Aperçu personnalisé · {ville}
+        </p>
+        <h2
+          className="font-semibold text-[clamp(22px,2.6vw,30px)] leading-[1.18] tracking-[-0.5px] text-label"
+          style={{ fontFamily: "'Instrument Serif', serif" }}
+        >
+          Votre profil présente{" "}
+          <span className="italic text-accent">
+            {risks.length > 1 ? `${risks.length} expositions` : "une exposition"}
+          </span>{" "}
+          identifiées.
+        </h2>
+      </div>
 
       {/* Risk cards */}
-      <div className="flex flex-col gap-3 mb-8">
+      <div className="flex flex-col gap-3">
         {risks.map((risk) => (
           <div
             key={risk}
-            className="flex items-start gap-4 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.08]"
+            className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/[0.03] border border-white/[0.07]"
           >
-            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-accent shrink-0 shadow-[0_0_8px_rgba(251,146,60,0.5)]" />
             <div>
-              <p className="text-[13px] font-medium text-label mb-0.5 leading-snug">{risk}</p>
-              <p className="font-mono text-[10px] text-ghost tracking-[0.04em]">
+              <p className="text-[14px] font-medium text-label leading-snug">{risk}</p>
+              <p className="font-mono text-[10px] text-ghost tracking-[0.04em] mt-0.5">
                 Analyse complète dans le rapport
               </p>
             </div>
@@ -81,64 +84,67 @@ export function WizardTeaser({
       </div>
 
       {/* Aperçu flou verrouillé */}
-      <div className="relative rounded-xl overflow-hidden mb-8">
+      <div className="relative rounded-2xl overflow-hidden">
         <div
-          className="px-5 py-4 bg-white/[0.02] border border-white/[0.08] select-none"
+          className="px-6 py-5 bg-white/[0.02] border border-white/[0.06] select-none"
           style={{ filter: "blur(3px)" }}
           aria-hidden
         >
-          <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-ghost mb-1">
+          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ghost mb-2">
             Analyse complète
           </p>
           <p className="text-[13px] text-muted leading-relaxed">
             Votre logement présente un DPE estimé F–G. Le coût de rénovation obligatoire d&apos;ici 2034 est compris entre 18 000 et 35 000 €. La valeur de revente est exposée à une décote progressive…
           </p>
         </div>
-        <div className="absolute inset-0 flex items-center justify-center bg-canvas/50 backdrop-blur-[1px]">
-          <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-muted border border-white/[0.1] rounded-full px-3 py-1.5 bg-canvas/80">
+        <div className="absolute inset-0 flex items-center justify-center bg-canvas/50 backdrop-blur-sm">
+          <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-muted border border-white/[0.12] rounded-full px-4 py-2 bg-canvas/80">
             Contenu verrouillé
           </span>
         </div>
       </div>
 
       {/* Paywall */}
-      <div className="rounded-2xl border border-accent/[0.18] p-6 relative overflow-hidden" style={{ background: "rgba(251,146,60,0.04)" }}>
-        <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-accent/[0.08] blur-3xl pointer-events-none" />
-        <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-3">
+      <div
+        className="rounded-3xl border border-accent/[0.16] p-8 relative overflow-hidden"
+        style={{ background: "rgba(251,146,60,0.03)" }}
+      >
+        <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-accent/[0.07] blur-3xl pointer-events-none" />
+        <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent mb-4">
           Rapport complet
         </p>
         <p
-          className="text-[18px] font-normal text-label mb-2 leading-snug"
+          className="text-[20px] font-normal text-label mb-2 leading-snug"
           style={{ fontFamily: "'Instrument Serif', serif" }}
         >
-          Accédez à votre analyse complète, vos 6 modules de suivi et votre guide d&apos;action personnalisé.
+          Accédez à votre analyse complète, vos 6 modules et votre guide d&apos;action personnalisé.
         </p>
-        <p className="text-[13px] text-muted mb-5 leading-relaxed">
+        <p className="text-[14px] text-muted mb-7 leading-relaxed">
           Sourcé sur les données publiques françaises. Personnalisé sur votre profil. Sans publicité.
         </p>
-        <div className="flex items-end gap-4 mb-5">
+        <div className="flex items-end gap-5 mb-7">
           <div>
             <span
-              className="text-[44px] text-label leading-none tracking-[-1.5px]"
+              className="text-[48px] text-label leading-none tracking-[-2px]"
               style={{ fontFamily: "'Instrument Serif', serif" }}
             >
               14
             </span>
-            <span className="text-[18px] text-ghost ml-0.5">€</span>
+            <span className="text-[20px] text-ghost ml-1">€</span>
           </div>
-          <div className="pb-1.5">
-            <p className="font-mono text-[10px] text-ghost tracking-[0.04em]">paiement unique</p>
-            <p className="font-mono text-[10px] text-ghost tracking-[0.04em]">ou 9 €/mois en Suivi</p>
+          <div className="pb-2">
+            <p className="font-mono text-[10px] text-ghost tracking-[0.04em] leading-relaxed">paiement unique</p>
+            <p className="font-mono text-[10px] text-ghost tracking-[0.04em] leading-relaxed">ou 9 €/mois en Suivi</p>
           </div>
         </div>
         <Link
           href="/paiement"
-          className="flex w-full items-center justify-center gap-2 px-6 py-3 rounded-xl bg-accent text-canvas font-semibold text-[14px] no-underline"
+          className="flex w-full items-center justify-center gap-2 px-7 py-4 rounded-xl bg-accent text-canvas font-semibold text-[15px] no-underline transition-all duration-300 hover:bg-accent/90 hover:shadow-lg hover:shadow-accent/20 active:scale-[0.98]"
           style={{ fontFamily: "'Instrument Sans', sans-serif" }}
         >
           Débloquer mon rapport complet — 14€
         </Link>
-        <p className="mt-3 text-center font-mono text-[10px] text-ghost tracking-[0.04em]">
+        <p className="mt-4 text-center font-mono text-[10px] text-ghost tracking-[0.04em]">
           Les 14 € sont déductibles si vous passez en Suivi mensuel
         </p>
       </div>
@@ -146,10 +152,11 @@ export function WizardTeaser({
       <button
         type="button"
         onClick={onRestart}
-        className="mt-4 w-full text-center font-mono text-[10px] tracking-[0.06em] uppercase text-ghost hover:text-muted transition-colors py-2"
+        className="text-center font-mono text-[10px] tracking-[0.08em] uppercase text-ghost hover:text-muted transition-colors duration-200 py-1"
       >
-        Recommencer
+        Recommencer depuis le début
       </button>
+
     </div>
   );
 }

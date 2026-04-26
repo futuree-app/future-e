@@ -1034,15 +1034,6 @@ a {
   border: 1px solid var(--c-border);
 }
 
-/* Wizard step animation */
-@keyframes step-enter {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.wizard-step {
-  animation: step-enter 0.22s ease-out both;
-}
-
 /* Dialog natif — styles non reproductibles en Tailwind */
 dialog.wizard-dialog {
   background: rgba(10, 12, 26, 0.88);
@@ -1074,10 +1065,6 @@ dialog.wizard-dialog::backdrop {
 }
 .wizard-step {
   animation: step-enter 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-dialog.wizard-dialog::backdrop {
-  background: rgba(0,0,0,0.72);
-  backdrop-filter: blur(4px);
 }
 /* Scroll-lock quand dialog ouvert */
 body:has(dialog.wizard-dialog[open]) {

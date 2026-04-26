@@ -101,19 +101,19 @@ export const ReportWizard = forwardRef<HTMLDialogElement, { initialContext?: str
         onClose={() => dispatch({ type: "RESET" })}
       >
         {/* Header — shrinks to content */}
-        <div className="flex items-center justify-between px-8 pt-7 pb-4 border-b border-white/[0.08] shrink-0">
+        <div className="flex items-center justify-between px-10 pt-8 pb-5 border-b border-white/[0.06] shrink-0">
           <WizardStepper currentStep={state.step} totalSteps={6} />
           <button
             type="button"
             onClick={handleClose}
-            className="font-mono text-[10px] tracking-[0.1em] uppercase text-ghost hover:text-muted transition-colors"
+            className="p-1.5 rounded-lg font-mono text-[10px] tracking-[0.1em] uppercase text-ghost hover:text-label hover:bg-white/[0.06] transition-all duration-200"
           >
-            Fermer ×
+            esc ×
           </button>
         </div>
 
         {/* Content — fills remaining height, scrollable */}
-        <div className="flex-1 overflow-y-auto min-h-0 px-8 py-7">
+        <div className="flex-1 overflow-y-auto min-h-0 px-10 py-9">
           {state.step < 6 ? (
             <WizardStep
               key={state.step}
