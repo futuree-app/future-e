@@ -17,21 +17,21 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
         <div className="auth-grid">
           <section className="auth-story">
-            <p className="auth-story-label">Connexion sécurisée</p>
+            <p className="auth-story-label">Votre espace personnel</p>
             <h2 className="auth-story-title">
-              Une entrée simple, dans la même atmosphère que le rapport.
+              Ce que vous avez construit, toujours là.
             </h2>
             <p className="auth-story-copy">
-              futur•e n&apos;ouvre pas une simple session. Vous retrouvez un
-              espace personnel où la commune, les tensions et le suivi restent
-              lisibles, sobres et tracés.
+              futur•e garde la mémoire de votre commune, de vos réponses et de
+              vos projections. Vous retrouvez exactement là où vous en étiez,
+              sans recommencer.
             </p>
             <div className="auth-story-card">
-              <p className="auth-story-card-label">Ce que vous retrouvez</p>
+              <p className="auth-story-card-label">Vous retrouvez</p>
               <ul className="auth-story-list">
-                <li>vos projections locales et leurs scénarios DRIAS</li>
-                <li>un accès direct au compte, au dashboard et au rapport</li>
-                <li>un accès classique par email et mot de passe</li>
+                <li>vos projections climatiques locales et leurs scénarios à 2050</li>
+                <li>votre rapport personnalisé et les 6 modules d&apos;analyse</li>
+                <li>le suivi de vos indicateurs au fil du temps</li>
               </ul>
             </div>
           </section>

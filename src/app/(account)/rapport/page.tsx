@@ -3,6 +3,7 @@ import { AccountNav } from "@/components/AccountNav";
 import { canAccessCompleteReport } from "@/lib/access";
 import { PRODUCT_MODULES } from "@/lib/product";
 import { getCurrentUserAccount } from "@/lib/user-account";
+import { QuartierWorkbook } from "../compte/QuartierWorkbook";
 
 const MODULE_COLORS: Record<string, string> = {
   quartier: "#60a5fa",
@@ -171,7 +172,7 @@ export default async function RapportPage() {
         {!fullReport && (
           <>
             {/* Module Quartier ouvert */}
-            <section className="pt-14">
+            <section className="pt-14" id="quartier">
               <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
                 <div>
                   <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Ce que votre territoire devient</p>
@@ -184,7 +185,7 @@ export default async function RapportPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-[1fr_320px] gap-6 mb-12">
+              <div className="grid grid-cols-[1fr_320px] gap-6 mb-8">
                 {/* Carte principale */}
                 <div className="glass rounded-xl p-8 border-t-2 border-t-info">
                   <h3 className="font-normal text-[26px] text-label mb-3 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
@@ -200,7 +201,7 @@ export default async function RapportPage() {
                     Ce module donne une lecture de ce qui change autour de chez vous. Ce qu&apos;il ne fait pas encore : lire comment ces changements croisent votre logement précis, votre santé, votre métier. C&apos;est ce que le rapport complet articule.
                   </p>
 
-                  <div className="grid grid-cols-2 gap-2.5 mb-6">
+                  <div className="grid grid-cols-2 gap-2.5">
                     {QUARTIER_FACTORS.map((f) => (
                       <div key={f.label} className="glass rounded-lg p-4">
                         <div className="flex items-center gap-2 mb-1">
@@ -212,10 +213,6 @@ export default async function RapportPage() {
                       </div>
                     ))}
                   </div>
-
-                  <Link href="/compte#quartier" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-                    Compléter ce module dans mon compte
-                  </Link>
                 </div>
 
                 {/* Sidebar */}
@@ -249,6 +246,22 @@ export default async function RapportPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Compléter le module Quartier */}
+              <div className="border-t border-white/[0.06] pt-8 mb-12">
+                <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-6">
+                  <div>
+                    <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Module ouvert · à compléter</p>
+                    <h3 className="font-normal text-[clamp(20px,2.2vw,28px)] leading-[1.2] tracking-[-0.4px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                      Vos observations complètent la lecture.
+                    </h3>
+                  </div>
+                  <p className="text-[15px] text-muted leading-[1.65]">
+                    Vos réponses croisent les données sans les remplacer. Ce que vous notez reste dans votre espace.
+                  </p>
+                </div>
+                <QuartierWorkbook userKey={account.userId} />
               </div>
             </section>
 
@@ -365,11 +378,14 @@ export default async function RapportPage() {
 
         {/* Footer nav */}
         <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-white/[0.08]">
-          <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
-            ← Retour au compte
+          <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+            Ouvrir le rapport complet
           </Link>
-          <Link href="/dashboard" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-            Voir le dashboard →
+          <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
+            Mon compte
+          </Link>
+          <Link href="/" className="font-mono text-[11px] tracking-[0.06em] uppercase text-ghost no-underline py-2 ml-auto">
+            Retour au site
           </Link>
         </div>
       </div>

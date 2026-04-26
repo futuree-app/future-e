@@ -340,24 +340,7 @@ export default function Navbar() {
                   background: 'rgba(255,255,255,0.02)',
                 }}
               >
-                Compte
-              </Link>
-              <Link
-                href="/dashboard"
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: 999,
-                  border: `1px solid ${C.border}`,
-                  color: C.text,
-                  textDecoration: 'none',
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: 11,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  background: 'rgba(255,255,255,0.02)',
-                }}
-              >
-                Dashboard
+                Se connecter
               </Link>
               <Link
                 href="/inscription"
@@ -566,7 +549,7 @@ export default function Navbar() {
                     textTransform: 'uppercase',
                   }}
                 >
-                  Compte
+                  Se connecter
                 </Link>
                 <Link
                   href="/inscription"

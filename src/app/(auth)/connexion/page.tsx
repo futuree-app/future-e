@@ -4,21 +4,22 @@ import { signInWithPasswordAction } from "@/app/auth/actions";
 
 export default function ConnexionPage() {
   return (
-    <div className="auth-card auth-card-wide">
-      <Link className="auth-back" href="/">
-        Retour à l&apos;accueil
-      </Link>
+    <div className="auth-card auth-card-wide flex flex-col gap-8">
       <PasswordForm
         action={signInWithPasswordAction}
-        title="Connexion"
-        subtitle="Entrez votre email et votre mot de passe pour retrouver votre espace futur•e."
+        title="Bon retour."
+        subtitle="Entrez votre email et votre mot de passe pour retrouver votre espace."
         submitLabel="Se connecter"
-        pendingLabel="Connexion..."
+        pendingLabel="Connexion…"
         passwordAutoComplete="current-password"
+        forgotPasswordHref="/mot-de-passe-oublie"
       />
-      <p className="auth-alt">
+      <p className="text-center font-mono text-[11px] tracking-[0.06em] text-ghost">
         Pas encore de compte ?{" "}
-        <Link className="auth-link" href="/inscription">
+        <Link
+          href="/inscription"
+          className="text-accent hover:text-accent/80 transition-colors duration-200"
+        >
           Créer un compte
         </Link>
       </p>

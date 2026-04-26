@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { signOutAction } from "@/app/auth/actions";
-import { QuartierWorkbook } from "./QuartierWorkbook";
 import { AccountNav } from "@/components/AccountNav";
 import {
   canAccessDashboard,
@@ -27,7 +26,6 @@ export default async function ComptePage() {
   const account = await getCurrentUserAccount();
   const hasDashboard = canAccessDashboard(account);
   const isInteractive = canAccessInteractiveDashboard(account);
-  const QUARTIER_MODULE = PRODUCT_MODULES.find((m) => m.id === "quartier")!;
   const LOCKED_MODULES = PRODUCT_MODULES.filter((m) => m.id !== "quartier");
 
   return (
@@ -73,10 +71,10 @@ export default async function ComptePage() {
             </div>
             <div className="flex gap-3 flex-wrap">
               <Link href="/rapport" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-                Relire mon rapport
+                Lire mon rapport
               </Link>
-              <Link href="#quartier" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
-                Compléter Quartier
+              <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
+                Passer au complet
               </Link>
             </div>
           </div>
@@ -130,46 +128,6 @@ export default async function ComptePage() {
                 <p className="text-[14px] text-muted leading-[1.65]">{k.copy}</p>
               </article>
             ))}
-          </div>
-        </section>
-
-        {/* ── Module Quartier ── */}
-        <section className="pt-14" id="quartier">
-          <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
-            <div>
-              <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Module ouvert</p>
-              <h2 className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                Quartier : ce que La Rochelle devient autour de vous.
-              </h2>
-            </div>
-            <p className="text-[15px] text-muted leading-[1.65]">
-              C&apos;est le module le plus immédiat du produit. Chaleur, eau, cadre de vie.
-            </p>
-          </div>
-          <div className="grid grid-cols-[1fr_1fr] gap-8 items-start">
-            <div className="flex flex-col gap-5">
-              <p className="text-[16px] leading-[1.75] text-muted">
-                Le module Quartier lit ce qui se passe à l&apos;échelle du territoire, pas de votre logement. C&apos;est la porte d&apos;entrée naturelle avant de lire Logement, Santé ou Projets.
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {QUARTIER_MODULE.signals.map((signal: string) => (
-                  <span key={signal} className="px-2.5 py-1 rounded bg-info/[0.08] border border-info/[0.15] font-mono text-[11px] text-info">
-                    {signal}
-                  </span>
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <article className="glass rounded-lg p-4">
-                  <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-ghost mb-2">Pourquoi commencer ici</p>
-                  <p className="text-[13px] text-muted leading-[1.65]">Le territoire concentre déjà chaleur, eau et cadre de vie.</p>
-                </article>
-                <article className="glass rounded-lg p-4">
-                  <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-ghost mb-2">Ce que vous ajoutez</p>
-                  <p className="text-[13px] text-muted leading-[1.65]">Vos observations de terrain croisent les données sans les remplacer.</p>
-                </article>
-              </div>
-            </div>
-            <QuartierWorkbook userKey={account.userId} />
           </div>
         </section>
 
