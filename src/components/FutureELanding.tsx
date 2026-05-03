@@ -2473,11 +2473,7 @@ export default function FutureELanding() {
               lineHeight: 1.2, letterSpacing: '-0.4px',
               color: C.text, margin: '0 0 10px',
             }}>
-              Six dimensions de votre vie
-              {commune ? ` à ${commune}` : ''}.{' '}
-              <span style={{ fontStyle: 'italic', color: C.orange }}>
-                Personnalisées. Sourcées. Actionnables.
-              </span>
+              Votre rapport en 2 minutes.
             </h2>
             <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.65, margin: 0 }}>
               Répondez à 6 questions. Obtenez un aperçu personnalisé de vos expositions climatiques — logement, métier, santé, mobilité, projets.
@@ -2503,7 +2499,7 @@ export default function FutureELanding() {
               fontSize: 10, color: C.dim,
               letterSpacing: '0.04em', marginTop: 10,
             }}>
-              6 questions · 2 minutes · aperçu gratuit
+              Gratuit · Sans inscription · Résultat partiel immédiat
             </p>
           </div>
         </div>
@@ -2585,7 +2581,7 @@ export default function FutureELanding() {
                 'Rapport complet PDF (6 modules)',
                 'Dashboard simplifié en lecture seule',
                 'Régénération 1 fois par an',
-                'Crédit applicable vers le Suivi',
+                'Les 14 € sont déduits si vous passez au Suivi dans les 7 jours.',
               ].map((feature) => (
                 <div key={feature} style={styles.planFeature}>
                   <span style={styles.planCheck}>✓</span>
