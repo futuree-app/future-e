@@ -2,6 +2,7 @@
 // @ts-nocheck
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ReportWizard } from '@/components/wizard/ReportWizard';
@@ -1582,6 +1583,25 @@ export default function FutureELanding() {
       lineHeight: 1.6,
       color: C.text,
     },
+    amnesieVisualWrap: {
+      ...glass({
+        borderRadius: 16,
+        padding: 8,
+        borderColor: 'rgba(255,255,255,0.1)',
+      }),
+      marginTop: 24,
+      position: 'relative',
+      overflow: 'hidden',
+      boxShadow: '0 24px 80px rgba(0,0,0,0.24)',
+    },
+    amnesieVisualInner: {
+      position: 'relative',
+      width: '100%',
+      aspectRatio: '16 / 9',
+      minHeight: 260,
+      borderRadius: 12,
+      overflow: 'hidden',
+    },
     modulesSection: {
       position: 'relative',
       zIndex: 2,
@@ -2219,12 +2239,79 @@ export default function FutureELanding() {
             enfants, la valeur de ce que vous possédez, les décisions que vous
             n&apos;avez pas encore prises.
           </p>
+          <div style={styles.amnesieVisualWrap}>
+            <div style={styles.amnesieVisualInner}>
+              <Image
+                src="/future-territoire-landing.jpg"
+                alt="Vue urbaine au crépuscule à travers une fenêtre ouverte"
+                fill
+                sizes="(max-width: 900px) 100vw, 860px"
+                style={{
+                  objectFit: 'cover',
+                  objectPosition: 'center center',
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background:
+                    'linear-gradient(180deg, rgba(6,8,18,0.02) 0%, rgba(6,8,18,0.14) 100%)',
+                  pointerEvents: 'none',
+                }}
+              />
+            </div>
+          </div>
           <div style={styles.amnesieHighlight}>
             futur•e existe pour combler cet intervalle. Pas une alarme de plus
             : une présence calme, continue, qui traduit les données publiques
             en lecture personnalisée pour votre vie. Comme vous suivez votre
             santé ou vos finances : sans obsession, sans oubli.
           </div>
+        </div>
+      </section>
+
+      <section style={styles.modulesSection}>
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <div
+            style={{
+              ...styles.sectionLabel,
+              justifyContent: 'center',
+              display: 'flex',
+            }}
+          >
+            6 modules
+          </div>
+          <h2 style={{ ...styles.sectionTitle, textAlign: 'center' }}>
+            Six dimensions de votre vie
+          </h2>
+          <p
+            style={{
+              ...styles.sectionSub,
+              textAlign: 'center',
+              margin: '0 auto',
+              maxWidth: 560,
+            }}
+          >
+            Chaque module croise votre profil avec les données publiques
+            disponibles pour votre commune.
+          </p>
+        </div>
+        <div style={styles.modulesGrid} className="modules-grid">
+          {MODULES.map((module) => (
+            <div key={module.name} style={styles.moduleCard(module.color)}>
+              <div style={styles.moduleIcon(module.color)}>{module.icon}</div>
+              <div style={styles.moduleName}>{module.name}</div>
+              <div style={styles.moduleDesc}>{module.desc}</div>
+              <div style={styles.moduleItems}>
+                {module.items.map((item) => (
+                  <div key={item} style={styles.moduleItem(module.color)}>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -2319,7 +2406,6 @@ export default function FutureELanding() {
                   boxSizing: 'border-box',
                 }}
               >
-                {/* Category badge */}
                 <div
                   style={{
                     fontFamily: "'JetBrains Mono', monospace",
@@ -2345,7 +2431,6 @@ export default function FutureELanding() {
                   {article.category}
                 </div>
 
-                {/* Title */}
                 <div
                   style={{
                     fontFamily: "'Instrument Serif', serif",
@@ -2359,7 +2444,6 @@ export default function FutureELanding() {
                   {article.title}
                 </div>
 
-                {/* Description */}
                 <p
                   style={{
                     fontFamily: "'JetBrains Mono', monospace",
@@ -2372,7 +2456,6 @@ export default function FutureELanding() {
                   {article.description}
                 </p>
 
-                {/* CTA */}
                 <div
                   style={{
                     fontFamily: "'JetBrains Mono', monospace",
@@ -2393,50 +2476,6 @@ export default function FutureELanding() {
                 </div>
               </div>
             </Link>
-          ))}
-        </div>
-      </section>
-
-      <section style={styles.modulesSection}>
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <div
-            style={{
-              ...styles.sectionLabel,
-              justifyContent: 'center',
-              display: 'flex',
-            }}
-          >
-            6 modules
-          </div>
-          <h2 style={{ ...styles.sectionTitle, textAlign: 'center' }}>
-            Six dimensions de votre vie
-          </h2>
-          <p
-            style={{
-              ...styles.sectionSub,
-              textAlign: 'center',
-              margin: '0 auto',
-              maxWidth: 560,
-            }}
-          >
-            Chaque module croise votre profil avec les données publiques
-            disponibles pour votre commune.
-          </p>
-        </div>
-        <div style={styles.modulesGrid} className="modules-grid">
-          {MODULES.map((module) => (
-            <div key={module.name} style={styles.moduleCard(module.color)}>
-              <div style={styles.moduleIcon(module.color)}>{module.icon}</div>
-              <div style={styles.moduleName}>{module.name}</div>
-              <div style={styles.moduleDesc}>{module.desc}</div>
-              <div style={styles.moduleItems}>
-                {module.items.map((item) => (
-                  <div key={item} style={styles.moduleItem(module.color)}>
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
           ))}
         </div>
       </section>

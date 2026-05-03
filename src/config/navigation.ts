@@ -26,7 +26,7 @@ export type NavDropdownItem = {
 export type NavItem = NavFlatItem | NavDropdownItem;
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: 'Le produit', href: '#produit' },
+  { label: 'Pourquoi futur·e', href: '/pourquoi' },
 
   // ─── Savoir — contenu éditorial gratuit ─────────────────────────────────────
   {
@@ -239,7 +239,7 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     slug: 'submersion',
     title: 'Submersion côtière',
     description:
-      "Le littoral atlantique fait face à une hausse du risque de +31 % en scénario médian. Les zones PPRi sont déjà en tension.",
+      "Un million de logements français sont en zone inondable. Sur le littoral atlantique, le risque progresse. Certaines communes ne seront plus assurables.",
     category: 'Environnement',
     accent: '#60a5fa',
     href: '/savoir/submersion',
