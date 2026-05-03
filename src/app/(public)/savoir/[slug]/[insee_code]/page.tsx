@@ -5,6 +5,7 @@ import { PaywallGate } from '@/components/PaywallGate';
 import { getCurrentSessionUser } from '@/lib/user-account';
 import { getClimatDataCommune } from '@/lib/drias-json';
 import { getGeorisquesSummary } from '@/lib/georisques';
+import { getAtmoForCommune } from '@/lib/atmo';
 import { createClient } from '@supabase/supabase-js';
 import { unstable_cache } from 'next/cache';
 
@@ -262,6 +263,9 @@ export default async function CommunePage({
     ? await getClimatDataCommune(commune.insee_code)
     : null;
   const georisques = await getGeorisquesSummary(commune.insee_code).catch(() => null);
+  const atmo = process.env.ATMO_USERNAME
+    ? await getAtmoForCommune(commune.insee_code).catch(() => null)
+    : null;
 
   const dept = commune.departement ?? commune.insee_code.slice(0, 2);
   const h1 = `Risque ${hub.thematique} à ${commune.nom_commune} (Dept. ${dept}) : Analyse et Prévention`;
@@ -369,6 +373,41 @@ export default async function CommunePage({
     }
     ` : `
     <p style="color:#6b7388;font-style:italic;">Résumé Géorisques indisponible pour cette commune.</p>
+    `}
+
+    <h2 style="--accent:${hub.accent}">Qualité de l&apos;air (ATMO)</h2>
+    <p>
+      Indice ATMO officiel pour la commune de <strong>${commune.nom_commune}</strong>,
+      publié quotidiennement par les associations agréées de surveillance de la qualité de l&apos;air.
+    </p>
+
+    ${atmo ? `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:24px 0;">
+      <div style="padding:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#6b7388;margin-bottom:8px;">Indice ATMO · ${atmo.date}</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:36px;line-height:1;color:${atmo.index.color};font-weight:400;">${atmo.index.label}</div>
+        <div style="margin-top:8px;font-size:12px;color:#9ba3b4;">Niveau ${atmo.index.value}/6</div>
+      </div>
+      <div style="padding:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#6b7388;margin-bottom:8px;">Polluants principaux</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+          ${[
+            ['NO₂', atmo.pollutants.no2],
+            ['O₃', atmo.pollutants.o3],
+            ['PM10', atmo.pollutants.pm10],
+            ['PM2.5', atmo.pollutants.pm25],
+          ].filter(([, v]) => v != null).map(([name, lvl]) => {
+            const l = lvl as { label: string; color: string };
+            return `<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;">
+              <span style="color:#6b7388;font-family:'JetBrains Mono',monospace;">${name}</span>
+              <span style="color:${l.color};">${l.label}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+    ` : `
+    <p style="color:#6b7388;font-style:italic;">Indice ATMO indisponible pour cette commune.</p>
     `}
 
     <h2 style="--accent:${hub.accent}">Analyse territoriale et comparaison</h2>

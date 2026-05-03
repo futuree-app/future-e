@@ -3,6 +3,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import Link from 'next/link';
 import { getClimatDataCommune } from '@/lib/drias-json';
 import { getGeorisquesSummary } from '@/lib/georisques';
+import { getAtmoForCommune } from '@/lib/atmo';
 import { createClient } from '@supabase/supabase-js';
 import { unstable_cache } from 'next/cache';
 import { AGIR_GUIDES } from '@/config/navigation';
@@ -212,6 +213,9 @@ export default async function TerritoireCommunePage({
   // Données DRIAS — libres, chargées pour tout le monde
   const driasData = await getClimatDataCommune(commune.insee_code);
   const georisques = await getGeorisquesSummary(commune.insee_code).catch(() => null);
+  const atmo = process.env.ATMO_USERNAME
+    ? await getAtmoForCommune(commune.insee_code).catch(() => null)
+    : null;
   const agirGuide = AGIR_GUIDES[slug];
 
   const dept = commune.departement ?? insee_code.slice(0, 2);
@@ -300,6 +304,27 @@ export default async function TerritoireCommunePage({
         : ''
     }
   ` : `<p style="color:#6b7388;font-style:italic;">Résumé Géorisques indisponible pour cette commune.</p>`;
+
+  const atmoGrid = atmo ? `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:24px 0;">
+      <div style="padding:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#6b7388;margin-bottom:8px;">Indice ATMO · ${atmo.date}</div>
+        <div style="font-family:var(--font-serif);font-size:36px;line-height:1;color:${atmo.index.color};font-weight:400;">${atmo.index.label}</div>
+        <div style="margin-top:8px;font-size:12px;color:#9ba3b4;">Niveau ${atmo.index.value}/6</div>
+      </div>
+      <div style="padding:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#6b7388;margin-bottom:8px;">Polluants</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+          ${([['NO₂', atmo.pollutants.no2], ['O₃', atmo.pollutants.o3], ['PM10', atmo.pollutants.pm10], ['PM2.5', atmo.pollutants.pm25]] as [string, { label: string; color: string } | null][])
+            .filter(([, v]) => v != null)
+            .map(([name, lvl]) => `<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;">
+              <span style="color:#6b7388;font-family:var(--font-mono);">${name}</span>
+              <span style="color:${lvl!.color};">${lvl!.label}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+  ` : '';
 
   return (
     <>
@@ -435,6 +460,16 @@ export default async function TerritoireCommunePage({
           Lecture communale issue de Géorisques / GASPAR. Cette section décrit des signaux officiels à l&apos;échelle de la commune, pas une lecture à l&apos;adresse.
         </p>
         <div dangerouslySetInnerHTML={{ __html: georisquesGrid }} />
+
+        {atmoGrid ? (
+          <>
+            <h2 style={{ ['--accent' as string]: hub.accent }}>Qualité de l&apos;air (ATMO)</h2>
+            <p style={{ color: '#9ba3b4', fontSize: 14, marginBottom: 0 }}>
+              Indice ATMO officiel · Publié quotidiennement par les associations agréées de surveillance de la qualité de l&apos;air.
+            </p>
+            <div dangerouslySetInnerHTML={{ __html: atmoGrid }} />
+          </>
+        ) : null}
 
         <h2 style={{ ['--accent' as string]: hub.accent }}>Analyse territoriale</h2>
         <p>
