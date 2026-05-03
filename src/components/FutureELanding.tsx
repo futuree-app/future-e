@@ -573,7 +573,7 @@ function getEmptyStateCopy(categories) {
     return "Le module affichera des questions liées à la mobilité, à l'eau, au logement et à l'adaptation du territoire.";
   }
 
-  return 'Le module affiche 4 questions sélectionnées selon le profil de votre territoire.';
+  return 'Quatre questions sélectionnées pour votre territoire apparaîtront ici.';
 }
 
 function getCommuneMetaCopy(communeName, usedFallback) {
@@ -2192,9 +2192,7 @@ export default function FutureELanding() {
           />
           <div style={styles.amnesieEyebrow}>Pourquoi s&apos;abonner</div>
           <h2 style={styles.amnesieTitle}>
-            Contre l&apos;amnésie,
-            <br />
-            pas contre le climat.
+            Votre inquiétude mérite une présence calme, toute l&apos;année.
           </h2>
           <p style={styles.amnesieBody}>
             Le changement climatique souffre en France d&apos;une forme
@@ -2212,10 +2210,10 @@ export default function FutureELanding() {
             se vide d&apos;un autre.
           </p>
           <p style={styles.amnesieBody}>
-            futur•e existe contre cet oubli. Une présence éditoriale calme,
-            mensuelle, personnalisée, qui maintient le climat de votre vie dans
-            votre conscience active toute l&apos;année, sans jamais peser, sans
-            jamais profiter des pics médiatiques pour vendre sa pertinence.
+            Une présence éditoriale douce, sérieuse, personnalisée — qui
+            maintient le climat de votre vie dans votre conscience active toute
+            l&apos;année, sans peser, sans attendre la prochaine canicule pour
+            redevenir utile.
           </p>
           <div style={styles.amnesieHighlight}>
             L&apos;enjeu n&apos;est pas de remplacer l&apos;alarme saisonnière
