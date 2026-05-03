@@ -1,6 +1,7 @@
 import "server-only";
 
 export type BanAddressResult = {
+  id: string | null;
   label: string;
   city: string | null;
   citycode: string | null;
@@ -14,6 +15,7 @@ type BanFeature = {
     coordinates?: [number, number];
   };
   properties?: {
+    id?: string;
     label?: string;
     city?: string;
     citycode?: string;
@@ -66,6 +68,7 @@ export async function geocodeBanAddress(query: string): Promise<BanAddressResult
     }
 
     return {
+      id: feature.properties?.id?.trim() || null,
       label: feature.properties?.label?.trim() || trimmed,
       city: feature.properties?.city?.trim() || null,
       citycode: feature.properties?.citycode?.trim() || null,
