@@ -2197,7 +2197,7 @@ export default function FutureELanding() {
           <p style={styles.amnesieBody}>
             Chaque semaine, une nouvelle alerte. Le cadmium dans les céréales.
             Les pics de pollution. La canicule qui arrive. Les incendies.
-            L&apos;inondation.
+            Les inondations.
           </p>
           <p style={styles.amnesieBody}>
             Vous lisez. Vous vous inquiétez. Puis l&apos;actualité passe à
@@ -2205,8 +2205,8 @@ export default function FutureELanding() {
           </p>
           <p style={styles.amnesieBody}>
             Ce n&apos;est pas un manque de volonté. La capacité
-            d&apos;inquiétude est limitée — c&apos;est documenté. Quand elle se
-            remplit d&apos;un sujet, elle se vide d&apos;un autre. Et le
+            d&apos;inquiétude est limitée, c&apos;est documenté. Quand elle se
+            remplit d&apos;un sujet, elle se vide d&apos;un autre. Le
             changement climatique, comme les risques sanitaires qui
             l&apos;accompagnent, souffre de cette forme particulière
             d&apos;invisibilité : il n&apos;est pas nié, il est oublié par
@@ -2219,18 +2219,11 @@ export default function FutureELanding() {
             enfants, la valeur de ce que vous possédez, les décisions que vous
             n&apos;avez pas encore prises.
           </p>
-          <p style={styles.amnesieBody}>
-            futur•e existe pour combler cet intervalle. Pas une alarme de plus
-            — une présence calme, continue, qui traduit les données publiques en
-            lecture personnalisée pour votre vie. Comme vous suivez votre santé
-            ou vos finances : sans obsession, sans oubli.
-          </p>
           <div style={styles.amnesieHighlight}>
-            L&apos;enjeu n&apos;est pas de remplacer l&apos;alarme saisonnière
-            par une alarme permanente. L&apos;enjeu est de rendre le climat
-            intégrable à la texture d&apos;une vie qui pense, à la façon dont on
-            intègre sa santé, ses finances, l&apos;éducation de ses enfants :
-            sans obsession, sans oubli, avec continuité.
+            futur•e existe pour combler cet intervalle. Pas une alarme de plus
+            : une présence calme, continue, qui traduit les données publiques
+            en lecture personnalisée pour votre vie. Comme vous suivez votre
+            santé ou vos finances : sans obsession, sans oubli.
           </div>
         </div>
       </section>
