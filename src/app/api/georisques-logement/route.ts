@@ -14,6 +14,7 @@ import { getZfeForPoint } from "@/lib/zfe";
 import { getIrepNearPoint } from "@/lib/irep";
 import { getAuditByBanId, getAuditByCoordinates } from "@/lib/audit";
 import { getCartofrichesForCommune } from "@/lib/cartofriches";
+import { getCommuneFullData } from "@/lib/commune-data";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -50,7 +51,7 @@ export async function GET(request: Request) {
         : getAuditByCoordinates(address.latitude, address.longitude).catch(() => null),
     ]);
 
-    const [georisquesCommune, atmo, altitude, eaufrance, zfe, irep, cartofriches] = await Promise.all([
+    const [georisquesCommune, atmo, altitude, eaufrance, zfe, irep, cartofriches, communeData] = await Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
       address.citycode && process.env.ATMO_USERNAME
         ? getAtmoForCommune(address.citycode).catch(() => null)
@@ -60,6 +61,7 @@ export async function GET(request: Request) {
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
       getIrepNearPoint(address.latitude, address.longitude).catch(() => null),
       address.citycode ? getCartofrichesForCommune(address.citycode).catch(() => null) : null,
+      address.citycode ? getCommuneFullData(address.citycode).catch(() => null) : null,
     ]);
 
     const georisquesAddress = process.env.GEORISQUES_API_TOKEN
@@ -82,6 +84,7 @@ export async function GET(request: Request) {
         zfe,
         irep,
         cartofriches,
+        communeData,
         atmo,
         eaufrance,
         georisques: {

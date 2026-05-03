@@ -79,6 +79,50 @@ type ApiResponse = {
       distanceM: number | null;
     }>;
   } | null;
+  communeData?: {
+    commune: {
+      inseeCode: string;
+      nom: string;
+      population: number | null;
+      vieillissement_pct: number | null;
+      logements: {
+        vacants_2022: number | null;
+        vacants_pct: number | null;
+        sociaux_2023: number | null;
+        sociaux_pct: number | null;
+      };
+      qualite_air: {
+        pm25: number | null;
+        pm10: number | null;
+        no2: number | null;
+        o3: number | null;
+      };
+      economie: {
+        revenu_median: number | null;
+        inferiorite_nationale_pct: number | null;
+      };
+      sante: {
+        acces_medecins: number | null;
+        eloignement_services_pct: number | null;
+      };
+      territoire: {
+        densite: number | null;
+        incendies: number | null;
+        taux_boisement: number | null;
+      };
+    };
+    iris: {
+      iris_count: number;
+      passoires_taux: number | null;
+      preca_energetique_pct: number | null;
+      taux_propriete: number | null;
+      taux_location: number | null;
+      taux_hlm: number | null;
+      taux_suroccupation: number | null;
+      taux_motorisation: number | null;
+      taux_transports_communs: number | null;
+    } | null;
+  } | null;
   atmo?: {
     inseeCode: string;
     date: string;
@@ -148,6 +192,24 @@ function DpeBadge({ label }: { label: string | null }) {
       fontSize: 15,
     }}>{label}</span>
   );
+}
+
+function formatInt(value: number | null | undefined): string | null {
+  if (value == null) return null;
+  return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(value);
+}
+
+function formatPct(value: number | null | undefined): string | null {
+  if (value == null) return null;
+  return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(value)} %`;
+}
+
+function formatDecimal(value: number | null | undefined, digits = 1): string | null {
+  if (value == null) return null;
+  return new Intl.NumberFormat("fr-FR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: digits,
+  }).format(value);
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -396,6 +458,71 @@ export default function GeorisquesLogementPage() {
                   </div>
                 ) : <div style={{ color: "var(--fg-3)", fontSize: 14 }}>Aucune friche répertoriée dans la commune</div>}
               </Card>
+            )}
+
+            {/* ADEME commune / IRIS */}
+            {result.communeData !== undefined && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                <Card title="ADEME commune">
+                  {result.communeData ? (
+                    <div style={{ display: "grid", gap: 10 }}>
+                      <div style={{ fontWeight: 600, fontSize: 15 }}>
+                        {result.communeData.commune.nom}
+                      </div>
+                      <DataGrid items={[
+                        result.communeData.commune.population != null
+                          ? `${formatInt(result.communeData.commune.population)} habitants`
+                          : null,
+                        result.communeData.commune.economie.revenu_median != null
+                          ? `Revenu médian : ${formatInt(result.communeData.commune.economie.revenu_median)} €`
+                          : null,
+                        result.communeData.commune.logements.vacants_pct != null
+                          ? `Logements vacants : ${formatPct(result.communeData.commune.logements.vacants_pct)}`
+                          : null,
+                        result.communeData.commune.logements.sociaux_pct != null
+                          ? `Logements sociaux : ${formatPct(result.communeData.commune.logements.sociaux_pct)}`
+                          : null,
+                        result.communeData.commune.qualite_air.pm25 != null
+                          ? `PM2.5 annuel : ${formatDecimal(result.communeData.commune.qualite_air.pm25)} µg/m³`
+                          : null,
+                        result.communeData.commune.sante.acces_medecins != null
+                          ? `Accès médecins : ${formatDecimal(result.communeData.commune.sante.acces_medecins)}`
+                          : null,
+                      ]} />
+                    </div>
+                  ) : <Nd />}
+                </Card>
+
+                <Card title="ADEME IRIS agrégé">
+                  {result.communeData?.iris ? (
+                    <div style={{ display: "grid", gap: 10 }}>
+                      <div style={{ color: "var(--fg-3)", fontSize: 13 }}>
+                        {result.communeData.iris.iris_count} IRIS agrégés sur le nom de commune ADEME
+                      </div>
+                      <DataGrid items={[
+                        result.communeData.iris.passoires_taux != null
+                          ? `Passoires thermiques : ${formatPct(result.communeData.iris.passoires_taux)}`
+                          : null,
+                        result.communeData.iris.preca_energetique_pct != null
+                          ? `Précarité énergétique : ${formatPct(result.communeData.iris.preca_energetique_pct)}`
+                          : null,
+                        result.communeData.iris.taux_propriete != null
+                          ? `Propriétaires : ${formatPct(result.communeData.iris.taux_propriete)}`
+                          : null,
+                        result.communeData.iris.taux_hlm != null
+                          ? `Parc HLM : ${formatPct(result.communeData.iris.taux_hlm)}`
+                          : null,
+                        result.communeData.iris.taux_suroccupation != null
+                          ? `Suroccupation : ${formatPct(result.communeData.iris.taux_suroccupation)}`
+                          : null,
+                        result.communeData.iris.taux_transports_communs != null
+                          ? `Transports en commun : ${formatPct(result.communeData.iris.taux_transports_communs)}`
+                          : null,
+                      ]} />
+                    </div>
+                  ) : <Nd />}
+                </Card>
+              </div>
             )}
 
             {/* Géorisques */}

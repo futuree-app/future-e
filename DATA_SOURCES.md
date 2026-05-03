@@ -65,6 +65,25 @@ Les données externes sont consommées côté serveur uniquement (`"use server"`
 - **Lib :** `src/lib/ban.ts`
 - **Données :** Géocodage adresse → coordonnées + `identifiant_ban` (id BAN de l'adresse)
 
+### ADEME — Données communales et IRIS
+- **Source :** API Data Fair ADEME
+- **Datasets :**
+  - `8ggfo546-mtjxy4lbqxcl462` — `data_communes`
+  - `jixoufr9qp0gko9xcqyzbr4a` — `data_iris`
+- **Lib :** `src/lib/commune-data.ts`
+- **Routes :**
+  - `GET /api/commune-data?insee=XXXXX`
+  - intégré dans `GET /api/georisques-logement`
+- **Données :**
+  - niveau commune : vacance, logements sociaux, revenu médian, pollution de fond, densité, accès aux services
+  - niveau IRIS agrégé : passoires thermiques, précarité énergétique, propriété/location, HLM, suroccupation, motorisation
+- **Méthode :**
+  - lookup `data_communes` par code INSEE
+  - récupération du nom de commune
+  - filtrage `data_iris` par `_contours_iris.nom_com:"Nom de commune"`
+- **Limite connue :** l’agrégation IRIS repose sur le nom de commune ADEME, pas sur un identifiant IRIS communal strict
+- **Cache :** `s-maxage=86400`, `stale-while-revalidate=604800`
+
 ---
 
 ## Module Santé
@@ -187,6 +206,7 @@ Les données externes sont consommées côté serveur uniquement (`"use server"`
 - Géocodage BAN (adresse → coordonnées + identifiant BAN)
 - Parcelle cadastrale (API Carto)
 - DPE du logement (ADEME)
+- Données communales et IRIS agrégées (ADEME)
 - ZFE (ADEME)
 - Qualité de l'air (ATMO)
 - Altitude (IGN)
