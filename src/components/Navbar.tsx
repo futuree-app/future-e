@@ -6,14 +6,14 @@ import { NAV_ITEMS, type NavDropdownItem, type NavItem } from '@/config/navigati
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 const C = {
-  bg: '#060812',
-  bgElev: 'rgba(255,255,255,0.03)',
-  border: 'rgba(255,255,255,0.08)',
-  borderHi: 'rgba(255,255,255,0.15)',
-  text: '#e9ecf2',
-  muted: '#9ba3b4',
-  dim: '#6b7388',
-  orange: '#fb923c',
+  bg: 'var(--bg)',
+  bgElev: 'var(--bg-elev)',
+  border: 'var(--border-1)',
+  borderHi: 'var(--border-hi)',
+  text: 'var(--fg-1)',
+  muted: 'var(--fg-3)',
+  dim: 'var(--fg-4)',
+  orange: 'var(--orange)',
 };
 
 function isDropdown(item: NavItem): item is NavDropdownItem {
@@ -82,7 +82,7 @@ export default function Navbar() {
           zIndex: 50,
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          background: 'rgba(6,8,18,0.85)',
+          background: 'var(--bg-card)',
           borderBottom: `1px solid ${C.border}`,
         }}
       >
@@ -396,7 +396,7 @@ export default function Navbar() {
           <div
             style={{
               borderTop: `1px solid ${C.border}`,
-              background: 'rgba(6,8,18,0.98)',
+              background: 'var(--bg-card-opaque)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
               animation: 'nb-mobile-open 0.2s ease both',

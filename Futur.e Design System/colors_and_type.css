@@ -1,0 +1,332 @@
+/* ============================================================
+   futur•e · Design Tokens
+   Palette + typography + spacing + radius + shadows
+   ============================================================ */
+
+/* Brand fonts — Instrument Serif self-hosted; Sans & Mono from Google Fonts */
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/InstrumentSerif-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/InstrumentSerif-Italic.ttf') format('truetype');
+}
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+:root {
+  /* ============ MODE-AGNOSTIC TOKENS ============ */
+
+  /* Accent (same across modes — orange is the invariant) */
+  --orange:         #fb923c;   /* PRIMARY · CTA, brandmark, kickers */
+  --orange-soft:    #fdba74;   /* hover, flow-step text */
+  --orange-hover:   #ffd0a8;   /* link hover */
+  --orange-tint:    rgba(251, 146, 60, 0.12);
+  --orange-tint-2:  rgba(251, 146, 60, 0.18);
+  --orange-ring:    rgba(251, 146, 60, 0.36);
+
+  --red:            #f87171;   --red-soft: #fecaca;   --red-tint: rgba(248, 113, 113, 0.12);
+  --blue:           #60a5fa;   --blue-soft: #c8ddff;  --blue-tint: rgba(96, 165, 250, 0.12);
+  --green:          #4ade80;   --green-soft: #86efac; --green-tint: rgba(74, 222, 128, 0.14);
+  --violet:         #a78bfa;   --violet-tint: rgba(167, 139, 250, 0.18);
+  --yellow:         #fbbf24;   --yellow-tint: rgba(251, 191, 36, 0.14);
+}
+
+/* ============ DARK MODE (default) ============ */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Background */
+  --bg:             #060812;   /* nuit bleutée, pas noir pur */
+  --bg-deep:        #0d1322;   /* gradient secondaire bottom */
+  --bg-elev:        rgba(255, 255, 255, 0.03);
+  --bg-elev-2:      rgba(255, 255, 255, 0.04);
+  --bg-elev-3:      rgba(255, 255, 255, 0.06);
+  --bg-card:        rgba(10, 15, 28, 0.72);        /* auth-card */
+  --bg-card-opaque: rgba(10, 15, 28, 0.78);        /* account-band */
+
+  /* Foreground */
+  --fg-hi:          #f6f4ef;   /* titres, accent ivoire */
+  --fg-1:           #e9ecf2;   /* body par défaut */
+  --fg-2:           #c6cfdb;   /* subtitles */
+  --fg-3:           #9ba3b4;   /* muted */
+  --fg-4:           #6b7388;   /* dim / placeholder */
+
+  /* Borders */
+  --border-1:       rgba(255, 255, 255, 0.08);
+  --border-2:       rgba(255, 255, 255, 0.12);
+  --border-hi:      rgba(255, 255, 255, 0.15);
+
+  /* Shadows (dark) */
+  --shadow-card:        0 8px 24px rgba(0, 0, 0, 0.24);
+  --shadow-card-hover:  0 8px 24px rgba(251, 146, 60, 0.10);
+  --shadow-hero:        0 30px 90px rgba(2, 6, 23, 0.42);
+  --shadow-band:        0 32px 90px rgba(2, 6, 23, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-inset-hi:    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-inset-lo:    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  --shadow-focus:       0 0 0 2px rgba(251, 146, 60, 0.18);
+  --glow-orange:        0 0 12px var(--orange);
+
+  /* Atmosphère / orbes (dark) — addition lumineuse sur fond sombre */
+  --orb-orange:    rgba(251, 146, 60, 0.45);
+  --orb-violet:    rgba(167, 139, 250, 0.35);
+  --orb-blue:      rgba(96, 165, 250, 0.25);
+  --orb-opacity:   1;
+}
+
+/* ============ LIGHT MODE ============ */
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Background — ivoire chaud, pas blanc pur */
+  --bg:             #faf8f3;   /* ivoire de jour, miroir du #f6f4ef dark */
+  --bg-deep:        #f2ede4;   /* gradient secondaire bottom */
+  --bg-elev:        rgba(26, 29, 40, 0.025);
+  --bg-elev-2:      rgba(26, 29, 40, 0.04);
+  --bg-elev-3:      rgba(26, 29, 40, 0.06);
+  --bg-card:        rgba(255, 255, 255, 0.72);     /* glass clair */
+  --bg-card-opaque: rgba(255, 255, 255, 0.92);
+
+  /* Foreground — slate sombre, chaud */
+  --fg-hi:          #1a1d28;   /* titres, miroir du #f6f4ef */
+  --fg-1:           #2b3040;   /* body par défaut */
+  --fg-2:           #3d4456;   /* subtitles */
+  --fg-3:           #5b6373;   /* muted */
+  --fg-4:           #8a93a4;   /* dim / placeholder */
+
+  /* Borders — slate translucide */
+  --border-1:       rgba(26, 29, 40, 0.08);
+  --border-2:       rgba(26, 29, 40, 0.12);
+  --border-hi:      rgba(26, 29, 40, 0.18);
+
+  /* Shadows (light) — plus diffuses, moins contrastées */
+  --shadow-card:        0 6px 20px rgba(26, 29, 40, 0.06);
+  --shadow-card-hover:  0 10px 28px rgba(251, 146, 60, 0.14);
+  --shadow-hero:        0 24px 72px rgba(26, 29, 40, 0.08);
+  --shadow-band:        0 24px 72px rgba(26, 29, 40, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --shadow-inset-hi:    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --shadow-inset-lo:    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --shadow-focus:       0 0 0 2px rgba(251, 146, 60, 0.22);
+  --glow-orange:        0 0 10px rgba(251, 146, 60, 0.6);
+
+  /* Atmosphère / orbes (light) — pastels plus opaques, soustraction
+     lumineuse douce. Évite l'effet "tâche grisée" des orbes dark. */
+  --orb-orange:    rgba(251, 146, 60, 0.18);
+  --orb-violet:    rgba(167, 139, 250, 0.14);
+  --orb-blue:      rgba(96, 165, 250, 0.12);
+  --orb-opacity:   0.8;
+}
+
+/* prefers-color-scheme light : mêmes orbes que [data-theme="light"] */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --orb-orange:  rgba(251, 146, 60, 0.18);
+    --orb-violet:  rgba(167, 139, 250, 0.14);
+    --orb-blue:    rgba(96, 165, 250, 0.12);
+    --orb-opacity: 0.8;
+  }
+}
+
+/* Auto-switch when no attribute set and user prefers light */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+    --bg:             #faf8f3;
+    --bg-deep:        #f2ede4;
+    --bg-elev:        rgba(26, 29, 40, 0.025);
+    --bg-elev-2:      rgba(26, 29, 40, 0.04);
+    --bg-elev-3:      rgba(26, 29, 40, 0.06);
+    --bg-card:        rgba(255, 255, 255, 0.72);
+    --bg-card-opaque: rgba(255, 255, 255, 0.92);
+    --fg-hi:          #1a1d28;
+    --fg-1:           #2b3040;
+    --fg-2:           #3d4456;
+    --fg-3:           #5b6373;
+    --fg-4:           #8a93a4;
+    --border-1:       rgba(26, 29, 40, 0.08);
+    --border-2:       rgba(26, 29, 40, 0.12);
+    --border-hi:      rgba(26, 29, 40, 0.18);
+    --shadow-card:        0 6px 20px rgba(26, 29, 40, 0.06);
+    --shadow-card-hover:  0 10px 28px rgba(251, 146, 60, 0.14);
+    --shadow-hero:        0 24px 72px rgba(26, 29, 40, 0.08);
+    --shadow-band:        0 24px 72px rgba(26, 29, 40, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    --shadow-inset-hi:    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    --shadow-inset-lo:    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    --shadow-focus:       0 0 0 2px rgba(251, 146, 60, 0.22);
+    --glow-orange:        0 0 10px rgba(251, 146, 60, 0.6);
+  }
+}
+
+:root {
+  /* ============ TYPOGRAPHY (mode-agnostic) ============ */
+
+  --font-serif:     "Instrument Serif", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-sans:      "Instrument Sans", "Avenir Next", Avenir, "Segoe UI", system-ui, sans-serif;
+  --font-mono:      "JetBrains Mono", "SF Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+
+  --fs-display-xl:  clamp(48px, 6vw, 82px);    /* account hero */
+  --fs-display-lg:  clamp(44px, 6vw, 68px);    /* auth story */
+  --fs-display:     clamp(42px, 5vw, 68px);    /* landing h1 */
+  --fs-h1:          clamp(34px, 5vw, 46px);    /* auth title */
+  --fs-h2:          clamp(30px, 3vw, 44px);    /* panel title */
+  --fs-h3:          clamp(28px, 3.5vw, 40px);  /* section title */
+  --fs-h4:          26px;                      /* gating title */
+  --fs-h5:          24px;                      /* auth-section */
+  --fs-h6:          20px;                      /* dashboard module */
+  --fs-body-lg:     18px;                      /* hero sub */
+  --fs-body:        16px;                      /* body default */
+  --fs-body-sm:     14px;                      /* plan feature */
+  --fs-meta:        13px;
+  --fs-label:       12px;
+  --fs-kicker:      11px;                      /* mono uppercase */
+
+  --lh-display:     0.96;
+  --lh-tight:       1.06;
+  --lh-title:       1.15;
+  --lh-body:        1.65;
+  --lh-prose:       1.72;
+
+  --tracking-tight: -0.045em;     /* display hero */
+  --tracking-display: -0.03em;    /* h1/h2 */
+  --tracking-body:   0;
+  --tracking-mono:   0.08em;
+  --tracking-kicker: 0.12em;
+
+  /* ============ SPACING ============ */
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ============ RADII ============ */
+
+  --radius-xs: 6px;    /* nav CTA */
+  --radius-sm: 8px;    /* CTA square, input free */
+  --radius-md: 10px;   /* input landing */
+  --radius-lg: 12px;   /* card landing, answer */
+  --radius-xl: 18px;   /* input auth, quartier note */
+  --radius-2xl: 22px;  /* panel compte */
+  --radius-3xl: 24px;  /* auth card */
+  --radius-4xl: 28px;  /* proto shell */
+  --radius-band: 34px; /* account band */
+  --radius-pill: 999px;
+
+  /* ============ BLUR ============ */
+
+  --blur-sm:  12px;   /* glass cards */
+  --blur-md:  16px;   /* nav sticky */
+  --blur-lg:  18px;   /* auth card */
+  --blur-orb: 100px;  /* background orbes */
+
+  /* ============ MOTION ============ */
+
+  --ease:        cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast:    150ms;
+  --dur-base:    200ms;
+  --dur-slow:    300ms;
+}
+
+/* ============ SEMANTIC ROLES ============ */
+
+body {
+  background: var(--bg);
+  color: var(--fg-1);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+}
+
+h1, .h1 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: var(--fs-display);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-display);
+  color: var(--fg-hi);
+  margin: 0 0 var(--space-6);
+}
+
+h2, .h2 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-title);
+  letter-spacing: var(--tracking-display);
+  color: var(--fg-hi);
+  margin: 0 0 var(--space-2);
+}
+
+h3, .h3 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: var(--fs-h5);
+  line-height: var(--lh-title);
+  color: var(--fg-hi);
+  margin: 0;
+}
+
+p {
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--fg-3);
+  margin: 0;
+}
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: var(--fs-kicker);
+  letter-spacing: var(--tracking-kicker);
+  text-transform: uppercase;
+  color: var(--orange);
+}
+
+.kicker-muted {
+  font-family: var(--font-mono);
+  font-size: var(--fs-kicker);
+  letter-spacing: var(--tracking-kicker);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-kicker);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.data {
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-sm);
+  color: var(--fg-1);
+}
+
+.accent-italic {
+  font-style: italic;
+  color: var(--orange);
+}
+
+code, .mono {
+  font-family: var(--font-mono);
+}

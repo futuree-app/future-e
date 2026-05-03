@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -60,7 +61,7 @@ const css = `
     pointer-events:none; z-index:1; mix-blend-mode:overlay;
   }
 
-  .nav { position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(6,8,18,0.65);border-bottom:1px solid var(--border); }
+  .nav { position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:var(--bg-card);border-bottom:1px solid var(--border); }
   .nav-inner { max-width:1100px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px; }
   .brand { font-family:var(--serif);font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--text);text-decoration:none; }
   .brand-dot { color:var(--accent);font-style:normal; }
@@ -284,6 +285,7 @@ export default function CadmiumPage() {
             <span className="sep">/</span>
             Cadmium
           </div>
+          <ThemeToggle />
         </div>
       </nav>
 
