@@ -2195,25 +2195,35 @@ export default function FutureELanding() {
             Votre inquiétude mérite une présence calme, toute l&apos;année.
           </h2>
           <p style={styles.amnesieBody}>
-            Le changement climatique souffre en France d&apos;une forme
-            particulière d&apos;invisibilité. Il n&apos;est ni nié ni ignoré.
-            Il est oublié par cycles. Chaque été, les canicules, les
-            sécheresses, les incendies reviennent dans l&apos;actualité. Chaque
-            automne, l&apos;attention s&apos;efface. Chaque hiver, le sujet
-            retourne à l&apos;arrière-plan.
+            Chaque semaine, une nouvelle alerte. Le cadmium dans les céréales.
+            Les pics de pollution. La canicule qui arrive. Les incendies.
+            L&apos;inondation.
           </p>
           <p style={styles.amnesieBody}>
-            Cette amnésie saisonnière n&apos;est pas un manque de volonté.
-            C&apos;est un phénomène documenté en psychologie comportementale : la
-            capacité finie d&apos;inquiétude. L&apos;attention aux risques
-            collectifs est limitée. Quand elle se remplit d&apos;un sujet, elle
-            se vide d&apos;un autre.
+            Vous lisez. Vous vous inquiétez. Puis l&apos;actualité passe à
+            autre chose, et vous aussi.
           </p>
           <p style={styles.amnesieBody}>
-            Une présence éditoriale douce, sérieuse, personnalisée — qui
-            maintient le climat de votre vie dans votre conscience active toute
-            l&apos;année, sans peser, sans attendre la prochaine canicule pour
-            redevenir utile.
+            Ce n&apos;est pas un manque de volonté. La capacité
+            d&apos;inquiétude est limitée — c&apos;est documenté. Quand elle se
+            remplit d&apos;un sujet, elle se vide d&apos;un autre. Et le
+            changement climatique, comme les risques sanitaires qui
+            l&apos;accompagnent, souffre de cette forme particulière
+            d&apos;invisibilité : il n&apos;est pas nié, il est oublié par
+            cycles.
+          </p>
+          <p style={styles.amnesieBody}>
+            Le problème, c&apos;est que ces risques ne disparaissent pas quand
+            l&apos;attention s&apos;efface. Ils progressent. Ils concernent
+            votre commune, votre logement, l&apos;air que respirent vos
+            enfants, la valeur de ce que vous possédez, les décisions que vous
+            n&apos;avez pas encore prises.
+          </p>
+          <p style={styles.amnesieBody}>
+            futur•e existe pour combler cet intervalle. Pas une alarme de plus
+            — une présence calme, continue, qui traduit les données publiques en
+            lecture personnalisée pour votre vie. Comme vous suivez votre santé
+            ou vos finances : sans obsession, sans oubli.
           </p>
           <div style={styles.amnesieHighlight}>
             L&apos;enjeu n&apos;est pas de remplacer l&apos;alarme saisonnière
