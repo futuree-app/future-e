@@ -50,21 +50,21 @@ const SCENARIOS = {
     year: 2030,
     label: "Accords tenus",
     temp: "+1.5°C",
-    color: "#4ade80",
+    color: "var(--green)",
   },
   median: {
     id: "gwl20_france_2_7c",
     year: 2050,
     label: "Trajectoire actuelle",
     temp: "+2.7°C",
-    color: "#fb923c",
+    color: "var(--orange)",
   },
   pessimistic: {
     id: "gwl30_france_4c",
     year: 2100,
     label: "Statu quo",
     temp: "+4°C",
-    color: "#f87171",
+    color: "var(--red)",
   },
 } as const;
 
@@ -188,7 +188,7 @@ export function DashboardExperience({
       title: "Ton quartier",
       subtitle: `${communeName} · DRIAS + Géorisques`,
       badge: heatStatus.badge,
-      color: "#60a5fa",
+      color: "var(--blue)",
       main: `${formatValue(summerTemp, 1)}°C`,
       label: "température moyenne d'été",
       points: [
@@ -202,7 +202,7 @@ export function DashboardExperience({
       title: "Ta santé",
       subtitle: "Stress thermique",
       badge: heatStatus.badge,
-      color: "#f87171",
+      color: "var(--red)",
       main: `${formatValue(hotDays, 0)}j`,
       label: "chaleur forte / an",
       points: [
@@ -216,7 +216,7 @@ export function DashboardExperience({
       title: "Ton logement",
       subtitle: "Confort d'été",
       badge: heatStatus.badge,
-      color: "#fb923c",
+      color: "var(--orange)",
       main: `${formatValue(tropicalNights, 0)}n`,
       label: "nuits tropicales / an",
       points: [
@@ -230,7 +230,7 @@ export function DashboardExperience({
       title: "Ton métier",
       subtitle: "Exposition chaleur",
       badge: heatStatus.badge,
-      color: "#a78bfa",
+      color: "var(--violet)",
       main: heatStatus.work,
       label: "pression climatique",
       points: [
@@ -244,7 +244,7 @@ export function DashboardExperience({
       title: "Ta mobilité",
       subtitle: "Tenue du quotidien",
       badge: heatStatus.badge,
-      color: "#4ade80",
+      color: "var(--green)",
       main: heatStatus.mobility,
       label: "tenue en été",
       points: [
@@ -258,7 +258,7 @@ export function DashboardExperience({
       title: "Tes projets",
       subtitle: "Arbitrages à prévoir",
       badge: heatStatus.badge,
-      color: "#fbbf24",
+      color: "var(--yellow)",
       main: heatStatus.projects,
       label: "points d'attention",
       points: [
@@ -296,11 +296,11 @@ export function DashboardExperience({
           padding: 24px;
           border-radius: 28px;
           background:
-            radial-gradient(circle at top left, rgba(251,146,60,0.12), transparent 32%),
-            radial-gradient(circle at top right, rgba(248,113,113,0.1), transparent 28%),
-            #060812;
-          color: #f6f0e8;
-          border: 1px solid rgba(255,255,255,0.08);
+            radial-gradient(circle at top left, var(--orange-tint), transparent 32%),
+            radial-gradient(circle at top right, var(--red-tint), transparent 28%),
+            var(--bg);
+          color: var(--fg-hi);
+          border: 1px solid var(--border-1);
         }
         .proto-topbar {
           display: flex;
@@ -312,7 +312,7 @@ export function DashboardExperience({
         .proto-brand {
           font-size: 22px;
           font-style: italic;
-          color: #f6f0e8;
+          color: var(--fg-hi);
         }
         .proto-meta {
           display: flex;
@@ -323,8 +323,8 @@ export function DashboardExperience({
         .proto-chip {
           padding: 8px 12px;
           border-radius: 999px;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
+          background: var(--bg-elev-2);
+          border: 1px solid var(--border-1);
           font-size: 12px;
           color: rgba(255,255,255,0.8);
         }
@@ -335,14 +335,14 @@ export function DashboardExperience({
           font-size: 11px;
           letter-spacing: 0.18em;
           text-transform: uppercase;
-          color: #fb923c;
+          color: var(--orange);
           margin-bottom: 12px;
         }
         .proto-title {
           margin: 0 0 10px;
           font-size: clamp(30px, 4vw, 54px);
           line-height: 1.02;
-          color: #fff7ed;
+          color: var(--fg-hi);
         }
         .proto-subtitle {
           margin: 0;
@@ -358,8 +358,8 @@ export function DashboardExperience({
           margin-bottom: 24px;
           padding: 16px;
           border-radius: 18px;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: var(--bg-elev-2);
+          border: 1px solid var(--border-1);
         }
         .proto-control-block {
           display: flex;
@@ -378,15 +378,15 @@ export function DashboardExperience({
           min-height: 34px;
           padding: 0 12px;
           border-radius: 10px;
-          border: 1px solid rgba(255,255,255,0.12);
+          border: 1px solid var(--border-2);
           background: transparent;
           color: rgba(255,255,255,0.72);
           cursor: pointer;
         }
         .proto-control-btn[data-active="true"] {
-          border-color: rgba(251,146,60,0.45);
-          background: rgba(251,146,60,0.12);
-          color: #fb923c;
+          border-color: var(--orange-ring);
+          background: var(--orange-tint);
+          color: var(--orange);
         }
         .proto-control-btn[data-disabled="true"] {
           opacity: 0.42;
@@ -402,8 +402,8 @@ export function DashboardExperience({
           overflow: hidden;
           padding: 22px;
           border-radius: 22px;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: var(--bg-elev-2);
+          border: 1px solid var(--border-1);
         }
         .proto-card::after {
           content: "";
@@ -412,7 +412,7 @@ export function DashboardExperience({
           width: 180px;
           height: 180px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(255,255,255,0.12), transparent 70%);
+          background: radial-gradient(circle, var(--border-2), transparent 70%);
           opacity: 0.5;
           pointer-events: none;
         }
@@ -426,7 +426,7 @@ export function DashboardExperience({
         .proto-card-title {
           margin: 0 0 4px;
           font-size: 18px;
-          color: #fff7ed;
+          color: var(--fg-hi);
         }
         .proto-card-sub {
           margin: 0;
@@ -436,8 +436,8 @@ export function DashboardExperience({
         .proto-badge {
           padding: 4px 8px;
           border-radius: 999px;
-          background: rgba(255,255,255,0.08);
-          border: 1px solid rgba(255,255,255,0.12);
+          background: var(--border-1);
+          border: 1px solid var(--border-2);
           font-size: 10px;
           text-transform: uppercase;
           letter-spacing: 0.08em;
@@ -461,7 +461,7 @@ export function DashboardExperience({
         }
         .proto-point {
           padding-top: 8px;
-          border-top: 1px solid rgba(255,255,255,0.08);
+          border-top: 1px solid var(--border-1);
           font-size: 13px;
           color: rgba(255,255,255,0.78);
         }
@@ -469,8 +469,8 @@ export function DashboardExperience({
           margin-top: 22px;
           padding: 24px;
           border-radius: 22px;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: var(--bg-elev-2);
+          border: 1px solid var(--border-1);
         }
         .proto-synthesis-text {
           margin: 0;
@@ -482,9 +482,9 @@ export function DashboardExperience({
           margin-top: 14px;
           padding: 14px 16px;
           border-radius: 16px;
-          background: rgba(251,146,60,0.08);
-          color: #f8c28b;
-          border-left: 3px solid #fb923c;
+          background: var(--orange-tint);
+          color: var(--orange-soft);
+          border-left: 3px solid var(--orange);
           line-height: 1.6;
         }
         @media (max-width: 1100px) {
@@ -510,7 +510,7 @@ export function DashboardExperience({
 
       <div className="proto-topbar">
         <div className="proto-brand">
-          futur<span style={{ color: "#fb923c", fontStyle: "normal" }}>•</span>e
+          futur<span style={{ color: "var(--orange)", fontStyle: "normal" }}>•</span>e
         </div>
         <div className="proto-meta">
           <div className="proto-chip">{communeName} · {DEFAULT_INSEE}</div>
@@ -529,7 +529,7 @@ export function DashboardExperience({
       <div className="proto-hero">
         <p className="proto-kicker">· projections climatiques compactes ·</p>
         <h2 className="proto-title">
-          À l&apos;horizon <span style={{ color: "#fb923c" }}>{currentScenario.year}</span>, scénario{" "}
+          À l&apos;horizon <span style={{ color: "var(--orange)" }}>{currentScenario.year}</span>, scénario{" "}
           <span style={{ color: currentScenario.color }}>
             {currentScenario.label.toLowerCase()}
           </span>

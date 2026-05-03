@@ -11,18 +11,18 @@ import Navbar from '@/components/Navbar';
 import { SAVOIR_HUB_ARTICLES } from '@/config/navigation';
 
 const C = {
-  bg: '#060812',
-  bgElev: 'rgba(255,255,255,0.03)',
-  border: 'rgba(255,255,255,0.08)',
-  borderHi: 'rgba(255,255,255,0.15)',
-  text: '#e9ecf2',
-  muted: '#9ba3b4',
-  dim: '#6b7388',
-  orange: '#fb923c',
-  red: '#f87171',
-  violet: '#a78bfa',
-  green: '#4ade80',
-  blue: '#60a5fa',
+  bg: 'var(--bg)',
+  bgElev: 'var(--bg-elev)',
+  border: 'var(--border-1)',
+  borderHi: 'var(--border-hi)',
+  text: 'var(--fg-1)',
+  muted: 'var(--fg-3)',
+  dim: 'var(--fg-4)',
+  orange: 'var(--orange)',
+  red: 'var(--red)',
+  violet: 'var(--violet)',
+  green: 'var(--green)',
+  blue: 'var(--blue)',
 };
 
 const PLM_CENTRAL_CODES: Record<string, { city: string; example: string }> = {
@@ -1125,7 +1125,7 @@ export default function FutureELanding() {
       zIndex: 50,
       backdropFilter: 'blur(16px)',
       WebkitBackdropFilter: 'blur(16px)',
-      background: 'rgba(6,8,18,0.7)',
+      background: 'var(--bg-card)',
       borderBottom: `1px solid ${C.border}`,
     },
     navInner: {
@@ -1175,7 +1175,7 @@ export default function FutureELanding() {
       fontSize: 11,
       letterSpacing: '0.08em',
       textTransform: 'uppercase',
-      background: 'rgba(255,255,255,0.02)',
+      background: 'var(--bg-elev)',
     },
     navCta: {
       padding: '8px 20px',
@@ -1242,7 +1242,7 @@ export default function FutureELanding() {
       width: '100%',
       padding: '16px 20px 16px 52px',
       borderRadius: 10,
-      background: 'rgba(255,255,255,0.05)',
+      background: 'var(--bg-elev-2)',
       border: `1px solid ${C.border}`,
       color: C.text,
       fontSize: 16,
@@ -1342,7 +1342,7 @@ export default function FutureELanding() {
       zIndex: 2,
       borderTop: `1px solid ${C.border}`,
       borderBottom: `1px solid ${C.border}`,
-      background: 'rgba(6,8,18,0.6)',
+      background: 'var(--bg-card)',
       overflow: 'hidden',
       padding: '12px 0',
     },
@@ -1396,8 +1396,8 @@ export default function FutureELanding() {
       gap: 8,
       padding: '6px 14px',
       borderRadius: 100,
-      background: 'rgba(251,146,60,0.12)',
-      border: '1px solid rgba(251,146,60,0.3)',
+      background: 'var(--orange-tint)',
+      border: '1px solid var(--orange-ring)',
       fontFamily: "'JetBrains Mono', monospace",
       fontSize: 12,
       color: C.orange,
@@ -1458,7 +1458,7 @@ export default function FutureELanding() {
       flex: 1,
       padding: '14px 18px',
       borderRadius: 8,
-      background: 'rgba(255,255,255,0.04)',
+      background: 'var(--bg-elev-2)',
       border: `1px solid ${C.border}`,
       color: C.text,
       fontSize: 15,
@@ -1541,7 +1541,7 @@ export default function FutureELanding() {
       ...glass({
         borderRadius: 16,
         padding: '48px 52px',
-        borderColor: 'rgba(251,146,60,0.15)',
+        borderColor: 'var(--orange-tint)',
       }),
       position: 'relative',
       overflow: 'hidden',
@@ -1573,7 +1573,7 @@ export default function FutureELanding() {
       ...glass({
         borderRadius: 8,
         padding: '18px 22px',
-        borderColor: 'rgba(251,146,60,0.2)',
+        borderColor: 'var(--orange-tint-2)',
         borderLeft: `2px solid ${C.orange}`,
         marginTop: 28,
       }),
@@ -1587,7 +1587,7 @@ export default function FutureELanding() {
       ...glass({
         borderRadius: 16,
         padding: 8,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: 'var(--border-1)',
       }),
       marginTop: 24,
       position: 'relative',
@@ -1732,7 +1732,7 @@ export default function FutureELanding() {
       width: '100%',
       padding: '13px',
       borderRadius: 8,
-      background: accent ? C.orange : 'rgba(255,255,255,0.06)',
+      background: accent ? C.orange : 'var(--bg-elev-3)',
       color: accent ? C.bg : C.text,
       fontWeight: 600,
       fontSize: 14,
@@ -1899,8 +1899,8 @@ export default function FutureELanding() {
         @keyframes breathe { 0%,100% { transform:scale(1); } 50% { transform:scale(1.08) translate(10px,-15px); } }
         .orb2-anim { animation: breathe 12s ease-in-out infinite; }
         .tension-card:hover { transform: translateY(-2px); }
-        input::placeholder { color: #6b7388; }
-        input:focus { border-color: rgba(251,146,60,0.5) !important; background: rgba(255,255,255,0.06) !important; }
+        input::placeholder { color: var(--fg-4); }
+        input:focus { border-color: var(--orange-ring) !important; background: var(--bg-elev-3) !important; }
         .answer-anim { animation: fadeIn 0.4s ease; }
         .plan-btn:hover { opacity: 0.88; }
         .suggestion-row:last-child { border-bottom: none !important; }
@@ -1929,7 +1929,7 @@ export default function FutureELanding() {
         @media (prefers-reduced-motion: reduce) {
           .slot-spin, .slot-settle, .slot-card-spin, .slot-card-settle { animation: none; }
         }
-        .savoir-hub-card:hover { border-color: rgba(255,255,255,0.18) !important; background: rgba(255,255,255,0.055) !important; }
+        .savoir-hub-card:hover { border-color: var(--border-hi) !important; background: var(--bg-elev-3) !important; }
         @media (max-width:768px) {
           .hero-grid { grid-template-columns: 1fr !important; }
           .hero-right { display: none !important; }
@@ -2022,8 +2022,8 @@ export default function FutureELanding() {
                 marginTop: 10,
                 padding: '10px 14px',
                 borderRadius: 8,
-                background: 'rgba(251,146,60,0.08)',
-                border: '1px solid rgba(251,146,60,0.25)',
+                background: 'var(--orange-tint)',
+                border: '1px solid var(--orange-tint-2)',
                 fontSize: 13,
                 color: C.orange,
                 lineHeight: 1.5,
@@ -2392,8 +2392,8 @@ export default function FutureELanding() {
               <div
                 className="savoir-hub-card"
                 style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  background: 'var(--bg-elev)',
+                  border: '1px solid var(--border-1)',
                   borderRadius: 10,
                   padding: '24px 22px',
                   height: '100%',
@@ -2641,7 +2641,7 @@ export default function FutureELanding() {
             style={{
               ...styles.planCard(true),
               boxShadow:
-                '0 0 0 1px rgba(251,146,60,0.3), 0 16px 48px rgba(251,146,60,0.12)',
+                '0 0 0 1px var(--orange-ring), 0 16px 48px var(--orange-tint)',
             }}
           >
             <div style={styles.planBadge}>Recommandé</div>

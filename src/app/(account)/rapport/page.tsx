@@ -6,12 +6,12 @@ import { getCurrentUserAccount } from "@/lib/user-account";
 import { QuartierWorkbook } from "../compte/QuartierWorkbook";
 
 const MODULE_COLORS: Record<string, string> = {
-  quartier: "#60a5fa",
-  logement: "#fb923c",
-  metier: "#a78bfa",
-  sante: "#4ade80",
-  mobilite: "#f87171",
-  projets: "#fb923c",
+  quartier: "var(--blue)",
+  logement: "var(--orange)",
+  metier: "var(--violet)",
+  sante: "var(--green)",
+  mobilite: "var(--red)",
+  projets: "var(--orange)",
 };
 
 const MODULE_ICONS: Record<string, string> = {
@@ -33,10 +33,10 @@ const MODULE_BENEFIT: Record<string, string> = {
 };
 
 const QUARTIER_FACTORS = [
-  { label: "Jours de chaleur extrême", val: "34 jours/an en 2050", col: "#f87171", src: "DRIAS / Météo-France · +2,7°C" },
-  { label: "Risque submersion", val: "+31 % en scénario médian", col: "#60a5fa", src: "Géorisques / BRGM" },
-  { label: "Érosion littorale", val: "Recul du trait de côte documenté", col: "#60a5fa", src: "Cerema · littoral atlantique" },
-  { label: "Îlots de chaleur urbains", val: "Quartiers centre exposés", col: "#f87171", src: "INSEE / IGN" },
+  { label: "Jours de chaleur extrême", val: "34 jours/an en 2050", col: "var(--red)", src: "DRIAS / Météo-France · +2,7°C" },
+  { label: "Risque submersion", val: "+31 % en scénario médian", col: "var(--blue)", src: "Géorisques / BRGM" },
+  { label: "Érosion littorale", val: "Recul du trait de côte documenté", col: "var(--blue)", src: "Cerema · littoral atlantique" },
+  { label: "Îlots de chaleur urbains", val: "Quartiers centre exposés", col: "var(--red)", src: "INSEE / IGN" },
 ];
 
 const LOCKED_MODULE_IDS = ["logement", "metier", "sante", "mobilite", "projets"];
@@ -49,9 +49,9 @@ export default async function RapportPage() {
   const lockedModules = PRODUCT_MODULES.filter((m) => LOCKED_MODULE_IDS.includes(m.id));
 
   const heroSignals = [
-    { label: "Cadmium dans les sols charentais", src: "GisSol / RMQS", col: "#fb923c" },
-    { label: "Saison pollinique allongée de 28 jours", src: "RNSA / Copernicus", col: "#4ade80" },
-    { label: "Assurance habitation : +8 à 12 %/an sur le littoral", src: "ACPR / Banque de France", col: "#60a5fa" },
+    { label: "Cadmium dans les sols charentais", src: "GisSol / RMQS", col: "var(--orange)" },
+    { label: "Saison pollinique allongée de 28 jours", src: "RNSA / Copernicus", col: "var(--green)" },
+    { label: "Assurance habitation : +8 à 12 %/an sur le littoral", src: "ACPR / Banque de France", col: "var(--blue)" },
   ];
 
   return (
@@ -121,11 +121,11 @@ export default async function RapportPage() {
           {/* Panel signals / résumé */}
           <aside
             className="glass rounded-2xl p-7 relative overflow-hidden"
-            style={!fullReport ? { borderColor: "rgba(251,146,60,0.22)", boxShadow: "0 0 0 1px rgba(251,146,60,0.15), 0 20px 60px rgba(251,146,60,0.07)" } : undefined}
+            style={!fullReport ? { borderColor: "var(--orange-tint-2)", boxShadow: "0 0 0 1px var(--orange-tint), 0 20px 60px rgba(251,146,60,0.07)" } : undefined}
           >
             {!fullReport && (
               <div className="absolute top-[-50px] right-[-50px] w-[160px] h-[160px] rounded-full pointer-events-none"
-                style={{ background: "radial-gradient(circle, rgba(251,146,60,0.08) 0%, transparent 70%)" }} />
+                style={{ background: "radial-gradient(circle, var(--orange-tint) 0%, transparent 70%)" }} />
             )}
             <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">
               {fullReport ? "Six dimensions ouvertes" : "Quelques signaux déjà disponibles"}
@@ -137,7 +137,7 @@ export default async function RapportPage() {
             {fullReport ? (
               <div className="flex flex-col gap-2.5">
                 {allModules.map((m) => {
-                  const col = MODULE_COLORS[m.id] ?? "#a78bfa";
+                  const col = MODULE_COLORS[m.id] ?? "var(--violet)";
                   return (
                     <div key={m.id} className="flex items-center gap-3 px-3 py-2.5 rounded-lg" style={{ background: `${col}0a`, border: `1px solid ${col}1a` }}>
                       <span className="text-[16px]">{MODULE_ICONS[m.id]}</span>
@@ -217,7 +217,7 @@ export default async function RapportPage() {
 
                 {/* Sidebar */}
                 <div className="flex flex-col gap-3.5">
-                  <div className="glass rounded-xl p-5" style={{ borderLeft: "2px solid #fb923c", borderColor: "rgba(251,146,60,0.15)" }}>
+                  <div className="glass rounded-xl p-5" style={{ borderLeft: "2px solid var(--orange)", borderColor: "var(--orange-tint)" }}>
                     <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2">Ce que le rapport complet ajoute</p>
                     <p className="text-[14px] leading-[1.65] text-muted mb-4">
                       Le module Quartier seul donne la lecture du territoire. Le rapport complet croise ces signaux avec votre logement, votre santé et votre mode de vie.
@@ -227,7 +227,7 @@ export default async function RapportPage() {
                     </Link>
                   </div>
 
-                  <div className="glass rounded-xl p-5" style={{ borderLeft: "2px solid #60a5fa", borderColor: "rgba(96,165,250,0.15)" }}>
+                  <div className="glass rounded-xl p-5" style={{ borderLeft: "2px solid var(--blue)", borderColor: "var(--blue-tint)" }}>
                     <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2">Pages Savoir associées</p>
                     <p className="text-[14px] leading-[1.65] text-muted mb-3">
                       Trois lectures de fond sur les sujets que ce module touche, accessibles gratuitement.
@@ -281,13 +281,13 @@ export default async function RapportPage() {
 
               <div className="grid grid-cols-3 gap-3.5">
                 {lockedModules.map((module, i) => {
-                  const col = MODULE_COLORS[module.id] ?? "#a78bfa";
+                  const col = MODULE_COLORS[module.id] ?? "var(--violet)";
                   const benefit = MODULE_BENEFIT[module.id] ?? module.summary;
                   return (
                     <article
                       key={module.id}
                       className="glass rounded-xl p-6 relative opacity-50"
-                      style={{ borderTop: "2px solid rgba(255,255,255,0.06)" }}
+                      style={{ borderTop: "2px solid var(--bg-elev-3)" }}
                     >
                       <div className="w-[34px] h-[34px] rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[17px] mb-3.5 grayscale">
                         {MODULE_ICONS[module.id]}
@@ -305,9 +305,9 @@ export default async function RapportPage() {
             </section>
 
             {/* Upgrade band */}
-            <div className="glass rounded-2xl p-11 grid grid-cols-[1fr_200px] gap-14 items-center mt-12 relative overflow-hidden" style={{ borderColor: "rgba(251,146,60,0.15)" }}>
+            <div className="glass rounded-2xl p-11 grid grid-cols-[1fr_200px] gap-14 items-center mt-12 relative overflow-hidden" style={{ borderColor: "var(--orange-tint)" }}>
               <div className="absolute top-[-80px] right-[-80px] w-[260px] h-[260px] rounded-full pointer-events-none"
-                style={{ background: "radial-gradient(circle, rgba(251,146,60,0.1) 0%, transparent 70%)" }} />
+                style={{ background: "radial-gradient(circle, var(--orange-tint) 0%, transparent 70%)" }} />
               <div>
                 <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">Rapport complet</p>
                 <h2 className="font-normal text-[clamp(22px,2.4vw,30px)] leading-[1.2] tracking-[-0.5px] text-label mb-3.5" style={{ fontFamily: "'Instrument Serif', serif" }}>
@@ -350,7 +350,7 @@ export default async function RapportPage() {
 
             <div className="grid grid-cols-3 gap-3.5">
               {allModules.map((module, i) => {
-                const col = MODULE_COLORS[module.id] ?? "#a78bfa";
+                const col = MODULE_COLORS[module.id] ?? "var(--violet)";
                 const benefit = MODULE_BENEFIT[module.id] ?? module.summary;
                 return (
                   <article
