@@ -507,7 +507,7 @@ function getHeroCopy(communeName, categories, usedFallback) {
   const hasCategory = (category) => safeCategories.includes(category);
 
   if (usedFallback) {
-    return `futur•e croise les données climatiques, sanitaires et immobilières publiques pour donner une première lecture locale du changement climatique. Pour ${name}, cette lecture est déjà utile, même si elle sera encore enrichie au fil du temps.`;
+    return `futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution de ${name} à travers le prisme du climat, de la santé et de l'immobilier.`;
   }
 
   if (hasCategory('littoral')) {
@@ -526,7 +526,7 @@ function getHeroCopy(communeName, categories, usedFallback) {
     return `futur•e lit ${name} à partir de vos contraintes réelles : dépendance à la voiture, chaleur, ressource en eau, valeur du logement et capacité d'adaptation du territoire.`;
   }
 
-  return `futur•e croise les données climatiques, sanitaires et immobilières publiques avec votre profil pour vous donner une lecture personnalisée et située du changement climatique. Pas des généralités : votre situation, dans ${name}.`;
+  return `futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution de ${name} à travers le prisme du climat, de la santé et de l'immobilier.`;
 }
 
 function getQuestionIntro(communeName, categories, usedFallback) {
