@@ -3,17 +3,17 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 
 const C = {
-  bg: '#060812',
-  bgElev: 'rgba(255,255,255,0.03)',
-  border: 'rgba(255,255,255,0.08)',
-  borderHi: 'rgba(255,255,255,0.14)',
-  text: '#e9ecf2',
-  muted: '#9ba3b4',
-  dim: '#6b7388',
-  accent: '#f87171',
-  warm: '#fb923c',
-  violet: '#a78bfa',
-  blue: '#60a5fa',
+  bg: 'var(--bg)',
+  bgElev: 'var(--bg-elev)',
+  border: 'var(--border-1)',
+  borderHi: 'var(--border-hi)',
+  text: 'var(--fg-1)',
+  muted: 'var(--fg-3)',
+  dim: 'var(--fg-4)',
+  accent: 'var(--red)',
+  warm: 'var(--orange)',
+  violet: 'var(--violet)',
+  blue: 'var(--blue)',
 };
 
 function glass(extra = {}) {
@@ -211,7 +211,7 @@ export default function PourquoiPage() {
                 ...glass({
                   borderRadius: 22,
                   padding: 8,
-                  borderColor: 'rgba(255,255,255,0.1)',
+                  borderColor: 'var(--border-1)',
                 }),
                 position: 'relative',
                 overflow: 'hidden',
