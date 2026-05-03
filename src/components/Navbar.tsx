@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { NAV_ITEMS, type NavDropdownItem, type NavItem } from '@/config/navigation';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const C = {
   bg: '#060812',
@@ -321,6 +322,7 @@ export default function Navbar() {
 
           {/* Right actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <ThemeToggle />
             <div
               className="nb-actions-desktop"
               style={{ display: 'flex', alignItems: 'center', gap: 10 }}
