@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-05-03T20:58:58.822Z",
+  "source_dir": "data/source",
+  "commune_count": 35006,
+  "scenario_count": 3,
+  "model_count": 17,
+  "indicator_count": 28,
+  "models": [
+    "ALADIN63_CNRM-CM5",
+    "ALADIN63_HadGEM2",
+    "CCLM4-8-17_HadGEM2",
+    "CCLM4-8-17_MPI-ESM",
+    "HIRHAM5_CM5A",
+    "HIRHAM5_NorESM1",
+    "HadREM3-GA7_CNRM-CM5",
+    "HadREM3-GA7_EC-EARTH",
+    "HadREM3-GA7_HadGEM2",
+    "RACMO22E_EC-EARTH",
+    "RCA4_EC-EARTH",
+    "RCA4_IPSL-CM5A",
+    "REMO2009_MPI-ESM",
+    "REMO2015_NorESM1",
+    "RegCM4-6_HadGEM2",
+    "RegCM4-6_MPI-ESM",
+    "WRF381P_NorESM1"
+  ],
+  "scenarios": [
+    "gwl15",
+    "gwl20",
+    "gwl30"
+  ]
+}
