@@ -3,6 +3,8 @@
    Palette + typography + spacing + radius + shadows
    ============================================================ */
 
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
 @font-face {
   font-family: 'Instrument Serif';
   font-style: normal;
@@ -17,7 +19,6 @@
   font-display: swap;
   src: url('/fonts/InstrumentSerif-Italic.ttf') format('truetype');
 }
-@import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
 :root {
   /* ============ MODE-AGNOSTIC TOKENS ============ */
