@@ -6,6 +6,7 @@ import { getCurrentSessionUser } from '@/lib/user-account';
 import { getClimatDataCommune } from '@/lib/drias-json';
 import { getGeorisquesSummary } from '@/lib/georisques';
 import { getAtmoForCommune } from '@/lib/atmo';
+import { getEaufranceSummary } from '@/lib/eaufrance';
 import { createClient } from '@supabase/supabase-js';
 import { unstable_cache } from 'next/cache';
 
@@ -266,6 +267,7 @@ export default async function CommunePage({
   const atmo = process.env.ATMO_USERNAME
     ? await getAtmoForCommune(commune.insee_code).catch(() => null)
     : null;
+  const eaufrance = await getEaufranceSummary(commune.insee_code).catch(() => null);
 
   const dept = commune.departement ?? commune.insee_code.slice(0, 2);
   const h1 = `Risque ${hub.thematique} à ${commune.nom_commune} (Dept. ${dept}) : Analyse et Prévention`;
@@ -409,6 +411,48 @@ export default async function CommunePage({
     ` : `
     <p style="color:#6b7388;font-style:italic;">Indice ATMO indisponible pour cette commune.</p>
     `}
+
+    <h2 style="--accent:${hub.accent}">Eau potable &amp; ressource locale</h2>
+    <p>
+      Données Hub'Eau (Eaufrance) pour <strong>${commune.nom_commune}</strong> —
+      qualité bactériologique, physico-chimique et signal de sécheresse sur les cours d'eau.
+    </p>
+
+    ${eaufrance?.drinkingWater ? `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:24px 0;">
+      <div style="padding:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#6b7388;margin-bottom:8px;">Eau potable · bactério</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:30px;line-height:1.1;color:${eaufrance.drinkingWater.conformBacterio === false ? '#f87171' : '#4ade80'};font-weight:400;">
+          ${eaufrance.drinkingWater.conformBacterio === false ? 'Non conforme' : eaufrance.drinkingWater.conformBacterio === true ? 'Conforme' : 'N/D'}
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#9ba3b4;">
+          ${eaufrance.drinkingWater.lastSampleDate ? `Dernier prélèvement : ${eaufrance.drinkingWater.lastSampleDate}` : 'Date indisponible'}
+        </div>
+      </div>
+      <div style="padding:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#6b7388;margin-bottom:8px;">Nitrates / Nitrites</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:30px;line-height:1.1;color:${(eaufrance.drinkingWater.nitrates ?? 0) > 50 ? '#f87171' : (eaufrance.drinkingWater.nitrates ?? 0) > 25 ? '#facc15' : '#4ade80'};font-weight:400;">
+          ${eaufrance.drinkingWater.nitrates != null ? `${eaufrance.drinkingWater.nitrates} mg/L` : 'N/D'}
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#9ba3b4;">
+          Seuil réglementaire : 50 mg/L${eaufrance.drinkingWater.nitrites != null ? ` · Nitrites : ${eaufrance.drinkingWater.nitrites} mg/L` : ''}
+        </div>
+      </div>
+    </div>
+    ` : ''}
+
+    ${eaufrance?.drought ? `
+    <div style="margin-top:${eaufrance.drinkingWater ? '0' : '24px'};padding:16px 20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#6b7388;margin-bottom:8px;">
+        Cours d'eau local${eaufrance.drought.riverName ? ` · ${eaufrance.drought.riverName}` : ''}
+      </div>
+      <div style="font-size:14px;color:${eaufrance.drought.isDry ? '#f87171' : '#9ba3b4'};">
+        ${eaufrance.drought.status ?? 'Observation disponible'}${eaufrance.drought.lastObservationDate ? ` — ${eaufrance.drought.lastObservationDate}` : ''}
+      </div>
+    </div>
+    ` : !eaufrance?.drinkingWater ? `
+    <p style="color:#6b7388;font-style:italic;">Données Eaufrance indisponibles pour cette commune.</p>
+    ` : ''}
 
     <h2 style="--accent:${hub.accent}">Analyse territoriale et comparaison</h2>
     <p>

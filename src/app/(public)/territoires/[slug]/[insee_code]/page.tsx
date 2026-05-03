@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { getClimatDataCommune } from '@/lib/drias-json';
 import { getGeorisquesSummary } from '@/lib/georisques';
 import { getAtmoForCommune } from '@/lib/atmo';
+import { getEaufranceSummary } from '@/lib/eaufrance';
 import { createClient } from '@supabase/supabase-js';
 import { unstable_cache } from 'next/cache';
 import { AGIR_GUIDES } from '@/config/navigation';
@@ -216,6 +217,7 @@ export default async function TerritoireCommunePage({
   const atmo = process.env.ATMO_USERNAME
     ? await getAtmoForCommune(commune.insee_code).catch(() => null)
     : null;
+  const eaufrance = await getEaufranceSummary(commune.insee_code).catch(() => null);
   const agirGuide = AGIR_GUIDES[slug];
 
   const dept = commune.departement ?? insee_code.slice(0, 2);
@@ -323,6 +325,33 @@ export default async function TerritoireCommunePage({
             </div>`).join('')}
         </div>
       </div>
+    </div>
+  ` : '';
+
+  const eaufranceGrid = (eaufrance?.drinkingWater || eaufrance?.drought) ? `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:24px 0;">
+      ${eaufrance.drinkingWater ? `
+      <div style="padding:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#6b7388;margin-bottom:8px;">Eau potable · bactério</div>
+        <div style="font-family:var(--font-serif);font-size:28px;line-height:1.15;color:${eaufrance.drinkingWater.conformBacterio === false ? '#f87171' : '#4ade80'};font-weight:400;">
+          ${eaufrance.drinkingWater.conformBacterio === false ? 'Non conforme' : eaufrance.drinkingWater.conformBacterio === true ? 'Conforme' : 'N/D'}
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#9ba3b4;">
+          ${eaufrance.drinkingWater.nitrates != null ? `Nitrates : ${eaufrance.drinkingWater.nitrates} mg/L (seuil 50)` : 'Nitrates non disponibles'}
+        </div>
+      </div>
+      ` : '<div></div>'}
+      ${eaufrance.drought ? `
+      <div style="padding:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#6b7388;margin-bottom:8px;">Cours d'eau${eaufrance.drought.riverName ? ` · ${eaufrance.drought.riverName}` : ''}</div>
+        <div style="font-family:var(--font-serif);font-size:28px;line-height:1.15;color:${eaufrance.drought.isDry ? '#f87171' : '#4ade80'};font-weight:400;">
+          ${eaufrance.drought.isDry ? 'Assec / Sec' : eaufrance.drought.status ?? 'En écoulement'}
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#9ba3b4;">
+          ${eaufrance.drought.lastObservationDate ?? 'Date non disponible'}
+        </div>
+      </div>
+      ` : '<div></div>'}
     </div>
   ` : '';
 
@@ -468,6 +497,16 @@ export default async function TerritoireCommunePage({
               Indice ATMO officiel · Publié quotidiennement par les associations agréées de surveillance de la qualité de l&apos;air.
             </p>
             <div dangerouslySetInnerHTML={{ __html: atmoGrid }} />
+          </>
+        ) : null}
+
+        {eaufranceGrid ? (
+          <>
+            <h2 style={{ ['--accent' as string]: hub.accent }}>Eau potable &amp; ressource locale</h2>
+            <p style={{ color: '#9ba3b4', fontSize: 14, marginBottom: 0 }}>
+              Données Hub'Eau (Eaufrance) · Conformité bactériologique, nitrates et signal sécheresse.
+            </p>
+            <div dangerouslySetInnerHTML={{ __html: eaufranceGrid }} />
           </>
         ) : null}
 
