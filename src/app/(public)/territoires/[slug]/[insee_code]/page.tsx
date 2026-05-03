@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import Link from 'next/link';
 import { getClimatDataCommune } from '@/lib/drias-json';
+import { getGeorisquesSummary } from '@/lib/georisques';
 import { createClient } from '@supabase/supabase-js';
 import { unstable_cache } from 'next/cache';
 import { AGIR_GUIDES } from '@/config/navigation';
@@ -170,6 +171,23 @@ function IndicatorCard({
   );
 }
 
+function buildGeorisquesHighlights(
+  riskLabels: string[],
+  seismicLabel: string | null,
+) {
+  const highlights = riskLabels.slice(0, 4);
+
+  if (highlights.length === 0 && seismicLabel) {
+    return [seismicLabel];
+  }
+
+  if (seismicLabel && !highlights.includes(seismicLabel)) {
+    highlights.push(seismicLabel);
+  }
+
+  return highlights;
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default async function TerritoireCommunePage({
   params,
@@ -193,11 +211,10 @@ export default async function TerritoireCommunePage({
 
   // Données DRIAS — libres, chargées pour tout le monde
   const driasData = await getClimatDataCommune(commune.insee_code);
+  const georisques = await getGeorisquesSummary(commune.insee_code).catch(() => null);
   const agirGuide = AGIR_GUIDES[slug];
 
   const dept = commune.departement ?? insee_code.slice(0, 2);
-  const h1 = `Risque ${hub.thematique} à ${commune.nom_commune} (Dept. ${dept}) : Analyse et Prévention`;
-
   const INDICATORS = [
     {
       key: 'ind_exposition' as const,
@@ -244,6 +261,45 @@ export default async function TerritoireCommunePage({
       `).join('')}
     </div>
   ` : `<p style="color:#6b7388;font-style:italic;">Données DRIAS indisponibles pour cette commune.</p>`;
+
+  const georisquesHighlights = buildGeorisquesHighlights(
+    georisques?.riskLabels ?? [],
+    georisques?.seismic?.label ?? null,
+  );
+
+  const georisquesGrid = georisques ? `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:24px 0;">
+      <div style="padding:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#6b7388;margin-bottom:8px;">Lecture communale</div>
+        <div style="font-family:var(--font-serif);font-size:28px;line-height:1.15;color:${hub.accent};font-weight:400;">
+          ${georisquesHighlights.length > 0 ? georisquesHighlights[0] : 'Aucun risque communal remonté'}
+        </div>
+        <div style="margin-top:8px;font-size:12px;line-height:1.6;color:#9ba3b4;">
+          Source Géorisques / GASPAR à l'échelle de la commune.
+        </div>
+      </div>
+      <div style="padding:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#6b7388;margin-bottom:8px;">Sismicité</div>
+        <div style="font-family:var(--font-serif);font-size:28px;line-height:1.15;color:${hub.accent};font-weight:400;">
+          ${georisques?.seismic?.label ?? 'Non renseignée'}
+        </div>
+        <div style="margin-top:8px;font-size:12px;line-height:1.6;color:#9ba3b4;">
+          ${georisques?.seismic?.code ? `Code zone ${georisques.seismic.code}` : 'Pas de code de zone disponible'}
+        </div>
+      </div>
+    </div>
+    ${
+      georisquesHighlights.length > 0
+        ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:-4px;">
+            ${georisquesHighlights
+              .map(
+                (label) => `<span style="display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);font-family:var(--font-mono);font-size:11px;letter-spacing:0.04em;color:#c6cfdb;">${label}</span>`,
+              )
+              .join('')}
+          </div>`
+        : ''
+    }
+  ` : `<p style="color:#6b7388;font-style:italic;">Résumé Géorisques indisponible pour cette commune.</p>`;
 
   return (
     <>
@@ -374,6 +430,12 @@ export default async function TerritoireCommunePage({
         </p>
         <div dangerouslySetInnerHTML={{ __html: driasGrid }} />
 
+        <h2 style={{ ['--accent' as string]: hub.accent }}>Risques officiels Géorisques</h2>
+        <p style={{ color: '#9ba3b4', fontSize: 14, marginBottom: 0 }}>
+          Lecture communale issue de Géorisques / GASPAR. Cette section décrit des signaux officiels à l&apos;échelle de la commune, pas une lecture à l&apos;adresse.
+        </p>
+        <div dangerouslySetInnerHTML={{ __html: georisquesGrid }} />
+
         <h2 style={{ ['--accent' as string]: hub.accent }}>Analyse territoriale</h2>
         <p>
           {commune.nom_commune} enregistre un score de tension de{' '}
@@ -382,6 +444,13 @@ export default async function TerritoireCommunePage({
           la vulnérabilité socio-économique, la capacité d&apos;adaptation locale
           et la fréquence historique des événements.
         </p>
+        {georisques && georisquesHighlights.length > 0 ? (
+          <p>
+            Côté risques réglementaires, la commune remonte notamment les signaux officiels{' '}
+            <strong>{georisquesHighlights.slice(0, 2).join(' et ')}</strong>
+            {georisquesHighlights.length > 2 ? ', parmi d&apos;autres risques recensés.' : '.'}
+          </p>
+        ) : null}
 
         {/* CTA conversion — glassmorphism */}
         <div

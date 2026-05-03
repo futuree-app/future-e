@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { PaywallGate } from '@/components/PaywallGate';
 import { getCurrentSessionUser } from '@/lib/user-account';
 import { getClimatDataCommune } from '@/lib/drias-json';
+import { getGeorisquesSummary } from '@/lib/georisques';
 import { createClient } from '@supabase/supabase-js';
 import { unstable_cache } from 'next/cache';
 
@@ -214,6 +215,23 @@ function IndicatorCard({
   );
 }
 
+function buildGeorisquesHighlights(
+  riskLabels: string[],
+  seismicLabel: string | null,
+) {
+  const highlights = riskLabels.slice(0, 4);
+
+  if (highlights.length === 0 && seismicLabel) {
+    return [seismicLabel];
+  }
+
+  if (seismicLabel && !highlights.includes(seismicLabel)) {
+    highlights.push(seismicLabel);
+  }
+
+  return highlights;
+}
+
 // ─── Page ────────────────────────────────────────────────────────────────────
 export default async function CommunePage({
   params,
@@ -243,6 +261,7 @@ export default async function CommunePage({
   const driasData = hasFullAccess
     ? await getClimatDataCommune(commune.insee_code)
     : null;
+  const georisques = await getGeorisquesSummary(commune.insee_code).catch(() => null);
 
   const dept = commune.departement ?? commune.insee_code.slice(0, 2);
   const h1 = `Risque ${hub.thematique} à ${commune.nom_commune} (Dept. ${dept}) : Analyse et Prévention`;
@@ -287,6 +306,10 @@ export default async function CommunePage({
   // Données DRIAS réelles (scénario gwl20, horizon 2050)
   const driasGwl20 = driasData?.commune?.s?.gwl20;
   const driasValues = driasGwl20?.v;
+  const georisquesHighlights = buildGeorisquesHighlights(
+    georisques?.riskLabels ?? [],
+    georisques?.seismic?.label ?? null,
+  );
 
   const fullHtml = `
     <h2 style="--accent:${hub.accent}">Projections climatiques DRIAS 2050</h2>
@@ -312,6 +335,40 @@ export default async function CommunePage({
     </div>
     ` : `
     <p style="color:#6b7388;font-style:italic;">Données DRIAS indisponibles pour cette commune.</p>
+    `}
+
+    <h2 style="--accent:${hub.accent}">Risques officiels Géorisques</h2>
+    <p>
+      Cette lecture repose sur les signaux officiels Géorisques / GASPAR à l&apos;échelle de la
+      <strong> commune</strong>. Elle ne remplace pas une vérification à l&apos;adresse pour un logement précis.
+    </p>
+
+    ${georisques ? `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:24px 0;">
+      <div style="padding:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#6b7388;margin-bottom:8px;">Lecture communale</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:30px;line-height:1.1;color:${hub.accent};font-weight:400;">${georisquesHighlights[0] ?? 'Aucun risque communal remonté'}</div>
+        <div style="margin-top:8px;font-size:12px;line-height:1.6;color:#9ba3b4;">Résumé officiel par commune.</div>
+      </div>
+      <div style="padding:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#6b7388;margin-bottom:8px;">Sismicité</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:30px;line-height:1.1;color:${hub.accent};font-weight:400;">${georisques.seismic?.label ?? 'Non renseignée'}</div>
+        <div style="margin-top:8px;font-size:12px;line-height:1.6;color:#9ba3b4;">${georisques.seismic?.code ? `Code zone ${georisques.seismic.code}` : 'Pas de code de zone disponible'}</div>
+      </div>
+    </div>
+    ${
+      georisquesHighlights.length > 0
+        ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:-4px;">
+            ${georisquesHighlights
+              .map(
+                (label) => `<span style="display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.04em;color:#c6cfdb;">${label}</span>`,
+              )
+              .join('')}
+          </div>`
+        : ''
+    }
+    ` : `
+    <p style="color:#6b7388;font-style:italic;">Résumé Géorisques indisponible pour cette commune.</p>
     `}
 
     <h2 style="--accent:${hub.accent}">Analyse territoriale et comparaison</h2>
@@ -480,7 +537,7 @@ export default async function CommunePage({
           }}
           aria-label="Navigation thématique"
         >
-          <h3>Explorer d'autres risques pour {commune.nom_commune}</h3>
+          <h3>Explorer d&apos;autres risques pour {commune.nom_commune}</h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '12px' }}>
             {Object.entries(SAVOIR_HUBS)
               .filter(([s]) => s !== slug)

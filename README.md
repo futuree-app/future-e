@@ -84,3 +84,49 @@ Le projet utilise actuellement :
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `ANTHROPIC_API_KEY` pour l'étape 10 du module Q&R
 - `ANTHROPIC_MODEL` optionnel, sinon `claude-sonnet-4-6`
+- `GEORISQUES_API_TOKEN` optionnel, côté serveur uniquement, pour activer les endpoints Géorisques `v2`
+
+## Géorisques
+
+### État actuel
+
+Le projet utilise deux modes d'accès :
+
+- `v1` sans jeton pour les résumés communaux
+- `v2` avec jeton Bearer pour les lectures au point géocodé utiles au module logement
+
+Résumé :
+
+- [src/lib/georisques.ts](/Users/quentinbrache/Desktop/Futur·e/src/lib/georisques.ts) gère les deux couches
+- `getGeorisquesSummary(insee)` = lecture communale `v1`
+- `getGeorisquesAddressSummary(latitude, longitude)` = lecture `v2` au point géocodé, si `GEORISQUES_API_TOKEN` est défini
+
+### Configuration du jeton v2
+
+Ajouter dans `.env.local` côté serveur :
+
+```bash
+GEORISQUES_API_TOKEN=...
+```
+
+Ne jamais exposer ce jeton dans du code client ni dans une variable `NEXT_PUBLIC_*`.
+
+### Endpoint logement
+
+Le projet expose :
+
+- `/api/georisques-logement?q=12 rue de la paix paris`
+
+Cette route :
+
+1. géocode l'adresse via BAN
+2. tente de résoudre une parcelle cadastrale via API Carto
+3. retourne toujours un résumé communal Géorisques
+4. retourne aussi une lecture `v2` au point géocodé si `GEORISQUES_API_TOKEN` est configuré
+5. retourne une lecture `v2` par parcelle si la parcelle a pu être résolue
+
+### Limites actuelles
+
+- la lecture `v2` actuelle couvre le **point géocodé** et, quand possible, la **parcelle cadastrale**
+- la lecture **ERRIAL complète** n'est pas encore intégrée comme restitution finale
+- certaines couches retournent des signaux réglementaires ou territoriaux, mais pas encore un diagnostic complet de transaction immobilière

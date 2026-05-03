@@ -9,15 +9,11 @@ type DashboardExperienceProps = {
 
 type DriasScenarioPayload = {
   h: string;
-  p: string;
-  dk: number;
-  c: "h" | "m" | "l";
   v: Record<string, number>;
 };
 
 type DriasPayload = {
   inseeCode: string;
-  departmentCode: string;
   commune: {
     n: string;
     s: Record<string, DriasScenarioPayload>;
@@ -46,21 +42,21 @@ const DEFAULT_INSEE = "17300";
 
 const SCENARIOS = {
   optimistic: {
-    id: "gwl15_france_2c",
+    id: "gwl15",
     year: 2030,
     label: "Accords tenus",
     temp: "+1.5°C",
     color: "var(--green)",
   },
   median: {
-    id: "gwl20_france_2_7c",
+    id: "gwl20",
     year: 2050,
     label: "Trajectoire actuelle",
     temp: "+2.7°C",
     color: "var(--orange)",
   },
   pessimistic: {
-    id: "gwl30_france_4c",
+    id: "gwl30",
     year: 2100,
     label: "Statu quo",
     temp: "+4°C",
@@ -115,8 +111,8 @@ export function DashboardExperience({
 
       try {
         const [driasResponse, georisquesResponse] = await Promise.all([
-          fetch(`/api/drias?dataset=dashboard&insee=${DEFAULT_INSEE}`),
-          fetch(`/api/georisques?insee=${DEFAULT_INSEE}`),
+          fetch(`/drias?insee=${DEFAULT_INSEE}`),
+          fetch(`/georisques?insee=${DEFAULT_INSEE}`),
         ]);
 
         if (!driasResponse.ok) {
@@ -520,7 +516,7 @@ export function DashboardExperience({
           {householdMode ? <div className="proto-chip">mode foyer actif</div> : null}
           {availableScenario ? (
             <div className="proto-chip">
-              point DRIAS {availableScenario.p} · {formatValue(availableScenario.dk, 1)} km
+              point DRIAS {availableScenario.h}
             </div>
           ) : null}
         </div>
