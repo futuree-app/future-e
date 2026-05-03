@@ -205,6 +205,7 @@ export type HubArticle = {
   category: string;
   accent: string;
   href: string;
+  image?: string;
 };
 
 export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
@@ -216,6 +217,7 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     category: 'Santé',
     accent: '#4ade80',
     href: '/savoir/cadmium',
+    image: '/hub-cadmium.jpg',
   },
   {
     slug: 'dependance-auto',
@@ -225,6 +227,7 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     category: 'Mobilité',
     accent: '#60a5fa',
     href: '/savoir/dependance-auto',
+    image: '/hub-dependance.jpg',
   },
   {
     slug: 'canicule',
@@ -234,6 +237,7 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     category: 'Environnement',
     accent: '#f87171',
     href: '/savoir/canicule',
+    image: '/hub-canicule.jpg',
   },
   {
     slug: 'submersion',
@@ -243,6 +247,7 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     category: 'Environnement',
     accent: '#60a5fa',
     href: '/savoir/submersion',
+    image: '/hub-submersion.jpg',
   },
 ];
 

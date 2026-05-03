@@ -2394,85 +2394,102 @@ export default function FutureELanding() {
                 style={{
                   background: 'var(--bg-elev)',
                   border: '1px solid var(--border-1)',
-                  borderRadius: 10,
-                  padding: '24px 22px',
+                  borderRadius: 12,
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 14,
                   transition: 'border-color 0.2s, background 0.2s',
                   backdropFilter: 'blur(12px)',
                   WebkitBackdropFilter: 'blur(12px)',
                   boxSizing: 'border-box',
+                  overflow: 'hidden',
                 }}
               >
-                <div
-                  style={{
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: 9,
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
-                    color: article.accent,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                  }}
-                >
-                  <span
+                {article.image && (
+                  <div style={{ position: 'relative', height: 156, flexShrink: 0 }}>
+                    <Image
+                      src={article.image}
+                      alt={article.title}
+                      fill
+                      style={{ objectFit: 'cover' }}
+                      sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, 25vw"
+                    />
+                    <div style={{
+                      position: 'absolute', inset: 0,
+                      background: 'linear-gradient(to bottom, transparent 40%, var(--bg-elev) 100%)',
+                    }} />
+                  </div>
+                )}
+
+                <div style={{ padding: '18px 20px 20px', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
+                  <div
                     style={{
-                      width: 5,
-                      height: 5,
-                      borderRadius: '50%',
-                      background: article.accent,
-                      display: 'inline-block',
-                      flexShrink: 0,
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: 9,
+                      letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      color: article.accent,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
                     }}
-                  />
-                  {article.category}
-                </div>
+                  >
+                    <span
+                      style={{
+                        width: 5,
+                        height: 5,
+                        borderRadius: '50%',
+                        background: article.accent,
+                        display: 'inline-block',
+                        flexShrink: 0,
+                      }}
+                    />
+                    {article.category}
+                  </div>
 
-                <div
-                  style={{
-                    fontFamily: "'Instrument Serif', serif",
-                    fontSize: 17,
-                    fontWeight: 400,
-                    color: C.text,
-                    lineHeight: 1.3,
-                    flex: 1,
-                  }}
-                >
-                  {article.title}
-                </div>
+                  <div
+                    style={{
+                      fontFamily: "'Instrument Serif', serif",
+                      fontSize: 17,
+                      fontWeight: 400,
+                      color: 'var(--fg-1)',
+                      lineHeight: 1.3,
+                      flex: 1,
+                    }}
+                  >
+                    {article.title}
+                  </div>
 
-                <p
-                  style={{
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: 11,
-                    color: C.dim,
-                    margin: 0,
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {article.description}
-                </p>
+                  <p
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: 11,
+                      color: 'var(--fg-4)',
+                      margin: 0,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {article.description}
+                  </p>
 
-                <div
-                  style={{
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: 11,
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase',
-                    color: article.accent,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    marginTop: 'auto',
-                  }}
-                >
-                  Lire
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M2.5 6H9.5M6.5 3L9.5 6L6.5 9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <div
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: 11,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: article.accent,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      marginTop: 'auto',
+                    }}
+                  >
+                    Lire
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M2.5 6H9.5M6.5 3L9.5 6L6.5 9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
                 </div>
               </div>
             </Link>
