@@ -6,6 +6,7 @@ import {
   getGeorisquesParcelSummary,
   getGeorisquesSummary,
 } from "@/lib/georisques";
+import { getAtmoForCommune } from "@/lib/atmo";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -33,8 +34,13 @@ export async function GET(request: Request) {
       address.latitude,
     ).catch(() => null);
 
-    const georisquesCommune =
-      address.citycode ? await getGeorisquesSummary(address.citycode) : null;
+    const [georisquesCommune, atmo] = await Promise.all([
+      address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
+      address.citycode && process.env.ATMO_USERNAME
+        ? getAtmoForCommune(address.citycode).catch(() => null)
+        : null,
+    ]);
+
     const georisquesAddress = process.env.GEORISQUES_API_TOKEN
       ? await getGeorisquesAddressSummary(address.latitude, address.longitude).catch(
           () => null,
@@ -49,6 +55,7 @@ export async function GET(request: Request) {
       {
         address,
         parcel,
+        atmo,
         georisques: {
           address: georisquesAddress,
           parcel: georisquesParcel,

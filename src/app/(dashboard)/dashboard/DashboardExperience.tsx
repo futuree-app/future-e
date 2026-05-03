@@ -38,6 +38,14 @@ type GeorisquesPayload = {
   } | null;
 };
 
+type AtmoLevel = { value: number; label: string; color: string };
+type AtmoPayload = {
+  inseeCode: string;
+  date: string;
+  index: AtmoLevel;
+  pollutants: { pm25: AtmoLevel | null; pm10: AtmoLevel | null; no2: AtmoLevel | null; o3: AtmoLevel | null };
+};
+
 const DEFAULT_INSEE = "17300";
 
 const SCENARIOS = {
@@ -99,6 +107,7 @@ export function DashboardExperience({
     useState<keyof typeof SCENARIOS>("median");
   const [payload, setPayload] = useState<DriasPayload | null>(null);
   const [georisques, setGeorisques] = useState<GeorisquesPayload | null>(null);
+  const [atmo, setAtmo] = useState<AtmoPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -110,9 +119,10 @@ export function DashboardExperience({
       setError("");
 
       try {
-        const [driasResponse, georisquesResponse] = await Promise.all([
+        const [driasResponse, georisquesResponse, atmoResponse] = await Promise.all([
           fetch(`/drias?insee=${DEFAULT_INSEE}`),
           fetch(`/georisques?insee=${DEFAULT_INSEE}`),
+          fetch(`/api/atmo/${DEFAULT_INSEE}`),
         ]);
 
         if (!driasResponse.ok) {
@@ -130,9 +140,14 @@ export function DashboardExperience({
           georisquesResponse.json() as Promise<GeorisquesPayload>,
         ]);
 
+        const nextAtmo = atmoResponse.ok
+          ? ((await atmoResponse.json()) as AtmoPayload)
+          : null;
+
         if (!cancelled) {
           setPayload(nextPayload);
           setGeorisques(nextGeorisques);
+          setAtmo(nextAtmo);
         }
       } catch (caughtError) {
         if (!cancelled) {
@@ -182,14 +197,14 @@ export function DashboardExperience({
     {
       id: "quartier",
       title: "Ton quartier",
-      subtitle: `${communeName} · DRIAS + Géorisques`,
+      subtitle: `${communeName} · DRIAS + Géorisques${atmo ? " + ATMO" : ""}`,
       badge: heatStatus.badge,
       color: "var(--blue)",
       main: `${formatValue(summerTemp, 1)}°C`,
       label: "température moyenne d'été",
       points: [
         `${formatValue(hotDays, 0)} jours > 30°C / an`,
-        georisquesPrimary,
+        atmo ? `Air : ${atmo.index.label} (${atmo.index.value}/6)` : georisquesPrimary,
         `${seismicLabel}`,
       ],
     },
@@ -282,7 +297,7 @@ export function DashboardExperience({
           georisquesLines.length > 0
             ? georisquesLines.join(" · ")
             : "aucun signal Géorisques prioritaire n'est remonté ici"
-        }. La chaleur reste le signal le plus structurant, mais elle se lit désormais avec la trame territoriale réelle du quartier.`;
+        }${atmo ? `. Qualité de l'air : indice ATMO ${atmo.index.label.toLowerCase()} (${atmo.index.value}/6, relevé du ${atmo.date})` : ""}. La chaleur reste le signal le plus structurant, mais elle se lit désormais avec la trame territoriale réelle du quartier.`;
 
   return (
     <div className="proto-shell">

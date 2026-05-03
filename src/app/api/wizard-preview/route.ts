@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getClimatDataCommune } from "@/lib/drias-json";
+import { getAtmoForCommune, type AtmoAirQuality } from "@/lib/atmo";
 
 export type WizardPreviewData = {
   commune_name: string | null;
   drias: {
-    canicule_gwl20: number | null;   // jours Tmax>30°C/an au scénario +2°C
-    canicule_gwl30: number | null;   // jours Tmax>30°C/an au scénario +3°C
-    delta_canicule: number | null;   // delta gwl20 - gwl15 (jours supplémentaires)
+    canicule_gwl20: number | null;
+    canicule_gwl30: number | null;
+    delta_canicule: number | null;
     nuits_tropicales_gwl20: number | null;
-    delta_precip_pct: number | null; // variation précipitations estivales gwl20 vs gwl15 (%)
+    delta_precip_pct: number | null;
   } | null;
   tensions: Array<{
     slug: string;
@@ -17,6 +18,7 @@ export type WizardPreviewData = {
     ind_exposition: number | null;
     ind_vulnerabilite: number | null;
   }>;
+  atmo: AtmoAirQuality | null;
   fallback: boolean;
 };
 
@@ -56,13 +58,15 @@ export async function GET(request: Request) {
 
   const safeInsee = String(insee).padStart(5, "0");
 
-  const [driasResult, tensionsResult] = await Promise.allSettled([
+  const [driasResult, tensionsResult, atmoResult] = await Promise.allSettled([
     getClimatDataCommune(safeInsee),
     fetchTensions(safeInsee),
+    process.env.ATMO_USERNAME ? getAtmoForCommune(safeInsee) : Promise.resolve(null),
   ]);
 
   const drias = driasResult.status === "fulfilled" ? driasResult.value : null;
   const tensions = tensionsResult.status === "fulfilled" ? tensionsResult.value : [];
+  const atmo = atmoResult.status === "fulfilled" ? atmoResult.value : null;
 
   let driasOut: WizardPreviewData["drias"] = null;
   let communeName: string | null = null;
@@ -97,6 +101,7 @@ export async function GET(request: Request) {
     commune_name: communeName,
     drias: driasOut,
     tensions,
+    atmo: atmo ?? null,
     fallback: !drias && tensions.length === 0,
   };
 
