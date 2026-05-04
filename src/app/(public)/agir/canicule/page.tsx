@@ -114,9 +114,7 @@ const css = `
   .sources a{color:var(--fg-1);text-decoration:none;border-bottom:1px solid var(--border-hi);transition:color 0.2s,border-color 0.2s;}
   .sources a:hover{color:var(--accent);border-color:var(--accent);}
 
-  .page-footer{position:relative;z-index:2;max-width:760px;margin:0 auto;padding:40px 28px 80px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.08em;text-transform:uppercase;}
-  .page-footer a{color:var(--fg-3);text-decoration:none;}
-  .page-footer a:hover{color:var(--accent);}
+  .nav-footer{position:relative;top:auto;margin-top:24px;border-top:1px solid var(--border-1);border-bottom:none;}
 
   @media(max-width:768px){
     .article{padding:40px 22px 80px;}
@@ -396,12 +394,19 @@ export default async function CaniculePage() {
 
       </article>
 
-      <footer className="page-footer">
-        <div>futur•e · Agir / Santé</div>
-        <div>
-          <Link href="/pourquoi">Pourquoi futur•e</Link>
-          {' · '}
-          <Link href="/territoires/canicule">Territoires / Canicule</Link>
+      <footer className="nav nav-footer">
+        <div className="nav-inner">
+          <Link href="/" className="brand">
+            futur<span className="brand-dot">•</span>e
+          </Link>
+          <div className="nav-crumb">
+            <Link href="/savoir/canicule" className="step-home">Savoir</Link>
+            <span className="sep">/</span>
+            <Link href="/savoir/chaleur-sante-mentale">Santé</Link>
+            <span className="sep">/</span>
+            Agir
+          </div>
+          <ThemeToggle />
         </div>
       </footer>
     </>
