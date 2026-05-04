@@ -42,6 +42,11 @@ export const NAV_ITEMS: NavItem[] = [
             description: 'Pollution naturelle et alimentation',
           },
           {
+            label: 'Chaleur et santé mentale',
+            href: '/savoir/chaleur-sante-mentale',
+            description: 'Effets psychiques des vagues de chaleur',
+          },
+          {
             label: 'Pollens & allergies',
             href: '/savoir/pollens',
             description: 'Saison pollinique élargie en 2050',
