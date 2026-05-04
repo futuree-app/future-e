@@ -132,8 +132,23 @@ const css = `
 `;
 
 export default async function CaniculePage() {
-  const user = await getCurrentSessionUser();
-  const hasFullAccess = canAccessActionPage(normalizeAccount(user));
+  const { supabase, user } = await getCurrentSessionUser();
+  let hasFullAccess = false;
+
+  if (user) {
+    const { data: accountRow } = await supabase
+      .from('user_accounts')
+      .select('plan, status')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    const account = normalizeAccount(
+      accountRow
+        ? { plan: accountRow.plan, status: accountRow.status, email: user.email ?? null }
+        : { email: user.email ?? null },
+    );
+    hasFullAccess = canAccessActionPage(account);
+  }
 
   return (
     <>
