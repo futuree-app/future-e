@@ -127,9 +127,9 @@ export default function ChaleurSanteMentalePage() {
             futur<span className="brand-dot">•</span>e
           </Link>
           <div className="nav-crumb">
-            <Link href="/savoir" className="step-home">Savoir</Link>
+            <Link href="/savoir/canicule" className="step-home">Savoir</Link>
             <span className="sep">/</span>
-            <Link href="/savoir/sante">Santé</Link>
+            <Link href="/savoir/chaleur-sante-mentale">Santé</Link>
             <span className="sep">/</span>
             Chaleur
           </div>
@@ -251,8 +251,8 @@ export default function ChaleurSanteMentalePage() {
                 Comment protéger votre foyer pendant une canicule <span className="arrow">→</span>
               </Link>
             </li>
-            <li>
-              <Link href="/">
+                <li>
+              <Link href="/territoires/canicule">
                 Comprendre l&apos;exposition canicule de votre commune <span className="arrow">→</span>
               </Link>
             </li>
@@ -298,9 +298,9 @@ export default function ChaleurSanteMentalePage() {
       <footer className="page-footer">
         <div>futur•e · Savoir / Santé</div>
         <div>
-          <Link href="#">Signaler une imprécision</Link>
+          <Link href="/pourquoi">Pourquoi futur•e</Link>
           {' · '}
-          <Link href="#">Méthodologie</Link>
+          <Link href="/territoires/canicule">Territoires / Canicule</Link>
         </div>
       </footer>
     </>

@@ -131,7 +131,7 @@ const css = `
   }
 `;
 
-export default async function CaniulePage() {
+export default async function CaniculePage() {
   const user = await getCurrentSessionUser();
   const hasFullAccess = canAccessActionPage(normalizeAccount(user));
 
@@ -149,9 +149,9 @@ export default async function CaniulePage() {
             futur<span className="brand-dot">•</span>e
           </Link>
           <div className="nav-crumb">
-            <Link href="/savoir" className="step-home">Savoir</Link>
+            <Link href="/savoir/canicule" className="step-home">Savoir</Link>
             <span className="sep">/</span>
-            <Link href="/savoir/sante">Santé</Link>
+            <Link href="/savoir/chaleur-sante-mentale">Santé</Link>
             <span className="sep">/</span>
             Agir
           </div>
@@ -314,7 +314,7 @@ export default async function CaniulePage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/">
+                  <Link href="/territoires/canicule">
                     Comprendre l&apos;exposition canicule de votre commune <span className="arrow">→</span>
                   </Link>
                 </li>
@@ -384,9 +384,9 @@ export default async function CaniulePage() {
       <footer className="page-footer">
         <div>futur•e · Agir / Santé</div>
         <div>
-          <Link href="#">Signaler une imprécision</Link>
+          <Link href="/pourquoi">Pourquoi futur•e</Link>
           {' · '}
-          <Link href="#">Méthodologie</Link>
+          <Link href="/territoires/canicule">Territoires / Canicule</Link>
         </div>
       </footer>
     </>
