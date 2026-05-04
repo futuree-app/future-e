@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import type { Metadata } from 'next';
-import { PaywallGate } from '@/components/PaywallGate';
 import { getCurrentSessionUser } from '@/lib/user-account';
 import { canAccessActionPage, normalizeAccount } from '@/lib/access';
 
@@ -15,20 +14,20 @@ export const metadata: Metadata = {
 
 const css = `
   :root {
-  --accent: #f87171;
+    --accent: #f87171;
     --accent-soft: rgba(248,113,113,0.12);
     --accent-border: rgba(248,113,113,0.28);
-    --green-border: rgba(74,222,128,0.22);
-}
+  }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--fg-1);font-family:var(--font-sans);font-size:16px;line-height:1.65;overflow-x:hidden;max-width:100vw;-webkit-font-smoothing:antialiased;}
 
-  .orb{position:fixed;border-radius:50%;filter:blur(120px);opacity:0.3;pointer-events:none;z-index:0;animation:breathe 14s ease-in-out infinite;}
-  .orb-1{width:480px;height:480px;background:radial-gradient(circle,#f87171 0%,transparent 70%);top:-120px;left:-100px;}
-  .orb-2{width:400px;height:400px;background:radial-gradient(circle,#a78bfa 0%,transparent 70%);bottom:-100px;right:-80px;animation-delay:-6s;}
-  @keyframes breathe{0%,100%{transform:scale(1);}50%{transform:scale(1.12) translate(15px,-22px);}}
+  .orb{position:fixed;border-radius:50%;filter:blur(120px);opacity:0.32;pointer-events:none;z-index:0;animation:breathe 14s ease-in-out infinite;}
+  .orb-1{width:520px;height:520px;background:radial-gradient(circle,#f87171 0%,transparent 70%);top:-140px;left:-120px;}
+  .orb-2{width:460px;height:460px;background:radial-gradient(circle,#a78bfa 0%,transparent 70%);bottom:-120px;right:-100px;animation-delay:-5s;}
+  .orb-3{width:380px;height:380px;background:radial-gradient(circle,#fb923c 0%,transparent 70%);top:50%;left:60%;opacity:0.16;animation-delay:-9s;}
+  @keyframes breathe{0%,100%{transform:scale(1) translate(0,0);}50%{transform:scale(1.15) translate(20px,-30px);}}
 
-  body::before{content:"";position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.03 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none;z-index:1;mix-blend-mode:overlay;}
+  body::before{content:"";position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none;z-index:1;mix-blend-mode:overlay;}
 
   .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:var(--bg-card);border-bottom:1px solid var(--border-1);}
   .nav-inner{max-width:1100px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
@@ -44,334 +43,97 @@ const css = `
   .article-meta{display:flex;align-items:center;gap:16px;margin-bottom:28px;flex-wrap:wrap;}
   .tag{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:100px;background:var(--accent-soft);border:1px solid var(--accent-border);font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);}
   .tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);}
-  .tag-actionnable{background:rgba(74,222,128,0.08);border-color:rgba(74,222,128,0.25);color:var(--green);}
-  .tag-actionnable::before{background:var(--green);box-shadow:0 0 10px var(--green);}
   .read-info{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.08em;text-transform:uppercase;}
 
-  h1{font-family:var(--font-serif);font-weight:400;font-size:clamp(36px,5vw,56px);line-height:1.1;letter-spacing:-0.02em;margin:0 0 28px;color:var(--fg-1);}
+  h1{font-family:var(--font-serif);font-weight:400;font-size:clamp(40px,6vw,60px);line-height:1.08;letter-spacing:-0.02em;margin:0 0 32px;color:var(--fg-1);}
   h1 em{font-style:italic;color:var(--accent);}
 
-  .dates{display:flex;align-items:center;gap:20px;margin:0 0 40px;padding:16px 20px;background:var(--bg-elev);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--border-1);border-radius:6px;width:fit-content;max-width:100%;}
-  .date-item{display:flex;flex-direction:column;gap:4px;}
-  .date-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--fg-4);}
-  .date-value{font-family:var(--font-sans);font-size:14px;color:var(--fg-1);font-weight:500;}
-  .date-value-muted{color:var(--fg-4);font-weight:400;}
-  .date-sep{width:1px;height:28px;background:var(--border-hi);}
+  .lede{font-family:var(--font-serif);font-size:clamp(19px,2.2vw,23px);line-height:1.55;color:var(--fg-1);font-weight:400;margin:0 0 48px;padding:0 0 48px;border-bottom:1px solid var(--border-1);}
 
-  .context-link{display:flex;align-items:center;gap:14px;padding:18px 20px;background:var(--bg-elev);border:1px solid var(--border-1);border-radius:6px;margin-bottom:40px;text-decoration:none;transition:border-color 0.2s,background 0.2s;}
-  .context-link:hover{border-color:var(--accent-border);background:var(--accent-soft);}
-  .context-link-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-4);margin-bottom:4px;}
-  .context-link-title{font-family:var(--font-serif);font-size:18px;font-style:italic;color:var(--fg-1);}
-  .context-link-arrow{margin-left:auto;font-size:14px;color:var(--fg-4);}
+  .assoc-link{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;background:var(--bg-elev);border:1px solid var(--border-1);border-radius:6px;font-size:14px;color:var(--fg-3);text-decoration:none;margin-bottom:56px;transition:border-color 0.2s,color 0.2s;}
+  .assoc-link:hover{border-color:var(--accent-border);color:var(--accent);}
+  .assoc-link-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-4);margin-right:4px;}
 
-  .lede{font-family:var(--font-serif);font-size:clamp(19px,2vw,23px);line-height:1.55;color:var(--fg-1);font-weight:400;margin:0 0 48px;padding:0 0 48px;border-bottom:1px solid var(--border-1);}
-
-  h2{font-family:var(--font-serif);font-weight:400;font-size:clamp(24px,2.8vw,32px);line-height:1.2;letter-spacing:-0.01em;margin:52px 0 18px;color:var(--fg-1);position:relative;}
-  h2::before{content:"";position:absolute;left:-28px;top:17px;width:14px;height:1px;background:var(--accent);}
+  h2{font-family:var(--font-serif);font-weight:400;font-size:clamp(24px,3vw,32px);line-height:1.22;letter-spacing:-0.01em;margin:56px 0 20px;color:var(--fg-1);position:relative;}
+  h2::before{content:"";position:absolute;left:-28px;top:18px;width:14px;height:1px;background:var(--accent);}
 
   p{margin:0 0 20px;color:var(--fg-1);font-size:17px;line-height:1.72;}
   p strong{font-weight:500;color:#fff;}
 
-  .levers{display:flex;flex-direction:column;gap:12px;margin:28px 0 8px;}
-  .lever-item{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start;padding:20px 22px;background:var(--bg-elev);border:1px solid var(--border-1);border-radius:6px;transition:border-color 0.2s;}
-  .lever-item:hover{border-color:var(--border-hi);}
-  .lever-num{font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--accent);padding-top:2px;}
-  .lever-title{font-family:var(--font-sans);font-size:16px;font-weight:500;color:#fff;margin-bottom:6px;}
-  .lever-desc{font-size:15px;color:var(--fg-3);line-height:1.6;margin:0;}
-  .lever-src{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);margin-top:8px;letter-spacing:0.04em;}
+  .keystat{margin:40px 0;padding:28px 32px;background:var(--bg-elev);backdrop-filter:blur(10px);border:1px solid var(--border-1);border-left:2px solid var(--accent);border-radius:4px;position:relative;overflow:hidden;}
+  .keystat::after{content:"";position:absolute;top:0;right:0;width:200px;height:200px;background:radial-gradient(circle,var(--accent-soft) 0%,transparent 70%);pointer-events:none;}
+  .keystat-number{font-family:var(--font-serif);font-size:52px;line-height:1;color:var(--accent);font-weight:400;letter-spacing:-0.02em;margin-bottom:8px;display:block;}
+  .keystat-label{font-size:15px;color:var(--fg-3);line-height:1.5;position:relative;z-index:1;}
+  .keystat-src{display:block;margin-top:10px;font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.05em;}
 
-  .steps{display:flex;flex-direction:column;gap:0;margin:24px 0;}
-  .step{display:grid;grid-template-columns:28px 1fr;gap:18px;align-items:start;position:relative;padding-bottom:24px;}
-  .step:last-child{padding-bottom:0;}
-  .step-line{position:absolute;left:13px;top:28px;bottom:0;width:1px;background:var(--border-1);}
-  .step:last-child .step-line{display:none;}
-  .step-dot{width:28px;height:28px;border-radius:50%;background:var(--bg-elev);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;color:var(--accent);flex-shrink:0;position:relative;z-index:1;}
-  .step-content{padding-top:4px;}
-  .step-title{font-size:16px;font-weight:500;color:#fff;margin-bottom:6px;}
-  .step-desc{font-size:15px;color:var(--fg-3);line-height:1.6;margin:0;}
-  .step-link{display:inline-block;margin-top:8px;font-family:var(--font-mono);font-size:11px;color:var(--fg-3);letter-spacing:0.05em;border-bottom:1px solid var(--border-1);text-decoration:none;transition:color 0.2s,border-color 0.2s;}
-  .step-link:hover{color:var(--accent);border-color:var(--accent);}
+  .leviers{display:flex;flex-direction:column;gap:2px;margin:28px 0 40px;}
+  .levier{display:grid;grid-template-columns:28px 1fr;gap:16px;align-items:start;padding:18px 0;border-bottom:1px solid var(--border-1);}
+  .levier:last-child{border-bottom:none;}
+  .levier-icon{width:22px;height:22px;border-radius:50%;background:var(--accent-soft);border:1px solid var(--accent-border);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-family:var(--font-mono);flex-shrink:0;margin-top:2px;}
+  .levier-title{font-size:15px;font-weight:600;color:var(--fg-1);margin:0 0 5px;}
+  .levier-desc{font-size:15px;color:var(--fg-3);line-height:1.65;margin:0 0 6px;}
+  .levier-src{font-family:var(--font-mono);font-size:10px;color:var(--fg-4);letter-spacing:0.06em;}
 
-  .profiles{display:flex;flex-direction:column;gap:16px;margin:28px 0;}
-  .profile-card{padding:22px 24px;background:var(--bg-elev);border:1px solid var(--border-1);border-radius:6px;}
-  .profile-card.haute{border-left:2px solid var(--accent);}
-  .profile-card.moderee{border-left:2px solid rgba(251,146,60,0.55);}
-  .profile-label{font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;}
-  .profile-card.haute .profile-label{color:var(--accent);}
-  .profile-card.moderee .profile-label{color:rgba(251,146,60,0.9);}
-  .profile-body{font-size:16px;color:var(--fg-1);line-height:1.65;margin:0;}
+  .steps{display:flex;flex-direction:column;gap:2px;margin:20px 0 40px;}
+  .step{display:grid;grid-template-columns:36px 1fr;gap:18px;align-items:start;padding:20px 0;border-bottom:1px solid var(--border-1);}
+  .step:last-child{border-bottom:none;}
+  .step-num{width:28px;height:28px;border-radius:50%;background:var(--bg-elev);border:1px solid var(--border-hi);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;color:var(--fg-4);flex-shrink:0;margin-top:1px;}
+  .step-title{font-size:15px;font-weight:600;color:var(--fg-1);margin:0 0 6px;}
+  .step-desc{font-size:15px;color:var(--fg-3);line-height:1.65;margin:0;}
+  .step-link{display:inline-block;margin-top:8px;font-family:var(--font-mono);font-size:11px;color:var(--accent);text-decoration:none;letter-spacing:0.04em;border-bottom:1px solid var(--accent-border);transition:border-color 0.2s;}
+  .step-link:hover{border-color:var(--accent);}
 
-  .questions{display:flex;flex-direction:column;gap:12px;margin:24px 0;}
-  .question-item{padding:18px 22px;background:var(--bg-elev);border:1px solid var(--border-1);border-left:2px solid var(--accent);border-radius:4px;font-size:16px;color:var(--fg-1);line-height:1.6;font-style:italic;font-family:var(--font-serif);}
-  .question-to{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-4);margin-bottom:8px;font-style:normal;}
+  .profiles{display:flex;flex-direction:column;gap:16px;margin:24px 0 40px;}
+  .profile{padding:22px 24px;background:var(--bg-elev);border:1px solid var(--border-1);border-radius:8px;}
+  .profile-title{font-size:14px;font-weight:600;color:var(--fg-1);margin:0 0 8px;}
+  .profile-title span{font-family:var(--font-mono);font-size:10px;font-weight:400;letter-spacing:0.08em;color:var(--accent);text-transform:uppercase;margin-right:10px;}
+  .profile-desc{font-size:14px;color:var(--fg-3);line-height:1.65;margin:0;}
 
-  .not-todo{display:flex;flex-direction:column;gap:12px;margin:24px 0;}
-  .not-todo-item{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;padding:18px 22px;background:rgba(255,255,255,0.02);border:1px solid var(--border-1);border-radius:6px;}
-  .not-todo-cross{font-family:var(--font-mono);font-size:14px;color:var(--fg-4);padding-top:1px;}
-  .not-todo-title{font-size:15px;font-weight:500;color:var(--fg-3);margin-bottom:4px;}
-  .not-todo-reason{font-size:14px;color:var(--fg-4);line-height:1.55;margin:0;}
+  .nolist{display:flex;flex-direction:column;gap:2px;margin:20px 0;}
+  .noitem{display:grid;grid-template-columns:28px 1fr;gap:16px;padding:18px 0;border-bottom:1px solid var(--border-1);}
+  .noitem:last-child{border-bottom:none;}
+  .no-icon{width:22px;height:22px;border-radius:50%;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px;}
+  .no-title{font-size:15px;font-weight:600;color:var(--fg-1);margin:0 0 5px;}
+  .no-desc{font-size:15px;color:var(--fg-3);line-height:1.65;margin:0;}
 
-  .back-link{display:flex;align-items:center;gap:10px;margin-top:48px;font-family:var(--font-serif);font-size:18px;font-style:italic;color:var(--fg-3);text-decoration:none;transition:color 0.2s;}
-  .back-link:hover{color:var(--accent);}
+  .actions-card{margin:48px 0 32px;padding:28px;background:var(--bg-elev);backdrop-filter:blur(10px);border:1px solid var(--border-1);border-radius:8px;}
+  .actions-card-head{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--fg-4);margin-bottom:18px;}
+  .actions-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:2px;}
+  .actions-list li a{display:flex;align-items:center;justify-content:space-between;padding:16px 0;color:var(--fg-1);text-decoration:none;border-bottom:1px solid var(--border-1);font-family:var(--font-serif);font-size:19px;font-style:italic;transition:padding 0.25s,color 0.25s;}
+  .actions-list li:last-child a{border-bottom:none;}
+  .actions-list li a:hover{padding-left:8px;color:var(--accent);}
+  .arrow{font-family:var(--font-sans);font-style:normal;font-size:14px;color:var(--fg-4);transition:transform 0.25s,color 0.25s;}
+  .actions-list li a:hover .arrow{transform:translateX(4px);color:var(--accent);}
 
-  .sources{margin-top:64px;padding-top:36px;border-top:1px solid var(--border-1);}
-  .sources h2{font-size:18px;font-family:var(--font-mono);font-style:normal;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-3);margin-bottom:20px;}
+  .sources{margin-top:72px;padding-top:40px;border-top:1px solid var(--border-1);}
+  .sources h2{font-size:13px;font-family:var(--font-mono);font-style:normal;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-3);margin-bottom:24px;}
   .sources h2::before{display:none;}
-  .sources ul{list-style:none;padding:0;margin:0;display:grid;gap:12px;}
-  .sources li{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:baseline;font-size:14px;color:var(--fg-3);line-height:1.55;}
+  .sources ul{list-style:none;padding:0;margin:0;display:grid;gap:14px;}
+  .sources li{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:baseline;font-size:14px;color:var(--fg-3);line-height:1.55;}
   .src-tag{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-4);padding:3px 8px;border:1px solid var(--border-1);border-radius:3px;white-space:nowrap;}
   .sources a{color:var(--fg-1);text-decoration:none;border-bottom:1px solid var(--border-hi);transition:color 0.2s,border-color 0.2s;}
   .sources a:hover{color:var(--accent);border-color:var(--accent);}
 
-  .page-footer{position:relative;z-index:2;max-width:760px;margin:0 auto;padding:36px 28px 72px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.08em;text-transform:uppercase;}
+  .page-footer{position:relative;z-index:2;max-width:760px;margin:0 auto;padding:40px 28px 80px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.08em;text-transform:uppercase;}
   .page-footer a{color:var(--fg-3);text-decoration:none;}
   .page-footer a:hover{color:var(--accent);}
 
   @media(max-width:768px){
     .article{padding:40px 22px 80px;}
     .nav-inner{padding:14px 22px;}
-    h1{font-size:34px;}
-    h2{font-size:24px;margin:40px 0 14px;}
+    h1{font-size:36px;}
+    h2{font-size:24px;margin:44px 0 16px;}
     h2::before{display:none;}
-    .lede{font-size:18px;padding-bottom:32px;margin-bottom:32px;}
-    p{font-size:16px;}
-    .lever-item{gap:14px;padding:16px 18px;}
-    .profile-card,.question-item,.not-todo-item{padding:16px 18px;}
-    .dates{padding:14px 16px;gap:14px;}
-    .context-link{padding:14px 16px;}
+    .lede{font-size:18px;}
+    p,.step-desc,.levier-desc,.no-desc,.profile-desc{font-size:15px;}
+    .keystat{padding:22px 20px;}
+    .keystat-number{font-size:42px;}
   }
 `;
 
-const previewHtml = `
-  <div class="article-meta">
-    <span class="tag">Santé</span>
-    <span class="tag tag-actionnable">Guide pratique</span>
-    <span class="read-info">Lecture 7 min</span>
-  </div>
-
-  <h1>Se préparer à la canicule :<br/><em>ce qui protège vraiment</em></h1>
-
-  <div class="dates">
-    <div class="date-item">
-      <span class="date-label">Publié</span>
-      <span class="date-value">26 avril 2026</span>
-    </div>
-    <div class="date-sep"></div>
-    <div class="date-item">
-      <span class="date-label">Mis à jour</span>
-      <span class="date-value date-value-muted">Aucune révision</span>
-    </div>
-  </div>
-
-  <a href="/savoir/canicule" class="context-link">
-    <div>
-      <div class="context-link-label">Page thématique associée</div>
-      <div class="context-link-title">Chaleur urbaine, seuils caniculaires et santé en France</div>
-    </div>
-    <span class="context-link-arrow">→</span>
-  </a>
-
-  <p class="lede">
-    La canicule d'août 2003 a causé environ 15 000 décès excédentaires en France en moins de trois semaines, selon Santé publique France et l'Inserm. Neuf décès sur dix ont eu lieu à domicile. Les épisodes de 2019 (environ 2 500 décès) et de 2022 (environ 10 400 décès sur trois vagues successives) ont montré que cette mortalité diminue quand des mesures spécifiques sont en place et que les personnes vulnérables ne sont pas isolées. Cette page décrit ce qui fonctionne à l'échelle du logement et de la personne, à partir des recommandations des autorités sanitaires françaises.
-  </p>
-`;
-
-const fullHtml = `
-  <h2>Ce que les données montrent</h2>
-  <p>
-    La mortalité caniculaire suit des profils répétables d'un épisode à l'autre. La canicule de 2003 a touché les 75 ans et plus à hauteur de 92 % des décès excédentaires selon l'Inserm, la grande majorité dans des logements sous les toits ou en dernier étage, chez des personnes vivant seules. En 2022, Santé publique France a identifié les mêmes facteurs dans son bilan de surmortalité : isolement social, logement mal ventilé, incapacité à adapter son environnement thermique, et pour une part significative, interaction avec un traitement médicamenteux.
-  </p>
-  <p>
-    Ce que l'on sait avec certitude : les bilans épidémiologiques de 2003, 2019 et 2022 documentent des mécanismes stables et reproductibles. Ce que les projections de Météo-France et du GIEC indiquent : la fréquence et l'intensité des épisodes caniculaires devraient augmenter d'ici 2050 dans tous les scénarios d'émissions. Ces deux niveaux de connaissance sont distincts. Cette page porte sur le premier : ce qui est documenté et applicable maintenant.
-  </p>
-
-  <h2>Les leviers efficaces au niveau du logement</h2>
-  <p>
-    L'essentiel de la protection contre la chaleur extrême se joue dans le logement. Trois leviers ont un effet démontré et ne nécessitent pas d'installation coûteuse.
-  </p>
-
-  <div class="levers">
-    <div class="lever-item">
-      <div class="lever-num">01</div>
-      <div class="lever-body">
-        <div class="lever-title">Ventilation nocturne et occultation diurne</div>
-        <p class="lever-desc">Ouvrir largement les fenêtres la nuit quand la température extérieure descend en dessous de la température intérieure, puis fermer et occulter dès le matin avant que le soleil chauffe la façade. Cette technique de free cooling passif peut maintenir l'intérieur à 5 à 10 degrés de moins que l'extérieur en journée, selon le Cerema. L'occultation est particulièrement efficace sur les façades sud et ouest : des volets fermés bloquent 60 à 80 % du rayonnement solaire entrant, selon l'orientation. Si vous n'avez pas de volets extérieurs, un film opaque ou des rideaux épais côté intérieur apportent une protection partielle mais réelle.</p>
-        <div class="lever-src">Source : Cerema, Bâtiments et confort d'été · ANSES, recommandations chaleur 2024</div>
-      </div>
-    </div>
-    <div class="lever-item">
-      <div class="lever-num">02</div>
-      <div class="lever-body">
-        <div class="lever-title">Réduire l'exposition directe au soleil entre 11 h et 19 h</div>
-        <p class="lever-desc">L'exposition au rayonnement solaire direct est un facteur de risque indépendant de la température ambiante. Rester à l'ombre, réduire les déplacements extérieurs aux heures les plus chaudes et planifier les sorties avant 11 h ou après 19 h est une mesure dont l'efficacité est documentée dans les bilans de Santé publique France. Les activités physiques intenses restent déconseillées même à l'ombre au-delà de 35 degrés extérieurs, et ce quelle que soit votre condition physique habituelle.</p>
-        <div class="lever-src">Source : Santé publique France, bilans caniculaires 2022 · ANSES, recommandations vague de chaleur 2024</div>
-      </div>
-    </div>
-    <div class="lever-item">
-      <div class="lever-num">03</div>
-      <div class="lever-body">
-        <div class="lever-title">Hydratation adaptée, en particulier pour les personnes âgées</div>
-        <p class="lever-desc">Boire régulièrement sans attendre la soif est la consigne de base pour tous. Pour les personnes âgées lors d'épisodes prolongés, l'eau seule n'est pas toujours suffisante : ingérer uniquement de grandes quantités d'eau sans apport en sel peut provoquer une hyponatrémie (dilution du sodium sanguin) dont les symptômes ressemblent à ceux de la déshydratation, notamment la confusion et la fatigue. Les solutions de réhydratation orale (SRO), disponibles en pharmacie sans ordonnance, apportent les électrolytes nécessaires. Cette précision est rarement communiquée dans les campagnes générales de prévention canicule.</p>
-        <div class="lever-src">Source : Société française de médecine d'urgence · ANSES, recommandations nutrition chaleur · HAS, fiches pratiques canicule</div>
-      </div>
-    </div>
-  </div>
-
-  <h2>Comment vous préparer avant le prochain épisode</h2>
-
-  <div class="steps">
-    <div class="step">
-      <div class="step-dot">1</div>
-      <div class="step-line"></div>
-      <div class="step-content">
-        <div class="step-title">Configurer les alertes Météo-France Vigilance pour votre département</div>
-        <p class="step-desc">Le Plan national canicule déclenche des niveaux d'alerte à partir de seuils de température spécifiques à chaque département, définis selon sa zone climatique. Les seuils ne sont pas les mêmes pour Marseille et pour Strasbourg. L'application Météo-France et le site vigilance.meteofrance.fr permettent de recevoir une notification dès le passage en vigilance orange ou rouge. Configurer cette alerte à l'avance prend deux minutes et évite de dépendre des médias pour savoir que les seuils de votre zone ont été franchis.</p>
-        <a href="https://vigilance.meteofrance.fr" class="step-link" target="_blank" rel="noopener">vigilance.meteofrance.fr · Alertes et seuils par département ↗</a>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-dot">2</div>
-      <div class="step-line"></div>
-      <div class="step-content">
-        <div class="step-title">Identifier la pièce la plus fraîche de votre logement</div>
-        <p class="step-desc">Dans la plupart des logements, la pièce la plus fraîche en journée est orientée au nord ou au nord-est, au rez-de-chaussée ou en sous-sol si ce dernier est accessible. Identifier cette pièce avant un épisode et préparer un espace où vous pouvez vous installer plusieurs heures (matelas, eau, rideau occultant) est une mesure de base recommandée par le Plan national canicule. Le sol peut être légèrement rafraîchi en vaporisant de l'eau sur le carrelage ou le parquet avant de fermer la pièce.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-dot">3</div>
-      <div class="step-line"></div>
-      <div class="step-content">
-        <div class="step-title">Repérer les espaces frais publics accessibles dans votre commune</div>
-        <p class="step-desc">Lors des vigilances orange et rouge, les mairies ont l'obligation d'ouvrir ou de signaler des espaces rafraîchisseurs accessibles gratuitement : salles municipales, médiathèques, gymnases climatisés. En dehors des périodes d'alerte, les bibliothèques, les grandes surfaces et certains musées constituent des refuges thermiques utilisables sans justification. Repérer les deux ou trois plus proches de chez vous avant un épisode réduit le délai de décision au moment où vous ou votre entourage en aurez besoin.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-dot">4</div>
-      <div class="step-line"></div>
-      <div class="step-content">
-        <div class="step-title">Vérifier avec votre médecin si votre traitement requiert une adaptation</div>
-        <p class="step-desc">Certains médicaments réduisent la capacité de thermorégulation ou augmentent la déshydratation lors d'épisodes caniculaires : diurétiques, antihypertenseurs (notamment les inhibiteurs de l'enzyme de conversion et les sartans), antipsychotiques, antiparkinsoniens, certains anxiolytiques et antidépresseurs tricycliques. La Haute Autorité de Santé recommande de discuter avec son médecin traitant avant l'été des adaptations éventuelles et des signes d'alerte spécifiques à son traitement. Ne modifiez pas votre traitement sans avis médical.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-dot">5</div>
-      <div class="step-line"></div>
-      <div class="step-content">
-        <div class="step-title">Inscrire une personne vulnérable sur le registre communal canicule</div>
-        <p class="step-desc">Depuis 2004, les communes peuvent tenir un registre des personnes vulnérables (personnes âgées isolées, personnes en situation de handicap) pour faciliter leur contact lors des alertes. Ce registre est volontaire, géré par le Centre communal d'action sociale (CCAS) et confidentiel. L'inscription permet à la commune d'effectuer des vérifications lors des alertes rouges. Votre mairie ou CCAS peut vous indiquer si ce registre existe dans votre commune et comment y inscrire un proche.</p>
-      </div>
-    </div>
-  </div>
-
-  <h2>Selon votre situation</h2>
-
-  <div class="profiles">
-    <div class="profile-card haute">
-      <div class="profile-label">Exposition élevée — personnes âgées isolées, logement sous les toits</div>
-      <p class="profile-body">Le profil le plus exposé combine plusieurs facteurs documentés dans les bilans post-canicule : plus de 75 ans, vivant seul, logement sous les combles ou en dernier étage sans occultation efficace, peu de contacts sociaux réguliers. C'est ce profil qui a représenté la grande majorité des décès de 2003 et 2022 selon Santé publique France et l'Inserm. La priorité est d'identifier ce profil dans votre entourage proche et d'établir un contact quotidien pendant les épisodes d'alerte orange ou rouge.</p>
-    </div>
-    <div class="profile-card haute">
-      <div class="profile-label">Exposition élevée — personnes sous traitement affectant la thermorégulation</div>
-      <p class="profile-body">Les personnes prenant des diurétiques, des antihypertenseurs de type IEC ou sartan, des antipsychotiques ou des médicaments antiparkinsoniens présentent une capacité réduite à thermoréguler ou un risque accru de déshydratation par interaction médicamenteuse. Cette interaction est documentée par l'ANSES et la Haute Autorité de Santé. La démarche utile est d'en parler en consultation avant l'été, pas d'attendre l'alerte, pour connaître la conduite à tenir spécifique à son traitement.</p>
-    </div>
-    <div class="profile-card moderee">
-      <div class="profile-label">Exposition modérée — travailleurs en extérieur</div>
-      <p class="profile-body">Le Code du travail impose des obligations aux employeurs lors de chaleur extrême : aménagement des horaires de travail, fourniture d'eau fraîche, accès à un espace à l'ombre, vêtements adaptés. Si ces mesures ne sont pas mises en place lors d'une vigilance orange ou rouge, vous pouvez contacter l'inspection du travail. Le droit de retrait s'applique en cas de danger grave et imminent, y compris pour les travailleurs exposés à la chaleur extérieure.</p>
-    </div>
-    <div class="profile-card moderee">
-      <div class="profile-label">Exposition modérée — adultes en bonne santé dans un logement ventilable</div>
-      <p class="profile-body">Pour un adulte en bonne santé sans traitement médicamenteux spécifique, vivant dans un logement ventilable, les mesures de base suffisent dans la grande majorité des épisodes caniculaires observés en France depuis 2003 : limiter l'exposition directe aux heures chaudes, boire régulièrement, appliquer la ventilation nocturne et l'occultation diurne. Le risque principal n'est pas l'hyperthermie personnelle mais la méconnaissance des personnes vulnérables dans l'entourage immédiat.</p>
-    </div>
-  </div>
-
-  <h2>Les questions à poser</h2>
-
-  <div class="questions">
-    <div class="question-item">
-      <span class="question-to">À votre médecin traitant, avant l'été</span>
-      "Mon traitement actuel nécessite-t-il une adaptation ou une surveillance particulière lors d'un épisode caniculaire, et quels sont les signes qui doivent m'alerter ?"
-    </div>
-    <div class="question-item">
-      <span class="question-to">À votre mairie ou CCAS</span>
-      "Où se trouve l'espace rafraîchisseur municipal le plus proche, et comment inscrire une personne âgée isolée sur le registre canicule de la commune ?"
-    </div>
-    <div class="question-item">
-      <span class="question-to">À votre bailleur ou au syndic de copropriété</span>
-      "Est-il possible d'installer des stores extérieurs ou des volets sur les fenêtres les plus exposées au soleil de l'après-midi, et quelle est la procédure pour les occupants ?"
-    </div>
-    <div class="question-item">
-      <span class="question-to">À vous-même, en regardant votre entourage</span>
-      "Qui autour de moi combine les facteurs de risque documentés : plus de 75 ans, vivant seul, peu de contacts réguliers ? Ai-je un moyen de les contacter quotidiennement lors du prochain épisode d'alerte ?"
-    </div>
-  </div>
-
-  <h2>Ce que vous n'avez pas à faire</h2>
-
-  <div class="not-todo">
-    <div class="not-todo-item">
-      <div class="not-todo-cross">×</div>
-      <div class="not-todo-body">
-        <div class="not-todo-title">Utiliser un ventilateur seul quand la température dépasse 35 degrés</div>
-        <p class="not-todo-reason">Au-delà de 35 degrés ambiants, un ventilateur souffle de l'air chaud sur la peau et accélère la transpiration sans abaisser la température corporelle. Il augmente la perte hydrique et peut aggraver la déshydratation, notamment chez les personnes âgées. L'ANSES recommande de ne pas utiliser le ventilateur seul au-delà de ce seuil, et de l'associer à une vaporisation régulière d'eau sur la peau, ou de préférer un espace climatisé.</p>
-      </div>
-    </div>
-    <div class="not-todo-item">
-      <div class="not-todo-cross">×</div>
-      <div class="not-todo-body">
-        <div class="not-todo-title">Supposer que la climatisation collective de l'immeuble ou du lieu de travail suffit</div>
-        <p class="not-todo-reason">Les systèmes de climatisation collective peuvent tomber en panne ou être insuffisants lors d'épisodes prolongés ou de pics de consommation simultanée. Connaître les espaces frais alternatifs accessibles près de chez soi ou de son lieu de travail avant un épisode permet de ne pas dépendre d'un seul système lors d'une alerte rouge.</p>
-      </div>
-    </div>
-    <div class="not-todo-item">
-      <div class="not-todo-cross">×</div>
-      <div class="not-todo-body">
-        <div class="not-todo-title">Modifier votre traitement médicamenteux sans avis médical pendant une canicule</div>
-        <p class="not-todo-reason">Même si certains médicaments sont documentés comme facteurs de risque en chaleur extrême, les arrêter ou en modifier la dose sans avis médical peut être dangereux. La démarche correcte est d'en avoir discuté avant l'été, en consultation programmée, pour connaître la conduite à tenir lors d'un épisode avec votre traitement spécifique.</p>
-      </div>
-    </div>
-    <div class="not-todo-item">
-      <div class="not-todo-cross">×</div>
-      <div class="not-todo-body">
-        <div class="not-todo-title">Attendre les symptômes de déshydratation pour commencer à boire</div>
-        <p class="not-todo-reason">La sensation de soif est un indicateur retardé, particulièrement peu fiable chez les personnes âgées, dont le mécanisme de la soif est moins sensible avec l'âge. Attendre d'avoir soif pour boire signifie commencer à s'hydrater après que la déshydratation est déjà amorcée. La consigne de boire régulièrement, toutes les heures environ, s'applique même en l'absence de sensation de soif lors d'un épisode caniculaire.</p>
-      </div>
-    </div>
-  </div>
-
-  <section class="sources">
-    <h2>Sources et pour aller plus loin</h2>
-    <ul>
-      <li><span class="src-tag">SPF</span><span>Santé publique France, Bilan de la surveillance sanitaire de la canicule de l'été 2022, octobre 2022. Estimation de la surmortalité par épisode, par tranche d'âge et par région. <a href="https://www.santepubliquefrance.fr" target="_blank" rel="noopener">santepubliquefrance.fr</a>.</span></li>
-      <li><span class="src-tag">Inserm</span><span>Analyse épidémiologique de la canicule d'août 2003 en France. Surmortalité par tranche d'âge, lieu de décès et facteurs de risque associés. <a href="https://www.inserm.fr" target="_blank" rel="noopener">inserm.fr</a>.</span></li>
-      <li><span class="src-tag">Météo-France</span><span>Plan national canicule, seuils de vigilance départementaux et documentation sur les niveaux d'alerte. <a href="https://vigilance.meteofrance.fr" target="_blank" rel="noopener">vigilance.meteofrance.fr</a>.</span></li>
-      <li><span class="src-tag">ANSES</span><span>Recommandations pour la protection de la santé face aux vagues de chaleur, fiches pratiques 2024. Inclut les interactions médicamenteuses, la nutrition et l'usage du ventilateur. <a href="https://www.anses.fr" target="_blank" rel="noopener">anses.fr</a>.</span></li>
-      <li><span class="src-tag">HAS</span><span>Haute Autorité de Santé, fiche mémo sur les précautions médicamenteuses en situation de chaleur extrême. Classes thérapeutiques à surveiller et conduite à tenir.</span></li>
-      <li><span class="src-tag">Cerema</span><span>Confort d'été dans les bâtiments, free cooling passif et efficacité de l'occultation solaire selon l'orientation, données mesurées sur sites. <a href="https://www.cerema.fr" target="_blank" rel="noopener">cerema.fr</a>.</span></li>
-      <li><span class="src-tag">CCAS</span><span>Registre communal des personnes vulnérables, mis en place dans le cadre du Plan national canicule depuis 2004. Renseignements auprès du Centre communal d'action sociale de votre mairie.</span></li>
-    </ul>
-  </section>
-
-  <a href="/savoir" class="back-link">← Pages thématiques</a>
-`;
-
-export default async function AgirCaniculePage() {
-  const { supabase, user } = await getCurrentSessionUser();
-  let hasFullAccess = false;
-
-  if (user) {
-    const { data: accountRow } = await supabase
-      .from('user_accounts')
-      .select('plan, status')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    const account = normalizeAccount(
-      accountRow
-        ? { plan: accountRow.plan, status: accountRow.status, email: user.email ?? null }
-        : { email: user.email ?? null },
-    );
-    hasFullAccess = canAccessActionPage(account);
-  }
+export default async function CaniulePage() {
+  const user = await getCurrentSessionUser();
+  const hasFullAccess = canAccessActionPage(normalizeAccount(user));
 
   return (
     <>
@@ -379,16 +141,17 @@ export default async function AgirCaniculePage() {
 
       <div className="orb orb-1" />
       <div className="orb orb-2" />
+      <div className="orb orb-3" />
 
       <nav className="nav">
         <div className="nav-inner">
-          <Link className="brand" href="/">
+          <Link href="/" className="brand">
             futur<span className="brand-dot">•</span>e
           </Link>
           <div className="nav-crumb">
-            <Link href="/savoir">Savoir</Link>
+            <Link href="/savoir" className="step-home">Savoir</Link>
             <span className="sep">/</span>
-            Santé
+            <Link href="/savoir/sante">Santé</Link>
             <span className="sep">/</span>
             Agir
           </div>
@@ -397,18 +160,233 @@ export default async function AgirCaniculePage() {
       </nav>
 
       <article className="article">
-        <PaywallGate
-          hasFullAccess={hasFullAccess}
-          previewHtml={previewHtml}
-          fullHtml={fullHtml}
-          accent="#f87171"
-        />
+
+        <div className="article-meta">
+          <span className="tag">Santé</span>
+          <span className="read-info">Guide pratique · Lecture 5 min · Avril 2026</span>
+        </div>
+
+        <h1>Se préparer à la canicule :<br /><em>ce qui protège vraiment</em></h1>
+
+        <p className="lede">
+          Lors de la canicule d&apos;août 2003, environ 15 000 personnes sont mortes en France en moins de trois semaines. Neuf décès sur dix ont eu lieu à domicile. Ce que les bilans de 2019 et 2022 ont montré : cette mortalité diminue quand les personnes vulnérables ne sont pas isolées et quand des gestes simples sont en place avant le début de l&apos;épisode. Cette page décrit ces gestes.
+        </p>
+
+        <Link href="/savoir/chaleur-sante-mentale" className="assoc-link">
+          <span className="assoc-link-label">Page associée</span>
+          La chaleur et la santé mentale
+          <span style={{ color: 'var(--fg-4)' }}>→</span>
+        </Link>
+
+        <h2>Ce qui fonctionne au niveau du logement</h2>
+
+        <p>L&apos;essentiel de la protection se joue à domicile. Trois gestes ont un effet documenté et ne coûtent rien.</p>
+
+        <div className="leviers">
+          <div className="levier">
+            <div className="levier-icon">01</div>
+            <div>
+              <p className="levier-title">Ventilation la nuit, occultation le jour</p>
+              <p className="levier-desc">Ouvrir les fenêtres la nuit quand l&apos;air extérieur se rafraîchit, puis tout fermer et occulter dès le matin avant que le soleil chauffe la façade. Cette technique peut maintenir l&apos;intérieur à 5 à 10 degrés de moins que l&apos;extérieur en journée. Des volets fermés bloquent 60 à 80 % du rayonnement solaire entrant selon l&apos;orientation. Sans volets extérieurs, des rideaux épais apportent une protection partielle mais réelle.</p>
+              <span className="levier-src">Cerema · ANSES recommandations chaleur 2024</span>
+            </div>
+          </div>
+          <div className="levier">
+            <div className="levier-icon">02</div>
+            <div>
+              <p className="levier-title">Rester à l&apos;ombre entre 11 h et 19 h</p>
+              <p className="levier-desc">L&apos;exposition directe au soleil est un facteur de risque indépendant de la température ambiante. Planifier les sorties avant 11 h ou après 19 h est l&apos;une des mesures les plus efficaces documentées dans les bilans de Santé publique France. Les activités physiques intenses restent déconseillées même à l&apos;ombre au-delà de 35 degrés, quelle que soit votre condition habituelle.</p>
+              <span className="levier-src">Santé publique France, bilans caniculaires 2022 · ANSES 2024</span>
+            </div>
+          </div>
+          <div className="levier">
+            <div className="levier-icon">03</div>
+            <div>
+              <p className="levier-title">Boire régulièrement, sans attendre la soif</p>
+              <p className="levier-desc">La sensation de soif est un indicateur retardé, particulièrement peu fiable chez les personnes âgées. Attendre d&apos;avoir soif signifie commencer à s&apos;hydrater après que la déshydratation est déjà amorcée. Pour les personnes âgées lors d&apos;épisodes prolongés, l&apos;eau seule n&apos;est pas toujours suffisante : les solutions de réhydratation orale disponibles en pharmacie sans ordonnance apportent les sels minéraux nécessaires. Cette précision est rarement mentionnée dans les campagnes générales.</p>
+              <span className="levier-src">ANSES recommandations nutrition chaleur · HAS fiches pratiques canicule</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="keystat">
+          <span className="keystat-number">9 sur 10</span>
+          <span className="keystat-label">Décès lors de la canicule de 2003 ont eu lieu à domicile. La plupart concernaient des personnes âgées vivant seules, dans des logements peu ventilés, sans contact régulier.</span>
+          <span className="keystat-src">Source : Inserm · Santé publique France, analyse canicule 2003</span>
+        </div>
+
+        {hasFullAccess ? (
+          <>
+            <h2>Ce que vous pouvez faire avant le prochain épisode</h2>
+
+            <div className="steps">
+              <div className="step">
+                <div className="step-num">01</div>
+                <div className="step-content">
+                  <p className="step-title">Configurer les alertes Météo-France pour votre département</p>
+                  <p className="step-desc">Les seuils de vigilance canicule sont fixés par département selon sa zone climatique. Ceux de Marseille ne sont pas ceux de Strasbourg. L&apos;application Météo-France permet de recevoir une notification dès le passage en vigilance orange ou rouge pour votre zone. Le configurer avant un épisode prend deux minutes.</p>
+                  <a className="step-link" href="https://vigilance.meteofrance.fr" target="_blank" rel="noopener">vigilance.meteofrance.fr ↗</a>
+                </div>
+              </div>
+              <div className="step">
+                <div className="step-num">02</div>
+                <div className="step-content">
+                  <p className="step-title">Identifier la pièce la plus fraîche de votre logement</p>
+                  <p className="step-desc">Dans la plupart des logements, c&apos;est une pièce orientée au nord ou au nord-est, au rez-de-chaussée. Repérer cet espace avant un épisode, et préparer un endroit où vous pouvez vous installer plusieurs heures, est une mesure recommandée par le Plan national canicule. Vaporiser un peu d&apos;eau sur le sol avant de fermer la pièce la rafraîchit légèrement.</p>
+                </div>
+              </div>
+              <div className="step">
+                <div className="step-num">03</div>
+                <div className="step-content">
+                  <p className="step-title">Repérer les espaces frais publics proches de chez vous</p>
+                  <p className="step-desc">Lors des vigilances orange et rouge, les mairies ont l&apos;obligation d&apos;ouvrir ou de signaler des espaces rafraîchisseurs accessibles gratuitement. En dehors des alertes, bibliothèques, grandes surfaces et certains musées sont utilisables. Connaître les deux ou trois plus proches avant un épisode réduit le délai de décision quand vous ou votre entourage en avez besoin.</p>
+                </div>
+              </div>
+              <div className="step">
+                <div className="step-num">04</div>
+                <div className="step-content">
+                  <p className="step-title">Vérifier avec votre médecin si votre traitement demande une attention particulière</p>
+                  <p className="step-desc">Certains médicaments, notamment les diurétiques, certains antihypertenseurs et les antipsychotiques, réduisent la capacité à supporter la chaleur ou augmentent le risque de déshydratation. La démarche utile est d&apos;en parler avant l&apos;été, en consultation programmée, pour connaître les signes à surveiller. Ne modifiez jamais votre traitement sans avis médical.</p>
+                </div>
+              </div>
+              <div className="step">
+                <div className="step-num">05</div>
+                <div className="step-content">
+                  <p className="step-title">Inscrire une personne vulnérable sur le registre communal canicule</p>
+                  <p className="step-desc">Depuis 2004, les communes peuvent tenir un registre des personnes âgées ou en situation de handicap pour faciliter leur contact lors des alertes. Ce registre est volontaire, géré par le Centre communal d&apos;action sociale et confidentiel. Votre mairie peut vous indiquer s&apos;il existe dans votre commune et comment y inscrire un proche.</p>
+                </div>
+              </div>
+            </div>
+
+            <h2>Selon votre situation</h2>
+
+            <div className="profiles">
+              <div className="profile">
+                <p className="profile-title"><span>Prioritaire</span>Personne âgée isolée, logement sous les toits</p>
+                <p className="profile-desc">C&apos;est le profil qui a représenté la grande majorité des décès de 2003 et 2022 selon Santé publique France et l&apos;Inserm : plus de 75 ans, vivant seul, logement en dernier étage sans occultation efficace, peu de contacts réguliers. La priorité est d&apos;identifier ce profil dans votre entourage et d&apos;établir un contact quotidien pendant les épisodes d&apos;alerte orange ou rouge.</p>
+              </div>
+              <div className="profile">
+                <p className="profile-title"><span>Vigilance</span>Personne sous traitement affectant la thermorégulation</p>
+                <p className="profile-desc">Les diurétiques, certains antihypertenseurs, les antipsychotiques et les médicaments antiparkinsoniens peuvent réduire la tolérance à la chaleur. La démarche utile est d&apos;en parler avant l&apos;été, pas d&apos;attendre l&apos;alerte, pour connaître la conduite à tenir avec son traitement spécifique.</p>
+              </div>
+              <div className="profile">
+                <p className="profile-title"><span>Standard</span>Adulte en bonne santé, logement ventilable</p>
+                <p className="profile-desc">Les mesures de base suffisent dans la grande majorité des épisodes : limiter l&apos;exposition directe aux heures chaudes, boire régulièrement, appliquer la ventilation nocturne et l&apos;occultation diurne. Le risque principal n&apos;est souvent pas personnel mais vient de la méconnaissance des personnes vulnérables dans l&apos;entourage immédiat.</p>
+              </div>
+              <div className="profile">
+                <p className="profile-title"><span>À connaître</span>Travailleur exposé à la chaleur</p>
+                <p className="profile-desc">Le Code du travail impose des obligations lors de chaleur extrême : aménagement des horaires, fourniture d&apos;eau fraîche, accès à l&apos;ombre. Si ces mesures sont absentes lors d&apos;une vigilance orange ou rouge, vous pouvez contacter l&apos;inspection du travail.</p>
+              </div>
+            </div>
+
+            <h2>Ce que vous n&apos;avez pas à faire</h2>
+
+            <div className="nolist">
+              <div className="noitem">
+                <div className="no-icon">×</div>
+                <div>
+                  <p className="no-title">Utiliser un ventilateur seul quand la température dépasse 35 degrés</p>
+                  <p className="no-desc">Au-delà de 35 degrés ambiants, un ventilateur souffle de l&apos;air chaud et accélère la perte hydrique sans abaisser la température corporelle. L&apos;ANSES recommande de l&apos;associer à une vaporisation régulière d&apos;eau sur la peau, ou de préférer un espace climatisé.</p>
+                </div>
+              </div>
+              <div className="noitem">
+                <div className="no-icon">×</div>
+                <div>
+                  <p className="no-title">Supposer que la climatisation de l&apos;immeuble suffit toujours</p>
+                  <p className="no-desc">Les systèmes collectifs peuvent tomber en panne lors d&apos;épisodes prolongés ou de pics de consommation simultanée. Connaître les espaces frais alternatifs proches de chez soi avant un épisode évite de dépendre d&apos;un seul système lors d&apos;une alerte rouge.</p>
+                </div>
+              </div>
+              <div className="noitem">
+                <div className="no-icon">×</div>
+                <div>
+                  <p className="no-title">Modifier votre traitement sans avis médical pendant une canicule</p>
+                  <p className="no-desc">Même si certains médicaments sont des facteurs de risque par forte chaleur, les arrêter ou modifier la dose sans avis médical peut être dangereux. La bonne démarche est d&apos;en avoir discuté avant l&apos;été, en consultation programmée.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="actions-card">
+              <div className="actions-card-head">Pour aller plus loin</div>
+              <ul className="actions-list">
+                <li>
+                  <Link href="/savoir/chaleur-sante-mentale">
+                    La chaleur et la santé mentale <span className="arrow">→</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/">
+                    Comprendre l&apos;exposition canicule de votre commune <span className="arrow">→</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <section className="sources">
+              <h2>Sources</h2>
+              <ul>
+                <li>
+                  <span className="src-tag">SPF</span>
+                  <span>Santé publique France, bilan de la surveillance sanitaire des canicules 2022 et 2003 par tranche d&apos;âge, lieu de décès et facteurs de risque, <a href="https://www.santepubliquefrance.fr" target="_blank" rel="noopener">santepubliquefrance.fr</a>.</span>
+                </li>
+                <li>
+                  <span className="src-tag">Inserm</span>
+                  <span>Analyse épidémiologique de la canicule d&apos;août 2003, surmortalité et facteurs de risque associés, <a href="https://www.inserm.fr" target="_blank" rel="noopener">inserm.fr</a>.</span>
+                </li>
+                <li>
+                  <span className="src-tag">ANSES</span>
+                  <span>Recommandations pour la protection de la santé face aux vagues de chaleur, fiches pratiques 2024. Inclut les interactions médicamenteuses et l&apos;usage du ventilateur, <a href="https://www.anses.fr" target="_blank" rel="noopener">anses.fr</a>.</span>
+                </li>
+                <li>
+                  <span className="src-tag">Cerema</span>
+                  <span>Confort d&apos;été dans les bâtiments, données mesurées sur l&apos;efficacité du free cooling passif et de l&apos;occultation solaire selon l&apos;orientation, <a href="https://www.cerema.fr" target="_blank" rel="noopener">cerema.fr</a>.</span>
+                </li>
+                <li>
+                  <span className="src-tag">HAS</span>
+                  <span>Haute Autorité de Santé, fiche mémo sur les précautions médicamenteuses en situation de chaleur extrême, classes thérapeutiques à surveiller.</span>
+                </li>
+                <li>
+                  <span className="src-tag">Météo-France</span>
+                  <span>Plan national canicule, seuils de vigilance départementaux et niveaux d&apos;alerte, <a href="https://vigilance.meteofrance.fr" target="_blank" rel="noopener">vigilance.meteofrance.fr</a>.</span>
+                </li>
+              </ul>
+            </section>
+          </>
+        ) : (
+          <div style={{ position: 'relative', marginTop: '40px' }}>
+            <div style={{ maxHeight: '260px', overflow: 'hidden', pointerEvents: 'none', userSelect: 'none', opacity: 0.45 }}>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: '28px', color: 'var(--fg-1)', margin: '0 0 20px' }}>
+                Ce que vous pouvez faire avant le prochain épisode
+              </h2>
+              <p style={{ color: 'var(--fg-3)', fontSize: '15px', lineHeight: 1.7 }}>Configurer les alertes Météo-France, identifier la pièce la plus fraîche, repérer les espaces frais publics, vérifier votre traitement avec votre médecin…</p>
+            </div>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '180px', background: 'linear-gradient(to bottom, transparent, var(--bg))', pointerEvents: 'none' }} />
+            <div style={{ marginTop: '40px', padding: '40px 36px', background: 'var(--bg-elev)', border: '1px solid var(--border-1)', borderLeft: '2px solid var(--accent)', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '16px' }}>
+                Réservé aux abonnés Suivi
+              </div>
+              <p style={{ fontFamily: 'var(--font-serif)', fontSize: '22px', lineHeight: 1.4, color: 'var(--fg-1)', margin: '0 0 28px', fontWeight: 400 }}>
+                Les étapes et profils détaillés sont<br />disponibles dans votre abonnement.
+              </p>
+              <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Link href="/inscription" style={{ display: 'inline-flex', alignItems: 'center', padding: '14px 28px', background: 'var(--accent)', color: '#060812', fontFamily: 'var(--font-sans)', fontSize: '15px', fontWeight: 600, textDecoration: 'none', borderRadius: '6px' }}>
+                  S&apos;abonner — Accès Suivi
+                </Link>
+                <Link href="/connexion" style={{ display: 'inline-flex', alignItems: 'center', padding: '14px 28px', border: '1px solid var(--border-1)', color: 'var(--fg-3)', fontFamily: 'var(--font-sans)', fontSize: '15px', textDecoration: 'none', borderRadius: '6px' }}>
+                  Déjà abonné ? Se connecter
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
       </article>
 
       <footer className="page-footer">
         <div>futur•e · Agir / Santé</div>
         <div>
-          <a href="#">Signaler une imprécision</a> · <a href="#">Méthodologie</a>
+          <Link href="#">Signaler une imprécision</Link>
+          {' · '}
+          <Link href="#">Méthodologie</Link>
         </div>
       </footer>
     </>

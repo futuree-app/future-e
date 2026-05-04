@@ -83,6 +83,9 @@ const FALLBACK_TENSION_IDS = [
   'retraite_ici',
 ];
 
+const LANDING_QNA_STORAGE_KEY = 'futuree:landing-qna-count';
+const LANDING_QNA_LIMIT = 2;
+
 const LANDING_DRIAS_SCENARIO = {
   id: 'gwl20',
   horizon: '2050',
@@ -629,6 +632,19 @@ export default function FutureELanding() {
   const [answerError, setAnswerError] = useState('');
   const [answerSource, setAnswerSource] = useState('');
   const [freeText, setFreeText] = useState('');
+  const [questionCount, setQuestionCount] = useState(() => {
+    if (typeof window === 'undefined') {
+      return 0;
+    }
+
+    try {
+      const raw = window.sessionStorage.getItem(LANDING_QNA_STORAGE_KEY);
+      const parsed = raw ? Number.parseInt(raw, 10) : 0;
+      return Number.isFinite(parsed) ? parsed : 0;
+    } catch {
+      return 0;
+    }
+  });
   const [plmHint, setPlmHint] = useState('');
   const [slotIndex, setSlotIndex] = useState(0);
   const [slotSettled, setSlotSettled] = useState(false);
@@ -646,10 +662,20 @@ export default function FutureELanding() {
         : null,
     );
     setTimeout(() => wizardRef.current?.showModal(), 0);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCommune, communeMeta]);
 
   const commune = selectedCommune?.name || '';
+  const questionLimitReached = questionCount >= LANDING_QNA_LIMIT;
+
+  function incrementQuestionCount() {
+    setQuestionCount((current) => {
+      const next = Math.min(current + 1, LANDING_QNA_LIMIT);
+      try {
+        window.sessionStorage.setItem(LANDING_QNA_STORAGE_KEY, String(next));
+      } catch {}
+      return next;
+    });
+  }
 
   function ensureSupabaseClient() {
     if (supabase.current) {
@@ -947,6 +973,11 @@ export default function FutureELanding() {
   };
 
   const selectTension = async (tension) => {
+    if (questionLimitReached || loading) {
+      return;
+    }
+
+    incrementQuestionCount();
     setActiveTension(tension);
     setLoading(true);
     setAnswer(null);
@@ -1049,18 +1080,91 @@ export default function FutureELanding() {
   };
 
   const submitFree = () => {
-    if (!freeText.trim()) {
+    if (!freeText.trim() || questionLimitReached || loading) {
       return;
     }
 
-    setActiveTension({ id: 'free', label: freeText, color: C.violet });
+    const question = freeText.trim();
+    incrementQuestionCount();
+    setActiveTension({ id: 'free', label: question, color: C.violet });
     setLoading(true);
     setAnswer(null);
+    setAnswerError('');
+    setAnswerSource('');
 
-    setTimeout(() => {
-      setAnswer(STATIC_ANSWERS.default);
-      setLoading(false);
-    }, 1100);
+    const fallbackAnswer = STATIC_ANSWERS.default;
+    const tension = {
+      id: 'free',
+      label: question,
+      sub: 'Question libre',
+      color: C.violet,
+    };
+
+    fetch('/qna', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        commune,
+        categories: communeMeta?.categories || ['all'],
+        driasContext: buildDriasContext(commune, communeIndicators),
+        georisquesContext: buildGeorisquesContext(communeGeorisques),
+        tension,
+        fallbackAnswer,
+        questionType: 'free',
+        freeTextQuestion: question,
+      }),
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          const errorPayload = await response.json().catch(() => null);
+          const errorMessage =
+            errorPayload?.details ||
+            errorPayload?.error ||
+            `Claude request failed with status ${response.status}`;
+          throw new Error(errorMessage);
+        }
+
+        const generatedAnswer = await response.json();
+        if (
+          generatedAnswer &&
+          typeof generatedAnswer.verdict === 'string' &&
+          typeof generatedAnswer.detail === 'string' &&
+          typeof generatedAnswer.cta === 'string'
+        ) {
+          setAnswer({
+            verdict: generatedAnswer.verdict,
+            detail: generatedAnswer.detail,
+            cta: generatedAnswer.cta,
+            href: '#',
+          });
+          setAnswerSource('claude');
+          return;
+        }
+
+        throw new Error('Claude returned an invalid payload.');
+      })
+      .catch((error) => {
+        const reason =
+          error instanceof Error ? error.message : 'Erreur inconnue côté serveur.';
+        setAnswer(fallbackAnswer);
+        setAnswerSource('fallback_local');
+        setAnswerError(
+          `Question libre indisponible pour le moment. Réponse générale affichée. Détail : ${reason}`,
+        );
+      })
+      .finally(() => {
+        setLoading(false);
+        setTimeout(
+          () =>
+            answerRef.current?.scrollIntoView({
+              behavior: 'smooth',
+              block: 'nearest',
+            }),
+          100,
+        );
+      });
 
     setFreeText('');
   };
@@ -1417,11 +1521,11 @@ export default function FutureELanding() {
       gap: 12,
       marginBottom: 20,
     },
-    tensionCard: (active, col) => ({
+    tensionCard: (active, col, disabled = false) => ({
       ...glass({
         borderRadius: 10,
         padding: '20px 22px',
-        cursor: 'pointer',
+        cursor: disabled ? 'not-allowed' : 'pointer',
         borderColor: active ? `${col}50` : C.border,
         boxShadow: active
           ? `0 0 0 1px ${col}40, 0 8px 24px ${col}15`
@@ -1431,6 +1535,8 @@ export default function FutureELanding() {
       textAlign: 'left',
       width: '100%',
       display: 'block',
+      opacity: disabled ? 0.45 : 1,
+      pointerEvents: disabled ? 'none' : 'auto',
     }),
     tensionLabel: {
       fontFamily: "'Instrument Serif', serif",
@@ -1465,7 +1571,7 @@ export default function FutureELanding() {
       fontFamily: "'Instrument Sans', sans-serif",
       outline: 'none',
     },
-    freeBtn: {
+    freeBtn: (disabled = false) => ({
       padding: '14px 24px',
       borderRadius: 8,
       background: C.orange,
@@ -1473,10 +1579,11 @@ export default function FutureELanding() {
       fontWeight: 600,
       fontSize: 14,
       border: 'none',
-      cursor: 'pointer',
+      cursor: disabled ? 'not-allowed' : 'pointer',
       whiteSpace: 'nowrap',
       fontFamily: "'Instrument Sans', sans-serif",
-    },
+      opacity: disabled ? 0.45 : 1,
+    }),
     answerBox: {
       ...glass({
         borderRadius: 12,
@@ -1529,6 +1636,29 @@ export default function FutureELanding() {
       cursor: 'pointer',
       border: 'none',
       fontFamily: "'Instrument Sans', sans-serif",
+    },
+    questionLimitNote: {
+      marginBottom: 20,
+      padding: '14px 16px',
+      borderRadius: 10,
+      background: 'var(--orange-tint)',
+      border: '1px solid var(--orange-ring)',
+      color: C.orange,
+      fontSize: 14,
+      lineHeight: 1.6,
+    },
+    paywallSecondary: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '13px 18px',
+      borderRadius: 10,
+      background: 'transparent',
+      border: `1px solid ${C.border}`,
+      color: C.text,
+      fontWeight: 500,
+      fontSize: 14,
+      textDecoration: 'none',
     },
     amnesieSection: {
       position: 'relative',
@@ -2086,6 +2216,12 @@ export default function FutureELanding() {
 
         {commune && tensions.length > 0 && (
           <>
+            {questionLimitReached && (
+              <div style={styles.questionLimitNote}>
+                Vous avez utilisé vos deux questions gratuites. Pour continuer, vous pouvez vous abonner au Suivi.
+              </div>
+            )}
+
             <div style={styles.tensionsGrid} className="tensions-grid">
               {tensions.map((tension) => (
                 <button
@@ -2094,7 +2230,9 @@ export default function FutureELanding() {
                   style={styles.tensionCard(
                     activeTension?.id === tension.id,
                     tension.color,
+                    questionLimitReached || loading,
                   )}
+                  disabled={questionLimitReached || loading}
                   onClick={() => selectTension(tension)}
                 >
                   <div style={styles.tensionLabel}>
@@ -2112,9 +2250,14 @@ export default function FutureELanding() {
                 placeholder="Ou posez votre propre question sur votre commune…"
                 value={freeText}
                 onChange={(event) => setFreeText(event.target.value)}
+                disabled={questionLimitReached || loading}
                 onKeyDown={(event) => event.key === 'Enter' && submitFree()}
               />
-              <button style={styles.freeBtn} onClick={submitFree}>
+              <button
+                style={styles.freeBtn(questionLimitReached || loading)}
+                onClick={submitFree}
+                disabled={questionLimitReached || loading}
+              >
                 Poser →
               </button>
             </div>
@@ -2162,6 +2305,11 @@ export default function FutureELanding() {
                       >
                         Générer mon rapport personnalisé →
                       </button>
+                      {questionLimitReached && (
+                        <Link href="/connexion" style={{ ...styles.paywallSecondary, marginLeft: 10 }}>
+                          S&apos;abonner au Suivi
+                        </Link>
+                      )}
                     </>
                   )
                 )}
