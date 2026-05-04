@@ -78,10 +78,12 @@ async function getToken(): Promise<string> {
     });
 
     if (!res.ok) throw new Error(`ATMO login failed: ${res.status}`);
-    const { value } = (await res.json()) as { value: string };
-    cachedToken = value;
+    const json = (await res.json()) as { token?: string; value?: string };
+    const token = json.token ?? json.value;
+    if (!token) throw new Error("ATMO login: no token in response");
+    cachedToken = token;
     tokenExpiresAt = Date.now() + 60 * 60 * 1000;
-    return value;
+    return token;
   } finally {
     clearTimeout(timeout);
   }
@@ -113,7 +115,9 @@ async function fetchRecords(inseeCode: string, date: string): Promise<AtmoRawRec
     );
 
     if (!res.ok) throw new Error(`ATMO data failed: ${res.status}`);
-    return (await res.json()) as AtmoRawRecord[];
+    const json = await res.json() as { features?: { properties: AtmoRawRecord }[] } | AtmoRawRecord[];
+    if (Array.isArray(json)) return json;
+    return (json.features ?? []).map((f) => f.properties);
   } finally {
     clearTimeout(timeout);
   }

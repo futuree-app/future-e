@@ -55,7 +55,8 @@ values
   ('tension_hydrique_connue', 'Tension hydrique connue', 'Zone déjà concernée par des tensions sur l’eau.'),
   ('vallee_industrielle', 'Vallée industrielle', 'Territoire à enjeux air / pollution / industrie.'),
   ('bonne_couverture_irve', 'Bonne couverture IRVE', 'Territoire où la recharge publique est plutôt présente.'),
-  ('sud_ouest', 'Sud-Ouest', 'Catégorie régionale utile pour certaines lectures produit.')
+  ('sud_ouest', 'Sud-Ouest', 'Catégorie régionale utile pour certaines lectures produit.'),
+  ('colonise_albopictus', 'Zone colonisée Aedes albopictus', 'Commune dont le département est classé niveau ≥ 1 sur la carte DGS de colonisation d''Aedes albopictus (mise à jour annuelle, source : DGS / Santé publique France).')
 on conflict (id) do update
 set
   label = excluded.label,
@@ -95,7 +96,13 @@ values
   ('vignobles', 'Mon vignoble va-t-il tenir à {commune} ?', 'Cépages, rendements, AOC', array['rural_viticole'], 2, '#4ade80'),
   ('feux', 'Les feux vont-ils atteindre {commune} ?', 'Risque, évolution, protection', array['mediterranee', 'rural_forestier'], 2, '#f87171'),
   ('mobilite_fragile', 'Mon mode de vie à {commune} repose-t-il trop sur la voiture ?', 'Dépendance auto, coût carburant, alternatives', array['rural_peri_urbain', 'periurbain_dependance_auto'], 1, '#fb923c'),
-  ('voiture_electrique', 'Passer à l''électrique a-t-il du sens à {commune} ?', 'Recharge, trajets, coût, usage réel', array['periurbain_dependance_auto', 'bonne_couverture_irve'], 2, '#fb923c')
+  ('voiture_electrique', 'Passer à l''électrique a-t-il du sens à {commune} ?', 'Recharge, trajets, coût, usage réel', array['periurbain_dependance_auto', 'bonne_couverture_irve'], 2, '#fb923c'),
+  -- Tension 27 : risque vectoriel émergent
+  -- Seuil de déclenchement : commune appartenant à un département classé ≥ niveau 1
+  -- sur la carte de colonisation DGS d'Aedes albopictus (mise à jour annuelle, publiée
+  -- chaque printemps par la DGS / Santé publique France). Peupler communes_categorization
+  -- avec la catégorie 'colonise_albopictus' à partir de la carte DGS de l'année en cours.
+  ('risque_vectoriel_emergent', 'Le moustique tigre est-il établi à {commune} ?', 'Aedes albopictus, dengue, chikungunya', array['colonise_albopictus', 'mediterranee', 'urbain_dense_sud'], 2, '#4ade80')
 on conflict (id) do update
 set
   label_template = excluded.label_template,

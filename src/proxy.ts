@@ -6,7 +6,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  * and propagates the updated session cookie to both request and response.
  * Without this, supabase.auth.getUser() returns null for expired sessions.
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(

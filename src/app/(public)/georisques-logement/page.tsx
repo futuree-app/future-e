@@ -1,234 +1,272 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useMemo } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-// ── Response type ─────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════
+// TYPES — inchangés depuis l'API existante
+// ════════════════════════════════════════════════════════════════════════════
 
 type ApiResponse = {
   error?: string;
-  address?: {
-    label: string;
-    city: string | null;
-    citycode: string | null;
-    postcode: string | null;
-    latitude: number;
-    longitude: number;
-  };
+  address?: { label: string; city: string | null; citycode: string | null; postcode: string | null; latitude: number; longitude: number; };
   altitude?: number | null;
-  parcel?: {
-    parcelCode: string;
-    nomCommune: string | null;
-    contenance: number | null;
-  } | null;
+  parcel?: { parcelCode: string; nomCommune: string | null; contenance: number | null; } | null;
   dpe?: {
-    id_dpe: string;
-    date_dpe: string | null;
-    etiquette_dpe: string | null;
-    etiquette_ges: string | null;
-    conso_ep_m2: number | null;
-    emission_ges_m2: number | null;
-    surface_m2: number | null;
-    annee_construction: number | null;
-    type_batiment: string | null;
-    adresse: string | null;
+    id_dpe: string; date_dpe: string | null; etiquette_dpe: string | null; etiquette_ges: string | null;
+    conso_ep_m2: number | null; emission_ges_m2: number | null; surface_m2: number | null;
+    annee_construction: number | null; type_batiment: string | null; adresse: string | null;
   } | null;
   audit?: {
-    n_audit: string;
-    date_audit: string | null;
-    classe_dpe_actuel: string | null;
-    scenarios: Array<{
-      categorie: string | null;
-      etape: string | null;
-      travaux: string | null;
-      conso_ep: number | null;
-      emission_ges: number | null;
-    }>;
+    n_audit: string; date_audit: string | null; classe_dpe_actuel: string | null;
+    scenarios: Array<{ categorie: string | null; etape: string | null; travaux: string | null; conso_ep: number | null; emission_ges: number | null; }>;
   } | null;
-  zfe?: {
-    inZfe: boolean;
-    zones: Array<{
-      id: string;
-      nom: string;
-      vp_critair: string | null;
-      deux_rm_critair: string | null;
-      date_debut: string | null;
-      date_fin: string | null;
-    }>;
-  } | null;
-  irep?: {
-    count: number;
-    installations: Array<{
-      id: number;
-      nom: string;
-      distanceM: number;
-      nombre_polluants: number;
-      milieu_emission: string | null;
-    }>;
-  } | null;
-  cartofriches?: {
-    count: number;
-    friches: Array<{
-      id: string;
-      nom: string;
-      type: string | null;
-      statut: string | null;
-      sol_pollue: boolean;
-      activite: string | null;
-      distanceM: number | null;
-    }>;
-  } | null;
+  zfe?: { inZfe: boolean; zones: Array<{ id: string; nom: string; vp_critair: string | null; deux_rm_critair: string | null; date_debut: string | null; date_fin: string | null; }>; } | null;
+  irep?: { count: number; installations: Array<{ id: number; nom: string; distanceM: number; nombre_polluants: number; milieu_emission: string | null; }>; } | null;
+  cartofriches?: { count: number; friches: Array<{ id: string; nom: string; type: string | null; statut: string | null; sol_pollue: boolean; activite: string | null; distanceM: number | null; }>; } | null;
   communeData?: {
     commune: {
-      inseeCode: string;
-      nom: string;
-      population: number | null;
-      vieillissement_pct: number | null;
-      logements: {
-        vacants_2022: number | null;
-        vacants_pct: number | null;
-        sociaux_2023: number | null;
-        sociaux_pct: number | null;
-      };
-      qualite_air: {
-        pm25: number | null;
-        pm10: number | null;
-        no2: number | null;
-        o3: number | null;
-      };
-      economie: {
-        revenu_median: number | null;
-        inferiorite_nationale_pct: number | null;
-      };
-      sante: {
-        acces_medecins: number | null;
-        eloignement_services_pct: number | null;
-      };
-      territoire: {
-        densite: number | null;
-        incendies: number | null;
-        taux_boisement: number | null;
-      };
+      inseeCode: string; nom: string; population: number | null; vieillissement_pct: number | null;
+      logements: { vacants_2022: number | null; vacants_pct: number | null; sociaux_2023: number | null; sociaux_pct: number | null; };
+      qualite_air: { pm25: number | null; pm10: number | null; no2: number | null; o3: number | null; };
+      economie: { revenu_median: number | null; inferiorite_nationale_pct: number | null; };
+      sante: { acces_medecins: number | null; eloignement_services_pct: number | null; };
+      territoire: { densite: number | null; incendies: number | null; taux_boisement: number | null; };
     };
     iris: {
-      iris_count: number;
-      passoires_taux: number | null;
-      preca_energetique_pct: number | null;
-      taux_propriete: number | null;
-      taux_location: number | null;
-      taux_hlm: number | null;
-      taux_suroccupation: number | null;
-      taux_motorisation: number | null;
-      taux_transports_communs: number | null;
+      iris_count: number; passoires_taux: number | null; preca_energetique_pct: number | null;
+      taux_propriete: number | null; taux_location: number | null; taux_hlm: number | null;
+      taux_suroccupation: number | null; taux_motorisation: number | null; taux_transports_communs: number | null;
     } | null;
   } | null;
   atmo?: {
-    inseeCode: string;
-    date: string;
+    inseeCode: string; date: string;
     index: { value: number; label: string; color: string };
-    pollutants: {
-      pm25: { value: number; label: string } | null;
-      pm10: { value: number; label: string } | null;
-      no2: { value: number; label: string } | null;
-      o3: { value: number; label: string } | null;
-    };
+    pollutants: { pm25: { value: number; label: string } | null; pm10: { value: number; label: string } | null; no2: { value: number; label: string } | null; o3: { value: number; label: string } | null; };
   } | null;
   eaufrance?: {
-    drinkingWater: {
-      conformBacterio: boolean | null;
-      conformPhysicoChem: boolean | null;
-      lastSampleDate: string | null;
-      nitrates: number | null;
-    } | null;
-    drought: {
-      riverName: string | null;
-      status: string | null;
-      isDry: boolean;
-    } | null;
+    drinkingWater: { conformBacterio: boolean | null; conformPhysicoChem: boolean | null; lastSampleDate: string | null; nitrates: number | null; } | null;
+    drought: { riverName: string | null; status: string | null; isDry: boolean; } | null;
   } | null;
   georisques?: {
-    address?: {
-      risks: { labels: string[] };
-      pprn: { labels: string[] };
-      rga: { code: string | null; label: string | null } | null;
-      seismic: { code: string | null; label: string | null } | null;
-    } | null;
-    parcel?: {
-      parcelCode: string;
-      risks: { labels: string[] };
-      pprn: { labels: string[]; zones: string[] };
-      rga: { code: string | null; label: string | null } | null;
-      seismic: { code: string | null; label: string | null } | null;
-    } | null;
-    commune?: {
-      communeName: string | null;
-      riskLabels: string[];
-      seismic: { code: string | null; label: string | null } | null;
-    } | null;
+    address?: { risks: { labels: string[] }; pprn: { labels: string[] }; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; } | null;
+    parcel?: { parcelCode: string; risks: { labels: string[] }; pprn: { labels: string[]; zones: string[] }; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; } | null;
+    commune?: { communeName: string | null; riskLabels: string[]; seismic: { code: string | null; label: string | null } | null; } | null;
   };
-  caveat?: string;
 };
 
-// ── DPE helpers ───────────────────────────────────────────────────────────────
+type SynthesisResponse = {
+  verdict: string;
+  signals: Array<{ level: "good" | "medium" | "bad" | "warn"; text: string }>;
+  reading: string;
+  actions: Array<{ title: string; description: string; href?: string }>;
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// CONSTANTES
+// ════════════════════════════════════════════════════════════════════════════
 
 const DPE_COLORS: Record<string, string> = {
   A: "#319334", B: "#33cc33", C: "#cbee39",
   D: "#ffff00", E: "#fbad26", F: "#f15a27", G: "#ed1c24",
 };
 
-function DpeBadge({ label }: { label: string | null }) {
-  if (!label) return <span style={{ color: "var(--fg-4)" }}>n.d.</span>;
+const DPE_LABELS: Record<string, string> = {
+  A: "Très performant", B: "Performant", C: "Assez performant",
+  D: "Peu performant", E: "Énergivore", F: "Très énergivore", G: "Passoire thermique",
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════════════════════════
+
+function fInt(v: number | null | undefined): string {
+  if (v == null) return "—";
+  return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(v);
+}
+function fPct(v: number | null | undefined): string {
+  if (v == null) return "—";
+  return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(v)} %`;
+}
+
+// Calcule un verdict synthétique côté client (avant ou en l'absence de l'IA)
+function computeQuickVerdict(r: ApiResponse): { level: "good" | "medium" | "bad"; signals: number } {
+  let score = 0;
+  let signals = 0;
+  const dpe = r.dpe?.etiquette_dpe;
+  if (dpe === "F" || dpe === "G") { score += 2; signals++; }
+  else if (dpe === "E") { score += 1; signals++; }
+  if ((r.georisques?.parcel?.risks.labels.length ?? 0) > 0) { score += 1; signals++; }
+  if ((r.georisques?.parcel?.pprn.labels.length ?? 0) > 0) { score += 2; signals++; }
+  if (r.zfe?.inZfe) { score += 1; signals++; }
+  if ((r.irep?.count ?? 0) > 0) { score += 1; signals++; }
+  if ((r.cartofriches?.count ?? 0) > 0 && r.cartofriches?.friches.some(f => f.sol_pollue)) { score += 1; signals++; }
+  if (r.atmo?.index?.value && r.atmo.index.value >= 4) { score += 1; signals++; }
+  if (r.eaufrance?.drinkingWater?.conformBacterio === false || r.eaufrance?.drinkingWater?.conformPhysicoChem === false) { score += 1; signals++; }
+
+  return {
+    level: score >= 4 ? "bad" : score >= 2 ? "medium" : "good",
+    signals,
+  };
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// UI ATOMS — design futur•e
+// ════════════════════════════════════════════════════════════════════════════
+
+function Kicker({ children }: { children: React.ReactNode }) {
+  return (
+    <p style={{ margin: 0, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent-dim, #7a6e60)" }}>
+      {children}
+    </p>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 style={{ margin: 0, fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: "clamp(22px,3vw,30px)", lineHeight: 1.18, letterSpacing: "-0.01em", color: "var(--fg-hi)" }}>
+      {children}
+    </h2>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--fg-4)", marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }}>
+      <span>{children}</span>
+      <span style={{ flex: 1, height: 1, background: "var(--border-1)" }} />
+    </div>
+  );
+}
+
+function DpeBadge({ label, size = "md" }: { label: string | null; size?: "sm" | "md" | "lg" }) {
+  const s = size === "lg" ? 56 : size === "md" ? 38 : 26;
+  const fs = size === "lg" ? 22 : size === "md" ? 16 : 12;
+  if (!label) return <span style={{ color: "var(--fg-4)" }}>—</span>;
   return (
     <span style={{
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      width: 32, height: 32,
-      borderRadius: 6,
+      display: "inline-flex", alignItems: "center", justifyContent: "center",
+      width: s, height: s, borderRadius: 4,
       background: DPE_COLORS[label] ?? "var(--bg-elev)",
-      color: ["A","B","C"].includes(label) ? "#060812" : "#060812",
-      fontWeight: 700,
-      fontSize: 15,
+      color: "#060812", fontWeight: 700, fontSize: fs, flexShrink: 0,
     }}>{label}</span>
   );
 }
 
-function formatInt(value: number | null | undefined): string | null {
-  if (value == null) return null;
-  return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(value);
+// Carte risque dans la grille de synthèse
+function RiskCard({
+  level, name, value, unit, desc, who,
+}: {
+  level: "good" | "medium" | "bad" | "warn";
+  name: string;
+  value: React.ReactNode;
+  unit: string;
+  desc: string;
+  who?: string;
+}) {
+  const colors = {
+    good:   { bar: "var(--green, #4a7c59)",   bg: "rgba(74,124,89,0.08)",  fg: "var(--green-light, #6aad7e)" },
+    medium: { bar: "var(--orange, #c47a3a)",  bg: "rgba(196,122,58,0.08)", fg: "var(--orange, #c47a3a)" },
+    bad:    { bar: "var(--red, #a84a3a)",     bg: "rgba(168,74,58,0.08)",  fg: "var(--red, #f87171)" },
+    warn:   { bar: "var(--yellow, #b8a042)",  bg: "rgba(184,160,66,0.08)", fg: "var(--yellow, #b8a042)" },
+  };
+  const c = colors[level];
+  const labels = { good: "Favorable", medium: "Modéré", bad: "Élevé", warn: "Vigilance" };
+  return (
+    <div style={{
+      background: "var(--bg-card)", border: "1px solid var(--border-1)",
+      padding: 20, position: "relative", overflow: "hidden",
+    }}>
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 2, background: c.bar }} />
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+        <div style={{ fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fg-3)" }}>{name}</div>
+        <div style={{ fontSize: 9, letterSpacing: "0.08em", padding: "3px 8px", borderRadius: 1, textTransform: "uppercase", background: c.bg, color: c.fg }}>{labels[level]}</div>
+      </div>
+      <div style={{ fontFamily: "var(--font-serif)", fontSize: 28, letterSpacing: "-0.03em", color: "var(--fg-hi)", marginBottom: 4, lineHeight: 1 }}>
+        {value}
+      </div>
+      <div style={{ fontSize: 10, color: "var(--fg-4)", letterSpacing: "0.04em", marginBottom: 10 }}>{unit}</div>
+      <div style={{ fontSize: 11, color: "var(--fg-3)", lineHeight: 1.6 }}>{desc}</div>
+      {who && (
+        <div style={{ display: "inline-block", marginTop: 8, fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 8px", background: "var(--bg-elev)", border: "1px solid var(--border-1)", color: "var(--fg-4)" }}>
+          {who}
+        </div>
+      )}
+    </div>
+  );
 }
 
-function formatPct(value: number | null | undefined): string | null {
-  if (value == null) return null;
-  return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(value)} %`;
+// Verdict en bandeau (gauche colorée)
+function Verdict({ level, title, detail }: { level: "good" | "medium" | "bad"; title: string; detail: string }) {
+  const colors = { good: "var(--green, #4a7c59)", medium: "var(--orange, #c47a3a)", bad: "var(--red, #a84a3a)" };
+  return (
+    <div style={{
+      background: "var(--bg-card)", border: "1px solid var(--border-1)",
+      borderLeft: `3px solid ${colors[level]}`, padding: "24px 28px",
+    }}>
+      <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 16, color: "var(--fg-hi)", marginBottom: 8, letterSpacing: "-0.01em" }}>
+        {title}
+      </div>
+      <div style={{ fontSize: 12, color: "var(--fg-3)", lineHeight: 1.7 }}>{detail}</div>
+    </div>
+  );
 }
 
-function formatDecimal(value: number | null | undefined, digits = 1): string | null {
-  if (value == null) return null;
-  return new Intl.NumberFormat("fr-FR", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: digits,
-  }).format(value);
+function Block({ label, value, sub }: { label: string; value: React.ReactNode; sub?: string }) {
+  return (
+    <div style={{ display: "grid", gap: 3 }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" }}>{label}</span>
+      <span style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-1)" }}>{value}</span>
+      {sub && <span style={{ fontSize: 11, color: "var(--fg-4)" }}>{sub}</span>}
+    </div>
+  );
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+function ActionCard({ title, desc, href, primary }: { title: string; desc: string; href?: string; primary?: boolean }) {
+  const content = (
+    <div style={{
+      padding: 18, background: primary ? "var(--bg-card)" : "var(--bg-elev)",
+      border: `1px solid ${primary ? "var(--accent-dim, #7a6e60)" : "var(--border-1)"}`,
+      cursor: "pointer", transition: "all 0.15s",
+      display: "block",
+    }}>
+      <div style={{ fontSize: 11, color: "var(--fg-1)", letterSpacing: "0.03em", marginBottom: 6, fontWeight: 500 }}>{title}</div>
+      <div style={{ fontSize: 10, color: "var(--fg-4)", lineHeight: 1.55 }}>{desc}</div>
+    </div>
+  );
+  if (href) return <Link href={href} style={{ textDecoration: "none" }}>{content}</Link>;
+  return content;
+}
 
-export default function GeorisquesLogementPage() {
-  const [query, setQuery]   = useState("12 rue de la paix paris");
+// ════════════════════════════════════════════════════════════════════════════
+// PAGE
+// ════════════════════════════════════════════════════════════════════════════
+
+export default function LogementPage() {
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError]   = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ApiResponse | null>(null);
+  const [activeTab, setActiveTab] = useState<"synthese" | "details" | "agir">("synthese");
+
+  // État pour la synthèse Claude API
+  const [synthesis, setSynthesis] = useState<SynthesisResponse | null>(null);
+  const [synthLoading, setSynthLoading] = useState(false);
+  const [synthError, setSynthError] = useState<string | null>(null);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!query.trim()) return;
     setLoading(true);
     setError(null);
+    setSynthesis(null); // reset synthesis on new analysis
     try {
-      const res     = await fetch(`/api/georisques-logement?q=${encodeURIComponent(query)}`);
+      const res = await fetch(`/api/georisques-logement?q=${encodeURIComponent(query)}`);
       const payload = (await res.json()) as ApiResponse;
       if (!res.ok) throw new Error(payload.error ?? `Erreur ${res.status}`);
       setResult(payload);
+      setActiveTab("synthese");
     } catch (err) {
       setResult(null);
       setError(err instanceof Error ? err.message : "Erreur de chargement.");
@@ -237,366 +275,655 @@ export default function GeorisquesLogementPage() {
     }
   }
 
-  return (
-    <main style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--fg-1)", padding: "32px 20px 80px" }}>
-      <div style={{ maxWidth: 980, margin: "0 auto" }}>
+  // Appel Claude API à la demande
+  async function requestSynthesis() {
+    if (!result) return;
+    setSynthLoading(true);
+    setSynthError(null);
+    try {
+      const res = await fetch("/api/synthesize-logement", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: result }),
+      });
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload.error ?? "Erreur de synthèse");
+      setSynthesis(payload as SynthesisResponse);
+    } catch (err) {
+      setSynthError(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setSynthLoading(false);
+    }
+  }
 
-        {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, marginBottom: 32 }}>
-          <Link href="/" style={{ color: "var(--fg-2)", textDecoration: "none" }}>futur•e</Link>
+  const quick = useMemo(() => result ? computeQuickVerdict(result) : null, [result]);
+  const isPassoire = ["F", "G"].includes(result?.dpe?.etiquette_dpe ?? "");
+  const dpe = result?.dpe;
+  const georisques = result?.georisques?.parcel ?? result?.georisques?.address;
+  const allRisks = [
+    ...(georisques?.risks?.labels ?? []),
+    ...(georisques?.pprn?.labels ?? []),
+  ].filter((v, i, a) => a.indexOf(v) === i);
+
+  return (
+    <main style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--fg-1)" }}>
+
+      {/* ── NAV ── */}
+      <nav style={{
+        position: "sticky", top: 0, zIndex: 10,
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+        padding: "16px 28px", borderBottom: "1px solid var(--border-1)",
+        background: "rgba(6,8,18,0.65)", backdropFilter: "blur(16px)",
+      }}>
+        <Link href="/" style={{ fontFamily: "var(--font-serif)", fontSize: 18, color: "var(--fg-1)", textDecoration: "none", fontStyle: "italic" }}>
+          futur<span style={{ color: "var(--accent, #c8b89a)", fontStyle: "normal" }}>•</span>e
+        </Link>
+        <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" }}>
+            Module Logement
+          </span>
           <ThemeToggle />
         </div>
+      </nav>
 
-        <div style={{ marginBottom: 32, padding: 28, borderRadius: 16, background: "var(--bg-card)", border: "1px solid var(--border-1)" }}>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--orange)", marginBottom: 12 }}>
-            Module logement
-          </div>
-          <h1 style={{ margin: "0 0 12px", fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: "clamp(28px,4vw,44px)", lineHeight: 1.08 }}>
-            Prévisualisation complète — adresse → données logement
-          </h1>
-          <p style={{ margin: 0, color: "var(--fg-3)", lineHeight: 1.7 }}>
-            DPE, audit énergétique, ZFE, qualité de l&apos;air, eau, sites industriels, friches, risques naturels — toutes les sources agrégées en une requête.
-          </p>
-        </div>
+      {/* ── HEADER + RECHERCHE ── */}
+      <section style={{ maxWidth: 760, margin: "0 auto", padding: "64px 28px 48px" }}>
+        <Kicker>Module 2 · Logement</Kicker>
+        <h1 style={{ margin: "16px 0 20px", fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: "clamp(36px,5vw,56px)", lineHeight: 1.06, letterSpacing: "-0.02em", color: "var(--fg-hi)" }}>
+          Ce que votre adresse<br />
+          <span style={{ fontStyle: "italic", color: "var(--accent, #c8b89a)" }}>dit du climat à venir.</span>
+        </h1>
+        <p style={{ margin: "0 0 36px", fontSize: 16, lineHeight: 1.7, color: "var(--fg-3)" }}>
+          DPE, risques naturels, qualité de l&apos;air, eau potable, friches, ZFE — une lecture complète d&apos;un logement
+          dans un territoire qui change. À partir des données publiques officielles.
+        </p>
 
-        {/* Search */}
-        <form onSubmit={handleSubmit} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 12, marginBottom: 24 }}>
+        <form onSubmit={handleSubmit} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8 }}>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Saisir une adresse"
-            style={{ width: "100%", borderRadius: 12, border: "1px solid var(--border-1)", background: "var(--bg-elev)", color: "var(--fg-1)", padding: "14px 16px", fontSize: 15 }}
+            placeholder="Ex. : 12 rue des Minimes, La Rochelle"
+            style={{
+              border: "1px solid var(--border-2)", background: "var(--bg-elev)", color: "var(--fg-1)",
+              padding: "14px 18px", fontSize: 14, outline: "none", fontFamily: "var(--font-sans)",
+            }}
           />
-          <button type="submit" disabled={loading} style={{ borderRadius: 12, border: "1px solid transparent", background: "var(--orange)", color: "#060812", padding: "14px 18px", fontWeight: 600, cursor: loading ? "default" : "pointer" }}>
-            {loading ? "Chargement..." : "Tester"}
+          <button
+            type="submit"
+            disabled={loading || !query.trim()}
+            style={{
+              border: "none", background: loading ? "var(--bg-elev)" : "var(--accent, #c8b89a)",
+              color: loading ? "var(--fg-4)" : "#060812", padding: "14px 28px",
+              fontWeight: 500, fontSize: 12, cursor: loading ? "default" : "pointer",
+              fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase",
+              transition: "all 0.15s",
+            }}
+          >
+            {loading ? "Analyse…" : "Analyser"}
           </button>
         </form>
 
         {error && (
-          <div style={{ marginBottom: 24, padding: 16, borderRadius: 12, background: "var(--red-tint)", border: "1px solid var(--border-1)", color: "var(--fg-1)" }}>
-            {error}
+          <div style={{ marginTop: 16, padding: "12px 16px", background: "rgba(168,74,58,0.08)", border: "1px solid rgba(168,74,58,0.25)", color: "var(--red, #f87171)", fontSize: 13, fontFamily: "var(--font-mono)" }}>
+            ⚠ {error}
           </div>
         )}
+      </section>
 
-        {result && (
-          <div style={{ display: "grid", gap: 14 }}>
+      {/* ── RÉSULTATS ── */}
+      {result && quick && (
+        <div style={{ maxWidth: 760, margin: "0 auto", padding: "0 28px 96px" }}>
 
-            {/* Adresse + Altitude */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 14, alignItems: "start" }}>
-              <Section title="Adresse BAN" lines={[
-                result.address?.label,
-                result.address?.citycode ? `INSEE ${result.address.citycode}` : null,
-                result.address ? `${result.address.latitude}, ${result.address.longitude}` : null,
-              ]} />
-              {result.altitude != null && (
-                <Section title="Altitude IGN" lines={[`${result.altitude} m NGF`]} />
-              )}
+          {/* ─ Property Card ─ */}
+          <div style={{
+            background: "var(--bg-card)", border: "1px solid var(--border-2)",
+            padding: 24, marginBottom: 28,
+            display: "grid", gridTemplateColumns: "1fr auto", gap: 20, alignItems: "start",
+          }}>
+            <div>
+              <div style={{ fontFamily: "var(--font-serif)", fontSize: 17, color: "var(--fg-hi)", letterSpacing: "-0.01em", marginBottom: 4 }}>
+                {result.address?.label}
+              </div>
+              <div style={{ fontSize: 10, color: "var(--fg-4)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 16 }}>
+                {result.address?.city ?? ""} {result.address?.citycode ? `· INSEE ${result.address.citycode}` : ""}
+              </div>
+              <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+                {result.parcel && <Block label="Parcelle" value={result.parcel.parcelCode} sub={result.parcel.contenance ? `${result.parcel.contenance} m²` : undefined} />}
+                {result.altitude != null && <Block label="Altitude" value={`${result.altitude} m NGF`} />}
+                {dpe?.surface_m2 && <Block label="Surface" value={`${dpe.surface_m2} m²`} />}
+                {dpe?.annee_construction && <Block label="Construction" value={String(dpe.annee_construction)} />}
+              </div>
             </div>
+          </div>
 
-            {/* Parcelle */}
-            <Section title="Parcelle cadastrale" lines={[
-              result.parcel?.parcelCode ?? "Aucune parcelle résolue",
-              result.parcel?.nomCommune ?? null,
-              result.parcel?.contenance ? `${result.parcel.contenance} m²` : null,
-            ]} />
+          {/* ─ TABS ─ */}
+          <div style={{ display: "flex", gap: 0, borderBottom: "1px solid var(--border-1)", marginBottom: 28 }}>
+            {[
+              { id: "synthese", label: "Synthèse" },
+              { id: "details", label: "Détails" },
+              { id: "agir", label: "Agir" },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                style={{
+                  padding: "10px 20px", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase",
+                  background: "transparent", border: "none",
+                  color: activeTab === tab.id ? "var(--accent, #c8b89a)" : "var(--fg-4)",
+                  borderBottom: `2px solid ${activeTab === tab.id ? "var(--accent, #c8b89a)" : "transparent"}`,
+                  marginBottom: -1, cursor: "pointer", fontFamily: "var(--font-mono)",
+                  transition: "all 0.15s",
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-            {/* DPE */}
-            {result.dpe !== undefined && (
-              <Card title="DPE logement">
-                {result.dpe ? (
-                  <div style={{ display: "grid", gap: 12 }}>
-                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                      <DpeBadge label={result.dpe.etiquette_dpe} />
-                      <span style={{ color: "var(--fg-3)", fontSize: 13 }}>énergie</span>
-                      <DpeBadge label={result.dpe.etiquette_ges} />
-                      <span style={{ color: "var(--fg-3)", fontSize: 13 }}>GES</span>
+          {/* ═════════════════════ SYNTHÈSE ═════════════════════ */}
+          {activeTab === "synthese" && (
+            <div style={{ display: "grid", gap: 28 }}>
+
+              {/* Verdict synthétique calculé */}
+              <Verdict
+                level={quick.level}
+                title={
+                  quick.level === "bad" ? `Plusieurs signaux convergents sur cette adresse.` :
+                  quick.level === "medium" ? `Signaux modérés à surveiller.` :
+                  `Adresse globalement favorable.`
+                }
+                detail={
+                  quick.level === "bad" ? `Ce logement combine ${quick.signals} signaux structurants : DPE, exposition aux risques, qualité environnementale ou contraintes réglementaires. Une lecture détaillée par dimension est disponible dans l'onglet Détails.` :
+                  quick.level === "medium" ? `Ce logement présente ${quick.signals} signaux qui méritent attention sans être structurants. Voir Détails pour le profil complet.` :
+                  `Aucun signal critique détecté sur les dimensions principales. Voir Détails pour la lecture complète.`
+                }
+              />
+
+              {/* Synthèse Claude API */}
+              <div>
+                <SectionLabel>Lecture personnalisée</SectionLabel>
+
+                {!synthesis && !synthLoading && (
+                  <div style={{
+                    background: "var(--bg-card)", border: "1px solid var(--border-1)",
+                    padding: 24, textAlign: "center",
+                  }}>
+                    <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 15, color: "var(--fg-hi)", marginBottom: 8 }}>
+                      Une lecture narrative de votre situation.
                     </div>
-                    <DataGrid items={[
-                      result.dpe.surface_m2 ? `${result.dpe.surface_m2} m²` : null,
-                      result.dpe.annee_construction ? `Construit ${result.dpe.annee_construction}` : null,
-                      result.dpe.type_batiment ?? null,
-                      result.dpe.conso_ep_m2 ? `${result.dpe.conso_ep_m2} kWh EP/m²/an` : null,
-                      result.dpe.emission_ges_m2 ? `${result.dpe.emission_ges_m2} kg CO₂/m²/an` : null,
-                      result.dpe.date_dpe ? `DPE du ${result.dpe.date_dpe.slice(0, 10)}` : null,
-                    ]} />
+                    <div style={{ fontSize: 12, color: "var(--fg-3)", lineHeight: 1.7, marginBottom: 20, maxWidth: 460, margin: "0 auto 20px" }}>
+                      Au-delà des chiffres, futur•e peut traduire ces données en quelques paragraphes situés dans votre contexte. Calmes, sourcés, sans alarmisme.
+                    </div>
+                    <button
+                      onClick={requestSynthesis}
+                      style={{
+                        padding: "12px 24px", background: "var(--accent, #c8b89a)", color: "#060812",
+                        border: "none", fontFamily: "var(--font-mono)", fontSize: 11,
+                        letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
+                      }}
+                    >
+                      Générer la lecture
+                    </button>
+                    {synthError && (
+                      <div style={{ marginTop: 16, fontSize: 11, color: "var(--red, #f87171)" }}>
+                        {synthError}
+                      </div>
+                    )}
                   </div>
-                ) : <Nd />}
-              </Card>
-            )}
+                )}
 
-            {/* Audit énergétique */}
-            {result.audit !== undefined && (
-              <Card title="Audit énergétique">
-                {result.audit ? (
-                  <div style={{ display: "grid", gap: 10 }}>
-                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                      <span style={{ color: "var(--fg-3)", fontSize: 13 }}>DPE actuel :</span>
-                      <DpeBadge label={result.audit.classe_dpe_actuel} />
-                      {result.audit.date_audit && <span style={{ color: "var(--fg-4)", fontSize: 12 }}>{result.audit.date_audit.slice(0, 10)}</span>}
+                {synthLoading && (
+                  <div style={{
+                    background: "var(--bg-card)", border: "1px solid var(--border-1)",
+                    padding: 32, textAlign: "center",
+                  }}>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent-dim, #7a6e60)" }}>
+                      Analyse en cours…
                     </div>
-                    {result.audit.scenarios.length > 0 && (
-                      <div style={{ display: "grid", gap: 6 }}>
-                        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--fg-4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                          Scénarios de rénovation ({result.audit.scenarios.length})
+                    <div style={{ fontSize: 11, color: "var(--fg-4)", marginTop: 8 }}>
+                      Croisement des données et rédaction de la lecture
+                    </div>
+                  </div>
+                )}
+
+                {synthesis && (
+                  <div style={{ display: "grid", gap: 20 }}>
+                    {/* Verdict IA */}
+                    <Verdict level={quick.level} title={synthesis.verdict} detail={synthesis.reading} />
+
+                    {/* Signaux structurés */}
+                    {synthesis.signals && synthesis.signals.length > 0 && (
+                      <div style={{ display: "grid", gap: 8 }}>
+                        {synthesis.signals.map((s, i) => {
+                          const colors = {
+                            good: { bg: "rgba(74,124,89,0.06)", border: "rgba(74,124,89,0.25)", fg: "var(--green-light, #6aad7e)" },
+                            medium: { bg: "rgba(196,122,58,0.06)", border: "rgba(196,122,58,0.25)", fg: "var(--orange, #c47a3a)" },
+                            bad: { bg: "rgba(168,74,58,0.06)", border: "rgba(168,74,58,0.25)", fg: "var(--red, #f87171)" },
+                            warn: { bg: "rgba(184,160,66,0.06)", border: "rgba(184,160,66,0.25)", fg: "var(--yellow, #b8a042)" },
+                          };
+                          const c = colors[s.level];
+                          return (
+                            <div key={i} style={{ padding: "14px 18px", background: c.bg, border: `1px solid ${c.border}`, fontSize: 13, color: "var(--fg-2)", lineHeight: 1.6 }}>
+                              <span style={{ color: c.fg, marginRight: 10, fontFamily: "var(--font-mono)", fontSize: 11 }}>
+                                {s.level === "good" ? "↓" : s.level === "bad" ? "↑" : s.level === "warn" ? "!" : "→"}
+                              </span>
+                              {s.text}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Risk Grid synthétique — lecture rapide */}
+              <div>
+                <SectionLabel>Dimensions clés</SectionLabel>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+
+                  {dpe?.etiquette_dpe && (
+                    <RiskCard
+                      level={isPassoire ? "bad" : ["D","E"].includes(dpe.etiquette_dpe) ? "warn" : "good"}
+                      name="Performance énergétique"
+                      value={`DPE ${dpe.etiquette_dpe}`}
+                      unit={DPE_LABELS[dpe.etiquette_dpe] ?? ""}
+                      desc={
+                        isPassoire ? "Passoire thermique. Interdiction de location progressive d'ici 2034 selon l'étiquette."
+                        : dpe.etiquette_dpe === "E" ? "Logement énergivore. Concerné par les obligations de rénovation à horizon 2034."
+                        : dpe.etiquette_dpe === "D" ? "Performance moyenne. Pression réglementaire à anticiper."
+                        : "Logement performant énergétiquement."
+                      }
+                    />
+                  )}
+
+                  {allRisks.length > 0 && (
+                    <RiskCard
+                      level="bad"
+                      name="Risques naturels"
+                      value={String(allRisks.length)}
+                      unit={`risque${allRisks.length > 1 ? "s" : ""} référencé${allRisks.length > 1 ? "s" : ""}`}
+                      desc={`Cette parcelle est exposée à : ${allRisks.slice(0, 3).join(", ")}${allRisks.length > 3 ? "…" : ""}.`}
+                    />
+                  )}
+
+                  {result.zfe?.inZfe && (
+                    <RiskCard
+                      level="warn"
+                      name="ZFE active"
+                      value="Oui"
+                      unit={`${result.zfe.zones.length} zone${result.zfe.zones.length > 1 ? "s" : ""} de circulation restreinte`}
+                      desc="Cette adresse est située dans une zone à faibles émissions. Restrictions progressives selon vignette Crit'Air."
+                    />
+                  )}
+
+                  {result.atmo && (
+                    <RiskCard
+                      level={result.atmo.index.value <= 2 ? "good" : result.atmo.index.value <= 3 ? "medium" : "bad"}
+                      name="Qualité de l'air"
+                      value={result.atmo.index.label}
+                      unit={`indice du ${result.atmo.date}`}
+                      desc="Mesure quotidienne ATMO. À surveiller dans la durée — la moyenne annuelle est plus structurante qu'une mesure ponctuelle."
+                    />
+                  )}
+
+                  {result.cartofriches && result.cartofriches.count > 0 && (
+                    <RiskCard
+                      level={result.cartofriches.friches.some(f => f.sol_pollue) ? "warn" : "medium"}
+                      name="Friches industrielles"
+                      value={String(result.cartofriches.count)}
+                      unit="friches référencées à proximité"
+                      desc={
+                        result.cartofriches.friches.some(f => f.sol_pollue)
+                          ? "Au moins une friche présente une pollution des sols documentée."
+                          : "Friches référencées sans pollution des sols documentée."
+                      }
+                    />
+                  )}
+
+                  {result.eaufrance?.drinkingWater && (
+                    <RiskCard
+                      level={
+                        result.eaufrance.drinkingWater.conformBacterio === false || result.eaufrance.drinkingWater.conformPhysicoChem === false
+                          ? "bad"
+                          : "good"
+                      }
+                      name="Eau potable"
+                      value={
+                        result.eaufrance.drinkingWater.conformBacterio === false || result.eaufrance.drinkingWater.conformPhysicoChem === false
+                          ? "Non conforme"
+                          : "Conforme"
+                      }
+                      unit={result.eaufrance.drinkingWater.lastSampleDate ? `dernier prélèvement ${result.eaufrance.drinkingWater.lastSampleDate.slice(0,10)}` : ""}
+                      desc={
+                        result.eaufrance.drinkingWater.nitrates != null
+                          ? `Nitrates : ${result.eaufrance.drinkingWater.nitrates} mg/L. Limite réglementaire : 50 mg/L.`
+                          : "Dernier contrôle ARS sur le réseau de distribution."
+                      }
+                    />
+                  )}
+
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* ═════════════════════ DÉTAILS ═════════════════════ */}
+          {activeTab === "details" && (
+            <div style={{ display: "grid", gap: 36 }}>
+
+              {/* Énergie */}
+              {dpe && (
+                <div>
+                  <SectionLabel>Énergie & rénovation</SectionLabel>
+                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 18 }}>
+                    <div style={{ display: "flex", gap: 18, alignItems: "center" }}>
+                      <DpeBadge label={dpe.etiquette_dpe} size="lg" />
+                      <div>
+                        <div style={{ fontWeight: 500, fontSize: 15, color: "var(--fg-hi)" }}>
+                          Étiquette {dpe.etiquette_dpe ?? "—"} — {DPE_LABELS[dpe.etiquette_dpe ?? ""] ?? "Donnée indisponible"}
+                        </div>
+                        <div style={{ fontSize: 11, color: "var(--fg-4)", marginTop: 4 }}>
+                          GES {dpe.etiquette_ges ?? "—"} · DPE du {dpe.date_dpe?.slice(0, 10) ?? "—"}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px,1fr))", gap: 14 }}>
+                      {dpe.conso_ep_m2 != null && <Block label="Consommation" value={`${dpe.conso_ep_m2} kWh EP/m²/an`} />}
+                      {dpe.emission_ges_m2 != null && <Block label="Émissions GES" value={`${dpe.emission_ges_m2} kg CO₂/m²/an`} />}
+                      {dpe.type_batiment && <Block label="Type" value={dpe.type_batiment} />}
+                    </div>
+
+                    {result.audit && result.audit.scenarios.length > 0 && (
+                      <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 10 }}>
+                        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--accent-dim, #7a6e60)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                          Audit énergétique · {result.audit.scenarios.length} scénarios
                         </div>
                         {result.audit.scenarios.map((s, i) => (
-                          <div key={i} style={{ padding: "8px 12px", borderRadius: 8, background: "var(--bg-elev)", border: "1px solid var(--border-1)", display: "grid", gap: 2 }}>
-                            {s.categorie && <span style={{ fontWeight: 600, fontSize: 13 }}>{s.categorie}</span>}
-                            {s.etape && <span style={{ color: "var(--fg-3)", fontSize: 12 }}>{s.etape}</span>}
-                            {s.conso_ep != null && <span style={{ color: "var(--fg-4)", fontSize: 12 }}>{s.conso_ep} kWh EP/m²/an après travaux</span>}
+                          <div key={i} style={{ padding: "10px 14px", background: "var(--bg-elev)", border: "1px solid var(--border-1)", display: "flex", justifyContent: "space-between", gap: 12 }}>
+                            <div>
+                              {s.categorie && <div style={{ fontSize: 12, color: "var(--fg-1)" }}>{s.categorie}</div>}
+                              {s.etape && <div style={{ fontSize: 10, color: "var(--fg-4)", marginTop: 2 }}>{s.etape}</div>}
+                            </div>
+                            {s.conso_ep != null && (
+                              <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--fg-3)", whiteSpace: "nowrap" }}>
+                                {s.conso_ep} kWh/m²/an
+                              </span>
+                            )}
                           </div>
                         ))}
                       </div>
                     )}
                   </div>
-                ) : <Nd />}
-              </Card>
-            )}
-
-            {/* ZFE */}
-            {result.zfe !== undefined && (
-              <Card title="Zone à Faibles Émissions (ZFE)">
-                {result.zfe?.inZfe ? (
-                  <div style={{ display: "grid", gap: 8 }}>
-                    {result.zfe.zones.map((z) => (
-                      <div key={z.id} style={{ padding: "8px 12px", borderRadius: 8, background: "var(--orange-tint)", border: "1px solid var(--border-1)" }}>
-                        <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>{z.nom}</div>
-                        <DataGrid items={[
-                          z.vp_critair ? `VP : Crit'Air ${z.vp_critair.replace("V","")} min.` : null,
-                          z.deux_rm_critair ? `2-roues : Crit'Air ${z.deux_rm_critair.replace("V","")} min.` : null,
-                          z.date_debut ? `Depuis ${z.date_debut}` : null,
-                          z.date_fin ? `Jusqu'au ${z.date_fin}` : null,
-                        ]} />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div style={{ color: "var(--fg-3)", fontSize: 14 }}>Adresse hors ZFE</div>
-                )}
-              </Card>
-            )}
-
-            {/* ATMO */}
-            {result.atmo && (
-              <Card title="Qualité de l'air — ATMO">
-                <div style={{ display: "grid", gap: 8 }}>
-                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                    <span style={{ padding: "4px 10px", borderRadius: 999, background: result.atmo.index.color + "22", border: `1px solid ${result.atmo.index.color}44`, color: result.atmo.index.color, fontWeight: 600, fontSize: 13 }}>
-                      {result.atmo.index.label}
-                    </span>
-                    <span style={{ color: "var(--fg-4)", fontSize: 12 }}>Indice {result.atmo.index.value} — {result.atmo.date}</span>
-                  </div>
-                  <DataGrid items={[
-                    result.atmo.pollutants.pm25 ? `PM2.5 : ${result.atmo.pollutants.pm25.label}` : null,
-                    result.atmo.pollutants.pm10 ? `PM10 : ${result.atmo.pollutants.pm10.label}` : null,
-                    result.atmo.pollutants.no2 ? `NO₂ : ${result.atmo.pollutants.no2.label}` : null,
-                    result.atmo.pollutants.o3 ? `O₃ : ${result.atmo.pollutants.o3.label}` : null,
-                  ]} />
                 </div>
-              </Card>
-            )}
+              )}
 
-            {/* Eau */}
-            {result.eaufrance && (
-              <Card title="Eau — Hub'Eau">
-                <DataGrid items={[
-                  result.eaufrance.drinkingWater?.conformBacterio != null
-                    ? `Bactério : ${result.eaufrance.drinkingWater.conformBacterio ? "✓ conforme" : "⚠ non conforme"}`
-                    : null,
-                  result.eaufrance.drinkingWater?.nitrates != null
-                    ? `Nitrates : ${result.eaufrance.drinkingWater.nitrates} mg/L`
-                    : null,
-                  result.eaufrance.drought?.isDry
-                    ? `⚠ Cours d'eau à sec : ${result.eaufrance.drought.riverName ?? ""}`
-                    : result.eaufrance.drought?.riverName
-                      ? `${result.eaufrance.drought.riverName} — ${result.eaufrance.drought.status ?? "n.d."}`
-                      : null,
-                ]} />
-              </Card>
-            )}
-
-            {/* IREP */}
-            {result.irep !== undefined && (
-              <Card title={`Installations industrielles polluantes — IREP (5 km)`}>
-                {result.irep && result.irep.count > 0 ? (
-                  <div style={{ display: "grid", gap: 6 }}>
-                    <div style={{ color: "var(--fg-3)", fontSize: 13, marginBottom: 4 }}>
-                      {result.irep.count} installation{result.irep.count > 1 ? "s" : ""} déclarante{result.irep.count > 1 ? "s" : ""}
+              {/* Risques */}
+              {(allRisks.length > 0 || georisques?.seismic || georisques?.rga) && (
+                <div>
+                  <SectionLabel>Risques naturels & technologiques</SectionLabel>
+                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 16 }}>
+                    {allRisks.length > 0 && (
+                      <div>
+                        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-4)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
+                          Risques référencés
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                          {allRisks.map((r, i) => (
+                            <span key={i} style={{ fontFamily: "var(--font-mono)", fontSize: 11, padding: "5px 11px", background: "rgba(168,74,58,0.08)", border: "1px solid rgba(168,74,58,0.25)", color: "var(--red, #f87171)" }}>
+                              {r}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px,1fr))", gap: 14 }}>
+                      {georisques?.seismic?.label && <Block label="Sismicité" value={georisques.seismic.label} />}
+                      {georisques?.rga?.label && <Block label="Retrait-gonflement argiles" value={georisques.rga.label} />}
                     </div>
-                    {result.irep.installations.slice(0, 5).map((inst) => (
-                      <div key={inst.id} style={{ padding: "8px 12px", borderRadius: 8, background: "var(--bg-elev)", border: "1px solid var(--border-1)", display: "flex", justifyContent: "space-between", gap: 8 }}>
-                        <span style={{ fontSize: 13, fontWeight: 500 }}>{inst.nom}</span>
-                        <span style={{ color: "var(--fg-4)", fontSize: 12, whiteSpace: "nowrap" }}>
-                          {(inst.distanceM / 1000).toFixed(1)} km · {inst.nombre_polluants} polluants · {inst.milieu_emission ?? "—"}
-                        </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Qualité de l'air et eau */}
+              {(result.atmo || result.eaufrance) && (
+                <div>
+                  <SectionLabel>Air & eau</SectionLabel>
+                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 16 }}>
+                    {result.atmo && (
+                      <div>
+                        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-4)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>
+                          ATMO · {result.atmo.date}
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px,1fr))", gap: 12 }}>
+                          {result.atmo.pollutants.pm25 && <Block label="PM2.5" value={result.atmo.pollutants.pm25.label} />}
+                          {result.atmo.pollutants.pm10 && <Block label="PM10" value={result.atmo.pollutants.pm10.label} />}
+                          {result.atmo.pollutants.no2 && <Block label="NO₂" value={result.atmo.pollutants.no2.label} />}
+                          {result.atmo.pollutants.o3 && <Block label="O₃" value={result.atmo.pollutants.o3.label} />}
+                        </div>
+                      </div>
+                    )}
+                    {result.eaufrance?.drinkingWater && (
+                      <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)" }}>
+                        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-4)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>
+                          Eau potable · ARS
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px,1fr))", gap: 12 }}>
+                          <Block
+                            label="Bactériologie"
+                            value={result.eaufrance.drinkingWater.conformBacterio === true ? "Conforme" : result.eaufrance.drinkingWater.conformBacterio === false ? "Non conforme" : "—"}
+                          />
+                          <Block
+                            label="Physico-chimique"
+                            value={result.eaufrance.drinkingWater.conformPhysicoChem === true ? "Conforme" : result.eaufrance.drinkingWater.conformPhysicoChem === false ? "Non conforme" : "—"}
+                          />
+                          {result.eaufrance.drinkingWater.nitrates != null && (
+                            <Block label="Nitrates" value={`${result.eaufrance.drinkingWater.nitrates} mg/L`} sub="Limite : 50 mg/L" />
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Friches & installations */}
+              {((result.cartofriches?.count ?? 0) > 0 || (result.irep?.count ?? 0) > 0) && (
+                <div>
+                  <SectionLabel>Environnement industriel</SectionLabel>
+                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 14 }}>
+                    {result.cartofriches && result.cartofriches.count > 0 && (
+                      <div>
+                        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-4)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
+                          {result.cartofriches.count} friche{result.cartofriches.count > 1 ? "s" : ""} à proximité
+                        </div>
+                        <div style={{ display: "grid", gap: 8 }}>
+                          {result.cartofriches.friches.slice(0, 5).map(f => (
+                            <div key={f.id} style={{ padding: "10px 14px", background: "var(--bg-elev)", border: "1px solid var(--border-1)", fontSize: 12, display: "flex", justifyContent: "space-between" }}>
+                              <span style={{ color: "var(--fg-2)" }}>{f.nom}</span>
+                              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: f.sol_pollue ? "var(--red, #f87171)" : "var(--fg-4)" }}>
+                                {f.distanceM ? `${f.distanceM} m` : ""}{f.sol_pollue ? " · sol pollué" : ""}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {result.irep && result.irep.count > 0 && (
+                      <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)" }}>
+                        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-4)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
+                          {result.irep.count} installation{result.irep.count > 1 ? "s" : ""} polluante{result.irep.count > 1 ? "s" : ""} référencée{result.irep.count > 1 ? "s" : ""}
+                        </div>
+                        <div style={{ display: "grid", gap: 8 }}>
+                          {result.irep.installations.slice(0, 3).map(i => (
+                            <div key={i.id} style={{ padding: "10px 14px", background: "var(--bg-elev)", border: "1px solid var(--border-1)", fontSize: 12, display: "flex", justifyContent: "space-between" }}>
+                              <span style={{ color: "var(--fg-2)" }}>{i.nom}</span>
+                              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-4)" }}>
+                                {i.distanceM} m · {i.nombre_polluants} polluant{i.nombre_polluants > 1 ? "s" : ""}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ZFE */}
+              {result.zfe?.inZfe && (
+                <div>
+                  <SectionLabel>Zone à faibles émissions</SectionLabel>
+                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 12 }}>
+                    {result.zfe.zones.map(z => (
+                      <div key={z.id} style={{ display: "grid", gap: 6 }}>
+                        <div style={{ fontWeight: 500, fontSize: 13, color: "var(--fg-hi)" }}>{z.nom}</div>
+                        <div style={{ fontSize: 11, color: "var(--fg-4)", fontFamily: "var(--font-mono)" }}>
+                          VP : Crit&apos;Air {z.vp_critair ?? "—"} · 2RM : Crit&apos;Air {z.deux_rm_critair ?? "—"}
+                        </div>
                       </div>
                     ))}
                   </div>
-                ) : <div style={{ color: "var(--fg-3)", fontSize: 14 }}>Aucune installation déclarante dans un rayon de 5 km</div>}
-              </Card>
-            )}
+                </div>
+              )}
 
-            {/* Cartofriches */}
-            {result.cartofriches !== undefined && (
-              <Card title="Friches et sites potentiellement pollués — Cartofriches">
-                {result.cartofriches && result.cartofriches.count > 0 ? (
-                  <div style={{ display: "grid", gap: 6 }}>
-                    <div style={{ color: "var(--fg-3)", fontSize: 13, marginBottom: 4 }}>
-                      {result.cartofriches.count} site{result.cartofriches.count > 1 ? "s" : ""} dans la commune
-                    </div>
-                    {result.cartofriches.friches.slice(0, 5).map((f) => (
-                      <div key={f.id} style={{ padding: "8px 12px", borderRadius: 8, background: f.sol_pollue ? "var(--red-tint)" : "var(--bg-elev)", border: "1px solid var(--border-1)" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                          <span style={{ fontSize: 13, fontWeight: 500 }}>{f.nom}</span>
-                          {f.sol_pollue && <span style={{ fontSize: 11, color: "#ef4444", fontFamily: "var(--font-mono)" }}>SOL POLLUÉ</span>}
-                        </div>
-                        <div style={{ color: "var(--fg-4)", fontSize: 12, marginTop: 2 }}>
-                          {[f.type, f.statut, f.activite].filter(Boolean).join(" · ")}
-                        </div>
-                      </div>
-                    ))}
+              {/* Contexte commune */}
+              {result.communeData && (
+                <div>
+                  <SectionLabel>Contexte de la commune</SectionLabel>
+                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px,1fr))", gap: 14 }}>
+                    {result.communeData.commune.population && <Block label="Population" value={fInt(result.communeData.commune.population)} />}
+                    {result.communeData.iris?.passoires_taux != null && <Block label="Passoires" value={fPct(result.communeData.iris.passoires_taux)} sub="dans le quartier" />}
+                    {result.communeData.iris?.preca_energetique_pct != null && <Block label="Précarité énergétique" value={fPct(result.communeData.iris.preca_energetique_pct)} />}
+                    {result.communeData.iris?.taux_propriete != null && <Block label="Propriétaires" value={fPct(result.communeData.iris.taux_propriete)} />}
+                    {result.communeData.commune.sante.acces_medecins != null && <Block label="Accès médecins" value={fInt(result.communeData.commune.sante.acces_medecins)} sub="médecins/10 000 hab" />}
                   </div>
-                ) : <div style={{ color: "var(--fg-3)", fontSize: 14 }}>Aucune friche répertoriée dans la commune</div>}
-              </Card>
-            )}
+                </div>
+              )}
 
-            {/* ADEME commune / IRIS */}
-            {result.communeData !== undefined && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-                <Card title="ADEME commune">
-                  {result.communeData ? (
-                    <div style={{ display: "grid", gap: 10 }}>
-                      <div style={{ fontWeight: 600, fontSize: 15 }}>
-                        {result.communeData.commune.nom}
-                      </div>
-                      <DataGrid items={[
-                        result.communeData.commune.population != null
-                          ? `${formatInt(result.communeData.commune.population)} habitants`
-                          : null,
-                        result.communeData.commune.economie.revenu_median != null
-                          ? `Revenu médian : ${formatInt(result.communeData.commune.economie.revenu_median)} €`
-                          : null,
-                        result.communeData.commune.logements.vacants_pct != null
-                          ? `Logements vacants : ${formatPct(result.communeData.commune.logements.vacants_pct)}`
-                          : null,
-                        result.communeData.commune.logements.sociaux_pct != null
-                          ? `Logements sociaux : ${formatPct(result.communeData.commune.logements.sociaux_pct)}`
-                          : null,
-                        result.communeData.commune.qualite_air.pm25 != null
-                          ? `PM2.5 annuel : ${formatDecimal(result.communeData.commune.qualite_air.pm25)} µg/m³`
-                          : null,
-                        result.communeData.commune.sante.acces_medecins != null
-                          ? `Accès médecins : ${formatDecimal(result.communeData.commune.sante.acces_medecins)}`
-                          : null,
-                      ]} />
-                    </div>
-                  ) : <Nd />}
-                </Card>
+            </div>
+          )}
 
-                <Card title="ADEME IRIS agrégé">
-                  {result.communeData?.iris ? (
-                    <div style={{ display: "grid", gap: 10 }}>
-                      <div style={{ color: "var(--fg-3)", fontSize: 13 }}>
-                        {result.communeData.iris.iris_count} IRIS agrégés sur le nom de commune ADEME
-                      </div>
-                      <DataGrid items={[
-                        result.communeData.iris.passoires_taux != null
-                          ? `Passoires thermiques : ${formatPct(result.communeData.iris.passoires_taux)}`
-                          : null,
-                        result.communeData.iris.preca_energetique_pct != null
-                          ? `Précarité énergétique : ${formatPct(result.communeData.iris.preca_energetique_pct)}`
-                          : null,
-                        result.communeData.iris.taux_propriete != null
-                          ? `Propriétaires : ${formatPct(result.communeData.iris.taux_propriete)}`
-                          : null,
-                        result.communeData.iris.taux_hlm != null
-                          ? `Parc HLM : ${formatPct(result.communeData.iris.taux_hlm)}`
-                          : null,
-                        result.communeData.iris.taux_suroccupation != null
-                          ? `Suroccupation : ${formatPct(result.communeData.iris.taux_suroccupation)}`
-                          : null,
-                        result.communeData.iris.taux_transports_communs != null
-                          ? `Transports en commun : ${formatPct(result.communeData.iris.taux_transports_communs)}`
-                          : null,
-                      ]} />
-                    </div>
-                  ) : <Nd />}
-                </Card>
+          {/* ═════════════════════ AGIR ═════════════════════ */}
+          {activeTab === "agir" && (
+            <div style={{ display: "grid", gap: 36 }}>
+
+              {/* Actions IA générées si dispo, sinon actions par défaut selon le profil */}
+              <div>
+                <SectionLabel>Actions documentées</SectionLabel>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+
+                  {/* Actions générées par Claude API */}
+                  {synthesis?.actions && synthesis.actions.length > 0 ? (
+                    synthesis.actions.map((a, i) => (
+                      <ActionCard key={i} title={a.title} desc={a.description} href={a.href} primary={i === 0} />
+                    ))
+                  ) : (
+                    <>
+                      {isPassoire && (
+                        <ActionCard
+                          title="Comprendre le calendrier DPE"
+                          desc="Interdiction progressive de location des passoires thermiques d'ici 2034. Quels travaux, quelles aides, quel ordre."
+                          href="/savoir/dpe-calendrier"
+                          primary
+                        />
+                      )}
+                      {(isPassoire || dpe?.etiquette_dpe === "E") && (
+                        <ActionCard
+                          title="Évaluer le coût d'une rénovation thermique"
+                          desc="Devis-type par typologie de bien, MaPrimeRénov' applicable, retour sur investissement à 10 ans."
+                          href="/savoir/renovation-cout"
+                        />
+                      )}
+                      {allRisks.length > 0 && (
+                        <ActionCard
+                          title="Vérifier votre couverture assurance"
+                          desc="Contacter votre assureur pour anticiper toute évolution de prime ou de garantie sur votre zone."
+                          href="/savoir/assurance-littorale"
+                        />
+                      )}
+                      {result.zfe?.inZfe && (
+                        <ActionCard
+                          title="Anticiper les restrictions ZFE"
+                          desc="Calendrier d'interdiction par vignette Crit'Air, alternatives de mobilité, aides à la conversion."
+                          href="/savoir/zfe-comprendre"
+                        />
+                      )}
+                      {result.cartofriches?.friches.some(f => f.sol_pollue) && (
+                        <ActionCard
+                          title="Pollution des sols à proximité"
+                          desc="Que dit la réglementation, quelles vérifications faire en cas de jardin potager, à qui poser la question."
+                          href="/savoir/sols-pollues"
+                        />
+                      )}
+                      {result.eaufrance?.drinkingWater?.nitrates != null && result.eaufrance.drinkingWater.nitrates > 25 && (
+                        <ActionCard
+                          title="Nitrates dans l'eau potable"
+                          desc="Comprendre les seuils, les recours, et les alternatives pour les profils sensibles (nourrissons, femmes enceintes)."
+                          href="/savoir/eau-nitrates"
+                        />
+                      )}
+                      <ActionCard
+                        title="Comparer ce logement avec d'autres territoires"
+                        desc="Le comparateur futur•e permet de mesurer comment ce bien se situe face à des territoires alternatifs sur les mêmes dimensions."
+                        href="/comparateur"
+                      />
+                    </>
+                  )}
+
+                </div>
               </div>
-            )}
 
-            {/* Géorisques */}
-            <Section title="Géorisques parcelle" lines={[
-              result.georisques?.parcel?.pprn.zones[0] ?? "Pas de zone PPRN détaillée",
-              result.georisques?.parcel?.rga?.label ?? null,
-              result.georisques?.parcel?.seismic?.label ?? null,
-            ]} chips={[
-              ...(result.georisques?.parcel?.risks.labels ?? []),
-              ...(result.georisques?.parcel?.pprn.labels ?? []),
-            ]} />
+              {/* CTA synthèse si pas encore demandée */}
+              {!synthesis && (
+                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, textAlign: "center" }}>
+                  <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 14, color: "var(--fg-3)", marginBottom: 16 }}>
+                    Pour des actions personnalisées selon votre situation exacte, demandez la lecture narrative dans l&apos;onglet Synthèse.
+                  </div>
+                  <button
+                    onClick={() => setActiveTab("synthese")}
+                    style={{
+                      padding: "10px 20px", background: "transparent", border: "1px solid var(--border-2)",
+                      color: "var(--fg-2)", fontFamily: "var(--font-mono)", fontSize: 11,
+                      letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer",
+                    }}
+                  >
+                    Voir la Synthèse
+                  </button>
+                </div>
+              )}
 
-            <Section title="Géorisques commune" lines={[
-              result.georisques?.commune?.communeName ?? "n.d.",
-              result.georisques?.commune?.seismic?.label ?? null,
-            ]} chips={result.georisques?.commune?.riskLabels ?? []} />
-
-            {result.caveat && (
-              <div style={{ padding: 18, borderRadius: 14, background: "var(--bg-elev)", border: "1px solid var(--border-1)", color: "var(--fg-3)", lineHeight: 1.7, fontSize: 13 }}>
-                {result.caveat}
+              {/* Pages Savoir associées */}
+              <div>
+                <SectionLabel>Pages Savoir associées</SectionLabel>
+                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)" }}>
+                  {[
+                    { title: "Comprendre votre DPE et son calendrier", href: "/savoir/dpe-comprendre" },
+                    { title: "Le risque de submersion et sa trajectoire", href: "/savoir/submersion" },
+                    { title: "Cadmium et qualité des sols agricoles", href: "/savoir/cadmium" },
+                  ].map((l, i) => (
+                    <Link key={i} href={l.href} style={{
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      padding: "16px 20px",
+                      borderBottom: i < 2 ? "1px solid var(--border-1)" : "none",
+                      textDecoration: "none", color: "var(--fg-1)",
+                      fontFamily: "var(--font-serif)", fontSize: 17, fontStyle: "italic",
+                      transition: "padding 0.25s, color 0.25s",
+                    }}>
+                      {l.title}
+                      <span style={{ fontFamily: "var(--font-mono)", fontStyle: "normal", fontSize: 12, color: "var(--fg-4)" }}>→</span>
+                    </Link>
+                  ))}
+                </div>
               </div>
-            )}
-          </div>
-        )}
-      </div>
-    </main>
-  );
-}
 
-// ── UI primitives ─────────────────────────────────────────────────────────────
+            </div>
+          )}
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section style={{ padding: 20, borderRadius: 14, background: "var(--bg-card)", border: "1px solid var(--border-1)" }}>
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)", marginBottom: 14 }}>
-        {title}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function Section({ title, lines, chips = [] }: { title: string; lines: Array<string | null | undefined>; chips?: string[] }) {
-  const safeLines = lines.filter((l): l is string => Boolean(l));
-  return (
-    <Card title={title}>
-      <div style={{ display: "grid", gap: 6 }}>
-        {safeLines.length > 0 ? safeLines.map((l) => <div key={l}>{l}</div>) : <Nd />}
-      </div>
-      {chips.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 14 }}>
-          {chips.map((c) => (
-            <span key={c} style={{ display: "inline-flex", padding: "7px 10px", borderRadius: 999, background: "var(--bg-elev)", border: "1px solid var(--border-1)", fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--fg-2)" }}>
-              {c}
-            </span>
-          ))}
         </div>
       )}
-    </Card>
+    </main>
   );
-}
-
-function DataGrid({ items }: { items: Array<string | null | undefined> }) {
-  const safe = items.filter((i): i is string => Boolean(i));
-  if (safe.length === 0) return null;
-  return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 16px" }}>
-      {safe.map((item) => (
-        <span key={item} style={{ fontSize: 13, color: "var(--fg-2)" }}>{item}</span>
-      ))}
-    </div>
-  );
-}
-
-function Nd() {
-  return <div style={{ color: "var(--fg-4)", fontSize: 13 }}>n.d.</div>;
 }
