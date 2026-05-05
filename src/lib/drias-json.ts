@@ -13,6 +13,10 @@ const COLUMN_MAP: Record<string, string> = {
   NORRR_yr:        "column11", // Annual precipitation (mm)
   NORRR_seas_JJA:  "column12", // Summer precipitation (mm)
   NORRR_seas_DJF:  "column13", // Winter precipitation (mm)
+  NORRRq99_yr:     "column15", // Heavy precipitation percentile (p99)
+  NORRx1d_yr:      "column16", // Maximum 1-day precipitation
+  NORIFM40_yr:     "column17", // Fire weather index days > 40
+  NORSWI04_yr:     "column18", // Soil dryness days (SWI < 0.4)
 };
 
 type RawRow = Record<string, string | number | null>;

@@ -10,6 +10,16 @@ type CommuneResult = {
   codeDepartement: string | null;
 };
 
+type BanMunicipalityFeature = {
+  properties?: {
+    citycode?: string;
+    municipality?: string;
+    city?: string;
+    postcode?: string;
+    depcode?: string;
+  };
+};
+
 type SelectedCommune = {
   code: string;
   nom: string;
@@ -87,21 +97,21 @@ export function ComparatorSearch({
 
       try {
         const res = await fetch(
-          `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(query)}&fields=nom,code,codesPostaux,codeDepartement&limit=8&boost=population`,
+          `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=8&type=municipality`,
         );
         const payload = await res.json();
-        const data: CommuneResult[] = Array.isArray(payload)
-          ? payload.map((item: {
-              code: string;
-              nom: string;
-              codesPostaux?: string[];
-              codeDepartement?: string;
-            }) => ({
-              code: item.code,
-              nom: item.nom,
-              codePostal: item.codesPostaux?.[0] ?? null,
-              codeDepartement: item.codeDepartement ?? null,
-            }))
+        const data: CommuneResult[] = Array.isArray(payload?.features)
+          ? payload.features
+              .map((feature: BanMunicipalityFeature) => ({
+                code: feature.properties?.citycode ?? '',
+                nom:
+                  feature.properties?.municipality ??
+                  feature.properties?.city ??
+                  '',
+                codePostal: feature.properties?.postcode ?? null,
+                codeDepartement: feature.properties?.depcode ?? null,
+              }))
+              .filter((item: CommuneResult) => Boolean(item.code && item.nom))
           : [];
 
         updateState(key, (current) => {
@@ -138,20 +148,24 @@ export function ComparatorSearch({
 
       try {
         const res = await fetch(
-          `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(state.value)}&fields=nom,code,codesPostaux,codeDepartement&limit=1&boost=population`,
+          `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(state.value)}&limit=1&type=municipality`,
         );
         const payload = await res.json();
-        const first = Array.isArray(payload) ? payload[0] : null;
+        const first = Array.isArray(payload?.features) ? payload.features[0] : null;
+        const code = first?.properties?.citycode;
+        const nom =
+          first?.properties?.municipality ??
+          first?.properties?.city;
 
-        if (!first?.code || !first?.nom) {
+        if (!code || !nom) {
           return null;
         }
 
         const commune: CommuneResult = {
-          code: first.code,
-          nom: first.nom,
-          codePostal: first.codesPostaux?.[0] ?? null,
-          codeDepartement: first.codeDepartement ?? null,
+          code,
+          nom,
+          codePostal: first.properties?.postcode ?? null,
+          codeDepartement: first.properties?.depcode ?? null,
         };
 
         handleSelect(key, commune);

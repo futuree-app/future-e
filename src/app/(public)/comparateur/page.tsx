@@ -6,7 +6,10 @@ import { ComparatorSearch } from '@/components/ComparatorSearch';
 import { canAccessActionPage, normalizeAccount } from '@/lib/access';
 import { getCommuneFullData } from '@/lib/commune-data';
 import { getClimatDataCommune } from '@/lib/drias-json';
+import { getEaufranceSummary } from '@/lib/eaufrance';
 import { getGeorisquesSummary } from '@/lib/georisques';
+import { getAtmoForCommune } from '@/lib/atmo';
+import { getPollensForCommune } from '@/lib/pollen';
 import { getCurrentSessionUser } from '@/lib/user-account';
 
 export const dynamic = 'force-dynamic';
@@ -342,6 +345,31 @@ function buildCommune(
   };
 }
 
+function clampScore(value: number) {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function averageScores(values: Array<number | null | undefined>) {
+  const valid = values.filter((value): value is number => value != null && !Number.isNaN(value));
+  if (valid.length === 0) return null;
+  return Math.round(valid.reduce((sum, value) => sum + value, 0) / valid.length);
+}
+
+function formatNumber(value: number, maximumFractionDigits = 1) {
+  return new Intl.NumberFormat('fr-FR', {
+    maximumFractionDigits,
+    minimumFractionDigits: Number.isInteger(value) ? 0 : Math.min(1, maximumFractionDigits),
+  }).format(value);
+}
+
+function formatEuros(value: number) {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
 function buildVerdict(
   left: CommuneComparison,
   right: CommuneComparison,
@@ -376,7 +404,7 @@ function buildVerdict(
 
   if (leftAdvantages.length === 0 && rightAdvantages.length === 0) {
     return hasFullAccess
-      ? `<strong>${left.name}</strong> et <strong>${right.name}</strong> ressortent à un niveau comparable sur les six dimensions lues ici. La différence se jouera surtout dans le détail des indicateurs et dans votre profil.`
+      ? `<strong>${left.name}</strong> et <strong>${right.name}</strong> ressortent à un niveau comparable sur les dix dimensions lues ici. La différence se jouera surtout dans le détail des indicateurs et dans votre profil.`
       : `<strong>${left.name}</strong> et <strong>${right.name}</strong> ressortent à un niveau proche sur la lecture publique. Les dimensions réservées permettent d'arbitrer plus finement.${lockedContext}`;
   }
 
@@ -420,10 +448,17 @@ async function fetchRows(codes: string[]) {
 async function buildFallbackMetrics(
   inseeCode: string,
 ): Promise<Partial<Record<DimensionSlug, DisplayMetric>>> {
-  const [driasData, georisques, communeFullData] = await Promise.all([
+  const [driasData, georisques, communeFullData, atmo, eaufrance, pollens] = await Promise.all([
     getClimatDataCommune(inseeCode).catch(() => null),
     getGeorisquesSummary(inseeCode).catch(() => null),
     getCommuneFullData(inseeCode).catch(() => null),
+    process.env.ATMO_USERNAME && process.env.ATMO_PASSWORD
+      ? getAtmoForCommune(inseeCode).catch(() => null)
+      : Promise.resolve(null),
+    getEaufranceSummary(inseeCode).catch(() => null),
+    process.env.ATMO_USERNAME && process.env.ATMO_PASSWORD
+      ? getPollensForCommune(inseeCode).catch(() => null)
+      : Promise.resolve(null),
   ]);
 
   const fallback: Partial<Record<DimensionSlug, DisplayMetric>> = {};
@@ -454,18 +489,18 @@ async function buildFallbackMetrics(
     };
   }
 
-  const incendies = communeFullData?.commune.territoire.incendies;
-  const tauxBoisement = communeFullData?.commune.territoire.taux_boisement;
+  const fireWeatherDays = driasValues?.NORIFM40_yr;
+  const soilDrynessDays = driasValues?.NORSWI04_yr;
 
-  if (incendies != null || tauxBoisement != null) {
+  if (fireWeatherDays != null || soilDrynessDays != null) {
     const components: number[] = [];
 
-    if (incendies != null) {
-      components.push(Math.max(0, Math.min(100, incendies * 12)));
+    if (fireWeatherDays != null) {
+      components.push(Math.max(0, Math.min(100, Math.round((fireWeatherDays / 60) * 100))));
     }
 
-    if (tauxBoisement != null) {
-      components.push(Math.max(0, Math.min(100, tauxBoisement * 1.4)));
+    if (soilDrynessDays != null) {
+      components.push(Math.max(0, Math.min(100, Math.round((soilDrynessDays / 180) * 100))));
     }
 
     const score =
@@ -474,14 +509,14 @@ async function buildFallbackMetrics(
         : null;
 
     const feuxParts = [
-      incendies != null ? `${Math.round(incendies)} incendies recensés` : null,
-      tauxBoisement != null ? `${Math.round(tauxBoisement)}% de boisement` : null,
+      fireWeatherDays != null ? `${Math.round(fireWeatherDays)} jours IFM > 40` : null,
+      soilDrynessDays != null ? `${Math.round(soilDrynessDays)} jours de sécheresse des sols` : null,
     ].filter(Boolean);
 
     fallback.feux = {
       score,
       label: feuxParts.join(' · ') || 'Signal territorial disponible',
-      note: 'Source ADEME / Data Fair · territoire forestier et historique incendie',
+      note: 'Source DRIAS · indicateur feux météo et sécheresse des sols',
     };
   }
 
@@ -520,6 +555,126 @@ async function buildFallbackMetrics(
       score,
       label: mobilityParts.slice(0, 2).join(' · ') || 'Lecture mobilité disponible',
       note: 'Source ADEME / IRIS · motorisation, transports collectifs, densité',
+    };
+  }
+
+  const annualAir = communeFullData?.commune.qualite_air;
+  const annualAirScores = [
+    annualAir?.pm25 != null ? clampScore((annualAir.pm25 / 25) * 100) : null,
+    annualAir?.pm10 != null ? clampScore((annualAir.pm10 / 40) * 100) : null,
+    annualAir?.no2 != null ? clampScore((annualAir.no2 / 40) * 100) : null,
+    annualAir?.o3 != null ? clampScore((annualAir.o3 / 120) * 100) : null,
+  ];
+  const atmoScore = atmo?.index ? clampScore(((atmo.index.value - 1) / 5) * 100) : null;
+  const airScore = averageScores([...annualAirScores, atmoScore]);
+
+  if (airScore != null) {
+    const airParts = [
+      annualAir?.pm25 != null ? `PM2.5 ${formatNumber(annualAir.pm25)} µg/m³` : null,
+      annualAir?.no2 != null ? `NO₂ ${formatNumber(annualAir.no2)} µg/m³` : null,
+      annualAir?.pm10 != null ? `PM10 ${formatNumber(annualAir.pm10)} µg/m³` : null,
+      annualAir?.o3 != null ? `O₃ ${formatNumber(annualAir.o3)} µg/m³` : null,
+    ].filter(Boolean);
+
+    fallback['qualite-air'] = {
+      score: airScore,
+      label: airParts.slice(0, 2).join(' · ') || `Indice ATMO ${atmo?.index.label ?? 'disponible'}`,
+      note:
+        airParts.length > 0
+          ? atmo?.date
+            ? `Source ADEME / Atmo France · concentrations annuelles + indice ${atmo.date}`
+            : 'Source ADEME / Data Fair · concentrations annuelles'
+          : atmo?.date
+            ? `Source Atmo France / AASQA · indice du ${atmo.date}`
+            : 'Source Atmo France / AASQA',
+    };
+  }
+
+  const accesMedecins = communeFullData?.commune.sante.acces_medecins;
+  const eloignementServices = communeFullData?.commune.sante.eloignement_services_pct;
+  const soinScore = averageScores([
+    accesMedecins != null ? clampScore(100 - Math.min(100, (accesMedecins / 5) * 100)) : null,
+    eloignementServices != null ? clampScore(eloignementServices) : null,
+  ]);
+
+  if (soinScore != null) {
+    const soinsParts = [
+      accesMedecins != null ? `APL médecins ${formatNumber(accesMedecins)}` : null,
+      eloignementServices != null ? `${formatNumber(eloignementServices)}% à plus de 20 min d’un service` : null,
+    ].filter(Boolean);
+
+    fallback['acces-soins'] = {
+      score: soinScore,
+      label: soinsParts.join(' · ') || 'Lecture sanitaire disponible',
+      note: 'Source ADEME / IRDES · accessibilité médicale et éloignement des services',
+    };
+  }
+
+  if (pollens?.index) {
+    const pollenScore = clampScore(((pollens.index.value - 1) / 5) * 100);
+    const dominantTaxa =
+      pollens.responsibleTaxa.length > 0
+        ? pollens.responsibleTaxa.slice(0, 2).join(', ')
+        : 'taxons non précisés';
+
+    fallback.pollens = {
+      score: pollenScore,
+      label: `Indice pollen ${pollens.index.label} · ${dominantTaxa}`,
+      note: `Source ${pollens.source ?? 'Atmo France / AASQA'} · indice communal du ${pollens.date}`,
+    };
+  }
+
+  const drynessDays = driasValues?.NORSWI04_yr;
+  const summerRain = driasValues?.NORRR_seas_JJA;
+  const droughtScore = averageScores([
+    drynessDays != null ? clampScore((drynessDays / 200) * 100) : null,
+    summerRain != null ? clampScore(100 - Math.min(100, (summerRain / 250) * 100)) : null,
+    eaufrance?.drought?.status
+      ? eaufrance.drought.isDry
+        ? 90
+        : 35
+      : null,
+  ]);
+
+  if (droughtScore != null) {
+    const stressParts = [
+      drynessDays != null ? `${Math.round(drynessDays)} jours de sécheresse des sols` : null,
+      summerRain != null ? `${Math.round(summerRain)} mm de pluie l'été` : null,
+      eaufrance?.drought?.status ?? null,
+    ].filter(Boolean);
+
+    fallback['stress-hydrique'] = {
+      score: droughtScore,
+      label: stressParts.slice(0, 2).join(' · ') || "Lecture ressource en eau disponible",
+      note:
+        eaufrance?.drought?.lastObservationDate
+          ? `Source DRIAS / Eaufrance · dernière observation ${eaufrance.drought.lastObservationDate}`
+          : 'Source DRIAS / Eaufrance · sécheresse des sols et écoulements',
+    };
+  }
+
+  const revenuMedian = communeFullData?.commune.economie.revenu_median;
+  const inferioriteNationale = communeFullData?.commune.economie.inferiorite_nationale_pct;
+  const revenuScore =
+    revenuMedian != null ? clampScore(((30_000 - revenuMedian) / 15_000) * 100) : null;
+  const inferioriteScore =
+    inferioriteNationale != null ? clampScore(Math.max(0, -inferioriteNationale) * 4) : null;
+  const ecoScore = averageScores([revenuScore, inferioriteScore]);
+
+  if (ecoScore != null) {
+    const ecoParts = [
+      revenuMedian != null ? `Revenu médian ${formatEuros(revenuMedian)}` : null,
+      inferioriteNationale != null
+        ? inferioriteNationale < 0
+          ? `${formatNumber(Math.abs(inferioriteNationale))}% sous la médiane nationale`
+          : `${formatNumber(inferioriteNationale)}% au-dessus de la médiane nationale`
+        : null,
+    ].filter(Boolean);
+
+    fallback['vulnerabilite-eco'] = {
+      score: ecoScore,
+      label: ecoParts.join(' · ') || 'Lecture économique disponible',
+      note: 'Source ADEME / INSEE · revenu médian et position relative',
     };
   }
 
@@ -753,7 +908,7 @@ export default async function ComparateurPage({
         ) : (
           <section className="empty-state">
             Choisissez deux communes pour afficher leur lecture comparative. La page reste
-            publique, mais seules deux dimensions sont visibles sans abonnement.
+            publique, mais seules quatre dimensions sont visibles sans abonnement.
           </section>
         )}
       </main>

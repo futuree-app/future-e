@@ -47,6 +47,11 @@ export const NAV_ITEMS: NavItem[] = [
             description: 'Effets psychiques des vagues de chaleur',
           },
           {
+            label: 'Pollutions invisibles',
+            href: '/savoir/pollutions-invisibles',
+            description: 'Sols, air, eau : ce que contient votre commune',
+          },
+          {
             label: 'Pollens & allergies',
             href: '/savoir/pollens',
             description: 'Saison pollinique élargie en 2050',
@@ -159,6 +164,11 @@ export const NAV_ITEMS: NavItem[] = [
             label: 'Se préparer à la canicule',
             href: '/agir/canicule',
             description: 'Ventilation, hydratation, personnes vulnérables',
+          },
+          {
+            label: 'Face aux pollutions invisibles',
+            href: '/agir/pollutions-invisibles',
+            description: 'IREP, sites pollués, eau, air — agir à sa juste échelle',
           },
           {
             label: 'Gérer le risque inondation',
