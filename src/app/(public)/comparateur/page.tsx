@@ -10,6 +10,7 @@ import { getEaufranceSummary } from '@/lib/eaufrance';
 import { getGeorisquesSummary } from '@/lib/georisques';
 import { getAtmoForCommune } from '@/lib/atmo';
 import { getPollensForCommune } from '@/lib/pollen';
+import { getGissolForCommune } from '@/lib/gissol';
 import { getCurrentSessionUser } from '@/lib/user-account';
 
 export const dynamic = 'force-dynamic';
@@ -448,7 +449,7 @@ async function fetchRows(codes: string[]) {
 async function buildFallbackMetrics(
   inseeCode: string,
 ): Promise<Partial<Record<DimensionSlug, DisplayMetric>>> {
-  const [driasData, georisques, communeFullData, atmo, eaufrance, pollens] = await Promise.all([
+  const [driasData, georisques, communeFullData, atmo, eaufrance, pollens, gissol] = await Promise.all([
     getClimatDataCommune(inseeCode).catch(() => null),
     getGeorisquesSummary(inseeCode).catch(() => null),
     getCommuneFullData(inseeCode).catch(() => null),
@@ -459,6 +460,7 @@ async function buildFallbackMetrics(
     process.env.ATMO_USERNAME && process.env.ATMO_PASSWORD
       ? getPollensForCommune(inseeCode).catch(() => null)
       : Promise.resolve(null),
+    getGissolForCommune(inseeCode).catch(() => null),
   ]);
 
   const fallback: Partial<Record<DimensionSlug, DisplayMetric>> = {};
@@ -490,33 +492,42 @@ async function buildFallbackMetrics(
   }
 
   const fireWeatherDays = driasValues?.NORIFM40_yr;
-  const soilDrynessDays = driasValues?.NORSWI04_yr;
+  // PPRIF ou risque incendie déclaré dans GASPAR (Géorisques)
+  const hasWildfireRisk = georisques?.flags.wildfire ?? false;
+  // La densité sert à identifier les zones urbaines sans forêt combustible
+  const communeDensityForFire = communeFullData?.commune.territoire.densite;
 
-  if (fireWeatherDays != null || soilDrynessDays != null) {
-    const components: number[] = [];
+  if (fireWeatherDays != null) {
+    // L'IFM seul mesure la météo favorable aux feux — pas la présence de forêt.
+    // On normalise sur 150 j (valeur extrême sud) pour mieux discriminer les zones.
+    const ifmScore = clampScore((fireWeatherDays / 150) * 100);
 
-    if (fireWeatherDays != null) {
-      components.push(Math.max(0, Math.min(100, Math.round((fireWeatherDays / 60) * 100))));
+    let score: number;
+    if (hasWildfireRisk) {
+      // GASPAR confirme un risque incendie de forêt (PPRIF ou équivalent) → IFM direct
+      score = ifmScore;
+    } else if (communeDensityForFire != null && communeDensityForFire > 2000) {
+      // Milieu urbain dense : végétation combustible quasi absente
+      score = clampScore(Math.round(ifmScore * 0.05));
+    } else if (communeDensityForFire != null && communeDensityForFire > 500) {
+      // Péri-urbain sans PPRIF
+      score = clampScore(Math.round(ifmScore * 0.2));
+    } else {
+      // Rural sans PPRIF déclaré → météo seule, pondérée par l'incertitude
+      score = clampScore(Math.round(ifmScore * 0.4));
     }
-
-    if (soilDrynessDays != null) {
-      components.push(Math.max(0, Math.min(100, Math.round((soilDrynessDays / 180) * 100))));
-    }
-
-    const score =
-      components.length > 0
-        ? Math.round(components.reduce((sum, value) => sum + value, 0) / components.length)
-        : null;
 
     const feuxParts = [
-      fireWeatherDays != null ? `${Math.round(fireWeatherDays)} jours IFM > 40` : null,
-      soilDrynessDays != null ? `${Math.round(soilDrynessDays)} jours de sécheresse des sols` : null,
+      `${Math.round(fireWeatherDays)} jours IFM > 40`,
+      hasWildfireRisk ? 'PPRIF déclaré' : null,
     ].filter(Boolean);
 
     fallback.feux = {
       score,
-      label: feuxParts.join(' · ') || 'Signal territorial disponible',
-      note: 'Source DRIAS · indicateur feux météo et sécheresse des sols',
+      label: feuxParts.join(' · '),
+      note: hasWildfireRisk
+        ? 'Source DRIAS + Géorisques · conditions météo et PPRIF déclaré'
+        : 'Source DRIAS · conditions météo (pas de PPRIF signalé sur cette commune)',
     };
   }
 
@@ -675,6 +686,18 @@ async function buildFallbackMetrics(
       score: ecoScore,
       label: ecoParts.join(' · ') || 'Lecture économique disponible',
       note: 'Source ADEME / INSEE · revenu médian et position relative',
+    };
+  }
+
+  if (gissol?.cadmium.value != null) {
+    fallback.cadmium = {
+      score: gissol.cadmium.score,
+      label: gissol.cadmium.value != null
+        ? `${gissol.cadmium.value.toFixed(2)} mg/kg · ${gissol.cadmium.label}`
+        : gissol.cadmium.label,
+      note: gissol.cadmium.source === 'api'
+        ? 'Source GisSol / ADEME · mesure RMQS communale'
+        : 'Source GisSol RMQS · teneur médiane départementale',
     };
   }
 

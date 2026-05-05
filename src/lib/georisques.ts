@@ -74,6 +74,7 @@ export type GeorisquesSummary = {
     clay: boolean;
     storm: boolean;
     seismic: boolean;
+    wildfire: boolean;
   };
   seismic: {
     code: string | null;
@@ -242,6 +243,10 @@ async function loadGeorisquesSummary(inseeCode: string): Promise<GeorisquesSumma
     seismic:
       Boolean(seismicItem?.code_zone) ||
       normalizedLabels.some((label) => label.includes("seisme")),
+    // PPRIF ou risque incendie déclaré dans GASPAR
+    wildfire: normalizedLabels.some(
+      (label) => label.includes("incendie") || label.includes("feux de foret"),
+    ),
   };
 
   return {
