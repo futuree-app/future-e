@@ -492,30 +492,66 @@ async function buildFallbackMetrics(
   }
 
   const fireWeatherDays = driasValues?.NORIFM40_yr;
-  // PPRIF ou risque incendie déclaré dans GASPAR (Géorisques)
   const hasWildfireRisk = georisques?.flags.wildfire ?? false;
-  // La densité sert à identifier les zones urbaines sans forêt combustible
-  const communeDensityForFire = communeFullData?.commune.territoire.densite;
 
   if (fireWeatherDays != null) {
-    // L'IFM seul mesure la météo favorable aux feux — pas la présence de forêt.
-    // On normalise sur 150 j (valeur extrême sud) pour mieux discriminer les zones.
+    // IFM mesure la météo favorable aux feux — pas la présence de forêt combustible.
+    // On pondère par un facteur départemental de végétation boisée (RMQS / IFN / IGN).
     const ifmScore = clampScore((fireWeatherDays / 150) * 100);
 
-    let score: number;
-    if (hasWildfireRisk) {
-      // GASPAR confirme un risque incendie de forêt (PPRIF ou équivalent) → IFM direct
-      score = ifmScore;
-    } else if (communeDensityForFire != null && communeDensityForFire > 2000) {
-      // Milieu urbain dense : végétation combustible quasi absente
-      score = clampScore(Math.round(ifmScore * 0.05));
-    } else if (communeDensityForFire != null && communeDensityForFire > 500) {
-      // Péri-urbain sans PPRIF
-      score = clampScore(Math.round(ifmScore * 0.2));
-    } else {
-      // Rural sans PPRIF déclaré → météo seule, pondérée par l'incertitude
-      score = clampScore(Math.round(ifmScore * 0.4));
-    }
+    // Facteur végétation par département (0 = pas de forêt combustible, 1 = forêt dense)
+    const DEPT_FIRE_FACTOR: Record<string, number> = {
+      // Landes / Gironde : plus grande forêt de pins d'Europe
+      "40": 0.95, "33": 0.90,
+      // Méditerranée : maquis + garrigue + pins très secs
+      "13": 0.90, "83": 0.90, "06": 0.85, "04": 0.85, "05": 0.80,
+      // Corse
+      "2A": 0.92, "2B": 0.92,
+      // Languedoc-Roussillon
+      "34": 0.82, "30": 0.82, "11": 0.78, "66": 0.80, "48": 0.70,
+      // Var hinterland / Alpes-Maritimes intérieur déjà dans PACA
+      // Haute-Garonne / Ariège / forêts pyrénéennes
+      "09": 0.72, "31": 0.55, "65": 0.70, "64": 0.65,
+      // Occitanie intérieure
+      "12": 0.60, "46": 0.55, "47": 0.50, "81": 0.55, "82": 0.50,
+      // Nouvelle-Aquitaine — Périgord, Corrèze, Creuse
+      "24": 0.65, "19": 0.60, "23": 0.55, "87": 0.55, "16": 0.50,
+      "17": 0.45, "79": 0.40,
+      // Centre / Sologne / forêts domaniales
+      "41": 0.55, "18": 0.45, "45": 0.45, "36": 0.50,
+      // Auvergne / Massif Central
+      "63": 0.55, "15": 0.55, "43": 0.55, "03": 0.45,
+      // Bretagne — bocage, landes côtières mais pas de grands massifs
+      "29": 0.30, "22": 0.30, "56": 0.30, "35": 0.28,
+      // Normandie
+      "14": 0.28, "50": 0.28, "61": 0.30, "27": 0.30, "76": 0.25,
+      // Hauts-de-France : grandes plaines céréalières, peu de forêt combustible
+      "59": 0.15, "62": 0.15, "80": 0.18, "02": 0.20, "60": 0.22,
+      // Grand Est
+      "57": 0.35, "54": 0.30, "55": 0.35, "08": 0.30,
+      "51": 0.30, "52": 0.40, "10": 0.40,
+      "67": 0.45, "68": 0.45, "88": 0.50, "70": 0.45, "90": 0.35,
+      // Bourgogne
+      "21": 0.50, "71": 0.48, "89": 0.45, "58": 0.48,
+      // Franche-Comté
+      "25": 0.50, "39": 0.55,
+      // Rhône-Alpes
+      "38": 0.50, "73": 0.55, "74": 0.45, "01": 0.40,
+      "07": 0.65, "26": 0.65, "42": 0.40, "69": 0.30,
+      // Île-de-France — forêts de Fontainebleau, Rambouillet mais zones très urbaines
+      "77": 0.35, "78": 0.25, "91": 0.25, "95": 0.22,
+      // Paris + petite couronne : béton, quasi pas de forêt combustible
+      "75": 0.02, "92": 0.04, "93": 0.04, "94": 0.04,
+      // Pays de la Loire
+      "44": 0.28, "49": 0.32, "53": 0.30, "72": 0.35, "85": 0.38,
+    };
+
+    const dept = inseeCode.padStart(5, "0").slice(0, 2);
+    const baseFactor = DEPT_FIRE_FACTOR[dept] ?? 0.35;
+    // GASPAR wildfire flag = PPRIF ou équivalent → score plein IFM
+    const vegetationFactor = hasWildfireRisk ? 1.0 : baseFactor;
+
+    const score = clampScore(Math.round(ifmScore * vegetationFactor));
 
     const feuxParts = [
       `${Math.round(fireWeatherDays)} jours IFM > 40`,
@@ -527,7 +563,7 @@ async function buildFallbackMetrics(
       label: feuxParts.join(' · '),
       note: hasWildfireRisk
         ? 'Source DRIAS + Géorisques · conditions météo et PPRIF déclaré'
-        : 'Source DRIAS · conditions météo (pas de PPRIF signalé sur cette commune)',
+        : 'Source DRIAS · conditions météo pondérées par la végétation départementale',
     };
   }
 
