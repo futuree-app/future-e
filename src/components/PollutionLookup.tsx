@@ -59,7 +59,7 @@ async function searchIrep(commune: Commune): Promise<string> {
   const data = (await res.json()) as { installations?: IrepInstallation[]; count?: number };
   const items = data.installations ?? [];
 
-  if (!items.length) return '__empty__Aucune installation industrielle classée ICPE recensée dans un rayon de 5 km autour de cette commune.';
+  if (!items.length) return '__empty__Aucune installation industrielle classée ICPE recensée dans un rayon de 10 km autour de cette commune selon les données ADEME.';
 
   return items.map(it => {
     const dist = it.distanceM < 1000
@@ -118,7 +118,7 @@ const ATMO_LABELS: Record<string, string> = { pm25: 'PM2.5', pm10: 'PM10', no2: 
 
 async function searchAtmo(commune: Commune): Promise<string> {
   const res = await fetch(`/api/atmo/${commune.code}`);
-  if (res.status === 404) return "__empty__Indice ATMO non disponible pour cette commune aujourd'hui. La couverture varie selon les régions.";
+  if (res.status === 404 || res.status === 500) return "__empty__Indice ATMO non disponible pour cette commune aujourd'hui. La couverture du réseau ATMO varie selon les régions — les grandes agglomérations sont mieux couvertes.";
   if (!res.ok) throw new Error(`Erreur ${res.status}`);
 
   const data = (await res.json()) as AtmoData;
@@ -150,9 +150,9 @@ type EauData = {
 };
 
 function eauConformBadge(val: string | null | undefined): string {
-  if (!val) return '<span class="result-badge badge-neutral">Données insuffisantes</span>';
   if (val === 'Conforme') return '<span class="result-badge badge-ok">Conforme</span>';
-  return '<span class="result-badge badge-alert">Non conforme</span>';
+  if (val === 'Non conforme') return '<span class="result-badge badge-alert">Non conforme</span>';
+  return '<span class="result-badge badge-neutral">Non renseigné</span>';
 }
 
 async function searchEau(commune: Commune): Promise<string> {

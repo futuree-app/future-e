@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const data = await getIrepNearPoint(lat, lon, 5000);
+    const data = await getIrepNearPoint(lat, lon, 10000);
     return NextResponse.json(data, {
       headers: { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' },
     });
