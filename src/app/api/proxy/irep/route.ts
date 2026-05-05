@@ -1,30 +1,21 @@
 import { NextResponse } from 'next/server';
-
-const UPSTREAM = 'https://data.georisques.gouv.fr/api/v1/installations_classees';
+import { getIrepNearPoint } from '@/lib/irep';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const insee = searchParams.get('insee');
-  if (!insee) {
-    return NextResponse.json({ error: 'Missing insee parameter.' }, { status: 400 });
+  const lat = parseFloat(searchParams.get('lat') ?? '');
+  const lon = parseFloat(searchParams.get('lon') ?? '');
+
+  if (isNaN(lat) || isNaN(lon)) {
+    return NextResponse.json({ error: 'Missing lat/lon parameters.' }, { status: 400 });
   }
 
-  const url = `${UPSTREAM}?code_insee=${encodeURIComponent(insee)}&page=1&page_size=20`;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
-
   try {
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeout);
-    if (!res.ok) {
-      return NextResponse.json({ error: `Upstream error ${res.status}` }, { status: res.status });
-    }
-    const data = await res.json();
+    const data = await getIrepNearPoint(lat, lon, 5000);
     return NextResponse.json(data, {
       headers: { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' },
     });
   } catch (err) {
-    clearTimeout(timeout);
     const message = err instanceof Error ? err.message : 'IREP proxy failed.';
     return NextResponse.json({ error: message }, { status: 502 });
   }

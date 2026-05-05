@@ -2,11 +2,14 @@
 
 import { useState, useRef, useCallback } from 'react';
 
+// ── Types ────────────────────────────────────────────────────────────────────
+
 type Commune = {
   nom: string;
   code: string;
   codesPostaux?: string[];
   departement?: { nom: string };
+  centre?: { type: string; coordinates: [number, number] }; // [lon, lat]
 };
 
 type ResultState = 'idle' | 'loading' | 'success' | 'empty' | 'error';
@@ -20,20 +23,13 @@ type LookupState = {
   resultHtml: string;
 };
 
-const initialState = (): LookupState => ({
-  inputValue: '',
-  selectedCommune: null,
-  dropdownOpen: false,
-  suggestions: [],
-  resultState: 'idle',
-  resultHtml: '',
-});
+// ── Commune autocomplete ──────────────────────────────────────────────────────
 
 async function fetchCommunes(q: string): Promise<Commune[]> {
   if (q.length < 2) return [];
   try {
     const res = await fetch(
-      `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,code,codesPostaux,departement&boost=population&limit=6`
+      `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,code,codesPostaux,departement,centre&boost=population&limit=6`
     );
     if (!res.ok) return [];
     return res.json();
@@ -42,8 +38,166 @@ async function fetchCommunes(q: string): Promise<Commune[]> {
   }
 }
 
+// ── IREP — installations industrielles ───────────────────────────────────────
+
+type IrepInstallation = {
+  id: number;
+  nom: string;
+  distanceM: number;
+  nombre_polluants: number;
+  milieu_emission: string | null;
+};
+
+async function searchIrep(commune: Commune): Promise<string> {
+  const coords = commune.centre?.coordinates;
+  if (!coords) throw new Error('Coordonnées non disponibles pour cette commune.');
+
+  const [lon, lat] = coords;
+  const res = await fetch(`/api/proxy/irep?lat=${lat}&lon=${lon}`);
+  if (!res.ok) throw new Error(`Erreur ${res.status}`);
+
+  const data = (await res.json()) as { installations?: IrepInstallation[]; count?: number };
+  const items = data.installations ?? [];
+
+  if (!items.length) return '__empty__Aucune installation industrielle classée ICPE recensée dans un rayon de 5 km autour de cette commune.';
+
+  return items.map(it => {
+    const dist = it.distanceM < 1000
+      ? `${it.distanceM} m`
+      : `${(it.distanceM / 1000).toFixed(1)} km`;
+    const polluants = it.nombre_polluants > 0
+      ? `${it.nombre_polluants} polluant${it.nombre_polluants > 1 ? 's' : ''} déclaré${it.nombre_polluants > 1 ? 's' : ''}`
+      : '';
+    const milieu = it.milieu_emission ?? '';
+    const meta = [dist, polluants, milieu].filter(Boolean).join(' · ');
+    return `<div class="lookup-result-item">
+      <div class="result-name">${it.nom}</div>
+      <div class="result-meta">${meta}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── SIS / Basol — sites pollués ───────────────────────────────────────────────
+
+async function searchSis(commune: Commune): Promise<string> {
+  const res = await fetch(`/api/proxy/sis?insee=${encodeURIComponent(commune.code)}`);
+  if (!res.ok) throw new Error(`Erreur ${res.status}`);
+
+  const data = (await res.json()) as {
+    data?: Array<Record<string, string>>;
+    results?: Array<Record<string, string>>;
+  };
+  const items = data.data ?? data.results ?? [];
+
+  if (!items.length) return '__empty__Aucun site pollué ou ancien site industriel recensé sur cette commune dans les bases Basias/Basol.';
+
+  return items.slice(0, 12).map(it => {
+    const nom = it.nom ?? it.raisonSociale ?? it.nomSite ?? 'Site';
+    const statut = it.statut ?? it.etatSite ?? '';
+    const adresse = it.adresse ?? it.commune ?? '';
+    const type = it.baseDonnees ?? (it.sitePollue ? 'Basol' : 'Basias');
+    const cls = statut?.toLowerCase().includes('traité') ? 'badge-ok' : statut ? 'badge-warn' : 'badge-neutral';
+    return `<div class="lookup-result-item">
+      <div class="result-name">${nom}<span class="result-badge badge-neutral">${type}</span>${statut ? `<span class="result-badge ${cls}">${statut}</span>` : ''}</div>
+      <div class="result-meta">${adresse}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── ATMO — qualité de l'air ──────────────────────────────────────────────────
+
+type AtmoLevel = { value: number; label: string; color: string };
+type AtmoData = {
+  inseeCode: string;
+  date: string;
+  index: AtmoLevel;
+  pollutants: { pm25: AtmoLevel | null; pm10: AtmoLevel | null; no2: AtmoLevel | null; o3: AtmoLevel | null };
+};
+
+const ATMO_LABELS: Record<string, string> = { pm25: 'PM2.5', pm10: 'PM10', no2: 'NO₂', o3: 'O₃' };
+
+async function searchAtmo(commune: Commune): Promise<string> {
+  const res = await fetch(`/api/atmo/${commune.code}`);
+  if (res.status === 404) return "__empty__Indice ATMO non disponible pour cette commune aujourd'hui. La couverture varie selon les régions.";
+  if (!res.ok) throw new Error(`Erreur ${res.status}`);
+
+  const data = (await res.json()) as AtmoData;
+  const idx = data.index;
+  const cls = idx.value <= 2 ? 'badge-ok' : idx.value <= 3 ? 'badge-warn' : 'badge-alert';
+
+  const polluantLines = (Object.entries(data.pollutants) as [string, AtmoLevel | null][])
+    .filter(([, v]) => v !== null)
+    .map(([k, v]) => `${ATMO_LABELS[k] ?? k} <span class="result-badge ${v!.value <= 2 ? 'badge-ok' : v!.value <= 3 ? 'badge-warn' : 'badge-alert'}">${v!.label}</span>`)
+    .join('&ensp;·&ensp;');
+
+  return `<div class="lookup-result-item">
+    <div class="result-name">
+      Indice ATMO <span class="result-badge ${cls}">${idx.label}</span>
+      <span style="font-size:11px;font-weight:400;color:var(--fg-4);font-family:var(--font-mono);margin-left:8px;">${data.date}</span>
+    </div>
+    <div class="result-meta">${polluantLines || 'Détail par polluant non disponible'}</div>
+  </div>`;
+}
+
+// ── EAU POTABLE ───────────────────────────────────────────────────────────────
+
+type EauData = {
+  empty?: boolean;
+  conformBacterio?: string | null;
+  conformPhysicoChem?: string | null;
+  lastSampleDate?: string | null;
+  highlights?: Array<{ label: string; value: number; unit: string; threshold?: number; warn?: number }>;
+};
+
+function eauConformBadge(val: string | null | undefined): string {
+  if (!val) return '<span class="result-badge badge-neutral">Données insuffisantes</span>';
+  if (val === 'Conforme') return '<span class="result-badge badge-ok">Conforme</span>';
+  return '<span class="result-badge badge-alert">Non conforme</span>';
+}
+
+async function searchEau(commune: Commune): Promise<string> {
+  const res = await fetch(`/api/proxy/eau?insee=${encodeURIComponent(commune.code)}`);
+  if (!res.ok) throw new Error(`Erreur ${res.status}`);
+
+  const data = (await res.json()) as EauData;
+  if (data.empty) return "__empty__Aucun contrôle d'eau potable récent disponible pour cette commune dans Hub'Eau (ARS).";
+
+  const date = data.lastSampleDate ?? '—';
+
+  const conformLines = [
+    `<div class="result-meta">Bactériologique ${eauConformBadge(data.conformBacterio)}&ensp;·&ensp;Physico-chimique ${eauConformBadge(data.conformPhysicoChem)}</div>`,
+  ].join('');
+
+  let highlightLines = '';
+  if (data.highlights?.length) {
+    highlightLines = data.highlights.map(h => {
+      const bad = h.threshold != null && h.value > h.threshold;
+      const warn = !bad && h.warn != null && h.value > h.warn;
+      const cls = bad ? 'badge-alert' : warn ? 'badge-warn' : 'badge-ok';
+      const note = bad ? ` — dépasse la norme (${h.threshold} ${h.unit})` : warn ? ` — zone de vigilance (> ${h.warn} ${h.unit})` : '';
+      return `<div class="result-meta" style="margin-top:4px;">${h.label} : <strong style="color:var(--fg-1)">${h.value} ${h.unit}</strong><span class="result-badge ${cls}" style="margin-left:6px;">${bad ? 'Dépassement' : warn ? 'Vigilance' : 'Normal'}</span>${note}</div>`;
+    }).join('');
+  }
+
+  return `<div class="lookup-result-item">
+    <div class="result-name">Dernier contrôle · ${date}</div>
+    ${conformLines}
+    ${highlightLines}
+    <div class="result-meta" style="margin-top:8px;font-size:12px;color:var(--fg-4);">Source : ARS via Hub'Eau · Les nitrates au-delà de 50 mg/L, le plomb au-delà de 10 µg/L et l'arsenic au-delà de 10 µg/L constituent des dépassements réglementaires.</div>
+  </div>`;
+}
+
+// ── Hook ─────────────────────────────────────────────────────────────────────
+
 function useLookup(blockId: string) {
-  const [state, setState] = useState<LookupState>(initialState);
+  const [state, setState] = useState<LookupState>({
+    inputValue: '',
+    selectedCommune: null,
+    dropdownOpen: false,
+    suggestions: [],
+    resultState: 'idle',
+    resultHtml: '',
+  });
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const onInput = useCallback((value: string) => {
@@ -60,133 +214,53 @@ function useLookup(blockId: string) {
   }, []);
 
   const onSelect = useCallback((commune: Commune) => {
-    setState(s => ({
-      ...s,
-      inputValue: commune.nom,
-      selectedCommune: commune,
-      dropdownOpen: false,
-      suggestions: [],
-    }));
+    setState(s => ({ ...s, inputValue: commune.nom, selectedCommune: commune, dropdownOpen: false, suggestions: [] }));
   }, []);
 
   const closeDropdown = useCallback(() => {
     setTimeout(() => setState(s => ({ ...s, dropdownOpen: false })), 200);
   }, []);
 
-  const search = useCallback(async (commune: Commune) => {
-    setState(s => ({ ...s, resultState: 'loading', resultHtml: '' }));
+  const onSearchClick = useCallback(async () => {
+    setState(s => {
+      if (!s.selectedCommune) return s;
+      return { ...s, resultState: 'loading', resultHtml: '' };
+    });
 
-    try {
-      let html = '';
+    setState(s => {
+      if (!s.selectedCommune) return s;
+      const commune = s.selectedCommune;
 
-      if (blockId === 'irep') {
-        const res = await fetch(`/api/proxy/irep?insee=${encodeURIComponent(commune.code)}`);
-        if (!res.ok) throw new Error(`Erreur ${res.status}`);
-        const data = await res.json();
-        const items: Record<string, string>[] = data.data ?? data.results ?? data ?? [];
-        if (!items.length) {
-          setState(s => ({ ...s, resultState: 'empty', resultHtml: 'Aucune installation classée recensée sur cette commune.' }));
-          return;
+      const searchFn =
+        blockId === 'irep' ? searchIrep :
+        blockId === 'sis'  ? searchSis  :
+        blockId === 'atmo' ? searchAtmo :
+        searchEau;
+
+      searchFn(commune).then(html => {
+        if (html.startsWith('__empty__')) {
+          setState(ss => ({ ...ss, resultState: 'empty', resultHtml: html.slice(9) }));
+        } else {
+          setState(ss => ({ ...ss, resultState: 'success', resultHtml: html }));
         }
-        html = items.slice(0, 12).map(it => {
-          const nom = it.nom_ets ?? it.raisonSociale ?? it.nomEtablissement ?? 'Établissement';
-          const regime = it.regime ?? it.etatActivite ?? '';
-          const adresse = it.adresse ?? it.adresseL4 ?? '';
-          const activite = it.activitePrincipale ?? '';
-          const cls = regime === 'Autorisation' ? 'badge-alert' : regime === 'Enregistrement' ? 'badge-warn' : 'badge-neutral';
-          return `<div class="lookup-result-item">
-            <div class="result-name">${nom}${regime ? `<span class="result-badge ${cls}">${regime}</span>` : ''}</div>
-            <div class="result-meta">${adresse}${activite ? ' · ' + activite : ''}</div>
-          </div>`;
-        }).join('');
+      }).catch(() => {
+        const fallback =
+          blockId === 'irep' || blockId === 'sis'
+            ? 'Données temporairement indisponibles. Consultez directement <a href="https://georisques.gouv.fr" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">georisques.gouv.fr</a>'
+            : blockId === 'atmo'
+            ? "Indice ATMO indisponible pour cette commune. La couverture nationale est partielle."
+            : "Données temporairement indisponibles. Consultez directement <a href='https://hubeau.eaufrance.fr' target='_blank' rel='noopener noreferrer' style='color:var(--accent)'>hubeau.eaufrance.fr</a>";
+        setState(ss => ({ ...ss, resultState: 'error', resultHtml: fallback }));
+      });
 
-      } else if (blockId === 'sis') {
-        const res = await fetch(`/api/proxy/sis?insee=${encodeURIComponent(commune.code)}`);
-        if (!res.ok) throw new Error(`Erreur ${res.status}`);
-        const data = await res.json();
-        const items: Record<string, string>[] = data.data ?? data.results ?? data ?? [];
-        if (!items.length) {
-          setState(s => ({ ...s, resultState: 'empty', resultHtml: 'Aucun site pollué ou ancien site industriel recensé sur cette commune dans les bases publiques.' }));
-          return;
-        }
-        html = items.slice(0, 12).map(it => {
-          const nom = it.nom ?? it.raisonSociale ?? it.nomSite ?? 'Site';
-          const statut = it.statut ?? it.etatSite ?? '';
-          const adresse = it.adresse ?? it.commune ?? '';
-          const type = it.baseDonnees ?? (it.sitePollue ? 'Basol' : 'Basias');
-          const cls = statut?.toLowerCase().includes('traité') ? 'badge-ok' : statut ? 'badge-warn' : 'badge-neutral';
-          return `<div class="lookup-result-item">
-            <div class="result-name">${nom}<span class="result-badge badge-neutral">${type}</span>${statut ? `<span class="result-badge ${cls}">${statut}</span>` : ''}</div>
-            <div class="result-meta">${adresse}</div>
-          </div>`;
-        }).join('');
-
-      } else if (blockId === 'atmo') {
-        const res = await fetch(`/api/proxy/atmo?insee=${encodeURIComponent(commune.code)}`);
-        if (!res.ok) throw new Error(`Erreur ${res.status}`);
-        const data = await res.json();
-        const indice = data?.indice_atmo;
-        if (!indice) {
-          setState(s => ({ ...s, resultState: 'empty', resultHtml: "Indice ATMO non disponible pour cette commune aujourd'hui." }));
-          return;
-        }
-        const val = indice.valeur ?? indice.indice ?? indice.code_qual ?? 0;
-        const label = indice.label ?? indice.lib_qual ?? '';
-        const cls = val <= 2 ? 'badge-ok' : val <= 4 ? 'badge-warn' : 'badge-alert';
-        const today = new Date().toISOString().slice(0, 10);
-        const polluants: Record<string, string | number>[] = indice.polluants ?? [];
-        html = `<div class="lookup-result-item">
-          <div class="result-name">Indice ATMO · ${commune.nom} · ${today}<span class="result-badge ${cls}">${label || val + '/6'}</span></div>
-          <div class="result-meta">${polluants.map(p => `${p.label ?? p.polluant} : ${p.valeur ?? p.indice}`).join(' · ') || 'Détail par polluant non disponible'}</div>
-        </div>`;
-
-      } else if (blockId === 'eau') {
-        const res = await fetch(`/api/proxy/eau?insee=${encodeURIComponent(commune.code)}`);
-        if (!res.ok) throw new Error(`Erreur ${res.status}`);
-        const data = await res.json();
-        const items: Record<string, string>[] = data.data ?? [];
-        if (!items.length) {
-          setState(s => ({ ...s, resultState: 'empty', resultHtml: "Aucun contrôle récent disponible pour cette commune dans Hub'Eau." }));
-          return;
-        }
-        const seen = new Set<string>();
-        const filtered = items.filter(it => {
-          const key = it.date_prelevement;
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        }).slice(0, 6);
-        html = filtered.map(it => {
-          const conforme = it.libelle_conclusion_conformite_prelevement?.toLowerCase().includes('conforme') ?? null;
-          const cls = conforme ? 'badge-ok' : conforme === false ? 'badge-alert' : 'badge-neutral';
-          const label = conforme ? 'Conforme' : conforme === false ? 'Non conforme' : 'En cours';
-          return `<div class="lookup-result-item">
-            <div class="result-name">${it.date_prelevement?.slice(0, 10) ?? '—'}<span class="result-badge ${cls}">${label}</span></div>
-            <div class="result-meta">${it.libelle_parametre ? it.libelle_parametre + ' : ' + (it.resultat_numerique ?? '—') : ''}</div>
-          </div>`;
-        }).join('');
-      }
-
-      setState(s => ({ ...s, resultState: 'success', resultHtml: html }));
-    } catch {
-      setState(s => ({
-        ...s,
-        resultState: 'error',
-        resultHtml: blockId === 'irep' || blockId === 'sis'
-          ? 'Données temporairement indisponibles. Consultez directement georisques.gouv.fr'
-          : blockId === 'atmo'
-          ? "Indice ATMO indisponible pour cette commune. La couverture varie selon les régions."
-          : 'Données temporairement indisponibles. Consultez directement hubeau.eaufrance.fr',
-      }));
-    }
+      return s;
+    });
   }, [blockId]);
-
-  const onSearchClick = useCallback(() => {
-    if (state.selectedCommune) search(state.selectedCommune);
-  }, [state.selectedCommune, search]);
 
   return { state, onInput, onSelect, closeDropdown, onSearchClick };
 }
+
+// ── Block component ───────────────────────────────────────────────────────────
 
 type LookupBlockProps = {
   blockId: string;
@@ -239,15 +313,15 @@ function LookupBlock({ blockId, title, sub, desc }: LookupBlockProps) {
           </div>
           <button
             className="lookup-btn"
-            disabled={!state.selectedCommune}
+            disabled={!state.selectedCommune || state.resultState === 'loading'}
             onClick={onSearchClick}
           >
-            Rechercher
+            {state.resultState === 'loading' ? '…' : 'Rechercher'}
           </button>
         </div>
 
         {state.resultState !== 'idle' && (
-          <div className={`lookup-results visible`}>
+          <div className="lookup-results visible">
             {state.resultState === 'loading' && (
               <div className="lookup-loading">Chargement…</div>
             )}
@@ -255,7 +329,7 @@ function LookupBlock({ blockId, title, sub, desc }: LookupBlockProps) {
               <div className="lookup-empty">{state.resultHtml}</div>
             )}
             {state.resultState === 'error' && (
-              <div className="lookup-error">{state.resultHtml}</div>
+              <div className="lookup-error" dangerouslySetInnerHTML={{ __html: state.resultHtml }} />
             )}
             {state.resultState === 'success' && (
               <div dangerouslySetInnerHTML={{ __html: state.resultHtml }} />
@@ -267,13 +341,15 @@ function LookupBlock({ blockId, title, sub, desc }: LookupBlockProps) {
   );
 }
 
+// ── Public export ─────────────────────────────────────────────────────────────
+
 export function PollutionLookup() {
   return (
     <>
       <LookupBlock
         blockId="irep"
         title="Installations industrielles à proximité"
-        sub="Registre IREP · Géorisques · Rejets déclarés par substance"
+        sub="Registre IREP · ADEME · Rejets déclarés par substance"
         desc="Les installations classées ICPE déclarent annuellement leurs rejets dans l'air, l'eau et les sols. Ce registre recense ce que les exploitants ont l'obligation de déclarer — pas nécessairement tout ce qui est émis, mais c'est le point de départ documenté."
       />
       <LookupBlock
@@ -291,8 +367,8 @@ export function PollutionLookup() {
       <LookupBlock
         blockId="eau"
         title="Qualité de l'eau potable"
-        sub="ARS · Contrôles nitrates, pesticides, métaux"
-        desc="L'ARS publie les résultats des contrôles sanitaires de l'eau potable par commune. Chaque prélèvement est daté et chiffré. Vous pouvez vérifier si des dépassements ont été signalés sur votre réseau de distribution dans les deux dernières années."
+        sub="ARS · Contrôles nitrates, pesticides, plomb, arsenic"
+        desc="L'ARS publie les résultats des contrôles sanitaires de l'eau potable par commune. Vous pouvez vérifier la conformité bactériologique et physico-chimique, ainsi que les teneurs en nitrates, plomb et arsenic si des analyses récentes sont disponibles."
       />
     </>
   );
