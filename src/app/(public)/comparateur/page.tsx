@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ComparatorSearch } from '@/components/ComparatorSearch';
 import { canAccessActionPage, normalizeAccount } from '@/lib/access';
+import { getCommuneFullData } from '@/lib/commune-data';
 import { getClimatDataCommune } from '@/lib/drias-json';
 import { getGeorisquesSummary } from '@/lib/georisques';
 import { getCurrentSessionUser } from '@/lib/user-account';
@@ -56,7 +57,11 @@ type DimensionSlug =
   | 'feux'
   | 'pollens'
   | 'cadmium'
-  | 'dependance-auto';
+  | 'dependance-auto'
+  | 'qualite-air'
+  | 'acces-soins'
+  | 'stress-hydrique'
+  | 'vulnerabilite-eco';
 
 const DIMENSIONS: Array<{
   slug: DimensionSlug;
@@ -71,7 +76,7 @@ const DIMENSIONS: Array<{
     slug: 'canicule',
     label: 'Canicule',
     shortLabel: 'la chaleur extrême',
-    sublabel: 'Projection chaleur par commune',
+    sublabel: 'Projection chaleur par commune · DRIAS 2050',
     accent: '#f87171',
     free: true,
     href: (code) => `/territoires/canicule/${code}`,
@@ -89,16 +94,43 @@ const DIMENSIONS: Array<{
     slug: 'feux',
     label: 'Feux de forêt',
     shortLabel: 'les feux de forêt',
-    sublabel: 'Extension des zones à risque',
+    sublabel: 'Extension des zones à risque · DRIAS',
     accent: '#fb923c',
-    free: false,
+    free: true,
     href: (code) => `/territoires/feux/${code}`,
+  },
+  {
+    slug: 'dependance-auto',
+    label: 'Dépendance automobile',
+    shortLabel: 'la dépendance à la voiture',
+    sublabel: 'Vulnérabilité mobilité du territoire · INSEE',
+    accent: '#f59e0b',
+    free: true,
+    href: (code) => `/territoires/dependance-auto/${code}`,
+  },
+  {
+    slug: 'qualite-air',
+    label: "Qualité de l'air",
+    shortLabel: "la qualité de l'air",
+    sublabel: 'PM2.5, NO₂, indice ATMO · lecture annuelle',
+    accent: '#38bdf8',
+    free: false,
+    href: (code) => `/territoires/qualite-air/${code}`,
+  },
+  {
+    slug: 'acces-soins',
+    label: 'Accès aux soins',
+    shortLabel: "l'accès aux soins",
+    sublabel: 'Densité médicale et déserts sanitaires · IRDES',
+    accent: '#34d399',
+    free: false,
+    href: (code) => `/territoires/acces-soins/${code}`,
   },
   {
     slug: 'pollens',
     label: 'Pollens',
     shortLabel: "l'exposition pollinique",
-    sublabel: 'Saisons longues et pics allergènes',
+    sublabel: 'Saisons longues et pics allergènes · RNSA',
     accent: '#4ade80',
     free: false,
     href: (code) => `/territoires/pollens/${code}`,
@@ -107,19 +139,28 @@ const DIMENSIONS: Array<{
     slug: 'cadmium',
     label: 'Cadmium',
     shortLabel: 'les pollutions diffuses',
-    sublabel: 'Teneur des sols et vigilance sanitaire',
+    sublabel: 'Teneur des sols et vigilance sanitaire · GisSol',
     accent: '#a78bfa',
     free: false,
     href: (code) => `/territoires/cadmium/${code}`,
   },
   {
-    slug: 'dependance-auto',
-    label: 'Dépendance automobile',
-    shortLabel: 'la dépendance à la voiture',
-    sublabel: 'Vulnérabilité mobilité du territoire',
-    accent: '#f59e0b',
+    slug: 'stress-hydrique',
+    label: 'Stress hydrique',
+    shortLabel: 'le stress hydrique',
+    sublabel: 'Sécheresse et tension sur la ressource en eau · DRIAS',
+    accent: '#818cf8',
     free: false,
-    href: (code) => `/territoires/dependance-auto/${code}`,
+    href: (code) => `/territoires/stress-hydrique/${code}`,
+  },
+  {
+    slug: 'vulnerabilite-eco',
+    label: 'Vulnérabilité économique',
+    shortLabel: 'la vulnérabilité économique',
+    sublabel: "Capacité d'adaptation du territoire · INSEE",
+    accent: '#e879f9',
+    free: false,
+    href: (code) => `/territoires/vulnerabilite-eco/${code}`,
   },
 ];
 
@@ -313,6 +354,8 @@ function buildVerdict(
   const activeDimensions = DIMENSIONS.filter((dimension) => hasFullAccess || dimension.free);
   const leftAdvantages: string[] = [];
   const rightAdvantages: string[] = [];
+  const lockedContext =
+    " Les dimensions santé et économiques — qualité de l'air, accès aux soins, pollens, cadmium, stress hydrique, vulnérabilité — peuvent modifier cet arbitrage selon votre profil.";
 
   for (const dimension of activeDimensions) {
     const leftScore =
@@ -334,24 +377,24 @@ function buildVerdict(
   if (leftAdvantages.length === 0 && rightAdvantages.length === 0) {
     return hasFullAccess
       ? `<strong>${left.name}</strong> et <strong>${right.name}</strong> ressortent à un niveau comparable sur les six dimensions lues ici. La différence se jouera surtout dans le détail des indicateurs et dans votre profil.`
-      : `<strong>${left.name}</strong> et <strong>${right.name}</strong> ressortent à un niveau proche sur la lecture publique. Les dimensions réservées permettent d'arbitrer plus finement.`;
+      : `<strong>${left.name}</strong> et <strong>${right.name}</strong> ressortent à un niveau proche sur la lecture publique. Les dimensions réservées permettent d'arbitrer plus finement.${lockedContext}`;
   }
 
   if (leftAdvantages.length > rightAdvantages.length) {
     return hasFullAccess
       ? `<strong>${left.name}</strong> ressort ici comme la commune la moins exposée, surtout sur ${leftAdvantages.slice(0, 2).join(' et ')}.`
-      : `Sur la lecture publique, <strong>${left.name}</strong> paraît moins exposée que <strong>${right.name}</strong>, surtout sur ${leftAdvantages.slice(0, 2).join(' et ')}.`;
+      : `Sur la lecture publique, <strong>${left.name}</strong> paraît moins exposée que <strong>${right.name}</strong>, surtout sur ${leftAdvantages.slice(0, 2).join(' et ')}.${lockedContext}`;
   }
 
   if (rightAdvantages.length > leftAdvantages.length) {
     return hasFullAccess
       ? `<strong>${right.name}</strong> ressort ici comme la commune la moins exposée, surtout sur ${rightAdvantages.slice(0, 2).join(' et ')}.`
-      : `Sur la lecture publique, <strong>${right.name}</strong> paraît moins exposée que <strong>${left.name}</strong>, surtout sur ${rightAdvantages.slice(0, 2).join(' et ')}.`;
+      : `Sur la lecture publique, <strong>${right.name}</strong> paraît moins exposée que <strong>${left.name}</strong>, surtout sur ${rightAdvantages.slice(0, 2).join(' et ')}.${lockedContext}`;
   }
 
   return hasFullAccess
     ? `<strong>${left.name}</strong> et <strong>${right.name}</strong> se partagent les avantages selon les dimensions. Le bon choix dépendra de la tension que vous tolérez le moins.`
-    : `<strong>${left.name}</strong> et <strong>${right.name}</strong> se partagent les avantages sur les dimensions visibles. Les dimensions verrouillées peuvent encore faire pencher l'arbitrage.`;
+    : `<strong>${left.name}</strong> et <strong>${right.name}</strong> se partagent les avantages sur les dimensions visibles. Les dimensions verrouillées peuvent encore faire pencher l'arbitrage.${lockedContext}`;
 }
 
 async function fetchRows(codes: string[]) {
@@ -377,9 +420,10 @@ async function fetchRows(codes: string[]) {
 async function buildFallbackMetrics(
   inseeCode: string,
 ): Promise<Partial<Record<DimensionSlug, DisplayMetric>>> {
-  const [driasData, georisques] = await Promise.all([
+  const [driasData, georisques, communeFullData] = await Promise.all([
     getClimatDataCommune(inseeCode).catch(() => null),
     getGeorisquesSummary(inseeCode).catch(() => null),
+    getCommuneFullData(inseeCode).catch(() => null),
   ]);
 
   const fallback: Partial<Record<DimensionSlug, DisplayMetric>> = {};
@@ -407,6 +451,75 @@ async function buildFallbackMetrics(
           ? 'Risque inondation signalé'
           : 'Pas de signal majeur remonté',
       note: georisques.riskLabels[0] ?? 'Source Géorisques · lecture communale',
+    };
+  }
+
+  const incendies = communeFullData?.commune.territoire.incendies;
+  const tauxBoisement = communeFullData?.commune.territoire.taux_boisement;
+
+  if (incendies != null || tauxBoisement != null) {
+    const components: number[] = [];
+
+    if (incendies != null) {
+      components.push(Math.max(0, Math.min(100, incendies * 12)));
+    }
+
+    if (tauxBoisement != null) {
+      components.push(Math.max(0, Math.min(100, tauxBoisement * 1.4)));
+    }
+
+    const score =
+      components.length > 0
+        ? Math.round(components.reduce((sum, value) => sum + value, 0) / components.length)
+        : null;
+
+    const feuxParts = [
+      incendies != null ? `${Math.round(incendies)} incendies recensés` : null,
+      tauxBoisement != null ? `${Math.round(tauxBoisement)}% de boisement` : null,
+    ].filter(Boolean);
+
+    fallback.feux = {
+      score,
+      label: feuxParts.join(' · ') || 'Signal territorial disponible',
+      note: 'Source ADEME / Data Fair · territoire forestier et historique incendie',
+    };
+  }
+
+  const tauxMotorisation = communeFullData?.iris?.taux_motorisation;
+  const tauxTransports = communeFullData?.iris?.taux_transports_communs;
+  const densite = communeFullData?.commune.territoire.densite;
+
+  if (tauxMotorisation != null || tauxTransports != null || densite != null) {
+    const components: number[] = [];
+
+    if (tauxMotorisation != null) {
+      components.push(Math.max(0, Math.min(100, tauxMotorisation)));
+    }
+
+    if (tauxTransports != null) {
+      components.push(Math.max(0, Math.min(100, 100 - Math.min(100, tauxTransports * 3.5))));
+    }
+
+    if (densite != null) {
+      const densityScore = 100 - Math.max(0, Math.min(100, (densite / 3000) * 100));
+      components.push(Math.round(densityScore));
+    }
+
+    const score =
+      components.length > 0
+        ? Math.round(components.reduce((sum, value) => sum + value, 0) / components.length)
+        : null;
+
+    const mobilityParts = [
+      tauxMotorisation != null ? `${Math.round(tauxMotorisation)}% de motorisation` : null,
+      tauxTransports != null ? `${Math.round(tauxTransports)}% en transports collectifs` : null,
+      densite != null ? `${Math.round(densite)} hab./km²` : null,
+    ].filter(Boolean);
+
+    fallback['dependance-auto'] = {
+      score,
+      label: mobilityParts.slice(0, 2).join(' · ') || 'Lecture mobilité disponible',
+      note: 'Source ADEME / IRIS · motorisation, transports collectifs, densité',
     };
   }
 
@@ -511,7 +624,7 @@ export default async function ComparateurPage({
         </h1>
         <p className="lede">
           Comparez deux territoires sur les tensions qui comptent pour une installation,
-          un achat ou un déménagement. La lecture publique montre deux dimensions.
+          un achat ou un déménagement. La lecture publique montre quatre dimensions. Le Suivi débloque les six autres.
           L&apos;abonnement Suivi débloque le comparatif complet.
         </p>
 
@@ -585,7 +698,7 @@ export default async function ComparateurPage({
                           <div className="score-note">Lecture personnalisée avec Suivi</div>
                         </div>
                         <div className="lock-overlay">
-                          <div className="lock-badge">4 dimensions débloquées avec Suivi</div>
+                          <div className="lock-badge">6 dimensions débloquées avec Suivi</div>
                         </div>
                       </>
                     ) : (
@@ -610,7 +723,7 @@ export default async function ComparateurPage({
                     diffuses ou le feu. C&apos;est ce bloc qui se débloque avec Suivi.
                   </p>
                   <div className="cta-points">
-                    <div className="cta-point">Quatre dimensions comparatives supplémentaires</div>
+                    <div className="cta-point">Six dimensions comparatives supplémentaires</div>
                     <div className="cta-point">Même lecture, mais croisée avec votre profil</div>
                     <div className="cta-point">Accès direct aux fiches territoire détaillées</div>
                     <div className="cta-point">Continuité avec le dashboard et le rapport</div>
