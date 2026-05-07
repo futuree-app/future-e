@@ -9,7 +9,7 @@ import { ReportWizard } from '@/components/wizard/ReportWizard';
 import { createClient } from '@/lib/supabase/client';
 import Navbar from '@/components/Navbar';
 import { SAVOIR_HUB_ARTICLES } from '@/config/navigation';
-import { ComparatorSearch } from '@/components/ComparatorSearch';
+import { LandingComparatorInput } from '@/components/LandingComparatorInput';
 
 const C = {
   bg: 'var(--bg)',
@@ -2713,83 +2713,99 @@ export default function FutureELanding() {
       {/* ── Lead magnet Comparateur ── */}
       <section style={{ position: 'relative', zIndex: 2, maxWidth: 1100, margin: '0 auto', padding: '0 28px 80px' }}>
         <div style={{
-          ...glass({ borderRadius: 20, padding: '48px 52px' }),
+          ...glass({ borderRadius: 20, padding: '52px 56px' }),
           position: 'relative', overflow: 'hidden',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 56,
+          alignItems: 'center',
         }}>
+
           <div style={{
-            position: 'absolute', top: -80, left: -80,
-            width: 300, height: 300, borderRadius: '50%',
-            background: `radial-gradient(circle, ${C.red}14 0%, transparent 70%)`,
+            position: 'absolute', bottom: -100, right: -80,
+            width: 320, height: 320, borderRadius: '50%',
+            background: `radial-gradient(circle, ${C.red}12 0%, transparent 70%)`,
             pointerEvents: 'none',
           }} />
-          <div style={{
-            display: 'flex', flexDirection: 'column', gap: 32,
-          }}>
-            <div>
-              <div style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 10, letterSpacing: '0.14em',
-                textTransform: 'uppercase', color: C.red, marginBottom: 12,
-              }}>
-                Outil gratuit
-              </div>
-              <h2 style={{
-                fontFamily: "'Instrument Serif', serif",
-                fontWeight: 400,
-                fontSize: 'clamp(24px, 2.8vw, 36px)',
-                lineHeight: 1.15, letterSpacing: '-0.4px',
-                color: C.text, margin: '0 0 14px',
-              }}>
-                Vous hésitez entre deux communes ?
-              </h2>
-              <p style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 13, color: C.muted, lineHeight: 1.7, margin: 0, maxWidth: 600,
-              }}>
-                Comparez deux communes sur 10 dimensions — canicule, inondation, feux, qualité de l&apos;air, cadmium, dépendance automobile, stress hydrique, pollens, accès aux soins, vulnérabilité économique. Données publiques DRIAS, INSEE, Géorisques.
-              </p>
-              <div style={{
-                display: 'flex', gap: 24, marginTop: 20, flexWrap: 'wrap',
-              }}>
-                {['Gratuit · sans inscription', '10 dimensions', 'Données publiques officielles'].map((item) => (
-                  <div key={item} style={{
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: 11, color: C.dim,
-                    display: 'flex', alignItems: 'center', gap: 8,
-                  }}>
-                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: C.red, display: 'inline-block', flexShrink: 0 }} />
-                    {item}
-                  </div>
-                ))}
-              </div>
+
+          {/* Colonne gauche — texte */}
+          <div>
+            <div style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 10, letterSpacing: '0.14em',
+              textTransform: 'uppercase', color: C.red, marginBottom: 16,
+            }}>
+              Outil gratuit · sans inscription
             </div>
 
+            <h2 style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontWeight: 400,
+              fontSize: 'clamp(26px, 2.6vw, 38px)',
+              lineHeight: 1.12, letterSpacing: '-0.5px',
+              color: C.text, margin: '0 0 20px',
+            }}>
+              10 indicateurs pour départager deux communes objectivement<br />
+              <em style={{ fontStyle: 'italic', color: C.red }}>dans quelques années</em>
+            </h2>
+
+            <p style={{
+              fontSize: 15, color: C.muted, lineHeight: 1.72,
+              margin: '0 0 28px', maxWidth: 420,
+            }}>
+              Canicule, inondation, qualité de l&apos;air, cadmium, dépendance automobile...
+              comparez deux communes sur ce qui change vraiment à l'horizon 2050.
+              Quatre dimensions gratuites. Six supplémentaires avec le Suivi.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                'Données DRIAS, INSEE, Géorisques, ATMO',
+                'Résultat en moins de dix secondes',
+                'Lecture en clair, sans jargon technique',
+              ].map((label) => (
+                <div key={label} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 11, color: C.dim, letterSpacing: '0.03em',
+                }}>
+                  <span style={{
+                    width: 4, height: 4, borderRadius: '50%',
+                    background: C.red, flexShrink: 0, display: 'inline-block',
+                  }} />
+                  {label}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Colonne droite — saisie + CTA */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <style>{`
-              .compare-shell { display: flex; flex-direction: column; gap: 16; }
-              .compare-selector { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 12; }
-              .compare-input-wrap { display: flex; flex-direction: column; gap: 6; }
-              .compare-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-4); }
-              .compare-input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border-1); background: var(--bg-elev); color: var(--fg-1); font-family: 'Instrument Sans', sans-serif; font-size: 15px; transition: border-color 0.15s; }
-              .compare-divider { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--fg-4); padding-bottom: 13px; text-align: center; }
-              .compare-dropdown { position: absolute; top: 100%; left: 0; right: 0; z-index: 50; background: var(--bg-elev-3); border: 1px solid var(--border-1); border-radius: 10px; margin-top: 4px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
-              .compare-row { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border: none; background: transparent; cursor: pointer; text-align: left; border-bottom: 1px solid var(--border-1); }
-              .compare-row-name { font-family: 'Instrument Sans', sans-serif; font-size: 14px; color: var(--fg-1); }
-              .compare-row-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--fg-4); }
-              .compare-actions { display: flex; gap: 10; flex-wrap: wrap; }
-              .compare-btn { padding: 13px 24px; border-radius: 10px; border: none; background: var(--red, #f87171); color: #fff; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer; transition: opacity 0.15s; }
-              .compare-btn:disabled { opacity: 0.45; cursor: default; }
-              .compare-btn:not(:disabled):hover { opacity: 0.88; }
-              .share-btn { padding: 13px 20px; border-radius: 10px; border: 1px solid var(--border-1); background: transparent; color: var(--fg-3); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.06em; cursor: pointer; transition: opacity 0.15s; }
-              .share-btn:disabled { opacity: 0.35; cursor: default; }
-              .compare-loading { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--fg-4); }
-              @media (max-width: 600px) {
-                .compare-selector { grid-template-columns: 1fr; }
-                .compare-divider { display: none; }
+              .lm-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-4); margin-bottom: 6px; display: block; }
+              .lm-input-wrap { position: relative; }
+              .lm-input { width: 100%; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border-1); background: var(--bg-elev); color: var(--fg-1); font-family: 'Instrument Sans', sans-serif; font-size: 15px; transition: border-color 0.2s; outline: none; }
+              .lm-input:focus { border-color: var(--red, #f87171); }
+              .lm-input::placeholder { color: var(--fg-4); }
+              .lm-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 50; background: var(--bg-elev-3); border: 1px solid var(--border-1); border-radius: 10px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+              .lm-row { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border: none; background: transparent; cursor: pointer; text-align: left; border-bottom: 1px solid var(--border-1); transition: background 0.12s; }
+              .lm-row:last-child { border-bottom: none; }
+              .lm-row:hover { background: var(--bg-elev); }
+              .lm-row-name { font-family: 'Instrument Sans', sans-serif; font-size: 14px; color: var(--fg-1); }
+              .lm-row-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--fg-4); }
+              .lm-cta { width: 100%; padding: 15px 24px; border-radius: 10px; border: none; background: var(--red, #f87171); color: #fff; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer; transition: opacity 0.15s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+              .lm-cta:disabled { opacity: 0.4; cursor: default; }
+              .lm-cta:not(:disabled):hover { opacity: 0.88; }
+              .lm-secondary { width: 100%; padding: 13px 24px; border-radius: 10px; border: 1px solid var(--border-1); background: transparent; color: var(--fg-3); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.06em; cursor: pointer; text-align: center; text-decoration: none; display: block; transition: color 0.15s, border-color 0.15s; }
+              .lm-secondary:hover { color: var(--fg-1); border-color: var(--border-2); }
+              @media (max-width: 720px) {
+                .lm-comparator-grid { grid-template-columns: 1fr !important; gap: 36px !important; }
               }
             `}</style>
 
-            <ComparatorSearch />
+            <LandingComparatorInput />
           </div>
+
         </div>
       </section>
 

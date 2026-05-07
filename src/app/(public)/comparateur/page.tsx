@@ -26,6 +26,9 @@ type SearchParams = {
   an?: string | string[];
   b?: string | string[];
   bn?: string | string[];
+  // Pré-remplissage depuis le lead magnet landing (?commune=CODE&nom=NOM)
+  commune?: string | string[];
+  nom?: string | string[];
 };
 
 type CompareRow = {
@@ -761,9 +764,10 @@ export default async function ComparateurPage({
   searchParams: Promise<SearchParams>;
 }) {
   const query = await searchParams;
-  const leftCode = pickString(query.a).trim();
+  // ?commune=CODE&nom=NOM vient du lead magnet landing — pré-remplit le champ gauche
+  const leftCode = (pickString(query.a) || pickString(query.commune)).trim();
   const rightCode = pickString(query.b).trim();
-  const leftName = pickString(query.an).trim();
+  const leftName = (pickString(query.an) || pickString(query.nom)).trim();
   const rightName = pickString(query.bn).trim();
 
   const { supabase, user } = await getCurrentSessionUser();
