@@ -36,8 +36,8 @@ const SLOT_CITIES = [
   {
     name: 'Lyon',
     cards: [
-      { label: 'Canicule à Lyon',      val: '47 jours > 30°C/an en 2050',       col: C.red,    src: 'DRIAS · +2°C' },
-      { label: 'Air à Lyon',            val: 'Ozone estival en hausse',           col: C.orange, src: 'ATMO / Santé publique France' },
+      { label: 'Canicule à Lyon',      val: '54 jours > 30°C/an en 2050',       col: C.red,    src: 'DRIAS · +4°C' },
+      { label: 'Nuits tropicales',      val: '63 nuits Tmin > 20°C/an',          col: C.red,    src: 'DRIAS · +4°C' },
       { label: 'Eau à Lyon',            val: 'Étiages sévères sur le Rhône',      col: C.blue,   src: 'BRGM / Agences de l\'eau' },
       { label: 'Immobilier à Lyon',     val: 'DPE et chaleur pèseront davantage', col: C.orange, src: 'DVF / ADEME' },
     ],
@@ -45,28 +45,28 @@ const SLOT_CITIES = [
   {
     name: 'Marseille',
     cards: [
-      { label: 'Chaleur à Marseille',   val: '63 jours > 30°C/an en 2050',         col: C.red,    src: 'DRIAS · +2°C' },
-      { label: 'Feux à Marseille',      val: 'Risque en hausse les étés secs',      col: C.red,    src: 'Prométhée / DREAL' },
-      { label: 'Submersion à Marseille',val: 'Calanques et zones basses exposées',  col: C.blue,   src: 'Géorisques / BRGM' },
-      { label: 'Immobilier à Marseille',val: 'Risque + DPE pèseront davantage',     col: C.orange, src: 'DVF / ADEME' },
+      { label: 'Chaleur à Marseille',   val: '57 jours > 30°C/an en 2050',         col: C.red,    src: 'DRIAS · +4°C' },
+      { label: 'Nuits tropicales',       val: '113 nuits Tmin > 20°C/an',           col: C.red,    src: 'DRIAS · +4°C' },
+      { label: 'Submersion à Marseille', val: 'Calanques et zones basses exposées', col: C.blue,   src: 'Géorisques / BRGM' },
+      { label: 'Feux à Marseille',       val: 'Risque en hausse les étés secs',     col: C.orange, src: 'Prométhée / DREAL' },
     ],
   },
   {
     name: 'Vannes',
     cards: [
-      { label: 'Littoral à Vannes',     val: 'Submersion et érosion en hausse',   col: C.blue,   src: 'Géorisques / BRGM' },
-      { label: 'Eau potable à Vannes',  val: 'Ressource sous tension l\'été',      col: C.blue,   src: 'BRGM / Agences de l\'eau' },
-      { label: 'Pollens à Vannes',      val: 'Saison allongée en Bretagne',        col: C.green,  src: 'RNSA / Copernicus' },
-      { label: 'Immobilier à Vannes',   val: 'Risque littoral pèse sur les prix',  col: C.orange, src: 'DVF / ADEME' },
+      { label: 'Canicule à Vannes',     val: '25 jours > 30°C/an en 2050',      col: C.red,    src: 'DRIAS · +4°C' },
+      { label: 'Littoral à Vannes',     val: 'Submersion et érosion en hausse',  col: C.blue,   src: 'Géorisques / BRGM' },
+      { label: 'Eau potable à Vannes',  val: 'Ressource sous tension l\'été',    col: C.blue,   src: 'BRGM / Agences de l\'eau' },
+      { label: 'Immobilier à Vannes',   val: 'Risque littoral pèse sur les prix',col: C.orange, src: 'DVF / ADEME' },
     ],
   },
   {
     name: 'La Rochelle',
     cards: [
-      { label: 'Submersion à La Rochelle', val: '+31 % en scénario médian',           col: C.blue,   src: 'Géorisques / BRGM' },
-      { label: 'Chaleur à La Rochelle',    val: '24 jours > 30°C/an en 2050',         col: C.red,    src: 'DRIAS · +2°C' },
-      { label: 'Pollens à La Rochelle',    val: 'Allongement de 28 jours en NA',      col: C.green,  src: 'RNSA / Copernicus' },
-      { label: 'Immobilier à La Rochelle', val: 'Risque + DPE pèseront davantage',    col: C.orange, src: 'DVF / ADEME' },
+      { label: 'Submersion à La Rochelle', val: 'Risque officiel recensé',             col: C.blue,   src: 'Géorisques / BRGM' },
+      { label: 'Chaleur à La Rochelle',    val: '30 jours > 30°C/an en 2050',          col: C.red,    src: 'DRIAS · +4°C' },
+      { label: 'Cadmium sols',             val: 'Sols charente-maritime : zone vigil.', col: C.orange, src: 'GisSol / RMQS' },
+      { label: 'Immobilier à La Rochelle', val: 'Risque + DPE pèseront davantage',     col: C.orange, src: 'DVF / ADEME' },
     ],
   },
 ];
@@ -88,10 +88,10 @@ const LANDING_QNA_STORAGE_KEY = 'futuree:landing-qna-count';
 const LANDING_QNA_LIMIT = 2;
 
 const LANDING_DRIAS_SCENARIO = {
-  id: 'gwl20',
+  id: 'gwl30',
   horizon: '2050',
-  shortLabel: '+2°C',
-  longLabel: 'niveau de réchauffement +2°C',
+  shortLabel: '+4°C',
+  longLabel: 'niveau de réchauffement +4°C',
 };
 
 const STATIC_ANSWERS = {
@@ -362,7 +362,7 @@ function getGeorisquesCard(communeName, georisques) {
   return null;
 }
 
-function getPreviewCards(communeName, categories, indicators, georisques) {
+function getPreviewCards(communeName, categories, indicators, georisques, gissol) {
   const name = communeName || 'votre commune';
   const safeCategories =
     categories && categories.length > 0 ? categories : ['all'];
@@ -466,26 +466,42 @@ function getPreviewCards(communeName, categories, indicators, georisques) {
     });
   }
 
-  cards.push(
-    {
+  // Cadmium GisSol — données réelles si disponibles
+  if (gissol?.cadmium?.label) {
+    const cdScore = gissol.cadmium.score ?? 0;
+    const cdCol = cdScore >= 65 ? C.red : cdScore >= 45 ? C.orange : C.green;
+    cards.push({
+      label: `Cadmium sols / ${name}`,
+      val: gissol.cadmium.label,
+      col: cdCol,
+      src: `GisSol / RMQS · source ${gissol.cadmium.source === 'api' ? 'mesure locale' : 'médiane dép.'}`,
+    });
+  } else {
+    cards.push({
       label: `Cadmium sols / ${name}`,
       val: 'Signal sanitaire à confirmer localement',
       col: C.orange,
       src: 'GisSol / RMQS',
-    },
-    {
-      label: `Saison pollinique à ${name}`,
-      val: 'Allongement probable dans les prochaines décennies',
-      col: C.green,
-      src: 'RNSA / Copernicus',
-    },
-    {
-      label: `Valeur immobilière à ${name}`,
-      val: 'Risque + DPE pèseront davantage',
-      col: C.orange,
-      src: 'DVF / ADEME',
-    },
-  );
+    });
+  }
+
+  // Nuits tropicales DRIAS — fallback si pas déjà dans driasCard
+  const tropicalNights = getLandingIndicatorValue(indicators, 'NORTR_yr');
+  if (tropicalNights !== null && tropicalNights !== undefined && !driasCard) {
+    cards.push({
+      label: `Nuits tropicales à ${name}`,
+      val: `${formatIndicatorValue(tropicalNights, 0)} nuits Tmin > 20°C/an`,
+      col: C.red,
+      src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
+    });
+  }
+
+  cards.push({
+    label: `Valeur immobilière à ${name}`,
+    val: 'Risque + DPE pèseront davantage',
+    col: C.orange,
+    src: 'DVF / ADEME',
+  });
 
   const uniqueCards = [];
   const seen = new Set();
@@ -626,6 +642,7 @@ export default function FutureELanding() {
   const [communeMeta, setCommuneMeta] = useState(null);
   const [communeIndicators, setCommuneIndicators] = useState({});
   const [communeGeorisques, setCommuneGeorisques] = useState(null);
+  const [communeGissol, setCommuneGissol] = useState(null);
   const [tensions, setTensions] = useState([]);
   const [activeTension, setActiveTension] = useState(null);
   const [answer, setAnswer] = useState(null);
@@ -846,6 +863,7 @@ export default function FutureELanding() {
     setCommuneMeta(null);
     setCommuneIndicators({});
     setCommuneGeorisques(null);
+    setCommuneGissol(null);
 
     if (tensionsCatalog.length === 0) {
       return;
@@ -900,9 +918,10 @@ export default function FutureELanding() {
     const indicatorInseeCode = nextCommune.citycode || matchedRow?.insee_code;
 
     if (indicatorInseeCode) {
-      const [driasResult, georisquesResult] = await Promise.allSettled([
+      const [driasResult, georisquesResult, gissolResult] = await Promise.allSettled([
         fetch(`/drias?dataset=landing&insee=${indicatorInseeCode}`),
         fetch(`/georisques?insee=${indicatorInseeCode}`),
+        fetch(`/api/gissol?insee=${indicatorInseeCode}`),
       ]);
 
       if (
@@ -946,6 +965,19 @@ export default function FutureELanding() {
       } else {
         setCommuneGeorisques(null);
       }
+
+      if (
+        gissolResult.status === 'fulfilled' &&
+        gissolResult.value.ok
+      ) {
+        try {
+          setCommuneGissol(await gissolResult.value.json());
+        } catch {
+          setCommuneGissol(null);
+        }
+      } else {
+        setCommuneGissol(null);
+      }
     }
 
     setTensions(buildTensions(tensionsCatalog, categories));
@@ -967,6 +999,7 @@ export default function FutureELanding() {
       setCommuneMeta(null);
       setCommuneIndicators({});
       setCommuneGeorisques(null);
+      setCommuneGissol(null);
       setTensions([]);
       setActiveTension(null);
       setAnswer(null);
@@ -2015,7 +2048,7 @@ export default function FutureELanding() {
     communeMeta?.usedFallback,
   );
   const previewCards = commune
-    ? getPreviewCards(commune, activeCategories, communeIndicators, communeGeorisques)
+    ? getPreviewCards(commune, activeCategories, communeIndicators, communeGeorisques, communeGissol)
     : activeSlotCity.cards;
   // Clé d'animation : change à chaque étape du slot, puis à chaque sélection de commune
   const slotAnimKey = commune ? `c-${commune}` : slotSettled ? 'settled' : `s-${slotIndex}`;
