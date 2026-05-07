@@ -9,7 +9,6 @@ import { getClimatDataCommune } from '@/lib/drias-json';
 import { getEaufranceSummary } from '@/lib/eaufrance';
 import { getGeorisquesSummary } from '@/lib/georisques';
 import { getAtmoForCommune } from '@/lib/atmo';
-import { getPollensForCommune } from '@/lib/pollen';
 import { getGissolForCommune } from '@/lib/gissol';
 import { getCurrentSessionUser } from '@/lib/user-account';
 
@@ -62,7 +61,7 @@ type DimensionSlug =
   | 'canicule'
   | 'submersion'
   | 'feux'
-  | 'pollens'
+  | 'chaleur-nocturne'
   | 'cadmium'
   | 'dependance-auto'
   | 'qualite-air'
@@ -134,13 +133,13 @@ const DIMENSIONS: Array<{
     href: (code) => `/territoires/acces-soins/${code}`,
   },
   {
-    slug: 'pollens',
-    label: 'Pollens',
-    shortLabel: "l'exposition pollinique",
-    sublabel: 'Saisons longues et pics allergènes · RNSA',
+    slug: 'chaleur-nocturne',
+    label: 'Chaleur nocturne',
+    shortLabel: 'les nuits tropicales',
+    sublabel: 'Nuits où Tmin > 20°C · DRIAS 2050 +4°C',
     accent: '#4ade80',
     free: false,
-    href: (code) => `/territoires/pollens/${code}`,
+    href: (code) => `/territoires/chaleur-nocturne/${code}`,
   },
   {
     slug: 'cadmium',
@@ -452,7 +451,7 @@ async function fetchRows(codes: string[]) {
 async function buildFallbackMetrics(
   inseeCode: string,
 ): Promise<Partial<Record<DimensionSlug, DisplayMetric>>> {
-  const [driasData, georisques, communeFullData, atmo, eaufrance, pollens, gissol] = await Promise.all([
+  const [driasData, georisques, communeFullData, atmo, eaufrance, gissol] = await Promise.all([
     getClimatDataCommune(inseeCode).catch(() => null),
     getGeorisquesSummary(inseeCode).catch(() => null),
     getCommuneFullData(inseeCode).catch(() => null),
@@ -460,9 +459,6 @@ async function buildFallbackMetrics(
       ? getAtmoForCommune(inseeCode).catch(() => null)
       : Promise.resolve(null),
     getEaufranceSummary(inseeCode).catch(() => null),
-    process.env.ATMO_USERNAME && process.env.ATMO_PASSWORD
-      ? getPollensForCommune(inseeCode).catch(() => null)
-      : Promise.resolve(null),
     getGissolForCommune(inseeCode).catch(() => null),
   ]);
 
@@ -666,17 +662,14 @@ async function buildFallbackMetrics(
     };
   }
 
-  if (pollens?.index) {
-    const pollenScore = clampScore(((pollens.index.value - 1) / 5) * 100);
-    const dominantTaxa =
-      pollens.responsibleTaxa.length > 0
-        ? pollens.responsibleTaxa.slice(0, 2).join(', ')
-        : 'taxons non précisés';
-
-    fallback.pollens = {
-      score: pollenScore,
-      label: `Indice pollen ${pollens.index.label} · ${dominantTaxa}`,
-      note: `Source ${pollens.source ?? 'Atmo France / AASQA'} · indice communal du ${pollens.date}`,
+  // Nuits tropicales (Tmin > 20°C) — indicator de confort nocturne et stress cardiovasculaire
+  // Valeurs gwl30 : Nice ~114, Toulouse ~69, Bordeaux ~51, Rouen ~12
+  const tropicalNights = driasValues?.NORTR_yr;
+  if (tropicalNights != null) {
+    fallback['chaleur-nocturne'] = {
+      score: clampScore(Math.round(tropicalNights)),
+      label: `${Math.round(tropicalNights)} nuits tropicales / an`,
+      note: 'Source DRIAS (+4°C) · nuits où Tmin > 20°C · horizon 2050',
     };
   }
 
@@ -713,17 +706,19 @@ async function buildFallbackMetrics(
   const inferioriteNationale = communeFullData?.commune.economie.inferiorite_nationale_pct;
   const revenuScore =
     revenuMedian != null ? clampScore(((30_000 - revenuMedian) / 15_000) * 100) : null;
+  // inferiorite_nationale_pct : positif = commune SOUS la médiane nationale, négatif = AU-DESSUS
+  // (le champ mesure l'écart d'infériorité : commune/nationale - 1, positif si inférieur)
   const inferioriteScore =
-    inferioriteNationale != null ? clampScore(Math.max(0, -inferioriteNationale) * 4) : null;
+    inferioriteNationale != null ? clampScore(Math.max(0, inferioriteNationale) * 4) : null;
   const ecoScore = averageScores([revenuScore, inferioriteScore]);
 
   if (ecoScore != null) {
     const ecoParts = [
       revenuMedian != null ? `Revenu médian ${formatEuros(revenuMedian)}` : null,
       inferioriteNationale != null
-        ? inferioriteNationale < 0
-          ? `${formatNumber(Math.abs(inferioriteNationale))}% sous la médiane nationale`
-          : `${formatNumber(inferioriteNationale)}% au-dessus de la médiane nationale`
+        ? inferioriteNationale > 0
+          ? `${formatNumber(inferioriteNationale)}% sous la médiane nationale`
+          : `${formatNumber(Math.abs(inferioriteNationale))}% au-dessus de la médiane nationale`
         : null,
     ].filter(Boolean);
 

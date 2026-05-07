@@ -24,7 +24,7 @@ export type CommuneData = {
   };
   economie: {
     revenu_median: number | null;
-    inferiorite_nationale_pct: number | null; // écart à la médiane nationale (négatif = sous la médiane)
+    inferiorite_nationale_pct: number | null; // positif = commune SOUS la médiane nationale, négatif = au-dessus
   };
   sante: {
     acces_medecins: number | null;  // APL médecins généralistes
