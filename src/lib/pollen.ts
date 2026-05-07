@@ -94,12 +94,21 @@ async function getToken(): Promise<string> {
   }
 }
 
-async function fetchRecords(inseeCode: string, date: string): Promise<PollenRawRecord[]> {
+// L'API ATMO Pollen organise les données par zone — souvent département, pas commune.
+// On extrait le code dept pour servir de fallback quand le code commune ne renvoie rien.
+function deptCode(inseeCode: string): string {
+  const code = inseeCode.padStart(5, "0");
+  if (code.startsWith("2A") || code.startsWith("2B")) return code.slice(0, 2);
+  if (code.startsWith("97")) return code.slice(0, 3);
+  return code.slice(0, 2);
+}
+
+async function fetchRecords(zoneCode: string, date: string): Promise<PollenRawRecord[]> {
   const token = await getToken();
   const params = new URLSearchParams({
     format: "geojson",
-    code_zone: inseeCode,
-    date,
+    code_zone: zoneCode,
+    date_ech: date,
     with_geom: "false",
   });
 
@@ -124,6 +133,14 @@ async function fetchRecords(inseeCode: string, date: string): Promise<PollenRawR
   }
 }
 
+function firstParseable(records: PollenRawRecord[], inseeCode: string): PollenSummary | null {
+  for (const rec of records) {
+    const result = parseRecord(rec, inseeCode);
+    if (result) return result;
+  }
+  return null;
+}
+
 function parseRecord(raw: PollenRawRecord, inseeCode: string): PollenSummary | null {
   const index = toLevel(raw.code_qual);
   if (!index) return null;
@@ -142,14 +159,26 @@ function parseRecord(raw: PollenRawRecord, inseeCode: string): PollenSummary | n
 }
 
 async function load(inseeCode: string): Promise<PollenSummary | null> {
-  const today = new Date().toISOString().split("T")[0];
-  const records = await fetchRecords(inseeCode, today);
-
-  if (records.length) return parseRecord(records[0], inseeCode);
-
-  const yesterday = new Date(Date.now() - 86_400_000).toISOString().split("T")[0];
-  const fallback = await fetchRecords(inseeCode, yesterday);
-  return fallback.length ? parseRecord(fallback[0], inseeCode) : null;
+  const dates = [
+    new Date().toISOString().split("T")[0],
+    new Date(Date.now() - 86_400_000).toISOString().split("T")[0],
+  ];
+  // Essai 1 : code commune (5 chiffres) — disponible sur certaines AASQA
+  for (const date of dates) {
+    const records = await fetchRecords(inseeCode, date).catch(() => []);
+    const result = firstParseable(records, inseeCode);
+    if (result) return result;
+  }
+  // Essai 2 : code département (2 chiffres) — fallback universel
+  const dept = deptCode(inseeCode);
+  if (dept !== inseeCode) {
+    for (const date of dates) {
+      const records = await fetchRecords(dept, date).catch(() => []);
+      const result = firstParseable(records, inseeCode);
+      if (result) return result;
+    }
+  }
+  return null;
 }
 
 const cache = new Map<string, Promise<PollenSummary | null>>();

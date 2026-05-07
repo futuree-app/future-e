@@ -467,7 +467,8 @@ async function buildFallbackMetrics(
   ]);
 
   const fallback: Partial<Record<DimensionSlug, DisplayMetric>> = {};
-  const driasValues = driasData?.commune?.s?.gwl20?.v;
+  // gwl30 = scénario +4°C — le plus pessimiste disponible dans le dataset DRIAS
+  const driasValues = driasData?.commune?.s?.gwl30?.v;
 
   if (driasValues?.NORTX30D_yr != null) {
     const days = Math.round(driasValues.NORTX30D_yr);
@@ -475,7 +476,7 @@ async function buildFallbackMetrics(
     fallback.canicule = {
       score: Math.max(0, Math.min(100, Math.round((days / 90) * 100))),
       label: `${days} jours > 30°C / an`,
-      note: 'Source DRIAS · horizon 2050',
+      note: 'Source DRIAS · horizon 2050 · scénario +4°C',
     };
   }
 
@@ -565,8 +566,8 @@ async function buildFallbackMetrics(
       score,
       label: feuxParts.join(' · '),
       note: hasWildfireRisk
-        ? 'Source DRIAS + Géorisques · conditions météo et PPRIF déclaré'
-        : 'Source DRIAS · conditions météo pondérées par la végétation départementale',
+        ? 'Source DRIAS (+4°C) + Géorisques · conditions météo et PPRIF déclaré'
+        : 'Source DRIAS (+4°C) · conditions météo pondérées par la végétation départementale',
     };
   }
 
@@ -619,12 +620,17 @@ async function buildFallbackMetrics(
   const airScore = averageScores([...annualAirScores, atmoScore]);
 
   if (airScore != null) {
-    const airParts = [
-      annualAir?.pm25 != null ? `PM2.5 ${formatNumber(annualAir.pm25)} µg/m³` : null,
-      annualAir?.no2 != null ? `NO₂ ${formatNumber(annualAir.no2)} µg/m³` : null,
-      annualAir?.pm10 != null ? `PM10 ${formatNumber(annualAir.pm10)} µg/m³` : null,
-      annualAir?.o3 != null ? `O₃ ${formatNumber(annualAir.o3)} µg/m³` : null,
-    ].filter(Boolean);
+    // Normes OMS 2021 : PM2.5 = 5 µg/m³, NO₂ = 10 µg/m³, PM10 = 15 µg/m³, O₃ = 60 µg/m³ (pic)
+    const pm25Label = annualAir?.pm25 != null
+      ? `PM2.5 ${formatNumber(annualAir.pm25)} µg/m³${annualAir.pm25 > 5 ? ` (×${(annualAir.pm25 / 5).toFixed(1)} norme OMS)` : ' — conforme OMS'}`
+      : null;
+    const no2Label = annualAir?.no2 != null
+      ? `NO₂ ${formatNumber(annualAir.no2)} µg/m³${annualAir.no2 > 10 ? ` (×${(annualAir.no2 / 10).toFixed(1)} norme OMS)` : ' — conforme OMS'}`
+      : null;
+    const pm10Label = annualAir?.pm10 != null
+      ? `PM10 ${formatNumber(annualAir.pm10)} µg/m³${annualAir.pm10 > 15 ? ` (×${(annualAir.pm10 / 15).toFixed(1)} norme OMS)` : ''}`
+      : null;
+    const airParts = [pm25Label, no2Label, pm10Label].filter(Boolean);
 
     fallback['qualite-air'] = {
       score: airScore,
@@ -632,8 +638,8 @@ async function buildFallbackMetrics(
       note:
         airParts.length > 0
           ? atmo?.date
-            ? `Source ADEME / Atmo France · concentrations annuelles + indice ${atmo.date}`
-            : 'Source ADEME / Data Fair · concentrations annuelles'
+            ? `Source ADEME / Atmo France · moyennes annuelles + indice du ${atmo.date} · norme OMS 2021`
+            : 'Source ADEME / Data Fair · moyennes annuelles · norme OMS 2021'
           : atmo?.date
             ? `Source Atmo France / AASQA · indice du ${atmo.date}`
             : 'Source Atmo France / AASQA',
@@ -649,8 +655,8 @@ async function buildFallbackMetrics(
 
   if (soinScore != null) {
     const soinsParts = [
-      accesMedecins != null ? `APL médecins ${formatNumber(accesMedecins)}` : null,
-      eloignementServices != null ? `${formatNumber(eloignementServices)}% à plus de 20 min d’un service` : null,
+      accesMedecins != null ? `Accès méd. ${formatNumber(accesMedecins)} cons./hab./an` : null,
+      eloignementServices != null ? `${formatNumber(eloignementServices)}% à +20 min d’un service` : null,
     ].filter(Boolean);
 
     fallback['acces-soins'] = {
@@ -698,8 +704,8 @@ async function buildFallbackMetrics(
       label: stressParts.slice(0, 2).join(' · ') || "Lecture ressource en eau disponible",
       note:
         eaufrance?.drought?.lastObservationDate
-          ? `Source DRIAS / Eaufrance · dernière observation ${eaufrance.drought.lastObservationDate}`
-          : 'Source DRIAS / Eaufrance · sécheresse des sols et écoulements',
+          ? `Source DRIAS (+4°C) / Eaufrance · dernière observation ${eaufrance.drought.lastObservationDate}`
+          : 'Source DRIAS (+4°C) / Eaufrance · sécheresse des sols et écoulements',
     };
   }
 

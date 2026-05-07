@@ -38,8 +38,8 @@ const DEPT_CADMIUM: Record<string, number> = {
   "76": 0.32, "27": 0.30, "14": 0.28, "50": 0.25, "61": 0.26,
   // Bretagne — agriculture intensive, épandages lisier phosphaté
   "22": 0.30, "29": 0.28, "35": 0.32, "56": 0.26,
-  // Pays de la Loire
-  "44": 0.28, "49": 0.24, "53": 0.22, "72": 0.22, "85": 0.24,
+  // Pays de la Loire — Loire-Atlantique et Vendée : céréales + maraîchage intensif
+  "44": 0.30, "49": 0.26, "53": 0.22, "72": 0.24, "85": 0.30,
   // Centre-Val-de-Loire
   "18": 0.20, "28": 0.24, "36": 0.18, "37": 0.20, "41": 0.22, "45": 0.26,
   // Île-de-France — sols urbains, remblais, pollutions historiques
@@ -57,9 +57,13 @@ const DEPT_CADMIUM: Record<string, number> = {
   // Occitanie intérieure
   "09": 0.16, "12": 0.20, "31": 0.24, "32": 0.22, "46": 0.20, "47": 0.22,
   "65": 0.18, "81": 0.26, "82": 0.24,
-  // Nouvelle-Aquitaine — Landes (sables pauvres = faible Cd), Poitou, Limousin
-  "16": 0.22, "17": 0.22, "19": 0.20, "23": 0.18, "24": 0.20, "33": 0.20,
-  "40": 0.12, "64": 0.18, "79": 0.22, "86": 0.22, "87": 0.20,
+  // Nouvelle-Aquitaine
+  // Charente-Maritime (17) : grande plaine céréalière/tournesols, phosphates intensifs → Cd élevé
+  // Charente (16), Vienne (86), Deux-Sèvres (79) : agriculture céréalière, Cd modéré à élevé
+  // Gironde (33) : viticulture Médoc + zone industrielle Bordeaux
+  // Landes (40) : sables pauvres, très faible Cd
+  "16": 0.32, "17": 0.38, "19": 0.22, "23": 0.20, "24": 0.28, "33": 0.30,
+  "40": 0.12, "64": 0.20, "79": 0.30, "86": 0.30, "87": 0.22,
   // Corse
   "2A": 0.12, "2B": 0.12,
 };
