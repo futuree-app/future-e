@@ -26,161 +26,50 @@ export type NavDropdownItem = {
 export type NavItem = NavFlatItem | NavDropdownItem;
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: 'Pourquoi futur·e', href: '/pourquoi' },
-
-  // ─── Savoir — contenu éditorial gratuit ─────────────────────────────────────
+  // ─── Explorer — thèmes + profils ────────────────────────────────────────────
   {
-    label: 'Savoir',
+    label: 'Explorer',
     groups: [
       {
-        groupLabel: 'Santé',
-        color: '#4ade80',
-        links: [
-          {
-            label: 'Cadmium dans les sols',
-            href: '/savoir/cadmium',
-            description: 'Pollution naturelle et alimentation',
-          },
-          {
-            label: 'Chaleur et santé mentale',
-            href: '/savoir/chaleur-sante-mentale',
-            description: 'Effets psychiques des vagues de chaleur',
-          },
-          {
-            label: 'Pollutions invisibles',
-            href: '/savoir/pollutions-invisibles',
-            description: 'Sols, air, eau : ce que contient votre commune',
-          },
-          {
-            label: 'Pollens & allergies',
-            href: '/savoir/pollens',
-            description: 'Saison pollinique élargie en 2050',
-            badge: 'Bientôt',
-          },
-        ],
-      },
-      {
-        groupLabel: 'Mobilité',
-        color: '#60a5fa',
-        links: [
-          {
-            label: 'Dépendance automobile',
-            href: '/savoir/dependance-auto',
-            description: 'Vulnérabilité des territoires ruraux',
-          },
-        ],
-      },
-      {
-        groupLabel: 'Environnement',
+        groupLabel: 'Par thème',
         color: '#f87171',
         links: [
           {
-            label: 'Canicule en 2050',
-            href: '/savoir/canicule',
-            description: 'Projections DRIAS pour les villes françaises',
+            label: 'Chaleur et canicule',
+            href: '/chaleur',
+            description: 'Jours > 30 °C, nuits tropicales · DRIAS 2050',
           },
           {
-            label: 'Submersion côtière',
-            href: '/savoir/submersion',
-            description: 'Risque inondation et littoral',
+            label: 'Inondation et submersion',
+            href: '/territoires/submersion',
+            description: 'Risque côtier et cours d\'eau · Géorisques',
           },
           {
             label: 'Feux de forêt',
-            href: '/savoir/feux',
-            description: 'Extension des zones à risque incendie',
-          },
-          {
-            label: 'Sécheresse',
-            href: '/savoir/secheresse',
-            description: 'Stress hydrique des sols agricoles',
-          },
-        ],
-      },
-    ],
-  },
-
-  // ─── Territoires — données communes, 100% gratuit ────────────────────────────
-  {
-    label: 'Territoires',
-    groups: [
-      {
-        groupLabel: 'Chercher ma commune',
-        color: '#60a5fa',
-        links: [
-          {
-            label: 'Communes exposées à la chaleur',
-            href: '/territoires/canicule',
-            description: 'Score de tension · Jours > 30 °C en 2050',
-          },
-          {
-            label: 'Communes en zone inondable',
-            href: '/territoires/submersion',
-            description: 'Score de tension · Littoral et cours d\'eau',
-          },
-          {
-            label: 'Communes en zone incendie',
             href: '/territoires/feux',
-            description: 'Score de tension · Risque feux de forêt',
+            description: 'Zones à risque incendie · Prométhée / DREAL',
           },
           {
-            label: 'Communes à risque cadmium',
+            label: 'Pollutions des sols',
             href: '/territoires/cadmium',
-            description: 'Score de tension · Sols et alimentation',
+            description: 'Cadmium, sites pollués · GisSol / IREP',
           },
           {
-            label: 'Communes sans alternative à la voiture',
+            label: 'Dépendance automobile',
             href: '/territoires/dependance-auto',
-            description: 'Score de tension · Mobilité et carburant',
-          },
-        ],
-      },
-    ],
-  },
-
-  { label: 'Comparer', href: '/comparateur' },
-
-  // ─── Agir — guides premium avec paywall ─────────────────────────────────────
-  {
-    label: 'Agir',
-    groups: [
-      {
-        groupLabel: 'Guides pratiques',
-        color: '#4ade80',
-        links: [
-          {
-            label: 'Réduire son exposition au cadmium',
-            href: '/agir/cadmium',
-            description: 'Leviers documentés · Étapes concrètes',
+            description: 'Vulnérabilité mobilité · INSEE / Ecolab',
           },
           {
-            label: 'Réduire sa dépendance automobile',
-            href: '/agir/dependance-auto',
-            description: 'Coût réel, alternatives, vulnérabilité mobilité',
+            label: 'Qualité de l\'air',
+            href: '/territoires/air',
+            description: 'PM2.5, NO₂, O₃ · ATMO France',
+            badge: 'Bientôt',
           },
           {
-            label: "Passer à l'électrique",
-            href: '/agir/voiture-electrique',
-            description: 'Quand cela a du sens selon votre territoire',
-          },
-          {
-            label: 'Se préparer à la canicule',
-            href: '/agir/canicule',
-            description: 'Ventilation, hydratation, personnes vulnérables',
-          },
-          {
-            label: 'Face aux pollutions invisibles',
-            href: '/agir/pollutions-invisibles',
-            description: 'IREP, sites pollués, eau, air — agir à sa juste échelle',
-          },
-          {
-            label: 'Gérer le risque inondation',
-            href: '/agir/inondation',
-            description: 'PPRNi, batardeaux, catnat',
-          },
-          {
-            label: 'Face aux feux de forêt',
-            href: '/agir/feux-forets',
-            description: 'Débroussaillement, évacuation, OBD',
+            label: 'Eau potable',
+            href: '/territoires/eau',
+            description: 'Stress hydrique, nappes · BRGM',
+            badge: 'Bientôt',
           },
         ],
       },
@@ -189,19 +78,18 @@ export const NAV_ITEMS: NavItem[] = [
         color: '#fb923c',
         links: [
           {
-            label: 'Pour les propriétaires',
-            href: '/agir/proprietaire',
-            description: 'DPE, rénovation, assurances',
-            badge: 'Bientôt',
+            label: 'Je cherche à déménager',
+            href: '/comparateur',
+            description: 'Comparer deux communes côte à côte',
           },
           {
-            label: 'Pour les familles',
+            label: 'J\'ai des enfants',
             href: '/agir/famille',
-            description: 'Santé des enfants, mobilité, scolarité',
+            description: 'Santé, pollutions, qualité de vie',
             badge: 'Bientôt',
           },
           {
-            label: 'Pour les retraités',
+            label: 'Je prépare ma retraite',
             href: '/agir/retraite',
             description: 'Chaleur, dépendance, budget',
             badge: 'Bientôt',
@@ -211,7 +99,9 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
 
-  { label: 'Tarifs', href: '#pricing' },
+  { label: 'Mon rapport', href: '/rapport' },
+  { label: 'Comparateur', href: '/comparateur' },
+  { label: 'Pourquoi futur·e', href: '/pourquoi' },
 ];
 
 // ─── Hub articles landing page ────────────────────────────────────────────────

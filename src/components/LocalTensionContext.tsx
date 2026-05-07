@@ -67,6 +67,7 @@ interface LocalTensionContextProps {
   thematique: string;
   accent?: string;
   limit?: number;
+  basePath?: string; // ex: '/chaleur' — override du chemin de destination
 }
 
 export async function LocalTensionContext({
@@ -74,6 +75,7 @@ export async function LocalTensionContext({
   thematique,
   accent = '#f87171',
   limit = 50,
+  basePath,
 }: LocalTensionContextProps) {
   const allCommunes = await fetchTopCommunesByRisk(slug);
   const communes = allCommunes.slice(0, limit);
@@ -181,7 +183,7 @@ export async function LocalTensionContext({
           return (
             <Link
               key={commune.insee_code}
-              href={`/savoir/${slug}/${commune.insee_code}`}
+              href={basePath ? `${basePath}/${commune.insee_code}` : `/savoir/${slug}/${commune.insee_code}`}
               style={{
                 display: 'grid',
                 gridTemplateColumns: '2.5rem 1fr repeat(4, 56px)',

@@ -14,12 +14,14 @@ interface CommuneSearchProps {
   slug: string;
   accent?: string;
   placeholder?: string;
+  basePath?: string; // ex: '/chaleur' — override du chemin de destination
 }
 
 export function CommuneSearch({
   slug,
   accent = '#60a5fa',
   placeholder = 'Saisissez votre commune…',
+  basePath,
 }: CommuneSearchProps) {
   const [value, setValue] = useState('');
   const [results, setResults] = useState<CommuneResult[]>([]);
@@ -61,7 +63,7 @@ export function CommuneSearch({
   function handleSelect(commune: CommuneResult) {
     setOpen(false);
     setValue(commune.nom);
-    router.push(`/territoires/${slug}/${commune.code}`);
+    router.push(basePath ? `${basePath}/${commune.code}` : `/territoires/${slug}/${commune.code}`);
   }
 
   return (
