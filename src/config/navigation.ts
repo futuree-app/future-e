@@ -137,6 +137,8 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
 
+  { label: 'Comparer', href: '/comparateur' },
+
   // ─── Agir — guides premium avec paywall ─────────────────────────────────────
   {
     label: 'Agir',

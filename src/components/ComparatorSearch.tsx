@@ -1,6 +1,6 @@
 'use client';
 
-import { startTransition, useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 
 type CommuneResult = {
@@ -53,6 +53,7 @@ export function ComparatorSearch({
   initialRight = null,
 }: ComparatorSearchProps) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const debounce = useRef<Record<InputKey, ReturnType<typeof setTimeout> | undefined>>({
     left: undefined,
     right: undefined,
@@ -246,9 +247,23 @@ export function ComparatorSearch({
       <style>{`
         .cmp-input:focus { border-color: rgba(248,113,113,0.35) !important; background: rgba(255,255,255,0.05) !important; outline: none; }
         .cmp-row:hover { background: rgba(255,255,255,0.05) !important; }
+        @keyframes cmp-progress {
+          0%   { width: 0%;   opacity: 1; }
+          60%  { width: 75%;  opacity: 1; }
+          90%  { width: 92%;  opacity: 1; }
+          100% { width: 100%; opacity: 0; }
+        }
+        .cmp-progress-bar {
+          position: absolute; top: 0; left: 0; height: 2px;
+          background: linear-gradient(90deg, #f87171, #fb923c);
+          border-radius: 0 2px 2px 0;
+          animation: cmp-progress 8s cubic-bezier(0.1, 0.4, 0.2, 1) forwards;
+        }
       `}</style>
 
-      <div className="compare-shell">
+      <div className="compare-shell" style={{ position: 'relative' }}>
+        {isPending && <div className="cmp-progress-bar" />}
+
         <div className="compare-selector">
           <SearchInput
             label="Commune A"
@@ -288,10 +303,10 @@ export function ComparatorSearch({
         </div>
 
         <div className="compare-actions">
-          <button type="button" className="compare-btn" onClick={runComparison} disabled={!ready}>
-            Lancer la comparaison
+          <button type="button" className="compare-btn" onClick={runComparison} disabled={!ready || isPending}>
+            {isPending ? 'Chargement…' : 'Lancer la comparaison'}
           </button>
-          <button type="button" className="share-btn" onClick={copyShareLink} disabled={!ready}>
+          <button type="button" className="share-btn" onClick={copyShareLink} disabled={!ready || isPending}>
             {copyLabel}
           </button>
         </div>
