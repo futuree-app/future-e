@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { isArrondissement } from '@/lib/communes';
 
 interface CommuneResult {
   code: string;
@@ -42,7 +43,8 @@ export function CommuneSearch({
       const res = await fetch(
         `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,code,codesPostaux,codeDepartement&limit=8&boost=population`,
       );
-      const data: CommuneResult[] = await res.json();
+      const raw: CommuneResult[] = await res.json();
+      const data = raw.filter((c) => !isArrondissement(c.code));
       setResults(data);
       setOpen(data.length > 0);
     } catch {

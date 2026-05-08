@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { isArrondissement } from '@/lib/communes';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { getClimatDataCommune } from '@/lib/drias-json';
 import { getGeorisquesSummary } from '@/lib/georisques';
@@ -8,6 +9,24 @@ import { createClient } from '@supabase/supabase-js';
 import { unstable_cache } from 'next/cache';
 
 export const revalidate = 86400;
+
+// Top 1 000 communes les plus peuplées générées statiquement au build
+// Le reste est généré à la demande puis mis en cache 24h (ISR)
+export async function generateStaticParams() {
+  try {
+    const res = await fetch(
+      'https://geo.api.gouv.fr/communes?fields=code,population&limit=35000',
+    );
+    const communes: { code: string; population?: number }[] = await res.json();
+    return communes
+      .filter((c) => !isArrondissement(c.code))
+      .sort((a, b) => (b.population ?? 0) - (a.population ?? 0))
+      .slice(0, 1000)
+      .map((c) => ({ insee_code: c.code }));
+  } catch {
+    return [];
+  }
+}
 
 const ACCENT = '#f87171';
 
@@ -54,11 +73,12 @@ export async function generateMetadata({
   params: Promise<{ insee_code: string }>;
 }): Promise<Metadata> {
   const { insee_code } = await params;
-  const commune = await fetchScore(insee_code);
-  if (!commune) return { title: 'Chaleur et canicule · futur•e' };
-
-  const title = `Chaleur et canicule à ${commune.nom_commune} : projections 2050 et score de tension`;
-  const description = `Score de tension canicule : ${commune.score}/100 — jours > 30°C, nuits tropicales et qualité de l'air à ${commune.nom_commune} en 2050 (DRIAS +4°C).`;
+  const [score, drias] = await Promise.all([fetchScore(insee_code), getClimatDataCommune(insee_code).catch(() => null)]);
+  const nomCommune = score?.nom_commune ?? drias?.commune?.n ?? insee_code;
+  const title = `Chaleur et canicule à ${nomCommune} : projections 2050`;
+  const description = score
+    ? `Score de tension canicule : ${score.score}/100 — jours > 30°C, nuits tropicales et qualité de l'air à ${nomCommune} en 2050.`
+    : `Jours > 30°C, nuits tropicales et qualité de l'air à ${nomCommune} en 2050.`;
 
   return {
     title: `${title} · futur•e`,
@@ -123,6 +143,7 @@ const css = `
   .articles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px;}
   .article-card{padding:22px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);text-decoration:none;display:flex;flex-direction:column;gap:10px;transition:border-color 0.2s,background 0.2s;}
   .article-card:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);}
+  .article-img{width:100%;height:140px;object-fit:cover;border-radius:6px;margin-bottom:2px;}
   .article-cat{font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
   .article-title{font-size:14px;font-weight:500;color:var(--fg-1);line-height:1.35;}
   .article-cta{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:${ACCENT};margin-top:auto;}
@@ -163,32 +184,57 @@ export default async function ChaleurCommune({
 
   const [commune, driasData, georisques, atmo] = await Promise.all([
     fetchScore(insee_code),
-    getClimatDataCommune(insee_code),
+    getClimatDataCommune(insee_code).catch(() => null),
     getGeorisquesSummary(insee_code).catch(() => null),
     process.env.ATMO_USERNAME
       ? getAtmoForCommune(insee_code).catch(() => null)
       : Promise.resolve(null),
   ]);
 
-  if (!commune) {
-    return (
-      <div style={{ padding: '40px', color: '#e9ecf2', fontFamily: 'system-ui' }}>
-        Commune introuvable.{' '}
-        <Link href="/chaleur" style={{ color: ACCENT }}>
-          Retour à Chaleur et canicule
-        </Link>
-      </div>
-    );
-  }
-
-  const dept = commune.departement ?? insee_code.slice(0, 2);
+  const communeName = commune?.nom_commune ?? driasData?.commune?.n ?? insee_code;
+  const dept = commune?.departement ?? insee_code.slice(0, 2);
   const driasV = driasData?.commune?.s?.gwl30?.v;
 
-  const DRIAS_ITEMS: [string, number | undefined, string][] = [
-    ['Jours Tmax ≥ 30°C / an',  driasV?.NORTX30D_yr,     'j'],
-    ['Jours Tmax ≥ 35°C / an',  driasV?.NORTX35D_yr,     'j'],
-    ['Nuits tropicales / an',    driasV?.NORTR_yr,         'n'],
-    ['Température moy. été',     driasV?.NORTMm_seas_JJA,  '°C'],
+  // Fallback score computed from DRIAS when not in communes_tension
+  function computeScoreFromDrias(): number | null {
+    if (!driasV) return null;
+    const parts: { w: number; v: number }[] = [];
+    if (driasV.NORTX30D_yr != null) parts.push({ w: 0.45, v: Math.min(100, (driasV.NORTX30D_yr / 70) * 100) });
+    if (driasV.NORTR_yr != null) parts.push({ w: 0.35, v: Math.min(100, (driasV.NORTR_yr / 120) * 100) });
+    if (driasV.NORTMm_seas_JJA != null) parts.push({ w: 0.20, v: Math.min(100, Math.max(0, (driasV.NORTMm_seas_JJA - 18) / 12 * 100)) });
+    if (parts.length === 0) return null;
+    const totalW = parts.reduce((s, p) => s + p.w, 0);
+    return Math.round(parts.reduce((s, p) => s + (p.v * p.w) / totalW, 0));
+  }
+
+  const displayScore = commune?.score ?? computeScoreFromDrias();
+  const scoreIsEstimated = !commune && displayScore != null;
+
+  const DRIAS_ITEMS: { label: string; val: number | undefined; unit: string; note: string }[] = [
+    {
+      label: 'Jours de forte chaleur par an',
+      val: driasV?.NORTX30D_yr,
+      unit: 'j',
+      note: "Jours où il fera plus de 30°C. Au-delà de 30 jours par an, rester dehors en plein soleil devient dangereux pour les personnes fragiles.",
+    },
+    {
+      label: 'Jours de canicule intense par an',
+      val: driasV?.NORTX35D_yr,
+      unit: 'j',
+      note: "Jours à plus de 35°C — seuil où les mécanismes de refroidissement du corps sont débordés, même chez les adultes en bonne santé.",
+    },
+    {
+      label: 'Nuits chaudes par an',
+      val: driasV?.NORTR_yr,
+      unit: 'n',
+      note: "Nuits où la température ne descend pas sous 20°C. Sans fraîcheur nocturne, le corps ne récupère pas et les risques d'accident cardiaque augmentent.",
+    },
+    {
+      label: "Température moyenne de l'été",
+      val: driasV?.NORTMm_seas_JJA,
+      unit: '°C',
+      note: "Moyenne sur juin–juillet–août. Au-dessus de 25°C, dormir fenêtre ouverte ne suffit plus. C'est la référence pour calibrer les besoins en climatisation.",
+    },
   ];
 
   const IND_ITEMS = [
@@ -198,10 +244,24 @@ export default async function ChaleurCommune({
     { key: 'ind_occurrence'    as const, label: 'Occurrence',           desc: 'Fréquence historique des événements.' },
   ];
 
-  const georisquesHighlights = [
-    ...(georisques?.riskLabels ?? []),
-    ...(georisques?.seismic?.label ? [georisques.seismic.label] : []),
-  ].slice(0, 5);
+  // Seuls les risques directement aggravés par la chaleur extrême
+  const HEAT_RISK_LABELS = new Set([
+    'Tassements différentiels',
+    'Retrait-gonflement des argiles',
+    'Feux de forêt',
+    'Sécheresse',
+    'Canicule',
+  ]);
+
+  const HEAT_RISK_DESCRIPTIONS: Record<string, string> = {
+    'Tassements différentiels': "Le sol argileux de cette commune gonfle avec l'humidité et se rétracte en période de sécheresse. Ce mouvement répété fissure les murs et les fondations des maisons. La sécheresse record de 2022 a déjà causé plus de 12 milliards € de sinistres en France — et les étés de 2050 seront bien plus secs.",
+    'Retrait-gonflement des argiles': "Même mécanisme : le sol bouge selon les saisons. Les maisons individuelles aux fondations superficielles sont les plus exposées. Avec des étés significativement plus secs prévus pour 2050 sur cette région, ce phénomène deviendra chronique.",
+    'Feux de forêt': "La commune est officiellement classée à risque incendie. Avec des vagues de chaleur plus fréquentes, plus longues et plus intenses, la saison des feux s'allonge déjà d'année en année. Les projections prévoient une extension géographique importante de ce risque vers le nord d'ici 2050.",
+    'Sécheresse': "Le territoire est officiellement exposé au risque sécheresse. Ce risque est directement amplifié par le réchauffement : les projections DRIAS prévoient des étés significativement plus secs pour les prochaines décennies.",
+    'Canicule': "La commune est officiellement reconnue comme exposée au risque canicule par l'État, ce qui génère des obligations de prévention pour les établissements accueillant des personnes vulnérables.",
+  };
+
+  const heatRisks = (georisques?.riskLabels ?? []).filter((l) => HEAT_RISK_LABELS.has(l));
 
   return (
     <>
@@ -219,7 +279,7 @@ export default async function ChaleurCommune({
           <div className="crumb">
             <Link href="/chaleur">Chaleur et canicule</Link>
             <span className="crumb-sep">/</span>
-            {commune.nom_commune}
+            {communeName}
           </div>
           <ThemeToggle />
         </div>
@@ -228,115 +288,124 @@ export default async function ChaleurCommune({
       <main className="page">
         <Link className="back-link" href="/chaleur">← Chaleur et canicule</Link>
 
+        {/* ── INTRO CONTEXTUELLE ───────────────────────────────────────── */}
+        <div style={{ marginBottom: 48 }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: ACCENT, marginBottom: 12 }}>
+            Chaleur et canicule · Projections 2050
+          </div>
+          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(26px, 4vw, 42px)', fontWeight: 400, color: 'var(--fg-1)', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 18px' }}>
+            À {communeName}, à quoi ressemblera un été en 2050 ?
+          </h1>
+          <p style={{ fontSize: 15, color: 'var(--fg-3)', lineHeight: 1.75, maxWidth: 640, margin: '0 0 12px' }}>
+            Cette page rassemble les projections climatiques officelles pour {communeName} — nombre de jours de canicule, nuits sans fraîcheur, risques associés — dans un scénario de réchauffement à +4°C d'ici 2050. Les données viennent de Météo-France, du CNRS, et des bases de risques officielles de l'État.
+          </p>
+          <p style={{ fontSize: 14, color: 'var(--fg-4)', lineHeight: 1.65, maxWidth: 640, margin: 0, fontFamily: 'var(--font-mono)' }}>
+            Que vous habitiez ici, envisagiez d'y déménager ou prépariez votre avenir, ces chiffres vous concernent directement.
+          </p>
+        </div>
+
         {/* ── BLOC 1 — TERRITOIRE ──────────────────────────────────────── */}
 
         {/* Score hero */}
-        <div className="score-hero">
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 32, flexWrap: 'wrap' }}>
-            <div>
-              <div className="score-num">
-                {commune.score}<span className="score-denom">/100</span>
-              </div>
-              <div className="score-label">Score de tension canicule</div>
-            </div>
-            <div style={{ flex: 1, minWidth: 180 }}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACCENT, marginBottom: 6 }}>
-                Chaleur et canicule · DRIAS +4°C
-              </div>
-              <div className="commune-name">{commune.nom_commune}</div>
-              <div className="commune-meta">Dept. {dept} · INSEE {commune.insee_code}</div>
-            </div>
-          </div>
-
-          {/* 4 indicators inline */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 20, marginTop: 28 }}>
-            {IND_ITEMS.map((ind) => {
-              const val = commune[ind.key];
-              const pct = val != null ? Math.min(100, Math.round(val)) : null;
-              return (
-                <div key={ind.key}>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--fg-4)', marginBottom: 6 }}>
-                    {ind.label}
-                  </div>
-                  {pct != null ? (
-                    <>
-                      <div style={{ fontFamily: 'var(--font-serif)', fontSize: 24, color: ACCENT, lineHeight: 1 }}>
-                        {pct}<span style={{ fontSize: '0.5em', color: 'var(--fg-4)' }}>/100</span>
-                      </div>
-                      <div className="ind-bar"><div className="ind-bar-fill" style={{ width: `${pct}%` }} /></div>
-                      <div style={{ fontSize: 11, color: 'var(--fg-4)', lineHeight: 1.4 }}>{ind.desc}</div>
-                    </>
-                  ) : (
-                    <div style={{ fontSize: 13, color: 'var(--fg-4)' }}>N/D</div>
-                  )}
+        {displayScore != null && (
+          <div className="score-hero" style={{ marginBottom: 48 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 32, flexWrap: 'wrap' }}>
+              <div>
+                <div className="score-num">
+                  {displayScore}<span className="score-denom">/100</span>
                 </div>
-              );
-            })}
-          </div>
-        </div>
+                <div className="score-label">
+                  Score de tension canicule{scoreIsEstimated ? ' · estimé depuis les projections DRIAS' : ''}
+                </div>
+              </div>
+              <div style={{ flex: 1, minWidth: 180 }}>
+                <div className="commune-name">{communeName}</div>
+                <div className="commune-meta">Dept. {dept} · INSEE {commune?.insee_code ?? insee_code}</div>
+              </div>
+            </div>
 
-        {/* DRIAS gwl30 */}
+            {/* 4 indicators inline — only if from DB */}
+            {commune && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 20, marginTop: 28 }}>
+                {IND_ITEMS.map((ind) => {
+                  const val = commune[ind.key];
+                  const pct = val != null ? Math.min(100, Math.round(val)) : null;
+                  return (
+                    <div key={ind.key}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--fg-4)', marginBottom: 6 }}>
+                        {ind.label}
+                      </div>
+                      {pct != null ? (
+                        <>
+                          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 24, color: ACCENT, lineHeight: 1 }}>
+                            {pct}<span style={{ fontSize: '0.5em', color: 'var(--fg-4)' }}>/100</span>
+                          </div>
+                          <div className="ind-bar"><div className="ind-bar-fill" style={{ width: `${pct}%` }} /></div>
+                          <div style={{ fontSize: 11, color: 'var(--fg-4)', lineHeight: 1.4 }}>{ind.desc}</div>
+                        </>
+                      ) : (
+                        <div style={{ fontSize: 13, color: 'var(--fg-4)' }}>N/D</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* DRIAS projections */}
         <div style={{ marginBottom: 10 }}>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACCENT, marginBottom: 4 }}>
-            Projections climatiques DRIAS 2050
+            Ce que les modèles prévoient pour 2050
           </div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg-4)' }}>
-            Scénario +4°C (GWL 3.0) · Météo-France / CNRS
+            Scénario +4°C · Météo-France / CNRS · Valeur médiane sur l'ensemble des modèles climatiques
           </div>
         </div>
         <div className="data-grid">
-          {DRIAS_ITEMS.filter(([, val]) => val != null).map(([label, val, unit]) => (
-            <div key={label} className="data-card">
-              <div className="data-card-label">{label}</div>
+          {DRIAS_ITEMS.filter((item) => item.val != null).map((item) => (
+            <div key={item.label} className="data-card">
+              <div className="data-card-label">{item.label}</div>
               <div className="data-card-value">
-                {typeof val === 'number' ? val.toFixed(0) : val}
-                <span className="data-card-unit"> {unit}</span>
+                {typeof item.val === 'number' ? item.val.toFixed(0) : item.val}
+                <span className="data-card-unit"> {item.unit}</span>
               </div>
-              <div className="data-card-note">Valeur médiane des modèles DRIAS · horizon 2050</div>
+              <div className="data-card-note">{item.note}</div>
             </div>
           ))}
-          {DRIAS_ITEMS.filter(([, val]) => val != null).length === 0 && (
+          {DRIAS_ITEMS.filter((item) => item.val != null).length === 0 && (
             <div style={{ gridColumn: '1/-1', padding: 20, color: 'var(--fg-4)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>
               Données DRIAS indisponibles pour cette commune.
             </div>
           )}
         </div>
 
-        {/* Géorisques */}
-        {georisques && (
+        {/* Géorisques — risques aggravés par la chaleur uniquement */}
+        {heatRisks.length > 0 && (
           <>
-            <div style={{ margin: '40px 0 10px' }}>
+            <div style={{ margin: '48px 0 10px' }}>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACCENT, marginBottom: 4 }}>
-                Risques officiels Géorisques
+                Ce que la chaleur extrême aggrave ici
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg-4)' }}>
-                Lecture communale GASPAR · pas une analyse à l'adresse
+                Risques officiels GASPAR · base nationale de l'État · données à l'échelle de la commune, pas de l'adresse exacte
               </div>
             </div>
             <div className="data-grid">
-              <div className="data-card">
-                <div className="data-card-label">Risque principal</div>
-                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: ACCENT, lineHeight: 1.2 }}>
-                  {georisquesHighlights[0] ?? 'Aucun risque communal remonté'}
+              {heatRisks.map((label) => (
+                <div key={label} className="data-card">
+                  <div className="data-card-label">{label}</div>
+                  <div className="data-card-note" style={{ marginTop: 0, fontSize: 13, lineHeight: 1.65, color: 'var(--fg-3)' }}>
+                    {HEAT_RISK_DESCRIPTIONS[label]}
+                  </div>
                 </div>
-              </div>
-              <div className="data-card">
-                <div className="data-card-label">Sismicité</div>
-                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: ACCENT, lineHeight: 1.2 }}>
-                  {georisques.seismic?.label ?? 'Non renseignée'}
-                </div>
-                {georisques.seismic?.code && (
-                  <div className="data-card-note">Zone {georisques.seismic.code}</div>
-                )}
-              </div>
+              ))}
             </div>
-            {georisquesHighlights.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
-                {georisquesHighlights.map((label) => (
-                  <span key={label} className="pill">{label}</span>
-                ))}
-              </div>
-            )}
+            <div style={{ marginTop: 12, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-4)' }}>
+              Ces données indiquent que la commune est concernée, pas forcément chaque logement. Vérifiez à votre adresse exacte sur{' '}
+              <a href="https://www.georisques.gouv.fr" target="_blank" rel="noopener" style={{ color: 'var(--fg-3)', textDecoration: 'underline' }}>georisques.gouv.fr</a>.
+            </div>
           </>
         )}
 
@@ -381,7 +450,7 @@ export default async function ChaleurCommune({
           <div className="cta-eyebrow">Rapport personnalisé</div>
           <p className="cta-title">
             Approfondissez ce diagnostic{' '}
-            <em style={{ fontStyle: 'italic', color: ACCENT }}>pour {commune.nom_commune}</em>
+            <em style={{ fontStyle: 'italic', color: ACCENT }}>pour {communeName}</em>
           </p>
           <p className="cta-sub">
             Logement · Mobilité · Santé · Économie locale — croisés pour votre profil spécifique.
@@ -401,6 +470,8 @@ export default async function ChaleurCommune({
           <p className="section-sub">Trois lectures de fond pour contextualiser ces données.</p>
           <div className="articles-grid">
             <Link href="/savoir/chaleur-sante-mentale" className="article-card">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/chaleur-sante-mentale.jpg" alt="Chaleur et santé mentale" className="article-img" />
               <span className="article-cat" style={{ background: 'rgba(248,113,113,0.12)', color: ACCENT }}>Santé mentale</span>
               <div className="article-title">Chaleur et santé mentale</div>
               <div style={{ fontSize: 12, color: 'var(--fg-4)', lineHeight: 1.55 }}>
@@ -409,6 +480,8 @@ export default async function ChaleurCommune({
               <div className="article-cta">Lire →</div>
             </Link>
             <Link href="/savoir/canicule" className="article-card">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/chaleur-rue.jpg" alt="Canicule en ville" className="article-img" />
               <span className="article-cat" style={{ background: 'rgba(248,113,113,0.12)', color: ACCENT }}>Projections</span>
               <div className="article-title">Canicule en 2050 : les projections</div>
               <div style={{ fontSize: 12, color: 'var(--fg-4)', lineHeight: 1.55 }}>
@@ -417,6 +490,8 @@ export default async function ChaleurCommune({
               <div className="article-cta">Lire →</div>
             </Link>
             <Link href="/savoir/pollutions-invisibles" className="article-card">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/chaleur-feuille.jpg" alt="Pollutions invisibles" className="article-img" />
               <span className="article-cat" style={{ background: 'rgba(251,146,60,0.12)', color: '#fb923c' }}>Air & sols</span>
               <div className="article-title">Pollutions invisibles</div>
               <div style={{ fontSize: 12, color: 'var(--fg-4)', lineHeight: 1.55 }}>
@@ -460,15 +535,15 @@ export default async function ChaleurCommune({
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14, marginTop: 24 }}>
             {[
               {
-                date: 'DRIAS · Scénario +4°C',
-                head: '57 communes dépasseront 60 j/an > 30°C',
-                body: 'La rupture est nette dans le sud-est et la vallée du Rhône. Nice, Marseille, Montpellier : les projections gwl30 sont maintenant convergentes entre modèles.',
-                src: 'DRIAS / Météo-France',
+                date: 'Météo-France · Projections 2050',
+                head: '57 communes dépasseront 60 jours de canicule par an',
+                body: 'La rupture est nette dans le sud-est et la vallée du Rhône. Nice, Marseille, Montpellier : les projections climatiques sont maintenant convergentes entre modèles.',
+                src: 'Météo-France / CNRS',
               },
               {
                 date: 'Copernicus · 2025',
                 head: '2025 : deuxième été le plus chaud jamais enregistré',
-                body: '+1,3°C au-dessus de la moyenne pré-industrielle. La trajectoire est cohérente avec les scénarios gwl20 à gwl30 utilisés par futur•e.',
+                body: "+1,3°C au-dessus de la moyenne d'avant l'ère industrielle. La trajectoire est cohérente avec les projections à +2°C et +4°C utilisées par futur•e.",
                 src: 'Copernicus Climate Change Service',
               },
             ].map((signal) => (
@@ -485,7 +560,7 @@ export default async function ChaleurCommune({
       </main>
 
       <footer className="page-footer">
-        <div>futur•e · Chaleur et canicule · {commune.nom_commune}</div>
+        <div>futur•e · Chaleur et canicule · {communeName}</div>
         <div>
           <Link href="/chaleur">← Toutes les communes</Link>
           {' · '}

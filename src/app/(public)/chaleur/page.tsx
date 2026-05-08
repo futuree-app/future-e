@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { CommuneSearch } from '@/components/CommuneSearch';
-import { LocalTensionContext } from '@/components/LocalTensionContext';
 import Navbar from '@/components/Navbar';
 
 export const revalidate = 86400;
@@ -10,10 +8,10 @@ export const revalidate = 86400;
 export const metadata: Metadata = {
   title: 'Chaleur et canicule en France · futur•e',
   description:
-    'Projections DRIAS +4°C · jours de canicule, nuits tropicales, températures estivales. Cherchez votre commune pour voir son exposition à la chaleur extrême en 2050.',
+    "Jours de canicule, nuits étouffantes, qualité de l'air : cherchez votre commune pour voir ce que les étés de 2050 changeront concrètement.",
   openGraph: {
     title: 'Chaleur et canicule en France · futur•e',
-    description: 'Projections DRIAS +4°C pour chaque commune française. Jours > 30°C, nuits tropicales, score de tension thermique.',
+    description: 'Projections climatiques pour chaque commune française. Jours > 30°C, nuits tropicales, score de tension thermique.',
   },
 };
 
@@ -28,47 +26,57 @@ const css = `
 
   .page{position:relative;z-index:2;max-width:960px;margin:0 auto;padding:72px 28px 120px;}
 
-  /* Typography */
+  /* Hero */
   .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:${ACCENT};margin-bottom:18px;display:flex;align-items:center;gap:10px;}
   .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:${ACCENT};box-shadow:0 0 10px ${ACCENT};flex-shrink:0;}
   h1{font-family:var(--font-serif);font-weight:400;font-size:clamp(36px,5vw,60px);line-height:1.08;letter-spacing:-0.02em;margin:0 0 22px;color:var(--fg-1);}
   h1 em{font-style:italic;color:${ACCENT};}
-  .lede{font-size:18px;color:var(--fg-3);margin:0 0 56px;line-height:1.7;max-width:620px;}
+  .lede{font-size:18px;color:var(--fg-3);margin:0 0 48px;line-height:1.7;max-width:620px;}
 
-  /* Section headers */
-  .section{margin:80px 0 0;}
+  /* Search hint */
+  .search-hint{margin-top:16px;font-family:var(--font-mono);font-size:11px;color:var(--fg-4);display:flex;align-items:center;gap:6px;}
+
+  /* Section */
+  .section{margin:72px 0 0;}
   .section-eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:${ACCENT};margin-bottom:10px;}
-  .section-title{font-family:var(--font-serif);font-weight:400;font-size:clamp(26px,3vw,36px);line-height:1.15;letter-spacing:-0.015em;margin:0 0 8px;color:var(--fg-1);}
-  .section-sub{font-size:15px;color:var(--fg-4);margin:0 0 32px;line-height:1.6;font-family:var(--font-mono);}
+  .section-title{font-family:var(--font-serif);font-weight:400;font-size:clamp(24px,3vw,34px);line-height:1.15;letter-spacing:-0.015em;margin:0 0 6px;color:var(--fg-1);}
+  .section-sub{font-size:14px;color:var(--fg-4);margin:0 0 28px;font-family:var(--font-mono);}
+  .divider{height:1px;background:rgba(255,255,255,0.06);margin:0;}
 
   /* Article cards */
   .articles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px;}
-  .article-card{padding:24px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);text-decoration:none;display:flex;flex-direction:column;gap:12px;transition:border-color 0.2s,background 0.2s;}
+  .article-card{border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);text-decoration:none;display:flex;flex-direction:column;overflow:hidden;transition:border-color 0.2s,background 0.2s;}
   .article-card:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);}
-  .article-cat{font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
-  .article-title{font-family:var(--font-sans);font-size:15px;font-weight:500;color:var(--fg-1);line-height:1.4;}
+  .article-img{width:100%;height:160px;object-fit:cover;display:block;filter:brightness(0.82);}
+  .article-body{padding:20px;display:flex;flex-direction:column;gap:10px;flex:1;}
+  .article-cat{font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;padding:3px 8px;border-radius:4px;align-self:flex-start;}
+  .article-title{font-size:15px;font-weight:500;color:var(--fg-1);line-height:1.4;}
   .article-desc{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);line-height:1.6;flex:1;}
-  .article-cta{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:${ACCENT};margin-top:4px;}
+  .article-cta{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:${ACCENT};}
 
-  /* Profile cards (Agir) */
-  .agir-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:28px;}
-  .agir-card{padding:28px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);text-decoration:none;display:flex;flex-direction:column;gap:10px;transition:border-color 0.2s,background 0.2s;}
-  .agir-card:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.16);}
-  .agir-profile{font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--fg-4);}
-  .agir-title{font-family:var(--font-sans);font-size:16px;font-weight:500;color:var(--fg-1);line-height:1.35;}
-  .agir-desc{font-size:13px;color:var(--fg-3);line-height:1.6;}
-  .agir-arrow{font-family:var(--font-mono);font-size:11px;color:${ACCENT};margin-top:auto;}
+  /* Rapport CTA — bloc mis en avant */
+  .rapport-cta{display:flex;flex-direction:column;gap:16px;padding:36px 40px;border-radius:14px;background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.22);text-decoration:none;margin-top:28px;transition:background 0.2s,border-color 0.2s;position:relative;overflow:hidden;}
+  .rapport-cta::after{content:"";position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,${ACCENT}14 0%,transparent 70%);pointer-events:none;}
+  .rapport-cta:hover{background:rgba(248,113,113,0.09);border-color:rgba(248,113,113,0.35);}
+  .rapport-cta-eyebrow{font-family:var(--font-mono);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:${ACCENT};}
+  .rapport-cta-title{font-family:var(--font-serif);font-size:clamp(22px,2.5vw,30px);font-weight:400;color:var(--fg-1);line-height:1.2;margin:0;}
+  .rapport-cta-desc{font-size:15px;color:var(--fg-3);line-height:1.65;max-width:560px;}
+  .rapport-cta-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:${ACCENT};color:#060812;font-family:var(--font-sans);font-size:14px;font-weight:600;border-radius:6px;align-self:flex-start;}
+
+  /* Guides secondaires */
+  .guides-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px;}
+  .guide-card{padding:22px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);text-decoration:none;display:flex;flex-direction:column;gap:8px;transition:border-color 0.2s,background 0.2s;}
+  .guide-card:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.14);}
+  .guide-label{font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--fg-4);}
+  .guide-title{font-size:14px;font-weight:500;color:var(--fg-1);line-height:1.35;}
+  .guide-cta{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:${ACCENT};margin-top:auto;}
 
   /* Signal cards */
   .signal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:28px;}
-  .signal-card{padding:24px;border-radius:10px;background:rgba(248,113,113,0.04);border:1px solid rgba(248,113,113,0.15);display:flex;flex-direction:column;gap:8px;}
-  .signal-date{font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#f87171;opacity:0.7;}
-  .signal-head{font-family:var(--font-sans);font-size:14px;font-weight:500;color:var(--fg-1);line-height:1.4;}
+  .signal-card{padding:22px;border-radius:10px;background:rgba(248,113,113,0.04);border:1px solid rgba(248,113,113,0.13);display:flex;flex-direction:column;gap:8px;}
+  .signal-source{font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:${ACCENT};opacity:0.65;}
+  .signal-head{font-size:14px;font-weight:500;color:var(--fg-1);line-height:1.4;}
   .signal-body{font-size:13px;color:var(--fg-3);line-height:1.6;}
-  .signal-src{font-family:var(--font-mono);font-size:10px;color:var(--fg-4);margin-top:4px;}
-
-  /* Divider */
-  .divider{height:1px;background:rgba(255,255,255,0.06);margin:0;}
 
   /* Footer */
   .page-footer{position:relative;z-index:2;max-width:960px;margin:0 auto;padding:32px 28px 64px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.06em;border-top:1px solid rgba(255,255,255,0.06);}
@@ -77,9 +85,8 @@ const css = `
   @media(max-width:768px){
     .page{padding:48px 20px 80px;}
     h1{font-size:34px;}
-    .articles-grid{grid-template-columns:1fr;}
-    .agir-grid{grid-template-columns:1fr;}
-    .signal-grid{grid-template-columns:1fr;}
+    .articles-grid,.guides-grid,.signal-grid{grid-template-columns:1fr;}
+    .rapport-cta{padding:24px 22px;}
   }
 `;
 
@@ -88,9 +95,8 @@ export default function ChaleurPage() {
     <>
       <style dangerouslySetInnerHTML={{ __html: css }} />
 
-      {/* Orbs */}
       <div className="orb" style={{ width: 600, height: 600, background: `radial-gradient(circle,${ACCENT} 0%,transparent 70%)`, top: -180, left: -150 }} />
-      <div className="orb" style={{ width: 400, height: 400, background: 'radial-gradient(circle,#fb923c 0%,transparent 70%)', bottom: -100, right: -80, animationDelay: '-6s', opacity: 0.14 }} />
+      <div className="orb" style={{ width: 380, height: 380, background: 'radial-gradient(circle,#fb923c 0%,transparent 70%)', bottom: -80, right: -80, animationDelay: '-6s', opacity: 0.13 }} />
 
       <Navbar />
 
@@ -103,30 +109,23 @@ export default function ChaleurPage() {
           à la <em>chaleur extrême</em>
         </h1>
         <p className="lede">
-          Les projections DRIAS au scénario +4°C montrent que des dizaines de communes françaises dépasseront
-          60 jours au-dessus de 30°C par an d'ici 2050. Cherchez votre commune pour voir son exposition.
+          En 2050, des dizaines de communes françaises dépasseront 60 jours au-dessus de 30°C par an.
+          Cherchez votre commune pour voir ce que ça change concrètement : jours de canicule, nuits étouffantes, qualité de l'air.
         </p>
 
         <div style={{ marginBottom: 12, fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--fg-4)' }}>
-          Rechercher ma commune
+          Chercher ma commune
         </div>
         <CommuneSearch
           slug="canicule"
           accent={ACCENT}
-          placeholder="Saisissez votre commune…"
+          placeholder="Ex : La Rochelle, Lyon, Vannes…"
           basePath="/chaleur"
         />
-        <div style={{ marginTop: 10, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-4)' }}>
-          Données DRIAS +4°C · Géorisques · ATMO France · Source : geo.api.gouv.fr
+        <div className="search-hint">
+          <span>↳</span>
+          <span>Projections 2050 · Géorisques · Qualité de l'air · Données publiques</span>
         </div>
-
-        <LocalTensionContext
-          slug="canicule"
-          thematique="Canicule"
-          accent={ACCENT}
-          limit={50}
-          basePath="/chaleur"
-        />
 
         <div className="divider" style={{ marginTop: 72 }} />
 
@@ -137,31 +136,43 @@ export default function ChaleurPage() {
           <p className="section-sub">Trois lectures pour aller plus loin que la météo.</p>
 
           <div className="articles-grid">
-            <Link href="/savoir/chaleur-sante-mentale" className="article-card">
-              <span className="article-cat" style={{ background: 'rgba(248,113,113,0.12)', color: ACCENT }}>Santé mentale</span>
-              <div className="article-title">Chaleur et santé mentale</div>
-              <div className="article-desc">
-                Sommeil, humeur, hospitalisations psychiatriques : les effets documentés de la chaleur sur la psyché. Ce qui est établi, ce qui reste débattu.
+            <Link href="/savoir/canicule" className="article-card">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/chaleur-rue.jpg" alt="Rue vide sous la canicule" className="article-img" />
+              <div className="article-body">
+                <span className="article-cat" style={{ background: 'rgba(248,113,113,0.12)', color: ACCENT }}>Projections</span>
+                <div className="article-title">Canicule en 2050 : ce qui nous attend</div>
+                <div className="article-desc">
+                  Marseille, Lyon, Toulouse : les données scientifiques commune par commune. Quels territoires basculeront vers un nouveau régime thermique ?
+                </div>
+                <div className="article-cta">Lire l'article →</div>
               </div>
-              <div className="article-cta">Lire l'article →</div>
             </Link>
 
-            <Link href="/savoir/canicule" className="article-card">
-              <span className="article-cat" style={{ background: 'rgba(248,113,113,0.12)', color: ACCENT }}>Projections</span>
-              <div className="article-title">Canicule en 2050 : les projections</div>
-              <div className="article-desc">
-                Marseille, Lyon, Toulouse : les données DRIAS commune par commune. Quels territoires basculeront vers un nouveau régime thermique ?
+            <Link href="/savoir/chaleur-sante-mentale" className="article-card">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/chaleur-sante-mentale.jpg" alt="Chaleur et santé mentale" className="article-img" />
+              <div className="article-body">
+                <span className="article-cat" style={{ background: 'rgba(248,113,113,0.12)', color: ACCENT }}>Santé mentale</span>
+                <div className="article-title">Chaleur et santé mentale</div>
+                <div className="article-desc">
+                  Sommeil perturbé, humeur dégradée, hospitalisations en hausse : les effets documentés sur la psyché, et les profils les plus exposés.
+                </div>
+                <div className="article-cta">Lire l'article →</div>
               </div>
-              <div className="article-cta">Lire l'article →</div>
             </Link>
 
             <Link href="/savoir/pollutions-invisibles" className="article-card">
-              <span className="article-cat" style={{ background: 'rgba(251,146,60,0.12)', color: '#fb923c' }}>Air & sols</span>
-              <div className="article-title">Pollutions invisibles</div>
-              <div className="article-desc">
-                La chaleur amplifie l'ozone estival et les pics de pollution. Comment lire les données ATMO et agir à la bonne échelle.
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/chaleur-feuille.jpg" alt="Pollution et air" className="article-img" />
+              <div className="article-body">
+                <span className="article-cat" style={{ background: 'rgba(251,146,60,0.12)', color: '#fb923c' }}>Air & sols</span>
+                <div className="article-title">Pollutions invisibles</div>
+                <div className="article-desc">
+                  La chaleur amplifie les pics d'ozone et de pollution fine. Comment lire les données de qualité de l'air et réduire son exposition.
+                </div>
+                <div className="article-cta">Lire l'article →</div>
               </div>
-              <div className="article-cta">Lire l'article →</div>
             </Link>
           </div>
         </section>
@@ -172,43 +183,42 @@ export default function ChaleurPage() {
         <section className="section">
           <div className="section-eyebrow">Agir</div>
           <h2 className="section-title">Ce que vous pouvez faire maintenant</h2>
-          <p className="section-sub">Trois angles selon votre situation.</p>
+          <p className="section-sub">Un diagnostic complet, et deux guides ciblés.</p>
 
-          <div className="agir-grid">
-            <Link href="/agir/canicule" className="agir-card">
-              <div className="agir-profile">Guide pratique</div>
-              <div className="agir-title">Se préparer à la canicule</div>
-              <div className="agir-desc">
-                Ventilation nocturne, hydratation, identification des personnes vulnérables dans votre entourage. Les gestes qui font une vraie différence lors d'un épisode caniculaire.
+          {/* Rapport — mis en avant */}
+          <Link href="/rapport" className="rapport-cta">
+            <div className="rapport-cta-eyebrow">Rapport personnalisé · futur•e</div>
+            <p className="rapport-cta-title">
+              Votre commune, votre profil,<br />
+              <em style={{ fontStyle: 'italic', color: ACCENT }}>vos décisions éclairées</em>
+            </p>
+            <p className="rapport-cta-desc">
+              Six modules croisés pour votre situation spécifique : <strong style={{ color: 'var(--fg-1)' }}>Quartier, Santé, Logement, Métier, Mobilité, Projets.</strong>{' '}
+              Pas un article générique : un diagnostic construit à partir de données publiques réelles, mis à jour régulièrement.
+            </p>
+            <span className="rapport-cta-btn">
+              Voir mon rapport →
+            </span>
+          </Link>
+
+          {/* Guides secondaires */}
+          <div className="guides-grid">
+            <Link href="/agir/canicule" className="guide-card">
+              <div className="guide-label">Guide pratique</div>
+              <div className="guide-title">Se préparer à la canicule</div>
+              <div style={{ fontSize: 13, color: 'var(--fg-3)', lineHeight: 1.6 }}>
+                Ventilation nocturne, hydratation, personnes vulnérables dans l'entourage. Les gestes qui font vraiment la différence.
               </div>
-              <div className="agir-arrow">Voir le guide →</div>
+              <div className="guide-cta">Voir le guide →</div>
             </Link>
 
-            <Link href="/comparateur" className="agir-card">
-              <div className="agir-profile">Projet de vie</div>
-              <div className="agir-title">Comparer deux communes sur la chaleur</div>
-              <div className="agir-desc">
-                Vous envisagez de déménager ? Le comparateur croise chaleur, qualité de l'air, eau, revenus et accès aux soins pour deux territoires côte à côte.
+            <Link href="/comparateur" className="guide-card">
+              <div className="guide-label">Outil de comparaison</div>
+              <div className="guide-title">Comparer deux communes</div>
+              <div style={{ fontSize: 13, color: 'var(--fg-3)', lineHeight: 1.6 }}>
+                Vous pensez à déménager ? Chaleur, air, eau, revenus, accès aux soins côte à côte en moins de 10 secondes.
               </div>
-              <div className="agir-arrow">Ouvrir le comparateur →</div>
-            </Link>
-
-            <Link href="/rapport" className="agir-card">
-              <div className="agir-profile">Rapport personnalisé</div>
-              <div className="agir-title">Votre rapport complet</div>
-              <div className="agir-desc">
-                Chaleur, logement, mobilité, santé : un diagnostic croisant toutes les sources pour votre commune et votre profil. Mis à jour avec les nouvelles données.
-              </div>
-              <div className="agir-arrow">Voir mon rapport →</div>
-            </Link>
-
-            <Link href="/agir/voiture-electrique" className="agir-card">
-              <div className="agir-profile">Mobilité</div>
-              <div className="agir-title">La chaleur et la voiture thermique</div>
-              <div className="agir-desc">
-                Les épisodes de chaleur dégradent les performances des moteurs thermiques et amplifient les îlots de chaleur urbains. Quand passer à l'électrique a du sens.
-              </div>
-              <div className="agir-arrow">Voir le guide →</div>
+              <div className="guide-cta">Ouvrir le comparateur →</div>
             </Link>
           </div>
         </section>
@@ -219,43 +229,39 @@ export default function ChaleurPage() {
         <section className="section">
           <div className="section-eyebrow">Signal en cours</div>
           <h2 className="section-title">Ce que les données disent aujourd'hui</h2>
-          <p className="section-sub">Bulletin de veille · Dernière mise à jour : mai 2026.</p>
+          <p className="section-sub">Bulletin de veille · Mai 2026.</p>
 
           <div className="signal-grid">
             <div className="signal-card">
-              <div className="signal-date">DRIAS · Scénario +4°C</div>
-              <div className="signal-head">57 communes dépasseront 60 jours/an au-dessus de 30°C</div>
+              <div className="signal-source">Météo-France · Projections 2050</div>
+              <div className="signal-head">57 communes dépasseront 60 jours de canicule par an</div>
               <div className="signal-body">
-                Les projections au scénario gwl30 montrent une rupture nette dans le sud-est et la vallée du Rhône. Nice, Marseille et Montpellier seront concernées avant 2050 dans la plupart des modèles.
+                Les modèles climatiques sont convergents : dans le sud-est et la vallée du Rhône, Nice, Marseille et Montpellier basculeront vers un nouveau régime thermique avant 2050. Ce n'est plus une hypothèse, c'est une trajectoire probable.
               </div>
-              <div className="signal-src">Source : DRIAS / Météo-France · gwl30 (+4°C)</div>
             </div>
 
             <div className="signal-card">
-              <div className="signal-date">Copernicus · Rapport 2025</div>
+              <div className="signal-source">Copernicus · Rapport 2025</div>
               <div className="signal-head">2025 : deuxième été le plus chaud jamais enregistré en Europe</div>
               <div className="signal-body">
-                Le service Copernicus confirme que les températures estivales européennes dépassent de 1,3°C la moyenne pré-industrielle. La tendance est cohérente avec les trajectoires gwl20 à gwl30.
+                Les températures estivales européennes dépassaient de 1,3°C la moyenne d'avant l'ère industrielle. La trajectoire est cohérente avec les projections à +2°C et +4°C que futur•e utilise.
               </div>
-              <div className="signal-src">Source : Copernicus Climate Change Service · C3S</div>
             </div>
 
             <div className="signal-card">
-              <div className="signal-date">Santé publique France · 2025</div>
-              <div className="signal-head">+18 % de surmortalité lors des épisodes caniculaires prolongés</div>
+              <div className="signal-source">Santé publique France · 2025</div>
+              <div className="signal-head">+18 % de surmortalité lors des canicules prolongées</div>
               <div className="signal-body">
-                Les épisodes de chaleur de plus de 5 jours consécutifs montrent une surmortalité en hausse par rapport à la décennie précédente, notamment chez les 75 ans et plus vivant seuls.
+                Les épisodes de plus de 5 jours consécutifs au-dessus de 30°C montrent une surmortalité en hausse par rapport à la décennie précédente, surtout chez les 75 ans et plus vivant seuls.
               </div>
-              <div className="signal-src">Source : Santé publique France · Surveillance canicule</div>
             </div>
 
             <div className="signal-card">
-              <div className="signal-date">ATMO France · Été 2025</div>
-              <div className="signal-head">L'ozone estival en hausse dans les agglomérations du sud</div>
+              <div className="signal-source">ATMO France · Été 2025</div>
+              <div className="signal-head">L'ozone estival en hausse dans les grandes villes du sud</div>
               <div className="signal-body">
-                Les pics d'ozone (O₃) sont amplifiés par la chaleur. Marseille, Lyon et Toulouse ont enregistré des dépassements du seuil d'information (180 µg/m³) lors de chaque canicule depuis 2022.
+                La chaleur transforme les polluants de l'air en ozone. Marseille, Lyon et Toulouse ont dépassé le seuil d'alerte lors de chaque épisode caniculaire depuis 2022. Les personnes asthmatiques sont les plus exposées.
               </div>
-              <div className="signal-src">Source : ATMO France · Indice ATMO quotidien</div>
             </div>
           </div>
         </section>
@@ -265,9 +271,9 @@ export default function ChaleurPage() {
       <footer className="page-footer">
         <div>futur•e · Chaleur et canicule</div>
         <div>
-          <Link href="/comparateur" style={{ color: 'var(--fg-3)', textDecoration: 'none' }}>Comparateur</Link>
+          <Link href="/comparateur">Comparateur</Link>
           {' · '}
-          <Link href="/pourquoi" style={{ color: 'var(--fg-3)', textDecoration: 'none' }}>Méthodologie</Link>
+          <Link href="/pourquoi">Méthodologie</Link>
         </div>
       </footer>
     </>
