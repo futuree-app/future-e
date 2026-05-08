@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { DRIAS_CITY_FALLBACK } from "@/lib/communes";
 
 // Mapping des colonnes techniques vers nos indicateurs métier
 const COLUMN_MAP: Record<string, string> = {
@@ -74,10 +75,13 @@ export async function getClimatDataCommune(inseeCode: string) {
   
   // Formatage de la recherche pour correspondre à l'index
   const safeInsee = inseeCode.padStart(5, '0');
-  const scenarioMap = index.get(safeInsee);
+
+  // Pour Paris, Lyon, Marseille : DRIAS indexe par arrondissement, pas par ville entière
+  const lookupInsee = DRIAS_CITY_FALLBACK[safeInsee] ?? safeInsee;
+  const scenarioMap = index.get(lookupInsee);
 
   if (!scenarioMap || scenarioMap.size === 0) {
-    console.warn(`[DRIAS API] Commune introuvable pour le code INSEE : ${inseeCode} (recherché comme ${safeInsee})`);
+    console.warn(`[DRIAS API] Commune introuvable pour le code INSEE : ${inseeCode} (recherché comme ${lookupInsee})`);
     return null;
   }
 
@@ -88,10 +92,17 @@ export async function getClimatDataCommune(inseeCode: string) {
     scenarios[id] = { h: "2050", v: rowToIndicators(row) };
   }
 
+  // Si on a utilisé un arrondissement comme proxy, on restitue le nom de la ville entière
+  const CITY_NAMES: Record<string, string> = {
+    '75056': 'Paris',
+    '69123': 'Lyon',
+    '13055': 'Marseille',
+  };
+
   return {
     inseeCode: safeInsee,
     commune: {
-      n: String(firstRow.commune_name),
+      n: CITY_NAMES[safeInsee] ?? String(firstRow.commune_name),
       s: scenarios,
     },
   };

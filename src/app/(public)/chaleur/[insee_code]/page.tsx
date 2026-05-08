@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { isArrondissement } from '@/lib/communes';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { getClimatDataCommune } from '@/lib/drias-json';
 import { getGeorisquesSummary } from '@/lib/georisques';
@@ -10,22 +9,13 @@ import { unstable_cache } from 'next/cache';
 
 export const revalidate = 86400;
 
-// Top 1 000 communes les plus peuplées générées statiquement au build
-// Le reste est généré à la demande puis mis en cache 24h (ISR)
-export async function generateStaticParams() {
-  try {
-    const res = await fetch(
-      'https://geo.api.gouv.fr/communes?fields=code,population&limit=35000',
-    );
-    const communes: { code: string; population?: number }[] = await res.json();
-    return communes
-      .filter((c) => !isArrondissement(c.code))
-      .sort((a, b) => (b.population ?? 0) - (a.population ?? 0))
-      .slice(0, 1000)
-      .map((c) => ({ insee_code: c.code }));
-  } catch {
-    return [];
-  }
+// Top 1 000 communes les plus peuplées — liste figée dans src/data/top1000-communes.json
+// Régénérer avec : scripts/update-top-communes.sh
+// Le reste des communes est généré à la demande via ISR (revalidate 24h)
+import top1000 from '@/data/top1000-communes.json';
+
+export function generateStaticParams() {
+  return (top1000 as string[]).map((code) => ({ insee_code: code }));
 }
 
 const ACCENT = '#f87171';
