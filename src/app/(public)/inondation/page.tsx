@@ -133,9 +133,22 @@ export default function InondationPage() {
         <section className="section">
           <div className="section-eyebrow">Comprendre</div>
           <h2 className="section-title">Ce que le risque inondation signifie vraiment</h2>
-          <p className="section-sub">Quatre lectures pour dépasser les idées reçues.</p>
+          <p className="section-sub">Cinq lectures pour dépasser les idées reçues.</p>
 
           <div className="articles-grid">
+            <Link href="/inondation/villes-les-plus-exposees" className="article-card">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/hub-submersion.jpg" alt="Top 10 villes inondation" className="article-img" />
+              <div className="article-body">
+                <span className="article-cat" style={{ background: 'rgba(96,165,250,0.12)', color: ACCENT }}>Classement</span>
+                <div className="article-title">Top 10 des villes les plus exposées aux inondations</div>
+                <div className="article-desc">
+                  Nîmes, Nice, Montpellier : le classement des villes françaises les plus vulnérables, avec les événements historiques et les projections 2050.
+                </div>
+                <div className="article-cta">Voir le classement →</div>
+              </div>
+            </Link>
+
             <Link href="/savoir/submersion" className="article-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/hub-submersion.jpg" alt="Inondation et submersion marine" className="article-img" />

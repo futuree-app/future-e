@@ -136,16 +136,16 @@ export default function ChaleurPage() {
           <p className="section-sub">Quatre lectures pour aller plus loin que la météo.</p>
 
           <div className="articles-grid">
-            <Link href="/savoir/canicule" className="article-card">
+            <Link href="/chaleur/villes-les-plus-exposees" className="article-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/chaleur-rue.jpg" alt="Rue vide sous la canicule" className="article-img" />
+              <img src="/chaleur-rue.jpg" alt="Top 10 villes chaleur" className="article-img" />
               <div className="article-body">
-                <span className="article-cat" style={{ background: 'rgba(248,113,113,0.12)', color: ACCENT }}>Projections</span>
-                <div className="article-title">Canicule en 2050 : ce qui nous attend</div>
+                <span className="article-cat" style={{ background: 'rgba(248,113,113,0.12)', color: ACCENT }}>Classement</span>
+                <div className="article-title">Top 10 des villes les plus exposées à la chaleur</div>
                 <div className="article-desc">
-                  Marseille, Lyon, Toulouse : les données scientifiques commune par commune. Quels territoires basculeront vers un nouveau régime thermique ?
+                  Perpignan, Montpellier, Nîmes : le classement des villes françaises les plus vulnérables en 2050, avec les données et les raisons spécifiques à chaque territoire.
                 </div>
-                <div className="article-cta">Lire l'article →</div>
+                <div className="article-cta">Voir le classement →</div>
               </div>
             </Link>
 
