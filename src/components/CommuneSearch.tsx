@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { isArrondissement } from '@/lib/communes';
 
@@ -28,6 +28,7 @@ export function CommuneSearch({
   const [results, setResults] = useState<CommuneResult[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const debounce = useRef<ReturnType<typeof setTimeout>>(undefined);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -65,7 +66,9 @@ export function CommuneSearch({
   function handleSelect(commune: CommuneResult) {
     setOpen(false);
     setValue(commune.nom);
-    router.push(basePath ? `${basePath}/${commune.code}` : `/territoires/${slug}/${commune.code}`);
+    startTransition(() => {
+      router.push(basePath ? `${basePath}/${commune.code}` : `/territoires/${slug}/${commune.code}`);
+    });
   }
 
   return (
@@ -73,7 +76,20 @@ export function CommuneSearch({
       <style>{`
         .cs-input:focus { border-color: ${accent}80 !important; background: rgba(255,255,255,0.07) !important; outline: none; }
         .cs-row:hover { background: rgba(255,255,255,0.05) !important; }
+        @keyframes cs-progress {
+          0%   { width: 0%;   opacity: 1; }
+          60%  { width: 75%;  opacity: 1; }
+          90%  { width: 92%;  opacity: 1; }
+          100% { width: 100%; opacity: 0; }
+        }
+        .cs-progress-bar {
+          position: fixed; top: 0; left: 0; height: 2px; z-index: 9999;
+          background: linear-gradient(90deg, ${accent}, ${accent}99);
+          border-radius: 0 2px 2px 0;
+          animation: cs-progress 8s cubic-bezier(0.1, 0.4, 0.2, 1) forwards;
+        }
       `}</style>
+      {isPending && <div className="cs-progress-bar" />}
       <div ref={wrapRef} style={{ position: 'relative', maxWidth: 520 }}>
         <div
           style={{

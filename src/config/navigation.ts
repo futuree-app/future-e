@@ -41,7 +41,7 @@ export const NAV_ITEMS: NavItem[] = [
           },
           {
             label: 'Inondation et submersion',
-            href: '/territoires/submersion',
+            href: '/inondation',
             description: 'Risque côtier et cours d\'eau · Géorisques',
           },
           {
