@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/client';
 import Navbar from '@/components/Navbar';
 import { SAVOIR_HUB_ARTICLES } from '@/config/navigation';
 import { LandingComparatorInput } from '@/components/LandingComparatorInput';
+import { deriveCategories } from '@/lib/commune-categories';
 
 const C = {
   bg: 'var(--bg)',
@@ -36,36 +37,36 @@ const SLOT_CITIES = [
   {
     name: 'Lyon',
     cards: [
-      { label: 'Canicule à Lyon',      val: '54 jours > 30°C/an en 2050',       col: C.red,    src: 'DRIAS · +4°C' },
-      { label: 'Nuits tropicales',      val: '63 nuits Tmin > 20°C/an',          col: C.red,    src: 'DRIAS · +4°C' },
-      { label: 'Eau à Lyon',            val: 'Étiages sévères sur le Rhône',      col: C.blue,   src: 'BRGM / Agences de l\'eau' },
-      { label: 'Immobilier à Lyon',     val: 'DPE et chaleur pèseront davantage', col: C.orange, src: 'DVF / ADEME' },
+      { label: 'Canicule à Lyon',      val: 'Très forte exposition estivale projetée', col: C.red,    src: 'DRIAS · +4°C' },
+      { label: 'Nuits tropicales',      val: 'Fréquence élevée projetée',              col: C.red,    src: 'DRIAS · +4°C' },
+      { label: 'Eau à Lyon',            val: 'Étiages sévères sur le Rhône',           col: C.blue,   src: 'BRGM / Agences de l\'eau' },
+      { label: 'Immobilier à Lyon',     val: 'DPE et chaleur pèseront davantage',      col: C.orange, src: 'DVF / ADEME' },
     ],
   },
   {
     name: 'Marseille',
     cards: [
-      { label: 'Chaleur à Marseille',   val: '57 jours > 30°C/an en 2050',         col: C.red,    src: 'DRIAS · +4°C' },
-      { label: 'Nuits tropicales',       val: '113 nuits Tmin > 20°C/an',           col: C.red,    src: 'DRIAS · +4°C' },
-      { label: 'Submersion à Marseille', val: 'Calanques et zones basses exposées', col: C.blue,   src: 'Géorisques / BRGM' },
-      { label: 'Feux à Marseille',       val: 'Risque en hausse les étés secs',     col: C.orange, src: 'Prométhée / DREAL' },
+      { label: 'Chaleur à Marseille',   val: 'Très forte exposition estivale projetée', col: C.red,    src: 'DRIAS · +4°C' },
+      { label: 'Nuits tropicales',       val: 'Fréquence élevée projetée',              col: C.red,    src: 'DRIAS · +4°C' },
+      { label: 'Submersion à Marseille', val: 'Calanques et zones basses exposées',     col: C.blue,   src: 'Géorisques / BRGM' },
+      { label: 'Feux à Marseille',       val: 'Risque en hausse les étés secs',         col: C.orange, src: 'Prométhée / DREAL' },
     ],
   },
   {
     name: 'Vannes',
     cards: [
-      { label: 'Canicule à Vannes',     val: '25 jours > 30°C/an en 2050',      col: C.red,    src: 'DRIAS · +4°C' },
-      { label: 'Littoral à Vannes',     val: 'Submersion et érosion en hausse',  col: C.blue,   src: 'Géorisques / BRGM' },
-      { label: 'Eau potable à Vannes',  val: 'Ressource sous tension l\'été',    col: C.blue,   src: 'BRGM / Agences de l\'eau' },
-      { label: 'Immobilier à Vannes',   val: 'Risque littoral pèse sur les prix',col: C.orange, src: 'DVF / ADEME' },
+      { label: 'Canicule à Vannes',     val: 'Exposition estivale marquée à horizon 2050', col: C.red,    src: 'DRIAS · +4°C' },
+      { label: 'Littoral à Vannes',     val: 'Submersion et érosion en hausse',            col: C.blue,   src: 'Géorisques / BRGM' },
+      { label: 'Eau potable à Vannes',  val: 'Ressource sous tension l\'été',              col: C.blue,   src: 'BRGM / Agences de l\'eau' },
+      { label: 'Immobilier à Vannes',   val: 'Risque littoral pèse sur les prix',          col: C.orange, src: 'DVF / ADEME' },
     ],
   },
   {
     name: 'La Rochelle',
     cards: [
       { label: 'Submersion à La Rochelle', val: 'Risque officiel recensé',             col: C.blue,   src: 'Géorisques / BRGM' },
-      { label: 'Chaleur à La Rochelle',    val: '30 jours > 30°C/an en 2050',          col: C.red,    src: 'DRIAS · +4°C' },
-      { label: 'Cadmium sols',             val: 'Sols charente-maritime : zone vigil.', col: C.orange, src: 'GisSol / RMQS' },
+      { label: 'Chaleur à La Rochelle',    val: 'Exposition estivale en hausse significative', col: C.red, src: 'DRIAS · +4°C' },
+      { label: 'Qualité des sols',         val: 'Signal modéré · données disponibles', col: C.orange, src: 'GisSol / RMQS' },
       { label: 'Immobilier à La Rochelle', val: 'Risque + DPE pèseront davantage',     col: C.orange, src: 'DVF / ADEME' },
     ],
   },
@@ -283,6 +284,13 @@ function buildGeorisquesContext(georisques) {
   };
 }
 
+function getDriasHeatLevel(hotDays: number): string {
+  if (hotDays >= 60) return 'Très forte exposition estivale projetée';
+  if (hotDays >= 30) return 'Exposition estivale marquée à horizon 2050';
+  if (hotDays >= 10) return 'Exposition estivale en hausse significative';
+  return 'Signal chaleur présent à horizon 2050';
+}
+
 function getDriasCard(communeName, indicators) {
   const hotDays = getLandingIndicatorValue(indicators, 'NORTX30D_yr');
   const tropicalNights = getLandingIndicatorValue(indicators, 'NORTR_yr');
@@ -291,7 +299,7 @@ function getDriasCard(communeName, indicators) {
   if (hotDays !== null && hotDays !== undefined) {
     return {
       label: `Chaleur à ${communeName}`,
-      val: `${formatIndicatorValue(hotDays, 0)} jours > 30°C/an`,
+      val: getDriasHeatLevel(hotDays),
       col: C.red,
       src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
     };
@@ -300,7 +308,7 @@ function getDriasCard(communeName, indicators) {
   if (tropicalNights !== null && tropicalNights !== undefined) {
     return {
       label: `Nuits tropicales à ${communeName}`,
-      val: `${formatIndicatorValue(tropicalNights, 0)} nuits/an`,
+      val: tropicalNights >= 30 ? 'Fréquence élevée projetée' : 'Signal présent à horizon 2050',
       col: C.red,
       src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
     };
@@ -309,7 +317,7 @@ function getDriasCard(communeName, indicators) {
   if (summerTemp !== null && summerTemp !== undefined) {
     return {
       label: `Été à ${communeName}`,
-      val: `${formatIndicatorValue(summerTemp, 1)}°C en moyenne`,
+      val: summerTemp >= 26 ? 'Températures estivales élevées projetées' : 'Hausse estivale projetée',
       col: C.red,
       src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
     };
@@ -466,20 +474,21 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
     });
   }
 
-  // Cadmium GisSol — données réelles si disponibles
+  // Cadmium GisSol — signal présent/absent, sans exposer la valeur exacte
   if (gissol?.cadmium?.label) {
     const cdScore = gissol.cadmium.score ?? 0;
     const cdCol = cdScore >= 65 ? C.red : cdScore >= 45 ? C.orange : C.green;
+    const cdLevel = cdScore >= 65 ? 'Signal élevé · données disponibles' : cdScore >= 45 ? 'Signal modéré · données disponibles' : 'Signal faible · données disponibles';
     cards.push({
-      label: `Cadmium sols / ${name}`,
-      val: gissol.cadmium.label,
+      label: `Qualité des sols à ${name}`,
+      val: cdLevel,
       col: cdCol,
-      src: `GisSol / RMQS · source ${gissol.cadmium.source === 'api' ? 'mesure locale' : 'médiane dép.'}`,
+      src: 'GisSol / RMQS',
     });
   } else {
     cards.push({
-      label: `Cadmium sols / ${name}`,
-      val: 'Signal sanitaire à confirmer localement',
+      label: `Qualité des sols à ${name}`,
+      val: 'Signal sanitaire à confirmer',
       col: C.orange,
       src: 'GisSol / RMQS',
     });
@@ -490,7 +499,7 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
   if (tropicalNights !== null && tropicalNights !== undefined && !driasCard) {
     cards.push({
       label: `Nuits tropicales à ${name}`,
-      val: `${formatIndicatorValue(tropicalNights, 0)} nuits Tmin > 20°C/an`,
+      val: tropicalNights >= 30 ? 'Fréquence élevée projetée' : 'Signal présent à horizon 2050',
       col: C.red,
       src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
     });
@@ -904,15 +913,22 @@ export default function FutureELanding() {
       }
     }
 
+    const inseeCode = nextCommune.citycode || matchedRow?.insee_code || null;
     const categories =
       matchedRow?.categories && matchedRow.categories.length > 0
         ? matchedRow.categories
-        : ['all'];
+        : inseeCode
+          ? deriveCategories(inseeCode)
+          : ['all'];
+
+    // usedFallback controls generic vs contextual copy: false when we have
+    // meaningful categories (either from DB or derived from dept code).
+    const hasContextualCategories = categories.length > 0 && !categories.every((c) => c === 'all');
 
     setCommuneMeta({
-      inseeCode: nextCommune.citycode || matchedRow?.insee_code || null,
+      inseeCode,
       categories,
-      usedFallback: !matchedRow,
+      usedFallback: !matchedRow && !hasContextualCategories,
     });
 
     const indicatorInseeCode = nextCommune.citycode || matchedRow?.insee_code;
