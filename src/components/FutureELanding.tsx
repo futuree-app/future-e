@@ -2990,6 +2990,9 @@ export default function FutureELanding() {
                 {label}
               </a>
             ))}
+            <a style={{ ...styles.footerLink, opacity: 0.5 }} href="/professionnels">
+              Professionnels
+            </a>
           </div>
           <div
             style={{
