@@ -44,7 +44,7 @@ const css = `
   .divider{height:1px;background:rgba(255,255,255,0.06);margin:0;}
 
   /* Article cards */
-  .articles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px;}
+  .articles-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px;}
   .article-card{border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);text-decoration:none;display:flex;flex-direction:column;overflow:hidden;transition:border-color 0.2s,background 0.2s;}
   .article-card:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);}
   .article-img{width:100%;height:160px;object-fit:cover;display:block;filter:brightness(0.82);}
@@ -133,7 +133,7 @@ export default function ChaleurPage() {
         <section className="section">
           <div className="section-eyebrow">Comprendre</div>
           <h2 className="section-title">Ce que la chaleur change vraiment</h2>
-          <p className="section-sub">Trois lectures pour aller plus loin que la météo.</p>
+          <p className="section-sub">Quatre lectures pour aller plus loin que la météo.</p>
 
           <div className="articles-grid">
             <Link href="/savoir/canicule" className="article-card">
@@ -170,6 +170,19 @@ export default function ChaleurPage() {
                 <div className="article-title">Pollutions invisibles</div>
                 <div className="article-desc">
                   La chaleur amplifie les pics d'ozone et de pollution fine. Comment lire les données de qualité de l'air et réduire son exposition.
+                </div>
+                <div className="article-cta">Lire l'article →</div>
+              </div>
+            </Link>
+
+            <Link href="/savoir/preparation-catastrophes" className="article-card">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/hub-preparation.jpg" alt="Préparation aux catastrophes climatiques" className="article-img" />
+              <div className="article-body">
+                <span className="article-cat" style={{ background: 'rgba(251,146,60,0.12)', color: '#fb923c' }}>Résilience</span>
+                <div className="article-title">Sommes-nous prêts à la prochaine catastrophe ?</div>
+                <div className="article-desc">
+                  84 % des Français savent que leur territoire devra s'adapter. Seulement 26 % se sentent préparés. Le paradoxe de la résilience française — et comment le réduire.
                 </div>
                 <div className="article-cta">Lire l'article →</div>
               </div>
