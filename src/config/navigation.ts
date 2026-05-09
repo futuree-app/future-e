@@ -156,6 +156,16 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     href: '/savoir/submersion',
     image: '/hub-submersion.jpg',
   },
+  {
+    slug: 'preparation-catastrophes',
+    title: 'Sommes-nous prêts ?',
+    description:
+      "84 % des Français savent que leur territoire devra s'adapter. Pourtant seulement 26 % se sentent préparés à une canicule. Le paradoxe de la résilience hexagonale.",
+    category: 'Résilience',
+    accent: '#fb923c',
+    href: '/savoir/preparation-catastrophes',
+    image: '/hub-preparation.jpg',
+  },
 ];
 
 // ─── Agir guides registry (pour les liens contextuels depuis Territoires) ─────

@@ -50,6 +50,28 @@ Forbidden vocabulary — always replace with plain French:
 - "GES" → always expand to "gaz à effet de serre"
 - "Bilan Carbone" → NEVER use (registered trademark). Always use "empreinte carbone" instead.
 - "neutralité carbone" → only if explained; prefer "équilibre entre émissions et absorption naturelle"
+- "arbovirose" → "maladie transmise par le moustique tigre (chikungunya, dengue)"
+- "Aedes albopictus" → "moustique tigre"
+- "LAV" → "démoustication"
+- "cas autochtone" → "cas contracté localement, sans voyage"
+
+Domain knowledge — préparation des Français aux catastrophes climatiques (Croix-Rouge française / Crédoc, rapport 2024) :
+- Seulement 26 % des Français se sentent bien ou très bien préparés face aux vagues de chaleur (sondage OpinionWay / Croix-Rouge, janvier 2024). Ce chiffre est encore plus bas pour les autres risques.
+- 44 % des Français estiment avoir déjà subi les conséquences du changement climatique sur leur lieu de vie — mais le sentiment de préparation augmente moins vite que le sentiment d'exposition. C'est l'écart central que le rapport nomme.
+- 84 % pensent que leur territoire devra prendre des mesures importantes dans les décennies à venir — mais très peu savent quoi faire concrètement.
+- 20 à 50 % des personnes exposées à une catastrophe naturelle risquent de développer des troubles psychologiques (stress post-traumatique, anxiété persistante jusqu'à 10 ans après une inondation, augmentation des suicides pendant les épisodes de chaleur). Préparer sa réponse en amont réduit ce risque.
+- La Croix-Rouge française recommande : (1) former 80 % de la population aux gestes qui sauvent, (2) que chacun prépare un sac d'urgence avant une crise (eau, médicaments, documents, lampe, radio, chargeur), (3) identifier les personnes vulnérables dans son entourage, (4) connaître le plan canicule de sa commune et les espaces rafraîchis disponibles.
+- Les outre-mer, confrontés à des catastrophes à répétition, sont mieux préparés que l'Hexagone — et servent de modèle pour ce que les territoires métropolitains devront devenir.
+- Source : Croix-Rouge française / Crédoc, "Événements climatiques extrêmes : sommes-nous prêts à l'inévitable ?", Rapport 2024 sur la résilience de la société française.
+
+Domain knowledge — santé vectorielle en France (bilan 2025, Santé publique France, mai 2026):
+- Le moustique tigre (Aedes albopictus) est présent dans 81 des 96 départements hexagonaux au 1er janvier 2025. Environ 49 % de la population hexagonale réside dans une commune colonisée.
+- En 2025, 809 cas de chikungunya contractés localement ont été confirmés en France hexagonale — un niveau exceptionnel, causé par une souche particulièrement adaptée au moustique tigre, importée depuis La Réunion (épidémie ECSA-2). C'est la première fois que la transmission locale atteint cette ampleur.
+- 30 cas de dengue contractés localement ont aussi été recensés, principalement en PACA et Occitanie (Aubagne, Rognac, Beaulieu, Fonsorbes…).
+- Les régions historiquement affectées par la transmission locale sont PACA, Occitanie, Auvergne-Rhône-Alpes, Corse et Île-de-France. En 2025, pour la première fois, la transmission locale a été documentée en Nouvelle-Aquitaine, Grand Est et Bourgogne-Franche-Comté.
+- La saison de surveillance active s'étend du 1er mai au 30 novembre, période d'activité du moustique tigre. Le réchauffement climatique allonge cette fenêtre et étend l'aire de colonisation vers le nord.
+- Les mesures de gestion incluent la démoustication dans un rayon de 150 mètres autour des cas, et des enquêtes en porte-à-porte.
+- Source : Bulletin Santé publique France, "Chikungunya, dengue et Zika, bilan 2025 en France hexagonale", publié le 6 mai 2026.
 
 Output strict JSON with:
 {
