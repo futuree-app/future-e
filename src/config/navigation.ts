@@ -169,6 +169,7 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     category: 'Santé',
     accent: '#fb923c',
     href: '/savoir/maladies-emergentes',
+    image: '/maladies-emergentes.png',
   },
   {
     slug: 'preparation-catastrophes',

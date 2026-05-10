@@ -50,6 +50,7 @@ const css = String.raw`
   h1 em { font-style:italic; color:var(--accent); }
   .article-intro { font-family:var(--font-serif); font-size:clamp(17px,2vw,21px); line-height:1.62; color:var(--fg-3); margin:0 0 40px; border-bottom:1px solid var(--border-1); padding-bottom:36px; }
   .article-meta { display:flex; gap:24px; flex-wrap:wrap; margin-bottom:44px; font-family:var(--font-mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--fg-4); }
+  .hero-image { width:min(100%, 560px); height:auto; display:block; border-radius:12px; margin:0 auto 36px; border:1px solid var(--border-1); }
 
   h2 { font-family:var(--font-serif); font-weight:400; font-size:clamp(24px,3vw,32px); line-height:1.2; letter-spacing:-0.01em; margin:64px 0 20px; color:var(--fg-1); position:relative; }
   h2::before { content:""; position:absolute; left:-28px; top:18px; width:14px; height:1px; background:var(--accent); }
@@ -136,6 +137,8 @@ const articleHtml = String.raw`
   <p class="article-intro">
     Des maladies autrefois cantonnées aux régions tropicales s'installent durablement en France métropolitaine. D'autres, déjà présentes, étendent leur territoire ou voient leur fréquence augmenter. Ce n'est pas une prédiction — c'est ce qui se passe déjà, documenté par les bulletins de surveillance des autorités sanitaires.
   </p>
+
+  <img src="/maladies-emergentes.png" alt="Zone humide au lever du jour, moustiques et lisière habitée" class="hero-image">
 
   <div class="article-meta">
     <span>Santé publique France</span>

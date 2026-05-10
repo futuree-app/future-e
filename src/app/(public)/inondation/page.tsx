@@ -175,16 +175,16 @@ export default function InondationPage() {
               </div>
             </Link>
 
-            <Link href="/agir/inondation" className="article-card">
+            <Link href="/comparateur" className="article-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/gerer-risque-inondation-logement.jpg" alt="Gérer le risque inondation" className="article-img" />
+              <img src="/comparer-deux-communes-demenagement.jpg" alt="Comparer deux communes" className="article-img" style={{ objectPosition: 'center 72%' }} />
               <div className="article-body">
-                <span className="article-cat" style={{ background: 'rgba(96,165,250,0.12)', color: ACCENT }}>Guide pratique</span>
-                <div className="article-title">Gérer le risque inondation</div>
+                <span className="article-cat" style={{ background: 'rgba(96,165,250,0.12)', color: ACCENT }}>Comparer</span>
+                <div className="article-title">Comparer deux communes</div>
                 <div className="article-desc">
-                  PPRN, IAL, assurance catnat, Fonds Barnier : comprendre ses droits et obligations quand on vit en zone inondable.
+                  Vous pensez à déménager ? Inondation, chaleur, air, eau, revenus, accès aux soins côte à côte en moins de 10 secondes.
                 </div>
-                <div className="article-cta">Lire le guide →</div>
+                <div className="article-cta">Ouvrir le comparateur →</div>
               </div>
             </Link>
           </div>

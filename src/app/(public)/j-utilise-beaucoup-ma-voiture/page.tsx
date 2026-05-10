@@ -134,7 +134,7 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
 
             <Link href="/j-utilise-beaucoup-ma-voiture/villes-les-plus-dependantes" className="article-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/hub-dependance.jpg" alt="Top 10 des villes les plus dépendantes à la voiture" className="article-img" />
+              <img src="/top10-villes-dependantes-voiture.jpg" alt="Top 10 des villes les plus dépendantes à la voiture" className="article-img" />
               <div className="article-body">
                 <span className="article-cat" style={{ background: 'rgba(251,146,60,0.12)', color: ACCENT }}>Classement</span>
                 <div className="article-title">Top 10 des villes les plus dépendantes à la voiture</div>
@@ -147,7 +147,7 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
 
             <Link href="/comparateur" className="article-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/hub-dependance.jpg" alt="Comparer deux communes" className="article-img" />
+              <img src="/comparer-deux-communes-demenagement.jpg" alt="Comparer deux communes" className="article-img" />
               <div className="article-body">
                 <span className="article-cat" style={{ background: 'rgba(96,165,250,0.12)', color: '#60a5fa' }}>Comparer</span>
                 <div className="article-title">Comparer deux communes avant de déménager</div>

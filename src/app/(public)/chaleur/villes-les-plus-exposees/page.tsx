@@ -6,12 +6,12 @@ import { getClimatDataCommune } from '@/lib/drias-json';
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: 'Top 10 des villes françaises les plus exposées à la chaleur en 2050 · futur•e',
+  title: 'Les 10 grandes villes françaises où la chaleur sera la plus difficile à vivre en 2050 · futur•e',
   description:
-    'Perpignan, Montpellier, Nîmes, Avignon : quelles villes françaises seront les plus touchées par la chaleur extrême en 2050 ? Les données DRIAS de Météo-France, classées et expliquées.',
+    'Perpignan, Montpellier, Nîmes, Avignon : dans quelles grandes villes françaises la chaleur pèsera le plus sur la vie quotidienne en 2050 ? Un classement futur•e expliqué ville par ville.',
   openGraph: {
-    title: 'Top 10 des villes françaises les plus exposées à la chaleur en 2050',
-    description: 'Les projections climatiques désignent 10 agglomérations particulièrement vulnérables. Données et explications par ville.',
+    title: 'Les 10 grandes villes françaises où la chaleur sera la plus difficile à vivre en 2050',
+    description: 'Un classement futur•e qui croise chaleur projetée, nuits tropicales et vulnérabilité locale. Données et explications par ville.',
   },
 };
 
@@ -26,7 +26,7 @@ const CITIES = [
     insee: '66136',
     dept: 'Pyrénées-Orientales (66)',
     score: 91,
-    editorial: "Perpignan est déjà aujourd'hui la ville la plus chaude de France métropolitaine. En 2024, elle a battu son record historique de chaleur avec 42°C. La Tramontane — le vent qui rafraîchissait traditionnellement le Roussillon — souffle de moins en moins souvent selon les mesures de Météo-France depuis 1980. Les projections DRIAS placent Perpignan en tête de toutes les villes françaises pour le nombre de jours au-dessus de 35°C d'ici 2050. Elle ne nous montre pas l'avenir : elle nous montre déjà l'avenir des villes de Montpellier et Toulouse dans 20 ans.",
+    editorial: "Perpignan se défend en tête de ce classement non pas seulement parce qu'elle sera très chaude, mais parce que la chaleur y est déjà difficile à encaisser sur la durée. La ville fait partie des plus chaudes de France métropolitaine, avec des étés très longs, des nuits souvent peu rafraîchissantes et une forte exposition aux épisodes intenses. Montpellier ou Nîmes peuvent afficher des indicateurs très élevés sur certains jours extrêmes. Mais Perpignan cumule chaleur de jour, chaleur nocturne et tension durable sur la vie quotidienne, ce qui explique son score global.",
     sources: 'DRIAS Météo-France, Météo-France Pyrénées-Orientales, données climatologiques 1950–2024',
   },
   {
@@ -35,7 +35,7 @@ const CITIES = [
     insee: '34172',
     dept: 'Hérault (34)',
     score: 87,
-    editorial: "Montpellier est la ville française qui a le plus grandi ces 30 dernières années. Selon l'INSEE, c'est l'agglomération dont la population a le plus augmenté de France depuis 1990. Résultat : des milliers d'hectares de garrigue et de terres agricoles ont été remplacés par du béton, ce qui amplifie l'îlot de chaleur urbain et aggrave les nuits chaudes. En 2050, les modèles DRIAS prévoient jusqu'à 70 jours par an au-dessus de 30°C à Montpellier — contre environ 40 aujourd'hui.",
+    editorial: "Montpellier ressort très haut parce qu'elle combine un climat déjà chaud avec une croissance urbaine très rapide. La ville s'est étendue, les surfaces minérales ont progressé et les nuits y deviennent plus difficiles à vivre. Les projections la placent parmi les grandes villes françaises les plus touchées par la hausse des jours très chauds. Ce qui pèse ici, ce n'est pas seulement la température maximale. C'est le fait qu'une grande agglomération dense devra encaisser cette chaleur avec de moins en moins de répit nocturne.",
     sources: 'INSEE, DRIAS Météo-France, Cerema',
   },
   {
@@ -44,7 +44,7 @@ const CITIES = [
     insee: '30189',
     dept: 'Gard (30)',
     score: 87,
-    editorial: "Nîmes est la ville française qui combine le plus fort ensoleillement avec l'absence de masse d'eau tempérante. Pas de mer à portée, pas de grand fleuve, une garrigue qui sèche dès juin. Le Gard est régulièrement le département avec le plus de jours de vigilance orange ou rouge chaleur en France. La sécheresse des sols aggrave le phénomène : la terre n'évapore plus d'eau, ce qui supprime le seul mécanisme naturel de refroidissement disponible.",
+    editorial: "Nîmes peut rivaliser avec Perpignan ou Montpellier sur plusieurs indicateurs bruts de chaleur. La ville cumule un fort ensoleillement, des sols qui sèchent vite et peu d'effet modérateur lié à la mer. Le Gard fait partie des départements les plus concernés par les épisodes de chaleur intense. Si Nîmes n'est pas première ici, ce n'est pas parce qu'elle sera moins touchée, mais parce que le score futur•e ne mesure pas seulement l'aléa thermique. Il mesure aussi la façon dont cette chaleur devient plus ou moins difficile à vivre localement.",
     sources: 'DRIAS Météo-France, Météo-France vigilances 2020–2024, Météo-France Gard',
   },
   {
@@ -53,8 +53,8 @@ const CITIES = [
     insee: '84007',
     dept: 'Vaucluse (84)',
     score: 85,
-    editorial: "Avignon perd son principal régulateur naturel. Le mistral — le vent nord qui balayait la vallée du Rhône et rafraîchissait la ville — souffle de moins en moins souvent selon Météo-France, qui documente une baisse de sa fréquence depuis les années 1980. La pierre calcaire des remparts et du bâti médiéval stocke la chaleur dans la journée et la restitue la nuit, empêchant les habitants de récupérer. Le Vaucluse est aussi l'un des départements français avec la population la plus âgée — un facteur de vulnérabilité sanitaire majeur.",
-    sources: 'DRIAS Météo-France, Météo-France rapport Mistral 2024, INSEE structure de population',
+    editorial: "Avignon réunit plusieurs facteurs qui rendent la chaleur difficile à vivre : un climat déjà très chaud, un bâti minéral qui garde la chaleur et une population localement plus âgée que dans beaucoup d'autres grandes villes. Ici, le sujet n'est pas seulement le pic de l'après-midi. C'est aussi la chaleur qui reste dans les murs et qui complique la récupération la nuit. Dans une ville historique et dense, cette inertie thermique compte beaucoup.",
+    sources: 'DRIAS Météo-France, INSEE structure de population',
   },
   {
     rank: 5,
@@ -62,7 +62,7 @@ const CITIES = [
     insee: '13055',
     dept: 'Bouches-du-Rhône (13)',
     score: 84,
-    editorial: "Marseille concentre trois problèmes à la fois. D'abord, un îlot de chaleur urbain intense documenté par le CEREMA : le centre-ville est en moyenne 5 à 7°C plus chaud que la campagne alentour. Ensuite, une pauvreté concentrée dans les quartiers nord — taux de pauvreté dépassant 40 % dans certains arrondissements selon l'INSEE — qui se traduit par moins de climatisation, des logements en moins bon état, moins d'accès aux soins. Enfin, une surmortalité lors des canicules nettement supérieure à la moyenne nationale, documentée par Santé Publique France.",
+    editorial: "Marseille ne remonte pas seulement à cause du climat méditerranéen. Elle remonte aussi parce que la chaleur y rencontre une grande ville dense, minérale et socialement inégale. Certains quartiers ont moins de végétation, des logements plus difficiles à rafraîchir et moins de marge pour s'adapter. Le score élevé de Marseille dit cela : la chaleur extrême ne frappe pas tout le monde de la même manière, et dans une métropole aussi contrastée, cette différence pèse lourd.",
     sources: 'CEREMA, INSEE, Santé Publique France, DRIAS Météo-France',
   },
   {
@@ -89,7 +89,7 @@ const CITIES = [
     insee: '31555',
     dept: 'Haute-Garonne (31)',
     score: 71,
-    editorial: "Toulouse est construite au fond du bassin aquitain — une dépression géographique encadrée par les Pyrénées, le Massif Central et le plateau du Quercy. Les masses d'air chaud y stagnent en été, sans circulation. La Garonne, autrefois fraîche en juin, atteint des températures record en juillet-août. Le rapport régional de Météo-France sur l'Occitanie projette une intensification des épisodes caniculaires parmi les plus marquées de France pour Toulouse — une ville qui n'avait pas l'habitude de ces extrêmes.",
+    editorial: "Toulouse se situe un cran derrière les villes méditerranéennes, mais la trajectoire y est nette. Les épisodes caniculaires y deviennent plus fréquents, plus longs et plus difficiles à supporter dans une grande métropole qui n'a pas historiquement construit toute son organisation autour de cette contrainte. Ce qui frappe à Toulouse, c'est moins l'image d'une ville déjà torride que la rapidité avec laquelle la chaleur s'y installe comme un problème ordinaire.",
     sources: 'DRIAS Météo-France, Météo-France rapport régional Occitanie',
   },
   {
@@ -107,7 +107,7 @@ const CITIES = [
     insee: '33063',
     dept: 'Gironde (33)',
     score: 58,
-    editorial: "Bordeaux accumule deux risques qui s'alimentent mutuellement. D'un côté, des étés de plus en plus chauds dans le bassin aquitain. De l'autre, la forêt des Landes en périphérie directe — 950 000 ha, la plus grande forêt d'Europe — classée à risque incendie très élevé. La canicule de 2022, qui a provoqué les incendies record de Gironde (26 000 ha brûlés), illustre comment la chaleur et les feux se renforcent mutuellement. La Garonne ne joue plus aucun rôle rafraîchissant : ses températures de surface ont augmenté de 1,5°C depuis 1980 selon l'OFB.",
+    editorial: "Bordeaux ferme ce top parce qu'elle entre dans une zone où la chaleur devient un vrai sujet de vie quotidienne, sans encore atteindre le niveau des villes méditerranéennes. Les étés y se réchauffent nettement, les épisodes extrêmes deviennent plus visibles et la grande forêt landaise voisine rappelle que chaleur, sécheresse et feux peuvent se renforcer. Bordeaux n'est pas la ville la plus exposée de France. Mais elle fait partie de celles pour lesquelles la chaleur ne peut plus être considérée comme un simple inconfort d'été.",
     sources: 'DRIAS Météo-France, Prométhée, OFB, Copernicus 2022',
   },
 ];
@@ -194,16 +194,14 @@ export default async function ChaleurTop10() {
       <main className="page">
         <div className="eyebrow">Chaleur et canicule · Classement 2050</div>
         <h1>
-          Les 10 villes françaises<br />
-          les plus exposées à la <em>chaleur</em>
+          Les 10 grandes villes françaises<br />
+          où la chaleur sera la plus <em>difficile à vivre</em>
         </h1>
         <p className="lede">
-          Quelle ville française sera la plus touchée par la canicule en 2050 ?
-          La réponse surprend : ce n&apos;est pas Lyon ou Paris, mais Perpignan — déjà la ville la plus chaude du pays.
-          Voici le classement complet, avec les données et les raisons spécifiques à chaque territoire.
+          Cette page ne classe pas seulement les villes les plus chaudes. Elle classe les grandes communes où la chaleur pèsera le plus sur la vie quotidienne en 2050, en croisant jours très chauds, nuits tropicales et vulnérabilités locales. Le Sud méditerranéen domine nettement, mais pas toujours pour les mêmes raisons d&apos;une ville à l&apos;autre.
         </p>
         <div className="method-note">
-          Classement basé sur le score de tension canicule futur•e — calculé à partir des projections DRIAS de Météo-France (scénario +4°C, horizon 2050), des données d&apos;îlots de chaleur urbains du CEREMA et des indicateurs socio-démographiques INSEE. Scénario médian sur l&apos;ensemble des modèles climatiques régionaux.
+          Classement fondé sur le score de tension canicule futur•e. Il combine projections climatiques DRIAS, nuits chaudes, intensité de la chaleur et vulnérabilités locales. La lecture correspond à un horizon 2050 dans une trajectoire de réchauffement conduisant vers environ +4°C en fin de siècle.
         </div>
 
         {CITIES.map((city, i) => {
