@@ -199,11 +199,11 @@ export default async function ChaleurTop10() {
         </h1>
         <p className="lede">
           Quelle ville française sera la plus touchée par la canicule en 2050 ?
-          La réponse surprend : ce n'est pas Lyon ou Paris, mais Perpignan — déjà la ville la plus chaude du pays.
+          La réponse surprend : ce n&apos;est pas Lyon ou Paris, mais Perpignan — déjà la ville la plus chaude du pays.
           Voici le classement complet, avec les données et les raisons spécifiques à chaque territoire.
         </p>
         <div className="method-note">
-          Classement basé sur le score de tension canicule futur•e — calculé à partir des projections DRIAS de Météo-France (scénario +4°C, horizon 2050), des données d'îlots de chaleur urbains du CEREMA et des indicateurs socio-démographiques INSEE. Scénario médian sur l'ensemble des modèles climatiques régionaux.
+          Classement basé sur le score de tension canicule futur•e — calculé à partir des projections DRIAS de Météo-France (scénario +4°C, horizon 2050), des données d&apos;îlots de chaleur urbains du CEREMA et des indicateurs socio-démographiques INSEE. Scénario médian sur l&apos;ensemble des modèles climatiques régionaux.
         </div>
 
         {CITIES.map((city, i) => {

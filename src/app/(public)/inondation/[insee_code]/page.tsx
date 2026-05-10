@@ -456,7 +456,7 @@ export default async function InondationCommune({
             </Link>
             <Link href="/agir/inondation" className="article-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/hub-submersion.jpg" alt="Gérer le risque inondation" className="article-img" />
+              <img src="/gerer-risque-inondation-logement.jpg" alt="Gérer le risque inondation" className="article-img" />
               <span className="article-cat" style={{ background: 'rgba(96,165,250,0.12)', color: ACCENT }}>Guide pratique</span>
               <div className="article-title">Gérer le risque inondation</div>
               <div style={{ fontSize: 12, color: 'var(--fg-4)', lineHeight: 1.55 }}>

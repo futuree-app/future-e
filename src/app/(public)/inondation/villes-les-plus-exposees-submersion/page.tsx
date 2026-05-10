@@ -355,6 +355,7 @@ const css = `
   h1{font-family:var(--font-serif);font-weight:400;font-size:clamp(32px,5vw,54px);line-height:1.08;letter-spacing:-0.02em;margin:0 0 20px;color:var(--fg-1);}
   h1 em{font-style:italic;color:${ACCENT};}
   .lede{font-size:17px;color:var(--fg-3);margin:0 0 16px;line-height:1.75;max-width:680px;}
+  .hero-image{width:100%;height:auto;display:block;border-radius:12px;margin:0 0 28px;border:1px solid rgba(255,255,255,0.08);}
   .method-note{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);line-height:1.7;margin:0 0 64px;max-width:680px;padding:14px 18px;border-left:2px solid rgba(255,255,255,0.08);}
 
   .city-item{padding:36px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
@@ -437,6 +438,12 @@ export default async function SubmersionTop10() {
           Les 10 villes françaises<br />
           les plus exposées à la <em>submersion marine</em>
         </h1>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/top10-submersion-marine.jpg"
+          alt="Littoral à marée très haute sous un ciel froid, image éditoriale de submersion marine"
+          className="hero-image"
+        />
         <p className="lede">
           Terres sous le niveau de la mer, bandes de sable qui rétrécissent, estuaires atlantiques : les dix villes françaises les plus vulnérables à la montée des eaux et aux submersions marines, selon les données de hauteur IGN et les projections du service géologique de l&apos;État (BRGM).
         </p>

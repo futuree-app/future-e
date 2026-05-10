@@ -110,7 +110,7 @@ export default function InondationPage() {
         </h1>
         <p className="lede">
           17 millions de Français vivent en zone inondable. Crues de rivières, submersions marines, ruissellement urbain :
-          cherchez votre commune pour comprendre son exposition réelle selon les données officielles de l'État.
+          cherchez votre commune pour comprendre son exposition réelle selon les données officielles de l&apos;État.
         </p>
 
         <div style={{ marginBottom: 12, fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--fg-4)' }}>
@@ -151,7 +151,7 @@ export default function InondationPage() {
 
             <Link href="/inondation/villes-les-plus-exposees-submersion" className="article-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/hub-submersion.jpg" alt="Top 10 villes submersion marine" className="article-img" />
+              <img src="/top10-submersion-marine.jpg" alt="Top 10 villes submersion marine" className="article-img" />
               <div className="article-body">
                 <span className="article-cat" style={{ background: 'rgba(56,189,248,0.12)', color: '#38bdf8' }}>Classement · Submersion</span>
                 <div className="article-title">Top 10 des villes les plus exposées à la submersion marine</div>
@@ -169,15 +169,15 @@ export default function InondationPage() {
                 <span className="article-cat" style={{ background: 'rgba(129,140,248,0.12)', color: '#818cf8' }}>Résilience</span>
                 <div className="article-title">Sommes-nous prêts à la prochaine catastrophe ?</div>
                 <div className="article-desc">
-                  84 % des Français savent que leur territoire devra s'adapter. Seulement 26 % se sentent préparés. Le paradoxe de la résilience française — et comment le réduire.
+                  84 % des Français savent que leur territoire devra s&apos;adapter. Seulement 26 % se sentent préparés. Le paradoxe de la résilience française — et comment le réduire.
                 </div>
-                <div className="article-cta">Lire l'article →</div>
+                <div className="article-cta">Lire l&apos;article →</div>
               </div>
             </Link>
 
             <Link href="/agir/inondation" className="article-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/hub-submersion.jpg" alt="Gérer le risque inondation" className="article-img" />
+              <img src="/gerer-risque-inondation-logement.jpg" alt="Gérer le risque inondation" className="article-img" />
               <div className="article-body">
                 <span className="article-cat" style={{ background: 'rgba(96,165,250,0.12)', color: ACCENT }}>Guide pratique</span>
                 <div className="article-title">Gérer le risque inondation</div>
@@ -239,7 +239,7 @@ export default function InondationPage() {
         {/* ── BLOC 4 — SIGNAL ────────────────────────────────────────────── */}
         <section className="section">
           <div className="section-eyebrow">Signal en cours</div>
-          <h2 className="section-title">Ce que les données disent aujourd'hui</h2>
+          <h2 className="section-title">Ce que les données disent aujourd&apos;hui</h2>
           <p className="section-sub">Bulletin de veille · Mai 2026.</p>
 
           <div className="signal-grid">
@@ -247,7 +247,7 @@ export default function InondationPage() {
               <div className="signal-source">Géorisques · Ministère de la Transition Écologique</div>
               <div className="signal-head">17 millions de Français vivent en zone inondable</div>
               <div className="signal-body">
-                Soit plus d'un Français sur quatre. La France est le pays européen le plus exposé au risque d'inondation, avec 9 millions de logements situés dans des zones potentiellement soumises aux crues ou aux submersions marines.
+                Soit plus d&apos;un Français sur quatre. La France est le pays européen le plus exposé au risque d&apos;inondation, avec 9 millions de logements situés dans des zones potentiellement soumises aux crues ou aux submersions marines.
               </div>
             </div>
 
@@ -255,23 +255,23 @@ export default function InondationPage() {
               <div className="signal-source">Caisse centrale de réassurance · 2025</div>
               <div className="signal-head">Les inondations : premier risque naturel assuré en France</div>
               <div className="signal-body">
-                Les inondations représentent 40 % du coût total des catastrophes naturelles indemnisées depuis 1982. Le coût moyen d'un sinistre inondation en maison individuelle dépasse 30 000 €. Les projections à 2050 prévoient une multiplication par deux des événements extrêmes.
+                Les inondations représentent 40 % du coût total des catastrophes naturelles indemnisées depuis 1982. Le coût moyen d&apos;un sinistre inondation en maison individuelle dépasse 30 000 €. Les projections à 2050 prévoient une multiplication par deux des événements extrêmes.
               </div>
             </div>
 
             <div className="signal-card">
               <div className="signal-source">Copernicus · Rapport 2025</div>
-              <div className="signal-head">Précipitations extrêmes : +18 % d'intensité en 30 ans en Europe</div>
+              <div className="signal-head">Précipitations extrêmes : +18 % d&apos;intensité en 30 ans en Europe</div>
               <div className="signal-body">
-                Les épisodes de pluies intenses ont gagné en fréquence et en intensité. Dans le sud de la France, les épisodes méditerranéens ("épisodes cévenols") dépassent de plus en plus souvent les records historiques, même dans des zones non classées à risque.
+                Les épisodes de pluies intenses ont gagné en fréquence et en intensité. Dans le sud de la France, les épisodes méditerranéens (&quot;épisodes cévenols&quot;) dépassent de plus en plus souvent les records historiques, même dans des zones non classées à risque.
               </div>
             </div>
 
             <div className="signal-card">
               <div className="signal-source">Secours Catholique – Caritas France · 2026</div>
-              <div className="signal-head">66 % des Français ignorent être exposés au risque d'inondation</div>
+              <div className="signal-head">66 % des Français ignorent être exposés au risque d&apos;inondation</div>
               <div className="signal-body">
-                Selon le Ministère de la Transition écologique, deux tiers des habitants de France hexagonale n'ont pas conscience d'être en zone à risque. Résultat : peu de préparation, des assurances résiliées, et des dégâts bien plus lourds quand la crue arrive.
+                Selon le Ministère de la Transition écologique, deux tiers des habitants de France hexagonale n&apos;ont pas conscience d&apos;être en zone à risque. Résultat : peu de préparation, des assurances résiliées, et des dégâts bien plus lourds quand la crue arrive.
               </div>
             </div>
           </div>

@@ -65,6 +65,7 @@ const css = `
   .context-link-arrow{margin-left:auto;font-size:14px;color:var(--fg-4);}
 
   .lede{font-family:var(--font-serif);font-size:clamp(19px,2vw,23px);line-height:1.55;color:var(--fg-1);font-weight:400;margin:0 0 48px;padding:0 0 48px;border-bottom:1px solid var(--border-1);}
+  .hero-image{width:100%;height:auto;display:block;border-radius:8px;border:1px solid var(--border-1);margin:0 0 32px;}
 
   h2{font-family:var(--font-serif);font-weight:400;font-size:clamp(24px,2.8vw,32px);line-height:1.2;letter-spacing:-0.01em;margin:52px 0 18px;color:var(--fg-1);position:relative;}
   h2::before{content:"";position:absolute;left:-28px;top:17px;width:14px;height:1px;background:var(--accent);}
@@ -148,6 +149,8 @@ const previewHtml = `
   </div>
 
   <h1>Gérer le risque inondation :<br/><em>évaluer son exposition et protéger son logement</em></h1>
+
+  <img class="hero-image" src="/gerer-risque-inondation-logement.jpg" alt="Équipements de préparation au risque inondation près d'une porte protégée" />
 
   <div class="dates">
     <div class="date-item">
