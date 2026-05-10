@@ -8,13 +8,13 @@ import top1000 from '@/data/top1000-communes.json';
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: 'Top 10 des villes françaises les plus dépendantes à la voiture · futur•e',
+  title: 'Les 10 villes où un choc sur le prix du carburant pèserait le plus vite · futur•e',
   description:
-    "Quelles grandes villes françaises exposent le plus leurs habitants à la dépendance automobile ? Un classement à partir des scores de tension mobilité déjà présents dans futur•e.",
+    "Quelles grandes villes françaises seraient les plus vite fragilisées par une hausse brutale du carburant ? Un classement à partir des scores mobilité de futur•e.",
   openGraph: {
-    title: 'Top 10 des villes françaises les plus dépendantes à la voiture',
+    title: 'Les 10 villes où un choc sur le prix du carburant pèserait le plus vite',
     description:
-      "Motorisation, faibles alternatives, fragilité budgétaire : les grandes villes françaises où la voiture reste la plus difficile à remplacer.",
+      "Budget, alternatives, organisation du territoire : les grandes villes où une hausse brutale du carburant pèserait le plus vite sur la vie quotidienne.",
   },
 };
 
@@ -138,39 +138,39 @@ const FALLBACK_TOP10: MobilityRow[] = [
 
 const EDITORIAL_BY_INSEE: Record<string, string> = {
   '13047':
-    "Istres arrive en tête parce que la voiture y relie tout : les quartiers, les zones d'activité, les courses, l'école, les rendez-vous. La commune est vaste, les fonctions urbaines sont dispersées, et les alternatives ne suffisent pas encore à remplacer facilement un véhicule. Ici, la dépendance à la voiture ne se voit pas seulement sur la route. Elle se voit dans le fait que toute la journée peut se dérégler dès qu'une voiture manque.",
+    "À Istres, une hausse du carburant ne toucherait pas seulement les longs trajets. Elle pèserait très vite sur les courses, les rendez-vous, l'école, le travail et tous les déplacements ordinaires. La commune est vaste, les fonctions urbaines sont dispersées, et la voiture sert encore à tenir ensemble la vie quotidienne. Quand son coût augmente, c'est tout l'équilibre du foyer qui se tend.",
   '13004':
-    "Arles ressort très haut parce que les distances y structurent la vie quotidienne. Entre le centre, les quartiers périphériques, les écarts et le territoire camarguais, beaucoup de trajets restent difficiles à organiser sans voiture. Ce n'est pas une ville où l'on parle d'abord de congestion. C'est une ville où l'absence de voiture réduit très vite l'accès au travail, aux services et aux déplacements ordinaires.",
+    "Arles ressort très haut parce que les distances y pèsent tout de suite dans le budget. Entre le centre, les quartiers périphériques, les écarts et le territoire camarguais, beaucoup de trajets restent difficiles à absorber autrement qu'en voiture. Ici, un choc sur le prix du carburant ne serait pas un sujet abstrait. Il se traduirait rapidement en arbitrages concrets sur les déplacements du quotidien.",
   '81065':
-    "À Castres, beaucoup de trajets du quotidien débordent largement du coeur de ville. Aller travailler, faire des courses, consulter, accompagner un proche ou un enfant suppose souvent de multiplier les déplacements. Les alternatives existent, mais elles ne rendent pas encore ces trajets assez simples pour remplacer facilement la voiture. Pour beaucoup d'habitants, la voiture reste moins un choix qu'un point d'appui.",
+    "À Castres, la vulnérabilité vient d'abord de l'accumulation des trajets. Aller travailler, faire des courses, consulter, accompagner un proche ou un enfant suppose souvent plusieurs déplacements dans une même journée. Tant que le carburant reste supportable, cette organisation tient. Quand il grimpe, la fragilité apparaît vite, surtout pour les ménages qui n'ont pas de solution de rechange simple.",
   '83061':
-    "Fréjus illustre une dépendance automobile typique des villes étalées : des quartiers séparés, des zones d'activité éloignées, des routines quotidiennes qui supposent de passer d'un point à un autre sans vraie continuité. Dans ce type de territoire, la voiture reste l'outil qui relie la vie ordinaire. Quand elle manque, c'est tout l'équilibre du foyer qui devient plus précaire.",
+    "Fréjus illustre bien ce que signifie un territoire étalé face à un choc énergétique. Les quartiers sont séparés, les zones d'activité éloignées, et beaucoup de routines supposent de passer d'un point à un autre sans vraie continuité. Quand le carburant augmente fortement, la contrainte ne porte pas seulement sur le budget transport. Elle rejaillit sur toute l'organisation de la semaine.",
   '97415':
-    "Saint-Paul apparaît très haut parce que la vie quotidienne s'y déploie sur un territoire vaste, avec des distances marquées entre habitat, services et emploi. Dans cette configuration, la voiture sert à tout relier. Elle permet moins de gagner du temps que de rendre les trajets possibles. Quand son coût augmente, ou quand elle n'est plus disponible, la fragilité apparaît immédiatement.",
+    "Saint-Paul apparaît très haut parce que la vie quotidienne s'y déploie sur un territoire vaste, avec des distances marquées entre habitat, services et emploi. Dans cette configuration, la voiture ne sert pas seulement à aller plus vite. Elle rend les trajets possibles. Quand son coût augmente brutalement, la pression se reporte presque immédiatement sur le budget et sur l'accès aux activités ordinaires.",
   '97311':
-    "À Saint-Laurent-du-Maroni, la dépendance à la voiture vient d'abord des distances. Quand les lieux de vie, les services et les trajets du quotidien sont dispersés, la voiture cesse d'être une option parmi d'autres. Elle devient un moyen d'accès à la vie courante. Cette dépendance pèse d'autant plus lourd quand les budgets sont déjà serrés.",
+    "À Saint-Laurent-du-Maroni, la vulnérabilité à un choc carburant vient d'abord des distances. Quand les lieux de vie, les services et les trajets du quotidien sont dispersés, la voiture cesse d'être une option parmi d'autres. Elle devient un moyen d'accès à la vie courante. Si son coût grimpe, la contrainte pèse d'autant plus lourd que les marges budgétaires sont déjà souvent limitées.",
   '66136':
-    "Perpignan reste l'une des grandes villes où la voiture structure le plus fortement les déplacements du quotidien. Le tissu urbain est étalé, les trajets vers les zones commerciales ou d'activité sont fréquents, et les alternatives restent inégales selon les quartiers. Quand le carburant augmente ou qu'un véhicule tombe en panne, la contrainte devient vite très concrète.",
+    "À Perpignan, la voiture garde une place très forte dans les déplacements du quotidien. Le tissu urbain est étalé, les trajets vers les zones commerciales ou d'activité sont fréquents, et les alternatives restent inégales selon les quartiers. Dans ce contexte, une hausse du carburant se transforme vite en pression concrète sur le budget des ménages.",
   '49099':
-    "À Cholet, la voiture garde une place centrale pour articuler emploi, achats et déplacements familiaux. Cette dépendance se voit moins qu'un embouteillage ou qu'une grande rocade. Pourtant, elle pèse durablement sur les budgets et sur la marge de manoeuvre des ménages, surtout quand le prix de l'énergie remonte.",
+    "À Cholet, la voiture garde une place centrale pour articuler emploi, achats et déplacements familiaux. Cette dépendance se voit moins qu'un embouteillage ou qu'une grande rocade. Pourtant, elle se transforme vite en tension budgétaire quand le prix du carburant remonte, parce qu'une partie des trajets reste difficile à compresser ou à remplacer.",
   '85194':
-    "Les Sables-d'Olonne combine un centre identifiable et un territoire plus étalé qu'il n'y paraît. Entre les quartiers résidentiels, les zones commerciales et les trajets vers l'emploi, la voiture reste difficile à remplacer pour une partie importante des habitants. C'est une ville où l'on peut croire que tout est proche, alors qu'en pratique beaucoup de routines quotidiennes restent motorisées.",
+    "Les Sables-d'Olonne combine un centre identifiable et un territoire plus étalé qu'il n'y paraît. Entre les quartiers résidentiels, les zones commerciales et les trajets vers l'emploi, beaucoup de routines restent motorisées. Cela veut dire qu'un choc sur le prix du carburant peut peser plus vite qu'on ne l'imagine sur la vie quotidienne de nombreux habitants.",
   '34032':
-    "À Béziers, la voiture reste souvent la solution la plus simple pour relier logement, travail, courses et services. Cela ne veut pas dire qu'il n'existe aucune alternative. Cela veut dire qu'elles ne suffisent pas encore à rendre la voiture facilement remplaçable pour beaucoup d'habitants, surtout dès qu'il faut multiplier les trajets dans la journée.",
+    "À Béziers, la voiture reste souvent la solution la plus simple pour relier logement, travail, courses et services. Cela ne veut pas dire qu'il n'existe aucune alternative. Cela veut dire qu'elles ne suffisent pas encore à amortir facilement une forte hausse du carburant pour beaucoup d'habitants, surtout dès qu'il faut multiplier les trajets dans la journée.",
   '11262':
-    "Narbonne cumule plusieurs traits typiques des territoires très dépendants à la voiture : une ville étendue, des déplacements quotidiens dispersés et un lien fort avec les zones d'activités et les axes routiers. Pour beaucoup d'habitants, se passer de voiture reste possible sur le papier, mais difficile dans l'organisation réelle de la semaine.",
+    "Narbonne cumule plusieurs traits typiques des territoires vulnérables à un choc carburant : une ville étendue, des déplacements quotidiens dispersés et un lien fort avec les zones d'activités et les axes routiers. Pour beaucoup d'habitants, se passer de voiture reste possible sur le papier, mais difficile dans l'organisation réelle de la semaine.",
   '82121':
-    "Montauban apparaît haut dans ce classement parce que la voiture y reste au coeur des arbitrages quotidiens. Quand les distances s'allongent entre logement, emploi, école et commerces, la mobilité devient vite une question de budget autant que d'organisation. Les ménages qui n'ont qu'un seul véhicule sont les premiers exposés.",
+    "Montauban apparaît haut dans ce classement parce que la voiture y reste au coeur des arbitrages quotidiens. Quand les distances s'allongent entre logement, emploi, école et commerces, une hausse du carburant devient vite une question de budget autant que d'organisation. Les ménages qui n'ont qu'un seul véhicule ou peu de marge sont les premiers exposés.",
   '2A004':
-    "Ajaccio rappelle que la dépendance automobile ne concerne pas seulement les villes moyennes de l'intérieur. Ici aussi, les distances, le relief et l'étalement résidentiel renforcent la place de la voiture dans la vie courante. Pour une partie des habitants, vivre sans voiture reste théoriquement possible. Mais dès qu'il faut enchaîner plusieurs déplacements dans la même journée, cette possibilité se réduit très vite.",
+    "Ajaccio rappelle que cette vulnérabilité ne concerne pas seulement les villes moyennes de l'intérieur. Ici aussi, les distances, le relief et l'étalement résidentiel renforcent la place de la voiture dans la vie courante. Pour une partie des habitants, une forte hausse du carburant pèserait vite, parce qu'enchaîner plusieurs déplacements dans une même journée reste difficile autrement.",
   '81004':
-    "Albi montre bien ce qu'est une dépendance automobile installée sans être spectaculaire. La voiture n'y est pas seulement pratique : elle structure encore beaucoup de routines ordinaires. Cela pèse surtout sur les habitants qui doivent composer avec des horaires contraints, des trajets répétés ou des solutions de rechange trop rares.",
+    "Albi montre bien ce qu'est une fragilité installée sans être spectaculaire. La voiture n'y est pas seulement pratique : elle structure encore beaucoup de routines ordinaires. Quand le carburant monte, ce sont surtout les habitants aux horaires contraints, aux trajets répétés ou aux solutions de rechange trop rares qui encaissent le choc en premier.",
   '47001':
-    "Agen ressort dans ce top parce que beaucoup de trajets restent plus simples en voiture qu'autrement. Dès qu'il faut enchaîner plusieurs destinations dans une même journée, les alternatives deviennent moins évidentes. Ce n'est pas seulement un sujet de transport : c'est aussi un sujet de temps, de coût et de vulnérabilité très concrète.",
+    "Agen ressort dans ce top parce que beaucoup de trajets restent plus simples en voiture qu'autrement. Dès qu'il faut enchaîner plusieurs destinations dans une même journée, les alternatives deviennent moins évidentes. Ce n'est pas seulement un sujet de transport : c'est aussi un sujet de coût, de temps et de vulnérabilité très concrète quand l'énergie renchérit.",
   '26362':
-    "À Valence, la dépendance à la voiture ne vient pas d'un seul facteur mais d'un ensemble : distances du quotidien, organisation des zones d'activité et alternatives encore incomplètes. Le résultat est simple : pour une partie des habitants, la voiture reste moins un choix qu'une condition pratique pour tenir la semaine.",
+    "À Valence, la vulnérabilité à un choc carburant ne vient pas d'un seul facteur mais d'un ensemble : distances du quotidien, organisation des zones d'activité et alternatives encore incomplètes. Le résultat est simple : pour une partie des habitants, la voiture reste moins un choix qu'une condition pratique pour tenir la semaine.",
   '19031':
-    "Brive-la-Gaillarde ressort parce que la voiture y demeure un outil presque obligatoire pour une partie des trajets quotidiens. Ce genre de situation touche d'abord les ménages modestes, les actifs aux horaires décalés et toutes les personnes pour qui perdre en mobilité signifie aussi perdre en accès à l'emploi, aux services ou aux proches.",
+    "Brive-la-Gaillarde ressort parce que la voiture y demeure un outil presque obligatoire pour une partie des trajets quotidiens. Ce genre de situation rend les ménages modestes, les actifs aux horaires décalés et toutes les personnes aux déplacements contraints plus sensibles qu'ailleurs à une hausse rapide du prix du carburant.",
 };
 
 const DEPT_LABELS: Record<string, string> = {
@@ -325,17 +325,17 @@ function buildEditorial(row: MobilityRow) {
     parts.push("la voiture y structure encore fortement les déplacements du quotidien");
   }
   if ((row.ind_vulnerabilite ?? 0) >= 75) {
-    parts.push("la dépendance y pèse aussi comme une fragilité budgétaire pour une partie des habitants");
+    parts.push("la dépendance y devient vite une fragilité budgétaire pour une partie des habitants");
   }
   if ((row.ind_adaptation ?? 0) >= 75) {
-    parts.push("les alternatives locales restent trop faibles pour absorber facilement une hausse du carburant ou une panne");
+    parts.push("les alternatives locales restent trop faibles pour absorber facilement une hausse du carburant");
   }
   if ((row.ind_occurrence ?? 0) >= 75) {
     parts.push("cette situation n'est pas ponctuelle mais bien installée dans l'organisation du territoire");
   }
 
   if (parts.length === 0) {
-    return `${row.nom_commune} ressort dans les données mobilité parce que remplacer la voiture y reste plus difficile qu'ailleurs pour une partie importante des trajets du quotidien.`;
+    return `${row.nom_commune} ressort dans les données mobilité parce qu'une hausse du carburant y pèserait plus vite qu'ailleurs sur une partie importante des trajets du quotidien.`;
   }
 
   return `${row.nom_commune} ressort dans ce classement parce que ${parts.join(', ')}.`;
@@ -429,14 +429,14 @@ export default async function TopDependanceAutoPage() {
       <main className="page">
         <div className="eyebrow">Mobilité · Classement</div>
         <h1>
-          Les 10 villes françaises<br />
-          les plus <em>dépendantes à la voiture</em>
+          Les 10 villes où un choc<br />
+          sur le prix du carburant <em>pèserait le plus vite</em>
         </h1>
         <p className="lede">
-          Dans certaines villes, la voiture reste un choix. Dans d&apos;autres, elle reste une condition. Ce classement montre les grandes communes où se déplacer sans voiture reste le plus difficile au quotidien, et où cette dépendance pèse le plus vite sur le budget, le temps et l&apos;accès aux services.
+          Dans certaines villes, une hausse du carburant se sent d&apos;abord à la pompe. Dans d&apos;autres, elle remonte très vite dans toute la vie quotidienne. Ce classement montre les grandes communes où la voiture reste si centrale qu&apos;un choc sur son coût pèserait immédiatement sur le budget, les déplacements et l&apos;accès aux services.
         </p>
         <div className="method-note">
-          Classement construit à partir du score mobilité futur•e, puis resserré sur les 200 communes les plus peuplées pour garder un top lisible. L&apos;idée n&apos;est pas de dire où les habitants aiment la voiture, mais où il reste le plus difficile de s&apos;en passer.
+          Ce top repose sur le score mobilité futur•e et se concentre sur les 200 communes les plus peuplées. Il ne mesure pas un goût pour la voiture, mais le poids qu&apos;elle garde dans la vie quotidienne quand son coût augmente.
         </div>
 
         <div className="reading-grid">
@@ -449,19 +449,19 @@ export default async function TopDependanceAutoPage() {
           <div className="reading-card">
             <h2 className="reading-title"><span className="reading-icon">V</span>Vulnérabilité</h2>
             <p className="reading-copy">
-              Quand la voiture manque ou coûte plus cher, les habitants ont vite moins de marge.
+              Quand le carburant grimpe, les habitants ont vite moins de marge pour absorber le choc.
             </p>
           </div>
           <div className="reading-card">
             <h2 className="reading-title"><span className="reading-icon">A</span>Adaptation</h2>
             <p className="reading-copy">
-              Les alternatives existent, mais elles restent souvent trop faibles pour vraiment remplacer la voiture.
+              Les alternatives existent, mais elles restent souvent trop faibles pour vraiment amortir la hausse.
             </p>
           </div>
           <div className="reading-card">
             <h2 className="reading-title"><span className="reading-icon">O</span>Occurrence</h2>
             <p className="reading-copy">
-              Cette dépendance ne relève pas d&apos;un cas isolé. Elle est installée dans l&apos;organisation du territoire.
+              Cette vulnérabilité ne relève pas d&apos;un cas isolé. Elle est installée dans l&apos;organisation du territoire.
             </p>
           </div>
         </div>
@@ -507,9 +507,9 @@ export default async function TopDependanceAutoPage() {
 
         <div className="cta-block">
           <div className="cta-rapport">
-            <div className="cta-rapport-title">Le top 10 raconte des tendances. Le rapport lit votre situation.</div>
+            <div className="cta-rapport-title">Le top 10 montre le risque. Le rapport dit comment il vous touche.</div>
             <p className="cta-rapport-desc">
-              Une ville peut ressortir très haut au classement sans que cela dise tout de votre vie quotidienne. Le rapport ajoute le niveau communal, votre profil, puis les six dimensions futur•e pour savoir où la mobilité bloque vraiment.
+              Une ville peut ressortir très haut au classement sans que cela dise tout de votre situation. Le rapport ajoute votre commune, votre profil et les six dimensions futur•e pour comprendre où un choc énergétique pèserait vraiment sur votre quotidien.
             </p>
             <div className="cta-links">
               <Link href="/rapport" className="cta-btn">Voir le rapport →</Link>
