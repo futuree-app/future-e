@@ -25,7 +25,7 @@ const MODULE_ICONS: Record<string, string> = {
 
 const MODULE_BENEFIT: Record<string, string> = {
   quartier: "Ce que votre territoire devient. Chaleur, inondations, érosion, qualité de vie : ce qui change autour de chez vous dans les prochaines décennies.",
-  logement: "Ce que votre logement devient : confort d'été, valeur future, coût d'assurance, obligations de rénovation. Ce que vous ne voyez pas encore dans votre bail ou votre acte de propriété.",
+  logement: "Ce que votre habitat devient : confort, risques, valeur. DPE, réglementation, exposition par adresse, coût d'assurance projeté et valeur immobilière à 20 ans.",
   metier: "Ce que le changement climatique fait à votre secteur. Certains métiers gagnent en importance, d'autres se fragilisent.",
   sante: "Ce que votre environnement fait à votre corps. Chaleur, pollens, qualité de l'air, cadmium dans les sols : des signaux qui existent déjà.",
   mobilite: "Est-ce que votre mode de vie quotidien reste tenable ici ? Dépendance à la voiture, coût des trajets, alternatives réelles.",
@@ -275,13 +275,12 @@ export default async function RapportPage() {
                   </h2>
                 </div>
                 <p className="text-[15px] text-muted leading-[1.65]">
-                  Chaque dimension croise votre profil avec les données publiques disponibles pour La Rochelle.
+                  Certaines lectures sont déjà plus avancées que d&apos;autres. Le module Logement est le plus abouti à ce stade.
                 </p>
               </div>
 
               <div className="grid grid-cols-3 gap-3.5">
                 {lockedModules.map((module, i) => {
-                  const col = MODULE_COLORS[module.id] ?? "var(--violet)";
                   const benefit = MODULE_BENEFIT[module.id] ?? module.summary;
                   return (
                     <article
@@ -369,6 +368,13 @@ export default async function RapportPage() {
                       <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
                       Ouvert
                     </span>
+                    {module.id === "logement" ? (
+                      <div className="mt-4">
+                        <Link href="/rapport/logement" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: col, border: `1px solid ${col}33`, background: `${col}0d` }}>
+                          Ouvrir le module
+                        </Link>
+                      </div>
+                    ) : null}
                   </article>
                 );
               })}

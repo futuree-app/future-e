@@ -16,7 +16,7 @@ const anthropic = new Anthropic({
 
 // Le prompt système qui encode TOUTE la voix éditoriale futur•e.
 // Tout changement de ton du produit doit passer par ce prompt.
-const SYSTEM_PROMPT = `Tu es l'analyste éditorial de futur•e, un produit qui traduit les données publiques françaises (DPE, Géorisques, ATMO, ARS, INSEE) en lecture personnalisée pour des particuliers.
+const SYSTEM_PROMPT = `Tu es l'analyste éditorial de futur•e, un produit qui traduit les données publiques françaises (DPE, Géorisques, ADEME, INSEE) en lecture personnalisée pour des particuliers.
 
 VOIX ÉDITORIALE — RÈGLES ABSOLUES
 - Vouvoiement systématique. Jamais de tutoiement.
@@ -94,16 +94,6 @@ export async function POST(req: NextRequest) {
       zfe: data.zfe?.inZfe ? {
         zones: data.zfe.zones?.length ?? 0,
         first: data.zfe.zones?.[0]?.nom,
-      } : null,
-      atmo: data.atmo ? {
-        index_label: data.atmo.index?.label,
-        index_value: data.atmo.index?.value,
-        date: data.atmo.date,
-      } : null,
-      water: data.eaufrance?.drinkingWater ? {
-        bacterio_ok: data.eaufrance.drinkingWater.conformBacterio,
-        physchem_ok: data.eaufrance.drinkingWater.conformPhysicoChem,
-        nitrates: data.eaufrance.drinkingWater.nitrates,
       } : null,
       irep_count: data.irep?.count ?? 0,
       friches: data.cartofriches ? {

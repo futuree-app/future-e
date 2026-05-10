@@ -6,9 +6,7 @@ import {
   getGeorisquesParcelSummary,
   getGeorisquesSummary,
 } from "@/lib/georisques";
-import { getAtmoForCommune } from "@/lib/atmo";
 import { getAltitude } from "@/lib/ign";
-import { getEaufranceSummary } from "@/lib/eaufrance";
 import { getDpeByBanId, getDpeByCoordinates } from "@/lib/dpe";
 import { getZfeForPoint } from "@/lib/zfe";
 import { getIrepNearPoint } from "@/lib/irep";
@@ -51,13 +49,9 @@ export async function GET(request: Request) {
         : getAuditByCoordinates(address.latitude, address.longitude).catch(() => null),
     ]);
 
-    const [georisquesCommune, atmo, altitude, eaufrance, zfe, irep, cartofriches, communeData] = await Promise.all([
+    const [georisquesCommune, altitude, zfe, irep, cartofriches, communeData] = await Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
-      address.citycode && process.env.ATMO_USERNAME
-        ? getAtmoForCommune(address.citycode).catch(() => null)
-        : null,
       getAltitude(address.latitude, address.longitude).catch(() => null),
-      address.citycode ? getEaufranceSummary(address.citycode).catch(() => null) : null,
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
       getIrepNearPoint(address.latitude, address.longitude).catch(() => null),
       address.citycode ? getCartofrichesForCommune(address.citycode).catch(() => null) : null,
@@ -85,8 +79,6 @@ export async function GET(request: Request) {
         irep,
         cartofriches,
         communeData,
-        atmo,
-        eaufrance,
         georisques: {
           address: georisquesAddress,
           parcel: georisquesParcel,

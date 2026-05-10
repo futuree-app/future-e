@@ -437,7 +437,7 @@ export default async function InondationCommune({
               Ces données indiquent que la commune est concernée, pas nécessairement chaque logement. Vérifiez à votre adresse exacte sur{' '}
               <a href="https://www.georisques.gouv.fr" target="_blank" rel="noopener" style={{ color: 'var(--fg-3)', textDecoration: 'underline' }}>georisques.gouv.fr</a>{' '}
               ou via notre{' '}
-              <Link href="/georisques-logement" style={{ color: 'var(--fg-3)', textDecoration: 'underline' }}>outil d&apos;analyse par adresse</Link>.
+              <Link href="/rapport/logement" style={{ color: 'var(--fg-3)', textDecoration: 'underline' }}>module Logement</Link>.
             </div>
           </>
         )}
@@ -454,7 +454,7 @@ export default async function InondationCommune({
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
             <Link href="/inscription" className="cta-btn">Commencer — 14 jours gratuits</Link>
-            <Link href="/georisques-logement" className="cta-sec">Analyser mon adresse exacte →</Link>
+            <Link href="/rapport/logement" className="cta-sec">Ouvrir le module Logement →</Link>
           </div>
         </div>
 

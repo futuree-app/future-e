@@ -40,15 +40,6 @@ type ApiResponse = {
       taux_suroccupation: number | null; taux_motorisation: number | null; taux_transports_communs: number | null;
     } | null;
   } | null;
-  atmo?: {
-    inseeCode: string; date: string;
-    index: { value: number; label: string; color: string };
-    pollutants: { pm25: { value: number; label: string } | null; pm10: { value: number; label: string } | null; no2: { value: number; label: string } | null; o3: { value: number; label: string } | null; };
-  } | null;
-  eaufrance?: {
-    drinkingWater: { conformBacterio: boolean | null; conformPhysicoChem: boolean | null; lastSampleDate: string | null; nitrates: number | null; } | null;
-    drought: { riverName: string | null; status: string | null; isDry: boolean; } | null;
-  } | null;
   georisques?: {
     address?: { risks: { labels: string[] }; pprn: { labels: string[] }; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; } | null;
     parcel?: { parcelCode: string; risks: { labels: string[] }; pprn: { labels: string[]; zones: string[] }; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; } | null;
@@ -102,12 +93,83 @@ function computeQuickVerdict(r: ApiResponse): { level: "good" | "medium" | "bad"
   if (r.zfe?.inZfe) { score += 1; signals++; }
   if ((r.irep?.count ?? 0) > 0) { score += 1; signals++; }
   if ((r.cartofriches?.count ?? 0) > 0 && r.cartofriches?.friches.some(f => f.sol_pollue)) { score += 1; signals++; }
-  if (r.atmo?.index?.value && r.atmo.index.value >= 4) { score += 1; signals++; }
-  if (r.eaufrance?.drinkingWater?.conformBacterio === false || r.eaufrance?.drinkingWater?.conformPhysicoChem === false) { score += 1; signals++; }
-
   return {
     level: score >= 4 ? "bad" : score >= 2 ? "medium" : "good",
     signals,
+  };
+}
+
+function getInsuranceOutlook(risks: string[]) {
+  const joined = risks.join(" ").toLowerCase();
+  const hasSensitiveRisk =
+    joined.includes("inond") ||
+    joined.includes("submersion") ||
+    joined.includes("débordement") ||
+    joined.includes("argile");
+
+  if (hasSensitiveRisk || risks.length >= 3) {
+    return {
+      level: "bad" as const,
+      value: "Sous pression",
+      unit: "lecture qualitative à 20 ans",
+      desc: "Quand les sinistres climatiques se répètent, la prime, les franchises ou les conditions de couverture peuvent se tendre plus vite.",
+    };
+  }
+
+  if (risks.length > 0) {
+    return {
+      level: "warn" as const,
+      value: "À surveiller",
+      unit: "lecture qualitative à 20 ans",
+      desc: "Le signal n'annonce pas une hausse automatique des coûts, mais il pèse sur la lecture assurantielle du bien dans la durée.",
+    };
+  }
+
+  return {
+    level: "good" as const,
+    value: "Plus stable",
+    unit: "lecture qualitative à 20 ans",
+    desc: "Aucun risque naturel fort ne ressort ici dans les bases consultées. Cela ne supprime pas le risque, mais limite la pression assurantielle visible.",
+  };
+}
+
+function getValueOutlook(args: {
+  dpeLabel: string | null | undefined;
+  risks: string[];
+  pollutedFricheNearby: boolean;
+  passoiresPct: number | null | undefined;
+}) {
+  let fragility = 0;
+  if (args.dpeLabel === "F" || args.dpeLabel === "G") fragility += 2;
+  else if (args.dpeLabel === "E") fragility += 1;
+  if (args.risks.length >= 2) fragility += 2;
+  else if (args.risks.length === 1) fragility += 1;
+  if (args.pollutedFricheNearby) fragility += 1;
+  if ((args.passoiresPct ?? 0) >= 20) fragility += 1;
+
+  if (fragility >= 4) {
+    return {
+      level: "bad" as const,
+      value: "Fragilisée",
+      unit: "valeur à 20 ans",
+      desc: "Un bien exposé, énergivore ou situé dans un marché local déjà tendu peut devenir plus difficile à louer, assurer ou revendre correctement.",
+    };
+  }
+
+  if (fragility >= 2) {
+    return {
+      level: "warn" as const,
+      value: "À arbitrer",
+      unit: "valeur à 20 ans",
+      desc: "Le bien ne se dégrade pas nécessairement, mais plusieurs signaux peuvent peser sur sa valeur future s'ils ne sont pas traités.",
+    };
+  }
+
+  return {
+    level: "good" as const,
+    value: "Plus résiliente",
+    unit: "valeur à 20 ans",
+    desc: "Le logement semble mieux placé pour conserver sa désirabilité relative, sous réserve de l'évolution du marché local et des travaux réalisés.",
   };
 }
 
@@ -120,14 +182,6 @@ function Kicker({ children }: { children: React.ReactNode }) {
     <p style={{ margin: 0, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent-dim, #7a6e60)" }}>
       {children}
     </p>
-  );
-}
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 style={{ margin: 0, fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: "clamp(22px,3vw,30px)", lineHeight: 1.18, letterSpacing: "-0.01em", color: "var(--fg-hi)" }}>
-      {children}
-    </h2>
   );
 }
 
@@ -304,6 +358,13 @@ export default function LogementPage() {
     ...(georisques?.risks?.labels ?? []),
     ...(georisques?.pprn?.labels ?? []),
   ].filter((v, i, a) => a.indexOf(v) === i);
+  const insuranceOutlook = getInsuranceOutlook(allRisks);
+  const valueOutlook = getValueOutlook({
+    dpeLabel: dpe?.etiquette_dpe,
+    risks: allRisks,
+    pollutedFricheNearby: result?.cartofriches?.friches.some((f) => f.sol_pollue) ?? false,
+    passoiresPct: result?.communeData?.iris?.passoires_taux,
+  });
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--fg-1)" }}>
@@ -334,8 +395,8 @@ export default function LogementPage() {
           <span style={{ fontStyle: "italic", color: "var(--accent, #c8b89a)" }}>dit du climat à venir.</span>
         </h1>
         <p style={{ margin: "0 0 36px", fontSize: 16, lineHeight: 1.7, color: "var(--fg-3)" }}>
-          DPE, risques naturels, qualité de l&apos;air, eau potable, friches, ZFE — une lecture complète d&apos;un logement
-          dans un territoire qui change. À partir des données publiques officielles.
+          DPE, risques par adresse, pression assurantielle, trajectoire de valeur, friches et contraintes locales :
+          une lecture du logement à partir des données publiques officielles.
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8 }}>
@@ -540,12 +601,28 @@ export default function LogementPage() {
                   {allRisks.length > 0 && (
                     <RiskCard
                       level="bad"
-                      name="Risques naturels"
+                      name="Risques par adresse"
                       value={String(allRisks.length)}
                       unit={`risque${allRisks.length > 1 ? "s" : ""} référencé${allRisks.length > 1 ? "s" : ""}`}
                       desc={`Cette parcelle est exposée à : ${allRisks.slice(0, 3).join(", ")}${allRisks.length > 3 ? "…" : ""}.`}
                     />
                   )}
+
+                  <RiskCard
+                    level={insuranceOutlook.level}
+                    name="Coût d'assurance projeté"
+                    value={insuranceOutlook.value}
+                    unit={insuranceOutlook.unit}
+                    desc={insuranceOutlook.desc}
+                  />
+
+                  <RiskCard
+                    level={valueOutlook.level}
+                    name="Valeur immobilière"
+                    value={valueOutlook.value}
+                    unit={valueOutlook.unit}
+                    desc={valueOutlook.desc}
+                  />
 
                   {result.zfe?.inZfe && (
                     <RiskCard
@@ -554,16 +631,6 @@ export default function LogementPage() {
                       value="Oui"
                       unit={`${result.zfe.zones.length} zone${result.zfe.zones.length > 1 ? "s" : ""} de circulation restreinte`}
                       desc="Cette adresse est située dans une zone à faibles émissions. Restrictions progressives selon vignette Crit'Air."
-                    />
-                  )}
-
-                  {result.atmo && (
-                    <RiskCard
-                      level={result.atmo.index.value <= 2 ? "good" : result.atmo.index.value <= 3 ? "medium" : "bad"}
-                      name="Qualité de l'air"
-                      value={result.atmo.index.label}
-                      unit={`indice du ${result.atmo.date}`}
-                      desc="Mesure quotidienne ATMO. À surveiller dans la durée — la moyenne annuelle est plus structurante qu'une mesure ponctuelle."
                     />
                   )}
 
@@ -577,28 +644,6 @@ export default function LogementPage() {
                         result.cartofriches.friches.some(f => f.sol_pollue)
                           ? "Au moins une friche présente une pollution des sols documentée."
                           : "Friches référencées sans pollution des sols documentée."
-                      }
-                    />
-                  )}
-
-                  {result.eaufrance?.drinkingWater && (
-                    <RiskCard
-                      level={
-                        result.eaufrance.drinkingWater.conformBacterio === false || result.eaufrance.drinkingWater.conformPhysicoChem === false
-                          ? "bad"
-                          : "good"
-                      }
-                      name="Eau potable"
-                      value={
-                        result.eaufrance.drinkingWater.conformBacterio === false || result.eaufrance.drinkingWater.conformPhysicoChem === false
-                          ? "Non conforme"
-                          : "Conforme"
-                      }
-                      unit={result.eaufrance.drinkingWater.lastSampleDate ? `dernier prélèvement ${result.eaufrance.drinkingWater.lastSampleDate.slice(0,10)}` : ""}
-                      desc={
-                        result.eaufrance.drinkingWater.nitrates != null
-                          ? `Nitrates : ${result.eaufrance.drinkingWater.nitrates} mg/L. Limite réglementaire : 50 mg/L.`
-                          : "Dernier contrôle ARS sur le réseau de distribution."
                       }
                     />
                   )}
@@ -663,7 +708,7 @@ export default function LogementPage() {
               {/* Risques */}
               {(allRisks.length > 0 || georisques?.seismic || georisques?.rga) && (
                 <div>
-                  <SectionLabel>Risques naturels & technologiques</SectionLabel>
+                  <SectionLabel>Risques physiques par adresse</SectionLabel>
                   <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 16 }}>
                     {allRisks.length > 0 && (
                       <div>
@@ -687,52 +732,30 @@ export default function LogementPage() {
                 </div>
               )}
 
-              {/* Qualité de l'air et eau */}
-              {(result.atmo || result.eaufrance) && (
-                <div>
-                  <SectionLabel>Air & eau</SectionLabel>
-                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 16 }}>
-                    {result.atmo && (
-                      <div>
-                        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-4)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>
-                          ATMO · {result.atmo.date}
-                        </div>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px,1fr))", gap: 12 }}>
-                          {result.atmo.pollutants.pm25 && <Block label="PM2.5" value={result.atmo.pollutants.pm25.label} />}
-                          {result.atmo.pollutants.pm10 && <Block label="PM10" value={result.atmo.pollutants.pm10.label} />}
-                          {result.atmo.pollutants.no2 && <Block label="NO₂" value={result.atmo.pollutants.no2.label} />}
-                          {result.atmo.pollutants.o3 && <Block label="O₃" value={result.atmo.pollutants.o3.label} />}
-                        </div>
-                      </div>
-                    )}
-                    {result.eaufrance?.drinkingWater && (
-                      <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)" }}>
-                        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-4)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>
-                          Eau potable · ARS
-                        </div>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px,1fr))", gap: 12 }}>
-                          <Block
-                            label="Bactériologie"
-                            value={result.eaufrance.drinkingWater.conformBacterio === true ? "Conforme" : result.eaufrance.drinkingWater.conformBacterio === false ? "Non conforme" : "—"}
-                          />
-                          <Block
-                            label="Physico-chimique"
-                            value={result.eaufrance.drinkingWater.conformPhysicoChem === true ? "Conforme" : result.eaufrance.drinkingWater.conformPhysicoChem === false ? "Non conforme" : "—"}
-                          />
-                          {result.eaufrance.drinkingWater.nitrates != null && (
-                            <Block label="Nitrates" value={`${result.eaufrance.drinkingWater.nitrates} mg/L`} sub="Limite : 50 mg/L" />
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+              <div>
+                <SectionLabel>Assurance & valeur</SectionLabel>
+                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                  <RiskCard
+                    level={insuranceOutlook.level}
+                    name="Pression d'assurance"
+                    value={insuranceOutlook.value}
+                    unit={insuranceOutlook.unit}
+                    desc={insuranceOutlook.desc}
+                  />
+                  <RiskCard
+                    level={valueOutlook.level}
+                    name="Trajectoire de valeur"
+                    value={valueOutlook.value}
+                    unit={valueOutlook.unit}
+                    desc={valueOutlook.desc}
+                  />
                 </div>
-              )}
+              </div>
 
-              {/* Friches & installations */}
+              {/* Environnement du bien */}
               {((result.cartofriches?.count ?? 0) > 0 || (result.irep?.count ?? 0) > 0) && (
                 <div>
-                  <SectionLabel>Environnement industriel</SectionLabel>
+                  <SectionLabel>Environnement du bien</SectionLabel>
                   <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 14 }}>
                     {result.cartofriches && result.cartofriches.count > 0 && (
                       <div>
@@ -798,7 +821,7 @@ export default function LogementPage() {
                     {result.communeData.iris?.passoires_taux != null && <Block label="Passoires" value={fPct(result.communeData.iris.passoires_taux)} sub="dans le quartier" />}
                     {result.communeData.iris?.preca_energetique_pct != null && <Block label="Précarité énergétique" value={fPct(result.communeData.iris.preca_energetique_pct)} />}
                     {result.communeData.iris?.taux_propriete != null && <Block label="Propriétaires" value={fPct(result.communeData.iris.taux_propriete)} />}
-                    {result.communeData.commune.sante.acces_medecins != null && <Block label="Accès médecins" value={fInt(result.communeData.commune.sante.acces_medecins)} sub="médecins/10 000 hab" />}
+                    {result.communeData.commune.logements.vacants_pct != null && <Block label="Logements vacants" value={fPct(result.communeData.commune.logements.vacants_pct)} />}
                   </div>
                 </div>
               )}
@@ -858,13 +881,6 @@ export default function LogementPage() {
                           href="/savoir/sols-pollues"
                         />
                       )}
-                      {result.eaufrance?.drinkingWater?.nitrates != null && result.eaufrance.drinkingWater.nitrates > 25 && (
-                        <ActionCard
-                          title="Nitrates dans l'eau potable"
-                          desc="Comprendre les seuils, les recours, et les alternatives pour les profils sensibles (nourrissons, femmes enceintes)."
-                          href="/savoir/eau-nitrates"
-                        />
-                      )}
                       <ActionCard
                         title="Comparer ce logement avec d'autres territoires"
                         desc="Le comparateur futur•e permet de mesurer comment ce bien se situe face à des territoires alternatifs sur les mêmes dimensions."
@@ -902,7 +918,7 @@ export default function LogementPage() {
                   {[
                     { title: "Comprendre votre DPE et son calendrier", href: "/savoir/dpe-comprendre" },
                     { title: "Le risque de submersion et sa trajectoire", href: "/savoir/submersion" },
-                    { title: "Cadmium et qualité des sols agricoles", href: "/savoir/cadmium" },
+                    { title: "Pollutions invisibles : ce que le sol garde", href: "/savoir/pollutions-invisibles" },
                   ].map((l, i) => (
                     <Link key={i} href={l.href} style={{
                       display: "flex", justifyContent: "space-between", alignItems: "center",
