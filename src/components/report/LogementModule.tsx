@@ -297,7 +297,7 @@ function ActionCard({ title, desc, href, primary }: { title: string; desc: strin
 // PAGE
 // ════════════════════════════════════════════════════════════════════════════
 
-export default function LogementPage() {
+export default function LogementModule() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

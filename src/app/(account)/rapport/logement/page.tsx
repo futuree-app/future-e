@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { canAccessCompleteReport } from "@/lib/access";
+import LogementModule from "@/components/report/LogementModule";
 import { getCurrentUserAccount } from "@/lib/user-account";
-import LogementPage from "@/app/(public)/georisques-logement/page";
 
 export default async function RapportLogementPage() {
   const account = await getCurrentUserAccount();
@@ -10,5 +10,5 @@ export default async function RapportLogementPage() {
     redirect("/rapport");
   }
 
-  return <LogementPage />;
+  return <LogementModule />;
 }
