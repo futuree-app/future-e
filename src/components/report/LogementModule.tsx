@@ -2,7 +2,7 @@
 
 import { FormEvent, useState, useMemo } from "react";
 import Link from "next/link";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { AccountNav } from "@/components/AccountNav";
 
 // ════════════════════════════════════════════════════════════════════════════
 // TYPES — inchangés depuis l'API existante
@@ -67,19 +67,6 @@ const DPE_LABELS: Record<string, string> = {
   A: "Très performant", B: "Performant", C: "Assez performant",
   D: "Peu performant", E: "Énergivore", F: "Très énergivore", G: "Passoire thermique",
 };
-
-// ════════════════════════════════════════════════════════════════════════════
-// HELPERS
-// ════════════════════════════════════════════════════════════════════════════
-
-function fInt(v: number | null | undefined): string {
-  if (v == null) return "—";
-  return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(v);
-}
-function fPct(v: number | null | undefined): string {
-  if (v == null) return "—";
-  return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(v)} %`;
-}
 
 // Calcule un verdict synthétique côté client (avant ou en l'absence de l'IA)
 function computeQuickVerdict(r: ApiResponse): { level: "good" | "medium" | "bad"; signals: number } {
@@ -171,18 +158,6 @@ function getValueOutlook(args: {
     unit: "valeur à 20 ans",
     desc: "Le logement semble mieux placé pour conserver sa désirabilité relative, sous réserve de l'évolution du marché local et des travaux réalisés.",
   };
-}
-
-// ════════════════════════════════════════════════════════════════════════════
-// UI ATOMS — design futur•e
-// ════════════════════════════════════════════════════════════════════════════
-
-function Kicker({ children }: { children: React.ReactNode }) {
-  return (
-    <p style={{ margin: 0, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent-dim, #7a6e60)" }}>
-      {children}
-    </p>
-  );
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -367,39 +342,80 @@ export default function LogementModule() {
   });
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--fg-1)" }}>
+    <div className="min-h-screen bg-canvas text-label relative overflow-hidden" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+      <div className="fixed top-[-160px] left-[-130px] w-[520px] h-[520px] rounded-full bg-accent/[0.10] blur-[100px] opacity-32 pointer-events-none z-0" />
+      <div className="fixed bottom-[-100px] right-[-80px] w-[400px] h-[400px] rounded-full bg-orange/[0.08] blur-[88px] opacity-24 pointer-events-none z-0" />
 
-      {/* ── NAV ── */}
-      <nav style={{
-        position: "sticky", top: 0, zIndex: 10,
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        padding: "16px 28px", borderBottom: "1px solid var(--border-1)",
-        background: "rgba(6,8,18,0.65)", backdropFilter: "blur(16px)",
-      }}>
-        <Link href="/" style={{ fontFamily: "var(--font-serif)", fontSize: 18, color: "var(--fg-1)", textDecoration: "none", fontStyle: "italic" }}>
-          futur<span style={{ color: "var(--accent, #c8b89a)", fontStyle: "normal" }}>•</span>e
-        </Link>
-        <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" }}>
-            Module Logement
-          </span>
-          <ThemeToggle />
-        </div>
-      </nav>
+      <AccountNav
+        secondaryCta={{ href: "/rapport", label: "Mon rapport" }}
+        primaryCta={{ href: "/dashboard", label: "Dashboard" }}
+      />
 
-      {/* ── HEADER + RECHERCHE ── */}
-      <section style={{ maxWidth: 760, margin: "0 auto", padding: "64px 28px 48px" }}>
-        <Kicker>Module 2 · Logement</Kicker>
-        <h1 style={{ margin: "16px 0 20px", fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: "clamp(36px,5vw,56px)", lineHeight: 1.06, letterSpacing: "-0.02em", color: "var(--fg-hi)" }}>
-          Ce que votre adresse<br />
-          <span style={{ fontStyle: "italic", color: "var(--accent, #c8b89a)" }}>dit du climat à venir.</span>
-        </h1>
-        <p style={{ margin: "0 0 36px", fontSize: 16, lineHeight: 1.7, color: "var(--fg-3)" }}>
-          DPE, risques par adresse, pression assurantielle, trajectoire de valeur, friches et contraintes locales :
-          une lecture du logement à partir des données publiques officielles.
-        </p>
+      <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
+        <section className="grid grid-cols-[1fr_360px] gap-14 items-start py-20">
+          <div>
+            <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-accent mb-5">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+              Module 02 · Logement
+            </div>
+            <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+              Ce que votre habitat devient.<br />
+              <span className="italic text-accent">Confort, risques, valeur.</span>
+            </h1>
+            <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[560px]">
+              Ce module lit le bien lui-même : DPE, risques par adresse, pression assurantielle et trajectoire de valeur. Il ne raconte pas tout le territoire. Il raconte ce que ce logement absorbe, perd ou protège.
+            </p>
+            <div className="flex gap-3 flex-wrap">
+              <Link href="/rapport" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
+                Retour au hub
+              </Link>
+              <Link href="/rapport/quartier" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
+                Voir le module Quartier
+              </Link>
+            </div>
+          </div>
 
-        <form onSubmit={handleSubmit} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8 }}>
+          <aside className="glass rounded-2xl p-7">
+            <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">Lecture du bien</p>
+            <h2 className="font-normal text-[22px] leading-[1.2] text-label mb-5 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
+              Les briques du module.
+            </h2>
+            <div className="flex flex-col gap-2.5">
+              {[
+                { label: "Performance énergétique", val: dpe?.etiquette_dpe ? `DPE ${dpe.etiquette_dpe}` : "Lecture à l'adresse", col: "var(--orange)" },
+                { label: "Risques par adresse", val: allRisks.length > 0 ? `${allRisks.length} signal${allRisks.length > 1 ? "s" : ""}` : "Après analyse", col: "var(--red)" },
+                { label: "Pression d'assurance", val: insuranceOutlook.value, col: "var(--blue)" },
+                { label: "Valeur à 20 ans", val: valueOutlook.value, col: "var(--green)" },
+              ].map((f) => (
+                <div key={f.label} className="flex gap-3.5 items-start px-3.5 py-3 rounded-lg" style={{ background: `${f.col}0c`, border: `1px solid ${f.col}22` }}>
+                  <span className="w-[7px] h-[7px] rounded-full shrink-0 mt-[5px]" style={{ background: f.col, boxShadow: `0 0 8px ${f.col}` }} />
+                  <div>
+                    <div className="text-[13px] font-medium text-label mb-0.5 leading-[1.3]">{f.label}</div>
+                    <div className="font-mono text-[10px] tracking-[0.04em]" style={{ color: f.col }}>{f.val}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </aside>
+        </section>
+
+        <div className="border-t border-white/[0.08]" />
+
+        <section className="pt-14">
+          <div className="grid grid-cols-[1fr_320px] gap-10 items-end mb-8">
+            <div>
+              <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Lecture par défaut</p>
+              <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                Analyser un logement précis.
+              </h2>
+            </div>
+            <p className="text-[15px] text-muted leading-[1.65]">
+              Entrez une adresse pour ouvrir la lecture du bien. Le module s&apos;arrête au logement et à son exposition directe.
+            </p>
+          </div>
+
+          <div className="glass rounded-xl p-8 border-t-2 border-t-accent" style={{ maxWidth: 760 }}>
+            <form onSubmit={handleSubmit} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8 }}>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -422,18 +438,19 @@ export default function LogementModule() {
           >
             {loading ? "Analyse…" : "Analyser"}
           </button>
-        </form>
+            </form>
 
-        {error && (
-          <div style={{ marginTop: 16, padding: "12px 16px", background: "rgba(168,74,58,0.08)", border: "1px solid rgba(168,74,58,0.25)", color: "var(--red, #f87171)", fontSize: 13, fontFamily: "var(--font-mono)" }}>
-            ⚠ {error}
+            {error && (
+              <div style={{ marginTop: 16, padding: "12px 16px", background: "rgba(168,74,58,0.08)", border: "1px solid rgba(168,74,58,0.25)", color: "var(--red, #f87171)", fontSize: 13, fontFamily: "var(--font-mono)" }}>
+                ⚠ {error}
+              </div>
+            )}
           </div>
-        )}
-      </section>
+        </section>
 
       {/* ── RÉSULTATS ── */}
       {result && quick && (
-        <div style={{ maxWidth: 760, margin: "0 auto", padding: "0 28px 96px" }}>
+        <section style={{ maxWidth: 760, padding: "24px 0 96px" }}>
 
           {/* ─ Property Card ─ */}
           <div style={{
@@ -634,20 +651,6 @@ export default function LogementModule() {
                     />
                   )}
 
-                  {result.cartofriches && result.cartofriches.count > 0 && (
-                    <RiskCard
-                      level={result.cartofriches.friches.some(f => f.sol_pollue) ? "warn" : "medium"}
-                      name="Friches industrielles"
-                      value={String(result.cartofriches.count)}
-                      unit="friches référencées à proximité"
-                      desc={
-                        result.cartofriches.friches.some(f => f.sol_pollue)
-                          ? "Au moins une friche présente une pollution des sols documentée."
-                          : "Friches référencées sans pollution des sols documentée."
-                      }
-                    />
-                  )}
-
                 </div>
               </div>
 
@@ -752,49 +755,6 @@ export default function LogementModule() {
                 </div>
               </div>
 
-              {/* Abords immédiats du bien */}
-              {((result.cartofriches?.count ?? 0) > 0 || (result.irep?.count ?? 0) > 0) && (
-                <div>
-                  <SectionLabel>Abords immédiats du bien</SectionLabel>
-                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 14 }}>
-                    {result.cartofriches && result.cartofriches.count > 0 && (
-                      <div>
-                        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-4)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
-                          {result.cartofriches.count} friche{result.cartofriches.count > 1 ? "s" : ""} à proximité
-                        </div>
-                        <div style={{ display: "grid", gap: 8 }}>
-                          {result.cartofriches.friches.slice(0, 5).map(f => (
-                            <div key={f.id} style={{ padding: "10px 14px", background: "var(--bg-elev)", border: "1px solid var(--border-1)", fontSize: 12, display: "flex", justifyContent: "space-between" }}>
-                              <span style={{ color: "var(--fg-2)" }}>{f.nom}</span>
-                              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: f.sol_pollue ? "var(--red, #f87171)" : "var(--fg-4)" }}>
-                                {f.distanceM ? `${f.distanceM} m` : ""}{f.sol_pollue ? " · sol pollué" : ""}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {result.irep && result.irep.count > 0 && (
-                      <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)" }}>
-                        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-4)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
-                          {result.irep.count} installation{result.irep.count > 1 ? "s" : ""} polluante{result.irep.count > 1 ? "s" : ""} référencée{result.irep.count > 1 ? "s" : ""}
-                        </div>
-                        <div style={{ display: "grid", gap: 8 }}>
-                          {result.irep.installations.slice(0, 3).map(i => (
-                            <div key={i.id} style={{ padding: "10px 14px", background: "var(--bg-elev)", border: "1px solid var(--border-1)", fontSize: 12, display: "flex", justifyContent: "space-between" }}>
-                              <span style={{ color: "var(--fg-2)" }}>{i.nom}</span>
-                              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-4)" }}>
-                                {i.distanceM} m · {i.nombre_polluants} polluant{i.nombre_polluants > 1 ? "s" : ""}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
               {/* ZFE */}
               {result.zfe?.inZfe && (
                 <div>
@@ -808,20 +768,6 @@ export default function LogementModule() {
                         </div>
                       </div>
                     ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Contexte commune */}
-              {result.communeData && (
-                <div>
-                  <SectionLabel>Contexte de la commune</SectionLabel>
-                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px,1fr))", gap: 14 }}>
-                    {result.communeData.commune.population && <Block label="Population" value={fInt(result.communeData.commune.population)} />}
-                    {result.communeData.iris?.passoires_taux != null && <Block label="Passoires" value={fPct(result.communeData.iris.passoires_taux)} sub="dans le quartier" />}
-                    {result.communeData.iris?.preca_energetique_pct != null && <Block label="Précarité énergétique" value={fPct(result.communeData.iris.preca_energetique_pct)} />}
-                    {result.communeData.iris?.taux_propriete != null && <Block label="Propriétaires" value={fPct(result.communeData.iris.taux_propriete)} />}
-                    {result.communeData.commune.logements.vacants_pct != null && <Block label="Logements vacants" value={fPct(result.communeData.commune.logements.vacants_pct)} />}
                   </div>
                 </div>
               )}
@@ -938,8 +884,9 @@ export default function LogementModule() {
             </div>
           )}
 
-        </div>
+        </section>
       )}
-    </main>
+      </div>
+    </div>
   );
 }
