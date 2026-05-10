@@ -133,32 +133,32 @@ export default function InondationPage() {
         <section className="section">
           <div className="section-eyebrow">Comprendre</div>
           <h2 className="section-title">Ce que le risque inondation signifie vraiment</h2>
-          <p className="section-sub">Cinq lectures pour dépasser les idées reçues.</p>
+          <p className="section-sub">Trois lectures pour dépasser les idées reçues.</p>
 
           <div className="articles-grid">
             <Link href="/inondation/villes-les-plus-exposees" className="article-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/hub-submersion.jpg" alt="Top 10 villes inondation" className="article-img" />
               <div className="article-body">
-                <span className="article-cat" style={{ background: 'rgba(96,165,250,0.12)', color: ACCENT }}>Classement</span>
+                <span className="article-cat" style={{ background: 'rgba(96,165,250,0.12)', color: ACCENT }}>Classement · Inondation</span>
                 <div className="article-title">Top 10 des villes les plus exposées aux inondations</div>
                 <div className="article-desc">
-                  Nîmes, Nice, Montpellier : le classement des villes françaises les plus vulnérables, avec les événements historiques et les projections 2050.
+                  Nîmes, Nice, Perpignan : épisodes cévenols, crues méditerranéennes, précipitations extrêmes. Le classement des villes françaises les plus vulnérables aux inondations fluviales, avec les projections 2050.
                 </div>
                 <div className="article-cta">Voir le classement →</div>
               </div>
             </Link>
 
-            <Link href="/savoir/submersion" className="article-card">
+            <Link href="/inondation/villes-les-plus-exposees-submersion" className="article-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/hub-submersion.jpg" alt="Inondation et submersion marine" className="article-img" />
+              <img src="/hub-submersion.jpg" alt="Top 10 villes submersion marine" className="article-img" />
               <div className="article-body">
-                <span className="article-cat" style={{ background: 'rgba(96,165,250,0.12)', color: ACCENT }}>Projections</span>
-                <div className="article-title">Inondations en 2050 : ce qui nous attend</div>
+                <span className="article-cat" style={{ background: 'rgba(56,189,248,0.12)', color: '#38bdf8' }}>Classement · Submersion</span>
+                <div className="article-title">Top 10 des villes les plus exposées à la submersion marine</div>
                 <div className="article-desc">
-                  Les données commune par commune. Quels territoires verront leurs précipitations extrêmes s'intensifier ? Quelles côtes sont menacées par la montée des eaux ?
+                  Gravelines, Sète, Dunkerque : polders sous le niveau de la mer, cordons dunaires, estuaires atlantiques. Les villes françaises les plus vulnérables à la montée des eaux.
                 </div>
-                <div className="article-cta">Lire l'article →</div>
+                <div className="article-cta">Voir le classement →</div>
               </div>
             </Link>
 
@@ -185,19 +185,6 @@ export default function InondationPage() {
                   PPRN, IAL, assurance catnat, Fonds Barnier : comprendre ses droits et obligations quand on vit en zone inondable.
                 </div>
                 <div className="article-cta">Lire le guide →</div>
-              </div>
-            </Link>
-
-            <Link href="/georisques-logement" className="article-card">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/future-territoire-landing.jpg" alt="Risques par adresse" className="article-img" />
-              <div className="article-body">
-                <span className="article-cat" style={{ background: 'rgba(129,140,248,0.12)', color: '#818cf8' }}>Logement</span>
-                <div className="article-title">Les risques de votre adresse exacte</div>
-                <div className="article-desc">
-                  Zone PPRN, zone de crue, niveau de prescription : l'analyse complète des risques naturels à votre adresse précise.
-                </div>
-                <div className="article-cta">Analyser mon adresse →</div>
               </div>
             </Link>
           </div>
@@ -281,10 +268,10 @@ export default function InondationPage() {
             </div>
 
             <div className="signal-card">
-              <div className="signal-source">BRGM · Projections littorales 2050</div>
-              <div className="signal-head">134 communes littorales menacées de submersion permanente</div>
+              <div className="signal-source">Secours Catholique – Caritas France · 2026</div>
+              <div className="signal-head">66 % des Français ignorent être exposés au risque d'inondation</div>
               <div className="signal-body">
-                Avec une élévation du niveau de la mer de 30 à 60 cm d'ici 2050, les submersions marines exceptionnelles deviendront régulières sur certains littoraux atlantiques et méditerranéens. Les zones d'habitat temporaire (résidences secondaires) sont particulièrement exposées.
+                Selon le Ministère de la Transition écologique, deux tiers des habitants de France hexagonale n'ont pas conscience d'être en zone à risque. Résultat : peu de préparation, des assurances résiliées, et des dégâts bien plus lourds quand la crue arrive.
               </div>
             </div>
           </div>

@@ -46,6 +46,8 @@ const COLUMN_MAP = {
   NORSWI04_yr: 'column18', // jours sécheresse sol (SWI < 0.4)
   NORRRq99_yr: 'column15', // précip. remarquables (p99)
   NORRx1d_yr:  'column16', // précip. extrêmes (max journalier)
+  NORRR_yr:    'column11', // précip. annuelles totales (mm)
+  NORRR_seas_DJF: 'column13', // précip. hivernales (Déc-Fév, mm) — signal crues fluviales
 };
 
 /**
@@ -69,10 +71,14 @@ const RISK_DEFINITIONS = {
   submersion: {
     thematique: 'Submersion',
     indicators: {
-      ind_exposition:    { col: 'NORRx1d_yr', max: 150 },
-      ind_vulnerabilite: { col: 'NORRRq99_yr', max: 80 },
-      ind_adaptation:    { col: 'NORRRq99_yr', max: 80 },
-      ind_occurrence:    { col: 'NORRx1d_yr', max: 150 },
+      // p99 journalier : poids ×3 — même pondération que la formule page commune
+      ind_exposition:    { col: 'NORRRq99_yr',    max: 150,  weight: 3   },
+      // Précipitations hivernales : saison des crues fluviales
+      ind_vulnerabilite: { col: 'NORRR_seas_DJF', max: 500,  weight: 1   },
+      // Volume annuel saturation sols
+      ind_adaptation:    { col: 'NORRR_yr',        max: 2000, weight: 0.5 },
+      // Évolution des pluies extrêmes, signal futur (range 3.3-6.7)
+      ind_occurrence:    { col: 'NORRx1d_yr',      max: 7,    weight: 0.5 },
     },
   },
   feux: {
@@ -108,6 +114,7 @@ function normalize(value, { min = 0, max, invert = false } = {}) {
 
 /**
  * Calcule les 4 indicateurs et le score global pour une commune/risque.
+ * Si les indicateurs ont un champ `weight`, utilise une moyenne pondérée.
  */
 function computeScores(row, riskDef) {
   const { indicators } = riskDef;
@@ -119,11 +126,27 @@ function computeScores(row, riskDef) {
     scores[indKey] = normalize(raw, def);
   }
 
-  const validScores = Object.values(scores).filter((s) => s != null);
-  const globalScore =
-    validScores.length > 0
+  const entries = Object.entries(indicators);
+  const hasWeights = entries.some(([, def]) => def.weight != null);
+
+  let globalScore = 0;
+  if (hasWeights) {
+    let totalW = 0;
+    let weightedSum = 0;
+    for (const [indKey, def] of entries) {
+      const s = scores[indKey];
+      if (s == null) continue;
+      const w = def.weight ?? 1;
+      weightedSum += s * w;
+      totalW += w;
+    }
+    globalScore = totalW > 0 ? Math.round(weightedSum / totalW) : 0;
+  } else {
+    const validScores = Object.values(scores).filter((s) => s != null);
+    globalScore = validScores.length > 0
       ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length)
       : 0;
+  }
 
   return { ...scores, score: globalScore };
 }
@@ -182,22 +205,45 @@ async function main() {
       });
     }
 
-    // Top 50
+    // Top N : 500 pour submersion (pour capturer les grandes villes atlantiques
+    // qui ont des scores modérés mais documentés), 50 pour les autres risques.
+    const topN = slug === 'submersion' ? 500 : 50;
     results.sort((a, b) => b.score - a.score);
-    const top50 = results.slice(0, 50);
+    const top50 = results.slice(0, topN);
 
     console.log(`  Top score: ${top50[0]?.score} (${top50[0]?.nom_commune})`);
-    console.log(`  #50 score: ${top50[49]?.score} (${top50[49]?.nom_commune})`);
+    console.log(`  #${topN} score: ${top50[topN - 1]?.score} (${top50[topN - 1]?.nom_commune})`);
 
-    // Upsert dans Supabase
+    // GREATEST côté JS : ne jamais écraser un score existant plus élevé (scores manuels calibrés)
+    const inseeCodes = top50.map((r) => r.insee_code);
+    const { data: existing } = await supabase
+      .from('communes_tension')
+      .select('insee_code, score')
+      .eq('slug', slug)
+      .in('insee_code', inseeCodes);
+
+    const existingMap = new Map((existing ?? []).map((r) => [r.insee_code, r.score]));
+    const toWrite = top50.filter((r) => {
+      const prev = existingMap.get(r.insee_code);
+      return prev == null || r.score > prev;
+    });
+
+    const skippedCount = top50.length - toWrite.length;
+    if (skippedCount > 0) console.log(`  ${skippedCount} communes préservées (score existant ≥ score calculé)`);
+
+    if (toWrite.length === 0) {
+      console.log(`  Rien à écrire pour slug="${slug}".`);
+      continue;
+    }
+
     const { error } = await supabase
       .from('communes_tension')
-      .upsert(top50, { onConflict: 'slug,insee_code' });
+      .upsert(toWrite, { onConflict: 'slug,insee_code' });
 
     if (error) {
       console.error(`  ERROR for slug="${slug}":`, error.message);
     } else {
-      console.log(`  Upserted ${top50.length} rows for slug="${slug}".`);
+      console.log(`  Upserted ${toWrite.length} rows for slug="${slug}" (top ${topN}).`);
     }
   }
 

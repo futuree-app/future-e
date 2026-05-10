@@ -8,85 +8,93 @@ export const revalidate = 86400;
 export const metadata: Metadata = {
   title: 'Top 10 des villes françaises les plus exposées aux inondations · futur•e',
   description:
-    'Nîmes, Nice, Montpellier, Toulon : quelles villes françaises sont les plus touchées par les inondations ? Les données de Géorisques et Météo-France, classées et expliquées.',
+    'Nîmes, Nice, Perpignan, Grenoble : classement des 10 villes françaises les plus exposées aux inondations fluviales et pluviales, avec les données DRIAS Météo-France et Géorisques.',
   openGraph: {
     title: 'Top 10 des villes françaises les plus exposées aux inondations',
-    description: 'Crues soudaines, submersions, épisodes méditerranéens : les 10 villes françaises les plus exposées aux inondations selon les données officielles.',
+    description: 'Crues fluviales, épisodes cévenols, rivières torrentielles : les 10 villes françaises les plus exposées selon les projections DRIAS à +4°C.',
   },
 };
 
 const ACCENT = '#60a5fa';
 
-const CANDIDATE_CITIES = [
+type CandidateCity = {
+  nom: string;
+  insee: string;
+  dept: string;
+  editorial: string;
+  sources: string;
+};
+
+const CANDIDATE_CITIES: CandidateCity[] = [
   {
     nom: 'Nîmes',
     insee: '30189',
     dept: 'Gard (30)',
-    editorial: "Nîmes est la capitale française des inondations soudaines. En octobre 1988, 160 mm de pluie sont tombés en moins de 6 heures, tuant 11 personnes et dévastant le centre-ville. En septembre 2002, c'est tout le département du Gard qui a été inondé en une nuit — 23 morts, un milliard d'euros de dégâts. Ce type d'événement, qu'on appelle un épisode cévenol, est causé par des masses d'air chaud et humide venant de Méditerranée qui se bloquent contre les Cévennes et lâchent des volumes d'eau colossaux en quelques heures. Les projections de Météo-France prévoient que ces épisodes seront plus intenses d'ici 2050.",
-    sources: 'Géorisques GASPAR, Météo-France, PPRI Nîmes, DRIAS',
+    editorial: "Nîmes est la capitale française des inondations soudaines. En octobre 1988, 160 mm de pluie sont tombés en moins de 6 heures, tuant 11 personnes et dévastant le centre-ville. En septembre 2002, c'est tout le département du Gard qui a été inondé en une nuit : 23 morts, un milliard d'euros de dégâts. Ce type d'événement, appelé épisode cévenol, est causé par des masses d'air chaud et humide venant de Méditerranée qui se bloquent contre les Cévennes et lâchent des volumes d'eau colossaux en quelques heures. Les projections Météo-France indiquent que ces épisodes gagneront en intensité d'ici 2050.",
+    sources: 'Géorisques GASPAR, Météo-France, plan de prévention du risque inondation Nîmes, DRIAS',
   },
   {
     nom: 'Nice',
     insee: '06088',
     dept: 'Alpes-Maritimes (06)',
-    editorial: "Nice a connu la pire catastrophe naturelle récente de France métropolitaine. En octobre 2015, des pluies torrentielles ont tué 20 personnes en une seule nuit sur la Côte d'Azur. La topographie de la région explique tout : des reliefs alpins très proches de la mer forcent les nuages à précipiter brutalement sur un territoire étroit et densément peuplé. Les torrents côtiers — le Paillon à Nice, le Var, la Siagne — passent de presque à sec à des crues violentes en quelques heures. Un phénomène que le changement climatique intensifie.",
-    sources: 'Géorisques GASPAR, Cerema, PPRI Alpes-Maritimes, Météo-France',
-  },
-  {
-    nom: 'Montpellier',
-    insee: '34172',
-    dept: 'Hérault (34)',
-    editorial: "Montpellier est traversée par trois cours d'eau qui débordent lors des épisodes méditerranéens intenses : le Lez, la Mosson et le Verdanson. Les inondations de 2003 ont mis sous eau plusieurs quartiers de la ville. Le problème s'aggrave car Montpellier est la métropole française qui a le plus grandi ces 30 ans : des milliers d'hectares imperméabilisés, plus d'eau qui s'infiltre dans les sols, plus de ruissellement lors des pluies intenses. La Métropole a identifié 30 000 habitants vivant en zone inondable sur son territoire.",
-    sources: 'Géorisques, Montpellier Métropole, PPRI Lez, DRIAS Météo-France',
-  },
-  {
-    nom: 'Toulon',
-    insee: '83137',
-    dept: 'Var (83)',
-    editorial: "En juin 2010, 350 mm de pluie sont tombés en 24 heures dans le Var — l'équivalent de 6 mois de précipitations. 25 personnes sont mortes, dont plusieurs emportées par les crues de la Nartuby à Draguignan. La région toulonnaise est exposée au même type de risque : des rivières côtières à régime torrentiel (le Gapeau, le Roubaud, le Las) qui passent en quelques heures d'un filet d'eau à des torrents dévastateurs. Toulon est encaissée entre la mer et des collines qui concentrent ces flux vers la ville.",
-    sources: 'Géorisques GASPAR, PPRI Var, Cerema, DRIAS Météo-France',
-  },
-  {
-    nom: 'Avignon',
-    insee: '84007',
-    dept: 'Vaucluse (84)',
-    editorial: "Avignon est doublement exposée : le Rhône à l'ouest, la Durance au sud. Ces deux fleuves confluent à une dizaine de kilomètres en amont de la ville. En novembre 2003, les crues du Rhône ont submergé des dizaines de communes autour d'Avignon, causant plus d'un milliard d'euros de dégâts dans le Vaucluse. La frange ouest des remparts de la ville est classée en zone rouge du PPRI du Rhône. Les projections DRIAS prévoient des épisodes de précipitations extrêmes plus fréquents sur le couloir rhodanien.",
-    sources: 'Géorisques GASPAR, PPRI Rhône Avignon, Cerema, DRIAS',
-  },
-  {
-    nom: 'Bayonne',
-    insee: '64102',
-    dept: 'Pyrénées-Atlantiques (64)',
-    editorial: "Bayonne est à la confluence de l'Adour et de la Nive. En décembre 2014 et janvier 2021, les deux rivières ont débordé simultanément, inondant le centre historique. Ce qui rend Bayonne particulièrement vulnérable, c'est la possibilité d'un troisième facteur qui s'ajoute aux crues : une surcote marine lors d'une tempête atlantique qui bloque l'évacuation des eaux vers l'océan. C'est l'un des rares endroits en France où le risque fluvial et le risque maritime peuvent frapper en même temps.",
-    sources: 'Géorisques GASPAR, PPRI Adour, Cerema, BRGM littoral',
+    editorial: "Nice a connu la pire catastrophe naturelle récente de France métropolitaine. En octobre 2015, des pluies torrentielles ont tué 20 personnes en une seule nuit sur la Côte d'Azur. La géographie de la région explique tout : des reliefs alpins très proches de la mer forcent les nuages à précipiter brutalement sur un territoire étroit et densément peuplé. Les rivières côtières (le Paillon à Nice, le Var, la Siagne) passent de presque à sec à des crues violentes en quelques heures. Ce délai quasi nul ne laisse pas le temps d'évacuer.",
+    sources: 'Géorisques GASPAR, Cerema, plan de prévention du risque inondation Alpes-Maritimes, Météo-France',
   },
   {
     nom: 'Perpignan',
     insee: '66136',
     dept: 'Pyrénées-Orientales (66)',
-    editorial: "Perpignan est traversée par la Têt, l'Agly et le Tech — trois cours d'eau pyrénéens à régime torrentiel. En octobre 2020, des pluies record ont inondé plusieurs communes des Pyrénées-Orientales. En 1940, la catastrophe de la Têt avait causé des centaines de morts dans la région. Les épisodes méditerranéens touchent aussi le Roussillon : quand un flux humide du sud se bloque sur les Pyrénées, le département peut recevoir 200 à 400 mm en 24 heures.",
-    sources: 'Géorisques GASPAR, PPRI Têt, Météo-France, DRIAS',
+    editorial: "Perpignan est traversée par la Têt, l'Agly et le Tech, trois cours d'eau pyrénéens qui montent très vite lors des pluies intenses. Les précipitations extrêmes enregistrées autour de Perpignan figurent parmi les plus élevées de notre classement. En octobre 2020, des pluies record ont inondé plusieurs communes des Pyrénées-Orientales. En 1940, une catastrophe sur la Têt avait causé des centaines de morts dans la région. Quand un flux humide du sud se bloque contre les Pyrénées, le département peut recevoir 200 à 400 mm de pluie en 24 heures, soit plusieurs mois de précipitations habituelles.",
+    sources: 'Géorisques GASPAR, plan de prévention du risque inondation de la Têt, Météo-France, DRIAS',
   },
   {
-    nom: 'Carcassonne',
-    insee: '11069',
-    dept: 'Aude (11)',
-    editorial: "En octobre 2018, des crues de l'Aude ont tué 15 personnes dans le département — la catastrophe naturelle la plus meurtrière en France depuis 2010. Carcassonne est construite en deux parties : la Cité médiévale sur la hauteur (protégée), et la ville basse le long de l'Aude (en zone inondable). Lors de la crue de 2018, certains secteurs de la ville basse ont été submergés sous 2 mètres d'eau. Les précipitations lors de cet événement ont atteint 200 à 300 mm en moins de 6 heures.",
-    sources: 'Géorisques GASPAR, PPRI Aude, Météo-France, Cerema',
+    nom: 'Toulon',
+    insee: '83137',
+    dept: 'Var (83)',
+    editorial: "En juin 2010, 350 mm de pluie sont tombés en 24 heures dans le Var, soit l'équivalent de six mois de précipitations habituelles. 25 personnes sont mortes, dont plusieurs emportées par les crues à Draguignan. La région toulonnaise est exposée au même risque : des rivières côtières à régime torrentiel (le Gapeau, le Roubaud, le Las) qui passent en quelques heures d'un filet d'eau à des torrents dévastateurs. La rapidité de la montée des eaux est le danger principal : le temps d'alerte est souvent trop court pour évacuer.",
+    sources: 'Géorisques GASPAR, plan de prévention du risque inondation Var, Cerema, DRIAS Météo-France',
   },
   {
-    nom: 'Marseille',
-    insee: '13055',
-    dept: 'Bouches-du-Rhône (13)',
-    editorial: "Marseille est surtout connue pour ses risques de sécheresse et de feux, mais la ville est aussi régulièrement frappée par des inondations soudaines. L'Huveaune, qui traverse les quartiers est et sud, déborde lors des épisodes méditerranéens intenses. En octobre 2023, des pluies torrentielles ont causé des inondations dans plusieurs arrondissements, interrompu le trafic ferroviaire pendant plusieurs jours et endommagé des quartiers entiers. Le centre-ville de Marseille est imperméabilisé à plus de 90 % selon Aix-Marseille Métropole.",
-    sources: 'Géorisques, PPRI Huveaune, Aix-Marseille Métropole, DRIAS',
+    nom: 'Montpellier',
+    insee: '34172',
+    dept: 'Hérault (34)',
+    editorial: "Montpellier est traversée par trois cours d'eau qui débordent lors des épisodes méditerranéens intenses : le Lez, la Mosson et le Verdanson. Les inondations de 2003 ont mis sous eau plusieurs quartiers de la ville. Le problème s'aggrave parce que Montpellier est la métropole française qui a le plus grandi ces 30 ans : des milliers d'hectares de sols imperméabilisés, moins d'eau qui s'infiltre dans la terre, plus de ruissellement lors des pluies intenses. La Métropole a identifié 30 000 habitants vivant dans des zones à risque d'inondation.",
+    sources: 'Géorisques, Montpellier Métropole, plan de prévention du risque inondation du Lez, DRIAS Météo-France',
   },
   {
     nom: 'Grenoble',
     insee: '38185',
     dept: 'Isère (38)',
-    editorial: "Grenoble est construite au fond d'une cuvette entourée par trois massifs : Belledonne, la Chartreuse et le Vercors. Lors des épisodes pluvieux intenses, l'eau de ces reliefs converge vers la ville via l'Isère et le Drac — deux cours d'eau qui confluent à 2 km du centre-ville. Le BRGM a classé Grenoble parmi les villes françaises les plus exposées aux inondations par débordement de cours d'eau. La Métropole a investi plus de 300 millions d'euros depuis 20 ans pour renforcer ses digues — une protection réelle, mais une exposition structurelle qui demeure.",
-    sources: 'BRGM, Géorisques GASPAR, PPRI Isère, Grenoble Alpes Métropole',
+    editorial: "Grenoble est construite au fond d'une cuvette entourée par trois massifs : Belledonne, la Chartreuse et le Vercors. Lors des épisodes pluvieux intenses, l'eau de ces reliefs converge vers la ville via l'Isère et le Drac, deux cours d'eau qui se rejoignent à 2 km du centre-ville. Le service géologique de l'État (BRGM) a classé Grenoble parmi les villes françaises les plus exposées aux inondations par débordement de rivières. La Métropole a investi plus de 300 millions d'euros depuis 20 ans pour renforcer ses digues.",
+    sources: 'BRGM, Géorisques GASPAR, plan de prévention du risque inondation de l\'Isère, Grenoble Alpes Métropole',
+  },
+  {
+    nom: 'Avignon',
+    insee: '84007',
+    dept: 'Vaucluse (84)',
+    editorial: "Avignon est doublement exposée : le Rhône à l'ouest, la Durance au sud. Ces deux fleuves se rejoignent à une dizaine de kilomètres en amont de la ville. En novembre 2003, les crues du Rhône ont submergé des dizaines de communes autour d'Avignon, causant plus d'un milliard d'euros de dégâts dans le Vaucluse. La frange ouest des remparts est classée en zone rouge du plan de prévention du risque inondation du Rhône : aucune construction nouvelle n'y est autorisée.",
+    sources: 'Géorisques GASPAR, plan de prévention du risque inondation du Rhône Avignon, Cerema, DRIAS',
+  },
+  {
+    nom: 'Carcassonne',
+    insee: '11069',
+    dept: 'Aude (11)',
+    editorial: "En octobre 2018, des crues de l'Aude ont tué 15 personnes dans le département, la catastrophe naturelle la plus meurtrière en France depuis 2010. Carcassonne est construite en deux parties : la Cité médiévale sur la hauteur (protégée) et la ville basse le long de l'Aude, en zone inondable. Lors de la crue de 2018, certains secteurs de la ville basse ont été submergés sous deux mètres d'eau. Les projections Météo-France indiquent que ce type d'événement, autrefois rare, pourrait se produire deux à trois fois plus souvent d'ici la fin du siècle.",
+    sources: 'Géorisques GASPAR, plan de prévention du risque inondation de l\'Aude, Météo-France, Cerema',
+  },
+  {
+    nom: 'Bayonne',
+    insee: '64102',
+    dept: 'Pyrénées-Atlantiques (64)',
+    editorial: "Bayonne est au confluent de l'Adour et de la Nive. En décembre 2014 et en janvier 2021, les deux rivières ont débordé simultanément, inondant le centre historique. Ce qui rend Bayonne particulièrement vulnérable, c'est la possibilité d'un troisième facteur : une forte tempête atlantique peut bloquer l'écoulement des eaux vers l'océan, aggravant les inondations fluviales. Avec plus de 1 200 mm de pluie par an, Bayonne est aussi l'une des villes de plaine les plus arrosées de France.",
+    sources: 'Géorisques GASPAR, plan de prévention du risque inondation de l\'Adour, Cerema, BRGM littoral, DRIAS',
+  },
+  {
+    nom: 'Marseille',
+    insee: '13201',
+    dept: 'Bouches-du-Rhône (13)',
+    editorial: "Marseille est régulièrement frappée par des inondations soudaines. L'Huveaune, qui traverse les quartiers est et sud, déborde lors des épisodes méditerranéens intenses. En octobre 2023, des pluies torrentielles ont causé des inondations dans plusieurs arrondissements et interrompu le trafic ferroviaire pendant plusieurs jours. Le centre-ville est imperméabilisé à plus de 90 % selon Aix-Marseille Métropole : presque toute la pluie qui tombe ruisselle directement dans les rues plutôt que de s'infiltrer dans le sol, ce qui amplifie chaque épisode pluvieux intense.",
+    sources: 'Géorisques, plan de prévention du risque inondation de l\'Huveaune, Aix-Marseille Métropole, DRIAS',
   },
 ];
 
@@ -149,11 +157,13 @@ const css = `
 
 type DriasV = Record<string, number | undefined>;
 
-function computeSubmersionScore(v: DriasV | null): number {
+function computeScore(v: DriasV | null): number {
   if (!v) return 0;
   const parts: { w: number; v: number }[] = [];
-  if (v.NORRx1d_yr != null) parts.push({ w: 0.5, v: Math.min(100, (v.NORRx1d_yr / 150) * 100) });
-  if (v.NORRRq99_yr != null) parts.push({ w: 0.5, v: Math.min(100, (v.NORRRq99_yr / 80) * 100) });
+  if (v.NORRRq99_yr != null)    parts.push({ w: 3,   v: Math.min(100, (v.NORRRq99_yr / 150) * 100) });
+  if (v.NORRR_seas_DJF != null) parts.push({ w: 1,   v: Math.min(100, (v.NORRR_seas_DJF / 500) * 100) });
+  if (v.NORRR_yr != null)       parts.push({ w: 0.5, v: Math.min(100, (v.NORRR_yr / 2000) * 100) });
+  if (v.NORRx1d_yr != null)     parts.push({ w: 0.5, v: Math.min(100, (v.NORRx1d_yr / 7) * 100) });
   if (parts.length === 0) return 0;
   const totalW = parts.reduce((s, p) => s + p.w, 0);
   return Math.round(parts.reduce((s, p) => s + (p.v * p.w) / totalW, 0));
@@ -175,7 +185,7 @@ export default async function InondationTop10() {
     .map((city, i) => ({
       ...city,
       driasV: driasResults[i],
-      score: computeSubmersionScore(driasResults[i]),
+      score: computeScore(driasResults[i]),
     }))
     .sort((a, b) => b.score - a.score)
     .map((city, i) => ({ ...city, rank: i + 1 }));
@@ -189,25 +199,23 @@ export default async function InondationTop10() {
       <Navbar />
 
       <main className="page">
-        <div className="eyebrow">Inondation et submersion · Classement 2050</div>
+        <div className="eyebrow">Inondation · Classement 2050</div>
         <h1>
           Les 10 villes françaises<br />
           les plus exposées aux <em>inondations</em>
         </h1>
         <p className="lede">
-          Ces dix villes ont toutes subi des inondations catastrophiques ces dernières années.
-          Ce ne sont pas forcément celles qu'on imaginerait — Paris n'est pas en tête.
-          Les grandes coupables : les pluies méditerranéennes extrêmes, qui frappent plus vite et plus fort que les crues classiques de la Loire ou de la Seine.
+          Crues de rivières, épisodes de pluies extrêmes, ruissellement dans les rues : les dix villes françaises les plus exposées aux inondations, selon les projections Météo-France à l'horizon 2050 dans un scénario de réchauffement de 4°C.
         </p>
         <div className="method-note">
-          Classement basé sur le score de tension submersion futur•e — calculé à partir des projections DRIAS de Météo-France (précipitations extrêmes en scénario +4°C, horizon 2050). Complété par les données Géorisques (GASPAR) et les Plans de Prévention des Risques Inondation approuvés. Scénario médian sur l'ensemble des modèles climatiques régionaux.
+          Comment lire ce classement. Le score combine quatre indicateurs climatiques : l'intensité des pluies les plus fortes de l'année (pondération principale, car c'est elle qui cause les catastrophes documentées), les précipitations en hiver qui font déborder les rivières, le volume de pluie annuel qui sature les sols, et l'évolution des pluies extrêmes par rapport à aujourd'hui. Les données viennent de DRIAS Météo-France, scénario à +4°C. La submersion marine est un risque différent : elle fait l'objet d'un classement séparé.
         </div>
 
         {cities.map((city) => {
           const v = city.driasV;
-          const precMax = v?.NORRx1d_yr != null ? Math.round(v.NORRx1d_yr) : null;
           const precQ99 = v?.NORRRq99_yr != null ? Math.round(v.NORRRq99_yr) : null;
           const precHiver = v?.NORRR_seas_DJF != null ? Math.round(v.NORRR_seas_DJF) : null;
+          const precAnnuel = v?.NORRR_yr != null ? Math.round(v.NORRR_yr) : null;
 
           return (
             <div key={city.insee} className="city-item">
@@ -225,31 +233,31 @@ export default async function InondationTop10() {
                 )}
               </div>
 
-              {(precMax != null || precQ99 != null || precHiver != null) && (
+              {(precQ99 != null || precHiver != null || precAnnuel != null) && (
                 <div className="city-stats">
-                  {precMax != null && (
-                    <div className="city-stat">
-                      <div className="city-stat-label">Pluie max en 1 jour (2050)</div>
-                      <div className="city-stat-value">{precMax}<span className="city-stat-unit"> mm</span></div>
-                    </div>
-                  )}
                   {precQ99 != null && (
                     <div className="city-stat">
-                      <div className="city-stat-label">Précip. intenses (p99)</div>
-                      <div className="city-stat-value">{precQ99}<span className="city-stat-unit"> mm</span></div>
+                      <div className="city-stat-label">Pluies les plus fortes</div>
+                      <div className="city-stat-value">{precQ99}<span className="city-stat-unit"> mm/j</span></div>
                     </div>
                   )}
                   {precHiver != null && (
                     <div className="city-stat">
-                      <div className="city-stat-label">Précip. hiver (2050)</div>
+                      <div className="city-stat-label">Pluies en hiver</div>
                       <div className="city-stat-value">{precHiver}<span className="city-stat-unit"> mm</span></div>
+                    </div>
+                  )}
+                  {precAnnuel != null && (
+                    <div className="city-stat">
+                      <div className="city-stat-label">Pluies par an</div>
+                      <div className="city-stat-value">{precAnnuel}<span className="city-stat-unit"> mm</span></div>
                     </div>
                   )}
                 </div>
               )}
 
               <p className="city-editorial">{city.editorial}</p>
-              <div className="city-sources">Sources · {city.sources}</div>
+              <div className="city-sources">Sources : {city.sources}</div>
               <Link href={`/inondation/${city.insee}`} className="city-link">
                 Données complètes pour {city.nom} →
               </Link>
@@ -263,12 +271,12 @@ export default async function InondationTop10() {
           <div className="cta-rapport">
             <div className="cta-rapport-title">Votre commune est-elle exposée ?</div>
             <p className="cta-rapport-desc">
-              Ces dix villes sont les plus connues, mais le risque existe partout. Cherchez votre commune — puis construisez votre rapport personnalisé avec six dimensions croisées : Quartier, Santé, Logement, Métier, Mobilité, Projets.
+              Ces dix villes concentrent les risques les plus élevés, mais le risque d'inondation existe dans des milliers de communes françaises. Cherchez la vôtre pour voir son niveau d'exposition, puis construisez votre rapport personnalisé.
             </p>
             <div className="cta-links">
               <Link href="/rapport" className="cta-btn">Créer mon rapport →</Link>
               <Link href="/inondation" className="cta-sec">Explorer par commune</Link>
-              <Link href="/georisques-logement" className="cta-sec">Analyser mon adresse</Link>
+              <Link href="/comparateur" className="cta-sec">Comparer deux villes</Link>
             </div>
           </div>
         </div>

@@ -3,9 +3,7 @@ import Link from 'next/link';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { getClimatDataCommune } from '@/lib/drias-json';
 import { getGeorisquesSummary } from '@/lib/georisques';
-import { getAtmoForCommune } from '@/lib/atmo';
 import { createClient } from '@supabase/supabase-js';
-import { unstable_cache } from 'next/cache';
 
 export const revalidate = 86400;
 
@@ -37,20 +35,17 @@ type CommuneScore = {
   ind_occurrence: number | null;
 };
 
-const fetchScore = unstable_cache(
-  async (insee_code: string): Promise<CommuneScore | null> => {
-    const { data, error } = await getAnon()
-      .from('communes_tension')
-      .select('insee_code, nom_commune, departement, score, ind_exposition, ind_vulnerabilite, ind_adaptation, ind_occurrence')
-      .eq('slug', 'submersion')
-      .eq('insee_code', insee_code)
-      .maybeSingle();
-    if (error) return null;
-    return data;
-  },
-  ['inondation-commune-score'],
-  { revalidate: 86400, tags: ['communes-tension'] },
-);
+async function fetchScore(insee_code: string): Promise<CommuneScore | null> {
+  const { data, error } = await getAnon()
+    .from('communes_tension')
+    .select('insee_code, nom_commune, departement, score, ind_exposition, ind_vulnerabilite, ind_adaptation, ind_occurrence')
+    .eq('slug', 'submersion')
+    .eq('insee_code', insee_code)
+    .maybeSingle();
+
+  if (error) return null;
+  return data;
+}
 
 // ── Metadata ──────────────────────────────────────────────────────────────────
 
@@ -63,9 +58,7 @@ export async function generateMetadata({
   const [score, drias] = await Promise.all([fetchScore(insee_code), getClimatDataCommune(insee_code).catch(() => null)]);
   const nomCommune = score?.nom_commune ?? drias?.commune?.n ?? insee_code;
   const title = `Inondation et submersion à ${nomCommune} : risques et données officielles`;
-  const description = score
-    ? `Score de tension submersion : ${score.score}/100 — exposition aux crues, précipitations extrêmes et submersions marines à ${nomCommune}.`
-    : `Risques d'inondation, zones PPRI et précipitations extrêmes à ${nomCommune} selon les données officielles.`;
+  const description = `Risques d'inondation, précipitations extrêmes et submersions marines à ${nomCommune} selon les données officielles de Météo-France et Géorisques.`;
 
   return {
     title: `${title} · futur•e`,
@@ -166,13 +159,10 @@ export default async function InondationCommune({
 }) {
   const { insee_code } = await params;
 
-  const [commune, driasData, georisques, atmo] = await Promise.all([
+  const [commune, driasData, georisques] = await Promise.all([
     fetchScore(insee_code),
     getClimatDataCommune(insee_code).catch(() => null),
     getGeorisquesSummary(insee_code).catch(() => null),
-    process.env.ATMO_USERNAME
-      ? getAtmoForCommune(insee_code).catch(() => null)
-      : Promise.resolve(null),
   ]);
 
   const communeName = commune?.nom_commune ?? driasData?.commune?.n ?? insee_code;
@@ -182,15 +172,27 @@ export default async function InondationCommune({
   function computeScoreFromDrias(): number | null {
     if (!driasV) return null;
     const parts: { w: number; v: number }[] = [];
-    if (driasV.NORRx1d_yr != null) parts.push({ w: 0.5, v: Math.min(100, (driasV.NORRx1d_yr / 150) * 100) });
-    if (driasV.NORRRq99_yr != null) parts.push({ w: 0.5, v: Math.min(100, (driasV.NORRRq99_yr / 80) * 100) });
+    if (driasV.NORRRq99_yr != null)     parts.push({ w: 3, v: Math.min(100, (driasV.NORRRq99_yr / 150) * 100) });
+    if (driasV.NORRR_seas_DJF != null)  parts.push({ w: 1, v: Math.min(100, (driasV.NORRR_seas_DJF / 500) * 100) });
+    if (driasV.NORRR_yr != null)        parts.push({ w: 0.5, v: Math.min(100, (driasV.NORRR_yr / 2000) * 100) });
+    if (driasV.NORRx1d_yr != null)      parts.push({ w: 0.5, v: Math.min(100, (driasV.NORRx1d_yr / 7) * 100) });
     if (parts.length === 0) return null;
     const totalW = parts.reduce((s, p) => s + p.w, 0);
     return Math.round(parts.reduce((s, p) => s + (p.v * p.w) / totalW, 0));
   }
 
-  const displayScore = commune?.score ?? computeScoreFromDrias();
-  const scoreIsEstimated = !commune && displayScore != null;
+  // Score inondation fluviale : toujours calculé depuis DRIAS gwl30 formule pondérée
+  const displayScore = computeScoreFromDrias() ?? null;
+
+  // Score submersion marine : toute commune littorale ayant un score en base
+  // (alimenté par populate-coastal-submersion.js — altitude au-dessus du niveau de la mer)
+  // Les départements côtiers de France métropolitaine :
+  const COASTAL_DEPTS = new Set(['06','11','13','14','17','22','29','30','33','34','35','40','44','50','56','59','62','64','66','76','83','85','2A','2B']);
+  // On ne montre le bloc que si la commune est littorale ET a un score explicitement
+  // inséré par le script côtier (ind_exposition null = score altimétrique, pas DRIAS fluvial)
+  const coastalScore = (commune != null && COASTAL_DEPTS.has(dept) && commune.ind_exposition == null)
+    ? commune.score
+    : null;
 
   const DRIAS_ITEMS: { label: string; val: number | undefined; unit: string; note: string }[] = [
     {
@@ -277,13 +279,13 @@ export default async function InondationCommune({
             Inondation et submersion · Projections 2050
           </div>
           <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(26px, 4vw, 42px)', fontWeight: 400, color: 'var(--fg-1)', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 18px' }}>
-            À {communeName}, quel est le risque d'inondation réel ?
+            À {communeName}, quel est le risque d&apos;inondation réel ?
           </h1>
           <p style={{ fontSize: 15, color: 'var(--fg-3)', lineHeight: 1.75, maxWidth: 640, margin: '0 0 12px' }}>
-            Cette page rassemble les données officielles sur l'exposition de {communeName} aux inondations, aux submersions marines et aux précipitations extrêmes — issues de Géorisques, de Météo-France et du CNRS, dans un scénario de réchauffement à +4°C d'ici 2050.
+            Cette page rassemble les données officielles sur l&apos;exposition de {communeName} aux inondations, aux submersions marines et aux précipitations extrêmes — issues de Géorisques, de Météo-France et du CNRS, dans un scénario de réchauffement à +4°C d&apos;ici 2050.
           </p>
           <p style={{ fontSize: 14, color: 'var(--fg-4)', lineHeight: 1.65, maxWidth: 640, margin: 0, fontFamily: 'var(--font-mono)' }}>
-            Que vous habitiez ici, envisagiez d'y acheter un bien ou prépariez votre avenir, ces données ont une valeur concrète pour vos décisions.
+            Que vous habitiez ici, envisagiez d&apos;y acheter un bien ou prépariez votre avenir, ces données ont une valeur concrète pour vos décisions.
           </p>
         </div>
 
@@ -297,9 +299,7 @@ export default async function InondationCommune({
                 <div className="score-num">
                   {displayScore}<span className="score-denom">/100</span>
                 </div>
-                <div className="score-label">
-                  Score de tension submersion{scoreIsEstimated ? ' · estimé depuis les projections DRIAS' : ''}
-                </div>
+                <div className="score-label">Score de tension inondation · projections DRIAS +4°C</div>
               </div>
               <div style={{ flex: 1, minWidth: 180 }}>
                 <div className="commune-name">{communeName}</div>
@@ -307,7 +307,7 @@ export default async function InondationCommune({
               </div>
             </div>
 
-            {commune && (
+            {commune && IND_ITEMS.some((ind) => commune[ind.key] != null) && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 20, marginTop: 28 }}>
                 {IND_ITEMS.map((ind) => {
                   const val = commune[ind.key];
@@ -336,13 +336,40 @@ export default async function InondationCommune({
           </div>
         )}
 
+        {/* ── BLOC SUBMERSION MARINE (villes côtières uniquement) ──────── */}
+        {coastalScore != null && (
+          <div style={{ padding: '28px 32px', borderRadius: 12, background: 'rgba(56,189,248,0.05)', border: '1px solid rgba(56,189,248,0.2)', marginBottom: 48 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 28, flexWrap: 'wrap', marginBottom: 18 }}>
+              <div>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(48px,7vw,72px)', lineHeight: 1, fontWeight: 400, letterSpacing: '-0.03em', color: '#38bdf8' }}>
+                  {coastalScore}<span style={{ fontSize: '0.38em', color: 'var(--fg-4)' }}>/100</span>
+                </div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--fg-4)', marginTop: 6 }}>
+                  Score de risque submersion marine · altitude NGF
+                </div>
+              </div>
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <div style={{ fontSize: 14, color: 'var(--fg-3)', lineHeight: 1.7 }}>
+                  {communeName} est une commune littorale exposée à un risque <strong style={{ color: 'var(--fg-1)' }}>distinct</strong> des inondations fluviales : la submersion marine. Ce score mesure la hauteur de la ville au-dessus du niveau de la mer. Plus une ville est basse, plus elle est vulnérable si la mer monte lors d&apos;une tempête ou si le niveau marin s&apos;élève durablement avec le réchauffement.
+                </div>
+              </div>
+            </div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-4)', borderTop: '1px solid rgba(56,189,248,0.12)', paddingTop: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+              <span>Inondation fluviale et submersion marine sont deux risques indépendants. Une ville peut être peu exposée à l&apos;un et très exposée à l&apos;autre.</span>
+              <Link href="/inondation/villes-les-plus-exposees-submersion" style={{ color: '#38bdf8', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                Voir le classement submersion →
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* DRIAS projections */}
         <div style={{ marginBottom: 10 }}>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACCENT, marginBottom: 4 }}>
             Ce que les modèles prévoient pour 2050
           </div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg-4)' }}>
-            Scénario +4°C · Météo-France / CNRS · Valeur médiane sur l'ensemble des modèles climatiques
+            Scénario +4°C · Météo-France / CNRS · Valeur médiane sur l&apos;ensemble des modèles climatiques
           </div>
         </div>
         <div className="data-grid">
@@ -371,7 +398,7 @@ export default async function InondationCommune({
                 Risques officiels reconnus sur cette commune
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg-4)' }}>
-                Base GASPAR · Géorisques · données à l'échelle de la commune, pas de l'adresse exacte
+                Base GASPAR · Géorisques · données à l&apos;échelle de la commune, pas de l&apos;adresse exacte
               </div>
             </div>
             <div className="data-grid">
@@ -388,43 +415,7 @@ export default async function InondationCommune({
               Ces données indiquent que la commune est concernée, pas nécessairement chaque logement. Vérifiez à votre adresse exacte sur{' '}
               <a href="https://www.georisques.gouv.fr" target="_blank" rel="noopener" style={{ color: 'var(--fg-3)', textDecoration: 'underline' }}>georisques.gouv.fr</a>{' '}
               ou via notre{' '}
-              <Link href="/georisques-logement" style={{ color: 'var(--fg-3)', textDecoration: 'underline' }}>outil d'analyse par adresse</Link>.
-            </div>
-          </>
-        )}
-
-        {/* ATMO */}
-        {atmo && (
-          <>
-            <div style={{ margin: '40px 0 10px' }}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACCENT, marginBottom: 4 }}>
-                Qualité de l'air · ATMO France
-              </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg-4)' }}>
-                Indice ATMO du {atmo.date} · Contexte multi-risques
-              </div>
-            </div>
-            <div className="data-grid">
-              <div className="data-card">
-                <div className="data-card-label">Indice ATMO</div>
-                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: atmo.index.color, lineHeight: 1.2 }}>
-                  {atmo.index.label}
-                </div>
-                <div className="data-card-note">Niveau {atmo.index.value}/6</div>
-              </div>
-              <div className="data-card">
-                <div className="data-card-label">Polluants</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
-                  {([['NO₂', atmo.pollutants.no2], ['O₃', atmo.pollutants.o3], ['PM10', atmo.pollutants.pm10], ['PM2.5', atmo.pollutants.pm25]] as [string, { label: string; color: string } | null][])
-                    .filter(([, v]) => v != null)
-                    .map(([name, lvl]) => (
-                      <div key={name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg-4)' }}>{name}</span>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: lvl!.color }}>{lvl!.label}</span>
-                      </div>
-                    ))}
-                </div>
-              </div>
+              <Link href="/georisques-logement" style={{ color: 'var(--fg-3)', textDecoration: 'underline' }}>outil d&apos;analyse par adresse</Link>.
             </div>
           </>
         )}
@@ -450,7 +441,7 @@ export default async function InondationCommune({
         {/* ── BLOC 2 — COMPRENDRE ──────────────────────────────────────── */}
         <section className="section">
           <div className="section-eyebrow">Comprendre</div>
-          <h2 className="section-title">Aller plus loin sur l'inondation</h2>
+          <h2 className="section-title">Aller plus loin sur l&apos;inondation</h2>
           <p className="section-sub">Trois lectures de fond pour contextualiser ces données.</p>
           <div className="articles-grid">
             <Link href="/savoir/submersion" className="article-card">
@@ -503,7 +494,7 @@ export default async function InondationCommune({
             <Link href="/comparateur" style={{ padding: '24px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: 10, transition: 'border-color 0.2s' }}>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--fg-4)' }}>Outil de comparaison</div>
               <div style={{ fontSize: 16, fontWeight: 500, color: 'var(--fg-1)', lineHeight: 1.35 }}>Comparer avec une autre commune</div>
-              <div style={{ fontSize: 13, color: 'var(--fg-3)', lineHeight: 1.6 }}>Inondation, chaleur, air, eau, revenus, accès aux soins : les deux territoires côte à côte en moins de 10 secondes.</div>
+              <div style={{ fontSize: 13, color: 'var(--fg-3)', lineHeight: 1.6 }}>Inondation, chaleur, eau, revenus, accès aux soins : les deux territoires côte à côte en moins de 10 secondes.</div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: ACCENT, marginTop: 'auto' }}>Ouvrir le comparateur →</div>
             </Link>
           </div>
