@@ -228,6 +228,13 @@ export default async function InondationCommune({
     { key: 'ind_occurrence'    as const, label: 'Occurrence',            desc: 'Fréquence des événements extrêmes projetés.' },
   ];
 
+  const IND_LEGEND = [
+    { icon: 'E', label: 'Exposition', text: "Le territoire reçoit des pluies ou des débordements qui peuvent faire monter l'eau rapidement." },
+    { icon: 'V', label: 'Vulnérabilité', text: 'Certaines zones habitées ou certains habitants ont moins de marge face à une inondation.' },
+    { icon: 'A', label: 'Adaptation', text: 'La commune dispose de plus ou moins de protections, d\'équipements et de moyens pour réagir.' },
+    { icon: 'O', label: 'Occurrence', text: 'Les épisodes à risque y sont déjà présents, ou appelés à devenir plus fréquents.' },
+  ];
+
   const FLOOD_RISK_LABELS = new Set([
     'Inondation',
     'Submersion marine',
@@ -308,8 +315,22 @@ export default async function InondationCommune({
             </div>
 
             {commune && IND_ITEMS.some((ind) => commune[ind.key] != null) && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 20, marginTop: 28 }}>
-                {IND_ITEMS.map((ind) => {
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 12, marginTop: 28, marginBottom: 24 }}>
+                  {IND_LEGEND.map((item) => (
+                    <div key={item.label} style={{ padding: '14px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, fontFamily: 'var(--font-serif)', fontSize: 18, color: 'var(--fg-1)' }}>
+                        <span style={{ width: 22, height: 22, borderRadius: 999, background: ACCENT, color: '#060812', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.06em', flexShrink: 0 }}>
+                          {item.icon}
+                        </span>
+                        {item.label}
+                      </div>
+                      <div style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--fg-3)' }}>{item.text}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 20, marginTop: 28 }}>
+                  {IND_ITEMS.map((ind) => {
                   const val = commune[ind.key];
                   const pct = val != null ? Math.min(100, Math.round(val)) : null;
                   return (
@@ -330,8 +351,9 @@ export default async function InondationCommune({
                       )}
                     </div>
                   );
-                })}
-              </div>
+                  })}
+                </div>
+              </>
             )}
           </div>
         )}

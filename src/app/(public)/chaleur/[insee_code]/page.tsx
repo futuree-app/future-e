@@ -234,6 +234,13 @@ export default async function ChaleurCommune({
     { key: 'ind_occurrence'    as const, label: 'Occurrence',           desc: 'Fréquence historique des événements.' },
   ];
 
+  const IND_LEGEND = [
+    { icon: 'E', label: 'Exposition', text: "Le territoire chauffe fortement et expose directement les habitants." },
+    { icon: 'V', label: 'Vulnérabilité', text: 'Certaines personnes ou certains logements y sont plus fragiles face à la chaleur.' },
+    { icon: 'A', label: 'Adaptation', text: 'La commune dispose de plus ou moins de moyens pour aider les habitants à faire face.' },
+    { icon: 'O', label: 'Occurrence', text: 'Les épisodes de chaleur intense y sont déjà fréquents, ou appelés à le devenir très vite.' },
+  ];
+
   // Seuls les risques directement aggravés par la chaleur extrême
   const HEAT_RISK_LABELS = new Set([
     'Tassements différentiels',
@@ -287,10 +294,10 @@ export default async function ChaleurCommune({
             À {communeName}, à quoi ressemblera un été en 2050 ?
           </h1>
           <p style={{ fontSize: 15, color: 'var(--fg-3)', lineHeight: 1.75, maxWidth: 640, margin: '0 0 12px' }}>
-            Cette page rassemble les projections climatiques officelles pour {communeName} — nombre de jours de canicule, nuits sans fraîcheur, risques associés — dans un scénario de réchauffement à +4°C d'ici 2050. Les données viennent de Météo-France, du CNRS, et des bases de risques officielles de l'État.
+            Cette page rassemble les projections climatiques officelles pour {communeName} — nombre de jours de canicule, nuits sans fraîcheur, risques associés — dans un scénario de réchauffement à +4°C d&apos;ici 2050. Les données viennent de Météo-France, du CNRS, et des bases de risques officielles de l&apos;État.
           </p>
           <p style={{ fontSize: 14, color: 'var(--fg-4)', lineHeight: 1.65, maxWidth: 640, margin: 0, fontFamily: 'var(--font-mono)' }}>
-            Que vous habitiez ici, envisagiez d'y déménager ou prépariez votre avenir, ces chiffres vous concernent directement.
+            Que vous habitiez ici, envisagiez d&apos;y déménager ou prépariez votre avenir, ces chiffres vous concernent directement.
           </p>
         </div>
 
@@ -316,8 +323,22 @@ export default async function ChaleurCommune({
 
             {/* 4 indicators inline — only if from DB */}
             {commune && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 20, marginTop: 28 }}>
-                {IND_ITEMS.map((ind) => {
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 12, marginTop: 28, marginBottom: 24 }}>
+                  {IND_LEGEND.map((item) => (
+                    <div key={item.label} style={{ padding: '14px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, fontFamily: 'var(--font-serif)', fontSize: 18, color: 'var(--fg-1)' }}>
+                        <span style={{ width: 22, height: 22, borderRadius: 999, background: ACCENT, color: '#060812', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.06em', flexShrink: 0 }}>
+                          {item.icon}
+                        </span>
+                        {item.label}
+                      </div>
+                      <div style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--fg-3)' }}>{item.text}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 20, marginTop: 28 }}>
+                  {IND_ITEMS.map((ind) => {
                   const val = commune[ind.key];
                   const pct = val != null ? Math.min(100, Math.round(val)) : null;
                   return (
@@ -338,8 +359,9 @@ export default async function ChaleurCommune({
                       )}
                     </div>
                   );
-                })}
-              </div>
+                  })}
+                </div>
+              </>
             )}
           </div>
         )}
@@ -350,7 +372,7 @@ export default async function ChaleurCommune({
             Ce que les modèles prévoient pour 2050
           </div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg-4)' }}>
-            Scénario +4°C · Météo-France / CNRS · Valeur médiane sur l'ensemble des modèles climatiques
+            Scénario +4°C · Météo-France / CNRS · Valeur médiane sur l&apos;ensemble des modèles climatiques
           </div>
         </div>
         <div className="data-grid">
@@ -379,7 +401,7 @@ export default async function ChaleurCommune({
                 Ce que la chaleur extrême aggrave ici
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg-4)' }}>
-                Risques officiels GASPAR · base nationale de l'État · données à l'échelle de la commune, pas de l'adresse exacte
+                Risques officiels GASPAR · base nationale de l&apos;État · données à l&apos;échelle de la commune, pas de l&apos;adresse exacte
               </div>
             </div>
             <div className="data-grid">
@@ -404,10 +426,10 @@ export default async function ChaleurCommune({
           <>
             <div style={{ margin: '40px 0 10px' }}>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACCENT, marginBottom: 4 }}>
-                Qualité de l'air · ATMO France
+                Qualité de l&apos;air · ATMO France
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg-4)' }}>
-                Indice ATMO du {atmo.date} · La chaleur amplifie l'ozone estival
+                Indice ATMO du {atmo.date} · La chaleur amplifie l&apos;ozone estival
               </div>
             </div>
             <div className="data-grid">
@@ -485,7 +507,7 @@ export default async function ChaleurCommune({
               <span className="article-cat" style={{ background: 'rgba(251,146,60,0.12)', color: '#fb923c' }}>Air & sols</span>
               <div className="article-title">Pollutions invisibles</div>
               <div style={{ fontSize: 12, color: 'var(--fg-4)', lineHeight: 1.55 }}>
-                La chaleur amplifie l'ozone. Comment lire les données et agir à la bonne échelle.
+                La chaleur amplifie l&apos;ozone. Comment lire les données et agir à la bonne échelle.
               </div>
               <div className="article-cta">Lire →</div>
             </Link>

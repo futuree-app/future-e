@@ -55,11 +55,6 @@ export const NAV_ITEMS: NavItem[] = [
             description: 'Cadmium, sites pollués · GisSol / IREP',
           },
           {
-            label: 'Dépendance automobile',
-            href: '/territoires/dependance-auto',
-            description: 'Vulnérabilité mobilité · INSEE / Ecolab',
-          },
-          {
             label: 'Qualité de l\'air',
             href: '/territoires/air',
             description: 'PM2.5, NO₂, O₃ · ATMO France',
@@ -71,6 +66,11 @@ export const NAV_ITEMS: NavItem[] = [
             description: 'Stress hydrique, nappes · BRGM',
             badge: 'Bientôt',
           },
+          {
+            label: 'Maladies émergentes',
+            href: '/savoir/maladies-emergentes',
+            description: 'Moustiques, tiques, hantavirus · Santé publique France',
+          },
         ],
       },
       {
@@ -81,6 +81,11 @@ export const NAV_ITEMS: NavItem[] = [
             label: 'Je cherche à déménager',
             href: '/comparateur',
             description: 'Comparer deux communes côte à côte',
+          },
+          {
+            label: 'J\'utilise beaucoup ma voiture',
+            href: '/j-utilise-beaucoup-ma-voiture',
+            description: 'Vulnérabilité mobilité · INSEE / Ecolab',
           },
           {
             label: 'J\'ai des enfants',
@@ -155,6 +160,15 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     accent: '#60a5fa',
     href: '/savoir/submersion',
     image: '/hub-submersion.jpg',
+  },
+  {
+    slug: 'maladies-emergentes',
+    title: 'Maladies émergentes',
+    description:
+      "Moustique tigre, West Nile, hantavirus : ce que le changement climatique déplace déjà vers la France.",
+    category: 'Santé',
+    accent: '#fb923c',
+    href: '/savoir/maladies-emergentes',
   },
   {
     slug: 'preparation-catastrophes',
