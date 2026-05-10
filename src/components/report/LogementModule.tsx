@@ -752,10 +752,10 @@ export default function LogementModule() {
                 </div>
               </div>
 
-              {/* Environnement du bien */}
+              {/* Abords immédiats du bien */}
               {((result.cartofriches?.count ?? 0) > 0 || (result.irep?.count ?? 0) > 0) && (
                 <div>
-                  <SectionLabel>Environnement du bien</SectionLabel>
+                  <SectionLabel>Abords immédiats du bien</SectionLabel>
                   <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 14 }}>
                     {result.cartofriches && result.cartofriches.count > 0 && (
                       <div>

@@ -3,7 +3,6 @@ import { AccountNav } from "@/components/AccountNav";
 import { canAccessCompleteReport } from "@/lib/access";
 import { PRODUCT_MODULES } from "@/lib/product";
 import { getCurrentUserAccount } from "@/lib/user-account";
-import { QuartierWorkbook } from "../compte/QuartierWorkbook";
 
 const MODULE_COLORS: Record<string, string> = {
   quartier: "var(--blue)",
@@ -31,13 +30,6 @@ const MODULE_BENEFIT: Record<string, string> = {
   mobilite: "Est-ce que votre mode de vie quotidien reste tenable ici ? Dépendance à la voiture, coût des trajets, alternatives réelles.",
   projets: "Est-ce que vos projets sont cohérents avec ce que ce lieu va devenir ? Achat, déménagement, retraite, installation durable.",
 };
-
-const QUARTIER_FACTORS = [
-  { label: "Jours de chaleur extrême", val: "34 jours/an en 2050", col: "var(--red)", src: "DRIAS / Météo-France · +2,7°C" },
-  { label: "Risque submersion", val: "+31 % en scénario médian", col: "var(--blue)", src: "Géorisques / BRGM" },
-  { label: "Érosion littorale", val: "Recul du trait de côte documenté", col: "var(--blue)", src: "Cerema · littoral atlantique" },
-  { label: "Îlots de chaleur urbains", val: "Quartiers centre exposés", col: "var(--red)", src: "INSEE / IGN" },
-];
 
 const LOCKED_MODULE_IDS = ["logement", "metier", "sante", "mobilite", "projets"];
 
@@ -83,10 +75,10 @@ export default async function RapportPage() {
               <>
                 <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
                   Votre vie à La Rochelle<br />
-                  <span className="italic text-accent">en 2050, dimension par dimension.</span>
+                  <span className="italic text-accent">module par module.</span>
                 </h1>
                 <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[500px]">
-                  Les six lectures de votre situation sont ouvertes. Chaque dimension croise vos données avec les projections disponibles pour La Rochelle.
+                  Le rapport complet garde six dimensions. Quartier et Logement sont déjà accessibles comme modules dédiés. Les autres suivent la même structure.
                 </p>
                 <div className="flex gap-3 flex-wrap">
                   <Link href="/dashboard" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
@@ -128,21 +120,23 @@ export default async function RapportPage() {
                 style={{ background: "radial-gradient(circle, var(--orange-tint) 0%, transparent 70%)" }} />
             )}
             <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">
-              {fullReport ? "Six dimensions ouvertes" : "Quelques signaux déjà disponibles"}
+              {fullReport ? "Hub des modules" : "Quelques signaux déjà disponibles"}
             </p>
             <h2 className="font-normal text-[22px] leading-[1.2] text-label mb-5 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              {fullReport ? "Rapport complet · La Rochelle · 2050" : "La Rochelle, ce que les données montrent déjà"}
+              {fullReport ? "Rapport complet · La Rochelle" : "La Rochelle, ce que les données montrent déjà"}
             </h2>
 
             {fullReport ? (
               <div className="flex flex-col gap-2.5">
                 {allModules.map((m) => {
                   const col = MODULE_COLORS[m.id] ?? "var(--violet)";
+                  const status =
+                    m.id === "quartier" || m.id === "logement" ? "Accessible" : "En cours";
                   return (
                     <div key={m.id} className="flex items-center gap-3 px-3 py-2.5 rounded-lg" style={{ background: `${col}0a`, border: `1px solid ${col}1a` }}>
                       <span className="text-[16px]">{MODULE_ICONS[m.id]}</span>
                       <span className="text-[14px] text-label font-medium">{m.name}</span>
-                      <span className="ml-auto font-mono text-[10px] tracking-[0.06em] uppercase" style={{ color: col }}>Ouvert</span>
+                      <span className="ml-auto font-mono text-[10px] tracking-[0.06em] uppercase" style={{ color: col }}>{status}</span>
                     </div>
                   );
                 })}
@@ -171,115 +165,40 @@ export default async function RapportPage() {
         {/* ── Vue gratuite ── */}
         {!fullReport && (
           <>
-            {/* Module Quartier ouvert */}
             <section className="pt-14" id="quartier">
               <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
                 <div>
-                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Ce que votre territoire devient</p>
+                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Hub du rapport</p>
                   <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                    Quartier : la lecture ouverte.
+                    Les modules accessibles depuis votre rapport.
                   </h2>
                 </div>
                 <p className="text-[15px] text-muted leading-[1.65]">
-                  Ce module lit ce qui se passe autour de chez vous : chaleur, eau, littoral, cadre de vie.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-[1fr_320px] gap-6 mb-8">
-                {/* Carte principale */}
-                <div className="glass rounded-xl p-8 border-t-2 border-t-info">
-                  <h3 className="font-normal text-[26px] text-label mb-3 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                    La Rochelle, à l&apos;horizon 2050 dans le scénario médian.
-                  </h3>
-                  <p className="text-[16px] leading-[1.75] text-muted mb-4">
-                    La chaleur d&apos;abord : La Rochelle passera de 5 à 34 jours par an en alerte canicule d&apos;ici 2050, dans le scénario à +2,7°C (DRIAS / Météo-France). Ce n&apos;est pas une projection lointaine. Ce sont des étés qui changent de texture.
-                  </p>
-                  <p className="text-[16px] leading-[1.75] text-muted mb-4">
-                    Le littoral ensuite. Le risque de submersion progresse de 31 % en scénario médian selon Géorisques. Les quartiers des Minimes et d&apos;Aytré concentrent l&apos;exposition. Le centre historique et les zones en hauteur sont moins concernés.
-                  </p>
-                  <p className="text-[16px] leading-[1.75] text-muted mb-6">
-                    Ce module donne une lecture de ce qui change autour de chez vous. Ce qu&apos;il ne fait pas encore : lire comment ces changements croisent votre logement précis, votre santé, votre métier. C&apos;est ce que le rapport complet articule.
-                  </p>
-
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {QUARTIER_FACTORS.map((f) => (
-                      <div key={f.label} className="glass rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: f.col, boxShadow: `0 0 6px ${f.col}` }} />
-                          <span className="text-[13px] font-medium text-label leading-[1.3]">{f.label}</span>
-                        </div>
-                        <span className="block font-mono text-[11px] tracking-[0.02em] ml-3.5" style={{ color: f.col }}>{f.val}</span>
-                        <span className="block font-mono text-[10px] text-ghost tracking-[0.02em] ml-3.5">{f.src}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Sidebar */}
-                <div className="flex flex-col gap-3.5">
-                  <div className="glass rounded-xl p-5" style={{ borderLeft: "2px solid var(--orange)", borderColor: "var(--orange-tint)" }}>
-                    <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2">Ce que le rapport complet ajoute</p>
-                    <p className="text-[14px] leading-[1.65] text-muted mb-4">
-                      Le module Quartier seul donne la lecture du territoire. Le rapport complet croise ces signaux avec votre logement, votre santé et votre mode de vie.
-                    </p>
-                    <Link href="/#pricing" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[13px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-                      Voir les formules
-                    </Link>
-                  </div>
-
-                  <div className="glass rounded-xl p-5" style={{ borderLeft: "2px solid var(--blue)", borderColor: "var(--blue-tint)" }}>
-                    <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2">Pages Savoir associées</p>
-                    <p className="text-[14px] leading-[1.65] text-muted mb-3">
-                      Trois lectures de fond sur les sujets que ce module touche, accessibles gratuitement.
-                    </p>
-                    <div className="flex flex-col gap-2">
-                      {[
-                        { label: "La submersion côtière", href: "/savoir/submersion-cotiere" },
-                        { label: "Comprendre le DPE de votre logement", href: "/savoir/dpe-logement" },
-                        { label: "Le cadmium dans l'alimentation", href: "/savoir/cadmium-alimentation" },
-                      ].map((p) => (
-                        <Link key={p.href} href={p.href} className="flex items-center gap-1.5 text-[13px] text-info no-underline">
-                          <span className="opacity-60">→</span>
-                          {p.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Compléter le module Quartier */}
-              <div className="border-t border-white/[0.06] pt-8 mb-12">
-                <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-6">
-                  <div>
-                    <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Module ouvert · à compléter</p>
-                    <h3 className="font-normal text-[clamp(20px,2.2vw,28px)] leading-[1.2] tracking-[-0.4px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                      Vos observations complètent la lecture.
-                    </h3>
-                  </div>
-                  <p className="text-[15px] text-muted leading-[1.65]">
-                    Vos réponses croisent les données sans les remplacer. Ce que vous notez reste dans votre espace.
-                  </p>
-                </div>
-                <QuartierWorkbook userKey={account.userId} />
-              </div>
-            </section>
-
-            {/* Cinq modules fermés */}
-            <section className="pt-2">
-              <div className="grid grid-cols-[1fr_320px] gap-10 items-end mb-8">
-                <div>
-                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Cinq lectures fermées</p>
-                  <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                    Ce que le rapport complet lit pour vous.
-                  </h2>
-                </div>
-                <p className="text-[15px] text-muted leading-[1.65]">
-                  Certaines lectures sont déjà plus avancées que d&apos;autres. Le module Logement est le plus abouti à ce stade.
+                  Le hub présente les modules. Les pages dédiées approfondissent.
                 </p>
               </div>
 
               <div className="grid grid-cols-3 gap-3.5">
+                <article className="glass rounded-xl p-6 relative" style={{ borderTop: "2px solid var(--blue)" }}>
+                  <div className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[17px] mb-3.5 border" style={{ background: "var(--blue)16", borderColor: "var(--blue)22" }}>
+                    {MODULE_ICONS.quartier}
+                  </div>
+                  <p className="font-mono text-[10px] tracking-[0.1em] text-ghost mb-1 uppercase">Module 01</p>
+                  <h3 className="font-normal text-[20px] text-label mb-2.5" style={{ fontFamily: "'Instrument Serif', serif" }}>Quartier</h3>
+                  <p className="text-[13px] text-muted leading-[1.65] mb-3.5">
+                    Ce que le territoire devient autour de vous : chaleur, eau, littoral, cadre de vie. La lecture ouverte de votre rapport.
+                  </p>
+                  <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase" style={{ color: "var(--blue)" }}>
+                    <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: "var(--blue)", boxShadow: "0 0 6px var(--blue)" }} />
+                    Accessible
+                  </span>
+                  <div className="mt-4">
+                    <Link href="/rapport/quartier" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: "var(--blue)", border: "1px solid var(--blue)33", background: "var(--blue)0d" }}>
+                      Ouvrir le module
+                    </Link>
+                  </div>
+                </article>
+
                 {lockedModules.map((module, i) => {
                   const benefit = MODULE_BENEFIT[module.id] ?? module.summary;
                   return (
@@ -300,6 +219,20 @@ export default async function RapportPage() {
                     </article>
                   );
                 })}
+              </div>
+            </section>
+
+            <section className="pt-2">
+              <div className="grid grid-cols-[1fr_320px] gap-10 items-end mb-8">
+                <div>
+                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Le rapport complet</p>
+                  <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                    Ce que les autres modules ajoutent.
+                  </h2>
+                </div>
+                <p className="text-[15px] text-muted leading-[1.65]">
+                  Le hub gratuit s&apos;arrête au territoire. Le rapport complet ouvre ensuite le logement, la santé, la mobilité, le métier et les projets.
+                </p>
               </div>
             </section>
 
@@ -337,13 +270,13 @@ export default async function RapportPage() {
           <section className="pt-14">
             <div className="grid grid-cols-[1fr_320px] gap-10 items-end mb-8">
               <div>
-                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Six lectures ouvertes</p>
+                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Modules du rapport complet</p>
                 <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                  Votre situation à La Rochelle, dimension par dimension.
+                  Votre hub de modules à La Rochelle.
                 </h2>
               </div>
               <p className="text-[15px] text-muted leading-[1.65]">
-                Sans score synthétique : les arbitrages restent les vôtres.
+                Quartier et Logement sont déjà accessibles comme pages dédiées. Les autres modules suivent la même logique.
               </p>
             </div>
 
@@ -351,6 +284,12 @@ export default async function RapportPage() {
               {allModules.map((module, i) => {
                 const col = MODULE_COLORS[module.id] ?? "var(--violet)";
                 const benefit = MODULE_BENEFIT[module.id] ?? module.summary;
+                const href =
+                  module.id === "quartier"
+                    ? "/rapport/quartier"
+                    : module.id === "logement"
+                      ? "/rapport/logement"
+                      : null;
                 return (
                   <article
                     key={module.id}
@@ -366,11 +305,11 @@ export default async function RapportPage() {
                     <p className="text-[13px] text-muted leading-[1.65] mb-3.5">{benefit}</p>
                     <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase" style={{ color: col }}>
                       <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
-                      Ouvert
+                      {href ? "Accessible" : "En construction"}
                     </span>
-                    {module.id === "logement" ? (
+                    {href ? (
                       <div className="mt-4">
-                        <Link href="/rapport/logement" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: col, border: `1px solid ${col}33`, background: `${col}0d` }}>
+                        <Link href={href} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: col, border: `1px solid ${col}33`, background: `${col}0d` }}>
                           Ouvrir le module
                         </Link>
                       </div>
