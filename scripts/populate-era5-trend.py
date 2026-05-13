@@ -170,11 +170,53 @@ def detect_time_dim(ds: xr.Dataset) -> str:
 
 
 def compute_annual_means(ds: xr.Dataset) -> xr.DataArray:
-    """Convertit t2m (K) → moyenne annuelle (°C) par cellule grille."""
+    """Convertit t2m (K) → moyenne annuelle (°C) par cellule grille.
+    Filtre les années incomplètes (< 12 mois) pour éviter de biaiser la moyenne récente."""
     t2m = ds["t2m"] - 273.15
     time_dim = detect_time_dim(ds)
+
+    # Compte de mois par année (basé uniquement sur la dimension temporelle, indépendant des cellules NaN)
+    times = ds[time_dim].values  # datetime64[ns]
+    years_per_step = np.array([np.datetime64(t, "Y").astype(int) + 1970 for t in times])
+    unique_years, counts = np.unique(years_per_step, return_counts=True)
+    complete_years = set(unique_years[counts == 12].tolist())
+
     annual = t2m.groupby(f"{time_dim}.year").mean(dim=time_dim)
-    return annual
+    keep = [y for y in annual["year"].values if int(y) in complete_years]
+    return annual.sel(year=keep)
+
+
+def extract_cell_with_fallback(annual: xr.DataArray, lat: float, lon: float, max_radius_deg: float = 0.5) -> np.ndarray | None:
+    """Extrait la série temporelle annuelle pour la cellule la plus proche.
+    Si la cellule la plus proche est NaN (commune côtière sur pixel mer),
+    cherche la cellule terre la plus proche dans un rayon max_radius_deg."""
+    cell = annual.sel(latitude=lat, longitude=lon, method="nearest")
+    vals = np.asarray(cell.values, dtype=float)
+    if not np.isnan(vals).all():
+        return vals
+
+    # Fallback : grille 5×5 autour du point, cherche la plus proche cellule valide
+    lats = annual["latitude"].values
+    lons = annual["longitude"].values
+    # cellules dans le rayon
+    lat_mask = np.abs(lats - lat) <= max_radius_deg
+    lon_mask = np.abs(lons - lon) <= max_radius_deg
+    candidate_lats = lats[lat_mask]
+    candidate_lons = lons[lon_mask]
+
+    best_dist = np.inf
+    best_vals = None
+    for cl in candidate_lats:
+        for cn in candidate_lons:
+            test = annual.sel(latitude=cl, longitude=cn, method="nearest").values
+            test = np.asarray(test, dtype=float)
+            if np.isnan(test).all():
+                continue
+            d = (cl - lat) ** 2 + (cn - lon) ** 2
+            if d < best_dist:
+                best_dist = d
+                best_vals = test
+    return best_vals
 
 
 def compute_trends(
@@ -193,18 +235,11 @@ def compute_trends(
             continue
 
         annual = zone_annuals[zone]
-        try:
-            cell = annual.sel(latitude=lat, longitude=lon, method="nearest")
-        except Exception:
+        vals = extract_cell_with_fallback(annual, lat, lon)
+        if vals is None:
             skipped += 1
             continue
-
-        years = np.asarray(cell["year"].values, dtype=int)
-        vals  = np.asarray(cell.values, dtype=float)
-
-        if np.isnan(vals).all():
-            skipped += 1
-            continue
+        years = np.asarray(annual["year"].values, dtype=int)
 
         # Baseline 1961-1990
         bmask = (years >= BASELINE_START) & (years <= BASELINE_END)
