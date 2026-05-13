@@ -48,17 +48,26 @@ const SLUG_LABELS: Record<string, string> = {
   submersion: "Submersion marine",
   feux: "Feux de forêt",
   cadmium: "Pollution agricole",
-  dependance_auto: "Dépendance automobile",
+  "dependance-auto": "Dépendance automobile",
   secheresse: "Sécheresse",
 };
 
-const SLUG_HEADLINES: Record<string, string> = {
+const SLUG_HEADLINES_FORT: Record<string, string> = {
   canicule: "Les vagues de chaleur deviendront un risque récurrent ici.",
-  submersion: "Le littoral de votre commune est exposé à la submersion marine.",
+  submersion: "Votre commune est nettement exposée à la submersion marine.",
   feux: "Le risque d'incendie de forêt est élevé dans votre territoire.",
   cadmium: "Les sols agricoles autour de chez vous présentent une pollution notable.",
-  dependance_auto: "Votre territoire dépend fortement de la voiture pour vivre au quotidien.",
+  "dependance-auto": "Votre territoire dépend fortement de la voiture pour vivre au quotidien.",
   secheresse: "La ressource en eau locale est sous tension croissante.",
+};
+
+const SLUG_HEADLINES_MODERE: Record<string, string> = {
+  canicule: "Les épisodes de chaleur devraient s'intensifier ici dans les prochaines décennies.",
+  submersion: "Une partie de votre commune est exposée à la submersion marine.",
+  feux: "Votre territoire connaîtra ponctuellement un risque d'incendie à surveiller.",
+  cadmium: "Quelques sols agricoles autour de chez vous montrent une pollution mesurable.",
+  "dependance-auto": "Votre territoire reste assez dépendant de la voiture pour les trajets du quotidien.",
+  secheresse: "La ressource en eau locale connaît des tensions saisonnières.",
 };
 
 const SLUG_SOURCES: Record<string, string> = {
@@ -66,9 +75,13 @@ const SLUG_SOURCES: Record<string, string> = {
   submersion: "IGN (côtier) · Géorisques (fluvial)",
   feux: "Base Prométhée · DREAL",
   cadmium: "GisSol · RMQS (qualité des sols agricoles)",
-  dependance_auto: "ADEME · INSEE RP (taux de motorisation)",
+  "dependance-auto": "ADEME · INSEE RP (taux de motorisation)",
   secheresse: "BRGM · Agences de l'eau",
 };
+
+/* Seuils d'intensité d'exposition (sur le score 0–100) */
+const SCORE_FORT = 65;
+const SCORE_MODERE = 40;
 
 /* ── Signal card — 4 lignes : headline / stat / precision / source ── */
 function Signal({ icon, headline, stat, precision, source }: SignalContent) {
@@ -140,23 +153,29 @@ function computeSignals(
     });
   }
 
-  /* Risque territorial */
+  /* Signal territorial — uniquement si exposition au moins modérée (≥ 40/100) */
   if (data?.tensions && data.tensions.length > 0) {
     const top = data.tensions[0];
-    const slug = SLUG_LABELS[top.slug] ?? top.slug;
-    const headline = SLUG_HEADLINES[top.slug] ?? `Un risque ${slug.toLowerCase()} a été recensé sur votre commune.`;
-    const expoTxt = top.ind_exposition !== null
-      ? `Score d'exposition ${Math.round(top.ind_exposition)}/100`
-      : `Score territorial ${top.score}/100`;
-    signals.push({
-      icon: "📍",
-      headline,
-      stat: expoTxt,
-      precision: data.tensions.length > 1
-        ? `${data.tensions.length} risques climatiques référencés pour ${ville}.`
-        : "Risque officiellement recensé dans votre territoire.",
-      source: SLUG_SOURCES[top.slug] ?? "Données publiques françaises",
-    });
+    const score = top.ind_exposition !== null ? Math.round(top.ind_exposition) : top.score;
+
+    if (score >= SCORE_MODERE) {
+      const isFort = score >= SCORE_FORT;
+      const slugLabel = SLUG_LABELS[top.slug] ?? top.slug;
+      const headline = isFort
+        ? (SLUG_HEADLINES_FORT[top.slug] ?? `Exposition élevée à ${slugLabel.toLowerCase()} sur votre commune.`)
+        : (SLUG_HEADLINES_MODERE[top.slug] ?? `Exposition modérée à ${slugLabel.toLowerCase()} à surveiller.`);
+      const intensityLabel = isFort ? "exposition élevée" : "exposition modérée";
+
+      signals.push({
+        icon: "📍",
+        headline,
+        stat: `Score ${score}/100 — ${intensityLabel}`,
+        precision: data.tensions.length > 1
+          ? `${data.tensions.length} signaux climatiques référencés pour ${ville}.`
+          : (isFort ? "Signal officiellement recensé dans votre territoire." : "Signal à surveiller dans votre territoire."),
+        source: SLUG_SOURCES[top.slug] ?? "Données publiques françaises",
+      });
+    }
   }
 
   /* Logement / DPE */
