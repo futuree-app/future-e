@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getClimatDataCommune } from "@/lib/drias-json";
 import { getAtmoForCommune, type AtmoAirQuality } from "@/lib/atmo";
+import { getEra5Trend, type Era5Trend } from "@/lib/era5-trend";
 
 export type WizardPreviewData = {
   commune_name: string | null;
@@ -19,6 +20,7 @@ export type WizardPreviewData = {
     ind_vulnerabilite: number | null;
   }>;
   atmo: AtmoAirQuality | null;
+  era5: Era5Trend | null;
   fallback: boolean;
 };
 
@@ -58,15 +60,17 @@ export async function GET(request: Request) {
 
   const safeInsee = String(insee).padStart(5, "0");
 
-  const [driasResult, tensionsResult, atmoResult] = await Promise.allSettled([
+  const [driasResult, tensionsResult, atmoResult, era5Result] = await Promise.allSettled([
     getClimatDataCommune(safeInsee),
     fetchTensions(safeInsee),
     process.env.ATMO_USERNAME ? getAtmoForCommune(safeInsee) : Promise.resolve(null),
+    getEra5Trend(safeInsee),
   ]);
 
   const drias = driasResult.status === "fulfilled" ? driasResult.value : null;
   const tensions = tensionsResult.status === "fulfilled" ? tensionsResult.value : [];
   const atmo = atmoResult.status === "fulfilled" ? atmoResult.value : null;
+  const era5 = era5Result.status === "fulfilled" ? era5Result.value : null;
 
   let driasOut: WizardPreviewData["drias"] = null;
   let communeName: string | null = null;
@@ -102,6 +106,7 @@ export async function GET(request: Request) {
     drias: driasOut,
     tensions,
     atmo: atmo ?? null,
+    era5: era5 ?? null,
     fallback: !drias && tensions.length === 0,
   };
 

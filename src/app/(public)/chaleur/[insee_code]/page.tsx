@@ -4,6 +4,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { getClimatDataCommune } from '@/lib/drias-json';
 import { getGeorisquesSummary } from '@/lib/georisques';
 import { getAtmoForCommune } from '@/lib/atmo';
+import { getEra5Trend } from '@/lib/era5-trend';
 import { createClient } from '@supabase/supabase-js';
 import { unstable_cache } from 'next/cache';
 
@@ -172,13 +173,14 @@ export default async function ChaleurCommune({
 }) {
   const { insee_code } = await params;
 
-  const [commune, driasData, georisques, atmo] = await Promise.all([
+  const [commune, driasData, georisques, atmo, era5] = await Promise.all([
     fetchScore(insee_code),
     getClimatDataCommune(insee_code).catch(() => null),
     getGeorisquesSummary(insee_code).catch(() => null),
     process.env.ATMO_USERNAME
       ? getAtmoForCommune(insee_code).catch(() => null)
       : Promise.resolve(null),
+    getEra5Trend(insee_code).catch(() => null),
   ]);
 
   const communeName = commune?.nom_commune ?? driasData?.commune?.n ?? insee_code;
@@ -300,6 +302,42 @@ export default async function ChaleurCommune({
             Que vous habitiez ici, envisagiez d&apos;y déménager ou prépariez votre avenir, ces chiffres vous concernent directement.
           </p>
         </div>
+
+        {/* ── ANCRAGE LOCAL ERA5 — climat déjà observé ──────────────── */}
+        {era5 && (
+          <div
+            style={{
+              marginBottom: 48,
+              padding: '28px 32px',
+              borderRadius: 14,
+              background: `linear-gradient(135deg, ${ACCENT}10 0%, ${ACCENT}03 100%)`,
+              border: `1px solid ${ACCENT}38`,
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 18 }}>
+              <span style={{ fontSize: 22, lineHeight: 1, marginTop: 4 }} aria-hidden>🌍</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: ACCENT, marginBottom: 10 }}>
+                  Ancrage local · Climat déjà observé
+                </div>
+                <p style={{ fontSize: 17, color: 'var(--fg-1)', lineHeight: 1.45, fontWeight: 500, margin: '0 0 10px', maxWidth: 640 }}>
+                  À {communeName}, le changement climatique est déjà mesurable aujourd&apos;hui.
+                </p>
+                <p style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: ACCENT, fontWeight: 400, lineHeight: 1.1, margin: '0 0 12px', letterSpacing: '-0.01em' }}>
+                  {era5.delta_c >= 0 ? '+' : ''}{era5.delta_c.toFixed(1)}°C depuis la fin du XXᵉ siècle
+                </p>
+                <p style={{ fontSize: 14, color: 'var(--fg-3)', lineHeight: 1.6, margin: '0 0 10px', maxWidth: 640 }}>
+                  Mesuré sur la moyenne des 10 dernières années, comparée à la période de référence 1961-1990. Les chiffres ci-dessous montrent ce que ce réchauffement deviendra à l&apos;horizon 2050 si la trajectoire continue.
+                </p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-4)', letterSpacing: '0.04em', margin: 0 }}>
+                  Réanalyse ERA5-Land · Copernicus Climate Data Store · données jusqu&apos;à {era5.data_through_year}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── BLOC 1 — TERRITOIRE ──────────────────────────────────────── */}
 

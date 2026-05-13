@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { LogementAge, WizardAnswers } from "./types";
 import type { WizardPreviewData } from "@/app/api/wizard-preview/route";
+import type { Era5Trend } from "@/lib/era5-trend";
 
 type SignalContent = {
   icon: string;
@@ -12,6 +13,44 @@ type SignalContent = {
   precision?: string; // précision concrète (chiffre/contexte secondaire)
   source: string;     // source / méthode (micro-ligne)
 };
+
+/* ── Carte d'ancrage ERA5 — affichée toujours, au-dessus des signaux d'exposition ── */
+function Era5AnchorCard({ era5, ville }: { era5: Era5Trend; ville: string }) {
+  const sign = era5.delta_c >= 0 ? "+" : "";
+  return (
+    <div
+      className="rounded-[1.7rem] border relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, rgba(251,146,60,0.06) 0%, rgba(251,146,60,0.02) 100%)",
+        borderColor: "rgba(251,146,60,0.22)",
+        padding: "1.75rem 2rem",
+      }}
+    >
+      <div className="flex items-start gap-4">
+        <span className="shrink-0 text-[20px] leading-none" style={{ marginTop: "0.15rem" }} aria-hidden>
+          🌍
+        </span>
+        <div className="min-w-0 flex flex-col gap-1.5">
+          <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent/90">
+            Ancrage local · Climat déjà observé
+          </p>
+          <p className="text-[16px] text-label leading-[1.4] font-medium text-balance mt-1">
+            À {ville}, le changement climatique est déjà mesurable aujourd&apos;hui.
+          </p>
+          <p className="text-[18px] text-accent font-semibold leading-[1.3] mt-1">
+            {sign}{era5.delta_c.toFixed(1)}°C depuis la fin du XXᵉ siècle
+          </p>
+          <p className="text-[14px] text-muted leading-[1.4]">
+            Mesuré sur la moyenne des 10 dernières années, comparée à la période 1961-1990.
+          </p>
+          <p className="font-mono text-[11px] text-ghost/75 tracking-[0.06em] leading-[1.4]" style={{ marginTop: "0.4rem" }}>
+            Réanalyse ERA5-Land · Copernicus Climate Data Store · données jusqu&apos;à {era5.data_through_year}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* ── Estimation DPE par tranche d'âge ── */
 function dpeFromAge(age: LogementAge | null): { headline: string; classe: string; ageLabel: string } {
@@ -314,6 +353,11 @@ export function WizardTeaser({
           </h2>
         )}
       </div>
+
+      {/* Carte d'ancrage ERA5 — toujours visible, hors décompte signaux */}
+      {!loading && data?.era5 && (
+        <Era5AnchorCard era5={data.era5} ville={ville} />
+      )}
 
       {/* Signals — 1 ou 2 visibles selon le nombre total, reste flouté */}
       {!loading && (
