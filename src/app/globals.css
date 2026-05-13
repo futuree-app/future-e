@@ -1031,9 +1031,7 @@ a {
 /* Dialog natif — styles non reproductibles en Tailwind */
 dialog.wizard-dialog {
   margin: auto;
-  background: rgba(10, 12, 26, 0.88);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: rgba(10, 12, 26, 0.97);
   border: 1px solid var(--border-1);
   border-radius: 32px;
   padding: 0;
@@ -1062,8 +1060,7 @@ dialog.wizard-dialog > div:last-child {
   min-height: 0;
 }
 dialog.wizard-dialog::backdrop {
-  background: rgba(0,0,0,0.76);
-  backdrop-filter: blur(6px);
+  background: rgba(0,0,0,0.80);
 }
 /* Wizard step animation — légèrement plus douce */
 @keyframes step-enter {
@@ -1072,6 +1069,13 @@ dialog.wizard-dialog::backdrop {
 }
 .wizard-step {
   animation: step-enter 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Wizard loading bar — sweep indéterminé */
+@keyframes wizard-loading-bar {
+  0%   { left: -35%; width: 35%; }
+  50%  { left: 35%;  width: 45%; }
+  100% { left: 105%; width: 35%; }
 }
 
 .wizard-input,

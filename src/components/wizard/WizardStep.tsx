@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { WizardAnswers } from "./types";
+import type { LogementAge, WizardAnswers } from "./types";
 
 type StepConfig =
   | { key: "quartier"; module: string; step: string; question: string; type: "text"; placeholder: string }
@@ -41,6 +41,8 @@ const STEPS: StepConfig[] = [
       "Finance / Assurance",
       "Industrie / Énergie",
       "Services / Numérique",
+      "Retraité",
+      "Sans emploi",
       "Autre",
     ],
   },
@@ -48,10 +50,10 @@ const STEPS: StepConfig[] = [
     key: "sante",
     module: "Santé",
     step: "04",
-    question: "Avez-vous des sensibilités environnementales ?",
+    question: "Avez-vous des sensibilités particulières ?",
     type: "multi",
     options: [
-      "Allergies polliniques",
+      "Allergies au pollen",
       "Asthme / Troubles respiratoires",
       "Sensibilité à la chaleur",
       "Pathologie chronique",
@@ -70,7 +72,7 @@ const STEPS: StepConfig[] = [
     key: "projets",
     module: "Projets",
     step: "06",
-    question: "Quel est votre projet de vie majeur à 5 ans ?",
+    question: "Avez-vous un projet de vie majeur dans les prochaines années ?",
     type: "select",
     options: ["achat", "retraite", "demenagement", "autre"],
   },
@@ -89,6 +91,18 @@ const PROJETS_LABELS: Record<string, string> = {
   demenagement: "Déménagement",
   autre: "Aucun projet majeur",
 };
+
+const LOGEMENT_TYPE_LABELS: Record<string, string> = {
+  maison: "Maison",
+  appartement: "Appartement",
+  autre: "Autre (camping-car, tiny house, van…)",
+};
+
+const LOGEMENT_AGE_OPTIONS: { value: LogementAge; label: string }[] = [
+  { value: "recent", label: "Moins de 10 ans (après 2016)" },
+  { value: "middle", label: "Entre 10 et 50 ans" },
+  { value: "old", label: "Plus de 50 ans (avant 1976)" },
+];
 
 type BanSuggestion = {
   id: string;
@@ -122,6 +136,7 @@ export function WizardStep({
   onSetInsee,
   onNext,
   onPrev,
+  onSkip,
 }: {
   step: number;
   answers: WizardAnswers;
@@ -129,6 +144,7 @@ export function WizardStep({
   onSetInsee: (insee: string) => void;
   onNext: () => void;
   onPrev: () => void;
+  onSkip: (key: keyof WizardAnswers) => void;
 }) {
   const config = STEPS[step];
   const current = answers[config.key];
@@ -175,27 +191,30 @@ export function WizardStep({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  const logement = current as WizardAnswers["logement"];
   const canNext =
-    config.type === "multi"
-      ? (current as string[]).length > 0
-      : current !== null && current !== "";
+    config.type === "logement"
+      ? logement?.type != null && logement?.age != null
+      : config.type === "multi"
+        ? (current as string[]).length > 0
+        : current !== null && current !== "";
 
   return (
     <div className="wizard-step flex flex-col gap-10 md:gap-12">
 
       {/* Module label + Question */}
-      <div className="max-w-[44rem]">
-        <p className="font-mono text-[11px] tracking-[0.18em] uppercase text-accent/90 mb-4">
+      <div className="max-w-[44rem] flex flex-col gap-6">
+        <p className="font-mono text-[11px] tracking-[0.18em] uppercase text-accent/90">
           Module {config.step} · {config.module}
         </p>
         <h2
-          className="font-semibold text-[clamp(2rem,4.2vw,3.7rem)] leading-[1.01] tracking-[-0.035em] text-label text-balance"
+          className="font-semibold text-[clamp(1.55rem,3vw,2.5rem)] leading-[1.08] tracking-[-0.025em] text-label text-balance"
           style={{ fontFamily: "'Instrument Serif', serif" }}
         >
           {config.question}
         </h2>
         {config.type === "text" && (
-          <p className="mt-5 max-w-[36rem] text-[15px] leading-7 text-muted">
+          <p className="max-w-[36rem] text-[15px] leading-[1.7] text-muted">
             Commencez par votre commune. Le rapport s&apos;adaptera ensuite à votre territoire et à vos priorités.
           </p>
         )}
@@ -246,12 +265,13 @@ export function WizardStep({
         </div>
       )}
 
-      {/* ── Logement (type + année) ── */}
+      {/* ── Logement (type + âge) ── */}
       {config.type === "logement" && (
-        <div className="flex flex-col gap-6 max-w-[52rem]">
-          <div className="grid grid-cols-2 gap-3">
-            {(["maison", "appartement"] as const).map((t) => {
-              const selected = (current as WizardAnswers["logement"])?.type === t;
+        <div className="flex flex-col gap-10 max-w-[52rem]">
+          {/* Type de logement */}
+          <div className="flex flex-col gap-3">
+            {(["maison", "appartement", "autre"] as const).map((t) => {
+              const selected = logement?.type === t;
               return (
                 <button
                   key={t}
@@ -259,34 +279,50 @@ export function WizardStep({
                   onClick={() =>
                     onAnswer(config.key, {
                       type: t,
-                      year: (current as WizardAnswers["logement"])?.year ?? 2000,
+                      age: logement?.age ?? null,
                     })
                   }
-                  className={`${optionBase} wizard-option-center font-medium ${selected ? optionSelected : optionIdle}`}
+                  className={`${optionBase} ${selected ? optionSelected : optionIdle}`}
                 >
-                  {t === "maison" ? "Maison" : "Appartement"}
+                  {LOGEMENT_TYPE_LABELS[t]}
                 </button>
               );
             })}
           </div>
-          <div>
-            <label className="block font-mono text-[10px] tracking-[0.12em] uppercase text-ghost mb-3">
-              Année de construction
-            </label>
-            <input
-              type="number"
-              min={1800}
-              max={2024}
-              placeholder="Ex : 1978"
-              value={(current as WizardAnswers["logement"])?.year ?? ""}
-              onChange={(e) =>
-                onAnswer(config.key, {
-                  type: (current as WizardAnswers["logement"])?.type ?? "appartement",
-                  year: parseInt(e.target.value) || 2000,
-                })
-              }
-              className="wizard-input w-full rounded-2xl bg-white/[0.04] border border-white/[0.08] text-label text-[16px] placeholder:text-ghost focus:outline-none focus:border-accent/50 focus:bg-white/[0.06] transition-all duration-200"
-            />
+
+          {/* Âge du logement */}
+          <div className="flex flex-col gap-10">
+            <div className="flex flex-col gap-6">
+              <h3
+                className="font-semibold text-[clamp(1.55rem,3vw,2.5rem)] leading-[1.08] tracking-[-0.025em] text-label"
+                style={{ fontFamily: "'Instrument Serif', serif" }}
+              >
+                Quel est l&apos;âge de votre logement ?
+              </h3>
+              <p className="text-[15px] text-muted/75 leading-[1.7] max-w-[42rem]">
+                Un petit doute ? La date de construction de votre logement apparaît sans doute sur votre contrat d&apos;assurance.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3">
+              {LOGEMENT_AGE_OPTIONS.map(({ value, label }) => {
+                const selected = logement?.age === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() =>
+                      onAnswer(config.key, {
+                        type: logement?.type ?? "appartement",
+                        age: value,
+                      })
+                    }
+                    className={`${optionBase} ${selected ? optionSelected : optionIdle}`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
@@ -338,6 +374,23 @@ export function WizardStep({
               </button>
             );
           })}
+        </div>
+      )}
+
+      {/* ── Je ne sais pas (toutes étapes sauf quartier) ── */}
+      {step > 0 && (
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 max-w-[52rem]">
+          <button
+            type="button"
+            onClick={() => onSkip(config.key)}
+            className="inline-flex items-center justify-center shrink-0 min-h-[3.75rem] rounded-full border border-white/[0.12] bg-white/[0.04] text-[15px] font-medium text-muted hover:bg-white/[0.07] hover:text-label transition-all duration-200 whitespace-nowrap"
+            style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem" }}
+          >
+            Je ne sais pas répondre
+          </button>
+          <p className="text-[13px] text-muted/60 leading-snug">
+            Votre profil sera estimé à partir de données nationales représentatives.
+          </p>
         </div>
       )}
 

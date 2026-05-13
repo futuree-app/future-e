@@ -5,6 +5,7 @@ import {
   type WizardAnswers,
   type WizardState,
   WIZARD_INITIAL_ANSWERS,
+  WIZARD_SKIP_DEFAULTS,
   WIZARD_STORAGE_KEY,
 } from "./types";
 import { WizardStepper } from "./WizardStepper";
@@ -32,6 +33,7 @@ type Action =
   | { type: "NEXT" }
   | { type: "PREV" }
   | { type: "SET_ANSWER"; key: keyof WizardAnswers; value: WizardAnswers[keyof WizardAnswers] }
+  | { type: "SKIP"; key: keyof WizardAnswers }
   | { type: "SET_INSEE"; insee: string }
   | { type: "PRE_FILL_COMMUNE"; payload: { name: string; insee: string } }
   | { type: "RESET" }
@@ -48,6 +50,18 @@ function reducer(state: WizardState, action: Action): WizardState {
         ...state,
         answers: { ...state.answers, [action.key]: action.value },
       };
+    case "SKIP":
+      return {
+        ...state,
+        step: Math.min(state.step + 1, 6),
+        unknownAnswers: state.unknownAnswers.includes(action.key)
+          ? state.unknownAnswers
+          : [...state.unknownAnswers, action.key],
+        answers: {
+          ...state.answers,
+          [action.key]: WIZARD_SKIP_DEFAULTS[action.key] ?? state.answers[action.key],
+        },
+      };
     case "SET_INSEE":
       return { ...state, inseeCode: action.insee };
     case "PRE_FILL_COMMUNE":
@@ -61,12 +75,13 @@ function reducer(state: WizardState, action: Action): WizardState {
       }
       return state;
     case "RESET":
-      return { step: 0, context: state.context, inseeCode: null, answers: { ...WIZARD_INITIAL_ANSWERS } };
+      return { step: 0, context: state.context, inseeCode: null, unknownAnswers: [], answers: { ...WIZARD_INITIAL_ANSWERS } };
     case "RESTORE":
       return {
         ...state,
         step: action.payload.step ?? state.step,
         inseeCode: action.payload.inseeCode ?? state.inseeCode,
+        unknownAnswers: action.payload.unknownAnswers ?? state.unknownAnswers,
         answers: action.payload.answers
           ? { ...WIZARD_INITIAL_ANSWERS, ...action.payload.answers }
           : state.answers,
@@ -85,6 +100,7 @@ export const ReportWizard = forwardRef<
     step: 0,
     context: initialContext ?? null,
     inseeCode: null,
+    unknownAnswers: [],
     answers: { ...WIZARD_INITIAL_ANSWERS },
   });
 
@@ -146,6 +162,7 @@ export const ReportWizard = forwardRef<
             onSetInsee={(insee) => dispatch({ type: "SET_INSEE", insee })}
             onNext={() => dispatch({ type: "NEXT" })}
             onPrev={() => dispatch({ type: "PREV" })}
+            onSkip={(key) => dispatch({ type: "SKIP", key })}
           />
         ) : (
           <WizardTeaser
