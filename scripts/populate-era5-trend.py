@@ -96,8 +96,8 @@ def download_zone(zone_name: str, bbox: list[float]) -> Path | None:
     """Télécharge le NetCDF ERA5-Land pour une zone bbox. Skip si déjà fait.
     Renvoie None si le fichier n'existe pas et que cdsapi n'est pas configuré."""
     target = DATA_DIR / f"era5_{zone_name}.nc"
-    if target.exists() and target.stat().st_size > 1_000_000:
-        print(f"  ✓ {zone_name} déjà téléchargé : {target}")
+    if target.exists() and target.stat().st_size > 100_000:
+        print(f"  ✓ {zone_name} déjà téléchargé : {target} ({target.stat().st_size / 1e6:.1f} Mo)")
         return target
 
     if not HAS_CDSAPI:
