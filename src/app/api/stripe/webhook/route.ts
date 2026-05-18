@@ -2,8 +2,8 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import type Stripe from "stripe";
-import { resend } from "@/lib/resend";
-import { stripe } from "@/lib/stripe";
+import { getResend } from "@/lib/resend";
+import { getStripe } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 
@@ -50,6 +50,7 @@ function getEntitlements(productType: string) {
 
 async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
   const { userId, userEmail, productType } = paymentIntent.metadata;
+  const resend = getResend();
 
   await supabaseAdmin.from("payments").upsert(
     {
@@ -137,6 +138,7 @@ export async function POST(request: Request) {
   let event: Stripe.Event;
 
   try {
+    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(
       body,
       signature,
