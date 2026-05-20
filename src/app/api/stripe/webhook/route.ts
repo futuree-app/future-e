@@ -86,7 +86,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
 
   if (userEmail) {
     await resend.emails.send({
-      from: "futur·e <hello@futuree.fr>",
+      from: "futur·e <hello@futur-e.fr>",
       to: userEmail,
       subject: "Votre rapport futur·e est en cours de génération",
       html: `
@@ -102,7 +102,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     sendAt.setDate(sendAt.getDate() + 7);
 
     await resend.emails.send({
-      from: "futur·e <hello@futuree.fr>",
+      from: "futur·e <hello@futur-e.fr>",
       to: userEmail,
       subject: "Vos 14 € couvrent votre premier mois de Suivi",
       scheduledAt: sendAt.toISOString(),
@@ -114,7 +114,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
           Rien à repayer avant le mois 3.
         </p>
         <p>
-          <a href="https://futuree.fr/inscription?upgrade=true">
+          <a href="https://futur-e.fr/inscription?upgrade=true">
             Activer mon Suivi →
           </a>
         </p>

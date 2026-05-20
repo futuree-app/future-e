@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { isArrondissement } from '@/lib/communes';
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.futuree.fr';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://futur-e.fr';
 
 const STATIC_PAGES: MetadataRoute.Sitemap = [
   { url: BASE_URL,                         priority: 1.0, changeFrequency: 'weekly'  },
