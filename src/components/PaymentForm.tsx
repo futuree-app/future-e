@@ -49,19 +49,29 @@ export function PaymentForm({ onSuccess }: PaymentFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-      <PaymentElement />
+      <PaymentElement
+        options={{
+          layout: {
+            type: "accordion",
+            defaultCollapsed: false,
+            spacedAccordionItems: false,
+          },
+        }}
+      />
 
       {error ? (
         <p className="font-mono text-sm text-red-400">{error}</p>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={!stripe || loading}
-        className="w-full rounded-lg bg-[var(--accent)] px-4 py-4 font-medium text-[var(--bg)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {loading ? "Traitement…" : "Payer"}
-      </button>
+      <div className="sticky bottom-0 z-10 -mx-2 border-t border-white/8 bg-[var(--bg-elev)]/96 px-2 pb-2 pt-4 backdrop-blur">
+        <button
+          type="submit"
+          disabled={!stripe || loading}
+          className="w-full rounded-lg bg-[var(--accent)] px-4 py-4 font-medium text-[var(--bg)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {loading ? "Traitement…" : "Payer"}
+        </button>
+      </div>
     </form>
   );
 }

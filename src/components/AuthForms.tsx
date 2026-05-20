@@ -57,6 +57,7 @@ export function PasswordForm({
   pendingLabel,
   passwordAutoComplete,
   forgotPasswordHref,
+  nextDestination,
 }: {
   action: ActionFn;
   title: string;
@@ -65,6 +66,7 @@ export function PasswordForm({
   pendingLabel: string;
   passwordAutoComplete: string;
   forgotPasswordHref?: string;
+  nextDestination?: string;
 }) {
   const [state, formAction] = useActionState(action, EMPTY_STATE);
 
@@ -81,6 +83,7 @@ export function PasswordForm({
       </div>
 
       <form action={formAction} className="flex flex-col gap-5">
+        {nextDestination ? <input type="hidden" name="next" value={nextDestination} /> : null}
         <div>
           <label className={labelCls} htmlFor="auth-email">Email</label>
           <input
@@ -133,11 +136,13 @@ export function MagicLinkForm({
   title,
   subtitle,
   submitLabel,
+  nextDestination,
 }: {
   action: ActionFn;
   title: string;
   subtitle: string;
   submitLabel: string;
+  nextDestination?: string;
 }) {
   const [state, formAction] = useActionState(action, EMPTY_STATE);
 
@@ -154,6 +159,7 @@ export function MagicLinkForm({
       </div>
 
       <form action={formAction} className="flex flex-col gap-5">
+        {nextDestination ? <input type="hidden" name="next" value={nextDestination} /> : null}
         <div>
           <label className={labelCls} htmlFor="magic-email">Email</label>
           <input

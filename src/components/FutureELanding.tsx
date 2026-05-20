@@ -2803,7 +2803,7 @@ export default function FutureELanding() {
               margin: '0 0 28px', maxWidth: 420,
             }}>
               Canicule, inondation, qualité de l&apos;air, cadmium, dépendance automobile...
-              comparez deux communes sur ce qui change vraiment à l'horizon 2050.
+              comparez deux communes sur ce qui change vraiment à l&apos;horizon 2050.
               Quatre dimensions gratuites. Six supplémentaires avec le Suivi.
             </p>
 
@@ -2945,7 +2945,7 @@ export default function FutureELanding() {
             <Link
               style={styles.planBtn(false)}
               className="plan-btn"
-              href="/connexion"
+              href="/checkout/rapport-complet"
             >
               Acheter le rapport
             </Link>
@@ -2987,7 +2987,7 @@ export default function FutureELanding() {
             <Link
               style={styles.planBtn(true)}
               className="plan-btn"
-              href="/connexion"
+              href="/checkout/suivi"
             >
               S&apos;abonner au Suivi
             </Link>

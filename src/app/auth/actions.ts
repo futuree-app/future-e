@@ -10,6 +10,14 @@ function getStringField(formData: FormData, key: string) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function getSafeNextPath(value: string) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+    return "/compte";
+  }
+
+  return value;
+}
+
 async function getBaseUrl() {
   const headerStore = await headers();
   const forwardedProto = headerStore.get("x-forwarded-proto");
@@ -72,6 +80,7 @@ export async function signInWithPasswordAction(
 ): Promise<AuthActionState> {
   const email = getStringField(formData, "email").toLowerCase();
   const password = getStringField(formData, "password");
+  const next = getSafeNextPath(getStringField(formData, "next"));
 
   if (!email || !password) {
     return {
@@ -93,7 +102,7 @@ export async function signInWithPasswordAction(
     };
   }
 
-  redirect("/compte");
+  redirect(next);
 }
 
 export async function signUpWithPasswordAction(
@@ -102,6 +111,7 @@ export async function signUpWithPasswordAction(
 ): Promise<AuthActionState> {
   const email = getStringField(formData, "email").toLowerCase();
   const password = getStringField(formData, "password");
+  const next = getSafeNextPath(getStringField(formData, "next"));
 
   if (!email || !password) {
     return {
@@ -120,7 +130,7 @@ export async function signUpWithPasswordAction(
   const supabase = await createClient();
   const baseUrl = await getBaseUrl();
   const redirectTo = new URL("/auth/callback", baseUrl);
-  redirectTo.searchParams.set("next", "/compte");
+  redirectTo.searchParams.set("next", next);
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -138,7 +148,7 @@ export async function signUpWithPasswordAction(
   }
 
   if (data.session) {
-    redirect("/compte");
+    redirect(next);
   }
 
   return {
