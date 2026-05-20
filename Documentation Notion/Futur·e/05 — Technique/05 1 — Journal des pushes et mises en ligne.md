@@ -410,6 +410,28 @@ Il reformule l’historique en séquences produit lisibles :
 
 ---
 
+### 21/05/2026 — Refonte des pages /checkout
+
+**Commits**
+- `e67af8c` — Refonte des pages /checkout/rapport-complet et /checkout/suivi
+
+**Pages / modules touchés**
+- `src/app/(public)/checkout/[product]/page.tsx` : refonte complète
+- thème par produit (vert pour Rapport, orange pour Suivi)
+- sections ajoutées : hero avec badge statut, « Ce que vous obtenez » (4 cartes), timeline en 3 étapes, FAQ inline (4 questions), aside sticky avec récap commande, bande de clôture avec citation
+- `/checkout/suivi` : embarque désormais `SuiviWaitlistForm`, marquée `noindex`
+
+**Impact utilisateur**
+- les pages de paiement ne sont plus de simples écrans transactionnels : elles racontent ce qu'on achète et rassurent avant le clic
+- cohérence visuelle avec la landing et `/suivi-bientot`
+- `/checkout/suivi` devient une variante « bientôt » lisible, sans bouton Stripe inactif
+
+**Dépendances externes**
+- aucune nouvelle dépendance — Stripe / Resend / Supabase inchangés
+- la liste d'attente Suivi sur cette page utilise la même table `suivi_waitlist` (migration `003` déjà requise)
+
+---
+
 ### 21/05/2026 — Page « Suivi à venir » + repositionnement landing
 
 **Commits**
