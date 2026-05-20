@@ -30,7 +30,7 @@ export function AccountNav({
         <div className="flex items-center gap-8">
           {[
             { label: "Le produit", href: "/" },
-            { label: "Pages Savoir", href: "/savoir" },
+            { label: "Pages Savoir", href: "/savoir/cadmium" },
             { label: "Tarifs", href: "/#pricing" },
           ].map((l) => (
             <Link

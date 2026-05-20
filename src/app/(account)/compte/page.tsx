@@ -215,11 +215,10 @@ export default async function ComptePage() {
           </div>
           <div className="flex gap-5 flex-wrap">
             {[
-              { label: "Manifeste", href: "/manifeste" },
-              { label: "Méthodologie", href: "/methodologie" },
-              { label: "Pages Savoir", href: "/savoir" },
-              { label: "Contact", href: "/contact" },
-              { label: "Mentions légales", href: "/mentions-legales" },
+              { label: "Pourquoi futur•e", href: "/pourquoi" },
+              { label: "Pages Savoir", href: "/savoir/cadmium" },
+              { label: "Tarifs", href: "/#pricing" },
+              { label: "Contact", href: "mailto:hello@futur-e.fr" },
             ].map((l) => (
               <Link key={l.label} href={l.href} className="font-mono text-[11px] text-ghost no-underline tracking-[0.06em] uppercase">
                 {l.label}
