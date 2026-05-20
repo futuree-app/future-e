@@ -413,7 +413,7 @@ Il reformule l’historique en séquences produit lisibles :
 ### 21/05/2026 — Page « Suivi à venir » + repositionnement landing
 
 **Commits**
-- à compléter au push
+- `e67bb78` — Page « Suivi à venir » + repositionnement de la landing
 
 **Pages / modules touchés**
 - nouveau : `/suivi-bientot` (coming soon · liste d'attente)
