@@ -99,7 +99,6 @@ export function PaymentWrapper({
             borderRadius: "8px",
           },
         },
-        paymentMethodOrder: ["apple_pay", "google_pay", "card"],
       }}
     >
       <PaymentForm onSuccess={onSuccess} />
