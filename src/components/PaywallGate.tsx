@@ -75,7 +75,7 @@ export function PaywallGate({
             marginBottom: '16px',
           }}
         >
-          Réservé aux abonnés Suivi
+          Le Suivi · prochainement
         </div>
         <p
           style={{
@@ -89,7 +89,7 @@ export function PaywallGate({
         >
           Les leviers documentés, étape par étape,
           <br />
-          sont disponibles dans votre abonnement.
+          arrivent avec l&apos;ouverture du Suivi.
         </p>
         <div
           style={{
@@ -100,7 +100,7 @@ export function PaywallGate({
           }}
         >
           <Link
-            href="/inscription"
+            href="/suivi-bientot"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -115,23 +115,7 @@ export function PaywallGate({
               letterSpacing: '-0.01em',
             }}
           >
-            S&apos;abonner — Accès Suivi
-          </Link>
-          <Link
-            href="/connexion"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '14px 28px',
-              border: '1px solid rgba(255,255,255,0.12)',
-              color: '#9ba3b4',
-              fontFamily: "'Instrument Sans', system-ui, sans-serif",
-              fontSize: '15px',
-              textDecoration: 'none',
-              borderRadius: '6px',
-            }}
-          >
-            Déjà abonné ? Se connecter
+            Être prévenu·e à l&apos;ouverture
           </Link>
         </div>
       </div>

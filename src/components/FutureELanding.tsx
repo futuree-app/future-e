@@ -2268,7 +2268,7 @@ export default function FutureELanding() {
           <>
             {questionLimitReached && (
               <div style={styles.questionLimitNote}>
-                Vous avez utilisé vos deux questions gratuites. Pour continuer, vous pouvez vous abonner au Suivi.
+                Vous avez utilisé vos deux questions gratuites. Le Suivi arrive bientôt — inscrivez-vous pour être prévenu·e à l&apos;ouverture.
               </div>
             )}
 
@@ -2356,8 +2356,8 @@ export default function FutureELanding() {
                         Générer mon rapport personnalisé →
                       </button>
                       {questionLimitReached && (
-                        <Link href="/connexion" style={{ ...styles.paywallSecondary, marginLeft: 10 }}>
-                          S&apos;abonner au Suivi
+                        <Link href="/suivi-bientot" style={{ ...styles.paywallSecondary, marginLeft: 10 }}>
+                          Être prévenu·e à l&apos;ouverture du Suivi
                         </Link>
                       )}
                     </>
@@ -2921,7 +2921,22 @@ export default function FutureELanding() {
             </Link>
           </div>
 
-          <div style={styles.planCard(false)}>
+          <div
+            style={{
+              ...styles.planCard(false),
+              borderColor: `${C.green}40`,
+              boxShadow: '0 0 0 1px var(--green-soft), 0 16px 48px var(--green-tint)',
+            }}
+          >
+            <div
+              style={{
+                ...styles.planBadge,
+                background: C.green,
+                color: C.bg,
+              }}
+            >
+              Disponible maintenant
+            </div>
             <div style={styles.planPrice}>
               14<span style={styles.planPriceSub}>€ une fois</span>
             </div>
@@ -2934,7 +2949,7 @@ export default function FutureELanding() {
                 'Rapport complet PDF (6 modules)',
                 'Dashboard simplifié en lecture seule',
                 'Régénération 1 fois par an',
-                'Les 14 € sont déduits si vous passez au Suivi dans les 7 jours.',
+                'Les 14 € seront déduits à l’ouverture du Suivi (prochainement).',
               ].map((feature) => (
                 <div key={feature} style={styles.planFeature}>
                   <span style={styles.planCheck}>✓</span>
@@ -2943,11 +2958,15 @@ export default function FutureELanding() {
               ))}
             </div>
             <Link
-              style={styles.planBtn(false)}
+              style={{
+                ...styles.planBtn(true),
+                background: C.green,
+                color: C.bg,
+              }}
               className="plan-btn"
               href="/checkout/rapport-complet"
             >
-              Acheter le rapport
+              Acheter le rapport — 14 €
             </Link>
           </div>
 
@@ -2958,7 +2977,7 @@ export default function FutureELanding() {
                 '0 0 0 1px var(--orange-ring), 0 16px 48px var(--orange-tint)',
             }}
           >
-            <div style={styles.planBadge}>Recommandé</div>
+            <div style={styles.planBadge}>À venir</div>
             <div style={styles.planPrice}>
               9<span style={styles.planPriceSub}>€ / mois</span>
             </div>
@@ -2987,9 +3006,9 @@ export default function FutureELanding() {
             <Link
               style={styles.planBtn(true)}
               className="plan-btn"
-              href="/checkout/suivi"
+              href="/suivi-bientot"
             >
-              S&apos;abonner au Suivi
+              Être prévenu·e à l&apos;ouverture
             </Link>
           </div>
         </div>

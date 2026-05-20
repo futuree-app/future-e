@@ -934,7 +934,7 @@ export default async function ComparateurPage({
             {!hasFullAccess ? (
               <section className="panel cta">
                 <div>
-                  <div className="panel-label">Suivi · comparateur complet</div>
+                  <div className="panel-label">Suivi · prochainement</div>
                   <h2 className="cta-title">La version publique reste volontairement partielle.</h2>
                   <p className="cta-desc">
                     Les dimensions visibles donnent une première hiérarchie. Le vrai arbitrage
@@ -954,11 +954,8 @@ export default async function ComparateurPage({
                     <div className="cta-price">9€</div>
                     <div className="cta-period">par mois · sans engagement</div>
                   </div>
-                  <Link href="/inscription" className="cta-button">
-                    S&apos;abonner au Suivi
-                  </Link>
-                  <Link href="/connexion" className="cta-secondary">
-                    Déjà abonné ? Se connecter
+                  <Link href="/suivi-bientot" className="cta-button">
+                    Être prévenu·e à l&apos;ouverture
                   </Link>
                 </div>
               </section>

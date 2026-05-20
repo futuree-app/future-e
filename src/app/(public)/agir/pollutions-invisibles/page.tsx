@@ -411,7 +411,7 @@ export default async function AgirPollutionsInvisiblesPage() {
                 color: 'var(--fg-4)',
                 margin: '0 0 12px',
               }}>
-                Accès Suivi
+                Le Suivi · prochainement
               </p>
               <p style={{
                 fontFamily: 'var(--font-serif)',
@@ -431,7 +431,7 @@ export default async function AgirPollutionsInvisiblesPage() {
                 IREP, sites pollués, qualité de l&apos;air, eau potable — pour votre commune, sans quitter la page.
               </p>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <Link href="/inscription" style={{
+                <Link href="/suivi-bientot" style={{
                   display: 'inline-block',
                   padding: '12px 28px',
                   background: 'var(--accent)',
@@ -442,20 +442,7 @@ export default async function AgirPollutionsInvisiblesPage() {
                   textTransform: 'uppercase',
                   textDecoration: 'none',
                 }}>
-                  S&apos;abonner — Accès Suivi
-                </Link>
-                <Link href="/connexion" style={{
-                  display: 'inline-block',
-                  padding: '12px 28px',
-                  border: '1px solid var(--border-hi)',
-                  color: 'var(--fg-3)',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '12px',
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  textDecoration: 'none',
-                }}>
-                  Déjà abonné ? Se connecter
+                  Être prévenu·e à l&apos;ouverture
                 </Link>
               </div>
             </div>

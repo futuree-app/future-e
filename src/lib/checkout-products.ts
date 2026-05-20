@@ -25,7 +25,7 @@ export const CHECKOUT_PRODUCTS: Record<CheckoutProductSlug, CheckoutProduct> = {
       "Rapport complet PDF",
       "6 modules d'analyse",
       "Dashboard simplifié en lecture seule",
-      "Les 14 € sont déduits si vous passez ensuite au Suivi",
+      "Les 14 € seront déduits à l'ouverture du Suivi (prochainement)",
     ],
   },
   suivi: {

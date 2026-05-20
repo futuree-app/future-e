@@ -375,17 +375,14 @@ export default async function CaniculePage() {
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '180px', background: 'linear-gradient(to bottom, transparent, var(--bg))', pointerEvents: 'none' }} />
             <div style={{ marginTop: '40px', padding: '40px 36px', background: 'var(--bg-elev)', border: '1px solid var(--border-1)', borderLeft: '2px solid var(--accent)', borderRadius: '8px', textAlign: 'center' }}>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '16px' }}>
-                Réservé aux abonnés Suivi
+                Le Suivi · prochainement
               </div>
               <p style={{ fontFamily: 'var(--font-serif)', fontSize: '22px', lineHeight: 1.4, color: 'var(--fg-1)', margin: '0 0 28px', fontWeight: 400 }}>
-                Les étapes et profils détaillés sont<br />disponibles dans votre abonnement.
+                Les étapes et profils détaillés arrivent<br />avec l&apos;ouverture du Suivi.
               </p>
               <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <Link href="/inscription" style={{ display: 'inline-flex', alignItems: 'center', padding: '14px 28px', background: 'var(--accent)', color: '#060812', fontFamily: 'var(--font-sans)', fontSize: '15px', fontWeight: 600, textDecoration: 'none', borderRadius: '6px' }}>
-                  S&apos;abonner — Accès Suivi
-                </Link>
-                <Link href="/connexion" style={{ display: 'inline-flex', alignItems: 'center', padding: '14px 28px', border: '1px solid var(--border-1)', color: 'var(--fg-3)', fontFamily: 'var(--font-sans)', fontSize: '15px', textDecoration: 'none', borderRadius: '6px' }}>
-                  Déjà abonné ? Se connecter
+                <Link href="/suivi-bientot" style={{ display: 'inline-flex', alignItems: 'center', padding: '14px 28px', background: 'var(--accent)', color: '#060812', fontFamily: 'var(--font-sans)', fontSize: '15px', fontWeight: 600, textDecoration: 'none', borderRadius: '6px' }}>
+                  Être prévenu·e à l&apos;ouverture
                 </Link>
               </div>
             </div>

@@ -253,12 +253,12 @@ export default async function RapportPage() {
                 <span className="block text-[52px] text-label leading-none tracking-[-2px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
                   14<span className="text-[22px] text-ghost">€</span>
                 </span>
-                <span className="block font-mono text-[11px] text-ghost tracking-[0.04em] mt-1 mb-5">une fois · ou 9 €/mois</span>
+                <span className="block font-mono text-[11px] text-ghost tracking-[0.04em] mt-1 mb-5">une fois · Suivi 9 €/mois prochainement</span>
                 <Link href="/#pricing" className="flex items-center justify-center px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[13px] no-underline w-full" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
                   Voir les formules
                 </Link>
                 <p className="mt-2.5 font-mono text-[10px] text-ghost tracking-[0.04em] text-center leading-[1.6]">
-                  Les 14 € sont déductibles si vous passez en Suivi mensuel.
+                  Les 14 € seront déductibles à l&apos;ouverture du Suivi mensuel.
                 </p>
               </div>
             </div>

@@ -195,10 +195,10 @@ export default async function SavoirHubPage({
     </p>
     <h2 style="--accent:${accentRgb}">Utiliser ces données pour votre territoire</h2>
     <p>
-      En tant qu'abonné Suivi, vous pouvez générer un rapport personnalisé pour votre
-      commune ou votre quartier. Ce rapport intègre les données détaillées de chaque
-      indicateur, les projections à 2030 et 2050, et des recommandations adaptées à
-      votre situation.
+      Le Suivi — bientôt disponible — vous permettra de générer un rapport personnalisé
+      pour votre commune ou votre quartier. Ce rapport intègre les données détaillées de
+      chaque indicateur, les projections à 2030 et 2050, et des recommandations adaptées
+      à votre situation.
     </p>
   `;
 
