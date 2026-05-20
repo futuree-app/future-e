@@ -1,8 +1,113 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import Navbar from "@/components/Navbar";
 import { CheckoutPaymentPanel } from "@/components/CheckoutPaymentPanel";
-import { getCheckoutProduct } from "@/lib/checkout-products";
+import { SuiviWaitlistForm } from "@/components/SuiviWaitlistForm";
+import { getCheckoutProduct, type CheckoutProductSlug } from "@/lib/checkout-products";
 import { createClient } from "@/lib/supabase/server";
+
+type Theme = {
+  accent: string;
+  accentSoft: string;
+  accentTint: string;
+  accentRing: string;
+  accentGlow: string;
+  orb: string;
+  status: string;
+};
+
+const THEMES: Record<CheckoutProductSlug, Theme> = {
+  "rapport-complet": {
+    accent: "var(--green)",
+    accentSoft: "var(--green-soft)",
+    accentTint: "var(--green-tint)",
+    accentRing: "rgba(74,222,128,0.36)",
+    accentGlow: "rgba(74,222,128,0.16)",
+    orb: "rgba(74,222,128,0.32)",
+    status: "Disponible maintenant",
+  },
+  suivi: {
+    accent: "var(--orange)",
+    accentSoft: "var(--orange-soft)",
+    accentTint: "var(--orange-tint)",
+    accentRing: "var(--orange-ring)",
+    accentGlow: "rgba(251,146,60,0.18)",
+    orb: "var(--orb-orange)",
+    status: "Bientôt disponible",
+  },
+};
+
+const COPY: Record<CheckoutProductSlug, {
+  kicker: string;
+  hero: { line1: string; line2: string };
+  promise: string;
+  whatYouGet: { n: string; title: string; body: string }[];
+  timeline: { n: string; title: string; body: string }[];
+  faqs: { q: string; a: string }[];
+  notIncluded?: string[];
+}> = {
+  "rapport-complet": {
+    kicker: "Rapport complet · 14 € une fois",
+    hero: { line1: "Votre futur,", line2: "posé sur la table." },
+    promise: "Un rapport intégral, six modules personnalisés à partir de votre commune et de votre profil. Téléchargeable, à conserver. Les 14 € seront déduits à l'ouverture du Suivi.",
+    whatYouGet: [
+      { n: "01", title: "Rapport PDF complet", body: "Six modules d'analyse — santé, mobilité, environnement, logement, projets, quartier — écrits pour vous, sourcés sur les données publiques (DRIAS, INSEE, Géorisques, IREP)." },
+      { n: "02", title: "Dashboard simplifié", body: "Vos indicateurs clés en lecture seule, accessibles à tout moment depuis votre espace futur•e." },
+      { n: "03", title: "Régénération annuelle", body: "Une mise à jour du rapport par an, incluse, pour suivre l'évolution de votre territoire." },
+      { n: "04", title: "Crédit Suivi", body: "Les 14 € seront entièrement déduits du Suivi mensuel à son ouverture (prochainement)." },
+    ],
+    timeline: [
+      { n: "01", title: "Paiement sécurisé", body: "Stripe — moins de 2 minutes, carte bancaire ou Apple/Google Pay." },
+      { n: "02", title: "Génération du rapport", body: "Votre rapport est produit puis envoyé par email sous 24 heures ouvrées." },
+      { n: "03", title: "Accès permanent", body: "Téléchargeable depuis votre espace, exportable en PDF, partageable en lien temporaire." },
+    ],
+    faqs: [
+      { q: "Le rapport est-il vraiment personnalisé ?", a: "Oui. Chaque module est construit à partir de votre commune, votre profil de risque et vos réponses au wizard. Deux foyers d'une même ville obtiennent deux rapports différents." },
+      { q: "Combien de temps avant de le recevoir ?", a: "Sous 24 heures ouvrées. La plupart des rapports sont produits en quelques minutes ; nous gardons 24 h pour les périodes de forte demande." },
+      { q: "Et si je passe au Suivi plus tard ?", a: "Les 14 € seront déduits intégralement de votre premier mois de Suivi à son ouverture. Aucune démarche à faire de votre côté." },
+      { q: "Mes données sont-elles vendues ?", a: "Jamais. Les données issues du wizard restent dans votre espace. Voir notre politique RGPD." },
+    ],
+  },
+  suivi: {
+    kicker: "Suivi · 9 €/mois · prochainement",
+    hero: { line1: "Le Suivi.", line2: "Bientôt." },
+    promise: "Le rapport futur•e ne s'arrête pas à un PDF. Avec le Suivi, il devient vivant : un dashboard interactif, des alertes ciblées, une lecture mensuelle écrite pour vous. Inscrivez-vous pour être prévenu·e en avant-première.",
+    whatYouGet: [
+      { n: "01", title: "Dashboard interactif", body: "Vos risques, vos indicateurs, vos seuils — mis à jour à chaque nouvelle donnée publique." },
+      { n: "02", title: "Alertes locales", body: "Canicule, sécheresse, nouvelles études DRIAS sur votre département : prévenu·e sans être inondé·e." },
+      { n: "03", title: "Profil vivant", body: "Vous déménagez, achetez, changez de mode de vie : votre profil suit, vos projections aussi." },
+      { n: "04", title: "Lettre mensuelle", body: "Écrite à la main, personnalisée — vos territoires, vos risques, vos décisions du moment." },
+    ],
+    timeline: [
+      { n: "01", title: "Vous laissez votre email", body: "Et, si vous voulez, votre commune et votre motivation principale." },
+      { n: "02", title: "Un seul email à l'ouverture", body: "Aucun spam d'ici là. Vous serez prévenu·e en premier, avec 30 jours offerts." },
+      { n: "03", title: "Activation en un clic", body: "Lien direct vers votre dashboard Suivi, sans engagement, résiliable à tout moment." },
+    ],
+    faqs: [
+      { q: "Quand le Suivi ouvre-t-il vraiment ?", a: "Nous visons une ouverture progressive dans les prochains mois. Les inscrits à la liste d'attente passent en premier." },
+      { q: "Pourquoi pas tout de suite ?", a: "Nous voulons que la première version tienne ses promesses : alertes utiles, dashboard fiable, newsletter écrite — pas un produit générique." },
+      { q: "L'inscription m'engage-t-elle ?", a: "Aucun engagement. Aucune carte demandée. Juste votre email pour être prévenu·e." },
+      { q: "Et si j'ai déjà acheté le rapport ?", a: "Les 14 € seront entièrement déduits de votre premier mois de Suivi à son ouverture." },
+    ],
+  },
+};
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ product: string }>;
+}): Promise<Metadata> {
+  const { product: slug } = await params;
+  const product = getCheckoutProduct(slug);
+  if (!product) return { title: "futur•e" };
+  const isSuivi = product.slug === "suivi";
+  return {
+    title: isSuivi ? "Suivi · Bientôt — futur•e" : `${product.title} · futur•e`,
+    description: product.subtitle,
+    robots: isSuivi ? { index: false, follow: false } : undefined,
+  };
+}
 
 export default async function CheckoutPage({
   params,
@@ -12,101 +117,732 @@ export default async function CheckoutPage({
   const { product: productSlug } = await params;
   const product = getCheckoutProduct(productSlug);
 
-  if (!product) {
-    notFound();
-  }
+  if (!product) notFound();
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   const checkoutPath = `/checkout/${product.slug}`;
+  const theme = THEMES[product.slug];
+  const copy = COPY[product.slug];
+  const isSuivi = product.slug === "suivi";
 
   return (
-    <main className="min-h-screen bg-[var(--bg)] px-6 py-10 text-[var(--fg-1)]">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
-        <Link
-          href="/#pricing"
-          className="font-mono text-[11px] tracking-[0.12em] text-[var(--fg-4)] uppercase transition-colors hover:text-[var(--fg-1)]"
-        >
-          ← Retour aux tarifs
-        </Link>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "var(--bg)",
+        color: "var(--fg-1)",
+        position: "relative",
+        overflowX: "hidden",
+        fontFamily: "var(--font-sans)",
+      }}
+    >
+      <style>{`
+        @keyframes orbBreathe {
+          0%, 100% { transform: scale(1) translate(0, 0); }
+          50% { transform: scale(1.16) translate(40px, -20px); }
+        }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulseDot {
+          0%, 100% { opacity: 1; box-shadow: 0 0 0 0 ${theme.accentRing}; }
+          50%      { opacity: 0.85; box-shadow: 0 0 0 10px rgba(0,0,0,0); }
+        }
+        .checkout-orb  { animation: orbBreathe 20s ease-in-out infinite; }
+        .checkout-fadeup { opacity: 0; animation: fadeUp 0.7s var(--ease) forwards; }
+        .checkout-dot  { animation: pulseDot 2.4s ease-in-out infinite; }
+        details.checkout-faq[open] summary .faq-chev { transform: rotate(180deg); }
+        details.checkout-faq summary { list-style: none; cursor: pointer; }
+        details.checkout-faq summary::-webkit-details-marker { display: none; }
+        @media (max-width: 980px) {
+          .checkout-grid { grid-template-columns: 1fr !important; }
+          .checkout-aside { position: static !important; }
+          .checkout-timeline { grid-template-columns: 1fr !important; }
+          .checkout-features { grid-template-columns: 1fr !important; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .checkout-orb, .checkout-fadeup, .checkout-dot { animation: none !important; opacity: 1 !important; }
+        }
+      `}</style>
 
-        <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
-          <section className="rounded-[28px] border border-white/8 bg-white/[0.03] p-8 md:p-10">
-            <p className="mb-3 font-mono text-[11px] tracking-[0.14em] text-[var(--fg-4)] uppercase">
-              Paiement sécurisé
-            </p>
-            <h1
-              className="mb-4 text-[clamp(34px,5vw,54px)] leading-[0.96] tracking-[-0.04em]"
-              style={{ fontFamily: "'Instrument Serif', serif" }}
+      {/* Orbs */}
+      <div
+        aria-hidden
+        className="checkout-orb"
+        style={{
+          position: "absolute",
+          top: -200,
+          right: -160,
+          width: 620,
+          height: 620,
+          borderRadius: "50%",
+          background: `radial-gradient(circle, ${theme.orb} 0%, transparent 70%)`,
+          filter: "blur(var(--blur-orb))",
+          opacity: "var(--orb-opacity)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: 480,
+          left: -180,
+          width: 480,
+          height: 480,
+          borderRadius: "50%",
+          background: "radial-gradient(circle, var(--orb-violet) 0%, transparent 70%)",
+          filter: "blur(var(--blur-orb))",
+          opacity: "calc(var(--orb-opacity) * 0.7)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <Navbar />
+
+        <main style={{ maxWidth: 1240, margin: "0 auto", padding: "40px 24px 120px" }}>
+          {/* Back link */}
+          <Link
+            href="/#pricing"
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "var(--fs-kicker)",
+              letterSpacing: "var(--tracking-kicker)",
+              color: "var(--fg-4)",
+              textTransform: "uppercase",
+              textDecoration: "none",
+              transition: "color var(--dur-base) var(--ease)",
+              display: "inline-block",
+              marginBottom: 28,
+            }}
+          >
+            ← Retour aux tarifs
+          </Link>
+
+          {/* Hero band */}
+          <section
+            className="checkout-fadeup"
+            style={{
+              animationDelay: "0.05s",
+              marginBottom: 56,
+            }}
+          >
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "8px 14px",
+                background: theme.accentTint,
+                border: `1px solid ${theme.accentRing}`,
+                borderRadius: "var(--radius-pill)",
+                marginBottom: 24,
+              }}
             >
-              {product.title}
+              <span
+                className="checkout-dot"
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: theme.accent,
+                }}
+              />
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--fs-kicker)",
+                  letterSpacing: "var(--tracking-kicker)",
+                  textTransform: "uppercase",
+                  color: theme.accent,
+                }}
+              >
+                {theme.status}
+              </span>
+              <span
+                style={{
+                  width: 1,
+                  height: 12,
+                  background: "var(--border-2)",
+                }}
+              />
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--fs-kicker)",
+                  letterSpacing: "var(--tracking-kicker)",
+                  textTransform: "uppercase",
+                  color: "var(--fg-3)",
+                }}
+              >
+                {copy.kicker}
+              </span>
+            </div>
+
+            <h1
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: "var(--fs-display-lg)",
+                lineHeight: "var(--lh-display)",
+                letterSpacing: "var(--tracking-tight)",
+                margin: "0 0 22px",
+                color: "var(--fg-hi)",
+                maxWidth: 880,
+              }}
+            >
+              {copy.hero.line1}
+              <br />
+              <span style={{ fontStyle: "italic", color: theme.accent }}>
+                {copy.hero.line2}
+              </span>
             </h1>
-            <p className="mb-8 max-w-2xl text-[16px] leading-relaxed text-[var(--fg-3)]">
-              {product.subtitle}
+
+            <p
+              style={{
+                fontSize: "var(--fs-body-lg)",
+                lineHeight: "var(--lh-body)",
+                color: "var(--fg-2)",
+                maxWidth: 680,
+                margin: 0,
+              }}
+            >
+              {copy.promise}
             </p>
-
-            <div className="mb-8 flex items-end gap-3">
-              <div className="text-[42px] font-semibold tracking-[-0.05em] text-[var(--fg-1)]">
-                {product.amount}
-                <span className="ml-1 text-[22px] text-[var(--fg-3)]">€</span>
-              </div>
-              <div className="pb-1 text-[14px] text-[var(--fg-4)]">{product.priceLabel.replace(`${product.amount} €`, "").trim()}</div>
-            </div>
-
-            <div className="grid gap-3">
-              {product.features.map((feature) => (
-                <div
-                  key={feature}
-                  className="flex items-start gap-3 rounded-2xl border border-white/8 bg-white/[0.02] px-4 py-3 text-[15px] text-[var(--fg-2)]"
-                >
-                  <span className="mt-[2px] text-[var(--accent)]">✓</span>
-                  <span>{feature}</span>
-                </div>
-              ))}
-            </div>
           </section>
 
-          <aside className="rounded-[28px] border border-white/8 bg-[var(--bg-elev)] p-8 md:p-10">
-            {user ? (
-              <CheckoutPaymentPanel product={product} userEmail={user.email} />
-            ) : (
-              <div className="flex h-full flex-col justify-between gap-8">
-                <div>
-                  <p className="mb-2 font-mono text-[11px] tracking-[0.12em] text-[var(--fg-4)] uppercase">
+          {/* Main grid */}
+          <div
+            className="checkout-grid"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1.15fr 0.85fr",
+              gap: 40,
+              alignItems: "start",
+            }}
+          >
+            {/* LEFT — Value props */}
+            <div>
+              <section
+                className="checkout-fadeup"
+                style={{ animationDelay: "0.15s", marginBottom: 64 }}
+              >
+                <p
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "var(--fs-kicker)",
+                    letterSpacing: "var(--tracking-kicker)",
+                    textTransform: "uppercase",
+                    color: theme.accent,
+                    margin: "0 0 14px",
+                  }}
+                >
+                  Ce que vous obtenez
+                </p>
+                <h2
+                  style={{
+                    fontFamily: "var(--font-serif)",
+                    fontSize: "var(--fs-h3)",
+                    lineHeight: "var(--lh-title)",
+                    letterSpacing: "var(--tracking-display)",
+                    margin: "0 0 28px",
+                    color: "var(--fg-hi)",
+                  }}
+                >
+                  {isSuivi
+                    ? "Un climat qui bouge, un outil qui suit."
+                    : "Tout ce qu'il vous faut pour décider."}
+                </h2>
+
+                <div
+                  className="checkout-features"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, 1fr)",
+                    gap: 16,
+                  }}
+                >
+                  {copy.whatYouGet.map((item, i) => (
+                    <article
+                      key={item.n}
+                      className="checkout-fadeup"
+                      style={{
+                        animationDelay: `${0.2 + i * 0.05}s`,
+                        background: "var(--bg-elev)",
+                        border: "1px solid var(--border-1)",
+                        borderRadius: "var(--radius-2xl)",
+                        padding: "24px 22px",
+                        backdropFilter: "blur(var(--blur-sm))",
+                        WebkitBackdropFilter: "blur(var(--blur-sm))",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontFamily: "var(--font-mono)",
+                          fontSize: "var(--fs-kicker)",
+                          letterSpacing: "var(--tracking-kicker)",
+                          color: theme.accent,
+                          marginBottom: 12,
+                        }}
+                      >
+                        {item.n}
+                      </div>
+                      <h3
+                        style={{
+                          fontFamily: "var(--font-serif)",
+                          fontSize: 22,
+                          lineHeight: 1.2,
+                          letterSpacing: "var(--tracking-display)",
+                          margin: "0 0 10px",
+                          color: "var(--fg-hi)",
+                        }}
+                      >
+                        {item.title}
+                      </h3>
+                      <p
+                        style={{
+                          fontSize: "var(--fs-body-sm)",
+                          lineHeight: "var(--lh-body)",
+                          color: "var(--fg-3)",
+                          margin: 0,
+                        }}
+                      >
+                        {item.body}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+
+              {/* Timeline */}
+              <section
+                className="checkout-fadeup"
+                style={{ animationDelay: "0.3s", marginBottom: 64 }}
+              >
+                <p
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "var(--fs-kicker)",
+                    letterSpacing: "var(--tracking-kicker)",
+                    textTransform: "uppercase",
+                    color: "var(--fg-4)",
+                    margin: "0 0 14px",
+                  }}
+                >
+                  Comment ça se passe
+                </p>
+                <h2
+                  style={{
+                    fontFamily: "var(--font-serif)",
+                    fontSize: "var(--fs-h4)",
+                    lineHeight: "var(--lh-title)",
+                    letterSpacing: "var(--tracking-display)",
+                    margin: "0 0 28px",
+                    color: "var(--fg-hi)",
+                  }}
+                >
+                  Trois étapes, rien de plus.
+                </h2>
+
+                <ol
+                  className="checkout-timeline"
+                  style={{
+                    listStyle: "none",
+                    padding: 0,
+                    margin: 0,
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, 1fr)",
+                    gap: 16,
+                  }}
+                >
+                  {copy.timeline.map((step, i) => (
+                    <li
+                      key={step.n}
+                      style={{
+                        position: "relative",
+                        padding: "22px 20px",
+                        background: "var(--bg-elev-2)",
+                        border: "1px solid var(--border-1)",
+                        borderLeft: `2px solid ${theme.accent}`,
+                        borderRadius: "var(--radius-lg)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 10,
+                          letterSpacing: "0.14em",
+                          color: "var(--fg-4)",
+                          textTransform: "uppercase",
+                          marginBottom: 10,
+                        }}
+                      >
+                        Étape {String(i + 1).padStart(2, "0")}
+                      </div>
+                      <div
+                        style={{
+                          fontFamily: "var(--font-serif)",
+                          fontSize: 19,
+                          lineHeight: 1.25,
+                          color: "var(--fg-hi)",
+                          margin: "0 0 8px",
+                        }}
+                      >
+                        {step.title}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 13,
+                          lineHeight: 1.55,
+                          color: "var(--fg-3)",
+                        }}
+                      >
+                        {step.body}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+
+              {/* FAQ */}
+              <section className="checkout-fadeup" style={{ animationDelay: "0.4s" }}>
+                <p
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "var(--fs-kicker)",
+                    letterSpacing: "var(--tracking-kicker)",
+                    textTransform: "uppercase",
+                    color: "var(--fg-4)",
+                    margin: "0 0 14px",
+                  }}
+                >
+                  Questions fréquentes
+                </p>
+                <h2
+                  style={{
+                    fontFamily: "var(--font-serif)",
+                    fontSize: "var(--fs-h4)",
+                    lineHeight: "var(--lh-title)",
+                    letterSpacing: "var(--tracking-display)",
+                    margin: "0 0 24px",
+                    color: "var(--fg-hi)",
+                  }}
+                >
+                  Vous vous demandiez peut-être…
+                </h2>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {copy.faqs.map((faq, i) => (
+                    <details
+                      key={i}
+                      className="checkout-faq"
+                      style={{
+                        background: "var(--bg-elev)",
+                        border: "1px solid var(--border-1)",
+                        borderRadius: "var(--radius-lg)",
+                        padding: "16px 20px",
+                      }}
+                    >
+                      <summary
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          gap: 16,
+                          fontFamily: "var(--font-sans)",
+                          fontSize: 15,
+                          color: "var(--fg-1)",
+                          fontWeight: 500,
+                        }}
+                      >
+                        <span>{faq.q}</span>
+                        <span
+                          className="faq-chev"
+                          style={{
+                            transition: "transform var(--dur-base) var(--ease)",
+                            color: theme.accent,
+                            fontFamily: "var(--font-mono)",
+                            fontSize: 14,
+                            flexShrink: 0,
+                          }}
+                          aria-hidden
+                        >
+                          ▾
+                        </span>
+                      </summary>
+                      <p
+                        style={{
+                          margin: "12px 0 4px",
+                          fontSize: 14,
+                          lineHeight: "var(--lh-body)",
+                          color: "var(--fg-3)",
+                        }}
+                      >
+                        {faq.a}
+                      </p>
+                    </details>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            {/* RIGHT — Sticky aside */}
+            <aside
+              className="checkout-aside checkout-fadeup"
+              style={{
+                animationDelay: "0.2s",
+                position: "sticky",
+                top: 24,
+                background: "var(--bg-card)",
+                backdropFilter: "blur(var(--blur-lg))",
+                WebkitBackdropFilter: "blur(var(--blur-lg))",
+                border: "1px solid var(--border-2)",
+                borderRadius: "var(--radius-3xl)",
+                padding: "32px 30px",
+                boxShadow: `var(--shadow-hero), 0 0 0 1px ${theme.accentGlow}`,
+              }}
+            >
+              {/* Order summary */}
+              <div
+                style={{
+                  paddingBottom: 22,
+                  marginBottom: 22,
+                  borderBottom: "1px solid var(--border-1)",
+                }}
+              >
+                <p
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "var(--fs-kicker)",
+                    letterSpacing: "var(--tracking-kicker)",
+                    textTransform: "uppercase",
+                    color: "var(--fg-4)",
+                    margin: "0 0 14px",
+                  }}
+                >
+                  {isSuivi ? "Liste d'attente" : "Votre commande"}
+                </p>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    justifyContent: "space-between",
+                    gap: 12,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: "var(--font-serif)",
+                      fontSize: 16,
+                      color: "var(--fg-1)",
+                    }}
+                  >
+                    {product.title}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "var(--font-serif)",
+                      fontSize: 32,
+                      lineHeight: 1,
+                      color: "var(--fg-hi)",
+                      letterSpacing: "var(--tracking-display)",
+                    }}
+                  >
+                    {product.amount}
+                    <span style={{ fontSize: 16, color: "var(--fg-3)", marginLeft: 4 }}>
+                      €{isSuivi ? "/mois" : ""}
+                    </span>
+                  </div>
+                </div>
+                <p
+                  style={{
+                    margin: "8px 0 0",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 11,
+                    letterSpacing: "0.06em",
+                    color: "var(--fg-4)",
+                  }}
+                >
+                  {isSuivi
+                    ? "Sans engagement · 30 jours offerts à l'ouverture"
+                    : "Paiement unique · TTC · déductible du Suivi"}
+                </p>
+              </div>
+
+              {/* Action */}
+              {isSuivi ? (
+                <SuiviWaitlistForm />
+              ) : user ? (
+                <CheckoutPaymentPanel product={product} userEmail={user.email} />
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                  <p
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "var(--fs-kicker)",
+                      letterSpacing: "var(--tracking-kicker)",
+                      textTransform: "uppercase",
+                      color: "var(--fg-4)",
+                      margin: 0,
+                    }}
+                  >
                     Avant de payer
                   </p>
-                  <h2
-                    className="mb-4 text-[30px] leading-tight tracking-[-0.04em]"
-                    style={{ fontFamily: "'Instrument Serif', serif" }}
+                  <h3
+                    style={{
+                      fontFamily: "var(--font-serif)",
+                      fontSize: 26,
+                      lineHeight: 1.2,
+                      letterSpacing: "var(--tracking-display)",
+                      margin: 0,
+                      color: "var(--fg-hi)",
+                    }}
                   >
-                    Ouvrez d’abord votre espace.
-                  </h2>
-                  <p className="text-[15px] leading-relaxed text-[var(--fg-3)]">
-                    Le paiement doit être rattaché à un compte pour débloquer votre rapport, votre dashboard et vos modules.
+                    Ouvrez d&apos;abord votre espace.
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: 14,
+                      lineHeight: "var(--lh-body)",
+                      color: "var(--fg-3)",
+                      margin: 0,
+                    }}
+                  >
+                    Le paiement doit être rattaché à un compte pour débloquer votre rapport.
                   </p>
-                </div>
-
-                <div className="flex flex-col gap-3">
                   <Link
                     href={`/inscription?next=${encodeURIComponent(checkoutPath)}`}
-                    className="flex items-center justify-center rounded-xl bg-[var(--accent)] px-5 py-4 text-[15px] font-semibold text-[var(--bg)] transition-opacity hover:opacity-90"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "16px 24px",
+                      background: theme.accent,
+                      color: "#0b0e1a",
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "var(--fs-label)",
+                      letterSpacing: "var(--tracking-kicker)",
+                      textTransform: "uppercase",
+                      fontWeight: 600,
+                      borderRadius: "var(--radius-md)",
+                      textDecoration: "none",
+                      boxShadow: "var(--shadow-card)",
+                      marginTop: 4,
+                    }}
                   >
                     Créer mon compte puis payer
                   </Link>
                   <Link
                     href={`/connexion?next=${encodeURIComponent(checkoutPath)}`}
-                    className="flex items-center justify-center rounded-xl border border-white/10 px-5 py-4 text-[14px] text-[var(--fg-2)] transition-colors hover:border-white/20 hover:text-[var(--fg-1)]"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "14px 24px",
+                      border: "1px solid var(--border-2)",
+                      color: "var(--fg-2)",
+                      fontFamily: "var(--font-sans)",
+                      fontSize: 14,
+                      borderRadius: "var(--radius-md)",
+                      textDecoration: "none",
+                    }}
                   >
-                    J’ai déjà un compte
+                    J&apos;ai déjà un compte
                   </Link>
                 </div>
+              )}
+
+              {/* Trust row */}
+              <div
+                style={{
+                  marginTop: 22,
+                  paddingTop: 18,
+                  borderTop: "1px solid var(--border-1)",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 14,
+                  justifyContent: "space-between",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 10,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: "var(--fg-4)",
+                }}
+              >
+                <span>{isSuivi ? "RGPD" : "Stripe · sécurisé"}</span>
+                <span>{isSuivi ? "0 spam" : "TVA incluse"}</span>
+                <span>{isSuivi ? "0 engagement" : "Support FR"}</span>
               </div>
-            )}
-          </aside>
-        </div>
+            </aside>
+          </div>
+
+          {/* Closing reassurance band */}
+          <section
+            className="checkout-fadeup"
+            style={{
+              animationDelay: "0.5s",
+              marginTop: 96,
+              borderRadius: "var(--radius-band)",
+              padding: "48px 40px",
+              background: `linear-gradient(135deg, ${theme.accentTint} 0%, var(--bg-elev-2) 60%, transparent 100%)`,
+              border: "1px solid var(--border-1)",
+              boxShadow: "var(--shadow-band)",
+              textAlign: "center",
+            }}
+          >
+            <p
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontStyle: "italic",
+                fontSize: "var(--fs-h4)",
+                lineHeight: 1.3,
+                letterSpacing: "var(--tracking-display)",
+                margin: 0,
+                color: "var(--fg-hi)",
+                maxWidth: 680,
+                marginInline: "auto",
+              }}
+            >
+              {isSuivi
+                ? "« Ce n'est plus une projection qu'on consulte. C'est une relation qu'on tient avec son territoire. »"
+                : "« Pas une étude de plus. Un rapport pour décider — calmement, et à temps. »"}
+            </p>
+            <p
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "var(--fs-kicker)",
+                letterSpacing: "var(--tracking-kicker)",
+                textTransform: "uppercase",
+                color: "var(--fg-4)",
+                marginTop: 22,
+              }}
+            >
+              futur•e · {product.title}
+            </p>
+            <p
+              style={{
+                marginTop: 18,
+                fontSize: 13,
+                color: "var(--fg-3)",
+              }}
+            >
+              Une question ? Écrivez-nous à{" "}
+              <a
+                href="mailto:hello@futur-e.fr"
+                style={{ color: theme.accent, textDecoration: "none" }}
+              >
+                hello@futur-e.fr
+              </a>
+            </p>
+          </section>
+        </main>
       </div>
-    </main>
+    </div>
   );
 }
