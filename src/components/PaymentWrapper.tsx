@@ -91,7 +91,7 @@ export function PaymentWrapper({
         appearance: {
           theme: "night",
           variables: {
-            colorPrimary: "#c8b89a",
+            colorPrimary: "#fb923c",
             colorBackground: "#12172a",
             colorText: "#e9ecf2",
             colorDanger: "#f87171",
@@ -99,6 +99,7 @@ export function PaymentWrapper({
             borderRadius: "8px",
           },
         },
+        paymentMethodOrder: ["apple_pay", "google_pay", "card"],
       }}
     >
       <PaymentForm onSuccess={onSuccess} />

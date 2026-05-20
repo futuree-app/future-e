@@ -63,11 +63,30 @@ export function PaymentForm({ onSuccess }: PaymentFormProps) {
         <p className="font-mono text-sm text-red-400">{error}</p>
       ) : null}
 
-      <div className="sticky bottom-0 z-10 -mx-2 border-t border-white/8 bg-[var(--bg-elev)]/96 px-2 pb-2 pt-4 backdrop-blur">
+      <div
+        style={{
+          marginTop: 8,
+          paddingTop: 16,
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
         <button
           type="submit"
           disabled={!stripe || loading}
-          className="w-full rounded-lg bg-[var(--accent)] px-4 py-4 font-medium text-[var(--bg)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          style={{
+            width: "100%",
+            padding: "16px",
+            borderRadius: 8,
+            background: loading ? "rgba(251,146,60,0.5)" : "#fb923c",
+            color: "#060812",
+            fontFamily: "Instrument Sans, system-ui, sans-serif",
+            fontSize: 15,
+            fontWeight: 600,
+            border: "none",
+            cursor: loading ? "wait" : "pointer",
+            opacity: !stripe ? 0.5 : 1,
+            transition: "opacity 0.15s, background 0.15s",
+          }}
         >
           {loading ? "Traitement…" : "Payer"}
         </button>
