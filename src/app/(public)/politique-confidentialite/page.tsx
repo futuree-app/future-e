@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { CookieSettingsLink } from "@/components/CookieSettingsLink";
 
 export const metadata: Metadata = {
   title: "Politique de confidentialité — futur•e",
@@ -190,7 +191,9 @@ export default function PolitiqueConfidentialitePage() {
               Un cookie technique (<code style={{ fontFamily: "monospace", fontSize: 13, background: "rgba(255,255,255,0.06)", padding: "2px 6px", borderRadius: 4 }}>futuree-consent</code>) est utilisé pour mémoriser votre choix. Il ne contient aucune donnée personnelle.
             </p>
             <p>
-              Vous pouvez modifier votre choix à tout moment depuis le lien <strong style={{ color: "var(--fg-1)" }}>« Gestion des cookies »</strong> disponible en bas de chaque page.
+              Vous pouvez modifier votre choix à tout moment depuis le lien{" "}
+              <CookieSettingsLink style={{ color: "var(--orange)", fontFamily: "inherit", fontSize: "inherit" }} />{" "}
+              disponible en bas de chaque page.
             </p>
           </Section>
 

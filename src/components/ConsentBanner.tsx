@@ -30,6 +30,13 @@ export function ConsentBanner() {
     } catch {
       setVisible(true);
     }
+
+    const handler = () => {
+      try { localStorage.removeItem(STORAGE_KEY); } catch {}
+      setVisible(true);
+    };
+    window.addEventListener("futuree:show-consent", handler);
+    return () => window.removeEventListener("futuree:show-consent", handler);
   }, []);
 
   function handleConsent(value: ConsentValue) {

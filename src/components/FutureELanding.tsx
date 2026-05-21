@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ReportWizard } from '@/components/wizard/ReportWizard';
 import { createClient } from '@/lib/supabase/client';
 import Navbar from '@/components/Navbar';
+import { CookieSettingsLink } from '@/components/CookieSettingsLink';
 import { SAVOIR_HUB_ARTICLES } from '@/config/navigation';
 import { LandingComparatorInput } from '@/components/LandingComparatorInput';
 import { deriveCategories } from '@/lib/commune-categories';
@@ -3025,6 +3026,10 @@ export default function FutureELanding() {
                 {label}
               </a>
             ))}
+            <a style={styles.footerLink} href="/politique-confidentialite">
+              Confidentialité
+            </a>
+            <CookieSettingsLink style={styles.footerLink} />
             <a style={{ ...styles.footerLink, opacity: 0.5 }} href="/professionnels">
               Professionnels
             </a>
