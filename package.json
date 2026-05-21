@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.93.0",
+    "@microsoft/clarity": "^1.0.2",
     "@stripe/react-stripe-js": "^6.4.0",
     "@stripe/stripe-js": "^9.6.0",
     "@supabase/ssr": "^0.10.2",
