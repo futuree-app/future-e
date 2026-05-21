@@ -20,25 +20,6 @@ Il reformule l’historique en séquences produit lisibles :
 
 ## Historique synthétique
 
-### 21/05/2026 — Pages auth : copy différenciée connexion / inscription
-
-**Commits**
-- `7f853b9` — Pages auth : copy différenciée connexion / inscription
-
-**Pages / modules touchés**
-- `(auth)/layout.tsx` — bloc `auth-story` sorti du layout partagé
-- `(auth)/connexion/page.tsx` — copy "retour", métriques visuelles (6 / 3 / ∞)
-- `(auth)/inscription/page.tsx` — copy "Ce que ce lieu fait à votre vie", liste orientée promesse personnelle
-
-**Impact utilisateur**
-- Les deux pages affichent désormais un message distinct, adapté au contexte (retour vs première fois)
-- L'inscription communique la promesse de personnalisation plutôt que la description du produit
-
-**Dépendances externes**
-- Aucune
-
----
-
 ### 18/04/2026 — Initialisation du projet
 
 **Commits**
@@ -426,29 +407,6 @@ Il reformule l’historique en séquences produit lisibles :
 
 **Notes**
 - deux commits proches sur le même chantier : séquence à considérer comme un seul lot fonctionnel
-
----
-
-### 21/05/2026 — Stripe : méthodes de paiement + fix bouton + vars Vercel
-
-**Commits**
-- `28d3ed6` — Stripe : restreindre aux méthodes CB / Apple Pay / Google Pay + fix bouton Payer
-- `ae039cf` — Fix TS : retirer paymentMethodOrder (propriété inexistante)
-
-**Pages / modules touchés**
-- `src/app/api/stripe/create-payment-intent/route.ts` : `automatic_payment_methods` remplacé par `payment_method_types: ["card"]` — supprime MB WAY, Klarna, Bancontact, Amazon Pay, EPS
-- `src/components/PaymentForm.tsx` : bouton Payer en style inline (#fb923c) — corrige le problème de contraste (var(--accent) non résolu dans le contexte Stripe Elements)
-- `src/components/PaymentWrapper.tsx` : nettoyage paymentMethodOrder (invalide sur le type StripeElementsOptionsClientSecret)
-- `src/components/AccountNav.tsx` + `src/app/(account)/compte/page.tsx` : liens morts remplacés (commit `d2ca611`)
-
-**Impact utilisateur**
-- Le formulaire de paiement n'affiche plus que CB, Apple Pay et Google Pay
-- Le bouton "Payer" est visible (orange sur fond sombre) au lieu de noirci
-- Les 404 RSC dans la console (manifeste, contact, etc.) sont supprimés
-
-**Dépendances externes**
-- Variables Stripe ajoutées manuellement sur Vercel (`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`) — sans cette étape le paiement restait cassé en prod
-- Redeploy manuel déclenché via `npx vercel --prod` pour prendre en compte les nouvelles vars
 
 ---
 
