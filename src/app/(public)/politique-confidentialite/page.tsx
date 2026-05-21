@@ -8,13 +8,15 @@ export const metadata: Metadata = {
 
 const LAST_UPDATED = "22 mai 2026";
 
+const NO_SELL_NOTICE = "futur•e ne revend jamais les données personnelles de ses utilisateurs et ne les utilise pas à des fins de publicité comportementale.";
+
 const PROCESSORS = [
-  { name: "Supabase", role: "Base de données et authentification", location: "États-Unis (EU contractuel)", link: "https://supabase.com/privacy" },
-  { name: "Vercel", role: "Hébergement et diffusion du site", location: "États-Unis (EU contractuel)", link: "https://vercel.com/legal/privacy-policy" },
-  { name: "Stripe", role: "Traitement des paiements", location: "États-Unis (EU contractuel)", link: "https://stripe.com/fr/privacy" },
-  { name: "Google (GA4 + GTM)", role: "Mesure d'audience (avec consentement)", location: "États-Unis (EU contractuel)", link: "https://policies.google.com/privacy" },
+  { name: "Supabase", role: "Base de données et authentification", location: "États-Unis — clauses contractuelles types UE", link: "https://supabase.com/privacy" },
+  { name: "Vercel", role: "Hébergement et diffusion du site", location: "États-Unis — clauses contractuelles types UE", link: "https://vercel.com/legal/privacy-policy" },
+  { name: "Stripe", role: "Traitement des paiements", location: "États-Unis — clauses contractuelles types UE", link: "https://stripe.com/fr/privacy" },
+  { name: "Google (GA4 + GTM)", role: "Mesure d'audience (avec consentement)", location: "États-Unis — clauses contractuelles types UE", link: "https://policies.google.com/privacy" },
   { name: "PostHog", role: "Analytics produit (avec consentement)", location: "Union Européenne", link: "https://posthog.com/privacy" },
-  { name: "Microsoft Clarity", role: "Enregistrements de session (avec consentement)", location: "États-Unis (EU contractuel)", link: "https://privacy.microsoft.com/fr-fr/privacystatement" },
+  { name: "Microsoft Clarity", role: "Enregistrements de session (avec consentement)", location: "États-Unis — clauses contractuelles types UE", link: "https://privacy.microsoft.com/fr-fr/privacystatement" },
 ];
 
 export default function PolitiqueConfidentialitePage() {
@@ -119,10 +121,13 @@ export default function PolitiqueConfidentialitePage() {
           {/* Données collectées */}
           <Section title="Données collectées">
             <p>futur•e collecte uniquement ce dont le service a besoin pour fonctionner :</p>
-            <ul style={{ paddingLeft: 20, lineHeight: 2, color: "var(--fg-2)", margin: "12px 0 0" }}>
+            <p style={{ marginTop: 16, padding: "12px 16px", borderRadius: 10, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", fontSize: 14 }}>
+              {NO_SELL_NOTICE}
+            </p>
+            <ul style={{ paddingLeft: 20, lineHeight: 2, color: "var(--fg-2)", margin: "16px 0 0" }}>
               <li><strong style={{ color: "var(--fg-1)" }}>Email et mot de passe</strong> — pour créer et accéder à votre compte.</li>
               <li><strong style={{ color: "var(--fg-1)" }}>Commune de référence</strong> — pour personnaliser les projections climatiques.</li>
-              <li><strong style={{ color: "var(--fg-1)" }}>Réponses au questionnaire</strong> — logement, mobilité, santé, projets. Elles restent dans votre espace et ne sont jamais revendues.</li>
+              <li><strong style={{ color: "var(--fg-1)" }}>Réponses au questionnaire</strong> — logement, mobilité, confort de vie, environnement personnel et projets. Elles restent dans votre espace et ne sont jamais revendues.</li>
               <li><strong style={{ color: "var(--fg-1)" }}>Données de paiement</strong> — traitées directement par Stripe. futur•e ne voit ni ne stocke vos coordonnées bancaires.</li>
               <li><strong style={{ color: "var(--fg-1)" }}>Données de navigation</strong> — uniquement si vous avez donné votre consentement via la bannière.</li>
             </ul>
@@ -185,7 +190,24 @@ export default function PolitiqueConfidentialitePage() {
               Un cookie technique (<code style={{ fontFamily: "monospace", fontSize: 13, background: "rgba(255,255,255,0.06)", padding: "2px 6px", borderRadius: 4 }}>futuree-consent</code>) est utilisé pour mémoriser votre choix. Il ne contient aucune donnée personnelle.
             </p>
             <p>
-              Vous pouvez modifier votre choix à tout moment en vidant les données de votre navigateur pour ce site.
+              Vous pouvez modifier votre choix à tout moment depuis le lien <strong style={{ color: "var(--fg-1)" }}>« Gestion des cookies »</strong> disponible en bas de chaque page.
+            </p>
+          </Section>
+
+          {/* Session recordings */}
+          <Section title="Enregistrements de session">
+            <p>
+              Avec votre consentement, futur•e utilise Microsoft Clarity pour enregistrer des sessions de navigation anonymisées (mouvements, clics, scroll). Ces enregistrements servent uniquement à améliorer l'ergonomie du service.
+            </p>
+            <p>
+              Les enregistrements de session <strong style={{ color: "var(--fg-1)" }}>ne permettent pas de voir les mots de passe, les données bancaires ou tout champ sensible saisi</strong> — ces éléments sont masqués automatiquement avant transmission.
+            </p>
+          </Section>
+
+          {/* Mineurs */}
+          <Section title="Âge minimum">
+            <p>
+              futur•e n'est pas destiné aux personnes de moins de 15 ans. Si vous êtes parent et pensez que votre enfant a créé un compte, contactez-nous à <a href="mailto:hello@futur-e.fr" style={{ color: "var(--orange)" }}>hello@futur-e.fr</a> pour le supprimer.
             </p>
           </Section>
 
