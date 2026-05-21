@@ -3,6 +3,7 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ClarityInit } from "@/components/ClarityInit";
+import { PostHogProvider } from "@/components/PostHogProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -33,7 +34,9 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
-        {children}
+        <PostHogProvider>
+          {children}
+        </PostHogProvider>
         <ClarityInit />
         <Analytics />
         <SpeedInsights />
