@@ -16,25 +16,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         <div className="auth-grid">
-          <section className="auth-story">
-            <p className="auth-story-label">Votre espace personnel</p>
-            <h2 className="auth-story-title">
-              Ce que vous avez construit, toujours là.
-            </h2>
-            <p className="auth-story-copy">
-              futur•e garde la mémoire de votre commune, de vos réponses et de
-              vos projections. Vous retrouvez exactement là où vous en étiez,
-              sans recommencer.
-            </p>
-            <div className="auth-story-card">
-              <p className="auth-story-card-label">Vous retrouvez</p>
-              <ul className="auth-story-list">
-                <li>vos projections climatiques locales et leurs scénarios à 2050</li>
-                <li>votre rapport personnalisé et les 6 modules d&apos;analyse</li>
-                <li>le suivi de vos indicateurs au fil du temps</li>
-              </ul>
-            </div>
-          </section>
           {children}
         </div>
       </div>
