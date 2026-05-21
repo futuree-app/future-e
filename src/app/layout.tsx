@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ClarityInit } from "@/components/ClarityInit";
@@ -36,6 +37,7 @@ export default function RootLayout({
         <ClarityInit />
         <Analytics />
         <SpeedInsights />
+        <GoogleAnalytics gaId="G-MLT5Y4TC6W" />
       </body>
     </html>
   );
