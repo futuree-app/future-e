@@ -4,6 +4,7 @@ import posthog from "posthog-js";
 import { PostHogProvider as PHProvider, usePostHog } from "posthog-js/react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, Suspense } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 function PostHogPageView() {
   const pathname = usePathname();
@@ -36,6 +37,26 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       defaults: "2026-01-30",
       debug: process.env.NODE_ENV === "development",
     });
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        posthog.identify(user.id, { email: user.email });
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        posthog.identify(session.user.id, { email: session.user.email });
+      } else if (event === "SIGNED_OUT") {
+        posthog.reset();
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   return (
