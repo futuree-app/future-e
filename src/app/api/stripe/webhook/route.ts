@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import type Stripe from "stripe";
 import { getResend } from "@/lib/resend";
 import { getStripe } from "@/lib/stripe";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export const runtime = "nodejs";
 
@@ -122,6 +123,21 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
       `,
     });
   }
+
+  const distinctId = userEmail || userId || paymentIntent.id;
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId,
+    event: "payment_completed",
+    properties: {
+      product_type: productType,
+      amount: paymentIntent.amount / 100,
+      currency: paymentIntent.currency,
+      payment_intent_id: paymentIntent.id,
+      user_id: userId && userId !== "anonymous" ? userId : null,
+    },
+  });
+  await posthog.shutdown();
 }
 
 export async function POST(request: Request) {

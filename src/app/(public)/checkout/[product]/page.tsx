@@ -6,6 +6,7 @@ import { CheckoutPaymentPanel } from "@/components/CheckoutPaymentPanel";
 import { SuiviWaitlistForm } from "@/components/SuiviWaitlistForm";
 import { getCheckoutProduct, type CheckoutProductSlug } from "@/lib/checkout-products";
 import { createClient } from "@/lib/supabase/server";
+import { CheckoutViewedTracker } from "./CheckoutViewedTracker";
 
 type Theme = {
   accent: string;
@@ -204,6 +205,7 @@ export default async function CheckoutPage({
         }}
       />
 
+      <CheckoutViewedTracker productSlug={product.slug} />
       <div style={{ position: "relative", zIndex: 1 }}>
         <Navbar />
 

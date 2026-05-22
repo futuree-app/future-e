@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export const runtime = "nodejs";
 
@@ -37,6 +38,19 @@ export async function POST(request: Request) {
         productType: productType.trim(),
       },
     });
+
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId: user?.email ?? "anonymous",
+      event: "payment_intent_created",
+      properties: {
+        product_type: productType.trim(),
+        amount,
+        currency: "eur",
+        user_id: user?.id ?? null,
+      },
+    });
+    await posthog.shutdown();
 
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,

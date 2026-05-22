@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { AuthActionState } from "@/app/auth/shared";
 import { createClient } from "@/lib/supabase/server";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 function getStringField(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -102,6 +103,11 @@ export async function signInWithPasswordAction(
     };
   }
 
+  const posthog = getPostHogClient();
+  posthog.identify({ distinctId: email, properties: { email } });
+  posthog.capture({ distinctId: email, event: "user_logged_in", properties: { email, method: "password" } });
+  await posthog.shutdown();
+
   redirect(next);
 }
 
@@ -147,6 +153,15 @@ export async function signUpWithPasswordAction(
     };
   }
 
+  const posthog = getPostHogClient();
+  posthog.identify({ distinctId: email, properties: { email } });
+  posthog.capture({
+    distinctId: email,
+    event: "user_signed_up",
+    properties: { email, method: "password", email_confirmation_required: !data.session },
+  });
+  await posthog.shutdown();
+
   if (data.session) {
     redirect(next);
   }
@@ -160,6 +175,14 @@ export async function signUpWithPasswordAction(
 
 export async function signOutAction() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   await supabase.auth.signOut();
+
+  if (user?.email) {
+    const posthog = getPostHogClient();
+    posthog.capture({ distinctId: user.email, event: "user_signed_out" });
+    await posthog.shutdown();
+  }
+
   redirect("/");
 }

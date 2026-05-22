@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import posthog from "posthog-js";
 
 export function GoogleSignInButton({ next }: { next?: string }) {
   const [loading, setLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
+    posthog.capture("google_sign_in_clicked", { next: next ?? null });
     const supabase = createClient();
     const callbackUrl = new URL("/auth/callback", window.location.origin);
     if (next && next.startsWith("/") && !next.startsWith("//")) {

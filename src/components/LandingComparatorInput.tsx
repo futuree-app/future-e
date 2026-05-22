@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import posthog from 'posthog-js';
 
 type Commune = {
   nom: string;
@@ -64,6 +65,11 @@ export function LandingComparatorInput() {
 
   const handleGo = () => {
     if (!selected) return;
+    posthog.capture('comparator_commune_selected', {
+      commune: selected.nom,
+      code_insee: selected.code,
+      departement: selected.departement?.nom ?? null,
+    });
     router.push(`/comparateur?commune=${encodeURIComponent(selected.code)}&nom=${encodeURIComponent(selected.nom)}`);
   };
 

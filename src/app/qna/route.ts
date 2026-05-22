@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
@@ -155,7 +157,10 @@ export async function POST(request: Request) {
 
   let lastErrorText = "No Anthropic model could be used.";
 
+  const traceId = randomUUID();
+
   for (const model of MODEL_CANDIDATES) {
+    const t0 = Date.now();
     const anthropicResponse = await fetch(ANTHROPIC_API_URL, {
       method: "POST",
       headers: {
@@ -176,6 +181,7 @@ export async function POST(request: Request) {
         ],
       }),
     });
+    const latency = (Date.now() - t0) / 1000;
 
     if (!anthropicResponse.ok) {
       lastErrorText = await anthropicResponse.text();
@@ -186,6 +192,24 @@ export async function POST(request: Request) {
     const text =
       anthropicJson?.content?.find?.((item: { type: string }) => item.type === "text")
         ?.text ?? "";
+
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId: "anonymous",
+      event: "$ai_generation",
+      properties: {
+        $ai_trace_id: traceId,
+        $ai_provider: "anthropic",
+        $ai_model: model,
+        $ai_input_tokens: anthropicJson?.usage?.input_tokens ?? null,
+        $ai_output_tokens: anthropicJson?.usage?.output_tokens ?? null,
+        $ai_latency: latency,
+        $ai_http_status: anthropicResponse.status,
+        $ai_base_url: "https://api.anthropic.com",
+        $ai_span_name: "qna",
+      },
+    });
+    await posthog.shutdown();
 
     try {
       const answer = parseClaudeJson(text);

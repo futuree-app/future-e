@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef, useCallback, useEffect, useReducer, useState } from "react";
+import posthog from "posthog-js";
 import {
   type WizardAnswers,
   type WizardState,
@@ -160,7 +161,18 @@ export const ReportWizard = forwardRef<
             answers={state.answers}
             onAnswer={(key, value) => dispatch({ type: "SET_ANSWER", key, value })}
             onSetInsee={(insee) => dispatch({ type: "SET_INSEE", insee })}
-            onNext={() => dispatch({ type: "NEXT" })}
+            onNext={() => {
+                if (state.step === 5) {
+                  posthog.capture("wizard_completed", {
+                    commune: state.answers.quartier ?? null,
+                    secteur: state.answers.metier ?? null,
+                    mobilite: state.answers.mobilite ?? null,
+                    projets: state.answers.projets ?? null,
+                    unknown_answers_count: state.unknownAnswers.length,
+                  });
+                }
+                dispatch({ type: "NEXT" });
+              }}
             onPrev={() => dispatch({ type: "PREV" })}
             onSkip={(key) => dispatch({ type: "SKIP", key })}
           />

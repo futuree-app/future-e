@@ -3,6 +3,7 @@ import { AccountNav } from "@/components/AccountNav";
 import { canAccessCompleteReport } from "@/lib/access";
 import { PRODUCT_MODULES } from "@/lib/product";
 import { getCurrentUserAccount } from "@/lib/user-account";
+import { TrackedModuleLink, TrackedUpgradeLink } from "./RapportTrackedLinks";
 
 const MODULE_COLORS: Record<string, string> = {
   quartier: "var(--blue)",
@@ -193,9 +194,9 @@ export default async function RapportPage() {
                     Accessible
                   </span>
                   <div className="mt-4">
-                    <Link href="/rapport/quartier" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: "var(--blue)", border: "1px solid var(--blue)33", background: "var(--blue)0d" }}>
+                    <TrackedModuleLink href="/rapport/quartier" moduleId="quartier" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: "var(--blue)", border: "1px solid var(--blue)33", background: "var(--blue)0d" }}>
                       Ouvrir le module
-                    </Link>
+                    </TrackedModuleLink>
                   </div>
                 </article>
 
@@ -254,9 +255,9 @@ export default async function RapportPage() {
                   14<span className="text-[22px] text-ghost">€</span>
                 </span>
                 <span className="block font-mono text-[11px] text-ghost tracking-[0.04em] mt-1 mb-5">une fois · Suivi 9 €/mois prochainement</span>
-                <Link href="/#pricing" className="flex items-center justify-center px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[13px] no-underline w-full" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+                <TrackedUpgradeLink href="/#pricing" className="flex items-center justify-center px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[13px] no-underline w-full" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
                   Voir les formules
-                </Link>
+                </TrackedUpgradeLink>
                 <p className="mt-2.5 font-mono text-[10px] text-ghost tracking-[0.04em] text-center leading-[1.6]">
                   Les 14 € seront déductibles à l&apos;ouverture du Suivi mensuel.
                 </p>
@@ -309,9 +310,9 @@ export default async function RapportPage() {
                     </span>
                     {href ? (
                       <div className="mt-4">
-                        <Link href={href} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: col, border: `1px solid ${col}33`, background: `${col}0d` }}>
+                        <TrackedModuleLink href={href} moduleId={module.id} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: col, border: `1px solid ${col}33`, background: `${col}0d` }}>
                           Ouvrir le module
-                        </Link>
+                        </TrackedModuleLink>
                       </div>
                     ) : null}
                   </article>
@@ -323,9 +324,9 @@ export default async function RapportPage() {
 
         {/* Footer nav */}
         <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-white/[0.08]">
-          <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+          <TrackedUpgradeLink href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
             Ouvrir le rapport complet
-          </Link>
+          </TrackedUpgradeLink>
           <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
             Mon compte
           </Link>

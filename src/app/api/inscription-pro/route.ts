@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getPostHogClient } from '@/lib/posthog-server';
 
 export async function POST(request: Request) {
   const { profession, email, cabinet, besoin } = await request.json();
@@ -21,6 +22,18 @@ export async function POST(request: Request) {
     console.error('[inscription-pro]', error.message);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
+
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: email.trim().toLowerCase(),
+    event: 'pro_inscription_submitted',
+    properties: {
+      profession,
+      cabinet: cabinet || null,
+      besoin: besoin || null,
+    },
+  });
+  await posthog.shutdown();
 
   return NextResponse.json({ ok: true });
 }

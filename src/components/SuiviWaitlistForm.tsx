@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import posthog from 'posthog-js';
 
 const MOTIVATIONS = [
   { value: 'alertes', label: 'Recevoir des alertes locales' },
@@ -36,6 +37,10 @@ export function SuiviWaitlistForm() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || 'error');
       }
+      posthog.capture('suivi_waitlist_joined', {
+        commune: payload.commune || null,
+        motivation: payload.motivation || null,
+      });
       setStatus('done');
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'error');
@@ -242,7 +247,7 @@ export function SuiviWaitlistForm() {
           lineHeight: 1.7,
         }}
       >
-        Aucun spam · Un seul email à l'ouverture · RGPD
+        Aucun spam · Un seul email à l&apos;ouverture · RGPD
       </p>
     </form>
   );

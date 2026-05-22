@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>futur•e — Logo HD</title>
+<style>
+  @font-face {
+    font-family: 'Instrument Serif';
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url('fonts/InstrumentSerif-Italic.ttf') format('truetype');
+  }
+  @font-face {
+    font-family: 'Instrument Serif';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('fonts/InstrumentSerif-Regular.ttf') format('truetype');
+  }
+  :root {
+    /* ——— Design tokens (subset of futur•e DS) ——— */
+    --bg: #060812;
+    --bg-deep: #0d1322;
+    --bg-card: rgba(255,255,255,0.04);
+    --border-1: rgba(255,255,255,0.08);
+    --fg-hi: #f6f4ef;
+    --fg-1: #e9ecf2;
+    --fg-3: #9ba3b4;
+    --fg-4: #6b7388;
+    --orange: #fb923c;
+    --orange-tint: rgba(251,146,60,0.12);
+    --font-serif: 'Instrument Serif', 'Georgia', serif;
+    --font-sans: 'Instrument Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;
+  }
+  [data-theme="light"] {
+    --bg: #faf8f3;
+    --bg-deep: #f2ede4;
+    --bg-card: rgba(26,29,40,0.04);
+    --border-1: rgba(26,29,40,0.08);
+    --fg-hi: #1a1d28;
+    --fg-1: #2b3040;
+    --fg-3: #5b6373;
+    --fg-4: #7a8294;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg-1);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+  body::before, body::after {
+    content: ''; position: fixed; border-radius: 50%; filter: blur(100px);
+    pointer-events: none; z-index: 0;
+  }
+  body::before {
+    width: 560px; height: 560px;
+    background: radial-gradient(circle, rgba(251,146,60,0.42) 0%, transparent 70%);
+    top: -180px; left: -150px;
+  }
+  body::after {
+    width: 480px; height: 480px;
+    background: radial-gradient(circle, rgba(167,139,250,0.36) 0%, transparent 70%);
+    bottom: -160px; right: -120px;
+  }
+  [data-theme="light"] body::before { background: radial-gradient(circle, rgba(251,146,60,0.22) 0%, transparent 70%); }
+  [data-theme="light"] body::after  { background: radial-gradient(circle, rgba(167,139,250,0.18) 0%, transparent 70%); }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 64px 32px 120px; position: relative; z-index: 1; }
+
+  /* Header */
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 56px; }
+  .brand {
+    font-family: var(--font-serif); font-style: italic; font-size: 28px;
+    letter-spacing: -0.02em; line-height: 1; color: var(--fg-hi);
+  }
+  .brand .dot { color: var(--orange); font-style: normal; padding: 0 2px; }
+  .kicker {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--fg-3);
+  }
+  .kicker .dot { color: var(--orange); margin-right: 8px; }
+  .theme-toggle {
+    width: 38px; height: 38px; border-radius: 999px;
+    border: 1px solid var(--border-1); background: var(--bg-card);
+    color: var(--fg-1); cursor: pointer; font-size: 16px;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background 150ms ease;
+  }
+  .theme-toggle:hover { background: var(--orange-tint); }
+
+  /* Hero */
+  h1 {
+    font-family: var(--font-serif); font-weight: 400;
+    font-size: clamp(40px, 7vw, 72px); line-height: 0.98; letter-spacing: -0.03em;
+    color: var(--fg-hi); margin: 0 0 18px;
+  }
+  h1 em { color: var(--orange); font-style: italic; }
+  .lede {
+    max-width: 640px; font-size: 17px; line-height: 1.55; color: var(--fg-3);
+    margin: 0 0 56px;
+  }
+
+  /* Section */
+  section { margin-bottom: 72px; }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; margin-bottom: 22px; }
+  .section-head h2 {
+    font-family: var(--font-serif); font-weight: 400; font-size: 28px;
+    letter-spacing: -0.02em; color: var(--fg-hi); margin: 0;
+  }
+  .section-head .meta { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-4); }
+
+  /* Variant cards */
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    border: 1px solid var(--border-1); border-radius: 18px; overflow: hidden;
+    background: var(--bg-card); backdrop-filter: blur(14px);
+    display: flex; flex-direction: column;
+    transition: border-color 200ms ease, transform 200ms ease;
+  }
+  .card:hover { border-color: rgba(251,146,60,0.32); }
+
+  .stage {
+    height: 220px; display: flex; align-items: center; justify-content: center;
+    padding: 32px 40px; position: relative;
+  }
+  .stage.dark      { background: #060812; }
+  .stage.light     { background: #faf8f3; }
+  .stage.checker {
+    background-color: rgba(127,127,127,0.06);
+    background-image:
+      linear-gradient(45deg, rgba(127,127,127,0.18) 25%, transparent 25%),
+      linear-gradient(-45deg, rgba(127,127,127,0.18) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, rgba(127,127,127,0.18) 75%),
+      linear-gradient(-45deg, transparent 75%, rgba(127,127,127,0.18) 75%);
+    background-size: 18px 18px;
+    background-position: 0 0, 0 9px, 9px -9px, -9px 0;
+  }
+  .stage img { max-width: 76%; max-height: 70%; height: auto; display: block; }
+
+  .meta-row {
+    padding: 16px 20px; border-top: 1px solid var(--border-1);
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    flex-wrap: wrap;
+  }
+  .name {
+    font-family: var(--font-serif); font-style: italic; font-size: 17px;
+    color: var(--fg-hi); letter-spacing: -0.01em;
+  }
+  .name small {
+    display: block; font-family: var(--font-mono); font-style: normal;
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--fg-4); margin-top: 4px;
+  }
+  .dls { display: flex; gap: 6px; flex-wrap: wrap; }
+  .dl {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--fg-1);
+    padding: 7px 11px; border-radius: 999px; border: 1px solid var(--border-1);
+    background: rgba(127,127,127,0.04);
+    text-decoration: none; cursor: pointer;
+    transition: border-color 150ms ease, color 150ms ease, background 150ms ease;
+  }
+  .dl:hover { border-color: var(--orange); color: var(--orange); background: var(--orange-tint); }
+  .dl.primary { color: var(--orange); border-color: rgba(251,146,60,0.36); background: var(--orange-tint); }
+  .dl.primary:hover { background: rgba(251,146,60,0.20); }
+
+  /* Anatomy section */
+  .anatomy {
+    border: 1px solid var(--border-1); border-radius: 22px;
+    background: var(--bg-card); backdrop-filter: blur(14px);
+    padding: 36px 40px;
+  }
+  .anatomy-stage {
+    border-radius: 14px; background: #060812; padding: 48px 32px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 28px; overflow: hidden;
+  }
+  .anatomy-stage img { width: 80%; max-width: 720px; height: auto; }
+  .anatomy-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 22px;
+  }
+  .spec {
+    border-top: 1px solid var(--border-1); padding-top: 12px;
+  }
+  .spec .lbl {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--fg-4); margin-bottom: 6px;
+  }
+  .spec .val {
+    font-family: var(--font-serif); font-size: 22px; color: var(--fg-hi);
+    line-height: 1.15; letter-spacing: -0.01em;
+  }
+  .spec .val.mono { font-family: var(--font-mono); font-style: normal; font-size: 15px; letter-spacing: 0; }
+  .spec .swatch {
+    display: inline-block; width: 14px; height: 14px; border-radius: 4px;
+    border: 1px solid var(--border-1); vertical-align: -2px; margin-right: 8px;
+  }
+
+  /* Usage do/don't */
+  .usage { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 720px) { .usage { grid-template-columns: 1fr; } }
+  .usage-card { border: 1px solid var(--border-1); border-radius: 14px; overflow: hidden; }
+  .usage-card .pict {
+    height: 140px; display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .usage-card .pict img { max-height: 80%; max-width: 70%; }
+  .usage-card .lbl {
+    padding: 14px 18px; border-top: 1px solid var(--border-1);
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; display: flex; align-items: center; gap: 8px;
+  }
+  .tick { color: #4ade80; }
+  .cross { color: #f87171; }
+
+  /* Bulk download bar */
+  .bulkbar {
+    position: sticky; top: 24px; z-index: 5;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; padding: 14px 22px; border-radius: 999px;
+    background: rgba(6,8,18,0.78); backdrop-filter: blur(18px);
+    border: 1px solid var(--border-1);
+    margin-bottom: 32px;
+  }
+  [data-theme="light"] .bulkbar { background: rgba(250,248,243,0.78); }
+  .bulkbar .lbl {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--fg-3);
+  }
+  .bulkbar .lbl strong { color: var(--fg-hi); font-weight: 600; }
+
+  footer {
+    margin-top: 80px; padding-top: 28px; border-top: 1px solid var(--border-1);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--fg-4);
+    display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <span class="brand">futur<span class="dot">•</span>e</span>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="kicker"><span class="dot">·</span>identité — logo HD</span>
+      <button class="theme-toggle" id="themeToggle" title="Basculer mode">◐</button>
+    </div>
+  </header>
+
+  <h1>Le logo, en <em>haute définition</em>.</h1>
+  <p class="lede">
+    Le wordmark <em>futur•e</em> décliné pour tous les supports : SVG vectoriel
+    (texte embarqué avec la police Instrument Serif italique en base64) et PNG
+    en cinq résolutions de 256 à 4096 px. Cinq variantes de couleur + deux
+    cartouches prêts à poser sur fond chaud ou nocturne.
+  </p>
+
+  <div class="bulkbar">
+    <span class="lbl">Pack — <strong>7 SVG · 35 PNG</strong> · 256 → 4096 px</span>
+    <span class="lbl" style="color:var(--fg-4)">cliquer un format ci-dessous pour télécharger</span>
+  </div>
+
+  <!-- Anatomy -->
+  <section>
+    <div class="section-head">
+      <h2>Anatomie</h2>
+      <span class="meta">Instrument Serif · italique · 1000 px ref</span>
+    </div>
+    <div class="anatomy">
+      <div class="anatomy-stage">
+        <img src="svg/futuree-primary-on-dark.svg" alt="futur•e" />
+      </div>
+      <div class="anatomy-grid">
+        <div class="spec">
+          <div class="lbl">Police</div>
+          <div class="val">Instrument <em style="font-style:italic">Serif</em></div>
+          <div class="val mono" style="margin-top:4px;color:var(--fg-3)">400 · italique</div>
+        </div>
+        <div class="spec">
+          <div class="lbl">Letter-spacing</div>
+          <div class="val mono">−0.02 em</div>
+        </div>
+        <div class="spec">
+          <div class="lbl">Accent</div>
+          <div class="val mono"><span class="swatch" style="background:#fb923c"></span>#fb923c</div>
+          <div class="val mono" style="margin-top:4px;color:var(--fg-3);font-size:11px">orange Tailwind 400</div>
+        </div>
+        <div class="spec">
+          <div class="lbl">Texte (sombre)</div>
+          <div class="val mono"><span class="swatch" style="background:#f6f4ef"></span>#f6f4ef</div>
+        </div>
+        <div class="spec">
+          <div class="lbl">Texte (clair)</div>
+          <div class="val mono"><span class="swatch" style="background:#1a1d28"></span>#1a1d28</div>
+        </div>
+        <div class="spec">
+          <div class="lbl">Puce médiane</div>
+          <div class="val mono">U+2022 « • »</div>
+          <div class="val mono" style="margin-top:4px;color:var(--fg-3);font-size:11px">italique désactivée</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Variants -->
+  <section>
+    <div class="section-head">
+      <h2>Variantes</h2>
+      <span class="meta">cliquer pour télécharger</span>
+    </div>
+    <div class="grid" id="variantGrid"></div>
+  </section>
+
+  <!-- Usage -->
+  <section>
+    <div class="section-head">
+      <h2>Usage</h2>
+      <span class="meta">do / don't</span>
+    </div>
+    <div class="usage">
+      <div class="usage-card">
+        <div class="pict" style="background:#060812"><img src="svg/futuree-primary-on-dark.svg" /></div>
+        <div class="lbl"><span class="tick">✓</span> Sur fond nocturne <code style="color:var(--fg-3);margin-left:auto;font-family:inherit">#060812</code></div>
+      </div>
+      <div class="usage-card">
+        <div class="pict" style="background:#faf8f3"><img src="svg/futuree-primary-on-light.svg" /></div>
+        <div class="lbl"><span class="tick">✓</span> Sur fond ivoire <code style="color:var(--fg-3);margin-left:auto;font-family:inherit">#faf8f3</code></div>
+      </div>
+      <div class="usage-card">
+        <div class="pict" style="background:#fb923c"><img src="svg/futuree-mono-white.svg" /></div>
+        <div class="lbl"><span class="tick">✓</span> Mono blanc sur teinte orange</div>
+      </div>
+      <div class="usage-card">
+        <div class="pict" style="background:linear-gradient(45deg,#fb923c,#a78bfa)"><img src="svg/futuree-primary-on-dark.svg" style="opacity:0.9"/></div>
+        <div class="lbl"><span class="cross">✗</span> Ne pas poser sur dégradé saturé</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>futur•e — design system · logo pack v1</span>
+    <span id="dateStamp"></span>
+  </footer>
+</div>
+
+<script>
+  // —— Theme toggle ——
+  const html = document.documentElement;
+  const tg = document.getElementById('themeToggle');
+  const saved = localStorage.getItem('futuree-theme');
+  if (saved) html.dataset.theme = saved;
+  function syncIcon() { tg.textContent = html.dataset.theme === 'light' ? '◑' : '◐'; }
+  syncIcon();
+  tg.addEventListener('click', () => {
+    html.dataset.theme = html.dataset.theme === 'light' ? 'dark' : 'light';
+    localStorage.setItem('futuree-theme', html.dataset.theme);
+    syncIcon();
+  });
+
+  // —— Variant cards ——
+  const variants = [
+    { id: 'futuree-primary-on-dark',  name: 'Primary — fond sombre',  stage: 'dark',     desc: 'usage par défaut · #f6f4ef + orange' },
+    { id: 'futuree-primary-on-light', name: 'Primary — fond clair',   stage: 'light',    desc: 'mode jour · #1a1d28 + orange' },
+    { id: 'futuree-mono-orange',      name: 'Mono — orange',           stage: 'checker',  desc: 'tout orange · contextes accentués' },
+    { id: 'futuree-mono-white',       name: 'Mono — blanc',            stage: 'dark',     desc: 'sur photo / fond coloré' },
+    { id: 'futuree-mono-black',       name: 'Mono — noir',             stage: 'light',    desc: 'impression noir & blanc' },
+    { id: 'futuree-card-dark',        name: 'Carte sombre',            stage: 'checker',  desc: 'fond #060812 inclus' },
+    { id: 'futuree-card-light',       name: 'Carte claire',            stage: 'checker',  desc: 'fond #faf8f3 inclus' },
+  ];
+  const widths = [256, 512, 1024, 2048, 4096];
+  const grid = document.getElementById('variantGrid');
+  for (const v of variants) {
+    const card = document.createElement('div'); card.className = 'card';
+    const stage = document.createElement('div'); stage.className = 'stage ' + v.stage;
+    const img = document.createElement('img'); img.src = `svg/${v.id}.svg`; img.alt = v.name;
+    stage.appendChild(img);
+    const meta = document.createElement('div'); meta.className = 'meta-row';
+    const nm = document.createElement('div'); nm.className = 'name';
+    nm.innerHTML = `${v.name}<small>${v.desc}</small>`;
+    const dls = document.createElement('div'); dls.className = 'dls';
+    const svgA = document.createElement('a'); svgA.className = 'dl primary'; svgA.textContent = 'SVG';
+    svgA.href = `svg/${v.id}.svg`; svgA.download = `${v.id}.svg`;
+    dls.appendChild(svgA);
+    for (const w of widths) {
+      const a = document.createElement('a'); a.className = 'dl'; a.textContent = `${w}`;
+      a.href = `png/${v.id}-${w}.png`; a.download = `${v.id}-${w}.png`;
+      a.title = `PNG ${w}px`;
+      dls.appendChild(a);
+    }
+    meta.appendChild(nm); meta.appendChild(dls);
+    card.appendChild(stage); card.appendChild(meta);
+    grid.appendChild(card);
+  }
+
+  // —— Footer date ——
+  document.getElementById('dateStamp').textContent =
+    new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+</script>
+</body>
+</html>

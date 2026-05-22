@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { ClarityInit } from "@/components/ClarityInit";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import "./globals.css";
@@ -45,7 +44,6 @@ export default function RootLayout({
           {children}
         </PostHogProvider>
         <ConsentBanner />
-        <ClarityInit />
         <Analytics />
         <SpeedInsights />
         <GoogleAnalytics gaId="G-MLT5Y4TC6W" />

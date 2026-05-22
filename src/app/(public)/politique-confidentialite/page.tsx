@@ -16,8 +16,7 @@ const PROCESSORS = [
   { name: "Vercel", role: "Hébergement et diffusion du site", location: "États-Unis — clauses contractuelles types UE", link: "https://vercel.com/legal/privacy-policy" },
   { name: "Stripe", role: "Traitement des paiements", location: "États-Unis — clauses contractuelles types UE", link: "https://stripe.com/fr/privacy" },
   { name: "Google (GA4 + GTM)", role: "Mesure d'audience (avec consentement)", location: "États-Unis — clauses contractuelles types UE", link: "https://policies.google.com/privacy" },
-  { name: "PostHog", role: "Analytics produit (avec consentement)", location: "Union Européenne", link: "https://posthog.com/privacy" },
-  { name: "Microsoft Clarity", role: "Enregistrements de session (avec consentement)", location: "États-Unis — clauses contractuelles types UE", link: "https://privacy.microsoft.com/fr-fr/privacystatement" },
+  { name: "PostHog", role: "Analytics produit et enregistrements de session (avec consentement)", location: "Union Européenne", link: "https://posthog.com/privacy" },
 ];
 
 export default function PolitiqueConfidentialitePage() {
@@ -142,7 +141,7 @@ export default function PolitiqueConfidentialitePage() {
                 ["Gérer votre compte et l'authentification", "Email", "Exécution du contrat"],
                 ["Traiter le paiement", "Données de paiement (Stripe)", "Exécution du contrat"],
                 ["Mesurer l'audience et améliorer le service", "Navigation, événements", "Consentement"],
-                ["Enregistrements de session et heatmaps", "Navigation (Clarity)", "Consentement"],
+                ["Enregistrements de session et heatmaps", "Navigation (PostHog)", "Consentement"],
               ]}
             />
           </Section>
@@ -200,7 +199,7 @@ export default function PolitiqueConfidentialitePage() {
           {/* Session recordings */}
           <Section title="Enregistrements de session">
             <p>
-              Avec votre consentement, futur•e utilise Microsoft Clarity pour enregistrer des sessions de navigation anonymisées (mouvements, clics, scroll). Ces enregistrements servent uniquement à améliorer l'ergonomie du service.
+              Avec votre consentement, futur•e utilise PostHog pour enregistrer des sessions de navigation anonymisées (mouvements, clics, scroll). Ces enregistrements servent uniquement à améliorer l'ergonomie du service.
             </p>
             <p>
               Les enregistrements de session <strong style={{ color: "var(--fg-1)" }}>ne permettent pas de voir les mots de passe, les données bancaires ou tout champ sensible saisi</strong> — ces éléments sont masqués automatiquement avant transmission.

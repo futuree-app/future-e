@@ -20,6 +20,188 @@ Il reformule l’historique en séquences produit lisibles :
 
 ## Historique synthétique
 
+### 22/05/2026 — Gestion des cookies : lien de réouverture
+
+**Commits**
+- `9425a87` — Gestion des cookies : lien de réouverture de la bannière
+
+**Pages / modules touchés**
+- `src/components/ConsentBanner.tsx` — écoute event `futuree:show-consent`
+- `src/components/CookieSettingsLink.tsx` — nouveau composant bouton
+- `src/components/FutureELanding.tsx` — footer : + Confidentialité + Gestion des cookies
+- `(public)/politique-confidentialite/page.tsx` — lien Gestion des cookies fonctionnel
+
+**Impact utilisateur**
+- Clic sur "Gestion des cookies" → bannière de consentement réapparaît sans rechargement
+
+**Dépendances externes**
+- Aucune
+
+---
+
+### 22/05/2026 — Politique de confidentialité : corrections v2
+
+**Commits**
+- `74b8337` — Politique de confidentialité : corrections v2
+
+**Pages / modules touchés**
+- `(public)/politique-confidentialite/page.tsx`
+
+**Modifications**
+- "santé" → "confort de vie, environnement personnel" (évite les données sensibles RGPD)
+- Mention explicite : pas de revente ni publicité comportementale
+- Cookies : lien "Gestion des cookies" (à ajouter en footer)
+- Nouvelle section enregistrements de session avec mention masquage champs sensibles
+- Nouvelle section âge minimum (< 15 ans)
+- Transferts US : formulation "clauses contractuelles types UE"
+
+**Dépendances externes**
+- Lien "Gestion des cookies" dans le footer à implémenter
+
+---
+
+### 22/05/2026 — PostHog : correction double init + options manquantes
+
+**Commits**
+- `119e842` — PostHog : correction double init + pageleave, web vitals, scroll depth
+
+**Pages / modules touchés**
+- `instrumentation-client.ts` — seul point d'init, options complètes
+- `src/components/PostHogProvider.tsx` — init supprimée, Provider seul
+
+**Impact utilisateur**
+- $pageleave, $web_vitals et scroll depth désormais capturés
+- Plus de conflit d'initialisation double
+
+**Dépendances externes**
+- Aucune nouvelle — `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN` et `NEXT_PUBLIC_POSTHOG_HOST` déjà requis
+
+---
+
+### 22/05/2026 — Page politique de confidentialité
+
+**Commits**
+- `9eefc30` — Ajout de la page Politique de confidentialité
+
+**Pages / modules touchés**
+- `(public)/politique-confidentialite/page.tsx` — nouvelle page statique
+
+**Impact utilisateur**
+- Lien "En savoir plus" de la bannière de consentement désormais fonctionnel
+- Page accessible à `/politique-confidentialite`
+
+**Dépendances externes**
+- Aucune
+
+---
+
+### 21/05/2026 — Consent Mode v2 + bannière de consentement
+
+**Commits**
+- `b1ee337` — Consent Mode v2 : bannière de consentement + défauts Google
+
+**Pages / modules touchés**
+- `src/app/layout.tsx` — script défauts denied injecté avant GTM, ConsentBanner ajouté
+- `src/components/ConsentBanner.tsx` — nouveau composant barre basse discrète
+
+**Impact utilisateur**
+- Barre de consentement visible au premier chargement, disparaît après choix
+- Choix mémorisé en localStorage (`futuree-consent`)
+- Analytics et ads désactivés par défaut, activés uniquement si accepté
+
+**Dépendances externes**
+- Lien "En savoir plus" pointe vers `/politique-confidentialite` (page à créer si besoin)
+
+---
+
+### 21/05/2026 — Ajout de Google Tag Manager (GTM-NZ9TS3ZF)
+
+**Commits**
+- `5fb4a1c` — Ajout de Google Tag Manager (GTM-NZ9TS3ZF)
+
+**Pages / modules touchés**
+- `src/app/layout.tsx` — composant `GoogleTagManager` injecté dans le root layout
+
+**Impact utilisateur**
+- GTM actif sur l'ensemble du site, prêt à recevoir des tags et triggers depuis l'interface GTM
+
+**Dépendances externes**
+- Container ID hardcodé : `GTM-NZ9TS3ZF` (compte GTM existant)
+- Aucune variable d'env requise
+
+---
+
+### 21/05/2026 — PostHog : Provider client-side et tracking pageview
+
+**Commits**
+- `de231da` — PostHog : ajout du Provider client-side et tracking pageview
+
+**Pages / modules touchés**
+- `src/components/PostHogProvider.tsx` — nouveau composant client (init + pageview)
+- `src/app/layout.tsx` — wrap de l'app dans PostHogProvider
+
+**Impact utilisateur**
+- Tracking pageview actif sur toutes les routes, events custom déjà présents dans le code désormais opérationnels
+
+**Dépendances externes**
+- `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN` et `NEXT_PUBLIC_POSTHOG_HOST` à définir dans Vercel et `.env.local`
+
+---
+
+### 21/05/2026 — Ajout de Google Analytics 4
+
+**Commits**
+- `a8197cb` — Ajout de Google Analytics 4 (G-MLT5Y4TC6W)
+
+**Pages / modules touchés**
+- `src/app/layout.tsx` — composant `GoogleAnalytics` injecté dans le root layout
+
+**Impact utilisateur**
+- Tracking GA4 actif sur l'ensemble du site
+
+**Dépendances externes**
+- Measurement ID hardcodé : `G-MLT5Y4TC6W` (compte Google Analytics existant)
+- Aucune variable d'env requise
+
+---
+
+### 21/05/2026 — Ajout de Microsoft Clarity
+
+**Commits**
+- `b8b4e9e` — Ajout de Microsoft Clarity (analytics comportemental)
+
+**Pages / modules touchés**
+- `src/components/ClarityInit.tsx` — nouveau composant client
+- `src/app/layout.tsx` — intégration dans le root layout
+
+**Impact utilisateur**
+- Enregistrement des sessions et heatmaps actifs sur l'ensemble du site dès que la variable d'env est définie
+
+**Dépendances externes**
+- `NEXT_PUBLIC_CLARITY_PROJECT_ID` à ajouter dans les variables d'env Vercel (et `.env.local` en dev)
+- Le Project ID se trouve dans Clarity > Settings > Overview
+
+---
+
+### 21/05/2026 — Pages auth : copy différenciée connexion / inscription
+
+**Commits**
+- `7f853b9` — Pages auth : copy différenciée connexion / inscription
+
+**Pages / modules touchés**
+- `(auth)/layout.tsx` — bloc `auth-story` sorti du layout partagé
+- `(auth)/connexion/page.tsx` — copy "retour", métriques visuelles (6 / 3 / ∞)
+- `(auth)/inscription/page.tsx` — copy "Ce que ce lieu fait à votre vie", liste orientée promesse personnelle
+
+**Impact utilisateur**
+- Les deux pages affichent désormais un message distinct, adapté au contexte (retour vs première fois)
+- L'inscription communique la promesse de personnalisation plutôt que la description du produit
+
+**Dépendances externes**
+- Aucune
+
+---
+
 ### 18/04/2026 — Initialisation du projet
 
 **Commits**
