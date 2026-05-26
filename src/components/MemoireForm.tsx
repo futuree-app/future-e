@@ -55,7 +55,7 @@ export function MemoireForm({ profile, canEditCommune = false }: MemoireFormProp
   const [error, setError] = useState<string | null>(null);
   const [confirmClearAll, setConfirmClearAll] = useState(false);
 
-  const saveField = async (field: string, value: ProfileValue) => {
+  const saveField = async (field: string, value: ProfileValue | Record<string, string>) => {
     setSavingField(field);
     setError(null);
     try {
