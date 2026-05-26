@@ -305,7 +305,7 @@ export function MemoireForm({ profile, canEditCommune = false }: MemoireFormProp
 
 // ───── Sous-composants ─────────────────────────────────────────────────────
 
-type SaveFn = (field: string, value: ProfileValue) => void | Promise<void>;
+type SaveFn = (field: string, value: ProfileValue | Record<string, string>) => void | Promise<void>;
 
 type CommuneResult = { code: string; nom: string; codeDepartement: string };
 
