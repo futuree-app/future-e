@@ -1,10 +1,13 @@
-// Server Component : charge la commune utilisateur depuis user_profiles
-// et monte le widget AskFuture uniquement si elle est renseignée.
-// Pas de fallback INSEE en dur — on ne veut pas qu'un user sans commune
-// voie des données d'une autre ville.
+// Server Component : charge la commune et le plan utilisateur, puis monte
+// AskFuture uniquement pour les comptes payants.
+// — free          : pas de widget
+// — one_shot      : 3 questions au total (comptées dans ask_conversations)
+// — suivi / foyer : illimité
 
 import { createClient } from "@/lib/supabase/server";
 import { AskFuture } from "./AskFuture";
+
+const ONE_SHOT_QUOTA = 3;
 
 export async function AskFutureMount() {
   const supabase = await createClient();
@@ -14,18 +17,43 @@ export async function AskFutureMount() {
 
   if (!user) return null;
 
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("home_insee_code, home_commune")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const [{ data: profile }, { data: account }] = await Promise.all([
+    supabase
+      .from("user_profiles")
+      .select("home_insee_code, home_commune")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("user_accounts")
+      .select("plan")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+  ]);
 
   if (!profile?.home_insee_code) return null;
+
+  const plan = account?.plan ?? "free";
+  if (plan === "free") return null;
+
+  let questionsUsed = 0;
+  let questionsMax: number | null = null;
+
+  if (plan === "one_shot") {
+    questionsMax = ONE_SHOT_QUOTA;
+    const { count } = await supabase
+      .from("ask_conversations")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("role", "user");
+    questionsUsed = count ?? 0;
+  }
 
   return (
     <AskFuture
       communeInsee={profile.home_insee_code}
       communeName={profile.home_commune ?? "votre commune"}
+      questionsUsed={questionsUsed}
+      questionsMax={questionsMax}
     />
   );
 }

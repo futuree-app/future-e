@@ -423,6 +423,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
     }
 
+    const { data: account } = await supabase
+      .from("user_accounts")
+      .select("plan")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const plan = account?.plan ?? "free";
+
+    if (plan === "free") {
+      return NextResponse.json(
+        { error: "AskFuture est réservé aux abonnés Rapport et Suivi." },
+        { status: 403 },
+      );
+    }
+
+    if (plan === "one_shot") {
+      const { count } = await supabase
+        .from("ask_conversations")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("role", "user");
+      if ((count ?? 0) >= 3) {
+        return NextResponse.json(
+          { error: "Quota de 3 questions atteint. Passez au Suivi pour un accès illimité." },
+          { status: 403 },
+        );
+      }
+    }
+
     const { data: profile } = await supabase
       .from("user_profiles")
       .select("*")

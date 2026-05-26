@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { signOutAction } from "@/app/auth/actions";
 import { AccountNav } from "@/components/AccountNav";
+import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
 import {
   canAccessDashboard,
   canAccessInteractiveDashboard,
   getPlanLabel,
 } from "@/lib/access";
 import { PRODUCT_MODULES } from "@/lib/product";
-import { getCurrentUserAccount } from "@/lib/user-account";
+import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 
 const MODULE_ICONS: Record<string, string> = {
   quartier: "🏘", logement: "🏠", metier: "💼",
@@ -28,6 +29,15 @@ export default async function ComptePage() {
   const isInteractive = canAccessInteractiveDashboard(account);
   const LOCKED_MODULES = PRODUCT_MODULES.filter((m) => m.id !== "quartier");
 
+  const { supabase, user } = await requireCurrentUser();
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("home_commune, home_insee_code")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const commune = profile?.home_commune ?? null;
+
   return (
     <div
       className="min-h-screen bg-canvas text-label relative overflow-hidden"
@@ -44,6 +54,8 @@ export default async function ComptePage() {
 
       <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
 
+        {!commune && <div className="pt-10"><CommuneSetupBanner /></div>}
+
         {/* ── Hero ── */}
         <section className="grid grid-cols-[1fr_380px] gap-14 items-start py-20">
           <div>
@@ -55,7 +67,7 @@ export default async function ComptePage() {
               className="font-normal text-[clamp(34px,3.8vw,52px)] leading-[1.1] tracking-[-1.2px] mb-5 text-label"
               style={{ fontFamily: "'Instrument Serif', serif" }}
             >
-              Votre lecture de La Rochelle<br />
+              {commune ? `Votre lecture de ${commune}` : "Votre espace personnel"}<br />
               <span className="italic text-accent">ne disparaît plus.</span>
             </h1>
             <p className="text-[17px] leading-[1.72] text-muted mb-8 max-w-[480px]">
@@ -120,7 +132,7 @@ export default async function ComptePage() {
           <div className="grid grid-cols-3 gap-3.5">
             {[
               { accent: "border-t-accent", title: "Rapport sauvegardé sans limite", copy: "Vous retrouvez la synthèse globale et le module Quartier sans repasser par la landing." },
-              { accent: "border-t-info", title: "Lien de partage permanent", copy: "Partagez une lecture datée et sourcée sur La Rochelle, sans lien qui expire." },
+              { accent: "border-t-info", title: "Lien de partage permanent", copy: `Partagez une lecture datée et sourcée${commune ? ` sur ${commune}` : ""}, sans lien qui expire.` },
               { accent: "border-t-amethyst", title: "Une alerte si les données changent", copy: "Si une donnée significative évolue pour votre commune, le compte gratuit peut en donner le signal." },
             ].map((k) => (
               <article key={k.title} className={`glass rounded-xl p-5 border-t-2 ${k.accent}`}>
@@ -141,7 +153,7 @@ export default async function ComptePage() {
               </h2>
             </div>
             <p className="text-[15px] text-muted leading-[1.65]">
-              Chaque module croise votre profil avec les données disponibles pour La Rochelle.
+              {commune ? `Chaque module croise votre profil avec les données disponibles pour ${commune}.` : "Chaque module croise votre profil avec les données disponibles pour votre commune."}
             </p>
           </div>
           <div className="grid grid-cols-3 gap-3">
@@ -165,7 +177,7 @@ export default async function ComptePage() {
             <div className="absolute top-[-60px] right-[-60px] w-[200px] h-[200px] rounded-full bg-accent/[0.08] pointer-events-none" />
             <div>
               <h2 className="font-normal text-[clamp(20px,2.2vw,26px)] leading-[1.2] tracking-[-0.4px] text-label mb-2.5" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                Six lectures de votre vie à La Rochelle. Sourcées. Personnalisées.
+                {commune ? `Six lectures de votre vie à ${commune}. Sourcées. Personnalisées.` : "Six lectures de votre vie. Sourcées. Personnalisées."}
               </h2>
               <p className="text-[15px] text-muted leading-[1.7]">
                 Le rapport complet ne produit pas un score. Il garde les dimensions distinctes pour que vos arbitrages restent les vôtres.
@@ -196,6 +208,9 @@ export default async function ComptePage() {
               {isInteractive ? "Dashboard interactif" : "Dashboard"}
             </Link>
           )}
+          <Link href="/compte/memoire" className="font-mono text-[11px] tracking-[0.06em] uppercase text-ghost no-underline py-2">
+            Ma mémoire futur•e
+          </Link>
           <Link href="/" className="font-mono text-[11px] tracking-[0.06em] uppercase text-ghost no-underline py-2">
             Retour au site
           </Link>

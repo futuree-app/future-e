@@ -26,13 +26,16 @@ interface AskFutureProps {
   communeInsee: string;
   communeName: string;
   placeholder?: string;
+  questionsUsed?: number;
+  questionsMax?: number | null;
 }
 
-export function AskFuture({ communeInsee, communeName, placeholder }: AskFutureProps) {
+export function AskFuture({ communeInsee, communeName, placeholder, questionsUsed = 0, questionsMax = null }: AskFutureProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [usedCount, setUsedCount] = useState(questionsUsed);
   const [profileQuestion, setProfileQuestion] = useState<ProfileQuestion | null>(null);
   const [profileSavingOption, setProfileSavingOption] = useState<string | null>(null);
   const [sessionId] = useState(
@@ -110,6 +113,7 @@ export function AskFuture({ communeInsee, communeName, placeholder }: AskFutureP
         }
 
         setMessages((prev) => [...prev, { role: "assistant", content: data.answer }]);
+        setUsedCount((n) => n + 1);
         if (data.profileQuestion) {
           setProfileQuestion(data.profileQuestion);
         }
@@ -274,35 +278,51 @@ export function AskFuture({ communeInsee, communeName, placeholder }: AskFutureP
             <div ref={messagesEndRef} />
           </div>
 
-          <form onSubmit={handleSubmit} className="ask-form">
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={placeholder ?? "Votre question sur ce territoire…"}
-              className="ask-input"
-              disabled={loading}
-              autoComplete="off"
-              aria-label="Question"
-            />
-            <button
-              type="submit"
-              disabled={!input.trim() || loading}
-              className="ask-submit"
-              aria-label="Envoyer"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path
-                  d="M2 8L14 8M9 3L14 8L9 13"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          </form>
+          {questionsMax !== null && usedCount >= questionsMax ? (
+            <div className="ask-quota-reached">
+              <p className="ask-quota-text">
+                Vous avez utilisé vos {questionsMax} questions incluses avec le Rapport.
+              </p>
+              <a href="/checkout/suivi" className="ask-quota-cta">
+                Passer au Suivi pour un accès illimité
+              </a>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="ask-form">
+              {questionsMax !== null && (
+                <span className="ask-quota-counter">
+                  {Math.max(0, questionsMax - usedCount)} question{questionsMax - usedCount > 1 ? "s" : ""} restante{questionsMax - usedCount > 1 ? "s" : ""}
+                </span>
+              )}
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={placeholder ?? "Votre question sur ce territoire…"}
+                className="ask-input"
+                disabled={loading}
+                autoComplete="off"
+                aria-label="Question"
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || loading}
+                className="ask-submit"
+                aria-label="Envoyer"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path
+                    d="M2 8L14 8M9 3L14 8L9 13"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </form>
+          )}
 
           <div className="ask-footer">
             Données DRIAS · Géorisques · ANSES · INSEE · Hub&apos;Eau · ATMO
