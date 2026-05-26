@@ -65,6 +65,17 @@ async function fetchHubeau<T>(pathname: string, params: URLSearchParams): Promis
 
 // ── Loaders ──────────────────────────────────────────────────────────────────
 
+// L'API Hub'Eau renvoie des codes de conformité ("C", "N", "S", "D"), pas les
+// libellés. C = conforme, N = non conforme ; le reste (sans objet, dépassement
+// de référence) n'est pas une conformité limite tranchée, donc null.
+function conformityFromCode(code: string | null | undefined): boolean | null {
+  if (code == null) return null;
+  const c = code.trim().toUpperCase();
+  if (c === "C" || c === "CONFORME") return true;
+  if (c === "N" || c === "NON CONFORME") return false;
+  return null;
+}
+
 async function loadDrinkingWater(inseeCode: string) {
   const sixMonthsAgo = new Date(Date.now() - 183 * 86_400_000)
     .toISOString()
@@ -99,14 +110,8 @@ async function loadDrinkingWater(inseeCode: string) {
   const nitriteRecord = records.find((r) => r.code_parametre === "1350");
 
   return {
-    conformBacterio:
-      latest.conformite_limites_bact_prelevement != null
-        ? latest.conformite_limites_bact_prelevement === "Conforme"
-        : null,
-    conformPhysicoChem:
-      latest.conformite_limites_pc_prelevement != null
-        ? latest.conformite_limites_pc_prelevement === "Conforme"
-        : null,
+    conformBacterio: conformityFromCode(latest.conformite_limites_bact_prelevement),
+    conformPhysicoChem: conformityFromCode(latest.conformite_limites_pc_prelevement),
     lastSampleDate: latest.date_prelevement ?? null,
     nitrates: nitrateRecord?.resultat_numerique ?? null,
     nitrites: nitriteRecord?.resultat_numerique ?? null,
