@@ -59,8 +59,9 @@ export function MemoireForm({ profile, canEditCommune = false }: MemoireFormProp
     setSavingField(field);
     setError(null);
     try {
+      const communeValue = value as unknown as Record<string, string>;
       const body = field === "commune"
-        ? { field: "commune", insee_code: (value as Record<string, string>).insee_code, nom: (value as Record<string, string>).nom }
+        ? { field: "commune", insee_code: communeValue.insee_code, nom: communeValue.nom }
         : { field, value };
       const res = await fetch("/api/profile", {
         method: "PATCH",
