@@ -25,13 +25,6 @@ type ApiResponse = {
   zfe?: { inZfe: boolean; zones: Array<{ id: string; nom: string; vp_critair: string | null; deux_rm_critair: string | null; date_debut: string | null; date_fin: string | null; }>; } | null;
   irep?: { count: number; installations: Array<{ id: number; nom: string; distanceM: number; nombre_polluants: number; milieu_emission: string | null; }>; } | null;
   cartofriches?: { count: number; friches: Array<{ id: string; nom: string; type: string | null; statut: string | null; sol_pollue: boolean; activite: string | null; distanceM: number | null; }>; } | null;
-  climateData?: {
-    inseeCode: string;
-    commune: {
-      n: string;
-      s: Record<string, { h: string; v: Record<string, number> }>;
-    };
-  } | null;
   communeData?: {
     commune: {
       inseeCode: string; nom: string; population: number | null; vieillissement_pct: number | null;
@@ -481,6 +474,23 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
             </div>
           </div>
 
+          {/* Avertissement si l'adresse est dans une commune différente du profil */}
+          {defaultCommune && result.address?.city &&
+            result.address.city.toLowerCase() !== defaultCommune.toLowerCase() && (
+            <div style={{
+              marginBottom: 20, padding: "12px 16px",
+              background: "rgba(184,160,66,0.06)", border: "1px solid rgba(184,160,66,0.25)",
+              borderLeft: "3px solid var(--yellow, #b8a042)",
+              fontSize: 12, color: "var(--fg-2)", lineHeight: 1.65,
+            }}>
+              <strong style={{ color: "var(--yellow, #b8a042)", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                Adresse hors commune
+              </strong>
+              <br />
+              Cette adresse est à <strong>{result.address.city}</strong>, votre commune de résidence déclarée est <strong>{defaultCommune}</strong>. L&apos;analyse porte sur ce bien, mais les modules Quartier et Santé restent calés sur votre commune principale.
+            </div>
+          )}
+
           {/* ─ TABS ─ */}
           <div style={{ display: "flex", gap: 0, borderBottom: "1px solid var(--border-1)", marginBottom: 28 }}>
             {[
@@ -523,41 +533,6 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                   `Aucun signal critique détecté sur les dimensions principales. Voir Détails pour la lecture complète.`
                 }
               />
-
-              {/* Trajectoire climatique DRIAS */}
-              {result.climateData && (() => {
-                const gwl20 = result.climateData.commune.s["gwl20"]?.v;
-                if (!gwl20) return null;
-                const r = (v: number | undefined) => v != null ? Math.round(v) : null;
-                const heatDays = r(gwl20["NORTX35D_yr"]);
-                const tropicalNights = r(gwl20["NORTR_yr"]);
-                const fireDays = r(gwl20["NORIFM40_yr"]);
-                const items = [
-                  heatDays != null && { label: "Chaleur extrême (>35°C)", val: `${heatDays} j/an`, col: "var(--red, #f87171)" },
-                  tropicalNights != null && { label: "Nuits tropicales (>20°C)", val: `${tropicalNights} nuits/an`, col: "var(--orange, #c47a3a)" },
-                  fireDays != null && fireDays > 0 && { label: "Risque incendie", val: `${fireDays} j/an`, col: "var(--orange, #c47a3a)" },
-                ].filter(Boolean) as { label: string; val: string; col: string }[];
-                if (items.length === 0) return null;
-                return (
-                  <div>
-                    <SectionLabel>Trajectoire climatique 2050 · {result.climateData.commune.n}</SectionLabel>
-                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 20, display: "flex", gap: 16, flexWrap: "wrap" }}>
-                      {items.map((item) => (
-                        <div key={item.label} style={{ flex: "1 1 140px", padding: "14px 16px", background: `${item.col}0a`, border: `1px solid ${item.col}28` }}>
-                          <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-4)", marginBottom: 6 }}>{item.label}</div>
-                          <div style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 600, color: item.col }}>{item.val}</div>
-                          <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--fg-4)", marginTop: 4 }}>en 2050 · scénario +2°C</div>
-                        </div>
-                      ))}
-                      <div style={{ flex: "2 1 200px", padding: "14px 16px", display: "flex", alignItems: "center" }}>
-                        <p style={{ fontSize: 12, color: "var(--fg-3)", lineHeight: 1.65, margin: 0 }}>
-                          Ces projections DRIAS/Météo-France concernent la commune de l&apos;adresse analysée. Elles complètent la lecture physique du logement avec la trajectoire climatique locale.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
 
               {/* Synthèse Claude API */}
               <div>

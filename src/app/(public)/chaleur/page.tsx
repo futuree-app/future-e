@@ -257,7 +257,7 @@ export default function ChaleurPage() {
               <div className="signal-source">Copernicus · Rapport 2025</div>
               <div className="signal-head">2025 : deuxième été le plus chaud jamais enregistré en Europe</div>
               <div className="signal-body">
-                Les températures estivales européennes dépassaient de 1,3°C la moyenne d'avant l'ère industrielle. La trajectoire est cohérente avec les projections à +2°C et +4°C que futur•e utilise.
+                Les températures estivales européennes dépassaient de 1,3°C la moyenne d'avant l'ère industrielle. La trajectoire est cohérente avec les projections à +2,7°C et +4°C que futur•e utilise pour la France.
               </div>
             </div>
 

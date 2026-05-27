@@ -205,7 +205,7 @@ export default async function InondationTop10() {
           les plus exposées aux <em>inondations</em>
         </h1>
         <p className="lede">
-          Crues de rivières, épisodes de pluies extrêmes, ruissellement dans les rues : les dix villes françaises les plus exposées aux inondations, selon les projections Météo-France à l'horizon 2050 dans un scénario de réchauffement de 4°C.
+          Crues de rivières, épisodes de pluies extrêmes, ruissellement dans les rues : les dix villes françaises les plus exposées aux inondations, selon les projections Météo-France à l'horizon 2050 dans un scénario de réchauffement de +4°C.
         </p>
         <div className="method-note">
           Comment lire ce classement. Le score combine quatre indicateurs climatiques : l'intensité des pluies les plus fortes de l'année (pondération principale, car c'est elle qui cause les catastrophes documentées), les précipitations en hiver qui font déborder les rivières, le volume de pluie annuel qui sature les sols, et l'évolution des pluies extrêmes par rapport à aujourd'hui. Les données viennent de DRIAS Météo-France, scénario à +4°C. La submersion marine est un risque différent : elle fait l'objet d'un classement séparé.

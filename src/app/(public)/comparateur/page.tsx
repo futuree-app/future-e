@@ -463,7 +463,7 @@ async function buildFallbackMetrics(
   ]);
 
   const fallback: Partial<Record<DimensionSlug, DisplayMetric>> = {};
-  // gwl30 = scénario +4°C — le plus pessimiste disponible dans le dataset DRIAS
+  // gwl30 = scénario +4°C GWL — trajectoire politiques actuelles, le plus pessimiste disponible dans le dataset DRIAS
   const driasValues = driasData?.commune?.s?.gwl30?.v;
 
   if (driasValues?.NORTX30D_yr != null) {

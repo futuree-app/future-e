@@ -1,9 +1,13 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { AccountNav } from "@/components/AccountNav";
 import { canAccessCompleteReport } from "@/lib/access";
 import { PRODUCT_MODULES } from "@/lib/product";
-import { getCurrentUserAccount } from "@/lib/user-account";
+import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { TrackedModuleLink, TrackedUpgradeLink } from "./RapportTrackedLinks";
+import HorizonBar from "@/components/report/HorizonBar";
+import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
 
 const MODULE_COLORS: Record<string, string> = {
   quartier: "var(--blue)",
@@ -37,6 +41,16 @@ const LOCKED_MODULE_IDS = ["logement", "metier", "sante", "mobilite", "projets"]
 export default async function RapportPage() {
   const account = await getCurrentUserAccount();
   const fullReport = canAccessCompleteReport(account);
+
+  const { supabase, user } = await requireCurrentUser();
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("home_commune")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const communeName = profile?.home_commune ?? null;
+  const displayName = communeName ?? "votre commune";
 
   const allModules = PRODUCT_MODULES;
   const lockedModules = PRODUCT_MODULES.filter((m) => LOCKED_MODULE_IDS.includes(m.id));
@@ -75,7 +89,7 @@ export default async function RapportPage() {
             {fullReport ? (
               <>
                 <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                  Votre vie à La Rochelle<br />
+                  Votre vie à {displayName}<br />
                   <span className="italic text-accent">module par module.</span>
                 </h1>
                 <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[500px]">
@@ -93,7 +107,7 @@ export default async function RapportPage() {
             ) : (
               <>
                 <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                  Ce que La Rochelle devient.<br />
+                  Ce que {displayName} devient.<br />
                   <span className="italic text-accent">Les premiers signaux, sans détours.</span>
                 </h1>
                 <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[500px]">
@@ -124,7 +138,7 @@ export default async function RapportPage() {
               {fullReport ? "Hub des modules" : "Quelques signaux déjà disponibles"}
             </p>
             <h2 className="font-normal text-[22px] leading-[1.2] text-label mb-5 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              {fullReport ? "Rapport complet · La Rochelle" : "La Rochelle, ce que les données montrent déjà"}
+              {fullReport ? `Rapport complet · ${displayName}` : `${displayName}, ce que les données montrent déjà`}
             </h2>
 
             {fullReport ? (
@@ -162,6 +176,19 @@ export default async function RapportPage() {
         </section>
 
         <div className="border-t border-white/[0.08]" />
+
+        {!communeName && (
+          <div className="pt-10">
+            <CommuneSetupBanner />
+          </div>
+        )}
+
+        <HorizonBar
+          communeName={displayName}
+          locked={!fullReport}
+        />
+
+        <div className="border-t border-white/[0.08] mt-14" />
 
         {/* ── Vue gratuite ── */}
         {!fullReport && (
@@ -244,7 +271,7 @@ export default async function RapportPage() {
               <div>
                 <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">Rapport complet</p>
                 <h2 className="font-normal text-[clamp(22px,2.4vw,30px)] leading-[1.2] tracking-[-0.5px] text-label mb-3.5" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                  Six lectures de votre vie à La Rochelle. Sourcées. Sans généralités.
+                  Six lectures de votre vie à {displayName}. Sourcées. Sans généralités.
                 </h2>
                 <p className="text-[15px] text-muted leading-[1.7]">
                   Logement, métier, santé, mobilité, projets : le rapport complet lit chacune de ces dimensions à travers votre profil et les données publiques disponibles pour votre commune.
@@ -273,7 +300,7 @@ export default async function RapportPage() {
               <div>
                 <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Modules du rapport complet</p>
                 <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                  Votre hub de modules à La Rochelle.
+                  Votre hub de modules à {displayName}.
                 </h2>
               </div>
               <p className="text-[15px] text-muted leading-[1.65]">

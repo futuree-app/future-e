@@ -60,7 +60,7 @@ const SCENARIOS = {
     id: "gwl20",
     year: 2050,
     label: "Trajectoire actuelle",
-    temp: "+2.7°C",
+    temp: "+2,7°C",
     color: "var(--orange)",
   },
   pessimistic: {
