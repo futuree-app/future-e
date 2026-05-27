@@ -62,12 +62,13 @@ export async function PATCH(request: NextRequest) {
 
     // Cas spécial : carnet de bord Quartier (objet JSONB libre).
     if (field === "workbook_quartier") {
-      if (value !== null && value !== undefined && (typeof value !== "object" || Array.isArray(value))) {
+      const wbValue = body.value;
+      if (wbValue !== null && wbValue !== undefined && (typeof wbValue !== "object" || Array.isArray(wbValue))) {
         return NextResponse.json({ error: "Objet attendu pour workbook_quartier." }, { status: 400 });
       }
       const { error } = await supabase
         .from("user_profiles")
-        .update({ workbook_quartier: value ?? null, updated_at: new Date().toISOString() })
+        .update({ workbook_quartier: wbValue ?? null, updated_at: new Date().toISOString() })
         .eq("user_id", user.id);
       if (error) {
         console.error("[profile] PATCH workbook_quartier error:", error);
