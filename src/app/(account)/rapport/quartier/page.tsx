@@ -157,11 +157,6 @@ export default async function RapportQuartierPage() {
               <Link href="/rapport" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
                 Retour au hub
               </Link>
-              {!fullReport ? (
-                <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline">
-                  Ouvrir le rapport complet
-                </Link>
-              ) : null}
             </div>
           </div>
 
@@ -246,21 +241,17 @@ export default async function RapportQuartierPage() {
             </div>
 
             <div className="flex flex-col gap-3.5">
-              <div className="glass rounded-xl p-5" style={{ borderLeft: "2px solid var(--orange)" }}>
-                <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2">Ce que le rapport complet ajoute</p>
-                <p className="text-[14px] leading-[1.65] text-muted mb-4">
-                  Le module Quartier donne la lecture du lieu. Le rapport complet la croise ensuite avec votre logement, votre profil et vos autres dimensions de vie.
-                </p>
-                {!fullReport ? (
-                  <Link href="/#pricing" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[13px] no-underline">
-                    Voir les formules
-                  </Link>
-                ) : (
+              {fullReport && (
+                <div className="glass rounded-xl p-5" style={{ borderLeft: "2px solid var(--orange)" }}>
+                  <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2">Module suivant</p>
+                  <p className="text-[14px] leading-[1.65] text-muted mb-4">
+                    Le module Quartier donne la lecture du lieu. Logement, santé, mobilité, métier et projets croisent ensuite ces données avec votre profil.
+                  </p>
                   <Link href="/rapport/logement" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/[0.05] text-muted text-[13px] no-underline border border-white/[0.08]">
                     Ouvrir le module Logement
                   </Link>
-                )}
-              </div>
+                </div>
+              )}
 
               <div className="glass rounded-xl p-5" style={{ borderLeft: "2px solid var(--blue)" }}>
                 <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2">Pages Savoir associées</p>

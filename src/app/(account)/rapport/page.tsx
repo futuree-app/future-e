@@ -69,46 +69,30 @@ export default async function RapportPage() {
           <div>
             <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-accent mb-5">
               <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
-              {fullReport ? "Rapport complet" : "Rapport partiel"}
+              Mon rapport
             </div>
 
-            {fullReport ? (
-              <>
-                <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                  Votre vie à La Rochelle<br />
-                  <span className="italic text-accent">module par module.</span>
-                </h1>
-                <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[500px]">
-                  Le rapport complet garde six dimensions. Quartier et Logement sont déjà accessibles comme modules dédiés. Les autres suivent la même structure.
-                </p>
-                <div className="flex gap-3 flex-wrap">
-                  <Link href="/dashboard" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-                    Voir le dashboard
-                  </Link>
-                  <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
-                    Mon compte
-                  </Link>
-                </div>
-              </>
-            ) : (
-              <>
-                <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                  Ce que La Rochelle devient.<br />
-                  <span className="italic text-accent">Les premiers signaux, sans détours.</span>
-                </h1>
-                <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[500px]">
-                  Quelques données publiques sur votre territoire suffisent déjà à poser des questions que vous n&apos;auriez peut-être pas pensé à formuler. Ce que vous lisez ici est une première lecture, pas le rapport complet.
-                </p>
-                <div className="flex gap-3 flex-wrap">
-                  <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-                    Ouvrir le rapport complet
-                  </Link>
-                  <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
-                    Mon compte
-                  </Link>
-                </div>
-              </>
-            )}
+            <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+              Votre vie à La Rochelle<br />
+              <span className="italic text-accent">module par module.</span>
+            </h1>
+            <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[500px]">
+              Six dimensions. Quartier et Logement sont déjà accessibles. Les autres modules suivent la même structure.
+            </p>
+            <div className="flex gap-3 flex-wrap">
+              {fullReport ? (
+                <Link href="/dashboard" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+                  Voir le dashboard
+                </Link>
+              ) : (
+                <Link href="/rapport/quartier" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+                  Ouvrir le module Quartier
+                </Link>
+              )}
+              <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
+                Mon compte
+              </Link>
+            </div>
           </div>
 
           {/* Panel signals / résumé */}
@@ -120,44 +104,27 @@ export default async function RapportPage() {
               <div className="absolute top-[-50px] right-[-50px] w-[160px] h-[160px] rounded-full pointer-events-none"
                 style={{ background: "radial-gradient(circle, var(--orange-tint) 0%, transparent 70%)" }} />
             )}
-            <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">
-              {fullReport ? "Hub des modules" : "Quelques signaux déjà disponibles"}
-            </p>
+            <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">Hub des modules</p>
             <h2 className="font-normal text-[22px] leading-[1.2] text-label mb-5 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              {fullReport ? "Rapport complet · La Rochelle" : "La Rochelle, ce que les données montrent déjà"}
+              La Rochelle, six dimensions.
             </h2>
-
-            {fullReport ? (
-              <div className="flex flex-col gap-2.5">
-                {allModules.map((m) => {
-                  const col = MODULE_COLORS[m.id] ?? "var(--violet)";
-                  const status =
-                    m.id === "quartier" || m.id === "logement" ? "Accessible" : "En cours";
-                  return (
-                    <div key={m.id} className="flex items-center gap-3 px-3 py-2.5 rounded-lg" style={{ background: `${col}0a`, border: `1px solid ${col}1a` }}>
-                      <span className="text-[16px]">{MODULE_ICONS[m.id]}</span>
-                      <span className="text-[14px] text-label font-medium">{m.name}</span>
-                      <span className="ml-auto font-mono text-[10px] tracking-[0.06em] uppercase" style={{ color: col }}>{status}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2.5">
-                {heroSignals.map((s) => (
-                  <div key={s.label} className="flex gap-3.5 items-start px-3.5 py-3 rounded-lg" style={{ background: `${s.col}0c`, border: `1px solid ${s.col}22` }}>
-                    <span className="w-[7px] h-[7px] rounded-full shrink-0 mt-[5px]" style={{ background: s.col, boxShadow: `0 0 8px ${s.col}` }} />
-                    <div>
-                      <div className="text-[13px] font-medium text-label mb-0.5 leading-[1.3]">{s.label}</div>
-                      <div className="font-mono text-[10px] text-ghost tracking-[0.04em]">{s.src}</div>
-                    </div>
+            <div className="flex flex-col gap-2.5">
+              {allModules.map((m) => {
+                const col = MODULE_COLORS[m.id] ?? "var(--violet)";
+                const accessible = m.id === "quartier" || m.id === "logement";
+                return (
+                  <div key={m.id} className="flex items-center gap-3 px-3 py-2.5 rounded-lg" style={{ background: `${col}0a`, border: `1px solid ${col}1a`, opacity: (!fullReport && !accessible) ? 0.45 : 1 }}>
+                    <span className="text-[16px]">{MODULE_ICONS[m.id]}</span>
+                    <span className="text-[14px] text-label font-medium">{m.name}</span>
+                    {(fullReport || accessible) && (
+                      <span className="ml-auto font-mono text-[10px] tracking-[0.06em] uppercase" style={{ color: col }}>
+                        {accessible ? "Accessible" : "—"}
+                      </span>
+                    )}
                   </div>
-                ))}
-                <p className="font-mono text-[11px] text-ghost tracking-[0.04em] leading-[1.6] mt-1 px-3 py-2.5 rounded-lg bg-white/[0.02] border border-white/[0.08]">
-                  Le rapport complet lit ces signaux à travers votre profil. Ce n&apos;est pas la même chose que de lire des données brutes.
-                </p>
-              </div>
-            )}
+                );
+              })}
+            </div>
           </aside>
         </section>
 
@@ -223,46 +190,6 @@ export default async function RapportPage() {
               </div>
             </section>
 
-            <section className="pt-2">
-              <div className="grid grid-cols-[1fr_320px] gap-10 items-end mb-8">
-                <div>
-                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Le rapport complet</p>
-                  <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                    Ce que les autres modules ajoutent.
-                  </h2>
-                </div>
-                <p className="text-[15px] text-muted leading-[1.65]">
-                  Le hub gratuit s&apos;arrête au territoire. Le rapport complet ouvre ensuite le logement, la santé, la mobilité, le métier et les projets.
-                </p>
-              </div>
-            </section>
-
-            {/* Upgrade band */}
-            <div className="glass rounded-2xl p-11 grid grid-cols-[1fr_200px] gap-14 items-center mt-12 relative overflow-hidden" style={{ borderColor: "var(--orange-tint)" }}>
-              <div className="absolute top-[-80px] right-[-80px] w-[260px] h-[260px] rounded-full pointer-events-none"
-                style={{ background: "radial-gradient(circle, var(--orange-tint) 0%, transparent 70%)" }} />
-              <div>
-                <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">Rapport complet</p>
-                <h2 className="font-normal text-[clamp(22px,2.4vw,30px)] leading-[1.2] tracking-[-0.5px] text-label mb-3.5" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                  Six lectures de votre vie à La Rochelle. Sourcées. Sans généralités.
-                </h2>
-                <p className="text-[15px] text-muted leading-[1.7]">
-                  Logement, métier, santé, mobilité, projets : le rapport complet lit chacune de ces dimensions à travers votre profil et les données publiques disponibles pour votre commune.
-                </p>
-              </div>
-              <div className="text-center">
-                <span className="block text-[52px] text-label leading-none tracking-[-2px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                  14<span className="text-[22px] text-ghost">€</span>
-                </span>
-                <span className="block font-mono text-[11px] text-ghost tracking-[0.04em] mt-1 mb-5">une fois · Suivi 9 €/mois prochainement</span>
-                <TrackedUpgradeLink href="/#pricing" className="flex items-center justify-center px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[13px] no-underline w-full" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-                  Voir les formules
-                </TrackedUpgradeLink>
-                <p className="mt-2.5 font-mono text-[10px] text-ghost tracking-[0.04em] text-center leading-[1.6]">
-                  Les 14 € seront déductibles à l&apos;ouverture du Suivi mensuel.
-                </p>
-              </div>
-            </div>
           </>
         )}
 
@@ -271,13 +198,13 @@ export default async function RapportPage() {
           <section className="pt-14">
             <div className="grid grid-cols-[1fr_320px] gap-10 items-end mb-8">
               <div>
-                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Modules du rapport complet</p>
+                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Vos modules</p>
                 <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
                   Votre hub de modules à La Rochelle.
                 </h2>
               </div>
               <p className="text-[15px] text-muted leading-[1.65]">
-                Quartier et Logement sont déjà accessibles comme pages dédiées. Les autres modules suivent la même logique.
+                Quartier et Logement sont déjà accessibles. Les autres modules suivent la même structure.
               </p>
             </div>
 
@@ -304,10 +231,12 @@ export default async function RapportPage() {
                     <p className="font-mono text-[10px] tracking-[0.1em] text-ghost mb-1 uppercase">Module 0{i + 1}</p>
                     <h3 className="font-normal text-[20px] text-label mb-2.5" style={{ fontFamily: "'Instrument Serif', serif" }}>{module.name}</h3>
                     <p className="text-[13px] text-muted leading-[1.65] mb-3.5">{benefit}</p>
-                    <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase" style={{ color: col }}>
-                      <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
-                      {href ? "Accessible" : "En construction"}
-                    </span>
+                    {href && (
+                      <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase" style={{ color: col }}>
+                        <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
+                        Accessible
+                      </span>
+                    )}
                     {href ? (
                       <div className="mt-4">
                         <TrackedModuleLink href={href} moduleId={module.id} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: col, border: `1px solid ${col}33`, background: `${col}0d` }}>
@@ -324,9 +253,14 @@ export default async function RapportPage() {
 
         {/* Footer nav */}
         <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-white/[0.08]">
-          <TrackedUpgradeLink href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-            Ouvrir le rapport complet
-          </TrackedUpgradeLink>
+          <Link href="/rapport/quartier" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+            Module Quartier
+          </Link>
+          {fullReport && (
+            <Link href="/rapport/logement" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
+              Module Logement
+            </Link>
+          )}
           <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
             Mon compte
           </Link>
