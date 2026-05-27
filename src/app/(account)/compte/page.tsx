@@ -51,7 +51,7 @@ export default async function ComptePage() {
 
       <AccountNav
         secondaryCta={{ href: "/rapport", label: "Mon rapport" }}
-        primaryCta={fullAccess ? { href: "/dashboard", label: "Dashboard" } : { href: "/rapport", label: "Mon rapport" }}
+        primaryCta={fullAccess ? { href: "/dashboard", label: "Dashboard" } : { href: "/#pricing", label: "Passer au complet" }}
       />
 
       <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
@@ -74,8 +74,8 @@ export default async function ComptePage() {
             </h1>
             <p className="text-[17px] leading-[1.72] text-muted mb-8 max-w-[480px]">
               {fullAccess
-                ? "Six dimensions ouvertes. Commencez par le module de votre choix."
-                : "Votre rapport est sauvegardé ici, sans limite de temps. Vous pouvez y revenir, le compléter, le partager."}
+                ? "Le rapport complet est ici. Six dimensions, toutes ouvertes. Commencez par le module de votre choix."
+                : "Le rapport partiel est sauvegardé ici, sans limite de temps. Vous pouvez y revenir, le compléter, le partager."}
             </p>
             <div className="flex gap-2 flex-wrap mb-7">
               <span className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] font-mono text-[11px] text-ghost">
@@ -89,6 +89,11 @@ export default async function ComptePage() {
               <Link href="/rapport" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
                 {fullAccess ? "Voir mes modules" : "Lire mon rapport"}
               </Link>
+              {!fullAccess && (
+                <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
+                  Passer au complet
+                </Link>
+              )}
             </div>
           </div>
 
@@ -181,6 +186,60 @@ export default async function ComptePage() {
                 ))}
               </div>
 
+              {/* ── Modules fermés ── */}
+              <div className="pt-14">
+                <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
+                  <div>
+                    <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Cinq dimensions fermées</p>
+                    <h2 className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                      Ce que le rapport complet lit pour vous.
+                    </h2>
+                  </div>
+                  <p className="text-[15px] text-muted leading-[1.65]">
+                    {commune ? `Chaque module croise votre profil avec les données disponibles pour ${commune}.` : "Chaque module croise votre profil avec les données disponibles pour votre commune."}
+                  </p>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {LOCKED_MODULES.map((module, i) => (
+                    <article key={module.id} className="glass rounded-xl p-5 opacity-50">
+                      <div className="w-[30px] h-[30px] rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[15px] mb-3 grayscale">
+                        {MODULE_ICONS[module.id]}
+                      </div>
+                      <p className="font-mono text-[10px] tracking-[0.1em] text-ghost mb-0.5 uppercase">Module 0{i + 2}</p>
+                      <h3 className="font-normal text-[18px] text-muted mb-2" style={{ fontFamily: "'Instrument Serif', serif" }}>{module.name}</h3>
+                      <p className="text-[12px] text-ghost leading-[1.6] mb-3">{MODULE_BENEFIT[module.id] ?? module.summary}</p>
+                      <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase text-ghost bg-white/[0.03] border border-white/[0.08] rounded-full px-2 py-1">
+                        Fermé
+                      </span>
+                    </article>
+                  ))}
+                </div>
+
+                {/* Upgrade band */}
+                <div className="glass rounded-2xl p-10 border-accent/[0.12] grid grid-cols-[1fr_180px] gap-12 items-center mt-10 relative overflow-hidden">
+                  <div className="absolute top-[-60px] right-[-60px] w-[200px] h-[200px] rounded-full bg-accent/[0.08] pointer-events-none" />
+                  <div>
+                    <h2 className="font-normal text-[clamp(20px,2.2vw,26px)] leading-[1.2] tracking-[-0.4px] text-label mb-2.5" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                      {commune ? `Six lectures de votre vie à ${commune}. Sourcées. Personnalisées.` : "Six lectures de votre vie. Sourcées. Personnalisées."}
+                    </h2>
+                    <p className="text-[15px] text-muted leading-[1.7]">
+                      Le rapport complet ne produit pas un score. Il garde les dimensions distinctes pour que vos arbitrages restent les vôtres.
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <span className="block text-[44px] text-label leading-none tracking-[-1.5px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                      14<span className="text-[20px] text-ghost ml-0.5">€</span>
+                    </span>
+                    <span className="block font-mono text-[10px] text-ghost tracking-[0.04em] mt-1 mb-4">une fois · Suivi 9 €/mois prochainement</span>
+                    <Link href="/#pricing" className="flex items-center justify-center px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[13px] no-underline w-full" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+                      Voir les formules
+                    </Link>
+                    <p className="mt-2.5 font-mono text-[10px] text-ghost tracking-[0.04em] text-center leading-[1.6]">
+                      Les 14 € seront déductibles à l&apos;ouverture du Suivi.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </>
           )}
         </section>
@@ -219,7 +278,8 @@ export default async function ComptePage() {
             {[
               { label: "Pourquoi futur•e", href: "/pourquoi" },
               { label: "Pages Savoir", href: "/savoir/cadmium" },
-                { label: "Contact", href: "mailto:hello@futur-e.fr" },
+              { label: "Tarifs", href: "/#pricing" },
+              { label: "Contact", href: "mailto:hello@futur-e.fr" },
             ].map((l) => (
               <Link key={l.label} href={l.href} className="font-mono text-[11px] text-ghost no-underline tracking-[0.06em] uppercase">
                 {l.label}
