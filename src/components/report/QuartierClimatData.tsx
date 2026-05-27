@@ -1,6 +1,7 @@
 "use client";
 
 import { useHorizon, HORIZON_META } from "@/hooks/useHorizon";
+import type { GeorisquesSummary } from "@/lib/georisques";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -11,6 +12,7 @@ type SharedProps = {
   communeName: string;
   scenarios: GwlScenarios | null;
   pm25: number | null;
+  georisques: GeorisquesSummary | null;
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -19,132 +21,185 @@ function r(v: number | undefined | null) {
   return v != null ? Math.round(v) : null;
 }
 
-function buildFactors(gwlData: Record<string, number> | null | undefined, pm25: number | null | undefined, horizonKey: string): Factor[] {
+function buildFactors(gwlData: Record<string, number> | null | undefined, pm25: number | null | undefined, horizonKey: string, georisques: GeorisquesSummary | null): Factor[] {
   const meta = HORIZON_META[horizonKey as keyof typeof HORIZON_META] ?? HORIZON_META.gwl20;
   const heatDays = r(gwlData?.["NORTX35D_yr"]);
+  const hotDays = r(gwlData?.["NORTX30D_yr"]);
   const tropicalNights = r(gwlData?.["NORTR_yr"]);
   const fireDays = r(gwlData?.["NORIFM40_yr"]);
 
   return [
     {
-      label: "Jours de chaleur extrême",
+      label: "Jours chauds (> 30°C)",
+      val: hotDays != null ? `${hotDays} jours/an en ${meta.year}` : "—",
+      col: "var(--orange)",
+      src: `DRIAS / Météo-France · France ${meta.france}`,
+      missing: hotDays == null,
+    },
+    {
+      label: "Jours de chaleur extrême (> 35°C)",
       val: heatDays != null ? `${heatDays} jours/an en ${meta.year}` : "—",
       col: "var(--red)",
       src: `DRIAS / Météo-France · France ${meta.france}`,
       missing: heatDays == null,
     },
     {
-      label: "Nuits tropicales",
+      label: "Nuits tropicales (> 20°C)",
       val: tropicalNights != null ? `${tropicalNights} nuits/an en ${meta.year}` : "—",
       col: "var(--orange)",
       src: "DRIAS / Météo-France · Tmin > 20°C",
       missing: tropicalNights == null,
     },
     {
-      label: "Qualité de l'air",
-      val: pm25 != null ? `${pm25} µg/m³ (PM2.5 annuel)` : "—",
-      col: "var(--blue)",
-      src: "ADEME / données territoires",
-      missing: pm25 == null,
-    },
-    {
-      label: "Risque incendie",
+      label: "Conditions météo favorables au feu",
       val: fireDays != null ? `${fireDays} jours/an en ${meta.year}` : "—",
       col: "var(--orange)",
-      src: "DRIAS · indice météo-feu > 40",
+      src: "DRIAS · IFM > 40 · indice météo, pas risque réel",
       missing: fireDays == null,
+    },
+    {
+      label: "Inondation fluviale",
+      val: georisques ? (georisques.flags.flood ? "Zone exposée recensée" : "Aucun périmètre recensé") : "—",
+      col: "var(--blue)",
+      src: "Géorisques · échelle communale",
+      missing: !georisques?.flags.flood,
+    },
+    {
+      label: "Submersion marine",
+      val: georisques ? (georisques.flags.marineSubmersion ? "Côte exposée recensée" : "Aucun périmètre recensé") : "—",
+      col: "var(--blue)",
+      src: "Géorisques · échelle communale",
+      missing: !georisques?.flags.marineSubmersion,
     },
   ];
 }
 
-function buildParagraphs(communeName: string, gwlData: Record<string, number> | null | undefined, pm25: number | null | undefined, horizonKey: string): string[] {
+function buildParagraphs(communeName: string, gwlData: Record<string, number> | null | undefined, pm25: number | null | undefined, horizonKey: string, georisques: GeorisquesSummary | null): string[] {
   const meta = HORIZON_META[horizonKey as keyof typeof HORIZON_META] ?? HORIZON_META.gwl20;
   const heatDays = r(gwlData?.["NORTX35D_yr"]);
+  const hotDays = r(gwlData?.["NORTX30D_yr"]);
   const tropicalNights = r(gwlData?.["NORTR_yr"]);
   const fireDays = r(gwlData?.["NORIFM40_yr"]);
 
+  void pm25;
+
   const paragraphs: string[] = [];
 
-  if (heatDays != null) {
-    let p = `La chaleur d'abord : ${communeName} atteindrait ${heatDays} jour${heatDays > 1 ? "s" : ""} par an de chaleur extrême (Tmax > 35°C) à l'horizon ${meta.year}, dans le scénario France ${meta.france}. Ce n'est pas un basculement abstrait. Ce sont des étés qui deviennent plus longs, plus lourds et plus difficiles à traverser.`;
+  if (heatDays != null || hotDays != null) {
+    let p = `À l'horizon ${meta.year}, ${communeName} atteindrait`;
+    if (hotDays != null) p += ` ${hotDays} jour${hotDays > 1 ? "s" : ""} par an au-dessus de 30°C`;
+    if (hotDays != null && heatDays != null) p += `, dont`;
+    if (heatDays != null) p += ` ${heatDays} jour${heatDays > 1 ? "s" : ""} de chaleur extrême dépassant 35°C`;
+    p += `.`;
     if (tropicalNights != null) {
-      p += ` Les nuits ne rafraîchissent plus : ${tropicalNights} nuit${tropicalNights > 1 ? "s" : ""} tropicale${tropicalNights > 1 ? "s" : ""} par an sont attendues (Tmin > 20°C).`;
+      p += ` Les nuits ne rafraîchissent plus : ${tropicalNights} nuit${tropicalNights > 1 ? "s" : ""} par an resteraient au-dessus de 20°C.`;
     }
+    p += " Ce n'est pas un basculement abstrait. Ce sont des étés qui deviennent plus lourds et plus difficiles à traverser.";
     paragraphs.push(p);
   } else if (!gwlData) {
     paragraphs.push(
-      `Les projections climatiques pour ${communeName} ne sont pas encore disponibles dans notre base DRIAS. Cette commune sera intégrée lors de la prochaine mise à jour.`,
+      `Les projections climatiques pour ${communeName} ne sont pas encore disponibles dans notre base de données. Cette commune sera intégrée lors de la prochaine mise à jour.`,
     );
   }
 
-  const airParts: string[] = [];
-  if (pm25 != null) airParts.push(`la qualité de l'air affiche ${pm25} µg/m³ de PM2.5 en moyenne annuelle`);
-  if (fireDays != null && fireDays > 2)
-    airParts.push(`le risque météo-feu dépasse le seuil critique ${fireDays} jour${fireDays > 1 ? "s" : ""} par an en ${meta.year}`);
-  if (airParts.length > 0) {
+  if (fireDays != null) {
     paragraphs.push(
-      airParts
-        .map((s, i) => (i === 0 ? s.charAt(0).toUpperCase() + s.slice(1) : s))
-        .join(", et ") + ".",
+      `Les projections indiquent ${fireDays} jour${fireDays > 1 ? "s" : ""} par an en ${meta.year} avec des conditions météo favorables aux incendies. Cet indice reflète la météo, pas la probabilité réelle : le risque effectif dépend aussi de la végétation et de l'humidité des sols.`,
     );
   }
 
-  paragraphs.push(
-    "Ce module lit ce qui change autour de chez vous. Il ne dit pas encore comment ces changements croisent votre logement précis, votre budget ou votre santé. C'est la suite du rapport qui prend le relais.",
-  );
+  if (georisques) {
+    const risks: string[] = [];
+    if (georisques.flags.flood) risks.push("inondation fluviale");
+    if (georisques.flags.marineSubmersion) risks.push("submersion marine");
+    if (risks.length > 0) {
+      paragraphs.push(
+        `${communeName} est classée en zone à risque ${risks.join(" et ")}. Ces risques sont identifiés à l'échelle de la commune. L'exposition précise de votre adresse est accessible dans le module Logement.`,
+      );
+    }
+  }
 
   return paragraphs;
 }
 
-// ─── Aside (panneau héro droit) ───────────────────────────────────────────────
+// ─── FactorGrid (grille horizontale de cartes) ────────────────────────────────
 
-export function QuartierAside({ communeName, scenarios, pm25 }: SharedProps) {
+export function QuartierAside({ communeName, scenarios, pm25, georisques }: SharedProps) {
   const [horizon] = useHorizon();
   const meta = HORIZON_META[horizon];
   const gwlData = scenarios?.[horizon]?.v ?? null;
-  const factors = buildFactors(gwlData, pm25, horizon);
+  const factors = buildFactors(gwlData, pm25, horizon, georisques);
 
   return (
-    <aside className="glass rounded-2xl p-7">
-      <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">Lecture territoriale</p>
-      <h2 className="font-normal text-[22px] leading-[1.2] text-label mb-5 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
-        {communeName}, horizon {meta.year}.
-      </h2>
-      <div className="flex flex-col gap-2.5">
+    <div>
+      <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-4">
+        {communeName}, horizon {meta.year} · données territoriales
+      </p>
+      <div className="grid grid-cols-4 gap-2.5">
         {factors.map((f) => (
           <div
             key={f.label}
-            className="flex gap-3.5 items-start px-3.5 py-3 rounded-lg"
+            className="glass rounded-xl px-4 py-3.5"
             style={{
-              background: f.missing ? "var(--ghost)08" : `${f.col}0c`,
-              border: `1px solid ${f.missing ? "var(--ghost)" : f.col}22`,
-              opacity: f.missing ? 0.5 : 1,
+              borderTop: `2px solid ${f.missing ? "var(--ghost)" : f.col}`,
+              opacity: f.missing ? 0.45 : 1,
             }}
           >
-            <span
-              className="w-[7px] h-[7px] rounded-full shrink-0 mt-[5px]"
-              style={{ background: f.missing ? "var(--ghost)" : f.col, boxShadow: f.missing ? "none" : `0 0 8px ${f.col}` }}
-            />
-            <div>
-              <div className="text-[13px] font-medium text-label mb-0.5 leading-[1.3]">{f.label}</div>
-              <div className="font-mono text-[10px] tracking-[0.04em]" style={{ color: f.missing ? "var(--ghost)" : f.col }}>{f.val}</div>
-              <div className="font-mono text-[10px] text-ghost tracking-[0.04em]">{f.src}</div>
-            </div>
+            <div className="text-[12px] font-medium text-label mb-2 leading-[1.3]">{f.label}</div>
+            <div className="font-mono text-[11px] tracking-[0.02em] mb-0.5" style={{ color: f.missing ? "var(--ghost)" : f.col }}>{f.val}</div>
+            <div className="font-mono text-[10px] text-ghost tracking-[0.02em] leading-[1.4]">{f.src}</div>
           </div>
         ))}
       </div>
-    </aside>
+    </div>
+  );
+}
+
+// ─── SectionTitle (titre dynamique horizon-aware) ─────────────────────────────
+
+export function QuartierSectionTitle({ communeName, scenarios, georisques }: Omit<SharedProps, "pm25">) {
+  const [horizon] = useHorizon();
+  const meta = HORIZON_META[horizon];
+  const gwlData = scenarios?.[horizon]?.v ?? null;
+  const hotDays = r(gwlData?.["NORTX30D_yr"]);
+  const tropicalNights = r(gwlData?.["NORTR_yr"]);
+  const flood = georisques?.flags.flood ?? false;
+  const submersion = georisques?.flags.marineSubmersion ?? false;
+
+  let title = "";
+
+  if (hotDays != null && (flood || submersion)) {
+    const risks = [flood && "inondations", submersion && "submersion marine"].filter(Boolean).join(" et ");
+    title = `${hotDays} jours de chaleur en ${meta.year}, ${communeName} exposée aux ${risks}.`;
+  } else if (hotDays != null && tropicalNights != null) {
+    title = `${hotDays} jours chauds et ${tropicalNights} nuits tropicales attendus en ${meta.year}.`;
+  } else if (hotDays != null) {
+    title = `${hotDays} jours au-dessus de 30°C attendus à l'horizon ${meta.year}.`;
+  } else if (flood || submersion) {
+    const risks = [flood && "inondations", submersion && "submersion marine"].filter(Boolean).join(" et ");
+    title = `${communeName} exposée aux ${risks} selon les données de risques naturels.`;
+  } else {
+    title = `Les signaux climatiques pour ${communeName} à l'horizon ${meta.year}.`;
+  }
+
+  return (
+    <div>
+      <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Synthèse territoriale</p>
+      <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+        {title}
+      </h2>
+    </div>
   );
 }
 
 // ─── DataBody (bloc principal de données) ─────────────────────────────────────
 
-export function QuartierDataBody({ communeName, scenarios, pm25 }: SharedProps) {
+export function QuartierDataBody({ communeName, scenarios, pm25, georisques }: SharedProps) {
   const [horizon] = useHorizon();
   const meta = HORIZON_META[horizon];
   const gwlData = scenarios?.[horizon]?.v ?? null;
-  const factors = buildFactors(gwlData, pm25, horizon);
-  const paragraphs = communeName ? buildParagraphs(communeName, gwlData, pm25, horizon) : [];
+  const factors = buildFactors(gwlData, pm25, horizon, georisques);
+  const paragraphs = communeName ? buildParagraphs(communeName, gwlData, pm25, horizon, georisques) : [];
 
   return (
     <div className="glass rounded-xl p-8 border-t-2 border-t-info">
@@ -160,21 +215,6 @@ export function QuartierDataBody({ communeName, scenarios, pm25 }: SharedProps) 
           Renseignez votre commune dans votre profil pour accéder aux projections climatiques de votre territoire.
         </p>
       )}
-      <div className="grid grid-cols-2 gap-2.5 mt-6">
-        {factors.map((f) => (
-          <div key={f.label} className="glass rounded-lg p-4" style={{ opacity: f.missing ? 0.45 : 1 }}>
-            <div className="flex items-center gap-2 mb-1">
-              <span
-                className="w-1.5 h-1.5 rounded-full shrink-0"
-                style={{ background: f.missing ? "var(--ghost)" : f.col, boxShadow: f.missing ? "none" : `0 0 6px ${f.col}` }}
-              />
-              <span className="text-[13px] font-medium text-label leading-[1.3]">{f.label}</span>
-            </div>
-            <span className="block font-mono text-[11px] tracking-[0.02em] ml-3.5" style={{ color: f.missing ? "var(--ghost)" : f.col }}>{f.val}</span>
-            <span className="block font-mono text-[10px] text-ghost tracking-[0.02em] ml-3.5">{f.src}</span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

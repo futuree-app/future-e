@@ -28,12 +28,11 @@ const MODULE_ICONS: Record<string, string> = {
 };
 
 const MODULE_BENEFIT: Record<string, string> = {
-  quartier: "Ce que votre territoire devient. Chaleur, inondations, érosion, qualité de vie : ce qui change autour de chez vous dans les prochaines décennies.",
-  logement: "Ce que votre habitat devient : confort, risques, valeur. DPE, réglementation, exposition par adresse, coût d'assurance projeté et valeur immobilière à 20 ans.",
-  metier: "Ce que le changement climatique fait à votre secteur. Certains métiers gagnent en importance, d'autres se fragilisent.",
-  sante: "Ce que votre environnement fait à votre corps. Chaleur, pollens, qualité de l'air, cadmium dans les sols : des signaux qui existent déjà.",
-  mobilite: "Est-ce que votre mode de vie quotidien reste tenable ici ? Dépendance à la voiture, coût des trajets, alternatives réelles.",
-  projets: "Est-ce que vos projets sont cohérents avec ce que ce lieu va devenir ? Achat, déménagement, retraite, installation durable.",
+  logement: "DPE, risques par adresse, coût d'assurance, valeur à 20 ans. Ce que votre logement vaut vraiment dans ce contexte.",
+  metier: "Votre secteur face aux transformations qui viennent. Ce qui se renforce, ce qui se fragilise selon l'horizon.",
+  sante: "Chaleur, pollens, air, sols. Ce que cet environnement fait à votre corps aujourd'hui et selon les décennies à venir.",
+  mobilite: "Voiture, transports, trajets quotidiens. Ce que ça coûte réellement de vivre ici sans remettre en cause vos habitudes.",
+  projets: "Achat, installation, retraite. Ce que ce territoire va devenir et ce que ça implique pour vos décisions.",
 };
 
 const LOCKED_MODULE_IDS = ["logement", "metier", "sante", "mobilite", "projets"];
@@ -86,43 +85,29 @@ export default async function RapportPage() {
               {fullReport ? "Rapport complet" : "Rapport partiel"}
             </div>
 
-            {fullReport ? (
-              <>
-                <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                  Votre vie à {displayName}<br />
-                  <span className="italic text-accent">module par module.</span>
-                </h1>
-                <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[500px]">
-                  Le rapport complet garde six dimensions. Quartier et Logement sont déjà accessibles comme modules dédiés. Les autres suivent la même structure.
-                </p>
-                <div className="flex gap-3 flex-wrap">
+            <>
+              <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                {displayName} en 2030, 2050, 2100.<br />
+                <span className="italic text-accent">Ce que ça change pour vous.</span>
+              </h1>
+              <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[500px]">
+                Six angles sur ce que le changement climatique fait concrètement à votre quotidien ici. Choisissez un horizon. Les données s&apos;adaptent quand c&apos;est possible.
+              </p>
+              <div className="flex gap-3 flex-wrap">
+                {fullReport ? (
                   <Link href="/dashboard" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
                     Voir le dashboard
                   </Link>
-                  <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
-                    Mon compte
-                  </Link>
-                </div>
-              </>
-            ) : (
-              <>
-                <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                  Ce que {displayName} devient.<br />
-                  <span className="italic text-accent">Les premiers signaux, sans détours.</span>
-                </h1>
-                <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[500px]">
-                  Quelques données publiques sur votre territoire suffisent déjà à poser des questions que vous n&apos;auriez peut-être pas pensé à formuler. Ce que vous lisez ici est une première lecture, pas le rapport complet.
-                </p>
-                <div className="flex gap-3 flex-wrap">
+                ) : (
                   <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
                     Ouvrir le rapport complet
                   </Link>
-                  <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
-                    Mon compte
-                  </Link>
-                </div>
-              </>
-            )}
+                )}
+                <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
+                  Mon compte
+                </Link>
+              </div>
+            </>
           </div>
 
           {/* Panel signals / résumé */}
@@ -183,10 +168,12 @@ export default async function RapportPage() {
           </div>
         )}
 
-        <HorizonBar
-          communeName={displayName}
-          locked={!fullReport}
-        />
+        <div id="horizon">
+          <HorizonBar
+            communeName={displayName}
+            locked={!fullReport}
+          />
+        </div>
 
         <div className="border-t border-white/[0.08] mt-14" />
 
@@ -214,7 +201,7 @@ export default async function RapportPage() {
                   <p className="font-mono text-[10px] tracking-[0.1em] text-ghost mb-1 uppercase">Module 01</p>
                   <h3 className="font-normal text-[20px] text-label mb-2.5" style={{ fontFamily: "'Instrument Serif', serif" }}>Quartier</h3>
                   <p className="text-[13px] text-muted leading-[1.65] mb-3.5">
-                    Ce que le territoire devient autour de vous : chaleur, eau, littoral, cadre de vie. La lecture ouverte de votre rapport.
+                    Chaleur, inondations, érosion côtière. Ce que {displayName} devient selon l&apos;horizon choisi, données climatiques publiques à l&apos;appui.
                   </p>
                   <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase" style={{ color: "var(--blue)" }}>
                     <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: "var(--blue)", boxShadow: "0 0 6px var(--blue)" }} />
@@ -228,7 +215,9 @@ export default async function RapportPage() {
                 </article>
 
                 {lockedModules.map((module, i) => {
-                  const benefit = MODULE_BENEFIT[module.id] ?? module.summary;
+                  const benefit = module.id === "quartier"
+                  ? `Chaleur, inondations, érosion côtière. Ce que ${displayName} devient selon l'horizon choisi, données climatiques publiques à l'appui.`
+                  : MODULE_BENEFIT[module.id] ?? module.summary;
                   return (
                     <article
                       key={module.id}
@@ -296,22 +285,18 @@ export default async function RapportPage() {
         {/* ── Vue payant ── */}
         {fullReport && (
           <section className="pt-14">
-            <div className="grid grid-cols-[1fr_320px] gap-10 items-end mb-8">
-              <div>
-                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Modules du rapport complet</p>
-                <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                  Votre hub de modules à {displayName}.
-                </h2>
-              </div>
-              <p className="text-[15px] text-muted leading-[1.65]">
-                Quartier et Logement sont déjà accessibles comme pages dédiées. Les autres modules suivent la même logique.
-              </p>
+            <div className="mb-8">
+              <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                Vos six dimensions, pour vous.
+              </h2>
             </div>
 
             <div className="grid grid-cols-3 gap-3.5">
               {allModules.map((module, i) => {
                 const col = MODULE_COLORS[module.id] ?? "var(--violet)";
-                const benefit = MODULE_BENEFIT[module.id] ?? module.summary;
+                const benefit = module.id === "quartier"
+                  ? `Chaleur, inondations, érosion côtière. Ce que ${displayName} devient selon l'horizon choisi, données climatiques publiques à l'appui.`
+                  : MODULE_BENEFIT[module.id] ?? module.summary;
                 const href =
                   module.id === "quartier"
                     ? "/rapport/quartier"

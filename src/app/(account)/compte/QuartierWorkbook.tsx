@@ -254,6 +254,7 @@ const S = {
 // ─── component ────────────────────────────────────────────────────────────────
 export function QuartierWorkbook({ userKey }: QuartierWorkbookProps) {
   const storageKey = `${PREFIX}${userKey}`;
+  const [open, setOpen] = useState(false);
   const [answers, setAnswers] = useState<QuartierAnswers>(EMPTY);
   const [ready, setReady] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
@@ -318,25 +319,43 @@ export function QuartierWorkbook({ userKey }: QuartierWorkbookProps) {
   return (
     <div style={S.wrap}>
 
-      {/* en-tête + barre de progression */}
-      <div>
+      {/* en-tête + toggle */}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        style={{ all: "unset", cursor: "pointer", display: "block", width: "100%" }}
+      >
         <div style={S.head}>
           <div>
-            <p style={S.kicker}>Module ouvert · À compléter</p>
+            <p style={S.kicker}>{open ? "Observations terrain · Ouvert" : "Observations terrain"}</p>
             <h3 style={S.title}>Vos repères de terrain</h3>
           </div>
-          <span style={S.progressPill(completionPct)}>
-            {completion}/4{completionPct === 1 ? " ✓" : ""}
-          </span>
-        </div>
-        <div style={{ marginTop: 14 }}>
-          <div style={S.progressBar}>
-            <div style={S.progressFill(completionPct)} />
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+            <span style={S.progressPill(completionPct)}>
+              {completion}/4{completionPct === 1 ? " ✓" : ""}
+            </span>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: C.dim, letterSpacing: "0.04em" }}>
+              {open ? "▲" : "▼"}
+            </span>
           </div>
         </div>
-      </div>
+        {open && (
+          <div style={{ marginTop: 14 }}>
+            <div style={S.progressBar}>
+              <div style={S.progressFill(completionPct)} />
+            </div>
+          </div>
+        )}
+      </button>
+
+      {!open && (
+        <p style={{ fontSize: 13, color: C.dim, lineHeight: 1.6, margin: 0 }}>
+          Croisez vos observations de terrain avec les données climatiques. Stocké localement dans votre navigateur.
+        </p>
+      )}
 
       {/* 3 questions à choix */}
+      {open && (<>
       {QUESTIONS.map((q) => (
         <div key={q.key} style={S.questionWrap}>
           <div>
@@ -392,6 +411,7 @@ export function QuartierWorkbook({ userKey }: QuartierWorkbookProps) {
       <div style={S.helperBox}>
         Ce module ne remplace pas la lecture du territoire. Il lui donne un point d&apos;accroche plus personnel : vos observations croisées avec les données publiques, dans la suite du rapport.
       </div>
+      </>)}
     </div>
   );
 }
