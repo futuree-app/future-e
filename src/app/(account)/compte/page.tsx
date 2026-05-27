@@ -154,7 +154,7 @@ export default async function ComptePage() {
                     <h3 className="font-normal text-[18px] text-label mb-2" style={{ fontFamily: "'Instrument Serif', serif" }}>{module.name}</h3>
                     <p className="text-[12px] text-muted leading-[1.6] mb-3">{MODULE_BENEFIT[module.id] ?? module.summary}</p>
                     <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase text-accent bg-accent/[0.06] border border-accent/[0.2] rounded-full px-2 py-1">
-                      {module.id === "quartier" || module.id === "logement" ? "Ouvrir" : "Bientôt"}
+                      {module.id === "quartier" || module.id === "logement" ? "Ouvrir" : "—"}
                     </span>
                   </Link>
                 ))}
@@ -230,7 +230,7 @@ export default async function ComptePage() {
                     <span className="block text-[44px] text-label leading-none tracking-[-1.5px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
                       14<span className="text-[20px] text-ghost ml-0.5">€</span>
                     </span>
-                    <span className="block font-mono text-[10px] text-ghost tracking-[0.04em] mt-1 mb-4">une fois · Suivi 9 €/mois prochainement</span>
+                    <span className="block font-mono text-[10px] text-ghost tracking-[0.04em] mt-1 mb-4">une fois</span>
                     <Link href="/#pricing" className="flex items-center justify-center px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[13px] no-underline w-full" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
                       Voir les formules
                     </Link>

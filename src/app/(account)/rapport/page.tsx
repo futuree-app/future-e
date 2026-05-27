@@ -132,7 +132,7 @@ export default async function RapportPage() {
                 {allModules.map((m) => {
                   const col = MODULE_COLORS[m.id] ?? "var(--violet)";
                   const status =
-                    m.id === "quartier" || m.id === "logement" ? "Accessible" : "En cours";
+                    m.id === "quartier" || m.id === "logement" ? "Accessible" : "—";
                   return (
                     <div key={m.id} className="flex items-center gap-3 px-3 py-2.5 rounded-lg" style={{ background: `${col}0a`, border: `1px solid ${col}1a` }}>
                       <span className="text-[16px]">{MODULE_ICONS[m.id]}</span>
@@ -254,7 +254,7 @@ export default async function RapportPage() {
                 <span className="block text-[52px] text-label leading-none tracking-[-2px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
                   14<span className="text-[22px] text-ghost">€</span>
                 </span>
-                <span className="block font-mono text-[11px] text-ghost tracking-[0.04em] mt-1 mb-5">une fois · Suivi 9 €/mois prochainement</span>
+                <span className="block font-mono text-[11px] text-ghost tracking-[0.04em] mt-1 mb-5">une fois</span>
                 <TrackedUpgradeLink href="/#pricing" className="flex items-center justify-center px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[13px] no-underline w-full" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
                   Voir les formules
                 </TrackedUpgradeLink>
@@ -306,7 +306,7 @@ export default async function RapportPage() {
                     <p className="text-[13px] text-muted leading-[1.65] mb-3.5">{benefit}</p>
                     <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase" style={{ color: col }}>
                       <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
-                      {href ? "Accessible" : "En construction"}
+                      {href ? "Accessible" : "—"}
                     </span>
                     {href ? (
                       <div className="mt-4">
