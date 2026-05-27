@@ -60,6 +60,22 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
     }
 
+    // Cas spécial : carnet de bord Quartier (objet JSONB libre).
+    if (field === "workbook_quartier") {
+      if (value !== null && value !== undefined && (typeof value !== "object" || Array.isArray(value))) {
+        return NextResponse.json({ error: "Objet attendu pour workbook_quartier." }, { status: 400 });
+      }
+      const { error } = await supabase
+        .from("user_profiles")
+        .update({ workbook_quartier: value ?? null, updated_at: new Date().toISOString() })
+        .eq("user_id", user.id);
+      if (error) {
+        console.error("[profile] PATCH workbook_quartier error:", error);
+        return NextResponse.json({ error: "Erreur de sauvegarde." }, { status: 500 });
+      }
+      return NextResponse.json({ success: true });
+    }
+
     // Cas spécial : mise à jour de la commune (deux champs atomiques).
     if (field === "commune") {
       const inseeCode = typeof body.insee_code === "string" ? body.insee_code.trim() : null;

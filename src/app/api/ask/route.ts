@@ -385,6 +385,36 @@ function buildUserProfileText(profile: ProfileRow): string {
     lines.push(`Projets de vie : ${projects.join(", ")}`);
   }
 
+  const HEAT_LABELS: Record<string, string> = {
+    supportable: "l'été reste supportable",
+    fragile: "l'été commence à peser",
+    difficile: "l'été est déjà difficile",
+  };
+  const WATER_LABELS: Record<string, string> = {
+    loin: "non exposé",
+    ponctuel: "tensions ponctuelles observées",
+    present: "sujet déjà concret",
+  };
+  const SHELTER_LABELS: Record<string, string> = {
+    resilient: "le quartier absorbe encore bien",
+    tendu: "le cadre de vie se tend l'été",
+    fragilise: "le quartier montre déjà ses limites",
+  };
+  const workbook = profile.workbook_quartier as Record<string, string> | null | undefined;
+  if (workbook && typeof workbook === "object" && !Array.isArray(workbook)) {
+    const obs: string[] = [];
+    if (workbook.heat) obs.push(`- Vécu estival : ${HEAT_LABELS[workbook.heat] ?? workbook.heat}`);
+    if (workbook.water) obs.push(`- Rapport à l'eau : ${WATER_LABELS[workbook.water] ?? workbook.water}`);
+    if (workbook.shelter) obs.push(`- Cadre de vie estival : ${SHELTER_LABELS[workbook.shelter] ?? workbook.shelter}`);
+    if (typeof workbook.note === "string" && workbook.note.trim()) {
+      obs.push(`- Note terrain libre : ${workbook.note.trim()}`);
+    }
+    if (obs.length > 0) {
+      lines.push("Observations terrain (module Quartier) :");
+      lines.push(...obs);
+    }
+  }
+
   return lines.length > 0 ? lines.join("\n") : "Profil non renseigné.";
 }
 

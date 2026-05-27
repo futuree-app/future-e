@@ -295,6 +295,19 @@ export function QuartierWorkbook({ userKey }: QuartierWorkbookProps) {
     window.localStorage.setItem(storageKey, JSON.stringify(answers));
   }, [answers, ready, storageKey]);
 
+  // ── sync to server with 1 s debounce
+  useEffect(() => {
+    if (!ready) return;
+    const timer = setTimeout(() => {
+      fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ field: "workbook_quartier", value: answers }),
+      }).catch(() => {});
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [answers, ready]);
+
   // ── feedback visuel "Sauvegardé" (effet indépendant)
   useEffect(() => {
     if (!ready) return;
