@@ -43,3 +43,8 @@ next-env.d.ts
 .claude/
 .aider*
 .env.local
+
+# non-source assets (docs Notion exportées, logo, rapports de setup)
+Documentation Notion/
+logo/
+posthog-setup-report.md
