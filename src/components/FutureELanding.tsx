@@ -12,6 +12,7 @@ import { CookieSettingsLink } from '@/components/CookieSettingsLink';
 import { SAVOIR_HUB_ARTICLES } from '@/config/navigation';
 import { LandingComparatorInput } from '@/components/LandingComparatorInput';
 import { deriveCategories } from '@/lib/commune-categories';
+import posthog from 'posthog-js';
 
 const C = {
   bg: 'var(--bg)',
@@ -848,6 +849,23 @@ export default function FutureELanding() {
       clearTimeout(timeout);
     };
   }, [inputValue, selectedCommune]);
+
+  useEffect(() => {
+    const section = document.getElementById('pricing');
+    if (!section) return;
+    let fired = false;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !fired) {
+          fired = true;
+          posthog.capture('pricing_page_viewed');
+        }
+      },
+      { threshold: 0.2 },
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
 
   async function loadCommuneTensions(nextCommune) {
     const plm = PLM_CENTRAL_CODES[nextCommune.citycode];

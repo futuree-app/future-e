@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import posthog from 'posthog-js';
 
 type CommuneResult = {
   code: string;
@@ -218,6 +219,13 @@ export function ComparatorSearch({
     params.set('b', resolvedRight.code);
     params.set('bn', resolvedRight.nom);
 
+    posthog.capture('territory_compared', {
+      commune_a: resolvedLeft.nom,
+      insee_a: resolvedLeft.code,
+      commune_b: resolvedRight.nom,
+      insee_b: resolvedRight.code,
+    });
+
     startTransition(() => {
       router.replace(`/comparateur?${params.toString()}`, { scroll: false });
     });
@@ -236,6 +244,12 @@ export function ComparatorSearch({
 
     const url = `${window.location.origin}/comparateur?${params.toString()}`;
     await navigator.clipboard.writeText(url);
+    posthog.capture('report_link_copied', {
+      commune_a: left.selected.nom,
+      insee_a: left.selected.code,
+      commune_b: right.selected.nom,
+      insee_b: right.selected.code,
+    });
     setCopyLabel('Lien copié');
     window.setTimeout(() => setCopyLabel('Copier le lien'), 1800);
   }
