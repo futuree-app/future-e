@@ -1167,3 +1167,106 @@ dialog.wizard-dialog::backdrop {
 body:has(dialog.wizard-dialog[open]) {
   overflow: hidden;
 }
+
+/* ── HorizonSwitch ───────────────────────────────────────────────────────── */
+
+.horizon-switch-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.horizon-switch-label {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6b7388;
+}
+
+.horizon-switch {
+  display: inline-flex;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.horizon-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-width: 72px;
+}
+
+.horizon-btn:hover:not(.horizon-btn--active) {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.horizon-btn--active {
+  background: rgba(200, 184, 154, 0.14);
+  border-color: rgba(200, 184, 154, 0.3);
+  box-shadow: 0 0 12px rgba(200, 184, 154, 0.08);
+}
+
+.horizon-btn-label {
+  font-family: 'Instrument Sans', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #9ba3b4;
+  transition: color 0.15s;
+}
+
+.horizon-btn--active .horizon-btn-label {
+  color: #c8b89a;
+}
+
+.horizon-btn-sublabel {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: #6b7388;
+  transition: color 0.15s;
+}
+
+.horizon-btn--active .horizon-btn-sublabel {
+  color: rgba(200, 184, 154, 0.7);
+}
+
+.horizon-switch-source {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b7388;
+}
+
+.card-no-projection {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b7388;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 640px) {
+  .horizon-btn {
+    min-width: 56px;
+    padding: 8px 10px;
+  }
+  .horizon-btn-label {
+    font-size: 13px;
+  }
+}

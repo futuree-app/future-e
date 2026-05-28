@@ -13,6 +13,7 @@ import { SAVOIR_HUB_ARTICLES } from '@/config/navigation';
 import { LandingComparatorInput } from '@/components/LandingComparatorInput';
 import { deriveCategories } from '@/lib/commune-categories';
 import posthog from 'posthog-js';
+import { HorizonSwitch, type Horizon } from '@/components/HorizonSwitch';
 
 const C = {
   bg: 'var(--bg)',
@@ -95,6 +96,52 @@ const LANDING_DRIAS_SCENARIO = {
   horizon: '2050',
   shortLabel: '+4°C',
   longLabel: 'niveau de réchauffement +4°C',
+};
+
+const HORIZON_TO_GWL: Record<Horizon, string | null> = {
+  today: null,
+  '2030': 'gwl15',
+  '2050': 'gwl20',
+  '2100': 'gwl30',
+};
+
+// Tensions pour lesquelles on peut afficher une valeur DRIAS par horizon
+const DRIAS_TENSION_CONFIG: Record<string, {
+  indicator: string;
+  getSub: (value: number, name: string) => string;
+}> = {
+  canicule_vivable: {
+    indicator: 'NORTX30D_yr',
+    getSub: (v, name) => `${Math.round(v)} jours > 30°C par an à ${name}`,
+  },
+  acheter_canicule: {
+    indicator: 'NORTX30D_yr',
+    getSub: (v, name) => `${Math.round(v)} jours > 30°C par an à ${name}`,
+  },
+  enfants_chaleur: {
+    indicator: 'NORTX30D_yr',
+    getSub: (v, name) => `${Math.round(v)} jours > 30°C par an à ${name}`,
+  },
+  feux: {
+    indicator: 'NORIFM40_yr',
+    getSub: (v, _name) => `${Math.round(v)} jours de risque incendie élevé par an`,
+  },
+  randonner_ici: {
+    indicator: 'NORIFM40_yr',
+    getSub: (v, _name) => `${Math.round(v)} jours de risque incendie élevé par an`,
+  },
+  eau_potable: {
+    indicator: 'NORSWI04_yr',
+    getSub: (v, name) => `${Math.round(v)} jours de sol sec par an à ${name}`,
+  },
+  metier_agricole: {
+    indicator: 'NORRR_seas_JJA',
+    getSub: (v, name) => `${Math.round(v)} mm de pluie en été à ${name}`,
+  },
+  vignobles: {
+    indicator: 'NORTMm_seas_JJA',
+    getSub: (v, name) => `${v.toFixed(1)} °C en été à ${name}`,
+  },
 };
 
 const STATIC_ANSWERS = {
@@ -215,6 +262,27 @@ function formatIndicatorValue(value, digits = 0) {
 
 function getLandingIndicatorValue(indicators, indicatorCode) {
   return indicators?.[LANDING_DRIAS_SCENARIO.id]?.[indicatorCode]?.value_numeric ?? null;
+}
+
+function getDriaSub(
+  tensionId: string,
+  horizon: Horizon,
+  indicators: Record<string, unknown>,
+  communeName: string,
+  staticSub: string,
+): { sub: string; isDriasProjectable: boolean } {
+  const config = DRIAS_TENSION_CONFIG[tensionId];
+  if (!config) return { sub: staticSub, isDriasProjectable: false };
+
+  if (horizon === 'today') return { sub: staticSub, isDriasProjectable: true };
+
+  const gwlId = HORIZON_TO_GWL[horizon];
+  if (!gwlId) return { sub: staticSub, isDriasProjectable: true };
+
+  const value = (indicators as any)?.[gwlId]?.[config.indicator]?.value_numeric;
+  if (value == null || Number.isNaN(Number(value))) return { sub: staticSub, isDriasProjectable: true };
+
+  return { sub: config.getSub(Number(value), communeName), isDriasProjectable: true };
 }
 
 function buildDriasContext(communeName, indicators) {
@@ -667,6 +735,7 @@ export default function FutureELanding() {
   const [communeDataLoading, setCommuneDataLoading] = useState(false);
   const [tensions, setTensions] = useState([]);
   const [activeTension, setActiveTension] = useState(null);
+  const [horizon, setHorizon] = useState<Horizon>('today');
   const [answer, setAnswer] = useState(null);
   const [loading, setLoading] = useState(false);
   const [answerError, setAnswerError] = useState('');
@@ -2312,26 +2381,42 @@ export default function FutureELanding() {
               </div>
             )}
 
+            <HorizonSwitch value={horizon} onChange={setHorizon} />
+
             <div style={styles.tensionsGrid} className="tensions-grid">
-              {tensions.map((tension) => (
-                <button
-                  key={tension.id}
-                  className="tension-card"
-                  style={styles.tensionCard(
-                    activeTension?.id === tension.id,
-                    tension.color,
-                    questionLimitReached || loading,
-                  )}
-                  disabled={questionLimitReached || loading}
-                  onClick={() => selectTension(tension)}
-                >
-                  <div style={styles.tensionLabel}>
-                    {tension.label.replace('{commune}', commune)}
-                  </div>
-                  <div style={styles.tensionSub}>{tension.sub}</div>
-                  <span style={styles.tensionArrow(tension.color)}>→</span>
-                </button>
-              ))}
+              {tensions.map((tension) => {
+                const { sub, isDriasProjectable } = getDriaSub(
+                  tension.id,
+                  horizon,
+                  communeIndicators,
+                  commune,
+                  tension.sub,
+                );
+                return (
+                  <button
+                    key={tension.id}
+                    className="tension-card"
+                    style={styles.tensionCard(
+                      activeTension?.id === tension.id,
+                      tension.color,
+                      questionLimitReached || loading,
+                    )}
+                    disabled={questionLimitReached || loading}
+                    onClick={() => selectTension(tension)}
+                  >
+                    <div style={styles.tensionLabel}>
+                      {tension.label.replace('{commune}', commune)}
+                    </div>
+                    <div style={styles.tensionSub}>{sub}</div>
+                    {!isDriasProjectable && horizon !== 'today' && (
+                      <p className="card-no-projection">
+                        données actuelles · projection temporelle non disponible
+                      </p>
+                    )}
+                    <span style={styles.tensionArrow(tension.color)}>→</span>
+                  </button>
+                );
+              })}
             </div>
 
             <div style={styles.freeWrap} className="free-wrap">
