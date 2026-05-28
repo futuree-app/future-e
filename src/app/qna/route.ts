@@ -82,6 +82,28 @@ Output strict JSON with:
   "cta": "..."
 }`;
 
+const QUESTION_CATEGORY_MAP: Record<string, string> = {
+  canicule: "chaleur",
+  chaleur: "chaleur",
+  incendie: "chaleur",
+  secheresse: "eau",
+  eau: "eau",
+  inondation: "inondation",
+  submersion: "inondation",
+  littoral: "inondation",
+  logement: "logement",
+  retrait_gonflement: "logement",
+  energie: "energie",
+  sante: "sante",
+  assurance: "assurance",
+  mobilite: "demenagement",
+  biodiversite: "autre",
+};
+
+function resolveQuestionCategory(tensionId: string): string {
+  return QUESTION_CATEGORY_MAP[tensionId?.toLowerCase?.()] ?? "autre";
+}
+
 function stripCodeFence(value: string) {
   return value.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
 }
@@ -207,6 +229,7 @@ export async function POST(request: Request) {
         $ai_http_status: anthropicResponse.status,
         $ai_base_url: "https://api.anthropic.com",
         $ai_span_name: "qna",
+        question_category: resolveQuestionCategory(tension.id),
       },
     });
     await posthog.shutdown();

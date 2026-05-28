@@ -10,6 +10,7 @@ import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
 import { QuartierAside, QuartierDataBody, QuartierSectionTitle } from "@/components/report/QuartierClimatData";
 import { getGeorisquesSummary, type GeorisquesSummary } from "@/lib/georisques";
+import { ModuleTracker } from "@/components/ModuleTracker";
 
 export default async function RapportQuartierPage() {
   const account = await getCurrentUserAccount();
@@ -47,6 +48,7 @@ export default async function RapportQuartierPage() {
         primaryCta={{ href: "/dashboard", label: "Dashboard" }}
       />
 
+      <ModuleTracker moduleId="quartier" commune={communeName} inseeCode={inseeCode} />
       <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
         {!communeName && (
           <div className="pt-10">

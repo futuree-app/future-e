@@ -164,6 +164,30 @@
 .ask-message-content p:last-child { margin: 0; }
 .ask-message-break { height: 4px; }
 
+/* ── Feedback 👍/👎 ──────────────────────────────────────────────────────── */
+.ask-feedback {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+.ask-feedback-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 3px 5px;
+  border-radius: 4px;
+  opacity: 0.35;
+  transition: opacity 0.15s, background 0.15s;
+}
+.ask-feedback-btn:hover:not(:disabled) {
+  opacity: 0.9;
+  background: rgba(255, 255, 255, 0.06);
+}
+.ask-feedback-btn:disabled { cursor: default; }
+.ask-feedback-btn[data-given="true"] { opacity: 1; }
+
 /* ── Loading dots ────────────────────────────────────────────────────────── */
 .ask-loading {
   display: flex;

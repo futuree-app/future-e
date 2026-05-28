@@ -2,6 +2,7 @@
 
 import { forwardRef, useCallback, useEffect, useReducer, useState } from "react";
 import posthog from "posthog-js";
+import { departmentFromInsee } from "@/lib/posthog-props";
 import {
   type WizardAnswers,
   type WizardState,
@@ -9,6 +10,8 @@ import {
   WIZARD_SKIP_DEFAULTS,
   WIZARD_STORAGE_KEY,
 } from "./types";
+
+const STEP_NAMES = ["adresse", "logement", "metier", "sante", "mobilite", "projets"] as const;
 import { WizardStepper } from "./WizardStepper";
 import { WizardStep } from "./WizardStep";
 import { WizardTeaser } from "./WizardTeaser";
@@ -127,6 +130,20 @@ export const ReportWizard = forwardRef<
     if (!initialCommune) return;
     dispatch({ type: "PRE_FILL_COMMUNE", payload: initialCommune });
   }, [initialCommune]);
+
+  // Track each step view once it becomes active (après restauration)
+  useEffect(() => {
+    if (!restored) return;
+    const stepName = STEP_NAMES[state.step];
+    if (!stepName) return; // step 6 = teaser, pas un step funnel
+    posthog.capture("wizard_step_viewed", {
+      step: stepName,
+      commune: state.answers.quartier ?? null,
+      insee_code: state.inseeCode ?? null,
+      department: departmentFromInsee(state.inseeCode),
+      report_id: state.inseeCode ?? null,
+    });
+  }, [state.step, restored]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleClose = useCallback(() => {
     if (ref && "current" in ref && ref.current) {

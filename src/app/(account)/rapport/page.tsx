@@ -44,11 +44,12 @@ export default async function RapportPage() {
   const { supabase, user } = await requireCurrentUser();
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("home_commune")
+    .select("home_commune, home_insee_code")
     .eq("user_id", user.id)
     .maybeSingle();
 
   const communeName = profile?.home_commune ?? null;
+  const inseeCode = profile?.home_insee_code ?? null;
   const displayName = communeName ?? "votre commune";
 
   const allModules = PRODUCT_MODULES;
@@ -208,7 +209,7 @@ export default async function RapportPage() {
                     Accessible
                   </span>
                   <div className="mt-4">
-                    <TrackedModuleLink href="/rapport/quartier" moduleId="quartier" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: "var(--blue)", border: "1px solid var(--blue)33", background: "var(--blue)0d" }}>
+                    <TrackedModuleLink href="/rapport/quartier" moduleId="quartier" commune={displayName} inseeCode={inseeCode} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: "var(--blue)", border: "1px solid var(--blue)33", background: "var(--blue)0d" }}>
                       Ouvrir le module
                     </TrackedModuleLink>
                   </div>
@@ -322,7 +323,7 @@ export default async function RapportPage() {
                     </span>
                     {href ? (
                       <div className="mt-4">
-                        <TrackedModuleLink href={href} moduleId={module.id} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: col, border: `1px solid ${col}33`, background: `${col}0d` }}>
+                        <TrackedModuleLink href={href} moduleId={module.id} commune={displayName} inseeCode={inseeCode} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: col, border: `1px solid ${col}33`, background: `${col}0d` }}>
                           Ouvrir le module
                         </TrackedModuleLink>
                       </div>

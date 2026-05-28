@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import posthog from "posthog-js";
 import "./ask-future.css";
 
 type Message = {
@@ -30,6 +31,12 @@ interface AskFutureProps {
   questionsMax?: number | null;
 }
 
+function moduleIdFromPath(): string | null {
+  if (typeof window === "undefined") return null;
+  const match = window.location.pathname.match(/\/rapport\/([a-z]+)/);
+  return match?.[1] ?? null;
+}
+
 export function AskFuture({ communeInsee, communeName, placeholder, questionsUsed = 0, questionsMax = null }: AskFutureProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -38,6 +45,7 @@ export function AskFuture({ communeInsee, communeName, placeholder, questionsUse
   const [usedCount, setUsedCount] = useState(questionsUsed);
   const [profileQuestion, setProfileQuestion] = useState<ProfileQuestion | null>(null);
   const [profileSavingOption, setProfileSavingOption] = useState<string | null>(null);
+  const [messageFeedback, setMessageFeedback] = useState<Record<number, "positive" | "negative">>({});
   const [sessionId] = useState(
     () => `session_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
   );
@@ -52,8 +60,6 @@ export function AskFuture({ communeInsee, communeName, placeholder, questionsUse
   }, [messages, profileQuestion, loading]);
 
   // Focus l'input à l'ouverture + pré-warm du contexte territorial (fire-and-forget).
-  // Au premier open de la session, déclenche le pré-fetch ADEME + DRIAS + Hub'Eau
-  // pour que la première vraie question bénéficie déjà du cache framework.
   useEffect(() => {
     if (!isOpen) return;
     inputRef.current?.focus();
@@ -63,7 +69,6 @@ export function AskFuture({ communeInsee, communeName, placeholder, questionsUse
       method: "GET",
       credentials: "same-origin",
     }).catch(() => {
-      // Pré-warm silencieux : si ça échoue, la vraie POST refera les fetches.
       warmedRef.current = false;
     });
   }, [isOpen, communeInsee]);
@@ -151,14 +156,25 @@ export function AskFuture({ communeInsee, communeName, placeholder, questionsUse
       console.error("[AskFuture] PATCH:", error);
     }
 
-    // Inscrire la réponse comme un message utilisateur pour garder l'historique,
-    // et déclencher une nouvelle requête pour que Claude poursuive avec
-    // l'info nouvellement connue.
     const echo = `${profileQuestion.question} ${answer}`;
     setProfileQuestion(null);
     setProfileSavingOption(null);
     await sendMessage(echo);
   };
+
+  const handleFeedback = useCallback(
+    (messageIdx: number, polarity: "positive" | "negative") => {
+      if (messageFeedback[messageIdx]) return;
+      setMessageFeedback((prev) => ({ ...prev, [messageIdx]: polarity }));
+      posthog.capture(`ai_feedback_${polarity}`, {
+        question_category: null,
+        module_id: moduleIdFromPath(),
+        trace_id: `${sessionId}_msg${messageIdx}`,
+        report_id: communeInsee,
+      });
+    },
+    [messageFeedback, sessionId, communeInsee],
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -239,6 +255,30 @@ export function AskFuture({ communeInsee, communeName, placeholder, questionsUse
                     ),
                   )}
                 </div>
+                {message.role === "assistant" && (
+                  <div className="ask-feedback" aria-label="Cette réponse vous a été utile ?">
+                    <button
+                      type="button"
+                      className="ask-feedback-btn"
+                      aria-label="Utile"
+                      data-given={messageFeedback[i] === "positive" ? "true" : undefined}
+                      disabled={messageFeedback[i] !== undefined}
+                      onClick={() => handleFeedback(i, "positive")}
+                    >
+                      👍
+                    </button>
+                    <button
+                      type="button"
+                      className="ask-feedback-btn"
+                      aria-label="Pas utile"
+                      data-given={messageFeedback[i] === "negative" ? "true" : undefined}
+                      disabled={messageFeedback[i] !== undefined}
+                      onClick={() => handleFeedback(i, "negative")}
+                    >
+                      👎
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
 
