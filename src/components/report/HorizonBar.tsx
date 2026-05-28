@@ -1,10 +1,15 @@
 "use client";
 
+import { useRef } from "react";
+import posthog from "posthog-js";
 import { useHorizon, type HorizonKey } from "@/hooks/useHorizon";
+import { buildGeoProps } from "@/lib/posthog-props";
 
 export interface HorizonBarProps {
   communeName: string;
   locked?: boolean;
+  inseeCode?: string | null;
+  moduleId?: string | null;
 }
 
 const HORIZONS = [
@@ -31,11 +36,36 @@ const HORIZONS = [
   },
 ] as const;
 
-export default function HorizonBar({ communeName, locked = false }: HorizonBarProps) {
+const HORIZON_YEAR: Record<HorizonKey, string> = {
+  gwl15: "2030",
+  gwl20: "2050",
+  gwl30: "2100",
+};
+
+export default function HorizonBar({ communeName, locked = false, inseeCode, moduleId }: HorizonBarProps) {
   const [active, setHorizon] = useHorizon();
+  const prevActiveRef = useRef<HorizonKey>(active);
 
   const effectiveActive: HorizonKey = locked ? "gwl20" : active;
   const horizon = HORIZONS.find((h) => h.key === effectiveActive)!;
+
+  const geo = buildGeoProps({ commune: communeName, inseeCode });
+
+  function handleHorizonClick(key: HorizonKey) {
+    if (locked || key === active) return;
+    const fromHorizon = HORIZON_YEAR[prevActiveRef.current];
+    const toHorizon = HORIZON_YEAR[key];
+    prevActiveRef.current = key;
+    setHorizon(key);
+
+    posthog.capture("report_scenario_changed", {
+      from_scenario: fromHorizon,
+      to_scenario: toHorizon,
+      module_id: moduleId ?? null,
+      risk_category: null,
+      ...geo,
+    });
+  }
 
   return (
     <section className="pt-14">
@@ -58,7 +88,7 @@ export default function HorizonBar({ communeName, locked = false }: HorizonBarPr
             return (
               <button
                 key={h.key}
-                onClick={() => !locked && setHorizon(h.key)}
+                onClick={() => handleHorizonClick(h.key)}
                 disabled={locked}
                 style={{
                   background: isActive ? "rgba(200,184,154,0.10)" : "rgba(255,255,255,0.03)",

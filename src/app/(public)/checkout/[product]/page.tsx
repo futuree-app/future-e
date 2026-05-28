@@ -205,7 +205,7 @@ export default async function CheckoutPage({
         }}
       />
 
-      <CheckoutViewedTracker productSlug={product.slug} />
+      <CheckoutViewedTracker productSlug={product.slug} amount={product.amount} />
       <div style={{ position: "relative", zIndex: 1 }}>
         <Navbar />
 

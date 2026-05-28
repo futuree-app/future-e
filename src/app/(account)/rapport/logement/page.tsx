@@ -22,7 +22,7 @@ export default async function RapportLogementPage() {
 
   return (
     <>
-      <ModuleTracker moduleId="logement" commune={profile?.home_commune ?? null} inseeCode={profile?.home_insee_code ?? null} />
+      <ModuleTracker moduleId="logement" commune={profile?.home_commune ?? null} inseeCode={profile?.home_insee_code ?? null} source="page" />
       <LogementModule defaultCommune={profile?.home_commune ?? null} />
     </>
   );

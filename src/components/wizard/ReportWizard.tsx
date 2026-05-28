@@ -2,7 +2,7 @@
 
 import { forwardRef, useCallback, useEffect, useReducer, useRef, useState } from "react";
 import posthog from "posthog-js";
-import { departmentFromInsee } from "@/lib/posthog-props";
+import { departmentFromInsee, regionFromDepartment } from "@/lib/posthog-props";
 import {
   type WizardAnswers,
   type WizardState,
@@ -146,11 +146,14 @@ export const ReportWizard = forwardRef<
     const stepName = STEP_NAMES[state.step];
     if (!stepName) return; // step 6 = teaser, pas un step funnel
     firedWizardStepsRef.current.add(state.step);
+    const dept = departmentFromInsee(state.inseeCode);
     posthog.capture("wizard_step_viewed", {
       step: stepName,
+      step_index: state.step,
       commune: state.answers.quartier ?? null,
       insee_code: state.inseeCode ?? null,
-      department: departmentFromInsee(state.inseeCode),
+      department: dept,
+      region: regionFromDepartment(dept),
       report_id: state.inseeCode ?? null,
     });
   }, [state.step, restored]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -190,12 +193,17 @@ export const ReportWizard = forwardRef<
             onSetInsee={(insee) => dispatch({ type: "SET_INSEE", insee })}
             onNext={() => {
                 if (state.step === 5) {
+                  const dept = departmentFromInsee(state.inseeCode);
                   posthog.capture("wizard_completed", {
                     commune: state.answers.quartier ?? null,
                     secteur: state.answers.metier ?? null,
                     mobilite: state.answers.mobilite ?? null,
                     projets: state.answers.projets ?? null,
                     unknown_answers_count: state.unknownAnswers.length,
+                    insee_code: state.inseeCode ?? null,
+                    department: dept,
+                    region: regionFromDepartment(dept),
+                    report_id: state.inseeCode ?? null,
                   });
                 }
                 dispatch({ type: "NEXT" });

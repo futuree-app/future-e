@@ -48,7 +48,7 @@ export default async function RapportQuartierPage() {
         primaryCta={{ href: "/dashboard", label: "Dashboard" }}
       />
 
-      <ModuleTracker moduleId="quartier" commune={communeName} inseeCode={inseeCode} />
+      <ModuleTracker moduleId="quartier" commune={communeName} inseeCode={inseeCode} source="page" />
       <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
         {!communeName && (
           <div className="pt-10">

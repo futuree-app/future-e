@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import posthog from "posthog-js";
-import { buildGeoProps } from "@/lib/posthog-props";
+import { buildGeoProps, buildModuleProps } from "@/lib/posthog-props";
 
 export function TrackedModuleLink({
   href,
@@ -30,6 +30,7 @@ export function TrackedModuleLink({
         posthog.capture("report_module_opened", {
           module_id: moduleId,
           source: "hub",
+          ...buildModuleProps(moduleId),
           ...buildGeoProps({ commune, inseeCode }),
         })
       }
@@ -44,18 +45,22 @@ export function TrackedUpgradeLink({
   children,
   className,
   style,
+  source = "autre",
 }: {
   href: string;
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  source?: string;
 }) {
   return (
     <Link
       href={href}
       className={className}
       style={style}
-      onClick={() => posthog.capture("report_upgrade_cta_clicked")}
+      onClick={() =>
+        posthog.capture("report_upgrade_cta_clicked", { source })
+      }
     >
       {children}
     </Link>

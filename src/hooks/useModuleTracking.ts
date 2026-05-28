@@ -2,25 +2,28 @@
 
 import { useEffect, useRef } from "react";
 import posthog from "posthog-js";
-import { buildGeoProps, type GeoContext } from "@/lib/posthog-props";
+import { buildGeoProps, buildModuleProps, type GeoContext } from "@/lib/posthog-props";
 
 const SCROLL_THRESHOLDS = [25, 50, 75, 90] as const;
 
 type UseModuleTrackingOptions = GeoContext & {
   moduleId: string;
+  source?: "page" | "hub";
 };
 
-export function useModuleTracking({ moduleId, commune, inseeCode, reportId }: UseModuleTrackingOptions) {
+export function useModuleTracking({ moduleId, source = "page", commune, inseeCode, reportId }: UseModuleTrackingOptions) {
   const startRef = useRef(Date.now());
   const firedRef = useRef(new Set<number>());
   const maxScrollRef = useRef(0);
 
   useEffect(() => {
     const geo = buildGeoProps({ commune, inseeCode, reportId });
+    const mod = buildModuleProps(moduleId);
 
     posthog.capture("report_module_opened", {
       module_id: moduleId,
-      source: "page",
+      source,
+      ...mod,
       ...geo,
     });
 
@@ -42,7 +45,12 @@ export function useModuleTracking({ moduleId, commune, inseeCode, reportId }: Us
             module_id: moduleId,
             scroll_percentage: threshold,
             time_spent_seconds: Math.round((Date.now() - startRef.current) / 1000),
+            ...mod,
             report_id: geo.report_id,
+            commune: geo.commune,
+            insee_code: geo.insee_code,
+            department: geo.department,
+            region: geo.region,
           });
         }
       }
@@ -55,11 +63,18 @@ export function useModuleTracking({ moduleId, commune, inseeCode, reportId }: Us
       posthog.capture("report_module_closed", {
         module_id: moduleId,
         read_percentage: maxScrollRef.current,
+        scroll_depth_pct: maxScrollRef.current,
         time_spent_seconds: Math.round((Date.now() - startRef.current) / 1000),
+        time_spent_sec: Math.round((Date.now() - startRef.current) / 1000),
+        ...mod,
         report_id: geo.report_id,
+        commune: geo.commune,
+        insee_code: geo.insee_code,
+        department: geo.department,
+        region: geo.region,
       });
     };
-    // Geo props are captured once at mount — intentional snapshot.
+    // Geo props are snapshotted once at mount — intentional.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [moduleId]);
+  }, [moduleId, source]);
 }

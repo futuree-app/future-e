@@ -173,6 +173,7 @@ export default async function RapportPage() {
           <HorizonBar
             communeName={displayName}
             locked={!fullReport}
+            inseeCode={inseeCode}
           />
         </div>
 

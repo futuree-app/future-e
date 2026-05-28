@@ -144,6 +144,7 @@ export async function POST(request: Request) {
     fallbackAnswer,
     questionType = "preset",
     freeTextQuestion = null,
+    inseeCode = null,
   } = body ?? {};
 
   if (!commune || !tension?.id || !tension?.label) {
@@ -230,6 +231,9 @@ export async function POST(request: Request) {
         $ai_base_url: "https://api.anthropic.com",
         $ai_span_name: "qna",
         question_category: resolveQuestionCategory(tension.id),
+        module_id: tension.id ?? null,
+        module_context: tension.id ?? null,
+        report_id: inseeCode ?? null,
       },
     });
     await posthog.shutdown();

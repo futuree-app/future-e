@@ -44,6 +44,11 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
+        // Identify de base — email uniquement.
+        // Les propriétés CAS (climate_awareness_score, cas_segment, total_modules_opened,
+        // total_ai_questions, wizard_completed_at) sont calculées en SQL PostHog
+        // et devront être envoyées ici via posthog.identify() une fois que la
+        // fonction de scoring côté app sera disponible.
         posthog.identify(user.id, { email: user.email });
       }
     });
