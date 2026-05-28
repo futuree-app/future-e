@@ -260,8 +260,8 @@ function formatIndicatorValue(value, digits = 0) {
   }).format(value);
 }
 
-function getLandingIndicatorValue(indicators, indicatorCode) {
-  return indicators?.[LANDING_DRIAS_SCENARIO.id]?.[indicatorCode]?.value_numeric ?? null;
+function getLandingIndicatorValue(indicators, indicatorCode, gwlId = LANDING_DRIAS_SCENARIO.id) {
+  return indicators?.[gwlId]?.[indicatorCode]?.value_numeric ?? null;
 }
 
 function getDriaSub(
@@ -361,15 +361,17 @@ function getDriasHeatLevel(hotDays: number, name: string): string {
   return `Les projections montrent déjà une hausse des fortes chaleurs à ${name}.`;
 }
 
-function getDriasCard(communeName, indicators) {
-  const hotDays = getLandingIndicatorValue(indicators, 'NORTX30D_yr');
-  const tropicalNights = getLandingIndicatorValue(indicators, 'NORTR_yr');
-  const summerTemp = getLandingIndicatorValue(indicators, 'NORTMm_seas_JJA');
+function getDriasCard(communeName, indicators, gwlId = LANDING_DRIAS_SCENARIO.id, numeric = false) {
+  const hotDays = getLandingIndicatorValue(indicators, 'NORTX30D_yr', gwlId);
+  const tropicalNights = getLandingIndicatorValue(indicators, 'NORTR_yr', gwlId);
+  const summerTemp = getLandingIndicatorValue(indicators, 'NORTMm_seas_JJA', gwlId);
 
   if (hotDays !== null && hotDays !== undefined) {
     return {
       label: `Chaleur à ${communeName}`,
-      val: getDriasHeatLevel(hotDays, communeName),
+      val: numeric
+        ? `${Math.round(hotDays)} jours > 30°C par an`
+        : getDriasHeatLevel(hotDays, communeName),
       col: C.red,
       src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
     };
@@ -378,9 +380,11 @@ function getDriasCard(communeName, indicators) {
   if (tropicalNights !== null && tropicalNights !== undefined) {
     return {
       label: `Nuits tropicales à ${communeName}`,
-      val: tropicalNights >= 30
-        ? `Les nuits sans fraîcheur, celles où l'on ne récupère pas, seront plus fréquentes à ${communeName}.`
-        : `Les projections indiquent des nuits chaudes plus nombreuses à ${communeName} d'ici 2050.`,
+      val: numeric
+        ? `${Math.round(tropicalNights)} nuits > 20°C par an`
+        : tropicalNights >= 30
+          ? `Les nuits sans fraîcheur, celles où l'on ne récupère pas, seront plus fréquentes à ${communeName}.`
+          : `Les projections indiquent des nuits chaudes plus nombreuses à ${communeName} d'ici 2050.`,
       col: C.red,
       src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
     };
@@ -389,9 +393,11 @@ function getDriasCard(communeName, indicators) {
   if (summerTemp !== null && summerTemp !== undefined) {
     return {
       label: `Été à ${communeName}`,
-      val: summerTemp >= 26
-        ? `Les étés à ${communeName} tels que vous les connaissez vont changer de nature.`
-        : `Les étés à ${communeName} deviennent progressivement plus chauds.`,
+      val: numeric
+        ? `${Number(summerTemp).toFixed(1)} °C en moyenne l'été`
+        : summerTemp >= 26
+          ? `Les étés à ${communeName} tels que vous les connaissez vont changer de nature.`
+          : `Les étés à ${communeName} deviennent progressivement plus chauds.`,
       col: C.red,
       src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
     };
@@ -444,7 +450,7 @@ function getGeorisquesCard(communeName, georisques) {
   return null;
 }
 
-function getPreviewCards(communeName, categories, indicators, georisques, gissol) {
+function getPreviewCards(communeName, categories, indicators, georisques, gissol, gwlId = LANDING_DRIAS_SCENARIO.id, numeric = false) {
   const name = communeName || 'votre commune';
   const safeCategories =
     categories && categories.length > 0 ? categories : ['all'];
@@ -452,7 +458,7 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
   const hasCategory = (category) => safeCategories.includes(category);
 
   const cards = [];
-  const driasCard = getDriasCard(name, indicators);
+  const driasCard = getDriasCard(name, indicators, gwlId, numeric);
   const georisquesCard = getGeorisquesCard(name, georisques);
 
   if (driasCard) {
@@ -573,13 +579,15 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
   }
 
   // Nuits tropicales DRIAS — fallback si pas déjà dans driasCard
-  const tropicalNights = getLandingIndicatorValue(indicators, 'NORTR_yr');
+  const tropicalNights = getLandingIndicatorValue(indicators, 'NORTR_yr', gwlId);
   if (tropicalNights !== null && tropicalNights !== undefined && !driasCard) {
     cards.push({
       label: `Nuits tropicales à ${name}`,
-      val: tropicalNights >= 30
-        ? `Les nuits sans fraîcheur, celles où l'on ne récupère pas, seront plus fréquentes à ${name}.`
-        : `Les projections indiquent des nuits chaudes plus nombreuses à ${name} d'ici 2050.`,
+      val: numeric
+        ? `${Math.round(tropicalNights)} nuits > 20°C par an`
+        : tropicalNights >= 30
+          ? `Les nuits sans fraîcheur, celles où l'on ne récupère pas, seront plus fréquentes à ${name}.`
+          : `Les projections indiquent des nuits chaudes plus nombreuses à ${name} d'ici 2050.`,
       col: C.red,
       src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
     });
@@ -2164,8 +2172,11 @@ export default function FutureELanding() {
     commune,
     communeMeta?.usedFallback,
   );
+  const horizonGwl = HORIZON_TO_GWL[horizon];
+  const effectiveGwl = horizonGwl ?? LANDING_DRIAS_SCENARIO.id;
+  const showNumeric = horizon !== 'today';
   const previewCards = commune
-    ? getPreviewCards(commune, activeCategories, communeIndicators, communeGeorisques, communeGissol)
+    ? getPreviewCards(commune, activeCategories, communeIndicators, communeGeorisques, communeGissol, effectiveGwl, showNumeric)
     : activeSlotCity.cards;
   // Clé d'animation : change à chaque étape du slot, puis à chaque sélection de commune
   const slotAnimKey = commune ? `c-${commune}` : slotSettled ? 'settled' : `s-${slotIndex}`;
@@ -2320,6 +2331,9 @@ export default function FutureELanding() {
           </div>
 
           <div style={styles.heroRight} className="hero-right">
+            {commune && (
+              <HorizonSwitch value={horizon} onChange={setHorizon} />
+            )}
             {communeDataLoading && (
               <div style={{ position: 'relative', height: 2, borderRadius: 1, background: 'rgba(255,255,255,0.06)', overflow: 'hidden', marginBottom: 6 }}>
                 <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '40%', background: 'linear-gradient(90deg, transparent, #fb923c, transparent)', animation: 'hero-loading-sweep 1.4s ease-in-out infinite' }} />
@@ -2380,8 +2394,6 @@ export default function FutureELanding() {
                 Vous avez utilisé vos deux questions gratuites. Le Suivi arrive bientôt — inscrivez-vous pour être prévenu·e à l&apos;ouverture.
               </div>
             )}
-
-            <HorizonSwitch value={horizon} onChange={setHorizon} />
 
             <div style={styles.tensionsGrid} className="tensions-grid">
               {tensions.map((tension) => {
