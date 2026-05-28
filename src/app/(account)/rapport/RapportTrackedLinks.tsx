@@ -29,6 +29,7 @@ export function TrackedModuleLink({
       onClick={() =>
         posthog.capture("report_module_opened", {
           module_id: moduleId,
+          source: "hub",
           ...buildGeoProps({ commune, inseeCode }),
         })
       }

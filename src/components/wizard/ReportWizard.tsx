@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useCallback, useEffect, useReducer, useState } from "react";
+import { forwardRef, useCallback, useEffect, useReducer, useRef, useState } from "react";
 import posthog from "posthog-js";
 import { departmentFromInsee } from "@/lib/posthog-props";
 import {
@@ -131,11 +131,21 @@ export const ReportWizard = forwardRef<
     dispatch({ type: "PRE_FILL_COMMUNE", payload: initialCommune });
   }, [initialCommune]);
 
-  // Track each step view once it becomes active (après restauration)
+  // Garde-fou : ne pas ré-émettre wizard_step_viewed si l'utilisateur revient en arrière.
+  const firedWizardStepsRef = useRef(new Set<number>());
+  // Réinitialiser le suivi quand le wizard est réinitialisé (RESET remet step à 0).
+  useEffect(() => {
+    if (state.step === 0 && restored) {
+      firedWizardStepsRef.current = new Set();
+    }
+  }, [state.step, restored]);
+
   useEffect(() => {
     if (!restored) return;
+    if (firedWizardStepsRef.current.has(state.step)) return;
     const stepName = STEP_NAMES[state.step];
     if (!stepName) return; // step 6 = teaser, pas un step funnel
+    firedWizardStepsRef.current.add(state.step);
     posthog.capture("wizard_step_viewed", {
       step: stepName,
       commune: state.answers.quartier ?? null,

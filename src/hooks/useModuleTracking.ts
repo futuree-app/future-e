@@ -20,6 +20,7 @@ export function useModuleTracking({ moduleId, commune, inseeCode, reportId }: Us
 
     posthog.capture("report_module_opened", {
       module_id: moduleId,
+      source: "page",
       ...geo,
     });
 
