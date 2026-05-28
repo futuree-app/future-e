@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import Navbar from '@/components/Navbar';
 import { ComparatorSearch } from '@/components/ComparatorSearch';
 import { canAccessActionPage, normalizeAccount } from '@/lib/access';
 import { getCommuneFullData } from '@/lib/commune-data';
@@ -179,7 +180,6 @@ const css = `
   .orb-3{width:360px;height:360px;background:radial-gradient(circle,#4ade80 0%,transparent 70%);top:42%;left:58%;opacity:0.14;animation-delay:-9s;}
   @keyframes breathe{0%,100%{transform:scale(1) translate(0,0);}50%{transform:scale(1.14) translate(20px,-28px);}}
   body::before{content:"";position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.032 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none;z-index:1;mix-blend-mode:overlay;}
-  .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:var(--bg-card);border-bottom:1px solid var(--border-1);}
   .nav-inner{max-width:1120px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
   .brand{font-family:var(--font-serif);font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
   .brand-dot{color:#f87171;font-style:normal;}
@@ -820,19 +820,7 @@ export default async function ComparateurPage({
       <div className="orb orb-2" />
       <div className="orb orb-3" />
 
-      <nav className="nav">
-        <div className="nav-inner">
-          <Link href="/" className="brand">
-            futur<span className="brand-dot">•</span>e
-          </Link>
-          <div className="nav-crumb">
-            <Link href="/">Accueil</Link>
-            <span className="sep">/</span>
-            Comparateur
-          </div>
-          <ThemeToggle />
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="page">
         <div className="eyebrow">Outil public · Comparateur</div>

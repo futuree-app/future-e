@@ -948,3 +948,123 @@ Pour chaque lot poussé :
 4. **Si config externe**
    - préciser si le code seul ne suffit pas
    - ex. : Stripe webhook, DNS OVH, Resend, Supabase Auth, variables Vercel
+
+---
+
+### 28/05/2026 — Unification navbar, reformulation cards landing, barre de chargement, switch temporel
+
+**Commits**
+- `4e48f6b` — Unification navbar (AccountNav → Navbar avec prop `ctas`)
+- `c4663dc` — Barre de chargement animée sur le panneau héro droit
+- `73fe3a2` — Reformulation cards héro + suppression ligne source
+- `ec51cd5` — Switch temporel 2030 / 2050 / 2100 sur les cards de tension
+
+**Ce qui a été poussé**
+
+*Navbar unifiée*
+- `AccountNav` supprimé — remplacé par `Navbar` (même composant que la landing) sur toutes les pages `/compte`, `/rapport`, `/rapport/quartier`, `/rapport/logement`, `/compte/memoire`
+- `Navbar` accepte maintenant une prop optionnelle `ctas` pour personaliser les deux boutons selon le contexte
+
+*Barre de chargement héro*
+- fine barre orange animée (shimmer) au-dessus des preview cards droites pendant le fetch commune (DRIAS + Géorisques + GisSol)
+- valeurs des cards atténuées (opacity 0.35) pendant le chargement
+
+*Reformulation des preview cards*
+- tous les `val` des 4 cards héro réécrits en phrases complètes avec le nom de la commune interpolé
+- suppression du badge source sur la landing (gardé uniquement dans le rapport)
+- mise à jour des cards hardcodées (Lyon, Marseille, Vannes, La Rochelle)
+
+*Switch temporel*
+- nouveau composant `HorizonSwitch.tsx` : pill "Aujourd'hui / 2030 / 2050 / 2100" avec sublabels +2°C / +2.7°C / +4°C
+- s'affiche au-dessus des 4 cards de tension dès qu'une commune est saisie
+- 8 tensions projetables (canicule, feux, eau, vigne, randonner…) : subtitle bascule vers les chiffres DRIAS du GWL correspondant — sans nouvelle requête réseau (données déjà chargées)
+- autres tensions : subtitle statique + mention discrète "données actuelles · projection temporelle non disponible" quand un horizon futur est sélectionné
+
+**Impact visible**
+- menu cohérent sur toutes les pages de l'app connectée
+- transition visuellement propre quand une commune est saisie sur la landing
+- cards héro lisibles et personnalisées (retour utilisateur adressé)
+- première démonstration interactive de la valeur temporelle de futur•e : l'utilisateur voit comment son territoire change dans le temps
+
+**Dépendances externes**
+- aucune
+- données DRIAS déjà présentes dans `public/data_climat.json` pour les trois GWL
+
+---
+
+### 28/05/2026 — Landing : réorganisation sections + analytics transversaux
+
+**Commits**
+- `45b4eac` — feat(landing): interversion sections — 6 modules avant Pourquoi s'abonner
+- `fc6b5ad` — fix(analytics): correction des propriétés PostHog manquantes ou mal nommées
+- `52b929c` — feat(analytics): territory_compared, report_link_copied, pricing_page_viewed
+
+**Pages / modules touchés**
+- `src/components/FutureELanding.tsx` — la section "6 modules" (preuve produit) remonte avant la section "Pourquoi s'abonner" (pricing) : l'utilisateur voit la valeur avant l'appel à l'action
+- `src/components/wizard/ReportWizard.tsx` — taxonomie `wizard_step_viewed` corrigée : noms d'étapes stabilisés (`landing / adresse / profil_foyer / logement / mobilite / generation`) + `step_name` ajouté comme alias de `step`
+- `src/components/ComparatorSearch.tsx` — event `territory_compared` déclenché sur "Lancer la comparaison" avec `commune_a`, `insee_a`, `commune_b`, `insee_b` ; event `report_link_copied` sur "Copier le lien"
+- `src/components/FutureELanding.tsx` — event `pricing_page_viewed` via IntersectionObserver (seuil 20%) sur `<section id="pricing">`, déclenché une seule fois par montage
+
+**Impact utilisateur**
+- Ordre de lecture amélioré : les preuves concrètes (modules) précèdent la conversion
+- Aucun impact visible sur l'analytics
+
+**Dépendances externes**
+- Aucune
+
+---
+
+### 28-29/05/2026 — Switch temporel : correctifs placement et refonte narrative
+
+**Commits**
+- `49e10e5` — fix(landing): switch temporel — placement hero + style inline
+- `6e3e83a` — refactor(landing): switch temporel narratif — ton par horizon, chiffres secondaires
+
+**Pages / modules touchés**
+- `src/components/HorizonSwitch.tsx` — pills épurées : sublabels "+2°C" retirés des boutons, ligne contextuelle séparée sous le switch ("projection +2,7°C · DRIAS TRACC-2023") ; style inline complet (compatibilité Tailwind v4 purge)
+- `src/components/FutureELanding.tsx` — placement du switch corrigé dans le hero droit ; basculement en narratives par horizon : chaque card affiche une phrase immersive selon l'horizon choisi (texte de tension plutôt que chiffre brut) ; données chiffrées reléguées en position secondaire (`note`), non affichées en render landing
+
+**Impact visible**
+- Interface plus lisible : les boutons de sélection temporelle ne sont plus chargés
+- Les cards communiquent une tension narrative ("les nuits sans fraîcheur deviennent plus fréquentes") plutôt qu'un chiffre brut
+
+**Dépendances externes**
+- Aucune
+
+---
+
+### 29/05/2026 — Narratives DRIAS immersives, CTA rapport, navbar comparateur, fix catégorie
+
+**Commits**
+- (lot non encore committé au moment de la rédaction — commit de session)
+
+**Pages / modules touchés**
+
+*Narratives DRIAS — FutureELanding.tsx*
+- 5 indicateurs prioritaires câblés : `NORTX35D_yr` (Canicule), `NORTR_yr` (Nuits tropicales), `NORRRq99_yr` (Pluies extrêmes), `NORIFM40_yr` (Feux), `NORSWI04_yr` (Eau/sécheresse)
+- Chaque indicateur dispose de 4 phrases distinctes par horizon (aujourd'hui / 2030 / 2050 / 2100), plates, sans seuils numériques — chiffres conservés dans `note` pour usage futur mais non affichés sur la landing
+- Architecture des cards : bloc 1 Canicule (universel), bloc 2 catégorie (Feux/Eau/Vigne/Neige selon profil géographique), bloc 3 Nuits (universel), bloc 4 Pluies (universel), bloc 5 Géorisques horizon-aware, bloc 6 statiques
+- `getQuestionIntro` réécrit avec ton immersif et territorial par catégorie (méditerranée, littoral, montagne, vectoriel, all)
+- Limit Q&A gratuite réduite : `LANDING_QNA_LIMIT = 1` (était 2)
+- Suppression du texte "données actuelles · projection temporelle non disponible" dans le bloc Q&R
+- Suppression du rendu des chiffres (`note`) dans les cards — contenu narratif seul en partie gratuite
+
+*CTA rapport*
+- Bloc "50+ indicateurs" ajouté sous les cards dans le panneau héro droit (visible uniquement si commune saisie) : texte contextuel, lien vers `/checkout/rapport-complet`, lien vers `/comparateur`, mention "50+ indicateurs climatiques, sanitaires et territoriaux" en monospacé
+
+*Navbar comparateur*
+- `src/app/(public)/comparateur/page.tsx` — remplacement de la nav sur mesure par `<Navbar />` (composant partagé), cohérence avec toutes les autres pages de l'app
+
+*Fix catégorie géographique*
+- `src/lib/commune-categories.ts` — correction typo `'mediteranee'` → `'mediterranee'` (ligne 54) : les communes du Sud (Perpignan, Marseille, Nice…) recevaient une catégorie inconnue, les empêchant d'obtenir les cards DRIAS spécifiques (Feux, Vigne)
+
+*Explorer menu*
+- `src/config/navigation.ts` — descriptions conservées mais sources retirées (ex. "Jours > 30 °C, nuits tropicales" sans "· DRIAS 2050") : menu plus épuré sans attribution technique
+
+**Impact visible**
+- Cards landing entièrement narratives : plus de chiffres bruts en accès libre, ton engageant par commune et par horizon
+- Comparateur : menu cohérent avec le reste du site
+- Perpignan et toutes les communes méditerranéennes reçoivent désormais les bonnes cards de catégorie
+
+**Dépendances externes**
+- Aucune — `NORRRq99_yr` (column15) déjà présent dans `public/data_climat.json`

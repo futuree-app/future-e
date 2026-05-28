@@ -51,7 +51,7 @@ export function deriveCategories(inseeCode: string): string[] {
   const cats: string[] = [];
 
   if (DEPT_MONTAGNE.has(dept)) cats.push('montagne');
-  if (DEPT_MEDITERRANEE.has(dept)) cats.push('mediteranee');
+  if (DEPT_MEDITERRANEE.has(dept)) cats.push('mediterranee');
   else if (DEPT_LITTORAL_ATLANTIQUE.has(dept)) cats.push('littoral');
   if (DEPT_VECTORIEL.has(dept)) cats.push('vectoriel');
 
