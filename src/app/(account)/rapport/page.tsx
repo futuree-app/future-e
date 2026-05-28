@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { AccountNav } from "@/components/AccountNav";
+import Navbar from "@/components/Navbar";
 import { canAccessCompleteReport } from "@/lib/access";
 import { PRODUCT_MODULES } from "@/lib/product";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
@@ -71,10 +71,7 @@ export default async function RapportPage() {
       <div className="fixed bottom-[-100px] right-[-100px] w-[420px] h-[420px] rounded-full bg-amethyst/[0.12] blur-[90px] opacity-28 pointer-events-none z-0" />
       <div className="fixed top-[42%] left-[58%] w-[280px] h-[280px] rounded-full bg-info/[0.08] blur-[70px] opacity-16 pointer-events-none z-0" />
 
-      <AccountNav
-        secondaryCta={{ href: "/compte", label: "Mon compte" }}
-        primaryCta={{ href: "/dashboard", label: "Dashboard" }}
-      />
+      <Navbar ctas={{ secondary: { href: "/compte", label: "Mon compte" }, primary: { href: "/dashboard", label: "Dashboard" } }} />
 
       <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
 

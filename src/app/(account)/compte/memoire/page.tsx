@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AccountNav } from "@/components/AccountNav";
+import Navbar from "@/components/Navbar";
 import { MemoireForm } from "@/components/MemoireForm";
 import { requireCurrentUser } from "@/lib/user-account";
 
@@ -51,10 +51,7 @@ export default async function MemoirePage() {
       <div className="fixed top-[-160px] left-[-130px] w-[520px] h-[520px] rounded-full bg-accent/[0.10] blur-[100px] opacity-40 pointer-events-none z-0" />
       <div className="fixed bottom-[-100px] right-[-80px] w-[400px] h-[400px] rounded-full bg-amethyst/[0.08] blur-[88px] opacity-30 pointer-events-none z-0" />
 
-      <AccountNav
-        secondaryCta={{ href: "/compte", label: "Mon compte" }}
-        primaryCta={{ href: "/rapport", label: "Mon rapport" }}
-      />
+      <Navbar ctas={{ secondary: { href: "/compte", label: "Mon compte" }, primary: { href: "/rapport", label: "Mon rapport" } }} />
 
       <div className="relative z-[2] max-w-[860px] mx-auto px-7 pb-24">
         <section className="py-16">

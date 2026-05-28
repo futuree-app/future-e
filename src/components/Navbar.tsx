@@ -20,7 +20,12 @@ function isDropdown(item: NavItem): item is NavDropdownItem {
   return 'groups' in item && item.groups !== undefined;
 }
 
-export default function Navbar() {
+interface NavCtas {
+  secondary?: { href: string; label: string };
+  primary?: { href: string; label: string };
+}
+
+export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
@@ -328,7 +333,7 @@ export default function Navbar() {
               style={{ display: 'flex', alignItems: 'center', gap: 10 }}
             >
               <Link
-                href="/connexion"
+                href={ctas?.secondary?.href ?? '/connexion'}
                 style={{
                   padding: '8px 12px',
                   borderRadius: 999,
@@ -342,10 +347,10 @@ export default function Navbar() {
                   background: 'rgba(255,255,255,0.02)',
                 }}
               >
-                Se connecter
+                {ctas?.secondary?.label ?? 'Se connecter'}
               </Link>
               <Link
-                href="/inscription"
+                href={ctas?.primary?.href ?? '/inscription'}
                 style={{
                   padding: '8px 20px',
                   borderRadius: 6,
@@ -357,7 +362,7 @@ export default function Navbar() {
                   textDecoration: 'none',
                 }}
               >
-                Commencer
+                {ctas?.primary?.label ?? 'Commencer'}
               </Link>
             </div>
 
@@ -535,7 +540,7 @@ export default function Navbar() {
               {/* Mobile CTA */}
               <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <Link
-                  href="/connexion"
+                  href={ctas?.secondary?.href ?? '/connexion'}
                   onClick={() => setMobileOpen(false)}
                   style={{
                     display: 'block',
@@ -551,10 +556,10 @@ export default function Navbar() {
                     textTransform: 'uppercase',
                   }}
                 >
-                  Se connecter
+                  {ctas?.secondary?.label ?? 'Se connecter'}
                 </Link>
                 <Link
-                  href="/inscription"
+                  href={ctas?.primary?.href ?? '/inscription'}
                   onClick={() => setMobileOpen(false)}
                   style={{
                     display: 'block',
@@ -569,7 +574,7 @@ export default function Navbar() {
                     fontSize: 14,
                   }}
                 >
-                  Commencer
+                  {ctas?.primary?.label ?? 'Commencer'}
                 </Link>
               </div>
             </div>

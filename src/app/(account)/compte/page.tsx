@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { signOutAction } from "@/app/auth/actions";
-import { AccountNav } from "@/components/AccountNav";
+import Navbar from "@/components/Navbar";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
 import {
   canAccessCompleteReport,
@@ -49,10 +49,7 @@ export default async function ComptePage() {
       <div className="fixed top-[-160px] left-[-130px] w-[520px] h-[520px] rounded-full bg-accent/[0.12] blur-[100px] opacity-40 pointer-events-none z-0" />
       <div className="fixed bottom-[-100px] right-[-80px] w-[400px] h-[400px] rounded-full bg-amethyst/[0.10] blur-[88px] opacity-30 pointer-events-none z-0" />
 
-      <AccountNav
-        secondaryCta={{ href: "/rapport", label: "Mon rapport" }}
-        primaryCta={fullAccess ? { href: "/dashboard", label: "Dashboard" } : { href: "/#pricing", label: "Passer au complet" }}
-      />
+      <Navbar ctas={{ secondary: { href: "/rapport", label: "Mon rapport" }, primary: fullAccess ? { href: "/dashboard", label: "Dashboard" } : { href: "/#pricing", label: "Passer au complet" } }} />
 
       <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
 
