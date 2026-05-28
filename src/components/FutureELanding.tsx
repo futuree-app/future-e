@@ -2395,6 +2395,50 @@ export default function FutureELanding() {
         )}
       </section>
 
+      <section style={styles.modulesSection}>
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <div
+            style={{
+              ...styles.sectionLabel,
+              justifyContent: 'center',
+              display: 'flex',
+            }}
+          >
+            6 modules
+          </div>
+          <h2 style={{ ...styles.sectionTitle, textAlign: 'center' }}>
+            Six dimensions de votre vie
+          </h2>
+          <p
+            style={{
+              ...styles.sectionSub,
+              textAlign: 'center',
+              margin: '0 auto',
+              maxWidth: 560,
+            }}
+          >
+            Chaque module croise votre profil avec les données publiques
+            disponibles pour votre commune.
+          </p>
+        </div>
+        <div style={styles.modulesGrid} className="modules-grid">
+          {MODULES.map((module) => (
+            <div key={module.name} style={styles.moduleCard(module.color)}>
+              <div style={styles.moduleIcon(module.color)}>{module.icon}</div>
+              <div style={styles.moduleName}>{module.name}</div>
+              <div style={styles.moduleDesc}>{module.desc}</div>
+              <div style={styles.moduleItems}>
+                {module.items.map((item) => (
+                  <div key={item} style={styles.moduleItem(module.color)}>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section style={styles.amnesieSection}>
         <div style={styles.amnesieInner} className="amnesie-inner">
           <div
@@ -2467,50 +2511,6 @@ export default function FutureELanding() {
             en lecture personnalisée pour votre vie. Comme vous suivez votre
             santé ou vos finances : sans obsession, sans oubli.
           </div>
-        </div>
-      </section>
-
-      <section style={styles.modulesSection}>
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <div
-            style={{
-              ...styles.sectionLabel,
-              justifyContent: 'center',
-              display: 'flex',
-            }}
-          >
-            6 modules
-          </div>
-          <h2 style={{ ...styles.sectionTitle, textAlign: 'center' }}>
-            Six dimensions de votre vie
-          </h2>
-          <p
-            style={{
-              ...styles.sectionSub,
-              textAlign: 'center',
-              margin: '0 auto',
-              maxWidth: 560,
-            }}
-          >
-            Chaque module croise votre profil avec les données publiques
-            disponibles pour votre commune.
-          </p>
-        </div>
-        <div style={styles.modulesGrid} className="modules-grid">
-          {MODULES.map((module) => (
-            <div key={module.name} style={styles.moduleCard(module.color)}>
-              <div style={styles.moduleIcon(module.color)}>{module.icon}</div>
-              <div style={styles.moduleName}>{module.name}</div>
-              <div style={styles.moduleDesc}>{module.desc}</div>
-              <div style={styles.moduleItems}>
-                {module.items.map((item) => (
-                  <div key={item} style={styles.moduleItem(module.color)}>
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
         </div>
       </section>
 
