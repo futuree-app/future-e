@@ -354,53 +354,104 @@ function buildGeorisquesContext(georisques) {
   };
 }
 
-function getDriasHeatLevel(hotDays: number, name: string): string {
-  if (hotDays >= 60) return `Les projections placent ${name} parmi les communes les plus exposées aux étés futurs.`;
-  if (hotDays >= 30) return `D'ici 2050, les étés à ${name} seront sensiblement plus chauds qu'aujourd'hui.`;
-  if (hotDays >= 10) return `Les fortes chaleurs devraient devenir plus fréquentes à ${name}.`;
-  return `Les projections montrent déjà une hausse des fortes chaleurs à ${name}.`;
+// Narratives chaleur par horizon — le ton évolue, pas seulement le chiffre
+function heatNarrative(hotDays: number, name: string, horizon: Horizon): { val: string; note: string | null } {
+  const n = Math.round(hotDays);
+  const note = (horizon !== 'today') ? `≈ ${n} jours > 30°C par an` : null;
+
+  if (horizon === 'today') {
+    if (hotDays >= 30) return { val: `Les fortes chaleurs font déjà partie des étés à ${name}.`, note };
+    if (hotDays >= 10) return { val: `Les fortes chaleurs se font déjà sentir certains étés à ${name}.`, note };
+    return { val: `Les canicules restent encore rares à ${name}.`, note };
+  }
+
+  if (horizon === '2030') {
+    if (hotDays >= 30) return { val: `Les périodes de canicule pourraient devenir plus longues et plus répétées à ${name}.`, note };
+    return { val: `Les étés à ${name} devraient se réchauffer sensiblement d'ici 2030.`, note };
+  }
+
+  if (horizon === '2050') {
+    if (hotDays >= 60) return { val: `Les étés à ${name} pourraient devenir difficiles à vivre.`, note };
+    if (hotDays >= 30) return { val: `Les étés à ${name} pourraient changer de nature d'ici 2050.`, note };
+    return { val: `Les fortes chaleurs devraient devenir bien plus fréquentes à ${name} d'ici 2050.`, note };
+  }
+
+  // 2100
+  if (hotDays >= 60) return { val: `${name} pourrait connaître des étés parmi les plus intenses de France.`, note };
+  if (hotDays >= 30) return { val: `${name} pourrait faire face à des étés durablement marqués par la chaleur.`, note };
+  return { val: `Les étés à ${name} pourraient être bien plus chauds d'ici la fin du siècle.`, note };
 }
 
-function getDriasCard(communeName, indicators, gwlId = LANDING_DRIAS_SCENARIO.id, numeric = false) {
+// Narratives nuits tropicales par horizon
+function nightsNarrative(nights: number, name: string, horizon: Horizon): { val: string; note: string | null } {
+  const n = Math.round(nights);
+  const note = (horizon !== 'today') ? `≈ ${n} nuits > 20°C par an` : null;
+
+  if (horizon === 'today') {
+    if (nights >= 20) return { val: `Les nuits chaudes sans fraîcheur sont déjà fréquentes à ${name}.`, note };
+    return { val: `Les nuits chaudes commencent à se faire sentir certains étés à ${name}.`, note };
+  }
+
+  if (horizon === '2030') {
+    if (nights >= 20) return { val: `Les nuits sans fraîcheur devraient se multiplier à ${name}.`, note };
+    return { val: `Les nuits chaudes pourraient devenir plus fréquentes à ${name} d'ici 2030.`, note };
+  }
+
+  if (horizon === '2050') {
+    if (nights >= 30) return { val: `Les nuits où l'on ne récupère pas pourraient devenir la norme à ${name}.`, note };
+    return { val: `Les nuits chaudes devraient s'imposer de plus en plus fréquemment à ${name}.`, note };
+  }
+
+  // 2100
+  if (nights >= 30) return { val: `${name} pourrait connaître des étés où le repos nocturne devient difficile.`, note };
+  return { val: `Les nuits chaudes pourraient être bien plus fréquentes à ${name} en fin de siècle.`, note };
+}
+
+// Narratives température estivale par horizon
+function summerTempNarrative(temp: number, name: string, horizon: Horizon): { val: string; note: string | null } {
+  const t = Number(temp).toFixed(1);
+  const note = (horizon !== 'today') ? `≈ ${t} °C en moyenne l'été` : null;
+
+  if (horizon === 'today') {
+    if (temp >= 26) return { val: `Les étés chauds sont déjà la norme à ${name}.`, note };
+    return { val: `Les étés à ${name} se réchauffent progressivement.`, note };
+  }
+
+  if (horizon === '2030') {
+    if (temp >= 26) return { val: `Les étés à ${name} pourraient encore se réchauffer sensiblement d'ici 2030.`, note };
+    return { val: `Les températures estivales à ${name} devraient augmenter.`, note };
+  }
+
+  if (horizon === '2050') {
+    if (temp >= 26) return { val: `Les étés à ${name} tels que vous les connaissez vont changer de nature.`, note };
+    return { val: `Les étés à ${name} pourraient devenir nettement plus chauds d'ici 2050.`, note };
+  }
+
+  // 2100
+  if (temp >= 28) return { val: `${name} pourrait connaître des étés comparables aux zones les plus chaudes d'Europe.`, note };
+  return { val: `Les températures estivales à ${name} pourraient dépasser largement ce qui est normal aujourd'hui.`, note };
+}
+
+function getDriasCard(communeName, indicators, horizon: Horizon = 'today') {
+  // Pour 'today' on utilise gwl15 pour la classification d'intensité (le plus conservateur)
+  const gwlId = HORIZON_TO_GWL[horizon] ?? 'gwl15';
   const hotDays = getLandingIndicatorValue(indicators, 'NORTX30D_yr', gwlId);
   const tropicalNights = getLandingIndicatorValue(indicators, 'NORTR_yr', gwlId);
   const summerTemp = getLandingIndicatorValue(indicators, 'NORTMm_seas_JJA', gwlId);
 
   if (hotDays !== null && hotDays !== undefined) {
-    return {
-      label: `Chaleur à ${communeName}`,
-      val: numeric
-        ? `${Math.round(hotDays)} jours > 30°C par an`
-        : getDriasHeatLevel(hotDays, communeName),
-      col: C.red,
-      src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
-    };
+    const { val, note } = heatNarrative(hotDays, communeName, horizon);
+    return { label: `Chaleur à ${communeName}`, val, note, col: C.red, src: 'DRIAS / Météo-France' };
   }
 
   if (tropicalNights !== null && tropicalNights !== undefined) {
-    return {
-      label: `Nuits tropicales à ${communeName}`,
-      val: numeric
-        ? `${Math.round(tropicalNights)} nuits > 20°C par an`
-        : tropicalNights >= 30
-          ? `Les nuits sans fraîcheur, celles où l'on ne récupère pas, seront plus fréquentes à ${communeName}.`
-          : `Les projections indiquent des nuits chaudes plus nombreuses à ${communeName} d'ici 2050.`,
-      col: C.red,
-      src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
-    };
+    const { val, note } = nightsNarrative(tropicalNights, communeName, horizon);
+    return { label: `Nuits tropicales à ${communeName}`, val, note, col: C.red, src: 'DRIAS / Météo-France' };
   }
 
   if (summerTemp !== null && summerTemp !== undefined) {
-    return {
-      label: `Été à ${communeName}`,
-      val: numeric
-        ? `${Number(summerTemp).toFixed(1)} °C en moyenne l'été`
-        : summerTemp >= 26
-          ? `Les étés à ${communeName} tels que vous les connaissez vont changer de nature.`
-          : `Les étés à ${communeName} deviennent progressivement plus chauds.`,
-      col: C.red,
-      src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
-    };
+    const { val, note } = summerTempNarrative(summerTemp, communeName, horizon);
+    return { label: `Été à ${communeName}`, val, note, col: C.red, src: 'DRIAS / Météo-France' };
   }
 
   return null;
@@ -450,7 +501,7 @@ function getGeorisquesCard(communeName, georisques) {
   return null;
 }
 
-function getPreviewCards(communeName, categories, indicators, georisques, gissol, gwlId = LANDING_DRIAS_SCENARIO.id, numeric = false) {
+function getPreviewCards(communeName, categories, indicators, georisques, gissol, horizon: Horizon = 'today') {
   const name = communeName || 'votre commune';
   const safeCategories =
     categories && categories.length > 0 ? categories : ['all'];
@@ -458,7 +509,7 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
   const hasCategory = (category) => safeCategories.includes(category);
 
   const cards = [];
-  const driasCard = getDriasCard(name, indicators, gwlId, numeric);
+  const driasCard = getDriasCard(name, indicators, horizon);
   const georisquesCard = getGeorisquesCard(name, georisques);
 
   if (driasCard) {
@@ -579,18 +630,11 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
   }
 
   // Nuits tropicales DRIAS — fallback si pas déjà dans driasCard
-  const tropicalNights = getLandingIndicatorValue(indicators, 'NORTR_yr', gwlId);
+  const gwlFallback = HORIZON_TO_GWL[horizon] ?? 'gwl15';
+  const tropicalNights = getLandingIndicatorValue(indicators, 'NORTR_yr', gwlFallback);
   if (tropicalNights !== null && tropicalNights !== undefined && !driasCard) {
-    cards.push({
-      label: `Nuits tropicales à ${name}`,
-      val: numeric
-        ? `${Math.round(tropicalNights)} nuits > 20°C par an`
-        : tropicalNights >= 30
-          ? `Les nuits sans fraîcheur, celles où l'on ne récupère pas, seront plus fréquentes à ${name}.`
-          : `Les projections indiquent des nuits chaudes plus nombreuses à ${name} d'ici 2050.`,
-      col: C.red,
-      src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
-    });
+    const { val, note } = nightsNarrative(tropicalNights, name, horizon);
+    cards.push({ label: `Nuits tropicales à ${name}`, val, note, col: C.red, src: 'DRIAS / Météo-France' });
   }
 
   cards.push({
@@ -2172,11 +2216,8 @@ export default function FutureELanding() {
     commune,
     communeMeta?.usedFallback,
   );
-  const horizonGwl = HORIZON_TO_GWL[horizon];
-  const effectiveGwl = horizonGwl ?? LANDING_DRIAS_SCENARIO.id;
-  const showNumeric = horizon !== 'today';
   const previewCards = commune
-    ? getPreviewCards(commune, activeCategories, communeIndicators, communeGeorisques, communeGissol, effectiveGwl, showNumeric)
+    ? getPreviewCards(commune, activeCategories, communeIndicators, communeGeorisques, communeGissol, horizon)
     : activeSlotCity.cards;
   // Clé d'animation : change à chaque étape du slot, puis à chaque sélection de commune
   const slotAnimKey = commune ? `c-${commune}` : slotSettled ? 'settled' : `s-${slotIndex}`;
@@ -2353,6 +2394,11 @@ export default function FutureELanding() {
                 <div>
                   <div style={styles.previewTitle}>{item.label}</div>
                   <div style={{ ...styles.previewSub, opacity: communeDataLoading ? 0.35 : 1, transition: 'opacity 0.4s' }}>{item.val}</div>
+                  {item.note && (
+                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: 'var(--fg-4)', lineHeight: 1.4, marginTop: 4, opacity: communeDataLoading ? 0.35 : 0.75, transition: 'opacity 0.4s' }}>
+                      {item.note}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
