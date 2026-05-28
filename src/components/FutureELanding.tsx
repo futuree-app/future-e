@@ -654,6 +654,7 @@ export default function FutureELanding() {
   const [communeIndicators, setCommuneIndicators] = useState({});
   const [communeGeorisques, setCommuneGeorisques] = useState(null);
   const [communeGissol, setCommuneGissol] = useState(null);
+  const [communeDataLoading, setCommuneDataLoading] = useState(false);
   const [tensions, setTensions] = useState([]);
   const [activeTension, setActiveTension] = useState(null);
   const [answer, setAnswer] = useState(null);
@@ -892,6 +893,7 @@ export default function FutureELanding() {
     setCommuneIndicators({});
     setCommuneGeorisques(null);
     setCommuneGissol(null);
+    setCommuneDataLoading(true);
 
     if (tensionsCatalog.length === 0) {
       return;
@@ -1016,6 +1018,7 @@ export default function FutureELanding() {
     }
 
     setTensions(buildTensions(tensionsCatalog, categories));
+    setCommuneDataLoading(false);
   }
 
   const handleInputChange = (value) => {
@@ -2121,6 +2124,10 @@ export default function FutureELanding() {
           65%  { transform: translateY(4px);   filter: blur(0);   opacity: 1; }
           100% { transform: translateY(0);     filter: blur(0);   opacity: 1; }
         }
+        @keyframes hero-loading-sweep {
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(350%); }
+        }
         .slot-spin         { display:inline-block; animation: slot-spin-kf      1.1s cubic-bezier(0.2,0,0.4,1) both; }
         .slot-settle       { display:inline-block; animation: slot-settle-kf    1.3s cubic-bezier(0.2,0.8,0.3,1) both; }
         .slot-card-spin    { animation: slot-card-spin-kf   1.1s cubic-bezier(0.2,0,0.4,1) both; }
@@ -2234,6 +2241,11 @@ export default function FutureELanding() {
           </div>
 
           <div style={styles.heroRight} className="hero-right">
+            {communeDataLoading && (
+              <div style={{ position: 'relative', height: 2, borderRadius: 1, background: 'rgba(255,255,255,0.06)', overflow: 'hidden', marginBottom: 6 }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '40%', background: 'linear-gradient(90deg, transparent, #fb923c, transparent)', animation: 'hero-loading-sweep 1.4s ease-in-out infinite' }} />
+              </div>
+            )}
             {previewCards.map((item, index) => (
               <div
                 key={`${slotAnimKey}-${index}`}
@@ -2247,8 +2259,8 @@ export default function FutureELanding() {
                 <div style={styles.previewDot(item.col)} />
                 <div>
                   <div style={styles.previewTitle}>{item.label}</div>
-                  <div style={styles.previewSub}>{item.val}</div>
-                  <span style={styles.previewBadge(item.col)}>{item.src}</span>
+                  <div style={{ ...styles.previewSub, opacity: communeDataLoading ? 0.35 : 1, transition: 'opacity 0.4s' }}>{item.val}</div>
+                  <span style={{ ...styles.previewBadge(item.col), opacity: communeDataLoading ? 0.35 : 1, transition: 'opacity 0.4s' }}>{item.src}</span>
                 </div>
               </div>
             ))}
