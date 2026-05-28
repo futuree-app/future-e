@@ -43,6 +43,8 @@ export function useModuleTracking({ moduleId, source = "page", commune, inseeCod
           firedRef.current.add(threshold);
           posthog.capture("report_module_scroll", {
             module_id: moduleId,
+            scroll_depth: threshold,
+            scroll_percent: threshold,
             scroll_percentage: threshold,
             time_spent_seconds: Math.round((Date.now() - startRef.current) / 1000),
             ...mod,
@@ -63,7 +65,10 @@ export function useModuleTracking({ moduleId, source = "page", commune, inseeCod
       posthog.capture("report_module_closed", {
         module_id: moduleId,
         read_percentage: maxScrollRef.current,
+        scroll_depth: maxScrollRef.current,
         scroll_depth_pct: maxScrollRef.current,
+        scroll_percent: maxScrollRef.current,
+        scroll_percentage: maxScrollRef.current,
         time_spent_seconds: Math.round((Date.now() - startRef.current) / 1000),
         time_spent_sec: Math.round((Date.now() - startRef.current) / 1000),
         ...mod,

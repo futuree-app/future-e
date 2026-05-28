@@ -59,6 +59,7 @@ export default function HorizonBar({ communeName, locked = false, inseeCode, mod
     setHorizon(key);
 
     posthog.capture("report_scenario_changed", {
+      scenario: toHorizon,
       from_scenario: fromHorizon,
       to_scenario: toHorizon,
       module_id: moduleId ?? null,

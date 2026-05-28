@@ -11,7 +11,7 @@ import {
   WIZARD_STORAGE_KEY,
 } from "./types";
 
-const STEP_NAMES = ["adresse", "logement", "metier", "sante", "mobilite", "projets"] as const;
+const STEP_NAMES = ["landing", "adresse", "profil_foyer", "logement", "mobilite", "generation"] as const;
 import { WizardStepper } from "./WizardStepper";
 import { WizardStep } from "./WizardStep";
 import { WizardTeaser } from "./WizardTeaser";
@@ -133,10 +133,13 @@ export const ReportWizard = forwardRef<
 
   // Garde-fou : ne pas ré-émettre wizard_step_viewed si l'utilisateur revient en arrière.
   const firedWizardStepsRef = useRef(new Set<number>());
+  // Timestamp de démarrage du wizard — pour wizard_duration_seconds.
+  const wizardStartRef = useRef(Date.now());
   // Réinitialiser le suivi quand le wizard est réinitialisé (RESET remet step à 0).
   useEffect(() => {
     if (state.step === 0 && restored) {
       firedWizardStepsRef.current = new Set();
+      wizardStartRef.current = Date.now();
     }
   }, [state.step, restored]);
 
@@ -149,6 +152,7 @@ export const ReportWizard = forwardRef<
     const dept = departmentFromInsee(state.inseeCode);
     posthog.capture("wizard_step_viewed", {
       step: stepName,
+      step_name: stepName,
       step_index: state.step,
       commune: state.answers.quartier ?? null,
       insee_code: state.inseeCode ?? null,
@@ -194,17 +198,23 @@ export const ReportWizard = forwardRef<
             onNext={() => {
                 if (state.step === 5) {
                   const dept = departmentFromInsee(state.inseeCode);
-                  posthog.capture("wizard_completed", {
+                  const durationSec = Math.round((Date.now() - wizardStartRef.current) / 1000);
+                  const geoProps = {
                     commune: state.answers.quartier ?? null,
-                    secteur: state.answers.metier ?? null,
-                    mobilite: state.answers.mobilite ?? null,
-                    projets: state.answers.projets ?? null,
-                    unknown_answers_count: state.unknownAnswers.length,
                     insee_code: state.inseeCode ?? null,
                     department: dept,
                     region: regionFromDepartment(dept),
                     report_id: state.inseeCode ?? null,
+                    wizard_duration_seconds: durationSec,
+                  };
+                  posthog.capture("wizard_completed", {
+                    secteur: state.answers.metier ?? null,
+                    mobilite: state.answers.mobilite ?? null,
+                    projets: state.answers.projets ?? null,
+                    unknown_answers_count: state.unknownAnswers.length,
+                    ...geoProps,
                   });
+                  posthog.capture("report_generated", geoProps);
                 }
                 dispatch({ type: "NEXT" });
               }}

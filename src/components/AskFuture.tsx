@@ -169,18 +169,18 @@ export function AskFuture({ communeInsee, communeName, placeholder, questionsUse
       const traceId = `${sessionId}_msg${messageIdx}`;
       const moduleId = moduleIdFromPath();
       const feedbackProps = {
-        question_category: null,
+        feedback_type: polarity,
+        feedback: polarity,
+        question_category: "autre",
         module_id: moduleId,
         module_context: moduleId,
+        message_id: traceId,
         trace_id: traceId,
         report_id: communeInsee,
       };
       // Deux événements : l'un granulaire (legacy), l'un unifié (dashboards)
       posthog.capture(`ai_feedback_${polarity}`, feedbackProps);
-      posthog.capture("ai_feedback_submitted", {
-        feedback: polarity,
-        ...feedbackProps,
-      });
+      posthog.capture("ai_feedback_submitted", feedbackProps);
     },
     [messageFeedback, sessionId, communeInsee],
   );
