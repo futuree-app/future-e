@@ -2387,6 +2387,7 @@ export default function FutureELanding() {
             <div style={styles.searchWrap} ref={searchWrapRef}>
               <span style={styles.searchIcon}>⌖</span>
               <input
+                id="commune-input"
                 style={styles.searchInput}
                 placeholder="Saisissez votre commune…"
                 value={inputValue}
@@ -2705,7 +2706,16 @@ export default function FutureELanding() {
               marginBottom: 8,
             }}
           >
-              Saisissez votre commune.
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById('commune-input');
+                  if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus(); }
+                }}
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit', fontStyle: 'italic', fontSize: 'inherit', color: C.accent, textDecoration: 'underline', textUnderlineOffset: 3 }}
+              >
+                Saisissez votre commune.
+              </button>
             </div>
             <div style={{ fontSize: 14, color: C.dim }}>
               {emptyStateCopy}
@@ -2757,6 +2767,70 @@ export default function FutureELanding() {
           ))}
         </div>
       </section>
+
+ {/* ── CTA Rapport personnalisé ── */}
+      <div style={{ position: 'relative', zIndex: 2, maxWidth: 1100, margin: '0 auto', padding: '0 28px 80px' }}>
+        <div style={{
+          ...glass({ borderRadius: 20, padding: '48px 52px' }),
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 40,
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            position: 'absolute', top: -70, right: -70,
+            width: 260, height: 260, borderRadius: '50%',
+            background: `radial-gradient(circle, ${C.orange}18 0%, transparent 70%)`,
+            pointerEvents: 'none',
+          }} />
+          <div style={{ maxWidth: 540 }}>
+            <div style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 10, letterSpacing: '0.14em',
+              textTransform: 'uppercase', color: C.orange, marginBottom: 10,
+            }}>
+              Rapport personnalisé
+            </div>
+            <h2 style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontWeight: 400,
+              fontSize: 'clamp(22px, 2.4vw, 30px)',
+              lineHeight: 1.2, letterSpacing: '-0.4px',
+              color: C.text, margin: '0 0 10px',
+            }}>
+              Votre rapport en 2 minutes.
+            </h2>
+            <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.65, margin: 0 }}>
+              Répondez à 6 questions. Obtenez un aperçu personnalisé de vos expositions climatiques — logement, métier, santé, mobilité, projets.
+            </p>
+          </div>
+          <div style={{ flexShrink: 0, textAlign: 'center' }}>
+            <button
+              type="button"
+              onClick={() => openWizard('quartier')}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                gap: 8, padding: '14px 28px', borderRadius: 12,
+                background: C.orange, color: C.bg,
+                fontFamily: "'Instrument Sans', sans-serif",
+                fontWeight: 600, fontSize: 15,
+                border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              Obtenir mon rapport personnalisé
+            </button>
+            <p style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 10, color: C.dim,
+              letterSpacing: '0.04em', marginTop: 10,
+            }}>
+              Gratuit · Sans inscription · Résultat partiel immédiat
+            </p>
+          </div>
+        </div>
+      </div>
 
       <section style={styles.amnesieSection}>
         <div style={styles.amnesieInner} className="amnesie-inner">
@@ -2832,70 +2906,6 @@ export default function FutureELanding() {
           </div>
         </div>
       </section>
-
- {/* ── CTA Rapport personnalisé ── */}
-      <div style={{ position: 'relative', zIndex: 2, maxWidth: 1100, margin: '0 auto', padding: '0 28px 80px' }}>
-        <div style={{
-          ...glass({ borderRadius: 20, padding: '48px 52px' }),
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 40,
-          position: 'relative',
-          overflow: 'hidden',
-        }}>
-          <div style={{
-            position: 'absolute', top: -70, right: -70,
-            width: 260, height: 260, borderRadius: '50%',
-            background: `radial-gradient(circle, ${C.orange}18 0%, transparent 70%)`,
-            pointerEvents: 'none',
-          }} />
-          <div style={{ maxWidth: 540 }}>
-            <div style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 10, letterSpacing: '0.14em',
-              textTransform: 'uppercase', color: C.orange, marginBottom: 10,
-            }}>
-              Rapport personnalisé
-            </div>
-            <h2 style={{
-              fontFamily: "'Instrument Serif', serif",
-              fontWeight: 400,
-              fontSize: 'clamp(22px, 2.4vw, 30px)',
-              lineHeight: 1.2, letterSpacing: '-0.4px',
-              color: C.text, margin: '0 0 10px',
-            }}>
-              Votre rapport en 2 minutes.
-            </h2>
-            <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.65, margin: 0 }}>
-              Répondez à 6 questions. Obtenez un aperçu personnalisé de vos expositions climatiques — logement, métier, santé, mobilité, projets.
-            </p>
-          </div>
-          <div style={{ flexShrink: 0, textAlign: 'center' }}>
-            <button
-              type="button"
-              onClick={() => openWizard('quartier')}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                gap: 8, padding: '14px 28px', borderRadius: 12,
-                background: C.orange, color: C.bg,
-                fontFamily: "'Instrument Sans', sans-serif",
-                fontWeight: 600, fontSize: 15,
-                border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
-              }}
-            >
-              Obtenir mon rapport personnalisé
-            </button>
-            <p style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 10, color: C.dim,
-              letterSpacing: '0.04em', marginTop: 10,
-            }}>
-              Gratuit · Sans inscription · Résultat partiel immédiat
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Hub Savoir */}
       <section

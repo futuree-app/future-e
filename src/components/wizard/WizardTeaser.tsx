@@ -429,7 +429,7 @@ export function WizardTeaser({
 
           <div className="flex flex-col gap-4">
             <Link
-              href="/paiement"
+              href="/checkout/rapport-complet"
               className="wizard-cta flex w-full gap-2 rounded-xl bg-accent text-canvas text-[15px] no-underline transition-all duration-300 hover:bg-accent/90 hover:shadow-lg hover:shadow-accent/20 active:scale-[0.98]"
             >
               Débloquer mon rapport complet — 14€
