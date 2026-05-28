@@ -39,37 +39,37 @@ const SLOT_CITIES = [
   {
     name: 'Lyon',
     cards: [
-      { label: 'Canicule à Lyon',      val: 'Très forte exposition estivale projetée', col: C.red,    src: 'DRIAS · +4°C' },
-      { label: 'Nuits tropicales',      val: 'Fréquence élevée projetée',              col: C.red,    src: 'DRIAS · +4°C' },
-      { label: 'Eau à Lyon',            val: 'Étiages sévères sur le Rhône',           col: C.blue,   src: 'BRGM / Agences de l\'eau' },
-      { label: 'Immobilier à Lyon',     val: 'DPE et chaleur pèseront davantage',      col: C.orange, src: 'DVF / ADEME' },
+      { label: 'Canicule à Lyon',      val: 'Les projections placent Lyon parmi les communes les plus exposées aux étés futurs.', col: C.red,    src: 'DRIAS · +4°C' },
+      { label: 'Nuits tropicales',      val: 'Les nuits sans fraîcheur, celles où l\'on ne récupère pas, seront plus fréquentes à Lyon.', col: C.red, src: 'DRIAS · +4°C' },
+      { label: 'Eau à Lyon',            val: 'L\'approvisionnement en eau de Lyon sera sous pression pendant les étés futurs.',           col: C.blue,   src: 'BRGM / Agences de l\'eau' },
+      { label: 'Immobilier à Lyon',     val: 'À Lyon, les risques climatiques et les normes énergétiques vont peser sur les prix.',      col: C.orange, src: 'DVF / ADEME' },
     ],
   },
   {
     name: 'Marseille',
     cards: [
-      { label: 'Chaleur à Marseille',   val: 'Très forte exposition estivale projetée', col: C.red,    src: 'DRIAS · +4°C' },
-      { label: 'Nuits tropicales',       val: 'Fréquence élevée projetée',              col: C.red,    src: 'DRIAS · +4°C' },
-      { label: 'Submersion à Marseille', val: 'Calanques et zones basses exposées',     col: C.blue,   src: 'Géorisques / BRGM' },
-      { label: 'Feux à Marseille',       val: 'Risque en hausse les étés secs',         col: C.orange, src: 'Prométhée / DREAL' },
+      { label: 'Chaleur à Marseille',   val: 'Les projections placent Marseille parmi les communes les plus exposées aux étés futurs.',  col: C.red,    src: 'DRIAS · +4°C' },
+      { label: 'Nuits tropicales',       val: 'Les nuits sans fraîcheur, celles où l\'on ne récupère pas, seront plus fréquentes à Marseille.', col: C.red, src: 'DRIAS · +4°C' },
+      { label: 'Submersion à Marseille', val: 'Marseille figure parmi les communes exposées au risque de submersion.',                           col: C.blue,   src: 'Géorisques / BRGM' },
+      { label: 'Feux à Marseille',       val: 'Le risque d\'incendie autour de Marseille augmente à chaque été sec.',                            col: C.orange, src: 'Prométhée / DREAL' },
     ],
   },
   {
     name: 'Vannes',
     cards: [
-      { label: 'Canicule à Vannes',     val: 'Exposition estivale marquée à horizon 2050', col: C.red,    src: 'DRIAS · +4°C' },
-      { label: 'Littoral à Vannes',     val: 'Submersion et érosion en hausse',            col: C.blue,   src: 'Géorisques / BRGM' },
-      { label: 'Eau potable à Vannes',  val: 'Ressource sous tension l\'été',              col: C.blue,   src: 'BRGM / Agences de l\'eau' },
-      { label: 'Immobilier à Vannes',   val: 'Risque littoral pèse sur les prix',          col: C.orange, src: 'DVF / ADEME' },
+      { label: 'Canicule à Vannes',     val: 'D\'ici 2050, les étés à Vannes seront sensiblement plus chauds qu\'aujourd\'hui.',          col: C.red,    src: 'DRIAS · +4°C' },
+      { label: 'Littoral à Vannes',     val: 'Vannes figure parmi les communes exposées au risque de submersion.',                          col: C.blue,   src: 'Géorisques / BRGM' },
+      { label: 'Eau potable à Vannes',  val: 'L\'approvisionnement en eau de Vannes sera sous pression pendant les étés futurs.',          col: C.blue,   src: 'BRGM / Agences de l\'eau' },
+      { label: 'Immobilier à Vannes',   val: 'À Vannes, les risques climatiques et les normes énergétiques vont peser sur les prix.',      col: C.orange, src: 'DVF / ADEME' },
     ],
   },
   {
     name: 'La Rochelle',
     cards: [
-      { label: 'Submersion à La Rochelle', val: 'Risque officiel recensé',             col: C.blue,   src: 'Géorisques / BRGM' },
-      { label: 'Chaleur à La Rochelle',    val: 'Exposition estivale en hausse significative', col: C.red, src: 'DRIAS · +4°C' },
-      { label: 'Qualité des sols',         val: 'Signal modéré · données disponibles', col: C.orange, src: 'GisSol / RMQS' },
-      { label: 'Immobilier à La Rochelle', val: 'Risque + DPE pèseront davantage',     col: C.orange, src: 'DVF / ADEME' },
+      { label: 'Submersion à La Rochelle', val: 'La Rochelle figure parmi les communes exposées au risque de submersion.',                     col: C.blue,   src: 'Géorisques / BRGM' },
+      { label: 'Chaleur à La Rochelle',    val: 'Les fortes chaleurs devraient devenir plus fréquentes à La Rochelle.',                        col: C.red,    src: 'DRIAS · +4°C' },
+      { label: 'Qualité des sols',         val: 'Un niveau de vigilance modéré a été relevé dans les sols autour de La Rochelle.',             col: C.orange, src: 'GisSol / RMQS' },
+      { label: 'Immobilier à La Rochelle', val: 'À La Rochelle, les risques climatiques et les normes énergétiques vont peser sur les prix.', col: C.orange, src: 'DVF / ADEME' },
     ],
   },
 ];
@@ -125,7 +125,7 @@ const STATIC_ANSWERS = {
   valeur_immo: {
     verdict: "Moins risqué que ce qu'on raconte, mais pas sans condition.",
     detail:
-      'Les zones exposées aux risques documentés (PPRi, RGA, submersion) voient déjà leurs prix stagner ou baisser par rapport à des zones similaires sans risque (DVF 2024). Le DPE devient un facteur de valeur majeur : un logement F ou G se négocie en moyenne 6 à 15 % moins cher que son équivalent C (ADEME). À l’horizon 2030, les obligations de rénovation énergétique rendront certains biens quasi invendables sans travaux.',
+      'Les zones exposées aux risques documentés (PPRi, RGA, submersion) voient déjà leurs prix stagner ou baisser par rapport à des zones similaires sans risque (DVF 2024). Le DPE devient un facteur de valeur majeur : un logement F ou G se négocie en moyenne 6 à 15 % moins cher que son équivalent C (ADEME). À l\'horizon 2030, les obligations de rénovation énergétique rendront certains biens quasi invendables sans travaux.',
     cta: 'Voir le module Logement de votre rapport',
   },
   default: {
@@ -286,11 +286,11 @@ function buildGeorisquesContext(georisques) {
   };
 }
 
-function getDriasHeatLevel(hotDays: number): string {
-  if (hotDays >= 60) return 'Très forte exposition estivale projetée';
-  if (hotDays >= 30) return 'Exposition estivale marquée à horizon 2050';
-  if (hotDays >= 10) return 'Exposition estivale en hausse significative';
-  return 'Signal chaleur présent à horizon 2050';
+function getDriasHeatLevel(hotDays: number, name: string): string {
+  if (hotDays >= 60) return `Les projections placent ${name} parmi les communes les plus exposées aux étés futurs.`;
+  if (hotDays >= 30) return `D'ici 2050, les étés à ${name} seront sensiblement plus chauds qu'aujourd'hui.`;
+  if (hotDays >= 10) return `Les fortes chaleurs devraient devenir plus fréquentes à ${name}.`;
+  return `Les projections montrent déjà une hausse des fortes chaleurs à ${name}.`;
 }
 
 function getDriasCard(communeName, indicators) {
@@ -301,7 +301,7 @@ function getDriasCard(communeName, indicators) {
   if (hotDays !== null && hotDays !== undefined) {
     return {
       label: `Chaleur à ${communeName}`,
-      val: getDriasHeatLevel(hotDays),
+      val: getDriasHeatLevel(hotDays, communeName),
       col: C.red,
       src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
     };
@@ -310,7 +310,9 @@ function getDriasCard(communeName, indicators) {
   if (tropicalNights !== null && tropicalNights !== undefined) {
     return {
       label: `Nuits tropicales à ${communeName}`,
-      val: tropicalNights >= 30 ? 'Fréquence élevée projetée' : 'Signal présent à horizon 2050',
+      val: tropicalNights >= 30
+        ? `Les nuits sans fraîcheur, celles où l'on ne récupère pas, seront plus fréquentes à ${communeName}.`
+        : `Les projections indiquent des nuits chaudes plus nombreuses à ${communeName} d'ici 2050.`,
       col: C.red,
       src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
     };
@@ -319,7 +321,9 @@ function getDriasCard(communeName, indicators) {
   if (summerTemp !== null && summerTemp !== undefined) {
     return {
       label: `Été à ${communeName}`,
-      val: summerTemp >= 26 ? 'Températures estivales élevées projetées' : 'Hausse estivale projetée',
+      val: summerTemp >= 26
+        ? `Les étés à ${communeName} tels que vous les connaissez vont changer de nature.`
+        : `Les étés à ${communeName} deviennent progressivement plus chauds.`,
       col: C.red,
       src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
     };
@@ -336,7 +340,7 @@ function getGeorisquesCard(communeName, georisques) {
   if (georisques.flags?.marineSubmersion) {
     return {
       label: `Submersion à ${communeName}`,
-      val: 'Risque officiel recensé',
+      val: `${communeName} figure parmi les communes exposées au risque de submersion.`,
       col: C.blue,
       src: 'Géorisques / BRGM',
     };
@@ -345,7 +349,7 @@ function getGeorisquesCard(communeName, georisques) {
   if (georisques.flags?.flood) {
     return {
       label: `Inondation à ${communeName}`,
-      val: 'Risque officiel recensé',
+      val: `Certaines zones de ${communeName} sont exposées aux inondations.`,
       col: C.blue,
       src: 'Géorisques / BRGM',
     };
@@ -354,7 +358,7 @@ function getGeorisquesCard(communeName, georisques) {
   if (georisques.flags?.clay) {
     return {
       label: `Argiles à ${communeName}`,
-      val: 'Tassements différentiels recensés',
+      val: `Les sols argileux de ${communeName} peuvent provoquer des fissures dans les bâtiments lors des sécheresses.`,
       col: C.orange,
       src: 'Géorisques / BRGM',
     };
@@ -363,7 +367,7 @@ function getGeorisquesCard(communeName, georisques) {
   if (georisques.flags?.landslide) {
     return {
       label: `Terrain à ${communeName}`,
-      val: 'Mouvements de terrain recensés',
+      val: `Le territoire de ${communeName} présente une sensibilité aux mouvements de terrain.`,
       col: C.orange,
       src: 'Géorisques / BRGM',
     };
@@ -392,7 +396,7 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
   } else if (hasCategory('littoral') || hasCategory('littoral_atlantique')) {
     cards.push({
       label: `Submersion à ${name}`,
-      val: '+31 % en scénario médian',
+      val: `Le risque de submersion à ${name} pourrait augmenter de 31 % dans le scénario médian.`,
       col: C.blue,
       src: 'Géorisques / BRGM',
     });
@@ -401,7 +405,7 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
   if (hasCategory('montagne')) {
     cards.push({
       label: `Neige à ${name}`,
-      val: 'Saisons plus courtes à horizon 2050',
+      val: `Les hivers enneigés pourraient devenir plus rares à ${name}.`,
       col: C.blue,
       src: 'Météo-France montagne',
     });
@@ -410,7 +414,7 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
   if (hasCategory('mediterranee') || hasCategory('rural_forestier')) {
     cards.push({
       label: `Feux autour de ${name}`,
-      val: 'Risque en hausse pendant les étés secs',
+      val: `Le risque d'incendie autour de ${name} augmente à chaque été sec.`,
       col: C.red,
       src: 'Prométhée / DREAL',
     });
@@ -424,7 +428,7 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
     if (!driasCard) {
       cards.push({
         label: `Canicule à ${name}`,
-        val: '34 jours/an en 2050',
+        val: `À ${name}, les projections anticipent jusqu'à 34 jours de canicule par an d'ici 2050.`,
         col: C.red,
         src: 'DRIAS / Météo-France',
       });
@@ -434,16 +438,16 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
   if (hasCategory('rural_agricole') || hasCategory('tension_hydrique_connue')) {
     cards.push({
       label: `Eau potable à ${name}`,
-      val: 'Ressource sous tension l’été',
+      val: `L'approvisionnement en eau de ${name} sera sous pression pendant les étés futurs.`,
       col: C.blue,
-      src: 'BRGM / Agences de l’eau',
+      src: 'BRGM / Agences de l\'eau',
     });
   }
 
   if (hasCategory('periurbain_dependance_auto') || hasCategory('rural_peri_urbain')) {
     cards.push({
       label: `Mobilité à ${name}`,
-      val: 'Dépendance voiture à surveiller',
+      val: `La dépendance à la voiture à ${name} expose les habitants aux hausses de coût du carburant.`,
       col: C.orange,
       src: 'INSEE / Ecolab',
     });
@@ -452,7 +456,7 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
   if (hasCategory('tourisme_urbain')) {
     cards.push({
       label: `Tourisme à ${name}`,
-      val: 'Activité sensible aux étés extrêmes',
+      val: `Les étés extrêmes pourraient fragiliser l'activité touristique locale.`,
       col: C.violet,
       src: 'INSEE / France Tourisme',
     });
@@ -461,7 +465,7 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
   if (hasCategory('rural_viticole')) {
     cards.push({
       label: `Vigne à ${name}`,
-      val: 'Pression sur cépages et rendements',
+      val: `La chaleur pourrait modifier les équilibres viticoles autour de ${name}.`,
       col: C.green,
       src: 'INAO / Agreste',
     });
@@ -470,7 +474,7 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
   if (hasCategory('vallee_industrielle')) {
     cards.push({
       label: `Air à ${name}`,
-      val: 'Pollution et ozone à surveiller',
+      val: `La qualité de l'air à ${name} se dégrade lors des pics de chaleur, avec une hausse de l'ozone.`,
       col: C.red,
       src: 'ATMO / Santé publique France',
     });
@@ -480,7 +484,11 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
   if (gissol?.cadmium?.label) {
     const cdScore = gissol.cadmium.score ?? 0;
     const cdCol = cdScore >= 65 ? C.red : cdScore >= 45 ? C.orange : C.green;
-    const cdLevel = cdScore >= 65 ? 'Signal élevé · données disponibles' : cdScore >= 45 ? 'Signal modéré · données disponibles' : 'Signal faible · données disponibles';
+    const cdLevel = cdScore >= 65
+      ? `Les données disponibles montrent une vigilance élevée sur les sols de ${name}.`
+      : cdScore >= 45
+        ? `Un niveau de vigilance modéré a été relevé dans les sols autour de ${name}.`
+        : `Les données disponibles montrent un niveau de vigilance faible pour les sols de ${name}.`;
     cards.push({
       label: `Qualité des sols à ${name}`,
       val: cdLevel,
@@ -490,7 +498,7 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
   } else {
     cards.push({
       label: `Qualité des sols à ${name}`,
-      val: 'Signal sanitaire à confirmer',
+      val: `Les données sur les sols de ${name} ne permettent pas encore de conclure.`,
       col: C.orange,
       src: 'GisSol / RMQS',
     });
@@ -501,7 +509,9 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
   if (tropicalNights !== null && tropicalNights !== undefined && !driasCard) {
     cards.push({
       label: `Nuits tropicales à ${name}`,
-      val: tropicalNights >= 30 ? 'Fréquence élevée projetée' : 'Signal présent à horizon 2050',
+      val: tropicalNights >= 30
+        ? `Les nuits sans fraîcheur, celles où l'on ne récupère pas, seront plus fréquentes à ${name}.`
+        : `Les projections indiquent des nuits chaudes plus nombreuses à ${name} d'ici 2050.`,
       col: C.red,
       src: `DRIAS / Météo-France · ${LANDING_DRIAS_SCENARIO.shortLabel}`,
     });
@@ -509,7 +519,7 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
 
   cards.push({
     label: `Valeur immobilière à ${name}`,
-    val: 'Risque + DPE pèseront davantage',
+    val: `À ${name}, les risques climatiques et les normes énergétiques vont peser sur les prix.`,
     col: C.orange,
     src: 'DVF / ADEME',
   });
@@ -2260,7 +2270,6 @@ export default function FutureELanding() {
                 <div>
                   <div style={styles.previewTitle}>{item.label}</div>
                   <div style={{ ...styles.previewSub, opacity: communeDataLoading ? 0.35 : 1, transition: 'opacity 0.4s' }}>{item.val}</div>
-                  <span style={{ ...styles.previewBadge(item.col), opacity: communeDataLoading ? 0.35 : 1, transition: 'opacity 0.4s' }}>{item.src}</span>
                 </div>
               </div>
             ))}
@@ -2980,7 +2989,7 @@ export default function FutureELanding() {
                 'Rapport complet PDF (6 modules)',
                 'Dashboard simplifié en lecture seule',
                 'Régénération 1 fois par an',
-                'Les 14 € seront déduits à l’ouverture du Suivi (prochainement).',
+                'Les 14 € seront déduits à l\'ouverture du Suivi (prochainement).',
               ].map((feature) => (
                 <div key={feature} style={styles.planFeature}>
                   <span style={styles.planCheck}>✓</span>
