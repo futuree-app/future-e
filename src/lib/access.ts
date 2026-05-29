@@ -33,7 +33,7 @@ export const PLAN_MATRIX: Record<UserPlan, CapabilityMatrix> = {
     householdModeEnabled: false,
   },
   one_shot: {
-    label: "Rapport PDF one-shot",
+    label: "Rapport interactif",
     reportAccess: "complete",
     dashboardAccess: "read_only",
     newsletterEnabled: false,

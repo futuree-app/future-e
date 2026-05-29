@@ -933,7 +933,7 @@ export default async function ComparateurPage({
                     <div className="cta-point">Six dimensions comparatives supplémentaires</div>
                     <div className="cta-point">Même lecture, mais croisée avec votre profil</div>
                     <div className="cta-point">Accès direct aux fiches territoire détaillées</div>
-                    <div className="cta-point">Continuité avec le dashboard et le rapport</div>
+                    <div className="cta-point">Continuité avec le dashboard et le rapport interactif</div>
                   </div>
                 </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { usePostHog } from "posthog-js/react";
 
 // ─── palette ─────────────────────────────────────────────────────────────────
 const C = {
@@ -27,10 +28,18 @@ function glass(extra: React.CSSProperties = {}): React.CSSProperties {
 }
 
 // ─── types ────────────────────────────────────────────────────────────────────
-type QuartierWorkbookProps = { userKey: string };
-type QuartierAnswers = { heat: string; water: string; shelter: string; note: string };
-const EMPTY: QuartierAnswers = { heat: "", water: "", shelter: "", note: "" };
+type QuartierWorkbookProps = {
+  userKey: string;
+  /** Commune observée — requise pour persister dans terrain_observations. */
+  commune?: string | null;
+  inseeCode?: string | null;
+  /** report_id si un jour le concept existe ; aujourd'hui null. */
+  reportId?: string | null;
+};
+type QuartierAnswers = { heat: string; water: string; shelter: string; change: string; note: string };
+const EMPTY: QuartierAnswers = { heat: "", water: "", shelter: "", change: "", note: "" };
 const PREFIX = "futuree:quartier-workbook:";
+type ChoiceKey = "heat" | "water" | "shelter" | "change";
 
 // ─── questions ────────────────────────────────────────────────────────────────
 const QUESTIONS = [
@@ -46,22 +55,32 @@ const QUESTIONS = [
   },
   {
     key: "water" as const,
-    label: "Le sujet eau est-il d\u00e9j\u00e0 visible autour de vous\u00a0?",
-    sub: "Restrictions, nappes, ruissellement",
+    label: "L\u2019eau est-elle d\u00e9j\u00e0 devenue un sujet dans votre quartier\u00a0?",
+    sub: "Restrictions, s\u00e9cheresse, ruissellement",
     options: [
-      { value: "loin",      label: "Je ne me sens pas expos\u00e9" },
-      { value: "ponctuel",  label: "J\u2019ai d\u00e9j\u00e0 vu des tensions ponctuelles" },
+      { value: "loin",      label: "Je ne me sens pas concern\u00e9" },
+      { value: "ponctuel",  label: "J\u2019ai d\u00e9j\u00e0 vu quelques tensions" },
       { value: "present",   label: "L\u2019eau est d\u00e9j\u00e0 un sujet concret ici" },
     ],
   },
   {
     key: "shelter" as const,
-    label: "Le cadre de vie absorbe-t-il encore bien les \u00e9t\u00e9s qui se durcissent\u00a0?",
-    sub: "Ombre, espaces verts, \u00eelots de chaleur",
+    label: "Votre quartier reste-t-il agr\u00e9able pendant les fortes chaleurs\u00a0?",
+    sub: "Ombre, espaces verts, fra\u00eecheur",
     options: [
-      { value: "resilient",  label: "Le quartier absorbe encore bien" },
-      { value: "tendu",      label: "Le cadre de vie se tend l\u2019\u00e9t\u00e9" },
-      { value: "fragilise",  label: "Le quartier montre d\u00e9j\u00e0 ses limites" },
+      { value: "resilient",  label: "Oui, plut\u00f4t" },
+      { value: "tendu",      label: "Cela devient plus difficile" },
+      { value: "fragilise",  label: "Non, cela se ressent d\u00e9j\u00e0 fortement" },
+    ],
+  },
+  {
+    key: "change" as const,
+    label: "Avez-vous observ\u00e9 des changements dans votre quartier ces derni\u00e8res ann\u00e9es\u00a0?",
+    sub: "V\u00e9g\u00e9tation, usages, saisons, eau, chaleur",
+    options: [
+      { value: "faible",  label: "Pas vraiment" },
+      { value: "visible", label: "Quelques \u00e9volutions visibles" },
+      { value: "fort",    label: "Beaucoup de changements" },
     ],
   },
 ];
@@ -252,14 +271,30 @@ const S = {
 };
 
 // ─── component ────────────────────────────────────────────────────────────────
-export function QuartierWorkbook({ userKey }: QuartierWorkbookProps) {
+export function QuartierWorkbook({ userKey, commune, inseeCode, reportId }: QuartierWorkbookProps) {
   const storageKey = `${PREFIX}${userKey}`;
+  const posthog = usePostHog();
   const [open, setOpen] = useState(false);
   const [answers, setAnswers] = useState<QuartierAnswers>(EMPTY);
   const [ready, setReady] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [focusedTextarea, setFocusedTextarea] = useState(false);
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Anti-doublon des événements PostHog dans une même session de page.
+  const completedFiredRef = useRef(false);
+  const freeTextFiredLenRef = useRef(0);
+
+  // Propriétés communes à tous les événements workbook. Le contenu du texte
+  // libre n'y figure JAMAIS, uniquement sa longueur / sa présence.
+  const baseEventProps = useMemo(
+    () => ({
+      module: "quartier",
+      commune: commune ?? null,
+      insee_code: inseeCode ?? null,
+      report_id: reportId ?? null,
+    }),
+    [commune, inseeCode, reportId],
+  );
 
   // ── hydrate from localStorage
   useEffect(() => {
@@ -274,6 +309,7 @@ export function QuartierWorkbook({ userKey }: QuartierWorkbookProps) {
             heat: p.heat ?? "",
             water: p.water ?? "",
             shelter: p.shelter ?? "",
+            change: p.change ?? "",
             note: p.note ?? "",
           });
         }
@@ -296,17 +332,35 @@ export function QuartierWorkbook({ userKey }: QuartierWorkbookProps) {
   }, [answers, ready, storageKey]);
 
   // ── sync to server with 1 s debounce
+  // Double écriture : /api/terrain-observations persiste à la fois
+  // user_profiles.workbook_quartier (compat) ET terrain_observations (base
+  // propre). Si la commune n'est pas connue, on retombe sur l'ancien PATCH
+  // /api/profile pour préserver la compatibilité.
   useEffect(() => {
     if (!ready) return;
     const timer = setTimeout(() => {
-      fetch("/api/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ field: "workbook_quartier", value: answers }),
-      }).catch(() => {});
+      if (inseeCode && commune) {
+        fetch("/api/terrain-observations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            answers,
+            inseeCode,
+            commune,
+            reportId: reportId ?? null,
+            module: "quartier",
+          }),
+        }).catch(() => {});
+      } else {
+        fetch("/api/profile", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ field: "workbook_quartier", value: answers }),
+        }).catch(() => {});
+      }
     }, 1000);
     return () => clearTimeout(timer);
-  }, [answers, ready]);
+  }, [answers, ready, inseeCode, commune, reportId]);
 
   // ── feedback visuel "Sauvegardé" (effet indépendant)
   useEffect(() => {
@@ -319,14 +373,47 @@ export function QuartierWorkbook({ userKey }: QuartierWorkbookProps) {
     };
   }, [answers, ready]);
 
+  const answeredChoices = useMemo(
+    () => [answers.heat, answers.water, answers.shelter, answers.change].filter(Boolean).length,
+    [answers],
+  );
+
   const completion = useMemo(() => {
-    return [answers.heat, answers.water, answers.shelter, answers.note.trim()].filter(Boolean).length;
+    return [answers.heat, answers.water, answers.shelter, answers.change, answers.note.trim()].filter(Boolean).length;
   }, [answers]);
 
-  const completionPct = completion / 4;
+  const completionPct = completion / 5;
 
-  function pick(field: "heat" | "water" | "shelter", value: string) {
-    setAnswers((c) => ({ ...c, [field]: c[field] === value ? "" : value }));
+  // ── workbook_completed : une fois les 4 questions à choix renseignées.
+  // Tiré au plus une fois par session de page (réinitialisé si l'utilisateur
+  // retire une réponse, pour pouvoir re-déclencher après re-complétion).
+  useEffect(() => {
+    if (!ready) return;
+    if (answeredChoices >= QUESTIONS.length) {
+      if (!completedFiredRef.current) {
+        completedFiredRef.current = true;
+        posthog?.capture("workbook_completed", {
+          ...baseEventProps,
+          answered_count: answeredChoices,
+          has_free_text: answers.note.trim().length > 0,
+        });
+      }
+    } else {
+      completedFiredRef.current = false;
+    }
+  }, [ready, answeredChoices, answers.note, posthog, baseEventProps]);
+
+  function pick(field: ChoiceKey, value: string) {
+    const next = answers[field] === value ? "" : value;
+    // workbook_answered : uniquement lors d'une sélection (pas d'une dé-sélection).
+    if (next) {
+      posthog?.capture("workbook_answered", {
+        ...baseEventProps,
+        question_id: field,
+        answer_value: next,
+      });
+    }
+    setAnswers((c) => ({ ...c, [field]: next }));
   }
 
   return (
@@ -335,17 +422,20 @@ export function QuartierWorkbook({ userKey }: QuartierWorkbookProps) {
       {/* en-tête + toggle */}
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          if (!open) posthog?.capture("workbook_opened", baseEventProps);
+          setOpen((v) => !v);
+        }}
         style={{ all: "unset", cursor: "pointer", display: "block", width: "100%" }}
       >
         <div style={S.head}>
           <div>
-            <p style={S.kicker}>{open ? "Observations terrain · Ouvert" : "Observations terrain"}</p>
+            <p style={S.kicker}>{open ? "Observation du territoire · Ouvert" : "Observation du territoire"}</p>
             <h3 style={S.title}>Vos repères de terrain</h3>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
             <span style={S.progressPill(completionPct)}>
-              {completion}/4{completionPct === 1 ? " ✓" : ""}
+              {completion}/5{completionPct === 1 ? " ✓" : ""}
             </span>
             <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: C.dim, letterSpacing: "0.04em" }}>
               {open ? "▲" : "▼"}
@@ -362,9 +452,23 @@ export function QuartierWorkbook({ userKey }: QuartierWorkbookProps) {
       </button>
 
       {!open && (
-        <p style={{ fontSize: 13, color: C.dim, lineHeight: 1.6, margin: 0 }}>
-          Croisez vos observations de terrain avec les données climatiques. Stocké localement dans votre navigateur.
-        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.65, margin: 0 }}>
+            Vos observations de terrain complètent les données publiques et affinent la lecture de votre commune.
+          </p>
+          <p
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 10,
+              letterSpacing: "0.08em",
+              color: C.dim,
+              margin: 0,
+              textTransform: "uppercase",
+            }}
+          >
+            Stocké localement dans votre navigateur
+          </p>
+        </div>
       )}
 
       {/* 3 questions à choix */}
@@ -405,12 +509,24 @@ export function QuartierWorkbook({ userKey }: QuartierWorkbookProps) {
         <textarea
           id="quartier-note"
           style={S.textarea(focusedTextarea)}
-          placeholder="Les nuits sont devenues plus lourdes, l'ombre manque en été, le jardin souffre, les rues se vident plus tôt..."
+          placeholder="Les nuits sont devenues plus lourdes, certains arbres souffrent davantage, l'eau manque plus souvent, les rues se vident plus tôt l'été..."
           rows={5}
           value={answers.note}
           onChange={(e) => setAnswers((c) => ({ ...c, note: e.target.value }))}
           onFocus={() => setFocusedTextarea(true)}
-          onBlur={() => setFocusedTextarea(false)}
+          onBlur={() => {
+            setFocusedTextarea(false);
+            // workbook_free_text_written : on n'envoie QUE la longueur, jamais
+            // le contenu. Tiré quand le texte change réellement entre deux blur.
+            const len = answers.note.trim().length;
+            if (len > 0 && len !== freeTextFiredLenRef.current) {
+              freeTextFiredLenRef.current = len;
+              posthog?.capture("workbook_free_text_written", {
+                ...baseEventProps,
+                text_length: len,
+              });
+            }
+          }}
         />
       </div>
 
@@ -422,7 +538,7 @@ export function QuartierWorkbook({ userKey }: QuartierWorkbookProps) {
 
       {/* note éditoriale */}
       <div style={S.helperBox}>
-        Ce module ne remplace pas la lecture du territoire. Il lui donne un point d&apos;accroche plus personnel : vos observations croisées avec les données publiques, dans la suite du rapport.
+        Les données racontent une partie de l&apos;histoire. Ce que vous observez raconte le reste.
       </div>
       </>)}
     </div>

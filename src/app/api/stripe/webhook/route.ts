@@ -89,10 +89,10 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     await resend.emails.send({
       from: "futur·e <hello@futur-e.fr>",
       to: userEmail,
-      subject: "Votre rapport futur·e est en cours de génération",
+      subject: "Votre rapport interactif futur·e est en préparation",
       html: `
         <p>Merci pour votre confiance.</p>
-        <p>Votre rapport est en cours de génération. Vous le recevrez dans les prochaines minutes.</p>
+        <p>Votre rapport interactif est en préparation. Vous le recevrez dans les prochaines minutes.</p>
         <p>— futur·e</p>
       `,
     });
@@ -108,7 +108,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
       subject: "Vos 14 € couvrent votre premier mois de Suivi",
       scheduledAt: sendAt.toISOString(),
       html: `
-        <p>Votre rapport futur·e est là depuis une semaine.</p>
+        <p>Votre rapport interactif futur·e est là depuis une semaine.</p>
         <p>
           Si vous souhaitez suivre l'évolution de votre situation mois par mois,
           vos 14 € couvrent votre premier mois de Suivi — et une partie du second.

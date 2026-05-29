@@ -398,7 +398,7 @@ export function WizardTeaser({
         <div className="flex flex-col gap-7 md:gap-8">
           <div className="flex flex-col gap-4 md:gap-5">
             <p className="font-mono text-[11px] tracking-[0.16em] uppercase text-accent">
-              Rapport complet
+              Rapport interactif
             </p>
             <p
               className="max-w-[20ch] text-[clamp(1.85rem,3.4vw,2.45rem)] font-normal text-label leading-[1.08] tracking-[-0.025em] text-balance"
@@ -432,7 +432,7 @@ export function WizardTeaser({
               href="/checkout/rapport-complet"
               className="wizard-cta flex w-full gap-2 rounded-xl bg-accent text-canvas text-[15px] no-underline transition-all duration-300 hover:bg-accent/90 hover:shadow-lg hover:shadow-accent/20 active:scale-[0.98]"
             >
-              Débloquer mon rapport complet — 14€
+              Débloquer mon rapport interactif — 14€
             </Link>
             <p className="text-center font-mono text-[11px] text-ghost tracking-[0.04em] leading-relaxed">
               Les 14 € seront déductibles à l&apos;ouverture du Suivi mensuel

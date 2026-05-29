@@ -38,17 +38,6 @@ type SharedProps = {
   vigieau: VigieauSummary | null;
 };
 
-// Couleurs par niveau VigiEau, calées sur la palette glassmorphism du produit.
-function vigieauColor(level: VigieauSummary["maxLevel"] | "pas_de_restrictions" | null): string {
-  switch (level) {
-    case "crise": return "var(--red)";
-    case "alerte_renforcee": return "var(--red)";
-    case "alerte": return "var(--orange)";
-    case "vigilance": return "var(--orange)";
-    default: return "var(--green)";
-  }
-}
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function r(v: number | undefined | null) {
@@ -59,7 +48,6 @@ function buildFactors(
   gwlData: Record<string, number> | null | undefined,
   horizonKey: string,
   georisques: GeorisquesSummary | null,
-  vigieau: VigieauSummary | null,
   territoire: Territoire | null,
 ): Factor[] {
   const meta = HORIZON_META[horizonKey as keyof typeof HORIZON_META] ?? HORIZON_META.gwl20;
@@ -68,15 +56,6 @@ function buildFactors(
   const tropicalNights = r(gwlData?.["NORTR_yr"]);
   const fireDays = r(gwlData?.["NORIFM40_yr"]);
   const drySoilDays = r(gwlData?.["NORSWI04_yr"]);
-
-  // VigiEau : couverture 100% France. La carte affiche le niveau le plus élevé
-  // actuel, et reste lisible quand "Aucune restriction" (en vert calme).
-  const vigieauLevel = vigieau?.maxLevel ?? null;
-  const vigieauVal = levelLabel(vigieauLevel);
-  const vigieauSrc = vigieau?.topZone?.label
-    ? `VigiEau / Propluvia · ${vigieau.topZone.label}`
-    : "VigiEau / Propluvia · arrêté préfectoral";
-  const vigieauMissing = vigieau == null;
 
   const boisementPct = territoire?.taux_boisement != null
     ? Math.round(territoire.taux_boisement)
@@ -117,13 +96,6 @@ function buildFactors(
       col: "var(--orange)",
       src: `DRIAS · indice SWI < 0,4 · France ${meta.france}`,
       missing: drySoilDays == null,
-    },
-    {
-      label: "Restrictions sécheresse",
-      val: vigieauVal,
-      col: vigieauColor(vigieauLevel),
-      src: vigieauSrc,
-      missing: vigieauMissing,
     },
     {
       label: "Inondation fluviale",
@@ -248,17 +220,13 @@ function formatFrDate(iso: string): string {
 
 // ─── FactorGrid (grille horizontale de cartes) ────────────────────────────────
 
-export function QuartierAside({ communeName, scenarios, georisques, territoire, vigieau }: Omit<SharedProps, "drought">) {
+export function QuartierAside({ communeName: _communeName, scenarios, georisques, territoire }: Omit<SharedProps, "drought" | "vigieau">) {
   const [horizon] = useHorizon();
-  const meta = HORIZON_META[horizon];
   const gwlData = scenarios?.[horizon]?.v ?? null;
-  const factors = buildFactors(gwlData, horizon, georisques, vigieau, territoire);
+  const factors = buildFactors(gwlData, horizon, georisques, territoire);
 
   return (
     <div>
-      <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-4">
-        {communeName}, horizon {meta.year} · données territoriales
-      </p>
       <div className="grid grid-cols-4 gap-2.5">
         {factors.map((f) => (
           <div
@@ -322,7 +290,7 @@ export function QuartierDataBody({ communeName, scenarios, georisques, drought, 
   const [horizon] = useHorizon();
   const meta = HORIZON_META[horizon];
   const gwlData = scenarios?.[horizon]?.v ?? null;
-  const factors = buildFactors(gwlData, horizon, georisques, vigieau, territoire);
+  const factors = buildFactors(gwlData, horizon, georisques, territoire);
   const paragraphs = communeName ? buildParagraphs(communeName, gwlData, horizon, georisques, drought, vigieau) : [];
 
   return (

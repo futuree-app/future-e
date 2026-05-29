@@ -14,17 +14,18 @@ export type CheckoutProduct = {
 export const CHECKOUT_PRODUCTS: Record<CheckoutProductSlug, CheckoutProduct> = {
   "rapport-complet": {
     slug: "rapport-complet",
-    title: "Rapport complet",
+    title: "Rapport interactif",
     subtitle:
-      "Le rapport intégral, à conserver, avec ses six modules et un accès lecture seule au dashboard.",
+      "Le rapport interactif intégral, à conserver, avec ses six modules et un accès lecture seule au dashboard.",
     amount: 14,
     priceLabel: "14 € une fois",
     productType: "one-shot",
     ctaLabel: "Payer 14 €",
     features: [
-      "Rapport complet PDF",
-      "6 modules d'analyse",
+      "6 modules interactifs personnalisés",
+      "AskFuture — 3 questions incluses",
       "Dashboard simplifié en lecture seule",
+      "Export PDF, à conserver",
       "Les 14 € seront déduits à l'ouverture du Suivi (prochainement)",
     ],
   },
@@ -32,7 +33,7 @@ export const CHECKOUT_PRODUCTS: Record<CheckoutProductSlug, CheckoutProduct> = {
     slug: "suivi",
     title: "Suivi",
     subtitle:
-      "Le rapport devient vivant : dashboard interactif, profil modifiable, alertes et mises à jour ciblées.",
+      "Le rapport interactif devient vivant : dashboard évolutif, profil modifiable, alertes et mises à jour ciblées.",
     amount: 9,
     priceLabel: "9 €",
     productType: "suivi-solo",

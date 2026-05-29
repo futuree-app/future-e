@@ -188,7 +188,7 @@ const fullHtml = `
 
   <h2>Les leviers concrets au niveau du logement</h2>
   <p>
-    Une partie significative des dommages lors d'une inondation est évitable par des mesures préventives. Trois leviers ont un rapport efficacité/coût démontré.
+    Une partie significative des dommages lors d'une inondation est évitable par des mesures préventives. Trois leviers ont un rapport interactif efficacité/coût démontré.
   </p>
 
   <div class="levers">

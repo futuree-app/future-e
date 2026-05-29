@@ -8,9 +8,15 @@ import { canAccessCompleteReport } from "@/lib/access";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
-import { QuartierAside, QuartierDataBody, QuartierSectionTitle } from "@/components/report/QuartierClimatData";
-import { getGeorisquesSummary, type GeorisquesSummary } from "@/lib/georisques";
+import { QuartierAside } from "@/components/report/QuartierClimatData";
+import QuartierSynthesis, {
+  type WorkbookQuartier,
+} from "@/components/report/QuartierSynthesis";
+import { getGeorisquesSummary } from "@/lib/georisques";
 import { ModuleTracker } from "@/components/ModuleTracker";
+import { deriveQuartierSources, buildFallbackSummary } from "@/lib/quartier-signals";
+import { AskFutureInlineMount } from "@/components/AskFutureInlineMount";
+import { SuiviWaitlistBlock } from "@/components/report/SuiviWaitlistBlock";
 
 export default async function RapportQuartierPage() {
   const account = await getCurrentUserAccount();
@@ -19,12 +25,13 @@ export default async function RapportQuartierPage() {
 
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("home_commune, home_insee_code")
+    .select("home_commune, home_insee_code, workbook_quartier")
     .eq("user_id", user.id)
     .maybeSingle();
 
   const communeName = profile?.home_commune ?? null;
   const inseeCode = profile?.home_insee_code ?? null;
+  const initialWorkbook = normalizeWorkbook(profile?.workbook_quartier);
 
   const [enrichment, georisques] = await Promise.all([
     inseeCode ? gatherCommuneEnrichment(inseeCode) : null,
@@ -32,10 +39,16 @@ export default async function RapportQuartierPage() {
   ]);
 
   const scenarios = enrichment?.drias?.commune.s ?? null;
-  const drought = enrichment?.eau?.drought ?? null;
   const territoire = enrichment?.ademe?.commune.territoire ?? null;
-  const vigieau = enrichment?.vigieau ?? null;
   const displayName = communeName ?? "votre commune";
+
+  // Sources mobilisées par horizon : pré-calculées côté serveur, le composant
+  // client choisit via useHorizon. Évite de transférer tout enrichment.
+  const sourcesByHorizon = {
+    gwl15: deriveQuartierSources(enrichment, georisques, "gwl15"),
+    gwl20: deriveQuartierSources(enrichment, georisques, "gwl20"),
+    gwl30: deriveQuartierSources(enrichment, georisques, "gwl30"),
+  };
 
   return (
     <div
@@ -55,7 +68,8 @@ export default async function RapportQuartierPage() {
           </div>
         )}
 
-        <section className="py-20 max-w-[680px]">
+        {/* Hero */}
+        <section className="pt-20 pb-6 max-w-[680px]">
           <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-info mb-5">
             <span className="w-1.5 h-1.5 rounded-full bg-info shrink-0" />
             Module 01 · Quartier
@@ -67,80 +81,99 @@ export default async function RapportQuartierPage() {
             Ce que {displayName} devient.<br />
             <span className="italic text-info">Canicule, inondation, feux.</span>
           </h1>
-          <p className="text-[17px] leading-[1.72] text-muted mb-9">
+          <p className={`text-[17px] leading-[1.72] text-muted ${fullReport ? "mb-0" : "mb-9"}`}>
             Comment le changement climatique va transformer votre commune.
           </p>
           {!fullReport && (
             <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline">
-              Ouvrir le rapport complet
+              Ouvrir le rapport interactif
             </Link>
           )}
         </section>
 
-        <QuartierAside communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} />
+        {/* Synthèse pleine largeur */}
+        <section className="pt-2">
+          <QuartierSynthesis
+            communeName={communeName}
+            inseeCode={inseeCode}
+            userKey={account.userId}
+            sourcesByHorizon={sourcesByHorizon}
+            initialWorkbook={initialWorkbook}
+            fallbackSummary={buildFallbackSummary(communeName, "votre horizon")}
+          />
+        </section>
 
-        <div className="flex gap-3 flex-wrap mt-6">
-          <a href="/rapport" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/[0.05] text-muted text-[13px] no-underline border border-white/[0.08]">
-            ← Retour au rapport
-          </a>
-          <a href="/rapport#horizon" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/[0.05] text-muted text-[13px] no-underline border border-white/[0.08]">
-            Changer l&apos;horizon temporel
-          </a>
+        <div className="border-t border-white/[0.08] mt-10" />
+
+        {/* Ce que montrent les données (cartes) */}
+        <section className="pt-14">
+          <h2
+            className="font-normal italic text-[clamp(22px,2vw,28px)] leading-[1.25] tracking-[-0.3px] text-label mb-6"
+            style={{ fontFamily: "'Instrument Serif', serif" }}
+          >
+            Ce que montrent les données
+          </h2>
+          <QuartierAside communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} />
+        </section>
+
+        {/* Repères de terrain */}
+        <section className="pt-14">
+          <QuartierWorkbook
+            userKey={account.userId}
+            commune={communeName}
+            inseeCode={inseeCode}
+            reportId={inseeCode}
+          />
+        </section>
+
+        {/* Une question ? — AskFuture inline (uniquement pour comptes payants) */}
+        <section className="pt-14">
+          <AskFutureInlineMount
+            placeholder={`Votre question sur ${displayName}…`}
+            suggestions={[
+              `Que signifie +4°C pour ${displayName} ?`,
+              "Mon logement est-il concerné ?",
+              "Quel avenir pour mes enfants ici ?",
+            ]}
+          />
+        </section>
+
+        {/* Porte suivante : continuité naturelle du rapport, juste après la lecture */}
+        <div className="mt-14 flex justify-end">
+          <Link
+            href="/rapport/logement"
+            className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg no-underline font-semibold text-[14px]"
+            style={{ background: "var(--orange)", color: "var(--canvas)", fontFamily: "'Instrument Sans', sans-serif" }}
+          >
+            Module Logement
+            <span className="text-[16px] leading-none">→</span>
+          </Link>
         </div>
 
-        <div className="border-t border-white/[0.08] mt-14" />
+        {/* Vision long terme : une fois la lecture terminée, rester informé */}
+        <SuiviWaitlistBlock commune={communeName} inseeCode={inseeCode} moduleId="quartier" />
 
-        <section className="pt-14">
-          <div className="mb-8">
-            <QuartierSectionTitle communeName={displayName} scenarios={scenarios} georisques={georisques} />
-          </div>
-
-          <div className="grid grid-cols-[1fr_320px] gap-6 mb-8">
-            <QuartierDataBody communeName={displayName} scenarios={scenarios} georisques={georisques} drought={drought} territoire={territoire} vigieau={vigieau} />
-
-            <div className="flex flex-col gap-3.5">
-              {!fullReport && (
-                <div className="glass rounded-xl p-5" style={{ borderLeft: "2px solid var(--orange)" }}>
-                  <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2">Ce que le rapport complet ajoute</p>
-                  <p className="text-[14px] leading-[1.65] text-muted mb-4">
-                    Le module Quartier donne la lecture du lieu. Le rapport complet la croise ensuite avec votre logement, votre profil et vos autres dimensions de vie.
-                  </p>
-                  <Link href="/#pricing" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[13px] no-underline">
-                    Voir les formules
-                  </Link>
-                </div>
-              )}
-
-              <div className="glass rounded-xl p-5" style={{ borderLeft: "2px solid var(--blue)" }}>
-                <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2">Pages Savoir associées</p>
-                <div className="flex flex-col gap-2">
-                  <Link href="/savoir/submersion-cotiere" className="flex items-center gap-1.5 text-[13px] text-info no-underline">
-                    <span className="opacity-60">→</span>
-                    La submersion côtière
-                  </Link>
-                  <span className="flex items-center gap-1.5 text-[13px] text-ghost opacity-40 cursor-default">
-                    <span className="opacity-60">→</span>
-                    Les vagues de chaleur urbaines <span className="font-mono text-[10px] ml-1">(à venir)</span>
-                  </span>
-                </div>
-              </div>
-
-              <Link
-                href="/rapport/logement"
-                className="flex items-center justify-center gap-2.5 w-full px-5 py-3.5 rounded-xl no-underline font-semibold text-[14px]"
-                style={{ background: "var(--orange)", color: "var(--canvas)", fontFamily: "'Instrument Sans', sans-serif" }}
-              >
-                Module Logement
-                <span className="text-[16px] leading-none">→</span>
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <section className="pt-4">
-          <QuartierWorkbook userKey={account.userId} />
-        </section>
+        {/* Sortie propre */}
+        <div className="mt-14">
+          <a href="/rapport" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/[0.05] text-muted text-[13px] no-underline border border-white/[0.08]">
+            ← Retour au rapport interactif
+          </a>
+        </div>
       </div>
     </div>
   );
+}
+
+function normalizeWorkbook(raw: unknown): WorkbookQuartier | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const wb: WorkbookQuartier = {
+    heat: typeof r.heat === "string" ? r.heat : "",
+    water: typeof r.water === "string" ? r.water : "",
+    shelter: typeof r.shelter === "string" ? r.shelter : "",
+    change: typeof r.change === "string" ? r.change : "",
+    note: typeof r.note === "string" ? r.note : "",
+  };
+  const filled = [wb.heat, wb.water, wb.shelter, wb.change, wb.note.trim()].filter(Boolean).length;
+  return filled > 0 ? wb : null;
 }

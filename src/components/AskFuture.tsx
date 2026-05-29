@@ -29,6 +29,13 @@ interface AskFutureProps {
   placeholder?: string;
   questionsUsed?: number;
   questionsMax?: number | null;
+  /**
+   * "floating" (défaut) = bouton bottom-right qui ouvre un panel modal.
+   * "inline"            = panel toujours ouvert, intégré au flux de la page.
+   */
+  variant?: "floating" | "inline";
+  /** Suggestions cliquables affichées au-dessus du champ en variante inline. */
+  suggestions?: string[];
 }
 
 function moduleIdFromPath(): string | null {
@@ -37,8 +44,19 @@ function moduleIdFromPath(): string | null {
   return match?.[1] ?? null;
 }
 
-export function AskFuture({ communeInsee, communeName, placeholder, questionsUsed = 0, questionsMax = null }: AskFutureProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function AskFuture({
+  communeInsee,
+  communeName,
+  placeholder,
+  questionsUsed = 0,
+  questionsMax = null,
+  variant = "floating",
+  suggestions,
+}: AskFutureProps) {
+  const inline = variant === "inline";
+  // En variante inline, le panel est ouvert par défaut et le bouton trigger
+  // n'est jamais rendu.
+  const [isOpen, setIsOpen] = useState(inline);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -191,8 +209,11 @@ export function AskFuture({ communeInsee, communeName, placeholder, questionsUse
   };
 
   return (
-    <div className="ask-future-container" data-open={isOpen ? "true" : "false"}>
-      {!isOpen && (
+    <div
+      className={`ask-future-container${inline ? " ask-future-container--inline" : ""}`}
+      data-open={isOpen ? "true" : "false"}
+    >
+      {!isOpen && !inline && (
         <button
           type="button"
           onClick={() => setIsOpen(true)}
@@ -220,31 +241,62 @@ export function AskFuture({ communeInsee, communeName, placeholder, questionsUse
       )}
 
       {isOpen && (
-        <div className="ask-panel" role="dialog" aria-label="AskFuture">
-          <div className="ask-header">
-            <div className="ask-header-left">
-              <div className="ask-dot" aria-hidden="true" />
-              <span className="ask-commune">{communeName}</span>
+        <div
+          className={`ask-panel${inline ? " ask-panel--inline" : ""}`}
+          role={inline ? undefined : "dialog"}
+          aria-label="AskFuture"
+        >
+          {!inline && (
+            <div className="ask-header">
+              <div className="ask-header-left">
+                <div className="ask-dot" aria-hidden="true" />
+                <span className="ask-commune">{communeName}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="ask-close"
+                aria-label="Fermer"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path
+                    d="M1 1L13 13M13 1L1 13"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="ask-close"
-              aria-label="Fermer"
-            >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path
-                  d="M1 1L13 13M13 1L1 13"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
-          </div>
+          )}
 
           <div className="ask-messages">
-            {messages.length === 0 && (
+            {messages.length === 0 && inline && (
+              <div className="ask-inline-intro">
+                <h3 className="ask-inline-title">Une question ?</h3>
+                <p className="ask-inline-desc">
+                  Nous avons déjà analysé votre territoire. Posez une question
+                  sur votre logement, vos projets ou les évolutions à venir.
+                </p>
+                {suggestions && suggestions.length > 0 && (
+                  <div className="ask-inline-suggestions">
+                    {suggestions.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        className="ask-inline-suggestion-btn"
+                        onClick={() => void sendMessage(s)}
+                        disabled={loading}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {messages.length === 0 && !inline && (
               <div className="ask-empty">
                 <p className="ask-empty-title">Posez votre question sur {communeName}.</p>
                 <p className="ask-empty-hint">
@@ -330,10 +382,15 @@ export function AskFuture({ communeInsee, communeName, placeholder, questionsUse
           {questionsMax !== null && usedCount >= questionsMax ? (
             <div className="ask-quota-reached">
               <p className="ask-quota-text">
-                Vous avez utilisé vos {questionsMax} questions incluses avec le Rapport.
+                Vous avez utilisé vos {questionsMax} questions incluses avec le Rapport interactif.
               </p>
-              <a href="/checkout/suivi" className="ask-quota-cta">
-                Passer au Suivi pour un accès illimité
+              <a
+                href="https://futur-e.fr/suivi-bientot"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ask-quota-cta"
+              >
+                Être informé du lancement du Suivi
               </a>
             </div>
           ) : (

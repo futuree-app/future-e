@@ -549,7 +549,7 @@ export default async function TerritoireCommunePage({
               marginBottom: 14,
             }}
           >
-            Rapport personnalisé
+            Rapport interactif personnalisé
           </div>
           <p
             style={{

@@ -32,8 +32,8 @@ export default async function DashboardPage() {
             </h1>
             <p className="account-copy account-copy-lead">
               {!hasDashboard
-                ? "Le compte gratuit sert d'abord a sauvegarder le rapport partiel et a maintenir une continuite de lecture. Le dashboard n'est pas tease comme s'il etait deja la."
-                : "Le dashboard payant prolonge le rapport : comparaison de scenarios, lecture par module, details de facteurs et usage recurrent."}
+                ? "Le compte gratuit sert d'abord a sauvegarder le rapport interactif partiel et a maintenir une continuite de lecture. Le dashboard n'est pas tease comme s'il etait deja la."
+                : "Le dashboard payant prolonge le rapport interactif : comparaison de scenarios, lecture par module, details de facteurs et usage recurrent."}
             </p>
           </div>
 
@@ -49,7 +49,7 @@ export default async function DashboardPage() {
             <div className="account-summary-metrics">
               <div className="account-summary-metric">
                 <span className="account-summary-value">{hasFullReport ? "Oui" : "Non"}</span>
-                <span className="account-summary-label">rapport complet</span>
+                <span className="account-summary-label">rapport interactif</span>
               </div>
               <div className="account-summary-metric">
                 <span className="account-summary-value">{isInteractive ? "3" : "1"}</span>
@@ -80,7 +80,7 @@ export default async function DashboardPage() {
                 </div>
                 <p className="account-copy">
                   Le gratuit s&apos;arrete volontairement avant cet espace. Il
-                  garde le rapport partiel sans brouiller la promesse du plan
+                  garde le rapport interactif partiel sans brouiller la promesse du plan
                   payant.
                 </p>
               </div>
@@ -98,7 +98,7 @@ export default async function DashboardPage() {
                   <span className="account-flow-step">Suivi</span>
                   <h3 className="account-flow-title">Dashboard complet</h3>
                   <p className="account-copy">
-                    Scenarios, horizons, details de facteurs, rapport mis a
+                    Scenarios, horizons, details de facteurs, rapport interactif mis a
                     jour et newsletter mensuelle personnalisee.
                   </p>
                 </article>
@@ -117,7 +117,7 @@ export default async function DashboardPage() {
               <div>
                 <p className="gating-label">Avant cela</p>
                 <h2 className="account-section-title-xl">
-                  Votre point d&apos;appui reste le compte gratuit et le rapport
+                  Votre point d&apos;appui reste le compte gratuit et le rapport interactif
                   partiel.
                 </h2>
               </div>
@@ -126,7 +126,7 @@ export default async function DashboardPage() {
                   Retour au compte
                 </Link>
                 <Link className="account-button account-button-secondary" href="/rapport">
-                  Relire le rapport
+                  Relire le rapport interactif
                 </Link>
               </div>
             </section>
@@ -150,7 +150,7 @@ export default async function DashboardPage() {
                   <p className="account-copy">
                     Pas de scenarios multiples, pas de detail des facteurs, pas
                     de pistes d&apos;action. C&apos;est une lecture ponctuelle du
-                    rapport deja achete.
+                    rapport interactif deja achete.
                   </p>
                 </div>
               </section>

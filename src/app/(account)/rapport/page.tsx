@@ -80,7 +80,7 @@ export default async function RapportPage() {
           <div>
             <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-accent mb-5">
               <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
-              {fullReport ? "Rapport complet" : "Rapport partiel"}
+              {fullReport ? "Rapport interactif" : "Rapport interactif partiel"}
             </div>
 
             <>
@@ -98,7 +98,7 @@ export default async function RapportPage() {
                   </Link>
                 ) : (
                   <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-                    Ouvrir le rapport complet
+                    Ouvrir le rapport interactif
                   </Link>
                 )}
                 <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
@@ -121,7 +121,7 @@ export default async function RapportPage() {
               {fullReport ? "Hub des modules" : "Quelques signaux déjà disponibles"}
             </p>
             <h2 className="font-normal text-[22px] leading-[1.2] text-label mb-5 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              {fullReport ? `Rapport complet · ${displayName}` : `${displayName}, ce que les données montrent déjà`}
+              {fullReport ? `Rapport interactif · ${displayName}` : `${displayName}, ce que les données montrent déjà`}
             </h2>
 
             {fullReport ? (
@@ -151,7 +151,7 @@ export default async function RapportPage() {
                   </div>
                 ))}
                 <p className="font-mono text-[11px] text-ghost tracking-[0.04em] leading-[1.6] mt-1 px-3 py-2.5 rounded-lg bg-white/[0.02] border border-white/[0.08]">
-                  Le rapport complet lit ces signaux à travers votre profil. Ce n&apos;est pas la même chose que de lire des données brutes.
+                  Le rapport interactif lit ces signaux à travers votre profil. Ce n&apos;est pas la même chose que de lire des données brutes.
                 </p>
               </div>
             )}
@@ -182,9 +182,9 @@ export default async function RapportPage() {
             <section className="pt-14" id="quartier">
               <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
                 <div>
-                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Hub du rapport</p>
+                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Hub du rapport interactif</p>
                   <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                    Les modules accessibles depuis votre rapport.
+                    Les modules accessibles depuis votre rapport interactif.
                   </h2>
                 </div>
                 <p className="text-[15px] text-muted leading-[1.65]">
@@ -241,13 +241,13 @@ export default async function RapportPage() {
             <section className="pt-2">
               <div className="grid grid-cols-[1fr_320px] gap-10 items-end mb-8">
                 <div>
-                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Le rapport complet</p>
+                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Le rapport interactif</p>
                   <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
                     Ce que les autres modules ajoutent.
                   </h2>
                 </div>
                 <p className="text-[15px] text-muted leading-[1.65]">
-                  Le hub gratuit s&apos;arrête au territoire. Le rapport complet ouvre ensuite le logement, la santé, la mobilité, le métier et les projets.
+                  Le hub gratuit s&apos;arrête au territoire. Le rapport interactif ouvre ensuite le logement, la santé, la mobilité, le métier et les projets.
                 </p>
               </div>
             </section>
@@ -257,12 +257,12 @@ export default async function RapportPage() {
               <div className="absolute top-[-80px] right-[-80px] w-[260px] h-[260px] rounded-full pointer-events-none"
                 style={{ background: "radial-gradient(circle, var(--orange-tint) 0%, transparent 70%)" }} />
               <div>
-                <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">Rapport complet</p>
+                <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">Rapport interactif</p>
                 <h2 className="font-normal text-[clamp(22px,2.4vw,30px)] leading-[1.2] tracking-[-0.5px] text-label mb-3.5" style={{ fontFamily: "'Instrument Serif', serif" }}>
                   Six lectures de votre vie à {displayName}. Sourcées. Sans généralités.
                 </h2>
                 <p className="text-[15px] text-muted leading-[1.7]">
-                  Logement, métier, santé, mobilité, projets : le rapport complet lit chacune de ces dimensions à travers votre profil et les données publiques disponibles pour votre commune.
+                  Logement, métier, santé, mobilité, projets : le rapport interactif lit chacune de ces dimensions à travers votre profil et les données publiques disponibles pour votre commune.
                 </p>
               </div>
               <div className="text-center">
@@ -336,7 +336,7 @@ export default async function RapportPage() {
         {/* Footer nav */}
         <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-white/[0.08]">
           <TrackedUpgradeLink href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-            Ouvrir le rapport complet
+            Ouvrir le rapport interactif
           </TrackedUpgradeLink>
           <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
             Mon compte

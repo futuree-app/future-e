@@ -8,7 +8,7 @@ export default function MerciPage() {
           Merci pour votre confiance.
         </h1>
         <p className="mb-8 text-[var(--fg-3)]">
-          Vous recevrez votre rapport par email dans les prochaines minutes.
+          Vous recevrez votre rapport interactif par email dans les prochaines minutes.
         </p>
         <Link
           href="/dashboard"

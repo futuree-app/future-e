@@ -348,6 +348,70 @@
 }
 .ask-quota-cta:hover { text-decoration: underline; }
 
+/* ── Variante inline ─────────────────────────────────────────────────────── */
+.ask-future-container--inline {
+  position: relative;
+  bottom: auto;
+  right: auto;
+  width: 100%;
+  z-index: auto;
+}
+.ask-panel--inline {
+  width: 100%;
+  max-width: 100%;
+  max-height: none;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 2px solid rgba(200, 184, 154, 0.5);
+  box-shadow: none;
+}
+.ask-inline-intro {
+  padding: 8px 4px 16px;
+}
+.ask-inline-title {
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400;
+  font-size: clamp(24px, 2.4vw, 30px);
+  line-height: 1.2;
+  letter-spacing: -0.4px;
+  color: #e9ecf2;
+  margin: 0 0 10px 0;
+  font-style: italic;
+}
+.ask-inline-desc {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #9ba3b4;
+  margin: 0 0 18px 0;
+}
+.ask-inline-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ask-inline-suggestion-btn {
+  padding: 8px 14px;
+  background: rgba(200, 184, 154, 0.1);
+  border: 1px solid rgba(200, 184, 154, 0.25);
+  border-radius: 100px;
+  font-size: 13px;
+  color: #c8b89a;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.ask-inline-suggestion-btn:hover:not(:disabled) {
+  background: rgba(200, 184, 154, 0.2);
+  border-color: rgba(200, 184, 154, 0.5);
+  color: #e9ecf2;
+}
+.ask-inline-suggestion-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 /* ── Mobile ──────────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
   .ask-future-container {

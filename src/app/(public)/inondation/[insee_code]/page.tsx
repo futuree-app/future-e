@@ -444,7 +444,7 @@ export default async function InondationCommune({
 
         {/* CTA conversion */}
         <div className="cta-block">
-          <div className="cta-eyebrow">Rapport personnalisé</div>
+          <div className="cta-eyebrow">Rapport interactif personnalisé</div>
           <p className="cta-title">
             Approfondissez ce diagnostic{' '}
             <em style={{ fontStyle: 'italic', color: ACCENT }}>pour {communeName}</em>

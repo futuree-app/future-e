@@ -275,7 +275,7 @@ export function DashboardExperience({
       points: [
         "Achat, travaux et confort d'été deviennent liés",
         "Les scénarios changent le niveau de prudence à adopter",
-        "Le rapport complet détaillera les arbitrages concrets",
+        "Le rapport interactif détaillera les arbitrages concrets",
       ],
     },
   ];

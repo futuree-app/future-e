@@ -29,7 +29,7 @@ export default async function ConnexionPage({
     <>
       <section className="auth-story">
         <p className="auth-story-label">Bon retour</p>
-        <h2 className="auth-story-title">Votre rapport vous attend.</h2>
+        <h2 className="auth-story-title">Votre rapport interactif vous attend.</h2>
         <p className="auth-story-copy">
           Vos projections, vos réponses et votre commune sont exactement là où
           vous les avez laissés.

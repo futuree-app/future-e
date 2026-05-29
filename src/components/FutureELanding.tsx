@@ -149,37 +149,37 @@ const STATIC_ANSWERS = {
     verdict: 'À acheter avec les yeux ouverts.',
     detail:
       "La Rochelle présente un risque de submersion en hausse de +31 % en scénario médian 2050 (DRIAS, Géorisques). Les Minimes et Aytré sont en zone PPRi modérée à élevée. Les coûts d'assurance habitation progressent de 8 à 12 % par an sur le littoral charentais (ACPR 2024). L'achat reste viable à condition de choisir le bon quartier, d'étudier la DPE et l'assurabilité future.",
-    cta: 'Voir le rapport complet sur La Rochelle',
+    cta: 'Voir le rapport interactif sur La Rochelle',
   },
   enfants_sante: {
     verdict: 'Trois signaux méritent votre attention.',
     detail:
       "Les sols charentais sont naturellement chargés en cadmium (GisSol/RMQS). L'ANSES a alerté en mars 2026 qu'un Français sur deux est surexposé par son alimentation, dont 36 % des enfants de moins de 3 ans. La saison pollinique s'est allongée de 28 jours en Nouvelle-Aquitaine (RNSA/Copernicus). Les jours de canicule projetés à La Rochelle passent de 5 à 34 par an en 2050 en scénario médian (DRIAS). Rien d'irrémédiable, mais autant le savoir tôt.",
-    cta: 'Voir le module Santé de votre rapport',
+    cta: 'Voir le module Santé de votre rapport interactif',
   },
   mobilite_fragile: {
     verdict: "Bressuire est un territoire où la voiture n'est pas un choix.",
     detail:
       "84 % des actifs résidant dans des communes rurales similaires utilisent la voiture pour aller travailler (INSEE/Ecolab). Les flux domicile-travail sortants dépassent souvent 50 %. L'offre de transport collectif reste limitée et les bornes de recharge publique insuffisantes pour une transition fluide. Cette structure expose directement les budgets des foyers à la volatilité du prix des carburants.",
-    cta: 'Voir le module Mobilité de votre rapport',
+    cta: 'Voir le module Mobilité de votre rapport interactif',
   },
   metier_general: {
     verdict: "Ça dépend du secteur. Certains gagnent, d'autres perdent.",
     detail:
       "Le secteur associatif et de l'ESS sera relativement peu exposé aux risques physiques directs, mais fortement affecté par l'évolution des financements et des priorités. Les métiers liés à l'adaptation climatique (bilan carbone, transition énergétique) sont en forte croissance. Les secteurs à exposition extérieure (BTP, agriculture) sont les plus vulnérables à la chaleur croissante (INRS).",
-    cta: 'Voir le module Métier de votre rapport',
+    cta: 'Voir le module Métier de votre rapport interactif',
   },
   valeur_immo: {
     verdict: "Moins risqué que ce qu'on raconte, mais pas sans condition.",
     detail:
       'Les zones exposées aux risques documentés (PPRi, RGA, submersion) voient déjà leurs prix stagner ou baisser par rapport à des zones similaires sans risque (DVF 2024). Le DPE devient un facteur de valeur majeur : un logement F ou G se négocie en moyenne 6 à 15 % moins cher que son équivalent C (ADEME). À l\'horizon 2030, les obligations de rénovation énergétique rendront certains biens quasi invendables sans travaux.',
-    cta: 'Voir le module Logement de votre rapport',
+    cta: 'Voir le module Logement de votre rapport interactif',
   },
   default: {
     verdict: 'Les données pour cette commune pointent plusieurs signaux.',
     detail:
-      "Un rapport complet croise les données climatiques, sanitaires, immobilières et professionnelles pour votre commune et votre profil spécifique. Ce que futur•e fait, c'est transformer ces données publiques en lecture lisible et personnalisée, pour que vous puissiez décider, pas seulement vous inquiéter.",
-    cta: 'Générer votre rapport complet',
+      "Un rapport interactif croise les données climatiques, sanitaires, immobilières et professionnelles pour votre commune et votre profil spécifique. Ce que futur•e fait, c'est transformer ces données publiques en lecture lisible et personnalisée, pour que vous puissiez décider, pas seulement vous inquiéter.",
+    cta: 'Générer votre rapport interactif',
   },
 };
 
@@ -2511,7 +2511,7 @@ export default function FutureELanding() {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    Créer mon rapport →
+                    Créer mon rapport interactif →
                   </button>
                   <a
                     href="/comparateur"
@@ -2665,7 +2665,7 @@ export default function FutureELanding() {
                           openWizard(ctx);
                         }}
                       >
-                        Générer mon rapport personnalisé →
+                        Générer mon rapport interactif personnalisé →
                       </button>
                       {questionLimitReached && (
                         <Link href="/suivi-bientot" style={{ ...styles.paywallSecondary, marginLeft: 10 }}>
@@ -2759,7 +2759,7 @@ export default function FutureELanding() {
         </div>
       </section>
 
- {/* ── CTA Rapport personnalisé ── */}
+ {/* ── CTA Rapport interactif personnalisé ── */}
       <div style={{ position: 'relative', zIndex: 2, maxWidth: 1100, margin: '0 auto', padding: '0 28px 80px' }}>
         <div style={{
           ...glass({ borderRadius: 20, padding: '48px 52px' }),
@@ -2782,7 +2782,7 @@ export default function FutureELanding() {
               fontSize: 10, letterSpacing: '0.14em',
               textTransform: 'uppercase', color: C.orange, marginBottom: 10,
             }}>
-              Rapport personnalisé
+              Rapport interactif personnalisé
             </div>
             <h2 style={{
               fontFamily: "'Instrument Serif', serif",
@@ -2791,7 +2791,7 @@ export default function FutureELanding() {
               lineHeight: 1.2, letterSpacing: '-0.4px',
               color: C.text, margin: '0 0 10px',
             }}>
-              Votre rapport en 2 minutes.
+              Votre rapport interactif en 2 minutes.
             </h2>
             <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.65, margin: 0 }}>
               Répondez à 6 questions. Obtenez un aperçu personnalisé de vos expositions climatiques — logement, métier, santé, mobilité, projets.
@@ -2810,7 +2810,7 @@ export default function FutureELanding() {
                 border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
               }}
             >
-              Obtenir mon rapport personnalisé
+              Obtenir mon rapport interactif personnalisé
             </button>
             <p style={{
               fontFamily: "'JetBrains Mono', monospace",
@@ -3207,7 +3207,7 @@ export default function FutureELanding() {
               maxWidth: 500,
             }}
           >
-            Un rapport gratuit pour commencer. Un abonnement si vous voulez que
+            Un rapport interactif gratuit pour commencer. Un abonnement si vous voulez que
             le suivi dure.
           </p>
         </div>
@@ -3218,12 +3218,12 @@ export default function FutureELanding() {
             </div>
             <div style={styles.planName}>Découverte</div>
             <div style={styles.planDesc}>
-              Un rapport partiel pour voir ce que futur•e peut faire pour vous.
+              Un rapport interactif partiel pour voir ce que futur•e peut faire pour vous.
             </div>
             <div style={styles.planFeatures}>
               {[
                 'Saisie de commune et profil simplifié',
-                'Rapport partiel (1 module)',
+                'Rapport interactif partiel (1 module)',
                 '3 pages Savoir thématiques',
                 'Lien de partage temporaire 72h',
               ].map((feature) => (
@@ -3261,14 +3261,16 @@ export default function FutureELanding() {
             <div style={styles.planPrice}>
               14<span style={styles.planPriceSub}>€ une fois</span>
             </div>
-            <div style={styles.planName}>Rapport complet</div>
+            <div style={styles.planName}>Rapport interactif</div>
             <div style={styles.planDesc}>
-              Le rapport intégral, téléchargeable, à conserver.
+              Le rapport interactif intégral, téléchargeable, à conserver.
             </div>
             <div style={styles.planFeatures}>
               {[
-                'Rapport complet PDF (6 modules)',
+                '6 modules interactifs personnalisés',
+                'AskFuture — 3 questions incluses',
                 'Dashboard simplifié en lecture seule',
+                'Export PDF, à conserver',
                 'Régénération 1 fois par an',
                 'Les 14 € seront déduits à l\'ouverture du Suivi (prochainement).',
               ].map((feature) => (
@@ -3287,7 +3289,7 @@ export default function FutureELanding() {
               className="plan-btn"
               href="/checkout/rapport-complet"
             >
-              Acheter le rapport — 14 €
+              Acheter le rapport interactif — 14 €
             </Link>
           </div>
 
@@ -3304,7 +3306,7 @@ export default function FutureELanding() {
             </div>
             <div style={styles.planName}>Suivi</div>
             <div style={styles.planDesc}>
-              Le rapport vit avec vous. Les alertes arrivent quand vos données
+              Le rapport interactif vit avec vous. Les alertes arrivent quand vos données
               changent.
             </div>
             <div style={styles.planFeatures}>

@@ -5,7 +5,7 @@ import { SuiviWaitlistForm } from '@/components/SuiviWaitlistForm';
 export const metadata: Metadata = {
   title: 'Suivi · Bientôt disponible — futur•e',
   description:
-    "Le rapport futur•e devient vivant : dashboard interactif, alertes locales et newsletter mensuelle personnalisée. Inscrivez-vous pour être prévenu·e à l'ouverture.",
+    "Le rapport interactif futur•e devient vivant : dashboard interactif, alertes locales et newsletter mensuelle personnalisée. Inscrivez-vous pour être prévenu·e à l'ouverture.",
   robots: { index: false, follow: false },
 };
 
@@ -195,7 +195,7 @@ export default function SuiviBientotPage() {
                   margin: '0 0 36px',
                 }}
               >
-                Le rapport futur•e ne s'arrête pas à un PDF. Avec le Suivi, il devient
+                Le rapport interactif futur•e ne s'arrête pas à un PDF. Avec le Suivi, il devient
                 vivant : un dashboard interactif, des alertes ciblées et une lecture
                 mensuelle écrite pour <em style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--fg-1)' }}>vous</em>,
                 pour vos territoires, pour vos décisions.

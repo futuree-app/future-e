@@ -364,7 +364,7 @@ export default function PourquoiPage() {
             rien qui ne soit vérifiable.
           </p>
           <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.8, margin: '0 0 16px' }}>
-            Le rapport initial donne une lecture de votre situation aujourd&apos;hui. Mais les données évoluent,
+            Le rapport interactif initial donne une lecture de votre situation aujourd&apos;hui. Mais les données évoluent,
             les risques se précisent, votre vie change. C&apos;est pourquoi futur•e propose un suivi mensuel :
             une newsletter personnalisée pour votre commune, des notifications ciblées quand une donnée qui vous
             concerne évolue, et un tableau de bord que vous pouvez consulter à tout moment.
@@ -463,7 +463,7 @@ export default function PourquoiPage() {
                 <rect x="180" y="470" width="360" height="74" rx="10" fill="rgba(251, 146, 60, 0.06)" stroke="rgba(251, 146, 60, 0.4)" strokeWidth="1" />
                 <text x="360" y="491" textAnchor="middle" fill={C.warm} fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="0.12em">04 — Votre lecture personnalisée</text>
                 <text x="360" y="513" textAnchor="middle" fill={C.text} fontFamily="'Instrument Serif', serif" fontSize="13" fontStyle="italic">Une lecture située, sourcée, mensuelle.</text>
-                <text x="360" y="531" textAnchor="middle" fill={C.muted} fontFamily="'Instrument Sans', sans-serif" fontSize="9.5">Rapport initial, suivi continu, mode foyer.</text>
+                <text x="360" y="531" textAnchor="middle" fill={C.muted} fontFamily="'Instrument Sans', sans-serif" fontSize="9.5">Rapport interactif initial, suivi continu, mode foyer.</text>
               </g>
             </svg>
 

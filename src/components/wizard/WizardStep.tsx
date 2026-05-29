@@ -215,7 +215,7 @@ export function WizardStep({
         </h2>
         {config.type === "text" && (
           <p className="max-w-[36rem] text-[15px] leading-[1.7] text-muted">
-            Commencez par votre commune. Le rapport s&apos;adaptera ensuite à votre territoire et à vos priorités.
+            Commencez par votre commune. Le rapport interactif s&apos;adaptera ensuite à votre territoire et à vos priorités.
           </p>
         )}
       </div>

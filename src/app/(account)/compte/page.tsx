@@ -71,8 +71,8 @@ export default async function ComptePage() {
             </h1>
             <p className="text-[17px] leading-[1.72] text-muted mb-8 max-w-[480px]">
               {fullAccess
-                ? "Le rapport complet est ici. Six dimensions, toutes ouvertes. Commencez par le module de votre choix."
-                : "Le rapport partiel est sauvegardé ici, sans limite de temps. Vous pouvez y revenir, le compléter, le partager."}
+                ? "Le rapport interactif est ici. Six dimensions, toutes ouvertes. Commencez par le module de votre choix."
+                : "Le rapport interactif partiel est sauvegardé ici, sans limite de temps. Vous pouvez y revenir, le compléter, le partager."}
             </p>
             <div className="flex gap-2 flex-wrap mb-7">
               <span className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] font-mono text-[11px] text-ghost">
@@ -84,7 +84,7 @@ export default async function ComptePage() {
             </div>
             <div className="flex gap-3 flex-wrap">
               <Link href="/rapport" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-                {fullAccess ? "Voir mes modules" : "Lire mon rapport"}
+                {fullAccess ? "Voir mes modules" : "Lire mon rapport interactif"}
               </Link>
               {!fullAccess && (
                 <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
@@ -114,8 +114,8 @@ export default async function ComptePage() {
             </div>
             <p className="text-[14px] leading-[1.7] text-muted">
               {fullAccess
-                ? "Tous les modules sont accessibles depuis le hub rapport. Futur·e répond à vos questions en tenant compte de votre commune et de votre profil."
-                : "Le compte sauvegarde votre rapport, fournit un lien de partage permanent et peut signaler une mise à jour si les données changent pour votre commune."}
+                ? "Tous les modules sont accessibles depuis le hub rapport interactif. Futur·e répond à vos questions en tenant compte de votre commune et de votre profil."
+                : "Le compte sauvegarde votre rapport interactif, fournit un lien de partage permanent et peut signaler une mise à jour si les données changent pour votre commune."}
             </p>
           </aside>
         </section>
@@ -172,7 +172,7 @@ export default async function ComptePage() {
               </div>
               <div className="grid grid-cols-3 gap-3.5">
                 {[
-                  { accent: "border-t-accent", title: "Rapport sauvegardé sans limite", copy: "Vous retrouvez la synthèse globale et le module Quartier sans repasser par la landing." },
+                  { accent: "border-t-accent", title: "Rapport interactif sauvegardé sans limite", copy: "Vous retrouvez la synthèse globale et le module Quartier sans repasser par la landing." },
                   { accent: "border-t-info", title: "Lien de partage permanent", copy: `Partagez une lecture datée et sourcée${commune ? ` sur ${commune}` : ""}, sans lien qui expire.` },
                   { accent: "border-t-amethyst", title: "Une alerte si les données changent", copy: "Si une donnée significative évolue pour votre commune, le compte gratuit peut en donner le signal." },
                 ].map((k) => (
@@ -189,7 +189,7 @@ export default async function ComptePage() {
                   <div>
                     <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Cinq dimensions fermées</p>
                     <h2 className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                      Ce que le rapport complet lit pour vous.
+                      Ce que le rapport interactif lit pour vous.
                     </h2>
                   </div>
                   <p className="text-[15px] text-muted leading-[1.65]">
@@ -220,7 +220,7 @@ export default async function ComptePage() {
                       {commune ? `Six lectures de votre vie à ${commune}. Sourcées. Personnalisées.` : "Six lectures de votre vie. Sourcées. Personnalisées."}
                     </h2>
                     <p className="text-[15px] text-muted leading-[1.7]">
-                      Le rapport complet ne produit pas un score. Il garde les dimensions distinctes pour que vos arbitrages restent les vôtres.
+                      Le rapport interactif ne produit pas un score. Il garde les dimensions distinctes pour que vos arbitrages restent les vôtres.
                     </p>
                   </div>
                   <div className="text-center">
@@ -244,7 +244,7 @@ export default async function ComptePage() {
         {/* Footer nav */}
         <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-white/[0.08]">
           <Link href="/rapport" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-            Lire mon rapport
+            Lire mon rapport interactif
           </Link>
           {hasDashboard && (
             <Link href="/dashboard" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">

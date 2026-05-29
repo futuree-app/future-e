@@ -18,6 +18,8 @@ Ordre recommandé :
 `02_init_qna.sql` sert à sortir les réponses Q&R de démo du code front.
 `03_init_indicators.sql` crée une couche de données normalisée pour brancher DRIAS puis d'autres sources.
 `05_init_georisques.sql` prépare la normalisation des signaux officiels Géorisques pour Quartier, Logement et Projets.
+`10_add_workbook_quartier.sql` ajoute la colonne `user_profiles.workbook_quartier` (repères de terrain, écriture compat).
+`11_terrain_observations.sql` crée la table dédiée `terrain_observations` (base propre des repères de terrain, RLS par utilisateur, préparation de l'agrégation territoriale future). À lancer après `10`.
 
 Import DRIAS recommandé :
 

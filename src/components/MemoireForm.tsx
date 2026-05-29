@@ -431,7 +431,7 @@ function CommuneBlock({
       <p className="text-[13px] text-muted leading-[1.6]">
         {canEdit
           ? "Modifiez votre commune si vous avez déménagé. Cela recalibrera votre accès aux données territoriales."
-          : "La commune conditionne le fonctionnement de votre rapport. Pour la modifier, passez au Suivi."}
+          : "La commune conditionne le fonctionnement de votre rapport interactif. Pour la modifier, passez au Suivi."}
       </p>
     </div>
   );
