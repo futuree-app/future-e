@@ -16,23 +16,23 @@ const HORIZONS = [
   {
     key: "gwl15" as const,
     year: "2030",
-    sublabel: "demain",
-    gwl: "+2°C",
-    tagline: "2030, c'est demain. Les trajectoires sont déjà engagées.",
+    recommended: false,
+    title: "2030",
+    body: "Les changements sont déjà engagés. Cet horizon montre ce qui commence à se transformer dans votre territoire.",
   },
   {
     key: "gwl20" as const,
     year: "2050",
-    sublabel: "votre vie",
-    gwl: "+2,7°C",
-    tagline: "2050, c'est proche. À peine le temps de prendre des décisions et de voir leurs conséquences. C'est le monde des enfants d'aujourd'hui à l'âge adulte.",
+    recommended: true,
+    title: "2050 · Horizon recommandé",
+    body: "C'est l'horizon le plus utile pour décider aujourd'hui : logement, mobilité, santé, famille, retraite, investissement.",
   },
   {
     key: "gwl30" as const,
     year: "2100",
-    sublabel: "vos petits-enfants",
-    gwl: "+4°C",
-    tagline: "2100, c'est plus proche qu'il n'y paraît. C'est le monde de ceux qui ont dix ans aujourd'hui, une fois vieux. Ce territoire, ils l'hériteront tel que vous le laissez.",
+    recommended: false,
+    title: "2100",
+    body: "Cet horizon montre où la trajectoire pourrait mener à long terme — le monde que les enfants d'aujourd'hui pourraient connaître plus âgés.",
   },
 ] as const;
 
@@ -71,50 +71,102 @@ export default function HorizonBar({ communeName, locked = false, inseeCode, mod
   return (
     <section className="pt-14">
       <div className="flex items-start justify-between gap-8 mb-8 flex-wrap">
-        <div>
-          <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">
+
+        {/* Texte dynamique gauche */}
+        <div style={{ minWidth: 0, flex: "1 1 260px" }}>
+          <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-3">
             Projection climatique · {communeName}
           </p>
           <h2
-            className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label"
-            style={{ fontFamily: "'Instrument Serif', serif" }}
+            className="font-normal leading-[1.18] tracking-[-0.5px] text-label mb-3"
+            style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: "clamp(20px, 2.4vw, 28px)",
+              transition: "opacity 0.2s ease",
+            }}
           >
-            {locked ? "Scénario médian · 2050." : "Choisissez votre horizon."}
+            {locked ? "Scénario médian · 2050." : horizon.title}
           </h2>
+          {!locked && (
+            <p
+              className="text-muted"
+              style={{
+                fontSize: 14,
+                lineHeight: 1.75,
+                maxWidth: 480,
+                margin: 0,
+                transition: "opacity 0.2s ease",
+              }}
+            >
+              {horizon.body}
+            </p>
+          )}
         </div>
 
-        <div className="flex gap-2 shrink-0" style={{ opacity: locked ? 0.45 : 1, pointerEvents: locked ? "none" : "auto" }}>
+        {/* Boutons horizons */}
+        <div className="flex gap-2 shrink-0" style={{ opacity: locked ? 0.45 : 1, pointerEvents: locked ? "none" : "auto", paddingTop: 16 }}>
           {HORIZONS.map((h) => {
             const isActive = effectiveActive === h.key;
             return (
-              <button
-                key={h.key}
-                onClick={() => handleHorizonClick(h.key)}
-                disabled={locked}
-                style={{
-                  background: isActive ? "rgba(200,184,154,0.10)" : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${isActive ? "rgba(200,184,154,0.35)" : "rgba(255,255,255,0.08)"}`,
-                  borderRadius: 12,
-                  padding: "10px 18px",
-                  cursor: locked ? "default" : "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 2,
-                  transition: "all 0.15s",
-                  minWidth: 88,
-                }}
-              >
-                <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: isActive ? "var(--accent, #c8b89a)" : "var(--ghost, #555)" }}>
-                  {h.gwl}
-                </span>
-                <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, fontWeight: 400, letterSpacing: "-0.5px", lineHeight: 1, color: isActive ? "var(--label, #f0ece5)" : "var(--muted, #888)" }}>
-                  {h.year}
-                </span>
-                <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 9, letterSpacing: "0.06em", color: "var(--ghost, #555)" }}>
-                  {h.sublabel}
-                </span>
-              </button>
+              <div key={h.key} style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                {h.recommended && (
+                  <span style={{
+                    position: "absolute",
+                    top: -16,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    fontFamily: "var(--font-mono, monospace)",
+                    fontSize: 7,
+                    letterSpacing: "0.10em",
+                    textTransform: "uppercase",
+                    color: "var(--canvas, #1a1814)",
+                    background: "var(--accent, #c8b89a)",
+                    borderRadius: 4,
+                    padding: "2px 6px",
+                    whiteSpace: "nowrap",
+                  }}>
+                    Recommandé
+                  </span>
+                )}
+                <button
+                  onClick={() => handleHorizonClick(h.key)}
+                  disabled={locked}
+                  style={{
+                    background: isActive ? "rgba(200,184,154,0.10)" : "rgba(255,255,255,0.03)",
+                    border: `1px solid ${isActive ? "rgba(200,184,154,0.35)" : "rgba(255,255,255,0.08)"}`,
+                    borderRadius: 12,
+                    padding: "10px 16px",
+                    cursor: locked ? "default" : "pointer",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 4,
+                    transition: "background 0.15s, border-color 0.15s",
+                    minWidth: 88,
+                  }}
+                >
+                  <span style={{
+                    fontFamily: "'Instrument Serif', serif",
+                    fontSize: 22,
+                    fontWeight: 400,
+                    letterSpacing: "-0.5px",
+                    lineHeight: 1,
+                    color: isActive ? "var(--label, #f0ece5)" : "var(--muted, #888)",
+                    transition: "color 0.15s",
+                  }}>
+                    {h.year}
+                  </span>
+                  <span style={{
+                    fontFamily: "var(--font-mono, monospace)",
+                    fontSize: 9,
+                    letterSpacing: "0.08em",
+                    color: isActive ? "var(--accent, #c8b89a)" : "var(--ghost, #555)",
+                    transition: "color 0.15s",
+                  }}>
+                    {h.key === "gwl15" ? "+2°C" : h.key === "gwl20" ? "+2,7°C" : "+4°C"}
+                  </span>
+                </button>
+              </div>
             );
           })}
         </div>
@@ -137,13 +189,6 @@ export default function HorizonBar({ communeName, locked = false, inseeCode, mod
           </a>
         </div>
       )}
-
-      <p
-        className="text-[16px] leading-[1.8] text-muted max-w-[600px]"
-        style={{ borderLeft: "2px solid rgba(200,184,154,0.30)", paddingLeft: 20 }}
-      >
-        {horizon.tagline}
-      </p>
     </section>
   );
 }
