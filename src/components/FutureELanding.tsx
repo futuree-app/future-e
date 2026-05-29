@@ -2489,16 +2489,17 @@ export default function FutureELanding() {
                   lineHeight: 1.5,
                   margin: 0,
                 }}>
-                  Ces projections ne sont qu'un aperçu de ce qui pourrait changer à {commune}.
+                  Ces projections ne sont qu'un aperçu de ce qui pourrait changer à {commune}. futur·e croise plus de 50 indicateurs - climat, santé, territoire - avec votre profil.
                 </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                  <a
-                    href="/checkout/rapport-complet"
+                <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
+                  <button
+                    type="button"
+                    onClick={() => openWizard('quartier')}
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '9px 14px',
+                      gap: 6,
+                      padding: '8px 12px',
                       borderRadius: 8,
                       background: 'rgba(200,184,154,0.10)',
                       border: '1px solid rgba(200,184,154,0.22)',
@@ -2506,18 +2507,18 @@ export default function FutureELanding() {
                       fontSize: 12,
                       fontWeight: 600,
                       color: '#c8b89a',
-                      textDecoration: 'none',
                       cursor: 'pointer',
+                      whiteSpace: 'nowrap',
                     }}
                   >
-                    Explorer le rapport complet <span>→</span>
-                  </a>
+                    Créer mon rapport →
+                  </button>
                   <a
                     href="/comparateur"
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      padding: '8px 14px',
+                      padding: '8px 12px',
                       borderRadius: 8,
                       background: 'transparent',
                       border: '1px solid rgba(255,255,255,0.07)',
@@ -2527,22 +2528,12 @@ export default function FutureELanding() {
                       color: C.muted,
                       cursor: 'pointer',
                       textDecoration: 'none',
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     Comparer une autre commune
                   </a>
                 </div>
-                <p style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: 9,
-                  letterSpacing: '0.06em',
-                  textTransform: 'uppercase',
-                  color: C.dim,
-                  lineHeight: 1,
-                  margin: 0,
-                }}>
-                  50+ indicateurs climatiques, sanitaires et territoriaux
-                </p>
               </div>
             )}
           </div>

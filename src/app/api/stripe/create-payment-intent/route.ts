@@ -5,19 +5,27 @@ import { getPostHogClient } from "@/lib/posthog-server";
 
 export const runtime = "nodejs";
 
+// Server-side price map — client-provided amounts are never trusted
+const PRODUCT_PRICES: Record<string, { amountEur: number; stripePriceId: string }> = {
+  "one-shot":   { amountEur: 14, stripePriceId: process.env.STRIPE_RAPPORT_PRICE_ID ?? "" },
+  "suivi-solo": { amountEur: 9,  stripePriceId: process.env.STRIPE_SUIVI_PRICE_ID   ?? "" },
+};
+
 export async function POST(request: Request) {
   try {
-    const { amount, productType } = await request.json();
+    const { productType } = await request.json();
 
-    if (
-      typeof amount !== "number" ||
-      !Number.isFinite(amount) ||
-      amount <= 0 ||
-      typeof productType !== "string" ||
-      productType.trim().length === 0
-    ) {
+    if (typeof productType !== "string" || productType.trim().length === 0) {
       return NextResponse.json(
-        { error: "Montant ou produit invalide." },
+        { error: "Produit invalide." },
+        { status: 400 },
+      );
+    }
+
+    const priceConfig = PRODUCT_PRICES[productType.trim()];
+    if (!priceConfig) {
+      return NextResponse.json(
+        { error: "Produit inconnu." },
         { status: 400 },
       );
     }
@@ -29,13 +37,14 @@ export async function POST(request: Request) {
     const stripe = getStripe();
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100),
+      amount: Math.round(priceConfig.amountEur * 100),
       currency: "eur",
       payment_method_types: ["card"],
       metadata: {
         userId: user?.id ?? "anonymous",
         userEmail: user?.email ?? "",
         productType: productType.trim(),
+        stripePriceId: priceConfig.stripePriceId,
       },
     });
 
@@ -45,7 +54,7 @@ export async function POST(request: Request) {
       event: "payment_intent_created",
       properties: {
         product_type: productType.trim(),
-        amount,
+        amount: priceConfig.amountEur,
         currency: "eur",
         user_id: user?.id ?? null,
       },
