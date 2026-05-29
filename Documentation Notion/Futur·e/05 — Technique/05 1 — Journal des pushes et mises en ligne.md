@@ -1068,3 +1068,82 @@ Pour chaque lot poussé :
 
 **Dépendances externes**
 - Aucune — `NORRRq99_yr` (column15) déjà présent dans `public/data_climat.json`
+
+---
+
+### 29/05/2026 — Landing : bloc rapport remonté, wizard → checkout, lien commune Q&R
+
+**Commits**
+- (lot de session — commit unique)
+
+**Pages / modules touchés**
+
+*Bloc "Rapport personnalisé" remonté*
+- `src/components/FutureELanding.tsx` — le bloc CTA "Rapport personnalisé / Votre rapport en 2 minutes." est déplacé avant la section "Pourquoi s'abonner" (était après) : l'appel à l'action produit précède le texte éditorial long
+
+*Wizard → checkout*
+- `src/components/wizard/WizardTeaser.tsx` — le bouton final du wizard "Débloquer mon rapport complet — 14€" pointe désormais vers `/checkout/rapport-complet` (était `/paiement`, page inexistante)
+
+*Lien commune cliquable dans le bloc Q&R*
+- `src/components/FutureELanding.tsx` — dans l'état vide du bloc Q&R (aucune commune saisie), "Saisissez votre commune." devient un bouton cliquable : scrolle vers le champ de saisie en haut du hero et le met en focus ; le champ reçoit l'`id="commune-input"` pour cibler l'action
+
+**Impact visible**
+- Le wizard ne renvoie plus vers une URL cassée
+- L'utilisateur qui arrive sur le Q&R sans commune peut cliquer directement sur le texte pour être ramené au champ de saisie
+
+**Dépendances externes**
+- Aucune
+
+---
+
+### 29/05/2026 — Module Quartier : sécheresse (VigiEau + ONDE), ADEME territoire, fix bug DRIAS columns + régénération JSON
+
+**Commits**
+- (à compléter après commit)
+
+**Pages / modules touchés**
+
+*Phase 0 — hygiène et câblage de données déjà fetchées*
+- `src/components/report/QuartierClimatData.tsx` — retrait de `pm25` (récupéré et ignoré via `void pm25`, angle Santé pas Quartier) ; branchement de `drought` (Hub'Eau ONDE, écoulements terrain) et `territoire` (ADEME communeData) ; carte « Taux de boisement » ajoutée
+- `src/app/(account)/rapport/quartier/page.tsx` — extraction de `drought`, `territoire`, `vigieau` depuis `gatherCommuneEnrichment` et propagation aux composants
+- `src/lib/eaufrance.ts` — fix bug détection assec : `obs.includes("écoul")` matchait à tort « Écoulement visible acceptable » ; remplacé par `obs.includes("assec") || obs.includes("non visible")` (seuls libellés ONDE indiquant un cours d'eau réellement à sec)
+
+*Nouvelle source — VigiEau / Propluvia (arrêtés sécheresse préfectoraux)*
+- `src/lib/vigieau.ts` (nouveau) — `getVigieauSummary(insee)` interroge `api.vigieau.gouv.fr/api/zones?commune=` ; retourne le niveau de gravité le plus élevé en cours sur la commune (vigilance / alerte / alerte renforcée / crise / aucune restriction) + nom du bassin et période de validité. Couverture 100% France. Cache `next: { revalidate: 3600 }` + cache mémoire par commune. Fallback `{ maxLevel: null, zones: [] }` en cas d'échec API
+- `src/lib/commune-enrichment.ts` — `gatherCommuneEnrichment` ajoute `vigieau` à `EnrichmentResult` ; fetché en parallèle des autres sources
+- `src/components/report/QuartierClimatData.tsx` — carte « Restrictions sécheresse » (couleur calée sur le niveau : vert / orange / rouge selon gravité) ; paragraphe narratif sécheresse unifié en arc temporel à 3 signaux : présent administratif (VigiEau) + présent observation terrain (ONDE si commune avec station rurale) + futur modélisé (DRIAS SWI04, horizon courant)
+
+*Bug correction — mapping de colonnes DRIAS faux dans l'app entière*
+- `scripts/build-drias-median.js` — sélectionne désormais le fichier source ayant le **plus d'indicateurs** comme référence d'ordonnancement canonique (au lieu du premier alphabétique) ; ajoute la couverture par indicateur dans les métadonnées (`indicator_coverage_by_models`) ; conserve `canonical_source_file` et `indicator_order` pour traçabilité
+- `public/data_climat.json` — régénéré : 35 006 communes × 3 scénarios × 30 indicateurs (au lieu de 28). Les 28 indicateurs standards sont couverts par 17/17 modèles, NORIFM40_yr et AIFM40_yr par 10/17 modèles (les modèles WRF381P, ALADIN63_HadGEM2, HIRHAM5, HadREM3-GA7, RegCM4-6_MPI-ESM ne fournissent pas l'indicateur feu)
+- `data/drias_median_metadata.json` — régénéré avec les nouveaux champs
+- `src/lib/drias-json.ts` — COLUMN_MAP corrigé : `NORRRq99_yr` passe de column15 → column14 (était décalé), `NORRx1d_yr` de column16 → column15, ajout de `NORRRq99refD_yr: column16`, `NORIFM40_yr: column17` (rétabli, était indisponible), `NORSWI04_yr: column18` (correct par hasard mais valeur était fausse)
+
+**Impact visible**
+
+*Module Quartier (`/rapport/quartier`)*
+- Aside passe de 6 à 9 cartes : ajout de « Restrictions sécheresse » (VigiEau), « Sécheresse des sols » (DRIAS SWI04 vraies données), « Taux de boisement » (ADEME). Layout 4+4+1 temporaire en `grid-cols-4` jusqu'à intégration des prochains indicateurs (P1 GASPAR, P4 BDIFF, P8 INSEE équipements) qui combleront pour 12 cartes (3 × 4)
+- Paragraphe sécheresse unifié : pour La Rochelle 2050 par exemple, lit désormais « La Rochelle est actuellement en vigilance sécheresse sur le bassin du Curé - Sèvre Niortaise jusqu'au 31 octobre 2026 (VigiEau, Propluvia). À l'horizon 2050, le sol de la commune serait sec environ 145 jours par an (DRIAS, indice SWI < 0,4). »
+- Carte « Conditions météo favorables au feu » : valeur corrigée. Avant le bug DRIAS, elle affichait en réalité la sécheresse des sols sous un label feu (ex : 150 j/an annoncés comme feu pour La Rochelle GWL30, en fait du SWI04). Désormais : ~9-10 j/an, cohérent avec la côte atlantique humide
+
+*Cascades positives ailleurs (le bug DRIAS faussait silencieusement plusieurs pages)*
+- `src/app/(public)/comparateur/page.tsx` — la colonne « jours risque feu » retrouve la vraie donnée NORIFM40_yr
+- `src/app/(public)/inondation/[insee_code]/page.tsx` et `villes-les-plus-exposees/page.tsx` — les scores NORRRq99_yr / NORRx1d_yr étaient calculés avec des colonnes décalées d'un cran : ils étaient faux, désormais corrects
+- `src/components/FutureELanding.tsx` — narratives feux et précipitations extrêmes retrouvent leurs vraies valeurs
+- `src/app/api/ask/route.ts` — Q&R peut citer les jours risque feu avec la bonne valeur
+
+**Validation croisée**
+- Commune test au hasard : Radepont (27487, Eure). Valeurs JSON GWL15 / GWL20 / GWL30 recalculées indépendamment depuis les 17 fichiers source bruts : médianes identiques à la décimale pour NORTX30D_yr (7,7 / 11,9 / 18,2), NORIFM40_yr sur 10 modèles (2 / 4 / 7,5), NORSWI04_yr sur 17 modèles (128 / 136 / 148). Validation OK
+- Commune test La Rochelle (17300) GWL30 : NORIFM40_yr = 9,5 j/an (plausible côte atlantique), NORSWI04_yr = 150 j/an (plausible)
+
+**Dépendances externes**
+- **VigiEau API** (`api.vigieau.gouv.fr/api`) : licence publique, sans clé, sans rate-limit annoncé. Si l'API tombe, fallback silencieux `maxLevel: null` (carte affiche « Aucune restriction » en vert), pas de crash
+- Aucune migration Supabase, aucune nouvelle variable d'env
+
+**Ce qui manque ensuite (Phase 1 du plan d'action)**
+- Synthèse Claude streamée par défaut sur les modules Quartier et Logement (sortir l'IA de derrière le bouton, AI SDK 6 `streamText` via Vercel AI Gateway)
+- Croisement DPE × climat dans Logement
+- Coûts rénovation ADEME + carte RGE à proximité dans Logement (libs `renovation.ts` et `rge.ts` déjà présentes, jamais affichées)
+- Intégration des sources Couche 2 prioritaires : P1 GASPAR (CatNat historiques), P4 BDIFF (incendies historiques), P11 zonage H1/H2/H3, P8 équipements INSEE
+- La carte « Conditions feu » repose sur 10/17 modèles seulement (les modèles WRF, ALADIN_HadGEM2, HIRHAM5, HadREM3-GA7, RegCM4-6_MPI-ESM ne publient pas NORIFM40_yr). La médiane reste valide mais moins robuste que les autres indicateurs — à noter si on étend l'usage de cet indicateur
+- Documentation produit : `SOURCES_MODULES_MATRIX.md` créé à la racine, en complément de `DATA_SOURCES.md` (branchement technique vs branchement éditorial)

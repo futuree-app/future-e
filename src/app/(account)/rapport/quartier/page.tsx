@@ -32,7 +32,9 @@ export default async function RapportQuartierPage() {
   ]);
 
   const scenarios = enrichment?.drias?.commune.s ?? null;
-  const pm25 = enrichment?.ademe?.commune.qualite_air.pm25 ?? null;
+  const drought = enrichment?.eau?.drought ?? null;
+  const territoire = enrichment?.ademe?.commune.territoire ?? null;
+  const vigieau = enrichment?.vigieau ?? null;
   const displayName = communeName ?? "votre commune";
 
   return (
@@ -75,7 +77,7 @@ export default async function RapportQuartierPage() {
           )}
         </section>
 
-        <QuartierAside communeName={displayName} scenarios={scenarios} pm25={pm25} georisques={georisques} />
+        <QuartierAside communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} />
 
         <div className="flex gap-3 flex-wrap mt-6">
           <a href="/rapport" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/[0.05] text-muted text-[13px] no-underline border border-white/[0.08]">
@@ -94,7 +96,7 @@ export default async function RapportQuartierPage() {
           </div>
 
           <div className="grid grid-cols-[1fr_320px] gap-6 mb-8">
-            <QuartierDataBody communeName={displayName} scenarios={scenarios} pm25={pm25} georisques={georisques} />
+            <QuartierDataBody communeName={displayName} scenarios={scenarios} georisques={georisques} drought={drought} territoire={territoire} vigieau={vigieau} />
 
             <div className="flex flex-col gap-3.5">
               {!fullReport && (

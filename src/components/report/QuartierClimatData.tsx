@@ -2,18 +2,52 @@
 
 import { useHorizon, HORIZON_META } from "@/hooks/useHorizon";
 import type { GeorisquesSummary } from "@/lib/georisques";
+import type { EaufranceSummary } from "@/lib/eaufrance";
+import type { VigieauSummary, DroughtLevel } from "@/lib/vigieau";
+
+// Libellé FR d'un niveau VigiEau. Dupliqué ici (et non importé depuis lib/vigieau)
+// car ce composant est client et vigieau.ts est server-only.
+function levelLabel(level: DroughtLevel | "pas_de_restrictions" | null | undefined): string {
+  switch (level) {
+    case "crise": return "Crise";
+    case "alerte_renforcee": return "Alerte renforcée";
+    case "alerte": return "Alerte";
+    case "vigilance": return "Vigilance";
+    default: return "Aucune restriction";
+  }
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type GwlScenarios = Record<string, { h: string; v: Record<string, number> }>;
 type Factor = { label: string; val: string; col: string; src: string; missing: boolean };
 
+type Drought = NonNullable<EaufranceSummary["drought"]>;
+type Territoire = {
+  densite: number | null;
+  incendies: number | null;
+  taux_boisement: number | null;
+};
+
 type SharedProps = {
   communeName: string;
   scenarios: GwlScenarios | null;
-  pm25: number | null;
   georisques: GeorisquesSummary | null;
+  drought: Drought | null;
+  territoire: Territoire | null;
+  vigieau: VigieauSummary | null;
 };
+
+// Couleurs par niveau VigiEau, calées sur la palette glassmorphism du produit.
+function vigieauColor(level: VigieauSummary["maxLevel"] | "pas_de_restrictions" | null): string {
+  switch (level) {
+    case "crise": return "var(--red)";
+    case "alerte_renforcee": return "var(--red)";
+    case "alerte": return "var(--orange)";
+    case "vigilance": return "var(--orange)";
+    default: return "var(--green)";
+  }
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -21,12 +55,32 @@ function r(v: number | undefined | null) {
   return v != null ? Math.round(v) : null;
 }
 
-function buildFactors(gwlData: Record<string, number> | null | undefined, pm25: number | null | undefined, horizonKey: string, georisques: GeorisquesSummary | null): Factor[] {
+function buildFactors(
+  gwlData: Record<string, number> | null | undefined,
+  horizonKey: string,
+  georisques: GeorisquesSummary | null,
+  vigieau: VigieauSummary | null,
+  territoire: Territoire | null,
+): Factor[] {
   const meta = HORIZON_META[horizonKey as keyof typeof HORIZON_META] ?? HORIZON_META.gwl20;
   const heatDays = r(gwlData?.["NORTX35D_yr"]);
   const hotDays = r(gwlData?.["NORTX30D_yr"]);
   const tropicalNights = r(gwlData?.["NORTR_yr"]);
   const fireDays = r(gwlData?.["NORIFM40_yr"]);
+  const drySoilDays = r(gwlData?.["NORSWI04_yr"]);
+
+  // VigiEau : couverture 100% France. La carte affiche le niveau le plus élevé
+  // actuel, et reste lisible quand "Aucune restriction" (en vert calme).
+  const vigieauLevel = vigieau?.maxLevel ?? null;
+  const vigieauVal = levelLabel(vigieauLevel);
+  const vigieauSrc = vigieau?.topZone?.label
+    ? `VigiEau / Propluvia · ${vigieau.topZone.label}`
+    : "VigiEau / Propluvia · arrêté préfectoral";
+  const vigieauMissing = vigieau == null;
+
+  const boisementPct = territoire?.taux_boisement != null
+    ? Math.round(territoire.taux_boisement)
+    : null;
 
   return [
     {
@@ -58,6 +112,20 @@ function buildFactors(gwlData: Record<string, number> | null | undefined, pm25: 
       missing: fireDays == null,
     },
     {
+      label: "Sécheresse des sols",
+      val: drySoilDays != null ? `${drySoilDays} jours/an en ${meta.year}` : "—",
+      col: "var(--orange)",
+      src: `DRIAS · indice SWI < 0,4 · France ${meta.france}`,
+      missing: drySoilDays == null,
+    },
+    {
+      label: "Restrictions sécheresse",
+      val: vigieauVal,
+      col: vigieauColor(vigieauLevel),
+      src: vigieauSrc,
+      missing: vigieauMissing,
+    },
+    {
       label: "Inondation fluviale",
       val: georisques ? (georisques.flags.flood ? "Zone exposée recensée" : "Aucun périmètre recensé") : "—",
       col: "var(--blue)",
@@ -71,17 +139,30 @@ function buildFactors(gwlData: Record<string, number> | null | undefined, pm25: 
       src: "Géorisques · échelle communale",
       missing: !georisques?.flags.marineSubmersion,
     },
+    {
+      label: "Taux de boisement",
+      val: boisementPct != null ? `${boisementPct}%` : "—",
+      col: "var(--green)",
+      src: "ADEME · données communales",
+      missing: boisementPct == null,
+    },
   ];
 }
 
-function buildParagraphs(communeName: string, gwlData: Record<string, number> | null | undefined, pm25: number | null | undefined, horizonKey: string, georisques: GeorisquesSummary | null): string[] {
+function buildParagraphs(
+  communeName: string,
+  gwlData: Record<string, number> | null | undefined,
+  horizonKey: string,
+  georisques: GeorisquesSummary | null,
+  drought: Drought | null,
+  vigieau: VigieauSummary | null,
+): string[] {
   const meta = HORIZON_META[horizonKey as keyof typeof HORIZON_META] ?? HORIZON_META.gwl20;
   const heatDays = r(gwlData?.["NORTX35D_yr"]);
   const hotDays = r(gwlData?.["NORTX30D_yr"]);
   const tropicalNights = r(gwlData?.["NORTR_yr"]);
   const fireDays = r(gwlData?.["NORIFM40_yr"]);
-
-  void pm25;
+  const drySoilDays = r(gwlData?.["NORSWI04_yr"]);
 
   const paragraphs: string[] = [];
 
@@ -119,16 +200,59 @@ function buildParagraphs(communeName: string, gwlData: Record<string, number> | 
     }
   }
 
+  // Sécheresse : arc temporel à 3 signaux quand ils sont disponibles.
+  //   VigiEau     → présent administratif (100% France)
+  //   ONDE        → présent observation terrain (rural seulement)
+  //   DRIAS SWI04 → futur modélisé (100% France, dépend de l'horizon)
+  const droughtSentences: string[] = [];
+
+  if (vigieau?.maxLevel) {
+    const niveau = levelLabel(vigieau.maxLevel).toLowerCase();
+    const bassin = vigieau.topZone?.label ? ` sur le bassin ${vigieau.topZone.label}` : "";
+    const fin = vigieau.topZone?.endDate
+      ? ` jusqu'au ${formatFrDate(vigieau.topZone.endDate)}`
+      : "";
+    droughtSentences.push(
+      `${communeName} est actuellement en ${niveau} sécheresse${bassin}${fin}, selon l'arrêté préfectoral en vigueur (VigiEau, Propluvia).`,
+    );
+  }
+
+  if (drought?.isDry) {
+    const cours = drought.riverName ? `le ${drought.riverName}` : "le cours d'eau local";
+    const lead = droughtSentences.length === 0
+      ? `${cours.charAt(0).toUpperCase()}${cours.slice(1)} a été observé`
+      : `Localement, ${cours} a été observé`;
+    droughtSentences.push(
+      `${lead} à sec dans une observation récente du réseau ONDE (Hub'Eau, OFB).`,
+    );
+  }
+
+  if (drySoilDays != null) {
+    droughtSentences.push(
+      `À l'horizon ${meta.year}, le sol de la commune serait sec environ ${drySoilDays} jours par an dans le scénario France ${meta.france} (DRIAS, indice SWI < 0,4).`,
+    );
+  }
+
+  if (droughtSentences.length > 0) {
+    paragraphs.push(droughtSentences.join(" "));
+  }
+
   return paragraphs;
+}
+
+function formatFrDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 }
 
 // ─── FactorGrid (grille horizontale de cartes) ────────────────────────────────
 
-export function QuartierAside({ communeName, scenarios, pm25, georisques }: SharedProps) {
+export function QuartierAside({ communeName, scenarios, georisques, territoire, vigieau }: Omit<SharedProps, "drought">) {
   const [horizon] = useHorizon();
   const meta = HORIZON_META[horizon];
   const gwlData = scenarios?.[horizon]?.v ?? null;
-  const factors = buildFactors(gwlData, pm25, horizon, georisques);
+  const factors = buildFactors(gwlData, horizon, georisques, vigieau, territoire);
 
   return (
     <div>
@@ -157,7 +281,7 @@ export function QuartierAside({ communeName, scenarios, pm25, georisques }: Shar
 
 // ─── SectionTitle (titre dynamique horizon-aware) ─────────────────────────────
 
-export function QuartierSectionTitle({ communeName, scenarios, georisques }: Omit<SharedProps, "pm25">) {
+export function QuartierSectionTitle({ communeName, scenarios, georisques }: Pick<SharedProps, "communeName" | "scenarios" | "georisques">) {
   const [horizon] = useHorizon();
   const meta = HORIZON_META[horizon];
   const gwlData = scenarios?.[horizon]?.v ?? null;
@@ -194,12 +318,12 @@ export function QuartierSectionTitle({ communeName, scenarios, georisques }: Omi
 
 // ─── DataBody (bloc principal de données) ─────────────────────────────────────
 
-export function QuartierDataBody({ communeName, scenarios, pm25, georisques }: SharedProps) {
+export function QuartierDataBody({ communeName, scenarios, georisques, drought, territoire, vigieau }: SharedProps) {
   const [horizon] = useHorizon();
   const meta = HORIZON_META[horizon];
   const gwlData = scenarios?.[horizon]?.v ?? null;
-  const factors = buildFactors(gwlData, pm25, horizon, georisques);
-  const paragraphs = communeName ? buildParagraphs(communeName, gwlData, pm25, horizon, georisques) : [];
+  const factors = buildFactors(gwlData, horizon, georisques, vigieau, territoire);
+  const paragraphs = communeName ? buildParagraphs(communeName, gwlData, horizon, georisques, drought, vigieau) : [];
 
   return (
     <div className="glass rounded-xl p-8 border-t-2 border-t-info">

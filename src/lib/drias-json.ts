@@ -2,22 +2,36 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { DRIAS_CITY_FALLBACK } from "@/lib/communes";
 
-// Mapping des colonnes techniques vers nos indicateurs métier
+// Mapping des colonnes techniques vers nos indicateurs métier.
+//
+// L'ordre reflète celui du fichier de référence sélectionné par
+// scripts/build-drias-median.js : le fichier source ayant le plus d'indicateurs
+// (typiquement 30 sur le standard DRIAS-TRACC). Les indicateurs partiellement
+// couverts (NORIFM40_yr et AIFM40_yr, fournis par 10 modèles sur 17) sont
+// agrégés sur les modèles qui les fournissent — voir
+// data/drias_median_metadata.json pour la couverture exacte.
+//
+// Les valeurs sont les médianes des modèles climatiques DRIAS-TRACC pour chaque
+// commune × scénario (gwl15 = +1.5°C / 2030, gwl20 = +2°C / 2050,
+// gwl30 = +3°C / 2100).
 const COLUMN_MAP: Record<string, string> = {
-  NORTMm_yr:       "column04", // Annual mean temperature (°C)
-  NORTMm_seas_JJA: "column05", // Summer mean temperature (°C)
-  NORTMm_seas_DJF: "column06", // Winter mean temperature (°C)
-  NORTXm_seas_JJA: "column07", // Summer mean max temperature (°C)
-  NORTX35D_yr:     "column08", // Days with Tmax > 35°C per year
-  NORTX30D_yr:     "column09", // Days with Tmax > 30°C per year
-  NORTR_yr:        "column10", // Tropical nights (Tmin > 20°C) per year
-  NORRR_yr:        "column11", // Annual precipitation (mm)
-  NORRR_seas_JJA:  "column12", // Summer precipitation (mm)
-  NORRR_seas_DJF:  "column13", // Winter precipitation (mm)
-  NORRRq99_yr:     "column15", // Heavy precipitation percentile (p99)
-  NORRx1d_yr:      "column16", // Maximum 1-day precipitation
-  NORIFM40_yr:     "column17", // Fire weather index days > 40
-  NORSWI04_yr:     "column18", // Soil dryness days (SWI < 0.4)
+  NORTMm_yr:        "column04", // Annual mean temperature (°C)
+  NORTMm_seas_JJA:  "column05", // Summer mean temperature (°C)
+  NORTMm_seas_DJF:  "column06", // Winter mean temperature (°C)
+  NORTXm_seas_JJA:  "column07", // Summer mean max temperature (°C)
+  NORTX35D_yr:      "column08", // Days with Tmax > 35°C per year
+  NORTX30D_yr:      "column09", // Days with Tmax > 30°C per year
+  NORTR_yr:         "column10", // Tropical nights (Tmin > 20°C) per year
+  NORRR_yr:         "column11", // Annual precipitation (mm)
+  NORRR_seas_JJA:   "column12", // Summer precipitation (mm)
+  NORRR_seas_DJF:   "column13", // Winter precipitation (mm)
+  NORRRq99_yr:      "column14", // Heavy precipitation percentile (p99) (mm)
+  NORRx1d_yr:       "column15", // Maximum 1-day precipitation (mm)
+  NORRRq99refD_yr:  "column16", // Heavy precip days frequency (days/yr)
+  NORIFM40_yr:      "column17", // Fire weather index days > 40 (days/yr) — 10 models
+  NORSWI04_yr:      "column18", // Soil dryness days (SWI < 0.4) (days/yr)
+  // column19 et suivants = indicateurs d'anomalie (ATMm_yr, etc.) — non utilisés
+  // en UI à ce stade.
 };
 
 type RawRow = Record<string, string | number | null>;

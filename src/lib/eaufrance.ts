@@ -141,7 +141,11 @@ async function loadDrought(inseeCode: string) {
 
   const latest = records[0];
   const obs = latest.libelle_observation?.toLowerCase() ?? "";
-  const isDry = obs.includes("assec") || obs.includes("sec") || obs.includes("écoul");
+  // ONDE renvoie des libellés normalisés : "Écoulement visible acceptable",
+  // "Écoulement visible faible", "Écoulement non visible", "Assec",
+  // "Observation impossible". Seuls "Assec" et "Écoulement non visible"
+  // signalent un cours d'eau effectivement à sec.
+  const isDry = obs.includes("assec") || obs.includes("non visible");
 
   return {
     lastObservationDate: latest.date_observation ?? null,

@@ -236,15 +236,54 @@ async function main() {
     }
   }
 
-  const referenceRows = Array.from(parsedFiles[0].records.values());
+  // Référence d'ordonnancement canonique : on prend le fichier qui couvre le
+  // PLUS d'indicateurs (typiquement 30 sur le standard DRIAS-TRACC). Le premier
+  // alphabétique (utilisé dans la version précédente) ne couvrait que 28
+  // indicateurs sur 30 : NORIFM40_yr et AIFM40_yr étaient perdus, et toutes
+  // les colonnes après position 13 étaient décalées d'un cran dans le JSON.
+  let canonicalSource = parsedFiles[0];
+  let canonicalCount = 0;
+  for (const parsed of parsedFiles) {
+    const sample = parsed.records.values().next().value;
+    const count = Object.keys(sample).filter(
+      (key) => !["Point", "Latitude", "Longitude", "Niveau"].includes(key),
+    ).length;
+    if (count > canonicalCount) {
+      canonicalCount = count;
+      canonicalSource = parsed;
+    }
+  }
+
+  const referenceRows = Array.from(canonicalSource.records.values());
   const enrichedCommunes = buildNearestPointIndex(communes, referenceRows);
   const indicatorKeys = Object.keys(referenceRows[0]).filter(
     (key) => !["Point", "Latitude", "Longitude", "Niveau"].includes(key),
   );
 
+  // Couverture par indicateur : combien de modèles fournissent cet indicateur.
+  // Utile pour transparence (NORIFM40_yr typiquement couvert par ~10 modèles,
+  // les autres par les 17).
+  const indicatorCoverage = Object.fromEntries(indicatorKeys.map((k) => [k, 0]));
+  for (const parsed of parsedFiles) {
+    const sample = parsed.records.values().next().value;
+    const sampleKeys = new Set(Object.keys(sample));
+    for (const key of indicatorKeys) {
+      if (sampleKeys.has(key)) indicatorCoverage[key] += 1;
+    }
+  }
+  // /3 car chaque modèle a 3 scénarios = 3 fichiers comptés au-dessus.
+  for (const key of indicatorKeys) {
+    indicatorCoverage[key] = indicatorCoverage[key] / scenarios.length;
+  }
+
   console.log(
     `Loaded ${models.length} models, ${enrichedCommunes.length} communes, ${indicatorKeys.length} indicators.`,
   );
+  console.log(`Canonical source: ${canonicalSource.file} (${indicatorKeys.length} indicators).`);
+  console.log(`Indicator coverage (models providing each):`);
+  for (const key of indicatorKeys) {
+    console.log(`  ${key}: ${indicatorCoverage[key]}/${models.length} models`);
+  }
 
   const outputRows = [];
 
@@ -273,6 +312,8 @@ async function main() {
       outputRow.column02 = toFixedNumber(commune.longitude, 4);
       outputRow.column03 = scenario.toUpperCase();
 
+      // Pour chaque indicateur canonique, médiane des modèles qui le fournissent.
+      // Les modèles n'ayant pas l'indicateur retournent undefined et sont filtrés.
       indicatorKeys.forEach((indicatorKey, index) => {
         const values = modelRows
           .map((row) => row[indicatorKey])
@@ -297,6 +338,9 @@ async function main() {
     scenario_count: scenarios.length,
     model_count: models.length,
     indicator_count: indicatorKeys.length,
+    canonical_source_file: canonicalSource.file,
+    indicator_order: indicatorKeys,
+    indicator_coverage_by_models: indicatorCoverage,
     models,
     scenarios,
   };
