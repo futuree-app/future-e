@@ -106,6 +106,20 @@ export function AskFuture({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
+  // Pré-remplissage depuis une carte-indicateur (drawer MetricDrawer → AskFuture
+  // inline). Découplé via événement window, pas de prop drilling.
+  useEffect(() => {
+    if (!inline) return;
+    const handler = (e: Event) => {
+      const prefill = (e as CustomEvent<{ prefill?: string }>).detail?.prefill;
+      if (typeof prefill === "string" && prefill) setInput(prefill);
+      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      inputRef.current?.focus();
+    };
+    window.addEventListener("futuree:ask", handler as EventListener);
+    return () => window.removeEventListener("futuree:ask", handler as EventListener);
+  }, [inline]);
+
   const sendMessage = useCallback(
     async (userMessage: string) => {
       const trimmed = userMessage.trim();

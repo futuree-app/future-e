@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useHorizon, HORIZON_META } from "@/hooks/useHorizon";
+import { MetricDrawer, type CardDetail } from "@/components/MetricDrawer";
 import type { GeorisquesSummary, GasparCatnatSummary } from "@/lib/georisques";
 import type { EaufranceSummary } from "@/lib/eaufrance";
 import type { VigieauSummary, DroughtLevel } from "@/lib/vigieau";
@@ -20,7 +22,7 @@ function levelLabel(level: DroughtLevel | "pas_de_restrictions" | null | undefin
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type GwlScenarios = Record<string, { h: string; v: Record<string, number> }>;
-type Factor = { label: string; val: string; col: string; src: string; missing: boolean };
+type Factor = { label: string; val: string; col: string; src: string; missing: boolean; detail?: CardDetail };
 
 type Drought = NonNullable<EaufranceSummary["drought"]>;
 type Territoire = {
@@ -126,16 +128,34 @@ function buildFactors(
   // (QuartierAside). Histoire vécue : nombre de reconnaissances depuis l'origine.
   if (catnat !== undefined) {
     const hasCatnat = !!catnat && catnat.total > 0;
+    const headline = hasCatnat
+      ? `${catnat!.total} arrêté${catnat!.total > 1 ? "s" : ""}${catnat!.firstYear ? ` depuis ${catnat!.firstYear}` : ""}`
+      : "—";
+    const detail: CardDetail | undefined = hasCatnat
+      ? {
+          eyebrow: "Histoire du territoire",
+          title: "Catastrophes naturelles reconnues",
+          headline,
+          subhead: catnat!.summary ?? undefined,
+          accent: "var(--blue)",
+          breakdown: catnat!.byRisk.map((rk) => ({ label: rk.label, value: String(rk.count) })),
+          facts: [
+            ...(catnat!.firstYear ? [{ label: "Première reconnaissance", value: String(catnat!.firstYear) }] : []),
+            ...(catnat!.lastYear ? [{ label: "Dernière reconnaissance", value: String(catnat!.lastYear) }] : []),
+          ],
+          why: "Les arrêtés de catastrophe naturelle racontent l'histoire vécue du territoire : ils montrent quels aléas ont déjà marqué la commune, et à quelle fréquence.",
+          askPrefill: "Que racontent les arrêtés de catastrophe naturelle de ma commune ?",
+        }
+      : undefined;
     factors.push({
       label: "Catastrophes naturelles reconnues",
-      val: hasCatnat
-        ? `${catnat!.total} arrêté${catnat!.total > 1 ? "s" : ""}${catnat!.firstYear ? ` depuis ${catnat!.firstYear}` : ""}`
-        : "—",
+      val: headline,
       col: "var(--blue)",
       src: hasCatnat && catnat!.topRisk
         ? `Géorisques · GASPAR · surtout ${catnat!.topRisk.toLowerCase()}`
         : "Géorisques · GASPAR · arrêtés CatNat",
       missing: !hasCatnat,
+      detail,
     });
   }
 
@@ -243,27 +263,58 @@ function formatFrDate(iso: string): string {
 
 export function QuartierAside({ communeName: _communeName, scenarios, georisques, territoire, catnat }: Omit<SharedProps, "drought" | "vigieau">) {
   const [horizon] = useHorizon();
+  const [openDetail, setOpenDetail] = useState<CardDetail | null>(null);
   const gwlData = scenarios?.[horizon]?.v ?? null;
   const factors = buildFactors(gwlData, horizon, georisques, territoire, catnat ?? null);
 
   return (
     <div>
       <div className="grid grid-cols-4 gap-2.5">
-        {factors.map((f) => (
-          <div
-            key={f.label}
-            className="glass rounded-xl px-4 py-3.5"
-            style={{
-              borderTop: `2px solid ${f.missing ? "var(--ghost)" : f.col}`,
-              opacity: f.missing ? 0.45 : 1,
-            }}
-          >
-            <div className="text-[12px] font-medium text-label mb-2 leading-[1.3]">{f.label}</div>
-            <div className="font-mono text-[11px] tracking-[0.02em] mb-0.5" style={{ color: f.missing ? "var(--ghost)" : f.col }}>{f.val}</div>
-            <div className="font-mono text-[10px] text-ghost tracking-[0.02em] leading-[1.4]">{f.src}</div>
-          </div>
-        ))}
+        {factors.map((f) => {
+          const clickable = !!f.detail;
+          return (
+            <div
+              key={f.label}
+              className={`glass rounded-xl px-4 py-3.5${clickable ? " metric-card-clickable" : ""}`}
+              style={{
+                borderTop: `2px solid ${f.missing ? "var(--ghost)" : f.col}`,
+                opacity: f.missing ? 0.45 : 1,
+                cursor: clickable ? "pointer" : undefined,
+              }}
+              role={clickable ? "button" : undefined}
+              tabIndex={clickable ? 0 : undefined}
+              onClick={clickable ? () => setOpenDetail(f.detail!) : undefined}
+              onKeyDown={
+                clickable
+                  ? (e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setOpenDetail(f.detail!);
+                      }
+                    }
+                  : undefined
+              }
+            >
+              <div className="text-[12px] font-medium text-label mb-2 leading-[1.3]">{f.label}</div>
+              <div className="font-mono text-[11px] tracking-[0.02em] mb-0.5" style={{ color: f.missing ? "var(--ghost)" : f.col }}>{f.val}</div>
+              <div className="font-mono text-[10px] text-ghost tracking-[0.02em] leading-[1.4]">{f.src}</div>
+              {clickable && (
+                <div className="font-mono text-[10px] tracking-[0.06em] mt-2" style={{ color: f.col }}>
+                  Détail →
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
+
+      <MetricDrawer detail={openDetail} onClose={() => setOpenDetail(null)} />
+
+      <style>{`
+        .metric-card-clickable { transition: transform 0.15s ease, background 0.15s ease; }
+        .metric-card-clickable:hover { transform: translateY(-2px); background: rgba(255,255,255,0.05); }
+        .metric-card-clickable:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+      `}</style>
     </div>
   );
 }

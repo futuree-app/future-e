@@ -512,21 +512,58 @@ export type GasparCatnatSummary = {
   /** Répartition par famille d'aléa, triée par fréquence décroissante. */
   byRisk: { label: string; count: number }[];
   topRisk: string | null;
+  /** Phrase de synthèse déterministe (≤ 120 car.), ou null si aucun arrêté. */
+  summary: string | null;
 };
 
-// Regroupe les libellés JO bruts en familles lisibles et stables.
+// Couche de traduction utilisateur — point UNIQUE de conversion des libellés
+// administratifs GASPAR/Géorisques en familles compréhensibles sans jargon.
+// Réutilisable partout (carte, drawer, synthèse, AskFuture passent par byRisk).
 function simplifyCatnatRisk(raw: string): string {
   const n = normalizeLabel(raw);
   if (n.includes("submersion")) return "Submersion marine";
-  if (n.includes("inondation") || n.includes("coulee") || n.includes("nappe")) return "Inondations";
-  if (n.includes("secheresse") || n.includes("retrait") || n.includes("argile")) return "Sécheresse des sols";
-  if (n.includes("mouvement de terrain") || n.includes("glissement") || n.includes("eboulement")) return "Mouvements de terrain";
+  if (n.includes("vague") || n.includes("chocs mecaniques")) return "Érosion et impact des vagues";
+  if (
+    n.includes("inondation") ||
+    n.includes("coulee") ||
+    n.includes("nappe") ||
+    n.includes("crue") ||
+    n.includes("torrentiel")
+  )
+    return "Inondations";
+  if (n.includes("secheresse") || n.includes("retrait") || n.includes("argile"))
+    return "Sécheresse des sols";
+  if (
+    n.includes("mouvement de terrain") ||
+    n.includes("glissement") ||
+    n.includes("eboulement") ||
+    n.includes("affaissement")
+  )
+    return "Mouvements de terrain";
   if (n.includes("cyclo") || n.includes("ouragan")) return "Cyclone";
-  if (n.includes("tempete")) return "Tempête";
+  if (n.includes("tempete") || n.includes("grains")) return "Tempête";
   if (n.includes("seisme") || n.includes("sismi")) return "Séisme";
   if (n.includes("avalanche")) return "Avalanche";
   if (n.includes("grele")) return "Grêle";
+  if (n.includes("neige")) return "Neige";
   return raw.trim();
+}
+
+// Phrase de synthèse déterministe (≤ 120 car.) à partir de la répartition.
+// Aucune IA : pure logique sur les fréquences.
+function describeCatnat(
+  byRisk: { label: string; count: number }[],
+  total: number,
+): string | null {
+  if (total === 0 || byRisk.length === 0) return null;
+  const top = byRisk[0];
+  const lower = top.label.toLowerCase();
+  if (byRisk.length === 1) return `Uniquement ${lower}.`;
+  const ratio = top.count / total;
+  if (ratio >= 0.55) return `Surtout ${lower}.`;
+  if (ratio >= 0.4) return `${top.label} : près de la moitié des reconnaissances.`;
+  const sentence = `${top.label} et ${byRisk[1].label.toLowerCase()} sont les aléas les plus fréquents.`;
+  return sentence.length <= 120 ? sentence : `Plusieurs aléas, surtout ${lower}.`;
 }
 
 function parseEvtYear(value: string | null | undefined): number | null {
@@ -563,12 +600,15 @@ async function loadGasparCatnatSummary(inseeCode: string): Promise<GasparCatnatS
     .map(([label, count]) => ({ label, count }))
     .sort((a, b) => b.count - a.count);
 
+  const total = typeof json?.results === "number" ? json.results : items.length;
+
   return {
-    total: typeof json?.results === "number" ? json.results : items.length,
+    total,
     firstYear,
     lastYear,
     byRisk,
     topRisk: byRisk[0]?.label ?? null,
+    summary: describeCatnat(byRisk, total),
   };
 }
 
