@@ -170,7 +170,7 @@ function buildFactors(
       col: "var(--red)",
       src: `DRIAS / Météo-France · France ${meta.france}`,
       missing: heatDays == null,
-      tip: "Au-delà de 35°C, le corps peine à évacuer la chaleur. Ces jours pèsent sur les personnes fragiles, le travail en extérieur et la nuit qui suit.",
+      tip: "Plus ces journées sont nombreuses, plus les étés deviennent éprouvants, surtout pour les enfants, les personnes âgées et celles qui vivent ou travaillent dehors.",
     },
     {
       label: "Nuits tropicales (> 20°C)",
@@ -178,7 +178,7 @@ function buildFactors(
       col: "var(--orange)",
       src: "DRIAS / Météo-France · Tmin > 20°C",
       missing: tropicalNights == null,
-      tip: "Quand la nuit ne descend pas sous 20°C, le corps ne récupère pas de la chaleur du jour. C'est un marqueur clé de l'inconfort estival.",
+      tip: "Quand la chaleur ne retombe pas la nuit, on dort moins bien et on récupère mal. C'est l'un des signes les plus parlants d'un climat qui change près de chez soi.",
     },
     {
       label: "Conditions météo favorables au feu",
@@ -186,7 +186,7 @@ function buildFactors(
       col: "var(--orange)",
       src: "DRIAS · IFM > 40 · indice météo, pas risque réel",
       missing: fireDays == null,
-      tip: "Indice météo (vent, air sec, chaleur) favorable au feu, pas une probabilité d'incendie. Le risque réel dépend aussi de la végétation et de l'humidité des sols.",
+      tip: "Plus ces journées se multiplient, plus le risque qu'un feu démarre et se propage augmente, surtout près des espaces naturels et des forêts.",
     },
     {
       label: "Sécheresse des sols",
@@ -209,7 +209,7 @@ function buildFactors(
       col: "var(--blue)",
       src: "Géorisques · échelle communale",
       missing: !georisques?.flags.flood,
-      tip: "Indique si un périmètre de risque inondation est recensé sur la commune. L'exposition précise de votre adresse est dans le module Logement.",
+      tip: "Savoir qu'une partie de la commune peut être atteinte par une crue aide à comprendre où l'on vit, ce qui peut être touché et ce qu'il faut anticiper.",
     },
     {
       label: "Submersion marine",
@@ -217,7 +217,7 @@ function buildFactors(
       col: "var(--blue)",
       src: "Géorisques · échelle communale",
       missing: !georisques?.flags.marineSubmersion,
-      tip: "Recense l'existence d'un périmètre de submersion marine sur la commune : littoral exposé à la montée des eaux et aux tempêtes. Détail à l'adresse dans le module Logement.",
+      tip: "Sur le littoral, savoir si la mer peut atteindre une partie de la commune aide à comprendre ce qui est exposé aux tempêtes et à la montée des eaux.",
     },
     {
       label: "Taux de boisement",
@@ -225,7 +225,7 @@ function buildFactors(
       col: "var(--green)",
       src: "ADEME · données communales",
       missing: boisementPct == null,
-      tip: "Le couvert arboré tempère les îlots de chaleur l'été et retient les sols. Il pèse aussi sur le feu : peu de végétation, peu de combustible ; beaucoup et sèche, le feu se propage plus vite.",
+      tip: "Les arbres rafraîchissent la commune l'été et abritent la vie. Leur place en dit long sur le confort par fortes chaleurs et sur le quotidien qu'on y trouve.",
     },
   ];
 
