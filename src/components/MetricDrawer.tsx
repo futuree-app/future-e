@@ -18,13 +18,16 @@ export type CardDetail = {
   /** Phrase de synthèse courte sous le chiffre phare. */
   subhead?: string;
   accent?: string;
-  /** Intitulé de la section liste (défaut « Répartition »). Ex. « Les trois signaux », « Trajectoire ». */
+  /** Intitulé de la section liste (défaut « Répartition »). Ex. « Trois temps », « Jours chauds par an ». */
   breakdownLabel?: string;
-  breakdown?: { label: string; value: string }[];
+  /** `bar` (0→1) dessine une barre de proportion sous la ligne : la donnée se voit, pas juste se lit. */
+  breakdown?: { label: string; value: string; bar?: number }[];
   facts?: { label: string; value: string }[];
   why: string;
   /** Si fourni, affiche « Poser une question » qui pré-remplit AskFuture (événement). */
   askPrefill?: string;
+  /** Note de sources en pied de drawer, discrète. La narration ne cite pas les bases ; le pied, oui. */
+  sources?: string;
 };
 
 export function MetricDrawer({
@@ -77,8 +80,15 @@ export function MetricDrawer({
             <ul className="metric-drawer-rows">
               {detail.breakdown.map((r) => (
                 <li key={r.label}>
-                  <span>{r.label}</span>
-                  <span className="metric-drawer-val">{r.value}</span>
+                  <div className="metric-drawer-row-head">
+                    <span>{r.label}</span>
+                    <span className="metric-drawer-val">{r.value}</span>
+                  </div>
+                  {r.bar != null && (
+                    <span className="metric-drawer-bar" aria-hidden>
+                      <span style={{ width: `${Math.max(4, Math.round(r.bar * 100))}%`, background: accent }} />
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -115,6 +125,8 @@ export function MetricDrawer({
             Poser une question à futur•e <span aria-hidden>→</span>
           </button>
         )}
+
+        {detail.sources && <p className="metric-drawer-sources">{detail.sources}</p>}
       </aside>
 
       <style>{`
@@ -163,9 +175,19 @@ export function MetricDrawer({
         }
         .metric-drawer-rows { list-style: none; margin: 0; padding: 0; }
         .metric-drawer-rows li {
-          display: flex; justify-content: space-between; align-items: baseline;
           padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
           font-size: 14px; color: #c6cfdb;
+        }
+        .metric-drawer-row-head {
+          display: flex; justify-content: space-between; align-items: baseline;
+        }
+        .metric-drawer-bar {
+          display: block; margin-top: 7px; height: 5px; border-radius: 3px;
+          background: rgba(255,255,255,0.07); overflow: hidden;
+        }
+        .metric-drawer-bar > span {
+          display: block; height: 100%; border-radius: 3px;
+          transition: width 0.4s cubic-bezier(0.22,1,0.36,1);
         }
         .metric-drawer-val { font-family: 'JetBrains Mono', monospace; color: #e9ecf2; }
         .metric-drawer-facts { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
@@ -186,6 +208,12 @@ export function MetricDrawer({
           font-family: inherit; transition: all 0.15s;
         }
         .metric-drawer-ask:hover { background: rgba(200,184,154,0.2); border-color: rgba(200,184,154,0.6); }
+        .metric-drawer-sources {
+          margin: 20px 0 0; padding-top: 14px;
+          border-top: 1px solid rgba(255,255,255,0.06);
+          font-family: 'JetBrains Mono', monospace; font-size: 10px;
+          letter-spacing: 0.04em; line-height: 1.5; color: #5c6478;
+        }
         @keyframes metric-fade { from { opacity: 0; } to { opacity: 1; } }
         @keyframes metric-slide-right { from { transform: translateX(40px); opacity: 0.4; } to { transform: translateX(0); opacity: 1; } }
         @media (max-width: 640px) {

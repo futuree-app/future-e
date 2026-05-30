@@ -79,81 +79,79 @@ function buildFactors(
     ? Math.round(territoire.taux_boisement)
     : null;
 
-  // ── Carte « Jours chauds » → drawer trajectoire (2030 / 2050 / 2100) ──────────
-  // Lecture des trois horizons : la carte ne montre qu'un point, le drawer la pente.
+  // ── Carte « Jours chauds » → drawer : la chaleur qui s'installe ───────────────
+  // On lit les trois horizons et on les rend comme une montée VISIBLE (barres),
+  // pas comme un tableau. Le récit prime ; les sources passent en pied de drawer.
   const hotAt = (k: HorizonKey) => r(scenarios?.[k]?.v?.["NORTX30D_yr"]);
   const hotTraj = (["gwl15", "gwl20", "gwl30"] as HorizonKey[])
     .map((k) => ({ k, v: hotAt(k) }))
     .filter((x) => x.v != null) as { k: HorizonKey; v: number }[];
   const hot2030 = hotAt("gwl15");
   const hot2100 = hotAt("gwl30");
-  let hotSubhead: string | undefined;
-  if (hot2030 != null && hot2100 != null && hot2100 > hot2030) {
-    hotSubhead = `De ${hot2030} à ${hot2100} jours par an entre 2030 et 2100 : la chaleur s'installe, elle ne fait pas que passer.`;
-  } else if (hotDays != null) {
-    hotSubhead = "Des journées où la ville se vit autrement : ombre, eau, horaires décalés.";
-  }
+  const hotMax = Math.max(...hotTraj.map((x) => x.v), 1);
   const heatDetail: CardDetail | undefined = hotDays != null
     ? {
-        eyebrow: "Trajectoire climatique",
+        eyebrow: "Des étés qui s'intensifient",
         title: "Jours chauds (> 30°C)",
-        headline: `${hotDays} jours/an en ${meta.year}`,
-        subhead: hotSubhead,
+        headline:
+          hot2030 != null && hot2100 != null && hot2100 > hot2030
+            ? `${hot2030} → ${hot2100} jours par an`
+            : `${hotDays} jours par an en ${meta.year}`,
+        subhead: "Les journées à plus de 30°C deviennent progressivement plus fréquentes.",
         accent: "var(--orange)",
-        breakdownLabel: "Trajectoire",
+        breakdownLabel: "Jours chauds par an",
         breakdown: hotTraj.map((x) => ({
-          label: `${HORIZON_META[x.k].year} · France ${HORIZON_META[x.k].france}`,
-          value: `${x.v} j/an`,
+          label: HORIZON_META[x.k].year,
+          value: `${x.v} jours`,
+          bar: x.v / hotMax,
         })),
-        facts: heatDays != null ? [{ label: `dont > 35°C en ${meta.year}`, value: `${heatDays} j/an` }] : undefined,
-        why: "Un « jour chaud » dépasse 30°C. Isolés ils passent ; répétés, ils changent le quotidien : sommeil, écoles, travail dehors, personnes fragiles. La trajectoire montre l'accélération, pas un pic isolé.",
+        facts: heatDays != null ? [{ label: `dont > 35°C en ${meta.year}`, value: `${heatDays} jours` }] : undefined,
+        why: "Quelques journées de forte chaleur, on les traverse. Quand elles se multiplient, c'est l'été qui change de visage : des nuits qui ne rafraîchissent plus, des logements et des écoles qui surchauffent, le travail dehors plus pénible, les personnes âgées et les enfants plus exposés. Et la courbe ne fait pas que monter, elle s'accélère.",
         askPrefill: `Comment la chaleur va-t-elle évoluer dans ma commune d'ici ${HORIZON_META.gwl30.year} ?`,
+        sources: "Projections DRIAS, Météo-France · scénarios France +2°C à +4°C",
       }
     : undefined;
 
-  // ── Carte « Sécheresse des sols » → drawer arc à 3 signaux ───────────────────
-  //   VigiEau (arrêté du moment) · ONDE (terrain) · DRIAS SWI04 (futur modélisé)
+  // ── Carte « Sécheresse des sols » → drawer : un territoire qui s'assèche ──────
+  // Trois temps (présent, terrain, futur) racontés en langage utilisateur ; les
+  // noms de bases (VigiEau, ONDE, DRIAS) descendent en pied de drawer.
   const hasDroughtStory = drySoilDays != null || !!vigieau?.maxLevel || !!drought?.isDry;
+  const droughtActive = !!vigieau?.maxLevel || !!drought?.isDry;
   const droughtRows: { label: string; value: string }[] = [
-    { label: "Restriction en cours", value: vigieau?.maxLevel ? levelLabel(vigieau.maxLevel) : "Aucune" },
+    { label: "Aujourd'hui", value: vigieau?.maxLevel ? levelLabel(vigieau.maxLevel) : "Pas de restriction d'eau" },
     {
-      label: "Terrain (réseau ONDE)",
-      value: drought ? (drought.isDry ? "Cours d'eau à sec" : "Écoulement observé") : "Non observé",
+      label: "Cours d'eau observés",
+      value: drought ? (drought.isDry ? "À sec par endroits" : "Niveau normal") : "Pas d'observation locale",
     },
-    ...(drySoilDays != null ? [{ label: `Sol sec en ${meta.year}`, value: `${drySoilDays} j/an` }] : []),
+    ...(drySoilDays != null ? [{ label: `Sols en ${meta.year}`, value: `${drySoilDays} jours secs/an` }] : []),
   ];
-  const droughtParts: string[] = [];
-  if (vigieau?.maxLevel) droughtParts.push(`restriction « ${levelLabel(vigieau.maxLevel).toLowerCase()} » en vigueur`);
-  if (drought?.isDry) droughtParts.push("un cours d'eau observé à sec");
-  if (drySoilDays != null) droughtParts.push(`un sol sec ~${drySoilDays} j/an en ${meta.year}`);
-  const droughtSubhead =
-    droughtParts.length > 0
-      ? droughtParts.join(", ").replace(/^./, (c) => c.toUpperCase()) + "."
-      : undefined;
   const droughtFacts =
     vigieau?.maxLevel && vigieau.topZone
       ? [
-          ...(vigieau.topZone.label ? [{ label: "Bassin concerné", value: vigieau.topZone.label }] : []),
+          ...(vigieau.topZone.label ? [{ label: "Zone concernée", value: vigieau.topZone.label }] : []),
           ...(vigieau.topZone.endDate ? [{ label: "Jusqu'au", value: formatFrDate(vigieau.topZone.endDate) }] : []),
         ]
       : undefined;
   const droughtDetail: CardDetail | undefined = hasDroughtStory
     ? {
-        eyebrow: "Le sol et l'eau · 3 temps",
+        eyebrow: "Un territoire qui s'assèche",
         title: "Sécheresse des sols",
         headline:
           drySoilDays != null
-            ? `${drySoilDays} jours de sol sec/an en ${meta.year}`
+            ? `Sol sec ~${drySoilDays} jours/an d'ici ${meta.year}`
             : vigieau?.maxLevel
-              ? `Restriction : ${levelLabel(vigieau.maxLevel).toLowerCase()}`
+              ? `Restriction « ${levelLabel(vigieau.maxLevel).toLowerCase()} » en cours`
               : "Cours d'eau à sec observé",
-        subhead: droughtSubhead,
+        subhead: droughtActive
+          ? "Le territoire montre déjà des signes, et la tendance s'accentue."
+          : "Le territoire s'assèche progressivement, surtout en été.",
         accent: "var(--orange)",
-        breakdownLabel: "Les trois signaux",
+        breakdownLabel: "Trois temps",
         breakdown: droughtRows,
         facts: droughtFacts && droughtFacts.length > 0 ? droughtFacts : undefined,
-        why: "La sécheresse des sols se lit à trois échelles de temps : l'arrêté préfectoral du moment (VigiEau), ce qu'on observe sur les cours d'eau (réseau ONDE) et ce que projettent les modèles (DRIAS). Au-delà du confort, un sol qui s'assèche fragilise les fondations en terrain argileux et tend l'accès à l'eau.",
+        why: "La sécheresse ne se voit pas d'un coup, elle s'installe. L'eau qu'on restreint l'été, les cours d'eau qui faiblissent, la terre qui se rétracte et fragilise les fondations des maisons sur sol argileux : trois signes d'un même mouvement, du présent vers l'avenir. C'est un changement de fond du territoire, pas un épisode isolé.",
         askPrefill: "Ma commune est-elle exposée à la sécheresse ?",
+        sources: "VigiEau (arrêtés préfectoraux) · réseau ONDE, Hub'Eau (cours d'eau) · projections DRIAS, Météo-France",
       }
     : undefined;
 
@@ -252,6 +250,7 @@ function buildFactors(
           ],
           why: "Les arrêtés de catastrophe naturelle racontent l'histoire vécue du territoire : ils montrent quels aléas ont déjà marqué la commune, et à quelle fréquence.",
           askPrefill: "Que racontent les arrêtés de catastrophe naturelle de ma commune ?",
+          sources: "Géorisques · base GASPAR (arrêtés de catastrophe naturelle)",
         }
       : undefined;
     factors.push({
