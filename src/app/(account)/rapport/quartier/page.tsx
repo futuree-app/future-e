@@ -17,6 +17,8 @@ import { ModuleTracker } from "@/components/ModuleTracker";
 import { deriveQuartierSources, buildFallbackSummary } from "@/lib/quartier-signals";
 import { AskFutureInlineMount } from "@/components/AskFutureInlineMount";
 import { SuiviWaitlistBlock } from "@/components/report/SuiviWaitlistBlock";
+import { TerritoryCover } from "@/components/report/TerritoryCover";
+import { deriveTerritoryMood } from "@/lib/territory-mood";
 
 export default async function RapportQuartierPage() {
   const account = await getCurrentUserAccount();
@@ -41,6 +43,9 @@ export default async function RapportQuartierPage() {
   const scenarios = enrichment?.drias?.commune.s ?? null;
   const territoire = enrichment?.ademe?.commune.territoire ?? null;
   const displayName = communeName ?? "votre commune";
+
+  // Identité visuelle du territoire (déterministe, sans appel réseau).
+  const territoryMood = deriveTerritoryMood({ communeName, inseeCode, territoire });
 
   // Sources mobilisées par horizon : pré-calculées côté serveur, le composant
   // client choisit via useHorizon. Évite de transférer tout enrichment.
@@ -91,8 +96,16 @@ export default async function RapportQuartierPage() {
           )}
         </section>
 
+        {/* Couverture éditoriale — donne une identité visuelle au territoire
+            avant la lecture, sans concurrencer le texte */}
+        {communeName && (
+          <div className="pt-1">
+            <TerritoryCover mood={territoryMood} />
+          </div>
+        )}
+
         {/* Synthèse pleine largeur */}
-        <section className="pt-2">
+        <section className="pt-8">
           <QuartierSynthesis
             communeName={communeName}
             inseeCode={inseeCode}

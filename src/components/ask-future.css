@@ -278,6 +278,25 @@
   line-height: 1.5;
 }
 .ask-input::placeholder { color: #6b7388; }
+
+/* En variante inline, le champ est un vrai encadré qui attire l'œil */
+.ask-form--inline {
+  margin-top: 8px;
+  padding: 6px 6px 6px 16px;
+  border: 1px solid rgba(200, 184, 154, 0.35);
+  border-radius: 12px;
+  background: rgba(200, 184, 154, 0.06);
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.ask-form--inline:focus-within {
+  border-color: rgba(200, 184, 154, 0.6);
+  background: rgba(200, 184, 154, 0.1);
+  box-shadow: 0 0 0 3px rgba(200, 184, 154, 0.08);
+}
+.ask-form--inline .ask-input::placeholder {
+  color: #c8b89a;
+  opacity: 0.85;
+}
 .ask-submit {
   width: 32px;
   height: 32px;

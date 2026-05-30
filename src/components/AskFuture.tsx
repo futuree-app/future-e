@@ -394,7 +394,7 @@ export function AskFuture({
               </a>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="ask-form">
+            <form onSubmit={handleSubmit} className={`ask-form${inline ? " ask-form--inline" : ""}`}>
               {questionsMax !== null && (
                 <span className="ask-quota-counter">
                   {Math.max(0, questionsMax - usedCount)} question{questionsMax - usedCount > 1 ? "s" : ""} restante{questionsMax - usedCount > 1 ? "s" : ""}
@@ -430,9 +430,11 @@ export function AskFuture({
             </form>
           )}
 
-          <div className="ask-footer">
-            Données DRIAS · Géorisques · ANSES · INSEE · Hub&apos;Eau · ATMO
-          </div>
+          {!inline && (
+            <div className="ask-footer">
+              Données DRIAS · Géorisques · ANSES · INSEE · Hub&apos;Eau · ATMO
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -48,3 +48,9 @@ next-env.d.ts
 Documentation Notion/
 logo/
 posthog-setup-report.md
+
+# Bannières sources (les WebP optimisées vivent dans public/covers)
+Photos/
+# Exports design system locaux
+*Design System.html
+*Design System.pdf
