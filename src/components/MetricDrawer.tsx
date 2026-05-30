@@ -18,6 +18,8 @@ export type CardDetail = {
   /** Phrase de synthèse courte sous le chiffre phare. */
   subhead?: string;
   accent?: string;
+  /** Intitulé de la section liste (défaut « Répartition »). Ex. « Les trois signaux », « Trajectoire ». */
+  breakdownLabel?: string;
   breakdown?: { label: string; value: string }[];
   facts?: { label: string; value: string }[];
   why: string;
@@ -71,7 +73,7 @@ export function MetricDrawer({
 
         {detail.breakdown && detail.breakdown.length > 0 && (
           <div className="metric-drawer-section">
-            <p className="metric-drawer-label">Répartition</p>
+            <p className="metric-drawer-label">{detail.breakdownLabel ?? "Répartition"}</p>
             <ul className="metric-drawer-rows">
               {detail.breakdown.map((r) => (
                 <li key={r.label}>

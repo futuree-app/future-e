@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useHorizon, HORIZON_META } from "@/hooks/useHorizon";
+import { useHorizon, HORIZON_META, type HorizonKey } from "@/hooks/useHorizon";
 import { MetricDrawer, type CardDetail } from "@/components/MetricDrawer";
+import { MetricTooltip } from "@/components/MetricTooltip";
 import type { GeorisquesSummary, GasparCatnatSummary } from "@/lib/georisques";
 import type { EaufranceSummary } from "@/lib/eaufrance";
 import type { VigieauSummary, DroughtLevel } from "@/lib/vigieau";
@@ -22,7 +23,17 @@ function levelLabel(level: DroughtLevel | "pas_de_restrictions" | null | undefin
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type GwlScenarios = Record<string, { h: string; v: Record<string, number> }>;
-type Factor = { label: string; val: string; col: string; src: string; missing: boolean; detail?: CardDetail };
+type Factor = {
+  label: string;
+  val: string;
+  col: string;
+  src: string;
+  missing: boolean;
+  /** Carte cliquable → drawer éditorial (la carte raconte une histoire). */
+  detail?: CardDetail;
+  /** Glose courte au survol/focus (seuil ou sens à expliquer, mais pas d'histoire). */
+  tip?: string;
+};
 
 type Drought = NonNullable<EaufranceSummary["drought"]>;
 type Territoire = {
@@ -48,13 +59,16 @@ function r(v: number | undefined | null) {
 }
 
 function buildFactors(
-  gwlData: Record<string, number> | null | undefined,
-  horizonKey: string,
+  scenarios: GwlScenarios | null,
+  horizonKey: HorizonKey,
   georisques: GeorisquesSummary | null,
   territoire: Territoire | null,
+  vigieau: VigieauSummary | null,
+  drought: Drought | null,
   catnat?: GasparCatnatSummary | null,
 ): Factor[] {
-  const meta = HORIZON_META[horizonKey as keyof typeof HORIZON_META] ?? HORIZON_META.gwl20;
+  const meta = HORIZON_META[horizonKey] ?? HORIZON_META.gwl20;
+  const gwlData = scenarios?.[horizonKey]?.v ?? null;
   const heatDays = r(gwlData?.["NORTX35D_yr"]);
   const hotDays = r(gwlData?.["NORTX30D_yr"]);
   const tropicalNights = r(gwlData?.["NORTR_yr"]);
@@ -65,6 +79,84 @@ function buildFactors(
     ? Math.round(territoire.taux_boisement)
     : null;
 
+  // ── Carte « Jours chauds » → drawer trajectoire (2030 / 2050 / 2100) ──────────
+  // Lecture des trois horizons : la carte ne montre qu'un point, le drawer la pente.
+  const hotAt = (k: HorizonKey) => r(scenarios?.[k]?.v?.["NORTX30D_yr"]);
+  const hotTraj = (["gwl15", "gwl20", "gwl30"] as HorizonKey[])
+    .map((k) => ({ k, v: hotAt(k) }))
+    .filter((x) => x.v != null) as { k: HorizonKey; v: number }[];
+  const hot2030 = hotAt("gwl15");
+  const hot2100 = hotAt("gwl30");
+  let hotSubhead: string | undefined;
+  if (hot2030 != null && hot2100 != null && hot2100 > hot2030) {
+    hotSubhead = `De ${hot2030} à ${hot2100} jours par an entre 2030 et 2100 : la chaleur s'installe, elle ne fait pas que passer.`;
+  } else if (hotDays != null) {
+    hotSubhead = "Des journées où la ville se vit autrement : ombre, eau, horaires décalés.";
+  }
+  const heatDetail: CardDetail | undefined = hotDays != null
+    ? {
+        eyebrow: "Trajectoire climatique",
+        title: "Jours chauds (> 30°C)",
+        headline: `${hotDays} jours/an en ${meta.year}`,
+        subhead: hotSubhead,
+        accent: "var(--orange)",
+        breakdownLabel: "Trajectoire",
+        breakdown: hotTraj.map((x) => ({
+          label: `${HORIZON_META[x.k].year} · France ${HORIZON_META[x.k].france}`,
+          value: `${x.v} j/an`,
+        })),
+        facts: heatDays != null ? [{ label: `dont > 35°C en ${meta.year}`, value: `${heatDays} j/an` }] : undefined,
+        why: "Un « jour chaud » dépasse 30°C. Isolés ils passent ; répétés, ils changent le quotidien — sommeil, écoles, travail dehors, personnes fragiles. La trajectoire montre l'accélération, pas un pic isolé.",
+        askPrefill: `Comment la chaleur va-t-elle évoluer dans ma commune d'ici ${HORIZON_META.gwl30.year} ?`,
+      }
+    : undefined;
+
+  // ── Carte « Sécheresse des sols » → drawer arc à 3 signaux ───────────────────
+  //   VigiEau (arrêté du moment) · ONDE (terrain) · DRIAS SWI04 (futur modélisé)
+  const hasDroughtStory = drySoilDays != null || !!vigieau?.maxLevel || !!drought?.isDry;
+  const droughtRows: { label: string; value: string }[] = [
+    { label: "Restriction en cours", value: vigieau?.maxLevel ? levelLabel(vigieau.maxLevel) : "Aucune" },
+    {
+      label: "Terrain (réseau ONDE)",
+      value: drought ? (drought.isDry ? "Cours d'eau à sec" : "Écoulement observé") : "Non observé",
+    },
+    ...(drySoilDays != null ? [{ label: `Sol sec en ${meta.year}`, value: `${drySoilDays} j/an` }] : []),
+  ];
+  const droughtParts: string[] = [];
+  if (vigieau?.maxLevel) droughtParts.push(`restriction « ${levelLabel(vigieau.maxLevel).toLowerCase()} » en vigueur`);
+  if (drought?.isDry) droughtParts.push("un cours d'eau observé à sec");
+  if (drySoilDays != null) droughtParts.push(`un sol sec ~${drySoilDays} j/an en ${meta.year}`);
+  const droughtSubhead =
+    droughtParts.length > 0
+      ? droughtParts.join(", ").replace(/^./, (c) => c.toUpperCase()) + "."
+      : undefined;
+  const droughtFacts =
+    vigieau?.maxLevel && vigieau.topZone
+      ? [
+          ...(vigieau.topZone.label ? [{ label: "Bassin concerné", value: vigieau.topZone.label }] : []),
+          ...(vigieau.topZone.endDate ? [{ label: "Jusqu'au", value: formatFrDate(vigieau.topZone.endDate) }] : []),
+        ]
+      : undefined;
+  const droughtDetail: CardDetail | undefined = hasDroughtStory
+    ? {
+        eyebrow: "Le sol et l'eau · 3 temps",
+        title: "Sécheresse des sols",
+        headline:
+          drySoilDays != null
+            ? `${drySoilDays} jours de sol sec/an en ${meta.year}`
+            : vigieau?.maxLevel
+              ? `Restriction : ${levelLabel(vigieau.maxLevel).toLowerCase()}`
+              : "Cours d'eau à sec observé",
+        subhead: droughtSubhead,
+        accent: "var(--orange)",
+        breakdownLabel: "Les trois signaux",
+        breakdown: droughtRows,
+        facts: droughtFacts && droughtFacts.length > 0 ? droughtFacts : undefined,
+        why: "La sécheresse des sols se lit à trois échelles de temps : l'arrêté préfectoral du moment (VigiEau), ce qu'on observe sur les cours d'eau (réseau ONDE) et ce que projettent les modèles (DRIAS). Au-delà du confort, un sol qui s'assèche fragilise les fondations en terrain argileux et tend l'accès à l'eau.",
+        askPrefill: "Ma commune est-elle exposée à la sécheresse ?",
+      }
+    : undefined;
+
   const factors: Factor[] = [
     {
       label: "Jours chauds (> 30°C)",
@@ -72,6 +164,7 @@ function buildFactors(
       col: "var(--orange)",
       src: `DRIAS / Météo-France · France ${meta.france}`,
       missing: hotDays == null,
+      detail: heatDetail,
     },
     {
       label: "Jours de chaleur extrême (> 35°C)",
@@ -79,6 +172,7 @@ function buildFactors(
       col: "var(--red)",
       src: `DRIAS / Météo-France · France ${meta.france}`,
       missing: heatDays == null,
+      tip: "Au-delà de 35°C, le corps peine à évacuer la chaleur. Ces jours pèsent sur les personnes fragiles, le travail en extérieur et la nuit qui suit.",
     },
     {
       label: "Nuits tropicales (> 20°C)",
@@ -86,6 +180,7 @@ function buildFactors(
       col: "var(--orange)",
       src: "DRIAS / Météo-France · Tmin > 20°C",
       missing: tropicalNights == null,
+      tip: "Quand la nuit ne descend pas sous 20°C, le corps ne récupère pas de la chaleur du jour. C'est un marqueur clé de l'inconfort estival.",
     },
     {
       label: "Conditions météo favorables au feu",
@@ -93,13 +188,22 @@ function buildFactors(
       col: "var(--orange)",
       src: "DRIAS · IFM > 40 · indice météo, pas risque réel",
       missing: fireDays == null,
+      tip: "Indice météo (vent, air sec, chaleur) favorable au feu — pas une probabilité d'incendie. Le risque réel dépend aussi de la végétation et de l'humidité des sols.",
     },
     {
       label: "Sécheresse des sols",
-      val: drySoilDays != null ? `${drySoilDays} jours/an en ${meta.year}` : "—",
+      val:
+        drySoilDays != null
+          ? `${drySoilDays} jours/an en ${meta.year}`
+          : vigieau?.maxLevel
+            ? levelLabel(vigieau.maxLevel)
+            : drought?.isDry
+              ? "Cours d'eau à sec"
+              : "—",
       col: "var(--orange)",
       src: `DRIAS · indice SWI < 0,4 · France ${meta.france}`,
-      missing: drySoilDays == null,
+      missing: !hasDroughtStory,
+      detail: droughtDetail,
     },
     {
       label: "Inondation fluviale",
@@ -107,6 +211,7 @@ function buildFactors(
       col: "var(--blue)",
       src: "Géorisques · échelle communale",
       missing: !georisques?.flags.flood,
+      tip: "Indique si un périmètre de risque inondation est recensé sur la commune (PPRI, atlas). L'exposition précise de votre adresse est dans le module Logement.",
     },
     {
       label: "Submersion marine",
@@ -114,6 +219,7 @@ function buildFactors(
       col: "var(--blue)",
       src: "Géorisques · échelle communale",
       missing: !georisques?.flags.marineSubmersion,
+      tip: "Recense l'existence d'un périmètre de submersion marine sur la commune — littoral exposé à la montée des eaux et aux tempêtes. Détail à l'adresse dans le module Logement.",
     },
     {
       label: "Taux de boisement",
@@ -261,11 +367,10 @@ function formatFrDate(iso: string): string {
 
 // ─── FactorGrid (grille horizontale de cartes) ────────────────────────────────
 
-export function QuartierAside({ communeName: _communeName, scenarios, georisques, territoire, catnat }: Omit<SharedProps, "drought" | "vigieau">) {
+export function QuartierAside({ communeName: _communeName, scenarios, georisques, territoire, vigieau, drought, catnat }: SharedProps) {
   const [horizon] = useHorizon();
   const [openDetail, setOpenDetail] = useState<CardDetail | null>(null);
-  const gwlData = scenarios?.[horizon]?.v ?? null;
-  const factors = buildFactors(gwlData, horizon, georisques, territoire, catnat ?? null);
+  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, catnat ?? null);
 
   return (
     <div>
@@ -277,6 +382,7 @@ export function QuartierAside({ communeName: _communeName, scenarios, georisques
               key={f.label}
               className={`glass rounded-xl px-4 py-3.5${clickable ? " metric-card-clickable" : ""}`}
               style={{
+                position: "relative",
                 borderTop: `2px solid ${f.missing ? "var(--ghost)" : f.col}`,
                 opacity: f.missing ? 0.45 : 1,
                 cursor: clickable ? "pointer" : undefined,
@@ -302,6 +408,11 @@ export function QuartierAside({ communeName: _communeName, scenarios, georisques
                 <div className="font-mono text-[10px] tracking-[0.06em] mt-2" style={{ color: f.col }}>
                   Détail →
                 </div>
+              )}
+              {!clickable && f.tip && (
+                <span style={{ position: "absolute", top: 10, right: 10 }}>
+                  <MetricTooltip text={f.tip} accent={f.missing ? undefined : f.col} />
+                </span>
               )}
             </div>
           );

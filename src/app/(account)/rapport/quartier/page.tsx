@@ -41,6 +41,8 @@ export default async function RapportQuartierPage() {
 
   const scenarios = enrichment?.drias?.commune.s ?? null;
   const territoire = enrichment?.ademe?.commune.territoire ?? null;
+  const vigieau = enrichment?.vigieau ?? null;
+  const drought = enrichment?.eau?.drought ?? null;
   const displayName = communeName ?? "votre commune";
 
   // Identité visuelle du territoire (déterministe, sans appel réseau).
@@ -125,7 +127,7 @@ export default async function RapportQuartierPage() {
           >
             Ce que montrent les données
           </h2>
-          <QuartierAside communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} catnat={catnat} />
+          <QuartierAside communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} />
         </section>
 
         {/* Une question ? — AskFuture inline (uniquement pour comptes payants) :
