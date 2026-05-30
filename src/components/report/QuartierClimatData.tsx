@@ -97,15 +97,15 @@ function buildFactors(
           hot2030 != null && hot2100 != null && hot2100 > hot2030
             ? `${hot2030} → ${hot2100} jours par an`
             : `${hotDays} jours par an en ${meta.year}`,
-        subhead: "Les journées à plus de 30°C deviennent progressivement plus fréquentes.",
+        subhead: "Les fortes chaleurs gagnent du terrain, année après année.",
         accent: "var(--orange)",
         breakdownLabel: "Jours chauds par an",
         breakdown: hotTraj.map((x) => ({
-          label: HORIZON_META[x.k].year,
+          label: `À l'horizon ${HORIZON_META[x.k].year}`,
           value: `${x.v} jours`,
           bar: x.v / hotMax,
         })),
-        facts: heatDays != null ? [{ label: `dont > 35°C en ${meta.year}`, value: `${heatDays} jours` }] : undefined,
+        facts: heatDays != null ? [{ label: "dont chaleur extrême", value: `${heatDays} jours` }] : undefined,
         why: "Quelques journées de forte chaleur, on les traverse. Quand elles se multiplient, c'est l'été qui change de visage : des nuits qui ne rafraîchissent plus, des logements et des écoles qui surchauffent, le travail dehors plus pénible, les personnes âgées et les enfants plus exposés. Et la courbe ne fait pas que monter, elle s'accélère.",
         askPrefill: `Comment la chaleur va-t-elle évoluer dans ma commune d'ici ${HORIZON_META.gwl30.year} ?`,
         sources: "Projections DRIAS, Météo-France · scénarios France +2°C à +4°C",
@@ -118,12 +118,23 @@ function buildFactors(
   const hasDroughtStory = drySoilDays != null || !!vigieau?.maxLevel || !!drought?.isDry;
   const droughtActive = !!vigieau?.maxLevel || !!drought?.isDry;
   const droughtRows: { label: string; value: string }[] = [
-    { label: "Aujourd'hui", value: vigieau?.maxLevel ? levelLabel(vigieau.maxLevel) : "Pas de restriction d'eau" },
     {
-      label: "Cours d'eau observés",
-      value: drought ? (drought.isDry ? "À sec par endroits" : "Niveau normal") : "Pas d'observation locale",
+      label: "Aujourd'hui",
+      value: vigieau?.maxLevel
+        ? `Restriction « ${levelLabel(vigieau.maxLevel).toLowerCase()} » en cours`
+        : "Aucune restriction en cours",
     },
-    ...(drySoilDays != null ? [{ label: `Sols en ${meta.year}`, value: `${drySoilDays} jours secs/an` }] : []),
+    {
+      label: "Sur le terrain",
+      value: drought
+        ? drought.isDry
+          ? "Cours d'eau à sec par endroits"
+          : "Pas de cours d'eau à sec"
+        : "Aucun signal observé localement",
+    },
+    ...(drySoilDays != null
+      ? [{ label: `À l'horizon ${meta.year}`, value: `Environ ${drySoilDays} jours secs par an` }]
+      : []),
   ];
   const droughtFacts =
     vigieau?.maxLevel && vigieau.topZone
@@ -138,13 +149,13 @@ function buildFactors(
         title: "Sécheresse des sols",
         headline:
           drySoilDays != null
-            ? `Sol sec ~${drySoilDays} jours/an d'ici ${meta.year}`
+            ? `Environ ${drySoilDays} jours secs par an d'ici ${meta.year}`
             : vigieau?.maxLevel
               ? `Restriction « ${levelLabel(vigieau.maxLevel).toLowerCase()} » en cours`
               : "Cours d'eau à sec observé",
         subhead: droughtActive
-          ? "Le territoire montre déjà des signes, et la tendance s'accentue."
-          : "Le territoire s'assèche progressivement, surtout en été.",
+          ? "Les premiers signes sont déjà là, et le climat les amplifie."
+          : "Le territoire s'assèche peu à peu, et les étés pèsent de plus en plus sur l'eau.",
         accent: "var(--orange)",
         breakdownLabel: "Trois temps",
         breakdown: droughtRows,
@@ -209,7 +220,7 @@ function buildFactors(
       col: "var(--blue)",
       src: "Géorisques · échelle communale",
       missing: !georisques?.flags.flood,
-      tip: "Savoir qu'une partie de la commune peut être atteinte par une crue aide à comprendre où l'on vit, ce qui peut être touché et ce qu'il faut anticiper.",
+      tip: "Savoir qu'une partie de la commune peut être atteinte par une crue aide à comprendre ce qui peut être touché. Détail à votre adresse dans le module Logement.",
     },
     {
       label: "Submersion marine",
@@ -217,7 +228,7 @@ function buildFactors(
       col: "var(--blue)",
       src: "Géorisques · échelle communale",
       missing: !georisques?.flags.marineSubmersion,
-      tip: "Sur le littoral, savoir si la mer peut atteindre une partie de la commune aide à comprendre ce qui est exposé aux tempêtes et à la montée des eaux.",
+      tip: "Sur le littoral, savoir si la mer peut atteindre la commune aide à comprendre ce qui est exposé aux tempêtes. Détail à votre adresse dans le module Logement.",
     },
     {
       label: "Taux de boisement",
@@ -249,6 +260,7 @@ function buildFactors(
             ...(catnat!.lastYear ? [{ label: "Dernière reconnaissance", value: String(catnat!.lastYear) }] : []),
           ],
           why: "Les arrêtés de catastrophe naturelle racontent l'histoire vécue du territoire : ils montrent quels aléas ont déjà marqué la commune, et à quelle fréquence.",
+          whyLabel: "Ce que cela raconte",
           askPrefill: "Que racontent les arrêtés de catastrophe naturelle de ma commune ?",
           sources: "Géorisques · base GASPAR (arrêtés de catastrophe naturelle)",
         }

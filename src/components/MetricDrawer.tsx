@@ -24,9 +24,11 @@ export type CardDetail = {
   breakdown?: { label: string; value: string; bar?: number }[];
   facts?: { label: string; value: string }[];
   why: string;
+  /** Intitulé de la section récit (défaut « Ce que cela change »). Ex. « Ce que cela raconte ». */
+  whyLabel?: string;
   /** Si fourni, affiche « Poser une question » qui pré-remplit AskFuture (événement). */
   askPrefill?: string;
-  /** Note de sources en pied de drawer, discrète. La narration ne cite pas les bases ; le pied, oui. */
+  /** Sources repliées dans un accordéon discret. La narration ne cite jamais les bases ; cet accordéon, oui. */
   sources?: string;
 };
 
@@ -107,9 +109,16 @@ export function MetricDrawer({
         )}
 
         <div className="metric-drawer-section">
-          <p className="metric-drawer-label">Pourquoi ce chiffre compte</p>
+          <p className="metric-drawer-label">{detail.whyLabel ?? "Ce que cela change"}</p>
           <p className="metric-drawer-why">{detail.why}</p>
         </div>
+
+        {detail.sources && (
+          <details className="metric-drawer-sources">
+            <summary>Méthodologie et sources</summary>
+            <p>{detail.sources}</p>
+          </details>
+        )}
 
         {detail.askPrefill && (
           <button
@@ -125,8 +134,6 @@ export function MetricDrawer({
             Poser une question à futur•e <span aria-hidden>→</span>
           </button>
         )}
-
-        {detail.sources && <p className="metric-drawer-sources">{detail.sources}</p>}
       </aside>
 
       <style>{`
@@ -209,10 +216,24 @@ export function MetricDrawer({
         }
         .metric-drawer-ask:hover { background: rgba(200,184,154,0.2); border-color: rgba(200,184,154,0.6); }
         .metric-drawer-sources {
-          margin: 20px 0 0; padding-top: 14px;
+          margin: 4px 0 22px; padding-top: 14px;
           border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .metric-drawer-sources > summary {
+          list-style: none; cursor: pointer;
           font-family: 'JetBrains Mono', monospace; font-size: 10px;
-          letter-spacing: 0.04em; line-height: 1.5; color: #5c6478;
+          letter-spacing: 0.12em; text-transform: uppercase; color: #5c6478;
+          display: inline-flex; align-items: center; gap: 7px;
+          transition: color 0.15s;
+        }
+        .metric-drawer-sources > summary::-webkit-details-marker { display: none; }
+        .metric-drawer-sources > summary::before { content: '+'; font-size: 12px; line-height: 1; width: 8px; text-align: center; }
+        .metric-drawer-sources[open] > summary::before { content: '\\2013'; }
+        .metric-drawer-sources > summary:hover { color: #9ba3b4; }
+        .metric-drawer-sources > p {
+          margin: 11px 0 0;
+          font-family: 'JetBrains Mono', monospace; font-size: 10px;
+          letter-spacing: 0.04em; line-height: 1.6; color: #5c6478;
         }
         @keyframes metric-fade { from { opacity: 0; } to { opacity: 1; } }
         @keyframes metric-slide-right { from { transform: translateX(40px); opacity: 0.4; } to { transform: translateX(0); opacity: 1; } }
