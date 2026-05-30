@@ -106,7 +106,7 @@ function buildFactors(
           value: `${x.v} j/an`,
         })),
         facts: heatDays != null ? [{ label: `dont > 35°C en ${meta.year}`, value: `${heatDays} j/an` }] : undefined,
-        why: "Un « jour chaud » dépasse 30°C. Isolés ils passent ; répétés, ils changent le quotidien — sommeil, écoles, travail dehors, personnes fragiles. La trajectoire montre l'accélération, pas un pic isolé.",
+        why: "Un « jour chaud » dépasse 30°C. Isolés ils passent ; répétés, ils changent le quotidien : sommeil, écoles, travail dehors, personnes fragiles. La trajectoire montre l'accélération, pas un pic isolé.",
         askPrefill: `Comment la chaleur va-t-elle évoluer dans ma commune d'ici ${HORIZON_META.gwl30.year} ?`,
       }
     : undefined;
@@ -188,7 +188,7 @@ function buildFactors(
       col: "var(--orange)",
       src: "DRIAS · IFM > 40 · indice météo, pas risque réel",
       missing: fireDays == null,
-      tip: "Indice météo (vent, air sec, chaleur) favorable au feu — pas une probabilité d'incendie. Le risque réel dépend aussi de la végétation et de l'humidité des sols.",
+      tip: "Indice météo (vent, air sec, chaleur) favorable au feu, pas une probabilité d'incendie. Le risque réel dépend aussi de la végétation et de l'humidité des sols.",
     },
     {
       label: "Sécheresse des sols",
@@ -211,7 +211,7 @@ function buildFactors(
       col: "var(--blue)",
       src: "Géorisques · échelle communale",
       missing: !georisques?.flags.flood,
-      tip: "Indique si un périmètre de risque inondation est recensé sur la commune (PPRI, atlas). L'exposition précise de votre adresse est dans le module Logement.",
+      tip: "Indique si un périmètre de risque inondation est recensé sur la commune. L'exposition précise de votre adresse est dans le module Logement.",
     },
     {
       label: "Submersion marine",
@@ -219,7 +219,7 @@ function buildFactors(
       col: "var(--blue)",
       src: "Géorisques · échelle communale",
       missing: !georisques?.flags.marineSubmersion,
-      tip: "Recense l'existence d'un périmètre de submersion marine sur la commune — littoral exposé à la montée des eaux et aux tempêtes. Détail à l'adresse dans le module Logement.",
+      tip: "Recense l'existence d'un périmètre de submersion marine sur la commune : littoral exposé à la montée des eaux et aux tempêtes. Détail à l'adresse dans le module Logement.",
     },
     {
       label: "Taux de boisement",
@@ -227,6 +227,7 @@ function buildFactors(
       col: "var(--green)",
       src: "ADEME · données communales",
       missing: boisementPct == null,
+      tip: "Le couvert arboré tempère les îlots de chaleur l'été et retient les sols. Il pèse aussi sur le feu : peu de végétation, peu de combustible ; beaucoup et sèche, le feu se propage plus vite.",
     },
   ];
 
@@ -478,7 +479,7 @@ export function QuartierDataBody({ communeName, scenarios, georisques, drought, 
   return (
     <div className="glass rounded-xl p-8 border-t-2 border-t-info">
       <h3 className="font-normal text-[26px] text-label mb-3 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
-        {communeName}, à l&apos;horizon {meta.year} — scénario France {meta.france}.
+        {communeName}, à l&apos;horizon {meta.year}, scénario France {meta.france}.
       </h3>
       {paragraphs.length > 0 ? (
         paragraphs.map((p, i) => (
