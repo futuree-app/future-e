@@ -6,12 +6,13 @@
 // pas les signaux ici.
 
 import type { EnrichmentResult } from "@/lib/commune-enrichment";
-import type { GeorisquesSummary } from "@/lib/georisques";
+import type { GeorisquesSummary, GasparCatnatSummary } from "@/lib/georisques";
 import type { HorizonKey } from "@/hooks/useHorizon";
 
 export type QuartierSourceKey =
   | "DRIAS"
   | "Géorisques"
+  | "GASPAR"
   | "VigiEau"
   | "Hub'Eau"
   | "ADEME";
@@ -19,6 +20,7 @@ export type QuartierSourceKey =
 export function deriveQuartierSources(
   enrichment: EnrichmentResult | null,
   georisques: GeorisquesSummary | null,
+  catnat: GasparCatnatSummary | null,
   horizon: HorizonKey,
 ): QuartierSourceKey[] {
   const sources = new Set<QuartierSourceKey>();
@@ -28,6 +30,7 @@ export function deriveQuartierSources(
   if (georisques?.flags.flood || georisques?.flags.marineSubmersion) {
     sources.add("Géorisques");
   }
+  if (catnat && catnat.total > 0) sources.add("GASPAR");
   if (enrichment?.eau?.drought) sources.add("Hub'Eau");
   if (enrichment?.ademe?.commune.territoire) sources.add("ADEME");
 

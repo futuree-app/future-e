@@ -487,3 +487,104 @@ export async function getGeorisquesParcelSummary(parcelCode: string) {
     throw error;
   }
 }
+
+// ─── GASPAR — historique des arrêtés CatNat (P1) ───────────────────────────
+// Angle Quartier : "histoire vécue du territoire" — combien de fois la commune
+// a été reconnue en état de catastrophe naturelle, depuis quand, et pour quels
+// aléas. Source GASPAR v1 (/gaspar/catnat, sans token), distincte de la
+// typologie de risques (/gaspar/risques) déjà utilisée pour les flags.
+
+type GasparCatnatItem = {
+  date_debut_evt?: string | null;
+  libelle_risque_jo?: string | null;
+};
+
+type GasparCatnatResponse = {
+  data?: GasparCatnatItem[] | null;
+  results?: number | null;
+};
+
+export type GasparCatnatSummary = {
+  /** Nombre total d'arrêtés CatNat sur la commune. */
+  total: number;
+  firstYear: number | null;
+  lastYear: number | null;
+  /** Répartition par famille d'aléa, triée par fréquence décroissante. */
+  byRisk: { label: string; count: number }[];
+  topRisk: string | null;
+};
+
+// Regroupe les libellés JO bruts en familles lisibles et stables.
+function simplifyCatnatRisk(raw: string): string {
+  const n = normalizeLabel(raw);
+  if (n.includes("submersion")) return "Submersion marine";
+  if (n.includes("inondation") || n.includes("coulee") || n.includes("nappe")) return "Inondations";
+  if (n.includes("secheresse") || n.includes("retrait") || n.includes("argile")) return "Sécheresse des sols";
+  if (n.includes("mouvement de terrain") || n.includes("glissement") || n.includes("eboulement")) return "Mouvements de terrain";
+  if (n.includes("cyclo") || n.includes("ouragan")) return "Cyclone";
+  if (n.includes("tempete")) return "Tempête";
+  if (n.includes("seisme") || n.includes("sismi")) return "Séisme";
+  if (n.includes("avalanche")) return "Avalanche";
+  if (n.includes("grele")) return "Grêle";
+  return raw.trim();
+}
+
+function parseEvtYear(value: string | null | undefined): number | null {
+  if (!value) return null;
+  const year = Number(value.split("/")[2]);
+  return Number.isFinite(year) && year > 1900 ? year : null;
+}
+
+async function loadGasparCatnatSummary(inseeCode: string): Promise<GasparCatnatSummary> {
+  const json = await fetchJson<GasparCatnatResponse>(
+    "/gaspar/catnat",
+    new URLSearchParams({ code_insee: inseeCode, page: "1", page_size: "500" }),
+  );
+
+  const items = json?.data ?? [];
+  const counts = new Map<string, number>();
+  let firstYear: number | null = null;
+  let lastYear: number | null = null;
+
+  for (const item of items) {
+    const label = item.libelle_risque_jo?.trim();
+    if (label) {
+      const family = simplifyCatnatRisk(label);
+      counts.set(family, (counts.get(family) ?? 0) + 1);
+    }
+    const year = parseEvtYear(item.date_debut_evt);
+    if (year != null) {
+      firstYear = firstYear == null ? year : Math.min(firstYear, year);
+      lastYear = lastYear == null ? year : Math.max(lastYear, year);
+    }
+  }
+
+  const byRisk = Array.from(counts.entries())
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count);
+
+  return {
+    total: typeof json?.results === "number" ? json.results : items.length,
+    firstYear,
+    lastYear,
+    byRisk,
+    topRisk: byRisk[0]?.label ?? null,
+  };
+}
+
+const catnatSummaryCache = new Map<string, Promise<GasparCatnatSummary>>();
+
+export async function getGasparCatnatSummary(inseeCode: string) {
+  const cacheKey = inseeCode.trim();
+
+  if (!catnatSummaryCache.has(cacheKey)) {
+    catnatSummaryCache.set(cacheKey, loadGasparCatnatSummary(cacheKey));
+  }
+
+  try {
+    return await catnatSummaryCache.get(cacheKey)!;
+  } catch (error) {
+    catnatSummaryCache.delete(cacheKey);
+    throw error;
+  }
+}

@@ -17,7 +17,6 @@ import { NextRequest } from "next/server";
 import { streamText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
-import { getGeorisquesSummary } from "@/lib/georisques";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -73,6 +72,9 @@ Si le payload contient une section "reperes_terrain_utilisateur", l'utilisateur 
 - S'ils contrastent avec les projections, nommez cet écart sobrement ("Le quartier paraît encore tenir, mais la trajectoire change ce confort").
 - Ne citez jamais les valeurs brutes des repères (jamais "vous avez répondu fragile"). Traduisez-les en lecture.
 - N'inventez pas de repères absents.
+
+HISTOIRE VÉCUE DU TERRITOIRE — ARRÊTÉS CATNAT
+Si le payload contient "historique_catnat", la commune a déjà été reconnue en état de catastrophe naturelle un certain nombre de fois (nombre_arretes, depuis depuis_annee, aléas dans aleas_principaux). C'est une mémoire vécue, pas une projection. Vous POUVEZ l'évoquer UNE fois, sobrement, pour ancrer le récit dans le passé réel du territoire : "la commune a déjà connu X reconnaissances de catastrophe naturelle depuis {année}, surtout liées à {aléa}". Règles : jamais alarmiste, jamais une liste, ne citez pas la source (ni GASPAR ni Géorisques), n'inventez aucun chiffre absent. Si le champ est absent ou nul, n'en parlez pas.
 
 PÉRIMÈTRE — MODULE QUARTIER
 Vous traitez : chaleur, sécheresse, eau, inondation, submersion, feux, qualité de l'air, sols, cadre de vie territorial, évolution de la commune.
@@ -179,10 +181,10 @@ export async function POST(req: NextRequest) {
 
   const meta = HORIZON_META[horizon];
 
-  const [enrichment, georisques] = await Promise.all([
-    gatherCommuneEnrichment(inseeCode).catch(() => null),
-    getGeorisquesSummary(inseeCode).catch(() => null),
-  ]);
+  // Socle commun : une seule passe, Géorisques + GASPAR inclus.
+  const enrichment = await gatherCommuneEnrichment(inseeCode).catch(() => null);
+  const georisques = enrichment?.georisques ?? null;
+  const catnat = enrichment?.catnat ?? null;
 
   const gwlData = enrichment?.drias?.commune.s?.[horizon]?.v ?? null;
   const displayName = communeName ?? enrichment?.ademe?.commune.nom ?? "votre commune";
@@ -234,6 +236,15 @@ export async function POST(req: NextRequest) {
           vieillissement_pct_65_plus: enrichment.ademe.commune.vieillissement_pct ?? null,
         }
       : null,
+    historique_catnat:
+      catnat && catnat.total > 0
+        ? {
+            nombre_arretes: catnat.total,
+            depuis_annee: catnat.firstYear,
+            derniere_annee: catnat.lastYear,
+            aleas_principaux: catnat.byRisk.slice(0, 3),
+          }
+        : null,
     reperes_terrain_utilisateur: shapeWorkbook(body.workbook),
   };
 

@@ -12,7 +12,6 @@ import { QuartierAside } from "@/components/report/QuartierClimatData";
 import QuartierSynthesis, {
   type WorkbookQuartier,
 } from "@/components/report/QuartierSynthesis";
-import { getGeorisquesSummary } from "@/lib/georisques";
 import { ModuleTracker } from "@/components/ModuleTracker";
 import { deriveQuartierSources, buildFallbackSummary } from "@/lib/quartier-signals";
 import { AskFutureInlineMount } from "@/components/AskFutureInlineMount";
@@ -35,10 +34,10 @@ export default async function RapportQuartierPage() {
   const inseeCode = profile?.home_insee_code ?? null;
   const initialWorkbook = normalizeWorkbook(profile?.workbook_quartier);
 
-  const [enrichment, georisques] = await Promise.all([
-    inseeCode ? gatherCommuneEnrichment(inseeCode) : null,
-    inseeCode ? getGeorisquesSummary(inseeCode).catch(() => null) : null,
-  ]);
+  // Socle commun : Géorisques + GASPAR inclus dans l'enrichissement.
+  const enrichment = inseeCode ? await gatherCommuneEnrichment(inseeCode) : null;
+  const georisques = enrichment?.georisques ?? null;
+  const catnat = enrichment?.catnat ?? null;
 
   const scenarios = enrichment?.drias?.commune.s ?? null;
   const territoire = enrichment?.ademe?.commune.territoire ?? null;
@@ -50,9 +49,9 @@ export default async function RapportQuartierPage() {
   // Sources mobilisées par horizon : pré-calculées côté serveur, le composant
   // client choisit via useHorizon. Évite de transférer tout enrichment.
   const sourcesByHorizon = {
-    gwl15: deriveQuartierSources(enrichment, georisques, "gwl15"),
-    gwl20: deriveQuartierSources(enrichment, georisques, "gwl20"),
-    gwl30: deriveQuartierSources(enrichment, georisques, "gwl30"),
+    gwl15: deriveQuartierSources(enrichment, georisques, catnat, "gwl15"),
+    gwl20: deriveQuartierSources(enrichment, georisques, catnat, "gwl20"),
+    gwl30: deriveQuartierSources(enrichment, georisques, catnat, "gwl30"),
   };
 
   return (
@@ -126,20 +125,11 @@ export default async function RapportQuartierPage() {
           >
             Ce que montrent les données
           </h2>
-          <QuartierAside communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} />
+          <QuartierAside communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} catnat={catnat} />
         </section>
 
-        {/* Repères de terrain */}
-        <section className="pt-14">
-          <QuartierWorkbook
-            userKey={account.userId}
-            commune={communeName}
-            inseeCode={inseeCode}
-            reportId={inseeCode}
-          />
-        </section>
-
-        {/* Une question ? — AskFuture inline (uniquement pour comptes payants) */}
+        {/* Une question ? — AskFuture inline (uniquement pour comptes payants) :
+            capte la curiosité à chaud, juste après la lecture */}
         <section className="pt-14">
           <AskFutureInlineMount
             placeholder={`Votre question sur ${displayName}…`}
@@ -148,6 +138,16 @@ export default async function RapportQuartierPage() {
               "Mon logement est-il concerné ?",
               "Quel avenir pour mes enfants ici ?",
             ]}
+          />
+        </section>
+
+        {/* Repères de terrain : geste de contribution, après s'être approprié le sujet */}
+        <section className="pt-14">
+          <QuartierWorkbook
+            userKey={account.userId}
+            commune={communeName}
+            inseeCode={inseeCode}
+            reportId={inseeCode}
           />
         </section>
 

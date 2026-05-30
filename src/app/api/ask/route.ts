@@ -15,6 +15,8 @@ import { createClient } from "@/lib/supabase/server";
 import { deriveCategories } from "@/lib/commune-categories";
 import { type CommuneFullData } from "@/lib/commune-data";
 import { type EaufranceSummary } from "@/lib/eaufrance";
+import { type VigieauSummary } from "@/lib/vigieau";
+import { type GeorisquesSummary, type GasparCatnatSummary } from "@/lib/georisques";
 import {
   gatherCommuneEnrichment,
   type ClimatData,
@@ -103,7 +105,7 @@ type ToolInput = {
 };
 
 // ─── System prompt ─────────────────────────────────────────────────────────
-const SYSTEM_PROMPT_BASE = `Vous êtes l'assistant de futur•e. Votre rôle : interpréter les données territoriales publiques (DRIAS, Géorisques, ATMO, ANSES, INSEE, Hub'Eau) pour aider l'utilisateur à comprendre ce qu'elles impliquent concrètement pour sa vie dans sa commune.
+const SYSTEM_PROMPT_BASE = `Vous êtes l'assistant de futur•e. Votre rôle : interpréter les données territoriales publiques (DRIAS, Géorisques, GASPAR, VigiEau, ATMO, ANSES, INSEE, Hub'Eau) pour aider l'utilisateur à comprendre ce qu'elles impliquent concrètement pour sa vie dans sa commune.
 
 PÉRIMÈTRE STRICT
 Vous répondez uniquement sur :
@@ -338,10 +340,68 @@ function formatEauBlock(data: EaufranceSummary | null): string {
   return out.join("\n");
 }
 
+function formatGeorisquesBlock(g: GeorisquesSummary | null): string {
+  if (!g) {
+    return "[Géorisques] Pas de données de risques naturels Géorisques disponibles pour cette commune.";
+  }
+  const f = g.flags;
+  const present = [
+    f.flood && "inondation fluviale",
+    f.marineSubmersion && "submersion marine",
+    f.landslide && "mouvement de terrain",
+    f.clay && "retrait-gonflement des argiles",
+    f.wildfire && "feux de forêt",
+    f.storm && "tempête",
+    f.seismic && "sismicité",
+  ].filter(Boolean) as string[];
+  const out: string[] = ["[Géorisques — risques naturels recensés à l'échelle de la commune]"];
+  out.push(
+    present.length > 0
+      ? `- Risques recensés : ${present.join(", ")}.`
+      : "- Aucun périmètre de risque naturel majeur recensé à l'échelle communale.",
+  );
+  if (g.seismic?.label) out.push(`- Zone sismique : ${g.seismic.label}.`);
+  out.push("- Échelle commune. L'exposition précise d'une adresse relève du module Logement.");
+  return out.join("\n");
+}
+
+function formatGasparBlock(c: GasparCatnatSummary | null): string {
+  if (!c || c.total === 0) {
+    return "[GASPAR] Aucune reconnaissance de catastrophe naturelle recensée (ou donnée indisponible) pour cette commune.";
+  }
+  const out: string[] = ["[GASPAR — historique des arrêtés de catastrophe naturelle (CatNat)]"];
+  out.push(
+    `- ${c.total} reconnaissance${c.total > 1 ? "s" : ""} de l'état de catastrophe naturelle${c.firstYear ? ` depuis ${c.firstYear}` : ""}${c.lastYear ? `, la plus récente en ${c.lastYear}` : ""}.`,
+  );
+  if (c.byRisk.length > 0) {
+    out.push(`- Par aléa : ${c.byRisk.map((rk) => `${rk.label} (${rk.count})`).join(", ")}.`);
+  }
+  return out.join("\n");
+}
+
+function formatVigieauBlock(v: VigieauSummary | null): string {
+  if (!v || !v.maxLevel) {
+    return "[VigiEau] Aucune restriction sécheresse en cours (ou donnée indisponible) pour cette commune.";
+  }
+  const labels: Record<string, string> = {
+    crise: "crise",
+    alerte_renforcee: "alerte renforcée",
+    alerte: "alerte",
+    vigilance: "vigilance",
+  };
+  const lvl = labels[v.maxLevel] ?? v.maxLevel;
+  const bassin = v.topZone?.label ? ` sur le bassin ${v.topZone.label}` : "";
+  const fin = v.topZone?.endDate ? ` (jusqu'au ${v.topZone.endDate})` : "";
+  return `[VigiEau — arrêté sécheresse préfectoral en cours]\n- Niveau ${lvl}${bassin}${fin}.`;
+}
+
 function formatEnrichmentBlock(enr: EnrichmentResult): string {
   return [
     formatAdemeBlock(enr.ademe),
     formatDriasBlock(enr.drias),
+    formatGeorisquesBlock(enr.georisques),
+    formatGasparBlock(enr.catnat),
+    formatVigieauBlock(enr.vigieau),
     formatEauBlock(enr.eau),
   ].join("\n\n");
 }
@@ -400,12 +460,18 @@ function buildUserProfileText(profile: ProfileRow): string {
     tendu: "le cadre de vie se tend l'été",
     fragilise: "le quartier montre déjà ses limites",
   };
+  const CHANGE_LABELS: Record<string, string> = {
+    faible: "peu de changement perçu ces dernières années",
+    visible: "quelques évolutions visibles ces dernières années",
+    fort: "beaucoup de changements perçus ces dernières années",
+  };
   const workbook = profile.workbook_quartier as Record<string, string> | null | undefined;
   if (workbook && typeof workbook === "object" && !Array.isArray(workbook)) {
     const obs: string[] = [];
     if (workbook.heat) obs.push(`- Vécu estival : ${HEAT_LABELS[workbook.heat] ?? workbook.heat}`);
     if (workbook.water) obs.push(`- Rapport à l'eau : ${WATER_LABELS[workbook.water] ?? workbook.water}`);
     if (workbook.shelter) obs.push(`- Cadre de vie estival : ${SHELTER_LABELS[workbook.shelter] ?? workbook.shelter}`);
+    if (workbook.change) obs.push(`- Changements perçus : ${CHANGE_LABELS[workbook.change] ?? workbook.change}`);
     if (typeof workbook.note === "string" && workbook.note.trim()) {
       obs.push(`- Note terrain libre : ${workbook.note.trim()}`);
     }
@@ -500,7 +566,10 @@ export async function POST(request: NextRequest) {
     const anyEnrichmentData =
       enrichment.ademe !== null ||
       enrichment.drias !== null ||
-      enrichment.eau !== null;
+      enrichment.eau !== null ||
+      enrichment.georisques !== null ||
+      enrichment.catnat !== null ||
+      enrichment.vigieau !== null;
 
     const systemPrompt = `${SYSTEM_PROMPT_BASE}
 

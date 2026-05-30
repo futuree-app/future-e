@@ -430,15 +430,30 @@ export function QuartierWorkbook({ userKey, commune, inseeCode, reportId }: Quar
       >
         <div style={S.head}>
           <div>
-            <p style={S.kicker}>{open ? "Observation du territoire · Ouvert" : "Observation du territoire"}</p>
             <h3 style={S.title}>Vos repères de terrain</h3>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
             <span style={S.progressPill(completionPct)}>
               {completion}/5{completionPct === 1 ? " ✓" : ""}
             </span>
-            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: C.dim, letterSpacing: "0.04em" }}>
-              {open ? "▲" : "▼"}
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "5px 12px",
+                borderRadius: 100,
+                border: `1px solid ${C.border}`,
+                background: "rgba(255,255,255,0.04)",
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 11,
+                color: C.muted,
+                letterSpacing: "0.04em",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {open ? "Réduire" : "Compléter"}
+              <span style={{ fontSize: 9 }}>{open ? "▲" : "▼"}</span>
             </span>
           </div>
         </div>
@@ -452,23 +467,9 @@ export function QuartierWorkbook({ userKey, commune, inseeCode, reportId }: Quar
       </button>
 
       {!open && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.65, margin: 0 }}>
-            Vos observations de terrain complètent les données publiques et affinent la lecture de votre commune.
-          </p>
-          <p
-            style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 10,
-              letterSpacing: "0.08em",
-              color: C.dim,
-              margin: 0,
-              textTransform: "uppercase",
-            }}
-          >
-            Stocké localement dans votre navigateur
-          </p>
-        </div>
+        <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.65, margin: 0 }}>
+          Complétez les données publiques avec votre expérience du territoire.
+        </p>
       )}
 
       {/* 3 questions à choix */}

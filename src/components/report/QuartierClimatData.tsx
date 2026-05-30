@@ -1,7 +1,7 @@
 "use client";
 
 import { useHorizon, HORIZON_META } from "@/hooks/useHorizon";
-import type { GeorisquesSummary } from "@/lib/georisques";
+import type { GeorisquesSummary, GasparCatnatSummary } from "@/lib/georisques";
 import type { EaufranceSummary } from "@/lib/eaufrance";
 import type { VigieauSummary, DroughtLevel } from "@/lib/vigieau";
 
@@ -36,6 +36,7 @@ type SharedProps = {
   drought: Drought | null;
   territoire: Territoire | null;
   vigieau: VigieauSummary | null;
+  catnat?: GasparCatnatSummary | null;
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -49,6 +50,7 @@ function buildFactors(
   horizonKey: string,
   georisques: GeorisquesSummary | null,
   territoire: Territoire | null,
+  catnat?: GasparCatnatSummary | null,
 ): Factor[] {
   const meta = HORIZON_META[horizonKey as keyof typeof HORIZON_META] ?? HORIZON_META.gwl20;
   const heatDays = r(gwlData?.["NORTX35D_yr"]);
@@ -61,7 +63,7 @@ function buildFactors(
     ? Math.round(territoire.taux_boisement)
     : null;
 
-  return [
+  const factors: Factor[] = [
     {
       label: "Jours chauds (> 30°C)",
       val: hotDays != null ? `${hotDays} jours/an en ${meta.year}` : "—",
@@ -119,6 +121,25 @@ function buildFactors(
       missing: boisementPct == null,
     },
   ];
+
+  // Carte CatNat (GASPAR) — ajoutée seulement quand l'appelant fournit la donnée
+  // (QuartierAside). Histoire vécue : nombre de reconnaissances depuis l'origine.
+  if (catnat !== undefined) {
+    const hasCatnat = !!catnat && catnat.total > 0;
+    factors.push({
+      label: "Catastrophes naturelles reconnues",
+      val: hasCatnat
+        ? `${catnat!.total} arrêté${catnat!.total > 1 ? "s" : ""}${catnat!.firstYear ? ` depuis ${catnat!.firstYear}` : ""}`
+        : "—",
+      col: "var(--blue)",
+      src: hasCatnat && catnat!.topRisk
+        ? `Géorisques · GASPAR · surtout ${catnat!.topRisk.toLowerCase()}`
+        : "Géorisques · GASPAR · arrêtés CatNat",
+      missing: !hasCatnat,
+    });
+  }
+
+  return factors;
 }
 
 function buildParagraphs(
@@ -220,10 +241,10 @@ function formatFrDate(iso: string): string {
 
 // ─── FactorGrid (grille horizontale de cartes) ────────────────────────────────
 
-export function QuartierAside({ communeName: _communeName, scenarios, georisques, territoire }: Omit<SharedProps, "drought" | "vigieau">) {
+export function QuartierAside({ communeName: _communeName, scenarios, georisques, territoire, catnat }: Omit<SharedProps, "drought" | "vigieau">) {
   const [horizon] = useHorizon();
   const gwlData = scenarios?.[horizon]?.v ?? null;
-  const factors = buildFactors(gwlData, horizon, georisques, territoire);
+  const factors = buildFactors(gwlData, horizon, georisques, territoire, catnat ?? null);
 
   return (
     <div>
@@ -286,11 +307,10 @@ export function QuartierSectionTitle({ communeName, scenarios, georisques }: Pic
 
 // ─── DataBody (bloc principal de données) ─────────────────────────────────────
 
-export function QuartierDataBody({ communeName, scenarios, georisques, drought, territoire, vigieau }: SharedProps) {
+export function QuartierDataBody({ communeName, scenarios, georisques, drought, vigieau }: SharedProps) {
   const [horizon] = useHorizon();
   const meta = HORIZON_META[horizon];
   const gwlData = scenarios?.[horizon]?.v ?? null;
-  const factors = buildFactors(gwlData, horizon, georisques, territoire);
   const paragraphs = communeName ? buildParagraphs(communeName, gwlData, horizon, georisques, drought, vigieau) : [];
 
   return (
