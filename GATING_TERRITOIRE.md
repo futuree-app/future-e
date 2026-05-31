@@ -80,3 +80,67 @@ acheté en posant `active_insee_code` via `/api/territoire/activer` (aucune
 vérification de grant). Exploitable, pas seulement théorique. Corrigé par le
 contrôle territoire-aware ci-dessus : la lecture est désormais gatée sur le grant,
 le repli est silencieux sur la résidence.
+
+## État de la base (2026-05-31)
+
+Migration `supabase/12_init_report_grants.sql` **appliquée en production** (projet
+`future·e`, `xkewgsccadjmondzmjxj`) : table `report_grants` (RLS select-own),
+colonnes `user_profiles.active_insee_code` / `active_commune`, colonne
+`payments.target_insee`. Advisor sécurité : aucun warning sur `report_grants`.
+
+## V2 — multi-compte / multi-territoire : ce qui reste à faire
+
+La V1 est volontairement mono-territoire-actif et mono-compte. Pour passer à un
+vrai compte multi-territoires (et au foyer / multi-compte), voici la dette
+identifiée, par ordre logique. Rien de tout ça n'est nécessaire pour `/ou-vivre`
+ni pour vendre le rapport unitaire ; c'est le palier au-dessus.
+
+### 1. Découpler l'accès du « territoire actif » (cœur du chantier)
+- Aujourd'hui un seul `active_insee_code` à la fois : l'utilisateur consulte UN
+  territoire, bascule via overlay. En V2, un compte doit pouvoir **lister et
+  ouvrir plusieurs territoires débloqués** sans bascule destructive.
+- `report_grants` porte déjà le modèle (1 ligne = 1 territoire). Ce qui manque :
+  une **vue « mes territoires »** (liste des grants + résidence) comme porte
+  d'entrée, à la place de l'overlay unique. L'overlay `active_*` peut rester comme
+  « dernier consulté » mais cesse d'être l'unique chemin de lecture.
+- Conséquence routing : `/rapport` devrait accepter un INSEE explicite
+  (`/rapport/[insee]` ou `?territoire=`) plutôt que de dépendre de l'overlay en
+  base. Gating inchangé : `resolveReadableTerritory` vérifie déjà le grant, il
+  suffira de lui passer l'INSEE demandé au lieu de l'overlay.
+
+### 2. Gating : retirer le rôle « source de vérité » de report_access
+- En V1, `report_access=complete` reste le juge des capacités globales ET co-juge
+  implicite du rapport résidence. En V2, le rapport **résidence** doit lui aussi
+  devenir un grant (`source='direct'` sur `home_insee_code`) pour un modèle
+  uniforme « 1 territoire lu = 1 grant ».
+- `report_access` ne garderait alors que les capacités transverses (dashboard,
+  suivi, foyer, newsletter). À faire : écrire un grant résidence à l'achat
+  one-shot historique + migration de données pour les comptes existants.
+
+### 3. Pack Décision (déclencheur commercial de la V2)
+- Écrit N grants `source='pack_decision'` en un paiement. Bloqué tant que le point
+  1 n'existe pas (sinon pas de surface pour consulter les N territoires).
+- Pricing à câbler dans `create-payment-intent` (un PaymentIntent, N grants au
+  webhook) et UI de sélection des territoires comparés.
+
+### 4. Foyer / multi-compte (households)
+- Les tables `households` / `household_members` existent déjà (vides). En V2
+  foyer, un grant doit pouvoir être **partagé au foyer**, pas seulement au
+  `user_id`. À trancher : grant porté par `household_id` quand le compte est en
+  mode foyer, ou duplication par membre. Impacte la policy RLS `select_own`
+  (devient `select_own_or_household`).
+- `household_mode_enabled` est déjà posé sur l'entitlement foyer ; rien n'est
+  branché côté lecture.
+
+### 5. Hygiène / dette mineure
+- `/api/territoire/activer` ne vérifie aucun droit (commodité UX). Sans risque
+  d'accès depuis le gating lecture, mais en V2 multi-territoires, le poser devrait
+  exiger un grant pour éviter les overlays « fantômes ». Trivial à ajouter quand
+  le point 1 sera fait.
+- `payments.target_insee` est tracé mais pas réconcilié avec `report_grants` :
+  pour de l'analytics/SAV multi-territoires, une jointure ou une vue serait utile.
+
+### Invariant à préserver dans toute la V2
+La résidence (`home_insee_code` / `home_commune`) ne change jamais par un achat.
+Tout le reste est overlay / grant. C'est la règle qui a guidé la V1, elle tient
+pour la V2.
