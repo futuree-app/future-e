@@ -319,6 +319,36 @@ Principe de prudence V1 : **étroite et increvable sur les incompatibilités év
 
 Un rapport se génère à la demande sur la commune choisie. Un comparateur doit **scorer les ~35 000 communes** sur des indicateurs harmonisés et comparables nationalement, plus une couche **viabilité/services** qui n'existe pas encore. C'est le vrai gros lift de la V1, à budgéter comme tel, bien plus que l'interface.
 
+### 5.12 Les trois portes d'entrée et la place de chaque brique (doctrine de parcours)
+
+Le comparateur de projet de vie devient l'entrée la plus différenciante, mais **pas la seule entrée légitime**. La phrase « je ne sais pas où regarder » décrit le comparateur de projet de vie, pas futur•e dans son ensemble. Le produit répond à trois situations distinctes :
+
+1. **Comprendre un territoire connu** : « j'y vis », « j'achète ici », « mon client habite ici », « que devient ce territoire ? ». Porte historique et **porte B2B** (assureur, CGP, notaire, diagnostiqueur), qui arrivent avec une adresse déjà identifiée, pas avec un projet de mobilité.
+2. **Arbitrer entre plusieurs territoires** : « j'hésite entre plusieurs options », « lequel est le plus cohérent ? ».
+3. **Découvrir de nouveaux territoires** : « je ne sais pas encore où regarder ».
+
+Chaîne de parcours cible :
+
+> Découvrir → comparateur de projet de vie → Arbitrer → comparateur de communes → Comprendre → rapport → Approfondir → AskFuture rapport → Suivre → Le Fil
+
+**Le comparateur de communes change de statut.** Il n'est plus une porte d'entrée de premier niveau, il devient un **outil d'arbitrage de shortlist** (vue côte-à-côte des 3 résultats du projet de vie, et pages SEO « X ou Y »). Il est rétrogradé du hero, mais **ni supprimé ni caché** : footer, navigation secondaire et pages SEO restent des chemins trouvables pour les profils à forte intention qui arrivent déjà avec une shortlist en tête.
+
+**Les quatre niveaux de réponse, à garder nets** (frontière éditoriale verrouillée) :
+
+| Brique | Question |
+|---|---|
+| Comparateur de communes / de projet de vie | Où regarder ? |
+| AskFuture comparateur | Pourquoi regarder ici ? |
+| Rapport | Que faut-il comprendre ? |
+| AskFuture rapport | Explorons en profondeur. |
+
+**Décision actée (2026-05-31) : le wizard n'est pas universel, il reste attaché au parcours « commune connue ».** Le `ReportWizard` croise un profil de personne (âge du logement, mobilité, santé, projet d'achat) avec une commune unique pour répondre « que devient ma vie ici ? ». Ces questions ont du sens quand l'utilisateur part de sa commune actuelle, d'une commune où il a déjà un projet concret, ou d'un logement à qualifier. Après le comparateur de projet de vie, il est encore en découverte : il ne sait pas s'il vivra là, dans quel logement, s'il achètera ou louera, ni si ce territoire restera dans sa shortlist. Demander l'âge du logement à ce stade casse le fil narratif et produit des signaux faux.
+
+Deux rampes de conversion distinctes :
+
+- **Parcours commune connue** : commune saisie → wizard → aperçu personnalisé → rapport. Le wizard reste le point de conversion ici.
+- **Parcours territoires découverts** (depuis `/ou-vivre`) : projet de vie → 3 territoires → AskFuture comparateur scellé → comparer ces territoires (optionnel) → explorer un territoire → **paywall territoire** → **rapport généré sur l'INSEE seul**. Le profil et la personnalisation sont collectés ensuite, dans le rapport payant si nécessaire. Le CTA « Explorer ce territoire » de `/ou-vivre` **n'ouvre pas le wizard**.
+
 ---
 
 ## 6. Prochaines décisions à prendre
