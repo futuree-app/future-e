@@ -228,14 +228,111 @@ Mots écartés en amont : **Surveillance** (anxiogène, casse la marque), **Veil
 
 ---
 
-## 5. Prochaines décisions à prendre
+## 5. Comparateur de vie et modèle multi-territoires
+
+### 5.1 Le changement de nature du produit
+
+futur•e passe d'un **produit d'analyse** (« Que vaut cette commune ? ») à un **produit d'orientation** (« Où est ma place ? »). Le comparateur de vie n'est pas une fonctionnalité de plus : c'est potentiellement la **nouvelle porte d'entrée** du produit, et une catégorie plus large que le rapport.
+
+Funnel actuel :
+> Nom de commune → Rapport → Le Fil
+
+Funnel cible :
+> Projet de vie → Comparateur → Rapport → AskFuture → Le Fil
+
+Cette bascule colle au slogan « Choisir où vivre dans un monde qui change ». La question « Où devrais-je vivre ? » a un marché plus large et plus fréquent que « Que vaut cette commune ? ».
+
+### 5.2 Parcours produit visé
+
+1. **Texte libre** : l'utilisateur décrit son projet de vie (« Nous avons un enfant de 5 ans et cherchons un endroit sain pour grandir »).
+2. **Reformulation IA** : futur•e reformule et confirme la compréhension. C'est ici qu'on **extrait les contraintes dures et les préférences molles** (voir 5.3), sans afficher de formulaire.
+3. **Cadrage optionnel et conversationnel** : « Souhaitez-vous limiter la recherche à une région ? » → boutons « Toute la France » / « Oui, préciser ». Pas de filtres région/taille imposés d'emblée : on ne retombe pas dans un moteur immobilier classique.
+4. **Résultats** : 3 territoires compatibles + synthèse courte.
+5. **« Pourquoi ces territoires ? »** (V2) : explicitation des critères privilégiés (qualité de l'air, exposition limitée aux fortes chaleurs, services, cadre familial). Transforme le moteur en **conseiller**.
+
+### 5.3 Le vrai défi n'est pas le scoring, c'est l'absurdité
+
+Le risque produit n'est pas un classement imparfait, c'est un résultat manifestement absurde (« proche de l'océan » qui renvoie Angoulême parce que son score climat est excellent). Un seul résultat absurde et l'utilisateur conclut « ce truc ne comprend rien ».
+
+Règle d'architecture : **séparer contraintes dures et préférences molles.**
+
+- **Contraintes dures (éliminent avant tout scoring)** : littoral, proximité d'une zone, budget, « pas trop loin de ma famille ». Filtres d'exclusion.
+- **Préférences molles (optimisées par score)** : qualité de l'air, chaleur, pollution, vitalité.
+
+Les filtres existent donc, mais ils sont **déduits du texte libre, pas demandés**. On garde le conversationnel et on devient increvable sur les incompatibilités évidentes, même avec un scoring V1 modeste.
+
+### 5.4 Compatible ET réaliste
+
+Optimiser le climat dans le vide mène à la Creuse, la Lozère, le Cantal : climat idéal, mais personne n'y déménage. futur•e ne minimise pas le risque climatique, il cherche **un lieu où une vie tient** : climat + viabilité (services, emploi, connexion, vitalité). C'est aussi une vérité que la voix éditoriale peut assumer (« les havres climatiques les plus purs se vident ; voici la frontière réaliste »). C'est un différenciateur défendable, pas un compromis.
+
+### 5.5 Logique économique : le comparateur ne se vend pas, il débloque
+
+Le comparateur est un **produit de recherche** (créer l'intention), pas un produit d'analyse (générer du revenu direct). Analogie : Google ne vend pas la recherche, SeLoger ne vend pas le moteur, Meilleurs Agents ne vend pas l'estimation. Ces outils créent l'intention ; le revenu vient après.
+
+Donc : **le comparateur est gratuit** (3 territoires + synthèse courte + aperçus), et il sert de machine d'acquisition vers les produits payants.
+
+Garde-fou non négociable : **le matching et le classement sont déterministes** (calcul sur indicateurs pré-calculés, zéro appel LLM par recherche). L'IA n'intervient que sur deux points bon marché et cachables : (a) parser le texte libre en contraintes + préférences, (b) le « pourquoi ces territoires ». La prose narrative coûteuse reste dans le rapport payant. Sans cette règle, le comparateur gratuit devient une machine à brûler des tokens.
+
+### 5.6 Le compte devient centré personne/foyer, pas commune
+
+Le comparateur casse l'hypothèse « 1 utilisateur = 1 commune = 1 rapport ». Le compte se réorganise autour d'une personne ou d'un foyer qui détient une **collection de territoires** :
+
+- **Mon territoire actuel** (ex. La Rochelle)
+- **Territoires suivis** (ex. Vannes, Angoulême)
+- **Territoires explorés** (ex. Niort, Rennes)
+- **Mes rapports** : la liste des rapports achetés, par territoire.
+
+Le rapport devient un **produit unitaire** (un territoire), accumulable dans le compte.
+
+### 5.7 Échelle de prix consolidée
+
+| Palier | Prix | Contenu |
+|---|---|---|
+| **Comparateur** | Gratuit | Projet de vie → 3 territoires compatibles + synthèse courte + aperçus |
+| **Rapport** | 19 € (14 € fondateur) | Analyse complète d'un territoire, modules, AskFuture |
+| **Pack Décision** | 39 € | 3 territoires (composé depuis la sortie du comparateur). **Probable hero SKU.** |
+| **Le Fil futur•e** | 49 €/an | 1 territoire principal (dashboard vivant complet) + 1 à 2 territoires observés (Signaux + mention mensuelle). Foyer : davantage d'observés. |
+
+Le **Pack Décision** est sans doute le meilleur produit : 3 rapports valent 57 € à l'unité, le pack à 39 € fait *deal* et monte le panier moyen. Surtout, il change la proposition de valeur : on n'achète plus « un rapport » mais « de l'aide à choisir entre plusieurs futurs », ce qui vaut psychologiquement bien plus que 19 €. Son CTA est déjà écrit par le comparateur (« Explorer ces 3 territoires, 39 € »).
+
+### 5.8 Le funnel le plus puissant : Pack Décision → Le Fil
+
+Le Pack et Le Fil ne sont pas séparés : **le Pack est le meilleur point d'entrée du Fil.** Qui achète 3 rapports pour décider veut suivre ces territoires *pendant* qu'il décide (la décision dure des mois).
+
+> Pack Décision 39 € (3 rapports) → « Gardez votre shortlist en veille pendant que vous décidez » → Le Fil 49 €/an (1 principal + territoires observés).
+
+C'est l'usage qui justifie enfin les « territoires observés » du Fil, et il branche directement sur l'upsell Foyer déjà prévu (Foyer = plus de territoires observés). Le principal a le dashboard vivant complet ; les observés n'ont que les Signaux et une mention dans la lecture mensuelle (léger à produire).
+
+### 5.9 SEO : la longue traîne climato-consciente
+
+Le head term (« où vivre avec un enfant ») est saturé (SeLoger, Meilleurs Agents, palmarès presse). futur•e ne gagne pas là frontalement. Sa mine d'or est la **longue traîne de la relocation climat** : « ville fraîche pour la retraite », « où vivre près de l'océan sans risque de submersion », « commune où l'eau ne manquera pas en 2050 ». Concurrence quasi nulle, angle futur•e gagnant. Objectif : **posséder la longue traîne, pas concurrencer le palmarès des villes.**
+
+### 5.10 Objectif d'apprentissage de la V1
+
+La V1 ne sert pas à valider le scoring ni l'algorithme. Elle sert à répondre à une question : **les gens préfèrent-ils commencer par leur projet de vie plutôt que par une commune ?**
+
+Signal mesurable : le taux de conversion **comparateur → rapport/pack**, comparé à celui des entrées par nom de commune. Si le trafic comparateur convertit mieux, la thèse « machine d'acquisition » est validée ; s'il convertit moins, c'est un canal de notoriété, pas d'acquisition. Instrumenter les deux origines dès le jour 1.
+
+Principe de prudence V1 : **étroite et increvable sur les incompatibilités évidentes** plutôt que large et maligne. Accepter un scoring imparfait, refuser tout résultat absurde.
+
+### 5.11 Le vrai coût de la V1 est la data, pas l'UI
+
+Un rapport se génère à la demande sur la commune choisie. Un comparateur doit **scorer les ~35 000 communes** sur des indicateurs harmonisés et comparables nationalement, plus une couche **viabilité/services** qui n'existe pas encore. C'est le vrai gros lift de la V1, à budgéter comme tel, bien plus que l'interface.
+
+---
+
+## 6. Prochaines décisions à prendre
 
 1. Trancher le prix récurrent : **49 €/an** (recommandé comme mise en avant) vs 9 €/mois (secondaire).
-2. Acter rapport **14 € fondateur / 19,99 € public**.
+2. Acter rapport **14 € fondateur / 19,99 € public** (ou 19 € net dans l'échelle comparateur).
 3. Nom : **Le Fil futur•e** (validé). À tester sur la compréhension immédiate (Le Fil vs Les Signaux) et sur la connotation feed.
 4. Réécrire la mécanique de crédit 14 € si Le Fil devient annuel.
 5. Décider du séquencement : lecture mensuelle artisanale d'abord (rétention), moteur de Signaux et alertes ensuite.
 6. Fixer le prix et le périmètre du palier Foyer.
+7. Valider le passage du compte à un modèle **personne/foyer multi-territoires** (actuel / suivis / explorés / mes rapports).
+8. Acter le **Pack Décision (39 €, 3 territoires)** et le funnel Pack → Le Fil.
+9. Décider du périmètre data V1 du comparateur : indicateurs nationaux comparables + couche viabilité/services.
+10. Confirmer la règle de **matching déterministe** (coût) et l'architecture **contraintes dures vs préférences molles** (anti-absurdité).
 
 ---
 
