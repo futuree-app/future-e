@@ -8,6 +8,7 @@
 // et propose des suggestions cliquables transmises par le module appelant.
 
 import { createClient } from "@/lib/supabase/server";
+import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
 import { AskFuture } from "./AskFuture";
 
 const ONE_SHOT_QUOTA = 3;
@@ -28,7 +29,7 @@ export async function AskFutureInlineMount({ suggestions, placeholder }: Props) 
   const [{ data: profile }, { data: account }] = await Promise.all([
     supabase
       .from("user_profiles")
-      .select("home_insee_code, home_commune")
+      .select(TERRITORY_SELECT)
       .eq("user_id", user.id)
       .maybeSingle(),
     supabase
@@ -38,7 +39,8 @@ export async function AskFutureInlineMount({ suggestions, placeholder }: Props) 
       .maybeSingle(),
   ]);
 
-  if (!profile?.home_insee_code) return null;
+  const territory = await resolveReadableTerritory(supabase, user.id, profile);
+  if (!territory.inseeCode) return null;
 
   const plan = account?.plan ?? "free";
   if (plan === "free") return null;
@@ -59,8 +61,8 @@ export async function AskFutureInlineMount({ suggestions, placeholder }: Props) 
   return (
     <AskFuture
       variant="inline"
-      communeInsee={profile.home_insee_code}
-      communeName={profile.home_commune ?? "votre commune"}
+      communeInsee={territory.inseeCode}
+      communeName={territory.communeName ?? "votre commune"}
       questionsUsed={questionsUsed}
       questionsMax={questionsMax}
       suggestions={suggestions}

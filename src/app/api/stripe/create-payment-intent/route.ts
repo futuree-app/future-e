@@ -13,7 +13,8 @@ const PRODUCT_PRICES: Record<string, { amountEur: number; stripePriceId: string 
 
 export async function POST(request: Request) {
   try {
-    const { productType } = await request.json();
+    const { productType, targetInsee, targetCommune, source, rank } =
+      await request.json();
 
     if (typeof productType !== "string" || productType.trim().length === 0) {
       return NextResponse.json(
@@ -30,6 +31,20 @@ export async function POST(request: Request) {
       );
     }
 
+    // Territoire ciblé (parcours comparateur). Optionnel : sans lui, achat sur
+    // la commune de résidence (comportement historique). On valide un vrai code
+    // INSEE à 5 caractères pour ne jamais propager un code postal (piège connu).
+    const cleanInsee =
+      typeof targetInsee === "string" && /^[0-9AB][0-9]{4}$/i.test(targetInsee.trim())
+        ? targetInsee.trim().toUpperCase()
+        : "";
+    const cleanCommune =
+      typeof targetCommune === "string" ? targetCommune.trim().slice(0, 120) : "";
+    const cleanSource =
+      source === "comparateur_vie" || source === "pack_decision" ? source : "direct";
+    const cleanRank =
+      Number.isInteger(rank) && rank >= 1 && rank <= 3 ? String(rank) : "";
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -45,6 +60,10 @@ export async function POST(request: Request) {
         userEmail: user?.email ?? "",
         productType: productType.trim(),
         stripePriceId: priceConfig.stripePriceId,
+        targetInsee: cleanInsee,
+        targetCommune: cleanCommune,
+        grantSource: cleanSource,
+        grantRank: cleanRank,
       },
     });
 

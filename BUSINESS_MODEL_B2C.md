@@ -284,6 +284,8 @@ Le comparateur casse l'hypothèse « 1 utilisateur = 1 commune = 1 rapport ». L
 
 Le rapport devient un **produit unitaire** (un territoire), accumulable dans le compte.
 
+**Résidence et territoire actif de lecture sont deux choses distinctes (acté V1).** Acheter le rapport d'un territoire exploré ne déplace pas le domicile de l'utilisateur : il habite toujours sa commune de résidence. On introduit donc dès la V1 la notion de **territoire actif de lecture** : la résidence reste fixe (`home_insee_code` / `home_commune`), et le territoire consulté est un état séparé (`active_insee_code` / `active_commune`, vide par défaut = on consulte la résidence). Après un achat depuis le comparateur, l'utilisateur arrive sur le rapport du territoire acheté avec un bandeau « Vous consultez {commune}. Revenir à {résidence}. ». Les rapports achetés sont tracés par territoire dans une table `report_grants` (un grant = un territoire débloqué), déjà compatible Pack Décision (trois grants) et futur compte multi-territoires, sans en construire la refonte maintenant.
+
 ### 5.7 Échelle de prix consolidée
 
 | Palier | Prix | Contenu |

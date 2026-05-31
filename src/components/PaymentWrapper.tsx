@@ -5,18 +5,29 @@ import { Elements } from "@stripe/react-stripe-js";
 import { stripePromise } from "@/lib/stripe-client";
 import { PaymentForm } from "@/components/PaymentForm";
 
+// Territoire ciblé optionnel (parcours comparateur). Sans lui, l'achat porte
+// sur la commune de résidence (comportement historique du checkout).
+type PaymentGrant = {
+  targetInsee: string;
+  targetCommune: string | null;
+  source: string;
+  rank: number | null;
+};
+
 type PaymentWrapperProps = {
   amount: number;
   productType: string;
   onSuccess: () => void;
+  grant?: PaymentGrant;
 };
 
 export function PaymentWrapper({
   amount,
   productType,
   onSuccess,
+  grant,
 }: PaymentWrapperProps) {
-  const requestKey = `${amount}:${productType}`;
+  const requestKey = `${amount}:${productType}:${grant?.targetInsee ?? ""}`;
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [clientSecretKey, setClientSecretKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +39,14 @@ export function PaymentWrapper({
     fetch("/api/stripe/create-payment-intent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount, productType }),
+      body: JSON.stringify({
+        amount,
+        productType,
+        targetInsee: grant?.targetInsee,
+        targetCommune: grant?.targetCommune,
+        source: grant?.source,
+        rank: grant?.rank,
+      }),
     })
       .then(async (response) => {
         const payload = await response.json();

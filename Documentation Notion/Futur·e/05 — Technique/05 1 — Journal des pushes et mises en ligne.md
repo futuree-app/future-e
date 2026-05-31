@@ -1147,3 +1147,291 @@ Pour chaque lot poussé :
 - Intégration des sources Couche 2 prioritaires : P1 GASPAR (CatNat historiques), P4 BDIFF (incendies historiques), P11 zonage H1/H2/H3, P8 équipements INSEE
 - La carte « Conditions feu » repose sur 10/17 modèles seulement (les modèles WRF, ALADIN_HadGEM2, HIRHAM5, HadREM3-GA7, RegCM4-6_MPI-ESM ne publient pas NORIFM40_yr). La médiane reste valide mais moins robuste que les autres indicateurs — à noter si on étend l'usage de cet indicateur
 - Documentation produit : `SOURCES_MODULES_MATRIX.md` créé à la racine, en complément de `DATA_SOURCES.md` (branchement technique vs branchement éditorial)
+
+---
+
+### 29/05/2026 — Synthèse Quartier streamée, observations terrain, renommage « rapport interactif » + inversion hiérarchie PDF
+
+> **Statut : committé et poussé sur `main`.** Cinq chantiers regroupés ci-dessous. La migration Supabase `11` a déjà été exécutée manuellement en base.
+
+**Commits**
+- `f49db20` — feat: synthèse Quartier streamée, observations terrain, renommage « rapport interactif » + hiérarchie PDF
+
+**Chantier 1 — Synthèse Quartier streamée (IA sortie de derrière le bouton)**
+- `src/components/report/QuartierSynthesis.tsx` (nouveau) — panneau pleine largeur : titre + 3 blocs streamés depuis `/api/synthesize-quartier`, mini-nav horizons, bouton « Régénérer avec mes repères », footer « Sources mobilisées », fallback statique si l'IA échoue
+- `src/app/api/synthesize-quartier/route.ts` (nouveau) — `streamText` (AI SDK 6) via Anthropic direct (`claude-sonnet-4-5`), prompt éditorial strict (voix, jargon interdit, périmètre Quartier), probe du premier chunk → vrai 502 si provider down
+- `src/lib/quartier-signals.ts` (nouveau) — `deriveQuartierSources()` (sources mobilisées par horizon) + `buildFallbackSummary()`
+- `src/components/AskFutureInlineMount.tsx` (nouveau) — montage inline d'AskFuture en bas de module (comptes payants)
+- `src/components/report/SuiviWaitlistBlock.tsx` (nouveau) — bloc transition liste d'attente Suivi, events PostHog `follow_waitlist_cta_viewed` / `_clicked`
+- `src/hooks/useHorizon.ts`, `src/components/AskFuture.tsx`, `src/components/ask-future.css`, `src/components/report/QuartierClimatData.tsx` — ajustements de branchement
+- `docs/synthesis-cache-todo.md` (nouveau) — note de cache à faire sur la synthèse
+
+**Chantier 2 — Refonte fin de module Quartier + repères de terrain**
+- `src/app/(account)/rapport/quartier/page.tsx` — suppression de l'en-tête « Lecture territoriale » redondant, espace hero réduit, réordonnancement de la fin (AskFuture → bouton Module Logement → bloc Suivi → Retour), workbook alimenté en `commune`/`inseeCode`/`reportId`
+- `src/app/(account)/compte/QuartierWorkbook.tsx` — dédoublonnage en-tête, 5 questions (Q2/Q3 reformulées « vécu », Q4 nouvelle « changements observés »), compteur /5
+
+**Chantier 3 — Observations terrain (base propre, intelligence territoriale future)**
+- `supabase/11_terrain_observations.sql` (nouveau) — table `terrain_observations` (user/commune/module, answers jsonb, free_text, source, version), index unique `(user_id, insee_code, module)`, index `insee_code`, RLS par utilisateur (select/insert/update own). **Déjà exécutée en base.**
+- `src/app/api/terrain-observations/route.ts` (nouveau) — POST double écriture : `user_profiles.workbook_quartier` (compat) + upsert `terrain_observations` ; fallback `/api/profile` si commune inconnue
+- `QuartierWorkbook.tsx` — sauvegarde bascule vers `/api/terrain-observations` ; 4 events PostHog : `workbook_opened`, `workbook_answered`, `workbook_completed`, `workbook_free_text_written` (texte libre : longueur seule, jamais le contenu)
+- `supabase/README.md` — doc migration 11
+- ⚠️ Observations **non encore injectées** dans les prompts IA (mesure de volume/qualité d'abord)
+
+**Chantier 4 — Renommage marketing « rapport » → « rapport interactif » (copy uniquement)**
+- ~40 fichiers de copie visible (landing, espace connecté, checkout, hubs chaleur/inondation/voiture, pages agir, auth, merci, wizard, territoires…) : « rapport » isolé → « rapport interactif » ; palier « Rapport complet » → « Rapport interactif » (sans « complet »)
+- **Intacts (zéro migration produit)** : routes `/rapport*`, slug Stripe `rapport-complet`, clés produit (`checkout-products.ts`), événements/props analytics (`posthog-props.ts`), variables d'env, libellé court navbar « Mon rapport »
+- **Préservés à la main** : rapports externes (« Rapport Dumont », « Copernicus · Rapport 2025 », « Météo-France rapport régional », Lancet/Pasteur/ANSES/Croix-Rouge/EFSA, ERRIAL), prompts IA internes, « par rapport à », classes CSS `*-rapport-*`
+
+**Chantier 5 — Copy produit restante + inversion de la hiérarchie PDF**
+- `src/lib/checkout-products.ts` — descriptions visibles : titre « Rapport complet » → « Rapport interactif », sous-titres alignés, features réordonnées (« 6 modules interactifs personnalisés », « AskFuture — 3 questions incluses », « Dashboard simplifié… », « Export PDF, à conserver »). **Slug / IDs / logique Stripe intacts.**
+- `src/app/api/stripe/webhook/route.ts` — emails transactionnels alignés : « Votre **rapport interactif** futur·e est en préparation » (sujet + corps + relance J+7). Logique inchangée.
+- **Inversion PDF → fonctionnalité** (le PDF n'est plus présenté comme le produit, mais comme une capacité incluse) sur 4 emplacements :
+  - `checkout/[product]/page.tsx` item 01 : « Rapport PDF complet » → « Rapport interactif personnalisé » (+ « Export PDF inclus » en fin de body)
+  - `FutureELanding.tsx` carte pricing : 1ᵉʳ bullet « Rapport complet PDF » remplacé par « 6 modules interactifs » + « AskFuture » en tête, « Export PDF, à conserver » rétrogradé
+  - `checkout-products.ts` features : idem
+  - `src/lib/access.ts` : label du plan `one_shot` « Rapport PDF one-shot » → « Rapport interactif » (clé `one_shot` inchangée)
+- **Non touché** : politique de confidentialité (« Fournir le rapport personnalisé » conservé — texte juridique) ; zones pro/Suivi où le PDF était déjà une capacité (« Export PDF… », « ne s'arrête pas à un PDF », « Plus un PDF figé »)
+- ⚠️ Le PDF reste une **fonctionnalité incluse** partout : aucune suppression de capacité, aucune migration produit
+
+**Impact utilisateur**
+- Le module Quartier ouvre directement sur une lecture IA streamée et personnalisable (repères de terrain), sans clic
+- Les repères de terrain sont persistés proprement et préparent une couche d'observation collective
+- Le produit est nommé « rapport interactif » partout dans la copie visible : l'utilisateur n'attend plus un PDF
+
+**Dépendances externes**
+- **package.json** : ajout de `ai@^6` et `@ai-sdk/anthropic@^3` (streaming synthèse) — `npm install` requis au déploiement
+- **Supabase** : migration `11_terrain_observations.sql` — ✅ déjà exécutée
+- **Env** : `ANTHROPIC_API_KEY` déjà requise (aucune nouvelle variable)
+- Routing modèle : Anthropic direct aujourd'hui, à migrer vers Vercel AI Gateway à la mise en vente
+
+**Ce qui reste à surveiller après push**
+- Vérifier le `npm install` (nouvelles deps `ai` / `@ai-sdk/anthropic`) au build Vercel
+- Plus tard : injection des observations terrain dans les prompts IA (quand le volume sera suffisant), API d'agrégation anonymisée par commune (seuil ~30), migration du routing modèle vers Vercel AI Gateway
+
+---
+
+### 29/05/2026 — UX : barre de chargement de navigation (feedback au clic)
+
+**Commits**
+- `e9d8290` — feat(ux): barre de chargement de navigation sur l'espace compte et le dashboard
+
+**Pages / modules touchés**
+- `src/components/RouteLoadingBar.tsx` (nouveau) — server component : barre orange indéterminée fixée en haut (réutilise le keyframe global `wizard-loading-bar`) + indice central pulsé, fond `bg-canvas` pleine page
+- `src/app/(account)/loading.tsx` (nouveau) — frontière Suspense de navigation pour tout l'espace compte (compte, rapport, modules, mémoire)
+- `src/app/(dashboard)/loading.tsx` (nouveau) — idem pour le dashboard
+
+**Problème résolu**
+- Les pages module (`/rapport`, `/rapport/quartier`, `/rapport/logement`) sont `force-dynamic` avec de gros fetchs (DRIAS, Géorisques, VigiEau) et n'avaient **aucun** `loading.tsx` : au clic sur « ouvrir le module », rien ne s'affichait jusqu'à la fin du chargement → impression de missclick
+- Solution idiomatique Next 16 : `loading.tsx` au niveau des groupes de routes → Next montre la barre instantanément au clic pendant que le server component charge
+
+**Impact utilisateur**
+- Retour visuel immédiat sur toute navigation vers l'espace compte / les modules / le dashboard
+
+**Dépendances externes**
+- Aucune (build de production validé localement)
+
+---
+
+### 30/05/2026 — Couverture éditoriale par commune (module Quartier)
+
+**Commits**
+- `b15d388` — feat(quartier): couverture éditoriale par commune (illustrations bespoke)
+
+**Pages / modules touchés**
+- `src/components/report/TerritoryCover.tsx` (réécrit) — bande ultra-wide sous le titre, avant la synthèse. Image par commune via chaîne de repli `/covers/bespoke/{insee}.webp` → `/covers/archetypes/{catégorie}.webp` → `all.webp` (repli à la volée sur `onError`). Cartouche HTML catégorie (dynamique, aucun texte gravé), recadrage CSS `object-fit: cover`, fondu vers le canvas + bordure.
+- `src/lib/territory-mood.ts` — `deriveTerritoryMood()` (catégorie géo + densité + boisement ADEME), + `inseeCode`. `buildImagePrompt()` conservé (socle).
+- `src/data/cover-communes-top100.json` — top 100 communes par population (issu de `top1000-communes.json`) + repère visuel pré-rempli (rangs 1-50 + La Rochelle).
+- `public/covers/bespoke/*.webp` — **51 illustrations bespoke** (top 50 communes + La Rochelle 17300), style sérigraphie éditoriale, recette « warm muted » ancrée sur la palette de marque. Générées via ChatGPT (gpt-image-1) à partir d'une fiche-recette verrouillée, recadrées en bande, **converties PNG→WebP (145 Mo → 15 Mo)**.
+- `src/components/AskFuture.tsx` + `ask-future.css` — variante inline : retrait de la ligne de sources, champ/placeholder mis en valeur (encadré + couleur d'accent).
+- `.gitignore` — `Photos/` (bannières sources PNG) et exports « Design System » exclus du suivi.
+
+**Décisions de direction (exploration design)**
+- Testé : bande SVG procédurale → atmosphérique → trajectoire 2030/2050/2100 → illustration éditoriale figurative → photo. **Retenu** : illustration éditoriale (sérigraphie), **bande ultra-wide sans knockout**, nom en HTML. Le « wow » reste la synthèse qui se génère ; la couverture pose l'identité du lieu sans la concurrencer.
+- Cast jaune (travers gpt-image-1) neutralisé : 9 images corrigées via ImageMagick, et **bloc STYLE anti-jaune** (balance neutre) adopté comme standard pour les lots suivants.
+- Stratégie **hybride** : bespoke pour le top 100 (~15-16 % de la population couverte par commune exacte), **archétypes par catégorie** (~10-12, à produire) pour les ~84 % restants.
+
+**Impact utilisateur**
+- Le module Quartier ouvre sur une bande illustrée propre à la commune (top 50 + La Rochelle), avant la lecture.
+
+**Dépendances externes**
+- Aucune. Images statiques servies depuis `public/covers`.
+
+**Reste à faire**
+- Régénérer les ~9 communes pâles/jaunes si on veut l'uniformité parfaite (optionnel).
+- Produire les **~10-12 archétypes** par catégorie (couverture des communes hors top 100).
+- Continuer les bespoke 51→100 si souhaité.
+- Note mapping : Colombes = 92025, Argenteuil = 95018.
+
+---
+
+### 30/05/2026 — GASPAR (CatNat), socle de contexte commun AskFuture/Quartier, bannières 51-60, UX Quartier
+
+**Commits**
+- `eecb32c` — feat(quartier): GASPAR CatNat + socle contexte commun (AskFuture/synthèse) + bannières 51-60
+
+**Chantier 1 — GASPAR (arrêtés CatNat) — « histoire vécue du territoire » (P1 de la matrice)**
+- `src/lib/georisques.ts` — `getGasparCatnatSummary(insee)` : total d'arrêtés CatNat, première/dernière année, répartition par aléa (familles), cache + fallback. Endpoint v1 `/gaspar/catnat` (sans token). Distinct de `/gaspar/risques` (typologie, déjà utilisée pour les flags).
+- `src/components/report/QuartierClimatData.tsx` — carte « Catastrophes naturelles reconnues » (ex. « 21 arrêtés depuis 1999 · surtout inondations »). Grille → 9 cartes.
+- `src/lib/quartier-signals.ts` — chip source **GASPAR** ajoutée.
+- `src/app/api/synthesize-quartier/route.ts` — `historique_catnat` dans le payload + règle éditoriale « histoire vécue » (évocation sobre, une fois, sans alarmisme ni citation de source).
+
+**Chantier 2 — Socle de contexte territorial commun (consolidation AskFuture)**
+- Audit : AskFuture (`/api/ask`) ne recevait NI Géorisques, NI GASPAR, et VigiEau était fetché puis jeté. La synthèse Quartier les avait. Incohérence : AskFuture répondait avec moins de données que les modules.
+- `src/lib/commune-enrichment.ts` — `gatherCommuneEnrichment` promu en **socle commun** : ajoute `georisques` + `catnat` à l'agrégat (DRIAS/ADEME/Hub'Eau/VigiEau déjà présents). Une source branchée une fois → dispo partout.
+- `src/app/api/synthesize-quartier/route.ts` + `src/app/(account)/rapport/quartier/page.tsx` — consomment `enrichment.georisques/catnat` (3 fetchs en doublon supprimés).
+- `src/app/api/ask/route.ts` — AskFuture reçoit désormais **Géorisques** (risques + zone sismique), **GASPAR** (historique CatNat), **VigiEau** (restriction en cours), + observations terrain `change` (Q4). Liste des sources citables du prompt mise à jour. Garde-fous « dire quand la donnée manque » étendus à chaque nouveau bloc.
+- Périmètre éditorial **inchangé** : la synthèse Quartier reste territoriale (aucun champ individuel ajouté à son payload). Couche report/module (adresse/DPE) reportée en v2.
+
+**Chantier 3 — Bannières bespoke 51-60**
+- `public/covers/bespoke/{insee}.webp` — 10 communes (Poitiers, Aubervilliers, Aulnay, Dunkerque, Nouméa, Saint-Pierre 974, Versailles, Courbevoie, Rueil-Malmaison, Le Tampon 974), recette « warm muted aplats nets », WebP. Scan jaune propre.
+- `src/data/cover-communes-top100.json` — landmarks 51-70(+71) pré-remplis.
+
+**Chantier 4 — UX module Quartier**
+- `src/app/(account)/rapport/quartier/page.tsx` — inversion **AskFuture ↔ Observations de terrain** (parcours : lire → demander → contribuer → continuer).
+- `src/app/(account)/compte/QuartierWorkbook.tsx` — copy simplifiée (titre + une ligne) + **bouton « Compléter ▾ »** clair pour signaler que le bloc se déplie.
+
+**Impact utilisateur**
+- AskFuture peut enfin répondre sur les catastrophes naturelles, les risques recensés et la sécheresse en cours d'une commune.
+- Module Quartier : carte CatNat + synthèse qui ancre le passé vécu ; parcours fin de module plus logique.
+- 60 communes bespoke couvertes (sur top 100).
+
+**Dépendances externes**
+- Aucune nouvelle. GASPAR/VigiEau v1 publics sans token. `GEORISQUES_API_TOKEN` déjà requis pour la v2 adresse/parcelle (module Logement, inchangé).
+
+**Reste à faire**
+- Archétypes par catégorie (couverture hors top 100).
+- Bespoke 61→100 (briefs envoyés jusqu'à 71).
+- BDIFF (incendies historiques, P4) = prochain candidat « histoire vécue » côté feu.
+
+---
+
+### 30/05/2026 — Drawers éditoriaux des cartes Quartier (primitive MetricDrawer) + synthèse CatNat déterministe
+
+**Commits**
+- `e3b4167` — feat(quartier): drawer éditorial cartes-indicateurs (CatNat) + synthèse déterministe
+
+**Chantier — Une carte n'est pas un KPI mort, c'est une porte d'entrée**
+- `src/components/MetricDrawer.tsx` (nouveau) — primitive de design-system **réutilisable et agnostique du module** : panneau latéral (desktop) / bottom-sheet (mobile) qui glisse sans quitter la page. Contenu éditorial court : chiffre phare → répartition → faits → « pourquoi ce chiffre compte » → (optionnel) question AskFuture. Un module fournit juste un objet `CardDetail`.
+- `src/components/report/QuartierClimatData.tsx` — `Factor` accepte un `detail?: CardDetail`. Carte « Catastrophes naturelles reconnues » devient cliquable (rôle/clavier/focus) et ouvre le drawer GASPAR (répartition par aléa, première/dernière reconnaissance, mise en perspective). Affordance « Détail → ».
+- `src/components/AskFuture.tsx` — écoute l'événement window `futuree:ask` : le bouton « Poser une question » du drawer pré-remplit AskFuture inline (découplage par événement, pas de prop drilling).
+- `src/lib/georisques.ts` — `simplifyCatnatRisk` enrichi (érosion/vagues, crues, torrentiel, affaissement, neige, grains…) confirmé comme **point unique** de traduction du jargon CatNat. `describeCatnat` = phrase de synthèse **déterministe** (≤120 car., aucune IA, pure logique sur les fréquences), exposée via `GasparCatnatSummary.summary`.
+
+**Reste à faire (drawers Quartier)**
+- Drawer « Sécheresse des sols » (arc 3 signaux VigiEau + ONDE + DRIAS).
+- Drawer « Jours chauds >30 °C » (trajectoire 2030/2050/2100 + seuils).
+- Puis primitive légère `<MetricTooltip>` pour 5 cartes (chaleur >35, nuits tropicales, feu, inondation, submersion). Boisement = aucun détail.
+- Principe : drawer seulement si la carte raconte une histoire ; pas de mini-dashboards.
+
+**Couvertures**
+- Bespoke 61→71 converties et poussées (`22d3d0b`) : Béziers `34032`, Pau `64445`, Cherbourg-en-Cotentin `50129`, Mérignac `33281`, Champigny-sur-Marne `94017`, Antibes `06004`, Saint-Maur-des-Fossés `94068`, Ajaccio `2A004`, Fort-de-France `97209`, Saint-Nazaire `44184`. La Rochelle (rang 63, `17300`) déjà couverte. Mapping `cover-communes-top100.json` déjà pré-rempli (résolution par nom de fichier `{insee}.webp`).
+- Reste : bespoke 72→100 + archétypes par catégorie (hors top 100 → placeholder sinon).
+
+---
+
+### 30/05/2026 — Drawers Chaleur (trajectoire) + Sécheresse (arc 3 signaux) + primitive MetricTooltip + briefs 72→81
+
+**Commits**
+- `9a743df` — feat(quartier): drawers Chaleur (trajectoire) + Sécheresse (arc 3 signaux) + MetricTooltip
+
+**Chantier — Finir le sens des cartes Quartier (drawers + tooltips)**
+- `src/components/report/QuartierClimatData.tsx` :
+  - Carte **« Jours chauds > 30 °C »** → drawer **trajectoire** : lecture des 3 horizons DRIAS (`scenarios.gwl15/20/30.v.NORTX30D_yr`) → 2030 / 2050 / 2100. Subhead déterministe (« de X à Y jours »), fait « dont > 35 °C », `breakdownLabel: "Trajectoire"`.
+  - Carte **« Sécheresse des sols »** → drawer **arc à 3 signaux** : VigiEau (arrêté du moment) · ONDE/Hub'Eau (terrain) · DRIAS SWI04 (futur). `breakdownLabel: "Les trois signaux"`. Carte non grisée + cliquable dès qu'**un** des 3 signaux existe (plus seulement DRIAS) ; headline et val s'adaptent à la donnée disponible. Facts = bassin + date de fin d'arrêté si restriction active.
+  - `buildFactors` change de signature : reçoit `scenarios` (au lieu de `gwlData`), `vigieau`, `drought`.
+  - `Factor` gagne `tip?: string`. **5 tooltips** (chaleur > 35, nuits tropicales, feu, inondation, submersion) ; boisement = rien.
+- `src/components/MetricTooltip.tsx` (nouveau) — primitive légère « ⓘ » au coin de carte : survol + focus clavier + tap mobile, bulle, fermeture clic-extérieur/Échap, `stopPropagation` pour ne pas déclencher un éventuel drawer. Pas d'état partagé.
+- `src/components/MetricDrawer.tsx` — `breakdownLabel?` optionnel (défaut « Répartition »).
+- `src/app/(account)/rapport/quartier/page.tsx` — `QuartierAside` reçoit `vigieau` + `drought` (déjà dans `gatherCommuneEnrichment`, aucun nouveau fetch).
+
+**Principe tenu** : drawer seulement si la carte raconte une histoire (CatNat, Chaleur, Sécheresse) ; tooltip pour un seuil à gloser ; rien pour le boisement. Pas de mini-dashboards.
+
+**Couvertures**
+- Briefs d'illustration **72→81** renseignés dans `cover-communes-top100.json` (Cannes, Noisy-le-Grand, Drancy, Mamoudzou, Cergy, Levallois-Perret, Issy-les-Moulineaux, Calais, Pessac, Colmar). À générer puis convertir.
+
+**Reste à faire**
+- Génération PNG 72→81 puis conversion WebP + bespoke 82→100.
+- Archétypes par catégorie (hors top 100).
+
+---
+
+### 30/05/2026 — Tooltip boisement + drawers recentrés sur le récit territorial + doctrine tooltips
+
+**Commits**
+- `cafe9ca` — feat(quartier): tooltip Taux de boisement + tooltips sans source, zéro tiret cadratin
+- `10fb97f` — refactor(quartier): drawers Sécheresse + Chaleur recentrés sur le récit territorial
+- `803e692` — refactor(quartier): tooltips recentrés sur l'enjeu territorial
+
+**Chantier 1 — Tooltip boisement + règles de copy**
+- `src/components/report/QuartierClimatData.tsx` — tooltip ajouté sur « Taux de boisement » (la carte raconte une histoire : îlots de chaleur tempérés l'été, rôle sur le feu).
+- Règle posée : les tooltips ne citent **jamais** la source (retrait de « PPRI, atlas »). La ligne `src` des cartes et le pied des drawers portent déjà la provenance.
+- Règle posée : **jamais de tiret cadratin** dans la copy ; virgule ou deux points. Corrigé partout (tooltips, drawer Chaleur, titre du bloc données).
+
+**Chantier 2 — Drawers Sécheresse + Chaleur au niveau de CatNat (test utilisateur interne)**
+- Constat : CatNat marche (histoire territoriale immédiate) ; Sécheresse et Chaleur restaient « sources et indicateurs » (VigiEau, ONDE, DRIAS, « France +2°C »…).
+- Objectif : garder la donnée, raconter le phénomène, sources présentes mais discrètes. Test : « si je ne connais ni ONDE ni DRIAS, est-ce que je comprends quand même ? ».
+- `src/components/MetricDrawer.tsx` — deux ajouts à la primitive :
+  - `breakdown[].bar` (0→1) : barre de proportion sous une ligne → la donnée se **voit**, pas juste se lit.
+  - `sources` : note de pied **discrète** (filet + mono 10px gris). La narration ne cite plus les bases ; le pied, oui.
+- **Drawer Chaleur** : trajectoire rendue en **barres** (montée visible), libellés = années seules (plus de « France +2°C » dans le tableau), headline « X → Y jours par an », subhead « Les journées à plus de 30°C deviennent progressivement plus fréquentes », paragraphe centré sur le **quotidien** (nuits, logements/écoles, travail dehors, personnes fragiles, accélération) au lieu de définir le seuil. Sources en pied (DRIAS, Météo-France).
+- **Drawer Sécheresse** : trois temps en langage utilisateur — **Aujourd'hui** / **Cours d'eau observés** (« réseau ONDE » sorti du libellé) / **Sols en 2050** ; headline « Sol sec ~X jours/an d'ici 2050 » ; paragraphe sur le **phénomène vécu** (l'eau restreinte l'été, les rivières qui faiblissent, la terre qui se rétracte et fragilise les fondations), pas la méthodo. Facts « Zone concernée » + « Jusqu'au ». Sources en pied (VigiEau · ONDE/Hub'Eau · DRIAS).
+- **Drawer CatNat** : pied de sources ajouté pour la cohérence des trois drawers.
+
+**Chantier 3 — Doctrine tooltips**
+- Un tooltip répond à UNE question : « **Pourquoi ce chiffre aide-t-il à comprendre le territoire ?** ». **≤ 2 phrases, ≤ 35 mots.** Interdit : définir l'indicateur, décrire la méthodo, citer la source, jargon/seuils chiffrés. Ton simple, concret, humain.
+- Réécriture des 6 tooltips (chaleur > 35, nuits tropicales, feu, inondation, submersion, boisement) dans cet esprit.
+
+**Règle de design éditorial (drawers)**
+- CatNat = référence. Un bon drawer futur•e ne documente pas une source et ne décrit pas une méthodologie : il **raconte un phénomène territorial**. Le lecteur ressort avec « j'ai compris ce qui change dans ma commune », pas « j'ai compris quelles bases ont été utilisées ».
+
+**Mémoire** (hors repo) : règles « pas de tiret cadratin » et « doctrine tooltips » enregistrées.
+
+**Reste à faire**
+- Génération PNG 72→81 puis conversion WebP + bespoke 82→100 ; archétypes par catégorie.
+- Valider le rendu des drawers/tooltips en conditions réelles (app).
+
+---
+
+### 31/05/2026 — Comparateur de vie « Où vivre » : moteur V1.6 gelé + plateforme de marque + business model
+
+**Commits**
+- `ecb97d2` — feat(comparateur): moteur V1.6 « Où vivre » (gel)
+- `e74caf0` — docs: plateforme de marque + business model B2C (Le Fil, comparateur)
+- (rappel) `cf8c558` — docs: business model B2C initial
+
+**Chantier produit — bascule analyse → orientation**
+- futur•e passe de « que vaut cette commune ? » à « où pourrais-je vivre ? ». Nouvelle porte d'entrée : projet de vie → comparateur → rapport → AskFuture → Le Fil.
+- `PLATEFORME_DE_MARQUE.md` (racine) : Vision « Habiter dans un monde qui change », Problème, Réponse, Mission, Nos principes (lucides/sourcés/honnêtes/utiles), nuance anti-prescription (« futur•e ne choisit pas à votre place »).
+- `BUSINESS_MODEL_B2C.md` : produit récurrent renommé **Le Fil futur•e** (catégorie veille territoriale ; canal newsletter ; brique Signaux), §5 comparateur de vie + compte multi-territoires + **Pack Décision** (3 territoires) comme hero SKU. Échelle gratuit / 19 € / 39 € / 49 €-an.
+- `docs/comparateur-sante-environnementale.md` : audit santé-env (pesticides/eau/sols/industriel).
+
+**Moteur (déterministe, IA seulement pour parse + future synthèse)**
+- `data/comparateur-index.json` — index national pré-calculé, **34 788 communes métropole**. Contenu : climat DRIAS gwl20 (+ temp hiver, pluie annuelle) et percentiles ; géo (distance côte approx via ancres côtières, à remplacer par trait de côte IGN) ; population/densité ; **santé : PM2.5/NO2** ; **vivabilité : APL médecins, éloignement services** ; **pression agricole : IFT × SAU, nuance bio**. Tout bulk ADEME `data_communes` (gratuit, sans clé) + DRIAS local.
+- `src/lib/comparateur-vie.ts` — 13 préférences pondérées, contraintes dures (région, mer, lieu nommé géolocalisé, taille de ville 5k/25k/100k), courbes comportementales (isolement, calme en bande, douceur via temp hivernale), baseline de viabilité, rollup Paris/Lyon/Marseille, compromis explicite + cas « aucun territoire parfait ».
+- `src/app/api/comparateur-vie/parse/route.ts` — Anthropic tool use (claude-sonnet-4-6), vocabulaire fermé, règle élimine/pondère/ambigu, climat perçu (fuir chaleur ≠ douceur ≠ soleil), **heuristique famille/santé** : famille/enfant/environnement sain/pesticides/agriculture intensive → active acces_services + eviter_isolement + faible_pression_agricole sans exposer le jargon (« IFT », « pression agricole » jamais montrés).
+- `src/app/api/comparateur-vie/match/route.ts` — déterministe, 0 IA, 0 appel externe.
+- `scripts/` — fetch ADEME (population/air/soins/services/IFT/SAU/bio), build index, demo de validation. Caches bruts `data/communes-*.json` gitignorés (l'index buildé est versionné).
+
+**Itérations scoring validées par batteries de tests réelles**
+- V1 climat/géo → V1.5 (air_sain, acces_soins, acces_services) → V1.6 (pression agricole IFT). Absurdités corrigées en route : isolement (échelle absolue vs percentile), calme (bande optimale), « doux ≠ le plus froid » (temp hivernale + douceur_climat + ensoleillement_recherche), villages pour projets famille (heuristique + baseline), pression agricole crédible (Épernay 100, Beaune 63, Guéret 6, Chamonix 0).
+- `pression_agricole` = PRESSION (IFT), jamais exposition ; préférence **optionnelle**.
+- Exclus du score (anti-biais social) : revenu médian, logements sociaux, sécurité, ICPE.
+
+**Reste à faire**
+- Interface `/ou-vivre` (3 étapes : projet libre → reformulation/validation → résultats) + **couche synthèse IA** (interprétation + enrichissement shortlist eau / cadmium / BASOL-SIS).
+- Instrumentation PostHog (events life_comparator_*).
+- Déploiement : ajouter `data/comparateur-index.json` à `outputFileTracingIncludes` dans `next.config.ts` (sinon index 16 Mo non embarqué en serverless).
+- V2 : nitrates eau en score national (bulk Hub'Eau), RPG fin, bassin d'emploi.
+
+---
+
+### 31/05/2026 — Comparateur : couche synthèse IA + tracing serverless
+
+**Commit** : `822da7a` — feat(comparateur): synthèse IA interprétative + tracing index serverless
+
+- `next.config.ts` : `outputFileTracingIncludes` pour `data/comparateur-index.json` sur `/api/comparateur-vie/match` (embarquer l'index 16 Mo en serverless).
+- `src/app/api/comparateur-vie/synthesize/route.ts` : synthèse éditoriale streamée (AI SDK, Anthropic direct, claude-sonnet-4-5), miroir de synthesize-quartier. INTERPRÈTE le résultat déterministe, ne choisit/reranke/modifie aucune commune.
+- **Doctrine éditoriale (frontière comparateur ↔ rapport)** : la synthèse parle des RAISONS, le rapport des CONSÉQUENCES. Généreuse sur l'interprétation du projet (le miroir, le « wow »), avare sur le détail commune (la curiosité). Compromis = pont vers le rapport. Crée une question, pas une réponse. Qualitatif only (aucun chiffre/percentile/horizon daté), non prescriptif, jamais « top villes », pression ≠ exposition, suivi ≠ danger. Vouvoiement, zéro tiret cadratin.
+- Contrat d'entrée **extensible** : `enrichment` (eau/cadmium/sols suivis) optionnel, branché plus tard sans changer la signature.
+- Validé en réel : synthèse « famille/sain/océan » → miroir du projet + logique Bretagne vs Pays basque + compromis central nommé + clôture « la décision vous appartient ». Effet futur•e confirmé.
+
+**Reste** : enrichissement eau/cadmium/BASOL-SIS en prose (contrat prêt) ; page `/ou-vivre` ; instrumentation PostHog `life_comparator_*`.

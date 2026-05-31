@@ -50,7 +50,14 @@ function getEntitlements(productType: string) {
 }
 
 async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
-  const { userId, userEmail, productType } = paymentIntent.metadata;
+  const { userId, userEmail, productType, targetInsee, targetCommune, grantSource, grantRank } =
+    paymentIntent.metadata;
+
+  // Territoire ciblé (parcours comparateur). Vide = achat sur la résidence.
+  const insee = typeof targetInsee === "string" ? targetInsee.trim() : "";
+  const commune = typeof targetCommune === "string" ? targetCommune.trim() : "";
+  const source = grantSource || "direct";
+  const rank = grantRank ? Number.parseInt(grantRank, 10) : null;
   const resend = getResend();
 
   await supabaseAdmin.from("payments").upsert(
@@ -61,6 +68,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
       product_type: productType,
       status: "succeeded",
       email: userEmail || null,
+      target_insee: insee || null,
     },
     { onConflict: "stripe_payment_intent_id" },
   );
@@ -77,11 +85,33 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
       { onConflict: "user_id" },
     );
 
+    // Profil : on n'écrase JAMAIS la résidence. Si un territoire a été ciblé
+    // (comparateur), on le trace comme grant et on le pose en territoire actif
+    // de lecture. Sinon, comportement historique (rapport sur la résidence).
+    const profileUpdate: Record<string, unknown> = {
+      household_mode_enabled: entitlements.household_mode_enabled,
+    };
+
+    if (insee) {
+      await supabaseAdmin.from("report_grants").upsert(
+        {
+          user_id: userId,
+          insee,
+          commune: commune || null,
+          source,
+          rank: rank && rank >= 1 && rank <= 3 ? rank : null,
+          stripe_payment_intent_id: paymentIntent.id,
+        },
+        { onConflict: "user_id,insee" },
+      );
+
+      profileUpdate.active_insee_code = insee;
+      profileUpdate.active_commune = commune || null;
+    }
+
     await supabaseAdmin
       .from("user_profiles")
-      .update({
-        household_mode_enabled: entitlements.household_mode_enabled,
-      })
+      .update(profileUpdate)
       .eq("user_id", userId);
   }
 

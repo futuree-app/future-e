@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { canAccessCompleteReport } from "@/lib/access";
 import LogementModule from "@/components/report/LogementModule";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
+import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
 import { ModuleTracker } from "@/components/ModuleTracker";
 
 export default async function RapportLogementPage() {
@@ -16,14 +17,16 @@ export default async function RapportLogementPage() {
   const { supabase, user } = await requireCurrentUser();
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("home_commune, home_insee_code")
+    .select(TERRITORY_SELECT)
     .eq("user_id", user.id)
     .maybeSingle();
 
+  const territory = await resolveReadableTerritory(supabase, user.id, profile);
+
   return (
     <>
-      <ModuleTracker moduleId="logement" commune={profile?.home_commune ?? null} inseeCode={profile?.home_insee_code ?? null} source="page" />
-      <LogementModule defaultCommune={profile?.home_commune ?? null} />
+      <ModuleTracker moduleId="logement" commune={territory.communeName} inseeCode={territory.inseeCode} source="page" />
+      <LogementModule defaultCommune={territory.communeName} />
     </>
   );
 }

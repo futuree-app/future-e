@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { canAccessCompleteReport } from "@/lib/access";
 import { PRODUCT_MODULES } from "@/lib/product";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
+import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
 import { TrackedModuleLink, TrackedUpgradeLink } from "./RapportTrackedLinks";
 import HorizonBar from "@/components/report/HorizonBar";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
@@ -44,12 +45,13 @@ export default async function RapportPage() {
   const { supabase, user } = await requireCurrentUser();
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("home_commune, home_insee_code")
+    .select(TERRITORY_SELECT)
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const communeName = profile?.home_commune ?? null;
-  const inseeCode = profile?.home_insee_code ?? null;
+  const territory = await resolveReadableTerritory(supabase, user.id, profile);
+  const communeName = territory.communeName;
+  const inseeCode = territory.inseeCode;
   const displayName = communeName ?? "votre commune";
 
   const allModules = PRODUCT_MODULES;
@@ -74,6 +76,58 @@ export default async function RapportPage() {
       <Navbar ctas={{ secondary: { href: "/compte", label: "Mon compte" }, primary: { href: "/dashboard", label: "Dashboard" } }} />
 
       <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
+
+        {/* ── Bandeau territoire refusé (activé sans rapport débloqué) ── */}
+        {territory.deniedInsee && (
+          <div
+            className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border px-5 py-3.5"
+            style={{ borderColor: "var(--orange-tint)", background: "var(--orange-tint)" }}
+          >
+            <p className="text-[14px] text-label leading-snug">
+              Le rapport de{" "}
+              <span className="font-semibold">{territory.deniedCommune ?? "ce territoire"}</span>{" "}
+              n&apos;est pas débloqué sur votre compte.
+              {territory.residenceCommune ? (
+                <span className="text-muted">
+                  {" "}Vous consultez votre résidence {territory.residenceCommune}.
+                </span>
+              ) : null}
+            </p>
+            <Link
+              href={`/territoire/${territory.deniedInsee}/debloquer${
+                territory.deniedCommune
+                  ? `?nom=${encodeURIComponent(territory.deniedCommune)}`
+                  : ""
+              }`}
+              className="shrink-0 font-mono text-[11px] tracking-[0.08em] uppercase text-accent hover:text-label no-underline border border-accent/[0.3] rounded-lg px-3.5 py-2"
+            >
+              Débloquer ce territoire
+            </Link>
+          </div>
+        )}
+
+        {/* ── Bandeau territoire actif (≠ résidence) ── */}
+        {!territory.isResidence && (
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/[0.18] bg-accent/[0.05] px-5 py-3.5">
+            <p className="text-[14px] text-label leading-snug">
+              Vous consultez{" "}
+              <span className="font-semibold text-accent">{displayName}</span>
+              {territory.residenceCommune ? (
+                <span className="text-muted">
+                  {" "}· votre résidence reste {territory.residenceCommune}
+                </span>
+              ) : null}
+            </p>
+            <Link
+              href="/rapport/residence"
+              className="shrink-0 font-mono text-[11px] tracking-[0.08em] uppercase text-muted hover:text-label no-underline border border-white/[0.12] rounded-lg px-3.5 py-2"
+            >
+              {territory.residenceCommune
+                ? `Revenir à ${territory.residenceCommune}`
+                : "Revenir à ma résidence"}
+            </Link>
+          </div>
+        )}
 
         {/* ── Hero ── */}
         <section className="grid grid-cols-[1fr_400px] gap-16 items-start py-20">

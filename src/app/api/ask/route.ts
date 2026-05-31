@@ -554,6 +554,29 @@ export async function POST(request: NextRequest) {
       .eq("user_id", user.id)
       .maybeSingle();
 
+    // Gating territoire-aware (cf. resolveReadableTerritory / GATING_TERRITOIRE.md).
+    // Le communeInsee vient du client : on n'accepte de répondre que sur la
+    // résidence ou un territoire réellement débloqué (report_grant). Sinon 403 :
+    // l'API ne doit pas devenir une porte dérobée vers un rapport jamais acheté.
+    const askInsee = communeInsee.trim().toUpperCase();
+    const rawResidence = (profile as Record<string, unknown> | null)?.home_insee_code;
+    const residenceInsee =
+      typeof rawResidence === "string" ? rawResidence.trim().toUpperCase() : "";
+    if (askInsee !== residenceInsee) {
+      const { data: grant } = await supabase
+        .from("report_grants")
+        .select("insee")
+        .eq("user_id", user.id)
+        .eq("insee", askInsee)
+        .maybeSingle();
+      if (!grant) {
+        return NextResponse.json(
+          { error: "Ce territoire n'est pas débloqué sur votre compte." },
+          { status: 403 },
+        );
+      }
+    }
+
     // Les 4 sources tournent en parallèle. Supabase (rapide, déjà ouvert)
     // + ADEME/DRIAS/Hub'Eau (caches framework côté lib).
     const [{ text: communeContext, hasTensionData }, enrichment] =

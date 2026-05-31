@@ -14,6 +14,7 @@ import QuartierSynthesis, {
 } from "@/components/report/QuartierSynthesis";
 import { ModuleTracker } from "@/components/ModuleTracker";
 import { deriveQuartierSources, buildFallbackSummary } from "@/lib/quartier-signals";
+import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
 import { AskFutureInlineMount } from "@/components/AskFutureInlineMount";
 import { SuiviWaitlistBlock } from "@/components/report/SuiviWaitlistBlock";
 import { TerritoryCover } from "@/components/report/TerritoryCover";
@@ -26,12 +27,13 @@ export default async function RapportQuartierPage() {
 
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("home_commune, home_insee_code, workbook_quartier")
+    .select(`${TERRITORY_SELECT}, workbook_quartier`)
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const communeName = profile?.home_commune ?? null;
-  const inseeCode = profile?.home_insee_code ?? null;
+  const territory = await resolveReadableTerritory(supabase, user.id, profile);
+  const communeName = territory.communeName;
+  const inseeCode = territory.inseeCode;
   const initialWorkbook = normalizeWorkbook(profile?.workbook_quartier);
 
   // Socle commun : Géorisques + GASPAR inclus dans l'enrichissement.
