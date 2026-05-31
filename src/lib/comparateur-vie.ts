@@ -1,6 +1,7 @@
 import "server-only";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { resolveZones, resolveExclusions, type AppliedZone } from "@/lib/geo-zones";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — moteur de compatibilité déterministe (V1).
@@ -42,6 +43,12 @@ export type Preference = { key: PreferenceKey; weight: number };
 export type HardConstraints = {
   region?: string | null;
   departements?: string[];
+  // Ancres géographiques (cf. geo-zones.ts). zones = ancres positives
+  // (macro-zone, façade maritime, massif) intersectées ; excludeZones = ancres
+  // négatives (« quitter Paris », « pas le Nord »). Le parse n'émet que des
+  // jetons d'une liste fermée ; le moteur détient la table jeton → départements.
+  zones?: string[];
+  excludeZones?: string[];
   nearSea?: { active: boolean; maxKm?: number | null };
   excludeSea?: boolean;
   nearPlace?: { label: string; maxKm?: number | null } | null;
@@ -79,6 +86,10 @@ export type MatchOutcome = {
   candidates: number;
   message: string | null;
   results: MatchResult[];
+  // Ancres réellement appliquées (libellé + convention assumée), pour un affichage
+  // honnête du périmètre côté UI (« recherche limitée au Sud, au sens… »).
+  appliedZones?: AppliedZone[];
+  appliedExclusions?: AppliedZone[];
 };
 
 // Tailles de ville (V1) — utilisées par le parse pour traduire "petite / moyenne
@@ -192,6 +203,12 @@ const CITY_LABEL: Record<string, string> = { PARIS: "Paris", LYON: "Lyon", MARSE
 // ── Scoring ────────────────────────────────────────────────────────────────────
 function clamp(v: number, lo: number, hi: number) { return Math.max(lo, Math.min(hi, v)); }
 
+// Énumération française : ["a"] → "a" ; ["a","b"] → "a et b" ; ["a","b","c"] → "a, b et c".
+function listFr(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? "";
+  return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
+}
+
 function avgPct(c: IndexCommune, fields: string[]): number | null {
   const vals = fields.map((f) => c.pct[f]).filter((v): v is number => v != null);
   return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
@@ -282,10 +299,20 @@ function reasonText(key: PreferenceKey, c: IndexCommune): string {
   return typeof r === "function" ? r(c) : r;
 }
 
-function passesHard(c: IndexCommune, hc: HardConstraints, placePoint: { lat: number; lon: number; maxKm: number } | null): boolean {
+function passesHard(
+  c: IndexCommune,
+  hc: HardConstraints,
+  placePoint: { lat: number; lon: number; maxKm: number } | null,
+  zoneDepts: Set<string> | null,
+  excludeDepts: Set<string>,
+): boolean {
   if (c.population != null && c.population < POP_FLOOR) return false;
   if (hc.region && c.region !== hc.region) return false;
   if (hc.departements?.length && !hc.departements.includes(c.dept)) return false;
+  // Ancres géographiques : zoneDepts (intersection des ancres positives) restreint
+  // le périmètre ; excludeDepts (union des ancres négatives) le rogne.
+  if (zoneDepts && !zoneDepts.has(c.dept)) return false;
+  if (excludeDepts.has(c.dept)) return false;
   if (hc.nearSea?.active && c.distance_cote_km > (hc.nearSea.maxKm ?? 30)) return false;
   if (hc.excludeSea && c.distance_cote_km < 15) return false;
   if (hc.communeSize) {
@@ -309,6 +336,13 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     if (hit) placePoint = { lat: hit.lat, lon: hit.lon, maxKm: parsed.hardConstraints.nearPlace.maxKm ?? 50 };
   }
 
+  // Ancres géographiques : résolution jeton → départements (intersection des
+  // ancres positives, union des exclusions). Le moteur détient la table ; le
+  // parse n'a fourni que des jetons.
+  const hc = parsed.hardConstraints ?? {};
+  const zone = resolveZones(hc.zones);
+  const exclusion = resolveExclusions(hc.excludeZones);
+
   // Baseline de viabilité : eviter_isolement implicite si absent
   const prefs: (Preference & { baseline?: boolean })[] = parsed.preferences
     .filter((p) => PREFERENCE_KEYS.includes(p.key))
@@ -318,7 +352,9 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   }
   const totalW = prefs.reduce((s, p) => s + p.weight, 0) || 1;
 
-  const candidates = communes.filter((c) => passesHard(c, parsed.hardConstraints ?? {}, placePoint));
+  const candidates = communes.filter((c) =>
+    passesHard(c, hc, placePoint, zone.departements, exclusion.departements),
+  );
 
   type Sub = { key: PreferenceKey; weight: number; baseline?: boolean; s: number };
   const scored = candidates.map((c) => {
@@ -360,24 +396,72 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
 
   scored.sort((a, b) => b.result.compatibility - a.result.compatibility);
 
-  // Rollup big-3 : une seule entrée par ville mère (la meilleure, déjà en tête)
+  const TARGET = 5;
+
+  // Rollup big-3 : une seule entrée par ville mère (la meilleure, déjà en tête).
   const seenCity = new Set<string>();
-  const deduped: MatchResult[] = [];
-  for (const s of scored) {
-    if (seenCity.has(s.cityKey)) continue;
+  const unique = scored.filter((s) => {
+    if (seenCity.has(s.cityKey)) return false;
     seenCity.add(s.cityKey);
-    deduped.push(s.result);
-    if (deduped.length >= 5) break;
+    return true;
+  });
+
+  // Étalement géographique (dégel diversité, 2026-05-31). Au lieu de prendre les
+  // 5 meilleurs scores bruts, souvent agglomérés au même endroit (Biarritz /
+  // Anglet / Bayonne, top-5 tout breton…), on étale : la meilleure de chaque
+  // région d'abord, puis on complète par départements encore absents, puis sans
+  // contrainte. Le n°1 reste le meilleur score national ; les suivants favorisent
+  // des territoires réellement différents. Choix produit : différence > optimalité
+  // brute sur les rangs 2 et 3 (cf. OU_VIVRE_ROADMAP.md).
+  const seenRegion = new Set<string>();
+  const seenDept = new Set<string>();
+  const deduped: MatchResult[] = [];
+  const pushPick = (r: MatchResult) => {
+    seenRegion.add(r.region ?? r.dept);
+    seenDept.add(r.dept);
+    deduped.push(r);
+  };
+  for (const s of unique) {
+    if (deduped.length >= TARGET) break;
+    if (seenRegion.has(s.result.region ?? s.result.dept)) continue;
+    pushPick(s.result);
+  }
+  for (const s of unique) {
+    if (deduped.length >= TARGET) break;
+    if (deduped.includes(s.result) || seenDept.has(s.result.dept)) continue;
+    pushPick(s.result);
+  }
+  for (const s of unique) {
+    if (deduped.length >= TARGET) break;
+    if (deduped.includes(s.result)) continue;
+    pushPick(s.result);
   }
 
   const best = deduped[0]?.compatibility ?? 0;
   const perfect = candidates.length > 0 && best >= PERFECT_THRESHOLD;
+
+  // Sur-contrainte : quand les ancres en filtre vident le vivier, on le DIT en
+  // nommant le périmètre, sans relâcher automatiquement ni inventer de résultat
+  // (cf. ANCRES_GEOGRAPHIQUES.md, choix V1 « détecter et le dire »).
+  const anchorLabels = [...zone.applied, ...exclusion.applied].map((z) => z.label);
+  const emptyMessage =
+    anchorLabels.length > 0
+      ? `Aucun territoire ne réunit l'ensemble de vos critères dans ${listFr(anchorLabels)}. Essayez d'élargir le périmètre ou un autre critère.`
+      : "Aucun territoire ne respecte l'ensemble de vos contraintes. Essayez d'élargir un critère.";
   const message =
     candidates.length === 0
-      ? "Aucun territoire ne respecte l'ensemble de vos contraintes. Essayez d'élargir un critère."
+      ? emptyMessage
       : perfect
         ? null
         : "Aucun territoire ne réunit l'ensemble de vos critères. Voici ceux qui impliquent le moins de compromis.";
 
-  return { perfectMatch: perfect, bestCompatibility: best, candidates: candidates.length, message, results: deduped };
+  return {
+    perfectMatch: perfect,
+    bestCompatibility: best,
+    candidates: candidates.length,
+    message,
+    results: deduped,
+    appliedZones: zone.applied,
+    appliedExclusions: exclusion.applied,
+  };
 }

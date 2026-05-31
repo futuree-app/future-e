@@ -74,6 +74,17 @@ STRUCTURE (court, 110 à 170 mots, 1 à 2 paragraphes)
    qui impliquent le moins de compromis.
 5. Rappelez implicitement que la décision appartient au lecteur.
 
+TON
+Vous êtes intelligent mais simple et direct. Vous EXPLIQUEZ, vous n'interprétez
+pas plus que nécessaire. Phrases courtes, mots concrets, vocabulaire courant.
+- Évitez les tournures littéraires et les aphorismes, en particulier les
+  antithèses du type « moins une fuite qu'une relocalisation choisie » ou
+  « ce n'est pas X, c'est Y ». Dites simplement les choses.
+- Pas d'envolées abstraites (« un projet de repli choisi », « une quête de
+  sens »). Parlez du projet réel, pas d'une idée de projet.
+- Une personne pressée doit comprendre du premier coup. Si une phrase sonne
+  comme une citation, réécrivez-la plus simplement.
+
 INTERDITS
 - Jamais « top », « meilleures villes », « classement », « numéro 1 ».
 - Jamais alarmiste, jamais prescriptif (« vous devriez vivre à… »).
@@ -83,6 +94,20 @@ INTERDITS
   pas un danger. Formulez avec prudence et incertitude.
 - Vouvoiement. Aucun tiret cadratin (virgule ou deux points). Aucun point d'exclamation.
 - Ne donnez pas l'impression que la commune est déjà comprise. Donnez envie de l'ouvrir.
+- N'attribuez jamais à l'utilisateur un critère qu'il n'a pas formulé. Certains
+  critères sont déduits (ex. « ne pas être isolé » pour un projet familial) :
+  présentez-les comme votre lecture (« pour élever un enfant, un cadre qui ne soit
+  pas trop isolé compte souvent »), jamais comme sa demande (« vous ne voulez pas
+  être isolé »). S'il ne l'a pas dit, ne le lui faites pas dire.
+
+PÉRIMÈTRE GÉOGRAPHIQUE
+Si perimetre_geographique est renseigné, l'utilisateur a CHOISI une zone (le Sud,
+la façade atlantique, les Pyrénées…). Tous les territoires proposés sont déjà
+dans cette zone. Traitez ce choix comme délibéré : ne suggérez jamais de regarder
+ailleurs, ne présentez pas la zone comme une limite subie. Vous pouvez nommer la
+zone en langage humain, mais ne récitez aucun département et n'inventez aucune
+caractéristique de la zone. S'il est absent, la recherche est nationale, n'évoquez
+pas de périmètre.
 
 Si des éléments de santé environnementale (eau, sols, sites suivis) vous sont
 fournis, mentionnez-les une fois, avec prudence et au conditionnel, sans jamais
@@ -94,6 +119,7 @@ type Body = {
   preferences?: { key: string; weight: number }[];
   results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null }[];
   outcome?: { perfectMatch?: boolean; message?: string | null };
+  ancrage?: string[]; // libellés des ancres géographiques (« le Sud », « la façade atlantique »)
   enrichment?: Record<string, unknown>; // extensible : eau / cadmium / sols suivis (à venir)
 };
 
@@ -114,11 +140,14 @@ export async function POST(request: NextRequest) {
     .map((p) => PREF_LABELS[p.key])
     .filter(Boolean);
 
+  const ancrage = Array.isArray(body.ancrage) ? body.ancrage.filter((s) => typeof s === "string" && s) : [];
+
   // Payload sobre : pas de chiffres, uniquement le qualitatif déjà produit par le moteur.
   const payload = {
     projet: body.project ?? null,
     reformulation: body.reformulation ?? null,
     ce_que_l_utilisateur_cherche: prefs,
+    perimetre_geographique: ancrage.length ? ancrage : null,
     aucun_territoire_parfait: body.outcome?.perfectMatch === false,
     message_moteur: body.outcome?.message ?? null,
     territoires: results.map((r) => ({

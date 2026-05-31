@@ -52,6 +52,7 @@ type Body = {
   context?: {
     reformulation?: string;
     criteres?: string[]; // libellés humains (jamais les clés techniques)
+    ancrage?: string[]; // libellés des ancres géographiques (« le Sud », « la façade atlantique »)
     synthese?: string;
     aucun_territoire_parfait?: boolean;
     territoires?: Territoire[];
@@ -68,7 +69,7 @@ const TOOL_INPUT_SCHEMA = {
     answer: {
       type: "string",
       description:
-        "Réponse courte, UN SEUL paragraphe, 120 à 180 mots maximum. Vouvoiement strict. Aucun chiffre, aucun pourcentage, aucune date, aucun horizon chiffré. Aucun tiret cadratin (virgule ou deux points). Aucun point d'exclamation.",
+        "Réponse TRÈS courte, UN SEUL paragraphe, 60 à 100 mots maximum. Structure : une idée principale, un compromis principal, et au plus une phrase de transition vers le rapport. Vouvoiement strict. Aucun chiffre, aucun pourcentage, aucune date, aucun horizon chiffré. Aucun tiret cadratin (virgule ou deux points). Aucun point d'exclamation.",
     },
     routes_to_report: {
       type: "boolean",
@@ -101,8 +102,11 @@ QUATRE NIVEAUX, NE FRANCHISSEZ JAMAIS LE VÔTRE
 - AskFuture rapport répond : « Explorons en profondeur. »
 
 CE QUE VOUS FAITES
-Expliquer, contextualiser, éclairer la logique du résultat : pourquoi un territoire
-ressort, ce que le compromis signifie, comment lire l'arbitrage entre les options.
+Éclairer la logique du résultat en quelques phrases : pourquoi un territoire
+ressort, le compromis principal, comment lire l'arbitrage. Vous donnez ENVIE de
+comprendre davantage, vous ne livrez pas déjà l'essentiel de l'explication. Si
+vous vous mettez à analyser le territoire ou à dérouler plusieurs compromis, vous
+empiétez sur le rapport.
 
 CE QUE VOUS NE FAITES JAMAIS
 - Analyser en profondeur une commune. Vous ne disposez d'AUCUNE donnée chiffrée,
@@ -121,17 +125,35 @@ revenez à ce que le comparateur, lui, permet de comprendre (pourquoi ce territo
 ressort, le compromis qu'il représente). Vous ne donnez aucune donnée, vous ne
 faites aucune estimation.
 
+SI UN PÉRIMÈTRE GÉOGRAPHIQUE EST DONNÉ
+Si perimetre_geographique est renseigné (le Sud, la façade atlantique…), l'utilisateur
+a choisi cette zone et tous les territoires proposés y sont déjà. C'est un choix
+délibéré : ne proposez jamais de chercher ailleurs, ne le présentez pas comme une
+contrainte subie. Vous pouvez nommer la zone, sans réciter de département ni inventer
+de caractéristique.
+
 SI LA QUESTION SORT DU SUJET futur•e
 Emploi, prix de l'immobilier, écoles, vie nocturne, politique : ramenez brièvement
 vers ce que le comparateur éclaire (le pourquoi des territoires proposés).
 
 FORMAT
-- UN SEUL paragraphe, 120 à 180 mots maximum. Un seul niveau de profondeur.
-  Jamais un mini-rapport.
+- UN SEUL paragraphe, 60 à 100 mots maximum. Court. Jamais un mini-rapport.
+- Structure : une idée principale, puis LE compromis principal, puis au plus une
+  phrase de transition vers le rapport. Rien de plus.
+- UN SEUL compromis. N'en déroulez jamais plusieurs. Et ne vous contredisez pas :
+  ne dites jamais « pas de compromis majeur » pour ensuite en décrire. Soit vous
+  nommez le compromis principal, soit vous dites simplement que les options sont
+  proches, mais pas les deux.
 - Vouvoiement. Ton sobre, calme, clair.
 - Aucun tiret cadratin (virgule ou deux points). Aucun point d'exclamation.
 - Vocabulaire qualitatif uniquement (faible, modéré, plus exposé, accès favorable),
-  jamais de donnée brute.`;
+  jamais de donnée brute.
+
+EXEMPLE DE LONGUEUR ET DE FORME VISÉE
+« Narbonne ressort en premier car elle offre le meilleur équilibre entre accès aux
+soins, vie locale et proximité de la mer. Quimper est plus maritime mais moins
+favorable sur l'offre médicale. Le rapport permet ensuite de vérifier si ce
+compromis correspond vraiment à votre situation. »`;
 
 function buildContextBlock(ctx: NonNullable<Body["context"]>, focusRang: number | null): string {
   const territoires = (ctx.territoires ?? []).map((t) => ({
@@ -145,6 +167,7 @@ function buildContextBlock(ctx: NonNullable<Body["context"]>, focusRang: number 
   const payload = {
     reformulation_du_projet: ctx.reformulation ?? null,
     criteres_detectes: ctx.criteres ?? [],
+    perimetre_geographique: Array.isArray(ctx.ancrage) && ctx.ancrage.length ? ctx.ancrage : null,
     synthese_deja_affichee: ctx.synthese ?? null,
     aucun_territoire_parfait: ctx.aucun_territoire_parfait ?? false,
     territoires,

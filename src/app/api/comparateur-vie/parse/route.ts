@@ -10,6 +10,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse, type NextRequest } from "next/server";
 import { PREFERENCE_KEYS, type ParsedProject } from "@/lib/comparateur-vie";
+import { ANCHOR_ZONE_TOKENS, EXCLUSION_ZONE_TOKENS } from "@/lib/geo-zones";
 
 export const runtime = "nodejs";
 
@@ -34,8 +35,20 @@ const TOOL_INPUT_SCHEMA = {
       description:
         "Critères qui ÉLIMINENT les communes. Ne remplir que ce qui est EXPLICITE. En cas de doute, ne pas mettre en contrainte dure : utiliser une préférence ou une ambiguïté.",
       properties: {
-        region: { type: ["string", "null"], enum: [...REGIONS, null], description: "Région exacte si explicitement demandée, sinon null." },
-        departements: { type: "array", items: { type: "string" }, description: "Codes département à 2 chiffres (ex: '17','2A') si explicites." },
+        region: { type: ["string", "null"], enum: [...REGIONS, null], description: "Région ADMINISTRATIVE exacte si explicitement demandée (ex: 'je veux vivre en Bretagne'), sinon null. N'utilisez PAS region pour une zone vernaculaire comme 'le Sud' : utilisez zones." },
+        departements: { type: "array", items: { type: "string" }, description: "Codes département à 2 chiffres (ex: '17','2A') UNIQUEMENT si l'utilisateur cite un département précis. N'inventez jamais une liste de départements pour traduire une zone (le Sud, l'Atlantique…) : passez par zones." },
+        zones: {
+          type: "array",
+          items: { type: "string", enum: [...ANCHOR_ZONE_TOKENS] },
+          description:
+            "Ancres géographiques POSITIVES (filtre de périmètre). Choisissez le ou les jetons de la liste fermée qui nomment la zone visée. Macro-zones : sud, sud_ouest, sud_est, nord, est, grand_ouest, centre. Façades maritimes : atlantique, manche, mediterranee, cote_basque. Massifs : alpes, pyrenees, massif_central, vosges, jura, corse. Le moteur détient la table jeton → départements, vous ne fournissez que le jeton. Choisissez le jeton LE PLUS SPÉCIFIQUE : 'le Sud-Ouest' → sud_ouest seul (jamais sud aussi) ; 'le Sud' → sud. Plusieurs jetons = intersection ('le Sud près des Pyrénées' → ['sud','pyrenees']).",
+        },
+        excludeZones: {
+          type: "array",
+          items: { type: "string", enum: [...EXCLUSION_ZONE_TOKENS] },
+          description:
+            "Ancres géographiques NÉGATIVES (zones à EXCLURE). 'quitter Paris' → ['paris'] ; 'loin de la région parisienne' → ['idf'] ; 'pas dans le Nord' → ['nord']. 'fuir la ville' n'est PAS une zone : c'est une taille de commune (communeSize), pas excludeZones.",
+        },
         nearSea: {
           type: "object",
           properties: { active: { type: "boolean" }, maxKm: { type: ["number", "null"] } },
@@ -90,6 +103,14 @@ RÈGLES
 - Climat perçu : distinguez "fuir la chaleur" (faible_chaleur), "rechercher la douceur" (douceur_climat, hivers tempérés), "rechercher le soleil / le chaud" (ensoleillement_recherche). "climat doux" et "agréable" relèvent de douceur_climat, pas de faible_chaleur.
 - N'inventez aucune donnée. Emploi, écoles, services, sécurité, prix : hors périmètre V1. Si l'utilisateur insiste dessus, mentionnez-le en ambiguities sans créer de préférence.
 - Vouvoiement. Aucun tiret cadratin. Aucun point d'exclamation.
+
+ANCRES GÉOGRAPHIQUES (zones / excludeZones) : règles spécifiques
+- Une ancre est un PÉRIMÈTRE, pas une préférence. Quand l'utilisateur nomme une zone ("le Sud", "le Sud-Ouest", "sur la côte atlantique", "près des Pyrénées", "le Grand Ouest"), remplissez zones avec le ou les jetons de la liste fermée. C'est un FILTRE par défaut (ancre identitaire). Ne la mettez PAS en zones seulement si elle est explicitement très souple ("j'aime bien le Sud mais sans plus") : dans ce cas, signalez-la en ambiguities, sans filtre.
+- NE SÉPAREZ JAMAIS le lieu de sa connotation. "Le Sud" est un LIEU, pas une demande de chaleur. N'ajoutez une préférence climatique (ensoleillement_recherche, faible_chaleur, douceur_climat) QUE si l'utilisateur exprime lui-même ce souhait climatique. Exemple clé : "fuir les canicules tout en restant dans le Sud" → zones:["sud"] + preference faible_chaleur. Surtout PAS ensoleillement_recherche (il fuit la chaleur, il ne la cherche pas).
+- Jeton le plus spécifique : "le Sud-Ouest" → zones:["sud_ouest"] uniquement, jamais ["sud","sud_ouest"]. "la côte basque" → ["cote_basque"]. "le Sud près de la montagne, côté Pyrénées" → ["sud","pyrenees"].
+- Façade maritime nommée → zones (atlantique / manche / mediterranee). Mer générique sans façade ("au bord de la mer") → nearSea ou proximite_mer, pas zones.
+- Exclusions → excludeZones. "quitter Paris" → excludeZones:["paris"]. "pas le Nord" → excludeZones:["nord"].
+- Vous ne fournissez QUE des jetons. N'écrivez jamais vous-même de liste de départements pour une zone.
 
 PRÉFÉRENCES DISPONIBLES (liste fermée)
 - faible_chaleur : étés plus frais, moins de canicules
