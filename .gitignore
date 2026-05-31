@@ -54,3 +54,7 @@ Photos/
 # Exports design system locaux
 *Design System.html
 *Design System.pdf
+
+# Caches bruts régénérables (comparateur de vie) — l'index buildé est versionné, pas les extractions brutes
+data/communes-population.json
+data/communes-vivabilite.json
