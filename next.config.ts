@@ -6,6 +6,12 @@ const nextConfig: NextConfig = {
     root: path.resolve(__dirname),
   },
   skipTrailingSlashRedirect: true,
+  // L'index national du comparateur de vie est lu via fs au runtime par la route
+  // match. On force son inclusion dans la trace serverless (sinon : marche en
+  // local, fichier introuvable en prod).
+  outputFileTracingIncludes: {
+    "/api/comparateur-vie/match": ["./data/comparateur-index.json"],
+  },
   async rewrites() {
     return [
       {
