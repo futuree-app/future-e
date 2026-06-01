@@ -212,6 +212,18 @@ async function main() {
     console.warn('⚠ communes-altitude.json absent : altitude = null. Lancez populate-communes-altitude.js.');
   }
 
+  // Viabilité du bassin d'emploi (taille + diversité, maille ZE2020 héritée par
+  // commune). Cache produit par populate-communes-emploi.js (INSEE Flores A38).
+  let emploiMap = {};
+  try {
+    const raw = JSON.parse(await fs.readFile(path.join(root, 'data', 'communes-emploi.json'), 'utf8'));
+    emploiMap = raw.data ?? raw;
+    const n = Object.keys(emploiMap).length;
+    console.log(`Emploi (viabilité bassin) : ${n} communes (ZE2020, Flores A38).`);
+  } catch {
+    console.warn('⚠ communes-emploi.json absent : emploi = null. Lancez populate-communes-emploi.js --write.');
+  }
+
   // 1) Garder une ligne gwl20 par commune métropolitaine
   const byInsee = new Map();
   for (const row of rows) {
@@ -249,6 +261,10 @@ async function main() {
       densite: pop.densite ?? null,
       distance_cote_km: distanceCoteKm(lat, lon),
       altitude: altMap[insee] ?? null, // m NGF, centroïde IGN RGE ALTI (cf. populate-communes-altitude.js)
+      // Viabilité du bassin d'emploi (ZE2020 héritée). taille/diversite = 0–100.
+      emploi: emploiMap[insee]
+        ? { ze: emploiMap[insee].ze, taille: emploiMap[insee].taille, diversite: emploiMap[insee].diversite }
+        : null,
       clim,
       // Santé environnementale + vivabilité (scorables nationalement)
       viv: {
@@ -314,6 +330,7 @@ async function main() {
       'distance_cote_km : min haversine à une liste de villes côtières (V1, à remplacer par le trait de côte IGN)',
       'population/densité : ADEME data_communes (population_totale_2021, densite_de_population_2022)',
       'altitude : centroïde de la commune via IGN RGE ALTI (Géoplateforme). Sous-estime une commune de vallée étendue (centroïde en fond de vallée).',
+      'emploi : viabilité du bassin (taille + diversité A38) à la maille ZE2020 INSEE, héritée par commune. Flores fin 2024, salarié uniquement (sous-estime agriculture/indépendants).',
     ],
     columnMapSource: 'src/lib/drias-json.ts',
   };

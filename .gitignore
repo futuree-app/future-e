@@ -58,3 +58,12 @@ Photos/
 # Caches bruts régénérables (comparateur de vie) — l'index buildé est versionné, pas les extractions brutes
 data/communes-population.json
 data/communes-vivabilite.json
+
+# Sources INSEE emploi brutes (~250 Mo) — non versionnées ; les caches dérivés
+# data/communes-emploi.json et data/ze-emploi-na38.json le sont (cf. altitude).
+data/source/DS_FLORES_A38_2024_CSV_FR.zip
+data/source/DS_FLORES_A38_2024_data.csv
+data/source/DS_FLORES_A38_2024_metadata.csv
+data/source/ZE2020_au_01-01-2026.zip
+data/source/ZE2020_au_01-01-2026.xlsx
+data/source/_probe_ze.mjs
