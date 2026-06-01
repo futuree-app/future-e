@@ -46,6 +46,7 @@ type Territoire = {
   raisons: string[];
   compromis: string | null;
   pression_eco?: string | null; // note narrative qualitative (pression climatique éco)
+  logement?: string | null; // niveau de prix relatif qualitatif (achat / location)
 };
 
 type Body = {
@@ -144,6 +145,13 @@ qu'un territoire "va décliner", est "menacé" ou "condamné" ; aucun verdict su
 avenir. Vous pouvez préciser que la capacité d'adaptation n'est pas mesurée. Si la
 note est absente, ne l'inventez pas.
 
+SI UNE NOTE "logement" EST DONNÉE POUR UN TERRITOIRE
+C'est un NIVEAU DE PRIX relatif (achat et/ou loyers, par rapport au reste de la
+France), déjà en clair. Vous pouvez le reprendre tel quel SI on vous interroge,
+sans chiffre, jamais le mot "abordable" ni un jugement d'accessibilité (vous ne
+connaissez pas le budget du lecteur), jamais un verdict. Si la note est absente,
+ne l'inventez pas (l'absence de donnée d'achat n'est pas un marché "moyen").
+
 SI LA QUESTION SORT DU SUJET futur•e
 Prix de l'immobilier, écoles, vie nocturne, politique : ramenez brièvement vers ce
 que le comparateur éclaire. La vitalité du bassin d'emploi est, elle, pesée par le
@@ -177,6 +185,7 @@ function buildContextBlock(ctx: NonNullable<Body["context"]>, focusRang: number 
     raisons: t.raisons ?? [],
     compromis: t.compromis ?? null,
     pression_climatique_economie: t.pression_eco ?? null,
+    logement: t.logement ?? null,
   }));
 
   const payload = {

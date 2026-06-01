@@ -103,6 +103,11 @@ export type MatchResult = {
   // Pression climatique sur l'économie locale (NARRATIF, n'entre PAS dans le score).
   // Note de lecture prudente : dépendance à un secteur sensible, pas un verdict.
   pressionEco: { palier: "moderee" | "marquee"; note: string } | null;
+  // Logement (NARRATIF, hors score, hors tri). UNE phrase de niveau de prix RELATIF :
+  // agrégée (« marché … ») quand achat et location vont dans le même sens, détaillée
+  // (« achat …, loyers … ») seulement en cas de divergence. Jamais un chiffre ni une
+  // accessibilité (détail au rapport). null = silence (moyen, ou achat indisponible).
+  logement: string | null;
   metrics: {
     distance_cote_km: number;
     population: number | null;
@@ -194,6 +199,24 @@ type IndexCommune = {
   // Pression climatique sur l'économie locale (NARRATIF, hors score) : un secteur
   // sensible dont l'économie dépend, exposé à un aléa. null = faible (aucune note).
   pression_eco?: { palier: "moderee" | "marquee"; secteur: string; alea: string } | null;
+  // Logement (cf. scripts/populate-logement.mjs). Niveaux relatifs en paliers ;
+  // médianes/maille/fiabilité conservées pour le RAPPORT, jamais exposées au gate.
+  logement?: {
+    achat:
+      | { dispo: false }
+      | {
+          dispo: true;
+          niveau: "tres_bas" | "bas" | "moyen" | "haut" | "tres_haut";
+          maison: { eur_m2: number; maille: string } | null;
+          appart: { eur_m2: number; maille: string } | null;
+        };
+    location: {
+      niveau: "tres_bas" | "bas" | "moyen" | "haut" | "tres_haut";
+      appart_eur_m2: number | null;
+      maison_eur_m2: number | null;
+      fiabilite: "observee" | "estimee";
+    } | null;
+  } | null;
 };
 type IndexFile = { meta: unknown; communes: IndexCommune[] };
 
@@ -554,6 +577,55 @@ function pressionEcoNote(pe: { palier: "moderee" | "marquee"; secteur: string; a
   return `${part} de l'économie locale repose sur ${secteur}, ${alea}.`;
 }
 
+// Logement : niveau de prix RELATIF en libellé qualitatif (NARRATIF, hors score).
+// « moyen » → silence (pas de note) ; achat indisponible (Alsace-Moselle) → silence
+// aussi (jamais déguisé en « moyen »). Jamais de chiffre ni d'accessibilité : le
+// détail vit au rapport. Achat et location séparés. cf. populate-logement.mjs.
+const LOGEMENT_ACHAT: Record<string, string> = {
+  tres_haut: "immobilier parmi les plus chers",
+  haut: "immobilier plus cher que la moyenne",
+  bas: "immobilier moins cher que la moyenne",
+  tres_bas: "immobilier parmi les moins chers",
+};
+const LOGEMENT_LOCATION: Record<string, string> = {
+  tres_haut: "loyers parmi les plus élevés",
+  haut: "loyers plus élevés que la moyenne",
+  bas: "loyers plus bas que la moyenne",
+  tres_bas: "loyers parmi les plus bas",
+};
+// niveau → sens (+ cher / − moins cher / 0 silence) ; « moyen » = silencieux.
+function logementSens(n: string | null): -1 | 0 | 1 {
+  if (n === "tres_haut" || n === "haut") return 1;
+  if (n === "tres_bas" || n === "bas") return -1;
+  return 0;
+}
+const isExtreme = (n: string | null) => n === "tres_haut" || n === "tres_bas";
+// UNE phrase. Agrégée si achat et location concordent ; détaillée si divergence ;
+// un seul axe si l'autre est silencieux ; rien si les deux sont moyens / absents.
+function logementNote(c: IndexCommune): string | null {
+  const lg = c.logement;
+  if (!lg) return null;
+  const aN = lg.achat?.dispo ? lg.achat.niveau : null;
+  const lN = lg.location ? lg.location.niveau : null;
+  const a = logementSens(aN), l = logementSens(lN);
+  if (a === 0 && l === 0) return null;
+  if (a !== 0 && l !== 0) {
+    if (a === l) {
+      // concordance : une seule phrase « marché … ». « parmi les … » si les DEUX
+      // axes sont extrêmes, sinon « … que la moyenne » (on ne sur-promet pas).
+      const both = isExtreme(aN) && isExtreme(lN);
+      return a > 0
+        ? both ? "marché parmi les plus chers" : "marché plus cher que la moyenne"
+        : both ? "marché parmi les moins chers" : "marché moins cher que la moyenne";
+    }
+    // divergence : on détaille, sans jamais le mot « abordable » (= accessibilité).
+    return `${a > 0 ? "achat plus cher" : "achat moins cher"}, ${l > 0 ? "loyers plus élevés" : "loyers plus bas"}`;
+  }
+  // un seul axe distinctif
+  if (a !== 0) return LOGEMENT_ACHAT[aN!] ?? null;
+  return LOGEMENT_LOCATION[lN!] ?? null;
+}
+
 function passesHard(
   c: IndexCommune,
   hc: HardConstraints,
@@ -690,11 +762,13 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
         ? inZoneDept && mountainPref
         : inZoneDept || mountainPref;
     const visible = subs.filter((x) => !x.baseline);
-    const reasons = [...visible]
-      .sort((a, b) => b.weight * b.s - a.weight * a.s)
-      .slice(0, 3)
-      .filter((x) => x.s >= 55)
-      .map((x) => reasonText(x.key, c));
+    const ranked = [...visible].sort((a, b) => b.weight * b.s - a.weight * a.s);
+    let reasons = ranked.slice(0, 3).filter((x) => x.s >= 55).map((x) => reasonText(x.key, c));
+    // Garantie : une carte ne doit jamais paraître vide ou « pas finie ». Si aucun
+    // aspect ne dépasse le seuil de saillance, on montre quand même les 1 à 2
+    // meilleurs aspects relatifs (ce qui explique pourquoi la commune ressort), sans
+    // le seuil. Le tri reste honnête, on ne fabrique pas une raison qui n'existe pas.
+    if (reasons.length === 0) reasons = ranked.slice(0, 2).map((x) => reasonText(x.key, c));
     const worst = [...visible].sort((a, b) => a.weight * a.s - b.weight * b.s)[0];
     const tradeoff = worst && worst.s < 50 ? REASON_NEG[worst.key] : null;
     return {
@@ -714,6 +788,8 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
         pressionEco: c.pression_eco
           ? { palier: c.pression_eco.palier, note: pressionEcoNote(c.pression_eco) }
           : null,
+        // Logement : note narrative qualitative (achat / location), hors score.
+        logement: logementNote(c),
         metrics: {
           distance_cote_km: c.distance_cote_km,
           population: c.population,

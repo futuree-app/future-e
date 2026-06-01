@@ -139,13 +139,21 @@ locale repose sur une activité sensible à un aléa climatique. RÈGLES STRICTE
 jamais le mot "résilience" ni "fragile" ; ne dites jamais qu'un territoire "va
 décliner", est "menacé" ou "condamné" ; aucun verdict sur son avenir économique.
 Vous pouvez rappeler que la capacité d'adaptation n'est pas mesurée. Si le champ est
-absent ou nul, n'en parlez pas (ne le déduisez jamais vous-même).`;
+absent ou nul, n'en parlez pas (ne le déduisez jamais vous-même).
+
+Si un champ "logement" est fourni pour un territoire, vous pouvez le mentionner UNE
+fois comme une information pratique : c'est un NIVEAU DE PRIX relatif (achat et/ou
+loyers, par rapport au reste de la France), déjà formulé en clair. RÈGLES : reprenez
+le sens tel quel (plus cher / moins cher), jamais un chiffre, jamais "abordable" ni
+un jugement d'accessibilité (on ne sait pas le budget du lecteur), jamais un verdict.
+Si le champ est absent ou nul, n'en parlez pas (notamment : l'absence de donnée
+d'achat en Alsace-Moselle n'est pas un marché "moyen", ne l'interprétez pas).`;
 
 type Body = {
   project?: string;
   reformulation?: string;
   preferences?: { key: string; weight: number }[];
-  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null }[];
+  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null }[];
   outcome?: { perfectMatch?: boolean; message?: string | null };
   perimetre?: string[]; // ancres dures = cadre choisi (tous les territoires y sont)
   orientation?: string[]; // ancres souples = penchant (résultats inclinés, sans s'y limiter)
@@ -187,6 +195,7 @@ export async function POST(request: NextRequest) {
       raisons: r.reasons ?? [],
       compromis: r.tradeoff ?? null,
       pression_climatique_economie: r.pressionEco ?? null,
+      logement: r.logement ?? null,
     })),
     sante_environnementale: body.enrichment ?? null,
   };

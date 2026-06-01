@@ -67,3 +67,6 @@ data/source/DS_FLORES_A38_2024_metadata.csv
 data/source/ZE2020_au_01-01-2026.zip
 data/source/ZE2020_au_01-01-2026.xlsx
 data/source/_probe_ze.mjs
+
+# Caches bruts logement (DVF ~420 Mo + ANIL) — non versionnés ; le dérivé vit dans l'index
+data/cache-logement/

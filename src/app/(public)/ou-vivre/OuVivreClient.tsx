@@ -145,6 +145,7 @@ export function OuVivreClient() {
               reasons: r.reasons,
               tradeoff: r.tradeoff,
               pressionEco: r.pressionEco?.note ?? null, // narratif qualitatif, firewall préservé
+              logement: r.logement, // niveau de prix relatif qualitatif, firewall préservé
             })),
             outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message },
             perimetre: outcomeMeta.perimetre ?? [],
@@ -351,6 +352,7 @@ export function OuVivreClient() {
               raisons: r.reasons,
               compromis: r.tradeoff,
               pression_eco: r.pressionEco?.note ?? null, // narratif qualitatif, firewall préservé
+              logement: r.logement, // niveau de prix relatif qualitatif, firewall préservé
             })),
           },
           focus: null,
@@ -778,6 +780,15 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
                   {r.pressionEco && (
                     <p className="mt-3 text-[12px] leading-[1.5] text-amber-300/70">
                       À noter : {r.pressionEco.note}
+                    </p>
+                  )}
+
+                  {/* Logement : une phrase de niveau de prix relatif, NARRATIVE,
+                      hors classement. Agrégée si achat et location concordent.
+                      Silence si niveau moyen ou achat indisponible. */}
+                  {r.logement && (
+                    <p className="mt-3 text-[12px] leading-[1.5] text-label/55">
+                      Logement : {r.logement}
                     </p>
                   )}
 

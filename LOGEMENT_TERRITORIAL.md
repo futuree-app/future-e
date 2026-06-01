@@ -365,3 +365,53 @@ Datafoncier DV3F (indicateurs de marché, Dynmark, API Données foncières) ; Ca
 des loyers (Ministère de la Transition écologique / ANIL, data.gouv.fr) ;
 Observatoires Locaux des Loyers ; zonage tendu / encadrement (État) ; INSEE
 Filosofi (revenu). État vérifié en juin 2026.
+
+## Implémenté V1 (2026-06-02)
+
+Livré : signal logement NARRATIF, NON SCORÉ, aucun impact sur le tri. Calculé par
+`scripts/populate-logement.mjs`, patché dans le champ `logement` de l'index, attaché
+au résultat après le scoring (comme `pression_eco`).
+
+Arbitrage de source confirmé par les faits (Phase 1) : **Option B**. Le CEREMA DV3F
+n'est pas accessible automatiquement à un produit privé (Box manuel / API réservée
+aux acteurs publics) ; et l'accessibilité (son seul vrai atout) étant hors
+comparateur, on perdait le pipeline maîtrisé pour un gain nul. Donc **DVF auto-agrégé
+pour l'achat, ANIL pour la location**. Le CEREMA reste la source du futur module
+logement (accessibilité).
+
+Réalités actées à l'implémentation :
+- **Achat = médian €/m² DVF** (maison + appartement séparés), fenêtre 2021-2024,
+  filtrage Vente + type + surface + garde-fou aberrants (300-20 000 €/m²) + dédup
+  mutation. Maille : commune si ≥ 10 ventes/type, sinon repli EPCI, sinon au-delà.
+- **Robustesse validée sur l'index entier** : maison 73,8 % commune / 21,6 % EPCI /
+  0 % au-delà ; appartement 15,5 % / 77,8 % / 2,1 % (l'appartement bascule en EPCI
+  en rural, normal). **Absent 4,6 % = Alsace-Moselle** (57/67/68, hors DVF), géré
+  proprement : achat silencieux au comparateur, « non disponible » au rapport, jamais
+  « moyen ».
+- **Location = loyer €/m² charges comprises ANIL** (appartement + maison), millésime
+  2025, national (Alsace-Moselle incluse), drapeau de fiabilité observée/estimée.
+- **Paliers** : 5 niveaux par percentiles nationaux (déciles aux extrêmes, tiers au
+  centre), libellé achat combiné = moyenne des percentiles maison + appartement.
+  « moyen » = silence.
+
+Signal utilisateur (tranché avec le porteur) :
+- **Comparateur** : UNE phrase de niveau de prix relatif, zéro chiffre.
+  - agrégée quand achat et location concordent : « marché parmi les plus chers /
+    plus cher que la moyenne / moins cher que la moyenne / parmi les moins chers » ;
+  - détaillée seulement en divergence : « achat moins cher, loyers plus élevés » ;
+  - un seul axe si l'autre est silencieux ; rien si les deux sont moyens.
+  - **Jamais « abordable »** (= accessibilité, réservée au module), jamais « tendu »
+    (= signal tension séparé, à venir).
+- **Rapport** : médians maison / appartement, maille utilisée, fiabilité, et la
+  distinction explicite « dans la moyenne » vs « donnée d'achat non disponible ».
+- **Synthèse + AskFuture** : reçoivent le libellé qualitatif (firewall préservé),
+  avec règle stricte (sens tel quel, pas de chiffre, pas d'« abordable », pas de
+  verdict, l'absence d'achat n'est pas un marché « moyen »).
+
+Effet de bord positif réglé en même temps : **garantie anti-carte-vide** (une carte
+qui ne sortait aucune raison au-dessus du seuil affiche désormais ses 1-2 meilleurs
+aspects relatifs, pour ne jamais paraître « pas finie »).
+
+Restent hors V1 : tension locative (note à venir, zonage tendu + vacance) ;
+accessibilité (module logement, CEREMA) ; abordabilité opt-in (porte V2). Cache brut
+DVF (~420 Mo) gitignoré ; le dérivé vit dans l'index ; script rejouable.
