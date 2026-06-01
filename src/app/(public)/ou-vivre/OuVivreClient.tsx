@@ -285,6 +285,11 @@ export function OuVivreClient() {
   const hardZoneLabels = zoneAnchors.filter((z) => z.strength === "hard").map((z) => z.label);
   const prefZoneLabels = zoneAnchors.filter((z) => z.strength === "preferred").map((z) => z.label);
   const inspZoneLabels = zoneAnchors.filter((z) => z.strength === "inspiration").map((z) => z.label);
+  // Montagne (critère altitude) : même affichage que les zones, par force.
+  const montStrength = parsed?.hardConstraints?.montagne?.strength;
+  if (montStrength === "hard") hardZoneLabels.push("la montagne");
+  else if (montStrength === "preferred") prefZoneLabels.push("la montagne");
+  else if (montStrength === "inspiration") inspZoneLabels.push("la montagne");
   const exclLabels = parsed ? exclusionsToLabels(parsed.hardConstraints?.excludeZones) : [];
 
   // ── AskFuture comparateur ─────────────────────────────────────────────────

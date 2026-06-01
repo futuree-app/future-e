@@ -429,16 +429,75 @@ frontière.
 À noter pour plus tard : le gradient pourrait s'étendre à `nearSea` / `nearPlace`
 (« idéalement près de Lyon »), non fait en V1.
 
+## Montagne générique (altitude) — conception validée (2026-06-01)
+
+Le trou de données altitude est comblé : `comparateur-index.json` porte désormais
+`altitude` (centroïde IGN RGE ALTI). « Montagne » devient donc un **critère
+d'altitude propre à la commune**, avec le même gradient de force que les ancres,
+distinct des massifs nommés (zones par département) et des préférences climatiques.
+
+Doctrine (tranchée par le porteur) :
+- **« à la montagne », « en altitude »** → critère altitude (V1).
+- **« près des Alpes / Pyrénées »** → zone massif (déjà fait), pas le critère altitude.
+- **« proche de la montagne »** (accès au relief sans être en altitude) → **non
+  supporté en V1** : risque trop fort de résultats contre-intuitifs (Annecy,
+  Grenoble, Chambéry, en fond de vallée). On ne lui donne aucune sémantique
+  approximative ; le parse ne renseigne rien.
+
+Parse : « à la montagne / en montagne / en altitude / village de montagne / haute
+montagne » → `montagne` avec force (hard = nécessité ou mention nue ; preferred =
+j'aimerais ; inspiration = pourquoi pas). Massif nommé → zone. « proche de la
+montagne » → rien.
+
+Représentation : nouveau champ `hardConstraints.montagne = { strength }` (miroir de
+`nearSea` qui a déjà dur + souple). Pas un jeton de zone (altitude continue), pas
+une simple préférence (il lui faut le mode filtre).
+
+Application moteur (cohérente avec les courbes comportementales existantes) :
+- **Courbe de montagnosité** altitude → score 0-100, recalée « vivre à la montagne »
+  (pas que la haute montagne) : `[[300, 0], [600, 50], [1000, 85], [1400, 100]]`.
+  500 m ≈ 33, 800 m ≈ 67. Le pivot est 600 m.
+- **hard** → filtre : montagnosité ≥ 50, soit altitude ≥ 600 m (~292 communes
+  pop ≥ 1500). Vivier viable ; la sur-contrainte (mer + montagne) reste gérée par
+  le message « détecter et le dire ».
+- **preferred / inspiration** → bonus **proportionnel** à la montagnosité :
+  `bonus = montagnosité/100 × force` (preferred 12, inspiration 4). Une commune à
+  1400 m est tirée plus fort qu'une à 600 m.
+- **Combinaison des bonus souples** : `max` au sein d'un même axe (entre zones :
+  sémantique OU « Atlantique ou Sud-Ouest »), **somme bornée entre axes orthogonaux**
+  (zone vs altitude), plafond 18. Ainsi l'intersection « le Sud-Ouest ET en altitude »
+  prime sur chaque axe seul (12), sans agir comme un filtre.
+- **Étalement échelonné** : une ancre préférée (zone ou montagne) déclenche
+  l'échelonné (2 in-zone + 1 ouverture sur 3 cartes) ; `inspiration` garde la
+  diversité. Le prédicat « in-zone » :
+  - montagne preferred seule → communes de montagnosité ≥ 50 ;
+  - zone preferred seule → communes de la zone ;
+  - **zone preferred ET montagne preferred → l'INTERSECTION** (commune de la zone
+    ET en altitude). Sans cela, les grandes villes de plaine de la zone (Toulouse,
+    Bordeaux) écraseraient l'altitude. Vérifié : « Sud-Ouest idéalement à la
+    montagne » sort Bagnères-de-Bigorre et Luc-la-Primaube, pas Toulouse.
+
+Affichage : puce « la montagne » au gate, stylée par force ; ligne « recherche
+limitée aux communes de montagne (à partir d'environ 600 m d'altitude) » (hard) ou
+« orientés vers l'altitude » (souple) ; « la montagne » intégrée à cadre/orientation
+pour la synthèse et AskFuture (libellé seul, l'altitude chiffrée ne quitte pas l'UI).
+
+Risques : seuil conventionnel assumé et affiché ; le centroïde sous-estime les
+villes de vallée (Grenoble exclu de « à la montagne », ce qui est correct pour ce
+sens) ; routage parse massif-nommé vs altitude = point le plus délicat.
+
+Étendu futur noté : inverse « en plaine / pas la montagne » (non géré V1).
+
 ## Catégories futures notées (non implémentées)
 
 À instruire ensuite, par ordre de valeur pressentie :
 
-1. **Montagne générique sans nom** (« à la montagne », « en altitude ») : pas de
-   champ altitude/relief dans l'index. Aujourd'hui seuls les massifs nommés sont
-   gérés (par département). Piste cheap : « montagne » = union des massifs nommés.
-2. **Ancres relationnelles** (« à 2 h de Paris », « accessible depuis Lyon ») :
+1. **Ancres relationnelles** (« à 2 h de Paris », « accessible depuis Lyon ») :
    contrainte de temps de trajet, pas de distance à vol d'oiseau. Trou de données
    majeur (ni isochrones ni temps de trajet dans l'index). Reporté.
-3. **Ancres relatives / directionnelles** (« plus au sud », « me rapprocher ») :
+2. **Ancres relatives / directionnelles** (« plus au sud », « me rapprocher ») :
    nécessitent la résidence de l'utilisateur, absente du comparateur anonyme.
    Reporté.
+3. **« proche de la montagne »** (accès au relief) : nécessite une proximité au
+   relief (commune basse mais adossée à un massif), non calculable proprement sans
+   donnée de relief voisin. Volontairement non supporté en V1.

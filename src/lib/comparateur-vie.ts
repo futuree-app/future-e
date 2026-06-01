@@ -57,6 +57,11 @@ export type HardConstraints = {
   // que des jetons d'une liste fermée ; le moteur détient la table jeton → départements.
   zones?: ZoneAnchor[];
   excludeZones?: string[];
+  // Montagne générique = critère d'ALTITUDE propre à la commune (distinct des
+  // massifs nommés, qui sont des zones). Même gradient de force : hard = filtre
+  // (altitude ≥ ~600 m), preferred / inspiration = bonus proportionnel à la
+  // montagnosité. « proche de la montagne » (accès au relief) n'est PAS géré en V1.
+  montagne?: { strength: ZoneStrength } | null;
   nearSea?: { active: boolean; maxKm?: number | null };
   excludeSea?: boolean;
   nearPlace?: { label: string; maxKm?: number | null } | null;
@@ -131,6 +136,12 @@ function lerp(anchors: Anchors, x: number | null | undefined): number | null {
 const ISOLEMENT: Anchors = [[0, 0], [1000, 5], [2000, 15], [5000, 45], [10000, 65], [20000, 80], [50000, 92], [100000, 97], [300000, 100]];
 const CALME: Anchors = [[0, 55], [30, 65], [80, 85], [150, 95], [400, 100], [800, 95], [1500, 80], [3000, 55], [6000, 30], [12000, 12], [30000, 3]];
 const WINTER_MILD: Anchors = [[-3, 5], [1, 30], [4, 60], [7, 88], [9, 100], [12, 95], [16, 80]];
+// Montagnosité : altitude (m) → score 0-100, recalée « vivre à la montagne » (pas
+// que la haute montagne). Pivot 600 m = 50 (= seuil du filtre dur). cf. ANCRES.
+const MONTAGNE: Anchors = [[300, 0], [600, 50], [1000, 85], [1400, 100]];
+function montagnosite(alt: number | null | undefined): number | null {
+  return alt == null ? null : lerp(MONTAGNE, alt);
+}
 
 // ── Index ────────────────────────────────────────────────────────────────────
 type IndexCommune = {
@@ -223,10 +234,21 @@ function listFr(items: string[]): string {
 // caler en réel : preferred domine d'ordinaire le haut du classement sans agir
 // comme un filtre, inspiration oriente à peine.
 const STRENGTH_BONUS: Record<ZoneStrength, number> = { hard: 0, preferred: 12, inspiration: 4 };
+// Plafond du bonus souple combiné entre axes orthogonaux (zone + montagne). Permet
+// à l'intersection (« le Sud-Ouest ET en altitude ») de primer sur chaque axe seul
+// (12) sans agir comme un filtre dur. Au sein d'un même axe, c'est un max, pas une somme.
+const SOFT_BONUS_CAP = 18;
 function softZoneBonus(dept: string, soft: SoftZone[]): number {
   let b = 0; // sémantique OU : max du bonus auquel la commune a droit, pas de cumul
   for (const s of soft) if (s.departements.has(dept)) b = Math.max(b, STRENGTH_BONUS[s.strength]);
   return b;
+}
+// Bonus montagne souple : proportionnel à la montagnosité (une commune haute est
+// tirée plus fort qu'une moyenne montagne). hard ne bonifie pas (il filtre).
+function montagneBonus(alt: number | null | undefined, strength: ZoneStrength | undefined): number {
+  if (!strength || strength === "hard") return 0;
+  const m = montagnosite(alt);
+  return m == null ? 0 : (m / 100) * STRENGTH_BONUS[strength];
 }
 
 function avgPct(c: IndexCommune, fields: string[]): number | null {
@@ -333,6 +355,12 @@ function passesHard(
   // filtrent pas (elles bonifient le score, hors de cette fonction).
   if (zoneDepts && !zoneDepts.has(c.dept)) return false;
   if (excludeDepts.has(c.dept)) return false;
+  // Montagne dure : altitude ≥ ~600 m (montagnosité ≥ 50). Les communes sans
+  // altitude (îles, littoral) sont exclues, ce qui est correct pour « à la montagne ».
+  if (hc.montagne?.strength === "hard") {
+    const m = montagnosite(c.altitude);
+    if (m == null || m < 50) return false;
+  }
   if (hc.nearSea?.active && c.distance_cote_km > (hc.nearSea.maxKm ?? 30)) return false;
   if (hc.excludeSea && c.distance_cote_km < 15) return false;
   if (hc.communeSize) {
@@ -362,6 +390,16 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   const hc = parsed.hardConstraints ?? {};
   const zone = resolveZoneAnchors(hc.zones);
   const exclusion = resolveExclusions(hc.excludeZones);
+  const montagne = hc.montagne ?? null;
+
+  // Ancres PRÉFÉRÉES (zones + montagne) : servent au prédicat d'étalement échelonné.
+  // inspiration n'en fait pas partie (son penchant léger passe par le score seul).
+  const preferredDepts = new Set<string>();
+  for (const sz of zone.soft) {
+    if (sz.strength === "preferred") for (const d of sz.departements) preferredDepts.add(d);
+  }
+  const montagnePreferred = montagne?.strength === "preferred";
+  const anyPreferred = preferredDepts.size > 0 || montagnePreferred;
 
   // Baseline de viabilité : eviter_isolement implicite si absent
   const prefs: (Preference & { baseline?: boolean })[] = parsed.preferences
@@ -388,8 +426,25 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     // villes saturent déjà à 100, le clamp écrase le bonus et l'ancre préférée ne
     // départage plus. Le score affiché reste borné à 100.
     const base = subs.reduce((s, x) => s + x.weight * x.s, 0) / totalW;
-    const rawScore = base + softZoneBonus(c.dept, zone.soft);
+    // Bonus d'ancre souple. Au sein d'un axe : max (sémantique OU, ex. « Atlantique
+    // ou Sud-Ouest »). Entre axes orthogonaux (zone vs altitude) : somme bornée, pour
+    // que l'intersection (« le Sud-Ouest ET en altitude ») prime sans filtrer.
+    const soft = Math.min(
+      SOFT_BONUS_CAP,
+      softZoneBonus(c.dept, zone.soft) + montagneBonus(c.altitude, montagne?.strength),
+    );
+    const rawScore = base + soft;
     const compatibility = clamp(Math.round(rawScore), 0, 100);
+    // « In-zone » pour l'étalement échelonné. Quand zone ET montagne sont toutes
+    // deux préférées, le cœur dominant est l'INTERSECTION (« le Sud-Ouest ET en
+    // altitude »), pas l'union : sinon les grandes villes de plaine de la zone
+    // écraseraient l'altitude. Sinon, critère unique (zone seule, ou montagne seule).
+    const inZoneDept = preferredDepts.has(c.dept);
+    const mountainHere = (montagnosite(c.altitude) ?? 0) >= 50;
+    const pref =
+      preferredDepts.size > 0 && montagnePreferred
+        ? inZoneDept && mountainHere
+        : inZoneDept || (montagnePreferred && mountainHere);
     const visible = subs.filter((x) => !x.baseline);
     const reasons = [...visible]
       .sort((a, b) => b.weight * b.s - a.weight * a.s)
@@ -401,6 +456,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     return {
       cityKey: cityKey(c.insee),
       sortScore: rawScore,
+      pref,
       result: {
         insee: c.insee,
         nom: CITY_LABEL[cityKey(c.insee)] ?? c.nom,
@@ -436,14 +492,6 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     return true;
   });
 
-  // Départements de la (des) zone(s) PRÉFÉRÉE(s) : déclenche l'étalement échelonné.
-  // inspiration n'en fait pas partie (son penchant léger passe par le score, pas
-  // par l'étalement).
-  const preferredDepts = new Set<string>();
-  for (const sz of zone.soft) {
-    if (sz.strength === "preferred") for (const d of sz.departements) preferredDepts.add(d);
-  }
-
   const seenRegion = new Set<string>();
   const seenDept = new Set<string>();
   const deduped: MatchResult[] = [];
@@ -453,19 +501,19 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     deduped.push(r);
   };
 
-  if (preferredDepts.size > 0) {
-    // Étalement ÉCHELONNÉ (ancre préférée) : la zone domine, avec UNE seule ouverture
-    // hors zone, placée au dernier rang affiché pour rester visible sans noyer la
-    // zone. C'est ce qui distingue preferred (2 de la zone + 1 ouverture sur 3 cartes)
-    // de hard (3 de la zone) et d'inspiration (diversité). cf. ANCRES_GEOGRAPHIQUES.md.
+  if (anyPreferred) {
+    // Étalement ÉCHELONNÉ (ancre préférée : zone OU montagne) : la zone préférée
+    // domine, avec UNE seule ouverture hors zone, au dernier rang affiché pour
+    // rester visible sans la noyer. Distingue preferred (2 in-zone + 1 ouverture sur
+    // 3 cartes) de hard (3 in-zone) et d'inspiration (diversité). cf. ANCRES.
     const zSeen = new Set<string>();
     const zonePicks: MatchResult[] = [];
     for (const s of unique) {
-      if (!preferredDepts.has(s.result.dept) || zSeen.has(s.result.dept)) continue;
+      if (!s.pref || zSeen.has(s.result.dept)) continue;
       zSeen.add(s.result.dept);
       zonePicks.push(s.result);
     }
-    const alt = unique.find((s) => !preferredDepts.has(s.result.dept) && !zSeen.has(s.result.dept))?.result ?? null;
+    const alt = unique.find((s) => !s.pref && !zSeen.has(s.result.dept))?.result ?? null;
     for (const r of zonePicks.slice(0, DISPLAY - 1)) pushPick(r);
     if (alt) pushPick(alt);
     for (const r of zonePicks) {
@@ -504,10 +552,21 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   // Sur-contrainte : quand les ancres en filtre vident le vivier, on le DIT en
   // nommant le périmètre, sans relâcher automatiquement ni inventer de résultat
   // (cf. ANCRES_GEOGRAPHIQUES.md, choix V1 « détecter et le dire »).
+  // Montagne intégrée aux ancres appliquées (libellé + convention + force), pour
+  // l'affichage et la synthèse, exactement comme une zone.
+  const montagneApplied: AppliedZone[] = montagne
+    ? [{
+        label: "la montagne",
+        convention: "communes de montagne, à partir d'environ 600 m d'altitude",
+        strength: montagne.strength,
+      }]
+    : [];
+  const appliedZones = [...zone.applied, ...montagneApplied];
+
   // Seules les ancres DURES (et les exclusions) peuvent vider le vivier : ce sont
   // elles qu'on nomme. Les ancres souples ne filtrent pas.
   const anchorLabels = [
-    ...zone.applied.filter((z) => z.strength === "hard"),
+    ...appliedZones.filter((z) => z.strength === "hard"),
     ...exclusion.applied,
   ].map((z) => z.label);
   const emptyMessage =
@@ -527,7 +586,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     candidates: candidates.length,
     message,
     results: deduped,
-    appliedZones: zone.applied,
+    appliedZones,
     appliedExclusions: exclusion.applied,
   };
 }

@@ -49,6 +49,15 @@ const TOOL_INPUT_SCHEMA = {
           description:
             "Ancres géographiques NÉGATIVES (zones à EXCLURE). 'quitter Paris' → ['paris'] ; 'loin de la région parisienne' → ['idf'] ; 'pas dans le Nord' → ['nord']. 'fuir la ville' n'est PAS une zone : c'est une taille de commune (communeSize), pas excludeZones.",
         },
+        montagne: {
+          type: ["object", "null"],
+          properties: {
+            strength: { type: "string", enum: ["hard", "preferred", "inspiration"] },
+          },
+          required: ["strength"],
+          description:
+            "Vivre EN ALTITUDE / à la montagne, par l'altitude de la commune elle-même. Renseignez SI l'utilisateur veut être à la montagne ('à la montagne', 'en montagne', 'en altitude', 'un village de montagne', 'en haute montagne'), avec la MÊME force que les zones (hard = nécessité ou mention nue ; preferred = j'aimerais bien ; inspiration = pourquoi pas). NE PAS l'utiliser pour un massif nommé ('près des Pyrénées' = zones), NI pour 'proche de la montagne' (accès au relief, NON supporté : ne rien mettre). null sinon.",
+        },
         nearSea: {
           type: "object",
           properties: { active: { type: "boolean" }, maxKm: { type: ["number", "null"] } },
@@ -114,6 +123,7 @@ ANCRES GÉOGRAPHIQUES (zones / excludeZones) : règles spécifiques
 - NE SÉPAREZ JAMAIS le lieu de sa connotation. "Le Sud" est un LIEU, pas une demande de chaleur. N'ajoutez une préférence climatique (ensoleillement_recherche, faible_chaleur, douceur_climat) QUE si l'utilisateur exprime lui-même ce souhait. Exemple clé : "fuir les canicules tout en restant dans le Sud" → zones:[{zone:"sud",strength:"hard"}] + preference faible_chaleur. Surtout PAS ensoleillement_recherche.
 - Jeton le plus spécifique : "le Sud-Ouest" → [{zone:"sud_ouest",...}] uniquement, jamais sud en plus. La force peut différer par ancre : "la mer absolument, pourquoi pas le Sud-Ouest" → nearSea.active=true + zones:[{zone:"sud_ouest",strength:"inspiration"}].
 - Façade maritime nommée → zones (atlantique / manche / mediterranee). Mer générique sans façade ("au bord de la mer") → nearSea ou proximite_mer, pas zones.
+- MONTAGNE par altitude (champ montagne, pas zones) : "à la montagne", "en altitude", "un village de montagne", "en haute montagne" → montagne avec la force adéquate (mention nue = hard). ATTENTION : un massif nommé ("près des Alpes", "dans les Pyrénées") va dans zones (alpes/pyrenees…), PAS dans montagne. Et "proche de la montagne" (accès au relief, sans être en altitude) n'est PAS supporté : ne renseignez ni montagne ni zones, mentionnez-le au plus dans la reformulation.
 - Exclusions → excludeZones. "quitter Paris" → excludeZones:["paris"]. "pas le Nord" → excludeZones:["nord"].
 - Vous ne fournissez QUE des jetons et leur force. N'écrivez jamais vous-même de liste de départements.
 
