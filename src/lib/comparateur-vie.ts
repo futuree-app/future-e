@@ -143,6 +143,7 @@ type IndexCommune = {
   population: number | null;
   densite: number | null;
   distance_cote_km: number;
+  altitude?: number | null; // m NGF, centroïde IGN RGE ALTI (base de la détection « montagne »)
   clim: Record<string, number | null>;
   pct: Record<string, number | null>;
   viv?: Record<string, number | null>;

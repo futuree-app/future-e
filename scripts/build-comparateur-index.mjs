@@ -202,6 +202,16 @@ async function main() {
     }
   }
 
+  // Altitude (centroïde IGN RGE ALTI). Cache produit par populate-communes-altitude.js.
+  let altMap = {};
+  try {
+    altMap = JSON.parse(await fs.readFile(path.join(root, 'data', 'communes-altitude.json'), 'utf8'));
+    const n = Object.values(altMap).filter((v) => v != null).length;
+    console.log(`Altitude : ${n} communes (centroïde IGN).`);
+  } catch {
+    console.warn('⚠ communes-altitude.json absent : altitude = null. Lancez populate-communes-altitude.js.');
+  }
+
   // 1) Garder une ligne gwl20 par commune métropolitaine
   const byInsee = new Map();
   for (const row of rows) {
@@ -238,6 +248,7 @@ async function main() {
       population: pop.population ?? null,
       densite: pop.densite ?? null,
       distance_cote_km: distanceCoteKm(lat, lon),
+      altitude: altMap[insee] ?? null, // m NGF, centroïde IGN RGE ALTI (cf. populate-communes-altitude.js)
       clim,
       // Santé environnementale + vivabilité (scorables nationalement)
       viv: {
@@ -302,6 +313,7 @@ async function main() {
     approximations: [
       'distance_cote_km : min haversine à une liste de villes côtières (V1, à remplacer par le trait de côte IGN)',
       'population/densité : ADEME data_communes (population_totale_2021, densite_de_population_2022)',
+      'altitude : centroïde de la commune via IGN RGE ALTI (Géoplateforme). Sous-estime une commune de vallée étendue (centroïde en fond de vallée).',
     ],
     columnMapSource: 'src/lib/drias-json.ts',
   };
