@@ -56,7 +56,16 @@ const TOOL_INPUT_SCHEMA = {
           },
           required: ["strength"],
           description:
-            "Vivre EN ALTITUDE / à la montagne, par l'altitude de la commune elle-même. Renseignez SI l'utilisateur veut être à la montagne ('à la montagne', 'en montagne', 'en altitude', 'un village de montagne', 'en haute montagne'), avec la MÊME force que les zones (hard = nécessité ou mention nue ; preferred = j'aimerais bien ; inspiration = pourquoi pas). NE PAS l'utiliser pour un massif nommé ('près des Pyrénées' = zones), NI pour 'proche de la montagne' (accès au relief, NON supporté : ne rien mettre). null sinon.",
+            "Vivre EN ALTITUDE / à la montagne, par l'altitude de la commune elle-même. Renseignez SI l'utilisateur veut ÊTRE à la montagne ('à la montagne', 'en montagne', 'en altitude', 'un village de montagne', 'en haute montagne'), avec la MÊME force que les zones (hard = nécessité ou mention nue ; preferred = j'aimerais bien ; inspiration = pourquoi pas). NE PAS l'utiliser pour un massif nommé ('près des Pyrénées' = zones), NI pour 'proche d'une montagne' (= reliefProche). null sinon.",
+        },
+        reliefProche: {
+          type: ["object", "null"],
+          properties: {
+            strength: { type: "string", enum: ["hard", "preferred", "inspiration"] },
+          },
+          required: ["strength"],
+          description:
+            "PROCHE d'une montagne / d'un massif, accès au relief SANS forcément vivre en altitude ('proche d'une montagne', 'proche de la montagne', 'près des sommets', 'pour faire de la randonnée en montagne', 'au pied des montagnes'). Distinct de montagne (= être EN altitude) et d'un massif nommé (= zones). Le moteur mesure la proximité d'un massif (un relief élevé est à portée). Force : hard = nécessité ou mention nue ; preferred = souhait ; inspiration = ouverture. null sinon.",
         },
         nearSea: {
           type: "object",
@@ -132,7 +141,10 @@ ANCRES GÉOGRAPHIQUES (zones / excludeZones) : règles spécifiques
 - NE SÉPAREZ JAMAIS le lieu de sa connotation. "Le Sud" est un LIEU, pas une demande de chaleur. N'ajoutez une préférence climatique (ensoleillement_recherche, faible_chaleur, douceur_climat) QUE si l'utilisateur exprime lui-même ce souhait. Exemple clé : "fuir les canicules tout en restant dans le Sud" → zones:[{zone:"sud",strength:"hard"}] + preference faible_chaleur. Surtout PAS ensoleillement_recherche.
 - Jeton le plus spécifique : "le Sud-Ouest" → [{zone:"sud_ouest",...}] uniquement, jamais sud en plus. La force peut différer par ancre : "la mer absolument, pourquoi pas le Sud-Ouest" → nearSea.active=true + zones:[{zone:"sud_ouest",strength:"inspiration"}].
 - Façade maritime nommée → zones (atlantique / manche / mediterranee). Mer générique sans façade ("au bord de la mer") → nearSea ou proximite_mer, pas zones.
-- MONTAGNE par altitude (champ montagne, pas zones) : "à la montagne", "en altitude", "un village de montagne", "en haute montagne" → montagne avec la force adéquate (mention nue = hard). ATTENTION : un massif nommé ("près des Alpes", "dans les Pyrénées") va dans zones (alpes/pyrenees…), PAS dans montagne. Et "proche de la montagne" (accès au relief, sans être en altitude) n'est PAS supporté : ne renseignez ni montagne ni zones, mentionnez-le au plus dans la reformulation.
+- RELIEF, trois cas DISTINCTS à ne pas confondre :
+  • ÊTRE en altitude (champ montagne) : "à la montagne", "en altitude", "un village de montagne", "en haute montagne" → montagne, force adéquate (mention nue = hard).
+  • PROCHE d'une montagne (champ reliefProche) : "proche d'une montagne", "proche de la montagne", "au pied des montagnes", "pour faire de la randonnée", "près des sommets" → reliefProche, force adéquate. C'est l'accès au relief sans vivre en altitude (une ville au pied d'un massif convient). NE confondez PAS avec montagne.
+  • Massif NOMMÉ (zones) : "près des Alpes", "dans les Pyrénées" → zones (alpes/pyrenees…), PAS montagne ni reliefProche.
 - Exclusions → excludeZones. "quitter Paris" → excludeZones:["paris"]. "pas le Nord" → excludeZones:["nord"].
 - Vous ne fournissez QUE des jetons et leur force. N'écrivez jamais vous-même de liste de départements.
 

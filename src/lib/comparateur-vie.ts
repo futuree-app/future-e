@@ -65,8 +65,13 @@ export type HardConstraints = {
   // Montagne générique = critère d'ALTITUDE propre à la commune (distinct des
   // massifs nommés, qui sont des zones). Même gradient de force : hard = filtre
   // (altitude ≥ ~600 m), preferred / inspiration = bonus proportionnel à la
-  // montagnosité. « proche de la montagne » (accès au relief) n'est PAS géré en V1.
+  // montagnosité.
   montagne?: { strength: ZoneStrength } | null;
+  // « Proche d'une montagne » = PROXIMITÉ au relief (massif à portée), distincte de
+  // l'altitude propre (montagne). Grenoble (214 m) est proche d'une montagne sans
+  // être en altitude. Même gradient : hard = filtre (relief_proximite ≥ 50),
+  // preferred / inspiration = bonus proportionnel. Adossé à relief_proximite (index).
+  reliefProche?: { strength: ZoneStrength } | null;
   nearSea?: { active: boolean; maxKm?: number | null };
   excludeSea?: boolean;
   nearPlace?: { label: string; maxKm?: number | null } | null;
@@ -174,6 +179,10 @@ type IndexCommune = {
   densite: number | null;
   distance_cote_km: number;
   altitude?: number | null; // m NGF, centroïde IGN RGE ALTI (base de la détection « montagne »)
+  // Proximité au relief (0–100) : altitude max dans ~35 km. Distingue « proche
+  // d'une montagne » (Grenoble 95, Pau 69) de la plaine (Toulouse 0), là où
+  // l'altitude propre échoue (Grenoble est à 214 m). cf. scripts/add-relief-proximite.mjs.
+  relief_proximite?: number | null;
   clim: Record<string, number | null>;
   pct: Record<string, number | null>;
   viv?: Record<string, number | null>;
@@ -294,11 +303,25 @@ function buildSignature(c: IndexCommune): string[] {
     sig.push((c.region && COAST_BY_REGION[c.region]) || "Bord de mer");
   } else if (massifToken && alt >= 200) {
     sig.push(MASSIF_LABEL[massifToken]);
+  } else {
+    // 1b. Ville (repli géographique) : sans côte ni massif, la TAILLE de la ville est
+    //     son image, c'est ainsi qu'un humain la décrit. Langage naturel, jamais le
+    //     jargon « pôle urbain ». Ne se déclenche que sur le créneau géo vide (Nice
+    //     garde « Côte méditerranéenne », Grenoble « Aux portes des Alpes »). Sous
+    //     10 000 hab : pas de label, signature courte assumée.
+    const pop = c.population ?? 0;
+    if (pop >= 100_000) sig.push("Grande ville");
+    else if (pop >= 30_000) sig.push("Ville moyenne");
+    else if (pop >= 10_000) sig.push("Petite ville");
   }
 
-  // 2. Bassin d'emploi nommé.
+  // 2. Bassin d'emploi nommé, SEULEMENT s'il apporte un contexte au-delà de la
+  //    commune. « Bassin de Limoges » sur la commune Limoges ne raconte rien de
+  //    plus que le nom déjà affiché ; on l'omet. « Bassin de Grenoble » sur Crolles
+  //    situe le territoire : on le garde. Règle : le nom du bassin doit différer de
+  //    celui de la commune (comparaison normalisée).
   const nom = zeInfo(c)?.nom;
-  if (nom) sig.push(bassinLabel(nom));
+  if (nom && normalizeName(nom) !== normalizeName(c.nom)) sig.push(bassinLabel(nom));
 
   // 3. Climat / relief, seulement si DISTINCTIF ET IDENTITAIRE, et s'il reste une
   //    place. Règle : un élément de signature doit être une chose par laquelle un
@@ -310,7 +333,13 @@ function buildSignature(c: IndexCommune): string[] {
   //    remplir, une signature courte est assumée.
   if (sig.length < 3) {
     const djf = c.clim?.NORTMm_seas_DJF ?? null;
-    if (coastal) sig.push(c.region && MED_REGIONS.has(c.region) ? "Climat méditerranéen" : "Climat maritime");
+    // Sur la côte méditerranéenne, « Climat méditerranéen » répète le mot déjà posé
+    // par « Côte méditerranéenne » : il n'ajoute aucune facette. On laisse alors
+    // parler le climat VÉCU distinctif, la douceur des hivers (« Hivers doux »), via
+    // la cascade ci-dessous. L'Atlantique/Manche n'a pas ce doublon : « Climat
+    // maritime » est une facette neuve à côté de « Côte bretonne/normande ».
+    const med = coastal && c.region != null && MED_REGIONS.has(c.region);
+    if (coastal && !med) sig.push("Climat maritime");
     else if (massifToken && alt >= 600) sig.push("En altitude");
     else if (djf != null && djf <= 3) sig.push("Hivers marqués");
     else if (djf != null && djf >= 8) sig.push("Hivers doux");
@@ -392,6 +421,14 @@ function montagneBonus(alt: number | null | undefined, strength: ZoneStrength | 
   const m = montagnosite(alt);
   return m == null ? 0 : (m / 100) * STRENGTH_BONUS[strength];
 }
+// Bonus « proche d'une montagne » : proportionnel à relief_proximite (massif à
+// portée). hard ne bonifie pas (il filtre). Une commune au pied des Alpes est
+// tirée fort même à basse altitude (là où montagneBonus la rate).
+function reliefBonus(relief: number | null | undefined, strength: ZoneStrength | undefined): number {
+  if (!strength || strength === "hard") return 0;
+  return relief == null ? 0 : (relief / 100) * STRENGTH_BONUS[strength];
+}
+const RELIEF_PROCHE_HARD = 50; // seuil filtre « il me faut la montagne proche » (Pau 69, Nice 62 passent ; plaine non)
 
 function avgPct(c: IndexCommune, fields: string[]): number | null {
   const vals = fields.map((f) => c.pct[f]).filter((v): v is number => v != null);
@@ -537,6 +574,12 @@ function passesHard(
     const m = montagnosite(c.altitude);
     if (m == null || m < 50) return false;
   }
+  // « Proche d'une montagne » dur : un massif doit être à portée (relief_proximite
+  // ≥ seuil). Capture les villes au pied du relief (Grenoble), que le filtre
+  // d'altitude propre exclurait à tort.
+  if (hc.reliefProche?.strength === "hard") {
+    if ((c.relief_proximite ?? 0) < RELIEF_PROCHE_HARD) return false;
+  }
   if (hc.nearSea?.active && c.distance_cote_km > (hc.nearSea.maxKm ?? 30)) return false;
   if (hc.excludeSea && c.distance_cote_km < 15) return false;
   if (hc.communeSize) {
@@ -568,15 +611,17 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   const zone = resolveZoneAnchors(hc.zones);
   const exclusion = resolveExclusions(hc.excludeZones);
   const montagne = hc.montagne ?? null;
+  const reliefProche = hc.reliefProche ?? null;
 
-  // Ancres PRÉFÉRÉES (zones + montagne) : servent au prédicat d'étalement échelonné.
-  // inspiration n'en fait pas partie (son penchant léger passe par le score seul).
+  // Ancres PRÉFÉRÉES (zones + montagne + relief) : servent au prédicat d'étalement
+  // échelonné. inspiration n'en fait pas partie (son penchant léger passe par le score).
   const preferredDepts = new Set<string>();
   for (const sz of zone.soft) {
     if (sz.strength === "preferred") for (const d of sz.departements) preferredDepts.add(d);
   }
   const montagnePreferred = montagne?.strength === "preferred";
-  const anyPreferred = preferredDepts.size > 0 || montagnePreferred;
+  const reliefPreferred = reliefProche?.strength === "preferred";
+  const anyPreferred = preferredDepts.size > 0 || montagnePreferred || reliefPreferred;
 
   const prefs: (Preference & { baseline?: boolean })[] = parsed.preferences
     .filter((p) => PREFERENCE_KEYS.includes(p.key))
@@ -620,10 +665,13 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     // Bonus d'ancre souple. Au sein d'un axe : max (sémantique OU, ex. « Atlantique
     // ou Sud-Ouest »). Entre axes orthogonaux (zone vs altitude) : somme bornée, pour
     // que l'intersection (« le Sud-Ouest ET en altitude ») prime sans filtrer.
-    const soft = Math.min(
-      SOFT_BONUS_CAP,
-      softZoneBonus(c.dept, zone.soft) + montagneBonus(c.altitude, montagne?.strength),
+    // Montagne (altitude propre) et relief (massif à portée) sont le MÊME axe : on
+    // prend le max, pas la somme (sinon double comptage si les deux sont posés).
+    const mountainBonus = Math.max(
+      montagneBonus(c.altitude, montagne?.strength),
+      reliefBonus(c.relief_proximite, reliefProche?.strength),
     );
+    const soft = Math.min(SOFT_BONUS_CAP, softZoneBonus(c.dept, zone.soft) + mountainBonus);
     const rawScore = base + soft;
     const compatibility = clamp(Math.round(rawScore), 0, 100);
     // « In-zone » pour l'étalement échelonné. Quand zone ET montagne sont toutes
@@ -631,11 +679,16 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     // altitude »), pas l'union : sinon les grandes villes de plaine de la zone
     // écraseraient l'altitude. Sinon, critère unique (zone seule, ou montagne seule).
     const inZoneDept = preferredDepts.has(c.dept);
-    const mountainHere = (montagnosite(c.altitude) ?? 0) >= 50;
+    // Cœur « montagne » : soit en altitude (montagne), soit un massif à portée
+    // (relief). Les deux sont le même axe pour l'étalement.
+    const mountainPref =
+      (montagnePreferred && (montagnosite(c.altitude) ?? 0) >= 50) ||
+      (reliefPreferred && (c.relief_proximite ?? 0) >= RELIEF_PROCHE_HARD);
+    const anyMountainPreferred = montagnePreferred || reliefPreferred;
     const pref =
-      preferredDepts.size > 0 && montagnePreferred
-        ? inZoneDept && mountainHere
-        : inZoneDept || (montagnePreferred && mountainHere);
+      preferredDepts.size > 0 && anyMountainPreferred
+        ? inZoneDept && mountainPref
+        : inZoneDept || mountainPref;
     const visible = subs.filter((x) => !x.baseline);
     const reasons = [...visible]
       .sort((a, b) => b.weight * b.s - a.weight * a.s)

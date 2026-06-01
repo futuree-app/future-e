@@ -292,6 +292,17 @@ export function OuVivreClient() {
   if (montStrength === "hard") hardZoneLabels.push("la montagne");
   else if (montStrength === "preferred") prefZoneLabels.push("la montagne");
   else if (montStrength === "inspiration") inspZoneLabels.push("la montagne");
+  // Proche d'un massif (relief à portée, distinct de « vivre à la montagne »).
+  // On affiche le SENS retenu (glose utilisateur), jamais la méthode d'estimation.
+  const reliefStrength = parsed?.hardConstraints?.reliefProche?.strength;
+  const reliefLabel =
+    reliefStrength === "hard"
+      ? "proche d'un massif"
+      : reliefStrength === "preferred"
+        ? "idéalement proche d'un massif"
+        : reliefStrength === "inspiration"
+          ? "ouvert à : proche d'un massif"
+          : null;
   const exclLabels = parsed ? exclusionsToLabels(parsed.hardConstraints?.excludeZones) : [];
 
   // ── AskFuture comparateur ─────────────────────────────────────────────────
@@ -534,7 +545,7 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
           {/* Périmètre géographique avec gradient de force : l'ancre définit ou
               incline l'espace de recherche, distinct des préférences. On distingue
               visuellement dure (filtre), préférée (penchant) et inspiration. */}
-          {(zoneAnchors.length > 0 || exclLabels.length > 0) && (
+          {(zoneAnchors.length > 0 || exclLabels.length > 0 || reliefLabel) && (
             <div className="mt-6">
               <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">
                 <span className="text-emerald-400">✓</span> Le périmètre recherché
@@ -573,6 +584,22 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
                   </span>
                 ))}
               </div>
+              {/* Relief à portée : on rend l'interprétation VISIBLE (le critère était
+                  jadis silencieusement ignoré). Glose = sens retenu, pas la méthode. */}
+              {reliefLabel && (
+                <div className="mt-2.5 flex flex-col gap-1.5">
+                  <span className="self-start text-[12px] text-label/90 border border-accent/[0.22] rounded-full px-3 py-1">
+                    {reliefLabel}
+                  </span>
+                  <span
+                    className="flex items-baseline gap-1 pl-1 text-[12.5px] leading-snug text-label/55 italic"
+                    style={{ fontFamily: "'Instrument Serif', serif" }}
+                  >
+                    <span className="not-italic text-accent/50">→</span>
+                    reliefs montagneux à proximité
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
