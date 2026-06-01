@@ -4,36 +4,45 @@ Sujets ouverts après la première passe UX du Comparateur de vie. Rien ici n'es
 bloquant pour la V1 ; ce sont les chantiers de confiance / crédibilité repérés à
 l'usage réel. Tenu à jour au fil des passes.
 
-Dernière mise à jour : 2026-05-31.
+Dernière mise à jour : 2026-06-01.
 
-## 1. Signal « bassin d'emploi » (chantier V2, à instruire)
+## 1. Signal « bassin d'emploi » — LIVRÉ (dégel moteur, 2026-06-01)
 
-Constat à l'usage : un utilisateur qui précise une contrainte d'emploi (« ma
-conjointe doit retrouver un poste de gestionnaire de paie ») voit ressortir des
-territoires comme Bastia et lève un sourcil, même si le moteur n'est pas faux. Il
-ressent qu'un pan important de son projet n'a pas pesé.
+Premier signal **économique** du comparateur. Le moteur ne répond plus seulement à
+une question territoriale ou climatique : il pèse aussi la crédibilité d'un projet
+de vie actif. Tranché « signal de viabilité » (taille + diversité du bassin), pas
+matching métier : le « ce que le climat fait à votre secteur » reste au rapport
+(module Métier).
 
-État V1 :
-- Le parse **entend** l'emploi : il le met dans la reformulation et le sort en
-  `ambiguities`. Le gate de confirmation l'affiche donc déjà.
-- Mais le moteur **ne score pas** l'emploi (exclu du périmètre V1, cf. prompt
-  parse). La reformulation dit « à prendre en compte », ce qui sur-engage
-  légèrement. Atténué en V1 par une ligne de cadrage honnête au gate
-  (« le comparateur pèse climat/environnement/cadre de vie ; emploi, écoles, prix
-  se lisent dans le rapport »).
+Constat fondateur : un utilisateur précisant une contrainte d'emploi (« ma conjointe
+doit retrouver un poste de gestionnaire de paie ») voyait ressortir Bastia et levait
+un sourcil. Désormais le bassin d'emploi est pesé et ce cas produit un changement
+visible (les bassins plus profonds et diversifiés remontent).
 
-Doctrine à trancher en V2 : l'emploi est-il une question de **raisons** (« où
-regarder », comparateur) ou de **conséquences** (« votre secteur ici », module
-*métier* du rapport) ? Position actuelle : plutôt conséquences, donc rapport. Un
-signal emploi au niveau comparateur recouperait le module métier.
+Données (lot A, commit data séparé) :
+- maille **zone d'emploi INSEE ZE2020** (306 zones), héritée par commune ;
+- source **Flores A38 fin 2024** (effectifs salariés, niveau ZE pour éviter le secret
+  statistique communal) + composition communale ZE2020 ; caches versionnés
+  (`communes-emploi.json`, `ze-emploi-na38.json`), brut INSEE gitignoré ;
+- **taille** = courbe saturante log (anti-biais métropole) ; **diversite** = entropie
+  A38 étirée p5-p95. Salarié uniquement (limite assumée).
 
-Si on l'instruit quand même comme **signal de viabilité** (pas un score fin) :
-- source candidate : zones d'emploi INSEE, taux d'emploi / densité d'emplois,
-  éventuellement dynamisme par grand secteur ;
-- forme : préférence souple `viabilite_emploi` ou filtre de plancher, PAS une
-  promesse « votre métier ici » (ça reste le rapport) ;
-- impact : nouvelle clé `PREFERENCE_KEYS` + scoring → **touche le moteur gelé
-  V1.6**, donc décision de dégel explicite requise.
+Moteur (lot B) : clé `viabilite_emploi` = `0.6·taille + 0.4·diversite`. Modèle hybride :
+- emploi **signalé** par le parse → préférence poids 2 ;
+- projet **hors-emploi** (retraite, télétravail total) → baseline emploi supprimée,
+  jamais pénalisé ;
+- emploi **non mentionné** → partage du plancher de réalisme existant
+  (`eviter_isolement` 0,5 + `viabilite_emploi` 0,5), budget de viabilité implicite
+  **inchangé** vs V1 (pas de préférence universelle ajoutée vers les métropoles).
+- Jamais un filtre dur. Firewall qualitatif préservé (« un bassin d'emploi dynamique »).
+
+Cadrage gate mis à jour : « le comparateur pèse climat, cadre de vie et vitalité du
+bassin d'emploi ; le détail du métier reste au rapport ».
+
+Vérifié : non-régression climat / Sud, retraite et télétravail non pénalisés, cas
+fondateur (conjointe gestionnaire de paie) à effet visible, Corse qui recule sans
+être éliminée. Détail conception : voir aussi `PRESSION_CLIMATIQUE_ECONOMIE.md`
+(second signal économique, distinct, narratif, non encore implémenté).
 
 ## 2. Diversité des résultats — RÉSOLU (dégel moteur, 2026-05-31)
 
