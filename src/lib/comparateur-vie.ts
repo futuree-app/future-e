@@ -37,6 +37,10 @@ export const PREFERENCE_KEYS = [
   "proximite_mer",
   "cadre_calme",
   "eviter_isolement",
+  // Viabilité du bassin d'emploi (ZE2020, Flores A38) : taille + diversité
+  // sectorielle. Préférence poids 2 si l'emploi est signalé ; sinon partage le
+  // plancher de réalisme avec eviter_isolement (baseline). Jamais un filtre dur.
+  "viabilite_emploi",
   // Santé environnementale + vivabilité (V1.5/V1.6)
   "air_sain",                 // air de fond plus pur (PM2.5 ≫ NO2)
   "acces_soins",              // accès aux médecins généralistes (APL)
@@ -73,6 +77,9 @@ export type ParsedProject = {
   hardConstraints: HardConstraints;
   preferences: Preference[];
   ambiguities?: { topic: string; question: string }[];
+  // Projet hors-emploi (retraite, télétravail total, sans activité) : supprime la
+  // baseline de viabilité du bassin d'emploi (ne jamais pénaliser un tel projet).
+  emploiHorsSujet?: boolean;
 };
 
 export type MatchResult = {
@@ -115,7 +122,11 @@ export const VILLE_SIZE = {
 
 const POP_FLOOR = 1500; // plancher de réalisme : on retire les hameaux
 const PERFECT_THRESHOLD = 80;
-const VIABILITY_BASELINE_W = 1; // eviter_isolement implicite si absent
+const VIABILITY_BASELINE_W = 1; // plancher de réalisme classique (isolement) si absent
+// Quand l'emploi n'est pas mentionné, on PARTAGE ce budget de 1 entre isolement et
+// viabilité du bassin (0,5 + 0,5) : le plancher devient bassin-conscient sans ajouter
+// de poids universel (budget de viabilité implicite inchangé vs V1). cf. checkpoint 2026-06-01.
+const VIABILITY_BASELINE_SPLIT = 0.5;
 
 // ── Courbes comportementales (interpolation linéaire entre ancres) ───────────
 type Anchors = [number, number][];
@@ -161,6 +172,8 @@ type IndexCommune = {
   vivpct?: Record<string, number | null>;
   agri?: Record<string, number | null>;
   pression_agricole?: number | null;
+  // Viabilité du bassin d'emploi (ZE2020 héritée). taille/diversite = 0–100.
+  emploi?: { ze: string; taille: number; diversite: number } | null;
 };
 type IndexFile = { meta: unknown; communes: IndexCommune[] };
 
@@ -301,6 +314,9 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
       return c.vivpct?.eloignement == null ? null : 100 - c.vivpct.eloignement; // éloignement bas = mieux
     case "faible_pression_agricole":
       return c.pression_agricole == null ? null : 100 - c.pression_agricole;
+    case "viabilite_emploi":
+      // taille (courbe saturante) + diversité (entropie A38), maille ZE héritée.
+      return c.emploi == null ? null : Math.round(0.6 * c.emploi.taille + 0.4 * c.emploi.diversite);
     default:
       return null;
   }
@@ -320,6 +336,7 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   acces_soins: "bon accès aux médecins",
   acces_services: "services et commerces à proximité",
   faible_pression_agricole: "loin des cultures à traitements fréquents",
+  viabilite_emploi: "bassin d'emploi vaste et diversifié",
 };
 const REASON_NEG: Record<PreferenceKey, string> = {
   faible_chaleur: "chaleur en hausse",
@@ -335,6 +352,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   acces_soins: "zone sous-dotée en médecins",
   acces_services: "services parfois éloignés",
   faible_pression_agricole: "environnement agricole à traitements fréquents à proximité",
+  viabilite_emploi: "bassin d'emploi étroit ou peu diversifié",
 };
 function reasonText(key: PreferenceKey, c: IndexCommune): string {
   const r = REASON_POS[key];
@@ -401,12 +419,26 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   const montagnePreferred = montagne?.strength === "preferred";
   const anyPreferred = preferredDepts.size > 0 || montagnePreferred;
 
-  // Baseline de viabilité : eviter_isolement implicite si absent
   const prefs: (Preference & { baseline?: boolean })[] = parsed.preferences
     .filter((p) => PREFERENCE_KEYS.includes(p.key))
     .map((p) => ({ key: p.key, weight: clamp(Math.round(p.weight) || 1, 1, 3) }));
-  if (!prefs.some((p) => p.key === "eviter_isolement")) {
-    prefs.push({ key: "eviter_isolement", weight: VIABILITY_BASELINE_W, baseline: true });
+
+  // Plancher de réalisme (baseline de viabilité), cf. checkpoint 2026-06-01 :
+  //  - emploi signalé (préférence) OU projet hors-emploi → plancher classique sur
+  //    eviter_isolement (poids 1) ; l'emploi ne pèse pas en plus en implicite.
+  //  - emploi non mentionné → on PARTAGE ce budget de 1 entre isolement et bassin
+  //    (0,5 + 0,5) : plancher bassin-conscient, budget de viabilité implicite
+  //    INCHANGÉ vs V1, pas de préférence universelle ajoutée.
+  //  - si l'utilisateur a explicitement demandé eviter_isolement, le plancher est
+  //    déjà exprimé : on n'ajoute aucune baseline.
+  const hasIsolement = prefs.some((p) => p.key === "eviter_isolement");
+  const hasEmploi = prefs.some((p) => p.key === "viabilite_emploi"); // signalé par le parse
+  const horsEmploi = parsed.emploiHorsSujet === true;
+  if (hasEmploi || horsEmploi) {
+    if (!hasIsolement) prefs.push({ key: "eviter_isolement", weight: VIABILITY_BASELINE_W, baseline: true });
+  } else if (!hasIsolement) {
+    prefs.push({ key: "eviter_isolement", weight: VIABILITY_BASELINE_SPLIT, baseline: true });
+    prefs.push({ key: "viabilite_emploi", weight: VIABILITY_BASELINE_SPLIT, baseline: true });
   }
   const totalW = prefs.reduce((s, p) => s + p.weight, 0) || 1;
 

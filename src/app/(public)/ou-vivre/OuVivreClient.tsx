@@ -585,6 +585,15 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
             </div>
           )}
 
+          {/* Cadrage de périmètre : ce que le comparateur pèse vs ce qui reste au
+              rapport. Le bassin d'emploi est désormais pesé (sa vitalité), jamais
+              le métier (qui appartient au rapport). */}
+          <p className="mt-6 text-[12px] leading-[1.6] text-ghost">
+            Le comparateur pèse le climat, le cadre de vie et la vitalité du bassin
+            d&apos;emploi. Le détail de votre métier face au climat, comme les écoles ou
+            les prix, se lit dans le rapport.
+          </p>
+
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <button
               onClick={runMatch}

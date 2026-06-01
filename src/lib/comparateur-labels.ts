@@ -23,6 +23,7 @@ export const PREFERENCE_LABELS: Record<string, string> = {
   acces_soins: "un bon accès aux soins",
   acces_services: "des services du quotidien accessibles",
   faible_pression_agricole: "un environnement peu marqué par l'agriculture intensive",
+  viabilite_emploi: "un bassin d'emploi dynamique",
 };
 
 // Convertit une liste de préférences {key} en libellés humains, sans doublon,

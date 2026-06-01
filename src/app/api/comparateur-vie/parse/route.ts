@@ -98,6 +98,11 @@ const TOOL_INPUT_SCHEMA = {
         required: ["topic", "question"],
       },
     },
+    emploiHorsSujet: {
+      type: "boolean",
+      description:
+        "true UNIQUEMENT si le projet est explicitement hors-emploi (retraite, télétravail total / 100 % à distance, sans activité, rentier). Supprime le plancher de viabilité du bassin d'emploi (on ne pénalise jamais un tel projet). Ne pas mettre true si l'emploi compte, ni par défaut.",
+    },
   },
   required: ["reformulation", "hardConstraints", "preferences"],
 };
@@ -110,7 +115,11 @@ RÈGLES
 - Distinguez fortement ce qui ÉLIMINE (contrainte dure) de ce qui PONDÈRE (préférence). En cas de doute, préférez la préférence : on n'élimine que sur un critère explicite.
 - "proche de l'océan / de la mer" = contrainte dure (nearSea.active) UNIQUEMENT si c'est présenté comme indispensable. Sinon, préférence proximite_mer (poids 2 ou 3).
 - Climat perçu : distinguez "fuir la chaleur" (faible_chaleur), "rechercher la douceur" (douceur_climat, hivers tempérés), "rechercher le soleil / le chaud" (ensoleillement_recherche). "climat doux" et "agréable" relèvent de douceur_climat, pas de faible_chaleur.
-- N'inventez aucune donnée. Emploi, écoles, services, sécurité, prix : hors périmètre V1. Si l'utilisateur insiste dessus, mentionnez-le en ambiguities sans créer de préférence.
+- N'inventez aucune donnée. Écoles, services, sécurité, prix : hors périmètre V1. Si l'utilisateur insiste dessus, mentionnez-le en ambiguities sans créer de préférence.
+- EMPLOI (critère viabilite_emploi = vitalité du bassin d'emploi : taille + diversité sectorielle, jamais la promesse d'un poste précis) :
+  • Si l'emploi est un enjeu du projet (besoin de retrouver un poste, conjoint·e qui doit travailler, "trouver du travail", "le marché de l'emploi", projet de vie actif) → préférence viabilite_emploi poids 2. Le détail de VOTRE métier face au climat reste au rapport ; ici on pèse seulement la vitalité du bassin.
+  • Si le projet est HORS-EMPLOI (retraite, télétravail total / 100 % à distance, sans activité, rentier) → emploiHorsSujet:true et N'ajoutez PAS viabilite_emploi.
+  • Si rien n'indique l'emploi → ne rien mettre (le moteur applique seul un plancher de viabilité par défaut).
 - Vouvoiement. Aucun tiret cadratin. Aucun point d'exclamation.
 
 ANCRES GÉOGRAPHIQUES (zones / excludeZones) : règles spécifiques
@@ -141,6 +150,7 @@ PRÉFÉRENCES DISPONIBLES (liste fermée)
 - acces_soins : bon accès aux médecins
 - acces_services : services et commerces accessibles
 - faible_pression_agricole : éloigné des cultures à traitements fréquents (environnement peu marqué par l'agriculture intensive)
+- viabilite_emploi : vitalité du bassin d'emploi (taille + diversité sectorielle), à activer (poids 2) si l'emploi est un enjeu du projet
 
 TRADUCTION AUTOMATIQUE (activez le critère interne, sans exposer le terme technique)
 - "famille", "enfant", "élever un enfant", "grandir" → ajoutez eviter_isolement (poids 2), acces_services (poids 2), faible_pression_agricole (poids 2).
@@ -148,6 +158,8 @@ TRADUCTION AUTOMATIQUE (activez le critère interne, sans exposer le terme techn
 - "pesticides", "agriculture intensive", "loin des cultures traitées" → faible_pression_agricole (poids 3).
 - "qualité de l'air", "respirer", "pollution de l'air" → air_sain (poids 3).
 - "accès aux soins", "médecins", "hôpital", "retraite" → acces_soins (poids 2 à 3).
+- "retraite", "à la retraite", "jeune retraité" → acces_soins (poids 2 à 3) ET emploiHorsSujet:true (pas de viabilite_emploi).
+- "télétravail total", "100 % télétravail", "je travaille de chez moi", "full remote" → emploiHorsSujet:true (l'emploi local n'est pas un enjeu).
 Dans la reformulation, restez en langage humain (ex. « un environnement peu marqué par l'agriculture intensive »), n'employez jamais les termes "IFT", "pression agricole" ni "exposition aux pesticides".`;
 
 export async function POST(request: NextRequest) {

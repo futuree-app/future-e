@@ -39,6 +39,7 @@ const PREF_LABELS: Record<string, string> = {
   acces_soins: "un bon accès aux soins",
   acces_services: "des services du quotidien accessibles",
   faible_pression_agricole: "un environnement peu marqué par l'agriculture intensive",
+  viabilite_emploi: "un bassin d'emploi dynamique",
 };
 
 const SYSTEM = `Vous écrivez la synthèse éditoriale du Comparateur de vie de futur•e.
