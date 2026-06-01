@@ -266,3 +266,52 @@ secteurs locaux est signalée ; le détail métier reste au rapport ».
 4. **Choix de l'indicateur chaleur** pour le tourisme estival : `NORTX30D_yr`
    (plus fréquent, plus stable) ou `NORTX35D_yr` (canicule, plus rare mais plus
    parlant) ?
+
+## Implémenté V1 (2026-06-01)
+
+Livré : NARRATIF, NON SCORÉ, aucun impact sur le tri. Calculé au build (champ
+`pression_eco` de l'index), attaché au résultat après le scoring, dans
+`comparateur-vie.ts`. Réalités de la donnée actées à l'implémentation, qui adaptent
+la conception sans la trahir :
+
+- **`AZ` = agriculture + sylviculture + pêche** : A38 ne sépare pas la forêt. Le
+  couple agri × sécheresse et forêt × feu pointent donc tous deux vers `AZ`. On
+  garde l'aléa dominant, et **« feu » est réservé aux percentiles d'incendie
+  réellement élevés (≥ 80)** pour ne pas étiqueter un vignoble (Beaune) comme exposé
+  au feu ; ailleurs l'aléa nommé est la sécheresse.
+- **`IZ` = hébergement-restauration = proxy tourisme**, pas un emploi touristique
+  parfait (mélange tourisme et restauration courante). Limite assumée : pas de
+  produit « emploi touristique » INSEE dans nos données.
+- **Tourisme montagne vs estival** classé par la **médiane d'altitude de la ZE**
+  (≥ 900 m = montagne), pas l'altitude communale : sinon les villes-services de
+  vallée (Albertville, 339 m) seraient prises pour de l'estival.
+- **Tourisme montagne × neige = proxy prudent** (altitude + hiver `NORTMm_seas_DJF`)
+  avec **plancher** : l'exposition d'une économie de neige ne s'efface pas pour une
+  station haute et froide. Maillon le plus faible, assumé comme tel.
+- **Seuil de dépendance 8 %** : on ne flague un couple que si le secteur sensible
+  pèse au moins 8 % de l'emploi local. Sinon aléa fort × part faible flaguerait à
+  tort (signal climatique déguisé). C'est ce qui garde Bastia, La Rochelle, Pau,
+  Clermont, Guéret, **et Arcachon**, en faible (le danger incendie d'Arcachon est un
+  aléa local du territoire, pas une dépendance économique à un secteur exposé).
+- **Paliers faible / modérée / marquée** par percentiles nationaux de la pression
+  brute ; **faible = aucune note**. Signal rare et sélectif (596 communes sur
+  34 788).
+- **Affichage** : bloc « À noter » distinct des raisons et compromis scorés, jamais
+  dans le score ni dans le tri ; **note d'humilité unique** sous les cartes (la
+  capacité d'adaptation n'est pas mesurée). Transmis à la synthèse et à AskFuture en
+  libellé qualitatif (firewall préservé), avec garde-fous : jamais « résilience »,
+  « fragile », « va décliner », ni verdict ; toujours « dépendance ».
+
+Vérifié en réel : Chamonix marquée (tourisme montagne / neige) ; agriculture de la
+plaine corse, golfe de Saint-Tropez (estival), Alpes (montagne) visibles ; les 7 cas
+de référence cohérents ; synthèse et AskFuture prudents (LLM testé en réel) ;
+non-régression du ranking (la note s'attache hors scoring) ; tsc + eslint verts.
+
+Réponses aux questions ouvertes : (1) un seul palier nommant le couple dominant
+(décomposition non retenue en V1) ; (2) sous-ensemble `AZ` / `IZ` suffisant ; (3)
+paliers calés par percentiles (modérée p70, marquée p90 de la pression brute,
+après seuil de dépendance) ; (4) `NORTX30D_yr` retenu pour la chaleur estivale.
+
+Reste hors V1, noté : dépendance à la forêt comme sujet propre (nécessiterait une
+source forêt dédiée, A38 ne l'isole pas) ; V2 éventuelle d'un petit signal scoré
+indépendant, seulement après épreuve réelle du narratif.

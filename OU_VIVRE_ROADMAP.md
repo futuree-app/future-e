@@ -41,8 +41,30 @@ bassin d'emploi ; le détail du métier reste au rapport ».
 
 Vérifié : non-régression climat / Sud, retraite et télétravail non pénalisés, cas
 fondateur (conjointe gestionnaire de paie) à effet visible, Corse qui recule sans
-être éliminée. Détail conception : voir aussi `PRESSION_CLIMATIQUE_ECONOMIE.md`
-(second signal économique, distinct, narratif, non encore implémenté).
+être éliminée.
+
+## 1bis. Pression climatique sur l'économie locale — LIVRÉ (2026-06-01)
+
+Second signal **économique**, distinct de la viabilité (on ne contamine pas un signal
+robuste taille+diversité par un signal interprétatif). **Narratif, non scoré, aucun
+impact sur le tri** : une note « À noter » prudente quand un territoire recommandé
+dépend d'une activité sensible à un aléa climatique.
+
+- Données : `ze-emploi-na38.json` (parts A38 par ZE) + percentiles DRIAS + altitude.
+- Couples : `AZ` (agri+forêt, sécheresse/feu, feu réservé aux percentiles ≥ 80) ;
+  `IZ` (proxy tourisme : estival×chaleur en plaine, montagne×neige en altitude, type
+  classé par médiane d'altitude de la ZE, proxy neige prudent à plancher).
+- Seuil de **dépendance 8 %** : flague seulement si le secteur sensible pèse vraiment
+  (sinon signal climatique déguisé). Paliers faible/modérée/marquée par percentiles ;
+  signal rare (596 communes / 34 788).
+- Garde-fous : jamais « résilience / fragile / va décliner / verdict » ; capacité
+  d'adaptation explicitement non mesurée. Synthèse et AskFuture prudents (vérifié réel).
+
+Le moteur répond désormais à trois questions : territoriale/climatique, viabilité du
+projet de vie (bassin d'emploi), et pression climatique sur l'économie locale.
+Conception et réalités de la donnée : `PRESSION_CLIMATIQUE_ECONOMIE.md` (section
+« Implémenté V1 »). Hors V1 : dépendance forêt comme sujet propre (source dédiée),
+V2 éventuelle d'un signal scoré après épreuve du narratif.
 
 ## 2. Diversité des résultats — RÉSOLU (dégel moteur, 2026-05-31)
 
