@@ -10,7 +10,10 @@ const nextConfig: NextConfig = {
   // match. On force son inclusion dans la trace serverless (sinon : marche en
   // local, fichier introuvable en prod).
   outputFileTracingIncludes: {
-    "/api/comparateur-vie/match": ["./data/comparateur-index.json"],
+    "/api/comparateur-vie/match": [
+      "./data/comparateur-index.json",
+      "./data/ze-emploi-na38.json",
+    ],
   },
   async rewrites() {
     return [

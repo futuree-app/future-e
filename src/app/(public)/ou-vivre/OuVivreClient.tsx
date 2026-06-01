@@ -719,6 +719,15 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
                     {[r.region, r.dept].filter(Boolean).join(" · ")}
                   </p>
 
+                  {/* Signature territoriale : image du lieu (géo · bassin ·
+                      climat), distincte des raisons de score. Pose le décor avant
+                      la justification du match. Cf. buildSignature (moteur). */}
+                  {r.signature.length > 0 && (
+                    <p className="mt-3 text-[12px] leading-[1.5] text-label/65">
+                      {r.signature.join(" · ")}
+                    </p>
+                  )}
+
                   {r.reasons.length > 0 && (
                     <ul className="mt-4 flex flex-col gap-1.5">
                       {r.reasons.map((reason) => (

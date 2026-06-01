@@ -4,6 +4,7 @@ import path from "node:path";
 import {
   resolveZoneAnchors,
   resolveExclusions,
+  ZONE_TABLE,
   type AppliedZone,
   type ZoneAnchor,
   type ZoneStrength,
@@ -89,6 +90,10 @@ export type MatchResult = {
   region: string | null;
   compatibility: number; // 0–100
   reasons: string[];
+  // Signature territoriale : couche DISTINCTE des reasons. Ne justifie pas le
+  // score, donne une image du territoire (géo → bassin → climat/relief, max 3),
+  // à partir des seuls attributs mesurés. cf. buildSignature.
+  signature: string[];
   tradeoff: string | null; // le compromis principal, ou null
   // Pression climatique sur l'économie locale (NARRATIF, n'entre PAS dans le score).
   // Note de lecture prudente : dépendance à un secteur sensible, pas un verdict.
@@ -193,6 +198,124 @@ async function loadIndex(): Promise<IndexCommune[]> {
   const parsed = JSON.parse(raw) as IndexFile;
   indexCache = parsed.communes;
   return indexCache;
+}
+
+// ── Bassins d'emploi (ZE2020) : nom + effectif salarié ────────────────────────
+// Pour NOMMER le bassin dans la signature (« bassin de Brest ») et GRADUER la
+// raison emploi (« vaste » seulement si la ZE est réellement grande). Chargé une
+// fois, comme l'index. Source : data/ze-emploi-na38.json (Flores A38).
+type ZeInfo = { nom: string; total: number };
+let zeTableCache: Map<string, ZeInfo> | null = null;
+async function loadZeTable(): Promise<Map<string, ZeInfo>> {
+  if (zeTableCache) return zeTableCache;
+  const map = new Map<string, ZeInfo>();
+  try {
+    const filePath = path.join(process.cwd(), "data", "ze-emploi-na38.json");
+    const raw = JSON.parse(await fs.readFile(filePath, "utf8")) as {
+      data: Record<string, { nom: string; total: number }>;
+    };
+    for (const [code, v] of Object.entries(raw.data)) {
+      if (v?.nom != null) map.set(code, { nom: v.nom, total: v.total });
+    }
+  } catch {
+    // Table absente : signature sans nom de bassin, raison emploi non graduée.
+  }
+  zeTableCache = map;
+  return zeTableCache;
+}
+function zeInfo(c: IndexCommune): ZeInfo | null {
+  return c.emploi ? zeTableCache?.get(c.emploi.ze) ?? null : null;
+}
+
+// ── Signature territoriale ────────────────────────────────────────────────────
+// Couche d'IMAGE du territoire, distincte des reasons (qui justifient le score).
+// Ordre fixe géographie → bassin → climat/relief, max 3. Libellés incarnés mais
+// 100 % adossés à des tables déterministes (mêmes tables que les filtres d'ancres).
+
+// Région littorale → nom de côte incarné. Ne s'applique QUE si la commune est
+// proche du trait de côte (gate distance). Fallback « Bord de mer » sinon.
+const COAST_BY_REGION: Record<string, string> = {
+  Bretagne: "Côte bretonne",
+  Normandie: "Côte normande",
+  "Hauts-de-France": "Côte d'Opale",
+  "Pays de la Loire": "Côte atlantique",
+  "Nouvelle-Aquitaine": "Côte atlantique",
+  Occitanie: "Côte méditerranéenne",
+  "Provence-Alpes-Côte d'Azur": "Côte méditerranéenne",
+  Corse: "Littoral corse",
+};
+// Régions à littoral méditerranéen : le climat côtier y est « méditerranéen »
+// (plus évocateur que « maritime »), ailleurs « maritime » (Atlantique/Manche).
+const MED_REGIONS = new Set([
+  "Occitanie",
+  "Provence-Alpes-Côte d'Azur",
+  "Corse",
+]);
+// Massif → libellé incarné. Le département appartient au token massif de
+// ZONE_TABLE (la table même qui filtre « près des Alpes »).
+const MASSIF_LABEL: Record<string, string> = {
+  alpes: "Aux portes des Alpes",
+  pyrenees: "Au pied des Pyrénées",
+  massif_central: "Dans le Massif central",
+  vosges: "Au pied des Vosges",
+  jura: "Dans le Jura",
+};
+// dept → token massif (inverse de ZONE_TABLE), construit une fois.
+const DEPT_TO_MASSIF: Record<string, string> = (() => {
+  const out: Record<string, string> = {};
+  for (const token of Object.keys(MASSIF_LABEL)) {
+    for (const dept of ZONE_TABLE[token]?.departements ?? []) {
+      if (!(dept in out)) out[dept] = token;
+    }
+  }
+  return out;
+})();
+
+// « Bassin de X » avec élision/contraction correcte (de + Le = du, de + Les = des,
+// de + voyelle = d'). Les noms de ZE peuvent commencer par un article (« Le Mont
+// Blanc ») ou une voyelle (« Annecy »).
+function bassinLabel(nom: string): string {
+  if (/^Les /.test(nom)) return `Bassin des ${nom.slice(4)}`;
+  if (/^Le /.test(nom)) return `Bassin du ${nom.slice(3)}`;
+  if (/^La /.test(nom)) return `Bassin de la ${nom.slice(3)}`;
+  if (/^[AEIOUYÉÈÊÀHaeiouyéèêàh]/.test(nom)) return `Bassin d'${nom}`;
+  return `Bassin de ${nom}`;
+}
+
+function buildSignature(c: IndexCommune): string[] {
+  const sig: string[] = [];
+  const coastal = c.distance_cote_km != null && c.distance_cote_km <= 15;
+  const massifToken = DEPT_TO_MASSIF[c.dept];
+  const alt = c.altitude ?? 0;
+
+  // 1. Géographie : côte si littorale, sinon massif (gate altitude ≥ 200 m pour
+  //    ne pas écrire « aux portes des Alpes » à une commune de plaine).
+  if (coastal) {
+    sig.push((c.region && COAST_BY_REGION[c.region]) || "Bord de mer");
+  } else if (massifToken && alt >= 200) {
+    sig.push(MASSIF_LABEL[massifToken]);
+  }
+
+  // 2. Bassin d'emploi nommé.
+  const nom = zeInfo(c)?.nom;
+  if (nom) sig.push(bassinLabel(nom));
+
+  // 3. Climat / relief, seulement si DISTINCTIF ET IDENTITAIRE, et s'il reste une
+  //    place. Règle : un élément de signature doit être une chose par laquelle un
+  //    humain décrit spontanément le territoire, pas une donnée vraie mais inerte.
+  //    L'altitude n'est identitaire qu'en haute altitude (la montagne EST le lieu :
+  //    Aurillac, Le Puy). La bande 200–600 m (« altitude modérée ») est du
+  //    remplissage : elle ne sortait que quand le label massif portait déjà le
+  //    relief (Grenoble, Clermont). On la supprime, on ne remplit jamais pour
+  //    remplir, une signature courte est assumée.
+  if (sig.length < 3) {
+    const djf = c.clim?.NORTMm_seas_DJF ?? null;
+    if (coastal) sig.push(c.region && MED_REGIONS.has(c.region) ? "Climat méditerranéen" : "Climat maritime");
+    else if (massifToken && alt >= 600) sig.push("En altitude");
+    else if (djf != null && djf <= 3) sig.push("Hivers marqués");
+    else if (djf != null && djf >= 8) sig.push("Hivers doux");
+  }
+  return sig.slice(0, 3);
 }
 
 function normalizeName(s: string): string {
@@ -342,7 +465,13 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   acces_soins: "bon accès aux médecins",
   acces_services: "services et commerces à proximité",
   faible_pression_agricole: "loin des cultures à traitements fréquents",
-  viabilite_emploi: "bassin d'emploi vaste et diversifié",
+  // « Vaste » est gradué sur la taille RÉELLE de la ZE (effectif salarié absolu),
+  // pas sur le percentile saturé : le mot ne sort que là où il est mérité. La
+  // diversité (entropie A38) est, elle, toujours défendable.
+  viabilite_emploi: (c) =>
+    (zeInfo(c)?.total ?? 0) >= 200_000
+      ? "vaste bassin d'emploi diversifié"
+      : "bassin d'emploi diversifié",
 };
 const REASON_NEG: Record<PreferenceKey, string> = {
   faible_chaleur: "chaleur en hausse",
@@ -422,6 +551,7 @@ function passesHard(
 
 export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome> {
   const communes = await loadIndex();
+  await loadZeTable(); // nom + taille des bassins (signature + raison emploi graduée)
 
   // Résolution nearPlace (label → coords d'une commune de l'index)
   let placePoint: { lat: number; lon: number; maxKm: number } | null = null;
@@ -525,6 +655,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
         region: c.region,
         compatibility,
         reasons,
+        signature: buildSignature(c),
         tradeoff,
         // Narratif, hors score : note de pression climatique sur l'économie (ou null).
         pressionEco: c.pression_eco
