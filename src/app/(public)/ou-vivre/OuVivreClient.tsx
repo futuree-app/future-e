@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import posthog from "posthog-js";
 import type { ParsedProject, MatchOutcome, MatchResult } from "@/lib/comparateur-vie";
-import { preferencesToLabels } from "@/lib/comparateur-labels";
+import { preferencesToLabels, preferencesToInterpreted } from "@/lib/comparateur-labels";
 import { anchorsToLabeled, exclusionsToLabels } from "@/lib/geo-zones";
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -39,7 +39,7 @@ const EXAMPLES = [
 // Phrases d'attente pendant le calcul + la synthèse : plus légères et
 // rassurantes qu'un simple « analyse en cours », honnêtes sur ce qui se passe.
 const WAITING_PHRASES = [
-  "Nous parcourons plus de 30 000 communes…",
+  "Nous parcourons les 34 000 communes de France métropolitaine…",
   "Nous croisons climat, environnement et cadre de vie…",
   "Nous consultons les données scientifiques publiques…",
   "Nous pesons les compromis de chaque territoire…",
@@ -276,8 +276,9 @@ export function OuVivreClient() {
     capture("life_project_refine");
   }, []);
 
-  // Critères humains détectés (jamais les clés techniques), affichés au gate.
-  const criteres = parsed ? preferencesToLabels(parsed.preferences) : [];
+  // Critères humains détectés (jamais les clés techniques), affichés au gate, avec
+  // leur interprétation visible (glose) pour les faux amis / la polysémie.
+  const criteres = parsed ? preferencesToInterpreted(parsed.preferences) : [];
 
   // Ancres géographiques détectées (périmètre, distinct des préférences), avec leur
   // force. Au gate, on n'a que les jetons du parse : on les traduit en libellés. Le
@@ -452,9 +453,9 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
       </div>
 
       {/* ── Micro-réassurance (crédibilité du socle de données) ── */}
-      <p className="mt-3 text-[12px] leading-[1.6] text-ghost">
-        Analyse basée sur plus de 30 000 communes françaises et des données publiques
-        climatiques, sanitaires et territoriales.
+      <p className="mt-3 text-[12px] leading-[1.7] text-ghost">
+        Plus de 20 indicateurs publics, climatiques, sanitaires et territoriaux, projetés à
+        l&apos;horizon 2050, croisés sur les 34 000 communes de France métropolitaine.
       </p>
 
       {/* ── Exemples ── */}
@@ -506,14 +507,25 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
               <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">
                 <span className="text-emerald-400">✓</span> Les critères identifiés
               </p>
-              <div className="flex flex-wrap gap-2">
+              {/* Interprétations visibles : la puce + une glose discrète pour les
+                  critères à écart de sens (doux, calme…), rien pour les évidents.
+                  Pur affichage, aucun impact sur le score. Cf. audit sémantique. */}
+              <div className="flex flex-wrap gap-x-2 gap-y-3">
                 {criteres.map((c) => (
-                  <span
-                    key={c}
-                    className="text-[12px] text-label/90 border border-white/[0.12] rounded-full px-3 py-1"
-                  >
-                    {c}
-                  </span>
+                  <div key={c.label} className="flex flex-col gap-1.5">
+                    <span className="self-start text-[12px] text-label/90 border border-white/[0.12] rounded-full px-3 py-1">
+                      {c.label}
+                    </span>
+                    {c.gloss && (
+                      <span
+                        className="flex items-baseline gap-1 pl-1 text-[12.5px] leading-snug text-label/55 italic"
+                        style={{ fontFamily: "'Instrument Serif', serif" }}
+                      >
+                        <span className="not-italic text-accent/50">→</span>
+                        {c.gloss}
+                      </span>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
@@ -587,23 +599,14 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
             </div>
           )}
 
-          {/* Cadrage de périmètre : ce que le comparateur pèse vs ce qui reste au
-              rapport. Le bassin d'emploi est désormais pesé (sa vitalité), jamais
-              le métier (qui appartient au rapport). */}
-          <p className="mt-6 text-[12px] leading-[1.6] text-ghost">
-            Le comparateur pèse le climat, le cadre de vie et la vitalité du bassin
-            d&apos;emploi. Le détail de votre métier face au climat, comme les écoles ou
-            les prix, se lit dans le rapport.
-          </p>
-
-          <div className="mt-7 flex flex-wrap items-center gap-3">
+          <div className="mt-8 flex flex-wrap items-center gap-3">
             <button
               onClick={runMatch}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px]"
               style={{ fontFamily: "'Instrument Sans', sans-serif" }}
             >
-              C&apos;est bien ça
-              <span aria-hidden>👍</span>
+              Lancer l&apos;analyse
+              <span aria-hidden>→</span>
             </button>
             <button
               onClick={refine}
@@ -745,17 +748,17 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
                   <a
                     href={`/territoire/${r.insee}/debloquer?nom=${encodeURIComponent(r.nom)}&rank=${i + 1}&source=comparateur_vie`}
                     onClick={() => onExplore(r, i + 1)}
-                    className="group relative mt-7 flex flex-col items-center gap-1 overflow-hidden rounded-xl px-4 py-4 no-underline text-accent border border-accent/[0.35] bg-accent/[0.08] transition-all duration-300 hover:bg-accent/[0.16] hover:border-accent/[0.6] hover:shadow-[0_8px_30px_-6px_var(--accent)]"
+                    className="group relative mt-7 flex flex-col items-center gap-1 overflow-hidden rounded-xl px-4 py-3 no-underline text-accent border border-accent/[0.35] bg-accent/[0.08] transition-all duration-300 hover:bg-accent/[0.16] hover:border-accent/[0.6] hover:shadow-[0_8px_30px_-6px_var(--accent)]"
                   >
                     {/* Reflet premium qui balaie au survol */}
                     <span
                       aria-hidden
                       className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/[0.22] to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full"
                     />
-                    <span className="relative font-mono text-[12px] tracking-[0.08em] uppercase">
+                    <span className="relative text-center font-mono text-[10.5px] tracking-[0.08em] uppercase">
                       Découvrir ce territoire
                     </span>
-                    <span className="relative font-mono text-[9px] tracking-[0.04em] text-accent/70">
+                    <span className="relative text-center font-mono text-[8.5px] tracking-[0.04em] text-accent/70">
                       Rapport complet interactif · 14 €
                     </span>
                   </a>
