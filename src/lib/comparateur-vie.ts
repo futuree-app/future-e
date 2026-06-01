@@ -90,6 +90,9 @@ export type MatchResult = {
   compatibility: number; // 0–100
   reasons: string[];
   tradeoff: string | null; // le compromis principal, ou null
+  // Pression climatique sur l'économie locale (NARRATIF, n'entre PAS dans le score).
+  // Note de lecture prudente : dépendance à un secteur sensible, pas un verdict.
+  pressionEco: { palier: "moderee" | "marquee"; note: string } | null;
   metrics: {
     distance_cote_km: number;
     population: number | null;
@@ -174,6 +177,9 @@ type IndexCommune = {
   pression_agricole?: number | null;
   // Viabilité du bassin d'emploi (ZE2020 héritée). taille/diversite = 0–100.
   emploi?: { ze: string; taille: number; diversite: number } | null;
+  // Pression climatique sur l'économie locale (NARRATIF, hors score) : un secteur
+  // sensible dont l'économie dépend, exposé à un aléa. null = faible (aucune note).
+  pression_eco?: { palier: "moderee" | "marquee"; secteur: string; alea: string } | null;
 };
 type IndexFile = { meta: unknown; communes: IndexCommune[] };
 
@@ -359,6 +365,29 @@ function reasonText(key: PreferenceKey, c: IndexCommune): string {
   return typeof r === "function" ? r(c) : r;
 }
 
+// Pression climatique sur l'économie locale → libellé qualitatif (NARRATIF).
+// Garde-fous : parle de DÉPENDANCE à un secteur sensible, jamais de verdict
+// (« fragile », « va décliner », « résilient ») ni de chiffre. cf.
+// PRESSION_CLIMATIQUE_ECONOMIE.md. La capacité d'adaptation n'est pas mesurée
+// (rappelé à l'affichage, pas dans chaque note).
+const PE_SECTEUR: Record<string, string> = {
+  agri_foret: "l'agriculture et la forêt",
+  tourisme_estival: "le tourisme estival",
+  tourisme_montagne: "le tourisme de montagne",
+};
+const PE_ALEA: Record<string, string> = {
+  secheresse: "sensibles à la sécheresse",
+  feu: "exposées au risque de feu",
+  chaleur: "sensible à la hausse des chaleurs",
+  neige: "sensible à l'évolution de l'enneigement",
+};
+function pressionEcoNote(pe: { palier: "moderee" | "marquee"; secteur: string; alea: string }): string {
+  const part = pe.palier === "marquee" ? "Une part importante" : "Une part";
+  const secteur = PE_SECTEUR[pe.secteur] ?? "certaines activités";
+  const alea = PE_ALEA[pe.alea] ?? "sensibles au climat";
+  return `${part} de l'économie locale repose sur ${secteur}, ${alea}.`;
+}
+
 function passesHard(
   c: IndexCommune,
   hc: HardConstraints,
@@ -497,6 +526,10 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
         compatibility,
         reasons,
         tradeoff,
+        // Narratif, hors score : note de pression climatique sur l'économie (ou null).
+        pressionEco: c.pression_eco
+          ? { palier: c.pression_eco.palier, note: pressionEcoNote(c.pression_eco) }
+          : null,
         metrics: {
           distance_cote_km: c.distance_cote_km,
           population: c.population,

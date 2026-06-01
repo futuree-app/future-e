@@ -115,13 +115,21 @@ PÉRIMÈTRE ET ORIENTATION GÉOGRAPHIQUES
 
 Si des éléments de santé environnementale (eau, sols, sites suivis) vous sont
 fournis, mentionnez-les une fois, avec prudence et au conditionnel, sans jamais
-les présenter comme un verdict. S'ils sont absents, n'en parlez pas.`;
+les présenter comme un verdict. S'ils sont absents, n'en parlez pas.
+
+Si un champ "pression_climatique_economie" est fourni pour un territoire,
+mentionnez-le UNE fois, comme une note de lecture prudente : une part de l'économie
+locale repose sur une activité sensible à un aléa climatique. RÈGLES STRICTES :
+jamais le mot "résilience" ni "fragile" ; ne dites jamais qu'un territoire "va
+décliner", est "menacé" ou "condamné" ; aucun verdict sur son avenir économique.
+Vous pouvez rappeler que la capacité d'adaptation n'est pas mesurée. Si le champ est
+absent ou nul, n'en parlez pas (ne le déduisez jamais vous-même).`;
 
 type Body = {
   project?: string;
   reformulation?: string;
   preferences?: { key: string; weight: number }[];
-  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null }[];
+  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null }[];
   outcome?: { perfectMatch?: boolean; message?: string | null };
   perimetre?: string[]; // ancres dures = cadre choisi (tous les territoires y sont)
   orientation?: string[]; // ancres souples = penchant (résultats inclinés, sans s'y limiter)
@@ -162,6 +170,7 @@ export async function POST(request: NextRequest) {
       region: r.region ?? null,
       raisons: r.reasons ?? [],
       compromis: r.tradeoff ?? null,
+      pression_climatique_economie: r.pressionEco ?? null,
     })),
     sante_environnementale: body.enrichment ?? null,
   };

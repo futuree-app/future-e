@@ -144,6 +144,7 @@ export function OuVivreClient() {
               region: r.region,
               reasons: r.reasons,
               tradeoff: r.tradeoff,
+              pressionEco: r.pressionEco?.note ?? null, // narratif qualitatif, firewall préservé
             })),
             outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message },
             perimetre: outcomeMeta.perimetre ?? [],
@@ -337,6 +338,7 @@ export function OuVivreClient() {
               region: r.region,
               raisons: r.reasons,
               compromis: r.tradeoff,
+              pression_eco: r.pressionEco?.note ?? null, // narratif qualitatif, firewall préservé
             })),
           },
           focus: null,
@@ -731,6 +733,15 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
                     </p>
                   )}
 
+                  {/* Pression climatique sur l'économie locale : note de lecture
+                      prudente, NARRATIVE, distincte des raisons/compromis scorés.
+                      N'a pas pesé dans le classement. */}
+                  {r.pressionEco && (
+                    <p className="mt-3 text-[12px] leading-[1.5] text-amber-300/70">
+                      À noter : {r.pressionEco.note}
+                    </p>
+                  )}
+
                   <a
                     href={`/territoire/${r.insee}/debloquer?nom=${encodeURIComponent(r.nom)}&rank=${i + 1}&source=comparateur_vie`}
                     onClick={() => onExplore(r, i + 1)}
@@ -751,6 +762,16 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
                 </article>
               ))}
             </div>
+
+            {/* Garde-fou wording : on rappelle, une fois, que ce signal ne dit pas
+                l'avenir du territoire (la capacité d'adaptation n'est pas mesurée). */}
+            {top.some((r) => r.pressionEco) && (
+              <p className="mt-5 text-[11px] leading-[1.6] text-ghost/80 max-w-[640px]">
+                Les notes « À noter » signalent une dépendance économique à des activités
+                sensibles au climat. Elles ne mesurent pas la capacité d&apos;adaptation du
+                territoire et ne préjugent pas de son avenir.
+              </p>
+            )}
 
           </div>
 

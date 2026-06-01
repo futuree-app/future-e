@@ -224,6 +224,16 @@ async function main() {
     console.warn('⚠ communes-emploi.json absent : emploi = null. Lancez populate-communes-emploi.js --write.');
   }
 
+  // Parts sectorielles A38 par ZE (pour la pression climatique sur l'économie, lot B).
+  let zeNa38 = {};
+  try {
+    const raw = JSON.parse(await fs.readFile(path.join(root, 'data', 'ze-emploi-na38.json'), 'utf8'));
+    zeNa38 = raw.data ?? raw;
+    console.log(`Parts A38 par ZE : ${Object.keys(zeNa38).length} zones (pression climatique éco).`);
+  } catch {
+    console.warn('⚠ ze-emploi-na38.json absent : pression_eco = null. Lancez populate-communes-emploi.js --write.');
+  }
+
   // 1) Garder une ligne gwl20 par commune métropolitaine
   const byInsee = new Map();
   for (const row of rows) {
@@ -315,6 +325,86 @@ async function main() {
     }
   }
 
+  // Pression climatique sur l'économie locale (lot B, NARRATIF NON SCORÉ, cf.
+  // PRESSION_CLIMATIQUE_ECONOMIE.md). Σ part_secteur(ZE) × sensibilité × aléa(pct
+  // commune). N'entre JAMAIS dans le score : signal de lecture prudente seulement.
+  // A38 : AZ = agri + sylviculture + pêche (forêt non isolable) → exposée sécheresse
+  // ET feu, on garde l'aléa dominant. IZ = hébergement-restauration = proxy tourisme
+  // (estival en plaine/côte, montagne en altitude ; neige = proxy faible, assumé).
+  const clampB = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  // Seuil minimal de DÉPENDANCE : on ne flague un couple que si le secteur sensible
+  // pèse réellement dans l'emploi local (sinon aléa fort × part faible flaguerait à
+  // tort, c.-à-d. un signal climatique déguisé). Validé 2026-06-01.
+  const MIN_PART = 0.08;
+  // Type de tourisme classé au niveau ZE (l'altitude communale rate les villes-services
+  // de vallée : Albertville 339 m est du ski). Médiane ZE ≥ 900 m = tourisme de montagne.
+  const zeAlts = {};
+  for (const c of communes) {
+    const ze = emploiMap[c.insee]?.ze;
+    if (ze && c.altitude != null) (zeAlts[ze] ||= []).push(c.altitude);
+  }
+  const zeMedAlt = {};
+  for (const [ze, a] of Object.entries(zeAlts)) {
+    a.sort((x, y) => x - y);
+    zeMedAlt[ze] = a[Math.floor(a.length / 2)];
+  }
+  for (const c of communes) {
+    c._pe = null;
+    const ze = emploiMap[c.insee]?.ze;
+    const sec = ze ? zeNa38[ze] : null;
+    if (!sec || !sec.total) continue;
+    const part = (code) => (sec.secteurs?.[code] ?? 0) / sec.total;
+    const azPart = part('AZ');
+    const izPart = part('IZ');
+    const couples = [];
+    // AZ (agri + forêt) : sécheresse (0,7) vs feu (0,8). « feu » RÉSERVÉ aux vraies
+    // zones à risque incendie (percentile ≥ 80) : A38 mélange forêt et vignes/cultures,
+    // et étiqueter « feu » un vignoble (Beaune) serait faux. Ailleurs → sécheresse.
+    if (azPart >= MIN_PART) {
+      const sech = 0.7 * ((c.pct.NORSWI04_yr ?? 0) / 100);
+      const feu = 0.8 * ((c.pct.NORIFM40_yr ?? 0) / 100);
+      const feuHigh = (c.pct.NORIFM40_yr ?? 0) >= 80;
+      couples.push(feuHigh && feu >= sech
+        ? { secteur: 'agri_foret', alea: 'feu', contrib: azPart * feu }
+        : { secteur: 'agri_foret', alea: 'secheresse', contrib: azPart * sech });
+    }
+    // IZ (proxy tourisme) : estival (chaleur) en plaine, montagne (neige) en altitude.
+    // Type classé par la médiane d'altitude de la ZE (pas la commune : cf. ci-dessus).
+    if (izPart >= MIN_PART) {
+      const montagne = (zeMedAlt[ze] ?? 0) >= 900;
+      if (montagne) {
+        // Tourisme de montagne = DÉPENDANCE structurelle à une activité climato-sensible.
+        // Plancher 0,45 (l'exposition ne s'efface pas pour une station haute et froide),
+        // + increment pour les stations basses / aux hivers doux (proxy faible, assumé).
+        const altRisk = clampB((1800 - (c.altitude ?? 0)) / (1800 - 800), 0, 1);
+        const winterRisk = (c.pct.NORTMm_seas_DJF ?? 50) / 100;
+        const neige = clampB(0.45 + 0.4 * (0.5 * altRisk + 0.5 * winterRisk), 0, 1);
+        couples.push({ secteur: 'tourisme_montagne', alea: 'neige', contrib: izPart * 0.8 * neige });
+      } else {
+        const chaleur = 0.7 * ((c.pct.NORTX30D_yr ?? 0) / 100);
+        couples.push({ secteur: 'tourisme_estival', alea: 'chaleur', contrib: izPart * chaleur });
+      }
+    }
+    if (!couples.length) continue;
+    const brute = couples.reduce((s, x) => s + x.contrib, 0);
+    const dom = couples.reduce((a, b) => (b.contrib > a.contrib ? b : a));
+    c._pe = { brute, secteur: dom.secteur, alea: dom.alea };
+  }
+  // Paliers par percentiles nationaux de la pression brute (> 0).
+  const peVals = communes.map((c) => c._pe?.brute).filter((v) => v != null && v > 0).sort((a, b) => a - b);
+  const peP = (p) => peVals[Math.min(peVals.length - 1, Math.floor((p / 100) * peVals.length))] ?? Infinity;
+  const PE_MODEREE = peP(70), PE_MARQUEE = peP(90);
+  let peModeree = 0, peMarquee = 0;
+  for (const c of communes) {
+    const pe = c._pe;
+    delete c._pe;
+    if (!pe || pe.brute < PE_MODEREE) { c.pression_eco = null; continue; } // faible → aucune phrase
+    const palier = pe.brute >= PE_MARQUEE ? 'marquee' : 'moderee';
+    if (palier === 'marquee') peMarquee++; else peModeree++;
+    c.pression_eco = { palier, secteur: pe.secteur, alea: pe.alea };
+  }
+  console.log(`Pression climatique éco : ${peMarquee} marquée, ${peModeree} modérée (seuils brut p70=${PE_MODEREE.toFixed(3)} p90=${PE_MARQUEE.toFixed(3)}).`);
+
   const withPop = communes.filter((c) => c.population != null).length;
   const meta = {
     generatedScenario: SCENARIO,
@@ -331,6 +421,7 @@ async function main() {
       'population/densité : ADEME data_communes (population_totale_2021, densite_de_population_2022)',
       'altitude : centroïde de la commune via IGN RGE ALTI (Géoplateforme). Sous-estime une commune de vallée étendue (centroïde en fond de vallée).',
       'emploi : viabilité du bassin (taille + diversité A38) à la maille ZE2020 INSEE, héritée par commune. Flores fin 2024, salarié uniquement (sous-estime agriculture/indépendants).',
+      'pression_eco : pression climatique sur l\'économie locale (NARRATIF, hors score). Σ part_secteur(ZE) × sensibilité × aléa(pct). AZ = agri+forêt (sécheresse/feu) ; IZ = proxy tourisme (estival=chaleur en plaine, montagne=neige en altitude, proxy faible). Ne mesure PAS la capacité d\'adaptation. Paliers par percentiles nationaux (modérée p70, marquée p90).',
     ],
     columnMapSource: 'src/lib/drias-json.ts',
   };

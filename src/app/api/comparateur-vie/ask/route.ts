@@ -45,6 +45,7 @@ type Territoire = {
   region: string | null;
   raisons: string[];
   compromis: string | null;
+  pression_eco?: string | null; // note narrative qualitative (pression climatique éco)
 };
 
 type Body = {
@@ -135,9 +136,19 @@ SI UN PÉRIMÈTRE OU UNE ORIENTATION SONT DONNÉS
 - Dans les deux cas : nommez la zone, sans réciter de département ni inventer de
   caractéristique.
 
+SI UNE NOTE "pression_climatique_economie" EST DONNÉE POUR UN TERRITOIRE
+C'est une lecture prudente : une part de l'économie locale repose sur une activité
+sensible à un aléa climatique. Vous pouvez l'expliquer SI on vous interroge dessus,
+en une phrase. RÈGLES STRICTES : jamais "résilience" ni "fragile" ; ne dites jamais
+qu'un territoire "va décliner", est "menacé" ou "condamné" ; aucun verdict sur son
+avenir. Vous pouvez préciser que la capacité d'adaptation n'est pas mesurée. Si la
+note est absente, ne l'inventez pas.
+
 SI LA QUESTION SORT DU SUJET futur•e
-Emploi, prix de l'immobilier, écoles, vie nocturne, politique : ramenez brièvement
-vers ce que le comparateur éclaire (le pourquoi des territoires proposés).
+Prix de l'immobilier, écoles, vie nocturne, politique : ramenez brièvement vers ce
+que le comparateur éclaire. La vitalité du bassin d'emploi est, elle, pesée par le
+comparateur (vous pouvez l'expliquer qualitativement), mais le détail d'un métier
+précis ou d'un salaire reste au rapport.
 
 FORMAT
 - UN SEUL paragraphe, 60 à 100 mots maximum. Court. Jamais un mini-rapport.
@@ -165,6 +176,7 @@ function buildContextBlock(ctx: NonNullable<Body["context"]>, focusRang: number 
     region: t.region ?? null,
     raisons: t.raisons ?? [],
     compromis: t.compromis ?? null,
+    pression_climatique_economie: t.pression_eco ?? null,
   }));
 
   const payload = {
