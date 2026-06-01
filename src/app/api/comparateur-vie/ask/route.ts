@@ -52,7 +52,8 @@ type Body = {
   context?: {
     reformulation?: string;
     criteres?: string[]; // libellés humains (jamais les clés techniques)
-    ancrage?: string[]; // libellés des ancres géographiques (« le Sud », « la façade atlantique »)
+    perimetre?: string[]; // ancres dures = cadre choisi
+    orientation?: string[]; // ancres souples = penchant
     synthese?: string;
     aucun_territoire_parfait?: boolean;
     territoires?: Territoire[];
@@ -125,12 +126,14 @@ revenez à ce que le comparateur, lui, permet de comprendre (pourquoi ce territo
 ressort, le compromis qu'il représente). Vous ne donnez aucune donnée, vous ne
 faites aucune estimation.
 
-SI UN PÉRIMÈTRE GÉOGRAPHIQUE EST DONNÉ
-Si perimetre_geographique est renseigné (le Sud, la façade atlantique…), l'utilisateur
-a choisi cette zone et tous les territoires proposés y sont déjà. C'est un choix
-délibéré : ne proposez jamais de chercher ailleurs, ne le présentez pas comme une
-contrainte subie. Vous pouvez nommer la zone, sans réciter de département ni inventer
-de caractéristique.
+SI UN PÉRIMÈTRE OU UNE ORIENTATION SONT DONNÉS
+- perimetre_geographique (cadre dur) : zone choisie, tous les territoires proposés
+  y sont. Ne proposez jamais de chercher ailleurs, ce n'est pas une contrainte subie.
+- orientation_geographique (penchant) : zone préférée sans s'y limiter. Les
+  résultats penchent vers elle mais peuvent en sortir. Ne la présentez pas comme
+  une frontière ; vous pouvez noter le penchant.
+- Dans les deux cas : nommez la zone, sans réciter de département ni inventer de
+  caractéristique.
 
 SI LA QUESTION SORT DU SUJET futur•e
 Emploi, prix de l'immobilier, écoles, vie nocturne, politique : ramenez brièvement
@@ -167,7 +170,8 @@ function buildContextBlock(ctx: NonNullable<Body["context"]>, focusRang: number 
   const payload = {
     reformulation_du_projet: ctx.reformulation ?? null,
     criteres_detectes: ctx.criteres ?? [],
-    perimetre_geographique: Array.isArray(ctx.ancrage) && ctx.ancrage.length ? ctx.ancrage : null,
+    perimetre_geographique: Array.isArray(ctx.perimetre) && ctx.perimetre.length ? ctx.perimetre : null,
+    orientation_geographique: Array.isArray(ctx.orientation) && ctx.orientation.length ? ctx.orientation : null,
     synthese_deja_affichee: ctx.synthese ?? null,
     aucun_territoire_parfait: ctx.aucun_territoire_parfait ?? false,
     territoires,

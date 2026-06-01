@@ -1,7 +1,14 @@
 import "server-only";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { resolveZones, resolveExclusions, type AppliedZone } from "@/lib/geo-zones";
+import {
+  resolveZoneAnchors,
+  resolveExclusions,
+  type AppliedZone,
+  type ZoneAnchor,
+  type ZoneStrength,
+  type SoftZone,
+} from "@/lib/geo-zones";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — moteur de compatibilité déterministe (V1).
@@ -41,13 +48,14 @@ export type PreferenceKey = (typeof PREFERENCE_KEYS)[number];
 export type Preference = { key: PreferenceKey; weight: number };
 
 export type HardConstraints = {
-  region?: string | null;
   departements?: string[];
-  // Ancres géographiques (cf. geo-zones.ts). zones = ancres positives
-  // (macro-zone, façade maritime, massif) intersectées ; excludeZones = ancres
-  // négatives (« quitter Paris », « pas le Nord »). Le parse n'émet que des
-  // jetons d'une liste fermée ; le moteur détient la table jeton → départements.
-  zones?: string[];
+  // Ancres géographiques avec gradient de force (cf. geo-zones.ts). Chaque ancre
+  // porte une force : hard (filtre, définit le périmètre, ancres dures
+  // intersectées), preferred / inspiration (bonus de score, sans exclusion). Les
+  // régions administratives sont des jetons de zone comme les autres (plus de champ
+  // region séparé). excludeZones = ancres négatives, dures en V1. Le parse n'émet
+  // que des jetons d'une liste fermée ; le moteur détient la table jeton → départements.
+  zones?: ZoneAnchor[];
   excludeZones?: string[];
   nearSea?: { active: boolean; maxKm?: number | null };
   excludeSea?: boolean;
@@ -209,6 +217,17 @@ function listFr(items: string[]): string {
   return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
 }
 
+// Gradient de force d'ancre : bonus additif de score pour les ancres souples
+// (cf. ANCRES_GEOGRAPHIQUES.md). hard ne bonifie pas (il filtre). Constantes à
+// caler en réel : preferred domine d'ordinaire le haut du classement sans agir
+// comme un filtre, inspiration oriente à peine.
+const STRENGTH_BONUS: Record<ZoneStrength, number> = { hard: 0, preferred: 12, inspiration: 4 };
+function softZoneBonus(dept: string, soft: SoftZone[]): number {
+  let b = 0; // sémantique OU : max du bonus auquel la commune a droit, pas de cumul
+  for (const s of soft) if (s.departements.has(dept)) b = Math.max(b, STRENGTH_BONUS[s.strength]);
+  return b;
+}
+
 function avgPct(c: IndexCommune, fields: string[]): number | null {
   const vals = fields.map((f) => c.pct[f]).filter((v): v is number => v != null);
   return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
@@ -307,10 +326,10 @@ function passesHard(
   excludeDepts: Set<string>,
 ): boolean {
   if (c.population != null && c.population < POP_FLOOR) return false;
-  if (hc.region && c.region !== hc.region) return false;
   if (hc.departements?.length && !hc.departements.includes(c.dept)) return false;
-  // Ancres géographiques : zoneDepts (intersection des ancres positives) restreint
-  // le périmètre ; excludeDepts (union des ancres négatives) le rogne.
+  // Ancres dures : zoneDepts (intersection des ancres hard) restreint le périmètre ;
+  // excludeDepts (union des ancres négatives) le rogne. Les ancres souples ne
+  // filtrent pas (elles bonifient le score, hors de cette fonction).
   if (zoneDepts && !zoneDepts.has(c.dept)) return false;
   if (excludeDepts.has(c.dept)) return false;
   if (hc.nearSea?.active && c.distance_cote_km > (hc.nearSea.maxKm ?? 30)) return false;
@@ -336,11 +355,11 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     if (hit) placePoint = { lat: hit.lat, lon: hit.lon, maxKm: parsed.hardConstraints.nearPlace.maxKm ?? 50 };
   }
 
-  // Ancres géographiques : résolution jeton → départements (intersection des
-  // ancres positives, union des exclusions). Le moteur détient la table ; le
-  // parse n'a fourni que des jetons.
+  // Ancres géographiques : résolution jeton → départements avec gradient de force.
+  // hard → périmètre dur (intersection) ; preferred / inspiration → bonus de score.
+  // Le moteur détient la table ; le parse n'a fourni que des jetons et leur force.
   const hc = parsed.hardConstraints ?? {};
-  const zone = resolveZones(hc.zones);
+  const zone = resolveZoneAnchors(hc.zones);
   const exclusion = resolveExclusions(hc.excludeZones);
 
   // Baseline de viabilité : eviter_isolement implicite si absent
@@ -353,7 +372,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   const totalW = prefs.reduce((s, p) => s + p.weight, 0) || 1;
 
   const candidates = communes.filter((c) =>
-    passesHard(c, hc, placePoint, zone.departements, exclusion.departements),
+    passesHard(c, hc, placePoint, zone.hardDepartements, exclusion.departements),
   );
 
   type Sub = { key: PreferenceKey; weight: number; baseline?: boolean; s: number };
@@ -363,7 +382,13 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
       const s = subScore(p.key, c);
       if (s != null) subs.push({ key: p.key, weight: p.weight, baseline: p.baseline, s });
     }
-    const compatibility = Math.round(subs.reduce((s, x) => s + x.weight * x.s, 0) / totalW);
+    // Score de base (préférences), puis bonus d'ancre souple (preferred / inspiration).
+    // On garde le score brut (non plafonné) pour le tri : sinon, quand les grandes
+    // villes saturent déjà à 100, le clamp écrase le bonus et l'ancre préférée ne
+    // départage plus. Le score affiché reste borné à 100.
+    const base = subs.reduce((s, x) => s + x.weight * x.s, 0) / totalW;
+    const rawScore = base + softZoneBonus(c.dept, zone.soft);
+    const compatibility = clamp(Math.round(rawScore), 0, 100);
     const visible = subs.filter((x) => !x.baseline);
     const reasons = [...visible]
       .sort((a, b) => b.weight * b.s - a.weight * a.s)
@@ -374,6 +399,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     const tradeoff = worst && worst.s < 50 ? REASON_NEG[worst.key] : null;
     return {
       cityKey: cityKey(c.insee),
+      sortScore: rawScore,
       result: {
         insee: c.insee,
         nom: CITY_LABEL[cityKey(c.insee)] ?? c.nom,
@@ -394,9 +420,12 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     };
   });
 
-  scored.sort((a, b) => b.result.compatibility - a.result.compatibility);
+  // Tri sur le score brut (bonus d'ancre souple inclus, non plafonné) : le n°1
+  // reste le meilleur, et une ancre préférée départage à saturation.
+  scored.sort((a, b) => b.sortScore - a.sortScore);
 
   const TARGET = 5;
+  const DISPLAY = 3; // cartes réellement affichées (le client tranche à 3)
 
   // Rollup big-3 : une seule entrée par ville mère (la meilleure, déjà en tête).
   const seenCity = new Set<string>();
@@ -406,13 +435,14 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     return true;
   });
 
-  // Étalement géographique (dégel diversité, 2026-05-31). Au lieu de prendre les
-  // 5 meilleurs scores bruts, souvent agglomérés au même endroit (Biarritz /
-  // Anglet / Bayonne, top-5 tout breton…), on étale : la meilleure de chaque
-  // région d'abord, puis on complète par départements encore absents, puis sans
-  // contrainte. Le n°1 reste le meilleur score national ; les suivants favorisent
-  // des territoires réellement différents. Choix produit : différence > optimalité
-  // brute sur les rangs 2 et 3 (cf. OU_VIVRE_ROADMAP.md).
+  // Départements de la (des) zone(s) PRÉFÉRÉE(s) : déclenche l'étalement échelonné.
+  // inspiration n'en fait pas partie (son penchant léger passe par le score, pas
+  // par l'étalement).
+  const preferredDepts = new Set<string>();
+  for (const sz of zone.soft) {
+    if (sz.strength === "preferred") for (const d of sz.departements) preferredDepts.add(d);
+  }
+
   const seenRegion = new Set<string>();
   const seenDept = new Set<string>();
   const deduped: MatchResult[] = [];
@@ -421,20 +451,50 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     seenDept.add(r.dept);
     deduped.push(r);
   };
-  for (const s of unique) {
-    if (deduped.length >= TARGET) break;
-    if (seenRegion.has(s.result.region ?? s.result.dept)) continue;
-    pushPick(s.result);
-  }
-  for (const s of unique) {
-    if (deduped.length >= TARGET) break;
-    if (deduped.includes(s.result) || seenDept.has(s.result.dept)) continue;
-    pushPick(s.result);
-  }
-  for (const s of unique) {
-    if (deduped.length >= TARGET) break;
-    if (deduped.includes(s.result)) continue;
-    pushPick(s.result);
+
+  if (preferredDepts.size > 0) {
+    // Étalement ÉCHELONNÉ (ancre préférée) : la zone domine, avec UNE seule ouverture
+    // hors zone, placée au dernier rang affiché pour rester visible sans noyer la
+    // zone. C'est ce qui distingue preferred (2 de la zone + 1 ouverture sur 3 cartes)
+    // de hard (3 de la zone) et d'inspiration (diversité). cf. ANCRES_GEOGRAPHIQUES.md.
+    const zSeen = new Set<string>();
+    const zonePicks: MatchResult[] = [];
+    for (const s of unique) {
+      if (!preferredDepts.has(s.result.dept) || zSeen.has(s.result.dept)) continue;
+      zSeen.add(s.result.dept);
+      zonePicks.push(s.result);
+    }
+    const alt = unique.find((s) => !preferredDepts.has(s.result.dept) && !zSeen.has(s.result.dept))?.result ?? null;
+    for (const r of zonePicks.slice(0, DISPLAY - 1)) pushPick(r);
+    if (alt) pushPick(alt);
+    for (const r of zonePicks) {
+      if (deduped.length >= TARGET) break;
+      if (!deduped.includes(r)) pushPick(r);
+    }
+    for (const s of unique) {
+      if (deduped.length >= TARGET) break;
+      if (!deduped.includes(s.result)) pushPick(s.result);
+    }
+  } else {
+    // Étalement géographique standard (dégel diversité, 2026-05-31) : meilleure par
+    // région, puis départements encore absents, puis sans contrainte. Le n°1 reste le
+    // meilleur score (bonus inspiration inclus) ; les suivants favorisent des
+    // territoires réellement différents (cf. OU_VIVRE_ROADMAP.md).
+    for (const s of unique) {
+      if (deduped.length >= TARGET) break;
+      if (seenRegion.has(s.result.region ?? s.result.dept)) continue;
+      pushPick(s.result);
+    }
+    for (const s of unique) {
+      if (deduped.length >= TARGET) break;
+      if (deduped.includes(s.result) || seenDept.has(s.result.dept)) continue;
+      pushPick(s.result);
+    }
+    for (const s of unique) {
+      if (deduped.length >= TARGET) break;
+      if (deduped.includes(s.result)) continue;
+      pushPick(s.result);
+    }
   }
 
   const best = deduped[0]?.compatibility ?? 0;
@@ -443,7 +503,12 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   // Sur-contrainte : quand les ancres en filtre vident le vivier, on le DIT en
   // nommant le périmètre, sans relâcher automatiquement ni inventer de résultat
   // (cf. ANCRES_GEOGRAPHIQUES.md, choix V1 « détecter et le dire »).
-  const anchorLabels = [...zone.applied, ...exclusion.applied].map((z) => z.label);
+  // Seules les ancres DURES (et les exclusions) peuvent vider le vivier : ce sont
+  // elles qu'on nomme. Les ancres souples ne filtrent pas.
+  const anchorLabels = [
+    ...zone.applied.filter((z) => z.strength === "hard"),
+    ...exclusion.applied,
+  ].map((z) => z.label);
   const emptyMessage =
     anchorLabels.length > 0
       ? `Aucun territoire ne réunit l'ensemble de vos critères dans ${listFr(anchorLabels)}. Essayez d'élargir le périmètre ou un autre critère.`

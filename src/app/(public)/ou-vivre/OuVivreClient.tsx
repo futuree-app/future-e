@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import posthog from "posthog-js";
 import type { ParsedProject, MatchOutcome, MatchResult } from "@/lib/comparateur-vie";
 import { preferencesToLabels } from "@/lib/comparateur-labels";
-import { zonesToLabels, exclusionsToLabels } from "@/lib/geo-zones";
+import { anchorsToLabeled, exclusionsToLabels } from "@/lib/geo-zones";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — client.
@@ -46,40 +46,13 @@ const WAITING_PHRASES = [
   "Nous cherchons ce qui correspond vraiment à votre projet…",
 ];
 
-// Diversité géographique des cartes : le moteur (gelé) renvoie jusqu'à 5
-// territoires triés par score, souvent agglomérés au même endroit (ex. Biarritz
-// / Anglet / Bayonne, ou Brest / Saint-Malo / Quimper). On dé-duplique par
-// RÉGION sur ce top-5 (repli département si région nulle), en gardant le mieux
-// classé de chaque région d'abord, puis on complète si besoin pour atteindre n
-// cartes. Choix produit : on préfère trois propositions réellement différentes à
-// trois quasi-optimales jumelles. La région est le grain géo le plus large
-// disponible côté client (MatchResult n'expose pas de coordonnées).
-function diversify(results: MatchResult[], n: number): MatchResult[] {
-  const regionSeen = new Set<string>();
-  const deptSeen = new Set<string>();
-  const pick: MatchResult[] = [];
-
-  // Passe 1 : une par région (diversité maximale), la mieux classée d'abord.
-  for (const r of results) {
-    if (pick.length >= n) return pick;
-    const region = r.region ?? r.dept;
-    if (regionSeen.has(region)) continue;
-    regionSeen.add(region);
-    deptSeen.add(r.dept);
-    pick.push(r);
-  }
-  // Passe 2 : compléter avec des DÉPARTEMENTS encore non représentés. Règle
-  // dure : jamais deux communes du même département (tue les voisins type
-  // Brest/Guipavas ou Bayonne/Anglet). Peut renvoyer moins de n si le moteur a
-  // tout aggloméré dans le même coin : on assume 2 vraiment différentes plutôt
-  // que 3 jumelles.
-  for (const r of results) {
-    if (pick.length >= n) return pick;
-    if (deptSeen.has(r.dept)) continue;
-    deptSeen.add(r.dept);
-    pick.push(r);
-  }
-  return pick;
+// Cartes affichées : on prend les 3 premiers territoires DANS L'ORDRE du moteur.
+// Le moteur fait désormais tout l'étalement (diversité par région/département, et
+// étalement échelonné quand une ancre est préférée : zone dominante + 1 ouverture).
+// La dé-dup client d'avant (par région/département) faisait doublon et écrasait
+// l'étalement échelonné : on fait confiance au serveur.
+function topCards(results: MatchResult[] | undefined | null): MatchResult[] {
+  return (results ?? []).slice(0, 3);
 }
 
 // Palier qualitatif de correspondance, à la place d'un score chiffré : le %
@@ -149,7 +122,12 @@ export function OuVivreClient() {
       project: string,
       p: ParsedProject,
       top: MatchResult[],
-      outcomeMeta: { perfectMatch: boolean; message: string | null; ancrage?: string[] },
+      outcomeMeta: {
+        perfectMatch: boolean;
+        message: string | null;
+        perimetre?: string[];
+        orientation?: string[];
+      },
     ) => {
       setSynthesis("");
       setSynthesizing(true);
@@ -168,7 +146,8 @@ export function OuVivreClient() {
               tradeoff: r.tradeoff,
             })),
             outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message },
-            ancrage: outcomeMeta.ancrage ?? [],
+            perimetre: outcomeMeta.perimetre ?? [],
+            orientation: outcomeMeta.orientation ?? [],
           }),
         });
 
@@ -270,7 +249,7 @@ export function OuVivreClient() {
       return;
     }
 
-    const top = diversify(matchOutcome.results, 3);
+    const top = topCards(matchOutcome.results);
     capture("life_match_succeeded", {
       candidates: matchOutcome.candidates,
       best_compatibility: matchOutcome.bestCompatibility,
@@ -283,7 +262,8 @@ export function OuVivreClient() {
     void streamSynthesis(seq, submittedText, parsed, top, {
       perfectMatch: matchOutcome.perfectMatch,
       message: matchOutcome.message,
-      ancrage: matchOutcome.appliedZones?.map((z) => z.label),
+      perimetre: matchOutcome.appliedZones?.filter((z) => z.strength === "hard").map((z) => z.label),
+      orientation: matchOutcome.appliedZones?.filter((z) => z.strength !== "hard").map((z) => z.label),
     });
   }, [parsed, submittedText, streamSynthesis]);
 
@@ -298,14 +278,17 @@ export function OuVivreClient() {
   // Critères humains détectés (jamais les clés techniques), affichés au gate.
   const criteres = parsed ? preferencesToLabels(parsed.preferences) : [];
 
-  // Ancres géographiques détectées (périmètre, distinct des préférences). Au gate,
-  // on n'a que les jetons du parse : on les traduit en libellés. Le périmètre
-  // assumé (convention « au sens… ») s'affiche aux résultats, via outcome.
-  const zonesLabels = parsed ? zonesToLabels(parsed.hardConstraints?.zones) : [];
+  // Ancres géographiques détectées (périmètre, distinct des préférences), avec leur
+  // force. Au gate, on n'a que les jetons du parse : on les traduit en libellés. Le
+  // périmètre assumé (convention « au sens… ») s'affiche aux résultats, via outcome.
+  const zoneAnchors = parsed ? anchorsToLabeled(parsed.hardConstraints?.zones) : [];
+  const hardZoneLabels = zoneAnchors.filter((z) => z.strength === "hard").map((z) => z.label);
+  const prefZoneLabels = zoneAnchors.filter((z) => z.strength === "preferred").map((z) => z.label);
+  const inspZoneLabels = zoneAnchors.filter((z) => z.strength === "inspiration").map((z) => z.label);
   const exclLabels = parsed ? exclusionsToLabels(parsed.hardConstraints?.excludeZones) : [];
 
   // ── AskFuture comparateur ─────────────────────────────────────────────────
-  const top = diversify(outcome?.results ?? [], 3);
+  const top = topCards(outcome?.results);
 
   // Chips de questions suggérées : transforment « je dois inventer une question »
   // en « tiens, ça m'intéresse, je clique ». La première est contextualisée sur
@@ -339,7 +322,8 @@ export function OuVivreClient() {
           context: {
             reformulation: parsed.reformulation,
             criteres: preferencesToLabels(parsed.preferences),
-            ancrage: outcome?.appliedZones?.map((z) => z.label) ?? [],
+            perimetre: outcome?.appliedZones?.filter((z) => z.strength === "hard").map((z) => z.label) ?? [],
+            orientation: outcome?.appliedZones?.filter((z) => z.strength !== "hard").map((z) => z.label) ?? [],
             synthese: synthesis,
             aucun_territoire_parfait: outcome?.perfectMatch === false,
             territoires: top.map((r, i) => ({
@@ -528,20 +512,37 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
             </div>
           )}
 
-          {/* Périmètre géographique : l'ancre définit l'espace de recherche, on la
-              montre à part des critères (ce n'est pas une préférence de plus). */}
-          {(zonesLabels.length > 0 || exclLabels.length > 0) && (
+          {/* Périmètre géographique avec gradient de force : l'ancre définit ou
+              incline l'espace de recherche, distinct des préférences. On distingue
+              visuellement dure (filtre), préférée (penchant) et inspiration. */}
+          {(zoneAnchors.length > 0 || exclLabels.length > 0) && (
             <div className="mt-6">
               <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">
                 <span className="text-emerald-400">✓</span> Le périmètre recherché
               </p>
               <div className="flex flex-wrap gap-2">
-                {zonesLabels.map((z) => (
+                {hardZoneLabels.map((z) => (
                   <span
                     key={z}
-                    className="text-[12px] text-label/90 border border-accent/[0.3] bg-accent/[0.06] rounded-full px-3 py-1"
+                    className="text-[12px] text-label/90 border border-accent/[0.35] bg-accent/[0.08] rounded-full px-3 py-1"
                   >
                     {z}
+                  </span>
+                ))}
+                {prefZoneLabels.map((z) => (
+                  <span
+                    key={z}
+                    className="text-[12px] text-label/80 border border-accent/[0.18] rounded-full px-3 py-1"
+                  >
+                    idéalement {z}
+                  </span>
+                ))}
+                {inspZoneLabels.map((z) => (
+                  <span
+                    key={z}
+                    className="text-[12px] text-muted border border-white/[0.1] rounded-full px-3 py-1"
+                  >
+                    ouvert à : {z}
                   </span>
                 ))}
                 {exclLabels.map((z) => (
@@ -630,12 +631,21 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
             </button>
           </div>
 
-          {/* Périmètre assumé, affiché honnêtement : la frontière d'une zone est une
-              convention, pas une vérité. On dit où l'on a cherché et selon quel sens. */}
-          {outcome?.appliedZones && outcome.appliedZones.length > 0 && (
+          {/* Périmètre assumé, affiché honnêtement. Les ancres dures ont borné la
+              recherche (on dit où et selon quel sens) ; les ancres souples l'ont
+              seulement inclinée (on le dit sans prétendre à une frontière). */}
+          {outcome?.appliedZones?.some((z) => z.strength === "hard") && (
             <p className="mt-3 text-[12px] leading-[1.6] text-ghost">
-              Recherche limitée à {outcome.appliedZones.map((z) => z.label).join(", ")} :{" "}
-              {outcome.appliedZones.map((z) => z.convention).join(" ; ")}.
+              Recherche limitée à{" "}
+              {outcome.appliedZones.filter((z) => z.strength === "hard").map((z) => z.label).join(", ")} :{" "}
+              {outcome.appliedZones.filter((z) => z.strength === "hard").map((z) => z.convention).join(" ; ")}.
+            </p>
+          )}
+          {outcome?.appliedZones?.some((z) => z.strength !== "hard") && (
+            <p className="mt-3 text-[12px] leading-[1.6] text-ghost">
+              Résultats orientés vers{" "}
+              {outcome.appliedZones.filter((z) => z.strength !== "hard").map((z) => z.label).join(", ")}, sans
+              s&apos;y limiter.
             </p>
           )}
 

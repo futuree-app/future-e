@@ -100,14 +100,17 @@ INTERDITS
   pas trop isolé compte souvent »), jamais comme sa demande (« vous ne voulez pas
   être isolé »). S'il ne l'a pas dit, ne le lui faites pas dire.
 
-PÉRIMÈTRE GÉOGRAPHIQUE
-Si perimetre_geographique est renseigné, l'utilisateur a CHOISI une zone (le Sud,
-la façade atlantique, les Pyrénées…). Tous les territoires proposés sont déjà
-dans cette zone. Traitez ce choix comme délibéré : ne suggérez jamais de regarder
-ailleurs, ne présentez pas la zone comme une limite subie. Vous pouvez nommer la
-zone en langage humain, mais ne récitez aucun département et n'inventez aucune
-caractéristique de la zone. S'il est absent, la recherche est nationale, n'évoquez
-pas de périmètre.
+PÉRIMÈTRE ET ORIENTATION GÉOGRAPHIQUES
+- perimetre_geographique (cadre dur) : l'utilisateur a CHOISI cette zone, tous les
+  territoires proposés y sont. Choix délibéré : ne suggérez jamais de regarder
+  ailleurs, ne le présentez pas comme une limite subie.
+- orientation_geographique (penchant) : l'utilisateur PRÉFÈRE cette zone sans s'y
+  limiter. Les résultats penchent vers elle mais peuvent en sortir si un territoire
+  est nettement plus pertinent. Ne la présentez jamais comme une frontière ; vous
+  pouvez noter le penchant et expliquer un résultat hors zone.
+- Dans les deux cas : nommez la zone en langage humain, ne récitez aucun
+  département, n'inventez aucune caractéristique. Si les deux sont absents, la
+  recherche est nationale, n'évoquez pas de périmètre.
 
 Si des éléments de santé environnementale (eau, sols, sites suivis) vous sont
 fournis, mentionnez-les une fois, avec prudence et au conditionnel, sans jamais
@@ -119,7 +122,8 @@ type Body = {
   preferences?: { key: string; weight: number }[];
   results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null }[];
   outcome?: { perfectMatch?: boolean; message?: string | null };
-  ancrage?: string[]; // libellés des ancres géographiques (« le Sud », « la façade atlantique »)
+  perimetre?: string[]; // ancres dures = cadre choisi (tous les territoires y sont)
+  orientation?: string[]; // ancres souples = penchant (résultats inclinés, sans s'y limiter)
   enrichment?: Record<string, unknown>; // extensible : eau / cadmium / sols suivis (à venir)
 };
 
@@ -140,14 +144,16 @@ export async function POST(request: NextRequest) {
     .map((p) => PREF_LABELS[p.key])
     .filter(Boolean);
 
-  const ancrage = Array.isArray(body.ancrage) ? body.ancrage.filter((s) => typeof s === "string" && s) : [];
+  const perimetre = Array.isArray(body.perimetre) ? body.perimetre.filter((s) => typeof s === "string" && s) : [];
+  const orientation = Array.isArray(body.orientation) ? body.orientation.filter((s) => typeof s === "string" && s) : [];
 
   // Payload sobre : pas de chiffres, uniquement le qualitatif déjà produit par le moteur.
   const payload = {
     projet: body.project ?? null,
     reformulation: body.reformulation ?? null,
     ce_que_l_utilisateur_cherche: prefs,
-    perimetre_geographique: ancrage.length ? ancrage : null,
+    perimetre_geographique: perimetre.length ? perimetre : null,
+    orientation_geographique: orientation.length ? orientation : null,
     aucun_territoire_parfait: body.outcome?.perfectMatch === false,
     message_moteur: body.outcome?.message ?? null,
     territoires: results.map((r) => ({

@@ -317,19 +317,128 @@ Vérifié en réel sur le cas fondateur (« fuir les canicules, rester dans le S
 `ensoleillement` parasite), les façades, les exclusions, l'intersection et la
 sur-contrainte.
 
+## Gradient de force d'ancre (conception validée, 2026-06-01)
+
+Évolution du moteur d'ancres : une ancre n'est plus binaire (présente = filtre,
+absente = ignorée). Sa **force** varie selon la formulation. Trois niveaux,
+doctrine tranchée par le porteur :
+
+- **hard** = filtre. Définit l'espace de recherche (comportement V1 actuel).
+- **preferred** = bonus fort de score, sans exclusion. Incline le classement dans
+  l'espace, laisse remonter un excellent territoire hors zone.
+- **inspiration** = bonus faible + signal éditorial. Oriente légèrement et nourrit
+  la synthèse, sans déformer les résultats.
+
+La force appartient à chaque ancre, pas à la phrase (« la mer absolument, pourquoi
+pas le Sud-Ouest » = mer dure + sud_ouest inspiration).
+
+### Règles linguistiques de parse
+
+- **Polarité d'abord** : « surtout pas le Sud » est une exclusion, jamais une ancre.
+- **Émotion n'est pas contrainte** : « j'adore le Sud » plafonne à preferred.
+- **hard** : nécessité ou identité nue. Marqueurs : absolument, impérativement,
+  obligatoirement, uniquement, il faut, « je veux rester/vivre en/dans ». Défaut
+  d'une mention nue (« en Bretagne », « dans le Sud », « sur la côte Atlantique »)
+  = hard (le gate permet de corriger).
+- **preferred** : souhait au conditionnel. Marqueurs : j'aimerais bien, idéalement,
+  de préférence, plutôt, si possible.
+- **inspiration** : ouverture, hypothèse. Marqueurs : pourquoi pas, je suis ouvert
+  à, éventuellement, ça pourrait être, pas contre.
+
+### Représentation (schéma)
+
+`zones` passe de `string[]` à une liste d'objets (rupture assumée, lot non encore
+en vente) :
+
+```
+zones: [
+  { zone: "sud",       strength: "hard" },
+  { zone: "sud_ouest", strength: "preferred" }
+]
+excludeZones: ["paris"]   // inchangé, dur en V1 du gradient
+```
+
+### Application moteur
+
+- hard : intersection des zones dures → filtre `passesHard` (vivier). Inchangé.
+- preferred / inspiration : aucun filtrage. Bonus **additif** au score de base,
+  après la moyenne pondérée, score borné à 100. Plusieurs zones souples : on prend
+  le **max** du bonus (sémantique OU, pas de cumul).
+- Constantes (à caler en réel) : preferred ≈ +12, inspiration ≈ +4.
+- Interaction avec l'étalement diversité : le bonus est dans le score, l'étalement
+  opère ensuite. Rang 2-3 peut réinjecter une région hors zone (désirable pour
+  montrer l'alternative). On ajuste le bonus si preferred ne domine pas assez,
+  plutôt que la logique d'étalement.
+
+### Affichage
+
+- Gate « Le périmètre recherché » : trois forces distinguées visuellement (dure =
+  puce pleine ; preferred = « idéalement … » ; inspiration = « ouvert à : … »).
+- Résultats : ligne « Recherche limitée à … » uniquement pour les zones dures ;
+  ligne « Résultats orientés vers …, sans s'y limiter » pour les souples.
+- Synthèse / AskFuture : reçoivent cadre (hard) et orientation (soft) séparés, en
+  libellés qualitatifs. L'éditorial ne présente jamais une zone souple comme une
+  frontière.
+
+### Risques de sur-interprétation
+
+- Mention nue = dure peut sur-contraindre : mitigé par le gate (correction), toggle
+  strict/souple noté en futur.
+- Confusion preferred/inspiration : rendue peu coûteuse par conception (inspiration
+  ne pèse presque rien sur le résultat, surtout sur le récit).
+- Enthousiasme durci à tort : règle émotion ≠ contrainte dans le prompt.
+- Bonus trop fort = filtre déguisé : bornes + vérification réelle qu'un territoire
+  hors zone nettement meilleur remonte.
+
+### Formulations de test (à vérifier en réel)
+
+| Formulation | Attendu |
+|---|---|
+| « je veux vivre en Bretagne » | bretagne hard |
+| « j'aimerais bien vivre en Bretagne » | bretagne preferred |
+| « pourquoi pas la Bretagne » | bretagne inspiration |
+| « je suis ouvert au Sud-Ouest » | sud_ouest inspiration |
+| « la mer absolument, pourquoi pas le Sud-Ouest » | mer dure (nearSea) + sud_ouest inspiration |
+
+### Implémenté et vérifié (2026-06-01)
+
+- **Régions repliées dans les zones.** Plus de champ `region` séparé : les 13
+  régions administratives sont des jetons de zone (bretagne, occitanie…), même
+  machinerie et même gradient que les macro-zones. Une seule notion d'ancre.
+- **Tri sur score brut (non plafonné).** Le bonus souple départage même quand les
+  grandes villes saturent à 100 (sinon le n°1 d'une demande géographique nue
+  partait ailleurs). Le score affiché reste borné à 100.
+- **Étalement échelonné** (le point qui distingue vraiment les forces sur les 3
+  cartes affichées) :
+  - hard → 3 communes de la zone (filtre) ;
+  - preferred → 2 communes de la zone + 1 ouverture hors zone (zone dominante,
+    mais l'alternative reste visible) ;
+  - inspiration → n°1 incliné vers la zone par le bonus, puis diversité conservée.
+- **Bonus calés** : preferred +12, inspiration +4. Vérifiés en réel.
+- **Client simplifié** : la dé-dup géographique côté client (qui réinjectait de la
+  diversité et écrasait l'échelonné) est retirée ; le client prend les 3 premiers
+  dans l'ordre du moteur, désormais seul responsable de l'étalement.
+
+Vérifié en réel : les 5 formulations de test attribuent la bonne force ; les trois
+forces produisent trois affichages distincts (hard 3/3 zone, preferred 2 zone + 1
+ouverture, inspiration 1 zone + 2 diverses) ; le combo hard Sud + preferred
+Sud-Ouest borne au Sud puis fait dominer le Sud-Ouest avec une ouverture sudiste ;
+la synthèse présente l'orientation souple comme un penchant, jamais comme une
+frontière.
+
+À noter pour plus tard : le gradient pourrait s'étendre à `nearSea` / `nearPlace`
+(« idéalement près de Lyon »), non fait en V1.
+
 ## Catégories futures notées (non implémentées)
 
 À instruire ensuite, par ordre de valeur pressentie :
 
-1. **Gradient de force d'ancre** (dure / préférée / inspiration) : aujourd'hui
-   binaire (filtre si présente, sinon rien). Manque une ancre « souple » qui
-   oriente sans éliminer. Demande un mécanisme de score de zone, pas seulement un
-   filtre.
+1. **Montagne générique sans nom** (« à la montagne », « en altitude ») : pas de
+   champ altitude/relief dans l'index. Aujourd'hui seuls les massifs nommés sont
+   gérés (par département). Piste cheap : « montagne » = union des massifs nommés.
 2. **Ancres relationnelles** (« à 2 h de Paris », « accessible depuis Lyon ») :
    contrainte de temps de trajet, pas de distance à vol d'oiseau. Trou de données
-   majeur (ni isochrones ni temps de trajet dans l'index).
-3. **Montagne générique sans nom** (« à la montagne », « en altitude ») : pas de
-   champ altitude/relief dans l'index. Aujourd'hui seuls les massifs nommés sont
-   gérés (par département).
-4. **Ancres relatives / directionnelles** (« plus au sud », « me rapprocher ») :
+   majeur (ni isochrones ni temps de trajet dans l'index). Reporté.
+3. **Ancres relatives / directionnelles** (« plus au sud », « me rapprocher ») :
    nécessitent la résidence de l'utilisateur, absente du comparateur anonyme.
+   Reporté.
