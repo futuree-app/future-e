@@ -842,23 +842,10 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
                     </p>
                   )}
 
-                  {/* Logement : une phrase de niveau de prix relatif, NARRATIVE,
-                      hors classement. Agrégée si achat et location concordent.
-                      Silence si niveau moyen ou achat indisponible. */}
-                  {r.logement && (
-                    <p className="mt-3 text-[12px] leading-[1.5] text-label/55">
-                      Logement : {r.logement}
-                    </p>
-                  )}
-
-                  {/* Littoral : signal NARRATIF, hors classement, affiché seulement
-                      sur intention littorale (le moteur ne le renseigne que dans ce cas).
-                      Lucidité « monde qui change », détail au rapport. */}
-                  {r.littoral && (
-                    <p className="mt-3 text-[12px] leading-[1.5] text-info/75">
-                      Littoral : {r.littoral}
-                    </p>
-                  )}
+                  {/* Logement et littoral : NE PAS afficher sur les cartes (doctrine
+                      2026-06-02). Ils enrichissent la décision mais n'expliquent pas le
+                      classement. Conservés dans le payload de synthèse et le contexte
+                      AskFuture ; le détail vit au rapport. */}
 
                   <a
                     href={`/territoire/${r.insee}/debloquer?nom=${encodeURIComponent(r.nom)}&rank=${i + 1}&source=comparateur_vie`}

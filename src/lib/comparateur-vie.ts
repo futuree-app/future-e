@@ -836,7 +836,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
         // Littoral : renseigné seulement sur intention littorale + commune inscrite.
         littoral:
           littoralIndex?.get(String(c.insee).padStart(5, "0"))?.traitDeCote.concernee
-            ? "concernée par le recul du trait de côte"
+            ? "exposée à l'érosion du littoral (la côte recule)"
             : null,
         metrics: {
           distance_cote_km: c.distance_cote_km,

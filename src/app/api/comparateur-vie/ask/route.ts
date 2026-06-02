@@ -47,6 +47,7 @@ type Territoire = {
   compromis: string | null;
   pression_eco?: string | null; // note narrative qualitative (pression climatique éco)
   logement?: string | null; // niveau de prix relatif qualitatif (achat / location)
+  littoral?: string | null; // signal recul du trait de côte (binaire, sans vitesse)
 };
 
 type Body = {
@@ -152,6 +153,13 @@ sans chiffre, jamais le mot "abordable" ni un jugement d'accessibilité (vous ne
 connaissez pas le budget du lecteur), jamais un verdict. Si la note est absente,
 ne l'inventez pas (l'absence de donnée d'achat n'est pas un marché "moyen").
 
+SI UNE NOTE "littoral" EST DONNÉE POUR UN TERRITOIRE
+Elle signale que la commune est exposée à l'érosion du littoral (la côte recule). N'en
+parlez QUE si la question porte sur le littoral, la mer, la côte, l'érosion ou
+l'exposition côtière. Parlez d'ÉROSION en langage clair, pas de "recul du trait de
+côte" ni de la loi ; sobre, jamais alarmiste, aucune vitesse ni chiffre (le détail vit
+au rapport). Si la note est absente, ne l'inventez pas.
+
 SI LA QUESTION SORT DU SUJET futur•e
 Prix de l'immobilier, écoles, vie nocturne, politique : ramenez brièvement vers ce
 que le comparateur éclaire. La vitalité du bassin d'emploi est, elle, pesée par le
@@ -186,6 +194,7 @@ function buildContextBlock(ctx: NonNullable<Body["context"]>, focusRang: number 
     compromis: t.compromis ?? null,
     pression_climatique_economie: t.pression_eco ?? null,
     logement: t.logement ?? null,
+    littoral: t.littoral ?? null,
   }));
 
   const payload = {

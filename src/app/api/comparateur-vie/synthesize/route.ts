@@ -149,11 +149,11 @@ un jugement d'accessibilité (on ne sait pas le budget du lecteur), jamais un ve
 Si le champ est absent ou nul, n'en parlez pas (notamment : l'absence de donnée
 d'achat en Alsace-Moselle n'est pas un marché "moyen", ne l'interprétez pas).
 
-Si un champ "littoral" est fourni pour un territoire, vous pouvez le mentionner UNE
-fois, comme une lucidité utile à un projet de vie sur la côte, jamais comme une
-alarme. La commune est inscrite au titre du recul du trait de côte (loi Climat et
-Résilience) : dites-le sobrement, sans dramatiser, sans parler de "menace" ni de
-commune "condamnée". Ne déduisez jamais ce statut vous-même ; si le champ est absent
+Si un champ "littoral" est fourni pour un territoire, vous pouvez l'évoquer UNE fois,
+en LANGAGE CLAIR : la commune est exposée à l'ÉROSION du littoral (la côte y recule).
+N'employez JAMAIS le jargon "inscrite au titre du recul du trait de côte" et ne citez
+pas la loi : parlez simplement d'érosion côtière, sobrement, jamais comme une alarme,
+sans "menace" ni commune "condamnée", sans vitesse ni chiffre. Si le champ est absent
 ou nul, n'en parlez pas.`;
 
 type Body = {
