@@ -36,6 +36,22 @@ const EXAMPLES = [
   "Un climat doux et un bon accès aux médecins",
 ];
 
+// Placeholder tournant du champ libre (au repos, champ vide). Discipline produit :
+// chaque phrase est plus riche que le moteur MAIS chaque morceau est couvert par un
+// vrai signal (vérifié via la route de parse, 2026-06-02). On n'affiche jamais un
+// exemple qui reposerait sur un signal absent (prix, tempête, maladies émergentes).
+const PLACEHOLDER_PHRASES = [
+  "Fuir les canicules sans quitter le Sud-Ouest, avec un coin de nature et des médecins à proximité.",
+  "Vivre près de la Méditerranée, à l'écart des secteurs qui brûlent l'été, dans une ville encore vivante.",
+  "Préparer ma retraite sur la côte atlantique, au calme, avec un bon accès aux soins et aux commerces.",
+  "Élever un enfant loin de l'agriculture intensive et de l'air pollué, dans une commune entourée de nature.",
+  "Une ville où l'on pourra encore dormir la nuit pendant les canicules, et où l'eau ne manquera pas l'été.",
+  "Près de Pau, au pied des Pyrénées, avec un hôpital, des commerces et de la nature à portée.",
+  "Un village de montagne qui reste vivant, avec un médecin et des commerces, à l'abri des fortes chaleurs.",
+  "Trouver du vert au quotidien sans m'éloigner des services, dans un cadre calme mais habitable.",
+  "Dans le Grand Ouest, à l'abri des pluies qui inondent, avec de la nature et une vraie vie de village.",
+];
+
 // Phrases d'attente pendant le calcul + la synthèse : plus légères et
 // rassurantes qu'un simple « analyse en cours », honnêtes sur ce qui se passe.
 const WAITING_PHRASES = [
@@ -104,6 +120,7 @@ export function OuVivreClient() {
   const [synthesis, setSynthesis] = useState("");
   const [synthesizing, setSynthesizing] = useState(false);
   const [phraseIdx, setPhraseIdx] = useState(0);
+  const [typedPlaceholder, setTypedPlaceholder] = useState("");
 
   // AskFuture comparateur
   const [askMessages, setAskMessages] = useState<AskMessage[]>([]);
@@ -414,6 +431,46 @@ export function OuVivreClient() {
   }, [rotating]);
   const waitingPhrase = WAITING_PHRASES[phraseIdx % WAITING_PHRASES.length];
 
+  // Placeholder « machine à écrire » : le curseur tape une phrase, marque une pause,
+  // l'efface, puis passe à la suivante. Seulement au repos et champ vide, pour ne
+  // jamais distraire pendant la frappe ou l'affichage des résultats.
+  const rotatingPlaceholder = phase === "idle" && text.length === 0;
+  useEffect(() => {
+    if (!rotatingPlaceholder) return;
+    let phraseI = 0;
+    let charI = 0;
+    let mode: "typing" | "holding" | "deleting" = "typing";
+    let timer: ReturnType<typeof setTimeout>;
+    const step = () => {
+      const full = PLACEHOLDER_PHRASES[phraseI % PLACEHOLDER_PHRASES.length];
+      if (mode === "typing") {
+        charI++;
+        setTypedPlaceholder(full.slice(0, charI));
+        if (charI >= full.length) {
+          mode = "holding";
+          timer = setTimeout(step, 2600); // pause lecture sur la phrase complète
+          return;
+        }
+        timer = setTimeout(step, 34 + (full[charI - 1] === " " ? 30 : 0));
+      } else if (mode === "holding") {
+        mode = "deleting";
+        timer = setTimeout(step, 40);
+      } else {
+        charI--;
+        setTypedPlaceholder(full.slice(0, Math.max(0, charI)));
+        if (charI <= 0) {
+          phraseI++;
+          mode = "typing";
+          timer = setTimeout(step, 420); // courte respiration avant la phrase suivante
+          return;
+        }
+        timer = setTimeout(step, 16); // effacement plus rapide que la frappe
+      }
+    };
+    timer = setTimeout(step, 500);
+    return () => clearTimeout(timer);
+  }, [rotatingPlaceholder]);
+
   return (
     <div className="pt-16">
       {/* ── Hero ── */}
@@ -445,7 +502,7 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
           }}
           rows={4}
           maxLength={2000}
-          placeholder="Nous cherchons un endroit plus frais l'été, proche de la mer sans y être collés, pour élever un enfant dans un environnement sain…"
+          placeholder={rotatingPlaceholder ? `${typedPlaceholder}▌` : ""}
           className="w-full resize-none bg-transparent text-[16px] leading-[1.7] text-label placeholder:text-ghost outline-none"
           style={{ fontFamily: "'Instrument Sans', sans-serif" }}
         />
