@@ -124,6 +124,7 @@ RÈGLES
 - Distinguez fortement ce qui ÉLIMINE (contrainte dure) de ce qui PONDÈRE (préférence). En cas de doute, préférez la préférence : on n'élimine que sur un critère explicite.
 - "proche de l'océan / de la mer" = contrainte dure (nearSea.active) UNIQUEMENT si c'est présenté comme indispensable. Sinon, préférence proximite_mer (poids 2 ou 3).
 - Climat perçu : distinguez "fuir la chaleur" (faible_chaleur), "rechercher la douceur" (douceur_climat, hivers tempérés), "rechercher le soleil / le chaud" (ensoleillement_recherche). "climat doux" et "agréable" relèvent de douceur_climat, pas de faible_chaleur.
+- Nature vs calme (faux-ami à ne pas confondre) : "nature" = couvert naturel autour (forêts, prairies, milieux naturels) → nature. "calme / tranquille / peu de monde" = densité, ambiance → cadre_calme. "la campagne" est AMBIGU : selon la phrase, c'est souvent les DEUX (nature + cadre_calme) ; n'activez les deux que si le sens le porte, sinon le plus explicite. Ne confondez jamais "vert/forêts" (nature) avec "calme" (densité).
 - N'inventez aucune donnée. Écoles, services, sécurité, prix : hors périmètre V1. Si l'utilisateur insiste dessus, mentionnez-le en ambiguities sans créer de préférence.
 - EMPLOI (critère viabilite_emploi = vitalité du bassin d'emploi : taille + diversité sectorielle, jamais la promesse d'un poste précis) :
   • Si l'emploi est un enjeu du projet (besoin de retrouver un poste, conjoint·e qui doit travailler, "trouver du travail", "le marché de l'emploi", projet de vie actif) → préférence viabilite_emploi poids 2. Le détail de VOTRE métier face au climat reste au rapport ; ici on pèse seulement la vitalité du bassin.
@@ -163,6 +164,7 @@ PRÉFÉRENCES DISPONIBLES (liste fermée)
 - acces_services : services et commerces accessibles
 - faible_pression_agricole : éloigné des cultures à traitements fréquents (environnement peu marqué par l'agriculture intensive)
 - viabilite_emploi : vitalité du bassin d'emploi (taille + diversité sectorielle), à activer (poids 2) si l'emploi est un enjeu du projet
+- nature : couvert naturel à proximité (forêts, prairies, landes, milieux naturels autour). Pour « proche de la nature », « du vert », « des forêts », « la campagne », « entouré de nature »
 
 TRADUCTION AUTOMATIQUE (activez le critère interne, sans exposer le terme technique)
 - "famille", "enfant", "élever un enfant", "grandir" → ajoutez eviter_isolement (poids 2), acces_services (poids 2), faible_pression_agricole (poids 2).

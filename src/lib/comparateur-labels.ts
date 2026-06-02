@@ -24,6 +24,7 @@ export const PREFERENCE_LABELS: Record<string, string> = {
   acces_services: "des services du quotidien accessibles",
   faible_pression_agricole: "un environnement peu marqué par l'agriculture intensive",
   viabilite_emploi: "un bassin d'emploi dynamique",
+  nature: "des espaces naturels à proximité",
 };
 
 // Interprétations visibles (audit sémantique, cf. AUDIT_SEMANTIQUE_COMPARATEUR.md).
@@ -37,6 +38,9 @@ export const PREFERENCE_INTERPRETATIONS: Record<string, string | null> = {
   ensoleillement_recherche: "plus chaud et plus sec",
   proximite_mer: "accès rapide à la côte",
   eviter_isolement: "commune assez peuplée pour une vie locale",
+  // « à proximité » assumé (on mesure le couvert autour, pas dans la commune). Jamais
+  // « préservé / sauvage / biodiversité », qu'on ne mesure pas (cf. NATURE_TERRITORIAL.md).
+  nature: "forêts, prairies et milieux naturels autour",
   // self-évidents (le mot = la mesure) : pas de glose
   faible_chaleur: null,
   faible_secheresse: null,

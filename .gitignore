@@ -70,3 +70,6 @@ data/source/_probe_ze.mjs
 
 # Caches bruts logement (DVF ~420 Mo + ANIL) — non versionnés ; le dérivé vit dans l'index
 data/cache-logement/
+
+# Cache brut nature (OSO 2023 ~737 Mo + contours) — non versionné ; le dérivé vit dans l'index
+data/cache-nature/

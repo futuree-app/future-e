@@ -47,6 +47,9 @@ export const PREFERENCE_KEYS = [
   "acces_soins",              // accès aux médecins généralistes (APL)
   "acces_services",           // services/commerces accessibles
   "faible_pression_agricole", // éloigné des cultures à traitements fréquents (pression, pas exposition)
+  // Caractère naturel à proximité (OSO 2023, couvert naturel élargi dans 15 km).
+  // « perçu comme naturel », pas biodiversité ni wilderness. cf. NATURE_TERRITORIAL.md.
+  "nature",
 ] as const;
 export type PreferenceKey = (typeof PREFERENCE_KEYS)[number];
 
@@ -199,6 +202,14 @@ type IndexCommune = {
   // Pression climatique sur l'économie locale (NARRATIF, hors score) : un secteur
   // sensible dont l'économie dépend, exposé à un aléa. null = faible (aucune note).
   pression_eco?: { palier: "moderee" | "marquee"; secteur: string; alea: string } | null;
+  // Caractère naturel (cf. scripts/populate-nature.py, OSO 2023). score = percentile
+  // national du rayon 15 km (pour le moteur) ; brut_pct + composition pour le rapport.
+  nature?: {
+    score: number; // 0-100, percentile national du couvert naturel élargi dans 15 km
+    brut_pct: number; // couvert naturel élargi DANS la commune
+    radius_pct: number | null;
+    composition: Record<string, number>;
+  } | null;
   // Logement (cf. scripts/populate-logement.mjs). Niveaux relatifs en paliers ;
   // médianes/maille/fiabilité conservées pour le RAPPORT, jamais exposées au gate.
   logement?: {
@@ -506,6 +517,9 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
     case "viabilite_emploi":
       // taille (courbe saturante) + diversité (entropie A38), maille ZE héritée.
       return c.emploi == null ? null : Math.round(0.6 * c.emploi.taille + 0.4 * c.emploi.diversite);
+    case "nature":
+      // percentile national du couvert naturel élargi dans 15 km (cf. populate-nature.py).
+      return c.nature?.score ?? null;
     default:
       return null;
   }
@@ -525,6 +539,9 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   acces_soins: "bon accès aux médecins",
   acces_services: "services et commerces à proximité",
   faible_pression_agricole: "loin des cultures à traitements fréquents",
+  // « à proximité » assumé : on mesure le couvert naturel autour, pas dans la commune.
+  // Jamais « commune naturelle / préservée / sauvage / biodiversité » (cf. doctrine).
+  nature: "forêts et espaces naturels à proximité",
   // « Vaste » est gradué sur la taille RÉELLE de la ZE (effectif salarié absolu),
   // pas sur le percentile saturé : le mot ne sort que là où il est mérité. La
   // diversité (entropie A38) est, elle, toujours défendable.
@@ -548,6 +565,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   acces_services: "services parfois éloignés",
   faible_pression_agricole: "environnement agricole à traitements fréquents à proximité",
   viabilite_emploi: "bassin d'emploi étroit ou peu diversifié",
+  nature: "peu d'espaces naturels à proximité",
 };
 function reasonText(key: PreferenceKey, c: IndexCommune): string {
   const r = REASON_POS[key];
@@ -633,7 +651,9 @@ function passesHard(
   zoneDepts: Set<string> | null,
   excludeDepts: Set<string>,
 ): boolean {
-  if (c.population != null && c.population < POP_FLOOR) return false;
+  // Population nulle = commune fantôme/donnée manquante : exclue comme sous le plancher
+  // (sinon le critère nature pourrait faire remonter des communes quasi inhabitées).
+  if (c.population == null || c.population < POP_FLOOR) return false;
   if (hc.departements?.length && !hc.departements.includes(c.dept)) return false;
   // Ancres dures : zoneDepts (intersection des ancres hard) restreint le périmètre ;
   // excludeDepts (union des ancres négatives) le rogne. Les ancres souples ne
