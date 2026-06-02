@@ -10,6 +10,16 @@
   right: 24px;
   z-index: 100;
   font-family: var(--font-sans);
+  transition: opacity 0.18s ease;
+}
+
+/* Quand un drawer (MetricDrawer) est ouvert, on efface la barre fixe : elle
+   gênerait la lecture du drawer et ferait doublon avec son CTA « Poser une
+   question ». Le mount inline (dans le flux de page) n'est pas concerné. */
+body[data-drawer-open] .ask-future-container:not(.ask-future-container--inline) {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
 }
 
 /* ── Trigger (état fermé) ────────────────────────────────────────────────── */

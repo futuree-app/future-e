@@ -47,9 +47,13 @@ export function MetricDrawer({
     window.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    // Signale l'ouverture globalement : la barre AskFuture fixe se masque tant
+    // qu'un drawer est ouvert (lecture non gênée, pas de doublon avec son CTA).
+    document.body.setAttribute("data-drawer-open", "true");
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
+      document.body.removeAttribute("data-drawer-open");
     };
   }, [detail, onClose]);
 
