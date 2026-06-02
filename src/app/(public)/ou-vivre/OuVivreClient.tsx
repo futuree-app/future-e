@@ -29,6 +29,29 @@ type AskMessage = { role: "user" | "assistant"; content: string };
 
 const FREE_ASK = 2;
 
+// Typographie FR robuste (y compris Safari, qui ignore text-wrap: pretty) : on lie
+// par une espace insécable les « petits mots » au mot suivant (une ligne ne doit
+// pas se terminer par « les », « leur », « et », « à »…) et la ponctuation haute
+// (: ; ! ? ») au mot précédent. Évite les coupures en plein milieu d'un groupe.
+const ORPHAN_WORDS = new Set([
+  "le", "la", "les", "un", "une", "des", "du", "de", "d", "à", "au", "aux", "et", "ou",
+  "en", "ce", "ces", "son", "sa", "ses", "leur", "leurs", "ma", "mon", "mes", "ta", "ton",
+  "tes", "notre", "votre", "nos", "vos", "par", "pour", "sur", "sans", "qui", "que", "qu",
+  "ne", "si", "l",
+]);
+const HIGH_PUNCT = new Set([":", ";", "!", "?", "»"]);
+function bindOrphans(text: string): string {
+  const parts = text.split(" ");
+  return parts
+    .map((w, i) => {
+      if (i === parts.length - 1) return w;
+      const bare = w.toLowerCase().replace(/[.,:;!?«»()]/g, "");
+      const bind = ORPHAN_WORDS.has(bare) || HIGH_PUNCT.has(parts[i + 1]);
+      return w + (bind ? " " : " ");
+    })
+    .join("");
+}
+
 const EXAMPLES = [
   "Fuir les canicules, rester dans le Sud",
   "La mer pas trop loin, un coin calme pour la retraite",
@@ -129,6 +152,7 @@ export function OuVivreClient() {
   const [askRemaining, setAskRemaining] = useState(FREE_ASK);
   const [askLimit, setAskLimit] = useState(false);
   const [routesNudge, setRoutesNudge] = useState(false);
+  const [askTyped, setAskTyped] = useState("");
 
   const runSeq = useRef(0); // garde-fou contre les réponses obsolètes (re-submit)
 
@@ -327,17 +351,50 @@ export function OuVivreClient() {
   // ── AskFuture comparateur ─────────────────────────────────────────────────
   const top = topCards(outcome?.results);
 
-  // Chips de questions suggérées : transforment « je dois inventer une question »
-  // en « tiens, ça m'intéresse, je clique ». La première est contextualisée sur
-  // le territoire n°1.
-  const askChips = top.length
-    ? [
-        `Pourquoi ${top[0].nom} ressort en premier ?`,
-        "Quel est le principal compromis ?",
-        "Pourquoi ce territoire plutôt qu'un autre ?",
-        "Qu'est-ce qui a le plus compté dans la sélection ?",
-      ]
-    : [];
+  // Chips suggérées (MAX 3, une seule ligne) : ancrées sur les vraies communes et
+  // signaux du classement, pas des questions génériques. Reflètent les arbitrages.
+  const askChips = (() => {
+    if (!top.length) return [];
+    const c0 = top[0].nom;
+    const c1 = top[1]?.nom;
+    const out: string[] = [
+      c1 ? `Pourquoi ${c0} plutôt que ${c1} ?` : `Pourquoi ${c0} ressort en premier ?`,
+    ];
+    const littoral = top.find((r) => r.littoral)?.nom;
+    if (littoral) out.push(`Le littoral est-il un sujet à ${littoral} ?`);
+    else if (exclLabels[0]) out.push(`Que vais-je gagner en quittant ${exclLabels[0]} ?`);
+    else out.push("Quels risques climatiques les séparent ?");
+    out.push("Qu'est-ce qui a vraiment pesé ?");
+    return out.slice(0, 3);
+  })();
+
+  // Pool du placeholder « machine à écrire » : donne envie de cliquer avant même
+  // d'avoir une question en tête, en montrant l'étendue du moteur (climat, littoral,
+  // nature/emploi, retraite, canicule…), templaté sur les communes réelles.
+  const askPlaceholders = (() => {
+    if (!top.length) return [];
+    const c0 = top[0].nom;
+    const c1 = top[1]?.nom;
+    const litt = top.find((r) => r.littoral)?.nom;
+    const keys = new Set((parsed?.preferences ?? []).map((p) => p.key));
+    const pool: string[] = [];
+    if (c1) pool.push(`Pourquoi ${c0} ressort devant ${c1} ?`);
+    pool.push("Que va changer le climat ici d'ici 2050 ?");
+    if (litt) pool.push(`L'érosion du littoral est-elle un sujet à ${litt} ?`);
+    if (keys.has("nature") && keys.has("viabilite_emploi"))
+      pool.push("Où trouver plus de nature sans perdre l'accès à l'emploi ?");
+    pool.push("Laquelle est la plus adaptée pour une retraite dans 20 ans ?");
+    pool.push("Quelle commune restera la plus vivable pendant les canicules ?");
+    pool.push("Pourquoi futur•e écarte des communes que j'avais en tête ?");
+    pool.push("Que montrent les données que je ne vois pas encore ?");
+    return pool;
+  })();
+  const askPlaceholdersRef = useRef<string[]>(askPlaceholders);
+  askPlaceholdersRef.current = askPlaceholders;
+  const askTopKey = top.map((t) => t.insee).join(",");
+  // Rotation tant que le champ est vierge et qu'aucune conversation n'a démarré.
+  const askRotating =
+    top.length > 0 && !askLimit && askInput.length === 0 && askMessages.length === 0;
 
   const sendAsk = useCallback(async (preset?: string) => {
     const question = (preset ?? askInput).trim();
@@ -473,6 +530,47 @@ export function OuVivreClient() {
     return () => clearTimeout(timer);
   }, [rotatingPlaceholder]);
 
+  // Machine à écrire du champ AskFuture : rotation des questions inspirantes
+  // (ancrées sur les résultats), tant que le champ est vierge et qu'aucune
+  // conversation n'a démarré. Redémarre quand le jeu de résultats change.
+  useEffect(() => {
+    if (!askRotating) return;
+    const pool = askPlaceholdersRef.current;
+    if (!pool.length) return;
+    let phraseI = 0;
+    let charI = 0;
+    let mode: "typing" | "holding" | "deleting" = "typing";
+    let timer: ReturnType<typeof setTimeout>;
+    const step = () => {
+      const full = pool[phraseI % pool.length];
+      if (mode === "typing") {
+        charI++;
+        setAskTyped(full.slice(0, charI));
+        if (charI >= full.length) {
+          mode = "holding";
+          timer = setTimeout(step, 2400);
+          return;
+        }
+        timer = setTimeout(step, 34 + (full[charI - 1] === " " ? 28 : 0));
+      } else if (mode === "holding") {
+        mode = "deleting";
+        timer = setTimeout(step, 40);
+      } else {
+        charI--;
+        setAskTyped(full.slice(0, Math.max(0, charI)));
+        if (charI <= 0) {
+          phraseI++;
+          mode = "typing";
+          timer = setTimeout(step, 380);
+          return;
+        }
+        timer = setTimeout(step, 16);
+      }
+    };
+    timer = setTimeout(step, 400);
+    return () => clearTimeout(timer);
+  }, [askRotating, askTopKey]);
+
   return (
     <div className="pt-16">
       {/* ── Hero ── */}
@@ -487,10 +585,10 @@ export function OuVivreClient() {
           Découvrez où vivre,{" "}
           <span className="italic text-accent">selon ce qui compte pour vous.</span>
         </h1>
-        <p className="mt-5 max-w-[640px] text-[17px] leading-[1.72] text-muted text-balance">
-          Changement climatique, pollution, accès aux soins, qualité de vie...
-
-futur•e vous aide à identifier les territoires les plus compatibles avec votre situation, vos projets et les compromis qu&apos;ils impliquent.
+        <p className="mt-5 text-[17px] leading-[1.72] text-muted text-pretty">
+          {bindOrphans(
+            "Changement climatique, pollution, accès aux soins, qualité de vie... futur•e vous aide à identifier les territoires les plus compatibles avec votre situation, vos projets et les compromis qu'ils impliquent.",
+          )}
         </p>
       </header>
 
@@ -868,6 +966,14 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
               ))}
             </div>
 
+            {/* Promesse rapport : au niveau des CTA « Découvrir », on dit ce que le
+                rapport apporte au-delà du classement (vend la décision, pas du contenu). */}
+            <p className="mt-6 text-[13.5px] leading-[1.65] text-muted text-pretty">
+              {bindOrphans(
+                "Le rapport complet révèle ce que les classements ne montrent pas : les compromis, les fragilités et les trajectoires de chaque territoire, pour passer d'une intuition à une décision éclairée.",
+              )}
+            </p>
+
             {/* Garde-fou wording : on rappelle, une fois, que ce signal ne dit pas
                 l'avenir du territoire (la capacité d'adaptation n'est pas mesurée). */}
             {top.some((r) => r.pressionEco) && (
@@ -880,41 +986,38 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
 
           </div>
 
-          {/* AskFuture comparateur — transition + guide de lecture */}
+          {/* Bloc 1 — comprendre les arbitrages derrière le classement (pas « une IA ») */}
           <section className="mt-12 glass rounded-2xl p-7">
             <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">
-              AskFuture · Guide de lecture
+              Lire les arbitrages
             </p>
             <h2
               className="font-normal text-[22px] text-label mb-1.5"
               style={{ fontFamily: "'Instrument Serif', serif" }}
             >
-              Vous hésitez encore ?
+              Pourquoi ces territoires ressortent ?
             </h2>
-            <p className="text-[14px] text-muted leading-[1.65] mb-5 max-w-[600px]">
-              {askRemaining > 0 ? (
-                <>
-                  AskFuture explique le raisonnement derrière ces résultats et les compromis
-                  identifiés.{" "}
-                  <span className="text-ghost">
-                    {askRemaining} question{askRemaining > 1 ? "s" : ""}{" "}
-                    {askRemaining > 1 ? "gratuites" : "gratuite"}.
-                  </span>
-                </>
-              ) : (
-                "Pour aller plus loin, ouvrez le rapport d'un de ces territoires."
-              )}
+            <p className={`text-[14px] text-muted leading-[1.65] text-pretty ${askRemaining > 0 ? "mb-1.5" : "mb-5"}`}>
+              {askRemaining > 0
+                ? bindOrphans("Posez une question sur les territoires proposés, les compromis identifiés ou leur évolution future.")
+                : bindOrphans("Pour aller plus loin, ouvrez le rapport d'un de ces territoires.")}
             </p>
+            {askRemaining > 0 && (
+              <p className="text-[11px] text-ghost mb-5">
+                {askRemaining} question{askRemaining > 1 ? "s" : ""}{" "}
+                {askRemaining > 1 ? "gratuites" : "gratuite"}.
+              </p>
+            )}
 
             {/* Chips de questions suggérées */}
             {!askLimit && askChips.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-5">
+              <div className="flex flex-nowrap gap-2 mb-5 overflow-x-auto">
                 {askChips.map((q) => (
                   <button
                     key={q}
                     onClick={() => sendAsk(q)}
                     disabled={askLoading}
-                    className="text-left text-[12.5px] leading-snug text-muted hover:text-label border border-white/[0.12] hover:border-accent/[0.4] rounded-full px-3.5 py-1.5 transition-colors disabled:opacity-40"
+                    className="shrink-0 whitespace-nowrap text-left text-[12.5px] leading-snug text-muted hover:text-label border border-white/[0.12] hover:border-accent/[0.4] rounded-full px-3.5 py-1.5 transition-colors disabled:opacity-40"
                   >
                     {q}
                   </button>
@@ -954,8 +1057,7 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
             {askLimit ? (
               <div className="rounded-xl border border-accent/[0.25] bg-accent/[0.05] px-5 py-4">
                 <p className="text-[14px] leading-[1.6] text-label">
-                  Vous avez utilisé vos {FREE_ASK} questions. Pour aller plus loin, ouvrez le rapport
-                  d&apos;un de ces territoires : il répond avec les chiffres, les risques et les projections.
+                  {bindOrphans(`Vous avez utilisé vos ${FREE_ASK} questions gratuites. Le rapport complet d'un territoire prend le relais pour passer d'une intuition à une décision éclairée.`)}
                 </p>
               </div>
             ) : (
@@ -970,7 +1072,7 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
                     }
                   }}
                   rows={1}
-                  placeholder="Pourquoi ce territoire plutôt qu'un autre ?"
+                  placeholder={askRotating ? `${askTyped}▌` : "Posez votre question sur ces territoires…"}
                   className="flex-1 resize-none bg-white/[0.03] border border-white/[0.1] rounded-lg px-4 py-3 text-[14px] text-label placeholder:text-ghost outline-none focus:border-accent/[0.4]"
                   style={{ fontFamily: "'Instrument Sans', sans-serif" }}
                 />
@@ -993,16 +1095,16 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
             >
               <div>
                 <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-1.5">
-                  Décider
+                  Comparer
                 </p>
                 <h3
                   className="font-normal text-[21px] leading-[1.2] text-label"
                   style={{ fontFamily: "'Instrument Serif', serif" }}
                 >
-                  Vous hésitez entre les trois ?
+                  Mettre les territoires côte à côte.
                 </h3>
                 <p className="mt-1.5 text-[13px] leading-[1.6] text-muted max-w-[520px]">
-                  Comparez leurs points forts, leurs fragilités et leurs compromis pour
+                  Comparez leurs points forts, leurs fragilités et leurs trajectoires pour
                   identifier celui qui correspond le mieux à votre projet.
                 </p>
               </div>
