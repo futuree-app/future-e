@@ -20,6 +20,29 @@ Il reformule l’historique en séquences produit lisibles :
 
 ## Historique synthétique
 
+### 01/06/2026 — Comparateur « Où vivre » : gate sémantique, gloses visibles + réassurance moteur
+
+**Commits**
+- `71861a3` — feat(comparateur): gate sémantique, gloses visibles + réassurance moteur
+
+**Pages / modules touchés**
+- `src/lib/comparateur-labels.ts` — `PREFERENCE_INTERPRETATIONS` (table de gloses) + `preferencesToInterpreted()` : porte l'interprétation visible (glose) à côté de chaque libellé de critère. Pur affichage, aucun impact sur le score.
+- `src/app/(public)/ou-vivre/OuVivreClient.tsx` — au gate « ce que nous avons compris » : gloses affichées sous les puces (serif italique, connecteur `→`) pour les faux amis / polysémies (doux, calme, ensoleillé, proximité mer, vie locale) ; micro-réassurance réécrite (20+ indicateurs publics projetés à 2050, 34 000 communes) ; bouton principal « Lancer l'analyse » (au lieu de « C'est bien ça 👍 ») ; suppression du disclaimer périmètre (écoles/prix/métier) ; bouton « Découvrir ce territoire » allégé (police + centrage) ; phrase de chargement alignée sur 34 000 communes.
+
+**Impact utilisateur**
+- Le gate ne dit plus seulement « j'ai compris », il montre **comment** il a compris : chaque critère ambigu porte l'interprétation réelle du moteur (ex. « doux → hivers tempérés, étés sans excès »), ce qui désamorce les malentendus silencieux identifiés par l'audit sémantique.
+- Réassurance recentrée sur la profondeur (indicateurs + projection climatique 2050) plutôt que sur le seul volume de communes.
+- Aucun changement de score ni de classement.
+
+**Dépendances externes**
+- Aucune nouvelle variable d'env, aucune donnée nouvelle, aucune migration.
+
+**Notes**
+- Chantier issu de `AUDIT_SEMANTIQUE_COMPARATEUR.md` (recommandation n°1, « pédagogie au gate »). Spec : `docs/superpowers/specs/2026-06-01-gloses-visibles-hors-mesure-design.md`.
+- Volet « honnêteté hors-mesure » (champ `horsMesure` au parse pour nature / authentique / chaleureux) **non livré** dans ce lot, repoussé volontairement : on valide d'abord la pédagogie sur les critères déjà mesurés.
+
+---
+
 ### 28/05/2026 — Analytics PostHog : tracking complet — wizard, modules, feedback IA, horizon, checkout
 
 **Commits**
@@ -1435,3 +1458,168 @@ Pour chaque lot poussé :
 - Validé en réel : synthèse « famille/sain/océan » → miroir du projet + logique Bretagne vs Pays basque + compromis central nommé + clôture « la décision vous appartient ». Effet futur•e confirmé.
 
 **Reste** : enrichissement eau/cadmium/BASOL-SIS en prose (contrat prêt) ; page `/ou-vivre` ; instrumentation PostHog `life_comparator_*`.
+
+---
+
+### 31/05/2026 (soir) : Comparateur, endpoint AskFuture scellé + territoire actif de lecture
+
+**Commits** : `edfc953` (AskFuture comparateur scellé), `eb0b017` + `79e7dd6` (territoire actif, module Quartier).
+
+- `edfc953` : endpoint AskFuture du comparateur, guide de lecture scellé (ne reçoit que du qualitatif, firewall préservé).
+- `eb0b017` / `79e7dd6` (module territoire, hors comparateur) : notion de territoire actif de lecture, gating territoire-aware ; migration 12 appliquée, roadmap V2 multi-territoire notée.
+
+---
+
+### 01/06/2026 : Comparateur, parcours /ou-vivre + ancres géographiques + montagne par altitude
+
+**Commits** : `3c2194f` (ancres + parcours), `eaeb313` (gradient de force), `06eff64` (altitude), `30cfb99` (montagne générique).
+
+- **Parcours `/ou-vivre`** posé (`3c2194f`) : projet libre → reformulation/validation → résultats. Ancres géographiques V1.
+- **Ancres = LIEU, pas préférence** : le moteur possède la table jeton → départements (`geo-zones.ts`), le LLM ne fait que NOMMER (liste fermée de jetons : régions, macro-zones, façades, massifs). L'ancre définit l'espace de recherche ; les préférences ordonnent dedans. Plusieurs ancres dures = intersection. Chaque zone porte une `convention` affichée honnêtement.
+- **Gradient de force** (`eaeb313`) : hard (filtre), preferred (bonus fort), inspiration (bonus léger). Lu sur le MARQUEUR d'intensité, pas sur la zone (mention nue = hard). Polarité d'abord (« surtout pas le Sud » = exclusion).
+- **Altitude** ajoutée à l'index (`06eff64`, centroïde IGN, m NGF), base de la détection montagne.
+- **Montagne par altitude** (`30cfb99`) : `hardConstraints.montagne`, distinct des massifs nommés. Courbe de montagnosité (pivot 600 m). hard = filtre (≥ ~600 m), preferred/inspiration = bonus proportionnel. Intersection zone+montagne priorisée (« Sud-Ouest idéalement à la montagne » → Bagnères, pas Toulouse). À cette étape, « proche de la montagne » restait NON supporté (corrigé le même jour, voir entrée relief).
+
+---
+
+### 01/06/2026 : Comparateur, viabilité du bassin d'emploi (ZE2020 + Flores A38)
+
+**Commits** : `1d6016b` (données), `f9b38f9` (scoring), `60f15d9` (docs).
+
+- **Données** (`1d6016b`) : Flores A38 fin 2024 à la maille ZE2020 (évite le secret statistique du grain commune), hérité par commune. `taille` = courbe log saturante, `diversite` = entropie A38 étirée p5-p95. Caches `data/communes-emploi.json` (34 743) + `data/ze-emploi-na38.json` (306 ZE). Salarié uniquement (sous-estime agri/indépendants), limite assumée.
+- **Scoring** (`f9b38f9`) : clé `viabilite_emploi` (0,6·taille + 0,4·diversite). Modèle hybride : emploi signalé → préférence poids 2 ; hors-emploi (retraite, télétravail total) → `emploiHorsSujet`, jamais pénalisé ; non mentionné → partage du plancher de réalisme (isolement 0,5 + bassin 0,5), budget INCHANGÉ vs V1.
+- Le bassin est PESÉ, le métier précis reste au rapport. Firewall qualitatif préservé (« un bassin d'emploi dynamique »).
+
+---
+
+### 01/06/2026 : Comparateur, pression climatique sur l'économie locale (narratif, non scoré)
+
+**Commits** : `b3e73dc` (conception), `2691318` (feat), `3af5908` (docs).
+
+- Second signal économique, **NARRATIF et NON SCORÉ** (aucun impact sur le tri). Σ part_secteur(ZE) × sensibilité × aléa(pct commune), calculé au build (`pression_eco`), attaché après le scoring.
+- Couples V1 : agri+forêt × sécheresse/feu (feu réservé aux percentiles ≥ 80, pour ne pas étiqueter un vignoble), proxy tourisme estival × chaleur en plaine / tourisme montagne × neige en altitude. Neige = maillon faible assumé.
+- Seuil de dépendance 8 % (on ne flague que si le secteur sensible pèse vraiment). Paliers par percentiles, faible = aucune note.
+- **Garde-fous stricts** : jamais « résilience » ni « fragile » ni verdict ; toujours « dépendance » ; capacité d'adaptation non mesurée (note d'humilité unique). Transmis prudemment à synthèse + AskFuture.
+
+---
+
+### 01/06/2026 : Comparateur, audit sémantique + gloses visibles + gate sémantique
+
+**Commits** : `6d5e5be` (audit), `6cb2a5e` (conception), `71861a3` (gate).
+
+- **Audit sémantique** (`6d5e5be`, `AUDIT_SEMANTIQUE_COMPARATEUR.md`) : cartographie des mots dont le sens utilisateur diffère de ce que le moteur mesure. Quatre familles : A faux ami (doux = hiver océanique, pas Méditerranée), B polysémie (calme = densité), C hors-mesure donnée absente (nature), D non mesurable affectif (authentique). Le risque produit n'est plus « le moteur manque de données » mais « il répond silencieusement à un autre sens que celui voulu ».
+- **Gate sémantique livré** (`71861a3`) : gloses d'interprétation sous les puces de critère (serif italique, connecteur `→`), pour rendre explicite ce que le moteur entend. Réassurance recentrée (« 20+ indicateurs publics projetés à 2050, croisés sur 34 000 communes »). Bouton « Lancer l'analyse ». Retrait du disclaimer périmètre qui cassait le moment.
+- **Hors-mesure** (volet B) conçu mais non livré (afficher les notions sans critère sous « ce qui reste ouvert »), reporté pour valider d'abord la pédagogie sur les critères mesurés.
+
+---
+
+### 01/06/2026 : Comparateur, signature territoriale (image identitaire du lieu)
+
+**Commit** : `4c56923` feat(comparateur): signature territoriale, image identitaire du lieu
+(fait suite, le même jour, au gate sémantique `71861a3` : gloses visibles + réassurance moteur, non encore journalé)
+
+**Quoi** : une couche `signature: string[]` sur `MatchResult`, distincte des `reasons`. Les raisons justifient le score, la signature donne une IMAGE du territoire. Ordre fixe géographie, bassin d'emploi nommé, climat ou relief. Max 3, 100 % déterministe, mêmes tables que les filtres d'ancres. Affichée en ligne discrète sous « Région · dépt », au-dessus des raisons.
+- Géo : côte incarnée par région (« Côte bretonne », « Côte méditerranéenne ») si littoral ≤ 15 km, sinon massif (« Aux portes des Alpes », « Dans le Massif central ») si dept ∈ massif et altitude ≥ 200 m.
+- Bassin : « Bassin de X » via `data/ze-emploi-na38.json` (ZE2020, Flores A38), avec élision correcte (du / des / de la / d').
+- Climat/relief : maritime ou méditerranéen sur les côtes, « En altitude » en massif ≥ 600 m, sinon caractère hivernal si marqué (≤ 3 °C) ou doux (≥ 8 °C), sinon rien.
+
+**Règle de conception (la doctrine, plus importante que le correctif)** : un élément de signature doit être distinctif ET identitaire. Une chose par laquelle un humain décrit spontanément un territoire, pas une donnée vraie mais inerte affichée pour remplir un emplacement. « Altitude 286 m », « altitude modérée », « température moyenne X » sont réels mais ne racontent rien : c'est une fuite de donnée dans l'interface. La bande altitude 200 à 600 m a donc été retirée (elle ne sortait que là où le label massif portait déjà le relief : Grenoble, Clermont) ; seule la haute altitude reste, là où la montagne EST le lieu (Aurillac, Le Puy). Corollaire : une signature peut être courte, n'a pas besoin de trois éléments, on ne remplit jamais pour remplir. Limoges, « Bassin de Limoges », point.
+
+**Correctif lié** : la raison emploi « vaste » est graduée sur l'effectif salarié réel de la zone (seuil ~200 k), plus sur un percentile saturé. Grenoble oui, Brest/Cherbourg non.
+
+**Tracing** : `ze-emploi-na38.json` ajouté à `outputFileTracingIncludes` du endpoint `/api/comparateur-vie/match` (sinon introuvable en serverless).
+
+**Validé** sur panel réel (build OK + trace des signatures) : Limoges/Dijon courts, Clermont/Grenoble débarrassés du filler altitude, Aurillac/Le Puy gardent « En altitude », côtes Atlantique/Manche en « Climat maritime », Méditerranée en « Climat méditerranéen ».
+
+**Suite** : le doublon méditerranéen, le dédoublonnage du bassin et l'axe ville ont été tranchés et livrés dans le lot relief (entrée suivante).
+
+---
+
+### 01/06/2026 : Comparateur, « proche d'une montagne » (précalcul relief) + raffinements signature + firewall synthèse
+
+**Analyse produit (avant code).** Cas révélateur : « proche d'une montagne pour la randonnée », puis la synthèse conclut « aucun n'est à proximité d'un massif ». Le parse traduisait « proche d'une montagne » en NÉANT (non supporté, par conception), le moteur n'en tenait donc aucun compte, et la synthèse rationalisait l'oubli après coup. Asymétrie indéfendable : « à la montagne » et « près des Alpes » marchaient, « proche d'une montagne » disparaissait. Test des deux approximations possibles : l'union des départements massif fait remonter Nice/Toulouse/Strasbourg (préfectures de plaine ou de littoral d'un département classé massif) ; l'altitude propre rate Grenoble (214 m). Conclusion : vrai trou de données, comme « nature ». Choix d'aller direct au vrai correctif.
+
+**Précalcul relief** (`scripts/add-relief-proximite.mjs`). Pour chaque commune, `relief_proximite` (0–100) = altitude max dans 35 km, à partir des seules altitudes de l'index (aucune source externe). reliefMax et non densité (la densité avantage les Alpes, massif large, et pénalise les Pyrénées, chaîne étroite : Pau tomberait à 23). Validé : Grenoble 95, Pau 69, Tarbes 85, Annecy 84, Gap 100, Toulouse/Strasbourg/Limoges 0. Effet de bord assumé : Côte d'Azur ~66 (sommets proches), sous les vraies villes de montagne. Champ ajouté aux 34 788 communes, idempotent, documenté dans `meta`.
+
+**Moteur** : `hardConstraints.reliefProche` (gradient hard/preferred/inspiration), distinct de `montagne` (altitude propre). hard = filtre `relief_proximite ≥ 50` ; preferred/inspiration = bonus proportionnel. Montagne et relief sont le même axe (max, pas somme). End-to-end vérifié : projet « famille/nature/calme/air sain » sans reliefProche → Mont-de-Marsan (plaine) ; avec → Oloron-Sainte-Marie, Bagnères-de-Bigorre, Saint-Dié, Aurillac.
+
+**Parse** : « proche d'une montagne / au pied des montagnes / pour faire de la randonnée » → `reliefProche`, distinct de « à la montagne » (montagne) et des massifs nommés (zones). N'est plus jeté.
+
+**Gate, glose visible** : sous « Le périmètre recherché », puce « proche d'un massif » + glose `→ reliefs montagneux à proximité`. Doctrine tranchée : la glose dit le SENS retenu (interprétation utilisateur), jamais la MÉTHODE (l'estimation par l'altitude alentour reste hors écran). Pas de surpromesse d'accès aux sentiers.
+
+**Firewall synthèse** (`synthesize/route.ts`) : règle stricte « ne commentez que ce qui a été mesuré ». La synthèse ne peut plus affirmer ni nier une notion absente des signaux mesurés, même si le texte brut du projet la mentionne ; jamais « aucun n'est X » pour un X non mesuré. Tue la rationalisation a posteriori à la source.
+
+**Raffinements signature (lot groupé)** :
+- Bassin dédupliqué : « Bassin de X » seulement si X ≠ nom de la commune (« Bassin de Limoges » sur Limoges ne raconte rien, retiré).
+- Climat méditerranéen retiré du doublon : sur la côte med, « Côte méditerranéenne · … · Climat méditerranéen » répétait le mot ; remplacé par la facette vécue distinctive (« Hivers doux »). L'Atlantique garde « Climat maritime » (facette neuve).
+- Axe ville (repli quand ni côte ni massif) : « Grande ville » (≥ 100k) / « Ville moyenne » (30–100k) / « Petite ville » (10–30k), langage naturel (jamais « pôle urbain », jargon). Signatures vides : de 2,5 % à 0,3 %. Doctrine [[feedback_signature_identitaire]] : un élément doit raconter le lieu.
+
+**Règle de conception actée** : futur•e ne doit jamais affirmer ni nier une notion qu'il n'a pas réellement mesurée. Le gate rend l'interprétation visible, le firewall empêche la synthèse d'improviser, le précalcul comble le trou plutôt que de l'avouer quand la donnée le permet.
+
+**Reste / V2** : « proximité au relief » est aujourd'hui approchée par l'altitude alentour (centroïde, rayon circulaire, pas de versant ni d'accès route). Une vraie métrique d'accès au relief reste un raffinement V2. Logement €/m² (achat + location) : chantier données autonome à scoper séparément (DVF, loyers, granularité, qualité des sources).
+
+---
+
+### 01/06/2026 : Logement, conception (avant toute acquisition) + doctrine tranchée
+
+**Document** : `LOGEMENT_TERRITORIAL.md` (racine, jumeau de `PRESSION_CLIMATIQUE_ECONOMIE.md`). Conception only, aucun code, aucune donnée acquise.
+
+**Sources vérifiées (juin 2026)** :
+- Achat → **CEREMA DV3F** (indicateurs agrégés : prix médian €/m², volumes, accessibilité financière, taux de rotation ; mailles commune/EPCI/aire d'attraction/dept ; xlsx libre + API ; version DV3F 2025-1). Trou : exclut Alsace-Moselle (57/67/68) et Mayotte (livre foncier). DVF brut = repli, pas retenu (le CEREMA fait mieux le nettoyage).
+- Location → **Carte des loyers** (Ministère Transition écologique / ANIL ; loyer €/m² charges comprises modélisé depuis annonces leboncoin+SeLoger ; maille commune, France hors Mayotte ; appart T1-T2/T3+ et maison ; millésime 2025 ; drapeaux de fiabilité R²/n/intervalle ; imputation des petites communes). Limite : loyers d'ANNONCE, pas baux réels.
+
+**Doctrine tranchée par le porteur** :
+- **Logement non scoré, aucun impact sur le tri.** Un score logement universel reviendrait à décréter « moins cher = meilleur territoire », pénaliserait la désirabilité, combattrait les autres signaux et rouvrirait le biais social du revenu. Ce n'est pas la mission du comparateur.
+- Séparation produit clé : le **comparateur** répond à « **où vivre ?** », le **module logement** à « **puis-je réellement m'y installer ?** ».
+- **Module à trois couches** : niveau de prix, accessibilité, tension. Le comparateur ne reçoit que **deux notes narratives** (prix relatif, tension locative), statut identique à la pression climatique. Le reste vit dans le module et le rapport.
+- **Accessibilité CEREMA hors classement** (repose sur le revenu médian, exclu du moteur pour le biais social) : rapport / AskFuture / module seulement.
+- **Tension locative** = note complémentaire (« marché tendu / détendu »), pas un critère.
+- Achat et location toujours séparés. Maille : commune affichée, marché calculé (héritage commune → EPCI → aire d'attraction), comme l'emploi.
+
+**Porte V2 (notée, pas ouverte)** : abordabilité comme préférence **opt-in** (pesée seulement si formulée : « abordable », « budget serré »), dans la doctrine « on ne score que ce qui est formulé ». Décision distincte après épreuve du narratif ; faux ami « abordable » à trancher d'abord.
+
+**Restent ouvertes** (détails d'implémentation, au lancement du chantier) : affichage chiffre vs positionnement relatif ; traitement propre du trou Alsace-Moselle ; nom du module. Aucune acquisition ni implémentation tant que non lancé.
+
+---
+
+### 02/06/2026 : Comparateur, signal logement narratif non scoré (achat + location)
+
+**Commit** : `feat(comparateur): ajouter signal logement narratif non scoré`. Conception : `LOGEMENT_TERRITORIAL.md` (section « Implémenté V1 »).
+
+**Source tranchée par les faits (Phase 1 sur données réelles)** : Option B. Le CEREMA DV3F n'est pas automatisable pour un produit privé (Box manuel / API réservée acteurs publics), et son atout (accessibilité) étant hors comparateur, on perdait le pipeline maîtrisé pour rien. Donc **DVF auto-agrégé (achat) + Carte des loyers ANIL (location)**. CEREMA réservé au futur module.
+
+**Robustesse validée (crunch national, 34 788 communes, fenêtre 2021-2024)** : maison 74 % commune / 22 % EPCI / 0 % au-delà ; appartement 16 % / 78 % / 2 % (bascule EPCI en rural, normal) ; **4,6 % absent = Alsace-Moselle** (57/67/68, hors DVF). Le risque « inutilisable sur 20 000 communes » ne s'est pas matérialisé.
+
+**Implémenté** :
+- `scripts/populate-logement.mjs` : médian €/m² DVF (maison/appart, repli commune→EPCI→au-delà) + loyer €/m² ANIL, paliers par percentiles nationaux (déciles/tiers), patch du champ `logement` de l'index. Cache brut (~420 Mo) gitignoré, dérivé dans l'index, script rejouable.
+- Moteur : note `logement` qualitative attachée HORS score (comme `pression_eco`), zéro impact ranking.
+- **Signal comparateur** : une phrase agrégée (« marché parmi les plus chers / plus cher / moins cher que la moyenne… ») quand achat et location concordent, détail (« achat moins cher, loyers plus élevés ») seulement en divergence, un seul axe si l'autre est silencieux, rien si tout moyen. **Jamais « abordable »** (= accessibilité, module) **ni « tendu »** (= signal tension à venir). Zéro chiffre (réservé au rapport).
+- **Alsace-Moselle** : achat silencieux au comparateur, « non disponible » au rapport, jamais déguisé en « moyen ».
+- **Synthèse + AskFuture** : reçoivent le libellé qualitatif, règle stricte (sens tel quel, pas de chiffre, pas d'« abordable », pas de verdict).
+- **Garantie anti-carte-vide** : une carte sans raison au-dessus du seuil affiche ses 1-2 meilleurs aspects relatifs (plus de carte « pas finie »).
+
+**Vérifié** : build OK ; échantillon réel (Bordeaux/Nice « marché parmi les plus chers », Grenoble « plus cher que la moyenne », Limoges silence, Strasbourg loyers seuls, Saint-Véran achat seul) ; libellés agrégés et cas de divergence cohérents.
+
+**Reste** : tension locative (note à venir : zonage tendu + vacance) ; accessibilité (module logement, CEREMA) ; abordabilité opt-in (porte V2). `DONNEES_CANDIDATES_CEREMA.md` (pistes CEREMA explorées) gardé local, non committé.
+
+---
+
+### 02/06/2026 : Comparateur, critère nature opt-in (couvert naturel OSO à proximité)
+
+**Commits** : `feat(comparateur): ajouter critère nature opt-in par couvert OSO à proximité` + `docs(comparateur)` avec `NATURE_TERRITORIAL.md` (doctrine V1 figée).
+
+**Quoi** : nouveau critère SCORÉ **opt-in** `nature` = caractère naturel à proximité, pesé seulement si l'utilisateur le formule (aucun effet sinon). Comble le trou « nature » de l'audit sémantique. Premier critère bâti pour combler un trou sémantique.
+
+**Source + méthode** : **OSO 2023** (CESBIO/Théia, raster 10 m), calcul zonal par commune (`scripts/populate-nature.py`, Python + rasterio, **offline** ; env. géospatial requis). Définition **élargie « perçu comme naturel »** = couvert naturel strict + **prairies** (forêts, landes, garrigue, pelouses, marais, dunes, eaux + prairies extensives) ; **exclut** grandes cultures intensives, vignes, vergers. Maille = **rayon 15 km** pondéré surface (pas la commune : Grenoble 19 % intra → 79 % rayon). Score = **percentile national du rayon** (ranking) ; `brut_pct` + `composition` pour le rapport.
+
+**Décisions tranchées sur données réelles** : OSO vs CLC (OSO récent + finesse bocage : Vire 11 % forêt OSO vs 2 % CLC à 25 ha) ; élargi vs strict (l'Aubrac tombe à 11 % en strict OSO, classé « prairies », 100 % en élargi → prairies incluses) ; vignes/vergers exclus (Meursault 18 % → 65 % si inclus ; nature ≠ paysage agricole). **Limite assumée** : prairies intensives lisent « naturel » ; on mesure un PAYSAGE perçu naturel, pas la biodiversité.
+
+**Glose stricte** : « forêts, prairies et milieux naturels autour ». Jamais « biodiversité / sauvage / préservé » (non mesurés).
+
+**Fix global** : `passesHard` exclut désormais les communes à **population nulle** (14, ex. Conques-en-Rouergue) pour TOUTES les requêtes, pour ne pas faire remonter de communes fantômes via nature.
+
+**Vérifié sur le moteur** : build OK ; nature seule → Bagnères-de-Bigorre / Bourg-d'Oisans / Digne (min pop 3 063, aucune commune fantôme) ; **nature + emploi → Annecy en tête** (sweet-spot naturel-vivant) ; nature + soins, nature + services cohérents. Score percentile discriminant (Coulon 9, Outarville 0, Grenoble 73, Annecy 79, Nasbinals 99).
+
+**Cache** : OSO 2023 (737 Mo) + contours gitignorés (`data/cache-nature/`) ; dérivé dans l'index ; script rejouable.
+
+**Reste / V2** : effet rayon qui relève les vignobles via leur environnement boisé (accepté) ; tension future avec un signal mobilité ; classes spécialisées (vignes/vergers/pastoral) réversibles si tests utilisateurs.
