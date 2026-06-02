@@ -9,6 +9,7 @@ import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
 import { QuartierAside } from "@/components/report/QuartierClimatData";
+import LittoralModule from "@/components/report/LittoralModule";
 import QuartierSynthesis, {
   type WorkbookQuartier,
 } from "@/components/report/QuartierSynthesis";
@@ -40,6 +41,7 @@ export default async function RapportQuartierPage() {
   const enrichment = inseeCode ? await gatherCommuneEnrichment(inseeCode) : null;
   const georisques = enrichment?.georisques ?? null;
   const catnat = enrichment?.catnat ?? null;
+  const littoral = enrichment?.littoral ?? null;
 
   const scenarios = enrichment?.drias?.commune.s ?? null;
   const territoire = enrichment?.ademe?.commune.territoire ?? null;
@@ -131,6 +133,12 @@ export default async function RapportQuartierPage() {
           </h2>
           <QuartierAside communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} />
         </section>
+
+        {littoral && (
+          <section className="pt-14">
+            <LittoralModule summary={littoral} communeName={displayName} />
+          </section>
+        )}
 
         {/* Une question ? — AskFuture inline (uniquement pour comptes payants) :
             capte la curiosité à chaud, juste après la lecture */}
