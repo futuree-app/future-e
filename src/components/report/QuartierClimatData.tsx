@@ -291,37 +291,97 @@ function buildFactors(
     });
   }
 
-  // Carte Littoral (recul du trait de côte) — ajoutée seulement pour les communes
-  // inscrites sur la liste officielle (loi Climat et Résilience). Enrichissement
-  // spécialisé et conditionnel : même format carte → drawer que les autres indicateurs,
-  // pas un bloc à part. Narratif, hors score.
-  if (littoral?.traitDeCote.concernee) {
+  // Carte Littoral (recul du trait de côte) — Niveau 4 de la doctrine littoral :
+  // c'est ICI que vit l'intensité (le rapport démontre), pas sur les cartes du
+  // comparateur. Affichée si la commune a une donnée d'érosion (Cerema, couverture
+  // nationale) OU est inscrite loi Climat et Résilience. Le drawer mène par les
+  // OBSERVATIONS (ampleur, recul max, période) puis les IMPLICATIONS projet de vie.
+  if (littoral && (littoral.erosion || littoral.traitDeCote.concernee)) {
+    const e = littoral.erosion;
+    const CLASSE_LABEL: Record<string, string> = {
+      faible: "Érosion faible",
+      "modéré": "Érosion modérée",
+      "marqué": "Érosion marquée",
+      "très marqué": "Érosion très marquée",
+    };
+    const CLASSE_FEM: Record<string, string> = {
+      faible: "faible",
+      "modéré": "modérée",
+      "marqué": "marquée",
+      "très marqué": "très marquée",
+    };
+    const fr1 = (n: number) => Math.abs(n).toLocaleString("fr-FR", { maximumFractionDigits: 1 });
     const decretDate = littoral.traitDeCote.decret?.debut
       ? formatFrDate(littoral.traitDeCote.decret.debut)
       : null;
+
+    // Label de carte + headline du drawer
+    let cardVal: string;
+    let headline: string;
+    if (e && e.amenage) {
+      cardVal = "Littoral aménagé";
+      headline = "Littoral fortement aménagé";
+    } else if (e && e.classe) {
+      cardVal = CLASSE_LABEL[e.classe];
+      headline = CLASSE_LABEL[e.classe];
+    } else {
+      cardVal = "Exposée à l'érosion";
+      headline = "Exposée à l'érosion du littoral";
+    }
+
+    // « Ce que montrent les observations » (seulement si donnée d'érosion)
+    const obs: { label: string; value: string }[] = [];
+    if (e) {
+      // % d'ampleur seulement hors garde-fou (sur côte aménagée, trop peu de
+      // segments valides pour un pourcentage honnête).
+      if (e.pctRecul != null && !e.amenage)
+        obs.push({ label: "Part du littoral qui recule", value: `${e.pctRecul} %` });
+      if (e.reculMaxMpan != null && e.reculMaxMpan < 0)
+        obs.push({ label: "Recul max observé", value: `jusqu'à ${fr1(e.reculMaxMpan)} m/an` });
+      if (e.periode)
+        obs.push({ label: "Période observée", value: `${e.periode[0]}–${e.periode[1]}` });
+    }
+
+    const facts = littoral.traitDeCote.concernee
+      ? [
+          { label: "Statut", value: "Inscrite (loi Climat et Résilience)" },
+          ...(decretDate ? [{ label: "Depuis", value: decretDate }] : []),
+        ]
+      : undefined;
+
+    const amenageStrong = !!e?.amenage && (e.classe === "marqué" || e.classe === "très marqué");
+    const amenageNote = e?.amenage
+      ? `Le littoral est fortement aménagé (digues, port) : l'érosion y est partiellement mesurable.${amenageStrong && e.classe ? ` Sur les rares secteurs mesurables, une érosion ${CLASSE_FEM[e.classe]} est observée.` : ""} `
+      : "";
+    const implications =
+      "acheter en bord de mer, c'est miser sur un bien dont la valeur et la constructibilité peuvent évoluer ; et surtout, l'érosion n'ouvre droit à aucune indemnisation, car elle est considérée comme prévisible, contrairement à une catastrophe naturelle. On peut tout à fait choisir de vivre ici, en le faisant les yeux ouverts, en pensant autant à la revente qu'à la transmission.";
+
     const littoralDetail: CardDetail = {
       eyebrow: `Littoral · ${FACADE_LABEL[littoral.facade]}`,
-      title: "Recul du trait de côte",
-      headline: "Commune concernée",
-      subhead: `${communeName} fait partie des communes où l'érosion du littoral devra être prise en compte dans l'aménagement des prochaines décennies.`,
+      title: "Érosion du littoral",
+      headline,
+      subhead:
+        e && !e.amenage && e.pctRecul != null
+          ? `${e.pctRecul} % du littoral communal montrent une érosion observée : la côte y recule.`
+          : `${communeName} est exposée à l'érosion du littoral.`,
       accent: "var(--blue)",
-      breakdownLabel: "Ce que l'assurance couvre",
-      breakdown: [
-        { label: "Recul du trait de côte", value: "Non couvert" },
-        { label: "Submersion marine", value: "Couvert" },
-      ],
-      facts: decretDate ? [{ label: "Inscrite depuis", value: decretDate }] : [],
-      whyLabel: "Ce que ça change pour un projet de vie",
-      why: `Cela ne veut pas dire que toute la commune est concernée de la même manière : ce sont surtout certaines zones côtières qui devront s'adapter au recul du trait de côte au fil des décennies. Pour un projet de vie, la nuance compte. Acheter en bord de mer, c'est miser sur un bien dont la valeur et la constructibilité peuvent évoluer ; et surtout, l'érosion n'ouvre droit à aucune indemnisation, car elle est considérée comme prévisible, contrairement à une catastrophe naturelle. On peut tout à fait choisir de vivre ici, et beaucoup le feront pour de bonnes raisons : il s'agit simplement de le faire les yeux ouverts, en pensant autant à la revente qu'à la transmission. C'est pour cette raison que ${communeName} figure sur la liste nationale des communes concernées par la loi Climat et Résilience.`,
-      askPrefill: "Que signifie le recul du trait de côte pour ma commune ?",
+      breakdownLabel: obs.length ? "Ce que montrent les observations" : undefined,
+      breakdown: obs.length ? obs : undefined,
+      facts,
+      whyLabel: "Ce que cela implique pour un projet de vie",
+      why: e
+        ? `${amenageNote}Ces observations portent sur le passé, ce n'est pas une prévision. Pour un projet de vie, elles comptent : ${implications}`
+        : `Pour un projet de vie, ${implications}`,
+      askPrefill: "Qu'est-ce que l'érosion du littoral change pour ma commune ?",
       sources:
         "Cerema, indicateur national de l'érosion côtière (Géolittoral) · Liste des communes, loi Climat et Résilience (data.gouv.fr) · CCR, régime catastrophes naturelles",
     };
+
     factors.push({
       label: "Littoral",
-      val: "Commune concernée par le recul du trait de côte",
+      val: cardVal,
       col: "var(--blue)",
-      src: "Cerema · Loi Climat et Résilience",
+      src: e ? "Cerema · indicateur d'érosion côtière" : "Cerema · Loi Climat et Résilience",
       missing: false,
       detail: littoralDetail,
     });
