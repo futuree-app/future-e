@@ -9,7 +9,6 @@ import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
 import { QuartierAside } from "@/components/report/QuartierClimatData";
-import LittoralModule from "@/components/report/LittoralModule";
 import QuartierSynthesis, {
   type WorkbookQuartier,
 } from "@/components/report/QuartierSynthesis";
@@ -131,14 +130,8 @@ export default async function RapportQuartierPage() {
           >
             Ce que montrent les données
           </h2>
-          <QuartierAside communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} />
+          <QuartierAside communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} littoral={littoral} />
         </section>
-
-        {littoral && (
-          <section className="pt-14">
-            <LittoralModule summary={littoral} communeName={displayName} />
-          </section>
-        )}
 
         {/* Une question ? — AskFuture inline (uniquement pour comptes payants) :
             capte la curiosité à chaud, juste après la lecture */}

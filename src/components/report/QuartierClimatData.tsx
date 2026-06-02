@@ -7,6 +7,17 @@ import { MetricTooltip } from "@/components/MetricTooltip";
 import type { GeorisquesSummary, GasparCatnatSummary } from "@/lib/georisques";
 import type { EaufranceSummary } from "@/lib/eaufrance";
 import type { VigieauSummary, DroughtLevel } from "@/lib/vigieau";
+import type { LittoralSummary, LittoralFacade } from "@/lib/littoral";
+
+// Façade maritime → libellé (le composant est client : on duplique le libellé
+// plutôt que d'importer une valeur depuis littoral.ts, server-only).
+const FACADE_LABEL: Record<LittoralFacade, string> = {
+  manche: "façade Manche",
+  atlantique: "façade atlantique",
+  bretagne: "littoral breton",
+  mediterranee: "façade méditerranéenne",
+  outre_mer: "littoral ultramarin",
+};
 
 // Libellé FR d'un niveau VigiEau. Dupliqué ici (et non importé depuis lib/vigieau)
 // car ce composant est client et vigieau.ts est server-only.
@@ -50,6 +61,7 @@ type SharedProps = {
   territoire: Territoire | null;
   vigieau: VigieauSummary | null;
   catnat?: GasparCatnatSummary | null;
+  littoral?: LittoralSummary | null;
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -65,7 +77,9 @@ function buildFactors(
   territoire: Territoire | null,
   vigieau: VigieauSummary | null,
   drought: Drought | null,
+  communeName: string,
   catnat?: GasparCatnatSummary | null,
+  littoral?: LittoralSummary | null,
 ): Factor[] {
   const meta = HORIZON_META[horizonKey] ?? HORIZON_META.gwl20;
   const gwlData = scenarios?.[horizonKey]?.v ?? null;
@@ -277,6 +291,42 @@ function buildFactors(
     });
   }
 
+  // Carte Littoral (recul du trait de côte) — ajoutée seulement pour les communes
+  // inscrites sur la liste officielle (loi Climat et Résilience). Enrichissement
+  // spécialisé et conditionnel : même format carte → drawer que les autres indicateurs,
+  // pas un bloc à part. Narratif, hors score.
+  if (littoral?.traitDeCote.concernee) {
+    const decretDate = littoral.traitDeCote.decret?.debut
+      ? formatFrDate(littoral.traitDeCote.decret.debut)
+      : null;
+    const littoralDetail: CardDetail = {
+      eyebrow: `Littoral · ${FACADE_LABEL[littoral.facade]}`,
+      title: "Recul du trait de côte",
+      headline: "Commune concernée",
+      subhead: `${communeName} fait partie des communes où l'érosion du littoral devra être prise en compte dans l'aménagement des prochaines décennies.`,
+      accent: "var(--blue)",
+      breakdownLabel: "Ce que l'assurance couvre",
+      breakdown: [
+        { label: "Recul du trait de côte", value: "Non couvert" },
+        { label: "Submersion marine", value: "Couvert" },
+      ],
+      facts: decretDate ? [{ label: "Inscrite depuis", value: decretDate }] : [],
+      whyLabel: "Ce que ça change pour un projet de vie",
+      why: `Cela ne veut pas dire que toute la commune est concernée de la même manière : ce sont surtout certaines zones côtières qui devront s'adapter au recul du trait de côte au fil des décennies. Pour un projet de vie, la nuance compte. Acheter en bord de mer, c'est miser sur un bien dont la valeur et la constructibilité peuvent évoluer ; et surtout, l'érosion n'ouvre droit à aucune indemnisation, car elle est considérée comme prévisible, contrairement à une catastrophe naturelle. On peut tout à fait choisir de vivre ici, et beaucoup le feront pour de bonnes raisons : il s'agit simplement de le faire les yeux ouverts, en pensant autant à la revente qu'à la transmission. C'est pour cette raison que ${communeName} figure sur la liste nationale des communes concernées par la loi Climat et Résilience.`,
+      askPrefill: "Que signifie le recul du trait de côte pour ma commune ?",
+      sources:
+        "Cerema, indicateur national de l'érosion côtière (Géolittoral) · Liste des communes, loi Climat et Résilience (data.gouv.fr) · CCR, régime catastrophes naturelles",
+    };
+    factors.push({
+      label: "Littoral",
+      val: "Commune concernée par le recul du trait de côte",
+      col: "var(--blue)",
+      src: "Cerema · Loi Climat et Résilience",
+      missing: false,
+      detail: littoralDetail,
+    });
+  }
+
   return factors;
 }
 
@@ -379,10 +429,10 @@ function formatFrDate(iso: string): string {
 
 // ─── FactorGrid (grille horizontale de cartes) ────────────────────────────────
 
-export function QuartierAside({ communeName: _communeName, scenarios, georisques, territoire, vigieau, drought, catnat }: SharedProps) {
+export function QuartierAside({ communeName, scenarios, georisques, territoire, vigieau, drought, catnat, littoral }: SharedProps) {
   const [horizon] = useHorizon();
   const [openDetail, setOpenDetail] = useState<CardDetail | null>(null);
-  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, catnat ?? null);
+  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, littoral ?? null);
 
   return (
     <div>
