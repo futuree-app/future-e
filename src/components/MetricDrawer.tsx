@@ -30,6 +30,11 @@ export type CardDetail = {
   askPrefill?: string;
   /** Sources repliées dans un accordéon discret. La narration ne cite jamais les bases ; cet accordéon, oui. */
   sources?: string;
+  /** Encart « À savoir » fixe, séparé du récit (why) : une information vraie dans tous
+   *  les cas, qui ne doit pas teinter le récit (ex. cadre assurantiel). */
+  note?: string;
+  /** Intitulé de l'encart (défaut « À savoir »). */
+  noteLabel?: string;
 };
 
 export function MetricDrawer({
@@ -116,6 +121,13 @@ export function MetricDrawer({
           <p className="metric-drawer-label">{detail.whyLabel ?? "Ce que cela change"}</p>
           <p className="metric-drawer-why">{detail.why}</p>
         </div>
+
+        {detail.note && (
+          <div className="metric-drawer-note">
+            <p className="metric-drawer-note-label">{detail.noteLabel ?? "À savoir"}</p>
+            <p className="metric-drawer-note-text">{detail.note}</p>
+          </div>
+        )}
 
         {detail.sources && (
           <details className="metric-drawer-sources">
@@ -210,6 +222,15 @@ export function MetricDrawer({
         }
         .metric-drawer-fact .metric-drawer-val { font-size: 16px; }
         .metric-drawer-why { font-size: 15px; line-height: 1.7; color: #9ba3b4; margin: 0; }
+        .metric-drawer-note {
+          margin: 0 0 22px; padding: 14px 16px; border-radius: 10px;
+          background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+        }
+        .metric-drawer-note-label {
+          font-family: 'JetBrains Mono', monospace; font-size: 10px;
+          letter-spacing: 0.14em; text-transform: uppercase; color: #6b7388; margin: 0 0 7px;
+        }
+        .metric-drawer-note-text { font-size: 13px; line-height: 1.6; color: #9ba3b4; margin: 0; }
         .metric-drawer-ask {
           margin-top: 8px; width: 100%;
           display: inline-flex; align-items: center; justify-content: center; gap: 8px;

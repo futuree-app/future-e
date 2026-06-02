@@ -353,8 +353,22 @@ function buildFactors(
     const amenageNote = e?.amenage
       ? `Le littoral est fortement aménagé (digues, port) : l'érosion y est partiellement mesurable.${amenageStrong && e.classe ? ` Sur les rares secteurs mesurables, une érosion ${CLASSE_FEM[e.classe]} est observée.` : ""} `
       : "";
-    const implications =
-      "acheter en bord de mer, c'est miser sur un bien dont la valeur et la constructibilité peuvent évoluer ; et surtout, l'érosion n'ouvre droit à aucune indemnisation, car elle est considérée comme prévisible, contrairement à une catastrophe naturelle. On peut tout à fait choisir de vivre ici, en le faisant les yeux ouverts, en pensant autant à la revente qu'à la transmission.";
+    // Récit PILOTÉ PAR LA CLASSE : l'intensité du texte suit l'intensité de la donnée
+    // (sinon La Rochelle « faible » sonnerait comme un avertissement fort). Le cadre
+    // assurantiel sort du récit (encart « À savoir » fixe, même ton pour tous).
+    const CLASSE_NARRATIVE: Record<string, string> = {
+      faible:
+        "Les observations disponibles montrent que le littoral évolue localement, mais à un rythme faible. Cela ne signifie pas qu'un projet immobilier est aujourd'hui remis en question : pour la plupart des habitants, le recul du trait de côte restera un sujet lointain et très dépendant de la localisation précise du bien. Comme partout sur le littoral, il reste utile de comprendre ces dynamiques avant d'acheter ou de transmettre un bien.",
+      "modéré":
+        "Les observations montrent un recul mesurable sur certains secteurs du littoral. Cela ne remet pas en cause la vie quotidienne, mais peut devenir un élément à prendre en compte dans un projet immobilier de long terme, notamment pour la valeur future ou les possibilités d'aménagement.",
+      "marqué":
+        "Le recul observé est significatif sur une partie du littoral. Pour un projet immobilier, il devient pertinent de s'intéresser à la localisation exacte du bien, aux documents d'urbanisme et aux perspectives d'évolution du trait de côte sur plusieurs décennies.",
+      "très marqué":
+        "Le recul observé figure parmi les plus importants du littoral français. Pour un projet de vie ou d'investissement, la question ne se limite plus au cadre de vie : l'évolution future du littoral peut avoir des conséquences concrètes sur la valeur, la constructibilité et la transmission des biens situés dans les secteurs les plus exposés.",
+    };
+    const narrFallback =
+      "Le littoral de la commune est concerné par le recul du trait de côte. Comme partout sur le littoral, il reste utile de comprendre ces dynamiques avant d'acheter ou de transmettre un bien.";
+    const classNarrative = e?.classe ? CLASSE_NARRATIVE[e.classe] : null;
 
     const littoralDetail: CardDetail = {
       eyebrow: `Littoral · ${FACADE_LABEL[littoral.facade]}`,
@@ -370,8 +384,9 @@ function buildFactors(
       facts,
       whyLabel: "Ce que cela implique pour un projet de vie",
       why: e
-        ? `${amenageNote}Ces observations portent sur le passé, ce n'est pas une prévision. Pour un projet de vie, elles comptent : ${implications}`
-        : `Pour un projet de vie, ${implications}`,
+        ? `${amenageNote}Ce sont des observations passées, pas une prévision. ${classNarrative ?? narrFallback}`
+        : narrFallback,
+      note: "Contrairement à la submersion marine, le recul du trait de côte n'est pas couvert par le régime catastrophes naturelles, car il est considéré comme un phénomène prévisible.",
       askPrefill: "Qu'est-ce que l'érosion du littoral change pour ma commune ?",
       sources:
         "Cerema, indicateur national de l'érosion côtière (Géolittoral) · Liste des communes, loi Climat et Résilience (data.gouv.fr) · CCR, régime catastrophes naturelles",
