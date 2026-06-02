@@ -10,6 +10,7 @@ import {
   type ZoneStrength,
   type SoftZone,
 } from "@/lib/geo-zones";
+import { getLittoralIndex } from "@/lib/littoral";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — moteur de compatibilité déterministe (V1).
@@ -111,6 +112,10 @@ export type MatchResult = {
   // (« achat …, loyers … ») seulement en cas de divergence. Jamais un chiffre ni une
   // accessibilité (détail au rapport). null = silence (moyen, ou achat indisponible).
   logement: string | null;
+  // Littoral (NARRATIF, hors score, hors tri). Renseigné UNIQUEMENT si l'utilisateur
+  // exprime une intention littorale ET que la commune est inscrite au titre du recul
+  // du trait de côte (liste officielle). null sinon (silence). cf. hasCoastalIntent.
+  littoral: string | null;
   metrics: {
     distance_cote_km: number;
     population: number | null;
@@ -684,6 +689,19 @@ function passesHard(
   return true;
 }
 
+// Intention littorale (déclencheur du signal littoral, narratif). Large : mer
+// indispensable, façade maritime nommée, ou simple préférence de proximité mer.
+// Jamais si l'utilisateur exclut le littoral. Aucun effet sur le score ni le tri.
+function hasCoastalIntent(parsed: ParsedProject): boolean {
+  const hc = parsed.hardConstraints ?? {};
+  if (hc.excludeSea) return false;
+  if (hc.nearSea?.active) return true;
+  const FACADES = new Set(["atlantique", "manche", "mediterranee", "cote_basque"]);
+  if (hc.zones?.some((z) => FACADES.has(z.zone))) return true;
+  if (parsed.preferences?.some((p) => p.key === "proximite_mer")) return true;
+  return false;
+}
+
 export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome> {
   const communes = await loadIndex();
   await loadZeTable(); // nom + taille des bassins (signature + raison emploi graduée)
@@ -704,6 +722,11 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   const exclusion = resolveExclusions(hc.excludeZones);
   const montagne = hc.montagne ?? null;
   const reliefProche = hc.reliefProche ?? null;
+
+  // Signal littoral (narratif, hors score) : on ne charge l'index et on ne
+  // renseigne le champ QUE si une intention littorale est exprimée. Sinon, silence.
+  const coastalIntent = hasCoastalIntent(parsed);
+  const littoralIndex = coastalIntent ? await getLittoralIndex() : null;
 
   // Ancres PRÉFÉRÉES (zones + montagne + relief) : servent au prédicat d'étalement
   // échelonné. inspiration n'en fait pas partie (son penchant léger passe par le score).
@@ -810,6 +833,11 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
           : null,
         // Logement : note narrative qualitative (achat / location), hors score.
         logement: logementNote(c),
+        // Littoral : renseigné seulement sur intention littorale + commune inscrite.
+        littoral:
+          littoralIndex?.get(String(c.insee).padStart(5, "0"))?.traitDeCote.concernee
+            ? "concernée par le recul du trait de côte"
+            : null,
         metrics: {
           distance_cote_km: c.distance_cote_km,
           population: c.population,

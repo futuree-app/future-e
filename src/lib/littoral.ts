@@ -58,3 +58,19 @@ export async function getLittoralSummary(
     traitDeCote: { concernee: rec.concernee, decret: rec.decret },
   };
 }
+
+// Index complet (clé INSEE paddée → résumé). Pour les consommateurs qui font de
+// nombreux lookups après un seul chargement (ex. le moteur du comparateur, qui
+// teste chaque commune candidate).
+export async function getLittoralIndex(): Promise<Map<string, LittoralSummary>> {
+  const index = await loadIndex();
+  const out = new Map<string, LittoralSummary>();
+  for (const [insee, rec] of index) {
+    out.set(insee, {
+      insee: rec.insee,
+      facade: rec.facade,
+      traitDeCote: { concernee: rec.concernee, decret: rec.decret },
+    });
+  }
+  return out;
+}

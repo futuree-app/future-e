@@ -163,6 +163,7 @@ export function OuVivreClient() {
               tradeoff: r.tradeoff,
               pressionEco: r.pressionEco?.note ?? null, // narratif qualitatif, firewall préservé
               logement: r.logement, // niveau de prix relatif qualitatif, firewall préservé
+              littoral: r.littoral, // narratif littoral (recul du trait de côte), firewall préservé
             })),
             outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message },
             perimetre: outcomeMeta.perimetre ?? [],
@@ -370,6 +371,7 @@ export function OuVivreClient() {
               compromis: r.tradeoff,
               pression_eco: r.pressionEco?.note ?? null, // narratif qualitatif, firewall préservé
               logement: r.logement, // niveau de prix relatif qualitatif, firewall préservé
+              littoral: r.littoral, // narratif littoral (recul du trait de côte), firewall préservé
             })),
           },
           focus: null,
@@ -846,6 +848,15 @@ futur•e vous aide à identifier les territoires les plus compatibles avec votr
                   {r.logement && (
                     <p className="mt-3 text-[12px] leading-[1.5] text-label/55">
                       Logement : {r.logement}
+                    </p>
+                  )}
+
+                  {/* Littoral : signal NARRATIF, hors classement, affiché seulement
+                      sur intention littorale (le moteur ne le renseigne que dans ce cas).
+                      Lucidité « monde qui change », détail au rapport. */}
+                  {r.littoral && (
+                    <p className="mt-3 text-[12px] leading-[1.5] text-info/75">
+                      Littoral : {r.littoral}
                     </p>
                   )}
 

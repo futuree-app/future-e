@@ -147,13 +147,20 @@ loyers, par rapport au reste de la France), déjà formulé en clair. RÈGLES : 
 le sens tel quel (plus cher / moins cher), jamais un chiffre, jamais "abordable" ni
 un jugement d'accessibilité (on ne sait pas le budget du lecteur), jamais un verdict.
 Si le champ est absent ou nul, n'en parlez pas (notamment : l'absence de donnée
-d'achat en Alsace-Moselle n'est pas un marché "moyen", ne l'interprétez pas).`;
+d'achat en Alsace-Moselle n'est pas un marché "moyen", ne l'interprétez pas).
+
+Si un champ "littoral" est fourni pour un territoire, vous pouvez le mentionner UNE
+fois, comme une lucidité utile à un projet de vie sur la côte, jamais comme une
+alarme. La commune est inscrite au titre du recul du trait de côte (loi Climat et
+Résilience) : dites-le sobrement, sans dramatiser, sans parler de "menace" ni de
+commune "condamnée". Ne déduisez jamais ce statut vous-même ; si le champ est absent
+ou nul, n'en parlez pas.`;
 
 type Body = {
   project?: string;
   reformulation?: string;
   preferences?: { key: string; weight: number }[];
-  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null }[];
+  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null }[];
   outcome?: { perfectMatch?: boolean; message?: string | null };
   perimetre?: string[]; // ancres dures = cadre choisi (tous les territoires y sont)
   orientation?: string[]; // ancres souples = penchant (résultats inclinés, sans s'y limiter)
@@ -196,6 +203,7 @@ export async function POST(request: NextRequest) {
       compromis: r.tradeoff ?? null,
       pression_climatique_economie: r.pressionEco ?? null,
       logement: r.logement ?? null,
+      littoral: r.littoral ?? null,
     })),
     sante_environnementale: body.enrichment ?? null,
   };
