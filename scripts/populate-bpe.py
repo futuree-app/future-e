@@ -26,8 +26,13 @@ RAYON_KM = 15
 CELL = 0.18  # grille spatiale, comme populate-nature.py
 
 # Confirmés sur la donnée (échantillon NOMRS, métropole + DOM concordants).
-# Écoles = secondaire : collège + lycées (gén/techno, pro, agricole). Primaire et supérieur
-# exclus ; C304/C305 (sections internes) exclus pour ne pas double-compter un même site.
+# Écoles = secondaire : collège + lycées (gén/techno, pro, agricole). Le critère répond à
+# « puis-je scolariser mes enfants ici ? » (projet familial).
+# CHOIX PRODUIT, pas une absence d'intérêt :
+#   - C5xx (enseignement supérieur) volontairement EXCLUS : ils répondent à une autre question
+#     (études, dynamisme étudiant, attractivité urbaine), qui pourra alimenter un signal distinct.
+#   - C304/C305 (sections internes) exclus pour ne pas double-compter un même site.
+#   - primaire/maternelle exclus (quasi universels, peu discriminants).
 ECOLES_TYPEQU = {"C201", "C301", "C302", "C303"}
 # Culture au sens large : cinéma, conservatoire (pratique), bibliothèque/médiathèque, musée,
 # théâtre/salle de spectacle/scène. Exclus : F313 (monuments/jardins = tourisme), F314 (archives).

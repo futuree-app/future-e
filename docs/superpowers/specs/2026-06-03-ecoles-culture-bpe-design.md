@@ -27,8 +27,16 @@ Doctrine cadre (non négociable) :
 1. **Deux critères séparés** : `acces_ecoles` et `acces_culture`. Pas de critère combiné.
 2. **Métrique** : accès par rayon (~15 km autour du centroïde), percentile national.
    Calque `populate-nature.py`. Brut conservé pour un futur rapport. Aucun appel runtime.
-3. **Écoles** = collèges + lycées (général/techno + pro). Primaire EXCLU (quasi universel,
-   peu discriminant).
+3. **Écoles** = collèges + lycées (général/techno + pro + agricole). Primaire EXCLU (quasi
+   universel, peu discriminant). Codes confirmés : `C201`, `C301`, `C302`, `C303`.
+   **Enseignement supérieur (C5xx) volontairement EXCLU (choix produit, pas une absence
+   d'intérêt) :** le critère `acces_ecoles` mesure l'accès à l'enseignement SECONDAIRE, dans
+   une logique de projet familial et de scolarisation des enfants (« puis-je scolariser mes
+   enfants ici ? »). L'enseignement supérieur répond à une autre question (études, dynamisme
+   étudiant, attractivité urbaine) et pourra alimenter ultérieurement un signal distinct. On
+   ne mélange pas trois sujets différents : accès collège/lycée, présence universitaire,
+   dynamisme étudiant. `C304`/`C305` (sections internes) exclus aussi (double-comptage d'un
+   même site).
 4. **Culture** = bibliothèque/médiathèque + cinéma + théâtre/musée, ÉLARGI au spectacle
    vivant et à la pratique artistique s'ils existent dans la nomenclature BPE (salles de
    spectacle, salles de concert, scènes conventionnées, conservatoires, écoles de musique,
