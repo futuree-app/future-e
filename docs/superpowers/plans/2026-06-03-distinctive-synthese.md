@@ -122,9 +122,11 @@ Hiérarchie à respecter absolument :
 
 Quand au moins DEUX communes affichées portent un trait distinctif, consacrez UNE phrase à les
 différencier. N'utilisez QUE les libellés fournis, sans extrapoler ni inventer. Une commune SANS
-trait : dites simplement qu'elle ne se détache pas nettement, ne lui fabriquez aucun axe. Si moins
-de deux traits sont fournis, dites honnêtement que les profils sont proches, sans forcer une
-différence. Restez sobre : une phrase, jamais l'inventaire des cartes.
+trait : dites simplement qu'elle ne se détache pas nettement, ne lui fabriquez aucun axe.
+Certaines communes jouent un rôle de compromis ou d'équilibre : il est normal, et même informatif,
+qu'elles ne portent aucun trait distinctif saillant (« X se situe plutôt comme un compromis entre
+les options »). Si moins de deux traits sont fournis, dites honnêtement que les profils sont
+proches, sans forcer une différence. Restez sobre : une phrase, jamais l'inventaire des cartes.
 
 ✔ « Aurillac est la plus proche de la montagne, tandis qu'Ussel propose un bassin de vie plus
 compact. » / « Quimper présente les étés les plus supportables des options, tandis que Narbonne
