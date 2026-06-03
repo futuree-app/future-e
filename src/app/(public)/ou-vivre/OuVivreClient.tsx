@@ -649,8 +649,9 @@ export function OuVivreClient() {
 
       {/* ── Micro-réassurance (crédibilité du socle de données) ── */}
       <p className="mt-3 text-[12px] leading-[1.7] text-ghost">
-        Plus de 20 indicateurs publics, climatiques, sanitaires et territoriaux, projetés à
-        l&apos;horizon 2050, croisés sur les 34 000 communes de France métropolitaine.
+        Plus de 20 indicateurs publics, climatiques, sanitaires et territoriaux, croisés sur
+        les 34 000 communes de France métropolitaine, avec les projections climatiques à
+        l&apos;horizon 2050.
       </p>
 
       {/* ── Exemples ── */}
