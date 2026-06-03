@@ -136,6 +136,11 @@ export type MatchResult = {
   // Pression climatique sur l'économie locale (NARRATIF, n'entre PAS dans le score).
   // Note de lecture prudente : dépendance à un secteur sensible, pas un verdict.
   pressionEco: { palier: "moderee" | "marquee"; note: string } | null;
+  // Pression climatique inondation (NARRATIF, n'entre PAS dans le score/tri/reasons).
+  // Signal complémentaire affiché UNIQUEMENT quand la trajectoire DRIAS des pluies
+  // extrêmes change la lecture de l'historique CatNat observé. Jamais une prédiction.
+  // null = silence (climat n'ajoute rien, ou DRIAS manquant). cf. buildClimatInondation.
+  climatInondation: string | null;
   // Logement (NARRATIF, hors score, hors tri). UNE phrase de niveau de prix RELATIF :
   // agrégée (« marché … ») quand achat et location vont dans le même sens, détaillée
   // (« achat …, loyers … ») seulement en cas de divergence. Jamais un chiffre ni une
@@ -737,6 +742,8 @@ function assignSignaux(
       .slice(0, SIGNAUX_MAX);
     const signaux: Record<string, string> = {};
     for (const x of ranked) signaux[x.dim.id] = x.dim.bands[bandIndex(x.s)];
+    // Signal narratif climatique (déjà calculé à l'assemblage, self-gated, hors cap ambiant).
+    if (r.climatInondation) signaux["climat_inondation"] = r.climatInondation;
     r.signaux = signaux;
   });
 }
@@ -825,6 +832,26 @@ function pressionEcoNote(pe: { palier: "moderee" | "marquee"; secteur: string; a
   const secteur = PE_SECTEUR[pe.secteur] ?? "certaines activités";
   const alea = PE_ALEA[pe.alea] ?? "sensibles au climat";
   return `${part} de l'économie locale repose sur ${secteur}, ${alea}.`;
+}
+
+// Signal narratif (hors score). N'existe que si la PRESSION climatique est marquée :
+// tendance projetée des pluies extrêmes forte (NORRx1d, moteur principal) ET niveau déjà
+// significatif (NORRRq99, garde-fou). La phrase s'adapte à l'historique CatNat observé.
+// Seuils calés sur témoins réels (porteur) : tendance >= 88 ET niveau >= 75 -> ~12,5 % des
+// communes, garde Nîmes (94/93) et Arles (88/79), exclut Lens (3/1) et Paris (4/8, crue de
+// Seine fluviale non captée par la tendance pluies extrêmes). Préférence : rare mais crédible.
+function buildClimatInondation(c: IndexCommune): string | null {
+  const inond = c.inondation;
+  if (!inond) return null;
+  const tendance = c.pct.NORRx1d_yr; // Δ projeté des pluies extrêmes (percentile national)
+  const niveau = c.pct.NORRRq99_yr; // niveau p99 journalier (percentile national)
+  if (tendance == null || niveau == null) return null; // DRIAS manquant -> silence
+  const pressionMarquee = tendance >= 88 && niveau >= 75;
+  if (!pressionMarquee) return null; // le climat n'ajoute rien -> silence
+  const historiqueNotable = inond.risque >= 66; // beaucoup d'arrêtés CatNat observés
+  return historiqueNotable
+    ? "Historique d'inondation déjà présent ; les pluies extrêmes tendent à s'intensifier."
+    : "Peu d'inondations recensées à ce jour ; les pluies extrêmes tendent à s'intensifier.";
 }
 
 // Logement : niveau de prix RELATIF en libellé qualitatif (NARRATIF, hors score).
@@ -1217,6 +1244,8 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
         pressionEco: c.pression_eco
           ? { palier: c.pression_eco.palier, note: pressionEcoNote(c.pression_eco) }
           : null,
+        // Narratif, hors score : nuance climatique sur l'inondation (ou null/silence).
+        climatInondation: buildClimatInondation(c),
         // Logement : note narrative qualitative (achat / location), hors score.
         logement: logementNote(c),
         // Littoral : renseigné seulement sur intention littorale + commune inscrite.
