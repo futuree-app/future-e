@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import { useHorizon, HORIZON_META, type HorizonKey } from "@/hooks/useHorizon";
 import type { QuartierSourceKey } from "@/lib/quartier-signals";
+import { AUTO_SYNTHESIS } from "@/lib/auto-synthesis";
 
 const HORIZON_PILLS: { key: HorizonKey; year: string; recommended?: boolean }[] = [
   { key: "gwl15", year: "2030" },
@@ -200,6 +201,8 @@ export default function QuartierSynthesis({
 
   useEffect(() => {
     if (!inseeCode || !communeName) return;
+    // Auto seulement si AUTO_SYNTHESIS ; sinon l'utilisateur la déclenche via le bouton.
+    if (!AUTO_SYNTHESIS) return;
     const cleanup = fetchSynthesis(workbook, false);
     return cleanup;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -275,6 +278,18 @@ export default function QuartierSynthesis({
         )}
 
         {synthState === "error" && <FallbackPanel text={fallbackSummary} />}
+
+        {!AUTO_SYNTHESIS && synthState === "idle" && (
+          <div className="mt-2">
+            <button
+              type="button"
+              onClick={() => fetchSynthesis(workbook, false)}
+              className="quartier-regen-btn"
+            >
+              Générer la synthèse
+            </button>
+          </div>
+        )}
 
         {synthState !== "error" &&
           parsed.blocks.map((b, i) => {
