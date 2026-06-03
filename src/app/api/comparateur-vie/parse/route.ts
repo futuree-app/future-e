@@ -84,6 +84,26 @@ const TOOL_INPUT_SCHEMA = {
           properties: { min: { type: ["number", "null"] }, max: { type: ["number", "null"] } },
           description: "Taille de commune si explicite. petite ville = {min:5000,max:25000} ; ville moyenne = {min:25000,max:100000} ; grande ville = {min:100000,max:null}.",
         },
+        excludePlace: {
+          type: "array",
+          description:
+            "Villes que l'utilisateur veut QUITTER ('quitter Lyon', 'fuir Bordeaux', 'ne plus vivre à Lille'). Le moteur exclut l'agglomération de la ville. Donnez le nom de la ville tel quel. EXCEPTION : Paris et la région parisienne vont dans excludeZones (paris / idf), PAS ici.",
+          items: {
+            type: "object",
+            properties: { label: { type: "string" } },
+            required: ["label"],
+          },
+        },
+        sizeRelativeTo: {
+          type: ["object", "null"],
+          description:
+            "Taille relative à une ville citée : 'plus petit que Lyon', 'pas plus grand que Bordeaux', 'une ville plus grande que Niort'. Donnez le nom de la ville et la direction. Le moteur résout la taille.",
+          properties: {
+            label: { type: "string" },
+            direction: { type: "string", enum: ["smaller", "larger"] },
+          },
+          required: ["label", "direction"],
+        },
       },
     },
     preferences: {
@@ -159,7 +179,9 @@ ANCRES GÉOGRAPHIQUES (zones / excludeZones) : règles spécifiques
   • ÊTRE en altitude (champ montagne) : "à la montagne", "en altitude", "un village de montagne", "en haute montagne" → montagne, force adéquate (mention nue = hard).
   • PROCHE d'une montagne (champ reliefProche) : "proche d'une montagne", "proche de la montagne", "au pied des montagnes", "pour faire de la randonnée", "près des sommets" → reliefProche, force adéquate. C'est l'accès au relief sans vivre en altitude (une ville au pied d'un massif convient). NE confondez PAS avec montagne.
   • Massif NOMMÉ (zones) : "près des Alpes", "dans les Pyrénées" → zones (alpes/pyrenees…), PAS montagne ni reliefProche.
-- Exclusions → excludeZones. "quitter Paris" → excludeZones:["paris"]. "pas le Nord" → excludeZones:["nord"].
+- Exclusions de ZONE → excludeZones (jetons fermés). "pas le Nord" → excludeZones:["nord"]. "quitter Paris" / "la région parisienne" → excludeZones:["paris"|"idf"] (cas spécial petite couronne, NE PAS utiliser excludePlace).
+- Exclusion de VILLE → excludePlace. "quitter Lyon", "fuir Bordeaux", "ne plus vivre à Lille", "partir de Nantes" → excludePlace:[{label:"Lyon"}] etc. (le moteur exclut l'agglomération). Une ville n'est PAS un jeton de zone : ne la mettez jamais dans excludeZones.
+- TAILLE RELATIVE → sizeRelativeTo. "plus petit que Lyon", "pas plus grand que Bordeaux" → {label:"Lyon", direction:"smaller"}. "plus grand que Niort" → {label:"Niort", direction:"larger"}. Donnez le label brut, jamais une population.
 - Vous ne fournissez QUE des jetons et leur force. N'écrivez jamais vous-même de liste de départements.
 
 PRÉFÉRENCES DISPONIBLES (liste fermée)
