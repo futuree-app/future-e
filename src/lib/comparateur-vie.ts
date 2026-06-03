@@ -640,7 +640,7 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
     case "prefere_grande_ville":
       return lerp(GRANDE_VILLE_MAX, tailleVille(c));
     case "vie_etudiante": {
-      // 40 % accès (présence établissements sup) + 60 % dynamisme (part étudiante UU).
+      // 40 % accès (présence établissements sup, BPE) + 60 % dynamisme (part étudiante UU, MESR).
       const a = c.etudes_acces ?? null;
       const d = c.etudes_dyn ?? null;
       if (a == null && d == null) return null;
