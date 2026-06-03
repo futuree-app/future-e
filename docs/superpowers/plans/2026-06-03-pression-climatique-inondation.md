@@ -110,10 +110,25 @@ print("signal 'accentuer'  (historique notable + pression):",len(buckets["accent
 print("silence:",buckets[None]," | dont DRIAS manquant:",miss_drias)
 print("exemples surveiller:",buckets["surveiller"][:8])
 print("exemples accentuer :",buckets["accentuer"][:8])
+# Cas motivants du V2 (porteur) : vérifier que le signal raconte quelque chose d'utile.
+print("--- cas motivants ---")
+def find(name):
+    return next((c for c in communes if str(c.get("nom","")).lower()==name.lower()), None)
+for n in ["Paris","Marseille","Lens","Nîmes","Arles"]:
+    c=find(n)
+    if not c: print(f"  {n}: introuvable (vérifier libellé/arrondissements PLM)"); continue
+    inond=c.get("inondation") or {}
+    print(f"  {n:10} risque={inond.get('risque')} NORRx1d={c.get('pct',{}).get('NORRx1d_yr')} NORRRq99={c.get('pct',{}).get('NORRRq99_yr')} -> signal={signal(c)}")
 PY
 ```
 
-Expected : les deux buckets non vides ; « accentuer » contient des communes méditerranéennes connues (Nîmes, Arles, communes du Gard/Hérault/Vaucluse) ; le silence reste majoritaire (le signal est rare). Si la distribution est aberrante (ex : un bucket vide, ou >50 % de communes avec signal), ajuster les seuils `66`/`34` dans `buildClimatInondation` (Step 2) et relancer ce témoin AVANT de continuer. Noter les seuils retenus.
+Expected : les deux buckets non vides ; « accentuer » contient des communes méditerranéennes connues (Nîmes, Arles, Gard/Hérault/Vaucluse) ; le silence reste **largement majoritaire** (le signal doit rester RARE).
+
+**Garde-fou rareté (porteur, remarque 2) :** objectif indicatif — le total des communes avec signal devrait rester de l'ordre de quelques pourcents, pas des dizaines. Si > ~10 % des communes déclenchent, **resserrer** les seuils (monter `66` vers `75`/`80` sur la tendance, et/ou `34` vers `50` sur le niveau) et relancer ce témoin AVANT de continuer. Préférence assumée : manquer quelques cas intéressants plutôt que produire du bruit.
+
+**Cas motivants (porteur, remarque 4) :** présenter au porteur les lignes Paris / Marseille / Lens / Nîmes / Arles. Attendu : le signal raconte quelque chose d'utile sur ces cas (ex : Nîmes/Arles historique notable + pression → « accentuer » ; Paris/Marseille = cas où l'observé communal sous-estimait l'aléa, le signal doit éclairer s'il se déclenche, ou rester silencieux de façon défendable). **Checkpoint de revue porteur ici** avant Step 7.
+
+**Formulation (porteur, remarque 5) :** la phrase « Historique d'inondation limité, mais évolution climatique à surveiller » est jugée potentiellement trop interprétative. Après les témoins réels, proposer 1-2 variantes plus factuelles au porteur (ex : « Peu d'inondations recensées à ce jour ; les pluies extrêmes tendent à s'intensifier. ») et recaler dans `buildClimatInondation` (Step 2) si validé. Noter les seuils ET la formulation retenus.
 
 - [ ] **Step 7 : Commit**
 
