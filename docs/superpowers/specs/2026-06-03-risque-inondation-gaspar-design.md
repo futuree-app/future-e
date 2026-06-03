@@ -173,3 +173,27 @@ CatNat est HISTORIQUE. Décision (porteur) : on ASSUME la différence, on ne l'e
 - Module `/inondation` DRIAS (inchangé).
 - Risque parcellaire / adresse (reste au rapport).
 - Exclusion dure des TRI (écartée : préférence graduée seulement).
+
+## Journal — V1 livrée (2026-06-03, mergée sur main, commit 6010395)
+
+> **V1 inondation** : signal structurel observé, fondé sur CatNat + TRI, distinct des pluies
+> extrêmes DRIAS ; ne prétend pas prédire le risque futur à l'adresse.
+
+État livré et vérifié :
+- Crawl GASPAR complet (34 788 communes, 0 manquante) ; champ `inondation`
+  (`catnat` + `tri:false` + `risque` en percentile national) dans `comparateur-index.json`.
+- `faible_risque_inondation` (subScore = 100 − risque) n'agit QUE si demandé ; ne pénalise
+  jamais le rural par défaut.
+- `/parse` dissocie inondation réelle/historique (`faible_risque_inondation`) et pluies
+  intenses projetées (`faible_precip_extremes`), qui reste distinct.
+- `/match` : Nîmes / Arles / Lens ne remontent pas quand l'utilisateur demande d'éviter
+  l'inondation ; communes peu exposées en tête.
+
+Constat assumé (non bloquant) : **Paris / Marseille** peuvent remonter sur le critère. C'est
+la conséquence normale du choix V1 — *CatNat observé à l'échelle communale ≠ aléa futur ni
+risque local à l'adresse*.
+
+Dette V2 (à traiter le moment venu) :
+- amplificateur DRIAS (cf. section doctrine ci-dessus, point d'accroche = champ `risque`) ;
+- meilleure lecture hydrologique ;
+- éventuellement données zonées / TRI / PPRI plus fines (résolution infra-communale).
