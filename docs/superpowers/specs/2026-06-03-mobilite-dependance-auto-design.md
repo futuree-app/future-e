@@ -5,152 +5,177 @@ Statut : design validé (porteur), prêt pour plan d'implémentation.
 
 ## Problème / intention
 
-Chantier #3 de la roadmap : un critère **mobilité** opt-in dans le comparateur, angle climat
-(« pouvoir vivre en conduisant moins »), national, précalculé. L'existant
-`scripts/populate-dependance-auto.js` est inadéquat : top200 seulement, écrit dans Supabase
-(pas l'index comparateur), agrège l'IRIS→commune **par nom** (fragile), et **mélange la
-densité** dans le score (ce qui pénalise mécaniquement le rural). On repart proprement.
+Chantier #3 de la roadmap : des critères **mobilité** opt-in dans le comparateur, angle climat
++ projet de vie, nationaux, précalculés. L'existant `scripts/populate-dependance-auto.js` est
+inadéquat : top200, Supabase (pas l'index), agrégation IRIS→commune par nom, densité mélangée
+au score. On repart proprement.
 
-Deux intentions distinctes, confirmées porteur :
-1. **Dépendance à la voiture** : « je veux pouvoir me passer de la voiture / moins conduire ».
-2. **Accès aux transports** : « je veux une gare, des bus, pouvoir bouger sans voiture ».
+Deux dimensions de choix résidentiel **distinctes**, toutes deux **vrais critères de scoring
+opt-in en V1** (décision porteur, après instruction des sources) :
 
-Les deux deviennent des **critères de scoring opt-in en V1** (clés séparées). Le risque de
-surpondération est maîtrisé par l'opt-in : chaque critère ne pèse que s'il est explicitement
-demandé.
+1. **Dépendance automobile** — `faible_dependance_auto`. « Puis-je vivre ici sans dépendre
+   fortement de ma voiture ? » Mesure d'**usage contraint** : part des trajets domicile-travail
+   faits en voiture.
+2. **Accessibilité transports** — `acces_transports`. « Y a-t-il une gare ? Est-ce facile de
+   prendre le train ? Puis-je rejoindre une métropole ? » Mesure d'**offre** : desserte
+   ferroviaire accessible alentour, valable pour tous (y compris retraités, télétravailleurs).
+
+Deux opt-in séparés → pas de surpondération mécanique (chacun ne pèse que s'il est demandé).
+Le rural n'est jamais pénalisé par défaut.
 
 ## Doctrine
 
-- Critères **opt-in** : `subScore` calculé seulement si la clé est demandée. Le rural n'est
-  **jamais pénalisé par défaut**. S'il sort bas quand le critère EST demandé, c'est légitime
-  (l'utilisateur a demandé à dépendre moins de la voiture).
-- **Densité exclue** du calcul : la densité est déjà captée ailleurs (cadre_calme,
-  eviter_isolement) ; la mélanger ici fabriquerait un proxy urbain qui pénalise le rural.
-- Gloses honnêtes : on mesure l'**usage domicile-travail**, pas la qualité du réseau routier
-  ni le détail des lignes (ça reste au rapport).
-- Pas d'IA dans le scoring. Précalcul déterministe dans `comparateur-index.json`.
+- Critères **opt-in** : `subScore` calculé seulement si la clé est demandée. Le rural sort bas
+  uniquement quand le critère EST demandé (légitime). Jamais de pénalité par défaut.
+- **Densité exclue** de tout calcul (captée ailleurs : cadre_calme, eviter_isolement).
+- `faible_dependance_auto` mesure l'**usage** (part voiture domicile-travail), `acces_transports`
+  mesure l'**offre** (gares). On ne les mélange pas.
+- Gloses honnêtes : usage domicile-travail / desserte des gares, pas la qualité du réseau ni
+  les horaires (rapport). Pas d'IA dans le scoring ; précalcul déterministe.
 
-## Source unique
+## Sources
 
-[INSEE RP MOBPRO 2022 — fichier détail](https://www.insee.fr/fr/statistiques/8589904)
-(« Mobilités professionnelles des individus », recensement). Niveau **commune de résidence**
-(arrondissements municipaux pour Paris/Lyon/Marseille, ce qui colle à l'index qui stocke aussi
-les PLM par arrondissement). Format Parquet. Variables utilisées :
-- `COMMUNE` : commune de résidence (code INSEE).
-- `TRANS` : mode de transport principal domicile-travail (format détaillé depuis RP2017).
-- `IPONDI` : poids individuel (le fichier est un sondage : toujours pondérer).
-
+### A. Dépendance auto — INSEE RP MOBPRO 2022
+[Fichier détail](https://www.insee.fr/fr/statistiques/8589904) « Mobilités professionnelles ».
+Niveau commune de résidence (arrondissements pour PLM, comme l'index). Format Parquet,
+volumineux → gitignoré (`data/rp-mobpro-2022.parquet`), traité avec `.venv-bpe` (pyarrow).
+Variables : `COMMUNE` (résidence), `TRANS` (mode domicile-travail), `IPONDI` (poids).
 Codes `TRANS` (RP2017+) : 1 pas de transport, 2 marche, 3 vélo, 4 deux-roues motorisé,
-**5 voiture/camion/fourgonnette**, **6 transports en commun**.
+**5 voiture/camion/fourgonnette**, 6 transports en commun.
 
-Le fichier parquet est volumineux : gitignoré (comme `data/bpe24.parquet`), placé dans
-`data/rp-mobpro-2022.parquet`. Traité avec le venv `.venv-bpe` (pyarrow).
+### B. Accès transports — SNCF Open Data
+Deux datasets (API opendatasoft `ressources.data.sncf.com`, ~3000 gares, national) :
+- [gares-de-voyageurs](https://ressources.data.sncf.com/explore/dataset/gares-de-voyageurs/) :
+  `codeinsee`, `position_geographique` ([lat, lon]), `segment_drg` (A/B/C), `codes_uic`, `nom`.
+- [frequentation-gares](https://ressources.data.sncf.com/explore/dataset/frequentation-gares/) :
+  `code_uic_complet`, `total_voyageurs_2024` (dernière année), `segmentation_drg`, `nom_gare`.
 
-## Métriques (par commune de résidence, pondérées IPONDI)
+Jointure gares↔fréquentation par **UIC** (`codes_uic` ↔ `code_uic_complet`). Si l'UIC ne matche
+pas pour une gare, **fallback** : pondérer par `segment_drg` via une fréquentation proxy
+(A ≈ 5 000 000, B ≈ 500 000, C ≈ 50 000 voyageurs/an). La validation de la clé de jointure et le
+format exact d'export (CSV/JSON) sont des tâches du plan.
 
+## Métriques
+
+### Dépendance auto (par commune de résidence, pondéré IPONDI)
 ```
-total      = Σ IPONDI (tous actifs occupés résidents de la commune)
-part_voiture = Σ IPONDI[TRANS==5] / total      # 0..1
-part_tc      = Σ IPONDI[TRANS==6] / total      # 0..1
+total        = Σ IPONDI (actifs occupés résidents)
+part_voiture = Σ IPONDI[TRANS==5] / total            # 0..1
 ```
+Seuil de fiabilité : `total < 50` → commune laissée à `null` (échantillon trop faible).
+`dependance = percentile national de part_voiture` (0-100, haut = dépend de la voiture).
 
-**Seuil de fiabilité** : si `total < 50` (actifs pondérés), la commune est laissée à `null`
-(échantillon trop faible, part bruitée). null = pas de pénalité, comme `inondation`.
-
-Percentiles nationaux (bisect sur la distribution des communes renseignées) :
+### Accès transports (accès ferroviaire pondéré par la desserte)
+Pour chaque commune `c` (coords `lat`/`lon` de l'index), sur les gares à moins de 100 km
+(distance haversine `d` en km) :
 ```
-dependance = percentile(part_voiture)   # 0-100, haut = dépend beaucoup de la voiture
-acces_tc   = percentile(part_tc)        # 0-100, haut = beaucoup de trajets en TC
+acces_raw(c) = max sur gares g [ voyageurs_g / (1 + (d(c,g) / 20)^2) ]     # 0 si aucune gare < 100 km
 ```
+- `voyageurs_g` : `total_voyageurs_2024` (jointure UIC) ou proxy de segment (fallback).
+- Le **max** privilégie la meilleure gare accessible : une grande gare TGV un peu loin l'emporte
+  sur une halte proche, ce qui capte « rejoindre une métropole ». L'atténuation `1/(1+(d/20)^2)`
+  vaut ~1 à 0 km, 0.5 à 20 km, ~0.16 à 45 km.
+```
+desserte = percentile national de acces_raw   # 0-100, haut = bien reliée par le train
+```
+Communes sans aucune gare à <100 km : `acces_raw = 0` → entrent dans le percentile (desserte
+basse), ce n'est pas `null` (l'absence de desserte est une information, pas une donnée manquante).
 
-## Champ index
+## Champs index (deux champs séparés, deux scripts indépendants)
 
 ```ts
-c.mobilite = {
-  part_voiture: number;  // brut 0..1, conservé pour un futur rapport
-  part_tc: number;       // brut 0..1
-  dependance: number;    // percentile national de part_voiture (0-100)
-  acces_tc: number;      // percentile national de part_tc (0-100)
-} | null
+c.mobilite = {            // INSEE MOBPRO
+  part_voiture: number;   // brut 0..1 (rapport futur)
+  dependance: number;     // percentile national (0-100)
+} | null;                 // null = sous le seuil de fiabilité
+
+c.transport = {           // SNCF
+  desserte: number;       // percentile national de l'accès ferroviaire pondéré (0-100)
+  gare_nom: string | null;   // meilleure gare retenue (rapport futur)
+  gare_km: number | null;    // distance à cette gare (rapport futur)
+} | null;                 // null seulement si lat/lon commune absents (rare)
 ```
 
 ## Moteur (`src/lib/comparateur-vie.ts`)
 
-Deux clés ajoutées à `PREFERENCE_KEYS` (et donc, filet typé oblige, à `REASON_POS`,
-`REASON_NEG`, `PREFERENCE_LABELS`, `PREFERENCE_INTERPRETATIONS`) :
+Deux clés ajoutées à `PREFERENCE_KEYS` (donc, filet typé, à `REASON_POS`, `REASON_NEG`,
+`PREFERENCE_LABELS`, `PREFERENCE_INTERPRETATIONS`) :
 
 - `subScore` :
   - `faible_dependance_auto` → `c.mobilite ? 100 - c.mobilite.dependance : null`
-  - `acces_transports` → `c.mobilite?.acces_tc ?? null`
+  - `acces_transports` → `c.transport?.desserte ?? null`
 - `REASON_POS` / `REASON_NEG` :
   - `faible_dependance_auto` : « peu dépendante de la voiture au quotidien » /
     « territoire où la voiture reste quasi indispensable »
-  - `acces_transports` : « bien desservie en transports en commun » /
-    « peu desservie en transports en commun »
+  - `acces_transports` : « bien reliée par le train » / « desserte ferroviaire limitée »
 - `PREFERENCE_LABELS` :
   - `faible_dependance_auto` : « une faible dépendance à la voiture »
-  - `acces_transports` : « l'accès aux transports en commun »
+  - `acces_transports` : « l'accès au train et aux gares »
 - `PREFERENCE_INTERPRETATIONS` (gloses) :
   - `faible_dependance_auto` : « part des trajets domicile-travail faits en voiture, pas la
     qualité du réseau routier »
-  - `acces_transports` : « part des trajets domicile-travail en transports en commun, pas le
-    détail des lignes ni des horaires »
+  - `acces_transports` : « desserte ferroviaire accessible alentour (présence et fréquentation
+    des gares), pas le détail des horaires »
 
 **Signal ambiant.** `acces_transports` rejoint `AMBIENT_DIMENSIONS` via sa clé `subScore`
-(comme `acces_soins`), donc il répond aussi à « et côté transports ? » hors recherche, **sans
-élargir** le mécanisme :
+(comme `acces_soins`), pour répondre à « et côté transports ? » hors recherche :
 ```
 { id: "transports", key: "acces_transports",
-  bands: ["mieux desservie en transports", "desserte en transports intermédiaire", "moins desservie en transports"] }
+  bands: ["bien reliée par le train", "desserte ferroviaire intermédiaire", "peu reliée par le train"] }
 ```
-`faible_dependance_auto` **n'est pas** ajouté aux signaux ambiants (redondant avec
-`transports`, et c'est une dimension de contrainte plutôt qu'une question naturelle « et côté
-dépendance auto ? »).
+`faible_dependance_auto` n'est pas en ambiant (redondant, dimension de contrainte).
 
 ## Parse (`src/app/api/comparateur-vie/parse/route.ts`)
 
-Le parse (LLM) doit pouvoir produire les deux clés :
 - → `faible_dependance_auto` : « sans voiture », « moins conduire », « ne pas dépendre de la
-  voiture », « tout à pied », « se garer c'est l'enfer » (intention de moindre usage auto).
-- → `acces_transports` : « une gare », « le train », « des bus », « transports en commun »,
-  « bien desservi », « pouvoir aller en ville sans voiture ».
-Les deux peuvent coexister (« sans voiture, avec une gare ») → les deux clés, chacune son poids.
+  voiture », « tout à pied », « se garer c'est l'enfer ».
+- → `acces_transports` : « une gare », « le train », « TER », « TGV », « rejoindre une
+  métropole », « transports en commun », « bien desservi », « aller en ville sans voiture ».
+- Distincts et cumulables (« sans voiture, avec une gare » → les deux). Aucun déduit par défaut
+  d'un projet rural ou familial.
 
-## Script (`scripts/populate-mobilite.py`)
+## Scripts
 
-Venv `.venv-bpe` (pyarrow). 1) lit `data/rp-mobpro-2022.parquet` (colonnes COMMUNE, TRANS,
-IPONDI) ; 2) agrège par COMMUNE (Σ IPONDI total, TRANS==5, TRANS==6) ; 3) applique le seuil
-de fiabilité (total < 50 → null) ; 4) calcule les percentiles nationaux ; 5) `--write-index`
-patche `comparateur-index.json` (champ `mobilite`). Même forme que `populate-inondation.py`
-(`--write-index`). L'URL/placement du parquet est une tâche du plan (téléchargement manuel
-dans `data/` ou par le script ; fichier gitignoré).
+### `scripts/populate-mobilite.py` (venv `.venv-bpe`, pyarrow)
+Lit le parquet MOBPRO (COMMUNE, TRANS, IPONDI), agrège par commune, applique le seuil, calcule
+`part_voiture` + percentile `dependance`, `--write-index` → `c.mobilite`.
+
+### `scripts/populate-transports.py` (venv `.venv-bpe`, numpy)
+1) Télécharge/charge les deux datasets SNCF (gares + fréquentation) ; 2) joint par UIC (fallback
+segment) → liste de gares `{lat, lon, voyageurs}` ; 3) pour chaque commune de l'index (lat/lon),
+calcule `acces_raw` (haversine vectorisé numpy, cutoff 100 km, atténuation `1/(1+(d/20)^2)`,
+max) ; 4) percentile national `desserte` ; 5) `--write-index` → `c.transport` (desserte +
+meilleure gare nom/km). L'URL d'export exacte des datasets est une tâche du plan.
 
 ## Vérification (pas de runner de test, cf. AGENTS.md)
 
 1. `npx tsc --noEmit` + `npm run lint`.
-2. Script + `--write-index` : témoins data — Paris/Lyon (faible part voiture, acces_tc haut) ;
-   commune rurale isolée (part voiture ~proche de 1, acces_tc bas) ; distribution saine ;
-   communes sous le seuil → `null`.
-3. `curl /parse` : « je veux pouvoir vivre sans voiture » → `faible_dependance_auto` ; « je
-   veux une gare et des trains » → `acces_transports` ; « sans voiture mais avec une gare » →
-   les deux.
-4. `curl /match` (`acces_transports`) : métropoles desservies en tête ; (`faible_dependance_auto`)
-   grandes villes en tête ; rural **non pénalisé** quand aucun critère mobilité n'est demandé
-   (témoin : recherche neutre, pas de reason mobilité, pas de chute du rural).
+2. Scripts + `--write-index` :
+   - mobilité : Paris/arrondissements (part voiture basse, dependance basse) ; rural isolé
+     (part voiture ~0.9+, dependance ~100) ; communes sous seuil → `null`.
+   - transports : commune avec gare TGV (Lyon, Tours, Lille) → desserte haute ; commune de
+     montagne sans gare proche → desserte basse ; témoin : meilleure gare nommée plausible.
+3. `curl /parse` : « vivre sans voiture » → `faible_dependance_auto` ; « une gare et le TGV » →
+   `acces_transports` ; « sans voiture mais avec une gare » → les deux.
+4. `curl /match` : `acces_transports` → villes à gare majeure en tête (« bien reliée par le
+   train ») ; `faible_dependance_auto` → grandes villes en tête ; recherche neutre (`nature`) →
+   aucune reason mobilité, rural non pénalisé.
 5. `curl /ask` « et côté transports ? » → réponse qualitative comparative (signal ambiant), zéro chiffre.
 
 ## Hors périmètre / V2
 
-- Vélo, marche, distances domicile-travail (autres modes TRANS) : pas en V1.
-- Gares/lignes/horaires précis : rapport.
-- Densité dans le score : exclue (défaut de l'ancien script, corrigé).
-- L'ancien `populate-dependance-auto.js` (Supabase, top200) : laissé tel quel, hors périmètre
-  (module Supabase distinct) ; ce chantier ne le remplace pas, il crée le critère comparateur.
+- TC urbains fins (bus/tram/métro, GTFS) : V2. En V1 l'accès ferroviaire est le proxy d'offre.
+- Vélo, marche, distances domicile-travail (autres modes TRANS) : V2.
+- Horaires, lignes, temps de trajet réels : rapport.
+- Densité dans le score : exclue.
+- L'ancien `populate-dependance-auto.js` (Supabase, top200) : hors périmètre, non remplacé ici.
 
 ## Notes doctrine
 
-- Cf. [[inondation_scoring]] (même patron de précalcul percentile + `--write-index`),
+- Cf. [[inondation_scoring]] (patron percentile + `--write-index`), [[project_horsmesure_cleanup]]
+  (patron BPE : accès par rayon + percentile, réutilisé pour l'accès ferroviaire),
   [[parcours_doctrine]] (opt-in, ne pas pénaliser le rural),
-  [[feedback_no_em_dash]] (pas de tiret cadratin),
-  [[project_signaux_ambiants_askfuture]] (acces_transports rejoint les signaux ambiants).
+  [[project_signaux_ambiants_askfuture]] (acces_transports rejoint les signaux ambiants),
+  [[feedback_no_em_dash]] (pas de tiret cadratin), [[feedback_callendar]] (sources publiques
+  uniquement, SNCF/INSEE attribuables).
 - `home_insee_code` = code INSEE, jamais code postal (cf. [[home_insee_code_pitfall]]).
