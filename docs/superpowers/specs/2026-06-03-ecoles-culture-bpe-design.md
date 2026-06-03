@@ -33,6 +33,11 @@ Doctrine cadre (non négociable) :
    vivant et à la pratique artistique s'ils existent dans la nomenclature BPE (salles de
    spectacle, salles de concert, scènes conventionnées, conservatoires, écoles de musique,
    équipements culturels comparables). On mesure l'ACCÈS à une offre, pas la vitalité.
+   **L'objectif est de mesurer l'accès à une offre culturelle AU SENS LARGE.** La culture
+   ne se réduit pas à la culture institutionnelle : lorsqu'ils existent dans la BPE, les
+   lieux de DIFFUSION et de PRATIQUE artistique (salles de spectacle/concert, conservatoires,
+   écoles de musique, etc.) sont considérés au même titre que les équipements plus
+   institutionnels (musée, bibliothèque). Ne pas régresser vers un simple « musée + bibliothèque ».
 5. **Opt-in strict** : aucun effet si l'utilisateur ne demande rien.
 6. **Déduction famille → écoles uniquement, poids 1 max** :
    - mention explicite (écoles / collège / lycée / scolarité) → poids NORMAL ;
@@ -100,6 +105,9 @@ Ensembles d'équipements (codes `TYPEQU` à CONFIRMER dans le plan contre la doc
 - effet de bord du rayon dur : un équipement juste hors rayon. Mitigations possibles :
   rayon un peu plus large, pondération décroissante avec la distance, ou comptage souple.
   V1 : rayon dur comme nature, documenter le choix ; affiner si les témoins le justifient.
+- pertinence d'un rayon UNIQUE de 15 km entre urbain dense et rural très peu peuplé : 15 km
+  autour de Paris et 15 km autour d'Aubusson n'ont pas la même signification. Pas un sujet
+  V1, mais à garder en tête (rayon adaptatif à la densité = piste future).
 
 ## 2. Moteur — `comparateur-vie.ts`
 
@@ -110,8 +118,8 @@ Ensembles d'équipements (codes `TYPEQU` à CONFIRMER dans le plan contre la doc
   - `case "acces_ecoles": return c.ecoles?.score ?? null;`
   - `case "acces_culture": return c.culture?.score ?? null;`
 - `REASON_POS` :
-  - `acces_ecoles: "collège et lycée accessibles à proximité"`
-  - `acces_culture: "accès à une offre culturelle à proximité"`
+  - `acces_ecoles: "collèges et lycées accessibles autour"`
+  - `acces_culture: "équipements culturels accessibles autour"`
 - `REASON_NEG` :
   - `acces_ecoles: "établissements du secondaire plus éloignés"`
   - `acces_culture: "offre culturelle accessible plus limitée"`
@@ -151,6 +159,14 @@ mesurée, pour ne jamais absorber en silence la qualité/vitalité.
   locale »…), distincte de l'intention d'accès.
 - Un même projet peut donc produire À LA FOIS la préférence (accès, mesuré) ET le hors-mesure
   (qualité/vitalité, honnête). C'est voulu.
+
+EXEMPLE CANONIQUE (le cas utilisateur le plus fréquent, à coder noir sur blanc) :
+> « je cherche une ville avec de bonnes écoles »
+> doit produire :
+> - préférence : `acces_ecoles` (poids normal) — on mesure l'accès aux collèges et lycées ;
+> - horsMesure : `ecoles` (recadré qualité) — on dit qu'on ne mesure pas la qualité scolaire.
+Ni silence (« compris : bonnes écoles = accès »), ni rejet (« on ne mesure pas ça ») : les deux.
+À reprendre tel quel dans le prompt de parse et dans la vérification.
 
 ## 5. Glose visible — `comparateur-labels.ts`
 
