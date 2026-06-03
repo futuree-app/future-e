@@ -37,19 +37,21 @@ Juste après la fonction `pressionEcoNote(...)` (se termine ~l.825), insérer :
 // Signal narratif (hors score). N'existe que si la PRESSION climatique est marquée :
 // tendance projetée des pluies extrêmes forte (NORRx1d, moteur principal) ET niveau déjà
 // significatif (NORRRq99, garde-fou). La phrase s'adapte à l'historique CatNat observé.
-// Seuils (66 = haut de distribution, 34 = pas-bas) alignés sur bandIndex, à caler sur témoins.
+// Seuils calés sur témoins réels (porteur) : tendance >= 88 ET niveau >= 75 -> ~12,5 % des
+// communes, garde Nîmes (94/93) et Arles (88/79), exclut Lens (3/1) et Paris (4/8, crue de
+// Seine fluviale non captée par la tendance pluies extrêmes). Préférence : rare mais crédible.
 function buildClimatInondation(c: IndexCommune): string | null {
   const inond = c.inondation;
   if (!inond) return null;
   const tendance = c.pct.NORRx1d_yr; // Δ projeté des pluies extrêmes (percentile national)
   const niveau = c.pct.NORRRq99_yr; // niveau p99 journalier (percentile national)
   if (tendance == null || niveau == null) return null; // DRIAS manquant -> silence
-  const pressionMarquee = tendance >= 66 && niveau >= 34;
+  const pressionMarquee = tendance >= 88 && niveau >= 75;
   if (!pressionMarquee) return null; // le climat n'ajoute rien -> silence
   const historiqueNotable = inond.risque >= 66; // beaucoup d'arrêtés CatNat observés
   return historiqueNotable
-    ? "Historique d'inondation déjà marqué, dans un contexte climatique susceptible d'accentuer cet aléa."
-    : "Historique d'inondation limité, mais évolution climatique à surveiller.";
+    ? "Historique d'inondation déjà présent ; les pluies extrêmes tendent à s'intensifier."
+    : "Peu d'inondations recensées à ce jour ; les pluies extrêmes tendent à s'intensifier.";
 }
 ```
 
@@ -93,7 +95,7 @@ def signal(c):
     if not inond: return None
     t=c.get("pct",{}).get("NORRx1d_yr"); n=c.get("pct",{}).get("NORRRq99_yr")
     if t is None or n is None: return None
-    if not (t>=66 and n>=34): return None
+    if not (t>=88 and n>=75): return None
     return "accentuer" if inond.get("risque",0)>=66 else "surveiller"
 buckets={"surveiller":[],"accentuer":[],None:0}
 miss_drias=0
@@ -208,8 +210,8 @@ curl -s -X POST http://localhost:3000/api/comparateur-vie/synthesize -H 'Content
    "preferences":[{"key":"faible_risque_inondation","weight":3}],
    "project":"Je veux éviter les zones inondables",
    "results":[
-     {"nom":"Nîmes","region":"Occitanie","reasons":["historique d inondation plus marqué"],"tradeoff":null,"climatInondation":"Historique d'\''inondation déjà marqué, dans un contexte climatique susceptible d'\''accentuer cet aléa."},
-     {"nom":"Rennes","region":"Bretagne","reasons":["historique d inondation plus faible"],"tradeoff":null,"climatInondation":"Historique d'\''inondation limité, mais évolution climatique à surveiller."}
+     {"nom":"Nîmes","region":"Occitanie","reasons":["historique d inondation plus marqué"],"tradeoff":null,"climatInondation":"Historique d'\''inondation déjà présent ; les pluies extrêmes tendent à s'\''intensifier."},
+     {"nom":"Rennes","region":"Bretagne","reasons":["historique d inondation plus faible"],"tradeoff":null,"climatInondation":"Peu d'\''inondations recensées à ce jour ; les pluies extrêmes tendent à s'\''intensifier."}
    ]
  }' | python3 -c "import sys,re; a=sys.stdin.read(); print(a); print('--- chiffre:',bool(re.search(r'[0-9]',a)),'| mots interdits:',[w for w in ['va se produire','risque futur','prédiction','classement','résilience','fragile','menacé','condamné'] if w in a.lower()])"
 ```
@@ -224,7 +226,7 @@ curl -s -X POST http://localhost:3000/api/comparateur-vie/synthesize -H 'Content
    "preferences":[{"key":"nature","weight":2}],
    "project":"Je veux de la nature",
    "results":[
-     {"nom":"Nîmes","region":"Occitanie","reasons":["nature à proximité"],"tradeoff":null,"climatInondation":"Historique d'\''inondation déjà marqué, dans un contexte climatique susceptible d'\''accentuer cet aléa."}
+     {"nom":"Nîmes","region":"Occitanie","reasons":["nature à proximité"],"tradeoff":null,"climatInondation":"Historique d'\''inondation déjà présent ; les pluies extrêmes tendent à s'\''intensifier."}
    ]
  }' | python3 -c "import sys; a=sys.stdin.read(); print(a); print('--- mentionne inondation/climat (attendu: non):', any(w in a.lower() for w in ['inondation','pluies extrêmes','aléa climatique']))"
 ```
@@ -278,8 +280,8 @@ Expected : aucune ligne (exit 1).
 ```bash
 curl -s -X POST http://localhost:3000/api/comparateur-vie/ask -H 'Content-Type: application/json' \
  -d '{"question":"et côté inondations et climat ?","context":{"territoires":[
-   {"rang":1,"nom":"Rennes","region":"Bretagne","raisons":["historique faible"],"compromis":null,"signaux":{"inondation":"historique d inondation plus faible","climat_inondation":"Historique d'\''inondation limité, mais évolution climatique à surveiller."}},
-   {"rang":2,"nom":"Nîmes","region":"Occitanie","raisons":["nature"],"compromis":null,"signaux":{"inondation":"historique d inondation plus marqué","climat_inondation":"Historique d'\''inondation déjà marqué, dans un contexte climatique susceptible d'\''accentuer cet aléa."}}
+   {"rang":1,"nom":"Rennes","region":"Bretagne","raisons":["historique faible"],"compromis":null,"signaux":{"inondation":"historique d inondation plus faible","climat_inondation":"Peu d'\''inondations recensées à ce jour ; les pluies extrêmes tendent à s'\''intensifier."}},
+   {"rang":2,"nom":"Nîmes","region":"Occitanie","raisons":["nature"],"compromis":null,"signaux":{"inondation":"historique d inondation plus marqué","climat_inondation":"Historique d'\''inondation déjà présent ; les pluies extrêmes tendent à s'\''intensifier."}}
  ]}}' | python3 -c "import sys,re; a=__import__('json').load(sys.stdin).get('answer',''); print(a); print('--- chiffre:',bool(re.search(r'[0-9]',a)),'| mots interdits:',[w for w in ['va se produire','risque futur','prédiction'] if w in a.lower()])"
 ```
 

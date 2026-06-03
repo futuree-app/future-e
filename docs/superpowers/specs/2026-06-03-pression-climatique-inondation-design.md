@@ -64,13 +64,21 @@ l'historique observé (`c.inondation.risque`, par terciles cohérents avec les b
 
 | Historique CatNat | Pression | `climatInondation` |
 |---|---|---|
-| limité **ou** intermédiaire | marquée | « Historique d'inondation limité, mais évolution climatique à surveiller. » |
-| notable | marquée | « Historique déjà marqué, dans un contexte climatique susceptible d'accentuer cet aléa. » |
+| limité **ou** intermédiaire | marquée | « Peu d'inondations recensées à ce jour ; les pluies extrêmes tendent à s'intensifier. » |
+| notable | marquée | « Historique d'inondation déjà présent ; les pluies extrêmes tendent à s'intensifier. » |
 | quelconque | non marquée | `null` (silence) |
 
-Le tercile **intermédiaire** rejoint la famille « à surveiller » : c'est précisément le cas où le
-climat ajoute de l'information (territoire moyen dont la trajectoire devient plus sensible).
-Formulations ci-dessus = base, à affiner à la marge ; esprit et ton figés.
+Le tercile **intermédiaire** rejoint la famille « peu d'inondations recensées » : c'est précisément
+le cas où le climat ajoute de l'information (territoire moyen dont la trajectoire devient plus
+sensible). Formulations **factuelles** (porteur) : on sépare l'observé (« peu d'inondations
+recensées » / « historique déjà présent ») du projeté (« les pluies extrêmes tendent à
+s'intensifier »), sans verbe interprétatif type « à surveiller ».
+
+**Seuils calés sur témoins réels (porteur)** : `pct(NORRx1d_yr) >= 88` ET `pct(NORRRq99_yr) >= 75`
+→ ~12,5 % des communes. Garde Nîmes (94/93) et Arles (88/79) en « historique déjà présent » ;
+exclut Lens (3/1) et Paris (4/8 : crue de Seine fluviale, non captée par la tendance pluies
+extrêmes — limite assumée). Préférence porteur : signal rare mais crédible plutôt qu'une cible de
+prévalence ; ne pas forcer Marseille/Lyon si cela élargit trop.
 
 ## Surfaces
 
