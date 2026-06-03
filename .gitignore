@@ -77,3 +77,4 @@ data/cache-nature/
 # BPE : venv dédié + source parquet locale (non versionnés)
 .venv-bpe/
 data/bpe24.parquet
+data/.cache/
