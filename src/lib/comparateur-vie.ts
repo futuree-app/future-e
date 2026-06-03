@@ -968,8 +968,8 @@ function buildDistinctive(
     { tier: 2, value: (c) => c.clim.NORRR_yr ?? null, dir: "max", scale: 250, label: "la plus pluvieuse", guard: (w) => w >= 850 },
     { tier: 2, value: (c) => c.clim.NORTMm_seas_DJF ?? null, dir: "max", scale: 4, label: "les hivers les plus doux" },
     { tier: 2, value: (c) => c.clim.NORTX30D_yr ?? null, dir: "max", scale: 15, label: "les étés les plus chauds" },
-    { tier: 2, value: (c) => c.population ?? null, dir: "min", scale: 1, mode: "ratio", label: "la plus petite ville" },
-    { tier: 2, value: (c) => c.population ?? null, dir: "max", scale: 1, mode: "ratio", label: "la plus grande ville" },
+    { tier: 2, value: (c) => tailleVille(c), dir: "min", scale: 1, mode: "ratio", label: "la plus petite ville" },
+    { tier: 2, value: (c) => tailleVille(c), dir: "max", scale: 1, mode: "ratio", label: "la plus grande ville" },
   ];
   const cand = new Map<string, { tier: number; label: string; sal: number }[]>(picks.map((c) => [c.insee, []]));
   for (const cd of CANDS) {
