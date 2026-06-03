@@ -25,6 +25,8 @@ export const PREFERENCE_LABELS: Record<string, string> = {
   faible_pression_agricole: "un environnement peu marqué par l'agriculture intensive",
   viabilite_emploi: "un bassin d'emploi dynamique",
   nature: "des espaces naturels à proximité",
+  acces_ecoles: "l'accès aux collèges et lycées",
+  acces_culture: "l'accès à une offre culturelle",
 };
 
 // Interprétations visibles (audit sémantique, cf. AUDIT_SEMANTIQUE_COMPARATEUR.md).
@@ -41,6 +43,10 @@ export const PREFERENCE_INTERPRETATIONS: Record<string, string | null> = {
   // « à proximité » assumé (on mesure le couvert autour, pas dans la commune). Jamais
   // « préservé / sauvage / biodiversité », qu'on ne mesure pas (cf. NATURE_TERRITORIAL.md).
   nature: "forêts, prairies et milieux naturels autour",
+  // Gloses OBLIGATOIRES (caveat méthodo assumé) : éviter le contresens « critère présent =
+  // bonnes écoles / vie culturelle riche ». On mesure l'accès, pas la qualité ni la vitalité.
+  acces_ecoles: "accès aux collèges et lycées autour, pas la qualité des établissements",
+  acces_culture: "présence d'équipements culturels accessibles autour, pas l'animation ni la qualité",
   // self-évidents (le mot = la mesure) : pas de glose
   faible_chaleur: null,
   faible_secheresse: null,
@@ -88,15 +94,15 @@ export function preferencesToInterpreted(
   return out;
 }
 
-// Phrases honnêtes affichées au gate pour les notions sans critère dans le moteur.
-// Formulation FIXE par kind (on n'interpole pas le mot brut de l'utilisateur, pour
-// éviter les accords bancals). écoles / culture = « pas encore » (une donnée publique
-// pourrait les approcher un jour, BPE) ; affectif = jamais (expérience personnelle).
+// Phrases honnêtes affichées au gate pour les facettes SANS critère dans le moteur. écoles /
+// culture sont désormais MESURÉES en ACCÈS (acces_ecoles / acces_culture) ; leur phrase
+// hors-mesure est recadrée sur la facette non mesurée (qualité / vitalité). affectif = jamais
+// mesurable (expérience personnelle). On n'interpole jamais le mot brut (accords bancals).
 const HORS_MESURE_PHRASES: Record<string, string> = {
   ecoles:
-    "La présence d'écoles, de collèges et de lycées n'est pas encore un critère mesuré par futur•e.",
+    "La qualité, la réputation et les options des établissements ne sont pas mesurées par futur•e ; seul l'accès aux collèges et lycées l'est.",
   culture:
-    "L'accès à la vie culturelle (cinémas, théâtres, musées) n'est pas encore un critère mesuré par futur•e.",
+    "L'animation culturelle, la programmation et la vie associative locale ne sont pas mesurées par futur•e ; seul l'accès aux équipements culturels l'est.",
   affectif:
     "Le caractère d'un lieu (authentique, chaleureux, vivant) relève d'une expérience personnelle, pas d'une donnée territoriale.",
 };
