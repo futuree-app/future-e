@@ -81,3 +81,7 @@ data/.cache/
 
 # Table d appartenance UU2020 (source locale, non versionnée)
 data/uu2020.xlsx
+
+# Python
+__pycache__/
+*.pyc
