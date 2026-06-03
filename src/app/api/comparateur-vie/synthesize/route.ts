@@ -206,6 +206,16 @@ décliner", est "menacé" ou "condamné" ; aucun verdict sur son avenir économi
 Vous pouvez rappeler que la capacité d'adaptation n'est pas mesurée. Si le champ est
 absent ou nul, n'en parlez pas (ne le déduisez jamais vous-même).
 
+Si un champ "pression_climatique_inondation" est fourni pour un territoire,
+mentionnez-le UNE fois, comme une nuance de lecture et JAMAIS comme une prédiction.
+C'est un signal COMPLÉMENTAIRE : la tendance climatique des pluies extrêmes éclaire
+l'historique d'inondation observé, sans le remplacer. RÈGLES STRICTES : ne dites
+JAMAIS qu'une inondation "va" se produire, ni "risque futur", ni un chiffre, ni un
+classement ; ne confondez pas ce signal avec le critère inondation (historique
+observé) ni avec les pluies extrêmes (projection, critère distinct). Le texte fourni
+est déjà sobre, reprenez-en l'esprit (point de vigilance, jamais une alarme). Si le
+champ est absent ou nul, n'en parlez pas (ne le déduisez jamais vous-même).
+
 Si un champ "logement" est fourni pour un territoire, vous pouvez le mentionner UNE
 fois comme une information pratique : c'est un NIVEAU DE PRIX relatif (achat et/ou
 loyers, par rapport au reste de la France), déjà formulé en clair. RÈGLES : reprenez
@@ -225,7 +235,7 @@ type Body = {
   project?: string;
   reformulation?: string;
   preferences?: { key: string; weight: number }[];
-  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null }[];
+  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null; climatInondation?: string | null }[];
   outcome?: { perfectMatch?: boolean; message?: string | null };
   perimetre?: string[]; // ancres dures = cadre choisi (tous les territoires y sont)
   orientation?: string[]; // ancres souples = penchant (résultats inclinés, sans s'y limiter)
@@ -249,6 +259,11 @@ export async function POST(request: NextRequest) {
     .map((p) => PREF_LABELS[p.key])
     .filter(Boolean);
 
+  // Frontière porteur : la nuance climatique inondation n'apparaît dans la synthèse
+  // que si l'inondation a été explicitement demandée (sinon la synthèse l'introduirait
+  // spontanément alors que l'utilisateur n'a pas parlé d'inondation).
+  const inondationDemandee = (body.preferences ?? []).some((p) => p.key === "faible_risque_inondation");
+
   const perimetre = Array.isArray(body.perimetre) ? body.perimetre.filter((s) => typeof s === "string" && s) : [];
   const orientation = Array.isArray(body.orientation) ? body.orientation.filter((s) => typeof s === "string" && s) : [];
 
@@ -267,6 +282,7 @@ export async function POST(request: NextRequest) {
       raisons: r.reasons ?? [],
       compromis: r.tradeoff ?? null,
       pression_climatique_economie: r.pressionEco ?? null,
+      pression_climatique_inondation: inondationDemandee ? (r.climatInondation ?? null) : null,
       logement: r.logement ?? null,
       littoral: r.littoral ?? null,
       trait_distinctif: r.distinctive ?? null,
