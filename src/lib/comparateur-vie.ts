@@ -892,8 +892,10 @@ function passesHard(
   if (hc.nearSea?.active && c.distance_cote_km > (hc.nearSea.maxKm ?? 30)) return false;
   if (hc.excludeSea && c.distance_cote_km < 15) return false;
   if (hc.communeSize) {
-    if (hc.communeSize.min != null && (c.population ?? 0) < hc.communeSize.min) return false;
-    if (hc.communeSize.max != null && (c.population ?? Infinity) > hc.communeSize.max) return false;
+    // Évalué en TAILLE D'AGGLOMÉRATION (UU), pas en population communale (cf. chantier C).
+    const t = tailleVille(c);
+    if (hc.communeSize.min != null && (t ?? 0) < hc.communeSize.min) return false;
+    if (hc.communeSize.max != null && (t ?? Infinity) > hc.communeSize.max) return false;
   }
   if (placePoint) {
     if (haversineKm(c.lat, c.lon, placePoint.lat, placePoint.lon) > placePoint.maxKm) return false;
@@ -1055,14 +1057,24 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   if (hc.sizeRelativeTo?.label && names) {
     const raw = hc.sizeRelativeTo.label;
     const key = normalizeName(raw);
-    const refPop = PLM_VILLES[key]?.pop ?? names.get(key)?.population ?? null;
+    // Référence en TAILLE D'AGGLOMÉRATION : pop d'UU (PLM via leur UU parente ; sinon
+    // tailleVille de la commune de référence). Corrige la limite B (comparaison communale).
+    const plm = PLM_VILLES[key];
+    const refHit = names.get(key);
+    const refPop = plm
+      ? uuPopCache?.get(plm.uu) ?? null
+      : refHit
+        ? tailleVille(refHit)
+        : null;
     if (refPop != null) {
       const cs = hc.communeSize ?? {};
+      // Bornes STRICTEMENT exclusives : « plus petit que Lyon » exclut l'agglo lyonnaise
+      // elle-même (taille d'UU égale), pas seulement ce qui la dépasse.
       if (hc.sizeRelativeTo.direction === "smaller") {
-        cs.max = Math.min(cs.max ?? Infinity, refPop);
+        cs.max = Math.min(cs.max ?? Infinity, refPop - 1);
         appliedPlaces.push(`communes plus petites que ${raw}`);
       } else {
-        cs.min = Math.max(cs.min ?? 0, refPop);
+        cs.min = Math.max(cs.min ?? 0, refPop + 1);
         appliedPlaces.push(`communes plus grandes que ${raw}`);
       }
       hc.communeSize = cs;
