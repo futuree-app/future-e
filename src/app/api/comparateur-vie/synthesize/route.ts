@@ -42,6 +42,7 @@ const PREF_LABELS: Record<string, string> = {
   viabilite_emploi: "un bassin d'emploi dynamique",
   acces_ecoles: "l'accès aux collèges et lycées",
   acces_culture: "l'accès à une offre culturelle",
+  faible_risque_inondation: "un faible risque d'inondation",
 };
 
 const SYSTEM = `Vous écrivez la synthèse éditoriale du Comparateur de vie de futur•e.

@@ -27,6 +27,7 @@ export const PREFERENCE_LABELS: Record<string, string> = {
   nature: "des espaces naturels à proximité",
   acces_ecoles: "l'accès aux collèges et lycées",
   acces_culture: "l'accès à une offre culturelle",
+  faible_risque_inondation: "un faible risque d'inondation",
 };
 
 // Interprétations visibles (audit sémantique, cf. AUDIT_SEMANTIQUE_COMPARATEUR.md).
@@ -47,11 +48,12 @@ export const PREFERENCE_INTERPRETATIONS: Record<string, string | null> = {
   // bonnes écoles / vie culturelle riche ». On mesure l'accès, pas la qualité ni la vitalité.
   acces_ecoles: "accès aux collèges et lycées autour, pas la qualité des établissements",
   acces_culture: "présence d'équipements culturels accessibles autour, pas l'animation ni la qualité",
+  faible_risque_inondation: "historique d'arrêtés CatNat inondation et territoires à risque important, pas une garantie d'absence de crue",
   // self-évidents (le mot = la mesure) : pas de glose
   faible_chaleur: null,
   faible_secheresse: null,
   faible_risque_feu: null,
-  faible_precip_extremes: null,
+  faible_precip_extremes: "pluies intenses projetées, pas le risque d'inondation réel",
   air_sain: null,
   acces_soins: null,
   acces_services: null,
