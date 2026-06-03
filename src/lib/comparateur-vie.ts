@@ -82,6 +82,8 @@ export type HardConstraints = {
   communeSize?: { min?: number | null; max?: number | null } | null;
 };
 
+export type HorsMesureKind = "ecoles" | "culture" | "affectif";
+
 export type ParsedProject = {
   reformulation: string;
   hardConstraints: HardConstraints;
@@ -90,6 +92,10 @@ export type ParsedProject = {
   // Projet hors-emploi (retraite, télétravail total, sans activité) : supprime la
   // baseline de viabilité du bassin d'emploi (ne jamais pénaliser un tel projet).
   emploiHorsSujet?: boolean;
+  // Notions exprimées par l'utilisateur SANS critère dans le moteur (écoles, vie
+  // culturelle, caractère affectif). Pur affichage honnête au gate, aucun impact
+  // sur le score. cf. plan 2026-06-03 (constat QA : ces notions étaient avalées en silence).
+  horsMesure?: { term: string; kind: HorsMesureKind }[];
 };
 
 export type MatchResult = {
