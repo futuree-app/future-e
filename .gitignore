@@ -73,3 +73,7 @@ data/cache-logement/
 
 # Cache brut nature (OSO 2023 ~737 Mo + contours) — non versionné ; le dérivé vit dans l'index
 data/cache-nature/
+
+# BPE : venv dédié + source parquet locale (non versionnés)
+.venv-bpe/
+data/bpe24.parquet
