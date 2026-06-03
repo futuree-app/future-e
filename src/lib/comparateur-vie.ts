@@ -51,6 +51,10 @@ export const PREFERENCE_KEYS = [
   // Caractère naturel à proximité (OSO 2023, couvert naturel élargi dans 15 km).
   // « perçu comme naturel », pas biodiversité ni wilderness. cf. NATURE_TERRITORIAL.md.
   "nature",
+  // Accès BPE (collèges+lycées / offre culturelle large) dans ~15 km, percentile national.
+  // Opt-in strict : aucun plancher. Accès, JAMAIS la qualité ni la vitalité.
+  "acces_ecoles",
+  "acces_culture",
 ] as const;
 export type PreferenceKey = (typeof PREFERENCE_KEYS)[number];
 
@@ -243,6 +247,10 @@ type IndexCommune = {
       fiabilite: "observee" | "estimee";
     } | null;
   } | null;
+  // Accès BPE par rayon ~15 km (cf. scripts/populate-bpe.py). score = percentile national
+  // du comptage d'équipements ; count = brut conservé pour un futur rapport. Accès, pas qualité.
+  ecoles?: { score: number | null; count: number } | null;
+  culture?: { score: number | null; count: number } | null;
 };
 type IndexFile = { meta: unknown; communes: IndexCommune[] };
 
@@ -535,6 +543,10 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
     case "nature":
       // percentile national du couvert naturel élargi dans 15 km (cf. populate-nature.py).
       return c.nature?.score ?? null;
+    case "acces_ecoles":
+      return c.ecoles?.score ?? null; // percentile accès collèges+lycées dans ~15 km
+    case "acces_culture":
+      return c.culture?.score ?? null; // percentile accès offre culturelle dans ~15 km
     default:
       return null;
   }
@@ -557,6 +569,8 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   // « à proximité » assumé : on mesure le couvert naturel autour, pas dans la commune.
   // Jamais « commune naturelle / préservée / sauvage / biodiversité » (cf. doctrine).
   nature: "forêts et espaces naturels à proximité",
+  acces_ecoles: "collèges et lycées accessibles autour",
+  acces_culture: "équipements culturels accessibles autour",
   // « Vaste » est gradué sur la taille RÉELLE de la ZE (effectif salarié absolu),
   // pas sur le percentile saturé : le mot ne sort que là où il est mérité. La
   // diversité (entropie A38) est, elle, toujours défendable.
@@ -581,6 +595,8 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   faible_pression_agricole: "environnement agricole à traitements fréquents à proximité",
   viabilite_emploi: "bassin d'emploi étroit ou peu diversifié",
   nature: "peu d'espaces naturels à proximité",
+  acces_ecoles: "établissements du secondaire plus éloignés",
+  acces_culture: "offre culturelle accessible plus limitée",
 };
 function reasonText(key: PreferenceKey, c: IndexCommune): string {
   const r = REASON_POS[key];
