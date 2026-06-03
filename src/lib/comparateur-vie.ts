@@ -296,12 +296,34 @@ type IndexFile = { meta: unknown; communes: IndexCommune[] };
 let indexCache: IndexCommune[] | null = null;
 let nameCache: Map<string, IndexCommune> | null = null;
 
+// Population d'unité urbaine = somme des populations communales par code UU. Dérivée au
+// chargement de l'index (pas de source externe, pas de regénération de l'index). Sert à
+// mesurer la TAILLE D'AGGLOMÉRATION (isolement, taille de ville) plutôt que la commune seule.
+let uuPopCache: Map<string, number> | null = null;
+function buildUuPop(communes: IndexCommune[]): void {
+  const m = new Map<string, number>();
+  for (const c of communes) {
+    if (c.uu && c.population != null) m.set(c.uu, (m.get(c.uu) ?? 0) + c.population);
+  }
+  uuPopCache = m;
+}
+// Taille du « bassin de ville » : pop d'UU si la commune est dans une UU, sinon sa pop
+// communale (une commune hors UU est son propre bassin). cf. spec chantier C.
+function tailleVille(c: IndexCommune): number | null {
+  if (c.uu && uuPopCache) {
+    const p = uuPopCache.get(c.uu);
+    if (p != null) return p;
+  }
+  return c.population ?? null;
+}
+
 async function loadIndex(): Promise<IndexCommune[]> {
   if (indexCache) return indexCache;
   const filePath = path.join(process.cwd(), "data", "comparateur-index.json");
   const raw = await fs.readFile(filePath, "utf8");
   const parsed = JSON.parse(raw) as IndexFile;
   indexCache = parsed.communes;
+  buildUuPop(indexCache);
   return indexCache;
 }
 
@@ -551,7 +573,7 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
     case "cadre_calme":
       return lerp(CALME, c.densite);
     case "eviter_isolement":
-      return lerp(ISOLEMENT, c.population);
+      return lerp(ISOLEMENT, tailleVille(c)); // taille d'agglomération, pas la commune seule
     case "douceur_climat": {
       const w = lerp(WINTER_MILD, c.clim.NORTMm_seas_DJF);
       if (w == null) return null;
@@ -696,7 +718,7 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   faible_precip_extremes: "pluies extrêmes rares",
   proximite_mer: (c) => `à ${c.distance_cote_km} km de la côte`,
   cadre_calme: "cadre calme et habitable",
-  eviter_isolement: (c) => `vie locale réelle (${(c.population ?? 0).toLocaleString("fr-FR")} hab.)`,
+  eviter_isolement: (c) => `bassin de vie de ${(tailleVille(c) ?? 0).toLocaleString("fr-FR")} hab.`,
   air_sain: "air de fond plus pur",
   acces_soins: "bon accès aux médecins",
   acces_services: "services et commerces à proximité",
@@ -726,7 +748,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   faible_precip_extremes: "pluies intenses fréquentes",
   proximite_mer: "éloignée du littoral",
   cadre_calme: "plus dense que recherché",
-  eviter_isolement: "commune de petite taille",
+  eviter_isolement: "bassin de vie réduit, plus isolé",
   air_sain: "air plus chargé en particules",
   acces_soins: "zone sous-dotée en médecins",
   acces_services: "services parfois éloignés",
