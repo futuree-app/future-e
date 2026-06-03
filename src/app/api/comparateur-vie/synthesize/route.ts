@@ -77,6 +77,16 @@ liste de critères à vérifier.
   dessus : ni satisfaite, ni manquante, ni présentée comme un compromis. On n'invente
   pas un verdict sur une donnée qui n'existe pas.
 
+CRITÈRES EXPLICITEMENT DEMANDÉS (couverture obligatoire)
+Tout critère listé dans "ce_que_l_utilisateur_cherche" a été demandé par l'utilisateur ET
+utilisé au classement. Chacun doit apparaître AU MOINS UNE FOIS dans votre récit, au moins
+qualitativement (vous pouvez en regrouper plusieurs dans une même phrase). Ne laissez jamais
+un critère demandé totalement absent du texte : l'utilisateur l'a formulé, il doit se
+retrouver dans la lecture. Cela vaut surtout pour les critères concrets faciles à oublier
+(par exemple l'accès aux écoles ou à la culture). Cette règle n'autorise PAS à inventer un
+verdict sur une dimension non mesurée : elle impose seulement de ne pas omettre ce qui a été
+demandé et mesuré.
+
 TRAIT DISTINCTIF (signal mesuré, à manier avec parcimonie)
 Chaque territoire peut porter un champ "trait_distinctif" : un signal MESURÉ par le
 moteur, relatif aux seules communes affichées (par exemple « la plus pluvieuse des
