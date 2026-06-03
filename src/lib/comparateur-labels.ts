@@ -87,3 +87,34 @@ export function preferencesToInterpreted(
   }
   return out;
 }
+
+// Phrases honnêtes affichées au gate pour les notions sans critère dans le moteur.
+// Formulation FIXE par kind (on n'interpole pas le mot brut de l'utilisateur, pour
+// éviter les accords bancals). écoles / culture = « pas encore » (une donnée publique
+// pourrait les approcher un jour, BPE) ; affectif = jamais (expérience personnelle).
+const HORS_MESURE_PHRASES: Record<string, string> = {
+  ecoles:
+    "La présence d'écoles, de collèges et de lycées n'est pas encore un critère mesuré par futur•e.",
+  culture:
+    "L'accès à la vie culturelle (cinémas, théâtres, musées) n'est pas encore un critère mesuré par futur•e.",
+  affectif:
+    "Le caractère d'un lieu (authentique, chaleureux, vivant) relève d'une expérience personnelle, pas d'une donnée territoriale.",
+};
+
+// Convertit les notions hors-mesure en phrases à afficher, sans doublon de phrase
+// (deux termes d'un même kind se replient sur une seule phrase). Ignore les kinds inconnus.
+export function horsMesureToPhrases(
+  items: { term: string; kind: string }[] | null | undefined,
+): string[] {
+  if (!items) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const it of items) {
+    const phrase = HORS_MESURE_PHRASES[it.kind];
+    if (phrase && !seen.has(phrase)) {
+      seen.add(phrase);
+      out.push(phrase);
+    }
+  }
+  return out;
+}
