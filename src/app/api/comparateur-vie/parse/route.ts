@@ -208,6 +208,7 @@ PRÉFÉRENCES DISPONIBLES (liste fermée)
 - acces_transports : accès au train et aux gares (desserte ferroviaire pondérée par la fréquentation). Pour « une gare », « le train », « TER », « TGV », « rejoindre une métropole », « transports en commun », « bien desservi », « aller en ville sans voiture »
 - eviter_grandes_villes : préférer une ville à taille humaine (taille de l'agglomération / unité urbaine). Pour « une petite ville », « une ville à taille humaine », « pas une métropole », « pas une grande ville », « éviter les grandes villes », « loin de l'agitation urbaine »
 - prefere_grande_ville : préférer une grande ville (taille de l'agglomération). Pour « une grande ville », « une métropole », « une grande agglomération », « du dynamisme urbain », « l'animation d'une grande ville »
+- vie_etudiante : ville étudiante / accès aux études supérieures (présence d'établissements supérieurs ET poids des étudiants dans la population, niveau agglomération). Pour « une ville étudiante », « université », « fac », « faire des études », « pour mes études » ou celles des enfants, « campus », « vie étudiante », « ville animée par les étudiants »
 
 TRADUCTION AUTOMATIQUE (activez le critère interne, sans exposer le terme technique)
 - "famille", "enfant", "élever un enfant", "grandir" → ajoutez eviter_isolement (poids 2), acces_services (poids 2), faible_pression_agricole (poids 2).
@@ -224,6 +225,8 @@ TRADUCTION AUTOMATIQUE (activez le critère interne, sans exposer le terme techn
 - "ville moyenne", "ville de taille moyenne" → eviter_grandes_villes (poids 2) ET eviter_isolement (poids 2) : plafond + plancher font émerger la ville moyenne.
 - "grande ville", "métropole", "grande agglomération", "dynamisme urbain", "animation urbaine" → prefere_grande_ville (poids 2 à 3).
 - "plus petit que {ville}", "plus grand que {ville}", "moins de N habitants" → contrainte dure (sizeRelativeTo / communeSize), désormais évaluée en taille d'agglomération (UU). Ne créez PAS de préférence eviter_grandes_villes/prefere_grande_ville en plus dans ce cas.
+- "ville étudiante", "université", "fac", "faire des études", "pour mes études", "pour les études des enfants", "campus", "vie étudiante", "animée par les étudiants" → vie_etudiante (poids 2 à 3).
+- NE PAS router "ville dynamique", "ville vivante", "ville animée" vers vie_etudiante : ce sont des intentions distinctes (les étudiants ne sont qu'un proxy partiel du dynamisme). vie_etudiante ne s'active que sur une intention explicite d'études / d'étudiants.
 HORS-MESURE (notions sans critère dans le moteur) : remplissez horsMesure, ne fabriquez JAMAIS de proxy.
 - ÉCOLES. L'ACCÈS aux collèges et lycées EST mesuré (acces_ecoles). La QUALITÉ ne l'est pas.
   • "écoles", "collège", "lycée", "scolarité", "scolariser" (accès) → préférence acces_ecoles (poids 2, ou 3 si essentiel).

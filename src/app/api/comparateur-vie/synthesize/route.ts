@@ -136,6 +136,13 @@ jamais des CONSÉQUENCES détaillées (ça, c'est le rapport). Donc :
   exposé, accès favorable, accès plus limité ;
 - jamais de résumé exhaustif des dimensions, jamais d'inventaire.
 
+SI "une ville étudiante" EST DEMANDÉ (vie_etudiante)
+Ce critère mesure DEUX choses : la présence d'établissements supérieurs accessibles, et le poids
+des étudiants dans la population du bassin de vie. Il NE mesure PAS la qualité des formations, la
+réputation des établissements, les classements, les débouchés, ni la vie culturelle étudiante.
+Présentez-le comme un indicateur de présence et de dynamisme étudiant, jamais comme une évaluation
+qualitative des études proposées.
+
 STRUCTURE (court, 110 à 170 mots, 1 à 2 paragraphes)
 1. Ce que le projet révèle (interprétation, le miroir).
 2. La logique d'ensemble (l'arbitrage que les territoires représentent), PUIS un moment de
