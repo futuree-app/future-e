@@ -138,6 +138,11 @@ export type MatchResult = {
   // espaces naturels des trois »). Palette hiérarchisée (P1 projet de vie > P2 climat/
   // taille). Narratif, hors score, hors tri. null si rien ne se détache. cf. buildDistinctive.
   distinctive: string | null;
+  // Signaux ambiants (NARRATIF, hors score, hors tri) : 0 à 5 phrases qualitatives
+  // descriptives par territoire (bande nationale, filtrées par contraste de groupe),
+  // pour qu'AskFuture réponde aux « et côté X ? » hors critères. clé dimension lisible
+  // -> phrase. Jamais de chiffre. cf. assignSignaux + AMBIENT_DIMENSIONS.
+  signaux: Record<string, string>;
   metrics: {
     distance_cote_km: number;
     population: number | null;
@@ -1034,6 +1039,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
             ? "exposée à l'érosion du littoral (la côte recule)"
             : null,
         distinctive: null, // renseigné après l'assemblage final (relatif au groupe affiché)
+        signaux: {}, // rempli après l'assemblage final sur le groupe affiché (cf. assignSignaux)
         metrics: {
           distance_cote_km: c.distance_cote_km,
           population: c.population,
