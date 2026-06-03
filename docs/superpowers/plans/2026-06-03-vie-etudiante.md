@@ -73,18 +73,22 @@ Juste après le cas `prefere_grande_ville` (`return lerp(GRANDE_VILLE_MAX, taill
 ```
 
 - [ ] **Step 4 : `REASON_POS`** (après `prefere_grande_ville: "grande ville animée",`)
+
+Formulation FACTUELLE (pas « animée », qui interprète) :
 ```ts
-  vie_etudiante: "ville étudiante animée",
+  vie_etudiante: "forte présence étudiante",
 ```
 
 - [ ] **Step 5 : `REASON_NEG`** (après `prefere_grande_ville: "petit bassin urbain",`)
 ```ts
-  vie_etudiante: "offre étudiante limitée",
+  vie_etudiante: "présence étudiante limitée",
 ```
 
 - [ ] **Step 6 : Signal ambiant** (dans `AMBIENT_DIMENSIONS`, après l'entrée `transports`)
+
+Bandes factuelles (présence, pas jugement d'ambiance) :
 ```ts
-  { id: "vie_etudiante", key: "vie_etudiante", bands: ["ville étudiante animée", "présence étudiante intermédiaire", "peu d'étudiants"] },
+  { id: "vie_etudiante", key: "vie_etudiante", bands: ["forte présence étudiante", "présence étudiante intermédiaire", "présence étudiante limitée"] },
 ```
 
 - [ ] **Step 7 : tsc + lint**
@@ -128,36 +132,62 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ---
 
-## Task 3 : parse — router l'intention vie étudiante
+## Task 3 : parse + note de doctrine (prompts synthèse & AskFuture)
 
-**Files:** Modify `src/app/api/comparateur-vie/parse/route.ts`
+**Files:** Modify `src/app/api/comparateur-vie/parse/route.ts`, `src/app/api/comparateur-vie/synthesize/route.ts`, `src/app/api/comparateur-vie/ask/route.ts`
 
 - [ ] **Step 1 : Description de clé** (après la ligne décrivant `prefere_grande_ville`)
 ```
 - vie_etudiante : ville étudiante / accès aux études supérieures (présence d'établissements supérieurs ET poids des étudiants dans la population, niveau agglomération). Pour « une ville étudiante », « université », « fac », « faire des études », « pour mes études » ou celles des enfants, « campus », « vie étudiante », « ville animée par les étudiants »
 ```
 
-- [ ] **Step 2 : Règle de routage** (dans « TRADUCTION AUTOMATIQUE », après la dernière règle de taille de ville — repère : la ligne `... → prefere_grande_ville (poids 2 à 3).`)
+- [ ] **Step 2 : Règle de routage + NON-routage** (dans « TRADUCTION AUTOMATIQUE », après la dernière règle de taille de ville — repère : la ligne `... → prefere_grande_ville (poids 2 à 3).`)
 ```
 - "ville étudiante", "université", "fac", "faire des études", "pour mes études", "pour les études des enfants", "campus", "vie étudiante", "animée par les étudiants" → vie_etudiante (poids 2 à 3).
+- NE PAS router "ville dynamique", "ville vivante", "ville animée" vers vie_etudiante : ce sont des intentions distinctes (les étudiants ne sont qu'un proxy partiel du dynamisme). vie_etudiante ne s'active que sur une intention explicite d'études / d'étudiants.
 ```
 
-- [ ] **Step 3 : tsc** — Run: `npx tsc --noEmit` — Expected: aucune erreur (enum tiré de `PREFERENCE_KEYS`).
+- [ ] **Step 3 : Note de doctrine dans le prompt SYNTHÈSE**
 
-- [ ] **Step 4 : Témoin curl**
+Dans `src/app/api/comparateur-vie/synthesize/route.ts`, juste avant la ligne `STRUCTURE (court, 110 à 170 mots, 1 à 2 paragraphes)`, insérer :
+```
+SI "une ville étudiante" EST DEMANDÉ (vie_etudiante)
+Ce critère mesure DEUX choses : la présence d'établissements supérieurs accessibles, et le poids
+des étudiants dans la population du bassin de vie. Il NE mesure PAS la qualité des formations, la
+réputation des établissements, les classements, les débouchés, ni la vie culturelle étudiante.
+Présentez-le comme un indicateur de présence et de dynamisme étudiant, jamais comme une évaluation
+qualitative des études proposées.
+
+```
+
+- [ ] **Step 4 : Note de doctrine dans le prompt ASKFUTURE**
+
+Dans `src/app/api/comparateur-vie/ask/route.ts`, juste avant la ligne `SI LA QUESTION SORT DU SUJET futur•e`, insérer :
+```
+SI LA VIE ÉTUDIANTE EST EN JEU (critère ou signal vie_etudiante)
+C'est un indicateur de PRÉSENCE et de DYNAMISME étudiant : présence d'établissements supérieurs
+accessibles + poids des étudiants dans la population du bassin de vie. Il ne dit RIEN de la qualité
+des formations, de la réputation, des classements ni des débouchés. Répondez en termes de présence
+et de dynamisme, jamais en évaluation qualitative des études.
+
+```
+
+- [ ] **Step 5 : tsc** — Run: `npx tsc --noEmit` — Expected: aucune erreur (enum tiré de `PREFERENCE_KEYS`).
+
+- [ ] **Step 6 : Témoin curl — routage + non-routage**
 ```bash
-for q in "je cherche une ville étudiante" "un endroit pour faire mes études" "une ville avec une université"; do
+for q in "je cherche une ville étudiante" "un endroit pour faire mes études" "une ville avec une université" "je veux une ville dynamique et vivante"; do
   printf "Q: %s\n" "$q"
   curl -s -X POST http://localhost:3000/api/comparateur-vie/parse -H 'Content-Type: application/json' -d "{\"text\":\"$q\"}" \
    | python3 -c "import sys,json; d=json.load(sys.stdin); print('  ->', [p['key'] for p in d.get('parsed',d).get('preferences',[])])"
 done
 ```
-Expected : chaque requête contient `vie_etudiante`.
+Expected : les trois premières contiennent `vie_etudiante` ; « ville dynamique et vivante » ne contient **pas** `vie_etudiante`.
 
-- [ ] **Step 5 : Commit**
+- [ ] **Step 7 : Commit**
 ```bash
-git add src/app/api/comparateur-vie/parse/route.ts
-git commit -m "feat(comparateur): parse route l'intention vie etudiante
+git add src/app/api/comparateur-vie/parse/route.ts src/app/api/comparateur-vie/synthesize/route.ts src/app/api/comparateur-vie/ask/route.ts
+git commit -m "feat(comparateur): parse vie etudiante (+ non-routage ville dynamique) + doctrine prompts
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -394,8 +424,8 @@ curl -s -X POST http://localhost:3000/api/comparateur-vie/match -H 'Content-Type
 echo "=== /ask ==="
 curl -s -X POST http://localhost:3000/api/comparateur-vie/ask -H 'Content-Type: application/json' \
  -d '{"question":"et côté vie étudiante ?","context":{"territoires":[
-   {"rang":1,"nom":"Rennes","region":"Bretagne","raisons":["dynamisme"],"compromis":null,"signaux":{"vie_etudiante":"ville étudiante animée"}},
-   {"rang":2,"nom":"Aurillac","region":"Auvergne-Rhône-Alpes","raisons":["nature"],"compromis":null,"signaux":{"vie_etudiante":"peu d'\''étudiants"}}
+   {"rang":1,"nom":"Rennes","region":"Bretagne","raisons":["dynamisme"],"compromis":null,"signaux":{"vie_etudiante":"forte présence étudiante"}},
+   {"rang":2,"nom":"Aurillac","region":"Auvergne-Rhône-Alpes","raisons":["nature"],"compromis":null,"signaux":{"vie_etudiante":"présence étudiante limitée"}}
  ]}}' \
  | python3 -c "import sys,json,re; a=json.load(sys.stdin).get('answer',''); print(a); print('chiffre:', bool(re.search(r'[0-9]', a)))"
 ```
