@@ -85,3 +85,6 @@ data/uu2020.xlsx
 # Python
 __pycache__/
 *.pyc
+
+# RP MOBPRO (volumineux, non versionné)
+data/rp-mobpro-2022.parquet
