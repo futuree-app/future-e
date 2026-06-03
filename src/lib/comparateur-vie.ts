@@ -84,6 +84,11 @@ export type HardConstraints = {
   excludeSea?: boolean;
   nearPlace?: { label: string; maxKm?: number | null } | null;
   communeSize?: { min?: number | null; max?: number | null } | null;
+  // « Quitter {ville} » : exclut l'unité urbaine de la ville (le moteur résout label -> UU).
+  excludePlace?: { label: string }[];
+  // « Plus petit / grand que {ville} » : le moteur résout label -> population communale de
+  // référence et pose communeSize (V1 : comparaison COMMUNALE, pas d'agglomération, cf. spec).
+  sizeRelativeTo?: { label: string; direction: "smaller" | "larger" } | null;
 };
 
 export type HorsMesureKind = "ecoles" | "culture" | "affectif";
@@ -150,6 +155,9 @@ export type MatchOutcome = {
   // honnête du périmètre côté UI (« recherche limitée au Sud, au sens… »).
   appliedZones?: AppliedZone[];
   appliedExclusions?: AppliedZone[];
+  // Contraintes ville/taille résolues (« exclusion de l'agglomération de Lyon »,
+  // « communes plus petites que Bordeaux »), pour l'affichage honnête du périmètre.
+  appliedPlaces?: string[];
 };
 
 // Tailles de ville (V1) — utilisées par le parse pour traduire "petite / moyenne
@@ -251,6 +259,9 @@ type IndexCommune = {
   // du comptage d'équipements ; count = brut conservé pour un futur rapport. Accès, pas qualité.
   ecoles?: { score: number | null; count: number } | null;
   culture?: { score: number | null; count: number } | null;
+  // Unité urbaine INSEE (UU2020, cf. scripts/populate-unite-urbaine.py). null = commune hors
+  // unité urbaine (isolée/rurale). Sert à « quitter {ville} » (exclusion par agglomération).
+  uu?: string | null;
 };
 type IndexFile = { meta: unknown; communes: IndexCommune[] };
 
@@ -681,6 +692,8 @@ function passesHard(
   placePoint: { lat: number; lon: number; maxKm: number } | null,
   zoneDepts: Set<string> | null,
   excludeDepts: Set<string>,
+  excludeUU: Set<string>,
+  excludeInsee: Set<string>,
 ): boolean {
   // Population nulle = commune fantôme/donnée manquante : exclue comme sous le plancher
   // (sinon le critère nature pourrait faire remonter des communes quasi inhabitées).
@@ -691,6 +704,9 @@ function passesHard(
   // filtrent pas (elles bonifient le score, hors de cette fonction).
   if (zoneDepts && !zoneDepts.has(c.dept)) return false;
   if (excludeDepts.has(c.dept)) return false;
+  // Exclusion de ville par unité urbaine (« quitter Lyon ») et par commune (ville hors-UU).
+  if (c.uu && excludeUU.has(c.uu)) return false;
+  if (excludeInsee.has(c.insee)) return false;
   // Montagne dure : altitude ≥ ~600 m (montagnosité ≥ 50). Les communes sans
   // altitude (îles, littoral) sont exclues, ce qui est correct pour « à la montagne ».
   if (hc.montagne?.strength === "hard") {
@@ -815,22 +831,77 @@ function buildDistinctive(
   return out;
 }
 
+// Paris / Lyon / Marseille : communes à arrondissements. L'index les stocke par arrondissement
+// (75101.., 69381.., 13201..), pas par code commune, et nameIndex ne connaît donc pas « Lyon ».
+// On résout ces 3 villes par alias direct : nom normalisé -> { uu, pop municipale INSEE }.
+const PLM_VILLES: Record<string, { uu: string; pop: number }> = {
+  paris: { uu: "00851", pop: 2_133_111 },
+  lyon: { uu: "00760", pop: 522_250 },
+  marseille: { uu: "00759", pop: 873_076 },
+};
+
 export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome> {
   const communes = await loadIndex();
   await loadZeTable(); // nom + taille des bassins (signature + raison emploi graduée)
 
+  const hc = parsed.hardConstraints ?? {};
+
+  // nameIndex partagé : nearPlace (proximité), excludePlace (exclusion agglo), sizeRelativeTo (taille).
+  const needNames =
+    !!hc.nearPlace?.label || (hc.excludePlace?.length ?? 0) > 0 || !!hc.sizeRelativeTo?.label;
+  const names = needNames ? await nameIndex() : null;
+
   // Résolution nearPlace (label → coords d'une commune de l'index)
   let placePoint: { lat: number; lon: number; maxKm: number } | null = null;
-  if (parsed.hardConstraints?.nearPlace?.label) {
-    const names = await nameIndex();
-    const hit = names.get(normalizeName(parsed.hardConstraints.nearPlace.label));
-    if (hit) placePoint = { lat: hit.lat, lon: hit.lon, maxKm: parsed.hardConstraints.nearPlace.maxKm ?? 50 };
+  if (hc.nearPlace?.label && names) {
+    const hit = names.get(normalizeName(hc.nearPlace.label));
+    if (hit) placePoint = { lat: hit.lat, lon: hit.lon, maxKm: hc.nearPlace.maxKm ?? 50 };
+  }
+
+  // Libellés de périmètre ville/taille effectivement appliqués (pour l'outcome, cf. Task 5).
+  const appliedPlaces: string[] = [];
+
+  // Exclusion de ville (« quitter {ville} ») par unité urbaine ; ville hors-UU → la commune seule.
+  const excludeUU = new Set<string>();
+  const excludeInsee = new Set<string>();
+  for (const ep of hc.excludePlace ?? []) {
+    const raw = ep?.label ?? "";
+    const key = normalizeName(raw);
+    if (!key) continue;
+    const plm = PLM_VILLES[key];
+    if (plm) {
+      excludeUU.add(plm.uu);
+      appliedPlaces.push(`exclusion de l'agglomération de ${raw}`);
+      continue;
+    }
+    const hit = names?.get(key);
+    if (!hit) continue; // ville inconnue : ignorée (pas de filtre, pas d'erreur)
+    if (hit.uu) excludeUU.add(hit.uu);
+    else excludeInsee.add(hit.insee);
+    appliedPlaces.push(`exclusion de l'agglomération de ${raw}`);
+  }
+
+  // Taille relative (« plus petit/grand que {ville} ») → population communale de référence.
+  if (hc.sizeRelativeTo?.label && names) {
+    const raw = hc.sizeRelativeTo.label;
+    const key = normalizeName(raw);
+    const refPop = PLM_VILLES[key]?.pop ?? names.get(key)?.population ?? null;
+    if (refPop != null) {
+      const cs = hc.communeSize ?? {};
+      if (hc.sizeRelativeTo.direction === "smaller") {
+        cs.max = Math.min(cs.max ?? Infinity, refPop);
+        appliedPlaces.push(`communes plus petites que ${raw}`);
+      } else {
+        cs.min = Math.max(cs.min ?? 0, refPop);
+        appliedPlaces.push(`communes plus grandes que ${raw}`);
+      }
+      hc.communeSize = cs;
+    }
   }
 
   // Ancres géographiques : résolution jeton → départements avec gradient de force.
   // hard → périmètre dur (intersection) ; preferred / inspiration → bonus de score.
   // Le moteur détient la table ; le parse n'a fourni que des jetons et leur force.
-  const hc = parsed.hardConstraints ?? {};
   const zone = resolveZoneAnchors(hc.zones);
   const exclusion = resolveExclusions(hc.excludeZones);
   const montagne = hc.montagne ?? null;
@@ -875,7 +946,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   const totalW = prefs.reduce((s, p) => s + p.weight, 0) || 1;
 
   const candidates = communes.filter((c) =>
-    passesHard(c, hc, placePoint, zone.hardDepartements, exclusion.departements),
+    passesHard(c, hc, placePoint, zone.hardDepartements, exclusion.departements, excludeUU, excludeInsee),
   );
 
   type Sub = { key: PreferenceKey; weight: number; baseline?: boolean; s: number };
@@ -1087,5 +1158,6 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     results: deduped,
     appliedZones,
     appliedExclusions: exclusion.applied,
+    appliedPlaces: appliedPlaces.length ? appliedPlaces : undefined,
   };
 }
