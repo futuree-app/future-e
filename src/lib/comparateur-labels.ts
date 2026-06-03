@@ -28,6 +28,8 @@ export const PREFERENCE_LABELS: Record<string, string> = {
   acces_ecoles: "l'accès aux collèges et lycées",
   acces_culture: "l'accès à une offre culturelle",
   faible_risque_inondation: "un faible risque d'inondation",
+  faible_dependance_auto: "une faible dépendance à la voiture",
+  acces_transports: "l'accès au train et aux gares",
 };
 
 // Interprétations visibles (audit sémantique, cf. AUDIT_SEMANTIQUE_COMPARATEUR.md).
@@ -50,6 +52,8 @@ export const PREFERENCE_INTERPRETATIONS: Record<string, string | null> = {
   acces_ecoles: null,
   acces_culture: "présence d'équipements culturels",
   faible_risque_inondation: "historique d'arrêtés CatNat inondation et territoires à risque important, pas une garantie d'absence de crue",
+  faible_dependance_auto: "part des trajets domicile-travail faits en voiture, pas la qualité du réseau routier",
+  acces_transports: "desserte ferroviaire accessible alentour (présence et fréquentation des gares), pas le détail des horaires",
   // self-évidents (le mot = la mesure) : pas de glose
   faible_chaleur: null,
   faible_secheresse: null,
