@@ -60,8 +60,8 @@ DEUX RÉGIMES
 
 NE COMMENTEZ QUE CE QUI A ÉTÉ MESURÉ (règle stricte, anti-rationalisation)
 Le moteur n'a évalué QUE les critères listés dans "ce_que_l_utilisateur_cherche",
-"perimetre_geographique" et "orientation_geographique", plus les "raisons" et
-"compromis" de chaque territoire. Le champ "projet" est le texte brut de
+"perimetre_geographique" et "orientation_geographique", plus les "raisons", les
+"compromis" et le "trait_distinctif" de chaque territoire. Le champ "projet" est le texte brut de
 l'utilisateur : il vous sert à capter le ton et l'intention, il n'est JAMAIS une
 liste de critères à vérifier.
 - N'affirmez ni ne niez jamais qu'un territoire satisfait ou non une notion ABSENTE
@@ -74,6 +74,20 @@ liste de critères à vérifier.
   dessus : ni satisfaite, ni manquante, ni présentée comme un compromis. On n'invente
   pas un verdict sur une donnée qui n'existe pas.
 
+TRAIT DISTINCTIF (signal mesuré, à manier avec parcimonie)
+Chaque territoire peut porter un champ "trait_distinctif" : un signal MESURÉ par le
+moteur, relatif aux seules communes affichées (par exemple « la plus pluvieuse des
+trois » ou « le meilleur accès aux médecins des trois »). Vous pouvez vous en servir
+pour dire ce qui distingue un territoire des autres, même si l'utilisateur ne l'a pas
+demandé : c'est une vraie différence, ce n'est pas un critère de classement.
+Règles : ne commentez que le contenu exact du champ, n'inventez aucun second trait,
+n'en faites pas un critère de tri, présentez-le comme une différence relative entre
+les options proposées, n'extrapolez pas au-delà du libellé.
+Usage SÉLECTIF : servez-vous d'un trait distinctif seulement quand il aide vraiment à
+raconter l'arbitrage. Ne les listez pas, n'en faites pas l'inventaire, ne paraphrasez
+pas les cartes. Si un trait n'éclaire rien ou alourdit le récit, ignorez-le. Certains
+territoires n'en ont pas : n'en inventez aucun pour eux.
+
 FRONTIÈRE AVEC LE RAPPORT
 Vous parlez des RAISONS (pourquoi ces territoires ressortent). Vous ne parlez
 jamais des CONSÉQUENCES détaillées (ça, c'est le rapport). Donc :
@@ -84,7 +98,9 @@ jamais des CONSÉQUENCES détaillées (ça, c'est le rapport). Donc :
 
 STRUCTURE (court, 110 à 170 mots, 1 à 2 paragraphes)
 1. Ce que le projet révèle (interprétation, le miroir).
-2. La logique d'ensemble des territoires proposés (l'arbitrage qu'ils représentent).
+2. La logique d'ensemble des territoires proposés (l'arbitrage qu'ils représentent),
+   et ce qui distingue les uns des autres quand un trait distinctif le permet. Ne
+   lissez pas les territoires : s'ils se ressemblent, dites aussi ce qui les sépare.
 3. Le ou les compromis principaux, nommés honnêtement. Le compromis est un pont :
    il pointe vers ce qu'on gagnerait à regarder de plus près.
 4. Si aucun territoire ne réunit tout : dites-le clairement, ce sont les options
@@ -160,7 +176,7 @@ type Body = {
   project?: string;
   reformulation?: string;
   preferences?: { key: string; weight: number }[];
-  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null }[];
+  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null }[];
   outcome?: { perfectMatch?: boolean; message?: string | null };
   perimetre?: string[]; // ancres dures = cadre choisi (tous les territoires y sont)
   orientation?: string[]; // ancres souples = penchant (résultats inclinés, sans s'y limiter)
@@ -204,6 +220,7 @@ export async function POST(request: NextRequest) {
       pression_climatique_economie: r.pressionEco ?? null,
       logement: r.logement ?? null,
       littoral: r.littoral ?? null,
+      trait_distinctif: r.distinctive ?? null,
     })),
     sante_environnementale: body.enrichment ?? null,
   };
