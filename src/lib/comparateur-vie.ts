@@ -577,6 +577,92 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
   }
 }
 
+// ── Signaux ambiants (narratif, hors score) ──────────────────────────────────
+// Petit jeu de dimensions que la recherche n'a pas forcément classées, pour qu'AskFuture
+// réponde aux « et côté X ? » de façon qualitative et comparative. Réutilise subScore
+// (favorabilité 0-100, direction gérée par dimension). Bandes = terciles nationaux ;
+// phrases DESCRIPTIVES (décrire, pas juger). cf. spec 2026-06-03-signaux-ambiants-askfuture.
+type AmbientDim = { id: string; key: PreferenceKey; bands: [string, string, string] };
+// bands = [ >=66 favorable, 34-65 intermédiaire, <34 notable ]. Ordre = priorité de départage.
+const AMBIENT_DIMENSIONS: AmbientDim[] = [
+  { id: "inondation", key: "faible_risque_inondation", bands: ["historique d'inondation plus faible", "historique d'inondation intermédiaire", "historique d'inondation plus marqué"] },
+  { id: "chaleur", key: "faible_chaleur", bands: ["étés généralement plus supportables", "étés intermédiaires", "étés généralement plus chauds"] },
+  { id: "secheresse", key: "faible_secheresse", bands: ["sols moins exposés à la sécheresse", "exposition intermédiaire à la sécheresse", "sols plus exposés à la sécheresse"] },
+  { id: "feu", key: "faible_risque_feu", bands: ["risque de feu plus faible", "risque de feu intermédiaire", "risque de feu plus marqué"] },
+  { id: "nature", key: "nature", bands: ["davantage de nature autour", "présence de nature intermédiaire", "moins de nature autour"] },
+  { id: "soins", key: "acces_soins", bands: ["accès aux soins plus facile", "accès aux soins intermédiaire", "accès aux soins plus limité"] },
+  { id: "emploi", key: "viabilite_emploi", bands: ["bassin d'emploi plus dynamique", "bassin d'emploi intermédiaire", "bassin d'emploi moins dynamique"] },
+  { id: "ecoles", key: "acces_ecoles", bands: ["accès aux écoles plus facile", "accès aux écoles intermédiaire", "accès aux écoles plus limité"] },
+  { id: "culture", key: "acces_culture", bands: ["offre culturelle plus présente", "offre culturelle intermédiaire", "offre culturelle plus limitée"] },
+  { id: "air", key: "air_sain", bands: ["air généralement plus sain", "qualité de l'air intermédiaire", "air généralement moins sain"] },
+];
+const SIGNAUX_MAX = 5;
+
+function bandIndex(score: number): 0 | 1 | 2 {
+  return score >= 66 ? 0 : score < 34 ? 2 : 1;
+}
+
+// Calcule les signaux ambiants sur le GROUPE affiché (mutation in place de r.signaux).
+// 1) score par (dim, commune) hors critères demandés et hors données absentes ;
+// 2) filtre de contraste de groupe (>=2 communes : la dim doit s'étaler sur >=2 bandes) ;
+// 3) par commune, classer par |score - moyenne de groupe| (ou |score - 50| si une seule
+//    commune), garder 5, mapper la phrase de bande.
+function assignSignaux(
+  picks: MatchResult[],
+  communeByInsee: Map<string, IndexCommune>,
+  requestedKeys: Set<PreferenceKey>,
+): void {
+  const cols = picks.map((r) => communeByInsee.get(r.insee) ?? null);
+
+  // 1. scores alignés sur picks, par dimension (null = critère demandé OU donnée absente)
+  const scoresByDim = new Map<string, (number | null)[]>();
+  for (const dim of AMBIENT_DIMENSIONS) {
+    if (requestedKeys.has(dim.key)) {
+      scoresByDim.set(dim.id, picks.map(() => null));
+    } else {
+      scoresByDim.set(dim.id, cols.map((c) => (c ? subScore(dim.key, c) : null)));
+    }
+  }
+
+  // 2. filtre de contraste de groupe
+  const groupContrast = picks.length >= 2;
+  const kept = new Set<string>();
+  for (const dim of AMBIENT_DIMENSIONS) {
+    const present = scoresByDim.get(dim.id)!.filter((s): s is number => s != null);
+    if (present.length === 0) continue;
+    if (!groupContrast) {
+      kept.add(dim.id);
+    } else if (new Set(present.map(bandIndex)).size >= 2) {
+      kept.add(dim.id);
+    }
+  }
+
+  // 3. moyenne de groupe par dimension retenue
+  const meanByDim = new Map<string, number>();
+  for (const id of kept) {
+    const present = scoresByDim.get(id)!.filter((s): s is number => s != null);
+    meanByDim.set(id, present.reduce((a, b) => a + b, 0) / present.length);
+  }
+
+  // 4. sélection par commune (Array.sort est stable -> égalité = ordre du tableau §1)
+  picks.forEach((r, i) => {
+    const ranked = AMBIENT_DIMENSIONS
+      .filter((dim) => kept.has(dim.id))
+      .map((dim) => ({ dim, s: scoresByDim.get(dim.id)![i] }))
+      .filter((x): x is { dim: AmbientDim; s: number } => x.s != null)
+      .map((x) => ({
+        dim: x.dim,
+        s: x.s,
+        dist: groupContrast ? Math.abs(x.s - (meanByDim.get(x.dim.id) ?? 50)) : Math.abs(x.s - 50),
+      }))
+      .sort((a, b) => b.dist - a.dist)
+      .slice(0, SIGNAUX_MAX);
+    const signaux: Record<string, string> = {};
+    for (const x of ranked) signaux[x.dim.id] = x.dim.bands[bandIndex(x.s)];
+    r.signaux = signaux;
+  });
+}
+
 const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> = {
   faible_chaleur: "étés plus frais",
   douceur_climat: "climat doux, hivers tempérés",
@@ -1166,6 +1252,14 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     liDistinct,
   );
   for (const r of shownPicks) r.distinctive = distinctiveMap[r.insee] ?? null;
+
+  // Signaux ambiants (narratif, hors score) sur le groupe affiché. requestedKeys = clés
+  // EXPLICITEMENT demandées (hors baseline auto) : un critère pesé n'est pas redondé ici,
+  // sa raison le porte déjà. byInsee est déjà construit ci-dessus pour le trait distinctif.
+  const requestedKeys = new Set<PreferenceKey>(
+    parsed.preferences.filter((p) => PREFERENCE_KEYS.includes(p.key)).map((p) => p.key),
+  );
+  assignSignaux(shownPicks, byInsee, requestedKeys);
 
   return {
     perfectMatch: perfect,
