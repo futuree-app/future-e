@@ -28,16 +28,26 @@ Distinction importante : il y a deux « inondation » dans le projet, qui resten
 - Le parse **dissocie** explicitement les deux notions (voir routing).
 - Module `/inondation` (DRIAS) inchangé.
 
-### Signal (hybride)
+### Signal (V1 = fréquence CatNat ; TRI différé)
 
 `c.inondation = { catnat: number; tri: boolean; risque: number }` :
 - **catnat** : nombre d'arrêtés de catastrophe naturelle de type INONDATION FLUVIALE/PLUVIALE
   par commune (débordement, ruissellement, coulées de boue, crues). **La submersion marine
   est EXCLUE** (« chocs mécaniques liés à l'action des vagues ») : elle relève du chantier
   littoral, on ne mélange pas deux familles de risque.
-- **tri** : la commune est-elle en Territoire à Risque important d'Inondation (~120 zones).
-- **risque** : 0-100, plus haut = plus exposé. Dérivé du percentile national de `catnat`,
-  relevé si `tri` (signal de gravité). Formule précise calée au plan (tunable).
+- **tri** : réservé pour le bonus de gravité (Territoire à Risque important d'Inondation).
+  **V1 : toujours false** (pas de source nationale TRI propre trouvée ; à brancher plus tard
+  sans rupture). Champ conservé dans le schéma dès maintenant.
+- **risque** : 0-100, plus haut = plus exposé. V1 = percentile national de `catnat`. Quand le
+  TRI sera disponible, on relèvera `risque` pour les communes en TRI (formule tunable).
+
+### Acquisition des données (décision porteur)
+
+- **CatNat** : pas de bulk national à jour (le seul dataset national data.gouv date de 2016).
+  Acquisition par **loop API GASPAR `/gaspar/catnat` par commune** (~35k communes), one-shot,
+  avec **cache/reprise** (relançable). Données à jour, endpoint déjà éprouvé dans `georisques.ts`.
+- **TRI** : aucune liste nationale propre trouvée (seulement des fichiers régionaux). **Différé** :
+  V1 livre la fréquence CatNat seule (déjà un vrai discriminant, capture Nîmes/Lens).
 
 ### Moteur
 
