@@ -81,6 +81,13 @@ comparateur-labels.ts
 
 ## 1. Données — `scripts/populate-bpe.py`
 
+**Source figée** : BPE24 (INSEE, millésime 2024), parquet national géolocalisé, ~183 Mo,
+data.gouv (`https://static.data.gouv.fr/resources/base-permanente-des-equipements-3/20260330-145351/bpe24.parquet`).
+Téléchargement one-shot local (avec accord du porteur), AUCUN appel runtime. Lecture via
+`pyarrow` (à installer ; `pandas` 3.0.3 + `numpy` déjà présents, aucun lecteur parquet installé).
+Investigation : l'API ADEME `data_communes` déjà utilisée ne porte que le niveau de gamme
+agrégé (pas de comptage par type) → insuffisante, écartée.
+
 Nouveau script Python calqué sur `populate-nature.py` :
 - lit les centroïdes (`lat`/`lon`) depuis `data/comparateur-index.json` ;
 - lit la BPE géolocalisée (équipements avec coordonnées et code `TYPEQU`) ;
