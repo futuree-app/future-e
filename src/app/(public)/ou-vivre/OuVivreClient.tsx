@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import posthog from "posthog-js";
 import type { ParsedProject, MatchOutcome, MatchResult } from "@/lib/comparateur-vie";
-import { preferencesToLabels, preferencesToInterpreted } from "@/lib/comparateur-labels";
+import {
+  preferencesToLabels,
+  preferencesToInterpreted,
+  horsMesureToPhrases,
+} from "@/lib/comparateur-labels";
 import { anchorsToLabeled, exclusionsToLabels } from "@/lib/geo-zones";
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -322,6 +326,7 @@ export function OuVivreClient() {
   // Critères humains détectés (jamais les clés techniques), affichés au gate, avec
   // leur interprétation visible (glose) pour les faux amis / la polysémie.
   const criteres = parsed ? preferencesToInterpreted(parsed.preferences) : [];
+  const horsMesurePhrases = parsed ? horsMesureToPhrases(parsed.horsMesure) : [];
 
   // Ancres géographiques détectées (périmètre, distinct des préférences), avec leur
   // force. Au gate, on n'a que les jetons du parse : on les traduit en libellés. Le
@@ -765,15 +770,24 @@ export function OuVivreClient() {
           {/* Ce qui reste ouvert : reformulé en hypothèses, jamais en questions.
               Tant qu'il n'y a pas de mécanisme d'affinage interactif, une question
               ouverte crée une attente de réponse impossible à satisfaire. */}
-          {parsed.ambiguities && parsed.ambiguities.length > 0 && (
+          {((parsed.ambiguities && parsed.ambiguities.length > 0) ||
+            horsMesurePhrases.length > 0) && (
             <div className="mt-6">
               <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">
                 <span className="text-amber-400">⚠</span> Ce qui reste ouvert
               </p>
               <ul className="flex flex-col gap-2">
-                {parsed.ambiguities.map((a, i) => (
+                {horsMesurePhrases.map((phrase, i) => (
                   <li
-                    key={i}
+                    key={`hm-${i}`}
+                    className="text-[13px] leading-[1.6] text-muted border-l-2 border-amber-400/30 pl-3"
+                  >
+                    {phrase}
+                  </li>
+                ))}
+                {parsed.ambiguities?.map((a, i) => (
+                  <li
+                    key={`amb-${i}`}
                     className="text-[13px] leading-[1.6] text-muted border-l-2 border-amber-400/30 pl-3"
                   >
                     <span className="text-label">{a.topic}</span> : sans précision de votre
