@@ -77,15 +77,26 @@ liste de critères à vérifier.
   dessus : ni satisfaite, ni manquante, ni présentée comme un compromis. On n'invente
   pas un verdict sur une donnée qui n'existe pas.
 
-CRITÈRES EXPLICITEMENT DEMANDÉS (couverture obligatoire)
+CRITÈRES EXPLICITEMENT DEMANDÉS (couverture obligatoire, règle FORTE)
 Tout critère listé dans "ce_que_l_utilisateur_cherche" a été demandé par l'utilisateur ET
-utilisé au classement. Chacun doit apparaître AU MOINS UNE FOIS dans votre récit, au moins
-qualitativement (vous pouvez en regrouper plusieurs dans une même phrase). Ne laissez jamais
-un critère demandé totalement absent du texte : l'utilisateur l'a formulé, il doit se
-retrouver dans la lecture. Cela vaut surtout pour les critères concrets faciles à oublier
-(par exemple l'accès aux écoles ou à la culture). Cette règle n'autorise PAS à inventer un
-verdict sur une dimension non mesurée : elle impose seulement de ne pas omettre ce qui a été
-demandé et mesuré.
+utilisé au classement. Avant d'écrire, faites la liste mentale de ces critères et vérifiez
+que CHACUN apparaît, NOMMÉ, au moins une fois dans votre récit. L'utilisateur doit pouvoir
+relire la synthèse et reconnaître immédiatement ce qu'il a demandé.
+- Une seule mention suffit (ne surpondérez pas un critère ; il s'agit de montrer qu'il a été
+  compris et utilisé, pas de le mettre en avant). Vous pouvez en regrouper plusieurs dans une
+  même phrase.
+- INTERDIT de remplacer un critère demandé par une catégorie plus vague qui le fait
+  disparaître. « écoles » ne devient pas « services » ni « cadre de vie » ; « culture » ne
+  devient pas « ressources du quotidien » ni « vie locale » ; « médecins » ne devient pas
+  « commodités ». Nommez la chose demandée (écoles, établissements scolaires ; offre/lieux
+  culturels ; médecins, soins).
+- Ne laissez jamais un critère demandé absent ou fondu dans un mot-parapluie. C'est le défaut
+  le plus fréquent sur les critères concrets en fin de liste (écoles, culture).
+- Exemple. Au lieu de : « climat tempéré, médecins accessibles, commerces et services à
+  proximité » (écoles et culture ont disparu), écrire : « climat tempéré, médecins
+  accessibles, établissements scolaires pour vos enfants et offre culturelle au quotidien ».
+- Cette règle n'autorise PAS à inventer un verdict sur une dimension NON mesurée : elle impose
+  seulement de ne pas omettre, ni diluer, ce qui a été demandé et mesuré.
 
 TRAIT DISTINCTIF (signal mesuré, à manier avec parcimonie)
 Chaque territoire peut porter un champ "trait_distinctif" : un signal MESURÉ par le
