@@ -1,7 +1,12 @@
 # Hiérarchie d'information du bloc « critères identifiés » — design
 
 Date : 2026-06-03
-Statut : design validé (porteur), prêt pour plan d'implémentation.
+Statut : LIVRÉ. Révision en cours d'implémentation (porteur) : le **niveau 3 a été
+supprimé** — jugé redondant avec le tooltip N2 (sa première moitié répétait la glose), et
+réintroduisant un registre méthodologique qu'on voulait sortir de ce moment. Les limites
+méthodologiques vivent dans le **rapport**. Design final = **N1 (puces) + N2 (tooltip
+positif)** uniquement. Les sections N3 ci-dessous sont conservées pour mémoire mais NON
+implémentées (`PREFERENCE_CAVEAT` et le champ `caveat` n'existent pas dans le code livré).
 
 ## Intention
 
