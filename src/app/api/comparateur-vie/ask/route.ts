@@ -48,6 +48,7 @@ type Territoire = {
   pression_eco?: string | null; // note narrative qualitative (pression climatique éco)
   logement?: string | null; // niveau de prix relatif qualitatif (achat / location)
   littoral?: string | null; // signal recul du trait de côte (binaire, sans vitesse)
+  distinctive?: string | null; // trait distinctif relatif au groupe affiché (narratif, hors-score)
 };
 
 type Body = {
@@ -160,6 +161,15 @@ l'exposition côtière. Parlez d'ÉROSION en langage clair, pas de "recul du tra
 côte" ni de la loi ; sobre, jamais alarmiste, aucune vitesse ni chiffre (le détail vit
 au rapport). Si la note est absente, ne l'inventez pas.
 
+SI UN "trait_distinctif" EST DONNÉ POUR UN TERRITOIRE
+C'est un signal MESURÉ par le moteur, relatif aux seules communes affichées (par
+exemple « la plus pluvieuse des trois »). Servez-vous-en surtout quand la question
+porte sur les différences entre territoires, les compromis, ou le choix de l'un
+plutôt que l'autre : il aide à expliquer ce qui distingue une commune. Ne le déroulez
+pas spontanément à chaque réponse. Mêmes règles que le reste : ne commentez que le
+contenu exact du champ, n'inventez aucun trait, n'en faites pas un nouveau classement,
+un seul compromis.
+
 SI LA QUESTION SORT DU SUJET futur•e
 Prix de l'immobilier, écoles, vie nocturne, politique : ramenez brièvement vers ce
 que le comparateur éclaire. La vitalité du bassin d'emploi est, elle, pesée par le
@@ -195,6 +205,7 @@ function buildContextBlock(ctx: NonNullable<Body["context"]>, focusRang: number 
     pression_climatique_economie: t.pression_eco ?? null,
     logement: t.logement ?? null,
     littoral: t.littoral ?? null,
+    trait_distinctif: t.distinctive ?? null,
   }));
 
   const payload = {
