@@ -7,6 +7,7 @@ import {
   preferencesToLabels,
   preferencesToInterpreted,
   horsMesureToPhrases,
+  buildDistinctiveTraits,
 } from "@/lib/comparateur-labels";
 import { anchorsToLabeled, exclusionsToLabels } from "@/lib/geo-zones";
 
@@ -355,6 +356,8 @@ export function OuVivreClient() {
 
   // ── AskFuture comparateur ─────────────────────────────────────────────────
   const top = topCards(outcome?.results);
+  // Trait distinctif par commune, relatif aux communes affichées (aide à trancher).
+  const distinctives = buildDistinctiveTraits(top);
 
   // Chips suggérées (MAX 3, une seule ligne) : ancrées sur les vraies communes et
   // signaux du classement, pas des questions génériques. Reflètent les arbitrages.
@@ -925,6 +928,14 @@ export function OuVivreClient() {
                   {r.signature.length > 0 && (
                     <p className="mt-3 text-[12px] leading-[1.5] text-label/65">
                       {r.signature.join(" · ")}
+                    </p>
+                  )}
+
+                  {/* Trait distinctif relatif aux communes affichées : ce qui la
+                      démarque des autres propositions (narratif, hors score). Léger. */}
+                  {distinctives[r.insee] && (
+                    <p className="mt-1.5 text-[11.5px] leading-snug text-accent/75 italic">
+                      {distinctives[r.insee].charAt(0).toUpperCase() + distinctives[r.insee].slice(1)}.
                     </p>
                   )}
 

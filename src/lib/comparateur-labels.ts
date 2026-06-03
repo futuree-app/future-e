@@ -118,3 +118,76 @@ export function horsMesureToPhrases(
   }
   return out;
 }
+
+// Trait distinctif d'une commune RELATIF aux autres communes affichées : l'attribut
+// où elle sort le plus du lot, en langage léger (« la plus proche de la mer des trois »).
+// Décisionnel (aide à trancher ENTRE les propositions), narratif, hors score, hors tri.
+// Se tait si rien ne se détache (doctrine : on ne remplit jamais pour remplir).
+type DistinctiveMetrics = {
+  precip_annuelle: number | null;
+  population: number | null;
+  jours_chauds_30: number | null;
+  temp_hiver: number | null;
+  distance_cote_km: number | null;
+  ifm: number | null;
+};
+type DistinctiveInput = { insee: string; metrics: DistinctiveMetrics };
+
+const DISTINCTIVE_CANDIDATES: {
+  key: keyof DistinctiveMetrics;
+  dir: "min" | "max";
+  scale: number;
+  label: string;
+  guard?: (v: number) => boolean;
+}[] = [
+  { key: "distance_cote_km", dir: "min", scale: 50, label: "la plus proche de la mer", guard: (v) => v <= 60 },
+  { key: "precip_annuelle", dir: "max", scale: 250, label: "la plus pluvieuse", guard: (v) => v >= 850 },
+  { key: "precip_annuelle", dir: "min", scale: 250, label: "la plus sèche", guard: (v) => v <= 750 },
+  { key: "jours_chauds_30", dir: "max", scale: 15, label: "les étés les plus chauds" },
+  { key: "jours_chauds_30", dir: "min", scale: 15, label: "les étés les plus frais" },
+  { key: "temp_hiver", dir: "max", scale: 4, label: "les hivers les plus doux" },
+  { key: "temp_hiver", dir: "min", scale: 4, label: "les hivers les plus rudes" },
+  { key: "ifm", dir: "max", scale: 20, label: "la plus exposée aux feux", guard: (v) => v >= 15 },
+];
+const DISTINCTIVE_FLOOR = 0.45; // saillance minimale (écart au plus proche, normalisé)
+
+export function buildDistinctiveTraits(results: DistinctiveInput[]): Record<string, string> {
+  const n = results.length;
+  if (n < 2) return {};
+  const suffix = n >= 3 ? " des trois" : " des deux";
+  const cand = new Map<string, { label: string; sal: number }[]>(
+    results.map((r) => [r.insee, []]),
+  );
+
+  for (const c of DISTINCTIVE_CANDIDATES) {
+    const vals = results
+      .map((r) => ({ insee: r.insee, v: r.metrics?.[c.key] }))
+      .filter((x): x is { insee: string; v: number } => x.v != null);
+    if (vals.length < 2) continue;
+    const sorted = [...vals].sort((a, b) => a.v - b.v);
+    const ext = c.dir === "min" ? sorted[0] : sorted[sorted.length - 1];
+    const nearest = c.dir === "min" ? sorted[1] : sorted[sorted.length - 2];
+    if (c.guard && !c.guard(ext.v)) continue;
+    const sal = Math.abs(ext.v - nearest.v) / c.scale;
+    if (sal >= DISTINCTIVE_FLOOR) cand.get(ext.insee)!.push({ label: c.label + suffix, sal });
+  }
+
+  // Population : saillance par ratio (échelle log), pas additive.
+  const pops = results
+    .map((r) => ({ insee: r.insee, v: r.metrics?.population }))
+    .filter((x): x is { insee: string; v: number } => x.v != null);
+  if (pops.length >= 2) {
+    const s = [...pops].sort((a, b) => a.v - b.v);
+    const ratioSmall = s[1].v / s[0].v;
+    const ratioBig = s[s.length - 1].v / s[s.length - 2].v;
+    if (ratioSmall >= 1.6) cand.get(s[0].insee)!.push({ label: "la plus petite" + suffix, sal: Math.log2(ratioSmall) });
+    if (ratioBig >= 1.6) cand.get(s[s.length - 1].insee)!.push({ label: "la plus grande" + suffix, sal: Math.log2(ratioBig) });
+  }
+
+  const out: Record<string, string> = {};
+  for (const r of results) {
+    const best = (cand.get(r.insee) ?? []).sort((a, b) => b.sal - a.sal)[0];
+    if (best) out[r.insee] = best.label;
+  }
+  return out;
+}
