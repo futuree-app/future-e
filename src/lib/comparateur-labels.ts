@@ -44,10 +44,11 @@ export const PREFERENCE_INTERPRETATIONS: Record<string, string | null> = {
   // « à proximité » assumé (on mesure le couvert autour, pas dans la commune). Jamais
   // « préservé / sauvage / biodiversité », qu'on ne mesure pas (cf. NATURE_TERRITORIAL.md).
   nature: "forêts, prairies et milieux naturels autour",
-  // Gloses OBLIGATOIRES (caveat méthodo assumé) : éviter le contresens « critère présent =
-  // bonnes écoles / vie culturelle riche ». On mesure l'accès, pas la qualité ni la vitalité.
-  acces_ecoles: "accès aux collèges et lycées autour, pas la qualité des établissements",
-  acces_culture: "présence d'équipements culturels accessibles autour, pas l'animation ni la qualité",
+  // On mesure l'ACCÈS, pas la qualité ni la vitalité. Le caveat méthodo (« qualité / animation
+  // non mesurées ») vit dans HORS_MESURE_PHRASES, affiché au gate : inutile de le redire ici.
+  // écoles : le libellé « l'accès aux collèges et lycées » dit déjà tout, pas de glose (null).
+  acces_ecoles: null,
+  acces_culture: "présence d'équipements culturels",
   faible_risque_inondation: "historique d'arrêtés CatNat inondation et territoires à risque important, pas une garantie d'absence de crue",
   // self-évidents (le mot = la mesure) : pas de glose
   faible_chaleur: null,
