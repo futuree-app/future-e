@@ -107,6 +107,19 @@ const TOOL_INPUT_SCHEMA = {
         required: ["topic", "question"],
       },
     },
+    horsMesure: {
+      type: "array",
+      description:
+        "Notions exprimées par l'utilisateur qui n'ont AUCUN critère dans le moteur. Ne JAMAIS fabriquer de proxy. Maximum 3. Vide si aucune.",
+      items: {
+        type: "object",
+        properties: {
+          term: { type: "string", description: "le mot tel que l'utilisateur l'a dit" },
+          kind: { type: "string", enum: ["ecoles", "culture", "affectif"] },
+        },
+        required: ["term", "kind"],
+      },
+    },
     emploiHorsSujet: {
       type: "boolean",
       description:
@@ -125,7 +138,7 @@ RÈGLES
 - "proche de l'océan / de la mer" = contrainte dure (nearSea.active) UNIQUEMENT si c'est présenté comme indispensable. Sinon, préférence proximite_mer (poids 2 ou 3).
 - Climat perçu : distinguez "fuir la chaleur" (faible_chaleur), "rechercher la douceur" (douceur_climat, hivers tempérés), "rechercher le soleil / le chaud" (ensoleillement_recherche). "climat doux" et "agréable" relèvent de douceur_climat, pas de faible_chaleur.
 - Nature vs calme (faux-ami à ne pas confondre) : "nature" = couvert naturel autour (forêts, prairies, milieux naturels) → nature. "calme / tranquille / peu de monde" = densité, ambiance → cadre_calme. "la campagne" est AMBIGU : selon la phrase, c'est souvent les DEUX (nature + cadre_calme) ; n'activez les deux que si le sens le porte, sinon le plus explicite. Ne confondez jamais "vert/forêts" (nature) avec "calme" (densité).
-- N'inventez aucune donnée. Écoles, services, sécurité, prix : hors périmètre V1. Si l'utilisateur insiste dessus, mentionnez-le en ambiguities sans créer de préférence.
+- N'inventez aucune donnée. Services, sécurité, prix : hors périmètre V1, ne créez pas de préférence. Les écoles et la vie culturelle se déclarent en horsMesure (voir HORS-MESURE), jamais en préférence ni en ambiguities.
 - EMPLOI (critère viabilite_emploi = vitalité du bassin d'emploi : taille + diversité sectorielle, jamais la promesse d'un poste précis) :
   • Si l'emploi est un enjeu du projet (besoin de retrouver un poste, conjoint·e qui doit travailler, "trouver du travail", "le marché de l'emploi", projet de vie actif) → préférence viabilite_emploi poids 2. Le détail de VOTRE métier face au climat reste au rapport ; ici on pèse seulement la vitalité du bassin.
   • Si le projet est HORS-EMPLOI (retraite, télétravail total / 100 % à distance, sans activité, rentier) → emploiHorsSujet:true et N'ajoutez PAS viabilite_emploi.
@@ -174,6 +187,12 @@ TRADUCTION AUTOMATIQUE (activez le critère interne, sans exposer le terme techn
 - "accès aux soins", "médecins", "hôpital", "retraite" → acces_soins (poids 2 à 3).
 - "retraite", "à la retraite", "jeune retraité" → acces_soins (poids 2 à 3) ET emploiHorsSujet:true (pas de viabilite_emploi).
 - "télétravail total", "100 % télétravail", "je travaille de chez moi", "full remote" → emploiHorsSujet:true (l'emploi local n'est pas un enjeu).
+HORS-MESURE (notions sans critère dans le moteur) : remplissez horsMesure, ne fabriquez JAMAIS de proxy.
+- "écoles", "école", "collège", "lycée", "scolarité", "bon établissement scolaire" → { term, kind: "ecoles" }. NE rabattez PAS sur acces_services.
+- "vie culturelle", "culture", "cinéma", "théâtre", "musée", "concerts", "sorties", "animée culturellement" → { term, kind: "culture" }. NE rabattez PAS sur eviter_isolement ni sur une grande ville.
+- "authentique", "chaleureux", "accueillant", "convivial", "esprit de village", "du caractère", "de l'âme", "qui bouge", "vivante" → { term, kind: "affectif" }.
+- Ne remplissez horsMesure QUE si la notion est réellement exprimée ; ces notions n'ajoutent AUCUNE préférence. La nature, le calme, les services et les soins SONT mesurés : ne les mettez jamais en horsMesure.
+
 Dans la reformulation, restez en langage humain (ex. « un environnement peu marqué par l'agriculture intensive »), n'employez jamais les termes "IFT", "pression agricole" ni "exposition aux pesticides".`;
 
 export async function POST(request: NextRequest) {
