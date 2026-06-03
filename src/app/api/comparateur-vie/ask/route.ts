@@ -49,6 +49,7 @@ type Territoire = {
   logement?: string | null; // niveau de prix relatif qualitatif (achat / location)
   littoral?: string | null; // signal recul du trait de côte (binaire, sans vitesse)
   distinctive?: string | null; // trait distinctif relatif au groupe affiché (narratif, hors-score)
+  signaux?: Record<string, string>; // signaux ambiants qualitatifs (hors-score, hors critères)
 };
 
 type Body = {
@@ -122,13 +123,34 @@ CE QUE VOUS NE FAITES JAMAIS
 - Donner un chiffre, un pourcentage, une date, un horizon chiffré.
 
 SI LA QUESTION DEMANDE LE DÉTAIL DU RAPPORT
-Si on vous demande un niveau de précision que vous n'avez pas (risque d'inondation
-précis, potabilité de l'eau, pollution des sols, jours de canicule, projections
-datées, n'importe quel module), mettez routes_to_report=true. Dans answer : dites en
-une phrase que cette lecture précise appartient au rapport du territoire, puis
-revenez à ce que le comparateur, lui, permet de comprendre (pourquoi ce territoire
-ressort, le compromis qu'il représente). Vous ne donnez aucune donnée, vous ne
-faites aucune estimation.
+Deux niveaux, ne les confondez pas :
+- Signal QUALITATIF présent dans "signaux" d'un territoire (cf. section dédiée) : vous
+  POUVEZ répondre, qualitativement et en comparant les communes affichées. Ce n'est
+  pas du ressort du rapport.
+- Précision FINE, à l'adresse, ou CHIFFRÉE (cartographie de l'aléa, intensité locale,
+  valeur exacte, potabilité de l'eau, pollution des sols, projections datées,
+  n'importe quel module) : vous ne l'avez pas. Mettez routes_to_report=true, dites en
+  une phrase que cette lecture précise appartient au rapport du territoire, puis
+  revenez à ce que le comparateur permet de comprendre. Aucune donnée, aucune estimation.
+
+SI DES "signaux" SONT DONNÉS POUR LES TERRITOIRES
+Chaque territoire peut porter des "signaux" : de courtes lectures qualitatives sur des
+dimensions que la recherche n'a pas forcément classées (inondation, chaleur, sécheresse,
+risque de feu, nature, soins, emploi, écoles, culture, air). Ils existent pour répondre
+aux questions du type « et côté inondation ? », « laquelle est la plus exposée à la
+chaleur ? », même hors critères de recherche.
+RÈGLES :
+- Qualitatif et relatif UNIQUEMENT. Comparez les communes affichées entre elles (« parmi
+  les trois, X semble … que Y »). Jamais un chiffre, jamais un classement nouveau.
+- N'utilisez QUE le contenu exact des "signaux". N'inventez jamais une dimension absente,
+  ne devinez pas une commune qui n'a pas le signal (son absence n'est pas un verdict).
+- Signaux moins favorables AUTORISÉS : vous pouvez dire qu'une commune est plus exposée
+  ou moins dotée qu'une autre. Ne lissez pas tout en positif.
+- TON : un constat, jamais une alerte, jamais une recommandation. Décrire, pas corriger.
+  Acceptable : « Parmi les trois, Narbonne semble plus exposée à la chaleur estivale que
+  Quimper. » Jamais : « attention », « évitez », « privilégiez ».
+- Restez SÉLECTIF : un seul signal pertinent suffit pour répondre. N'égrenez pas la liste,
+  ne transformez pas la réponse en inventaire (sinon vous refaites un rapport).
 
 SI UN PÉRIMÈTRE OU UNE ORIENTATION SONT DONNÉS
 - perimetre_geographique (cadre dur) : zone choisie, tous les territoires proposés
@@ -206,6 +228,7 @@ function buildContextBlock(ctx: NonNullable<Body["context"]>, focusRang: number 
     logement: t.logement ?? null,
     littoral: t.littoral ?? null,
     trait_distinctif: t.distinctive ?? null,
+    signaux: t.signaux ?? {},
   }));
 
   const payload = {
