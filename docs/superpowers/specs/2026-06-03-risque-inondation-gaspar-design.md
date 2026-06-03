@@ -149,6 +149,24 @@ comparateur-labels.ts + synthesize : libellés + gloses des deux clés
 4. `curl /match` (`faible_risque_inondation`) : communes peu exposées en tête, reason « peu
    d'arrêtés CatNat inondation » ; rural sec non pénalisé quand le critère n'est pas demandé.
 
+## Doctrine : temporalité (réalisé vs projeté), tranchée
+
+Tension soulevée : la plupart des signaux climat de futur•e sont PROSPECTIFS (DRIAS), alors que
+CatNat est HISTORIQUE. Décision (porteur) : on ASSUME la différence, on ne l'efface pas.
+- DRIAS (`faible_precip_extremes`) mesure un **aléa climatique futur** (un seul moteur).
+- CatNat (`faible_risque_inondation`) mesure une **vulnérabilité territoriale observée** =
+  le résultat intégré aléa × exposition. L'inondation est composite (risque = aléa ×
+  exposition territoriale) ; la propension structurelle (plaine alluviale, rivière, drainage)
+  est quasi-stationnaire dans le temps. CatNat la capte ; DRIAS ne voit qu'une partie de
+  l'équation.
+- On préfère un **signal structurel honnête aujourd'hui** plutôt qu'un risque futur
+  artificiellement homogénéisé (fabriquer une projection hydrologique simplifiée = fausse
+  précision, ce que futur•e s'interdit). Les gloses expliquent la différence.
+- **V2 documentée (à faire le moment venu) :** évaluer un amplificateur climatique DRIAS
+  (risque structurel CatNat modulé par la tendance des précip extrêmes, NORRx1d delta déjà
+  dans `data_climat.json`) SI une méthode robuste apparaît. Le champ `risque` est déjà le bon
+  point d'accroche pour ce raffinement, sans rupture.
+
 ## Hors périmètre
 
 - Submersion marine (chantier littoral, déjà séparé).
