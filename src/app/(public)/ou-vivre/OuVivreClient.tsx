@@ -436,6 +436,7 @@ export function OuVivreClient() {
               logement: r.logement, // niveau de prix relatif qualitatif, firewall préservé
               littoral: r.littoral, // narratif littoral (recul du trait de côte), firewall préservé
               distinctive: r.distinctive, // trait distinctif relatif au groupe (narratif, hors-score), firewall préservé
+              signaux: r.signaux, // signaux ambiants qualitatifs (hors-score), firewall préservé
             })),
           },
           focus: null,
