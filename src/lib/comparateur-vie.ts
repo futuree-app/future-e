@@ -10,7 +10,7 @@ import {
   type ZoneStrength,
   type SoftZone,
 } from "@/lib/geo-zones";
-import { getLittoralIndex } from "@/lib/littoral";
+import { getLittoralIndex, type LittoralSummary } from "@/lib/littoral";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — moteur de compatibilité déterministe (V1).
@@ -122,6 +122,10 @@ export type MatchResult = {
   // exprime une intention littorale ET que la commune est inscrite au titre du recul
   // du trait de côte (liste officielle). null sinon (silence). cf. hasCoastalIntent.
   littoral: string | null;
+  // Trait distinctif RELATIF aux communes affichées (« la plus proche de grands
+  // espaces naturels des trois »). Palette hiérarchisée (P1 projet de vie > P2 climat/
+  // taille). Narratif, hors score, hors tri. null si rien ne se détache. cf. buildDistinctive.
+  distinctive: string | null;
   metrics: {
     distance_cote_km: number;
     population: number | null;
@@ -708,6 +712,91 @@ function hasCoastalIntent(parsed: ParsedProject): boolean {
   return false;
 }
 
+// ── Trait distinctif (narratif, hors score) ──────────────────────────────────
+// Pour CHAQUE commune affichée, l'arbitrage le plus UTILE qui la démarque du groupe.
+// Palette hiérarchisée : P1 (projet de vie) prime sur P2 (climat/taille). Muet si rien
+// ne se détache. cf. plan 2026-06-03-trait-distinctif-palette.
+function erosionSeverity(insee: string, littoralIndex: Map<string, LittoralSummary> | null): number | null {
+  const e = littoralIndex?.get(String(insee).padStart(5, "0"))?.erosion;
+  if (!e || !e.classe) return null;
+  const rank: Record<string, number> = { faible: 1, "modéré": 2, "marqué": 3, "très marqué": 4 };
+  return rank[e.classe] ?? null;
+}
+const LOGEMENT_ORDINAL: Record<string, number> = { tres_bas: 1, bas: 2, moyen: 3, haut: 4, tres_haut: 5 };
+function logementNiveau(c: IndexCommune): number | null {
+  const a = c.logement?.achat;
+  if (!a || !a.dispo) return null;
+  return LOGEMENT_ORDINAL[a.niveau] ?? null;
+}
+function eteSupportable(c: IndexCommune): number | null {
+  const heat = avgPct(c, ["NORTX30D_yr", "NORTX35D_yr", "NORTR_yr"]);
+  const dry = c.pct["NORSWI04_yr"] ?? null;
+  const parts = [heat, dry].filter((x): x is number => x != null);
+  return parts.length ? parts.reduce((a, b) => a + b, 0) / parts.length : null;
+}
+
+type DistinctiveCand = {
+  tier: 1 | 2;
+  value: (c: IndexCommune) => number | null;
+  dir: "min" | "max";
+  scale: number;
+  mode?: "ratio" | "step";
+  label: string;
+  guard?: (winner: number) => boolean;
+};
+const DISTINCTIVE_FLOOR = 0.5;
+
+function buildDistinctive(
+  picks: IndexCommune[],
+  littoralIndex: Map<string, LittoralSummary> | null,
+): Record<string, string> {
+  const n = picks.length;
+  if (n < 2) return {};
+  const suffix = n >= 3 ? " des trois" : " des deux";
+  const CANDS: DistinctiveCand[] = [
+    { tier: 1, value: (c) => c.nature?.score ?? null, dir: "max", scale: 22, label: "la plus proche de grands espaces naturels", guard: (w) => w >= 60 },
+    { tier: 1, value: (c) => c.vivpct?.apl ?? null, dir: "max", scale: 22, label: "le meilleur accès aux médecins", guard: (w) => w >= 50 },
+    { tier: 1, value: (c) => (c.emploi ? 0.6 * c.emploi.taille + 0.4 * c.emploi.diversite : null), dir: "max", scale: 22, label: "le bassin d'emploi le plus dynamique", guard: (w) => w >= 50 },
+    { tier: 1, value: eteSupportable, dir: "min", scale: 22, label: "les étés les plus supportables" },
+    { tier: 1, value: (c) => erosionSeverity(c.insee, littoralIndex), dir: "min", scale: 1, mode: "step", label: "le littoral le moins exposé" },
+    { tier: 1, value: logementNiveau, dir: "min", scale: 1, mode: "step", label: "le marché immobilier le plus accessible" },
+    { tier: 1, value: (c) => c.relief_proximite ?? null, dir: "max", scale: 22, label: "la plus proche de la montagne", guard: (w) => w >= 55 },
+    { tier: 2, value: (c) => c.clim.NORRR_yr ?? null, dir: "max", scale: 250, label: "la plus pluvieuse", guard: (w) => w >= 850 },
+    { tier: 2, value: (c) => c.clim.NORTMm_seas_DJF ?? null, dir: "max", scale: 4, label: "les hivers les plus doux" },
+    { tier: 2, value: (c) => c.clim.NORTX30D_yr ?? null, dir: "max", scale: 15, label: "les étés les plus chauds" },
+    { tier: 2, value: (c) => c.population ?? null, dir: "min", scale: 1, mode: "ratio", label: "la plus petite ville" },
+    { tier: 2, value: (c) => c.population ?? null, dir: "max", scale: 1, mode: "ratio", label: "la plus grande ville" },
+  ];
+  const cand = new Map<string, { tier: number; label: string; sal: number }[]>(picks.map((c) => [c.insee, []]));
+  for (const cd of CANDS) {
+    const vals = picks.map((c) => ({ insee: c.insee, v: cd.value(c) })).filter((x): x is { insee: string; v: number } => x.v != null);
+    if (vals.length < 2) continue;
+    const sorted = [...vals].sort((a, b) => a.v - b.v);
+    const ext = cd.dir === "min" ? sorted[0] : sorted[sorted.length - 1];
+    const nearest = cd.dir === "min" ? sorted[1] : sorted[sorted.length - 2];
+    if (cd.guard && !cd.guard(ext.v)) continue;
+    let sal: number;
+    if (cd.mode === "ratio") {
+      const ratio = cd.dir === "min" ? nearest.v / ext.v : ext.v / nearest.v;
+      if (!(ratio >= 1.6)) continue;
+      sal = Math.log2(ratio);
+    } else if (cd.mode === "step") {
+      if (Math.abs(ext.v - nearest.v) < 1) continue;
+      sal = Math.abs(ext.v - nearest.v);
+    } else {
+      sal = Math.abs(ext.v - nearest.v) / cd.scale;
+      if (sal < DISTINCTIVE_FLOOR) continue;
+    }
+    cand.get(ext.insee)!.push({ tier: cd.tier, label: cd.label + suffix, sal });
+  }
+  const out: Record<string, string> = {};
+  for (const c of picks) {
+    const best = (cand.get(c.insee) ?? []).sort((a, b) => a.tier - b.tier || b.sal - a.sal)[0];
+    if (best) out[c.insee] = best.label;
+  }
+  return out;
+}
+
 export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome> {
   const communes = await loadIndex();
   await loadZeTable(); // nom + taille des bassins (signature + raison emploi graduée)
@@ -844,6 +933,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
           littoralIndex?.get(String(c.insee).padStart(5, "0"))?.traitDeCote.concernee
             ? "exposée à l'érosion du littoral (la côte recule)"
             : null,
+        distinctive: null, // renseigné après l'assemblage final (relatif au groupe affiché)
         metrics: {
           distance_cote_km: c.distance_cote_km,
           population: c.population,
@@ -958,6 +1048,18 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
       : perfect
         ? null
         : "Aucun territoire ne réunit l'ensemble de vos critères. Voici ceux qui impliquent le moins de compromis.";
+
+  // Trait distinctif (narratif, hors score) sur les seules communes AFFICHÉES, relatif
+  // au groupe. Le moteur a accès à tous les sous-scores ; on charge l'index littoral ici
+  // si besoin (pour « le littoral le moins exposé », même hors intention littorale).
+  const liDistinct = littoralIndex ?? (await getLittoralIndex());
+  const byInsee = new Map(communes.map((c) => [c.insee, c]));
+  const shownPicks = deduped.slice(0, DISPLAY);
+  const distinctiveMap = buildDistinctive(
+    shownPicks.map((r) => byInsee.get(r.insee)).filter((c): c is IndexCommune => c != null),
+    liDistinct,
+  );
+  for (const r of shownPicks) r.distinctive = distinctiveMap[r.insee] ?? null;
 
   return {
     perfectMatch: perfect,
