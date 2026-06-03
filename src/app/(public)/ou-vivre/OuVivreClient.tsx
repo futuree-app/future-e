@@ -192,6 +192,7 @@ export function OuVivreClient() {
               pressionEco: r.pressionEco?.note ?? null, // narratif qualitatif, firewall préservé
               logement: r.logement, // niveau de prix relatif qualitatif, firewall préservé
               littoral: r.littoral, // narratif littoral (recul du trait de côte), firewall préservé
+              distinctive: r.distinctive, // trait distinctif relatif au groupe (narratif, hors-score), firewall préservé
             })),
             outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message },
             perimetre: outcomeMeta.perimetre ?? [],
@@ -434,6 +435,7 @@ export function OuVivreClient() {
               pression_eco: r.pressionEco?.note ?? null, // narratif qualitatif, firewall préservé
               logement: r.logement, // niveau de prix relatif qualitatif, firewall préservé
               littoral: r.littoral, // narratif littoral (recul du trait de côte), firewall préservé
+              distinctive: r.distinctive, // trait distinctif relatif au groupe (narratif, hors-score), firewall préservé
             })),
           },
           focus: null,
