@@ -10,6 +10,7 @@ import {
 } from "@/lib/comparateur-labels";
 import { anchorsToLabeled, exclusionsToLabels } from "@/lib/geo-zones";
 import { ChipTooltip } from "@/components/ChipTooltip";
+import { AUTO_SYNTHESIS } from "@/lib/auto-synthesis";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — client.
@@ -308,13 +309,16 @@ export function OuVivreClient() {
     });
     setPhase("results");
 
-    // SYNTHÈSE (streamée, non bloquante pour les cartes)
-    void streamSynthesis(seq, submittedText, parsed, top, {
-      perfectMatch: matchOutcome.perfectMatch,
-      message: matchOutcome.message,
-      perimetre: matchOutcome.appliedZones?.filter((z) => z.strength === "hard").map((z) => z.label),
-      orientation: matchOutcome.appliedZones?.filter((z) => z.strength !== "hard").map((z) => z.label),
-    });
+    // SYNTHÈSE (streamée, non bloquante pour les cartes). Auto seulement si AUTO_SYNTHESIS ;
+    // sinon l'utilisateur la déclenche via le bouton « Générer » (generateSynthesis).
+    if (AUTO_SYNTHESIS) {
+      void streamSynthesis(seq, submittedText, parsed, top, {
+        perfectMatch: matchOutcome.perfectMatch,
+        message: matchOutcome.message,
+        perimetre: matchOutcome.appliedZones?.filter((z) => z.strength === "hard").map((z) => z.label),
+        orientation: matchOutcome.appliedZones?.filter((z) => z.strength !== "hard").map((z) => z.label),
+      });
+    }
   }, [parsed, submittedText, streamSynthesis]);
 
   // Affiner : revenir à l'édition du texte sans perdre ce qui est saisi.
@@ -357,6 +361,18 @@ export function OuVivreClient() {
 
   // ── AskFuture comparateur ─────────────────────────────────────────────────
   const top = topCards(outcome?.results);
+
+  // Déclenchement manuel de la synthèse (quand l'auto est coupé, cf. AUTO_SYNTHESIS).
+  // Rejoue le corps du useEffect à partir de l'état courant (outcome déjà calculé).
+  const generateSynthesis = useCallback(() => {
+    if (!parsed || !outcome?.results?.length) return;
+    void streamSynthesis(runSeq.current, submittedText, parsed, topCards(outcome.results), {
+      perfectMatch: outcome.perfectMatch,
+      message: outcome.message,
+      perimetre: outcome.appliedZones?.filter((z) => z.strength === "hard").map((z) => z.label),
+      orientation: outcome.appliedZones?.filter((z) => z.strength !== "hard").map((z) => z.label),
+    });
+  }, [parsed, outcome, submittedText, streamSynthesis]);
 
   // Chips suggérées (MAX 3, une seule ligne) : ancrées sur les vraies communes et
   // signaux du classement, pas des questions génériques. Reflètent les arbitrages.
@@ -879,6 +895,14 @@ export function OuVivreClient() {
                 {synthesis}
                 {synthesizing && <span className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-accent/70 animate-pulse" />}
               </p>
+            ) : !AUTO_SYNTHESIS && !synthesizing ? (
+              <button
+                type="button"
+                onClick={generateSynthesis}
+                className="text-[14px] text-label border border-accent/40 bg-accent/[0.08] rounded-full px-4 py-2 hover:bg-accent/[0.14] transition-colors"
+              >
+                Générer la synthèse
+              </button>
             ) : (
               <p className="flex items-center gap-2.5 text-[15px] text-ghost">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
