@@ -777,8 +777,10 @@ function buildDistinctive(
     if (cd.guard && !cd.guard(ext.v)) continue;
     let sal: number;
     if (cd.mode === "ratio") {
+      // Taille de ville : signal RARE, seulement si l'écart est vraiment structurant
+      // (×2,5). Toulouse/Foix → oui ; Toulouse/Bordeaux → non. cf. doctrine porteur.
       const ratio = cd.dir === "min" ? nearest.v / ext.v : ext.v / nearest.v;
-      if (!(ratio >= 1.6)) continue;
+      if (!(ratio >= 2.0)) continue;
       sal = Math.log2(ratio);
     } else if (cd.mode === "step") {
       if (Math.abs(ext.v - nearest.v) < 1) continue;
