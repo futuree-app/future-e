@@ -78,3 +78,6 @@ data/cache-nature/
 .venv-bpe/
 data/bpe24.parquet
 data/.cache/
+
+# Table d appartenance UU2020 (source locale, non versionnée)
+data/uu2020.xlsx
