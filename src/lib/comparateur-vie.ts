@@ -55,6 +55,9 @@ export const PREFERENCE_KEYS = [
   // Opt-in strict : aucun plancher. Accès, JAMAIS la qualité ni la vitalité.
   "acces_ecoles",
   "acces_culture",
+  // Risque inondation fluvial/pluvial : historique d'arrêtés CatNat (GASPAR), percentile national.
+  // Opt-in, préférence graduée. Distinct de faible_precip_extremes (pluies, pas risque réel).
+  "faible_risque_inondation",
 ] as const;
 export type PreferenceKey = (typeof PREFERENCE_KEYS)[number];
 
@@ -262,6 +265,9 @@ type IndexCommune = {
   // Unité urbaine INSEE (UU2020, cf. scripts/populate-unite-urbaine.py). null = commune hors
   // unité urbaine (isolée/rurale). Sert à « quitter {ville} » (exclusion par agglomération).
   uu?: string | null;
+  // Risque inondation (cf. scripts/populate-inondation.py). catnat = nb d'arrêtés CatNat
+  // inondation (hors submersion marine) ; tri réservé (false en V1) ; risque 0-100 (haut = exposé).
+  inondation?: { catnat: number; tri: boolean; risque: number } | null;
 };
 type IndexFile = { meta: unknown; communes: IndexCommune[] };
 
@@ -558,6 +564,9 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
       return c.ecoles?.score ?? null; // percentile accès collèges+lycées dans ~15 km
     case "acces_culture":
       return c.culture?.score ?? null; // percentile accès offre culturelle dans ~15 km
+    case "faible_risque_inondation":
+      // risque faible -> score haut. Historique CatNat inondation, pas une garantie d'absence de crue.
+      return c.inondation == null ? null : 100 - c.inondation.risque;
     default:
       return null;
   }
@@ -582,6 +591,7 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   nature: "forêts et espaces naturels à proximité",
   acces_ecoles: "collèges et lycées accessibles autour",
   acces_culture: "équipements culturels accessibles autour",
+  faible_risque_inondation: "peu d'arrêtés CatNat inondation",
   // « Vaste » est gradué sur la taille RÉELLE de la ZE (effectif salarié absolu),
   // pas sur le percentile saturé : le mot ne sort que là où il est mérité. La
   // diversité (entropie A38) est, elle, toujours défendable.
@@ -608,6 +618,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   nature: "peu d'espaces naturels à proximité",
   acces_ecoles: "établissements du secondaire plus éloignés",
   acces_culture: "offre culturelle accessible plus limitée",
+  faible_risque_inondation: "historique CatNat inondation plus marqué",
 };
 function reasonText(key: PreferenceKey, c: IndexCommune): string {
   const r = REASON_POS[key];
