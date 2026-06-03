@@ -9,6 +9,7 @@ import {
   horsMesureToPhrases,
 } from "@/lib/comparateur-labels";
 import { anchorsToLabeled, exclusionsToLabels } from "@/lib/geo-zones";
+import { ChipTooltip } from "@/components/ChipTooltip";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — client.
@@ -685,27 +686,43 @@ export function OuVivreClient() {
               <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">
                 <span className="text-emerald-400">✓</span> Les critères identifiés
               </p>
-              {/* Interprétations visibles : la puce + une glose discrète pour les
-                  critères à écart de sens (doux, calme…), rien pour les évidents.
-                  Pur affichage, aucun impact sur le score. Cf. audit sémantique. */}
-              <div className="flex flex-wrap gap-x-2 gap-y-3">
-                {criteres.map((c) => (
-                  <div key={c.label} className="flex flex-col gap-1.5">
-                    <span className="self-start text-[12px] text-label/90 border border-white/[0.12] rounded-full px-3 py-1">
+              {/* N1 : puces seules. N2 : une puce à nuance porte un soulignement
+                  pointillé + bulle positive au survol/tap (ChipTooltip) ; les évidentes
+                  restent nues. Pur affichage, aucun impact sur le score. */}
+              <div className="flex flex-wrap gap-2">
+                {criteres.map((c) =>
+                  c.tooltip ? (
+                    <ChipTooltip key={c.label} label={c.label} text={c.tooltip} />
+                  ) : (
+                    <span
+                      key={c.label}
+                      className="text-[12px] text-label/90 border border-white/[0.12] rounded-full px-3 py-1"
+                    >
                       {c.label}
                     </span>
-                    {c.gloss && (
-                      <span
-                        className="flex items-baseline gap-1 pl-1 text-[12.5px] leading-snug text-label/55 italic"
-                        style={{ fontFamily: "'Instrument Serif', serif" }}
-                      >
-                        <span className="not-italic text-accent/50">→</span>
-                        {c.gloss}
-                      </span>
-                    )}
-                  </div>
-                ))}
+                  ),
+                )}
               </div>
+              {/* N3 : aide secondaire repliée (limites de périmètre), fermée par défaut.
+                  N'apparaît que si au moins un critère demandé porte un caveat. */}
+              {criteres.some((c) => c.caveat) && (
+                <details className="mt-3 group">
+                  <summary className="cursor-pointer list-none font-mono text-[10px] tracking-[0.14em] uppercase text-ghost hover:text-label/70 transition-colors">
+                    <span className="text-accent/60 group-open:hidden">+ </span>
+                    <span className="hidden group-open:inline text-accent/60">– </span>
+                    Ce que ces critères mesurent
+                  </summary>
+                  <ul className="mt-2.5 flex flex-col gap-1.5">
+                    {criteres
+                      .filter((c) => c.caveat)
+                      .map((c) => (
+                        <li key={c.label} className="text-[12.5px] leading-snug text-label/55">
+                          <span className="text-label/80">{c.label}</span> : {c.caveat}
+                        </li>
+                      ))}
+                  </ul>
+                </details>
+              )}
             </div>
           )}
 

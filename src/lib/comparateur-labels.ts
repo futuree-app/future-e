@@ -35,41 +35,51 @@ export const PREFERENCE_LABELS: Record<string, string> = {
   vie_etudiante: "une ville étudiante",
 };
 
-// Interprétations visibles (audit sémantique, cf. AUDIT_SEMANTIQUE_COMPARATEUR.md).
-// Glose affichée sous la puce du critère pour rendre EXPLICITE ce que le moteur
-// entend, et désamorcer les faux amis (« doux » = hiver océanique, pas Méditerranée)
-// et la polysémie (« calme » = densité, pas la campagne). null = le libellé dit déjà
-// tout, on ne glose pas (anti-bloat). Pur affichage : aucun impact sur le score.
-export const PREFERENCE_INTERPRETATIONS: Record<string, string | null> = {
-  douceur_climat: "hivers tempérés, étés sans excès",
-  cadre_calme: "densité modérée, sans isolement",
-  ensoleillement_recherche: "plus chaud et plus sec",
-  proximite_mer: "accès rapide à la côte",
-  eviter_isolement: "commune assez peuplée pour une vie locale",
-  // « à proximité » assumé (on mesure le couvert autour, pas dans la commune). Jamais
-  // « préservé / sauvage / biodiversité », qu'on ne mesure pas (cf. NATURE_TERRITORIAL.md).
-  nature: "forêts, prairies et milieux naturels autour",
-  // On mesure l'ACCÈS, pas la qualité ni la vitalité. Le caveat méthodo (« qualité / animation
-  // non mesurées ») vit dans HORS_MESURE_PHRASES, affiché au gate : inutile de le redire ici.
-  // écoles : le libellé « l'accès aux collèges et lycées » dit déjà tout, pas de glose (null).
-  acces_ecoles: null,
-  acces_culture: "présence d'équipements culturels",
-  faible_risque_inondation: "historique d'arrêtés CatNat inondation et territoires à risque important, pas une garantie d'absence de crue",
-  faible_dependance_auto: "part des trajets domicile-travail faits en voiture, pas la qualité du réseau routier",
-  acces_transports: "desserte ferroviaire accessible alentour (présence et fréquentation des gares), pas le détail des horaires",
-  eviter_grandes_villes: "taille de l'agglomération (unité urbaine), pas de la seule commune",
-  prefere_grande_ville: "taille de l'agglomération (unité urbaine), pas de la seule commune",
-  vie_etudiante: "présence d'établissements supérieurs et poids des étudiants dans la population, pas la qualité ni la réputation des formations",
-  // self-évidents (le mot = la mesure) : pas de glose
+// N2 — glose positive affichée au survol/tap de la puce (cf. ChipTooltip). Courte,
+// orientée compréhension du SENS du critère, jamais de négation. null = puce nue
+// (le libellé suffit, anti-bloat). Pur affichage, aucun impact sur le score.
+export const PREFERENCE_TOOLTIP: Record<string, string | null> = {
+  vie_etudiante: "Présence d'établissements d'enseignement supérieur et d'une population étudiante active.",
+  acces_transports: "Présence et fréquentation des gares à proximité.",
+  faible_dependance_auto: "Part des trajets domicile-travail faits autrement qu'en voiture.",
+  cadre_calme: "Environnement peu dense, propice à un rythme plus calme.",
+  douceur_climat: "Hivers tempérés, étés sans excès.",
+  ensoleillement_recherche: "Plus chaud et plus sec.",
+  proximite_mer: "Accès rapide à la côte.",
+  eviter_isolement: "Présence d'un bassin de vie offrant services et activités du quotidien.",
+  nature: "Forêts, prairies et milieux naturels autour.",
+  acces_culture: "Présence d'équipements culturels à proximité.",
+  acces_ecoles: "Collèges et lycées accessibles alentour.",
+  eviter_grandes_villes: "Taille de l'agglomération (unité urbaine).",
+  prefere_grande_ville: "Taille de l'agglomération (unité urbaine).",
+  faible_risque_inondation: "Historique d'inondations observé sur le territoire.",
+  faible_precip_extremes: "Pluies intenses projetées par le climat.",
+  // self-évidents (le libellé = la mesure) : pas de bulle
   faible_chaleur: null,
   faible_secheresse: null,
   faible_risque_feu: null,
-  faible_precip_extremes: "pluies intenses projetées, pas le risque d'inondation réel",
   air_sain: null,
   acces_soins: null,
   acces_services: null,
   faible_pression_agricole: null,
   viabilite_emploi: null,
+};
+
+// N3 — limite de périmètre, affichée dans le panneau repliable « Ce que ces critères
+// mesurent ». Formulée en POSITIF (« mesure X, sans évaluer Y »), jamais en « pas… ».
+// null = pas de caveat (pas de ligne N3). Les caveats hors-mesure plus larges (qualité
+// des écoles/culture côté facette non mesurée) restent au gate (HORS_MESURE_PHRASES).
+export const PREFERENCE_CAVEAT: Record<string, string | null> = {
+  vie_etudiante: "mesure la présence d'établissements et d'étudiants, sans évaluer les formations",
+  acces_transports: "mesure la présence et la fréquentation des gares, sans détailler horaires ni correspondances",
+  faible_dependance_auto: "mesure les habitudes de déplacement du territoire",
+  nature: "mesure le couvert naturel dans les environs de la commune",
+  acces_culture: "mesure la présence d'équipements culturels, sans évaluer l'activité culturelle locale",
+  acces_ecoles: "mesure l'accès aux collèges et lycées, sans évaluer la qualité des établissements",
+  eviter_grandes_villes: "mesure la taille de l'agglomération entière (unité urbaine)",
+  prefere_grande_ville: "mesure la taille de l'agglomération entière (unité urbaine)",
+  faible_risque_inondation: "mesure l'historique d'inondations observé, sans préjuger des crues futures",
+  faible_precip_extremes: "mesure les pluies intenses projetées, distinctes du risque d'inondation réel",
 };
 
 // Convertit une liste de préférences {key} en libellés humains, sans doublon,
@@ -90,18 +100,23 @@ export function preferencesToLabels(
   return out;
 }
 
-// Variante portant l'interprétation visible (glose) à côté du libellé, sans doublon.
+// Variante portant l'interprétation pour le bloc critères : libellé + glose positive N2
+// (tooltip) + limite de périmètre N3 (caveat), sans doublon de libellé.
 export function preferencesToInterpreted(
   preferences: { key: string }[] | null | undefined,
-): { label: string; gloss: string | null }[] {
+): { label: string; tooltip: string | null; caveat: string | null }[] {
   if (!preferences) return [];
   const seen = new Set<string>();
-  const out: { label: string; gloss: string | null }[] = [];
+  const out: { label: string; tooltip: string | null; caveat: string | null }[] = [];
   for (const p of preferences) {
     const label = PREFERENCE_LABELS[p.key];
     if (label && !seen.has(label)) {
       seen.add(label);
-      out.push({ label, gloss: PREFERENCE_INTERPRETATIONS[p.key] ?? null });
+      out.push({
+        label,
+        tooltip: PREFERENCE_TOOLTIP[p.key] ?? null,
+        caveat: PREFERENCE_CAVEAT[p.key] ?? null,
+      });
     }
   }
   return out;
