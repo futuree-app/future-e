@@ -37,6 +37,8 @@ ECOLES_TYPEQU = {"C201", "C301", "C302", "C303"}
 # Culture au sens large : cinéma, conservatoire (pratique), bibliothèque/médiathèque, musée,
 # théâtre/salle de spectacle/scène. Exclus : F313 (monuments/jardins = tourisme), F314 (archives).
 CULTURE_TYPEQU = {"F303", "F305", "F307", "F312", "F315"}
+# Enseignement supérieur : universités, écoles, STS/CPGE, santé, autres (cf. spec vie étudiante).
+SUP_TYPEQU = {"C501", "C502", "C503", "C504", "C505", "C509"}
 
 # Colonnes confirmées dans le schéma du parquet BPE24.
 COL_TYPE = "TYPEQU"
@@ -104,7 +106,7 @@ def main():
     print(f"communes géolocalisées : {len(communes)}", file=sys.stderr)
 
     rec = {code: {} for code in codes}
-    for field, typeset in (("ecoles", ECOLES_TYPEQU), ("culture", CULTURE_TYPEQU)):
+    for field, typeset in (("ecoles", ECOLES_TYPEQU), ("culture", CULTURE_TYPEQU), ("etudes_acces", SUP_TYPEQU)):
         elat, elon = load_equip_points(typeset)
         print(f"{field} : {len(elat)} équipements géolocalisés", file=sys.stderr)
         counts = count_within_radius(clat, clon, elat, elon)
@@ -121,8 +123,10 @@ def main():
             r = rec.get(c["insee"])
             c["ecoles"] = r["ecoles"] if r else None
             c["culture"] = r["culture"] if r else None
+            # etudes_acces : on n'expose que le percentile (number), pas le count.
+            c["etudes_acces"] = r["etudes_acces"]["score"] if r else None
         json.dump(idx, open(INDEX, "w"))
-        print("✓ index patché (champs ecoles + culture : score + count)", file=sys.stderr)
+        print("✓ index patché (ecoles + culture + etudes_acces)", file=sys.stderr)
 
 
 if __name__ == "__main__":
