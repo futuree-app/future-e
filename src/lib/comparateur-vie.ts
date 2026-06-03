@@ -590,7 +590,7 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
       // risque faible -> score haut. Historique CatNat inondation, pas une garantie d'absence de crue.
       return c.inondation == null ? null : 100 - c.inondation.risque;
     case "faible_dependance_auto":
-      // part voiture domicile-travail faible -> score haut. Usage contraint, pas la possession.
+      // part voiture domicile-travail faible -> score haut. Usage contraint (MOBPRO), pas la possession.
       return c.mobilite == null ? null : 100 - c.mobilite.dependance;
     case "acces_transports":
       // desserte ferroviaire accessible (gares SNCF pondérées par fréquentation).
