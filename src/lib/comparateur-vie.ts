@@ -58,6 +58,10 @@ export const PREFERENCE_KEYS = [
   // Risque inondation fluvial/pluvial : historique d'arrêtés CatNat (GASPAR), percentile national.
   // Opt-in, préférence graduée. Distinct de faible_precip_extremes (pluies, pas risque réel).
   "faible_risque_inondation",
+  // Mobilité. faible_dependance_auto = part voiture domicile-travail (MOBPRO) ; acces_transports
+  // = accès ferroviaire pondéré desserte (gares SNCF). Opt-in, graduées. cf. populate-mobilite/transports.
+  "faible_dependance_auto",
+  "acces_transports",
 ] as const;
 export type PreferenceKey = (typeof PREFERENCE_KEYS)[number];
 
@@ -273,6 +277,19 @@ type IndexCommune = {
   // Risque inondation (cf. scripts/populate-inondation.py). catnat = nb d'arrêtés CatNat
   // inondation (hors submersion marine) ; tri réservé (false en V1) ; risque 0-100 (haut = exposé).
   inondation?: { catnat: number; tri: boolean; risque: number } | null;
+  // Mobilité domicile-travail (cf. scripts/populate-mobilite.py, RP MOBPRO 2022). part_voiture
+  // brut 0..1 (rapport futur) ; dependance = percentile national (haut = dépend de la voiture).
+  mobilite?: {
+    part_voiture: number;
+    dependance: number;
+  } | null;
+  // Accès ferroviaire (cf. scripts/populate-transports.py, gares SNCF + fréquentation).
+  // desserte = percentile national de l'accès pondéré (haut = bien reliée par le train).
+  transport?: {
+    desserte: number;
+    gare_nom: string | null;
+    gare_km: number | null;
+  } | null;
 };
 type IndexFile = { meta: unknown; communes: IndexCommune[] };
 
@@ -572,6 +589,12 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
     case "faible_risque_inondation":
       // risque faible -> score haut. Historique CatNat inondation, pas une garantie d'absence de crue.
       return c.inondation == null ? null : 100 - c.inondation.risque;
+    case "faible_dependance_auto":
+      // part voiture domicile-travail faible -> score haut. Usage contraint, pas la possession.
+      return c.mobilite == null ? null : 100 - c.mobilite.dependance;
+    case "acces_transports":
+      // desserte ferroviaire accessible (gares SNCF pondérées par fréquentation).
+      return c.transport?.desserte ?? null;
     default:
       return null;
   }
@@ -595,6 +618,7 @@ const AMBIENT_DIMENSIONS: AmbientDim[] = [
   { id: "ecoles", key: "acces_ecoles", bands: ["accès aux écoles plus facile", "accès aux écoles intermédiaire", "accès aux écoles plus limité"] },
   { id: "culture", key: "acces_culture", bands: ["offre culturelle plus présente", "offre culturelle intermédiaire", "offre culturelle plus limitée"] },
   { id: "air", key: "air_sain", bands: ["air généralement plus sain", "qualité de l'air intermédiaire", "air généralement moins sain"] },
+  { id: "transports", key: "acces_transports", bands: ["bien reliée par le train", "desserte ferroviaire intermédiaire", "peu reliée par le train"] },
 ];
 const SIGNAUX_MAX = 5;
 
@@ -683,6 +707,8 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   acces_ecoles: "collèges et lycées accessibles autour",
   acces_culture: "équipements culturels accessibles autour",
   faible_risque_inondation: "peu d'arrêtés CatNat inondation",
+  faible_dependance_auto: "peu dépendante de la voiture au quotidien",
+  acces_transports: "bien reliée par le train",
   // « Vaste » est gradué sur la taille RÉELLE de la ZE (effectif salarié absolu),
   // pas sur le percentile saturé : le mot ne sort que là où il est mérité. La
   // diversité (entropie A38) est, elle, toujours défendable.
@@ -710,6 +736,8 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   acces_ecoles: "établissements du secondaire plus éloignés",
   acces_culture: "offre culturelle accessible plus limitée",
   faible_risque_inondation: "historique CatNat inondation plus marqué",
+  faible_dependance_auto: "territoire où la voiture reste quasi indispensable",
+  acces_transports: "desserte ferroviaire limitée",
 };
 function reasonText(key: PreferenceKey, c: IndexCommune): string {
   const r = REASON_POS[key];
