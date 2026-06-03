@@ -32,6 +32,7 @@ export const PREFERENCE_LABELS: Record<string, string> = {
   acces_transports: "l'accès au train et aux gares",
   eviter_grandes_villes: "une ville à taille humaine",
   prefere_grande_ville: "une grande ville",
+  vie_etudiante: "une ville étudiante",
 };
 
 // Interprétations visibles (audit sémantique, cf. AUDIT_SEMANTIQUE_COMPARATEUR.md).
@@ -58,6 +59,7 @@ export const PREFERENCE_INTERPRETATIONS: Record<string, string | null> = {
   acces_transports: "desserte ferroviaire accessible alentour (présence et fréquentation des gares), pas le détail des horaires",
   eviter_grandes_villes: "taille de l'agglomération (unité urbaine), pas de la seule commune",
   prefere_grande_ville: "taille de l'agglomération (unité urbaine), pas de la seule commune",
+  vie_etudiante: "présence d'établissements supérieurs et poids des étudiants dans la population, pas la qualité ni la réputation des formations",
   // self-évidents (le mot = la mesure) : pas de glose
   faible_chaleur: null,
   faible_secheresse: null,
