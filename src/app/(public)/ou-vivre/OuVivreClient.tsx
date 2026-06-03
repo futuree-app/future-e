@@ -688,7 +688,8 @@ export function OuVivreClient() {
               </p>
               {/* N1 : puces seules. N2 : une puce à nuance porte un soulignement
                   pointillé + bulle positive au survol/tap (ChipTooltip) ; les évidentes
-                  restent nues. Pur affichage, aucun impact sur le score. */}
+                  restent nues. Pur affichage, aucun impact sur le score. Les limites
+                  méthodologiques vivent dans le rapport, pas ici. */}
               <div className="flex flex-wrap gap-2">
                 {criteres.map((c) =>
                   c.tooltip ? (
@@ -703,26 +704,6 @@ export function OuVivreClient() {
                   ),
                 )}
               </div>
-              {/* N3 : aide secondaire repliée (limites de périmètre), fermée par défaut.
-                  N'apparaît que si au moins un critère demandé porte un caveat. */}
-              {criteres.some((c) => c.caveat) && (
-                <details className="mt-3 group">
-                  <summary className="cursor-pointer list-none font-mono text-[10px] tracking-[0.14em] uppercase text-ghost hover:text-label/70 transition-colors">
-                    <span className="text-accent/60 group-open:hidden">+ </span>
-                    <span className="hidden group-open:inline text-accent/60">– </span>
-                    Ce que ces critères mesurent
-                  </summary>
-                  <ul className="mt-2.5 flex flex-col gap-1.5">
-                    {criteres
-                      .filter((c) => c.caveat)
-                      .map((c) => (
-                        <li key={c.label} className="text-[12.5px] leading-snug text-label/55">
-                          <span className="text-label/80">{c.label}</span> : {c.caveat}
-                        </li>
-                      ))}
-                  </ul>
-                </details>
-              )}
             </div>
           )}
 

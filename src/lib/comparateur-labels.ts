@@ -65,23 +65,6 @@ export const PREFERENCE_TOOLTIP: Record<string, string | null> = {
   viabilite_emploi: null,
 };
 
-// N3 — limite de périmètre, affichée dans le panneau repliable « Ce que ces critères
-// mesurent ». Formulée en POSITIF (« mesure X, sans évaluer Y »), jamais en « pas… ».
-// null = pas de caveat (pas de ligne N3). Les caveats hors-mesure plus larges (qualité
-// des écoles/culture côté facette non mesurée) restent au gate (HORS_MESURE_PHRASES).
-export const PREFERENCE_CAVEAT: Record<string, string | null> = {
-  vie_etudiante: "mesure la présence d'établissements et d'étudiants, sans évaluer les formations",
-  acces_transports: "mesure la présence et la fréquentation des gares, sans détailler horaires ni correspondances",
-  faible_dependance_auto: "mesure les habitudes de déplacement du territoire",
-  nature: "mesure le couvert naturel dans les environs de la commune",
-  acces_culture: "mesure la présence d'équipements culturels, sans évaluer l'activité culturelle locale",
-  acces_ecoles: "mesure l'accès aux collèges et lycées, sans évaluer la qualité des établissements",
-  eviter_grandes_villes: "mesure la taille de l'agglomération entière (unité urbaine)",
-  prefere_grande_ville: "mesure la taille de l'agglomération entière (unité urbaine)",
-  faible_risque_inondation: "mesure l'historique d'inondations observé, sans préjuger des crues futures",
-  faible_precip_extremes: "mesure les pluies intenses projetées, distinctes du risque d'inondation réel",
-};
-
 // Convertit une liste de préférences {key} en libellés humains, sans doublon,
 // en ignorant toute clé inconnue.
 export function preferencesToLabels(
@@ -101,22 +84,19 @@ export function preferencesToLabels(
 }
 
 // Variante portant l'interprétation pour le bloc critères : libellé + glose positive N2
-// (tooltip) + limite de périmètre N3 (caveat), sans doublon de libellé.
+// (tooltip, affichée au survol/tap), sans doublon de libellé. Les limites méthodologiques
+// ne sont pas affichées ici (elles vivent dans le rapport).
 export function preferencesToInterpreted(
   preferences: { key: string }[] | null | undefined,
-): { label: string; tooltip: string | null; caveat: string | null }[] {
+): { label: string; tooltip: string | null }[] {
   if (!preferences) return [];
   const seen = new Set<string>();
-  const out: { label: string; tooltip: string | null; caveat: string | null }[] = [];
+  const out: { label: string; tooltip: string | null }[] = [];
   for (const p of preferences) {
     const label = PREFERENCE_LABELS[p.key];
     if (label && !seen.has(label)) {
       seen.add(label);
-      out.push({
-        label,
-        tooltip: PREFERENCE_TOOLTIP[p.key] ?? null,
-        caveat: PREFERENCE_CAVEAT[p.key] ?? null,
-      });
+      out.push({ label, tooltip: PREFERENCE_TOOLTIP[p.key] ?? null });
     }
   }
   return out;
