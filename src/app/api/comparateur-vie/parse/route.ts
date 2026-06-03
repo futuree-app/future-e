@@ -138,7 +138,7 @@ RÈGLES
 - "proche de l'océan / de la mer" = contrainte dure (nearSea.active) UNIQUEMENT si c'est présenté comme indispensable. Sinon, préférence proximite_mer (poids 2 ou 3).
 - Climat perçu : distinguez "fuir la chaleur" (faible_chaleur), "rechercher la douceur" (douceur_climat, hivers tempérés), "rechercher le soleil / le chaud" (ensoleillement_recherche). "climat doux" et "agréable" relèvent de douceur_climat, pas de faible_chaleur.
 - Nature vs calme (faux-ami à ne pas confondre) : "nature" = couvert naturel autour (forêts, prairies, milieux naturels) → nature. "calme / tranquille / peu de monde" = densité, ambiance → cadre_calme. "la campagne" est AMBIGU : selon la phrase, c'est souvent les DEUX (nature + cadre_calme) ; n'activez les deux que si le sens le porte, sinon le plus explicite. Ne confondez jamais "vert/forêts" (nature) avec "calme" (densité).
-- N'inventez aucune donnée. Services, sécurité, prix : hors périmètre V1, ne créez pas de préférence. Les écoles et la vie culturelle se déclarent en horsMesure (voir HORS-MESURE), jamais en préférence ni en ambiguities.
+- N'inventez aucune donnée. Sécurité, prix : hors périmètre, ne créez pas de préférence. L'ACCÈS aux écoles (collèges/lycées) et à une offre culturelle EST mesuré (acces_ecoles / acces_culture, voir LISTE et HORS-MESURE) ; seule leur QUALITÉ / VITALITÉ reste en horsMesure.
 - EMPLOI (critère viabilite_emploi = vitalité du bassin d'emploi : taille + diversité sectorielle, jamais la promesse d'un poste précis) :
   • Si l'emploi est un enjeu du projet (besoin de retrouver un poste, conjoint·e qui doit travailler, "trouver du travail", "le marché de l'emploi", projet de vie actif) → préférence viabilite_emploi poids 2. Le détail de VOTRE métier face au climat reste au rapport ; ici on pèse seulement la vitalité du bassin.
   • Si le projet est HORS-EMPLOI (retraite, télétravail total / 100 % à distance, sans activité, rentier) → emploiHorsSujet:true et N'ajoutez PAS viabilite_emploi.
@@ -178,6 +178,8 @@ PRÉFÉRENCES DISPONIBLES (liste fermée)
 - faible_pression_agricole : éloigné des cultures à traitements fréquents (environnement peu marqué par l'agriculture intensive)
 - viabilite_emploi : vitalité du bassin d'emploi (taille + diversité sectorielle), à activer (poids 2) si l'emploi est un enjeu du projet
 - nature : couvert naturel à proximité (forêts, prairies, landes, milieux naturels autour). Pour « proche de la nature », « du vert », « des forêts », « la campagne », « entouré de nature »
+- acces_ecoles : accès aux collèges et lycées autour (présence/proximité, PAS la qualité des établissements). Pour « écoles », « collège », « lycée », « scolarité », ou déduit d'une famille avec enfants (poids 1)
+- acces_culture : accès à une offre culturelle autour au sens large, diffusion et pratique (cinéma, médiathèque, théâtre, musée, salle de spectacle/concert, conservatoire). PAS la vitalité ni la programmation
 
 TRADUCTION AUTOMATIQUE (activez le critère interne, sans exposer le terme technique)
 - "famille", "enfant", "élever un enfant", "grandir" → ajoutez eviter_isolement (poids 2), acces_services (poids 2), faible_pression_agricole (poids 2).
@@ -188,8 +190,15 @@ TRADUCTION AUTOMATIQUE (activez le critère interne, sans exposer le terme techn
 - "retraite", "à la retraite", "jeune retraité" → acces_soins (poids 2 à 3) ET emploiHorsSujet:true (pas de viabilite_emploi).
 - "télétravail total", "100 % télétravail", "je travaille de chez moi", "full remote" → emploiHorsSujet:true (l'emploi local n'est pas un enjeu).
 HORS-MESURE (notions sans critère dans le moteur) : remplissez horsMesure, ne fabriquez JAMAIS de proxy.
-- "écoles", "école", "collège", "lycée", "scolarité", "bon établissement scolaire" → { term, kind: "ecoles" }. NE rabattez PAS sur acces_services.
-- "vie culturelle", "culture", "cinéma", "théâtre", "musée", "concerts", "sorties", "animée culturellement" → { term, kind: "culture" }. NE rabattez PAS sur eviter_isolement ni sur une grande ville.
+- ÉCOLES. L'ACCÈS aux collèges et lycées EST mesuré (acces_ecoles). La QUALITÉ ne l'est pas.
+  • "écoles", "collège", "lycée", "scolarité", "scolariser" (accès) → préférence acces_ecoles (poids 2, ou 3 si essentiel).
+  • Si le projet exprime clairement une FAMILLE avec enfants à scolariser SANS dire "école" → acces_ecoles poids 1 (déduction, jamais plus). Présentée comme votre lecture, jamais comme sa demande.
+  • "bonnes écoles", "qualité", "réputation", "établissement réputé", "options" (bilingue, latin) → AJOUTER en plus { term, kind: "ecoles" } (qualité, hors-mesure). NE rabattez PAS sur acces_services.
+  • CAS CANONIQUE : "une ville avec de bonnes écoles" → préférence acces_ecoles (poids 2) ET horsMesure { kind: "ecoles" }. Les deux à la fois.
+- CULTURE. L'ACCÈS à une offre culturelle EST mesuré (acces_culture), AU SENS LARGE : cinéma, médiathèque, théâtre, musée, mais aussi diffusion et pratique (salle de spectacle/concert, conservatoire, école de musique). La VITALITÉ (programmation, scène locale, associations) ne l'est pas.
+  • "culture", "cinéma", "théâtre", "musée", "médiathèque", "bibliothèque", "concerts", "spectacle", "conservatoire", "sorties culturelles" (accès) → préférence acces_culture (poids 2, ou 3 si essentiel). JAMAIS de déduction culture (uniquement si exprimé).
+  • "vie culturelle animée", "ambiance", "scène locale", "vie associative", "ça bouge culturellement" (vitalité) → AJOUTER { term, kind: "culture" } (hors-mesure). NE rabattez PAS sur eviter_isolement ni sur une grande ville.
+  • Dites toujours "accès à une offre culturelle", JAMAIS "vie culturelle", dans la reformulation.
 - "authentique", "chaleureux", "accueillant", "convivial", "esprit de village", "du caractère", "de l'âme", "qui bouge", "vivante" → { term, kind: "affectif" }.
 - Ne remplissez horsMesure QUE si la notion est réellement exprimée ; ces notions n'ajoutent AUCUNE préférence. La nature, le calme, les services et les soins SONT mesurés : ne les mettez jamais en horsMesure.
 
