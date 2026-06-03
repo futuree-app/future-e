@@ -62,6 +62,10 @@ export const PREFERENCE_KEYS = [
   // = accès ferroviaire pondéré desserte (gares SNCF). Opt-in, graduées. cf. populate-mobilite/transports.
   "faible_dependance_auto",
   "acces_transports",
+  // Taille de ville (UU). eviter_grandes_villes = préférer le petit (cloche petite/moyenne ville
+  // avec le plancher eviter_isolement) ; prefere_grande_ville = préférer le grand. cf. chantier C.
+  "eviter_grandes_villes",
+  "prefere_grande_ville",
 ] as const;
 export type PreferenceKey = (typeof PREFERENCE_KEYS)[number];
 
@@ -205,6 +209,12 @@ function lerp(anchors: Anchors, x: number | null | undefined): number | null {
   return last[1];
 }
 const ISOLEMENT: Anchors = [[0, 0], [1000, 5], [2000, 15], [5000, 45], [10000, 65], [20000, 80], [50000, 92], [100000, 97], [300000, 100]];
+// Taille d'UU -> préférence. Bornes éditoriales (cf. spec) : village <2k, petite 2-25k,
+// moyenne 25-100k, grande 100-500k, métropole >500k. GRANDE_VILLE_MIN décroît (favorise le
+// petit), GRANDE_VILLE_MAX croît (favorise le grand). La cloche petite/moyenne émerge de la
+// composition avec eviter_isolement (plancher).
+const GRANDE_VILLE_MIN: Anchors = [[0, 100], [2000, 100], [25000, 85], [100000, 55], [300000, 25], [500000, 12], [1000000, 3]];
+const GRANDE_VILLE_MAX: Anchors = [[0, 0], [25000, 10], [100000, 40], [300000, 70], [500000, 85], [1000000, 97], [2000000, 100]];
 const CALME: Anchors = [[0, 55], [30, 65], [80, 85], [150, 95], [400, 100], [800, 95], [1500, 80], [3000, 55], [6000, 30], [12000, 12], [30000, 3]];
 const WINTER_MILD: Anchors = [[-3, 5], [1, 30], [4, 60], [7, 88], [9, 100], [12, 95], [16, 80]];
 // Montagnosité : altitude (m) → score 0-100, recalée « vivre à la montagne » (pas
@@ -617,6 +627,10 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
     case "acces_transports":
       // desserte ferroviaire accessible (gares SNCF pondérées par fréquentation).
       return c.transport?.desserte ?? null;
+    case "eviter_grandes_villes":
+      return lerp(GRANDE_VILLE_MIN, tailleVille(c));
+    case "prefere_grande_ville":
+      return lerp(GRANDE_VILLE_MAX, tailleVille(c));
     default:
       return null;
   }
@@ -731,6 +745,8 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   faible_risque_inondation: "peu d'arrêtés CatNat inondation",
   faible_dependance_auto: "peu dépendante de la voiture au quotidien",
   acces_transports: "bien reliée par le train",
+  eviter_grandes_villes: "ville à taille humaine",
+  prefere_grande_ville: "grande ville animée",
   // « Vaste » est gradué sur la taille RÉELLE de la ZE (effectif salarié absolu),
   // pas sur le percentile saturé : le mot ne sort que là où il est mérité. La
   // diversité (entropie A38) est, elle, toujours défendable.
@@ -760,6 +776,8 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   faible_risque_inondation: "historique CatNat inondation plus marqué",
   faible_dependance_auto: "territoire où la voiture reste quasi indispensable",
   acces_transports: "desserte ferroviaire limitée",
+  eviter_grandes_villes: "grande agglomération",
+  prefere_grande_ville: "petit bassin urbain",
 };
 function reasonText(key: PreferenceKey, c: IndexCommune): string {
   const r = REASON_POS[key];
