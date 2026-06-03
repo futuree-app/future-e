@@ -66,6 +66,9 @@ export const PREFERENCE_KEYS = [
   // avec le plancher eviter_isolement) ; prefere_grande_ville = préférer le grand. cf. chantier C.
   "eviter_grandes_villes",
   "prefere_grande_ville",
+  // Vie étudiante (BPE C5xx + effectifs MESR). Accès aux études + dynamisme étudiant combinés
+  // (40/60). Opt-in. cf. populate-bpe (etudes_acces) + populate-etudiants (etudes_dyn).
+  "vie_etudiante",
 ] as const;
 export type PreferenceKey = (typeof PREFERENCE_KEYS)[number];
 
@@ -300,6 +303,11 @@ type IndexCommune = {
     gare_nom: string | null;
     gare_km: number | null;
   } | null;
+  // Vie étudiante. etudes_acces = percentile présence établissements sup (BPE C5xx, cf.
+  // populate-bpe.py) ; etudes_dyn = percentile part étudiante au niveau UU (MESR, cf.
+  // populate-etudiants.py). Combinés dans subScore("vie_etudiante").
+  etudes_acces?: number | null;
+  etudes_dyn?: number | null;
 };
 type IndexFile = { meta: unknown; communes: IndexCommune[] };
 
@@ -631,6 +639,15 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
       return lerp(GRANDE_VILLE_MIN, tailleVille(c));
     case "prefere_grande_ville":
       return lerp(GRANDE_VILLE_MAX, tailleVille(c));
+    case "vie_etudiante": {
+      // 40 % accès (présence établissements sup) + 60 % dynamisme (part étudiante UU).
+      const a = c.etudes_acces ?? null;
+      const d = c.etudes_dyn ?? null;
+      if (a == null && d == null) return null;
+      if (a == null) return d;
+      if (d == null) return a;
+      return Math.round(0.4 * a + 0.6 * d);
+    }
     default:
       return null;
   }
@@ -655,6 +672,7 @@ const AMBIENT_DIMENSIONS: AmbientDim[] = [
   { id: "culture", key: "acces_culture", bands: ["offre culturelle plus présente", "offre culturelle intermédiaire", "offre culturelle plus limitée"] },
   { id: "air", key: "air_sain", bands: ["air généralement plus sain", "qualité de l'air intermédiaire", "air généralement moins sain"] },
   { id: "transports", key: "acces_transports", bands: ["bien reliée par le train", "desserte ferroviaire intermédiaire", "peu reliée par le train"] },
+  { id: "vie_etudiante", key: "vie_etudiante", bands: ["forte présence étudiante", "présence étudiante intermédiaire", "présence étudiante limitée"] },
 ];
 const SIGNAUX_MAX = 5;
 
@@ -747,6 +765,7 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   acces_transports: "bien reliée par le train",
   eviter_grandes_villes: "ville à taille humaine",
   prefere_grande_ville: "grande ville animée",
+  vie_etudiante: "forte présence étudiante",
   // « Vaste » est gradué sur la taille RÉELLE de la ZE (effectif salarié absolu),
   // pas sur le percentile saturé : le mot ne sort que là où il est mérité. La
   // diversité (entropie A38) est, elle, toujours défendable.
@@ -778,6 +797,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   acces_transports: "desserte ferroviaire limitée",
   eviter_grandes_villes: "grande agglomération",
   prefere_grande_ville: "petit bassin urbain",
+  vie_etudiante: "présence étudiante limitée",
 };
 function reasonText(key: PreferenceKey, c: IndexCommune): string {
   const r = REASON_POS[key];
