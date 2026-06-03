@@ -32,7 +32,7 @@ Il ne doit jamais pouvoir dire :
 > « Guérande a connu 3 arrêtés CatNat contre 12 à La Rochelle. » (→ rapport)
 
 Frontière : AskFuture aide à **comparer**, il ne devient pas un rapport gratuit. D'où le
-plafond de signaux (cf. §5).
+plafond de signaux (cf. §4).
 
 ## Solution
 
@@ -57,14 +57,18 @@ Chacune réutilise une clé `subScore` existante :
 | emploi          | `viabilite_emploi`        |
 | écoles          | `acces_ecoles`            |
 | culture         | `acces_culture`           |
-| proximité mer   | `proximite_mer`           |
 | air             | `air_sain`                |
 
 Exclus car **déjà** dans le contexte AskFuture (pas de doublon) : logement, littoral,
 pression éco, trait distinctif.
 
-Reporté en V2 : **froid hivernal** (pas de clé `subScore` dédiée, et surtout faible valeur
-d'usage : question rarement posée spontanément, donnée disponible ≠ besoin exprimé).
+Reporté en V2 :
+- **froid hivernal** (pas de clé `subScore` dédiée, et surtout faible valeur d'usage :
+  question rarement posée spontanément, donnée disponible ≠ besoin exprimé).
+- **proximité mer** (`proximite_mer`) : déjà visible partout, souvent demandée explicitement,
+  faible intelligence comparative. Les dimensions retenues (inondation, air, soins, emploi,
+  culture, écoles, chaleur, sécheresse, feu, nature) sont précisément celles qu'un humain ne
+  voit pas immédiatement. On préserve la rareté du signal en l'écartant.
 
 ### 2. Bande qualitative (terciles nationaux)
 
@@ -87,7 +91,6 @@ juger ; jamais « favorable / défavorable ») :
 | `viabilite_emploi`        | bassin d'emploi plus dynamique     | bassin d'emploi intermédiaire          | bassin d'emploi moins dynamique    |
 | `acces_ecoles`            | accès aux écoles plus facile       | accès aux écoles intermédiaire         | accès aux écoles plus limité       |
 | `acces_culture`           | offre culturelle plus présente     | offre culturelle intermédiaire         | offre culturelle plus limitée      |
-| `proximite_mer`           | littoral plus proche               | littoral à distance intermédiaire      | littoral plus éloigné              |
 | `air_sain`                | air généralement plus sain         | qualité de l'air intermédiaire         | air généralement moins sain        |
 
 ### 3. Dédoublonnage avec `reasons`
@@ -96,30 +99,50 @@ Si une dimension **était** un critère de tri (sa clé est dans `parsed.prefere
 **n'émet pas** son signal ambiant : la `reason` la porte déjà. Net : `reasons` = « pourquoi
 ça ressort », `signaux` = « tout le reste, qualitatif ». Pas de double mention.
 
-### 4. Sélection des 5 signaux les plus discriminants
+### 4. Sélection : contraste de groupe d'abord, puis 5 signaux max
 
-Plafond **5 signaux par territoire**, pour ne pas recréer un mini-rapport. Règle :
+AskFuture répond sur « parmi ces territoires… », pas « par rapport à la France entière ». Un
+signal n'a donc de valeur que s'il **différencie les communes affichées**. La bande nationale
+sert à produire la phrase (description honnête et absolue) ; un **filtre de contraste local**
+décide si on l'émet. Si les trois communes partagent la même bande sur une dimension (toutes
+« accès aux soins plus facile »), le signal n'aide pas à choisir : on ne l'émet pas.
 
-1. Calculer `subScore` pour chaque dimension ambiante, retirer celles déjà critères (§3) et
-   celles dont le score est `null` (donnée absente).
-2. Trier par **|score − 50| décroissant** (les traits les plus marqués, favorables OU
-   notables, d'abord ; les « intermédiaire » fades tombent en bas).
-3. Garder les **5 premières**. En cas d'égalité de |score − 50|, ordre stable selon l'ordre
-   fixe du tableau §1 (déterminisme).
+Le calcul est donc **collectif** sur l'ensemble des territoires affichés (`results`), pas
+isolément par commune :
+
+1. Pour chaque dimension ambiante : `subScore` + bande nationale (§2) pour chaque commune
+   affichée. Retirer la dimension par commune si elle est déjà un critère (§3) ou si le score
+   est `null` (donnée absente).
+2. **Filtre de contraste de groupe** (si ≥ 2 communes affichées) : ne **retenir** une
+   dimension que si les communes qui ont la donnée s'étalent sur **≥ 2 bandes nationales
+   distinctes**. Sinon (toutes la même bande), la dimension est écartée pour tout le groupe.
+3. **Sélection par territoire** : parmi les dimensions retenues, classer pour chaque commune
+   par **|score − moyenne du groupe sur cette dimension| décroissant** (ce qui distingue
+   *cette* commune de ses voisines remonte en premier), garder les **5 premières**. Égalité :
+   ordre stable selon le tableau §1.
 4. Mapper chaque dimension retenue sur sa phrase de bande (§2).
 
-`signaux` est donc un `Record<string, string>` de **0 à 5 entrées** (clé dimension lisible →
-phrase). 0 si toutes les dimensions sont déjà des critères ou absentes.
+**Cas d'une seule commune affichée** (ex. `perfectMatch`) : pas de contraste possible. On
+retombe sur la lecture absolue : dimensions non critères et non nulles, classées par
+**|score − 50| décroissant**, 5 max. Ainsi un résultat unique garde des signaux utiles à une
+question « et côté X ? ».
+
+`signaux` est un `Record<string, string>` de **0 à 5 entrées** (clé dimension lisible →
+phrase). 0 si rien ne contraste / tout est déjà critère ou absent.
 
 ### 5. Où c'est calculé
 
-Dans `src/lib/comparateur-vie.ts`, à la construction de chaque `MatchResult` **affiché**
-(les `results` seulement, coût négligeable) :
+Dans `src/lib/comparateur-vie.ts`. Comme la sélection est **collective** (filtre de contraste
+de groupe), le calcul se fait une fois sur l'ensemble des `results` affichés, après leur
+sélection :
 - nouvelle table module `AMBIENT_DIMENSIONS` : liste ordonnée `{ id, key, bands: [fav, mid, notable] }` ;
-- helper `buildSignaux(c, requestedKeys)` : applique §2–§4, renvoie `Record<string,string>` ;
-- `MatchResult` gagne le champ `signaux: Record<string, string>`.
+- helper `assignSignaux(results, requestedKeys)` : applique §2–§4 sur le groupe (calcule les
+  bandes, le filtre de contraste, la moyenne de groupe par dimension, puis remplit jusqu'à 5
+  signaux par commune) ;
+- `MatchResult` gagne le champ `signaux: Record<string, string>` (rempli par `assignSignaux`).
 
-Aucune métrique brute n'est exposée : seules les phrases de bande quittent le moteur.
+Coût négligeable (≤ ~10 communes × 10 dimensions). Aucune métrique brute n'est exposée :
+seules les phrases de bande quittent le moteur.
 
 ### 6. Branchement dans les routes
 
@@ -134,6 +157,12 @@ Aucune métrique brute n'est exposée : seules les phrases de bande quittent le 
 - Nouvelle section « SI DES `signaux` SONT DONNÉS POUR LES TERRITOIRES » : qualitatif et
   relatif uniquement ; comparaison entre communes affichées autorisée ; ne jamais inventer une
   dimension absente de `signaux` ; jamais de nombre ; pas un nouveau classement.
+  - **Signaux moins favorables autorisés** (le filtre de contraste les fait remonter
+    légitimement) : AskFuture peut spontanément dire qu'une commune affichée est plus exposée /
+    moins dotée qu'une autre. Sinon on retombe dans le travers « tout est merveilleux ».
+  - **Règle de ton (stricte)** : constat, jamais alerte, jamais recommandation. Décrire, pas
+    corriger. Ex. acceptable : « Parmi les trois, Narbonne semble plus exposée à la chaleur
+    estivale que Quimper. » Jamais : « attention », « évitez », « privilégiez ».
 
 **Synthèse (`synthesize/route.ts`) — inchangée en V1, UNE exception**
 - Les signaux ambiants **ne** vont **pas** à la synthèse (son rôle reste d'expliquer le
@@ -153,7 +182,9 @@ Aucune métrique brute n'est exposée : seules les phrases de bande quittent le 
 
 1. `npx tsc --noEmit` + `npm run lint`.
 2. `curl /match` : chaque `result` porte `signaux` (≤ 5 entrées) ; un critère demandé n'y est
-   pas dupliqué ; une commune sans donnée sur une dimension ne l'émet pas.
+   pas dupliqué ; une commune sans donnée sur une dimension ne l'émet pas ; **une dimension où
+   toutes les communes affichées partagent la même bande n'apparaît dans aucun `signaux`**
+   (filtre de contraste). Témoin inverse : une dimension où les communes diffèrent apparaît.
 3. `curl /ask` avec `signaux` en contexte + « et côté inondation ? » → réponse qualitative et
    comparative entre communes affichées, **zéro chiffre**, pas d'esquive vers le rapport.
 4. `curl /ask` « et côté X ? » pour une dimension **hors** `signaux` du territoire → renvoie
@@ -164,8 +195,11 @@ Aucune métrique brute n'est exposée : seules les phrases de bande quittent le 
 
 ## Notes doctrine
 
-- Signaux **descriptifs**, jamais normatifs (« plus marqué », pas « défavorable »).
-- Bande **nationale** ; l'« écart notable » entre communes émerge du fait qu'AskFuture voit la
-  bande de tous les territoires affichés (pas de logique relative supplémentaire dans le moteur).
+- Signaux **descriptifs**, jamais normatifs (« plus marqué », pas « défavorable »). Le ton est
+  un constat, jamais une alerte ni une recommandation.
+- Bande **nationale** pour la phrase, mais l'utilité comparative est garantie au niveau
+  **donnée** : un signal n'est émis que s'il contraste dans le groupe affiché (§4). On ne se
+  repose donc PAS sur le LLM pour filtrer le bruit « les trois sont pareilles ».
+- Un signal n'est affiché que s'il apporte une différence utile entre les territoires proposés.
 - Cf. [[feedback_callendar]] (ne pas citer Callendar), [[feedback_no_em_dash]] (pas de tiret
   cadratin), [[feedback_tooltip_no_sources]] (esprit : qualitatif, pas de méthodo/source).
