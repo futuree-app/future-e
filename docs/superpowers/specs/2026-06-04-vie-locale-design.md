@@ -106,6 +106,14 @@ commune** :
 - **Pondération par type de POI** : bouton possible (un marché hebdo pèse-t-il plus qu'un
   café ?). V1 = poids égal par POI ; à réviser si la sonde le réclame.
 
+**Constat post-sonde : le tourisme est la vraie limite V2, pas K.** La hiérarchie ne bouge
+quasiment pas avec K pour les communes incarnant le concept (Uzès, Lyon, La Rochelle), mais les
+communes touristiques saturent le haut quel que soit K (Saint-Tropez 99 ; suivront Gordes,
+Collioure, Rocamadour…). Le critère mesure donc « densité de vie **visible** », pas « vie locale
+**vécue à l'année** » : acceptable et assumé en V1. Direction V2 dédiée (autre chantier) :
+croiser résidences secondaires, ratio restaurants/habitants, population saisonnière, vacance
+saisonnière, pour distinguer l'animation touristique de la vie locale permanente.
+
 ## Câblage TS
 
 Script `scripts/populate-vie-locale.py` (venv `.venv-bpe`, numpy ; `--selftest` / `--summary`
@@ -128,6 +136,24 @@ Six points de câblage habituels (`comparateur-vie.ts` + `comparateur-labels.ts`
   `vie_locale`. Distinct de `acces_culture` (équipements) et `acces_services` (commerces).
 - **Cache index dev** : après `--write-index`, vraie modif de `comparateur-vie.ts` pour
   réinitialiser `indexCache`.
+
+## Notes d'exécution (2026-06-04)
+
+- **POI OSM rattachés avec un plancher de distance (8 km).** Les tuiles bbox débordent sur
+  l'étranger (Italie/Espagne/Allemagne/Suisse/Belgique/Angleterre) ; sans garde-fou, le
+  rattachement au centroïde français le plus proche collait les POI étrangers sur les communes
+  frontalières (bug constaté : La Brigue, 719 hab → 22 195 POI italiens). Correctif : un POI
+  dont le centroïde communal le plus proche est à > 8 km est écarté (hors France). La Brigue
+  retombe à 3 POI ; 240 k POI étrangers écartés, 148 k POI français conservés. (Le filtre `area`
+  Overpass a été testé puis abandonné : fragile selon le miroir, vides silencieux.)
+- **K figé à 1000.** La sonde a montré un effet contre-intuitif : un K plus grand **récompense
+  les banlieues-dortoirs** (leur densité bouge peu, les petites communes sont écrasées et chutent
+  dans le percentile). Or « dortoir bas » est le cas d'usage fondateur (Sevran : 28 à K=1000,
+  mais 71 à K=8000). 1000 est la seule valeur qui le respecte, sans faire exploser les villages
+  (Plaudren 60). La peur initiale (hameau 1 café = score délirant) ne s'est pas matérialisée.
+- **Sources actives à jour 2026-06** : RNA waldec (`position == 'A'`, géocodage `adrs_codeinsee`,
+  1,84 M actives) + AMALIA 67/68/57 (`INSCRITE`, 75 k, Strasbourg = 13 611 → trou Alsace-Moselle
+  comblé). 34 539/34 788 communes notées (assos quasi universelles).
 
 ## Validation
 
