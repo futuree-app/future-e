@@ -210,6 +210,7 @@ PRÉFÉRENCES DISPONIBLES (liste fermée)
 - eviter_grandes_villes : préférer une ville à taille humaine (taille de l'agglomération / unité urbaine). Pour « une petite ville », « une ville à taille humaine », « pas une métropole », « pas une grande ville », « éviter les grandes villes », « loin de l'agitation urbaine »
 - prefere_grande_ville : préférer une grande ville (taille de l'agglomération). Pour « une grande ville », « une métropole », « une grande agglomération », « du dynamisme urbain », « l'animation d'une grande ville »
 - vie_etudiante : ville étudiante / accès aux études supérieures (présence d'établissements supérieurs ET poids des étudiants dans la population, niveau agglomération). Pour « une ville étudiante », « université », « fac », « faire des études », « pour mes études » ou celles des enfants, « campus », « vie étudiante », « ville animée par les étudiants »
+- vie_locale : intensité de vie sociale du territoire (densité de lieux où l'on se retrouve — cafés, bars, restaurants, marchés, sport, maisons des associations — et tissu associatif, par habitant). DISTINCT de acces_culture (équipements) et acces_services (commerces). Pour « une ville vivante », « animé », « il se passe des choses », « ne pas s'ennuyer », « vie de quartier », « des cafés, des assos, un marché »
 
 TRADUCTION AUTOMATIQUE (activez le critère interne, sans exposer le terme technique)
 - "famille", "enfant", "élever un enfant", "grandir" → ajoutez eviter_isolement (poids 2), acces_services (poids 2), faible_pression_agricole (poids 2).
@@ -222,6 +223,7 @@ TRADUCTION AUTOMATIQUE (activez le critère interne, sans exposer le terme techn
 - "sans voiture", "se passer de la voiture", "moins conduire", "ne pas dépendre de la voiture", "tout à pied", "se garer c'est l'enfer" → faible_dependance_auto (poids 2 à 3).
 - "une gare", "le train", "TER", "TGV", "rejoindre une métropole en train" → acces_transports (poids 2 à 3).
 - "transports en commun", "bus", "tram", "métro", "réseau local", "bien desservi en ville", "se déplacer en ville sans voiture" → mobilite_quotidienne (poids 2 à 3).
+- "une ville vivante", "animé", "il se passe des choses", "ne pas s'ennuyer", "vie de quartier", "des cafés et des assos" → vie_locale (poids 2 à 3).
 - Mobilité : faible_dependance_auto (se passer de la voiture, comportement), acces_transports (train/gares, ouverture du territoire) et mobilite_quotidienne (TC urbains à portée de marche) sont TROIS critères DISTINCTS et cumulables. N'en déduisez aucun par défaut d'un projet rural ou familial.
 - "petite ville", "ville à taille humaine", "pas une métropole", "pas une grande ville", "éviter les grandes villes" → eviter_grandes_villes (poids 2 à 3).
 - "ville moyenne", "ville de taille moyenne" → eviter_grandes_villes (poids 2) ET eviter_isolement (poids 2) : plafond + plancher font émerger la ville moyenne.

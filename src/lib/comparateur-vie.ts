@@ -74,6 +74,9 @@ export const PREFERENCE_KEYS = [
   // Vie étudiante (BPE C5xx + effectifs MESR). Accès aux études + dynamisme étudiant combinés
   // (40/60). Opt-in. cf. populate-bpe (etudes_acces) + populate-etudiants (etudes_dyn).
   "vie_etudiante",
+  // Vie locale : intensité de vie sociale (lieux de sociabilité OSM + tissu associatif RNA/AMALIA,
+  // densité par habitant avec masse critique). Présence d'une vie sociale, jamais l'événementiel. Opt-in.
+  "vie_locale",
 ] as const;
 export type PreferenceKey = (typeof PREFERENCE_KEYS)[number];
 
@@ -322,6 +325,14 @@ type IndexCommune = {
     tram: boolean;
     metro: boolean;
     arret_km: number;
+  } | null;
+  // Vie locale (cf. scripts/populate-vie-locale.py). score = 0.7 lieux de sociabilité (OSM) +
+  // 0.3 tissu associatif (RNA + AMALIA), densité par habitant lissée (masse critique K=1000).
+  // null = pas de vie locale mesurable. Présence d'une vie sociale, PAS l'événementiel.
+  vieLocale?: {
+    score: number;
+    lieux_pct: number;
+    assos_pct: number;
   } | null;
   // Vie étudiante. etudes_acces = percentile présence établissements sup (BPE C5xx, cf.
   // populate-bpe.py) ; etudes_dyn = percentile part étudiante au niveau UU (MESR, cf.
@@ -671,6 +682,9 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
       if (d == null) return a;
       return Math.round(0.4 * a + 0.6 * d);
     }
+    case "vie_locale":
+      // intensité de vie sociale (lieux + assos par habitant) ; pas de vie locale mesurable = 0.
+      return c.vieLocale?.score ?? 0;
     default:
       return null;
   }
@@ -697,6 +711,7 @@ const AMBIENT_DIMENSIONS: AmbientDim[] = [
   { id: "transports", key: "acces_transports", bands: ["bien reliée par le train", "desserte ferroviaire intermédiaire", "peu reliée par le train"] },
   { id: "mobilite_quotidienne", key: "mobilite_quotidienne", bands: ["transports du quotidien bien présents", "desserte du quotidien intermédiaire", "peu de transports du quotidien à pied"] },
   { id: "vie_etudiante", key: "vie_etudiante", bands: ["forte présence étudiante", "présence étudiante intermédiaire", "présence étudiante limitée"] },
+  { id: "vie_locale", key: "vie_locale", bands: ["vie locale animée", "vie locale intermédiaire", "vie locale plus discrète"] },
 ];
 const SIGNAUX_MAX = 5;
 
@@ -797,6 +812,7 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   eviter_grandes_villes: "ville à taille humaine",
   prefere_grande_ville: "grande ville animée",
   vie_etudiante: "forte présence étudiante",
+  vie_locale: "vie locale animée (commerces, marchés, associations)",
   // « Vaste » est gradué sur la taille RÉELLE de la ZE (effectif salarié absolu),
   // pas sur le percentile saturé : le mot ne sort que là où il est mérité. La
   // diversité (entropie A38) est, elle, toujours défendable.
@@ -830,6 +846,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   eviter_grandes_villes: "grande agglomération",
   prefere_grande_ville: "petit bassin urbain",
   vie_etudiante: "présence étudiante limitée",
+  vie_locale: "peu de lieux de vie et d'animation locale",
 };
 function reasonText(key: PreferenceKey, c: IndexCommune): string {
   const r = REASON_POS[key];

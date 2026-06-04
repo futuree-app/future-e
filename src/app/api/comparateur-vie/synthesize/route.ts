@@ -46,6 +46,7 @@ const PREF_LABELS: Record<string, string> = {
   faible_dependance_auto: "une faible dépendance à la voiture",
   acces_transports: "l'accès au train et aux gares",
   mobilite_quotidienne: "les transports du quotidien (bus, tram, métro)",
+  vie_locale: "une vie locale animée (commerces, marchés, associations)",
 };
 
 const SYSTEM = `Vous écrivez la synthèse éditoriale du Comparateur de vie de futur•e.
