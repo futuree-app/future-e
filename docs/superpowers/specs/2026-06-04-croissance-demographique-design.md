@@ -120,6 +120,18 @@ l'étalement péri-urbain ; le déclin n'est pas un défaut (certains veulent la
 calme, des zones peu tendues). Vocabulaire **descriptif, jamais normatif**, partout (libellés,
 reasons, bandes ambiantes). Le critère est opt-in : il ne joue que si l'utilisateur le demande.
 
+## Note d'exécution (2026-06-04)
+
+La sonde des extrêmes a tranché net : sur le **taux brut**, **39/50** du top 50 étaient des
+communes **< 500 hab** (bruit : un hameau de 16 hab à +17 %/an). Lissage requis. `SHRINK_K`
+figé à **3000** (`taux *= pop/(pop+3000)`) après comparaison 1000/3000/8000 : 3000 élimine le
+bruit (0/50) et fait remonter les vraies périphéries d'agglo attractives (Betton/Rennes,
+Bègles/Bordeaux, Couëron/Nantes, Aucamville/Toulouse, Fontanil/Grenoble en `match` réel) sans
+sur-écraser un petit bourg en boom réel (Bezannes). Score signé : Vierzon/Felletin/Paris en bas
+(`perd`), Montpellier en haut (`gagne_attire`). Distribution récit : perd ~45 %, gagne ~44 %,
+stable ~11 % (dont `stable_renouv` = cas-3, 1166 communes). Source : INSEE évolution-structure
+2021 (34 770/34 788 communes notées).
+
 ## Validation
 
 Procédure : après `--write-index`, toucher `comparateur-vie.ts` (bust `indexCache`), puis
