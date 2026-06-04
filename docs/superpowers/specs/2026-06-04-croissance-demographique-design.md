@@ -22,8 +22,10 @@ narratif qui qualifie le phénomène, cf. inondation observée + pression, vie �
 dynamisme, mobilité observée + transports) :
 - **Score = A** : taux de croissance démographique **total** (le plus universel, « se
   développe / se vide »).
-- **Narratif = B** : décomposition **solde naturel vs solde migratoire** (« portée par
-  l'arrivée de nouveaux habitants » vs « par sa structure démographique »).
+- **Narratif = B** : **part de nouveaux arrivants** (habitants ayant emménagé depuis une autre
+  commune / dépt / région / l'étranger dans l'année), via les variables IRAN du recensement.
+  Plus fidèle à « est-ce que des gens viennent s'installer ici ? » que la décomposition
+  naturel/migratoire, et **une seule source**.
 
 Principe de nommage (test de stabilité du porteur) : « si je retire le narratif migratoire, le
 nom reste-t-il vrai ? ». `croissance_demographique` → oui. `attractivité` → non (ce serait le
@@ -35,23 +37,29 @@ sur « attractivité »).
 
 - **Clé** : `croissance_demographique`.
 - **Libellé utilisateur** (incarné) : « Un territoire qui gagne des habitants ».
-- **Champ index** : `c.demographie = { croissance, taux_total, taux_migratoire, taux_naturel } | null`.
+- **Champ index** : `c.demographie = { croissance, taux_total, part_nouveaux } | null`.
   - `croissance` : score 0-100 (percentile national du taux total).
-  - `taux_total`, `taux_migratoire`, `taux_naturel` : taux annualisés (%), pour le narratif/rapport.
+  - `taux_total` : taux de croissance annualisé (%).
+  - `part_nouveaux` : part (%) des habitants ayant emménagé depuis une autre commune/dépt/
+    région/l'étranger dans l'année (IRAN3-7 / pop 1 an+). Narratif uniquement.
   - `null` = donnée absente (commune trop récente, fusionnée, hors champ recensement).
 - **Opt-in strict** : rural/territoire stable non pénalisé hors critère.
 
 ## Source de données
 
-INSEE, **base communale « Évolution et structure de la population » (recensement)**, une seule
-source. Elle porte par commune la population à deux millésimes (P15, P21) et les naissances /
-décès cumulés sur la période. On en dérive **les deux** signaux :
-- `taux_total` = `(P21/P15)^(1/n) − 1` annualisé (n ≈ 6 ans).
-- `taux_naturel` ≈ `(naissances − décès) / n / population_moyenne`.
-- `taux_migratoire` ≈ `taux_total − taux_naturel` (solde apparent des entrées-sorties).
+INSEE, **base communale « Évolution et structure de la population » 2021 (recensement)**, une
+seule source (confirmée à l'acquisition) :
+`https://www.insee.fr/fr/statistiques/fichier/8201904/base-cc-evol-struct-pop-2021_csv.zip`
+(zip → `base-cc-evol-struct-pop-2021.CSV`, séparateur `;`, encodage latin-1, 321 colonnes,
+niveau commune `CODGEO`). On en dérive **les deux** signaux :
+- `taux_total` = `(P21_POP / P15_POP)^(1/6) − 1` annualisé (fenêtre 2015-2021).
+- `part_nouveaux` = `(P21_POP01P_IRAN3 + IRAN4 + IRAN5 + IRAN6 + IRAN7) / P21_POP01P` : part des
+  habitants (1 an et +) ayant emménagé d'une autre commune/dépt/région/DOM/étranger dans
+  l'année. (IRAN1 = même logement, IRAN2 = même commune → exclus : ce ne sont pas des arrivées
+  d'ailleurs.)
 
-Secours pour le migratoire : l'Observatoire des Territoires expose le taux migratoire apparent
-par commune. URL/colonnes exactes à confirmer à l'acquisition.
+La base ne contient **pas** de naissances/décès (donc pas de décomposition naturel/migratoire) ;
+le narratif passe par les arrivées IRAN, plus fidèle à l'intention et sans 2ᵉ source.
 
 **Fenêtre temporelle : 2015-2021 par défaut.** Choix assumé : robuste > frais. Une fenêtre
 intercensitaire de ~6 ans lisse le bruit ; pour un comparateur de projet de vie, un signal
@@ -61,16 +69,19 @@ légèrement ancien mais stable vaut mieux qu'un indicateur frais mais volatil.
 
 - **Score** : percentile national du `taux_total` annualisé. **Signé** : une commune qui se
   vide → percentile bas, qui gagne → haut. Lisible : « gagne / stable / perd des habitants ».
-- **Narratif migratoire** : surfacé en synthèse + AskFuture (patron `climatInondation` = signal
-  narratif HORS score), via `taux_migratoire` / `taux_naturel`. Trois cas :
-  - croissance + migratoire dominant → « portée par l'arrivée de nouveaux habitants »,
-  - croissance + naturel dominant → « portée par sa structure démographique (natalité) »,
-  - déclin → « perd des habitants » (et, si migratoire négatif, « par départ » plutôt que
-    vieillissement).
+- **Narratif nouveaux arrivants** : surfacé en synthèse + AskFuture (patron `climatInondation`
+  = signal narratif HORS score), en croisant le **signe de la croissance** et le **niveau de
+  `part_nouveaux`** (tercile national). Quatre cas (formulations descriptives) :
+  - croissance + forte arrivée → « gagne des habitants et attire de nouveaux arrivants »,
+  - croissance + faible arrivée → « gagne des habitants sans fort renouvellement récent »,
+  - stable + forte arrivée → « population stable, mais renouvellement résidentiel marqué »
+    (le « cas 3 », désormais capté),
+  - déclin + faible arrivée → « perd des habitants et accueille peu de nouveaux arrivants ».
 
-**Limite honnête inscrite** : le solde migratoire **net** ne peut PAS révéler le « cas du
-renouvellement » (population stable mais fort renouvellement entrées/sorties) ; cela demande les
-flux **bruts**, non publiés proprement par commune. On ne le promet pas, on le glose.
+**Limite honnête inscrite** : `part_nouveaux` est une **arrivée résidentielle récente sur 1 an**
+(année du recensement), pas une attractivité structurelle parfaite ; flux **entrant** (pas le
+net entrées-sorties). Plus volatil sur les très petites communes — acceptable pour un narratif
+**qualitatif par bandes**, glosé, jamais présenté comme une mesure fine.
 
 **Bruit des petites communes : à trancher PAR SONDE, pas a priori.** Un village de 50 hab à
 +5 habitants = +10 %/6 ans, qui squatterait le haut du classement. NE PAS winsoriser d'emblée :
@@ -136,7 +147,8 @@ humainement plausibles.
 ## Hors périmètre
 
 - Sit@del / construction de logements (urbanisme/spéculation, pas la trajectoire vécue).
-- Flux migratoires bruts / renouvellement (non publiés par commune ; cas-3 hors de portée).
+- Décomposition naturel/migratoire par naissances/décès (2ᵉ source) : remplacée par les arrivées
+  IRAN (même source, capte le renouvellement / cas-3).
 - Critère inverse « je veux un territoire stable » (partiellement couvert par `cadre_calme` /
   `eviter_grandes_villes` ; le score non normatif suffit en V1).
 - Composite A+B+C.
