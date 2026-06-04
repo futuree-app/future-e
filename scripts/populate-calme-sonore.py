@@ -33,7 +33,8 @@ R_EARTH = 6371.0
 # Le score n'est PAS la distance à la source la plus proche (bruit d'échantillonnage en
 # grande ville), mais l'intégrale de proximité (1 - d/R_EXPO) le long de TOUTES les sources
 # dans R_EXPO, pondérée par classe, + une contribution ponctuelle aéroport. Puis fonction
-# saturante -> 0-100. Loin de tout = 100. Boutons PROVISOIRES, à figer par sonde (gate porteur).
+# saturante -> 0-100. Loin de tout = 100. Boutons FIGÉS par sonde (gate porteur 2026-06-05,
+# validés sur la couronne de La Rochelle) ; gardés paramétrables et documentés.
 R_EXPO = 5.0     # rayon d'exposition cumulée (km)
 H_HALF = 150.0   # demi-vie : score = 100 * 0.5^(E/H_HALF). Plus H grand, plus c'est clément.
 W_AUTO = 1.0     # poids autoroute/voie rapide (par km de proximité intégrée)

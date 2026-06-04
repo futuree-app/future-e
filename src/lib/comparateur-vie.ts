@@ -80,6 +80,12 @@ export const PREFERENCE_KEYS = [
   // Croissance démographique : trajectoire de population (gagne/perd des habitants), INSEE
   // 2015-2021. Narratif = part de nouveaux arrivants (IRAN). Descriptif, jamais normatif. Opt-in.
   "croissance_demographique",
+  // Calme sonore : EXPOSITION CUMULÉE aux grandes infrastructures bruyantes (autoroutes/voies
+  // rapides, rail à 3 tiers lgv/main/branch, aéroports commerciaux) dans un rayon d'ambiance.
+  // Score = densité d'infra bruyantes autour du lieu de vie (pas la distance à la plus proche),
+  // saturée -> loin de tout = 100. Récit = source la plus proche nommable. Descriptif, pas dB.
+  // Distinct de cadre_calme (densité de bâti). Opt-in. cf. populate-calme-sonore.py.
+  "calme_sonore",
 ] as const;
 export type PreferenceKey = (typeof PREFERENCE_KEYS)[number];
 
@@ -170,6 +176,11 @@ export type MatchResult = {
   // « perd ». Surfacé en synthèse UNIQUEMENT si croissance_demographique est demandée (même
   // frontière que climatInondation). null = pas de donnée. cf. RECIT_DEMOGRAPHIE.
   demographie: string | null;
+  // Calme sonore (NARRATIF, hors score/tri). Récit explicatif : nomme la source bruyante la
+  // plus proche NOMMABLE et sa distance (« autoroute à ~900 m »). Le score, lui, est cumulé.
+  // Surfacé en synthèse UNIQUEMENT si calme_sonore est demandé (même frontière que demographie/
+  // climatInondation). null = silence (aucune source proche nommable). cf. calmeSonoreRecit.
+  calmeSonore: string | null;
   // Signaux ambiants (NARRATIF, hors score, hors tri) : 0 à 5 phrases qualitatives
   // descriptives par territoire (bande nationale, filtrées par contraste de groupe),
   // pour qu'AskFuture réponde aux « et côté X ? » hors critères. clé dimension lisible
@@ -356,6 +367,15 @@ type IndexCommune = {
   // populate-etudiants.py). Combinés dans subScore("vie_etudiante").
   etudes_acces?: number | null;
   etudes_dyn?: number | null;
+  // Calme sonore (cf. scripts/populate-calme-sonore.py). score = exposition cumulée saturée
+  // (densité d'infra bruyantes dans R_EXPO, jamais la distance à la plus proche) -> loin de
+  // tout = 100, JAMAIS null au sens « non noté ». sourceDominante ∈ {auto,rail,aero} | null +
+  // distanceKm = source la plus proche NOMMABLE (récit seul, pas le score) ; null = silence.
+  calmeSonore?: {
+    score: number;
+    sourceDominante: "auto" | "rail" | "aero" | null;
+    distanceKm: number | null;
+  } | null;
 };
 type IndexFile = { meta: unknown; communes: IndexCommune[] };
 
@@ -705,6 +725,10 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
     case "croissance_demographique":
       // trajectoire démographique ; null (donnée absente) -> non noté (opt-in, pas de pénalité).
       return c.demographie?.croissance ?? null;
+    case "calme_sonore":
+      // exposition cumulée aux infra bruyantes ; loin de tout = 100 (jamais « non noté »).
+      // Champ absent (commune sans calcul) -> traité comme calme (100), pas comme pénalité.
+      return c.calmeSonore?.score ?? 100;
     default:
       return null;
   }
@@ -733,6 +757,7 @@ const AMBIENT_DIMENSIONS: AmbientDim[] = [
   { id: "vie_etudiante", key: "vie_etudiante", bands: ["forte présence étudiante", "présence étudiante intermédiaire", "présence étudiante limitée"] },
   { id: "vie_locale", key: "vie_locale", bands: ["vie locale animée", "vie locale intermédiaire", "vie locale plus discrète"] },
   { id: "croissance_demographique", key: "croissance_demographique", bands: ["gagne des habitants", "population stable", "perd des habitants"] },
+  { id: "calme_sonore", key: "calme_sonore", bands: ["à l'écart des grandes infrastructures bruyantes", "exposition sonore intermédiaire", "environnement maillé d'infrastructures bruyantes"] },
 ];
 
 // Narratif « nouveaux arrivants » (HORS score) : phrase descriptive, jamais normative.
@@ -744,6 +769,18 @@ export const RECIT_DEMOGRAPHIE: Record<string, string> = {
   stable: "population globalement stable",
   perd: "perd des habitants",
 };
+
+// Récit explicatif du calme sonore (HORS score, qui est cumulé). Nomme la source bruyante
+// la plus proche NOMMABLE + sa distance. null = aucune source proche (silence : rien à
+// expliquer, même si l'ambiance cumulée reste un peu exposée). Descriptif, jamais un jugement.
+function calmeSonoreRecit(c: IndexCommune): string | null {
+  const cs = c.calmeSonore;
+  if (!cs || cs.sourceDominante == null || cs.distanceKm == null) return null;
+  const lib = cs.sourceDominante === "auto" ? "un grand axe routier"
+    : cs.sourceDominante === "rail" ? "une voie ferrée"
+    : "un aéroport";
+  return `${lib} à environ ${cs.distanceKm} km`;
+}
 const SIGNAUX_MAX = 5;
 
 function bandIndex(score: number): 0 | 1 | 2 {
@@ -845,6 +882,9 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   vie_etudiante: "forte présence étudiante",
   vie_locale: "vie locale animée (commerces, marchés, associations)",
   croissance_demographique: "population en croissance",
+  // Positif = score haut = environnement peu maillé d'infra bruyantes. Le coupable proche
+  // (autoroute/rail/aéro) se raconte côté récit (calmeSonoreRecit), pas dans la reason positive.
+  calme_sonore: "à l'écart des grandes infrastructures bruyantes",
   // « Vaste » est gradué sur la taille RÉELLE de la ZE (effectif salarié absolu),
   // pas sur le percentile saturé : le mot ne sort que là où il est mérité. La
   // diversité (entropie A38) est, elle, toujours défendable.
@@ -880,6 +920,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   vie_etudiante: "présence étudiante limitée",
   vie_locale: "peu de lieux de vie et d'animation locale",
   croissance_demographique: "population en baisse",
+  calme_sonore: "environnement assez maillé d'infrastructures bruyantes",
 };
 function reasonText(key: PreferenceKey, c: IndexCommune): string {
   const r = REASON_POS[key];
@@ -1332,6 +1373,8 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
         // Évolution démographique : récit construit ici (comme climatInondation), gaté à
         // l'affichage côté synthèse par « croissance_demographique demandée ».
         demographie: c.demographie?.recit ? (RECIT_DEMOGRAPHIE[c.demographie.recit] ?? null) : null,
+        // Calme sonore : récit construit ici, gaté côté synthèse par « calme_sonore demandé ».
+        calmeSonore: calmeSonoreRecit(c),
         signaux: {}, // rempli après l'assemblage final sur le groupe affiché (cf. assignSignaux)
         metrics: {
           distance_cote_km: c.distance_cote_km,

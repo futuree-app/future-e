@@ -36,6 +36,7 @@ export const PREFERENCE_LABELS: Record<string, string> = {
   vie_etudiante: "une ville étudiante",
   vie_locale: "une vie locale animée",
   croissance_demographique: "Un territoire qui gagne des habitants",
+  calme_sonore: "l'éloignement des grandes sources de bruit (axes, rail, aéroports)",
 };
 
 // N2 — glose positive affichée au survol/tap de la puce (cf. ChipTooltip). Courte,
@@ -60,6 +61,7 @@ export const PREFERENCE_TOOLTIP: Record<string, string | null> = {
   prefere_grande_ville: "Taille de l'agglomération (unité urbaine).",
   faible_risque_inondation: "Historique d'inondations observé sur le territoire.",
   faible_precip_extremes: "Pluies intenses projetées par le climat.",
+  calme_sonore: "Densité de grandes infrastructures bruyantes autour (axes rapides, voie ferrée, aéroport). Mesure l'environnement sonore structurel, pas le bruit ressenti.",
   // self-évidents (le libellé = la mesure) : pas de bulle
   faible_chaleur: null,
   faible_secheresse: null,
