@@ -46,31 +46,26 @@ difficile à maintenir et à expliquer).
 
 ## Sources de données
 
-Téléchargées hors runtime (comme le rail), pas de fichier local versionné.
+> **Révision majeure (exécution) : source UNIQUE = OpenStreetMap.** Le plan initial prenait
+> les arrêts dans le CSV GTFS national. La sonde a révélé que ce CSV a des **trous par réseau** :
+> Lyon (2ᵉ métropole) n'y a que **38 arrêts dans un rayon de 5 km** contre **722 à Rennes**, car
+> le réseau TCL n'est pas agrégé. Un critère « mobilité du quotidien » notant Lyon à zéro est
+> indéfendable. OSM, en revanche, cartographie **tous** les arrêts (bus inclus) de façon uniforme
+> et courante (2 103 arrêts OSM dans la même bbox Lyon). On a donc **abandonné le CSV GTFS** et
+> tout basé sur OSM, arrêts **et** mode. Une source, robuste, sans trou réseau.
 
-1. **Couverture (arrêts)** : `gtfs_stops_france_export` — CSV national consolidé de tous les
-   GTFS de la plateforme. Source : transport.data.gouv.fr, dataset
-   « Arrêts de transport en France »
-   (`https://transport.data.gouv.fr/resources/81333/download`, à jour janvier 2026).
-   Colonnes utiles : `stop_id, stop_name, stop_lat, stop_lon, location_type`.
-   - **Pas de `route_type` / mode** dans ce fichier.
-   - **Arrêts non dédoublonnés** : un même point physique apparaît plusieurs fois s'il est
-     couvert par plusieurs GTFS (urbain + régional). → dédoublonnage spatial obligatoire.
-   - Filtrer aux vrais arrêts d'embarquement : `location_type` ∈ {0, vide}.
-2. **Mode structurant (tram / métro)** : **OpenStreetMap via Overpass**, et non le GeoJSON
-   national de lignes (le seul existant date de 2021, 300 Mo, stale ; écarté après recherche).
-   OSM cartographie tram et métro de façon **à jour et exhaustive** en France, et le repo a un
-   précédent (la base cyclable vient d'un export OSM national). On récupère des **nœuds
-   ponctuels** d'arrêts (pas de géométrie de ligne à traiter) :
-   - `node["railway"="tram_stop"]` → mode **tram** (mesuré : ~3 326 nœuds en France).
-   - stations `subway` (`node["railway"="station"]["station"="subway"]`, `["subway"="yes"]`,
-     `node["station"="subway"]`) → mode **métro** (mesuré : ~488 nœuds, cohérent Paris + 5 métros
-     régionaux).
-   - Requête Overpass filtrée sur la France (`area["ISO3166-1"="FR"][admin_level=2]`), ~3 800
-     nœuds, ~1 Mo, un seul appel. Le mode se lit **directement dans le tag** du nœud.
-   - Garde-fou Overpass (rate-limit / indispo au script-time) : le script **cache la réponse
-     brute OSM** dans `data/.cache/` (gitignoré) et la réutilise ; option `--refresh-osm` pour
-     forcer un re-fetch.
+Source unique : **OpenStreetMap via Overpass** (hors runtime, cachée, pas de fichier versionné).
+
+- **Couverture (tous arrêts)** : `node["highway"="bus_stop"]`, `node["public_transport"="platform"]`,
+  `node["railway"="tram_stop"]`, et stations `subway`. ~568 000 arrêts dédoublonnés (~55 m)
+  nationalement. OSM peut sous-cartographier des arrêts ruraux obscurs (car scolaire 2×/jour),
+  ce qui est **souhaitable** ici (on ne crédite pas un arrêt fantôme).
+- **Mode structurant** : lu **directement dans le tag** du même jeu de nœuds —
+  `railway=tram_stop` → tram (~11 700), `station=subway` / `subway=yes` → métro (~1 800).
+- **Acquisition tuilée** : requête Overpass par bbox (France métropolitaine en tuiles de 2° +
+  5 bbox DOM), **cachée par tuile** dans `data/.cache/osm-stops-tiles/` (gitignoré, résumable
+  si Overpass flanche). Miroirs Overpass essayés dans l'ordre avec retry (le principal renvoie
+  souvent 504). Option `--refresh-osm` pour re-fetch.
 
 ## Métrique
 
@@ -79,7 +74,9 @@ Téléchargées hors runtime (comme le rail), pas de fichier local versionné.
    gonflées.
 2. **Couverture pondérée.** Pour chaque commune (centroïde lat/lon de l'index) :
    `couverture = Σ` sur arrêts dédoublonnés à distance `d <= R` de `(1 − d/R)`. Décroissance
-   linéaire forte ; `R` petit (échelle marche). **`R` à figer par sonde** (cf. Validation).
+   linéaire forte ; `R` petit (échelle marche). **`R` figé par sonde : 1000 m** — à 500 m la
+   détection du mode casse (le centroïde est rarement à <500 m d'un arrêt tram/métro) ; à 1500 m
+   on sort du pas-de-porte ; 1000 m capte bien le mode et reste marchable (~12 min).
 3. **Facteur mode.** `facteur = metro ? 2.0 : tram ? 1.5 : 1.0`, où `tram`/`metro` sont vrais
    si un **nœud OSM** du mode correspondant (tram_stop / station subway) est à `d <= R` du
    centroïde. Détection ponctuelle directe (mêmes grille + haversine que la couverture, aucune
@@ -94,15 +91,29 @@ communes à zéro recevraient un score ≈ 70/100. Une commune **sans aucun rés
 sur « se déplacer sans voiture » : absurde, et c'est le même « déforme le signal » que sur
 BPE.
 
-Correctif :
-- `acces_raw == 0` → `c.reseauLocal = null`, et `subScore = 0`.
-- `acces_raw > 0` → `acces` = percentile **parmi les seules communes desservies**
-  (`acces_raw > 0`), rééchelonné 1-100.
+Correctif (avec **plancher de crédibilité**, ajouté à l'exécution) :
+- `acces_raw < ACCESS_FLOOR` (= **1.0**) → `c.reseauLocal = null`, et `subScore = 0`.
+- `acces_raw >= 1.0` → `acces` = percentile **parmi les seules communes desservies**
+  (`acces_raw >= 1.0`), rééchelonné 1-100.
 
-Logique produit en deux temps : (1) y a-t-il un réseau de mobilité quotidienne accessible à
-pied ? (2) si oui, quelle est la qualité relative de cet accès parmi les communes
+**Pourquoi le plancher 1.0.** Sans lui, la médiane de couverture des « desservies » est ~0,87 :
+la moitié des communes « desservies » n'ont en gros qu'**un arrêt en bordure du rayon**, et le
+percentile-parmi-desservies les gonfle (un village à 6 arrêts épars ressortait à 71/100). Le
+plancher 1.0 (≈ un arrêt vraiment proche, ou deux à ~500 m) est un **seuil de crédibilité** :
+« y a-t-il un accès réel à pied à un réseau ? », pas « un objet OSM existe-t-il dans le rayon ? ».
+Choix produit, pas technique : le critère s'appelle « se déplacer sans voiture ». Avec 1.0,
+Plaudren (village) tombe à 36, Vannes 96, Paris 100. 1.0 préserve les gradients (2.0 effacerait
+les bourgs-centres et petits réseaux réels). 5 985 communes desservies (17 %).
+
+Logique produit en deux temps : (1) y a-t-il un réseau de mobilité quotidienne **crédible**
+accessible à pied ? (2) si oui, quelle est la qualité relative de cet accès parmi les communes
 desservies ? Préférer cette exception explicite à un score national homogène mais
 produitement faux.
+
+**Compression du haut assumée.** Paris/Lyon/Bordeaux/Rennes/Strasbourg/La Rochelle/Vannes
+ressortent toutes à 96-100. C'est une **caractéristique**, pas un défaut : le critère distingue
+*réaliste / difficile / quasi-impossible* de vivre sans voiture, pas les grandes villes entre
+elles (dans toutes, la réponse honnête est « oui »).
 
 `subScore(mobilite_quotidienne, c) = c.reseauLocal?.acces ?? 0` (pas de réseau = 0, puisque
 l'utilisateur a explicitement demandé les TC).
