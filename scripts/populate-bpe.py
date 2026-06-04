@@ -22,7 +22,17 @@ PARQUET = os.path.join(ROOT, "data", "bpe24.parquet")
 CACHE = os.path.join(ROOT, "data", ".cache")
 OUT = os.path.join(CACHE, "communes-bpe.json")
 
-RAYON_KM = 15
+# Rayon d'accès ADAPTATIF au type de territoire (cf. spec 2026-06-04-rayon-bpe-adaptatif).
+# Le rayon suit la mobilité acceptée par les habitants, PAS la taxonomie des cartes.
+# tailleVille (pop d'UU, sinon pop communale)  ->  rayon
+#   >= 500 000 (vraie métropole)        5 km
+#   100 000 - 500 000 (grande ville)   10 km
+#   30 000 - 100 000 (ville moyenne)   15 km
+#   < 30 000 ou null (rural / isolé)   25 km
+# 25 km en rural assume la doctrine « ne jamais pénaliser le rural par défaut » : même
+# à 25 km, une métropole reste devant en nombre d'équipements (comparabilité conservée).
+RADIUS_TABLE = ((500_000, 5.0), (100_000, 10.0), (30_000, 15.0))
+RADIUS_RURAL = 25.0
 CELL = 0.18  # grille spatiale, comme populate-nature.py
 
 # Confirmés sur la donnée (échantillon NOMRS, métropole + DOM concordants).
@@ -53,6 +63,38 @@ def haversine_np(lat0, lon0, lats, lons):
     dlmb = np.radians(lons - lon0)
     a = np.sin(dphi / 2) ** 2 + np.cos(p0) * np.cos(lp) * np.sin(dlmb / 2) ** 2
     return 2 * R * np.arcsin(np.sqrt(a))
+
+
+def radius_for(taille):
+    """Rayon d'accès en km selon tailleVille. None -> rural (25 km)."""
+    if taille is None:
+        return RADIUS_RURAL
+    for seuil, r in RADIUS_TABLE:
+        if taille >= seuil:
+            return r
+    return RADIUS_RURAL
+
+
+def build_uupop(idx_communes):
+    """Somme des populations communales par code UU (réplique uuPopCache côté TS).
+    Itère sur TOUTES les communes de l'index (y compris non géolocalisées) : une UU
+    pèse par sa population totale, pas seulement ses communes géolocalisées."""
+    uupop = {}
+    for c in idx_communes:
+        uu = c.get("uu")
+        pop = c.get("population")
+        if uu and pop is not None:
+            uupop[uu] = uupop.get(uu, 0) + pop
+    return uupop
+
+
+def taille_ville(c, uupop):
+    """Pop d'UU si la commune appartient à une UU connue, sinon sa pop communale
+    (une commune hors UU est son propre bassin). Réplique tailleVille() côté TS."""
+    uu = c.get("uu")
+    if uu and uu in uupop:
+        return uupop[uu]
+    return c.get("population")
 
 
 def load_equip_points(typequ_set):
@@ -93,10 +135,41 @@ def percentile_scores(counts):
     return [round(100 * bisect.bisect_right(srt, int(c)) / n) if n else None for c in counts]
 
 
+def selftest():
+    # Bornes exactes de la table de rayons.
+    assert radius_for(None) == 25.0
+    assert radius_for(0) == 25.0
+    assert radius_for(29_999) == 25.0
+    assert radius_for(30_000) == 15.0
+    assert radius_for(99_999) == 15.0
+    assert radius_for(100_000) == 10.0
+    assert radius_for(499_999) == 10.0
+    assert radius_for(500_000) == 5.0
+    assert radius_for(12_000_000) == 5.0
+    # Reconstruction pop d'UU : somme par code, ignore pop null, ignore uu null.
+    up = build_uupop([
+        {"uu": "00851", "population": 100},
+        {"uu": "00851", "population": 50},
+        {"uu": None, "population": 800},
+        {"uu": "00851", "population": None},
+    ])
+    assert up == {"00851": 150}, up
+    # tailleVille : UU connue -> pop d'UU ; hors UU -> pop communale ; UU inconnue -> pop communale.
+    assert taille_ville({"uu": "00851", "population": 100}, up) == 150
+    assert taille_ville({"uu": None, "population": 800}, up) == 800
+    assert taille_ville({"uu": "99999", "population": 700}, up) == 700
+    print("✓ selftest OK", file=sys.stderr)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--write-index", action="store_true")
+    ap.add_argument("--selftest", action="store_true")
     args = ap.parse_args()
+
+    if args.selftest:
+        selftest()
+        return
 
     idx = json.load(open(INDEX))
     communes = [c for c in idx["communes"] if c.get("lat") is not None and c.get("lon") is not None]
