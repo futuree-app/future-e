@@ -1,7 +1,55 @@
 # Design : critère `calme_sonore`
 
+Date : 2026-06-04 (révisé 2026-06-05)
+Statut : validé (brainstorming) ; pivot scoring acté en sonde (cf. RÉVISION ci-dessous)
+
+## RÉVISION 2026-06-05 : pivot « plus proche » → « exposition cumulée »
+
+La sonde a invalidé le modèle initial « distance à la source dominante la plus proche »
+(`max`) : depuis un point unique (chef-lieu), il produit un bruit d'échantillonnage en
+grande ville (Nantes-centre sortait à 100 « calme » parce que son périph tombait à 2.2 km,
+pile hors rayon). Diagnostic porteur : *la distance à la source la plus proche n'est pas
+une bonne représentation du bruit AMBIANT.*
+
+**Nouveau modèle (A, validé sur témoins) : exposition CUMULÉE.** Pour chaque commune, on
+intègre la proximité `(1 - d/R)` le long de TOUTES les sources dans un rayon `R` (~5 km),
+pondérée par classe, plus une contribution ponctuelle aéroport. C'est une « densité
+d'infrastructures bruyantes autour du lieu de vie », conceptuellement proche de l'ambiance
+sonore vécue. Résultat : les métropoles ressortent naturellement bruyantes (Lille/Paris/
+Marseille/Lyon en bas), le rural reste calme (Mende 100), et un village collé à l'autoroute
+(Valserhône) reste exposé : ce n'est PAS une taille-de-ville déguisée (garde-fou clé). La
+couronne de La Rochelle (territoire connu du porteur) sort cohérente (cœur + couronne proche
+~47-49, couronne externe ~59-62).
+
+Conséquences sur le reste du design :
+- Le **score** vient de l'exposition cumulée via une fonction saturante
+  `score = round(100 * 0.5^(E/H))` (E=0 → 100 ; absolu, pas percentile ; jamais null).
+- Le **récit `sourceDominante`** garde le calcul « source la plus proche » (inchangé) : le
+  score raconte l'ambiance, le récit nomme le coupable (« autoroute à ~900 m »).
+- **Sources V1 inchangées** (autoroute/voie rapide, rail à 3 tiers lgv/main/branch, aéroports
+  commerciaux). `primary` testé en sonde et REJETÉ : il resserre le haut (métropoles) mais
+  érode le rural (Mende 100→75, bourg rural 71→44), car OSM ne donne pas le trafic et une
+  nationale quasi déserte compte autant qu'un boulevard urbain. Mauvais échange (casse le
+  cœur de valeur « far = 100 » pour un gain cosmétique sur des cœurs de ville que personne ne
+  filtre pour le calme).
+- **Rail à 3 tiers** (décidé en sonde) : `highspeed=yes` (LGV) > `usage=main` > `usage=branch`,
+  proxy du NIVEAU D'INFRASTRUCTURE OSM, jamais « intensité réelle » (pas de GTFS, pas de
+  trains/jour). Glose : « voies distinguées selon leur niveau d'infrastructure OSM (proxy) ».
+- **Nouveaux boutons à sonder/figer** : rayon d'exposition `R`, demi-vie `H`, poids aéroport
+  `W_AERO`, poids de classes (`W_AUTO/W_MAIN/W_LGV/W_BRANCH`).
+- **Limite documentée (candidate V2)** : résidu de point unique sur quelques cœurs de grande
+  métropole (Bordeaux/Montpellier/Nantes lisent un peu trop calme). Correctif éventuel = une
+  « densité de maillage » qui annule les nationales isolées, PAS un `primary` brut.
+- **Propreté d'implémentation** : dédup des ways par id au chargement (un way à cheval sur
+  deux tuiles ne doit compter qu'une fois dans l'intégrale).
+
+Le reste du document ci-dessous décrit le modèle initial « plus proche » : conservé pour
+l'historique ; lire la présente révision comme la source de vérité du scoring.
+
+---
+
 Date : 2026-06-04
-Statut : validé (brainstorming), prêt pour writing-plans
+Statut initial : validé (brainstorming), prêt pour writing-plans
 
 ## Intention
 

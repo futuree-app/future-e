@@ -29,11 +29,27 @@ OUT_CACHE = os.path.join(CACHE, "communes-calme-sonore.json")
 
 R_EARTH = 6371.0
 
-# ── Rayons caractéristiques par classe (km) : décroissance linéaire absolue. ────
-# Valeurs INITIALES indicatives, à CONFIRMER/AJUSTER par la sonde (gate porteur)
-# avant la matrice témoins. Un aéroport porte plus loin qu'une autoroute (R_AUTO<R_RAIL<R_AERO).
-R_AUTO = 1.5
-R_RAIL = 3.0
+# ── MODÈLE DE SCORE : exposition CUMULÉE (cf. RÉVISION 2026-06-05 du design) ────
+# Le score n'est PAS la distance à la source la plus proche (bruit d'échantillonnage en
+# grande ville), mais l'intégrale de proximité (1 - d/R_EXPO) le long de TOUTES les sources
+# dans R_EXPO, pondérée par classe, + une contribution ponctuelle aéroport. Puis fonction
+# saturante -> 0-100. Loin de tout = 100. Boutons PROVISOIRES, à figer par sonde (gate porteur).
+R_EXPO = 5.0     # rayon d'exposition cumulée (km)
+H_HALF = 150.0   # demi-vie : score = 100 * 0.5^(E/H_HALF). Plus H grand, plus c'est clément.
+W_AUTO = 1.0     # poids autoroute/voie rapide (par km de proximité intégrée)
+W_MAIN = 1.0     # poids rail usage=main
+W_LGV = 1.5      # poids rail LGV (porte plus, plus bruyant)
+W_BRANCH = 0.3   # poids rail secondaire (faible : ne doit pas éroder le rural)
+W_AERO = 100.0   # poids contribution aéroport (terme ponctuel = W_AERO * (1 - d/R_AERO))
+
+# ── Rayons caractéristiques par classe (km) — UNIQUEMENT pour le RÉCIT (source dominante
+# la plus proche : « autoroute à ~900 m »). N'entrent PAS dans le score cumulé.
+R_AUTO = 2.0
+# Rail à 3 tiers : proxy du NIVEAU D'INFRASTRUCTURE OSM (highspeed/usage), PAS l'intensité
+# réelle (trains/jour). Une LGV porte loin, une ligne secondaire ne pénalise qu'au pied.
+R_LGV = 2.5      # highspeed=yes
+R_MAIN = 1.5     # usage=main
+R_BRANCH = 0.6   # usage=branch
 R_AERO = 8.0
 
 # ── Whitelist aéroports COMMERCIAUX (codes IATA) ───────────────────────────────
@@ -65,21 +81,27 @@ def expo_class(d_km, r_km):
         return 0.0
     return max(0.0, min(1.0, 1.0 - d_km / r_km))
 
-def score_from_dists(d_auto, d_rail, d_aero):
-    """Combinaison MAX (source dominante) -> (score 0-100, classe dominante, distance dominante).
+def recit_dominant(d_auto, d_lgv, d_main, d_branch, d_aero):
+    """Source la plus proche pour le RÉCIT (pas le score) -> (src, distance) ou (None, None).
 
-    Loin de toute source -> expo 0 -> score 100. Ne renvoie JAMAIS None (calme = mesure, pas absence).
+    Les 3 tiers de rail s'affichent tous comme « rail » (l'utilisateur ne voit pas le tier).
+    None = aucune source dans son rayon de récit (silence : rien à nommer).
     """
     cands = [
         ("auto", d_auto, expo_class(d_auto, R_AUTO)),
-        ("rail", d_rail, expo_class(d_rail, R_RAIL)),
+        ("rail", d_lgv, expo_class(d_lgv, R_LGV)),
+        ("rail", d_main, expo_class(d_main, R_MAIN)),
+        ("rail", d_branch, expo_class(d_branch, R_BRANCH)),
         ("aero", d_aero, expo_class(d_aero, R_AERO)),
     ]
     src, dist, e = max(cands, key=lambda x: x[2])
-    score = round(100 * (1 - e))
     if e <= 0.0:
-        return 100, None, None  # calme : aucune source dominante à nommer
-    return score, src, round(dist, 1)
+        return None, None
+    return src, round(dist, 1)
+
+def score_from_exposure(E):
+    """Exposition cumulée -> score 0-100, saturant. E=0 -> 100 (loin de tout, jamais null)."""
+    return round(100 * 0.5 ** (E / H_HALF))
 
 # ── Plomberie Overpass (copiée de populate-reseau-local.py, générique) ─────────
 OVERPASS_MIRRORS = [
@@ -154,20 +176,26 @@ def query_airports(s, w, n, e):
             f'nwr["aeroway"="aerodrome"]["iata"]{bb};'
             ');out center;')
 
-def classify_rail(tags):
-    """True si voie ferrée de GRANDE CIRCULATION (source de bruit). Filtre le secondaire/inerte.
+def rail_tier(tags):
+    """Niveau d'infrastructure ferroviaire (proxy du niveau OSM, PAS l'intensité réelle).
 
-    Inclut : usage=main, OU highspeed=yes (LGV). Exclut explicitement service, sidings,
-    usage industrial/tourism/military/branch, disused/abandoned/construction.
+    -> 'lgv' | 'main' | 'branch' | None. LGV prime (highspeed=yes). Exclut toujours
+    service/sidings, usage industrial/tourism/military, disused/abandoned/construction,
+    et le rail sans usage connu (prudence V1).
     """
     if tags.get("service"):
-        return False
-    if tags.get("usage") in ("industrial", "tourism", "military", "branch"):
-        return False
+        return None
     for k in ("disused", "abandoned", "construction", "razed", "proposed"):
         if tags.get(k) or tags.get("railway") == k:
-            return False
-    return tags.get("usage") == "main" or tags.get("highspeed") == "yes"
+            return None
+    if tags.get("highspeed") == "yes":
+        return "lgv"
+    u = tags.get("usage")
+    if u == "main":
+        return "main"
+    if u == "branch":
+        return "branch"
+    return None  # industrial/tourism/military/absent : exclus
 
 # ── Densification des lignes en nuage de points (pour distance par grille) ──────
 DENSIFY_KM = 0.2  # pas d'échantillonnage le long des lignes (~200 m)
@@ -193,30 +221,49 @@ def _tile_elements(dest, qfn, s, w, n, e, refresh):
     return fetch_tile(qfn(s, w, n, e), dest)
 
 def load_osm(refresh=False):
-    """Retourne (auto_pts, rail_pts, aero_pts) : 3 arrays Nx2 (lat,lon) en float64."""
+    """Retourne (auto, lgv, main, branch, aero, aero_iata) : 5 arrays Nx2 (lat,lon) + la liste iata.
+
+    DÉDUP par id de way : un way à cheval sur deux tuiles (Overpass renvoie sa géométrie
+    complète dans chaque tuile qu'il touche) ne doit compter qu'UNE fois dans l'intégrale.
+    """
     os.makedirs(OSM_TILE_DIR, exist_ok=True)
-    auto, rail, aero = [], [], []
+    auto, lgv, rmain, branch, aero = [], [], [], [], []
+    rail_sink = {"lgv": lgv, "main": rmain, "branch": branch}
+    seen_auto, seen_rail, seen_aero = set(), set(), set()
     for (s, w, n, e) in tiles():
-        for name, q, sink in (("roads", query_roads, auto), ("rail", query_rail, rail)):
-            dest = os.path.join(OSM_TILE_DIR, f"{name}_{s}_{w}.json")
-            for el in _tile_elements(dest, q, s, w, n, e, refresh):
-                if el.get("type") != "way" or "geometry" not in el:
-                    continue
-                if name == "rail" and not classify_rail(el.get("tags", {})):
-                    continue
-                sink.extend(densify(el["geometry"]))
+        dest = os.path.join(OSM_TILE_DIR, f"roads_{s}_{w}.json")
+        for el in _tile_elements(dest, query_roads, s, w, n, e, refresh):
+            if el.get("type") != "way" or "geometry" not in el:
+                continue
+            wid = el.get("id")
+            if wid in seen_auto:
+                continue
+            seen_auto.add(wid)
+            auto.extend(densify(el["geometry"]))
+        dest = os.path.join(OSM_TILE_DIR, f"rail_{s}_{w}.json")
+        for el in _tile_elements(dest, query_rail, s, w, n, e, refresh):
+            if el.get("type") != "way" or "geometry" not in el:
+                continue
+            wid = el.get("id")
+            if wid in seen_rail:
+                continue
+            seen_rail.add(wid)
+            tier = rail_tier(el.get("tags", {}))
+            if tier:
+                rail_sink[tier].extend(densify(el["geometry"]))
         dest = os.path.join(OSM_TILE_DIR, f"airports_{s}_{w}.json")
         for el in _tile_elements(dest, query_airports, s, w, n, e, refresh):
             iata = (el.get("tags", {}).get("iata") or "").strip().upper()
-            if iata not in WHITELIST_IATA:
+            if iata not in WHITELIST_IATA or el.get("id") in seen_aero:
                 continue
+            seen_aero.add(el.get("id"))
             c = el.get("center") or el
             if c.get("lat") is not None:
                 aero.append((c["lat"], c["lon"], iata))
     def arr(p):
         return np.array([(x[0], x[1]) for x in p], dtype=np.float64) if p else np.empty((0, 2))
     aero_iata = sorted({x[2] for x in aero})
-    return arr(auto), arr(rail), arr(aero), aero_iata
+    return arr(auto), arr(lgv), arr(rmain), arr(branch), arr(aero), aero_iata
 
 # ── Distance la plus proche par classe (recherche par grille) ──────────────────
 GRID = 0.1  # cellule ~11 km lat : ±1 cellule capte toute source dans les rayons max
@@ -247,73 +294,131 @@ def load_communes():
     communes = [c for c in idx["communes"] if c.get("lat") is not None and c.get("lon") is not None]
     return idx, communes
 
-def compute_dists(communes, auto, rail, aero):
-    ga, gr, ge = _grid(auto), _grid(rail), _grid(aero)
+# ── Exposition cumulée (modèle de SCORE) ───────────────────────────────────────
+def _grid_cells(pts, cell):
+    g = {}
+    for k in range(len(pts)):
+        key = (int(math.floor(pts[k, 0] / cell)), int(math.floor(pts[k, 1] / cell)))
+        g.setdefault(key, []).append(k)
+    return g
+
+def cum_line(lat, lon, pts, grid, cell, R):
+    """Intégrale de proximité le long d'une classe de lignes dans R : sum (1-d/R)*DENSIFY_KM.
+
+    Voisinage ±2 cellules (cell ~= R) : couvre tout point à <= R, partout en France.
+    """
+    if len(pts) == 0:
+        return 0.0
+    ci, cj = int(math.floor(lat / cell)), int(math.floor(lon / cell))
+    idx = []
+    for di in (-2, -1, 0, 1, 2):
+        for dj in (-2, -1, 0, 1, 2):
+            idx.extend(grid.get((ci + di, cj + dj), []))
+    if not idx:
+        return 0.0
+    sub = pts[idx]
+    d = hav_km(lat, lon, sub[:, 0], sub[:, 1])
+    return float(np.clip(1 - d / R, 0, None).sum()) * DENSIFY_KM
+
+def aero_term(lat, lon, aero):
+    """Contribution ponctuelle de l'aéroport commercial le plus proche : W_AERO*(1-d/R_AERO)."""
+    if len(aero) == 0:
+        return 0.0
+    dm = float(np.min(hav_km(lat, lon, aero[:, 0], aero[:, 1])))
+    return W_AERO * max(0.0, 1 - dm / R_AERO)
+
+def compute_all(communes, auto, lgv, rmain, branch, aero):
+    """Par commune : {score, src, dist, E}. score = exposition cumulée saturée ; src/dist = récit."""
+    cell = R_EXPO / 111.0
+    gA, gL, gM, gB = (_grid_cells(auto, cell), _grid_cells(lgv, cell),
+                      _grid_cells(rmain, cell), _grid_cells(branch, cell))
+    # grilles séparées (maille GRID=0.1) pour le récit « source la plus proche »
+    rA, rL, rM, rB, rE = (_grid(auto), _grid(lgv), _grid(rmain), _grid(branch), _grid(aero))
     out = []
     for c in communes:
         la, lo = c["lat"], c["lon"]
-        out.append((nearest_km(la, lo, auto, ga),
-                    nearest_km(la, lo, rail, gr),
-                    nearest_km(la, lo, aero, ge)))
+        E = (W_AUTO * cum_line(la, lo, auto, gA, cell, R_EXPO)
+             + W_MAIN * cum_line(la, lo, rmain, gM, cell, R_EXPO)
+             + W_LGV * cum_line(la, lo, lgv, gL, cell, R_EXPO)
+             + W_BRANCH * cum_line(la, lo, branch, gB, cell, R_EXPO)
+             + aero_term(la, lo, aero))
+        src, dist = recit_dominant(nearest_km(la, lo, auto, rA), nearest_km(la, lo, lgv, rL),
+                                   nearest_km(la, lo, rmain, rM), nearest_km(la, lo, branch, rB),
+                                   nearest_km(la, lo, aero, rE))
+        out.append({"score": score_from_exposure(E), "src": src, "dist": dist, "E": round(E, 1)})
     return out
 
 # Témoins : la validation qualitative locale prime sur la distribution nationale.
-# La Rochelle = juge principal (aéroport régional + rocade + voie ferrée).
+# La Rochelle + sa couronne = juge principal (territoire connu du porteur). Codes INSEE
+# vérifiés par nom dans l'index (piège : 17290=Prignac, pas Puilboreau ; PLM = arrondissements).
 TEMOINS = {
-    "17300": "La Rochelle (aéroport + rocade + rail)",
-    "75056": "Paris (axes + aéroports proches)",
-    "69123": "Lyon (rocade / A7)",
-    "31555": "Toulouse (périph + Blagnac)",
-    "13055": "Marseille (rocade + voies)",
-    "01033": "Bellegarde-Valserhône (LGV + A40)",
-    "15014": "Aurillac secteur (Cantal, attendu calme)",
-    "48095": "Mende (Lozère isolé, attendu ~100)",
-    "12145": "Rodez secteur (Aveyron)",
-    "50129": "un bourg de la Manche (rural)",
+    "17300": "La Rochelle",
+    "17200": "  Lagord (couronne LR)",
+    "17291": "  Puilboreau (couronne LR)",
+    "17028": "  Aytré (couronne LR)",
+    "17010": "  Angoulins (couronne LR ext.)",
+    "75101": "Paris 1er",
+    "69381": "Lyon 1er",
+    "13201": "Marseille 1er",
+    "31555": "Toulouse",
+    "33063": "Bordeaux",
+    "44109": "Nantes",
+    "59350": "Lille",
+    "34172": "Montpellier",
+    "06088": "Nice",
+    "01033": "Valserhône (village/A40)",
+    "15014": "Aurillac",
+    "15012": "Arpajon-sur-Cère",
+    "12202": "Rodez",
+    "09122": "Foix",
+    "48095": "Mende (isolé)",
+    "50129": "bourg Manche (rural)",
 }
 
 def _f(x):
     return "n/a" if x is None else f"{x:.1f}"
 
-def _probe_matrix(communes, dists, mode):
+def _show_temoins(communes, results):
     by = {c["insee"]: i for i, c in enumerate(communes)}
-    header = f"\n{'commune':42} {'d_auto':>8} {'d_rail':>8} {'d_aero':>8}"
-    if mode == "matrix":
-        header += f" {'score':>6} {'src':>5} {'d_km':>6}"
-    print(header, file=sys.stderr)
+    print(f"\n{'commune':28} {'EXPO':>7} {'score':>6} {'src':>5} {'dkm':>6}", file=sys.stderr)
     for ins, lib in TEMOINS.items():
         if ins not in by:
-            print(f"{lib:42} {'ABSENT':>8}", file=sys.stderr); continue
-        da, dr, de = dists[by[ins]]
-        cells = f"{_f(da):>8} {_f(dr):>8} {_f(de):>8}"
-        if mode == "matrix":
-            sc, src, d = score_from_dists(da, dr, de)
-            cells += f" {sc:>6} {str(src):>5} {_f(d):>6}"
-        print(f"{lib:42} {cells}", file=sys.stderr)
+            print(f"{lib:28} {'ABSENT':>7}", file=sys.stderr); continue
+        r = results[by[ins]]
+        print(f"{lib:28} {r['E']:>7} {r['score']:>6} {str(r['src']):>5} {_f(r['dist']):>6}", file=sys.stderr)
 
 def selftest():
     assert expo_class(0.0, 1.5) == 1.0
     assert expo_class(1.5, 1.5) == 0.0
     assert abs(expo_class(0.75, 1.5) - 0.5) < 1e-9
-    assert expo_class(99.0, 8.0) == 0.0
     assert expo_class(None, 1.5) == 0.0
-    # loin de tout -> 100, pas de source dominante, jamais None
-    assert score_from_dists(50.0, 50.0, 50.0) == (100, None, None)
-    # autoroute proche domine une voie ferrée plus lointaine (en expo)
-    s, src, d = score_from_dists(0.75, 2.0, None)  # expo_auto .5 vs expo_rail .33
-    assert (src, d) == ("auto", 0.8), (src, d)
-    assert s == 50
-    # aéroport à 4 km : expo .5 sur R_AERO=8
-    s, src, d = score_from_dists(None, None, 4.0)
-    assert (s, src, d) == (50, "aero", 4.0), (s, src, d)
-    # rail : ne garder que la grande circulation (usage=main / LGV), jeter le reste
-    assert classify_rail({"usage": "main"}) is True
-    assert classify_rail({"highspeed": "yes"}) is True
-    assert classify_rail({"usage": "branch"}) is False
-    assert classify_rail({"usage": "industrial"}) is False
-    assert classify_rail({"service": "siding"}) is False
-    assert classify_rail({"disused": "yes", "usage": "main"}) is False
-    assert classify_rail({}) is False  # rail sans usage connu : exclu (prudence V1)
+    # récit (source la plus proche), jamais le score
+    assert recit_dominant(None, None, None, None, None) == (None, None)
+    assert recit_dominant(50.0, 50.0, 50.0, 50.0, 50.0) == (None, None)  # loin de tout : silence
+    assert recit_dominant(1.0, None, None, None, None) == ("auto", 1.0)  # auto 1 km / R_AUTO 2
+    assert recit_dominant(None, None, None, None, 4.0) == ("aero", 4.0)  # aéro 4 km / R_AERO 8
+    assert recit_dominant(None, None, None, 0.3, None) == ("rail", 0.3)  # branch s'affiche « rail »
+    assert recit_dominant(None, None, 1.2, 0.3, None) == ("rail", 0.3)   # branch proche domine main loin
+    # score saturant : E=0 -> 100, demi-vie H_HALF
+    assert score_from_exposure(0.0) == 100
+    assert score_from_exposure(H_HALF) == 50
+    assert score_from_exposure(2 * H_HALF) == 25
+    # exposition cumulée : un point au contact -> (1-0)*DENSIFY_KM
+    p = np.array([[45.0, 1.0]]); cell = R_EXPO / 111.0
+    assert abs(cum_line(45.0, 1.0, p, _grid_cells(p, cell), cell, R_EXPO) - DENSIFY_KM) < 1e-9
+    assert cum_line(45.0, 1.0, np.empty((0, 2)), {}, cell, R_EXPO) == 0.0
+    # aéroport au contact -> W_AERO ; loin -> 0
+    assert aero_term(45.0, 1.0, np.array([[45.0, 1.0]])) == W_AERO
+    assert aero_term(45.0, 1.0, np.array([[10.0, 1.0]])) == 0.0
+    # rail_tier : hiérarchie OSM (proxy), LGV prime, secondaire inclus, inerte exclu
+    assert rail_tier({"highspeed": "yes"}) == "lgv"
+    assert rail_tier({"highspeed": "yes", "usage": "branch"}) == "lgv"  # LGV prime
+    assert rail_tier({"usage": "main"}) == "main"
+    assert rail_tier({"usage": "branch"}) == "branch"
+    assert rail_tier({"usage": "industrial"}) is None
+    assert rail_tier({"service": "siding"}) is None
+    assert rail_tier({"disused": "yes", "usage": "main"}) is None
+    assert rail_tier({}) is None  # rail sans usage connu : exclu (prudence V1)
     print("✓ selftest OK", file=sys.stderr)
 
 def main():
@@ -330,20 +435,44 @@ def main():
         return
 
     if args.summary:
-        auto, rail, aero, aero_iata = load_osm(refresh=args.refresh_osm)
+        auto, lgv, rmain, branch, aero, aero_iata = load_osm(refresh=args.refresh_osm)
         print(f"points autoroute/voie rapide : {len(auto)}", file=sys.stderr)
-        print(f"points rail principal        : {len(rail)}", file=sys.stderr)
+        print(f"points rail LGV / main / branch : {len(lgv)} / {len(rmain)} / {len(branch)}", file=sys.stderr)
         print(f"aéroports commerciaux retenus : {len(aero_iata)} -> {' '.join(aero_iata)}", file=sys.stderr)
         return
 
-    if args.probe:
+    if args.probe or args.matrix:
         idx, communes = load_communes()
-        auto, rail, aero, _ = load_osm(refresh=args.refresh_osm)
-        dists = compute_dists(communes, auto, rail, aero)
-        _probe_matrix(communes, dists, "probe")
+        auto, lgv, rmain, branch, aero, _ = load_osm(refresh=args.refresh_osm)
+        print(f"R_EXPO={R_EXPO} H={H_HALF} W(auto/main/lgv/branch/aero)="
+              f"{W_AUTO}/{W_MAIN}/{W_LGV}/{W_BRANCH}/{W_AERO}", file=sys.stderr)
+        results = compute_all(communes, auto, lgv, rmain, branch, aero)
+        _show_temoins(communes, results)
+        if args.matrix:
+            import collections
+            scores = [r["score"] for r in results]
+            buckets = collections.Counter(s // 10 * 10 for s in scores)
+            n100 = sum(1 for s in scores if s == 100)
+            print(f"\ndistribution score : {dict(sorted(buckets.items()))}", file=sys.stderr)
+            print(f"score=100 (loin de tout) : {n100}/{len(scores)} ({100*n100//len(scores)} %)", file=sys.stderr)
         return
 
-    print("calcul national : voir --matrix / --write-index", file=sys.stderr)
+    # Calcul national complet -> cache (+ index si --write-index)
+    idx, communes = load_communes()
+    auto, lgv, rmain, branch, aero, _ = load_osm(refresh=args.refresh_osm)
+    print(f"communes : {len(communes)} | R_EXPO={R_EXPO} H={H_HALF}", file=sys.stderr)
+    results = compute_all(communes, auto, lgv, rmain, branch, aero)
+    rec = {}
+    for c, r in zip(communes, results):
+        rec[c["insee"]] = {"score": r["score"], "sourceDominante": r["src"], "distanceKm": r["dist"]}
+    os.makedirs(CACHE, exist_ok=True)
+    json.dump(rec, open(OUT_CACHE, "w"))
+    print(f"✓ cache écrit : {OUT_CACHE}", file=sys.stderr)
+    if args.write_index:
+        for c in idx["communes"]:
+            c["calmeSonore"] = rec.get(c["insee"])  # non géolocalisée -> None
+        json.dump(idx, open(INDEX, "w"))
+        print("✓ index patché (calmeSonore)", file=sys.stderr)
 
 if __name__ == "__main__":
     main()
