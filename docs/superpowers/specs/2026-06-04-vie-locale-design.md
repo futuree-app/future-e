@@ -146,9 +146,26 @@ Procédure : après `--write-index`, toucher `comparateur-vie.ts` (bust `indexCa
 | Village avec un seul café | Moyen, pas exceptionnel (masse critique) |
 | Grande ville active | Haut |
 | Zone pavillonnaire sans centralité | Bas |
+| **Agglo réelle entière** (La Rochelle 17300 + Puilboreau 17286 + Lagord 17197 + Aytré 17028) | Lecture **plausible à l'échelle agglo** ; surveiller la sous-notation des périphéries intégrées (limite connue ci-dessous) |
 
 Garde-fou : si la banlieue-dortoir score comme une petite ville vivante, ou si le village
 touristique écrase tout, revoir `K` ou les pondérations de type de POI **avant** `--write-index`.
+Le test agglo n'est pas un garde-fou bloquant (la sous-notation périphérique est une limite
+assumée), mais il doit « raconter quelque chose de plausible » : le centre haut, les périphéries
+graduées, pas d'aberration.
+
+## Limite connue (première V2)
+
+**La commune n'est pas toujours la bonne unité d'espace vécu.** Une commune résidentielle de
+6 000 hab collée à une ville-centre de 8 000 hab est vécue comme **un seul espace** par
+l'habitant, mais le rattachement communal des POI la fait apparaître pauvre en vie locale alors
+qu'elle accède à pied/voiture à celle du centre. Le V1 **favorise les communes-centres et
+sous-note les périphéries intégrées**. C'est la première limite qui apparaîtra.
+
+Direction V2 (hors périmètre V1) : un **lissage intercommunal** (compter aussi, avec décote, les
+POI/assos des communes immédiatement voisines ou du bassin de vie) plutôt qu'un strict
+rattachement communal. Non retenu en V1 pour ne pas réintroduire la complexité d'échelle qu'on
+a justement écartée, mais documenté comme l'évolution naturelle.
 
 ## Hors périmètre
 
