@@ -67,6 +67,49 @@ def recit_code(taux, part, part_hi):
     return "stable_renouv" if forte else "stable"
 
 
+def download(url, dest):
+    if not os.path.exists(dest):
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        req = urllib.request.Request(url, headers={"User-Agent": "futur-e/populate-demographie"})
+        with urllib.request.urlopen(req, timeout=300) as r, open(dest, "wb") as f:
+            f.write(r.read())
+    return dest
+
+
+def _num(s):
+    s = (s or "").strip().replace(",", ".")
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
+def load_insee(valid_insee):
+    """Retourne dict insee -> (taux_total, part_nouveaux) pour les communes de l'index."""
+    download(INSEE_URL, INSEE_ZIP)
+    out = {}
+    z = zipfile.ZipFile(INSEE_ZIP)
+    with z.open(INSEE_CSV) as f:
+        rd = csv.DictReader(io.TextIOWrapper(f, encoding="latin-1"), delimiter=";")
+        for row in rd:
+            ins = (row.get("CODGEO") or "").strip()
+            if ins not in valid_insee:
+                continue
+            p15 = _num(row.get("P15_POP")); p21 = _num(row.get("P21_POP"))
+            taux = growth_rate(p15, p21)
+            p01p = _num(row.get("P21_POP01P"))
+            iran = sum(_num(row.get(f"P21_POP01P_IRAN{k}")) or 0.0 for k in (3, 4, 5, 6, 7))
+            out[ins] = (taux, part_nouveaux(iran, p01p))
+    print(f"INSEE : {len(out)} communes appariées", file=sys.stderr)
+    return out
+
+
+def load_communes():
+    idx = json.load(open(INDEX))
+    communes = [c for c in idx["communes"]]
+    return idx, communes
+
+
 def selftest():
     assert growth_rate(100, 100) == 0.0
     assert abs(growth_rate(1000, 1061, 6) - 0.01) < 1e-3   # ~ +1 %/an
@@ -93,6 +136,21 @@ def main():
     args = ap.parse_args()
     if args.selftest:
         selftest()
+        return
+
+    if args.summary:
+        idx, communes = load_communes()
+        valid = {c["insee"] for c in communes}
+        data = load_insee(valid)
+        taux = [data.get(c["insee"], (None, None))[0] for c in communes]
+        nonnull = [t for t in taux if t is not None]
+        import statistics
+        print(f"communes avec taux : {len(nonnull)}/{len(communes)}", file=sys.stderr)
+        print(f"taux médian : {statistics.median(nonnull)*100:.2f} %/an | "
+              f"min {min(nonnull)*100:.1f} max {max(nonnull)*100:.1f}", file=sys.stderr)
+        parts = [data.get(c['insee'], (None, None))[1] for c in communes]
+        pv = sorted(p for p in parts if p is not None)
+        print(f"part_nouveaux terciles : P33={pv[len(pv)//3]*100:.1f}% P66={pv[2*len(pv)//3]*100:.1f}%", file=sys.stderr)
         return
 
 
