@@ -42,8 +42,11 @@ TILE_DEG = 2.0
 ASSIGN_CELL = 0.1   # grille de rattachement POI -> commune (centroïde le plus proche)
 R_EARTH = 6371.0
 
-# K (masse critique) : population virtuelle au dénominateur. FIGÉ PAR SONDE (Task 4).
-K = 3000
+# K (masse critique) : population virtuelle au dénominateur. Figé par sonde (Task 4) : 1000.
+# Seule valeur où la banlieue-dortoir reste basse (Sevran 28) — le cas d'usage fondateur ;
+# un K plus grand RÉCOMPENSE les dortoirs (densité stable des grandes pop, petites communes
+# écrasées). Ne fait pas exploser les villages (Plaudren 60). cf. spec.
+K = 1000
 
 
 def hav_km(lat0, lon0, lats, lons):
@@ -176,6 +179,32 @@ def assign_to_communes(communes, plat, plon):
     return counts
 
 
+TEMOINS = {
+    "30334": "Uzès (petite ville vivante)",
+    "93071": "Sevran (banlieue dortoir dense)",
+    "83119": "Saint-Tropez (village touristique)",
+    "56157": "Plaudren (village 1 café)",
+    "69381": "Lyon 1er (grande ville active)",
+    "17300": "La Rochelle (agglo centre)",
+    "17286": "Puilboreau (agglo périph)",
+    "17197": "Lagord (agglo périph)",
+    "17028": "Aytré (agglo périph)",
+}
+
+
+def compute_scores(communes, lieux, assos, k):
+    """Retourne dict insee -> (score, p_lieux, p_assos, n_lieux, n_assos)."""
+    dl = [density(lieux.get(c["insee"], 0), c.get("population"), k) for c in communes]
+    da = [density(assos.get(c["insee"], 0), c.get("population"), k) for c in communes]
+    pl = component_pct(dl)
+    pa = component_pct(da)
+    out = {}
+    for i, c in enumerate(communes):
+        out[c["insee"]] = (combine(pl[i], pa[i]), pl[i], pa[i],
+                           lieux.get(c["insee"], 0), assos.get(c["insee"], 0))
+    return out
+
+
 def download(url, dest):
     if not os.path.exists(dest):
         os.makedirs(os.path.dirname(dest), exist_ok=True)
@@ -255,9 +284,9 @@ def load_assos(communes):
 
 
 def selftest():
-    assert abs(density(10, 7000) - 10 / 10000) < 1e-12
-    assert abs(density(1, 30) - 1 / 3030) < 1e-12   # hameau écrasé par K
-    assert density(0, 5000) == 0.0
+    assert abs(density(10, 7000, 3000) - 10 / 10000) < 1e-12
+    assert abs(density(1, 30, 3000) - 1 / 3030) < 1e-12   # hameau écrasé par K
+    assert density(0, 5000, 3000) == 0.0
     # composante : zéros -> 0, positifs -> percentile parmi >0 (3 positifs : 0.001,0.002,0.004)
     assert component_pct([0, 0, 0.001, 0.002, 0.004]) == [0, 0, 33, 67, 100]
     assert component_pct([0, 0]) == [0, 0]
@@ -289,6 +318,53 @@ def main():
         # contrôle Alsace-Moselle : Strasbourg (67482) doit être non nul (via AMALIA).
         print(f"Strasbourg assos : {assos.get('67482', 0)} | Paris 1er : {assos.get('75101', 0)}", file=sys.stderr)
         return
+
+    if args.probe:
+        idx, communes = load_communes()
+        plat, plon = load_social_pois()
+        lieux = assign_to_communes(communes, plat, plon)
+        assos = load_assos(communes)
+        print(f"\n{'commune':34} " + "".join(f"{f'K={k}':>10}" for k in (1000, 3000, 8000)), file=sys.stderr)
+        scores = {k: compute_scores(communes, lieux, assos, k) for k in (1000, 3000, 8000)}
+        for ins, lib in TEMOINS.items():
+            cells = [f"{scores[k].get(ins, ('—',))[0]:>10}" for k in (1000, 3000, 8000)]
+            print(f"{lib:34} " + "".join(cells), file=sys.stderr)
+        return
+
+    # Calcul national complet (commun à --matrix et --write-index et défaut).
+    idx, communes = load_communes()
+    plat, plon = load_social_pois()
+    lieux = assign_to_communes(communes, plat, plon)
+    assos = load_assos(communes)
+    scores = compute_scores(communes, lieux, assos, K)
+    rec = {}
+    for c in communes:
+        sc, pl, pa, nl, na = scores[c["insee"]]
+        rec[c["insee"]] = None if (pl == 0 and pa == 0) else {"score": sc, "lieux_pct": pl, "assos_pct": pa}
+    served = sum(1 for v in rec.values() if v)
+    print(f"communes avec vie_locale : {served}/{len(communes)} | K={K}", file=sys.stderr)
+    os.makedirs(CACHE, exist_ok=True)
+    json.dump(rec, open(OUT_CACHE, "w"))
+    print(f"✓ cache écrit : {OUT_CACHE}", file=sys.stderr)
+
+    if args.matrix:
+        print(f"\n{'commune':34} {'score':>6} {'lieux':>6} {'assos':>6} {'nL':>6} {'nA':>7}", file=sys.stderr)
+        for ins, lib in TEMOINS.items():
+            sc = scores.get(ins)
+            if not sc:
+                print(f"{lib:34} ABSENT", file=sys.stderr); continue
+            s, pl, pa, nl, na = sc
+            print(f"{lib:34} {s:>6} {pl:>6} {pa:>6} {nl:>6} {na:>7}", file=sys.stderr)
+        import collections
+        served_scores = [v["score"] for v in rec.values() if v]
+        buckets = collections.Counter((s - 1) // 10 * 10 for s in served_scores)
+        print(f"\ndistribution score : {dict(sorted(buckets.items()))}", file=sys.stderr)
+
+    if args.write_index:
+        for c in idx["communes"]:
+            c["vieLocale"] = rec.get(c["insee"])
+        json.dump(idx, open(INDEX, "w"))
+        print("✓ index patché (vieLocale)", file=sys.stderr)
 
 
 if __name__ == "__main__":
