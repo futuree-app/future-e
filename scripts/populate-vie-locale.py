@@ -19,6 +19,8 @@ RNA_WALDEC_ZIP = os.path.join(CACHE, "rna_waldec.zip")
 RNA_WALDEC_URL = "https://media.interieur.gouv.fr/rna/rna_waldec_20260601.zip"
 AMALIA = {  # dept -> URL data.gouv (CSV ; ETAT_ASSOCIATION, COMMUNE, CODE_POSTAL)
     "67": "https://static.data.gouv.fr/resources/associations-de-droit-local-alsace-moselle-pour-le-departement-du-bas-rhin-67/20260602-153021/67-opendatas.csv",
+    "68": "https://static.data.gouv.fr/resources/associations-de-droit-local-alsace-moselle-pour-le-departement-du-haut-rhin-68/20260602-152943/68-opendatas.csv",
+    "57": "https://static.data.gouv.fr/resources/associations-de-droit-local-alsace-moselle-pour-le-departement-de-la-moselle-57/20260602-152910/57-opendatas.csv",
 }
 AMALIA_CACHE = os.path.join(CACHE, "amalia")
 
@@ -174,6 +176,84 @@ def assign_to_communes(communes, plat, plon):
     return counts
 
 
+def download(url, dest):
+    if not os.path.exists(dest):
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        req = urllib.request.Request(url, headers={"User-Agent": "futur-e/populate-vie-locale"})
+        with urllib.request.urlopen(req, timeout=580) as r, open(dest, "wb") as f:
+            f.write(r.read())
+    return dest
+
+
+def load_rna(valid_insee):
+    """RNA waldec : associations ACTIVES (position == 'A') par INSEE (adrs_codeinsee)."""
+    download(RNA_WALDEC_URL, RNA_WALDEC_ZIP)
+    counts = {}
+    z = zipfile.ZipFile(RNA_WALDEC_ZIP)
+    for name in [n for n in z.namelist() if n.lower().endswith(".csv")]:
+        with z.open(name) as f:
+            rd = csv.DictReader(io.TextIOWrapper(f, encoding="latin-1"), delimiter=";")
+            for row in rd:
+                if (row.get("position") or "").strip().upper() != "A":
+                    continue
+                ins = (row.get("adrs_codeinsee") or "").strip()
+                if ins in valid_insee:
+                    counts[ins] = counts.get(ins, 0) + 1
+    print(f"RNA actives géocodées : {sum(counts.values())} sur {len(counts)} communes", file=sys.stderr)
+    return counts
+
+
+def normalize_nom(s):
+    import unicodedata
+    s = unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode().lower()
+    for ch in "-'":
+        s = s.replace(ch, " ")
+    return " ".join(s.split())
+
+
+def build_nom_index(communes, depts):
+    """(nom normalisé, dept) -> insee, restreint aux départements `depts`."""
+    m = {}
+    for c in communes:
+        if str(c.get("dept")) in depts:
+            m[(normalize_nom(c["nom"]), str(c["dept"]))] = c["insee"]
+    return m
+
+
+def load_amalia(communes, valid_insee):
+    """AMALIA 67/68/57 : associations INSCRITE par INSEE (résolu via nom+dept ; dept du CP)."""
+    depts = {"67", "68", "57"}
+    nom_idx = build_nom_index(communes, depts)
+    counts = {}
+    unmatched = 0
+    for dept, url in AMALIA.items():
+        path = download(url, os.path.join(AMALIA_CACHE, f"{dept}.csv"))
+        rd = csv.DictReader(open(path, encoding="utf-8-sig"), delimiter=";")
+        for row in rd:
+            if (row.get("ETAT_ASSOCIATION") or "").strip().upper() != "INSCRITE":
+                continue
+            cp = (row.get("CODE_POSTAL") or "").strip()
+            d = cp[:2] if cp[:2] in depts else dept
+            ins = nom_idx.get((normalize_nom(row.get("COMMUNE", "")), d))
+            if ins and ins in valid_insee:
+                counts[ins] = counts.get(ins, 0) + 1
+            else:
+                unmatched += 1
+    print(f"AMALIA inscrites géocodées : {sum(counts.values())} ({unmatched} non résolues)", file=sys.stderr)
+    return counts
+
+
+def load_assos(communes):
+    valid = {c["insee"] for c in communes}
+    rna = load_rna(valid)
+    amalia = load_amalia(communes, valid)
+    out = dict(rna)
+    for ins, v in amalia.items():
+        out[ins] = out.get(ins, 0) + v
+    print(f"assos totales : {sum(out.values())} sur {len(out)} communes", file=sys.stderr)
+    return out
+
+
 def selftest():
     assert abs(density(10, 7000) - 10 / 10000) < 1e-12
     assert abs(density(1, 30) - 1 / 3030) < 1e-12   # hameau écrasé par K
@@ -205,6 +285,9 @@ def main():
         nz = sum(1 for v in lieux.values() if v > 0)
         top = sorted(lieux.items(), key=lambda kv: -kv[1])[:5]
         print(f"communes avec ≥1 POI : {nz} | top : {[(k, v) for k, v in top]}", file=sys.stderr)
+        assos = load_assos(communes)
+        # contrôle Alsace-Moselle : Strasbourg (67482) doit être non nul (via AMALIA).
+        print(f"Strasbourg assos : {assos.get('67482', 0)} | Paris 1er : {assos.get('75101', 0)}", file=sys.stderr)
         return
 
 
