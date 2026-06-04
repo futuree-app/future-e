@@ -23,8 +23,11 @@ OUT_CACHE = os.path.join(CACHE, "communes-demographie.json")
 YEARS = 6  # 2015 -> 2021
 # Zone morte autour de 0 pour « stable » (taux annualisé) ; seuil d'arrivée = tercile haut.
 STABLE_BAND = 0.0015      # ±0,15 %/an = stable
-# Lissage petites communes : taux *= pop/(pop+SHRINK_K). FIGÉ PAR SONDE (Task 3). 0 = désactivé.
-SHRINK_K = 0
+# Lissage petites communes : taux *= pop/(pop+SHRINK_K). Figé par sonde (Task 3) : 3000.
+# Sans lissage, 39/50 du top étaient des villages < 500 hab (bruit : un hameau de 16 hab à
+# +17 %/an). 3000 tue le bruit (0/50) et fait remonter les vraies périphéries attractives,
+# sans sur-écraser un petit bourg en boom réel (ex. Bezannes). cf. spec.
+SHRINK_K = 3000
 
 
 def growth_rate(p_old, p_new, years=YEARS):
@@ -110,6 +113,45 @@ def load_communes():
     return idx, communes
 
 
+TEMOINS = {
+    "34172": "Montpellier (grande ville en croissance)",
+    "35210": "Pacé (périphérie rennaise attractive)",
+    "18279": "Vierzon (ville en déclin)",
+    "75101": "Paris 1er (référence)",
+    "73304": "Val-d'Isère (micro-commune touristique)",
+    "23096": "Felletin (rural Creuse en déclin)",
+}
+RECIT_LABEL = {
+    "gagne_attire": "gagne des habitants et attire de nouveaux arrivants",
+    "gagne_sans_renouv": "gagne des habitants sans fort renouvellement récent",
+    "stable_renouv": "population stable, mais renouvellement résidentiel marqué",
+    "stable": "population globalement stable",
+    "perd": "perd des habitants",
+}
+
+
+def compute(communes, data):
+    """Retourne (rec dict insee->{croissance,taux_total,part_nouveaux,recit}, part_hi)."""
+    parts = [data.get(c["insee"], (None, None))[1] for c in communes]
+    pv = sorted(p for p in parts if p is not None)
+    part_hi = pv[2 * len(pv) // 3] if pv else 0.0  # tercile haut = « forte arrivée »
+    eff = [effective_rate(data.get(c["insee"], (None, None))[0], c.get("population")) for c in communes]
+    pcts = percentile_signed(eff)
+    rec = {}
+    for i, c in enumerate(communes):
+        taux, part = data.get(c["insee"], (None, None))
+        if pcts[i] is None:
+            rec[c["insee"]] = None
+        else:
+            rec[c["insee"]] = {
+                "croissance": pcts[i],
+                "taux_total": round(taux * 100, 2),
+                "part_nouveaux": round(part * 100, 1) if part is not None else None,
+                "recit": recit_code(taux, part, part_hi),
+            }
+    return rec, part_hi
+
+
 def selftest():
     assert growth_rate(100, 100) == 0.0
     assert abs(growth_rate(1000, 1061, 6) - 0.01) < 1e-3   # ~ +1 %/an
@@ -152,6 +194,55 @@ def main():
         pv = sorted(p for p in parts if p is not None)
         print(f"part_nouveaux terciles : P33={pv[len(pv)//3]*100:.1f}% P66={pv[2*len(pv)//3]*100:.1f}%", file=sys.stderr)
         return
+
+    if args.probe:
+        idx, communes = load_communes()
+        valid = {c["insee"] for c in communes}
+        data = load_insee(valid)
+        rows = []
+        for c in communes:
+            taux, part = data.get(c["insee"], (None, None))
+            if taux is not None:
+                rows.append((taux, c["insee"], c["nom"], c.get("population"), part))
+        rows.sort(reverse=True)
+
+        def show(label, rs):
+            print(f"\n=== {label} ===", file=sys.stderr)
+            for taux, ins, nom, pop, part in rs:
+                pn = f"{part*100:.0f}%" if part is not None else "—"
+                print(f"  {taux*100:+6.1f}%/an  pop {str(pop):>7}  arrivées {pn:>4}  {nom} ({ins})", file=sys.stderr)
+        show("TOP 50 (plus forte croissance brute)", rows[:50])
+        show("BOTTOM 50 (plus fort déclin brut)", rows[-50:])
+        small = sum(1 for r in rows[:50] if (r[3] or 0) < 500)
+        print(f"\npetites communes (<500 hab) dans le TOP 50 : {small}/50", file=sys.stderr)
+        return
+
+    idx, communes = load_communes()
+    valid = {c["insee"] for c in communes}
+    data = load_insee(valid)
+    rec, part_hi = compute(communes, data)
+    served = sum(1 for v in rec.values() if v)
+    print(f"communes notées : {served}/{len(communes)} | SHRINK_K={SHRINK_K} | seuil arrivée P66={part_hi*100:.1f}%", file=sys.stderr)
+    os.makedirs(CACHE, exist_ok=True)
+    json.dump(rec, open(OUT_CACHE, "w"))
+    print(f"✓ cache écrit : {OUT_CACHE}", file=sys.stderr)
+
+    if args.matrix:
+        print(f"\n{'commune':40} {'score':>6} {'taux':>7} {'arriv':>6}  recit", file=sys.stderr)
+        for ins, lib in TEMOINS.items():
+            r = rec.get(ins)
+            if not r:
+                print(f"{lib:40} {'ABSENT/null':>6}", file=sys.stderr); continue
+            print(f"{lib:40} {r['croissance']:>6} {r['taux_total']:>6}% {str(r['part_nouveaux']):>5}%  {r['recit']}", file=sys.stderr)
+        import collections
+        dist = collections.Counter(v["recit"] for v in rec.values() if v)
+        print(f"\ndistribution recit : {dict(dist)}", file=sys.stderr)
+
+    if args.write_index:
+        for c in idx["communes"]:
+            c["demographie"] = rec.get(c["insee"])
+        json.dump(idx, open(INDEX, "w"))
+        print("✓ index patché (demographie)", file=sys.stderr)
 
 
 if __name__ == "__main__":
