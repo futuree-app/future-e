@@ -51,7 +51,8 @@ export const PREFERENCE_KEYS = [
   // Caractère naturel à proximité (OSO 2023, couvert naturel élargi dans 15 km).
   // « perçu comme naturel », pas biodiversité ni wilderness. cf. NATURE_TERRITORIAL.md.
   "nature",
-  // Accès BPE (collèges+lycées / offre culturelle large) dans ~15 km, percentile national.
+  // Accès BPE (collèges+lycées / offre culturelle large), pondéré par la proximité,
+  // rayon adapté au territoire (5 à 25 km), percentile national.
   // Opt-in strict : aucun plancher. Accès, JAMAIS la qualité ni la vitalité.
   "acces_ecoles",
   "acces_culture",
@@ -285,7 +286,8 @@ type IndexCommune = {
       fiabilite: "observee" | "estimee";
     } | null;
   } | null;
-  // Accès BPE par rayon ~15 km (cf. scripts/populate-bpe.py). score = percentile national
+  // Accès BPE pondéré par la proximité, rayon adapté au territoire, 5 km en métropole à
+  // 25 km en rural (cf. scripts/populate-bpe.py). score = percentile national
   // du comptage d'équipements ; count = brut conservé pour un futur rapport. Accès, pas qualité.
   ecoles?: { score: number | null; count: number } | null;
   culture?: { score: number | null; count: number } | null;
@@ -628,9 +630,9 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
       // percentile national du couvert naturel élargi dans 15 km (cf. populate-nature.py).
       return c.nature?.score ?? null;
     case "acces_ecoles":
-      return c.ecoles?.score ?? null; // percentile accès collèges+lycées dans ~15 km
+      return c.ecoles?.score ?? null; // percentile accès collèges+lycées, pondéré proximité, rayon adapté
     case "acces_culture":
-      return c.culture?.score ?? null; // percentile accès offre culturelle dans ~15 km
+      return c.culture?.score ?? null; // percentile accès offre culturelle, pondéré proximité, rayon adapté
     case "faible_risque_inondation":
       // risque faible -> score haut. Historique CatNat inondation, pas une garantie d'absence de crue.
       return c.inondation == null ? null : 100 - c.inondation.risque;

@@ -82,13 +82,48 @@ Exclus de la V1 (justifications) :
   mélangerait deux chantiers.
 - ❌ `distance_cote_km` (proximité mer) : donnée géographique, pas un accès. Reste fixe.
 
+## Révision (2026-06-04) : accès pondéré par la proximité
+
+La V1 « comptage binaire dans le rayon adaptatif » a été validée puis **rejetée par la
+matrice de cas témoins** : elle produisait une **inversion centre / périphérie**. Exemple
+mesuré : culture Vannes (la ville) = percentile 29, Plaudren (village à 15 km de Vannes) =
+79. Habiter à côté de la ville battait habiter dans la ville.
+
+Cause : un percentile national unique sur des comptages binaires, alors que les communes
+ont des **aires de captation différentes**. Le disque rural de 25 km (≈ 1 960 km²) est bien
+plus grand que le disque urbain (≈ 700 km²) ; sur un critère concentré comme la culture, un
+village ratissant 25 km encaisse toute la culture d'une ville voisine et la dépasse, parce
+que l'inclusion binaire compte « 0 km » et « 24 km » pour 1 point chacun.
+
+Ce défaut **préexistait au rayon fixe de 15 km** (0 km = 15 km = 1 point) ; le rayon
+adaptatif l'a seulement rendu visible. Correctif retenu, qui améliore la mesure d'accès
+elle-même :
+
+**Accès pondéré par la proximité.** Chaque équipement à distance `d` compte pour
+`poids = 1 − d / DMAX` (décroissance **linéaire** : explicable, auditable, robuste ; pas de
+gaussienne), avec :
+- `DMAX = 25 km`, **échelle de décroissance FIXE** pour toutes les communes. La pente ne
+  dépend pas du territoire : un équipement à 20 km vaut moins qu'à 2 km, universellement.
+- le **rayon adaptatif** (5/10/15/25 km) ne sert plus que de **coupure** : au-delà du rayon
+  accepté par le territoire, l'équipement ne compte pas (`d > radius[i]` → 0).
+
+Découpler la décroissance (fixe) de la coupure (adaptative) répare l'inversion : le résident
+de la ville (équipements proches, poids forts) repasse devant le villageois (mêmes
+équipements vus de loin, poids faibles), tout en gardant la priorité A (le rural ratisse
+toujours 25 km). Variante écartée : `1 − d / radius[i]` (pente fonction du rayon), qui
+laissait le rural à grand rayon doublement avantagé et ne réparait pas culture Vannes/Plaudren.
+
+Le percentile national est calculé sur cet **accès pondéré** (floats), pas sur un comptage
+entier. Le champ `count` du cache devient la somme pondérée (debug only, non lu côté TS).
+
 ## Mécanisme
 
 1. **Rayon par commune.** Reconstruire la pop d'UU côté Python (somme des `population` par
    `uu` lue dans `data/comparateur-index.json`), dériver `tailleVille`, puis le rayon via la
    table. Produire un tableau `radius[i]` aligné sur l'ordre des communes.
-2. **Comptage adaptatif.** `count_within_radius` reçoit le tableau `radius` au lieu du
-   scalaire `RAYON_KM` : le test devient `d <= radius[i]`.
+2. **Accès pondéré.** `count_within_radius` reçoit le tableau `radius` ; pour chaque commune
+   `i`, il somme `1 − d / DMAX` sur les équipements tels que `d <= radius[i]` (cf. révision
+   ci-dessus). `DMAX = 25.0`, fixe.
 3. **Normalisation.** Percentile national **unique** sur les comptages adaptatifs
    (`bisect`, inchangé). C'est un **re-scoring global** des trois champs : le rayon urbain
    passant de 15 à 5/10 km, les comptages bruts urbains baissent ; les ruraux montent ; le
@@ -114,9 +149,9 @@ sont donc :
 - les commentaires `« dans ~15 km »` de `src/lib/comparateur-vie.ts` ;
 - les docstrings et commentaires de `scripts/populate-bpe.py`.
 
-Nouvelle formulation type : « rayon adapté au type de territoire (5 km en métropole à
-25 km en rural) ». Re-grep du user-facing en fin de chantier pour ne laisser aucun
-« 15 km » menteur. Les tooltips restent dans la doctrine (≤ 2 phrases, « pourquoi ça aide »,
+Nouvelle formulation type : « accès pondéré par la proximité, rayon adapté au territoire
+(5 km en métropole à 25 km en rural) ». Re-grep du user-facing en fin de chantier pour ne
+laisser aucun « 15 km » menteur. Les tooltips restent dans la doctrine (≤ 2 phrases, « pourquoi ça aide »,
 sans méthodo/source) : a priori intouchés.
 
 ## Validation
@@ -128,17 +163,20 @@ sur le dev (`:3000`).
 Mais la validation décisive est qualitative, sur des **cas témoins concrets** : c'est là
 qu'on voit si on corrige un biais ou si on déforme le signal.
 
-| Cas | Attendu |
-|---|---|
-| Village à ~15 km d'une ville moyenne | Monte nettement |
-| Village vraiment isolé | Monte peu ou pas |
-| Petite commune de périphérie rennaise | Reste bien notée |
-| Centre de Rennes | Baisse un peu mais reste haut |
-| Paris | Baisse un peu mais reste excellent |
-| Commune rurale très éloignée de tout | Reste faible |
+| Cas | Attendu | Mesuré (post-pondération, écoles/culture) |
+|---|---|---|
+| Village à ~15 km d'une ville moyenne (Plaudren) | Monte, mais reste < la ville | 74→79 / 67→72 |
+| Village vraiment isolé (Mende) | Monte peu / reste bas | 36→41 / 37→39 |
+| Périphérie rennaise (Vezin-le-Coquet) | Reste bien notée | 97→98 / 97→93 |
+| Centre de Rennes | Baisse un peu mais reste haut | 97→98 / 97→95 |
+| Paris 1er / Lyon 1er | Reste excellent | 100→100 / 99→99-100 |
+| **Centre vs périphérie (Vannes vs Plaudren)** | **La ville reste devant** | écoles 91>79, culture 76>72 |
 
-Si une de ces lignes échoue (ex. un village isolé qui monte fort, ou Paris qui s'effondre),
-le design déforme le signal et doit être revu avant merge.
+Critère d'arrêt (gate avant `--write-index`) : si Paris/Lyon s'effondrent, si une périphérie
+rennaise chute fortement, ou surtout si un village dépasse la ville voisine (inversion
+centre/périphérie), le design déforme le signal et doit être revu. **Résultat : gate passé**
+après adoption de l'accès pondéré (scheme B). La V1 binaire avait échoué ce gate (culture
+Vannes 29 < Plaudren 79), ce qui a motivé la révision ci-dessus.
 
 ## Hors périmètre
 

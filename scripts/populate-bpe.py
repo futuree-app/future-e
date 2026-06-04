@@ -111,14 +111,22 @@ def load_equip_points(typequ_set):
 # en longitude vers Dunkerque (~51°N, 25 km ≈ 0.357°) et dans les DOM. cf. spec.
 NEI = 2
 
+# Échelle FIXE de décroissance de l'accès (= rayon max). La pente ne dépend PAS du type de
+# territoire : un équipement à 20 km vaut moins qu'à 2 km, universellement. Le rayon
+# adaptatif ne sert que de COUPURE (au-delà du rayon accepté = 0). Découpler décroissance
+# et coupure répare l'inversion centre/périphérie (un villageois ne doit pas dépasser le
+# habitant de la ville pour l'accès aux équipements de cette ville). cf. spec.
+DMAX = 25.0
+
 
 def count_within_radius(clat, clon, elat, elon, radius):
-    """Pour chaque commune i, compte les équipements dans radius[i] km (rayon adaptatif).
+    """Pour chaque commune i : accès BPE PONDÉRÉ par la proximité. Chaque équipement à
+    distance d <= radius[i] compte pour (1 - d/DMAX) ; au-delà du rayon accepté, 0.
     Grille spatiale sur les équipements pour éviter le O(n*m)."""
     grid = {}
     for j in range(len(elat)):
         grid.setdefault((int(elat[j] // CELL), int(elon[j] // CELL)), []).append(j)
-    out = np.zeros(len(clat), dtype=np.int64)
+    out = np.zeros(len(clat), dtype=np.float64)
     for i in range(len(clat)):
         ci, cj = int(clat[i] // CELL), int(clon[i] // CELL)
         idxs = []
@@ -129,15 +137,16 @@ def count_within_radius(clat, clon, elat, elon, radius):
             continue
         idxs = np.array(idxs)
         d = haversine_np(clat[i], clon[i], elat[idxs], elon[idxs])
-        out[i] = int((d <= radius[i]).sum())
+        win = d <= radius[i]
+        out[i] = float((1.0 - d[win] / DMAX).sum())
     return out
 
 
 def percentile_scores(counts):
-    """Percentile national du comptage (bisect, comme finalize() de populate-nature.py)."""
-    srt = sorted(int(c) for c in counts)
+    """Percentile national de l'accès pondéré (bisect ; floats, ne PAS caster en int)."""
+    srt = sorted(float(c) for c in counts)
     n = len(srt)
-    return [round(100 * bisect.bisect_right(srt, int(c)) / n) if n else None for c in counts]
+    return [round(100 * bisect.bisect_right(srt, float(c)) / n) if n else None for c in counts]
 
 
 def selftest():
@@ -198,7 +207,8 @@ def main():
         counts = count_within_radius(clat, clon, elat, elon, radius)
         scores = percentile_scores(counts)
         for i, code in enumerate(codes):
-            rec[code][field] = {"score": scores[i], "count": int(counts[i])}
+            # count = accès pondéré (somme des 1 - d/DMAX), debug only, plus un entier.
+            rec[code][field] = {"score": scores[i], "count": round(float(counts[i]), 2)}
 
     os.makedirs(CACHE, exist_ok=True)
     json.dump(rec, open(OUT, "w"))
