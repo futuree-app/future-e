@@ -107,8 +107,13 @@ def load_equip_points(typequ_set):
     return lats[keep], lons[keep]
 
 
-def count_within_radius(clat, clon, elat, elon):
-    """Pour chaque commune (clat/clon), compte les équipements (elat/elon) dans RAYON_KM.
+# Voisinage grille : ±2 cellules (±0.36° avec CELL=0.18) couvre 25 km partout, y compris
+# en longitude vers Dunkerque (~51°N, 25 km ≈ 0.357°) et dans les DOM. cf. spec.
+NEI = 2
+
+
+def count_within_radius(clat, clon, elat, elon, radius):
+    """Pour chaque commune i, compte les équipements dans radius[i] km (rayon adaptatif).
     Grille spatiale sur les équipements pour éviter le O(n*m)."""
     grid = {}
     for j in range(len(elat)):
@@ -117,14 +122,14 @@ def count_within_radius(clat, clon, elat, elon):
     for i in range(len(clat)):
         ci, cj = int(clat[i] // CELL), int(clon[i] // CELL)
         idxs = []
-        for di in (-1, 0, 1):
-            for dj in (-1, 0, 1):
+        for di in range(-NEI, NEI + 1):
+            for dj in range(-NEI, NEI + 1):
                 idxs += grid.get((ci + di, cj + dj), [])
         if not idxs:
             continue
         idxs = np.array(idxs)
         d = haversine_np(clat[i], clon[i], elat[idxs], elon[idxs])
-        out[i] = int((d <= RAYON_KM).sum())
+        out[i] = int((d <= radius[i]).sum())
     return out
 
 
@@ -178,11 +183,19 @@ def main():
     clon = np.array([c["lon"] for c in communes], dtype="float64")
     print(f"communes géolocalisées : {len(communes)}", file=sys.stderr)
 
+    uupop = build_uupop(idx["communes"])
+    radius = np.array([radius_for(taille_ville(c, uupop)) for c in communes], dtype="float64")
+    # Distribution des classes de rayon, pour contrôle visuel.
+    import collections as _c
+    dist = _c.Counter(radius.tolist())
+    print("rayons (km -> communes) : "
+          + ", ".join(f"{int(k)}:{v}" for k, v in sorted(dist.items())), file=sys.stderr)
+
     rec = {code: {} for code in codes}
     for field, typeset in (("ecoles", ECOLES_TYPEQU), ("culture", CULTURE_TYPEQU), ("etudes_acces", SUP_TYPEQU)):
         elat, elon = load_equip_points(typeset)
         print(f"{field} : {len(elat)} équipements géolocalisés", file=sys.stderr)
-        counts = count_within_radius(clat, clon, elat, elon)
+        counts = count_within_radius(clat, clon, elat, elon, radius)
         scores = percentile_scores(counts)
         for i, code in enumerate(codes):
             rec[code][field] = {"score": scores[i], "count": int(counts[i])}
