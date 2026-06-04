@@ -77,6 +77,9 @@ export const PREFERENCE_KEYS = [
   // Vie locale : intensité de vie sociale (lieux de sociabilité OSM + tissu associatif RNA/AMALIA,
   // densité par habitant avec masse critique). Présence d'une vie sociale, jamais l'événementiel. Opt-in.
   "vie_locale",
+  // Croissance démographique : trajectoire de population (gagne/perd des habitants), INSEE
+  // 2015-2021. Narratif = part de nouveaux arrivants (IRAN). Descriptif, jamais normatif. Opt-in.
+  "croissance_demographique",
 ] as const;
 export type PreferenceKey = (typeof PREFERENCE_KEYS)[number];
 
@@ -333,6 +336,15 @@ type IndexCommune = {
     score: number;
     lieux_pct: number;
     assos_pct: number;
+  } | null;
+  // Croissance démographique (cf. scripts/populate-demographie.py, INSEE 2015-2021).
+  // croissance = percentile national signé du taux de croissance total. part_nouveaux + recit =
+  // narratif « nouveaux arrivants » (IRAN), HORS score. Trajectoire, PAS désirabilité.
+  demographie?: {
+    croissance: number;
+    taux_total: number;
+    part_nouveaux: number | null;
+    recit: string | null;
   } | null;
   // Vie étudiante. etudes_acces = percentile présence établissements sup (BPE C5xx, cf.
   // populate-bpe.py) ; etudes_dyn = percentile part étudiante au niveau UU (MESR, cf.
@@ -685,6 +697,9 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
     case "vie_locale":
       // intensité de vie sociale (lieux + assos par habitant) ; pas de vie locale mesurable = 0.
       return c.vieLocale?.score ?? 0;
+    case "croissance_demographique":
+      // trajectoire démographique ; null (donnée absente) -> non noté (opt-in, pas de pénalité).
+      return c.demographie?.croissance ?? null;
     default:
       return null;
   }
@@ -712,7 +727,18 @@ const AMBIENT_DIMENSIONS: AmbientDim[] = [
   { id: "mobilite_quotidienne", key: "mobilite_quotidienne", bands: ["transports du quotidien bien présents", "desserte du quotidien intermédiaire", "peu de transports du quotidien à pied"] },
   { id: "vie_etudiante", key: "vie_etudiante", bands: ["forte présence étudiante", "présence étudiante intermédiaire", "présence étudiante limitée"] },
   { id: "vie_locale", key: "vie_locale", bands: ["vie locale animée", "vie locale intermédiaire", "vie locale plus discrète"] },
+  { id: "croissance_demographique", key: "croissance_demographique", bands: ["gagne des habitants", "population stable", "perd des habitants"] },
 ];
+
+// Narratif « nouveaux arrivants » (HORS score) : phrase descriptive, jamais normative.
+// Mappe c.demographie.recit -> phrase (cf. populate-demographie.py RECIT_LABEL).
+export const RECIT_DEMOGRAPHIE: Record<string, string> = {
+  gagne_attire: "gagne des habitants et attire de nouveaux arrivants",
+  gagne_sans_renouv: "gagne des habitants sans fort renouvellement récent",
+  stable_renouv: "population stable, mais renouvellement résidentiel marqué",
+  stable: "population globalement stable",
+  perd: "perd des habitants",
+};
 const SIGNAUX_MAX = 5;
 
 function bandIndex(score: number): 0 | 1 | 2 {
@@ -813,6 +839,7 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   prefere_grande_ville: "grande ville animée",
   vie_etudiante: "forte présence étudiante",
   vie_locale: "vie locale animée (commerces, marchés, associations)",
+  croissance_demographique: "population en croissance",
   // « Vaste » est gradué sur la taille RÉELLE de la ZE (effectif salarié absolu),
   // pas sur le percentile saturé : le mot ne sort que là où il est mérité. La
   // diversité (entropie A38) est, elle, toujours défendable.
@@ -847,6 +874,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   prefere_grande_ville: "petit bassin urbain",
   vie_etudiante: "présence étudiante limitée",
   vie_locale: "peu de lieux de vie et d'animation locale",
+  croissance_demographique: "population en baisse",
 };
 function reasonText(key: PreferenceKey, c: IndexCommune): string {
   const r = REASON_POS[key];

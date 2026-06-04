@@ -35,6 +35,7 @@ export const PREFERENCE_LABELS: Record<string, string> = {
   prefere_grande_ville: "une grande ville",
   vie_etudiante: "une ville étudiante",
   vie_locale: "une vie locale animée",
+  croissance_demographique: "Un territoire qui gagne des habitants",
 };
 
 // N2 — glose positive affichée au survol/tap de la puce (cf. ChipTooltip). Courte,
@@ -43,6 +44,7 @@ export const PREFERENCE_LABELS: Record<string, string> = {
 export const PREFERENCE_TOOLTIP: Record<string, string | null> = {
   vie_etudiante: "Présence d'établissements d'enseignement supérieur et d'une population étudiante active.",
   vie_locale: "Densité des lieux où l'on se retrouve (cafés, marchés, sport, associations) rapportée à la population. Indique si le territoire a une vie sociale au quotidien.",
+  croissance_demographique: "Évolution récente de la population (gagne ou perd des habitants). Mesure la trajectoire du territoire, pas sa désirabilité.",
   acces_transports: "Présence et fréquentation des gares à proximité.",
   mobilite_quotidienne: "Indique si un réseau de bus, tram ou métro dessert les environs immédiats. Mesure la possibilité de s'y déplacer au quotidien sans voiture.",
   faible_dependance_auto: "Part des trajets domicile-travail faits autrement qu'en voiture.",
