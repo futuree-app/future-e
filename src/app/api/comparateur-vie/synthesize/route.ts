@@ -45,6 +45,7 @@ const PREF_LABELS: Record<string, string> = {
   faible_risque_inondation: "un faible risque d'inondation",
   faible_dependance_auto: "une faible dépendance à la voiture",
   acces_transports: "l'accès au train et aux gares",
+  mobilite_quotidienne: "les transports du quotidien (bus, tram, métro)",
 };
 
 const SYSTEM = `Vous écrivez la synthèse éditoriale du Comparateur de vie de futur•e.

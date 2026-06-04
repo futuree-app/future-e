@@ -205,7 +205,8 @@ PRÉFÉRENCES DISPONIBLES (liste fermée)
 - acces_ecoles : accès aux collèges et lycées autour (présence/proximité, PAS la qualité des établissements). Pour « écoles », « collège », « lycée », « scolarité », ou déduit d'une famille avec enfants (poids 1)
 - acces_culture : accès à une offre culturelle autour au sens large, diffusion et pratique (cinéma, médiathèque, théâtre, musée, salle de spectacle/concert, conservatoire). PAS la vitalité ni la programmation
 - faible_dependance_auto : pouvoir vivre en conduisant moins (part des trajets domicile-travail faits en voiture, percentile national). Pour « sans voiture », « moins conduire », « ne pas dépendre de la voiture », « tout à pied », « ne pas être coincé sans voiture »
-- acces_transports : accès au train et aux gares (desserte ferroviaire pondérée par la fréquentation). Pour « une gare », « le train », « TER », « TGV », « rejoindre une métropole », « transports en commun », « bien desservi », « aller en ville sans voiture »
+- acces_transports : accès au train et aux gares (desserte ferroviaire pondérée par la fréquentation). Pour « une gare », « le train », « TER », « TGV », « rejoindre une métropole en train »
+- mobilite_quotidienne : réseau de transports en commun urbains à portée de marche (bus, tram, métro de proximité, présence d'un réseau local). DISTINCT du train (acces_transports) et de la dépendance auto. Pour « bus », « tram », « métro », « transports en commun », « réseau de transport local », « se déplacer en ville sans voiture », « bien desservi en TC urbains »
 - eviter_grandes_villes : préférer une ville à taille humaine (taille de l'agglomération / unité urbaine). Pour « une petite ville », « une ville à taille humaine », « pas une métropole », « pas une grande ville », « éviter les grandes villes », « loin de l'agitation urbaine »
 - prefere_grande_ville : préférer une grande ville (taille de l'agglomération). Pour « une grande ville », « une métropole », « une grande agglomération », « du dynamisme urbain », « l'animation d'une grande ville »
 - vie_etudiante : ville étudiante / accès aux études supérieures (présence d'établissements supérieurs ET poids des étudiants dans la population, niveau agglomération). Pour « une ville étudiante », « université », « fac », « faire des études », « pour mes études » ou celles des enfants, « campus », « vie étudiante », « ville animée par les étudiants »
@@ -219,8 +220,9 @@ TRADUCTION AUTOMATIQUE (activez le critère interne, sans exposer le terme techn
 - "retraite", "à la retraite", "jeune retraité" → acces_soins (poids 2 à 3) ET emploiHorsSujet:true (pas de viabilite_emploi).
 - "télétravail total", "100 % télétravail", "je travaille de chez moi", "full remote" → emploiHorsSujet:true (l'emploi local n'est pas un enjeu).
 - "sans voiture", "se passer de la voiture", "moins conduire", "ne pas dépendre de la voiture", "tout à pied", "se garer c'est l'enfer" → faible_dependance_auto (poids 2 à 3).
-- "une gare", "le train", "TER", "TGV", "rejoindre une métropole", "transports en commun", "bien desservi", "aller en ville sans voiture" → acces_transports (poids 2 à 3).
-- Mobilité : faible_dependance_auto (se passer de la voiture) et acces_transports (offre ferroviaire) sont DISTINCTS et peuvent coexister. N'en déduisez aucun par défaut d'un projet rural ou familial.
+- "une gare", "le train", "TER", "TGV", "rejoindre une métropole en train" → acces_transports (poids 2 à 3).
+- "transports en commun", "bus", "tram", "métro", "réseau local", "bien desservi en ville", "se déplacer en ville sans voiture" → mobilite_quotidienne (poids 2 à 3).
+- Mobilité : faible_dependance_auto (se passer de la voiture, comportement), acces_transports (train/gares, ouverture du territoire) et mobilite_quotidienne (TC urbains à portée de marche) sont TROIS critères DISTINCTS et cumulables. N'en déduisez aucun par défaut d'un projet rural ou familial.
 - "petite ville", "ville à taille humaine", "pas une métropole", "pas une grande ville", "éviter les grandes villes" → eviter_grandes_villes (poids 2 à 3).
 - "ville moyenne", "ville de taille moyenne" → eviter_grandes_villes (poids 2) ET eviter_isolement (poids 2) : plafond + plancher font émerger la ville moyenne.
 - "grande ville", "métropole", "grande agglomération", "dynamisme urbain", "animation urbaine" → prefere_grande_ville (poids 2 à 3).

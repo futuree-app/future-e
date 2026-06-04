@@ -30,6 +30,7 @@ export const PREFERENCE_LABELS: Record<string, string> = {
   faible_risque_inondation: "un faible risque d'inondation",
   faible_dependance_auto: "une faible dépendance à la voiture",
   acces_transports: "l'accès au train et aux gares",
+  mobilite_quotidienne: "les transports en commun du quotidien (bus, tram, métro)",
   eviter_grandes_villes: "une ville à taille humaine",
   prefere_grande_ville: "une grande ville",
   vie_etudiante: "une ville étudiante",
@@ -41,6 +42,7 @@ export const PREFERENCE_LABELS: Record<string, string> = {
 export const PREFERENCE_TOOLTIP: Record<string, string | null> = {
   vie_etudiante: "Présence d'établissements d'enseignement supérieur et d'une population étudiante active.",
   acces_transports: "Présence et fréquentation des gares à proximité.",
+  mobilite_quotidienne: "Indique si un réseau de bus, tram ou métro dessert les environs immédiats. Mesure la possibilité de s'y déplacer au quotidien sans voiture.",
   faible_dependance_auto: "Part des trajets domicile-travail faits autrement qu'en voiture.",
   cadre_calme: "Environnement peu dense, propice à un rythme plus calme.",
   douceur_climat: "Hivers tempérés, étés sans excès.",

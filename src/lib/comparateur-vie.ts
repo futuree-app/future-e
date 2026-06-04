@@ -63,6 +63,10 @@ export const PREFERENCE_KEYS = [
   // = accès ferroviaire pondéré desserte (gares SNCF). Opt-in, graduées. cf. populate-mobilite/transports.
   "faible_dependance_auto",
   "acces_transports",
+  // Mobilité du quotidien : réseau TC à portée de marche (arrêts OSM bus/tram/métro, rehaussé
+  // par le mode structurant). Distinct du rail (ouverture) et de la dépendance auto
+  // (comportement). Opt-in. cf. populate-reseau-local.
+  "mobilite_quotidienne",
   // Taille de ville (UU). eviter_grandes_villes = préférer le petit (cloche petite/moyenne ville
   // avec le plancher eviter_isolement) ; prefere_grande_ville = préférer le grand. cf. chantier C.
   "eviter_grandes_villes",
@@ -309,6 +313,15 @@ type IndexCommune = {
     desserte: number;
     gare_nom: string | null;
     gare_km: number | null;
+  } | null;
+  // Réseau de mobilité du quotidien (cf. scripts/populate-reseau-local.py : arrêts OSM
+  // bus/tram/métro). acces = percentile PARMI les communes desservies (réseau crédible à
+  // pied) ; null = non desservie. tram/metro = mode structurant à portée de marche.
+  reseauLocal?: {
+    acces: number;
+    tram: boolean;
+    metro: boolean;
+    arret_km: number;
   } | null;
   // Vie étudiante. etudes_acces = percentile présence établissements sup (BPE C5xx, cf.
   // populate-bpe.py) ; etudes_dyn = percentile part étudiante au niveau UU (MESR, cf.
@@ -642,6 +655,9 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
     case "acces_transports":
       // desserte ferroviaire accessible (gares SNCF pondérées par fréquentation).
       return c.transport?.desserte ?? null;
+    case "mobilite_quotidienne":
+      // réseau TC du quotidien à portée de marche ; pas de réseau crédible = 0 (l'utilisateur l'a demandé).
+      return c.reseauLocal?.acces ?? 0;
     case "eviter_grandes_villes":
       return lerp(GRANDE_VILLE_MIN, tailleVille(c));
     case "prefere_grande_ville":
@@ -679,6 +695,7 @@ const AMBIENT_DIMENSIONS: AmbientDim[] = [
   { id: "culture", key: "acces_culture", bands: ["offre culturelle plus présente", "offre culturelle intermédiaire", "offre culturelle plus limitée"] },
   { id: "air", key: "air_sain", bands: ["air généralement plus sain", "qualité de l'air intermédiaire", "air généralement moins sain"] },
   { id: "transports", key: "acces_transports", bands: ["bien reliée par le train", "desserte ferroviaire intermédiaire", "peu reliée par le train"] },
+  { id: "mobilite_quotidienne", key: "mobilite_quotidienne", bands: ["transports du quotidien bien présents", "desserte du quotidien intermédiaire", "peu de transports du quotidien à pied"] },
   { id: "vie_etudiante", key: "vie_etudiante", bands: ["forte présence étudiante", "présence étudiante intermédiaire", "présence étudiante limitée"] },
 ];
 const SIGNAUX_MAX = 5;
@@ -772,6 +789,11 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   faible_risque_inondation: "peu d'arrêtés CatNat inondation",
   faible_dependance_auto: "peu dépendante de la voiture au quotidien",
   acces_transports: "bien reliée par le train",
+  mobilite_quotidienne: (c) => {
+    const r = c.reseauLocal;
+    const mode = r?.metro ? "métro" : r?.tram ? "tram" : "bus";
+    return `réseau de ${mode} à portée de marche`;
+  },
   eviter_grandes_villes: "ville à taille humaine",
   prefere_grande_ville: "grande ville animée",
   vie_etudiante: "forte présence étudiante",
@@ -804,6 +826,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   faible_risque_inondation: "historique CatNat inondation plus marqué",
   faible_dependance_auto: "territoire où la voiture reste quasi indispensable",
   acces_transports: "desserte ferroviaire limitée",
+  mobilite_quotidienne: "peu ou pas de transports en commun de proximité",
   eviter_grandes_villes: "grande agglomération",
   prefere_grande_ville: "petit bassin urbain",
   vie_etudiante: "présence étudiante limitée",
