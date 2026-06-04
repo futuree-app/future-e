@@ -25,7 +25,9 @@ Conséquences sur le reste du design :
 - Le **score** vient de l'exposition cumulée via une fonction saturante
   `score = round(100 * 0.5^(E/H))` (E=0 → 100 ; absolu, pas percentile ; jamais null).
 - Le **récit `sourceDominante`** garde le calcul « source la plus proche » (inchangé) : le
-  score raconte l'ambiance, le récit nomme le coupable (« autoroute à ~900 m »).
+  score raconte l'ambiance, le récit NOMME le coupable (« la proximité d'un grand axe
+  routier »), SANS chiffre (doctrine : aucune donnée précise en synthèse/AskFuture ; la
+  distance reste interne au champ index, jamais exposée).
 - **Sources V1 inchangées** (autoroute/voie rapide, rail à 3 tiers lgv/main/branch, aéroports
   commerciaux). `primary` testé en sonde et REJETÉ : il resserre le haut (métropoles) mais
   érode le rural (Mende 100→75, bourg rural 71→44), car OSM ne donne pas le trafic et une

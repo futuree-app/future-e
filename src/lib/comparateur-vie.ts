@@ -775,11 +775,12 @@ export const RECIT_DEMOGRAPHIE: Record<string, string> = {
 // expliquer, même si l'ambiance cumulée reste un peu exposée). Descriptif, jamais un jugement.
 function calmeSonoreRecit(c: IndexCommune): string | null {
   const cs = c.calmeSonore;
-  if (!cs || cs.sourceDominante == null || cs.distanceKm == null) return null;
-  const lib = cs.sourceDominante === "auto" ? "un grand axe routier"
-    : cs.sourceDominante === "rail" ? "une voie ferrée"
-    : "un aéroport";
-  return `${lib} à environ ${cs.distanceKm} km`;
+  if (!cs || cs.sourceDominante == null) return null;
+  // Doctrine : AUCUN chiffre dans la synthèse / AskFuture. On NOMME la source proche
+  // (axe routier, voie ferrée, aéroport), jamais la distance (distanceKm reste interne).
+  return cs.sourceDominante === "auto" ? "la proximité d'un grand axe routier"
+    : cs.sourceDominante === "rail" ? "la proximité d'une voie ferrée"
+    : "la proximité d'un aéroport";
 }
 const SIGNAUX_MAX = 5;
 
