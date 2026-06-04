@@ -165,6 +165,11 @@ export type MatchResult = {
   // espaces naturels des trois »). Palette hiérarchisée (P1 projet de vie > P2 climat/
   // taille). Narratif, hors score, hors tri. null si rien ne se détache. cf. buildDistinctive.
   distinctive: string | null;
+  // Évolution démographique (NARRATIF, hors score/tri). Récit plus riche que la reason :
+  // distingue « gagne et attire », « gagne sans renouvellement », « stable mais renouvellement »,
+  // « perd ». Surfacé en synthèse UNIQUEMENT si croissance_demographique est demandée (même
+  // frontière que climatInondation). null = pas de donnée. cf. RECIT_DEMOGRAPHIE.
+  demographie: string | null;
   // Signaux ambiants (NARRATIF, hors score, hors tri) : 0 à 5 phrases qualitatives
   // descriptives par territoire (bande nationale, filtrées par contraste de groupe),
   // pour qu'AskFuture réponde aux « et côté X ? » hors critères. clé dimension lisible
@@ -1324,6 +1329,9 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
             ? "exposée à l'érosion du littoral (la côte recule)"
             : null,
         distinctive: null, // renseigné après l'assemblage final (relatif au groupe affiché)
+        // Évolution démographique : récit construit ici (comme climatInondation), gaté à
+        // l'affichage côté synthèse par « croissance_demographique demandée ».
+        demographie: c.demographie?.recit ? (RECIT_DEMOGRAPHIE[c.demographie.recit] ?? null) : null,
         signaux: {}, // rempli après l'assemblage final sur le groupe affiché (cf. assignSignaux)
         metrics: {
           distance_cote_km: c.distance_cote_km,

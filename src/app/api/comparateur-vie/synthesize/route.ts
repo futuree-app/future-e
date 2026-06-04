@@ -219,6 +219,14 @@ observé) ni avec les pluies extrêmes (projection, critère distinct). Le texte
 est déjà sobre, reprenez-en l'esprit (point de vigilance, jamais une alarme). Si le
 champ est absent ou nul, n'en parlez pas (ne le déduisez jamais vous-même).
 
+Si un champ "evolution_demographique" est fourni pour un territoire, mentionnez-le UNE
+fois comme une nuance descriptive de la TRAJECTOIRE du territoire (gagne ou perd des
+habitants, attire de nouveaux arrivants, renouvellement résidentiel). RÈGLES STRICTES :
+DÉCRIVEZ, ne JUGEZ jamais (« peu dynamique », « territoire d'avenir », « en perte de
+vitesse » sont INTERDITS — certains cherchent justement un territoire stable ou détendu) ;
+jamais un chiffre, jamais une prédiction ; c'est une trajectoire observée, pas une
+désirabilité. Si le champ est absent ou nul, n'en parlez pas (ne le déduisez jamais).
+
 Si un champ "logement" est fourni pour un territoire, vous pouvez le mentionner UNE
 fois comme une information pratique : c'est un NIVEAU DE PRIX relatif (achat et/ou
 loyers, par rapport au reste de la France), déjà formulé en clair. RÈGLES : reprenez
@@ -238,7 +246,7 @@ type Body = {
   project?: string;
   reformulation?: string;
   preferences?: { key: string; weight: number }[];
-  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null; climatInondation?: string | null }[];
+  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null; climatInondation?: string | null; demographie?: string | null }[];
   outcome?: { perfectMatch?: boolean; message?: string | null };
   perimetre?: string[]; // ancres dures = cadre choisi (tous les territoires y sont)
   orientation?: string[]; // ancres souples = penchant (résultats inclinés, sans s'y limiter)
@@ -266,6 +274,9 @@ export async function POST(request: NextRequest) {
   // que si l'inondation a été explicitement demandée (sinon la synthèse l'introduirait
   // spontanément alors que l'utilisateur n'a pas parlé d'inondation).
   const inondationDemandee = (body.preferences ?? []).some((p) => p.key === "faible_risque_inondation");
+  // Même frontière pour la démographie : on n'introduit le récit (déclin / renouvellement)
+  // que si l'utilisateur a activé croissance_demographique.
+  const croissanceDemandee = (body.preferences ?? []).some((p) => p.key === "croissance_demographique");
 
   const perimetre = Array.isArray(body.perimetre) ? body.perimetre.filter((s) => typeof s === "string" && s) : [];
   const orientation = Array.isArray(body.orientation) ? body.orientation.filter((s) => typeof s === "string" && s) : [];
@@ -286,6 +297,7 @@ export async function POST(request: NextRequest) {
       compromis: r.tradeoff ?? null,
       pression_climatique_economie: r.pressionEco ?? null,
       pression_climatique_inondation: inondationDemandee ? (r.climatInondation ?? null) : null,
+      evolution_demographique: croissanceDemandee ? (r.demographie ?? null) : null,
       logement: r.logement ?? null,
       littoral: r.littoral ?? null,
       trait_distinctif: r.distinctive ?? null,

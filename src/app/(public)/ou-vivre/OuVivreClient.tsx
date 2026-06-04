@@ -195,6 +195,8 @@ export function OuVivreClient() {
               logement: r.logement, // niveau de prix relatif qualitatif, firewall préservé
               littoral: r.littoral, // narratif littoral (recul du trait de côte), firewall préservé
               distinctive: r.distinctive, // trait distinctif relatif au groupe (narratif, hors-score), firewall préservé
+              climatInondation: r.climatInondation, // narratif inondation, gaté côté route par inondation demandée
+              demographie: r.demographie, // récit démographique, gaté côté route par croissance demandée
             })),
             outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message },
             perimetre: outcomeMeta.perimetre ?? [],
