@@ -57,13 +57,20 @@ Téléchargées hors runtime (comme le rail), pas de fichier local versionné.
    - **Arrêts non dédoublonnés** : un même point physique apparaît plusieurs fois s'il est
      couvert par plusieurs GTFS (urbain + régional). → dédoublonnage spatial obligatoire.
    - Filtrer aux vrais arrêts d'embarquement : `location_type` ∈ {0, vide}.
-2. **Mode structurant (lignes)** : GeoJSON national « tracés de lignes » (généré par
-   gtfs-to-geojson, porte `route_type` par ligne via `shapes.txt`). On en extrait tram
-   (`route_type == 0`) et métro (`route_type == 1`).
-   - Fraîcheur à confirmer à l'acquisition (la version data.gouv connue datait de 2021) ;
-     tram/métro étant des modes stables, une version un peu datée est tolérable, à gloser.
-   - **Fallback documenté** si le fichier national est inexploitable : détecter tram/métro
-     via un petit ensemble curé de réseaux GTFS lourds (dernier recours, noté comme dette).
+2. **Mode structurant (tram / métro)** : **OpenStreetMap via Overpass**, et non le GeoJSON
+   national de lignes (le seul existant date de 2021, 300 Mo, stale ; écarté après recherche).
+   OSM cartographie tram et métro de façon **à jour et exhaustive** en France, et le repo a un
+   précédent (la base cyclable vient d'un export OSM national). On récupère des **nœuds
+   ponctuels** d'arrêts (pas de géométrie de ligne à traiter) :
+   - `node["railway"="tram_stop"]` → mode **tram** (mesuré : ~3 326 nœuds en France).
+   - stations `subway` (`node["railway"="station"]["station"="subway"]`, `["subway"="yes"]`,
+     `node["station"="subway"]`) → mode **métro** (mesuré : ~488 nœuds, cohérent Paris + 5 métros
+     régionaux).
+   - Requête Overpass filtrée sur la France (`area["ISO3166-1"="FR"][admin_level=2]`), ~3 800
+     nœuds, ~1 Mo, un seul appel. Le mode se lit **directement dans le tag** du nœud.
+   - Garde-fou Overpass (rate-limit / indispo au script-time) : le script **cache la réponse
+     brute OSM** dans `data/.cache/` (gitignoré) et la réutilise ; option `--refresh-osm` pour
+     forcer un re-fetch.
 
 ## Métrique
 
@@ -74,9 +81,9 @@ Téléchargées hors runtime (comme le rail), pas de fichier local versionné.
    `couverture = Σ` sur arrêts dédoublonnés à distance `d <= R` de `(1 − d/R)`. Décroissance
    linéaire forte ; `R` petit (échelle marche). **`R` à figer par sonde** (cf. Validation).
 3. **Facteur mode.** `facteur = metro ? 2.0 : tram ? 1.5 : 1.0`, où `tram`/`metro` sont vrais
-   si un sommet de ligne `route_type` 0 / 1 passe à `d <= R` du centroïde. (Les géométries de
-   lignes sont éclatées en sommets denses pour rester sur la machinerie grille + haversine,
-   sans dépendance géométrique nouvelle.) Valeurs 1.5 / 2.0 = boutons à régler.
+   si un **nœud OSM** du mode correspondant (tram_stop / station subway) est à `d <= R` du
+   centroïde. Détection ponctuelle directe (mêmes grille + haversine que la couverture, aucune
+   géométrie de ligne). Valeurs 1.5 / 2.0 = boutons à régler.
 4. **Score brut.** `acces_raw = couverture × facteur`.
 
 ## Normalisation (exception assumée au patron percentile national)
@@ -134,7 +141,8 @@ Le critère mesure la **présence d'un réseau de TC à portée de marche**, reh
 structurant (tram / métro) dessert la proximité immédiate. Il NE mesure PAS la fréquence, les
 horaires, ni l'exploitation du réseau. Le mode lourd est un **proxy de qualité**, pas une
 mesure de fréquence réelle. Le centroïde communal est une **approximation V1** (grossière
-pour une commune étendue ou éclatée). Idéal V2+ : temps d'accès réels, fréquences.
+pour une commune étendue ou éclatée). Sources à jour 2026 (arrêts GTFS national + tram/métro
+OSM) : pas de dette de fraîcheur. Idéal V2+ : temps d'accès réels, fréquences.
 
 ## Validation
 
