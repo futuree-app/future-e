@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useId, useRef, useState } from "react";
 import type {
   ComparaisonComplete,
   ComparaisonCellule,
@@ -9,8 +10,8 @@ import type {
 
 // Comparaison complète (Pack Décision) : matrice d'arbitrages, 7 thèmes stables, palier
 // incarné absolu + avantage relatif au trio. Aucun chiffre, aucune jauge. Le trio reste
-// trois colonnes persistantes (en-tête collant) ; la commune qui mène s'allume en accent
-// et l'oeil suit l'arbitrage colonne par colonne. cf. spec 2026-06-05-comparateur-complet.
+// trois colonnes, rappelées en tête de chaque thème ; la commune qui mène s'allume en
+// accent. Quand les trois disent la même chose, une seule valeur centrée. cf. spec.
 
 type Props = {
   data: ComparaisonComplete;
@@ -19,46 +20,145 @@ type Props = {
 };
 
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
-// Gabarit de grille partagé par l'en-tête collant ET chaque ligne, pour que les colonnes
-// s'alignent. Mobile = une colonne (empilé) ; desktop = libellé + 3 communes.
+// Gabarit partagé par l'en-tête de colonnes ET chaque ligne, pour aligner les colonnes.
+// Mobile = empilé ; desktop = libellé + 3 communes.
 const GRID = "grid grid-cols-1 md:grid-cols-[minmax(150px,210px)_repeat(3,minmax(0,1fr))] md:gap-x-4";
 
 function reveal(i: number): React.CSSProperties {
-  return { animation: `step-enter 0.55s ${EASE} both`, animationDelay: `${0.04 * i}s` };
+  return { animation: `step-enter 0.55s ${EASE} both`, animationDelay: `${0.05 * i}s` };
 }
 
-function leaderInsee(ligne: ComparaisonLigne): string | null {
-  return ligne.avantage.type === "avantage" ? ligne.avantage.insee : null;
+// ── Icônes premium par thème (stroke, monochrome accent) ─────────────────────
+const THEME_ICONS: Record<string, React.ReactNode> = {
+  climat: (
+    <>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5.6 5.6 4.2 4.2M19.8 19.8l-1.4-1.4M18.4 5.6l1.4-1.4M4.2 19.8l1.4-1.4" />
+    </>
+  ),
+  risques: (
+    <>
+      <path d="M12 3l7 3v5c0 4.5-3 7.4-7 9-4-1.6-7-4.5-7-9V6z" />
+      <path d="M12 8.5v4M12 16h.01" />
+    </>
+  ),
+  sante_env: (
+    <>
+      <path d="M11 20A7 7 0 0 1 4 13C4 8 8 4 20 4c0 8-4 12-9 12z" />
+      <path d="M5 19c5-1.5 8-4.5 9-9" />
+    </>
+  ),
+  cadre: <path d="M3 20l6-9 3.5 5 2-3L21 20z" />,
+  mobilite: (
+    <>
+      <rect x="5" y="3" width="14" height="13" rx="3" />
+      <path d="M5 11h14M9 7h6M8 16l-2 4M16 16l2 4" />
+      <circle cx="9" cy="13.5" r=".6" />
+      <circle cx="15" cy="13.5" r=".6" />
+    </>
+  ),
+  services: (
+    <>
+      <rect x="5" y="4" width="14" height="17" rx="1.5" />
+      <path d="M9 8h.01M12 8h.01M15 8h.01M9 12h.01M12 12h.01M15 12h.01M10 21v-3.5h4V21" />
+    </>
+  ),
+  vitalite: (
+    <>
+      <circle cx="9" cy="8" r="3" />
+      <path d="M3.5 20c0-3 2.5-5 5.5-5s5.5 2 5.5 5M16 5.5a3 3 0 0 1 0 6M20.5 20c0-2.4-1.4-4-3.3-4.6" />
+    </>
+  ),
+};
+
+function ThemeIcon({ id }: { id: string }) {
+  return (
+    <span
+      className="grid place-items-center w-9 h-9 rounded-xl shrink-0"
+      style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)" }}
+    >
+      <svg
+        width="19"
+        height="19"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="var(--accent)"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        {THEME_ICONS[id] ?? null}
+      </svg>
+    </span>
+  );
 }
 
-// Une cellule de palier. En tête de colonne sur desktop (nom caché, repris de l'en-tête) ;
-// préfixée du nom de la commune sur mobile. La commune qui mène s'allume en accent.
-function Cellule({
-  cell,
-  nom,
-  leader,
-}: {
-  cell: ComparaisonCellule;
-  nom: string;
-  leader: boolean;
-}) {
-  const tone = !cell.disponible
-    ? "text-ghost italic"
-    : leader
-      ? "text-accent"
-      : "text-label";
+// ── Tooltip inline (label souligné pointillé), même esprit que ChipTooltip ────
+function LabelTip({ label, text }: { label: string; text: string }) {
+  const [open, setOpen] = useState(false);
+  const id = useId();
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+  return (
+    <span ref={ref} className="relative inline-block" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      <button
+        type="button"
+        aria-describedby={open ? id : undefined}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+        className="text-left text-[14.5px] leading-[1.3] text-label cursor-help underline decoration-dotted decoration-white/25 underline-offset-[3px] hover:decoration-white/50 transition-colors"
+      >
+        {label}
+      </button>
+      {open && (
+        <span
+          role="tooltip"
+          id={id}
+          className="absolute z-50 bottom-[calc(100%+8px)] left-0 w-max max-w-[240px] rounded-[10px] border border-white/10 px-3 py-2.5 text-[12.5px] leading-[1.5] font-normal normal-case tracking-normal"
+          style={{ background: "#0b101c", color: "#c6cfdb", boxShadow: "0 12px 32px rgba(0,0,0,0.5)" }}
+        >
+          {text}
+        </span>
+      )}
+    </span>
+  );
+}
+
+function paletteTone(cell: ComparaisonCellule, leader: boolean): string {
+  if (!cell.disponible) return "text-ghost italic";
+  return leader ? "text-accent" : "text-label";
+}
+
+function Cellule({ cell, nom, leader }: { cell: ComparaisonCellule; nom: string; leader: boolean }) {
   return (
     <div
       className={[
-        "flex items-baseline gap-3 md:block md:gap-0 md:rounded-xl md:px-3.5 md:py-2.5 md:transition-colors",
-        leader ? "md:bg-accent/[0.07] md:ring-1 md:ring-accent/20" : "",
+        "flex items-baseline gap-3 md:block md:gap-0 md:rounded-xl md:px-3.5 md:py-2.5",
+        leader ? "md:bg-accent/[0.07]" : "",
       ].join(" ")}
     >
-      <span className="md:hidden w-[88px] shrink-0 font-mono text-[10px] tracking-[0.08em] uppercase text-ghost pt-0.5">
+      <span className="md:hidden w-[92px] shrink-0 font-mono text-[10px] tracking-[0.08em] uppercase text-ghost pt-0.5">
         {nom}
       </span>
       <span className="min-w-0">
-        <span className={`text-[14px] leading-[1.45] ${tone}`}>{cell.palier}</span>
+        <span className={`text-[14px] leading-[1.45] ${paletteTone(cell, leader)}`}>{cell.palier}</span>
         {cell.qualifier && (
           <span className="block text-[12px] leading-[1.4] text-muted mt-0.5">{cell.qualifier}</span>
         )}
@@ -68,26 +168,43 @@ function Cellule({
 }
 
 function LigneRow({ ligne, trio }: { ligne: ComparaisonLigne; trio: MatchResult[] }) {
-  const leader = leaderInsee(ligne);
+  const leader = ligne.avantage.type === "avantage" ? ligne.avantage.insee : null;
   const egalite = ligne.avantage.type === "egalite";
   const cellByInsee = new Map(ligne.cellules.map((c) => [c.insee, c]));
+
+  // Fusion : les trois disent exactement la même chose (palier + qualifier) -> une valeur.
+  const dispo = ligne.cellules.filter((c) => c.disponible);
+  const merged =
+    dispo.length === ligne.cellules.length &&
+    new Set(dispo.map((c) => `${c.palier}|${c.qualifier ?? ""}`)).size === 1;
+
   return (
-    <div className={`${GRID} gap-y-2 md:gap-y-0 md:items-center py-4 border-t border-white/[0.06]`}>
+    <div className={`${GRID} gap-y-2 md:gap-y-0 md:items-center py-3.5 border-t border-white/[0.06]`}>
       <div className="md:pr-2">
-        <span className="text-[14.5px] leading-[1.3] text-label">{ligne.label}</span>
+        <LabelTip label={ligne.label} text={ligne.aide} />
         <span
-          className={`block mt-0.5 font-mono text-[9.5px] tracking-[0.12em] uppercase ${
+          className={`block mt-1 font-mono text-[9.5px] tracking-[0.12em] uppercase ${
             egalite ? "text-ghost" : "text-accent"
           }`}
         >
           {egalite ? "À égalité" : `Avantage ${trio.find((r) => r.insee === leader)?.nom ?? ""}`}
         </span>
       </div>
-      {trio.map((r) => {
-        const cell = cellByInsee.get(r.insee);
-        if (!cell) return <div key={r.insee} />;
-        return <Cellule key={r.insee} cell={cell} nom={r.nom} leader={cell.insee === leader} />;
-      })}
+
+      {merged ? (
+        <div className="md:col-span-3 md:px-3.5 md:py-2.5 md:text-center">
+          <span className="text-[14px] leading-[1.45] text-muted">{dispo[0].palier}</span>
+          {dispo[0].qualifier && (
+            <span className="md:block text-[12px] leading-[1.4] text-muted md:mt-0.5"> {dispo[0].qualifier}</span>
+          )}
+        </div>
+      ) : (
+        trio.map((r) => {
+          const cell = cellByInsee.get(r.insee);
+          if (!cell) return <div key={r.insee} />;
+          return <Cellule key={r.insee} cell={cell} nom={r.nom} leader={cell.insee === leader} />;
+        })
+      )}
     </div>
   );
 }
@@ -104,9 +221,7 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
 
       {/* Hero */}
       <div style={reveal(0)}>
-        <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-3">
-          Comparaison complète
-        </p>
+        <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-3">Comparaison complète</p>
         <h2
           className="font-normal text-[clamp(26px,3.6vw,38px)] leading-[1.12] tracking-[-0.6px] text-label max-w-[760px]"
           style={{ fontFamily: "'Instrument Serif', serif" }}
@@ -114,29 +229,25 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
           Vous les avez retenus tous les trois.{" "}
           <span className="italic text-accent">Voici, critère par critère, ce qui penche et ce qui se vaut.</span>
         </h2>
-        {/* Légende du trio sur mobile (sur desktop, l'en-tête collant la porte) */}
-        <p className="md:hidden mt-5 text-[14px] text-muted">
-          {trio.map((r, i) => (
-            <span key={r.insee}>
-              {i > 0 && <span className="text-ghost"> · </span>}
-              <span className="text-label">{r.nom}</span>
-            </span>
-          ))}
-        </p>
       </div>
 
       {/* Chapeau : navigation vers ce qui sépare vraiment */}
       {data.chapeau.length > 0 && (
-        <div className="glass rounded-2xl px-6 py-5 mt-9" style={{ ...reveal(1), borderColor: "color-mix(in srgb, var(--accent) 32%, transparent)" }}>
-          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-3">
-            Ce qui les sépare vraiment
-          </p>
+        <div
+          className="glass rounded-2xl px-6 py-5 mt-9"
+          style={{ ...reveal(1), borderColor: "color-mix(in srgb, var(--accent) 32%, transparent)" }}
+        >
+          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-1">Ce qui les sépare vraiment</p>
+          <p className="text-[12.5px] text-muted mb-3.5">Les critères où les trois territoires s&apos;écartent le plus.</p>
           <div className="flex flex-wrap gap-2">
             {data.chapeau.map((c) => (
               <span
                 key={c}
                 className="px-3.5 py-1.5 rounded-full text-[13px] text-label"
-                style={{ border: "1px solid color-mix(in srgb, var(--accent) 40%, transparent)" }}
+                style={{
+                  border: "1px solid color-mix(in srgb, var(--accent) 38%, transparent)",
+                  background: "color-mix(in srgb, var(--accent) 8%, transparent)",
+                }}
               >
                 {c}
               </span>
@@ -145,47 +256,34 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
         </div>
       )}
 
-      {/* En-tête collant des 3 communes (desktop) : ancre l'identité des colonnes au scroll */}
-      <div
-        className={`${GRID} hidden md:grid md:sticky md:top-0 z-10 mt-12 mb-1 py-3 -mx-3 px-3 rounded-xl`}
-        style={{ background: "color-mix(in srgb, var(--canvas) 86%, transparent)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
-      >
-        <div className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-ghost self-end pb-1">
-          Critère
-        </div>
-        {trio.map((r, i) => (
-          <div key={r.insee} className="px-3.5">
-            <div className="font-mono text-[9.5px] tracking-[0.16em] text-ghost mb-0.5">
-              {String(i + 1).padStart(2, "0")}
-            </div>
-            <div
-              className="text-[18px] leading-[1.15] text-label"
-              style={{ fontFamily: "'Instrument Serif', serif" }}
-            >
-              {r.nom}
-            </div>
-          </div>
-        ))}
-      </div>
-
       {/* Thèmes */}
-      <div className="mt-2 md:mt-4 space-y-12">
+      <div className="mt-12 space-y-12">
         {data.themes.map((th, i) => (
           <section key={th.id} style={reveal(2 + i)}>
-            <div className="flex items-baseline gap-3 mb-1.5">
-              <span className="font-mono text-[11px] tracking-[0.16em] text-ghost">
-                {String(i + 1).padStart(2, "0")}
-              </span>
+            <div className="flex items-center gap-3 mb-2">
+              <ThemeIcon id={th.id} />
               <h3
-                className="font-normal text-[22px] leading-[1.15] text-label"
+                className="font-normal text-[23px] leading-[1.1] text-label"
                 style={{ fontFamily: "'Instrument Serif', serif" }}
               >
                 {th.titre}
               </h3>
             </div>
-            <p className="text-[14.5px] leading-[1.55] text-muted italic mb-4 max-w-[680px]">
-              {th.synthese}
-            </p>
+            <p className="text-[14.5px] leading-[1.55] text-muted italic mb-4 max-w-[680px]">{th.synthese}</p>
+
+            {/* En-tête des 3 communes, rappelé pour ce thème (desktop) */}
+            <div className={`${GRID} hidden md:grid pb-1`}>
+              <div className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-ghost self-end pb-1">Critère</div>
+              {trio.map((r, n) => (
+                <div key={r.insee} className="px-3.5 flex items-baseline gap-2">
+                  <span className="font-mono text-[9.5px] text-ghost">{String(n + 1).padStart(2, "0")}</span>
+                  <span className="text-[14px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                    {r.nom}
+                  </span>
+                </div>
+              ))}
+            </div>
+
             <div>
               {th.lignes.map((l) => (
                 <LigneRow key={l.id} ligne={l} trio={trio} />
