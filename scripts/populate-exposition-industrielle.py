@@ -259,7 +259,22 @@ def main():
         print(f"score=100 (loin de tout) : {n100}/{len(scores)} ({100*n100//len(scores)} %)", file=sys.stderr)
         return
 
-    print("calcul : voir --probe / --matrix / --write-index", file=sys.stderr)
+    # Calcul national complet -> cache + index
+    idx, communes = load_communes()
+    cls, lat, lon = load_sites(refresh=args.refresh)
+    print(f"communes : {len(communes)} | sites : {len(cls)} | R={R_EXPO} H={H_HALF} λ={LAMBDA}", file=sys.stderr)
+    results = compute_all(communes, cls, lat, lon)
+    rec = {}
+    for c, r in zip(communes, results):
+        rec[c["insee"]] = {"score": r["score"], "sourceDominante": r["sourceDominante"]}
+    os.makedirs(CACHE, exist_ok=True)
+    json.dump(rec, open(os.path.join(CACHE, "communes-expo-industrielle.json"), "w"))
+    print("✓ cache écrit", file=sys.stderr)
+    if args.write_index:
+        for c in idx["communes"]:
+            c["expoIndustrielle"] = rec.get(c["insee"])  # non géolocalisée -> None
+        json.dump(idx, open(INDEX, "w"))
+        print("✓ index patché (expoIndustrielle)", file=sys.stderr)
 
 if __name__ == "__main__":
     main()
