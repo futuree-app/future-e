@@ -233,8 +233,8 @@ export type MatchResult = {
 // Mot du palier = ABSOLU (seuils nationaux), avantage = RELATIF au trio. cf. spec
 // 2026-06-05-comparateur-complet-design.
 export type ComparaisonAvantage =
-  | { type: "avantage"; insee: string } // une commune mène nettement
-  | { type: "egalite" }; // les trois se rejoignent (ou dimension non directionnelle)
+  | { type: "avantage"; insees: string[] } // 1 ou 2 communes au meilleur palier du trio
+  | { type: "egalite" }; // les trois au même palier (ou dimension non directionnelle)
 
 export type ComparaisonCellule = {
   insee: string;
@@ -997,7 +997,7 @@ const THEME_ORDER: { id: string; titre: string }[] = [
 const DIMENSIONS: ComparaisonDim[] = [
   { id: "etes_frais", label: "Étés frais", themeId: "climat", key: "faible_chaleur", paliers: ["Étés frais", "Étés tempérés", "Étés chauds"], gp: "les étés frais", aide: "À quel point les étés restent supportables côté chaleur." },
   { id: "douceur", label: "Douceur du climat", themeId: "climat", key: "douceur_climat", paliers: ["Climat doux", "Climat contrasté", "Hivers rigoureux"], gp: "la douceur du climat", aide: "Des hivers tempérés et des étés sans excès." },
-  { id: "ensoleillement", label: "Ensoleillement", themeId: "climat", key: "ensoleillement_recherche", paliers: ["Chaud et ensoleillé", "Ensoleillement modéré", "Frais et humide"], gp: "l'ensoleillement", aide: "Plutôt chaud et sec, ou plutôt frais et humide." },
+  { id: "ensoleillement", label: "Ensoleillement", themeId: "climat", key: "ensoleillement_recherche", paliers: ["Chaud et ensoleillé", "Ensoleillement modéré", "Frais et humide"], gp: "l'ensoleillement", aide: "Le caractère ensoleillé et chaud du climat, surtout l'été." },
   { id: "inondation", label: "Inondation", themeId: "risques", key: "faible_risque_inondation", paliers: ["Risque faible", "Risque modéré", "Risque plus marqué"], gp: "le risque d'inondation", aide: "Ce que dit l'historique d'inondations du territoire." },
   { id: "feu", label: "Feu", themeId: "risques", key: "faible_risque_feu", paliers: ["Risque faible", "Risque modéré", "Risque plus marqué"], gp: "le risque de feu", aide: "L'exposition du secteur au risque d'incendie." },
   { id: "pluies", label: "Pluies intenses", themeId: "risques", key: "faible_precip_extremes", paliers: ["Peu de pluies intenses", "Pluies intenses modérées", "Pluies intenses fréquentes"], gp: "les pluies intenses", aide: "La fréquence des épisodes de pluies très intenses." },
@@ -1089,10 +1089,11 @@ function buildComparaisonComplete(
       return { insee: r.insee, palier, qualifier: dimQualifier(dim.id, c), disponible: true };
     });
 
-    // Avantage fondé sur le PALIER affiché (pas le score caché) : une commune ne mène que
-    // si son palier est STRICTEMENT le meilleur du trio. Si deux communes partagent le
-    // meilleur palier, c'est « À égalité » (sinon un mot identique apparaîtrait coloré sur
-    // l'une et pas l'autre). Taille de ville = jamais directionnel.
+    // Avantage fondé sur le PALIER affiché (pas le score caché) : les communes au MEILLEUR
+    // palier du trio mènent. 1 commune -> « Avantage X ». 2 communes au même meilleur palier
+    // pendant que la 3e est en retrait -> « Avantage X et Y » (les deux s'allument), pas un
+    // faux « À égalité ». 3 communes au même palier -> vraie égalité. On nomme qui mène,
+    // jamais qui est en retrait. Taille de ville = jamais directionnel.
     let avantage: ComparaisonAvantage = { type: "egalite" };
     if (dim.key !== "taille_ville") {
       const bands = trio.map((r, i) => (raw[i] == null ? null : bandIndex(raw[i]!)));
@@ -1100,7 +1101,9 @@ function buildComparaisonComplete(
       if (present.length >= 1) {
         const best = Math.min(...present);
         const holders = trio.filter((r, i) => bands[i] === best);
-        if (holders.length === 1) avantage = { type: "avantage", insee: holders[0].insee };
+        if (holders.length >= 1 && holders.length <= 2) {
+          avantage = { type: "avantage", insees: holders.map((h) => h.insee) };
+        }
       }
     }
     ligneByDim.set(dim.id, { id: dim.id, label: dim.label, aide: dim.aide, avantage, cellules });
@@ -1115,10 +1118,13 @@ function buildComparaisonComplete(
     const lignes = DIMENSIONS.filter((d) => d.themeId === th.id).map((d) => ligneByDim.get(d.id)!);
     const winners = new Map<string, string[]>(); // insee -> groupes nominaux menés
     for (const l of lignes) {
-      if (l.avantage.type === "avantage") {
-        const arr = winners.get(l.avantage.insee) ?? [];
+      // Seuls les avantages NETS (une seule commune) nourrissent la synthèse ; les
+      // avantages partagés (2 communes) sont ambigus et n'y entrent pas.
+      if (l.avantage.type === "avantage" && l.avantage.insees.length === 1) {
+        const insee = l.avantage.insees[0];
+        const arr = winners.get(insee) ?? [];
         arr.push(gpById.get(l.id) ?? l.label.toLowerCase());
-        winners.set(l.avantage.insee, arr);
+        winners.set(insee, arr);
       }
     }
     const ranked = [...winners.entries()].sort((a, b) => b[1].length - a[1].length);

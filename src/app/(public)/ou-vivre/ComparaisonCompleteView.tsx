@@ -75,14 +75,14 @@ function ThemeIcon({ id }: { id: string }) {
   return (
     <span
       className="grid place-items-center w-9 h-9 rounded-xl shrink-0"
-      style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)" }}
+      style={{ background: "var(--orange-tint)" }}
     >
       <svg
         width="19"
         height="19"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="var(--accent)"
+        stroke="var(--orange)"
         strokeWidth="1.6"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -154,9 +154,7 @@ function Cellule({ cell, nom, leader }: { cell: ComparaisonCellule; nom: string;
         leader ? "md:bg-accent/[0.07]" : "",
       ].join(" ")}
     >
-      <span className="md:hidden w-[92px] shrink-0 font-mono text-[10px] tracking-[0.08em] uppercase text-ghost pt-0.5">
-        {nom}
-      </span>
+      <span className="md:hidden w-[104px] shrink-0 text-[12px] text-muted pt-0.5">{nom}</span>
       <span className="min-w-0">
         <span className={`text-[14px] leading-[1.45] ${paletteTone(cell, leader)}`}>{cell.palier}</span>
         {cell.qualifier && (
@@ -168,9 +166,12 @@ function Cellule({ cell, nom, leader }: { cell: ComparaisonCellule; nom: string;
 }
 
 function LigneRow({ ligne, trio }: { ligne: ComparaisonLigne; trio: MatchResult[] }) {
-  const leader = ligne.avantage.type === "avantage" ? ligne.avantage.insee : null;
+  const leaders = ligne.avantage.type === "avantage" ? ligne.avantage.insees : [];
   const egalite = ligne.avantage.type === "egalite";
   const cellByInsee = new Map(ligne.cellules.map((c) => [c.insee, c]));
+  const leaderNoms = leaders
+    .map((insee) => trio.find((r) => r.insee === insee)?.nom ?? "")
+    .filter(Boolean);
 
   // Fusion : les trois disent exactement la même chose (palier + qualifier) -> une valeur.
   const dispo = ligne.cellules.filter((c) => c.disponible);
@@ -187,22 +188,32 @@ function LigneRow({ ligne, trio }: { ligne: ComparaisonLigne; trio: MatchResult[
             egalite ? "text-ghost" : "text-accent"
           }`}
         >
-          {egalite ? "À égalité" : `Avantage ${trio.find((r) => r.insee === leader)?.nom ?? ""}`}
+          {egalite ? "À égalité" : `Avantage ${leaderNoms.join(" et ")}`}
         </span>
       </div>
 
       {merged ? (
-        <div className="md:col-span-3 md:px-3.5 md:py-2.5 md:text-center">
-          <span className="text-[14px] leading-[1.45] text-muted">{dispo[0].palier}</span>
-          {dispo[0].qualifier && (
-            <span className="md:block text-[12px] leading-[1.4] text-muted md:mt-0.5"> {dispo[0].qualifier}</span>
-          )}
-        </div>
+        // Valeur unique alignée sous la commune du MILIEU (colonne centrale).
+        <>
+          <div className="hidden md:block" aria-hidden />
+          <div className="flex items-baseline gap-3 md:block md:gap-0 md:px-3.5 md:py-2.5 md:text-center">
+            <span className="md:hidden w-[92px] shrink-0 font-mono text-[10px] tracking-[0.08em] uppercase text-ghost pt-0.5">
+              Les trois
+            </span>
+            <span className="min-w-0">
+              <span className="text-[14px] leading-[1.45] text-muted">{dispo[0].palier}</span>
+              {dispo[0].qualifier && (
+                <span className="block text-[12px] leading-[1.4] text-muted mt-0.5">{dispo[0].qualifier}</span>
+              )}
+            </span>
+          </div>
+          <div className="hidden md:block" aria-hidden />
+        </>
       ) : (
         trio.map((r) => {
           const cell = cellByInsee.get(r.insee);
           if (!cell) return <div key={r.insee} />;
-          return <Cellule key={r.insee} cell={cell} nom={r.nom} leader={cell.insee === leader} />;
+          return <Cellule key={r.insee} cell={cell} nom={r.nom} leader={leaders.includes(cell.insee)} />;
         })
       )}
     </div>
@@ -235,7 +246,7 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
       {data.chapeau.length > 0 && (
         <div
           className="glass rounded-2xl px-6 py-5 mt-9"
-          style={{ ...reveal(1), borderColor: "color-mix(in srgb, var(--accent) 32%, transparent)" }}
+          style={{ ...reveal(1), borderColor: "var(--orange-ring)" }}
         >
           <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-1">Ce qui les sépare vraiment</p>
           <p className="text-[12.5px] text-muted mb-3.5">Les critères où les trois territoires s&apos;écartent le plus.</p>
@@ -244,10 +255,7 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
               <span
                 key={c}
                 className="px-3.5 py-1.5 rounded-full text-[13px] text-label"
-                style={{
-                  border: "1px solid color-mix(in srgb, var(--accent) 38%, transparent)",
-                  background: "color-mix(in srgb, var(--accent) 8%, transparent)",
-                }}
+                style={{ border: "1px solid var(--orange-ring)", background: "var(--orange-tint)" }}
               >
                 {c}
               </span>
@@ -272,12 +280,12 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
             <p className="text-[14.5px] leading-[1.55] text-muted italic mb-4 max-w-[680px]">{th.synthese}</p>
 
             {/* En-tête des 3 communes, rappelé pour ce thème (desktop) */}
-            <div className={`${GRID} hidden md:grid pb-1`}>
+            <div className={`${GRID} hidden md:grid pb-2 border-b border-white/[0.06]`}>
               <div className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-ghost self-end pb-1">Critère</div>
               {trio.map((r, n) => (
                 <div key={r.insee} className="px-3.5 flex items-baseline gap-2">
-                  <span className="font-mono text-[9.5px] text-ghost">{String(n + 1).padStart(2, "0")}</span>
-                  <span className="text-[14px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                  <span className="font-mono text-[10px] text-accent">{String(n + 1).padStart(2, "0")}</span>
+                  <span className="text-[17px] leading-[1.1] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
                     {r.nom}
                   </span>
                 </div>

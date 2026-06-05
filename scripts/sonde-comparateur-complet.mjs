@@ -42,7 +42,9 @@ async function main() {
       console.log(`\n  ${th.titre}`);
       console.log(`    » ${th.synthese}`);
       for (const l of th.lignes) {
-        const av = l.avantage.type === "avantage" ? `Avantage ${nom(r.trio, l.avantage.insee)}` : "À égalité";
+        const av = l.avantage.type === "avantage"
+          ? `Avantage ${l.avantage.insees.map((i) => nom(r.trio, i)).join(" et ")}`
+          : "À égalité";
         console.log(`    ${l.label}  [${av}]`);
         for (const cell of l.cellules) {
           const q = cell.qualifier ? `, ${cell.qualifier}` : "";
