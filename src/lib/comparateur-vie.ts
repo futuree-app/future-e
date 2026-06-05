@@ -599,14 +599,25 @@ function buildIdentite(c: IndexCommune): string {
   const coastal = c.distance_cote_km != null && c.distance_cote_km <= 15;
   const altitude = c.altitude ?? 0;
   const relief = c.relief_proximite ?? 0;
+  // Montagne : altitude propre élevée, ou massif vraiment à portée et déjà en hauteur.
+  const montagne = altitude >= 600 || (relief >= 60 && altitude >= 350);
   const periurbain =
     c.population != null && uuPop != null && uuPop >= 100000 && c.population < 25000;
+  // « Grande ville » : la COMMUNE elle-même est grande (pas l'UU), sinon un village
+  // dans une grande agglo serait mal étiqueté (Espelette).
+  const grandeVille = c.population != null && c.population >= 50000;
+  const med = c.region != null && MED_REGIONS.has(c.region);
+  // Macro-Sud pour incarner « le Sud / le Sud-Ouest » dans la promesse.
+  const sudOuest = c.region === "Nouvelle-Aquitaine";
+  const sud = c.region === "Occitanie" || c.region === "Provence-Alpes-Côte d'Azur";
+  const frais = (subScore("faible_chaleur", c) ?? 0) >= 60;
+  const doux = (subScore("douceur_climat", c) ?? 0) >= 65;
+  const vieLocaleForte = (subScore("vie_locale", c) ?? 0) >= 60;
 
   // Dominante : plus haut subScore parmi un ensemble curé de traits de caractère.
   const CHAR_KEYS: PreferenceKey[] = [
     "vie_locale", "vie_etudiante", "cadre_calme", "calme_sonore", "nature",
-    "acces_services", "acces_soins", "croissance_demographique",
-    "faible_chaleur", "proximite_mer",
+    "acces_services", "croissance_demographique", "proximite_mer",
   ];
   let domKey: PreferenceKey | null = null;
   let domScore = -1;
@@ -615,41 +626,58 @@ function buildIdentite(c: IndexCommune): string {
     if (s != null && s > domScore) { domScore = s; domKey = k; }
   }
 
-  // Mapping archétype → promesse (table de départ, calibrée par sonde).
-  if (periurbain && (domKey === "acces_services" || domKey === "vie_locale")) {
-    return "Pour rester proche d'une grande ville sans en vivre le centre.";
+  // Cascade du plus distinctif au plus générique. Le repli neutre ne sert qu'en
+  // tout dernier recours : chaque lieu doit raconter une histoire singulière.
+  if (montagne) {
+    if (vieLocaleForte) return "Pour vivre en montagne dans une commune qui reste animée.";
+    return frais
+      ? "Pour vivre en montagne, dans un climat plus supportable l'été."
+      : "Pour vivre en montagne, au grand air.";
   }
-  if (coastal && (domKey === "proximite_mer" || domKey === "cadre_calme" || domKey === "calme_sonore")) {
-    return "Pour un quotidien tourné vers la mer, à un rythme plus posé.";
+  if (coastal && med) {
+    return "Pour un quotidien méditerranéen, les pieds près de l'eau.";
   }
-  if (coastal && domKey === "acces_services" && (taille === "moyenne" || taille === "grande")) {
+  if (coastal && grandeVille) {
     return "Pour la vie au bord de l'eau avec les services d'une vraie ville.";
   }
-  if (domKey === "faible_chaleur" && (altitude >= 400 || relief >= 50)) {
+  if (coastal) {
+    return "Pour un quotidien tourné vers la mer, à un rythme plus posé.";
+  }
+  if (periurbain) {
+    return "Pour rester proche d'une grande ville sans en vivre le centre.";
+  }
+  if (frais && sudOuest) {
+    return "Pour rester dans le Sud-Ouest sans subir les plus fortes chaleurs.";
+  }
+  if (frais && sud) {
+    return "Pour rester dans le Sud sans subir les plus fortes chaleurs.";
+  }
+  if (frais) {
     return "Pour chercher davantage de fraîcheur et un rythme plus posé.";
   }
   if (domKey === "vie_etudiante") {
     return "Pour une ville étudiante à taille humaine.";
   }
   if (domKey === "croissance_demographique") {
-    return "Pour s'installer dans un territoire qui monte.";
+    return "Pour s'installer dans un territoire qui attire.";
   }
-  if ((domKey === "nature" || domKey === "cadre_calme" || domKey === "calme_sonore") && (taille === "village" || taille === "petite")) {
-    return "Pour un cadre préservé, loin de l'agitation.";
+  if (grandeVille) {
+    return "Pour la vie d'une grande ville et tous ses services.";
   }
   if (domKey === "vie_locale" && (taille === "petite" || taille === "moyenne")) {
     return "Pour une petite ville qui reste vraiment vivante.";
   }
-  // « Grande ville » : gaté sur la population de la COMMUNE elle-même (pas l'UU),
-  // sinon un village dans une grande agglo serait mal étiqueté (Espelette).
-  if ((taille === "grande" || taille === "metropole") && c.population != null && c.population >= 50000) {
-    return "Pour la vie d'une grande ville et tous ses services.";
+  if ((domKey === "nature" || domKey === "cadre_calme" || domKey === "calme_sonore") &&
+      (taille === "village" || taille === "petite")) {
+    return "Pour un cadre rural préservé, loin de l'agitation.";
   }
-  if ((domKey === "nature" || domKey === "proximite_mer") && (taille === "village" || taille === "petite")) {
-    return "Pour un cadre préservé, au plus près de la nature.";
+  if (doux) {
+    return "Pour un climat doux une bonne partie de l'année.";
   }
-  // Repli neutre, sobre, adossé à la dominante.
-  return "Pour un bon équilibre entre cadre de vie et services.";
+  if (taille === "village" || taille === "petite") {
+    return "Pour la tranquillité d'une commune à taille humaine.";
+  }
+  return "Pour un cadre de vie équilibré, sans excès.";
 }
 
 // ── Découverte : 2e force POSITIVE sur une dimension non demandée ─────────────
@@ -987,7 +1015,18 @@ function assignCompromis(shownPicks: MatchResult[], byInsee: Map<string, IndexCo
       }
     }
     if (worstKey && worstDelta >= 12) {
-      r.compromis = `En échange, ${COMPROMIS_NEG[worstKey]} que dans les autres options.`;
+      // Comparatif concret : nommer la commune affichée qui MÈNE sur cette dimension
+      // (on nomme celle qui est meilleure, jamais un perdant). Le cerveau arbitre.
+      let leaderNom: string | null = null;
+      let leaderScore = -1;
+      for (const o of shownPicks) {
+        if (o.insee === r.insee) continue;
+        const oc = byInsee.get(o.insee);
+        const os = oc ? subScore(worstKey, oc) : null;
+        if (os != null && os > leaderScore) { leaderScore = os; leaderNom = o.nom; }
+      }
+      const ref = leaderNom ? `qu'à ${leaderNom}` : "que dans vos deux autres options";
+      r.compromis = `En échange, ${COMPROMIS_NEG[worstKey]} ${ref}.`;
     } else {
       r.compromis = "Le bon compromis des trois, sans faiblesse marquée.";
     }

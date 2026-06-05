@@ -95,11 +95,11 @@ export function CompareView({ results, onBack, onExploreReport, onPackDecision }
           className="font-normal text-[20px] leading-[1.2] text-label"
           style={{ fontFamily: "'Instrument Serif', serif" }}
         >
-          Aller au bout de la décision.
+          Vous hésitez entre ces trois options ?
         </h3>
         <p className="mt-1.5 text-[13px] leading-[1.6] text-muted max-w-[620px]">
-          Les 3 rapports détaillés, plus jusqu&apos;à 3 nouvelles idées de territoires pour le
-          même projet et un rapport supplémentaire offert.
+          Comparez les 3 territoires sur l&apos;ensemble des critères, posez vos questions et
+          explorez jusqu&apos;à 3 nouvelles pistes pour le même projet.
         </p>
         <button
           onClick={onPackDecision}
