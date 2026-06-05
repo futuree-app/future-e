@@ -13,6 +13,7 @@ Usage :
     .venv-bpe/bin/python scripts/populate-heritage-industriel.py --write-index --rayon 3
 """
 import json, os, sys, math, argparse, urllib.request, unicodedata, time
+import concurrent.futures, threading
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INDEX = os.path.join(ROOT, "data", "comparateur-index.json")
@@ -155,23 +156,32 @@ def fetch_commune_instructions(lat, lon):
     return out
 
 
-def fetch_all(refresh=False):
-    """Boucle sur toutes les communes de l'index ; cache {insee: [sites]} avec reprise."""
+def fetch_all(refresh=False, workers=8):
+    """Récupère les sites `instructions` de toutes les communes ; cache {insee:[sites]} avec
+    reprise. Concurrent (pool de threads modéré) : l'API Géorisques tolère 1000 req/min ; 8
+    workers restent polis. dict assignment = atomique sous GIL ; un lock protège les dumps."""
     idx = json.load(open(INDEX))
     communes = [c for c in idx["communes"]
                 if c.get("lat") is not None and c.get("lon") is not None]
     os.makedirs(CACHE, exist_ok=True)
     cache = {} if refresh else (json.load(open(SSP_CACHE)) if os.path.exists(SSP_CACHE) else {})
     todo = [c for c in communes if c["insee"] not in cache]
-    print(f"{len(cache)} en cache, {len(todo)} à récupérer", file=sys.stderr)
-    for n, c in enumerate(todo, 1):
+    print(f"{len(cache)} en cache, {len(todo)} à récupérer ({workers} workers)", file=sys.stderr)
+    lock = threading.Lock()
+    done = [0]
+
+    def work(c):
         sites = fetch_commune_instructions(c["lat"], c["lon"])
-        if sites is None:
-            continue  # réseau KO : laissé hors cache, repris au prochain run
-        cache[c["insee"]] = sites
-        if n % 200 == 0:
-            json.dump(cache, open(SSP_CACHE, "w"))
-            print(f"  {n}/{len(todo)} (cumul {len(cache)})", file=sys.stderr)
+        if sites is not None:
+            cache[c["insee"]] = sites
+        with lock:
+            done[0] += 1
+            if done[0] % 500 == 0:
+                json.dump(cache, open(SSP_CACHE, "w"))
+                print(f"  {done[0]}/{len(todo)} (cumul {len(cache)})", file=sys.stderr)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
+        list(ex.map(work, todo))
     json.dump(cache, open(SSP_CACHE, "w"))
     print(f"✓ cache écrit : {SSP_CACHE} ({len(cache)} communes)", file=sys.stderr)
     return cache
@@ -263,13 +273,14 @@ def main():
     ap.add_argument("--write-index", action="store_true")
     ap.add_argument("--refresh", action="store_true")
     ap.add_argument("--rayon", type=float, default=R_KM)
+    ap.add_argument("--workers", type=int, default=8)
     args = ap.parse_args()
 
     if args.selftest:
         selftest()
         return
     if args.fetch:
-        fetch_all(refresh=args.refresh)
+        fetch_all(refresh=args.refresh, workers=args.workers)
         return
 
     cache = json.load(open(SSP_CACHE)) if os.path.exists(SSP_CACHE) else {}
