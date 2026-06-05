@@ -23,9 +23,13 @@ Mesure l'**éloignement des installations industrielles classées à risque** (s
 ICPE industrielles) autour du lieu de vie. Descriptif : une **présence administrative**, jamais
 un niveau de pollution ni un risque sanitaire avéré.
 
-Glose (UI / tooltip) :
-> Densité d'installations industrielles classées à proximité (sites Seveso, IED). Mesure leur
-> présence, pas un niveau de pollution ni un risque sanitaire avéré.
+Glose (UI / tooltip), RESSERRÉE pour ne pas sur-promettre (cas Marcel-Paul, cf. §11) :
+> Densité d'installations industrielles classées EN ACTIVITÉ à proximité (sites Seveso, IED).
+> Mesure leur présence, pas un niveau de pollution ni un risque sanitaire avéré. Ne couvre pas
+> les anciens sites pollués ni les friches (signal distinct à venir).
+
+Note libellé : le chip reste « Loin des sites industriels à risque » (vendeur, et Seveso = risque
+est factuel) ; c'est la tooltip qui porte le carve-out « en activité, pas l'héritage pollué ».
 
 ## 3. Doctrine (décrire jamais juger, sujet anxiogène)
 
@@ -167,3 +171,13 @@ sonde (piège connu : faux témoins, PLM = arrondissements).
 Sols pollués (BASOL/BASIAS/SIS, en refonte InfoSols 2024-25, instable), friches (Cartofriches,
 non exhaustif -> faux « rien ici »), carrières, axes logistiques. Plutôt en signal de fiche
 qu'en score tant que les sources ne sont pas stables et sans trou.
+
+**Axe V2 distinct « héritage industriel & sites pollués »** (décidé après le cas Marcel-Paul).
+La V1 mesure le risque industriel EN ACTIVITÉ ; elle rate volontairement l'HÉRITAGE pollué.
+Exemple canonique : le chantier Marcel-Paul à La Rochelle (ancienne usine à gaz EDF-GDF, sols
+pollués HAP/BTEX/cyanures, dépollution en cours) est `regime=Déclaration`, NON Seveso, NON IED :
+invisible en V1, et c'est CORRECT (ce n'est pas un risque industriel actif). Il appartient à un
+futur axe « héritage », à construire comme critère ou signal de fiche SÉPARÉ, jamais fondu dans
+l'exposition industrielle active (réalités et données différentes). Sources à EXPLORER (pas
+seulement BASOL/BASIAS, instables) ; Marcel-Paul = témoin de référence : si l'axe héritage ne le
+fait pas ressortir, il est raté.

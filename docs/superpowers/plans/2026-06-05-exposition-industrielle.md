@@ -546,7 +546,7 @@ Dans `src/lib/comparateur-labels.ts`, dans `PREFERENCE_LABELS` après l'entrée 
 Dans `PREFERENCE_TOOLTIP`, après l'entrée `calme_sonore:`, ajouter :
 
 ```ts
-  faible_exposition_industrielle: "Densité d'installations industrielles classées à proximité (sites Seveso, IED). Mesure leur présence, pas un niveau de pollution ni un risque sanitaire avéré.",
+  faible_exposition_industrielle: "Densité d'installations industrielles classées en activité à proximité (sites Seveso, IED). Mesure leur présence, pas un niveau de pollution ni un risque sanitaire avéré. Ne couvre pas les anciens sites pollués ni les friches (signal distinct à venir).",
 ```
 
 - [ ] **Step 7: tsc + lint**
