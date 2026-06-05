@@ -419,7 +419,7 @@ type IndexCommune = {
   // Site SSP/ex-BASOL (couche `instructions`) IDENTIFIABLE le plus proche du chef-lieu. null =
   // aucun dans le rayon. activite = catégorie grand public (repli "generique"). distanceKm INTERNE.
   heritageIndustriel?: {
-    activite: "usine_gaz" | "raffinerie_hydrocarbures" | "chimie" | "metallurgie" | "decharge" | "generique";
+    activite: "usine_gaz" | "raffinerie_hydrocarbures" | "station_service" | "chimie" | "metallurgie" | "mine" | "decharge" | "generique";
     plusieurs: boolean;
     distanceKm: number;
   } | null;
@@ -971,8 +971,10 @@ const HERITAGE_LABEL: Record<
 > = {
   usine_gaz: { mot: "ancienne usine à gaz", genre: "f" },
   raffinerie_hydrocarbures: { mot: "ancien dépôt d'hydrocarbures", genre: "m" },
+  station_service: { mot: "ancienne station-service", genre: "f" },
   chimie: { mot: "ancien site chimique", genre: "m" },
   metallurgie: { mot: "ancienne fonderie", genre: "f" },
+  mine: { mot: "ancienne mine", genre: "f" },
   decharge: { mot: "ancienne décharge", genre: "f" },
   generique: { mot: "ancien site industriel", genre: "m" },
 };

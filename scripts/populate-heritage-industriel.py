@@ -24,13 +24,20 @@ SSP_URL = "https://www.georisques.gouv.fr/api/v1/ssp"
 FETCH_RAYON_M = 5000   # fetch large : couvre la sonde 3 ET 5 km en une passe
 R_KM = 3.0             # rayon du SIGNAL, PROVISOIRE — figé par sonde (gate porteur, Task 4)
 
-# (catégorie, genre, mots-clés normalisés) — ordre = priorité. cf. spec §3bis.
+# (catégorie, genre, mots-clés normalisés) — ORDRE = priorité (1er match gagne). cf. spec §3bis.
+# Tables affinées par audit des "generique" (gate porteur 2026-06-05) : station-service/garage et
+# mine sortis du repli ; cokerie/laminoir -> métallurgie ; "total" en fin de nom corrigé.
 ACTIVITE = [
     ("usine_gaz", "f", ["gdf", "gaz de france", "usine a gaz", "edf gdf", "edf  gdf", "edf/gdf"]),
+    # station-service/garage AVANT hydrocarbures : un "GARAGE TOTAL" est une station, pas un dépôt.
+    ("station_service", "f", ["station service", "station-service", "station essence", "garage"]),
     ("raffinerie_hydrocarbures", "m", ["esso", "raffinerie", "petrol", "hydrocarbure",
-                                       "depot petrolier", "shell", "total ", "antar"]),
+                                       "depot petrolier", "depot d'hydrocarbure", "shell",
+                                       "total", "antar", "elf ", "fioul", "avia"]),
     ("chimie", "m", ["chimi", "chimique"]),
-    ("metallurgie", "f", ["fonderie", "metallurg", "siderurg", "acierie", "aciers", "forge"]),
+    ("metallurgie", "f", ["fonderie", "metallurg", "siderurg", "acierie", "aciers", "forge",
+                          "cokerie", "laminoir", "trefilerie"]),
+    ("mine", "f", ["minier", "miniere", "houillere", "charbonnage", "mine de", "puits de mine"]),
     ("decharge", "f", ["decharge", "ordures", "dechets menagers"]),
 ]
 
@@ -85,6 +92,12 @@ def selftest():
     assert activite_of("Agence EDF / GDF Services") == "usine_gaz"
     assert activite_of("Centre EDF  GDF Services") == "usine_gaz"
     assert activite_of("ESSO SERVICE PORTE ROYALE") == "raffinerie_hydrocarbures"
+    assert activite_of("GARAGE TOTAL") == "station_service"          # garage prime sur la marque
+    assert activite_of("Station Service du Centre") == "station_service"
+    assert activite_of("STATION TOTAL") == "raffinerie_hydrocarbures"  # marque, sans garage/service
+    assert activite_of("Ancienne mine de fer") == "mine"
+    assert activite_of("Houilleres du Bassin du Nord") == "mine"
+    assert activite_of("Cokerie de Drocourt") == "metallurgie"
     assert activite_of("TRIAXE INDUSTRIES") == "generique"
     assert activite_of("SNC DELFAU ET CIE") == "generique"
     assert activite_of("") == "generique"
