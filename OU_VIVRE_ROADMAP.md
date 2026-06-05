@@ -159,20 +159,31 @@ l'ensemble des critères, posez vos questions, explorez jusqu'à 3 nouvelles pis
 Ordre : 1) construire la comparaison complète (vue plan payant) ; 2) en déduire le
 teaser sur CompareView.
 
-## 8. Héritages industriels (sols pollués) — critère à ajouter
+## 8. Héritage industriel (sols pollués) — LIVRÉ (signal narratif non scoré, 2026-06-05)
 
-Ajouter un critère « héritage industriel / sols pollués », **distinct** de
-`faible_exposition_industrielle` (déjà livré : sites ICPE/Seveso EN ACTIVITÉ,
-présence administrative, pas un niveau de pollution). L'héritage couvre le passif :
-sites et sols pollués (BASOL/Géorisques), anciens sites industriels (BASIAS),
-friches (Cartofriches). C'est le cas « Marcel-Paul » repéré au cadrage de
-l'exposition active et explicitement reporté en V2.
+Implémenté comme **signal NARRATIF, NON scoré** (PAS un critère), sur branche
+`feat/heritage-industriel` (non mergé tant que « push sur main » n'est pas dit). Spec
+`docs/superpowers/specs/2026-06-05-heritage-industriel-design.md`, plan
+`docs/superpowers/plans/2026-06-05-heritage-industriel.md`.
 
-Libs déjà câblées côté data (gissol / cartofriches / irep, cf. piste santé
-environnementale). À rebrainstormer avec le porteur : critère propre, ou composante
-d'un futur composite « santé environnementale » (Seveso/sols/friches/axes log/
-industrie/air). Doctrine inchangée : présence d'un passif, jamais un verdict
-sanitaire ; nommer sans mesurer ; gate qualitatif.
+Doctrine fondatrice tranchée : **ICPE/Seveso = industrie active (scoré) vs SSP/ex-BASOL =
+héritage (narratif)**, jamais fondus. Scorer l'héritage pénaliserait les ports / bassins
+ouvriers / villes anciennes = biais social refusé. Donc gate par intention exprimée
+(`heritageIntent` au parse, comme l'intention littorale), surfacé en synthèse (frontière
+`calme_sonore`) + AskFuture, jamais dans le tri.
+
+- **Source** : API Géorisques `/api/v1/ssp`, sous-clé `instructions` UNIQUEMENT (ex-BASOL curé) ;
+  `casias` banni (bruit), SIS/Cartofriches/IREP réservés au rapport. Index national 18 % des
+  communes à **R=3 km** (figé par sonde, gate porteur ; 5 km réservé au rapport détaillé).
+- **Récit** documentaire au passé, activité nommée (usine à gaz / hydrocarbures / station-service /
+  métallurgie / mine / chimie / décharge) + repli générique, « parmi d'autres » au pluriel. JAMAIS
+  « pollué/risque/toxique » ni chiffre au gratuit (état de gestion → rapport).
+- **Témoin obligatoire validé** : Marcel-Paul (La Rochelle) → « une ancienne usine à gaz … recensée
+  à proximité ». 96 communes (0,3 %) en 500 API persistant = `null` (défaut sûr).
+- **Évolution future notée** : filtre opt-in binaire NON scoré (« voir/éviter »), module rapport
+  payant (état, substances, densité, SIS, 5 km).
+
+Cf. [[exposition_industrielle]], [[idee_sante_environnementale]].
 
 ## 9. Pages paywall « Le rapport complet de… » — à refaire
 
