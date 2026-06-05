@@ -156,6 +156,20 @@ def fetch_commune_instructions(lat, lon):
     return out
 
 
+def _load_cache():
+    """Charge le cache ; récupère un fichier tronqué (coupe à la dernière entrée complète)."""
+    if not os.path.exists(SSP_CACHE):
+        return {}
+    raw = open(SSP_CACHE).read()
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        pos = raw.rfind("]")
+        cache = json.loads(raw[:pos + 1] + "}") if pos > 0 else {}
+        print(f"  cache récupéré (tronqué) : {len(cache)} communes", file=sys.stderr)
+        return cache
+
+
 def fetch_all(refresh=False, workers=8):
     """Récupère les sites `instructions` de toutes les communes ; cache {insee:[sites]} avec
     reprise. Concurrent (pool de threads modéré) : l'API Géorisques tolère 1000 req/min ; 8
@@ -164,25 +178,33 @@ def fetch_all(refresh=False, workers=8):
     communes = [c for c in idx["communes"]
                 if c.get("lat") is not None and c.get("lon") is not None]
     os.makedirs(CACHE, exist_ok=True)
-    cache = {} if refresh else (json.load(open(SSP_CACHE)) if os.path.exists(SSP_CACHE) else {})
+    cache = {} if refresh else _load_cache()
     todo = [c for c in communes if c["insee"] not in cache]
     print(f"{len(cache)} en cache, {len(todo)} à récupérer ({workers} workers)", file=sys.stderr)
     lock = threading.Lock()
     done = [0]
 
+    def _dump():
+        # snapshot SOUS le lock : json.dump ne doit jamais itérer un dict muté par un autre thread
+        # (sinon RuntimeError + fichier tronqué). Écriture atomique via fichier temporaire + replace.
+        snap = dict(cache)
+        tmp = SSP_CACHE + ".tmp"
+        json.dump(snap, open(tmp, "w"))
+        os.replace(tmp, SSP_CACHE)
+
     def work(c):
-        sites = fetch_commune_instructions(c["lat"], c["lon"])
-        if sites is not None:
-            cache[c["insee"]] = sites
+        sites = fetch_commune_instructions(c["lat"], c["lon"])  # réseau HORS lock (la partie lente)
         with lock:
+            if sites is not None:
+                cache[c["insee"]] = sites
             done[0] += 1
             if done[0] % 500 == 0:
-                json.dump(cache, open(SSP_CACHE, "w"))
+                _dump()
                 print(f"  {done[0]}/{len(todo)} (cumul {len(cache)})", file=sys.stderr)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
         list(ex.map(work, todo))
-    json.dump(cache, open(SSP_CACHE, "w"))
+    _dump()
     print(f"✓ cache écrit : {SSP_CACHE} ({len(cache)} communes)", file=sys.stderr)
     return cache
 
@@ -283,7 +305,7 @@ def main():
         fetch_all(refresh=args.refresh, workers=args.workers)
         return
 
-    cache = json.load(open(SSP_CACHE)) if os.path.exists(SSP_CACHE) else {}
+    cache = _load_cache()
     idx, communes = load_communes()
     if args.matrix:
         _matrix(communes, cache)
