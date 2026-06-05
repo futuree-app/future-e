@@ -10,6 +10,8 @@ type Props = {
   onBack: () => void;
   onExploreReport: (r: MatchResult, rang: number) => void;
   onPackDecision: () => void;
+  // Entrée temporaire d'aperçu vers la comparaison complète (le paywall = spec séparée).
+  onPreviewComplete?: () => void;
 };
 
 // Forces : 1 confirmation (reason[0], critère demandé) + 1 découverte (atout
@@ -27,7 +29,7 @@ function cap(s: string): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 }
 
-export function CompareView({ results, onBack, onExploreReport, onPackDecision }: Props) {
+export function CompareView({ results, onBack, onExploreReport, onPackDecision, onPreviewComplete }: Props) {
   const trio = results.slice(0, 3);
   return (
     <div className="pt-10">
@@ -109,6 +111,14 @@ export function CompareView({ results, onBack, onExploreReport, onPackDecision }
           Me prévenir au lancement
           <span aria-hidden>→</span>
         </button>
+        {onPreviewComplete && (
+          <button
+            onClick={onPreviewComplete}
+            className="block mt-4 font-mono text-[11px] tracking-[0.1em] text-accent hover:underline"
+          >
+            Voir la comparaison complète (aperçu) →
+          </button>
+        )}
       </div>
     </div>
   );

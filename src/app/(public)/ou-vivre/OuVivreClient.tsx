@@ -12,6 +12,7 @@ import { anchorsToLabeled, exclusionsToLabels } from "@/lib/geo-zones";
 import { ChipTooltip } from "@/components/ChipTooltip";
 import { AUTO_SYNTHESIS } from "@/lib/auto-synthesis";
 import { CompareView } from "./CompareView";
+import { ComparaisonCompleteView } from "./ComparaisonCompleteView";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — client.
@@ -148,7 +149,7 @@ export function OuVivreClient() {
 
   const [parsed, setParsed] = useState<ParsedProject | null>(null);
   const [outcome, setOutcome] = useState<MatchOutcome | null>(null);
-  const [view, setView] = useState<"results" | "compare">("results");
+  const [view, setView] = useState<"results" | "compare" | "complete">("results");
 
   const [synthesis, setSynthesis] = useState("");
   const [synthesizing, setSynthesizing] = useState(false);
@@ -605,6 +606,20 @@ export function OuVivreClient() {
 
   // Révélateur d'arbitrages : vue en place, réutilise outcome déjà calculé (pas de
   // recalcul, le projet vit en mémoire client). cf. spec 2026-06-05-comparateur-3.
+  // Comparaison complète (Pack Décision) : vue en place, réutilise outcome déjà calculé.
+  // Entrée TEMPORAIRE d'aperçu (le déverrouillage payant = spec séparée).
+  if (view === "complete" && outcome?.results?.length) {
+    return (
+      <div className="pt-16">
+        <ComparaisonCompleteView
+          data={outcome.comparaisonComplete}
+          trio={topCards(outcome.results)}
+          onBack={() => setView("results")}
+        />
+      </div>
+    );
+  }
+
   if (view === "compare" && outcome?.results?.length) {
     return (
       <div className="pt-16">
@@ -616,6 +631,7 @@ export function OuVivreClient() {
             window.location.href = `/territoire/${r.insee}/debloquer?nom=${encodeURIComponent(r.nom)}&rank=${rang}&source=comparateur_3`;
           }}
           onPackDecision={() => capture("pack_decision_waitlist_clicked", { count: top.length })}
+          onPreviewComplete={() => setView("complete")}
         />
       </div>
     );
