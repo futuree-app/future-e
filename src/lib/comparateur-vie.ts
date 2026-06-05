@@ -1103,7 +1103,14 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   faible_secheresse: "sols peu exposés à la sécheresse",
   faible_risque_feu: "faible risque de feu",
   faible_precip_extremes: "pluies extrêmes rares",
-  proximite_mer: (c) => `à ${c.distance_cote_km} km de la côte`,
+  // On nomme, on ne mesure pas : paliers qualitatifs, jamais la distance brute
+  // (le chiffre cassait le récit sur le révélateur d'arbitrages). Le détail au rapport.
+  proximite_mer: (c) =>
+    c.distance_cote_km <= 2
+      ? "en bord de mer"
+      : c.distance_cote_km <= 8
+        ? "à deux pas du littoral"
+        : "à proximité du littoral",
   cadre_calme: "cadre calme et habitable",
   eviter_isolement: (c) => `bassin de vie de ${(tailleVille(c) ?? 0).toLocaleString("fr-FR")} hab.`,
   air_sain: "air de fond plus pur",
