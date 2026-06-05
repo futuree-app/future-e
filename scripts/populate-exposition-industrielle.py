@@ -31,7 +31,9 @@ R_EARTH = 6371.0
 # ── Boutons FIGÉS PAR SONDE (gate porteur). Valeurs de départ provisoires. ──────
 R_EXPO = 8.0     # rayon d'exposition (km) : un site industriel « pèse » dans ce rayon
 H_HALF = 6.0     # demi-vie : score = 100 * 0.5^(E/H). Plus H petit, plus c'est sévère.
-LAMBDA = 0.15    # poids du terme « bassin » (concentration). FAIBLE : garantit l'invariant.
+LAMBDA = 0.04    # poids du terme « bassin » (concentration). FIGÉ PAR SONDE (gate 2026-06-05) :
+#                  à 0.15 Paris-centre (380 ICPE banales, 0 Seveso) sortait aussi exposé que Fos ;
+#                  à 0.04 tous les sites Seveso lourds restent sous Paris, l'invariant tient.
 
 # Poids de gravité (départ brutal, sonde réduira l'écart si besoin).
 WEIGHT = {"seveso_haut": 10.0, "seveso_bas": 5.0, "ied": 3.0, "industrie": 1.0}
