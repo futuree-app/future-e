@@ -1021,6 +1021,136 @@ const DIMENSIONS: ComparaisonDim[] = [
   { id: "taille_ville", label: "Taille de ville", themeId: "vitalite", key: "taille_ville", paliers: ["Grande agglomération", "Ville moyenne", "Petite ville ou rural"] },
 ];
 
+// Palier factuel de taille d'agglomération (dimension non directionnelle).
+function tailleVillePalier(c: IndexCommune): string {
+  const t = tailleVille(c) ?? 0;
+  return t >= 100_000 ? "Grande agglomération"
+    : t >= 25_000 ? "Ville moyenne"
+    : t >= 5_000 ? "Petite ville"
+    : "Plutôt rural";
+}
+
+// Suffixe court non chiffré pour les dimensions qui portent une source dominante nommable.
+// Réutilise les sources des récits existants (sans chiffre), abrégées en suffixe de palier.
+function dimQualifier(dimId: string, c: IndexCommune): string | null {
+  if (dimId === "calme_sonore") {
+    const src = c.calmeSonore?.sourceDominante;
+    return src === "auto" ? "axe routier proche"
+      : src === "rail" ? "voie ferrée proche"
+      : src === "aero" ? "aéroport proche"
+      : null;
+  }
+  if (dimId === "industrie") {
+    const src = c.expoIndustrielle?.sourceDominante;
+    return src == null ? null
+      : (src === "seveso_haut" || src === "seveso_bas") ? "site à risque majeur proche"
+      : "site industriel proche";
+  }
+  return null;
+}
+
+const CHAPEAU_SPREAD = 25; // écart min (max-min subScore) pour qu'une dimension « sépare »
+const CHAPEAU_MAX = 4;
+
+// Construit la comparaison complète du trio affiché. Déterministe, hors score/tri.
+// Mot du palier ABSOLU (bandIndex), avantage RELATIF au trio (égalité si écart < gap
+// OU même palier partout), synthèse honnête par thème, chapeau de divergences.
+function buildComparaisonComplete(
+  picks: MatchResult[],
+  byInsee: Map<string, IndexCommune>,
+): ComparaisonComplete {
+  const trio = picks.slice(0, 3);
+  const cols = trio.map((r) => byInsee.get(r.insee) ?? null);
+
+  // subScore par dimension, aligné sur le trio (null = donnée absente pour la commune)
+  const rawByDim = new Map<string, (number | null)[]>();
+  for (const dim of DIMENSIONS) {
+    if (dim.key === "taille_ville") {
+      rawByDim.set(dim.id, cols.map((c) => (c ? tailleVille(c) ?? null : null)));
+    } else {
+      const key = dim.key; // narrowed à PreferenceKey ; hoisté hors closure (TS perd la narrowing sinon)
+      rawByDim.set(dim.id, cols.map((c) => (c ? subScore(key, c) : null)));
+    }
+  }
+
+  // une ligne par dimension : palier absolu + avantage relatif au trio
+  const ligneByDim = new Map<string, ComparaisonLigne>();
+  for (const dim of DIMENSIONS) {
+    const raw = rawByDim.get(dim.id)!;
+    const cellules: ComparaisonCellule[] = trio.map((r, i) => {
+      const c = cols[i];
+      const s = raw[i];
+      if (c == null || s == null) {
+        return { insee: r.insee, palier: "Non mesuré ici", qualifier: null, disponible: false };
+      }
+      const palier = dim.key === "taille_ville" ? tailleVillePalier(c) : dim.paliers[bandIndex(s)];
+      return { insee: r.insee, palier, qualifier: dimQualifier(dim.id, c), disponible: true };
+    });
+
+    // taille de ville = jamais directionnel ; sinon meilleure favorabilité, « À égalité »
+    // si l'écart leader/2e est sous le seuil OU si tous les paliers sont identiques.
+    let avantage: ComparaisonAvantage = { type: "egalite" };
+    if (dim.key !== "taille_ville") {
+      const scored = trio
+        .map((r, i) => ({ insee: r.insee, s: raw[i] }))
+        .filter((x): x is { insee: string; s: number } => x.s != null)
+        .sort((a, b) => b.s - a.s);
+      if (scored.length >= 2) {
+        const gap = scored[0].s - scored[1].s;
+        const paliersDispo = cellules.filter((c) => c.disponible).map((c) => c.palier);
+        const tousMemePalier = new Set(paliersDispo).size <= 1;
+        if (gap >= COMPROMIS_GAP && !tousMemePalier) {
+          avantage = { type: "avantage", insee: scored[0].insee };
+        }
+      } else if (scored.length === 1) {
+        avantage = { type: "avantage", insee: scored[0].insee };
+      }
+    }
+    ligneByDim.set(dim.id, { id: dim.id, label: dim.label, avantage, cellules });
+  }
+
+  // thèmes : phrase de synthèse honnête à partir des avantages du thème
+  const nomByInsee = new Map(trio.map((r) => [r.insee, r.nom]));
+  const themes: ComparaisonTheme[] = THEME_ORDER.map((th) => {
+    const lignes = DIMENSIONS.filter((d) => d.themeId === th.id).map((d) => ligneByDim.get(d.id)!);
+    const winners = new Map<string, string[]>(); // insee -> labels menés
+    for (const l of lignes) {
+      if (l.avantage.type === "avantage") {
+        const arr = winners.get(l.avantage.insee) ?? [];
+        arr.push(l.label.toLowerCase());
+        winners.set(l.avantage.insee, arr);
+      }
+    }
+    const ranked = [...winners.entries()].sort((a, b) => b[1].length - a[1].length);
+    let synthese: string;
+    if (ranked.length === 0) {
+      synthese = "Sur ce thème, les trois territoires se ressemblent.";
+    } else if (ranked.length === 1) {
+      const [insee, labels] = ranked[0];
+      synthese = `${nomByInsee.get(insee)} prend l'avantage (${labels.slice(0, 2).join(", ")}).`;
+    } else {
+      const [a, b] = ranked;
+      synthese = `${nomByInsee.get(a[0])} se distingue (${a[1][0]}), ${nomByInsee.get(b[0])} sur ${b[1][0]}.`;
+    }
+    return { id: th.id, titre: th.titre, synthese, lignes };
+  });
+
+  // chapeau : dimensions au plus fort écart dans le trio (outil de navigation)
+  const chapeau = DIMENSIONS
+    .filter((d) => d.key !== "taille_ville")
+    .map((d) => {
+      const present = rawByDim.get(d.id)!.filter((s): s is number => s != null);
+      const spread = present.length >= 2 ? Math.max(...present) - Math.min(...present) : 0;
+      return { label: d.label, spread };
+    })
+    .filter((x) => x.spread >= CHAPEAU_SPREAD)
+    .sort((a, b) => b.spread - a.spread)
+    .slice(0, CHAPEAU_MAX)
+    .map((x) => x.label);
+
+  return { themes, chapeau };
+}
+
 // Narratif « nouveaux arrivants » (HORS score) : phrase descriptive, jamais normative.
 // Mappe c.demographie.recit -> phrase (cf. populate-demographie.py RECIT_LABEL).
 export const RECIT_DEMOGRAPHIE: Record<string, string> = {
@@ -1986,12 +2116,15 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   assignCompromis(shownPicks, byInsee, tradeoffKeyByInsee);
   assignDecouverte(shownPicks, byInsee, requestedKeys);
 
+  const comparaisonComplete = buildComparaisonComplete(shownPicks, byInsee);
+
   return {
     perfectMatch: perfect,
     bestCompatibility: best,
     candidates: candidates.length,
     message,
     results: deduped,
+    comparaisonComplete,
     appliedZones,
     appliedExclusions: exclusion.applied,
     appliedPlaces: appliedPlaces.length ? appliedPlaces : undefined,
