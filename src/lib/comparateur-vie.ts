@@ -228,12 +228,49 @@ export type MatchResult = {
   };
 };
 
+// ── Comparaison complète (Pack Décision, narratif, hors score/tri) ────────────
+// Matrice d'arbitrages du trio affiché : 27 dimensions groupées en 7 thèmes stables.
+// Mot du palier = ABSOLU (seuils nationaux), avantage = RELATIF au trio. cf. spec
+// 2026-06-05-comparateur-complet-design.
+export type ComparaisonAvantage =
+  | { type: "avantage"; insee: string } // une commune mène nettement
+  | { type: "egalite" }; // les trois se rejoignent (ou dimension non directionnelle)
+
+export type ComparaisonCellule = {
+  insee: string;
+  palier: string; // mot incarné absolu (« Très préservé »)
+  qualifier: string | null; // suffixe court non chiffré (« axe routier proche ») ou null
+  disponible: boolean; // false = donnée non mesurée pour cette commune
+};
+
+export type ComparaisonLigne = {
+  id: string; // id de dimension
+  label: string; // « Calme sonore »
+  avantage: ComparaisonAvantage;
+  cellules: ComparaisonCellule[]; // 3, ordre des picks
+};
+
+export type ComparaisonTheme = {
+  id: string;
+  titre: string; // « SANTÉ ENVIRONNEMENTALE »
+  synthese: string; // phrase honnête
+  lignes: ComparaisonLigne[];
+};
+
+export type ComparaisonComplete = {
+  themes: ComparaisonTheme[];
+  chapeau: string[]; // 0 à 4 libellés courts « ce qui les sépare vraiment »
+};
+
 export type MatchOutcome = {
   perfectMatch: boolean;
   bestCompatibility: number;
   candidates: number;
   message: string | null;
   results: MatchResult[];
+  // Comparaison complète du trio affiché (Pack Décision). Calculée sur les 3 premiers
+  // results, narratif, hors score/tri. cf. buildComparaisonComplete.
+  comparaisonComplete: ComparaisonComplete;
   // Ancres réellement appliquées (libellé + convention assumée), pour un affichage
   // honnête du périmètre côté UI (« recherche limitée au Sud, au sens… »).
   appliedZones?: AppliedZone[];
@@ -926,6 +963,60 @@ const AMBIENT_DIMENSIONS: AmbientDim[] = [
   { id: "croissance_demographique", key: "croissance_demographique", bands: ["gagne des habitants", "population stable", "perd des habitants"] },
   { id: "calme_sonore", key: "calme_sonore", bands: ["à l'écart des grandes infrastructures bruyantes", "exposition sonore intermédiaire", "environnement maillé d'infrastructures bruyantes"] },
   { id: "expo_industrielle", key: "faible_exposition_industrielle", bands: ["à l'écart des sites industriels à risque", "présence industrielle intermédiaire", "environnement industriel marqué"] },
+];
+
+// ── Dimensions de la comparaison complète ────────────────────────────────────
+// 27 dimensions (la taille de ville fusionne eviter/prefere_grande_ville). Chaque
+// dimension porte 3 paliers ABSOLUS [favorable (>=66), intermédiaire, notable (<34)],
+// alignés sur les seuils de bandIndex. Mot autoportant, jamais un score. Les paliers
+// sont un PREMIER JET éditorial, à calibrer avec le porteur (test du maire, cf. spec §6).
+type ComparaisonDim = {
+  id: string;
+  label: string;
+  themeId: string;
+  key: PreferenceKey | "taille_ville"; // "taille_ville" = palier factuel via tailleVille
+  paliers: [string, string, string]; // [hi, mid, lo]
+};
+
+const THEME_ORDER: { id: string; titre: string }[] = [
+  { id: "climat", titre: "Climat" },
+  { id: "risques", titre: "Risques naturels" },
+  { id: "sante_env", titre: "Santé environnementale" },
+  { id: "cadre", titre: "Nature & cadre" },
+  { id: "mobilite", titre: "Mobilité" },
+  { id: "services", titre: "Services & proximité" },
+  { id: "vitalite", titre: "Vie locale & trajectoires" },
+];
+
+// paliers remplis en Task 2 (séparé pour garder les diffs lisibles).
+const DIMENSIONS: ComparaisonDim[] = [
+  { id: "etes_frais", label: "Étés frais", themeId: "climat", key: "faible_chaleur", paliers: ["", "", ""] },
+  { id: "douceur", label: "Douceur du climat", themeId: "climat", key: "douceur_climat", paliers: ["", "", ""] },
+  { id: "ensoleillement", label: "Ensoleillement", themeId: "climat", key: "ensoleillement_recherche", paliers: ["", "", ""] },
+  { id: "inondation", label: "Inondation", themeId: "risques", key: "faible_risque_inondation", paliers: ["", "", ""] },
+  { id: "feu", label: "Feu", themeId: "risques", key: "faible_risque_feu", paliers: ["", "", ""] },
+  { id: "pluies", label: "Pluies intenses", themeId: "risques", key: "faible_precip_extremes", paliers: ["", "", ""] },
+  { id: "secheresse", label: "Sécheresse", themeId: "risques", key: "faible_secheresse", paliers: ["", "", ""] },
+  { id: "air", label: "Air", themeId: "sante_env", key: "air_sain", paliers: ["", "", ""] },
+  { id: "calme_sonore", label: "Calme sonore", themeId: "sante_env", key: "calme_sonore", paliers: ["", "", ""] },
+  { id: "industrie", label: "Sites industriels", themeId: "sante_env", key: "faible_exposition_industrielle", paliers: ["", "", ""] },
+  { id: "agriculture", label: "Agriculture intensive", themeId: "sante_env", key: "faible_pression_agricole", paliers: ["", "", ""] },
+  { id: "nature", label: "Espaces naturels", themeId: "cadre", key: "nature", paliers: ["", "", ""] },
+  { id: "mer", label: "Mer", themeId: "cadre", key: "proximite_mer", paliers: ["", "", ""] },
+  { id: "cadre_calme", label: "Cadre calme", themeId: "cadre", key: "cadre_calme", paliers: ["", "", ""] },
+  { id: "sans_voiture", label: "Sans voiture", themeId: "mobilite", key: "faible_dependance_auto", paliers: ["", "", ""] },
+  { id: "train", label: "Train / gares", themeId: "mobilite", key: "acces_transports", paliers: ["", "", ""] },
+  { id: "tc_quotidien", label: "TC du quotidien", themeId: "mobilite", key: "mobilite_quotidienne", paliers: ["", "", ""] },
+  { id: "soins", label: "Soins", themeId: "services", key: "acces_soins", paliers: ["", "", ""] },
+  { id: "services", label: "Services", themeId: "services", key: "acces_services", paliers: ["", "", ""] },
+  { id: "ecoles", label: "Collèges / lycées", themeId: "services", key: "acces_ecoles", paliers: ["", "", ""] },
+  { id: "culture", label: "Culture", themeId: "services", key: "acces_culture", paliers: ["", "", ""] },
+  { id: "isolement", label: "Isolement", themeId: "services", key: "eviter_isolement", paliers: ["", "", ""] },
+  { id: "emploi", label: "Emploi", themeId: "vitalite", key: "viabilite_emploi", paliers: ["", "", ""] },
+  { id: "vie_locale", label: "Vie locale", themeId: "vitalite", key: "vie_locale", paliers: ["", "", ""] },
+  { id: "vie_etudiante", label: "Vie étudiante", themeId: "vitalite", key: "vie_etudiante", paliers: ["", "", ""] },
+  { id: "demographie", label: "Démographie", themeId: "vitalite", key: "croissance_demographique", paliers: ["", "", ""] },
+  { id: "taille_ville", label: "Taille de ville", themeId: "vitalite", key: "taille_ville", paliers: ["", "", ""] },
 ];
 
 // Narratif « nouveaux arrivants » (HORS score) : phrase descriptive, jamais normative.
