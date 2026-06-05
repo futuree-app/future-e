@@ -187,6 +187,11 @@ export type MatchResult = {
   // Surfacé en synthèse UNIQUEMENT si calme_sonore est demandé (même frontière que demographie/
   // climatInondation). null = silence (aucune source proche nommable). cf. calmeSonoreRecit.
   calmeSonore: string | null;
+  // Exposition industrielle (NARRATIF, hors score/tri). Nomme en langage courant le site le plus
+  // préoccupant proche, SANS chiffre : « la proximité d'un site industriel à risque majeur »
+  // (Seveso) / « d'un site industriel » (IED/industrie). Gaté en synthèse par « critère demandé ».
+  // null = silence (aucun site préoccupant proche). cf. expoIndustrielleRecit.
+  expoIndustrielle: string | null;
   // Signaux ambiants (NARRATIF, hors score, hors tri) : 0 à 5 phrases qualitatives
   // descriptives par territoire (bande nationale, filtrées par contraste de groupe),
   // pour qu'AskFuture réponde aux « et côté X ? » hors critères. clé dimension lisible
@@ -799,6 +804,17 @@ function calmeSonoreRecit(c: IndexCommune): string | null {
     : cs.sourceDominante === "rail" ? "la proximité d'une voie ferrée"
     : "la proximité d'un aéroport";
 }
+
+// Récit de l'exposition industrielle (HORS score). Langage courant, sans chiffre, sans jargon
+// (« Seveso » jamais affiché). « à risque majeur » = sens factuel de Seveso, pas un jugement.
+// null = aucun site préoccupant proche (silence). Descriptif, jamais « dangereux/toxique ».
+function expoIndustrielleRecit(c: IndexCommune): string | null {
+  const src = c.expoIndustrielle?.sourceDominante;
+  if (src == null) return null;
+  return (src === "seveso_haut" || src === "seveso_bas")
+    ? "la proximité d'un site industriel à risque majeur"
+    : "la proximité d'un site industriel";
+}
 const SIGNAUX_MAX = 5;
 
 function bandIndex(score: number): 0 | 1 | 2 {
@@ -1395,6 +1411,8 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
         demographie: c.demographie?.recit ? (RECIT_DEMOGRAPHIE[c.demographie.recit] ?? null) : null,
         // Calme sonore : récit construit ici, gaté côté synthèse par « calme_sonore demandé ».
         calmeSonore: calmeSonoreRecit(c),
+        // Exposition industrielle : récit construit ici, gaté côté synthèse par « critère demandé ».
+        expoIndustrielle: expoIndustrielleRecit(c),
         signaux: {}, // rempli après l'assemblage final sur le groupe affiché (cf. assignSignaux)
         metrics: {
           distance_cote_km: c.distance_cote_km,

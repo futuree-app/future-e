@@ -49,6 +49,7 @@ const PREF_LABELS: Record<string, string> = {
   vie_locale: "une vie locale animée (commerces, marchés, associations)",
   croissance_demographique: "un territoire qui gagne des habitants",
   calme_sonore: "l'éloignement des grandes sources de bruit (axes, rail, aéroports)",
+  faible_exposition_industrielle: "l'éloignement des sites industriels à risque",
 };
 
 const SYSTEM = `Vous écrivez la synthèse éditoriale du Comparateur de vie de futur•e.
@@ -247,7 +248,7 @@ type Body = {
   project?: string;
   reformulation?: string;
   preferences?: { key: string; weight: number }[];
-  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null; climatInondation?: string | null; demographie?: string | null; calmeSonore?: string | null }[];
+  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null; climatInondation?: string | null; demographie?: string | null; calmeSonore?: string | null; expoIndustrielle?: string | null }[];
   outcome?: { perfectMatch?: boolean; message?: string | null };
   perimetre?: string[]; // ancres dures = cadre choisi (tous les territoires y sont)
   orientation?: string[]; // ancres souples = penchant (résultats inclinés, sans s'y limiter)
@@ -281,6 +282,9 @@ export async function POST(request: NextRequest) {
   // Même frontière pour le calme sonore : on ne nomme une infrastructure bruyante (autoroute,
   // rail, aéroport) que si l'utilisateur a activé calme_sonore. Jamais un trait distinctif subi.
   const calmeSonoreDemande = (body.preferences ?? []).some((p) => p.key === "calme_sonore");
+  // Même frontière pour l'exposition industrielle : on ne nomme un site industriel que si
+  // l'utilisateur a activé le critère (jamais un trait subi).
+  const expoIndustrielleDemandee = (body.preferences ?? []).some((p) => p.key === "faible_exposition_industrielle");
 
   const perimetre = Array.isArray(body.perimetre) ? body.perimetre.filter((s) => typeof s === "string" && s) : [];
   const orientation = Array.isArray(body.orientation) ? body.orientation.filter((s) => typeof s === "string" && s) : [];
@@ -303,6 +307,7 @@ export async function POST(request: NextRequest) {
       pression_climatique_inondation: inondationDemandee ? (r.climatInondation ?? null) : null,
       evolution_demographique: croissanceDemandee ? (r.demographie ?? null) : null,
       calme_sonore: calmeSonoreDemande ? (r.calmeSonore ?? null) : null,
+      exposition_industrielle: expoIndustrielleDemandee ? (r.expoIndustrielle ?? null) : null,
       logement: r.logement ?? null,
       littoral: r.littoral ?? null,
       trait_distinctif: r.distinctive ?? null,

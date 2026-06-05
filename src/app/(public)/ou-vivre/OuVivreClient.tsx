@@ -198,6 +198,7 @@ export function OuVivreClient() {
               climatInondation: r.climatInondation, // narratif inondation, gaté côté route par inondation demandée
               demographie: r.demographie, // récit démographique, gaté côté route par croissance demandée
               calmeSonore: r.calmeSonore, // récit calme sonore (source bruyante proche), gaté côté route par calme_sonore demandé
+              expoIndustrielle: r.expoIndustrielle, // récit sites industriels, gaté côté route par critère demandé
             })),
             outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message },
             perimetre: outcomeMeta.perimetre ?? [],
