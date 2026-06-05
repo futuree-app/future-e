@@ -86,6 +86,12 @@ export const PREFERENCE_KEYS = [
   // saturée -> loin de tout = 100. Récit = source la plus proche nommable. Descriptif, pas dB.
   // Distinct de cadre_calme (densité de bâti). Opt-in. cf. populate-calme-sonore.py.
   "calme_sonore",
+  // Exposition industrielle : éloignement aux installations classées à risque (Géorisques ICPE :
+  // Seveso/IED/industrie EN ACTIVITÉ). Exposition HYBRIDE (site dominant + concentration), pondérée
+  // par gravité. Présence administrative, PAS un niveau de pollution ni un risque sanitaire avéré.
+  // Ne couvre PAS l'héritage pollué (Marcel-Paul, V2). Loin de tout = 100. Opt-in. cf.
+  // populate-exposition-industrielle.py.
+  "faible_exposition_industrielle",
 ] as const;
 export type PreferenceKey = (typeof PREFERENCE_KEYS)[number];
 
@@ -375,6 +381,13 @@ type IndexCommune = {
     score: number;
     sourceDominante: "auto" | "rail" | "aero" | null;
     distanceKm: number | null;
+  } | null;
+  // Exposition industrielle (cf. scripts/populate-exposition-industrielle.py). score = exposition
+  // hybride saturée (dominant + λ·bassin, pondérée gravité) -> loin de tout = 100, JAMAIS null au
+  // sens « non noté ». sourceDominante = classe du site le plus préoccupant proche (récit).
+  expoIndustrielle?: {
+    score: number;
+    sourceDominante: "seveso_haut" | "seveso_bas" | "ied" | "industrie" | null;
   } | null;
 };
 type IndexFile = { meta: unknown; communes: IndexCommune[] };
@@ -729,6 +742,9 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
       // exposition cumulée aux infra bruyantes ; loin de tout = 100 (jamais « non noté »).
       // Champ absent (commune sans calcul) -> traité comme calme (100), pas comme pénalité.
       return c.calmeSonore?.score ?? 100;
+    case "faible_exposition_industrielle":
+      // éloignement aux sites industriels à risque ; loin de tout = 100 (jamais « non noté »).
+      return c.expoIndustrielle?.score ?? 100;
     default:
       return null;
   }
@@ -758,6 +774,7 @@ const AMBIENT_DIMENSIONS: AmbientDim[] = [
   { id: "vie_locale", key: "vie_locale", bands: ["vie locale animée", "vie locale intermédiaire", "vie locale plus discrète"] },
   { id: "croissance_demographique", key: "croissance_demographique", bands: ["gagne des habitants", "population stable", "perd des habitants"] },
   { id: "calme_sonore", key: "calme_sonore", bands: ["à l'écart des grandes infrastructures bruyantes", "exposition sonore intermédiaire", "environnement maillé d'infrastructures bruyantes"] },
+  { id: "expo_industrielle", key: "faible_exposition_industrielle", bands: ["à l'écart des sites industriels à risque", "présence industrielle intermédiaire", "environnement industriel marqué"] },
 ];
 
 // Narratif « nouveaux arrivants » (HORS score) : phrase descriptive, jamais normative.
@@ -886,6 +903,7 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   // Positif = score haut = environnement peu maillé d'infra bruyantes. Le coupable proche
   // (autoroute/rail/aéro) se raconte côté récit (calmeSonoreRecit), pas dans la reason positive.
   calme_sonore: "à l'écart des grandes infrastructures bruyantes",
+  faible_exposition_industrielle: "à l'écart des sites industriels à risque",
   // « Vaste » est gradué sur la taille RÉELLE de la ZE (effectif salarié absolu),
   // pas sur le percentile saturé : le mot ne sort que là où il est mérité. La
   // diversité (entropie A38) est, elle, toujours défendable.
@@ -922,6 +940,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   vie_locale: "peu de lieux de vie et d'animation locale",
   croissance_demographique: "population en baisse",
   calme_sonore: "environnement assez maillé d'infrastructures bruyantes",
+  faible_exposition_industrielle: "à proximité de sites industriels à risque",
 };
 function reasonText(key: PreferenceKey, c: IndexCommune): string {
   const r = REASON_POS[key];
