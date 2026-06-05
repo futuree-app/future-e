@@ -103,6 +103,119 @@ def selftest():
     assert c == "seveso_haut"
     print("✓ selftest OK", file=sys.stderr)
 
+# ── Acquisition ICPE nationale (Géorisques, pagination, cachée) ────────────────
+GEORISQUES_URL = "https://www.georisques.gouv.fr/api/v1/installations_classees"
+
+def fetch_icpe_national(refresh=False):
+    """Récupère toutes les ICPE (pagination page_size=1000) -> liste de dicts, cachée sur disque."""
+    if (not refresh) and os.path.exists(ICPE_CACHE):
+        return json.load(open(ICPE_CACHE))
+    os.makedirs(CACHE, exist_ok=True)
+    out, page, total_pages = [], 1, None
+    while total_pages is None or page <= total_pages:
+        url = f"{GEORISQUES_URL}?page={page}&page_size=1000"
+        doc = None
+        for attempt in (1, 2, 3):
+            try:
+                req = urllib.request.Request(url, headers={"User-Agent": "futur-e/populate-expo-industrielle"})
+                with urllib.request.urlopen(req, timeout=120) as r:
+                    doc = json.loads(r.read())
+                break
+            except Exception as e:  # noqa: BLE001 (résilience réseau volontaire)
+                print(f"  page {page} essai {attempt} : {e}", file=sys.stderr); time.sleep(2)
+        if doc is None:
+            raise RuntimeError(f"page {page} échouée après 3 essais")
+        if total_pages is None:
+            total_pages = doc.get("total_pages")
+            print(f"total ICPE : {doc.get('results')} | pages : {total_pages}", file=sys.stderr)
+        out.extend(doc.get("data", []))
+        if page % 20 == 0:
+            print(f"  page {page}/{total_pages} ({len(out)} cumulés)", file=sys.stderr)
+        page += 1
+    json.dump(out, open(ICPE_CACHE, "w"))
+    print(f"✓ cache ICPE écrit : {ICPE_CACHE} ({len(out)} installations)", file=sys.stderr)
+    return out
+
+def load_sites(refresh=False):
+    """Retourne (classes:list[str], lats:np.ndarray, lons:np.ndarray) des sites RETENUS, dédupliqués
+    par codeAIOT. classes parallèle aux coordonnées."""
+    raw = fetch_icpe_national(refresh=refresh)
+    seen = set()
+    cls, lat, lon = [], [], []
+    for p in raw:
+        cid = p.get("codeAIOT")
+        if cid in seen:
+            continue
+        seen.add(cid)
+        c = icpe_class(p)
+        if c is None:
+            continue
+        la, lo = p.get("latitude"), p.get("longitude")
+        if la is None or lo is None:
+            continue
+        cls.append(c); lat.append(la); lon.append(lo)
+    return cls, np.array(lat, dtype=np.float64), np.array(lon, dtype=np.float64)
+
+# ── Exposition par commune (grille) ────────────────────────────────────────────
+GRID = 0.1  # cellule ~11 km : ±1 cellule couvre R_EXPO=8 km partout
+
+def _grid(lat, lon):
+    g = {}
+    for k in range(len(lat)):
+        key = (int(math.floor(lat[k] / GRID)), int(math.floor(lon[k] / GRID)))
+        g.setdefault(key, []).append(k)
+    return g
+
+def commune_exposure(la, lo, cls, lat, lon, grid):
+    """(E, classe_dominante) pour une commune (chef-lieu la,lo)."""
+    if len(lat) == 0:
+        return 0.0, None
+    ci, cj = int(math.floor(la / GRID)), int(math.floor(lo / GRID))
+    idx = []
+    for di in (-1, 0, 1):
+        for dj in (-1, 0, 1):
+            idx.extend(grid.get((ci + di, cj + dj), []))
+    if not idx:
+        return 0.0, None
+    sub = np.array(idx)
+    d = hav_km(la, lo, lat[sub], lon[sub])
+    sites = [(cls[idx[k]], float(d[k])) for k in range(len(idx)) if d[k] < R_EXPO]
+    return exposure(sites)
+
+def load_communes():
+    idx = json.load(open(INDEX))
+    communes = [c for c in idx["communes"] if c.get("lat") is not None and c.get("lon") is not None]
+    return idx, communes
+
+def compute_all(communes, cls, lat, lon):
+    grid = _grid(lat, lon)
+    out = []
+    for c in communes:
+        E, dom = commune_exposure(c["lat"], c["lon"], cls, lat, lon, grid)
+        out.append({"score": score_from_E(E), "sourceDominante": dom, "E": round(E, 2)})
+    return out
+
+# Codes INSEE VÉRIFIÉS par nom dans l'index (Lacq=64300 ; Paris en arrondissement, piège PLM).
+TEMOINS = {
+    "13039": "Fos-sur-Mer (industrie lourde)",
+    "69276": "Feyzin (raffinerie)",
+    "64300": "Lacq (bassin chimique)",
+    "76305": "Gonfreville-l'Orcher (raffinerie)",
+    "44052": "Donges (raffinerie)",
+    "75101": "Paris 1er (bcp d'ICPE, 0 Seveso = contrôle)",
+    "17300": "La Rochelle (contrôle, Marcel-Paul exclu)",
+    "48095": "Mende (rural, attendu ~100)",
+}
+
+def _show(communes, results):
+    by = {c["insee"]: i for i, c in enumerate(communes)}
+    print(f"\n{'commune':38} {'E':>8} {'score':>6} {'dominante':>12}", file=sys.stderr)
+    for ins, lib in TEMOINS.items():
+        if ins not in by:
+            print(f"{lib:38} {'ABSENT':>8}", file=sys.stderr); continue
+        r = results[by[ins]]
+        print(f"{lib:38} {r['E']:>8} {r['score']:>6} {str(r['sourceDominante']):>12}", file=sys.stderr)
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--selftest", action="store_true")
@@ -115,7 +228,36 @@ def main():
     if args.selftest:
         selftest()
         return
-    print("acquisition/calcul : voir Task 2+", file=sys.stderr)
+
+    if args.summary:
+        import collections
+        cls, lat, lon = load_sites(refresh=args.refresh)
+        print(f"sites retenus : {len(cls)}", file=sys.stderr)
+        print(f"par classe : {dict(collections.Counter(cls))}", file=sys.stderr)
+        return
+
+    if args.probe:
+        idx, communes = load_communes()
+        cls, lat, lon = load_sites(refresh=args.refresh)
+        print(f"R_EXPO={R_EXPO} H={H_HALF} LAMBDA={LAMBDA} | poids={WEIGHT}", file=sys.stderr)
+        results = compute_all(communes, cls, lat, lon)
+        _show(communes, results)
+        return
+
+    if args.matrix:
+        import collections
+        idx, communes = load_communes()
+        cls, lat, lon = load_sites(refresh=args.refresh)
+        results = compute_all(communes, cls, lat, lon)
+        _show(communes, results)
+        scores = [r["score"] for r in results]
+        buckets = collections.Counter(s // 10 * 10 for s in scores)
+        n100 = sum(1 for s in scores if s == 100)
+        print(f"\ndistribution score : {dict(sorted(buckets.items()))}", file=sys.stderr)
+        print(f"score=100 (loin de tout) : {n100}/{len(scores)} ({100*n100//len(scores)} %)", file=sys.stderr)
+        return
+
+    print("calcul : voir --probe / --matrix / --write-index", file=sys.stderr)
 
 if __name__ == "__main__":
     main()
