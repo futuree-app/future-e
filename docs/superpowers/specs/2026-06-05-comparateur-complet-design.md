@@ -105,7 +105,7 @@ Mapping des 28 clés de préférence vers 27 dimensions (la taille de ville fusi
 | **Nature & cadre** | Espaces naturels (`nature`), Mer (`proximite_mer`), Cadre calme (`cadre_calme`) |
 | **Mobilité** | Sans voiture (`faible_dependance_auto`), Train / gares (`acces_transports`), TC du quotidien (`mobilite_quotidienne`) |
 | **Services & proximité** | Soins (`acces_soins`), Services (`acces_services`), Collèges / lycées (`acces_ecoles`), Culture (`acces_culture`), Isolement (`eviter_isolement`) |
-| **Vitalité & dynamique** | Emploi (`viabilite_emploi`), Vie locale (`vie_locale`), Vie étudiante (`vie_etudiante`), Démographie (`croissance_demographique`), Taille de ville (`eviter_grandes_villes` / `prefere_grande_ville`) |
+| **Vie locale & trajectoires** | Emploi (`viabilite_emploi`), Vie locale (`vie_locale`), Vie étudiante (`vie_etudiante`), Démographie (`croissance_demographique`), Taille de ville (`eviter_grandes_villes` / `prefere_grande_ville`) |
 
 Décompte : 3 + 4 + 4 + 3 + 3 + 5 + 5 = 27. L'ordre des thèmes ET des dimensions est
 **stable**, jamais réordonné selon le trio (la carte mentale ne doit pas bouger).
@@ -153,6 +153,14 @@ L'authoring des tables de paliers incarnés (27 dimensions, 3 à 5 paliers chacu
 autoportants) est le principal coût de mise en oeuvre. Faible risque technique, gros
 travail éditorial. Les bandes de `AMBIENT_DIMENSIONS` servent de point de départ.
 
+**Test du maire (doctrine de wording).** Pour chaque libellé de palier : « un maire
+pourrait-il raisonnablement contester cette formulation ? ». Si oui, le mot est trop
+normatif (un jugement, pas un fait). On préfère un fait mesuré, et aux pôles une forme
+relative au national (« air de fond plus pur », « accès plus limité », « bassin d'emploi
+étendu / resserré ») plutôt qu'un verdict absolu (« air pur », « bassin dynamique »). Le
+bon ton de référence est le calme sonore (« Très préservé / Modéré / Exposé ») qui décrit
+une réalité.
+
 ## 7. Synthèse par thème
 
 Sous le titre de chaque thème, une phrase déterministe construite à partir des avantages
@@ -168,6 +176,12 @@ des dimensions du thème. Elle transforme le tableau en récit.
 
 Phrase générée par règles (compte des avantages par commune dans le thème, dimension la
 plus saillante), pas par IA. Descriptive, sans chiffre.
+
+C'est l'endroit le plus sensible de la vue : l'utilisateur y ressent soit « on me raconte
+une histoire » soit « on me récite des dimensions ». Le premier jet par règles est une
+base ; une 2e passe éditoriale après les premières sondes réelles est attendue, pas
+optionnelle. Surveiller l'effet mécanique du « X prend l'avantage » répété thème après
+thème.
 
 ## 8. Chapeau « Ce qui les sépare vraiment »
 

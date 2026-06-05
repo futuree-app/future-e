@@ -105,7 +105,7 @@ const THEME_ORDER: { id: string; titre: string }[] = [
   { id: "cadre", titre: "Nature & cadre" },
   { id: "mobilite", titre: "Mobilité" },
   { id: "services", titre: "Services & proximité" },
-  { id: "vitalite", titre: "Vitalité & dynamique" },
+  { id: "vitalite", titre: "Vie locale & trajectoires" },
 ];
 
 // paliers = placeholder "" ici ; remplis en Task 2 (séparé pour garder les diffs lisibles).
@@ -163,39 +163,41 @@ git commit -m "feat(comparateur-complet): types + table des 27 dimensions / 7 th
 
 Remplacer chaque `paliers: ["", "", ""]` par les libellés ci-dessous (ordre [favorable, intermédiaire, notable]). Direction : `subScore` rend une favorabilité (haut = favorable au sens du critère), donc le 1er palier est toujours le « bon » côté. `taille_ville` est factuel (rempli mais non utilisé tel quel, cf. Task 3 special-case).
 
+**Test du maire (doctrine de wording)** : pour chaque libellé, se demander « un maire pourrait-il raisonnablement contester cette formulation ? ». Si oui, le mot est trop normatif (un jugement, pas un fait) : préférer un fait mesuré et, au pôle haut/bas, une forme relative au national (« plus pur », « plus limité », « étendu / resserré ») plutôt qu'un verdict absolu (« pur », « dynamique »). Référence du bon ton : le bruit (« Très préservé / Modéré / Exposé ») décrit une réalité.
+
 ```typescript
   // climat
   etes_frais:     ["Étés frais", "Étés tempérés", "Étés chauds"]
   douceur:        ["Climat doux", "Climat contrasté", "Hivers rigoureux"]
   ensoleillement: ["Chaud et ensoleillé", "Ensoleillement modéré", "Frais et humide"]
-  // risques (favorable = risque faible)
+  // risques (favorable = risque faible, fondé sur l'historique observé)
   inondation:     ["Risque faible", "Risque modéré", "Risque plus marqué"]
   feu:            ["Risque faible", "Risque modéré", "Risque plus marqué"]
   pluies:         ["Peu de pluies intenses", "Pluies intenses modérées", "Pluies intenses fréquentes"]
   secheresse:     ["Sols peu exposés", "Exposition modérée", "Sols exposés"]
   // santé environnementale
-  air:            ["Air pur", "Air intermédiaire", "Air plus chargé"]
+  air:            ["Air de fond plus pur", "Air de fond intermédiaire", "Air de fond plus chargé"]
   calme_sonore:   ["Très préservé", "Modéré", "Exposé"]
   industrie:      ["À l'écart des sites industriels", "Présence industrielle modérée", "Environnement industriel marqué"]
   agriculture:    ["Peu d'agriculture intensive", "Agriculture intensive modérée", "Agriculture intensive marquée"]
   // nature & cadre
   nature:         ["Beaucoup de nature autour", "Nature présente", "Peu de nature autour"]
   mer:            ["En bord de mer", "Proche du littoral", "Loin de la mer"]
-  cadre_calme:    ["Cadre paisible", "Cadre intermédiaire", "Cadre dense"]
+  cadre_calme:    ["Cadre peu dense", "Densité intermédiaire", "Cadre dense"]
   // mobilité
-  sans_voiture:   ["Peu dépendant de la voiture", "Dépendance modérée", "Voiture indispensable"]
+  sans_voiture:   ["Peu dépendant de la voiture", "Dépendance modérée", "Voiture très présente"]
   train:          ["Bien relié par le train", "Desserte ferroviaire modérée", "Peu relié par le train"]
   tc_quotidien:   ["Réseau du quotidien présent", "Desserte partielle", "Peu de transports du quotidien"]
-  // services & proximité
-  soins:          ["Bon accès aux soins", "Accès intermédiaire", "Accès limité"]
-  services:       ["Services accessibles", "Accès intermédiaire", "Services plus éloignés"]
-  ecoles:         ["Collèges et lycées bien accessibles", "Accès intermédiaire", "Accès plus limité"]
-  culture:        ["Offre culturelle présente", "Offre intermédiaire", "Offre plus limitée"]
-  isolement:      ["Bassin de vie bien pourvu", "Bassin de proximité", "Plutôt isolé"]
-  // vitalité & dynamique
-  emploi:         ["Bassin d'emploi dynamique", "Bassin intermédiaire", "Bassin restreint"]
+  // services & proximité (forme relative au national, pas de verdict absolu)
+  soins:          ["Accès aux soins plus facile", "Accès intermédiaire", "Accès plus limité"]
+  services:       ["Services proches", "Accès intermédiaire", "Services plus éloignés"]
+  ecoles:         ["Collèges et lycées plus accessibles", "Accès intermédiaire", "Accès plus limité"]
+  culture:        ["Offre culturelle plus présente", "Offre intermédiaire", "Offre plus limitée"]
+  isolement:      ["Bassin de vie étendu", "Bassin de proximité", "Bassin de vie restreint"]
+  // vie locale & trajectoires (emploi = taille/diversité du bassin, pas un jugement de dynamisme)
+  emploi:         ["Bassin d'emploi étendu", "Bassin d'emploi intermédiaire", "Bassin d'emploi resserré"]
   vie_locale:     ["Vie locale animée", "Vie locale intermédiaire", "Vie locale plus discrète"]
-  vie_etudiante:  ["Forte présence étudiante", "Présence étudiante intermédiaire", "Présence étudiante limitée"]
+  vie_etudiante:  ["Forte présence étudiante", "Présence étudiante intermédiaire", "Présence étudiante plus limitée"]
   demographie:    ["Gagne des habitants", "Population stable", "Perd des habitants"]
   taille_ville:   ["Grande agglomération", "Ville moyenne", "Petite ville ou rural"]
 ```
@@ -689,7 +691,8 @@ git commit -m "feat(comparateur-complet): vue atteignable via apercu (paywall ho
 
 ## Notes de fin de plan
 
-- **Calibrage éditorial** : les paliers (Task 2), les phrases de synthèse (Task 3) et le seuil `CHAPEAU_SPREAD` sont un premier jet. Après Task 4/Task 6, faire une passe avec le porteur sur quelques trios témoins (montagne, littoral, périurbain) et ajuster les mots, comme pour `sonde-comparateur-3`.
+- **Calibrage éditorial** : les paliers (Task 2), les phrases de synthèse (Task 3) et le seuil `CHAPEAU_SPREAD` sont un premier jet. Après Task 4/Task 6, faire une passe avec le porteur sur quelques trios témoins (montagne, littoral, périurbain) et ajuster les mots, comme pour `sonde-comparateur-3`. Appliquer le test du maire à chaque palier.
+- **2e passe synthèse (obligatoire)** : la phrase de synthèse par thème est l'endroit où l'utilisateur ressent soit « on me raconte une histoire » soit « on me récite des dimensions ». Le premier jet par règles (compte d'avantages) servira de base, mais une 2e passe éditoriale après les premières sondes réelles est attendue, pas optionnelle. Surveiller l'effet mécanique (« X prend l'avantage » répété).
 - **Hors périmètre rappelé** : serrure du paywall, AskFuture du pack, 3 nouvelles pistes, teaser de conversion. L'entrée d'aperçu de Task 6 est temporaire et sera remplacée par le déverrouillage payant dans sa propre spec.
 - **Frontière** : aucun récit profond (héritage, littoral, pression éco) n'est rendu ici ; ils restent au rapport. Le chapeau V1 est piloté par l'écart de subScore ; l'augmentation narrative du chapeau (spec §8) est un raffinement à ajouter si la sonde montre des trios homogènes mal couverts.
 ```
