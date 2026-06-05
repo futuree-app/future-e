@@ -31,34 +31,52 @@ social que futur·e refuse. **Donc : signal narratif, jamais une note.**
   (« je veux voir / éviter les territoires comportant plusieurs anciens sites pollués »), qui
   reste dans « je veux voir » et jamais « le moteur juge que c'est mauvais ».
 
-## 2. Source (reconnaissance 2026)
+## 2. Source (reconnaissance live 2026-06-05, vérifiée en appel réel)
 
-**SSP / ex-BASOL** : « Sites et sols pollués (ou potentiellement pollués) appelant une action
-des pouvoirs publics ». ~11 200 sites (2025). Géoréférencé au **point (XY)**. **CSV national**
-téléchargeable en une fois (+ déclinaisons régionale/départementale) ; MAJ **quotidienne** ;
-API Géorisques également (`rayon` + `latlon`, rate limit 1000 req/min). Curé par construction :
-**tout site présent est notable** (pas de filtre de gravité à inventer, contrairement à l'ICPE).
+API **Géorisques `GET /api/v1/ssp`** (`latlon=lon,lat` + `rayon` en m, rate limit 1000 req/min).
+C'est un endpoint **composite** qui renvoie QUATRE sous-bases ; on n'en garde **qu'une seule** :
 
-Pourquoi SSP est la bonne colonne vertébrale :
-- curé, crédible, géoréférencé ;
-- intègre l'inventaire historique des **anciennes usines à gaz EDF-GDF** (~467 sites), donc
-  attrape le témoin **Marcel-Paul (La Rochelle)** : ancienne usine à gaz (houille distillée
-  depuis 1840, puis GDF), sols HAP/BTEX/cyanures, dépollution en cours. C'est `regime=Déclaration`
-  côté ICPE (invisible en exposition active, et c'est CORRECT), mais c'est un site SSP de plein
-  droit.
+| sous-clé | nature | usage |
+|---|---|---|
+| **`instructions`** | dossiers d'instruction SSP = **ex-BASOL curé** (sites pollués appelant une action publique) | **SOURCE DU SIGNAL** |
+| `casias` | inventaire historique (ex-BASIAS) | **IGNORÉ** (418 sites en 3 km à La Rochelle vs 8 en `instructions` : c'est le bruit qu'on bannit) |
+| `conclusions_sis` | secteurs SIS (réglementaire) | réservé **rapport** |
+| `conclusions_sup` | servitudes d'utilité publique | réservé **rapport** |
 
-Sources **écartées** pour ce signal :
-- **CASIAS / ex-BASIAS** (300 000+ sites) : inventaire historique d'anciennes activités, présence
-  ≠ pollution, toute ville en a → bruit massif, banni du signal.
-- **SIS** (secteurs d'info sur les sols, parcelles réglementaires) : complément légal intéressant,
-  réservé au **rapport** (V2 éventuelle comme couche « constructibilité »).
-- **Cartofriches** (câblé, `cartofriches.ts`) : ~3 000 sites, **non exhaustif** → faux « rien ici »,
-  réservé au rapport/fiche.
-- **IREP** (câblé) : émissions ACTIVES, recoupe l'exposition active, hors héritage.
-- **GISSOL** cadmium (câblé) : fond géochimique maille ~16 km, hors sujet héritage.
+La couche `instructions` est curée par construction : **tout site présent est notable** (pas de
+filtre de gravité à inventer, contrairement à l'ICPE). Ordre de grandeur national ~11 000 sites.
 
-**Gate data** : confirmer en début d'implémentation la voie de fetch (CSV national data.gouv /
-Géorisques vs API paginée) et la présence effective de Marcel-Paul + le champ activité exploitable.
+**Témoin Marcel-Paul CONFIRMÉ en live** : « Agence EDF / GDF Services » / « Centre EDF GDF
+Services », `code_insee=17300` (La Rochelle), présent dans `instructions` (statut « Clôturée » /
+« En cours ») ET dans `conclusions_sis`. L'ancienne usine à gaz tombe donc bien dans la couche
+curée. ✓ (côté ICPE c'est `regime=Déclaration`, invisible en exposition active, et c'est CORRECT.)
+
+**Champs réels d'un enregistrement `instructions`** :
+`identifiant_ssp`, `nom_etablissement`, `adresse`, `adresse_lieudit`, `code_insee`, `nom_commune`,
+`statut` (« Clôturée » / « En cours » …), `fiche_risque`, `date_maj`, `geom` (**MultiPolygon**).
+
+Deux réalités structurantes (≠ hypothèses initiales de la spec) :
+1. **Pas de champ activité propre.** Le seul descripteur est `nom_etablissement` (texte libre :
+   « Agence EDF / GDF Services », « ESSO SERVICE PORTE ROYALE », « TRIAXE INDUSTRIES »,
+   « SNC DELFAU ET CIE »). L'activité se dérive donc **par mots-clés** sur `nom_etablissement`
+   (cf. §3bis), et le **repli `generique` sera la norme** (on ne nomme que les cas sûrs : usines à
+   gaz, pétroliers, chimie/métallurgie identifiables). C'est honnête et assumé.
+2. **Géométrie = MultiPolygon**, pas un point → distance calculée sur le **centroïde** (moyenne des
+   sommets) du site.
+
+**Acquisition retenue** : **boucle géo par commune** sur le chef-lieu (`latlon` + `rayon=5000`),
+en ne lisant que `instructions`, avec **cache + reprise** sur disque. Le rayon de fetch 5 km
+couvre les deux variantes de sonde (3 vs 5 km) en **une seule passe** : on stocke la distance
+réelle au centroïde et la sonde ne fait que filtrer. ~34 788 communes × 1 appel ≈ 35 min à 1000
+req/min (précompute offline, caché, repris en cas de coupure). Bulk national CSV data.gouv = repli
+si l'API est trop instable.
+
+Sources **écartées** pour ce signal : `casias` (bruit), SIS/SUP (rapport), Cartofriches (`câblé`,
+~3 000 sites non exhaustifs → faux « rien ici », rapport), IREP (émissions actives, hors héritage),
+GISSOL cadmium (maille ~16 km, hors sujet).
+
+**Gate data** : FRANCHI en live (endpoint, champs, Marcel-Paul confirmés). Reste à confirmer à
+l'implémentation la **robustesse de la boucle 34k appels** (sinon repli bulk CSV).
 
 ## 3. Donnée d'index
 
@@ -72,31 +90,35 @@ heritageIndustriel?: {
 } | null;                                      // null = aucun site SSP dans R
 ```
 
-- `null` = aucun site SSP dans le rayon `R`. **R PROVISOIRE = 3 km**, à **figer par sonde
-  (3 km vs 5 km)**. L'héritage est hyperlocal : un rayon serré évite de remonter, dans les villes
-  anciennes, un tissu de signaux qui effraie sans raison. Le **rapport** pourra élargir.
-- `activite` = catégorie du **site le plus proche**, via **table curée** (cf. §3bis), repli
-  `"generique"` si l'activité BASOL n'est pas mappable avec certitude. **On nomme quand on est
-  sûr, on reste générique sinon, jamais on ne devine.**
-- `distanceKm` interne : tie-break + futur rapport, **jamais** exposé au récit (doctrine no chiffre).
+- `null` = aucun site `instructions` dans le rayon `R`. **R PROVISOIRE = 3 km**, à **figer par
+  sonde (3 km vs 5 km)** ; le fetch se fait à 5 km et la sonde filtre (cf. §2). L'héritage est
+  hyperlocal : un rayon serré évite de remonter, dans les villes anciennes, un tissu de signaux
+  qui effraie sans raison. Le **rapport** pourra élargir.
+- `activite` = catégorie du **site le plus proche**, dérivée par **mots-clés sur
+  `nom_etablissement`** (cf. §3bis), repli `"generique"` si non mappable avec certitude.
+  **On nomme quand on est sûr, on reste générique sinon, jamais on ne devine.**
+- `distanceKm` interne (centroïde du MultiPolygon) : tie-break + futur rapport, **jamais** exposé
+  au récit (doctrine no chiffre).
 
-### 3bis. Table d'activité curée (BASOL → label grand public)
+### 3bis. Table d'activité (mots-clés `nom_etablissement` → label grand public)
 
-Le champ activité/origine de BASOL est semi-libre : on mappe vers une **poignée** de catégories
-évocatrices et grand public, chacune avec son **genre** (pour l'accord du récit) :
+`nom_etablissement` est un texte libre (raison sociale historique). On mappe vers une **poignée**
+de catégories évocatrices, chacune avec son **genre** (pour l'accord du récit), par recherche de
+mots-clés sur le libellé **normalisé** (minuscules, sans accents) :
 
-| Catégorie (`HeritageActivite`) | genre | label récit |
-|---|---|---|
-| `usine_gaz` | f | « ancienne usine à gaz » |
-| `chimie` | m | « ancien site chimique » |
-| `metallurgie` | f | « ancienne fonderie » / « ancien site métallurgique » |
-| `raffinerie_hydrocarbures` | m | « ancien dépôt d'hydrocarbures » |
-| `decharge` | f | « ancienne décharge » |
-| `generique` (repli) | m | « ancien site industriel » |
+| Catégorie (`HeritageActivite`) | genre | mots-clés (exemples, à étendre) | label récit |
+|---|---|---|---|
+| `usine_gaz` | f | `gdf`, `gaz de france`, `usine a gaz`, `edf gdf` | « ancienne usine à gaz » |
+| `raffinerie_hydrocarbures` | m | `esso`, `total`, `raffinerie`, `petrol`, `hydrocarbure`, `depot petrolier` | « ancien dépôt d'hydrocarbures » |
+| `chimie` | m | `chimi`, `chimique` | « ancien site chimique » |
+| `metallurgie` | f | `fonderie`, `metallurg`, `siderurg`, `acierie`, `aciers` | « ancienne fonderie » |
+| `decharge` | f | `decharge`, `ordures`, `dechets` | « ancienne décharge » |
+| `generique` (repli) | m | (tout le reste) | « ancien site industriel » |
 
-Liste à compléter à l'implémentation d'après la distribution réelle des libellés BASOL
-(mapping par mots-clés, casse/accents normalisés). Toute activité non reconnue → `generique`.
-**Ne jamais inventer une catégorie** : dans le doute, `generique`.
+Liste de mots-clés à **étendre à l'implémentation** d'après la distribution réelle de
+`nom_etablissement` (selftest sur échantillon). Toute raison sociale non reconnue → `generique`.
+**Ne jamais inventer une catégorie** : dans le doute, `generique`. Vu la nature du champ, `generique`
+sera fréquent, et c'est correct.
 
 ## 4. Récit (NARRATIF, gaté, SANS chiffre)
 
@@ -144,13 +166,16 @@ Champ ajouté à `MatchResult` : `heritageIndustriel: string | null`. Construit 
 
 Script `scripts/populate-heritage-industriel.py` (venv `.venv-bpe`, modèle
 `populate-exposition-industrielle.py`) :
-1. fetch national SSP/BASOL (CSV data.gouv/Géorisques, fallback API paginée) ;
-2. dédup par identifiant de site ;
-3. mapping activité → catégorie curée (§3bis) ;
-4. grille spatiale + pour chaque chef-lieu : sites SSP dans `R` → plus proche (catégorie +
-   `distanceKm`), `plusieurs` (≥ 2) ;
-5. modes `--selftest` (assertions, dont Marcel-Paul ≠ null + catégorie `usine_gaz`),
-   `--summary`, `--probe`, `--matrix`, `--write-index`, `--refresh`.
+1. **boucle géo par commune** : `GET /api/v1/ssp?latlon=lon,lat&rayon=5000`, ne lire que la
+   sous-clé `instructions` (ignorer `casias`/`conclusions_sis`/`conclusions_sup`) ; **cache +
+   reprise** par `code_insee` sur disque (résilience réseau, 3 essais/commune comme l'exposition) ;
+2. dédup par `identifiant_ssp` ; **centroïde** du MultiPolygon `geom` → distance haversine au
+   chef-lieu (pas de grille nécessaire : l'API a déjà borné au rayon) ;
+3. activité du site le plus proche via mots-clés sur `nom_etablissement` normalisé (§3bis) ;
+4. par commune (au rayon `R` de sonde ≤ 5 km cachés) : `activite` (plus proche), `plusieurs`
+   (≥ 2 sites dans `R`), `distanceKm` (plus proche) ; aucun site → `null` ;
+5. modes `--selftest` (assertions : mapping activité, accord récit, Marcel-Paul `17300` ≠ null +
+   catégorie `usine_gaz`), `--summary`, `--probe`, `--matrix`, `--write-index`, `--refresh`.
 
 Câblage TS :
 1. type `IndexCommune` (champ `heritageIndustriel`).
@@ -166,8 +191,11 @@ Câblage TS :
 
 ## 7. Sonde à gates
 
-1. **Gate data** : confirmer voie de fetch + champ activité + présence de Marcel-Paul (vérif live).
-2. **Sonde rayon** : `R = 3 km` vs `5 km` sur communes témoins → **gate porteur** avant de figer.
+1. **Gate data** : FRANCHI en live le 2026-06-05 (endpoint `/api/v1/ssp` sous-clé `instructions`,
+   champs réels, Marcel-Paul confirmé `code_insee=17300`). Reste à confirmer la robustesse de la
+   boucle 34k appels (sinon repli bulk CSV data.gouv).
+2. **Sonde rayon** : `R = 3 km` vs `5 km` (filtré sur le cache fetché à 5 km) sur communes témoins
+   → **gate porteur** avant de figer.
    - Témoin OBLIGATOIRE : **Marcel-Paul / La Rochelle** doit sortir (catégorie `usine_gaz`). Si le
      récit ne fire pas, l'axe est raté.
    - Témoins « héritage lourd » attendus non-null : bassins miniers/sidérurgiques (Nord, Lorraine),
