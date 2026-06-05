@@ -185,6 +185,10 @@ export type MatchResult = {
   // worst < 50, sinon retrait relatif au groupe affiché, sinon « sans faiblesse
   // marquée ». Finalisé après assemblage (assignCompromis). cf. spec.
   compromis: string;
+  // Découverte (NARRATIF, hors score/tri) : une force POSITIVE sur une dimension
+  // NON demandée (« tiens, je n'y avais pas pensé »). null si rien de saillant.
+  // Finalisée après assemblage (assignDecouverte). cf. spec (2e force).
+  decouverte: string | null;
   // Évolution démographique (NARRATIF, hors score/tri). Récit plus riche que la reason :
   // distingue « gagne et attire », « gagne sans renouvellement », « stable mais renouvellement »,
   // « perd ». Surfacé en synthèse UNIQUEMENT si croissance_demographique est demandée (même
@@ -636,11 +640,47 @@ function buildIdentite(c: IndexCommune): string {
   if (domKey === "vie_locale" && (taille === "petite" || taille === "moyenne")) {
     return "Pour une petite ville qui reste vraiment vivante.";
   }
-  if (taille === "grande" || taille === "metropole") {
+  // « Grande ville » : gaté sur la population de la COMMUNE elle-même (pas l'UU),
+  // sinon un village dans une grande agglo serait mal étiqueté (Espelette).
+  if ((taille === "grande" || taille === "metropole") && c.population != null && c.population >= 50000) {
     return "Pour la vie d'une grande ville et tous ses services.";
+  }
+  if ((domKey === "nature" || domKey === "proximite_mer") && (taille === "village" || taille === "petite")) {
+    return "Pour un cadre préservé, au plus près de la nature.";
   }
   // Repli neutre, sobre, adossé à la dominante.
   return "Pour un bon équilibre entre cadre de vie et services.";
+}
+
+// ── Découverte : 2e force POSITIVE sur une dimension non demandée ─────────────
+// Effet « conseiller » : surfacer un atout réel auquel l'utilisateur n'a pas pensé.
+// Top subScore parmi un ensemble curé NON demandé, seuil de saillance (>=66), phrasé
+// via reasonText (donc toujours positif). null si rien ne se détache. Hors score/tri.
+// On écarte acces_services/acces_soins : trop génériques (presque partout hauts),
+// ils écrasent la découverte et ne « surprennent » pas. On garde les dimensions
+// distinctives et évocatrices.
+const DECOUVERTE_KEYS: PreferenceKey[] = [
+  "proximite_mer", "nature", "vie_locale", "vie_etudiante", "acces_transports",
+  "mobilite_quotidienne", "calme_sonore", "faible_chaleur", "douceur_climat",
+  "croissance_demographique", "air_sain",
+];
+function assignDecouverte(
+  shownPicks: MatchResult[],
+  byInsee: Map<string, IndexCommune>,
+  requestedKeys: Set<PreferenceKey>,
+): void {
+  for (const r of shownPicks) {
+    const c = byInsee.get(r.insee);
+    if (!c) { r.decouverte = null; continue; }
+    let bestKey: PreferenceKey | null = null;
+    let bestScore = 65; // seuil de saillance (band haute)
+    for (const k of DECOUVERTE_KEYS) {
+      if (requestedKeys.has(k)) continue; // non demandée seulement
+      const s = subScore(k, c);
+      if (s != null && s > bestScore) { bestScore = s; bestKey = k; }
+    }
+    r.decouverte = bestKey ? reasonText(bestKey, c) : null;
+  }
 }
 
 function normalizeName(s: string): string {
@@ -1527,6 +1567,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
         identite: buildIdentite(c),
         tradeoff,
         compromis: "", // finalisé après assemblage (assignCompromis)
+        decouverte: null, // finalisé après assemblage (assignDecouverte)
         // Narratif, hors score : note de pression climatique sur l'économie (ou null).
         pressionEco: c.pression_eco
           ? { palier: c.pression_eco.palier, note: pressionEcoNote(c.pression_eco) }
@@ -1684,6 +1725,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   );
   assignSignaux(shownPicks, byInsee, requestedKeys);
   assignCompromis(shownPicks, byInsee);
+  assignDecouverte(shownPicks, byInsee, requestedKeys);
 
   return {
     perfectMatch: perfect,
