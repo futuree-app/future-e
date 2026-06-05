@@ -145,6 +145,11 @@ const TOOL_INPUT_SCHEMA = {
       description:
         "true UNIQUEMENT si le projet est explicitement hors-emploi (retraite, télétravail total / 100 % à distance, sans activité, rentier). Supprime le plancher de viabilité du bassin d'emploi (on ne pénalise jamais un tel projet). Ne pas mettre true si l'emploi compte, ni par défaut.",
     },
+    heritageIntent: {
+      type: "boolean",
+      description:
+        "true UNIQUEMENT si l'utilisateur exprime un intérêt pour le passé industriel / la pollution historique des sols (anciens sites industriels, sols pollués, anciennes usines, terrain pollué, héritage industriel, pollution historique). C'est un signal narratif NON scoré : ne créez AUCUNE préférence (ni faible_exposition_industrielle, qui ne couvre QUE l'industrie EN ACTIVITÉ).",
+    },
   },
   required: ["reformulation", "hardConstraints", "preferences"],
 };
@@ -250,6 +255,7 @@ HORS-MESURE (notions sans critère dans le moteur) : remplissez horsMesure, ne f
   • Dites toujours "accès à une offre culturelle", JAMAIS "vie culturelle", dans la reformulation.
 - "authentique", "chaleureux", "accueillant", "convivial", "esprit de village", "du caractère", "de l'âme", "qui bouge", "vivante" → { term, kind: "affectif" }.
 - Ne remplissez horsMesure QUE si la notion est réellement exprimée ; ces notions n'ajoutent AUCUNE préférence. La nature, le calme, les services et les soins SONT mesurés : ne les mettez jamais en horsMesure.
+- HÉRITAGE INDUSTRIEL. Si la demande évoque "sols pollués", "terrain pollué", "ancienne usine", "anciens sites industriels", "passé industriel", "héritage industriel", "pollution historique" → heritageIntent:true. C'est un signal narratif NON scoré : n'ajoutez AUCUNE préférence (surtout PAS faible_exposition_industrielle, qui ne couvre QUE l'industrie EN ACTIVITÉ : Seveso/ICPE actifs, pas le passé pollué). Distinguez bien "près d'usines / zones industrielles" (industrie active → faible_exposition_industrielle) de "ancien site pollué / passé industriel" (héritage → heritageIntent).
 
 Dans la reformulation, restez en langage humain (ex. « un environnement peu marqué par l'agriculture intensive »), n'employez jamais les termes "IFT", "pression agricole" ni "exposition aux pesticides".`;
 

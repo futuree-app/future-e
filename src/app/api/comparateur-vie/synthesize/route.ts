@@ -242,13 +242,21 @@ en LANGAGE CLAIR : la commune est exposée à l'ÉROSION du littoral (la côte y
 N'employez JAMAIS le jargon "inscrite au titre du recul du trait de côte" et ne citez
 pas la loi : parlez simplement d'érosion côtière, sobrement, jamais comme une alarme,
 sans "menace" ni commune "condamnée", sans vitesse ni chiffre. Si le champ est absent
+ou nul, n'en parlez pas.
+
+Si un champ "heritage_industriel" est fourni pour un territoire, vous pouvez le reprendre
+UNE fois TEL QUEL : c'est un signal DOCUMENTAIRE au passé (ex. « une ancienne usine à gaz
+est recensée à proximité »). N'ajoutez JAMAIS "pollué", "toxique", "dangereux", "risque",
+ni aucun chiffre ; ne dramatisez pas. Ne le confondez PAS avec l'exposition industrielle
+active (sites en activité) : ici c'est l'HÉRITAGE (un ancien site). Si le champ est absent
 ou nul, n'en parlez pas.`;
 
 type Body = {
   project?: string;
   reformulation?: string;
   preferences?: { key: string; weight: number }[];
-  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null; climatInondation?: string | null; demographie?: string | null; calmeSonore?: string | null; expoIndustrielle?: string | null }[];
+  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null; climatInondation?: string | null; demographie?: string | null; calmeSonore?: string | null; expoIndustrielle?: string | null; heritageIndustriel?: string | null }[];
+  heritageIntent?: boolean; // intention héritage industriel exprimée (gate du récit, non scoré)
   outcome?: { perfectMatch?: boolean; message?: string | null };
   perimetre?: string[]; // ancres dures = cadre choisi (tous les territoires y sont)
   orientation?: string[]; // ancres souples = penchant (résultats inclinés, sans s'y limiter)
@@ -285,6 +293,9 @@ export async function POST(request: NextRequest) {
   // Même frontière pour l'exposition industrielle : on ne nomme un site industriel que si
   // l'utilisateur a activé le critère (jamais un trait subi).
   const expoIndustrielleDemandee = (body.preferences ?? []).some((p) => p.key === "faible_exposition_industrielle");
+  // Héritage industriel : NON scoré, pas un critère -> on lit le flag d'intention (heritageIntent),
+  // jamais preferences. On ne nomme un ancien site QUE si l'utilisateur a exprimé l'intention.
+  const heritageDemande = body.heritageIntent === true;
 
   const perimetre = Array.isArray(body.perimetre) ? body.perimetre.filter((s) => typeof s === "string" && s) : [];
   const orientation = Array.isArray(body.orientation) ? body.orientation.filter((s) => typeof s === "string" && s) : [];
@@ -308,6 +319,7 @@ export async function POST(request: NextRequest) {
       evolution_demographique: croissanceDemandee ? (r.demographie ?? null) : null,
       calme_sonore: calmeSonoreDemande ? (r.calmeSonore ?? null) : null,
       exposition_industrielle: expoIndustrielleDemandee ? (r.expoIndustrielle ?? null) : null,
+      heritage_industriel: heritageDemande ? (r.heritageIndustriel ?? null) : null,
       logement: r.logement ?? null,
       littoral: r.littoral ?? null,
       trait_distinctif: r.distinctive ?? null,

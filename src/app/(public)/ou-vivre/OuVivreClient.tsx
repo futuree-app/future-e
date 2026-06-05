@@ -190,6 +190,7 @@ export function OuVivreClient() {
             project,
             reformulation: p.reformulation,
             preferences: p.preferences,
+            heritageIntent: p.heritageIntent ?? false, // intention héritage (gate du récit héritage en synthèse)
             results: top.map((r) => ({
               nom: r.nom,
               region: r.region,
@@ -203,6 +204,7 @@ export function OuVivreClient() {
               demographie: r.demographie, // récit démographique, gaté côté route par croissance demandée
               calmeSonore: r.calmeSonore, // récit calme sonore (source bruyante proche), gaté côté route par calme_sonore demandé
               expoIndustrielle: r.expoIndustrielle, // récit sites industriels, gaté côté route par critère demandé
+              heritageIndustriel: r.heritageIndustriel, // récit héritage industriel, gaté côté route par heritageIntent
             })),
             outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message },
             perimetre: outcomeMeta.perimetre ?? [],
@@ -462,6 +464,7 @@ export function OuVivreClient() {
               littoral: r.littoral, // narratif littoral (recul du trait de côte), firewall préservé
               distinctive: r.distinctive, // trait distinctif relatif au groupe (narratif, hors-score), firewall préservé
               signaux: r.signaux, // signaux ambiants qualitatifs (hors-score), firewall préservé
+              heritage_industriel: r.heritageIndustriel ?? null, // récit héritage (narratif, hors-score), firewall préservé
             })),
           },
           focus: null,

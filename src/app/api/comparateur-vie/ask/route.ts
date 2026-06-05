@@ -50,6 +50,7 @@ type Territoire = {
   littoral?: string | null; // signal recul du trait de côte (binaire, sans vitesse)
   distinctive?: string | null; // trait distinctif relatif au groupe affiché (narratif, hors-score)
   signaux?: Record<string, string>; // signaux ambiants qualitatifs (hors-score, hors critères)
+  heritage_industriel?: string | null; // ancien site SSP/ex-BASOL proche (narratif documentaire, hors-score)
 };
 
 type Body = {
@@ -193,6 +194,14 @@ absolu (« la plus proche de la montagne », jamais « meilleure grâce à ») n
 classement ; un trait peut porter sur une dimension non demandée ; n'inventez aucun trait, n'en
 faites pas un nouveau classement. Ne le déroulez pas à chaque réponse.
 
+SI UN CHAMP "heritage_industriel" EST DONNÉ POUR UN TERRITOIRE
+C'est un ancien site industriel recensé à proximité, formulé au PASSÉ et de façon DOCUMENTAIRE
+(ex. « une ancienne usine à gaz est recensée à proximité »). N'en parlez QUE si la question porte
+sur le passé industriel, les sols pollués, les anciennes usines ou l'histoire du lieu. Reprenez le
+contenu TEL QUEL, SANS ajouter « pollué », « toxique », « dangereux », « risque » ni aucun chiffre,
+et NE le confondez PAS avec l'exposition industrielle active (sites en activité). Absent ou nul :
+n'en parlez pas.
+
 SI UN SIGNAL "climat_inondation" EST DONNÉ POUR UN TERRITOIRE
 C'est une nuance COMPLÉMENTAIRE : la tendance climatique des pluies extrêmes éclaire
 l'historique d'inondation observé, sans jamais le remplacer ni prédire une inondation.
@@ -245,6 +254,7 @@ function buildContextBlock(ctx: NonNullable<Body["context"]>, focusRang: number 
     littoral: t.littoral ?? null,
     trait_distinctif: t.distinctive ?? null,
     signaux: t.signaux ?? {},
+    heritage_industriel: t.heritage_industriel ?? null,
   }));
 
   const payload = {

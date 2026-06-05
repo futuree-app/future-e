@@ -138,6 +138,10 @@ export type ParsedProject = {
   // Projet hors-emploi (retraite, télétravail total, sans activité) : supprime la
   // baseline de viabilité du bassin d'emploi (ne jamais pénaliser un tel projet).
   emploiHorsSujet?: boolean;
+  // Intention « héritage industriel / sols pollués » exprimée par l'utilisateur. Booléen pur
+  // (PAS une préférence pesée, PAS un PREFERENCE_KEY). Gate le récit heritageIndustriel en synthèse,
+  // comme l'intention littorale gate le récit littoral. cf. parse/route.ts.
+  heritageIntent?: boolean;
   // Notions exprimées par l'utilisateur SANS critère dans le moteur (écoles, vie
   // culturelle, caractère affectif). Pur affichage honnête au gate, aucun impact
   // sur le score. cf. plan 2026-06-03 (constat QA : ces notions étaient avalées en silence).
@@ -204,6 +208,11 @@ export type MatchResult = {
   // (Seveso) / « d'un site industriel » (IED/industrie). Gaté en synthèse par « critère demandé ».
   // null = silence (aucun site préoccupant proche). cf. expoIndustrielleRecit.
   expoIndustrielle: string | null;
+  // Héritage industriel (NARRATIF, hors score/tri). Nomme au passé l'ancien site SSP/ex-BASOL le
+  // plus proche identifiable (« une ancienne usine à gaz est recensée à proximité »), SANS
+  // « pollué/risque » ni chiffre (état/substances = rapport). Gaté en synthèse par l'intention
+  // héritage exprimée (comme calmeSonore par son critère). null = silence. cf. heritageRecit.
+  heritageIndustriel: string | null;
   // Signaux ambiants (NARRATIF, hors score, hors tri) : 0 à 5 phrases qualitatives
   // descriptives par territoire (bande nationale, filtrées par contraste de groupe),
   // pour qu'AskFuture réponde aux « et côté X ? » hors critères. clé dimension lisible
@@ -405,6 +414,14 @@ type IndexCommune = {
   expoIndustrielle?: {
     score: number;
     sourceDominante: "seveso_haut" | "seveso_bas" | "ied" | "industrie" | null;
+  } | null;
+  // Héritage industriel (cf. scripts/populate-heritage-industriel.py). Signal NARRATIF, NON scoré.
+  // Site SSP/ex-BASOL (couche `instructions`) IDENTIFIABLE le plus proche du chef-lieu. null =
+  // aucun dans le rayon. activite = catégorie grand public (repli "generique"). distanceKm INTERNE.
+  heritageIndustriel?: {
+    activite: "usine_gaz" | "raffinerie_hydrocarbures" | "chimie" | "metallurgie" | "decharge" | "generique";
+    plusieurs: boolean;
+    distanceKm: number;
   } | null;
 };
 type IndexFile = { meta: unknown; communes: IndexCommune[] };
@@ -943,6 +960,35 @@ function expoIndustrielleRecit(c: IndexCommune): string | null {
   return (src === "seveso_haut" || src === "seveso_bas")
     ? "la proximité d'un site industriel à risque majeur"
     : "la proximité d'un site industriel";
+}
+
+// ── Héritage industriel (récit narratif, gaté, hors score) ───────────────────
+// Label grand public + genre par catégorie. Le récit reste DOCUMENTAIRE et au passé
+// (« ancienne … recensée »), JAMAIS « pollué/risque/toxique » (réservés au rapport). cf. spec §4.
+const HERITAGE_LABEL: Record<
+  NonNullable<IndexCommune["heritageIndustriel"]>["activite"],
+  { mot: string; genre: "m" | "f" }
+> = {
+  usine_gaz: { mot: "ancienne usine à gaz", genre: "f" },
+  raffinerie_hydrocarbures: { mot: "ancien dépôt d'hydrocarbures", genre: "m" },
+  chimie: { mot: "ancien site chimique", genre: "m" },
+  metallurgie: { mot: "ancienne fonderie", genre: "f" },
+  decharge: { mot: "ancienne décharge", genre: "f" },
+  generique: { mot: "ancien site industriel", genre: "m" },
+};
+function heritageRecit(c: IndexCommune): string | null {
+  const h = c.heritageIndustriel;
+  if (!h) return null;
+  const { mot, genre } = HERITAGE_LABEL[h.activite];
+  const art = genre === "f" ? "Une" : "Un";
+  const rec = genre === "f" ? "recensée" : "recensé";
+  if (h.plusieurs) {
+    if (h.activite === "generique") {
+      return "Plusieurs anciens sites industriels sont recensés à proximité.";
+    }
+    return `${art} ${mot}, parmi d'autres anciens sites industriels, est ${rec} à proximité.`;
+  }
+  return `${art} ${mot} est ${rec} à proximité.`;
 }
 const SIGNAUX_MAX = 5;
 
@@ -1700,6 +1746,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
         calmeSonore: calmeSonoreRecit(c),
         // Exposition industrielle : récit construit ici, gaté côté synthèse par « critère demandé ».
         expoIndustrielle: expoIndustrielleRecit(c),
+        heritageIndustriel: heritageRecit(c),
         signaux: {}, // rempli après l'assemblage final sur le groupe affiché (cf. assignSignaux)
         metrics: {
           distance_cote_km: c.distance_cote_km,
