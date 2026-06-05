@@ -177,6 +177,14 @@ export type MatchResult = {
   // espaces naturels des trois »). Palette hiérarchisée (P1 projet de vie > P2 climat/
   // taille). Narratif, hors score, hors tri. null si rien ne se détache. cf. buildDistinctive.
   distinctive: string | null;
+  // Identité « promesse de vie » (NARRATIF, hors score/tri). Déterministe par
+  // archétype (taille UU × contexte × dominante). Raconte la décision, pas la
+  // géographie. cf. buildIdentite.
+  identite: string;
+  // Compromis TOUJOURS présent (NARRATIF, hors score/tri). tradeoff absolu si
+  // worst < 50, sinon retrait relatif au groupe affiché, sinon « sans faiblesse
+  // marquée ». Finalisé après assemblage (assignCompromis). cf. spec.
+  compromis: string;
   // Évolution démographique (NARRATIF, hors score/tri). Récit plus riche que la reason :
   // distingue « gagne et attire », « gagne sans renouvellement », « stable mais renouvellement »,
   // « perd ». Surfacé en synthèse UNIQUEMENT si croissance_demographique est demandée (même
@@ -569,6 +577,72 @@ function buildSignature(c: IndexCommune): string[] {
   return sig.slice(0, 3);
 }
 
+// ── Identité « promesse de vie » (narratif, hors score) ──────────────────────
+// Déterministe : archétype (taille × contexte × dominante) → promesse « Pour… ».
+// Raconte la décision, pas la fiche. 100 % adossé aux signaux mesurés.
+function tailleLabel(pop: number | null): "village" | "petite" | "moyenne" | "grande" | "metropole" {
+  if (pop == null) return "petite";
+  if (pop < 2000) return "village";
+  if (pop < 25000) return "petite";
+  if (pop < 100000) return "moyenne";
+  if (pop < 500000) return "grande";
+  return "metropole";
+}
+
+function buildIdentite(c: IndexCommune): string {
+  const uuPop = tailleVille(c);
+  const taille = tailleLabel(uuPop);
+  const coastal = c.distance_cote_km != null && c.distance_cote_km <= 15;
+  const altitude = c.altitude ?? 0;
+  const relief = c.relief_proximite ?? 0;
+  const periurbain =
+    c.population != null && uuPop != null && uuPop >= 100000 && c.population < 25000;
+
+  // Dominante : plus haut subScore parmi un ensemble curé de traits de caractère.
+  const CHAR_KEYS: PreferenceKey[] = [
+    "vie_locale", "vie_etudiante", "cadre_calme", "calme_sonore", "nature",
+    "acces_services", "acces_soins", "croissance_demographique",
+    "faible_chaleur", "proximite_mer",
+  ];
+  let domKey: PreferenceKey | null = null;
+  let domScore = -1;
+  for (const k of CHAR_KEYS) {
+    const s = subScore(k, c);
+    if (s != null && s > domScore) { domScore = s; domKey = k; }
+  }
+
+  // Mapping archétype → promesse (table de départ, calibrée par sonde).
+  if (periurbain && (domKey === "acces_services" || domKey === "vie_locale")) {
+    return "Pour rester proche d'une grande ville sans en vivre le centre.";
+  }
+  if (coastal && (domKey === "proximite_mer" || domKey === "cadre_calme" || domKey === "calme_sonore")) {
+    return "Pour un quotidien tourné vers la mer, à un rythme plus posé.";
+  }
+  if (coastal && domKey === "acces_services" && (taille === "moyenne" || taille === "grande")) {
+    return "Pour la vie au bord de l'eau avec les services d'une vraie ville.";
+  }
+  if (domKey === "faible_chaleur" && (altitude >= 400 || relief >= 50)) {
+    return "Pour chercher davantage de fraîcheur et un rythme plus posé.";
+  }
+  if (domKey === "vie_etudiante") {
+    return "Pour une ville étudiante à taille humaine.";
+  }
+  if (domKey === "croissance_demographique") {
+    return "Pour s'installer dans un territoire qui monte.";
+  }
+  if ((domKey === "nature" || domKey === "cadre_calme" || domKey === "calme_sonore") && (taille === "village" || taille === "petite")) {
+    return "Pour un cadre préservé, loin de l'agitation.";
+  }
+  if (domKey === "vie_locale" && (taille === "petite" || taille === "moyenne")) {
+    return "Pour une petite ville qui reste vraiment vivante.";
+  }
+  if (taille === "grande" || taille === "metropole") {
+    return "Pour la vie d'une grande ville et tous ses services.";
+  }
+  // Repli neutre, sobre, adossé à la dominante.
+  return "Pour un bon équilibre entre cadre de vie et services.";
+}
+
 function normalizeName(s: string): string {
   return s
     .normalize("NFD")
@@ -819,6 +893,65 @@ const SIGNAUX_MAX = 5;
 
 function bandIndex(score: number): 0 | 1 | 2 {
   return score >= 66 ? 0 : score < 34 ? 2 : 1;
+}
+
+// ── Compromis toujours présent (narratif, hors score) ────────────────────────
+// tradeoff absolu (worst < 50, déjà dans r.tradeoff) sinon le retrait le plus net
+// RELATIF au groupe affiché, sinon « sans faiblesse marquée ». Jamais de chiffre,
+// jamais nommer un perdant (« que dans les autres options »).
+const COMPROMIS_KEYS: PreferenceKey[] = [
+  "faible_chaleur", "faible_secheresse", "faible_risque_inondation", "air_sain",
+  "acces_soins", "acces_services", "calme_sonore", "faible_exposition_industrielle",
+  "vie_locale", "faible_dependance_auto",
+];
+const COMPROMIS_NEG: Partial<Record<PreferenceKey, string>> = {
+  faible_chaleur: "la chaleur estivale est plus marquée",
+  faible_secheresse: "la sécheresse est plus présente",
+  faible_risque_inondation: "le risque d'inondation est plus présent",
+  air_sain: "l'air de fond est un peu moins pur",
+  acces_soins: "l'offre de soins est plus limitée",
+  acces_services: "les services sont moins accessibles",
+  calme_sonore: "l'environnement sonore est plus exposé",
+  faible_exposition_industrielle: "les sites industriels sont plus présents",
+  vie_locale: "la vie locale est plus discrète",
+  faible_dependance_auto: "la voiture y est plus indispensable",
+};
+
+function assignCompromis(shownPicks: MatchResult[], byInsee: Map<string, IndexCommune>): void {
+  // Scores de groupe par clé (moyenne sur les communes affichées).
+  const groupMean = new Map<PreferenceKey, number>();
+  for (const k of COMPROMIS_KEYS) {
+    const vals: number[] = [];
+    for (const r of shownPicks) {
+      const c = byInsee.get(r.insee);
+      const s = c ? subScore(k, c) : null;
+      if (s != null) vals.push(s);
+    }
+    if (vals.length) groupMean.set(k, vals.reduce((a, b) => a + b, 0) / vals.length);
+  }
+  for (const r of shownPicks) {
+    if (r.tradeoff) {
+      r.compromis = `En échange, ${r.tradeoff}.`;
+      continue;
+    }
+    const c = byInsee.get(r.insee);
+    let worstKey: PreferenceKey | null = null;
+    let worstDelta = 0;
+    if (c) {
+      for (const k of COMPROMIS_KEYS) {
+        const s = subScore(k, c);
+        const mean = groupMean.get(k);
+        if (s == null || mean == null || !COMPROMIS_NEG[k]) continue;
+        const delta = mean - s; // positif = en retrait du groupe
+        if (delta > worstDelta) { worstDelta = delta; worstKey = k; }
+      }
+    }
+    if (worstKey && worstDelta >= 12) {
+      r.compromis = `En échange, ${COMPROMIS_NEG[worstKey]} que dans les autres options.`;
+    } else {
+      r.compromis = "Le bon compromis des trois, sans faiblesse marquée.";
+    }
+  }
 }
 
 // Calcule les signaux ambiants sur le GROUPE affiché (mutation in place de r.signaux).
@@ -1391,7 +1524,9 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
         compatibility,
         reasons,
         signature: buildSignature(c),
+        identite: buildIdentite(c),
         tradeoff,
+        compromis: "", // finalisé après assemblage (assignCompromis)
         // Narratif, hors score : note de pression climatique sur l'économie (ou null).
         pressionEco: c.pression_eco
           ? { palier: c.pression_eco.palier, note: pressionEcoNote(c.pression_eco) }
@@ -1548,6 +1683,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     parsed.preferences.filter((p) => PREFERENCE_KEYS.includes(p.key)).map((p) => p.key),
   );
   assignSignaux(shownPicks, byInsee, requestedKeys);
+  assignCompromis(shownPicks, byInsee);
 
   return {
     perfectMatch: perfect,
