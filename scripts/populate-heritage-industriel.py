@@ -94,6 +94,15 @@ def selftest():
     assert centroid({"type": "Point", "coordinates": [-1.15, 46.16]}) == (46.16, -1.15)
     assert centroid(None) is None
     assert round(hav_km(46.16, -1.15, 46.16, -1.15), 3) == 0.0
+    # commune_heritage : un site NOMMÉ un peu plus loin prime sur un générique très proche.
+    c0 = {"lat": 46.0, "lon": 2.0}
+    def _site(nom, dkm):
+        return {"nom": nom, "lat": 46.0 + dkm / 111.0, "lon": 2.0}
+    r = commune_heritage(c0, [_site("ZONE INDUS", 0.4), _site("Usine a Gaz de X", 1.6)], 3.0)
+    assert r["activite"] == "usine_gaz" and r["plusieurs"], r
+    r = commune_heritage(c0, [_site("ZONE INDUS", 0.4)], 3.0)
+    assert r["activite"] == "generique" and not r["plusieurs"], r
+    assert commune_heritage(c0, [_site("Usine a Gaz", 4.0)], 3.0) is None
     print("✓ selftest OK", file=sys.stderr)
 
 
@@ -157,18 +166,23 @@ def fetch_all(refresh=False):
 
 # ── Calcul par commune ─────────────────────────────────────────────────────────
 def commune_heritage(c, sites, rayon_km):
-    """{activite, plusieurs, distanceKm} pour une commune, ou None si aucun site dans rayon_km."""
+    """{activite, plusieurs, distanceKm} pour une commune, ou None si aucun site dans rayon_km.
+
+    Choix du site NOMMÉ : on privilégie le site IDENTIFIABLE (catégorie ≠ generique) le plus
+    proche s'il en existe un dans le rayon, sinon le générique le plus proche. Le récit vaut par
+    son crochet (« une ancienne usine à gaz »), pas par le site banal qui se trouve être 30 m plus
+    près. plusieurs = il y a d'autres anciens sites autour (≥ 2 au total dans le rayon)."""
     near = []
     for s in sites:
         d = hav_km(c["lat"], c["lon"], s["lat"], s["lon"])
         if d <= rayon_km:
-            near.append((d, s))
+            near.append((d, activite_of(s["nom"])))
     if not near:
         return None
     near.sort(key=lambda x: x[0])
-    d, s = near[0]
-    return {"activite": activite_of(s["nom"]), "plusieurs": len(near) >= 2,
-            "distanceKm": round(d, 2)}
+    named = [x for x in near if x[1] != "generique"]
+    d, act = named[0] if named else near[0]
+    return {"activite": act, "plusieurs": len(near) >= 2, "distanceKm": round(d, 2)}
 
 
 def load_communes():
@@ -183,7 +197,7 @@ TEMOINS = {
     "17300": "La Rochelle (Marcel-Paul, usine a gaz — OBLIGATOIRE non-null)",
     "59350": "Lille (bassin industriel ancien)",
     "57463": "Metz (Lorraine siderurgique)",
-    "69123": "Lyon (vallee de la chimie proche)",
+    "71153": "Le Creusot (bassin siderurgique Schneider)",
     "48095": "Mende (rural, attendu null)",
     "15014": "Aurillac (rural, attendu null)",
 }
