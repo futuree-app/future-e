@@ -105,7 +105,7 @@ Mapping des 28 clés de préférence vers 27 dimensions (la taille de ville fusi
 | **Nature & cadre** | Espaces naturels (`nature`), Mer (`proximite_mer`), Cadre calme (`cadre_calme`) |
 | **Mobilité** | Sans voiture (`faible_dependance_auto`), Train / gares (`acces_transports`), TC du quotidien (`mobilite_quotidienne`) |
 | **Services & proximité** | Soins (`acces_soins`), Services (`acces_services`), Collèges / lycées (`acces_ecoles`), Culture (`acces_culture`), Isolement (`eviter_isolement`) |
-| **Vitalité & dynamiques** | Emploi (`viabilite_emploi`), Vie locale (`vie_locale`), Vie étudiante (`vie_etudiante`), Démographie (`croissance_demographique`), Taille de ville (`eviter_grandes_villes` / `prefere_grande_ville`) |
+| **Vitalité & dynamique** | Emploi (`viabilite_emploi`), Vie locale (`vie_locale`), Vie étudiante (`vie_etudiante`), Démographie (`croissance_demographique`), Taille de ville (`eviter_grandes_villes` / `prefere_grande_ville`) |
 
 Décompte : 3 + 4 + 4 + 3 + 3 + 5 + 5 = 27. L'ordre des thèmes ET des dimensions est
 **stable**, jamais réordonné selon le trio (la carte mentale ne doit pas bouger).
@@ -233,8 +233,6 @@ dans la comparaison. Ils peuvent informer la sélection du chapeau, sans s'affic
   travail éditorial, à valider par le porteur sur quelques dimensions témoins).
 - Seuil d'égalité (réutiliser `COMPROMIS_GAP` = 12 ou calibrer un seuil propre).
 - Dimension « Taille de ville » : formulation de l'avantage non directionnel.
-- Nom définitif du thème 7 : « Vitalité & dynamiques » (recommandé) ou « Dynamique du
-  territoire ».
 - Sonde de calibrage sur trios réels (à l'image de `sonde-comparateur-3.mjs`) : vérifier
   que les paliers absolus, avantages et synthèses tiennent sur des trios contrastés ET
   homogènes.
