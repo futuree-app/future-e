@@ -76,7 +76,7 @@ export function CompareView({ results, onBack, onExploreReport, onPackDecision }
               onClick={() => onExploreReport(r, i + 1)}
               className="mt-5 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-white/[0.14] hover:border-white/[0.28] text-[13px] text-label transition-colors"
             >
-              Débloquer le rapport de {r.nom}
+              Explorer cette option
               <span aria-hidden>→</span>
             </button>
           </div>

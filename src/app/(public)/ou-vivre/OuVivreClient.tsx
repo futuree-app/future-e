@@ -977,14 +977,10 @@ export function OuVivreClient() {
                     </p>
                   )}
 
-                  {/* Trait distinctif relatif aux communes affichées : ce qui la
-                      démarque des autres propositions (narratif, hors score). Léger. */}
-                  {r.distinctive && (
-                    <p className="mt-1.5 text-[11.5px] leading-snug text-accent/75 italic">
-                      {r.distinctive.charAt(0).toUpperCase() + r.distinctive.slice(1)}.
-                    </p>
-                  )}
-
+                  {/* Trait distinctif (ce qui démarque la commune des autres) : volontairement
+                      ABSENT de cette liste. Démarquer les trois territoires les uns des autres
+                      est le rôle du comparateur (CompareView), pas de la première vue. Le champ
+                      r.distinctive reste calculé côté moteur (réservé synthèse/AskFuture). */}
                   {r.reasons.length > 0 && (
                     <ul className="mt-4 flex flex-col gap-1.5">
                       {r.reasons.map((reason) => (

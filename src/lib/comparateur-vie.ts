@@ -593,7 +593,11 @@ function tailleLabel(pop: number | null): "village" | "petite" | "moyenne" | "gr
   return "metropole";
 }
 
-function buildIdentite(c: IndexCommune): string {
+// Candidats d'identité, ordonnés du plus distinctif au plus générique. On en
+// renvoie PLUSIEURS pour que la passe de groupe (assignIdentite) puisse départager
+// deux communes au profil proche (deux côtières, deux montagnes) sans répéter la
+// même promesse dans un trio. Le dernier candidat (neutre) est toujours présent.
+function buildIdentiteCandidates(c: IndexCommune): string[] {
   const uuPop = tailleVille(c);
   const taille = tailleLabel(uuPop);
   const coastal = c.distance_cote_km != null && c.distance_cote_km <= 15;
@@ -613,71 +617,54 @@ function buildIdentite(c: IndexCommune): string {
   const frais = (subScore("faible_chaleur", c) ?? 0) >= 60;
   const doux = (subScore("douceur_climat", c) ?? 0) >= 65;
   const vieLocaleForte = (subScore("vie_locale", c) ?? 0) >= 60;
+  const natureForte = (subScore("nature", c) ?? 0) >= 60;
+  const calmeForte = Math.max(subScore("cadre_calme", c) ?? 0, subScore("calme_sonore", c) ?? 0) >= 62;
+  const etudianteForte = (subScore("vie_etudiante", c) ?? 0) >= 55;
+  const croissanceForte = (subScore("croissance_demographique", c) ?? 0) >= 62;
+  const petit = taille === "village" || taille === "petite";
 
-  // Dominante : plus haut subScore parmi un ensemble curé de traits de caractère.
-  const CHAR_KEYS: PreferenceKey[] = [
-    "vie_locale", "vie_etudiante", "cadre_calme", "calme_sonore", "nature",
-    "acces_services", "croissance_demographique", "proximite_mer",
-  ];
-  let domKey: PreferenceKey | null = null;
-  let domScore = -1;
-  for (const k of CHAR_KEYS) {
-    const s = subScore(k, c);
-    if (s != null && s > domScore) { domScore = s; domKey = k; }
-  }
+  const out: string[] = [];
+  const push = (s: string) => { if (!out.includes(s)) out.push(s); };
 
-  // Cascade du plus distinctif au plus générique. Le repli neutre ne sert qu'en
-  // tout dernier recours : chaque lieu doit raconter une histoire singulière.
-  if (montagne) {
-    if (vieLocaleForte) return "Pour vivre en montagne dans une commune qui reste animée.";
-    return frais
-      ? "Pour vivre en montagne, dans un climat plus supportable l'été."
-      : "Pour vivre en montagne, au grand air.";
+  // Axe géographique majeur (le plus identitaire) en premier.
+  if (montagne && vieLocaleForte) push("Pour vivre en montagne dans une commune qui reste animée.");
+  if (montagne && frais) push("Pour vivre en montagne, dans un climat plus supportable l'été.");
+  if (montagne) push("Pour vivre en montagne, au grand air.");
+  if (coastal && med) push("Pour un quotidien méditerranéen, les pieds près de l'eau.");
+  if (coastal && grandeVille) push("Pour la vie au bord de l'eau avec les services d'une vraie ville.");
+  if (coastal) push("Pour un quotidien tourné vers la mer, à un rythme plus posé.");
+  if (periurbain) push("Pour vivre aux portes d'une grande ville, sans en habiter le centre.");
+  // Climat.
+  if (frais && sudOuest) push("Pour rester dans le Sud-Ouest sans subir les plus fortes chaleurs.");
+  if (frais && sud) push("Pour rester dans le Sud sans subir les plus fortes chaleurs.");
+  if (frais) push("Pour chercher davantage de fraîcheur et un rythme plus posé.");
+  if (doux) push("Pour un climat doux une bonne partie de l'année.");
+  // Traits de caractère (départagent deux communes de même géographie).
+  if (etudianteForte) push("Pour une ville étudiante à taille humaine.");
+  if (croissanceForte) push("Pour s'installer dans un territoire qui attire.");
+  if (vieLocaleForte && (taille === "petite" || taille === "moyenne")) push("Pour une petite ville qui reste vraiment vivante.");
+  if ((natureForte || calmeForte) && petit) push("Pour un cadre rural préservé, loin de l'agitation.");
+  if (calmeForte) push("Pour un quotidien au calme, loin de l'agitation.");
+  if (natureForte) push("Pour vivre au plus près de la nature.");
+  if (grandeVille) push("Pour la vie d'une grande ville et tous ses services.");
+  if (petit) push("Pour la tranquillité d'une commune à taille humaine.");
+  // Repli neutre, toujours disponible en dernier recours.
+  push("Pour un cadre de vie équilibré, sans excès.");
+  return out;
+}
+
+// Identité unique DANS le groupe affiché : chaque commune prend, dans l'ordre
+// d'affichage, son meilleur candidat non encore pris par une autre du trio. Les
+// raisons et compromis peuvent se répéter (logique), pas l'identité (choix porteur).
+function assignIdentite(shownPicks: MatchResult[], byInsee: Map<string, IndexCommune>): void {
+  const used = new Set<string>();
+  for (const r of shownPicks) {
+    const c = byInsee.get(r.insee);
+    const cands = c ? buildIdentiteCandidates(c) : ["Pour un cadre de vie équilibré, sans excès."];
+    const chosen = cands.find((x) => !used.has(x)) ?? cands[cands.length - 1];
+    used.add(chosen);
+    r.identite = chosen;
   }
-  if (coastal && med) {
-    return "Pour un quotidien méditerranéen, les pieds près de l'eau.";
-  }
-  if (coastal && grandeVille) {
-    return "Pour la vie au bord de l'eau avec les services d'une vraie ville.";
-  }
-  if (coastal) {
-    return "Pour un quotidien tourné vers la mer, à un rythme plus posé.";
-  }
-  if (periurbain) {
-    return "Pour rester proche d'une grande ville sans en vivre le centre.";
-  }
-  if (frais && sudOuest) {
-    return "Pour rester dans le Sud-Ouest sans subir les plus fortes chaleurs.";
-  }
-  if (frais && sud) {
-    return "Pour rester dans le Sud sans subir les plus fortes chaleurs.";
-  }
-  if (frais) {
-    return "Pour chercher davantage de fraîcheur et un rythme plus posé.";
-  }
-  if (domKey === "vie_etudiante") {
-    return "Pour une ville étudiante à taille humaine.";
-  }
-  if (domKey === "croissance_demographique") {
-    return "Pour s'installer dans un territoire qui attire.";
-  }
-  if (grandeVille) {
-    return "Pour la vie d'une grande ville et tous ses services.";
-  }
-  if (domKey === "vie_locale" && (taille === "petite" || taille === "moyenne")) {
-    return "Pour une petite ville qui reste vraiment vivante.";
-  }
-  if ((domKey === "nature" || domKey === "cadre_calme" || domKey === "calme_sonore") &&
-      (taille === "village" || taille === "petite")) {
-    return "Pour un cadre rural préservé, loin de l'agitation.";
-  }
-  if (doux) {
-    return "Pour un climat doux une bonne partie de l'année.";
-  }
-  if (taille === "village" || taille === "petite") {
-    return "Pour la tranquillité d'une commune à taille humaine.";
-  }
-  return "Pour un cadre de vie équilibré, sans excès.";
 }
 
 // ── Découverte : 2e force POSITIVE sur une dimension non demandée ─────────────
@@ -979,13 +966,94 @@ const COMPROMIS_NEG: Partial<Record<PreferenceKey, string>> = {
   air_sain: "l'air de fond est un peu moins pur",
   acces_soins: "l'offre de soins est plus limitée",
   acces_services: "les services sont moins accessibles",
-  calme_sonore: "l'environnement sonore est plus exposé",
+  calme_sonore: "l'environnement est plus bruyant",
   faible_exposition_industrielle: "les sites industriels sont plus présents",
   vie_locale: "la vie locale est plus discrète",
   faible_dependance_auto: "la voiture y est plus indispensable",
 };
 
-function assignCompromis(shownPicks: MatchResult[], byInsee: Map<string, IndexCommune>): void {
+// Écart minimal pour citer une commune de référence (« qu'à Briançon ») : en deçà,
+// la divergence n'est pas crédible (le « leader » est lui aussi faible), on reste sur
+// la formulation absolue. Sert au seuil relatif ET au comparatif.
+const COMPROMIS_GAP = 12;
+
+// Commune affichée qui MÈNE sur la dimension (la meilleure, jamais un perdant), pour
+// le comparatif « qu'à X ». null si aucune autre n'est notée sur cette clé.
+function compromisLeader(
+  key: PreferenceKey,
+  self: MatchResult,
+  shownPicks: MatchResult[],
+  byInsee: Map<string, IndexCommune>,
+): { nom: string; score: number } | null {
+  let nom: string | null = null;
+  let score = -1;
+  for (const o of shownPicks) {
+    if (o.insee === self.insee) continue;
+    const oc = byInsee.get(o.insee);
+    const os = oc ? subScore(key, oc) : null;
+    if (os != null && os > score) { score = os; nom = o.nom; }
+  }
+  return nom ? { nom, score } : null;
+}
+
+// Candidats de compromis d'une commune, ordonnés du plus saillant au moins saillant.
+// On en renvoie PLUSIEURS (comme buildIdentiteCandidates) pour que la passe de groupe
+// puisse garantir un compromis UNIQUE par dimension dans le trio : sinon deux communes
+// affichent le même arbitrage et la tension comparative s'effondre. Chaque candidat
+// porte sa clé (dimension, base de l'unicité) et son texte déjà rendu (comparatif si un
+// leader se détache, sinon formulation absolue). Jamais de chiffre, jamais un perdant nommé.
+type CompromisCand = { key: PreferenceKey; severity: number; text: string };
+function buildCompromisCandidates(
+  r: MatchResult,
+  c: IndexCommune | null,
+  tradeoffKey: PreferenceKey | null,
+  groupMean: Map<PreferenceKey, number>,
+  shownPicks: MatchResult[],
+  byInsee: Map<string, IndexCommune>,
+): CompromisCand[] {
+  const out: CompromisCand[] = [];
+  const seen = new Set<PreferenceKey>();
+  const add = (key: PreferenceKey, severity: number) => {
+    if (seen.has(key)) return;
+    seen.add(key);
+    const self = c ? subScore(key, c) : null;
+    const leader = compromisLeader(key, r, shownPicks, byInsee);
+    const neg = COMPROMIS_NEG[key];
+    // Comparatif seulement si la dimension a un sens relatif (COMPROMIS_NEG) ET qu'un
+    // leader se détache vraiment (écart ≥ seuil) : « moins accessibles qu'à X ». Sinon
+    // formulation absolue télégraphique (REASON_NEG), honnête sans inventer de divergence.
+    const text =
+      neg && leader && self != null && leader.score - self >= COMPROMIS_GAP
+        ? `En échange, ${neg} qu'à ${leader.nom}.`
+        : `En échange, ${REASON_NEG[key]}.`;
+    out.push({ key, severity, text });
+  };
+
+  // 1. Faiblesse ABSOLUE (pref demandée scorant < 50) : priorité maximale, comme avant
+  //    (où r.tradeoff court-circuitait). Severity gonflée pour primer sur les retraits relatifs.
+  if (tradeoffKey) add(tradeoffKey, 1000);
+
+  // 2. Retraits RELATIFS au groupe (COMPROMIS_KEYS), ordonnés par delta décroissant.
+  if (c) {
+    const rel: { key: PreferenceKey; delta: number }[] = [];
+    for (const k of COMPROMIS_KEYS) {
+      const s = subScore(k, c);
+      const mean = groupMean.get(k);
+      if (s == null || mean == null || !COMPROMIS_NEG[k]) continue;
+      const delta = mean - s; // positif = en retrait du groupe
+      if (delta >= COMPROMIS_GAP) rel.push({ key: k, delta });
+    }
+    rel.sort((a, b) => b.delta - a.delta);
+    for (const x of rel) add(x.key, x.delta);
+  }
+  return out;
+}
+
+function assignCompromis(
+  shownPicks: MatchResult[],
+  byInsee: Map<string, IndexCommune>,
+  tradeoffKeyByInsee: Map<string, PreferenceKey | null>,
+): void {
   // Scores de groupe par clé (moyenne sur les communes affichées).
   const groupMean = new Map<PreferenceKey, number>();
   for (const k of COMPROMIS_KEYS) {
@@ -997,36 +1065,20 @@ function assignCompromis(shownPicks: MatchResult[], byInsee: Map<string, IndexCo
     }
     if (vals.length) groupMean.set(k, vals.reduce((a, b) => a + b, 0) / vals.length);
   }
+
+  // Compromis UNIQUE par dimension : dans l'ordre d'affichage, chaque commune prend son
+  // candidat le plus saillant dont la dimension n'est pas déjà prise par une autre du
+  // trio. Résultat : trois arbitrages distincts (chaleur / services / industrie…) plutôt
+  // que le même compromis répété. Repli si aucune dimension libre ne se détache.
+  const used = new Set<PreferenceKey>();
   for (const r of shownPicks) {
-    if (r.tradeoff) {
-      r.compromis = `En échange, ${r.tradeoff}.`;
-      continue;
-    }
-    const c = byInsee.get(r.insee);
-    let worstKey: PreferenceKey | null = null;
-    let worstDelta = 0;
-    if (c) {
-      for (const k of COMPROMIS_KEYS) {
-        const s = subScore(k, c);
-        const mean = groupMean.get(k);
-        if (s == null || mean == null || !COMPROMIS_NEG[k]) continue;
-        const delta = mean - s; // positif = en retrait du groupe
-        if (delta > worstDelta) { worstDelta = delta; worstKey = k; }
-      }
-    }
-    if (worstKey && worstDelta >= 12) {
-      // Comparatif concret : nommer la commune affichée qui MÈNE sur cette dimension
-      // (on nomme celle qui est meilleure, jamais un perdant). Le cerveau arbitre.
-      let leaderNom: string | null = null;
-      let leaderScore = -1;
-      for (const o of shownPicks) {
-        if (o.insee === r.insee) continue;
-        const oc = byInsee.get(o.insee);
-        const os = oc ? subScore(worstKey, oc) : null;
-        if (os != null && os > leaderScore) { leaderScore = os; leaderNom = o.nom; }
-      }
-      const ref = leaderNom ? `qu'à ${leaderNom}` : "que dans vos deux autres options";
-      r.compromis = `En échange, ${COMPROMIS_NEG[worstKey]} ${ref}.`;
+    const c = byInsee.get(r.insee) ?? null;
+    const tradeoffKey = tradeoffKeyByInsee.get(r.insee) ?? null;
+    const cands = buildCompromisCandidates(r, c, tradeoffKey, groupMean, shownPicks, byInsee);
+    const chosen = cands.find((x) => !used.has(x.key));
+    if (chosen) {
+      used.add(chosen.key);
+      r.compromis = chosen.text;
     } else {
       r.compromis = "Le bon compromis des trois, sans faiblesse marquée.";
     }
@@ -1112,7 +1164,16 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
         ? "à deux pas du littoral"
         : "à proximité du littoral",
   cadre_calme: "cadre calme et habitable",
-  eviter_isolement: (c) => `bassin de vie de ${(tailleVille(c) ?? 0).toLocaleString("fr-FR")} hab.`,
+  // On nomme, on ne mesure pas : paliers qualitatifs sur la taille du bassin de vie,
+  // jamais le nombre d'habitants brut (le chiffre cassait le récit). Détail au rapport.
+  eviter_isolement: (c) => {
+    const t = tailleVille(c) ?? 0;
+    return t >= 100_000
+      ? "au cœur d'un vaste bassin de vie"
+      : t >= 25_000
+        ? "bassin de vie bien pourvu"
+        : "bassin de vie de proximité";
+  },
   air_sain: "air de fond plus pur",
   acces_soins: "bon accès aux médecins",
   acces_services: "services et commerces à proximité",
@@ -1597,11 +1658,15 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     // le seuil. Le tri reste honnête, on ne fabrique pas une raison qui n'existe pas.
     if (reasons.length === 0) reasons = ranked.slice(0, 2).map((x) => reasonText(x.key, c));
     const worst = [...visible].sort((a, b) => a.weight * a.s - b.weight * b.s)[0];
-    const tradeoff = worst && worst.s < 50 ? REASON_NEG[worst.key] : null;
+    const tradeoffKey: PreferenceKey | null = worst && worst.s < 50 ? worst.key : null;
+    const tradeoff = tradeoffKey ? REASON_NEG[tradeoffKey] : null;
     return {
       cityKey: cityKey(c.insee),
       sortScore: rawScore,
       pref,
+      // Clé du compromis absolu (pref demandée scorant < 50), conservée pour l'unicité
+      // par dimension dans le trio (assignCompromis). null = pas de faiblesse absolue.
+      tradeoffKey,
       result: {
         insee: c.insee,
         nom: CITY_LABEL[cityKey(c.insee)] ?? c.nom,
@@ -1610,7 +1675,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
         compatibility,
         reasons,
         signature: buildSignature(c),
-        identite: buildIdentite(c),
+        identite: buildIdentiteCandidates(c)[0], // défaut ; unicité de groupe via assignIdentite
         tradeoff,
         compromis: "", // finalisé après assemblage (assignCompromis)
         decouverte: null, // finalisé après assemblage (assignDecouverte)
@@ -1769,8 +1834,14 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   const requestedKeys = new Set<PreferenceKey>(
     parsed.preferences.filter((p) => PREFERENCE_KEYS.includes(p.key)).map((p) => p.key),
   );
+  // Clés de compromis absolu par commune (faiblesse demandée scorant < 50), pour
+  // l'unicité par dimension dans le trio (cf. assignCompromis).
+  const tradeoffKeyByInsee = new Map<string, PreferenceKey | null>(
+    scored.map((s) => [s.result.insee, s.tradeoffKey]),
+  );
   assignSignaux(shownPicks, byInsee, requestedKeys);
-  assignCompromis(shownPicks, byInsee);
+  assignIdentite(shownPicks, byInsee);
+  assignCompromis(shownPicks, byInsee, tradeoffKeyByInsee);
   assignDecouverte(shownPicks, byInsee, requestedKeys);
 
   return {

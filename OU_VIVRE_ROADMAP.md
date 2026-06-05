@@ -4,7 +4,7 @@ Sujets ouverts après la première passe UX du Comparateur de vie. Rien ici n'es
 bloquant pour la V1 ; ce sont les chantiers de confiance / crédibilité repérés à
 l'usage réel. Tenu à jour au fil des passes.
 
-Dernière mise à jour : 2026-06-01.
+Dernière mise à jour : 2026-06-05.
 
 ## 1. Signal « bassin d'emploi » — LIVRÉ (dégel moteur, 2026-06-01)
 
@@ -140,6 +140,46 @@ Restent notées comme catégories futures (non implémentées) :
 - ancres relationnelles (« à 2 h de Paris ») : trou de données isochrones ;
 - montagne générique sans nom : trou de données altitude ;
 - ancres relatives (« plus au sud ») : pas de résidence dans le comparateur anonyme.
+
+## 7. Comparateur — teaser vers la comparaison complète (plan payant) — À CONCEVOIR
+
+Sur la page comparateur (CompareView, le révélateur d'arbitrages), donner envie
+d'aller plus loin : entrer en profondeur dans la **comparaison complète** des trois
+territoires, réservée au plan payant (Pack Décision). Aujourd'hui CompareView
+révèle l'arbitrage (identité / 2 forces / 1 compromis, zéro chiffre) puis s'arrête ;
+il manque le pont qui transforme le doute intelligent en envie de creuser.
+
+À traiter **dans un deuxième temps**, une fois la comparaison complète construite :
+on veut d'abord voir à quoi elle ressemble (quelles dimensions côte à côte, quelle
+forme) avant de dessiner le teaser qui y mène. Le teaser doit donner envie sans
+livrer l'essentiel (même principe que le firewall AskFuture / la synthèse). Cohérent
+avec le placeholder Pack Décision déjà posé (« comparez les 3 territoires sur
+l'ensemble des critères, posez vos questions, explorez jusqu'à 3 nouvelles pistes »).
+
+Ordre : 1) construire la comparaison complète (vue plan payant) ; 2) en déduire le
+teaser sur CompareView.
+
+## 8. Héritages industriels (sols pollués) — critère à ajouter
+
+Ajouter un critère « héritage industriel / sols pollués », **distinct** de
+`faible_exposition_industrielle` (déjà livré : sites ICPE/Seveso EN ACTIVITÉ,
+présence administrative, pas un niveau de pollution). L'héritage couvre le passif :
+sites et sols pollués (BASOL/Géorisques), anciens sites industriels (BASIAS),
+friches (Cartofriches). C'est le cas « Marcel-Paul » repéré au cadrage de
+l'exposition active et explicitement reporté en V2.
+
+Libs déjà câblées côté data (gissol / cartofriches / irep, cf. piste santé
+environnementale). À rebrainstormer avec le porteur : critère propre, ou composante
+d'un futur composite « santé environnementale » (Seveso/sols/friches/axes log/
+industrie/air). Doctrine inchangée : présence d'un passif, jamais un verdict
+sanitaire ; nommer sans mesurer ; gate qualitatif.
+
+## 9. Pages paywall « Le rapport complet de… » — à refaire
+
+Refonte des pages paywall du rapport (« Le rapport complet de {commune} »).
+Objectif : convertir l'envie née sur le comparateur / les fiches en achat. À cadrer
+avec le porteur (contenu, preuve de valeur, prix déjà affiché 14 €, articulation
+avec le Pack Décision et le teaser comparaison complète du point 7).
 
 ## Fait en V1 (pour mémoire)
 
