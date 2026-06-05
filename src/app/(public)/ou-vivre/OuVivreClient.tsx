@@ -11,6 +11,7 @@ import {
 import { anchorsToLabeled, exclusionsToLabels } from "@/lib/geo-zones";
 import { ChipTooltip } from "@/components/ChipTooltip";
 import { AUTO_SYNTHESIS } from "@/lib/auto-synthesis";
+import { CompareView } from "./CompareView";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — client.
@@ -147,6 +148,7 @@ export function OuVivreClient() {
 
   const [parsed, setParsed] = useState<ParsedProject | null>(null);
   const [outcome, setOutcome] = useState<MatchOutcome | null>(null);
+  const [view, setView] = useState<"results" | "compare">("results");
 
   const [synthesis, setSynthesis] = useState("");
   const [synthesizing, setSynthesizing] = useState(false);
@@ -498,17 +500,13 @@ export function OuVivreClient() {
     capture("life_explore_clicked", { rang, insee: r.insee });
   };
 
-  const compareHref = (() => {
-    if (top.length < 2) return null;
-    const params = new URLSearchParams();
-    params.set("a", top[0].insee);
-    params.set("b", top[1].insee);
-    if (top[2]) params.set("c", top[2].insee);
-    params.set("from", "ou-vivre");
-    return `/comparateur?${params.toString()}`;
-  })();
+  const canCompare = top.length >= 2;
 
-  const onCompare = () => capture("life_compare_clicked", { count: top.length });
+  const onCompare = () => {
+    capture("life_compare_clicked", { count: top.length });
+    setView("compare");
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const busy = phase === "parsing" || phase === "matching";
 
@@ -601,6 +599,24 @@ export function OuVivreClient() {
     timer = setTimeout(step, 400);
     return () => clearTimeout(timer);
   }, [askRotating, askTopKey]);
+
+  // Révélateur d'arbitrages : vue en place, réutilise outcome déjà calculé (pas de
+  // recalcul, le projet vit en mémoire client). cf. spec 2026-06-05-comparateur-3.
+  if (view === "compare" && outcome?.results?.length) {
+    return (
+      <div className="pt-16">
+        <CompareView
+          results={outcome.results}
+          onBack={() => setView("results")}
+          onExploreReport={(r, rang) => {
+            onExplore(r, rang);
+            window.location.href = `/territoire/${r.insee}/debloquer?nom=${encodeURIComponent(r.nom)}&rank=${rang}&source=comparateur_3`;
+          }}
+          onPackDecision={() => capture("pack_decision_waitlist_clicked", { count: top.length })}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="pt-16">
@@ -1142,8 +1158,8 @@ export function OuVivreClient() {
             )}
           </section>
 
-          {/* Décider : pont vers la comparaison (et le futur Pack Décision) ── */}
-          {compareHref && (
+          {/* Décider : pont vers le révélateur d'arbitrages (et le futur Pack Décision) ── */}
+          {canCompare && (
             <div
               className="mt-8 glass rounded-2xl p-7 flex flex-col md:flex-row md:items-center justify-between gap-5"
               style={{ borderColor: "var(--accent)", boxShadow: "0 0 0 1px var(--accent)" }}
@@ -1163,15 +1179,14 @@ export function OuVivreClient() {
                   identifier celui qui correspond le mieux à votre projet.
                 </p>
               </div>
-              <a
-                href={compareHref}
+              <button
                 onClick={onCompare}
-                className="shrink-0 inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline"
+                className="shrink-0 inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-accent text-canvas font-semibold text-[14px]"
                 style={{ fontFamily: "'Instrument Sans', sans-serif" }}
               >
                 Comparer ces territoires
                 <span aria-hidden>→</span>
-              </a>
+              </button>
             </div>
           )}
         </div>
