@@ -90,13 +90,17 @@ heritageIndustriel?: {
 } | null;                                      // null = aucun site SSP dans R
 ```
 
-- `null` = aucun site `instructions` dans le rayon `R`. **R PROVISOIRE = 3 km**, à **figer par
-  sonde (3 km vs 5 km)** ; le fetch se fait à 5 km et la sonde filtre (cf. §2). L'héritage est
-  hyperlocal : un rayon serré évite de remonter, dans les villes anciennes, un tissu de signaux
-  qui effraie sans raison. Le **rapport** pourra élargir.
-- `activite` = catégorie du **site le plus proche**, dérivée par **mots-clés sur
-  `nom_etablissement`** (cf. §3bis), repli `"generique"` si non mappable avec certitude.
-  **On nomme quand on est sûr, on reste générique sinon, jamais on ne devine.**
+- `null` = aucun site `instructions` dans le rayon `R`. **R FIGÉ À 3 km** (gate porteur
+  2026-06-05). Sonde nationale (échantillon ~1500 communes ≥ 1500 hab) : **3 km → 18 % des communes
+  portent un signal, 5 km → 32 %** (5 km double l'empreinte). Choix produit : l'enjeu n'est pas le
+  faux négatif mais le **faux signal narratif** (« une ancienne usine à gaz est recensée » est très
+  chargé cognitivement) ; mieux vaut manquer quelques cas que flaguer trop large. **Le rapport
+  détaillé (payant) pourra, lui, élargir à 5 km** — le fetch est d'ailleurs caché à 5 km, le rayon
+  n'est qu'un filtre, donc le rapport réutilise le même cache sans re-fetch.
+- `activite` = catégorie du **site IDENTIFIABLE le plus proche** (on privilégie un site nommable
+  même un peu plus loin qu'un générique très proche : le crochet « usine à gaz » vaut mieux que le
+  banal à 30 m), dérivée par **mots-clés sur `nom_etablissement`** (cf. §3bis), repli `"generique"`
+  sinon. **On nomme quand on est sûr, on reste générique sinon, jamais on ne devine.**
 - `distanceKm` interne (centroïde du MultiPolygon) : tie-break + futur rapport, **jamais** exposé
   au récit (doctrine no chiffre).
 
@@ -106,19 +110,25 @@ heritageIndustriel?: {
 de catégories évocatrices, chacune avec son **genre** (pour l'accord du récit), par recherche de
 mots-clés sur le libellé **normalisé** (minuscules, sans accents) :
 
-| Catégorie (`HeritageActivite`) | genre | mots-clés (exemples, à étendre) | label récit |
+| Catégorie (`HeritageActivite`) | genre | mots-clés (extrait) | label récit |
 |---|---|---|---|
 | `usine_gaz` | f | `gdf`, `gaz de france`, `usine a gaz`, `edf gdf` | « ancienne usine à gaz » |
-| `raffinerie_hydrocarbures` | m | `esso`, `total`, `raffinerie`, `petrol`, `hydrocarbure`, `depot petrolier` | « ancien dépôt d'hydrocarbures » |
+| `station_service` | f | `station service`, `station-service`, `garage` | « ancienne station-service » |
+| `raffinerie_hydrocarbures` | m | `esso`, `total`, `raffinerie`, `petrol`, `hydrocarbure`, `fioul`, `avia` | « ancien dépôt d'hydrocarbures » |
 | `chimie` | m | `chimi`, `chimique` | « ancien site chimique » |
-| `metallurgie` | f | `fonderie`, `metallurg`, `siderurg`, `acierie`, `aciers` | « ancienne fonderie » |
-| `decharge` | f | `decharge`, `ordures`, `dechets` | « ancienne décharge » |
+| `metallurgie` | f | `fonderie`, `metallurg`, `siderurg`, `cokerie`, `laminoir`, `trefilerie` | « ancienne fonderie » |
+| `mine` | f | `minier`, `houillere`, `charbonnage`, `mine de` | « ancienne mine » |
+| `decharge` | f | `decharge`, `ordures`, `dechets menagers` | « ancienne décharge » |
 | `generique` (repli) | m | (tout le reste) | « ancien site industriel » |
 
-Liste de mots-clés à **étendre à l'implémentation** d'après la distribution réelle de
-`nom_etablissement` (selftest sur échantillon). Toute raison sociale non reconnue → `generique`.
-**Ne jamais inventer une catégorie** : dans le doute, `generique`. Vu la nature du champ, `generique`
-sera fréquent, et c'est correct.
+ORDRE = priorité (1er match gagne) : `station_service` avant `raffinerie_hydrocarbures` (un
+« GARAGE TOTAL » est une station, pas un dépôt). Tables **affinées par audit des `generique`**
+(gate porteur 2026-06-05) : station-service/garage et mine sortis du repli, cokerie/laminoir →
+métallurgie, fix marque « total » en fin de nom. Après curation, `generique` reste ~47 % des
+non-null (raisons sociales non généralisables : « TRIAXE INDUSTRIES », « SNC DELFAU ») — assumé,
+on ne force pas. Toute raison sociale non reconnue → `generique`. **Ne jamais inventer une
+catégorie.** « ancienne décharge » est gardée nommée (présente dans SSP, colle à l'intention « sols
+pollués »), même si pas industrielle au sens strict.
 
 ## 4. Récit (NARRATIF, gaté, SANS chiffre)
 
@@ -208,8 +218,9 @@ Câblage TS :
 
 ## 8. Hors scope V1 (notés)
 
-- **Module rapport payant** « héritage industriel & sites pollués » : état de gestion, substances,
-  distances précises, densité, SIS, Cartofriches, sources. C'est là que vit la résolution du
-  « faut-il s'inquiéter ? ».
+- **Module rapport payant** « héritage industriel & sites pollués » : état de gestion (Clôturée /
+  En cours), substances, distances précises, densité, **rayon élargi à 5 km** (réutilise le même
+  cache, fetché à 5 km — le gratuit n'en montre que 3 km), SIS, Cartofriches, sources. C'est là que
+  vit la résolution du « faut-il s'inquiéter ? ».
 - **Filtre opt-in binaire** non scoré (évolution future, cf. §1).
 - **SIS** comme couche complémentaire de récit/score (réservé rapport en V1).
