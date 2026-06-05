@@ -248,19 +248,11 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
           className="glass rounded-2xl px-6 py-5 mt-9"
           style={{ ...reveal(1), borderColor: "var(--orange-ring)" }}
         >
-          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-1">Ce qui les sépare vraiment</p>
-          <p className="text-[12.5px] text-muted mb-3.5">Les critères où les trois territoires s&apos;écartent le plus.</p>
-          <div className="flex flex-wrap gap-2">
-            {data.chapeau.map((c) => (
-              <span
-                key={c}
-                className="px-3.5 py-1.5 rounded-full text-[13px] text-label"
-                style={{ border: "1px solid var(--orange-ring)", background: "var(--orange-tint)" }}
-              >
-                {c}
-              </span>
-            ))}
-          </div>
+          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-2.5">Ce qui les sépare vraiment</p>
+          <p className="text-[16px] leading-[1.55] text-label">{data.chapeau[0]}</p>
+          {data.chapeau.length > 1 && (
+            <p className="text-[14.5px] leading-[1.6] text-muted mt-1.5">{data.chapeau.slice(1).join(" ")}</p>
+          )}
         </div>
       )}
 
