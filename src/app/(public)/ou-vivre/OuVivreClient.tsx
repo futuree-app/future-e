@@ -58,27 +58,29 @@ function bindOrphans(text: string): string {
     .join("");
 }
 
+// Ordre : tête d'affiche climat/protection (le moat, invisible chez SeLoger),
+// puis projet de vie. Set figé par le porteur, chaque chip validée par la sonde
+// parse+match (2026-06-05). Pas de chip immobilière tant que DVF n'est pas au moteur.
 const EXAMPLES = [
-  "Fuir les canicules, rester dans le Sud",
-  "La mer pas trop loin, un coin calme pour la retraite",
-  "Élever mes enfants loin de l'agriculture intensive",
-  "Un climat doux et un bon accès aux médecins",
+  "Vivre dans le Sud sans les canicules",
+  "Élever mes enfants dans un environnement sain",
+  "Je veux vivre sans voiture au quotidien",
+  "Une petite ville vivante près de l'océan",
+  "Préparer ma retraite dans un climat tempéré",
+  "Une ville qui attire de nouveaux habitants",
 ];
 
 // Placeholder tournant du champ libre (au repos, champ vide). Discipline produit :
 // chaque phrase est plus riche que le moteur MAIS chaque morceau est couvert par un
-// vrai signal (vérifié via la route de parse, 2026-06-02). On n'affiche jamais un
+// vrai signal (vérifié via la route de parse, 2026-06-05). On n'affiche jamais un
 // exemple qui reposerait sur un signal absent (prix, tempête, maladies émergentes).
+// Ordre = rotation par force décroissante (les plus multi-critères en tête).
 const PLACEHOLDER_PHRASES = [
-  "Fuir les canicules sans quitter le Sud-Ouest, avec un coin de nature et des médecins à proximité.",
-  "Vivre près de la Méditerranée, à l'écart des secteurs qui brûlent l'été, dans une ville encore vivante.",
-  "Préparer ma retraite sur la côte atlantique, au calme, avec un bon accès aux soins et aux commerces.",
-  "Élever un enfant loin de l'agriculture intensive et de l'air pollué, dans une commune entourée de nature.",
-  "Une ville où l'on pourra encore dormir la nuit pendant les canicules, et où l'eau ne manquera pas l'été.",
-  "Près de Pau, au pied des Pyrénées, avec un hôpital, des commerces et de la nature à portée.",
-  "Un village de montagne qui reste vivant, avec un médecin et des commerces, à l'abri des fortes chaleurs.",
-  "Trouver du vert au quotidien sans m'éloigner des services, dans un cadre calme mais habitable.",
-  "Dans le Grand Ouest, à l'abri des pluies qui inondent, avec de la nature et une vraie vie de village.",
+  "Je cherche une petite ville vivante, avec une gare, des médecins accessibles et un climat supportable l'été.",
+  "Nous voulons élever nos enfants loin des sites industriels à risque, sans être isolés des services.",
+  "Je voudrais vivre sans voiture, près de l'océan, dans une ville qui attire encore de nouveaux habitants.",
+  "Un endroit calme pour la retraite, avec des étudiants, des commerces et peu de risque d'inondation.",
+  "Rester dans le Sud, mais éviter les canicules les plus intenses.",
 ];
 
 // Phrases d'attente pendant le calcul + la synthèse : plus légères et
@@ -616,7 +618,7 @@ export function OuVivreClient() {
         </h1>
         <p className="mt-5 text-[17px] leading-[1.72] text-muted text-pretty">
           {bindOrphans(
-            "Changement climatique, pollution, accès aux soins, qualité de vie... futur•e vous aide à identifier les territoires les plus compatibles avec votre situation, vos projets et les compromis qu'ils impliquent.",
+            "futur•e vous aide à identifier les territoires les plus compatibles avec votre projet de vie, en révélant les compromis entre climat, santé, cadre de vie, mobilité et accès aux services.",
           )}
         </p>
       </header>
@@ -653,9 +655,10 @@ export function OuVivreClient() {
 
       {/* ── Micro-réassurance (crédibilité du socle de données) ── */}
       <p className="mt-3 text-[12px] leading-[1.7] text-ghost">
-        Plus de 20 indicateurs publics, climatiques, sanitaires et territoriaux, croisés sur
-        les 34 000 communes de France métropolitaine, avec les projections climatiques à
-        l&apos;horizon 2050.
+        Près de 30 critères publics croisés sur les 34 000 communes de France métropolitaine,
+        avec les projections climatiques à l&apos;horizon 2050 : chaleur, inondations, qualité
+        de l&apos;air, bruit et risques industriels, mais aussi soins, mobilité, services et
+        vie locale.
       </p>
 
       {/* ── Exemples ── */}
