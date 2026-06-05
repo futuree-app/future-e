@@ -1037,14 +1037,6 @@ export function OuVivreClient() {
               ))}
             </div>
 
-            {/* Promesse rapport : au niveau des CTA « Découvrir », on dit ce que le
-                rapport apporte au-delà du classement (vend la décision, pas du contenu). */}
-            <p className="mt-6 text-[13.5px] leading-[1.65] text-muted text-pretty">
-              {bindOrphans(
-                "Le rapport complet révèle ce que les classements ne montrent pas : les compromis, les fragilités et les trajectoires de chaque territoire, pour passer d'une intuition à une décision éclairée.",
-              )}
-            </p>
-
             {/* Garde-fou wording : on rappelle, une fois, que ce signal ne dit pas
                 l'avenir du territoire (la capacité d'adaptation n'est pas mesurée). */}
             {top.some((r) => r.pressionEco) && (
@@ -1056,6 +1048,39 @@ export function OuVivreClient() {
             )}
 
           </div>
+
+          {/* Décider : pont vers le révélateur d'arbitrages, juste sous les 3 fiches
+              (le moment où l'œil vient de voir les options). Avant AskFuture. */}
+          {canCompare && (
+            <div
+              className="mt-8 glass rounded-2xl p-7 flex flex-col md:flex-row md:items-center justify-between gap-5"
+              style={{ borderColor: "var(--accent)", boxShadow: "0 0 0 1px var(--accent)" }}
+            >
+              <div>
+                <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-1.5">
+                  Comparer
+                </p>
+                <h3
+                  className="font-normal text-[21px] leading-[1.2] text-label"
+                  style={{ fontFamily: "'Instrument Serif', serif" }}
+                >
+                  Mettre les territoires côte à côte.
+                </h3>
+                <p className="mt-1.5 text-[13px] leading-[1.6] text-muted max-w-[520px]">
+                  Comparez leurs points forts, leurs fragilités et leurs trajectoires pour
+                  identifier celui qui correspond le mieux à votre projet.
+                </p>
+              </div>
+              <button
+                onClick={onCompare}
+                className="shrink-0 inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-accent text-canvas font-semibold text-[14px]"
+                style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+              >
+                Comparer ces territoires
+                <span aria-hidden>→</span>
+              </button>
+            </div>
+          )}
 
           {/* Bloc 1 — comprendre les arbitrages derrière le classement (pas « une IA ») */}
           <section className="mt-12 glass rounded-2xl p-7">
@@ -1157,38 +1182,6 @@ export function OuVivreClient() {
               </div>
             )}
           </section>
-
-          {/* Décider : pont vers le révélateur d'arbitrages (et le futur Pack Décision) ── */}
-          {canCompare && (
-            <div
-              className="mt-8 glass rounded-2xl p-7 flex flex-col md:flex-row md:items-center justify-between gap-5"
-              style={{ borderColor: "var(--accent)", boxShadow: "0 0 0 1px var(--accent)" }}
-            >
-              <div>
-                <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-1.5">
-                  Comparer
-                </p>
-                <h3
-                  className="font-normal text-[21px] leading-[1.2] text-label"
-                  style={{ fontFamily: "'Instrument Serif', serif" }}
-                >
-                  Mettre les territoires côte à côte.
-                </h3>
-                <p className="mt-1.5 text-[13px] leading-[1.6] text-muted max-w-[520px]">
-                  Comparez leurs points forts, leurs fragilités et leurs trajectoires pour
-                  identifier celui qui correspond le mieux à votre projet.
-                </p>
-              </div>
-              <button
-                onClick={onCompare}
-                className="shrink-0 inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-accent text-canvas font-semibold text-[14px]"
-                style={{ fontFamily: "'Instrument Sans', sans-serif" }}
-              >
-                Comparer ces territoires
-                <span aria-hidden>→</span>
-              </button>
-            </div>
-          )}
         </div>
       )}
     </div>
