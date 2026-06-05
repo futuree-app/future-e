@@ -31,6 +31,11 @@ qui utilise les risques pour éclairer ces choix.
 - Hiérarchie du message : compatibilité d'abord, puis « en tenant compte de »
   pour le différenciant (nuisances/risques), puis « mais aussi » pour
   l'agrément (soins, mobilité, services, vie locale).
+- Division du travail entre les deux phrases du hero : les gens achètent un
+  arbitrage, pas une liste de datasets. Donc le SOUS-TITRE porte la promesse
+  (révéler les compromis entre familles, registre décision), et le COMPTEUR
+  porte la preuve (l'inventaire granulaire, qui mène par le différenciant
+  invisible). On ne met pas l'inventaire de critères dans le sous-titre.
 
 Repère d'honnêteté : l'immobilier (prix) n'est pas un critère du moteur
 aujourd'hui (DVF = roadmap V2). On ne le mentionne jamais comme une chose qu'on
@@ -47,14 +52,15 @@ Avant :
 
 Après :
 > futur•e vous aide à identifier les territoires les plus compatibles avec votre
-> projet de vie, en tenant compte de la chaleur, des inondations, de la qualité
-> de l'air, du bruit, des risques industriels, mais aussi de l'accès aux soins,
-> de la mobilité et de la vie locale.
+> projet de vie, en révélant les compromis entre climat, santé, cadre de vie,
+> mobilité et accès aux services.
 
-Note : le texte reste passé par `bindOrphans`. La mention « compromis » disparaît
-du sous-titre mais reste portée par l'UI (gate de confirmation, cartes,
-synthèse) ; à confirmer en spec self-review si on veut la réinjecter en queue
-sans alourdir.
+Décision : le sous-titre est centré DÉCISION (révéler les compromis), pas
+inventaire de critères. L'inventaire détaillé descend dans le compteur. La
+mention « compromis » redevient ainsi la colonne vertébrale du sous-titre, ce
+qui résout la question précédente sur sa disparition.
+
+Note : le texte reste passé par `bindOrphans`.
 
 ### 2. Compteur / micro-réassurance (ligne ~656)
 
