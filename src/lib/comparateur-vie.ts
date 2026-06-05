@@ -260,7 +260,6 @@ export type ComparaisonTheme = {
 
 export type ComparaisonComplete = {
   themes: ComparaisonTheme[];
-  chapeau: string[]; // 0 à 4 libellés courts « ce qui les sépare vraiment »
 };
 
 export type MatchOutcome = {
@@ -1139,43 +1138,7 @@ function buildComparaisonComplete(
     return { id: th.id, titre: th.titre, synthese, lignes };
   });
 
-  // chapeau : 2 à 3 phrases déterministes résumant ce qui sépare vraiment le trio. On part
-  // des dimensions où les PALIERS affichés divergent le plus (cohérent avec la table), puis
-  // on nomme qui se détache. Zéro IA. On nomme qui mène, jamais qui est en retrait.
-  const diverg = DIMENSIONS
-    .filter((d) => d.key !== "taille_ville")
-    .map((d) => {
-      const present = rawByDim.get(d.id)!.filter((s): s is number => s != null);
-      if (present.length < 2) return null;
-      const bands = present.map(bandIndex);
-      return {
-        d,
-        ligne: ligneByDim.get(d.id)!,
-        bandSpread: Math.max(...bands) - Math.min(...bands),
-        spread: Math.max(...present) - Math.min(...present),
-      };
-    })
-    .filter((x): x is NonNullable<typeof x> => x != null && x.bandSpread >= 1)
-    .sort((a, b) => b.bandSpread - a.bandSpread || b.spread - a.spread)
-    .slice(0, 3);
-
-  const chapeau: string[] = [];
-  if (diverg.length === 0) {
-    chapeau.push("Les trois territoires se ressemblent beaucoup : les différences se jouent dans les détails.");
-  } else {
-    chapeau.push(`C'est surtout sur ${joinFr(diverg.map((x) => x.d.gp))} que les trois territoires se distinguent.`);
-    for (const x of diverg.slice(0, 2)) {
-      const av = x.ligne.avantage;
-      if (av.type === "avantage" && av.insees.length === 1) {
-        const cell = x.ligne.cellules.find((c) => c.insee === av.insees[0]);
-        chapeau.push(`Sur ${x.d.gp}, ${nomByInsee.get(av.insees[0])} se détache (${(cell?.palier ?? "").toLowerCase()}).`);
-      } else if (av.type === "avantage" && av.insees.length === 2) {
-        chapeau.push(`Sur ${x.d.gp}, ${av.insees.map((i) => nomByInsee.get(i)).join(" et ")} se détachent.`);
-      }
-    }
-  }
-
-  return { themes, chapeau };
+  return { themes };
 }
 
 // Narratif « nouveaux arrivants » (HORS score) : phrase descriptive, jamais normative.

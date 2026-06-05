@@ -37,7 +37,6 @@ async function main() {
     console.log("PROJET » " + r.text);
     if (r.error) { console.log("  ERREUR:", r.error); continue; }
     console.log("  TRIO : " + r.trio.map((c) => c.nom).join(" · "));
-    console.log("  CE QUI LES SÉPARE : " + (r.cc.chapeau.join(" · ") || "(rien de net)"));
     for (const th of r.cc.themes) {
       console.log(`\n  ${th.titre}`);
       console.log(`    » ${th.synthese}`);

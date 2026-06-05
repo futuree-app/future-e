@@ -242,24 +242,10 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
         </h2>
       </div>
 
-      {/* Chapeau : navigation vers ce qui sépare vraiment */}
-      {data.chapeau.length > 0 && (
-        <div
-          className="glass rounded-2xl px-6 py-5 mt-9"
-          style={{ ...reveal(1), borderColor: "var(--orange-ring)" }}
-        >
-          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-2.5">Ce qui les sépare vraiment</p>
-          <p className="text-[16px] leading-[1.55] text-label">{data.chapeau[0]}</p>
-          {data.chapeau.length > 1 && (
-            <p className="text-[14.5px] leading-[1.6] text-muted mt-1.5">{data.chapeau.slice(1).join(" ")}</p>
-          )}
-        </div>
-      )}
-
       {/* Thèmes */}
       <div className="mt-12 space-y-12">
         {data.themes.map((th, i) => (
-          <section key={th.id} style={reveal(2 + i)}>
+          <section key={th.id} style={reveal(1 + i)}>
             <div className="flex items-center gap-3 mb-2">
               <ThemeIcon id={th.id} />
               <h3
