@@ -535,14 +535,22 @@ export async function POST(request: NextRequest) {
     }
 
     if (plan === "one_shot") {
-      const { count } = await supabase
+      // Pool unique proportionnel aux droits : 3 questions par territoire débloqué
+      // (report_grant), comptées globalement. Un rapport seul = 3, un Pack Décision
+      // (3 grants) = 9, en un seul compteur. Plancher de 3 (résidence sans grant).
+      const { count: grantCount } = await supabase
+        .from("report_grants")
+        .select("insee", { count: "exact", head: true })
+        .eq("user_id", user.id);
+      const quota = 3 * Math.max(1, grantCount ?? 0);
+      const { count: askedCount } = await supabase
         .from("ask_conversations")
         .select("id", { count: "exact", head: true })
         .eq("user_id", user.id)
         .eq("role", "user");
-      if ((count ?? 0) >= 3) {
+      if ((askedCount ?? 0) >= quota) {
         return NextResponse.json(
-          { error: "Quota de 3 questions atteint. Passez au Suivi pour un accès illimité." },
+          { error: `Quota de ${quota} questions atteint. Passez au Suivi pour un accès illimité.` },
           { status: 403 },
         );
       }
