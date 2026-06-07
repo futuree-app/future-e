@@ -37,6 +37,15 @@ const THEMES: Record<CheckoutProductSlug, Theme> = {
     orb: "var(--orb-orange)",
     status: "Bientôt disponible",
   },
+  "pack-decision": {
+    accent: "var(--violet)",
+    accentSoft: "var(--violet-soft, var(--violet))",
+    accentTint: "var(--violet-tint, rgba(139,92,246,0.08))",
+    accentRing: "rgba(139,92,246,0.36)",
+    accentGlow: "rgba(139,92,246,0.16)",
+    orb: "var(--orb-violet)",
+    status: "Disponible maintenant",
+  },
 };
 
 const COPY: Record<CheckoutProductSlug, {
@@ -67,6 +76,28 @@ const COPY: Record<CheckoutProductSlug, {
       { q: "Le rapport interactif est-il vraiment personnalisé ?", a: "Oui. Chaque module est construit à partir de votre commune, votre profil de risque et vos réponses au wizard. Deux foyers d'une même ville obtiennent deux rapports différents." },
       { q: "Combien de temps avant de le recevoir ?", a: "Sous 24 heures ouvrées. La plupart des rapports sont produits en quelques minutes ; nous gardons 24 h pour les périodes de forte demande." },
       { q: "Et si je passe au Suivi plus tard ?", a: "Les 14 € seront déduits intégralement de votre premier mois de Suivi à son ouverture. Aucune démarche à faire de votre côté." },
+      { q: "Mes données sont-elles vendues ?", a: "Jamais. Les données issues du wizard restent dans votre espace. Voir notre politique RGPD." },
+    ],
+  },
+  "pack-decision": {
+    kicker: "Pack Décision · 39 € une fois",
+    hero: { line1: "Trois territoires.", line2: "Un choix clair." },
+    promise: "La comparaison complète des trois communes que vous arbitrez, leurs trois rapports interactifs, et trois nouvelles pistes issues du même projet de vie.",
+    whatYouGet: [
+      { n: "01", title: "Comparaison complète", body: "Les trois territoires côte à côte, thème par thème : risques, mobilité, vie locale, logement, environnement, services." },
+      { n: "02", title: "Trois rapports interactifs", body: "Un rapport complet par commune, personnalisé à partir de votre profil et de votre projet de vie." },
+      { n: "03", title: "Trois nouvelles pistes", body: "Des communes proches ou inattendues, calculées sur le même projet, pour élargir l'arbitrage." },
+      { n: "04", title: "AskFuture · 9 questions", body: "Neuf questions pour approfondir les points sensibles : ce que les données ne disent pas seules." },
+    ],
+    timeline: [
+      { n: "01", title: "Paiement sécurisé", body: "Stripe — moins de 2 minutes, carte bancaire ou Apple/Google Pay." },
+      { n: "02", title: "Génération du pack", body: "Comparaison et trois rapports produits et envoyés sous 24 heures ouvrées." },
+      { n: "03", title: "Accès permanent", body: "Accessibles depuis votre espace, exportables en PDF, partageables en lien temporaire." },
+    ],
+    faqs: [
+      { q: "Sur quelles communes porte le Pack Décision ?", a: "Sur les trois communes que vous avez sélectionnées dans le comparateur. Vous les confirmez au moment du paiement." },
+      { q: "Combien de temps avant de recevoir le pack ?", a: "Sous 24 heures ouvrées. La plupart des packs sont produits en quelques minutes." },
+      { q: "Puis-je utiliser le pack pour un achat ou une location ?", a: "Oui. Le pack est conçu pour les arbitrages de fond : déménagement, achat immobilier, changement de cadre de vie." },
       { q: "Mes données sont-elles vendues ?", a: "Jamais. Les données issues du wizard restent dans votre espace. Voir notre politique RGPD." },
     ],
   },
