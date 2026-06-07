@@ -1499,7 +1499,7 @@ git commit -m "feat(pack-decision): CTA comparateur vers la page d'achat + fix v
 **Files:**
 - Create: `scripts/sonde-pack-decision.mjs`
 
-- [ ] **Step 1: Écrire la sonde**
+- [x] **Step 1: Écrire la sonde**
 
 ```js
 // Sonde Pack Décision : vérifie le VERROU (le /match gratuit ne fuit ni la matrice
@@ -1566,7 +1566,7 @@ async function main() {
 main();
 ```
 
-- [ ] **Step 2: Lancer la sonde**
+- [x] **Step 2: Lancer la sonde**
 
 Avec `npm run dev` actif :
 Run: `node scripts/sonde-pack-decision.mjs`
@@ -1584,7 +1584,7 @@ Documenter pour le porteur (pas automatisable ici) :
 6. En base : `select * from decision_packs` (1 ligne, trio_key correct), `select * from report_grants`
    (3 lignes source `pack_decision`).
 
-- [ ] **Step 4: Vérification finale globale**
+- [x] **Step 4: Vérification finale globale**
 
 ```bash
 npx tsc --noEmit
@@ -1592,7 +1592,7 @@ npx eslint "src/app/(public)/comparateur/pack-decision/" "src/app/api/comparateu
 ```
 Expected : aucune erreur.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scripts/sonde-pack-decision.mjs
@@ -1603,9 +1603,9 @@ git commit -m "feat(pack-decision): sonde verrou + apercu"
 
 ## Finalisation
 
-- [ ] Relire la spec une dernière fois, vérifier que chaque critère de réussite (spec §10) est couvert.
-- [ ] `npx tsc --noEmit` global propre.
-- [ ] Sonde verte.
+- [x] Relire la spec une dernière fois, vérifier que chaque critère de réussite (spec §10) est couvert.
+- [x] `npx tsc --noEmit` global propre.
+- [x] Sonde verte.
 - [ ] Parcours payant validé manuellement (compte de test + Stripe CLI).
 - [ ] Merge `--ff-only` sur `main` (invoquer la skill `superpowers:finishing-a-development-branch`).
 

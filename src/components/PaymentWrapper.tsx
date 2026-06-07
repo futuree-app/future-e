@@ -37,7 +37,16 @@ export function PaymentWrapper({
   pack,
   returnUrl,
 }: PaymentWrapperProps) {
-  const requestKey = `${amount}:${productType}:${grant?.targetInsee ?? ""}:${pack?.trio.map((t) => t.insee).join("-") ?? ""}`;
+  const requestBody = JSON.stringify({
+    amount,
+    productType,
+    targetInsee: grant?.targetInsee,
+    targetCommune: grant?.targetCommune,
+    source: grant?.source,
+    rank: grant?.rank,
+    pack,
+  });
+  const requestKey = requestBody;
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [clientSecretKey, setClientSecretKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -49,15 +58,7 @@ export function PaymentWrapper({
     fetch("/api/stripe/create-payment-intent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        amount,
-        productType,
-        targetInsee: grant?.targetInsee,
-        targetCommune: grant?.targetCommune,
-        source: grant?.source,
-        rank: grant?.rank,
-        pack,
-      }),
+      body: requestBody,
     })
       .then(async (response) => {
         const payload = await response.json();
@@ -92,7 +93,7 @@ export function PaymentWrapper({
     return () => {
       active = false;
     };
-  }, [amount, productType, requestKey]);
+  }, [requestBody, requestKey]);
 
   if (error && errorKey === requestKey) {
     return (
