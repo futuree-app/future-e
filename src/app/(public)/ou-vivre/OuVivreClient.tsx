@@ -1026,16 +1026,11 @@ export function OuVivreClient() {
                     </p>
                   )}
 
-                  {/* Pression climatique sur l'économie locale : note de lecture
-                      prudente, NARRATIVE, distincte des raisons/compromis scorés.
-                      N'a pas pesé dans le classement. */}
-                  {r.pressionEco && (
-                    <p className="mt-3 text-[12px] leading-[1.5] text-amber-300/70">
-                      À noter : {r.pressionEco.note}
-                    </p>
-                  )}
-
-                  {/* Logement et littoral : NE PAS afficher sur les cartes (doctrine
+                  {/* Pression éco (NARRATIF) : NE PAS afficher sur les cartes de résultats.
+                      C'est de l'arbitrage, pas de la présentation : sur la première vue ça
+                      pré-juge et singularise négativement une commune (asymétrie). Conservé
+                      dans le payload synthèse + contexte AskFuture (l. 200/463) et au rapport.
+                      Logement et littoral : idem, NE PAS afficher sur les cartes (doctrine
                       2026-06-02). Ils enrichissent la décision mais n'expliquent pas le
                       classement. Conservés dans le payload de synthèse et le contexte
                       AskFuture ; le détail vit au rapport. */}
@@ -1055,16 +1050,6 @@ export function OuVivreClient() {
                 </article>
               ))}
             </div>
-
-            {/* Garde-fou wording : on rappelle, une fois, que ce signal ne dit pas
-                l'avenir du territoire (la capacité d'adaptation n'est pas mesurée). */}
-            {top.some((r) => r.pressionEco) && (
-              <p className="mt-5 text-[11px] leading-[1.6] text-ghost/80 max-w-[640px]">
-                Les notes « À noter » signalent une dépendance économique à des activités
-                sensibles au climat. Elles ne mesurent pas la capacité d&apos;adaptation du
-                territoire et ne préjugent pas de son avenir.
-              </p>
-            )}
 
           </div>
 
