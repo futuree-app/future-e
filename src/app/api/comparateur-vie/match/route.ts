@@ -28,7 +28,12 @@ export async function POST(request: NextRequest) {
 
   try {
     const outcome = await matchProjects(parsed);
-    return NextResponse.json(outcome);
+    // VERROU : la matrice complète et les pistes sont payantes (Pack Décision).
+    // On ne les expose jamais dans la réponse gratuite, et on borne les résultats
+    // au top 3 (la CompareView gratuite n'affiche que le trio).
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { comparaisonComplete: _cc, pistes: _p, ...safe } = outcome;
+    return NextResponse.json({ ...safe, results: outcome.results.slice(0, 3) });
   } catch (error) {
     console.error("[comparateur-vie/match]", error);
     return NextResponse.json({ error: "Erreur lors du calcul des territoires." }, { status: 500 });

@@ -2206,3 +2206,12 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     appliedPlaces: appliedPlaces.length ? appliedPlaces : undefined,
   };
 }
+
+// Aperçu tronqué de la comparaison complète : on ne garde que les 2 premiers thèmes,
+// pour le teaser de la page de conviction. Le complet n'a aucun endpoint d'API.
+export function truncateComparaison(cc: ComparaisonComplete): ComparaisonComplete {
+  return {
+    resume: cc.resume.slice(0, 1),
+    themes: cc.themes.slice(0, 2),
+  };
+}
