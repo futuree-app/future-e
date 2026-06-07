@@ -46,7 +46,7 @@ Remplacer le `subtitle` et le tableau `features` du produit `"rapport-complet"` 
     features: [
       "La lecture du territoire : ce qu'il devient face au climat (canicule, inondation, sécheresse)",
       "Les sources publiques croisées et rendues lisibles pour cette commune",
-      "AskFuture — 3 questions pour creuser ce qui compte pour vous",
+      "AskFuture — 3 questions pour approfondir le territoire",
       "À conserver, et qui s'enrichit au fil des prochains modules",
     ],
 ```
@@ -84,16 +84,19 @@ import { deriveQuartierSources } from "@/lib/quartier-signals";
 export type QuartierPreviewCard = { titre: string; constat: string };
 export type QuartierPreview = { cards: QuartierPreviewCard[]; sources: string[] };
 
+// Garde-fou latence : une paywall doit rester rapide. L'enrichissement fait des appels
+// externes (DRIAS, Géorisques…) ; on plafonne l'attente et, au-delà, on rend null (la page
+// masque le bloc aperçu). Jamais d'erreur bloquante, jamais de rendu retardé au-delà du cap.
+const PREVIEW_TIMEOUT_MS = 1200;
+
 // Aperçu RÉEL du module Quartier pour un INSEE. Cartes déterministes gatées sur la présence
-// de la donnée (pas de fabrication, pas de chiffre). null = pas d'aperçu exploitable -> la
-// page masque le bloc. cf. spec 2026-06-07-paywall-territoire.
+// de la donnée (pas de fabrication, pas de chiffre). null = pas d'aperçu exploitable OU trop
+// lent -> la page masque le bloc. cf. spec 2026-06-07-paywall-territoire.
 export async function getQuartierPreview(insee: string): Promise<QuartierPreview | null> {
-  let enrichment;
-  try {
-    enrichment = await gatherCommuneEnrichment(insee);
-  } catch {
-    return null;
-  }
+  const enrichment = await Promise.race([
+    gatherCommuneEnrichment(insee).catch(() => null),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), PREVIEW_TIMEOUT_MS)),
+  ]);
   if (!enrichment) return null;
 
   const georisques = enrichment.georisques ?? null;
@@ -388,8 +391,8 @@ Remplacer tout le bloc `<main className="max-w-[760px] mx-auto px-6 py-16"> … 
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             { t: "Comprendre le territoire", d: "Ce que la commune devient : canicule, inondation, sécheresse, risques du secteur." },
-            { t: "Mesurer les compromis", d: "Ce qui joue en sa faveur, ce qui demande vigilance, ce qui dépend de votre projet." },
-            { t: "Poser vos questions", d: "3 questions à AskFuture pour creuser les points qui comptent pour vous." },
+            { t: "Situer les principaux compromis", d: "Ce qui joue en sa faveur, ce qui demande vigilance, ce qui dépend de votre projet." },
+            { t: "Poser vos questions", d: "3 questions à AskFuture pour approfondir le territoire." },
           ].map((c) => (
             <div key={c.t} className="rounded-2xl border border-white/[0.1] bg-white/[0.03] p-5">
               <p className="text-[15px] text-label" style={{ fontFamily: "var(--font-serif)" }}>{c.t}</p>
@@ -449,9 +452,9 @@ Remplacer tout le bloc `<main className="max-w-[760px] mx-auto px-6 py-16"> … 
           </p>
         </section>
 
-        {/* 6. CTA paiement (langage produit) */}
+        {/* 6. CTA paiement (langage produit : « Explorer », pas « Débloquer » qui sonne SaaS) */}
         <h2 className="mt-14 text-[22px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
-          Débloquer le rapport de {displayName}
+          Explorer le rapport de {displayName}
         </h2>
         <div className="mt-5 rounded-2xl border border-white/[0.1] bg-white/[0.03] p-7">
           {user ? (
@@ -502,8 +505,8 @@ Expected: PASS, aucune sortie eslint.
 
 Avec `npm run dev` en cours :
 
-Run: `curl -s -m 90 "http://localhost:3000/territoire/38185/debloquer?nom=Grenoble" | grep -o "Avant de choisir.\{0,40\}\|Aperçu du rapport.\{0,30\}\|Pourquoi ce rapport est payant\|Débloquer le rapport de.\{0,20\}"`
-Expected : on voit le hero (« Avant de choisir … Grenoble »), le bloc « Pourquoi ce rapport est payant », le CTA « Débloquer le rapport de Grenoble », et (si l'enrichissement Grenoble répond) « Aperçu du rapport ». Si l'aperçu manque, ce n'est pas une erreur (repli prévu) ; vérifier alors avec une autre commune (`35238`/Rennes) que l'aperçu apparaît au moins une fois.
+Run: `curl -s -m 90 "http://localhost:3000/territoire/38185/debloquer?nom=Grenoble" | grep -o "Avant de choisir.\{0,40\}\|Aperçu du rapport.\{0,30\}\|Pourquoi ce rapport est payant\|Explorer le rapport de.\{0,20\}"`
+Expected : on voit le hero (« Avant de choisir … Grenoble »), le bloc « Pourquoi ce rapport est payant », le CTA « Explorer le rapport de Grenoble », et (si l'enrichissement Grenoble répond) « Aperçu du rapport ». Si l'aperçu manque, ce n'est pas une erreur (repli prévu) ; vérifier alors avec une autre commune (`35238`/Rennes) que l'aperçu apparaît au moins une fois.
 
 - [ ] **Step 6: Vérifier dans le navigateur**
 

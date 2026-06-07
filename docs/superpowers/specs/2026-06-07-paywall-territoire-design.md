@@ -73,11 +73,12 @@ Tout reste server-first ; le perso est une petite surcouche client.
   fonction d'aperçu, rend les sections, garde le `TerritoryUnlockPanel` Stripe et le flux
   connexion/inscription existants.
 - **`getQuartierPreview(insee)`** (créer, serveur) : renvoie les données d'aperçu du module Quartier
-  pour un INSEE : un petit ensemble de cartes `{ titre, constat }` où `constat` est la première
-  phrase réelle (sans chiffre) tirée du contenu Quartier déjà calculé. Réutilise les sources/
-  helpers existants du module Quartier (`components/report/QuartierClimatData`, données commune).
-  Mis en cache (`unstable_cache`) comme le rapport. Renvoie `null` si la commune n'a pas d'aperçu
-  exploitable (la page masque alors le bloc preuve, plutôt que d'afficher du vide).
+  pour un INSEE : un petit ensemble de cartes `{ titre, constat }` où `constat` est une phrase
+  déterministe et sans chiffre, GATÉE sur la présence réelle de la donnée (réutilise
+  `gatherCommuneEnrichment(insee)`, déjà INSEE-based, et `deriveQuartierSources` pour les chips de
+  sources réelles). **Garde-fou latence obligatoire** : une paywall doit rester rapide ; l'appel
+  est plafonné (~1,2 s) par un `Promise.race` avec timeout, renvoie `null` au-delà ou en cas
+  d'erreur, et ne bloque jamais le rendu. `null` = la page masque le bloc preuve (pas de vide).
 - **`TerritoryUnlockPreview`** (créer, serveur) : présentation pure des cartes d'aperçu (titre +
   constat tronqué + fondu + cadenas). Aucune logique de données.
 - **`PersonalTouch`** (créer, client) : lit `localStorage` (clé `futuree:projet:labels`), si présent
@@ -98,8 +99,9 @@ Ordre pensé pour convaincre AVANT de demander l'argent :
    « Avant de choisir {commune}, regardez ce que les données racontent vraiment. » Sous-texte qui
    remet en contexte (« Vous avez vu pourquoi {commune} ressort. Le rapport va plus loin : … »).
 2. **Ce que le rapport vous permet de vérifier.** 3 cartes, formulées sur ce qui existe réellement
-   (comprendre le territoire / identifier les compromis / poser vos questions), sans lister de
-   modules non construits.
+   (comprendre le territoire / **situer les principaux compromis** / poser vos questions), sans
+   lister de modules non construits. « Situer » et non « mesurer » : mesurer les compromis, c'est
+   le Pack Décision 39 €, pas le rapport 14 €.
 3. **Aperçu du rapport** (`TerritoryUnlockPreview`). Cartes Quartier avec extraits réels tronqués +
    fondu + cadenas. La ligne `PersonalTouch` s'insère en tête si un projet est en `localStorage`.
    Masqué entièrement si `getQuartierPreview` renvoie `null`.
@@ -110,9 +112,10 @@ Ordre pensé pour convaincre AVANT de demander l'argent :
    payez son croisement, sa mise en lisibilité et son application à votre projet ») + réassurance
    visible (« Aucun engagement. Acheter ce rapport n'ajoute pas {commune} comme commune de
    résidence. »).
-6. **CTA paiement.** Le `TerritoryUnlockPanel` existant, mais le libellé d'action devient
-   « Débloquer le rapport de {commune} » (et le flux compte/connexion inchangé). Récap court :
-   accès immédiat, consultable et exportable.
+6. **CTA paiement.** Le `TerritoryUnlockPanel` existant, précédé d'un titre de conviction en
+   langage produit « Explorer le rapport de {commune} » (« explorer/lire », pas « débloquer » qui
+   sonne SaaS). Le bouton de paiement lui-même (dans `PaymentWrapper`) peut rester « Payer 14 € »
+   au moment de l'acte d'achat (réassurance bancaire). Flux compte/connexion inchangé.
 
 ## 7. Hors périmètre
 
