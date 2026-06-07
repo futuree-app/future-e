@@ -234,13 +234,15 @@ export type MatchResult = {
 // 2026-06-05-comparateur-complet-design.
 export type ComparaisonAvantage =
   | { type: "avantage"; insees: string[] } // 1 ou 2 communes au meilleur palier du trio
-  | { type: "egalite" }; // les trois au même palier (ou dimension non directionnelle)
+  | { type: "egalite" } // les trois au même palier
+  | { type: "neutre" }; // dimension non directionnelle (taille, ensoleillement) : pas de gagnant
 
 export type ComparaisonCellule = {
   insee: string;
   palier: string; // mot incarné absolu (« Très préservé »)
   qualifier: string | null; // suffixe court non chiffré (« axe routier proche ») ou null
   disponible: boolean; // false = donnée non mesurée pour cette commune
+  alerte: boolean; // true = pire tier d'un critère de RISQUE, alors qu'une autre commune fait mieux
 };
 
 export type ComparaisonLigne = {
@@ -977,51 +979,57 @@ type ComparaisonDim = {
   themeId: string;
   key: PreferenceKey | "taille_ville"; // "taille_ville" = palier factuel via tailleVille
   paliers: [string, string, string]; // [hi, mid, lo]
-  gp: string; // groupe nominal avec article, pour les phrases de synthèse (« le calme sonore »)
+  gp: string; // groupe nominal neutre avec article (« le calme sonore »)
+  forte: string; // groupe nominal VALENCÉ pour la synthèse (« son faible risque d'inondation »)
   aide: string; // glose tooltip (≤2 phrases, « pourquoi ça aide à comprendre », sans méthodo)
+  risque: boolean; // true = critère de risque/nuisance : le pire tier s'affiche en rouge si contraste
+  directionnel: boolean; // false = préférence non universelle (ensoleillement, taille) : pas de gagnant
 };
 
+// gp = libellé du thème pour le résumé, avec une glose entre parenthèses (on explicite ce
+// que chaque thème recouvre, « risques naturels = inondation, feu… »).
 const THEME_ORDER: { id: string; titre: string; gp: string }[] = [
-  { id: "climat", titre: "Climat", gp: "le climat" },
-  { id: "risques", titre: "Risques naturels", gp: "les risques naturels" },
-  { id: "sante_env", titre: "Santé environnementale", gp: "la santé environnementale" },
-  { id: "cadre", titre: "Nature & cadre", gp: "la nature et le cadre de vie" },
-  { id: "mobilite", titre: "Mobilité", gp: "la mobilité" },
-  { id: "services", titre: "Services & proximité", gp: "les services et la proximité" },
-  { id: "vitalite", titre: "Vie locale & trajectoires", gp: "la vie locale et les trajectoires" },
+  { id: "climat", titre: "Climat", gp: "le climat (chaleur, douceur, soleil)" },
+  { id: "risques", titre: "Risques naturels", gp: "les risques naturels (inondation, feu, sécheresse)" },
+  { id: "sante_env", titre: "Santé environnementale", gp: "la santé environnementale (air, bruit, industrie)" },
+  { id: "cadre", titre: "Nature & cadre", gp: "la nature et le cadre de vie (espaces naturels, mer)" },
+  { id: "mobilite", titre: "Mobilité", gp: "la mobilité (voiture, train, transports)" },
+  { id: "services", titre: "Services & proximité", gp: "les services (soins, écoles, commerces)" },
+  { id: "vitalite", titre: "Vie locale & trajectoires", gp: "la vie locale et les trajectoires (emploi, démographie)" },
 ];
 
-// Paliers [favorable (>=66), intermédiaire, notable (<34)]. Test du maire : fait mesuré,
-// forme relative au national aux pôles (« plus pur », « étendu/resserré »), pas de verdict
-// absolu (« pur », « dynamique »). Référence de ton : calme sonore. Premier jet, à calibrer.
+// Paliers [favorable (>=66), intermédiaire, notable (<34)]. Libellés clairs et concrets
+// (compréhensibles sans jargon). forte = groupe valencé pour la synthèse. risque = critère
+// dont le pire tier s'affiche en rouge si une autre commune fait mieux. directionnel=false
+// = préférence non universelle (pas de gagnant). Premier jet, à calibrer.
 const DIMENSIONS: ComparaisonDim[] = [
-  { id: "etes_frais", label: "Étés frais", themeId: "climat", key: "faible_chaleur", paliers: ["Étés frais", "Étés tempérés", "Étés chauds"], gp: "les étés frais", aide: "À quel point les étés restent supportables côté chaleur." },
-  { id: "douceur", label: "Douceur du climat", themeId: "climat", key: "douceur_climat", paliers: ["Climat doux", "Climat contrasté", "Hivers rigoureux"], gp: "la douceur du climat", aide: "Des hivers tempérés et des étés sans excès." },
-  { id: "ensoleillement", label: "Ensoleillement", themeId: "climat", key: "ensoleillement_recherche", paliers: ["Chaud et ensoleillé", "Ensoleillement modéré", "Frais et humide"], gp: "l'ensoleillement", aide: "Le caractère ensoleillé et chaud du climat, surtout l'été." },
-  { id: "inondation", label: "Inondation", themeId: "risques", key: "faible_risque_inondation", paliers: ["Risque faible", "Risque modéré", "Risque plus marqué"], gp: "le risque d'inondation", aide: "Ce que dit l'historique d'inondations du territoire." },
-  { id: "feu", label: "Feu", themeId: "risques", key: "faible_risque_feu", paliers: ["Risque faible", "Risque modéré", "Risque plus marqué"], gp: "le risque de feu", aide: "L'exposition du secteur au risque d'incendie." },
-  { id: "pluies", label: "Pluies intenses", themeId: "risques", key: "faible_precip_extremes", paliers: ["Peu de pluies intenses", "Pluies intenses modérées", "Pluies intenses fréquentes"], gp: "les pluies intenses", aide: "La fréquence des épisodes de pluies très intenses." },
-  { id: "secheresse", label: "Sécheresse", themeId: "risques", key: "faible_secheresse", paliers: ["Sols peu exposés", "Exposition modérée", "Sols exposés"], gp: "la sécheresse", aide: "À quel point les sols sont exposés au manque d'eau." },
-  { id: "air", label: "Air", themeId: "sante_env", key: "air_sain", paliers: ["Air de fond plus pur", "Air de fond intermédiaire", "Air de fond plus chargé"], gp: "l'air", aide: "La qualité de l'air de fond respiré au quotidien." },
-  { id: "calme_sonore", label: "Calme sonore", themeId: "sante_env", key: "calme_sonore", paliers: ["Très préservé du bruit", "Exposition sonore modérée", "Fortement exposé au bruit"], gp: "le calme sonore", aide: "L'éloignement des grandes sources de bruit (axes, rail, aéroports)." },
-  { id: "industrie", label: "Sites industriels", themeId: "sante_env", key: "faible_exposition_industrielle", paliers: ["Peu exposé aux sites industriels à risque", "Présence industrielle modérée", "Environnement industriel marqué"], gp: "les sites industriels", aide: "La présence de sites industriels classés à proximité, pas un niveau de pollution." },
-  { id: "agriculture", label: "Agriculture intensive", themeId: "sante_env", key: "faible_pression_agricole", paliers: ["Peu d'agriculture intensive", "Agriculture intensive modérée", "Agriculture intensive marquée"], gp: "l'agriculture intensive", aide: "L'éloignement des cultures à traitements fréquents." },
-  { id: "nature", label: "Espaces naturels", themeId: "cadre", key: "nature", paliers: ["Beaucoup de nature autour", "Nature présente", "Peu de nature autour"], gp: "les espaces naturels", aide: "La présence d'espaces naturels autour du lieu de vie." },
-  { id: "mer", label: "Mer", themeId: "cadre", key: "proximite_mer", paliers: ["En bord de mer", "Proche du littoral", "Loin de la mer"], gp: "la proximité de la mer", aide: "La proximité de la côte." },
-  { id: "cadre_calme", label: "Cadre de vie", themeId: "cadre", key: "cadre_calme", paliers: ["Environnement peu dense", "Densité intermédiaire", "Environnement dense"], gp: "le cadre de vie", aide: "À quel point l'environnement bâti est dense ou aéré." },
-  { id: "sans_voiture", label: "Sans voiture", themeId: "mobilite", key: "faible_dependance_auto", paliers: ["Peu dépendant de la voiture", "Dépendance modérée", "Voiture très présente"], gp: "la vie sans voiture", aide: "Part des trajets du quotidien faisables autrement qu'en voiture." },
-  { id: "train", label: "Train / gares", themeId: "mobilite", key: "acces_transports", paliers: ["Bien relié par le train", "Gare accessible, desserte limitée", "Peu relié par le train"], gp: "le train", aide: "La desserte par le train et les gares proches." },
-  { id: "tc_quotidien", label: "Transports du quotidien", themeId: "mobilite", key: "mobilite_quotidienne", paliers: ["Réseau du quotidien présent", "Desserte partielle", "Peu de transports du quotidien"], gp: "les transports du quotidien", aide: "Un réseau de bus, tram ou métro pour se déplacer sans voiture au quotidien." },
-  { id: "soins", label: "Soins", themeId: "services", key: "acces_soins", paliers: ["Accès aux soins plus facile", "Accès intermédiaire", "Accès plus limité"], gp: "l'accès aux soins", aide: "La facilité d'accès aux médecins." },
-  { id: "services", label: "Services", themeId: "services", key: "acces_services", paliers: ["Services proches", "Accès intermédiaire", "Services plus éloignés"], gp: "les services", aide: "La proximité des commerces et services du quotidien." },
-  { id: "ecoles", label: "Collèges / lycées", themeId: "services", key: "acces_ecoles", paliers: ["Collèges et lycées plus accessibles", "Accès intermédiaire", "Accès plus limité"], gp: "l'accès aux collèges et lycées", aide: "L'accès aux collèges et lycées alentour." },
-  { id: "culture", label: "Culture", themeId: "services", key: "acces_culture", paliers: ["Offre culturelle plus présente", "Offre intermédiaire", "Offre plus limitée"], gp: "l'offre culturelle", aide: "La présence d'équipements culturels à proximité." },
-  { id: "isolement", label: "Isolement", themeId: "services", key: "eviter_isolement", paliers: ["Bassin de vie étendu", "Bassin de proximité", "Bassin de vie restreint"], gp: "le bassin de vie", aide: "La taille du bassin de vie qui dessert le territoire." },
-  { id: "emploi", label: "Emploi", themeId: "vitalite", key: "viabilite_emploi", paliers: ["Bassin d'emploi étendu", "Bassin d'emploi intermédiaire", "Bassin d'emploi resserré"], gp: "le bassin d'emploi", aide: "L'étendue et la diversité du bassin d'emploi." },
-  { id: "vie_locale", label: "Vie locale", themeId: "vitalite", key: "vie_locale", paliers: ["Vie locale animée", "Vie locale intermédiaire", "Vie locale plus discrète"], gp: "la vie locale", aide: "L'intensité de la vie sociale (cafés, marchés, sport, associations)." },
-  { id: "vie_etudiante", label: "Vie étudiante", themeId: "vitalite", key: "vie_etudiante", paliers: ["Forte présence étudiante", "Présence étudiante intermédiaire", "Présence étudiante plus limitée"], gp: "la vie étudiante", aide: "La présence d'étudiants et d'établissements supérieurs." },
-  { id: "demographie", label: "Démographie", themeId: "vitalite", key: "croissance_demographique", paliers: ["Gagne des habitants", "Population stable", "Perd des habitants"], gp: "la démographie", aide: "Si le territoire gagne ou perd des habitants." },
-  { id: "taille_ville", label: "Taille de ville", themeId: "vitalite", key: "taille_ville", paliers: ["Grande agglomération", "Ville moyenne", "Petite ville ou rural"], gp: "la taille de ville", aide: "La taille de l'agglomération." },
+  { id: "etes_frais", label: "Étés frais", themeId: "climat", key: "faible_chaleur", paliers: ["Étés frais", "Étés tempérés", "Étés chauds"], gp: "les étés frais", forte: "ses étés frais", aide: "À quel point les étés restent supportables côté chaleur.", risque: false, directionnel: true },
+  { id: "douceur", label: "Douceur du climat", themeId: "climat", key: "douceur_climat", paliers: ["Climat doux", "Climat contrasté", "Hivers rigoureux"], gp: "la douceur du climat", forte: "la douceur de son climat", aide: "Des hivers tempérés et des étés sans excès.", risque: false, directionnel: true },
+  { id: "ensoleillement", label: "Ensoleillement", themeId: "climat", key: "ensoleillement_recherche", paliers: ["Chaud et ensoleillé", "Ensoleillement modéré", "Frais et peu ensoleillé"], gp: "l'ensoleillement", forte: "son ensoleillement", aide: "Le caractère ensoleillé et chaud du climat l'été. Affiché sans gagnant : c'est une préférence, pas un avantage universel.", risque: false, directionnel: false },
+  { id: "inondation", label: "Inondation", themeId: "risques", key: "faible_risque_inondation", paliers: ["Risque d'inondation faible", "Risque modéré", "Risque élevé"], gp: "le risque d'inondation", forte: "son faible risque d'inondation", aide: "Ce que dit l'historique d'inondations du territoire.", risque: true, directionnel: true },
+  { id: "feu", label: "Feu", themeId: "risques", key: "faible_risque_feu", paliers: ["Risque de feu faible", "Risque modéré", "Risque élevé"], gp: "le risque de feu", forte: "son faible risque de feu", aide: "L'exposition du secteur au risque d'incendie.", risque: true, directionnel: true },
+  { id: "pluies", label: "Pluies intenses", themeId: "risques", key: "faible_precip_extremes", paliers: ["Peu de pluies intenses", "Pluies intenses modérées", "Pluies intenses fréquentes"], gp: "les pluies intenses", forte: "ses pluies intenses rares", aide: "La fréquence des épisodes de pluies très intenses.", risque: true, directionnel: true },
+  { id: "secheresse", label: "Sécheresse", themeId: "risques", key: "faible_secheresse", paliers: ["Sols peu exposés à la sécheresse", "Exposition modérée", "Sols très exposés"], gp: "la sécheresse", forte: "ses sols peu exposés à la sécheresse", aide: "À quel point les sols sont exposés au manque d'eau.", risque: true, directionnel: true },
+  { id: "air", label: "Air", themeId: "sante_env", key: "air_sain", paliers: ["Air pur", "Qualité de l'air moyenne", "Air pollué"], gp: "l'air", forte: "son air pur", aide: "La qualité de l'air respiré au quotidien.", risque: true, directionnel: true },
+  { id: "calme_sonore", label: "Calme sonore", themeId: "sante_env", key: "calme_sonore", paliers: ["Très préservé du bruit", "Exposition sonore modérée", "Fortement exposé au bruit"], gp: "le calme sonore", forte: "son calme", aide: "L'éloignement des grandes sources de bruit (axes, rail, aéroports).", risque: true, directionnel: true },
+  { id: "industrie", label: "Sites industriels", themeId: "sante_env", key: "faible_exposition_industrielle", paliers: ["Peu exposé aux sites industriels à risque", "Présence industrielle modérée", "Environnement industriel marqué"], gp: "les sites industriels", forte: "son éloignement des sites industriels", aide: "La présence de sites industriels classés à proximité, pas un niveau de pollution.", risque: true, directionnel: true },
+  { id: "agriculture", label: "Agriculture intensive", themeId: "sante_env", key: "faible_pression_agricole", paliers: ["Peu d'agriculture intensive", "Agriculture intensive modérée", "Agriculture intensive marquée"], gp: "l'agriculture intensive", forte: "le peu d'agriculture intensive autour", aide: "L'éloignement des cultures à traitements fréquents.", risque: true, directionnel: true },
+  { id: "nature", label: "Espaces naturels", themeId: "cadre", key: "nature", paliers: ["Beaucoup de nature autour", "Nature présente", "Peu de nature autour"], gp: "les espaces naturels", forte: "ses espaces naturels", aide: "La présence d'espaces naturels autour du lieu de vie.", risque: false, directionnel: true },
+  { id: "mer", label: "Mer", themeId: "cadre", key: "proximite_mer", paliers: ["En bord de mer", "Proche du littoral", "Loin de la mer"], gp: "la proximité de la mer", forte: "sa proximité de la mer", aide: "La proximité de la côte.", risque: false, directionnel: true },
+  { id: "cadre_calme", label: "Cadre de vie", themeId: "cadre", key: "cadre_calme", paliers: ["Cadre paisible et habitable", "Cadre intermédiaire", "Très urbain ou très isolé"], gp: "le cadre de vie", forte: "son cadre de vie paisible", aide: "À quel point le cadre est paisible et habitable, ni trop urbain et dense, ni trop isolé.", risque: false, directionnel: true },
+  { id: "sans_voiture", label: "Sans voiture", themeId: "mobilite", key: "faible_dependance_auto", paliers: ["Peu dépendant de la voiture", "Dépendance modérée à la voiture", "Voiture indispensable"], gp: "la vie sans voiture", forte: "sa faible dépendance à la voiture", aide: "Part des trajets du quotidien faisables autrement qu'en voiture.", risque: false, directionnel: true },
+  { id: "train", label: "Train / gares", themeId: "mobilite", key: "acces_transports", paliers: ["Bien relié par le train", "Gare accessible, desserte limitée", "Peu relié par le train"], gp: "le train", forte: "sa desserte ferroviaire", aide: "La desserte par le train et les gares proches.", risque: false, directionnel: true },
+  { id: "tc_quotidien", label: "Transports du quotidien", themeId: "mobilite", key: "mobilite_quotidienne", paliers: ["Réseau de transports présent", "Desserte partielle", "Peu de transports en commun"], gp: "les transports du quotidien", forte: "ses transports du quotidien", aide: "Un réseau de bus, tram ou métro pour se déplacer sans voiture au quotidien.", risque: false, directionnel: true },
+  { id: "soins", label: "Soins", themeId: "services", key: "acces_soins", paliers: ["Bon accès aux soins", "Accès intermédiaire", "Accès aux soins limité"], gp: "l'accès aux soins", forte: "son accès aux soins", aide: "La facilité d'accès aux médecins.", risque: false, directionnel: true },
+  { id: "services", label: "Services", themeId: "services", key: "acces_services", paliers: ["Services proches", "Accès intermédiaire", "Services éloignés"], gp: "les services", forte: "ses services accessibles", aide: "La proximité des commerces et services du quotidien.", risque: false, directionnel: true },
+  { id: "ecoles", label: "Collèges / lycées", themeId: "services", key: "acces_ecoles", paliers: ["Collèges et lycées accessibles", "Accès intermédiaire", "Accès limité"], gp: "l'accès aux collèges et lycées", forte: "son accès aux collèges et lycées", aide: "L'accès aux collèges et lycées alentour.", risque: false, directionnel: true },
+  { id: "culture", label: "Culture", themeId: "services", key: "acces_culture", paliers: ["Offre culturelle présente", "Offre intermédiaire", "Offre limitée"], gp: "l'offre culturelle", forte: "son offre culturelle", aide: "La présence d'équipements culturels à proximité.", risque: false, directionnel: true },
+  { id: "isolement", label: "Isolement", themeId: "services", key: "eviter_isolement", paliers: ["Bassin de vie étendu", "Bassin de proximité", "Bassin de vie restreint"], gp: "le bassin de vie", forte: "son bassin de vie étendu", aide: "La taille du bassin de vie qui dessert le territoire.", risque: false, directionnel: true },
+  { id: "emploi", label: "Emploi", themeId: "vitalite", key: "viabilite_emploi", paliers: ["Bassin d'emploi étendu", "Bassin d'emploi intermédiaire", "Bassin d'emploi resserré"], gp: "le bassin d'emploi", forte: "son bassin d'emploi étendu", aide: "L'étendue et la diversité du bassin d'emploi.", risque: false, directionnel: true },
+  { id: "vie_locale", label: "Vie locale", themeId: "vitalite", key: "vie_locale", paliers: ["Vie locale animée", "Vie locale intermédiaire", "Vie locale discrète"], gp: "la vie locale", forte: "sa vie locale animée", aide: "L'intensité de la vie sociale (cafés, marchés, sport, associations).", risque: false, directionnel: true },
+  { id: "vie_etudiante", label: "Vie étudiante", themeId: "vitalite", key: "vie_etudiante", paliers: ["Forte présence étudiante", "Présence étudiante intermédiaire", "Présence étudiante limitée"], gp: "la vie étudiante", forte: "sa vie étudiante", aide: "La présence d'étudiants et d'établissements supérieurs.", risque: false, directionnel: true },
+  { id: "demographie", label: "Démographie", themeId: "vitalite", key: "croissance_demographique", paliers: ["Gagne des habitants", "Population stable", "Perd des habitants"], gp: "la démographie", forte: "sa croissance démographique", aide: "Si le territoire gagne ou perd des habitants.", risque: false, directionnel: true },
+  { id: "taille_ville", label: "Taille de ville", themeId: "vitalite", key: "taille_ville", paliers: ["Grande agglomération", "Ville moyenne", "Petite ville ou rural"], gp: "la taille de ville", forte: "sa taille", aide: "La taille de l'agglomération.", risque: false, directionnel: false },
 ];
 
 // Palier factuel de taille d'agglomération (dimension non directionnelle).
@@ -1093,24 +1101,20 @@ function buildComparaisonComplete(
   const ligneByDim = new Map<string, ComparaisonLigne>();
   for (const dim of DIMENSIONS) {
     const raw = rawByDim.get(dim.id)!;
-    const cellules: ComparaisonCellule[] = trio.map((r, i) => {
-      const c = cols[i];
-      const s = raw[i];
-      if (c == null || s == null) {
-        return { insee: r.insee, palier: "Non mesuré ici", qualifier: null, disponible: false };
-      }
-      const palier = dim.key === "taille_ville" ? tailleVillePalier(c) : dim.paliers[bandIndex(s)];
-      return { insee: r.insee, palier, qualifier: dimQualifier(dim.id, c), disponible: true };
-    });
+    // bande de favorabilité par commune (null = donnée absente, ou taille = factuel non bandé)
+    const bands = trio.map((r, i) =>
+      raw[i] == null || dim.key === "taille_ville" ? null : bandIndex(raw[i]!),
+    );
+    const someoneBetter = (b: number) => bands.some((x) => x != null && x < b);
 
-    // Avantage fondé sur le PALIER affiché (pas le score caché) : les communes au MEILLEUR
-    // palier du trio mènent. 1 commune -> « Avantage X ». 2 communes au même meilleur palier
-    // pendant que la 3e est en retrait -> « Avantage X et Y » (les deux s'allument), pas un
-    // faux « À égalité ». 3 communes au même palier -> vraie égalité. On nomme qui mène,
-    // jamais qui est en retrait. Taille de ville = jamais directionnel.
+    // Avantage fondé sur le PALIER affiché. Dimension non directionnelle (préférence : soleil,
+    // taille) -> « neutre », pas de gagnant. Sinon les communes au MEILLEUR palier mènent :
+    // 1 -> « Avantage X » ; 2 (3e en retrait) -> « Avantage X et Y » ; 3 au même palier ->
+    // « À égalité ». On nomme qui mène, jamais qui est en retrait.
     let avantage: ComparaisonAvantage = { type: "egalite" };
-    if (dim.key !== "taille_ville") {
-      const bands = trio.map((r, i) => (raw[i] == null ? null : bandIndex(raw[i]!)));
+    if (!dim.directionnel) {
+      avantage = { type: "neutre" };
+    } else {
       const present = bands.filter((b): b is 0 | 1 | 2 => b != null);
       if (present.length >= 1) {
         const best = Math.min(...present);
@@ -1120,12 +1124,32 @@ function buildComparaisonComplete(
         }
       }
     }
+    const leaderSet = avantage.type === "avantage" ? new Set(avantage.insees) : new Set<string>();
+
+    const cellules: ComparaisonCellule[] = trio.map((r, i) => {
+      const c = cols[i];
+      const s = raw[i];
+      if (c == null || s == null) {
+        return { insee: r.insee, palier: "Donnée non disponible", qualifier: null, disponible: false, alerte: false };
+      }
+      const band = bands[i];
+      const palier = dim.key === "taille_ville" ? tailleVillePalier(c) : dim.paliers[band!];
+      // Qualifier (source proche) seulement pour expliquer une EXPOSITION : pas sur le tier
+      // favorable, pas sur la commune qui MÈNE (sinon « Avantage » + « site à risque proche »
+      // se contredisent).
+      const qualifier =
+        band != null && band >= 1 && !leaderSet.has(r.insee) ? dimQualifier(dim.id, c) : null;
+      // Alerte rouge : pire tier d'un critère de risque, alors qu'une autre commune fait mieux.
+      const alerte = dim.risque && band === 2 && someoneBetter(2);
+      return { insee: r.insee, palier, qualifier, disponible: true, alerte };
+    });
+
     ligneByDim.set(dim.id, { id: dim.id, label: dim.label, aide: dim.aide, avantage, cellules });
   }
 
   // thèmes : phrase de synthèse honnête (phrases naturelles, groupes nominaux avec article)
   const nomByInsee = new Map(trio.map((r) => [r.insee, r.nom]));
-  const gpById = new Map(DIMENSIONS.map((d) => [d.id, d.gp]));
+  const forteById = new Map(DIMENSIONS.map((d) => [d.id, d.forte]));
   const joinFr = (xs: string[]): string =>
     xs.length <= 1 ? (xs[0] ?? "") : `${xs.slice(0, -1).join(", ")} et ${xs[xs.length - 1]}`;
   const themes: ComparaisonTheme[] = THEME_ORDER.map((th) => {
@@ -1137,7 +1161,7 @@ function buildComparaisonComplete(
       if (l.avantage.type === "avantage" && l.avantage.insees.length === 1) {
         const insee = l.avantage.insees[0];
         const arr = winners.get(insee) ?? [];
-        arr.push(gpById.get(l.id) ?? l.label.toLowerCase());
+        arr.push(forteById.get(l.id) ?? l.label.toLowerCase());
         winners.set(insee, arr);
       }
     }
@@ -1146,11 +1170,11 @@ function buildComparaisonComplete(
     if (ranked.length === 0) {
       synthese = "Sur ce thème, les trois territoires se ressemblent.";
     } else if (ranked.length === 1) {
-      const [insee, gps] = ranked[0];
-      synthese = `${nomByInsee.get(insee)} prend l'avantage sur ${joinFr(gps.slice(0, 2))}.`;
+      const [insee, fortes] = ranked[0];
+      synthese = `${nomByInsee.get(insee)} se distingue par ${joinFr(fortes.slice(0, 2))}.`;
     } else {
       const [a, b] = ranked;
-      synthese = `${nomByInsee.get(a[0])} se distingue sur ${a[1][0]}, ${nomByInsee.get(b[0])} sur ${b[1][0]}.`;
+      synthese = `${nomByInsee.get(a[0])} se distingue par ${a[1][0]}, ${nomByInsee.get(b[0])} par ${b[1][0]}.`;
     }
     return { id: th.id, titre: th.titre, synthese, lignes };
   });

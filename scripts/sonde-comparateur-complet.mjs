@@ -45,11 +45,12 @@ async function main() {
       for (const l of th.lignes) {
         const av = l.avantage.type === "avantage"
           ? `Avantage ${l.avantage.insees.map((i) => nom(r.trio, i)).join(" et ")}`
-          : "À égalité";
+          : l.avantage.type === "neutre" ? "(descriptif)" : "À égalité";
         console.log(`    ${l.label}  [${av}]`);
         for (const cell of l.cellules) {
           const q = cell.qualifier ? `, ${cell.qualifier}` : "";
-          console.log(`        ${nom(r.trio, cell.insee)} : ${cell.palier}${q}`);
+          const flag = cell.alerte ? " ⚠ROUGE" : "";
+          console.log(`        ${nom(r.trio, cell.insee)} : ${cell.palier}${q}${flag}`);
         }
       }
     }

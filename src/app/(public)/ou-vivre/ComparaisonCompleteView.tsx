@@ -143,7 +143,9 @@ function LabelTip({ label, text }: { label: string; text: string }) {
 
 function paletteTone(cell: ComparaisonCellule, leader: boolean): string {
   if (!cell.disponible) return "text-ghost italic";
-  return leader ? "text-accent" : "text-label";
+  if (leader) return "text-accent";
+  if (cell.alerte) return "text-danger";
+  return "text-label";
 }
 
 function Cellule({ cell, nom, leader }: { cell: ComparaisonCellule; nom: string; leader: boolean }) {
@@ -168,6 +170,7 @@ function Cellule({ cell, nom, leader }: { cell: ComparaisonCellule; nom: string;
 function LigneRow({ ligne, trio }: { ligne: ComparaisonLigne; trio: MatchResult[] }) {
   const leaders = ligne.avantage.type === "avantage" ? ligne.avantage.insees : [];
   const egalite = ligne.avantage.type === "egalite";
+  const neutre = ligne.avantage.type === "neutre";
   const cellByInsee = new Map(ligne.cellules.map((c) => [c.insee, c]));
   const leaderNoms = leaders
     .map((insee) => trio.find((r) => r.insee === insee)?.nom ?? "")
@@ -183,13 +186,15 @@ function LigneRow({ ligne, trio }: { ligne: ComparaisonLigne; trio: MatchResult[
     <div className={`${GRID} gap-y-2 md:gap-y-0 md:items-center py-3.5 border-t border-white/[0.06]`}>
       <div className="md:pr-2">
         <LabelTip label={ligne.label} text={ligne.aide} />
-        <span
-          className={`block mt-1 font-mono text-[9.5px] tracking-[0.12em] uppercase ${
-            egalite ? "text-ghost" : "text-accent"
-          }`}
-        >
-          {egalite ? "À égalité" : `Avantage ${leaderNoms.join(" et ")}`}
-        </span>
+        {!neutre && (
+          <span
+            className={`block mt-1 font-mono text-[9.5px] tracking-[0.12em] uppercase ${
+              egalite ? "text-ghost" : "text-accent"
+            }`}
+          >
+            {egalite ? "À égalité" : `Avantage ${leaderNoms.join(" et ")}`}
+          </span>
+        )}
       </div>
 
       {merged ? (
@@ -265,6 +270,7 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
                 {th.titre}
               </h3>
             </div>
+            <p className="text-[12px] text-ghost mb-2">{th.lignes.map((l) => l.label).join(" · ")}</p>
             <p className="text-[14.5px] leading-[1.55] text-muted italic mb-4 max-w-[680px]">{th.synthese}</p>
 
             {/* En-tête des 3 communes, rappelé pour ce thème (desktop) */}

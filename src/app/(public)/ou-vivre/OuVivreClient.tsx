@@ -1034,17 +1034,12 @@ export function OuVivreClient() {
                   <a
                     href={`/territoire/${r.insee}/debloquer?nom=${encodeURIComponent(r.nom)}&rank=${i + 1}&source=comparateur_vie`}
                     onClick={() => onExplore(r, i + 1)}
-                    className="group relative mt-7 flex flex-col items-center gap-1 overflow-hidden rounded-xl px-4 py-3 no-underline text-accent border border-accent/[0.35] bg-accent/[0.08] transition-all duration-300 hover:bg-accent/[0.16] hover:border-accent/[0.6] hover:shadow-[0_8px_30px_-6px_var(--accent)]"
+                    className="mt-7 flex flex-col items-center gap-1 rounded-xl px-4 py-3 no-underline text-muted border border-white/[0.14] transition-colors hover:border-white/[0.28] hover:text-label"
                   >
-                    {/* Reflet premium qui balaie au survol */}
-                    <span
-                      aria-hidden
-                      className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/[0.22] to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full"
-                    />
-                    <span className="relative text-center font-mono text-[10.5px] tracking-[0.08em] uppercase">
+                    <span className="text-center font-mono text-[10.5px] tracking-[0.08em] uppercase">
                       Découvrir ce territoire
                     </span>
-                    <span className="relative text-center font-mono text-[8.5px] tracking-[0.04em] text-accent/70">
+                    <span className="text-center font-mono text-[8.5px] tracking-[0.04em] text-ghost">
                       Rapport complet interactif · 14 €
                     </span>
                   </a>
@@ -1088,11 +1083,18 @@ export function OuVivreClient() {
               </div>
               <button
                 onClick={onCompare}
-                className="shrink-0 inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-accent text-canvas font-semibold text-[14px]"
+                className="group relative overflow-hidden shrink-0 inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-accent text-canvas font-semibold text-[14px] transition-shadow duration-300 hover:shadow-[0_8px_30px_-6px_var(--orange)]"
                 style={{ fontFamily: "'Instrument Sans', sans-serif" }}
               >
-                Comparer ces territoires
-                <span aria-hidden>→</span>
+                {/* Reflet premium qui balaie au survol */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/[0.35] to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full"
+                />
+                <span className="relative inline-flex items-center gap-2">
+                  Comparer ces territoires
+                  <span aria-hidden>→</span>
+                </span>
               </button>
             </div>
           )}
