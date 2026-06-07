@@ -259,6 +259,7 @@ export type ComparaisonTheme = {
 };
 
 export type ComparaisonComplete = {
+  resume: string[]; // « En résumé » : 1 à 3 phrases, niveau thème (qui mène sur quels thèmes)
   themes: ComparaisonTheme[];
 };
 
@@ -980,14 +981,14 @@ type ComparaisonDim = {
   aide: string; // glose tooltip (≤2 phrases, « pourquoi ça aide à comprendre », sans méthodo)
 };
 
-const THEME_ORDER: { id: string; titre: string }[] = [
-  { id: "climat", titre: "Climat" },
-  { id: "risques", titre: "Risques naturels" },
-  { id: "sante_env", titre: "Santé environnementale" },
-  { id: "cadre", titre: "Nature & cadre" },
-  { id: "mobilite", titre: "Mobilité" },
-  { id: "services", titre: "Services & proximité" },
-  { id: "vitalite", titre: "Vie locale & trajectoires" },
+const THEME_ORDER: { id: string; titre: string; gp: string }[] = [
+  { id: "climat", titre: "Climat", gp: "le climat" },
+  { id: "risques", titre: "Risques naturels", gp: "les risques naturels" },
+  { id: "sante_env", titre: "Santé environnementale", gp: "la santé environnementale" },
+  { id: "cadre", titre: "Nature & cadre", gp: "la nature et le cadre de vie" },
+  { id: "mobilite", titre: "Mobilité", gp: "la mobilité" },
+  { id: "services", titre: "Services & proximité", gp: "les services et la proximité" },
+  { id: "vitalite", titre: "Vie locale & trajectoires", gp: "la vie locale et les trajectoires" },
 ];
 
 // Paliers [favorable (>=66), intermédiaire, notable (<34)]. Test du maire : fait mesuré,
@@ -1002,14 +1003,14 @@ const DIMENSIONS: ComparaisonDim[] = [
   { id: "pluies", label: "Pluies intenses", themeId: "risques", key: "faible_precip_extremes", paliers: ["Peu de pluies intenses", "Pluies intenses modérées", "Pluies intenses fréquentes"], gp: "les pluies intenses", aide: "La fréquence des épisodes de pluies très intenses." },
   { id: "secheresse", label: "Sécheresse", themeId: "risques", key: "faible_secheresse", paliers: ["Sols peu exposés", "Exposition modérée", "Sols exposés"], gp: "la sécheresse", aide: "À quel point les sols sont exposés au manque d'eau." },
   { id: "air", label: "Air", themeId: "sante_env", key: "air_sain", paliers: ["Air de fond plus pur", "Air de fond intermédiaire", "Air de fond plus chargé"], gp: "l'air", aide: "La qualité de l'air de fond respiré au quotidien." },
-  { id: "calme_sonore", label: "Calme sonore", themeId: "sante_env", key: "calme_sonore", paliers: ["Très préservé", "Modéré", "Exposé"], gp: "le calme sonore", aide: "L'éloignement des grandes sources de bruit (axes, rail, aéroports)." },
-  { id: "industrie", label: "Sites industriels", themeId: "sante_env", key: "faible_exposition_industrielle", paliers: ["À l'écart des sites industriels", "Présence industrielle modérée", "Environnement industriel marqué"], gp: "les sites industriels", aide: "La présence de sites industriels classés à proximité, pas un niveau de pollution." },
+  { id: "calme_sonore", label: "Calme sonore", themeId: "sante_env", key: "calme_sonore", paliers: ["Très préservé du bruit", "Exposition sonore modérée", "Fortement exposé au bruit"], gp: "le calme sonore", aide: "L'éloignement des grandes sources de bruit (axes, rail, aéroports)." },
+  { id: "industrie", label: "Sites industriels", themeId: "sante_env", key: "faible_exposition_industrielle", paliers: ["Peu exposé aux sites industriels à risque", "Présence industrielle modérée", "Environnement industriel marqué"], gp: "les sites industriels", aide: "La présence de sites industriels classés à proximité, pas un niveau de pollution." },
   { id: "agriculture", label: "Agriculture intensive", themeId: "sante_env", key: "faible_pression_agricole", paliers: ["Peu d'agriculture intensive", "Agriculture intensive modérée", "Agriculture intensive marquée"], gp: "l'agriculture intensive", aide: "L'éloignement des cultures à traitements fréquents." },
   { id: "nature", label: "Espaces naturels", themeId: "cadre", key: "nature", paliers: ["Beaucoup de nature autour", "Nature présente", "Peu de nature autour"], gp: "les espaces naturels", aide: "La présence d'espaces naturels autour du lieu de vie." },
   { id: "mer", label: "Mer", themeId: "cadre", key: "proximite_mer", paliers: ["En bord de mer", "Proche du littoral", "Loin de la mer"], gp: "la proximité de la mer", aide: "La proximité de la côte." },
-  { id: "cadre_calme", label: "Cadre de vie", themeId: "cadre", key: "cadre_calme", paliers: ["Cadre peu dense", "Densité intermédiaire", "Cadre dense"], gp: "le cadre de vie", aide: "À quel point l'environnement bâti est dense ou aéré." },
+  { id: "cadre_calme", label: "Cadre de vie", themeId: "cadre", key: "cadre_calme", paliers: ["Environnement peu dense", "Densité intermédiaire", "Environnement dense"], gp: "le cadre de vie", aide: "À quel point l'environnement bâti est dense ou aéré." },
   { id: "sans_voiture", label: "Sans voiture", themeId: "mobilite", key: "faible_dependance_auto", paliers: ["Peu dépendant de la voiture", "Dépendance modérée", "Voiture très présente"], gp: "la vie sans voiture", aide: "Part des trajets du quotidien faisables autrement qu'en voiture." },
-  { id: "train", label: "Train / gares", themeId: "mobilite", key: "acces_transports", paliers: ["Bien relié par le train", "Desserte ferroviaire modérée", "Peu relié par le train"], gp: "le train", aide: "La desserte par le train et les gares proches." },
+  { id: "train", label: "Train / gares", themeId: "mobilite", key: "acces_transports", paliers: ["Bien relié par le train", "Gare accessible, desserte limitée", "Peu relié par le train"], gp: "le train", aide: "La desserte par le train et les gares proches." },
   { id: "tc_quotidien", label: "Transports du quotidien", themeId: "mobilite", key: "mobilite_quotidienne", paliers: ["Réseau du quotidien présent", "Desserte partielle", "Peu de transports du quotidien"], gp: "les transports du quotidien", aide: "Un réseau de bus, tram ou métro pour se déplacer sans voiture au quotidien." },
   { id: "soins", label: "Soins", themeId: "services", key: "acces_soins", paliers: ["Accès aux soins plus facile", "Accès intermédiaire", "Accès plus limité"], gp: "l'accès aux soins", aide: "La facilité d'accès aux médecins." },
   { id: "services", label: "Services", themeId: "services", key: "acces_services", paliers: ["Services proches", "Accès intermédiaire", "Services plus éloignés"], gp: "les services", aide: "La proximité des commerces et services du quotidien." },
@@ -1049,6 +1050,22 @@ function dimQualifier(dimId: string, c: IndexCommune): string | null {
       : "site industriel proche";
   }
   return null;
+}
+
+// Commune qui mène un thème = celle qui a le plus d'avantages NETS (1 commune) parmi ses
+// dimensions, si elle est strictement devant. Égalité de tête -> thème équilibré (null).
+function themeLeaderInsee(lignes: ComparaisonLigne[]): string | null {
+  const cnt = new Map<string, number>();
+  for (const l of lignes) {
+    if (l.avantage.type === "avantage" && l.avantage.insees.length === 1) {
+      const i = l.avantage.insees[0];
+      cnt.set(i, (cnt.get(i) ?? 0) + 1);
+    }
+  }
+  const sorted = [...cnt.entries()].sort((a, b) => b[1] - a[1]);
+  if (sorted.length === 0) return null;
+  if (sorted.length > 1 && sorted[0][1] === sorted[1][1]) return null;
+  return sorted[0][0];
 }
 
 // Construit la comparaison complète du trio affiché. Déterministe, hors score/tri.
@@ -1138,7 +1155,31 @@ function buildComparaisonComplete(
     return { id: th.id, titre: th.titre, synthese, lignes };
   });
 
-  return { themes };
+  // « En résumé » : niveau thème. Quelles communes mènent quels thèmes (prépare la lecture
+  // du détail). Déterministe. La 1re commune (mène le plus de thèmes) « prend l'avantage »,
+  // les suivantes « se distinguent ». On nomme qui mène, jamais qui est en retrait.
+  const gpThemeById = new Map(THEME_ORDER.map((t) => [t.id, t.gp]));
+  const ledByInsee = new Map<string, string[]>();
+  for (const th of themes) {
+    const lead = themeLeaderInsee(th.lignes);
+    if (lead) {
+      const arr = ledByInsee.get(lead) ?? [];
+      arr.push(gpThemeById.get(th.id) ?? th.titre.toLowerCase());
+      ledByInsee.set(lead, arr);
+    }
+  }
+  const ordered = [...ledByInsee.entries()].sort((a, b) => b[1].length - a[1].length);
+  const resume: string[] = [];
+  if (ordered.length === 0) {
+    resume.push("Les trois territoires sont très proches sur l'ensemble des thèmes.");
+  } else {
+    ordered.forEach(([insee, gps], idx) => {
+      const verbe = idx === 0 ? "prend l'avantage sur" : "se distingue sur";
+      resume.push(`${nomByInsee.get(insee)} ${verbe} ${joinFr(gps)}.`);
+    });
+  }
+
+  return { resume, themes };
 }
 
 // Narratif « nouveaux arrivants » (HORS score) : phrase descriptive, jamais normative.

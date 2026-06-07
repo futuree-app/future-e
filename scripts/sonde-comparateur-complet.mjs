@@ -37,6 +37,8 @@ async function main() {
     console.log("PROJET » " + r.text);
     if (r.error) { console.log("  ERREUR:", r.error); continue; }
     console.log("  TRIO : " + r.trio.map((c) => c.nom).join(" · "));
+    console.log("  EN RÉSUMÉ :");
+    for (const s of r.cc.resume) console.log("    " + s);
     for (const th of r.cc.themes) {
       console.log(`\n  ${th.titre}`);
       console.log(`    » ${th.synthese}`);

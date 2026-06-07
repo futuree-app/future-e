@@ -193,22 +193,15 @@ function LigneRow({ ligne, trio }: { ligne: ComparaisonLigne; trio: MatchResult[
       </div>
 
       {merged ? (
-        // Valeur unique alignée sous la commune du MILIEU (colonne centrale).
-        <>
-          <div className="hidden md:block" aria-hidden />
-          <div className="flex items-baseline gap-3 md:block md:gap-0 md:px-3.5 md:py-2.5 md:text-center">
-            <span className="md:hidden w-[92px] shrink-0 font-mono text-[10px] tracking-[0.08em] uppercase text-ghost pt-0.5">
-              Les trois
-            </span>
-            <span className="min-w-0">
-              <span className="text-[14px] leading-[1.45] text-muted">{dispo[0].palier}</span>
-              {dispo[0].qualifier && (
-                <span className="block text-[12px] leading-[1.4] text-muted mt-0.5">{dispo[0].qualifier}</span>
-              )}
-            </span>
-          </div>
-          <div className="hidden md:block" aria-hidden />
-        </>
+        // Égalité parfaite : une seule valeur qui traverse les 3 colonnes (pas de cellule
+        // vide, pas l'impression qu'une seule commune porte la valeur).
+        <div className="md:col-span-3 md:px-3.5 md:py-2.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <span className="text-[14px] leading-[1.45] text-label">
+            {dispo[0].palier}
+            {dispo[0].qualifier ? `, ${dispo[0].qualifier}` : ""}
+          </span>
+          <span className="text-[13px] text-muted">· les trois territoires se valent</span>
+        </div>
       ) : (
         trio.map((r) => {
           const cell = cellByInsee.get(r.insee);
@@ -242,10 +235,27 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
         </h2>
       </div>
 
+      {/* En résumé : qui mène sur quels thèmes (prépare la lecture du détail) */}
+      {data.resume.length > 0 && (
+        <div className="glass rounded-2xl px-6 py-5 mt-9" style={reveal(1)}>
+          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-2.5">En résumé</p>
+          <div className="space-y-1.5">
+            {data.resume.map((s, n) => (
+              <p
+                key={n}
+                className={n === 0 ? "text-[16px] leading-[1.55] text-label" : "text-[14.5px] leading-[1.55] text-muted"}
+              >
+                {s}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Thèmes */}
       <div className="mt-12 space-y-12">
         {data.themes.map((th, i) => (
-          <section key={th.id} style={reveal(1 + i)}>
+          <section key={th.id} style={reveal(2 + i)}>
             <div className="flex items-center gap-3 mb-2">
               <ThemeIcon id={th.id} />
               <h3
