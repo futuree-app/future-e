@@ -4,7 +4,10 @@ import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase/server";
 import { getCheckoutProduct } from "@/lib/checkout-products";
+import { getQuartierPreview } from "@/lib/quartier-preview";
 import { TerritoryUnlockPanel } from "./TerritoryUnlockPanel";
+import { TerritoryUnlockPreview } from "./TerritoryUnlockPreview";
+import { PersonalTouch } from "./PersonalTouch";
 
 // Paywall de territoire : débloque le rapport d'une commune explorée depuis le
 // comparateur (parcours « territoires découverts »). Distinct du checkout
@@ -49,6 +52,7 @@ export default async function TerritoryUnlockPage({
   const rank = rawRank && /^[1-3]$/.test(rawRank) ? Number.parseInt(rawRank, 10) : null;
 
   const product = getCheckoutProduct("rapport-complet")!;
+  const preview = await getQuartierPreview(insee);
 
   const supabase = await createClient();
   const {
@@ -68,33 +72,93 @@ export default async function TerritoryUnlockPage({
           ← Retour aux territoires
         </Link>
 
+        {/* 1. Hero de continuité */}
         <p className="mt-10 font-mono text-[11px] tracking-[0.16em] uppercase text-accent">
-          Rapport de territoire · 14 € une fois
+          Rapport de territoire · {displayName} · 14 € une fois
         </p>
         <h1
           className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] tracking-[-0.02em] text-label"
           style={{ fontFamily: "var(--font-serif)" }}
         >
-          Le rapport complet de{" "}
-          <span className="italic text-accent">{displayName}</span>.
+          Avant de choisir <span className="italic text-accent">{displayName}</span>, regardez ce
+          que les données racontent vraiment.
         </h1>
-        <p className="mt-5 max-w-[46ch] text-[16px] leading-[1.7] text-muted">
-          Vous avez vu pourquoi ce territoire ressort. Le rapport va plus loin : ce que ses
-          données impliquent concrètement, six modules sourcés sur les données publiques.
-          Votre commune de résidence n&apos;est pas modifiée, vous ajoutez simplement ce
-          territoire à votre lecture.
+        <p className="mt-5 max-w-[52ch] text-[16px] leading-[1.7] text-muted">
+          Vous avez vu pourquoi {displayName} ressort dans votre recherche. Le rapport va plus
+          loin : il met à plat ce que ce territoire devient face au climat, et ce que ça implique
+          concrètement pour un projet de vie.
         </p>
 
-        <ul className="mt-8 flex flex-col gap-2.5">
-          {product.features.map((f) => (
-            <li key={f} className="flex items-start gap-3 text-[14px] text-label/90">
-              <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-              {f}
-            </li>
+        {/* 2. Ce que le rapport permet de vérifier (honnête, sans liste de modules) */}
+        <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { t: "Comprendre le territoire", d: "Ce que la commune devient : canicule, inondation, sécheresse, risques du secteur." },
+            { t: "Situer les principaux compromis", d: "Ce qui joue en sa faveur, ce qui demande vigilance, ce qui dépend de votre projet." },
+            { t: "Poser vos questions", d: "3 questions à AskFuture pour approfondir le territoire." },
+          ].map((c) => (
+            <div key={c.t} className="rounded-2xl border border-white/[0.1] bg-white/[0.03] p-5">
+              <p className="text-[15px] text-label" style={{ fontFamily: "var(--font-serif)" }}>{c.t}</p>
+              <p className="mt-2 text-[13px] leading-[1.6] text-muted">{c.d}</p>
+            </div>
           ))}
-        </ul>
+        </div>
 
-        <div className="mt-10 rounded-2xl border border-white/[0.1] bg-white/[0.03] p-7">
+        {/* 3. Aperçu réel (masqué si indisponible) */}
+        {preview && (
+          <section className="mt-14">
+            <h2 className="text-[22px] text-label mb-1" style={{ fontFamily: "var(--font-serif)" }}>
+              Aperçu du rapport de {displayName}
+            </h2>
+            <p className="text-[13px] text-muted mb-5">
+              Le constat est visible, l&apos;analyse complète se débloque avec le rapport.
+            </p>
+            <PersonalTouch commune={displayName} />
+            <TerritoryUnlockPreview preview={preview} commune={displayName} />
+          </section>
+        )}
+
+        {/* 4. AskFuture par l'exemple */}
+        <section className="mt-14">
+          <h2 className="text-[22px] text-label mb-4" style={{ fontFamily: "var(--font-serif)" }}>
+            Vous pourrez demander
+          </h2>
+          <ul className="flex flex-col gap-2.5">
+            {[
+              `${displayName} est-elle adaptée à mon projet ?`,
+              "Quels sont les compromis les plus importants ?",
+              "Quels risques regarder avant d'acheter ou de louer ?",
+              "Que faudrait-il vérifier sur place ?",
+            ].map((q) => (
+              <li key={q} className="flex items-start gap-3 text-[14px] text-label/90">
+                <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                {q}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* 5. Pourquoi 14 € + réassurance */}
+        <section className="mt-14 rounded-2xl border border-white/[0.1] bg-white/[0.03] p-7">
+          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-2">
+            Pourquoi ce rapport est payant ?
+          </p>
+          <p className="text-[14px] leading-[1.7] text-muted">
+            futur·e croise des données publiques dispersées, les rend lisibles commune par
+            commune et les applique à votre projet. Vous ne payez pas l&apos;accès aux données
+            publiques, vous payez leur croisement, leur mise en perspective et leur lecture.
+          </p>
+          <p className="mt-4 text-[14px] leading-[1.7] text-muted">
+            <span className="text-label">Aucun engagement.</span> Débloquer ce rapport
+            n&apos;ajoute pas {displayName} comme commune de résidence : vous l&apos;ouvrez
+            simplement pour la lire, la comparer et la conserver.
+          </p>
+        </section>
+
+        {/* 6. CTA paiement (langage produit : « Explorer », pas « Débloquer » qui sonne SaaS) */}
+        <h2 className="mt-14 text-[22px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+          Explorer le rapport de {displayName}
+        </h2>
+        <div className="mt-5 rounded-2xl border border-white/[0.1] bg-white/[0.03] p-7">
           {user ? (
             <TerritoryUnlockPanel
               insee={insee}
@@ -104,9 +168,9 @@ export default async function TerritoryUnlockPage({
             />
           ) : (
             <div className="flex flex-col gap-4">
-              <h2 className="text-[20px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+              <h3 className="text-[20px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                 Ouvrez d&apos;abord votre espace.
-              </h2>
+              </h3>
               <p className="text-[14px] leading-[1.6] text-muted">
                 Le rapport est rattaché à votre compte pour que vous le retrouviez à tout moment.
               </p>
