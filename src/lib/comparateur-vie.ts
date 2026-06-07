@@ -1130,7 +1130,7 @@ function buildComparaisonComplete(
       const c = cols[i];
       const s = raw[i];
       if (c == null || s == null) {
-        return { insee: r.insee, palier: "Donnée non disponible", qualifier: null, disponible: false, alerte: false };
+        return { insee: r.insee, palier: "Non concernée", qualifier: null, disponible: false, alerte: false };
       }
       const band = bands[i];
       const palier = dim.key === "taille_ville" ? tailleVillePalier(c) : dim.paliers[band!];
