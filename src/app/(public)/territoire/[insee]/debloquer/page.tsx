@@ -61,10 +61,20 @@ export default async function TerritoryUnlockPage({
 
   const backHref = `/territoire/${insee}/debloquer${commune ? `?nom=${encodeURIComponent(commune)}` : ""}`;
 
+  // Une seule révélation orchestrée au chargement (stagger). step-enter vit dans globals.css.
+  const reveal = (i: number) => ({
+    animation: "step-enter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both",
+    animationDelay: `${0.06 * i}s`,
+  });
+
   return (
-    <div className="min-h-screen bg-canvas text-label" style={{ fontFamily: "var(--font-sans)" }}>
+    <div className="relative min-h-screen overflow-hidden bg-canvas text-label" style={{ fontFamily: "var(--font-sans)" }}>
+      {/* Atmosphère : halos diffus pour la profondeur (pas un fond plat) */}
+      <div aria-hidden className="pointer-events-none fixed -top-40 -left-32 h-[480px] w-[480px] rounded-full blur-[120px] opacity-[0.10]" style={{ background: "var(--orange)" }} />
+      <div aria-hidden className="pointer-events-none fixed top-1/3 -right-40 h-[420px] w-[420px] rounded-full blur-[130px] opacity-[0.07]" style={{ background: "var(--color-info)" }} />
+
       <Navbar />
-      <main className="max-w-[760px] mx-auto px-6 py-16">
+      <main className="relative z-[1] max-w-[760px] mx-auto px-6 py-16">
         <Link
           href="/ou-vivre"
           className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost hover:text-muted no-underline"
@@ -73,42 +83,48 @@ export default async function TerritoryUnlockPage({
         </Link>
 
         {/* 1. Hero de continuité */}
-        <p className="mt-10 font-mono text-[11px] tracking-[0.16em] uppercase text-accent">
-          Rapport de territoire · {displayName} · 14 € une fois
-        </p>
-        <h1
-          className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] tracking-[-0.02em] text-label"
-          style={{ fontFamily: "var(--font-serif)" }}
-        >
-          Avant de choisir <span className="italic text-accent">{displayName}</span>, regardez ce
-          que les données racontent vraiment.
-        </h1>
-        <p className="mt-5 max-w-[58ch] text-[16px] leading-[1.7] text-muted">
-          Vous avez vu pourquoi {displayName} ressort dans votre recherche. Le rapport complet va
-          plus loin : il met à plat ce que ce territoire implique concrètement pour votre projet, à
-          partir des données disponibles sur le climat, les risques, la santé environnementale, la
-          mobilité, le logement et le cadre de vie.
-        </p>
+        <div style={reveal(0)}>
+          <p className="mt-10 font-mono text-[11px] tracking-[0.16em] uppercase text-accent">
+            Rapport de territoire · {displayName} · 14 € une fois
+          </p>
+          <h1
+            className="mt-4 text-[clamp(2rem,4.4vw,3.1rem)] leading-[1.06] tracking-[-0.02em] text-label"
+            style={{ fontFamily: "var(--font-serif)" }}
+          >
+            Avant de choisir <span className="italic text-accent">{displayName}</span>, regardez ce
+            que les données racontent vraiment.
+          </h1>
+          <p className="mt-5 max-w-[58ch] text-[16px] leading-[1.7] text-muted">
+            Vous avez vu pourquoi {displayName} ressort dans votre recherche. Le rapport complet va
+            plus loin : il met à plat ce que ce territoire implique concrètement pour votre projet, à
+            partir des données disponibles sur le climat, les risques, la santé environnementale, la
+            mobilité, le logement et le cadre de vie.
+          </p>
+        </div>
 
         {/* 2. Ce que le rapport permet de vérifier (honnête, sans liste de modules) */}
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4" style={reveal(1)}>
           {[
-            { t: "Comprendre le territoire", d: `Ce que les données permettent de dire sur ${displayName} aujourd'hui, et ce qui peut évoluer dans les prochaines décennies.` },
-            { t: "Identifier les points de vigilance", d: `Ce qui joue en faveur de ${displayName}, ce qui demande attention, et ce qui dépend vraiment de votre projet.` },
-            { t: "Poser vos questions", d: "3 questions à AskFuture pour approfondir cette option avec votre situation." },
+            { n: "01", t: "Comprendre le territoire", d: `Ce que les données permettent de dire sur ${displayName} aujourd'hui, et ce qui peut évoluer dans les prochaines décennies.` },
+            { n: "02", t: "Identifier les points de vigilance", d: `Ce qui joue en faveur de ${displayName}, ce qui demande attention, et ce qui dépend vraiment de votre projet.` },
+            { n: "03", t: "Poser vos questions", d: "3 questions à AskFuture pour approfondir cette option avec votre situation." },
           ].map((c) => (
-            <div key={c.t} className="rounded-2xl border border-white/[0.1] bg-white/[0.03] p-5">
-              <p className="text-[15px] text-label" style={{ fontFamily: "var(--font-serif)" }}>{c.t}</p>
+            <div key={c.t} className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
+              <p className="font-mono text-[10px] tracking-[0.14em] text-ghost mb-3">{c.n}</p>
+              <p className="text-[16px] leading-[1.2] text-label" style={{ fontFamily: "var(--font-serif)" }}>{c.t}</p>
               <p className="mt-2 text-[13px] leading-[1.6] text-muted">{c.d}</p>
             </div>
           ))}
         </div>
 
-        {/* 3. Aperçu réel (masqué si indisponible) */}
+        {/* 3. Aperçu réel = le héros visuel (masqué si indisponible) */}
         {preview && (
-          <section className="mt-14">
-            <h2 className="text-[22px] text-label mb-1" style={{ fontFamily: "var(--font-serif)" }}>
-              Aperçu du rapport de {displayName}
+          <section className="mt-20" style={reveal(2)}>
+            <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent mb-2">
+              Aperçu réel du rapport
+            </p>
+            <h2 className="text-[clamp(22px,2.6vw,28px)] leading-[1.15] text-label mb-1" style={{ fontFamily: "var(--font-serif)" }}>
+              Ce que futur·e a déjà analysé sur {displayName}
             </h2>
             <p className="text-[13px] text-muted mb-5">
               Le constat est visible, l&apos;analyse complète se débloque avec le rapport.
@@ -119,7 +135,7 @@ export default async function TerritoryUnlockPage({
         )}
 
         {/* 4. AskFuture par l'exemple */}
-        <section className="mt-14">
+        <section className="mt-20" style={reveal(3)}>
           <h2 className="text-[22px] text-label mb-4" style={{ fontFamily: "var(--font-serif)" }}>
             Vous pourrez demander
           </h2>
@@ -132,76 +148,84 @@ export default async function TerritoryUnlockPage({
               `Pourquoi ${displayName} plutôt qu'une autre option ?`,
             ].map((q) => (
               <li key={q} className="flex items-start gap-3 text-[14px] text-label/90">
-                <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-ghost" />
                 {q}
               </li>
             ))}
           </ul>
         </section>
 
-        {/* 5. Pourquoi ce rapport est payant ? */}
-        <section className="mt-14 rounded-2xl border border-white/[0.1] bg-white/[0.03] p-7">
-          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-2">
+        {/* 5. Pourquoi payant : prose éditoriale (filet accent), pas une boîte */}
+        <section className="mt-20 border-l-2 pl-5" style={{ ...reveal(4), borderColor: "var(--orange)" }}>
+          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2">
             Pourquoi ce rapport est payant ?
           </p>
-          <p className="text-[14px] leading-[1.7] text-muted">
+          <p className="max-w-[60ch] text-[15px] leading-[1.75] text-muted">
             futur·e croise des données publiques dispersées, les rend lisibles commune par
             commune et les applique à votre projet. Vous ne payez pas l&apos;accès aux données
             publiques, vous payez leur croisement, leur mise en perspective et leur lecture.
           </p>
         </section>
 
-        {/* 6. Aucun engagement (réassurance, bloc dédié) */}
-        <section className="mt-4 rounded-2xl border border-white/[0.1] bg-white/[0.03] p-7">
-          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-2">
-            Aucun engagement
+        {/* 6. Aucun engagement : une ligne discrète, pas une boîte de plus */}
+        <p className="mt-8 flex items-start gap-2.5 text-[13px] leading-[1.6] text-ghost" style={reveal(5)}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-[2px] shrink-0" aria-hidden>
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+          <span>
+            <span className="text-muted">Aucun engagement.</span> Débloquer ce rapport ne modifie
+            pas votre commune de résidence : vous ouvrez simplement {displayName} comme option à
+            lire, comparer et conserver.
+          </span>
+        </p>
+
+        {/* 7. CTA paiement : le point le plus lumineux de la page (anneau + glow) */}
+        <section className="mt-20" style={reveal(6)}>
+          <h2 className="text-[clamp(22px,2.6vw,28px)] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+            Explorer le rapport de {displayName}
+          </h2>
+          <p className="mt-2 font-mono text-[11px] tracking-[0.08em] text-muted">
+            14 € · paiement unique · accès immédiat · TVA incluse
           </p>
-          <p className="text-[14px] leading-[1.7] text-muted">
-            Débloquer ce rapport ne modifie pas votre commune de résidence. Vous ouvrez
-            simplement {displayName} comme option à lire, comparer et conserver.
+          <div
+            className="mt-5 rounded-2xl bg-white/[0.03] p-7"
+            style={{ border: "1px solid var(--orange-ring)", boxShadow: "0 24px 70px -28px var(--orange)" }}
+          >
+            {user ? (
+              <TerritoryUnlockPanel
+                insee={insee}
+                commune={commune}
+                rank={rank}
+                amount={product.amount}
+                submitLabel={`Débloquer le rapport de ${displayName}`}
+              />
+            ) : (
+              <div className="flex flex-col gap-4">
+                <h3 className="text-[20px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+                  Ouvrez d&apos;abord votre espace.
+                </h3>
+                <p className="text-[14px] leading-[1.6] text-muted">
+                  Le rapport est rattaché à votre compte pour que vous le retrouviez à tout moment.
+                </p>
+                <Link
+                  href={`/inscription?next=${encodeURIComponent(backHref)}`}
+                  className="flex items-center justify-center rounded-lg bg-accent px-6 py-4 font-mono text-[12px] tracking-[0.12em] uppercase font-semibold text-canvas no-underline"
+                >
+                  Créer mon compte puis débloquer
+                </Link>
+                <Link
+                  href={`/connexion?next=${encodeURIComponent(backHref)}`}
+                  className="flex items-center justify-center rounded-lg border border-white/[0.12] px-6 py-3.5 text-[14px] text-muted no-underline"
+                >
+                  J&apos;ai déjà un compte
+                </Link>
+              </div>
+            )}
+          </div>
+          <p className="mt-5 text-center font-mono text-[11px] tracking-[0.06em] text-ghost">
+            Paiement sécurisé par Stripe
           </p>
         </section>
-
-        {/* 7. CTA paiement (titre produit ; le bouton Stripe dit « Débloquer le rapport de … ») */}
-        <h2 className="mt-14 text-[22px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
-          Explorer le rapport de {displayName}
-        </h2>
-        <div className="mt-5 rounded-2xl border border-white/[0.1] bg-white/[0.03] p-7">
-          {user ? (
-            <TerritoryUnlockPanel
-              insee={insee}
-              commune={commune}
-              rank={rank}
-              amount={product.amount}
-              submitLabel={`Débloquer le rapport de ${displayName}`}
-            />
-          ) : (
-            <div className="flex flex-col gap-4">
-              <h3 className="text-[20px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
-                Ouvrez d&apos;abord votre espace.
-              </h3>
-              <p className="text-[14px] leading-[1.6] text-muted">
-                Le rapport est rattaché à votre compte pour que vous le retrouviez à tout moment.
-              </p>
-              <Link
-                href={`/inscription?next=${encodeURIComponent(backHref)}`}
-                className="flex items-center justify-center rounded-lg bg-accent px-6 py-4 font-mono text-[12px] tracking-[0.12em] uppercase font-semibold text-canvas no-underline"
-              >
-                Créer mon compte puis débloquer
-              </Link>
-              <Link
-                href={`/connexion?next=${encodeURIComponent(backHref)}`}
-                className="flex items-center justify-center rounded-lg border border-white/[0.12] px-6 py-3.5 text-[14px] text-muted no-underline"
-              >
-                J&apos;ai déjà un compte
-              </Link>
-            </div>
-          )}
-        </div>
-
-        <p className="mt-6 text-center font-mono text-[11px] tracking-[0.06em] text-ghost">
-          Stripe · sécurisé · TVA incluse · paiement unique
-        </p>
       </main>
     </div>
   );

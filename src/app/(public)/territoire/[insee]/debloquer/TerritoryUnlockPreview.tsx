@@ -15,23 +15,21 @@ export function TerritoryUnlockPreview({
         {preview.cards.map((card) => (
           <div
             key={card.titre}
-            className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-white/[0.03] p-5"
+            className="flex flex-col rounded-2xl border border-white/[0.08] bg-white/[0.025] p-5"
           >
-            <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-accent mb-2">
+            <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-accent mb-2.5">
               {card.titre}
             </p>
-            <p className="text-[14px] leading-[1.6] text-label/90">{card.constat}</p>
-            {/* Le reste de l'analyse, masqué */}
-            <div className="mt-2 h-12 relative">
-              <div className="space-y-1.5" aria-hidden>
-                <div className="h-2.5 w-[92%] rounded bg-white/[0.06]" />
-                <div className="h-2.5 w-[78%] rounded bg-white/[0.06]" />
-              </div>
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent to-canvas" />
+            <p className="text-[15px] leading-[1.6] text-label/85">{card.constat}</p>
+            <div className="mt-4 pt-3 flex items-center gap-2 border-t border-white/[0.06] text-ghost">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <rect x="5" y="11" width="14" height="10" rx="2" />
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+              </svg>
+              <span className="font-mono text-[9.5px] tracking-[0.1em] uppercase">
+                Lecture complète dans le rapport
+              </span>
             </div>
-            <p className="mt-1 inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase text-ghost">
-              <span aria-hidden>🔒</span> Lecture complète dans le rapport
-            </p>
           </div>
         ))}
       </div>
