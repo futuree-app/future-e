@@ -10,8 +10,6 @@ type Props = {
   onBack: () => void;
   onExploreReport: (r: MatchResult, rang: number) => void;
   onPackDecision: () => void;
-  // Entrée temporaire d'aperçu vers la comparaison complète (le paywall = spec séparée).
-  onPreviewComplete?: () => void;
 };
 
 // Forces : 1 confirmation (reason[0], critère demandé) + 1 découverte (atout
@@ -29,7 +27,7 @@ function cap(s: string): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 }
 
-export function CompareView({ results, onBack, onExploreReport, onPackDecision, onPreviewComplete }: Props) {
+export function CompareView({ results, onBack, onExploreReport, onPackDecision }: Props) {
   const trio = results.slice(0, 3);
   return (
     <div className="pt-10">
@@ -85,13 +83,13 @@ export function CompareView({ results, onBack, onExploreReport, onPackDecision, 
         ))}
       </div>
 
-      {/* Placeholder Pack Décision : élargir + trancher (produit non construit) */}
+      {/* Pack Décision : élargir + trancher */}
       <div
         className="mt-8 glass rounded-2xl p-7"
-        style={{ borderColor: "var(--accent)", boxShadow: "0 0 0 1px var(--accent)" }}
+        style={{ borderColor: "var(--orange-ring)", boxShadow: "0 0 0 1px var(--orange-ring)" }}
       >
         <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-1.5">
-          Bientôt · Pack Décision
+          Pack Décision · 39 €
         </p>
         <h3
           className="font-normal text-[20px] leading-[1.2] text-label"
@@ -108,17 +106,9 @@ export function CompareView({ results, onBack, onExploreReport, onPackDecision, 
           className="mt-4 inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px]"
           style={{ fontFamily: "'Instrument Sans', sans-serif" }}
         >
-          Me prévenir au lancement
+          Comparer en profondeur
           <span aria-hidden>→</span>
         </button>
-        {onPreviewComplete && (
-          <button
-            onClick={onPreviewComplete}
-            className="block mt-4 font-mono text-[11px] tracking-[0.1em] text-accent hover:underline"
-          >
-            Voir la comparaison complète (aperçu) →
-          </button>
-        )}
       </div>
     </div>
   );
