@@ -16,17 +16,16 @@ export const CHECKOUT_PRODUCTS: Record<CheckoutProductSlug, CheckoutProduct> = {
     slug: "rapport-complet",
     title: "Rapport interactif",
     subtitle:
-      "Le rapport interactif intégral, à conserver, avec ses six modules et un accès lecture seule au dashboard.",
+      "Une lecture interactive de ce que le territoire devient, à conserver et à enrichir.",
     amount: 14,
     priceLabel: "14 € une fois",
     productType: "one-shot",
-    ctaLabel: "Payer 14 €",
+    ctaLabel: "Débloquer le rapport",
     features: [
-      "6 modules interactifs personnalisés",
-      "AskFuture — 3 questions incluses",
-      "Dashboard simplifié en lecture seule",
-      "Export PDF, à conserver",
-      "Les 14 € seront déduits à l'ouverture du Suivi (prochainement)",
+      "La lecture du territoire : ce qu'il devient face au climat (canicule, inondation, sécheresse)",
+      "Les sources publiques croisées et rendues lisibles pour cette commune",
+      "AskFuture : 3 questions pour approfondir le territoire",
+      "À conserver, et qui s'enrichit au fil des prochains modules",
     ],
   },
   suivi: {
