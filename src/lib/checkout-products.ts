@@ -1,4 +1,4 @@
-export type CheckoutProductSlug = "rapport-complet" | "suivi" | "pack-decision";
+export type CheckoutProductSlug = "rapport-complet" | "suivi";
 
 export type CheckoutProduct = {
   slug: CheckoutProductSlug;
@@ -6,7 +6,7 @@ export type CheckoutProduct = {
   subtitle: string;
   amount: number;
   priceLabel: string;
-  productType: "one-shot" | "suivi-solo" | "pack-decision";
+  productType: "one-shot" | "suivi-solo";
   ctaLabel: string;
   features: string[];
 };
@@ -44,26 +44,10 @@ export const CHECKOUT_PRODUCTS: Record<CheckoutProductSlug, CheckoutProduct> = {
       "Notifications ciblées sur les événements",
     ],
   },
-  "pack-decision": {
-    slug: "pack-decision",
-    title: "Pack Décision",
-    subtitle:
-      "L'arbitrage entre trois territoires : la comparaison complète, leurs trois rapports, et trois nouvelles pistes.",
-    amount: 39,
-    priceLabel: "39 € une fois",
-    productType: "pack-decision",
-    ctaLabel: "Débloquer le Pack Décision",
-    features: [
-      "La comparaison complète des trois territoires, thème par thème",
-      "Les trois rapports complets, un par commune",
-      "Trois nouvelles pistes sur le même projet",
-      "AskFuture : 9 questions incluses",
-    ],
-  },
 };
 
 export function getCheckoutProduct(slug: string) {
-  if (slug === "rapport-complet" || slug === "suivi" || slug === "pack-decision") {
+  if (slug === "rapport-complet" || slug === "suivi") {
     return CHECKOUT_PRODUCTS[slug];
   }
 
