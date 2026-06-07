@@ -42,7 +42,7 @@ seul geste :
 2. les **3 rapports territoire complets** des communes du trio ;
 3. **3 nouvelles pistes** : les communes suivantes (rangs 4-5-6) du même projet, révélées en
    cartes (nom, identité, 2 forces, compromis), sans rapport complet ;
-4. **AskFuture : 9 questions incluses** dans le Pack Décision.
+4. **AskFuture : 9 questions incluses** dans le Pack Décision (pool unique).
 
 Économie : 3 rapports à 14 € valent 42 €. Le pack à 39 € est donc une offre cohérente (les 3
 rapports, plus la comparaison, plus les pistes, plus AskFuture).
@@ -141,8 +141,12 @@ Au retour de paiement, l'utilisateur revient sur la comparaison complète. La
   regardez ici », pas « trois rapports gratuits de plus » ;
 - les 3 communes du trio : liens vers leur **rapport complet** (accessible via `report_grants`),
   et non plus vers la page debloquer ;
-- AskFuture : **9 questions incluses**, mécanisme hérité du par-rapport (3 par `report_grant`),
-  présenté comme un quota unique de pack ;
+- AskFuture : **9 questions incluses**, en **un seul pool**. Mécanisme réel (vérifié dans
+  `api/ask`) : le quota n'était PAS « 3 par rapport », c'était un compteur global de 3 pour le plan
+  `one_shot`. On le rend proportionnel aux droits : pour un acheteur `one_shot`, quota global =
+  `3 × nombre de report_grants`. Un rapport seul reste à 3 (inchangé), un pack donne 9, en un seul
+  compteur (« vos questions »). L'achat du pack doit donc poser les entitlements `one_shot`
+  (`plan`, `report_access: complete`) pour que les rapports ET AskFuture s'ouvrent ;
 - pas de pack : vue en **aperçu tronqué** + CTA vers la page de conviction.
 
 ## 8. Doctrine respectée

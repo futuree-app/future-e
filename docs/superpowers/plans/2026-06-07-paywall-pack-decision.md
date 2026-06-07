@@ -38,7 +38,8 @@
 - `src/app/api/comparateur-vie/match/route.ts` : strip `comparaisonComplete` + `pistes` + résultats au-delà du top 3.
 - `src/lib/checkout-products.ts` : produit `pack-decision` (39 €).
 - `src/app/api/stripe/create-payment-intent/route.ts` : prix `pack-decision`, metadata trio, persistance du snapshot dans `pack_snapshots`.
-- `src/app/api/stripe/webhook/route.ts` : branche `pack-decision` (decision_pack + 3 grants depuis le staging).
+- `src/app/api/stripe/webhook/route.ts` : branche `pack-decision` (decision_pack + 3 grants + entitlements one_shot depuis le staging).
+- `src/app/api/ask/route.ts` : quota AskFuture proportionnel aux droits (3 × report_grants, pool unique).
 - `src/components/PaymentWrapper.tsx` : prop `pack` (trio + snapshot) + `returnUrl` configurable.
 - `src/components/PaymentForm.tsx` : `return_url` configurable (prop).
 - `src/app/(public)/ou-vivre/OuVivreClient.tsx` : CTA Pack Décision persiste `parsed` + trio en `localStorage` et navigue vers la page ; suppression du rendu libre `view === "complete"`.
@@ -416,12 +417,15 @@ idempotent, appelée par les deux. Ajouter à la fin de `src/lib/decision-packs.
 // Octroi du pack depuis le snapshot en staging (pack_snapshots), idempotent.
 // `admin` doit être un client service-role (bypass RLS). Si `expectedUserId` est
 // fourni, on vérifie que le snapshot appartient bien à cet utilisateur (sécurité
-// quand l'appel vient de la page de retour, pas du webhook signé). Retourne le
-// trio_key octroyé, ou null si rien à faire.
+// quand l'appel vient de la page de retour, pas du webhook signé). `email` permet
+// de poser les entitlements one_shot (report_access complete) sans clobber : tout
+// utilisateur connecté a déjà sa ligne user_accounts, l'upsert est un UPDATE.
+// Retourne le trio_key octroyé, ou null si rien à faire.
 export async function grantDecisionPackFromSnapshot(
   admin: SupabaseClient,
   paymentIntentId: string,
   expectedUserId?: string,
+  email?: string,
 ): Promise<string | null> {
   const { data: snap } = await admin
     .from("pack_snapshots")
@@ -463,6 +467,24 @@ export async function grantDecisionPackFromSnapshot(
     })),
     { onConflict: "user_id,insee" },
   );
+
+  // Entitlements one_shot au niveau compte : sans report_access = complete,
+  // l'acheteur ne pourrait NI lire les rapports (canAccessCompleteReport) NI
+  // utiliser AskFuture (api/ask bloque le plan free). Mêmes droits qu'un achat
+  // rapport one-shot. email requis seulement à l'INSERT (la ligne existe déjà).
+  if (email) {
+    await admin.from("user_accounts").upsert(
+      {
+        user_id: snap.user_id,
+        email,
+        plan: "one_shot",
+        status: "active",
+        report_access: "complete",
+        dashboard_access: "read_only",
+      },
+      { onConflict: "user_id" },
+    );
+  }
 
   return snap.trio_key as string;
 }
@@ -666,11 +688,13 @@ Pas de duplication : le webhook et la page de retour appellent la même fonction
 Au début de `handleSucceededPayment`, après la ligne `const resend = getResend();`, insérer :
 
 ```ts
-  // Pack Décision : crée le pack + 3 grants depuis le snapshot en staging, puis
-  // mail de confirmation, et on s'arrête (pas d'entitlement one-shot ni de
+  // Pack Décision : crée le pack + 3 grants + entitlements one_shot (report_access
+  // complete) depuis le snapshot en staging, via la fonction partagée (l'email pose
+  // les entitlements, sans quoi l'acheteur ne pourrait ni lire les rapports ni
+  // utiliser AskFuture). Puis mail de confirmation, et on s'arrête (pas de
   // territoire actif, le pack gère son propre déblocage).
   if (productType === "pack-decision") {
-    await grantDecisionPackFromSnapshot(supabaseAdmin, paymentIntent.id);
+    await grantDecisionPackFromSnapshot(supabaseAdmin, paymentIntent.id, undefined, userEmail || undefined);
     await supabaseAdmin.from("payments").upsert(
       {
         user_id: userId && userId !== "anonymous" ? userId : null,
@@ -714,7 +738,78 @@ Expected : aucune erreur.
 
 ```bash
 git add src/app/api/stripe/webhook/route.ts
-git commit -m "feat(pack-decision): webhook cree le pack + 3 report_grants"
+git commit -m "feat(pack-decision): webhook cree le pack + 3 report_grants + entitlements"
+```
+
+---
+
+## Task 7B : AskFuture, pool unique proportionnel aux droits (3 × grants)
+
+Le quota AskFuture actuel (`api/ask`) pour un plan `one_shot` est un compteur **global de 3**, pas
+« 3 par rapport ». Pour livrer honnêtement « 9 questions incluses » dans le Pack Décision (un seul
+pool, pas trois compteurs), on rend le quota proportionnel aux droits : `quota = 3 × nombre de
+report_grants`. Un rapport seul reste à 3 (1 grant), un pack donne 9 (3 grants), en un seul
+compteur.
+
+**Files:**
+- Modify: `src/app/api/ask/route.ts` (bloc `if (plan === "one_shot") { ... }`, ~lignes 537-549)
+
+- [ ] **Step 1: Remplacer le quota fixe par un quota proportionnel aux grants**
+
+Dans `src/app/api/ask/route.ts`, remplacer :
+
+```ts
+    if (plan === "one_shot") {
+      const { count } = await supabase
+        .from("ask_conversations")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("role", "user");
+      if ((count ?? 0) >= 3) {
+        return NextResponse.json(
+          { error: "Quota de 3 questions atteint. Passez au Suivi pour un accès illimité." },
+          { status: 403 },
+        );
+      }
+    }
+```
+
+par :
+
+```ts
+    if (plan === "one_shot") {
+      // Pool unique proportionnel aux droits : 3 questions par territoire débloqué
+      // (report_grant), comptées globalement. Un rapport seul = 3, un Pack Décision
+      // (3 grants) = 9, en un seul compteur. Plancher de 3 (résidence sans grant).
+      const { count: grantCount } = await supabase
+        .from("report_grants")
+        .select("insee", { count: "exact", head: true })
+        .eq("user_id", user.id);
+      const quota = 3 * Math.max(1, grantCount ?? 0);
+      const { count: askedCount } = await supabase
+        .from("ask_conversations")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("role", "user");
+      if ((askedCount ?? 0) >= quota) {
+        return NextResponse.json(
+          { error: `Quota de ${quota} questions atteint. Passez au Suivi pour un accès illimité.` },
+          { status: 403 },
+        );
+      }
+    }
+```
+
+- [ ] **Step 2: `tsc` + `eslint`**
+
+Run: `npx tsc --noEmit && npx eslint src/app/api/ask/route.ts`
+Expected : aucune erreur.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/app/api/ask/route.ts
+git commit -m "feat(pack-decision): AskFuture quota proportionnel aux droits (3 x grants)"
 ```
 
 ---
@@ -908,7 +1003,7 @@ export default async function PackDecisionPage({
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
-    await grantDecisionPackFromSnapshot(admin, paymentIntent, user.id);
+    await grantDecisionPackFromSnapshot(admin, paymentIntent, user.id, user.email ?? undefined);
   }
 
   const pack = user ? await resolvePackOwnership(supabase, user.id, insees) : null;
@@ -1493,7 +1588,7 @@ Documenter pour le porteur (pas automatisable ici) :
 
 ```bash
 npx tsc --noEmit
-npx eslint "src/app/(public)/comparateur/pack-decision/" "src/app/api/comparateur-vie/apercu/route.ts" "src/lib/decision-packs.ts" src/lib/comparateur-vie.ts src/lib/checkout-products.ts src/app/api/stripe/create-payment-intent/route.ts src/app/api/stripe/webhook/route.ts src/components/PaymentWrapper.tsx src/components/PaymentForm.tsx "src/app/(public)/ou-vivre/OuVivreClient.tsx" "src/app/(public)/ou-vivre/CompareView.tsx"
+npx eslint "src/app/(public)/comparateur/pack-decision/" "src/app/api/comparateur-vie/apercu/route.ts" "src/app/api/ask/route.ts" "src/lib/decision-packs.ts" src/lib/comparateur-vie.ts src/lib/checkout-products.ts src/app/api/stripe/create-payment-intent/route.ts src/app/api/stripe/webhook/route.ts src/components/PaymentWrapper.tsx src/components/PaymentForm.tsx "src/app/(public)/ou-vivre/OuVivreClient.tsx" "src/app/(public)/ou-vivre/CompareView.tsx"
 ```
 Expected : aucune erreur.
 
@@ -1523,7 +1618,7 @@ git commit -m "feat(pack-decision): sonde verrou + apercu"
 - §4 `decision_packs` + 3 grants → Task 1, Task 7. ✓
 - §5 verrou séparation payload → Task 2 (pistes), Task 3 (strip /match), Task 4 (aperçu tronqué), Task 11 (full rendu serveur seulement). La matrice complète n'a aucun endpoint d'API. ✓
 - §6 page de conviction dédiée + produit 39 € + metadata trio → Task 6, Task 11, Task 13. ✓
-- §7 expérience déverrouillée (matrice + 3 pistes + liens rapports + 9 questions) → Task 12. AskFuture = aucune plomberie neuve, hérité des report_grants, copy « 9 incluses ». ✓
+- §7 expérience déverrouillée (matrice + 3 pistes + liens rapports + 9 questions) → Task 12 (vue), Task 7 (entitlements one_shot, sans quoi rapports + AskFuture restent verrouillés), Task 7B (quota AskFuture = 3 × grants, pool unique de 9 réel et honnête). ✓
 - §8 doctrine (no em-dash, fix `var(--accent)`, largeur texte) → Task 14, rappels en tête. ✓
 - §9 hors-périmètre → non implémentés (corrects). ✓
 - §10 critères de réussite → Task 15 (sonde verrou) + vérif manuelle parcours payant. ✓
@@ -1534,7 +1629,9 @@ retour lit `?payment_intent` pour octroyer côté serveur (Task 8 doc + Task 11 
 restant le filet. Tout le reste contient le code réel.
 
 **Cohérence des types :** `trioKey()` (signature unique, Task 5) réutilisée Task 6.
-`grantDecisionPackFromSnapshot()` (Task 5) appelée par le webhook (Task 7) et la page (Task 11).
+`grantDecisionPackFromSnapshot(admin, pi, expectedUserId?, email?)` (Task 5, 4 params) appelée par
+le webhook (Task 7, email = userEmail) et la page (Task 11, email = user.email). Quota AskFuture
+(Task 7B) lit `report_grants`, plancher `max(1, …)` couvre le cas résidence sans grant.
 `pistes` ajouté à `MatchOutcome` Task 2, consommé Task 11/12/15. `pack` / `returnUrl` ajoutés à
 PaymentWrapper Task 9, consommés Task 10/13. Produit `pack-decision` / productType `pack-decision`
 cohérents Task 6 → create-payment-intent → webhook.
