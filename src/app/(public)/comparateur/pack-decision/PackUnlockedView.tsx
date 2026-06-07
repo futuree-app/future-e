@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { ComparaisonComplete, MatchResult } from "@/lib/comparateur-vie";
 import { ComparaisonCompleteView } from "@/app/(public)/ou-vivre/ComparaisonCompleteView";
 
@@ -25,6 +26,26 @@ function forces(r: MatchResult): string[] {
 }
 
 export function PackUnlockedView({ data, trio, pistes, projetLabel }: Props) {
+  const router = useRouter();
+  const [opening, setOpening] = useState<string | null>(null);
+
+  // Ouvrir le rapport d'une commune du trio = poser ce territoire en lecture
+  // active (l'accès est garanti par le report_grant du pack) puis aller au
+  // rapport. Même flux que le déblocage 14 € (TerritoryUnlockPanel).
+  async function openReport(insee: string, commune: string) {
+    setOpening(insee);
+    try {
+      await fetch("/api/territoire/activer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ insee, commune }),
+      });
+    } catch {
+      // Le rapport résout de toute façon le territoire actif côté serveur.
+    }
+    router.push("/rapport");
+  }
+
   return (
     <div className="pt-4">
       {projetLabel && (
@@ -33,19 +54,20 @@ export function PackUnlockedView({ data, trio, pistes, projetLabel }: Props) {
         </p>
       )}
 
-      {/* Liens vers les 3 rapports complets (débloqués par les report_grants) */}
+      {/* Ouvrir les 3 rapports complets (débloqués par les report_grants du pack) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-10">
         {trio.map((r) => (
-          <Link
+          <button
             key={r.insee}
-            href={`/territoire/${r.insee}`}
-            className="glass rounded-xl p-4 flex items-center justify-between hover:border-white/[0.28] border border-white/[0.14] transition-colors"
+            onClick={() => openReport(r.insee, r.nom)}
+            disabled={opening !== null}
+            className="glass rounded-xl p-4 flex items-center justify-between hover:border-white/[0.28] border border-white/[0.14] transition-colors text-left disabled:opacity-60"
           >
             <span className="text-[14px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              Rapport · {r.nom}
+              {opening === r.insee ? "Ouverture…" : `Rapport · ${r.nom}`}
             </span>
             <span aria-hidden className="text-accent">→</span>
-          </Link>
+          </button>
         ))}
       </div>
 
