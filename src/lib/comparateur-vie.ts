@@ -274,6 +274,10 @@ export type MatchOutcome = {
   // Comparaison complète du trio affiché (Pack Décision). Calculée sur les 3 premiers
   // results, narratif, hors score/tri. cf. buildComparaisonComplete.
   comparaisonComplete: ComparaisonComplete;
+  // Pistes : les communes suivantes (rangs 4-5-6) du MÊME projet, narratif calculé
+  // comme leur propre groupe de 3 (identité, forces, compromis), pour le Pack Décision.
+  // Réservé au payload payant : le verrou (route /match) le retire de la réponse gratuite.
+  pistes: MatchResult[];
   // Ancres réellement appliquées (libellé + convention assumée), pour un affichage
   // honnête du périmètre côté UI (« recherche limitée au Sud, au sens… »).
   appliedZones?: AppliedZone[];
@@ -2171,6 +2175,22 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   assignCompromis(shownPicks, byInsee, tradeoffKeyByInsee);
   assignDecouverte(shownPicks, byInsee, requestedKeys);
 
+  // Pistes : rangs 4-5-6, narratif calculé comme un groupe de 3 distinct (le trio
+  // garde son narratif relatif au groupe de 3 affiché). byInsee couvre déjà tous
+  // les candidats. Cartes seulement : pas de comparaison complète sur les pistes.
+  const pistesPicks = deduped.slice(3, 6);
+  if (pistesPicks.length) {
+    const pistesDistinctive = buildDistinctive(
+      pistesPicks.map((r) => byInsee.get(r.insee)).filter((c): c is IndexCommune => c != null),
+      liDistinct,
+    );
+    for (const r of pistesPicks) r.distinctive = pistesDistinctive[r.insee] ?? null;
+    assignSignaux(pistesPicks, byInsee, requestedKeys);
+    assignIdentite(pistesPicks, byInsee);
+    assignCompromis(pistesPicks, byInsee, tradeoffKeyByInsee);
+    assignDecouverte(pistesPicks, byInsee, requestedKeys);
+  }
+
   const comparaisonComplete = buildComparaisonComplete(shownPicks, byInsee);
 
   return {
@@ -2180,6 +2200,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     message,
     results: deduped,
     comparaisonComplete,
+    pistes: pistesPicks,
     appliedZones,
     appliedExclusions: exclusion.applied,
     appliedPlaces: appliedPlaces.length ? appliedPlaces : undefined,
