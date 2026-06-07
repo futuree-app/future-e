@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import Navbar from "@/components/Navbar";
@@ -20,6 +21,34 @@ function parseCommunes(raw: string | undefined): string[] {
     .map((s) => s.trim().toUpperCase())
     .filter((s) => /^[0-9AB][0-9]{4}$/i.test(s))
     .slice(0, 3);
+}
+
+async function getBaseUrl() {
+  const headerStore = await headers();
+  const forwardedProto = headerStore.get("x-forwarded-proto");
+  const forwardedHost = headerStore.get("x-forwarded-host");
+  const host = forwardedHost || headerStore.get("host");
+  const envBaseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const productionHost =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+
+  if (host && !host.includes("localhost")) {
+    return `${forwardedProto || "https"}://${host}`;
+  }
+
+  if (productionHost) {
+    return `https://${productionHost}`;
+  }
+
+  if (envBaseUrl && !envBaseUrl.includes("localhost")) {
+    return envBaseUrl;
+  }
+
+  if (host) {
+    return `${forwardedProto || "http"}://${host}`;
+  }
+
+  return envBaseUrl || "http://localhost:3000";
 }
 
 export default async function PackDecisionPage({
@@ -72,6 +101,9 @@ export default async function PackDecisionPage({
 
   // NON POSSÉDÉ : teaser. Le parsed du projet est lu côté client (localStorage),
   // et le compte est requis avant paiement (comme le 14 €).
+  const returnPath = `/comparateur/pack-decision?communes=${insees.join(",")}`;
+  const returnUrl = new URL(returnPath, await getBaseUrl()).toString();
+
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <Navbar />
@@ -79,7 +111,7 @@ export default async function PackDecisionPage({
         <PackConvictionView
           insees={insees}
           userEmail={user?.email ?? null}
-          returnUrl={`/comparateur/pack-decision?communes=${insees.join(",")}`}
+          returnUrl={returnUrl}
         />
       </main>
     </div>
