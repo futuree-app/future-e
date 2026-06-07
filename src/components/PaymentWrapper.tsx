@@ -20,6 +20,12 @@ type PaymentWrapperProps = {
   onSuccess: () => void;
   grant?: PaymentGrant;
   submitLabel?: string;
+  pack?: {
+    trio: { insee: string; commune: string }[];
+    projetLabel: string;
+    parsedSnapshot: unknown;
+  };
+  returnUrl?: string;
 };
 
 export function PaymentWrapper({
@@ -28,8 +34,10 @@ export function PaymentWrapper({
   onSuccess,
   grant,
   submitLabel,
+  pack,
+  returnUrl,
 }: PaymentWrapperProps) {
-  const requestKey = `${amount}:${productType}:${grant?.targetInsee ?? ""}`;
+  const requestKey = `${amount}:${productType}:${grant?.targetInsee ?? ""}:${pack?.trio.map((t) => t.insee).join("-") ?? ""}`;
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [clientSecretKey, setClientSecretKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +56,7 @@ export function PaymentWrapper({
         targetCommune: grant?.targetCommune,
         source: grant?.source,
         rank: grant?.rank,
+        pack,
       }),
     })
       .then(async (response) => {
@@ -121,7 +130,7 @@ export function PaymentWrapper({
         },
       }}
     >
-      <PaymentForm onSuccess={onSuccess} submitLabel={submitLabel} />
+      <PaymentForm onSuccess={onSuccess} submitLabel={submitLabel} returnUrl={returnUrl} />
     </Elements>
   );
 }

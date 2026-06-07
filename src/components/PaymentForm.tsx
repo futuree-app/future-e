@@ -6,9 +6,10 @@ import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
 type PaymentFormProps = {
   onSuccess: () => void;
   submitLabel?: string;
+  returnUrl?: string;
 };
 
-export function PaymentForm({ onSuccess, submitLabel }: PaymentFormProps) {
+export function PaymentForm({ onSuccess, submitLabel, returnUrl }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -35,7 +36,7 @@ export function PaymentForm({ onSuccess, submitLabel }: PaymentFormProps) {
     const { error: confirmError } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/merci`,
+        return_url: returnUrl ?? `${window.location.origin}/merci`,
       },
     });
 
