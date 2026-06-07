@@ -9,11 +9,12 @@ type Props = {
   commune: string | null;
   rank: number | null;
   amount: number;
+  submitLabel?: string;
 };
 
 // Panneau de paiement d'un rapport ciblé sur un territoire exploré.
 // À la réussite : bascule immédiate du territoire actif de lecture, puis rapport.
-export function TerritoryUnlockPanel({ insee, commune, rank, amount }: Props) {
+export function TerritoryUnlockPanel({ insee, commune, rank, amount, submitLabel }: Props) {
   const router = useRouter();
   const [activating, setActivating] = useState(false);
 
@@ -22,6 +23,7 @@ export function TerritoryUnlockPanel({ insee, commune, rank, amount }: Props) {
       <PaymentWrapper
         amount={amount}
         productType="one-shot"
+        submitLabel={submitLabel}
         grant={{ targetInsee: insee, targetCommune: commune, source: "comparateur_vie", rank }}
         onSuccess={async () => {
           setActivating(true);

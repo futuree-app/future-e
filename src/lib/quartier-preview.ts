@@ -30,7 +30,7 @@ export async function getQuartierPreview(insee: string): Promise<QuartierPreview
     cards.push({
       titre: "Le climat à venir",
       constat:
-        "La trajectoire climatique de cette commune est projetée à plusieurs horizons : étés plus chauds, saisons qui se déforment.",
+        "La trajectoire climatique de cette commune est projetée à plusieurs horizons : étés plus chauds, saisons qui se transforment, nouveaux équilibres à anticiper.",
     });
   }
   if (georisques?.flags?.flood || georisques?.flags?.marineSubmersion || (catnat && catnat.total > 0)) {
@@ -40,18 +40,11 @@ export async function getQuartierPreview(insee: string): Promise<QuartierPreview
         "Le territoire porte un historique de catastrophes naturelles reconnues, que le rapport replace dans son contexte.",
     });
   }
-  if (enrichment.vigieau?.maxLevel || enrichment.eau?.drought) {
-    cards.push({
-      titre: "Sécheresse et ressource en eau",
-      constat:
-        "La ressource en eau et les sols connaissent des tensions, suivies par les restrictions et l'état des nappes.",
-    });
-  }
   if (georisques) {
     cards.push({
       titre: "Les risques du secteur",
       constat:
-        "Les risques naturels et technologiques recensés autour de l'adresse sont passés en revue, un par un.",
+        "Les risques naturels, technologiques et environnementaux recensés autour du territoire sont passés en revue, un par un.",
     });
   }
 

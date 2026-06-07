@@ -19,6 +19,7 @@ type PaymentWrapperProps = {
   productType: string;
   onSuccess: () => void;
   grant?: PaymentGrant;
+  submitLabel?: string;
 };
 
 export function PaymentWrapper({
@@ -26,6 +27,7 @@ export function PaymentWrapper({
   productType,
   onSuccess,
   grant,
+  submitLabel,
 }: PaymentWrapperProps) {
   const requestKey = `${amount}:${productType}:${grant?.targetInsee ?? ""}`;
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -119,7 +121,7 @@ export function PaymentWrapper({
         },
       }}
     >
-      <PaymentForm onSuccess={onSuccess} />
+      <PaymentForm onSuccess={onSuccess} submitLabel={submitLabel} />
     </Elements>
   );
 }

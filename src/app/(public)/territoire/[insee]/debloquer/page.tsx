@@ -83,18 +83,19 @@ export default async function TerritoryUnlockPage({
           Avant de choisir <span className="italic text-accent">{displayName}</span>, regardez ce
           que les données racontent vraiment.
         </h1>
-        <p className="mt-5 max-w-[52ch] text-[16px] leading-[1.7] text-muted">
-          Vous avez vu pourquoi {displayName} ressort dans votre recherche. Le rapport va plus
-          loin : il met à plat ce que ce territoire devient face au climat, et ce que ça implique
-          concrètement pour un projet de vie.
+        <p className="mt-5 max-w-[58ch] text-[16px] leading-[1.7] text-muted">
+          Vous avez vu pourquoi {displayName} ressort dans votre recherche. Le rapport complet va
+          plus loin : il met à plat ce que ce territoire implique concrètement pour votre projet, à
+          partir des données disponibles sur le climat, les risques, la santé environnementale, la
+          mobilité, le logement et le cadre de vie.
         </p>
 
         {/* 2. Ce que le rapport permet de vérifier (honnête, sans liste de modules) */}
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
-            { t: "Comprendre le territoire", d: "Ce que la commune devient : canicule, inondation, sécheresse, risques du secteur." },
-            { t: "Situer les principaux compromis", d: "Ce qui joue en sa faveur, ce qui demande vigilance, ce qui dépend de votre projet." },
-            { t: "Poser vos questions", d: "3 questions à AskFuture pour approfondir le territoire." },
+            { t: "Comprendre le territoire", d: `Ce que les données permettent de dire sur ${displayName} aujourd'hui, et ce qui peut évoluer dans les prochaines décennies.` },
+            { t: "Identifier les points de vigilance", d: `Ce qui joue en faveur de ${displayName}, ce qui demande attention, et ce qui dépend vraiment de votre projet.` },
+            { t: "Poser vos questions", d: "3 questions à AskFuture pour approfondir cette option avec votre situation." },
           ].map((c) => (
             <div key={c.t} className="rounded-2xl border border-white/[0.1] bg-white/[0.03] p-5">
               <p className="text-[15px] text-label" style={{ fontFamily: "var(--font-serif)" }}>{c.t}</p>
@@ -128,6 +129,7 @@ export default async function TerritoryUnlockPage({
               "Quels sont les compromis les plus importants ?",
               "Quels risques regarder avant d'acheter ou de louer ?",
               "Que faudrait-il vérifier sur place ?",
+              `Pourquoi ${displayName} plutôt qu'une autre option ?`,
             ].map((q) => (
               <li key={q} className="flex items-start gap-3 text-[14px] text-label/90">
                 <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
@@ -137,7 +139,7 @@ export default async function TerritoryUnlockPage({
           </ul>
         </section>
 
-        {/* 5. Pourquoi 14 € + réassurance */}
+        {/* 5. Pourquoi ce rapport est payant ? */}
         <section className="mt-14 rounded-2xl border border-white/[0.1] bg-white/[0.03] p-7">
           <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-2">
             Pourquoi ce rapport est payant ?
@@ -147,14 +149,20 @@ export default async function TerritoryUnlockPage({
             commune et les applique à votre projet. Vous ne payez pas l&apos;accès aux données
             publiques, vous payez leur croisement, leur mise en perspective et leur lecture.
           </p>
-          <p className="mt-4 text-[14px] leading-[1.7] text-muted">
-            <span className="text-label">Aucun engagement.</span> Débloquer ce rapport
-            n&apos;ajoute pas {displayName} comme commune de résidence : vous l&apos;ouvrez
-            simplement pour la lire, la comparer et la conserver.
+        </section>
+
+        {/* 6. Aucun engagement (réassurance, bloc dédié) */}
+        <section className="mt-4 rounded-2xl border border-white/[0.1] bg-white/[0.03] p-7">
+          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-2">
+            Aucun engagement
+          </p>
+          <p className="text-[14px] leading-[1.7] text-muted">
+            Débloquer ce rapport ne modifie pas votre commune de résidence. Vous ouvrez
+            simplement {displayName} comme option à lire, comparer et conserver.
           </p>
         </section>
 
-        {/* 6. CTA paiement (langage produit : « Explorer », pas « Débloquer » qui sonne SaaS) */}
+        {/* 7. CTA paiement (titre produit ; le bouton Stripe dit « Débloquer le rapport de … ») */}
         <h2 className="mt-14 text-[22px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
           Explorer le rapport de {displayName}
         </h2>
@@ -165,6 +173,7 @@ export default async function TerritoryUnlockPage({
               commune={commune}
               rank={rank}
               amount={product.amount}
+              submitLabel={`Débloquer le rapport de ${displayName}`}
             />
           ) : (
             <div className="flex flex-col gap-4">

@@ -5,9 +5,10 @@ import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
 
 type PaymentFormProps = {
   onSuccess: () => void;
+  submitLabel?: string;
 };
 
-export function PaymentForm({ onSuccess }: PaymentFormProps) {
+export function PaymentForm({ onSuccess, submitLabel }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -88,7 +89,7 @@ export function PaymentForm({ onSuccess }: PaymentFormProps) {
             transition: "opacity 0.15s, background 0.15s",
           }}
         >
-          {loading ? "Traitement…" : "Payer"}
+          {loading ? "Traitement…" : (submitLabel ?? "Payer")}
         </button>
       </div>
     </form>
