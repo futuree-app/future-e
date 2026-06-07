@@ -502,6 +502,15 @@ export function OuVivreClient() {
   // ── CTA ───────────────────────────────────────────────────────────────────
   const onExplore = (r: MatchResult, rang: number) => {
     capture("life_explore_clicked", { rang, insee: r.insee });
+    // Dépose les priorités du projet (libellés client-safe) pour la touche perso de la paywall.
+    try {
+      const labels = preferencesToLabels(parsed?.preferences ?? null);
+      if (labels.length > 0) {
+        window.localStorage.setItem("futuree:projet:labels", JSON.stringify(labels));
+      }
+    } catch {
+      // best-effort, jamais bloquant
+    }
   };
 
   const canCompare = top.length >= 2;
