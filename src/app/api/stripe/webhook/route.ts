@@ -5,6 +5,7 @@ import type Stripe from "stripe";
 import { getResend } from "@/lib/resend";
 import { getStripe } from "@/lib/stripe";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { grantDecisionPackFromSnapshot } from "@/lib/decision-packs";
 
 export const runtime = "nodejs";
 
@@ -59,6 +60,46 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
   const source = grantSource || "direct";
   const rank = grantRank ? Number.parseInt(grantRank, 10) : null;
   const resend = getResend();
+
+  // Pack Décision : crée le pack + 3 grants + entitlements one_shot (report_access
+  // complete) depuis le snapshot en staging, via la fonction partagée (l'email pose
+  // les entitlements, sans quoi l'acheteur ne pourrait ni lire les rapports ni
+  // utiliser AskFuture). Puis mail de confirmation, et on s'arrête (pas de
+  // territoire actif, le pack gère son propre déblocage).
+  if (productType === "pack-decision") {
+    await grantDecisionPackFromSnapshot(supabaseAdmin, paymentIntent.id, undefined, userEmail || undefined);
+    await supabaseAdmin.from("payments").upsert(
+      {
+        user_id: userId && userId !== "anonymous" ? userId : null,
+        stripe_payment_intent_id: paymentIntent.id,
+        amount: paymentIntent.amount / 100,
+        product_type: productType,
+        status: "succeeded",
+        email: userEmail || null,
+      },
+      { onConflict: "stripe_payment_intent_id" },
+    );
+    if (userEmail) {
+      await resend.emails.send({
+        from: "futur·e <hello@futur-e.fr>",
+        to: userEmail,
+        subject: "Votre Pack Décision futur·e est débloqué",
+        html: `
+          <p>Merci pour votre confiance.</p>
+          <p>Votre comparaison complète et vos trois rapports sont accessibles depuis votre espace.</p>
+          <p>futur·e</p>
+        `,
+      });
+    }
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId: userEmail || userId || paymentIntent.id,
+      event: "payment_completed",
+      properties: { product_type: productType, amount: paymentIntent.amount / 100 },
+    });
+    await posthog.shutdown();
+    return;
+  }
 
   await supabaseAdmin.from("payments").upsert(
     {
