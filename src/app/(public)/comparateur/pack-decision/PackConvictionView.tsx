@@ -8,7 +8,8 @@ import { PackPaymentPanel } from "./PackPaymentPanel";
 type Props = {
   insees: string[];
   userEmail: string | null;
-  returnUrl: string;
+  returnUrl: string; // absolu : destiné à Stripe (return_url du PaymentIntent)
+  returnPath: string; // relatif : destiné à l'auth (next=), qui refuse les URL absolues
 };
 
 type Apercu = { apercu: ComparaisonComplete; trio: { insee: string; nom: string }[] };
@@ -20,7 +21,7 @@ const BUNDLE = [
   { t: "AskFuture : 9 questions incluses", d: "Pour creuser ce qui compte, sur chacun des territoires." },
 ];
 
-export function PackConvictionView({ insees, userEmail, returnUrl }: Props) {
+export function PackConvictionView({ insees, userEmail, returnUrl, returnPath }: Props) {
   const [parsed, setParsed] = useState<ParsedProject | null>(null);
   const [projetLabel, setProjetLabel] = useState("");
   const [apercu, setApercu] = useState<Apercu | null>(null);
@@ -142,13 +143,13 @@ export function PackConvictionView({ insees, userEmail, returnUrl }: Props) {
             <div className="flex flex-col gap-3">
               <p className="text-[13px] leading-[1.6] text-muted">Le paiement doit être rattaché à un compte.</p>
               <Link
-                href={`/inscription?next=${encodeURIComponent(returnUrl)}`}
+                href={`/inscription?next=${encodeURIComponent(returnPath)}`}
                 className="flex items-center justify-center px-5 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px]"
               >
                 Créer mon compte puis payer
               </Link>
               <Link
-                href={`/connexion?next=${encodeURIComponent(returnUrl)}`}
+                href={`/connexion?next=${encodeURIComponent(returnPath)}`}
                 className="flex items-center justify-center px-5 py-2.5 rounded-lg border border-white/[0.14] text-[13px] text-label"
               >
                 J&apos;ai déjà un compte

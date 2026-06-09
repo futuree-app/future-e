@@ -112,6 +112,7 @@ export default async function PackDecisionPage({
           insees={insees}
           userEmail={user?.email ?? null}
           returnUrl={returnUrl}
+          returnPath={returnPath}
         />
       </main>
     </div>
