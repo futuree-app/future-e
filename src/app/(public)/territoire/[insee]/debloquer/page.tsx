@@ -42,7 +42,7 @@ export default async function TerritoryUnlockPage({
   searchParams: Promise<{ nom?: string; rank?: string; source?: string }>;
 }) {
   const { insee: rawInsee } = await params;
-  const { nom, rank: rawRank } = await searchParams;
+  const { nom, rank: rawRank, source: rawSource } = await searchParams;
 
   const insee = cleanInsee(rawInsee);
   if (!insee) notFound();
@@ -59,7 +59,15 @@ export default async function TerritoryUnlockPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const backHref = `/territoire/${insee}/debloquer${commune ? `?nom=${encodeURIComponent(commune)}` : ""}`;
+  // Conserve nom + rank + source dans le retour d'auth : sinon l'aller-retour
+  // inscription/connexion ampute l'attribution (rang et provenance perdus).
+  const source = typeof rawSource === "string" && /^[a-z0-9_]{1,40}$/i.test(rawSource) ? rawSource : null;
+  const backParams = new URLSearchParams();
+  if (commune) backParams.set("nom", commune);
+  if (rank) backParams.set("rank", String(rank));
+  if (source) backParams.set("source", source);
+  const backQuery = backParams.toString();
+  const backHref = `/territoire/${insee}/debloquer${backQuery ? `?${backQuery}` : ""}`;
 
   // Une seule révélation orchestrée au chargement (stagger). step-enter vit dans globals.css.
   const reveal = (i: number) => ({
