@@ -275,6 +275,11 @@ export async function POST(request: NextRequest) {
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 800,
+      // Sonnet 4.6 tourne en effort "high" par défaut : pour une extraction
+      // structurée à outil forcé, c'est ce qui faisait durer le parse 25-40 s.
+      // On baisse l'effort et on coupe le thinking ; qualité vérifiée à la main.
+      output_config: { effort: "low" },
+      thinking: { type: "disabled" },
       system: SYSTEM,
       tools: [
         {
