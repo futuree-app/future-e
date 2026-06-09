@@ -11,7 +11,7 @@ import {
 import { anchorsToLabeled, exclusionsToLabels } from "@/lib/geo-zones";
 import { ChipTooltip } from "@/components/ChipTooltip";
 import { AUTO_SYNTHESIS } from "@/lib/auto-synthesis";
-import { CompareView } from "./CompareView";
+import { departmentName } from "@/lib/regions-fr";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — client.
@@ -44,7 +44,7 @@ const FREE_ASK = 2;
 // résultats, réhydraté au montage, avec un TTL court : on restaure le retour de
 // paywall, on ne ressuscite pas une session d'il y a deux jours.
 const SESSION_KEY = "futuree:ouvivre:session";
-const SESSION_VERSION = 2;
+const SESSION_VERSION = 3;
 const SESSION_TTL_MS = 2 * 60 * 60 * 1000; // 2 h
 
 type SessionSnapshot = {
@@ -57,7 +57,6 @@ type SessionSnapshot = {
   askMessages: AskMessage[];
   askRemaining: number;
   askLimit: boolean;
-  view: "results" | "compare";
 };
 
 function saveSession(s: Omit<SessionSnapshot, "v" | "savedAt">): void {
@@ -171,6 +170,23 @@ function topCards(results: MatchResult[] | undefined | null): MatchResult[] {
   return (results ?? []).slice(0, 3);
 }
 
+// Correspondance affichée sur la carte : 1 confirmation (reason[0], le critère
+// demandé) + 1 découverte (atout positif non demandé, champ moteur r.decouverte ;
+// repli reason[1]). Dédup. Remplace la longue liste de raisons (qui se répétait
+// d'une carte à l'autre) par ce qui rapproche ET ce qui distingue. cf. CompareView.
+function forces(r: MatchResult): string[] {
+  const confirmation = r.reasons?.[0] ?? null;
+  const decouverte = r.decouverte ?? r.reasons?.[1] ?? null;
+  const out: string[] = [];
+  if (confirmation) out.push(confirmation);
+  if (decouverte && decouverte !== confirmation) out.push(decouverte);
+  return out.slice(0, 2);
+}
+
+function cap(s: string): string {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+
 // Palier qualitatif de correspondance, à la place d'un score chiffré : le %
 // brut est instable (parse non déterministe) et tassé en haut (tout entre 83 et
 // 98), donc faussement précis. Le palier dit la force sans fausse précision.
@@ -216,7 +232,6 @@ export function OuVivreClient() {
 
   const [parsed, setParsed] = useState<ParsedProject | null>(null);
   const [outcome, setOutcome] = useState<MatchOutcome | null>(null);
-  const [view, setView] = useState<"results" | "compare">("results");
 
   const [synthesis, setSynthesis] = useState("");
   const [synthesizing, setSynthesizing] = useState(false);
@@ -254,7 +269,6 @@ export function OuVivreClient() {
     setAskMessages(s.askMessages);
     setAskRemaining(s.askRemaining);
     setAskLimit(s.askLimit);
-    setView(s.view);
     setPhase("results");
     capture("life_session_restored");
   }, []);
@@ -262,8 +276,8 @@ export function OuVivreClient() {
   // ── Sauvegarde du parcours tant qu'on est en résultats (cartes/comparaison).
   useEffect(() => {
     if (phase !== "results" || !parsed || !outcome?.results?.length) return;
-    saveSession({ submittedText, parsed, outcome, synthesis, askMessages, askRemaining, askLimit, view });
-  }, [phase, parsed, outcome, synthesis, askMessages, askRemaining, askLimit, view, submittedText]);
+    saveSession({ submittedText, parsed, outcome, synthesis, askMessages, askRemaining, askLimit });
+  }, [phase, parsed, outcome, synthesis, askMessages, askRemaining, askLimit, submittedText]);
 
   // ── Synthèse streamée ─────────────────────────────────────────────────────
   const streamSynthesis = useCallback(
@@ -613,12 +627,24 @@ export function OuVivreClient() {
     }
   };
 
-  const canCompare = top.length >= 2;
+  const canPack = top.length >= 2;
 
-  const onCompare = () => {
-    capture("life_compare_clicked", { count: top.length });
-    setView("compare");
-    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  // Pack Décision : dépose le projet en mémoire (lu par la page de conviction) et
+  // navigue vers la comparaison approfondie payante. Remplace l'ancienne vue
+  // intermédiaire « Ce qui les distingue » : ses infos (identité, correspondance,
+  // compromis) vivent désormais directement sur les cartes de résultats.
+  const onPackDecision = () => {
+    if (!outcome?.results?.length) return;
+    const trio = topCards(outcome.results);
+    try {
+      if (parsed) window.localStorage.setItem("futuree:projet:parsed", JSON.stringify(parsed));
+      window.localStorage.setItem("futuree:projet:label", submittedText.slice(0, 200));
+    } catch {
+      // localStorage indisponible : la page de conviction proposera de revenir au comparateur.
+    }
+    capture("pack_decision_cta_clicked", { count: trio.length });
+    const communes = trio.map((r) => r.insee).join(",");
+    window.location.href = `/comparateur/pack-decision?communes=${encodeURIComponent(communes)}`;
   };
 
   const busy = phase === "parsing" || phase === "matching";
@@ -713,35 +739,6 @@ export function OuVivreClient() {
     timer = setTimeout(step, 400);
     return () => clearTimeout(timer);
   }, [askRotating, askTopKey]);
-
-  // Révélateur d'arbitrages : vue en place, réutilise outcome déjà calculé (pas de
-  // recalcul, le projet vit en mémoire client). cf. spec 2026-06-05-comparateur-3.
-  if (view === "compare" && outcome?.results?.length) {
-    return (
-      <div className="pt-16">
-        <CompareView
-          results={outcome.results}
-          onBack={() => setView("results")}
-          onExploreReport={(r, rang) => {
-            onExplore(r, rang);
-            window.location.href = `/territoire/${r.insee}/debloquer?nom=${encodeURIComponent(r.nom)}&rank=${rang}&source=comparateur_3`;
-          }}
-          onPackDecision={() => {
-            const trio = topCards(outcome.results);
-            try {
-              if (parsed) window.localStorage.setItem("futuree:projet:parsed", JSON.stringify(parsed));
-              window.localStorage.setItem("futuree:projet:label", submittedText.slice(0, 200));
-            } catch {
-              // localStorage indisponible : la page de conviction proposera de revenir au comparateur.
-            }
-            capture("pack_decision_cta_clicked", { count: trio.length });
-            const communes = trio.map((r) => r.insee).join(",");
-            window.location.href = `/comparateur/pack-decision?communes=${encodeURIComponent(communes)}`;
-          }}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="pt-16">
@@ -1063,11 +1060,15 @@ export function OuVivreClient() {
           {/* Cartes territoires */}
           <div className="mt-9">
             <h2
-              className="font-normal text-[24px] leading-[1.2] tracking-[-0.4px] text-label mb-5"
+              className="font-normal text-[24px] leading-[1.2] tracking-[-0.4px] text-label mb-2"
               style={{ fontFamily: "'Instrument Serif', serif" }}
             >
               Les territoires à regarder.
             </h2>
+            <p className="text-[14px] leading-[1.6] text-muted mb-6">
+              Les trois pourraient convenir.{" "}
+              <span className="italic text-accent">Mais ils ne racontent pas la même histoire.</span>
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {top.map((r, i) => (
                 <article
@@ -1075,74 +1076,54 @@ export function OuVivreClient() {
                   className="glass rounded-2xl p-7 flex flex-col"
                   style={{ borderTop: "2px solid var(--accent)" }}
                 >
-                  <div className="flex items-baseline justify-between gap-2 mb-1">
-                    <p className="font-mono text-[10px] tracking-[0.1em] text-ghost uppercase">
-                      Territoire {i + 1}
-                    </p>
-                    <span className="font-mono text-[9px] tracking-[0.06em] uppercase text-accent/80">
-                      {matchTier(r.compatibility)}
-                    </span>
-                  </div>
+                  {/* Identité : l'essence du lieu, en tête (remplace « Territoire N »). */}
+                  <p className="text-[13px] leading-[1.5] text-accent italic">{r.identite}</p>
                   <h3
-                    className="font-normal text-[22px] text-label leading-[1.15]"
+                    className="mt-2 font-normal text-[22px] text-label leading-[1.15]"
                     style={{ fontFamily: "'Instrument Serif', serif" }}
                   >
                     {r.nom}
                   </h3>
                   <p className="mt-0.5 text-[12px] text-muted">
-                    {[r.region, r.dept].filter(Boolean).join(" · ")}
+                    {[r.region, departmentName(r.dept)].filter(Boolean).join(" · ")}
                   </p>
 
-                  {/* Signature territoriale : image du lieu (géo · bassin ·
-                      climat), distincte des raisons de score. Pose le décor avant
-                      la justification du match. Cf. buildSignature (moteur). */}
-                  {r.signature.length > 0 && (
-                    <p className="mt-3 text-[12px] leading-[1.5] text-label/65">
-                      {r.signature.join(" · ")}
-                    </p>
-                  )}
-
-                  {/* Trait distinctif (ce qui démarque la commune des autres) : volontairement
-                      ABSENT de cette liste. Démarquer les trois territoires les uns des autres
-                      est le rôle du comparateur (CompareView), pas de la première vue. Le champ
-                      r.distinctive reste calculé côté moteur (réservé synthèse/AskFuture). */}
-                  {r.reasons.length > 0 && (
-                    <ul className="mt-4 flex flex-col gap-1.5">
-                      {r.reasons.map((reason) => (
-                        <li key={reason} className="flex items-start gap-2 text-[13px] text-label/90 leading-snug">
-                          <span className="mt-[6px] h-1 w-1 shrink-0 rounded-full bg-accent" />
-                          {reason}
+                  {/* Correspondance : palier qualitatif + ce qui rapproche du projet
+                      (1 confirmation demandée + 1 découverte non demandée, distinct d'une
+                      carte à l'autre). Remplace la longue liste de raisons qui se répétait. */}
+                  <p className="mt-4 font-mono text-[9px] tracking-[0.06em] uppercase text-accent/80">
+                    {matchTier(r.compatibility)}
+                  </p>
+                  {forces(r).length > 0 && (
+                    <ul className="mt-2 flex flex-col gap-1.5">
+                      {forces(r).map((f) => (
+                        <li key={f} className="flex items-start gap-2 text-[13px] text-label/90 leading-snug">
+                          <span className="text-emerald-400 shrink-0" aria-hidden>+</span>
+                          <span>{cap(f)}</span>
                         </li>
                       ))}
                     </ul>
                   )}
 
-                  {r.tradeoff && (
-                    <p className="mt-3 text-[12px] leading-[1.5] text-ghost">
-                      Compromis : {r.tradeoff}
+                  {/* Compromis : la tension assumée, ce qui distingue le territoire et donne
+                      envie de comparer en profondeur. Récit moteur, toujours présent, hors score.
+                      Pression éco / logement / littoral restent hors carte (doctrine 2026-06-02)
+                      et vivent dans la synthèse, AskFuture et le rapport. */}
+                  {r.compromis && (
+                    <p className="mt-4 pt-3 border-t border-white/[0.08] text-[12.5px] leading-[1.55] text-muted">
+                      Compromis : {r.compromis}
                     </p>
                   )}
-
-                  {/* Pression éco (NARRATIF) : NE PAS afficher sur les cartes de résultats.
-                      C'est de l'arbitrage, pas de la présentation : sur la première vue ça
-                      pré-juge et singularise négativement une commune (asymétrie). Conservé
-                      dans le payload synthèse + contexte AskFuture (l. 200/463) et au rapport.
-                      Logement et littoral : idem, NE PAS afficher sur les cartes (doctrine
-                      2026-06-02). Ils enrichissent la décision mais n'expliquent pas le
-                      classement. Conservés dans le payload de synthèse et le contexte
-                      AskFuture ; le détail vit au rapport. */}
 
                   <a
                     href={`/territoire/${r.insee}/debloquer?nom=${encodeURIComponent(r.nom)}&rank=${i + 1}&source=comparateur_vie`}
                     onClick={() => onExplore(r, i + 1)}
-                    className="mt-7 flex flex-col items-center gap-1 rounded-xl px-4 py-3 no-underline text-muted border border-white/[0.14] transition-colors hover:border-white/[0.28] hover:text-label"
+                    className="mt-6 flex items-center justify-center gap-2 rounded-xl px-4 py-3 no-underline text-muted border border-white/[0.14] transition-colors hover:border-white/[0.28] hover:text-label"
                   >
-                    <span className="text-center font-mono text-[10.5px] tracking-[0.08em] uppercase">
-                      Découvrir ce territoire
+                    <span className="font-mono text-[10.5px] tracking-[0.08em] uppercase">
+                      Explorer le rapport · 14 €
                     </span>
-                    <span className="text-center font-mono text-[8.5px] tracking-[0.04em] text-ghost">
-                      Rapport complet interactif · 14 €
-                    </span>
+                    <span aria-hidden>→</span>
                   </a>
                 </article>
               ))}
@@ -1150,30 +1131,31 @@ export function OuVivreClient() {
 
           </div>
 
-          {/* Décider : pont vers le révélateur d'arbitrages, juste sous les 3 fiches
-              (le moment où l'œil vient de voir les options). Avant AskFuture. */}
-          {canCompare && (
+          {/* Décider : un seul pont vers la comparaison approfondie payante, juste sous
+              les 3 fiches (l'œil vient de voir les options et leurs compromis). L'ancienne
+              vue intermédiaire « Ce qui les distingue » est fusionnée dans les cartes. */}
+          {canPack && (
             <div
               className="mt-8 glass rounded-2xl p-7 flex flex-col md:flex-row md:items-center justify-between gap-5"
               style={{ borderColor: "var(--accent)", boxShadow: "0 0 0 1px var(--accent)" }}
             >
               <div>
                 <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-1.5">
-                  Comparer
+                  Pack Décision · 39 €
                 </p>
                 <h3
                   className="font-normal text-[21px] leading-[1.2] text-label"
                   style={{ fontFamily: "'Instrument Serif', serif" }}
                 >
-                  Mettre les territoires côte à côte.
+                  Comparer les trois en profondeur.
                 </h3>
                 <p className="mt-1.5 text-[13px] leading-[1.6] text-muted max-w-[520px]">
-                  Comparez leurs points forts, leurs fragilités et leurs trajectoires pour
-                  identifier celui qui correspond le mieux à votre projet.
+                  Les trois territoires sur l&apos;ensemble des critères, vos questions, et des
+                  pistes supplémentaires pour le même projet.
                 </p>
               </div>
               <button
-                onClick={onCompare}
+                onClick={onPackDecision}
                 className="group relative overflow-hidden shrink-0 inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-accent text-canvas font-semibold text-[14px] transition-shadow duration-300 hover:shadow-[0_8px_30px_-6px_var(--orange)]"
                 style={{ fontFamily: "'Instrument Sans', sans-serif" }}
               >
@@ -1183,7 +1165,7 @@ export function OuVivreClient() {
                   className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/[0.35] to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full"
                 />
                 <span className="relative inline-flex items-center gap-2">
-                  Comparer ces territoires
+                  Comparer en profondeur
                   <span aria-hidden>→</span>
                 </span>
               </button>
