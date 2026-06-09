@@ -58,6 +58,9 @@ export function PackConvictionView({ insees, userEmail, returnUrl, returnPath }:
   }, [parsed]);
 
   const trioNoms = apercu?.trio.map((t) => t.nom) ?? [];
+  // Garde-fou : on n'autorise l'achat que si le trio nommé est chargé. Sinon le
+  // fallback (noms vides) produirait un pack/snapshot avec des communes sans nom.
+  const apercuReady = apercu?.trio.length === 3;
   const trioForBuy = (apercu?.trio ?? insees.map((insee) => ({ insee, nom: "" }))).map((t) => ({
     insee: t.insee,
     commune: t.nom,
@@ -131,7 +134,7 @@ export function PackConvictionView({ insees, userEmail, returnUrl, returnPath }:
               39<span className="text-[15px] text-muted ml-1">€</span>
             </span>
           </div>
-          {userEmail && parsed ? (
+          {userEmail && parsed && apercuReady ? (
             <PackPaymentPanel
               trio={trioForBuy}
               projetLabel={projetLabel}
@@ -155,6 +158,10 @@ export function PackConvictionView({ insees, userEmail, returnUrl, returnPath }:
                 J&apos;ai déjà un compte
               </Link>
             </div>
+          ) : parsed ? (
+            <p className="text-[13px] leading-[1.6] text-muted">
+              Préparation du comparatif… le paiement s&apos;active dès que l&apos;aperçu est prêt.
+            </p>
           ) : (
             <p className="text-[13px] leading-[1.6] text-muted">
               Reprenez votre comparaison pour débloquer le pack.{" "}
