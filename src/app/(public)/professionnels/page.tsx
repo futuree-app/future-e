@@ -13,9 +13,13 @@ const ACCENT = '#c8b89a';
 const css = `
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:#060812;color:#e9ecf2;font-family:'Instrument Sans',system-ui,sans-serif;font-size:16px;line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
-  .orb{position:fixed;border-radius:50%;filter:blur(120px);opacity:0.25;pointer-events:none;z-index:0;animation:breathe 16s ease-in-out infinite;}
-  @keyframes breathe{0%,100%{transform:scale(1) translate(0,0);}50%{transform:scale(1.15) translate(20px,-30px);}}
-  body::before{content:"";position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.026 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none;z-index:1;mix-blend-mode:overlay;}
+  .orb{position:fixed;border-radius:50%;filter:blur(120px);opacity:0.25;pointer-events:none;z-index:0;animation:breathe 16s ease-in-out infinite;will-change:opacity;}
+  /* « breathe » via opacité uniquement : sur une couche floue (blur 120px),
+     animer transform forçait une re-rastérisation du flou à chaque frame (la
+     « lourdeur »). L'opacité est composée par le GPU sans repaint : le halo
+     respire pour le même coût qu'un calque statique. */
+  @keyframes breathe{0%,100%{opacity:0.20;}50%{opacity:0.30;}}
+  body::before{content:"";position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.026 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none;z-index:1;opacity:0.5;}
 
   .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(6,8,18,0.72);border-bottom:1px solid rgba(255,255,255,0.08);}
   .nav-inner{max-width:1100px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px;}
@@ -59,6 +63,9 @@ const css = `
   @media(max-width:560px){
     .hero{padding:80px 28px 60px;}
     .scene-inner{padding:32px 24px;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .orb,.hero-badge-dot{animation:none;}
   }
 `;
 
