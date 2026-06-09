@@ -778,7 +778,7 @@ export default async function CheckoutPage({
                 }}
               >
                 <span>{isSuivi ? "RGPD" : "Stripe · sécurisé"}</span>
-                <span>{isSuivi ? "0 spam" : "TVA incluse"}</span>
+                <span>{isSuivi ? "0 spam" : "TVA non applicable"}</span>
                 <span>{isSuivi ? "0 engagement" : "Support FR"}</span>
               </div>
             </aside>

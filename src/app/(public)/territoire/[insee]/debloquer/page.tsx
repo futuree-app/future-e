@@ -185,7 +185,7 @@ export default async function TerritoryUnlockPage({
             Explorer le rapport de {displayName}
           </h2>
           <p className="mt-2 font-mono text-[11px] tracking-[0.08em] text-muted">
-            14 € · paiement unique · accès immédiat · TVA incluse
+            14 € · paiement unique · accès immédiat · TVA non applicable, art. 293 B du CGI
           </p>
           <div
             className="mt-5 rounded-2xl bg-white/[0.03] p-7"
