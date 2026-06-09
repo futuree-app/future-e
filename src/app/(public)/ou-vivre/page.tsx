@@ -22,6 +22,20 @@ export default function OuVivrePage() {
       className="min-h-screen bg-canvas text-label relative overflow-hidden"
       style={{ fontFamily: "'Instrument Sans', sans-serif" }}
     >
+      {/* Retour arrière du navigateur : une navigation "back_forward" vers cette
+          page (atteinte via window.location.href côté paywall) re-rend l'UI mais
+          NE rejoue PAS les effets React, donc la réhydratation du parcours (cf.
+          OuVivreClient) ne se déclenche pas. Ce script s'exécute au parse, avant
+          tout affichage : si on arrive par retour arrière et qu'un instantané de
+          session existe, on force un rechargement normal — où l'effet de montage
+          restaure le parcours. La clé est la seule constante dupliquée (SESSION_KEY). */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html:
+            "(function(){try{var n=performance.getEntriesByType('navigation')[0];if(n&&n.type==='back_forward'&&localStorage.getItem('futuree:ouvivre:session')){location.reload();}}catch(e){}})();",
+        }}
+      />
+
       {/* Orbs */}
       <div className="fixed top-[-160px] left-[-130px] w-[540px] h-[540px] rounded-full bg-accent/[0.14] blur-[100px] opacity-40 pointer-events-none z-0" />
       <div className="fixed bottom-[-100px] right-[-100px] w-[420px] h-[420px] rounded-full bg-amethyst/[0.12] blur-[90px] opacity-28 pointer-events-none z-0" />
