@@ -36,6 +36,64 @@ type AskMessage = { role: "user" | "assistant"; content: string };
 
 const FREE_ASK = 2;
 
+// ── Persistance de session (anti perte d'état au retour d'un paywall) ────────
+// Le parcours vit en state React : naviguer vers un paywall puis revenir (lien
+// « Retour aux territoires » ou bouton précédent du navigateur) remontait un
+// formulaire vierge, détruisant le projet, le trio, la synthèse et l'échange
+// AskFuture déjà produits. On dépose un instantané complet tant qu'on est en
+// résultats, réhydraté au montage, avec un TTL court : on restaure le retour de
+// paywall, on ne ressuscite pas une session d'il y a deux jours.
+const SESSION_KEY = "futuree:ouvivre:session";
+const SESSION_VERSION = 2;
+const SESSION_TTL_MS = 2 * 60 * 60 * 1000; // 2 h
+
+type SessionSnapshot = {
+  v: number;
+  savedAt: number;
+  submittedText: string;
+  parsed: ParsedProject;
+  outcome: MatchOutcome;
+  synthesis: string;
+  askMessages: AskMessage[];
+  askRemaining: number;
+  askLimit: boolean;
+  view: "results" | "compare";
+};
+
+function saveSession(s: Omit<SessionSnapshot, "v" | "savedAt">): void {
+  if (typeof window === "undefined") return;
+  try {
+    const payload: SessionSnapshot = { v: SESSION_VERSION, savedAt: Date.now(), ...s };
+    window.localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
+  } catch {
+    // best-effort : quota plein ou stockage indisponible, jamais bloquant
+  }
+}
+
+function loadSession(): SessionSnapshot | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw) as SessionSnapshot;
+    if (s.v !== SESSION_VERSION) return null;
+    if (!s.savedAt || Date.now() - s.savedAt > SESSION_TTL_MS) return null;
+    if (!s.parsed || !s.outcome?.results?.length) return null;
+    return s;
+  } catch {
+    return null;
+  }
+}
+
+function clearSession(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(SESSION_KEY);
+  } catch {
+    // best-effort
+  }
+}
+
 // Typographie FR robuste (y compris Safari, qui ignore text-wrap: pretty) : on lie
 // par une espace insécable les « petits mots » au mot suivant (une ligne ne doit
 // pas se terminer par « les », « leur », « et », « à »…) et la ponctuation haute
@@ -166,6 +224,37 @@ export function OuVivreClient() {
 
   const runSeq = useRef(0); // garde-fou contre les réponses obsolètes (re-submit)
 
+  // ── Réhydratation au montage : restaure le parcours après un aller-retour
+  // paywall, sans rejouer parse/match/synthèse (tout vit déjà dans le snapshot).
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    if (restoredRef.current) return;
+    restoredRef.current = true;
+    const s = loadSession();
+    if (!s) return;
+    runSeq.current++; // invalide tout flux en cours par cohérence
+    // Réhydratation localStorage au montage (client-only) : pattern légitime,
+    // pas un cascading render (s'exécute une seule fois, gardé par restoredRef).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSubmittedText(s.submittedText);
+    setText(s.submittedText);
+    setParsed(s.parsed);
+    setOutcome(s.outcome);
+    setSynthesis(s.synthesis);
+    setAskMessages(s.askMessages);
+    setAskRemaining(s.askRemaining);
+    setAskLimit(s.askLimit);
+    setView(s.view);
+    setPhase("results");
+    capture("life_session_restored");
+  }, []);
+
+  // ── Sauvegarde du parcours tant qu'on est en résultats (cartes/comparaison).
+  useEffect(() => {
+    if (phase !== "results" || !parsed || !outcome?.results?.length) return;
+    saveSession({ submittedText, parsed, outcome, synthesis, askMessages, askRemaining, askLimit, view });
+  }, [phase, parsed, outcome, synthesis, askMessages, askRemaining, askLimit, view, submittedText]);
+
   // ── Synthèse streamée ─────────────────────────────────────────────────────
   const streamSynthesis = useCallback(
     async (
@@ -240,6 +329,8 @@ export function OuVivreClient() {
   const runParse = useCallback(async (input: string) => {
     const project = input.trim();
     if (project.length < 3) return;
+
+    clearSession(); // une nouvelle recherche remplace la session restaurable
 
     const seq = ++runSeq.current;
     // reset aval
