@@ -152,6 +152,16 @@ const WAITING_PHRASES = [
   "Nous cherchons ce qui correspond vraiment à votre projet…",
 ];
 
+// Phrases d'attente pendant le PARSE (lecture + structuration du projet, quelques
+// secondes). Sans elles, l'écran reste figé sur une seule ligne et l'utilisateur
+// conclut au plantage bien avant la fin. On raconte l'étape en cours.
+const PARSE_PHRASES = [
+  "Nous lisons votre projet…",
+  "Nous repérons vos critères de vie…",
+  "Nous distinguons l'essentiel de l'accessoire…",
+  "Nous cernons le périmètre que vous visez…",
+];
+
 // Cartes affichées : on prend les 3 premiers territoires DANS L'ORDRE du moteur.
 // Le moteur fait désormais tout l'étalement (diversité par région/département, et
 // étalement échelonné quand une ancre est préférée : zone dominante + 1 ouverture).
@@ -614,13 +624,14 @@ export function OuVivreClient() {
   const busy = phase === "parsing" || phase === "matching";
 
   // Rotation des phrases d'attente pendant le calcul et le début de la synthèse.
-  const rotating = phase === "matching" || (synthesizing && !synthesis);
+  const rotating = phase === "parsing" || phase === "matching" || (synthesizing && !synthesis);
   useEffect(() => {
     if (!rotating) return;
     const id = setInterval(() => setPhraseIdx((i) => i + 1), 1900);
     return () => clearInterval(id);
   }, [rotating]);
-  const waitingPhrase = WAITING_PHRASES[phraseIdx % WAITING_PHRASES.length];
+  const phrasePool = phase === "parsing" ? PARSE_PHRASES : WAITING_PHRASES;
+  const waitingPhrase = phrasePool[phraseIdx % phrasePool.length];
 
   // Placeholder « machine à écrire » : le curseur tape une phrase, marque une pause,
   // l'efface, puis passe à la suivante. Seulement au repos et champ vide, pour ne
@@ -815,7 +826,7 @@ export function OuVivreClient() {
         <div className="mt-10 flex items-center gap-3 text-muted">
           <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
           <span className="text-[15px]">
-            {phase === "parsing" ? "Nous lisons votre projet…" : waitingPhrase}
+            {waitingPhrase}
           </span>
         </div>
       )}
