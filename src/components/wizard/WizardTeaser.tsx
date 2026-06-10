@@ -19,10 +19,10 @@ function Era5AnchorCard({ era5, ville }: { era5: Era5Trend; ville: string }) {
   const sign = era5.delta_c >= 0 ? "+" : "";
   return (
     <div
-      className="rounded-[1.7rem] border relative overflow-hidden"
+      className="rounded-[1.7rem] border border-dashed relative overflow-hidden"
       style={{
-        background: "linear-gradient(135deg, rgba(251,146,60,0.06) 0%, rgba(251,146,60,0.02) 100%)",
-        borderColor: "rgba(251,146,60,0.22)",
+        background: "linear-gradient(135deg, rgba(96,165,250,0.07) 0%, rgba(96,165,250,0.02) 100%)",
+        borderColor: "rgba(96,165,250,0.34)",
         padding: "1.75rem 2rem",
       }}
     >
@@ -31,13 +31,13 @@ function Era5AnchorCard({ era5, ville }: { era5: Era5Trend; ville: string }) {
           🌍
         </span>
         <div className="min-w-0 flex flex-col gap-1.5">
-          <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent/90">
-            Ancrage local · Climat déjà observé
+          <p className="font-mono text-[10px] tracking-[0.16em] uppercase" style={{ color: "rgb(96,165,250)" }}>
+            Repère · climat déjà observé (hors points d&apos;attention)
           </p>
           <p className="text-[16px] text-label leading-[1.4] font-medium text-balance mt-1">
             À {ville}, le changement climatique est déjà mesurable aujourd&apos;hui.
           </p>
-          <p className="text-[18px] text-accent font-semibold leading-[1.3] mt-1">
+          <p className="text-[18px] font-semibold leading-[1.3] mt-1" style={{ color: "rgb(96,165,250)" }}>
             {sign}{era5.delta_c.toFixed(1)}°C depuis la fin du XXᵉ siècle
           </p>
           <p className="text-[14px] text-muted leading-[1.4]">
@@ -208,9 +208,9 @@ function computeSignals(
       signals.push({
         icon: "📍",
         headline,
-        stat: `Score ${score}/100 — ${intensityLabel}`,
+        stat: `Score ${score}/100 · ${intensityLabel}`,
         precision: data.tensions.length > 1
-          ? `${data.tensions.length} signaux climatiques référencés pour ${ville}.`
+          ? `Un des ${data.tensions.length} signaux d'exposition recensés pour ${ville}.`
           : (isFort ? "Signal officiellement recensé dans votre territoire." : "Signal à surveiller dans votre territoire."),
         source: SLUG_SOURCES[top.slug] ?? "Données publiques françaises",
       });
@@ -345,11 +345,11 @@ export function WizardTeaser({
             className="font-semibold text-[clamp(2rem,4.2vw,3.8rem)] leading-[1.04] tracking-[-0.03em] text-label text-balance"
             style={{ fontFamily: "'Instrument Serif', serif" }}
           >
-            Votre profil présente{" "}
+            Votre situation fait déjà ressortir{" "}
             <span className="italic text-accent">
-              {hasMultipleSignals ? `${signals.length} signaux d'exposition` : "un signal d'exposition"}
+              {hasMultipleSignals ? `${signals.length} points d'attention` : "un point d'attention"}
             </span>{" "}
-            {hasMultipleSignals ? "identifiés." : "identifié."}
+            à {ville}.
           </h2>
         )}
       </div>
@@ -381,7 +381,7 @@ export function WizardTeaser({
               </div>
               <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(6,8,18,0.45)" }}>
                 <span className="font-mono text-[11px] tracking-[0.12em] uppercase text-muted border border-white/[0.12] rounded-full bg-canvas/85" style={{ padding: "0.75rem 1.5rem" }}>
-                  {lockedSignals.length} signa{lockedSignals.length > 1 ? "ux" : "l"} verrouillé{lockedSignals.length > 1 ? "s" : ""}
+                  {lockedSignals.length} point{lockedSignals.length > 1 ? "s" : ""} d&apos;attention verrouillé{lockedSignals.length > 1 ? "s" : ""}
                 </span>
               </div>
             </div>
@@ -401,30 +401,14 @@ export function WizardTeaser({
               Rapport interactif
             </p>
             <p
-              className="max-w-[20ch] text-[clamp(1.85rem,3.4vw,2.45rem)] font-normal text-label leading-[1.08] tracking-[-0.025em] text-balance"
+              className="max-w-[42rem] text-[clamp(1.85rem,3.4vw,2.45rem)] font-normal text-label leading-[1.08] tracking-[-0.025em] text-balance"
               style={{ fontFamily: "'Instrument Serif', serif" }}
             >
-              Accédez à votre analyse complète, vos 6 modules et votre guide d&apos;action personnalisé.
+              Découvrez ce que ces points d&apos;attention signifient vraiment pour votre logement, votre santé, votre mobilité et vos projets.
             </p>
             <p className="max-w-[42rem] text-[15px] text-muted leading-7">
-              Sourcé sur les données publiques françaises. Personnalisé sur votre profil. Sans publicité.
+              Construit à partir de vos réponses et des données publiques de {ville}.
             </p>
-          </div>
-
-          <div className="flex flex-col gap-3 md:flex-row md:items-end md:gap-6">
-            <div className="flex items-end gap-1.5">
-              <span
-                className="text-[56px] text-label leading-none tracking-[-0.03em]"
-                style={{ fontFamily: "'Instrument Serif', serif" }}
-              >
-                14
-              </span>
-              <span className="mb-2 text-[24px] text-ghost">€</span>
-            </div>
-            <div className="flex flex-col gap-1 pb-1">
-              <p className="font-mono text-[11px] text-ghost tracking-[0.04em] leading-relaxed">paiement unique</p>
-              <p className="font-mono text-[11px] text-ghost tracking-[0.04em] leading-relaxed">Le Fil 9 €/mois · prochainement</p>
-            </div>
           </div>
 
           <div className="flex flex-col gap-4">
@@ -432,11 +416,8 @@ export function WizardTeaser({
               href="/checkout/rapport-complet"
               className="wizard-cta flex w-full gap-2 rounded-xl bg-accent text-canvas text-[15px] no-underline transition-all duration-300 hover:bg-accent/90 hover:shadow-lg hover:shadow-accent/20 active:scale-[0.98]"
             >
-              Débloquer mon rapport interactif — 14€
+              Débloquer mon rapport interactif · 14 €
             </Link>
-            <p className="text-center font-mono text-[11px] text-ghost tracking-[0.04em] leading-relaxed">
-              Les 14 € seront déductibles à l&apos;ouverture du Fil mensuel
-            </p>
           </div>
         </div>
       </div>
