@@ -884,7 +884,7 @@ export default function FutureELanding() {
   const [plmHint, setPlmHint] = useState('');
   const [slotIndex, setSlotIndex] = useState(0);
   const [slotSettled, setSlotSettled] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+  const orb1Ref = useRef(null);
 
   const wizardRef = useRef(null);
   const [wizardContext, setWizardContext] = useState(null);
@@ -940,11 +940,23 @@ export default function FutureELanding() {
   }
 
   useEffect(() => {
-    const onMove = (event) =>
-      setMousePos({
-        x: event.clientX / window.innerWidth,
-        y: event.clientY / window.innerHeight,
-      });
+    // Parallaxe orb1 pilotée hors React : on coalesce les mousemove en une seule
+    // mise à jour par frame (rAF) appliquée directement au DOM. Évite de re-render
+    // tout le composant à chaque micro-mouvement de souris (cause de jank, surtout
+    // au-dessus des cartes glass de bas de page).
+    let raf = 0;
+    let nx = 0;
+    let ny = 0;
+    const onMove = (event) => {
+      nx = (event.clientX / window.innerWidth - 0.5) * 30;
+      ny = (event.clientY / window.innerHeight - 0.5) * 30;
+      if (!raf) {
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          if (orb1Ref.current) orb1Ref.current.style.transform = `translate(${nx}px, ${ny}px)`;
+        });
+      }
+    };
 
     const onClickOutside = (event) => {
       if (!searchWrapRef.current?.contains(event.target)) {
@@ -956,6 +968,7 @@ export default function FutureELanding() {
     window.addEventListener('click', onClickOutside);
 
     return () => {
+      if (raf) cancelAnimationFrame(raf);
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('click', onClickOutside);
     };
@@ -1457,9 +1470,6 @@ export default function FutureELanding() {
     setFreeText('');
   };
 
-  const orb1x = (mousePos.x - 0.5) * 30;
-  const orb1y = (mousePos.y - 0.5) * 30;
-
   const styles = {
     root: {
       fontFamily: "'Instrument Sans', system-ui, sans-serif",
@@ -1478,12 +1488,12 @@ export default function FutureELanding() {
       background: `radial-gradient(circle, ${C.orange}55 0%, transparent 70%)`,
       top: -180,
       left: -150,
-      filter: 'blur(100px)',
       opacity: 0.45,
       pointerEvents: 'none',
       zIndex: 0,
-      transform: `translate(${orb1x}px,${orb1y}px)`,
+      transform: 'translate(0px, 0px)',
       transition: 'transform 0.3s ease',
+      willChange: 'transform',
     },
     orb2: {
       position: 'fixed',
@@ -1493,7 +1503,6 @@ export default function FutureELanding() {
       background: `radial-gradient(circle, ${C.violet}40 0%, transparent 70%)`,
       bottom: -150,
       right: -120,
-      filter: 'blur(100px)',
       opacity: 0.38,
       pointerEvents: 'none',
       zIndex: 0,
@@ -1506,7 +1515,6 @@ export default function FutureELanding() {
       background: `radial-gradient(circle, ${C.red}30 0%, transparent 70%)`,
       top: '50%',
       left: '60%',
-      filter: 'blur(80px)',
       opacity: 0.22,
       pointerEvents: 'none',
       zIndex: 0,
@@ -1994,6 +2002,11 @@ export default function FutureELanding() {
         padding: '48px 52px',
         borderColor: 'var(--orange-tint)',
       }),
+      // perf : fond opaque sans backdrop-filter (le verre dépoli au-dessus des orbs
+      // fixes coûtait très cher au scroll sur GPU faible — cf. bas de page lourd)
+      background: 'var(--bg-card)',
+      backdropFilter: 'none',
+      WebkitBackdropFilter: 'none',
       position: 'relative',
       overflow: 'hidden',
     },
@@ -2028,6 +2041,9 @@ export default function FutureELanding() {
         borderLeft: `2px solid ${C.orange}`,
         marginTop: 28,
       }),
+      background: 'var(--bg-card)',
+      backdropFilter: 'none',
+      WebkitBackdropFilter: 'none',
       fontFamily: "'Instrument Serif', serif",
       fontStyle: 'italic',
       fontSize: 18,
@@ -2040,6 +2056,9 @@ export default function FutureELanding() {
         padding: 8,
         borderColor: 'var(--border-1)',
       }),
+      background: 'var(--bg-card)',
+      backdropFilter: 'none',
+      WebkitBackdropFilter: 'none',
       marginTop: 24,
       position: 'relative',
       overflow: 'hidden',
@@ -2353,8 +2372,6 @@ export default function FutureELanding() {
         @keyframes scroll-x { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes breathe { 0%,100% { transform:scale(1); } 50% { transform:scale(1.08) translate(10px,-15px); } }
-        .orb2-anim { animation: breathe 12s ease-in-out infinite; }
         .tension-card:hover { transform: translateY(-2px); }
         input::placeholder { color: var(--fg-4); }
         input:focus { border-color: var(--orange-ring) !important; background: var(--bg-elev-3) !important; }
@@ -2412,8 +2429,8 @@ export default function FutureELanding() {
         }
       `}</style>
 
-      <div style={styles.orb1} />
-      <div style={styles.orb2} className="orb2-anim" />
+      <div ref={orb1Ref} style={styles.orb1} />
+      <div style={styles.orb2} />
       <div style={styles.orb3} />
 
       <Navbar />
