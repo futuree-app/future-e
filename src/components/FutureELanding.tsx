@@ -10,7 +10,6 @@ import { createClient } from '@/lib/supabase/client';
 import Navbar from '@/components/Navbar';
 import { CookieSettingsLink } from '@/components/CookieSettingsLink';
 import { SAVOIR_HUB_ARTICLES } from '@/config/navigation';
-import { LandingComparatorInput } from '@/components/LandingComparatorInput';
 import { deriveCategories } from '@/lib/commune-categories';
 import posthog from 'posthog-js';
 import { HorizonSwitch, type Horizon } from '@/components/HorizonSwitch';
@@ -2180,6 +2179,12 @@ export default function FutureELanding() {
     },
     planCheck: { color: C.green, flexShrink: 0, marginTop: 1 },
     planBtn: (accent) => ({
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      textAlign: 'center',
+      textDecoration: 'none',
+      boxSizing: 'border-box',
       width: '100%',
       padding: '13px',
       borderRadius: 8,
@@ -2230,10 +2235,10 @@ export default function FutureELanding() {
       color: C.blue,
       desc: 'Votre cadre de vie local : nuisances, nature proche, ambiance, et ce que le quartier devient.',
       items: [
-        'Canicule et jours extrêmes',
-        'Submersion et inondations',
-        'Risque incendie',
-        'Érosion littorale',
+        'Nature et espaces de respiration',
+        'Calme et nuisances sonores',
+        'Vitalité et services de proximité',
+        'Aléas climatiques du lieu',
       ],
     },
     {
@@ -2266,10 +2271,10 @@ export default function FutureELanding() {
       color: C.red,
       desc: 'Votre environnement quotidien : air, chaleur, sols, eau, bruit et facteurs de fragilité.',
       items: [
-        'Canicule et vulnérabilité',
+        "Qualité de l'air respiré",
+        'Chaleur et vulnérabilité',
         'Cadmium et métaux lourds',
-        'Pollens et saison allongée',
-        "Qualité de l'eau potable",
+        'Bruit et eau potable',
       ],
     },
     {
@@ -2393,6 +2398,7 @@ export default function FutureELanding() {
           .hero-right { display: none !important; }
           .modules-grid { grid-template-columns: 1fr !important; }
           .pricing-grid { grid-template-columns: 1fr !important; }
+          .lifecompare-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
           .tensions-grid { grid-template-columns: 1fr !important; }
           .amnesie-inner { padding: 28px 24px !important; }
           .hero-section { padding: 60px 20px 40px !important; }
@@ -2549,7 +2555,7 @@ export default function FutureELanding() {
                   lineHeight: 1.5,
                   margin: 0,
                 }}>
-                  Ces projections ne sont qu'un aperçu de ce qui pourrait changer à {commune}. futur·e croise plus de 50 indicateurs - climat, santé, territoire - avec votre profil.
+                  Ces projections ne sont qu&apos;un aperçu de ce qui pourrait changer à {commune}. futur·e croise plus de 50 indicateurs (cadre de vie, santé, mobilité, climat) avec votre profil.
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
                   <button
@@ -2574,7 +2580,7 @@ export default function FutureELanding() {
                     Créer mon rapport interactif →
                   </button>
                   <a
-                    href="/comparateur"
+                    href="/ou-vivre"
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -2591,7 +2597,7 @@ export default function FutureELanding() {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    Comparer une autre commune
+                    Comparer selon mon projet de vie
                   </a>
                 </div>
               </div>
@@ -2612,6 +2618,108 @@ export default function FutureELanding() {
           </div>
         </div>
       </div>
+
+      {/* ── Encart : comparateur de projet de vie (voie principale) ── */}
+      <section style={{ position: 'relative', zIndex: 2, maxWidth: 1100, margin: '0 auto', padding: '56px 28px 16px' }}>
+        <div style={{
+          ...glass({ borderRadius: 20, padding: '52px 56px' }),
+          position: 'relative', overflow: 'hidden',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 56,
+          alignItems: 'start',
+        }} className="lifecompare-grid">
+          <div style={{
+            position: 'absolute', bottom: -100, right: -80,
+            width: 320, height: 320, borderRadius: '50%',
+            background: `radial-gradient(circle, ${C.orange}14 0%, transparent 70%)`,
+            pointerEvents: 'none',
+          }} />
+
+          {/* Colonne gauche : texte */}
+          <div>
+            <div style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 10, letterSpacing: '0.14em',
+              textTransform: 'uppercase', color: C.orange, marginBottom: 16,
+            }}>
+              Trouver où vivre · sans inscription
+            </div>
+            <h2 style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontWeight: 400,
+              fontSize: 'clamp(26px, 2.6vw, 38px)',
+              lineHeight: 1.12, letterSpacing: '-0.5px',
+              color: C.text, margin: '0 0 20px',
+            }}>
+              Décrivez votre projet de vie,<br />
+              <em style={{ fontStyle: 'italic', color: C.orange }}>futur·e cherche les territoires qui s&apos;en approchent</em>
+            </h2>
+            <p style={{
+              fontSize: 15, color: C.muted, lineHeight: 1.72,
+              margin: '0 0 28px', maxWidth: 420,
+            }}>
+              Vous écrivez ce qui compte pour vous : le quotidien, vos contraintes, ce à quoi
+              vous tenez. futur·e les confronte aux données publiques de chaque territoire et
+              fait remonter ceux qui y répondent le mieux, du cadre de vie au climat de demain.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                '34 000 communes, près de 30 critères',
+                'Cadre de vie, services, mobilité, santé, climat',
+                'Une lecture en langage clair, sans jargon',
+              ].map((label) => (
+                <div key={label} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 11, color: C.dim, letterSpacing: '0.03em',
+                }}>
+                  <span style={{
+                    width: 4, height: 4, borderRadius: '50%',
+                    background: C.orange, flexShrink: 0, display: 'inline-block',
+                  }} />
+                  {label}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Colonne droite : image + exemple (texte sous l'image) + CTA */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'stretch' }}>
+            <div style={{
+              position: 'relative', width: '100%', aspectRatio: '4 / 3',
+              borderRadius: 16, overflow: 'hidden', border: `1px solid ${C.border}`,
+            }}>
+              <Image
+                src="/comparer-deux-communes-demenagement.jpg"
+                alt="Choisir où vivre selon son projet de vie"
+                fill
+                sizes="(max-width: 768px) 100vw, 480px"
+                style={{ objectFit: 'cover', objectPosition: 'center' }}
+              />
+            </div>
+            <p style={{
+              fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
+              fontSize: 19, lineHeight: 1.42, color: C.text, margin: 0,
+            }}>
+              « Près de la mer, au calme, des commerces à pied, loin des pollutions, sans subir
+              les canicules ni dépendre de la voiture. »
+            </p>
+            <p style={{ fontSize: 13, color: C.dim, lineHeight: 1.6, margin: 0 }}>
+              Un exemple de projet. Le vôtre tient en quelques phrases.
+            </p>
+            <Link href="/ou-vivre" style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              padding: '15px 28px', borderRadius: 10,
+              background: C.orange, color: C.bg,
+              fontFamily: "'Instrument Sans', sans-serif", fontWeight: 600, fontSize: 15,
+              textDecoration: 'none',
+            }}>
+              Trouver où vivre →
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <section style={styles.qrSection} className="qr-section">
         <div style={styles.sectionLabel}>Première lecture</div>
@@ -2732,6 +2840,12 @@ export default function FutureELanding() {
                           Être prévenu·e à l&apos;ouverture du Fil
                         </Link>
                       )}
+                      <p style={{ marginTop: 14, fontSize: 13, color: C.dim, lineHeight: 1.5 }}>
+                        Vous hésitez entre plusieurs lieux ?{' '}
+                        <a href="/ou-vivre" style={{ color: C.orange, textDecoration: 'none', fontWeight: 600 }}>
+                          Comparez les territoires selon votre projet de vie →
+                        </a>
+                      </p>
                     </>
                   )
                 )}
@@ -2879,81 +2993,6 @@ export default function FutureELanding() {
           </div>
         </div>
       </div>
-
-      <section style={styles.amnesieSection}>
-        <div style={styles.amnesieInner} className="amnesie-inner">
-          <div
-            style={{
-              position: 'absolute',
-              top: -60,
-              right: -60,
-              width: 250,
-              height: 250,
-              borderRadius: '50%',
-              background: `radial-gradient(circle, ${C.orange}20 0%, transparent 70%)`,
-              pointerEvents: 'none',
-            }}
-          />
-          <div style={styles.amnesieEyebrow}>Pourquoi s&apos;abonner</div>
-          <h2 style={styles.amnesieTitle}>
-            Votre inquiétude mérite une présence calme, toute l&apos;année.
-          </h2>
-          <p style={styles.amnesieBody}>
-            Chaque semaine, une nouvelle alerte. Le cadmium dans les céréales.
-            Les pics de pollution. La canicule qui arrive. Les incendies.
-            Les inondations.
-          </p>
-          <p style={styles.amnesieBody}>
-            Vous lisez. Vous vous inquiétez. Puis l&apos;actualité passe à
-            autre chose, et vous aussi.
-          </p>
-          <p style={styles.amnesieBody}>
-            Ce n&apos;est pas un manque de volonté. La capacité
-            d&apos;inquiétude est limitée, c&apos;est documenté. Quand elle se
-            remplit d&apos;un sujet, elle se vide d&apos;un autre. Le
-            changement climatique, comme les risques sanitaires qui
-            l&apos;accompagnent, souffre de cette forme particulière
-            d&apos;invisibilité : il n&apos;est pas nié, il est oublié par
-            cycles.
-          </p>
-          <p style={styles.amnesieBody}>
-            Le problème, c&apos;est que ces risques ne disparaissent pas quand
-            l&apos;attention s&apos;efface. Ils progressent. Ils concernent
-            votre commune, votre logement, l&apos;air que respirent vos
-            enfants, la valeur de ce que vous possédez, les décisions que vous
-            n&apos;avez pas encore prises.
-          </p>
-          <div style={styles.amnesieVisualWrap}>
-            <div style={styles.amnesieVisualInner}>
-              <Image
-                src="/future-territoire-landing.jpg"
-                alt="Vue urbaine au crépuscule à travers une fenêtre ouverte"
-                fill
-                sizes="(max-width: 900px) 100vw, 860px"
-                style={{
-                  objectFit: 'cover',
-                  objectPosition: 'center center',
-                }}
-              />
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background:
-                    'linear-gradient(180deg, rgba(6,8,18,0.02) 0%, rgba(6,8,18,0.14) 100%)',
-                  pointerEvents: 'none',
-                }}
-              />
-            </div>
-          </div>
-          <div style={styles.amnesieHighlight}>
-            futur•e existe pour combler cet intervalle. Pas une alarme de plus
-            : une présence calme, continue, qui traduit les données publiques
-            en lecture personnalisée pour votre vie. Comme vous suivez votre
-            santé ou vos finances : sans obsession, sans oubli.
-          </div>
-        </div>
-      </section>
 
       {/* Hub Savoir */}
       <section
@@ -3137,104 +3176,6 @@ export default function FutureELanding() {
         </div>
       </section>
 
-      {/* ── Lead magnet Comparateur ── */}
-      <section style={{ position: 'relative', zIndex: 2, maxWidth: 1100, margin: '0 auto', padding: '0 28px 80px' }}>
-        <div style={{
-          ...glass({ borderRadius: 20, padding: '52px 56px' }),
-          position: 'relative', overflow: 'hidden',
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 56,
-          alignItems: 'center',
-        }}>
-
-          <div style={{
-            position: 'absolute', bottom: -100, right: -80,
-            width: 320, height: 320, borderRadius: '50%',
-            background: `radial-gradient(circle, ${C.red}12 0%, transparent 70%)`,
-            pointerEvents: 'none',
-          }} />
-
-          {/* Colonne gauche — texte */}
-          <div>
-            <div style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 10, letterSpacing: '0.14em',
-              textTransform: 'uppercase', color: C.red, marginBottom: 16,
-            }}>
-              Outil gratuit · sans inscription
-            </div>
-
-            <h2 style={{
-              fontFamily: "'Instrument Serif', serif",
-              fontWeight: 400,
-              fontSize: 'clamp(26px, 2.6vw, 38px)',
-              lineHeight: 1.12, letterSpacing: '-0.5px',
-              color: C.text, margin: '0 0 20px',
-            }}>
-              10 indicateurs pour départager deux communes objectivement<br />
-              <em style={{ fontStyle: 'italic', color: C.red }}>dans quelques années</em>
-            </h2>
-
-            <p style={{
-              fontSize: 15, color: C.muted, lineHeight: 1.72,
-              margin: '0 0 28px', maxWidth: 420,
-            }}>
-              Canicule, inondation, qualité de l&apos;air, cadmium, dépendance automobile...
-              comparez deux communes sur ce qui change vraiment à l&apos;horizon 2050.
-              Quatre dimensions gratuites. Six supplémentaires avec Le Fil.
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[
-                'Données DRIAS, INSEE, Géorisques, ATMO',
-                'Résultat en moins de dix secondes',
-                'Lecture en clair, sans jargon technique',
-              ].map((label) => (
-                <div key={label} style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: 11, color: C.dim, letterSpacing: '0.03em',
-                }}>
-                  <span style={{
-                    width: 4, height: 4, borderRadius: '50%',
-                    background: C.red, flexShrink: 0, display: 'inline-block',
-                  }} />
-                  {label}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Colonne droite — saisie + CTA */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <style>{`
-              .lm-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-4); margin-bottom: 6px; display: block; }
-              .lm-input-wrap { position: relative; }
-              .lm-input { width: 100%; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border-1); background: var(--bg-elev); color: var(--fg-1); font-family: 'Instrument Sans', sans-serif; font-size: 15px; transition: border-color 0.2s; outline: none; }
-              .lm-input:focus { border-color: var(--red, #f87171); }
-              .lm-input::placeholder { color: var(--fg-4); }
-              .lm-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 50; background: var(--bg-elev-3); border: 1px solid var(--border-1); border-radius: 10px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
-              .lm-row { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border: none; background: transparent; cursor: pointer; text-align: left; border-bottom: 1px solid var(--border-1); transition: background 0.12s; }
-              .lm-row:last-child { border-bottom: none; }
-              .lm-row:hover { background: var(--bg-elev); }
-              .lm-row-name { font-family: 'Instrument Sans', sans-serif; font-size: 14px; color: var(--fg-1); }
-              .lm-row-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--fg-4); }
-              .lm-cta { width: 100%; padding: 15px 24px; border-radius: 10px; border: none; background: var(--red, #f87171); color: #fff; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer; transition: opacity 0.15s; display: flex; align-items: center; justify-content: center; gap: 10px; }
-              .lm-cta:disabled { opacity: 0.4; cursor: default; }
-              .lm-cta:not(:disabled):hover { opacity: 0.88; }
-              .lm-secondary { width: 100%; padding: 13px 24px; border-radius: 10px; border: 1px solid var(--border-1); background: transparent; color: var(--fg-3); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.06em; cursor: pointer; text-align: center; text-decoration: none; display: block; transition: color 0.15s, border-color 0.15s; }
-              .lm-secondary:hover { color: var(--fg-1); border-color: var(--border-2); }
-              @media (max-width: 720px) {
-                .lm-comparator-grid { grid-template-columns: 1fr !important; gap: 36px !important; }
-              }
-            `}</style>
-
-            <LandingComparatorInput />
-          </div>
-
-        </div>
-      </section>
 
       <section id="pricing" style={styles.pricingSection}>
         <div style={{ textAlign: 'center', marginBottom: 0 }}>
@@ -3329,7 +3270,7 @@ export default function FutureELanding() {
                 'Dashboard simplifié en lecture seule',
                 'Export PDF, à conserver',
                 'Régénération 1 fois par an',
-                'Les 14 € seront déduits à l\'ouverture du Fil (prochainement).',
+                'En cas d\'abonnement, les 14 € seront déduits à l\'ouverture du Fil.',
               ].map((feature) => (
                 <div key={feature} style={styles.planFeature}>
                   <span style={styles.planCheck}>✓</span>
@@ -3376,8 +3317,8 @@ export default function FutureELanding() {
             </div>
             <div style={styles.planFeatures}>
               {[
-                'La comparaison complète des trois communes (7 thèmes, 27 dimensions)',
-                'Les trois rapports interactifs complets, à conserver',
+                'La comparaison complète des trois communes sur 27 dimensions.',
+                'Les trois rapports interactifs complets, par commune',
                 'Trois nouvelles pistes si aucune ne tranche',
                 'AskFuture : 9 questions incluses',
               ].map((feature) => (
@@ -3422,7 +3363,6 @@ export default function FutureELanding() {
                 'Profil modifiable à tout moment',
                 'Newsletter mensuelle personnalisée',
                 'Notifications ciblées sur événements',
-                'Comparateur de villes (exclusif Foyer)',
                 'Historique des mises à jour',
               ].map((feature) => (
                 <div key={feature} style={styles.planFeature}>
@@ -3440,6 +3380,82 @@ export default function FutureELanding() {
             >
               Être prévenu·e à l&apos;ouverture
             </Link>
+          </div>
+        </div>
+      </section>
+
+
+      <section style={styles.amnesieSection}>
+        <div style={styles.amnesieInner} className="amnesie-inner">
+          <div
+            style={{
+              position: 'absolute',
+              top: -60,
+              right: -60,
+              width: 250,
+              height: 250,
+              borderRadius: '50%',
+              background: `radial-gradient(circle, ${C.orange}20 0%, transparent 70%)`,
+              pointerEvents: 'none',
+            }}
+          />
+          <div style={styles.amnesieEyebrow}>Pourquoi s&apos;abonner</div>
+          <h2 style={styles.amnesieTitle}>
+            Votre inquiétude mérite une présence calme, toute l&apos;année.
+          </h2>
+          <p style={styles.amnesieBody}>
+            Chaque semaine, une nouvelle alerte. Le cadmium dans les céréales.
+            Les pics de pollution. La canicule qui arrive. Les incendies.
+            Les inondations.
+          </p>
+          <p style={styles.amnesieBody}>
+            Vous lisez. Vous vous inquiétez. Puis l&apos;actualité passe à
+            autre chose, et vous aussi.
+          </p>
+          <p style={styles.amnesieBody}>
+            Ce n&apos;est pas un manque de volonté. La capacité
+            d&apos;inquiétude est limitée, c&apos;est documenté. Quand elle se
+            remplit d&apos;un sujet, elle se vide d&apos;un autre. Le
+            changement climatique, comme les risques sanitaires qui
+            l&apos;accompagnent, souffre de cette forme particulière
+            d&apos;invisibilité : il n&apos;est pas nié, il est oublié par
+            cycles.
+          </p>
+          <p style={styles.amnesieBody}>
+            Le problème, c&apos;est que ces risques ne disparaissent pas quand
+            l&apos;attention s&apos;efface. Ils progressent. Ils concernent
+            votre commune, votre logement, l&apos;air que respirent vos
+            enfants, la valeur de ce que vous possédez, les décisions que vous
+            n&apos;avez pas encore prises.
+          </p>
+          <div style={styles.amnesieVisualWrap}>
+            <div style={styles.amnesieVisualInner}>
+              <Image
+                src="/future-territoire-landing.jpg"
+                alt="Vue urbaine au crépuscule à travers une fenêtre ouverte"
+                fill
+                sizes="(max-width: 900px) 100vw, 860px"
+                style={{
+                  objectFit: 'cover',
+                  objectPosition: 'center center',
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background:
+                    'linear-gradient(180deg, rgba(6,8,18,0.02) 0%, rgba(6,8,18,0.14) 100%)',
+                  pointerEvents: 'none',
+                }}
+              />
+            </div>
+          </div>
+          <div style={styles.amnesieHighlight}>
+            futur•e existe pour combler cet intervalle. Pas une alarme de plus
+            : une présence calme, continue, qui traduit les données publiques
+            en lecture personnalisée pour votre vie. Comme vous suivez votre
+            santé ou vos finances : sans obsession, sans oubli.
           </div>
         </div>
       </section>
