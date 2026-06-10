@@ -1,6 +1,7 @@
 import "server-only";
 export const dynamic = "force-dynamic";
 
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { QuartierWorkbook } from "@/app/(account)/compte/QuartierWorkbook";
@@ -22,6 +23,13 @@ import { deriveTerritoryMood } from "@/lib/territory-mood";
 
 export default async function RapportQuartierPage() {
   const account = await getCurrentUserAccount();
+
+  // Doctrine 2026-06-11 : Quartier est premium. Le gratuit n'ouvre aucun module
+  // et est renvoyé vers le hub /rapport (qui lui montre la première lecture).
+  if (!canAccessCompleteReport(account)) {
+    redirect("/rapport");
+  }
+
   const { supabase, user } = await requireCurrentUser();
   const fullReport = canAccessCompleteReport(account);
 
@@ -81,7 +89,7 @@ export default async function RapportQuartierPage() {
         <section className="pt-20 pb-6 max-w-[680px]">
           <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-info mb-5">
             <span className="w-1.5 h-1.5 rounded-full bg-info shrink-0" />
-            Module 01 · Quartier
+            Module 01 · Territoire
           </div>
           <h1
             className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-4 text-label"

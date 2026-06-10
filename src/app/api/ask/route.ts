@@ -457,9 +457,9 @@ function buildUserProfileText(profile: ProfileRow): string {
     present: "sujet déjà concret",
   };
   const SHELTER_LABELS: Record<string, string> = {
-    resilient: "le quartier absorbe encore bien",
+    resilient: "le territoire absorbe encore bien",
     tendu: "le cadre de vie se tend l'été",
-    fragilise: "le quartier montre déjà ses limites",
+    fragilise: "le territoire montre déjà ses limites",
   };
   const CHANGE_LABELS: Record<string, string> = {
     faible: "peu de changement perçu ces dernières années",
@@ -477,7 +477,7 @@ function buildUserProfileText(profile: ProfileRow): string {
       obs.push(`- Note terrain libre : ${workbook.note.trim()}`);
     }
     if (obs.length > 0) {
-      lines.push("Observations terrain (module Quartier) :");
+      lines.push("Observations terrain (module Territoire) :");
       lines.push(...obs);
     }
   }

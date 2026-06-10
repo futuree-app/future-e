@@ -35,3 +35,29 @@ export const WIZARD_SKIP_DEFAULTS: Partial<WizardAnswers> = {
 };
 
 export const WIZARD_STORAGE_KEY = "futur-e:wizard";
+
+// Vrai si l'utilisateur a réellement renseigné quelque chose dans le wizard.
+// Sert à décider si on persiste / affiche une « première lecture ».
+export function hasWizardContent(a: WizardAnswers | null | undefined): boolean {
+  if (!a) return false;
+  return Boolean(
+    a.quartier || a.logement || a.metier || (a.sante && a.sante.length > 0) || a.mobilite || a.projets,
+  );
+}
+
+// Lit les réponses du wizard depuis le sessionStorage (client uniquement).
+// Retourne null si rien d'exploitable.
+export function readWizardAnswersFromStorage(): WizardAnswers | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(WIZARD_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<WizardState>;
+    const answers = parsed.answers
+      ? { ...WIZARD_INITIAL_ANSWERS, ...parsed.answers }
+      : null;
+    return hasWizardContent(answers) ? answers : null;
+  } catch {
+    return null;
+  }
+}

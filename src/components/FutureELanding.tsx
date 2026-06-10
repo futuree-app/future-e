@@ -2322,10 +2322,10 @@ export default function FutureELanding() {
 
   const MODULES = [
     {
-      name: 'Quartier',
+      name: 'Territoire',
       icon: '🏘',
       color: C.blue,
-      desc: 'Votre cadre de vie local : nuisances, nature proche, ambiance, et ce que le quartier devient.',
+      desc: 'Votre cadre de vie local : nuisances, nature proche, ambiance, et ce que le territoire devient.',
       items: [
         'Nature et espaces de respiration',
         'Calme et nuisances sonores',
@@ -3346,7 +3346,7 @@ export default function FutureELanding() {
             </div>
             <div style={styles.planFeatures}>
               {[
-                '6 analyses personnalisées : logement, quartier, santé, mobilité, métier, projets',
+                '6 analyses personnalisées : logement, territoire, santé, mobilité, métier, projets',
                 'AskFuture : 3 questions incluses',
                 'Dashboard simplifié en lecture seule',
                 'Export PDF, à conserver',

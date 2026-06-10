@@ -9,6 +9,9 @@ import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territo
 import { TrackedModuleLink, TrackedUpgradeLink } from "./RapportTrackedLinks";
 import HorizonBar from "@/components/report/HorizonBar";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
+import { RapportPremiereLecture } from "@/components/wizard/RapportPremiereLecture";
+import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
+import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 
 const MODULE_COLORS: Record<string, string> = {
   quartier: "var(--blue)",
@@ -36,8 +39,6 @@ const MODULE_BENEFIT: Record<string, string> = {
   projets: "Achat, installation, retraite. Ce que ce territoire va devenir et ce que ça implique pour vos décisions.",
 };
 
-const LOCKED_MODULE_IDS = ["logement", "metier", "sante", "mobilite", "projets"];
-
 export default async function RapportPage() {
   const account = await getCurrentUserAccount();
   const fullReport = canAccessCompleteReport(account);
@@ -45,7 +46,7 @@ export default async function RapportPage() {
   const { supabase, user } = await requireCurrentUser();
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select(TERRITORY_SELECT)
+    .select(`${TERRITORY_SELECT}, wizard_answers`)
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -55,13 +56,8 @@ export default async function RapportPage() {
   const displayName = communeName ?? "votre commune";
 
   const allModules = PRODUCT_MODULES;
-  const lockedModules = PRODUCT_MODULES.filter((m) => LOCKED_MODULE_IDS.includes(m.id));
-
-  const heroSignals = [
-    { label: "Cadmium dans les sols charentais", src: "GisSol / RMQS", col: "var(--orange)" },
-    { label: "Saison pollinique allongée de 28 jours", src: "RNSA / Copernicus", col: "var(--green)" },
-    { label: "Assurance habitation : +8 à 12 %/an sur le littoral", src: "ACPR / Banque de France", col: "var(--blue)" },
-  ];
+  // Première lecture du compte gratuit : réponses du wizard persistées (point 2).
+  const serverWizardAnswers = (profile?.wizard_answers ?? null) as WizardAnswers | null;
 
   return (
     <div
@@ -76,6 +72,10 @@ export default async function RapportPage() {
       <Navbar ctas={{ secondary: { href: "/compte", label: "Mon compte" }, primary: { href: "/dashboard", label: "Dashboard" } }} />
 
       <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
+
+        {/* Persiste les réponses du wizard (sessionStorage → profil) à la 1re
+            page authentifiée, si elles ne sont pas déjà en base. */}
+        <WizardAnswersSync hasServerAnswers={hasWizardContent(serverWizardAnswers)} />
 
         {/* ── Bandeau territoire refusé (activé sans rapport débloqué) ── */}
         {territory.deniedInsee && (
@@ -130,7 +130,7 @@ export default async function RapportPage() {
         )}
 
         {/* ── Hero ── */}
-        <section className="grid grid-cols-[1fr_400px] gap-16 items-start py-20">
+        <section className={fullReport ? "grid grid-cols-[1fr_400px] gap-16 items-start py-20" : "py-20"}>
           <div>
             <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-accent mb-5">
               <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
@@ -162,23 +162,16 @@ export default async function RapportPage() {
             </>
           </div>
 
-          {/* Panel signals / résumé */}
-          <aside
-            className="glass rounded-2xl p-7 relative overflow-hidden"
-            style={!fullReport ? { borderColor: "var(--orange-tint-2)", boxShadow: "0 0 0 1px var(--orange-tint), 0 20px 60px rgba(251,146,60,0.07)" } : undefined}
-          >
-            {!fullReport && (
-              <div className="absolute top-[-50px] right-[-50px] w-[160px] h-[160px] rounded-full pointer-events-none"
-                style={{ background: "radial-gradient(circle, var(--orange-tint) 0%, transparent 70%)" }} />
-            )}
-            <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">
-              {fullReport ? "Hub des modules" : "Quelques signaux déjà disponibles"}
-            </p>
-            <h2 className="font-normal text-[22px] leading-[1.2] text-label mb-5 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              {fullReport ? `Rapport interactif · ${displayName}` : `${displayName}, ce que les données montrent déjà`}
-            </h2>
-
-            {fullReport ? (
+          {/* Panel hub des modules — payant uniquement. En gratuit, les signaux
+              réels sont portés par la première lecture plus bas (pas de doublon). */}
+          {fullReport && (
+            <aside className="glass rounded-2xl p-7 relative overflow-hidden">
+              <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">
+                Hub des modules
+              </p>
+              <h2 className="font-normal text-[22px] leading-[1.2] text-label mb-5 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                Rapport interactif · {displayName}
+              </h2>
               <div className="flex flex-col gap-2.5">
                 {allModules.map((m) => {
                   const col = MODULE_COLORS[m.id] ?? "var(--violet)";
@@ -193,23 +186,8 @@ export default async function RapportPage() {
                   );
                 })}
               </div>
-            ) : (
-              <div className="flex flex-col gap-2.5">
-                {heroSignals.map((s) => (
-                  <div key={s.label} className="flex gap-3.5 items-start px-3.5 py-3 rounded-lg" style={{ background: `${s.col}0c`, border: `1px solid ${s.col}22` }}>
-                    <span className="w-[7px] h-[7px] rounded-full shrink-0 mt-[5px]" style={{ background: s.col, boxShadow: `0 0 8px ${s.col}` }} />
-                    <div>
-                      <div className="text-[13px] font-medium text-label mb-0.5 leading-[1.3]">{s.label}</div>
-                      <div className="font-mono text-[10px] text-ghost tracking-[0.04em]">{s.src}</div>
-                    </div>
-                  </div>
-                ))}
-                <p className="font-mono text-[11px] text-ghost tracking-[0.04em] leading-[1.6] mt-1 px-3 py-2.5 rounded-lg bg-white/[0.02] border border-white/[0.08]">
-                  Le rapport interactif lit ces signaux à travers votre profil. Ce n&apos;est pas la même chose que de lire des données brutes.
-                </p>
-              </div>
-            )}
-          </aside>
+            </aside>
+          )}
         </section>
 
         <div className="border-t border-white/[0.08]" />
@@ -230,109 +208,17 @@ export default async function RapportPage() {
 
         <div className="border-t border-white/[0.08] mt-14" />
 
-        {/* ── Vue gratuite ── */}
+        {/* ── Vue gratuite : la première lecture post-wizard ── */}
         {!fullReport && (
-          <>
-            <section className="pt-14" id="quartier">
-              <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
-                <div>
-                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Hub du rapport interactif</p>
-                  <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                    Les modules accessibles depuis votre rapport interactif.
-                  </h2>
-                </div>
-                <p className="text-[15px] text-muted leading-[1.65]">
-                  Le hub présente les modules. Les pages dédiées approfondissent.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3.5">
-                <article className="glass rounded-xl p-6 relative" style={{ borderTop: "2px solid var(--blue)" }}>
-                  <div className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[17px] mb-3.5 border" style={{ background: "var(--blue)16", borderColor: "var(--blue)22" }}>
-                    {MODULE_ICONS.quartier}
-                  </div>
-                  <p className="font-mono text-[10px] tracking-[0.1em] text-ghost mb-1 uppercase">Module 01</p>
-                  <h3 className="font-normal text-[20px] text-label mb-2.5" style={{ fontFamily: "'Instrument Serif', serif" }}>Quartier</h3>
-                  <p className="text-[13px] text-muted leading-[1.65] mb-3.5">
-                    Chaleur, inondations, érosion côtière. Ce que {displayName} devient selon l&apos;horizon choisi, données climatiques publiques à l&apos;appui.
-                  </p>
-                  <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase" style={{ color: "var(--blue)" }}>
-                    <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: "var(--blue)", boxShadow: "0 0 6px var(--blue)" }} />
-                    Accessible
-                  </span>
-                  <div className="mt-4">
-                    <TrackedModuleLink href="/rapport/quartier" moduleId="quartier" commune={displayName} inseeCode={inseeCode} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: "var(--blue)", border: "1px solid var(--blue)33", background: "var(--blue)0d" }}>
-                      Ouvrir le module
-                    </TrackedModuleLink>
-                  </div>
-                </article>
-
-                {lockedModules.map((module, i) => {
-                  const benefit = module.id === "quartier"
-                  ? `Chaleur, inondations, érosion côtière. Ce que ${displayName} devient selon l'horizon choisi, données climatiques publiques à l'appui.`
-                  : MODULE_BENEFIT[module.id] ?? module.summary;
-                  return (
-                    <article
-                      key={module.id}
-                      className="glass rounded-xl p-6 relative opacity-50"
-                      style={{ borderTop: "2px solid var(--bg-elev-3)" }}
-                    >
-                      <div className="w-[34px] h-[34px] rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[17px] mb-3.5 grayscale">
-                        {MODULE_ICONS[module.id]}
-                      </div>
-                      <p className="font-mono text-[10px] tracking-[0.1em] text-ghost mb-1 uppercase">Module 0{i + 2}</p>
-                      <h3 className="font-normal text-[20px] text-muted mb-2.5" style={{ fontFamily: "'Instrument Serif', serif" }}>{module.name}</h3>
-                      <p className="text-[13px] text-ghost leading-[1.65] mb-3.5 opacity-70">{benefit}</p>
-                      <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase text-ghost bg-white/[0.04] border border-white/[0.08] rounded-full px-2.5 py-1">
-                        Fermé
-                      </span>
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="pt-2">
-              <div className="grid grid-cols-[1fr_320px] gap-10 items-end mb-8">
-                <div>
-                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Le rapport interactif</p>
-                  <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                    Ce que les autres modules ajoutent.
-                  </h2>
-                </div>
-                <p className="text-[15px] text-muted leading-[1.65]">
-                  Le hub gratuit s&apos;arrête au territoire. Le rapport interactif ouvre ensuite le logement, la santé, la mobilité, le métier et les projets.
-                </p>
-              </div>
-            </section>
-
-            {/* Upgrade band */}
-            <div className="glass rounded-2xl p-11 grid grid-cols-[1fr_200px] gap-14 items-center mt-12 relative overflow-hidden" style={{ borderColor: "var(--orange-tint)" }}>
-              <div className="absolute top-[-80px] right-[-80px] w-[260px] h-[260px] rounded-full pointer-events-none"
-                style={{ background: "radial-gradient(circle, var(--orange-tint) 0%, transparent 70%)" }} />
-              <div>
-                <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">Rapport interactif</p>
-                <h2 className="font-normal text-[clamp(22px,2.4vw,30px)] leading-[1.2] tracking-[-0.5px] text-label mb-3.5" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                  Six lectures de votre vie à {displayName}. Sourcées. Sans généralités.
-                </h2>
-                <p className="text-[15px] text-muted leading-[1.7]">
-                  Logement, métier, santé, mobilité, projets : le rapport interactif lit chacune de ces dimensions à travers votre profil et les données publiques disponibles pour votre commune.
-                </p>
-              </div>
-              <div className="text-center">
-                <span className="block text-[52px] text-label leading-none tracking-[-2px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                  14<span className="text-[22px] text-ghost">€</span>
-                </span>
-                <span className="block font-mono text-[11px] text-ghost tracking-[0.04em] mt-1 mb-5">une fois</span>
-                <TrackedUpgradeLink href="/#pricing" className="flex items-center justify-center px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[13px] no-underline w-full" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-                  Voir les formules
-                </TrackedUpgradeLink>
-                <p className="mt-2.5 font-mono text-[10px] text-ghost tracking-[0.04em] text-center leading-[1.6]">
-                  Les 14 € seront déductibles à l&apos;ouverture du Fil mensuel.
-                </p>
-              </div>
+          <section className="pt-14" id="quartier">
+            <div className="mb-8 max-w-[640px]">
+              <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Votre première lecture</p>
+              <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                Ce que vos réponses font déjà ressortir à {displayName}.
+              </h2>
             </div>
-          </>
+            <RapportPremiereLecture serverAnswers={serverWizardAnswers} inseeCode={inseeCode} />
+          </section>
         )}
 
         {/* ── Vue payant ── */}

@@ -367,7 +367,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                 Retour au hub
               </Link>
               <Link href="/rapport/quartier" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
-                Voir le module Quartier
+                Voir le module Territoire
               </Link>
             </div>
           </div>
@@ -484,7 +484,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                 Adresse hors commune
               </strong>
               <br />
-              Cette adresse est à <strong>{result.address.city}</strong>, votre commune de résidence déclarée est <strong>{defaultCommune}</strong>. L&apos;analyse porte sur ce bien, mais les modules Quartier et Santé restent calés sur votre commune principale.
+              Cette adresse est à <strong>{result.address.city}</strong>, votre commune de résidence déclarée est <strong>{defaultCommune}</strong>. L&apos;analyse porte sur ce bien, mais les modules Territoire et Santé restent calés sur votre commune principale.
             </div>
           )}
 

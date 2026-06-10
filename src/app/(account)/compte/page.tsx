@@ -10,6 +10,8 @@ import {
 } from "@/lib/access";
 import { PRODUCT_MODULES } from "@/lib/product";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
+import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
+import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 
 const MODULE_ICONS: Record<string, string> = {
   quartier: "🏘", logement: "🏠", metier: "💼",
@@ -36,11 +38,12 @@ export default async function ComptePage() {
   const { supabase, user } = await requireCurrentUser();
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("home_commune, home_insee_code")
+    .select("home_commune, home_insee_code, wizard_answers")
     .eq("user_id", user.id)
     .maybeSingle();
 
   const commune = profile?.home_commune ?? null;
+  const serverWizardAnswers = (profile?.wizard_answers ?? null) as WizardAnswers | null;
 
   return (
     <div
@@ -54,6 +57,10 @@ export default async function ComptePage() {
       <Navbar ctas={{ secondary: { href: "/rapport", label: "Mon rapport" }, primary: fullAccess ? { href: "/dashboard", label: "Dashboard" } : { href: "/#pricing", label: "Passer au complet" } }} />
 
       <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
+
+        {/* Persiste les réponses du wizard (sessionStorage → profil) si elles
+            ne sont pas déjà en base : rend la première lecture retrouvable. */}
+        <WizardAnswersSync hasServerAnswers={hasWizardContent(serverWizardAnswers)} />
 
         {!commune && <div className="pt-10"><CommuneSetupBanner /></div>}
 

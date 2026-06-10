@@ -1,7 +1,7 @@
 export const PRODUCT_MODULES = [
   {
     id: "quartier",
-    name: "Quartier",
+    name: "Territoire",
     summary: "Ce que le territoire devient autour de vous.",
     signals: ["Canicule", "Submersion", "Feux", "Cadre de vie"],
   },

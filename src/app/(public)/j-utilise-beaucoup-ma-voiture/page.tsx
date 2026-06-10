@@ -107,7 +107,7 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
           <div className="hero-note-label">Ce qui est public ici</div>
           <div className="hero-note-text">
             Vous pouvez lire les analyses et les guides pratiques. <strong>Le diagnostic par commune et par profil détaillé</strong> reste réservé au rapport interactif : il va plus loin avec les six dimensions futur•e
-            {' '}<strong>Quartier, Santé, Logement, Métier, Mobilité, Projets</strong>.
+            {' '}<strong>Territoire, Santé, Logement, Métier, Mobilité, Projets</strong>.
           </div>
         </div>
 
@@ -202,7 +202,7 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
               <em style={{ fontStyle: 'italic', color: ACCENT }}>vos marges de manœuvre réelles</em>
             </p>
             <p className="rapport-cta-desc">
-              Le rapport interactif croise la mobilité avec six dimensions : <strong style={{ color: 'var(--fg-1)' }}>Quartier, Santé, Logement, Métier, Mobilité, Projets.</strong>{' '}
+              Le rapport interactif croise la mobilité avec six dimensions : <strong style={{ color: 'var(--fg-1)' }}>Territoire, Santé, Logement, Métier, Mobilité, Projets.</strong>{' '}
               Il ne vous donne pas seulement une idée générale. Il relie votre lieu de vie, vos contraintes quotidiennes et les décisions qui ont du sens pour vous.
             </p>
             <span className="rapport-cta-btn">Découvrir le rapport interactif →</span>

@@ -438,7 +438,7 @@ export default function PourquoiPage() {
               <path className="why-trace-down" d="M 360 298 Q 490 340 620 380" stroke="rgba(96, 165, 250, 0.4)" strokeWidth="0.9" />
 
               {[
-                ['Quartier', 100, 380],
+                ['Territoire', 100, 380],
                 ['Logement', 230, 390],
                 ['Métier', 320, 400],
                 ['Santé', 400, 400],

@@ -286,7 +286,7 @@ export function WizardTeaser({
   answers: WizardAnswers;
   context: string | null;
   inseeCode: string | null;
-  onRestart: () => void;
+  onRestart?: () => void;
 }) {
   const ville = answers.quartier || "votre commune";
 
@@ -422,13 +422,15 @@ export function WizardTeaser({
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={onRestart}
-        className="text-center font-mono text-[11px] tracking-[0.08em] uppercase text-ghost hover:text-muted transition-colors duration-200 py-2"
-      >
-        Recommencer depuis le début
-      </button>
+      {onRestart && (
+        <button
+          type="button"
+          onClick={onRestart}
+          className="text-center font-mono text-[11px] tracking-[0.08em] uppercase text-ghost hover:text-muted transition-colors duration-200 py-2"
+        >
+          Recommencer depuis le début
+        </button>
+      )}
 
     </div>
   );

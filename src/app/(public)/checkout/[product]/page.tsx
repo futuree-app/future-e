@@ -51,22 +51,20 @@ const COPY: Record<CheckoutProductSlug, {
   "rapport-complet": {
     kicker: "Rapport interactif · 14 € une fois",
     hero: { line1: "Votre futur,", line2: "posé sur la table." },
-    promise: "Un rapport interactif intégral, six modules personnalisés à partir de votre commune et de votre profil. Téléchargeable, à conserver. Les 14 € seront déduits à l'ouverture du Fil.",
+    promise: "Un rapport interactif intégral, six modules personnalisés à partir de votre commune et de votre profil. Téléchargeable, à conserver.",
     whatYouGet: [
-      { n: "01", title: "Rapport interactif personnalisé", body: "Six modules interactifs — santé, mobilité, environnement, logement, projets, quartier — écrits pour vous, sourcés sur les données publiques (DRIAS, INSEE, Géorisques, IREP). Export PDF inclus." },
+      { n: "01", title: "Rapport interactif personnalisé", body: "Six modules interactifs : territoire, logement, métier, santé, mobilité, projets. Écrits pour vous, sourcés sur les données publiques (DRIAS, INSEE, Géorisques, IREP). Export PDF inclus." },
       { n: "02", title: "Dashboard simplifié", body: "Vos indicateurs clés en lecture seule, accessibles à tout moment depuis votre espace futur•e." },
       { n: "03", title: "Régénération annuelle", body: "Une mise à jour du rapport interactif par an, incluse, pour suivre l'évolution de votre territoire." },
-      { n: "04", title: "Crédit Le Fil", body: "Les 14 € seront entièrement déduits du Fil mensuel à son ouverture (prochainement)." },
     ],
     timeline: [
-      { n: "01", title: "Paiement sécurisé", body: "Stripe — moins de 2 minutes, carte bancaire ou Apple/Google Pay." },
+      { n: "01", title: "Paiement sécurisé", body: "Stripe, moins de 2 minutes, carte bancaire ou Apple/Google Pay." },
       { n: "02", title: "Génération du rapport interactif", body: "Votre rapport interactif est produit puis envoyé par email sous 24 heures ouvrées." },
       { n: "03", title: "Accès permanent", body: "Téléchargeable depuis votre espace, exportable en PDF, partageable en lien temporaire." },
     ],
     faqs: [
       { q: "Le rapport interactif est-il vraiment personnalisé ?", a: "Oui. Chaque module est construit à partir de votre commune, votre profil de risque et vos réponses au wizard. Deux foyers d'une même ville obtiennent deux rapports différents." },
       { q: "Combien de temps avant de le recevoir ?", a: "Sous 24 heures ouvrées. La plupart des rapports sont produits en quelques minutes ; nous gardons 24 h pour les périodes de forte demande." },
-      { q: "Et si je passe au Fil plus tard ?", a: "Les 14 € seront déduits intégralement de votre premier mois du Fil à son ouverture. Aucune démarche à faire de votre côté." },
       { q: "Mes données sont-elles vendues ?", a: "Jamais. Les données issues du wizard restent dans votre espace. Voir notre politique RGPD." },
     ],
   },
@@ -673,7 +671,7 @@ export default async function CheckoutPage({
                 >
                   {isFil
                     ? "Sans engagement · 30 jours offerts à l'ouverture"
-                    : "Paiement unique · TTC · déductible du Fil"}
+                    : "Paiement unique · TVA non applicable, art. 293 B du CGI"}
                 </p>
               </div>
 

@@ -81,7 +81,7 @@ Vous traitez : chaleur, sécheresse, eau, inondation, submersion, feux, qualité
 Vous ne traitez JAMAIS : logement, santé personnelle, patrimoine, achat immobilier, métier, retraite, projets individuels. Ces sujets appartiennent à d'autres modules.`;
 
 // ─── Synthèse principale ───────────────────────────────────────────────────
-const SYNTHESIS_PROMPT = `Vous êtes l'analyste éditorial de futur•e pour le module Quartier. Vous répondez à une seule question : "Que devient ce territoire ?"
+const SYNTHESIS_PROMPT = `Vous êtes l'analyste éditorial de futur•e pour le module Territoire. Vous répondez à une seule question : "Que devient ce territoire ?"
 
 ${VOICE_RULES}
 

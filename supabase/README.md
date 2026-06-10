@@ -20,6 +20,7 @@ Ordre recommandé :
 `05_init_georisques.sql` prépare la normalisation des signaux officiels Géorisques pour Quartier, Logement et Projets.
 `10_add_workbook_quartier.sql` ajoute la colonne `user_profiles.workbook_quartier` (repères de terrain, écriture compat).
 `11_terrain_observations.sql` crée la table dédiée `terrain_observations` (base propre des repères de terrain, RLS par utilisateur, préparation de l'agrégation territoriale future). À lancer après `10`.
+`14_add_wizard_answers.sql` ajoute la colonne `user_profiles.wizard_answers` (réponses du questionnaire persistées pour ré-afficher la « première lecture » du compte gratuit ; écriture via `/api/profile`).
 
 Import DRIAS recommandé :
 

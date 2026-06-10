@@ -196,7 +196,7 @@ export function DashboardExperience({
   const modules = [
     {
       id: "quartier",
-      title: "Ton quartier",
+      title: "Ton territoire",
       subtitle: `${communeName} · DRIAS + Géorisques${atmo ? " + ATMO" : ""}`,
       badge: heatStatus.badge,
       color: "var(--blue)",
@@ -297,7 +297,7 @@ export function DashboardExperience({
           georisquesLines.length > 0
             ? georisquesLines.join(" · ")
             : "aucun signal Géorisques prioritaire n'est remonté ici"
-        }${atmo ? `. Qualité de l'air : indice ATMO ${atmo.index.label.toLowerCase()} (${atmo.index.value}/6, relevé du ${atmo.date})` : ""}. La chaleur reste le signal le plus structurant, mais elle se lit désormais avec la trame territoriale réelle du quartier.`;
+        }${atmo ? `. Qualité de l'air : indice ATMO ${atmo.index.label.toLowerCase()} (${atmo.index.value}/6, relevé du ${atmo.date})` : ""}. La chaleur reste le signal le plus structurant, mais elle se lit désormais avec la trame territoriale réelle de la commune.`;
 
   return (
     <div className="proto-shell">

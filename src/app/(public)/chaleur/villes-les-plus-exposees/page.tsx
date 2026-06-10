@@ -263,7 +263,7 @@ export default async function ChaleurTop10() {
             <div className="cta-rapport-title">Votre commune est-elle exposée ?</div>
             <p className="cta-rapport-desc">
               Cherchez votre ville pour voir ses projections spécifiques — puis construisez votre rapport interactif personnalisé.
-              Six dimensions croisées : Quartier, Santé, Logement, Métier, Mobilité, Projets.
+              Six dimensions croisées : Territoire, Santé, Logement, Métier, Mobilité, Projets.
             </p>
             <div className="cta-links">
               <Link href="/rapport" className="cta-btn">Créer mon rapport interactif →</Link>

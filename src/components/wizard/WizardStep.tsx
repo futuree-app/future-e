@@ -12,7 +12,7 @@ type StepConfig =
 const STEPS: StepConfig[] = [
   {
     key: "quartier",
-    module: "Quartier",
+    module: "Territoire",
     step: "01",
     question: "Quelle est votre ville ou votre code postal ?",
     type: "text",

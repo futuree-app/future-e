@@ -11,6 +11,45 @@
 
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import type { WizardAnswers } from "@/components/wizard/types";
+
+// Normalise un objet réponses-wizard reçu du client vers la forme WizardAnswers
+// stricte (cf. src/components/wizard/types.ts). Tout champ invalide retombe sur
+// sa valeur neutre. Retourne null si l'entrée n'est pas un objet exploitable.
+function normalizeWizardAnswers(raw: unknown): WizardAnswers | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const r = raw as Record<string, unknown>;
+
+  const logementType = ["maison", "appartement", "autre"];
+  const logementAge = ["recent", "middle", "old"];
+  const mobilite = ["voiture", "transport", "velo", "mixte"];
+  const projets = ["achat", "retraite", "demenagement", "autre"];
+
+  const rawLogement = r.logement;
+  let logement: WizardAnswers["logement"] = null;
+  if (rawLogement && typeof rawLogement === "object" && !Array.isArray(rawLogement)) {
+    const l = rawLogement as Record<string, unknown>;
+    if (typeof l.type === "string" && logementType.includes(l.type)) {
+      logement = {
+        type: l.type as NonNullable<WizardAnswers["logement"]>["type"],
+        age: typeof l.age === "string" && logementAge.includes(l.age)
+          ? (l.age as NonNullable<WizardAnswers["logement"]>["age"])
+          : null,
+      };
+    }
+  }
+
+  return {
+    quartier: typeof r.quartier === "string" && r.quartier.trim() ? r.quartier.trim() : null,
+    logement,
+    metier: typeof r.metier === "string" && r.metier.trim() ? r.metier.trim() : null,
+    sante: Array.isArray(r.sante)
+      ? Array.from(new Set(r.sante.filter((s): s is string => typeof s === "string" && s.trim().length > 0)))
+      : [],
+    mobilite: typeof r.mobilite === "string" && mobilite.includes(r.mobilite) ? (r.mobilite as WizardAnswers["mobilite"]) : null,
+    projets: typeof r.projets === "string" && projets.includes(r.projets) ? (r.projets as WizardAnswers["projets"]) : null,
+  };
+}
 
 type FieldType = "text" | "boolean" | "array";
 type FieldConfig = { type: FieldType; allowed?: readonly string[] };
@@ -72,6 +111,22 @@ export async function PATCH(request: NextRequest) {
         .eq("user_id", user.id);
       if (error) {
         console.error("[profile] PATCH workbook_quartier error:", error);
+        return NextResponse.json({ error: "Erreur de sauvegarde." }, { status: 500 });
+      }
+      return NextResponse.json({ success: true });
+    }
+
+    // Cas spécial : réponses du wizard (objet JSONB borné, cf. WizardAnswers).
+    // Sert à persister la « première lecture » du compte gratuit. On normalise
+    // pour ne jamais stocker un blob arbitraire envoyé par le client.
+    if (field === "wizard_answers") {
+      const normalized = normalizeWizardAnswers(body.value);
+      const { error } = await supabase
+        .from("user_profiles")
+        .update({ wizard_answers: normalized, updated_at: new Date().toISOString() })
+        .eq("user_id", user.id);
+      if (error) {
+        console.error("[profile] PATCH wizard_answers error:", error);
         return NextResponse.json({ error: "Erreur de sauvegarde." }, { status: 500 });
       }
       return NextResponse.json({ success: true });
