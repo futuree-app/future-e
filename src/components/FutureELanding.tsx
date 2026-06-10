@@ -13,6 +13,7 @@ import { SAVOIR_HUB_ARTICLES } from '@/config/navigation';
 import { deriveCategories } from '@/lib/commune-categories';
 import posthog from 'posthog-js';
 import { HorizonSwitch, type Horizon } from '@/components/HorizonSwitch';
+import HeroProjetTerritoires from '@/components/HeroProjetTerritoires';
 
 const C = {
   bg: 'var(--bg)',
@@ -2398,7 +2399,7 @@ export default function FutureELanding() {
           .hero-right { display: none !important; }
           .modules-grid { grid-template-columns: 1fr !important; }
           .pricing-grid { grid-template-columns: 1fr !important; }
-          .lifecompare-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+          .lifecompare-grid { grid-template-columns: 1fr !important; gap: 32px !important; padding: 32px 22px !important; }
           .tensions-grid { grid-template-columns: 1fr !important; }
           .amnesie-inner { padding: 28px 24px !important; }
           .hero-section { padding: 60px 20px 40px !important; }
@@ -2684,30 +2685,9 @@ export default function FutureELanding() {
             </div>
           </div>
 
-          {/* Colonne droite : image + exemple (texte sous l'image) + CTA */}
+          {/* Colonne droite : animation projet de vie -> territoires + CTA */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'stretch' }}>
-            <div style={{
-              position: 'relative', width: '100%', aspectRatio: '4 / 3',
-              borderRadius: 16, overflow: 'hidden', border: `1px solid ${C.border}`,
-            }}>
-              <Image
-                src="/comparer-deux-communes-demenagement.jpg"
-                alt="Choisir où vivre selon son projet de vie"
-                fill
-                sizes="(max-width: 768px) 100vw, 480px"
-                style={{ objectFit: 'cover', objectPosition: 'center' }}
-              />
-            </div>
-            <p style={{
-              fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
-              fontSize: 19, lineHeight: 1.42, color: C.text, margin: 0,
-            }}>
-              « Près de la mer, au calme, des commerces à pied, loin des pollutions, sans subir
-              les canicules ni dépendre de la voiture. »
-            </p>
-            <p style={{ fontSize: 13, color: C.dim, lineHeight: 1.6, margin: 0 }}>
-              Un exemple de projet. Le vôtre tient en quelques phrases.
-            </p>
+            <HeroProjetTerritoires />
             <Link href="/ou-vivre" style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10,
               padding: '15px 28px', borderRadius: 10,
