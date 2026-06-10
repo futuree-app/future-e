@@ -88,3 +88,6 @@ __pycache__/
 
 # RP MOBPRO (volumineux, non versionné)
 data/rp-mobpro-2022.parquet
+
+# Captures/scripts de debug temporaires
+.tmp-audit-screenshots/
