@@ -21,7 +21,8 @@
 // est porté par le client dans `history`. Seul état persistant : le cookie
 // compteur (2 questions gratuites, GLOBAL au parcours comparateur).
 //
-// Routing modèle : Anthropic direct (claude-sonnet-4-5), comme synthesize.
+// Routing modèle : Anthropic direct (claude-sonnet-4-6, effort low + thinking
+// off — gratuit/court, harmonisé avec /qna et parse).
 // Migration Vercel AI Gateway à la mise en vente.
 // ════════════════════════════════════════════════════════════════════════════
 
@@ -342,9 +343,13 @@ export async function POST(request: NextRequest) {
   ];
 
   try {
+    // Gratuit / réponse courte : on privilégie la vitesse. Sonnet 4.6 + effort
+    // low + thinking coupé (cf. /qna, parse), pour ne pas subir le défaut "high".
     const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
+      model: "claude-sonnet-4-6",
       max_tokens: 600,
+      output_config: { effort: "low" },
+      thinking: { type: "disabled" },
       system: SYSTEM,
       tools: [
         {

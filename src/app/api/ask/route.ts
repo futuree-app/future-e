@@ -628,6 +628,11 @@ ${profileText}`;
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 1500,
+      // Synthèse longue et payante : on vise la qualité sans subir l'effort
+      // "high" par défaut de Sonnet 4.6 (trop lent). effort medium + thinking
+      // coupé = compromis qualité/latence pour le contenu payant.
+      output_config: { effort: "medium" },
+      thinking: { type: "disabled" },
       system: systemPrompt,
       tools: [
         {

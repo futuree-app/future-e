@@ -17,6 +17,19 @@ const MODEL_CANDIDATES = [
   DEFAULT_MODEL,
 ].filter(Boolean) as string[];
 
+// output_config.effort n'est supporté que sur Sonnet 4.6 et Opus 4.5+ : il
+// plante (400) sur Sonnet 4.5, Haiku 4.5 et Opus 4.1. On ne le pose donc que
+// sur les modèles compatibles ; le thinking désactivé, lui, passe partout.
+function supportsEffort(model: string): boolean {
+  return (
+    model.includes("sonnet-4-6") ||
+    model.includes("opus-4-5") ||
+    model.includes("opus-4-6") ||
+    model.includes("opus-4-7") ||
+    model.includes("opus-4-8")
+  );
+}
+
 const SYSTEM_PROMPT = `You are the content engine of futur•e, a French web app that generates personalized climate projections for individual users.
 
 You produce a short direct answer for the "module question-réponse".
@@ -195,6 +208,11 @@ export async function POST(request: Request) {
         model,
         max_tokens: 320,
         temperature: 0.35,
+        // Sonnet 4.6 tourne en effort "high" par défaut : c'est ce qui rend la
+        // première réponse de la home (l'effet « wow ») lente. On coupe le
+        // thinking partout et on baisse l'effort là où c'est supporté.
+        thinking: { type: "disabled" },
+        ...(supportsEffort(model) ? { output_config: { effort: "low" } } : {}),
         system: SYSTEM_PROMPT,
         messages: [
           {

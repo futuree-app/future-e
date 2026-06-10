@@ -256,7 +256,15 @@ DONNÉES :
 ${JSON.stringify(payload, null, 2)}`;
 
   const result = streamText({
-    model: anthropic("claude-sonnet-4-5"),
+    // Synthèse payante : Sonnet 4.6 pour la qualité. Côté AI SDK, l'effort et le
+    // thinking se posent via providerOptions.anthropic (pas output_config).
+    model: anthropic("claude-sonnet-4-6"),
+    providerOptions: {
+      anthropic: {
+        effort: "medium",
+        thinking: { type: "disabled" },
+      },
+    },
     system: SYNTHESIS_PROMPT,
     prompt: userMessage,
     onError: ({ error }) => {

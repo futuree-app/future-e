@@ -115,9 +115,13 @@ ${JSON.stringify(payload, null, 2)}
 
 Rappel : JSON strict uniquement, sans markdown.`;
 
+    // Synthèse payante : Sonnet 4.6 pour la qualité. effort medium + thinking
+    // coupé pour ne pas subir l'effort "high" par défaut de 4.6 (trop lent).
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
+      model: "claude-sonnet-4-6",
       max_tokens: 1500,
+      output_config: { effort: "medium" },
+      thinking: { type: "disabled" },
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userMessage }],
     });

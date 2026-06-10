@@ -333,7 +333,15 @@ DONNÉES :
 ${JSON.stringify(payload, null, 2)}`;
 
   const result = streamText({
-    model: anthropic("claude-sonnet-4-5"),
+    // Synthèse payante (comparateur / Pack Décision) : Sonnet 4.6 pour la
+    // qualité. Effort et thinking via providerOptions.anthropic côté AI SDK.
+    model: anthropic("claude-sonnet-4-6"),
+    providerOptions: {
+      anthropic: {
+        effort: "medium",
+        thinking: { type: "disabled" },
+      },
+    },
     system: SYSTEM,
     prompt: userMessage,
     onError: ({ error }) => {
