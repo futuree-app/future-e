@@ -26,8 +26,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" data-theme="dark" suppressHydrationWarning>
-      <GoogleTagManager gtmId="GTM-NZ9TS3ZF" />
       <head>
+        {/* Scripts bootstrap (consent + thème) : inline dans <head>, rendus
+            uniquement côté serveur (root layout = Server Component, jamais
+            re-rendu en nav client) → exécution avant paint, sans warning React.
+            Placement dans <head> = recommandation explicite de React 19. */}
         <script
           dangerouslySetInnerHTML={{
             __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{analytics_storage:'denied',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',wait_for_update:500});`,
@@ -40,6 +43,9 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
+        {/* GTM dans <body> (et non enfant direct de <html>) : @next/third-parties
+            l'injecte via next/script, c'est le placement attendu. */}
+        <GoogleTagManager gtmId="GTM-NZ9TS3ZF" />
         <PostHogProvider>
           {children}
         </PostHogProvider>

@@ -41,36 +41,36 @@ const SLOT_CITIES = [
     name: 'Lyon',
     cards: [
       { label: 'Canicule à Lyon',      val: 'Les projections placent Lyon parmi les communes les plus exposées aux étés futurs.', col: C.red,    src: 'DRIAS · +4°C' },
+      { label: 'Mobilité à Lyon',      val: 'Métro, tram et train dessinent un quotidien moins dépendant de la voiture à Lyon.',  col: C.violet, src: 'INSEE MOBPRO / SNCF' },
+      { label: 'Vie locale à Lyon',    val: 'Commerces, écoles et vie associative restent denses dans le quotidien lyonnais.',    col: C.green,  src: 'INSEE BPE / RNA' },
       { label: 'Nuits tropicales',      val: 'Les nuits sans fraîcheur, celles où l\'on ne récupère pas, seront plus fréquentes à Lyon.', col: C.red, src: 'DRIAS · +4°C' },
-      { label: 'Eau à Lyon',            val: 'L\'approvisionnement en eau de Lyon sera sous pression pendant les étés futurs.',           col: C.blue,   src: 'BRGM / Agences de l\'eau' },
-      { label: 'Immobilier à Lyon',     val: 'À Lyon, les risques climatiques et les normes énergétiques vont peser sur les prix.',      col: C.orange, src: 'DVF / ADEME' },
     ],
   },
   {
     name: 'Marseille',
     cards: [
       { label: 'Chaleur à Marseille',   val: 'Les projections placent Marseille parmi les communes les plus exposées aux étés futurs.',  col: C.red,    src: 'DRIAS · +4°C' },
-      { label: 'Nuits tropicales',       val: 'Les nuits sans fraîcheur, celles où l\'on ne récupère pas, seront plus fréquentes à Marseille.', col: C.red, src: 'DRIAS · +4°C' },
+      { label: 'Nature à Marseille',     val: 'Entre mer et calanques, l\'accès à la nature pèse dans le quotidien marseillais.',           col: C.green,  src: 'OSM / IGN' },
+      { label: 'Mobilité à Marseille',   val: 'Au quotidien, se déplacer à Marseille tient encore beaucoup à la voiture.',                      col: C.violet, src: 'INSEE MOBPRO' },
       { label: 'Submersion à Marseille', val: 'Marseille figure parmi les communes exposées au risque de submersion.',                           col: C.blue,   src: 'Géorisques / BRGM' },
-      { label: 'Feux à Marseille',       val: 'Le risque d\'incendie autour de Marseille augmente à chaque été sec.',                            col: C.orange, src: 'Prométhée / DREAL' },
     ],
   },
   {
     name: 'Vannes',
     cards: [
       { label: 'Canicule à Vannes',     val: 'D\'ici 2050, les étés à Vannes seront sensiblement plus chauds qu\'aujourd\'hui.',          col: C.red,    src: 'DRIAS · +4°C' },
+      { label: 'Vie locale à Vannes',   val: 'À taille humaine, Vannes garde un centre dense en commerces et en services.',                col: C.green,  src: 'INSEE BPE' },
+      { label: 'Mobilité à Vannes',     val: 'Courtes distances : à Vannes, une partie des trajets du quotidien se fait à pied ou à vélo.', col: C.violet, src: 'INSEE MOBPRO' },
       { label: 'Littoral à Vannes',     val: 'Vannes figure parmi les communes exposées au risque de submersion.',                          col: C.blue,   src: 'Géorisques / BRGM' },
-      { label: 'Eau potable à Vannes',  val: 'L\'approvisionnement en eau de Vannes sera sous pression pendant les étés futurs.',          col: C.blue,   src: 'BRGM / Agences de l\'eau' },
-      { label: 'Immobilier à Vannes',   val: 'À Vannes, les risques climatiques et les normes énergétiques vont peser sur les prix.',      col: C.orange, src: 'DVF / ADEME' },
     ],
   },
   {
     name: 'La Rochelle',
     cards: [
       { label: 'Submersion à La Rochelle', val: 'La Rochelle figure parmi les communes exposées au risque de submersion.',                     col: C.blue,   src: 'Géorisques / BRGM' },
+      { label: 'Mobilité à La Rochelle',   val: 'La Rochelle reste une ville où le vélo tient une vraie place dans les trajets.',             col: C.violet, src: 'INSEE MOBPRO' },
+      { label: 'Nature à La Rochelle',     val: 'Océan, marais et parcs : l\'accès à la nature marque le quotidien rochelais.',               col: C.green,  src: 'OSM / IGN' },
       { label: 'Chaleur à La Rochelle',    val: 'Les fortes chaleurs devraient devenir plus fréquentes à La Rochelle.',                        col: C.red,    src: 'DRIAS · +4°C' },
-      { label: 'Qualité des sols',         val: 'Un niveau de vigilance modéré a été relevé dans les sols autour de La Rochelle.',             col: C.orange, src: 'GisSol / RMQS' },
-      { label: 'Immobilier à La Rochelle', val: 'À La Rochelle, les risques climatiques et les normes énergétiques vont peser sur les prix.', col: C.orange, src: 'DVF / ADEME' },
     ],
   },
 ];
@@ -90,6 +90,9 @@ const FALLBACK_TENSION_IDS = [
 
 const LANDING_QNA_STORAGE_KEY = 'futuree:landing-qna-count';
 const LANDING_QNA_LIMIT = 1;
+// Persiste la commune choisie pour la restaurer au retour arrière (navigation
+// dure vers /ou-vivre puis « précédent »), sinon on repart à zéro.
+const LANDING_COMMUNE_STORAGE_KEY = 'futuree:landing-commune';
 
 const LANDING_DRIAS_SCENARIO = {
   id: 'gwl30',
@@ -570,29 +573,39 @@ function getGeorisquesCard(communeName, georisques, horizon: Horizon = 'today') 
   return null;
 }
 
+// Hash déterministe d'un nom de commune → varie le mix de cartes d'une commune
+// à l'autre sans flicker (pas de Math.random, stable au re-render et au SSR).
+function hashName(str: string): number {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  }
+  return h;
+}
+
 function getPreviewCards(communeName, categories, indicators, georisques, gissol, horizon: Horizon = 'today') {
   const name = communeName || 'votre commune';
   const safeCategories =
     categories && categories.length > 0 ? categories : ['all'];
 
   const hasCategory = (category) => safeCategories.includes(category);
+  const hasAny = (...cats) => cats.some((category) => safeCategories.includes(category));
 
-  const cards = [];
   const gwlId = HORIZON_TO_GWL[horizon] ?? 'gwl15';
-  const driasCard = getDriasCard(name, indicators, horizon);
-  const georisquesCard = getGeorisquesCard(name, georisques, horizon);
 
-  // ── Bloc 1 : Canicule sévère (NORTX35D_yr) — toujours en position 1
+  // ── Cartes CLIMAT (par ordre de priorité) ─────────────────────────
+  // La canicule sévère reste l'accroche : toujours en position 1.
+  const climate = [];
+  const driasCard = getDriasCard(name, indicators, horizon);
   if (driasCard) {
-    cards.push(driasCard);
+    climate.push(driasCard);
   }
 
-  // ── Bloc 2 : Cartes DRIAS spécifiques à la catégorie — position 2
   if (hasCategory('mediterranee') || hasCategory('rural_forestier')) {
     const firedays = getLandingIndicatorValue(indicators, 'NORIFM40_yr', gwlId);
     if (firedays !== null && firedays !== undefined) {
       const { val, note } = feuxNarrative(firedays, name, horizon);
-      cards.push({ label: `Feux autour de ${name}`, val, note, col: C.red, src: 'DRIAS / Météo-France' });
+      climate.push({ label: `Feux autour de ${name}`, val, note, col: C.red, src: 'DRIAS / Météo-France' });
     }
   }
 
@@ -600,7 +613,7 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
     const drydays = getLandingIndicatorValue(indicators, 'NORSWI04_yr', gwlId);
     if (drydays !== null && drydays !== undefined) {
       const { val, note } = eauNarrative(drydays, name, horizon);
-      cards.push({ label: `Eau à ${name}`, val, note, col: C.blue, src: 'DRIAS / Météo-France' });
+      climate.push({ label: `Eau à ${name}`, val, note, col: C.blue, src: 'DRIAS / Météo-France' });
     }
   }
 
@@ -608,7 +621,7 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
     const summerTemp = getLandingIndicatorValue(indicators, 'NORTMm_seas_JJA', gwlId);
     if (summerTemp !== null && summerTemp !== undefined) {
       const { val, note } = vigneNarrative(summerTemp, name, horizon);
-      cards.push({ label: `Vigne à ${name}`, val, note, col: C.green, src: 'DRIAS / Météo-France' });
+      climate.push({ label: `Vigne à ${name}`, val, note, col: C.green, src: 'DRIAS / Météo-France' });
     }
   }
 
@@ -616,72 +629,66 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
     const winterTemp = getLandingIndicatorValue(indicators, 'NORTMm_seas_DJF', gwlId);
     if (winterTemp !== null && winterTemp !== undefined) {
       const { val, note } = neigeNarrative(winterTemp, name, horizon);
-      cards.push({ label: `Neige à ${name}`, val, note, col: C.blue, src: 'DRIAS / Météo-France' });
+      climate.push({ label: `Neige à ${name}`, val, note, col: C.blue, src: 'DRIAS / Météo-France' });
     }
   }
 
-  // ── Bloc 3 : Nuits tropicales (NORTR_yr) — universel
   const tropicalNights = getLandingIndicatorValue(indicators, 'NORTR_yr', gwlId);
   if (tropicalNights !== null && tropicalNights !== undefined) {
     const { val, note } = nightsNarrative(tropicalNights, name, horizon);
-    cards.push({ label: `Nuits à ${name}`, val, note, col: C.red, src: 'DRIAS / Météo-France' });
+    climate.push({ label: `Nuits à ${name}`, val, note, col: C.red, src: 'DRIAS / Météo-France' });
   }
 
-  // ── Bloc 4 : Précipitations extrêmes (NORRRq99_yr) — universel
   const extremeRain = getLandingIndicatorValue(indicators, 'NORRRq99_yr', gwlId);
   if (extremeRain !== null && extremeRain !== undefined) {
     const { val, note } = pluiesNarrative(extremeRain, name, horizon);
-    cards.push({ label: `Pluies à ${name}`, val, note, col: C.blue, src: 'DRIAS / Météo-France' });
+    climate.push({ label: `Pluies à ${name}`, val, note, col: C.blue, src: 'DRIAS / Météo-France' });
   }
 
-  // ── Bloc 5 : Géorisques (contextuel, horizon-aware)
+  const georisquesCard = getGeorisquesCard(name, georisques, horizon);
   if (georisquesCard) {
-    cards.push(georisquesCard);
+    climate.push(georisquesCard);
   } else if (hasCategory('littoral') || hasCategory('littoral_atlantique')) {
-    cards.push({
-      label: `Submersion à ${name}`,
-      val: submersionNarrative(name, horizon).val,
-      col: C.blue,
-      src: 'Géorisques / BRGM',
-    });
-  }
-
-  // ── Bloc 6 : Cartes contextuelles statiques
-  if (hasCategory('periurbain_dependance_auto') || hasCategory('rural_peri_urbain')) {
-    cards.push({
-      label: `Mobilité à ${name}`,
-      val: `La dépendance à la voiture à ${name} expose les habitants aux hausses de coût du carburant.`,
-      col: C.orange,
-      src: 'INSEE / Ecolab',
-    });
-  }
-
-  if (hasCategory('tourisme_urbain')) {
-    cards.push({
-      label: `Tourisme à ${name}`,
-      val: `Les étés extrêmes pourraient fragiliser l'activité touristique locale.`,
-      col: C.violet,
-      src: 'INSEE / France Tourisme',
-    });
+    climate.push({ label: `Submersion à ${name}`, val: submersionNarrative(name, horizon).val, col: C.blue, src: 'Géorisques / BRGM' });
   }
 
   if (hasCategory('vallee_industrielle')) {
-    cards.push({
-      label: `Air à ${name}`,
-      val: `La qualité de l'air à ${name} se dégrade lors des pics de chaleur, avec une hausse de l'ozone.`,
-      col: C.red,
-      src: 'ATMO / Santé publique France',
-    });
+    climate.push({ label: `Air à ${name}`, val: `La qualité de l'air à ${name} se dégrade lors des pics de chaleur, avec une hausse de l'ozone.`, col: C.red, src: 'ATMO / Santé publique France' });
   }
 
-  cards.push({
-    label: `Valeur immobilière à ${name}`,
-    val: immobilierNarrative(name, horizon).val,
-    col: C.orange,
-    src: 'DVF / ADEME',
+  // ── Cartes PROFONDEUR (cadre de vie / nature / mobilité) ──────────
+  // Qualitatives, ancrées sur le profil de la commune : elles montrent
+  // l'étendue du produit au-delà du climat, sans entrer dans la donnée.
+  const depth = [];
+  // Mobilité (violet) — toujours présente, formulation selon le profil
+  const carDependent = hasAny(
+    'periurbain_dependance_auto', 'rural_peri_urbain', 'rural_agricole',
+    'rural_forestier', 'rural_viticole', 'montagne',
+  );
+  depth.push({
+    label: `Mobilité à ${name}`,
+    val: carDependent
+      ? `À ${name}, le quotidien dépend largement de la voiture pour se déplacer.`
+      : `À ${name}, transports et courtes distances pèsent dans les trajets du quotidien.`,
+    col: C.violet,
+    src: 'INSEE MOBPRO',
   });
+  // Nature ou vie locale (vert) — selon le profil
+  if (hasAny('littoral', 'littoral_atlantique')) {
+    depth.push({ label: `Nature à ${name}`, val: `À ${name}, le littoral et les espaces ouverts façonnent le cadre de vie.`, col: C.green, src: 'OSM / IGN' });
+  } else if (hasCategory('montagne')) {
+    depth.push({ label: `Nature à ${name}`, val: `À ${name}, le relief et le plein air façonnent le cadre de vie.`, col: C.green, src: 'OSM / IGN' });
+  } else if (hasAny('rural_forestier', 'rural_agricole', 'rural_viticole')) {
+    depth.push({ label: `Nature à ${name}`, val: `Autour de ${name}, espaces agricoles et nature rythment le quotidien.`, col: C.green, src: 'OSM / IGN' });
+  } else if (hasCategory('tourisme_urbain')) {
+    depth.push({ label: `Vie locale à ${name}`, val: `À ${name}, commerces, services et vie culturelle animent le quotidien.`, col: C.green, src: 'INSEE BPE / RNA' });
+  } else {
+    depth.push({ label: `Vie locale à ${name}`, val: `À ${name}, commerces, services et vie associative font le quotidien.`, col: C.green, src: 'INSEE BPE / RNA' });
+  }
 
-  // Cadmium GisSol — signal présent/absent, pas projective, en fin de liste
+  // ── Cartes de repli (non-climat, hors « profondeur ») ─────────────
+  const fillers = [];
+  fillers.push({ label: `Valeur immobilière à ${name}`, val: immobilierNarrative(name, horizon).val, col: C.orange, src: 'DVF / ADEME' });
   if (gissol?.cadmium?.label) {
     const cdScore = gissol.cadmium.score ?? 0;
     const cdCol = cdScore >= 65 ? C.red : cdScore >= 45 ? C.orange : C.green;
@@ -690,29 +697,38 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
       : cdScore >= 45
         ? `Un niveau de vigilance modéré a été relevé dans les sols autour de ${name}.`
         : `Les données disponibles montrent un niveau de vigilance faible pour les sols de ${name}.`;
-    cards.push({
-      label: `Qualité des sols à ${name}`,
-      val: cdLevel,
-      col: cdCol,
-      src: 'GisSol / RMQS',
-    });
+    fillers.push({ label: `Qualité des sols à ${name}`, val: cdLevel, col: cdCol, src: 'GisSol / RMQS' });
   }
 
-  const uniqueCards = [];
-  const seen = new Set();
+  // ── Assemblage : viser 2 climat + 2 profondeur, accroche climat en
+  //    position 1, entrelacement varié d'une commune à l'autre (seed =
+  //    hash du nom, donc stable par commune, insensible à l'horizon). ──
+  const result = [];
+  const pushUnique = (card) => {
+    if (card && !result.some((c) => c.label === card.label)) result.push(card);
+  };
 
-  for (const card of cards) {
-    if (seen.has(card.label)) {
-      continue;
-    }
-    seen.add(card.label);
-    uniqueCards.push(card);
-    if (uniqueCards.length >= 4) {
-      break;
-    }
+  const hook = climate.shift(); // canicule (ou 1er climat disponible)
+  pushUnique(hook);
+
+  const restClimate = climate.slice(0, 1); // un climat de plus
+  const restDepth = depth.slice(0, 2);
+  const c = [...restClimate];
+  const d = [...restDepth];
+  const order = [['c', 'd', 'd'], ['d', 'c', 'd'], ['d', 'd', 'c']][hashName(name) % 3];
+  for (const slot of order) {
+    if (slot === 'c' && c.length) pushUnique(c.shift());
+    else if (slot === 'd' && d.length) pushUnique(d.shift());
+  }
+  [...c, ...d].forEach(pushUnique);
+
+  // Compléter à 4 si besoin : climat restant → profondeur → repli
+  for (const card of [...climate, ...depth, ...fillers]) {
+    if (result.length >= 4) break;
+    pushUnique(card);
   }
 
-  return uniqueCards;
+  return result.slice(0, 4);
 }
 
 function getHeroCopy(communeName, categories, usedFallback) {
@@ -901,6 +917,54 @@ export default function FutureELanding() {
   }, [selectedCommune, communeMeta]);
 
   const commune = selectedCommune?.name || '';
+
+  // Retour en haut au montage : en navigation client (Link), App Router restaure
+  // la position de scroll précédente. Au retour depuis /ou-vivre, ça tombait au
+  // milieu (les modules) car la home se remonte avec une autre mise en page.
+  // On force le haut, après la restauration du routeur (rAF).
+  useEffect(() => {
+    const id = window.requestAnimationFrame(() => window.scrollTo(0, 0));
+    return () => window.cancelAnimationFrame(id);
+  }, []);
+
+  // Ancre douce : quand une commune est saisie depuis le hero, on amène l'œil
+  // sur « Première lecture » (ses questions), là où est l'interaction forte.
+  // L'effet ne se déclenche qu'aux transitions de commune (commune part de '').
+  // restoringRef : une restauration au montage (retour arrière) ne doit PAS
+  // déclencher le scroll, sinon la page recharge déjà scrollée vers le bas.
+  const firstReadRef = useRef<HTMLElement>(null);
+  const restoringRef = useRef(false);
+  useEffect(() => {
+    if (!commune) return;
+    if (restoringRef.current) { restoringRef.current = false; return; }
+    if (typeof window !== 'undefined'
+      && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+    const id = window.requestAnimationFrame(() => {
+      firstReadRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [commune]);
+
+  // Restauration de la commune au montage : une fois le catalogue de tensions
+  // chargé, on rejoue loadCommuneTensions(sauvegarde) pour réhydrater commune +
+  // indicateurs + tensions. restoringRef coupe le scroll auto (pas de saut au
+  // chargement). Lecture en effet (jamais au SSR) → pas de mismatch d'hydratation.
+  const didRestoreRef = useRef(false);
+  useEffect(() => {
+    if (didRestoreRef.current || tensionsCatalog.length === 0 || selectedCommune) return;
+    let saved: { name?: string; citycode?: string } | null = null;
+    try {
+      const raw = window.sessionStorage.getItem(LANDING_COMMUNE_STORAGE_KEY);
+      if (raw) saved = JSON.parse(raw);
+    } catch {}
+    if (!saved?.name) return;
+    didRestoreRef.current = true;
+    restoringRef.current = true;
+    setCommuneFieldOpen(true);
+    loadCommuneTensions(saved);
+  }, [tensionsCatalog, selectedCommune]);
 
   // Seconde voie du hero : révèle le champ commune (replié par défaut) et y place
   // le curseur. La voie principale reste « Trouver où vivre » vers le parcours.
@@ -1112,6 +1176,13 @@ export default function FutureELanding() {
 
     setSelectedCommune(nextCommune);
     setInputValue(nextCommune.name);
+    // Persiste la sélection pour la restaurer au retour arrière.
+    try {
+      window.sessionStorage.setItem(
+        LANDING_COMMUNE_STORAGE_KEY,
+        JSON.stringify(nextCommune),
+      );
+    } catch {}
     setSuggestions([]);
     setSuggestionsOpen(false);
     setActiveTension(null);
@@ -1270,6 +1341,7 @@ export default function FutureELanding() {
       setTensions([]);
       setActiveTension(null);
       setAnswer(null);
+      try { window.sessionStorage.removeItem(LANDING_COMMUNE_STORAGE_KEY); } catch {}
     }
   };
 
@@ -2597,7 +2669,7 @@ export default function FutureELanding() {
                   >
                     Créer mon rapport interactif →
                   </button>
-                  <a
+                  <Link
                     href="/ou-vivre"
                     style={{
                       display: 'inline-flex',
@@ -2616,7 +2688,7 @@ export default function FutureELanding() {
                     }}
                   >
                     Comparer selon mon projet de vie
-                  </a>
+                  </Link>
                 </div>
               </div>
             )}
@@ -2637,8 +2709,13 @@ export default function FutureELanding() {
         </div>
       </div>
 
+      {/* Quand une commune est saisie, on remonte « Première lecture » (les
+          questions sur la commune) au-dessus de l'encart comparateur : on veut
+          d'abord laisser l'utilisateur questionner sa commune et découvrir le
+          produit. Sans commune, l'ordre par défaut met le comparateur en tête. */}
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
       {/* ── Encart : comparateur de projet de vie (voie principale) ── */}
-      <section style={{ position: 'relative', zIndex: 2, maxWidth: 1100, margin: '0 auto', padding: '56px 28px 16px' }}>
+      <section style={{ position: 'relative', zIndex: 2, maxWidth: 1100, margin: '0 auto', padding: '56px 28px 16px', order: commune ? 2 : 1 }}>
         <div style={{
           ...glass({ borderRadius: 20, padding: '52px 56px' }),
           position: 'relative', overflow: 'hidden',
@@ -2718,7 +2795,7 @@ export default function FutureELanding() {
         </div>
       </section>
 
-      <section style={styles.qrSection} className="qr-section">
+      <section ref={firstReadRef} style={{ ...styles.qrSection, order: commune ? 1 : 2 }} className="qr-section">
         <div style={styles.sectionLabel}>Première lecture</div>
         <h2 style={styles.sectionTitle}>
           {commune ? `Vos questions sur ${commune}` : 'Vos questions sur votre commune'}
@@ -2736,7 +2813,7 @@ export default function FutureELanding() {
           <>
             {questionLimitReached && (
               <div style={styles.questionLimitNote}>
-                Vous avez utilisé vos deux questions gratuites. Le Fil arrive bientôt : inscrivez-vous pour être prévenu·e à l&apos;ouverture.
+                Vous avez utilisé votre question gratuite. Le Fil arrive bientôt : inscrivez-vous pour être prévenu·e à l&apos;ouverture.
               </div>
             )}
 
@@ -2839,9 +2916,9 @@ export default function FutureELanding() {
                       )}
                       <p style={{ marginTop: 14, fontSize: 13, color: C.dim, lineHeight: 1.5 }}>
                         Vous hésitez entre plusieurs lieux ?{' '}
-                        <a href="/ou-vivre" style={{ color: C.orange, textDecoration: 'none', fontWeight: 600 }}>
+                        <Link href="/ou-vivre" style={{ color: C.orange, textDecoration: 'none', fontWeight: 600 }}>
                           Comparez les territoires selon votre projet de vie →
-                        </a>
+                        </Link>
                       </p>
                     </>
                   )
@@ -2882,6 +2959,7 @@ export default function FutureELanding() {
           </div>
         )}
       </section>
+      </div>
 
       <section style={styles.modulesSection}>
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
