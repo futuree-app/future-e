@@ -2205,7 +2205,7 @@ export default function FutureELanding() {
     },
     pricingGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(4,1fr)',
+      gridTemplateColumns: 'repeat(3,1fr)',
       gap: 16,
       marginTop: 40,
     },
@@ -2811,11 +2811,6 @@ export default function FutureELanding() {
 
         {commune && tensions.length > 0 && (
           <>
-            {questionLimitReached && (
-              <div style={styles.questionLimitNote}>
-                Vous avez utilisé votre question gratuite. Le Fil arrive bientôt : inscrivez-vous pour être prévenu·e à l&apos;ouverture.
-              </div>
-            )}
 
             <div style={styles.tensionsGrid} className="tensions-grid">
               {tensions.map((tension) => {
@@ -2893,33 +2888,44 @@ export default function FutureELanding() {
                     <>
                       <div style={styles.verdict}>« {answer.verdict} »</div>
                       <p style={styles.detail}>{answer.detail}</p>
-                      <button
-                        type="button"
-                        style={{ ...styles.answerCta, border: 'none', cursor: 'pointer' }}
-                        onClick={() => {
-                          const cta = answer.cta || '';
-                          const ctx =
-                            cta.includes('Santé') ? 'sante' :
-                            cta.includes('Mobilité') ? 'mobilite' :
-                            cta.includes('Métier') ? 'metier' :
-                            cta.includes('Logement') ? 'logement' :
-                            cta.includes('Projets') ? 'projets' : 'quartier';
-                          openWizard(ctx);
-                        }}
-                      >
-                        Générer mon rapport interactif personnalisé →
-                      </button>
-                      {questionLimitReached && (
-                        <Link href="/le-fil" style={{ ...styles.paywallSecondary, marginLeft: 10 }}>
-                          Être prévenu·e à l&apos;ouverture du Fil
-                        </Link>
-                      )}
-                      <p style={{ marginTop: 14, fontSize: 13, color: C.dim, lineHeight: 1.5 }}>
-                        Vous hésitez entre plusieurs lieux ?{' '}
-                        <Link href="/ou-vivre" style={{ color: C.orange, textDecoration: 'none', fontWeight: 600 }}>
-                          Comparez les territoires selon votre projet de vie →
-                        </Link>
+                      {/* Justification commerciale explicite : pourquoi aller plus loin. */}
+                      <p style={{ fontSize: 13.5, color: C.dim, lineHeight: 1.55, margin: '0 0 16px' }}>
+                        Cette réponse reste générale. Le rapport tient compte de votre logement,
+                        de votre situation et de votre projet de vie.
                       </p>
+                      {/* Deux portes au même niveau : analyser cette commune (rapport) OU
+                          en trouver de meilleures (comparateur, produit différenciant). */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                        <button
+                          type="button"
+                          style={{ ...styles.answerCta, border: 'none', cursor: 'pointer' }}
+                          onClick={() => {
+                            const cta = answer.cta || '';
+                            const ctx =
+                              cta.includes('Santé') ? 'sante' :
+                              cta.includes('Mobilité') ? 'mobilite' :
+                              cta.includes('Métier') ? 'metier' :
+                              cta.includes('Logement') ? 'logement' :
+                              cta.includes('Projets') ? 'projets' : 'quartier';
+                            openWizard(ctx);
+                          }}
+                        >
+                          Générer mon rapport interactif personnalisé →
+                        </button>
+                        <Link
+                          href="/ou-vivre"
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 10,
+                            padding: '12px 24px', borderRadius: 8,
+                            background: 'transparent', border: `1px solid ${C.orange}`,
+                            color: C.orange, fontWeight: 600, fontSize: 14,
+                            textDecoration: 'none', cursor: 'pointer',
+                            fontFamily: "'Instrument Sans', sans-serif",
+                          }}
+                        >
+                          Trouver des territoires qui me correspondent →
+                        </Link>
+                      </div>
                     </>
                   )
                 )}
@@ -3281,7 +3287,7 @@ export default function FutureELanding() {
             }}
           >
             Gratuit pour découvrir, le rapport pour éclairer une commune, le Pack pour
-            arbitrer entre trois. Le Fil, ensuite, pour rester à jour.
+            arbitrer entre plusieurs territoires.
           </p>
         </div>
         <div style={styles.pricingGrid} className="pricing-grid">
@@ -3345,7 +3351,6 @@ export default function FutureELanding() {
                 'Dashboard simplifié en lecture seule',
                 'Export PDF, à conserver',
                 'Régénération 1 fois par an',
-                'En cas d\'abonnement, les 14 € seront déduits à l\'ouverture du Fil.',
               ].map((feature) => (
                 <div key={feature} style={styles.planFeature}>
                   <span style={styles.planCheck}>✓</span>
@@ -3415,47 +3420,6 @@ export default function FutureELanding() {
               Comparer trois territoires
             </Link>
           </div>
-
-          <div
-            style={{
-              ...styles.planCard(true),
-              boxShadow:
-                '0 0 0 1px var(--orange-ring), 0 16px 48px var(--orange-tint)',
-            }}
-          >
-            <div style={styles.planBadge}>À venir</div>
-            <div style={styles.planPrice}>
-              9<span style={styles.planPriceSub}>€ / mois</span>
-            </div>
-            <div style={styles.planName}>Le Fil</div>
-            <div style={styles.planDesc}>
-              Le rapport interactif vit avec vous. Les alertes arrivent quand vos données
-              changent.
-            </div>
-            <div style={styles.planFeatures}>
-              {[
-                'Dashboard complet et interactif',
-                'Profil modifiable à tout moment',
-                'Newsletter mensuelle personnalisée',
-                'Notifications ciblées sur événements',
-                'Historique des mises à jour',
-              ].map((feature) => (
-                <div key={feature} style={styles.planFeature}>
-                  <span style={{ color: C.orange, flexShrink: 0, marginTop: 1 }}>
-                    ✓
-                  </span>
-                  {feature}
-                </div>
-              ))}
-            </div>
-            <Link
-              style={styles.planBtn(true)}
-              className="plan-btn"
-              href="/le-fil"
-            >
-              Être prévenu·e à l&apos;ouverture
-            </Link>
-          </div>
         </div>
       </section>
 
@@ -3476,32 +3440,33 @@ export default function FutureELanding() {
           />
           <div style={styles.amnesieEyebrow}>Pourquoi s&apos;abonner</div>
           <h2 style={styles.amnesieTitle}>
-            Votre inquiétude mérite une présence calme, toute l&apos;année.
+            Votre territoire continue d&apos;évoluer, même lorsque vous n&apos;y pensez plus.
           </h2>
           <p style={styles.amnesieBody}>
-            Chaque semaine, une nouvelle alerte. Le cadmium dans les céréales.
-            Les pics de pollution. La canicule qui arrive. Les incendies.
-            Les inondations.
+            Une semaine, on parle du cadmium. La suivante, d&apos;une canicule.
+            Puis des incendies, d&apos;une pollution de l&apos;air ou d&apos;un
+            nouveau projet d&apos;aménagement.
           </p>
           <p style={styles.amnesieBody}>
-            Vous lisez. Vous vous inquiétez. Puis l&apos;actualité passe à
-            autre chose, et vous aussi.
+            Vous lisez. Vous vous inquiétez parfois. Puis l&apos;actualité passe
+            à autre chose.
           </p>
           <p style={styles.amnesieBody}>
-            Ce n&apos;est pas un manque de volonté. La capacité
-            d&apos;inquiétude est limitée, c&apos;est documenté. Quand elle se
-            remplit d&apos;un sujet, elle se vide d&apos;un autre. Le
-            changement climatique, comme les risques sanitaires qui
-            l&apos;accompagnent, souffre de cette forme particulière
-            d&apos;invisibilité : il n&apos;est pas nié, il est oublié par
-            cycles.
+            Ce n&apos;est pas un manque de volonté. La capacité d&apos;attention
+            est limitée, c&apos;est documenté. Quand elle se concentre sur un
+            sujet, elle en laisse d&apos;autres à l&apos;arrière-plan.
           </p>
           <p style={styles.amnesieBody}>
-            Le problème, c&apos;est que ces risques ne disparaissent pas quand
-            l&apos;attention s&apos;efface. Ils progressent. Ils concernent
-            votre commune, votre logement, l&apos;air que respirent vos
-            enfants, la valeur de ce que vous possédez, les décisions que vous
-            n&apos;avez pas encore prises.
+            Pendant ce temps, les territoires continuent d&apos;évoluer. Les
+            risques changent. Les services se transforment. Les infrastructures
+            se développent ou se dégradent. Les tensions sur l&apos;eau
+            progressent. Les normes évoluent. Les décisions publiques produisent
+            leurs effets.
+          </p>
+          <p style={styles.amnesieBody}>
+            Ces changements concernent votre commune, votre logement, votre
+            santé, vos déplacements et les choix que vous n&apos;avez pas encore
+            pris.
           </p>
           <div style={styles.amnesieVisualWrap}>
             <div style={styles.amnesieVisualInner}>
@@ -3527,10 +3492,44 @@ export default function FutureELanding() {
             </div>
           </div>
           <div style={styles.amnesieHighlight}>
-            futur•e existe pour combler cet intervalle. Pas une alarme de plus
-            : une présence calme, continue, qui traduit les données publiques
-            en lecture personnalisée pour votre vie. Comme vous suivez votre
-            santé ou vos finances : sans obsession, sans oubli.
+            Le Fil existe pour maintenir ce lien dans la durée. Pas une alerte
+            de plus : une présence calme, continue, qui traduit les données
+            publiques en lecture personnalisée pour votre vie. Comme vous suivez
+            votre santé ou vos finances : sans obsession, sans oubli.
+          </div>
+
+          {/* Pré-lancement du Fil : liste d'attente, aucun prix tant que le
+              produit n'existe pas. Le texte ci-dessus prépare déjà l'abonnement. */}
+          <div style={{
+            marginTop: 32,
+            paddingTop: 28,
+            borderTop: `1px solid ${C.border}`,
+          }}>
+            <div style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 10, letterSpacing: '0.14em',
+              textTransform: 'uppercase', color: C.orange, marginBottom: 14,
+            }}>
+              Le Fil · à venir
+            </div>
+            <p style={{
+              fontSize: 15, color: C.muted, lineHeight: 1.7,
+              margin: '0 0 22px', maxWidth: 620,
+            }}>
+              Mises à jour personnalisées de votre territoire, évolutions des
+              risques, qualité de l&apos;air, eau, santé environnementale,
+              mobilité et décisions locales qui comptent.
+            </p>
+            <Link href="/le-fil" style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '13px 24px', borderRadius: 10,
+              background: 'transparent', border: `1px solid ${C.orange}`,
+              color: C.orange, fontWeight: 600, fontSize: 14,
+              textDecoration: 'none',
+              fontFamily: "'Instrument Sans', sans-serif",
+            }}>
+              Être prévenu·e à l&apos;ouverture →
+            </Link>
           </div>
         </div>
       </section>
