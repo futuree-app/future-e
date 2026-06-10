@@ -29,7 +29,9 @@ export default async function ComptePage() {
   const hasDashboard = canAccessDashboard(account);
   const isInteractive = canAccessInteractiveDashboard(account);
   const fullAccess = canAccessCompleteReport(account);
-  const LOCKED_MODULES = PRODUCT_MODULES.filter((m) => m.id !== "quartier");
+  // Doctrine 2026-06-11 : le gratuit n'ouvre plus aucun module (Quartier compris).
+  // Les 6 modules sont premium ; le gratuit garde la mini-analyse post-wizard.
+  const LOCKED_MODULES = PRODUCT_MODULES;
 
   const { supabase, user } = await requireCurrentUser();
   const { data: profile } = await supabase
@@ -72,7 +74,7 @@ export default async function ComptePage() {
             <p className="text-[17px] leading-[1.72] text-muted mb-8 max-w-[480px]">
               {fullAccess
                 ? "Le rapport interactif est ici. Six dimensions, toutes ouvertes. Commencez par le module de votre choix."
-                : "Le rapport interactif partiel est sauvegardé ici, sans limite de temps. Vous pouvez y revenir, le compléter, le partager."}
+                : "Votre première lecture personnalisée est sauvegardée ici, sans limite de temps. Le rapport interactif, lui, ouvre les six modules."}
             </p>
             <div className="flex gap-2 flex-wrap mb-7">
               <span className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] font-mono text-[11px] text-ghost">
@@ -84,7 +86,7 @@ export default async function ComptePage() {
             </div>
             <div className="flex gap-3 flex-wrap">
               <Link href="/rapport" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-                {fullAccess ? "Voir mes modules" : "Lire mon rapport interactif"}
+                {fullAccess ? "Voir mes modules" : "Reprendre ma première lecture"}
               </Link>
               {!fullAccess && (
                 <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
@@ -99,12 +101,12 @@ export default async function ComptePage() {
               {fullAccess ? "Votre abonnement" : "Ce que le compte gratuit garde"}
             </p>
             <h2 className="font-normal text-[20px] leading-[1.2] text-label mb-5 tracking-[-0.2px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              {fullAccess ? "Six dimensions, toutes ouvertes." : "Un fil continu, pas un faux dashboard."}
+              {fullAccess ? "Six dimensions, toutes ouvertes." : "Votre première lecture, retrouvable."}
             </h2>
             <div className="grid grid-cols-3 rounded-lg overflow-hidden border border-white/[0.08] mb-5">
               {(fullAccess
                 ? [{ val: "6", label: "modules ouverts" }, { val: "∞", label: "questions Futur·e" }, { val: "∞", label: "mises à jour" }]
-                : [{ val: "1", label: "ville de référence" }, { val: "2", label: "dimensions ouvertes" }, { val: "∞", label: "lecture retrouvable" }]
+                : [{ val: "1", label: "ville de référence" }, { val: "1", label: "lecture personnalisée" }, { val: "∞", label: "retrouvable" }]
               ).map((m, i) => (
                 <div key={m.label} className={`px-3 py-3.5 text-center ${i < 2 ? "border-r border-white/[0.08]" : ""}`}>
                   <span className="block text-[26px] text-accent leading-none mb-1" style={{ fontFamily: "'Instrument Serif', serif" }}>{m.val}</span>
@@ -115,7 +117,7 @@ export default async function ComptePage() {
             <p className="text-[14px] leading-[1.7] text-muted">
               {fullAccess
                 ? "Tous les modules sont accessibles depuis le hub rapport interactif. Futur·e répond à vos questions en tenant compte de votre commune et de votre profil."
-                : "Le compte sauvegarde votre rapport interactif, fournit un lien de partage permanent et peut signaler une mise à jour si les données changent pour votre commune."}
+                : "Le compte garde votre première lecture et votre commune de référence, pour y revenir sans repasser par le questionnaire."}
             </p>
           </aside>
         </section>
@@ -163,18 +165,17 @@ export default async function ComptePage() {
                 <div>
                   <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Dans votre accès gratuit</p>
                   <h2 className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                    Trois choses concrètes que ce compte vous donne.
+                    Ce que ce compte garde pour vous.
                   </h2>
                 </div>
                 <p className="text-[15px] text-muted leading-[1.65]">
                   Pas un espace vide en attente de paiement. Un point de départ qui reste utile.
                 </p>
               </div>
-              <div className="grid grid-cols-3 gap-3.5">
+              <div className="grid grid-cols-2 gap-3.5">
                 {[
-                  { accent: "border-t-accent", title: "Rapport interactif sauvegardé sans limite", copy: "Vous retrouvez la synthèse globale et le module Quartier sans repasser par la landing." },
-                  { accent: "border-t-info", title: "Lien de partage permanent", copy: `Partagez une lecture datée et sourcée${commune ? ` sur ${commune}` : ""}, sans lien qui expire.` },
-                  { accent: "border-t-amethyst", title: "Une alerte si les données changent", copy: "Si une donnée significative évolue pour votre commune, le compte gratuit peut en donner le signal." },
+                  { accent: "border-t-accent", title: "Votre première lecture sauvegardée", copy: `Vous retrouvez votre lecture personnalisée${commune ? ` sur ${commune}` : ""} sans repasser par le questionnaire.` },
+                  { accent: "border-t-info", title: "Votre questionnaire conservé", copy: "Vos réponses restent prêtes à nourrir le rapport interactif quand vous déciderez d'aller plus loin." },
                 ].map((k) => (
                   <article key={k.title} className={`glass rounded-xl p-5 border-t-2 ${k.accent}`}>
                     <h3 className="font-normal text-[17px] text-label mb-2.5 leading-[1.3]" style={{ fontFamily: "'Instrument Serif', serif" }}>{k.title}</h3>
@@ -187,7 +188,7 @@ export default async function ComptePage() {
               <div className="pt-14">
                 <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
                   <div>
-                    <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Cinq dimensions fermées</p>
+                    <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Six dimensions fermées</p>
                     <h2 className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
                       Ce que le rapport interactif lit pour vous.
                     </h2>
@@ -202,7 +203,7 @@ export default async function ComptePage() {
                       <div className="w-[30px] h-[30px] rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[15px] mb-3 grayscale">
                         {MODULE_ICONS[module.id]}
                       </div>
-                      <p className="font-mono text-[10px] tracking-[0.1em] text-ghost mb-0.5 uppercase">Module 0{i + 2}</p>
+                      <p className="font-mono text-[10px] tracking-[0.1em] text-ghost mb-0.5 uppercase">Module 0{i + 1}</p>
                       <h3 className="font-normal text-[18px] text-muted mb-2" style={{ fontFamily: "'Instrument Serif', serif" }}>{module.name}</h3>
                       <p className="text-[12px] text-ghost leading-[1.6] mb-3">{MODULE_BENEFIT[module.id] ?? module.summary}</p>
                       <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase text-ghost bg-white/[0.03] border border-white/[0.08] rounded-full px-2 py-1">
@@ -231,9 +232,6 @@ export default async function ComptePage() {
                     <Link href="/#pricing" className="flex items-center justify-center px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[13px] no-underline w-full" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
                       Voir les formules
                     </Link>
-                    <p className="mt-2.5 font-mono text-[10px] text-ghost tracking-[0.04em] text-center leading-[1.6]">
-                      Les 14 € seront déductibles à l&apos;ouverture du Fil.
-                    </p>
                   </div>
                 </div>
               </div>

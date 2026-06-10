@@ -32,7 +32,7 @@ export default async function DashboardPage() {
             </h1>
             <p className="account-copy account-copy-lead">
               {!hasDashboard
-                ? "Le compte gratuit sert d'abord a sauvegarder le rapport interactif partiel et a maintenir une continuite de lecture. Le dashboard n'est pas tease comme s'il etait deja la."
+                ? "Le compte gratuit sert d'abord a sauvegarder votre premiere lecture personnalisee et a maintenir une continuite. Le dashboard n'est pas tease comme s'il etait deja la."
                 : "Le dashboard payant prolonge le rapport interactif : comparaison de scenarios, lecture par module, details de facteurs et usage recurrent."}
             </p>
           </div>
@@ -80,7 +80,7 @@ export default async function DashboardPage() {
                 </div>
                 <p className="account-copy">
                   Le gratuit s&apos;arrete volontairement avant cet espace. Il
-                  garde le rapport interactif partiel sans brouiller la promesse du plan
+                  garde votre premiere lecture personnalisee sans brouiller la promesse du plan
                   payant.
                 </p>
               </div>

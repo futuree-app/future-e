@@ -3276,7 +3276,7 @@ export default function FutureELanding() {
               marginBottom: 8,
             }}
           >
-            Choisissez votre formule
+            Découvrir, comprendre ou arbitrer
           </h2>
           <p
             style={{
@@ -3286,8 +3286,8 @@ export default function FutureELanding() {
               maxWidth: 500,
             }}
           >
-            Gratuit pour découvrir, le rapport pour éclairer une commune, le Pack pour
-            arbitrer entre plusieurs territoires.
+            Une lecture personnalisée à partir de vos réponses et des données publiques,
+            à l&apos;échelle d&apos;une commune ou de plusieurs.
           </p>
         </div>
         <div style={styles.pricingGrid} className="pricing-grid">
@@ -3297,14 +3297,14 @@ export default function FutureELanding() {
             </div>
             <div style={styles.planName}>Découverte</div>
             <div style={styles.planDesc}>
-              Un rapport interactif partiel pour voir ce que futur•e peut faire pour vous.
+              Le questionnaire et votre première lecture personnalisée, pour voir ce que futur•e révèle sur votre situation.
             </div>
             <div style={styles.planFeatures}>
               {[
-                'Saisie de commune et profil simplifié',
-                'Rapport interactif partiel (1 module)',
+                'Le questionnaire de profil personnalisé',
+                'Votre première lecture : vos premiers points d\'attention',
+                'Le climat déjà observé pour votre commune',
                 '3 pages Savoir thématiques',
-                'Lien de partage temporaire 72h',
               ].map((feature) => (
                 <div key={feature} style={styles.planFeature}>
                   <span style={styles.planCheck}>✓</span>
@@ -3346,7 +3346,7 @@ export default function FutureELanding() {
             </div>
             <div style={styles.planFeatures}>
               {[
-                '6 modules interactifs personnalisés',
+                '6 analyses personnalisées : logement, quartier, santé, mobilité, métier, projets',
                 'AskFuture : 3 questions incluses',
                 'Dashboard simplifié en lecture seule',
                 'Export PDF, à conserver',
@@ -3392,7 +3392,7 @@ export default function FutureELanding() {
             </div>
             <div style={styles.planName}>Pack Décision</div>
             <div style={styles.planDesc}>
-              L&apos;aboutissement du parcours Où vivre : trois territoires comparés thème
+              Quand une commune ne suffit plus : trois territoires comparés thème
               par thème, pour décider avec plus de recul.
             </div>
             <div style={styles.planFeatures}>
