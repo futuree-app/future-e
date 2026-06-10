@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
-import { SuiviWaitlistForm } from '@/components/SuiviWaitlistForm';
+import { FilWaitlistForm } from '@/components/FilWaitlistForm';
 
 export const metadata: Metadata = {
-  title: 'Suivi · Bientôt disponible — futur•e',
+  title: 'Le Fil · Bientôt disponible — futur•e',
   description:
     "Le rapport interactif futur•e devient vivant : dashboard interactif, alertes locales et newsletter mensuelle personnalisée. Inscrivez-vous pour être prévenu·e à l'ouverture.",
   robots: { index: false, follow: false },
@@ -32,7 +32,7 @@ const FEATURES = [
   },
 ];
 
-export default function SuiviBientotPage() {
+export default function LeFilPage() {
   return (
     <div
       style={{
@@ -180,7 +180,7 @@ export default function SuiviBientotPage() {
                   color: 'var(--fg-hi)',
                 }}
               >
-                Le Suivi.<br />
+                Le Fil.<br />
                 <span style={{ fontStyle: 'italic', color: 'var(--orange)' }}>
                   Votre futur, en mouvement.
                 </span>
@@ -195,7 +195,7 @@ export default function SuiviBientotPage() {
                   margin: '0 0 36px',
                 }}
               >
-                Le rapport interactif futur•e ne s'arrête pas à un PDF. Avec le Suivi, il devient
+                Le rapport interactif futur•e ne s'arrête pas à un PDF. Avec Le Fil, il devient
                 vivant : un dashboard interactif, des alertes ciblées et une lecture
                 mensuelle écrite pour <em style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--fg-1)' }}>vous</em>,
                 pour vos territoires, pour vos décisions.
@@ -271,7 +271,7 @@ export default function SuiviBientotPage() {
               >
                 Soyez prévenu·e en premier.
               </h2>
-              <SuiviWaitlistForm />
+              <FilWaitlistForm />
             </aside>
           </section>
 
@@ -288,7 +288,7 @@ export default function SuiviBientotPage() {
                   margin: '0 0 14px',
                 }}
               >
-                Ce que change le Suivi
+                Ce que change Le Fil
               </p>
               <h2
                 style={{
@@ -403,7 +403,7 @@ export default function SuiviBientotPage() {
                 marginTop: 22,
               }}
             >
-              futur•e · Suivi
+              futur•e · Le Fil
             </p>
           </section>
         </main>

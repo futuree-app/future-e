@@ -61,7 +61,7 @@ export default async function DashboardPage() {
               </div>
             </div>
             <p className="account-copy">
-              One-shot ouvre un dashboard simple. Suivi et Foyer ouvrent la
+              One-shot ouvre un dashboard simple. Le Fil et Foyer ouvrent la
               lecture interactive et recurrente.
             </p>
           </aside>
@@ -95,7 +95,7 @@ export default async function DashboardPage() {
                   </p>
                 </article>
                 <article className="account-flow-card">
-                  <span className="account-flow-step">Suivi</span>
+                  <span className="account-flow-step">Le Fil</span>
                   <h3 className="account-flow-title">Dashboard complet</h3>
                   <p className="account-copy">
                     Scenarios, horizons, details de facteurs, rapport interactif mis a

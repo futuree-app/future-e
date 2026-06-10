@@ -280,7 +280,7 @@ export default async function TerritoiresHubPage({
               lineHeight: 1.7,
             }}
           >
-            Rapport interactif · Recommandations personnalisées · Suivi dans le temps
+            Rapport interactif · Recommandations personnalisées · Le Fil
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
             <Link

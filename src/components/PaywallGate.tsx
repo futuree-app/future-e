@@ -75,7 +75,7 @@ export function PaywallGate({
             marginBottom: '16px',
           }}
         >
-          Le Suivi · prochainement
+          Le Fil · prochainement
         </div>
         <p
           style={{
@@ -89,7 +89,7 @@ export function PaywallGate({
         >
           Les leviers documentés, étape par étape,
           <br />
-          arrivent avec l&apos;ouverture du Suivi.
+          arrivent avec l&apos;ouverture du Fil.
         </p>
         <div
           style={{
@@ -100,7 +100,7 @@ export function PaywallGate({
           }}
         >
           <Link
-            href="/suivi-bientot"
+            href="/le-fil"
             style={{
               display: 'inline-flex',
               alignItems: 'center',

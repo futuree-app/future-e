@@ -530,7 +530,7 @@ export async function POST(request: NextRequest) {
 
     if (plan === "free") {
       return NextResponse.json(
-        { error: "AskFuture est réservé aux abonnés Rapport et Suivi." },
+        { error: "AskFuture est réservé aux abonnés Rapport et Le Fil." },
         { status: 403 },
       );
     }
@@ -551,7 +551,7 @@ export async function POST(request: NextRequest) {
         .eq("role", "user");
       if ((askedCount ?? 0) >= quota) {
         return NextResponse.json(
-          { error: `Quota de ${quota} questions atteint. Passez au Suivi pour un accès illimité.` },
+          { error: `Quota de ${quota} questions atteint. Passez au Fil pour un accès illimité.` },
           { status: 403 },
         );
       }

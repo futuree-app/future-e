@@ -195,7 +195,7 @@ export default async function SavoirHubPage({
     </p>
     <h2 style="--accent:${accentRgb}">Utiliser ces données pour votre territoire</h2>
     <p>
-      Le Suivi — bientôt disponible — vous permettra de générer un rapport interactif personnalisé
+      Le Fil, bientôt disponible, vous permettra de générer un rapport interactif personnalisé
       pour votre commune ou votre quartier. Ce rapport interactif intègre les données détaillées de
       chaque indicateur, les projections à 2030 et 2050, et des recommandations adaptées
       à votre situation.

@@ -232,7 +232,7 @@ export default async function ComptePage() {
                       Voir les formules
                     </Link>
                     <p className="mt-2.5 font-mono text-[10px] text-ghost tracking-[0.04em] text-center leading-[1.6]">
-                      Les 14 € seront déductibles à l&apos;ouverture du Suivi.
+                      Les 14 € seront déductibles à l&apos;ouverture du Fil.
                     </p>
                   </div>
                 </div>

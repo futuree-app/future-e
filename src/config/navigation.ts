@@ -26,6 +26,9 @@ export type NavDropdownItem = {
 export type NavItem = NavFlatItem | NavDropdownItem;
 
 export const NAV_ITEMS: NavItem[] = [
+  // ─── Où vivre — porte d'entrée principale du produit ────────────────────────
+  { label: 'Où vivre', href: '/ou-vivre' },
+
   // ─── Explorer — thèmes + profils ────────────────────────────────────────────
   {
     label: 'Explorer',
@@ -47,7 +50,7 @@ export const NAV_ITEMS: NavItem[] = [
         groupLabel: 'Par profil',
         color: '#fb923c',
         links: [
-          { label: 'Je cherche à déménager',        href: '/comparateur',                  description: 'Comparer deux communes côte à côte' },
+          { label: 'Je cherche à déménager',        href: '/ou-vivre',                     description: 'Trouver où vivre selon votre projet de vie' },
           { label: 'J\'utilise beaucoup ma voiture', href: '/j-utilise-beaucoup-ma-voiture', description: 'Vulnérabilité mobilité' },
           { label: 'J\'ai des enfants',              href: '/agir/famille',                  description: 'Santé, pollutions, qualité de vie',  badge: 'Bientôt' },
           { label: 'Je prépare ma retraite',         href: '/agir/retraite',                 description: 'Chaleur, dépendance, budget',         badge: 'Bientôt' },
@@ -127,8 +130,8 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     slug: 'preparation-catastrophes',
     title: 'Sommes-nous prêts ?',
     description:
-      "84 % des Français savent que leur territoire devra s'adapter. Pourtant seulement 26 % se sentent préparés à une canicule. Le paradoxe de la résilience hexagonale.",
-    category: 'Résilience',
+      "84 % des Français savent que leur territoire devra s'adapter. Pourtant seulement 26 % se sentent préparés à une canicule. Le paradoxe français de l'adaptation.",
+    category: 'Adaptation',
     accent: '#fb923c',
     href: '/savoir/preparation-catastrophes',
     image: '/hub-preparation.jpg',

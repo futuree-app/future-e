@@ -176,18 +176,18 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     await resend.emails.send({
       from: "futur·e <hello@futur-e.fr>",
       to: userEmail,
-      subject: "Vos 14 € couvrent votre premier mois de Suivi",
+      subject: "Vos 14 € couvrent votre premier mois du Fil",
       scheduledAt: sendAt.toISOString(),
       html: `
         <p>Votre rapport interactif futur·e est là depuis une semaine.</p>
         <p>
           Si vous souhaitez suivre l'évolution de votre situation mois par mois,
-          vos 14 € couvrent votre premier mois de Suivi — et une partie du second.
+          vos 14 € couvrent votre premier mois du Fil, et une partie du second.
           Rien à repayer avant le mois 3.
         </p>
         <p>
           <a href="https://futur-e.fr/inscription?upgrade=true">
-            Activer mon Suivi →
+            Activer Le Fil →
           </a>
         </p>
         <p>— futur·e</p>

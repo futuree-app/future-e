@@ -328,7 +328,7 @@ export default async function RapportPage() {
                   Voir les formules
                 </TrackedUpgradeLink>
                 <p className="mt-2.5 font-mono text-[10px] text-ghost tracking-[0.04em] text-center leading-[1.6]">
-                  Les 14 € seront déductibles à l&apos;ouverture du Suivi mensuel.
+                  Les 14 € seront déductibles à l&apos;ouverture du Fil mensuel.
                 </p>
               </div>
             </div>

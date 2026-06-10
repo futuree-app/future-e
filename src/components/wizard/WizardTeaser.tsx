@@ -423,7 +423,7 @@ export function WizardTeaser({
             </div>
             <div className="flex flex-col gap-1 pb-1">
               <p className="font-mono text-[11px] text-ghost tracking-[0.04em] leading-relaxed">paiement unique</p>
-              <p className="font-mono text-[11px] text-ghost tracking-[0.04em] leading-relaxed">Suivi 9 €/mois · prochainement</p>
+              <p className="font-mono text-[11px] text-ghost tracking-[0.04em] leading-relaxed">Le Fil 9 €/mois · prochainement</p>
             </div>
           </div>
 
@@ -435,7 +435,7 @@ export function WizardTeaser({
               Débloquer mon rapport interactif — 14€
             </Link>
             <p className="text-center font-mono text-[11px] text-ghost tracking-[0.04em] leading-relaxed">
-              Les 14 € seront déductibles à l&apos;ouverture du Suivi mensuel
+              Les 14 € seront déductibles à l&apos;ouverture du Fil mensuel
             </p>
           </div>
         </div>

@@ -11,7 +11,7 @@ const MOTIVATIONS = [
   { value: 'autre', label: 'Autre chose' },
 ];
 
-export function SuiviWaitlistForm() {
+export function FilWaitlistForm() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -86,7 +86,7 @@ export function SuiviWaitlistForm() {
           On vous écrit en premier.
         </p>
         <p style={{ fontSize: 'var(--fs-body-sm)', color: 'var(--fg-3)', margin: 0, lineHeight: 1.6 }}>
-          Dès que le Suivi ouvre, vous recevez votre invitation et trente jours offerts.
+          Dès que Le Fil ouvre, vous recevez votre invitation et trente jours offerts.
         </p>
       </div>
     );

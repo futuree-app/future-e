@@ -411,7 +411,7 @@ export default async function AgirPollutionsInvisiblesPage() {
                 color: 'var(--fg-4)',
                 margin: '0 0 12px',
               }}>
-                Le Suivi · prochainement
+                Le Fil · prochainement
               </p>
               <p style={{
                 fontFamily: 'var(--font-serif)',
@@ -431,7 +431,7 @@ export default async function AgirPollutionsInvisiblesPage() {
                 IREP, sites pollués, qualité de l&apos;air, eau potable — pour votre commune, sans quitter la page.
               </p>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <Link href="/suivi-bientot" style={{
+                <Link href="/le-fil" style={{
                   display: 'inline-block',
                   padding: '12px 28px',
                   background: 'var(--accent)',

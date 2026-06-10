@@ -723,7 +723,7 @@ function getHeroCopy(communeName, categories, usedFallback) {
   const hasCategory = (category) => safeCategories.includes(category);
 
   if (usedFallback) {
-    return `futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution de ${name} à travers le prisme du climat, de la santé et de l'immobilier.`;
+    return `futur•e décode les données publiques pour lire ce que le changement climatique change déjà dans votre quotidien. Accédez à une première lecture personnalisée de l'évolution de ${name} à travers le prisme du climat, de la santé et de l'immobilier.`;
   }
 
   if (hasCategory('littoral')) {
@@ -846,6 +846,7 @@ export default function FutureELanding() {
   const searchWrapRef = useRef(null);
 
   const [selectedCommune, setSelectedCommune] = useState(null);
+  const [communeFieldOpen, setCommuneFieldOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
@@ -900,6 +901,16 @@ export default function FutureELanding() {
   }, [selectedCommune, communeMeta]);
 
   const commune = selectedCommune?.name || '';
+
+  // Seconde voie du hero : révèle le champ commune (replié par défaut) et y place
+  // le curseur. La voie principale reste « Trouver où vivre » vers le parcours.
+  const openCommuneField = useCallback(() => {
+    setCommuneFieldOpen(true);
+    setTimeout(() => {
+      const el = document.getElementById('commune-input');
+      if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus(); }
+    }, 60);
+  }, []);
   const questionLimitReached = questionCount >= LANDING_QNA_LIMIT;
 
   function incrementQuestionCount() {
@@ -1618,6 +1629,39 @@ export default function FutureELanding() {
       margin: '0 0 40px',
       maxWidth: 480,
     },
+    heroCtaRow: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: 12,
+      marginBottom: 24,
+    },
+    heroCtaPrimary: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '14px 28px',
+      borderRadius: 10,
+      background: C.orange,
+      color: C.bg,
+      fontFamily: "'Instrument Sans', sans-serif",
+      fontWeight: 600,
+      fontSize: 15,
+      textDecoration: 'none',
+    },
+    heroCtaSecondary: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '14px 24px',
+      borderRadius: 10,
+      background: 'rgba(255,255,255,0.02)',
+      border: `1px solid ${C.border}`,
+      color: C.text,
+      fontFamily: "'Instrument Sans', sans-serif",
+      fontWeight: 600,
+      fontSize: 15,
+      cursor: 'pointer',
+    },
     searchWrap: { position: 'relative', maxWidth: 480 },
     searchInput: {
       width: '100%',
@@ -2070,7 +2114,7 @@ export default function FutureELanding() {
     },
     pricingGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(3,1fr)',
+      gridTemplateColumns: 'repeat(4,1fr)',
       gap: 16,
       marginTop: 40,
     },
@@ -2184,7 +2228,7 @@ export default function FutureELanding() {
       name: 'Quartier',
       icon: '🏘',
       color: C.blue,
-      desc: 'Ce que votre territoire devient face aux aléas climatiques.',
+      desc: 'Votre cadre de vie local : nuisances, nature proche, ambiance, et ce que le quartier devient.',
       items: [
         'Canicule et jours extrêmes',
         'Submersion et inondations',
@@ -2196,7 +2240,7 @@ export default function FutureELanding() {
       name: 'Logement',
       icon: '🏠',
       color: C.orange,
-      desc: 'Ce que votre habitat devient : confort, risques, valeur.',
+      desc: 'Votre habitat dans la durée : confort, sécurité, valeur et exposition aux risques.',
       items: [
         'DPE et réglementation future',
         'Risques physiques par adresse',
@@ -2208,9 +2252,9 @@ export default function FutureELanding() {
       name: 'Métier',
       icon: '💼',
       color: C.violet,
-      desc: 'Ce que le changement climatique fait à votre secteur.',
+      desc: 'Votre secteur et sa trajectoire : emploi local, transformations, chaleur au travail, débouchés.',
       items: [
-        'Résilience sectorielle',
+        'Solidité du secteur',
         'Exposition à la chaleur',
         'Transformations structurelles',
         'Opportunités émergentes',
@@ -2220,7 +2264,7 @@ export default function FutureELanding() {
       name: 'Santé',
       icon: '🫁',
       color: C.red,
-      desc: 'Ce que votre environnement fait à votre corps.',
+      desc: 'Votre environnement quotidien : air, chaleur, sols, eau, bruit et facteurs de fragilité.',
       items: [
         'Canicule et vulnérabilité',
         'Cadmium et métaux lourds',
@@ -2244,7 +2288,7 @@ export default function FutureELanding() {
       name: 'Projets',
       icon: '🗓',
       color: C.blue,
-      desc: 'Vos décisions de vie à moyen terme, éclairées.',
+      desc: 'Vos décisions de vie à moyen terme : famille, retraite, achat, installation ou départ.',
       items: [
         'Achat immobilier',
         'Déménagement, vers où',
@@ -2341,6 +2385,9 @@ export default function FutureELanding() {
           .slot-spin, .slot-settle, .slot-card-spin, .slot-card-settle { animation: none; }
         }
         .savoir-hub-card:hover { border-color: var(--border-hi) !important; background: var(--bg-elev-3) !important; }
+        @media (max-width:1024px) and (min-width:769px) {
+          .pricing-grid { grid-template-columns: repeat(2,1fr) !important; }
+        }
         @media (max-width:768px) {
           .hero-grid { grid-template-columns: 1fr !important; }
           .hero-right { display: none !important; }
@@ -2371,77 +2418,90 @@ export default function FutureELanding() {
               <span style={styles.eyebrowDot} />
               Données publiques · Lecture locale · Projection personnalisée
             </div>
-            <h1 style={styles.h1}>
-              Votre vie à{' '}
-              <span
-                key={slotAnimKey}
-                style={styles.h1Accent}
-                className={commune || slotSettled ? 'slot-settle' : 'slot-spin'}
-              >
-                {previewCommune}
-              </span>
-              {' '}en 2050.
-            </h1>
-            <p style={styles.heroSub}>{heroCopy}</p>
-
-            <div style={styles.searchWrap} ref={searchWrapRef}>
-              <span style={styles.searchIcon}>⌖</span>
-              <input
-                id="commune-input"
-                style={styles.searchInput}
-                placeholder="Saisissez votre commune…"
-                value={inputValue}
-                onChange={(event) => handleInputChange(event.target.value)}
-                onFocus={() => {
-                  if (suggestions.length > 0) {
-                    setSuggestionsOpen(true);
-                  }
-                }}
-              />
-
-              {suggestionsOpen && suggestions.length > 0 && (
-                <div style={styles.suggestionsPanel}>
-                  {suggestions.map((suggestion) => (
-                    <button
-                      key={suggestion.id}
-                      className="suggestion-row"
-                      style={styles.suggestionButton}
-                      onClick={() => loadCommuneTensions(suggestion)}
-                    >
-                      <div style={styles.suggestionTitle}>{suggestion.name}</div>
-                      <div style={styles.suggestionMeta}>
-                        {suggestion.postcode ? `${suggestion.postcode} · ` : ''}
-                        {suggestion.context}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <p style={styles.searchSub}>
-              Tapez votre commune pour faire apparaître les premières questions qui comptent vraiment ici.
+            <h1 style={styles.h1}>Où vivre demain ?</h1>
+            <p style={styles.heroSub}>
+              {commune
+                ? heroCopy
+                : "Comparez les territoires français selon votre projet de vie, des services du quotidien jusqu'au climat de demain."}
             </p>
-            <div style={styles.helperText}>
-              {catalogLoading && 'Préparation des questions…'}
-              {!catalogLoading && catalogError && catalogError}
-              {!catalogLoading && !catalogError && searchLoading && 'Recherche en cours…'}
-              {!catalogLoading && !catalogError && searchError && searchError}
+
+            {/* Deux entrées : trouver où vivre (parcours, voie principale) ou
+                analyser une commune précise (seconde voie, champ replié). */}
+            <div style={styles.heroCtaRow}>
+              <Link href="/ou-vivre" style={styles.heroCtaPrimary}>
+                Trouver où vivre
+              </Link>
+              <button
+                type="button"
+                onClick={openCommuneField}
+                style={styles.heroCtaSecondary}
+              >
+                Analyser ma commune
+              </button>
             </div>
 
-            {plmHint && (
-              <div style={{
-                marginTop: 10,
-                padding: '10px 14px',
-                borderRadius: 8,
-                background: 'var(--orange-tint)',
-                border: '1px solid var(--orange-tint-2)',
-                fontSize: 13,
-                color: C.orange,
-                lineHeight: 1.5,
-              }}>
-                {plmHint}
-              </div>
+            {(communeFieldOpen || commune) && (
+              <>
+                <div style={styles.searchWrap} ref={searchWrapRef}>
+                  <span style={styles.searchIcon}>⌖</span>
+                  <input
+                    id="commune-input"
+                    style={styles.searchInput}
+                    placeholder="Saisissez votre commune…"
+                    value={inputValue}
+                    onChange={(event) => handleInputChange(event.target.value)}
+                    onFocus={() => {
+                      if (suggestions.length > 0) {
+                        setSuggestionsOpen(true);
+                      }
+                    }}
+                  />
+
+                  {suggestionsOpen && suggestions.length > 0 && (
+                    <div style={styles.suggestionsPanel}>
+                      {suggestions.map((suggestion) => (
+                        <button
+                          key={suggestion.id}
+                          className="suggestion-row"
+                          style={styles.suggestionButton}
+                          onClick={() => loadCommuneTensions(suggestion)}
+                        >
+                          <div style={styles.suggestionTitle}>{suggestion.name}</div>
+                          <div style={styles.suggestionMeta}>
+                            {suggestion.postcode ? `${suggestion.postcode} · ` : ''}
+                            {suggestion.context}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <p style={styles.searchSub}>
+                  Saisissez une commune précise pour en lire les premières questions qui comptent ici.
+                </p>
+                <div style={styles.helperText}>
+                  {catalogLoading && 'Préparation des questions…'}
+                  {!catalogLoading && catalogError && catalogError}
+                  {!catalogLoading && !catalogError && searchLoading && 'Recherche en cours…'}
+                  {!catalogLoading && !catalogError && searchError && searchError}
+                </div>
+
+                {plmHint && (
+                  <div style={{
+                    marginTop: 10,
+                    padding: '10px 14px',
+                    borderRadius: 8,
+                    background: 'var(--orange-tint)',
+                    border: '1px solid var(--orange-tint-2)',
+                    fontSize: 13,
+                    color: C.orange,
+                    lineHeight: 1.5,
+                  }}>
+                    {plmHint}
+                  </div>
+                )}
+              </>
             )}
 
           </div>
@@ -2571,7 +2631,7 @@ export default function FutureELanding() {
           <>
             {questionLimitReached && (
               <div style={styles.questionLimitNote}>
-                Vous avez utilisé vos deux questions gratuites. Le Suivi arrive bientôt — inscrivez-vous pour être prévenu·e à l&apos;ouverture.
+                Vous avez utilisé vos deux questions gratuites. Le Fil arrive bientôt : inscrivez-vous pour être prévenu·e à l&apos;ouverture.
               </div>
             )}
 
@@ -2668,8 +2728,8 @@ export default function FutureELanding() {
                         Générer mon rapport interactif personnalisé →
                       </button>
                       {questionLimitReached && (
-                        <Link href="/suivi-bientot" style={{ ...styles.paywallSecondary, marginLeft: 10 }}>
-                          Être prévenu·e à l&apos;ouverture du Suivi
+                        <Link href="/le-fil" style={{ ...styles.paywallSecondary, marginLeft: 10 }}>
+                          Être prévenu·e à l&apos;ouverture du Fil
                         </Link>
                       )}
                     </>
@@ -2699,10 +2759,7 @@ export default function FutureELanding() {
           >
               <button
                 type="button"
-                onClick={() => {
-                  const el = document.getElementById('commune-input');
-                  if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus(); }
-                }}
+                onClick={openCommuneField}
                 style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit', fontStyle: 'italic', fontSize: 'inherit', color: C.accent, textDecoration: 'underline', textUnderlineOffset: 3 }}
               >
                 Saisissez votre commune.
@@ -2737,8 +2794,8 @@ export default function FutureELanding() {
               maxWidth: 560,
             }}
           >
-            Chaque module croise votre profil avec les données publiques
-            disponibles pour votre commune.
+            Chaque dimension lue à travers les données publiques : cadre de vie,
+            services, mobilité, santé, risques, climat et trajectoires locales.
           </p>
         </div>
         <div style={styles.modulesGrid} className="modules-grid">
@@ -3125,7 +3182,7 @@ export default function FutureELanding() {
             }}>
               Canicule, inondation, qualité de l&apos;air, cadmium, dépendance automobile...
               comparez deux communes sur ce qui change vraiment à l&apos;horizon 2050.
-              Quatre dimensions gratuites. Six supplémentaires avec le Suivi.
+              Quatre dimensions gratuites. Six supplémentaires avec Le Fil.
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -3207,8 +3264,8 @@ export default function FutureELanding() {
               maxWidth: 500,
             }}
           >
-            Un rapport interactif gratuit pour commencer. Un abonnement si vous voulez que
-            le suivi dure.
+            Gratuit pour découvrir, le rapport pour éclairer une commune, le Pack pour
+            arbitrer entre trois. Le Fil, ensuite, pour rester à jour.
           </p>
         </div>
         <div style={styles.pricingGrid} className="pricing-grid">
@@ -3268,11 +3325,11 @@ export default function FutureELanding() {
             <div style={styles.planFeatures}>
               {[
                 '6 modules interactifs personnalisés',
-                'AskFuture — 3 questions incluses',
+                'AskFuture : 3 questions incluses',
                 'Dashboard simplifié en lecture seule',
                 'Export PDF, à conserver',
                 'Régénération 1 fois par an',
-                'Les 14 € seront déduits à l\'ouverture du Suivi (prochainement).',
+                'Les 14 € seront déduits à l\'ouverture du Fil (prochainement).',
               ].map((feature) => (
                 <div key={feature} style={styles.planFeature}>
                   <span style={styles.planCheck}>✓</span>
@@ -3289,7 +3346,57 @@ export default function FutureELanding() {
               className="plan-btn"
               href="/checkout/rapport-complet"
             >
-              Acheter le rapport interactif — 14 €
+              Acheter le rapport interactif · 14 €
+            </Link>
+          </div>
+
+          <div
+            style={{
+              ...styles.planCard(false),
+              borderColor: `${C.violet}40`,
+              boxShadow: '0 0 0 1px rgba(167,139,250,0.18), 0 16px 48px rgba(167,139,250,0.10)',
+            }}
+          >
+            <div
+              style={{
+                ...styles.planBadge,
+                background: C.violet,
+                color: C.bg,
+              }}
+            >
+              Au bout du parcours
+            </div>
+            <div style={styles.planPrice}>
+              39<span style={styles.planPriceSub}>€ une fois</span>
+            </div>
+            <div style={styles.planName}>Pack Décision</div>
+            <div style={styles.planDesc}>
+              L&apos;aboutissement du parcours Où vivre : trois territoires comparés thème
+              par thème, pour décider avec plus de recul.
+            </div>
+            <div style={styles.planFeatures}>
+              {[
+                'La comparaison complète des trois communes (7 thèmes, 27 dimensions)',
+                'Les trois rapports interactifs complets, à conserver',
+                'Trois nouvelles pistes si aucune ne tranche',
+                'AskFuture : 9 questions incluses',
+              ].map((feature) => (
+                <div key={feature} style={styles.planFeature}>
+                  <span style={styles.planCheck}>✓</span>
+                  {feature}
+                </div>
+              ))}
+            </div>
+            <Link
+              style={{
+                ...styles.planBtn(true),
+                background: C.violet,
+                color: C.bg,
+              }}
+              className="plan-btn"
+              href="/ou-vivre"
+            >
+              Comparer trois territoires
             </Link>
           </div>
 
@@ -3304,7 +3411,7 @@ export default function FutureELanding() {
             <div style={styles.planPrice}>
               9<span style={styles.planPriceSub}>€ / mois</span>
             </div>
-            <div style={styles.planName}>Suivi</div>
+            <div style={styles.planName}>Le Fil</div>
             <div style={styles.planDesc}>
               Le rapport interactif vit avec vous. Les alertes arrivent quand vos données
               changent.
@@ -3329,7 +3436,7 @@ export default function FutureELanding() {
             <Link
               style={styles.planBtn(true)}
               className="plan-btn"
-              href="/suivi-bientot"
+              href="/le-fil"
             >
               Être prévenu·e à l&apos;ouverture
             </Link>

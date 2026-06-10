@@ -399,12 +399,12 @@ export function AskFuture({
                 Vous avez utilisé vos {questionsMax} questions incluses avec le Rapport interactif.
               </p>
               <a
-                href="https://futur-e.fr/suivi-bientot"
+                href="https://futur-e.fr/le-fil"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="ask-quota-cta"
               >
-                Être informé du lancement du Suivi
+                Être informé du lancement du Fil
               </a>
             </div>
           ) : (

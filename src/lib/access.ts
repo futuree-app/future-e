@@ -41,7 +41,7 @@ export const PLAN_MATRIX: Record<UserPlan, CapabilityMatrix> = {
     householdModeEnabled: false,
   },
   suivi: {
-    label: "Abonnement Suivi",
+    label: "Abonnement Le Fil",
     reportAccess: "complete",
     dashboardAccess: "interactive",
     newsletterEnabled: true,

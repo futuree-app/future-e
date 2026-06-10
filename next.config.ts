@@ -39,6 +39,9 @@ const nextConfig: NextConfig = {
       { source: '/territoires/submersion/:code', destination: '/inondation/:code', permanent: true },
       { source: '/savoir/submersion', destination: '/inondation', permanent: true },
       { source: '/savoir/submersion/:code', destination: '/inondation/:code', permanent: true },
+      // Renommage offre « Suivi » → « Le Fil » (texte + routes publiques)
+      { source: '/suivi-bientot', destination: '/le-fil', permanent: true },
+      { source: '/checkout/suivi', destination: '/checkout/le-fil', permanent: true },
     ];
   },
 };

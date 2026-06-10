@@ -471,7 +471,7 @@ export default function PourquoiPage() {
               <div style={{ ...glass({ padding: '14px 16px', borderRadius: 8 }), display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                 <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.warm, marginTop: 7, flexShrink: 0 }} />
                 <div>
-                  <strong style={{ display: 'block', fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 2 }}>Suivi mensuel</strong>
+                  <strong style={{ display: 'block', fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 2 }}>Le Fil</strong>
                   <span style={{ fontSize: 12, color: C.dim, lineHeight: 1.5 }}>Newsletter et notifications quand une donnée évolue.</span>
                 </div>
               </div>

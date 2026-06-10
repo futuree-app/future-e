@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { usePostHog } from "posthog-js/react";
 
-const WAITLIST_URL = "https://futur-e.fr/suivi-bientot";
+const WAITLIST_URL = "https://futur-e.fr/le-fil";
 
 type Props = {
   commune: string | null;
@@ -11,8 +11,8 @@ type Props = {
   moduleId: string;
 };
 
-// Bloc de transition vers la liste d'attente du Suivi futur•e.
-// Le Suivi n'est pas encore disponible : on présente exclusivement une
+// Bloc de transition vers la liste d'attente du Fil futur•e.
+// Le Fil n'est pas encore disponible : on présente exclusivement une
 // inscription à la liste d'attente, jamais comme un produit commercialisable.
 //
 // Posthog :
@@ -20,7 +20,7 @@ type Props = {
 //                                    via IntersectionObserver pour éviter de
 //                                    compter les vues en bas de page jamais lues)
 //   - follow_waitlist_cta_clicked  : clic sur le CTA
-export function SuiviWaitlistBlock({ commune, inseeCode, moduleId }: Props) {
+export function FilWaitlistBlock({ commune, inseeCode, moduleId }: Props) {
   const posthog = usePostHog();
   const rootRef = useRef<HTMLDivElement>(null);
   const viewedRef = useRef(false);
@@ -72,7 +72,7 @@ export function SuiviWaitlistBlock({ commune, inseeCode, moduleId }: Props) {
           Ce rapport est une photographie.
         </p>
         <p className="text-[15px] leading-[1.72] text-muted mb-7">
-          Votre commune continuera d&apos;évoluer dans les années à venir. Le Suivi futur•e permettra bientôt d&apos;être informé automatiquement des évolutions importantes concernant votre territoire.
+          Votre commune continuera d&apos;évoluer dans les années à venir. Le Fil futur•e permettra bientôt d&apos;être informé automatiquement des évolutions importantes concernant votre territoire.
         </p>
         <a
           href={WAITLIST_URL}

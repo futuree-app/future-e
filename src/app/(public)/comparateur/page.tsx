@@ -18,7 +18,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Comparateur de communes · futur•e',
   description:
-    "Comparez deux communes sur leurs tensions climatiques, sanitaires et de mobilité. Une lecture publique, puis un déblocage complet avec l'abonnement Suivi.",
+    "Comparez deux communes sur leurs tensions climatiques, sanitaires et de mobilité. Une lecture publique, puis un déblocage complet avec l'abonnement Le Fil.",
 };
 
 type SearchParams = {
@@ -831,8 +831,8 @@ export default async function ComparateurPage({
         </h1>
         <p className="lede">
           Comparez deux territoires sur les tensions qui comptent pour une installation,
-          un achat ou un déménagement. La lecture publique montre quatre dimensions. Le Suivi débloque les six autres.
-          L&apos;abonnement Suivi débloque le comparatif complet.
+          un achat ou un déménagement. La lecture publique montre quatre dimensions. Le Fil débloque les six autres.
+          L&apos;abonnement Le Fil débloque le comparatif complet.
         </p>
 
         <ComparatorSearch
@@ -898,14 +898,14 @@ export default async function ComparateurPage({
                       <>
                         <div className="score-cell locked-cell">
                           <div className="risk-tag risk-unknown">Détail réservé</div>
-                          <div className="score-note">Lecture personnalisée avec Suivi</div>
+                          <div className="score-note">Lecture personnalisée avec Le Fil</div>
                         </div>
                         <div className="score-cell locked-cell">
                           <div className="risk-tag risk-unknown">Détail réservé</div>
-                          <div className="score-note">Lecture personnalisée avec Suivi</div>
+                          <div className="score-note">Lecture personnalisée avec Le Fil</div>
                         </div>
                         <div className="lock-overlay">
-                          <div className="lock-badge">6 dimensions débloquées avec Suivi</div>
+                          <div className="lock-badge">6 dimensions débloquées avec Le Fil</div>
                         </div>
                       </>
                     ) : (
@@ -922,12 +922,12 @@ export default async function ComparateurPage({
             {!hasFullAccess ? (
               <section className="panel cta">
                 <div>
-                  <div className="panel-label">Suivi · prochainement</div>
+                  <div className="panel-label">Le Fil · prochainement</div>
                   <h2 className="cta-title">La version publique reste volontairement partielle.</h2>
                   <p className="cta-desc">
                     Les dimensions visibles donnent une première hiérarchie. Le vrai arbitrage
                     se joue souvent sur la santé locale, la mobilité quotidienne, les pollutions
-                    diffuses ou le feu. C&apos;est ce bloc qui se débloque avec Suivi.
+                    diffuses ou le feu. C&apos;est ce bloc qui se débloque avec Le Fil.
                   </p>
                   <div className="cta-points">
                     <div className="cta-point">Six dimensions comparatives supplémentaires</div>
@@ -942,7 +942,7 @@ export default async function ComparateurPage({
                     <div className="cta-price">9€</div>
                     <div className="cta-period">par mois · sans engagement</div>
                   </div>
-                  <Link href="/suivi-bientot" className="cta-button">
+                  <Link href="/le-fil" className="cta-button">
                     Être prévenu·e à l&apos;ouverture
                   </Link>
                 </div>
@@ -951,7 +951,7 @@ export default async function ComparateurPage({
 
             <div className="footnote">
               Données · Supabase `communes_tension` · lecture comparative non normative ·
-              scores synthétiques à l&apos;échelle communale · accès complet réservé aux comptes Suivi
+              scores synthétiques à l&apos;échelle communale · accès complet réservé aux comptes Le Fil
             </div>
           </>
         ) : (

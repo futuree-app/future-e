@@ -457,7 +457,7 @@ export default async function CommunePage({
     <h2 style="--accent:${hub.accent}">Analyse territoriale et comparaison</h2>
     <p>
       ${commune.nom_commune} se situe dans le département ${dept}.
-      Le Suivi — prochainement — donnera accès à une comparaison avec les communes voisines
+      Le Fil, prochainement, donnera accès à une comparaison avec les communes voisines
       et aux recommandations personnalisées selon votre situation.
     </p>
 
