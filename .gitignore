@@ -74,6 +74,10 @@ data/cache-logement/
 # Cache brut nature (OSO 2023 ~737 Mo + contours) — non versionné ; le dérivé vit dans l'index
 data/cache-nature/
 
+# Cache brut INSEE logement (base-cc-logement ~40 Mo) — non versionné ; le dérivé
+# vit dans data/residences-secondaires.json
+data/cache-saisonnalite/
+
 # BPE : venv dédié + source parquet locale (non versionnés)
 .venv-bpe/
 data/bpe24.parquet

@@ -8,6 +8,7 @@ import type { GeorisquesSummary, GasparCatnatSummary } from "@/lib/georisques";
 import type { EaufranceSummary } from "@/lib/eaufrance";
 import type { VigieauSummary, DroughtLevel } from "@/lib/vigieau";
 import type { LittoralSummary, LittoralFacade } from "@/lib/littoral";
+import type { DemographieCardData, CouvertCardData } from "@/lib/territory-identity";
 
 // Façade maritime → libellé (le composant est client : on duplique le libellé
 // plutôt que d'importer une valeur depuis littoral.ts, server-only).
@@ -62,12 +63,59 @@ type SharedProps = {
   vigieau: VigieauSummary | null;
   catnat?: GasparCatnatSummary | null;
   littoral?: LittoralSummary | null;
+  // Bloc 4 : trajectoire de population + couvert naturel + saisonnalité (données riches).
+  demographie?: DemographieCardData | null;
+  couvertNaturel?: CouvertCardData | null;
+  saisonnalitePct?: number | null;
 };
+
+// ─── Thèmes de lecture ────────────────────────────────────────────────────────
+// Code couleur stable et lisible : vert = le territoire (ce qu'il est, ce qui le
+// transforme), orange = le climat, bleu = les risques recensés. Les cartes sont
+// regroupées et titrées par thème : le décor d'abord, l'aléa ensuite.
+type ThemeKey = "territoire" | "climat" | "risque";
+const THEME: Record<ThemeKey, { label: string; col: string }> = {
+  territoire: { label: "Le territoire", col: "var(--green)" },
+  climat: { label: "Le climat", col: "var(--orange)" },
+  risque: { label: "Les risques", col: "var(--blue)" },
+};
+const THEME_ORDER: ThemeKey[] = ["territoire", "climat", "risque"];
+const THEME_OF: Record<string, ThemeKey> = {
+  "Trajectoire de population": "territoire",
+  "Résidences secondaires": "territoire",
+  "Couvert naturel": "territoire",
+  "Taux de boisement": "territoire",
+  "Jours chauds (> 30°C)": "climat",
+  "Jours de chaleur extrême (> 35°C)": "climat",
+  "Nuits tropicales (> 20°C)": "climat",
+  "Conditions météo favorables au feu": "climat",
+  "Sécheresse des sols": "climat",
+  "Inondation fluviale": "risque",
+  "Submersion marine": "risque",
+  "Catastrophes naturelles reconnues": "risque",
+  "Littoral": "risque",
+};
+function themeOf(label: string): ThemeKey {
+  return THEME_OF[label] ?? "territoire";
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function r(v: number | undefined | null) {
   return v != null ? Math.round(v) : null;
+}
+
+// Nombre français à une décimale (virgule), sans zéro inutile. Ex : 4 -> "4", 0.68 -> "0,7".
+function frFloat(n: number): string {
+  return (Math.round(n * 10) / 10).toString().replace(".", ",");
+}
+
+function cap(s: string): string {
+  return s.length > 0 ? s[0].toUpperCase() + s.slice(1) : s;
+}
+
+function signed(n: number): string {
+  return `${n >= 0 ? "+" : ""}${frFloat(n)}`;
 }
 
 function buildFactors(
@@ -80,6 +128,9 @@ function buildFactors(
   communeName: string,
   catnat?: GasparCatnatSummary | null,
   littoral?: LittoralSummary | null,
+  demographie?: DemographieCardData | null,
+  couvertNaturel?: CouvertCardData | null,
+  saisonnalitePct?: number | null,
 ): Factor[] {
   const meta = HORIZON_META[horizonKey] ?? HORIZON_META.gwl20;
   const gwlData = scenarios?.[horizonKey]?.v ?? null;
@@ -230,7 +281,7 @@ function buildFactors(
     },
     {
       label: "Inondation fluviale",
-      val: georisques ? (georisques.flags.flood ? "Zone exposée recensée" : "Aucun périmètre recensé") : "—",
+      val: georisques ? (georisques.flags.flood ? "Une partie du territoire est concernée" : "Aucun périmètre recensé") : "—",
       col: "var(--blue)",
       src: "Géorisques · échelle communale",
       missing: !georisques?.flags.flood,
@@ -238,21 +289,111 @@ function buildFactors(
     },
     {
       label: "Submersion marine",
-      val: georisques ? (georisques.flags.marineSubmersion ? "Côte exposée recensée" : "Aucun périmètre recensé") : "—",
+      val: georisques ? (georisques.flags.marineSubmersion ? "Le littoral fait partie des zones surveillées" : "Aucun périmètre recensé") : "—",
       col: "var(--blue)",
       src: "Géorisques · échelle communale",
       missing: !georisques?.flags.marineSubmersion,
       tip: "Sur le littoral, savoir si la mer peut atteindre la commune aide à comprendre ce qui est exposé aux tempêtes. Détail à votre adresse dans le module Logement.",
     },
-    {
-      label: "Taux de boisement",
-      val: boisementPct != null ? `${boisementPct}%` : "—",
-      col: "var(--green)",
-      src: "ADEME · données communales",
-      missing: boisementPct == null,
-      tip: "Les arbres rafraîchissent la commune l'été et abritent la vie. Leur place en dit long sur le confort par fortes chaleurs et sur le quotidien qu'on y trouve.",
-    },
+    // Carte couvert naturel : enrichie (OSO + composition) si fournie, sinon
+    // repli sur le seul taux de boisement ADEME.
+    couvertNaturel
+      ? {
+          label: "Couvert naturel",
+          val: couvertNaturel.headlineLabel,
+          col: "var(--green)",
+          src: "OSO · ADEME · échelle communale",
+          missing: false,
+          detail: {
+            eyebrow: "L'occupation des sols",
+            title: "Couvert naturel",
+            headline: `${couvertNaturel.brutPct} % d'espaces naturels`,
+            subhead:
+              couvertNaturel.radiusPct != null
+                ? `Dans un rayon de 15 km autour de la commune : ${couvertNaturel.radiusPct} %.`
+                : undefined,
+            accent: "var(--green)",
+            breakdownLabel: "Ce qui couvre le territoire",
+            breakdown: couvertNaturel.composition.slice(0, 5).map((c) => ({
+              label: c.label,
+              value: `${c.pct} %`,
+              bar: c.pct / 100,
+            })),
+            why: "La place laissée aux espaces naturels en dit long sur le territoire : ils rafraîchissent la commune l'été, retiennent l'eau lors des fortes pluies et abritent la vie. Là où le bâti domine, ces effets se font plus rares.",
+            whyLabel: "Ce que cela raconte",
+            askPrefill: "Quelle place les espaces naturels occupent-ils dans ma commune ?",
+            sources: "OSO 2023 (CESBIO, couverture des sols) · ADEME (taux de boisement)",
+          },
+        }
+      : {
+          label: "Taux de boisement",
+          val: boisementPct != null ? `${boisementPct}%` : "—",
+          col: "var(--green)",
+          src: "ADEME · données communales",
+          missing: boisementPct == null,
+          tip: "Les arbres rafraîchissent la commune l'été et abritent la vie. Leur place en dit long sur le confort par fortes chaleurs et sur le quotidien qu'on y trouve.",
+        },
   ];
+
+  // Carte « Trajectoire de population » en tête de grille (le décor avant l'aléa).
+  if (demographie) {
+    const facts: { label: string; value: string }[] = [];
+    if (demographie.annualPct != null) facts.push({ label: "Évolution annuelle", value: `${signed(demographie.annualPct)} %/an` });
+    if (demographie.partNouveaux != null) facts.push({ label: "Nouveaux arrivants", value: `${frFloat(demographie.partNouveaux)} %` });
+    factors.unshift({
+      label: "Trajectoire de population",
+      val: demographie.status,
+      col: "var(--green)",
+      src: "INSEE · recensement · échelle communale",
+      missing: false,
+      detail: {
+        eyebrow: "La trajectoire du territoire",
+        title: "Trajectoire de population",
+        headline: demographie.totalPeriodPct != null ? `${signed(demographie.totalPeriodPct)} % depuis 2015` : demographie.status,
+        subhead: demographie.recitPhrase ? `${cap(demographie.recitPhrase)}.` : undefined,
+        accent: "var(--green)",
+        facts: facts.length > 0 ? facts : undefined,
+        why: "La trajectoire de population dit beaucoup d'un territoire : une commune qui gagne des habitants attire et se transforme, une commune qui en perd voit ses services et ses logements évoluer autrement. C'est une tendance de fond, pas un chiffre isolé.",
+        whyLabel: "Ce que cela raconte",
+        askPrefill: "Comment la population de ma commune évolue-t-elle ?",
+        sources: "INSEE, recensement (évolution de la population 2015-2021)",
+      },
+    });
+  }
+
+  // Carte saisonnalité (résidences secondaires) — toujours présente, même faible,
+  // pour une grille sans trou. Le regroupement par thème la place avec le territoire.
+  const saiLevel =
+    saisonnalitePct == null
+      ? null
+      : saisonnalitePct >= 40
+        ? "Forte"
+        : saisonnalitePct >= 20
+          ? "Marquée"
+          : saisonnalitePct >= 8
+            ? "Modérée"
+            : "Faible";
+  factors.push({
+    label: "Résidences secondaires",
+    val: saiLevel ?? "—",
+    col: "var(--green)",
+    src: "INSEE · logement · échelle communale",
+    missing: saisonnalitePct == null,
+    detail:
+      saisonnalitePct != null
+        ? {
+            eyebrow: "La saisonnalité du territoire",
+            title: "Résidences secondaires",
+            headline: `${Math.round(saisonnalitePct)} % du parc de logements`,
+            subhead: "Part de résidences secondaires et de logements occasionnels.",
+            accent: "var(--green)",
+            why: "Une part élevée de résidences secondaires signale une fréquentation touristique : la population réelle gonfle l'été et s'allège hors saison. Cela façonne les commerces, les services et le rythme de la commune au fil de l'année.",
+            whyLabel: "Ce que cela raconte",
+            askPrefill: "Ma commune est-elle marquée par le tourisme saisonnier ?",
+            sources: "INSEE, recensement (base communale logement 2022)",
+          }
+        : undefined,
+  });
 
   // Carte CatNat (GASPAR) — ajoutée seulement quand l'appelant fournit la donnée
   // (QuartierAside). Histoire vécue : nombre de reconnaissances depuis l'origine.
@@ -268,7 +409,16 @@ function buildFactors(
           headline,
           subhead: catnat!.summary ?? undefined,
           accent: "var(--blue)",
-          breakdown: catnat!.byRisk.map((rk) => ({ label: rk.label, value: String(rk.count) })),
+          breakdown: catnat!.byRisk.map((rk) => ({
+            label: rk.label,
+            value: String(rk.count),
+            bar: catnat!.total > 0 ? rk.count / catnat!.total : 0,
+          })),
+          timeline:
+            catnat!.byDecade.length > 0
+              ? catnat!.byDecade.map((dc) => ({ label: `${String(dc.decade).slice(2)}s`, count: dc.count }))
+              : undefined,
+          timelineLabel: "Au fil des décennies",
           facts: [
             ...(catnat!.firstYear ? [{ label: "Première reconnaissance", value: String(catnat!.firstYear) }] : []),
             ...(catnat!.lastYear ? [{ label: "Dernière reconnaissance", value: String(catnat!.lastYear) }] : []),
@@ -504,53 +654,74 @@ function formatFrDate(iso: string): string {
 
 // ─── FactorGrid (grille horizontale de cartes) ────────────────────────────────
 
-export function QuartierAside({ communeName, scenarios, georisques, territoire, vigieau, drought, catnat, littoral }: SharedProps) {
+export function QuartierAside({ communeName, scenarios, georisques, territoire, vigieau, drought, catnat, littoral, demographie, couvertNaturel, saisonnalitePct }: SharedProps) {
   const [horizon] = useHorizon();
   const [openDetail, setOpenDetail] = useState<CardDetail | null>(null);
-  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, littoral ?? null);
+  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null);
+
+  // Regroupement par thème : le décor (territoire) d'abord, puis le climat, puis
+  // les risques. Le code couleur suit le thème, pas la carte individuelle.
+  const groups = THEME_ORDER
+    .map((t) => ({ t, items: factors.filter((f) => themeOf(f.label) === t) }))
+    .filter((g) => g.items.length > 0);
 
   return (
     <div>
-      <div className="grid grid-cols-4 gap-2.5">
-        {factors.map((f) => {
-          const clickable = !!f.detail;
+      <div className="flex flex-col gap-7">
+        {groups.map((g) => {
+          const col = THEME[g.t].col;
           return (
-            <div
-              key={f.label}
-              className={`glass rounded-xl px-4 py-3.5${clickable ? " metric-card-clickable" : ""}`}
-              style={{
-                position: "relative",
-                borderTop: `2px solid ${f.missing ? "var(--ghost)" : f.col}`,
-                opacity: f.missing ? 0.45 : 1,
-                cursor: clickable ? "pointer" : undefined,
-              }}
-              role={clickable ? "button" : undefined}
-              tabIndex={clickable ? 0 : undefined}
-              onClick={clickable ? () => setOpenDetail(f.detail!) : undefined}
-              onKeyDown={
-                clickable
-                  ? (e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setOpenDetail(f.detail!);
-                      }
-                    }
-                  : undefined
-              }
-            >
-              <div className="text-[12px] font-medium text-label mb-2 leading-[1.3]">{f.label}</div>
-              <div className="font-mono text-[11px] tracking-[0.02em] mb-0.5" style={{ color: f.missing ? "var(--ghost)" : f.col }}>{f.val}</div>
-              <div className="font-mono text-[10px] text-ghost tracking-[0.02em] leading-[1.4]">{f.src}</div>
-              {clickable && (
-                <div className="font-mono text-[10px] tracking-[0.06em] mt-2" style={{ color: f.col }}>
-                  Détail →
-                </div>
-              )}
-              {!clickable && f.tip && (
-                <span style={{ position: "absolute", top: 10, right: 10 }}>
-                  <MetricTooltip text={f.tip} accent={f.missing ? undefined : f.col} />
+            <div key={g.t}>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: col }} />
+                <span className="font-mono text-[11px] tracking-[0.12em] uppercase" style={{ color: col }}>
+                  {THEME[g.t].label}
                 </span>
-              )}
+              </div>
+              <div className="grid grid-cols-4 gap-2.5">
+                {g.items.map((f) => {
+                  const clickable = !!f.detail;
+                  return (
+                    <div
+                      key={f.label}
+                      className={`glass rounded-xl px-4 py-3.5${clickable ? " metric-card-clickable" : ""}`}
+                      style={{
+                        position: "relative",
+                        borderTop: `2px solid ${f.missing ? "var(--ghost)" : col}`,
+                        opacity: f.missing ? 0.45 : 1,
+                        cursor: clickable ? "pointer" : undefined,
+                      }}
+                      role={clickable ? "button" : undefined}
+                      tabIndex={clickable ? 0 : undefined}
+                      onClick={clickable ? () => setOpenDetail(f.detail!) : undefined}
+                      onKeyDown={
+                        clickable
+                          ? (e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                setOpenDetail(f.detail!);
+                              }
+                            }
+                          : undefined
+                      }
+                    >
+                      <div className="text-[12px] font-medium text-label mb-2 leading-[1.3]">{f.label}</div>
+                      <div className="font-mono text-[11px] tracking-[0.02em] mb-0.5" style={{ color: f.missing ? "var(--ghost)" : col }}>{f.val}</div>
+                      <div className="font-mono text-[10px] text-ghost tracking-[0.02em] leading-[1.4]">{f.src}</div>
+                      {clickable && (
+                        <div className="font-mono text-[10px] tracking-[0.06em] mt-2" style={{ color: col }}>
+                          Détail →
+                        </div>
+                      )}
+                      {!clickable && f.tip && (
+                        <span style={{ position: "absolute", top: 10, right: 10 }}>
+                          <MetricTooltip text={f.tip} accent={f.missing ? undefined : col} />
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           );
         })}

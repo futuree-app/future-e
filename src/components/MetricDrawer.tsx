@@ -23,6 +23,10 @@ export type CardDetail = {
   /** `bar` (0→1) dessine une barre de proportion sous la ligne : la donnée se voit, pas juste se lit. */
   breakdown?: { label: string; value: string; bar?: number }[];
   facts?: { label: string; value: string }[];
+  /** Micro-frise temporelle (sparkline) : une colonne par période, hauteur ∝ count. */
+  timeline?: { label: string; count: number }[];
+  /** Intitulé de la frise (défaut « Au fil du temps »). */
+  timelineLabel?: string;
   why: string;
   /** Intitulé de la section récit (défaut « Ce que cela change »). Ex. « Ce que cela raconte ». */
   whyLabel?: string;
@@ -105,6 +109,26 @@ export function MetricDrawer({
             </ul>
           </div>
         )}
+
+        {detail.timeline && detail.timeline.length > 0 && (() => {
+          const maxCount = Math.max(...detail.timeline.map((t) => t.count), 1);
+          return (
+            <div className="metric-drawer-section">
+              <p className="metric-drawer-label">{detail.timelineLabel ?? "Au fil du temps"}</p>
+              <div className="metric-drawer-frise">
+                {detail.timeline.map((t) => (
+                  <div key={t.label} className="metric-drawer-frise-col">
+                    <span className="metric-drawer-frise-count">{t.count}</span>
+                    <span className="metric-drawer-frise-track" aria-hidden>
+                      <span style={{ height: `${Math.max(8, Math.round((t.count / maxCount) * 100))}%`, background: accent }} />
+                    </span>
+                    <span className="metric-drawer-frise-tick">{t.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {detail.facts && detail.facts.length > 0 && (
           <div className="metric-drawer-facts">
@@ -213,6 +237,30 @@ export function MetricDrawer({
           transition: width 0.4s cubic-bezier(0.22,1,0.36,1);
         }
         .metric-drawer-val { font-family: 'JetBrains Mono', monospace; color: #e9ecf2; }
+        .metric-drawer-frise {
+          display: flex; align-items: flex-end; gap: 6px; height: 88px;
+          padding-top: 4px;
+        }
+        .metric-drawer-frise-col {
+          flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;
+          height: 100%; justify-content: flex-end;
+        }
+        .metric-drawer-frise-count {
+          font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #9ba3b4;
+        }
+        .metric-drawer-frise-track {
+          width: 100%; flex: 1; display: flex; align-items: flex-end;
+          background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;
+          min-height: 30px;
+        }
+        .metric-drawer-frise-track > span {
+          display: block; width: 100%; border-radius: 4px;
+          transition: height 0.4s cubic-bezier(0.22,1,0.36,1);
+        }
+        .metric-drawer-frise-tick {
+          font-family: 'JetBrains Mono', monospace; font-size: 9px;
+          letter-spacing: 0.02em; color: #6b7388;
+        }
         .metric-drawer-facts { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
         .metric-drawer-fact {
           flex: 1; min-width: 130px;

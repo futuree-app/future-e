@@ -511,6 +511,8 @@ export type GasparCatnatSummary = {
   lastYear: number | null;
   /** Répartition par famille d'aléa, triée par fréquence décroissante. */
   byRisk: { label: string; count: number }[];
+  /** Comptage par décennie (frise temporelle), ordre chronologique. decade = 1980, 1990… */
+  byDecade: { decade: number; count: number }[];
   topRisk: string | null;
   /** Phrase de synthèse déterministe (≤ 120 car.), ou null si aucun arrêté. */
   summary: string | null;
@@ -580,6 +582,7 @@ async function loadGasparCatnatSummary(inseeCode: string): Promise<GasparCatnatS
 
   const items = json?.data ?? [];
   const counts = new Map<string, number>();
+  const decadeCounts = new Map<number, number>();
   let firstYear: number | null = null;
   let lastYear: number | null = null;
 
@@ -593,12 +596,18 @@ async function loadGasparCatnatSummary(inseeCode: string): Promise<GasparCatnatS
     if (year != null) {
       firstYear = firstYear == null ? year : Math.min(firstYear, year);
       lastYear = lastYear == null ? year : Math.max(lastYear, year);
+      const decade = Math.floor(year / 10) * 10;
+      decadeCounts.set(decade, (decadeCounts.get(decade) ?? 0) + 1);
     }
   }
 
   const byRisk = Array.from(counts.entries())
     .map(([label, count]) => ({ label, count }))
     .sort((a, b) => b.count - a.count);
+
+  const byDecade = Array.from(decadeCounts.entries())
+    .map(([decade, count]) => ({ decade, count }))
+    .sort((a, b) => a.decade - b.decade);
 
   const total = typeof json?.results === "number" ? json.results : items.length;
 
@@ -607,6 +616,7 @@ async function loadGasparCatnatSummary(inseeCode: string): Promise<GasparCatnatS
     firstYear,
     lastYear,
     byRisk,
+    byDecade,
     topRisk: byRisk[0]?.label ?? null,
     summary: describeCatnat(byRisk, total),
   };

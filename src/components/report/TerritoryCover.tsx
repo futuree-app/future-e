@@ -35,24 +35,6 @@ export function TerritoryCover({ mood }: { mood: TerritoryMood }) {
 
   return (
     <figure style={{ margin: 0 }}>
-      {/* cartouche au-dessus de la bande */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 9,
-          marginBottom: 10,
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: 11,
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          color: "#7c93ad",
-        }}
-      >
-        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--orange)", flexShrink: 0 }} />
-        {mood.typeLabel}
-      </div>
-
       {/* bande ultra-fine */}
       <div
         style={{

@@ -20,6 +20,10 @@ import { AskFutureInlineMount } from "@/components/AskFutureInlineMount";
 import { FilWaitlistBlock } from "@/components/report/FilWaitlistBlock";
 import { TerritoryCover } from "@/components/report/TerritoryCover";
 import { deriveTerritoryMood } from "@/lib/territory-mood";
+import { getTerritoryContext } from "@/lib/comparateur-vie";
+import { buildTerritoryIdentity, buildTerritoryCards } from "@/lib/territory-identity";
+import { TerritoryIdentityCard } from "@/components/report/TerritoryIdentityCard";
+import { getResidencesSecondairesPct } from "@/lib/saisonnalite";
 
 export default async function RapportQuartierPage() {
   const account = await getCurrentUserAccount();
@@ -59,6 +63,19 @@ export default async function RapportQuartierPage() {
   // Identité visuelle du territoire (déterministe, sans appel réseau).
   const territoryMood = deriveTerritoryMood({ communeName, inseeCode, territoire });
 
+  // Contexte territorial (index comparateur, lecture seule) : carte d'identité +
+  // trait distinctif. Absent (commune hors index, PLM) => on n'affiche pas la carte.
+  const territoryContext = inseeCode ? await getTerritoryContext(inseeCode) : null;
+  const saisonnalitePct = inseeCode ? await getResidencesSecondairesPct(inseeCode) : null;
+  const territoryIdentity = territoryContext
+    ? buildTerritoryIdentity({
+        communeName: displayName,
+        typeLabel: territoryMood.typeLabel,
+        context: territoryContext,
+      })
+    : null;
+  const territoryCards = territoryContext ? buildTerritoryCards(territoryContext.entry) : null;
+
   // Sources mobilisées par horizon : pré-calculées côté serveur, le composant
   // client choisit via useHorizon. Évite de transférer tout enrichment.
   const sourcesByHorizon = {
@@ -96,10 +113,10 @@ export default async function RapportQuartierPage() {
             style={{ fontFamily: "'Instrument Serif', serif" }}
           >
             Ce que {displayName} devient.<br />
-            <span className="italic text-info">Canicule, inondation, feux.</span>
+            <span className="italic text-info">Territoire, climat, risques.</span>
           </h1>
           <p className={`text-[17px] leading-[1.72] text-muted ${fullReport ? "mb-0" : "mb-9"}`}>
-            Comment le changement climatique va transformer votre commune.
+            Une lecture d&apos;ensemble de la commune : ce qu&apos;elle est, ce qui la transforme et les grands phénomènes auxquels elle est exposée.
           </p>
           {!fullReport && (
             <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline">
@@ -113,6 +130,21 @@ export default async function RapportQuartierPage() {
         {communeName && (
           <div className="pt-1">
             <TerritoryCover mood={territoryMood} />
+          </div>
+        )}
+
+        {/* Bloc 2 — Passeport territorial, précédé d'une transition qui nomme la
+            typologie : fait le pont entre l'illustration et la fiche. */}
+        {communeName && territoryIdentity && (
+          <div className="mt-7">
+            <TerritoryIdentityCard
+              communeName={displayName}
+              inseeCode={inseeCode}
+              identity={territoryIdentity}
+              territoryType={territoryMood.type}
+              tint={territoryMood.colors.skyHorizon}
+              accent={territoryMood.colors.accent}
+            />
           </div>
         )}
 
@@ -136,9 +168,9 @@ export default async function RapportQuartierPage() {
             className="font-normal italic text-[clamp(22px,2vw,28px)] leading-[1.25] tracking-[-0.3px] text-label mb-6"
             style={{ fontFamily: "'Instrument Serif', serif" }}
           >
-            Ce que montrent les données
+            Les grands signaux du territoire
           </h2>
-          <QuartierAside communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} littoral={littoral} />
+          <QuartierAside communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} />
         </section>
 
         {/* Une question ? — AskFuture inline (uniquement pour comptes payants) :

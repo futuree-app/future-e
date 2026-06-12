@@ -14,6 +14,16 @@ const nextConfig: NextConfig = {
       "./data/comparateur-index.json",
       "./data/ze-emploi-na38.json",
     ],
+    // Module Territoire : la page et la synthèse lisent l'index (carte d'identité,
+    // trait distinctif, démographie, couvert naturel) et la saisonnalité.
+    "/rapport/quartier": [
+      "./data/comparateur-index.json",
+      "./data/residences-secondaires.json",
+    ],
+    "/api/synthesize-quartier": [
+      "./data/comparateur-index.json",
+      "./data/residences-secondaires.json",
+    ],
   },
   async rewrites() {
     return [

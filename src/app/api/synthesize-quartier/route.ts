@@ -17,6 +17,9 @@ import { NextRequest } from "next/server";
 import { streamText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
+import { getTerritoryContext, getCommuneDistinctive, RECIT_DEMOGRAPHIE } from "@/lib/comparateur-vie";
+import { deriveTerritoryMood } from "@/lib/territory-mood";
+import { getResidencesSecondairesPct } from "@/lib/saisonnalite";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -76,9 +79,9 @@ Si le payload contient une section "reperes_terrain_utilisateur", l'utilisateur 
 HISTOIRE VÉCUE DU TERRITOIRE — ARRÊTÉS CATNAT
 Si le payload contient "historique_catnat", la commune a déjà été reconnue en état de catastrophe naturelle un certain nombre de fois (nombre_arretes, depuis depuis_annee, aléas dans aleas_principaux). C'est une mémoire vécue, pas une projection. Vous POUVEZ l'évoquer UNE fois, sobrement, pour ancrer le récit dans le passé réel du territoire : "la commune a déjà connu X reconnaissances de catastrophe naturelle depuis {année}, surtout liées à {aléa}". Règles : jamais alarmiste, jamais une liste, ne citez pas la source (ni GASPAR ni Géorisques), n'inventez aucun chiffre absent. Si le champ est absent ou nul, n'en parlez pas.
 
-PÉRIMÈTRE — MODULE QUARTIER
-Vous traitez : chaleur, sécheresse, eau, inondation, submersion, feux, qualité de l'air, sols, cadre de vie territorial, évolution de la commune.
-Vous ne traitez JAMAIS : logement, santé personnelle, patrimoine, achat immobilier, métier, retraite, projets individuels. Ces sujets appartiennent à d'autres modules.`;
+PÉRIMÈTRE — MODULE TERRITOIRE
+Le module Territoire pose le décor de la commune : ce qu'elle est, ce qui la transforme, ce à quoi elle est exposée. Vous traitez, à l'échelle communale : typologie et caractère du territoire, trajectoire de population, chaleur, sécheresse des sols, eau, inondation, submersion, feux, couvert naturel, évolution de la commune.
+Vous ne concluez JAMAIS sur : le logement (valeur, confort, état du bâti), la santé (air respiré, effets sur le corps, exposition, bruit, pollution), la mobilité (trajets, dépendance à la voiture), le métier (secteur, emploi) ni les projets personnels (achat, enfants, retraite, départ). Si un de ces sujets émerge, mentionnez-le en une phrase comme une question à explorer dans le module concerné, sans la traiter ici.`;
 
 // ─── Synthèse principale ───────────────────────────────────────────────────
 const SYNTHESIS_PROMPT = `Vous êtes l'analyste éditorial de futur•e pour le module Territoire. Vous répondez à une seule question : "Que devient ce territoire ?"
@@ -104,6 +107,9 @@ Lecture d'ensemble. Le sujet principal n'est pas un événement isolé : c'est u
 
 LONGUEUR
 Entre 350 et 550 mots au total. Pas plus. Mieux vaut court et clair que long et exhaustif.
+
+CONTEXTE DU TERRITOIRE — QUAND IL EST FOURNI
+Si le payload contient typologie, role_territorial, trajectoire_demographique, saisonnalite_touristique ou trait_distinctif, servez-vous-en pour situer le territoire (ce qu'il est, comment il évolue) avant ou pendant la lecture du climat. Posez le décor, ne dressez pas une liste. Le trait distinctif s'évoque une fois, sobrement, jamais comme un classement. La saisonnalité (résidences secondaires) se lit comme un trait du territoire, jamais comme un conseil d'achat ou d'investissement.
 
 DONNÉES À VENIR
 L'utilisateur vous transmet un payload JSON. Utilisez-le sans le réciter.`;
@@ -189,6 +195,16 @@ export async function POST(req: NextRequest) {
   const gwlData = enrichment?.drias?.commune.s?.[horizon]?.v ?? null;
   const displayName = communeName ?? enrichment?.ademe?.commune.nom ?? "votre commune";
 
+  // Contexte macro (index comparateur, lecture seule) : pose le décor du territoire.
+  const territoryCtx = await getTerritoryContext(inseeCode).catch(() => null);
+  const entry = territoryCtx?.entry ?? null;
+  const mood = deriveTerritoryMood({
+    communeName: displayName,
+    inseeCode,
+    territoire: enrichment?.ademe?.commune.territoire ?? null,
+  });
+  const saisonnalitePct = await getResidencesSecondairesPct(inseeCode).catch(() => null);
+
   const payload = {
     commune: {
       nom: displayName,
@@ -234,8 +250,28 @@ export async function POST(req: NextRequest) {
           densite_hab_par_km2: enrichment.ademe.commune.territoire.densite,
           taux_boisement_pct: enrichment.ademe.commune.territoire.taux_boisement,
           vieillissement_pct_65_plus: enrichment.ademe.commune.vieillissement_pct ?? null,
+          vacance_logements_pct: enrichment.ademe.commune.logements.vacants_pct ?? null,
         }
       : null,
+    typologie: mood.typeLabel,
+    role_territorial: territoryCtx
+      ? { role: territoryCtx.role, agglomeration: territoryCtx.uuLabel }
+      : null,
+    trajectoire_demographique:
+      entry?.demographie?.recit
+        ? {
+            tendance: RECIT_DEMOGRAPHIE[entry.demographie.recit] ?? null,
+            part_nouveaux_arrivants_pct: entry.demographie.part_nouveaux,
+          }
+        : null,
+    trait_distinctif: entry ? getCommuneDistinctive(entry) : null,
+    saisonnalite_touristique:
+      saisonnalitePct != null && saisonnalitePct >= 20
+        ? {
+            part_residences_secondaires_pct: saisonnalitePct,
+            niveau: saisonnalitePct >= 40 ? "forte" : "marquée",
+          }
+        : null,
     historique_catnat:
       catnat && catnat.total > 0
         ? {
