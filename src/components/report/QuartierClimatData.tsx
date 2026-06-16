@@ -718,7 +718,7 @@ function buildFactors(
   // garde la fréquence (lisible) + l'intensité 24h ; le cumul annuel descend en
   // méthodologie — le récit dit lui-même qu'il « dit peu de chose ».
   const rainFacts: { label: string; value: string }[] =
-    heavyRain != null ? [{ label: "Pluie intense en 24h", value: `${Math.round(heavyRain)} mm en ${meta.year}` }] : [];
+    heavyRain != null ? [{ label: "Pluie intense en 24h", value: `Jusqu'à ${Math.round(heavyRain)} mm en une journée` }] : [];
   factors.push({
     label: "Jours de pluie intense",
     val: heavyRainDays != null ? `${heavyRainDays} par an en ${meta.year}` : "—",
