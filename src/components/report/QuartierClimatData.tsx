@@ -269,21 +269,23 @@ function buildFactors(
   // noms de bases (VigiEau, ONDE, DRIAS) descendent en pied de drawer.
   const hasDroughtStory = drySoilDays != null || !!vigieau?.maxLevel || !!drought?.isDry;
   const droughtActive = !!vigieau?.maxLevel || !!drought?.isDry;
+  // « Vigilance » est le niveau le plus bas de VigiEau : c'est de la
+  // sensibilisation, pas une restriction d'usage. La nommer « restriction »
+  // contredit le reste de la carte. On ne parle de restriction qu'à partir
+  // d'« alerte ».
+  const todayValue = vigieau?.maxLevel
+    ? vigieau.maxLevel === "vigilance"
+      ? "Vigilance sécheresse, sans restriction"
+      : `Restriction « ${levelLabel(vigieau.maxLevel).toLowerCase()} » en cours`
+    : "Aucune restriction en cours";
   const droughtRows: { label: string; value: string }[] = [
-    {
-      label: "Aujourd'hui",
-      value: vigieau?.maxLevel
-        ? `Restriction « ${levelLabel(vigieau.maxLevel).toLowerCase()} » en cours`
-        : "Aucune restriction en cours",
-    },
-    {
-      label: "Sur le terrain",
-      value: drought
-        ? drought.isDry
-          ? "Cours d'eau à sec par endroits"
-          : "Pas de cours d'eau à sec"
-        : "Aucun signal observé localement",
-    },
+    { label: "Aujourd'hui", value: todayValue },
+    // Terrain : uniquement si on a une vraie observation ONDE. Sans donnée, on
+    // n'invente pas une réassurance (« pas de tension ») qui contredirait une
+    // restriction en cours.
+    ...(drought
+      ? [{ label: "Sur le terrain", value: drought.isDry ? "Cours d'eau à sec par endroits" : "Pas de cours d'eau à sec" }]
+      : []),
     ...(drySoilDays != null
       ? [{ label: `À l'horizon ${meta.year}`, value: `Environ ${drySoilDays} jours secs par an` }]
       : []),
@@ -291,8 +293,8 @@ function buildFactors(
   const droughtFacts =
     vigieau?.maxLevel && vigieau.topZone
       ? [
-          ...(vigieau.topZone.label ? [{ label: "Zone concernée", value: vigieau.topZone.label }] : []),
-          ...(vigieau.topZone.endDate ? [{ label: "Jusqu'au", value: formatFrDate(vigieau.topZone.endDate) }] : []),
+          ...(vigieau.topZone.label ? [{ label: "Territoire de gestion de l'eau", value: vigieau.topZone.label }] : []),
+          ...(vigieau.topZone.endDate ? [{ label: "Mesure en vigueur jusqu'au", value: formatFrDate(vigieau.topZone.endDate) }] : []),
         ]
       : undefined;
   const droughtDetail: CardDetail | undefined = hasDroughtStory
@@ -303,16 +305,18 @@ function buildFactors(
           drySoilDays != null
             ? `Environ ${drySoilDays} jours secs par an d'ici ${meta.year}`
             : vigieau?.maxLevel
-              ? `Restriction « ${levelLabel(vigieau.maxLevel).toLowerCase()} » en cours`
+              ? vigieau.maxLevel === "vigilance"
+                ? "Vigilance sécheresse en cours"
+                : `Restriction « ${levelLabel(vigieau.maxLevel).toLowerCase()} » en cours`
               : "Cours d'eau à sec observé",
         subhead: droughtActive
           ? "Les premiers signes sont déjà là, et le climat les amplifie."
           : "Le territoire s'assèche peu à peu, et les étés pèsent de plus en plus sur l'eau.",
         accent: "var(--orange)",
-        breakdownLabel: "Trois temps",
+        breakdownLabel: "Le fil de la sécheresse",
         breakdown: droughtRows,
         facts: droughtFacts && droughtFacts.length > 0 ? droughtFacts : undefined,
-        why: "La sécheresse ne se voit pas d'un coup, elle s'installe. L'eau qu'on restreint l'été, les cours d'eau qui faiblissent, la terre qui se rétracte et fragilise les fondations des maisons sur sol argileux : trois signes d'un même mouvement, du présent vers l'avenir. C'est un changement de fond du territoire, pas un épisode isolé.",
+        why: "La sécheresse ne se voit pas d'un coup, elle s'installe. L'eau qu'on restreint l'été, les cours d'eau qui faiblissent, la terre qui se rétracte : ces phénomènes racontent un même mouvement du territoire, du présent vers l'avenir. C'est un changement de fond, pas un épisode isolé.",
         askPrefill: "Ma commune est-elle exposée à la sécheresse ?",
         sources: "VigiEau (arrêtés préfectoraux) · réseau ONDE, Hub'Eau (cours d'eau) · projections DRIAS, Météo-France",
       }

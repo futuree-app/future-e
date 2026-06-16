@@ -227,8 +227,10 @@ export function MetricDrawer({
           font-size: 14px; color: #c6cfdb;
         }
         .metric-drawer-row-head {
-          display: flex; justify-content: space-between; align-items: baseline;
+          display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
         }
+        .metric-drawer-row-head > span:first-child { flex-shrink: 0; }
+        .metric-drawer-row-head .metric-drawer-val { text-align: right; }
         .metric-drawer-bar {
           display: block; margin-top: 7px; height: 5px; border-radius: 3px;
           background: rgba(255,255,255,0.07); overflow: hidden;
