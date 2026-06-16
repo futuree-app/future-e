@@ -106,7 +106,7 @@ const THEME_OF: Record<string, ThemeKey> = {
   "Nuits tropicales": "climat",
   "Conditions favorables au feu": "climat",
   "Sécheresse des sols": "climat",
-  "Pluies et épisodes intenses": "climat",
+  "Jours de pluie intense": "climat",
   "Inondation fluviale": "risque",
   "Submersion marine": "risque",
   "Catastrophes naturelles reconnues": "risque",
@@ -119,7 +119,7 @@ function themeOf(label: string): ThemeKey {
 const CARD_ORDER: string[] = [
   "Trajectoire de population", "Logements inoccupés", "Accès aux services", "Espaces naturels", "Taux de boisement", "Résidences secondaires",
   // Climat alterné mouvement/niveau pour le rythme (évite un mur de « +X »).
-  "Températures moyennes", "Sécheresse des sols", "Chaleurs estivales", "Conditions favorables au feu", "Nuits tropicales", "Pluies et épisodes intenses",
+  "Températures moyennes", "Sécheresse des sols", "Chaleurs estivales", "Conditions favorables au feu", "Nuits tropicales", "Jours de pluie intense",
   "Inondation fluviale", "Submersion marine", "Catastrophes naturelles reconnues", "Érosion du littoral",
 ];
 function cardRank(label: string): number {
@@ -339,7 +339,7 @@ function buildFactors(
           hotRef != null
             ? `≈ ${Math.round(hotRef)} → ${hotDays} jours chauds par an d'ici ${meta.year}`
             : `${hotDays} jours chauds par an en ${meta.year}`,
-        subhead: "Les fortes chaleurs gagnent du terrain, année après année.",
+        subhead: "Le nombre de jours de forte chaleur suit l'intensification des étés, indépendamment d'une canicule isolée.",
         accent: "var(--orange)",
         breakdownLabel: "Jours au-dessus de 30°C, par an",
         breakdown: trajectoryBreakdown(scenarios, "NORTX30D_yr", {
@@ -382,7 +382,7 @@ function buildFactors(
           tropicalNightsRef != null
             ? `≈ ${Math.round(tropicalNightsRef)} → ${tropicalNights} nuits par an d'ici ${meta.year}`
             : `${tropicalNights} nuits par an en ${meta.year}`,
-        subhead: "Des nuits où la chaleur ne retombe pas sous 20°C.",
+        subhead: "Des nuits où la chaleur ne retombe pas sous 20°C : même après le coucher du soleil, l'air ne se rafraîchit plus.",
         accent: "var(--orange)",
         breakdownLabel: "Nuits au-dessus de 20°C, par an",
         breakdown: trajectoryBreakdown(scenarios, "NORTR_yr", {
@@ -403,7 +403,6 @@ function buildFactors(
   // Trois temps (présent, terrain, futur) racontés en langage utilisateur ; les
   // noms de bases (VigiEau, ONDE, DRIAS) descendent en pied de drawer.
   const hasDroughtStory = drySoilDays != null || !!vigieau?.maxLevel || !!drought?.isDry;
-  const droughtActive = !!vigieau?.maxLevel || !!drought?.isDry;
   // « Vigilance » est le niveau le plus bas de VigiEau : c'est de la
   // sensibilisation, pas une restriction d'usage. La nommer « restriction »
   // contredit le reste de la carte. On ne parle de restriction qu'à partir
@@ -444,9 +443,7 @@ function buildFactors(
                 ? "Vigilance sécheresse en cours"
                 : `Restriction « ${levelLabel(vigieau.maxLevel).toLowerCase()} » en cours`
               : "Cours d'eau à sec observé",
-        subhead: droughtActive
-          ? "Les premiers signes sont déjà là, et le climat les amplifie."
-          : "Le territoire s'assèche peu à peu, et les étés pèsent de plus en plus sur l'eau.",
+        subhead: "Le manque durable d'eau dans les sols, même en dehors des périodes de restriction.",
         accent: "var(--orange)",
         breakdownLabel: "Le fil de la sécheresse",
         breakdown: droughtRows,
@@ -690,7 +687,7 @@ function buildFactors(
               summerAnom != null && winterAnom != null
                 ? `Été ${signed(summerAnom)} °C d'ici ${meta.year}\nHiver ${signed(winterAnom)} °C`
                 : `${frFloat(summerTraj[summerTraj.length - 1].v)} °C l'été à l'horizon ${HORIZON_META.gwl30.year}`,
-            subhead: "Le climat de fond, pas les pics : moyennes de juin-août et décembre-février.",
+            subhead: "Le climat de fond du territoire : la moyenne des saisons, qui transforme le paysage bien au-delà des pics ponctuels.",
             accent: "var(--orange)",
             breakdownLabel: "Été moyen, par horizon",
             breakdown: summerBreakdown,
@@ -711,19 +708,20 @@ function buildFactors(
         : undefined,
   });
 
-  // ── Pluies et épisodes intenses (Registre B : NIVEAU absolu, pas de trajectoire) ─
+  // ── Jours de pluie intense (Registre B : NIVEAU absolu, pas de trajectoire) ───
   // Signal faible et non monotone (il DÉCROÎT à Nice) : une trajectoire par horizon
   // emballerait du bruit, voire des barres qui baissent. On reste donc sur le niveau
   // daté + qualifieurs datés (cumul, intensité), sans tableau de pente.
-  const annualRain = gwlData?.["NORRR_yr"];
   const heavyRain = gwlData?.["NORRRq99_yr"];
-  const rainFacts: { label: string; value: string }[] = [
-    ...(annualRain != null ? [{ label: "Cumul annuel", value: `${Math.round(annualRain)} mm en ${meta.year}` }] : []),
-    ...(heavyRain != null ? [{ label: "Pluie intense en 24h", value: `${Math.round(heavyRain)} mm en ${meta.year}` }] : []),
-  ];
+  // Pluies = caractéristique du climat local, pas une trajectoire honnête (signal
+  // non monotone, décroît en Méditerranée). UNE histoire : la concentration. On
+  // garde la fréquence (lisible) + l'intensité 24h ; le cumul annuel descend en
+  // méthodologie — le récit dit lui-même qu'il « dit peu de chose ».
+  const rainFacts: { label: string; value: string }[] =
+    heavyRain != null ? [{ label: "Pluie intense en 24h", value: `${Math.round(heavyRain)} mm en ${meta.year}` }] : [];
   factors.push({
-    label: "Pluies et épisodes intenses",
-    val: heavyRainDays != null ? `${heavyRainDays} jours de fortes pluies/an en ${meta.year}` : "—",
+    label: "Jours de pluie intense",
+    val: heavyRainDays != null ? `${heavyRainDays} par an en ${meta.year}` : "—",
     col: "var(--orange)",
     src: "DRIAS / Météo-France · jours de pluie intense",
     missing: heavyRainDays == null,
@@ -731,9 +729,9 @@ function buildFactors(
       heavyRainDays != null
         ? {
             eyebrow: "Quand la pluie se concentre",
-            title: "Pluies et épisodes intenses",
-            headline: `${heavyRainDays} jours de fortes pluies par an en ${meta.year}`,
-            subhead: "Ce qui pèse n'est pas tant le cumul annuel que la façon dont la pluie se concentre.",
+            title: "Jours de pluie intense",
+            headline: `Environ ${heavyRainDays} jours de pluie intense par an en ${meta.year}`,
+            subhead: "Les épisodes de pluie les plus concentrés, souvent à l'origine des ruissellements et des inondations locales.",
             accent: "var(--orange)",
             facts: rainFacts.length > 0 ? rainFacts : undefined,
             why: "Le cumul de pluie sur l'année dit peu de chose. Ce qui compte, c'est l'intensité : quand la pluie tombe en peu d'heures, le ruissellement et le débordement deviennent possibles, même loin d'un cours d'eau. L'exposition précise d'une adresse relève du module Logement.",
