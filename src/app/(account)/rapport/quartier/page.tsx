@@ -24,6 +24,7 @@ import { getTerritoryContext } from "@/lib/comparateur-vie";
 import { buildTerritoryIdentity, buildTerritoryCards } from "@/lib/territory-identity";
 import { TerritoryIdentityCard } from "@/components/report/TerritoryIdentityCard";
 import { getResidencesSecondairesPct } from "@/lib/saisonnalite";
+import { getEra5Trend } from "@/lib/era5-trend";
 
 export default async function RapportQuartierPage() {
   const account = await getCurrentUserAccount();
@@ -56,6 +57,8 @@ export default async function RapportQuartierPage() {
 
   const scenarios = enrichment?.drias?.commune.s ?? null;
   const territoire = enrichment?.ademe?.commune.territoire ?? null;
+  const logementVacancePct = enrichment?.ademe?.commune.logements.vacants_pct ?? null;
+  const eloignementServicesPct = enrichment?.ademe?.commune.sante.eloignement_services_pct ?? null;
   const vigieau = enrichment?.vigieau ?? null;
   const drought = enrichment?.eau?.drought ?? null;
   const displayName = communeName ?? "votre commune";
@@ -67,6 +70,9 @@ export default async function RapportQuartierPage() {
   // trait distinctif. Absent (commune hors index, PLM) => on n'affiche pas la carte.
   const territoryContext = inseeCode ? await getTerritoryContext(inseeCode) : null;
   const saisonnalitePct = inseeCode ? await getResidencesSecondairesPct(inseeCode) : null;
+  // Tendance observée ERA5-Land (Copernicus) : preuve « le passé valide la
+  // projection » dans le drawer Températures. La face avant reste sur le futur DRIAS.
+  const era5 = inseeCode ? await getEra5Trend(inseeCode).catch(() => null) : null;
   const territoryIdentity = territoryContext
     ? buildTerritoryIdentity({
         communeName: displayName,
@@ -170,7 +176,7 @@ export default async function RapportQuartierPage() {
           >
             Les grands signaux du territoire
           </h2>
-          <QuartierAside communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} />
+          <QuartierAside communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={eloignementServicesPct} era5={era5} climatType={territoryMood.type} />
         </section>
 
         {/* Une question ? — AskFuture inline (uniquement pour comptes payants) :

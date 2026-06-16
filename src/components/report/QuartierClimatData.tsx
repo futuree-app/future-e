@@ -9,6 +9,8 @@ import type { EaufranceSummary } from "@/lib/eaufrance";
 import type { VigieauSummary, DroughtLevel } from "@/lib/vigieau";
 import type { LittoralSummary, LittoralFacade } from "@/lib/littoral";
 import type { DemographieCardData, CouvertCardData } from "@/lib/territory-identity";
+import type { Era5Trend } from "@/lib/era5-trend";
+import type { TerritoryType } from "@/lib/territory-mood";
 
 // Façade maritime → libellé (le composant est client : on duplique le libellé
 // plutôt que d'importer une valeur depuis littoral.ts, server-only).
@@ -38,6 +40,8 @@ type GwlScenarios = Record<string, { h: string; v: Record<string, number> }>;
 type Factor = {
   label: string;
   val: string;
+  /** Ligne secondaire sous la valeur (précision discrète, ex. « Peu de biens disponibles »). */
+  sub?: string;
   col: string;
   src: string;
   missing: boolean;
@@ -67,6 +71,16 @@ type SharedProps = {
   demographie?: DemographieCardData | null;
   couvertNaturel?: CouvertCardData | null;
   saisonnalitePct?: number | null;
+  // P0 : système humain (ADEME, échelle commune).
+  logementVacancePct?: number | null;
+  eloignementServicesPct?: number | null;
+  // Tendance observée ERA5-Land (Copernicus) : preuve « le passé valide la
+  // projection » dans le drawer Températures. Le passé ne porte pas la face
+  // avant (ce serait saboter le moat projection), il sert de preuve.
+  era5?: Era5Trend | null;
+  // Archétype climatique (déterministe, dérivé du département) : ancre le récit
+  // « Ce que cela raconte » du drawer Températures dans le caractère du lieu.
+  climatType?: TerritoryType | null;
 };
 
 // ─── Thèmes de lecture ────────────────────────────────────────────────────────
@@ -82,21 +96,35 @@ const THEME: Record<ThemeKey, { label: string; col: string }> = {
 const THEME_ORDER: ThemeKey[] = ["territoire", "climat", "risque"];
 const THEME_OF: Record<string, ThemeKey> = {
   "Trajectoire de population": "territoire",
+  "Logements inoccupés": "territoire",
+  "Accès aux services": "territoire",
   "Résidences secondaires": "territoire",
-  "Couvert naturel": "territoire",
+  "Espaces naturels": "territoire",
   "Taux de boisement": "territoire",
-  "Jours chauds (> 30°C)": "climat",
-  "Jours de chaleur extrême (> 35°C)": "climat",
-  "Nuits tropicales (> 20°C)": "climat",
-  "Conditions météo favorables au feu": "climat",
+  "Températures moyennes": "climat",
+  "Chaleurs estivales": "climat",
+  "Nuits tropicales": "climat",
+  "Conditions favorables au feu": "climat",
   "Sécheresse des sols": "climat",
+  "Pluies et épisodes intenses": "climat",
   "Inondation fluviale": "risque",
   "Submersion marine": "risque",
   "Catastrophes naturelles reconnues": "risque",
-  "Littoral": "risque",
+  "Érosion du littoral": "risque",
 };
 function themeOf(label: string): ThemeKey {
   return THEME_OF[label] ?? "territoire";
+}
+// Ordre de lecture au sein de chaque thème (le décor avant l'aléa, le légible avant le pointu).
+const CARD_ORDER: string[] = [
+  "Trajectoire de population", "Logements inoccupés", "Accès aux services", "Espaces naturels", "Taux de boisement", "Résidences secondaires",
+  // Climat alterné mouvement/niveau pour le rythme (évite un mur de « +X »).
+  "Températures moyennes", "Sécheresse des sols", "Chaleurs estivales", "Conditions favorables au feu", "Nuits tropicales", "Pluies et épisodes intenses",
+  "Inondation fluviale", "Submersion marine", "Catastrophes naturelles reconnues", "Érosion du littoral",
+];
+function cardRank(label: string): number {
+  const i = CARD_ORDER.indexOf(label);
+  return i === -1 ? 999 : i;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -118,6 +146,55 @@ function signed(n: number): string {
   return `${n >= 0 ? "+" : ""}${frFloat(n)}`;
 }
 
+// Entier signé pour les deltas en jours/nuits (ex : 11,3 -> « +11 »).
+function signedInt(n: number): string {
+  return `${n >= 0 ? "+" : ""}${Math.round(n)}`;
+}
+
+// Récit « Ce que cela raconte » du drawer Températures, ancré dans le caractère
+// climatique du lieu (archétype déterministe) plutôt qu'une phrase passe-partout.
+// Identitaire mais sobre ; échelle territoire (pas la vie de l'utilisateur), non
+// catastrophiste. La nuance été/hiver n'est ajoutée que si l'écart est net (>0,3 °C),
+// pour ne jamais affirmer une généralité fausse (ex. à la montagne l'été chauffe
+// plus vite que l'hiver).
+function buildClimatWhy(
+  communeName: string,
+  type: TerritoryType,
+  summerAnom: number | null | undefined,
+  winterAnom: number | null | undefined,
+): string {
+  const core: Record<TerritoryType, string> = {
+    littoral_atlantique: `À ${communeName}, le climat atlantique tempère encore les extrêmes, mais cet effet d'amortisseur faiblit à mesure que les saisons se réchauffent.`,
+    mediterraneen: `À ${communeName}, la chaleur fait déjà partie du climat ; ce qui change, c'est son intensité et sa durée au fil de l'année.`,
+    montagne: `À ${communeName}, le froid d'altitude a longtemps marqué le climat ; il devient moins présent, saison après saison.`,
+    plaine: `À ${communeName}, le climat intérieur se réchauffe sans l'amortisseur direct de l'océan ou de l'altitude.`,
+  };
+
+  let seasonClause = "";
+  if (summerAnom != null && winterAnom != null) {
+    if (winterAnom - summerAnom > 0.3) seasonClause = " Ici, l'hiver se réchauffe plus vite que l'été.";
+    else if (summerAnom - winterAnom > 0.3) seasonClause = " Ici, l'été se réchauffe plus vite que l'hiver.";
+  }
+  return core[type] + seasonClause;
+}
+
+// Face avant « mouvement » d'un phénomène compté en jours/nuits, avec garde-fou :
+// en climat froid (montagne) le phénomène est quasi absent (« +0 nuits » = effet
+// bug). On RAISONNE SUR LA VALEUR BRUTE (non arrondie) : sous le plancher on dit la
+// rareté ; sinon mouvement si le delta est net, à défaut le niveau absolu.
+function movementOrLevel(
+  absRaw: number | null | undefined,
+  deltaRaw: number | null | undefined,
+  unit: string,
+  rareLabel: string,
+  year: string,
+): string {
+  if (absRaw == null) return "—";
+  if (absRaw < 1.5) return rareLabel;
+  if (deltaRaw != null && Math.round(deltaRaw) >= 2) return `${signedInt(deltaRaw)} ${unit} d'ici ${year}`;
+  return `${Math.round(absRaw)} ${unit}/an en ${year}`;
+}
+
 function buildFactors(
   scenarios: GwlScenarios | null,
   horizonKey: HorizonKey,
@@ -131,6 +208,10 @@ function buildFactors(
   demographie?: DemographieCardData | null,
   couvertNaturel?: CouvertCardData | null,
   saisonnalitePct?: number | null,
+  logementVacancePct?: number | null,
+  eloignementServicesPct?: number | null,
+  era5?: Era5Trend | null,
+  climatType?: TerritoryType | null,
 ): Factor[] {
   const meta = HORIZON_META[horizonKey] ?? HORIZON_META.gwl20;
   const gwlData = scenarios?.[horizonKey]?.v ?? null;
@@ -139,6 +220,12 @@ function buildFactors(
   const tropicalNights = r(gwlData?.["NORTR_yr"]);
   const fireDays = r(gwlData?.["NORIFM40_yr"]);
   const drySoilDays = r(gwlData?.["NORSWI04_yr"]);
+  // Anomalies (delta projeté) pour les faces avant « mouvement ».
+  const summerAnom = gwlData?.["ATMm_seas_JJA"];
+  const winterAnom = gwlData?.["ATMm_seas_DJF"];
+  const hotDaysAnom = gwlData?.["ATX30D_yr"];
+  const tropicalNightsAnom = gwlData?.["ATR_yr"];
+  const heavyRainDays = r(gwlData?.["NORRRq99refD_yr"]);
 
   const boisementPct = territoire?.taux_boisement != null
     ? Math.round(territoire.taux_boisement)
@@ -157,11 +244,11 @@ function buildFactors(
   const heatDetail: CardDetail | undefined = hotDays != null
     ? {
         eyebrow: "Des étés qui s'intensifient",
-        title: "Jours chauds (> 30°C)",
+        title: "Chaleurs estivales",
         headline:
           hot2030 != null && hot2100 != null && hot2100 > hot2030
-            ? `${hot2030} → ${hot2100} jours par an`
-            : `${hotDays} jours par an en ${meta.year}`,
+            ? `${hot2030} → ${hot2100} jours chauds par an`
+            : `${hotDays} jours chauds par an en ${meta.year}`,
         subhead: "Les fortes chaleurs gagnent du terrain, année après année.",
         accent: "var(--orange)",
         breakdownLabel: "Jours chauds par an",
@@ -233,36 +320,36 @@ function buildFactors(
 
   const factors: Factor[] = [
     {
-      label: "Jours chauds (> 30°C)",
-      val: hotDays != null ? `${hotDays} jours/an en ${meta.year}` : "—",
+      // Registre A (mouvement) : face avant = delta projeté, garde-fou montagne
+      // (delta quasi nul -> « Restent rares »). Le drawer absorbe la chaleur extrême.
+      label: "Chaleurs estivales",
+      val: movementOrLevel(gwlData?.["NORTX30D_yr"], hotDaysAnom, "jours chauds", "Restent rares", meta.year),
       col: "var(--orange)",
       src: `DRIAS / Météo-France · France ${meta.france}`,
       missing: hotDays == null,
       detail: heatDetail,
     },
     {
-      label: "Jours de chaleur extrême (> 35°C)",
-      val: heatDays != null ? `${heatDays} jours/an en ${meta.year}` : "—",
-      col: "var(--red)",
-      src: `DRIAS / Météo-France · France ${meta.france}`,
-      missing: heatDays == null,
-      tip: "Plus ces journées sont nombreuses, plus les étés deviennent éprouvants, surtout pour les enfants, les personnes âgées et celles qui vivent ou travaillent dehors.",
-    },
-    {
-      label: "Nuits tropicales (> 20°C)",
-      val: tropicalNights != null ? `${tropicalNights} nuits/an en ${meta.year}` : "—",
+      // Registre A (mouvement) : « +9 nuits d'ici 2050 ». Tooltip porte l'absolu
+      // (départ -> arrivée) puisqu'il n'y a pas de drawer.
+      label: "Nuits tropicales",
+      val: movementOrLevel(gwlData?.["NORTR_yr"], tropicalNightsAnom, "nuits", "Quasi inexistantes", meta.year),
       col: "var(--orange)",
       src: "DRIAS / Météo-France · Tmin > 20°C",
       missing: tropicalNights == null,
-      tip: "Quand la chaleur ne retombe pas la nuit, on dort moins bien et on récupère mal. C'est l'un des signes les plus parlants d'un climat qui change près de chez soi.",
+      tip:
+        tropicalNights != null
+          ? `Nuits où la chaleur ne retombe pas sous 20°C : ${tropicalNights} par an attendues en ${meta.year}. C'est l'un des signes les plus parlants d'un climat qui change près de chez soi.`
+          : "Quand la chaleur ne retombe pas la nuit, on dort moins bien et on récupère mal. C'est l'un des signes les plus parlants d'un climat qui change près de chez soi.",
     },
     {
-      label: "Conditions météo favorables au feu",
+      // Registre B (niveau) : le chiffre porte son échelle, on garde l'absolu.
+      label: "Conditions favorables au feu",
       val: fireDays != null ? `${fireDays} jours/an en ${meta.year}` : "—",
       col: "var(--orange)",
       src: "DRIAS · IFM > 40 · indice météo, pas risque réel",
       missing: fireDays == null,
-      tip: "Plus ces journées se multiplient, plus le risque qu'un feu démarre et se propage augmente, surtout près des espaces naturels et des forêts.",
+      tip: "Indice météo (pas le risque réel à l'adresse) : plus ces journées se multiplient, plus le risque qu'un feu démarre et se propage augmente, surtout près des espaces naturels.",
     },
     {
       label: "Sécheresse des sols",
@@ -299,19 +386,28 @@ function buildFactors(
     // repli sur le seul taux de boisement ADEME.
     couvertNaturel
       ? {
-          label: "Couvert naturel",
+          label: "Espaces naturels",
           val: couvertNaturel.headlineLabel,
           col: "var(--green)",
           src: "OSO · ADEME · échelle communale",
           missing: false,
           detail: {
             eyebrow: "L'occupation des sols",
-            title: "Couvert naturel",
+            title: "Espaces naturels",
             headline: `${couvertNaturel.brutPct} % d'espaces naturels`,
-            subhead:
+            subhead: `${
+              couvertNaturel.brutPct >= 75
+                ? `À ${communeName}, le naturel l'emporte largement : le bâti tient peu de place.`
+                : couvertNaturel.brutPct >= 50
+                  ? `À ${communeName}, le naturel domine le paysage, le bâti reste minoritaire.`
+                  : couvertNaturel.brutPct >= 25
+                    ? `À ${communeName}, espaces bâtis et espaces ouverts s'équilibrent.`
+                    : `À ${communeName}, les espaces naturels sont rares : la commune est très urbanisée.`
+            }${
               couvertNaturel.radiusPct != null
-                ? `Dans un rayon de 15 km autour de la commune : ${couvertNaturel.radiusPct} %.`
-                : undefined,
+                ? ` Dans un rayon de 15 km autour de la commune : ${couvertNaturel.radiusPct} %.`
+                : ""
+            }`,
             accent: "var(--green)",
             breakdownLabel: "Ce qui couvre le territoire",
             breakdown: couvertNaturel.composition.slice(0, 5).map((c) => ({
@@ -385,7 +481,14 @@ function buildFactors(
             eyebrow: "La saisonnalité du territoire",
             title: "Résidences secondaires",
             headline: `${Math.round(saisonnalitePct)} % du parc de logements`,
-            subhead: "Part de résidences secondaires et de logements occasionnels.",
+            subhead:
+              saisonnalitePct >= 40
+                ? `À ${communeName}, le tourisme est très présent : la population réelle gonfle l'été et s'allège fortement hors saison.`
+                : saisonnalitePct >= 20
+                  ? `À ${communeName}, la saisonnalité est marquée : le tourisme pèse sur le rythme de la commune.`
+                  : saisonnalitePct >= 8
+                    ? `À ${communeName}, la présence touristique reste modérée, sans bouleverser le quotidien.`
+                    : `${communeName} est une commune de résidents permanents, peu marquée par le tourisme saisonnier.`,
             accent: "var(--green)",
             why: "Une part élevée de résidences secondaires signale une fréquentation touristique : la population réelle gonfle l'été et s'allège hors saison. Cela façonne les commerces, les services et le rythme de la commune au fil de l'année.",
             whyLabel: "Ce que cela raconte",
@@ -394,6 +497,168 @@ function buildFactors(
           }
         : undefined,
   });
+
+  // ── Cartes climat P0 : été / hiver moyens + pluies (DRIAS, par horizon) ───────
+  const seasonalTraj = (key: string) =>
+    (["gwl15", "gwl20", "gwl30"] as HorizonKey[])
+      .map((k) => ({ k, v: scenarios?.[k]?.v?.[key] }))
+      .filter((x): x is { k: HorizonKey; v: number } => x.v != null);
+
+  // ── Températures moyennes (fusion été + hiver, Registre A : mouvement) ─────────
+  // Face avant = delta projeté des DEUX saisons. Drawer = trajectoire du niveau
+  // (été par horizon) + hiver + PREUVE observée ERA5 (« le passé valide le futur »).
+  const winter = gwlData?.["NORTMm_seas_DJF"];
+  const summer = gwlData?.["NORTMm_seas_JJA"];
+  const summerTraj = seasonalTraj("NORTMm_seas_JJA");
+
+  // Référence été reconstruite (projeté − anomalie) : DRIAS ne fournit pas de
+  // colonne dédiée, mais l'anomalie par horizon la restitue, et elle est stable
+  // d'un horizon à l'autre (même période de référence). On prend la médiane.
+  const summerRefByHorizon = (["gwl15", "gwl20", "gwl30"] as HorizonKey[])
+    .map((k) => {
+      const p = scenarios?.[k]?.v?.["NORTMm_seas_JJA"];
+      const a = scenarios?.[k]?.v?.["ATMm_seas_JJA"];
+      return p != null && a != null ? p - a : null;
+    })
+    .filter((x): x is number => x != null)
+    .sort((a, b) => a - b);
+  const summerRef =
+    summerRefByHorizon.length > 0
+      ? summerRefByHorizon[Math.floor((summerRefByHorizon.length - 1) / 2)]
+      : null;
+
+  // Paire équilibrée été/hiver à l'horizon choisi : l'hiver ne doit pas paraître
+  // secondaire face à la trajectoire d'été.
+  const tempFacts: { label: string; value: string }[] = [
+    ...(summer != null
+      ? [{ label: `Été ${meta.year}`, value: `${frFloat(summer)} °C${summerAnom != null ? ` (${signed(summerAnom)})` : ""}` }]
+      : []),
+    ...(winter != null
+      ? [{ label: `Hiver ${meta.year}`, value: `${frFloat(winter)} °C${winterAnom != null ? ` (${signed(winterAnom)})` : ""}` }]
+      : []),
+  ];
+
+  // Trajectoire été = point de départ (référence) + horizons, pour lire la pente.
+  const summerBreakdown = [
+    ...(summerRef != null ? [{ label: "Climat de référence", value: `${frFloat(summerRef)} °C` }] : []),
+    ...summerTraj.map((t) => ({ label: `Horizon ${HORIZON_META[t.k].year}`, value: `${frFloat(t.v)} °C` })),
+  ];
+  factors.push({
+    label: "Températures moyennes",
+    val:
+      summerAnom != null && winterAnom != null
+        ? `Été ${signed(summerAnom)} °C · hiver ${signed(winterAnom)} °C d'ici ${meta.year}`
+        : summerAnom != null
+          ? `Été ${signed(summerAnom)} °C d'ici ${meta.year}`
+          : "—",
+    col: "var(--orange)",
+    src: `DRIAS / Météo-France · moyennes saisonnières · France ${meta.france}`,
+    missing: summerAnom == null && winterAnom == null,
+    detail:
+      summerTraj.length >= 2
+        ? {
+            eyebrow: "Trajectoire climatique",
+            title: "Températures moyennes",
+            headline:
+              summerAnom != null && winterAnom != null
+                ? `Été ${signed(summerAnom)} °C d'ici ${meta.year}\nHiver ${signed(winterAnom)} °C`
+                : `${frFloat(summerTraj[summerTraj.length - 1].v)} °C l'été à l'horizon ${HORIZON_META.gwl30.year}`,
+            subhead: "Le climat de fond, pas les pics : moyennes de juin-août et décembre-février.",
+            accent: "var(--orange)",
+            breakdownLabel: "Été moyen, par horizon",
+            breakdown: summerBreakdown,
+            facts: tempFacts.length > 0 ? tempFacts : undefined,
+            why: buildClimatWhy(communeName, climatType ?? "plaine", summerAnom, winterAnom),
+            whyLabel: "Ce que cela raconte",
+            ...(era5
+              ? {
+                  noteLabel: "Déjà observé",
+                  note: `${signed(era5.delta_c)} °C depuis 1961-1990 (réanalyse Copernicus / ERA5-Land). Le réchauffement projeté a déjà commencé.`,
+                }
+              : {}),
+            askPrefill: "Comment les températures évoluent-elles dans ma commune ?",
+            sources: era5
+              ? "Projections DRIAS-TRACC, Météo-France (moyennes saisonnières, période de référence 1976-2005) · réanalyse ERA5-Land, Copernicus (tendance observée)"
+              : "Projections DRIAS-TRACC, Météo-France · moyennes saisonnières (juin-août, décembre-février), période de référence 1976-2005",
+          }
+        : undefined,
+  });
+
+  // ── Pluies et épisodes intenses (fusion, Registre B : niveau en JOURS) ─────────
+  // Ni le cumul mm muet ni le % abstrait : on affiche les jours de fortes pluies
+  // (NORRRq99refD, déjà chargé). Cumul annuel + mm/24h descendent au drawer.
+  const annualRain = gwlData?.["NORRR_yr"];
+  const heavyRain = gwlData?.["NORRRq99_yr"];
+  const rainDaysTraj = (["gwl15", "gwl20", "gwl30"] as HorizonKey[])
+    .map((k) => ({ k, v: r(scenarios?.[k]?.v?.["NORRRq99refD_yr"]) }))
+    .filter((x): x is { k: HorizonKey; v: number } => x.v != null);
+  const rainDaysMax = Math.max(...rainDaysTraj.map((x) => x.v), 1);
+  const rainFacts: { label: string; value: string }[] = [
+    ...(annualRain != null ? [{ label: "Cumul annuel", value: `${Math.round(annualRain)} mm` }] : []),
+    ...(heavyRain != null ? [{ label: "Pluie intense en 24h", value: `${Math.round(heavyRain)} mm` }] : []),
+  ];
+  factors.push({
+    label: "Pluies et épisodes intenses",
+    val: heavyRainDays != null ? `${heavyRainDays} jours de fortes pluies/an en ${meta.year}` : "—",
+    col: "var(--orange)",
+    src: "DRIAS / Météo-France · jours de pluie intense",
+    missing: heavyRainDays == null,
+    detail:
+      heavyRainDays != null
+        ? {
+            eyebrow: "Quand la pluie se concentre",
+            title: "Pluies et épisodes intenses",
+            headline: `${heavyRainDays} jours de fortes pluies par an en ${meta.year}`,
+            subhead: "Ce qui pèse n'est pas tant le cumul annuel que la façon dont la pluie se concentre.",
+            accent: "var(--orange)",
+            breakdownLabel: rainDaysTraj.length >= 2 ? "Jours de fortes pluies, par horizon" : undefined,
+            breakdown:
+              rainDaysTraj.length >= 2
+                ? rainDaysTraj.map((t) => ({ label: `Horizon ${HORIZON_META[t.k].year}`, value: `${t.v} jours`, bar: t.v / rainDaysMax }))
+                : undefined,
+            facts: rainFacts.length > 0 ? rainFacts : undefined,
+            why: "Le cumul de pluie sur l'année dit peu de chose. Ce qui compte, c'est l'intensité : quand la pluie tombe en peu d'heures, le ruissellement et le débordement deviennent possibles, même loin d'un cours d'eau. L'exposition précise de votre adresse relève du module Logement.",
+            whyLabel: "Ce que cela raconte",
+            askPrefill: "Les pluies intenses vont-elles s'aggraver dans ma commune ?",
+            sources: "Projections DRIAS, Météo-France · jours de pluie intense (p99), cumul annuel, pluie journalière extrême",
+          }
+        : undefined,
+  });
+
+  // ── Cartes territoire P0 : le système humain (ADEME, échelle commune) ─────────
+  // Face avant qualitative (« vacance » ≈ « vacances » et « 0 % » = effet bug) ;
+  // Face avant = le chiffre ET son interprétation (head sur la ligne valeur,
+  // précision en dessous) ; le tooltip se limite à la définition.
+  if (logementVacancePct != null) {
+    const vac = Math.round(logementVacancePct);
+    const [vacHead, vacSub] =
+      vac >= 13
+        ? ["Perte d'attractivité", "Des logements qui peinent à trouver preneur"]
+        : vac < 8
+          ? ["Tension sur le logement", "Peu de biens disponibles"]
+          : ["Marché équilibré", "Vacance dans la moyenne"];
+    factors.push({
+      label: "Logements inoccupés",
+      val: `${vac} % · ${vacHead}`,
+      sub: vacSub,
+      col: "var(--green)",
+      src: "INSEE / ADEME · échelle communale",
+      missing: false,
+      tip: "Part du parc sans occupant au recensement.",
+    });
+  }
+  if (eloignementServicesPct != null) {
+    const elo = Math.round(eloignementServicesPct);
+    const eloLabel = elo < 5 ? "Services proches" : elo <= 20 ? "Éloignement modéré" : "Éloignement marqué";
+    factors.push({
+      label: "Accès aux services",
+      val: eloLabel,
+      col: "var(--green)",
+      src: "INSEE / ADEME · à plus de 20 min d'un service",
+      missing: false,
+      tip: `${elo} % des habitants vivent à plus de 20 min des services essentiels. Cette carte décrit le bassin de vie de la commune, pas vos trajets : ceux-ci relèvent du module Mobilité.`,
+    });
+  }
 
   // Carte CatNat (GASPAR) — ajoutée seulement quand l'appelant fournit la donnée
   // (QuartierAside). Histoire vécue : nombre de reconnaissances depuis l'origine.
@@ -543,7 +808,7 @@ function buildFactors(
     };
 
     factors.push({
-      label: "Littoral",
+      label: "Érosion du littoral",
       val: cardVal,
       col: "var(--blue)",
       src: e ? "Cerema · indicateur d'érosion côtière" : "Cerema · Loi Climat et Résilience",
@@ -654,15 +919,18 @@ function formatFrDate(iso: string): string {
 
 // ─── FactorGrid (grille horizontale de cartes) ────────────────────────────────
 
-export function QuartierAside({ communeName, scenarios, georisques, territoire, vigieau, drought, catnat, littoral, demographie, couvertNaturel, saisonnalitePct }: SharedProps) {
+export function QuartierAside({ communeName, scenarios, georisques, territoire, vigieau, drought, catnat, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, climatType }: SharedProps) {
   const [horizon] = useHorizon();
   const [openDetail, setOpenDetail] = useState<CardDetail | null>(null);
-  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null);
+  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, climatType ?? null);
 
   // Regroupement par thème : le décor (territoire) d'abord, puis le climat, puis
   // les risques. Le code couleur suit le thème, pas la carte individuelle.
   const groups = THEME_ORDER
-    .map((t) => ({ t, items: factors.filter((f) => themeOf(f.label) === t) }))
+    .map((t) => ({
+      t,
+      items: factors.filter((f) => themeOf(f.label) === t).sort((a, b) => cardRank(a.label) - cardRank(b.label)),
+    }))
     .filter((g) => g.items.length > 0);
 
   return (
@@ -707,6 +975,7 @@ export function QuartierAside({ communeName, scenarios, georisques, territoire, 
                     >
                       <div className="text-[12px] font-medium text-label mb-2 leading-[1.3]">{f.label}</div>
                       <div className="font-mono text-[11px] tracking-[0.02em] mb-0.5" style={{ color: f.missing ? "var(--ghost)" : col }}>{f.val}</div>
+                      {f.sub && <div className="text-[11px] text-label tracking-[0.01em] leading-[1.4] mb-0.5">{f.sub}</div>}
                       <div className="font-mono text-[10px] text-ghost tracking-[0.02em] leading-[1.4]">{f.src}</div>
                       {clickable && (
                         <div className="font-mono text-[10px] tracking-[0.06em] mt-2" style={{ color: col }}>

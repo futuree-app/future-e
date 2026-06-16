@@ -108,7 +108,7 @@ const PRESETS: Record<TerritoryType, Omit<TerritoryMood, "title" | "inseeCode" |
   },
 };
 
-function pickType(inseeCode: string | null): TerritoryType {
+export function deriveTerritoryType(inseeCode: string | null): TerritoryType {
   if (!inseeCode) return "plaine";
   const cats = deriveCategories(inseeCode);
   if (cats.includes("montagne")) return "montagne";
@@ -136,7 +136,7 @@ export function deriveTerritoryMood(params: {
   inseeCode: string | null;
   territoire?: TerritoireInput;
 }): TerritoryMood {
-  const type = pickType(params.inseeCode);
+  const type = deriveTerritoryType(params.inseeCode);
   const preset = PRESETS[type];
   return {
     ...preset,

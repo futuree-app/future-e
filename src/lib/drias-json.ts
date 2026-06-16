@@ -30,8 +30,13 @@ const COLUMN_MAP: Record<string, string> = {
   NORRRq99refD_yr:  "column16", // Heavy precip days frequency (days/yr)
   NORIFM40_yr:      "column17", // Fire weather index days > 40 (days/yr) — 10 models
   NORSWI04_yr:      "column18", // Soil dryness days (SWI < 0.4) (days/yr)
-  // column19 et suivants = indicateurs d'anomalie (ATMm_yr, etc.) — non utilisés
-  // en UI à ce stade.
+  // Anomalies (delta projeté vs période de référence DRIAS) — face avant
+  // « mouvement » du module Territoire. indicator_order[i] -> column{i+4}.
+  ATMm_seas_JJA:    "column20", // Summer mean temperature anomaly (°C)
+  ATMm_seas_DJF:    "column21", // Winter mean temperature anomaly (°C)
+  ATX30D_yr:        "column24", // Anomaly of days with Tmax > 30°C (days/yr)
+  ATR_yr:           "column25", // Anomaly of tropical nights (days/yr)
+  // column19/22/23/26+ = autres anomalies — non utilisées en UI à ce stade.
 };
 
 type RawRow = Record<string, string | number | null>;

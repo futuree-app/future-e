@@ -211,6 +211,7 @@ export function MetricDrawer({
         .metric-drawer-headline {
           font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600;
           margin: 0 0 6px; letter-spacing: 0.01em;
+          white-space: pre-line; line-height: 1.35;
         }
         .metric-drawer-subhead {
           font-size: 14px; line-height: 1.5; color: #9ba3b4; margin: 0;
