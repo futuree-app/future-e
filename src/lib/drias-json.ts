@@ -34,9 +34,10 @@ const COLUMN_MAP: Record<string, string> = {
   // « mouvement » du module Territoire. indicator_order[i] -> column{i+4}.
   ATMm_seas_JJA:    "column20", // Summer mean temperature anomaly (°C)
   ATMm_seas_DJF:    "column21", // Winter mean temperature anomaly (°C)
+  ATX35D_yr:        "column23", // Anomaly of days with Tmax > 35°C (days/yr)
   ATX30D_yr:        "column24", // Anomaly of days with Tmax > 30°C (days/yr)
   ATR_yr:           "column25", // Anomaly of tropical nights (days/yr)
-  // column19/22/23/26+ = autres anomalies — non utilisées en UI à ce stade.
+  // column19/22/26+ = autres anomalies — non utilisées en UI à ce stade.
 };
 
 type RawRow = Record<string, string | number | null>;

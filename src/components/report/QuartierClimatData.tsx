@@ -180,28 +180,43 @@ function reconstructReference(
 // Trajectoire du drawer : ligne de référence (départ) + un point par horizon.
 // `format` décide l'unité/arrondi (°C en frFloat, jours en entier) ; `refApprox`
 // préfixe « ≈ » sur la référence reconstruite ; `withBars` ajoute les barres.
+// Les barres sont normalisées sur l'horizon CHOISI (selectedHorizon) : c'est lui
+// le 100 %, et les horizons au-delà sont grisés (du contexte, pas le focus) —
+// sinon 2100 écrase visuellement l'horizon que l'utilisateur a sélectionné.
 function trajectoryBreakdown(
   scenarios: GwlScenarios | null,
   absKey: string,
-  opts: { ref: number | null; format: (n: number) => string; refApprox?: boolean; withBars?: boolean; refLabel?: string },
-): { label: string; value: string; bar?: number }[] {
-  const rows = (["gwl15", "gwl20", "gwl30"] as HorizonKey[])
+  opts: {
+    ref: number | null;
+    format: (n: number) => string;
+    refApprox?: boolean;
+    withBars?: boolean;
+    refLabel?: string;
+    selectedHorizon?: HorizonKey;
+  },
+): { label: string; value: string; bar?: number; muted?: boolean }[] {
+  const order: HorizonKey[] = ["gwl15", "gwl20", "gwl30"];
+  const rows = order
     .map((k) => ({ k, v: scenarios?.[k]?.v?.[absKey] }))
     .filter((x): x is { k: HorizonKey; v: number } => x.v != null);
-  const max = Math.max(opts.ref ?? 0, ...rows.map((x) => x.v), 1);
-  const out: { label: string; value: string; bar?: number }[] = [];
+  const selIdx = opts.selectedHorizon ? order.indexOf(opts.selectedHorizon) : -1;
+  const selVal = opts.selectedHorizon ? scenarios?.[opts.selectedHorizon]?.v?.[absKey] : null;
+  // Base de normalisation = valeur de l'horizon choisi (à défaut, le max).
+  const base = selVal != null && selVal > 0 ? selVal : Math.max(opts.ref ?? 0, ...rows.map((x) => x.v), 1);
+  const out: { label: string; value: string; bar?: number; muted?: boolean }[] = [];
   if (opts.ref != null) {
     out.push({
-      label: opts.refLabel ?? "Climat de référence",
+      label: opts.refLabel ?? "Fin du XXe siècle",
       value: `${opts.refApprox ? "≈ " : ""}${opts.format(opts.ref)}`,
-      ...(opts.withBars ? { bar: opts.ref / max } : {}),
+      ...(opts.withBars ? { bar: Math.min(1, opts.ref / base) } : {}),
     });
   }
   for (const x of rows) {
+    const beyond = selIdx >= 0 && order.indexOf(x.k) > selIdx;
     out.push({
       label: `Horizon ${HORIZON_META[x.k].year}`,
       value: opts.format(x.v),
-      ...(opts.withBars ? { bar: x.v / max } : {}),
+      ...(opts.withBars ? { bar: Math.min(1, x.v / base), muted: beyond } : {}),
     });
   }
   return out;
@@ -213,11 +228,20 @@ function trajectoryBreakdown(
 // le logement ni la santé), non catastrophiste. Variantes par thème ; on ne
 // décline « temperature » et « chaleur » que pour l'instant.
 function buildClimatWhy(
-  theme: "temperature" | "chaleur",
+  theme: "temperature" | "chaleur" | "nuits",
   communeName: string,
   type: TerritoryType,
   signals: { summerAnom?: number | null; winterAnom?: number | null },
 ): string {
+  if (theme === "nuits") {
+    const core: Record<TerritoryType, string> = {
+      littoral_atlantique: `À ${communeName}, les nuits restaient fraîches au bord de l'Atlantique ; elles gardent de plus en plus la chaleur du jour.`,
+      mediterraneen: `À ${communeName}, les nuits chaudes font déjà partie de l'été méditerranéen ; elles deviennent plus nombreuses et la saison s'étire.`,
+      montagne: `À ${communeName}, l'altitude a longtemps garanti des nuits fraîches ; elles commencent à céder lors des étés les plus chauds.`,
+      plaine: `À ${communeName}, loin de la mer, les nuits suivent le jour : quand les étés chauffent, elles cessent plus souvent de rafraîchir.`,
+    };
+    return core[type];
+  }
   if (theme === "chaleur") {
     const core: Record<TerritoryType, string> = {
       littoral_atlantique: `À ${communeName}, le climat atlantique a longtemps gardé les fortes chaleurs rares ; elles deviennent peu à peu une part ordinaire de l'été.`,
@@ -306,6 +330,8 @@ function buildFactors(
   // face affiche « +X jours d'ici {horizon} » depuis CE point, le drawer doit
   // donc partir d'ici pour que les deux racontent le même mouvement.
   const hotRef = reconstructReference(scenarios, "NORTX30D_yr", "ATX30D_yr");
+  // Référence des jours > 35°C (≈ 0 : la chaleur extrême est quasi nouvelle).
+  const extremeRef = reconstructReference(scenarios, "NORTX35D_yr", "ATX35D_yr");
   const heatDetail: CardDetail | undefined = hotDays != null
     ? {
         eyebrow: "Des étés qui s'intensifient",
@@ -323,14 +349,63 @@ function buildFactors(
           format: (n) => `${Math.round(n)} jours`,
           refApprox: true,
           withBars: true,
+          selectedHorizon: horizonKey,
         }),
         // Chaleur extrême : masquée à 0 (un « 0 » sous une carte qui crie « +X »
-        // est du bruit ; l'absence est déjà racontée par la rareté).
-        facts: heatDays != null && heatDays >= 1 ? [{ label: "Jours au-dessus de 35°C", value: `${heatDays} par an` }] : undefined,
+        // est du bruit). Règle de temporalité : toute donnée projetée du drawer
+        // porte son horizon. Trajectoire référence → horizon si la référence se
+        // reconstruit (elle est ≈ 0 : la chaleur extrême apparaît), sinon niveau daté.
+        facts:
+          heatDays != null && heatDays >= 1
+            ? [
+                {
+                  label: "Jours au-dessus de 35°C",
+                  value:
+                    extremeRef != null
+                      ? `≈ ${Math.round(extremeRef)} → ${heatDays} par an d'ici ${meta.year}`
+                      : `${heatDays} par an en ${meta.year}`,
+                },
+              ]
+            : undefined,
         why: buildClimatWhy("chaleur", communeName, climatType ?? "plaine", {}),
         whyLabel: "Ce que cela raconte",
         askPrefill: `Comment la chaleur va-t-elle évoluer dans ma commune d'ici ${HORIZON_META.gwl30.year} ?`,
         sources: "Projections DRIAS-TRACC, Météo-France · jours de forte chaleur (Tmax > 30°C), période de référence 1976-2005",
+      }
+    : undefined;
+
+  // ── Carte « Nuits tropicales » → drawer (gabarit) ────────────────────────────
+  // Même mécanique que Chaleurs. On ne montre le drawer que si le phénomène est
+  // réel (sinon, sur une commune froide à 0 nuit, une trajectoire « 0 → 0 » n'a
+  // rien à raconter : on garde le tooltip et la face dit « Quasi inexistantes »).
+  const tropicalNightsRef = reconstructReference(scenarios, "NORTR_yr", "ATR_yr");
+  const tropicalNightsMax = Math.max(
+    ...(["gwl15", "gwl20", "gwl30"] as HorizonKey[]).map((k) => scenarios?.[k]?.v?.["NORTR_yr"] ?? 0),
+    0,
+  );
+  const showTropicalDetail = tropicalNights != null && tropicalNightsMax >= 3;
+  const tropicalNightsDetail: CardDetail | undefined = showTropicalDetail
+    ? {
+        eyebrow: "Des nuits qui ne retombent plus",
+        title: "Nuits tropicales",
+        headline:
+          tropicalNightsRef != null
+            ? `≈ ${Math.round(tropicalNightsRef)} → ${tropicalNights} nuits par an d'ici ${meta.year}`
+            : `${tropicalNights} nuits par an en ${meta.year}`,
+        subhead: "Des nuits où la chaleur ne retombe pas sous 20°C.",
+        accent: "var(--orange)",
+        breakdownLabel: "Nuits au-dessus de 20°C, par an",
+        breakdown: trajectoryBreakdown(scenarios, "NORTR_yr", {
+          ref: tropicalNightsRef,
+          format: (n) => `${Math.round(n)} nuits`,
+          refApprox: true,
+          withBars: true,
+          selectedHorizon: horizonKey,
+        }),
+        why: buildClimatWhy("nuits", communeName, climatType ?? "plaine", {}),
+        whyLabel: "Ce que cela raconte",
+        askPrefill: "Les nuits tropicales vont-elles augmenter dans ma commune ?",
+        sources: "Projections DRIAS-TRACC, Météo-France · nuits tropicales (Tmin > 20°C), période de référence 1976-2005",
       }
     : undefined;
 
@@ -404,17 +479,17 @@ function buildFactors(
       detail: heatDetail,
     },
     {
-      // Registre A (mouvement) : « +9 nuits d'ici 2050 ». Tooltip porte l'absolu
-      // (départ -> arrivée) puisqu'il n'y a pas de drawer.
+      // Registre A (mouvement) : « +9 nuits d'ici 2050 ». Drawer gabarit si le
+      // phénomène est réel ; sinon tooltip (commune froide où il reste rare).
       label: "Nuits tropicales",
       val: movementOrLevel(gwlData?.["NORTR_yr"], tropicalNightsAnom, "nuits", "Quasi inexistantes", meta.year),
       col: "var(--orange)",
       src: "DRIAS / Météo-France · Tmin > 20°C",
       missing: tropicalNights == null,
-      tip:
-        tropicalNights != null
-          ? `Nuits où la chaleur ne retombe pas sous 20°C : ${tropicalNights} par an attendues en ${meta.year}. C'est l'un des signes les plus parlants d'un climat qui change près de chez soi.`
-          : "Quand la chaleur ne retombe pas la nuit, on dort moins bien et on récupère mal. C'est l'un des signes les plus parlants d'un climat qui change près de chez soi.",
+      detail: tropicalNightsDetail,
+      tip: showTropicalDetail
+        ? undefined
+        : "Quand la chaleur ne retombe pas la nuit, l'air ne rafraîchit plus le territoire. C'est l'un des signes les plus parlants d'un climat qui change près de chez soi.",
     },
     {
       // Registre B (niveau) : le chiffre porte son échelle, on garde l'absolu.

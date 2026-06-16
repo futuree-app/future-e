@@ -20,8 +20,9 @@ export type CardDetail = {
   accent?: string;
   /** Intitulé de la section liste (défaut « Répartition »). Ex. « Trois temps », « Jours chauds par an ». */
   breakdownLabel?: string;
-  /** `bar` (0→1) dessine une barre de proportion sous la ligne : la donnée se voit, pas juste se lit. */
-  breakdown?: { label: string; value: string; bar?: number }[];
+  /** `bar` (0→1) dessine une barre de proportion sous la ligne : la donnée se voit, pas juste se lit.
+   *  `muted` grise la barre (horizon au-delà de celui choisi par l'utilisateur : du contexte, pas le focus). */
+  breakdown?: { label: string; value: string; bar?: number; muted?: boolean }[];
   facts?: { label: string; value: string }[];
   /** Micro-frise temporelle (sparkline) : une colonne par période, hauteur ∝ count. */
   timeline?: { label: string; count: number }[];
@@ -101,7 +102,7 @@ export function MetricDrawer({
                   </div>
                   {r.bar != null && (
                     <span className="metric-drawer-bar" aria-hidden>
-                      <span style={{ width: `${Math.max(4, Math.round(r.bar * 100))}%`, background: accent }} />
+                      <span style={{ width: `${Math.max(4, Math.round(r.bar * 100))}%`, background: r.muted ? "rgba(255,255,255,0.18)" : accent }} />
                     </span>
                   )}
                 </li>
