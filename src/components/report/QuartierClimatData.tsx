@@ -151,26 +151,94 @@ function signedInt(n: number): string {
   return `${n >= 0 ? "+" : ""}${Math.round(n)}`;
 }
 
-// Récit « Ce que cela raconte » du drawer Températures, ancré dans le caractère
+// ─── Briques réutilisables du module Territoire (gabarit cartes climat) ───────
+// Doctrine : Face = mouvement projeté · Drawer = référence → trajectoire →
+// interprétation territoriale. La face et le drawer doivent parler du MÊME
+// mouvement, donc le drawer part de la même référence que la face.
+
+// Référence reconstruite (projeté − anomalie) : DRIAS n'expose pas de colonne
+// dédiée, mais l'anomalie par horizon la restitue, et elle est stable d'un
+// horizon à l'autre (même période de référence). Médiane pour lisser le bruit
+// de médiane-des-modèles. Renvoie null si l'indicateur n'a pas d'anomalie (la
+// carte sait alors retomber sur l'ancien mode).
+function reconstructReference(
+  scenarios: GwlScenarios | null,
+  absKey: string,
+  anomKey: string,
+): number | null {
+  const refs = (["gwl15", "gwl20", "gwl30"] as HorizonKey[])
+    .map((k) => {
+      const p = scenarios?.[k]?.v?.[absKey];
+      const a = scenarios?.[k]?.v?.[anomKey];
+      return p != null && a != null ? p - a : null;
+    })
+    .filter((x): x is number => x != null)
+    .sort((a, b) => a - b);
+  return refs.length ? refs[Math.floor((refs.length - 1) / 2)] : null;
+}
+
+// Trajectoire du drawer : ligne de référence (départ) + un point par horizon.
+// `format` décide l'unité/arrondi (°C en frFloat, jours en entier) ; `refApprox`
+// préfixe « ≈ » sur la référence reconstruite ; `withBars` ajoute les barres.
+function trajectoryBreakdown(
+  scenarios: GwlScenarios | null,
+  absKey: string,
+  opts: { ref: number | null; format: (n: number) => string; refApprox?: boolean; withBars?: boolean; refLabel?: string },
+): { label: string; value: string; bar?: number }[] {
+  const rows = (["gwl15", "gwl20", "gwl30"] as HorizonKey[])
+    .map((k) => ({ k, v: scenarios?.[k]?.v?.[absKey] }))
+    .filter((x): x is { k: HorizonKey; v: number } => x.v != null);
+  const max = Math.max(opts.ref ?? 0, ...rows.map((x) => x.v), 1);
+  const out: { label: string; value: string; bar?: number }[] = [];
+  if (opts.ref != null) {
+    out.push({
+      label: opts.refLabel ?? "Climat de référence",
+      value: `${opts.refApprox ? "≈ " : ""}${opts.format(opts.ref)}`,
+      ...(opts.withBars ? { bar: opts.ref / max } : {}),
+    });
+  }
+  for (const x of rows) {
+    out.push({
+      label: `Horizon ${HORIZON_META[x.k].year}`,
+      value: opts.format(x.v),
+      ...(opts.withBars ? { bar: x.v / max } : {}),
+    });
+  }
+  return out;
+}
+
+// Récit « Ce que cela raconte » des drawers climat, ancré dans le caractère
 // climatique du lieu (archétype déterministe) plutôt qu'une phrase passe-partout.
-// Identitaire mais sobre ; échelle territoire (pas la vie de l'utilisateur), non
-// catastrophiste. La nuance été/hiver n'est ajoutée que si l'écart est net (>0,3 °C),
-// pour ne jamais affirmer une généralité fausse (ex. à la montagne l'été chauffe
-// plus vite que l'hiver).
+// Identitaire mais sobre ; échelle territoire (pas la vie de l'utilisateur, pas
+// le logement ni la santé), non catastrophiste. Variantes par thème ; on ne
+// décline « temperature » et « chaleur » que pour l'instant.
 function buildClimatWhy(
+  theme: "temperature" | "chaleur",
   communeName: string,
   type: TerritoryType,
-  summerAnom: number | null | undefined,
-  winterAnom: number | null | undefined,
+  signals: { summerAnom?: number | null; winterAnom?: number | null },
 ): string {
+  if (theme === "chaleur") {
+    const core: Record<TerritoryType, string> = {
+      littoral_atlantique: `À ${communeName}, le climat atlantique a longtemps gardé les fortes chaleurs rares ; elles deviennent peu à peu une part ordinaire de l'été.`,
+      mediterraneen: `À ${communeName}, les fortes chaleurs font déjà partie de l'été ; ce qui change, c'est leur nombre et la longueur des épisodes.`,
+      montagne: `À ${communeName}, l'altitude a longtemps tenu les fortes chaleurs à distance ; elles gagnent désormais les étés.`,
+      plaine: `À ${communeName}, sans façade maritime ni relief pour tempérer, les fortes chaleurs s'installent plus tôt et durent plus longtemps.`,
+    };
+    return `${core[type]} La progression s'accélère, elle ne fait pas que monter.`;
+  }
+
+  // theme === "temperature" : la nuance été/hiver n'est ajoutée que si l'écart
+  // est net (>0,3 °C), pour ne jamais affirmer une généralité fausse (ex. à la
+  // montagne l'été se réchauffe plus vite que l'hiver).
   const core: Record<TerritoryType, string> = {
     littoral_atlantique: `À ${communeName}, le climat atlantique tempère encore les extrêmes, mais cet effet d'amortisseur faiblit à mesure que les saisons se réchauffent.`,
     mediterraneen: `À ${communeName}, la chaleur fait déjà partie du climat ; ce qui change, c'est son intensité et sa durée au fil de l'année.`,
     montagne: `À ${communeName}, le froid d'altitude a longtemps marqué le climat ; il devient moins présent, saison après saison.`,
     plaine: `À ${communeName}, le climat intérieur se réchauffe sans l'amortisseur direct de l'océan ou de l'altitude.`,
   };
-
   let seasonClause = "";
+  const { summerAnom, winterAnom } = signals;
   if (summerAnom != null && winterAnom != null) {
     if (winterAnom - summerAnom > 0.3) seasonClause = " Ici, l'hiver se réchauffe plus vite que l'été.";
     else if (summerAnom - winterAnom > 0.3) seasonClause = " Ici, l'été se réchauffe plus vite que l'hiver.";
@@ -234,33 +302,35 @@ function buildFactors(
   // ── Carte « Jours chauds » → drawer : la chaleur qui s'installe ───────────────
   // On lit les trois horizons et on les rend comme une montée VISIBLE (barres),
   // pas comme un tableau. Le récit prime ; les sources passent en pied de drawer.
-  const hotAt = (k: HorizonKey) => r(scenarios?.[k]?.v?.["NORTX30D_yr"]);
-  const hotTraj = (["gwl15", "gwl20", "gwl30"] as HorizonKey[])
-    .map((k) => ({ k, v: hotAt(k) }))
-    .filter((x) => x.v != null) as { k: HorizonKey; v: number }[];
-  const hot2030 = hotAt("gwl15");
-  const hot2100 = hotAt("gwl30");
-  const hotMax = Math.max(...hotTraj.map((x) => x.v), 1);
+  // Référence reconstruite (jours > 30°C de la période de référence DRIAS) : la
+  // face affiche « +X jours d'ici {horizon} » depuis CE point, le drawer doit
+  // donc partir d'ici pour que les deux racontent le même mouvement.
+  const hotRef = reconstructReference(scenarios, "NORTX30D_yr", "ATX30D_yr");
   const heatDetail: CardDetail | undefined = hotDays != null
     ? {
         eyebrow: "Des étés qui s'intensifient",
         title: "Chaleurs estivales",
+        // Option A : référence → horizon sélectionné (colle exactement à la face).
         headline:
-          hot2030 != null && hot2100 != null && hot2100 > hot2030
-            ? `${hot2030} → ${hot2100} jours chauds par an`
+          hotRef != null
+            ? `≈ ${Math.round(hotRef)} → ${hotDays} jours chauds par an d'ici ${meta.year}`
             : `${hotDays} jours chauds par an en ${meta.year}`,
         subhead: "Les fortes chaleurs gagnent du terrain, année après année.",
         accent: "var(--orange)",
-        breakdownLabel: "Jours chauds par an",
-        breakdown: hotTraj.map((x) => ({
-          label: `À l'horizon ${HORIZON_META[x.k].year}`,
-          value: `${x.v} jours`,
-          bar: x.v / hotMax,
-        })),
-        facts: heatDays != null ? [{ label: "dont chaleur extrême", value: `${heatDays} jours` }] : undefined,
-        why: "Quelques journées de forte chaleur, on les traverse. Quand elles se multiplient, c'est l'été qui change de visage : des nuits qui ne rafraîchissent plus, des logements et des écoles qui surchauffent, le travail dehors plus pénible, les personnes âgées et les enfants plus exposés. Et la courbe ne fait pas que monter, elle s'accélère.",
+        breakdownLabel: "Jours au-dessus de 30°C, par an",
+        breakdown: trajectoryBreakdown(scenarios, "NORTX30D_yr", {
+          ref: hotRef,
+          format: (n) => `${Math.round(n)} jours`,
+          refApprox: true,
+          withBars: true,
+        }),
+        // Chaleur extrême : masquée à 0 (un « 0 » sous une carte qui crie « +X »
+        // est du bruit ; l'absence est déjà racontée par la rareté).
+        facts: heatDays != null && heatDays >= 1 ? [{ label: "Jours au-dessus de 35°C", value: `${heatDays} par an` }] : undefined,
+        why: buildClimatWhy("chaleur", communeName, climatType ?? "plaine", {}),
+        whyLabel: "Ce que cela raconte",
         askPrefill: `Comment la chaleur va-t-elle évoluer dans ma commune d'ici ${HORIZON_META.gwl30.year} ?`,
-        sources: "Projections DRIAS, Météo-France · scénarios France +2°C à +4°C",
+        sources: "Projections DRIAS-TRACC, Météo-France · jours de forte chaleur (Tmax > 30°C), période de référence 1976-2005",
       }
     : undefined;
 
@@ -515,21 +585,8 @@ function buildFactors(
   const summer = gwlData?.["NORTMm_seas_JJA"];
   const summerTraj = seasonalTraj("NORTMm_seas_JJA");
 
-  // Référence été reconstruite (projeté − anomalie) : DRIAS ne fournit pas de
-  // colonne dédiée, mais l'anomalie par horizon la restitue, et elle est stable
-  // d'un horizon à l'autre (même période de référence). On prend la médiane.
-  const summerRefByHorizon = (["gwl15", "gwl20", "gwl30"] as HorizonKey[])
-    .map((k) => {
-      const p = scenarios?.[k]?.v?.["NORTMm_seas_JJA"];
-      const a = scenarios?.[k]?.v?.["ATMm_seas_JJA"];
-      return p != null && a != null ? p - a : null;
-    })
-    .filter((x): x is number => x != null)
-    .sort((a, b) => a - b);
-  const summerRef =
-    summerRefByHorizon.length > 0
-      ? summerRefByHorizon[Math.floor((summerRefByHorizon.length - 1) / 2)]
-      : null;
+  // Référence été reconstruite via la brique partagée (médiane projeté − anomalie).
+  const summerRef = reconstructReference(scenarios, "NORTMm_seas_JJA", "ATMm_seas_JJA");
 
   // Paire équilibrée été/hiver à l'horizon choisi : l'hiver ne doit pas paraître
   // secondaire face à la trajectoire d'été.
@@ -543,10 +600,11 @@ function buildFactors(
   ];
 
   // Trajectoire été = point de départ (référence) + horizons, pour lire la pente.
-  const summerBreakdown = [
-    ...(summerRef != null ? [{ label: "Climat de référence", value: `${frFloat(summerRef)} °C` }] : []),
-    ...summerTraj.map((t) => ({ label: `Horizon ${HORIZON_META[t.k].year}`, value: `${frFloat(t.v)} °C` })),
-  ];
+  // Même brique que Chaleurs ; ici en °C (frFloat), sans « ≈ » ni barres.
+  const summerBreakdown = trajectoryBreakdown(scenarios, "NORTMm_seas_JJA", {
+    ref: summerRef,
+    format: (n) => `${frFloat(n)} °C`,
+  });
   factors.push({
     label: "Températures moyennes",
     val:
@@ -572,7 +630,7 @@ function buildFactors(
             breakdownLabel: "Été moyen, par horizon",
             breakdown: summerBreakdown,
             facts: tempFacts.length > 0 ? tempFacts : undefined,
-            why: buildClimatWhy(communeName, climatType ?? "plaine", summerAnom, winterAnom),
+            why: buildClimatWhy("temperature", communeName, climatType ?? "plaine", { summerAnom, winterAnom }),
             whyLabel: "Ce que cela raconte",
             ...(era5
               ? {
