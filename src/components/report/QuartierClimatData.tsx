@@ -330,8 +330,6 @@ function buildFactors(
   // face affiche « +X jours d'ici {horizon} » depuis CE point, le drawer doit
   // donc partir d'ici pour que les deux racontent le même mouvement.
   const hotRef = reconstructReference(scenarios, "NORTX30D_yr", "ATX30D_yr");
-  // Référence des jours > 35°C (≈ 0 : la chaleur extrême est quasi nouvelle).
-  const extremeRef = reconstructReference(scenarios, "NORTX35D_yr", "ATX35D_yr");
   const heatDetail: CardDetail | undefined = hotDays != null
     ? {
         eyebrow: "Des étés qui s'intensifient",
@@ -351,21 +349,13 @@ function buildFactors(
           withBars: true,
           selectedHorizon: horizonKey,
         }),
-        // Chaleur extrême : masquée à 0 (un « 0 » sous une carte qui crie « +X »
-        // est du bruit). Règle de temporalité : toute donnée projetée du drawer
-        // porte son horizon. Trajectoire référence → horizon si la référence se
-        // reconstruit (elle est ≈ 0 : la chaleur extrême apparaît), sinon niveau daté.
+        // Chaleur extrême = sous-signal qui QUALIFIE les jours chauds, pas une
+        // carte à part : un simple fait daté suffit (pas de trajectoire, « 0 → 3 »
+        // emballe du rien). Masqué à 0 (bruit sous une carte qui crie « +X »).
+        // Règle de temporalité respectée : la valeur porte son horizon.
         facts:
           heatDays != null && heatDays >= 1
-            ? [
-                {
-                  label: "Jours au-dessus de 35°C",
-                  value:
-                    extremeRef != null
-                      ? `≈ ${Math.round(extremeRef)} → ${heatDays} par an d'ici ${meta.year}`
-                      : `${heatDays} par an en ${meta.year}`,
-                },
-              ]
+            ? [{ label: "Jours au-dessus de 35°C", value: `Environ ${heatDays} par an en ${meta.year}` }]
             : undefined,
         why: buildClimatWhy("chaleur", communeName, climatType ?? "plaine", {}),
         whyLabel: "Ce que cela raconte",
