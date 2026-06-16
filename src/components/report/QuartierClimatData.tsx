@@ -711,18 +711,15 @@ function buildFactors(
         : undefined,
   });
 
-  // ── Pluies et épisodes intenses (fusion, Registre B : niveau en JOURS) ─────────
-  // Ni le cumul mm muet ni le % abstrait : on affiche les jours de fortes pluies
-  // (NORRRq99refD, déjà chargé). Cumul annuel + mm/24h descendent au drawer.
+  // ── Pluies et épisodes intenses (Registre B : NIVEAU absolu, pas de trajectoire) ─
+  // Signal faible et non monotone (il DÉCROÎT à Nice) : une trajectoire par horizon
+  // emballerait du bruit, voire des barres qui baissent. On reste donc sur le niveau
+  // daté + qualifieurs datés (cumul, intensité), sans tableau de pente.
   const annualRain = gwlData?.["NORRR_yr"];
   const heavyRain = gwlData?.["NORRRq99_yr"];
-  const rainDaysTraj = (["gwl15", "gwl20", "gwl30"] as HorizonKey[])
-    .map((k) => ({ k, v: r(scenarios?.[k]?.v?.["NORRRq99refD_yr"]) }))
-    .filter((x): x is { k: HorizonKey; v: number } => x.v != null);
-  const rainDaysMax = Math.max(...rainDaysTraj.map((x) => x.v), 1);
   const rainFacts: { label: string; value: string }[] = [
-    ...(annualRain != null ? [{ label: "Cumul annuel", value: `${Math.round(annualRain)} mm` }] : []),
-    ...(heavyRain != null ? [{ label: "Pluie intense en 24h", value: `${Math.round(heavyRain)} mm` }] : []),
+    ...(annualRain != null ? [{ label: "Cumul annuel", value: `${Math.round(annualRain)} mm en ${meta.year}` }] : []),
+    ...(heavyRain != null ? [{ label: "Pluie intense en 24h", value: `${Math.round(heavyRain)} mm en ${meta.year}` }] : []),
   ];
   factors.push({
     label: "Pluies et épisodes intenses",
@@ -738,13 +735,8 @@ function buildFactors(
             headline: `${heavyRainDays} jours de fortes pluies par an en ${meta.year}`,
             subhead: "Ce qui pèse n'est pas tant le cumul annuel que la façon dont la pluie se concentre.",
             accent: "var(--orange)",
-            breakdownLabel: rainDaysTraj.length >= 2 ? "Jours de fortes pluies, par horizon" : undefined,
-            breakdown:
-              rainDaysTraj.length >= 2
-                ? rainDaysTraj.map((t) => ({ label: `Horizon ${HORIZON_META[t.k].year}`, value: `${t.v} jours`, bar: t.v / rainDaysMax }))
-                : undefined,
             facts: rainFacts.length > 0 ? rainFacts : undefined,
-            why: "Le cumul de pluie sur l'année dit peu de chose. Ce qui compte, c'est l'intensité : quand la pluie tombe en peu d'heures, le ruissellement et le débordement deviennent possibles, même loin d'un cours d'eau. L'exposition précise de votre adresse relève du module Logement.",
+            why: "Le cumul de pluie sur l'année dit peu de chose. Ce qui compte, c'est l'intensité : quand la pluie tombe en peu d'heures, le ruissellement et le débordement deviennent possibles, même loin d'un cours d'eau. L'exposition précise d'une adresse relève du module Logement.",
             whyLabel: "Ce que cela raconte",
             askPrefill: "Les pluies intenses vont-elles s'aggraver dans ma commune ?",
             sources: "Projections DRIAS, Météo-France · jours de pluie intense (p99), cumul annuel, pluie journalière extrême",
