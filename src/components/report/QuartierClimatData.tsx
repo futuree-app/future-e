@@ -109,7 +109,7 @@ const THEME_OF: Record<string, ThemeKey> = {
   "Jours de pluie intense": "climat",
   "Inondation fluviale": "risque",
   "Submersion marine": "risque",
-  "Catastrophes naturelles reconnues": "risque",
+  "Mémoire des catastrophes": "risque",
   "Érosion du littoral": "risque",
 };
 function themeOf(label: string): ThemeKey {
@@ -120,7 +120,7 @@ const CARD_ORDER: string[] = [
   "Trajectoire de population", "Logements inoccupés", "Accès aux services", "Espaces naturels", "Taux de boisement", "Résidences secondaires",
   // Climat alterné mouvement/niveau pour le rythme (évite un mur de « +X »).
   "Températures moyennes", "Sécheresse des sols", "Chaleurs estivales", "Conditions favorables au feu", "Nuits tropicales", "Jours de pluie intense",
-  "Inondation fluviale", "Submersion marine", "Catastrophes naturelles reconnues", "Érosion du littoral",
+  "Inondation fluviale", "Submersion marine", "Mémoire des catastrophes", "Érosion du littoral",
 ];
 function cardRank(label: string): number {
   const i = CARD_ORDER.indexOf(label);
@@ -507,17 +507,24 @@ function buildFactors(
       val: georisques ? (georisques.flags.flood ? "Une partie du territoire est concernée" : "Aucun périmètre recensé") : "—",
       col: "var(--blue)",
       src: "Géorisques · échelle communale",
-      missing: !georisques?.flags.flood,
+      // L'inondation est pertinente partout : « aucun périmètre » est un signal
+      // POSITIF (non grisé), pas une donnée absente. Grisé seulement sans donnée.
+      missing: !georisques,
       tip: "Savoir qu'une partie de la commune peut être atteinte par une crue aide à comprendre ce qui peut être touché. Détail à votre adresse dans le module Logement.",
     },
-    {
-      label: "Submersion marine",
-      val: georisques ? (georisques.flags.marineSubmersion ? "Le littoral fait partie des zones surveillées" : "Aucun périmètre recensé") : "—",
-      col: "var(--blue)",
-      src: "Géorisques · échelle communale",
-      missing: !georisques?.flags.marineSubmersion,
-      tip: "Sur le littoral, savoir si la mer peut atteindre la commune aide à comprendre ce qui est exposé aux tempêtes. Détail à votre adresse dans le module Logement.",
-    },
+    // Submersion marine : aléa propre au littoral. On n'affiche la carte QUE si la
+    // commune est concernée (sinon elle est simplement absente, pas grisée : une
+    // « Submersion : non » n'a aucun sens à l'intérieur des terres).
+    ...(georisques?.flags.marineSubmersion
+      ? [{
+          label: "Submersion marine",
+          val: "Le littoral fait partie des zones surveillées",
+          col: "var(--blue)",
+          src: "Géorisques · échelle communale",
+          missing: false,
+          tip: "Sur le littoral, savoir si la mer peut atteindre la commune aide à comprendre ce qui est exposé aux tempêtes. Détail à votre adresse dans le module Logement.",
+        }]
+      : []),
     // Carte couvert naturel : enrichie (OSO + composition) si fournie, sinon
     // repli sur le seul taux de boisement ADEME.
     couvertNaturel
@@ -787,7 +794,7 @@ function buildFactors(
     const detail: CardDetail | undefined = hasCatnat
       ? {
           eyebrow: "Histoire du territoire",
-          title: "Catastrophes naturelles reconnues",
+          title: "Mémoire des catastrophes",
           headline,
           subhead: catnat!.summary ?? undefined,
           accent: "var(--blue)",
@@ -811,13 +818,22 @@ function buildFactors(
           sources: "Géorisques · base GASPAR (arrêtés de catastrophe naturelle)",
         }
       : undefined;
+    // Flagship du bloc risque : le dominant remonte sur la FACE (distinctif et
+    // identitaire), plus planqué dans la source. Le 2e aléa n'apparaît que s'il
+    // est comparable au 1er (sinon « Surtout X » suffit, pas de faux pluriel).
+    const sortedRisks = hasCatnat ? [...catnat!.byRisk].sort((a, b) => b.count - a.count) : [];
+    const dominantSub =
+      sortedRisks.length === 0
+        ? undefined
+        : sortedRisks.length >= 2 && sortedRisks[1].count >= sortedRisks[0].count * 0.5
+          ? `Surtout ${sortedRisks[0].label.toLowerCase()} et ${sortedRisks[1].label.toLowerCase()}`
+          : `Surtout ${sortedRisks[0].label.toLowerCase()}`;
     factors.push({
-      label: "Catastrophes naturelles reconnues",
+      label: "Mémoire des catastrophes",
       val: headline,
+      sub: dominantSub,
       col: "var(--blue)",
-      src: hasCatnat && catnat!.topRisk
-        ? `Géorisques · GASPAR · surtout ${catnat!.topRisk.toLowerCase()}`
-        : "Géorisques · GASPAR · arrêtés CatNat",
+      src: "Géorisques · GASPAR · arrêtés CatNat",
       missing: !hasCatnat,
       detail,
     });
@@ -1090,12 +1106,12 @@ export function QuartierAside({ communeName, scenarios, georisques, territoire, 
                           : undefined
                       }
                     >
-                      <div className="text-[12px] font-medium text-label mb-2 leading-[1.3]">{f.label}</div>
-                      <div className="font-mono text-[11px] tracking-[0.02em] mb-0.5" style={{ color: f.missing ? "var(--ghost)" : col }}>{f.val}</div>
-                      {f.sub && <div className="text-[11px] text-label tracking-[0.01em] leading-[1.4] mb-0.5">{f.sub}</div>}
-                      <div className="font-mono text-[10px] text-ghost tracking-[0.02em] leading-[1.4]">{f.src}</div>
+                      <div className="text-[13px] font-medium text-label mb-2 leading-[1.3]">{f.label}</div>
+                      <div className="font-mono text-[12px] tracking-[0.02em] mb-0.5" style={{ color: f.missing ? "var(--ghost)" : col }}>{f.val}</div>
+                      {f.sub && <div className="text-[12px] text-label tracking-[0.01em] leading-[1.4] mb-0.5">{f.sub}</div>}
+                      <div className="font-mono text-[11px] text-ghost tracking-[0.02em] leading-[1.4]">{f.src}</div>
                       {clickable && (
-                        <div className="font-mono text-[10px] tracking-[0.06em] mt-2" style={{ color: col }}>
+                        <div className="font-mono text-[11px] tracking-[0.06em] mt-2" style={{ color: col }}>
                           Détail →
                         </div>
                       )}
