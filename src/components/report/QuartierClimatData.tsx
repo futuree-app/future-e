@@ -104,11 +104,11 @@ const THEME_OF: Record<string, ThemeKey> = {
   "Températures moyennes": "climat",
   "Chaleurs estivales": "climat",
   "Nuits tropicales": "climat",
-  "Conditions favorables au feu": "climat",
   "Sécheresse des sols": "climat",
   "Jours de pluie intense": "climat",
   "Inondation fluviale": "risque",
   "Submersion marine": "risque",
+  "Conditions favorables au feu": "risque",
   "Mémoire des catastrophes": "risque",
   "Érosion du littoral": "risque",
 };
@@ -119,8 +119,8 @@ function themeOf(label: string): ThemeKey {
 const CARD_ORDER: string[] = [
   "Trajectoire de population", "Logements inoccupés", "Accès aux services", "Espaces naturels", "Taux de boisement", "Résidences secondaires",
   // Climat alterné mouvement/niveau pour le rythme (évite un mur de « +X »).
-  "Températures moyennes", "Sécheresse des sols", "Chaleurs estivales", "Conditions favorables au feu", "Nuits tropicales", "Jours de pluie intense",
-  "Inondation fluviale", "Submersion marine", "Mémoire des catastrophes", "Érosion du littoral",
+  "Températures moyennes", "Sécheresse des sols", "Chaleurs estivales", "Nuits tropicales", "Jours de pluie intense",
+  "Mémoire des catastrophes", "Inondation fluviale", "Submersion marine", "Conditions favorables au feu", "Érosion du littoral",
 ];
 function cardRank(label: string): number {
   const i = CARD_ORDER.indexOf(label);
