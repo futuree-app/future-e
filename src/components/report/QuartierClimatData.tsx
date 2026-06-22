@@ -858,6 +858,15 @@ function buildFactors(
       "marqué": "marquée",
       "très marqué": "très marquée",
     };
+    // La classe Cerema décrit le RYTHME du recul, pas son étendue. Le % (pctRecul)
+    // décrit l'étendue. Sans ce rappel, « Érosion faible » + « 54 % » se contredit
+    // visuellement. On réconcilie : la côte recule largement MAIS lentement.
+    const CLASSE_PACE: Record<string, string> = {
+      faible: "mais à un rythme lent",
+      "modéré": "à un rythme modéré",
+      "marqué": "à un rythme déjà soutenu",
+      "très marqué": "à un rythme rapide",
+    };
     const fr1 = (n: number) => Math.abs(n).toLocaleString("fr-FR", { maximumFractionDigits: 1 });
     const decretDate = littoral.traitDeCote.decret?.debut
       ? formatFrDate(littoral.traitDeCote.decret.debut)
@@ -924,7 +933,7 @@ function buildFactors(
       headline,
       subhead:
         e && !e.amenage && e.pctRecul != null
-          ? `${e.pctRecul} % du littoral communal montrent une érosion observée : la côte y recule.`
+          ? `La côte recule sur ${e.pctRecul} % du littoral communal, ${(e.classe && CLASSE_PACE[e.classe]) ?? "à un rythme mesuré"}.`
           : `${communeName} est exposée à l'érosion du littoral.`,
       accent: "var(--blue)",
       breakdownLabel: obs.length ? "Ce que montrent les observations" : undefined,
