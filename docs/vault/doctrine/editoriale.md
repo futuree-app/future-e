@@ -1,62 +1,95 @@
-# Voix et honnêteté du texte
+# Voix et honnêteté éditoriale
 
-> Règle durable. Fiches miroir : `/memory/feedback_no_em_dash.md`,
-> `/memory/feedback_signature_identitaire.md`, `/memory/feedback_callendar.md`.
+> Règle durable. Sources : `Documentation Notion/.../03 1 — Voix et positionnement
+> éditorial`, et fiches `/memory/feedback_no_em_dash.md`,
+> `/memory/feedback_signature_identitaire.md`, `/memory/feedback_callendar.md`. Découle des
+> invariants n°3, 4 et 7 (`principes/invariants.md`).
 
-Trois exigences sur tout texte que produit futur·e : une voix typographique constante, un
-récit du territoire qui raconte le lieu plutôt que sa donnée, des sources honnêtes.
+## Ce que futur·e dit, ce qu'elle ne dit pas
 
-## 1. Pas de tiret cadratin
+futur·e dit : voici ce que les données publiques montrent pour votre vie dans votre commune,
+à l'horizon que vous choisissez. futur·e ne dit pas : voici ce que vous devriez faire pour
+sauver la planète. La différence est absolue, elle structure chaque phrase.
 
-Ne jamais employer de tiret cadratin (—) dans le texte rédigé : copy UI, prose, messages.
-Préférer une virgule ou deux points selon le sens.
+## Les trois piliers du ton
 
-- **Pourquoi** : préférence stylistique constante du porteur.
-- **Exception unique** : un modèle ou prompt figé fourni par le porteur qu'il demande de
-  ne pas modifier (ex. blocs STYLE/NEGATIVE des prompts d'illustration). Le « — » comme
-  marqueur « pas de donnée » dans une valeur d'UI reste une convention distincte et
-  acceptable (voir `doctrine/interface.md`).
+- **Lucidité, pas panique.** On dit ce que les données disent, sans minimiser ni amplifier.
+  Quand c'est préoccupant, on le dit sobrement. Quand c'est rassurant, on le dit aussi.
+- **Données, pas opinions.** Chaque affirmation significative est sourcée. On distingue ce
+  qui est mesuré, projeté, modélisé, interprété, et on ne confond pas les quatre.
+- **Respect de l'intelligence du lecteur.** On ne simplifie pas à l'excès, on ne cache pas
+  l'incertitude pour faire propre. « Les projections indiquent », pas « il fera ». « À
+  l'échelle de la commune, car les données IRIS ne sont pas disponibles », plutôt que de
+  feindre une précision qu'on n'a pas (voir `doctrine/data.md`).
 
-## 2. Signature territoriale : distinctive ET identitaire
+## Ce que futur·e ne fait pas
 
-Tout élément affiché pour « décrire » un lieu doit être **distinctif ET identitaire** :
-une chose par laquelle un humain décrit spontanément le territoire.
+- **Ne prescrit pas de gestes individuels** comme solutions climatiques. Un geste améliore
+  la résilience personnelle, il ne remplace pas le changement systémique. On ne confond pas
+  les deux.
+- **Ne culpabilise pas. Jamais.** Ni explicitement, ni par le choix des mots.
+- **Ne fabrique pas d'optimisme.** Si aucun signal positif n'existe dans les données pour un
+  module, on n'en invente pas. Le silence est plus honnête que l'optimisme manufacturé.
+- **Ne fait pas de politique partisane.** On peut mentionner les engagements publics d'élus
+  locaux et les outils de suivi citoyen. On ne nomme jamais un parti, on ne prescrit jamais
+  un vote.
 
-- Identitaire : « Aux portes des Alpes », « Côte méditerranéenne », « Bassin de Grenoble ».
-- Donnée vraie mais **inerte** : « Altitude 286 m », « altitude modérée », « température
-  moyenne X ». Personne ne choisit Limoges parce qu'elle est à 286 m. Les afficher est une
-  **fuite de donnée** dans l'interface.
+## Règles typographiques et stylistiques
 
-Corollaires :
-- Une signature peut être courte, n'a pas besoin de trois éléments, on ne remplit jamais
-  pour remplir. « Limoges, Bassin de Limoges » est préférable à « Limoges, Bassin de
-  Limoges · Altitude modérée ».
-- L'altitude n'est identitaire qu'en haute altitude (la montagne EST le lieu, ex.
-  Aurillac, Le Puy ≥ 600 m), jamais dans la bande 200 à 600 m où le label massif porte
-  déjà le relief. Climat « méditerranéen » sur les façades concernées (plus évocateur que
-  « maritime »).
-- **Pourquoi** : le porteur (2026-06-01) a tranché que « raconter un territoire, pas
-  remplir un emplacement » prime sur le correctif Limoges/Dijon qui l'a révélé. Risque
-  sinon : déguiser une donnée saturée ou inerte en caractéristique du lieu. Principe
-  transverse : **ne jamais déguiser une position relative en caractéristique absolue**.
-- Implémenté dans `buildSignature` (`src/lib/comparateur-vie.ts`), commit 4c56923.
+- **Vouvoiement** toujours, sans exception.
+- **Tirets cadratins (—) interdits** dans tous les outputs produit : c'est le marqueur le
+  plus reconnaissable des textes générés par IA. Les remplacer par des virgules, parenthèses,
+  deux points ou points. *Exception unique* : un modèle ou prompt figé fourni par le porteur
+  qu'il demande de ne pas modifier (ex. blocs STYLE/NEGATIVE des prompts d'illustration). Le
+  « — » comme marqueur « pas de donnée » dans une valeur d'UI reste une convention distincte
+  et acceptable (voir `doctrine/interface.md`).
+- **Points d'exclamation interdits** dans tous les outputs produit.
+- **Formules interdites** : « il ne tient qu'à vous » (rejette le systémique sur l'individu),
+  « à l'heure où », « à l'ère de », « dans un monde où » (ouvertures creuses), « en résumé »,
+  « pour conclure », « en somme », « globalement » dans les synthèses.
+- **« Bilan Carbone » interdit** (méthodologie déposée) : toujours « empreinte carbone ».
 
-## 3. Ne pas citer Callendar comme source
+## Glossaire des termes à traduire
 
-Ne pas citer « Callendar » dans les contenus affichés : cartes signaux, attributions de
-données, mentions de méthodologie côté front.
+| Terme technique | Formulation futur·e |
+| --- | --- |
+| IFT | indice d'utilisation des pesticides |
+| RCP 2.6 / 4.5 / 8.5 | scénario optimiste / médian / pessimiste |
+| PPRi | plan de prévention du risque inondation |
+| DPE | diagnostic énergétique du logement (puis DPE) |
+| RMQS | réseau national de mesure des sols |
+| maladies vectorielles | maladies transmises par moustiques et tiques |
+| retrait-gonflement des argiles | mouvements des sols argileux qui peuvent fissurer les maisons |
+| stress hydrique | manque d'eau |
+| anthropique | d'origine humaine |
+| GES | gaz à effet de serre (toujours développé) |
+| Bilan Carbone | interdit, utiliser « empreinte carbone » |
+| résilience | acceptable seulement si clairement expliqué |
+| impact | préférer « effet », « conséquence », « ce que ça change » |
 
-- **Pourquoi** : Callendar est un concurrent commercial sur l'analyse climat × immobilier,
-  pas une source publique française. Les citer reviendrait à leur faire de la pub gratuite
-  et à induire en erreur sur la nature des données (futur·e s'appuie sur des données
-  publiques).
-- **Comment** : pour les attributions de source dans l'UI (ex. `SLUG_SOURCES` dans
-  `WizardTeaser.tsx`), ne citer que les sources publiques réelles : IGN (RGE Alti),
-  Géorisques, BRGM, ADEME, INSEE, DRIAS / Météo-France, Prométhée / DREAL, GisSol / RMQS,
-  Agences de l'eau. Le code peut comparer en interne des données d'autres acteurs ; les
-  attributions visibles ne les nomment jamais.
+## Signature territoriale : distinctive ET identitaire
+
+Tout élément affiché pour décrire un lieu doit être **distinctif ET identitaire** : une
+chose par laquelle un humain décrit spontanément le territoire (« Aux portes des Alpes »,
+« Côte méditerranéenne », « Bassin de Grenoble »). Pas une donnée vraie mais **inerte**
+(« Altitude 286 m », « altitude modérée ») : personne ne choisit une commune pour son
+altitude, l'afficher est une fuite de donnée.
+
+Corollaires : une signature peut être courte, on ne remplit jamais pour remplir. L'altitude
+n'est identitaire qu'en haute altitude (la montagne EST le lieu, ex. Aurillac, Le Puy ≥
+600 m), jamais dans la bande 200 à 600 m. Principe transverse : **ne jamais déguiser une
+position relative en caractéristique absolue** (invariant n°6). Implémenté dans
+`buildSignature` (`src/lib/comparateur-vie.ts`), commit 4c56923.
+
+## Ne pas citer Callendar comme source
+
+Ne pas citer « Callendar » dans les contenus affichés (cartes signaux, attributions,
+méthodologie front) : c'est un concurrent commercial, pas une source publique française. Ne
+citer que les sources publiques réelles : IGN (RGE Alti), Géorisques, BRGM, ADEME, INSEE,
+DRIAS / Météo-France, Prométhée / DREAL, GisSol / RMQS, Agences de l'eau. Le code peut
+comparer d'autres données en interne, les attributions visibles ne les nomment jamais.
 
 ## Liens
 
-Doctrine des gloses et de l'interface : `doctrine/interface.md`. Positionnement :
-`doctrine/positionnement.md`.
+`doctrine/interface.md`, `doctrine/data.md`, `doctrine/positionnement.md`,
+`vision/positionnement.md`, `principes/invariants.md`.
