@@ -16,6 +16,8 @@ page du vault** (chemin). L'une pointe vers l'autre, jamais de copier-coller.
 
 ## Carte du vault
 
+- **`principes/`** — les invariants : ce qui ne devrait quasiment jamais changer. La couche
+  la plus profonde, les axiomes dont le reste dérive.
 - **`vision/`** — ce qu'est futur·e, pour qui, positionnement.
 - **`doctrine/`** — règles durables : UX, éditoriale, design, data.
 - **`modules/`** — une page par surface produit (Territoire, Logement, Santé, Mobilité,
@@ -24,6 +26,16 @@ page du vault** (chemin). L'une pointe vers l'autre, jamais de copier-coller.
 - **`arbitrages/`** — options étudiées/refusées, compromis plus locaux.
 - **`recherches/`** — méthodo, comparatifs data, qualité des sources.
 - **`architecture/`** — architecture fonctionnelle, flux, dépendances.
+
+### Les trois questions, les trois couches
+
+- **Invariant** (`principes/`) : *qu'est-ce qui ne devrait quasiment jamais changer ?*
+- **ADR** (`adr/`) : *pourquoi avons-nous pris cette décision ?*
+- **Doctrine** (`doctrine/`) : *comment travaillons-nous ?*
+
+Un invariant ne bouge pas quand on apprend. Une doctrine évolue avec ce qu'on apprend. Une
+ADR est datée et peut être remplacée. Les invariants servent de fonction de test : une ADR
+ou une doctrine ne doit jamais contredire un invariant.
 
 ### ADR ou arbitrage ?
 
