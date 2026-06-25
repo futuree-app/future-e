@@ -38,6 +38,30 @@ correspondance est explicite, documentée et assumée, dans la base comme dans l
    disponible à l'échelle de la commune », « Cette donnée traduit une tendance territoriale,
    pas une mesure à l'adresse ».
 
+## Horizon temporel : seulement là où la donnée est projetée
+
+Un sélecteur d'horizon (2030 / 2050 / 2100) ou toute mention d'échéance future ne
+s'affiche que sur les contenus réellement projetés : Territoire/Quartier (DRIAS), Santé,
+Métier. Les modules à données présentes (Logement, Mobilité, Projets) ne revendiquent
+aucune projection : leur texte ne mentionne pas l'horizon, sous peine de promettre une
+trajectoire qu'on n'a pas. Formule de cadrage validée : « les données s'adaptent quand
+c'est possible ». Une donnée présente affichée dans un module projeté (ex. qualité de
+l'air actuelle) doit être explicitement nommée comme point de départ, pas comme
+projection.
+
+## Scénarios DRIAS = GWL, affichés à l'échelle France
+
+Les scénarios DRIAS-TRACC utilisés (`gwl15` / `gwl20` / `gwl30`) sont des Global Warming
+Levels : un réchauffement **mondial** de +1,5 / +2 / +3 °C, pas des RCP/SSP. Mais la France
+métropolitaine se réchauffe environ 1,5× plus vite que la moyenne mondiale. **Décision
+d'affichage (2026-06-25) : futur·e affiche partout l'échelle France**, conforme au cadrage
+national TRACC/PNACC-3 : +2 °C en 2030, +2,7 °C en 2050, **+4 °C en 2100** (gwl30). Donc
+« gwl30 = +4 °C » est correct à l'échelle France et doit être retenu (la lecture « +3 °C »
+serait l'échelle mondiale du même scénario). Règle : tout label de scénario dit son échelle,
+l'interface ne mélange jamais mondial et France d'un écran à l'autre, et l'échelle par défaut
+est la France. À harmoniser sur toutes les surfaces (HorizonBar, dashboard, fiches) et dans
+le glossaire de `doctrine/editoriale.md`.
+
 ## La question de contrôle
 
 Le produit doit toujours pouvoir répondre à : **à quelle échelle cette affirmation est-elle

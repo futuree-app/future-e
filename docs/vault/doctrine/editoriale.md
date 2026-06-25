@@ -34,6 +34,38 @@ sauver la planète. La différence est absolue, elle structure chaque phrase.
   locaux et les outils de suivi citoyen. On ne nomme jamais un parti, on ne prescrit jamais
   un vote.
 
+## La page s'adresse au lecteur, pas à elle-même
+
+Tout texte produit parle de la situation du lecteur, jamais de la structure du produit.
+On supprime les phrases qui décrivent le format, l'architecture ou les modules :
+« Votre vie à La Rochelle module par module », « les autres modules suivent la même
+logique », « ce module lit ce qui change autour de chez vous », « les données donnent la
+trajectoire, vos réponses donnent le point d'accroche ». Ces phrases sont écrites pour
+l'équipe, pas pour l'utilisateur, qui devient spectateur de l'architecture au lieu d'être
+mis face à ce qui le concerne.
+
+Corollaire : **on ne décrit jamais ce qu'on ne fait pas.** « Pas encore votre logement,
+pas encore votre santé, pas encore votre mobilité » est à bannir. Le statut d'un contenu
+(disponible, à venir) se porte par l'interface (badge, état de carte), pas par une phrase
+qui énumère les absences. Bon modèle de phrase, à généraliser : « Ce que La Rochelle
+devient. Chaleur, eau, risques. » — elle s'adresse au lecteur et ne parle que de son lieu.
+
+### Exemple appliqué : les paliers d'horizon
+
+Registre : une tension par palier, jamais de culpabilisation, jamais la même idée répétée
+d'un palier à l'autre (le « ce que vous faites détermine ce que vous vivrez » de 2030 et de
+2100 disait deux fois la même chose : on en garde une seule occurrence).
+
+- **2030** : « Les trajectoires sont déjà engagées. »
+- **2050** : « C'est proche. À peine le temps de prendre des décisions et de voir leurs
+  conséquences. C'est le monde des enfants d'aujourd'hui à l'âge adulte. »
+- **2100** : « Plus proche qu'il n'y paraît. C'est le monde de ceux qui ont dix ans
+  aujourd'hui, une fois vieux. Ce territoire, ils l'hériteront tel que vous le laissez. »
+
+La première version de 2030 (« Ce que vous faites dans les dix prochaines années détermine
+ce que vous vivrez ») a été écartée : forte mais culpabilisante, elle bloque au lieu
+d'engager selon le profil qui lit.
+
 ## Règles typographiques et stylistiques
 
 - **Vouvoiement** toujours, sans exception.
@@ -55,6 +87,7 @@ sauver la planète. La différence est absolue, elle structure chaque phrase.
 | --- | --- |
 | IFT | indice d'utilisation des pesticides |
 | RCP 2.6 / 4.5 / 8.5 | scénario optimiste / médian / pessimiste |
+| gwl15 / gwl20 / gwl30 (DRIAS-TRACC) | horizons réchauffement, affichés à l'échelle France (+2 / +2,7 / +4 °C ; voir `doctrine/data.md`) |
 | PPRi | plan de prévention du risque inondation |
 | DPE | diagnostic énergétique du logement (puis DPE) |
 | RMQS | réseau national de mesure des sols |
