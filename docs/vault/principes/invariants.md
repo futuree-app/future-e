@@ -59,6 +59,12 @@ Si elle s'allonge, c'est qu'on y fait entrer des préférences déguisées en in
    la précède ni ne la dicte.
    *(→ `vision/modele-economique.md`, `adr/ADR-0008`)*
 
+10. **La forme sert le fond, jamais l'inverse.**
+    Une interface n'embellit jamais au prix de la lisibilité ou de l'honnêteté du signal. Une
+    belle interface qui fait douter d'un chiffre, ou qui en suggère une fausse certitude, est un
+    échec de design.
+    *(→ `doctrine/design.md` narration > graphiques, `recherches/inventaire-design.md`, `adr/ADR-0005`)*
+
 ---
 
 **Usage.** Avant de graver une ADR ou une doctrine, vérifier qu'elle ne contredit aucun
