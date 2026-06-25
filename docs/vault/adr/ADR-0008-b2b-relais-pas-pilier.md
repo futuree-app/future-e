@@ -16,8 +16,11 @@ Trois raisons qui ne dépendent d'aucun calendrier :
 - le produit s'améliore grâce aux usages B2C (la boucle de la donnée d'usage) ;
 - le B2B se vend facilement une fois qu'on peut dire « on a X recherches de lieux de vie, Y
   achats, Z territoires comparés » : il valorise une preuve, il ne la fabrique pas ;
-- chaque produit (B2B compris) doit **renforcer le moteur B2C, jamais le détourner**. futur·e
-  ne devient pas un SaaS de diagnostics (cette ADR dérive de l'**invariant n°9**).
+- chaque produit (B2B compris) doit **renforcer le moteur B2C, jamais le détourner**. futur•e
+  ne devient pas un SaaS de diagnostics. (Ce principe **stratégique** vivait autrefois dans les
+  invariants ; il en est redescendu car contingent du pari B2C-d'abord, donc révisable sur
+  preuve. Son noyau non négociable, « on ne dessert jamais l'utilisateur B2C pour un acheteur »,
+  reste porté par l'invariant n°7, l'indépendance.)
 
 Formule de référence : « le B2B n'est pas la béquille du B2C, c'est la valorisation secondaire
 d'une preuve d'usage B2C ».

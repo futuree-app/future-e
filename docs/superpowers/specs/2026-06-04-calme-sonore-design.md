@@ -127,7 +127,7 @@ calme_sonore = round(100 × (1 − expo))
 **Rayons distincts par classe**, `R_auto < R_rail < R_aero` (un aéroport porte beaucoup
 plus loin qu'une autoroute). Valeurs **non figées** : placeholders indicatifs
 1.5 / 3 / 8 km, à **calibrer par sonde sur témoins** avant de figer (patron récurrent
-futur·e : sonde → gate porteur → matrice témoins → gate porteur → patch index).
+futur•e : sonde → gate porteur → matrice témoins → gate porteur → patch index).
 
 ## Saturation & null
 

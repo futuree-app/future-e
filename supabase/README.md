@@ -25,6 +25,6 @@ Ordre recommandé :
 Import DRIAS recommandé :
 
 1. Préparer un CSV de communes géolocalisées avec les colonnes `insee_code,commune_name,latitude,longitude`
-2. Depuis `Desktop/Futur·e/Data-test`, lancer :
+2. Depuis `Desktop/Futur•e/Data-test`, lancer :
    `npm run drias:sql -- --communes <communes.csv> --out drias-import.sql`
 3. Coller le SQL généré dans `Supabase > SQL Editor`

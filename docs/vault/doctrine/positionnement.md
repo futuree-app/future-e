@@ -5,7 +5,7 @@
 
 ## La promesse
 
-futur·e **n'est pas un site sur les risques**. C'est un site sur les **choix de vie**,
+futur•e **n'est pas un site sur les risques**. C'est un site sur les **choix de vie**,
 qui utilise les risques pour éclairer ces choix. La promesse centrale est la
 **compatibilité territoriale à long terme** : choisir où construire sa vie.
 

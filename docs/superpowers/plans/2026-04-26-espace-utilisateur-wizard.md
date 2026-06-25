@@ -138,7 +138,7 @@ body:has(dialog.wizard-dialog[open]) {
 - [ ] **Step 3 : Vérifier que le build passe**
 
 ```bash
-cd "/Users/quentinbrache/Desktop/Futur·e" && npm run build
+cd "/Users/quentinbrache/Desktop/Futur•e" && npm run build
 ```
 
 Expected : `✓ Compiled successfully` (ou uniquement des erreurs non liées aux CSS)
@@ -162,8 +162,8 @@ git commit -m "feat: add CSS design tokens and glass utility to globals.css"
 - [ ] **Step 1 : Déplacer les pages auth**
 
 ```bash
-mkdir -p "/Users/quentinbrache/Desktop/Futur·e/src/app/(auth)/connexion"
-mkdir -p "/Users/quentinbrache/Desktop/Futur·e/src/app/(auth)/inscription"
+mkdir -p "/Users/quentinbrache/Desktop/Futur•e/src/app/(auth)/connexion"
+mkdir -p "/Users/quentinbrache/Desktop/Futur•e/src/app/(auth)/inscription"
 git mv "src/app/connexion/page.tsx" "src/app/(auth)/connexion/page.tsx"
 git mv "src/app/inscription/page.tsx" "src/app/(auth)/inscription/page.tsx"
 ```
@@ -311,7 +311,7 @@ git commit -m "refactor: move auth pages to (auth) route group, layout hosts Aut
 - [ ] **Step 1 : Déplacer les répertoires**
 
 ```bash
-mkdir -p "/Users/quentinbrache/Desktop/Futur·e/src/app/(account)"
+mkdir -p "/Users/quentinbrache/Desktop/Futur•e/src/app/(account)"
 git mv "src/app/compte" "src/app/(account)/compte"
 git mv "src/app/rapport" "src/app/(account)/rapport"
 ```
@@ -364,7 +364,7 @@ git commit -m "refactor: move compte and rapport to (account) route group"
 - [ ] **Step 1 : Déplacer**
 
 ```bash
-mkdir -p "/Users/quentinbrache/Desktop/Futur·e/src/app/(dashboard)"
+mkdir -p "/Users/quentinbrache/Desktop/Futur•e/src/app/(dashboard)"
 git mv "src/app/dashboard" "src/app/(dashboard)/dashboard"
 ```
 
@@ -395,7 +395,7 @@ git commit -m "refactor: move dashboard to (dashboard) route group"
 - [ ] **Step 1 : Déplacer**
 
 ```bash
-mkdir -p "/Users/quentinbrache/Desktop/Futur·e/src/app/(public)"
+mkdir -p "/Users/quentinbrache/Desktop/Futur•e/src/app/(public)"
 git mv "src/app/page.tsx" "src/app/(public)/page.tsx"
 git mv "src/app/savoir" "src/app/(public)/savoir"
 git mv "src/app/territoires" "src/app/(public)/territoires"

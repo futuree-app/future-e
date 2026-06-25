@@ -1,7 +1,7 @@
 # principes/
 
 La couche la plus profonde du vault : les invariants, ce qui ne devrait quasiment jamais
-changer chez futur·e. Les ADR disent *pourquoi cette décision*, les doctrines disent
+changer chez futur•e. Les ADR disent *pourquoi cette décision*, les doctrines disent
 *comment on travaille*, les invariants disent *ce qui reste vrai à travers les décisions*.
 
 Ce sont les axiomes dont les ADR et les doctrines sont les théorèmes. Ils servent de

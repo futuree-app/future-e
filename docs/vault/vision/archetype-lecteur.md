@@ -7,7 +7,7 @@
 
 ## Principe
 
-futur·e ne s'adresse pas à « tout le monde », même si elle peut théoriquement concerner
+futur•e ne s'adresse pas à « tout le monde », même si elle peut théoriquement concerner
 beaucoup de monde. Elle parle d'abord à des personnes qui ont **déjà compris que le climat
 compte**, mais qui ne savent pas encore comment relier ce sujet à leurs propres arbitrages.
 

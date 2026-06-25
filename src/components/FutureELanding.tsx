@@ -2645,7 +2645,7 @@ export default function FutureELanding() {
                   lineHeight: 1.5,
                   margin: 0,
                 }}>
-                  Ces projections ne sont qu&apos;un aperçu de ce qui pourrait changer à {commune}. futur·e croise plus de 50 indicateurs (cadre de vie, santé, mobilité, climat) avec votre profil.
+                  Ces projections ne sont qu&apos;un aperçu de ce qui pourrait changer à {commune}. futur•e croise plus de 50 indicateurs (cadre de vie, santé, mobilité, climat) avec votre profil.
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
                   <button
@@ -2748,14 +2748,14 @@ export default function FutureELanding() {
               color: C.text, margin: '0 0 20px',
             }}>
               Décrivez votre projet de vie,<br />
-              <em style={{ fontStyle: 'italic', color: C.orange }}>futur·e cherche les territoires qui s&apos;en approchent</em>
+              <em style={{ fontStyle: 'italic', color: C.orange }}>futur•e cherche les territoires qui s&apos;en approchent</em>
             </h2>
             <p style={{
               fontSize: 15, color: C.muted, lineHeight: 1.72,
               margin: '0 0 28px', maxWidth: 420,
             }}>
               Vous écrivez ce qui compte pour vous : le quotidien, vos contraintes, ce à quoi
-              vous tenez. futur·e les confronte aux données publiques de chaque territoire et
+              vous tenez. futur•e les confronte aux données publiques de chaque territoire et
               fait remonter ceux qui y répondent le mieux, du cadre de vie au climat de demain.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

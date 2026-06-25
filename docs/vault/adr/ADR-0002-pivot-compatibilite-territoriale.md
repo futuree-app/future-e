@@ -14,7 +14,7 @@ exposition industrielle, bruit, santé environnementale. Le centre de gravité s
 
 ## Décision
 
-futur·e passe de **« moteur climat enrichi »** à **moteur de compatibilité territoriale** :
+futur•e passe de **« moteur climat enrichi »** à **moteur de compatibilité territoriale** :
 un comparateur (`/ou-vivre`) qui classe les lieux selon ~28 critères exprimés par
 préférences, le climat restant une composante centrale mais plus l'unique sujet.
 

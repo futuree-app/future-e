@@ -52,4 +52,4 @@ Le prompt système est long et identique pour tous les utilisateurs, donc le pro
 
 ---
 
-*Document futur·e · à supprimer une fois le cache implémenté.*
+*Document futur•e · à supprimer une fois le cache implémenté.*

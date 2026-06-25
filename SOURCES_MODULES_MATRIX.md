@@ -1,4 +1,4 @@
-# Matrice sources × modules — futur·e
+# Matrice sources × modules — futur•e
 
 Ce document complète `DATA_SOURCES.md` (qui décrit le **branchement technique** de chaque source). Ici on décrit le **branchement éditorial** : pour chaque source, dans quels modules elle vit et **avec quel angle narratif** dans chacun.
 
@@ -111,4 +111,4 @@ Le module Métier reste le plus pauvre en sources branchées. Aujourd'hui, seule
 
 ---
 
-*Document futur·e · Matrice sources × modules · À mettre à jour à chaque nouvelle source intégrée ou réaffectée.*
+*Document futur•e · Matrice sources × modules · À mettre à jour à chaque nouvelle source intégrée ou réaffectée.*

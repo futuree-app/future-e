@@ -242,7 +242,7 @@ function computeSignals(
       headline: "Votre dépendance à la voiture pèsera de plus en plus dans votre budget.",
       stat: "Forte exposition aux coûts du carburant et au carbone",
       precision: "ZFE, malus écologique et tarification carbone à anticiper.",
-      source: "Méthode futur·e · données ADEME",
+      source: "Méthode futur•e · données ADEME",
     });
   } else if (answers.sante.length > 0 && !answers.sante.includes("Aucune sensibilité particulière")) {
     const filtered = answers.sante.filter((s) => s !== "Aucune sensibilité particulière");
@@ -259,7 +259,7 @@ function computeSignals(
       headline: "Acheter aujourd'hui demande d'anticiper le climat pour ne pas se tromper.",
       stat: "Achat à risque climatique",
       precision: "Assurabilité, décote DPE, exposition territoriale à évaluer avant signature.",
-      source: "Méthode futur·e",
+      source: "Méthode futur•e",
     });
   }
 

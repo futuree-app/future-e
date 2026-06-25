@@ -2,7 +2,7 @@
 
 - **Statut** : accepté, **implémenté** (vérifié contre le code 2026-06-25)
 - **Date** : décision ~2026-06-07, architecture confirmée en conversation porteur
-- **Source** : conversation porteur × ChatGPT « futur·e et climat » (intake 2026-06-25),
+- **Source** : conversation porteur × ChatGPT « futur•e et climat » (intake 2026-06-25),
   vérifiée dans `supabase/13_init_decision_packs.sql`, `src/lib/decision-packs.ts`,
   `src/app/api/stripe/`. Recoupe `/memory/project_comparateur_complet.md`,
   `arbitrages/pricing-abonnements-reportes.md`.

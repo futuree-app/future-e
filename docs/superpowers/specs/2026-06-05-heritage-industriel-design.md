@@ -18,7 +18,7 @@ L'exposition active répond à « qu'y a-t-il autour de moi aujourd'hui ? ». L'
 un score : un ancien site peut être dépollué, surveillé, transformé. Scorer l'héritage
 pénaliserait mécaniquement les ports, les villes industrielles historiques, les bassins ouvriers,
 les centres anciens : on scorerait l'histoire plus que le présent. C'est exactement le biais
-social que futur·e refuse. **Donc : signal narratif, jamais une note.**
+social que futur•e refuse. **Donc : signal narratif, jamais une note.**
 
 ## 1. Statut & nature
 

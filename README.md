@@ -17,7 +17,7 @@ Puis ouvrir `http://localhost:3000`.
 
 Le fonctionnement du site n'a pas changé côté application.
 
-Le site lit toujours `public/data_climat.json` via [src/lib/drias-json.ts](/Users/quentinbrache/Desktop/Futur·e/src/lib/drias-json.ts).
+Le site lit toujours `public/data_climat.json` via [src/lib/drias-json.ts](/Users/quentinbrache/Desktop/Futur•e/src/lib/drias-json.ts).
 
 Autrement dit :
 
@@ -47,7 +47,7 @@ Le rattachement géographique reste le même principe qu'avant :
 
 Le script de génération est :
 
-- [scripts/build-drias-median.js](/Users/quentinbrache/Desktop/Futur·e/scripts/build-drias-median.js)
+- [scripts/build-drias-median.js](/Users/quentinbrache/Desktop/Futur•e/scripts/build-drias-median.js)
 
 Il :
 
@@ -97,7 +97,7 @@ Le projet utilise deux modes d'accès :
 
 Résumé :
 
-- [src/lib/georisques.ts](/Users/quentinbrache/Desktop/Futur·e/src/lib/georisques.ts) gère les deux couches
+- [src/lib/georisques.ts](/Users/quentinbrache/Desktop/Futur•e/src/lib/georisques.ts) gère les deux couches
 - `getGeorisquesSummary(insee)` = lecture communale `v1`
 - `getGeorisquesAddressSummary(latitude, longitude)` = lecture `v2` au point géocodé, si `GEORISQUES_API_TOKEN` est défini
 

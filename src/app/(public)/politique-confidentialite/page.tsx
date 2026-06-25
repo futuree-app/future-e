@@ -111,7 +111,7 @@ export default function PolitiqueConfidentialitePage() {
             </p>
             <InfoBlock>
               <InfoRow label="Nom" value="Quentin Brache" />
-              <InfoRow label="Structure" value="Micro-entreprise futur·e" />
+              <InfoRow label="Structure" value="Micro-entreprise futur•e" />
               <InfoRow label="SIREN" value="105 109 557" />
               <InfoRow label="Adresse" value="1 rue Saint Dominique, 17000 La Rochelle" />
               <InfoRow label="Contact" value="hello@futur-e.fr" />

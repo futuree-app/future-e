@@ -708,13 +708,13 @@ Au début de `handleSucceededPayment`, après la ligne `const resend = getResend
     );
     if (userEmail) {
       await resend.emails.send({
-        from: "futur·e <hello@futur-e.fr>",
+        from: "futur•e <hello@futur-e.fr>",
         to: userEmail,
-        subject: "Votre Pack Décision futur·e est débloqué",
+        subject: "Votre Pack Décision futur•e est débloqué",
         html: `
           <p>Merci pour votre confiance.</p>
           <p>Votre comparaison complète et vos trois rapports sont accessibles depuis votre espace.</p>
-          <p>— futur·e</p>
+          <p>— futur•e</p>
         `,
       });
     }

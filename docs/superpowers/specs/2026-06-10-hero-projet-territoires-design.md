@@ -7,7 +7,7 @@ Statut : implémenté (récit à deux actes), en attente de commit
 
 Remplacer la photo de cartons de déménagement (boîte image 4/3 de la colonne droite
 de la section « Décrivez votre projet de vie… » sur la home) par une animation
-propriétaire qui raconte le cœur différenciant de futur·e : un projet de vie en langage
+propriétaire qui raconte le cœur différenciant de futur•e : un projet de vie en langage
 naturel devient des territoires, **avec leurs compromis**, et **se recompose quand on
 précise le projet**.
 

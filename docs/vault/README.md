@@ -1,6 +1,6 @@
-# Vault futur·e — mémoire stratégique
+# Vault futur•e — mémoire stratégique
 
-Ce dossier est la **source de vérité** de futur·e : la connaissance durable (le *pourquoi*).
+Ce dossier est la **source de vérité** de futur•e : la connaissance durable (le *pourquoi*).
 Git raconte ce qui a changé ; le vault raconte pourquoi. Objectif : qu'un nouveau dev, un
 designer ou une IA comprenne le projet en quelques heures.
 
@@ -18,7 +18,7 @@ page du vault** (chemin). L'une pointe vers l'autre, jamais de copier-coller.
 
 - **`principes/`** — les invariants : ce qui ne devrait quasiment jamais changer. La couche
   la plus profonde, les axiomes dont le reste dérive.
-- **`vision/`** — ce qu'est futur·e, pour qui, positionnement.
+- **`vision/`** — ce qu'est futur•e, pour qui, positionnement.
 - **`doctrine/`** — règles durables : UX, éditoriale, design, data.
 - **`modules/`** — une page par surface produit (Territoire, Logement, Santé, Mobilité,
   Métier, Projets, Comparateur).
