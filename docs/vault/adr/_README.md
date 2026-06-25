@@ -15,3 +15,4 @@ Une option étudiée puis écartée, ou un compromis plus local, va dans arbitra
 - **ADR-0004** — Stack technique (Next.js, Supabase, Vercel, Stripe, Claude API).
 - **ADR-0005** — Direction artistique (glassmorphism sombre ; règles vivantes en doctrine).
 - **ADR-0006** — Architecture de l'équipe IA (7 personas + 2 capacités, board pré-mortem).
+- **ADR-0007** — Le Pack Décision est un bundle (entité `decision_packs`, trio_key, snapshot).
