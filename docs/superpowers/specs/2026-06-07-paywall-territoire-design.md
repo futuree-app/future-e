@@ -23,12 +23,12 @@ commune m'intrigue, dis-m'en plus ». La page doit prolonger cette curiosité, p
 bien avancé (niveau commune), **Logement** partiel et surtout lié à une adresse/bien précis, et
 **métier / santé / mobilité / projets** pas encore construits. La page ne doit donc PAS promettre
 de modules inexistants, ni flouter du faux. L'honnêteté joue dans les deux sens : survendre serait
-la vraie trahison de l'esprit futur·e (et un risque de déception/remboursement après paiement).
+la vraie trahison de l'esprit futur•e (et un risque de déception/remboursement après paiement).
 
 ## 2. Objectif
 
 Transformer la paywall en **dernière étape de conviction** plutôt qu'en caisse : remettre
-l'utilisateur dans le contexte de son clic, lui montrer une **preuve réelle** de ce que futur·e a
+l'utilisateur dans le contexte de son clic, lui montrer une **preuve réelle** de ce que futur•e a
 analysé sur cette commune (le seul module prêt et niveau commune : Quartier), expliquer ce qu'il
 débloque et pourquoi c'est payant, et finir par un CTA en langage produit. Le tout honnête sur le
 périmètre réellement livré aujourd'hui.
@@ -40,7 +40,7 @@ pas une liste de fonctionnalités.
 
 - **Honnêteté absolue** : on ne montre que du vrai (extraits réels), on ne promet que ce qui est
   livré. Aucun faux aperçu, aucun module non construit annoncé.
-- **Décrire, pas juger** ; **pas de chiffre dans l'aperçu** (cohérent partout dans futur·e).
+- **Décrire, pas juger** ; **pas de chiffre dans l'aperçu** (cohérent partout dans futur•e).
 - **Langage produit jusqu'au bout** : le CTA dit « Débloquer le rapport de {commune} », jamais
   « Payer ».
 - **Frontière intrigue / réponse** : l'aperçu intrigue (le constat), le rapport répond (l'analyse,

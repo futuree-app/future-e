@@ -441,7 +441,7 @@ Remplacer tout le bloc `<main className="max-w-[760px] mx-auto px-6 py-16"> … 
             Pourquoi ce rapport est payant ?
           </p>
           <p className="text-[14px] leading-[1.7] text-muted">
-            futur·e croise des données publiques dispersées, les rend lisibles commune par
+            futur•e croise des données publiques dispersées, les rend lisibles commune par
             commune et les applique à votre projet. Vous ne payez pas l&apos;accès aux données
             publiques, vous payez leur croisement, leur mise en perspective et leur lecture.
           </p>

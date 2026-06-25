@@ -132,7 +132,7 @@ export default async function TerritoryUnlockPage({
               Aperçu réel du rapport
             </p>
             <h2 className="text-[clamp(22px,2.6vw,28px)] leading-[1.15] text-label mb-1" style={{ fontFamily: "var(--font-serif)" }}>
-              Ce que futur·e a déjà analysé sur {displayName}
+              Ce que futur•e a déjà analysé sur {displayName}
             </h2>
             <p className="text-[13px] text-muted mb-5">
               Le constat est visible, l&apos;analyse complète se débloque avec le rapport.
@@ -169,7 +169,7 @@ export default async function TerritoryUnlockPage({
             Pourquoi ce rapport est payant ?
           </p>
           <p className="max-w-[60ch] text-[15px] leading-[1.75] text-muted">
-            futur·e croise des données publiques dispersées, les rend lisibles commune par
+            futur•e croise des données publiques dispersées, les rend lisibles commune par
             commune et les applique à votre projet. Vous ne payez pas l&apos;accès aux données
             publiques, vous payez leur croisement, leur mise en perspective et leur lecture.
           </p>

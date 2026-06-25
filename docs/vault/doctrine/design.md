@@ -38,7 +38,7 @@ module. C'est la traduction visuelle de l'invariant n°3.
 
 Pas de notification entre 22h et 7h, ni push ni email. Les newsletters partent le lundi
 matin entre 7h et 9h, heure locale. On ne notifie pas sur des pics ponctuels (ozone du jour,
-alerte météo du week-end) : c'est le rôle de Météo-France et RecoSanté, pas de futur·e.
+alerte météo du week-end) : c'est le rôle de Météo-France et RecoSanté, pas de futur•e.
 
 ## Ce que le produit ne fait pas (contraintes de design)
 

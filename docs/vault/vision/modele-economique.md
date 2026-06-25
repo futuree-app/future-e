@@ -12,7 +12,7 @@
 
 ## La thèse
 
-Le marché de futur·e n'est pas l'information climatique : c'est la décision de lieu de vie,
+Le marché de futur•e n'est pas l'information climatique : c'est la décision de lieu de vie,
 un comportement massif et ancien (palmarès de presse, comparateurs de communes, avis
 d'habitants, portails immobiliers) qui draine des audiences énormes mais n'est quasiment pas
 monétisé en B2C.
@@ -77,7 +77,7 @@ acquises.
 - **Mode Foyer** : upsell multi-personnes sur le rapport one-shot, distinct de l'abonnement
   (cf. `arbitrages/mode-foyer-recadre.md`).
 
-futur·e occupe l'étage intermédiaire vacant, entre le gratuit générique et le service humain
+futur•e occupe l'étage intermédiaire vacant, entre le gratuit générique et le service humain
 coûteux (chasseur immobilier 2-3 %, coaching relocation 300 €+).
 
 ### B2B (relais, avant-première dès automne 2026, rien d'achetable)
@@ -97,19 +97,19 @@ avec le temps :
 `sources publiques → croisements → interprétation → UX → marque → confiance → temps accumulé`
 
 (cohérent avec `adr/ADR-0002` : le moat est la combinaison, pas l'élément). Un concurrent copie
-un maillon vite ; il ne copie pas l'accumulation. Conséquence : futur·e ne protège pas des
+un maillon vite ; il ne copie pas l'accumulation. Conséquence : futur•e ne protège pas des
 données, elle protège la **transformation**.
 
-> futur·e ne vend pas des rapports : elle accumule une compréhension de la décision
+> futur•e ne vend pas des rapports : elle accumule une compréhension de la décision
 > territoriale, qu'elle restitue sous différentes formes (rapport, Pack, abonnement, B2B).
 
 ### Les actifs qui prennent de la valeur
 
 Le modèle n'accumule pas que du revenu, il accumule des actifs qui se valorisent seuls, en deux
 familles qui sont deux moteurs distincts :
-- **Actifs de connaissance** (ce qui rend futur·e plus intelligente) : le vault (doctrine,
+- **Actifs de connaissance** (ce qui rend futur•e plus intelligente) : le vault (doctrine,
   arbitrages), les pipelines et datasets enrichis, les prompts, et le capital de compréhension.
-- **Actifs de distribution** (ce qui rend futur·e plus accessible) : les 34 000 pages SEO, les
+- **Actifs de distribution** (ce qui rend futur•e plus accessible) : les 34 000 pages SEO, les
   contenus (pages Savoir), la marque, la base clients, les relations B2B.
 
 Lire le modèle par les actifs (pas seulement par le MRR) change la valorisation : même à revenu
@@ -117,7 +117,7 @@ modeste, l'accumulation a une valeur. Le code est l'outil des deux familles, pas
 
 ## Ce qu'on refuse de monétiser
 
-Découle des invariants (on éclaire une décision, on ne la vend pas). futur·e refuse, même
+Découle des invariants (on éclaire une décision, on ne la vend pas). futur•e refuse, même
 contre de la croissance :
 - la **publicité** (déjà tenu : « Aucune publicité » affiché en prod),
 - l'**affiliation immobilière** et la **vente de leads**,
@@ -126,7 +126,7 @@ contre de la croissance :
 
 Ces refus sont un actif de confiance, pas une contrainte. Ils sont gravés : l'indépendance ne
 se monétise pas (**invariant n°8**), et chaque produit renforce le moteur B2C sans jamais le
-détourner, futur·e ne devenant pas un SaaS de diagnostics (**invariant n°9**).
+détourner, futur•e ne devenant pas un SaaS de diagnostics (**invariant n°9**).
 
 ## Dimensionnement marché (B2C, étude du 10 juin 2026, sourcé)
 
@@ -168,7 +168,7 @@ Tout n'est pas au même niveau de certitude. Honnêteté du modèle :
 ## Risques structurants
 
 1. **La catégorie mal comprise** (risque marketing avant d'être économique) : si le marché lit
-   futur·e comme « un comparateur de villes de plus », on perd ; s'il comprend « une
+   futur•e comme « un comparateur de villes de plus », on perd ; s'il comprend « une
    intelligence territoriale personnalisée et prospective », on gagne. Le discours doit rattraper
    le produit (cf. `/memory/feedback_positionnement_compatibilite.md`).
 2. **Le paiement B2C non démontré** (précédent CityScan).

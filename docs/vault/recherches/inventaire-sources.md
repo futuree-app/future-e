@@ -2,14 +2,14 @@
 
 > Terrain et doctrine du futur agent **Data Curator** (cf. `adr/ADR-0006`). Le Data Curator
 > n'est pas le gardien de toutes les données du projet. Il répond à UNE question :
-> **« Cette donnée mérite-t-elle d'entrer dans le système de décision de futur·e, et si oui,
+> **« Cette donnée mérite-t-elle d'entrer dans le système de décision de futur•e, et si oui,
 > comment l'utiliser honnêtement ? »**
 >
 > Cette page porte le **durable** (comment décider) ; le **code** porte le vivant (le câblage
 > exact : `DATA_SOURCES.md` = technique, `SOURCES_MODULES_MATRIX.md` = éditorial rapport,
 > `src/lib/*.ts`, `scripts/populate-*`). Construite en confrontant le code au 2026-06-25.
 
-## Pourquoi une donnée rejoint futur·e
+## Pourquoi une donnée rejoint futur•e
 
 > Une donnée n'entre pas parce qu'elle est disponible. Elle entre parce qu'elle raconte
 > quelque chose du territoire que l'utilisateur ne pouvait pas comprendre autrement.
@@ -20,11 +20,11 @@ Deux corollaires :
 > Une bonne donnée mal racontée vaut moins qu'une donnée imparfaite bien contextualisée.
 
 > Le rôle principal du Data Curator est de dire **non**. Son travail n'est pas d'ajouter des
-> sources, c'est d'empêcher futur·e de devenir un catalogue.
+> sources, c'est d'empêcher futur•e de devenir un catalogue.
 
 ## La valeur n'est pas la donnée, c'est la transformation
 
-DRIAS est public, tout le monde y a accès. Le moat de futur·e n'est pas la donnée brute, c'est
+DRIAS est public, tout le monde y a accès. Le moat de futur•e n'est pas la donnée brute, c'est
 ce qu'on en fait. Le Curator protège la chaîne, pas la source :
 
 `source brute → pipeline → croisements → interprétation → expérience utilisateur`
@@ -40,7 +40,7 @@ Le but n'est pas d'appliquer une règle, c'est de penser juste :
 - Existe-t-il déjà une donnée qui raconte la même chose ?
 - À quelle échelle cette affirmation est-elle vraie ? (`doctrine/data.md`)
 - Quel est le coût de maintenance ? Est-il soutenable pour un fondateur solo ?
-- Que perdrait futur·e si cette source disparaissait demain ?
+- Que perdrait futur•e si cette source disparaissait demain ?
 - Sa licence est-elle compatible ? (attention ODbL d'OSM)
 
 Si l'intégration ne survit pas à ces questions, on n'intègre pas. Une source se **retire** aussi :
@@ -77,7 +77,7 @@ Le Curator doit savoir quel TYPE de donnée il manipule, car ça change la faço
 Toutes les sources ne jouent pas le même rôle. Cette hiérarchie sert les arbitrages de coût
 (le Business Strategist s'en servira). Coût de maintenance noté en clair, jamais en étoiles.
 
-- **Fondatrices** — sans elles, futur·e n'existe plus. **DRIAS** (maintenance faible, build
+- **Fondatrices** — sans elles, futur•e n'existe plus. **DRIAS** (maintenance faible, build
   annuel), **Géorisques** (moyenne, API tierce), **INSEE** recensement/MOBPRO/BPE (faible,
   millésime annuel à rebuild), **IGN/BAN** (faible, API stable).
 - **Enrichissement** — le produit reste excellent sans elles : GisSol, Cartofriches, RNSA,

@@ -81,13 +81,13 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     );
     if (userEmail) {
       await resend.emails.send({
-        from: "futur·e <hello@futur-e.fr>",
+        from: "futur•e <hello@futur-e.fr>",
         to: userEmail,
-        subject: "Votre Pack Décision futur·e est débloqué",
+        subject: "Votre Pack Décision futur•e est débloqué",
         html: `
           <p>Merci pour votre confiance.</p>
           <p>Votre comparaison complète et vos trois rapports sont accessibles depuis votre espace.</p>
-          <p>futur·e</p>
+          <p>futur•e</p>
         `,
       });
     }
@@ -158,13 +158,13 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
 
   if (userEmail) {
     await resend.emails.send({
-      from: "futur·e <hello@futur-e.fr>",
+      from: "futur•e <hello@futur-e.fr>",
       to: userEmail,
-      subject: "Votre rapport interactif futur·e est en préparation",
+      subject: "Votre rapport interactif futur•e est en préparation",
       html: `
         <p>Merci pour votre confiance.</p>
         <p>Votre rapport interactif est en préparation. Vous le recevrez dans les prochaines minutes.</p>
-        <p>— futur·e</p>
+        <p>— futur•e</p>
       `,
     });
   }
@@ -174,12 +174,12 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     sendAt.setDate(sendAt.getDate() + 7);
 
     await resend.emails.send({
-      from: "futur·e <hello@futur-e.fr>",
+      from: "futur•e <hello@futur-e.fr>",
       to: userEmail,
       subject: "Vos 14 € couvrent votre premier mois du Fil",
       scheduledAt: sendAt.toISOString(),
       html: `
-        <p>Votre rapport interactif futur·e est là depuis une semaine.</p>
+        <p>Votre rapport interactif futur•e est là depuis une semaine.</p>
         <p>
           Si vous souhaitez suivre l'évolution de votre situation mois par mois,
           vos 14 € couvrent votre premier mois du Fil, et une partie du second.
@@ -190,7 +190,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
             Activer Le Fil →
           </a>
         </p>
-        <p>— futur·e</p>
+        <p>— futur•e</p>
       `,
     });
   }

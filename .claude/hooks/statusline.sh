@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Statusline futur·e : branche git + modèle + ESTIMATION de remplissage du contexte.
+# Statusline futur•e : branche git + modèle + ESTIMATION de remplissage du contexte.
 # But : voir venir le seuil (~98 %) pour lancer /handoff avant de changer de compte.
 # L'estimation lit le dernier usage du transcript (input + cache) / fenêtre de contexte.
 # Dégradation propre si jq absent.

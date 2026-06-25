@@ -1,11 +1,11 @@
-# Le design de futur·e : signatures, système et patterns
+# Le design de futur•e : signatures, système et patterns
 
 > Terrain et doctrine du futur agent **Design Critic** (cf. `adr/ADR-0006`, architecture de
 > l'équipe IA). Le Design Critic n'est pas le gardien de tous les pixels du projet. Il répond
 > à UNE question : **« Cet écran sert-il la décision du lecteur, dans la voix et la direction
-> artistique de futur·e, ou ajoute-t-il du bruit ? »**
+> artistique de futur•e, ou ajoute-t-il du bruit ? »**
 >
-> Cette page porte le **durable** : ce qui fait qu'un écran est de futur·e et le resterait même
+> Cette page porte le **durable** : ce qui fait qu'un écran est de futur•e et le resterait même
 > si React, Tailwind et les tokens disparaissaient. Le **code** porte le vivant
 > (`design-tokens.css`, `globals.css`, les `<style>` colocalisés, les composants). Les **règles
 > verrouillées** vivent dans `doctrine/design.md` et `doctrine/interface.md` : cette page ne les
@@ -16,7 +16,7 @@
 ## La question-mère du Design Critic
 
 > Un écran n'est pas réussi parce qu'il est beau. Il est réussi parce qu'il aide à décider
-> sans mentir, dans la voix de futur·e.
+> sans mentir, dans la voix de futur•e.
 
 C'est la traduction visuelle de l'invariant n°1 (on éclaire, on ne décide pas à la place), de
 l'invariant n°4 (la donnée raconte avant de convaincre) et de l'invariant n°10 (la forme sert le
@@ -33,7 +33,7 @@ phrase. Trois verbes le résument :
 - **Protéger** : la lisibilité et l'honnêteté du signal. Dire non à l'ornement, au graphique qui
   fait joli sans rien raconter, à la fausse certitude.
 - **Simplifier** : chercher en premier ce qui peut **disparaître sans perte**. Un écran de
-  futur·e a peu d'éléments, chacun avec un rôle ; le bruit est l'ennemi par défaut.
+  futur•e a peu d'éléments, chacun avec un rôle ; le bruit est l'ennemi par défaut.
 - **Révéler** : faire apparaître le signal enfoui et **nommer ce qui manque** (une source
   inaccessible, un compromis tu, un mouvement qu'on ne voit pas). Pas une posture : un manque
   concret, désigné.
@@ -44,7 +44,7 @@ phrase. Trois verbes le résument :
 
 ---
 
-## Les signatures de futur·e (ce qui survit à un changement de techno)
+## Les signatures de futur•e (ce qui survit à un changement de techno)
 
 Si demain toute l'UI était refaite en Swift, voici ce qui devrait survivre. Ce sont les
 invariants visibles du produit, indépendants de React, de Tailwind et des tokens. Le Critic les
@@ -122,7 +122,7 @@ codent le sombre en dur et **ne suivent pas le thème**. C'est une vraie incohé
 
 ## Les patterns d'écran déjà tranchés
 
-Ces patterns sont la grammaire de futur·e. Le Critic juge la **conformité**, il ne les réinvente
+Ces patterns sont la grammaire de futur•e. Le Critic juge la **conformité**, il ne les réinvente
 pas. Le détail vivant est dans les fiches `/memory` citées.
 
 ### La carte-indicateur et son drawer (primitive centrale)

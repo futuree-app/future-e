@@ -16,7 +16,7 @@ locales) pour enrichir l'analyse d'un territoire.
 ## Pourquoi
 
 Risque de désinformation, charge de modération pour un projet solo, et surtout
-**contradiction frontale avec le ton sourcé** : futur·e ne vit que par la traçabilité de
+**contradiction frontale avec le ton sourcé** : futur•e ne vit que par la traçabilité de
 chaque affirmation (voir `vision/positionnement.md`, rapport à la preuve). Du contenu
 non sourcé éroderait le moat de crédibilité.
 

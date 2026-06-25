@@ -61,7 +61,7 @@ export const NAV_ITEMS: NavItem[] = [
 
   { label: 'Mon rapport', href: '/rapport' },
   { label: 'Comparateur', href: '/comparateur' },
-  { label: 'Pourquoi futur·e', href: '/pourquoi' },
+  { label: 'Pourquoi futur•e', href: '/pourquoi' },
 ];
 
 // ─── Hub articles landing page ────────────────────────────────────────────────

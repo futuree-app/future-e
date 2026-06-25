@@ -112,7 +112,7 @@ export default async function ComptePage() {
             </h2>
             <div className="grid grid-cols-3 rounded-lg overflow-hidden border border-white/[0.08] mb-5">
               {(fullAccess
-                ? [{ val: "6", label: "modules ouverts" }, { val: "∞", label: "questions Futur·e" }, { val: "∞", label: "mises à jour" }]
+                ? [{ val: "6", label: "modules ouverts" }, { val: "∞", label: "questions Futur•e" }, { val: "∞", label: "mises à jour" }]
                 : [{ val: "1", label: "ville de référence" }, { val: "1", label: "lecture personnalisée" }, { val: "∞", label: "retrouvable" }]
               ).map((m, i) => (
                 <div key={m.label} className={`px-3 py-3.5 text-center ${i < 2 ? "border-r border-white/[0.08]" : ""}`}>
@@ -123,7 +123,7 @@ export default async function ComptePage() {
             </div>
             <p className="text-[14px] leading-[1.7] text-muted">
               {fullAccess
-                ? "Tous les modules sont accessibles depuis le hub rapport interactif. Futur·e répond à vos questions en tenant compte de votre commune et de votre profil."
+                ? "Tous les modules sont accessibles depuis le hub rapport interactif. Futur•e répond à vos questions en tenant compte de votre commune et de votre profil."
                 : "Le compte garde votre première lecture et votre commune de référence, pour y revenir sans repasser par le questionnaire."}
             </p>
           </aside>

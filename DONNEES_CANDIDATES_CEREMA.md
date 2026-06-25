@@ -93,7 +93,7 @@ Révision après une relecture stratégique (challenge du porteur). Le premier p
 appliquait un filtre trop étroit (« est-ce du climat ? ») et sous-estimait le rôle
 du module Quartier. Ce recadrage corrige et fait foi sur les divergences.
 
-### futur·e = projet de vie territorial dans un monde qui change
+### futur•e = projet de vie territorial dans un monde qui change
 
 Le produit score déjà sur climat, emploi, cadre de vie, santé environnementale,
 relief, logement : c'est **un produit de projet de vie territorial**, pas un produit
@@ -112,7 +112,7 @@ a déjà ; notre angle est le territoire face au changement).
 - **Vécu quotidien / moat** (confort d'été réel, qualité des nuits, préservation,
   artificialisation, bruit, végétalisation) : durs à trouver ailleurs, **c'est là
   qu'on est unique**. Territoire du **module Quartier**, probable différenciateur
-  durable de futur·e. Le premier passage l'a sous-évalué.
+  durable de futur•e. Le premier passage l'a sous-évalué.
 
 Conséquence : deux files de priorité (must-have fonctionnel ET moat de vécu), ne pas
 laisser la première écraser la seconde.
@@ -137,7 +137,7 @@ laisser la première écraser la seconde.
 
 ### Angles morts (besoins, pas datasets)
 
-Dimensions de projet de vie encore invisibles dans futur·e :
+Dimensions de projet de vie encore invisibles dans futur•e :
 - **Accès à la nature (positif)** : on mesure l'artificialisation (le négatif) et le
   relief, pas « forêt / eau / espaces verts accessibles ». Manque fort, on-brand.
 - **Vivacité locale / sociabilité** : on a l'isolement (proxy population), pas

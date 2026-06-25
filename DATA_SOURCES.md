@@ -1,4 +1,4 @@
-# Sources de données — futur·e
+# Sources de données — futur•e
 
 Toutes les sources de données externes intégrées dans l'application, par module.
 

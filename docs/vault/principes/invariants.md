@@ -1,4 +1,4 @@
-# Les invariants de futur·e
+# Les invariants de futur•e
 
 > La couche la plus profonde du vault. Ce qui ne devrait quasiment jamais changer.
 
@@ -6,7 +6,7 @@
 dérivent, et (b) tu refuserais de la croissance pour le préserver. Si une preuve nouvelle
 pouvait te faire changer d'avis (« les scores triplent la conversion »), ce n'est pas un
 invariant, c'est une doctrine ou une stratégie. Un invariant ne bouge pas quand on
-*apprend* : il ne bouge que si futur·e décide de devenir un autre produit.
+*apprend* : il ne bouge que si futur•e décide de devenir un autre produit.
 
 **Cette page doit rester courte.** Sa force est inversement proportionnelle à sa longueur.
 Si elle s'allonge, c'est qu'on y fait entrer des préférences déguisées en invariants.
@@ -33,7 +33,7 @@ Si elle s'allonge, c'est qu'on y fait entrer des préférences déguisées en in
    *(→ `doctrine/editoriale.md` signature, `doctrine/interface.md` tooltips)*
 
 5. **On lit le mouvement, pas la photo.**
-   Les transformations comptent plus que les états. futur·e parle d'un monde qui change, pas
+   Les transformations comptent plus que les états. futur•e parle d'un monde qui change, pas
    d'un instantané.
    *(→ `doctrine/` gabarit climat, face = mouvement)*
 
@@ -44,7 +44,7 @@ Si elle s'allonge, c'est qu'on y fait entrer des préférences déguisées en in
    *(→ `doctrine/data.md` granularité, `doctrine/editoriale.md`)*
 
 7. **On parle à une intelligence, pas à une peur.**
-   Lucidité sans alarmisme, précision sans culpabilisation. futur·e existe contre l'amnésie,
+   Lucidité sans alarmisme, précision sans culpabilisation. futur•e existe contre l'amnésie,
    pas pour l'alarme permanente.
    *(→ `vision/manifeste.md`, `vision/positionnement.md`)*
 
@@ -55,7 +55,7 @@ Si elle s'allonge, c'est qu'on y fait entrer des préférences déguisées en in
    *(→ `vision/modele-economique.md`, `adr/ADR-0001`)*
 
 9. **Chaque produit renforce le moteur B2C, jamais ne le détourne.**
-   futur·e ne devient pas un SaaS de diagnostics. Le B2B valorise une preuve d'usage B2C, il ne
+   futur•e ne devient pas un SaaS de diagnostics. Le B2B valorise une preuve d'usage B2C, il ne
    la précède ni ne la dicte.
    *(→ `vision/modele-economique.md`, `adr/ADR-0008`)*
 

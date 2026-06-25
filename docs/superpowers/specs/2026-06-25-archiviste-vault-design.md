@@ -1,11 +1,11 @@
-# Archiviste de futur·e — mémoire stratégique à deux niveaux
+# Archiviste de futur•e — mémoire stratégique à deux niveaux
 
 Date : 2026-06-25
 Statut : design validé, prêt pour plan d'implémentation
 
 ## Problème
 
-futur·e accumule des centaines d'heures de réflexion (conversations ChatGPT/Claude,
+futur•e accumule des centaines d'heures de réflexion (conversations ChatGPT/Claude,
 audits, recherches data, arbitrages). Git raconte *ce qui a changé*. Personne ne tient
 *le pourquoi* de façon durable et navigable. On risque de refaire des recherches déjà
 faites, de rouvrir des débats déjà tranchés, et de perdre la doctrine si l'équipe change.
@@ -19,7 +19,7 @@ concurrencer avec un troisième silo.
 ## Objectif ultime
 
 Dans cinq ans, un nouveau dev / designer / IA doit comprendre en quelques heures :
-la vision de futur·e, son architecture, sa doctrine, ses grands arbitrages et les
+la vision de futur•e, son architecture, sa doctrine, ses grands arbitrages et les
 raisons profondes des choix. Le vault devient la mémoire stratégique du projet.
 
 ## Décisions structurantes (tranchées en brainstorming)
@@ -57,8 +57,8 @@ raisons profondes des choix. Le vault devient la mémoire stratégique du projet
 
 ```
 docs/vault/
-  README.md          # index narratif : raconte futur·e + pointe vers l'essentiel
-  vision/            # ce qu'est futur·e, pour qui, positionnement
+  README.md          # index narratif : raconte futur•e + pointe vers l'essentiel
+  vision/            # ce qu'est futur•e, pour qui, positionnement
   doctrine/          # règles durables : UX, éditoriale, design, data
   modules/           # une page par surface produit (voir liste)
   adr/               # décisions structurantes datées + numérotées (ADR-0001-...)

@@ -149,7 +149,7 @@ export default function HeroProjetTerritoires({ className }: { className?: strin
       ref={rootRef}
       className={['hpt-root', className].filter(Boolean).join(' ')}
       role="img"
-      aria-label="futur·e traduit un projet de vie en territoires et montre les compromis : Vannes, Saint-Nazaire, La Rochelle ; en ajoutant « sans subir la canicule », les résultats changent (Saint-Brieuc remplace La Rochelle)."
+      aria-label="futur•e traduit un projet de vie en territoires et montre les compromis : Vannes, Saint-Nazaire, La Rochelle ; en ajoutant « sans subir la canicule », les résultats changent (Saint-Brieuc remplace La Rochelle)."
       style={{
         position: 'relative',
         width: '100%',
@@ -393,7 +393,7 @@ function Token({
   );
 }
 
-/* Marqueur futur·e : point plein (répondu) ou anneau creux (en retrait). Pas d'emoji. */
+/* Marqueur futur•e : point plein (répondu) ou anneau creux (en retrait). Pas d'emoji. */
 function Dot({ filled }: { filled?: boolean }) {
   return (
     <span

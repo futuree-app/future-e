@@ -7,7 +7,7 @@ Une page = une règle ou un corpus de règles cohérent. Lié aux modules qui l'
 
 - **`positionnement.md`** — la promesse (site de choix de vie, pas de risques) et les
   règles de copy de positionnement (hero, « près de 30 critères », chips = promesses).
-- **`editoriale.md`** — voix et honnêteté éditoriale : trois piliers du ton, ce que futur·e
+- **`editoriale.md`** — voix et honnêteté éditoriale : trois piliers du ton, ce que futur•e
   ne fait pas, règles typo (vouvoiement, pas de tiret cadratin, pas de « ! »), formules
   interdites, glossaire FR, signature identitaire, Callendar non cité.
 - **`data.md`** — granularité et honnêteté géographique : ne jamais surpromettre la

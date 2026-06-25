@@ -8,7 +8,7 @@
 - **Branche courante** : `main` ; le Design Critic est sur la branche `feat/design-critic`.
 
 ## Objectif en cours
-Construction de la « mémoire stratégique » de futur·e (vault à deux niveaux) et de l'équipe
+Construction de la « mémoire stratégique » de futur•e (vault à deux niveaux) et de l'équipe
 d'agents IA. Modèle économique, invariants, Data Curator, outillage de passation : faits. On
 vient de livrer le **Design Critic** (3e agent). Prochain chantier : l'agent **Business Strategist**.
 
@@ -25,7 +25,13 @@ vient de livrer le **Design Critic** (3e agent). Prochain chantier : l'agent **B
   plomberie token, seulement l'incohérence visible) et **frontière** (ne réécrit pas le texte,
   le signale). **Invariant n°10** gravé (la forme sert le fond).
 - **Testé sur `/ou-vivre`** : concluant. Zéro bruit token, retraits d'ornement bien ciblés
-  (reflet premium + double typewriter), a révélé la divergence de marque `futur•e`/`futur·e`.
+  (reflet premium + double typewriter), a révélé une divergence de marque (point médian vs
+  puce) depuis tranchée.
+- **Marque harmonisée** : le porteur a tranché la **puce** (`futur•e`, U+2022) comme glyphe
+  canonique. Sweep byte-safe `futur·e`/`Futur·e` → puce sur 50 fichiers trackés (code + vault +
+  docs + agents + statusline), séparateurs ` · ` préservés, export `Documentation Notion/` laissé
+  intact (pas la source de vérité), caches aider non touchés. Le **dossier** `Futur·e` (point
+  médian) n'est PAS renommé (chemins/git).
 
 ## État git
 - Branche `feat/design-critic` (à commiter) : `docs/vault/recherches/inventaire-design.md`,
@@ -34,10 +40,8 @@ vient de livrer le **Design Critic** (3e agent). Prochain chantier : l'agent **B
 - `main` propre par ailleurs. PR à ouvrir pour le Design Critic.
 
 ## Prochaine étape immédiate
-1. Trancher la marque **`futur•e` (puce, 46 fichiers) vs `futur·e` (point médian, vault)** et
-   harmoniser tout le repo (chantier séparé, décision porteur en attente).
-2. Construire le **terrain du Business Strategist** (confronté au code/vault, comme les deux
-   précédents), puis son mandat. Règle : **pas de mandat d'agent tant que son terrain n'existe pas.**
+Construire le **terrain du Business Strategist** (confronté au code/vault, comme les deux
+précédents), puis son mandat. Règle : **pas de mandat d'agent tant que son terrain n'existe pas.**
 
 ## À lire d'abord à la reprise
 1. `MEMORY.md` (index) + fiche `project_archiviste_vault.md` (état + séquence agents-avant-audit).
@@ -48,7 +52,7 @@ vient de livrer le **Design Critic** (3e agent). Prochain chantier : l'agent **B
 ## Pièges / fils ouverts
 - Séquence tranchée : **agents AVANT la mission d'audit** (les agents produisent les besoins de
   l'audit). Ordre : Data Curator (fait) → Design Critic (fait) → Business Strategist → puis audit.
-- **Marque `futur•e`/`futur·e`** : décision porteur en attente, puis harmonisation repo (46 vs 5).
+- **Marque** : tranchée (puce `futur•e`), harmonisée sur le repo (voir « Fait dans cette session »).
 - **Trouvailles /ou-vivre non appliquées** (volontaire, on testait l'agent) : reflet premium
   animé du bouton Pack, double typewriter AskFuture redondant avec ses chips, ligne d'aperçu
   redondante dans la matrice, glyphes ⚠/✓ à vérifier au rendu. Rapport gardé en référence.

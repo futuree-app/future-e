@@ -12,7 +12,7 @@ ou un foyer, dans un lieu donné et à un horizon donné.
 
 ## Territoire de marque
 
-futur·e se situe à l'intersection de quatre registres :
+futur•e se situe à l'intersection de quatre registres :
 
 - la **rigueur** des données publiques,
 - la **lisibilité** d'un bon travail éditorial,
@@ -33,7 +33,7 @@ dans la clarté sans être engagé dans un camp.
 ## Rapport à la preuve
 
 Chaque module, chaque projection, **chaque affirmation significative doit pouvoir renvoyer à
-une source identifiable.** futur·e ne vit que si sa crédibilité est solide. La qualité
+une source identifiable.** futur•e ne vit que si sa crédibilité est solide. La qualité
 d'écriture ne doit jamais maquiller la faiblesse d'un fond.
 
 ## Rapport à l'incertitude
@@ -51,7 +51,7 @@ L'incertitude fait partie du produit. Distinguer clairement :
 Les automatismes du discours climat, vidés de sens : « Face à l'urgence climatique… »,
 « Il est grand temps de… », « 10 gestes simples pour… », « Il ne tient qu'à vous de… »,
 « Grâce à notre algorithme propriétaire… », « Transformez votre anxiété en action… ».
-futur·e se construit **contre** cette facilité de langage. (Règles détaillées dans
+futur•e se construit **contre** cette facilité de langage. (Règles détaillées dans
 `doctrine/editoriale.md`.)
 
 ## Positionnement implicite

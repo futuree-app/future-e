@@ -1,4 +1,4 @@
-# ADR-0006 : Architecture de l'équipe IA de futur·e
+# ADR-0006 : Architecture de l'équipe IA de futur•e
 
 - **Statut** : accepté
 - **Date** : 2026-06-25
@@ -6,7 +6,7 @@
 
 ## Contexte
 
-futur·e est développé en solo avec Claude Code. Au-delà des prompts ponctuels, une équipe
+futur•e est développé en solo avec Claude Code. Au-delà des prompts ponctuels, une équipe
 virtuelle de sous-agents émerge, chacun représentant un métier et partageant la même
 mémoire (vault + `/memory`). La question : quelle architecture est saine sur le long terme,
 sans tomber dans l'organigramme inutile ni le théâtre d'accord.
@@ -33,7 +33,7 @@ d'agents.
 4. **Business Strategist** : pricing, coûts IA, marges, ROI, contraintes micro-entreprise.
 5. **Product Strategist** : valeur utilisateur, cohérence avec la vision, simplification.
 6. **Software Architect** : dette technique, performance, maintenabilité.
-7. **Editorial Writer** : voix de futur·e, précision, promesse non trompeuse.
+7. **Editorial Writer** : voix de futur•e, précision, promesse non trompeuse.
 
 **Capacités, pas personas** :
 - **Recherche profonde (Researcher)** : agent d'**ouverture** (divergence). Élargit le champ,

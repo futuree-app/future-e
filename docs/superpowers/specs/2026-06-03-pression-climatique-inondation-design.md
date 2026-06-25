@@ -12,7 +12,7 @@ en intensification) n'est pas pris en compte, et l'observé communal peut sous-e
 trajectoire climatique.
 
 **Décision porteur (verrouillée)** : on ne fusionne PAS observé et projeté dans un score hybride.
-La vraie force de futur·e est justement d'avoir séparé :
+La vraie force de futur•e est justement d'avoir séparé :
 - **Risque inondation** = ce qui s'est réellement produit (CatNat) ;
 - **Précipitations extrêmes** = ce que le climat projette (`faible_precip_extremes`).
 

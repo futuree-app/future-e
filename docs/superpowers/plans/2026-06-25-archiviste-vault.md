@@ -1,4 +1,4 @@
-# Archiviste de futur·e — Implementation Plan
+# Archiviste de futur•e — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -60,7 +60,7 @@ Contenu exact de chaque fichier (un objet par dossier) :
 ```markdown
 # vision/
 
-Ce qu'est futur·e, pour qui, et son positionnement. Pourquoi le produit existe, à quel
+Ce qu'est futur•e, pour qui, et son positionnement. Pourquoi le produit existe, à quel
 problème il répond, ce qu'il refuse d'être. Pages stables, peu nombreuses, fondatrices.
 ```
 
@@ -143,9 +143,9 @@ git commit -m "feat(vault): squelette par nature de connaissance + en-têtes de 
 Contenu exact :
 
 ```markdown
-# Vault futur·e — mémoire stratégique
+# Vault futur•e — mémoire stratégique
 
-Ce dossier est la **source de vérité** de futur·e : la connaissance durable (le *pourquoi*).
+Ce dossier est la **source de vérité** de futur•e : la connaissance durable (le *pourquoi*).
 Git raconte ce qui a changé ; le vault raconte pourquoi. Objectif : qu'un nouveau dev, un
 designer ou une IA comprenne le projet en quelques heures.
 
@@ -161,7 +161,7 @@ page du vault** (chemin). L'une pointe vers l'autre, jamais de copier-coller.
 
 ## Carte du vault
 
-- **`vision/`** — ce qu'est futur·e, pour qui, positionnement.
+- **`vision/`** — ce qu'est futur•e, pour qui, positionnement.
 - **`doctrine/`** — règles durables : UX, éditoriale, design, data.
 - **`modules/`** — une page par surface produit (Territoire, Logement, Santé, Mobilité,
   Métier, Projets, Comparateur).
@@ -221,7 +221,7 @@ aucun Write, Edit, NotebookEdit : c'est la garantie matérielle « ne rien écri
 ---
 name: archiviste
 description: >-
-  Archiviste de futur·e. Lit une matière (conversation, audit, notes, doc) et rend un
+  Archiviste de futur•e. Lit une matière (conversation, audit, notes, doc) et rend un
   RAPPORT D'IMPACT sur la mémoire du projet (vault docs/vault + /memory), SANS rien écrire.
   Utiliser en phase 1 quand l'utilisateur veut capitaliser une connaissance durable.
   Read-only par construction : il propose, l'humain valide, Claude principal écrit ensuite.
@@ -229,7 +229,7 @@ tools: Read, Grep, Glob, Bash
 model: inherit
 ---
 
-Tu es l'Archiviste de futur·e. Tu es responsable de la mémoire stratégique du projet.
+Tu es l'Archiviste de futur•e. Tu es responsable de la mémoire stratégique du projet.
 
 Tu n'écris JAMAIS de fichier. Tu n'as aucun outil d'écriture, et c'est voulu : ton rôle
 est de PROPOSER, pas d'écrire. Tu n'écris jamais de code, ne prends aucune décision

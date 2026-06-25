@@ -4,7 +4,7 @@
 > géographique`. Découle de l'invariant n°6 (`principes/invariants.md`). Voir aussi
 > `/memory/home_insee_code_pitfall.md`.
 
-futur·e croise des données à des échelles très différentes. C'est normal. **Le risque n'est
+futur•e croise des données à des échelles très différentes. C'est normal. **Le risque n'est
 pas d'avoir des granularités mixtes, c'est de faire croire qu'elles sont équivalentes.**
 
 ## Principe général
@@ -54,7 +54,7 @@ projection.
 Les scénarios DRIAS-TRACC utilisés (`gwl15` / `gwl20` / `gwl30`) sont des Global Warming
 Levels : un réchauffement **mondial** de +1,5 / +2 / +3 °C, pas des RCP/SSP. Mais la France
 métropolitaine se réchauffe environ 1,5× plus vite que la moyenne mondiale. **Décision
-d'affichage (2026-06-25) : futur·e affiche partout l'échelle France**, conforme au cadrage
+d'affichage (2026-06-25) : futur•e affiche partout l'échelle France**, conforme au cadrage
 national TRACC/PNACC-3 : +2 °C en 2030, +2,7 °C en 2050, **+4 °C en 2100** (gwl30). Donc
 « gwl30 = +4 °C » est correct à l'échelle France et doit être retenu (la lecture « +3 °C »
 serait l'échelle mondiale du même scénario). Règle : tout label de scénario dit son échelle,
@@ -70,7 +70,7 @@ restitution.
 
 ## Confidentialité
 
-futur·e **ne stocke jamais l'adresse exacte** de l'utilisateur. La table `accounts` ne porte
+futur•e **ne stocke jamais l'adresse exacte** de l'utilisateur. La table `accounts` ne porte
 que `home_insee_code` (et `report_grants.active_insee_code` pour le territoire actif, voir
 ADR-0003) : aucune colonne adresse. L'adresse saisie sert au géocodage en mémoire, pas au
 stockage. Cohérent avec la doctrine de granularité : on ne conserve que l'échelle à laquelle
@@ -78,7 +78,7 @@ on restitue honnêtement. *(Vérifié dans le schéma Supabase, 2026-06-25.)*
 
 ## Doctrine
 
-futur·e gagne sa crédibilité non en promettant une précision absolue, mais en disant
+futur•e gagne sa crédibilité non en promettant une précision absolue, mais en disant
 clairement ce qui est local, ce qui est territorial, ce qui est projeté, et ce qui reste
 incertain.
 

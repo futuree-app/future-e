@@ -17,7 +17,7 @@ Critère opt-in `croissance_demographique` : mesurer si un territoire **gagne ou
 habitants**, avec un narratif qui explique la **nature** du phénomène (arrivée de nouveaux
 habitants vs natalité).
 
-Architecture en deux temps, cohérente avec le patron récent de futur·e (score lisible + signal
+Architecture en deux temps, cohérente avec le patron récent de futur•e (score lisible + signal
 narratif qui qualifie le phénomène, cf. inondation observée + pression, vie étudiante accès +
 dynamisme, mobilité observée + transports) :
 - **Score = A** : taux de croissance démographique **total** (le plus universel, « se
