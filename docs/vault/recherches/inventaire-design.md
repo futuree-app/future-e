@@ -9,8 +9,9 @@
 > si React, Tailwind et les tokens disparaissaient. Le **code** porte le vivant
 > (`design-tokens.css`, `globals.css`, les `<style>` colocalisés, les composants). Les **règles
 > verrouillées** vivent dans `doctrine/design.md` et `doctrine/interface.md` : cette page ne les
-> répète pas, elle les met en perspective. Elle découle de l'invariant n°10 (la forme sert le
-> fond). Construite en confrontant le code au 2026-06-26 ; l'état chiffré de ce jour est isolé,
+> répète pas, elle les met en perspective. Elle découle du principe de tête de `doctrine/design.md`
+> (la forme sert le fond) et des invariants n°4 (servir la décision) et n°5 (preuve).
+> Construite en confrontant le code au 2026-06-26 ; l'état chiffré de ce jour est isolé,
 > daté et périssable, en fin de page.
 
 ## La question-mère du Design Critic
@@ -18,9 +19,9 @@
 > Un écran n'est pas réussi parce qu'il est beau. Il est réussi parce qu'il aide à décider
 > sans mentir, dans la voix de futur•e.
 
-C'est la traduction visuelle de l'invariant n°1 (on éclaire, on ne décide pas à la place), de
-l'invariant n°4 (la donnée raconte avant de convaincre) et de l'invariant n°10 (la forme sert le
-fond, jamais l'inverse).
+C'est la traduction visuelle de l'invariant n°1 (on éclaire, on ne décide pas à la place) et
+n°4 (une donnée n'a de valeur que si elle aide une décision), et du principe de tête de
+`doctrine/design.md` (la forme sert le fond, jamais l'inverse).
 
 ### Le Critic est un éditeur, pas un directeur artistique
 
@@ -39,8 +40,8 @@ phrase. Trois verbes le résument :
   concret, désigné.
 
 > Une belle interface qui fait douter d'un chiffre, ou qui en suggère une fausse certitude, est
-> un échec de design, pas une réussite (invariant n°10). La forme sert la doctrine éditoriale,
-> jamais l'inverse.
+> un échec de design, pas une réussite (la forme sert le fond, principe de tête de
+> `doctrine/design.md`). La forme sert la doctrine éditoriale et la preuve, jamais l'inverse.
 
 ---
 
@@ -58,7 +59,7 @@ protège avant toute considération technique.
    contrainte subie.
 3. **L'émotion vient du récit, jamais des couleurs.** La palette pose une atmosphère (verre
    sombre, chaleur orange) ; elle ne dramatise pas la donnée. Pas de rouge alarmiste pour faire
-   peur, pas de vert rassurant pour flatter. L'invariant n°7 (parler à une intelligence, pas à
+   peur, pas de vert rassurant pour flatter. L'invariant n°6 (parler à une intelligence, pas à
    une peur) vit aussi dans le pixel.
 4. **Le chiffre est contextualisé avant d'être interprété.** On montre d'abord à quoi un nombre
    se compare (référence, répartition, mouvement), puis ce qu'il change. Jamais un chiffre nu
@@ -204,10 +205,10 @@ toute la philosophie va vers le retrait :
 - **Qu'est-ce qui peut disparaître sans perte ?** Quel élément, quel graphique, quelle ligne ne
   gagne pas sa place ? Le bruit est l'ennemi par défaut.
 - Cet écran aide-t-il à **décider**, ou se contente-t-il d'afficher ? (invariant n°1)
-- Le graphique **raconte-t-il** quelque chose qu'un paragraphe ne dirait pas mieux ? (invariant n°4)
+- Le graphique **raconte-t-il** quelque chose qu'un paragraphe ne dirait pas mieux ? (invariant n°4 + narration > graphiques)
 - Y a-t-il une **affirmation chiffrée sans source** accessible (drawer / accordéon) ? (invariant n°3)
 - La forme suggère-t-elle une **fausse certitude** (précision décorative, score global implicite) ?
-  (invariant n°10)
+  (la forme sert le fond + invariant n°5)
 - Le chiffre est-il **contextualisé avant d'être interprété** ?
 - L'élément distinctif **raconte-t-il le lieu**, ou est-ce une donnée inerte ?
 - Le bon **pattern** est-il utilisé au bon endroit (carte/drawer, hiérarchie de gloses, hero,

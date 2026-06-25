@@ -3,7 +3,7 @@
 > Règle durable. Sources : `Documentation Notion/.../03 1 — Voix et positionnement
 > éditorial`, et fiches `/memory/feedback_no_em_dash.md`,
 > `/memory/feedback_signature_identitaire.md`, `/memory/feedback_callendar.md`. Découle des
-> invariants n°3, 4 et 7 (`principes/invariants.md`).
+> invariants n°3, 4 et 6 (`principes/invariants.md`).
 
 ## Ce que futur•e dit, ce qu'elle ne dit pas
 
@@ -111,7 +111,7 @@ altitude, l'afficher est une fuite de donnée.
 Corollaires : une signature peut être courte, on ne remplit jamais pour remplir. L'altitude
 n'est identitaire qu'en haute altitude (la montagne EST le lieu, ex. Aurillac, Le Puy ≥
 600 m), jamais dans la bande 200 à 600 m. Principe transverse : **ne jamais déguiser une
-position relative en caractéristique absolue** (invariant n°6). Implémenté dans
+position relative en caractéristique absolue** (invariant n°5). Implémenté dans
 `buildSignature` (`src/lib/comparateur-vie.ts`), commit 4c56923.
 
 ## Ne pas citer Callendar comme source

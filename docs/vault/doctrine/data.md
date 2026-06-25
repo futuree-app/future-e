@@ -1,7 +1,7 @@
 # Données : granularité et honnêteté géographique
 
 > Règle durable. Source : `Documentation Notion/.../04 3 — Règles de granularité
-> géographique`. Découle de l'invariant n°6 (`principes/invariants.md`). Voir aussi
+> géographique`. Découle de l'invariant n°5 (`principes/invariants.md`). Voir aussi
 > `/memory/home_insee_code_pitfall.md`.
 
 futur•e croise des données à des échelles très différentes. C'est normal. **Le risque n'est

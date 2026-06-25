@@ -125,8 +125,10 @@ contre de la croissance :
 - tout **score manipulé** ou pondéré par un intérêt commercial (cf. `adr/ADR-0001`).
 
 Ces refus sont un actif de confiance, pas une contrainte. Ils sont gravés : l'indépendance ne
-se monétise pas (**invariant n°8**), et chaque produit renforce le moteur B2C sans jamais le
-détourner, futur•e ne devenant pas un SaaS de diagnostics (**invariant n°9**).
+se monétise pas (**invariant n°7**) et futur•e évolue avec les preuves, jamais avec les
+intérêts (**invariant n°8**). Que chaque produit renforce le moteur B2C sans jamais le
+détourner, futur•e ne devenant pas un SaaS de diagnostics, est un **principe stratégique**
+(non un invariant : contingent du pari B2C, cf. `adr/ADR-0008`).
 
 ## Dimensionnement marché (B2C, étude du 10 juin 2026, sourcé)
 

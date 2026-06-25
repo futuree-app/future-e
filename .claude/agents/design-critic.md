@@ -62,8 +62,9 @@ questions). Lis-la en premier. Puis ton slice canonique :
 - `docs/vault/adr/ADR-0005-direction-artistique.md` — la décision datée de DA.
 - `docs/vault/adr/ADR-0001-pas-de-score-synthetique.md` — pas de score global, ni à l'écran ni
   par un graphique qui le suggérerait.
-- `docs/vault/principes/invariants.md` — surtout n°1 (on éclaire), n°3 (source), n°4 (la donnée
-  raconte), n°5 (le mouvement, pas la photo).
+- `docs/vault/principes/invariants.md` — surtout n°1 (on éclaire), n°3 (source et limites), n°4
+  (servir la décision), n°5 (ne pas affirmer au-delà de la preuve), n°6 (intelligence pas peur).
+  Et le principe de tête de `doctrine/design.md` (la forme sert le fond).
 - Vérité vivante du code : `src/app/design-tokens.css`, `src/app/globals.css` (le système réel),
   et les composants/écrans concernés (`src/components/`, `src/app/(public)/`,
   `src/components/report/`, `src/components/wizard/`). Les fiches `/memory` qui portent les
