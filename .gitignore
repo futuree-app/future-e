@@ -41,6 +41,8 @@ yarn-error.log*
 next-env.d.ts
 .claude/*
 !.claude/agents/
+!.claude/commands/
+!.claude/hooks/
 .aider*
 .env.local
 
