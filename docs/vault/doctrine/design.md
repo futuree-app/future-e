@@ -11,9 +11,14 @@ proposition qui les contredit doit être explicitement justifiée avant d'être 
 ## Direction artistique
 
 **Glassmorphism sombre.** Palette : noir `#060812`, orange `#fb923c`, rouge `#f87171`,
-violet `#a78bfa`, vert `#4ade80`, bleu `#60a5fa`. Typographies : Inter Tight, Instrument
-Serif (italic), JetBrains Mono. Mesh gradients animés, noise overlay. La DA est validée,
-elle ne se remet pas en question à chaque itération.
+violet `#a78bfa`, vert `#4ade80`, bleu `#60a5fa`. Typographies : **Instrument Sans** (sans),
+Instrument Serif italic, JetBrains Mono (mono), définies en `--font-sans/serif/mono` dans
+`src/app/design-tokens.css`. Mesh gradients animés, noise overlay. La DA est validée, elle ne
+se remet pas en question à chaque itération.
+
+> Note : l'ADR-0005 (intention d'origine, avril 2026) cite « Inter Tight » comme sans. La
+> sans implémentée est **Instrument Sans** (vérifié dans le code 2026-06-25). Cette page porte
+> la réalité actuelle ; l'ADR garde la trace de l'intention datée.
 
 Règle de largeur de lecture et doctrine des gloses : voir `doctrine/interface.md`.
 

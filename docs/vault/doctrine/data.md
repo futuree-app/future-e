@@ -46,10 +46,11 @@ restitution.
 
 ## Confidentialité
 
-futur·e **ne stocke jamais l'adresse exacte** de l'utilisateur, seulement le code INSEE de
-la commune (et le code IRIS le cas échéant). L'adresse sert au géocodage en mémoire, pas au
+futur·e **ne stocke jamais l'adresse exacte** de l'utilisateur. La table `accounts` ne porte
+que `home_insee_code` (et `report_grants.active_insee_code` pour le territoire actif, voir
+ADR-0003) : aucune colonne adresse. L'adresse saisie sert au géocodage en mémoire, pas au
 stockage. Cohérent avec la doctrine de granularité : on ne conserve que l'échelle à laquelle
-on restitue honnêtement.
+on restitue honnêtement. *(Vérifié dans le schéma Supabase, 2026-06-25.)*
 
 ## Doctrine
 
