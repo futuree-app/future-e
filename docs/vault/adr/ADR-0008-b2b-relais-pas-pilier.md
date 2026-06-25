@@ -1,66 +1,57 @@
-# ADR-0008 : Le B2C est le socle, le B2B un relais en avant-première dès automne 2026
+# ADR-0008 : Le B2B est un relais de la preuve B2C, jamais le point de départ
 
-- **Statut** : accepté (décision stratégique ; pas de produit B2B payant livré, mais une page
-  de pré-lancement publique active)
-- **Date** : position consolidée au 25 juin 2026 (calendrier confirmé porteur contre l'étude)
-- **Source** : page de production `/professionnels` (« futur•e Pro », avant-première,
-  lancement automne 2026), « Étude de marché v2 » (10 juin 2026), retour business plan
-  (conv. ChatGPT, juin 2026), « Projections consolidées » (mai 2026), business models par
-  segment (CGP, assurance, notaires, diagnostiqueurs). Recoupe `vision/modele-economique.md`,
-  `vision/archetype-lecteur.md`.
+- **Statut** : accepté (décision stratégique ; pas de produit B2B payant livré, page de
+  pré-lancement publique active)
+- **Date** : position consolidée au 25 juin 2026
+- **Source** : page de production `/professionnels`, « Étude de marché v2 » (10 juin 2026),
+  retour business plan (juin 2026), « Projections consolidées » (mai 2026), business models par
+  segment. Recoupe `vision/modele-economique.md`, `vision/archetype-lecteur.md`.
 
-## Contexte
+## Décision (le principe durable)
 
-Trois sources donnaient trois calendriers B2B. Les projections de mai 2026 activaient le B2B
-tôt et agressivement (CGP M+6, assurance M+9, notaires M+12, diagnostiqueurs M+15 ; B2B = 46 %
-du MRR à M+36). L'étude de marché du 10 juin 2026 repoussait par prudence (« B2B exploré à
-partir de 2027 »). Mais le produit réel a déjà tranché : la page `/professionnels` est en
-production (avant-première, formulaire de capture, `robots: noindex`) et annonce un
-**lancement à l'automne 2026, segment par segment**. Le porteur confirme (2026-06-25) que
-c'est ce calendrier qui fait foi : la prod prime sur le prévisionnel de l'étude.
+**On construit toujours une preuve d'usage B2C avant de vendre aux professionnels. Le B2B
+valorise cette preuve, il ne la précède jamais et ne dicte jamais la roadmap cœur.**
 
-## Décision
+Trois raisons qui ne dépendent d'aucun calendrier :
+- le produit s'améliore grâce aux usages B2C (la boucle de la donnée d'usage) ;
+- le B2B se vend facilement une fois qu'on peut dire « on a X recherches de lieux de vie, Y
+  achats, Z territoires comparés » : il valorise une preuve, il ne la fabrique pas ;
+- chaque produit (B2B compris) doit **renforcer le moteur B2C, jamais le détourner**. futur·e
+  ne devient pas un SaaS de diagnostics (cette ADR dérive de l'**invariant n°9**).
 
-Le B2B est un **relais de croissance dimensionné, pas un pilier ni une béquille du B2C**.
-Le B2C reste le socle : la priorité absolue demeure de prouver la conversion B2C
-(instrumenter le tunnel : taux de clic CTA payants, taux paywall vers paiement). Mais
-l'**avant-première B2B démarre dès l'automne 2026** (capture de leads, entretiens découverte,
-essais gratuits prioritaires, construction des features par métier), en parallèle de la
-preuve B2C, pas après elle. La montée en revenus B2B s'étale ensuite sur 2027.
+Formule de référence : « le B2B n'est pas la béquille du B2C, c'est la valorisation secondaire
+d'une preuve d'usage B2C ».
 
-Formule de référence : « le B2B n'est pas la béquille du B2C, c'est la valorisation
-secondaire d'une preuve d'usage B2C ». Il devient simple à vendre une fois qu'on peut dire
-« on a X recherches de lieux de vie, Y achats, Z territoires comparés ».
-
-## Pourquoi
+## Pourquoi (et non l'inverse)
 
 - L'hypothèse critique du modèle (le consentement à payer B2C, jamais démontré, précédent
-  CityScan) reste à lever : le B2C garde la priorité d'effort (cf. `vision/modele-economique.md`).
-- Charge soutenable pour un fondateur solo : l'avant-première s'ouvre **segment par segment**
-  (CGP d'abord, friction la plus basse : le produit actuel suffit, seul l'export PDF manque),
-  pas les quatre d'un coup.
-- Le B2B reste un levier puissant (étude : SAM B2B 5-15 M€/an ; projections : ~46 % du MRR à
-  M+36) : « relais » ne veut pas dire marginal, veut dire séquencé et secondaire au socle B2C.
-- La référence de marché B2B existe (CityScan, 6-8,50 € HT/adresse aux mêmes professions) :
-  le pari B2B est crédible.
+  CityScan parti en B2B) doit être levée par le B2C lui-même (cf. `vision/modele-economique.md`).
+- Charge soutenable pour un fondateur solo : on ouvre **segment par segment**, par friction
+  croissante (CGP d'abord, le produit actuel suffit), pas les quatre d'un coup.
+- Le B2B reste un levier puissant (SAM B2B 5-15 M€/an ; ~46 % du MRR à M+36 dans les
+  projections) : « relais » ne veut pas dire marginal, veut dire séquencé et secondaire.
+
+## Annexe : état actuel et calendrier (daté, vieillira)
+
+Le calendrier découle du principe, il n'est pas la décision. Au 2026-06-25 : la page
+`/professionnels` est en production (avant-première, capture de leads, `noindex`) et annonce un
+lancement **automne 2026, segment par segment**. C'est ce calendrier qui fait foi (la prod prime
+sur le « 2027 » prudent de l'étude), mais il est susceptible de bouger : seul le principe
+ci-dessus est gravé. Aucun revenu B2B n'est acquis ; les ARPU par segment
+(cf. `vision/modele-economique.md`) sont du prévisionnel.
 
 ## Conséquences
 
-- Roadmap B2B conditionnée par segment : export PDF (CGP/notaires), données CatNat
-  (assurance), recherche par adresse (notaires/diagnostiqueurs), version mobile
-  (diagnostiqueurs), API.
-- `/professionnels` (avant-première, automne 2026) est la surface live du B2B aujourd'hui :
-  capture de leads, pas de produit payant. Aucun chiffre de revenu B2B n'est gravé comme
-  acquis ; les ARPU par segment (cf. `vision/modele-economique.md`) sont du prévisionnel.
-- Vigilance cohérence : la page `/professionnels` parle de « dix dimensions » et de « ~35 000
-  communes (métropole et ultra-marin) » là où le B2C dit « 7 thèmes / près de 30 critères » et
-  « 34 000 communes (métropole) ». À harmoniser (cf. note de dette dans `doctrine/data.md` et
-  la règle de non-confusion des taxonomies).
-- À rouvrir si la preuve B2C échoue (le B2B pourrait devenir prioritaire) ou si un accord
-  cadre B2B (réseau de diagnostiqueurs, éditeur logiciel, chambre professionnelle) se présente.
+- Roadmap B2B conditionnée par segment : export PDF (CGP/notaires), CatNat (assurance),
+  recherche par adresse (notaires/diagnostiqueurs), mobile (diagnostiqueurs), API.
+- Vigilance cohérence : la page `/professionnels` parle de « dix dimensions » et « ~35 000
+  communes » là où le B2C dit « 7 thèmes / près de 30 critères » et « 34 000 communes ». À
+  harmoniser.
+- À rouvrir si la preuve B2C échoue (le B2B pourrait devenir prioritaire) ou si un accord cadre
+  B2B (réseau, éditeur logiciel, chambre) se présente avant l'échéance.
 
 ## Liens
 
 `vision/modele-economique.md`, `vision/archetype-lecteur.md`,
-`adr/ADR-0002-pivot-compatibilite-territoriale.md`,
+`adr/ADR-0002-pivot-compatibilite-territoriale.md`, `principes/invariants.md`,
 `arbitrages/pricing-abonnements-reportes.md`.

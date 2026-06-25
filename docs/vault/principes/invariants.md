@@ -48,6 +48,17 @@ Si elle s'allonge, c'est qu'on y fait entrer des préférences déguisées en in
    pas pour l'alarme permanente.
    *(→ `vision/manifeste.md`, `vision/positionnement.md`)*
 
+8. **L'indépendance ne se monétise pas.**
+   Ni publicité, ni vente de leads, ni affiliation immobilière, ni recommandation sponsorisée,
+   ni placement territorial payé, ni score pondéré par un intérêt commercial. La confiance est
+   un actif, jamais une variable d'ajustement.
+   *(→ `vision/modele-economique.md`, `adr/ADR-0001`)*
+
+9. **Chaque produit renforce le moteur B2C, jamais ne le détourne.**
+   futur·e ne devient pas un SaaS de diagnostics. Le B2B valorise une preuve d'usage B2C, il ne
+   la précède ni ne la dicte.
+   *(→ `vision/modele-economique.md`, `adr/ADR-0008`)*
+
 ---
 
 **Usage.** Avant de graver une ADR ou une doctrine, vérifier qu'elle ne contredit aucun
