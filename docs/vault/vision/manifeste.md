@@ -17,25 +17,25 @@ informations qui manquent. C'est une façon honnête de les relier. Les données
 nombreuses et dispersées ; les décisions, elles, restent intimes et solitaires.
 
 futur•e naît de ce manque. Une couche qui transforme des données publiques éparses en une
-lecture personnelle et située : ce qu'un lieu devient, ce qu'on y risque, ce qu'on peut encore y
-choisir. **futur•e ne parle pas du climat pour parler du climat. Elle en parle parce qu'il
-change, en silence, les décisions qui engagent une vie.**
+lecture située : ce qu'un lieu devient, ce qu'on y risque, ce qu'on peut encore y choisir.
+**futur•e ne parle pas du climat pour parler du climat. Elle en parle parce qu'il change, en
+silence, les décisions qui engagent une vie.**
 
-Là où les données parlent en silos (climat, santé, logement, emploi, alimentation), futur•e
-parle en **trajectoires personnelles**. Elle ne prédit pas, elle projette : des scénarios
-plausibles, sourcés, lisibles. **Elle ne promet pas la certitude. Elle promet la clarté.**
+Là où les données parlent en silos (climat, santé, logement…), futur•e parle en **trajectoires
+personnelles**. **Elle ne promet pas la certitude. Elle promet la clarté.**
 
 ## Contre l'amnésie, dans un monde qui change
 
-Une décision de vie s'étire sur des décennies, mais on la prend avec une photographie du
-présent. Le monde, lui, ne tient pas en place. Et le climat n'est ni nié ni ignoré : il est
-**oublié par cycles**. Chaque été, à chaque canicule, l'alarme. Mais chaque automne, l'oubli.
+Les grandes décisions de vie s'étirent sur des décennies. Pourtant, on les prend presque
+toujours avec une photographie du présent, alors que le monde, lui, ne tient pas en place. À
+cela s'ajoute un second phénomène : le climat n'est ni nié ni ignoré, il est **oublié par
+cycles**. Chaque été, à chaque canicule, l'alarme. Mais chaque automne, l'oubli.
 
-**futur•e existe pour remettre le mouvement au cœur de ces décisions.** Une présence éditoriale
-calme, qui maintient le changement dans la conscience active toute l'année, sans dramatiser,
-sans profiter des pics médiatiques pour exister. L'enjeu n'est pas de remplacer l'alarme
-saisonnière par une alarme permanente. C'est de rendre le climat intégrable à une vie qui pense,
-comme on intègre sa santé ou ses finances : sans obsession, sans oubli, avec continuité.
+**futur•e existe pour remettre le mouvement au cœur de ces décisions, et pour les accompagner
+dans la durée :** calmement, sans dramatiser, sans profiter des pics médiatiques pour exister.
+L'enjeu n'est pas de remplacer l'alarme saisonnière par une alarme permanente. C'est de rendre
+le climat intégrable à une vie qui pense, comme on intègre sa santé ou ses finances : sans
+obsession, sans oubli, avec continuité.
 
 *(C'est l'ancrage le plus profond du projet. Le suivi éditorial dans le temps, « Le Fil », en
 découle : il n'est pas la raison de ce chapitre, il en est la conséquence.)*
@@ -44,9 +44,10 @@ découle : il n'est pas la raison de ce chapitre, il en est la conséquence.)*
 
 Dire à quelqu'un ce que le climat change dans sa vie, c'est toucher à ses choix intimes,
 parfois à son patrimoine, parfois à ses peurs. futur•e prend cette responsabilité au sérieux :
-chaque projection est sourcée, chaque formulation pesée, chaque limite assumée. Ce que nous ne
-savons pas, nous le disons. **Nous préférons parfois ne pas répondre plutôt que répondre avec
-une certitude trompeuse.** Ce qui relève d'un choix personnel, nous ne le tranchons pas.
+elle ne prédit pas, elle projette, et chaque projection est sourcée, chaque formulation pesée,
+chaque limite assumée. Ce que nous ne savons pas, nous le disons. **Nous préférons parfois ne
+pas répondre plutôt que répondre avec une certitude trompeuse.** Ce qui relève d'un choix
+personnel, nous ne le tranchons pas.
 **futur•e informe et éclaire. Elle ne décide jamais à la place du lecteur.**
 
 ## Ce que futur•e n'est pas, ce qu'elle veut être
@@ -56,7 +57,7 @@ ni un générateur de prédictions spectaculaires. Une interface qui transforme 
 publiques dispersées en décisions personnelles éclairées. L'objectif n'est pas de provoquer la
 peur, c'est de rendre le réel plus lisible et cette lucidité **activable**.
 
-> Les grandes décisions se prennent sur des décennies, avec une photo du présent.
+> Les grandes décisions se prennent sur des décennies, avec une image figée du présent.
 > futur•e y remet le mouvement.
 
 ## Liens
