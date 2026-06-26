@@ -26,6 +26,9 @@ page du vault** (chemin). L'une pointe vers l'autre, jamais de copier-coller.
 - **`arbitrages/`** — options étudiées/refusées, compromis plus locaux.
 - **`recherches/`** — méthodo, comparatifs data, qualité des sources.
 - **`architecture/`** — architecture fonctionnelle, flux, dépendances.
+- **`paris.md`** — registre vivant des paris du produit (croyances engagées, confiance, critère
+  de mort, ce qu'on a appris). La **boucle de retour** : la seule page qui revient demander si le
+  réel a confirmé. Type d'artefact à part — voir la note ci-dessous.
 
 ### Les trois questions, les trois couches
 
@@ -36,6 +39,13 @@ page du vault** (chemin). L'une pointe vers l'autre, jamais de copier-coller.
 Un invariant ne bouge pas quand on apprend. Une doctrine évolue avec ce qu'on apprend. Une
 ADR est datée et peut être remplacée. Les invariants servent de fonction de test : une ADR
 ou une doctrine ne doit jamais contredire un invariant.
+
+Ces trois couches raisonnent **avant** le fait. `paris.md` est un quatrième type, à part : un
+**registre vivant** qui revient **après** le fait demander *« l'avons-nous vérifié, ou seulement
+cru ? »*. Il ne pose pas une règle, il tient à jour la confiance qu'on accorde à nos propres
+croyances. Volontairement sans agent dédié pour l'instant : la doctrine d'abord (même chemin que
+le Discoverability Strategist), l'agent « gardien de la calibration » n'apparaîtra que le jour
+où une décision réelle aura faim de preuve. Voir `paris.md`.
 
 ### ADR ou arbitrage ?
 

@@ -167,6 +167,9 @@ Tout n'est pas au même niveau de certitude. Honnêteté du modèle :
   la croissance B2B. La disposition à payer est la variable à instrumenter EN PREMIER (clic CTA
   payants, taux paywall → paiement), avant toute dépense d'acquisition.
 
+Ces paris sont tenus à jour, avec leur niveau de confiance et leur critère de mort, dans le
+registre vivant `paris.md` (la boucle de retour du projet).
+
 ## Risques structurants
 
 1. **La catégorie mal comprise** (risque marketing avant d'être économique) : si le marché lit
@@ -195,5 +198,6 @@ territoriale lisible devient un standard de marché.
 `adr/ADR-0001-pas-de-score-synthetique.md`, `principes/invariants.md` (n°7 indépendance non
 monétisée, n°8 évolue avec les preuves jamais les intérêts), `arbitrages/pricing-abonnements-reportes.md`,
 `arbitrages/mode-foyer-recadre.md`, `vision/archetype-lecteur.md`, `vision/positionnement.md`,
+`paris.md` (registre vivant des paris ci-dessus),
 `doctrine/legal.md`, `/memory/business_modele_economique.md`,
 `/memory/feedback_positionnement_compatibilite.md`, `/memory/project_paywall_territoire.md`.

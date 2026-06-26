@@ -1,0 +1,118 @@
+# Les paris de futur•e
+
+> Registre vivant — un type de page à part dans le vault. Ni invariant (ça bouge avec ce qu'on
+> apprend), ni ADR (ce n'est pas une décision unique et datée), ni doctrine pure (ce n'est pas
+> une règle, c'est un journal). C'est la **boucle de retour** du projet : la liste des croyances
+> sur lesquelles futur•e a déjà engagé du travail, leur niveau de confiance, et ce qui les
+> tuerait. Source des paris en prose : `vision/modele-economique.md` (section « Hiérarchie de
+> preuve »). Fiche miroir : `/memory/project_paris_registre.md`.
+
+## Pourquoi cette page existe
+
+L'équipe d'agents de futur•e raisonne **avant** le fait : chacun juge une décision à l'aune de
+la doctrine et de la vision. Aucun ne revient, **après**, demander si le réel a confirmé. Cette
+page est ce retour. Elle existe avant l'agent qui l'exploitera un jour (voir le bas de page) :
+on commence par la doctrine, comme pour le Discoverability Strategist.
+
+Deux lignes la gouvernent — et gouverneront un jour l'agent :
+
+1. **On réduit l'incertitude au coût le plus faible possible — on ne la supprime pas.** On ne
+   cherche pas la preuve parfaite, mais le plus petit apprentissage utile. Cinq conversations
+   valent souvent mieux qu'un test sous-dimensionné.
+2. **L'absence de preuve n'est jamais une excuse pour ne pas décider.** Un pari sans signal se
+   tranche par conviction et se *note* ici pour être revisité — il ne se gèle pas. Le registre
+   sert à décider mieux, jamais à décider moins.
+
+## Anatomie d'un pari
+
+- **Statut** : non testé · en observation · appris · mort.
+- **Confiance** : faible / moyenne / forte, *et sur quoi elle repose* (anecdote, analogie,
+  doctrine, donnée). Nommer la nature de la preuve est déjà la moitié du travail.
+- **Signal attendu** : ce qu'on verrait dans le monde si le pari est vrai.
+- **Source de preuve** : *où* ce signal apparaîtra — donc ce qu'il faut instrumenter **avant**
+  que la décision n'arrive (les conversations du fondateur d'abord, PostHog/Stripe ensuite).
+- **Critère de mort** : ce qui invaliderait le pari (le seuil qui change la décision).
+- **Ce qu'on a appris** : pas un verdict — ce que l'observation nous apprend *sur le lecteur*.
+  Un pari infirmé sans apprentissage est du réel gâché.
+- **Dernière revue** : date.
+
+---
+
+## Pari #1 — Le consentement à payer en B2C
+
+Le pari central du modèle (précédent CityScan, parti en B2B faute de B2C). Tout le reste en dépend.
+
+- **Statut** : non testé.
+- **Confiance** : faible — repose sur des ancres de prix (14 € contre 600-800 € de diagnostics)
+  et l'analogie DPE, pas sur une vente observée.
+- **Signal attendu** : un taux de passage paywall → paiement non nul et stable sur le rapport 14 €.
+- **Source de preuve** : d'abord les premières ventes et conversations directes ; ensuite Stripe
+  (conversions) + PostHog (clic CTA payant → paiement). À instrumenter **en premier**.
+- **Critère de mort** : conversion durablement quasi nulle malgré une intention forte en amont →
+  le marché lit futur•e comme un gratuit-de-plus, pas comme un achat de décision.
+- **Ce qu'on a appris** : —
+- **Dernière revue** : 2026-06-26.
+
+## Pari #2 — La catégorie est comprise (« intelligence territoriale », pas « un comparateur de plus »)
+
+Risque n°1 du modèle, et marketing avant d'être économique. C'est le pari le mieux servi
+aujourd'hui par **toi** : ce que les gens disent de futur•e dans tes appels et tes emails. Le
+premier capital d'un produit vient des humains, pas des dashboards.
+
+- **Statut** : non testé.
+- **Confiance** : faible — conviction de positionnement, pas encore confrontée à la façon dont un
+  inconnu décrit le produit.
+- **Signal attendu** : des gens qui, sans qu'on les guide, décrivent futur•e comme « ça m'aide à
+  choisir où vivre », pas comme « un site de scores de villes ».
+- **Source de preuve** : conversations, retours, interviews, emails — qualitatif, disponible dès
+  maintenant.
+- **Critère de mort** : on doit réexpliquer la catégorie à presque chaque interlocuteur → le
+  produit ne porte pas son positionnement seul.
+- **Ce qu'on a appris** : —
+- **Dernière revue** : 2026-06-26.
+
+## Pari #3 — Le comparateur crée une valeur d'arbitrage qu'on paie
+
+Le Pack Décision (39 €) parie que comparer trois communes vaut plus que lire trois rapports
+(cf. `adr/ADR-0007`).
+
+- **Statut** : non testé.
+- **Confiance** : faible — repose sur l'ancre « trois rapports valent 42 €, le Pack les réunit
+  pour 39 € » et la doctrine du révélateur d'arbitrages, pas sur un achat.
+- **Signal attendu** : une part de Packs dans les ventes, et des lecteurs qui formulent
+  spontanément le besoin de *comparer* (pas seulement de comprendre une commune).
+- **Source de preuve** : conversations d'abord ; Stripe (part Pack vs rapport simple) ensuite.
+- **Critère de mort** : les acheteurs prennent le rapport simple et ne montent jamais au Pack,
+  même bien mis en avant.
+- **Ce qu'on a appris** : —
+- **Dernière revue** : 2026-06-26.
+
+---
+
+## L'agent viendra après la page (pas l'inverse)
+
+Ce registre est volontairement **sans agent**. Le « gardien de la calibration » (provisoirement
+famille *Learning* ; jamais *Empiricist* ni *Evidence* : le centre de gravité est l'apprentissage,
+pas la preuve) n'est **ni créé, ni mis en roadmap**. Raison, alignée sur le test d'admission de
+`adr/ADR-0006` et la règle « la donnée doit exister » : pré-lancement, un tel agent n'a pas de
+substrat et dégénérerait en Researcher (qui *génère* des hypothèses) ou en théâtre de mesure.
+
+Son déclencheur n'est pas un **volume** mais un **besoin** : la première décision réelle affamée
+de preuve (« Pack à 39 ou 49 € après quinze ventes ? »). Le jour où cette page vit d'elle-même,
+l'agent apparaîtra presque seul, son mandat déjà écrit ici — exactement le chemin du
+Discoverability Strategist (doctrine → scripts → outils → agent).
+
+Quand il existera, ce qu'il protégera, en une phrase : **l'écart entre ce que futur•e croit et
+ce qu'il a vérifié.** Sa frontière dure avec les autres : Business *projette* le modèle, lui
+*constate* ; Data Curator garde les sources qui *entrent* dans le produit, lui regarde les données
+sur sa *réception* ; Discoverability possède la mesure d'acquisition (Search Console), lui la
+conversion et la rétention une fois le lecteur arrivé. Ses garde-fous sont déjà les deux lignes
+du haut de cette page.
+
+## Liens
+
+`vision/modele-economique.md` (les paris en prose, section « Hiérarchie de preuve »),
+`principes/invariants.md` (n°8 : évolue avec les preuves, jamais les intérêts),
+`adr/ADR-0006-architecture-equipe-ia.md` (test d'admission, poste de travail, « la donnée doit
+exister »), `adr/ADR-0007-pack-decision-bundle.md` (Pari #3), `vision/positionnement.md`
+(Pari #2), `/memory/project_paris_registre.md`.
