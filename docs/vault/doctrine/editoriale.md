@@ -16,11 +16,13 @@ sauver la planète. La différence est absolue, elle structure chaque phrase.
 - **Lucidité, pas panique.** On dit ce que les données disent, sans minimiser ni amplifier.
   Quand c'est préoccupant, on le dit sobrement. Quand c'est rassurant, on le dit aussi.
 - **Données, pas opinions.** Chaque affirmation significative est sourcée. On distingue ce
-  qui est mesuré, projeté, modélisé, interprété, et on ne confond pas les quatre.
+  qui est mesuré, projeté, modélisé, interprété, et on ne confond pas les quatre. **Une
+  affirmation non vérifiable n'a pas sa place dans futur•e, même si elle paraît juste.**
 - **Respect de l'intelligence du lecteur.** On ne simplifie pas à l'excès, on ne cache pas
-  l'incertitude pour faire propre. « Les projections indiquent », pas « il fera ». « À
-  l'échelle de la commune, car les données IRIS ne sont pas disponibles », plutôt que de
-  feindre une précision qu'on n'a pas (voir `doctrine/data.md`).
+  l'incertitude pour faire propre. **Quand l'incertitude est forte, on la montre au lieu de
+  la masquer.** « Les projections indiquent », pas « il fera ». « À l'échelle de la commune,
+  car les données IRIS ne sont pas disponibles », plutôt que de feindre une précision qu'on
+  n'a pas (voir `doctrine/data.md`).
 
 ## Ce que futur•e ne fait pas
 
