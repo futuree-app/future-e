@@ -69,8 +69,10 @@ acquises.
 ### B2C (le socle, seul livré aujourd'hui)
 - **Gratuit** : parcours `/ou-vivre` jusqu'aux 3 territoires et à la synthèse (acquisition).
 - **14 €** : rapport de territoire (comprendre une commune).
-- **39 €** : Pack Décision (arbitrer entre trois communes ; cf. `adr/ADR-0007`). Ancre :
-  « trois rapports valent 42 €, le Pack les réunit pour 39 € ».
+- **39 €** : Pack Décision, **la comparaison complète sur les communes que le lecteur compare**
+  (2 ou 3 ; cf. `adr/ADR-0007` et son addendum). Ancre primaire = **valeur** (« 39 € contre le
+  coût d'une commune mal choisie ») ; la remise « trois rapports valent 42 € » devient secondaire
+  et ne s'invoque pas à 2 communes (où elle s'inverse : 2 rapports = 28 € < 39 €).
 - **Abonnement (« Le Fil »)** : PAS encore achetable. Page de pré-lancement (`/le-fil`, liste
   d'attente, `noindex`) affichant encore « 9 €/mois », mais direction = **tarif annuel**
   (~49,99 €/an) ; à recaler (cf. `arbitrages/pricing-abonnements-reportes.md`).

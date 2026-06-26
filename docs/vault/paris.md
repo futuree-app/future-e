@@ -73,8 +73,8 @@ premier capital d'un produit vient des humains, pas des dashboards.
 
 ## Pari #3 — Le comparateur crée une valeur d'arbitrage qu'on paie
 
-Le Pack Décision (39 €) parie que comparer trois communes vaut plus que lire trois rapports
-(cf. `adr/ADR-0007`).
+Le Pack Décision (39 €) parie que la comparaison complète vaut un achat, sur les communes que le
+lecteur compare (2 ou 3 ; cf. `adr/ADR-0007` et son addendum).
 
 - **Statut** : non testé.
 - **Confiance** : faible — repose sur l'ancre « trois rapports valent 42 €, le Pack les réunit
@@ -84,6 +84,38 @@ Le Pack Décision (39 €) parie que comparer trois communes vaut plus que lire 
 - **Source de preuve** : conversations d'abord ; Stripe (part Pack vs rapport simple) ensuite.
 - **Critère de mort** : les acheteurs prennent le rapport simple et ne montent jamais au Pack,
   même bien mis en avant.
+- **Ce qu'on a appris** : —
+- **Dernière revue** : 2026-06-26.
+
+## Pari #4 — Le moment « j'ai déjà 2 villes en tête » est solvable
+
+Le mode choix du comparateur (`modules/comparateur.md`) parie que le départage de lieux déjà
+choisis est un moment d'achat. **Pari contesté en interne**, et c'est sa valeur.
+
+- **Statut** : non testé.
+- **Confiance** : faible, et *disputée*. Product et Business le tiennent pour le moment d'achat le
+  plus chaud (intention déjà formée, douleur de se tromper présente). Une critique externe (ChatGPT)
+  l'inverse : ce moment serait de la **réassurance** (le lecteur croit déjà connaître la réponse),
+  donc une disposition à payer plus *faible* que le moment « je n'ai aucune idée où aller ». Personne
+  n'a la donnée. C'est un angle mort de consensus, gardé ouvert exprès.
+- **Signal attendu** : la conversion à 39 € des arrivées en mode choix (départage) au moins
+  comparable à celle des arrivées par la découverte.
+- **Source de preuve** : conversations d'abord ; Stripe + PostHog (conversion par porte d'entrée) ensuite.
+- **Critère de mort** : les départageurs convertissent nettement moins que les découvreurs → la
+  réassurance ne se monétise pas, le mode choix est un hook gratuit, pas un étage payant.
+- **Ce qu'on a appris** : —
+- **Dernière revue** : 2026-06-26.
+
+## Pari #5 — Le moment « choix » a du volume
+
+- **Statut** : non testé.
+- **Confiance** : faible — on suppose que beaucoup de gens arrivent avec des communes déjà en tête,
+  sans donnée.
+- **Signal attendu** : une part non marginale des sessions du comparateur saisit 2-3 communes à la
+  main (vs rebond vers `/ou-vivre`).
+- **Source de preuve** : PostHog après lancement (part des arrivées mode choix avec communes saisies).
+- **Critère de mort** : presque personne n'emprunte la porte « choix » → le mode ne mérite pas son
+  chantier, `/ou-vivre` + Pack suffisent.
 - **Ce qu'on a appris** : —
 - **Dernière revue** : 2026-06-26.
 

@@ -22,3 +22,5 @@ Frontière avec adr/ : une décision structurante et engageante va dans adr/.
   découplé (public).
 - **carte-exploration-probleme-ouvert** — carte-dashboard écartée (1er board) ; l'interaction
   spatiale reste un problème ouvert. Voir `adr/ADR-0009`.
+- **comparateur-un-moteur-trois-portes** — un seul moteur de comparaison (legacy `communes_tension`
+  scoré retiré) ; trois portes (découverte / départage / Pack), une sortie. Voir `modules/comparateur.md`.

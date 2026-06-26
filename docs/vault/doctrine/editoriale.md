@@ -35,6 +35,14 @@ sauver la planète. La différence est absolue, elle structure chaque phrase.
 - **Ne fait pas de politique partisane.** On peut mentionner les engagements publics d'élus
   locaux et les outils de suivi citoyen. On ne nomme jamais un parti, on ne prescrit jamais
   un vote.
+- **Ne tranche jamais à la place du lecteur.** Le verbe qui décide reste toujours côté lecteur
+  (« *vous* tranchez », « *vous* décidez », « *vous* choisissez ») ; futur•e n'a droit qu'au
+  **rôle de retrait** : enlever le hasard, l'angle mort, le doute d'avoir oublié l'essentiel.
+  Sont bannis les verbes qui font de futur•e le décideur : « résoudre votre choix », « prendre
+  la décision pour vous », « la bonne commune », « le bon choix », « décidez sûrement ». Modèle
+  stabilisé, déjà en prod sur le Pack : « Tranchez, sans deviner » (le lecteur agit, futur•e
+  retire la devinette). Découle des invariants n°1 (on éclaire, on ne décide jamais) et n°2 (pas
+  de verdict synthétique).
 
 ## La page s'adresse au lecteur, pas à elle-même
 
