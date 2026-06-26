@@ -114,8 +114,9 @@ Deux conséquences, gravées comme règles :
 1. **Gabarit « contre-pouvoir card »** : tout mandat devrait répondre explicitement à sept
    questions : sa question-mère, l'objectif qu'il maximise, la peur qu'il incarne, ce qu'il
    protège, ce qu'il refuse, quand il répond PASS, avec qui il est en tension. Editorial Writer
-   et Software Architect sont écrits avec cet en-tête et servent de **gabarit de référence** ;
-   les 5 mandats antérieurs seront harmonisés en passe séparée délibérée.
+   et Software Architect ont posé ce gabarit ; les 5 mandats antérieurs (Archiviste, Data
+   Curator, Design Critic, Business, Product) ont été harmonisés le 2026-06-26. **Les 8 agents
+   portent désormais la carte à 7 champs.**
 2. **Test d'admission d'un futur agent** : on s'interdit de créer un nouvel agent tant qu'on ne
    peut pas répondre en une phrase à *« quel contre-pouvoir nouveau apporte-t-il, que personne
    d'autre n'incarne déjà ? »*. Réponse floue = agent redondant. Cohérent avec le principe
