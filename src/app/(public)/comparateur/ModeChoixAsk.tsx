@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import posthog from "posthog-js";
+import { bindOrphans } from "@/lib/typography";
 
 // AskFuture en MODE CHOIX : réutilise l'endpoint borné de /ou-vivre
 // (`/api/comparateur-vie/ask`, 2 questions gratuites via cookie serveur partagé). Le contexte
@@ -41,14 +42,13 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
   const [limit, setLimit] = useState(false);
 
   const noms = trio.map((t) => t.nom);
-  const c0 = noms[0];
   const c1 = noms[1];
   const litt = trio.find((t) => t.littoral)?.nom;
 
   // Suggestions de départage : comparatives / risque / horizon, templatées sur les communes.
   const chips: string[] = (() => {
     const out: string[] = [];
-    if (c1) out.push(`Qu'est-ce qui sépare vraiment ${c0} et ${c1} ?`);
+    if (c1) out.push("Pour un achat sur 20 ans, laquelle est le pari le plus sûr ?");
     out.push("Laquelle vieillira le mieux face au climat de 2050 ?");
     if (litt) out.push(`L'érosion du littoral est-elle un sujet à ${litt} ?`);
     else out.push("Laquelle reste la plus vivable pendant les canicules ?");
@@ -134,8 +134,8 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
       </h2>
       <p className={`text-[14px] text-muted leading-[1.65] ${remaining > 0 ? "mb-1.5" : "mb-5"}`}>
         {remaining > 0
-          ? "Posez une question pour départager vos communes : un risque, un compromis, leur évolution future."
-          : "Pour aller plus loin, débloquez la comparaison complète."}
+          ? bindOrphans("Posez une question pour départager vos communes : un risque, un compromis, leur évolution future.")
+          : bindOrphans("Pour aller plus loin, débloquez la comparaison complète.")}
       </p>
       {remaining > 0 && (
         <p className="text-[11px] text-ghost mb-5">
@@ -184,8 +184,7 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
       {limit ? (
         <div className="rounded-xl border border-accent/[0.25] bg-accent/[0.05] px-5 py-4">
           <p className="text-[14px] leading-[1.6] text-label">
-            Vous avez utilisé vos {FREE_ASK} questions gratuites. La comparaison complète prend le
-            relais pour passer d&apos;une intuition à une décision éclairée.
+            {bindOrphans(`Vous avez utilisé vos ${FREE_ASK} questions gratuites. La comparaison complète prend le relais pour passer d'une intuition à une décision éclairée.`)}
           </p>
         </div>
       ) : (
