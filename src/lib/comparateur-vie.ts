@@ -1073,7 +1073,7 @@ type ComparaisonDim = {
 
 // gp = libellé du thème pour le résumé, avec une glose entre parenthèses (on explicite ce
 // que chaque thème recouvre, « risques naturels = inondation, feu… »).
-const THEME_ORDER: { id: string; titre: string; gp: string }[] = [
+export const THEME_ORDER: { id: string; titre: string; gp: string }[] = [
   { id: "climat", titre: "Climat", gp: "le climat (chaleur, douceur, soleil)" },
   { id: "risques", titre: "Risques naturels", gp: "les risques naturels (inondation, feu, sécheresse)" },
   { id: "sante_env", titre: "Santé environnementale", gp: "la santé environnementale (air, bruit, industrie)" },
@@ -1331,11 +1331,15 @@ export function buildComparaisonComplete(
   // Ligne de fracture : le candidat au plus grand écart, le risque d'abord (plus décisif),
   // puis l'ordre des thèmes. Domination = une commune mène (presque) tous les thèmes : il n'y a
   // pas de vrai compromis, la fracture pointe alors la SEULE dimension où une AUTRE commune mène.
+  // Pertinence décisionnelle du DÉFAUT dévoilé : un risque de niche à fort écart (feu,
+  // pluies, sécheresse) ne doit pas s'imposer comme thème par défaut devant un thème
+  // largement décisif. Pénalité d'écart (pas une exclusion : le lecteur peut toujours
+  // l'ouvrir via l'explorateur). cf. spec 2.5.
+  const LOW_RELEVANCE_DIMS = new Set(["feu", "pluies", "secheresse"]);
+  const relScore = (c: (typeof divCands)[number]) =>
+    c.spread - (LOW_RELEVANCE_DIMS.has(c.dimId) ? 1 : 0);
   const sortedCands = [...divCands].sort(
-    (a, b) =>
-      b.spread - a.spread ||
-      Number(b.risque) - Number(a.risque) ||
-      a.themeIdx - b.themeIdx,
+    (a, b) => relScore(b) - relScore(a) || a.themeIdx - b.themeIdx,
   );
   const dominator = ordered.length > 0 && ordered[0][1].length >= themes.length - 1 ? ordered[0][0] : null;
   const chosen = dominator
