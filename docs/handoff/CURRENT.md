@@ -32,17 +32,23 @@ nourrie par les besoins réels que les agents font émerger.
   lit tout contre la hiérarchie de preuve (signale les paris déguisés en acquis). PAS encore testé.
 - Corrigé un résidu v2 : Liens de `modele-economique.md` citaient encore invariants n°8/9.
 
+- **Business Strategist testé** sur le pricing Le Fil (9 €/mois → ~49,99 €/an) : concluant.
+  A produit un vrai insight (l'annuel **aveugle la cadence d'apprentissage de la rétention**,
+  un signal/an vs un/mois, sur le maillon le plus faible du moteur) et a relevé que graver 49,99
+  contredit l'arbitrage existant. Verdict : POURSUIVRE la direction annuelle, DIFFÉRER le chiffre.
+
 ## État git
-- Branche `feat/business-strategist` (à commiter/PR) : `.claude/agents/business-strategist.md`,
-  `docs/vault/vision/modele-economique.md` (fix liens), `docs/handoff/CURRENT.md`. Mémoire MAJ.
-- `main` à jour (PR #8 mergée, branche `feat/design-critic` supprimée).
+- `main` à jour : **PR #8 et #9 mergées**, branches supprimées. Les 4 agents sont sur `main`.
 
 ## Prochaine étape immédiate
-1. Tester le Business Strategist à chaud sur une décision réelle (ex. pricing Le Fil, un segment
-   B2B, le Mode Foyer), puis commiter/PR.
-2. Spécifier la **mission d'audit** de l'archiviste : la séquence d'agents est finie, ils ont
-   produit les vrais besoins (dette doc, dédup ~20 %, contradiction-vs-code). Voir
-   `project_archiviste_vault` pour le cadrage déjà tranché.
+1. **Correctifs du rapport Le Fil : EN ATTENTE.** Le porteur challenge le rapport via ChatGPT
+   avant qu'on applique quoi que ce soit côté pricing. Tant que ce n'est pas revenu, NE PAS
+   toucher : amollir le ~49,99 dans `modele-economique.md` l.76, note cadence d'apprentissage
+   dans `arbitrages/pricing-abonnements-reportes.md`, retrait du « 9 €/mois » du hero `/le-fil`.
+   (Rapport complet : `docs/rapports-agents/business-strategist/2026-06-26-pricing-le-fil.md`.)
+2. **Mission d'audit de l'archiviste : différée** (choix porteur, prochaine session). La séquence
+   d'agents est finie, ils ont produit les vrais besoins (dette doc, dédup ~20 %, contradiction-
+   vs-code, ex. l'incohérence l.76). Cadrage déjà tranché : voir `project_archiviste_vault`.
 
 ## À lire d'abord à la reprise
 1. `MEMORY.md` (index) + fiche `project_archiviste_vault.md` (état + séquence agents-avant-audit).
