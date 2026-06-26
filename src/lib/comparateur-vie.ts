@@ -260,8 +260,26 @@ export type ComparaisonTheme = {
   lignes: ComparaisonLigne[];
 };
 
+// Divergence (« la ligne de fracture », mode choix) : LE point où les communes nommées
+// s'écartent le plus. Déterministe, hors score. Sert l'ouverture du résultat gratuit (montrer
+// la TENSION, pas un classement) et désigne le thème à dévoiler en entier. domine = aucune
+// vraie tension (une commune mène presque tous les thèmes) : on bascule sur « ce ne sont pas
+// vraiment des compromis » et la fracture pointe la seule raison de pencher autrement.
+export type Divergence = {
+  dimId: string;
+  themeId: string;
+  label: string; // libellé de la dimension (« Risque d'inondation »)
+  leaderInsee: string;
+  leaderPalier: string; // palier favorable de la commune qui mène
+  exposeInsee: string;
+  exposePalier: string; // palier défavorable de la commune en retrait
+  domine: boolean;
+  dominatorInsee: string | null; // si domine : la commune qui mène presque tous les thèmes
+} | null;
+
 export type ComparaisonComplete = {
   resume: string[]; // « En résumé » : 1 à 3 phrases, niveau thème (qui mène sur quels thèmes)
+  divergence: Divergence; // mode choix : la ligne de fracture (null si tout est à égalité)
   themes: ComparaisonTheme[];
 };
 
@@ -1055,7 +1073,7 @@ type ComparaisonDim = {
 
 // gp = libellé du thème pour le résumé, avec une glose entre parenthèses (on explicite ce
 // que chaque thème recouvre, « risques naturels = inondation, feu… »).
-const THEME_ORDER: { id: string; titre: string; gp: string }[] = [
+export const THEME_ORDER: { id: string; titre: string; gp: string }[] = [
   { id: "climat", titre: "Climat", gp: "le climat (chaleur, douceur, soleil)" },
   { id: "risques", titre: "Risques naturels", gp: "les risques naturels (inondation, feu, sécheresse)" },
   { id: "sante_env", titre: "Santé environnementale", gp: "la santé environnementale (air, bruit, industrie)" },
@@ -1146,12 +1164,15 @@ function themeLeaderInsee(lignes: ComparaisonLigne[]): string | null {
 // Construit la comparaison complète du trio affiché. Déterministe, hors score/tri.
 // Mot du palier ABSOLU (bandIndex), avantage RELATIF au trio (égalité si écart < gap
 // OU même palier partout), synthèse honnête par thème, chapeau de divergences.
-function buildComparaisonComplete(
+export function buildComparaisonComplete(
   picks: MatchResult[],
   byInsee: Map<string, IndexCommune>,
 ): ComparaisonComplete {
   const trio = picks.slice(0, 3);
   const cols = trio.map((r) => byInsee.get(r.insee) ?? null);
+  // Cardinal-agnostique : le « trio » peut être 2 ou 3 communes (mode choix). Le mot qui
+  // dénombre les territoires dans les phrases de synthèse suit le cardinal réel.
+  const nMot = trio.length >= 3 ? "trois" : "deux";
 
   // subScore par dimension, aligné sur le trio (null = donnée absente pour la commune)
   const rawByDim = new Map<string, (number | null)[]>();
@@ -1166,6 +1187,14 @@ function buildComparaisonComplete(
 
   // une ligne par dimension : palier absolu + avantage relatif au trio
   const ligneByDim = new Map<string, ComparaisonLigne>();
+  // Candidats à la « ligne de fracture » (mode choix) : dimensions directionnelles où les
+  // communes s'écartent (un meilleur palier ET un pire présents). cf. type Divergence.
+  type DivCand = {
+    dimId: string; themeId: string; label: string; themeIdx: number;
+    leaderInsee: string; leaderPalier: string; exposeInsee: string; exposePalier: string;
+    spread: number; risque: boolean;
+  };
+  const divCands: DivCand[] = [];
   for (const dim of DIMENSIONS) {
     const raw = rawByDim.get(dim.id)!;
     // bande de favorabilité par commune (null = donnée absente, ou taille = factuel non bandé)
@@ -1175,9 +1204,11 @@ function buildComparaisonComplete(
     const someoneBetter = (b: number) => bands.some((x) => x != null && x < b);
 
     // Avantage fondé sur le PALIER affiché. Dimension non directionnelle (préférence : soleil,
-    // taille) -> « neutre », pas de gagnant. Sinon les communes au MEILLEUR palier mènent :
-    // 1 -> « Avantage X » ; 2 (3e en retrait) -> « Avantage X et Y » ; 3 au même palier ->
-    // « À égalité ». On nomme qui mène, jamais qui est en retrait.
+    // taille) -> « neutre », pas de gagnant. Sinon les communes au MEILLEUR palier mènent, MAIS
+    // seulement si au moins une commune présente est en retrait : « À égalité » dès que TOUTES
+    // les communes ayant la donnée partagent le meilleur palier. Cardinal-agnostique (2 ou 3) :
+    // à 2 communes au même palier, c'est une égalité, pas « Avantage A et B ». On nomme qui mène,
+    // jamais qui est en retrait.
     let avantage: ComparaisonAvantage = { type: "egalite" };
     if (!dim.directionnel) {
       avantage = { type: "neutre" };
@@ -1186,7 +1217,7 @@ function buildComparaisonComplete(
       if (present.length >= 1) {
         const best = Math.min(...present);
         const holders = trio.filter((r, i) => bands[i] === best);
-        if (holders.length >= 1 && holders.length <= 2) {
+        if (holders.length < present.length) {
           avantage = { type: "avantage", insees: holders.map((h) => h.insee) };
         }
       }
@@ -1212,6 +1243,33 @@ function buildComparaisonComplete(
     });
 
     ligneByDim.set(dim.id, { id: dim.id, label: dim.label, aide: dim.aide, avantage, cellules });
+
+    // Candidat fracture : dimension directionnelle où le trio s'écarte (meilleur + pire palier
+    // présents). On retient qui mène (meilleur palier) et qui est exposé (pire), pour la phrase.
+    if (dim.directionnel) {
+      const present = bands.filter((b): b is 0 | 1 | 2 => b != null);
+      if (present.length >= 2) {
+        const minBand = Math.min(...present);
+        const maxBand = Math.max(...present);
+        const spread = maxBand - minBand;
+        if (spread >= 1) {
+          const leaderIdx = bands.findIndex((b) => b === minBand);
+          const exposeIdx = bands.findIndex((b) => b === maxBand);
+          divCands.push({
+            dimId: dim.id,
+            themeId: dim.themeId,
+            label: dim.label,
+            themeIdx: THEME_ORDER.findIndex((t) => t.id === dim.themeId),
+            leaderInsee: trio[leaderIdx].insee,
+            leaderPalier: dim.paliers[minBand],
+            exposeInsee: trio[exposeIdx].insee,
+            exposePalier: dim.paliers[maxBand],
+            spread,
+            risque: !!dim.risque,
+          });
+        }
+      }
+    }
   }
 
   // thèmes : phrase de synthèse honnête (phrases naturelles, groupes nominaux avec article)
@@ -1235,7 +1293,7 @@ function buildComparaisonComplete(
     const ranked = [...winners.entries()].sort((a, b) => b[1].length - a[1].length);
     let synthese: string;
     if (ranked.length === 0) {
-      synthese = "Sur ce thème, les trois territoires se ressemblent.";
+      synthese = `Sur ce thème, les ${nMot} territoires se ressemblent.`;
     } else if (ranked.length === 1) {
       const [insee, fortes] = ranked[0];
       synthese = `${nomByInsee.get(insee)} se distingue par ${joinFr(fortes.slice(0, 2))}.`;
@@ -1262,7 +1320,7 @@ function buildComparaisonComplete(
   const ordered = [...ledByInsee.entries()].sort((a, b) => b[1].length - a[1].length);
   const resume: string[] = [];
   if (ordered.length === 0) {
-    resume.push("Les trois territoires sont très proches sur l'ensemble des thèmes.");
+    resume.push(`Les ${nMot} territoires sont très proches sur l'ensemble des thèmes.`);
   } else {
     ordered.forEach(([insee, gps], idx) => {
       const verbe = idx === 0 ? "prend l'avantage sur" : "se distingue sur";
@@ -1270,7 +1328,38 @@ function buildComparaisonComplete(
     });
   }
 
-  return { resume, themes };
+  // Ligne de fracture : le candidat au plus grand écart, le risque d'abord (plus décisif),
+  // puis l'ordre des thèmes. Domination = une commune mène (presque) tous les thèmes : il n'y a
+  // pas de vrai compromis, la fracture pointe alors la SEULE dimension où une AUTRE commune mène.
+  // Pertinence décisionnelle du DÉFAUT dévoilé : un risque de niche à fort écart (feu,
+  // pluies, sécheresse) ne doit pas s'imposer comme thème par défaut devant un thème
+  // largement décisif. Pénalité d'écart (pas une exclusion : le lecteur peut toujours
+  // l'ouvrir via l'explorateur). cf. spec 2.5.
+  const LOW_RELEVANCE_DIMS = new Set(["feu", "pluies", "secheresse"]);
+  const relScore = (c: (typeof divCands)[number]) =>
+    c.spread - (LOW_RELEVANCE_DIMS.has(c.dimId) ? 1 : 0);
+  const sortedCands = [...divCands].sort(
+    (a, b) => relScore(b) - relScore(a) || a.themeIdx - b.themeIdx,
+  );
+  const dominator = ordered.length > 0 && ordered[0][1].length >= themes.length - 1 ? ordered[0][0] : null;
+  const chosen = dominator
+    ? sortedCands.find((c) => c.leaderInsee !== dominator) ?? sortedCands[0] ?? null
+    : sortedCands[0] ?? null;
+  const divergence: Divergence = chosen
+    ? {
+        dimId: chosen.dimId,
+        themeId: chosen.themeId,
+        label: chosen.label,
+        leaderInsee: chosen.leaderInsee,
+        leaderPalier: chosen.leaderPalier,
+        exposeInsee: chosen.exposeInsee,
+        exposePalier: chosen.exposePalier,
+        domine: dominator != null,
+        dominatorInsee: dominator,
+      }
+    : null;
+
+  return { resume, divergence, themes };
 }
 
 // Narratif « nouveaux arrivants » (HORS score) : phrase descriptive, jamais normative.
@@ -1921,6 +2010,111 @@ const PLM_VILLES: Record<string, { uu: string; pop: number }> = {
   marseille: { uu: "00759", pop: 873_076 },
 };
 
+// Construit le MatchResult d'une commune à partir de l'index, hors champs RELATIFS au groupe
+// (distinctive/compromis/decouverte/signaux, finalisés par les assign* après assemblage).
+// `scoring` porte ce qui dépend du matching (score, reasons, compromis absolu) ; en mode
+// « choix » (communes nommées, sans préférences) il est neutre. `littoralIndex` non-null
+// active le récit d'érosion (intention littorale exprimée) ; null = silence.
+function baseResult(
+  c: IndexCommune,
+  scoring: { compatibility: number; reasons: string[]; tradeoff: string | null },
+  littoralIndex: Map<string, LittoralSummary> | null,
+): MatchResult {
+  return {
+    insee: c.insee,
+    nom: CITY_LABEL[cityKey(c.insee)] ?? c.nom,
+    dept: c.dept,
+    region: c.region,
+    compatibility: scoring.compatibility,
+    reasons: scoring.reasons,
+    signature: buildSignature(c),
+    identite: buildIdentiteCandidates(c)[0], // défaut ; unicité de groupe via assignIdentite
+    tradeoff: scoring.tradeoff,
+    compromis: "", // finalisé après assemblage (assignCompromis)
+    decouverte: null, // finalisé après assemblage (assignDecouverte)
+    // Narratif, hors score : note de pression climatique sur l'économie (ou null).
+    pressionEco: c.pression_eco
+      ? { palier: c.pression_eco.palier, note: pressionEcoNote(c.pression_eco) }
+      : null,
+    // Narratif, hors score : nuance climatique sur l'inondation (ou null/silence).
+    climatInondation: buildClimatInondation(c),
+    // Logement : note narrative qualitative (achat / location), hors score.
+    logement: logementNote(c),
+    // Littoral : renseigné seulement sur intention littorale + commune inscrite.
+    littoral:
+      littoralIndex?.get(String(c.insee).padStart(5, "0"))?.traitDeCote.concernee
+        ? "exposée à l'érosion du littoral (la côte recule)"
+        : null,
+    distinctive: null, // renseigné après l'assemblage final (relatif au groupe affiché)
+    // Évolution démographique : récit construit ici, gaté côté synthèse par « croissance demandée ».
+    demographie: c.demographie?.recit ? (RECIT_DEMOGRAPHIE[c.demographie.recit] ?? null) : null,
+    // Calme sonore : récit construit ici, gaté côté synthèse par « calme_sonore demandé ».
+    calmeSonore: calmeSonoreRecit(c),
+    // Exposition industrielle : récit construit ici, gaté côté synthèse par « critère demandé ».
+    expoIndustrielle: expoIndustrielleRecit(c),
+    heritageIndustriel: heritageRecit(c),
+    signaux: {}, // rempli après l'assemblage final sur le groupe affiché (cf. assignSignaux)
+    metrics: {
+      distance_cote_km: c.distance_cote_km,
+      population: c.population,
+      jours_chauds_30: c.clim.NORTX30D_yr ?? null,
+      temp_hiver: c.clim.NORTMm_seas_DJF ?? null,
+      precip_annuelle: c.clim.NORRR_yr ?? null,
+      ifm: c.clim.NORIFM40_yr ?? null,
+    },
+  };
+}
+
+// Entrée « mode choix » : le lecteur NOMME 2-3 communes (codes INSEE). Court-circuite
+// matchProjects et les préférences — il n'y a ni score, ni tri, ni reasons, seulement la
+// matrice d'arbitrages et les narratifs RELATIFS au groupe nommé. Renvoie le même couple
+// { trio, comparaison } que consomme le path /ou-vivre, plus la liste des codes ignorés
+// (hors index, dont PLM 75056/69123/13055 absents car l'index est par arrondissement).
+// null si moins de 2 communes valides après filtrage. cf. arbitrages/comparateur-un-moteur-trois-portes.
+export async function seedComparaison(
+  insees: string[],
+): Promise<{ trio: MatchResult[]; comparaison: ComparaisonComplete; ignores: string[] } | null> {
+  const communes = await loadIndex();
+  const byInsee = new Map(communes.map((c) => [c.insee, c]));
+  // Chargé pour le trait distinctif (relatif au groupe, pertinent même hors intention) ; on
+  // ne le passe PAS à baseResult (le récit d'érosion par carte reste gaté par l'intention,
+  // que le mode choix n'exprime pas).
+  const littoralIndex = await getLittoralIndex();
+
+  // Dédoublonnage en préservant l'ordre nommé ; codes hors index écartés et signalés.
+  const seen = new Set<string>();
+  const picks: MatchResult[] = [];
+  const ignores: string[] = [];
+  for (const raw of insees) {
+    const insee = String(raw).trim();
+    if (!insee || seen.has(insee)) continue;
+    seen.add(insee);
+    const c = byInsee.get(insee);
+    if (!c) { ignores.push(insee); continue; }
+    // compatibility 0 = neutre, non affiché en mode choix (le lecteur a nommé les communes,
+    // il n'y a pas de score de correspondance). Le matrice et les narratifs n'en dépendent pas.
+    picks.push(baseResult(c, { compatibility: 0, reasons: [], tradeoff: null }, null));
+    if (picks.length >= 3) break;
+  }
+  if (picks.length < 2) return null;
+
+  // Narratifs RELATIFS au groupe nommé, comme le path /ou-vivre. Aucune préférence en mode
+  // choix : requestedKeys vide, compromis absolu (tradeoffKey) nul partout.
+  const requestedKeys = new Set<PreferenceKey>();
+  const distinctiveMap = buildDistinctive(
+    picks.map((r) => byInsee.get(r.insee)).filter((c): c is IndexCommune => c != null),
+    littoralIndex,
+  );
+  for (const r of picks) r.distinctive = distinctiveMap[r.insee] ?? null;
+  assignSignaux(picks, byInsee, requestedKeys);
+  assignIdentite(picks, byInsee);
+  assignCompromis(picks, byInsee, new Map(picks.map((r) => [r.insee, null])));
+  assignDecouverte(picks, byInsee, requestedKeys);
+
+  const comparaison = buildComparaisonComplete(picks, byInsee);
+  return { trio: picks, comparaison, ignores };
+}
+
 export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome> {
   const communes = await loadIndex();
   await loadZeTable(); // nom + taille des bassins (signature + raison emploi graduée)
@@ -2097,50 +2291,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
       // Clé du compromis absolu (pref demandée scorant < 50), conservée pour l'unicité
       // par dimension dans le trio (assignCompromis). null = pas de faiblesse absolue.
       tradeoffKey,
-      result: {
-        insee: c.insee,
-        nom: CITY_LABEL[cityKey(c.insee)] ?? c.nom,
-        dept: c.dept,
-        region: c.region,
-        compatibility,
-        reasons,
-        signature: buildSignature(c),
-        identite: buildIdentiteCandidates(c)[0], // défaut ; unicité de groupe via assignIdentite
-        tradeoff,
-        compromis: "", // finalisé après assemblage (assignCompromis)
-        decouverte: null, // finalisé après assemblage (assignDecouverte)
-        // Narratif, hors score : note de pression climatique sur l'économie (ou null).
-        pressionEco: c.pression_eco
-          ? { palier: c.pression_eco.palier, note: pressionEcoNote(c.pression_eco) }
-          : null,
-        // Narratif, hors score : nuance climatique sur l'inondation (ou null/silence).
-        climatInondation: buildClimatInondation(c),
-        // Logement : note narrative qualitative (achat / location), hors score.
-        logement: logementNote(c),
-        // Littoral : renseigné seulement sur intention littorale + commune inscrite.
-        littoral:
-          littoralIndex?.get(String(c.insee).padStart(5, "0"))?.traitDeCote.concernee
-            ? "exposée à l'érosion du littoral (la côte recule)"
-            : null,
-        distinctive: null, // renseigné après l'assemblage final (relatif au groupe affiché)
-        // Évolution démographique : récit construit ici (comme climatInondation), gaté à
-        // l'affichage côté synthèse par « croissance_demographique demandée ».
-        demographie: c.demographie?.recit ? (RECIT_DEMOGRAPHIE[c.demographie.recit] ?? null) : null,
-        // Calme sonore : récit construit ici, gaté côté synthèse par « calme_sonore demandé ».
-        calmeSonore: calmeSonoreRecit(c),
-        // Exposition industrielle : récit construit ici, gaté côté synthèse par « critère demandé ».
-        expoIndustrielle: expoIndustrielleRecit(c),
-        heritageIndustriel: heritageRecit(c),
-        signaux: {}, // rempli après l'assemblage final sur le groupe affiché (cf. assignSignaux)
-        metrics: {
-          distance_cote_km: c.distance_cote_km,
-          population: c.population,
-          jours_chauds_30: c.clim.NORTX30D_yr ?? null,
-          temp_hiver: c.clim.NORTMm_seas_DJF ?? null,
-          precip_annuelle: c.clim.NORRR_yr ?? null,
-          ifm: c.clim.NORIFM40_yr ?? null,
-        },
-      } as MatchResult,
+      result: baseResult(c, { compatibility, reasons, tradeoff }, littoralIndex),
     };
   });
 
@@ -2312,6 +2463,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
 export function truncateComparaison(cc: ComparaisonComplete): ComparaisonComplete {
   return {
     resume: cc.resume.slice(0, 1),
+    divergence: cc.divergence,
     themes: cc.themes.slice(0, 2),
   };
 }

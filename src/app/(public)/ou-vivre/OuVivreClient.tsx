@@ -12,6 +12,7 @@ import { anchorsToLabeled, exclusionsToLabels } from "@/lib/geo-zones";
 import { ChipTooltip } from "@/components/ChipTooltip";
 import { AUTO_SYNTHESIS } from "@/lib/auto-synthesis";
 import { departmentName } from "@/lib/regions-fr";
+import { bindOrphans } from "@/lib/typography";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — client.
@@ -93,28 +94,8 @@ function clearSession(): void {
   }
 }
 
-// Typographie FR robuste (y compris Safari, qui ignore text-wrap: pretty) : on lie
-// par une espace insécable les « petits mots » au mot suivant (une ligne ne doit
-// pas se terminer par « les », « leur », « et », « à »…) et la ponctuation haute
-// (: ; ! ? ») au mot précédent. Évite les coupures en plein milieu d'un groupe.
-const ORPHAN_WORDS = new Set([
-  "le", "la", "les", "un", "une", "des", "du", "de", "d", "à", "au", "aux", "et", "ou",
-  "en", "ce", "ces", "son", "sa", "ses", "leur", "leurs", "ma", "mon", "mes", "ta", "ton",
-  "tes", "notre", "votre", "nos", "vos", "par", "pour", "sur", "sans", "qui", "que", "qu",
-  "ne", "si", "l",
-]);
-const HIGH_PUNCT = new Set([":", ";", "!", "?", "»"]);
-function bindOrphans(text: string): string {
-  const parts = text.split(" ");
-  return parts
-    .map((w, i) => {
-      if (i === parts.length - 1) return w;
-      const bare = w.toLowerCase().replace(/[.,:;!?«»()]/g, "");
-      const bind = ORPHAN_WORDS.has(bare) || HIGH_PUNCT.has(parts[i + 1]);
-      return w + (bind ? " " : " ");
-    })
-    .join("");
-}
+// bindOrphans : typographie FR robuste (Safari ignore text-wrap: pretty). Extrait dans
+// @/lib/typography pour servir aussi le comparateur. cf. AGENTS.md « Largeur du texte ».
 
 // Ordre : tête d'affiche climat/protection (le moat, invisible chez SeLoger),
 // puis projet de vie. Set figé par le porteur, chaque chip validée par la sonde

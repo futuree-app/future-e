@@ -23,7 +23,8 @@ type PaymentWrapperProps = {
   pack?: {
     trio: { insee: string; commune: string }[];
     projetLabel: string;
-    parsedSnapshot: unknown;
+    mode?: "replay" | "choix";
+    parsedSnapshot?: unknown; // absent en mode choix
   };
   returnUrl?: string;
 };

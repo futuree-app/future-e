@@ -4,88 +4,100 @@
 > compte Claude (même machine), reprend ici. La connaissance durable est déjà dans le vault
 > (`docs/vault/`) et `/memory` (`MEMORY.md` + fiches) : ce fichier ne capture que l'état vivant.
 
-- **Horodatage** : 2026-06-26
-- **Branche courante** : `main` (propre, à jour, tout poussé). Aucune PR ouverte.
+- **Horodatage** : 2026-06-27
+- **Branche courante** : `feat/comparateur-mode-choix` (PAS `main`). 3 fichiers modifiés NON commités.
+  Aucune PR ouverte.
 
 ## Objectif en cours
-**Consolidation du comparateur** : un seul moteur de comparaison, trois portes (découverte
-`/ou-vivre` / départage « mode choix » / Pack), une sortie. La **décision est entièrement prise et
-gravée** dans le vault. **Le BUILD est le prochain chantier** (le porteur ne veut PAS le différer) :
-reconstruire la porte « mode choix » sur le moteur conforme et redéfinir le Pack par l'arbitrage
-(N ∈ {2,3}). Rien de ce build n'est commencé.
+Polir la **page comparateur « mode choix »** (le build v3 synthèse + explorateur est déjà livré et
+commité sur cette branche). On applique une série de retouches UX/copy issues des retours du porteur
+(et d'une analyse ChatGPT de la page d'accueil vide). En cours : **3 nouvelles demandes d'animation/UX
+pas encore commencées** (voir Prochaine étape).
 
 ## Fait dans cette session
-- **Audit dette doc** (clos, commit `1eb159e`) : index ADR/arbitrages corrigés, orphelin carte
-  indexé, 2 TODO résolus, climat « composante centrale » (manifeste).
-- **`paris.md` créé** (commit `017e879`) : 4e type d'artefact du vault, registre vivant des paris
-  (boucle de retour). Agent « gardien de la calibration » (famille *Learning*) décidé mais NI créé
-  NI en roadmap, déclencheur = besoin pas volume. Voir fiche `project_paris_registre`.
-- **Honnêteté site pré-lancement** (commit `30a88d2`) : `/professionnels` « dix dimensions » (faux)
-  → « sept thèmes territoriaux » / « près de trente critères ». **Le Fil : tout prix retiré**
-  (hero `le-fil`, kicker + carte `/checkout`, CTA `/comparateur`, `priceLabel`) — l'offre Le Fil
-  est à cadrer avant son lancement (phase 2). `amount: 9` conservé en data inerte.
-- **Mini-board comparateur** (Product → Business → Software Architect → Editorial, challengé par
-  ChatGPT) puis **gravure** (commit `8433d90`) : voir Décisions ci-dessous.
+**Retouches appliquées, vérifiées `tsc`+`eslint` propres, NON commitées** (3 fichiers) :
+1. **`ModeChoixSearch.tsx`** : placeholders `Ex. Rennes` / `Ex. Lorient` (slot 3 garde
+   `Une 3e commune (facultatif)`) ; CTA `Comparer` → `Comparer ces communes` ; nouvelle ligne de
+   réassurance sous les boutons : `7 thèmes · près de 30 critères · aperçu gratuit` (mono, sobre).
+2. **`page.tsx`** (Hero) : sous-titre dégraissé pour retirer le doublon avec les chips « Ce qu'on
+   compare ». Nouveau : « Nommez les communes que vous avez en tête. On les met face à face et on
+   montre ce que chacune vous fait gagner ou perdre. Aucun classement, aucun score. » (l'énumération
+   des thèmes et « près de 30 critères » retirés du sous-titre, portés par chips + ligne réassurance).
+3. **`ModeChoixSynthese.tsx`** : **FIX BUG** « la synthèse ne se déclenchait jamais ». Root cause :
+   sous React Strict Mode (dev), le garde `ran.current` + le flag `cancelled` se neutralisaient (le
+   seul fetch lancé était annulé par le cleanup du 1er passage, le 2e passage sortait sans relancer →
+   `setText` jamais appelé). Remplacé par un `AbortController` par exécution d'effet (pattern
+   idiomatique). Diagnostic confirmé : la route API marche (`curl` → 200, synthèse streamée OK), donc
+   le bug était purement côté composant. Bug dev-only (prod sans Strict Mode aurait marché), corrigé
+   quand même. **`OuVivreClient.tsx` vérifié : pas le même pattern, pas de bug jumeau.**
 
-## Décisions prises (porteur, gravées dans le vault)
-- **Un moteur, trois portes** : legacy `/comparateur` (table `communes_tension`, scoré, cadre
-  risque) **à jeter** (viole invariant n°2 + pivot ADR-0002). Le « mode choix » (le lecteur NOMME
-  2-3 communes) est le besoin réel non servi (modèle de contrôle distinct du trio proposé par
-  `/ou-vivre`). Préserver l'URL `/comparateur` (funnel SEO), changer le moteur.
-- **Pack redéfini par l'arbitrage** (addendum `ADR-0007`) : « matrice complète sur les communes
-  comparées (N ∈ {2,3}) », prix unique 39 €, compteur hors définition. **Refus net** d'un palier
-  « 2 communes moins cher » (Business). **Ancre primaire** bascule remise → valeur (la remise
-  « 3 rapports = 42 € » s'inverse à 2 communes : 2 rapports = 28 € < 39 €).
-- **Voix** (Editorial) : la copy du Pack est DÉJÀ juste (« Vous hésitez entre {…} ? Tranchez, sans
-  deviner »). **Rejet** du « résoudre votre choix » de ChatGPT (ferait de futur•e le décideur).
-  Règle gravée dans `editoriale.md`. Ne PAS réécrire le hero.
+## Décisions prises (porteur, pas encore dans le vault)
+- **Tri de l'analyse ChatGPT de la home vide** (proposé par Claude, validé porteur) : adopter
+  placeholders + CTA + ligne réassurance ; **rejeter** émojis/icônes sur les chips de thèmes (contre
+  la DA sobre), **rejeter** le rebranding « moteur d'arbitrage » du mot « comparer » (mot conservé
+  pour le funnel SEO, mémoire `discoverability`), **rejeter** la réécriture du sous-titre en
+  « Choisissez les communes entre lesquelles vous hésitez » (redondant avec le H1).
+- Le porteur veut commiter ; reste à trancher : 1 seul commit ou séparer le fix (3) des retouches
+  copy (1-2). NON tranché.
 
 ## État git
-- Branche `main`, **working tree propre, tout poussé**. Dernier commit `8433d90`.
-- Commits de la session : `1eb159e`, `017e879`, `30a88d2`, `8433d90`. **Aucune PR ouverte.**
-- Mémoire `/memory` à jour (fiches `project_paris_registre`, `project_comparateur_consolidation`
-  + index), hors-repo.
+- Branche `feat/comparateur-mode-choix`. Dernier commit poussé/local : `021a669`.
+- **3 fichiers modifiés non commités** : `ModeChoixSearch.tsx`, `ModeChoixSynthese.tsx`, `page.tsx`
+  (tous sous `src/app/(public)/comparateur/`). `tsc --noEmit` (hors artefact `suivi-bientot`) et
+  `eslint` sur ces fichiers : propres.
+- Le build v3 (6 tâches du plan + T1) est déjà commité (`b6d656c`, `e515d85`, `128d271`, `ecdbc88`,
+  `4800653`, `ae74809`) + 2 retours porteur (`bf31de9`, `9c08814`).
+- Aucune PR ouverte. Branche pas encore mergée sur `main`.
 
 ## Prochaine étape immédiate
-**Démarrer le build du mode choix + redéfinition du Pack.** Ordre conseillé (du moins risqué au
-plus engageant), tout détaillé dans `/memory/project_comparateur_consolidation.md` :
-1. **Exporter `buildComparaisonComplete`** (`src/lib/comparateur-vie.ts`) + une entrée
-   `seed(insees[])` qui court-circuite `matchProjects`/préférences.
-2. **Rendu à n=2** : corriger le bug d'égalité (`comparateur-vie.ts` ~l.1189 : à 2 communes au
-   même palier, émet « Avantage A et B » au lieu d'« égalité » ; condition correcte
-   `holders.length < present.length`), rendre la grille de `ComparaisonCompleteView.tsx` fonction
-   de `trio.length` (sinon colonne fantôme), border la copy « trois » en dur (moteur l.1238/1265,
-   vue l.208/238).
-3. **Porte de saisie** des 2-3 communes nommées (URL `/comparateur` réutilisée) + **piège
-   PLM/arrondissements et communes hors index** (`/memory/project_exclusion_ville_uu`,
-   `home_insee_code_pitfall`).
-4. **Plomberie payante** (le plus engageant) : colonne `decision_packs.mode` (`replay`|`choix`),
-   `insee_3`/`commune_3` nullables, N `report_grants`, « 3 pistes » propres à `replay`, migration.
+**3 demandes du porteur, NON commencées** (interrompu juste après la recherche du code existant) :
+1. **Effet machine à écrire sur la synthèse** (`ModeChoixSynthese.tsx`). RÉUTILISER l'existant, ne
+   pas réinventer : implémentations dans `src/app/(public)/ou-vivre/OuVivreClient.tsx` (~l.643-720 :
+   pattern `mode: "typing" | "holding" | "deleting"`, setTimeout récursif) et
+   `src/components/HeroProjetTerritoires.tsx`. ATTENTION : ici le texte ARRIVE EN STREAM (chunks
+   réseau), pas une chaîne fixe ; il faut une machine à écrire qui « rattrape » un buffer qui grandit
+   (taper plus vite que le réseau, se caler sur la fin du flux), pas un simple slice d'une string
+   connue d'avance.
+2. **Animation au survol des thèmes verrouillés** (`ThemeExplorer.tsx`) : aujourd'hui tout est grisé,
+   rien ne signale qu'un thème est déverrouillable. Ajouter un feedback hover (ex. l'icône cadenas qui
+   s'anime/s'ouvre, élévation, bord accent) sur les boutons de la vitrine — uniquement tant que
+   `canRedirect` est vrai. Markup actuel : boutons `locked.map(...)` avec `disabled={!canRedirect}`,
+   icône cadenas SVG inline.
+3. **Pouvoir revenir au thème par défaut après avoir cliqué un thème à déverrouiller**
+   (`ThemeExplorer.tsx`). Règle ACTUELLE = « une seule redirection » : après le 1er clic, `redirected`
+   passe à true et le sélecteur se verrouille (on ne peut plus changer). Le porteur veut pouvoir
+   **revenir au thème par défaut** (au minimum). À cadrer : autoriser le retour seulement vers le
+   défaut, ou rouvrir toute navigation ? Le « une seule redirection » vient de la spec 2.4
+   (`docs/superpowers/specs/2026-06-26-comparateur-synthese-explorateur-design.md`) : VÉRIFIER la
+   spec avant de casser l'invariant ; c'est un assouplissement délibéré demandé par le porteur.
+
+Avant ça : décider du découpage des commits pour les 3 fichiers déjà modifiés (cf. Décisions).
 
 ## À lire d'abord à la reprise
-1. `MEMORY.md` (index) + fiche `project_comparateur_consolidation` (TOUT le terrain du build) et
-   `project_comparateur_complet` (la matrice payante déjà livrée).
-2. `docs/vault/modules/comparateur.md` (l'objet : 1 moteur, 3 portes), `adr/ADR-0007-pack-decision-bundle.md`
-   (+ son addendum), `arbitrages/comparateur-un-moteur-trois-portes.md`, `paris.md` (paris #3/#4/#5).
-3. Code : `src/lib/comparateur-vie.ts` (`buildComparaisonComplete` l.1149+), `src/app/(public)/ou-vivre/ComparaisonCompleteView.tsx`,
-   `src/lib/decision-packs.ts`, `supabase/13_init_decision_packs.sql`, `src/app/api/stripe/create-payment-intent/route.ts`,
-   `src/app/(public)/comparateur/page.tsx` (legacy à remplacer).
+1. `MEMORY.md` (index) + fiches `project_comparateur_consolidation`, `project_comparateur_complet`,
+   `synthesis_model_routing`, `feedback_positionnement_compatibilite`, `feedback_text_maxwidth`,
+   `feedback_no_em_dash`.
+2. Le plan v3 : `docs/superpowers/plans/2026-06-26-comparateur-synthese-explorateur.md` et la spec
+   design : `docs/superpowers/specs/2026-06-26-comparateur-synthese-explorateur-design.md` (la règle
+   « une seule redirection » = §2.4, à relire pour la demande 3).
+3. Code touché : `src/app/(public)/comparateur/` (`page.tsx`, `ModeChoixSearch.tsx`,
+   `ModeChoixSynthese.tsx`, `ThemeExplorer.tsx`, `ThemeMatrix.tsx`). Patrons machine à écrire :
+   `OuVivreClient.tsx` ~l.643-720, `HeroProjetTerritoires.tsx`.
 4. `docs/handoff/AUTO-SNAPSHOT.md` pour vérifier la fraîcheur.
 
 ## Pièges / fils ouverts
-- **Build estimé MOYEN (~1-2 j)** : le calcul de la matrice est déjà cardinal-agnostique (dégrade
-  à n=2), le coût est dans la **plomberie payante**. La vraie décision durable = la **colonne
-  `mode`** (un pack en mode choix ne se reconstruit pas en rejouant le projet). Borne : au-delà de
-  N=3, table enfant `decision_pack_communes`, pas une 4e colonne.
-- **Paris ouverts à instrumenter** (`paris.md`) : #4 le moment « 2 villes » est-il solvable ou de
-  la réassurance peu monétisable (inversion ChatGPT, angle mort de consensus) ; #5 ce moment a-t-il
-  du volume. Rouvrir le pricing fin (palier ? prix ?) seulement après ~15-30 ventes.
-- **Le Fil** : page volontairement SANS prix désormais ; l'offre de l'abonnement reste **à cadrer**
-  avant lancement (phase 2). `arbitrages/pricing-abonnements-reportes.md`.
-- **Dettes doc laissées exprès** : C2 partiellement purgée (`modules/comparateur.md` écrit) ; restent
-  `modules/` Logement/Santé/Mobilité/Métier/Projets + `architecture/parcours-et-acces.md` non écrits.
-- **Staleness site (hors comparateur)** : `/professionnels` corrigé ; reste le reste du site à
-  auditer au lancement (verrou robots/noindex à lever page par page, sitemap `/inondation`, JSON-LD).
-- **Fils anciens** : module **Métier** (verdict agent « REFORMULER », jamais appliqué) = le sujet
-  que le porteur a nommé comme suivant AVANT que le comparateur ne prenne la session ; carte de
-  France = problème OUVERT côté Researcher.
+- **Ne PAS recommiter le build v3** : il est déjà sur la branche. Seuls les 3 fichiers en `git status`
+  sont du travail vivant non commité.
+- **Machine à écrire + stream** : ne pas casser le streaming en croyant avoir une string fixe. Le
+  texte grandit par chunks ; la machine à écrire doit consommer un buffer. Garder le `AbortController`
+  (fix Strict Mode) intact.
+- **Vérif systématique** : `npx tsc --noEmit 2>&1 | grep -v suivi-bientot` puis
+  `npx eslint "<fichiers>"` (l'erreur `suivi-bientot/page.js` est un artefact `.next` préexistant,
+  hors sujet). Test runtime navigateur : `http://localhost:3000/comparateur?communes=17300,35238,56121`
+  (dev server tourne déjà sur :3000). La synthèse streamée ne se vérifie qu'en navigateur réel
+  (Strict Mode), pas en `curl`.
+- **Doctrine à respecter** : pas de tiret cadratin (virgule/deux points) ; pas de couronnement dans
+  la copy ; DA sobre (le porteur a déjà rejeté les émojis sur les chips) ; `bindOrphans` sur les
+  phrases importantes ; pas de `max-w` plus étroit que le bloc bordé.
+- **Le porteur a fait un `/clear` accidentel en début de session** : d'où la reconstitution via ce
+  handoff + git. Tout le contexte durable est bien sur disque, rien n'a été perdu.

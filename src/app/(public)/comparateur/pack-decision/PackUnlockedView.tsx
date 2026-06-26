@@ -54,8 +54,9 @@ export function PackUnlockedView({ data, trio, pistes, projetLabel }: Props) {
         </p>
       )}
 
-      {/* Ouvrir les 3 rapports complets (débloqués par les report_grants du pack) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-10">
+      {/* Ouvrir les rapports complets (débloqués par les report_grants du pack) ;
+          2 ou 3 selon le mode (choix peut n'en avoir que 2). */}
+      <div className={`grid grid-cols-1 ${trio.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3"} gap-3 mb-10`}>
         {trio.map((r) => (
           <button
             key={r.insee}
