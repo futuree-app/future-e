@@ -938,10 +938,6 @@ export default async function ComparateurPage({
                 </div>
 
                 <div className="cta-side">
-                  <div>
-                    <div className="cta-price">9€</div>
-                    <div className="cta-period">par mois · sans engagement</div>
-                  </div>
                   <Link href="/le-fil" className="cta-button">
                     Être prévenu·e à l&apos;ouverture
                   </Link>

@@ -69,7 +69,7 @@ const COPY: Record<CheckoutProductSlug, {
     ],
   },
   "le-fil": {
-    kicker: "Le Fil · 9 €/mois · prochainement",
+    kicker: "Le Fil · prochainement",
     hero: { line1: "Le Fil.", line2: "Bientôt." },
     promise: "Le rapport interactif futur•e ne s'arrête pas à un PDF. Avec Le Fil, il devient vivant : un dashboard interactif, des alertes ciblées, une lecture mensuelle écrite pour vous. Inscrivez-vous pour être prévenu·e en avant-première.",
     whatYouGet: [
@@ -654,10 +654,14 @@ export default async function CheckoutPage({
                       letterSpacing: "var(--tracking-display)",
                     }}
                   >
-                    {product.amount}
-                    <span style={{ fontSize: 16, color: "var(--fg-3)", marginLeft: 4 }}>
-                      €{isFil ? "/mois" : ""}
-                    </span>
+                    {isFil ? (
+                      <span style={{ fontSize: 16, color: "var(--fg-3)" }}>Prochainement</span>
+                    ) : (
+                      <>
+                        {product.amount}
+                        <span style={{ fontSize: 16, color: "var(--fg-3)", marginLeft: 4 }}>€</span>
+                      </>
+                    )}
                   </div>
                 </div>
                 <p

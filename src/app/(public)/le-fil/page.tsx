@@ -201,36 +201,7 @@ export default function LeFilPage() {
                 pour vos territoires, pour vos décisions.
               </p>
 
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'baseline',
-                  gap: 14,
-                  flexWrap: 'wrap',
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: 'var(--font-serif)',
-                    fontSize: 42,
-                    color: 'var(--fg-hi)',
-                    letterSpacing: 'var(--tracking-display)',
-                  }}
-                >
-                  9 €
-                  <span style={{ fontSize: 18, color: 'var(--fg-3)', marginLeft: 6 }}>/ mois</span>
-                </div>
-                <div
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 'var(--fs-meta)',
-                    color: 'var(--fg-3)',
-                    letterSpacing: '0.04em',
-                  }}
-                >
-                  · sans engagement · 30 jours offerts à l'ouverture
-                </div>
-              </div>
+              {/* Prix retiré jusqu'au cadrage de l'offre Le Fil (lancement phase 2) */}
             </div>
 
             {/* Form card */}

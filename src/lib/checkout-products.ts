@@ -34,7 +34,7 @@ export const CHECKOUT_PRODUCTS: Record<CheckoutProductSlug, CheckoutProduct> = {
     subtitle:
       "Le rapport interactif devient vivant : dashboard évolutif, profil modifiable, alertes et mises à jour ciblées.",
     amount: 9,
-    priceLabel: "9 €",
+    priceLabel: "Prochainement",
     productType: "suivi-solo",
     ctaLabel: "Activer Le Fil",
     features: [

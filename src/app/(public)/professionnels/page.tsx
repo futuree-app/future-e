@@ -77,7 +77,7 @@ const PROFESSIONS = [
     title: 'Conseillers en gestion de patrimoine',
     pitch: "Vos clients vous demandent : ce bien sera-t-il encore une bonne décision dans 15 ans ? Vous avez les données notariales et les rendements. Vous n'avez pas la lecture territoriale à 2050 — ni la dimension sanitaire qui va peser sur l'attractivité.",
     bullets: [
-      'Lecture des dix dimensions sur n\'importe quelle commune française',
+      'Lecture des sept thèmes territoriaux sur n\'importe quelle commune française',
       'Données sanitaires : cadmium, pesticides, qualité de l\'air — facteurs de valorisation ou de dépréciation à long terme',
       'Export PDF intégrable à vos notes de conseil',
       'Comparaison de quatre communes pour les arbitrages multi-options',
@@ -186,7 +186,7 @@ export default function ProfessionnelsPage() {
               <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>Pour qu'elles soient utilisables en rendez-vous client, il faut les agréger, les contextualiser, les traduire en langage accessible.</strong> C'est un travail d'éditorialisation que les bases publiques ne font pas — et que vous n'avez pas le temps de faire vous-même pour chaque dossier.
             </p>
             <p style={{ margin: 0 }}>
-              futur•e fait ce travail. Vous tapez une commune. En dix secondes, vous avez une lecture sur dix dimensions territoriales avec les sources citées et la mention "données publiques officielles". Pas de score opaque. Pas d'alarme. Une contextualisation factuelle.
+              futur•e fait ce travail. Vous tapez une commune. En dix secondes, vous avez une lecture sur sept thèmes territoriaux avec les sources citées et la mention "données publiques officielles". Pas de score opaque. Pas d'alarme. Une contextualisation factuelle.
             </p>
           </div>
         </div>
@@ -248,8 +248,8 @@ export default function ProfessionnelsPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 20 }}>
               {[
                 { num: '+ 124 %', title: 'Sinistres climatiques', desc: "Hausse des sinistres habitation liés aux risques naturels en France entre 2000 et 2024. Les assureurs durcissent. Les primes augmentent. Vos clients posent des questions.", src: 'France Assureurs · 2024' },
-                { num: '~ 35 000', title: 'Communes françaises', desc: "Chacune avec un profil distinct sur dix dimensions. futur•e couvre l'intégralité du territoire métropolitain et ultra-marin.", src: 'INSEE · DRIAS · Géorisques' },
-                { num: '10 s', title: 'Pour une lecture complète', desc: "De la saisie du nom de commune à l'affichage des dix dimensions sourcées, prêtes à être montrées à votre client ou exportées en PDF.", src: 'Mesuré en conditions réelles' },
+                { num: '~ 35 000', title: 'Communes françaises', desc: "Chacune avec un profil distinct sur sept thèmes territoriaux. futur•e couvre l'intégralité du territoire métropolitain et ultra-marin.", src: 'INSEE · DRIAS · Géorisques' },
+                { num: '10 s', title: 'Pour une lecture complète', desc: "De la saisie du nom de commune à l'affichage des sept thèmes sourcés, prêts à être montrés à votre client ou exportés en PDF.", src: 'Mesuré en conditions réelles' },
               ].map((w) => (
                 <div key={w.num} className="why-card">
                   <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 46, lineHeight: 1, color: ACCENT, marginBottom: 14, fontWeight: 400, letterSpacing: '-0.02em' }}>{w.num}</div>
@@ -318,7 +318,7 @@ export default function ProfessionnelsPage() {
             {
               num: '02',
               title: 'Aucun score synthétique opaque',
-              body: <p style={{ fontSize: 15, color: '#9ba3b4', lineHeight: 1.7, margin: 0 }}>futur•e refuse les notes de A à E ou les scores climatiques composites. Ce sont des artefacts éditoriaux qui simplifient à outrance. <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>À la place : dix dimensions distinctes, lisibles séparément.</strong> Une commune peut être bien classée sur la canicule et mal sur la submersion. C'est plus utile pour vous qu'un score moyen.</p>,
+              body: <p style={{ fontSize: 15, color: '#9ba3b4', lineHeight: 1.7, margin: 0 }}>futur•e refuse les notes de A à E ou les scores climatiques composites. Ce sont des artefacts éditoriaux qui simplifient à outrance. <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>À la place : près de trente critères distincts, lisibles séparément.</strong> Une commune peut être bien classée sur la canicule et mal sur la submersion. C'est plus utile pour vous qu'un score moyen.</p>,
             },
             {
               num: '03',
