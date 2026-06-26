@@ -121,6 +121,21 @@ Deux conséquences, gravées comme règles :
    d'autre n'incarne déjà ? »*. Réponse floue = agent redondant. Cohérent avec le principe
    fondateur : on investit dans la mémoire, pas dans le nombre d'agents.
 
+## Addendum (2026-06-26 bis) : 8e persona, le Discoverability Strategist
+
+Premier agent admis **par le test d'admission** plutôt que par le roster initial. Contre-pouvoir
+neuf : il protège **la découvrabilité** (l'existence de futur•e dans le monde), une chose
+qu'aucun autre n'incarne (Business pense l'acquisition au niveau stratégie, pas au niveau page ;
+personne ne demande « est-ce que quelqu'un trouvera ça ? »). Lentille **SEO + GEO** (être trouvé
+par les moteurs ET cité par les LLM), recadrée : pas de SEO old-school, la découvrabilité moderne
+est alliée de l'honnêteté (les moteurs génératifs citent le contenu sourcé et structuré, soit la
+doctrine futur•e). Il se **subordonne à l'Editorial Writer sur la voix** (la voix gagne) et porte
+le levier **programmatique des ~35 000 communes** (et son enjeu défensif, la « concurrence gratuite
+SEO » de `modele-economique.md`). Construit sur besoin advisory réel du porteur (questions SEO/GEO
+fréquentes), avant même le programmatique. Mandat : `.claude/agents/discoverability-strategist.md`.
+Le roster passe donc à **8 personas + le Researcher** ; le test d'admission reste le garde-fou
+contre la prolifération.
+
 ## Liens
 
 `README.md` (flux archiviste en deux temps), `.claude/agents/archiviste.md`,
