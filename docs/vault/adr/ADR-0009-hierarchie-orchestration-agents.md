@@ -10,7 +10,8 @@
 `ADR-0006` a posé le roster (7 personas + 2 capacités) et le board (pré-mortem distribué en deux
 passes). Le premier board joué, sur « faut-il une carte de France ? », a confirmé deux choses à
 la fois : (1) le board est extrêmement puissant (quatre lentilles indépendantes ont produit une
-décision solide et plusieurs angles morts qu'aucune seule n'aurait vus) ; (2) il est extrêmement
+décision solide et plusieurs angles morts qu'aucune seule n'aurait vus ; synthèse capturée dans
+`arbitrages/carte-exploration-probleme-ouvert.md`) ; (2) il est extrêmement
 coûteux (huit dispatches d'agents à froid, chacun relisant le vault). `ADR-0006` différait
 l'orchestrateur « après les 7 personas » : le coût réel impose de le devancer. La conclusion
 n'est pas d'utiliser moins les agents, c'est que **le board ne doit pas être le mode normal**.

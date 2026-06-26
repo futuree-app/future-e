@@ -85,5 +85,5 @@ incertain.
 ## Liens
 
 `doctrine/editoriale.md` (formulations honnêtes), `principes/invariants.md` (n°3 et n°6),
-`recherches/inventaire-sources` (à venir, terrain du futur agent Data Curator),
+`recherches/inventaire-sources.md` (terrain de l'agent Data Curator),
 `/memory/home_insee_code_pitfall.md`.

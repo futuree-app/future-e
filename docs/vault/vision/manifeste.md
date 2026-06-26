@@ -2,8 +2,9 @@
 
 > Page fondatrice, pérenne. Issue de l'intention d'origine (avril 2026, `Documentation
 > Notion/.../Manifeste de futur•e`), tenue à jour avec ce que futur•e est devenu : non plus un
-> lecteur du climat, mais un outil de décision de vie dont le climat est la **lentille
-> principale** (cf. `vision/positionnement.md`, `adr/ADR-0002-pivot-compatibilite-territoriale.md`).
+> lecteur du climat, mais un outil de décision de vie dont le climat est une **composante
+> centrale, plus le seul sujet** (cf. `vision/positionnement.md`,
+> `adr/ADR-0002-pivot-compatibilite-territoriale.md`).
 > Le problème fondateur, lui, n'a pas bougé.
 
 ## Le problème

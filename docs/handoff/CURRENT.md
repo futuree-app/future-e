@@ -5,90 +5,77 @@
 > (`docs/vault/`) et `/memory` (`MEMORY.md` + fiches) : ce fichier ne capture que l'état vivant.
 
 - **Horodatage** : 2026-06-26
-- **Branche courante** : `main` (propre, à jour). Aucune PR ouverte.
+- **Branche courante** : `chore/audit-dette-doc` (6 fichiers modifiés, **NON commités, NON poussés**).
+  `main` est propre et à jour. Aucune PR ouverte.
 
 ## Objectif en cours
-Construction et durcissement de l'**équipe d'agents IA** de futur•e et de son architecture. Cette
-session a complété le roster (8 personas + Researcher), l'a harmonisé sur un gabarit commun, créé
-le 8e agent (Discoverability Strategist) et posé la **doctrine « poste de travail »** (agents +
-outils métier déterministes). Prochaine grande étape restée en attente : la **mission d'audit de
-l'Archiviste** (transformer les débats en mémoire, détecter la dette documentaire).
+Première **mission d'audit de dette documentaire** du vault (la finalité en attente depuis deux
+handoffs). L'agent Archiviste a tourné en read-only et rendu son rapport ; les corrections sûres
+ont été appliquées sur la branche `chore/audit-dette-doc`. **Il reste à relire le diff, committer
+et ouvrir/merger la PR** — c'est exactement là que la session s'est arrêtée (l'utilisateur a
+interrompu le `git diff` de revue pour lancer ce handoff).
 
 ## Fait dans cette session
-- **Researcher v2 « agent de rupture »** (PR #15, mergé) : explore l'espace des PROBLÈMES (recadre
-  la question), « hypothèse remise en cause » au lieu d'auto-critique, test sans-écran, paradigmes.
-- **Roster complété** (PR #16, mergé) : **Editorial Writer** (protège la voix ; pouvoir « ce texte
-  ne devrait pas exister ») et **Software Architect** (protège le futur du code ; question-mère
-  « temps de reprise » du fondateur solo). Tous deux v2 après challenge ChatGPT (« Limites de mon
-  regard » obligatoire, etc.). Rapports de test à froid archivés (`/professionnels`, `comparateur-vie.ts`).
-- **Cadre « contre-pouvoirs »** gravé (addendum ADR-0006) : on définit un agent par la tension
-  qu'il incarne ; gabarit « contre-pouvoir card » à 7 champs ; **test d'admission** d'un futur agent.
-- **Harmonisation** (PR #17, mergé) : les 5 mandats antérieurs (Archiviste, Data Curator, Design
-  Critic, Business, Product) portent désormais la carte à 7 champs. Les 8 agents sont homogènes.
-- **Discoverability Strategist** (PR #18, mergé), 8e persona, 1er admis par le test d'admission :
-  protège la découvrabilité (SEO + GEO), se subordonne à l'Editorial sur la voix, porte le levier
-  programmatique 35k communes. v2 « intentions, pas pages » après challenge ChatGPT. Test à froid
-  sur `/inondation` archivé (verdict ANGLE MORT : double verrou robots, sitemap, zéro JSON-LD).
-- **1er outil métier + doctrine « poste de travail »** (dans PR #18) : `scripts/agents/discoverability/audit.mjs`
-  (inventaire SEO/GEO déterministe, fonctionne : 38 routes publiques, 25 hors sitemap, 37 sans
-  canonical, 38 sans JSON-LD). Addendum ADR-0006 ter : modèle poste de travail + 4 règles
-  (déterministe→script, `scripts/agents/<agent>/`, admission « la question apparaît deux fois »,
-  pas de structure spéculative) + corollaires (« le script ne conclut jamais » ; « un outil réduit
-  le coût d'un fait, jamais celui de penser » ; extracteurs vs vérificateurs ; contrat AgentFinding différé).
+- **Audit Archiviste lancé** (sous-agent `archiviste`, read-only). Verdict d'ensemble : vault en
+  bon état, **0 violation d'invariant**, la vraie dette est dans les INDEX (ce qui relie les
+  pages), pas dans le contenu. Rapport structuré en 3 dettes : (A) vocabulaire/staleness,
+  (B) sémantique vs invariants, (C) orphelins/redondance.
+- **A4 tranché factuellement** (vérif code) : la matrice du Pack a bien **27 dimensions**
+  (`DIMENSIONS` dans `src/lib/comparateur-vie.ts` : climat 3 · risques 4 · santé-env 4 · cadre 3 ·
+  mobilité 3 · services 5 · vitalité 5), distinctes des **28** `PREFERENCE_KEYS` du scoring
+  `/ou-vivre`. Deux taxonomies → `ADR-0007` (« 27 dims ») est JUSTE. Aucune correction.
+- **Corrections appliquées (non commitées)** sur `chore/audit-dette-doc` :
+  - **A1** `docs/vault/adr/_README.md` : ajout ADR-0008 + ADR-0009 à l'index ; ligne ADR-0006
+    passée de « 7 personas + 2 capacités » à « 8 personas + Researcher, contre-pouvoirs, poste de travail ».
+  - **C1** `docs/vault/arbitrages/_README.md` : indexation de l'orphelin
+    `carte-exploration-probleme-ouvert` + lien entrant ajouté depuis
+    `docs/vault/adr/ADR-0009-...md` (mention de la synthèse du board carte).
+  - **A2** `docs/vault/doctrine/data.md` : « `recherches/inventaire-sources` (à venir) » →
+    « `recherches/inventaire-sources.md` (terrain de l'agent Data Curator) ».
+    `docs/vault/doctrine/positionnement.md` : « Vision fondatrice à écrire dans `vision/` » →
+    « Vision fondatrice : `vision/positionnement.md` ».
+  - **B1** `docs/vault/vision/manifeste.md` : « le climat est la **lentille principale** » →
+    « le climat est une **composante centrale, plus le seul sujet** » (alignement sur
+    `doctrine/positionnement.md`, suite au pivot ADR-0002).
 
-## Décisions prises (porteur, gravées dans le vault sauf mention)
-- Roster à **8 personas + Researcher** ; le **test d'admission** est le garde-fou anti-prolifération.
-- Cadre **contre-pouvoirs** + gabarit 7 champs adopté pour tous les agents.
-- Discoverability nommé ainsi (pas « SEO/GEO Strategist ») pour intégrer le recadrage ; se
-  subordonne à l'Editorial sur la voix.
-- Doctrine **poste de travail** et ses 4 règles + corollaires (addendum ADR-0006 ter).
-- **API SERP différée** (manque apparu une seule fois) ; **dossiers d'outils vides refusés** (pas
-  de structure spéculative). Outils métier des autres agents : à créer sous la règle des deux fois.
-- Outils niveaux 2-4 (Search Console, crawler, SERP) = décision d'infra séparée, hors mandat tant
-  qu'ils n'existent pas (sinon l'agent promet des mesures qu'il n'a pas).
+## Décisions prises (porteur, cette session)
+- **B1 (poids du climat)** : porteur a choisi « **assouplir le manifeste** » — le climat devient
+  une composante centrale parmi d'autres, pas la lentille principale. Appliqué (voir ci-dessus).
+- **A4** : confirmé que 27 (matrice Pack) et 28 (scoring) sont deux taxonomies distinctes → pas de dette.
+- **C2 (10 liens pendants vers `modules/comparateur.md`, `modules/sante.md`,
+  `architecture/parcours-et-acces.md`)** : décision de **NE PAS combler maintenant** (ce serait du
+  remplissage). À tenir en liste de dette : écrire ces 3 pages purgera 10 liens morts d'un coup.
 
 ## État git
-- Branche `main`, **working tree propre**, tout poussé. Dernier commit : `d4d8481` (merge PR #18).
-- PR #15, #16, #17, #18 mergées et branches supprimées. **Aucune PR ouverte.**
-- Mémoire `/memory` à jour (fiches researcher v2, editorial_writer, software_architect,
-  discoverability_strategist, orchestration enrichie + index), hors-repo.
+- Branche `chore/audit-dette-doc`. **6 fichiers modifiés, working tree sale, RIEN commité, RIEN poussé.**
+  Fichiers : `adr/_README.md`, `arbitrages/_README.md`, `adr/ADR-0009-...md`, `doctrine/data.md`,
+  `doctrine/positionnement.md`, `vision/manifeste.md`.
+- `main` propre, dernier commit `a9e284f`. Aucune PR ouverte.
 
 ## Prochaine étape immédiate
-Deux options claires, au choix du porteur :
-1. **Mission d'audit de l'Archiviste** (la finalité du handoff précédent, toujours en attente) :
-   détection de dette documentaire dans le vault, read-only, rapport d'incohérence ; séparer
-   (a) vocabulaire/staleness grep-able de (b) sémantique (« cette ADR viole l'invariant X ») +
-   pages orphelines. Cadrage déjà tranché (fiche `project_archiviste_vault`).
-2. **Backlog SEO de lancement** révélé par le test Discoverability (matière prête, non appliquée) :
-   lever le double verrou robots page par page, ajouter `/inondation` au `sitemap.ts`, JSON-LD
-   schema.org, maillage inter-communes, canonical anti-cannibalisation, vérifier le CTA
-   « 14 jours gratuits » (`src/app/(public)/inondation/[insee_code]/page.tsx:456`).
+1. `git diff` pour relire les 6 modifications (revue interrompue, à reprendre).
+2. Committer sur `chore/audit-dette-doc` (message type `docs(vault): audit dette doc — index ADR/arbitrages, orphelin carte, TODO résolus, poids climat`).
+3. Ouvrir la PR (ou merger en fast-forward selon préférence porteur). Branche dédiée déjà créée.
 
 ## À lire d'abord à la reprise
-1. `MEMORY.md` (index) + fiches `project_agent_orchestration` (doctrine poste de travail +
-   corollaires), `project_discoverability_strategist`, `project_editorial_writer`,
-   `project_software_architect`, `project_researcher`, `project_archiviste_vault`.
-2. `docs/vault/adr/ADR-0006-architecture-equipe-ia.md` (3 addenda : contre-pouvoirs, 8e persona,
-   poste de travail) et `ADR-0009` (orchestration). `.claude/agents/` (les 9 mandats).
-3. `docs/rapports-agents/` (les 3 tests à froid de cette session : editorial-writer,
-   software-architect, discoverability-strategist).
-4. `docs/handoff/AUTO-SNAPSHOT.md` pour vérifier la fraîcheur.
+1. `MEMORY.md` (index) + fiche `project_archiviste_vault` (cadrage de cette mission d'audit :
+   les deux dettes (a) vocabulaire grep-able / (b) sémantique vs invariants, + pages orphelines).
+2. `docs/vault/principes/invariants.md` (la règle de mesure de l'audit), `docs/vault/adr/_README.md`
+   et `docs/vault/arbitrages/_README.md` (les index corrigés).
+3. `docs/handoff/AUTO-SNAPSHOT.md` pour vérifier la fraîcheur.
 
 ## Pièges / fils ouverts
-- **Agents jamais re-testés en v2** : Editorial, Software Architect et Discoverability ont vu leur
-  mandat évoluer APRÈS leur test à froid (sections « Limites de mon regard », intentions, etc.).
-  Les nouvelles sections obligatoires ne sont pas encore prouvées en run réel.
-- **Outils des autres agents** : la doctrine poste de travail est posée mais un seul outil existe
-  (Discoverability). Ne PAS créer d'outils par anticipation : attendre que la question apparaisse
-  deux fois (règle gravée). Famille « vérificateurs » (vault↔code, pricing↔Stripe) encore à ouvrir.
-- **Backlog SEO = pré-lancement** : le double verrou robots (`public/robots.txt` Disallow + noindex
-  hérité de `src/app/layout.tsx`) est probablement volontaire (site pas ouvert). À lever page par
-  page au lancement, pas à l'aveugle.
-- **CTA « 14 jours gratuits »** sur la page inondation commune : promesse peut-être fausse (le
-  modèle décrit du one-shot 14/39 €, pas d'essai). À vérifier Product/Business avant indexation.
-- **Décisions produit antérieures toujours en attente d'action** (rapports d'agents non appliqués) :
-  module **Métier** (verdict REFORMULER), correctifs **Le Fil**, trouvailles /ou-vivre (Design Critic).
-- **Researcher** : carte de France reste un problème OUVERT ; territoires-jumeaux = piste forte à
-  creuser (session Researcher dédiée « oublie la carte »). Pistes Researcher = NON VÉRIFIÉES.
-- Réserve ancienne : Run 3 (conv PostHog), pages `modules/` ×6, correctifs SITE (`/le-fil` prix,
-  taxonomie `/professionnels` que l'Editorial a aussi pointée).
+- **PR de l'audit non finalisée** : tout est sur une branche sale non commitée. Ne pas repartir de
+  `main` sans récupérer `chore/audit-dette-doc`, sinon les corrections sont perdues.
+- **Dettes connues laissées volontairement** : C2 (10 liens pendants vers 3 pages non écrites de
+  `modules/` et `architecture/`) ; pages vides `modules/` ×6, `recherches/` complet pour l'usage,
+  `architecture/` ossature seule. Connu et assumé (principe « consolider-puis-élaguer, pas additionner »).
+- **Staleness des pages PROD (hors vault, non corrigé)** : `/le-fil` affiche 9€/mois alors que la
+  direction est annuelle ~49,99€ ; `/professionnels` parle de « 10 dimensions » (≠ 7 thèmes / 27 dims /
+  28 critères). Le vault les documente correctement ; c'est le SITE qui est en retard. Chantier séparé.
+- **Limites de l'audit (déclarées par l'agent)** : il n'a PAS relu mot à mot `ADR-0001/0002/0003/0004/0005`,
+  `recherches/inventaire-design.md`, ni les 10 arbitrages individuels → confiance « moyenne-haute »
+  sur « 0 violation d'invariant », pas certaine. Une 2e passe ciblée sur ces pages reste possible.
+- **Fils anciens toujours ouverts** (rappel) : décisions produit non appliquées (module Métier
+  « REFORMULER », Le Fil, /ou-vivre Design Critic) ; backlog SEO de lancement (verrou robots,
+  sitemap `/inondation`, JSON-LD) ; carte de France = problème OUVERT côté Researcher.

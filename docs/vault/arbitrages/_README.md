@@ -20,3 +20,5 @@ Frontière avec adr/ : une décision structurante et engageante va dans adr/.
   Fil » sorti du pricing.
 - **mode-foyer-recadre** — Foyer = multi-personnes + données du foyer ; comparateur de villes
   découplé (public).
+- **carte-exploration-probleme-ouvert** — carte-dashboard écartée (1er board) ; l'interaction
+  spatiale reste un problème ouvert. Voir `adr/ADR-0009`.

@@ -1,7 +1,7 @@
 # Positionnement : un site de choix de vie
 
 > Règle durable. Fiche miroir : `/memory/feedback_positionnement_compatibilite.md`.
-> Vision fondatrice à écrire dans `vision/` depuis le manifeste Notion.
+> Vision fondatrice : `vision/positionnement.md`.
 
 ## La promesse
 

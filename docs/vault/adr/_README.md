@@ -14,5 +14,7 @@ Une option étudiée puis écartée, ou un compromis plus local, va dans arbitra
 - **ADR-0003** — Territoire actif de lecture, distinct de la résidence.
 - **ADR-0004** — Stack technique (Next.js, Supabase, Vercel, Stripe, Claude API).
 - **ADR-0005** — Direction artistique (glassmorphism sombre ; règles vivantes en doctrine).
-- **ADR-0006** — Architecture de l'équipe IA (7 personas + 2 capacités, board pré-mortem).
+- **ADR-0006** — Architecture de l'équipe IA (8 personas + Researcher, contre-pouvoirs, poste de travail).
 - **ADR-0007** — Le Pack Décision est un bundle (entité `decision_packs`, trio_key, snapshot).
+- **ADR-0008** — Le B2B est un relais de la preuve B2C, jamais le point de départ.
+- **ADR-0009** — Hiérarchie d'orchestration des agents (escalade 4 niveaux, boards asymétriques).
