@@ -136,6 +136,42 @@ fréquentes), avant même le programmatique. Mandat : `.claude/agents/discoverab
 Le roster passe donc à **8 personas + le Researcher** ; le test d'admission reste le garde-fou
 contre la prolifération.
 
+## Addendum (2026-06-26 ter) : de l'agent au « poste de travail » (outils métier)
+
+En dotant le Discoverability Strategist de son premier outil, le cadre s'élève encore : un agent
+n'est plus seulement une lentille (persona + tranche de mémoire), il devient un **poste de
+travail** : `persona → vault (doctrine) → scripts métier → connecteurs → rapport`. La lentille
+pense ; les outils déterministes collectent.
+
+Quatre règles, gravées :
+
+1. **Le déterministe va au script.** Un agent ne doit jamais brûler son intelligence à compter,
+   inventorier, parser, comparer. Ces tâches finissent dans un script ; l'agent **raisonne sur la
+   sortie**. Double gain : pas d'hallucination sur du factuel, et l'intelligence se concentre sur
+   le jugement. (Premier exemple : `scripts/agents/discoverability/audit.mjs`, inventaire SEO/GEO
+   statique du site, lu par l'agent au lieu d'être grep à la main.)
+2. **Les outils sont rangés par métier**, pas par projet : convention `scripts/agents/<agent>/`.
+   Un outil appartient à la lentille qui le mobilise.
+3. **Règle d'admission d'un outil : « quand la question apparaît deux fois ».** C'est l'équivalent
+   outillage du test d'admission des agents. On ne construit pas un outil (ni un connecteur payant)
+   par anticipation : on attend qu'un manque se répète. Pour un connecteur de données vivantes
+   (Search Console, PostHog, Stripe), s'ajoute un prérequis dur : la donnée doit exister (inutile
+   d'instrumenter Search Console tant que le site est en noindex). Conséquence appliquée : l'API
+   SERP, dont le manque n'est apparu qu'une fois (test /inondation), est **différée**.
+4. **Pas de structure spéculative.** On ne crée PAS de dossiers vides pour les autres agents « pour
+   envoyer un signal » : un dossier vide est du bruit, pas un signal (même discipline que « on
+   investit dans la mémoire, pas dans le nombre »). Le signal est cette convention écrite ; chaque
+   dossier naît avec son premier outil réel.
+
+**Taxonomie des outils d'un poste de travail** (cadre, pas obligation) : (a) **lecture** (Read,
+Grep, WebFetch) ; (b) **analyse** (scripts maison déterministes) ; (c) **données vivantes**
+(connecteurs : Search Console, PostHog, Stripe) ; (d) **simulateurs** (« et si… » : « si le Pack
+passe à 49 € ? », « si on supprime cette page ? »), la prochaine frontière, encore à inventer.
+
+Gouvernance : **chaque outil ajouté est une capacité que le mandat peut revendiquer.** Le jour où
+on en branche un, on met à jour le mandat de l'agent ET sa section « Limites de mon regard », pour
+qu'il ne promette jamais une mesure qu'il n'a pas.
+
 ## Liens
 
 `README.md` (flux archiviste en deux temps), `.claude/agents/archiviste.md`,

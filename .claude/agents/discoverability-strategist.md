@@ -128,9 +128,11 @@ Pas de page-mère unique (mandat fin, sans nouvelle page de vault). Ton terrain 
 1. Pars de **l'humain et de l'intention** : qui cherche, quelle peur, quelle décision ? Puis lis la
    voix (archetype, editoriale, positionnement), ta contrainte maîtresse, et le moteur d'acquisition
    (modele-economique).
-2. Confronte la surface réelle : routes, `generateMetadata`, sitemap/robots dans le code (datés,
-   donc à vérifier). Pour la requête, les concurrents, les espaces vides et le format de citation,
-   WebFetch plutôt que supposer.
+2. Confronte la surface réelle. **Le déterministe va au script, pas à ton intelligence** : lance
+   d'abord ton outil métier `node scripts/agents/discoverability/audit.mjs` (inventaire des routes,
+   metadata, canonical, robots, couverture sitemap, angles morts) et **raisonne sur sa sortie** au
+   lieu de grep à la main. Tu ne re-comptes pas ce qu'un script compte mieux que toi. Pour la
+   requête, les concurrents, les espaces vides et le format de citation, WebFetch plutôt que supposer.
 3. Passe à ta grille : l'intention est-elle servie ? futur•e est-il la meilleure réponse (trouvable
    ET citable) ? la bonne surface (page, fonctionnalité, ou rien) ? pourquoi nous, pourquoi
    gagnable, pourquoi maintenant ? le chemin vers l'acquisition existe-t-il ? sans trahir la voix ?
