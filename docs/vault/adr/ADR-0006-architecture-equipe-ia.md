@@ -172,6 +172,43 @@ Gouvernance : **chaque outil ajouté est une capacité que le mandat peut revend
 on en branche un, on met à jour le mandat de l'agent ET sa section « Limites de mon regard », pour
 qu'il ne promette jamais une mesure qu'il n'a pas.
 
+### Corollaires (gravés après challenge ChatGPT du 1er outil)
+
+- **Le script ne conclut jamais.** Trois niveaux étanches : **le script décrit, l'agent juge, le
+  board décide.** Un outil produit un état du monde (faits), jamais un verdict. On s'interdit donc
+  d'y ajouter un « SEO score », un « health score » ou une « priorité » : ce serait voler le travail
+  de l'agent et figer un jugement dans du déterministe. Conséquences appliquées : (1) **la gravité
+  (Gate/High/Low) n'est pas dans le script** — il classe par *nature* (verrou global vs trou par
+  route), l'agent range par gravité ; (2) **la doctrine n'est pas dans l'extracteur** — « cette page
+  est dans le tunnel d'acquisition » est une connaissance produit qui change ; l'extracteur reste
+  aveugle au produit, c'est l'agent qui marie faits + doctrine.
+- **Principe (niveau ADR, PAS un invariant — on reste à 8)** : *un outil réduit le coût d'obtenir un
+  fait, il ne réduit jamais le coût de penser.* C'est la digue contre la dérive où des outils très
+  performants transforment les agents en **opérateurs** plutôt qu'en penseurs. Tant que cette
+  frontière tient, l'architecture vieillit bien ; c'est ce qui la distingue d'une collection de
+  prompts spécialisés.
+
+### Deux familles d'outils (affine la taxonomie)
+
+- **Extracteurs** : lisent et produisent un état (l'`audit.mjs` actuel, un futur `inventory`,
+  `routes`, `coverage`). **Aveugles au produit**, purement factuels.
+- **Vérificateurs** : confrontent DEUX sources et émettent les **écarts** (vault ↔ code,
+  `pricing` ↔ Stripe, doctrine ↔ UI). Plus puissants, et c'est là que la doctrine peut entrer (le
+  vérificateur encode « le vault dit X »). Mais même un vérificateur **décrit l'écart, ne conclut
+  pas**. Famille encore à ouvrir.
+
+### Direction future (notée, pas construite) : le contrat de findings
+
+Le jour où plusieurs agents devront alimenter un board automatiquement, ils parleront le même
+langage : un contrat `AgentFinding { type, severity, evidence, source, confidence }`. Point de
+cohérence avec le corollaire ci-dessus : `severity` et `confidence` sont émis par **l'agent qui
+juge**, jamais par le script extracteur. C'est probablement la prochaine grande évolution ;
+déclencheur = un 2e producteur de findings, ou un board qu'on veut alimenter sans humain.
+Différé jusque-là. Autres pistes différées sous la règle des deux fois : le **diff entre deux
+audits** (l'évolution > l'état) ; l'**externalisation des règles** en config quand un vrai seuil
+réglable existera (aujourd'hui, abstraction prématurée) ; le split **core / CLI / présentation**
+quand un 2e consommateur (dashboard) apparaîtra.
+
 ## Liens
 
 `README.md` (flux archiviste en deux temps), `.claude/agents/archiviste.md`,
