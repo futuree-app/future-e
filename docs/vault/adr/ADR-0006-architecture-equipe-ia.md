@@ -122,6 +122,94 @@ Deux conséquences, gravées comme règles :
    d'autre n'incarne déjà ? »*. Réponse floue = agent redondant. Cohérent avec le principe
    fondateur : on investit dans la mémoire, pas dans le nombre d'agents.
 
+## Addendum (2026-06-26 bis) : 8e persona, le Discoverability Strategist
+
+Premier agent admis **par le test d'admission** plutôt que par le roster initial. Contre-pouvoir
+neuf : il protège **la découvrabilité** (l'existence de futur•e dans le monde), une chose
+qu'aucun autre n'incarne (Business pense l'acquisition au niveau stratégie, pas au niveau page ;
+personne ne demande « est-ce que quelqu'un trouvera ça ? »). Lentille **SEO + GEO** (être trouvé
+par les moteurs ET cité par les LLM), recadrée : pas de SEO old-school, la découvrabilité moderne
+est alliée de l'honnêteté (les moteurs génératifs citent le contenu sourcé et structuré, soit la
+doctrine futur•e). Il se **subordonne à l'Editorial Writer sur la voix** (la voix gagne) et porte
+le levier **programmatique des ~35 000 communes** (et son enjeu défensif, la « concurrence gratuite
+SEO » de `modele-economique.md`). Construit sur besoin advisory réel du porteur (questions SEO/GEO
+fréquentes), avant même le programmatique. Mandat : `.claude/agents/discoverability-strategist.md`.
+Le roster passe donc à **8 personas + le Researcher** ; le test d'admission reste le garde-fou
+contre la prolifération.
+
+## Addendum (2026-06-26 ter) : de l'agent au « poste de travail » (outils métier)
+
+En dotant le Discoverability Strategist de son premier outil, le cadre s'élève encore : un agent
+n'est plus seulement une lentille (persona + tranche de mémoire), il devient un **poste de
+travail** : `persona → vault (doctrine) → scripts métier → connecteurs → rapport`. La lentille
+pense ; les outils déterministes collectent.
+
+Quatre règles, gravées :
+
+1. **Le déterministe va au script.** Un agent ne doit jamais brûler son intelligence à compter,
+   inventorier, parser, comparer. Ces tâches finissent dans un script ; l'agent **raisonne sur la
+   sortie**. Double gain : pas d'hallucination sur du factuel, et l'intelligence se concentre sur
+   le jugement. (Premier exemple : `scripts/agents/discoverability/audit.mjs`, inventaire SEO/GEO
+   statique du site, lu par l'agent au lieu d'être grep à la main.)
+2. **Les outils sont rangés par métier**, pas par projet : convention `scripts/agents/<agent>/`.
+   Un outil appartient à la lentille qui le mobilise.
+3. **Règle d'admission d'un outil : « quand la question apparaît deux fois ».** C'est l'équivalent
+   outillage du test d'admission des agents. On ne construit pas un outil (ni un connecteur payant)
+   par anticipation : on attend qu'un manque se répète. Pour un connecteur de données vivantes
+   (Search Console, PostHog, Stripe), s'ajoute un prérequis dur : la donnée doit exister (inutile
+   d'instrumenter Search Console tant que le site est en noindex). Conséquence appliquée : l'API
+   SERP, dont le manque n'est apparu qu'une fois (test /inondation), est **différée**.
+4. **Pas de structure spéculative.** On ne crée PAS de dossiers vides pour les autres agents « pour
+   envoyer un signal » : un dossier vide est du bruit, pas un signal (même discipline que « on
+   investit dans la mémoire, pas dans le nombre »). Le signal est cette convention écrite ; chaque
+   dossier naît avec son premier outil réel.
+
+**Taxonomie des outils d'un poste de travail** (cadre, pas obligation) : (a) **lecture** (Read,
+Grep, WebFetch) ; (b) **analyse** (scripts maison déterministes) ; (c) **données vivantes**
+(connecteurs : Search Console, PostHog, Stripe) ; (d) **simulateurs** (« et si… » : « si le Pack
+passe à 49 € ? », « si on supprime cette page ? »), la prochaine frontière, encore à inventer.
+
+Gouvernance : **chaque outil ajouté est une capacité que le mandat peut revendiquer.** Le jour où
+on en branche un, on met à jour le mandat de l'agent ET sa section « Limites de mon regard », pour
+qu'il ne promette jamais une mesure qu'il n'a pas.
+
+### Corollaires (gravés après challenge ChatGPT du 1er outil)
+
+- **Le script ne conclut jamais.** Trois niveaux étanches : **le script décrit, l'agent juge, le
+  board décide.** Un outil produit un état du monde (faits), jamais un verdict. On s'interdit donc
+  d'y ajouter un « SEO score », un « health score » ou une « priorité » : ce serait voler le travail
+  de l'agent et figer un jugement dans du déterministe. Conséquences appliquées : (1) **la gravité
+  (Gate/High/Low) n'est pas dans le script** — il classe par *nature* (verrou global vs trou par
+  route), l'agent range par gravité ; (2) **la doctrine n'est pas dans l'extracteur** — « cette page
+  est dans le tunnel d'acquisition » est une connaissance produit qui change ; l'extracteur reste
+  aveugle au produit, c'est l'agent qui marie faits + doctrine.
+- **Principe (niveau ADR, PAS un invariant — on reste à 8)** : *un outil réduit le coût d'obtenir un
+  fait, il ne réduit jamais le coût de penser.* C'est la digue contre la dérive où des outils très
+  performants transforment les agents en **opérateurs** plutôt qu'en penseurs. Tant que cette
+  frontière tient, l'architecture vieillit bien ; c'est ce qui la distingue d'une collection de
+  prompts spécialisés.
+
+### Deux familles d'outils (affine la taxonomie)
+
+- **Extracteurs** : lisent et produisent un état (l'`audit.mjs` actuel, un futur `inventory`,
+  `routes`, `coverage`). **Aveugles au produit**, purement factuels.
+- **Vérificateurs** : confrontent DEUX sources et émettent les **écarts** (vault ↔ code,
+  `pricing` ↔ Stripe, doctrine ↔ UI). Plus puissants, et c'est là que la doctrine peut entrer (le
+  vérificateur encode « le vault dit X »). Mais même un vérificateur **décrit l'écart, ne conclut
+  pas**. Famille encore à ouvrir.
+
+### Direction future (notée, pas construite) : le contrat de findings
+
+Le jour où plusieurs agents devront alimenter un board automatiquement, ils parleront le même
+langage : un contrat `AgentFinding { type, severity, evidence, source, confidence }`. Point de
+cohérence avec le corollaire ci-dessus : `severity` et `confidence` sont émis par **l'agent qui
+juge**, jamais par le script extracteur. C'est probablement la prochaine grande évolution ;
+déclencheur = un 2e producteur de findings, ou un board qu'on veut alimenter sans humain.
+Différé jusque-là. Autres pistes différées sous la règle des deux fois : le **diff entre deux
+audits** (l'évolution > l'état) ; l'**externalisation des règles** en config quand un vrai seuil
+réglable existera (aujourd'hui, abstraction prématurée) ; le split **core / CLI / présentation**
+quand un 2e consommateur (dashboard) apparaîtra.
+
 ## Liens
 
 `README.md` (flux archiviste en deux temps), `.claude/agents/archiviste.md`,
