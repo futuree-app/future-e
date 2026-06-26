@@ -192,8 +192,8 @@ territoriale lisible devient un standard de marché.
 
 `adr/ADR-0008-b2b-relais-pas-pilier.md`, `adr/ADR-0002-pivot-compatibilite-territoriale.md`
 (moat = combinaison), `adr/ADR-0007-pack-decision-bundle.md`,
-`adr/ADR-0001-pas-de-score-synthetique.md`, `principes/invariants.md` (n°8 indépendance non
-monétisée, n°9 B2B ne détourne pas le B2C), `arbitrages/pricing-abonnements-reportes.md`,
+`adr/ADR-0001-pas-de-score-synthetique.md`, `principes/invariants.md` (n°7 indépendance non
+monétisée, n°8 évolue avec les preuves jamais les intérêts), `arbitrages/pricing-abonnements-reportes.md`,
 `arbitrages/mode-foyer-recadre.md`, `vision/archetype-lecteur.md`, `vision/positionnement.md`,
 `doctrine/legal.md`, `/memory/business_modele_economique.md`,
 `/memory/feedback_positionnement_compatibilite.md`, `/memory/project_paywall_territoire.md`.
