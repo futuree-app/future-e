@@ -260,8 +260,25 @@ export type ComparaisonTheme = {
   lignes: ComparaisonLigne[];
 };
 
+// Divergence (« la ligne de fracture », mode choix) : LE point où les communes nommées
+// s'écartent le plus. Déterministe, hors score. Sert l'ouverture du résultat gratuit (montrer
+// la TENSION, pas un classement) et désigne le thème à dévoiler en entier. domine = aucune
+// vraie tension (une commune mène presque tous les thèmes) : on bascule sur « ce ne sont pas
+// vraiment des compromis » et la fracture pointe la seule raison de pencher autrement.
+export type Divergence = {
+  dimId: string;
+  themeId: string;
+  label: string; // libellé de la dimension (« Risque d'inondation »)
+  leaderInsee: string;
+  leaderPalier: string; // palier favorable de la commune qui mène
+  exposeInsee: string;
+  exposePalier: string; // palier défavorable de la commune en retrait
+  domine: boolean;
+} | null;
+
 export type ComparaisonComplete = {
   resume: string[]; // « En résumé » : 1 à 3 phrases, niveau thème (qui mène sur quels thèmes)
+  divergence: Divergence; // mode choix : la ligne de fracture (null si tout est à égalité)
   themes: ComparaisonTheme[];
 };
 
@@ -1169,6 +1186,14 @@ export function buildComparaisonComplete(
 
   // une ligne par dimension : palier absolu + avantage relatif au trio
   const ligneByDim = new Map<string, ComparaisonLigne>();
+  // Candidats à la « ligne de fracture » (mode choix) : dimensions directionnelles où les
+  // communes s'écartent (un meilleur palier ET un pire présents). cf. type Divergence.
+  type DivCand = {
+    dimId: string; themeId: string; label: string; themeIdx: number;
+    leaderInsee: string; leaderPalier: string; exposeInsee: string; exposePalier: string;
+    spread: number; risque: boolean;
+  };
+  const divCands: DivCand[] = [];
   for (const dim of DIMENSIONS) {
     const raw = rawByDim.get(dim.id)!;
     // bande de favorabilité par commune (null = donnée absente, ou taille = factuel non bandé)
@@ -1217,6 +1242,33 @@ export function buildComparaisonComplete(
     });
 
     ligneByDim.set(dim.id, { id: dim.id, label: dim.label, aide: dim.aide, avantage, cellules });
+
+    // Candidat fracture : dimension directionnelle où le trio s'écarte (meilleur + pire palier
+    // présents). On retient qui mène (meilleur palier) et qui est exposé (pire), pour la phrase.
+    if (dim.directionnel) {
+      const present = bands.filter((b): b is 0 | 1 | 2 => b != null);
+      if (present.length >= 2) {
+        const minBand = Math.min(...present);
+        const maxBand = Math.max(...present);
+        const spread = maxBand - minBand;
+        if (spread >= 1) {
+          const leaderIdx = bands.findIndex((b) => b === minBand);
+          const exposeIdx = bands.findIndex((b) => b === maxBand);
+          divCands.push({
+            dimId: dim.id,
+            themeId: dim.themeId,
+            label: dim.label,
+            themeIdx: THEME_ORDER.findIndex((t) => t.id === dim.themeId),
+            leaderInsee: trio[leaderIdx].insee,
+            leaderPalier: dim.paliers[minBand],
+            exposeInsee: trio[exposeIdx].insee,
+            exposePalier: dim.paliers[maxBand],
+            spread,
+            risque: !!dim.risque,
+          });
+        }
+      }
+    }
   }
 
   // thèmes : phrase de synthèse honnête (phrases naturelles, groupes nominaux avec article)
@@ -1275,7 +1327,33 @@ export function buildComparaisonComplete(
     });
   }
 
-  return { resume, themes };
+  // Ligne de fracture : le candidat au plus grand écart, le risque d'abord (plus décisif),
+  // puis l'ordre des thèmes. Domination = une commune mène (presque) tous les thèmes : il n'y a
+  // pas de vrai compromis, la fracture pointe alors la SEULE dimension où une AUTRE commune mène.
+  const sortedCands = [...divCands].sort(
+    (a, b) =>
+      b.spread - a.spread ||
+      Number(b.risque) - Number(a.risque) ||
+      a.themeIdx - b.themeIdx,
+  );
+  const dominator = ordered.length > 0 && ordered[0][1].length >= themes.length - 1 ? ordered[0][0] : null;
+  const chosen = dominator
+    ? sortedCands.find((c) => c.leaderInsee !== dominator) ?? sortedCands[0] ?? null
+    : sortedCands[0] ?? null;
+  const divergence: Divergence = chosen
+    ? {
+        dimId: chosen.dimId,
+        themeId: chosen.themeId,
+        label: chosen.label,
+        leaderInsee: chosen.leaderInsee,
+        leaderPalier: chosen.leaderPalier,
+        exposeInsee: chosen.exposeInsee,
+        exposePalier: chosen.exposePalier,
+        domine: dominator != null,
+      }
+    : null;
+
+  return { resume, divergence, themes };
 }
 
 // Narratif « nouveaux arrivants » (HORS score) : phrase descriptive, jamais normative.
@@ -2379,6 +2457,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
 export function truncateComparaison(cc: ComparaisonComplete): ComparaisonComplete {
   return {
     resume: cc.resume.slice(0, 1),
+    divergence: cc.divergence,
     themes: cc.themes.slice(0, 2),
   };
 }
