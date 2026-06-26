@@ -5,63 +5,80 @@
 > (`docs/vault/`) et `/memory` (`MEMORY.md` + fiches) : ce fichier ne capture que l'état vivant.
 
 - **Horodatage** : 2026-06-26
-- **Branche courante** : `main` ; le Business Strategist est sur `feat/business-strategist`.
+- **Branche courante** : `feat/researcher-carte-ouverte` (PR #14 ouverte). `main` propre.
 
 ## Objectif en cours
-Construction de la « mémoire stratégique » de futur•e (vault à deux niveaux) et de l'équipe
-d'agents IA. **La séquence des 4 agents est terminée** (Archiviste, Data Curator, Design Critic,
-Business Strategist). Prochain grand chantier : spécifier la **mission d'audit** de l'archiviste,
-nourrie par les besoins réels que les agents font émerger.
+Construction de l'équipe d'agents IA de futur•e et de sa mémoire stratégique (vault + /memory).
+Cette session a posé presque toute l'équipe et son **architecture d'orchestration**. Il reste à
+merger la PR #14, puis à lancer la **mission d'audit** de l'Archiviste (le vrai aboutissement :
+transformer les débats des agents en mémoire qui évite de payer deux fois).
 
 ## Fait dans cette session
-- **PR #8 mergée sur `main`** (`a07dd9c`) : gouvernance vault en 4 temps.
-  1. **Design Critic** : terrain `recherches/inventaire-design.md` (signatures durables, 4
-     régimes de style, pourquoi la colocation est assumée, patterns, tensions, grille) + agent
-     read-only « rédacteur en chef de l'écran » (protéger/simplifier/révéler). Option A (ne juge
-     pas la plomberie token) + frontière texte. Testé `/ou-vivre` : concluant.
-  2. **Marque** : puce `futur•e` (U+2022) tranchée canonique, sweep byte-safe sur 50 fichiers,
-     séparateurs et export Notion préservés, dossier non renommé.
-  3. **Constitution v2** : invariants 10 → 8, plus durs (test « survit à une reconstruction dans
-     10 ans »). n°4 = servir la décision, n°5 = ne pas affirmer au-delà de la preuve, n°6 absorbe
-     l'ancien « mouvement », n°8 = évolue avec les preuves jamais les intérêts. « Forme sert le
-     fond » → tête de `doctrine/design.md` ; « renforce le B2C » → principe stratégique (ADR-0008).
-  4. **Manifeste** : recentrage climat → décision, « Contre l'amnésie » reformulé, totem de clôture.
-- **Business Strategist livré** (`feat/business-strategist`, à commiter) : 4e agent. Terrain déjà
-  existant (`modele-economique.md`), donc **mandat fin sans nouvelle page** (choix porteur).
-  Question = renforce-t-il le moteur et le moat ? Dit non au revenu vanité. Discipline propre :
-  lit tout contre la hiérarchie de preuve (signale les paris déguisés en acquis). PAS encore testé.
-- Corrigé un résidu v2 : Liens de `modele-economique.md` citaient encore invariants n°8/9.
+- **Business Strategist** mené jusqu'en **v3** (allocateur de ressources rares : goulot, coût
+  d'opportunité, table d'allocation, « si j'étais CEO »). Mergé (PR #10).
+- **Constitution v2** : invariants 10 → 8 (mergé PR #8). **Manifeste** recentré climat → décision
+  + totem (PR #8). **Marque** harmonisée vers la puce `futur•e` (PR #8).
+- **Positionnement** recentré sur l'identité de marque (l'ennemi, la décision, le totem) ; posture
+  éditoriale renvoyée à `doctrine/editoriale.md` (PR #11, mergé).
+- **Archétype-lecteur** recentré (moment déclencheur > démographie, transformation, totem) (PR #12).
+- **Product Strategist** livré en **v2** (différenciation/moat, 4 questions de clôture, signature
+  « le besoin est réel, la surface autonome ne l'est pas ») (PR #12, mergé). Testé sur le module
+  Métier → verdict REFORMULER (rapport archivé).
+- **ADR-0009 — hiérarchie d'orchestration** (mergé PR #13) : 4 niveaux (spécialiste / mini-board /
+  board stratégique / capture), orchestrateur = fonction de routage (pas un agent), boards
+  asymétriques sauf passe 1 du L3, PASS, Archiviste = mémoire des boards.
+- **Premier board joué** (carte de France, quorum Product/Business/Design/Data, 2 passes). Synthèse
+  dans `docs/board/traitees/`. Challengé par ChatGPT (outsider) → a révélé que le board, fait de
+  critiques, sait éliminer mais pas inventer.
+- **Researcher livré** (agent d'ouverture/divergence, PR #14 EN ATTENTE) : la lentille générative
+  manquante. 1er test sur la carte = 19 pistes (cartogramme, constellation, France qui se vide…).
+- **Carte gravée en problème OUVERT** (`arbitrages/carte-exploration-probleme-ouvert.md`) : la
+  carte-dashboard est fermée, l'interaction spatiale propre à futur•e reste ouverte.
 
-- **Business Strategist testé** sur le pricing Le Fil (9 €/mois → ~49,99 €/an) : concluant.
-  A produit un vrai insight (l'annuel **aveugle la cadence d'apprentissage de la rétention**,
-  un signal/an vs un/mois, sur le maillon le plus faible du moteur) et a relevé que graver 49,99
-  contredit l'arbitrage existant. Verdict : POURSUIVRE la direction annuelle, DIFFÉRER le chiffre.
+## Décisions prises (porteur, déjà gravées dans le vault sauf mention)
+- Invariants à 8 ; « la forme sert le fond » en tête de `doctrine/design.md` ; « renforce le B2C »
+  redescendu en principe stratégique (ADR-0008).
+- Marque canonique = la **puce** `futur•e` (U+2022). Le dossier `Futur·e` (point médian) n'est PAS
+  renommé.
+- Orchestration ADR-0009 (les deux nuances tranchées : orchestrateur = fonction ; passe 1 du L3
+  aveugle).
+- Carte = problème ouvert, pas rejet. Researcher construit en avance (le trou génératif).
+- Frontière Product ↔ Design gravée (le quoi vs le comment).
 
 ## État git
-- `main` à jour : **PR #8 et #9 mergées**, branches supprimées. Les 4 agents sont sur `main`.
+- Branche `feat/researcher-carte-ouverte`, **PR #14 ouverte** (Researcher + arbitrage carte ouvert
+  + rapport Researcher). Working tree propre.
+- `main` à jour : PR #8, #10, #11, #12, #13 mergées. Aucune autre PR ouverte.
+- Mémoire `/memory` à jour (fiches business/product/orchestration/researcher + index), hors-repo.
 
 ## Prochaine étape immédiate
-1. **Correctifs du rapport Le Fil : EN ATTENTE.** Le porteur challenge le rapport via ChatGPT
-   avant qu'on applique quoi que ce soit côté pricing. Tant que ce n'est pas revenu, NE PAS
-   toucher : amollir le ~49,99 dans `modele-economique.md` l.76, note cadence d'apprentissage
-   dans `arbitrages/pricing-abonnements-reportes.md`, retrait du « 9 €/mois » du hero `/le-fil`.
-   (Rapport complet : `docs/rapports-agents/business-strategist/2026-06-26-pricing-le-fil.md`.)
-2. **Mission d'audit de l'archiviste : différée** (choix porteur, prochaine session). La séquence
-   d'agents est finie, ils ont produit les vrais besoins (dette doc, dédup ~20 %, contradiction-
-   vs-code, ex. l'incohérence l.76). Cadrage déjà tranché : voir `project_archiviste_vault`.
+1. **Merger la PR #14** (`gh pr merge 14 --merge --delete-branch`).
+2. **Lancer la mission d'audit de l'Archiviste** : c'était la finalité de la séquence. Cadrage déjà
+   tranché (fiche `project_archiviste_vault`) : détection de dette documentaire, read-only, rapport
+   d'incohérence ; séparer (a) vocabulaire/staleness grep-able de (b) sémantique (« cette ADR viole
+   l'invariant X »), + pages orphelines. Matière déjà accumulée cette session (ex. cohérences
+   d'invariants reciblées, redondances potentielles). ADR-0009 a fait de l'Archiviste la mémoire
+   des décisions : l'audit est où il l'incarne.
 
 ## À lire d'abord à la reprise
-1. `MEMORY.md` (index) + fiche `project_archiviste_vault.md` (état + séquence agents-avant-audit).
-2. `docs/vault/README.md`, puis selon le sujet : `vision/modele-economique.md`,
-   `principes/invariants.md`, `recherches/inventaire-sources.md`.
-3. `docs/handoff/AUTO-SNAPSHOT.md` pour vérifier la fraîcheur (généré auto avant compaction).
+1. `MEMORY.md` (index) + fiches `project_archiviste_vault`, `project_agent_orchestration`,
+   `project_researcher`.
+2. `docs/vault/adr/ADR-0006` + `ADR-0009` (architecture et orchestration des agents),
+   `docs/vault/principes/invariants.md` (Constitution v2 à 8), `.claude/agents/` (les 6 mandats).
+3. `docs/handoff/AUTO-SNAPSHOT.md` pour vérifier la fraîcheur.
 
 ## Pièges / fils ouverts
-- Séquence tranchée : **agents AVANT la mission d'audit** (les agents produisent les besoins de
-  l'audit). Ordre : Data Curator (fait) → Design Critic (fait) → Business Strategist → puis audit.
-- **Marque** : tranchée (puce `futur•e`), harmonisée sur le repo (voir « Fait dans cette session »).
-- **Trouvailles /ou-vivre non appliquées** (volontaire, on testait l'agent) : reflet premium
-  animé du bouton Pack, double typewriter AskFuture redondant avec ses chips, ligne d'aperçu
-  redondante dans la matrice, glyphes ⚠/✓ à vérifier au rendu. Rapport gardé en référence.
-- Réserve : Run 3 (conv PostHog), pages `modules/` ×7, et 2 correctifs SITE (prix `/le-fil`
-  9€/mois → annuel ; taxonomie « 10 dimensions » de `/professionnels`).
+- **PR #14 non mergée** : le Researcher et l'arbitrage carte ouvert n'arrivent sur `main` qu'au merge.
+- **Researcher pas encore challengé** par ChatGPT (le porteur a challengé tous les autres agents) :
+  option avant de l'utiliser plus largement.
+- **Roster incomplet** : restent Software Architect et Editorial Writer (« émergent du besoin »,
+  pas un prérequis).
+- **Carte de France** : problème OUVERT, pas clos. Avant toute construction, tester (PostHog/sonde)
+  le segment « direction sans commune » et la flânerie. Pistes Researcher = NON VÉRIFIÉES, à passer
+  en convergence (Data Curator puis board).
+- **Décisions produit en attente d'action** (rapports d'agents, pas encore appliqués au code) :
+  module **Métier** (verdict REFORMULER, arbitrage `metier-pas-de-module-autonome` rédigé non
+  gravé) ; correctifs **Le Fil** (rapport Business, en attente du challenge ChatGPT du porteur).
+- **Trouvailles /ou-vivre** (test Design Critic) non appliquées : reflet premium, double typewriter.
+- Réserve ancienne : Run 3 (conv PostHog), pages `modules/` ×6, correctifs SITE (`/le-fil` prix,
+  taxonomie `/professionnels`).
