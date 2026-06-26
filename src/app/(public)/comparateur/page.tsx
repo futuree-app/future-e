@@ -3,6 +3,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { seedComparaison } from "@/lib/comparateur-vie";
 import { ModeChoixSearch } from "./ModeChoixSearch";
+import { ModeChoixAsk } from "./ModeChoixAsk";
 import { ThemeMatrix } from "./ThemeMatrix";
 
 export const dynamic = "force-dynamic";
@@ -210,6 +211,21 @@ export default async function ComparateurPage({
           </div>
         </section>
       )}
+
+      {/* AskFuture (borné, 2 questions) au point de curiosité maximale, avant le paywall. */}
+      <ModeChoixAsk
+        trio={trio.map((r) => ({
+          insee: r.insee,
+          nom: r.nom,
+          identite: r.identite,
+          compromis: r.compromis,
+          distinctive: r.distinctive,
+          signaux: r.signaux,
+          logement: r.logement,
+          littoral: r.littoral,
+          heritageIndustriel: r.heritageIndustriel,
+        }))}
+      />
 
       {/* 5. CTA Pack : l'amorce prend le relais de la tension, ancrée sur la VALEUR. */}
       <div className="mt-10 glass rounded-2xl p-6 md:p-7 border border-accent/20">
