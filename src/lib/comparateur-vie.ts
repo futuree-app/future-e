@@ -274,6 +274,7 @@ export type Divergence = {
   exposeInsee: string;
   exposePalier: string; // palier défavorable de la commune en retrait
   domine: boolean;
+  dominatorInsee: string | null; // si domine : la commune qui mène presque tous les thèmes
 } | null;
 
 export type ComparaisonComplete = {
@@ -1350,6 +1351,7 @@ export function buildComparaisonComplete(
         exposeInsee: chosen.exposeInsee,
         exposePalier: chosen.exposePalier,
         domine: dominator != null,
+        dominatorInsee: dominator,
       }
     : null;
 
