@@ -146,6 +146,7 @@ export default async function ComparateurPage({
           distinctive: r.distinctive,
         }))}
         divergence={comparaison.divergence ? { domine: comparaison.divergence.domine, dominatorInsee: comparaison.divergence.dominatorInsee } : null}
+        arbitrage={comparaison.arbitrage}
       />
 
       {/* 2. LE FACE-À-FACE : une signature (offre) + un revers (compromis) par commune. */}
@@ -187,10 +188,10 @@ export default async function ComparateurPage({
       {/* 5. CTA Pack : l'amorce prend le relais de la tension, ancrée sur la VALEUR. */}
       <div className="mt-10 glass rounded-2xl p-6 md:p-7 border border-accent/20">
         <p className="text-[15px] leading-[1.6] text-label max-w-[640px]" style={{ textWrap: "pretty" }}>
-          {bindOrphans("Vous voyez où chacune penche. Le Pack vous donne les sept thèmes critère par critère : le palier de chaque commune et ce qui les départage, là où ça compte pour votre décision.")}
+          {bindOrphans("Vous voyez où chacune penche. Ce qui reste, c'est de savoir laquelle correspond à votre façon d'habiter : le Pack reprend les sept thèmes critère par critère, le palier de chaque commune et ce qui les départage vraiment, là où ça décide votre choix.")}
         </p>
         <p className="mt-3 text-[13.5px] leading-[1.6] text-muted max-w-[640px]" style={{ textWrap: "pretty" }}>
-          {bindOrphans("39 €, paiement unique, sans engagement. Une décision de lieu de vie pèse des années : c'est peu pour la trancher les yeux ouverts.")}
+          {bindOrphans("39 €. Une décision de lieu de vie pèse des années : c'est peu pour la trancher les yeux ouverts. Accès immédiat, rapport interactif que vous gardez.")}
         </p>
         <Link
           href={ctaHref}

@@ -4,7 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { bindOrphans } from "@/lib/typography";
 
 type Commune = { nom: string; region: string | null; identite: string; compromis: string; distinctive: string | null };
-type Props = { communes: Commune[]; divergence: { domine: boolean; dominatorInsee: string | null } | null };
+type Props = {
+  communes: Commune[];
+  divergence: { domine: boolean; dominatorInsee: string | null } | null;
+  // Phrase de hiérarchisation déterministe (le critère reste au lecteur). Affichée d'emblée,
+  // au-dessus du narratif streamé, pour donner la lecture du choix sans attendre l'IA.
+  arbitrage: string | null;
+};
 
 // Repli déterministe si l'IA est indisponible : on assemble identité + compromis, sobrement.
 function fallbackSynthese(communes: Commune[]): string {
@@ -12,7 +18,7 @@ function fallbackSynthese(communes: Commune[]): string {
   return `Ces communes ne proposent pas la même vie. ${phrases.join(" ")} Aucune ne réunit tout : à vous de voir quel compromis vous ressemble le plus.`;
 }
 
-export function ModeChoixSynthese({ communes, divergence }: Props) {
+export function ModeChoixSynthese({ communes, divergence, arbitrage }: Props) {
   // Texte affiché = ce que la machine à écrire a déjà « tapé ». Le texte reçu du réseau vit
   // dans un buffer (ref) qui grandit par chunks ; la machine le rattrape, plus vite que le flux.
   const [shown, setShown] = useState("");
@@ -93,7 +99,12 @@ export function ModeChoixSynthese({ communes, divergence }: Props) {
   return (
     <section className="mt-10">
       <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-3">En un coup d&apos;œil</p>
-      <p className="text-[17px] leading-[1.7] text-label" style={{ textWrap: "pretty" }}>
+      {arbitrage && (
+        <p className="text-[18px] leading-[1.6] text-label mb-3" style={{ fontFamily: "'Instrument Serif', serif", textWrap: "pretty" }}>
+          {bindOrphans(arbitrage)}
+        </p>
+      )}
+      <p className="text-[17px] leading-[1.7] text-muted" style={{ textWrap: "pretty" }}>
         {shown ? bindOrphans(shown) : "futur•e regarde vos communes…"}
       </p>
     </section>

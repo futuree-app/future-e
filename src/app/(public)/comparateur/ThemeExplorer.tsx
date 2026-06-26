@@ -87,7 +87,10 @@ export function ThemeExplorer({ themes, trio, defaultThemeId }: Props) {
                       />
                     </svg>
                   </div>
-                  <p className="mt-2 text-[11.5px] leading-[1.5] text-ghost">{th.lignes.map((l) => l.label).join(" · ")}</p>
+                  <p className="mt-2 font-mono text-[10px] tracking-[0.12em] uppercase text-ghost/80">
+                    {th.lignes.length} critère{th.lignes.length > 1 ? "s" : ""} comparé{th.lignes.length > 1 ? "s" : ""}
+                  </p>
+                  <p className="mt-1 text-[11.5px] leading-[1.5] text-ghost">{th.lignes.map((l) => l.label).join(" · ")}</p>
                 </button>
               );
             })}

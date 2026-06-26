@@ -279,6 +279,11 @@ export type Divergence = {
 
 export type ComparaisonComplete = {
   resume: string[]; // « En résumé » : 1 à 3 phrases, niveau thème (qui mène sur quels thèmes)
+  // Phrase de hiérarchisation (mode choix) : forme conditionnelle à deux pôles, qui rend le
+  // critère au lecteur (« Si X compte d'abord, A prend l'avantage ; … »). Déterministe, bâtie
+  // depuis les deux communes qui mènent le plus de thèmes. null si pas de vrai arbitrage à deux
+  // pôles (une commune domine, ou une seule mène).
+  arbitrage: string | null;
   divergence: Divergence; // mode choix : la ligne de fracture (null si tout est à égalité)
   themes: ComparaisonTheme[];
 };
@@ -1073,14 +1078,16 @@ type ComparaisonDim = {
 
 // gp = libellé du thème pour le résumé, avec une glose entre parenthèses (on explicite ce
 // que chaque thème recouvre, « risques naturels = inondation, feu… »).
-export const THEME_ORDER: { id: string; titre: string; gp: string }[] = [
-  { id: "climat", titre: "Climat", gp: "le climat (chaleur, douceur, soleil)" },
-  { id: "risques", titre: "Risques naturels", gp: "les risques naturels (inondation, feu, sécheresse)" },
-  { id: "sante_env", titre: "Santé environnementale", gp: "la santé environnementale (air, bruit, industrie)" },
-  { id: "cadre", titre: "Nature & cadre", gp: "la nature et le cadre de vie (espaces naturels, mer)" },
-  { id: "mobilite", titre: "Mobilité", gp: "la mobilité (voiture, train, transports)" },
-  { id: "services", titre: "Services & proximité", gp: "les services (soins, écoles, commerces)" },
-  { id: "vitalite", titre: "Vie locale & trajectoires", gp: "la vie locale et les trajectoires (emploi, démographie)" },
+// gp = groupe nominal long (synthèses « En résumé »). court = forme brève pour la phrase
+// d'arbitrage (« Si la mobilité compte d'abord… »), sans parenthèses ni énumération.
+export const THEME_ORDER: { id: string; titre: string; gp: string; court: string }[] = [
+  { id: "climat", titre: "Climat", gp: "le climat (chaleur, douceur, soleil)", court: "le climat" },
+  { id: "risques", titre: "Risques naturels", gp: "les risques naturels (inondation, feu, sécheresse)", court: "les risques naturels" },
+  { id: "sante_env", titre: "Santé environnementale", gp: "la santé environnementale (air, bruit, industrie)", court: "la santé environnementale" },
+  { id: "cadre", titre: "Nature & cadre", gp: "la nature et le cadre de vie (espaces naturels, mer)", court: "le cadre de vie" },
+  { id: "mobilite", titre: "Mobilité", gp: "la mobilité (voiture, train, transports)", court: "la mobilité" },
+  { id: "services", titre: "Services & proximité", gp: "les services (soins, écoles, commerces)", court: "les services" },
+  { id: "vitalite", titre: "Vie locale & trajectoires", gp: "la vie locale et les trajectoires (emploi, démographie)", court: "la vie locale" },
 ];
 
 // Paliers [favorable (>=66), intermédiaire, notable (<34)]. Libellés clairs et concrets
@@ -1293,7 +1300,9 @@ export function buildComparaisonComplete(
     const ranked = [...winners.entries()].sort((a, b) => b[1].length - a[1].length);
     let synthese: string;
     if (ranked.length === 0) {
-      synthese = `Sur ce thème, les ${nMot} territoires se ressemblent.`;
+      // Conclure, pas seulement décrire : un thème sans gagnant net ne départage pas (il ne
+      // pèsera pas dans le choix). « départage » reste neutre (vaut pour la découverte aussi).
+      synthese = `Sur ce thème, les ${nMot} territoires se ressemblent : il ne les départage pas.`;
     } else if (ranked.length === 1) {
       const [insee, fortes] = ranked[0];
       synthese = `${nomByInsee.get(insee)} se distingue par ${joinFr(fortes.slice(0, 2))}.`;
@@ -1308,13 +1317,24 @@ export function buildComparaisonComplete(
   // du détail). Déterministe. La 1re commune (mène le plus de thèmes) « prend l'avantage »,
   // les suivantes « se distinguent ». On nomme qui mène, jamais qui est en retrait.
   const gpThemeById = new Map(THEME_ORDER.map((t) => [t.id, t.gp]));
+  const courtThemeById = new Map(THEME_ORDER.map((t) => [t.id, t.court]));
   const ledByInsee = new Map<string, string[]>();
+  // insee -> thèmes menés avec la FORCE du lead (nb de dimensions gagnées seul). Sert à choisir,
+  // pour la phrase d'arbitrage, le thème le plus distinctif de la commune (pas le 1er affiché :
+  // le climat, en tête de liste, n'est presque jamais le plus décisif).
+  const ledThemesByInsee = new Map<string, { themeId: string; strength: number }[]>();
   for (const th of themes) {
     const lead = themeLeaderInsee(th.lignes);
     if (lead) {
       const arr = ledByInsee.get(lead) ?? [];
       arr.push(gpThemeById.get(th.id) ?? th.titre.toLowerCase());
       ledByInsee.set(lead, arr);
+      const strength = th.lignes.filter(
+        (l) => l.avantage.type === "avantage" && l.avantage.insees.length === 1 && l.avantage.insees[0] === lead,
+      ).length;
+      const tarr = ledThemesByInsee.get(lead) ?? [];
+      tarr.push({ themeId: th.id, strength });
+      ledThemesByInsee.set(lead, tarr);
     }
   }
   const ordered = [...ledByInsee.entries()].sort((a, b) => b[1].length - a[1].length);
@@ -1342,6 +1362,30 @@ export function buildComparaisonComplete(
     (a, b) => relScore(b) - relScore(a) || a.themeIdx - b.themeIdx,
   );
   const dominator = ordered.length > 0 && ordered[0][1].length >= themes.length - 1 ? ordered[0][0] : null;
+
+  // Phrase de hiérarchisation à deux pôles. Seulement quand deux communes distinctes mènent
+  // (pas de domination) : on prend les deux qui mènent le PLUS de thèmes, et pour chacune son
+  // thème de tête (1er dans l'ordre THEME_ORDER). Forme conditionnelle : le critère reste au
+  // lecteur, on ne décide pas pour lui. cf. challenge paywall / doctrine éditoriale.
+  let arbitrage: string | null = null;
+  if (!dominator && ordered.length >= 2) {
+    const inseeA = ordered[0][0];
+    const inseeB = ordered[1][0];
+    // Thème le plus distinctif de chaque commune : force du lead décroissante (tri stable =
+    // départage par l'ordre THEME_ORDER à force égale).
+    const strongest = (insee: string) =>
+      [...(ledThemesByInsee.get(insee) ?? [])].sort((a, b) => b.strength - a.strength)[0]?.themeId;
+    const themeA = strongest(inseeA);
+    const themeB = strongest(inseeB);
+    if (themeA && themeB && themeA !== themeB) {
+      const courtA = courtThemeById.get(themeA)!;
+      const courtB = courtThemeById.get(themeB)!;
+      const verbeA = courtA.startsWith("les ") ? "comptent" : "compte"; // accord sujet pluriel
+      arbitrage =
+        `Si ${courtA} ${verbeA} d'abord pour vous, ${nomByInsee.get(inseeA)} prend l'avantage ; ` +
+        `si vous regardez surtout ${courtB}, ${nomByInsee.get(inseeB)} reprend la main.`;
+    }
+  }
   const chosen = dominator
     ? sortedCands.find((c) => c.leaderInsee !== dominator) ?? sortedCands[0] ?? null
     : sortedCands[0] ?? null;
@@ -1359,7 +1403,7 @@ export function buildComparaisonComplete(
       }
     : null;
 
-  return { resume, divergence, themes };
+  return { resume, arbitrage, divergence, themes };
 }
 
 // Narratif « nouveaux arrivants » (HORS score) : phrase descriptive, jamais normative.
@@ -2463,6 +2507,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
 export function truncateComparaison(cc: ComparaisonComplete): ComparaisonComplete {
   return {
     resume: cc.resume.slice(0, 1),
+    arbitrage: cc.arbitrage,
     divergence: cc.divergence,
     themes: cc.themes.slice(0, 2),
   };
