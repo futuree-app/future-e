@@ -80,7 +80,10 @@ négative** (« pourquoi ça échoue vu de ton métier ? », « où la compréhe
 - **Historien** : non un persona mais une **cadence**. Rétrospective produite à la demande aux
   jalons, dont le job unique est le fil narratif du *pourquoi la pensée a évolué* (ex. le
   pivot de l'ADR-0002), entre les ADR.
-- **Board orchestrateur** : après les 7 personas.
+- **Board orchestrateur** : prévu après les 7 personas. **Révisé par `adr/ADR-0009`** : le coût
+  réel du premier board l'a devancé. L'orchestration devient une fonction de routage (pas un
+  agent), dans une hiérarchie d'escalade à quatre niveaux (spécialiste / mini-board / board
+  stratégique / capture). Voir ADR-0009.
 
 ## Conséquence comportementale (la plus importante)
 
