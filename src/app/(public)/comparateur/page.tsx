@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { seedComparaison } from "@/lib/comparateur-vie";
+import { seedComparaison, THEME_ORDER } from "@/lib/comparateur-vie";
 import { bindOrphans } from "@/lib/typography";
 import { ModeChoixSearch } from "./ModeChoixSearch";
 import { ModeChoixAsk } from "./ModeChoixAsk";
@@ -46,7 +46,7 @@ function Hero({ compact = false }: { compact?: boolean }) {
       <div className="mb-6">
         <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-2">Comparateur de communes</p>
         <p className="text-[15px] leading-[1.55] text-muted" style={{ textWrap: "pretty" }}>
-          {bindOrphans("Vos communes, côte à côte, thème par thème. Ce qui les départage vraiment, pas un score de plus.")}
+          {bindOrphans("Vos communes face à face, thème par thème : ce que chacune vous fait gagner ou perdre.")}
         </p>
       </div>
     );
@@ -62,8 +62,18 @@ function Hero({ compact = false }: { compact?: boolean }) {
         <span className="italic text-accent">Comparez-les,&nbsp;tranchez&nbsp;sans&nbsp;deviner.</span>
       </h1>
       <p className="mt-4 text-[15px] leading-[1.6] text-muted" style={{ textWrap: "pretty" }}>
-        {bindOrphans("Nommez les communes que vous avez en tête. On les met côte à côte, thème par thème, pour montrer ce qui les départage vraiment, pas un score de plus.")}
+        {bindOrphans("Nommez les communes que vous avez en tête. On les met face à face sur près de 30 critères, du climat aux risques, du cadre de vie à la mobilité, et on montre ce que chacune vous fait gagner ou perdre.")}
       </p>
+      <div className="mt-7">
+        <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-ghost mb-3">Ce qu&apos;on compare</p>
+        <div className="flex flex-wrap gap-2">
+          {THEME_ORDER.map((t) => (
+            <span key={t.id} className="text-[12.5px] leading-none text-muted border border-white/[0.1] rounded-full px-3 py-1.5">
+              {t.titre}
+            </span>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
