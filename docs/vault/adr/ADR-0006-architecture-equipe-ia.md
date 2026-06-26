@@ -93,7 +93,37 @@ peu coûteuse qu'elle ne se saute jamais** : un réflexe de fin de session, pas 
 L'archiviste n'est pas un outil parmi dix, c'est l'habitude qui rend les neuf autres
 possibles.
 
+## Addendum (2026-06-26) : roster complété, les agents comme contre-pouvoirs
+
+Le roster des 7 personas + capacité d'ouverture est **complet** : Archiviste, Data Curator,
+Design Critic, Business Strategist, Product Strategist, **Editorial Writer** et **Software
+Architect** (les deux derniers livrés ce jour), plus le **Researcher** (capacité de divergence,
+v2 « agent de rupture »). Le Cartographe reste absorbé par l'Archiviste, l'Historien reste une
+cadence, pas un persona.
+
+En les construisant, le cadre a glissé : on ne définit plus un agent par **son domaine** mais par
+**la tension qu'il incarne**. Chaque agent est un **contre-pouvoir** qui protège une chose
+qu'aucun autre ne protège :
+
+- Business protège l'argent, Product protège la valeur, Data protège la vérité, Researcher
+  protège l'ouverture, Editorial protège la voix, Design protège la compréhension, Software
+  Architect protège le futur du code.
+
+Deux conséquences, gravées comme règles :
+
+1. **Gabarit « contre-pouvoir card »** : tout mandat devrait répondre explicitement à sept
+   questions : sa question-mère, l'objectif qu'il maximise, la peur qu'il incarne, ce qu'il
+   protège, ce qu'il refuse, quand il répond PASS, avec qui il est en tension. Editorial Writer
+   et Software Architect sont écrits avec cet en-tête et servent de **gabarit de référence** ;
+   les 5 mandats antérieurs seront harmonisés en passe séparée délibérée.
+2. **Test d'admission d'un futur agent** : on s'interdit de créer un nouvel agent tant qu'on ne
+   peut pas répondre en une phrase à *« quel contre-pouvoir nouveau apporte-t-il, que personne
+   d'autre n'incarne déjà ? »*. Réponse floue = agent redondant. Cohérent avec le principe
+   fondateur : on investit dans la mémoire, pas dans le nombre d'agents.
+
 ## Liens
 
 `README.md` (flux archiviste en deux temps), `.claude/agents/archiviste.md`,
-`adr/ADR-0002-pivot-compatibilite-territoriale.md` (matière du futur Historien).
+`.claude/agents/editorial-writer.md`, `.claude/agents/software-architect.md`,
+`adr/ADR-0009-hierarchie-orchestration-agents.md` (orchestration), `adr/ADR-0002-pivot-compatibilite-territoriale.md`
+(matière du futur Historien).
