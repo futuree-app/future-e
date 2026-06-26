@@ -14,15 +14,19 @@ export function trioKey(insees: string[]): string {
     .join("-");
 }
 
+// mode : 'replay' (trio PROPOSÉ par /ou-vivre, reconstruit en rejouant parsed_snapshot)
+// ou 'choix' (2-3 communes NOMMÉES sur /comparateur, reconstruites via seedComparaison,
+// sans projet). insees a 2 ou 3 entrées (jamais de null intercalé), communes est aligné.
 export type DecisionPack = {
   trioKey: string;
-  insees: [string, string, string];
-  communes: [string | null, string | null, string | null];
+  mode: "replay" | "choix";
+  insees: string[];
+  communes: (string | null)[];
   projetLabel: string | null;
-  parsedSnapshot: ParsedProject;
+  parsedSnapshot: ParsedProject | null; // null en mode choix
 };
 
-// L'utilisateur possède-t-il le pack pour ce trio ? Lecture RLS (ses propres packs).
+// L'utilisateur possède-t-il le pack pour ces communes ? Lecture RLS (ses propres packs).
 export async function resolvePackOwnership(
   supabase: SupabaseClient,
   userId: string,
@@ -32,19 +36,31 @@ export async function resolvePackOwnership(
   const { data } = await supabase
     .from("decision_packs")
     .select(
-      "trio_key, insee_1, insee_2, insee_3, commune_1, commune_2, commune_3, projet_label, parsed_snapshot",
+      "trio_key, mode, insee_1, insee_2, insee_3, commune_1, commune_2, commune_3, projet_label, parsed_snapshot",
     )
     .eq("user_id", userId)
     .eq("trio_key", key)
     .maybeSingle();
 
   if (!data) return null;
+  // insee_3 est nullable (pack à 2 communes) : on compacte sans trou, communes aligné.
+  const rawInsees = [data.insee_1, data.insee_2, data.insee_3];
+  const rawCommunes = [data.commune_1, data.commune_2, data.commune_3];
+  const inseesOut: string[] = [];
+  const communesOut: (string | null)[] = [];
+  rawInsees.forEach((ins, i) => {
+    if (ins) {
+      inseesOut.push(ins);
+      communesOut.push(rawCommunes[i] ?? null);
+    }
+  });
   return {
     trioKey: data.trio_key,
-    insees: [data.insee_1, data.insee_2, data.insee_3],
-    communes: [data.commune_1, data.commune_2, data.commune_3],
+    mode: data.mode === "choix" ? "choix" : "replay",
+    insees: inseesOut,
+    communes: communesOut,
     projetLabel: data.projet_label,
-    parsedSnapshot: data.parsed_snapshot as ParsedProject,
+    parsedSnapshot: (data.parsed_snapshot as ParsedProject | null) ?? null,
   };
 }
 
@@ -73,6 +89,7 @@ export async function grantDecisionPackFromSnapshot(
     {
       user_id: snap.user_id,
       trio_key: snap.trio_key,
+      mode: snap.mode === "choix" ? "choix" : "replay",
       insee_1: snap.insee_1,
       insee_2: snap.insee_2,
       insee_3: snap.insee_3,
@@ -86,12 +103,14 @@ export async function grantDecisionPackFromSnapshot(
     { onConflict: "user_id,trio_key" },
   );
 
+  // Un report_grant par commune RÉELLE (2 ou 3 ; insee_3 nullable en mode choix).
+  const grants = [
+    { insee: snap.insee_1, commune: snap.commune_1 },
+    { insee: snap.insee_2, commune: snap.commune_2 },
+    { insee: snap.insee_3, commune: snap.commune_3 },
+  ].filter((t) => t.insee);
   await admin.from("report_grants").upsert(
-    [
-      { insee: snap.insee_1, commune: snap.commune_1 },
-      { insee: snap.insee_2, commune: snap.commune_2 },
-      { insee: snap.insee_3, commune: snap.commune_3 },
-    ].map((t, i) => ({
+    grants.map((t, i) => ({
       user_id: snap.user_id,
       insee: t.insee,
       commune: t.commune,

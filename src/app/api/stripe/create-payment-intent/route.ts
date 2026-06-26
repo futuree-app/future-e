@@ -52,10 +52,13 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser();
     const stripe = getStripe();
 
-    // Pack Décision : trio de 3 INSEE valides + snapshot du projet. Le snapshot
-    // est persisté en base (pack_snapshots) ; les metadata Stripe ne portent que
-    // le petit (3 INSEE, 3 communes, libellé projet).
+    // Pack Décision : 2-3 INSEE valides. Mode 'replay' (trio /ou-vivre, snapshot du
+    // projet requis) ou 'choix' (communes nommées sur /comparateur, sans projet,
+    // reconstruites via seedComparaison). Le snapshot replay est persisté en base
+    // (pack_snapshots) ; les metadata Stripe ne portent que le petit (INSEE, communes,
+    // libellé/mode).
     const isPack = productType.trim() === "pack-decision";
+    const packMode = pack?.mode === "choix" ? "choix" : "replay";
     let packTrio: { insee: string; commune: string }[] = [];
     let packProjetLabel = "";
     if (isPack) {
@@ -66,11 +69,18 @@ export async function POST(request: Request) {
             ? t.insee.trim().toUpperCase() : "",
           commune: typeof t?.commune === "string" ? t.commune.trim().slice(0, 120) : "",
         }))
-        .filter((t: { insee: string }) => t.insee);
-      if (packTrio.length !== 3) {
-        return NextResponse.json({ error: "Trio de 3 communes requis." }, { status: 400 });
+        .filter((t: { insee: string }) => t.insee)
+        .slice(0, 3);
+      // choix : 2 ou 3 communes ; replay : exactement 3.
+      const okCount = packMode === "choix" ? packTrio.length >= 2 : packTrio.length === 3;
+      if (!okCount) {
+        return NextResponse.json(
+          { error: packMode === "choix" ? "2 à 3 communes requises." : "Trio de 3 communes requis." },
+          { status: 400 },
+        );
       }
-      if (!pack?.parsedSnapshot || typeof pack.parsedSnapshot !== "object") {
+      // replay seul exige le snapshot du projet ; choix n'en a pas.
+      if (packMode === "replay" && (!pack?.parsedSnapshot || typeof pack.parsedSnapshot !== "object")) {
         return NextResponse.json({ error: "Projet manquant." }, { status: 400 });
       }
       packProjetLabel = typeof pack?.projetLabel === "string" ? pack.projetLabel.trim().slice(0, 200) : "";
@@ -89,12 +99,13 @@ export async function POST(request: Request) {
         targetCommune: cleanCommune,
         grantSource: cleanSource,
         grantRank: cleanRank,
+        packMode: isPack ? packMode : "",
         packInsee1: isPack ? packTrio[0].insee : "",
         packInsee2: isPack ? packTrio[1].insee : "",
-        packInsee3: isPack ? packTrio[2].insee : "",
+        packInsee3: isPack ? (packTrio[2]?.insee ?? "") : "",
         packCommune1: isPack ? packTrio[0].commune : "",
         packCommune2: isPack ? packTrio[1].commune : "",
-        packCommune3: isPack ? packTrio[2].commune : "",
+        packCommune3: isPack ? (packTrio[2]?.commune ?? "") : "",
         packProjetLabel,
       },
     });
@@ -110,15 +121,17 @@ export async function POST(request: Request) {
         {
           stripe_payment_intent_id: paymentIntent.id,
           user_id: user?.id ?? null,
+          mode: packMode,
           trio_key: trioKey(packTrio.map((t) => t.insee)),
           insee_1: packTrio[0].insee,
           insee_2: packTrio[1].insee,
-          insee_3: packTrio[2].insee,
+          insee_3: packTrio[2]?.insee ?? null,
           commune_1: packTrio[0].commune || null,
           commune_2: packTrio[1].commune || null,
-          commune_3: packTrio[2].commune || null,
+          commune_3: packTrio[2]?.commune || null,
           projet_label: packProjetLabel || null,
-          parsed_snapshot: pack.parsedSnapshot,
+          // choix : aucun ParsedProject (la matrice se reconstruit via seedComparaison).
+          parsed_snapshot: packMode === "choix" ? null : pack.parsedSnapshot,
         },
         { onConflict: "stripe_payment_intent_id" },
       );

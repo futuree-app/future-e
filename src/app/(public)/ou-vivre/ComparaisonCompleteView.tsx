@@ -21,8 +21,15 @@ type Props = {
 
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 // Gabarit partagé par l'en-tête de colonnes ET chaque ligne, pour aligner les colonnes.
-// Mobile = empilé ; desktop = libellé + 3 communes.
-const GRID = "grid grid-cols-1 md:grid-cols-[minmax(150px,210px)_repeat(3,minmax(0,1fr))] md:gap-x-4";
+// Mobile = empilé ; desktop = libellé + N communes (2 ou 3 en mode choix). Classes LITTÉRALES
+// par cardinal : Tailwind n'extrait pas les valeurs arbitraires interpolées dynamiquement.
+const GRID_BY_N: Record<number, string> = {
+  2: "grid grid-cols-1 md:grid-cols-[minmax(150px,210px)_repeat(2,minmax(0,1fr))] md:gap-x-4",
+  3: "grid grid-cols-1 md:grid-cols-[minmax(150px,210px)_repeat(3,minmax(0,1fr))] md:gap-x-4",
+};
+const gridFor = (n: number): string => GRID_BY_N[n] ?? GRID_BY_N[3];
+// Col-span de la valeur fusionnée (égalité parfaite) : littéral par cardinal, même raison.
+const MERGED_SPAN_BY_N: Record<number, string> = { 2: "md:col-span-2", 3: "md:col-span-3" };
 
 function reveal(i: number): React.CSSProperties {
   return { animation: `step-enter 0.55s ${EASE} both`, animationDelay: `${0.05 * i}s` };
@@ -182,8 +189,9 @@ function LigneRow({ ligne, trio }: { ligne: ComparaisonLigne; trio: MatchResult[
     dispo.length === ligne.cellules.length &&
     new Set(dispo.map((c) => `${c.palier}|${c.qualifier ?? ""}`)).size === 1;
 
+  const n = trio.length;
   return (
-    <div className={`${GRID} gap-y-2 md:gap-y-0 md:items-center py-3.5 border-t border-white/[0.06]`}>
+    <div className={`${gridFor(n)} gap-y-2 md:gap-y-0 md:items-center py-3.5 border-t border-white/[0.06]`}>
       <div className="md:pr-2">
         <LabelTip label={ligne.label} text={ligne.aide} />
         {!neutre && (
@@ -200,12 +208,12 @@ function LigneRow({ ligne, trio }: { ligne: ComparaisonLigne; trio: MatchResult[
       {merged ? (
         // Égalité parfaite : une seule valeur qui traverse les 3 colonnes (pas de cellule
         // vide, pas l'impression qu'une seule commune porte la valeur).
-        <div className="md:col-span-3 md:px-3.5 md:py-2.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+        <div className={`${MERGED_SPAN_BY_N[n] ?? MERGED_SPAN_BY_N[3]} md:px-3.5 md:py-2.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5`}>
           <span className="text-[14px] leading-[1.45] text-label">
             {dispo[0].palier}
             {dispo[0].qualifier ? `, ${dispo[0].qualifier}` : ""}
           </span>
-          <span className="text-[13px] text-muted">· les trois territoires se valent</span>
+          <span className="text-[13px] text-muted">· les {n >= 3 ? "trois" : "deux"} territoires se valent</span>
         </div>
       ) : (
         trio.map((r) => {
@@ -235,7 +243,7 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
           className="font-normal text-[clamp(26px,3.6vw,38px)] leading-[1.12] tracking-[-0.6px] text-label max-w-[760px]"
           style={{ fontFamily: "'Instrument Serif', serif" }}
         >
-          Vous les avez retenus tous les trois.{" "}
+          Vous les avez retenus tous les {trio.length >= 3 ? "trois" : "deux"}.{" "}
           <span className="italic text-accent">Voici, critère par critère, ce qui penche et ce qui se vaut.</span>
         </h2>
       </div>
@@ -274,7 +282,7 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
             <p className="text-[14.5px] leading-[1.55] text-muted italic mb-4 max-w-[680px]">{th.synthese}</p>
 
             {/* En-tête des 3 communes, rappelé pour ce thème (desktop) */}
-            <div className={`${GRID} hidden md:grid pb-2 border-b border-white/[0.06]`}>
+            <div className={`${gridFor(trio.length)} hidden md:grid pb-2 border-b border-white/[0.06]`}>
               <div className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-ghost self-end pb-1">Critère</div>
               {trio.map((r, n) => (
                 <div key={r.insee} className="px-3.5 flex items-baseline gap-2">
