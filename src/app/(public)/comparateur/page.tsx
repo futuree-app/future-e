@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { seedComparaison } from "@/lib/comparateur-vie";
+import { bindOrphans } from "@/lib/typography";
 import { ModeChoixSearch } from "./ModeChoixSearch";
 import { ModeChoixAsk } from "./ModeChoixAsk";
-import { ThemeMatrix } from "./ThemeMatrix";
+import { ModeChoixSynthese } from "./ModeChoixSynthese";
+import { ThemeExplorer } from "./ThemeExplorer";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +38,19 @@ const Shell = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-function Hero() {
+function Hero({ compact = false }: { compact?: boolean }) {
+  // En état « résultats », le hero se condense pour ne pas dominer typographiquement la ligne
+  // de fracture (qui doit être le premier grand bloc). cf. rapports-agents/design-critic.
+  if (compact) {
+    return (
+      <div className="mb-6">
+        <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-2">Comparateur de communes</p>
+        <p className="text-[15px] leading-[1.55] text-muted" style={{ textWrap: "pretty" }}>
+          {bindOrphans("Vos communes, côte à côte, thème par thème. Ce qui les départage vraiment, pas un score de plus.")}
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="mb-8">
       <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-3">Comparateur de communes</p>
@@ -47,9 +61,8 @@ function Hero() {
         Vous hésitez entre plusieurs communes ?{" "}
         <span className="italic text-accent">Comparez-les,&nbsp;tranchez&nbsp;sans&nbsp;deviner.</span>
       </h1>
-      <p className="mt-4 text-[15px] leading-[1.6] text-muted max-w-[640px]" style={{ textWrap: "pretty" }}>
-        Nommez les communes que vous avez en tête. On les met côte à côte, thème par thème, pour
-        montrer ce qui les départage vraiment, pas un score de&nbsp;plus.
+      <p className="mt-4 text-[15px] leading-[1.6] text-muted" style={{ textWrap: "pretty" }}>
+        {bindOrphans("Nommez les communes que vous avez en tête. On les met côte à côte, thème par thème, pour montrer ce qui les départage vraiment, pas un score de plus.")}
       </p>
     </div>
   );
@@ -97,16 +110,13 @@ export default async function ComparateurPage({
   const ctaHref = `/comparateur/pack-decision?communes=${trio.map((r) => r.insee).join(",")}&mode=choix`;
   const colsClass = trio.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3";
 
-  // Le thème DÉVOILÉ = celui qui porte la fracture (le plus parlant). Repli : 1er thème.
-  const div = comparaison.divergence;
-  const nomBy = new Map(trio.map((r) => [r.insee, r.nom]));
-  const revealed =
-    (div && comparaison.themes.find((t) => t.id === div.themeId)) ?? comparaison.themes[0];
-  const lockedThemes = comparaison.themes.filter((t) => t.id !== revealed.id);
+  // Thème ouvert par défaut dans l'explorateur : celui de la divergence repondérée (cf. Task 1).
+  // Repli : 1er thème. L'explorateur gère ensuite l'ouverture/verrouillage côté client.
+  const revealedThemeId = comparaison.divergence?.themeId ?? comparaison.themes[0].id;
 
   return (
     <Shell>
-      <Hero />
+      <Hero compact />
       <ModeChoixSearch initial={initial} />
 
       {ignores.length > 0 && (
@@ -116,46 +126,17 @@ export default async function ComparateurPage({
         </p>
       )}
 
-      {/* 1. LA LIGNE DE FRACTURE : là où les communes s'écartent le plus. La tension, pas un classement. */}
-      {div && (
-        <div className="mt-12 mb-2">
-          <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-3">Là où ça se joue</p>
-          {div.domine ? (
-            <>
-              <h2
-                className="font-normal text-[clamp(22px,3vw,32px)] leading-[1.18] tracking-[-0.4px] text-label max-w-[760px]"
-                style={{ fontFamily: "'Instrument Serif', serif", textWrap: "balance" }}
-              >
-                {nomBy.get(div.dominatorInsee ?? "") ?? "L'une d'elles"} ressort sur presque tous les thèmes.{" "}
-                <span className="italic text-accent">Ce n&apos;est pas vraiment un compromis.</span>
-              </h2>
-              <p className="mt-3 text-[15px] leading-[1.6] text-muted max-w-[640px]" style={{ textWrap: "pretty" }}>
-                Le seul vrai contre-point : {nomBy.get(div.leaderInsee)}, {div.leaderPalier}.
-              </p>
-            </>
-          ) : (
-            <>
-              <h2
-                className="font-normal text-[clamp(22px,3vw,32px)] leading-[1.18] tracking-[-0.4px] text-label max-w-[760px]"
-                style={{ fontFamily: "'Instrument Serif', serif", textWrap: "balance" }}
-              >
-                C&apos;est sur {div.label.toLowerCase()} que l&apos;écart est le plus net{" "}
-                <span className="italic text-accent">entre vos communes.</span>
-              </h2>
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-[760px]">
-                <div className="glass rounded-xl px-4 py-3">
-                  <p className="text-[13px] text-accent" style={{ fontFamily: "'Instrument Serif', serif" }}>{nomBy.get(div.leaderInsee)}</p>
-                  <p className="mt-0.5 text-[13.5px] leading-[1.5] text-label">{div.leaderPalier}.</p>
-                </div>
-                <div className="glass rounded-xl px-4 py-3">
-                  <p className="text-[13px] text-muted" style={{ fontFamily: "'Instrument Serif', serif" }}>{nomBy.get(div.exposeInsee)}</p>
-                  <p className="mt-0.5 text-[13.5px] leading-[1.5] text-label">{div.exposePalier}.</p>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      )}
+      {/* 1. SYNTHÈSE générée (effet wow), une seule fois par chargement. */}
+      <ModeChoixSynthese
+        communes={trio.map((r) => ({
+          nom: r.nom,
+          region: r.region,
+          identite: r.identite,
+          compromis: r.compromis,
+          distinctive: r.distinctive,
+        }))}
+        divergence={comparaison.divergence ? { domine: comparaison.divergence.domine, dominatorInsee: comparaison.divergence.dominatorInsee } : null}
+      />
 
       {/* 2. LE FACE-À-FACE : une signature (offre) + un revers (compromis) par commune. */}
       <div className={`mt-8 grid grid-cols-1 ${colsClass} gap-4`}>
@@ -175,42 +156,8 @@ export default async function ComparateurPage({
         ))}
       </div>
 
-      {/* 3. UN THÈME DÉVOILÉ : la vraie grammaire du produit (paliers + avantages). */}
-      <section className="mt-12">
-        <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent mb-2">Le détail, sur un thème</p>
-        <h3 className="font-normal text-[23px] leading-[1.1] text-label mb-1" style={{ fontFamily: "'Instrument Serif', serif" }}>
-          {revealed.titre}
-        </h3>
-        <p className="text-[14.5px] leading-[1.55] text-muted italic mb-4 max-w-[680px]" style={{ textWrap: "pretty" }}>
-          {revealed.synthese}
-        </p>
-        <ThemeMatrix theme={revealed} trio={trio} />
-      </section>
-
-      {/* 4. LE RESTE, VERROUILLÉ : squelette réel (thèmes + critères), verdict voilé. */}
-      {lockedThemes.length > 0 && (
-        <section className="mt-12">
-          <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-muted mb-4">
-            Les {lockedThemes.length} autres thèmes
-          </p>
-          <div className={`grid grid-cols-1 sm:grid-cols-2 ${trio.length === 2 ? "" : "lg:grid-cols-3"} gap-3`}>
-            {lockedThemes.map((th) => (
-              <div key={th.id} className="glass rounded-xl px-4 py-4 flex flex-col">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[15px] leading-[1.15] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                    {th.titre}
-                  </p>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-ghost shrink-0" aria-hidden>
-                    <rect x="5" y="11" width="14" height="9" rx="1.5" />
-                    <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-                  </svg>
-                </div>
-                <p className="mt-2 text-[11.5px] leading-[1.5] text-ghost">{th.lignes.map((l) => l.label).join(" · ")}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      {/* 3. L'EXPLORATEUR : un thème dévoilé (défaut repondéré), le reste en vitrine cliquable. */}
+      <ThemeExplorer themes={comparaison.themes} trio={trio} defaultThemeId={revealedThemeId} />
 
       {/* AskFuture (borné, 2 questions) au point de curiosité maximale, avant le paywall. */}
       <ModeChoixAsk
@@ -230,12 +177,10 @@ export default async function ComparateurPage({
       {/* 5. CTA Pack : l'amorce prend le relais de la tension, ancrée sur la VALEUR. */}
       <div className="mt-10 glass rounded-2xl p-6 md:p-7 border border-accent/20">
         <p className="text-[15px] leading-[1.6] text-label max-w-[640px]" style={{ textWrap: "pretty" }}>
-          Vous voyez où chacune penche. Le Pack vous donne les sept thèmes critère par critère : le
-          palier de chaque commune et ce qui les départage, là où ça compte pour votre décision.
+          {bindOrphans("Vous voyez où chacune penche. Le Pack vous donne les sept thèmes critère par critère : le palier de chaque commune et ce qui les départage, là où ça compte pour votre décision.")}
         </p>
         <p className="mt-3 text-[13.5px] leading-[1.6] text-muted max-w-[640px]" style={{ textWrap: "pretty" }}>
-          39 €, paiement unique, sans engagement. Une décision de lieu de vie pèse des années :
-          c&apos;est peu, contre une commune mal choisie.
+          {bindOrphans("39 €, paiement unique, sans engagement. Une décision de lieu de vie pèse des années : c'est peu pour la trancher les yeux ouverts.")}
         </p>
         <Link
           href={ctaHref}
