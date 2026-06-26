@@ -165,9 +165,10 @@ export function ModeChoixSearch({ initial = [] }: { initial?: Selected[] }) {
     <div className="glass rounded-2xl p-6 md:p-7">
       <div className="space-y-3">
         {slots.map((s, i) => (
-          // z élevé sur le slot OUVERT : sinon la liste déroulante d'un champ passe
-          // SOUS le champ suivant (qui est peint après dans le DOM).
-          <div key={i} className={`relative ${s.open ? "z-30" : "z-0"}`}>
+          // z élevé sur le slot OUVERT : sinon la liste déroulante d'un champ passe SOUS le
+          // champ suivant. z-index INLINE (pas Tailwind) car .glass porte un backdrop-filter
+          // qui crée un contexte d'empilement où les classes z-* ne suffisaient pas.
+          <div key={i} className="relative" style={{ zIndex: s.open ? 50 : 1 }}>
             <div className="flex items-center gap-2">
               <span className="font-mono text-[11px] text-accent w-6 shrink-0">{String(i + 1).padStart(2, "0")}</span>
               <div className="relative flex-1">
@@ -178,14 +179,30 @@ export function ModeChoixSearch({ initial = [] }: { initial?: Selected[] }) {
                   onFocus={() => s.results.length > 0 && update(i, (p) => ({ ...p, open: true }))}
                   onBlur={() => setTimeout(() => update(i, (p) => ({ ...p, open: false })), 150)}
                   placeholder={i < MIN_SLOTS ? "Nom d'une commune" : "Une 3e commune (facultatif)"}
-                  className="w-full rounded-lg bg-white/[0.04] border border-white/[0.12] px-4 py-3 text-[15px] text-label placeholder:text-ghost outline-none focus:border-accent/60 transition-colors"
+                  className={`w-full rounded-lg px-4 py-3 text-[15px] text-label placeholder:text-ghost outline-none transition-colors ${
+                    s.selected
+                      ? "border border-accent/60 bg-accent/[0.07] pr-11"
+                      : "border border-white/[0.12] bg-white/[0.04] focus:border-accent/60"
+                  }`}
                   aria-label={`Commune ${i + 1}`}
                   autoComplete="off"
                 />
+                {/* Confirmation visible que la commune est bien retenue (pop animé). */}
+                {s.selected && !s.open && (
+                  <span
+                    key={s.selected.code}
+                    className="commune-check pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded-full bg-accent text-canvas"
+                    aria-hidden
+                  >
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 13l4 4L19 7" />
+                    </svg>
+                  </span>
+                )}
                 {s.open && s.results.length > 0 && (
                   <ul
-                    className="absolute z-30 left-0 right-0 mt-1 rounded-lg border border-white/[0.12] overflow-hidden"
-                    style={{ background: "#0b101c", boxShadow: "0 16px 40px rgba(0,0,0,0.5)" }}
+                    className="absolute left-0 right-0 mt-1 rounded-lg border border-white/[0.12] overflow-hidden"
+                    style={{ zIndex: 60, background: "#0b101c", boxShadow: "0 16px 40px rgba(0,0,0,0.5)" }}
                   >
                     {s.results.map((hit) => (
                       <li key={`${hit.code}-${hit.codePostal}`}>
