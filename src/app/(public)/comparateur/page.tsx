@@ -62,7 +62,7 @@ function Hero({ compact = false }: { compact?: boolean }) {
         <span className="italic text-accent">Comparez-les,&nbsp;tranchez&nbsp;sans&nbsp;deviner.</span>
       </h1>
       <p className="mt-4 text-[15px] leading-[1.6] text-muted" style={{ textWrap: "pretty" }}>
-        {bindOrphans("Nommez les communes que vous avez en tête. On les met face à face sur près de 30 critères, du climat aux risques, du cadre de vie à la mobilité, et on montre ce que chacune vous fait gagner ou perdre.")}
+        {bindOrphans("Nommez les communes que vous avez en tête. On les met face à face et on montre ce que chacune vous fait gagner ou perdre. Aucun classement, aucun score.")}
       </p>
       <div className="mt-7">
         <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-ghost mb-3">Ce qu&apos;on compare</p>

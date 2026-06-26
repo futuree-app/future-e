@@ -178,7 +178,7 @@ export function ModeChoixSearch({ initial = [] }: { initial?: Selected[] }) {
                   onChange={(e) => handleChange(i, e.target.value)}
                   onFocus={() => s.results.length > 0 && update(i, (p) => ({ ...p, open: true }))}
                   onBlur={() => setTimeout(() => update(i, (p) => ({ ...p, open: false })), 150)}
-                  placeholder={i < MIN_SLOTS ? "Nom d'une commune" : "Une 3e commune (facultatif)"}
+                  placeholder={i < MIN_SLOTS ? (i === 0 ? "Ex. Rennes" : "Ex. Lorient") : "Une 3e commune (facultatif)"}
                   className={`w-full rounded-lg px-4 py-3 text-[15px] text-label placeholder:text-ghost outline-none transition-colors ${
                     s.selected
                       ? "border border-accent/60 bg-accent/[0.07] pr-11"
@@ -244,7 +244,7 @@ export function ModeChoixSearch({ initial = [] }: { initial?: Selected[] }) {
           disabled={!ready || isPending}
           className="px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
         >
-          {isPending ? "Comparaison…" : "Comparer"}
+          {isPending ? "Comparaison…" : "Comparer ces communes"}
         </button>
         {slots.length < MAX_SLOTS && (
           <button
@@ -256,6 +256,9 @@ export function ModeChoixSearch({ initial = [] }: { initial?: Selected[] }) {
           </button>
         )}
       </div>
+      <p className="mt-4 font-mono text-[11px] tracking-[0.04em] text-muted">
+        7 thèmes · près de 30 critères · aperçu gratuit
+      </p>
       <p className="mt-3 text-[12px] leading-[1.5] text-ghost">
         Pour Paris, Lyon ou Marseille, choisissez un arrondissement (« Paris 11e »).
       </p>
