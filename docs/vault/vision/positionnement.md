@@ -1,69 +1,70 @@
-# Positionnement éditorial et de marque
+# Positionnement de marque
 
-> Page fondatrice, pérenne. Transcrite depuis `Documentation Notion/.../Positionnement
-> éditorial`. Distincte de `doctrine/positionnement.md` : ici le positionnement de marque
-> et la posture éditoriale ; là-bas les règles de copy du moteur de compatibilité. Les deux
-> se répondent.
+> Page fondatrice, pérenne. L'**identité de marque** de futur•e : pourquoi il existe, contre quoi
+> il se construit, quelle transformation il apporte. La **posture éditoriale** (ton, refus de
+> langage, rapport à la preuve et à l'incertitude) vit dans `doctrine/editoriale.md` ; les règles
+> de copy du moteur de compatibilité dans `doctrine/positionnement.md`. Distincte du manifeste
+> (le pourquoi fondateur) : ici, l'identité dans le marché.
 
-## Promesse
+## La promesse
 
-Traduire des données publiques dispersées en **implications concrètes** pour une personne
-ou un foyer, dans un lieu donné et à un horizon donné.
-
-## Territoire de marque
-
-futur•e se situe à l'intersection de quatre registres :
-
-- la **rigueur** des données publiques,
-- la **lisibilité** d'un bon travail éditorial,
-- l'**utilité** d'un outil d'aide à la projection,
-- la **sensibilité** d'un produit qui parle d'une vie réelle, pas d'un système abstrait.
+Les données publiques répondent rarement à la question que les gens se posent vraiment. Pas
+« quel sera le climat de cette commune en 2050 ? », mais « est-ce un bon endroit pour construire
+ma vie ? ». futur•e existe pour faire cette traduction : transformer des données publiques
+dispersées en **implications concrètes** pour une personne, un foyer, un lieu, un horizon.
 
 Le produit raconte moins « le climat » que ses **conséquences situées** : une force qui
 reconfigure des conditions de vie, des choix résidentiels, des arbitrages économiques, des
-habitudes, des vulnérabilités et des possibles.
+vulnérabilités et des possibles. C'est la colonne vertébrale de tout le reste (modules, cartes,
+comparateur, langage).
 
-## Ton
+## Contre quoi futur•e se construit
 
-Calme, adulte, net. Pas catastrophiste, pas ironique, pas professoral, pas corporate, pas
-techno-solutionniste, pas militant. Positivement : la voix d'un éditorialiste de qualité qui
-parle à un lecteur intelligent. Direct sans être brutal, précis sans être technique, engagé
-dans la clarté sans être engagé dans un camp.
+Tout positionnement a un adversaire. Le nôtre n'est pas le changement climatique : c'est **la
+décision de vie prise avec des informations éclatées**. Devoir recouper seul dix sites publics
+pour comprendre un territoire. Les comparateurs qui notent une ville sans dire ce qu'on y risque.
+Les outils qui affichent des données sans aider à décider. futur•e se construit contre cet écart
+entre l'abondance des données et la solitude de la décision.
 
-## Rapport à la preuve
+## La décision, pas la compréhension
 
-Chaque module, chaque projection, **chaque affirmation significative doit pouvoir renvoyer à
-une source identifiable.** futur•e ne vit que si sa crédibilité est solide. La qualité
-d'écriture ne doit jamais maquiller la faiblesse d'un fond.
+futur•e n'aide pas à **comprendre le climat**. Il aide à **prendre une décision de vie malgré
+l'incertitude**. C'est plus radical, et c'est le vrai différenciant : la donnée n'est pas la fin,
+l'arbitrage l'est.
 
-## Rapport à l'incertitude
+## Territoire de marque : trois mondes qui ne se rencontrent pas
 
-L'incertitude fait partie du produit. Distinguer clairement :
+futur•e existe parce que trois mondes se tournent le dos :
 
-- ce qui est **observé**,
-- ce qui est **modélisé**,
-- ce qui est **projeté** selon un scénario,
-- ce qui est une **interprétation** éditoriale fondée,
-- ce qui reste **trop fragile** pour être affirmé.
+- les **données publiques** sont rigoureuses mais inhabitables ;
+- les **outils numériques** sont pratiques mais superficiels ;
+- les **médias** racontent le climat mais rarement ses implications personnelles.
 
-## Ce que nous refusons d'écrire
-
-Les automatismes du discours climat, vidés de sens : « Face à l'urgence climatique… »,
-« Il est grand temps de… », « 10 gestes simples pour… », « Il ne tient qu'à vous de… »,
-« Grâce à notre algorithme propriétaire… », « Transformez votre anxiété en action… ».
-futur•e se construit **contre** cette facilité de langage. (Règles détaillées dans
-`doctrine/editoriale.md`.)
+futur•e tient à la jointure des trois : la **rigueur** de la donnée, la **lisibilité** d'un bon
+travail éditorial, l'**utilité** d'un outil de projection, la **sensibilité** d'un produit qui
+parle d'une vie réelle, pas d'un système abstrait.
 
 ## Positionnement implicite
 
-Un croisement entre la rigueur d'un rapport public, l'élégance d'un magazine exigeant,
-l'utilité d'un outil numérique et l'intimité d'un guide personnalisé. **Pas un assistant
-climat, pas une app green, pas un média engagé.** Quelque chose de plus sobre, plus
-construit, plus habitable : une couche de traduction, un produit de projection personnelle,
+**Pas un assistant climat, pas une app green, pas un média engagé.** Quelque chose de plus sobre,
+plus construit, plus habitable : une couche de traduction, un produit de projection personnelle,
 une mise en récit disciplinée de données publiques.
+
+## Ton
+
+Calme, adulte, net. La voix d'un éditorialiste de qualité qui parle à un lecteur intelligent :
+direct sans être brutal, précis sans être technique, engagé dans la clarté sans l'être dans un
+camp. Les refus de langage (formules climat creuses, culpabilisation, tiret cadratin) sont
+détaillés dans `doctrine/editoriale.md`.
+
+---
+
+> **Nous ne produisons pas de nouvelles données. Nous changeons ce que les données permettent de
+> décider.**
 
 ## Liens
 
-Pourquoi : `vision/manifeste.md`. À qui : `vision/archetype-lecteur.md`. Règles de voix et
-de copy : `doctrine/editoriale.md`, `doctrine/positionnement.md`. Honnêteté du signal :
-`doctrine/interface.md`.
+Pourquoi futur•e existe : `vision/manifeste.md`. À qui : `vision/archetype-lecteur.md`. Posture
+éditoriale (ton, preuve, incertitude, refus de langage) : `doctrine/editoriale.md`. Règles de
+copy du moteur de compatibilité : `doctrine/positionnement.md`. Honnêteté du signal :
+`doctrine/interface.md`. Le moat (la transformation, pas la donnée) : `adr/ADR-0002`.
