@@ -200,26 +200,32 @@ function glass(extra = {}) {
   };
 }
 
-function dedupeTensions(tensions) {
+// Famille « vie / territoire » : les questions en tension qui ne sont ni climat ni
+// risque (calme, transports, croissance, vie locale, départ de la ville). Sans
+// règle de diversité, les questions climat (prioritaires et nombreuses) saturent
+// les 4 slots et celles-ci ne surfacent jamais. On leur RÉSERVE un slot.
+const TERRITORY_TENSION_IDS = new Set([
+  'calme_infra',
+  'tc_sansvoiture',
+  'croissance_transformation',
+  'vielocale_reelle',
+  'quitter_ville',
+]);
+
+// Dédup par préfixe d'id (avant le premier « _ ») : évite 5 variantes « Acheter à X ? ».
+function dedupeByPrefix(tensions) {
   const seen = new Set();
   const result = [];
-
   for (const tension of tensions) {
     const key = tension.id.split('_')[0];
-    if (seen.has(key)) {
-      continue;
-    }
-
+    if (seen.has(key)) continue;
     seen.add(key);
     result.push(tension);
-
-    if (result.length >= 4) {
-      break;
-    }
   }
-
   return result;
 }
+
+const MAX_TENSIONS = 4;
 
 function buildTensions(catalog, categories) {
   const safeCategories =
@@ -236,20 +242,46 @@ function buildTensions(catalog, categories) {
     )
     .sort((a, b) => a.priority - b.priority);
 
-  const result = dedupeTensions(matching);
+  const deduped = dedupeByPrefix(matching);
+  const isTerritory = (t) => TERRITORY_TENSION_IDS.has(t.id);
+  const bestTerritory = deduped.find(isTerritory) ?? null;
 
+  // Règle de diversité : le climat reste dominant (3 slots), mais si une question
+  // « vie / territoire » s'applique, on lui garantit le dernier slot plutôt que
+  // de laisser une 4e question climat le prendre.
+  const result = [];
+  for (const tension of deduped) {
+    if (result.length >= MAX_TENSIONS) break;
+    const reserveLastForTerritory =
+      result.length === MAX_TENSIONS - 1 &&
+      bestTerritory &&
+      !result.some(isTerritory) &&
+      !isTerritory(tension);
+    if (reserveLastForTerritory) continue; // on saute cette question climat pour réserver le slot
+    result.push(tension);
+  }
+  if (
+    result.length < MAX_TENSIONS &&
+    bestTerritory &&
+    !result.some(isTerritory)
+  ) {
+    result.push(bestTerritory);
+  }
+
+  // Complément si moins de 4 questions ont matché.
+  for (const t of deduped) {
+    if (result.length >= MAX_TENSIONS) break;
+    if (!result.includes(t)) result.push(t);
+  }
   for (const id of FALLBACK_TENSION_IDS) {
-    if (result.length >= 4) {
-      break;
-    }
-
+    if (result.length >= MAX_TENSIONS) break;
     const fallback = catalog.find((item) => item.id === id && item.is_active);
     if (fallback && !result.find((item) => item.id === fallback.id)) {
       result.push(fallback);
     }
   }
 
-  return result.slice(0, 4);
+  return result.slice(0, MAX_TENSIONS);
 }
 
 function formatIndicatorValue(value, digits = 0) {
@@ -1235,12 +1267,25 @@ export default function FutureELanding() {
     }
 
     const inseeCode = nextCommune.citycode || matchedRow?.insee_code || null;
-    const categories =
-      matchedRow?.categories && matchedRow.categories.length > 0
-        ? matchedRow.categories
-        : inseeCode
-          ? deriveCategories(inseeCode)
-          : ['all'];
+    // Catégorisation manuelle (44 communes affinées à la main) prioritaire ; sinon
+    // on tire les catégories de la VRAIE donnée commune via /api/landing-signals
+    // (index A), au lieu du préfixe département qui laissait dormir le catalogue.
+    let categories: string[];
+    if (matchedRow?.categories && matchedRow.categories.length > 0) {
+      categories = matchedRow.categories;
+    } else if (inseeCode) {
+      try {
+        const res = await fetch(`/api/landing-signals?insee=${inseeCode}`);
+        const payload = res.ok ? await res.json() : null;
+        categories = Array.isArray(payload?.categories) && payload.categories.length > 0
+          ? payload.categories
+          : deriveCategories(inseeCode); // repli dept si l'endpoint échoue
+      } catch {
+        categories = deriveCategories(inseeCode);
+      }
+    } else {
+      categories = ['all'];
+    }
 
     // usedFallback controls generic vs contextual copy: false when we have
     // meaningful categories (either from DB or derived from dept code).
@@ -1398,6 +1443,7 @@ export default function FutureELanding() {
           driasContext: buildDriasContext(commune, communeIndicators),
           georisquesContext: buildGeorisquesContext(communeGeorisques),
           tension,
+          inseeCode: communeMeta?.inseeCode ?? null,
           fallbackAnswer: supabaseAnswer,
         }),
       });

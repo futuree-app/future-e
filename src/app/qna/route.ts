@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { getCommuneEntry, buildTerritorySignals } from "@/lib/comparateur-vie";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
@@ -48,6 +49,7 @@ Rules:
 - Do not invent precise local data that is not provided.
 - Use the commune name naturally.
 - If the answer is based on generic context rather than real local evidence, make that explicit in the detail.
+- "territory_signals", when present, are QUALITATIVE measured indicators for THIS commune (noise exposure, public transport, local life, demographic trend, industrial exposure, nature, sunlight, train station). Treat them as real local evidence and ground your answer in them. They carry levels and named facts, never exact figures — so never quote a number that is not given, and never upgrade a qualitative level into a false precise statistic.
 - Prefer strong verbs and concrete tradeoffs over abstract framing.
 - Avoid boilerplate phrases like "les données disponibles ici restent générales" unless strictly necessary.
 - The nuance belongs in the detail, not in the verdict.
@@ -167,6 +169,19 @@ export async function POST(request: Request) {
     );
   }
 
+  // Signaux territoire (index A) pour ancrer les questions hors climat/risque
+  // (calme, transports, croissance, vie locale…) sans que Claude invente.
+  // Absent (arrondissements Paris/Lyon/Marseille, ou échec) = on n'injecte rien.
+  let territorySignals: Record<string, unknown> | null = null;
+  if (inseeCode) {
+    try {
+      const entry = await getCommuneEntry(String(inseeCode));
+      if (entry) territorySignals = buildTerritorySignals(entry);
+    } catch {
+      territorySignals = null;
+    }
+  }
+
   const userPrompt = {
     user_profile: {
       commune,
@@ -184,8 +199,9 @@ export async function POST(request: Request) {
       editorial_base_answer: fallbackAnswer ?? null,
       drias_projection: driasContext ?? null,
       georisques_summary: georisquesContext ?? null,
+      territory_signals: territorySignals,
       note:
-        "futur•e may provide commune categories, a base editorial answer, commune-level DRIAS projections, and a Géorisques summary of official territorial risks. Use them when present, but do not pretend to have address-level or household-level data.",
+        "futur•e may provide commune categories, a base editorial answer, commune-level DRIAS projections, a Géorisques summary of official territorial risks, and qualitative territory_signals (noise, public transport, local life, demographics, industrial exposure, nature, sunlight, train). Use them when present, but do not pretend to have address-level or household-level data.",
     },
     objective:
       "Generate a landing-page style direct answer that feels specific to the commune, the territorial categories, the available DRIAS projections, and any official Géorisques signals, while staying honest about uncertainty.",

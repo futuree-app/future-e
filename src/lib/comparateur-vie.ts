@@ -11,6 +11,12 @@ import {
   type SoftZone,
 } from "@/lib/geo-zones";
 import { getLittoralIndex, type LittoralSummary } from "@/lib/littoral";
+import {
+  deptRegionalCategories,
+  deptFromInsee,
+  DEPT_MEDITERRANEE,
+  DEPT_LITTORAL_ATLANTIQUE,
+} from "@/lib/commune-categories";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — moteur de compatibilité déterministe (V1).
@@ -600,6 +606,172 @@ export async function getTerritoryContext(insee: string): Promise<TerritoryConte
   else role = "agglo";
 
   return { entry, uuLabel, uuPop, role };
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// CATÉGORIES ÉDITORIALES DE L'ACCUEIL (landing) — depuis la VRAIE donnée commune
+//
+// Remplace l'ancien fallback par préfixe département (commune-categories.ts), qui
+// ne savait émettre que 5 étiquettes et laissait dormir l'essentiel du catalogue
+// de tensions. Ici on lit l'entrée d'index (commune-level) pour émettre le
+// vocabulaire que tensions_catalog attend réellement.
+//
+// DOCTRINE : ces catégories CHOISISSENT un angle (quelle question / quelle carte
+// proposer pour donner envie), elles n'affichent JAMAIS un chiffre. Les seuils
+// sont donc volontairement tolérants — pas de fausse précision. La couche
+// régionale (climat méditerranéen, front albopictus) reste au département, qui
+// est la bonne granularité pour ces signaux-là.
+// ════════════════════════════════════════════════════════════════════════════
+
+export function deriveCategoriesFromEntry(c: IndexCommune): string[] {
+  const cats = new Set<string>(['all']); // les 5 questions génériques restent dispo
+
+  // Régional (département = bonne maille) : climat méditerranéen, moustique tigre.
+  for (const cat of deptRegionalCategories(c.insee)) cats.add(cat);
+
+  const dept = deptFromInsee(c.insee);
+  const lat = c.lat;
+  const sud = lat != null && lat < 45.3; // axe canicule : framing « sud » vs « nord »
+
+  // ── Côte : distance réelle, plus le préfixe département ─────────────────────
+  if (c.distance_cote_km != null && c.distance_cote_km <= 5) {
+    cats.add('littoral');
+    if (DEPT_MEDITERRANEE.has(dept)) cats.add('littoral_mediterranee');
+    else if (DEPT_LITTORAL_ATLANTIQUE.has(dept)) cats.add('littoral_atlantique');
+  }
+
+  // ── Montagne : altitude propre OU proximité au relief ──────────────────────
+  if ((c.altitude != null && c.altitude >= 800) ||
+      (c.relief_proximite != null && c.relief_proximite >= 70)) {
+    cats.add('montagne');
+  }
+
+  // ── Densité : urbain dense (sud/nord) vs rural/périurbain ───────────────────
+  // densite null = arrondissement (Paris/Lyon) présent dans l'index → cœur urbain.
+  const dense = c.densite == null || c.densite >= 1500;
+  if (dense) {
+    cats.add(sud ? 'urbain_dense_sud' : 'urbain_dense_nord');
+  } else {
+    cats.add('rural_peri_urbain');
+    // Dépendance à la voiture : percentile haut = peu d'alternatives.
+    if (c.mobilite && c.mobilite.dependance >= 60) cats.add('periurbain_dependance_auto');
+  }
+
+  // ── Caractère rural : agricole / forestier (couvert OSO, pas pression_agricole,
+  //    qui ne traque pas la ruralité). Réservé aux communes peu denses.
+  if (!dense && c.nature?.composition) {
+    const comp = c.nature.composition;
+    if ((comp.agricole ?? 0) >= 30) cats.add('rural_agricole');
+    if ((comp.foret ?? 0) >= 35) cats.add('rural_forestier');
+  }
+
+  // ── Exposition industrielle marquée → vallée industrielle ───────────────────
+  // score bas = exposé ; on exige une source réellement préoccupante.
+  if (c.expoIndustrielle &&
+      c.expoIndustrielle.score <= 30 &&
+      (c.expoIndustrielle.sourceDominante === 'seveso_haut' ||
+       c.expoIndustrielle.sourceDominante === 'seveso_bas' ||
+       c.expoIndustrielle.sourceDominante === 'ied')) {
+    cats.add('vallee_industrielle');
+  }
+
+  // ── Catégories des nouvelles questions en tension (validées Editorial + porteur).
+  //    Chacune ne se déclenche que là où la tension EST en jeu (l'angle, pas le chiffre).
+  // Calme : exposition au bruit d'infra notable (score bas = exposé).
+  if (c.calmeSonore && c.calmeSonore.score <= 40) cats.add('expose_bruit');
+  // Vivre sans voiture : réseau de transports en commun crédible à pied.
+  if (c.reseauLocal && (c.reseauLocal.tram || c.reseauLocal.metro || c.reseauLocal.acces >= 60)) {
+    cats.add('reseau_tc');
+  }
+  // Commune qui change : forte croissance démographique récente.
+  if (c.demographie && c.demographie.croissance >= 80) cats.add('croissance_forte');
+  // Vie locale en jeu : tissu social faible, hors cœur urbain (où la question ne se pose pas).
+  if (!dense && c.vieLocale && c.vieLocale.score <= 30) cats.add('faible_vie_locale');
+
+  return Array.from(cats);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// SIGNAUX TERRITOIRE pour /qna — traduit l'index A en faits QUALITATIFS honnêtes
+//
+// Sert à répondre aux questions en tension qui ne sont ni climat ni risque (calme,
+// transports, croissance, vie locale…) SANS que Claude invente : on lui donne le
+// signal mesuré, en niveau et en fait nommable, JAMAIS le percentile brut (doctrine
+// « on ne raconte que ce qu'on mesure », et le signal reste gaté). null/absent =
+// on ne dit rien plutôt qu'inventer.
+// ════════════════════════════════════════════════════════════════════════════
+
+const SOURCE_BRUIT_FR: Record<string, string> = {
+  auto: "un grand axe routier",
+  rail: "une voie ferrée",
+  aero: "un aéroport",
+};
+const SOURCE_INDUS_FR: Record<string, string> = {
+  seveso_haut: "un site industriel Seveso seuil haut",
+  seveso_bas: "un site industriel Seveso seuil bas",
+  ied: "une grande installation industrielle classée",
+  industrie: "un site industriel",
+};
+
+export function buildTerritorySignals(c: IndexCommune): Record<string, unknown> {
+  const s: Record<string, unknown> = {};
+
+  if (c.calmeSonore) {
+    const sc = c.calmeSonore.score;
+    s.calme = {
+      niveau: sc >= 70 ? "plutôt calme" : sc >= 40 ? "exposition sonore modérée" : "exposé au bruit d'infrastructures",
+      source_proche: c.calmeSonore.sourceDominante ? SOURCE_BRUIT_FR[c.calmeSonore.sourceDominante] ?? null : null,
+    };
+  }
+
+  if (c.reseauLocal) {
+    const a = c.reseauLocal.acces;
+    s.transports_commun = {
+      desservie: true,
+      tramway: c.reseauLocal.tram,
+      metro: c.reseauLocal.metro,
+      niveau: a >= 70 ? "réseau dense à portée de marche" : a >= 40 ? "réseau correct à portée de marche" : "réseau limité",
+    };
+  } else {
+    s.transports_commun = { desservie: false };
+  }
+
+  if (c.vieLocale) {
+    const sc = c.vieLocale.score;
+    s.vie_locale = { niveau: sc >= 70 ? "animée" : sc >= 40 ? "moyenne" : "réduite" };
+  }
+
+  if (c.demographie) {
+    const t = c.demographie.taux_total;
+    s.demographie = {
+      tendance: t == null ? null : t > 0.05 ? "forte croissance récente" : t > 0.01 ? "croissance" : t < -0.01 ? "déclin" : "stable",
+      recit_nouveaux_arrivants: c.demographie.recit ?? null,
+    };
+  }
+
+  if (c.expoIndustrielle && c.expoIndustrielle.score <= 40) {
+    s.exposition_industrielle = {
+      niveau: c.expoIndustrielle.score <= 25 ? "notable" : "modérée",
+      source_proche: c.expoIndustrielle.sourceDominante ? SOURCE_INDUS_FR[c.expoIndustrielle.sourceDominante] ?? null : null,
+    };
+  }
+
+  if (c.nature) {
+    const sc = c.nature.score;
+    s.nature = { niveau: sc >= 70 ? "fort caractère naturel" : sc >= 40 ? "nature présente" : "territoire peu naturel" };
+  }
+
+  if (c.rayonnement_pct != null) {
+    s.ensoleillement = {
+      niveau: c.rayonnement_pct >= 66 ? "très ensoleillé" : c.rayonnement_pct >= 33 ? "moyennement ensoleillé" : "peu ensoleillé",
+    };
+  }
+
+  if (c.transport && c.transport.gare_nom) {
+    s.train = { gare: c.transport.gare_nom, desserte: c.transport.desserte >= 60 ? "bien reliée" : "desserte limitée" };
+  }
+
+  return s;
 }
 
 // ── Bassins d'emploi (ZE2020) : nom + effectif salarié ────────────────────────
