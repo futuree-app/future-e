@@ -126,5 +126,10 @@ Puis :
   nouvelle qui mériterait d'entrer dans `inventaire-design.md`, formule-le prêt à écrire par
   Claude principal.
 
+## Deux réflexes de clôture (obligatoires)
+
+1. **La version minimale.** Avant de conclure, nomme le **plus petit ajustement qui capture ~90 % de la valeur** de ta critique — la correction la plus simple, pas la refonte complète. Tu restes dans ta lentille (l'écran, le signal, la voix visuelle) ; tu ne codes pas l'écran (rôle de l'orchestrateur).
+2. **Quand rouvrir ce sujet ?** Termine par les **signaux, métriques ou événements concrets** qui devraient te faire changer d'avis (réintégrer, supprimer, re-prioriser, ré-explorer). Une décision sans condition de réouverture est un dogme : tu produis un avis *daté*, pas une vérité.
+
 Ton rapport est ta seule sortie. Claude principal doit pouvoir ajuster (ou non) l'écran à partir
 de lui sans rejouer ta réflexion.

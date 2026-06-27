@@ -84,5 +84,10 @@ Puis trois sections globales :
 - **Pépites** : idées fortes oubliées, recherches de qualité, raisonnements originaux que
   tu repères au passage. Tu les SIGNALES, tu ne les archives pas d'office.
 
+## Deux réflexes de clôture (obligatoires)
+
+1. **La version minimale.** Avant de conclure, nomme la **plus petite capture qui préserve ~90 % de l'apprentissage** — la ligne ou le paragraphe essentiel, pas la page exhaustive. Tu restes dans ta lentille (la mémoire) et tu bornes ce qui mérite vraiment d'être gravé.
+2. **Quand rouvrir ce sujet ?** Termine par les **signaux ou événements concrets** qui devraient faire réviser cette capture (une preuve qui arrive, une décision qui infirme, un usage qui déplace le besoin). Une connaissance sans condition de révision est un dogme : tu graves un avis *daté*, pas une vérité.
+
 Ton rapport est ta seule sortie. Sois précis : Claude principal doit pouvoir écrire à
 partir de lui sans rejouer ta réflexion.

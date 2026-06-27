@@ -110,6 +110,28 @@ d'engager selon le profil qui lit.
 | résilience | acceptable seulement si clairement expliqué |
 | impact | préférer « effet », « conséquence », « ce que ça change » |
 
+## On ne raconte que ce qu'on mesure exactement
+
+Règle générale, dont le reste de cette page n'est qu'une déclinaison : **un label, une glose, une
+attribution ne doivent jamais promettre une grandeur que le calcul ne contient pas.** Si le critère
+mesure A, on ne le présente pas comme B, même si B est « du même genre » et plus vendeur. Le nom
+affiché doit décrire ce qui entre réellement dans le score, pas l'intention qu'on aimerait servir.
+
+Pourquoi c'est un invariant et pas un détail : c'est la promesse centrale de futur•e (la décision se
+prend sur du vrai). Le jour où l'étiquette ment, même « un peu », tout le reste devient suspect — et
+le lecteur n'a aucun moyen de savoir *quel* chiffre est honnête.
+
+Cas d'école (2026-06-27). Le critère `ensoleillement_recherche` **affichait** « ensoleillé » alors
+qu'il **mesurait** la chaleur d'été + le faible volume de pluie : deux communes au même été chaud et
+sec mais à l'ensoleillement opposé (crachin vs ciel clair) obtenaient le même score « soleil ». Le
+volume de pluie (mm) n'est pas l'insolation ni la fréquence de pluie. Correctif : soit dire ce qu'on
+mesure (« été chaud et sec »), soit intégrer la vraie donnée d'ensoleillement — jamais garder le label
+faux. Cf. `docs/cadrage-ensoleillement-attribution.md`.
+
+Test pratique avant d'afficher un label : *« si un lecteur ouvrait le calcul, se sentirait-il trahi
+par le mot que j'emploie ? »* Si oui, c'est le mot qui doit changer, pas le calcul qu'on espère qu'on
+ne regardera pas.
+
 ## Signature territoriale : distinctive ET identitaire
 
 Tout élément affiché pour décrire un lieu doit être **distinctif ET identitaire** : une

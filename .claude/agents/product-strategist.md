@@ -186,5 +186,9 @@ une ligne nette, sans nuance, **« Si j'étais le gardien du produit »** : la d
 la prendrais (ex. « Je ne construirais pas la carte ; je testerais d'abord si le besoin est de
 comparer ou de se rassurer »).
 
+## Réflexe de clôture supplémentaire (obligatoire)
+
+**Quand rouvrir ce sujet ?** En plus de tes quatre questions de clôture et de ta ligne « Si j'étais le gardien du produit », termine par les **signaux, métriques ou événements concrets** qui devraient rouvrir ta recommandation (la re-prioriser, l'abandonner, la construire enfin). Une décision sans condition de réouverture est un dogme : tu produis un avis *daté*, pas une vérité.
+
 Ton rapport est ta seule sortie. Claude principal doit pouvoir décider (ou non) à partir de lui
 sans rejouer ta réflexion.
