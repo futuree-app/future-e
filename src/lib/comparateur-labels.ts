@@ -12,7 +12,7 @@
 export const PREFERENCE_LABELS: Record<string, string> = {
   faible_chaleur: "des étés plus frais",
   douceur_climat: "un climat doux",
-  ensoleillement_recherche: "du soleil et de la chaleur",
+  ensoleillement_recherche: "un climat plus ensoleillé",
   faible_secheresse: "des sols peu exposés à la sécheresse",
   faible_risque_feu: "un faible risque de feu",
   faible_precip_extremes: "moins de pluies intenses",
@@ -52,7 +52,7 @@ export const PREFERENCE_TOOLTIP: Record<string, string | null> = {
   faible_dependance_auto: "Part des trajets domicile-travail faits autrement qu'en voiture.",
   cadre_calme: "Environnement peu dense, propice à un rythme plus calme.",
   douceur_climat: "Hivers tempérés, étés sans excès.",
-  ensoleillement_recherche: "Plus chaud et plus sec.",
+  ensoleillement_recherche: "Plus ensoleillé.",
   proximite_mer: "Accès rapide à la côte.",
   eviter_isolement: "Présence d'un bassin de vie offrant services et activités du quotidien.",
   nature: "Forêts, prairies et milieux naturels autour.",

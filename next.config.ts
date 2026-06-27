@@ -19,11 +19,16 @@ const nextConfig: NextConfig = {
     "/rapport/quartier": [
       "./data/comparateur-index.json",
       "./data/residences-secondaires.json",
+      "./data/communes-baignade.json",
     ],
     "/api/synthesize-quartier": [
       "./data/comparateur-index.json",
       "./data/residences-secondaires.json",
+      "./data/communes-baignade.json",
     ],
+    // AskFuture : le socle d'enrichissement lit la baignade (lib/baignade.ts).
+    "/api/ask": ["./data/communes-baignade.json"],
+    "/api/ask/context": ["./data/communes-baignade.json"],
   },
   async rewrites() {
     return [

@@ -32,7 +32,7 @@ import { getLittoralIndex, type LittoralSummary } from "@/lib/littoral";
 export const PREFERENCE_KEYS = [
   "faible_chaleur",            // = rechercher la fraîcheur
   "douceur_climat",            // hivers tempérés + étés non extrêmes
-  "ensoleillement_recherche",  // été chaud + peu de pluie (proxy soleil)
+  "ensoleillement_recherche",  // rayonnement solaire réel (ERA5)
   "faible_secheresse",
   "faible_risque_feu",
   "faible_precip_extremes",
@@ -381,6 +381,11 @@ export type IndexCommune = {
   // d'une montagne » (Grenoble 95, Pau 69) de la plaine (Toulouse 0), là où
   // l'altitude propre échoue (Grenoble est à 214 m). cf. scripts/add-relief-proximite.mjs.
   relief_proximite?: number | null;
+  // Ensoleillement réel : rayonnement solaire reçu au sol (ERA5-Land, indice
+  // J/m²/j) et son percentile national (0–100, haut = plus ensoleillé). Remplace
+  // l'ancien proxy faux (été chaud + peu de pluie). cf. scripts/populate-rayonnement-*.
+  rayonnement?: number | null;
+  rayonnement_pct?: number | null;
   clim: Record<string, number | null>;
   pct: Record<string, number | null>;
   viv?: Record<string, number | null>;
@@ -967,12 +972,11 @@ function subScore(key: PreferenceKey, c: IndexCommune): number | null {
       const s = c.pct.NORTX35D_yr == null ? 50 : 100 - c.pct.NORTX35D_yr;
       return Math.round(0.6 * w + 0.4 * s);
     }
-    case "ensoleillement_recherche": {
-      const summer = c.pct.NORTMm_seas_JJA;
-      if (summer == null) return null;
-      const dry = c.pct.NORRR_yr == null ? 50 : 100 - c.pct.NORRR_yr;
-      return Math.round(0.45 * summer + 0.55 * dry);
-    }
+    case "ensoleillement_recherche":
+      // Rayonnement solaire réel (ERA5), percentile national. Remplace l'ancien
+      // proxy FAUX (été chaud + peu de pluie, qui ne mesurait pas le soleil).
+      // Récit qualitatif (très/moyennement/peu ensoleillé), jamais d'heures.
+      return c.rayonnement_pct ?? null;
     case "air_sain": {
       const pm = c.vivpct?.pm25;
       if (pm == null) return null;
@@ -1104,7 +1108,7 @@ export const THEME_ORDER: { id: string; titre: string; gp: string; court: string
 const DIMENSIONS: ComparaisonDim[] = [
   { id: "etes_frais", label: "Étés frais", themeId: "climat", key: "faible_chaleur", paliers: ["Étés frais", "Étés tempérés", "Étés chauds"], gp: "les étés frais", forte: "ses étés frais", aide: "À quel point les étés restent supportables côté chaleur.", risque: false, directionnel: true },
   { id: "douceur", label: "Douceur du climat", themeId: "climat", key: "douceur_climat", paliers: ["Climat doux", "Climat contrasté", "Hivers rigoureux"], gp: "la douceur du climat", forte: "la douceur de son climat", aide: "Des hivers tempérés et des étés sans excès.", risque: false, directionnel: true },
-  { id: "ensoleillement", label: "Ensoleillement", themeId: "climat", key: "ensoleillement_recherche", paliers: ["Chaud et ensoleillé", "Ensoleillement modéré", "Frais et peu ensoleillé"], gp: "l'ensoleillement", forte: "son ensoleillement", aide: "Le caractère ensoleillé et chaud du climat l'été. Affiché sans gagnant : c'est une préférence, pas un avantage universel.", risque: false, directionnel: false },
+  { id: "ensoleillement", label: "Ensoleillement", themeId: "climat", key: "ensoleillement_recherche", paliers: ["Très ensoleillé", "Moyennement ensoleillé", "Peu ensoleillé"], gp: "l'ensoleillement", forte: "son ensoleillement", aide: "Le rayonnement solaire reçu au sol (ERA5), exprimé sans nombre d'heures. Affiché sans gagnant : c'est une préférence, pas un avantage universel.", risque: false, directionnel: false },
   { id: "inondation", label: "Inondation", themeId: "risques", key: "faible_risque_inondation", paliers: ["Risque d'inondation faible", "Risque modéré", "Risque élevé"], gp: "le risque d'inondation", forte: "son faible risque d'inondation", aide: "Ce que dit l'historique d'inondations du territoire.", risque: true, directionnel: true },
   { id: "feu", label: "Feu", themeId: "risques", key: "faible_risque_feu", paliers: ["Risque de feu faible", "Risque modéré", "Risque élevé"], gp: "le risque de feu", forte: "son faible risque de feu", aide: "L'exposition du secteur au risque d'incendie.", risque: true, directionnel: true },
   { id: "pluies", label: "Pluies intenses", themeId: "risques", key: "faible_precip_extremes", paliers: ["Peu de pluies intenses", "Pluies intenses modérées", "Pluies intenses fréquentes"], gp: "les pluies intenses", forte: "ses pluies intenses rares", aide: "La fréquence des épisodes de pluies très intenses.", risque: true, directionnel: true },
@@ -1737,7 +1741,7 @@ function assignSignaux(
 const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> = {
   faible_chaleur: "étés plus frais",
   douceur_climat: "climat doux, hivers tempérés",
-  ensoleillement_recherche: "plus chaud et plus sec, ensoleillé",
+  ensoleillement_recherche: "plus ensoleillé",
   faible_secheresse: "sols peu exposés à la sécheresse",
   faible_risque_feu: "faible risque de feu",
   faible_precip_extremes: "pluies extrêmes rares",
@@ -1797,7 +1801,7 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
 const REASON_NEG: Record<PreferenceKey, string> = {
   faible_chaleur: "chaleur en hausse",
   douceur_climat: "hivers rudes ou étés marqués",
-  ensoleillement_recherche: "climat plus frais et humide",
+  ensoleillement_recherche: "moins ensoleillé",
   faible_secheresse: "sols exposés à la sécheresse",
   faible_risque_feu: "risque de feu notable",
   faible_precip_extremes: "pluies intenses fréquentes",

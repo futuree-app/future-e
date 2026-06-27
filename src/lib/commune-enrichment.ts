@@ -26,6 +26,7 @@ import {
   type GasparCatnatSummary,
 } from "@/lib/georisques";
 import { getLittoralSummary, type LittoralSummary } from "@/lib/littoral";
+import { getBaignadeSummary, type BaignadeSummary } from "@/lib/baignade";
 
 export type ClimatData = Awaited<ReturnType<typeof getClimatDataCommune>>;
 
@@ -37,12 +38,13 @@ export type EnrichmentResult = {
   georisques: GeorisquesSummary | null;
   catnat: GasparCatnatSummary | null;
   littoral: LittoralSummary | null;
+  baignade: BaignadeSummary;
 };
 
 export async function gatherCommuneEnrichment(
   insee: string,
 ): Promise<EnrichmentResult> {
-  const [ademeRes, driasRes, eauRes, vigieauRes, georisquesRes, catnatRes, littoralRes] =
+  const [ademeRes, driasRes, eauRes, vigieauRes, georisquesRes, catnatRes, littoralRes, baignadeRes] =
     await Promise.allSettled([
       getCommuneFullData(insee),
       getClimatDataCommune(insee),
@@ -51,6 +53,7 @@ export async function gatherCommuneEnrichment(
       getGeorisquesSummary(insee),
       getGasparCatnatSummary(insee),
       getLittoralSummary(insee),
+      getBaignadeSummary(insee),
     ]);
 
   return {
@@ -61,5 +64,6 @@ export async function gatherCommuneEnrichment(
     georisques: georisquesRes.status === "fulfilled" ? georisquesRes.value : null,
     catnat: catnatRes.status === "fulfilled" ? catnatRes.value : null,
     littoral: littoralRes.status === "fulfilled" ? littoralRes.value : null,
+    baignade: baignadeRes.status === "fulfilled" ? baignadeRes.value : null,
   };
 }

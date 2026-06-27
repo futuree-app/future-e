@@ -161,7 +161,7 @@ Votre rôle : traduire un projet de vie exprimé en langage libre vers une struc
 RÈGLES
 - Distinguez fortement ce qui ÉLIMINE (contrainte dure) de ce qui PONDÈRE (préférence). En cas de doute, préférez la préférence : on n'élimine que sur un critère explicite.
 - "proche de l'océan / de la mer" = contrainte dure (nearSea.active) UNIQUEMENT si c'est présenté comme indispensable. Sinon, préférence proximite_mer (poids 2 ou 3).
-- Climat perçu : distinguez "fuir la chaleur" (faible_chaleur), "rechercher la douceur" (douceur_climat, hivers tempérés), "rechercher le soleil / le chaud" (ensoleillement_recherche). "climat doux" et "agréable" relèvent de douceur_climat, pas de faible_chaleur.
+- Climat perçu : distinguez "fuir la chaleur" (faible_chaleur), "rechercher la douceur" (douceur_climat, hivers tempérés), "rechercher le soleil / l'ensoleillement" (ensoleillement_recherche, = rayonnement solaire, pas la chaleur). "climat doux" et "agréable" relèvent de douceur_climat, pas de faible_chaleur.
 - Inondation vs pluies (ne pas confondre) : "inondation / crue / zone inondable / débordement / ruissellement / sans risque d'inondation" → faible_risque_inondation (risque réel). "pluies intenses / orages violents / grosses averses / précipitations extrêmes" → faible_precip_extremes (pluie, pas inondation). Ne routez JAMAIS "inondation" vers faible_precip_extremes.
 - Nature vs calme (faux-ami à ne pas confondre) : "nature" = couvert naturel autour (forêts, prairies, milieux naturels) → nature. "calme / tranquille / peu de monde" = densité, ambiance → cadre_calme. "la campagne" est AMBIGU : selon la phrase, c'est souvent les DEUX (nature + cadre_calme) ; n'activez les deux que si le sens le porte, sinon le plus explicite. Ne confondez jamais "vert/forêts" (nature) avec "calme" (densité).
 - N'inventez aucune donnée. Sécurité, prix : hors périmètre, ne créez pas de préférence. L'ACCÈS aux écoles (collèges/lycées) et à une offre culturelle EST mesuré (acces_ecoles / acces_culture, voir LISTE et HORS-MESURE) ; seule leur QUALITÉ / VITALITÉ reste en horsMesure.
@@ -193,7 +193,7 @@ ANCRES GÉOGRAPHIQUES (zones / excludeZones) : règles spécifiques
 PRÉFÉRENCES DISPONIBLES (liste fermée)
 - faible_chaleur : étés plus frais, moins de canicules
 - douceur_climat : hivers tempérés, climat doux et agréable
-- ensoleillement_recherche : plus chaud et plus ensoleillé, sud
+- ensoleillement_recherche : plus ensoleillé (rayonnement solaire), sud
 - faible_secheresse : sols moins exposés à la sécheresse
 - faible_risque_feu : faible risque d'incendie
 - faible_precip_extremes : moins de pluies intenses / orages violents / épisodes de précipitations extrêmes (PAS le risque d'inondation réel)

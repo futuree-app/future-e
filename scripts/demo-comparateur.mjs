@@ -26,7 +26,7 @@ const PREF_DEFS={
   air_sain:{kind:'air'}, acces_soins:{kind:'soins'}, acces_services:{kind:'services'},
 };
 const POS={ faible_chaleur:'étés plus frais', douceur_climat:'climat doux',
-  ensoleillement_recherche:'plus chaud et ensoleillé', faible_secheresse:'sols peu exposés à la sécheresse',
+  ensoleillement_recherche:'plus ensoleillé', faible_secheresse:'sols peu exposés à la sécheresse',
   faible_risque_feu:'faible risque de feu', faible_precip_extremes:'pluies extrêmes rares',
   proximite_mer:(c)=>`à ${c.distance_cote_km} km de la côte`, cadre_calme:'cadre calme et habitable',
   eviter_isolement:(c)=>`vie locale réelle (${c.population?.toLocaleString('fr-FR')} hab.)`,

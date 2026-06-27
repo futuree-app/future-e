@@ -39,7 +39,7 @@ const COLUMN_MAP = {
   NORTX35D_yr: 'column08', // jours Tmax > 35°C / an
   NORTX30D_yr: 'column09', // jours Tmax > 30°C / an
   NORTR_yr: 'column10', // nuits tropicales (Tmin > 20°C) / an
-  NORRR_yr: 'column11', // précipitations annuelles (mm) — proxy ensoleillement/sécheresse perçue
+  NORRR_yr: 'column11', // précipitations annuelles (mm) — sécheresse perçue (l'ensoleillement vient désormais du rayonnement ERA5, cf. populate-rayonnement-*)
   NORRRq99_yr: 'column14', // précipitations remarquables p99 (mm)
   NORRx1d_yr: 'column15', // précip. max sur 1 jour (mm)
   NORIFM40_yr: 'column17', // jours d'indice météo feu > 40 / an
