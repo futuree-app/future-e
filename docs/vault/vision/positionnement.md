@@ -32,6 +32,15 @@ futur•e n'aide pas à **comprendre le climat**. Il aide à **prendre une déci
 l'incertitude**. C'est plus radical, et c'est le vrai différenciant : la donnée n'est pas la fin,
 l'arbitrage l'est.
 
+## Là où futur•e s'arrête
+
+futur•e prépare une décision de vie et la désanxiété ; il ne se substitue pas au ressenti ni à la
+visite. Le meilleur moment du produit est celui où il dit honnêtement ce qu'il ne sait pas et rend la
+main au réel (« passez une soirée dans chaque centre, l'attachement au lieu tranchera »). Cette
+frontière n'est pas un aveu de faiblesse : c'est la signature de confiance qui distingue futur•e d'un
+outil qui feint de tout trancher. **Préparer, pas remplacer.** (Observé au premier dogfood réel,
+Brest vs Lorient, 2026-06-27 — voir `paris.md` #6.)
+
 ## Territoire de marque : trois mondes qui ne se rencontrent pas
 
 futur•e existe parce que trois mondes se tournent le dos :

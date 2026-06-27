@@ -121,6 +121,82 @@ choisis est un moment d'achat. **Pari contesté en interne**, et c'est sa valeur
 
 ---
 
+## Pari #6 — Avant d'arbitrer, le lecteur veut savoir qu'aucune option n'est catastrophique
+
+Issu du premier dogfood réel (Brest vs Lorient, 2026-06-27). Reformulé après critique externe : le bon niveau
+n'est pas « la synthèse crée la valeur » (la synthèse n'est qu'un *véhicule*), mais le **changement d'état
+mental** qu'elle produit. Le lecteur arrive avec « et si je faisais une énorme erreur ? » et cherche d'abord
+à atteindre « ok, les trois options sont raisonnables » — *avant* de chercher le meilleur choix. Le bénéfice
+premier est un **écran anti-catastrophe** (un seuil rassurant), pas un classement. Ce qui a soulagé le couple,
+c'est « si La Rochelle est vivable, Lorient l'est confortablement » : une mise hors de danger, pas une
+préférence.
+
+Conséquence sur ce qu'on construit : un objet **borné et petit** (le lecteur est-il rassuré qu'aucune piste
+n'est désastreuse ?), pas « une meilleure synthèse » (vague et infini). À **prototyper et mesurer**, pas à
+ériger en colonne du produit.
+
+- **Statut** : non testé.
+- **Confiance** : faible — une anecdote forte (dogfood N=1, le fondateur, juge et partie), mais cohérente
+  avec `vision/archetype-lecteur.md` (le bénéfice est émotionnel : « être en paix avec sa décision »).
+- **Signal attendu** : les lecteurs cherchent/retiennent d'abord le rassurage (« aucune n'est un mauvais
+  choix ») avant le départage ; les retours qualitatifs citent ce moment comme le soulagement.
+- **Source de preuve** : conversations directes d'abord ; ensuite engagement (PostHog : le rassurage est-il
+  lu/retenu avant le classement, ou sauté ?).
+- **Critère de mort** : les lecteurs réclament d'emblée des chiffres bruts et le classement, et ignorent le
+  rassurage → le besoin premier est l'arbitrage, pas la mise hors de danger.
+- **Ce qu'on a appris** : —
+- **Dernière revue** : 2026-06-27.
+
+---
+
+## Pari #7 — Le besoin n'est pas la similarité, c'est l'ancrage (« ne pas repartir de zéro »)
+
+Issu du même dogfood. Le porteur a demandé « trouve des villes proches de Brest » ; il a fallu fabriquer une
+heuristique à la main. Reformulé après critique externe : le besoin réel n'est **pas** la similarité (qui
+appelle un algorithme, une distance, un score caché — exactement ce que l'invariant n°2 interdit), c'est
+**l'ancrage** : ne pas repartir d'une page blanche, partir de quelque chose qu'on connaît. Cet ancrage est
+plus général que « comme Brest » : similaire à mon quartier, à mon mode de vie, à là où j'habite aujourd'hui.
+
+Conséquence de doctrine : **bannir le mot « similaire »** dans toute incarnation. La bonne forme n'est pas un
+moteur autonome mais une **entrée** dans le moteur existant : « Explorer à partir d'une commune » / « Commencer
+par une commune que vous aimez ». Le moteur ne change pas, seule l'amorce change. À brancher sur le problème
+déjà OUVERT par le board (« constellation », « territoires-jumeaux »), sans rouvrir un chantier.
+
+- **Statut** : non testé.
+- **Confiance** : faible — un seul dogfood, mais converge avec une exploration Researcher déjà cadrée.
+- **Signal attendu** : récurrence de « pars de X » / « comme là où j'habite » dans les conversations / sondes ;
+  les lecteurs amorcent volontiers par une commune-ancre plutôt que par une page blanche.
+- **Source de preuve** : conversations et sondes du comparateur ; plus tard, part des sessions amorcées par
+  une commune-ancre.
+- **Critère de mort** : personne n'exprime ce besoin d'ancrage → l'amorce par commune n'apporte rien, la page
+  blanche suffit.
+- **Ce qu'on a appris** : —
+- **Dernière revue** : 2026-06-27.
+
+---
+
+## Pari #8 — La délibération de couple est un objet produit distinct
+
+Issu du même dogfood (« ma conjointe et moi »). Préférences qui peuvent diverger, à peser ensemble.
+L'archétype et le produit sont centrés sur un décideur unique. Objet possible « notre arbitrage » (partagé) —
+à peser, pas à trancher.
+
+- **Statut** : non testé.
+- **Confiance** : faible — un seul cas, celui du fondateur.
+- **Signal attendu** : des lecteurs qui réclament de pondérer / confronter deux jeux de préférences.
+- **Source de preuve** : conversations directes ; plus tard, demandes explicites de comparaison de préférences.
+- **Critère de mort** : les décisions observées sont quasi toujours mono-décideur, ou le « partage » n'ajoute
+  aucune valeur perçue → détail d'usage, pas un objet produit.
+- **Ce qu'on a appris** : —
+- **Dernière revue** : 2026-06-27.
+
+> Les besoins de **données** révélés par ce dogfood (ensoleillement/jours de pluie, eaux de baignade
+> decision-grade) ne sont pas des paris : un pari est une croyance sur laquelle on a déjà engagé du travail.
+> Ces données ne sont pas intégrées — elles vivent dans `recherches/inventaire-sources.md` (« Gaps validés par
+> une décision réelle ») et deviendront éventuellement des paris quand leur intégration sera engagée.
+
+---
+
 ## L'agent viendra après la page (pas l'inverse)
 
 Ce registre est volontairement **sans agent**. Le « gardien de la calibration » (provisoirement

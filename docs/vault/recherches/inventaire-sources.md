@@ -174,6 +174,33 @@ bruit → **calme_sonore** (OSM), MOBPRO, nature (OSO). À mettre à jour dans l
 non intégrés : **Métier** (le plus pauvre, France Stratégie/INRS/Dares non câblés), **PFAS**
 (eau), **DVF au moteur** (V2).
 
+## Gaps validés par une décision réelle (dogfood Brest/Lorient, 2026-06-27)
+
+Quatre manques constatés *en situation de décision* (pas en théorie), lors du premier dogfood réel du
+produit. À instruire par le Data Curator (entrent-ils dans le système de décision, et comment
+honnêtement ?). N=1, fondateur juge et partie → signal directionnel, pas preuve de marché.
+
+| Donnée manquante | Pourquoi décisionnelle | Source candidate | Note |
+|---|---|---|---|
+| Ensoleillement (h/an) + jours de pluie ≥ 1 mm | Le cliché « il pleut » porte sur la FRÉQUENCE et la lumière, pas le cumul mm qu'on a déjà | Normales Météo-France | distinct de DRIAS cumul (mm) / intensité (q99, Rx1d). ⚠️ le critère `ensoleillement_recherche` actuel AFFICHE « ensoleillé » mais MESURE chaleur d'été + faible pluie (attribution fausse, à corriger) |
+| Qualité des eaux de baignade | Critère réel pour un choix de vie littoral ; a manqué 2 fois (algues vertes incluses) | baignades.sante.gouv.fr / Min. Santé (directive 2006/7/CE) | Hub'Eau ne l'expose pas ; maille site (point) ; ⚠️ les algues vertes ne sont PAS dans ce classement |
+| Population de l'unité/aire urbaine | « Est-ce une grande ville ? » se joue sur la taille vécue (agglo), pas la commune | INSEE (déjà câblé pour le scoring UU) | l'index a le code `uu`, pas le nombre d'habitants exposé au récit. On a l'UU, **pas** l'aire d'attraction (AAV) — ne pas dire « aire urbaine » |
+| Logement social / taux HLM | Demandé pour « comparer la politique logement » | INSEE / RPLS 2023 (déjà dans `commune-data.ts`) | présent à l'IRIS / par commune ; **descriptif neutre, jamais scoré** (ADR-0001) |
+
+**Statut après le dogfood (2026-06-27).** Deux des quatre n'étaient pas des sources externes mais des
+câblages internes, désormais portés dans l'index (`data/comparateur-index.json`) par des scripts
+d'enrichissement non destructifs :
+- **`uu_pop`** (population de l'unité urbaine) — `scripts/populate-uu-pop.mjs`. Dérivée de l'index. À
+  exposer au récit comme « agglomération / unité urbaine », **jamais « aire urbaine »** (on a l'UU, pas l'AAV).
+- **`hlm_pct`** (taux de logements sociaux) — `scripts/populate-hlm.mjs`, ADEME RPLS 2023. **Donnée présente
+  mais NON surfacée**, volontairement parquée : sa valence est ambiguë (selon le projet de vie, un fort taux
+  se lit comme accès abordable *ou* comme signal d'un quartier stigmatisé), ce qui interdit tout scoring et
+  en fait un critère « lieu de vie » discutable. À ne surfacer **que sur demande utilisateur avérée**
+  (intéressant mais non prioritaire). N'en faire ni une promesse ni un avantage.
+
+Les deux autres (ensoleillement réel, eaux de baignade) restent des **sources externes** à instruire ; voir
+aussi le cas « ensoleillement » comme attribution fausse à corriger (`docs/cadrage-ensoleillement-attribution.md`).
+
 ## Liens
 
 `adr/ADR-0006-architecture-equipe-ia.md` (Data Curator), `adr/ADR-0001-pas-de-score-synthetique.md`
