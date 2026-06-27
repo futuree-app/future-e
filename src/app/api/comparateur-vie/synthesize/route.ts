@@ -28,7 +28,7 @@ export const maxDuration = 60;
 const PREF_LABELS: Record<string, string> = {
   faible_chaleur: "des étés plus frais",
   douceur_climat: "un climat doux",
-  ensoleillement_recherche: "du soleil et de la chaleur",
+  ensoleillement_recherche: "un climat plus ensoleillé",
   faible_secheresse: "des sols peu exposés à la sécheresse",
   faible_risque_feu: "un faible risque de feu",
   faible_precip_extremes: "moins de pluies intenses",
