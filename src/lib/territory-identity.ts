@@ -32,15 +32,27 @@ function densiteLabel(d: number | null | undefined): { label: string; value: str
 }
 
 function roleLabel(ctx: TerritoryContext): string | null {
+  // Taille de l'unité urbaine (= agglomération), surfacée quand elle situe la
+  // commune : toujours pour une commune d'agglo (elle n'en est qu'une part),
+  // et pour un pôle seulement si l'agglo dépasse nettement la commune (sinon
+  // c'est le même nombre que la population, donc inerte).
+  const uuPop = frInt(ctx.uuPop);
   switch (ctx.role) {
     case "isolee":
       return "Commune isolée, hors agglomération";
-    case "pole":
+    case "pole": {
+      const communePop = ctx.entry.population ?? 0;
+      if (uuPop && ctx.uuPop != null && ctx.uuPop > communePop * 1.1) {
+        return `Principal pôle d'une agglomération de ${uuPop} habitants`;
+      }
       return "Principal pôle urbain local";
-    case "agglo":
-      return ctx.uuLabel
+    }
+    case "agglo": {
+      const base = ctx.uuLabel
         ? `Dans l'agglomération de ${ctx.uuLabel}`
         : "Dans une agglomération";
+      return uuPop ? `${base} (${uuPop} habitants)` : base;
+    }
   }
 }
 
