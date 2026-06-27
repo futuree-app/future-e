@@ -198,8 +198,20 @@ d'enrichissement non destructifs :
   en fait un critère « lieu de vie » discutable. À ne surfacer **que sur demande utilisateur avérée**
   (intéressant mais non prioritaire). N'en faire ni une promesse ni un avantage.
 
-Les deux autres (ensoleillement réel, eaux de baignade) restent des **sources externes** à instruire ; voir
-aussi le cas « ensoleillement » comme attribution fausse à corriger (`docs/cadrage-ensoleillement-attribution.md`).
+Les deux sources externes ont été intégrées (2026-06-27) :
+- **Ensoleillement** — **rayonnement solaire ERA5** (`scripts/populate-rayonnement-*`), normale 1991-2020,
+  injecté dans l'index (`rayonnement_pct`). **Répare l'attribution fausse** : le critère
+  `ensoleillement_recherche` lit désormais le rayonnement réel, récit **qualitatif** (très/moyennement/peu
+  ensoleillé), jamais d'heures inventées. QA vs heures Météo-France : Pearson 0,93 / Spearman 0,87. Caveat
+  côtier assumé (ERA5-Land masque l'océan → presqu'îles type Brest légèrement surestimées). Pour afficher des
+  **heures** un jour : second chantier (normales stations Météo-France).
+- **Eaux de baignade** — **Ministère de la Santé** (rapportage saison balnéaire, directive 2006/7/CE),
+  `scripts/populate-baignade.mjs` → `data/communes-baignade.json` (1702 communes avec site). Donnée
+  **module-agnostique**, branchée dans le socle `gatherCommuneEnrichment` (donc AskFuture + synthèse quartier
+  + rapport d'un coup), surfacée côté lifestyle via `baignade_ici`. **Graine du futur module Santé
+  environnementale** (foyer conceptuel : classement sanitaire ARS). Limites divulguées : classement
+  pluriannuel ≠ jour J, **n'inclut PAS les algues vertes**, couverture littoral/lacs (non nationale).
+  Voir aussi `docs/cadrage-ensoleillement-attribution.md`.
 
 ## Liens
 
