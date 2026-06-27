@@ -36,10 +36,10 @@ export function ThemeExplorer({ themes, trio, defaultThemeId }: Props) {
       <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-2">Là où ça se joue</p>
 
       {/* Thème ouvert : la vraie grammaire (paliers + avantages), les 2-3 communes. */}
-      <h3 className="font-normal text-[23px] leading-[1.1] text-label mb-1" style={{ fontFamily: "'Instrument Serif', serif" }}>
+      <h3 className="font-normal text-[25px] leading-[1.1] text-label mb-1" style={{ fontFamily: "'Instrument Serif', serif" }}>
         {open.titre}
       </h3>
-      <p className="text-[14.5px] leading-[1.55] text-muted italic mb-4" style={{ textWrap: "pretty" }}>
+      <p className="text-[16px] leading-[1.55] text-muted italic mb-4" style={{ textWrap: "pretty" }}>
         {bindOrphans(open.synthese)}
       </p>
       <ThemeMatrix theme={open} trio={trio} />
@@ -66,7 +66,7 @@ export function ThemeExplorer({ themes, trio, defaultThemeId }: Props) {
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-[15px] leading-[1.15] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                    <p className="text-[16.5px] leading-[1.15] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
                       {th.titre}
                     </p>
                     {/* Cadenas : au survol d'une carte ouvrable, l'anse se soulève et l'icône vire accent. */}
@@ -90,13 +90,13 @@ export function ThemeExplorer({ themes, trio, defaultThemeId }: Props) {
                   <p className="mt-2 font-mono text-[10px] tracking-[0.12em] uppercase text-ghost/80">
                     {th.lignes.length} critère{th.lignes.length > 1 ? "s" : ""} comparé{th.lignes.length > 1 ? "s" : ""}
                   </p>
-                  <p className="mt-1 text-[11.5px] leading-[1.5] text-ghost">{th.lignes.map((l) => l.label).join(" · ")}</p>
+                  <p className="mt-1 text-[12.5px] leading-[1.5] text-ghost">{th.lignes.map((l) => l.label).join(" · ")}</p>
                 </button>
               );
             })}
           </div>
           {!canRedirect && (
-            <p className="mt-4 text-[12.5px] leading-[1.55] text-muted">
+            <p className="mt-4 text-[14px] leading-[1.55] text-muted">
               {bindOrphans(
                 open.id === initial.id
                   ? "Vous êtes revenu au thème suggéré. Vous pouvez rouvrir le vôtre ; les autres se détaillent dans le Pack."

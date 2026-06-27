@@ -129,16 +129,16 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
   return (
     <section className="mt-12">
       <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent mb-2">Une question sur ces communes ?</p>
-      <h2 className="font-normal text-[22px] text-label mb-1.5" style={{ fontFamily: "'Instrument Serif', serif" }}>
+      <h2 className="font-normal text-[24px] text-label mb-1.5" style={{ fontFamily: "'Instrument Serif', serif" }}>
         Demandez à futur•e
       </h2>
-      <p className={`text-[14px] text-muted leading-[1.65] ${remaining > 0 ? "mb-1.5" : "mb-5"}`}>
+      <p className={`text-[15.5px] text-muted leading-[1.65] ${remaining > 0 ? "mb-1.5" : "mb-5"}`}>
         {remaining > 0
           ? bindOrphans("Posez une question pour départager vos communes : un risque, un compromis, leur évolution future.")
           : bindOrphans("Pour aller plus loin, débloquez la comparaison complète.")}
       </p>
       {remaining > 0 && (
-        <p className="text-[11px] text-ghost mb-5">
+        <p className="text-[12px] text-ghost mb-5">
           {remaining} question{remaining > 1 ? "s" : ""} {remaining > 1 ? "gratuites" : "gratuite"}.
         </p>
       )}
@@ -150,7 +150,7 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
               key={q}
               onClick={() => sendAsk(q)}
               disabled={loading}
-              className="shrink-0 whitespace-nowrap text-left text-[12.5px] leading-snug text-muted hover:text-label border border-white/[0.12] hover:border-accent/[0.4] rounded-full px-3.5 py-1.5 transition-colors disabled:opacity-40"
+              className="shrink-0 whitespace-nowrap text-left text-[14px] leading-snug text-muted hover:text-label border border-white/[0.12] hover:border-accent/[0.4] rounded-full px-3.5 py-1.5 transition-colors disabled:opacity-40"
             >
               {q}
             </button>
@@ -165,15 +165,15 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
               key={idx}
               className={
                 m.role === "user"
-                  ? "self-end max-w-[85%] rounded-xl bg-accent/[0.1] border border-accent/[0.18] px-4 py-2.5 text-[14px] text-label"
-                  : "self-start max-w-[92%] rounded-xl bg-white/[0.03] border border-white/[0.08] px-4 py-3 text-[14px] leading-[1.7] text-label"
+                  ? "self-end max-w-[85%] rounded-xl bg-accent/[0.1] border border-accent/[0.18] px-4 py-2.5 text-[15.5px] text-label"
+                  : "self-start max-w-[92%] rounded-xl bg-white/[0.03] border border-white/[0.08] px-4 py-3 text-[15.5px] leading-[1.7] text-label"
               }
             >
               {m.content}
             </div>
           ))}
           {loading && (
-            <div className="self-start flex items-center gap-2 text-ghost text-[13px]">
+            <div className="self-start flex items-center gap-2 text-ghost text-[14.5px]">
               <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
               futur•e réfléchit…
             </div>
@@ -183,7 +183,7 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
 
       {limit ? (
         <div className="rounded-xl border border-accent/[0.25] bg-accent/[0.05] px-5 py-4">
-          <p className="text-[14px] leading-[1.6] text-label">
+          <p className="text-[15.5px] leading-[1.6] text-label">
             {bindOrphans(`Vous avez utilisé vos ${FREE_ASK} questions gratuites. La comparaison complète prend le relais pour passer d'une intuition à une décision éclairée.`)}
           </p>
         </div>
@@ -200,13 +200,13 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
             }}
             rows={1}
             placeholder="Posez votre question sur ces communes…"
-            className="flex-1 resize-none bg-white/[0.03] border border-white/[0.1] rounded-lg px-4 py-3 text-[14px] text-label placeholder:text-ghost outline-none focus:border-accent/[0.4]"
+            className="flex-1 resize-none bg-white/[0.03] border border-white/[0.1] rounded-lg px-4 py-3 text-[15.5px] text-label placeholder:text-ghost outline-none focus:border-accent/[0.4]"
             style={{ fontFamily: "'Instrument Sans', sans-serif" }}
           />
           <button
             onClick={() => sendAsk()}
             disabled={loading || input.trim().length < 3}
-            className="shrink-0 px-5 py-3 rounded-lg bg-accent text-canvas font-semibold text-[13px] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="shrink-0 px-5 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14.5px] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Demander
           </button>

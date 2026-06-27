@@ -284,6 +284,13 @@ export type ComparaisonComplete = {
   // depuis les deux communes qui mènent le plus de thèmes. null si pas de vrai arbitrage à deux
   // pôles (une commune domine, ou une seule mène).
   arbitrage: string | null;
+  // Contexte spatial (mode choix) : UNE ligne sur la RELATION entre les communes (distance, même
+  // région / même unité urbaine). Révèle ce que les thèmes ne disent pas (à quel point les
+  // options sont proches ou éloignées : « même agglo » = on coupe les cheveux en quatre ;
+  // « 920 km, deux régions » = deux vies radicalement différentes). Déterministe, jamais une
+  // carte ni un bloc (cf. arbitrage board 2026-06-27 « révéler, pas localiser »). null si données
+  // de position manquantes.
+  spatialContext: string | null;
   divergence: Divergence; // mode choix : la ligne de fracture (null si tout est à égalité)
   themes: ComparaisonTheme[];
 };
@@ -1168,6 +1175,41 @@ function themeLeaderInsee(lignes: ComparaisonLigne[]): string | null {
   return sorted[0][0];
 }
 
+// Contexte spatial : UNE phrase sur la relation entre les communes (proches/éloignées, même
+// région/UU). Pas un bloc, pas une carte. Révèle ce que les thèmes ne disent pas. Déterministe.
+function buildSpatialContext(cols: (IndexCommune | null)[]): string | null {
+  const pts = cols.filter((c): c is IndexCommune => c != null);
+  if (pts.length < 2) return null;
+  const n = pts.length;
+  const nMot = n >= 3 ? "Trois" : "Deux";
+
+  // Écart du groupe = distance maximale entre deux communes.
+  let span = 0;
+  for (let i = 0; i < pts.length; i++)
+    for (let j = i + 1; j < pts.length; j++)
+      span = Math.max(span, haversineKm(pts[i].lat, pts[i].lon, pts[j].lat, pts[j].lon));
+  const km = Math.max(5, span >= 100 ? Math.round(span / 10) * 10 : Math.round(span / 5) * 5);
+
+  const uus = pts.map((c) => c.uu ?? null);
+  const sameUU = uus.every((u) => u != null && u === uus[0]);
+  if (sameUU) return `${nMot} communes de la même unité urbaine.`;
+
+  const regions = [...new Set(pts.map((c) => c.region).filter((r): r is string => r != null))];
+  const sameRegion = regions.length === 1 && pts.every((c) => c.region != null);
+  if (sameRegion) {
+    return n >= 3
+      ? `${nMot} communes de la même région, dans un rayon de ~${km} km.`
+      : `À ~${km} km, dans la même région.`;
+  }
+
+  // Régions différentes : c'est le contraste fort (deux vies éloignées).
+  if (n >= 3) {
+    const regMot = regions.length === 2 ? "deux" : regions.length === 3 ? "trois" : `${regions.length}`;
+    return `${nMot} communes, ${regMot} régions, jusqu'à ~${km} km d'écart.`;
+  }
+  return `À ~${km} km, deux régions différentes.`;
+}
+
 // Construit la comparaison complète du trio affiché. Déterministe, hors score/tri.
 // Mot du palier ABSOLU (bandIndex), avantage RELATIF au trio (égalité si écart < gap
 // OU même palier partout), synthèse honnête par thème, chapeau de divergences.
@@ -1302,7 +1344,7 @@ export function buildComparaisonComplete(
     if (ranked.length === 0) {
       // Conclure, pas seulement décrire : un thème sans gagnant net ne départage pas (il ne
       // pèsera pas dans le choix). « départage » reste neutre (vaut pour la découverte aussi).
-      synthese = `Sur ce thème, les ${nMot} territoires se ressemblent : il ne les départage pas.`;
+      synthese = `Sur ce thème, les ${nMot} territoires se ressemblent : rien ne les départage ici.`;
     } else if (ranked.length === 1) {
       const [insee, fortes] = ranked[0];
       synthese = `${nomByInsee.get(insee)} se distingue par ${joinFr(fortes.slice(0, 2))}.`;
@@ -1369,15 +1411,29 @@ export function buildComparaisonComplete(
   // lecteur, on ne décide pas pour lui. cf. challenge paywall / doctrine éditoriale.
   let arbitrage: string | null = null;
   if (!dominator && ordered.length >= 2) {
-    const inseeA = ordered[0][0];
-    const inseeB = ordered[1][0];
     // Thème le plus distinctif de chaque commune : force du lead décroissante (tri stable =
     // départage par l'ordre THEME_ORDER à force égale).
     const strongest = (insee: string) =>
       [...(ledThemesByInsee.get(insee) ?? [])].sort((a, b) => b.strength - a.strength)[0]?.themeId;
+    const inseeA = ordered[0][0];
+    const inseeB = ordered[1][0];
     const themeA = strongest(inseeA);
     const themeB = strongest(inseeB);
-    if (themeA && themeB && themeA !== themeB) {
+    // Les thèmes menés sont disjoints par commune (un seul leader par thème) : themeA/B/C sont
+    // donc nécessairement distincts dès qu'ils existent.
+    if (ordered.length >= 3) {
+      // TRIO : couvrir les TROIS communes (ne pas réduire un choix à trois à une opposition
+      // binaire, cf. audit éditorial). Énumération qui rend le critère au lecteur, sans couronner.
+      const inseeC = ordered[2][0];
+      const themeC = strongest(inseeC);
+      if (themeA && themeB && themeC) {
+        // « X pour Y » (pas « X sur Y », ambigu sur la direction pour un thème de risque) :
+        // chaque commune est le bon choix POUR cette priorité (le critère reste au lecteur).
+        arbitrage =
+          `Selon votre priorité : ${nomByInsee.get(inseeA)} pour ${courtThemeById.get(themeA)}, ` +
+          `${nomByInsee.get(inseeB)} pour ${courtThemeById.get(themeB)}, ${nomByInsee.get(inseeC)} pour ${courtThemeById.get(themeC)}.`;
+      }
+    } else if (themeA && themeB) {
       const courtA = courtThemeById.get(themeA)!;
       const courtB = courtThemeById.get(themeB)!;
       const verbeA = courtA.startsWith("les ") ? "comptent" : "compte"; // accord sujet pluriel
@@ -1403,7 +1459,9 @@ export function buildComparaisonComplete(
       }
     : null;
 
-  return { resume, arbitrage, divergence, themes };
+  const spatialContext = buildSpatialContext(cols);
+
+  return { resume, arbitrage, spatialContext, divergence, themes };
 }
 
 // Narratif « nouveaux arrivants » (HORS score) : phrase descriptive, jamais normative.
@@ -1606,7 +1664,9 @@ function assignCompromis(
       used.add(chosen.key);
       r.compromis = chosen.text;
     } else {
-      r.compromis = "Le bon compromis des trois, sans faiblesse marquée.";
+      // Cardinal-agnostique : 2 ou 3 communes en mode choix (« des deux » / « des trois »).
+      const nMot = shownPicks.length >= 3 ? "trois" : "deux";
+      r.compromis = `Le bon compromis des ${nMot}, sans faiblesse marquée.`;
     }
   }
 }
@@ -2508,6 +2568,7 @@ export function truncateComparaison(cc: ComparaisonComplete): ComparaisonComplet
   return {
     resume: cc.resume.slice(0, 1),
     arbitrage: cc.arbitrage,
+    spatialContext: cc.spatialContext,
     divergence: cc.divergence,
     themes: cc.themes.slice(0, 2),
   };

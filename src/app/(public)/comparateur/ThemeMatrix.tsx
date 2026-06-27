@@ -46,7 +46,7 @@ function LabelTip({ label, text }: { label: string; text: string }) {
         }}
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
-        className="text-left text-[14.5px] leading-[1.3] text-label cursor-help underline decoration-dotted decoration-white/25 underline-offset-[3px] hover:decoration-white/50 transition-colors"
+        className="text-left text-[16px] leading-[1.3] text-label cursor-help underline decoration-dotted decoration-white/25 underline-offset-[3px] hover:decoration-white/50 transition-colors"
       >
         {label}
       </button>
@@ -54,7 +54,7 @@ function LabelTip({ label, text }: { label: string; text: string }) {
         <span
           role="tooltip"
           id={id}
-          className="absolute z-50 bottom-[calc(100%+8px)] left-0 w-max max-w-[240px] rounded-[10px] border border-white/10 px-3 py-2.5 text-[12.5px] leading-[1.5] font-normal normal-case tracking-normal"
+          className="absolute z-50 bottom-[calc(100%+8px)] left-0 w-max max-w-[240px] rounded-[10px] border border-white/10 px-3 py-2.5 text-[14px] leading-[1.5] font-normal normal-case tracking-normal"
           style={{ background: "#0b101c", color: "#c6cfdb", boxShadow: "0 12px 32px rgba(0,0,0,0.5)" }}
         >
           {text}
@@ -79,11 +79,11 @@ function Cellule({ cell, nom, leader }: { cell: ComparaisonCellule; nom: string;
         leader ? "md:bg-accent/[0.07]" : "",
       ].join(" ")}
     >
-      <span className="md:hidden w-[104px] shrink-0 text-[12px] text-muted pt-0.5">{nom}</span>
+      <span className="md:hidden w-[104px] shrink-0 text-[13px] text-muted pt-0.5">{nom}</span>
       <span className="min-w-0">
-        <span className={`text-[14px] leading-[1.45] ${paletteTone(cell, leader)}`}>{cell.palier}</span>
+        <span className={`text-[15.5px] leading-[1.45] ${paletteTone(cell, leader)}`}>{cell.palier}</span>
         {cell.qualifier && (
-          <span className="block text-[12px] leading-[1.4] text-muted mt-0.5">{cell.qualifier}</span>
+          <span className="block text-[13px] leading-[1.4] text-muted mt-0.5">{cell.qualifier}</span>
         )}
       </span>
     </div>
@@ -123,11 +123,11 @@ function LigneRow({ ligne, trio }: { ligne: ComparaisonLigne; trio: MatchResult[
 
       {merged ? (
         <div className={`${MERGED_SPAN_BY_N[n] ?? MERGED_SPAN_BY_N[3]} md:px-3.5 md:py-2.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5`}>
-          <span className="text-[14px] leading-[1.45] text-label">
+          <span className="text-[15.5px] leading-[1.45] text-label">
             {dispo[0].palier}
             {dispo[0].qualifier ? `, ${dispo[0].qualifier}` : ""}
           </span>
-          <span className="text-[13px] text-muted">· les {n >= 3 ? "trois" : "deux"} territoires se valent</span>
+          <span className="text-[14.5px] text-muted">· les {n >= 3 ? "trois" : "deux"} territoires se valent</span>
         </div>
       ) : (
         trio.map((r) => {
@@ -148,7 +148,7 @@ export function MatrixHeader({ trio }: { trio: MatchResult[] }) {
       {trio.map((r, n) => (
         <div key={r.insee} className="px-3.5 flex items-baseline gap-2">
           <span className="font-mono text-[10px] text-accent">{String(n + 1).padStart(2, "0")}</span>
-          <span className="text-[17px] leading-[1.1] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+          <span className="text-[18.5px] leading-[1.1] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
             {r.nom}
           </span>
         </div>

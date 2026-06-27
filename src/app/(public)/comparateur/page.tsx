@@ -106,7 +106,7 @@ export default async function ComparateurPage({
         <Hero />
         <div className="glass rounded-2xl p-6 mb-6 border border-amber-500/20">
           <p className="text-[14px] leading-[1.6] text-label">
-            Nous n&apos;avons pas pu situer ces communes dans notre référentiel. Pour Paris, Lyon ou
+            Nous n&apos;avons pas pu situer ces communes dans nos données. Pour Paris, Lyon ou
             Marseille, choisissez un arrondissement (« Paris 11e »).
           </p>
         </div>
@@ -130,24 +130,15 @@ export default async function ComparateurPage({
       <ModeChoixSearch initial={initial} />
 
       {ignores.length > 0 && (
-        <p className="mt-4 text-[13px] leading-[1.55] text-muted">
+        <p className="mt-4 text-[14.5px] leading-[1.55] text-muted">
           {ignores.length === 1 ? "Une commune n'a pas pu être située" : `${ignores.length} communes n'ont pas pu être situées`} et
           n&apos;apparaît{ignores.length === 1 ? "" : "ssent"} pas ci-dessous (pour Paris, Lyon ou Marseille, choisissez un arrondissement).
         </p>
       )}
 
-      {/* 1. SYNTHÈSE générée (effet wow), une seule fois par chargement. */}
-      <ModeChoixSynthese
-        communes={trio.map((r) => ({
-          nom: r.nom,
-          region: r.region,
-          identite: r.identite,
-          compromis: r.compromis,
-          distinctive: r.distinctive,
-        }))}
-        divergence={comparaison.divergence ? { domine: comparaison.divergence.domine, dominatorInsee: comparaison.divergence.dominatorInsee } : null}
-        arbitrage={comparaison.arbitrage}
-      />
+      {/* 1. SYNTHÈSE : la phrase d'arbitrage déterministe (pose la tension, ne la résout pas).
+          Le narratif IA streamé a été retiré (cannibalisait le Pack, cf. board). */}
+      <ModeChoixSynthese arbitrage={comparaison.arbitrage} spatialContext={comparaison.spatialContext} />
 
       {/* 2. LE FACE-À-FACE : une signature (offre) + un revers (compromis) par commune. */}
       <div className={`mt-8 grid grid-cols-1 ${colsClass} gap-4`}>
@@ -155,12 +146,12 @@ export default async function ComparateurPage({
           <div key={r.insee} className="glass rounded-2xl p-5 flex flex-col">
             <div className="flex items-baseline gap-2 mb-3">
               <span className="font-mono text-[10px] text-accent">{String(i + 1).padStart(2, "0")}</span>
-              <span className="text-[20px] leading-[1.1] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+              <span className="text-[22px] leading-[1.1] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
                 {r.nom}
               </span>
             </div>
-            <p className="text-[14px] leading-[1.55] text-accent italic">{r.identite}</p>
-            <p className="mt-3 pt-3 border-t border-white/[0.08] text-[13px] leading-[1.55] text-muted">
+            <p className="text-[15.5px] leading-[1.55] text-accent italic">{r.identite}</p>
+            <p className="mt-3 pt-3 border-t border-white/[0.08] text-[14.5px] leading-[1.55] text-muted">
               {r.compromis}
             </p>
           </div>
@@ -187,15 +178,15 @@ export default async function ComparateurPage({
 
       {/* 5. CTA Pack : l'amorce prend le relais de la tension, ancrée sur la VALEUR. */}
       <div className="mt-10 glass rounded-2xl p-6 md:p-7 border border-accent/20">
-        <p className="text-[15px] leading-[1.6] text-label max-w-[640px]" style={{ textWrap: "pretty" }}>
-          {bindOrphans("Vous voyez où chacune penche. Ce qui reste, c'est de savoir laquelle correspond à votre façon d'habiter : le Pack reprend les sept thèmes critère par critère, le palier de chaque commune et ce qui les départage vraiment, là où ça décide votre choix.")}
+        <p className="text-[16.5px] leading-[1.6] text-label" style={{ textWrap: "pretty" }}>
+          {bindOrphans("Vous voyez où chacune penche. Ce qui reste, c'est de savoir laquelle correspond à votre façon d'habiter : le Pack détaille les sept thèmes critère par critère, situe chaque commune et montre ce qui les départage vraiment, là où ça décide votre choix.")}
         </p>
-        <p className="mt-3 text-[13.5px] leading-[1.6] text-muted max-w-[640px]" style={{ textWrap: "pretty" }}>
+        <p className="mt-3 text-[15px] leading-[1.6] text-muted" style={{ textWrap: "pretty" }}>
           {bindOrphans("39 €. Une décision de lieu de vie pèse des années : c'est peu pour la trancher les yeux ouverts. Accès immédiat, rapport interactif que vous gardez.")}
         </p>
         <Link
           href={ctaHref}
-          className="inline-flex items-center justify-center mt-5 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px]"
+          className="inline-flex items-center justify-center mt-5 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[15.5px]"
         >
           Voir la comparaison complète · 39 €
         </Link>
