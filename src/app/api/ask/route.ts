@@ -17,6 +17,7 @@ import { type CommuneFullData } from "@/lib/commune-data";
 import { type EaufranceSummary } from "@/lib/eaufrance";
 import { type VigieauSummary } from "@/lib/vigieau";
 import { type GeorisquesSummary, type GasparCatnatSummary } from "@/lib/georisques";
+import { type BaignadeSummary } from "@/lib/baignade";
 import {
   gatherCommuneEnrichment,
   type ClimatData,
@@ -396,6 +397,22 @@ function formatVigieauBlock(v: VigieauSummary | null): string {
   return `[VigiEau — arrêté sécheresse préfectoral en cours]\n- Niveau ${lvl}${bassin}${fin}.`;
 }
 
+function formatBaignadeBlock(b: BaignadeSummary): string {
+  if (!b) {
+    return "[Baignade] Pas de site de baignade déclaré pour cette commune (non littorale/lacustre, ou donnée indisponible).";
+  }
+  const dist = Object.entries(b.classements)
+    .map(([label, n]) => `${label} (${n})`)
+    .join(", ");
+  const out: string[] = [
+    "[Baignade — qualité des eaux de baignade (classement ARS, directive 2006/7/CE)]",
+    `- ${b.nSites} site(s) de baignade (${b.types.join(", ")})${b.saison ? ` — saison ${b.saison}` : ""}.`,
+    `- Classement des sites : ${dist}.`,
+    "- Classement PLURIANNUEL (4 saisons) : qualité habituelle, pas la baignabilité du jour J (fermetures ponctuelles possibles après pluie). N'inclut PAS les algues vertes.",
+  ];
+  return out.join("\n");
+}
+
 function formatEnrichmentBlock(enr: EnrichmentResult): string {
   return [
     formatAdemeBlock(enr.ademe),
@@ -404,6 +421,7 @@ function formatEnrichmentBlock(enr: EnrichmentResult): string {
     formatGasparBlock(enr.catnat),
     formatVigieauBlock(enr.vigieau),
     formatEauBlock(enr.eau),
+    formatBaignadeBlock(enr.baignade),
   ].join("\n\n");
 }
 
