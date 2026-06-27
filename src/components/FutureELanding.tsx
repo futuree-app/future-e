@@ -151,19 +151,19 @@ const STATIC_ANSWERS = {
   acheter_littoral: {
     verdict: 'À acheter avec les yeux ouverts.',
     detail:
-      "La Rochelle présente un risque de submersion en hausse de +31 % en scénario médian 2050 (DRIAS, Géorisques). Les Minimes et Aytré sont en zone PPRi modérée à élevée. Les coûts d'assurance habitation progressent de 8 à 12 % par an sur le littoral charentais (ACPR 2024). L'achat reste viable à condition de choisir le bon quartier, d'étudier la DPE et l'assurabilité future.",
-    cta: 'Voir le rapport interactif sur La Rochelle',
+      "Sur le littoral, le risque de submersion et d'érosion progresse, et le coût de l'assurance habitation grimpe dans les zones exposées. L'achat reste viable, à condition de regarder le risque à l'adresse, la qualité énergétique du logement (diagnostic de performance énergétique) et son assurabilité dans la durée. Le choix du quartier change tout.",
+    cta: 'Voir le rapport interactif sur votre commune',
   },
   enfants_sante: {
-    verdict: 'Trois signaux méritent votre attention.',
+    verdict: 'Plusieurs signaux méritent votre attention.',
     detail:
-      "Les sols charentais sont naturellement chargés en cadmium (GisSol/RMQS). L'ANSES a alerté en mars 2026 qu'un Français sur deux est surexposé par son alimentation, dont 36 % des enfants de moins de 3 ans. La saison pollinique s'est allongée de 28 jours en Nouvelle-Aquitaine (RNSA/Copernicus). Les jours de canicule projetés à La Rochelle passent de 5 à 34 par an en 2050 en scénario médian (DRIAS). Rien d'irrémédiable, mais autant le savoir tôt.",
+      "La santé des enfants face au climat se joue sur quelques fronts : la qualité de l'air, l'allongement de la saison pollinique, le nombre de jours de forte chaleur qui augmente, et selon les territoires la qualité des sols. Rien d'irrémédiable, mais autant connaître la situation de votre commune tôt pour agir au bon moment.",
     cta: 'Voir le module Santé de votre rapport interactif',
   },
   mobilite_fragile: {
-    verdict: "Bressuire est un territoire où la voiture n'est pas un choix.",
+    verdict: "Ici, la place de la voiture mérite d'être posée.",
     detail:
-      "84 % des actifs résidant dans des communes rurales similaires utilisent la voiture pour aller travailler (INSEE/Ecolab). Les flux domicile-travail sortants dépassent souvent 50 %. L'offre de transport collectif reste limitée et les bornes de recharge publique insuffisantes pour une transition fluide. Cette structure expose directement les budgets des foyers à la volatilité du prix des carburants.",
+      "Dans beaucoup de communes rurales et périurbaines, la voiture n'est pas un choix : l'offre de transport collectif reste limitée et les trajets du quotidien sont longs. Cette dépendance expose directement le budget des foyers à la volatilité du prix des carburants. Les alternatives, vélo, covoiturage, recharge électrique, dépendent fortement du territoire.",
     cta: 'Voir le module Mobilité de votre rapport interactif',
   },
   metier_general: {
