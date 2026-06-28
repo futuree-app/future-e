@@ -9,7 +9,14 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse, type NextRequest } from "next/server";
-import { PREFERENCE_KEYS, type ParsedProject } from "@/lib/comparateur-vie";
+import {
+  PREFERENCE_KEYS,
+  resolveCommuneByName,
+  deriveAnchorPreferences,
+  anchorReformulationSuffix,
+  type ParsedProject,
+  type IndexCommune,
+} from "@/lib/comparateur-vie";
 import { ANCHOR_ZONE_TOKENS, EXCLUSION_ZONE_TOKENS } from "@/lib/geo-zones";
 
 export const runtime = "nodejs";
@@ -320,6 +327,57 @@ export async function POST(request: NextRequest) {
     }
 
     const parsed = toolBlock.input as ParsedProject;
+
+    // ── Ancrage « une ville comme {commune} » ─────────────────────────────────
+    // Dérivation DÉTERMINISTE post-LLM : le LLM n'a extrait que le label. On traduit
+    // l'ancre en préférences nommées que le moteur conforme consomme. matchProjects
+    // reste inchangé. cf. spec 2026-06-28-explorer-depuis-commune-design.md (A.3/A.4/A.5).
+    const ancres = Array.isArray(parsed.communeAncre) ? parsed.communeAncre : [];
+    if (ancres.length > 0) {
+      const resolved: IndexCommune[] = [];
+      const unresolved: string[] = [];
+      for (const a of ancres) {
+        const label = a?.label?.trim();
+        if (!label) continue;
+        const entry = await resolveCommuneByName(label);
+        if (entry) resolved.push(entry);
+        else unresolved.push(label);
+      }
+
+      if (resolved.length > 0) {
+        const deriv = deriveAnchorPreferences(resolved);
+        const hc = (parsed.hardConstraints ??= {});
+        if (!Array.isArray(parsed.preferences)) parsed.preferences = [];
+
+        // Fusion préférences : l'EXPLICITE écrase le dérivé (même key -> garder l'explicite).
+        const explicitKeys = new Set(parsed.preferences.map((p) => p.key));
+        for (const p of deriv.preferences) {
+          if (!explicitKeys.has(p.key)) parsed.preferences.push(p);
+        }
+
+        // Taille : l'explicite (communeSize / sizeRelativeTo) écrase le gabarit dérivé.
+        if (deriv.communeSize && !hc.communeSize && !hc.sizeRelativeTo) {
+          hc.communeSize = deriv.communeSize;
+        }
+
+        // Ancre exclue du trio : ne pas proposer {ville} en réponse à « comme {ville} ».
+        // Réutilise l'exclusion d'agglomération existante du moteur (excludePlace).
+        hc.excludePlace = [
+          ...(hc.excludePlace ?? []),
+          ...resolved.map((e) => ({ label: e.nom })),
+        ];
+
+        // Transparence : on NOMME exactement les traits dérivés. Jamais « similaire ».
+        const suffix = anchorReformulationSuffix(resolved.map((e) => e.nom), deriv.traits);
+        if (suffix) parsed.reformulation = `${parsed.reformulation ?? ""} ${suffix}`.trim();
+      }
+
+      if (unresolved.length > 0) {
+        parsed.reformulation =
+          `${parsed.reformulation ?? ""} Je n'ai pas pu lire ${unresolved.join(", ")} ; dites-moi plutôt ce qui compte pour vous.`.trim();
+      }
+    }
+
     return NextResponse.json({ parsed });
   } catch (error) {
     console.error("[comparateur-vie/parse]", error);
