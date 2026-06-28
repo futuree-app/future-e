@@ -519,6 +519,18 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ---
 
+---
+
+### Task 4: Conflits ancre / contrainte explicite (ajoutée en exécution)
+
+Découverte par tests runtime après la Task 3 (« comme Brest mais en Auvergne », « comme Brest mais surtout pas une grande ville ») : deux traits dérivés contredisaient une contrainte explicite et étaient quand même promis. Correctif = étendre « l'explicite écrase le dérivé » à la géographie et à la taille (livré commit `bfba377`).
+
+- **Mer vs zone sans littoral** : `perimeterAllowsCoast(hc)` (lib) ; si les zones dures ne peuvent livrer aucun littoral, la route retire `proximite_mer` (préférence ET trait nommé). On ne nomme plus « en bord de mer » pour un trio sans mer. Auvergne : compat 71/68/67 → 93/89/87.
+- **Taille dérivée vs préférence de taille explicite** : si `eviter_grandes_villes` ou `prefere_grande_ville` est présent, le gabarit `communeSize` dérivé n'est pas appliqué. « comme Brest mais surtout pas une grande ville » → trio de petites villes côtières (Port-Louis, Valras-Plage, Rivedoux-Plage) au lieu d'un plancher dur à 81 500 hab.
+- **Refactor** : `AnchorDerivation.traits` passe en `{ key, text }[]` pour retirer proprement un trait par clé.
+
+**Calibration restante (non bloquante, T5)** : le gabarit dérivé reste un FILTRE DUR. « comme Nantes » impose un plancher d'agglo à ~270 000 hab (seulement ~10-15 agglos FR au-dessus). Défendable (« comme Nantes » implique grand) mais agressif. À trancher avec le porteur : garder le filtre dur, l'élargir, ou rétrograder la taille dérivée en préférence souple.
+
 ## Execution Handoff
 
 Plan complet, sauvegardé dans `docs/superpowers/plans/2026-06-28-explorer-depuis-commune.md`.
