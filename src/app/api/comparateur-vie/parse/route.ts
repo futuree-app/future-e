@@ -14,6 +14,7 @@ import {
   resolveCommuneByName,
   deriveAnchorPreferences,
   anchorReformulationSuffix,
+  perimeterAllowsCoast,
   type ParsedProject,
   type IndexCommune,
 } from "@/lib/comparateur-vie";
@@ -349,14 +350,29 @@ export async function POST(request: NextRequest) {
         const hc = (parsed.hardConstraints ??= {});
         if (!Array.isArray(parsed.preferences)) parsed.preferences = [];
 
+        // L'explicite écrase le dérivé, géographie comprise : si l'utilisateur a fixé une
+        // zone dure sans littoral (« comme Brest mais en Auvergne »), on retire le fait
+        // identitaire mer dérivé (préférence ET trait nommé) plutôt que de promettre une mer
+        // que le périmètre ne peut pas livrer. cf. perimeterAllowsCoast (honnêteté du signal).
+        const hasMer = deriv.preferences.some((p) => p.key === "proximite_mer");
+        if (hasMer && !(await perimeterAllowsCoast(hc))) {
+          deriv.preferences = deriv.preferences.filter((p) => p.key !== "proximite_mer");
+          deriv.traits = deriv.traits.filter((t) => t.key !== "proximite_mer");
+        }
+
         // Fusion préférences : l'EXPLICITE écrase le dérivé (même key -> garder l'explicite).
         const explicitKeys = new Set(parsed.preferences.map((p) => p.key));
         for (const p of deriv.preferences) {
           if (!explicitKeys.has(p.key)) parsed.preferences.push(p);
         }
 
-        // Taille : l'explicite (communeSize / sizeRelativeTo) écrase le gabarit dérivé.
-        if (deriv.communeSize && !hc.communeSize && !hc.sizeRelativeTo) {
+        // Taille : l'explicite écrase le gabarit dérivé. « Explicite » couvre la contrainte
+        // dure (communeSize / sizeRelativeTo) MAIS AUSSI une préférence de taille nommée
+        // (eviter_grandes_villes / prefere_grande_ville) : sinon le plancher dur dérivé de
+        // l'ancre (« comme Brest » -> min 81 500) contredirait « surtout pas une grande ville ».
+        const explicitSizePref =
+          explicitKeys.has("eviter_grandes_villes") || explicitKeys.has("prefere_grande_ville");
+        if (deriv.communeSize && !hc.communeSize && !hc.sizeRelativeTo && !explicitSizePref) {
           hc.communeSize = deriv.communeSize;
         }
 
@@ -368,7 +384,7 @@ export async function POST(request: NextRequest) {
         ];
 
         // Transparence : on NOMME exactement les traits dérivés. Jamais « similaire ».
-        const suffix = anchorReformulationSuffix(resolved.map((e) => e.nom), deriv.traits);
+        const suffix = anchorReformulationSuffix(resolved.map((e) => e.nom), deriv.traits.map((t) => t.text));
         if (suffix) parsed.reformulation = `${parsed.reformulation ?? ""} ${suffix}`.trim();
       }
 

@@ -2320,15 +2320,17 @@ function signatureScore(key: PreferenceKey, c: IndexCommune): number | null {
 export type AnchorDerivation = {
   preferences: Preference[];
   communeSize: { min: number; max: number } | null;
-  // Phrases humaines == EXACTEMENT les traits dérivés (pour la reformulation honnête).
-  traits: string[];
+  // Traits dérivés KEYÉS : phrase humaine == EXACTEMENT la préférence injectée (pour
+  // la reformulation honnête) ET key, pour pouvoir retirer un trait dont le périmètre
+  // explicite contredit la promesse (cf. perimeterAllowsCoast / proximite_mer).
+  traits: { key: PreferenceKey; text: string }[];
 };
 
 // Dérivation déterministe d'UNE commune-ancre. Lit l'index déjà chargé (server-only) :
 // l'appelant a résolu le label via resolveCommuneByName, donc loadIndex a tourné.
 export function communeToPreferences(entry: IndexCommune): AnchorDerivation {
   const preferences: Preference[] = [];
-  const traits: string[] = [];
+  const traits: { key: PreferenceKey; text: string }[] = [];
 
   // 1) Signature distinctive : critères où la commune se distingue au national.
   const ranked = SIGNATURE_KEYS
@@ -2338,13 +2340,13 @@ export function communeToPreferences(entry: IndexCommune): AnchorDerivation {
     .slice(0, SIGNATURE_MAX_KEYS);
   ranked.forEach((x, i) => {
     preferences.push({ key: x.key, weight: i === 0 ? 3 : 2 });
-    traits.push(reasonText(x.key, entry));
+    traits.push({ key: x.key, text: reasonText(x.key, entry) });
   });
 
   // 2) Faits identitaires évidents. Bord de mer -> proximite_mer (poids selon distance).
   if (entry.distance_cote_km != null && entry.distance_cote_km <= ANCRE_COAST_KM) {
     preferences.push({ key: "proximite_mer", weight: entry.distance_cote_km <= 5 ? 3 : 2 });
-    traits.push(reasonText("proximite_mer", entry));
+    traits.push({ key: "proximite_mer", text: reasonText("proximite_mer", entry) });
   }
 
   // 3) Gabarit de taille (taille d'AGGLOMÉRATION), fourchette large autour de l'ancre.
@@ -2372,11 +2374,11 @@ export function deriveAnchorPreferences(entries: IndexCommune[]): AnchorDerivati
     }
   }
   const preferences: Preference[] = [];
-  const traits: string[] = [];
+  const traits: { key: PreferenceKey; text: string }[] = [];
   for (const [key, weights] of weightsByKey) {
     if (weights.length !== entries.length) continue; // pas partagée par TOUTES les ancres
     preferences.push({ key, weight: Math.min(...weights) });
-    traits.push(reasonText(key, entries[0])); // trait partagé, phrasé sur la 1re ancre
+    traits.push({ key, text: reasonText(key, entries[0]) }); // trait partagé, phrasé sur la 1re ancre
   }
   const sizes = per
     .map((d) => d.communeSize)
@@ -2394,6 +2396,26 @@ export async function resolveCommuneByName(label: string): Promise<IndexCommune 
   if (!key) return null;
   const names = await nameIndex();
   return names.get(key) ?? null;
+}
+
+// Le périmètre dur (zones / départements explicites) peut-il livrer du littoral ? Sert à
+// retirer le fait identitaire dérivé proximite_mer quand l'utilisateur a fixé une zone sans
+// mer (« comme Brest mais en Auvergne ») : l'explicite écrase le dérivé, on ne nomme pas un
+// trait que le périmètre ne peut pas tenir (honnêteté du signal). Data-driven : on regarde
+// si une commune du périmètre est réellement côtière, plutôt qu'une liste de départements.
+export async function perimeterAllowsCoast(hc: HardConstraints): Promise<boolean> {
+  if (hc.excludeSea) return false;
+  if (hc.nearSea?.active) return true;
+  const zone = resolveZoneAnchors(hc.zones);
+  const hardDepts = new Set<string>([
+    ...(hc.departements ?? []),
+    ...(zone.hardDepartements ?? []),
+  ]);
+  if (hardDepts.size === 0) return true; // aucun périmètre géographique dur -> littoral atteignable
+  const communes = await loadIndex();
+  return communes.some(
+    (c) => hardDepts.has(c.dept) && c.distance_cote_km != null && c.distance_cote_km <= ANCRE_COAST_KM,
+  );
 }
 
 // Suffixe de reformulation DÉTERMINISTE : nomme EXACTEMENT les traits dérivés de l'ancre.
