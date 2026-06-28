@@ -118,6 +118,16 @@ const TOOL_INPUT_SCHEMA = {
         required: ["key", "weight"],
       },
     },
+    communeAncre: {
+      type: "array",
+      description:
+        "Communes-ANCRES : l'utilisateur PART d'une ville qu'il aime / connaît pour en chercher d'autres dans le même esprit. Déclencheurs : « une ville comme {ville} », « dans le genre de {ville} », « le même esprit que {ville} », « à la {ville} », « j'aime {ville}, je veux retrouver ça ailleurs ». DISTINCT de : nearPlace (être PRÈS de la ville), excludePlace (QUITTER la ville), sizeRelativeTo (sa TAILLE relative). Plusieurs ancres possibles (« comme Brest ou Lorient »). « surtout pas comme {ville} » n'est PAS une ancre : ignorez le négatif. Donnez le nom de la ville tel quel, sans décrire ses qualités (le système les calcule).",
+      items: {
+        type: "object",
+        properties: { label: { type: "string" } },
+        required: ["label"],
+      },
+    },
     ambiguities: {
       type: "array",
       description: "Points réellement ambigus à clarifier, avec UNE question simple chacun. Maximum 2. Vide si tout est clair.",
@@ -189,6 +199,18 @@ ANCRES GÉOGRAPHIQUES (zones / excludeZones) : règles spécifiques
 - Exclusion de VILLE → excludePlace. "quitter Lyon", "fuir Bordeaux", "ne plus vivre à Lille", "partir de Nantes" → excludePlace:[{label:"Lyon"}] etc. (le moteur exclut l'agglomération). Une ville n'est PAS un jeton de zone : ne la mettez jamais dans excludeZones.
 - TAILLE RELATIVE → sizeRelativeTo. "plus petit que Lyon", "pas plus grand que Bordeaux" → {label:"Lyon", direction:"smaller"}. "plus grand que Niort" → {label:"Niort", direction:"larger"}. Donnez le label brut, jamais une population.
 - Vous ne fournissez QUE des jetons et leur force. N'écrivez jamais vous-même de liste de départements.
+
+COMMUNE-ANCRE (communeAncre) : « partir d'une ville qu'on aime »
+- Quand l'utilisateur s'appuie sur une ville comme POINT DE DÉPART de ses goûts (« une ville comme Brest », « dans le genre de Lorient », « le même esprit que Bayonne », « j'aime Brest, je veux retrouver ça ailleurs »), ajoutez-la dans communeAncre:[{label:"Brest"}]. Le système en dérivera lui-même des préférences ; vous n'extrayez QUE le label.
+- NE DÉCRIVEZ PAS vous-même les qualités de la ville (sa mer, son calme, sa taille) et n'ajoutez aucune préférence à sa place : la dérivation est déterministe et faite après vous. Dans la reformulation, mentionnez la ville sobrement, sans en lister les mérites.
+- N'employez JAMAIS le mot « similaire » ni « identique » dans la reformulation, même si l'utilisateur l'emploie.
+- Quatre champs VOISINS à ne pas confondre :
+  • « comme Brest » = communeAncre (le même effet de vie).
+  • « près de Brest » = nearPlace (proximité géographique).
+  • « quitter Brest » / « partir de Brest » = excludePlace.
+  • « plus petit que Brest » = sizeRelativeTo.
+- Une ville peut cumuler les rôles : « une ville comme Brest mais dans le Sud » = communeAncre:[{label:"Brest"}] + zones:[{zone:"sud",strength:"hard"}]. L'ancre ne porte PAS la géographie (« dans le Sud » reste une zone) ni le climat.
+- « surtout pas comme Brest » : ce n'est pas une ancre positive. Ne la mettez pas dans communeAncre (ignorez le négatif), ne fabriquez pas d'exclusion à partir d'elle.
 
 PRÉFÉRENCES DISPONIBLES (liste fermée)
 - faible_chaleur : étés plus frais, moins de canicules
