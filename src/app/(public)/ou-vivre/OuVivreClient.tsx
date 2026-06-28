@@ -13,6 +13,7 @@ import { ChipTooltip } from "@/components/ChipTooltip";
 import { AUTO_SYNTHESIS } from "@/lib/auto-synthesis";
 import { departmentName } from "@/lib/regions-fr";
 import { bindOrphans } from "@/lib/typography";
+import { AnchorAmorce } from "./AnchorAmorce";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — client.
@@ -374,8 +375,10 @@ export function OuVivreClient() {
   }, []);
 
   // ── Étape 2 : MATCH + SYNTHÈSE (« ce produit réfléchit à ma situation ») ───
-  const runMatch = useCallback(async () => {
-    if (!parsed) return;
+  const runMatch = useCallback(async (override?: { parsed: ParsedProject; submittedText: string }) => {
+    const proj = override?.parsed ?? parsed;
+    const subText = override?.submittedText ?? submittedText;
+    if (!proj) return;
     const seq = ++runSeq.current;
     capture("life_project_confirmed");
 
@@ -385,7 +388,7 @@ export function OuVivreClient() {
       const r = await fetch("/api/comparateur-vie/match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ parsed }),
+        body: JSON.stringify({ parsed: proj }),
       });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error ?? "match");
@@ -418,7 +421,7 @@ export function OuVivreClient() {
     // SYNTHÈSE (streamée, non bloquante pour les cartes). Auto seulement si AUTO_SYNTHESIS ;
     // sinon l'utilisateur la déclenche via le bouton « Générer » (generateSynthesis).
     if (AUTO_SYNTHESIS) {
-      void streamSynthesis(seq, submittedText, parsed, top, {
+      void streamSynthesis(seq, subText, proj, top, {
         perfectMatch: matchOutcome.perfectMatch,
         message: matchOutcome.message,
         perimetre: matchOutcome.appliedZones?.filter((z) => z.strength === "hard").map((z) => z.label),
@@ -434,6 +437,29 @@ export function OuVivreClient() {
     setPhase("idle");
     capture("life_project_refine");
   }, []);
+
+  // Lancement depuis l'amorce commune (Phase B) : on reçoit un ParsedProject déjà
+  // assemblé par /anchor, on réinitialise l'aval comme un nouveau projet, puis on passe
+  // directement au matching (on saute l'étape "confirm"). cf. spec Phase B.
+  const launchFromAnchor = useCallback(
+    (p: ParsedProject, nom: string) => {
+      setOutcome(null);
+      setSynthesis("");
+      setAskMessages([]);
+      setAskInput("");
+      setAskRemaining(FREE_ASK);
+      setAskLimit(false);
+      setRoutesNudge(false);
+      setErrorMsg(null);
+      const subText = `une ville comme ${nom}`;
+      setParsed(p);
+      setSubmittedText(subText);
+      setText(subText);
+      capture("life_anchor_launched");
+      void runMatch({ parsed: p, submittedText: subText });
+    },
+    [runMatch],
+  );
 
   // Critères humains détectés (jamais les clés techniques), affichés au gate, avec
   // leur interprétation visible (glose) pour les faux amis / la polysémie.
@@ -799,6 +825,9 @@ export function OuVivreClient() {
         </div>
       )}
 
+      {/* ── Amorce « partez d'une commune » (Phase B, discrète, idle seulement) ── */}
+      {phase === "idle" && <AnchorAmorce onLaunch={launchFromAnchor} />}
+
       {/* ── Loading ── */}
       {busy && (
         <div className="mt-10 flex items-center gap-3 text-muted">
@@ -945,7 +974,7 @@ export function OuVivreClient() {
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <button
-              onClick={runMatch}
+              onClick={() => runMatch()}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px]"
               style={{ fontFamily: "'Instrument Sans', sans-serif" }}
             >
