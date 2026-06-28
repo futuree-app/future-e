@@ -219,6 +219,7 @@ export function OuVivreClient() {
   const [synthesizing, setSynthesizing] = useState(false);
   const [phraseIdx, setPhraseIdx] = useState(0);
   const [typedPlaceholder, setTypedPlaceholder] = useState("");
+  const [caretOn, setCaretOn] = useState(true); // clignotement du curseur de placeholder
 
   // AskFuture comparateur
   const [askMessages, setAskMessages] = useState<AskMessage[]>([]);
@@ -706,6 +707,14 @@ export function OuVivreClient() {
     return () => clearTimeout(timer);
   }, [rotatingPlaceholder]);
 
+  // Curseur clignotant du placeholder : signale que le champ est un endroit où ÉCRIRE
+  // (un primo-arrivant lisait la machine à écrire comme une bannière, pas comme un champ).
+  useEffect(() => {
+    if (!rotatingPlaceholder) return;
+    const blink = setInterval(() => setCaretOn((v) => !v), 530);
+    return () => clearInterval(blink);
+  }, [rotatingPlaceholder]);
+
   // Machine à écrire du champ AskFuture : rotation des questions inspirantes
   // (ancrées sur les résultats), tant que le champ est vierge et qu'aucune
   // conversation n'a démarré. Redémarre quand le jeu de résultats change.
@@ -770,6 +779,13 @@ export function OuVivreClient() {
 
       {/* ── Champ texte libre ── */}
       <div className="glass rounded-2xl p-5">
+        {/* Affordance fixe « c'est un champ où écrire » : un primo-arrivant lisait la
+            machine à écrire comme une bannière animée. Étiquette + curseur clignotant. */}
+        {rotatingPlaceholder && (
+          <div className="mb-2 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
+            <span aria-hidden>✎</span> Écrivez ici
+          </div>
+        )}
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -778,7 +794,7 @@ export function OuVivreClient() {
           }}
           rows={4}
           maxLength={2000}
-          placeholder={rotatingPlaceholder ? `${typedPlaceholder}▌` : ""}
+          placeholder={rotatingPlaceholder ? `${typedPlaceholder}${caretOn ? "▌" : " "}` : ""}
           className="w-full resize-none bg-transparent text-[16px] leading-[1.7] text-label placeholder:text-ghost outline-none"
           style={{ fontFamily: "'Instrument Sans', sans-serif" }}
         />
