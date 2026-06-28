@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { seedComparaison, THEME_ORDER } from "@/lib/comparateur-vie";
+import { seedComparaison, THEME_ORDER, THEME_CRITERIA } from "@/lib/comparateur-vie";
 import { bindOrphans } from "@/lib/typography";
+import { ChipTooltip } from "@/components/ChipTooltip";
 import { ModeChoixSearch } from "./ModeChoixSearch";
 import { ModeChoixAsk } from "./ModeChoixAsk";
 import { ModeChoixSynthese } from "./ModeChoixSynthese";
@@ -66,11 +67,11 @@ function Hero({ compact = false }: { compact?: boolean }) {
       </p>
       <div className="mt-7">
         <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-ghost mb-3">Ce qu&apos;on compare</p>
+        {/* Chaque thème se détaille au survol/tap : la liste de ses critères comparés
+            (ChipTooltip, soulignement pointillé = « il y a plus à voir »). */}
         <div className="flex flex-wrap gap-2">
           {THEME_ORDER.map((t) => (
-            <span key={t.id} className="text-[12.5px] leading-none text-muted border border-white/[0.1] rounded-full px-3 py-1.5">
-              {t.titre}
-            </span>
+            <ChipTooltip key={t.id} label={t.titre} text={(THEME_CRITERIA[t.id] ?? []).join(" · ")} />
           ))}
         </div>
       </div>

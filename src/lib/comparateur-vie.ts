@@ -1324,6 +1324,17 @@ const DIMENSIONS: ComparaisonDim[] = [
   { id: "taille_ville", label: "Taille de ville", themeId: "vitalite", key: "taille_ville", paliers: ["Grande agglomération", "Ville moyenne", "Petite ville ou rural"], gp: "la taille de ville", forte: "sa taille", aide: "La taille de l'agglomération.", risque: false, directionnel: false },
 ];
 
+// Critères (labels) de chaque thème, dérivés statiquement de DIMENSIONS. Sert à
+// détailler un thème HORS contexte commune (ex. les chips « Ce qu'on compare » de
+// l'accueil comparateur, détaillées au survol). Ordre = ordre d'affichage des dimensions.
+export const THEME_CRITERIA: Record<string, string[]> = THEME_ORDER.reduce(
+  (acc, t) => {
+    acc[t.id] = DIMENSIONS.filter((d) => d.themeId === t.id).map((d) => d.label);
+    return acc;
+  },
+  {} as Record<string, string[]>,
+);
+
 // Palier factuel de taille d'agglomération (dimension non directionnelle).
 function tailleVillePalier(c: IndexCommune): string {
   const t = tailleVille(c) ?? 0;
