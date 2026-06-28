@@ -29,10 +29,12 @@ import { AnchorAmorce } from "./AnchorAmorce";
 //     Jamais d'INSEE, jamais de metrics, jamais de clé technique.
 // ════════════════════════════════════════════════════════════════════════════
 
-// Rythme séquentiel voulu : on sépare le moment « ce produit m'a compris »
-// (phase "confirm", on montre la reformulation et on attend OK/Affiner) du
-// moment « ce produit réfléchit » (phase "matching" puis synthèse).
-type Phase = "idle" | "parsing" | "confirm" | "matching" | "results" | "empty" | "error";
+// Parcours en un clic : on ne barre plus l'accès aux résultats par un gate de
+// confirmation. Le parse enchaîne directement le match (déterministe), et
+// l'interprétation « ce produit m'a compris » remonte en EN-TÊTE des résultats
+// (repliable), comme une preuve EN CONTEXTE plutôt qu'un mur abstrait. La
+// correction reste possible via « Affiner » (re-parse explicite).
+type Phase = "idle" | "parsing" | "matching" | "results" | "empty" | "error";
 
 type AskMessage = { role: "user" | "assistant"; content: string };
 
@@ -152,13 +154,14 @@ function topCards(results: MatchResult[] | undefined | null): MatchResult[] {
   return (results ?? []).slice(0, 3);
 }
 
-// Correspondance affichée sur la carte : 1 confirmation (reason[0], le critère
-// demandé) + 1 découverte (atout positif non demandé, champ moteur r.decouverte ;
-// repli reason[1]). Dédup. Remplace la longue liste de raisons (qui se répétait
-// d'une carte à l'autre) par ce qui rapproche ET ce qui distingue. cf. CompareView.
+// Correspondance affichée sur la carte : 1 confirmation (reason[0], ce qui rapproche)
+// + 1 découverte (atout positif non demandé, champ moteur r.decouverte, garanti
+// DISTINCT d'une carte à l'autre par assignDecouverte). Pas de repli sur reasons[1] :
+// il n'est pas trio-distinct et ré-introduisait des cartes jumelles. Une découverte
+// nulle ⇒ la carte n'affiche que sa confirmation (honnête > répétition). cf. CompareView.
 function forces(r: MatchResult): string[] {
   const confirmation = r.reasons?.[0] ?? null;
-  const decouverte = r.decouverte ?? r.reasons?.[1] ?? null;
+  const decouverte = r.decouverte ?? null;
   const out: string[] = [];
   if (confirmation) out.push(confirmation);
   if (decouverte && decouverte !== confirmation) out.push(decouverte);
@@ -176,6 +179,16 @@ function matchTier(compatibility: number): string {
   if (compatibility >= 80) return "Forte correspondance";
   if (compatibility >= 65) return "Bonne correspondance";
   return "Correspondance partielle";
+}
+
+// Couleur du label de palier : la force se LIT à la couleur. « Forte » porte
+// l'accent chaud (le plus fort de la page) ; « Bonne » un vert calme et positif
+// mais distinct ; « partielle » s'atténue. Une bonne correspondance ne doit pas
+// se faire passer pour une forte.
+function matchTierClass(compatibility: number): string {
+  if (compatibility >= 80) return "text-accent/80";
+  if (compatibility >= 65) return "text-emerald-300/80";
+  return "text-muted";
 }
 
 function capture(event: string, props?: Record<string, unknown>) {
@@ -206,6 +219,204 @@ function fallbackSynthesis(parsed: ParsedProject, results: MatchResult[]): strin
   return `${parsed.reformulation}${reasonPart} Aucun ne réunit tout, chacun représente un arbitrage différent. Ouvrez celui qui vous parle pour comprendre ce qu'il implique vraiment.`;
 }
 
+// ── Panneau d'interprétation (« ce produit m'a compris ») ─────────────────────
+// Anciennement un gate BLOQUANT entre le parse et les résultats. Désormais un
+// EN-TÊTE des résultats : l'interprétation devient une preuve EN CONTEXTE, plus
+// un mur abstrait. La reformulation reste toujours visible ; le détail (critères,
+// périmètre, ce qui reste ouvert) est repliable pour aller vite aux communes. On
+// garde INTACTE la couche d'honnêteté (relief rendu visible, ambiguïtés en
+// hypothèses) : c'est le moat ; seul le caractère bloquant a sauté.
+function InterpretationPanel({
+  reformulation,
+  criteres,
+  hardZoneLabels,
+  prefZoneLabels,
+  inspZoneLabels,
+  exclLabels,
+  reliefLabel,
+  horsMesurePhrases,
+  ambiguities,
+  onRefine,
+}: {
+  reformulation: string;
+  criteres: { label: string; tooltip?: string | null }[];
+  hardZoneLabels: string[];
+  prefZoneLabels: string[];
+  inspZoneLabels: string[];
+  exclLabels: string[];
+  reliefLabel: string | null;
+  horsMesurePhrases: string[];
+  ambiguities?: { topic: string }[];
+  onRefine: () => void;
+}) {
+  // Compact par défaut : le haut de page est un bandeau mince « il m'a compris »
+  // (reformulation + critères), pour ne pas écraser la réponse (les territoires)
+  // qui suit. Le détail (périmètre, ce qui reste ouvert) s'ouvre à la demande.
+  const [open, setOpen] = useState(false);
+  const hasPerimetre =
+    hardZoneLabels.length > 0 ||
+    prefZoneLabels.length > 0 ||
+    inspZoneLabels.length > 0 ||
+    exclLabels.length > 0 ||
+    !!reliefLabel;
+  const hasOuvert = (ambiguities && ambiguities.length > 0) || horsMesurePhrases.length > 0;
+  const hasMore = hasPerimetre || hasOuvert; // ce qui vit derrière « Voir le détail »
+
+  return (
+    // Replié : bande mince (padding réduit) pour rapprocher la réponse. Déplié :
+    // padding plein, le détail a besoin d'air.
+    <div className={`glass rounded-2xl px-7 ${open ? "py-7" : "py-5"}`}>
+      {/* En-tête : titre + actions (Affiner / replier le détail) */}
+      <div className="flex items-start justify-between gap-4">
+        <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost">
+          <span className="text-emerald-400">✓</span> Ce que nous avons compris
+        </p>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={onRefine}
+            className="font-mono text-[10px] tracking-[0.08em] uppercase text-muted hover:text-label border border-white/[0.12] rounded-lg px-3 py-1.5"
+          >
+            Affiner
+          </button>
+          {hasMore && (
+            <button
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              className="font-mono text-[10px] tracking-[0.08em] uppercase text-muted hover:text-label border border-white/[0.12] rounded-lg px-3 py-1.5"
+            >
+              {open ? "Réduire" : "Voir le détail"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* La reformulation reste TOUJOURS visible (le « il m'a compris ») */}
+      <p
+        className="mt-3 text-[19px] leading-[1.6] text-label"
+        style={{ fontFamily: "'Instrument Serif', serif" }}
+      >
+        {reformulation}
+      </p>
+
+      {/* Critères : visibles en compact (sous la reformulation), c'est le « il m'a
+          compris » essentiel. N1 puces seules ; N2 une puce à nuance porte le
+          ChipTooltip. Pur affichage, aucun impact sur le score. */}
+      {criteres.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {criteres.map((c) =>
+            c.tooltip ? (
+              <ChipTooltip key={c.label} label={c.label} text={c.tooltip} />
+            ) : (
+              <span
+                key={c.label}
+                className="text-[12px] text-label/90 border border-white/[0.12] rounded-full px-3 py-1"
+              >
+                {c.label}
+              </span>
+            ),
+          )}
+        </div>
+      )}
+
+      {open && hasMore && (
+        <>
+          {/* Périmètre géographique avec gradient de force : l'ancre définit ou
+              incline l'espace de recherche, distinct des préférences. On distingue
+              visuellement dure (filtre), préférée (penchant) et inspiration. */}
+          {hasPerimetre && (
+            <div className="mt-6">
+              <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">
+                <span className="text-emerald-400">✓</span> Le périmètre recherché
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {hardZoneLabels.map((z) => (
+                  <span
+                    key={z}
+                    className="text-[12px] text-label/90 border border-accent/[0.35] bg-accent/[0.08] rounded-full px-3 py-1"
+                  >
+                    {z}
+                  </span>
+                ))}
+                {prefZoneLabels.map((z) => (
+                  <span
+                    key={z}
+                    className="text-[12px] text-label/80 border border-accent/[0.18] rounded-full px-3 py-1"
+                  >
+                    idéalement {z}
+                  </span>
+                ))}
+                {inspZoneLabels.map((z) => (
+                  <span
+                    key={z}
+                    className="text-[12px] text-muted border border-white/[0.1] rounded-full px-3 py-1"
+                  >
+                    ouvert à : {z}
+                  </span>
+                ))}
+                {exclLabels.map((z) => (
+                  <span
+                    key={z}
+                    className="text-[12px] text-muted border border-white/[0.12] rounded-full px-3 py-1"
+                  >
+                    hors {z}
+                  </span>
+                ))}
+              </div>
+              {/* Relief à portée : on rend l'interprétation VISIBLE (le critère était
+                  jadis silencieusement ignoré). Glose = sens retenu, pas la méthode. */}
+              {reliefLabel && (
+                <div className="mt-2.5 flex flex-col gap-1.5">
+                  <span className="self-start text-[12px] text-label/90 border border-accent/[0.22] rounded-full px-3 py-1">
+                    {reliefLabel}
+                  </span>
+                  <span
+                    className="flex items-baseline gap-1 pl-1 text-[12.5px] leading-snug text-label/55 italic"
+                    style={{ fontFamily: "'Instrument Serif', serif" }}
+                  >
+                    <span className="not-italic text-accent/50">→</span>
+                    reliefs montagneux à proximité
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Ce qui reste ouvert : reformulé en hypothèses, jamais en questions.
+              Tant qu'il n'y a pas de mécanisme d'affinage interactif, une question
+              ouverte crée une attente de réponse impossible à satisfaire. */}
+          {hasOuvert && (
+            <div className="mt-6">
+              <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">
+                <span className="text-amber-400">⚠</span> Ce qui reste ouvert
+              </p>
+              <ul className="flex flex-col gap-2">
+                {horsMesurePhrases.map((phrase, i) => (
+                  <li
+                    key={`hm-${i}`}
+                    className="text-[13px] leading-[1.6] text-muted border-l-2 border-amber-400/30 pl-3"
+                  >
+                    {phrase}
+                  </li>
+                ))}
+                {ambiguities?.map((a, i) => (
+                  <li
+                    key={`amb-${i}`}
+                    className="text-[13px] leading-[1.6] text-muted border-l-2 border-amber-400/30 pl-3"
+                  >
+                    <span className="text-label">{a.topic}</span> : sans précision de votre
+                    part, futur•e en retient une interprétation souple, sans en faire un
+                    critère éliminatoire.
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 export function OuVivreClient() {
   const [text, setText] = useState("");
   const [submittedText, setSubmittedText] = useState(""); // texte parsé, réutilisé pour la synthèse
@@ -231,6 +442,14 @@ export function OuVivreClient() {
   const [askTyped, setAskTyped] = useState("");
 
   const runSeq = useRef(0); // garde-fou contre les réponses obsolètes (re-submit)
+
+  // Ancre vers la zone de sortie : au clic « Explorer », on descend automatiquement
+  // à l'interprétation/résultats pour que la réponse soit dans le champ de vision
+  // sans scroll manuel. `searchStartedRef` distingue une recherche lancée par
+  // l'utilisateur (on scrolle) d'une réhydratation post-paywall (on ne touche pas
+  // la position). cf. effet plus bas, déclenché sur `phase`.
+  const outputAnchorRef = useRef<HTMLDivElement>(null);
+  const searchStartedRef = useRef(false);
 
   // ── Réhydratation au montage : restaure le parcours après un aller-retour
   // paywall, sans rejouer parse/match/synthèse (tout vit déjà dans le snapshot).
@@ -332,50 +551,8 @@ export function OuVivreClient() {
     [],
   );
 
-  // ── Étape 1 : PARSE → gate de confirmation (« ce produit m'a compris ») ────
-  const runParse = useCallback(async (input: string) => {
-    const project = input.trim();
-    if (project.length < 3) return;
-
-    clearSession(); // une nouvelle recherche remplace la session restaurable
-
-    const seq = ++runSeq.current;
-    // reset aval
-    setParsed(null);
-    setOutcome(null);
-    setSynthesis("");
-    setAskMessages([]);
-    setAskInput("");
-    setAskRemaining(FREE_ASK);
-    setAskLimit(false);
-    setRoutesNudge(false);
-    setErrorMsg(null);
-    setSubmittedText(project);
-
-    capture("life_project_submitted", { text_length: project.length });
-
-    setPhase("parsing");
-    try {
-      const r = await fetch("/api/comparateur-vie/parse", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: project }),
-      });
-      const data = await r.json();
-      if (!r.ok || !data.parsed) throw new Error(data.error ?? "parse");
-      if (seq !== runSeq.current) return;
-      capture("life_parse_succeeded");
-      setParsed(data.parsed as ParsedProject);
-      setPhase("confirm"); // on s'arrête : l'utilisateur valide ou affine
-    } catch {
-      if (seq !== runSeq.current) return;
-      capture("life_parse_failed");
-      setErrorMsg("Nous n'avons pas réussi à lire ce projet. Reformulez-le en une ou deux phrases.");
-      setPhase("error");
-    }
-  }, []);
-
-  // ── Étape 2 : MATCH + SYNTHÈSE (« ce produit réfléchit à ma situation ») ───
+  // ── Étape MATCH + SYNTHÈSE (« ce produit réfléchit à ma situation ») ───────
+  // Déclaré avant runParse car ce dernier l'enchaîne directement (plus de gate).
   const runMatch = useCallback(async (override?: { parsed: ParsedProject; submittedText: string }) => {
     const proj = override?.parsed ?? parsed;
     const subText = override?.submittedText ?? submittedText;
@@ -431,6 +608,54 @@ export function OuVivreClient() {
     }
   }, [parsed, submittedText, streamSynthesis]);
 
+  // ── Étape PARSE → enchaîne directement le match (plus de gate bloquant) ────
+  const runParse = useCallback(async (input: string) => {
+    const project = input.trim();
+    if (project.length < 3) return;
+
+    searchStartedRef.current = true; // autorise l'auto-scroll (recherche utilisateur)
+    clearSession(); // une nouvelle recherche remplace la session restaurable
+
+    const seq = ++runSeq.current;
+    // reset aval
+    setParsed(null);
+    setOutcome(null);
+    setSynthesis("");
+    setAskMessages([]);
+    setAskInput("");
+    setAskRemaining(FREE_ASK);
+    setAskLimit(false);
+    setRoutesNudge(false);
+    setErrorMsg(null);
+    setSubmittedText(project);
+
+    capture("life_project_submitted", { text_length: project.length });
+
+    setPhase("parsing");
+    try {
+      const r = await fetch("/api/comparateur-vie/parse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: project }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.parsed) throw new Error(data.error ?? "parse");
+      if (seq !== runSeq.current) return;
+      capture("life_parse_succeeded");
+      const parsedProject = data.parsed as ParsedProject;
+      setParsed(parsedProject);
+      // Plus de gate bloquant : on enchaîne directement le match (déterministe),
+      // l'interprétation s'affichera en en-tête des résultats. On passe par
+      // l'override car le state React n'est pas encore flushé (cf. launchFromAnchor).
+      void runMatch({ parsed: parsedProject, submittedText: project });
+    } catch {
+      if (seq !== runSeq.current) return;
+      capture("life_parse_failed");
+      setErrorMsg("Nous n'avons pas réussi à lire ce projet. Reformulez-le en une ou deux phrases.");
+      setPhase("error");
+    }
+  }, [runMatch]);
+
   // Affiner : revenir à l'édition du texte sans perdre ce qui est saisi.
   const refine = useCallback(() => {
     runSeq.current++; // invalide tout flux en cours
@@ -441,9 +666,10 @@ export function OuVivreClient() {
 
   // Lancement depuis l'amorce commune (Phase B) : on reçoit un ParsedProject déjà
   // assemblé par /anchor, on réinitialise l'aval comme un nouveau projet, puis on passe
-  // directement au matching (on saute l'étape "confirm"). cf. spec Phase B.
+  // directement au matching (même chemin que le texte libre désormais). cf. spec Phase B.
   const launchFromAnchor = useCallback(
     (p: ParsedProject, nom: string) => {
+      searchStartedRef.current = true; // autorise l'auto-scroll (recherche utilisateur)
       setOutcome(null);
       setSynthesis("");
       setAskMessages([]);
@@ -657,6 +883,21 @@ export function OuVivreClient() {
 
   const busy = phase === "parsing" || phase === "matching";
 
+  // Auto-scroll vers la zone de sortie. On scrolle sur chaque étape visible d'une
+  // recherche lancée par l'utilisateur : `parsing` (feedback immédiat, on suit le
+  // spinner) puis `results`/`empty` (la réponse est rendue, on re-cale dessus —
+  // car le re-rendu parsing→results déplace le contenu et annulait un scroll
+  // déclenché trop tôt). Le flag évite de bouger la page à la réhydratation.
+  useEffect(() => {
+    if (!searchStartedRef.current) return;
+    if (phase === "parsing" || phase === "results" || phase === "empty") {
+      const id = requestAnimationFrame(() =>
+        outputAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
+      return () => cancelAnimationFrame(id);
+    }
+  }, [phase]);
+
   // Rotation des phrases d'attente pendant le calcul et le début de la synthèse.
   const rotating = phase === "parsing" || phase === "matching" || (synthesizing && !synthesis);
   useEffect(() => {
@@ -808,7 +1049,7 @@ export function OuVivreClient() {
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ fontFamily: "'Instrument Sans', sans-serif" }}
           >
-            {phase === "confirm" || phase === "results" ? "Relancer une recherche" : "Explorer mes possibilités"}
+            {phase === "results" || phase === "empty" ? "Relancer une recherche" : "Explorer mes possibilités"}
             <span aria-hidden>→</span>
           </button>
         </div>
@@ -844,6 +1085,10 @@ export function OuVivreClient() {
       {/* ── Amorce « partez d'une commune » (Phase B, discrète, idle seulement) ── */}
       {phase === "idle" && <AnchorAmorce onLaunch={launchFromAnchor} />}
 
+      {/* Ancre de scroll : cible du saut automatique au lancement d'une recherche.
+          scroll-mt pour ne pas coller au tout en haut de la fenêtre. */}
+      <div ref={outputAnchorRef} className="scroll-mt-6" aria-hidden />
+
       {/* ── Loading ── */}
       {busy && (
         <div className="mt-10 flex items-center gap-3 text-muted">
@@ -851,159 +1096,6 @@ export function OuVivreClient() {
           <span className="text-[15px]">
             {waitingPhrase}
           </span>
-        </div>
-      )}
-
-      {/* ── Gate de confirmation : « ce produit m'a compris » ── */}
-      {phase === "confirm" && parsed && (
-        <div className="mt-9 glass rounded-2xl p-7">
-          {/* Ce que nous avons compris */}
-          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-3">
-            <span className="text-emerald-400">✓</span> Ce que nous avons compris
-          </p>
-          <p
-            className="text-[19px] leading-[1.6] text-label"
-            style={{ fontFamily: "'Instrument Serif', serif" }}
-          >
-            {parsed.reformulation}
-          </p>
-
-          {/* Les critères identifiés */}
-          {criteres.length > 0 && (
-            <div className="mt-6">
-              <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">
-                <span className="text-emerald-400">✓</span> Les critères identifiés
-              </p>
-              {/* N1 : puces seules. N2 : une puce à nuance porte un soulignement
-                  pointillé + bulle positive au survol/tap (ChipTooltip) ; les évidentes
-                  restent nues. Pur affichage, aucun impact sur le score. Les limites
-                  méthodologiques vivent dans le rapport, pas ici. */}
-              <div className="flex flex-wrap gap-2">
-                {criteres.map((c) =>
-                  c.tooltip ? (
-                    <ChipTooltip key={c.label} label={c.label} text={c.tooltip} />
-                  ) : (
-                    <span
-                      key={c.label}
-                      className="text-[12px] text-label/90 border border-white/[0.12] rounded-full px-3 py-1"
-                    >
-                      {c.label}
-                    </span>
-                  ),
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Périmètre géographique avec gradient de force : l'ancre définit ou
-              incline l'espace de recherche, distinct des préférences. On distingue
-              visuellement dure (filtre), préférée (penchant) et inspiration. */}
-          {(zoneAnchors.length > 0 || exclLabels.length > 0 || reliefLabel) && (
-            <div className="mt-6">
-              <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">
-                <span className="text-emerald-400">✓</span> Le périmètre recherché
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {hardZoneLabels.map((z) => (
-                  <span
-                    key={z}
-                    className="text-[12px] text-label/90 border border-accent/[0.35] bg-accent/[0.08] rounded-full px-3 py-1"
-                  >
-                    {z}
-                  </span>
-                ))}
-                {prefZoneLabels.map((z) => (
-                  <span
-                    key={z}
-                    className="text-[12px] text-label/80 border border-accent/[0.18] rounded-full px-3 py-1"
-                  >
-                    idéalement {z}
-                  </span>
-                ))}
-                {inspZoneLabels.map((z) => (
-                  <span
-                    key={z}
-                    className="text-[12px] text-muted border border-white/[0.1] rounded-full px-3 py-1"
-                  >
-                    ouvert à : {z}
-                  </span>
-                ))}
-                {exclLabels.map((z) => (
-                  <span
-                    key={z}
-                    className="text-[12px] text-muted border border-white/[0.12] rounded-full px-3 py-1"
-                  >
-                    hors {z}
-                  </span>
-                ))}
-              </div>
-              {/* Relief à portée : on rend l'interprétation VISIBLE (le critère était
-                  jadis silencieusement ignoré). Glose = sens retenu, pas la méthode. */}
-              {reliefLabel && (
-                <div className="mt-2.5 flex flex-col gap-1.5">
-                  <span className="self-start text-[12px] text-label/90 border border-accent/[0.22] rounded-full px-3 py-1">
-                    {reliefLabel}
-                  </span>
-                  <span
-                    className="flex items-baseline gap-1 pl-1 text-[12.5px] leading-snug text-label/55 italic"
-                    style={{ fontFamily: "'Instrument Serif', serif" }}
-                  >
-                    <span className="not-italic text-accent/50">→</span>
-                    reliefs montagneux à proximité
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Ce qui reste ouvert : reformulé en hypothèses, jamais en questions.
-              Tant qu'il n'y a pas de mécanisme d'affinage interactif, une question
-              ouverte crée une attente de réponse impossible à satisfaire. */}
-          {((parsed.ambiguities && parsed.ambiguities.length > 0) ||
-            horsMesurePhrases.length > 0) && (
-            <div className="mt-6">
-              <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">
-                <span className="text-amber-400">⚠</span> Ce qui reste ouvert
-              </p>
-              <ul className="flex flex-col gap-2">
-                {horsMesurePhrases.map((phrase, i) => (
-                  <li
-                    key={`hm-${i}`}
-                    className="text-[13px] leading-[1.6] text-muted border-l-2 border-amber-400/30 pl-3"
-                  >
-                    {phrase}
-                  </li>
-                ))}
-                {parsed.ambiguities?.map((a, i) => (
-                  <li
-                    key={`amb-${i}`}
-                    className="text-[13px] leading-[1.6] text-muted border-l-2 border-amber-400/30 pl-3"
-                  >
-                    <span className="text-label">{a.topic}</span> : sans précision de votre
-                    part, futur•e en retient une interprétation souple, sans en faire un
-                    critère éliminatoire.
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => runMatch()}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px]"
-              style={{ fontFamily: "'Instrument Sans', sans-serif" }}
-            >
-              Lancer l&apos;analyse
-              <span aria-hidden>→</span>
-            </button>
-            <button
-              onClick={refine}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-lg text-[14px] text-muted hover:text-label border border-white/[0.12] hover:border-white/[0.22] transition-colors"
-            >
-              Modifier ma demande
-            </button>
-          </div>
         </div>
       )}
 
@@ -1015,78 +1107,58 @@ export function OuVivreClient() {
       )}
 
       {/* ── Aucun territoire ── */}
-      {phase === "empty" && (
-        <div className="mt-10 rounded-xl border border-white/[0.1] bg-white/[0.03] px-6 py-7">
-          <p className="text-[16px] leading-[1.7] text-label">
-            {outcome?.message ?? "Aucun territoire ne respecte l'ensemble de vos contraintes. Essayez d'élargir un critère."}
-          </p>
+      {phase === "empty" && parsed && (
+        <div className="mt-12">
+          {/* L'interprétation reste visible : l'utilisateur voit ce qui a été compris
+              même sans résultat, et peut affiner en connaissance de cause. */}
+          <InterpretationPanel
+            reformulation={parsed.reformulation}
+            criteres={criteres}
+            hardZoneLabels={hardZoneLabels}
+            prefZoneLabels={prefZoneLabels}
+            inspZoneLabels={inspZoneLabels}
+            exclLabels={exclLabels}
+            reliefLabel={reliefLabel}
+            horsMesurePhrases={horsMesurePhrases}
+            ambiguities={parsed.ambiguities}
+            onRefine={refine}
+          />
+          <div className="mt-7 rounded-xl border border-white/[0.1] bg-white/[0.03] px-6 py-7">
+            <p className="text-[16px] leading-[1.7] text-label">
+              {outcome?.message ?? "Aucun territoire ne respecte l'ensemble de vos contraintes. Essayez d'élargir un critère."}
+            </p>
+          </div>
         </div>
       )}
 
       {/* ── Résultats ── */}
       {phase === "results" && parsed && (
         <div className="mt-12">
-          {/* Rappel discret du projet (déjà confirmé au gate) */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <p className="text-[13px] leading-[1.6] text-ghost max-w-[640px]">
-              {parsed.reformulation}
-            </p>
-            <button
-              onClick={refine}
-              className="shrink-0 font-mono text-[10px] tracking-[0.08em] uppercase text-muted hover:text-label border border-white/[0.12] rounded-lg px-3 py-1.5"
-            >
-              Affiner
-            </button>
-          </div>
+          {/* En-tête d'interprétation compact (« ce que nous avons compris »). On
+              le garde mince et au-dessus : la réponse (les territoires) vient juste
+              après, comme premier grand événement de la page. Les preuves (zones
+              appliquées, synthèse) redescendent SOUS les cartes (appui, pas étape). */}
+          <InterpretationPanel
+            reformulation={parsed.reformulation}
+            criteres={criteres}
+            hardZoneLabels={hardZoneLabels}
+            prefZoneLabels={prefZoneLabels}
+            inspZoneLabels={inspZoneLabels}
+            exclLabels={exclLabels}
+            reliefLabel={reliefLabel}
+            horsMesurePhrases={horsMesurePhrases}
+            ambiguities={parsed.ambiguities}
+            onRefine={refine}
+          />
 
-          {/* Périmètre assumé, affiché honnêtement. Les ancres dures ont borné la
-              recherche (on dit où et selon quel sens) ; les ancres souples l'ont
-              seulement inclinée (on le dit sans prétendre à une frontière). */}
-          {outcome?.appliedZones?.some((z) => z.strength === "hard") && (
-            <p className="mt-3 text-[12px] leading-[1.6] text-ghost">
-              Recherche limitée à{" "}
-              {outcome.appliedZones.filter((z) => z.strength === "hard").map((z) => z.label).join(", ")} :{" "}
-              {outcome.appliedZones.filter((z) => z.strength === "hard").map((z) => z.convention).join(" ; ")}.
+          {/* Cartes territoires — LE CŒUR DE LA RÉPONSE. Kicker + respiration
+              franche pour la détacher comme premier événement, sans surface en plus. */}
+          <div className="mt-14">
+            <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-2">
+              Territoires à explorer
             </p>
-          )}
-          {outcome?.appliedZones?.some((z) => z.strength !== "hard") && (
-            <p className="mt-3 text-[12px] leading-[1.6] text-ghost">
-              Résultats orientés vers{" "}
-              {outcome.appliedZones.filter((z) => z.strength !== "hard").map((z) => z.label).join(", ")}, sans
-              s&apos;y limiter.
-            </p>
-          )}
-
-          {/* Synthèse */}
-          <div className="mt-7 glass rounded-2xl p-7">
-            <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-3">
-              Ce que votre recherche révèle
-            </p>
-            {synthesis ? (
-              <p className="text-[16px] leading-[1.8] text-label whitespace-pre-line">
-                {synthesis}
-                {synthesizing && <span className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-accent/70 animate-pulse" />}
-              </p>
-            ) : !AUTO_SYNTHESIS && !synthesizing ? (
-              <button
-                type="button"
-                onClick={generateSynthesis}
-                className="text-[14px] text-label border border-accent/40 bg-accent/[0.08] rounded-full px-4 py-2 hover:bg-accent/[0.14] transition-colors"
-              >
-                Générer la synthèse
-              </button>
-            ) : (
-              <p className="flex items-center gap-2.5 text-[15px] text-ghost">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                {waitingPhrase}
-              </p>
-            )}
-          </div>
-
-          {/* Cartes territoires */}
-          <div className="mt-9">
             <h2
-              className="font-normal text-[24px] leading-[1.2] tracking-[-0.4px] text-label mb-2"
+              className="font-normal text-[26px] leading-[1.15] tracking-[-0.4px] text-label mb-2"
               style={{ fontFamily: "'Instrument Serif', serif" }}
             >
               Les territoires à regarder.
@@ -1099,8 +1171,19 @@ export function OuVivreClient() {
               {top.map((r, i) => (
                 <article
                   key={r.insee}
-                  className="glass rounded-2xl p-7 flex flex-col"
-                  style={{ borderTop: "2px solid var(--accent)" }}
+                  // Élévation RÉELLE : les cartes sont LA réponse, elles doivent se
+                  // détacher des blocs d'appui (synthèse, Pack) qui partagent le même
+                  // verre (--bg-elev 0.03). On les monte d'un cran (surface ~0.05,
+                  // entre --bg-elev-2 et -3), bordure plus nette (--border-2), ombre
+                  // portée sombre (décolle du fond) + liseré clair en haut (surface
+                  // éclairée) + halo accent chaud. Visible en 1×, sans dépendre du
+                  // débord d'ombre. L'accent revient à la réponse, plus à l'upsell.
+                  className="rounded-2xl p-7 flex flex-col border backdrop-blur-[12px] shadow-[0_14px_34px_-10px_rgba(0,0,0,0.55),0_0_52px_-18px_var(--accent),inset_0_1px_0_rgba(255,255,255,0.06)]"
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    borderColor: "var(--border-2)",
+                    borderTop: "2px solid var(--accent)",
+                  }}
                 >
                   {/* Identité : l'essence du lieu, en tête (remplace « Territoire N »). */}
                   <p className="text-[13px] leading-[1.5] text-accent italic">{r.identite}</p>
@@ -1117,7 +1200,7 @@ export function OuVivreClient() {
                   {/* Correspondance : palier qualitatif + ce qui rapproche du projet
                       (1 confirmation demandée + 1 découverte non demandée, distinct d'une
                       carte à l'autre). Remplace la longue liste de raisons qui se répétait. */}
-                  <p className="mt-4 font-mono text-[9px] tracking-[0.06em] uppercase text-accent/80">
+                  <p className={`mt-4 font-mono text-[9px] tracking-[0.06em] uppercase ${matchTierClass(r.compatibility)}`}>
                     {matchTier(r.compatibility)}
                   </p>
                   {forces(r).length > 0 && (
@@ -1157,14 +1240,59 @@ export function OuVivreClient() {
 
           </div>
 
+          {/* Preuve / profondeur SOUS la réponse : la synthèse narrative puis le
+              périmètre réellement appliqué. Appui de la réponse, pas étape avant elle. */}
+          <div className="mt-7 glass rounded-2xl p-7">
+            <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-3">
+              Ce que votre recherche révèle
+            </p>
+            {synthesis ? (
+              <p className="text-[16px] leading-[1.8] text-label whitespace-pre-line">
+                {synthesis}
+                {synthesizing && <span className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-accent/70 animate-pulse" />}
+              </p>
+            ) : !AUTO_SYNTHESIS && !synthesizing ? (
+              <button
+                type="button"
+                onClick={generateSynthesis}
+                className="text-[14px] text-label border border-accent/40 bg-accent/[0.08] rounded-full px-4 py-2 hover:bg-accent/[0.14] transition-colors"
+              >
+                Générer la synthèse
+              </button>
+            ) : (
+              <p className="flex items-center gap-2.5 text-[15px] text-ghost">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                {waitingPhrase}
+              </p>
+            )}
+          </div>
+
+          {/* Périmètre assumé, affiché honnêtement. Les ancres dures ont borné la
+              recherche (on dit où et selon quel sens) ; les ancres souples l'ont
+              seulement inclinée (on le dit sans prétendre à une frontière). */}
+          {outcome?.appliedZones?.some((z) => z.strength === "hard") && (
+            <p className="mt-3 text-[12px] leading-[1.6] text-ghost">
+              Recherche limitée à{" "}
+              {outcome.appliedZones.filter((z) => z.strength === "hard").map((z) => z.label).join(", ")} :{" "}
+              {outcome.appliedZones.filter((z) => z.strength === "hard").map((z) => z.convention).join(" ; ")}.
+            </p>
+          )}
+          {outcome?.appliedZones?.some((z) => z.strength !== "hard") && (
+            <p className="mt-3 text-[12px] leading-[1.6] text-ghost">
+              Résultats orientés vers{" "}
+              {outcome.appliedZones.filter((z) => z.strength !== "hard").map((z) => z.label).join(", ")}, sans
+              s&apos;y limiter.
+            </p>
+          )}
+
           {/* Décider : un seul pont vers la comparaison approfondie payante, juste sous
               les 3 fiches (l'œil vient de voir les options et leurs compromis). L'ancienne
               vue intermédiaire « Ce qui les distingue » est fusionnée dans les cartes. */}
           {canPack && (
-            <div
-              className="mt-8 glass rounded-2xl p-7 flex flex-col md:flex-row md:items-center justify-between gap-5"
-              style={{ borderColor: "var(--accent)", boxShadow: "0 0 0 1px var(--accent)" }}
-            >
+            // Pack repérable mais non dominant : plus de halo ni de bordure accent
+            // pleine (ils criaient plus fort que la réponse). Il reste identifiable
+            // par son label accent et son bouton ; la réponse garde la priorité.
+            <div className="mt-8 glass rounded-2xl p-7 flex flex-col md:flex-row md:items-center justify-between gap-5">
               <div>
                 <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-1.5">
                   Pack Décision · 39 €

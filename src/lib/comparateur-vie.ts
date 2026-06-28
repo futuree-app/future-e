@@ -1024,17 +1024,25 @@ function assignDecouverte(
   byInsee: Map<string, IndexCommune>,
   requestedKeys: Set<PreferenceKey>,
 ): void {
+  // Distinct DANS le groupe affiché (comme assignIdentite) : la découverte est la
+  // 2e force qui DIFFÉRENCIE les cartes. Si deux communes ont la même meilleure
+  // dimension non demandée, la 2e prend sa suivante ; si rien de distinct ne reste
+  // au-dessus du seuil, on n'affiche pas de découverte (mieux qu'une répétition).
+  const used = new Set<PreferenceKey>();
   for (const r of shownPicks) {
     const c = byInsee.get(r.insee);
     if (!c) { r.decouverte = null; continue; }
-    let bestKey: PreferenceKey | null = null;
-    let bestScore = 65; // seuil de saillance (band haute)
+    // Candidats au-dessus du seuil de saillance, triés par force décroissante.
+    const cands: { key: PreferenceKey; score: number }[] = [];
     for (const k of DECOUVERTE_KEYS) {
       if (requestedKeys.has(k)) continue; // non demandée seulement
       const s = subScore(k, c);
-      if (s != null && s > bestScore) { bestScore = s; bestKey = k; }
+      if (s != null && s > 65) cands.push({ key: k, score: s }); // seuil band haute
     }
-    r.decouverte = bestKey ? reasonText(bestKey, c) : null;
+    cands.sort((a, b) => b.score - a.score);
+    const pick = cands.find((x) => !used.has(x.key)) ?? null; // distinct, sinon rien
+    if (pick) { used.add(pick.key); r.decouverte = reasonText(pick.key, c); }
+    else r.decouverte = null;
   }
 }
 
