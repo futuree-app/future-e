@@ -87,8 +87,12 @@ export function ThemeExplorer({ themes, trio, defaultThemeId }: Props) {
                       />
                     </svg>
                   </div>
+                  {/* Verrou honnête : on dit OÙ ça vaut le coup (les communes divergent) plutôt
+                      qu'une quantité de critères (qui sentait le rationnement). Dérivé de
+                      l'avantage déjà calculé, rien de neuf dévoilé. cf. rapports-agents/
+                      product-strategist 2026-06-28 (rendu exact = ressort du Design Critic). */}
                   <p className="mt-2 font-mono text-[10px] tracking-[0.12em] uppercase text-ghost/80">
-                    {th.lignes.length} critère{th.lignes.length > 1 ? "s" : ""} comparé{th.lignes.length > 1 ? "s" : ""}
+                    {th.lignes.some((l) => l.avantage.type === "avantage") ? "Les communes s'écartent ici" : "Profils proches ici"}
                   </p>
                   <p className="mt-1 text-[12.5px] leading-[1.5] text-ghost">{th.lignes.map((l) => l.label).join(" · ")}</p>
                 </button>

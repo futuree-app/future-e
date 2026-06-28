@@ -1296,8 +1296,10 @@ export function OuVivreClient() {
                   Comparer les trois en profondeur.
                 </h3>
                 <p className="mt-1.5 text-[13px] leading-[1.6] text-muted max-w-[520px]">
-                  Les trois territoires sur l&apos;ensemble des critères, vos questions, et des
-                  pistes supplémentaires pour le même projet.
+                  Les trois côte à côte là où elles se départagent vraiment, et ce qu&apos;elles
+                  deviennent, pas seulement ce qu&apos;elles sont aujourd&apos;hui. Vos questions
+                  trouvent une réponse, et de nouvelles pistes pour le même projet si aucune des
+                  trois ne tranche.
                 </p>
               </div>
               <button

@@ -32,6 +32,14 @@ function parseCommunes(raw: string | string[] | undefined): string[] {
     .slice(0, 3);
 }
 
+// Forme de prose courte par thème (« la mobilité », « les services »), pour nommer
+// l'inconnu décisif dans l'upsell sans réciter une quantité de critères.
+const COURT_BY_THEME = new Map(THEME_ORDER.map((t) => [t.id, t.court] as const));
+function joinFr(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? "";
+  return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
+}
+
 const Shell = ({ children }: { children: React.ReactNode }) => (
   <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
     <Navbar />
@@ -125,6 +133,20 @@ export default async function ComparateurPage({
   // Repli : 1er thème. L'explorateur gère ensuite l'ouverture/verrouillage côté client.
   const revealedThemeId = comparaison.divergence?.themeId ?? comparaison.themes[0].id;
 
+  // Upsell : NOMMER l'inconnu décisif (les thèmes où les communes divergent encore et que le
+  // lecteur n'a pas dévoilés), pas une quantité de critères. Données déjà calculées (divergence
+  // + avantage par ligne) ; aucun dévoilement neuf (les titres sont déjà sur les cartes
+  // verrouillées). cf. rapports-agents/product-strategist 2026-06-28 (tension décisionnelle).
+  const autresDivergents = comparaison.themes
+    .filter((th) => th.id !== comparaison.divergence?.themeId)
+    .filter((th) => th.lignes.some((l) => l.avantage.type === "avantage"))
+    .map((th) => COURT_BY_THEME.get(th.id) ?? th.titre.toLowerCase());
+  const divCourt = comparaison.divergence ? COURT_BY_THEME.get(comparaison.divergence.themeId) ?? null : null;
+  const upsellLede =
+    divCourt && autresDivergents.length > 0
+      ? `Vos communes se départagent d'abord sur ${divCourt}, vous venez de le voir. Restent ${joinFr(autresDivergents)} : c'est là que se joue le reste de votre choix, et vous ne les y avez pas encore vues s'écarter.`
+      : "Vous voyez où chacune penche. Reste à savoir laquelle colle à votre façon d'habiter, et c'est dans le détail que ça se tranche.";
+
   return (
     <Shell>
       <Hero compact />
@@ -189,10 +211,13 @@ export default async function ComparateurPage({
           face-à-face), l'upsell reste repérable par son bouton. cf. dé-emphase /ou-vivre. */}
       <div className="mt-10 glass rounded-2xl p-6 md:p-7 border border-white/[0.1]">
         <p className="text-[16.5px] leading-[1.6] text-label" style={{ textWrap: "pretty" }}>
-          {bindOrphans("Vous voyez où chacune penche. Ce qui reste, c'est de savoir laquelle correspond à votre façon d'habiter : le Pack détaille les sept thèmes critère par critère, situe chaque commune et montre ce qui les départage vraiment, là où ça décide votre choix.")}
+          {bindOrphans(upsellLede)}
         </p>
         <p className="mt-3 text-[15px] leading-[1.6] text-muted" style={{ textWrap: "pretty" }}>
-          {bindOrphans("39 €. Une décision de lieu de vie pèse des années : c'est peu pour la trancher les yeux ouverts. Accès immédiat, rapport interactif que vous gardez.")}
+          {bindOrphans("Vous avez vu ce que ces communes sont aujourd'hui. Reste ce qu'elles deviennent : leur trajectoire, ce qui pèse le plus sur une décision qui vous engage des années.")}
+        </p>
+        <p className="mt-3 text-[15px] leading-[1.6] text-muted" style={{ textWrap: "pretty" }}>
+          {bindOrphans("39 €. Accès immédiat, rapport interactif que vous gardez.")}
         </p>
         <Link
           href={ctaHref}
