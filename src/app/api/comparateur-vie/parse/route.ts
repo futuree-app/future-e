@@ -9,7 +9,15 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse, type NextRequest } from "next/server";
-import { PREFERENCE_KEYS, type ParsedProject } from "@/lib/comparateur-vie";
+import {
+  PREFERENCE_KEYS,
+  resolveCommuneByName,
+  deriveAnchorPreferences,
+  anchorReformulationSuffix,
+  perimeterAllowsCoast,
+  type ParsedProject,
+  type IndexCommune,
+} from "@/lib/comparateur-vie";
 import { ANCHOR_ZONE_TOKENS, EXCLUSION_ZONE_TOKENS } from "@/lib/geo-zones";
 
 export const runtime = "nodejs";
@@ -118,6 +126,16 @@ const TOOL_INPUT_SCHEMA = {
         required: ["key", "weight"],
       },
     },
+    communeAncre: {
+      type: "array",
+      description:
+        "Communes-ANCRES : l'utilisateur PART d'une ville qu'il aime / connaît pour en chercher d'autres dans le même esprit. Déclencheurs : « une ville comme {ville} », « dans le genre de {ville} », « le même esprit que {ville} », « à la {ville} », « j'aime {ville}, je veux retrouver ça ailleurs ». DISTINCT de : nearPlace (être PRÈS de la ville), excludePlace (QUITTER la ville), sizeRelativeTo (sa TAILLE relative). Plusieurs ancres possibles (« comme Brest ou Lorient »). « surtout pas comme {ville} » n'est PAS une ancre : ignorez le négatif. Donnez le nom de la ville tel quel, sans décrire ses qualités (le système les calcule).",
+      items: {
+        type: "object",
+        properties: { label: { type: "string" } },
+        required: ["label"],
+      },
+    },
     ambiguities: {
       type: "array",
       description: "Points réellement ambigus à clarifier, avec UNE question simple chacun. Maximum 2. Vide si tout est clair.",
@@ -189,6 +207,18 @@ ANCRES GÉOGRAPHIQUES (zones / excludeZones) : règles spécifiques
 - Exclusion de VILLE → excludePlace. "quitter Lyon", "fuir Bordeaux", "ne plus vivre à Lille", "partir de Nantes" → excludePlace:[{label:"Lyon"}] etc. (le moteur exclut l'agglomération). Une ville n'est PAS un jeton de zone : ne la mettez jamais dans excludeZones.
 - TAILLE RELATIVE → sizeRelativeTo. "plus petit que Lyon", "pas plus grand que Bordeaux" → {label:"Lyon", direction:"smaller"}. "plus grand que Niort" → {label:"Niort", direction:"larger"}. Donnez le label brut, jamais une population.
 - Vous ne fournissez QUE des jetons et leur force. N'écrivez jamais vous-même de liste de départements.
+
+COMMUNE-ANCRE (communeAncre) : « partir d'une ville qu'on aime »
+- Quand l'utilisateur s'appuie sur une ville comme POINT DE DÉPART de ses goûts (« une ville comme Brest », « dans le genre de Lorient », « le même esprit que Bayonne », « j'aime Brest, je veux retrouver ça ailleurs »), ajoutez-la dans communeAncre:[{label:"Brest"}]. Le système en dérivera lui-même des préférences ; vous n'extrayez QUE le label.
+- NE DÉCRIVEZ PAS vous-même les qualités de la ville (sa mer, son calme, sa taille) et n'ajoutez aucune préférence à sa place : la dérivation est déterministe et faite après vous. Dans la reformulation, mentionnez la ville sobrement, sans en lister les mérites.
+- N'employez JAMAIS le mot « similaire » ni « identique » dans la reformulation, même si l'utilisateur l'emploie.
+- Quatre champs VOISINS à ne pas confondre :
+  • « comme Brest » = communeAncre (le même effet de vie).
+  • « près de Brest » = nearPlace (proximité géographique).
+  • « quitter Brest » / « partir de Brest » = excludePlace.
+  • « plus petit que Brest » = sizeRelativeTo.
+- Une ville peut cumuler les rôles : « une ville comme Brest mais dans le Sud » = communeAncre:[{label:"Brest"}] + zones:[{zone:"sud",strength:"hard"}]. L'ancre ne porte PAS la géographie (« dans le Sud » reste une zone) ni le climat.
+- « surtout pas comme Brest » : ce n'est pas une ancre positive. Ne la mettez pas dans communeAncre (ignorez le négatif), ne fabriquez pas d'exclusion à partir d'elle.
 
 PRÉFÉRENCES DISPONIBLES (liste fermée)
 - faible_chaleur : étés plus frais, moins de canicules
@@ -298,6 +328,72 @@ export async function POST(request: NextRequest) {
     }
 
     const parsed = toolBlock.input as ParsedProject;
+
+    // ── Ancrage « une ville comme {commune} » ─────────────────────────────────
+    // Dérivation DÉTERMINISTE post-LLM : le LLM n'a extrait que le label. On traduit
+    // l'ancre en préférences nommées que le moteur conforme consomme. matchProjects
+    // reste inchangé. cf. spec 2026-06-28-explorer-depuis-commune-design.md (A.3/A.4/A.5).
+    const ancres = Array.isArray(parsed.communeAncre) ? parsed.communeAncre : [];
+    if (ancres.length > 0) {
+      const resolved: IndexCommune[] = [];
+      const unresolved: string[] = [];
+      for (const a of ancres) {
+        const label = a?.label?.trim();
+        if (!label) continue;
+        const entry = await resolveCommuneByName(label);
+        if (entry) resolved.push(entry);
+        else unresolved.push(label);
+      }
+
+      if (resolved.length > 0) {
+        const deriv = deriveAnchorPreferences(resolved);
+        const hc = (parsed.hardConstraints ??= {});
+        if (!Array.isArray(parsed.preferences)) parsed.preferences = [];
+
+        // L'explicite écrase le dérivé, géographie comprise : si l'utilisateur a fixé une
+        // zone dure sans littoral (« comme Brest mais en Auvergne »), on retire le fait
+        // identitaire mer dérivé (préférence ET trait nommé) plutôt que de promettre une mer
+        // que le périmètre ne peut pas livrer. cf. perimeterAllowsCoast (honnêteté du signal).
+        const hasMer = deriv.preferences.some((p) => p.key === "proximite_mer");
+        if (hasMer && !(await perimeterAllowsCoast(hc))) {
+          deriv.preferences = deriv.preferences.filter((p) => p.key !== "proximite_mer");
+          deriv.traits = deriv.traits.filter((t) => t.key !== "proximite_mer");
+        }
+
+        // Fusion préférences : l'EXPLICITE écrase le dérivé (même key -> garder l'explicite).
+        const explicitKeys = new Set(parsed.preferences.map((p) => p.key));
+        for (const p of deriv.preferences) {
+          if (!explicitKeys.has(p.key)) parsed.preferences.push(p);
+        }
+
+        // Taille : l'explicite écrase le gabarit dérivé. « Explicite » couvre la contrainte
+        // dure (communeSize / sizeRelativeTo) MAIS AUSSI une préférence de taille nommée
+        // (eviter_grandes_villes / prefere_grande_ville) : sinon le plancher dur dérivé de
+        // l'ancre (« comme Brest » -> min 81 500) contredirait « surtout pas une grande ville ».
+        const explicitSizePref =
+          explicitKeys.has("eviter_grandes_villes") || explicitKeys.has("prefere_grande_ville");
+        if (deriv.communeSize && !hc.communeSize && !hc.sizeRelativeTo && !explicitSizePref) {
+          hc.communeSize = deriv.communeSize;
+        }
+
+        // Ancre exclue du trio : ne pas proposer {ville} en réponse à « comme {ville} ».
+        // Réutilise l'exclusion d'agglomération existante du moteur (excludePlace).
+        hc.excludePlace = [
+          ...(hc.excludePlace ?? []),
+          ...resolved.map((e) => ({ label: e.nom })),
+        ];
+
+        // Transparence : on NOMME exactement les traits dérivés. Jamais « similaire ».
+        const suffix = anchorReformulationSuffix(resolved.map((e) => e.nom), deriv.traits.map((t) => t.text));
+        if (suffix) parsed.reformulation = `${parsed.reformulation ?? ""} ${suffix}`.trim();
+      }
+
+      if (unresolved.length > 0) {
+        parsed.reformulation =
+          `${parsed.reformulation ?? ""} Je n'ai pas pu lire ${unresolved.join(", ")} ; dites-moi plutôt ce qui compte pour vous.`.trim();
+      }
+    }
+
     return NextResponse.json({ parsed });
   } catch (error) {
     console.error("[comparateur-vie/parse]", error);
