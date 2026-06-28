@@ -152,6 +152,10 @@ export type ParsedProject = {
   // culturelle, caractère affectif). Pur affichage honnête au gate, aucun impact
   // sur le score. cf. plan 2026-06-03 (constat QA : ces notions étaient avalées en silence).
   horsMesure?: { term: string; kind: HorsMesureKind }[];
+  // Communes-ANCRES (« une ville comme {commune} »). Le LLM n'extrait que le label ;
+  // la dérivation des traits est déterministe, dans la route parse (post-LLM).
+  // ANCRAGE, pas similarité : traduit en préférences nommées, jamais en score. cf. Pari #7.
+  communeAncre?: { label: string }[];
 };
 
 export type MatchResult = {
@@ -2279,6 +2283,129 @@ export function getCommuneDistinctive(c: IndexCommune): string | null {
     if (!best || extremity > best.extremity) best = { label: d.label, extremity };
   }
   return best?.label ?? null;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// Explorer à partir d'une commune (ANCRAGE, pas similarité) — Pari #7.
+// On dérive d'une commune-ancre des PRÉFÉRENCES NOMMÉES (signature distinctive +
+// faits identitaires) que matchProjects consomme comme n'importe quel projet.
+// Aucun score de similarité entre communes. N'hérite NI de la région NI du climat.
+// ════════════════════════════════════════════════════════════════════════════
+
+// Critères de « signature » candidats : traits de vie distinctifs, SANS climat (non
+// hérité) ni géographie (pilotée par les zones explicites). Liste verrouillée au spec.
+const SIGNATURE_KEYS: PreferenceKey[] = [
+  "vie_locale", "calme_sonore", "nature", "mobilite_quotidienne",
+  "acces_transports", "vie_etudiante", "croissance_demographique",
+  "faible_exposition_industrielle",
+];
+const SIGNATURE_MIN = 70;      // percentile minimal pour qu'un trait « distingue » la commune
+const SIGNATURE_MAX_KEYS = 4;  // 1 dominant (poids 3) + jusqu'à 3 secondaires (poids 2)
+const ANCRE_COAST_KM = 15;     // au-delà, pas « au bord de la mer » (aligné sur buildSignature)
+const ANCRE_SIZE_BAND = 2.5;   // gabarit : [pop/2.5, pop*2.5] autour de la taille d'agglo
+
+// subScore mais SANS ses valeurs par défaut (donnée absente) : on n'invente pas une
+// signature à partir d'un champ manquant. Dans subScore, calme_sonore/expo défaut=100,
+// vie_locale/mobilite défaut=0 ; ici on les neutralise si la donnée brute manque.
+function signatureScore(key: PreferenceKey, c: IndexCommune): number | null {
+  switch (key) {
+    case "calme_sonore": if (c.calmeSonore?.score == null) return null; break;
+    case "faible_exposition_industrielle": if (c.expoIndustrielle?.score == null) return null; break;
+    case "mobilite_quotidienne": if (c.reseauLocal?.acces == null) return null; break;
+    case "vie_locale": if (c.vieLocale?.score == null) return null; break;
+  }
+  return subScore(key, c);
+}
+
+export type AnchorDerivation = {
+  preferences: Preference[];
+  communeSize: { min: number; max: number } | null;
+  // Phrases humaines == EXACTEMENT les traits dérivés (pour la reformulation honnête).
+  traits: string[];
+};
+
+// Dérivation déterministe d'UNE commune-ancre. Lit l'index déjà chargé (server-only) :
+// l'appelant a résolu le label via resolveCommuneByName, donc loadIndex a tourné.
+export function communeToPreferences(entry: IndexCommune): AnchorDerivation {
+  const preferences: Preference[] = [];
+  const traits: string[] = [];
+
+  // 1) Signature distinctive : critères où la commune se distingue au national.
+  const ranked = SIGNATURE_KEYS
+    .map((key) => ({ key, s: signatureScore(key, entry) }))
+    .filter((x): x is { key: PreferenceKey; s: number } => x.s != null && x.s >= SIGNATURE_MIN)
+    .sort((a, b) => b.s - a.s)
+    .slice(0, SIGNATURE_MAX_KEYS);
+  ranked.forEach((x, i) => {
+    preferences.push({ key: x.key, weight: i === 0 ? 3 : 2 });
+    traits.push(reasonText(x.key, entry));
+  });
+
+  // 2) Faits identitaires évidents. Bord de mer -> proximite_mer (poids selon distance).
+  if (entry.distance_cote_km != null && entry.distance_cote_km <= ANCRE_COAST_KM) {
+    preferences.push({ key: "proximite_mer", weight: entry.distance_cote_km <= 5 ? 3 : 2 });
+    traits.push(reasonText("proximite_mer", entry));
+  }
+
+  // 3) Gabarit de taille (taille d'AGGLOMÉRATION), fourchette large autour de l'ancre.
+  const pop = tailleVille(entry);
+  const communeSize = pop != null
+    ? { min: Math.round(pop / ANCRE_SIZE_BAND), max: Math.round(pop * ANCRE_SIZE_BAND) }
+    : null;
+
+  return { preferences, communeSize, traits };
+}
+
+// Plusieurs ancres (« comme Brest ou Lorient ») -> INTERSECTION des signatures (ce que
+// les ancres ont en COMMUN), poids = min (prudence), taille = fourchette englobante.
+export function deriveAnchorPreferences(entries: IndexCommune[]): AnchorDerivation {
+  if (entries.length === 0) return { preferences: [], communeSize: null, traits: [] };
+  if (entries.length === 1) return communeToPreferences(entries[0]);
+
+  const per = entries.map(communeToPreferences);
+  const weightsByKey = new Map<PreferenceKey, number[]>();
+  for (const d of per) {
+    for (const p of d.preferences) {
+      const arr = weightsByKey.get(p.key) ?? [];
+      arr.push(p.weight);
+      weightsByKey.set(p.key, arr);
+    }
+  }
+  const preferences: Preference[] = [];
+  const traits: string[] = [];
+  for (const [key, weights] of weightsByKey) {
+    if (weights.length !== entries.length) continue; // pas partagée par TOUTES les ancres
+    preferences.push({ key, weight: Math.min(...weights) });
+    traits.push(reasonText(key, entries[0])); // trait partagé, phrasé sur la 1re ancre
+  }
+  const sizes = per
+    .map((d) => d.communeSize)
+    .filter((s): s is { min: number; max: number } => s != null);
+  const communeSize = sizes.length
+    ? { min: Math.min(...sizes.map((s) => s.min)), max: Math.max(...sizes.map((s) => s.max)) }
+    : null;
+  return { preferences, communeSize, traits };
+}
+
+// Résolution nom d'ancre -> entrée d'index (réutilise nameIndex partagé). Paris / Lyon /
+// Marseille (index par arrondissement, absents de nameIndex) -> null : ancre ignorée (spec A.5).
+export async function resolveCommuneByName(label: string): Promise<IndexCommune | null> {
+  const key = normalizeName(label ?? "");
+  if (!key) return null;
+  const names = await nameIndex();
+  return names.get(key) ?? null;
+}
+
+// Suffixe de reformulation DÉTERMINISTE : nomme EXACTEMENT les traits dérivés de l'ancre.
+// Jamais « similaire », jamais de score. Vouvoiement, pas de tiret cadratin.
+export function anchorReformulationSuffix(anchorLabels: string[], traits: string[]): string {
+  if (anchorLabels.length === 0) return "";
+  const villes = listFr(anchorLabels);
+  if (traits.length === 0) {
+    return `Vous partez de ${villes}. Voici des communes à explorer dans cet esprit.`;
+  }
+  const objet = anchorLabels.length > 1 ? "ce que ces villes ont en commun" : `ce qui fait ${anchorLabels[0]}`;
+  return `Vous aimez ${villes} pour ${listFr(traits)}. Voici des communes qui portent ${objet}.`;
 }
 
 // Paris / Lyon / Marseille : communes à arrondissements. L'index les stocke par arrondissement
