@@ -12,10 +12,13 @@ interface CommuneResult {
 }
 
 interface CommuneSearchProps {
-  slug: string;
+  slug?: string;
   accent?: string;
   placeholder?: string;
   basePath?: string; // ex: '/chaleur' — override du chemin de destination
+  // Si fourni, on appelle ce callback au choix d'une commune AU LIEU de naviguer
+  // (utilisé par l'amorce « partez d'une commune » de /ou-vivre, Phase B).
+  onSelect?: (commune: { code: string; nom: string }) => void;
 }
 
 export function CommuneSearch({
@@ -23,6 +26,7 @@ export function CommuneSearch({
   accent = '#60a5fa',
   placeholder = 'Saisissez votre commune…',
   basePath,
+  onSelect,
 }: CommuneSearchProps) {
   const [value, setValue] = useState('');
   const [results, setResults] = useState<CommuneResult[]>([]);
@@ -66,6 +70,10 @@ export function CommuneSearch({
   function handleSelect(commune: CommuneResult) {
     setOpen(false);
     setValue(commune.nom);
+    if (onSelect) {
+      onSelect({ code: commune.code, nom: commune.nom });
+      return;
+    }
     startTransition(() => {
       router.push(basePath ? `${basePath}/${commune.code}` : `/territoires/${slug}/${commune.code}`);
     });
