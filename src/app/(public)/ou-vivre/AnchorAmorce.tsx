@@ -75,13 +75,22 @@ export function AnchorAmorce({
 
   if (!expanded) {
     return (
-      <button
-        onClick={() => setExpanded(true)}
-        className="mt-4 text-[13px] text-muted hover:text-label no-underline transition-colors"
-        style={{ fontFamily: "'Instrument Sans', sans-serif" }}
-      >
-        Pas d&apos;idée ? Partez d&apos;une commune que vous aimez <span aria-hidden>→</span>
-      </button>
+      <div className="mt-6 flex flex-col items-center gap-3">
+        <div className="flex w-full max-w-[420px] items-center gap-3 text-ghost">
+          <span className="h-px flex-1 bg-white/10" />
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em]">ou</span>
+          <span className="h-px flex-1 bg-white/10" />
+        </div>
+        <button
+          onClick={() => setExpanded(true)}
+          className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/5 px-5 py-2.5 text-[13px] font-medium text-accent transition-colors hover:border-accent hover:bg-accent/10"
+          style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+        >
+          <span aria-hidden>⌖</span>
+          Pas d&apos;idée ? Partez d&apos;une commune que vous aimez
+          <span aria-hidden>→</span>
+        </button>
+      </div>
     );
   }
 

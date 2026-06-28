@@ -60,6 +60,9 @@ export async function POST(request: NextRequest) {
   const preferences = deriv.preferences.filter((p) => !removed.has(p.key));
   const traits = deriv.traits.filter((t) => !removed.has(t.key));
   const keepSize = deriv.communeSize != null && !removed.has(SIZE_KEY);
+  // Préférences RETIRÉES (hors sentinel taille) : à ne pas re-surfacer en récit (découverte/
+  // signaux), sinon un trait que l'utilisateur a décoché réapparaît dans les cartes.
+  const suppressNarrativeKeys = deriv.preferences.filter((p) => removed.has(p.key)).map((p) => p.key);
 
   // chips affichées : traits gardés (keyés) + puce taille en dernier si gardée.
   const chips: { key: string; text: string }[] = traits.map((t) => ({ key: t.key, text: t.text }));
@@ -73,6 +76,7 @@ export async function POST(request: NextRequest) {
     },
     preferences,
     communeAncre: [{ label: entry.nom }],
+    ...(suppressNarrativeKeys.length ? { suppressNarrativeKeys } : {}),
   };
 
   return NextResponse.json({ found: true, nom: entry.nom, chips, parsed });

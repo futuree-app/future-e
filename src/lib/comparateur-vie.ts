@@ -156,6 +156,11 @@ export type ParsedProject = {
   // la dérivation des traits est déterministe, dans la route parse (post-LLM).
   // ANCRAGE, pas similarité : traduit en préférences nommées, jamais en score. cf. Pari #7.
   communeAncre?: { label: string }[];
+  // Traits dérivés que l'utilisateur a EXPLICITEMENT retirés (Phase B). On les traite
+  // comme « déjà adressés » : le moteur ne les re-surface pas en découverte ni en signal
+  // ambiant (sinon « j'ai retiré X » et X réapparaît dans les cartes). N'affecte NI le
+  // score NI le filtre. cf. assignDecouverte / assignSignaux (union dans requestedKeys).
+  suppressNarrativeKeys?: PreferenceKey[];
 };
 
 export type MatchResult = {
@@ -2845,6 +2850,11 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   const requestedKeys = new Set<PreferenceKey>(
     parsed.preferences.filter((p) => PREFERENCE_KEYS.includes(p.key)).map((p) => p.key),
   );
+  // Traits explicitement retirés à l'ancre (Phase B) : ne pas les re-surfacer en récit
+  // (découverte / signaux). On les ajoute aux clés « déjà adressées ». Hors score/filtre.
+  for (const k of parsed.suppressNarrativeKeys ?? []) {
+    if (PREFERENCE_KEYS.includes(k)) requestedKeys.add(k);
+  }
   // Clés de compromis absolu par commune (faiblesse demandée scorant < 50), pour
   // l'unicité par dimension dans le trio (cf. assignCompromis).
   const tradeoffKeyByInsee = new Map<string, PreferenceKey | null>(
