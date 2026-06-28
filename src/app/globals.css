@@ -1028,6 +1028,23 @@ a {
   border: 1px solid var(--c-border);
 }
 
+/* Carte « réponse » : le verre surélevé réservé au CŒUR d'un écran (les cartes
+   territoires de /ou-vivre, le face-à-face du comparateur). Surface plus claire
+   que .glass (~0.05 vs 0.03), bordure plus nette, ombre portée sombre + halo
+   accent + liseré clair en haut → elle se détache des blocs d'appui (synthèse,
+   Pack) qui restent en .glass. Source unique, partagée entre les portes. */
+.card-answer {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-2);
+  border-top: 2px solid var(--accent);
+  box-shadow:
+    0 14px 34px -10px rgba(0, 0, 0, 0.55),
+    0 0 52px -18px var(--accent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
 /* Dialog natif — styles non reproductibles en Tailwind */
 dialog.wizard-dialog {
   margin: auto;

@@ -1172,18 +1172,10 @@ export function OuVivreClient() {
                 <article
                   key={r.insee}
                   // Élévation RÉELLE : les cartes sont LA réponse, elles doivent se
-                  // détacher des blocs d'appui (synthèse, Pack) qui partagent le même
-                  // verre (--bg-elev 0.03). On les monte d'un cran (surface ~0.05,
-                  // entre --bg-elev-2 et -3), bordure plus nette (--border-2), ombre
-                  // portée sombre (décolle du fond) + liseré clair en haut (surface
-                  // éclairée) + halo accent chaud. Visible en 1×, sans dépendre du
-                  // débord d'ombre. L'accent revient à la réponse, plus à l'upsell.
-                  className="rounded-2xl p-7 flex flex-col border backdrop-blur-[12px] shadow-[0_14px_34px_-10px_rgba(0,0,0,0.55),0_0_52px_-18px_var(--accent),inset_0_1px_0_rgba(255,255,255,0.06)]"
-                  style={{
-                    background: "rgba(255,255,255,0.05)",
-                    borderColor: "var(--border-2)",
-                    borderTop: "2px solid var(--accent)",
-                  }}
+                  // Élévation RÉELLE via la classe partagée .card-answer (cf. globals.css) :
+                  // surface plus claire que les blocs d'appui, bordure nette, ombre + halo
+                  // accent + liseré clair. Même traitement que le face-à-face du comparateur.
+                  className="card-answer rounded-2xl p-7 flex flex-col"
                 >
                   {/* Identité : l'essence du lieu, en tête (remplace « Territoire N »). */}
                   <p className="text-[13px] leading-[1.5] text-accent italic">{r.identite}</p>

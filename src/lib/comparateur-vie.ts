@@ -1295,8 +1295,8 @@ export const THEME_ORDER: { id: string; titre: string; gp: string; court: string
 // dont le pire tier s'affiche en rouge si une autre commune fait mieux. directionnel=false
 // = préférence non universelle (pas de gagnant). Premier jet, à calibrer.
 const DIMENSIONS: ComparaisonDim[] = [
-  { id: "etes_frais", label: "Étés frais", themeId: "climat", key: "faible_chaleur", paliers: ["Étés frais", "Étés tempérés", "Étés chauds"], gp: "les étés frais", forte: "ses étés frais", aide: "À quel point les étés restent supportables côté chaleur.", risque: false, directionnel: true },
-  { id: "douceur", label: "Douceur du climat", themeId: "climat", key: "douceur_climat", paliers: ["Climat doux", "Climat contrasté", "Hivers rigoureux"], gp: "la douceur du climat", forte: "la douceur de son climat", aide: "Des hivers tempérés et des étés sans excès.", risque: false, directionnel: true },
+  { id: "etes_frais", label: "Étés frais", themeId: "climat", key: "faible_chaleur", paliers: ["Étés frais", "Étés tempérés", "Étés chauds"], gp: "les étés frais", forte: "ses étés frais", aide: "Spécifiquement les étés : à quel point la chaleur y reste supportable. La douceur d'ensemble (hivers et étés) est notée à part.", risque: false, directionnel: true },
+  { id: "douceur", label: "Douceur à l'année", themeId: "climat", key: "douceur_climat", paliers: ["Climat doux", "Climat contrasté", "Hivers rigoureux"], gp: "la douceur du climat", forte: "la douceur de son climat", aide: "La douceur d'ensemble sur l'année : hivers tempérés autant qu'étés sans excès. Les étés seuls sont notés à part.", risque: false, directionnel: true },
   { id: "ensoleillement", label: "Ensoleillement", themeId: "climat", key: "ensoleillement_recherche", paliers: ["Très ensoleillé", "Moyennement ensoleillé", "Peu ensoleillé"], gp: "l'ensoleillement", forte: "son ensoleillement", aide: "Le rayonnement solaire reçu au sol (ERA5), exprimé sans nombre d'heures. Affiché sans gagnant : c'est une préférence, pas un avantage universel.", risque: false, directionnel: false },
   { id: "inondation", label: "Inondation", themeId: "risques", key: "faible_risque_inondation", paliers: ["Risque d'inondation faible", "Risque modéré", "Risque élevé"], gp: "le risque d'inondation", forte: "son faible risque d'inondation", aide: "Ce que dit l'historique d'inondations du territoire.", risque: true, directionnel: true },
   { id: "feu", label: "Feu", themeId: "risques", key: "faible_risque_feu", paliers: ["Risque de feu faible", "Risque modéré", "Risque élevé"], gp: "le risque de feu", forte: "son faible risque de feu", aide: "L'exposition du secteur au risque d'incendie.", risque: true, directionnel: true },
@@ -1818,7 +1818,12 @@ function buildCompromisCandidates(
       const mean = groupMean.get(k);
       if (s == null || mean == null || !COMPROMIS_NEG[k]) continue;
       const delta = mean - s; // positif = en retrait du groupe
-      if (delta >= COMPROMIS_GAP) rel.push({ key: k, delta });
+      // Tout retrait RÉEL (sous le groupe) est candidat, même modeste : on préfère
+      // surfacer le vrai point faible relatif de chaque commune plutôt qu'un repli
+      // qui la louerait (« sans faiblesse marquée » = avantage déguisé, proscrit dans
+      // un face-à-face neutre). Le tri par delta garde le plus saillant en tête ; le
+      // comparatif « qu'à X » reste gardé par COMPROMIS_GAP dans add().
+      if (delta > 0) rel.push({ key: k, delta });
     }
     rel.sort((a, b) => b.delta - a.delta);
     for (const x of rel) add(x.key, x.delta);
@@ -1857,9 +1862,11 @@ function assignCompromis(
       used.add(chosen.key);
       r.compromis = chosen.text;
     } else {
-      // Cardinal-agnostique : 2 ou 3 communes en mode choix (« des deux » / « des trois »).
-      const nMot = shownPicks.length >= 3 ? "trois" : "deux";
-      r.compromis = `Le bon compromis des ${nMot}, sans faiblesse marquée.`;
+      // Aucun retrait relatif libre : la commune est au niveau ou au-dessus du groupe
+      // sur toutes les dimensions comparées. On n'INVENTE pas de revers, mais on ne la
+      // loue pas non plus (« sans faiblesse marquée » donnait un avantage). On n'affiche
+      // rien : les cartes gèrent l'absence (rendu conditionnel sur r.compromis).
+      r.compromis = "";
     }
   }
 }

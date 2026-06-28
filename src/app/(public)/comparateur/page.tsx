@@ -140,23 +140,30 @@ export default async function ComparateurPage({
           Le narratif IA streamé a été retiré (cannibalisait le Pack, cf. board). */}
       <ModeChoixSynthese arbitrage={comparaison.arbitrage} spatialContext={comparaison.spatialContext} />
 
-      {/* 2. LE FACE-À-FACE : une signature (offre) + un revers (compromis) par commune. */}
-      <div className={`mt-8 grid grid-cols-1 ${colsClass} gap-4`}>
-        {trio.map((r, i) => (
-          <div key={r.insee} className="glass rounded-2xl p-5 flex flex-col">
-            <div className="flex items-baseline gap-2 mb-3">
-              <span className="font-mono text-[10px] text-accent">{String(i + 1).padStart(2, "0")}</span>
-              <span className="text-[22px] leading-[1.1] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                {r.nom}
-              </span>
+      {/* 2. LE FACE-À-FACE : une signature (offre) + un revers (compromis) par commune.
+          C'est le CŒUR de la réponse → cartes surélevées (.card-answer, partagé avec
+          /ou-vivre) + kicker, pour qu'il se détache des blocs d'appui. */}
+      <section className="mt-10">
+        <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-3">Côte à côte</p>
+        <div className={`grid grid-cols-1 ${colsClass} gap-4`}>
+          {trio.map((r, i) => (
+            <div key={r.insee} className="card-answer rounded-2xl p-5 flex flex-col">
+              <div className="flex items-baseline gap-2 mb-3">
+                <span className="font-mono text-[10px] text-accent">{String(i + 1).padStart(2, "0")}</span>
+                <span className="text-[22px] leading-[1.1] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                  {r.nom}
+                </span>
+              </div>
+              <p className="text-[15.5px] leading-[1.55] text-accent italic">{r.identite}</p>
+              {r.compromis && (
+                <p className="mt-3 pt-3 border-t border-white/[0.08] text-[14.5px] leading-[1.55] text-muted">
+                  {r.compromis}
+                </p>
+              )}
             </div>
-            <p className="text-[15.5px] leading-[1.55] text-accent italic">{r.identite}</p>
-            <p className="mt-3 pt-3 border-t border-white/[0.08] text-[14.5px] leading-[1.55] text-muted">
-              {r.compromis}
-            </p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </section>
 
       {/* 3. L'EXPLORATEUR : un thème dévoilé (défaut repondéré), le reste en vitrine cliquable. */}
       <ThemeExplorer themes={comparaison.themes} trio={trio} defaultThemeId={revealedThemeId} />
@@ -176,8 +183,10 @@ export default async function ComparateurPage({
         }))}
       />
 
-      {/* 5. CTA Pack : l'amorce prend le relais de la tension, ancrée sur la VALEUR. */}
-      <div className="mt-10 glass rounded-2xl p-6 md:p-7 border border-accent/20">
+      {/* 5. CTA Pack : l'amorce prend le relais de la tension, ancrée sur la VALEUR.
+          Bordure neutre (plus d'accent) : l'accent est réservé à la réponse (le
+          face-à-face), l'upsell reste repérable par son bouton. cf. dé-emphase /ou-vivre. */}
+      <div className="mt-10 glass rounded-2xl p-6 md:p-7 border border-white/[0.1]">
         <p className="text-[16.5px] leading-[1.6] text-label" style={{ textWrap: "pretty" }}>
           {bindOrphans("Vous voyez où chacune penche. Ce qui reste, c'est de savoir laquelle correspond à votre façon d'habiter : le Pack détaille les sept thèmes critère par critère, situe chaque commune et montre ce qui les départage vraiment, là où ça décide votre choix.")}
         </p>
