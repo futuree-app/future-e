@@ -573,7 +573,7 @@ export default async function TerritoireCommunePage({
               lineHeight: 1.7,
             }}
           >
-            Comparaison avec les communes voisines · Recommandations selon votre profil · Le Fil
+            Comparaison avec les communes voisines · Recommandations selon votre profil
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
             <Link

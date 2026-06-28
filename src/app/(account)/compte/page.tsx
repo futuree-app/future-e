@@ -105,7 +105,7 @@ export default async function ComptePage() {
 
           <aside className="glass rounded-2xl p-7 relative overflow-hidden">
             <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">
-              {fullAccess ? "Votre abonnement" : "Ce que le compte gratuit garde"}
+              {fullAccess ? "Votre accès" : "Ce que le compte gratuit garde"}
             </p>
             <h2 className="font-normal text-[20px] leading-[1.2] text-label mb-5 tracking-[-0.2px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
               {fullAccess ? "Six dimensions, toutes ouvertes." : "Votre première lecture, retrouvable."}

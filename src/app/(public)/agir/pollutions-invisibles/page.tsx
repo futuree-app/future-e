@@ -1,7 +1,5 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { getCurrentSessionUser } from '@/lib/user-account';
-import { canAccessActionPage, normalizeAccount } from '@/lib/access';
 import { PollutionLookup } from '@/components/PollutionLookup';
 
 export const dynamic = 'force-dynamic';
@@ -158,25 +156,7 @@ const css = `
   }
 `;
 
-export default async function AgirPollutionsInvisiblesPage() {
-  const { supabase, user } = await getCurrentSessionUser();
-  let hasFullAccess = false;
-
-  if (user) {
-    const { data: accountRow } = await supabase
-      .from('user_accounts')
-      .select('plan, status')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    const account = normalizeAccount(
-      accountRow
-        ? { plan: accountRow.plan, status: accountRow.status, email: user.email ?? null }
-        : { email: user.email ?? null },
-    );
-    hasFullAccess = canAccessActionPage(account);
-  }
-
+export default function AgirPollutionsInvisiblesPage() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: css }} />
@@ -232,8 +212,7 @@ export default async function AgirPollutionsInvisiblesPage() {
           Avant d&apos;agir, savoir. Plusieurs bases publiques permettent de vérifier ce qui concerne votre commune directement ici, sans quitter la page.
         </p>
 
-        {hasFullAccess ? (
-          <>
+        <>
             {/* Level 1 — lookup blocks */}
             <PollutionLookup />
 
@@ -369,34 +348,9 @@ export default async function AgirPollutionsInvisiblesPage() {
                 </li>
               </ul>
             </div>
-          </>
-        ) : (
-          <div style={{ position: 'relative', marginTop: '40px' }}>
-            <div style={{ maxHeight: '260px', overflow: 'hidden', opacity: 0.45 }}>
-              <div className="lookup-block">
-                <div className="lookup-header">
-                  <div>
-                    <div className="lookup-title">Installations industrielles à proximité</div>
-                    <div className="lookup-sub">Registre IREP · Géorisques · Rejets déclarés par substance</div>
-                  </div>
-                </div>
-                <div className="lookup-body">
-                  <p className="lookup-desc">Les installations classées ICPE déclarent annuellement leurs rejets dans l&apos;air, l&apos;eau et les sols.</p>
-                  <div className="lookup-form">
-                    <input className="lookup-input" type="text" placeholder="Nom de commune…" disabled />
-                    <button className="lookup-btn" disabled>Rechercher</button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* CTA toujours visible : page Agir générique, ouverte. Pointe vers la décision, sans la tenter. */}
             <div style={{
-              position: 'absolute', inset: 0,
-              background: 'linear-gradient(to bottom, transparent 0%, var(--bg) 75%)',
-              pointerEvents: 'none',
-            }} />
-            <div style={{
-              position: 'relative',
-              marginTop: '24px',
+              marginTop: '40px',
               padding: '32px',
               background: 'var(--bg-elev)',
               border: '1px solid var(--border-hi)',
@@ -411,7 +365,7 @@ export default async function AgirPollutionsInvisiblesPage() {
                 color: 'var(--fg-4)',
                 margin: '0 0 12px',
               }}>
-                Le Fil · prochainement
+                Aller plus loin
               </p>
               <p style={{
                 fontFamily: 'var(--font-serif)',
@@ -420,7 +374,7 @@ export default async function AgirPollutionsInvisiblesPage() {
                 color: 'var(--fg-1)',
                 margin: '0 0 8px',
               }}>
-                Interrogez les bases publiques<br />depuis cette page
+                Trouvez les communes les moins exposées<br />aux pollutions, selon votre projet de vie.
               </p>
               <p style={{
                 fontSize: '14px',
@@ -428,10 +382,10 @@ export default async function AgirPollutionsInvisiblesPage() {
                 margin: '0 0 28px',
                 lineHeight: '1.6',
               }}>
-                IREP, sites pollués, qualité de l&apos;air, eau potable — pour votre commune, sans quitter la page.
+                IREP, sites pollués, qualité de l&apos;air, eau potable : ces signaux entrent dans le choix d&apos;une commune où vivre.
               </p>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <Link href="/le-fil" style={{
+                <Link href="/ou-vivre" style={{
                   display: 'inline-block',
                   padding: '12px 28px',
                   background: 'var(--accent)',
@@ -442,12 +396,11 @@ export default async function AgirPollutionsInvisiblesPage() {
                   textTransform: 'uppercase',
                   textDecoration: 'none',
                 }}>
-                  Être prévenu·e à l&apos;ouverture
+                  Trouver où vivre
                 </Link>
               </div>
             </div>
-          </div>
-        )}
+          </>
 
       </article>
 

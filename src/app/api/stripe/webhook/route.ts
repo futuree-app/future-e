@@ -176,18 +176,18 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     await resend.emails.send({
       from: "futur•e <hello@futur-e.fr>",
       to: userEmail,
-      subject: "Vos 14 € couvrent votre premier mois du Fil",
+      subject: "Le Fil arrive : soyez prévenu·e en avant-première",
       scheduledAt: sendAt.toISOString(),
       html: `
         <p>Votre rapport interactif futur•e est là depuis une semaine.</p>
         <p>
-          Si vous souhaitez suivre l'évolution de votre situation mois par mois,
-          vos 14 € couvrent votre premier mois du Fil, et une partie du second.
-          Rien à repayer avant le mois 3.
+          La suite, c'est Le Fil : votre rapport qui reste vivant, avec des mises
+          à jour et des alertes au fil de l'évolution de votre territoire. Il n'est
+          pas encore ouvert.
         </p>
         <p>
-          <a href="https://futur-e.fr/inscription?upgrade=true">
-            Activer Le Fil →
+          <a href="https://futur-e.fr/le-fil">
+            Rejoindre la liste d'attente →
           </a>
         </p>
         <p>— futur•e</p>

@@ -548,7 +548,7 @@ export async function POST(request: NextRequest) {
 
     if (plan === "free") {
       return NextResponse.json(
-        { error: "AskFuture est réservé aux abonnés Rapport et Le Fil." },
+        { error: "AskFuture est réservé aux détenteurs d'un rapport." },
         { status: 403 },
       );
     }

@@ -457,8 +457,8 @@ export default async function CommunePage({
     <h2 style="--accent:${hub.accent}">Analyse territoriale et comparaison</h2>
     <p>
       ${commune.nom_commune} se situe dans le département ${dept}.
-      Le Fil, prochainement, donnera accès à une comparaison avec les communes voisines
-      et aux recommandations personnalisées selon votre situation.
+      futur•e permet de comparer cette commune avec d'autres et d'accéder à des
+      recommandations personnalisées selon votre situation.
     </p>
 
     <h2 style="--accent:${hub.accent}">Recommandations pour les habitants</h2>
@@ -605,10 +605,12 @@ export default async function CommunePage({
 
         {/* PaywallGate pour l'analyse détaillée */}
         <PaywallGate
+          variant="report"
           hasFullAccess={hasFullAccess}
           previewHtml={previewHtml}
           fullHtml={fullHtml}
           accent={hub.accent}
+          unlockHref={`/territoire/${insee_code}/debloquer?nom=${encodeURIComponent(commune.nom_commune)}&source=savoir`}
         />
 
         {/* Maillage interne — SEO */}

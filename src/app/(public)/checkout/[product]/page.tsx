@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { CheckoutPaymentPanel } from "@/components/CheckoutPaymentPanel";
 import { FilWaitlistForm } from "@/components/FilWaitlistForm";
@@ -114,6 +114,9 @@ export default async function CheckoutPage({
   params: Promise<{ product: string }>;
 }) {
   const { product: productSlug } = await params;
+  // Le Fil n'est pas achetable : pas de faux checkout, on renvoie vers la liste
+  // d'attente honnête (passe « pas d'upsell pour un produit inexistant »).
+  if (productSlug === "le-fil") redirect("/le-fil");
   const product = getCheckoutProduct(productSlug);
 
   if (!product) notFound();

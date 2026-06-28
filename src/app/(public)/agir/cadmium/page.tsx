@@ -2,8 +2,6 @@ import Link from 'next/link';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import type { Metadata } from 'next';
 import { PaywallGate } from '@/components/PaywallGate';
-import { getCurrentSessionUser } from '@/lib/user-account';
-import { canAccessActionPage, normalizeAccount } from '@/lib/access';
 
 export const dynamic = 'force-dynamic';
 
@@ -333,24 +331,6 @@ const fullHtml = `
 `;
 
 export default async function AgirCadmiumPage() {
-  const { supabase, user } = await getCurrentSessionUser();
-  let hasFullAccess = false;
-
-  if (user) {
-    const { data: accountRow } = await supabase
-      .from('user_accounts')
-      .select('plan, status')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    const account = normalizeAccount(
-      accountRow
-        ? { plan: accountRow.plan, status: accountRow.status, email: user.email ?? null }
-        : { email: user.email ?? null },
-    );
-    hasFullAccess = canAccessActionPage(account);
-  }
-
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: css }} />
@@ -374,7 +354,7 @@ export default async function AgirCadmiumPage() {
 
       <article className="article">
         <PaywallGate
-          hasFullAccess={hasFullAccess}
+          variant="open"
           previewHtml={previewHtml}
           fullHtml={fullHtml}
           accent="#f87171"

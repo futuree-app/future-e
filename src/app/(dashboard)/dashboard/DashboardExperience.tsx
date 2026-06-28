@@ -648,8 +648,8 @@ export function DashboardExperience({
 
         {!interactive ? (
           <div className="proto-note">
-            Le plan one-shot reste verrouillé sur la lecture `gwl20` 2050. Les
-            plans Le Fil et Foyer peuvent comparer `gwl15`, `gwl20` et `gwl30`.
+            Le plan one-shot reste sur la lecture `gwl20` 2050. La comparaison des
+            scénarios `gwl15`, `gwl20` et `gwl30` arrivera avec Le Fil.
           </div>
         ) : null}
       </div>

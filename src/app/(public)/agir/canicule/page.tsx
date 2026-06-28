@@ -1,8 +1,6 @@
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import type { Metadata } from 'next';
-import { getCurrentSessionUser } from '@/lib/user-account';
-import { canAccessActionPage, normalizeAccount } from '@/lib/access';
 
 export const dynamic = 'force-dynamic';
 
@@ -129,25 +127,7 @@ const css = `
   }
 `;
 
-export default async function CaniculePage() {
-  const { supabase, user } = await getCurrentSessionUser();
-  let hasFullAccess = false;
-
-  if (user) {
-    const { data: accountRow } = await supabase
-      .from('user_accounts')
-      .select('plan, status')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    const account = normalizeAccount(
-      accountRow
-        ? { plan: accountRow.plan, status: accountRow.status, email: user.email ?? null }
-        : { email: user.email ?? null },
-    );
-    hasFullAccess = canAccessActionPage(account);
-  }
-
+export default function CaniculePage() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: css }} />
@@ -228,8 +208,7 @@ export default async function CaniculePage() {
           <span className="keystat-src">Source : Inserm · Santé publique France, analyse canicule 2003</span>
         </div>
 
-        {hasFullAccess ? (
-          <>
+        <>
             <h2>Ce que vous pouvez faire avant le prochain épisode</h2>
 
             <div className="steps">
@@ -363,31 +342,21 @@ export default async function CaniculePage() {
                 </li>
               </ul>
             </section>
-          </>
-        ) : (
-          <div style={{ position: 'relative', marginTop: '40px' }}>
-            <div style={{ maxHeight: '260px', overflow: 'hidden', pointerEvents: 'none', userSelect: 'none', opacity: 0.45 }}>
-              <h2 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: '28px', color: 'var(--fg-1)', margin: '0 0 20px' }}>
-                Ce que vous pouvez faire avant le prochain épisode
-              </h2>
-              <p style={{ color: 'var(--fg-3)', fontSize: '15px', lineHeight: 1.7 }}>Configurer les alertes Météo-France, identifier la pièce la plus fraîche, repérer les espaces frais publics, vérifier votre traitement avec votre médecin…</p>
-            </div>
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '180px', background: 'linear-gradient(to bottom, transparent, var(--bg))', pointerEvents: 'none' }} />
+            {/* CTA toujours visible : page Agir générique, ouverte. Pointe vers la décision, sans la tenter. */}
             <div style={{ marginTop: '40px', padding: '40px 36px', background: 'var(--bg-elev)', border: '1px solid var(--border-1)', borderLeft: '2px solid var(--accent)', borderRadius: '8px', textAlign: 'center' }}>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '16px' }}>
-                Le Fil · prochainement
+                Aller plus loin
               </div>
               <p style={{ fontFamily: 'var(--font-serif)', fontSize: '22px', lineHeight: 1.4, color: 'var(--fg-1)', margin: '0 0 28px', fontWeight: 400 }}>
-                Les étapes et profils détaillés arrivent<br />avec l&apos;ouverture du Fil.
+                Trouvez les communes qui restent vivables<br />face à la chaleur, selon votre projet de vie.
               </p>
               <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <Link href="/le-fil" style={{ display: 'inline-flex', alignItems: 'center', padding: '14px 28px', background: 'var(--accent)', color: '#060812', fontFamily: 'var(--font-sans)', fontSize: '15px', fontWeight: 600, textDecoration: 'none', borderRadius: '6px' }}>
-                  Être prévenu·e à l&apos;ouverture
+                <Link href="/ou-vivre" style={{ display: 'inline-flex', alignItems: 'center', padding: '14px 28px', background: 'var(--accent)', color: '#060812', fontFamily: 'var(--font-sans)', fontSize: '15px', fontWeight: 600, textDecoration: 'none', borderRadius: '6px' }}>
+                  Trouver où vivre
                 </Link>
               </div>
             </div>
-          </div>
-        )}
+          </>
 
       </article>
 
