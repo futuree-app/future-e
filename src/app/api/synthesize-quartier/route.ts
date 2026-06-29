@@ -75,6 +75,13 @@ La relation du lecteur à la commune change la POSTURE du texte, jamais les fait
 - "current_residence" : le lecteur VIT ici. Vous pouvez vous adresser à son vécu ("vos étés", "le quotidien ici"), et les repères de terrain (s'ils sont fournis) confrontent ce vécu aux projections.
 - "considering_living" : le lecteur ENVISAGE de s'y installer, il n'y vit PAS. Adoptez la posture de quelqu'un qui pèse une arrivée : "ce à quoi s'attendre en venant ici", "ce que vous choisiriez". Ne lui prêtez JAMAIS d'observations vécues ni de connaissance du terrain, ne dites jamais "vos étés ici". Aucun repère de terrain n'est fourni dans ce cas, n'en inventez pas. Le contenu factuel reste identique, seul le cadrage diffère.
 
+ATTENTES DU LECTEUR — CHAMP "attentes_decouverte" (uniquement en découverte)
+Si présent, le lecteur a indiqué ce qui compte le plus pour lui (priorite) et/ou ce qui pourrait le faire hésiter (hesitation). Ce sont des ATTENTES, jamais des faits ni des observations.
+- Servez-vous de la priorité pour HIÉRARCHISER les éléments réellement étayés par les données : mettez en avant ce qui y répond. N'inventez aucun élément et ne parlez pas d'un sujet absent des données juste parce qu'il est attendu.
+- Examinez l'hésitation honnêtement SI un signal pertinent existe ; ne confirmez JAMAIS une inquiétude sans preuve. Si les données ne permettent pas d'y répondre, dites-le simplement.
+- Si l'attente relève d'un autre module (logement, mobilité, santé, métier, projets), ne la traitez pas : signalez en une phrase qu'elle s'examine dans le module concerné.
+- Ne citez jamais les champs bruts ("vous avez écrit…"). Traduisez-les en lecture. Le contenu reste identique aux deux champs vides.
+
 REPÈRES DE TERRAIN — QUAND ILS SONT FOURNIS
 Si le payload contient une section "reperes_terrain_utilisateur", l'utilisateur a renseigné ses observations directes du quartier (chaleur estivale ressentie, visibilité du sujet eau, confort du quartier pendant les fortes chaleurs, changements observés ces dernières années, note libre). Vous DEVEZ en tenir compte sans les réciter :
 - Si les repères confirment la tendance des données, vous pouvez ancrer la prose dans le ressenti ("Vous l'observez déjà : les étés se durcissent").
@@ -157,6 +164,9 @@ type RequestBody = {
   // Relation du lecteur à la commune : il y vit (résidence) ou il l'explore
   // (découverte). Détermine la POSTURE de la synthèse, jamais les faits.
   relation?: "current_residence" | "considering_living";
+  // Attentes du lecteur en découverte : ce qui compte le plus (priority) et ce
+  // qui pourrait le faire hésiter (concern). Des ATTENTES, jamais des faits.
+  discovery?: { priority?: string; concern?: string };
   workbook?: WorkbookInput;
 };
 
@@ -213,6 +223,13 @@ export async function POST(req: NextRequest) {
 
   const { inseeCode, communeName, horizon } = body;
   const relation = body.relation === "considering_living" ? "considering_living" : "current_residence";
+  // Attentes découverte : uniquement en considering_living, bornées, jamais des faits.
+  const priorite = typeof body.discovery?.priority === "string" ? body.discovery.priority.trim().slice(0, 300) : "";
+  const hesitation = typeof body.discovery?.concern === "string" ? body.discovery.concern.trim().slice(0, 300) : "";
+  const attentesDecouverte =
+    relation === "considering_living" && (priorite || hesitation)
+      ? { priorite: priorite || null, hesitation: hesitation || null }
+      : null;
   if (!inseeCode || !horizon || !HORIZON_META[horizon]) {
     return new Response("Missing or invalid inseeCode / horizon.", { status: 400 });
   }
@@ -314,6 +331,7 @@ export async function POST(req: NextRequest) {
           }
         : null,
     relation_a_la_commune: relation,
+    attentes_decouverte: attentesDecouverte,
     // Garde-fou serveur : les observations vécues ne sont mobilisées QUE pour la
     // résidence. Sur une commune explorée, jamais (anti-contamination).
     reperes_terrain_utilisateur:

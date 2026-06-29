@@ -35,6 +35,9 @@ type Props = {
    *  inférée résidence/découverte). Détermine la posture de la synthèse ET le
    *  garde-fou : les observations vécues ne sont mobilisées que pour la résidence. */
   relation: "current_residence" | "considering_living";
+  /** Attentes du lecteur en découverte (priorité / hésitation), persistées par
+   *  commune dans report_context. Ignorées en résidence. */
+  initialDiscovery?: { priority: string; concern: string } | null;
   /** Texte court à afficher si la génération IA échoue. */
   fallbackSummary: string;
 };
@@ -67,6 +70,10 @@ function workbookKey(wb: WorkbookQuartier): string {
   return `${wb.heat}|${wb.water}|${wb.shelter}|${wb.change}|${wb.note.trim()}`;
 }
 
+function discoveryKeyOf(d: { priority: string; concern: string }): string {
+  return `${d.priority.trim()}|${d.concern.trim()}`;
+}
+
 // ─── Composant principal ──────────────────────────────────────────────────
 // Panel glass plein largeur :
 //   1. Titre Serif italic
@@ -82,6 +89,7 @@ export default function QuartierSynthesis({
   sourcesByHorizon,
   initialWorkbook,
   relation,
+  initialDiscovery,
   fallbackSummary,
 }: Props) {
   const isResidence = relation === "current_residence";
@@ -112,6 +120,14 @@ export default function QuartierSynthesis({
   const [usedWorkbookKey, setUsedWorkbookKey] = useState<string>(() =>
     workbookKey(seedWorkbook),
   );
+
+  // Attentes découverte (hors résidence). Ref pour éviter la closure périmée
+  // dans fetchSynthesis lors de la régénération.
+  const seedDiscovery = !isResidence && initialDiscovery ? initialDiscovery : { priority: "", concern: "" };
+  const [discovery, setDiscovery] = useState(seedDiscovery);
+  const discoveryRef = useRef(discovery);
+  discoveryRef.current = discovery;
+  const [usedDiscoveryKey, setUsedDiscoveryKey] = useState("");
 
   useEffect(() => {
     if (relation !== "current_residence") return; // pas de workbook hors résidence (anti-contamination)
@@ -164,6 +180,11 @@ export default function QuartierSynthesis({
               communeName,
               horizon,
               relation,
+              discovery:
+                relation === "considering_living" &&
+                (discoveryRef.current.priority.trim() || discoveryRef.current.concern.trim())
+                  ? discoveryRef.current
+                  : undefined,
               workbook: wbPayload,
             }),
             signal: controller.signal,
@@ -183,6 +204,7 @@ export default function QuartierSynthesis({
           if (requestId === synthReqRef.current) {
             setSynthState("done");
             setUsedWorkbookKey(workbookKey(wb));
+            setUsedDiscoveryKey(discoveryKeyOf(discoveryRef.current));
             posthog?.capture("quartier_ai_summary_completed", {
               commune: communeName,
               insee_code: inseeCode,
@@ -332,6 +354,77 @@ export default function QuartierSynthesis({
             >
               Régénérer avec mes repères
             </button>
+          </div>
+        )}
+
+        {/* Préciser cette lecture — uniquement en découverte. Deux champs libres,
+            optionnels : ils orientent l'ATTENTION de la synthèse, jamais les faits. */}
+        {relation === "considering_living" && synthState !== "streaming" && (
+          <div className="mt-7 pt-5 border-t border-white/[0.06]">
+            <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-info/80 mb-1.5">
+              Préciser cette lecture
+            </p>
+            <p className="text-[13px] leading-[1.55] text-muted mb-4 max-w-[480px]">
+              Dites-nous ce que vous recherchez ou ce qui vous fait hésiter dans cette commune.
+              La lecture sera adaptée à vos priorités, sans rien inventer.
+            </p>
+            <label className="block text-[13px] text-label mb-1.5">
+              Qu&apos;est-ce qui compte le plus pour vous dans cette commune&nbsp;?
+            </label>
+            <textarea
+              value={discovery.priority}
+              onChange={(e) => setDiscovery((d) => ({ ...d, priority: e.target.value }))}
+              maxLength={300}
+              rows={2}
+              placeholder="Aidez futur•e à mettre en avant ce qui est utile à votre recherche."
+              className="w-full bg-white/[0.03] border border-white/[0.1] rounded-md p-2.5 text-[14px] text-label placeholder:text-ghost mb-3 resize-y"
+            />
+            <label className="block text-[13px] text-label mb-1.5">
+              Qu&apos;est-ce qui pourrait vous faire hésiter&nbsp;?
+            </label>
+            <textarea
+              value={discovery.concern}
+              onChange={(e) => setDiscovery((d) => ({ ...d, concern: e.target.value }))}
+              maxLength={300}
+              rows={2}
+              placeholder="Une inquiétude ou un point que vous souhaitez examiner avec attention."
+              className="w-full bg-white/[0.03] border border-white/[0.1] rounded-md p-2.5 text-[14px] text-label placeholder:text-ghost mb-3 resize-y"
+            />
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                type="button"
+                disabled={discoveryKeyOf(discovery) === usedDiscoveryKey}
+                onClick={async () => {
+                  posthog?.capture("quartier_discovery_applied", {
+                    commune: communeName,
+                    insee_code: inseeCode,
+                    has_priority: !!discovery.priority.trim(),
+                    has_concern: !!discovery.concern.trim(),
+                  });
+                  try {
+                    await fetch("/api/report-context", {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        insee: inseeCode,
+                        discoveryWorkbook: { priority: discovery.priority, concern: discovery.concern },
+                      }),
+                    });
+                  } catch {
+                    /* la régénération reste utile même si la persistance échoue */
+                  }
+                  fetchSynthesis(workbook, true);
+                }}
+                className="quartier-regen-btn disabled:opacity-40 disabled:cursor-default"
+              >
+                Adapter la lecture
+              </button>
+              {usedDiscoveryKey &&
+                discoveryKeyOf(discovery) === usedDiscoveryKey &&
+                (discovery.priority.trim() || discovery.concern.trim()) && (
+                  <span className="text-[12px] text-info/80">Lecture adaptée à vos priorités.</span>
+                )}
+            </div>
           </div>
         )}
 

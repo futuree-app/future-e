@@ -14,14 +14,23 @@ import { isRelation } from "@/lib/report-context";
 
 export async function PATCH(request: NextRequest) {
   try {
-    const body = (await request.json()) as { insee?: string; relation?: string };
+    const body = (await request.json()) as {
+      insee?: string;
+      relation?: string;
+      discoveryWorkbook?: { priority?: string; concern?: string };
+    };
     const insee = typeof body.insee === "string" ? body.insee.trim() : "";
-    const { relation } = body;
 
     if (!insee) {
       return NextResponse.json({ error: "insee requis." }, { status: 400 });
     }
-    if (!isRelation(relation)) {
+
+    const hasRelation = body.relation !== undefined;
+    const hasDiscovery = body.discoveryWorkbook !== undefined;
+    if (!hasRelation && !hasDiscovery) {
+      return NextResponse.json({ error: "Rien à mettre à jour." }, { status: 400 });
+    }
+    if (hasRelation && !isRelation(body.relation)) {
       return NextResponse.json({ error: "relation invalide." }, { status: 400 });
     }
 
@@ -33,16 +42,25 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
     }
 
-    const { error } = await supabase.from("report_context").upsert(
-      {
-        user_id: user.id,
-        insee,
-        relation,
-        relation_source: "confirmed_by_user",
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "user_id,insee" },
-    );
+    const payload: Record<string, unknown> = {
+      user_id: user.id,
+      insee,
+      updated_at: new Date().toISOString(),
+    };
+    if (hasRelation) {
+      payload.relation = body.relation;
+      payload.relation_source = "confirmed_by_user";
+    }
+    if (hasDiscovery) {
+      const dw = body.discoveryWorkbook ?? {};
+      const priority = typeof dw.priority === "string" ? dw.priority.trim().slice(0, 300) : "";
+      const concern = typeof dw.concern === "string" ? dw.concern.trim().slice(0, 300) : "";
+      payload.discovery_workbook = priority || concern ? { priority, concern } : null;
+    }
+
+    const { error } = await supabase
+      .from("report_context")
+      .upsert(payload, { onConflict: "user_id,insee" });
 
     if (error) {
       console.error("[report-context] PATCH upsert error:", error.message);

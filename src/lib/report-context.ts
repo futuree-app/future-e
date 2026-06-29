@@ -76,6 +76,19 @@ export function resolveRelation(
   };
 }
 
+// Parse le workbook découverte stocké (jsonb libre) vers la forme typée attendue
+// par l'UI. null si vide ou absent.
+export function parseDiscoveryWorkbook(
+  raw: unknown,
+): { priority: string; concern: string } | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const priority = typeof r.priority === "string" ? r.priority : "";
+  const concern = typeof r.concern === "string" ? r.concern : "";
+  if (!priority && !concern) return null;
+  return { priority, concern };
+}
+
 // Posture transmise à la synthèse. Aujourd'hui binaire : seule la résidence
 // mobilise le vécu ; tout le reste (découverte / information / inconnu) adopte la
 // posture « quelqu'un qui pèse une arrivée ».

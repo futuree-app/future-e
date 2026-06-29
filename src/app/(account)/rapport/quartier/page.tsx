@@ -25,7 +25,7 @@ import { buildTerritoryIdentity, buildTerritoryCards } from "@/lib/territory-ide
 import { TerritoryIdentityCard } from "@/components/report/TerritoryIdentityCard";
 import { getResidencesSecondairesPct } from "@/lib/saisonnalite";
 import { getEra5Trend } from "@/lib/era5-trend";
-import { getReportContext, resolveRelation, synthesisRelation } from "@/lib/report-context";
+import { getReportContext, resolveRelation, synthesisRelation, parseDiscoveryWorkbook } from "@/lib/report-context";
 import { ReportRelationBanner } from "@/components/report/ReportRelationBanner";
 
 export default async function RapportQuartierPage() {
@@ -57,6 +57,7 @@ export default async function RapportQuartierPage() {
   const reportCtx = inseeCode ? await getReportContext(supabase, user.id, inseeCode) : null;
   const { relation: effectiveRelation } = resolveRelation(territory.isResidence, reportCtx);
   const isResidenceRelation = effectiveRelation === "current_residence";
+  const initialDiscovery = parseDiscoveryWorkbook(reportCtx?.discovery_workbook ?? null);
 
   // Socle commun : Géorisques + GASPAR inclus dans l'enrichissement.
   const enrichment = inseeCode ? await gatherCommuneEnrichment(inseeCode) : null;
@@ -184,6 +185,7 @@ export default async function RapportQuartierPage() {
             sourcesByHorizon={sourcesByHorizon}
             initialWorkbook={initialWorkbook}
             relation={synthesisRelation(effectiveRelation)}
+            initialDiscovery={initialDiscovery}
             fallbackSummary={buildFallbackSummary(communeName, "votre horizon")}
           />
         </section>
