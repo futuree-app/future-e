@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { getClimatDataCommune } from '@/lib/drias-json';
-import { getGeorisquesSummary } from '@/lib/georisques';
+import { getGeorisquesSummary, getGasparCatnatSummary } from '@/lib/georisques';
 import { createClient } from '@supabase/supabase-js';
 
 export const revalidate = 86400;
@@ -146,15 +146,23 @@ export default async function InondationCommune({
 }) {
   const { insee_code } = await params;
 
-  const [commune, driasData, georisques] = await Promise.all([
+  const [commune, driasData, georisques, catnat] = await Promise.all([
     fetchCommune(insee_code),
     getClimatDataCommune(insee_code).catch(() => null),
     getGeorisquesSummary(insee_code).catch(() => null),
+    getGasparCatnatSummary(insee_code).catch(() => null),
   ]);
 
   const communeName = commune?.nom_commune ?? driasData?.commune?.n ?? insee_code;
   const dept = commune?.departement ?? insee_code.slice(0, 2);
   const driasV = driasData?.commune?.s?.gwl30?.v;
+
+  // Mémoire CatNat liée à l'eau : arrêtés inondation + submersion marine. Fait brut,
+  // sans interprétation personnalisée — le croisement passé × futur reste au rapport
+  // Territoire (cf. doctrine frontière savoir/agir).
+  const catnatInond = (catnat?.byRisk ?? [])
+    .filter((rk) => rk.label === 'Inondations' || rk.label === 'Submersion marine')
+    .reduce((s, rk) => s + rk.count, 0);
 
   // Score submersion marine : toute commune littorale ayant un score en base
   // (alimenté par populate-coastal-submersion.js — altitude au-dessus du niveau de la mer)
@@ -345,6 +353,31 @@ export default async function InondationCommune({
               <a href="https://www.georisques.gouv.fr" target="_blank" rel="noopener" style={{ color: 'var(--fg-3)', textDecoration: 'underline' }}>georisques.gouv.fr</a>{' '}
               ou via notre{' '}
               <Link href="/rapport/logement" style={{ color: 'var(--fg-3)', textDecoration: 'underline' }}>module Logement</Link>.
+            </div>
+          </>
+        )}
+
+        {/* Mémoire CatNat — inondation + submersion (fait brut) */}
+        {catnatInond > 0 && (
+          <>
+            <div style={{ margin: '48px 0 10px' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACCENT, marginBottom: 4 }}>
+                Ce que la commune a déjà vécu
+              </div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg-4)' }}>
+                Arrêtés de catastrophe naturelle · base GASPAR (Géorisques)
+              </div>
+            </div>
+            <div className="data-card">
+              <div className="data-card-label">Inondation · reconnaissances officielles</div>
+              <div className="data-card-value">
+                {catnatInond}<span className="data-card-unit"> arrêté{catnatInond > 1 ? 's' : ''}</span>
+              </div>
+              <div className="data-card-note" style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--fg-3)' }}>
+                {communeName} a déjà été reconnue {catnatInond} fois en état de catastrophe naturelle
+                pour inondation ou submersion marine. C&apos;est l&apos;histoire vécue du territoire :
+                des événements qui ont réellement eu lieu, pas une simple exposition théorique.
+              </div>
             </div>
           </>
         )}

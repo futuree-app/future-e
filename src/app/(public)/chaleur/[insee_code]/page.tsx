@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { getClimatDataCommune } from '@/lib/drias-json';
-import { getGeorisquesSummary } from '@/lib/georisques';
+import { getGeorisquesSummary, getGasparCatnatSummary } from '@/lib/georisques';
 import { getAtmoForCommune } from '@/lib/atmo';
 import { getEra5Trend } from '@/lib/era5-trend';
 import { createClient } from '@supabase/supabase-js';
@@ -155,7 +155,7 @@ export default async function ChaleurCommune({
 }) {
   const { insee_code } = await params;
 
-  const [commune, driasData, georisques, atmo, era5] = await Promise.all([
+  const [commune, driasData, georisques, atmo, era5, catnat] = await Promise.all([
     fetchCommune(insee_code),
     getClimatDataCommune(insee_code).catch(() => null),
     getGeorisquesSummary(insee_code).catch(() => null),
@@ -163,10 +163,19 @@ export default async function ChaleurCommune({
       ? getAtmoForCommune(insee_code).catch(() => null)
       : Promise.resolve(null),
     getEra5Trend(insee_code).catch(() => null),
+    getGasparCatnatSummary(insee_code).catch(() => null),
   ]);
 
   const communeName = commune?.nom_commune ?? driasData?.commune?.n ?? insee_code;
   const driasV = driasData?.commune?.s?.gwl30?.v;
+
+  // Mémoire CatNat liée à la chaleur : les arrêtés « sécheresse des sols »
+  // (retrait-gonflement des argiles), aléa directement aggravé par des étés plus
+  // secs. Fait brut, sans interprétation personnalisée : la lecture croisée
+  // passé × futur reste au rapport Territoire (cf. doctrine frontière savoir/agir).
+  const catnatSecheresse = (catnat?.byRisk ?? [])
+    .filter((rk) => rk.label === 'Sécheresse des sols')
+    .reduce((s, rk) => s + rk.count, 0);
 
   const DRIAS_ITEMS: { label: string; val: number | undefined; unit: string; note: string }[] = [
     {
@@ -342,6 +351,31 @@ export default async function ChaleurCommune({
             <div style={{ marginTop: 12, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-4)' }}>
               Ces données indiquent que la commune est concernée, pas forcément chaque logement. Vérifiez à votre adresse exacte sur{' '}
               <a href="https://www.georisques.gouv.fr" target="_blank" rel="noopener" style={{ color: 'var(--fg-3)', textDecoration: 'underline' }}>georisques.gouv.fr</a>.
+            </div>
+          </>
+        )}
+
+        {/* Mémoire CatNat — sécheresse des sols (fait brut) */}
+        {catnatSecheresse > 0 && (
+          <>
+            <div style={{ margin: '48px 0 10px' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACCENT, marginBottom: 4 }}>
+                Ce que la commune a déjà vécu
+              </div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg-4)' }}>
+                Arrêtés de catastrophe naturelle · base GASPAR (Géorisques)
+              </div>
+            </div>
+            <div className="data-card">
+              <div className="data-card-label">Sécheresse des sols · reconnaissances officielles</div>
+              <div className="data-card-value">
+                {catnatSecheresse}<span className="data-card-unit"> arrêté{catnatSecheresse > 1 ? 's' : ''}</span>
+              </div>
+              <div className="data-card-note" style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--fg-3)' }}>
+                {communeName} a déjà été reconnue {catnatSecheresse} fois en état de catastrophe naturelle
+                pour sécheresse des sols — le retrait-gonflement des argiles qui fissure les fondations,
+                directement aggravé par des étés plus secs.
+              </div>
             </div>
           </>
         )}
