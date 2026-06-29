@@ -70,6 +70,11 @@ Préférez les phrases qui montrent ce que devient la vie sur place. Exemples du
 RICHESSE PRÉSERVÉE
 Simplifier la langue ne veut pas dire appauvrir le fond. Gardez les nuances, gardez les données, gardez la lecture d'ensemble. Changez seulement la manière de le dire.
 
+RELATION À LA COMMUNE — POSTURE (champ "relation_a_la_commune")
+La relation du lecteur à la commune change la POSTURE du texte, jamais les faits ni la discipline de preuve.
+- "current_residence" : le lecteur VIT ici. Vous pouvez vous adresser à son vécu ("vos étés", "le quotidien ici"), et les repères de terrain (s'ils sont fournis) confrontent ce vécu aux projections.
+- "considering_living" : le lecteur ENVISAGE de s'y installer, il n'y vit PAS. Adoptez la posture de quelqu'un qui pèse une arrivée : "ce à quoi s'attendre en venant ici", "ce que vous choisiriez". Ne lui prêtez JAMAIS d'observations vécues ni de connaissance du terrain, ne dites jamais "vos étés ici". Aucun repère de terrain n'est fourni dans ce cas, n'en inventez pas. Le contenu factuel reste identique, seul le cadrage diffère.
+
 REPÈRES DE TERRAIN — QUAND ILS SONT FOURNIS
 Si le payload contient une section "reperes_terrain_utilisateur", l'utilisateur a renseigné ses observations directes du quartier (chaleur estivale ressentie, visibilité du sujet eau, confort du quartier pendant les fortes chaleurs, changements observés ces dernières années, note libre). Vous DEVEZ en tenir compte sans les réciter :
 - Si les repères confirment la tendance des données, vous pouvez ancrer la prose dans le ressenti ("Vous l'observez déjà : les étés se durcissent").
@@ -149,6 +154,9 @@ type RequestBody = {
   inseeCode?: string;
   communeName?: string;
   horizon?: string;
+  // Relation du lecteur à la commune : il y vit (résidence) ou il l'explore
+  // (découverte). Détermine la POSTURE de la synthèse, jamais les faits.
+  relation?: "current_residence" | "considering_living";
   workbook?: WorkbookInput;
 };
 
@@ -204,6 +212,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { inseeCode, communeName, horizon } = body;
+  const relation = body.relation === "considering_living" ? "considering_living" : "current_residence";
   if (!inseeCode || !horizon || !HORIZON_META[horizon]) {
     return new Response("Missing or invalid inseeCode / horizon.", { status: 400 });
   }
@@ -304,7 +313,11 @@ export async function POST(req: NextRequest) {
             aleas_principaux: catnat.byRisk.slice(0, 3),
           }
         : null,
-    reperes_terrain_utilisateur: shapeWorkbook(body.workbook),
+    relation_a_la_commune: relation,
+    // Garde-fou serveur : les observations vécues ne sont mobilisées QUE pour la
+    // résidence. Sur une commune explorée, jamais (anti-contamination).
+    reperes_terrain_utilisateur:
+      relation === "current_residence" ? shapeWorkbook(body.workbook) : null,
   };
 
   const userMessage = `Commune : ${displayName}. Horizon : ${meta.year} (scénario France ${meta.france}).

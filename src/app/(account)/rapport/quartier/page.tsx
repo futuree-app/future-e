@@ -162,6 +162,7 @@ export default async function RapportQuartierPage() {
             userKey={account.userId}
             sourcesByHorizon={sourcesByHorizon}
             initialWorkbook={initialWorkbook}
+            isResidence={territory.isResidence}
             fallbackSummary={buildFallbackSummary(communeName, "votre horizon")}
           />
         </section>
@@ -192,15 +193,20 @@ export default async function RapportQuartierPage() {
           />
         </section>
 
-        {/* Repères de terrain : geste de contribution, après s'être approprié le sujet */}
-        <section className="pt-14">
-          <QuartierWorkbook
-            userKey={account.userId}
-            commune={communeName}
-            inseeCode={inseeCode}
-            reportId={inseeCode}
-          />
-        </section>
+        {/* Repères de terrain : observations VÉCUES, donc réservées à la commune de
+            résidence. Sur une commune explorée (découverte), on ne propose pas ce
+            workbook (sa variante « découverte » viendra dans une étape ultérieure) :
+            cela évite d'écrire des observations vécues sur une commune où l'on ne vit pas. */}
+        {territory.isResidence && (
+          <section className="pt-14">
+            <QuartierWorkbook
+              userKey={account.userId}
+              commune={communeName}
+              inseeCode={inseeCode}
+              reportId={inseeCode}
+            />
+          </section>
+        )}
 
         {/* Porte suivante : continuité naturelle du rapport, juste après la lecture */}
         <div className="mt-14 flex justify-end">
