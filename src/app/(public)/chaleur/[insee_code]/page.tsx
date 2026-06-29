@@ -30,29 +30,27 @@ function getAnon() {
   );
 }
 
-type CommuneScore = {
+type CommuneInfo = {
   insee_code: string;
   nom_commune: string;
   departement: string | null;
-  score: number;
-  ind_exposition: number | null;
-  ind_vulnerabilite: number | null;
-  ind_adaptation: number | null;
-  ind_occurrence: number | null;
 };
 
-const fetchScore = unstable_cache(
-  async (insee_code: string): Promise<CommuneScore | null> => {
+// Identité de la commune (nom, département) — uniquement pour l'affichage.
+// Le nom vient de cette table quand elle la connaît, sinon on retombe sur DRIAS
+// puis le code INSEE. Aucune note composite n'est lue ni affichée (cf. ADR-0001).
+const fetchCommune = unstable_cache(
+  async (insee_code: string): Promise<CommuneInfo | null> => {
     const { data, error } = await getAnon()
       .from('communes_tension')
-      .select('insee_code, nom_commune, departement, score, ind_exposition, ind_vulnerabilite, ind_adaptation, ind_occurrence')
+      .select('insee_code, nom_commune, departement')
       .eq('slug', 'canicule')
       .eq('insee_code', insee_code)
       .maybeSingle();
     if (error) return null;
     return data;
   },
-  ['chaleur-commune-score'],
+  ['chaleur-commune'],
   { revalidate: 86400, tags: ['communes-tension'] },
 );
 
@@ -64,12 +62,10 @@ export async function generateMetadata({
   params: Promise<{ insee_code: string }>;
 }): Promise<Metadata> {
   const { insee_code } = await params;
-  const [score, drias] = await Promise.all([fetchScore(insee_code), getClimatDataCommune(insee_code).catch(() => null)]);
-  const nomCommune = score?.nom_commune ?? drias?.commune?.n ?? insee_code;
+  const [commune, drias] = await Promise.all([fetchCommune(insee_code), getClimatDataCommune(insee_code).catch(() => null)]);
+  const nomCommune = commune?.nom_commune ?? drias?.commune?.n ?? insee_code;
   const title = `Chaleur et canicule à ${nomCommune} : projections 2050`;
-  const description = score
-    ? `Score de tension canicule : ${score.score}/100 — jours > 30°C, nuits tropicales et qualité de l'air à ${nomCommune} en 2050.`
-    : `Jours > 30°C, nuits tropicales et qualité de l'air à ${nomCommune} en 2050.`;
+  const description = `Jours > 30°C, nuits tropicales et qualité de l'air à ${nomCommune} en 2050.`;
 
   return {
     title: `${title} · futur•e`,
@@ -100,15 +96,6 @@ const css = `
   .back-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-4);text-decoration:none;margin-bottom:40px;transition:color 0.2s;}
   .back-link:hover{color:var(--fg-3);}
 
-  /* Hero score */
-  .score-hero{padding:36px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);position:relative;overflow:hidden;margin-bottom:48px;}
-  .score-hero::after{content:"";position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,${ACCENT}18 0%,transparent 70%);pointer-events:none;}
-  .score-num{font-family:var(--font-serif);font-size:clamp(64px,10vw,96px);line-height:1;font-weight:400;letter-spacing:-0.03em;color:${ACCENT};}
-  .score-denom{font-size:0.38em;color:var(--fg-4);}
-  .score-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-4);margin-top:6px;}
-  .commune-name{font-family:var(--font-serif);font-size:clamp(22px,3vw,32px);font-weight:400;color:var(--fg-1);line-height:1.15;}
-  .commune-meta{font-family:var(--font-mono);font-size:12px;color:var(--fg-4);margin-top:4px;}
-
   /* Data grids */
   .data-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:24px 0;}
   .data-card{padding:22px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);}
@@ -116,10 +103,6 @@ const css = `
   .data-card-value{font-family:var(--font-serif);font-size:32px;line-height:1;font-weight:400;color:${ACCENT};}
   .data-card-unit{font-size:0.45em;color:var(--fg-4);}
   .data-card-note{font-size:12px;color:var(--fg-3);margin-top:8px;line-height:1.5;}
-
-  /* Score bars */
-  .ind-bar{width:100%;height:4px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;margin:8px 0;}
-  .ind-bar-fill{height:100%;border-radius:2px;background:${ACCENT};}
 
   /* Pill tags */
   .pill{display:inline-flex;align-items:center;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);font-family:var(--font-mono);font-size:11px;color:var(--fg-3);}
@@ -160,7 +143,6 @@ const css = `
     .data-grid{grid-template-columns:1fr;}
     .articles-grid{grid-template-columns:1fr;}
     .cta-block{padding:24px;}
-    .score-hero{padding:24px;}
   }
 `;
 
@@ -174,7 +156,7 @@ export default async function ChaleurCommune({
   const { insee_code } = await params;
 
   const [commune, driasData, georisques, atmo, era5] = await Promise.all([
-    fetchScore(insee_code),
+    fetchCommune(insee_code),
     getClimatDataCommune(insee_code).catch(() => null),
     getGeorisquesSummary(insee_code).catch(() => null),
     process.env.ATMO_USERNAME
@@ -184,23 +166,7 @@ export default async function ChaleurCommune({
   ]);
 
   const communeName = commune?.nom_commune ?? driasData?.commune?.n ?? insee_code;
-  const dept = commune?.departement ?? insee_code.slice(0, 2);
   const driasV = driasData?.commune?.s?.gwl30?.v;
-
-  // Fallback score computed from DRIAS when not in communes_tension
-  function computeScoreFromDrias(): number | null {
-    if (!driasV) return null;
-    const parts: { w: number; v: number }[] = [];
-    if (driasV.NORTX30D_yr != null) parts.push({ w: 0.45, v: Math.min(100, (driasV.NORTX30D_yr / 70) * 100) });
-    if (driasV.NORTR_yr != null) parts.push({ w: 0.35, v: Math.min(100, (driasV.NORTR_yr / 120) * 100) });
-    if (driasV.NORTMm_seas_JJA != null) parts.push({ w: 0.20, v: Math.min(100, Math.max(0, (driasV.NORTMm_seas_JJA - 18) / 12 * 100)) });
-    if (parts.length === 0) return null;
-    const totalW = parts.reduce((s, p) => s + p.w, 0);
-    return Math.round(parts.reduce((s, p) => s + (p.v * p.w) / totalW, 0));
-  }
-
-  const displayScore = commune?.score ?? computeScoreFromDrias();
-  const scoreIsEstimated = !commune && displayScore != null;
 
   const DRIAS_ITEMS: { label: string; val: number | undefined; unit: string; note: string }[] = [
     {
@@ -227,20 +193,6 @@ export default async function ChaleurCommune({
       unit: '°C',
       note: "Moyenne sur juin–juillet–août. Au-dessus de 25°C, dormir fenêtre ouverte ne suffit plus. C'est la référence pour calibrer les besoins en climatisation.",
     },
-  ];
-
-  const IND_ITEMS = [
-    { key: 'ind_exposition'    as const, label: 'Exposition',          desc: "Niveau d'exposition physique du territoire." },
-    { key: 'ind_vulnerabilite' as const, label: 'Vulnérabilité',       desc: 'Fragilité socio-économique des habitants.' },
-    { key: 'ind_adaptation'    as const, label: "Capacité d'adaptation", desc: 'Ressources locales pour faire face au risque.' },
-    { key: 'ind_occurrence'    as const, label: 'Occurrence',           desc: 'Fréquence historique des événements.' },
-  ];
-
-  const IND_LEGEND = [
-    { icon: 'E', label: 'Exposition', text: "Le territoire chauffe fortement et expose directement les habitants." },
-    { icon: 'V', label: 'Vulnérabilité', text: 'Certaines personnes ou certains logements y sont plus fragiles face à la chaleur.' },
-    { icon: 'A', label: 'Adaptation', text: 'La commune dispose de plus ou moins de moyens pour aider les habitants à faire face.' },
-    { icon: 'O', label: 'Occurrence', text: 'Les épisodes de chaleur intense y sont déjà fréquents, ou appelés à le devenir très vite.' },
   ];
 
   // Seuls les risques directement aggravés par la chaleur extrême
@@ -336,71 +288,6 @@ export default async function ChaleurCommune({
                 </p>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* ── BLOC 1 — TERRITOIRE ──────────────────────────────────────── */}
-
-        {/* Score hero */}
-        {displayScore != null && (
-          <div className="score-hero" style={{ marginBottom: 48 }}>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 32, flexWrap: 'wrap' }}>
-              <div>
-                <div className="score-num">
-                  {displayScore}<span className="score-denom">/100</span>
-                </div>
-                <div className="score-label">
-                  Score de tension canicule{scoreIsEstimated ? ' · estimé depuis les projections DRIAS' : ''}
-                </div>
-              </div>
-              <div style={{ flex: 1, minWidth: 180 }}>
-                <div className="commune-name">{communeName}</div>
-                <div className="commune-meta">Dept. {dept} · INSEE {commune?.insee_code ?? insee_code}</div>
-              </div>
-            </div>
-
-            {/* 4 indicators inline — only if from DB */}
-            {commune && (
-              <>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 12, marginTop: 28, marginBottom: 24 }}>
-                  {IND_LEGEND.map((item) => (
-                    <div key={item.label} style={{ padding: '14px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, fontFamily: 'var(--font-serif)', fontSize: 18, color: 'var(--fg-1)' }}>
-                        <span style={{ width: 22, height: 22, borderRadius: 999, background: ACCENT, color: '#060812', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.06em', flexShrink: 0 }}>
-                          {item.icon}
-                        </span>
-                        {item.label}
-                      </div>
-                      <div style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--fg-3)' }}>{item.text}</div>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 20, marginTop: 28 }}>
-                  {IND_ITEMS.map((ind) => {
-                  const val = commune[ind.key];
-                  const pct = val != null ? Math.min(100, Math.round(val)) : null;
-                  return (
-                    <div key={ind.key}>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--fg-4)', marginBottom: 6 }}>
-                        {ind.label}
-                      </div>
-                      {pct != null ? (
-                        <>
-                          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 24, color: ACCENT, lineHeight: 1 }}>
-                            {pct}<span style={{ fontSize: '0.5em', color: 'var(--fg-4)' }}>/100</span>
-                          </div>
-                          <div className="ind-bar"><div className="ind-bar-fill" style={{ width: `${pct}%` }} /></div>
-                          <div style={{ fontSize: 11, color: 'var(--fg-4)', lineHeight: 1.4 }}>{ind.desc}</div>
-                        </>
-                      ) : (
-                        <div style={{ fontSize: 13, color: 'var(--fg-4)' }}>N/D</div>
-                      )}
-                    </div>
-                  );
-                  })}
-                </div>
-              </>
-            )}
           </div>
         )}
 

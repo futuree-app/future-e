@@ -24,21 +24,22 @@ function getAnon() {
   );
 }
 
-type CommuneScore = {
+type CommuneSubmersion = {
   insee_code: string;
   nom_commune: string;
   departement: string | null;
+  // Score altimétrique de submersion marine (hauteur au-dessus du niveau de la mer),
+  // alimenté par populate-coastal-submersion.js pour les seules communes littorales.
+  // ind_exposition reste null sur ces lignes : c'est ce qui les distingue d'un
+  // ancien score de tension composite, qu'on n'affiche plus (cf. ADR-0001).
   score: number;
   ind_exposition: number | null;
-  ind_vulnerabilite: number | null;
-  ind_adaptation: number | null;
-  ind_occurrence: number | null;
 };
 
-async function fetchScore(insee_code: string): Promise<CommuneScore | null> {
+async function fetchCommune(insee_code: string): Promise<CommuneSubmersion | null> {
   const { data, error } = await getAnon()
     .from('communes_tension')
-    .select('insee_code, nom_commune, departement, score, ind_exposition, ind_vulnerabilite, ind_adaptation, ind_occurrence')
+    .select('insee_code, nom_commune, departement, score, ind_exposition')
     .eq('slug', 'submersion')
     .eq('insee_code', insee_code)
     .maybeSingle();
@@ -55,8 +56,8 @@ export async function generateMetadata({
   params: Promise<{ insee_code: string }>;
 }): Promise<Metadata> {
   const { insee_code } = await params;
-  const [score, drias] = await Promise.all([fetchScore(insee_code), getClimatDataCommune(insee_code).catch(() => null)]);
-  const nomCommune = score?.nom_commune ?? drias?.commune?.n ?? insee_code;
+  const [commune, drias] = await Promise.all([fetchCommune(insee_code), getClimatDataCommune(insee_code).catch(() => null)]);
+  const nomCommune = commune?.nom_commune ?? drias?.commune?.n ?? insee_code;
   const title = `Inondation et submersion à ${nomCommune} : risques et données officielles`;
   const description = `Risques d'inondation, précipitations extrêmes et submersions marines à ${nomCommune} selon les données officielles de Météo-France et Géorisques.`;
 
@@ -89,15 +90,6 @@ const css = `
   .back-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-4);text-decoration:none;margin-bottom:40px;transition:color 0.2s;}
   .back-link:hover{color:var(--fg-3);}
 
-  /* Hero score */
-  .score-hero{padding:36px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);position:relative;overflow:hidden;margin-bottom:48px;}
-  .score-hero::after{content:"";position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,${ACCENT}18 0%,transparent 70%);pointer-events:none;}
-  .score-num{font-family:var(--font-serif);font-size:clamp(64px,10vw,96px);line-height:1;font-weight:400;letter-spacing:-0.03em;color:${ACCENT};}
-  .score-denom{font-size:0.38em;color:var(--fg-4);}
-  .score-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-4);margin-top:6px;}
-  .commune-name{font-family:var(--font-serif);font-size:clamp(22px,3vw,32px);font-weight:400;color:var(--fg-1);line-height:1.15;}
-  .commune-meta{font-family:var(--font-mono);font-size:12px;color:var(--fg-4);margin-top:4px;}
-
   /* Data grids */
   .data-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:24px 0;}
   .data-card{padding:22px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);}
@@ -105,10 +97,6 @@ const css = `
   .data-card-value{font-family:var(--font-serif);font-size:32px;line-height:1;font-weight:400;color:${ACCENT};}
   .data-card-unit{font-size:0.45em;color:var(--fg-4);}
   .data-card-note{font-size:12px;color:var(--fg-3);margin-top:8px;line-height:1.5;}
-
-  /* Score bars */
-  .ind-bar{width:100%;height:4px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;margin:8px 0;}
-  .ind-bar-fill{height:100%;border-radius:2px;background:${ACCENT};}
 
   /* Section headers */
   .section{margin:64px 0 0;}
@@ -146,7 +134,6 @@ const css = `
     .data-grid{grid-template-columns:1fr;}
     .articles-grid{grid-template-columns:1fr;}
     .cta-block{padding:24px;}
-    .score-hero{padding:24px;}
   }
 `;
 
@@ -160,7 +147,7 @@ export default async function InondationCommune({
   const { insee_code } = await params;
 
   const [commune, driasData, georisques] = await Promise.all([
-    fetchScore(insee_code),
+    fetchCommune(insee_code),
     getClimatDataCommune(insee_code).catch(() => null),
     getGeorisquesSummary(insee_code).catch(() => null),
   ]);
@@ -168,21 +155,6 @@ export default async function InondationCommune({
   const communeName = commune?.nom_commune ?? driasData?.commune?.n ?? insee_code;
   const dept = commune?.departement ?? insee_code.slice(0, 2);
   const driasV = driasData?.commune?.s?.gwl30?.v;
-
-  function computeScoreFromDrias(): number | null {
-    if (!driasV) return null;
-    const parts: { w: number; v: number }[] = [];
-    if (driasV.NORRRq99_yr != null)     parts.push({ w: 3, v: Math.min(100, (driasV.NORRRq99_yr / 150) * 100) });
-    if (driasV.NORRR_seas_DJF != null)  parts.push({ w: 1, v: Math.min(100, (driasV.NORRR_seas_DJF / 500) * 100) });
-    if (driasV.NORRR_yr != null)        parts.push({ w: 0.5, v: Math.min(100, (driasV.NORRR_yr / 2000) * 100) });
-    if (driasV.NORRx1d_yr != null)      parts.push({ w: 0.5, v: Math.min(100, (driasV.NORRx1d_yr / 7) * 100) });
-    if (parts.length === 0) return null;
-    const totalW = parts.reduce((s, p) => s + p.w, 0);
-    return Math.round(parts.reduce((s, p) => s + (p.v * p.w) / totalW, 0));
-  }
-
-  // Score inondation fluviale : toujours calculé depuis DRIAS gwl30 formule pondérée
-  const displayScore = computeScoreFromDrias() ?? null;
 
   // Score submersion marine : toute commune littorale ayant un score en base
   // (alimenté par populate-coastal-submersion.js — altitude au-dessus du niveau de la mer)
@@ -193,6 +165,17 @@ export default async function InondationCommune({
   const coastalScore = (commune != null && COASTAL_DEPTS.has(dept) && commune.ind_exposition == null)
     ? commune.score
     : null;
+
+  // On traduit le score altimétrique (0 m → 100, 5 m → 67, 10 m → 33, cf.
+  // populate-coastal-submersion.js) en une formulation qui DÉCRIT la position de
+  // la ville par rapport à la mer, sans note /100 (cf. ADR-0001). Le score n'est
+  // pas une altitude fiable au mètre près (échantillonnage + scores manuels),
+  // d'où des paliers larges plutôt qu'un chiffre.
+  const coastalBand =
+    coastalScore == null ? null
+    : coastalScore >= 80 ? 'Au niveau de la mer'
+    : coastalScore >= 55 ? 'Ville très basse'
+    : 'Ville basse';
 
   const DRIAS_ITEMS: { label: string; val: number | undefined; unit: string; note: string }[] = [
     {
@@ -219,20 +202,6 @@ export default async function InondationCommune({
       unit: 'mm',
       note: "Les crues de plaine surviennent principalement en hiver (décembre–février) quand les sols sont saturés. C'est la saison à risque pour la majorité des cours d'eau de plaine.",
     },
-  ];
-
-  const IND_ITEMS = [
-    { key: 'ind_exposition'    as const, label: 'Exposition',            desc: "Intensité des précipitations extrêmes." },
-    { key: 'ind_vulnerabilite' as const, label: 'Vulnérabilité',         desc: 'Fréquence des épisodes à fort ruissellement.' },
-    { key: 'ind_adaptation'    as const, label: "Capacité d'adaptation", desc: 'Ressources locales pour faire face au risque.' },
-    { key: 'ind_occurrence'    as const, label: 'Occurrence',            desc: 'Fréquence des événements extrêmes projetés.' },
-  ];
-
-  const IND_LEGEND = [
-    { icon: 'E', label: 'Exposition', text: "Le territoire reçoit des pluies ou des débordements qui peuvent faire monter l'eau rapidement." },
-    { icon: 'V', label: 'Vulnérabilité', text: 'Certaines zones habitées ou certains habitants ont moins de marge face à une inondation.' },
-    { icon: 'A', label: 'Adaptation', text: 'La commune dispose de plus ou moins de protections, d\'équipements et de moyens pour réagir.' },
-    { icon: 'O', label: 'Occurrence', text: 'Les épisodes à risque y sont déjà présents, ou appelés à devenir plus fréquents.' },
   ];
 
   const FLOOD_RISK_LABELS = new Set([
@@ -296,83 +265,21 @@ export default async function InondationCommune({
           </p>
         </div>
 
-        {/* ── BLOC 1 — TERRITOIRE ──────────────────────────────────────── */}
-
-        {/* Score hero */}
-        {displayScore != null && (
-          <div className="score-hero" style={{ marginBottom: 48 }}>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 32, flexWrap: 'wrap' }}>
-              <div>
-                <div className="score-num">
-                  {displayScore}<span className="score-denom">/100</span>
-                </div>
-                <div className="score-label">Score de tension inondation · projections DRIAS +4°C</div>
-              </div>
-              <div style={{ flex: 1, minWidth: 180 }}>
-                <div className="commune-name">{communeName}</div>
-                <div className="commune-meta">Dept. {dept} · INSEE {commune?.insee_code ?? insee_code}</div>
-              </div>
-            </div>
-
-            {commune && IND_ITEMS.some((ind) => commune[ind.key] != null) && (
-              <>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 12, marginTop: 28, marginBottom: 24 }}>
-                  {IND_LEGEND.map((item) => (
-                    <div key={item.label} style={{ padding: '14px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, fontFamily: 'var(--font-serif)', fontSize: 18, color: 'var(--fg-1)' }}>
-                        <span style={{ width: 22, height: 22, borderRadius: 999, background: ACCENT, color: '#060812', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.06em', flexShrink: 0 }}>
-                          {item.icon}
-                        </span>
-                        {item.label}
-                      </div>
-                      <div style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--fg-3)' }}>{item.text}</div>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 20, marginTop: 28 }}>
-                  {IND_ITEMS.map((ind) => {
-                  const val = commune[ind.key];
-                  const pct = val != null ? Math.min(100, Math.round(val)) : null;
-                  return (
-                    <div key={ind.key}>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--fg-4)', marginBottom: 6 }}>
-                        {ind.label}
-                      </div>
-                      {pct != null ? (
-                        <>
-                          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 24, color: ACCENT, lineHeight: 1 }}>
-                            {pct}<span style={{ fontSize: '0.5em', color: 'var(--fg-4)' }}>/100</span>
-                          </div>
-                          <div className="ind-bar"><div className="ind-bar-fill" style={{ width: `${pct}%` }} /></div>
-                          <div style={{ fontSize: 11, color: 'var(--fg-4)', lineHeight: 1.4 }}>{ind.desc}</div>
-                        </>
-                      ) : (
-                        <div style={{ fontSize: 13, color: 'var(--fg-4)' }}>N/D</div>
-                      )}
-                    </div>
-                  );
-                  })}
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
         {/* ── BLOC SUBMERSION MARINE (villes côtières uniquement) ──────── */}
         {coastalScore != null && (
           <div style={{ padding: '28px 32px', borderRadius: 12, background: 'rgba(56,189,248,0.05)', border: '1px solid rgba(56,189,248,0.2)', marginBottom: 48 }}>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 28, flexWrap: 'wrap', marginBottom: 18 }}>
-              <div>
-                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(48px,7vw,72px)', lineHeight: 1, fontWeight: 400, letterSpacing: '-0.03em', color: '#38bdf8' }}>
-                  {coastalScore}<span style={{ fontSize: '0.38em', color: 'var(--fg-4)' }}>/100</span>
+              <div style={{ maxWidth: 280 }}>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px,4.5vw,44px)', lineHeight: 1.05, fontWeight: 400, letterSpacing: '-0.02em', color: '#38bdf8' }}>
+                  {coastalBand}
                 </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--fg-4)', marginTop: 6 }}>
-                  Score de risque submersion marine · altitude NGF
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--fg-4)', marginTop: 8 }}>
+                  Submersion marine · hauteur au-dessus de la mer
                 </div>
               </div>
               <div style={{ flex: 1, minWidth: 200 }}>
                 <div style={{ fontSize: 14, color: 'var(--fg-3)', lineHeight: 1.7 }}>
-                  {communeName} est une commune littorale exposée à un risque <strong style={{ color: 'var(--fg-1)' }}>distinct</strong> des inondations fluviales : la submersion marine. Ce score mesure la hauteur de la ville au-dessus du niveau de la mer. Plus une ville est basse, plus elle est vulnérable si la mer monte lors d&apos;une tempête ou si le niveau marin s&apos;élève durablement avec le réchauffement.
+                  {communeName} est une commune littorale exposée à un risque <strong style={{ color: 'var(--fg-1)' }}>distinct</strong> des inondations fluviales : la submersion marine. Sa position par rapport au niveau de la mer conditionne sa vulnérabilité : plus une ville est basse, plus elle est exposée si la mer monte lors d&apos;une tempête ou si le niveau marin s&apos;élève durablement avec le réchauffement.
                 </div>
               </div>
             </div>
