@@ -25,6 +25,8 @@ import { buildTerritoryIdentity, buildTerritoryCards } from "@/lib/territory-ide
 import { TerritoryIdentityCard } from "@/components/report/TerritoryIdentityCard";
 import { getResidencesSecondairesPct } from "@/lib/saisonnalite";
 import { getEra5Trend } from "@/lib/era5-trend";
+import { getReportContext, resolveRelation, synthesisRelation } from "@/lib/report-context";
+import { ReportRelationBanner } from "@/components/report/ReportRelationBanner";
 
 export default async function RapportQuartierPage() {
   const account = await getCurrentUserAccount();
@@ -48,6 +50,13 @@ export default async function RapportQuartierPage() {
   const communeName = territory.communeName;
   const inseeCode = territory.inseeCode;
   const initialWorkbook = normalizeWorkbook(profile?.workbook_quartier);
+
+  // Contexte de lecture : relation effective (corrigée par l'utilisateur si posée,
+  // sinon inférée résidence/découverte). Pilote la posture de la synthèse, le
+  // garde-fou workbook, et le bandeau corrigeable.
+  const reportCtx = inseeCode ? await getReportContext(supabase, user.id, inseeCode) : null;
+  const { relation: effectiveRelation } = resolveRelation(territory.isResidence, reportCtx);
+  const isResidenceRelation = effectiveRelation === "current_residence";
 
   // Socle commun : Géorisques + GASPAR inclus dans l'enrichissement.
   const enrichment = inseeCode ? await gatherCommuneEnrichment(inseeCode) : null;
@@ -154,6 +163,18 @@ export default async function RapportQuartierPage() {
           </div>
         )}
 
+        {/* Contexte de lecture : relation à la commune (inférée, corrigeable).
+            Secondaire et après le contenu d'identité : jamais un gate. */}
+        {inseeCode && (
+          <div className="pt-6">
+            <ReportRelationBanner
+              insee={inseeCode}
+              relation={effectiveRelation}
+              communeName={displayName}
+            />
+          </div>
+        )}
+
         {/* Synthèse pleine largeur */}
         <section className="pt-8">
           <QuartierSynthesis
@@ -162,7 +183,7 @@ export default async function RapportQuartierPage() {
             userKey={account.userId}
             sourcesByHorizon={sourcesByHorizon}
             initialWorkbook={initialWorkbook}
-            isResidence={territory.isResidence}
+            relation={synthesisRelation(effectiveRelation)}
             fallbackSummary={buildFallbackSummary(communeName, "votre horizon")}
           />
         </section>
@@ -197,7 +218,7 @@ export default async function RapportQuartierPage() {
             résidence. Sur une commune explorée (découverte), on ne propose pas ce
             workbook (sa variante « découverte » viendra dans une étape ultérieure) :
             cela évite d'écrire des observations vécues sur une commune où l'on ne vit pas. */}
-        {territory.isResidence && (
+        {isResidenceRelation && (
           <section className="pt-14">
             <QuartierWorkbook
               userKey={account.userId}

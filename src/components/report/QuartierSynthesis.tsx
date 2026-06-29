@@ -31,10 +31,10 @@ type Props = {
   sourcesByHorizon: Record<HorizonKey, QuartierSourceKey[]>;
   /** Repères de terrain persistés côté Supabase (snapshot serveur). */
   initialWorkbook: WorkbookQuartier | null;
-  /** true si on lit la commune de RÉSIDENCE. Les observations vécues du workbook
-   *  ne sont mobilisées que pour la résidence : sur une commune explorée
-   *  (découverte), on n'injecte jamais les observations d'une autre commune. */
-  isResidence: boolean;
+  /** Relation EFFECTIVE du lecteur à la commune (stockée si corrigée, sinon
+   *  inférée résidence/découverte). Détermine la posture de la synthèse ET le
+   *  garde-fou : les observations vécues ne sont mobilisées que pour la résidence. */
+  relation: "current_residence" | "considering_living";
   /** Texte court à afficher si la génération IA échoue. */
   fallbackSummary: string;
 };
@@ -81,9 +81,10 @@ export default function QuartierSynthesis({
   userKey,
   sourcesByHorizon,
   initialWorkbook,
-  isResidence,
+  relation,
   fallbackSummary,
 }: Props) {
+  const isResidence = relation === "current_residence";
   const [horizon, setHorizon] = useHorizon();
   const meta = HORIZON_META[horizon];
   const posthog = usePostHog();
@@ -113,7 +114,7 @@ export default function QuartierSynthesis({
   );
 
   useEffect(() => {
-    if (!isResidence) return; // pas de workbook hors résidence (anti-contamination)
+    if (relation !== "current_residence") return; // pas de workbook hors résidence (anti-contamination)
     function sync() {
       const fromLs = readWorkbookFromStorage(userKey);
       if (countFilled(fromLs) > 0) {
@@ -125,7 +126,7 @@ export default function QuartierSynthesis({
     sync();
     window.addEventListener("focus", sync);
     return () => window.removeEventListener("focus", sync);
-  }, [userKey, isResidence]);
+  }, [userKey, relation]);
 
   // ─── Synthèse (stream) ─────────────────────────────────────────────────
   const [synthText, setSynthText] = useState("");
@@ -139,9 +140,6 @@ export default function QuartierSynthesis({
       const controller = new AbortController();
       const filledCount = countFilled(wb);
       const wbPayload = filledCount > 0 ? wb : undefined;
-      // Relation à la commune : résidence (on y vit) vs découverte (on l'explore).
-      // Détermine la posture de la synthèse, jamais les faits.
-      const relation = isResidence ? "current_residence" : "considering_living";
 
       (async () => {
         setSynthText("");
@@ -208,7 +206,7 @@ export default function QuartierSynthesis({
 
       return () => controller.abort();
     },
-    [inseeCode, communeName, horizon, posthog, isResidence],
+    [inseeCode, communeName, horizon, posthog, relation],
   );
 
   useEffect(() => {
