@@ -196,7 +196,7 @@ export default async function InondationCommune({
       label: 'Précipitations remarquables (p99)',
       val: driasV?.NORRRq99_yr,
       unit: 'mm',
-      note: "Seuil dépassé 1 % du temps — soit environ 3 à 4 fois par an. C'est l'indicateur de référence pour évaluer la fréquence des épisodes à fort ruissellement.",
+      note: "Seuil dépassé 1 % du temps, soit environ 3 à 4 fois par an. C'est l'indicateur de référence pour évaluer la fréquence des épisodes à fort ruissellement.",
     },
     {
       label: 'Précipitations annuelles totales',
@@ -266,7 +266,7 @@ export default async function InondationCommune({
             À {communeName}, quel est le risque d&apos;inondation réel ?
           </h1>
           <p style={{ fontSize: 15, color: 'var(--fg-3)', lineHeight: 1.75, maxWidth: 640, margin: '0 0 12px' }}>
-            Cette page rassemble les données officielles sur l&apos;exposition de {communeName} aux inondations, aux submersions marines et aux précipitations extrêmes — issues de Géorisques, de Météo-France et du CNRS, dans un scénario de réchauffement à +4°C d&apos;ici 2050.
+            Cette page rassemble les données officielles sur l&apos;exposition de {communeName} aux inondations, aux submersions marines et aux précipitations extrêmes, issues de Géorisques, de Météo-France et du CNRS, dans un scénario de réchauffement à +4°C d&apos;ici 2050.
           </p>
           <p style={{ fontSize: 14, color: 'var(--fg-4)', lineHeight: 1.65, maxWidth: 640, margin: 0, fontFamily: 'var(--font-mono)' }}>
             Que vous habitiez ici, envisagiez d&apos;y acheter un bien ou prépariez votre avenir, ces données ont une valeur concrète pour vos décisions.
@@ -376,7 +376,7 @@ export default async function InondationCommune({
               <div className="data-card-note" style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--fg-3)' }}>
                 {communeName} a déjà été reconnue {catnatInond} fois en état de catastrophe naturelle
                 pour inondation ou submersion marine. C&apos;est l&apos;histoire vécue du territoire :
-                des événements qui ont réellement eu lieu, pas une simple exposition théorique.
+                des événements qui ont réellement marqué la commune.
               </div>
             </div>
           </>
@@ -390,10 +390,10 @@ export default async function InondationCommune({
             <em style={{ fontStyle: 'italic', color: ACCENT }}>pour {communeName}</em>
           </p>
           <p className="cta-sub">
-            Logement · Mobilité · Santé · Économie locale — croisés pour votre profil spécifique.
+            Logement · Mobilité · Santé · Économie locale, croisés pour votre profil spécifique.
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Link href="/inscription" className="cta-btn">Commencer — 14 jours gratuits</Link>
+            <Link href={`/territoire/${insee_code}/debloquer?nom=${encodeURIComponent(communeName)}&source=inondation`} className="cta-btn">Ouvrir le rapport interactif</Link>
             <Link href="/rapport/logement" className="cta-sec">Ouvrir le module Logement →</Link>
           </div>
         </div>

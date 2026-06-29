@@ -448,7 +448,7 @@ function buildFactors(
         breakdownLabel: "Le fil de la sécheresse",
         breakdown: droughtRows,
         facts: droughtFacts && droughtFacts.length > 0 ? droughtFacts : undefined,
-        why: "La sécheresse ne se voit pas d'un coup, elle s'installe. L'eau qu'on restreint l'été, les cours d'eau qui faiblissent, la terre qui se rétracte : ces phénomènes racontent un même mouvement du territoire, du présent vers l'avenir. C'est un changement de fond, pas un épisode isolé.",
+        why: "La sécheresse ne se voit pas d'un coup, elle s'installe. L'eau qu'on restreint l'été, les cours d'eau qui faiblissent, la terre qui se rétracte : ces phénomènes racontent un même mouvement du territoire, du présent vers l'avenir. C'est un changement de fond qui s'inscrit dans la durée.",
         askPrefill: "Ma commune est-elle exposée à la sécheresse ?",
         sources: "VigiEau (arrêtés préfectoraux) · réseau ONDE, Hub'Eau (cours d'eau) · projections DRIAS, Météo-France",
       }
@@ -592,7 +592,7 @@ function buildFactors(
         subhead: demographie.recitPhrase ? `${cap(demographie.recitPhrase)}.` : undefined,
         accent: "var(--green)",
         facts: facts.length > 0 ? facts : undefined,
-        why: "La trajectoire de population dit beaucoup d'un territoire : une commune qui gagne des habitants attire et se transforme, une commune qui en perd voit ses services et ses logements évoluer autrement. C'est une tendance de fond, pas un chiffre isolé.",
+        why: "La trajectoire de population dit beaucoup d'un territoire : une commune qui gagne des habitants attire et se transforme, une commune qui en perd voit ses services et ses logements évoluer autrement. C'est une tendance de fond qui façonne durablement la commune.",
         whyLabel: "Ce que cela raconte",
         askPrefill: "Comment la population de ma commune évolue-t-elle ?",
         sources: "INSEE, recensement (évolution de la population 2015-2021)",

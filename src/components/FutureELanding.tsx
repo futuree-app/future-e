@@ -3092,7 +3092,7 @@ export default function FutureELanding() {
               Votre rapport interactif en 2 minutes.
             </h2>
             <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.65, margin: 0 }}>
-              Répondez à 6 questions. Obtenez un aperçu personnalisé de vos expositions climatiques — logement, métier, santé, mobilité, projets.
+              Répondez à 6 questions. Obtenez un aperçu personnalisé de vos expositions climatiques, logement, métier, santé, mobilité, projets.
             </p>
           </div>
           <div style={{ flexShrink: 0, textAlign: 'center' }}>
@@ -3177,7 +3177,7 @@ export default function FutureELanding() {
               maxWidth: 540,
             }}
           >
-            Des analyses fondées sur des données publiques — DRIAS, GisSol, INSEE, Géorisques.
+            Des analyses fondées sur des données publiques, DRIAS, GisSol, INSEE, Géorisques.
           </p>
         </div>
 

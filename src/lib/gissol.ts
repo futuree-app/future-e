@@ -91,10 +91,10 @@ function cadmiumToScore(value: number): number {
 }
 
 function cadmiumToLabel(value: number): string {
-  if (value < 0.2) return "Teneur faible — dans la norme nationale";
-  if (value < CADMIUM_THRESHOLD_HIGH) return "Teneur modérée — dans les valeurs usuelles";
-  if (value < CADMIUM_THRESHOLD_VERY_HIGH) return "Teneur élevée — zone de vigilance";
-  return "Teneur très élevée — dépassement valeur guide";
+  if (value < 0.2) return "Teneur faible, dans la norme nationale";
+  if (value < CADMIUM_THRESHOLD_HIGH) return "Teneur modérée, dans les valeurs usuelles";
+  if (value < CADMIUM_THRESHOLD_VERY_HIGH) return "Teneur élevée, zone de vigilance";
+  return "Teneur très élevée, dépassement valeur guide";
 }
 
 // ── ADEME Data Fair fetch ─────────────────────────────────────────────────────

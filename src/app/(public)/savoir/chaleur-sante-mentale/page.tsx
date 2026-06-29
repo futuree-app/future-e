@@ -239,7 +239,7 @@ export default function ChaleurSanteMentalePage() {
 
         <h2>Ce qui peut changer à l&apos;échelle collective</h2>
 
-        <p>Les plans canicule existants en France identifient les personnes vulnérables sur le plan physique mais intègrent encore insuffisamment la dimension santé mentale. Plusieurs mesures documentées dans d&apos;autres pays européens — extension des horaires des centres de soins psychiques pendant les vagues de chaleur, déclenchement automatique de visites à domicile pour les personnes isolées sous traitement psychiatrique, adaptation des protocoles de médication pendant les épisodes caniculaires — ne font pas encore partie du dispositif standard français.</p>
+        <p>Les plans canicule existants en France identifient les personnes vulnérables sur le plan physique mais intègrent encore insuffisamment la dimension santé mentale. Plusieurs mesures documentées dans d&apos;autres pays européens, extension des horaires des centres de soins psychiques pendant les vagues de chaleur, déclenchement automatique de visites à domicile pour les personnes isolées sous traitement psychiatrique, adaptation des protocoles de médication pendant les épisodes caniculaires, ne font pas encore partie du dispositif standard français.</p>
 
         <p>À l&apos;échelle du logement, la rénovation thermique des bâtiments a un double effet : réduire les émissions et protéger les occupants des effets de la chaleur. L&apos;abandon progressif des aides à la rénovation en France, documenté par plusieurs associations, va à l&apos;encontre de cet objectif de santé publique.</p>
 
@@ -268,7 +268,7 @@ export default function ChaleurSanteMentalePage() {
             </li>
             <li>
               <span className="src-tag">SPF</span>
-              <span>Santé publique France, Chaleur et santé — bilan de l&apos;été 2024, surveillance des indicateurs sanitaires liés à la chaleur, <a href="https://www.santepubliquefrance.fr" target="_blank" rel="noopener">santepubliquefrance.fr</a>, mars 2025.</span>
+              <span>Santé publique France, Chaleur et santé, bilan de l&apos;été 2024, surveillance des indicateurs sanitaires liés à la chaleur, <a href="https://www.santepubliquefrance.fr" target="_blank" rel="noopener">santepubliquefrance.fr</a>, mars 2025.</span>
             </li>
             <li>
               <span className="src-tag">Lancet PH</span>

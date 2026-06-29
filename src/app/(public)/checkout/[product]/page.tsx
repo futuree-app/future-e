@@ -73,10 +73,10 @@ const COPY: Record<CheckoutProductSlug, {
     hero: { line1: "Le Fil.", line2: "Bientôt." },
     promise: "Le rapport interactif futur•e ne s'arrête pas à un PDF. Avec Le Fil, il devient vivant : un dashboard interactif, des alertes ciblées, une lecture mensuelle écrite pour vous. Inscrivez-vous pour être prévenu·e en avant-première.",
     whatYouGet: [
-      { n: "01", title: "Dashboard interactif", body: "Vos risques, vos indicateurs, vos seuils — mis à jour à chaque nouvelle donnée publique." },
+      { n: "01", title: "Dashboard interactif", body: "Vos risques, vos indicateurs, vos seuils, mis à jour à chaque nouvelle donnée publique." },
       { n: "02", title: "Alertes locales", body: "Canicule, sécheresse, nouvelles études DRIAS sur votre département : prévenu·e sans être inondé·e." },
       { n: "03", title: "Profil vivant", body: "Vous déménagez, achetez, changez de mode de vie : votre profil suit, vos projections aussi." },
-      { n: "04", title: "Lettre mensuelle", body: "Écrite à la main, personnalisée — vos territoires, vos risques, vos décisions du moment." },
+      { n: "04", title: "Lettre mensuelle", body: "Écrite à la main, personnalisée, vos territoires, vos risques, vos décisions du moment." },
     ],
     timeline: [
       { n: "01", title: "Vous laissez votre email", body: "Et, si vous voulez, votre commune et votre motivation principale." },
@@ -85,7 +85,7 @@ const COPY: Record<CheckoutProductSlug, {
     ],
     faqs: [
       { q: "Quand Le Fil ouvre-t-il vraiment ?", a: "Nous visons une ouverture progressive dans les prochains mois. Les inscrits à la liste d'attente passent en premier." },
-      { q: "Pourquoi pas tout de suite ?", a: "Nous voulons que la première version tienne ses promesses : alertes utiles, dashboard fiable, newsletter écrite — pas un produit générique." },
+      { q: "Pourquoi pas tout de suite ?", a: "Nous voulons que la première version tienne ses promesses : alertes utiles, dashboard fiable, newsletter écrite, pas un produit générique." },
       { q: "L'inscription m'engage-t-elle ?", a: "Aucun engagement. Aucune carte demandée. Juste votre email pour être prévenu·e." },
       { q: "Et si j'ai déjà acheté le rapport interactif ?", a: "Les 14 € seront entièrement déduits de votre premier mois du Fil à son ouverture." },
     ],
@@ -102,7 +102,7 @@ export async function generateMetadata({
   if (!product) return { title: "futur•e" };
   const isFil = product.slug === "le-fil";
   return {
-    title: isFil ? "Le Fil · Bientôt — futur•e" : `${product.title} · futur•e`,
+    title: isFil ? "Le Fil · Bientôt · futur•e" : `${product.title} · futur•e`,
     description: product.subtitle,
     robots: isFil ? { index: false, follow: false } : undefined,
   };
@@ -818,7 +818,7 @@ export default async function CheckoutPage({
             >
               {isFil
                 ? "« Ce n'est plus une projection qu'on consulte. C'est une relation qu'on tient avec son territoire. »"
-                : "« Pas une étude de plus. Un rapport interactif pour décider — calmement, et à temps. »"}
+                : "« Pas une étude de plus. Un rapport interactif pour décider, calmement, et à temps. »"}
             </p>
             <p
               style={{

@@ -3,7 +3,7 @@ import Navbar from '@/components/Navbar';
 import { FilWaitlistForm } from '@/components/FilWaitlistForm';
 
 export const metadata: Metadata = {
-  title: 'Le Fil · Bientôt disponible — futur•e',
+  title: 'Le Fil · Bientôt disponible · futur•e',
   description:
     "Le rapport interactif futur•e devient vivant : dashboard interactif, alertes locales et newsletter mensuelle personnalisée. Inscrivez-vous pour être prévenu·e à l'ouverture.",
   robots: { index: false, follow: false },
@@ -13,7 +13,7 @@ const FEATURES = [
   {
     kicker: '01',
     title: 'Un dashboard qui respire',
-    body: "Vos risques climatiques, vos indicateurs et vos seuils — mis à jour à chaque nouvelle donnée publique. Plus un PDF figé, un tableau de bord vivant.",
+    body: "Vos risques climatiques, vos indicateurs et vos seuils, mis à jour à chaque nouvelle donnée publique. Plus un PDF figé, un tableau de bord vivant.",
   },
   {
     kicker: '02',
@@ -228,7 +228,7 @@ export default function LeFilPage() {
                   margin: '0 0 10px',
                 }}
               >
-                Liste d'attente — places limitées
+                Liste d'attente, places limitées
               </p>
               <h2
                 style={{

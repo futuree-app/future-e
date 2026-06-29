@@ -4,7 +4,7 @@ import { ProForm } from '@/components/ProForm';
 
 export const metadata: Metadata = {
   title: 'futur•e Pro · Outil de lecture territoriale pour les professionnels',
-  description: "DRIAS, Géorisques, INSEE, ANSES — toutes les données publiques officielles agrégées pour vos rendez-vous clients. Pour les CGP, notaires, agents d'assurance et diagnostiqueurs immobiliers.",
+  description: "DRIAS, Géorisques, INSEE, ANSES, toutes les données publiques officielles agrégées pour vos rendez-vous clients. Pour les CGP, notaires, agents d'assurance et diagnostiqueurs immobiliers.",
   robots: { index: false }, // discret : hors indexation pour l'instant
 };
 
@@ -75,10 +75,10 @@ const PROFESSIONS = [
     iconBg: 'rgba(96,165,250,0.10)',
     tag: 'Conseil en gestion de patrimoine',
     title: 'Conseillers en gestion de patrimoine',
-    pitch: "Vos clients vous demandent : ce bien sera-t-il encore une bonne décision dans 15 ans ? Vous avez les données notariales et les rendements. Vous n'avez pas la lecture territoriale à 2050 — ni la dimension sanitaire qui va peser sur l'attractivité.",
+    pitch: "Vos clients vous demandent : ce bien sera-t-il encore une bonne décision dans 15 ans ? Vous avez les données notariales et les rendements. Vous n'avez pas la lecture territoriale à 2050, ni la dimension sanitaire qui va peser sur l'attractivité.",
     bullets: [
       'Lecture des sept thèmes territoriaux sur n\'importe quelle commune française',
-      'Données sanitaires : cadmium, pesticides, qualité de l\'air — facteurs de valorisation ou de dépréciation à long terme',
+      'Données sanitaires : cadmium, pesticides, qualité de l\'air, facteurs de valorisation ou de dépréciation à long terme',
       'Export PDF intégrable à vos notes de conseil',
       'Comparaison de quatre communes pour les arbitrages multi-options',
     ],
@@ -91,7 +91,7 @@ const PROFESSIONS = [
     title: 'Notaires',
     pitch: "Votre devoir d'information s'étend. L'ERP couvre les risques réglementaires d'aujourd'hui. Il ne dit rien sur la trajectoire climatique du territoire à 2050, ni sur la qualité environnementale du sol et de l'air autour du bien.",
     bullets: [
-      'Recherche par adresse précise — pas seulement par commune',
+      'Recherche par adresse précise, pas seulement par commune',
       'Qualité environnementale : cadmium, pollutions de sols, sites ICPE à proximité (BRGM / IREP)',
       'Export PDF format acte, mention "données publiques officielles"',
       'Archivage par numéro de dossier sur cinq ans',
@@ -176,14 +176,14 @@ export default function ProfessionnelsPage() {
             "Nos clients nous posent des questions sur le risque climatique de leurs actifs immobiliers. Mais nous n'avons pas les outils pour leur répondre rapidement et sérieusement."
           </blockquote>
           <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#6b7388', marginLeft: 24, marginBottom: 48 }}>
-            — Un constat partagé par de nombreux professionnels
+            Un constat partagé par de nombreux professionnels
           </p>
           <div style={{ fontSize: 17, lineHeight: 1.75, color: '#9ba3b4' }}>
             <p style={{ margin: '0 0 18px' }}>
               Les données existent. Elles sont publiques. Elles sont produites par DRIAS, par Géorisques, par l'ANSES, par l'INSEE. Mais elles sont dispersées dans des dizaines de portails différents, dans des formats hétérogènes, avec des échelles géographiques qui ne se recoupent pas.
             </p>
             <p style={{ margin: '0 0 18px' }}>
-              <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>Pour qu'elles soient utilisables en rendez-vous client, il faut les agréger, les contextualiser, les traduire en langage accessible.</strong> C'est un travail d'éditorialisation que les bases publiques ne font pas — et que vous n'avez pas le temps de faire vous-même pour chaque dossier.
+              <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>Pour qu'elles soient utilisables en rendez-vous client, il faut les agréger, les contextualiser, les traduire en langage accessible.</strong> C'est un travail d'éditorialisation que les bases publiques ne font pas, et que vous n'avez pas le temps de faire vous-même pour chaque dossier.
             </p>
             <p style={{ margin: 0 }}>
               futur•e fait ce travail. Vous tapez une commune. En dix secondes, vous avez une lecture sur sept thèmes territoriaux avec les sources citées et la mention "données publiques officielles". Pas de score opaque. Pas d'alarme. Une contextualisation factuelle.
@@ -271,7 +271,7 @@ export default function ProfessionnelsPage() {
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 36, position: 'relative', zIndex: 1 }}>
               <div>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#6b7388', marginBottom: 14 }}>Avant — sans futur•e</div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#6b7388', marginBottom: 14 }}>Avant, sans futur•e</div>
                 {[
                   { time: 'Min 02', text: <><strong style={{ color: '#e9ecf2', fontWeight: 500 }}>Le client demande</strong> si le bien qu'il envisage à Saint-Jean-de-Luz sera encore assurable dans 20 ans.</> },
                   { time: 'Min 03', text: <>Vous évoquez la submersion, le retrait du trait de côte, "ça dépend des zones"… Sans chiffre précis.</> },

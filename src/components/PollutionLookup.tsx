@@ -118,7 +118,7 @@ const ATMO_LABELS: Record<string, string> = { pm25: 'PM2.5', pm10: 'PM10', no2: 
 
 async function searchAtmo(commune: Commune): Promise<string> {
   const res = await fetch(`/api/atmo/${commune.code}`);
-  if (res.status === 404 || res.status === 500) return "__empty__Indice ATMO non disponible pour cette commune aujourd'hui. La couverture du réseau ATMO varie selon les régions — les grandes agglomérations sont mieux couvertes.";
+  if (res.status === 404 || res.status === 500) return "__empty__Indice ATMO non disponible pour cette commune aujourd'hui. La couverture du réseau ATMO varie selon les régions, les grandes agglomérations sont mieux couvertes.";
   if (!res.ok) throw new Error(`Erreur ${res.status}`);
 
   const data = (await res.json()) as AtmoData;
@@ -174,7 +174,7 @@ async function searchEau(commune: Commune): Promise<string> {
       const bad = h.threshold != null && h.value > h.threshold;
       const warn = !bad && h.warn != null && h.value > h.warn;
       const cls = bad ? 'badge-alert' : warn ? 'badge-warn' : 'badge-ok';
-      const note = bad ? ` — dépasse la norme (${h.threshold} ${h.unit})` : warn ? ` — zone de vigilance (> ${h.warn} ${h.unit})` : '';
+      const note = bad ? `, dépasse la norme (${h.threshold} ${h.unit})` : warn ? `, zone de vigilance (> ${h.warn} ${h.unit})` : '';
       return `<div class="result-meta" style="margin-top:4px;">${h.label} : <strong style="color:var(--fg-1)">${h.value} ${h.unit}</strong><span class="result-badge ${cls}" style="margin-left:6px;">${bad ? 'Dépassement' : warn ? 'Vigilance' : 'Normal'}</span>${note}</div>`;
     }).join('');
   }
@@ -350,7 +350,7 @@ export function PollutionLookup() {
         blockId="irep"
         title="Installations industrielles à proximité"
         sub="Registre IREP · ADEME · Rejets déclarés par substance"
-        desc="Les installations classées ICPE déclarent annuellement leurs rejets dans l'air, l'eau et les sols. Ce registre recense ce que les exploitants ont l'obligation de déclarer — pas nécessairement tout ce qui est émis, mais c'est le point de départ documenté."
+        desc="Les installations classées ICPE déclarent annuellement leurs rejets dans l'air, l'eau et les sols. Ce registre recense ce que les exploitants ont l'obligation de déclarer, pas nécessairement tout ce qui est émis, mais c'est le point de départ documenté."
       />
       <LookupBlock
         blockId="sis"
@@ -362,7 +362,7 @@ export function PollutionLookup() {
         blockId="atmo"
         title="Qualité de l'air aujourd'hui"
         sub="Indice ATMO · PM2.5, PM10, NO₂, O₃"
-        desc="L'indice ATMO intègre les principaux polluants atmosphériques. Il est utile pour les épisodes de pollution, moins pour comprendre l'exposition chronique de fond — qui est plus déterminante sur le long terme que les pics ponctuels."
+        desc="L'indice ATMO intègre les principaux polluants atmosphériques. Il est utile pour les épisodes de pollution, moins pour comprendre l'exposition chronique de fond, qui est plus déterminante sur le long terme que les pics ponctuels."
       />
       <LookupBlock
         blockId="eau"

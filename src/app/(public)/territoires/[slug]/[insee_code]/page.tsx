@@ -577,7 +577,7 @@ export default async function TerritoireCommunePage({
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
             <Link
-              href="/inscription"
+              href={`/territoire/${insee_code}/debloquer?nom=${encodeURIComponent(commune.nom_commune)}&source=territoire`}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -591,7 +591,7 @@ export default async function TerritoireCommunePage({
                 borderRadius: 6,
               }}
             >
-              Commencer — 14 jours gratuits
+              Ouvrir le rapport interactif
             </Link>
             {agirGuide?.available && (
               <Link

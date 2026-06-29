@@ -27,7 +27,7 @@ export default function OuVivrePage() {
           NE rejoue PAS les effets React, donc la réhydratation du parcours (cf.
           OuVivreClient) ne se déclenche pas. Ce script s'exécute au parse, avant
           tout affichage : si on arrive par retour arrière et qu'un instantané de
-          session existe, on force un rechargement normal — où l'effet de montage
+          session existe, on force un rechargement normal, où l'effet de montage
           restaure le parcours. La clé est la seule constante dupliquée (SESSION_KEY). */}
       <script
         dangerouslySetInnerHTML={{

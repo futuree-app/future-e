@@ -26,7 +26,7 @@ const CITIES = [
     insee: '66136',
     dept: 'Pyrénées-Orientales (66)',
     score: 91,
-    editorial: "Perpignan se défend en tête de ce classement non pas seulement parce qu'elle sera très chaude, mais parce que la chaleur y est déjà difficile à encaisser sur la durée. La ville fait partie des plus chaudes de France métropolitaine, avec des étés très longs, des nuits souvent peu rafraîchissantes et une forte exposition aux épisodes intenses. Montpellier ou Nîmes peuvent afficher des indicateurs très élevés sur certains jours extrêmes. Mais Perpignan cumule chaleur de jour, chaleur nocturne et tension durable sur la vie quotidienne, ce qui explique son score global.",
+    editorial: "Perpignan se défend en tête de ce classement parce que la chaleur y est déjà difficile à encaisser sur la durée. La ville fait partie des plus chaudes de France métropolitaine, avec des étés très longs, des nuits souvent peu rafraîchissantes et une forte exposition aux épisodes intenses. Montpellier ou Nîmes peuvent afficher des indicateurs très élevés sur certains jours extrêmes. Mais Perpignan cumule chaleur de jour, chaleur nocturne et tension durable sur la vie quotidienne, ce qui explique son score global.",
     sources: 'DRIAS Météo-France, Météo-France Pyrénées-Orientales, données climatologiques 1950–2024',
   },
   {
@@ -80,7 +80,7 @@ const CITIES = [
     insee: '06088',
     dept: 'Alpes-Maritimes (06)',
     score: 78,
-    editorial: "Nice est prise en étau entre les Alpes et la mer. En été, les masses d'air chaud et humide remontant de Méditerranée ne peuvent pas se dissiper vers le nord — bloquées par les reliefs alpins. Résultat : une chaleur moite qui s'accumule, des nuits tropicales de plus en plus fréquentes. Contrairement aux idées reçues, la proximité de la mer n'est plus un avantage en plein cœur de l'été quand la Méditerranée est à 28°C.",
+    editorial: "Nice est prise en étau entre les Alpes et la mer. En été, les masses d'air chaud et humide remontant de Méditerranée ne peuvent pas se dissiper vers le nord, bloquées par les reliefs alpins. Résultat : une chaleur moite qui s'accumule, des nuits tropicales de plus en plus fréquentes. Contrairement aux idées reçues, la proximité de la mer n'est plus un avantage en plein cœur de l'été quand la Méditerranée est à 28°C.",
     sources: 'DRIAS Météo-France, Météo-France rapport régional PACA',
   },
   {
@@ -262,7 +262,7 @@ export default async function ChaleurTop10() {
           <div className="cta-rapport">
             <div className="cta-rapport-title">Votre commune est-elle exposée ?</div>
             <p className="cta-rapport-desc">
-              Cherchez votre ville pour voir ses projections spécifiques — puis construisez votre rapport interactif personnalisé.
+              Cherchez votre ville pour voir ses projections spécifiques, puis construisez votre rapport interactif personnalisé.
               Six dimensions croisées : Territoire, Santé, Logement, Métier, Mobilité, Projets.
             </p>
             <div className="cta-links">

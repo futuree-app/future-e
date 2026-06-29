@@ -182,7 +182,7 @@ export default function ChaleurPage() {
                 <span className="article-cat" style={{ background: 'rgba(251,146,60,0.12)', color: '#fb923c' }}>Résilience</span>
                 <div className="article-title">Sommes-nous prêts à la prochaine catastrophe ?</div>
                 <div className="article-desc">
-                  84 % des Français savent que leur territoire devra s'adapter. Seulement 26 % se sentent préparés. Le paradoxe de la résilience française — et comment le réduire.
+                  84 % des Français savent que leur territoire devra s'adapter. Seulement 26 % se sentent préparés. Le paradoxe de la résilience française, et comment le réduire.
                 </div>
                 <div className="article-cta">Lire l'article →</div>
               </div>

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Pollutions invisibles : ce que votre sol et votre air contiennent — futur•e',
+  title: 'Pollutions invisibles : ce que votre sol et votre air contiennent · futur•e',
   description:
     'Hydrocarbures dans les nappes, métaux lourds dans les terres agricoles, émissions industrielles dans l\'air ambiant. Ces pollutions s\'accumulent et dépendent de l\'histoire industrielle de votre commune.',
 };
@@ -200,7 +200,7 @@ export default function PollutionsInvisiblesPage() {
         <h3>Les hydrocarbures</h3>
 
         <p>
-          Les hydrocarbures — pétrole, gazole, huiles usagées — contaminent les sols à la faveur de fuites de cuves enterrées, d&apos;accidents de transport ou de déversements industriels. Les anciennes stations-service, dépôts de carburant et garages mécaniques sont les sources les plus courantes de contamination résiduelle. <strong>La présence de ces composés dans un sol ne se détecte ni à l&apos;odeur ni à la vue</strong> dans les concentrations habituellement rencontrées.
+          Les hydrocarbures, pétrole, gazole, huiles usagées, contaminent les sols à la faveur de fuites de cuves enterrées, d&apos;accidents de transport ou de déversements industriels. Les anciennes stations-service, dépôts de carburant et garages mécaniques sont les sources les plus courantes de contamination résiduelle. <strong>La présence de ces composés dans un sol ne se détecte ni à l&apos;odeur ni à la vue</strong> dans les concentrations habituellement rencontrées.
         </p>
 
         <p>
@@ -342,7 +342,7 @@ export default function PollutionsInvisiblesPage() {
         </p>
 
         <div className="irep-note">
-          <strong>Le registre IREP</strong> (Inspection des installations classées pour la protection de l&apos;environnement) recense toutes les déclarations annuelles de rejets polluants des installations industrielles françaises, par commune et par substance. Vous pouvez y rechercher ce qu&apos;une usine proche de chez vous déclare rejeter dans l&apos;air ou dans l&apos;eau. Ce registre ne couvre que les rejets déclarés et mesurés — il ne dit rien des pollutions héritées ou des émissions diffuses non mesurées.{' '}
+          <strong>Le registre IREP</strong> (Inspection des installations classées pour la protection de l&apos;environnement) recense toutes les déclarations annuelles de rejets polluants des installations industrielles françaises, par commune et par substance. Vous pouvez y rechercher ce qu&apos;une usine proche de chez vous déclare rejeter dans l&apos;air ou dans l&apos;eau. Ce registre ne couvre que les rejets déclarés et mesurés, il ne dit rien des pollutions héritées ou des émissions diffuses non mesurées.{' '}
           <a href="https://www.georisques.gouv.fr/risques/installations" target="_blank" rel="noopener noreferrer">Consulter les installations sur Géorisques →</a>
         </div>
 
@@ -357,7 +357,7 @@ export default function PollutionsInvisiblesPage() {
         <h2>Ce que cela change pour votre vie quotidienne</h2>
 
         <p>
-          Ces expositions ne provoquent pas de symptômes immédiats identifiables. Elles agissent dans la durée, par accumulation, à des niveaux que les études épidémiologiques ont progressivement associés à des effets sur la santé — développement neurologique des enfants, risques cardiovasculaires, cancers à long terme — sans qu&apos;il soit possible d&apos;établir un lien de causalité individuel.
+          Ces expositions ne provoquent pas de symptômes immédiats identifiables. Elles agissent dans la durée, par accumulation, à des niveaux que les études épidémiologiques ont progressivement associés à des effets sur la santé, développement neurologique des enfants, risques cardiovasculaires, cancers à long terme, sans qu&apos;il soit possible d&apos;établir un lien de causalité individuel.
         </p>
 
         <p>
@@ -413,35 +413,35 @@ export default function PollutionsInvisiblesPage() {
           <ul>
             <li>
               <span className="src-tag">ANSES</span>
-              <span>Agence nationale de sécurité sanitaire — avis et rapports sur les substances chimiques dans les sols et l&apos;air. <a href="https://www.anses.fr" target="_blank" rel="noopener noreferrer">anses.fr</a></span>
+              <span>Agence nationale de sécurité sanitaire, avis et rapports sur les substances chimiques dans les sols et l&apos;air. <a href="https://www.anses.fr" target="_blank" rel="noopener noreferrer">anses.fr</a></span>
             </li>
             <li>
               <span className="src-tag">CIRC</span>
-              <span>Centre international de recherche sur le cancer — monographies sur les cancérogènes, groupes de classification 1 à 4. <a href="https://monographs.iarc.who.int" target="_blank" rel="noopener noreferrer">monographs.iarc.who.int</a></span>
+              <span>Centre international de recherche sur le cancer, monographies sur les cancérogènes, groupes de classification 1 à 4. <a href="https://monographs.iarc.who.int" target="_blank" rel="noopener noreferrer">monographs.iarc.who.int</a></span>
             </li>
             <li>
               <span className="src-tag">IREP</span>
-              <span>Registre français des émissions polluantes — rejets déclarés par installation industrielle, par commune et par substance. <a href="https://www.georisques.gouv.fr" target="_blank" rel="noopener noreferrer">georisques.gouv.fr</a></span>
+              <span>Registre français des émissions polluantes, rejets déclarés par installation industrielle, par commune et par substance. <a href="https://www.georisques.gouv.fr" target="_blank" rel="noopener noreferrer">georisques.gouv.fr</a></span>
             </li>
             <li>
               <span className="src-tag">GisSol</span>
-              <span>Groupement d&apos;intérêt scientifique sur les sols — cartographies des teneurs en métaux lourds des sols français. <a href="https://www.gissol.fr" target="_blank" rel="noopener noreferrer">gissol.fr</a></span>
+              <span>Groupement d&apos;intérêt scientifique sur les sols, cartographies des teneurs en métaux lourds des sols français. <a href="https://www.gissol.fr" target="_blank" rel="noopener noreferrer">gissol.fr</a></span>
             </li>
             <li>
               <span className="src-tag">BRGM</span>
-              <span>Bureau de recherches géologiques et minières — base de données Basias et Basol sur les anciens sites industriels et les sites pollués. <a href="https://www.georisques.gouv.fr" target="_blank" rel="noopener noreferrer">georisques.gouv.fr</a></span>
+              <span>Bureau de recherches géologiques et minières, base de données Basias et Basol sur les anciens sites industriels et les sites pollués. <a href="https://www.georisques.gouv.fr" target="_blank" rel="noopener noreferrer">georisques.gouv.fr</a></span>
             </li>
             <li>
               <span className="src-tag">INERIS</span>
-              <span>Institut national de l&apos;environnement industriel et des risques — études de modélisation de la dispersion atmosphérique et valeurs guide de qualité de l&apos;air. <a href="https://www.ineris.fr" target="_blank" rel="noopener noreferrer">ineris.fr</a></span>
+              <span>Institut national de l&apos;environnement industriel et des risques, études de modélisation de la dispersion atmosphérique et valeurs guide de qualité de l&apos;air. <a href="https://www.ineris.fr" target="_blank" rel="noopener noreferrer">ineris.fr</a></span>
             </li>
             <li>
               <span className="src-tag">OMS</span>
-              <span>Organisation mondiale de la santé — lignes directrices sur la qualité de l&apos;air, révision 2021. <a href="https://www.who.int/publications/i/item/9789240034228" target="_blank" rel="noopener noreferrer">who.int</a></span>
+              <span>Organisation mondiale de la santé, lignes directrices sur la qualité de l&apos;air, révision 2021. <a href="https://www.who.int/publications/i/item/9789240034228" target="_blank" rel="noopener noreferrer">who.int</a></span>
             </li>
             <li>
               <span className="src-tag">Agences de l&apos;eau</span>
-              <span>Rapport sur l&apos;état des eaux 2024 — dépassements de normes pesticides dans les cours d&apos;eau et les nappes phréatiques.</span>
+              <span>Rapport sur l&apos;état des eaux 2024, dépassements de normes pesticides dans les cours d&apos;eau et les nappes phréatiques.</span>
             </li>
           </ul>
         </div>

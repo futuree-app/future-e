@@ -267,11 +267,11 @@ const fullHtml = `
 
   <div class="profiles">
     <div class="profile-card alert">
-      <div class="profile-label">Exposition forte — logement en zone rouge PPRNi ou en dessous de la cote de crue</div>
+      <div class="profile-label">Exposition forte, logement en zone rouge PPRNi ou en dessous de la cote de crue</div>
       <p class="profile-body">Si votre logement est classé en zone rouge d'un PPRNi approuvé, votre exposition à l'aléa fort est documentée officiellement. Les travaux de réduction de la vulnérabilité (mise en hauteur des équipements, batardeaux, clapet anti-retour) sont souvent éligibles à des subventions du Fonds Barnier (FPRNM), versé par votre assureur sur votre demande dans certaines conditions. Votre mairie et votre préfecture peuvent vous indiquer les dispositifs d'aide à la réduction de la vulnérabilité en vigueur dans votre département.</p>
     </div>
     <div class="profile-card alert">
-      <div class="profile-label">Exposition aux crues rapides — cours d'eau non surveillé par Vigicrues</div>
+      <div class="profile-label">Exposition aux crues rapides, cours d'eau non surveillé par Vigicrues</div>
       <p class="profile-body">Les crues torrentielles et les ruissellements intenses peuvent survenir en moins de deux heures après des précipitations intenses, sans alerte préalable sur les petits cours d'eau. Si votre logement est proche d'un ruisseau non surveillé ou en fond de vallon, la vigilance météorologique de Météo-France (pluie-inondation, orage) est votre principal signal d'alerte. Configurer les notifications de l'application Météo-France pour votre localisation précise est une mesure immédiate sans coût.</p>
     </div>
     <div class="profile-card">

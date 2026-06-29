@@ -80,7 +80,7 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     slug: 'cadmium',
     title: 'Cadmium dans les sols',
     description:
-      "Un Français sur deux est surexposé. Les sols agricoles français sont naturellement chargés en cadmium — et votre commune est peut-être concernée.",
+      "Un Français sur deux est surexposé. Les sols agricoles français sont naturellement chargés en cadmium, et votre commune est peut-être concernée.",
     category: 'Santé',
     accent: '#4ade80',
     href: '/savoir/cadmium',

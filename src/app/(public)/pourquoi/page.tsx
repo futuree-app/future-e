@@ -247,7 +247,7 @@ export default function PourquoiPage() {
 
         <section style={{ marginBottom: 64 }}>
           <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: C.dim, letterSpacing: '0.1em', marginBottom: 16 }}>
-            01 — Le constat
+            01 · Le constat
           </span>
           <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.55rem', fontWeight: 400, lineHeight: 1.3, margin: '0 0 20px' }}>
             Trop d&apos;alertes, pas assez de repères
@@ -277,7 +277,7 @@ export default function PourquoiPage() {
 
         <section style={{ marginBottom: 64 }}>
           <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: C.dim, letterSpacing: '0.1em', marginBottom: 16 }}>
-            02 — Ce que futur•e est
+            02 · Ce que futur•e est
           </span>
           <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.55rem', fontWeight: 400, lineHeight: 1.3, margin: '0 0 20px' }}>
             Une traduction, pas un commentaire
@@ -352,7 +352,7 @@ export default function PourquoiPage() {
 
         <section style={{ marginBottom: 64 }}>
           <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: C.dim, letterSpacing: '0.1em', marginBottom: 16 }}>
-            03 — Les données et le suivi
+            03 · Les données et le suivi
           </span>
           <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.55rem', fontWeight: 400, lineHeight: 1.3, margin: '0 0 20px' }}>
             Des sources publiques. Un suivi dans la durée.
@@ -396,7 +396,7 @@ export default function PourquoiPage() {
 
             <svg viewBox="0 0 720 560" xmlns="http://www.w3.org/2000/svg" aria-label="Schéma du fonctionnement de futur•e" style={{ display: 'block', width: '100%', height: 'auto', maxWidth: 720, margin: '0 auto' }}>
               <path d="M 90 195 A 280 280 0 0 1 630 195" stroke="rgba(248, 113, 113, 0.25)" strokeWidth="1" fill="none" strokeDasharray="3 4" />
-              <text x="360" y="22" textAnchor="middle" fill={C.dim} fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="0.1em">01 — Données publiques françaises</text>
+              <text x="360" y="22" textAnchor="middle" fill={C.dim} fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="0.1em">01 · Données publiques françaises</text>
 
               <path className="why-trace-up" d="M 100 175 Q 230 230 360 215" stroke="rgba(167, 139, 250, 0.4)" strokeWidth="0.9" />
               <path className="why-trace-up" d="M 200 105 Q 280 165 360 215" stroke="rgba(167, 139, 250, 0.4)" strokeWidth="0.9" />
@@ -418,7 +418,7 @@ export default function PourquoiPage() {
                 </g>
               ))}
 
-              <text x="200" y="218" textAnchor="middle" fill={C.dim} fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="0.1em" opacity="0.55">02 — Croisement</text>
+              <text x="200" y="218" textAnchor="middle" fill={C.dim} fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="0.1em" opacity="0.55">02 · Croisement</text>
 
               <g className="why-core-pulse">
                 <circle cx="360" cy="250" r="64" fill="rgba(248,113,113,0.08)" stroke="rgba(248,113,113,0.3)" strokeWidth="1" />
@@ -428,7 +428,7 @@ export default function PourquoiPage() {
               <text x="360" y="260" textAnchor="middle" fill={C.accent} fontFamily="'Instrument Serif', serif" fontSize="14" fontStyle="italic">+</text>
               <text x="360" y="276" textAnchor="middle" fill={C.text} fontFamily="'Instrument Serif', serif" fontSize="13" fontStyle="italic">votre profil</text>
 
-              <text x="360" y="335" textAnchor="middle" fill={C.dim} fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="0.1em">03 — Six modules de lecture</text>
+              <text x="360" y="335" textAnchor="middle" fill={C.dim} fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="0.1em">03 · Six modules de lecture</text>
 
               <path className="why-trace-down" d="M 360 298 Q 230 340 100 380" stroke="rgba(96, 165, 250, 0.4)" strokeWidth="0.9" />
               <path className="why-trace-down" d="M 360 298 Q 290 350 230 390" stroke="rgba(96, 165, 250, 0.4)" strokeWidth="0.9" />
@@ -461,7 +461,7 @@ export default function PourquoiPage() {
 
               <g className="why-final-card">
                 <rect x="180" y="470" width="360" height="74" rx="10" fill="rgba(251, 146, 60, 0.06)" stroke="rgba(251, 146, 60, 0.4)" strokeWidth="1" />
-                <text x="360" y="491" textAnchor="middle" fill={C.warm} fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="0.12em">04 — Votre lecture personnalisée</text>
+                <text x="360" y="491" textAnchor="middle" fill={C.warm} fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="0.12em">04 · Votre lecture personnalisée</text>
                 <text x="360" y="513" textAnchor="middle" fill={C.text} fontFamily="'Instrument Serif', serif" fontSize="13" fontStyle="italic">Une lecture située, sourcée, mensuelle.</text>
                 <text x="360" y="531" textAnchor="middle" fill={C.muted} fontFamily="'Instrument Sans', sans-serif" fontSize="9.5">Rapport interactif initial, suivi continu, mode foyer.</text>
               </g>
@@ -488,7 +488,7 @@ export default function PourquoiPage() {
 
         <section style={{ marginBottom: 64 }}>
           <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: C.dim, letterSpacing: '0.1em', marginBottom: 16 }}>
-            04 — Qui nous sommes
+            04 · Qui nous sommes
           </span>
           <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.55rem', fontWeight: 400, lineHeight: 1.3, margin: '0 0 20px' }}>
             Derrière futur•e

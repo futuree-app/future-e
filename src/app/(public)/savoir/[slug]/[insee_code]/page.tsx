@@ -414,7 +414,7 @@ export default async function CommunePage({
 
     <h2 style="--accent:${hub.accent}">Eau potable &amp; ressource locale</h2>
     <p>
-      Données Hub'Eau (Eaufrance) pour <strong>${commune.nom_commune}</strong> —
+      Données Hub'Eau (Eaufrance) pour <strong>${commune.nom_commune}</strong>, 
       qualité bactériologique, physico-chimique et signal de sécheresse sur les cours d'eau.
     </p>
 
@@ -447,7 +447,7 @@ export default async function CommunePage({
         Cours d'eau local${eaufrance.drought.riverName ? ` · ${eaufrance.drought.riverName}` : ''}
       </div>
       <div style="font-size:14px;color:${eaufrance.drought.isDry ? '#f87171' : '#9ba3b4'};">
-        ${eaufrance.drought.status ?? 'Observation disponible'}${eaufrance.drought.lastObservationDate ? ` — ${eaufrance.drought.lastObservationDate}` : ''}
+        ${eaufrance.drought.status ?? 'Observation disponible'}${eaufrance.drought.lastObservationDate ? `, ${eaufrance.drought.lastObservationDate}` : ''}
       </div>
     </div>
     ` : !eaufrance?.drinkingWater ? `

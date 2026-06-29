@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { CookieSettingsLink } from "@/components/CookieSettingsLink";
 
 export const metadata: Metadata = {
-  title: "Politique de confidentialité — futur•e",
+  title: "Politique de confidentialité · futur•e",
   description: "Comment futur•e collecte, utilise et protège vos données personnelles.",
 };
 
@@ -12,10 +12,10 @@ const LAST_UPDATED = "22 mai 2026";
 const NO_SELL_NOTICE = "futur•e ne revend jamais les données personnelles de ses utilisateurs et ne les utilise pas à des fins de publicité comportementale.";
 
 const PROCESSORS = [
-  { name: "Supabase", role: "Base de données et authentification", location: "États-Unis — clauses contractuelles types UE", link: "https://supabase.com/privacy" },
-  { name: "Vercel", role: "Hébergement et diffusion du site", location: "États-Unis — clauses contractuelles types UE", link: "https://vercel.com/legal/privacy-policy" },
-  { name: "Stripe", role: "Traitement des paiements", location: "États-Unis — clauses contractuelles types UE", link: "https://stripe.com/fr/privacy" },
-  { name: "Google (GA4 + GTM)", role: "Mesure d'audience (avec consentement)", location: "États-Unis — clauses contractuelles types UE", link: "https://policies.google.com/privacy" },
+  { name: "Supabase", role: "Base de données et authentification", location: "États-Unis, clauses contractuelles types UE", link: "https://supabase.com/privacy" },
+  { name: "Vercel", role: "Hébergement et diffusion du site", location: "États-Unis, clauses contractuelles types UE", link: "https://vercel.com/legal/privacy-policy" },
+  { name: "Stripe", role: "Traitement des paiements", location: "États-Unis, clauses contractuelles types UE", link: "https://stripe.com/fr/privacy" },
+  { name: "Google (GA4 + GTM)", role: "Mesure d'audience (avec consentement)", location: "États-Unis, clauses contractuelles types UE", link: "https://policies.google.com/privacy" },
   { name: "PostHog", role: "Analytics produit et enregistrements de session (avec consentement)", location: "Union Européenne", link: "https://posthog.com/privacy" },
 ];
 
@@ -125,11 +125,11 @@ export default function PolitiqueConfidentialitePage() {
               {NO_SELL_NOTICE}
             </p>
             <ul style={{ paddingLeft: 20, lineHeight: 2, color: "var(--fg-2)", margin: "16px 0 0" }}>
-              <li><strong style={{ color: "var(--fg-1)" }}>Email et mot de passe</strong> — pour créer et accéder à votre compte.</li>
-              <li><strong style={{ color: "var(--fg-1)" }}>Commune de référence</strong> — pour personnaliser les projections climatiques.</li>
-              <li><strong style={{ color: "var(--fg-1)" }}>Réponses au questionnaire</strong> — logement, mobilité, confort de vie, environnement personnel et projets. Elles restent dans votre espace et ne sont jamais revendues.</li>
-              <li><strong style={{ color: "var(--fg-1)" }}>Données de paiement</strong> — traitées directement par Stripe. futur•e ne voit ni ne stocke vos coordonnées bancaires.</li>
-              <li><strong style={{ color: "var(--fg-1)" }}>Données de navigation</strong> — uniquement si vous avez donné votre consentement via la bannière.</li>
+              <li><strong style={{ color: "var(--fg-1)" }}>Email et mot de passe</strong>, pour créer et accéder à votre compte.</li>
+              <li><strong style={{ color: "var(--fg-1)" }}>Commune de référence</strong>, pour personnaliser les projections climatiques.</li>
+              <li><strong style={{ color: "var(--fg-1)" }}>Réponses au questionnaire</strong>, logement, mobilité, confort de vie, environnement personnel et projets. Elles restent dans votre espace et ne sont jamais revendues.</li>
+              <li><strong style={{ color: "var(--fg-1)" }}>Données de paiement</strong>, traitées directement par Stripe. futur•e ne voit ni ne stocke vos coordonnées bancaires.</li>
+              <li><strong style={{ color: "var(--fg-1)" }}>Données de navigation</strong>, uniquement si vous avez donné votre consentement via la bannière.</li>
             </ul>
           </Section>
 
@@ -202,7 +202,7 @@ export default function PolitiqueConfidentialitePage() {
               Avec votre consentement, futur•e utilise PostHog pour enregistrer des sessions de navigation anonymisées (mouvements, clics, scroll). Ces enregistrements servent uniquement à améliorer l'ergonomie du service.
             </p>
             <p>
-              Les enregistrements de session <strong style={{ color: "var(--fg-1)" }}>ne permettent pas de voir les mots de passe, les données bancaires ou tout champ sensible saisi</strong> — ces éléments sont masqués automatiquement avant transmission.
+              Les enregistrements de session <strong style={{ color: "var(--fg-1)" }}>ne permettent pas de voir les mots de passe, les données bancaires ou tout champ sensible saisi</strong>, ces éléments sont masqués automatiquement avant transmission.
             </p>
           </Section>
 
@@ -217,11 +217,11 @@ export default function PolitiqueConfidentialitePage() {
           <Section title="Vos droits">
             <p>Conformément au RGPD, vous disposez des droits suivants sur vos données :</p>
             <ul style={{ paddingLeft: 20, lineHeight: 2, color: "var(--fg-2)", margin: "12px 0 0" }}>
-              <li><strong style={{ color: "var(--fg-1)" }}>Accès</strong> — obtenir une copie de vos données.</li>
-              <li><strong style={{ color: "var(--fg-1)" }}>Rectification</strong> — corriger des données inexactes.</li>
-              <li><strong style={{ color: "var(--fg-1)" }}>Effacement</strong> — supprimer votre compte et vos données.</li>
-              <li><strong style={{ color: "var(--fg-1)" }}>Portabilité</strong> — recevoir vos données dans un format lisible.</li>
-              <li><strong style={{ color: "var(--fg-1)" }}>Opposition</strong> — refuser certains traitements.</li>
+              <li><strong style={{ color: "var(--fg-1)" }}>Accès</strong>, obtenir une copie de vos données.</li>
+              <li><strong style={{ color: "var(--fg-1)" }}>Rectification</strong>, corriger des données inexactes.</li>
+              <li><strong style={{ color: "var(--fg-1)" }}>Effacement</strong>, supprimer votre compte et vos données.</li>
+              <li><strong style={{ color: "var(--fg-1)" }}>Portabilité</strong>, recevoir vos données dans un format lisible.</li>
+              <li><strong style={{ color: "var(--fg-1)" }}>Opposition</strong>, refuser certains traitements.</li>
             </ul>
             <p style={{ marginTop: 20 }}>
               Pour exercer ces droits : <a href="mailto:hello@futur-e.fr" style={{ color: "var(--orange)" }}>hello@futur-e.fr</a>. En cas de désaccord persistant, vous pouvez saisir la <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer" style={{ color: "var(--orange)" }}>CNIL</a>.

@@ -32,7 +32,7 @@ const HORIZONS = [
     year: "2100",
     recommended: false,
     title: "2100",
-    body: "Cet horizon montre où la trajectoire pourrait mener à long terme — le monde que les enfants d'aujourd'hui pourraient connaître plus âgés.",
+    body: "Cet horizon montre où la trajectoire pourrait mener à long terme, le monde que les enfants d'aujourd'hui pourraient connaître plus âgés.",
   },
 ] as const;
 

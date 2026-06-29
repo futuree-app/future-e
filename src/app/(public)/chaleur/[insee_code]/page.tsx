@@ -188,7 +188,7 @@ export default async function ChaleurCommune({
       label: 'Jours de canicule intense par an',
       val: driasV?.NORTX35D_yr,
       unit: 'j',
-      note: "Jours à plus de 35°C — seuil où les mécanismes de refroidissement du corps sont débordés, même chez les adultes en bonne santé.",
+      note: "Jours à plus de 35°C, seuil où les mécanismes de refroidissement du corps sont débordés, même chez les adultes en bonne santé.",
     },
     {
       label: 'Nuits chaudes par an',
@@ -214,7 +214,7 @@ export default async function ChaleurCommune({
   ]);
 
   const HEAT_RISK_DESCRIPTIONS: Record<string, string> = {
-    'Tassements différentiels': "Le sol argileux de cette commune gonfle avec l'humidité et se rétracte en période de sécheresse. Ce mouvement répété fissure les murs et les fondations des maisons. La sécheresse record de 2022 a déjà causé plus de 12 milliards € de sinistres en France — et les étés de 2050 seront bien plus secs.",
+    'Tassements différentiels': "Le sol argileux de cette commune gonfle avec l'humidité et se rétracte en période de sécheresse. Ce mouvement répété fissure les murs et les fondations des maisons. La sécheresse record de 2022 a déjà causé plus de 12 milliards € de sinistres en France, et les étés de 2050 seront bien plus secs.",
     'Retrait-gonflement des argiles': "Même mécanisme : le sol bouge selon les saisons. Les maisons individuelles aux fondations superficielles sont les plus exposées. Avec des étés significativement plus secs prévus pour 2050 sur cette région, ce phénomène deviendra chronique.",
     'Feux de forêt': "La commune est officiellement classée à risque incendie. Avec des vagues de chaleur plus fréquentes, plus longues et plus intenses, la saison des feux s'allonge déjà d'année en année. Les projections prévoient une extension géographique importante de ce risque vers le nord d'ici 2050.",
     'Sécheresse': "Le territoire est officiellement exposé au risque sécheresse. Ce risque est directement amplifié par le réchauffement : les projections DRIAS prévoient des étés significativement plus secs pour les prochaines décennies.",
@@ -257,7 +257,7 @@ export default async function ChaleurCommune({
             À {communeName}, à quoi ressemblera un été en 2050 ?
           </h1>
           <p style={{ fontSize: 15, color: 'var(--fg-3)', lineHeight: 1.75, maxWidth: 640, margin: '0 0 12px' }}>
-            Cette page rassemble les projections climatiques officelles pour {communeName} — nombre de jours de canicule, nuits sans fraîcheur, risques associés — dans un scénario de réchauffement à +4°C d&apos;ici 2050. Les données viennent de Météo-France, du CNRS, et des bases de risques officielles de l&apos;État.
+            Cette page rassemble les projections climatiques officelles pour {communeName}, nombre de jours de canicule, nuits sans fraîcheur, risques associés, dans un scénario de réchauffement à +4°C d&apos;ici 2050. Les données viennent de Météo-France, du CNRS, et des bases de risques officielles de l&apos;État.
           </p>
           <p style={{ fontSize: 14, color: 'var(--fg-4)', lineHeight: 1.65, maxWidth: 640, margin: 0, fontFamily: 'var(--font-mono)' }}>
             Que vous habitiez ici, envisagiez d&apos;y déménager ou prépariez votre avenir, ces chiffres vous concernent directement.
@@ -373,8 +373,8 @@ export default async function ChaleurCommune({
               </div>
               <div className="data-card-note" style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--fg-3)' }}>
                 {communeName} a déjà été reconnue {catnatSecheresse} fois en état de catastrophe naturelle
-                pour sécheresse des sols — le retrait-gonflement des argiles qui fissure les fondations,
-                directement aggravé par des étés plus secs.
+                pour sécheresse des sols. Ce phénomène de retrait-gonflement des argiles fissure les
+                fondations, et des étés plus secs l&apos;aggravent directement.
               </div>
             </div>
           </>
@@ -424,10 +424,10 @@ export default async function ChaleurCommune({
             <em style={{ fontStyle: 'italic', color: ACCENT }}>pour {communeName}</em>
           </p>
           <p className="cta-sub">
-            Logement · Mobilité · Santé · Économie locale — croisés pour votre profil spécifique.
+            Logement · Mobilité · Santé · Économie locale, croisés pour votre profil spécifique.
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Link href="/inscription" className="cta-btn">Commencer — 14 jours gratuits</Link>
+            <Link href={`/territoire/${insee_code}/debloquer?nom=${encodeURIComponent(communeName)}&source=chaleur`} className="cta-btn">Ouvrir le rapport interactif</Link>
             <Link href="/comparateur" className="cta-sec">Comparer avec une autre commune →</Link>
           </div>
         </div>

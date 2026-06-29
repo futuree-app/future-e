@@ -5,7 +5,7 @@ import { PollutionLookup } from '@/components/PollutionLookup';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Face aux pollutions invisibles : agir à sa juste échelle — futur•e',
+  title: 'Face aux pollutions invisibles : agir à sa juste échelle · futur•e',
   description:
     "Connaître la situation de votre commune, adapter quelques gestes, comprendre les recours collectifs. Un guide structuré pour agir sans se culpabiliser de ce qui dépasse votre portée.",
 };
@@ -189,7 +189,7 @@ export default function AgirPollutionsInvisiblesPage() {
         </h1>
 
         <p className="article-intro">
-          Certaines pollutions sont hors de votre portée. D&apos;autres peuvent être réduites à la marge. Quelques-unes appellent une réponse collective. Cette page ne prétend pas que l&apos;action individuelle suffit — elle dit ce qui est utile, ce qui ne l&apos;est pas, et où trouver des relais quand votre propre périmètre ne suffit plus.
+          Certaines pollutions sont hors de votre portée. D&apos;autres peuvent être réduites à la marge. Quelques-unes appellent une réponse collective. Cette page ne prétend pas que l&apos;action individuelle suffit, elle dit ce qui est utile, ce qui ne l&apos;est pas, et où trouver des relais quand votre propre périmètre ne suffit plus.
         </p>
 
         <Link href="/savoir/pollutions-invisibles" className="savoir-link">
@@ -198,7 +198,7 @@ export default function AgirPollutionsInvisiblesPage() {
         </Link>
 
         <div className="tone-block">
-          Ce que vous allez lire ne cherche pas à vous rendre responsable de pollutions que vous n&apos;avez pas créées. <strong>La grande majorité des expositions environnementales documentées sont le produit de décisions industrielles, agricoles et d&apos;urbanisme qui précèdent votre présence sur un territoire.</strong> Les gestes individuels ont un rôle — limité, réel, jamais suffisant seul.
+          Ce que vous allez lire ne cherche pas à vous rendre responsable de pollutions que vous n&apos;avez pas créées. <strong>La grande majorité des expositions environnementales documentées sont le produit de décisions industrielles, agricoles et d&apos;urbanisme qui précèdent votre présence sur un territoire.</strong> Les gestes individuels ont un rôle, limité, réel, jamais suffisant seul.
         </div>
 
         {/* Niveau 1 header always visible */}
@@ -218,7 +218,7 @@ export default function AgirPollutionsInvisiblesPage() {
 
             <div className="limit-block">
               <div className="limit-block-head">Limite de ce niveau</div>
-              <p>Ces bases disent ce qui est déclaré, mesuré, recensé. Elles ne disent pas ce qui est diffus, accidentel, ou non surveillé. Une commune sans installation IREP n&apos;est pas nécessairement sans pollution — elle peut avoir des sources agricoles, des pollutions historiques non inventoriées, ou des émissions de trafic non mesurées localement.</p>
+              <p>Ces bases disent ce qui est déclaré, mesuré, recensé. Elles ne disent pas ce qui est diffus, accidentel, ou non surveillé. Une commune sans installation IREP n&apos;est pas nécessairement sans pollution, elle peut avoir des sources agricoles, des pollutions historiques non inventoriées, ou des émissions de trafic non mesurées localement.</p>
               <p><strong>Savoir ce qui concerne votre commune est utile. Ce n&apos;est pas suffisant pour établir votre exposition réelle.</strong></p>
             </div>
 
@@ -230,7 +230,7 @@ export default function AgirPollutionsInvisiblesPage() {
             </div>
 
             <p>
-              Certains gestes réduisent l&apos;exposition dans des configurations précises. Ils ne valent que si votre situation les rend pertinents — ils ne remplacent pas une réduction des sources à l&apos;origine.
+              Certains gestes réduisent l&apos;exposition dans des configurations précises. Ils ne valent que si votre situation les rend pertinents, ils ne remplacent pas une réduction des sources à l&apos;origine.
             </p>
 
             <h3>Si vous avez un jardin potager en zone urbaine ancienne ou à proximité d&apos;un site industriel</h3>
@@ -240,7 +240,7 @@ export default function AgirPollutionsInvisiblesPage() {
                 <div className="action-check">✓</div>
                 <div className="action-body">
                   <div className="action-title">Faire analyser votre sol avant de consommer ce que vous y cultivez</div>
-                  <p className="action-desc">Une analyse complète — métaux lourds, HAP — coûte entre 80 et 200 euros selon le laboratoire et le panel de substances. Elle donne une image fiable de la teneur réelle de votre terre, indépendamment des bases nationales. Ce n&apos;est utile que si vous cultivez et consommez ce que vous produisez.</p>
+                  <p className="action-desc">Une analyse complète, métaux lourds, HAP, coûte entre 80 et 200 euros selon le laboratoire et le panel de substances. Elle donne une image fiable de la teneur réelle de votre terre, indépendamment des bases nationales. Ce n&apos;est utile que si vous cultivez et consommez ce que vous produisez.</p>
                   <span className="action-note">80–200 € · Laboratoire accrédité Cofrac</span>
                 </div>
               </div>
@@ -261,7 +261,7 @@ export default function AgirPollutionsInvisiblesPage() {
                 <div className="action-check">✓</div>
                 <div className="action-body">
                   <div className="action-title">Lavage des mains systématique après jeux extérieurs en zone identifiée</div>
-                  <p className="action-desc">Les enfants ingèrent davantage de sol que les adultes par contact main-bouche. Dans les zones où des métaux lourds sont documentés dans les sols, ce geste simple réduit l&apos;ingestion accidentelle. Il ne supprime pas l&apos;exposition — il la réduit. <span className="src">Source : ANSES</span></p>
+                  <p className="action-desc">Les enfants ingèrent davantage de sol que les adultes par contact main-bouche. Dans les zones où des métaux lourds sont documentés dans les sols, ce geste simple réduit l&apos;ingestion accidentelle. Il ne supprime pas l&apos;exposition, il la réduit. <span className="src">Source : ANSES</span></p>
                 </div>
               </div>
               <div className="action-item">
@@ -298,7 +298,7 @@ export default function AgirPollutionsInvisiblesPage() {
             </div>
 
             <p>
-              La majorité de l&apos;exposition aux pollutions invisibles est déterminée par des décisions qui n&apos;appartiennent pas aux individus exposés. Ces décisions se prennent dans des arènes où des droits d&apos;accès existent — et des recours collectifs aussi.
+              La majorité de l&apos;exposition aux pollutions invisibles est déterminée par des décisions qui n&apos;appartiennent pas aux individus exposés. Ces décisions se prennent dans des arènes où des droits d&apos;accès existent, et des recours collectifs aussi.
             </p>
 
             <div className="rights-block">
@@ -308,7 +308,7 @@ export default function AgirPollutionsInvisiblesPage() {
 
             <div className="rights-block">
               <div className="rights-block-head">Enquêtes publiques et participation</div>
-              <p>Toute modification d&apos;une installation industrielle classée fait l&apos;objet d&apos;une enquête publique. Ces enquêtes sont ouvertes à tous, leurs résultats sont publics, et vos observations y ont une valeur juridique. Elles sont annoncées dans les journaux locaux et sur les sites des préfectures — et passent inaperçues dans la grande majorité des cas.</p>
+              <p>Toute modification d&apos;une installation industrielle classée fait l&apos;objet d&apos;une enquête publique. Ces enquêtes sont ouvertes à tous, leurs résultats sont publics, et vos observations y ont une valeur juridique. Elles sont annoncées dans les journaux locaux et sur les sites des préfectures, et passent inaperçues dans la grande majorité des cas.</p>
             </div>
 
             <div className="rights-block">
@@ -322,7 +322,7 @@ export default function AgirPollutionsInvisiblesPage() {
             </div>
 
             <div className="closing">
-              Ce que vous pouvez faire à votre échelle, <strong>faites-le sans vous culpabiliser de ce qui dépasse votre portée</strong>. Ce qui dépasse votre portée individuelle, cherchez si des recours collectifs existent — souvent, ils existent déjà.
+              Ce que vous pouvez faire à votre échelle, <strong>faites-le sans vous culpabiliser de ce qui dépasse votre portée</strong>. Ce qui dépasse votre portée individuelle, cherchez si des recours collectifs existent, souvent, ils existent déjà.
             </div>
 
             <div className="actions-card">

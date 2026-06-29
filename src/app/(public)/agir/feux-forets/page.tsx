@@ -263,19 +263,19 @@ const fullHtml = `
 
   <div class="profiles">
     <div class="profile-card alert">
-      <div class="profile-label">Exposition forte — maison isolée en interface forêt-habitat immédiate</div>
+      <div class="profile-label">Exposition forte, maison isolée en interface forêt-habitat immédiate</div>
       <p class="profile-body">Si votre logement est enclavé dans un massif ou en lisière directe, avec une végétation dense à moins de 10 mètres, votre exposition est la plus forte. Le débroussaillement est non négociable : c'est la seule mesure documentée qui laisse à un bâtiment une chance de résister à un passage de feu sans présence humaine. Renseignez-vous auprès du SDIS de votre département pour obtenir un diagnostic de votre propriété, certains proposent ce service gratuitement dans les communes à risque.</p>
     </div>
     <div class="profile-card alert">
-      <div class="profile-label">Exposition forte — résidence secondaire non occupée pendant l'été</div>
+      <div class="profile-label">Exposition forte, résidence secondaire non occupée pendant l'été</div>
       <p class="profile-body">Une résidence secondaire inoccupée pendant la période à haut risque présente une vulnérabilité spécifique : personne pour déclencher l'alerte ou prendre les mesures d'urgence. Assurez-vous que le débroussaillement est effectué avant votre départ, que les aérations peuvent être fermées de l'extérieur, et que votre assureur est informé de la période de non-occupation. Certains contrats comportent des clauses restrictives en cas d'inoccupation prolongée.</p>
     </div>
     <div class="profile-card moderee">
-      <div class="profile-label">Exposition modérée — lotissement en périphérie de massif</div>
+      <div class="profile-label">Exposition modérée, lotissement en périphérie de massif</div>
       <p class="profile-body">Dans un lotissement, la responsabilité du débroussaillement est partagée entre les propriétaires individuels et, selon les cas, la copropriété ou l'association syndicale. Les parties communes (talus, accès, espaces verts) sont de la responsabilité du gestionnaire du lotissement. Vérifiez avec votre syndic ou votre association syndicale si les obligations légales de débroussaillement des parties communes sont respectées. Une seule parcelle non débroussaillée suffit à créer une continuité de combustible dans un lotissement.</p>
     </div>
     <div class="profile-card moderee">
-      <div class="profile-label">Exposition nouvelle — commune hors zone méditerranéenne classée après 2022</div>
+      <div class="profile-label">Exposition nouvelle, commune hors zone méditerranéenne classée après 2022</div>
       <p class="profile-body">Les incendies de la Gironde et des Landes en 2022 ont conduit à réviser le périmètre des communes classées en zone à risque dans plusieurs régions. Si votre commune a été classée récemment, vous pouvez ne pas encore être informé de vos obligations légales de débroussaillement. Vérifiez le statut actuel de votre commune auprès de la préfecture ou de la mairie : le classement peut être plus récent que les informations disponibles sur les portails nationaux.</p>
     </div>
   </div>

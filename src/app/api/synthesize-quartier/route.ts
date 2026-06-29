@@ -38,6 +38,7 @@ const VOICE_RULES = `VOIX ÉDITORIALE — RÈGLES ABSOLUES
 - Ton calme, humain, accessible, intelligent. Jamais alarmiste, jamais militant, jamais institutionnel, jamais infantilisant.
 - Pas d'exclamations, pas de questions rhétoriques, pas d'emoji.
 - Pas de tirets cadratin (—). Utilisez des deux-points, des virgules, des points.
+- Pas d'antithèse pour faire de l'emphase : jamais "c'est X, pas Y", "non pas X mais Y", "ce n'est pas X, c'est Y". Affirmez directement ce qui est, sans le définir par ce qu'il n'est pas.
 - Pas de phrases IA-typiques : "il convient de", "n'hésitez pas à", "il est important de", "dans le cadre de", "il s'agit de", "force est de constater".
 - Pas de superlatifs vides : "véritable enjeu", "défi majeur", "transformation profonde".
 - INTERDIT de citer les sources dans le corps du texte. Pas de (DRIAS), pas de (Géorisques), pas de (ADEME), pas de (VigiEau), pas de (Hub'Eau). Les sources sont affichées séparément dans l'UI.
@@ -77,8 +78,8 @@ Si le payload contient une section "reperes_terrain_utilisateur", l'utilisateur 
 - N'inventez pas de repères absents.
 
 HISTOIRE VÉCUE DU TERRITOIRE — ARRÊTÉS CATNAT, EN DIALOGUE AVEC LE FUTUR
-Si le payload contient "historique_catnat", la commune a déjà été reconnue en état de catastrophe naturelle (nombre_arretes, depuis depuis_annee, aléas dans aleas_principaux). C'est une mémoire vécue, pas une projection. Votre valeur ici n'est PAS de réciter ce nombre (la lecture gratuite le donne déjà brut) mais de le RELIER au futur projeté :
-- Quand un aléa déjà vécu (inondations, sécheresse des sols, submersion…) recoupe une tendance qui s'accentue dans climat_projete, faites le pont en une phrase : ce qui est déjà arrivé n'est pas un accident isolé du passé, c'est le début de ce que les projections amplifient. Exemple de registre : "Les inondations ne sont pas une crainte abstraite ici, la commune les a déjà connues, et les fortes pluies deviennent plus fréquentes."
+Si le payload contient "historique_catnat", la commune a déjà été reconnue en état de catastrophe naturelle (nombre_arretes, depuis depuis_annee, aléas dans aleas_principaux). C'est une mémoire vécue du passé réel, distincte des projections futures. Votre valeur ici tient au LIEN avec le futur projeté, davantage qu'au nombre lui-même (la lecture gratuite le donne déjà brut) :
+- Quand un aléa déjà vécu (inondations, sécheresse des sols, submersion…) recoupe une tendance qui s'accentue dans climat_projete, faites le pont en une phrase : ce que la commune a déjà vécu annonce ce que les projections amplifient. Exemple de registre : "La commune a déjà connu des inondations, et les fortes pluies deviennent plus fréquentes."
 - Quand le passé vécu et la trajectoire future portent sur des phénomènes différents, ne forcez pas le lien : évoquez la mémoire en une phrase, sobrement, sans la relier artificiellement.
 Règles : une seule fois, jamais alarmiste, jamais une liste, ne citez pas la source (ni GASPAR ni Géorisques), n'inventez aucun chiffre absent. Si le champ est absent ou nul, n'en parlez pas.
 

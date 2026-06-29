@@ -143,7 +143,7 @@ const articleBody = `
   </div>
 
   <p class="lede">
-    En France, 84 % des actifs résidant dans des communes rurales utilisent leur voiture pour aller travailler. Ce chiffre n'est pas le signe d'une préférence culturelle ou d'un manque de volonté de changer. Il reflète une organisation du territoire construite sur plusieurs décennies qui a rendu la voiture non pas commode, mais nécessaire. Comprendre pourquoi certains endroits produisent cette dépendance, et ce que cela implique pour les foyers qui y vivent, c'est l'objet de cette page.
+    En France, 84 % des actifs résidant dans des communes rurales utilisent leur voiture pour aller travailler. Derrière ce chiffre, une organisation du territoire construite sur plusieurs décennies, qui a rendu la voiture nécessaire au quotidien. Comprendre pourquoi certains endroits produisent cette dépendance, et ce que cela implique pour les foyers qui y vivent, c'est l'objet de cette page.
   </p>
 
   <h2>De quoi parle-t-on précisément</h2>

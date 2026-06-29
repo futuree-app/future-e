@@ -189,7 +189,7 @@ const previewHtml = `
   </a>
 
   <p class="lede">
-    Le véhicule électrique est souvent présenté comme la réponse évidente à la dépendance automobile et à la hausse du prix des carburants. La réalité est plus fine. Le passage à l'électrique réduit certaines fragilités et en laisse d'autres entières. Cette page décrit les conditions réelles qui déterminent si ce changement a du sens pour votre situation, votre usage et votre territoire — sans parti pris pour ou contre, à partir des données disponibles.
+    Le véhicule électrique est souvent présenté comme la réponse évidente à la dépendance automobile et à la hausse du prix des carburants. La réalité est plus fine. Le passage à l'électrique réduit certaines fragilités et en laisse d'autres entières. Cette page décrit les conditions réelles qui déterminent si ce changement a du sens pour votre situation, votre usage et votre territoire, sans parti pris pour ou contre, à partir des données disponibles.
   </p>
 `;
 
@@ -287,7 +287,7 @@ const fullHtml = `
       <div class="step-line"></div>
       <div class="step-content">
         <div class="step-title">Calculer votre kilométrage annuel réel et votre coût carburant actuel</div>
-        <p class="step-desc">Relevez votre kilométrage sur les deux dernières années (carnet d'entretien ou historique des contrôles techniques). Multipliez-le par votre consommation moyenne et par le prix moyen du carburant sur la période. C'est le montant que vous économisez en carburant en passant à l'électrique avec recharge à domicile — à comparer avec le surcoût à l'achat et les économies d'entretien.</p>
+        <p class="step-desc">Relevez votre kilométrage sur les deux dernières années (carnet d'entretien ou historique des contrôles techniques). Multipliez-le par votre consommation moyenne et par le prix moyen du carburant sur la période. C'est le montant que vous économisez en carburant en passant à l'électrique avec recharge à domicile, à comparer avec le surcoût à l'achat et les économies d'entretien.</p>
         <a href="https://calculautoeco.ademe.fr" class="step-link" target="_blank" rel="noopener">calculautoeco.ademe.fr · Simulateur coût complet ADEME ↗</a>
       </div>
     </div>
@@ -331,7 +331,7 @@ const fullHtml = `
 
   <div class="profiles">
     <div class="profile-card favorable">
-      <div class="profile-label">Fort rouleur en maison individuelle — cas le plus favorable</div>
+      <div class="profile-label">Fort rouleur en maison individuelle, cas le plus favorable</div>
       <p class="profile-body">Plus de 18 000 km/an, recharge à domicile possible, trajets majoritairement sur des axes couverts en bornes rapides : c'est le profil pour lequel le passage à l'électrique présente le meilleur rapport interactif économique et pratique. Le retour sur investissement par rapport à un thermique équivalent est généralement atteint entre la troisième et la quatrième année.</p>
     </div>
     <div class="profile-card favorable">
@@ -375,7 +375,7 @@ const fullHtml = `
 
   <h2>Ce que l'électrique ne résout pas</h2>
   <p>
-    Le passage à l'électrique réduit la sensibilité au prix du carburant fossile et les émissions de gaz à effet de serre à l'usage — c'est réel et documenté. Il ne réduit pas la dépendance structurelle à la voiture. Si votre trajet pivot vers votre lieu de travail n'a pas d'alternative crédible, avoir un véhicule électrique ne change pas votre fragilité face à une panne, à une perte de permis ou au vieillissement. La question de la motorisation et la question de la dépendance sont deux questions distinctes. Les traiter ensemble brouille les deux.
+    Le passage à l'électrique réduit la sensibilité au prix du carburant fossile et les émissions de gaz à effet de serre à l'usage, c'est réel et documenté. Il ne réduit pas la dépendance structurelle à la voiture. Si votre trajet pivot vers votre lieu de travail n'a pas d'alternative crédible, avoir un véhicule électrique ne change pas votre fragilité face à une panne, à une perte de permis ou au vieillissement. La question de la motorisation et la question de la dépendance sont deux questions distinctes. Les traiter ensemble brouille les deux.
   </p>
   <p>
     Sur le plan du bilan carbone cycle de vie, l'ADEME estime que la fabrication d'un véhicule électrique génère davantage d'émissions qu'un thermique équivalent, en raison principalement de la batterie. Ce déficit initial est compensé à l'usage : pour un véhicule assemblé en Europe chargé avec le mix électrique français (faiblement carboné grâce au nucléaire), l'ADEME situe le point de bascule entre 2 et 3 ans d'usage typique. Au-delà, chaque kilomètre parcouru réduit l'écart d'empreinte carbone globale par rapport à un thermique équivalent. Ce calcul change selon le pays de fabrication, le mix électrique utilisé pour la charge et la durée de vie du véhicule.

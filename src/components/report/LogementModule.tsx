@@ -684,7 +684,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                       <DpeBadge label={dpe.etiquette_dpe} size="lg" />
                       <div>
                         <div style={{ fontWeight: 500, fontSize: 15, color: "var(--fg-hi)" }}>
-                          Étiquette {dpe.etiquette_dpe ?? "—"} — {DPE_LABELS[dpe.etiquette_dpe ?? ""] ?? "Donnée indisponible"}
+                          Étiquette {dpe.etiquette_dpe ?? "—"}, {DPE_LABELS[dpe.etiquette_dpe ?? ""] ?? "Donnée indisponible"}
                         </div>
                         <div style={{ fontSize: 11, color: "var(--fg-4)", marginTop: 4 }}>
                           GES {dpe.etiquette_ges ?? "—"} · DPE du {dpe.date_dpe?.slice(0, 10) ?? "—"}

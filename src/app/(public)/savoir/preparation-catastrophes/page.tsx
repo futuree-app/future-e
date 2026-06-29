@@ -156,7 +156,7 @@ export default function PreparationCatastrophesPage() {
         <h1>Sommes-nous prêts à la prochaine catastrophe climatique ?<br /><em>Le paradoxe français.</em></h1>
 
         <p className="lede">
-          84 % des Français savent que leur territoire devra s&apos;adapter au changement climatique. Pourtant seulement 26 % se sentent préparés à une vague de chaleur. Cet écart — documenté par la Croix-Rouge française et le Crédoc — est le problème central de la résilience hexagonale. Comprendre pourquoi il existe, c&apos;est déjà commencer à le réduire.
+          84 % des Français savent que leur territoire devra s&apos;adapter au changement climatique. Pourtant seulement 26 % se sentent préparés à une vague de chaleur. Cet écart, documenté par la Croix-Rouge française et le Crédoc, est le problème central de la résilience hexagonale. Comprendre pourquoi il existe, c&apos;est déjà commencer à le réduire.
         </p>
 
         <Link href="/agir/canicule" className="assoc-link">
@@ -212,7 +212,7 @@ export default function PreparationCatastrophesPage() {
         </p>
 
         <p>
-          En mars 2024, l&apos;Agence européenne de l&apos;environnement a publié son évaluation des risques climatiques pour l&apos;Europe — le premier document de ce type à cette échelle. Son constat : <em>« La chaleur extrême, la sécheresse, les incendies de forêt et les inondations que nous avons connus ces dernières années en Europe vont s&apos;aggraver, y compris dans les scénarios optimistes du réchauffement climatique, et affecteront les conditions de vie sur tout le continent. »</em> Ce n&apos;est pas un scénario catastrophiste : c&apos;est la trajectoire basse.
+          En mars 2024, l&apos;Agence européenne de l&apos;environnement a publié son évaluation des risques climatiques pour l&apos;Europe, le premier document de ce type à cette échelle. Son constat : <em>« La chaleur extrême, la sécheresse, les incendies de forêt et les inondations que nous avons connus ces dernières années en Europe vont s&apos;aggraver, y compris dans les scénarios optimistes du réchauffement climatique, et affecteront les conditions de vie sur tout le continent. »</em> Ce n&apos;est pas un scénario catastrophiste : c&apos;est la trajectoire basse.
         </p>
 
         <div className="stats-grid" style={{ marginTop: '32px', marginBottom: '40px' }}>
@@ -223,7 +223,7 @@ export default function PreparationCatastrophesPage() {
           </div>
           <div className="stat-card">
             <span className="stat-number">44 M</span>
-            <span className="stat-label">Français présentent une vulnérabilité face aux inondations et mouvements de terrain — les deux tiers de la population hexagonale.</span>
+            <span className="stat-label">Français présentent une vulnérabilité face aux inondations et mouvements de terrain, les deux tiers de la population hexagonale.</span>
             <span className="stat-src">BRGM / Géorisques</span>
           </div>
           <div className="stat-card">
@@ -349,17 +349,17 @@ export default function PreparationCatastrophesPage() {
         </div>
 
         <p>
-          Les jeunes constituent la population la plus touchée par l&apos;écoanxiété. Dans les pays riches, entre <strong>40 et 80 % des enfants et jeunes adultes </strong> souffrent d&apos;incertitude, d&apos;anxiété ou de fortes réactions émotionnelles face au changement climatique — sentiments de désespoir, impuissance, deuil anticipé. Ce n&apos;est pas une pathologie : c&apos;est une réponse rationnelle à un risque réel. Mais elle peut être modulée par l&apos;action concrète.
+          Les jeunes constituent la population la plus touchée par l&apos;écoanxiété. Dans les pays riches, entre <strong>40 et 80 % des enfants et jeunes adultes </strong> souffrent d&apos;incertitude, d&apos;anxiété ou de fortes réactions émotionnelles face au changement climatique, sentiments de désespoir, impuissance, deuil anticipé. Ce n&apos;est pas une pathologie : c&apos;est une réponse rationnelle à un risque réel. Mais elle peut être modulée par l&apos;action concrète.
         </p>
 
         <p>
-          Le contre-intuitif que documentent les études sur la résilience : <strong>passer à l&apos;acte réduit l&apos;écoanxiété</strong>, pas l&apos;inverse. Préparer un sac d&apos;urgence, identifier les espaces rafraîchis proches de chez soi, appeler un voisin âgé pendant une alerte — ces gestes modestes créent un sentiment de maîtrise mesurable. L&apos;inaction face à un risque connu, elle, amplifie le sentiment d&apos;impuissance.
+          Le contre-intuitif que documentent les études sur la résilience : <strong>passer à l&apos;acte réduit l&apos;écoanxiété</strong>, pas l&apos;inverse. Préparer un sac d&apos;urgence, identifier les espaces rafraîchis proches de chez soi, appeler un voisin âgé pendant une alerte, ces gestes modestes créent un sentiment de maîtrise mesurable. L&apos;inaction face à un risque connu, elle, amplifie le sentiment d&apos;impuissance.
         </p>
 
         <div className="callout">
           <div className="callout-head">Ce que les outre-mer enseignent à l&apos;Hexagone</div>
           <p>
-            Les territoires ultramarins — Antilles, La Réunion, Mayotte — sont confrontés à des catastrophes à répétition : cyclones, sécheresses sévères, submersions. Ils sont structurellement mieux préparés que la France hexagonale. La Croix-Rouge les cite comme modèle pour ce que les territoires métropolitains devront devenir. À Mayotte, durant la sécheresse de 2023, la population a spontanément mis en place des systèmes de réserve d&apos;eau et de partage que l&apos;Hexagone n&apos;a jamais eu à développer. La préparation s&apos;y enseigne à l&apos;école, s&apos;intègre à l&apos;urbanisme. Ce n&apos;est pas une contrainte : c&apos;est une compétence construite par l&apos;expérience répétée.
+            Les territoires ultramarins, Antilles, La Réunion, Mayotte, sont confrontés à des catastrophes à répétition : cyclones, sécheresses sévères, submersions. Ils sont structurellement mieux préparés que la France hexagonale. La Croix-Rouge les cite comme modèle pour ce que les territoires métropolitains devront devenir. À Mayotte, durant la sécheresse de 2023, la population a spontanément mis en place des systèmes de réserve d&apos;eau et de partage que l&apos;Hexagone n&apos;a jamais eu à développer. La préparation s&apos;y enseigne à l&apos;école, s&apos;intègre à l&apos;urbanisme. Ce n&apos;est pas une contrainte : c&apos;est une compétence construite par l&apos;expérience répétée.
           </p>
         </div>
 
@@ -397,7 +397,7 @@ export default function PreparationCatastrophesPage() {
             </li>
             <li>
               <span className="src-tag">Inserm</span>
-              <span>Denis Hémon, Eric Jougla (Inserm), <em>Surmortalité liée à la canicule d&apos;août 2003 — Rapport d&apos;étape</em>, septembre 2003. Estimation de 15 000 décès, 9 sur 10 à domicile, sur-représentation des personnes âgées vivant seules. <a href="https://www.inserm.fr" target="_blank" rel="noopener">inserm.fr</a>.</span>
+              <span>Denis Hémon, Eric Jougla (Inserm), <em>Surmortalité liée à la canicule d&apos;août 2003, Rapport d&apos;étape</em>, septembre 2003. Estimation de 15 000 décès, 9 sur 10 à domicile, sur-représentation des personnes âgées vivant seules. <a href="https://www.inserm.fr" target="_blank" rel="noopener">inserm.fr</a>.</span>
             </li>
             <li>
               <span className="src-tag">Crédoc</span>

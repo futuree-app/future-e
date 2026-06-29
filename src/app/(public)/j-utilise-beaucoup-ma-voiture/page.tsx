@@ -126,7 +126,7 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
                 <span className="article-cat" style={{ background: 'rgba(251,146,60,0.12)', color: ACCENT }}>Savoir</span>
                 <div className="article-title">Pourquoi certains territoires rendent la voiture presque obligatoire</div>
                 <div className="article-desc">
-                  84 % des actifs ruraux vont travailler en voiture. Ce que ce chiffre dit de l&apos;organisation du territoire, et pourquoi cette dépendance n&apos;est pas un simple choix individuel.
+                  84 % des actifs ruraux vont travailler en voiture. Ce que ce chiffre dit de l&apos;organisation du territoire, et pourquoi cette dépendance est d&apos;abord une affaire de territoire.
                 </div>
                 <div className="article-cta">Lire l&apos;article →</div>
               </div>

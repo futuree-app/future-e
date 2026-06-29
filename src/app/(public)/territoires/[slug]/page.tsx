@@ -103,7 +103,7 @@ export async function generateMetadata({
   if (!hub) return { title: 'Territoires · futur•e' };
 
   return {
-    title: `${hub.thematique} par commune — Recherche · futur•e`,
+    title: `${hub.thematique} par commune, Recherche · futur•e`,
     description: hub.description,
   };
 }
@@ -284,7 +284,7 @@ export default async function TerritoiresHubPage({
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
             <Link
-              href="/inscription"
+              href="/ou-vivre"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -298,7 +298,7 @@ export default async function TerritoiresHubPage({
                 borderRadius: 6,
               }}
             >
-              Commencer — 14 jours gratuits
+              Explorer les communes
             </Link>
             {agirGuide?.available && (
               <Link
