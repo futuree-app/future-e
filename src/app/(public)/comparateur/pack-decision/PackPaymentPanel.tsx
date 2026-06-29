@@ -1,5 +1,6 @@
 "use client";
 
+import posthog from "posthog-js";
 import { PaymentWrapper } from "@/components/PaymentWrapper";
 import type { ParsedProject } from "@/lib/comparateur-vie";
 
@@ -25,6 +26,13 @@ export function PackPaymentPanel({ trio, projetLabel, mode = "replay", parsedSna
       submitLabel={submitLabel}
       returnUrl={returnUrl}
       pack={{ trio, projetLabel, mode, parsedSnapshot }}
+      onSubmit={() =>
+        posthog.capture("pack_payment_submitted", {
+          mode,
+          n: trio.length,
+          insees: trio.map((t) => t.insee),
+        })
+      }
       onSuccess={() => {}}
     />
   );

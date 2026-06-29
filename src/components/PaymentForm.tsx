@@ -7,9 +7,12 @@ type PaymentFormProps = {
   onSuccess: () => void;
   submitLabel?: string;
   returnUrl?: string;
+  // Optionnel : intention de paiement (clic sur le bouton payer), AVANT confirmation Stripe.
+  // Sert l'instrumentation du funnel ; no-op si non fourni (rétrocompatible).
+  onSubmit?: () => void;
 };
 
-export function PaymentForm({ onSuccess, submitLabel, returnUrl }: PaymentFormProps) {
+export function PaymentForm({ onSuccess, submitLabel, returnUrl, onSubmit }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -17,6 +20,7 @@ export function PaymentForm({ onSuccess, submitLabel, returnUrl }: PaymentFormPr
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    onSubmit?.(); // intention de paiement (clic), avant toute logique Stripe
 
     if (!stripe || !elements) {
       return;

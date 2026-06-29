@@ -27,6 +27,7 @@ type PaymentWrapperProps = {
     parsedSnapshot?: unknown; // absent en mode choix
   };
   returnUrl?: string;
+  onSubmit?: () => void; // intention de paiement (clic), pour l'instrumentation. cf. PaymentForm.
 };
 
 export function PaymentWrapper({
@@ -37,6 +38,7 @@ export function PaymentWrapper({
   submitLabel,
   pack,
   returnUrl,
+  onSubmit,
 }: PaymentWrapperProps) {
   const requestBody = JSON.stringify({
     amount,
@@ -132,7 +134,7 @@ export function PaymentWrapper({
         },
       }}
     >
-      <PaymentForm onSuccess={onSuccess} submitLabel={submitLabel} returnUrl={returnUrl} />
+      <PaymentForm onSuccess={onSuccess} submitLabel={submitLabel} returnUrl={returnUrl} onSubmit={onSubmit} />
     </Elements>
   );
 }
