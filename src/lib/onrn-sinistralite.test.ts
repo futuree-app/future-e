@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { classify } from "./onrn-sinistralite.ts";
+import { classify, getOnrnSinistralite } from "./onrn-sinistralite.ts";
 
 test("représentativité > 50% → lecture avec classes verbatim", () => {
   assert.deepEqual(
@@ -33,4 +33,15 @@ test("représentativité Entre 15 et 30% → faible_repr", () => {
 
 test("donnée absente → indispo", () => {
   assert.deepEqual(classify(undefined), { kind: "indispo" });
+});
+
+test("getOnrnSinistralite: Toulouse 31555 → sécheresse et inondation en lecture", async () => {
+  const r = await getOnrnSinistralite("31555");
+  assert.equal(r.secheresse.kind, "lecture");
+  assert.equal(r.inondation.kind, "lecture");
+});
+
+test("getOnrnSinistralite: INSEE nul → indispo/indispo", async () => {
+  const r = await getOnrnSinistralite(null);
+  assert.deepEqual(r, { secheresse: { kind: "indispo" }, inondation: { kind: "indispo" } });
 });
