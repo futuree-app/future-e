@@ -1,8 +1,10 @@
 "use client";
 
-import { FormEvent, useState, useMemo } from "react";
+import { FormEvent, useState } from "react";
+import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import type { OnrnSinistralite, PerilState } from "@/lib/onrn-sinistralite";
 
 // ════════════════════════════════════════════════════════════════════════════
 // TYPES — inchangés depuis l'API existante
@@ -45,6 +47,7 @@ type ApiResponse = {
     parcel?: { parcelCode: string; risks: { labels: string[] }; pprn: { labels: string[]; zones: string[] }; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; } | null;
     commune?: { communeName: string | null; riskLabels: string[]; seismic: { code: string | null; label: string | null } | null; } | null;
   };
+  sinistralite?: OnrnSinistralite | null;
 };
 
 type SynthesisResponse = {
@@ -68,97 +71,11 @@ const DPE_LABELS: Record<string, string> = {
   D: "Peu performant", E: "Énergivore", F: "Très énergivore", G: "Passoire thermique",
 };
 
-// Calcule un verdict synthétique côté client (avant ou en l'absence de l'IA)
-function computeQuickVerdict(r: ApiResponse): { level: "good" | "medium" | "bad"; signals: number } {
-  let score = 0;
-  let signals = 0;
-  const dpe = r.dpe?.etiquette_dpe;
-  if (dpe === "F" || dpe === "G") { score += 2; signals++; }
-  else if (dpe === "E") { score += 1; signals++; }
-  if ((r.georisques?.parcel?.risks.labels.length ?? 0) > 0) { score += 1; signals++; }
-  if ((r.georisques?.parcel?.pprn.labels.length ?? 0) > 0) { score += 2; signals++; }
-  if (r.zfe?.inZfe) { score += 1; signals++; }
-  if ((r.irep?.count ?? 0) > 0) { score += 1; signals++; }
-  if ((r.cartofriches?.count ?? 0) > 0 && r.cartofriches?.friches.some(f => f.sol_pollue)) { score += 1; signals++; }
-  return {
-    level: score >= 4 ? "bad" : score >= 2 ? "medium" : "good",
-    signals,
-  };
-}
+// Verdict composite client retiré (2026-07-02, ADR-0001 : pas de note globale calculée).
 
-function getInsuranceOutlook(risks: string[]) {
-  const joined = risks.join(" ").toLowerCase();
-  const hasSensitiveRisk =
-    joined.includes("inond") ||
-    joined.includes("submersion") ||
-    joined.includes("débordement") ||
-    joined.includes("argile");
-
-  if (hasSensitiveRisk || risks.length >= 3) {
-    return {
-      level: "bad" as const,
-      value: "Sous pression",
-      unit: "lecture qualitative à 20 ans",
-      desc: "Quand les sinistres climatiques se répètent, la prime, les franchises ou les conditions de couverture peuvent se tendre plus vite.",
-    };
-  }
-
-  if (risks.length > 0) {
-    return {
-      level: "warn" as const,
-      value: "À surveiller",
-      unit: "lecture qualitative à 20 ans",
-      desc: "Le signal n'annonce pas une hausse automatique des coûts, mais il pèse sur la lecture assurantielle du bien dans la durée.",
-    };
-  }
-
-  return {
-    level: "good" as const,
-    value: "Plus stable",
-    unit: "lecture qualitative à 20 ans",
-    desc: "Aucun risque naturel fort ne ressort ici dans les bases consultées. Cela ne supprime pas le risque, mais limite la pression assurantielle visible.",
-  };
-}
-
-function getValueOutlook(args: {
-  dpeLabel: string | null | undefined;
-  risks: string[];
-  pollutedFricheNearby: boolean;
-  passoiresPct: number | null | undefined;
-}) {
-  let fragility = 0;
-  if (args.dpeLabel === "F" || args.dpeLabel === "G") fragility += 2;
-  else if (args.dpeLabel === "E") fragility += 1;
-  if (args.risks.length >= 2) fragility += 2;
-  else if (args.risks.length === 1) fragility += 1;
-  if (args.pollutedFricheNearby) fragility += 1;
-  if ((args.passoiresPct ?? 0) >= 20) fragility += 1;
-
-  if (fragility >= 4) {
-    return {
-      level: "bad" as const,
-      value: "Fragilisée",
-      unit: "valeur à 20 ans",
-      desc: "Un bien exposé, énergivore ou situé dans un marché local déjà tendu peut devenir plus difficile à louer, assurer ou revendre correctement.",
-    };
-  }
-
-  if (fragility >= 2) {
-    return {
-      level: "warn" as const,
-      value: "À arbitrer",
-      unit: "valeur à 20 ans",
-      desc: "Le bien ne se dégrade pas nécessairement, mais plusieurs signaux peuvent peser sur sa valeur future s'ils ne sont pas traités.",
-    };
-  }
-
-  return {
-    level: "good" as const,
-    value: "Plus résiliente",
-    unit: "valeur à 20 ans",
-    desc: "Le logement semble mieux placé pour conserver sa désirabilité relative, sous réserve de l'évolution du marché local et des travaux réalisés.",
-  };
-}
+// Briques « assurance » et « valeur » retirées (2026-07-02) : déduites de labels, elles
+// affichaient une supposition comme une mesure. À refonder sur donnée réelle (ONRN coût +
+// fréquence sécheresse) selon docs/vault/modules/logement.md, jamais en prédiction du bien.
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -180,49 +97,6 @@ function DpeBadge({ label, size = "md" }: { label: string | null; size?: "sm" | 
       background: DPE_COLORS[label] ?? "var(--bg-elev)",
       color: "#060812", fontWeight: 700, fontSize: fs, flexShrink: 0,
     }}>{label}</span>
-  );
-}
-
-// Carte risque dans la grille de synthèse
-function RiskCard({
-  level, name, value, unit, desc, who,
-}: {
-  level: "good" | "medium" | "bad" | "warn";
-  name: string;
-  value: React.ReactNode;
-  unit: string;
-  desc: string;
-  who?: string;
-}) {
-  const colors = {
-    good:   { bar: "var(--green, #4a7c59)",   bg: "rgba(74,124,89,0.08)",  fg: "var(--green-light, #6aad7e)" },
-    medium: { bar: "var(--orange, #c47a3a)",  bg: "rgba(196,122,58,0.08)", fg: "var(--orange, #c47a3a)" },
-    bad:    { bar: "var(--red, #a84a3a)",     bg: "rgba(168,74,58,0.08)",  fg: "var(--red, #f87171)" },
-    warn:   { bar: "var(--yellow, #b8a042)",  bg: "rgba(184,160,66,0.08)", fg: "var(--yellow, #b8a042)" },
-  };
-  const c = colors[level];
-  const labels = { good: "Favorable", medium: "Modéré", bad: "Élevé", warn: "Vigilance" };
-  return (
-    <div style={{
-      background: "var(--bg-card)", border: "1px solid var(--border-1)",
-      padding: 20, position: "relative", overflow: "hidden",
-    }}>
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 2, background: c.bar }} />
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
-        <div style={{ fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fg-3)" }}>{name}</div>
-        <div style={{ fontSize: 9, letterSpacing: "0.08em", padding: "3px 8px", borderRadius: 1, textTransform: "uppercase", background: c.bg, color: c.fg }}>{labels[level]}</div>
-      </div>
-      <div style={{ fontFamily: "var(--font-serif)", fontSize: 28, letterSpacing: "-0.03em", color: "var(--fg-hi)", marginBottom: 4, lineHeight: 1 }}>
-        {value}
-      </div>
-      <div style={{ fontSize: 10, color: "var(--fg-4)", letterSpacing: "0.04em", marginBottom: 10 }}>{unit}</div>
-      <div style={{ fontSize: 11, color: "var(--fg-3)", lineHeight: 1.6 }}>{desc}</div>
-      {who && (
-        <div style={{ display: "inline-block", marginTop: 8, fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 8px", background: "var(--bg-elev)", border: "1px solid var(--border-1)", color: "var(--fg-4)" }}>
-          {who}
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -268,16 +142,169 @@ function ActionCard({ title, desc, href, primary }: { title: string; desc: strin
   return content;
 }
 
+// Passeport du bien : pendant du passeport territorial, au grain adresse. Surface
+// teintée à l'accent du module, adresse en grand (Instrument Serif), DPE en sceau.
+function PropertyPassport({
+  address,
+  parcel,
+  dpe,
+  altitude,
+}: {
+  address: ApiResponse["address"];
+  parcel: ApiResponse["parcel"];
+  dpe: ApiResponse["dpe"];
+  altitude: ApiResponse["altitude"];
+}) {
+  const tint = "#c8b89a";
+  const dpeLetter = dpe?.etiquette_dpe ?? null;
+  const fields: { label: string; value: string }[] = [];
+  if (dpe?.surface_m2) fields.push({ label: "Surface", value: `${dpe.surface_m2} m²` });
+  if (dpe?.annee_construction) fields.push({ label: "Construction", value: String(dpe.annee_construction) });
+  if (dpe?.type_batiment) fields.push({ label: "Type de bâti", value: dpe.type_batiment });
+  if (parcel?.parcelCode)
+    fields.push({ label: "Parcelle", value: parcel.contenance ? `${parcel.parcelCode} · ${parcel.contenance} m²` : parcel.parcelCode });
+  if (altitude != null) fields.push({ label: "Altitude", value: `${altitude} m NGF` });
+  if (address?.citycode) fields.push({ label: "Commune", value: `${address.city ?? ""} · INSEE ${address.citycode}` });
+
+  return (
+    <section
+      className="rounded-2xl px-7 py-6 relative overflow-hidden"
+      style={{
+        background: `linear-gradient(150deg, ${tint}1f 0%, ${tint}0a 55%, rgba(8,10,18,0.6) 100%)`,
+        border: `1px solid ${tint}33`,
+        boxShadow: `inset 0 1px 0 ${tint}1f`,
+      }}
+    >
+      <div className="flex items-start justify-between gap-4 mb-3">
+        <div>
+          <p className="font-mono text-[10px] tracking-[0.22em] uppercase" style={{ color: tint }}>
+            Passeport du logement
+          </p>
+          {parcel?.parcelCode && (
+            <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-ghost mt-1">Parcelle {parcel.parcelCode}</p>
+          )}
+        </div>
+        <div className="flex flex-col items-end gap-1.5 shrink-0">
+          <DpeBadge label={dpeLetter} size="lg" />
+          <p className="text-right font-mono text-[9px] tracking-[0.1em] uppercase text-ghost/70">
+            {dpeLetter ? `DPE ${dpeLetter}` : "DPE non trouvé"}
+          </p>
+        </div>
+      </div>
+
+      <h3
+        className="font-normal text-[clamp(22px,3vw,32px)] leading-[1.1] tracking-[-0.01em] text-label"
+        style={{ fontFamily: "'Instrument Serif', serif" }}
+      >
+        {address?.label ?? "Logement"}
+      </h3>
+      {dpeLetter && DPE_LABELS[dpeLetter] && (
+        <p className="text-[14px] leading-[1.55] text-muted mt-2">{DPE_LABELS[dpeLetter]}.</p>
+      )}
+
+      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-0 mt-5 pt-2 border-t" style={{ borderColor: `${tint}26` }}>
+        {fields.map((f) => (
+          <div key={f.label} className="flex items-start gap-3 py-3 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+            <div className="min-w-0">
+              <dt className="font-mono text-[9px] tracking-[0.14em] uppercase text-ghost mb-1">{f.label}</dt>
+              <dd className="text-[14px] text-label leading-snug">{f.value}</dd>
+            </div>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
+// Sonde projet : déclaration explicite acheteur/résident (mesure de cadrage). Non
+// bloquante, disparaît une fois répondue.
+function ProjectProbe({ answered, onAnswer }: { answered: string | null; onAnswer: (v: string) => void }) {
+  if (answered) return null;
+  const options = [
+    { v: "reside", label: "J'y vis" },
+    { v: "achat", label: "J'envisage d'acheter" },
+    { v: "location", label: "Je loue ou vais louer" },
+    { v: "autre", label: "Autre" },
+  ];
+  return (
+    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", borderRadius: 12, padding: "18px 20px" }}>
+      <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 14, color: "var(--fg-hi)", marginBottom: 12 }}>
+        Quel est votre projet sur ce logement ?
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        {options.map((o) => (
+          <button
+            key={o.v}
+            onClick={() => onAnswer(o.v)}
+            style={{
+              padding: "8px 14px", background: "var(--bg-elev)", border: "1px solid var(--border-2)",
+              color: "var(--fg-2)", fontSize: 12, cursor: "pointer", borderRadius: 8, fontFamily: "var(--font-sans)",
+            }}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 // PAGE
 // ════════════════════════════════════════════════════════════════════════════
+
+// Face 2 — matérialité assurantielle passée (ONRN/CCR, 1995-2021). Coût moyen +
+// fréquence des sinistres indemnisés, classes verbatim gatées par la
+// représentativité. Jamais prédictif : voir docs/vault/modules/logement.md.
+function PerilLine({ peril, mecanisme, state }: { peril: string; mecanisme: string; state: PerilState }) {
+  if (state.kind === "indispo") return null;
+  return (
+    <div style={{ display: "grid", gap: 6 }}>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" }}>
+        {peril}
+      </div>
+      <div style={{ fontSize: 13, color: "var(--fg-2)", lineHeight: 1.65 }}>
+        {state.kind === "lecture" && (
+          <>Sur 1995-2021, les sinistres {mecanisme} indemnisés au titre des catastrophes naturelles ont eu, pour les biens assurés de cette commune, un coût moyen de <strong style={{ color: "var(--fg-hi)" }}>{state.cout}</strong> et une fréquence de <strong style={{ color: "var(--fg-hi)" }}>{state.frequence}</strong>. Échantillon des assureurs (CCR) couvrant ici {state.representativite} du marché.</>
+        )}
+        {state.kind === "aucun" && (
+          <>Aucun sinistre CatNat {peril.toLowerCase()} répertorié par la CCR pour les biens assurés de cette commune sur 1995-2021. L&apos;échantillon couvre environ la moitié du marché : un historique vide n&apos;exclut pas une exposition future.</>
+        )}
+        {state.kind === "faible_repr" && (
+          <>Des sinistres {peril.toLowerCase()} sont répertoriés, mais l&apos;échantillon assurantiel local est trop mince (représentativité {state.representativite}) pour en tirer une lecture fiable.</>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SinistraliteBlock({ sinistralite }: { sinistralite: OnrnSinistralite }) {
+  const { secheresse, inondation } = sinistralite;
+  if (secheresse.kind === "indispo" && inondation.kind === "indispo") return null;
+  return (
+    <div>
+      <SectionLabel>Ce que le passé assurantiel dit</SectionLabel>
+      <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 18 }}>
+        <PerilLine peril="Sécheresse" mecanisme="sécheresse (retrait-gonflement des argiles)" state={secheresse} />
+        <PerilLine peril="Inondation" mecanisme="inondation (tous types : coulée de boue, remontée de nappe, submersion marine)" state={inondation} />
+        <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", fontSize: 11, color: "var(--fg-4)", lineHeight: 1.6 }}>
+          Le régime CatNat finance ces indemnisations par une surprime légale, aujourd&apos;hui uniforme au niveau national (portée à 20 % au 1ᵉʳ janvier 2025) : ce passé local ne fixe pas le prix de votre assurance. Un débat en cours (rapport Langreney) pose la question d&apos;une modulation selon l&apos;exposition locale.
+        </div>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.8 }}>
+          ONRN (État / CCR / Mission Risques Naturels), via Géorisques — sinistres indemnisés 1995-2021, biens assurés particuliers et professionnels.
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function LogementModule({ defaultCommune }: { defaultCommune?: string | null }) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ApiResponse | null>(null);
-  const [activeTab, setActiveTab] = useState<"synthese" | "details" | "agir">("synthese");
+  const [projet, setProjet] = useState<string | null>(null);
+  const posthog = usePostHog();
 
   // État pour la synthèse Claude API
   const [synthesis, setSynthesis] = useState<SynthesisResponse | null>(null);
@@ -295,7 +322,20 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
       const payload = (await res.json()) as ApiResponse;
       if (!res.ok) throw new Error(payload.error ?? `Erreur ${res.status}`);
       setResult(payload);
-      setActiveTab("synthese");
+      setProjet(null);
+      // Signal implicite acheteur/résident : l'adresse analysée est-elle la commune déclarée ?
+      const relation =
+        defaultCommune && payload.address?.city
+          ? payload.address.city.toLowerCase() === defaultCommune.toLowerCase()
+            ? "residence"
+            : "prospection"
+          : "inconnue";
+      posthog?.capture("logement_analyzed", {
+        relation_inferee: relation,
+        in_declared_commune: relation === "residence",
+        has_dpe: Boolean(payload.dpe?.etiquette_dpe),
+        insee: payload.address?.citycode ?? null,
+      });
     } catch (err) {
       setResult(null);
       setError(err instanceof Error ? err.message : "Erreur de chargement.");
@@ -325,7 +365,6 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
     }
   }
 
-  const quick = useMemo(() => result ? computeQuickVerdict(result) : null, [result]);
   const isPassoire = ["F", "G"].includes(result?.dpe?.etiquette_dpe ?? "");
   const dpe = result?.dpe;
   const georisques = result?.georisques?.parcel ?? result?.georisques?.address;
@@ -333,13 +372,6 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
     ...(georisques?.risks?.labels ?? []),
     ...(georisques?.pprn?.labels ?? []),
   ].filter((v, i, a) => a.indexOf(v) === i);
-  const insuranceOutlook = getInsuranceOutlook(allRisks);
-  const valueOutlook = getValueOutlook({
-    dpeLabel: dpe?.etiquette_dpe,
-    risks: allRisks,
-    pollutedFricheNearby: result?.cartofriches?.friches.some((f) => f.sol_pollue) ?? false,
-    passoiresPct: result?.communeData?.iris?.passoires_taux,
-  });
 
   return (
     <div className="min-h-screen bg-canvas text-label relative overflow-hidden" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
@@ -380,9 +412,8 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
             <div className="flex flex-col gap-2.5">
               {[
                 { label: "Performance énergétique", val: dpe?.etiquette_dpe ? `DPE ${dpe.etiquette_dpe}` : "Lecture à l'adresse", col: "var(--orange)" },
-                { label: "Risques par adresse", val: allRisks.length > 0 ? `${allRisks.length} signal${allRisks.length > 1 ? "s" : ""}` : "Après analyse", col: "var(--red)" },
-                { label: "Pression d'assurance", val: insuranceOutlook.value, col: "var(--blue)" },
-                { label: "Valeur à 20 ans", val: valueOutlook.value, col: "var(--green)" },
+                { label: "Risques du bâti", val: allRisks.length > 0 ? `${allRisks.length} signal${allRisks.length > 1 ? "s" : ""}` : "Après analyse", col: "var(--red)" },
+                { label: "Assurance et sécheresse", val: "Lecture à venir", col: "var(--blue)" },
               ].map((f) => (
                 <div key={f.label} className="flex gap-3.5 items-start px-3.5 py-3 rounded-lg" style={{ background: `${f.col}0c`, border: `1px solid ${f.col}22` }}>
                   <span className="w-[7px] h-[7px] rounded-full shrink-0 mt-[5px]" style={{ background: f.col, boxShadow: `0 0 8px ${f.col}` }} />
@@ -439,37 +470,23 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
 
             {error && (
               <div style={{ marginTop: 16, padding: "12px 16px", background: "rgba(168,74,58,0.08)", border: "1px solid rgba(168,74,58,0.25)", color: "var(--red, #f87171)", fontSize: 13, fontFamily: "var(--font-mono)" }}>
-                ⚠ {error}
+                {error}
               </div>
             )}
           </div>
         </section>
 
       {/* ── RÉSULTATS ── */}
-      {result && quick && (
-        <section style={{ maxWidth: 760, padding: "24px 0 96px" }}>
+      {result && (
+        <section style={{ maxWidth: 760, padding: "24px 0 96px", display: "grid", gap: 40 }}>
 
-          {/* ─ Property Card ─ */}
-          <div style={{
-            background: "var(--bg-card)", border: "1px solid var(--border-2)",
-            padding: 24, marginBottom: 28,
-            display: "grid", gridTemplateColumns: "1fr auto", gap: 20, alignItems: "start",
-          }}>
-            <div>
-              <div style={{ fontFamily: "var(--font-serif)", fontSize: 17, color: "var(--fg-hi)", letterSpacing: "-0.01em", marginBottom: 4 }}>
-                {result.address?.label}
-              </div>
-              <div style={{ fontSize: 10, color: "var(--fg-4)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 16 }}>
-                {result.address?.city ?? ""} {result.address?.citycode ? `· INSEE ${result.address.citycode}` : ""}
-              </div>
-              <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-                {result.parcel && <Block label="Parcelle" value={result.parcel.parcelCode} sub={result.parcel.contenance ? `${result.parcel.contenance} m²` : undefined} />}
-                {result.altitude != null && <Block label="Altitude" value={`${result.altitude} m NGF`} />}
-                {dpe?.surface_m2 && <Block label="Surface" value={`${dpe.surface_m2} m²`} />}
-                {dpe?.annee_construction && <Block label="Construction" value={String(dpe.annee_construction)} />}
-              </div>
-            </div>
-          </div>
+          {/* Passeport du bien : identité au grain adresse, DPE en sceau. */}
+          <PropertyPassport
+            address={result.address}
+            parcel={result.parcel}
+            dpe={result.dpe}
+            altitude={result.altitude}
+          />
 
           {/* Avertissement si l'adresse est dans une commune différente du profil */}
           {defaultCommune && result.address?.city &&
@@ -488,48 +505,20 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
             </div>
           )}
 
-          {/* ─ TABS ─ */}
-          <div style={{ display: "flex", gap: 0, borderBottom: "1px solid var(--border-1)", marginBottom: 28 }}>
-            {[
-              { id: "synthese", label: "Synthèse" },
-              { id: "details", label: "Détails" },
-              { id: "agir", label: "Agir" },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                style={{
-                  padding: "10px 20px", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase",
-                  background: "transparent", border: "none",
-                  color: activeTab === tab.id ? "var(--accent, #c8b89a)" : "var(--fg-4)",
-                  borderBottom: `2px solid ${activeTab === tab.id ? "var(--accent, #c8b89a)" : "transparent"}`,
-                  marginBottom: -1, cursor: "pointer", fontFamily: "var(--font-mono)",
-                  transition: "all 0.15s",
-                }}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          {/* Sonde projet : mesure explicite acheteur/résident, non bloquante. */}
+          <ProjectProbe
+            answered={projet}
+            onAnswer={(v) => {
+              setProjet(v);
+              posthog?.capture("logement_projet_declare", { projet: v, insee: result.address?.citycode ?? null });
+            }}
+          />
 
-          {/* ═════════════════════ SYNTHÈSE ═════════════════════ */}
-          {activeTab === "synthese" && (
+          {/* ═════════════════════ LECTURE ═════════════════════ */}
+          {(
             <div style={{ display: "grid", gap: 28 }}>
 
-              {/* Verdict synthétique calculé */}
-              <Verdict
-                level={quick.level}
-                title={
-                  quick.level === "bad" ? `Plusieurs signaux convergents sur cette adresse.` :
-                  quick.level === "medium" ? `Signaux modérés à surveiller.` :
-                  `Adresse globalement favorable.`
-                }
-                detail={
-                  quick.level === "bad" ? `Ce logement combine ${quick.signals} signaux structurants : DPE, exposition aux risques, qualité environnementale ou contraintes réglementaires. Une lecture détaillée par dimension est disponible dans l'onglet Détails.` :
-                  quick.level === "medium" ? `Ce logement présente ${quick.signals} signaux qui méritent attention sans être structurants. Voir Détails pour le profil complet.` :
-                  `Aucun signal critique détecté sur les dimensions principales. Voir Détails pour la lecture complète.`
-                }
-              />
+              {/* Verdict composite retiré (ADR-0001). La lecture vient de la synthèse ci-dessous. */}
 
               {/* Synthèse Claude API */}
               <div>
@@ -581,7 +570,17 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                 {synthesis && (
                   <div style={{ display: "grid", gap: 20 }}>
                     {/* Verdict IA */}
-                    <Verdict level={quick.level} title={synthesis.verdict} detail={synthesis.reading} />
+                    <Verdict
+                      level={
+                        synthesis.signals.some((s) => s.level === "bad")
+                          ? "bad"
+                          : synthesis.signals.some((s) => s.level === "medium" || s.level === "warn")
+                            ? "medium"
+                            : "good"
+                      }
+                      title={synthesis.verdict}
+                      detail={synthesis.reading}
+                    />
 
                     {/* Signaux structurés */}
                     {synthesis.signals && synthesis.signals.length > 0 && (
@@ -609,70 +608,11 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                 )}
               </div>
 
-              {/* Risk Grid synthétique — lecture rapide */}
-              <div>
-                <SectionLabel>Dimensions clés</SectionLabel>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-
-                  {dpe?.etiquette_dpe && (
-                    <RiskCard
-                      level={isPassoire ? "bad" : ["D","E"].includes(dpe.etiquette_dpe) ? "warn" : "good"}
-                      name="Performance énergétique"
-                      value={`DPE ${dpe.etiquette_dpe}`}
-                      unit={DPE_LABELS[dpe.etiquette_dpe] ?? ""}
-                      desc={
-                        isPassoire ? "Passoire thermique. Interdiction de location progressive d'ici 2034 selon l'étiquette."
-                        : dpe.etiquette_dpe === "E" ? "Logement énergivore. Concerné par les obligations de rénovation à horizon 2034."
-                        : dpe.etiquette_dpe === "D" ? "Performance moyenne. Pression réglementaire à anticiper."
-                        : "Logement performant énergétiquement."
-                      }
-                    />
-                  )}
-
-                  {allRisks.length > 0 && (
-                    <RiskCard
-                      level="bad"
-                      name="Risques par adresse"
-                      value={String(allRisks.length)}
-                      unit={`risque${allRisks.length > 1 ? "s" : ""} référencé${allRisks.length > 1 ? "s" : ""}`}
-                      desc={`Cette parcelle est exposée à : ${allRisks.slice(0, 3).join(", ")}${allRisks.length > 3 ? "…" : ""}.`}
-                    />
-                  )}
-
-                  <RiskCard
-                    level={insuranceOutlook.level}
-                    name="Coût d'assurance projeté"
-                    value={insuranceOutlook.value}
-                    unit={insuranceOutlook.unit}
-                    desc={insuranceOutlook.desc}
-                  />
-
-                  <RiskCard
-                    level={valueOutlook.level}
-                    name="Valeur immobilière"
-                    value={valueOutlook.value}
-                    unit={valueOutlook.unit}
-                    desc={valueOutlook.desc}
-                  />
-
-                  {result.zfe?.inZfe && (
-                    <RiskCard
-                      level="warn"
-                      name="ZFE active"
-                      value="Oui"
-                      unit={`${result.zfe.zones.length} zone${result.zfe.zones.length > 1 ? "s" : ""} de circulation restreinte`}
-                      desc="Cette adresse est située dans une zone à faibles émissions. Restrictions progressives selon vignette Crit'Air."
-                    />
-                  )}
-
-                </div>
-              </div>
-
             </div>
           )}
 
-          {/* ═════════════════════ DÉTAILS ═════════════════════ */}
-          {activeTab === "details" && (
+          {/* ═════════════════════ DIMENSIONS RÉELLES ═════════════════════ */}
+          {(
             <div style={{ display: "grid", gap: 36 }}>
 
               {/* Énergie */}
@@ -725,7 +665,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
               {/* Risques */}
               {(allRisks.length > 0 || georisques?.seismic || georisques?.rga) && (
                 <div>
-                  <SectionLabel>Risques physiques par adresse</SectionLabel>
+                  <SectionLabel>Risques du bâti</SectionLabel>
                   <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 16 }}>
                     {allRisks.length > 0 && (
                       <div>
@@ -749,25 +689,8 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                 </div>
               )}
 
-              <div>
-                <SectionLabel>Assurance & valeur</SectionLabel>
-                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                  <RiskCard
-                    level={insuranceOutlook.level}
-                    name="Pression d'assurance"
-                    value={insuranceOutlook.value}
-                    unit={insuranceOutlook.unit}
-                    desc={insuranceOutlook.desc}
-                  />
-                  <RiskCard
-                    level={valueOutlook.level}
-                    name="Trajectoire de valeur"
-                    value={valueOutlook.value}
-                    unit={valueOutlook.unit}
-                    desc={valueOutlook.desc}
-                  />
-                </div>
-              </div>
+              {/* Face 2 — matérialité assurantielle passée (ONRN) */}
+              {result.sinistralite && <SinistraliteBlock sinistralite={result.sinistralite} />}
 
               {/* ZFE */}
               {result.zfe?.inZfe && (
@@ -790,7 +713,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
           )}
 
           {/* ═════════════════════ AGIR ═════════════════════ */}
-          {activeTab === "agir" && (
+          {(
             <div style={{ display: "grid", gap: 36 }}>
 
               {/* Actions IA générées si dispo, sinon actions par défaut selon le profil */}
@@ -851,25 +774,6 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
 
                 </div>
               </div>
-
-              {/* CTA synthèse si pas encore demandée */}
-              {!synthesis && (
-                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, textAlign: "center" }}>
-                  <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 14, color: "var(--fg-3)", marginBottom: 16 }}>
-                    Pour des actions personnalisées selon votre situation exacte, demandez la lecture narrative dans l&apos;onglet Synthèse.
-                  </div>
-                  <button
-                    onClick={() => setActiveTab("synthese")}
-                    style={{
-                      padding: "10px 20px", background: "transparent", border: "1px solid var(--border-2)",
-                      color: "var(--fg-2)", fontFamily: "var(--font-mono)", fontSize: 11,
-                      letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer",
-                    }}
-                  >
-                    Voir la Synthèse
-                  </button>
-                </div>
-              )}
 
               {/* Pages Savoir associées */}
               <div>
