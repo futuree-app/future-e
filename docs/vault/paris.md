@@ -201,10 +201,13 @@ Issu de la veille assurermaville (2026-07-02, Business Strategist) : la douleur 
 réelle et croît (surprime CatNat 20 % au 01/01/2025, franchises, non-renouvellements), mais
 « la peur de la non-assurabilité fait payer les ménages » reste une hypothèse. Assurermaville
 prouve l'intérêt des militants et des élus, pas celui des acheteurs. Chantier data instruit
-et prêt, GELÉ jusqu'au premier signal : sinistralité ONRN/CCR, paire coût moyen + fréquence,
+et prêt : sinistralité ONRN/CCR, paire coût moyen + fréquence,
 doctrine d'usage écrite (`docs/rapports-agents/data-curator/2026-07-02-sinistralite-onrn-ccr.md`) ;
 la source balances comptables 6161 a été instruite et refusée le même jour (cf.
-inventaire-sources, victoires méthodologiques).
+inventaire-sources, victoires méthodologiques). **MISE À JOUR 2026-07-03 : la donnée est
+BRANCHÉE** dans le module Logement (Face 2, sécheresse + inondation, récit gaté par la
+représentativité, pédagogie CatNat non prédictive). Le pari passe de « gelé faute de surface »
+à « instrumenté » : on peut désormais observer si cette matérialité passée mord côté acheteur.
 
 - **Statut** : non testé.
 - **Confiance** : faible — analogie de douleur (les primes montent) et actualité presse, aucune

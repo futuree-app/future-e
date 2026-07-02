@@ -265,13 +265,13 @@ function PerilLine({ peril, mecanisme, state }: { peril: string; mecanisme: stri
       </div>
       <div style={{ fontSize: 13, color: "var(--fg-2)", lineHeight: 1.65 }}>
         {state.kind === "lecture" && (
-          <>Sur 1995-2021, les sinistres {mecanisme} indemnisés au titre des catastrophes naturelles ont eu, pour les biens assurés de cette commune, un coût moyen de <strong style={{ color: "var(--fg-hi)" }}>{state.cout}</strong> et une fréquence de <strong style={{ color: "var(--fg-hi)" }}>{state.frequence}</strong>. Échantillon des assureurs (CCR) couvrant ici {state.representativite} du marché.</>
+          <>Sur 1995-2021, les sinistres {mecanisme} indemnisés pour les biens assurés de cette commune ont eu un coût moyen de <strong style={{ color: "var(--fg-hi)" }}>{state.cout}</strong> et une fréquence de <strong style={{ color: "var(--fg-hi)" }}>{state.frequence}</strong>. Chiffres établis sur l&apos;échantillon CCR, qui couvre ici {state.representativite} du marché.</>
         )}
         {state.kind === "aucun" && (
-          <>Aucun sinistre CatNat {peril.toLowerCase()} répertorié par la CCR pour les biens assurés de cette commune sur 1995-2021. L&apos;échantillon couvre environ la moitié du marché : un historique vide n&apos;exclut pas une exposition future.</>
+          <>Aucun sinistre {peril.toLowerCase()} répertorié par la CCR pour les biens assurés de cette commune sur 1995-2021. L&apos;échantillon couvre environ la moitié du marché : un historique vide n&apos;exclut pas une exposition future.</>
         )}
         {state.kind === "faible_repr" && (
-          <>Des sinistres {peril.toLowerCase()} sont répertoriés, mais l&apos;échantillon assurantiel local est trop mince (représentativité {state.representativite}) pour en tirer une lecture fiable.</>
+          <>Des sinistres {peril.toLowerCase()} sont répertoriés ici, mais l&apos;échantillon assurantiel local est trop réduit (représentativité {state.representativite}) pour en tirer une lecture fiable.</>
         )}
       </div>
     </div>
@@ -283,15 +283,15 @@ function SinistraliteBlock({ sinistralite }: { sinistralite: OnrnSinistralite })
   if (secheresse.kind === "indispo" && inondation.kind === "indispo") return null;
   return (
     <div>
-      <SectionLabel>Ce que le passé assurantiel dit</SectionLabel>
+      <SectionLabel>Ce que le risque a déjà coûté ici</SectionLabel>
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 18 }}>
         <PerilLine peril="Sécheresse" mecanisme="sécheresse (retrait-gonflement des argiles)" state={secheresse} />
         <PerilLine peril="Inondation" mecanisme="inondation (tous types : coulée de boue, remontée de nappe, submersion marine)" state={inondation} />
         <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", fontSize: 11, color: "var(--fg-4)", lineHeight: 1.6 }}>
-          Le régime CatNat finance ces indemnisations par une surprime légale, aujourd&apos;hui uniforme au niveau national (portée à 20 % au 1ᵉʳ janvier 2025) : ce passé local ne fixe pas le prix de votre assurance. Un débat en cours (rapport Langreney) pose la question d&apos;une modulation selon l&apos;exposition locale.
+          Aujourd&apos;hui, ce passé local ne fixe pas le prix de votre assurance : le régime CatNat finance ces indemnisations par une surprime légale uniforme partout en France (portée à 20 % au 1ᵉʳ janvier 2025). Un débat en cours (rapport Langreney) pose la question d&apos;une modulation selon l&apos;exposition locale.
         </div>
         <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.8 }}>
-          ONRN (État / CCR / Mission Risques Naturels), via Géorisques — sinistres indemnisés 1995-2021, biens assurés particuliers et professionnels.
+          ONRN (État / CCR / Mission Risques Naturels), via Géorisques. Sinistres indemnisés 1995-2021, biens assurés particuliers et professionnels.
         </div>
       </div>
     </div>

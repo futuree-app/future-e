@@ -165,14 +165,72 @@ c'est économiser la dette future.
 | **EAIP** (zones inondables) | abandonnée | donnée communale non récupérable proprement | semaines de dette évitées, livré binaire honnête + CatNat flagship | `/memory/risque_enrichment_eaip.md` |
 | **ÎCU CSTB** (îlots de chaleur) | réservée Logement/Santé | granularité IRIS, score dépt-normalisé non comparable en Territoire | évite une carte Territoire trompeuse | `/memory/icu_ilot_chaleur_data.md` |
 | **DVF** (transactions) | différée V2 | pas de chip immobilière tant que pas au moteur | périmètre de scoring maîtrisé | `src/lib/comparateur-vie.ts` |
+| **Balances comptables des communes, compte 6161** (DGFiP, data.economie.gouv.fr, 2010-2024) | refusée | la prime d'assurance de la COMMUNE ne dit rien de l'assurabilité d'un LOGEMENT (crise SMACL/duopole, émeutes 2023, cycles de marchés publics, auto-assurance, périmètre 6161 partiel vs 6168, rupture M14→M57 en pleine fenêtre) ; le vrai historique de risque est déjà porté par CatNat/GASPAR ; pièges techniques : clé `ndept`+`insee` à recombiner, budgets annexes à exclure, millésimes vivants sur data.economie.gouv.fr (la fiche data.gouv s'arrête à 2017) | évite un signal « dégradation assurantielle » à attribution fausse copié d'un indice tiers ; économise la chaîne de corrections invérifiable (déflateur, nomenclature, patrimoine) | `docs/rapports-agents/data-curator/2026-07-02-balances-comptables-assurance-communes.md` |
+| **Sinistralité ONRN/CCR** (Géorisques, millésime 2025, 1995-2021) | différée, périmètre tranché | seule paire admise = **coût moyen + fréquence** (sécheresse, inondation) en récit gaté par la représentativité communale, module Logement/vulnérabilité ; **Reco = doublon GASPAR refusé ; S/P non surfacé** (prime non ventilée par péril) ; « échelle nationale » de CCR lue comme discipline (pas de scoring, pas de tendance inter-millésimes, classes verbatim), pas comme veto ; les « 39 776 lignes » = 34 839 communes + padding vide (vérifié) | évite un signal « assurabilité » prédictif indéfendable et un 5e doublon CatNat ; doctrine d'usage prête ; **MISE À JOUR 2026-07-02 : le porteur avance l'intégration au module Logement ; licence acceptée sans confirmation écrite (présomption favorable assumée) ; le coût moyen sécheresse a été corrigé à 100 % (fichier Géorisques ONRN désaligné réparé, cf. `2026-07-02-fix-csv-secheresse-onrn.md`), livré dans `data/source/onrn/`. **INTÉGRÉE 2026-07-03** : sécheresse ET inondation (coût moyen + fréquence) branchées au module Logement (Face 2), inondation re-téléchargée et consolidée (couplage 100 %, aucune corruption), lib `src/lib/onrn-sinistralite.ts`, récit gaté par la représentativité ; mapping INSEE 107 communes fusionnées = limite documentée** | `docs/rapports-agents/data-curator/2026-07-02-sinistralite-onrn-ccr.md` |
+| **Cartes de bruit stratégiques (dir. 2002/49) + Bruitparif** | refusées | couverture non nationale (agglos >100k / grandes infra ; Bruitparif = IDF), autorités/millésimes hétérogènes, pas de jeu national unifié ; un dB partout est impossible honnêtement | évite une brique bruit qui mentirait par le vide hors métropole (même famille de refus que iuhi/EAIP non nationaux) ; le module Logement dit « proximité d'un axe potentiellement bruyant » via OSM, jamais un dB | `docs/rapports-agents/data-curator/2026-07-02-autour-immediat-logement.md` |
+| **Canopée nationale au grain adresse** | différée/refusée | pas de jeu national de canopée fine ; Copernicus TCD 10 m (2018) trop grossier et redondant avec OCS GE ; « taux de canopée à la parcelle » = fausse précision | évite un 3e raster et un chiffre faux-précis ; la verdure se dit par « espace vert à X m » (OSM) + couverture du sol | `docs/rapports-agents/data-curator/2026-07-02-autour-immediat-logement.md` |
+| **OCS GE (IGN) pour la verdure au point** | différée | donnée « juste » (polygone fin, non contributif) mais couverture nationale non confirmée au 2026-07-02 + coût vecteur élevé pour solo | garde la porte ouverte à la robustesse ultérieure sans bloquer la Face 3 minimale (OSM capture ~90 % de la valeur) | `docs/rapports-agents/data-curator/2026-07-02-autour-immediat-logement.md` |
 
 ## Statut de la « roadmap » de la matrice repo (à acter)
 
 Plusieurs sources « à intégrer » dans `SOURCES_MODULES_MATRIX.md` sont **désormais livrées**
 côté scoring : GASPAR/CatNat, trait de côte Cerema, GisSol, équipements INSEE → **BPE24**,
 bruit → **calme_sonore** (OSM), MOBPRO, nature (OSO). À mettre à jour dans le doc repo. Restent
-non intégrés : **Métier** (le plus pauvre, France Stratégie/INRS/Dares non câblés), **PFAS**
-(eau), **DVF au moteur** (V2).
+non intégrés : **Métier** (le plus pauvre, France Stratégie/INRS/Dares non câblés), **DVF au
+moteur** (V2).
+
+**PFAS (eau)** : piste précisée par la veille du 2026-07-01
+(`docs/rapports-agents/deep-research/2026-07-01-demande-ou-vivre-climat-brut.md`) — surveillance
+de 20 PFAS dans l'eau distribuée obligatoire en France depuis le 1er janvier 2026 (directive UE,
+seuil somme 0,1 µg/L), source data.gouv.fr/Ministère de la Santé (Licence Ouverte 2.0, mise à
+jour mensuelle), quelques dizaines de réseaux sur ~8 000-8 800 dépassent le seuil (ordre de
+grandeur 0,3-0,4 % des réseaux, chiffre volatile à revérifier à l'usage, ne pas graver comme
+fixe). **Même piège d'agrégation que l'eau bactériologique** (`doctrine/data.md` règle 5) :
+donnée par UDI/réseau, pas par commune, et une moyenne nationale rassurante masquerait une
+exposition concentrée sur les réseaux qui dépassent. Pas encore auditée par le Data Curator ;
+intérêt pour un futur module Santé/eau au-delà de la conformité microbiologique classique. Rien
+qui touche le goulot d'acquisition, ne justifie aucune priorité produit immédiate.
+
+**Sinistralité assurantielle ONRN/CCR** : instruite par le Data Curator le 2026-07-02
+(`docs/rapports-agents/data-curator/2026-07-02-sinistralite-onrn-ccr.md`), verdict
+**DIFFÉRÉE, périmètre tranché**. Seule paire admise le jour venu : **coût moyen + fréquence
+des sinistres** (sécheresse/RGA et inondation), en récit qualitatif gaté par la
+représentativité communale (feuille 3 des xlsx : raconter seulement si ≥ « Entre 30 et
+50 % »), classes verbatim, module **Logement/vulnérabilité**, attribution « ONRN (État / CCR /
+MRN), via Géorisques ». Refusés : Reco_* (doublon GASPAR/CatNat en place), coût cumulé/par
+habitant/TRI (taille-dépendants), tempête (départemental). **S/P non surfacé côté lecteur**
+(la prime CatNat n'est pas ventilée par péril : dénominateur faux pour une lecture par péril).
+La phrase CCR « l'échelle pertinente est l'échelle nationale » (présente dans toutes les
+fiches) est lue comme discipline d'usage, pas comme veto (le producteur publie lui-même des
+cartes communales avec représentativité par commune ; classes nationales homogènes,
+contrairement à l'iuhi refusé) → triple interdit : jamais au scoring `/ou-vivre`, jamais de
+tendance inter-millésimes, jamais de valeur inventée dans une classe. Réalité des fichiers
+vérifiée ligne à ligne (inondation) : 34 839 communes métropole (+ 4 937 lignes de padding
+vide), référentiel INSEE 2021, Paris sans arrondissements, DOM absents. **Verrous avant
+intégration** : signal du pari #9 OU cadrage Logement-vulnérabilité, ET confirmation écrite
+de la licence auprès du contact ONRN (présomption Licence Ouverte via Géorisques, réserve de
+propriété intellectuelle des contributeurs non levée).
+
+**PIÈGE MAJEUR découvert au prototype (2026-07-02).** Le fichier `ONRN_CoutMoyen_SECH_9521.xlsx`
+(coût moyen sécheresse, le plus utile pour le RGA/Logement) a sa **feuille de données
+désalignée** : la colonne code INSEE a été triée indépendamment des colonnes nom + valeur
+(vérifié : code 31555 « Toulouse » y porte le nom « Saint-Omer-en-Chaussée » et la valeur
+« Pas de sinistre répertorié », alors que Toulouse en argiles a une représentativité 30-50 %).
+Une jointure par code INSEE sur ce fichier donne des valeurs FAUSSES et silencieuses. Les trois
+autres fichiers (fréquence sécheresse, coût moyen + fréquence inondation) sont sains (nom aligné
+au code, vérifié 6/6). Contournement du coût sécheresse : jointer par NOM (nom + valeur restent
+alignés entre eux) récupère proprement **93,1 %** des communes (89,4 % à nom unique + homonymes
+à classe constante) ; restent **2 406 communes (6,9 %)** homonymes à classes divergentes,
+indépartageables par le seul nom. La feuille est en fait triée alphabétiquement (collation
+Excel française, article/accents/tirets) tandis que le code reste en ordre INSEE, mais
+reproduire cette collation pour ré-aligner par position est trop fragile (échec de
+concordance). Solution propre : signaler le bug à l'ONRN et obtenir un fichier ré-aligné (bug
+d'export évident de leur côté) ; en attendant, le gate de représentativité écarte déjà une
+partie des 2 406 ambigus (petites communes à faible échantillon CCR). Le gate de représentativité (feuille 3, seuil ≥ « Entre 30 et 50 % »)
+fonctionne : au prototype, la sécheresse de La Rochelle (représ. 15-30 %) serait tue, à raison.
+Récit prototypé cohérent et discriminant sur 6 communes (La Rochelle inondation > 20 k€ = trace
+de Xynthia, Toulouse sécheresse argiles, Guéret et Brest quasi vierges). Script :
+scratchpad session 2ab961b4.
 
 ## Gaps validés par une décision réelle (dogfood Brest/Lorient, 2026-06-27)
 
