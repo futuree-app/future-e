@@ -5,6 +5,7 @@ import { usePostHog } from "posthog-js/react";
 import { useHorizon, HORIZON_META, type HorizonKey } from "@/hooks/useHorizon";
 import type { QuartierSourceKey } from "@/lib/quartier-signals";
 import { AUTO_SYNTHESIS } from "@/lib/auto-synthesis";
+import { QuartierWorkbook } from "@/app/(account)/compte/QuartierWorkbook";
 
 const HORIZON_PILLS: { key: HorizonKey; year: string; recommended?: boolean }[] = [
   { key: "gwl15", year: "2030" },
@@ -128,6 +129,7 @@ export default function QuartierSynthesis({
   const discoveryRef = useRef(discovery);
   discoveryRef.current = discovery;
   const [usedDiscoveryKey, setUsedDiscoveryKey] = useState("");
+  const [discoveryOpen, setDiscoveryOpen] = useState(false);
 
   useEffect(() => {
     if (relation !== "current_residence") return; // pas de workbook hors résidence (anti-contamination)
@@ -343,9 +345,8 @@ export default function QuartierSynthesis({
 
         {workbookChangedSinceLastFetch && synthState !== "streaming" && (
           <div className="mt-7 pt-5 border-t border-white/[0.06] flex items-center justify-between gap-4 flex-wrap">
-            <p className="text-[13px] leading-[1.55] text-muted max-w-[440px]">
-              Vos repères de terrain ont changé. La lecture peut être affinée
-              avec vos observations.
+            <p className="text-[13px] leading-[1.55] text-muted max-w-[620px]">
+              Vos repères ont changé.
             </p>
             <button
               type="button"
@@ -357,93 +358,129 @@ export default function QuartierSynthesis({
           </div>
         )}
 
-        {/* Préciser cette lecture — uniquement en découverte. Deux champs libres,
-            optionnels : ils orientent l'ATTENTION de la synthèse, jamais les faits. */}
+        {/* Repères de terrain — uniquement en résidence (observations vécues,
+            anti-contamination : jamais sur une commune où l'on ne vit pas).
+            Même emplacement que le bloc découverte ci-dessous, pour la symétrie :
+            sous la synthèse, dans le même panneau. Fermé par défaut (comme le
+            reste du parcours), mais le déclencheur est traité en CTA bleu bien
+            visible dans QuartierWorkbook, pas une pastille grise qui se perd. */}
+        {isResidence && synthState !== "streaming" && (
+          <div className="mt-7 pt-5 border-t border-white/[0.06]">
+            <QuartierWorkbook
+              userKey={userKey}
+              commune={communeName}
+              inseeCode={inseeCode}
+              reportId={inseeCode}
+            />
+          </div>
+        )}
+
+        {/* Vos priorités pour cette commune — uniquement en découverte. Deux
+            champs libres, optionnels : ils orientent l'ATTENTION de la
+            synthèse, jamais les faits. Titre aligné sur « Vos repères de
+            terrain » (résidence) : le lecteur en sujet, pas « la lecture ».
+            Fermé par défaut, même geste que le bloc résidence : tout le
+            header est cliquable, le déclencheur est un CTA bleu visible. */}
         {relation === "considering_living" && synthState !== "streaming" && (
           <div className="mt-7 pt-5 border-t border-white/[0.06]">
-            <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-info/80 mb-1.5">
-              Préciser cette lecture
-            </p>
-            <p className="text-[13px] leading-[1.55] text-muted mb-4 max-w-[480px]">
-              Dites-nous ce que vous recherchez ou ce qui vous fait hésiter dans cette commune.
-              La lecture sera adaptée à vos priorités, sans rien inventer.
-            </p>
-            <label className="block text-[13px] text-label mb-1.5">
-              Qu&apos;est-ce qui compte le plus pour vous dans cette commune&nbsp;?
-            </label>
-            <textarea
-              value={discovery.priority}
-              onChange={(e) => setDiscovery((d) => ({ ...d, priority: e.target.value }))}
-              maxLength={300}
-              rows={2}
-              placeholder="Aidez futur•e à mettre en avant ce qui est utile à votre recherche."
-              className="w-full bg-white/[0.03] border border-white/[0.1] rounded-md p-2.5 text-[14px] text-label placeholder:text-ghost mb-3 resize-y"
-            />
-            <label className="block text-[13px] text-label mb-1.5">
-              Qu&apos;est-ce qui pourrait vous faire hésiter&nbsp;?
-            </label>
-            <textarea
-              value={discovery.concern}
-              onChange={(e) => setDiscovery((d) => ({ ...d, concern: e.target.value }))}
-              maxLength={300}
-              rows={2}
-              placeholder="Une inquiétude ou un point que vous souhaitez examiner avec attention."
-              className="w-full bg-white/[0.03] border border-white/[0.1] rounded-md p-2.5 text-[14px] text-label placeholder:text-ghost mb-3 resize-y"
-            />
-            <div className="flex items-center gap-3 flex-wrap">
-              <button
-                type="button"
-                disabled={discoveryKeyOf(discovery) === usedDiscoveryKey}
-                onClick={async () => {
-                  posthog?.capture("quartier_discovery_applied", {
-                    commune: communeName,
-                    insee_code: inseeCode,
-                    has_priority: !!discovery.priority.trim(),
-                    has_concern: !!discovery.concern.trim(),
-                  });
-                  try {
-                    await fetch("/api/report-context", {
-                      method: "PATCH",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        insee: inseeCode,
-                        discoveryWorkbook: { priority: discovery.priority, concern: discovery.concern },
-                      }),
-                    });
-                  } catch {
-                    /* la régénération reste utile même si la persistance échoue */
-                  }
-                  fetchSynthesis(workbook, true);
-                }}
-                className="quartier-regen-btn disabled:opacity-40 disabled:cursor-default"
-              >
-                Adapter la lecture
-              </button>
-              {usedDiscoveryKey &&
-                discoveryKeyOf(discovery) === usedDiscoveryKey &&
-                (discovery.priority.trim() || discovery.concern.trim()) && (
-                  <span className="text-[12px] text-info/80">Lecture adaptée à vos priorités.</span>
+            <button
+              type="button"
+              onClick={() => setDiscoveryOpen((v) => !v)}
+              className="flex items-start justify-between gap-4 w-full text-left"
+            >
+              <div>
+                <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-info/80 mb-1.5">
+                  Vos priorités pour cette commune
+                </p>
+                {!discoveryOpen && (
+                  <p className="text-[13px] leading-[1.55] text-muted">
+                    Dites-nous ce que vous recherchez ou ce qui vous fait hésiter ici.
+                  </p>
                 )}
-            </div>
+              </div>
+              <span
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] whitespace-nowrap shrink-0 ${
+                  discoveryOpen
+                    ? "border border-white/[0.12] bg-white/[0.04] text-muted font-normal"
+                    : "border border-info/40 bg-info/[0.14] text-info font-semibold"
+                }`}
+              >
+                {discoveryOpen ? "Réduire" : "Compléter"}
+                <span className="text-[10px]">{discoveryOpen ? "▲" : "▼"}</span>
+              </span>
+            </button>
+
+            {discoveryOpen && (
+              <div className="mt-4">
+                <p className="text-[13px] leading-[1.55] text-muted mb-4">
+                  Vos priorités orientent ce qui suit, sans rien inventer.
+                </p>
+                <label className="block text-[13px] text-label mb-1.5">
+                  Qu&apos;est-ce qui compte le plus pour vous dans cette commune&nbsp;?
+                </label>
+                <textarea
+                  value={discovery.priority}
+                  onChange={(e) => setDiscovery((d) => ({ ...d, priority: e.target.value }))}
+                  maxLength={300}
+                  rows={2}
+                  placeholder="Le calme, les écoles, le budget, l'exposition aux risques : ce qui pèse le plus pour vous."
+                  className="w-full bg-white/[0.03] border border-white/[0.1] rounded-md p-2.5 text-[14px] text-label placeholder:text-ghost mb-3 resize-y"
+                />
+                <label className="block text-[13px] text-label mb-1.5">
+                  Qu&apos;est-ce qui pourrait vous faire hésiter&nbsp;?
+                </label>
+                <textarea
+                  value={discovery.concern}
+                  onChange={(e) => setDiscovery((d) => ({ ...d, concern: e.target.value }))}
+                  maxLength={300}
+                  rows={2}
+                  placeholder="Une inquiétude ou un point que vous souhaitez examiner avec attention."
+                  className="w-full bg-white/[0.03] border border-white/[0.1] rounded-md p-2.5 text-[14px] text-label placeholder:text-ghost mb-3 resize-y"
+                />
+                <div className="flex items-center gap-3 flex-wrap">
+                  <button
+                    type="button"
+                    disabled={discoveryKeyOf(discovery) === usedDiscoveryKey}
+                    onClick={async () => {
+                      posthog?.capture("quartier_discovery_applied", {
+                        commune: communeName,
+                        insee_code: inseeCode,
+                        has_priority: !!discovery.priority.trim(),
+                        has_concern: !!discovery.concern.trim(),
+                      });
+                      try {
+                        await fetch("/api/report-context", {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            insee: inseeCode,
+                            discoveryWorkbook: { priority: discovery.priority, concern: discovery.concern },
+                          }),
+                        });
+                      } catch {
+                        /* la régénération reste utile même si la persistance échoue */
+                      }
+                      fetchSynthesis(workbook, true);
+                    }}
+                    className="quartier-regen-btn disabled:opacity-40 disabled:cursor-default"
+                  >
+                    Adapter la lecture
+                  </button>
+                  {usedDiscoveryKey &&
+                    discoveryKeyOf(discovery) === usedDiscoveryKey &&
+                    (discovery.priority.trim() || discovery.concern.trim()) && (
+                      <span className="text-[12px] text-info/80">Vos priorités sont prises en compte.</span>
+                    )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
         {sources.length > 0 && (
-          <div className="mt-8 pt-5 border-t border-white/[0.06]">
-            <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-ghost mb-2.5">
-              Sources mobilisées
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {sources.map((s) => (
-                <span
-                  key={s}
-                  className="inline-flex items-center px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.08] font-mono text-[10px] tracking-[0.06em] uppercase text-ghost"
-                >
-                  {s}
-                </span>
-              ))}
-            </div>
-          </div>
+          <p className="mt-6 font-mono text-[10px] tracking-[0.1em] uppercase text-ghost">
+            <span className="font-bold">Sources</span> · {sources.join(" · ")}
+          </p>
         )}
       </div>
 

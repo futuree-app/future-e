@@ -1,12 +1,13 @@
-// Passeport territorial — bloc 2, sous TerritoryCover.
+// Passeport territorial — bloc 2, sous la ligne des années (TerritoryYearsBand).
 // Pas une fiche de données neutre : un objet à part, sur une surface teintée à la
-// couleur du territoire (même palette que la cover), grand nom de commune, code
-// INSEE en numéro de document, pictos 1px. La cover est la photo, ceci est la
+// couleur du territoire (palette territory-mood), grand nom de commune, code
+// INSEE en numéro de document, pictos 1px. La bande est la mémoire, ceci est la
 // page de données. Présentation seule (props sérialisables).
 
 import type { ReactNode } from "react";
 import type { TerritoryIdentity } from "@/lib/territory-identity";
 import type { TerritoryType } from "@/lib/territory-mood";
+import { PassportTiltScene } from "@/components/report/PassportTiltScene";
 
 // ── Pictos filaires 1px (stroke = currentColor) ───────────────────────────────
 const ICON: Record<string, ReactNode> = {
@@ -120,8 +121,12 @@ export function TerritoryIdentityCard({
   if (identity.solDominant) fields.push({ kind: "sol", label: "Occupation des sols", value: identity.solDominant });
 
   return (
+    // Scène 3D : la carte se déplie comme une feuille de papier au chargement,
+    // puis répond au survol (tilt, reflet, parallaxe). Classes dans globals.css,
+    // reduced-motion => à plat et immobile.
+    <PassportTiltScene>
     <section
-      className="rounded-2xl px-7 py-6 relative overflow-hidden"
+      className="passport-unfold rounded-2xl px-7 py-6 relative overflow-hidden"
       style={{
         background: `linear-gradient(150deg, ${tint}1f 0%, ${tint}0a 55%, rgba(8,10,18,0.6) 100%)`,
         border: `1px solid ${tint}33`,
@@ -138,7 +143,7 @@ export function TerritoryIdentityCard({
             <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-ghost mt-1">Commune N° {inseeCode}</p>
           )}
         </div>
-        <div className="flex flex-col items-end gap-1.5 shrink-0">
+        <div className="flex flex-col items-end gap-1.5 shrink-0 passport-layer-seal">
           <Seal type={territoryType} />
           <p className="text-right font-mono text-[9px] tracking-[0.1em] uppercase text-ghost/70">
             Sources · INSEE / OSO
@@ -148,7 +153,7 @@ export function TerritoryIdentityCard({
 
       {/* Identifiant : le nom de la commune, en grand, comme sur une pièce d'identité */}
       <h3
-        className="font-normal uppercase text-[clamp(28px,4.2vw,42px)] leading-[1.0] tracking-[0.01em] text-label"
+        className="passport-layer-name font-normal uppercase text-[clamp(28px,4.2vw,42px)] leading-[1.0] tracking-[0.01em] text-label"
         style={{ fontFamily: "'Instrument Serif', serif" }}
       >
         {communeName}
@@ -173,5 +178,6 @@ export function TerritoryIdentityCard({
         ))}
       </dl>
     </section>
+    </PassportTiltScene>
   );
 }

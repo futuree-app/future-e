@@ -419,7 +419,9 @@ export function QuartierWorkbook({ userKey, commune, inseeCode, reportId }: Quar
   return (
     <div style={S.wrap}>
 
-      {/* en-tête + toggle */}
+      {/* en-tête + toggle. Fermé par défaut, mais toute la zone (titre, texte
+          d'invite, pastille) est cliquable et la pastille adopte le bleu
+          d'action du produit à l'état fermé : le geste doit se voir. */}
       <button
         type="button"
         onClick={() => {
@@ -431,6 +433,11 @@ export function QuartierWorkbook({ userKey, commune, inseeCode, reportId }: Quar
         <div style={S.head}>
           <div>
             <h3 style={S.title}>Vos repères de terrain</h3>
+            {!open && (
+              <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.55, margin: "6px 0 0" }}>
+                Ajoutez votre expérience du quartier à ce que montrent déjà les données.
+              </p>
+            )}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
             <span style={S.progressPill(completionPct)}>
@@ -441,19 +448,20 @@ export function QuartierWorkbook({ userKey, commune, inseeCode, reportId }: Quar
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                padding: "5px 12px",
+                padding: "7px 14px",
                 borderRadius: 100,
-                border: `1px solid ${C.border}`,
-                background: "rgba(255,255,255,0.04)",
+                border: `1px solid ${open ? C.border : "rgba(96,165,250,0.4)"}`,
+                background: open ? "rgba(255,255,255,0.04)" : "rgba(96,165,250,0.14)",
                 fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 11,
-                color: C.muted,
+                fontSize: 12,
+                fontWeight: open ? 400 : 600,
+                color: open ? C.muted : C.blue,
                 letterSpacing: "0.04em",
                 whiteSpace: "nowrap",
               }}
             >
               {open ? "Réduire" : "Compléter"}
-              <span style={{ fontSize: 9 }}>{open ? "▲" : "▼"}</span>
+              <span style={{ fontSize: 10 }}>{open ? "▲" : "▼"}</span>
             </span>
           </div>
         </div>
@@ -465,12 +473,6 @@ export function QuartierWorkbook({ userKey, commune, inseeCode, reportId }: Quar
           </div>
         )}
       </button>
-
-      {!open && (
-        <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.65, margin: 0 }}>
-          Complétez les données publiques avec votre expérience du territoire.
-        </p>
-      )}
 
       {/* 3 questions à choix */}
       {open && (<>

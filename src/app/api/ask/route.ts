@@ -135,6 +135,9 @@ RÈGLES ABSOLUES
 - Chaque chiffre cité doit mentionner sa source entre parenthèses.
 - Le trio de communes et le périmètre géographique retenus par futur•e FONT AUTORITÉ. Ne contestez jamais qu'une commune du trio appartienne au périmètre demandé, ne la décrivez jamais comme « à l'écart », « hors zone » ou « en marge » du périmètre, et ne laissez jamais entendre qu'elle aurait été proposée par erreur. Ces communes ont été sélectionnées dans le périmètre voulu : tenez-le pour acquis et raisonnez à l'intérieur de ce cadre.
 
+RÉFÉRENTIEL DE RÉCHAUFFEMENT (TRACC)
+La France se réchauffe environ 1,7 fois plus vite que la moyenne mondiale. La trajectoire de référence française (TRACC 2023) et les écrans futur•e parlent en réchauffement EN FRANCE : +2 °C vers 2030, +2,7 °C vers 2050, +4 °C vers 2100. Ces trois jalons correspondent exactement aux scénarios DRIAS +1,5 °C, +2 °C et +3 °C GLOBAL du bloc DONNÉES TERRITORIALES DISPONIBLES. Quand l'utilisateur mentionne « +4 °C », il parle du réchauffement en France : répondez avec les données du scénario +3 °C global (horizon 2100) et explicitez l'équivalence en une phrase (« +4 °C en France vers 2100, soit +3 °C de réchauffement global »). Même logique pour +2 °C et +2,7 °C. Ces scénarios SONT couverts par les données : ne répondez jamais qu'ils manquent.
+
 FORMAT DE answer
 - 2 à 4 paragraphes maximum.
 - Sources en fin de paragraphe pertinent : (Source : DRIAS) ou (Source : Géorisques, ATMO).
@@ -276,12 +279,15 @@ function formatDriasBlock(data: ClimatData): string {
     return "[DRIAS] Pas de projections climatiques DRIAS disponibles pour cette commune.";
   }
   const out: string[] = [
-    "[DRIAS — projections climatiques horizon 2050, par réchauffement global]",
+    "[DRIAS-TRACC — projections climatiques par niveau de réchauffement]",
   ];
+  // Double référentiel : niveau GLOBAL (clés gwl) et son équivalent TRACC
+  // EN FRANCE (celui des écrans futur•e et du langage courant). Cf. règle
+  // RÉFÉRENTIEL DE RÉCHAUFFEMENT du prompt système.
   const scenarioLabels: Record<string, string> = {
-    gwl15: "+1.5 °C global",
-    gwl20: "+2.0 °C global",
-    gwl30: "+3.0 °C global",
+    gwl15: "+1,5 °C global (= +2 °C en France, horizon 2030)",
+    gwl20: "+2,0 °C global (= +2,7 °C en France, horizon 2050)",
+    gwl30: "+3,0 °C global (= +4 °C en France, horizon 2100)",
   };
   const indicatorOrder: Array<[string, string, string]> = [
     ["NORTMm_yr", "Température moyenne annuelle", " °C"],

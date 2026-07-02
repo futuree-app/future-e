@@ -10,12 +10,20 @@ type Relation =
   | "information_only"
   | "unknown";
 
-const LABEL: Record<Relation, string> = {
-  current_residence: "Lecture adaptée à votre commune de résidence",
-  considering_living: "Lecture adaptée à une commune que vous envisagez",
-  information_only: "Lecture d'une commune que vous explorez",
-  unknown: "Lecture d'une commune que vous explorez",
-};
+// La phrase porte son enjeu : elle dit à qui le rapport s'adresse (c'est ce qui
+// règle la posture de la synthèse), sinon « Vous vivez à Lorient » arrive de
+// nulle part. Le nom de la commune ancre la phrase.
+function label(relation: Relation, commune: string | null): string {
+  const lieu = commune ?? "cette commune";
+  switch (relation) {
+    case "current_residence":
+      return `Cette lecture s'adresse à quelqu'un qui vit à ${lieu}.`;
+    case "considering_living":
+      return `Cette lecture s'adresse à quelqu'un qui envisage de s'installer à ${lieu}.`;
+    default:
+      return `Cette lecture s'adresse à quelqu'un qui découvre ${lieu}.`;
+  }
+}
 
 // Les deux relations que l'utilisateur peut poser explicitement (le reste est
 // inféré). On reste sur le couple cœur ; information_only viendra plus tard.
@@ -69,7 +77,7 @@ export function ReportRelationBanner({
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-muted">
       <span className="inline-flex items-center gap-2">
         <span className="w-1 h-1 rounded-full bg-info/70 shrink-0" />
-        {LABEL[relation]}
+        {label(relation, communeName)}
       </span>
       {!open ? (
         <button

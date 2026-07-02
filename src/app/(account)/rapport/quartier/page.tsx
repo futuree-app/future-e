@@ -4,7 +4,6 @@ export const dynamic = "force-dynamic";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { QuartierWorkbook } from "@/app/(account)/compte/QuartierWorkbook";
 import { canAccessCompleteReport } from "@/lib/access";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
@@ -18,7 +17,7 @@ import { deriveQuartierSources, buildFallbackSummary } from "@/lib/quartier-sign
 import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
 import { AskFutureInlineMount } from "@/components/AskFutureInlineMount";
 import { FilWaitlistBlock } from "@/components/report/FilWaitlistBlock";
-import { TerritoryCover } from "@/components/report/TerritoryCover";
+import { TerritoryYearsBand } from "@/components/report/TerritoryYearsBand";
 import { deriveTerritoryMood } from "@/lib/territory-mood";
 import { getTerritoryContext } from "@/lib/comparateur-vie";
 import { buildTerritoryIdentity, buildTerritoryCards } from "@/lib/territory-identity";
@@ -56,7 +55,6 @@ export default async function RapportQuartierPage() {
   // garde-fou workbook, et le bandeau corrigeable.
   const reportCtx = inseeCode ? await getReportContext(supabase, user.id, inseeCode) : null;
   const { relation: effectiveRelation } = resolveRelation(territory.isResidence, reportCtx);
-  const isResidenceRelation = effectiveRelation === "current_residence";
   const initialDiscovery = parseDiscoveryWorkbook(reportCtx?.discovery_workbook ?? null);
 
   // Socle commun : Géorisques + GASPAR inclus dans l'enrichissement.
@@ -93,11 +91,17 @@ export default async function RapportQuartierPage() {
   const territoryCards = territoryContext ? buildTerritoryCards(territoryContext.entry) : null;
 
   // Sources mobilisées par horizon : pré-calculées côté serveur, le composant
-  // client choisit via useHorizon. Évite de transférer tout enrichment.
+  // client choisit via useHorizon. Ligne discrète sous la synthèse (pas de bloc
+  // à chips) : la synthèse porte des affirmations chiffrées, elle doit garder
+  // un renvoi de provenance sur son propre écran. hasTerritoryContext : le
+  // prompt de synthèse mobilise aussi le contexte territoire (rôle/agglomération,
+  // démographie, saisonnalité), qui vient de l'index comparateur + la base
+  // logement INSEE, pas des 6 sources détectées par défaut.
+  const hasTerritoryContext = territoryContext != null || saisonnalitePct != null;
   const sourcesByHorizon = {
-    gwl15: deriveQuartierSources(enrichment, georisques, catnat, "gwl15"),
-    gwl20: deriveQuartierSources(enrichment, georisques, catnat, "gwl20"),
-    gwl30: deriveQuartierSources(enrichment, georisques, catnat, "gwl30"),
+    gwl15: deriveQuartierSources(enrichment, georisques, catnat, "gwl15", hasTerritoryContext),
+    gwl20: deriveQuartierSources(enrichment, georisques, catnat, "gwl20", hasTerritoryContext),
+    gwl30: deriveQuartierSources(enrichment, georisques, catnat, "gwl30", hasTerritoryContext),
   };
 
   return (
@@ -119,7 +123,7 @@ export default async function RapportQuartierPage() {
         )}
 
         {/* Hero */}
-        <section className="pt-20 pb-6 max-w-[680px]">
+        <section className="pt-20 pb-6">
           <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-info mb-5">
             <span className="w-1.5 h-1.5 rounded-full bg-info shrink-0" />
             Module 01 · Territoire
@@ -141,18 +145,9 @@ export default async function RapportQuartierPage() {
           )}
         </section>
 
-        {/* Couverture éditoriale — donne une identité visuelle au territoire
-            avant la lecture, sans concurrencer le texte */}
-        {communeName && (
-          <div className="pt-1">
-            <TerritoryCover mood={territoryMood} />
-          </div>
-        )}
-
-        {/* Bloc 2 — Passeport territorial, précédé d'une transition qui nomme la
-            typologie : fait le pont entre l'illustration et la fiche. */}
+        {/* Passeport territorial : la carte d'identité ouvre le rapport. */}
         {communeName && territoryIdentity && (
-          <div className="mt-7">
+          <div className="pt-1">
             <TerritoryIdentityCard
               communeName={displayName}
               inseeCode={inseeCode}
@@ -164,20 +159,28 @@ export default async function RapportQuartierPage() {
           </div>
         )}
 
-        {/* Contexte de lecture : relation à la commune (inférée, corrigeable).
-            Secondaire et après le contenu d'identité : jamais un gate. */}
-        {inseeCode && (
-          <div className="pt-6">
-            <ReportRelationBanner
-              insee={inseeCode}
-              relation={effectiveRelation}
-              communeName={displayName}
-            />
+        {/* La ligne des années — mémoire du lieu (arrêtés CatNat), sous le
+            passeport. Rendue seulement si GASPAR a répondu : une bande vide
+            doit vouloir dire « commune épargnée », jamais « donnée en panne ». */}
+        {communeName && catnat && (
+          <div className="mt-10">
+            <TerritoryYearsBand communeName={displayName} years={catnat.years} />
           </div>
         )}
 
-        {/* Synthèse pleine largeur */}
-        <section className="pt-8">
+        {/* Synthèse pleine largeur, précédée de son réglage : la relation à la
+            commune (inférée, corrigeable) règle la posture du texte, elle vit
+            donc collée à la synthèse. Jamais un gate. */}
+        <section className="pt-10">
+          {inseeCode && (
+            <div className="mb-4">
+              <ReportRelationBanner
+                insee={inseeCode}
+                relation={effectiveRelation}
+                communeName={displayName}
+              />
+            </div>
+          )}
           <QuartierSynthesis
             communeName={communeName}
             inseeCode={inseeCode}
@@ -215,21 +218,6 @@ export default async function RapportQuartierPage() {
             ]}
           />
         </section>
-
-        {/* Repères de terrain : observations VÉCUES, donc réservées à la commune de
-            résidence. Sur une commune explorée (découverte), on ne propose pas ce
-            workbook (sa variante « découverte » viendra dans une étape ultérieure) :
-            cela évite d'écrire des observations vécues sur une commune où l'on ne vit pas. */}
-        {isResidenceRelation && (
-          <section className="pt-14">
-            <QuartierWorkbook
-              userKey={account.userId}
-              commune={communeName}
-              inseeCode={inseeCode}
-              reportId={inseeCode}
-            />
-          </section>
-        )}
 
         {/* Porte suivante : continuité naturelle du rapport, juste après la lecture */}
         <div className="mt-14 flex justify-end">

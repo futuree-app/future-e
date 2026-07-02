@@ -15,13 +15,19 @@ export type QuartierSourceKey =
   | "GASPAR"
   | "VigiEau"
   | "Hub'Eau"
-  | "ADEME";
+  | "ADEME"
+  | "INSEE";
 
 export function deriveQuartierSources(
   enrichment: EnrichmentResult | null,
   georisques: GeorisquesSummary | null,
   catnat: GasparCatnatSummary | null,
   horizon: HorizonKey,
+  /** Contexte territoire (rôle/agglomération, démographie, saisonnalité) mobilisé
+   *  par le prompt de synthèse : vient de l'index comparateur + la base logement
+   *  INSEE, pas des sources ci-dessus. Absent par défaut (ex. quartier-preview.ts
+   *  ne les charge pas), à passer explicitement quand le contexte est chargé. */
+  hasTerritoryContext = false,
 ): QuartierSourceKey[] {
   const sources = new Set<QuartierSourceKey>();
 
@@ -33,6 +39,7 @@ export function deriveQuartierSources(
   if (catnat && catnat.total > 0) sources.add("GASPAR");
   if (enrichment?.eau?.drought) sources.add("Hub'Eau");
   if (enrichment?.ademe?.commune.territoire) sources.add("ADEME");
+  if (hasTerritoryContext) sources.add("INSEE");
 
   return Array.from(sources);
 }

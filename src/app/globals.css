@@ -1098,6 +1098,131 @@ dialog.wizard-dialog::backdrop {
   animation: commune-check-pop 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* Passeport territorial : la carte se déplie comme une feuille de papier
+   (bascule 3D depuis le pli haut, léger sursaut, puis à plat). Un seul geste,
+   joué une fois au chargement, figé ensuite. */
+.passport-fold-scene {
+  /* Perspective courte = 3D plus prononcée pendant le dépliage. */
+  perspective: 850px;
+}
+@keyframes passport-unfold {
+  0% {
+    opacity: 0;
+    transform: rotateX(-82deg);
+    filter: brightness(0.45) drop-shadow(0 34px 28px rgba(0, 0, 0, 0.55));
+  }
+  45% {
+    opacity: 1;
+    filter: brightness(0.78) drop-shadow(0 20px 22px rgba(0, 0, 0, 0.42));
+  }
+  80% {
+    transform: rotateX(5deg);
+    filter: brightness(1.04) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.28));
+  }
+  100% {
+    opacity: 1;
+    transform: rotateX(0deg);
+    filter: brightness(1) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.18));
+  }
+}
+.passport-unfold {
+  transform-origin: 50% 0%;
+  backface-visibility: hidden;
+  animation: passport-unfold 1.05s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+/* Verre au repos : reflet haut + point de lumière dans l'angle, statiques. */
+.passport-unfold::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(168deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.035) 24%, transparent 48%),
+    radial-gradient(120% 60% at 10% 0%, rgba(255, 255, 255, 0.09), transparent 62%);
+}
+/* Rai de lumière : balaye la carte pendant le dépliage (la lumière accroche le
+   verre quand la feuille se tend), puis sort du cadre. Un seul passage. */
+.passport-unfold::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 32%,
+    rgba(255, 255, 255, 0.10) 44%,
+    rgba(255, 255, 255, 0.26) 50%,
+    rgba(255, 255, 255, 0.10) 56%,
+    transparent 68%
+  );
+  transform: translateX(-135%) skewX(-8deg);
+  animation: passport-sheen 1.15s cubic-bezier(0.3, 0.55, 0.25, 1) 0.4s forwards;
+}
+@keyframes passport-sheen {
+  to { transform: translateX(135%) skewX(-8deg); }
+}
+
+/* Toucher au survol : la carte s'incline vers le curseur, un reflet le suit,
+   le sceau et le nom glissent en parallaxe (plans de profondeur différents).
+   --px/--py (0..1) et --hover sont posés par PassportTiltScene.tsx. */
+.passport-touch {
+  --px: 0.5;
+  --py: 0.5;
+  --hover: 0;
+}
+.passport-tilt {
+  position: relative;
+  transform: rotateX(calc((0.5 - var(--py)) * 5deg))
+    rotateY(calc((var(--px) - 0.5) * 7deg))
+    translateZ(calc(var(--hover) * 10px));
+  transition: transform 0.16s ease-out;
+  will-change: transform;
+}
+/* Reflet ponctuel sous le curseur (au-dessus de la carte, clippé aux coins). */
+.passport-tilt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem; /* = rounded-2xl de la carte */
+  pointer-events: none;
+  opacity: var(--hover);
+  transition: opacity 0.35s ease;
+  background: radial-gradient(
+    340px circle at calc(var(--px) * 100%) calc(var(--py) * 100%),
+    rgba(255, 255, 255, 0.055),
+    transparent 70%
+  );
+}
+/* Parallaxe : le sceau (plan avant) glisse contre le curseur, le nom (plan
+   arrière) l'accompagne à peine. Les mini-décalages qui font « objet ». */
+.passport-layer-seal {
+  transform: translate(
+    calc((0.5 - var(--px)) * 9px),
+    calc((0.5 - var(--py)) * 9px)
+  );
+  transition: transform 0.16s ease-out;
+}
+.passport-layer-name {
+  display: block;
+  transform: translate(
+    calc((var(--px) - 0.5) * 4px),
+    calc((var(--py) - 0.5) * 3px)
+  );
+  transition: transform 0.16s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .passport-unfold { animation: none; }
+  .passport-unfold::after { animation: none; }
+  .passport-tilt,
+  .passport-layer-seal,
+  .passport-layer-name {
+    transform: none !important;
+    transition: none;
+  }
+  .passport-tilt::after { opacity: 0; }
+}
+
 /* Wizard loading bar — sweep indéterminé */
 @keyframes wizard-loading-bar {
   0%   { left: -35%; width: 35%; }

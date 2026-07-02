@@ -504,6 +504,9 @@ type GasparCatnatResponse = {
   results?: number | null;
 };
 
+/** Famille visuelle d'une année marquante (palette bande-trajectoire, jamais de rouge). */
+export type CatnatBandFamily = "inondation" | "secheresse" | "tempete" | "autre";
+
 export type GasparCatnatSummary = {
   /** Nombre total d'arrêtés CatNat sur la commune. */
   total: number;
@@ -513,6 +516,13 @@ export type GasparCatnatSummary = {
   byRisk: { label: string; count: number }[];
   /** Comptage par décennie (frise temporelle), ordre chronologique. decade = 1980, 1990… */
   byDecade: { decade: number; count: number }[];
+  /**
+   * Années marquées par au moins un arrêté, ordre chronologique, une famille
+   * dominante par année (la plus fréquente dans l'année ; égalité tranchée par
+   * gravité inondation > sécheresse > tempête > autre). Alimente la bande
+   * « ligne des années » du rapport Territoire.
+   */
+  years: { year: number; family: CatnatBandFamily }[];
   topRisk: string | null;
   /** Phrase de synthèse déterministe (≤ 120 car.), ou null si aucun arrêté. */
   summary: string | null;
@@ -568,6 +578,21 @@ function describeCatnat(
   return sentence.length <= 120 ? sentence : `Plusieurs aléas, surtout ${lower}.`;
 }
 
+// Famille visuelle d'un libellé simplifié (couche bande-trajectoire, 4 couleurs).
+const BAND_FAMILY_ORDER: CatnatBandFamily[] = ["inondation", "secheresse", "tempete", "autre"];
+
+function bandFamilyOf(simplified: string): CatnatBandFamily {
+  if (
+    simplified === "Inondations" ||
+    simplified === "Submersion marine" ||
+    simplified === "Érosion et impact des vagues"
+  )
+    return "inondation";
+  if (simplified === "Sécheresse des sols") return "secheresse";
+  if (simplified === "Tempête" || simplified === "Cyclone") return "tempete";
+  return "autre";
+}
+
 function parseEvtYear(value: string | null | undefined): number | null {
   if (!value) return null;
   const year = Number(value.split("/")[2]);
@@ -583,16 +608,23 @@ async function loadGasparCatnatSummary(inseeCode: string): Promise<GasparCatnatS
   const items = json?.data ?? [];
   const counts = new Map<string, number>();
   const decadeCounts = new Map<number, number>();
+  const yearFamilyCounts = new Map<number, Map<CatnatBandFamily, number>>();
   let firstYear: number | null = null;
   let lastYear: number | null = null;
 
   for (const item of items) {
     const label = item.libelle_risque_jo?.trim();
+    const year = parseEvtYear(item.date_debut_evt);
     if (label) {
       const family = simplifyCatnatRisk(label);
       counts.set(family, (counts.get(family) ?? 0) + 1);
+      if (year != null) {
+        const perYear = yearFamilyCounts.get(year) ?? new Map<CatnatBandFamily, number>();
+        const band = bandFamilyOf(family);
+        perYear.set(band, (perYear.get(band) ?? 0) + 1);
+        yearFamilyCounts.set(year, perYear);
+      }
     }
-    const year = parseEvtYear(item.date_debut_evt);
     if (year != null) {
       firstYear = firstYear == null ? year : Math.min(firstYear, year);
       lastYear = lastYear == null ? year : Math.max(lastYear, year);
@@ -600,6 +632,21 @@ async function loadGasparCatnatSummary(inseeCode: string): Promise<GasparCatnatS
       decadeCounts.set(decade, (decadeCounts.get(decade) ?? 0) + 1);
     }
   }
+
+  const years = Array.from(yearFamilyCounts.entries())
+    .map(([year, perYear]) => {
+      let family: CatnatBandFamily = "autre";
+      let best = -1;
+      for (const candidate of BAND_FAMILY_ORDER) {
+        const count = perYear.get(candidate) ?? 0;
+        if (count > best) {
+          best = count;
+          family = candidate;
+        }
+      }
+      return { year, family };
+    })
+    .sort((a, b) => a.year - b.year);
 
   const byRisk = Array.from(counts.entries())
     .map(([label, count]) => ({ label, count }))
@@ -617,6 +664,7 @@ async function loadGasparCatnatSummary(inseeCode: string): Promise<GasparCatnatS
     lastYear,
     byRisk,
     byDecade,
+    years,
     topRisk: byRisk[0]?.label ?? null,
     summary: describeCatnat(byRisk, total),
   };

@@ -1,4 +1,4 @@
-// Carte d'identité du territoire (bloc 2, sous TerritoryCover).
+// Carte d'identité du territoire (bloc 2, sous la ligne des années).
 // Dérive des libellés d'affichage déterministes à partir de la typologie (mood)
 // et de l'entrée d'index (densité, population, rôle UU, géographie, sol dominant).
 // Pur formatage : aucune conclusion logement / santé / mobilité / métier / projets.

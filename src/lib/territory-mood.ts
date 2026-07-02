@@ -2,11 +2,9 @@
 // 100 % déterministe à partir des données déjà disponibles (catégorie
 // géographique + territoire ADEME). Aucun appel réseau.
 //
-// Socle commun :
-//   - V1 (actuelle)  : consommé par <TerritoryCover> pour assembler une bande
-//                      de couverture SVG procédurale.
-//   - V2 (plus tard) : `buildImagePrompt(mood)` produit le prompt d'une image
-//                      éditoriale générée puis mise en cache par commune.
+// Socle commun : consommé par le passeport territorial (teinte/accent) et par
+// les cartes climat (type). L'ex-cover illustrée (TerritoryCover) a été
+// remplacée par la ligne des années (TerritoryYearsBand), qui ne dépend pas du mood.
 
 import { deriveCategories } from "@/lib/commune-categories";
 

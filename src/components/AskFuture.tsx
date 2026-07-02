@@ -72,15 +72,20 @@ export function AskFuture({
   const inputRef = useRef<HTMLInputElement>(null);
   const warmedRef = useRef(false);
 
-  // Scroll vers le bas à chaque nouveau message
+  // Scroll vers le bas à chaque nouveau message. Jamais au montage à vide :
+  // en variante inline (bas de page rapport), un scrollIntoView initial
+  // embarquerait toute la page vers le bloc « une question ».
   useEffect(() => {
+    if (messages.length === 0 && !profileQuestion && !loading) return;
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, profileQuestion, loading]);
 
   // Focus l'input à l'ouverture + pré-warm du contexte territorial (fire-and-forget).
+  // En inline, isOpen est vrai dès le montage : pas de focus (il ferait défiler
+  // la page jusqu'à l'input) ; l'événement futuree:ask focus déjà à la demande.
   useEffect(() => {
     if (!isOpen) return;
-    inputRef.current?.focus();
+    if (!inline) inputRef.current?.focus();
     if (warmedRef.current) return;
     warmedRef.current = true;
     fetch(`/api/ask/context?insee=${encodeURIComponent(communeInsee)}`, {
@@ -89,7 +94,7 @@ export function AskFuture({
     }).catch(() => {
       warmedRef.current = false;
     });
-  }, [isOpen, communeInsee]);
+  }, [isOpen, communeInsee, inline]);
 
   // Raccourcis clavier : ⌘K pour ouvrir, Esc pour fermer
   useEffect(() => {
