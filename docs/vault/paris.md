@@ -195,6 +195,30 @@ L'archétype et le produit sont centrés sur un décideur unique. Objet possible
 > Ces données ne sont pas intégrées — elles vivent dans `recherches/inventaire-sources.md` (« Gaps validés par
 > une décision réelle ») et deviendront éventuellement des paris quand leur intégration sera engagée.
 
+## Pari #9 — La pression assurantielle devient un déclencheur de paiement
+
+Issu de la veille assurermaville (2026-07-02, Business Strategist) : la douleur économique est
+réelle et croît (surprime CatNat 20 % au 01/01/2025, franchises, non-renouvellements), mais
+« la peur de la non-assurabilité fait payer les ménages » reste une hypothèse. Assurermaville
+prouve l'intérêt des militants et des élus, pas celui des acheteurs. Chantier data instruit
+et prêt, GELÉ jusqu'au premier signal : sinistralité ONRN/CCR, paire coût moyen + fréquence,
+doctrine d'usage écrite (`docs/rapports-agents/data-curator/2026-07-02-sinistralite-onrn-ccr.md`) ;
+la source balances comptables 6161 a été instruite et refusée le même jour (cf.
+inventaire-sources, victoires méthodologiques).
+
+- **Statut** : non testé.
+- **Confiance** : faible — analogie de douleur (les primes montent) et actualité presse, aucune
+  observation d'un ménage qui paie pour cette raison.
+- **Signal attendu** : des interlocuteurs qui évoquent spontanément l'assurance (prime, refus,
+  franchise) comme motif d'inquiétude dans une décision d'achat ou de déménagement.
+- **Source de preuve** : conversations founder-led d'abord ; sondes et questions AskFuture
+  (« pourrai-je assurer ma maison ici ? ») ensuite.
+- **Critère de mort** : sur un volume raisonnable de conversations et de questions AskFuture,
+  l'assurance n'apparaît jamais sans qu'on la mentionne → ancre de prix éditoriale au mieux,
+  pas un déclencheur.
+- **Ce qu'on a appris** : —
+- **Dernière revue** : 2026-07-02.
+
 ---
 
 ## L'agent viendra après la page (pas l'inverse)

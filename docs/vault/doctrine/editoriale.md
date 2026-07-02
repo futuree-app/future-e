@@ -146,6 +146,58 @@ n'est identitaire qu'en haute altitude (la montagne EST le lieu, ex. Aurillac, L
 position relative en caractéristique absolue** (invariant n°5). Implémenté dans
 `buildSignature` (`src/lib/comparateur-vie.ts`), commit 4c56923.
 
+## Statistiques marketing tierces : partie intéressée vs institut indépendant
+
+Avant de citer un chiffre externe sur le comportement résidentiel ou climatique (déménagement,
+intention, critère de choix), vérifier qui a produit l'étude. **Une entreprise dont le
+chiffre-cadeau sert son propre marché (portail immobilier, déménageur, promoteur, assureur)
+n'est pas une source neutre**, même si le chiffre est vrai. Elle peut être mentionnée mais
+jamais présentée comme la voix objective du marché — nommer la source et son intérêt (« selon
+une étude leboncoin », pas « selon une étude »).
+
+**Autorisé, prudent** : « les fortes chaleurs et les risques environnementaux commencent à
+entrer dans les réflexions résidentielles » (affirmation de tendance, sourcée, sans chiffre
+absolu). **Non autorisé sans meilleure preuve** : « un Français sur trois choisit désormais son
+lieu de vie selon le climat » (généralisation d'un chiffre de panel propriétaire d'un acteur
+commercial, présenté comme fait établi).
+
+**Ne jamais construire une série temporelle avec deux études différentes.** Deux enquêtes
+menées à des dates différentes, par des instituts différents, avec des méthodologies
+différentes, ne forment pas une évolution mesurée même si les chiffres semblent raconter une
+progression. Cas d'école détecté (2026-07-01) dans `vision/modele-economique.md` : le chiffre
+« intention de mobilité climatique doublée, 13 % en 2023 → 28 % en 2025, Odoxa » mélangeait en
+réalité un sondage **Ifop** de juin 2023 (13 %) et un sondage **Odoxa/ICI** de septembre 2025
+(28 %), deux instituts distincts, deux enquêtes ponctuelles non comparables, faussement
+attribuées à un même institut suivi dans le temps. Corrigé (voir `vision/modele-economique.md`).
+Sinon, présenter chaque chiffre isolément, avec sa date et sa source, jamais relié par « donc le
+signal double ».
+
+**Chiffre de référence actuel, le plus solide disponible** : sondage Odoxa pour ICI (réseau
+radio publique, pas une partie commercialement intéressée au marché immobilier), 13 164
+répondants, échantillon redressé sexe/âge/CSP/catégorie urbaine/région, collecte en ligne du
+1er au 15 septembre 2025 : **28 % des Français se disent prêts à déménager pour habiter une
+commune moins exposée aux risques climatiques, 12 % iraient jusqu'à changer de région.**
+Enquête ponctuelle (pas un baromètre suivi à ce jour, premier volet d'une série mensuelle ICI
+annoncée jusqu'à mars 2026) : citable comme un instantané daté et sourcé, pas comme une
+tendance mesurée dans le temps.
+
+**Côté santé environnementale, pas d'équivalent : ne pas forcer le parallèle.** Contrairement au
+climat, aucune enquête indépendante et récente ne mesure une intention de déménagement liée à la
+pollution (air, eau, sols). Ce qui existe et reste citable, c'est un chiffre de **perception du
+risque**, pas d'intention résidentielle : Baromètre santé environnement de **Santé publique
+France** (institut public, édition 2021) : parmi les répondants qui se disent informés sur
+chaque sujet, 92 % jugent la pollution de l'air extérieur à risque élevé/assez élevé, 90 % pour
+les métaux lourds, 89 % pour les sols pollués, 89 % pour les pesticides. **Ne jamais transformer
+ce chiffre d'inquiétude en un chiffre de comportement** (« les Français fuient la pollution »
+n'est pas prouvé, contrairement à « les Français s'inquiètent de la pollution », qui l'est).
+Deux sources écartées faute de neutralité ou de fraîcheur : un sondage Ifop donnant 78 %
+d'exposition ressentie à la pollution de l'air, commandé par le Réseau Action Climat (ONG
+engagée sur le sujet qu'elle sonde, pas un acteur commercial mais pas neutre) ; une enquête
+CREDOC trouvant que le cadre de vie ne pesait que ~3 % des motifs de déménagement contre ~25 %
+pour famille/travail/logement, mais datée d'octobre 1990, donc inutilisable comme chiffre
+actuel. *(Recherche du 2026-07-01,
+`docs/rapports-agents/deep-research/2026-07-01-demande-ou-vivre-climat-brut.md`.)*
+
 ## Ne pas citer Callendar comme source
 
 Ne pas citer « Callendar » dans les contenus affichés (cartes signaux, attributions,

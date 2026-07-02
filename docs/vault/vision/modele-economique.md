@@ -160,8 +160,9 @@ Tout n'est pas au même niveau de certitude. Honnêteté du modèle :
   (951 000 transactions, ~3 M déménagements/an, audiences des gratuits). Les ancres de prix
   (diagnostics 600-800 €).
 - **Preuves fortes** : le besoin de comprendre son territoire (91 839 notations ville-ideale,
-  couverture intégrale des comparateurs gratuits, intention de mobilité climatique doublée en
-  deux ans).
+  couverture intégrale des comparateurs gratuits) ; intention de mobilité climatique (28 % des
+  Français prêts à déménager pour une commune moins exposée, sondage Odoxa/ICI, sept. 2025,
+  13 164 répondants, méthodologie représentative — voir `doctrine/editoriale.md#statistiques-marketing-tierces`).
 - **Preuves moyennes / faibles** : le SEO comme canal dominant (plausible, pas mesuré sur notre
   prod) ; l'étage de prix vacant (opportunité OU absence de demande solvable).
 - **Hypothèses non démontrées (les paris)** : le **consentement à payer B2C** (le pari central,
@@ -179,7 +180,11 @@ registre vivant `paris.md` (la boucle de retour du projet).
    intelligence territoriale personnalisée et prospective », on gagne. Le discours doit rattraper
    le produit (cf. `/memory/feedback_positionnement_compatibilite.md`).
 2. **Le paiement B2C non démontré** (précédent CityScan).
-3. **Concurrence gratuite en SEO** (City Score, Bien dans ma ville, ville-ideale, MeilleurVille).
+3. **Concurrence gratuite en SEO** (City Score, Bien dans ma ville, ville-ideale, MeilleurVille ;
+   + assurermaville.fr depuis juillet 2026 : plaidoyer commune-institution par Reclaim Finance ×
+   Data For Good, recouvrement décisionnel faible, allié objectif sur la légitimation de la
+   catégorie ; à re-instruire s'ils ajoutent un volet ménage/adresse ou rankent sur des requêtes
+   décisionnelles, cf. `docs/rapports-agents/business-strategist/2026-07-02-veille-assurermaville.md`).
 4. **Un portail immobilier qui ajoute un score climat** (SeLoger, Bien'ici) : le plus dangereux,
    et l'acquéreur le plus plausible si la traction est prouvée.
 5. **Écart intention-action** : on monétise la réflexion, pas le déménagement.
@@ -189,9 +194,18 @@ registre vivant `paris.md` (la boucle de retour du projet).
 ## Contexte d'accélération 2025-2026 (sourcé)
 
 Surprime CatNat 12 % → 20 % au 01/01/2025 ; PNACC-3 (TRACC +2,7 °C en 2050, +4 °C en 2100,
-échelle France) ; intention de mobilité climatique doublée (13 % en 2023 → 28 % en 2025,
-Odoxa) ; précédent DPE (un A se vend ~16 % plus cher qu'un D) qui prouve qu'une information
-territoriale lisible devient un standard de marché.
+échelle France) ; 28 % des Français prêts à déménager pour une commune moins exposée aux
+risques climatiques (Odoxa/ICI, sept. 2025) ; précédent DPE (un A se vend ~16 % plus cher qu'un
+D) qui prouve qu'une information territoriale lisible devient un standard de marché ; indice de
+vulnérabilité assurantielle des communes publié par Reclaim Finance × Data For Good (ONG de
+plaidoyer, juillet 2026) : selon leur étude, 82 % des communes ont vu leurs dépenses
+multirisques augmenter entre 2020 et 2024, preuve supplémentaire que la douleur assurantielle
+devient un sujet grand public (source militante : citer l'ONG comme auteur, jamais comme
+institut neutre).
+*(Correction 2026-07-01 : l'ancienne formulation « doublée, 13 % en 2023 → 28 % en 2025,
+Odoxa » mélangeait un sondage Ifop 2023 et un sondage Odoxa/ICI 2025, deux instituts et deux
+enquêtes ponctuelles distinctes présentées à tort comme une même série suivie. Voir
+`doctrine/editoriale.md#statistiques-marketing-tierces`.)*
 
 ## Liens
 

@@ -28,8 +28,18 @@ correspondance est explicite, documentée et assumée, dans la base comme dans l
    d'une commune, d'une maille climatique, d'un zonage, d'une station proche.
 5. **Documenter les règles de rattachement par source.** Ex. : BAN (adresse → coordonnées +
    INSEE), DRIAS (point → maille la plus proche), Géorisques (INSEE ou zonage selon couche),
-   ATMO (point → station ou zone), baignade (point → site balnéaire pertinent), Eaufrance
-   (commune ou bassin selon disponibilité).
+   baignade (point → site balnéaire pertinent).
+   - **Eaufrance / SISE-Eaux (eau potable)** : la donnée n'est pas nativement communale, elle
+     est agrégée par Unité de Distribution (UDI). Une commune peut dépendre de plusieurs UDI de
+     qualité différente : ne jamais présenter « l'eau de la commune X » sans réduire
+     l'affirmation à l'UDI de rattachement. *(Vérifié sur data.gouv.fr, fiche SISE-Eaux,
+     2026-07-01.)*
+   - **ATMO (qualité de l'air)** : l'indice classique se calcule « en situation de fond », sans
+     tenir compte des phénomènes de proximité (effet canyon entre bâtiments, exposition en bord
+     d'axe routier). Un indice communal moyen masque une surexposition réelle à l'échelle de la
+     rue : ne jamais dire « l'air à {commune} est bon » sans nommer cette limite si le contenu
+     s'approche d'une lecture à la rue. *(Vérifié sur atmo-hdf.fr, « Carte stratégique de
+     l'air », 2026-07-01.)*
 6. **Préférer la cohérence à l'hyper-précision.** Quand deux sources ont des mailles
    incompatibles, remonter à une échelle robuste plutôt que produire un croisement
    artificiellement précis.
