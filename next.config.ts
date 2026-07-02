@@ -29,6 +29,12 @@ const nextConfig: NextConfig = {
     // AskFuture : le socle d'enrichissement lit la baignade (lib/baignade.ts).
     "/api/ask": ["./data/communes-baignade.json"],
     "/api/ask/context": ["./data/communes-baignade.json"],
+    // Module Logement : la sinistralité ONRN (lib/onrn-sinistralite.ts) lit les
+    // deux JSON runtime via fs au runtime de la route.
+    "/api/georisques-logement": [
+      "./data/onrn-secheresse.json",
+      "./data/onrn-inondation.json",
+    ],
   },
   async rewrites() {
     return [
