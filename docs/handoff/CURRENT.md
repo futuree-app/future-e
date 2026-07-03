@@ -1,47 +1,51 @@
 # Passation — session en cours
 
-**Horodatage** : 2026-07-03 16:11 · **Branche** : `main` (synchronisée avec `origin/main`, arbre propre)
+**Horodatage** : 2026-07-03 · **Branche** : `main` (synchronisée avec `origin/main`, arbre propre)
 
 ## Objectif en cours
-Module **Logement**, Face 2 (risques du bâti) : on vient de construire puis polir la brique **« Statut réglementaire à cette adresse »** (zonage PPRN au point) et de refondre la Face 2 en **niveaux de lecture** (divulgation progressive). Dernier geste : deux ajustements UX sur le **rapport Territoire** (interversion synthèse/mémoire du lieu + animation au scroll). Tout est commité et poussé. La session est à un point d'arrêt propre.
+Module **Logement**. Deux chantiers menés à terme cette session : (1) un nettoyage des frontières de la Face 2/3 (retraits assumés + précision des espaces verts) ; (2) le chantier **« Précision de l'adresse et du logement »** (autocomplétion BAN + attribution honnête du DPE) livré de bout en bout via le cycle brainstorm → spec → plan → exécution. Tout est sur `main`, poussé. Point d'arrêt propre.
 
 ## Fait dans cette session (du plus ancien au plus récent, tout sur `main`, poussé)
-- Reprise du handoff précédent : merge Face 3 Logement « Autour de cette adresse ».
-- `4434bad` : Face 3 affiche le **type précis** d'équipement (BPE TYPEQU conservé dans les shards + `TYPEQU_LABEL`), shards régénérés.
-- `9ba85cb` : Face 3 pleine largeur + polissage (alignement distances, sous-titres, footer ODbL).
-- `34d6bed` : **décision Face 4** (valeur immobilière parquée, engagement documenté déparqué) — vault + board.
-- `6782ad8` : **spike PPRI** — `/api/v2/gaspar/pprn` suffit (typeReg COVADIS rempli 12/12 sur 16 adresses testées).
-- `a28dfe9` : brique **statut réglementaire au point** (lib pure `src/lib/pprn-zonage.ts` + 6 tests, `georisques.ts` remonte `regulatoryPlans`, rendu `LogementModule.tsx`, chips PPRN retirées de « Risques du bâti »).
-- `e2c3a30`, `45da5e9`, `5b87a7c` : polissage Face 2 (grain « adresse » pas « parcelle », couleur par régime, date « référence Géorisques », refonte sinistralité, titres de péril colorés, métriques en flex).
-- `74036ad` + `5be622a` : **Face 2 en niveaux de lecture** (composants `Disclosure`, `Metric`, `Face2Implication` ; fréquence « pour 1 000 » ; méthode repliée en `<details>`) + doctrine gravée dans le vault.
-- `2999364` : **rapport Territoire** — synthèse (`QuartierSynthesis`) passe **avant** la mémoire du lieu (`TerritoryYearsBand`) ; l'animation de la ligne des années se déclenche à l'entrée dans le viewport (`IntersectionObserver`, `fill:both`) au lieu du montage.
+- **Polissage Face 2 sinistralité** (`ea72eaa`) : accessibilité grand public (bloc B2 en trois niveaux + `zoneLabel` anti-répétition, accordéons renommés « Comprendre… » + ligne cliquable + chevron, fréquence verrouillée « fréquence des sinistres parmi les biens assurés » sans « par an » ni « sur la période », phrase de comparaison sécheresse/inondation gâtée sur classes strictement séparées, tooltips MetricTooltip sur les deux périls, contraste gris relevé). **Correction doctrinale gravée au vault** : portée exacte d'ADR-0001 (interdit le score composite et le verdict, PAS la comparaison factuelle d'une même métrique dans une commune).
+- **Nettoyage des frontières Face 3** (`0cabafc`) : espaces verts nommés (parc/bois/forêt/pelouse/terrain via `greenKind`, `OSM_QUERY_VERSION` v1→v2 + `SOURCES_VERSION` →`c` pour recalcul des snapshots) ; « cartographié » retiré de chaque item ; **infra bruyante (voie ferrée/axe routier) retirée** du module → sujet Santé ; **ZFE (Crit'Air) retirée** (section + action + entrée de synthèse) → parquée pour Mobilité ; **« Pages Savoir associées » retiré** (mais « Actions documentées » CONSERVÉ, correction en cours de session). Doctrine gravée : frontière Logement/Santé **par sujet, pas par grain** (Santé sera aussi au grain adresse en résidence).
+- **Chantier « Précision de l'adresse et du logement »** : spec `f114dc3`, plan `09988a3`, puis 6 commits d'implémentation (`163741d`, `ff71ed9`, `8ba65d7`, `7bdec84`, `456d224`, `7f58e65`). Détail ci-dessous.
+
+## Chantier « Précision adresse/logement » — ce qui a été construit
+Problème réglé : le géocodage `limit=1` flou + `getDpeByBanId` qui prenait le DPE « le plus récent » au hasard parmi tous les logements d'une résidence (cas réel : 30 m² affiché pour un 60 m²).
+- **Libs pures** (`src/lib/dpe-attribution.ts`, SANS server-only car importées côté client) : `dedupeAndCollapseDpe` (dédup id + collapse conservateur même unité), `dpeAttributionStatus` (convergence forte = 1 candidat + maison + BAN housenumber ; sinon confirmation requise), `deriveAddressDpeContext` (fourchette sous garde-fou ≥3 diagnostics résidentiels). `dpe.ts` ré-exporte ces symboles + `getDpeCandidatesByBanId`.
+- **Autocomplétion** (`src/lib/ban.ts`) : `parseBanAutocomplete` + `autocompleteBanAddress` (client, abortable) ; `type` BAN (housenumber/street) ajouté ; `server-only` retiré.
+- **Contrat serveur** (`src/lib/selected-ban-address.ts`) : `SelectedBanAddress` atomique + `validateSelectedBanAddress`. La route `/api/georisques-logement` accepte l'adresse atomique en **POST** (chemin principal), garde `?q=` en repli, renvoie `dpeCandidates[]` + `banFeatureType`.
+- **Persistance** : migration `supabase/19_logement_dpe_selection.sql` (**APPLIQUÉE par le porteur**), colonnes `dpe_selection_status`/`selected_dpe_id`/`selected_dpe_snapshot` (figé daté)/`selected_dpe_at` ; `buildDpeSelectionFields` ; endpoint `POST /api/logement-dpe` (update ciblé, RLS own).
+- **Synthèse** : le DPE n'entre dans le prompt que si `auto_confirmed`/`user_confirmed`.
+- **UI** : `AddressAutocomplete` (sélection BAN clavier/abortable/hors-ordre + « Modifier l'adresse »), `DpeSelector` (choix honnête, aucun défaut présélectionné, « mon logement n'est pas dans la liste » + contexte adresse). `LogementModule` intègre la machine à états `dpeStatus` (loading/not_found/selection_required/auto_confirmed/confirmed/rejected/error) ; passeport + section Énergie + synthèse lisent le DPE **attribué** uniquement.
+- **Tests** : 53/53 verts (`node --test --experimental-strip-types`). tsc + eslint + `npm run build` OK.
 
 ## Décisions prises (porteur) déjà gravées au vault/mémoire
-- Face 4 : valeur immobilière **reste parquée** ; « engagement financier et réglementaire documenté » déparqué ; 1er morceau = statut réglementaire au point (en Face 2).
-- Deux corrections doctrinales : reformulation « pas de donnée de marché honnête » ; retrait de « coût que le marché ignore encore ».
-- Statut réglementaire : **tous les aléas** (pas seulement inondation) ; **chips PPRN retirées** du bloc Risques (dé-doublonnage).
-- Hook assurance **dé-daté** : ne plus nommer « Langreney » ni « en cours », garder l'idée de modulation locale. (Tranché par défaut, porteur absent au moment de la question — **réversible** vers une version neutre s'il préfère.)
-- Face 2 en niveaux : pas de comparaison auto inter-péril (ADR-0001), pas de chapeau « ce qu'il faut retenir » global (redondant synthèse IA), terme réglementaire officiel gardé en secondaire.
+- ADR-0001 : comparaison factuelle d'une même métrique dans une commune AUTORISÉE (sur-extension corrigée).
+- Frontière Logement/Santé **par sujet** ; Santé au grain adresse en résidence ; bruit/industrie/pollution → Santé.
+- Infra bruyante retirée de Logement (calcul OSM conservé, non affiché) ; ZFE → Mobilité (parquée) ; « Pages Savoir associées » retiré, « Actions documentées » conservé.
+- Ordre des modules à venir : **Santé → Mobilité → Métier**.
+- DPE : liste de candidats + confirmation (jamais « un seul donc c'est le vôtre ») ; absence assumée + contexte bâtiment ; persistance en V1.
+- **Édition manuelle des champs** (corriger soi-même les m²) : chantier SÉPARÉ lié à la personnalisation, **parqué** (hors périmètre du spec livré).
 
 ## État git
 - Branche `main`, **0 commit non poussé**, **aucun fichier modifié non commité**, **aucune PR ouverte**.
-- Mémoire projet (`/memory/project_module_logement.md`) et vault (`docs/vault/modules/logement.md` + `docs/board/2026-07-03-decision-face4-valeur-vs-engagement.md`) à jour.
+- Branche `feat/precision-adresse-logement` mergée en fast-forward puis supprimée.
+- Vault à jour : `docs/vault/modules/logement.md` (ADR-0001, frontières, greenKind, retraits). Mémoire à jour : `/memory/project_module_logement.md` (paragraphe « Nettoyage de frontières 2026-07-03 session 2 »).
 
 ## Prochaine étape immédiate
-Choix ouvert (aucune tâche en cours à finir). Deux candidats, par ordre de recommandation :
-1. **Remontée de nappe** (enrichissement Face 2) : couche Géorisques nationale, simple, compréhensible. À câbler comme le PPRN (nouvel appel dans `src/lib/georisques.ts`, endpoint à identifier ; token `GEORISQUES_API_TOKEN` déjà en `.env.local`, auth Bearer). **Ne pas** enchaîner mécaniquement le TRI derrière (partiel + scénarios = mini-spec requise d'abord).
-2. **Vérification visuelle en session payante** du module Logement (Face 2/3) et du rapport Territoire (interversion + animation scroll) : rien n'a été vérifié à l'œil, seulement types/lint/tests (le rendu est derrière `canAccessCompleteReport`).
+**Vérification visuelle en session payante** du chantier précision adresse/logement (rendu derrière `canAccessCompleteReport`, jamais vu à l'œil). Tester sur une vraie adresse (ex. 1 rue Saint-Dominique, 17000 La Rochelle — résidence multi-DPE) : (a) autocomplétion + sélection déclenche l'analyse, (b) sélecteur de logement s'affiche et le choix fige l'Énergie, (c) « mon logement n'est pas dans la liste » → wording d'absence + contexte bâtiment si ≥3, (d) maison individuelle → auto_confirmed révocable, (e) le choix persiste (table `logement`, colonnes DPE). Vérifier aussi que « Espace vert » affiche bien « Parc/Bois/… » maintenant que `SOURCES_VERSION` est en `c` (snapshots recalculés au prochain rendu).
 
 ## À lire d'abord à la reprise
 1. `/memory/MEMORY.md` puis `/memory/project_module_logement.md` (état complet du module, très à jour).
-2. `docs/vault/modules/logement.md` (doctrine + état de mise en œuvre, dont divulgation progressive et décision Face 4).
-3. `docs/board/2026-07-03-decision-face4-valeur-vs-engagement.md` (raisonnement + protocole spike PPRI + tableau de complétude).
-4. `docs/handoff/AUTO-SNAPSHOT.md` (fraîcheur, daté du 26/06 — plus ancien que ce brief).
+2. `docs/vault/modules/logement.md` (doctrine + frontières + ADR-0001).
+3. `docs/superpowers/specs/2026-07-03-precision-adresse-logement-design.md` et `docs/superpowers/plans/2026-07-03-precision-adresse-logement.md` (spec + plan du chantier livré).
+4. `docs/handoff/AUTO-SNAPSHOT.md` (fraîcheur).
 
 ## Pièges / fils ouverts
-- **Rendu non vérifié en navigateur** (session payante) pour toute la Face 2, la Face 3 et les changements Territoire. Comportement déterministe, mais l'œil manque.
-- **Hook Langreney dé-daté** : choix par défaut (porteur absent). Version neutre possible en une ligne dans `SinistraliteBlock` (`LogementModule.tsx`, Disclosure « Sources et limites »).
-- **API Géorisques v2 = 401 sans clé** : tout test d'API passe par `GEORISQUES_API_TOKEN` (`.env.local`), header `authorization: Bearer`. Le projet appelle `/api/v2/gaspar/pprn` (base GASPAR) ; le zonage cartographique fin vit dans une autre couche non appelée (non nécessaire, cf. spike).
-- **Animation Territoire** : `TerritoryYearsBand` masque ses ticks (opacity 0) au montage puis anime à l'entrée viewport. Le masquage a lieu hors écran car la bande est désormais **sous** la synthèse. Si elle repassait au-dessus de la ligne de flottaison, un flash « visible → masqué → animé » pourrait apparaître (basculer alors en `useLayoutEffect`).
-- **Fréquence ONRN** : affichée « X pour 1 000 » (biens assurés), jamais « par an » — définition du dénominateur/période non vérifiée. Ne pas ajouter « par an » sans la doc.
-- **Coquille cosmétique** dans le message du commit `e2c3a30` (caractère parasite) ; le code est correct. Non corrigé (réécriture d'historique non demandée).
+- **Rendu non vérifié à l'œil** (session payante) pour tout le chantier précision adresse + les retraits Face 2/3.
+- **Course auto_confirmed / persistance** : à l'analyse, `analyzeSelected` lance en parallèle `requestAutour` (qui crée la ligne `logement`) et `persistDpe("auto_confirmed", …)`. L'endpoint `/api/logement-dpe` fait un **update ciblé** : si la ligne n'existe pas encore, c'est un no-op silencieux (le DPE auto ne se persiste pas ce tour-là ; l'état client reste correct). Le cas `user_confirmed` (clic dans le sélecteur, plus tardif) n'a pas ce risque. Limitation mineure V1 assumée.
+- **Restauration au chargement NON implémentée** : au rechargement, le module repart vide (pas de pré-remplissage depuis la ligne `logement` sauvegardée). La persistance sert l'artefact (rapport/PDF), pas la reprise d'état client. Extension possible si besoin.
+- **IREP (industrie) + friches (sols pollués)** sont ENCORE envoyés à la synthèse Logement alors qu'ils relèvent de Santé par la même logique de frontière. Non traité (non demandé). À migrer quand Santé existera. Noté au vault.
+- **Champs ADEME étage/complément** (`numero_etage_appartement`, `complement_adresse_logement`) souvent vides : le collapse conservateur ne fusionne que si tous renseignés, sinon garde les candidats séparés (comportement voulu). Le sélecteur reste la voie sûre.
+- **RESTE Face 2** (inchangé depuis le handoff précédent) : remontée de nappe (national, simple, prioritaire) puis TRI (mini-spec requise d'abord).
