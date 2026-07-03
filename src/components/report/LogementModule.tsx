@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
@@ -9,6 +9,10 @@ import type { Face3Snapshot, Posture, GreenKind } from "@/lib/logement-autour-ty
 import type { RegulatoryPlan } from "@/lib/pprn-zonage";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { MetricTooltip } from "@/components/MetricTooltip";
+import { AddressAutocomplete } from "@/components/report/AddressAutocomplete";
+import { DpeSelector } from "@/components/report/DpeSelector";
+import { dpeAttributionStatus, deriveAddressDpeContext, type DpeRecord } from "@/lib/dpe-attribution";
+import type { BanAddressResult } from "@/lib/ban";
 import { PassportTiltScene } from "@/components/report/PassportTiltScene";
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -20,11 +24,8 @@ type ApiResponse = {
   address?: { label: string; city: string | null; citycode: string | null; postcode: string | null; latitude: number; longitude: number; };
   altitude?: number | null;
   parcel?: { parcelCode: string; nomCommune: string | null; contenance: number | null; } | null;
-  dpe?: {
-    id_dpe: string; date_dpe: string | null; etiquette_dpe: string | null; etiquette_ges: string | null;
-    conso_ep_m2: number | null; emission_ges_m2: number | null; surface_m2: number | null;
-    annee_construction: number | null; type_batiment: string | null; adresse: string | null;
-  } | null;
+  dpeCandidates?: DpeRecord[];
+  banFeatureType?: string | null;
   audit?: {
     n_audit: string; date_audit: string | null; classe_dpe_actuel: string | null;
     scenarios: Array<{ categorie: string | null; etape: string | null; travaux: string | null; conso_ep: number | null; emission_ges: number | null; }>;
@@ -146,7 +147,7 @@ function PropertyPassport({
 }: {
   address: ApiResponse["address"];
   parcel: ApiResponse["parcel"];
-  dpe: ApiResponse["dpe"];
+  dpe: DpeRecord | null;
   altitude: ApiResponse["altitude"];
 }) {
   const tint = "#c8b89a";
@@ -704,12 +705,18 @@ const POSTURE_FOR_PROJET: Record<string, Posture> = {
 };
 
 export default function LogementModule({ defaultCommune }: { defaultCommune?: string | null }) {
-  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ApiResponse | null>(null);
   const [projet, setProjet] = useState<string | null>(null);
   const [autour, setAutour] = useState<Face3Snapshot | null>(null);
+  // Attribution du DPE au logement (cf. spec §2). Aucun DPE affiché comme « le vôtre » tant
+  // qu'il n'est pas confirmé (auto ou par l'utilisateur).
+  const [dpeStatus, setDpeStatus] = useState<
+    "loading" | "not_found" | "selection_required" | "auto_confirmed" | "confirmed" | "rejected" | "error"
+  >("loading");
+  const [selectedDpe, setSelectedDpe] = useState<DpeRecord | null>(null);
+  const [dpeCandidates, setDpeCandidates] = useState<DpeRecord[]>([]);
   const autourRetriedRef = useRef(false);
   const posthog = usePostHog();
 
@@ -766,20 +773,43 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
   const [synthLoading, setSynthLoading] = useState(false);
   const [synthError, setSynthError] = useState<string | null>(null);
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!query.trim()) return;
+  // Déclenchée par la sélection d'une suggestion BAN (le texte libre n'analyse jamais). On
+  // envoie l'adresse ATOMIQUE au serveur ; on dérive ensuite l'état d'attribution du DPE.
+  async function analyzeSelected(a: BanAddressResult) {
+    if (!a.id) { setError("Adresse sans identifiant BAN."); return; }
     setLoading(true);
     setError(null);
-    setSynthesis(null); // reset synthesis on new analysis
+    setSynthesis(null);
     setAutour(null);
     autourRetriedRef.current = false;
+    setDpeStatus("loading");
+    setSelectedDpe(null);
+    setDpeCandidates([]);
     try {
-      const res = await fetch(`/api/georisques-logement?q=${encodeURIComponent(query)}`);
+      const res = await fetch("/api/georisques-logement", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: {
+          banId: a.id, label: a.label, postcode: a.postcode ?? "", city: a.city ?? "",
+          citycode: a.citycode ?? "", latitude: a.latitude, longitude: a.longitude, type: a.type,
+        } }),
+      });
       const payload = (await res.json()) as ApiResponse;
       if (!res.ok) throw new Error(payload.error ?? `Erreur ${res.status}`);
       setResult(payload);
       setProjet(null);
+      const candidates = payload.dpeCandidates ?? [];
+      setDpeCandidates(candidates);
+      const attribution = dpeAttributionStatus(candidates, payload.banFeatureType ?? null);
+      if (attribution.status === "not_found") {
+        setDpeStatus("not_found");
+      } else if (attribution.status === "auto_confirmed") {
+        setSelectedDpe(attribution.dpe);
+        setDpeStatus("auto_confirmed");
+        void persistDpe("auto_confirmed", attribution.dpe, payload);
+      } else {
+        setDpeStatus("selection_required");
+      }
       // Signal implicite acheteur/résident : l'adresse analysée est-elle la commune déclarée ?
       const relation =
         defaultCommune && payload.address?.city
@@ -790,10 +820,9 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
       posthog?.capture("logement_analyzed", {
         relation_inferee: relation,
         in_declared_commune: relation === "residence",
-        has_dpe: Boolean(payload.dpe?.etiquette_dpe),
+        dpe_attribution: attribution.status,
         insee: payload.address?.citycode ?? null,
       });
-      // Face 3 « autour de l'adresse » : posture par défaut résidence, corrigée ensuite par la sonde.
       void requestAutour(payload, "residence");
     } catch (err) {
       setResult(null);
@@ -801,6 +830,24 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
     } finally {
       setLoading(false);
     }
+  }
+
+  // Persiste le choix DPE dans l'artefact logement (échec silencieux à l'UI ; cohérence rétablie
+  // au prochain chargement). `payload` fournit l'adresse quand `result` n'est pas encore posé.
+  async function persistDpe(
+    status: "auto_confirmed" | "user_confirmed" | "not_in_list",
+    dpe: DpeRecord | null,
+    payload?: ApiResponse,
+  ) {
+    const a = (payload ?? result)?.address;
+    if (!a?.citycode) return;
+    try {
+      await fetch("/api/logement-dpe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ insee: a.citycode, status, dpe }),
+      });
+    } catch { /* échec silencieux */ }
   }
 
   // Appel Claude API à la demande
@@ -812,7 +859,11 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
       const res = await fetch("/api/synthesize-logement", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: result }),
+        body: JSON.stringify({ data: {
+          ...result,
+          selectedDpe,
+          dpeSelectionStatus: dpeStatus === "confirmed" ? "user_confirmed" : dpeStatus,
+        } }),
       });
       const payload = await res.json();
       if (!res.ok) throw new Error(payload.error ?? "Erreur de synthèse");
@@ -824,8 +875,9 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
     }
   }
 
-  const isPassoire = ["F", "G"].includes(result?.dpe?.etiquette_dpe ?? "");
-  const dpe = result?.dpe;
+  // Le DPE « du logement » = uniquement le choix attribué (jamais un candidat non confirmé).
+  const dpe = (dpeStatus === "auto_confirmed" || dpeStatus === "confirmed") ? selectedDpe : null;
+  const isPassoire = ["F", "G"].includes(dpe?.etiquette_dpe ?? "");
   const georisques = result?.georisques?.parcel ?? result?.georisques?.address;
   // Les libellés PPRN ne sont plus aplatis ici : ils sont portés, structurés (régime + zone +
   // plan), par le bloc « Statut réglementaire à cette adresse ». On garde les autres risques.
@@ -900,31 +952,15 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
           </div>
 
           <div className="glass rounded-xl p-8 border-t-2 border-t-accent" style={{ maxWidth: 760 }}>
-            <form onSubmit={handleSubmit} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8 }}>
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={`Ex. : 12 rue des Minimes${defaultCommune ? `, ${defaultCommune}` : ""}`}
-            style={{
-              border: "1px solid var(--border-2)", background: "var(--bg-elev)", color: "var(--fg-1)",
-              padding: "14px 18px", fontSize: 15, outline: "none", fontFamily: "var(--font-sans)",
-              borderRadius: 10,
-            }}
-          />
-          <button
-            type="submit"
-            disabled={loading || !query.trim()}
-            style={{
-              border: "none", background: loading ? "var(--bg-elev)" : "var(--accent, #c8b89a)",
-              color: loading ? "var(--fg-4)" : "#060812", padding: "14px 28px",
-              fontWeight: 500, fontSize: 12, cursor: loading ? "default" : "pointer",
-              fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase",
-              transition: "all 0.15s", borderRadius: 10,
-            }}
-          >
-            {loading ? "Analyse…" : "Analyser"}
-          </button>
-            </form>
+            <AddressAutocomplete
+              placeholder={`Ex. : 12 rue des Minimes${defaultCommune ? `, ${defaultCommune}` : ""}`}
+              onSelect={(a) => void analyzeSelected(a)}
+            />
+            {loading && (
+              <div style={{ marginTop: 14, fontSize: 12.5, color: "var(--fg-4)", fontFamily: "var(--font-mono)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                Analyse en cours…
+              </div>
+            )}
 
             {error && (
               <div style={{ marginTop: 16, padding: "12px 16px", background: "rgba(168,74,58,0.08)", border: "1px solid rgba(168,74,58,0.25)", borderRadius: 10, color: "var(--red, #f87171)", fontSize: 13, fontFamily: "var(--font-mono)" }}>
@@ -942,7 +978,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
           <PropertyPassport
             address={result.address}
             parcel={result.parcel}
-            dpe={result.dpe}
+            dpe={dpe}
             altitude={result.altitude}
           />
 
@@ -1068,7 +1104,37 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
           {(
             <div style={{ display: "grid", gap: 36 }}>
 
-              {/* Énergie */}
+              {/* Énergie — attribution du DPE au logement (sélecteur / absence / rejet / confirmé) */}
+              {dpeStatus === "selection_required" && (
+                <ReportSection eyebrow="Énergie & rénovation" tone="orange">
+                  <GlassCard>
+                    <DpeSelector
+                      candidates={dpeCandidates}
+                      context={deriveAddressDpeContext(dpeCandidates)}
+                      onPick={(d) => { setSelectedDpe(d); setDpeStatus("confirmed"); void persistDpe("user_confirmed", d); }}
+                      onNotInList={() => { setSelectedDpe(null); setDpeStatus("rejected"); void persistDpe("not_in_list", null); }}
+                    />
+                  </GlassCard>
+                </ReportSection>
+              )}
+              {dpeStatus === "not_found" && (
+                <ReportSection eyebrow="Énergie & rénovation" tone="orange">
+                  <GlassCard>
+                    <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+                      Aucun DPE retrouvé dans la base ouverte pour cette adresse. Cela ne signifie pas nécessairement qu&apos;aucun diagnostic n&apos;existe.
+                    </p>
+                  </GlassCard>
+                </ReportSection>
+              )}
+              {dpeStatus === "rejected" && (
+                <ReportSection eyebrow="Énergie & rénovation" tone="orange">
+                  <GlassCard>
+                    <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+                      Aucun des diagnostics retrouvés n&apos;a été attribué à ce logement.
+                    </p>
+                  </GlassCard>
+                </ReportSection>
+              )}
               {dpe && (
                 <ReportSection eyebrow="Énergie & rénovation" tone="orange">
                   <GlassCard>
@@ -1084,6 +1150,12 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                         </div>
                       </div>
                     </div>
+                    {dpeStatus === "auto_confirmed" && (
+                      <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>
+                        Un DPE a été retrouvé pour cette adresse.{" "}
+                        <button type="button" onClick={() => setDpeStatus("selection_required")} style={{ color: "var(--accent-dim, #7a6e60)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0, font: "inherit" }}>Ce n&apos;est pas le bon diagnostic</button>.
+                      </p>
+                    )}
 
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px,1fr))", gap: 14 }}>
                       {dpe.conso_ep_m2 != null && <Block label="Consommation" value={`${dpe.conso_ep_m2} kWh EP/m²/an`} />}
