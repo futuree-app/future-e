@@ -79,6 +79,38 @@ interdiction ; mono-aléa/multirisques), ce que renvoie réellement chaque appel
 Sortie du spike : décider si `/api/v2/gaspar/pprn` suffit, ou s'il faut ajouter l'appel à la couche
 de zonage cartographique, pour caler le niveau de récit honnêtement restituable.
 
+## Résultat du spike (2026-07-03)
+
+Lancé par Claude (token projet, géocodage BAN + `/api/v2/gaspar/pprn`), **16 adresses de bord d'eau**
+réparties (fleuves, submersion marine, littoral, métropoles, petites communes). **12 intersectent** une
+zone réglementée au point ; les 4 autres sont hors zone au point ou mal géocodées.
+
+**Verdict : `/api/v2/gaspar/pprn` (déjà appelé par le projet) SUFFIT.** Pas besoin de la couche de
+zonage cartographique. Sur les 12 points intersectants, `code` (typeReg COVADIS normalisé) + `libelle`
++ `codeZone` sont remplis **12/12 (100 %)**. Régimes observés : `02` Prescriptions, `03` Interdiction,
+`04` Interdiction stricte. Chaque item porte aussi `nom` (auto-descriptif, ex. « Zone rouge R1 - cours
+eau, zone non bâtie crue centennale »), `libPpr` et `dateModification`.
+
+Échantillon (label BAN → régime/zone → PPR) :
+- Lyon Quai Saint-Vincent → `03 Interdiction / R1` → PPRI du Grand Lyon
+- Arles Quai de la Roquette → `04 Interdiction stricte / RH` → PPRN-I SUB marine Arles 2015
+- Gruissan front de mer → `04 Interdiction stricte / RL1` → PPRL Gruissan
+- Toulouse Quai de Tounis → `02 Prescriptions` ×2 zones (Cid + B2) → PPR Toulouse
+- Grenoble Quai Créqui → `02 Prescriptions / Bi3` → PPRI Isère Amont
+- Nevers Quai de la Jonction → `04 Interdiction stricte / ZDE secteur A` → PPRi Loire val Nevers
+- Ivry Quai Marcel Boyer → `02 Prescriptions / ZVF` → PPRI Marne et Seine
+- Agen Quai du Canal → **3 PPRN mais `zoneRegExists:false`** (point hors zone → « commune concernée, point non intersecté »)
+
+**Conséquences pour le build (Face 2 « statut réglementaire au point ») :**
+- Restituable : régime (Prescriptions / Interdiction / Interdiction stricte) + code + libellé de zone
+  local + nom du PPR + date + renvoi au règlement officiel.
+- Non restituable sans le règlement : prescriptions chiffrées (extension X m², cote de plancher).
+- Gérer le **multi-zones** au même point (Toulouse, Ivry renvoient 2 zones) : afficher la plus
+  contraignante et/ou lister, à trancher au design.
+- Distinguer proprement « commune a un PPRI » (PPRN présents) de « point en zone » (`zoneRegExists`).
+
+Scripts du spike : `scratchpad/spike-pprn.mjs` (pilote) + `spike-pprn2.mjs` (batch ciblé).
+
 ## Discipline maintenue
 
 PPRI = information **réglementaire**, pas une probabilité de sinistre. **Absence d'intersection ≠

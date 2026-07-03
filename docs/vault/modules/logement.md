@@ -113,12 +113,16 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
   « ce que ce logement peut vous conduire à adapter, vérifier ou anticiper »). Le reste (audit,
   coût conventionnel DPE, échéances passoires) est **déjà affiché en Face 1**. **NE PAS construire** :
   synthèse des droits à construire, verdict de « marge de manœuvre », éligibilité Barnier « pour ce
-  bien », Face 4 dupliquant l'énergétique. **Nuance API à lever par un spike AVANT tout build** : le
-  projet appelle `/api/v2/gaspar/pprn` (base GASPAR des procédures) ; le `typeReg` COVADIS normalisé
-  (prescriptions / interdiction) vit dans la **couche de zonage cartographique** (celle du
-  `rapport_pdf` / WFS DDT), non appelée aujourd'hui. Premier ticket = mesurer sur 50-100 adresses
-  PPRI ce que `listTypeReg` renvoie réellement (clé projet requise : v2 = 401 sans inscription) et
-  comparer à la couche cartographique, pour caler le niveau de récit honnêtement restituable.
+  bien », Face 4 dupliquant l'énergétique. **Spike API FAIT le 2026-07-03 (16 adresses bord d'eau,
+  12 intersectantes) : `/api/v2/gaspar/pprn` — celui qu'on appelle DÉJÀ — SUFFIT.** `code` (typeReg
+  COVADIS normalisé) + `libelle` + `codeZone` remplis **12/12** sur les points intersectants ; régimes
+  vus `02` Prescriptions / `03` Interdiction / `04` Interdiction stricte, + `nom` de zone auto-descriptif
+  + `libPpr` + `dateModification`. La couche de zonage cartographique n'est **pas** nécessaire.
+  Restituable au point : régime + code/libellé de zone local + nom du PPR + date. Hors portée sans le
+  règlement : prescriptions chiffrées (extension X m², cote de plancher). Cas `zoneRegExists:false`
+  avec PPRN présents (Agen : 3 PPRN) = « la commune a un PPRI, ce point n'intersecte pas le zonage »,
+  jamais « pas exposé ». Prochain pas = **build de la brique « statut réglementaire au point » en Face 2**
+  (gérer le multi-zones : Toulouse/Ivry renvoient 2 zones au même point).
 - **Face 1 (l'enveloppe) : non branchée** (intake étage / orientation / etc. à MESURER avant de
   construire, cf. `/memory/project_module_logement.md`). Face 2 étendue (contraste PPRI / TRI /
   nappe au point) et vision module = `docs/board/2026-07-03-vision-module-logement-chatgpt.md`.
