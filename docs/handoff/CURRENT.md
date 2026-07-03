@@ -1,104 +1,91 @@
 # Brief de passation — session vivante
 
-**Horodatage** : 2026-06-28 · **Branche** : `main` (tout poussé jusqu'à `6904124`)
+**Horodatage** : 2026-07-03
+**Branche courante** : `main` (HEAD = `da556ab`, à pousser). Arbre propre après commit.
+
+---
 
 ## Objectif en cours
 
-Deux fils vivants :
-1. **CHANTIER ACTIF — « Explorer à partir d'une commune »** : brainstorm terminé, **spec écrit et
-   commité** (`6904124`), **EN ATTENTE de validation du porteur** avant de passer au plan
-   d'implémentation. C'est la première chose à reprendre.
-2. **Stratégie (réflexion, pas de code)** : rapport d'internationalisation du Business Strategist
-   produit + critique externe ChatGPT analysée. Décisions de cadrage prises, à capitaliser.
+**Chantier harmonisation du rapport : CLÔTURÉ et poussé.** Le kit de cartes partagé
+(`ReportSection` + `GlassCard`) est la source unique du langage visuel ; Logement le consomme,
+sa prose est remontée au registre de Territoire, ses cartes sont en verre arrondi et son passeport
+a l'effet 3D. Territoire n'est pas migré (adoption = fast-follow mécanique).
 
-## Fait dans cette session (tout poussé sur main)
+**Nouvelle cible : suite du module Logement.** Le module est aujourd'hui une lecture Face 2
+(sinistralité ONRN) branchée sur une Face « risques du bâti » + DPE. Reste à brancher/finir les
+autres faces et la plomberie autour (voir « Prochaine étape »).
 
-1. **Harmonisation accueil** (`5283b2b`) : l'accueil tire ses catégories de la vraie donnée commune
-   (`deriveCategoriesFromEntry` + `/api/landing-signals`) au lieu du préfixe dept ; 5 nouvelles
-   questions territoire (calme/transports/croissance/vie locale/quitter) avec `/qna` nourri de
-   `territory_signals` qualitatifs ; règle de diversité 3 climat + 1 territoire. Cf. mémoire
-   `project_accueil_harmonisation.md`.
-2. **uu_pop** (`540faf6`) : taille d'agglomération dans la ligne « Rôle » de la carte d'identité Territoire.
-3. **STATIC_ANSWERS** (`1ecdd2e`) : 3 réponses de secours codées en dur (La Rochelle/Bressuire)
-   réécrites en générique commune-agnostique. Démo d'accueil (villes-exemples) intact.
-4. **Spec « Explorer à partir d'une commune »** (`6904124`) :
-   `docs/superpowers/specs/2026-06-28-explorer-depuis-commune-design.md`.
-5. **Rapport internationalisation** (Business Strategist, **fichier non commité, untracked**) :
-   `docs/rapports-agents/business-strategist/2026-06-28-internationalisation.md`. Verdict : DIFFÉRER.
+## Fait dans cette session
 
-## Décisions prises (porteur = tranché)
+1. **Face 2 Logement — sinistralité ONRN** (LIVRÉ + poussé) : bloc « Ce que le risque a déjà
+   coûté ici » (coût moyen + fréquence ONRN sécheresse **et** inondation, 1995-2021, classes
+   verbatim gatées par la représentativité, pédagogie CatNat non prédictive). Lib pure testée
+   `src/lib/onrn-sinistralite.ts` (8/8), JSON runtime, câblage API. Vérifié navigateur (3 états).
+2. **Harmonisation du rapport (CLÔTURÉ)** :
+   - `d7d5040` kit `src/components/report/kit.tsx` (`ReportSection` + `GlassCard`).
+   - `901ba5f` migration + harmonisation de `LogementModule.tsx` : sections de résultat passées au
+     verre arrondi ; prose remontée à ~15-16px (au lieu de 11-13px) ; **tous** les encarts arrondis
+     (champ/bouton de recherche, alertes, `ActionCard`, lignes de scénario d'audit, signaux) ;
+     passeport du bien enveloppé dans `PassportTiltScene` (dépliage + tilt curseur + parallaxe
+     sceau DPE/adresse, en miroir du passeport territorial).
+   - `da556ab` doctrine : section « Kit de cartes du rapport » + règle d'harmonisation dans
+     `docs/vault/recherches/inventaire-design.md`.
+   - Vérifié navigateur (3 adresses : Toulouse/Bordeaux/Lille, 0 erreur console, tsc + eslint verts).
 
-**Produit / modules :**
-- Prochain module = **Logement** (le logement + la vulnérabilité, le « autour » à définir).
-  Cf. mémoire `project_module_logement.md`. Santé environnementale → plus tard.
-- **HLM** non surfacé, nulle part (piste d'affichage abandonnée, donnée dormante en base).
+## Décisions prises (porteur)
 
-**« Explorer à partir d'une commune » (design verrouillé, détaillé dans le spec) :**
-- Intention (c) : confirmer/lire ce qu'on aime à l'ancre → proposer des lieux qui le portent.
-- Forme = **A** (le parse apprend à lire « comme {commune} » et en dérive des préférences) d'abord,
-  **B** (entrée guidée discrète) ensuite si utile. Doctrine Pari #7 : ancrage ≠ similarité, mot
-  « similaire » banni, **moteur inchangé**.
-- Dérivation = Approche 1 (signature distinctive + faits identitaires), **pas** tous les points forts.
-- L'ancre **n'hérite ni de la région ni du climat** ; **l'explicite écrase le dérivé** ;
-  multi-ancres = **intersection** des signatures. Dérivation déterministe **dans la route parse**
-  (post-LLM), `matchProjects` intact, exclusion de l'ancre via `excludePlace`.
-
-**Stratégie internationalisation (réflexion) :**
-- **Décision inchangée : ne pas internationaliser maintenant** (goulot = preuve de paiement B2C France).
-- **Paywall** : ne PAS instrumenter pour analyser maintenant (pré-lancement = bruit). Juste vérifier
-  un jour que les événements clés (vue paywall → checkout → paiement) se déclenchent, pour ne pas
-  perdre la 1re cohorte au lancement. PostHog déjà câblé sur `$ai_generation`.
-- **Greffes acceptées à la critique ChatGPT** (à intégrer au rapport BS, voir Pièges) :
-  (a) **découpler** l'international du succès du Fil ; (b) reformuler le gate en « moteur économique
-  France démontré » (B2C one-shot OU récurrent OU B2B), **pas** un chiffre rond type « 1 000 sessions » ;
-  (c) traiter l'international comme un **test de portabilité** à hygiène cheap MAINTENANT (règles
-  précises : `territory` pas « commune française », id pays, adaptateurs de sources isolés — PAS
-  d'abstraction préventive) ; (d) choisir un futur 1er test par **similarité du système de données**,
-  pas par la langue (Belgique/Suisse = piège fédéral/cantonal) ; (e) **réordonner le segment Pro**
-  (chasseurs immobiliers / consultants relocation / mobilité d'entreprise AVANT les CGP, car alignés
-  sur l'intérêt du client) — contredit l'hypothèse vault « CGP d'abord ».
+- **Le rapport = un seul produit visuel.** Un écran de rapport qui lit « plus petit » ou « plus
+  carré » que Territoire est un défaut d'harmonisation (gravé dans l'inventaire design).
+- **Registre typo de lecture** : la prose d'un module se tient à ~15-16px comme Territoire, pas
+  11-13px. Le porteur décrivait le confort visé comme « Territoire zoomé à ~110 % ».
+- **Structure partagée, accent propre au module** : Territoire = info/bleu, Logement = taupe
+  (`#c8b89a`). Le kit ne porte que le chrome, jamais le contenu.
+- **Commit direct sur `main` + push** = norme de session (pas de PR sur ce repo).
 
 ## État git
 
-- Branche `main`, **tout poussé** jusqu'à `6904124`. Aucune PR ouverte.
-- Working tree :
-  - `M docs/handoff/CURRENT.md` = ce fichier.
-  - `docs/rapports-agents/business-strategist/2026-06-28-internationalisation.md` = commité (avec
-    addendum critique ChatGPT + raffinements acceptés).
-  - **NE PAS committer (pré-existants, non-miens)** : `src/components/PaymentForm.tsx`,
-    `PaymentWrapper.tsx`, `comparateur/pack-decision/PackPaymentPanel.tsx`,
-    `?? docs/rapports-agents/researcher/2026-06-27-relation-territoires.md`.
+- Branche `main`, HEAD `da556ab`. **Commits faits, push à confirmer** (dernière commande de la
+  session = `git push`). **Aucune PR.** Arbre propre (hors ce fichier).
+- Route dev jetable `src/app/dev-logement-preview/` **supprimée** (elle a servi la vérif navigateur).
 
 ## Prochaine étape immédiate
 
-**Faire valider le spec par le porteur** :
-`docs/superpowers/specs/2026-06-28-explorer-depuis-commune-design.md`. Une fois validé, invoquer la
-skill **`superpowers:writing-plans`** pour produire le plan d'implémentation, PUIS coder.
-**HARD-GATE brainstorming : ne rien implémenter avant validation du spec.**
+**Suite du module Logement — l'améliorer.** Le porteur veut avancer sur ce qui reste (cf. fiche
+mémoire `project_module_logement.md`, section « RESTE »). Chantiers ouverts, non priorisés :
+
+1. **Faces 1/3/4 non branchées** : le module lit aujourd'hui DPE + risques du bâti + sinistralité
+   (Face 2). Restent à câbler, selon la doctrine `docs/vault/modules/logement.md` :
+   - Face 1 « dedans » : DPE/confort été (îlot de chaleur CSTB en réserve, cf. `icu_ilot_chaleur_data.md`).
+   - Face 3 « autour immédiat » : buffer marche BPE + OSM.
+   - Face 4 « financier » : assurance DOCUMENTÉE (matérialité passée + parcelle + régime CatNat),
+     jamais prédite.
+2. **Dashboard PostHog** acheteur/résident à créer (l'instrumentation `logement_analyzed` /
+   `logement_projet_declare` émet déjà `relation_inferee`, `in_declared_commune`, `projet`).
+3. **Mapping INSEE 107 communes fusionnées** (certaines adresses tombent en `indispo`).
+
+Avant de coder : relire `docs/vault/modules/logement.md` (doctrine des 4 faces, frontière
+Santé = pollution/sols/industrie/radon/air, valeur immo prédite parquée, HLM exclu) et **brainstormer
+avec le porteur** quelle face prioriser.
 
 ## À lire d'abord à la reprise
 
-1. `MEMORY.md` (index mémoire), notamment `project_accueil_harmonisation.md`, `project_module_logement.md`.
-2. Le spec : `docs/superpowers/specs/2026-06-28-explorer-depuis-commune-design.md`.
-3. Vault : `docs/vault/paris.md` (Pari #7), `docs/vault/modules/comparateur.md`,
-   `docs/vault/arbitrages/comparateur-un-moteur-trois-portes.md`,
-   `docs/vault/arbitrages/carte-nationale-ecartee.md` (si présent ; sinon le board
-   `docs/board/traitees/2026-06-26-carte-de-france-synthese.md`).
-4. Le code à toucher : `src/app/api/comparateur-vie/parse/route.ts` (le « deviner » existant) et
-   `src/lib/comparateur-vie.ts` (`ParsedProject`, `matchProjects`, `getCommuneDistinctive`).
-5. `docs/handoff/AUTO-SNAPSHOT.md` (fraîcheur).
+1. `MEMORY.md` (index) + fiche **`project_module_logement.md`** (état complet du module, RESTE).
+2. `docs/vault/modules/logement.md` (doctrine des 4 faces, ce qui est branché/parqué).
+3. `src/components/report/LogementModule.tsx` (le module ; API du kit via `kit.tsx`).
+4. `docs/vault/recherches/inventaire-design.md` (règle d'harmonisation du rapport, à respecter pour
+   tout nouvel écran Logement).
+5. `docs/handoff/AUTO-SNAPSHOT.md` (fraîcheur repo).
 
 ## Pièges / fils ouverts
 
-- **HARD-GATE** : le spec « Explorer-commune » doit être validé par le porteur avant tout code.
-- **Greffes ChatGPT** : écrites en addendum du rapport BS (commité). Elles ne sont PAS encore
-  reflétées dans le vault (`vision/modele-economique.md` dit toujours « relais B2B = CGP d'abord ») :
-  à graver au vault quand le porteur décidera d'ouvrir le B2B.
-- **Accueil livré** : les 5 nouvelles questions + uu_pop sont dans le code/la base mais ne
-  s'activent qu'au **prochain déploiement** (les nouvelles catégories ne sont émises que par le code
-  poussé). Vérifié en runtime local (landing-signals + /qna ancré). Prod = sûr (rien ne s'active avant deploy).
-- **Seuil de « distinction »** dans `communeToPreferences` (quels critères = signature) : laissé au
-  plan d'implémentation, à fixer (p.ex. percentile ≥ 70).
-- **tsc** : erreur pré-existante `.next/types/validator.ts` (route `suivi-bientot`) sans rapport — ignorer.
-- **Restes parqués** : Git LFS (`comparateur-index.json` = 67,7 Mo), moustique tigre → signal
-  structuré pour module Santé (Data Curator), Design Critic labels (porteur a dit non).
+- **Auth** : `/rapport/logement` est derrière `canAccessCompleteReport` (payant). La vérif visuelle
+  passait par une route dev jetable (supprimée) ; le vrai parcours connecté n'a pas été retesté.
+- **`next build` complet non lancé** ce chantier (conflit dev server) : la trace serverless de la
+  Face 2 (`outputFileTracingIncludes`) suit le pattern existant mais n'est pas prouvée par un build.
+- **Tension éditoriale ouverte** (posée par l'Editorial, non tranchée) : « retrait-gonflement des
+  argiles » (jargon dans `{mecanisme}`) à gloser ou assumer.
+- **Adoption du kit par Territoire** = fast-follow documenté (mécanique, à faire quand on peut
+  vérifier Territoire au navigateur).
+- Script de pilotage navigateur réutilisable : `…/scratchpad/drive-face2.mjs` (3 adresses),
+  binaire `chrome-headless-shell` via `PW_CHROMIUM`, dev server sur :3000.
