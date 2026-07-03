@@ -1,10 +1,11 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import type { OnrnSinistralite, PerilState } from "@/lib/onrn-sinistralite";
+import type { Face3Snapshot, Posture } from "@/lib/logement-autour-types";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { PassportTiltScene } from "@/components/report/PassportTiltScene";
 
@@ -294,13 +295,139 @@ function SinistraliteBlock({ sinistralite }: { sinistralite: OnrnSinistralite })
   );
 }
 
+// Face 3 — « Autour de cette adresse » (buffer local au point géocodé). Hiérarchie :
+// vie quotidienne (BPE, socle) > infra potentiellement bruyantes (vigilance) > verts (repère).
+// Distances brutes à vol d'oiseau, aucun adjectif de proximité, aucun dB, aucune note.
+const FACE3_CAT_LABEL: Record<string, string> = {
+  sante: "Santé",
+  alimentation: "Alimentation quotidienne",
+  education: "Éducation",
+  transports: "Transports",
+  services: "Services essentiels",
+};
+function fmtDist(m: number): string {
+  return m >= 1000 ? `${(m / 1000).toFixed(1).replace(".", ",")} km` : `${m} m`;
+}
+function Face3Block({ s }: { s: Face3Snapshot }) {
+  const noisy = s.osm.potentiallyNoisyInfrastructure;
+  const bboxKm = (s.osm.bboxRadiusMeters / 1000).toFixed(1).replace(".", ",");
+  return (
+    <ReportSection eyebrow="Autour de cette adresse" tone="accent">
+      <GlassCard>
+        <div style={{ display: "grid", gap: 20 }}>
+          {/* Brique 1 — vie quotidienne (socle) */}
+          <div style={{ display: "grid", gap: 10 }}>
+            {s.bpe.categories.map((c) => (
+              <div key={c.category} style={{ display: "flex", justifyContent: "space-between", gap: 16, fontSize: 15, color: "var(--fg-2)", lineHeight: 1.5 }}>
+                <span>{FACE3_CAT_LABEL[c.category]}</span>
+                <span style={{ color: "var(--fg-hi)", textAlign: "right" }}>
+                  {c.nearest
+                    ? `le plus proche à environ ${fmtDist(c.nearest.distanceMeters)}`
+                    : `aucun recensé dans les ${(c.searchCapMeters / 1000)} km analysés`}
+                </span>
+              </div>
+            ))}
+          </div>
+          {/* Brique 2 — infrastructures potentiellement bruyantes (vigilance) */}
+          <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
+            {s.sourceStatus.osmInfrastructure === "pending" ? (
+              <em style={{ color: "var(--fg-4)" }}>Environnement en cours de récupération…</em>
+            ) : s.sourceStatus.osmInfrastructure === "failed" ? (
+              <span style={{ color: "var(--fg-4)" }}>Infrastructures : donnée momentanément indisponible.</span>
+            ) : noisy.length > 0 ? (
+              noisy
+                .map((x) => `à environ ${fmtDist(x.distanceMeters)} d'un axe ${x.type === "railway" ? "ferroviaire" : "autoroutier"} cartographié`)
+                .join(" ; ")
+                .replace(/^./, (c) => c.toUpperCase()) + "."
+            ) : (
+              `Aucun axe autoroutier ou ferroviaire cartographié dans l'emprise analysée de ${bboxKm} km.`
+            )}
+          </div>
+          {/* Brique 3 — espaces verts cartographiés (repère) */}
+          <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
+            {s.sourceStatus.osmGreenSpaces === "pending" ? (
+              <em style={{ color: "var(--fg-4)" }}>Environnement en cours de récupération…</em>
+            ) : s.sourceStatus.osmGreenSpaces === "failed" ? (
+              <span style={{ color: "var(--fg-4)" }}>Espaces verts : donnée momentanément indisponible.</span>
+            ) : s.osm.nearestMappedGreenSpace ? (
+              `Espace vert cartographié le plus proche à environ ${fmtDist(s.osm.nearestMappedGreenSpace.distanceMeters)}.`
+            ) : (
+              "Aucun espace vert correspondant aux catégories recherchées dans l'emprise cartographiée."
+            )}
+          </div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.8 }}>
+            INSEE (BPE) · OpenStreetMap (ODbL) · distances à vol d&apos;oiseau
+          </div>
+        </div>
+      </GlassCard>
+    </ReportSection>
+  );
+}
+
+const POSTURE_FOR_PROJET: Record<string, Posture> = {
+  reside: "residence",
+  achat: "prospection",
+  location: "prospection",
+  autre: "residence",
+};
+
 export default function LogementModule({ defaultCommune }: { defaultCommune?: string | null }) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ApiResponse | null>(null);
   const [projet, setProjet] = useState<string | null>(null);
+  const [autour, setAutour] = useState<Face3Snapshot | null>(null);
+  const autourRetriedRef = useRef(false);
   const posthog = usePostHog();
+
+  // Face 3 : génère (ou relit, figé) le snapshot « autour de l'adresse ». La donnée
+  // OSM vient du cache de tuile côté serveur ; l'affichage ne touche jamais Overpass.
+  async function requestAutour(payload: ApiResponse, posture: Posture) {
+    const a = payload.address;
+    if (!a?.citycode || a.latitude == null || a.longitude == null) return;
+    try {
+      const res = await fetch("/api/logement-autour", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          insee: a.citycode,
+          latitude: a.latitude,
+          longitude: a.longitude,
+          address_label: a.label,
+          parcel_code: payload.parcel?.parcelCode ?? null,
+          posture,
+        }),
+      });
+      if (!res.ok) return;
+      const { snapshot } = (await res.json()) as { snapshot: Face3Snapshot };
+      setAutour(snapshot);
+      // Observabilité de complétude, SANS donnée localisante fine (pas de tile_key/coords).
+      posthog?.capture("logement_autour", {
+        insee: a.citycode,
+        posture,
+        status_bpe: snapshot?.sourceStatus?.bpe,
+        status_osm_infra: snapshot?.sourceStatus?.osmInfrastructure,
+        status_osm_green: snapshot?.sourceStatus?.osmGreenSpaces,
+      });
+    } catch {
+      /* échec silencieux à l'UI ; l'observabilité vit dans le snapshot/serveur */
+    }
+  }
+
+  // Remplissage asynchrone minimal : si l'OSM est revenu `pending` (tuile froide,
+  // Overpass lent), on re-demande UNE fois après un court délai (la tuile est alors
+  // chaude grâce au after() serveur). Au-delà = incrément futur.
+  useEffect(() => {
+    if (!result || !autour || autourRetriedRef.current) return;
+    if (autour.sourceStatus.osmInfrastructure !== "pending") return;
+    autourRetriedRef.current = true;
+    const t = setTimeout(() => {
+      void requestAutour(result, POSTURE_FOR_PROJET[projet ?? "reside"] ?? "residence");
+    }, 4500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autour, result]);
 
   // État pour la synthèse Claude API
   const [synthesis, setSynthesis] = useState<SynthesisResponse | null>(null);
@@ -313,6 +440,8 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
     setLoading(true);
     setError(null);
     setSynthesis(null); // reset synthesis on new analysis
+    setAutour(null);
+    autourRetriedRef.current = false;
     try {
       const res = await fetch(`/api/georisques-logement?q=${encodeURIComponent(query)}`);
       const payload = (await res.json()) as ApiResponse;
@@ -332,6 +461,8 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
         has_dpe: Boolean(payload.dpe?.etiquette_dpe),
         insee: payload.address?.citycode ?? null,
       });
+      // Face 3 « autour de l'adresse » : posture par défaut résidence, corrigée ensuite par la sonde.
+      void requestAutour(payload, "residence");
     } catch (err) {
       setResult(null);
       setError(err instanceof Error ? err.message : "Erreur de chargement.");
@@ -508,6 +639,8 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
             onAnswer={(v) => {
               setProjet(v);
               posthog?.capture("logement_projet_declare", { projet: v, insee: result.address?.citycode ?? null });
+              // La posture déclarée met à jour le logement sauvegardé (persistée, non prédictive).
+              void requestAutour(result, POSTURE_FOR_PROJET[v] ?? "residence");
             }}
           />
 
@@ -683,6 +816,9 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
 
               {/* Face 2 — matérialité assurantielle passée (ONRN) */}
               {result.sinistralite && <SinistraliteBlock sinistralite={result.sinistralite} />}
+
+              {/* Face 3 — autour de cette adresse (buffer local au point géocodé) */}
+              {autour && <Face3Block s={autour} />}
 
               {/* ZFE */}
               {result.zfe?.inZfe && (
