@@ -121,8 +121,15 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
   Restituable au point : régime + code/libellé de zone local + nom du PPR + date. Hors portée sans le
   règlement : prescriptions chiffrées (extension X m², cote de plancher). Cas `zoneRegExists:false`
   avec PPRN présents (Agen : 3 PPRN) = « la commune a un PPRI, ce point n'intersecte pas le zonage »,
-  jamais « pas exposé ». Prochain pas = **build de la brique « statut réglementaire au point » en Face 2**
-  (gérer le multi-zones : Toulouse/Ivry renvoient 2 zones au même point).
+  jamais « pas exposé ». **Brique « Statut réglementaire à cette adresse » BRANCHÉE (2026-07-03, `main`).** En Face 2, entre
+  l'exposition (« Risques du bâti ») et la sinistralité ONRN communale. Lib pure testée
+  `src/lib/pprn-zonage.ts` (`buildRegulatoryPlans` : écarte les plans hors zone au point, ordonne par
+  régime le plus contraignant, gère l'état C listTypeReg vide) ; `georisques.ts` remonte
+  `regulatoryPlans` (address + parcel, transparent via la route) ; rendu `LogementModule.tsx` : terme
+  officiel + glose, multi-plans multi-aléa nommés (`modeleProcedure`), 3 états A/B/C distincts, date =
+  « fiche mise à jour le » (jamais « approuvé »), lien fiche Géorisques depuis `idGaspar` (HTTP 200
+  vérifié), jamais les travaux autorisés/interdits. Chips PPRN retirées du bloc « Risques du bâti »
+  (dé-doublonnage, décision porteur). Grain « adresse » affiché (vs sinistralité « commune »).
 - **Face 1 (l'enveloppe) : non branchée** (intake étage / orientation / etc. à MESURER avant de
   construire, cf. `/memory/project_module_logement.md`). Face 2 étendue (contraste PPRI / TRI /
   nappe au point) et vision module = `docs/board/2026-07-03-vision-module-logement-chatgpt.md`.

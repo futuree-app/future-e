@@ -1,4 +1,5 @@
 import "server-only";
+import { buildRegulatoryPlans, type RegulatoryPlan } from "./pprn-zonage.ts";
 
 type GasparRiskDetail = {
   libelle_risque_long?: string | null;
@@ -49,6 +50,10 @@ type GeorisquesV2RiskItem = {
 };
 
 type GeorisquesV2PprnItem = {
+  idGaspar?: string | null;
+  libPpr?: string | null;
+  modeleProcedure?: string | null;
+  dateModification?: string | null;
   libelleProcedure?: string | null;
   libelleAlea?: string | null;
   libelleSousAlea?: string | null;
@@ -95,6 +100,7 @@ export type GeorisquesAddressSummary = {
     total: number;
     labels: string[];
   };
+  regulatoryPlans: RegulatoryPlan[];
   rga: {
     code: string | null;
     label: string | null;
@@ -117,6 +123,7 @@ export type GeorisquesParcelSummary = {
     labels: string[];
     zones: string[];
   };
+  regulatoryPlans: RegulatoryPlan[];
   rga: {
     code: string | null;
     label: string | null;
@@ -330,6 +337,7 @@ async function loadGeorisquesAddressSummary(
       labels: pprnLabels,
       total: Number(pprnJson.totalElements ?? pprnLabels.length),
     },
+    regulatoryPlans: buildRegulatoryPlans(pprnJson.content),
     rga: rga
       ? {
           code: rga.codeExposition || null,
@@ -421,6 +429,7 @@ async function loadGeorisquesParcelSummary(
       total: Number(pprnJson.totalElements ?? pprnLabels.length),
       zones: pprnZones,
     },
+    regulatoryPlans: buildRegulatoryPlans(pprnJson.content),
     rga: rga
       ? {
           code: rga.codeExposition || null,

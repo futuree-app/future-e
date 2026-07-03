@@ -6,6 +6,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import type { OnrnSinistralite, PerilState } from "@/lib/onrn-sinistralite";
 import type { Face3Snapshot, Posture } from "@/lib/logement-autour-types";
+import type { RegulatoryPlan } from "@/lib/pprn-zonage";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { PassportTiltScene } from "@/components/report/PassportTiltScene";
 
@@ -46,8 +47,8 @@ type ApiResponse = {
     } | null;
   } | null;
   georisques?: {
-    address?: { risks: { labels: string[] }; pprn: { labels: string[] }; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; } | null;
-    parcel?: { parcelCode: string; risks: { labels: string[] }; pprn: { labels: string[]; zones: string[] }; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; } | null;
+    address?: { risks: { labels: string[] }; pprn: { labels: string[] }; regulatoryPlans?: RegulatoryPlan[]; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; } | null;
+    parcel?: { parcelCode: string; risks: { labels: string[] }; pprn: { labels: string[]; zones: string[] }; regulatoryPlans?: RegulatoryPlan[]; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; } | null;
     commune?: { communeName: string | null; riskLabels: string[]; seismic: { code: string | null; label: string | null } | null; } | null;
   };
   sinistralite?: OnrnSinistralite | null;
@@ -288,6 +289,127 @@ function SinistraliteBlock({ sinistralite }: { sinistralite: OnrnSinistralite })
           </div>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.8 }}>
             ONRN (État / CCR / Mission Risques Naturels), via Géorisques. Sinistres indemnisés 1995-2021, biens assurés particuliers et professionnels.
+          </div>
+        </div>
+      </GlassCard>
+    </ReportSection>
+  );
+}
+
+// Statut réglementaire au point (Face 2) — exploite le zonage PPRN déjà renvoyé par
+// Géorisques (spike 2026-07-03 : /api/v2/gaspar/pprn suffit). On CONSERVE le terme
+// réglementaire officiel + une glose en langage courant ; on ne déduit JAMAIS les travaux
+// autorisés ou interdits (le règlement local seul les porte).
+const REGIME_GLOSS: Record<string, { title: string; note: string }> = {
+  "01": { title: "Zone de prescriptions (hors zone d’aléa)", note: "Des conditions particulières peuvent s’appliquer. Le détail dépend du règlement officiel de cette zone." },
+  "02": { title: "Zone soumise à prescriptions", note: "Des conditions particulières peuvent s’appliquer aux projets et aux travaux. Le détail dépend du règlement officiel de cette zone." },
+  "03": { title: "Zone relevant d’un régime d’interdiction", note: "Certains projets peuvent être interdits. Les possibilités concernant le logement existant dépendent du règlement local." },
+  "04": { title: "Zone relevant d’un régime d’interdiction stricte", note: "C’est le régime réglementaire le plus contraignant. Le classement seul ne permet pas de déterminer les travaux précisément autorisés ou interdits." },
+  "05": { title: "Zone où un délaissement est possible", note: "Régime réglementaire particulier. Le détail dépend du règlement officiel de cette zone." },
+  "06": { title: "Zone où une expropriation est possible", note: "Régime réglementaire particulier. Le détail dépend du règlement officiel de cette zone." },
+};
+// Aléa lisible à partir du modèle de procédure (bonus ; à défaut on s’appuie sur le nom du plan).
+const HAZARD_LABEL: Record<string, string> = {
+  "PPRN-I": "Inondation",
+  "PPRN-RGA": "Retrait-gonflement des argiles",
+  "PPRN-MT": "Mouvements de terrain",
+  "PPRN-SM": "Submersion marine",
+  "PPRN-F": "Feux de forêt",
+  "PPRN-A": "Avalanches",
+  "PPRN-S": "Séisme",
+};
+
+function RegulatoryPlanCard({ plan, roleLabel }: { plan: RegulatoryPlan; roleLabel?: string }) {
+  const hazard = plan.hazardModel ? HAZARD_LABEL[plan.hazardModel] ?? null : null;
+  const fiche = plan.gasparId
+    ? `https://www.georisques.gouv.fr/donnee-risques/PPR/Fiche-ppr/pprn/${plan.gasparId}`
+    : null;
+  return (
+    <div style={{ display: "grid", gap: 8 }}>
+      {roleLabel && <div style={FACE3_FAMILY}>{roleLabel}</div>}
+      {plan.zones.length > 0 ? (
+        plan.zones.map((z, i) => {
+          const g = REGIME_GLOSS[z.regimeCode ?? ""] ?? { title: z.regime ?? "Zone réglementée", note: "Le détail dépend du règlement officiel de cette zone." };
+          return (
+            <div key={i} style={{ display: "grid", gap: 5 }}>
+              <div style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)" }}>{g.title}</div>
+              <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
+                {z.zoneCode || z.zoneName ? (
+                  <>Cette adresse relève de la zone <strong style={{ color: "var(--fg-hi)" }}>{[z.zoneCode, z.zoneName].filter(Boolean).join(" — ")}</strong>{plan.plan ? <> du <strong style={{ color: "var(--fg-hi)" }}>{plan.plan}</strong></> : null}.</>
+                ) : (
+                  <>Cette adresse relève d’une zone réglementée{plan.plan ? <> du <strong style={{ color: "var(--fg-hi)" }}>{plan.plan}</strong></> : null}.</>
+                )}
+              </div>
+              <div style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>{g.note}</div>
+            </div>
+          );
+        })
+      ) : (
+        // État C : plan présent au point, zone non détaillée dans la donnée reçue.
+        <div style={{ display: "grid", gap: 5 }}>
+          <div style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)" }}>Zone réglementée identifiée</div>
+          <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
+            {plan.plan ? <>Cette adresse relève du <strong style={{ color: "var(--fg-hi)" }}>{plan.plan}</strong>.</> : "Cette adresse relève d’un plan de prévention."}
+          </div>
+          <div style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>Le régime ou le libellé détaillé de la zone n’est pas disponible dans les données reçues.</div>
+        </div>
+      )}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.04em", color: "var(--fg-4)" }}>
+        {hazard && <span>Aléa : {hazard}</span>}
+        {plan.updatedAt && <span>Fiche mise à jour le {plan.updatedAt}</span>}
+        {fiche && (
+          <a href={fiche} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-dim, #7a6e60)", textDecoration: "underline" }}>
+            Fiche du plan sur Géorisques
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function RegulatoryStatusBlock({ georisques }: { georisques: ApiResponse["georisques"] }) {
+  const g = georisques?.parcel ?? georisques?.address;
+  const plans = g?.regulatoryPlans ?? [];
+  const grain = georisques?.parcel ? "parcelle" : "adresse";
+  return (
+    <ReportSection eyebrow="Statut réglementaire à cette adresse" tone="red">
+      <GlassCard>
+        <div style={{ display: "grid", gap: 16 }}>
+          <div style={FACE3_FAMILY}>Grain : {grain}</div>
+          {!g ? (
+            // État B : la source n'a pas permis de qualifier le point.
+            <div style={{ display: "grid", gap: 5 }}>
+              <div style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)" }}>Statut réglementaire non déterminé</div>
+              <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>Les données interrogées n’ont pas permis de qualifier cette adresse.</div>
+            </div>
+          ) : plans.length === 0 ? (
+            // État A : la source a répondu, aucun zonage n'intersecte le point.
+            <div style={{ display: "grid", gap: 5 }}>
+              <div style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)" }}>Aucun zonage réglementaire identifié à cette adresse</div>
+              <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
+                La commune peut être couverte par un plan de prévention sans que le point géocodé se situe dans l’une de ses zones réglementées. Cela ne signifie pas que le logement est exempt de tout risque.
+              </div>
+            </div>
+          ) : plans.length === 1 ? (
+            <RegulatoryPlanCard plan={plans[0]} />
+          ) : (
+            <div style={{ display: "grid", gap: 18 }}>
+              <div style={{ fontSize: 14, color: "var(--fg-3)", lineHeight: 1.6 }}>
+                <strong style={{ color: "var(--fg-hi)" }}>{plans.length} zonages réglementaires identifiés</strong> à cette adresse.
+              </div>
+              <RegulatoryPlanCard plan={plans[0]} roleLabel="Régime le plus contraignant parmi les zonages identifiés" />
+              {plans.slice(1).map((p, i) => (
+                <div key={i} style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)" }}>
+                  <RegulatoryPlanCard plan={p} roleLabel="Autre zonage applicable" />
+                </div>
+              ))}
+              <div style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>
+                Ces zonages peuvent concerner des phénomènes ou des règlements différents. Leur ordre d’affichage sert la lecture et ne détermine pas à lui seul les règles applicables à un projet.
+              </div>
+            </div>
+          )}
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.85 }}>
+            Géorisques (PPRN, information réglementaire) · au point géocodé · le classement ne résume pas le règlement
           </div>
         </div>
       </GlassCard>
@@ -542,10 +664,10 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
   const isPassoire = ["F", "G"].includes(result?.dpe?.etiquette_dpe ?? "");
   const dpe = result?.dpe;
   const georisques = result?.georisques?.parcel ?? result?.georisques?.address;
-  const allRisks = [
-    ...(georisques?.risks?.labels ?? []),
-    ...(georisques?.pprn?.labels ?? []),
-  ].filter((v, i, a) => a.indexOf(v) === i);
+  // Les libellés PPRN ne sont plus aplatis ici : ils sont portés, structurés (régime + zone +
+  // plan), par le bloc « Statut réglementaire à cette adresse ». On garde les autres risques.
+  const allRisks = (georisques?.risks?.labels ?? []).filter((v, i, a) => a.indexOf(v) === i);
+  const hasRegulatoryZones = (georisques?.regulatoryPlans?.length ?? 0) > 0;
 
   return (
     <div className="min-h-screen bg-canvas text-label relative overflow-hidden" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
@@ -859,6 +981,9 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                 </ReportSection>
               )}
 
+              {/* Statut réglementaire au point (PPRN) — entre l'exposition et la sinistralité communale */}
+              {result.georisques && <RegulatoryStatusBlock georisques={result.georisques} />}
+
               {/* Face 2 — matérialité assurantielle passée (ONRN) */}
               {result.sinistralite && <SinistraliteBlock sinistralite={result.sinistralite} />}
 
@@ -916,7 +1041,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                           href="/savoir/renovation-cout"
                         />
                       )}
-                      {allRisks.length > 0 && (
+                      {(allRisks.length > 0 || hasRegulatoryZones) && (
                         <ActionCard
                           title="Vérifier votre couverture assurance"
                           desc="Contacter votre assureur pour anticiper toute évolution de prime ou de garantie sur votre zone."
