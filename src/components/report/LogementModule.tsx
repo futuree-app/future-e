@@ -5,6 +5,8 @@ import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import type { OnrnSinistralite, PerilState } from "@/lib/onrn-sinistralite";
+import { ReportSection, GlassCard } from "@/components/report/kit";
+import { PassportTiltScene } from "@/components/report/PassportTiltScene";
 
 // ════════════════════════════════════════════════════════════════════════════
 // TYPES — inchangés depuis l'API existante
@@ -77,15 +79,6 @@ const DPE_LABELS: Record<string, string> = {
 // affichaient une supposition comme une mesure. À refonder sur donnée réelle (ONRN coût +
 // fréquence sécheresse) selon docs/vault/modules/logement.md, jamais en prédiction du bien.
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{ fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--fg-4)", marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }}>
-      <span>{children}</span>
-      <span style={{ flex: 1, height: 1, background: "var(--border-1)" }} />
-    </div>
-  );
-}
-
 function DpeBadge({ label, size = "md" }: { label: string | null; size?: "sm" | "md" | "lg" }) {
   const s = size === "lg" ? 56 : size === "md" ? 38 : 26;
   const fs = size === "lg" ? 22 : size === "md" ? 16 : 12;
@@ -100,42 +93,40 @@ function DpeBadge({ label, size = "md" }: { label: string | null; size?: "sm" | 
   );
 }
 
-// Verdict en bandeau (gauche colorée)
+// Verdict : carte verre avec liseré haut de la couleur du niveau
 function Verdict({ level, title, detail }: { level: "good" | "medium" | "bad"; title: string; detail: string }) {
-  const colors = { good: "var(--green, #4a7c59)", medium: "var(--orange, #c47a3a)", bad: "var(--red, #a84a3a)" };
+  const tone = level === "good" ? "green" : level === "bad" ? "red" : "orange";
   return (
-    <div style={{
-      background: "var(--bg-card)", border: "1px solid var(--border-1)",
-      borderLeft: `3px solid ${colors[level]}`, padding: "24px 28px",
-    }}>
-      <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 16, color: "var(--fg-hi)", marginBottom: 8, letterSpacing: "-0.01em" }}>
+    <GlassCard accentTop={tone} className="px-7 py-6">
+      <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 17, color: "var(--fg-hi)", marginBottom: 8, letterSpacing: "-0.01em" }}>
         {title}
       </div>
-      <div style={{ fontSize: 12, color: "var(--fg-3)", lineHeight: 1.7 }}>{detail}</div>
-    </div>
+      <div style={{ fontSize: 14, color: "var(--fg-3)", lineHeight: 1.7 }}>{detail}</div>
+    </GlassCard>
   );
 }
 
 function Block({ label, value, sub }: { label: string; value: React.ReactNode; sub?: string }) {
   return (
     <div style={{ display: "grid", gap: 3 }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" }}>{label}</span>
-      <span style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-1)" }}>{value}</span>
-      {sub && <span style={{ fontSize: 11, color: "var(--fg-4)" }}>{sub}</span>}
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" }}>{label}</span>
+      <span style={{ fontSize: 16, fontWeight: 500, color: "var(--fg-1)" }}>{value}</span>
+      {sub && <span style={{ fontSize: 12, color: "var(--fg-4)" }}>{sub}</span>}
     </div>
   );
 }
 
 function ActionCard({ title, desc, href, primary }: { title: string; desc: string; href?: string; primary?: boolean }) {
   const content = (
-    <div style={{
-      padding: 18, background: primary ? "var(--bg-card)" : "var(--bg-elev)",
-      border: `1px solid ${primary ? "var(--accent-dim, #7a6e60)" : "var(--border-1)"}`,
-      cursor: "pointer", transition: "all 0.15s",
-      display: "block",
-    }}>
-      <div style={{ fontSize: 11, color: "var(--fg-1)", letterSpacing: "0.03em", marginBottom: 6, fontWeight: 500 }}>{title}</div>
-      <div style={{ fontSize: 10, color: "var(--fg-4)", lineHeight: 1.55 }}>{desc}</div>
+    <div
+      className={primary ? "glass rounded-xl" : "rounded-xl"}
+      style={{
+        padding: 18, cursor: "pointer", transition: "all 0.15s", display: "block",
+        ...(primary ? {} : { background: "var(--bg-elev)", border: "1px solid var(--border-1)" }),
+      }}
+    >
+      <div style={{ fontSize: 13, color: "var(--fg-1)", letterSpacing: "0.03em", marginBottom: 6, fontWeight: 500 }}>{title}</div>
+      <div style={{ fontSize: 12, color: "var(--fg-4)", lineHeight: 1.55 }}>{desc}</div>
     </div>
   );
   if (href) return <Link href={href} style={{ textDecoration: "none" }}>{content}</Link>;
@@ -167,8 +158,11 @@ function PropertyPassport({
   if (address?.citycode) fields.push({ label: "Commune", value: `${address.city ?? ""} · INSEE ${address.citycode}` });
 
   return (
+    // Scène 3D : pendant du passeport territorial. Se déplie au chargement, puis
+    // répond au survol (tilt, reflet, parallaxe). Classes dans globals.css.
+    <PassportTiltScene>
     <section
-      className="rounded-2xl px-7 py-6 relative overflow-hidden"
+      className="passport-unfold rounded-2xl px-7 py-6 relative overflow-hidden"
       style={{
         background: `linear-gradient(150deg, ${tint}1f 0%, ${tint}0a 55%, rgba(8,10,18,0.6) 100%)`,
         border: `1px solid ${tint}33`,
@@ -184,7 +178,7 @@ function PropertyPassport({
             <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-ghost mt-1">Parcelle {parcel.parcelCode}</p>
           )}
         </div>
-        <div className="flex flex-col items-end gap-1.5 shrink-0">
+        <div className="flex flex-col items-end gap-1.5 shrink-0 passport-layer-seal">
           <DpeBadge label={dpeLetter} size="lg" />
           <p className="text-right font-mono text-[9px] tracking-[0.1em] uppercase text-ghost/70">
             {dpeLetter ? `DPE ${dpeLetter}` : "DPE non trouvé"}
@@ -193,7 +187,7 @@ function PropertyPassport({
       </div>
 
       <h3
-        className="font-normal text-[clamp(22px,3vw,32px)] leading-[1.1] tracking-[-0.01em] text-label"
+        className="passport-layer-name font-normal text-[clamp(22px,3vw,32px)] leading-[1.1] tracking-[-0.01em] text-label"
         style={{ fontFamily: "'Instrument Serif', serif" }}
       >
         {address?.label ?? "Logement"}
@@ -206,13 +200,14 @@ function PropertyPassport({
         {fields.map((f) => (
           <div key={f.label} className="flex items-start gap-3 py-3 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
             <div className="min-w-0">
-              <dt className="font-mono text-[9px] tracking-[0.14em] uppercase text-ghost mb-1">{f.label}</dt>
-              <dd className="text-[14px] text-label leading-snug">{f.value}</dd>
+              <dt className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">{f.label}</dt>
+              <dd className="text-[15px] text-label leading-snug">{f.value}</dd>
             </div>
           </div>
         ))}
       </dl>
     </section>
+    </PassportTiltScene>
   );
 }
 
@@ -227,8 +222,8 @@ function ProjectProbe({ answered, onAnswer }: { answered: string | null; onAnswe
     { v: "autre", label: "Autre" },
   ];
   return (
-    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", borderRadius: 12, padding: "18px 20px" }}>
-      <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 14, color: "var(--fg-hi)", marginBottom: 12 }}>
+    <GlassCard pad="sm">
+      <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 15, color: "var(--fg-hi)", marginBottom: 12 }}>
         Quel est votre projet sur ce logement ?
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -238,14 +233,14 @@ function ProjectProbe({ answered, onAnswer }: { answered: string | null; onAnswe
             onClick={() => onAnswer(o.v)}
             style={{
               padding: "8px 14px", background: "var(--bg-elev)", border: "1px solid var(--border-2)",
-              color: "var(--fg-2)", fontSize: 12, cursor: "pointer", borderRadius: 8, fontFamily: "var(--font-sans)",
+              color: "var(--fg-2)", fontSize: 13, cursor: "pointer", borderRadius: 8, fontFamily: "var(--font-sans)",
             }}
           >
             {o.label}
           </button>
         ))}
       </div>
-    </div>
+    </GlassCard>
   );
 }
 
@@ -260,10 +255,10 @@ function PerilLine({ peril, mecanisme, state }: { peril: string; mecanisme: stri
   if (state.kind === "indispo") return null;
   return (
     <div style={{ display: "grid", gap: 6 }}>
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" }}>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" }}>
         {peril}
       </div>
-      <div style={{ fontSize: 13, color: "var(--fg-2)", lineHeight: 1.65 }}>
+      <div style={{ fontSize: 15, color: "var(--fg-2)", lineHeight: 1.65 }}>
         {state.kind === "lecture" && (
           <>Sur 1995-2021, les sinistres {mecanisme} indemnisés pour les biens assurés de cette commune ont eu un coût moyen de <strong style={{ color: "var(--fg-hi)" }}>{state.cout}</strong> et une fréquence de <strong style={{ color: "var(--fg-hi)" }}>{state.frequence}</strong>. Chiffres établis sur l&apos;échantillon CCR, qui couvre ici {state.representativite} du marché.</>
         )}
@@ -282,19 +277,20 @@ function SinistraliteBlock({ sinistralite }: { sinistralite: OnrnSinistralite })
   const { secheresse, inondation } = sinistralite;
   if (secheresse.kind === "indispo" && inondation.kind === "indispo") return null;
   return (
-    <div>
-      <SectionLabel>Ce que le risque a déjà coûté ici</SectionLabel>
-      <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 18 }}>
-        <PerilLine peril="Sécheresse" mecanisme="sécheresse (retrait-gonflement des argiles)" state={secheresse} />
-        <PerilLine peril="Inondation" mecanisme="inondation (tous types : coulée de boue, remontée de nappe, submersion marine)" state={inondation} />
-        <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", fontSize: 11, color: "var(--fg-4)", lineHeight: 1.6 }}>
-          Aujourd&apos;hui, ce passé local ne fixe pas le prix de votre assurance : le régime CatNat finance ces indemnisations par une surprime légale uniforme partout en France (portée à 20 % au 1ᵉʳ janvier 2025). Un débat en cours (rapport Langreney) pose la question d&apos;une modulation selon l&apos;exposition locale.
+    <ReportSection eyebrow="Ce que le risque a déjà coûté ici">
+      <GlassCard>
+        <div style={{ display: "grid", gap: 18 }}>
+          <PerilLine peril="Sécheresse" mecanisme="sécheresse (retrait-gonflement des argiles)" state={secheresse} />
+          <PerilLine peril="Inondation" mecanisme="inondation (tous types : coulée de boue, remontée de nappe, submersion marine)" state={inondation} />
+          <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", fontSize: 12, color: "var(--fg-4)", lineHeight: 1.6 }}>
+            Aujourd&apos;hui, ce passé local ne fixe pas le prix de votre assurance : le régime CatNat finance ces indemnisations par une surprime légale uniforme partout en France (portée à 20 % au 1ᵉʳ janvier 2025). Un débat en cours (rapport Langreney) pose la question d&apos;une modulation selon l&apos;exposition locale.
+          </div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.8 }}>
+            ONRN (État / CCR / Mission Risques Naturels), via Géorisques. Sinistres indemnisés 1995-2021, biens assurés particuliers et professionnels.
+          </div>
         </div>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.8 }}>
-          ONRN (État / CCR / Mission Risques Naturels), via Géorisques. Sinistres indemnisés 1995-2021, biens assurés particuliers et professionnels.
-        </div>
-      </div>
-    </div>
+      </GlassCard>
+    </ReportSection>
   );
 }
 
@@ -450,7 +446,8 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
             placeholder={`Ex. : 12 rue des Minimes${defaultCommune ? `, ${defaultCommune}` : ""}`}
             style={{
               border: "1px solid var(--border-2)", background: "var(--bg-elev)", color: "var(--fg-1)",
-              padding: "14px 18px", fontSize: 14, outline: "none", fontFamily: "var(--font-sans)",
+              padding: "14px 18px", fontSize: 15, outline: "none", fontFamily: "var(--font-sans)",
+              borderRadius: 10,
             }}
           />
           <button
@@ -461,7 +458,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
               color: loading ? "var(--fg-4)" : "#060812", padding: "14px 28px",
               fontWeight: 500, fontSize: 12, cursor: loading ? "default" : "pointer",
               fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase",
-              transition: "all 0.15s",
+              transition: "all 0.15s", borderRadius: 10,
             }}
           >
             {loading ? "Analyse…" : "Analyser"}
@@ -469,7 +466,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
             </form>
 
             {error && (
-              <div style={{ marginTop: 16, padding: "12px 16px", background: "rgba(168,74,58,0.08)", border: "1px solid rgba(168,74,58,0.25)", color: "var(--red, #f87171)", fontSize: 13, fontFamily: "var(--font-mono)" }}>
+              <div style={{ marginTop: 16, padding: "12px 16px", background: "rgba(168,74,58,0.08)", border: "1px solid rgba(168,74,58,0.25)", borderRadius: 10, color: "var(--red, #f87171)", fontSize: 13, fontFamily: "var(--font-mono)" }}>
                 {error}
               </div>
             )}
@@ -494,8 +491,8 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
             <div style={{
               marginBottom: 20, padding: "12px 16px",
               background: "rgba(184,160,66,0.06)", border: "1px solid rgba(184,160,66,0.25)",
-              borderLeft: "3px solid var(--yellow, #b8a042)",
-              fontSize: 12, color: "var(--fg-2)", lineHeight: 1.65,
+              borderLeft: "3px solid var(--yellow, #b8a042)", borderRadius: 10,
+              fontSize: 13, color: "var(--fg-2)", lineHeight: 1.65,
             }}>
               <strong style={{ color: "var(--yellow, #b8a042)", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase" }}>
                 Adresse hors commune
@@ -521,18 +518,14 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
               {/* Verdict composite retiré (ADR-0001). La lecture vient de la synthèse ci-dessous. */}
 
               {/* Synthèse Claude API */}
-              <div>
-                <SectionLabel>Lecture personnalisée</SectionLabel>
+              <ReportSection eyebrow="Lecture personnalisée" tone="accent">
 
                 {!synthesis && !synthLoading && (
-                  <div style={{
-                    background: "var(--bg-card)", border: "1px solid var(--border-1)",
-                    padding: 24, textAlign: "center",
-                  }}>
-                    <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 15, color: "var(--fg-hi)", marginBottom: 8 }}>
+                  <GlassCard className="text-center">
+                    <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 16, color: "var(--fg-hi)", marginBottom: 8 }}>
                       Une lecture narrative de votre situation.
                     </div>
-                    <div style={{ fontSize: 12, color: "var(--fg-3)", lineHeight: 1.7, marginBottom: 20, maxWidth: 460, margin: "0 auto 20px" }}>
+                    <div style={{ fontSize: 14, color: "var(--fg-3)", lineHeight: 1.7, marginBottom: 20, maxWidth: 460, margin: "0 auto 20px" }}>
                       Au-delà des chiffres, futur•e peut traduire ces données en quelques paragraphes situés dans votre contexte. Calmes, sourcés, sans alarmisme.
                     </div>
                     <button
@@ -550,21 +543,18 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                         {synthError}
                       </div>
                     )}
-                  </div>
+                  </GlassCard>
                 )}
 
                 {synthLoading && (
-                  <div style={{
-                    background: "var(--bg-card)", border: "1px solid var(--border-1)",
-                    padding: 32, textAlign: "center",
-                  }}>
+                  <GlassCard pad="lg" className="text-center">
                     <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent-dim, #7a6e60)" }}>
                       Analyse en cours…
                     </div>
                     <div style={{ fontSize: 11, color: "var(--fg-4)", marginTop: 8 }}>
                       Croisement des données et rédaction de la lecture
                     </div>
-                  </div>
+                  </GlassCard>
                 )}
 
                 {synthesis && (
@@ -594,8 +584,8 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                           };
                           const c = colors[s.level];
                           return (
-                            <div key={i} style={{ padding: "14px 18px", background: c.bg, border: `1px solid ${c.border}`, fontSize: 13, color: "var(--fg-2)", lineHeight: 1.6 }}>
-                              <span style={{ color: c.fg, marginRight: 10, fontFamily: "var(--font-mono)", fontSize: 11 }}>
+                            <div key={i} style={{ padding: "14px 18px", background: c.bg, border: `1px solid ${c.border}`, borderRadius: 10, fontSize: 15, color: "var(--fg-2)", lineHeight: 1.6 }}>
+                              <span style={{ color: c.fg, marginRight: 10, fontFamily: "var(--font-mono)", fontSize: 12 }}>
                                 {s.level === "good" ? "↓" : s.level === "bad" ? "↑" : s.level === "warn" ? "!" : "→"}
                               </span>
                               {s.text}
@@ -606,7 +596,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                     )}
                   </div>
                 )}
-              </div>
+              </ReportSection>
 
             </div>
           )}
@@ -617,16 +607,16 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
 
               {/* Énergie */}
               {dpe && (
-                <div>
-                  <SectionLabel>Énergie & rénovation</SectionLabel>
-                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 18 }}>
+                <ReportSection eyebrow="Énergie & rénovation" tone="orange">
+                  <GlassCard>
+                  <div style={{ display: "grid", gap: 18 }}>
                     <div style={{ display: "flex", gap: 18, alignItems: "center" }}>
                       <DpeBadge label={dpe.etiquette_dpe} size="lg" />
                       <div>
-                        <div style={{ fontWeight: 500, fontSize: 15, color: "var(--fg-hi)" }}>
+                        <div style={{ fontWeight: 500, fontSize: 16, color: "var(--fg-hi)" }}>
                           Étiquette {dpe.etiquette_dpe ?? "—"}, {DPE_LABELS[dpe.etiquette_dpe ?? ""] ?? "Donnée indisponible"}
                         </div>
-                        <div style={{ fontSize: 11, color: "var(--fg-4)", marginTop: 4 }}>
+                        <div style={{ fontSize: 12, color: "var(--fg-4)", marginTop: 4 }}>
                           GES {dpe.etiquette_ges ?? "—"} · DPE du {dpe.date_dpe?.slice(0, 10) ?? "—"}
                         </div>
                       </div>
@@ -640,17 +630,17 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
 
                     {result.audit && result.audit.scenarios.length > 0 && (
                       <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 10 }}>
-                        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--accent-dim, #7a6e60)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--accent-dim, #7a6e60)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
                           Audit énergétique · {result.audit.scenarios.length} scénarios
                         </div>
                         {result.audit.scenarios.map((s, i) => (
-                          <div key={i} style={{ padding: "10px 14px", background: "var(--bg-elev)", border: "1px solid var(--border-1)", display: "flex", justifyContent: "space-between", gap: 12 }}>
+                          <div key={i} style={{ padding: "10px 14px", background: "var(--bg-elev)", border: "1px solid var(--border-1)", borderRadius: 10, display: "flex", justifyContent: "space-between", gap: 12 }}>
                             <div>
-                              {s.categorie && <div style={{ fontSize: 12, color: "var(--fg-1)" }}>{s.categorie}</div>}
-                              {s.etape && <div style={{ fontSize: 10, color: "var(--fg-4)", marginTop: 2 }}>{s.etape}</div>}
+                              {s.categorie && <div style={{ fontSize: 13, color: "var(--fg-1)" }}>{s.categorie}</div>}
+                              {s.etape && <div style={{ fontSize: 11, color: "var(--fg-4)", marginTop: 2 }}>{s.etape}</div>}
                             </div>
                             {s.conso_ep != null && (
-                              <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--fg-3)", whiteSpace: "nowrap" }}>
+                              <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--fg-3)", whiteSpace: "nowrap" }}>
                                 {s.conso_ep} kWh/m²/an
                               </span>
                             )}
@@ -659,22 +649,23 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                       </div>
                     )}
                   </div>
-                </div>
+                  </GlassCard>
+                </ReportSection>
               )}
 
               {/* Risques */}
               {(allRisks.length > 0 || georisques?.seismic || georisques?.rga) && (
-                <div>
-                  <SectionLabel>Risques du bâti</SectionLabel>
-                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 16 }}>
+                <ReportSection eyebrow="Risques du bâti" tone="red">
+                  <GlassCard>
+                  <div style={{ display: "grid", gap: 16 }}>
                     {allRisks.length > 0 && (
                       <div>
-                        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-4)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
+                        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--fg-4)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
                           Risques référencés
                         </div>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                           {allRisks.map((r, i) => (
-                            <span key={i} style={{ fontFamily: "var(--font-mono)", fontSize: 11, padding: "5px 11px", background: "rgba(168,74,58,0.08)", border: "1px solid rgba(168,74,58,0.25)", color: "var(--red, #f87171)" }}>
+                            <span key={i} style={{ fontFamily: "var(--font-mono)", fontSize: 12, padding: "5px 11px", background: "rgba(168,74,58,0.08)", border: "1px solid rgba(168,74,58,0.25)", color: "var(--red, #f87171)" }}>
                               {r}
                             </span>
                           ))}
@@ -686,7 +677,8 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                       {georisques?.rga?.label && <Block label="Retrait-gonflement argiles" value={georisques.rga.label} />}
                     </div>
                   </div>
-                </div>
+                  </GlassCard>
+                </ReportSection>
               )}
 
               {/* Face 2 — matérialité assurantielle passée (ONRN) */}
@@ -694,19 +686,20 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
 
               {/* ZFE */}
               {result.zfe?.inZfe && (
-                <div>
-                  <SectionLabel>Zone à faibles émissions</SectionLabel>
-                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)", padding: 24, display: "grid", gap: 12 }}>
+                <ReportSection eyebrow="Zone à faibles émissions" tone="blue">
+                  <GlassCard>
+                  <div style={{ display: "grid", gap: 12 }}>
                     {result.zfe.zones.map(z => (
                       <div key={z.id} style={{ display: "grid", gap: 6 }}>
-                        <div style={{ fontWeight: 500, fontSize: 13, color: "var(--fg-hi)" }}>{z.nom}</div>
-                        <div style={{ fontSize: 11, color: "var(--fg-4)", fontFamily: "var(--font-mono)" }}>
+                        <div style={{ fontWeight: 500, fontSize: 15, color: "var(--fg-hi)" }}>{z.nom}</div>
+                        <div style={{ fontSize: 12, color: "var(--fg-4)", fontFamily: "var(--font-mono)" }}>
                           VP : Crit&apos;Air {z.vp_critair ?? "—"} · 2RM : Crit&apos;Air {z.deux_rm_critair ?? "—"}
                         </div>
                       </div>
                     ))}
                   </div>
-                </div>
+                  </GlassCard>
+                </ReportSection>
               )}
 
             </div>
@@ -717,8 +710,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
             <div style={{ display: "grid", gap: 36 }}>
 
               {/* Actions IA générées si dispo, sinon actions par défaut selon le profil */}
-              <div>
-                <SectionLabel>Actions documentées</SectionLabel>
+              <ReportSection eyebrow="Actions documentées">
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
 
                   {/* Actions générées par Claude API */}
@@ -773,12 +765,11 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                   )}
 
                 </div>
-              </div>
+              </ReportSection>
 
               {/* Pages Savoir associées */}
-              <div>
-                <SectionLabel>Pages Savoir associées</SectionLabel>
-                <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-1)" }}>
+              <ReportSection eyebrow="Pages Savoir associées">
+                <div className="glass rounded-xl overflow-hidden">
                   {[
                     { title: "Comprendre votre DPE et son calendrier", href: "/savoir/dpe-comprendre" },
                     { title: "Le risque de submersion et sa trajectoire", href: "/savoir/submersion" },
@@ -797,7 +788,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                     </Link>
                   ))}
                 </div>
-              </div>
+              </ReportSection>
 
             </div>
           )}
