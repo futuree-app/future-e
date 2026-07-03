@@ -278,11 +278,11 @@ const ONRN_REPR_LABEL: Record<string, string> = {
 const onrnLabel = (map: Record<string, string>, v: string) => map[v] ?? v; // repli = verbatim
 const SINI_EYEBROW: React.CSSProperties = { fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" };
 
-function PerilLine({ peril, state }: { peril: string; state: PerilState }) {
+function PerilLine({ peril, color, state }: { peril: string; color: string; state: PerilState }) {
   if (state.kind === "indispo") return null;
   return (
     <div style={{ display: "grid", gap: 10 }}>
-      <div style={SINI_EYEBROW}>{peril}</div>
+      <div style={{ ...SINI_EYEBROW, color }}>{peril}</div>
       {state.kind === "lecture" && (
         <>
           {/* Flex plutôt que grille étroite : chaque métrique prend sa largeur naturelle,
@@ -317,8 +317,8 @@ function SinistraliteBlock({ sinistralite }: { sinistralite: OnrnSinistralite })
     <ReportSection eyebrow="Sinistralité indemnisée dans la commune">
       <GlassCard>
         <div style={{ display: "grid", gap: 18 }}>
-          <PerilLine peril="Sécheresse (retrait-gonflement des argiles)" state={secheresse} />
-          <PerilLine peril="Inondation (tous types)" state={inondation} />
+          <PerilLine peril="Sécheresse (retrait-gonflement des argiles)" color="var(--orange, #fb923c)" state={secheresse} />
+          <PerilLine peril="Inondation (tous types)" color="var(--blue, #60a5fa)" state={inondation} />
           <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", fontSize: 12, color: "var(--fg-4)", lineHeight: 1.6 }}>
             Ces données historiques ne permettent pas de prédire le montant de votre assurance ni les conditions proposées pour ce logement. La surprime légale CatNat est fixée nationalement à 20 % de la prime dommages depuis le 1ᵉʳ janvier 2025. Une modulation de cette surprime selon l&apos;exposition locale est débattue : si elle advenait, le passé local mesuré ici compterait davantage.
           </div>
