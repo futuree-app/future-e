@@ -49,26 +49,20 @@ function toRecordLegacy(r: LegacyApiRecord): DpeRecord {
     surface_m2:         null,
     annee_construction: r.annee_construction ?? null,
     type_batiment:      r.tr002_type_batiment_description ?? null,
+    etage:              null,
+    complement:         null,
   };
 }
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-export type DpeLabel = "A" | "B" | "C" | "D" | "E" | "F" | "G";
+// La logique pure d'attribution + les types de base vivent dans dpe-attribution.ts (sans
+// server-only, car le client s'en sert). On les ré-exporte ici pour les consommateurs serveur.
+export type { DpeLabel, DpeRecord, DpeAttribution, AddressDpeContext } from "./dpe-attribution.ts";
+export { dedupeAndCollapseDpe, dpeAttributionStatus, deriveAddressDpeContext } from "./dpe-attribution.ts";
 
-export type DpeRecord = {
-  id_dpe: string;
-  date_dpe: string | null;
-  id_ban: string | null;
-  adresse: string | null;
-  etiquette_dpe: DpeLabel | null;
-  etiquette_ges: DpeLabel | null;
-  conso_ep_m2: number | null;
-  emission_ges_m2: number | null;
-  surface_m2: number | null;
-  annee_construction: number | null;
-  type_batiment: string | null;
-};
+import { LABEL_ORDER, dedupeAndCollapseDpe } from "./dpe-attribution.ts";
+import type { DpeLabel, DpeRecord } from "./dpe-attribution.ts";
 
 export type DpeCommuneSummary = {
   inseeCode: string;
@@ -80,8 +74,6 @@ export type DpeCommuneSummary = {
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-const LABEL_ORDER: DpeLabel[] = ["A", "B", "C", "D", "E", "F", "G"];
 
 function computeMedian(distribution: Record<DpeLabel, number>, total: number): DpeLabel | null {
   if (total === 0) return null;
@@ -103,6 +95,8 @@ const SELECT_LOGEMENT = [
   "annee_construction",
   "surface_habitable_logement",
   "type_batiment",
+  "numero_etage_appartement",
+  "complement_adresse_logement",
   "date_etablissement_dpe",
   "conso_5_usages_par_m2_ep",
   "emission_ges_5_usages_par_m2",
@@ -118,6 +112,8 @@ type ApiRecord = {
   annee_construction?: number | null;
   surface_habitable_logement?: number | null;
   type_batiment?: string | null;
+  numero_etage_appartement?: string | null;
+  complement_adresse_logement?: string | null;
   date_etablissement_dpe?: string | null;
   conso_5_usages_par_m2_ep?: number | null;
   emission_ges_5_usages_par_m2?: number | null;
@@ -137,6 +133,8 @@ function toRecord(r: ApiRecord): DpeRecord {
     surface_m2:        r.surface_habitable_logement ?? null,
     annee_construction: r.annee_construction ?? null,
     type_batiment:     r.type_batiment ?? null,
+    etage:             r.numero_etage_appartement ?? null,
+    complement:        r.complement_adresse_logement ?? null,
   };
 }
 
@@ -165,6 +163,24 @@ async function fetchAgg(
 }
 
 // ── Public API ───────────────────────────────────────────────────────────────
+
+// Renvoie TOUS les DPE rattachés à l'identifiant BAN (existant puis neuf), triés du plus
+// récent au plus ancien, dédupliqués et collapsés (cf. dedupeAndCollapseDpe). Remplace le
+// « plus récent unique » de getDpeByBanId côté module Logement.
+export async function getDpeCandidatesByBanId(banId: string): Promise<DpeRecord[]> {
+  const collected: DpeRecord[] = [];
+  for (const dataset of [DS.existant, DS.neuf]) {
+    const results = await fetchLines(dataset, {
+      qs:     `identifiant_ban:"${banId}"`,
+      size:   "30",
+      sort:   "-date_etablissement_dpe",
+      select: SELECT_LOGEMENT,
+    });
+    collected.push(...results.map(toRecord));
+  }
+  return dedupeAndCollapseDpe(collected)
+    .sort((a, b) => (b.date_dpe ?? "").localeCompare(a.date_dpe ?? ""));
+}
 
 export async function getDpeByBanId(banId: string): Promise<DpeRecord | null> {
   for (const dataset of [DS.existant, DS.neuf]) {
