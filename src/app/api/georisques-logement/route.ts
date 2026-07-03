@@ -7,7 +7,8 @@ import {
   getGeorisquesSummary,
 } from "@/lib/georisques";
 import { getAltitude } from "@/lib/ign";
-import { getDpeByBanId, getDpeByCoordinates } from "@/lib/dpe";
+import { getDpeCandidatesByBanId, getDpeByCoordinates } from "@/lib/dpe";
+import { validateSelectedBanAddress } from "@/lib/selected-ban-address";
 import { getZfeForPoint } from "@/lib/zfe";
 import { getIrepNearPoint } from "@/lib/irep";
 import { getAuditByBanId, getAuditByCoordinates } from "@/lib/audit";
@@ -15,36 +16,24 @@ import { getCartofrichesForCommune } from "@/lib/cartofriches";
 import { getCommuneFullData } from "@/lib/commune-data";
 import { getOnrnSinistralite } from "@/lib/onrn-sinistralite";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const query = searchParams.get("q");
+// Cœur commun : construit le rapport à partir d'une adresse déjà résolue (géocodée en GET,
+// sélectionnée en POST). Renvoie la LISTE des DPE candidats (pas un « plus récent » arbitraire)
+// et le type de feature BAN, pour que le client décide l'attribution.
+type ResolvedAddress = {
+  id: string | null; label: string; city: string | null; citycode: string | null;
+  postcode: string | null; latitude: number; longitude: number;
+};
 
-  if (!query) {
-    return NextResponse.json(
-      { error: "Missing q parameter." },
-      { status: 400 },
-    );
-  }
-
-  try {
-    const address = await geocodeBanAddress(query);
-
-    if (!address) {
-      return NextResponse.json(
-        { error: "Address not found in BAN." },
-        { status: 404 },
-      );
-    }
-
+async function buildReport(address: ResolvedAddress, banFeatureType: string | null) {
     const parcel = await findCadastreParcelByPoint(
       address.longitude,
       address.latitude,
     ).catch(() => null);
 
-    const [dpe, audit] = await Promise.all([
+    const [dpeCandidates, audit] = await Promise.all([
       address.id
-        ? getDpeByBanId(address.id).catch(() => null)
-        : getDpeByCoordinates(address.latitude, address.longitude).catch(() => null),
+        ? getDpeCandidatesByBanId(address.id).catch(() => [])
+        : getDpeByCoordinates(address.latitude, address.longitude).then((d) => (d ? [d] : [])).catch(() => []),
       address.id
         ? getAuditByBanId(address.id).catch(() => null)
         : getAuditByCoordinates(address.latitude, address.longitude).catch(() => null),
@@ -75,7 +64,8 @@ export async function GET(request: Request) {
         address,
         parcel,
         altitude,
-        dpe,
+        dpeCandidates,
+        banFeatureType,
         audit,
         zfe,
         irep,
@@ -107,12 +97,43 @@ export async function GET(request: Request) {
         },
       },
     );
-  } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to resolve Géorisques logement preview.";
+}
 
+// GET (repli) : géocodage libre `?q=`. Ne doit plus écraser une sélection BAN explicite (POST).
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const query = searchParams.get("q");
+  if (!query) {
+    return NextResponse.json({ error: "Missing q parameter." }, { status: 400 });
+  }
+  try {
+    const address = await geocodeBanAddress(query);
+    if (!address) {
+      return NextResponse.json({ error: "Address not found in BAN." }, { status: 404 });
+    }
+    return await buildReport(address, address.type);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to resolve Géorisques logement preview.";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+// POST : adresse BAN sélectionnée avec précision (objet atomique validé). Chemin principal.
+export async function POST(request: Request) {
+  let body: unknown;
+  try { body = await request.json(); } catch { body = null; }
+  const sel = validateSelectedBanAddress((body as { address?: unknown })?.address);
+  if (!sel) {
+    return NextResponse.json({ error: "Invalid selected address." }, { status: 400 });
+  }
+  try {
+    const address: ResolvedAddress = {
+      id: sel.banId, label: sel.label, city: sel.city, citycode: sel.citycode,
+      postcode: sel.postcode, latitude: sel.latitude, longitude: sel.longitude,
+    };
+    return await buildReport(address, sel.type);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to resolve Géorisques logement preview.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
