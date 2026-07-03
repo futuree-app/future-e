@@ -177,6 +177,26 @@ autant que d'écriture.
 
 ---
 
+## Kit de cartes du rapport (standard partagé, 2026-07-03)
+
+Le langage de cartes du rapport vit dans `src/components/report/kit.tsx`
+(`ReportSection` = intertitre à puce mono ; `GlassCard` = `.glass rounded-xl`).
+C'est la SOURCE UNIQUE : tout module du rapport le consomme, tout futur module
+(Santé…) en hérite. Règle : **structure partagée, accent propre au module**
+(Territoire = info/bleu, Logement = taupe #c8b89a). Territoire n'a pas encore
+migré (il est déjà en .glass inline, markup identique au kit) : adoption =
+fast-follow mécanique, à faire quand on peut vérifier Territoire au navigateur.
+Ne pas réintroduire de carte `var(--bg-card)` coins-droits dans le rapport.
+
+Corollaire (harmonisation Logement, même date) : la prose de lecture d'un module
+se tient au registre de Territoire (~15-16px, pas 11-13px), aucun encart de
+résultat à coins droits (champ, bouton, alertes, lignes de scénario compris), et
+le passeport d'un module reprend l'effet 3D partagé (`PassportTiltScene` +
+`passport-unfold`/`passport-layer-*`). Un écran de rapport qui lit « plus petit »
+ou « plus carré » que Territoire est un défaut d'harmonisation.
+
+---
+
 ## Tensions ouvertes (à trancher par le porteur)
 
 Le Critic ne juge pas ce qui n'est pas tranché : il **nomme** ces points comme tensions.
