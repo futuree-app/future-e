@@ -93,7 +93,13 @@ export async function fetchOverpass(bbox: { s: number; w: number; n: number; e: 
   const body = new URLSearchParams({ data: overpassQuery(bbox.s, bbox.w, bbox.n, bbox.e) });
   for (const url of MIRRORS) {
     try {
-      const r = await fetch(url, { method: "POST", body, signal: AbortSignal.timeout(20_000) });
+      // Les miroirs Overpass rejettent (403/406/429) les requêtes sans User-Agent identifiable.
+      const r = await fetch(url, {
+        method: "POST",
+        body,
+        headers: { "User-Agent": "futur-e/logement-autour (contact: futur-e.app)", Accept: "application/json" },
+        signal: AbortSignal.timeout(25_000),
+      });
       if (!r.ok) continue;
       const doc = (await r.json()) as { elements?: unknown[] };
       if (Array.isArray(doc.elements)) return doc.elements;
