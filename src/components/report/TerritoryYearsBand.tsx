@@ -10,9 +10,12 @@
 //
 // - La bande émerge du fond sombre, sans cadre ni bordure (écart assumé au
 //   pattern carte bordée).
-// - Animation : UN passage chronologique gauche→droite, puis figé.
-//   prefers-reduced-motion => état final direct (fill: backwards, base opacity 1,
-//   donc sans JS ou sans animation la bande est complète).
+// - Animation : UN passage chronologique gauche→droite, DÉCLENCHÉ quand la bande
+//   entre dans le viewport (IntersectionObserver), puis figé. Tant qu'elle n'est
+//   pas vue, elle reste masquée (le masquage a lieu hors écran, la bande étant sous
+//   la synthèse, donc sans flash).
+//   prefers-reduced-motion => état final direct (base opacity 1 : sans JS ou sans
+//   animation la bande est complète).
 // - La légende situe la commune dans la distribution nationale (médiane, p90).
 
 import { useEffect, useRef } from "react";
@@ -78,27 +81,50 @@ export function TerritoryYearsBand({
   useEffect(() => {
     const root = rootRef.current;
     if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    root.querySelectorAll<SVGGElement>("[data-yr]").forEach((g) => {
-      const i = Number(g.dataset.yr);
-      const marked = g.dataset.marked === "1";
-      const delay = 300 + i * 145;
-      if (marked) {
-        g.animate(
-          [
-            { opacity: 0, transform: "scale(1.45)" },
-            { opacity: 1, transform: "scale(1)" },
-          ],
-          { duration: 1100, delay, easing: "cubic-bezier(.25,.9,.35,1)", fill: "backwards" },
-        );
-      } else {
-        g.animate([{ opacity: 0 }, { opacity: 1 }], {
-          duration: 750,
-          delay,
-          easing: "ease-out",
-          fill: "backwards",
-        });
-      }
-    });
+    const groups = Array.from(root.querySelectorAll<SVGGElement>("[data-yr]"));
+
+    // Masqué tant que la bande n'est pas entrée dans le viewport, sinon elle serait
+    // déjà « jouée » avant que l'utilisateur y arrive. `fill: both` fige l'état final.
+    groups.forEach((g) => { g.style.opacity = "0"; });
+
+    let played = false;
+    const play = () => {
+      if (played) return;
+      played = true;
+      groups.forEach((g) => {
+        const i = Number(g.dataset.yr);
+        const marked = g.dataset.marked === "1";
+        const delay = 300 + i * 145;
+        if (marked) {
+          g.animate(
+            [
+              { opacity: 0, transform: "scale(1.45)" },
+              { opacity: 1, transform: "scale(1)" },
+            ],
+            { duration: 1100, delay, easing: "cubic-bezier(.25,.9,.35,1)", fill: "both" },
+          );
+        } else {
+          g.animate([{ opacity: 0 }, { opacity: 1 }], {
+            duration: 750,
+            delay,
+            easing: "ease-out",
+            fill: "both",
+          });
+        }
+      });
+    };
+
+    const io = new IntersectionObserver(
+      (entries, obs) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          play();
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.2 },
+    );
+    io.observe(root);
+    return () => io.disconnect();
   }, []);
 
   return (

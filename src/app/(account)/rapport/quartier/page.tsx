@@ -159,15 +159,6 @@ export default async function RapportQuartierPage() {
           </div>
         )}
 
-        {/* La ligne des années — mémoire du lieu (arrêtés CatNat), sous le
-            passeport. Rendue seulement si GASPAR a répondu : une bande vide
-            doit vouloir dire « commune épargnée », jamais « donnée en panne ». */}
-        {communeName && catnat && (
-          <div className="mt-10">
-            <TerritoryYearsBand communeName={displayName} years={catnat.years} />
-          </div>
-        )}
-
         {/* Synthèse pleine largeur, précédée de son réglage : la relation à la
             commune (inférée, corrigeable) règle la posture du texte, elle vit
             donc collée à la synthèse. Jamais un gate. */}
@@ -192,6 +183,15 @@ export default async function RapportQuartierPage() {
             fallbackSummary={buildFallbackSummary(communeName, "votre horizon")}
           />
         </section>
+
+        {/* La ligne des années — mémoire du lieu (arrêtés CatNat), APRÈS la synthèse.
+            Animation déclenchée au scroll (cf. TerritoryYearsBand). Rendue seulement si
+            GASPAR a répondu : une bande vide = « commune épargnée », jamais « panne ». */}
+        {communeName && catnat && (
+          <div className="mt-12">
+            <TerritoryYearsBand communeName={displayName} years={catnat.years} />
+          </div>
+        )}
 
         <div className="border-t border-white/[0.08] mt-10" />
 
