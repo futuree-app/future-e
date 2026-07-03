@@ -285,7 +285,9 @@ function PerilLine({ peril, state }: { peril: string; state: PerilState }) {
       <div style={SINI_EYEBROW}>{peril}</div>
       {state.kind === "lecture" && (
         <>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px,1fr))", gap: 14 }}>
+          {/* Flex plutôt que grille étroite : chaque métrique prend sa largeur naturelle,
+              le label mono long tient sur une ligne (plus de retour à « mille »). */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "16px 48px" }}>
             <Block label="Coût moyen par sinistre indemnisé" value={onrnLabel(ONRN_COUT_LABEL, state.cout)} />
             <Block label="Fréquence (pour mille biens assurés)" value={onrnLabel(ONRN_FREQ_LABEL, state.frequence)} />
           </div>
