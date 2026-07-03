@@ -175,11 +175,53 @@ def selftest():
     print("✓ selftest OK", file=sys.stderr)
 
 
+# ── Face 3 « autour de cette adresse » : shards de POINTS par cellule de grille ──
+# Le comparateur agrège BPE à la commune ; la Face 3 garde les points pour un calcul
+# « plus proche par catégorie » au point géocodé (runtime TS). Codes TYPEQU confirmés
+# empiriquement sur NOMRS (métropole + DOM), 2026-07-03. FACE3_CELL DOIT égaler
+# GRID_CELL_DEG de src/lib/geo-grid.ts.
+FACE3_CELL = 0.18
+FACE3_DIR = os.path.join(ROOT, "data", "bpe-points")
+FACE3_CATS = {
+    "sante":        {"D265", "D307"},                          # médecin généraliste, pharmacie
+    "alimentation": {"B105", "B201", "B202", "B204", "B207", "B208"},  # supermarché/supérette/épicerie, boucherie, boulangerie, primeur
+    "education":    {"C107", "C108", "C109"},                  # maternelle, primaire, élémentaire
+    "transports":   {"E107", "E108", "E109"},                  # gares & haltes voyageurs
+    "services":     {"A203", "A206"},                          # banque, bureau de poste
+}
+
+
+def write_face3_shards():
+    import math
+    code_to_cat = {code: cat for cat, codes in FACE3_CATS.items() for code in codes}
+    all_types = list(code_to_cat)
+    t = pq.read_table(PARQUET, columns=[COL_TYPE, COL_LAT, COL_LON])
+    types = np.array(t.column(COL_TYPE).to_pylist(), dtype=object)
+    lats = np.array(t.column(COL_LAT).to_pylist(), dtype="float64")
+    lons = np.array(t.column(COL_LON).to_pylist(), dtype="float64")
+    keep = np.isin(types, all_types) & np.isfinite(lats) & np.isfinite(lons)
+    types, lats, lons = types[keep], lats[keep], lons[keep]
+    cells = {}
+    for ty, la, lo in zip(types, lats, lons):
+        key = f"g_{math.floor(la / FACE3_CELL)}_{math.floor(lo / FACE3_CELL)}"
+        cells.setdefault(key, []).append({"c": code_to_cat[ty], "lat": round(float(la), 6), "lon": round(float(lo), 6)})
+    os.makedirs(FACE3_DIR, exist_ok=True)
+    for key, pts in cells.items():
+        with open(os.path.join(FACE3_DIR, f"{key}.json"), "w") as f:
+            json.dump({"cell": key, "points": pts}, f, ensure_ascii=False, separators=(",", ":"))
+    print(f"✓ Face 3 : {len(cells)} cellules, {int(keep.sum())} équipements -> {FACE3_DIR}", file=sys.stderr)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--write-index", action="store_true")
     ap.add_argument("--selftest", action="store_true")
+    ap.add_argument("--face3-shards", action="store_true")
     args = ap.parse_args()
+
+    if args.face3_shards:
+        write_face3_shards()
+        return
 
     if args.selftest:
         selftest()

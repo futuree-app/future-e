@@ -79,7 +79,21 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
 - **Limite documentée** : les 107 communes fusionnées 2021→courant tombent en `indispo`
   (mapping non codé). Bon patron de désamorçage d'inférence à réutiliser : « ce passé local ne
   fixe pas le prix de votre assurance ».
-- **Faces 1, 3, 4 : non branchées** (voir `/memory/project_module_logement.md`).
+- **Face 3 (l'autour immédiat) : BRANCHÉE (2026-07-03).** Bloc « Autour de cette adresse » =
+  buffer local au point géocodé (jamais un temps de marche), 3 briques hiérarchisées : vie
+  quotidienne **BPE** (socle, local : plus proche par catégorie santé/alimentation/éducation/
+  transports/services, distances brutes à vol d'oiseau, cap 3 km) > **infra bruyantes OSM**
+  (vigilance, « à ~X m d'un axe cartographié », jamais un dB) > **espaces verts OSM** (repère,
+  « cartographié », jamais « pas de verdure »). Architecture : shards BPE en grille
+  (`data/bpe-points`, `populate-bpe.py --face3-shards`) ; OSM récupéré **à la génération** via
+  Overpass `out geom`, mis en cache par cellule (`osm_tile_cache`, service-role) et **figé dans un
+  snapshot** (table `logement`, artefact sauvegardé par (user, commune) + posture
+  residence/prospection) ; l'affichage ne touche JAMAIS Overpass. Distances point↔géométrie
+  (segments/polygones), pas point↔sommet. `sourceStatus` par source (panne observable). Vérifié
+  bout-en-bout (Toulouse : rail 1006 m, vert 40 m, cache chaud). Libs pures TDD (18 tests).
+  Spec/plan : `docs/superpowers/{specs,plans}/2026-07-03-logement-face3-*`.
+- **Faces 1, 4 : non branchées** (voir `/memory/project_module_logement.md`). Face 2 étendue
+  (contraste PPRI/TRI/nappe au point) et vision module = `docs/board/2026-07-03-vision-module-logement-chatgpt.md`.
 
 ## Liens
 

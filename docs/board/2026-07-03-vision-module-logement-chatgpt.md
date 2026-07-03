@@ -66,12 +66,33 @@ Notés à chaud pour ne pas les perdre. Chacun s'appuie sur l'état réel du pro
    la conversion acheteur/résident (l'instrumentation `logement_analyzed`/`logement_projet_declare`
    existe justement pour ça).
 
-2. **Le « waouh » contraste parcelle/commune est data-bloqué pour l'inondation — le cas le plus
-   vendeur.** La dé-binarisation EAIP (parcelle en zone inondable vs commune inondée) est une
-   **piste CLOSE** (`risque_enrichment_eaip` : « donnée non récupérable, livré binaire honnête »). Le
-   contraste marche pour RGA/sismicité (grain parcelle via Géorisques) mais **pas** pour la zone
-   inondable. Ne pas promettre le contraste uniformément ; il faut dire l'échelle (invariant du
-   module) là où on ne l'a pas.
+2. **~~Le « waouh » contraste parcelle/commune est data-bloqué pour l'inondation~~ — CORRIGÉ
+   (2026-07-03, porteur).** Mon point initial était **trop pessimiste** : il confondait l'EAIP (piste
+   effectivement close, `risque_enrichment_eaip`) avec « toute donnée inondation à l'adresse ». Faux.
+   L'inondation **est localisable à l'adresse dans de nombreux cas**, via des couches Géorisques
+   distinctes :
+   - **PPRI/PPRN (zone réglementaire au point/parcelle)** — **DÉJÀ récupéré par le projet** :
+     `src/lib/georisques.ts` interroge `/api/v2/gaspar/pprn` et reçoit `libelleAlea`,
+     `libelleSousAlea` et `zonageReglementaire.{zoneRegExists, codeZone}`, + détecte
+     `marineSubmersion`. On **aplatit** aujourd'hui ces champs en chips « risques référencés » ; le
+     contraste « la commune est concernée / cette adresse est en zone réglementaire B » est
+     atteignable **sans nouvelle API**, juste en exploitant le zonage déjà renvoyé.
+   - **TRI (scénario de probabilité au point)** et **remontée de nappe (couche nationale, cave)** —
+     couches Géorisques **à ajouter** (non fetchées aujourd'hui), grain point, couverture
+     hétérogène (TRI = territoires sélectionnés ; nappe = métropole + Corse).
+   - Discipline maintenue : PPRI = information **réglementaire**, pas une probabilité de sinistre ;
+     et surtout **absence d'intersection ≠ absence de risque** → afficher « non déterminé »/« n'intersecte
+     pas le zonage disponible », **jamais** « cette adresse n'est pas exposée ».
+   - **Structure de preuve cible (4 lignes distinctes, grains séparés)** pour la Face 2 : Historique
+     CatNat (commune) · PPRI/PPRN (point/parcelle) · TRI (point, si couvert) · Remontée de nappe
+     (point). Produit exactement le contraste « la commune a connu / le point est cartographié / le
+     logement a réellement été touché » sans confondre les niveaux.
+   - Nuance point vs parcelle : l'API consolidée répond au **point géocodé** (lon/lat) ; une V2 plus
+     robuste intersecterait la **géométrie de la parcelle** cadastrale avec les polygones PPR/TRI (une
+     grande parcelle peut être partiellement en zone alors que le point est juste dehors).
+   → **La Face 2 peut créer un vrai effet waouh sur l'inondation dès maintenant** (exploiter le zonage
+   PPRN déjà renvoyé), TRI/nappe en enrichissement. À traiter dans le chantier Face 2 étendue, après
+   la Face 3.
 
 3. **Face 1 rejoue le piège « supposition affichée comme mesure » déjà corrigé.** Les briques
    « assurance » et « valeur » ont été RETIRÉES le 2026-07-02 précisément parce que « déduites de

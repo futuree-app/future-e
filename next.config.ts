@@ -35,6 +35,11 @@ const nextConfig: NextConfig = {
       "./data/onrn-secheresse.json",
       "./data/onrn-inondation.json",
     ],
+    // Face 3 « autour de cette adresse » : la lib logement-bpe.ts lit les shards
+    // de points BPE par cellule de grille au runtime de la route.
+    "/api/logement-autour": [
+      "./data/bpe-points/**",
+    ],
   },
   async rewrites() {
     return [
