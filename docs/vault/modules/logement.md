@@ -151,11 +151,21 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
   1 000 ») → « qu'est-ce que j'en fais ? » (sortie décisionnelle adaptée à la posture) → « comment
   c'est produit ? » (Niveau 3, méthode/sources/mentions repliées dans un `<details>`, jamais
   supprimées, jamais au premier plan). Appliqué à la Face 2 : composants `Disclosure`, `Metric`,
-  `Face2Implication` dans `LogementModule.tsx`. Garde-fous : **pas de comparaison générée** entre
-  périls (« la sécheresse a été plus fréquente que… » = conclusion, viole ADR-0001) ; **pas de
-  chapeau « ce qu'il faut retenir » global** (redondant avec la synthèse IA) ; le terme réglementaire
+  `Face2Implication` dans `LogementModule.tsx`. Garde-fous : **pas de chapeau « ce qu'il faut
+  retenir » global** (redondant avec la synthèse IA) ; le terme réglementaire
   officiel reste présent, en secondaire sous la phrase courante (jamais remplacé par une version
   édulcorée). Interdits UX : « risque élevé », « logement à risque », jauge rouge, score 1-10.
+- **Portée exacte d'ADR-0001 pour la Face 2 (2026-07-03, correction d'une sur-extension).** ADR-0001
+  interdit le **score synthétique** (note globale par lieu/foyer, « 6/10 ») et le **verdict évaluatif**
+  (« logement à risque », « commune à éviter », jauge rouge). Il **n'interdit PAS** une comparaison
+  factuelle de deux sous-valeurs d'une **même métrique dans une même commune**. La sinistralité peut
+  donc porter « dans cette commune, les sinistres liés à la sécheresse ont été plus fréquents que ceux
+  liés à l'inondation », car c'est de la **transformation** (la valeur du produit, ADR-0002), pas une
+  note ni un classement inter-communes. Une session précédente avait rangé cette phrase sous ADR-0001
+  par excès de prudence ; corrigé. **Garde-fou technique** (pas doctrinal) : la comparaison ne
+  s'affiche que si les deux périls sont en lecture ET que leurs classes de fréquence sont strictement
+  séparées (rangs différents dans `ONRN_FREQ_RANK`) ; sinon muette. Ligne rouge inchangée : jamais de
+  phrase évaluative, jamais un chiffre absolu « par an » (dénominateur temporel non vérifié, cf. supra).
 - **Face 1 (l'enveloppe) : non branchée** (intake étage / orientation / etc. à MESURER avant de
   construire, cf. `/memory/project_module_logement.md`). Face 2 étendue (contraste PPRI / TRI /
   nappe au point) et vision module = `docs/board/2026-07-03-vision-module-logement-chatgpt.md`.

@@ -8,6 +8,7 @@ import type { OnrnSinistralite, PerilState } from "@/lib/onrn-sinistralite";
 import type { Face3Snapshot, Posture } from "@/lib/logement-autour-types";
 import type { RegulatoryPlan } from "@/lib/pprn-zonage";
 import { ReportSection, GlassCard } from "@/components/report/kit";
+import { MetricTooltip } from "@/components/MetricTooltip";
 import { PassportTiltScene } from "@/components/report/PassportTiltScene";
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -270,6 +271,17 @@ const ONRN_FREQ_PLAIN: Record<string, string> = {
   "Entre 5 et 10 ‰": "5 à 10 pour 1 000",
   "Plus de 10 ‰": "plus de 10 pour 1 000",
 };
+// Rang ordinal des classes de fréquence. Sert UNIQUEMENT à comparer deux périls d'une même
+// commune quand leurs classes sont strictement séparées (rangs différents). Ce n'est pas un
+// score (ADR-0001 vise le score composite et le verdict, pas la comparaison factuelle d'une
+// même métrique dans une commune) : on rapporte un fait, on ne note ni ne classe la commune.
+const ONRN_FREQ_RANK: Record<string, number> = {
+  "Entre 0 et 1 ‰": 1,
+  "Entre 1 et 2 ‰": 2,
+  "Entre 2 et 5 ‰": 3,
+  "Entre 5 et 10 ‰": 4,
+  "Plus de 10 ‰": 5,
+};
 const ONRN_REPR_LABEL: Record<string, string> = {
   "< 15%": "moins de 15 %",
   "Entre 15 et 30%": "15 à 30 %",
@@ -283,11 +295,17 @@ const SINI_EYEBROW: React.CSSProperties = { fontFamily: "var(--font-mono)", font
 // natif <details>, jamais supprimée, jamais au premier plan.
 function Disclosure({ summary, children }: { summary: string; children: React.ReactNode }) {
   return (
-    <details style={{ borderTop: "1px solid var(--border-1)", paddingTop: 12 }}>
-      <summary style={{ cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fg-4)" }}>
+    <details className="group" style={{ borderTop: "1px solid var(--border-1)" }}>
+      {/* Toute la ligne est cliquable (comportement natif de <summary>), avec une zone de */}
+      {/* frappe haute pour le tactile ; le chevron pivote à l'ouverture (variante Tailwind). */}
+      <summary
+        className="[&::-webkit-details-marker]:hidden"
+        style={{ cursor: "pointer", listStyle: "none", display: "flex", alignItems: "center", gap: 8, padding: "13px 0", fontSize: 13, fontWeight: 500, color: "var(--fg-3)" }}
+      >
+        <span className="transition-transform group-open:rotate-90" aria-hidden style={{ display: "inline-block", fontSize: 11, color: "var(--fg-4)" }}>▸</span>
         {summary}
       </summary>
-      <div style={{ marginTop: 12, display: "grid", gap: 10, fontSize: 12, color: "var(--fg-4)", lineHeight: 1.6 }}>
+      <div style={{ marginTop: 2, marginBottom: 13, display: "grid", gap: 10, fontSize: 12.5, color: "var(--fg-3)", lineHeight: 1.6 }}>
         {children}
       </div>
     </details>
@@ -304,15 +322,18 @@ function Metric({ value, caption }: { value: string; caption: string }) {
   );
 }
 
-function PerilLine({ peril, word, color, state }: { peril: string; word: string; color: string; state: PerilState }) {
+function PerilLine({ peril, word, color, state, tip }: { peril: string; word: string; color: string; state: PerilState; tip: string }) {
   if (state.kind === "indispo") return null;
   return (
     <div style={{ display: "grid", gap: 10 }}>
-      <div style={{ ...SINI_EYEBROW, color }}>{peril}</div>
+      <div style={{ ...SINI_EYEBROW, color, display: "flex", alignItems: "center", gap: 6 }}>
+        <span>{peril}</span>
+        <MetricTooltip text={tip} accent={color} />
+      </div>
       {state.kind === "lecture" && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px 48px" }}>
           <Metric value={onrnLabel(ONRN_COUT_LABEL, state.cout)} caption="coût moyen d’un sinistre indemnisé" />
-          <Metric value={onrnLabel(ONRN_FREQ_PLAIN, state.frequence)} caption="biens assurés concernés (fréquence observée sur la période)" />
+          <Metric value={onrnLabel(ONRN_FREQ_PLAIN, state.frequence)} caption="fréquence des sinistres parmi les biens assurés" />
         </div>
       )}
       {state.kind === "aucun" && (
@@ -336,30 +357,50 @@ function SinistraliteBlock({ sinistralite }: { sinistralite: OnrnSinistralite })
     secheresse.kind === "lecture" ? `sécheresse ${onrnLabel(ONRN_REPR_LABEL, secheresse.representativite)}` : null,
     inondation.kind === "lecture" ? `inondation ${onrnLabel(ONRN_REPR_LABEL, inondation.representativite)}` : null,
   ].filter(Boolean).join(", ");
+  // Comparaison factuelle des deux périls : n'est asservie QUE si les deux sont en lecture ET
+  // que leurs classes de fréquence sont strictement séparées (rangs différents). Sinon muette
+  // (jamais de comparaison quand on ne peut pas la fonder).
+  const freqCompare = (() => {
+    if (secheresse.kind !== "lecture" || inondation.kind !== "lecture") return null;
+    const rs = ONRN_FREQ_RANK[secheresse.frequence] ?? 0;
+    const ri = ONRN_FREQ_RANK[inondation.frequence] ?? 0;
+    if (!rs || !ri || rs === ri) return null;
+    return rs > ri
+      ? { more: "à la sécheresse", less: "à l’inondation" }
+      : { more: "à l’inondation", less: "à la sécheresse" };
+  })();
   return (
     <ReportSection eyebrow="Sinistres indemnisés dans la commune">
-      <GlassCard>
-        <div style={{ display: "grid", gap: 18 }}>
-          {/* Niveau 1 — ce que ça veut dire, en langage courant */}
-          <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>
-            Ce que les assureurs ont historiquement indemnisé dans la commune. Ces chiffres ne prédisent ni un sinistre pour ce logement, ni le prix de son assurance.
-          </p>
-          {/* Niveau 2 — les faits */}
-          <PerilLine peril="Sécheresse (retrait-gonflement des argiles)" word="de sécheresse" color="var(--orange, #fb923c)" state={secheresse} />
-          <PerilLine peril="Inondation (tous types)" word="d’inondation" color="var(--blue, #60a5fa)" state={inondation} />
-          {/* Rappel court sur l'assurance ; le détail va dans le repli */}
-          <p style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
-            Ces données ne permettent pas de prévoir votre cotisation. La surprime CatNat est fixée nationalement.
-          </p>
-          {/* Niveau 3 — méthode et sources, repliées */}
-          <Disclosure summary="Sources et limites">
-            {reprLine && <div>Données 1995-2021, établies sur un échantillon CCR. Couverture du marché local : {reprLine}.</div>}
-            <div>La fréquence est exprimée pour mille biens assurés (‰).</div>
-            <div>La surprime légale CatNat est fixée à 20 % de la prime dommages depuis le 1ᵉʳ janvier 2025. Une modulation selon l&apos;exposition locale est débattue : si elle advenait, le passé local mesuré ici compterait davantage.</div>
-            <div>ONRN (État / CCR / Mission Risques Naturels), via Géorisques. Biens assurés particuliers et professionnels.</div>
-          </Disclosure>
-        </div>
-      </GlassCard>
+      <div style={{ display: "grid", gap: 14 }}>
+        {/* Niveau 1 — ce que ça veut dire, en langage courant, hors de la carte de faits */}
+        <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>
+          Ce que les assureurs ont historiquement indemnisé dans la commune. Ces chiffres ne prédisent ni un sinistre pour ce logement, ni le prix de son assurance.
+        </p>
+        {/* Niveau 2 — les faits, dans la carte ; la conclusion factuelle en tête */}
+        <GlassCard>
+          <div style={{ display: "grid", gap: 18 }}>
+            {/* Lecture transverse : conclusion factuelle en tête des faits, quand elle est fondée */}
+            {freqCompare && (
+              <p style={{ fontSize: 14.5, fontWeight: 500, color: "var(--fg-hi)", lineHeight: 1.6, margin: 0 }}>
+                Dans cette commune, les sinistres indemnisés liés {freqCompare.more} ont été plus fréquents que ceux liés {freqCompare.less}.
+              </p>
+            )}
+            <PerilLine peril="Sécheresse (retrait-gonflement des argiles)" word="de sécheresse" color="var(--orange, #fb923c)" state={secheresse} tip="Le sol argileux gonfle avec l’humidité puis se rétracte en période sèche. Ces mouvements peuvent fissurer les murs et les fondations d’un logement." />
+            <PerilLine peril="Inondation (tous types)" word="d’inondation" color="var(--blue, #60a5fa)" state={inondation} tip="Regroupe tous les types : débordement de cours d’eau, ruissellement de pluie, remontée de nappe et submersion marine." />
+            {/* Rappel court sur l'assurance ; le détail va dans le repli */}
+            <p style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
+              Ces données ne permettent pas de prévoir votre cotisation. La surprime CatNat est fixée nationalement.
+            </p>
+            {/* Niveau 3 — méthode et sources, repliées */}
+            <Disclosure summary="Comprendre les chiffres et leurs limites">
+              {reprLine && <div>Données 1995-2021, établies sur un échantillon CCR. Couverture du marché local : {reprLine}.</div>}
+              <div>La fréquence rapporte les sinistres indemnisés aux biens assurés, exprimée pour mille (‰).</div>
+              <div>La surprime légale CatNat est fixée à 20 % de la prime dommages depuis le 1ᵉʳ janvier 2025. Une modulation selon l&apos;exposition locale est débattue : si elle advenait, le passé local mesuré ici compterait davantage.</div>
+              <div>ONRN (État / CCR / Mission Risques Naturels), via Géorisques. Biens assurés particuliers et professionnels.</div>
+            </Disclosure>
+          </div>
+        </GlassCard>
+      </div>
     </ReportSection>
   );
 }
@@ -401,33 +442,36 @@ const HAZARD_LABEL: Record<string, string> = {
   "PPRN-S": "Séisme",
 };
 
+// Libellé de zone lisible et non redondant : « Zone B2 — faiblement à moyennement exposée ».
+// La donnée répète souvent le code dans le nom (« … (B2) ») et le préfixe « Zone » : on purge.
+function zoneLabel(zoneCode: string | null, zoneName: string | null): string | null {
+  let name = (zoneName ?? "").trim();
+  if (zoneCode && name.endsWith(`(${zoneCode})`)) name = name.slice(0, -(zoneCode.length + 2)).trim();
+  name = name.replace(/^zone\s+/i, "").trim();
+  if (zoneCode && name) return `Zone ${zoneCode} — ${name}`;
+  if (zoneCode) return `Zone ${zoneCode}`;
+  return name || null;
+}
+
 function RegulatoryPlanCard({ plan, roleLabel }: { plan: RegulatoryPlan; roleLabel?: string }) {
-  const hazard = plan.hazardModel ? HAZARD_LABEL[plan.hazardModel] ?? null : null;
   const fiche = plan.gasparId
     ? `https://www.georisques.gouv.fr/donnee-risques/PPR/Fiche-ppr/pprn/${plan.gasparId}`
     : null;
   return (
-    <div style={{ display: "grid", gap: 6 }}>
+    <div style={{ display: "grid", gap: 10 }}>
       {roleLabel && <div style={FACE3_FAMILY}>{roleLabel}</div>}
-      {hazard && (
-        <div style={{ fontSize: 12.5, color: "var(--fg-4)" }}>Risque concerné : <span style={{ color: "var(--fg-2)" }}>{hazard}</span></div>
-      )}
       {plan.zones.length > 0 ? (
         plan.zones.map((z, i) => {
           const g = REGIME_GLOSS[z.regimeCode ?? ""] ?? { title: z.regime ?? "Zone réglementée", note: "Le détail dépend du règlement officiel de cette zone." };
+          const zl = zoneLabel(z.zoneCode, z.zoneName);
           return (
-            <div key={i} style={{ display: "grid", gap: 5 }}>
-              {/* Fait, en langage courant, avant le terme administratif */}
-              <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
-                {z.zoneCode || z.zoneName ? (
-                  <>Cette adresse relève de la zone <strong style={{ color: "var(--fg-hi)" }}>{[z.zoneCode, z.zoneName].filter(Boolean).join(" — ")}</strong>{plan.plan ? <> du <strong style={{ color: "var(--fg-hi)" }}>{plan.plan}</strong></> : null}.</>
-                ) : (
-                  <>Cette adresse relève d’une zone réglementée{plan.plan ? <> du <strong style={{ color: "var(--fg-hi)" }}>{plan.plan}</strong></> : null}.</>
-                )}
-              </div>
-              {/* Terme réglementaire officiel, secondaire, coloré par sévérité */}
-              <div style={{ fontSize: 13, fontWeight: 500, color: regimeColor(z.regimeCode) }}>{g.title}</div>
-              <div style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>{g.note}</div>
+            <div key={i} style={{ display: "grid", gap: 4 }}>
+              {/* Terme réglementaire officiel, en ancre scannable, coloré par sévérité */}
+              <div style={{ fontSize: 15, fontWeight: 500, color: regimeColor(z.regimeCode) }}>{g.title}</div>
+              {/* Plan puis zone, en faits secondaires (une idée par ligne, pas de phrase dense) */}
+              {plan.plan && <div style={{ fontSize: 13.5, color: "var(--fg-2)", lineHeight: 1.5 }}>{plan.plan}</div>}
+              {zl && <div style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.5 }}>{zl}</div>}
+              <div style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, marginTop: 2 }}>{g.note}</div>
             </div>
           );
         })
@@ -499,15 +543,19 @@ function RegulatoryStatusBlock({ georisques }: { georisques: ApiResponse["georis
                 </div>
               )}
               {/* Niveau 3 — méthode et détail technique, repliés */}
-              <Disclosure summary="Détail réglementaire et méthode">
+              <Disclosure summary="Comprendre ce classement">
                 <div>Grain : adresse (la donnée répond au point géocodé, pas à la géométrie de la parcelle).</div>
-                {plans.map((p, i) => (
-                  <div key={i}>
-                    {p.plan ?? "Plan"}
-                    {p.zones[0]?.regime ? ` · régime officiel : ${p.zones[0].regime}` : ""}
-                    {p.updatedAt ? ` · date de référence Géorisques : ${p.updatedAt}` : ""}
-                  </div>
-                ))}
+                {plans.map((p, i) => {
+                  const hazard = p.hazardModel ? HAZARD_LABEL[p.hazardModel] ?? null : null;
+                  return (
+                    <div key={i}>
+                      {p.plan ?? "Plan"}
+                      {hazard ? ` · risque concerné : ${hazard}` : ""}
+                      {p.zones[0]?.regime ? ` · régime officiel : ${p.zones[0].regime}` : ""}
+                      {p.updatedAt ? ` · date de référence Géorisques : ${p.updatedAt}` : ""}
+                    </div>
+                  );
+                })}
                 <div>Géorisques (PPRN, information réglementaire). Le classement ne résume pas le règlement : les travaux autorisés ou interdits ne se lisent que dans le règlement officiel de la zone.</div>
               </Disclosure>
             </>
