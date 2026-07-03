@@ -1,91 +1,47 @@
-# Brief de passation — session vivante
+# Passation — session en cours
 
-**Horodatage** : 2026-07-03
-**Branche courante** : `main` (HEAD = `da556ab`, à pousser). Arbre propre après commit.
-
----
+**Horodatage** : 2026-07-03 16:11 · **Branche** : `main` (synchronisée avec `origin/main`, arbre propre)
 
 ## Objectif en cours
+Module **Logement**, Face 2 (risques du bâti) : on vient de construire puis polir la brique **« Statut réglementaire à cette adresse »** (zonage PPRN au point) et de refondre la Face 2 en **niveaux de lecture** (divulgation progressive). Dernier geste : deux ajustements UX sur le **rapport Territoire** (interversion synthèse/mémoire du lieu + animation au scroll). Tout est commité et poussé. La session est à un point d'arrêt propre.
 
-**Chantier harmonisation du rapport : CLÔTURÉ et poussé.** Le kit de cartes partagé
-(`ReportSection` + `GlassCard`) est la source unique du langage visuel ; Logement le consomme,
-sa prose est remontée au registre de Territoire, ses cartes sont en verre arrondi et son passeport
-a l'effet 3D. Territoire n'est pas migré (adoption = fast-follow mécanique).
+## Fait dans cette session (du plus ancien au plus récent, tout sur `main`, poussé)
+- Reprise du handoff précédent : merge Face 3 Logement « Autour de cette adresse ».
+- `4434bad` : Face 3 affiche le **type précis** d'équipement (BPE TYPEQU conservé dans les shards + `TYPEQU_LABEL`), shards régénérés.
+- `9ba85cb` : Face 3 pleine largeur + polissage (alignement distances, sous-titres, footer ODbL).
+- `34d6bed` : **décision Face 4** (valeur immobilière parquée, engagement documenté déparqué) — vault + board.
+- `6782ad8` : **spike PPRI** — `/api/v2/gaspar/pprn` suffit (typeReg COVADIS rempli 12/12 sur 16 adresses testées).
+- `a28dfe9` : brique **statut réglementaire au point** (lib pure `src/lib/pprn-zonage.ts` + 6 tests, `georisques.ts` remonte `regulatoryPlans`, rendu `LogementModule.tsx`, chips PPRN retirées de « Risques du bâti »).
+- `e2c3a30`, `45da5e9`, `5b87a7c` : polissage Face 2 (grain « adresse » pas « parcelle », couleur par régime, date « référence Géorisques », refonte sinistralité, titres de péril colorés, métriques en flex).
+- `74036ad` + `5be622a` : **Face 2 en niveaux de lecture** (composants `Disclosure`, `Metric`, `Face2Implication` ; fréquence « pour 1 000 » ; méthode repliée en `<details>`) + doctrine gravée dans le vault.
+- `2999364` : **rapport Territoire** — synthèse (`QuartierSynthesis`) passe **avant** la mémoire du lieu (`TerritoryYearsBand`) ; l'animation de la ligne des années se déclenche à l'entrée dans le viewport (`IntersectionObserver`, `fill:both`) au lieu du montage.
 
-**Nouvelle cible : suite du module Logement.** Le module est aujourd'hui une lecture Face 2
-(sinistralité ONRN) branchée sur une Face « risques du bâti » + DPE. Reste à brancher/finir les
-autres faces et la plomberie autour (voir « Prochaine étape »).
-
-## Fait dans cette session
-
-1. **Face 2 Logement — sinistralité ONRN** (LIVRÉ + poussé) : bloc « Ce que le risque a déjà
-   coûté ici » (coût moyen + fréquence ONRN sécheresse **et** inondation, 1995-2021, classes
-   verbatim gatées par la représentativité, pédagogie CatNat non prédictive). Lib pure testée
-   `src/lib/onrn-sinistralite.ts` (8/8), JSON runtime, câblage API. Vérifié navigateur (3 états).
-2. **Harmonisation du rapport (CLÔTURÉ)** :
-   - `d7d5040` kit `src/components/report/kit.tsx` (`ReportSection` + `GlassCard`).
-   - `901ba5f` migration + harmonisation de `LogementModule.tsx` : sections de résultat passées au
-     verre arrondi ; prose remontée à ~15-16px (au lieu de 11-13px) ; **tous** les encarts arrondis
-     (champ/bouton de recherche, alertes, `ActionCard`, lignes de scénario d'audit, signaux) ;
-     passeport du bien enveloppé dans `PassportTiltScene` (dépliage + tilt curseur + parallaxe
-     sceau DPE/adresse, en miroir du passeport territorial).
-   - `da556ab` doctrine : section « Kit de cartes du rapport » + règle d'harmonisation dans
-     `docs/vault/recherches/inventaire-design.md`.
-   - Vérifié navigateur (3 adresses : Toulouse/Bordeaux/Lille, 0 erreur console, tsc + eslint verts).
-
-## Décisions prises (porteur)
-
-- **Le rapport = un seul produit visuel.** Un écran de rapport qui lit « plus petit » ou « plus
-  carré » que Territoire est un défaut d'harmonisation (gravé dans l'inventaire design).
-- **Registre typo de lecture** : la prose d'un module se tient à ~15-16px comme Territoire, pas
-  11-13px. Le porteur décrivait le confort visé comme « Territoire zoomé à ~110 % ».
-- **Structure partagée, accent propre au module** : Territoire = info/bleu, Logement = taupe
-  (`#c8b89a`). Le kit ne porte que le chrome, jamais le contenu.
-- **Commit direct sur `main` + push** = norme de session (pas de PR sur ce repo).
+## Décisions prises (porteur) déjà gravées au vault/mémoire
+- Face 4 : valeur immobilière **reste parquée** ; « engagement financier et réglementaire documenté » déparqué ; 1er morceau = statut réglementaire au point (en Face 2).
+- Deux corrections doctrinales : reformulation « pas de donnée de marché honnête » ; retrait de « coût que le marché ignore encore ».
+- Statut réglementaire : **tous les aléas** (pas seulement inondation) ; **chips PPRN retirées** du bloc Risques (dé-doublonnage).
+- Hook assurance **dé-daté** : ne plus nommer « Langreney » ni « en cours », garder l'idée de modulation locale. (Tranché par défaut, porteur absent au moment de la question — **réversible** vers une version neutre s'il préfère.)
+- Face 2 en niveaux : pas de comparaison auto inter-péril (ADR-0001), pas de chapeau « ce qu'il faut retenir » global (redondant synthèse IA), terme réglementaire officiel gardé en secondaire.
 
 ## État git
-
-- Branche `main`, HEAD `da556ab`. **Commits faits, push à confirmer** (dernière commande de la
-  session = `git push`). **Aucune PR.** Arbre propre (hors ce fichier).
-- Route dev jetable `src/app/dev-logement-preview/` **supprimée** (elle a servi la vérif navigateur).
+- Branche `main`, **0 commit non poussé**, **aucun fichier modifié non commité**, **aucune PR ouverte**.
+- Mémoire projet (`/memory/project_module_logement.md`) et vault (`docs/vault/modules/logement.md` + `docs/board/2026-07-03-decision-face4-valeur-vs-engagement.md`) à jour.
 
 ## Prochaine étape immédiate
-
-**Suite du module Logement — l'améliorer.** Le porteur veut avancer sur ce qui reste (cf. fiche
-mémoire `project_module_logement.md`, section « RESTE »). Chantiers ouverts, non priorisés :
-
-1. **Faces 1/3/4 non branchées** : le module lit aujourd'hui DPE + risques du bâti + sinistralité
-   (Face 2). Restent à câbler, selon la doctrine `docs/vault/modules/logement.md` :
-   - Face 1 « dedans » : DPE/confort été (îlot de chaleur CSTB en réserve, cf. `icu_ilot_chaleur_data.md`).
-   - Face 3 « autour immédiat » : buffer marche BPE + OSM.
-   - Face 4 « financier » : assurance DOCUMENTÉE (matérialité passée + parcelle + régime CatNat),
-     jamais prédite.
-2. **Dashboard PostHog** acheteur/résident à créer (l'instrumentation `logement_analyzed` /
-   `logement_projet_declare` émet déjà `relation_inferee`, `in_declared_commune`, `projet`).
-3. **Mapping INSEE 107 communes fusionnées** (certaines adresses tombent en `indispo`).
-
-Avant de coder : relire `docs/vault/modules/logement.md` (doctrine des 4 faces, frontière
-Santé = pollution/sols/industrie/radon/air, valeur immo prédite parquée, HLM exclu) et **brainstormer
-avec le porteur** quelle face prioriser.
+Choix ouvert (aucune tâche en cours à finir). Deux candidats, par ordre de recommandation :
+1. **Remontée de nappe** (enrichissement Face 2) : couche Géorisques nationale, simple, compréhensible. À câbler comme le PPRN (nouvel appel dans `src/lib/georisques.ts`, endpoint à identifier ; token `GEORISQUES_API_TOKEN` déjà en `.env.local`, auth Bearer). **Ne pas** enchaîner mécaniquement le TRI derrière (partiel + scénarios = mini-spec requise d'abord).
+2. **Vérification visuelle en session payante** du module Logement (Face 2/3) et du rapport Territoire (interversion + animation scroll) : rien n'a été vérifié à l'œil, seulement types/lint/tests (le rendu est derrière `canAccessCompleteReport`).
 
 ## À lire d'abord à la reprise
-
-1. `MEMORY.md` (index) + fiche **`project_module_logement.md`** (état complet du module, RESTE).
-2. `docs/vault/modules/logement.md` (doctrine des 4 faces, ce qui est branché/parqué).
-3. `src/components/report/LogementModule.tsx` (le module ; API du kit via `kit.tsx`).
-4. `docs/vault/recherches/inventaire-design.md` (règle d'harmonisation du rapport, à respecter pour
-   tout nouvel écran Logement).
-5. `docs/handoff/AUTO-SNAPSHOT.md` (fraîcheur repo).
+1. `/memory/MEMORY.md` puis `/memory/project_module_logement.md` (état complet du module, très à jour).
+2. `docs/vault/modules/logement.md` (doctrine + état de mise en œuvre, dont divulgation progressive et décision Face 4).
+3. `docs/board/2026-07-03-decision-face4-valeur-vs-engagement.md` (raisonnement + protocole spike PPRI + tableau de complétude).
+4. `docs/handoff/AUTO-SNAPSHOT.md` (fraîcheur, daté du 26/06 — plus ancien que ce brief).
 
 ## Pièges / fils ouverts
-
-- **Auth** : `/rapport/logement` est derrière `canAccessCompleteReport` (payant). La vérif visuelle
-  passait par une route dev jetable (supprimée) ; le vrai parcours connecté n'a pas été retesté.
-- **`next build` complet non lancé** ce chantier (conflit dev server) : la trace serverless de la
-  Face 2 (`outputFileTracingIncludes`) suit le pattern existant mais n'est pas prouvée par un build.
-- **Tension éditoriale ouverte** (posée par l'Editorial, non tranchée) : « retrait-gonflement des
-  argiles » (jargon dans `{mecanisme}`) à gloser ou assumer.
-- **Adoption du kit par Territoire** = fast-follow documenté (mécanique, à faire quand on peut
-  vérifier Territoire au navigateur).
-- Script de pilotage navigateur réutilisable : `…/scratchpad/drive-face2.mjs` (3 adresses),
-  binaire `chrome-headless-shell` via `PW_CHROMIUM`, dev server sur :3000.
+- **Rendu non vérifié en navigateur** (session payante) pour toute la Face 2, la Face 3 et les changements Territoire. Comportement déterministe, mais l'œil manque.
+- **Hook Langreney dé-daté** : choix par défaut (porteur absent). Version neutre possible en une ligne dans `SinistraliteBlock` (`LogementModule.tsx`, Disclosure « Sources et limites »).
+- **API Géorisques v2 = 401 sans clé** : tout test d'API passe par `GEORISQUES_API_TOKEN` (`.env.local`), header `authorization: Bearer`. Le projet appelle `/api/v2/gaspar/pprn` (base GASPAR) ; le zonage cartographique fin vit dans une autre couche non appelée (non nécessaire, cf. spike).
+- **Animation Territoire** : `TerritoryYearsBand` masque ses ticks (opacity 0) au montage puis anime à l'entrée viewport. Le masquage a lieu hors écran car la bande est désormais **sous** la synthèse. Si elle repassait au-dessus de la ligne de flottaison, un flash « visible → masqué → animé » pourrait apparaître (basculer alors en `useLayoutEffect`).
+- **Fréquence ONRN** : affichée « X pour 1 000 » (biens assurés), jamais « par an » — définition du dénominateur/période non vérifiée. Ne pas ajouter « par an » sans la doc.
+- **Coquille cosmétique** dans le message du commit `e2c3a30` (caractère parasite) ; le code est correct. Non corrigé (réécriture d'historique non demandée).
