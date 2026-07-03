@@ -32,7 +32,10 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
    (gatés « cartographié »), distance à une infrastructure bruyante OSM (proxy d'exposition,
    jamais un décibel). En **liste + distances**, jamais un score composite.
 4. **Ce que ça engage (le financier)** : assurance (voir règle de frontière), coûts de
-   rénovation. Récit : le coût futur que le marché ignore encore.
+   rénovation, statut réglementaire au point (PPR). Récit : le coût qu'un acquéreur doit
+   documenter avant de s'engager. (Ancienne formule « le coût futur que le marché ignore
+   encore » retirée le 2026-07-03 : elle supposait de savoir ce que le marché a intégré,
+   soit exactement la supposition que l'ADR-0001 interdit.)
 
 **Exclut** (renvoyer au module légitime) :
 - **Expositions pollution / santé → Santé** : sols pollués et friches, industrie proche,
@@ -41,8 +44,15 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
 - **Agrégats communaux → Territoire / comparateur** : vie locale, calme sonore, démographie,
   typologie. Logement n'en fait la lecture qu'au grain adresse (« à votre porte »).
 - **Trajets quotidiens → Mobilité.** **Composition sociale (HLM) : exclue** (donnée dormante).
-- **Valeur immobilière prédite : parquée** (pas de donnée de marché honnête aujourd'hui ;
-  question « le lecteur veut-il un chiffre de prix ? » non tranchée).
+- **Valeur immobilière individuelle : parquée.** Formulation corrigée le 2026-07-03 (« pas de
+  donnée de marché honnête » était imprécis) : il **existe** des données de transactions
+  honnêtes (DVF) et des effets statistiques observés (valeur verte notariale), mais **aucune
+  ne permet d'estimer honnêtement la valeur actuelle ou future d'un logement précis** à partir
+  de son adresse, de son DPE ou de ses risques. Restent interdits : estimation du bien, prix
+  cible, décote climatique, trajectoire de valeur, label « résilient / fragilisé », application
+  d'un % de valeur verte au bien, DVF en bloc de comparaison (il « arme le portail immo », hors
+  moat). L'**engagement financier et réglementaire documenté**, lui, est déparqué (voir État de
+  mise en œuvre, Face 4).
 - **Ce que l'open data ne porte pas** : logement traversant, luminosité / orientation réelle.
   À ne pas promettre ; au mieux à demander à l'utilisateur.
 
@@ -92,8 +102,26 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
   (segments/polygones), pas point↔sommet. `sourceStatus` par source (panne observable). Vérifié
   bout-en-bout (Toulouse : rail 1006 m, vert 40 m, cache chaud). Libs pures TDD (18 tests).
   Spec/plan : `docs/superpowers/{specs,plans}/2026-07-03-logement-face3-*`.
-- **Faces 1, 4 : non branchées** (voir `/memory/project_module_logement.md`). Face 2 étendue
-  (contraste PPRI/TRI/nappe au point) et vision module = `docs/board/2026-07-03-vision-module-logement-chatgpt.md`.
+- **Face 4 (le financier) : direction tranchée le 2026-07-03, non branchée.** Décision après un
+  aller-retour ChatGPT (trace : `docs/board/2026-07-03-decision-face4-valeur-vs-engagement.md`) :
+  la valeur immobilière individuelle **reste parquée** ; l'**engagement financier et réglementaire
+  documenté** se déparque. Son seul nouveau morceau **industrialisable aujourd'hui** est le
+  **statut réglementaire au point** (en zone réglementée oui/non ; régime prescriptions /
+  interdiction si disponible ; code + libellé local ; date d'approbation ; renvoi au règlement
+  officiel). Il vit en **Face 2** (exposition), pas dans une Face 4 autonome ; la sortie transverse
+  « À vérifier avant de décider » porte la conclusion actionnable, adaptée à la posture (résident :
+  « ce que ce logement peut vous conduire à adapter, vérifier ou anticiper »). Le reste (audit,
+  coût conventionnel DPE, échéances passoires) est **déjà affiché en Face 1**. **NE PAS construire** :
+  synthèse des droits à construire, verdict de « marge de manœuvre », éligibilité Barnier « pour ce
+  bien », Face 4 dupliquant l'énergétique. **Nuance API à lever par un spike AVANT tout build** : le
+  projet appelle `/api/v2/gaspar/pprn` (base GASPAR des procédures) ; le `typeReg` COVADIS normalisé
+  (prescriptions / interdiction) vit dans la **couche de zonage cartographique** (celle du
+  `rapport_pdf` / WFS DDT), non appelée aujourd'hui. Premier ticket = mesurer sur 50-100 adresses
+  PPRI ce que `listTypeReg` renvoie réellement (clé projet requise : v2 = 401 sans inscription) et
+  comparer à la couche cartographique, pour caler le niveau de récit honnêtement restituable.
+- **Face 1 (l'enveloppe) : non branchée** (intake étage / orientation / etc. à MESURER avant de
+  construire, cf. `/memory/project_module_logement.md`). Face 2 étendue (contraste PPRI / TRI /
+  nappe au point) et vision module = `docs/board/2026-07-03-vision-module-logement-chatgpt.md`.
 
 ## Liens
 
