@@ -64,9 +64,16 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
 - **Assurance : documentée, jamais prédite.** L'objet autorisé de la phrase = la **matérialité
   passée** du risque (sinistres indemnisés, coût, fréquence, échelle commune, classes verbatim,
   gaté par la représentativité) + l'**exposition de la parcelle** + la **pédagogie du régime
-  CatNat** (surprime nationale uniforme aujourd'hui, débat post-Langreney sur la modulation
-  locale). Interdits fermes : « vous serez surprimé / refusé », « votre maison fissurera »,
-  « les maisons d'ici » (dire « les biens assurés »), tout euro faux-précis.
+  CatNat** (surprime nationale uniforme aujourd'hui, 20 % depuis le 01/01/2025 ; hook moat = une
+  modulation *locale* de la surprime est débattue, **dé-datée dans l'UI** : ne plus nommer
+  « rapport Langreney » ni « en cours », qui périment vite). Interdits fermes : « vous serez
+  surprimé / refusé », « votre maison fissurera », « les maisons d'ici » (dire « les biens
+  assurés »), tout euro faux-précis. **« Ne fixe pas le prix » est trop large** : dire « ne permet
+  pas de prédire le montant ni les conditions » (la surprime n'est qu'une part de la prime MRH).
+  **Classes verbatim ONRN reformatables typographiquement** si les BORNES restent identiques
+  (« Entre 10 et 20k€ » → « 10 000 à 20 000 € ») : la doctrine verbatim interdit d'inventer une
+  précision, pas de corriger une typo. **Fréquence ‰ = pour mille biens assurés** ; ne PAS inventer
+  « par an » (définition ONRN du dénominateur/période non vérifiée).
 - **Récit décisionnel en défaut, pas un inventaire d'indicateurs.** Pas de grille brute
   label/valeur en vue principale, pas de synthèse planquée derrière un bouton.
 - **Aucun score composite ni verdict global calculé** (ADR-0001 : on pose, on ne note pas).
@@ -129,7 +136,15 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
   officiel + glose, multi-plans multi-aléa nommés (`modeleProcedure`), 3 états A/B/C distincts, date =
   « fiche mise à jour le » (jamais « approuvé »), lien fiche Géorisques depuis `idGaspar` (HTTP 200
   vérifié), jamais les travaux autorisés/interdits. Chips PPRN retirées du bloc « Risques du bâti »
-  (dé-doublonnage, décision porteur). Grain « adresse » affiché (vs sinistralité « commune »).
+  (dé-doublonnage, décision porteur). **Grain « adresse » (jamais « parcelle »)** : l'API répond au
+  point géocodé, pas à la géométrie cadastrale (bug corrigé le 2026-07-03). Polissage même jour :
+  couleur du titre par sévérité réglementaire (prescriptions ambre / interdiction orange /
+  interdiction stricte rouge, plus de rouge global sur une simple prescription) ; date =
+  « Date de référence Géorisques » (jamais « approuvé » ni « fiche mise à jour » : seul
+  `dateModification` existe, sémantique non certaine). **Bloc sinistralité refondu même jour** :
+  titre « Sinistralité indemnisée dans la commune » (l'ancien « Ce que le risque a déjà coûté ici »
+  sur-promettait), métriques (coût moyen / fréquence) au lieu d'un paragraphe, classes ONRN
+  reformatées, « inondation (tous types) » sans liste fausse-exhaustive, phrase assurance corrigée.
 - **Face 1 (l'enveloppe) : non branchée** (intake étage / orientation / etc. à MESURER avant de
   construire, cf. `/memory/project_module_logement.md`). Face 2 étendue (contraste PPRI / TRI /
   nappe au point) et vision module = `docs/board/2026-07-03-vision-module-logement-chatgpt.md`.

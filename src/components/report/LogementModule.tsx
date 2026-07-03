@@ -253,24 +253,57 @@ function ProjectProbe({ answered, onAnswer }: { answered: string | null; onAnswe
 // Face 2 — matérialité assurantielle passée (ONRN/CCR, 1995-2021). Coût moyen +
 // fréquence des sinistres indemnisés, classes verbatim gatées par la
 // représentativité. Jamais prédictif : voir docs/vault/modules/logement.md.
-function PerilLine({ peril, mecanisme, state }: { peril: string; mecanisme: string; state: PerilState }) {
+// Reformatage typographique des classes verbatim ONRN : mêmes BORNES exactes, libellé propre
+// (le verbatim source est incohérent : « 20k€ » vs « 10 k€ »). On n'invente aucune précision.
+const ONRN_COUT_LABEL: Record<string, string> = {
+  "Entre 0 et 2,5 k€": "moins de 2 500 €",
+  "Entre 2,5 et 5 k€": "2 500 à 5 000 €",
+  "Entre 5 et 10 k€": "5 000 à 10 000 €",
+  "Entre 10 et 20k€": "10 000 à 20 000 €",
+  "Plus de 20 k€": "plus de 20 000 €",
+};
+const ONRN_FREQ_LABEL: Record<string, string> = {
+  "Entre 0 et 1 ‰": "moins de 1 ‰",
+  "Entre 1 et 2 ‰": "1 à 2 ‰",
+  "Entre 2 et 5 ‰": "2 à 5 ‰",
+  "Entre 5 et 10 ‰": "5 à 10 ‰",
+  "Plus de 10 ‰": "plus de 10 ‰",
+};
+const ONRN_REPR_LABEL: Record<string, string> = {
+  "< 15%": "moins de 15 %",
+  "Entre 15 et 30%": "15 à 30 %",
+  "Entre 30 et 50%": "30 à 50 %",
+  "> 50%": "plus de 50 %",
+};
+const onrnLabel = (map: Record<string, string>, v: string) => map[v] ?? v; // repli = verbatim
+const SINI_EYEBROW: React.CSSProperties = { fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" };
+
+function PerilLine({ peril, state }: { peril: string; state: PerilState }) {
   if (state.kind === "indispo") return null;
   return (
-    <div style={{ display: "grid", gap: 6 }}>
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" }}>
-        {peril}
-      </div>
-      <div style={{ fontSize: 15, color: "var(--fg-2)", lineHeight: 1.65 }}>
-        {state.kind === "lecture" && (
-          <>Sur 1995-2021, les sinistres {mecanisme} indemnisés pour les biens assurés de cette commune ont eu un coût moyen de <strong style={{ color: "var(--fg-hi)" }}>{state.cout}</strong> et une fréquence de <strong style={{ color: "var(--fg-hi)" }}>{state.frequence}</strong>. Chiffres établis sur l&apos;échantillon CCR, qui couvre ici {state.representativite} du marché.</>
-        )}
-        {state.kind === "aucun" && (
-          <>Aucun sinistre {peril.toLowerCase()} répertorié par la CCR pour les biens assurés de cette commune sur 1995-2021. L&apos;échantillon couvre environ la moitié du marché : un historique vide n&apos;exclut pas une exposition future.</>
-        )}
-        {state.kind === "faible_repr" && (
-          <>Des sinistres {peril.toLowerCase()} sont répertoriés ici, mais l&apos;échantillon assurantiel local est trop réduit (représentativité {state.representativite}) pour en tirer une lecture fiable.</>
-        )}
-      </div>
+    <div style={{ display: "grid", gap: 10 }}>
+      <div style={SINI_EYEBROW}>{peril}</div>
+      {state.kind === "lecture" && (
+        <>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px,1fr))", gap: 14 }}>
+            <Block label="Coût moyen par sinistre indemnisé" value={onrnLabel(ONRN_COUT_LABEL, state.cout)} />
+            <Block label="Fréquence (pour mille biens assurés)" value={onrnLabel(ONRN_FREQ_LABEL, state.frequence)} />
+          </div>
+          <div style={{ fontSize: 12, color: "var(--fg-4)", lineHeight: 1.6 }}>
+            Données 1995-2021 · échantillon CCR couvrant {onrnLabel(ONRN_REPR_LABEL, state.representativite)} du marché local.
+          </div>
+        </>
+      )}
+      {state.kind === "aucun" && (
+        <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65 }}>
+          Aucun sinistre {peril.toLowerCase()} indemnisé répertorié par la CCR dans cette commune sur 1995-2021. L&apos;échantillon couvre environ la moitié du marché : un historique vide n&apos;exclut pas une exposition future.
+        </div>
+      )}
+      {state.kind === "faible_repr" && (
+        <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65 }}>
+          Des sinistres {peril.toLowerCase()} sont répertoriés ici, mais l&apos;échantillon assurantiel local est trop réduit (représentativité {onrnLabel(ONRN_REPR_LABEL, state.representativite)}) pour en tirer une lecture fiable.
+        </div>
+      )}
     </div>
   );
 }
@@ -279,13 +312,13 @@ function SinistraliteBlock({ sinistralite }: { sinistralite: OnrnSinistralite })
   const { secheresse, inondation } = sinistralite;
   if (secheresse.kind === "indispo" && inondation.kind === "indispo") return null;
   return (
-    <ReportSection eyebrow="Ce que le risque a déjà coûté ici">
+    <ReportSection eyebrow="Sinistralité indemnisée dans la commune">
       <GlassCard>
         <div style={{ display: "grid", gap: 18 }}>
-          <PerilLine peril="Sécheresse" mecanisme="sécheresse (retrait-gonflement des argiles)" state={secheresse} />
-          <PerilLine peril="Inondation" mecanisme="inondation (tous types : coulée de boue, remontée de nappe, submersion marine)" state={inondation} />
+          <PerilLine peril="Sécheresse (retrait-gonflement des argiles)" state={secheresse} />
+          <PerilLine peril="Inondation (tous types)" state={inondation} />
           <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", fontSize: 12, color: "var(--fg-4)", lineHeight: 1.6 }}>
-            Aujourd&apos;hui, ce passé local ne fixe pas le prix de votre assurance : le régime CatNat finance ces indemnisations par une surprime légale uniforme partout en France (portée à 20 % au 1ᵉʳ janvier 2025). Un débat en cours (rapport Langreney) pose la question d&apos;une modulation selon l&apos;exposition locale.
+            Ces données historiques ne permettent pas de prédire le montant de votre assurance ni les conditions proposées pour ce logement. La surprime légale CatNat est fixée nationalement à 20 % de la prime dommages depuis le 1ᵉʳ janvier 2025. Une modulation de cette surprime selon l&apos;exposition locale est débattue : si elle advenait, le passé local mesuré ici compterait davantage.
           </div>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.8 }}>
             ONRN (État / CCR / Mission Risques Naturels), via Géorisques. Sinistres indemnisés 1995-2021, biens assurés particuliers et professionnels.
@@ -308,6 +341,20 @@ const REGIME_GLOSS: Record<string, { title: string; note: string }> = {
   "05": { title: "Zone où un délaissement est possible", note: "Régime réglementaire particulier. Le détail dépend du règlement officiel de cette zone." },
   "06": { title: "Zone où une expropriation est possible", note: "Régime réglementaire particulier. Le détail dépend du règlement officiel de cette zone." },
 };
+// Couleur du titre par sévérité RÉGLEMENTAIRE officielle (pas un score) : prescriptions =
+// ambre du rapport, interdiction = orange, interdiction stricte = rouge. Évite qu'une simple
+// prescription ressemble à une alerte critique.
+const REGIME_COLOR: Record<string, string> = {
+  "01": "var(--yellow, #b8a042)",
+  "02": "var(--yellow, #b8a042)",
+  "03": "var(--orange, #c47a3a)",
+  "04": "var(--red, #f87171)",
+  "05": "var(--orange, #c47a3a)",
+  "06": "var(--red, #f87171)",
+};
+function regimeColor(code: string | null): string {
+  return REGIME_COLOR[code ?? ""] ?? "var(--fg-hi)";
+}
 // Aléa lisible à partir du modèle de procédure (bonus ; à défaut on s’appuie sur le nom du plan).
 const HAZARD_LABEL: Record<string, string> = {
   "PPRN-I": "Inondation",
@@ -332,7 +379,7 @@ function RegulatoryPlanCard({ plan, roleLabel }: { plan: RegulatoryPlan; roleLab
           const g = REGIME_GLOSS[z.regimeCode ?? ""] ?? { title: z.regime ?? "Zone réglementée", note: "Le détail dépend du règlement officiel de cette zone." };
           return (
             <div key={i} style={{ display: "grid", gap: 5 }}>
-              <div style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)" }}>{g.title}</div>
+              <div style={{ fontSize: 15, fontWeight: 500, color: regimeColor(z.regimeCode) }}>{g.title}</div>
               <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
                 {z.zoneCode || z.zoneName ? (
                   <>Cette adresse relève de la zone <strong style={{ color: "var(--fg-hi)" }}>{[z.zoneCode, z.zoneName].filter(Boolean).join(" — ")}</strong>{plan.plan ? <> du <strong style={{ color: "var(--fg-hi)" }}>{plan.plan}</strong></> : null}.</>
@@ -356,7 +403,7 @@ function RegulatoryPlanCard({ plan, roleLabel }: { plan: RegulatoryPlan; roleLab
       )}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.04em", color: "var(--fg-4)" }}>
         {hazard && <span>Aléa : {hazard}</span>}
-        {plan.updatedAt && <span>Fiche mise à jour le {plan.updatedAt}</span>}
+        {plan.updatedAt && <span>Date de référence Géorisques : {plan.updatedAt}</span>}
         {fiche && (
           <a href={fiche} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-dim, #7a6e60)", textDecoration: "underline" }}>
             Fiche du plan sur Géorisques
@@ -370,12 +417,12 @@ function RegulatoryPlanCard({ plan, roleLabel }: { plan: RegulatoryPlan; roleLab
 function RegulatoryStatusBlock({ georisques }: { georisques: ApiResponse["georisques"] }) {
   const g = georisques?.parcel ?? georisques?.address;
   const plans = g?.regulatoryPlans ?? [];
-  const grain = georisques?.parcel ? "parcelle" : "adresse";
   return (
-    <ReportSection eyebrow="Statut réglementaire à cette adresse" tone="red">
+    <ReportSection eyebrow="Statut réglementaire à cette adresse" tone="accent">
       <GlassCard>
         <div style={{ display: "grid", gap: 16 }}>
-          <div style={FACE3_FAMILY}>Grain : {grain}</div>
+          {/* Grain « adresse » : l'API répond au point géocodé, jamais à la géométrie de la parcelle. */}
+          <div style={FACE3_FAMILY}>Grain : adresse</div>
           {!g ? (
             // État B : la source n'a pas permis de qualifier le point.
             <div style={{ display: "grid", gap: 5 }}>
