@@ -303,7 +303,7 @@ const FACE3_CAT_LABEL: Record<string, string> = {
   alimentation: "Alimentation quotidienne",
   education: "Éducation",
   transports: "Transports",
-  services: "Services essentiels",
+  services: "Services du quotidien",
 };
 // Sous-titre de brique (vie quotidienne / vigilance / repère) et libellé de famille
 // (métadonnée secondaire au-dessus du type précis). Rendent visible la hiérarchie éditoriale.
@@ -318,12 +318,13 @@ const FACE3_FAMILY: React.CSSProperties = {
 function fmtDist(m: number): string {
   return m >= 1000 ? `${(m / 1000).toFixed(1).replace(".", ",")} km` : `${m} m`;
 }
-// Une ligne « type précis — env. distance ». Le type est en évidence, la distance à droite.
+// Une ligne « type précis — env. distance ». Le type est en évidence, la distance à droite,
+// alignée sur la même ligne de base que le type (chiffres tabulaires pour l'alignement).
 function Face3Line({ label, meters }: { label: string; meters: number }) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
       <span style={{ fontSize: 15, color: "var(--fg-1)", fontWeight: 500 }}>{label}</span>
-      <span style={{ fontSize: 15, color: "var(--fg-hi)", whiteSpace: "nowrap" }}>env. {fmtDist(meters)}</span>
+      <span style={{ fontSize: 15, color: "var(--fg-hi)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>env. {fmtDist(meters)}</span>
     </div>
   );
 }
@@ -340,29 +341,30 @@ function Face3Block({ s }: { s: Face3Snapshot }) {
             Les équipements et repères cartographiés les plus proches du logement.
           </p>
 
-          {/* Brique 1 — vie quotidienne (socle) : type précis + famille en métadonnée */}
+          {/* Brique 1 — vie quotidienne (socle) : famille en métadonnée, type précis en
+              information principale, distance alignée sur la ligne de base du type. */}
           <div style={{ display: "grid", gap: 12 }}>
-            <div style={FACE3_SUBHEAD}>Vie quotidienne autour de l’adresse</div>
-            <div style={{ display: "grid", gap: 12 }}>
+            <div style={FACE3_SUBHEAD}>Vie quotidienne</div>
+            <div style={{ display: "grid", gap: 10 }}>
               {s.bpe.categories.map((c) => (
-                <div key={c.category} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
-                  <div style={{ display: "grid", gap: 3, minWidth: 0 }}>
-                    <span style={FACE3_FAMILY}>{FACE3_CAT_LABEL[c.category]}</span>
+                <div key={c.category} style={{ display: "grid", gap: 2 }}>
+                  <span style={FACE3_FAMILY}>{FACE3_CAT_LABEL[c.category]}</span>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
                     <span style={{ fontSize: 15, color: c.nearest ? "var(--fg-1)" : "var(--fg-4)", fontWeight: 500 }}>
                       {c.nearest ? (c.nearest.typeLabel ?? FACE3_CAT_LABEL[c.category]) : "Aucun recensé"}
                     </span>
+                    <span style={{ fontSize: 15, color: c.nearest ? "var(--fg-hi)" : "var(--fg-4)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                      {c.nearest ? `env. ${fmtDist(c.nearest.distanceMeters)}` : `dans les ${c.searchCapMeters / 1000} km analysés`}
+                    </span>
                   </div>
-                  <span style={{ fontSize: 15, color: c.nearest ? "var(--fg-hi)" : "var(--fg-4)", whiteSpace: "nowrap" }}>
-                    {c.nearest ? `env. ${fmtDist(c.nearest.distanceMeters)}` : `dans les ${c.searchCapMeters / 1000} km analysés`}
-                  </span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Brique 2 — infrastructure potentiellement bruyante (vigilance) */}
+          {/* Brique 2 — infrastructure à vérifier (le titre ne conclut pas à une nuisance) */}
           <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 8 }}>
-            <div style={FACE3_SUBHEAD}>Point de vigilance</div>
+            <div style={FACE3_SUBHEAD}>Point à vérifier</div>
             {s.sourceStatus.osmInfrastructure === "pending" ? (
               <em style={{ color: "var(--fg-4)", fontSize: 14 }}>Environnement en cours de récupération…</em>
             ) : s.sourceStatus.osmInfrastructure === "failed" ? (
@@ -386,7 +388,7 @@ function Face3Block({ s }: { s: Face3Snapshot }) {
 
           {/* Brique 3 — espace vert cartographié (repère) */}
           <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 8 }}>
-            <div style={FACE3_SUBHEAD}>Repère autour du logement</div>
+            <div style={FACE3_SUBHEAD}>Espace vert</div>
             {s.sourceStatus.osmGreenSpaces === "pending" ? (
               <em style={{ color: "var(--fg-4)", fontSize: 14 }}>Environnement en cours de récupération…</em>
             ) : s.sourceStatus.osmGreenSpaces === "failed" ? (
@@ -401,7 +403,7 @@ function Face3Block({ s }: { s: Face3Snapshot }) {
           </div>
 
           <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.85 }}>
-            Sources : INSEE, BPE 2024 · © contributeurs OpenStreetMap — ODbL · distances approximatives à vol d’oiseau
+            Sources : INSEE, BPE 2024 · © les contributeurs OpenStreetMap (ODbL) · distances approximatives à vol d’oiseau
           </div>
         </div>
       </GlassCard>
@@ -602,15 +604,13 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
         <div className="border-t border-white/[0.08]" />
 
         <section className="pt-14">
-          <div className="grid grid-cols-[1fr_320px] gap-10 items-end mb-8">
-            <div>
-              <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Lecture par défaut</p>
-              <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                Analyser un logement précis.
-              </h2>
-            </div>
-            <p className="text-[15px] text-muted leading-[1.65]">
-              Entrez une adresse pour ouvrir la lecture du bien. Le module s&apos;arrête au logement et à son exposition directe.
+          <div className="mb-8">
+            <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Lecture par défaut</p>
+            <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+              Analyser un logement précis.
+            </h2>
+            <p className="text-[15px] text-muted leading-[1.65] mt-3 max-w-[640px]">
+              Entrez une adresse pour lire ce logement précis : sa performance énergétique, les risques du bâti, ce que le passé a coûté à assurer, et ce qui se trouve autour.
             </p>
           </div>
 
@@ -651,7 +651,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
 
       {/* ── RÉSULTATS ── */}
       {result && (
-        <section style={{ maxWidth: 760, padding: "24px 0 96px", display: "grid", gap: 40 }}>
+        <section style={{ padding: "24px 0 96px", display: "grid", gap: 40 }}>
 
           {/* Passeport du bien : identité au grain adresse, DPE en sceau. */}
           <PropertyPassport
