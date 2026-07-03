@@ -73,15 +73,21 @@ export async function POST(req: NextRequest) {
     const payload = {
       address: data.address?.label,
       altitude: data.altitude,
-      dpe: data.dpe ? {
-        etiquette: data.dpe.etiquette_dpe,
-        ges: data.dpe.etiquette_ges,
-        conso: data.dpe.conso_ep_m2,
-        emissions: data.dpe.emission_ges_m2,
-        surface: data.dpe.surface_m2,
-        construction: data.dpe.annee_construction,
-        type: data.dpe.type_batiment,
-      } : null,
+      // Le DPE n'entre dans la synthèse QUE s'il a été attribué au logement (convergence forte
+      // ou choix de l'utilisateur). Sinon null : le prompt le traite comme « non déterminé »,
+      // jamais une classe d'un autre logement de la résidence.
+      dpe:
+        (data.dpeSelectionStatus === "auto_confirmed" || data.dpeSelectionStatus === "user_confirmed") && data.selectedDpe
+          ? {
+              etiquette: data.selectedDpe.etiquette_dpe,
+              ges: data.selectedDpe.etiquette_ges,
+              conso: data.selectedDpe.conso_ep_m2,
+              emissions: data.selectedDpe.emission_ges_m2,
+              surface: data.selectedDpe.surface_m2,
+              construction: data.selectedDpe.annee_construction,
+              type: data.selectedDpe.type_batiment,
+            }
+          : null,
       audit: data.audit ? {
         scenarios_count: data.audit.scenarios?.length ?? 0,
       } : null,
