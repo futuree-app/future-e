@@ -262,12 +262,13 @@ const ONRN_COUT_LABEL: Record<string, string> = {
   "Entre 10 et 20k€": "10 000 à 20 000 €",
   "Plus de 20 k€": "plus de 20 000 €",
 };
-const ONRN_FREQ_LABEL: Record<string, string> = {
-  "Entre 0 et 1 ‰": "moins de 1 ‰",
-  "Entre 1 et 2 ‰": "1 à 2 ‰",
-  "Entre 2 et 5 ‰": "2 à 5 ‰",
-  "Entre 5 et 10 ‰": "5 à 10 ‰",
-  "Plus de 10 ‰": "plus de 10 ‰",
+// « ‰ » se lit mal : on traduit en « pour 1 000 » (mêmes bornes). Le ‰ reste dans « Sources et limites ».
+const ONRN_FREQ_PLAIN: Record<string, string> = {
+  "Entre 0 et 1 ‰": "moins de 1 pour 1 000",
+  "Entre 1 et 2 ‰": "1 à 2 pour 1 000",
+  "Entre 2 et 5 ‰": "2 à 5 pour 1 000",
+  "Entre 5 et 10 ‰": "5 à 10 pour 1 000",
+  "Plus de 10 ‰": "plus de 10 pour 1 000",
 };
 const ONRN_REPR_LABEL: Record<string, string> = {
   "< 15%": "moins de 15 %",
@@ -278,32 +279,50 @@ const ONRN_REPR_LABEL: Record<string, string> = {
 const onrnLabel = (map: Record<string, string>, v: string) => map[v] ?? v; // repli = verbatim
 const SINI_EYEBROW: React.CSSProperties = { fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" };
 
-function PerilLine({ peril, color, state }: { peril: string; color: string; state: PerilState }) {
+// Divulgation progressive : la preuve technique (méthode, sources, mentions) vit dans un repli
+// natif <details>, jamais supprimée, jamais au premier plan.
+function Disclosure({ summary, children }: { summary: string; children: React.ReactNode }) {
+  return (
+    <details style={{ borderTop: "1px solid var(--border-1)", paddingTop: 12 }}>
+      <summary style={{ cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fg-4)" }}>
+        {summary}
+      </summary>
+      <div style={{ marginTop: 12, display: "grid", gap: 10, fontSize: 12, color: "var(--fg-4)", lineHeight: 1.6 }}>
+        {children}
+      </div>
+    </details>
+  );
+}
+
+// Métrique lisible : valeur en évidence, description en dessous (une réponse, pas un tableau).
+function Metric({ value, caption }: { value: string; caption: string }) {
+  return (
+    <div style={{ display: "grid", gap: 3 }}>
+      <span style={{ fontSize: 20, fontWeight: 500, color: "var(--fg-hi)", fontVariantNumeric: "tabular-nums" }}>{value}</span>
+      <span style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.5, maxWidth: 240 }}>{caption}</span>
+    </div>
+  );
+}
+
+function PerilLine({ peril, word, color, state }: { peril: string; word: string; color: string; state: PerilState }) {
   if (state.kind === "indispo") return null;
   return (
     <div style={{ display: "grid", gap: 10 }}>
       <div style={{ ...SINI_EYEBROW, color }}>{peril}</div>
       {state.kind === "lecture" && (
-        <>
-          {/* Flex plutôt que grille étroite : chaque métrique prend sa largeur naturelle,
-              le label mono long tient sur une ligne (plus de retour à « mille »). */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "16px 48px" }}>
-            <Block label="Coût moyen par sinistre indemnisé" value={onrnLabel(ONRN_COUT_LABEL, state.cout)} />
-            <Block label="Fréquence (pour mille biens assurés)" value={onrnLabel(ONRN_FREQ_LABEL, state.frequence)} />
-          </div>
-          <div style={{ fontSize: 12, color: "var(--fg-4)", lineHeight: 1.6 }}>
-            Données 1995-2021 · échantillon CCR couvrant {onrnLabel(ONRN_REPR_LABEL, state.representativite)} du marché local.
-          </div>
-        </>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "16px 48px" }}>
+          <Metric value={onrnLabel(ONRN_COUT_LABEL, state.cout)} caption="coût moyen d’un sinistre indemnisé" />
+          <Metric value={onrnLabel(ONRN_FREQ_PLAIN, state.frequence)} caption="biens assurés concernés (fréquence observée sur la période)" />
+        </div>
       )}
       {state.kind === "aucun" && (
         <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65 }}>
-          Aucun sinistre {peril.toLowerCase()} indemnisé répertorié par la CCR dans cette commune sur 1995-2021. L&apos;échantillon couvre environ la moitié du marché : un historique vide n&apos;exclut pas une exposition future.
+          Aucun sinistre {word} n&apos;a été indemnisé dans cette commune sur la période observée. Un historique vide n&apos;exclut pas une exposition future.
         </div>
       )}
       {state.kind === "faible_repr" && (
         <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65 }}>
-          Des sinistres {peril.toLowerCase()} sont répertoriés ici, mais l&apos;échantillon assurantiel local est trop réduit (représentativité {onrnLabel(ONRN_REPR_LABEL, state.representativite)}) pour en tirer une lecture fiable.
+          Des sinistres {word} sont répertoriés ici, mais l&apos;échantillon assurantiel local est trop réduit pour en tirer une lecture fiable.
         </div>
       )}
     </div>
@@ -313,18 +332,32 @@ function PerilLine({ peril, color, state }: { peril: string; color: string; stat
 function SinistraliteBlock({ sinistralite }: { sinistralite: OnrnSinistralite }) {
   const { secheresse, inondation } = sinistralite;
   if (secheresse.kind === "indispo" && inondation.kind === "indispo") return null;
+  const reprLine = [
+    secheresse.kind === "lecture" ? `sécheresse ${onrnLabel(ONRN_REPR_LABEL, secheresse.representativite)}` : null,
+    inondation.kind === "lecture" ? `inondation ${onrnLabel(ONRN_REPR_LABEL, inondation.representativite)}` : null,
+  ].filter(Boolean).join(", ");
   return (
-    <ReportSection eyebrow="Sinistralité indemnisée dans la commune">
+    <ReportSection eyebrow="Sinistres indemnisés dans la commune">
       <GlassCard>
         <div style={{ display: "grid", gap: 18 }}>
-          <PerilLine peril="Sécheresse (retrait-gonflement des argiles)" color="var(--orange, #fb923c)" state={secheresse} />
-          <PerilLine peril="Inondation (tous types)" color="var(--blue, #60a5fa)" state={inondation} />
-          <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", fontSize: 12, color: "var(--fg-4)", lineHeight: 1.6 }}>
-            Ces données historiques ne permettent pas de prédire le montant de votre assurance ni les conditions proposées pour ce logement. La surprime légale CatNat est fixée nationalement à 20 % de la prime dommages depuis le 1ᵉʳ janvier 2025. Une modulation de cette surprime selon l&apos;exposition locale est débattue : si elle advenait, le passé local mesuré ici compterait davantage.
-          </div>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.8 }}>
-            ONRN (État / CCR / Mission Risques Naturels), via Géorisques. Sinistres indemnisés 1995-2021, biens assurés particuliers et professionnels.
-          </div>
+          {/* Niveau 1 — ce que ça veut dire, en langage courant */}
+          <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>
+            Ce que les assureurs ont historiquement indemnisé dans la commune. Ces chiffres ne prédisent ni un sinistre pour ce logement, ni le prix de son assurance.
+          </p>
+          {/* Niveau 2 — les faits */}
+          <PerilLine peril="Sécheresse (retrait-gonflement des argiles)" word="de sécheresse" color="var(--orange, #fb923c)" state={secheresse} />
+          <PerilLine peril="Inondation (tous types)" word="d’inondation" color="var(--blue, #60a5fa)" state={inondation} />
+          {/* Rappel court sur l'assurance ; le détail va dans le repli */}
+          <p style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
+            Ces données ne permettent pas de prévoir votre cotisation. La surprime CatNat est fixée nationalement.
+          </p>
+          {/* Niveau 3 — méthode et sources, repliées */}
+          <Disclosure summary="Sources et limites">
+            {reprLine && <div>Données 1995-2021, établies sur un échantillon CCR. Couverture du marché local : {reprLine}.</div>}
+            <div>La fréquence est exprimée pour mille biens assurés (‰).</div>
+            <div>La surprime légale CatNat est fixée à 20 % de la prime dommages depuis le 1ᵉʳ janvier 2025. Une modulation selon l&apos;exposition locale est débattue : si elle advenait, le passé local mesuré ici compterait davantage.</div>
+            <div>ONRN (État / CCR / Mission Risques Naturels), via Géorisques. Biens assurés particuliers et professionnels.</div>
+          </Disclosure>
         </div>
       </GlassCard>
     </ReportSection>
@@ -374,14 +407,17 @@ function RegulatoryPlanCard({ plan, roleLabel }: { plan: RegulatoryPlan; roleLab
     ? `https://www.georisques.gouv.fr/donnee-risques/PPR/Fiche-ppr/pprn/${plan.gasparId}`
     : null;
   return (
-    <div style={{ display: "grid", gap: 8 }}>
+    <div style={{ display: "grid", gap: 6 }}>
       {roleLabel && <div style={FACE3_FAMILY}>{roleLabel}</div>}
+      {hazard && (
+        <div style={{ fontSize: 12.5, color: "var(--fg-4)" }}>Risque concerné : <span style={{ color: "var(--fg-2)" }}>{hazard}</span></div>
+      )}
       {plan.zones.length > 0 ? (
         plan.zones.map((z, i) => {
           const g = REGIME_GLOSS[z.regimeCode ?? ""] ?? { title: z.regime ?? "Zone réglementée", note: "Le détail dépend du règlement officiel de cette zone." };
           return (
             <div key={i} style={{ display: "grid", gap: 5 }}>
-              <div style={{ fontSize: 15, fontWeight: 500, color: regimeColor(z.regimeCode) }}>{g.title}</div>
+              {/* Fait, en langage courant, avant le terme administratif */}
               <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
                 {z.zoneCode || z.zoneName ? (
                   <>Cette adresse relève de la zone <strong style={{ color: "var(--fg-hi)" }}>{[z.zoneCode, z.zoneName].filter(Boolean).join(" — ")}</strong>{plan.plan ? <> du <strong style={{ color: "var(--fg-hi)" }}>{plan.plan}</strong></> : null}.</>
@@ -389,6 +425,8 @@ function RegulatoryPlanCard({ plan, roleLabel }: { plan: RegulatoryPlan; roleLab
                   <>Cette adresse relève d’une zone réglementée{plan.plan ? <> du <strong style={{ color: "var(--fg-hi)" }}>{plan.plan}</strong></> : null}.</>
                 )}
               </div>
+              {/* Terme réglementaire officiel, secondaire, coloré par sévérité */}
+              <div style={{ fontSize: 13, fontWeight: 500, color: regimeColor(z.regimeCode) }}>{g.title}</div>
               <div style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>{g.note}</div>
             </div>
           );
@@ -396,24 +434,27 @@ function RegulatoryPlanCard({ plan, roleLabel }: { plan: RegulatoryPlan; roleLab
       ) : (
         // État C : plan présent au point, zone non détaillée dans la donnée reçue.
         <div style={{ display: "grid", gap: 5 }}>
-          <div style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)" }}>Zone réglementée identifiée</div>
           <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
             {plan.plan ? <>Cette adresse relève du <strong style={{ color: "var(--fg-hi)" }}>{plan.plan}</strong>.</> : "Cette adresse relève d’un plan de prévention."}
           </div>
           <div style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>Le régime ou le libellé détaillé de la zone n’est pas disponible dans les données reçues.</div>
         </div>
       )}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.04em", color: "var(--fg-4)" }}>
-        {hazard && <span>Aléa : {hazard}</span>}
-        {plan.updatedAt && <span>Date de référence Géorisques : {plan.updatedAt}</span>}
-        {fiche && (
-          <a href={fiche} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-dim, #7a6e60)", textDecoration: "underline" }}>
-            Fiche du plan sur Géorisques
-          </a>
-        )}
-      </div>
+      {fiche && (
+        <a href={fiche} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12.5, color: "var(--accent-dim, #7a6e60)", textDecoration: "underline", marginTop: 2 }}>
+          Consulter la fiche officielle du plan →
+        </a>
+      )}
     </div>
   );
+}
+
+// Niveau 1 — phrase langage courant, honnête, sensible à la sévérité SANS produire de score.
+function regulatoryHeadline(plans: RegulatoryPlan[]): string {
+  const topRank = plans[0]?.topRegimeRank ?? 99;
+  return topRank <= 1
+    ? "Cette adresse se situe dans une zone où certains projets et travaux peuvent être interdits ou strictement encadrés."
+    : "Cette adresse se situe dans une zone où certains projets et travaux peuvent être soumis à des règles particulières.";
 }
 
 function RegulatoryStatusBlock({ georisques }: { georisques: ApiResponse["georisques"] }) {
@@ -423,43 +464,82 @@ function RegulatoryStatusBlock({ georisques }: { georisques: ApiResponse["georis
     <ReportSection eyebrow="Statut réglementaire à cette adresse" tone="accent">
       <GlassCard>
         <div style={{ display: "grid", gap: 16 }}>
-          {/* Grain « adresse » : l'API répond au point géocodé, jamais à la géométrie de la parcelle. */}
-          <div style={FACE3_FAMILY}>Grain : adresse</div>
           {!g ? (
             // État B : la source n'a pas permis de qualifier le point.
-            <div style={{ display: "grid", gap: 5 }}>
-              <div style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)" }}>Statut réglementaire non déterminé</div>
-              <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>Les données interrogées n’ont pas permis de qualifier cette adresse.</div>
-            </div>
+            <>
+              <p style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)", margin: 0 }}>Statut réglementaire non déterminé</p>
+              <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>Les données interrogées n’ont pas permis de qualifier cette adresse.</p>
+            </>
           ) : plans.length === 0 ? (
             // État A : la source a répondu, aucun zonage n'intersecte le point.
-            <div style={{ display: "grid", gap: 5 }}>
-              <div style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)" }}>Aucun zonage réglementaire identifié à cette adresse</div>
-              <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
-                La commune peut être couverte par un plan de prévention sans que le point géocodé se situe dans l’une de ses zones réglementées. Cela ne signifie pas que le logement est exempt de tout risque.
-              </div>
-            </div>
-          ) : plans.length === 1 ? (
-            <RegulatoryPlanCard plan={plans[0]} />
+            <>
+              <p style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)", margin: 0 }}>Aucune zone réglementée identifiée à cette adresse</p>
+              <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+                La commune peut être couverte par un plan de prévention sans que le point se situe dans l’une de ses zones réglementées. Cela ne signifie pas que le logement est exempt de tout risque.
+              </p>
+            </>
           ) : (
-            <div style={{ display: "grid", gap: 18 }}>
-              <div style={{ fontSize: 14, color: "var(--fg-3)", lineHeight: 1.6 }}>
-                <strong style={{ color: "var(--fg-hi)" }}>{plans.length} zonages réglementaires identifiés</strong> à cette adresse.
-              </div>
-              <RegulatoryPlanCard plan={plans[0]} roleLabel="Régime le plus contraignant parmi les zonages identifiés" />
-              {plans.slice(1).map((p, i) => (
-                <div key={i} style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)" }}>
-                  <RegulatoryPlanCard plan={p} roleLabel="Autre zonage applicable" />
+            <>
+              {/* Niveau 1 — comprendre en cinq secondes */}
+              <p style={{ fontSize: 15, color: "var(--fg-hi)", lineHeight: 1.5, margin: 0 }}>{regulatoryHeadline(plans)}</p>
+              {/* Niveau 2 — le fait précis, par plan */}
+              {plans.length === 1 ? (
+                <RegulatoryPlanCard plan={plans[0]} />
+              ) : (
+                <div style={{ display: "grid", gap: 16 }}>
+                  <RegulatoryPlanCard plan={plans[0]} roleLabel="Règle la plus contraignante" />
+                  {plans.slice(1).map((p, i) => (
+                    <div key={i} style={{ paddingTop: 12, borderTop: "1px solid var(--border-1)" }}>
+                      <RegulatoryPlanCard plan={p} roleLabel="Autre zonage applicable" />
+                    </div>
+                  ))}
+                  <div style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>
+                    Ces zonages peuvent concerner des phénomènes ou des règlements différents. Leur ordre sert la lecture.
+                  </div>
                 </div>
-              ))}
-              <div style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>
-                Ces zonages peuvent concerner des phénomènes ou des règlements différents. Leur ordre d’affichage sert la lecture et ne détermine pas à lui seul les règles applicables à un projet.
-              </div>
-            </div>
+              )}
+              {/* Niveau 3 — méthode et détail technique, repliés */}
+              <Disclosure summary="Détail réglementaire et méthode">
+                <div>Grain : adresse (la donnée répond au point géocodé, pas à la géométrie de la parcelle).</div>
+                {plans.map((p, i) => (
+                  <div key={i}>
+                    {p.plan ?? "Plan"}
+                    {p.zones[0]?.regime ? ` · régime officiel : ${p.zones[0].regime}` : ""}
+                    {p.updatedAt ? ` · date de référence Géorisques : ${p.updatedAt}` : ""}
+                  </div>
+                ))}
+                <div>Géorisques (PPRN, information réglementaire). Le classement ne résume pas le règlement : les travaux autorisés ou interdits ne se lisent que dans le règlement officiel de la zone.</div>
+              </Disclosure>
+            </>
           )}
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.85 }}>
-            Géorisques (PPRN, information réglementaire) · au point géocodé · le classement ne résume pas le règlement
-          </div>
+        </div>
+      </GlassCard>
+    </ReportSection>
+  );
+}
+
+// « Ce que cela mérite de vérifier » — traduit la donnée en action, adaptée à la posture.
+// Déterministe, jamais un score ni une injonction alarmiste (« Qu'est-ce que j'en fais ? »).
+function Face2Implication({ projet, georisques, sinistralite }: { projet: string | null; georisques: ApiResponse["georisques"]; sinistralite: OnrnSinistralite | null | undefined }) {
+  const g = georisques?.parcel ?? georisques?.address;
+  const hasZone = (g?.regulatoryPlans?.length ?? 0) > 0;
+  const siniActive = Boolean(sinistralite) && [sinistralite!.secheresse.kind, sinistralite!.inondation.kind].some((k) => k === "lecture" || k === "faible_repr");
+  if (!hasZone && !siniActive) return null;
+  const posture = POSTURE_FOR_PROJET[projet ?? "reside"] ?? "residence";
+  return (
+    <ReportSection eyebrow="Ce que cela mérite de vérifier" tone="accent">
+      <GlassCard>
+        <div style={{ display: "grid", gap: 12 }}>
+          <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>
+            {hasZone
+              ? "Ce logement relève d’au moins une zone réglementée, et la commune a connu des sinistres indemnisés. Rien n’est certain pour ce bien, mais cela oriente ce qu’il vaut la peine de regarder."
+              : "La commune a connu des sinistres indemnisés. Rien n’est certain pour ce bien, mais cela oriente ce qu’il vaut la peine de regarder."}
+          </p>
+          <p style={{ fontSize: 14, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 }}>
+            {posture === "prospection"
+              ? "Avant d’acheter : demandez si des sinistres (fissures liées à la sécheresse, dégâts des eaux) ont déjà été déclarés, et consultez le règlement de la zone avant tout projet de travaux ou d’extension."
+              : "Si vous occupez ce logement : surveillez l’évolution d’éventuelles fissures, conservez les justificatifs de travaux et de sinistres, et vérifiez le règlement de la zone avant un projet d’extension."}
+          </p>
         </div>
       </GlassCard>
     </ReportSection>
@@ -1035,6 +1115,9 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
 
               {/* Face 2 — matérialité assurantielle passée (ONRN) */}
               {result.sinistralite && <SinistraliteBlock sinistralite={result.sinistralite} />}
+
+              {/* Sortie décisionnelle Face 2 : ce que cela mérite de vérifier (posture) */}
+              <Face2Implication projet={projet} georisques={result.georisques} sinistralite={result.sinistralite} />
 
               {/* Face 3 — autour de cette adresse (buffer local au point géocodé) */}
               {autour && <Face3Block s={autour} />}
