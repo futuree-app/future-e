@@ -145,6 +145,17 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
   titre « Sinistralité indemnisée dans la commune » (l'ancien « Ce que le risque a déjà coûté ici »
   sur-promettait), métriques (coût moyen / fréquence) au lieu d'un paragraphe, classes ONRN
   reformatées, « inondation (tous types) » sans liste fausse-exhaustive, phrase assurance corrigée.
+- **Doctrine de divulgation progressive (2026-07-03, réutilisable hors Logement).** Un bloc dense
+  doit répondre DANS L'ORDRE : « qu'est-ce que ça veut dire ? » (Niveau 1, phrase langage courant en
+  tête) → « quels sont les faits ? » (Niveau 2, métriques valeur-en-évidence, ‰ traduit en « pour
+  1 000 ») → « qu'est-ce que j'en fais ? » (sortie décisionnelle adaptée à la posture) → « comment
+  c'est produit ? » (Niveau 3, méthode/sources/mentions repliées dans un `<details>`, jamais
+  supprimées, jamais au premier plan). Appliqué à la Face 2 : composants `Disclosure`, `Metric`,
+  `Face2Implication` dans `LogementModule.tsx`. Garde-fous : **pas de comparaison générée** entre
+  périls (« la sécheresse a été plus fréquente que… » = conclusion, viole ADR-0001) ; **pas de
+  chapeau « ce qu'il faut retenir » global** (redondant avec la synthèse IA) ; le terme réglementaire
+  officiel reste présent, en secondaire sous la phrase courante (jamais remplacé par une version
+  édulcorée). Interdits UX : « risque élevé », « logement à risque », jauge rouge, score 1-10.
 - **Face 1 (l'enveloppe) : non branchée** (intake étage / orientation / etc. à MESURER avant de
   construire, cf. `/memory/project_module_logement.md`). Face 2 étendue (contraste PPRI / TRI /
   nappe au point) et vision module = `docs/board/2026-07-03-vision-module-logement-chatgpt.md`.
