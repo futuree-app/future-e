@@ -1,9 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { haversineM, distancePointToPolylineM, distancePointToPolygonM, type LngLat } from "./geo-distance.ts";
 import { cellKey, cellBBox } from "./geo-grid.ts";
-import type { OsmProximity } from "./logement-autour-types.ts";
+import type { OsmProximity, GreenKind } from "./logement-autour-types.ts";
 
-export const OSM_QUERY_VERSION = "osm-v1-2026-07-03";
+// v2 : on conserve le type d'espace vert (greenKind) ; bump = re-fetch des cellules à la demande.
+export const OSM_QUERY_VERSION = "osm-v2-2026-07-03";
 export const OSM_BBOX_RADIUS_M = 1500;
 export const OSM_CELL_DEG = 0.005; // ~500 m ; à valider (Paris/Lyon, ville moyenne, rural boisé)
 
@@ -18,6 +19,7 @@ export type OsmGeom = {
   kind: "line" | "polygon" | "node";
   role: "noisy" | "green";
   subtype: "motorway" | "trunk" | "railway" | "green";
+  greenKind?: GreenKind; // renseigné seulement pour role === "green"
   pts: LngLat[];
 };
 
@@ -49,12 +51,17 @@ export function parseOverpass(elements: unknown[]): OsmGeom[] {
       out.push({ kind: "line", role: "noisy", subtype: "trunk", pts });
     } else if (t.railway === "rail") {
       out.push({ kind: "line", role: "noisy", subtype: "railway", pts });
-    } else if (
-      t.leisure === "park" ||
-      t.natural === "wood" ||
-      ["forest", "grass", "recreation_ground"].includes(t.landuse ?? "")
-    ) {
-      out.push({ kind: closed ? "polygon" : "line", role: "green", subtype: "green", pts });
+    } else {
+      const greenKind: GreenKind | null =
+        t.leisure === "park" ? "park"
+        : t.natural === "wood" ? "wood"
+        : t.landuse === "forest" ? "forest"
+        : t.landuse === "grass" ? "grass"
+        : t.landuse === "recreation_ground" ? "recreation_ground"
+        : null;
+      if (greenKind) {
+        out.push({ kind: closed ? "polygon" : "line", role: "green", subtype: "green", greenKind, pts });
+      }
     }
   }
   return out;
@@ -69,6 +76,7 @@ export function computeOsmProximity(center: LngLat, geoms: OsmGeom[], bboxRadius
         : haversineM(center, g.pts[0]);
   const noisy = new Map<"motorway" | "trunk" | "railway", number>();
   let green: number | null = null;
+  let greenKind: GreenKind | undefined;
   for (const g of geoms) {
     const d = distTo(g);
     if (d > bboxRadiusM) continue;
@@ -78,13 +86,15 @@ export function computeOsmProximity(center: LngLat, geoms: OsmGeom[], bboxRadius
       if (cur === undefined || d < cur) noisy.set(st, d);
     } else if (green === null || d < green) {
       green = d;
+      greenKind = g.greenKind;
     }
   }
   return {
     potentiallyNoisyInfrastructure: [...noisy.entries()]
       .map(([type, d]) => ({ type, distanceMeters: Math.round(d) }))
       .sort((a, b) => a.distanceMeters - b.distanceMeters),
-    nearestMappedGreenSpace: green === null ? null : { distanceMeters: Math.round(green) },
+    nearestMappedGreenSpace:
+      green === null ? null : { distanceMeters: Math.round(green), ...(greenKind ? { kind: greenKind } : {}) },
     bboxRadiusMeters: bboxRadiusM,
   };
 }

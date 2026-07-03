@@ -5,7 +5,7 @@ import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import type { OnrnSinistralite, PerilState } from "@/lib/onrn-sinistralite";
-import type { Face3Snapshot, Posture } from "@/lib/logement-autour-types";
+import type { Face3Snapshot, Posture, GreenKind } from "@/lib/logement-autour-types";
 import type { RegulatoryPlan } from "@/lib/pprn-zonage";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { MetricTooltip } from "@/components/MetricTooltip";
@@ -604,6 +604,19 @@ const FACE3_CAT_LABEL: Record<string, string> = {
   transports: "Transports",
   services: "Services du quotidien",
 };
+// Nature de l'espace vert le plus proche : on nomme précisément ce que OSM a cartographié
+// (parc / bois / …) plutôt qu'un « espace vert » générique. Repli générique si le tag manque
+// (snapshot antérieur au greenKind).
+const GREEN_LABEL: Record<GreenKind, string> = {
+  park: "Parc",
+  wood: "Bois",
+  forest: "Forêt",
+  grass: "Pelouse",
+  recreation_ground: "Terrain de plein air",
+};
+function greenSpaceLabel(kind: GreenKind | undefined): string {
+  return kind ? GREEN_LABEL[kind] : "Espace vert";
+}
 // Sous-titre de brique (vie quotidienne / vigilance / repère) et libellé de famille
 // (métadonnée secondaire au-dessus du type précis). Rendent visible la hiérarchie éditoriale.
 const FACE3_SUBHEAD: React.CSSProperties = {
@@ -628,10 +641,6 @@ function Face3Line({ label, meters }: { label: string; meters: number }) {
   );
 }
 function Face3Block({ s }: { s: Face3Snapshot }) {
-  const noisy = s.osm.potentiallyNoisyInfrastructure;
-  const bboxKm = (s.osm.bboxRadiusMeters / 1000).toFixed(1).replace(".", ",");
-  // Un seul axe de vigilance : le plus proche (le rapport ne juge pas, il pose un repère).
-  const nearestNoisy = noisy.length > 0 ? noisy.reduce((a, b) => (b.distanceMeters < a.distanceMeters ? b : a)) : null;
   return (
     <ReportSection eyebrow="Autour de cette adresse" tone="accent">
       <GlassCard>
@@ -661,31 +670,8 @@ function Face3Block({ s }: { s: Face3Snapshot }) {
             </div>
           </div>
 
-          {/* Brique 2 — infrastructure à vérifier (le titre ne conclut pas à une nuisance) */}
-          <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 8 }}>
-            <div style={FACE3_SUBHEAD}>Point à vérifier</div>
-            {s.sourceStatus.osmInfrastructure === "pending" ? (
-              <em style={{ color: "var(--fg-4)", fontSize: 14 }}>Environnement en cours de récupération…</em>
-            ) : s.sourceStatus.osmInfrastructure === "failed" ? (
-              <span style={{ color: "var(--fg-4)", fontSize: 14 }}>Infrastructures : donnée momentanément indisponible.</span>
-            ) : nearestNoisy ? (
-              <>
-                <Face3Line
-                  label={nearestNoisy.type === "railway" ? "Voie ferrée cartographiée" : "Axe routier cartographié"}
-                  meters={nearestNoisy.distanceMeters}
-                />
-                <span style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>
-                  Cette distance ne mesure pas le bruit réellement perçu au logement.
-                </span>
-              </>
-            ) : (
-              <span style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
-                Aucun axe autoroutier ou ferroviaire cartographié dans l’emprise analysée de {bboxKm} km.
-              </span>
-            )}
-          </div>
-
-          {/* Brique 3 — espace vert cartographié (repère) */}
+          {/* Brique 2 — espace vert (repère). Infra de transport (bruit/nuisance) déplacée
+              vers le futur module Santé, au grain adresse. */}
           <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 8 }}>
             <div style={FACE3_SUBHEAD}>Espace vert</div>
             {s.sourceStatus.osmGreenSpaces === "pending" ? (
@@ -693,7 +679,7 @@ function Face3Block({ s }: { s: Face3Snapshot }) {
             ) : s.sourceStatus.osmGreenSpaces === "failed" ? (
               <span style={{ color: "var(--fg-4)", fontSize: 14 }}>Espaces verts : donnée momentanément indisponible.</span>
             ) : s.osm.nearestMappedGreenSpace ? (
-              <Face3Line label="Espace vert cartographié" meters={s.osm.nearestMappedGreenSpace.distanceMeters} />
+              <Face3Line label={greenSpaceLabel(s.osm.nearestMappedGreenSpace.kind)} meters={s.osm.nearestMappedGreenSpace.distanceMeters} />
             ) : (
               <span style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
                 Aucun espace vert correspondant aux catégories recherchées dans l’emprise cartographiée.
@@ -1170,23 +1156,8 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
               {/* Face 3 — autour de cette adresse (buffer local au point géocodé) */}
               {autour && <Face3Block s={autour} />}
 
-              {/* ZFE */}
-              {result.zfe?.inZfe && (
-                <ReportSection eyebrow="Zone à faibles émissions" tone="blue">
-                  <GlassCard>
-                  <div style={{ display: "grid", gap: 12 }}>
-                    {result.zfe.zones.map(z => (
-                      <div key={z.id} style={{ display: "grid", gap: 6 }}>
-                        <div style={{ fontWeight: 500, fontSize: 15, color: "var(--fg-hi)" }}>{z.nom}</div>
-                        <div style={{ fontSize: 12, color: "var(--fg-4)", fontFamily: "var(--font-mono)" }}>
-                          VP : Crit&apos;Air {z.vp_critair ?? "—"} · 2RM : Crit&apos;Air {z.deux_rm_critair ?? "—"}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  </GlassCard>
-                </ReportSection>
-              )}
+              {/* ZFE (Crit'Air) retirée : contrainte sur le véhicule, pas sur le logement.
+                  Parquée pour le futur module Mobilité. */}
 
             </div>
           )}
@@ -1195,7 +1166,10 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
           {(
             <div style={{ display: "grid", gap: 36 }}>
 
-              {/* Actions IA générées si dispo, sinon actions par défaut selon le profil */}
+              {/* Actions IA générées si dispo, sinon actions par défaut selon le profil.
+                  « Quoi vérifier » lié au logement : CONSERVÉ. Seule la liste générique
+                  « Pages Savoir associées » (pour aller plus loin) a été retirée le 2026-07-03
+                  (décision porteur), à réévaluer à la fin de tous les modules. */}
               <ReportSection eyebrow="Actions documentées">
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
 
@@ -1228,13 +1202,6 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                           href="/savoir/assurance-littorale"
                         />
                       )}
-                      {result.zfe?.inZfe && (
-                        <ActionCard
-                          title="Anticiper les restrictions ZFE"
-                          desc="Calendrier d'interdiction par vignette Crit'Air, alternatives de mobilité, aides à la conversion."
-                          href="/savoir/zfe-comprendre"
-                        />
-                      )}
                       {result.cartofriches?.friches.some(f => f.sol_pollue) && (
                         <ActionCard
                           title="Pollution des sols à proximité"
@@ -1250,29 +1217,6 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                     </>
                   )}
 
-                </div>
-              </ReportSection>
-
-              {/* Pages Savoir associées */}
-              <ReportSection eyebrow="Pages Savoir associées">
-                <div className="glass rounded-xl overflow-hidden">
-                  {[
-                    { title: "Comprendre votre DPE et son calendrier", href: "/savoir/dpe-comprendre" },
-                    { title: "Le risque de submersion et sa trajectoire", href: "/savoir/submersion" },
-                    { title: "Pollutions invisibles : ce que le sol garde", href: "/savoir/pollutions-invisibles" },
-                  ].map((l, i) => (
-                    <Link key={i} href={l.href} style={{
-                      display: "flex", justifyContent: "space-between", alignItems: "center",
-                      padding: "16px 20px",
-                      borderBottom: i < 2 ? "1px solid var(--border-1)" : "none",
-                      textDecoration: "none", color: "var(--fg-1)",
-                      fontFamily: "var(--font-serif)", fontSize: 17, fontStyle: "italic",
-                      transition: "padding 0.25s, color 0.25s",
-                    }}>
-                      {l.title}
-                      <span style={{ fontFamily: "var(--font-mono)", fontStyle: "normal", fontSize: 12, color: "var(--fg-4)" }}>→</span>
-                    </Link>
-                  ))}
                 </div>
               </ReportSection>
 

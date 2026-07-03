@@ -39,9 +39,13 @@ export const TYPEQU_LABEL: Record<string, string> = {
   A206: "Bureau de poste",
 };
 
+// Nature de l'espace vert cartographié (tag OSM conservé pour préciser « parc / bois / … »
+// plutôt qu'un « espace vert » générique). Optionnel : les snapshots antérieurs ne l'ont pas.
+export type GreenKind = "park" | "wood" | "forest" | "grass" | "recreation_ground";
+
 export type OsmProximity = {
   potentiallyNoisyInfrastructure: { type: "motorway" | "trunk" | "railway"; distanceMeters: number }[];
-  nearestMappedGreenSpace: { distanceMeters: number } | null;
+  nearestMappedGreenSpace: { distanceMeters: number; kind?: GreenKind } | null;
   bboxRadiusMeters: number;
 };
 

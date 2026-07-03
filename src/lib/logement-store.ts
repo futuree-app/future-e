@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { haversineM, type LngLat } from "./geo-distance.ts";
 import type { Posture, Face3Snapshot } from "./logement-autour-types.ts";
 
-export const SOURCES_VERSION = "face3-2026-07-03b"; // bump = invalidation de tous les snapshots (b : type précis BPE dans le snapshot)
+export const SOURCES_VERSION = "face3-2026-07-03c"; // bump = invalidation de tous les snapshots (c : nature de l'espace vert / greenKind dans le snapshot)
 
 export type LogementRow = {
   user_id: string;

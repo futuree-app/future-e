@@ -29,4 +29,14 @@ test("parc polygonal -> espace vert le plus proche", () => {
   ] }];
   const prox = computeOsmProximity({ lat: 48.850, lon: 2.3515 }, parseOverpass(els), 1500);
   assert.ok(prox.nearestMappedGreenSpace && prox.nearestMappedGreenSpace.distanceMeters < 200);
+  assert.equal(prox.nearestMappedGreenSpace?.kind, "park");
+});
+
+test("greenKind conservé selon le tag OSM (bois, forêt, pelouse, terrain)", () => {
+  const geom = (tags: Record<string, string>) =>
+    ({ type: "way", tags, geometry: [{ lat: 48.85, lon: 2.35 }, { lat: 48.85, lon: 2.36 }] });
+  assert.equal(parseOverpass([geom({ natural: "wood" })])[0].greenKind, "wood");
+  assert.equal(parseOverpass([geom({ landuse: "forest" })])[0].greenKind, "forest");
+  assert.equal(parseOverpass([geom({ landuse: "grass" })])[0].greenKind, "grass");
+  assert.equal(parseOverpass([geom({ landuse: "recreation_ground" })])[0].greenKind, "recreation_ground");
 });

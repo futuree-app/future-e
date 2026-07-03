@@ -91,10 +91,6 @@ export async function POST(req: NextRequest) {
       ],
       seismic: data.georisques?.parcel?.seismic?.label,
       rga: data.georisques?.parcel?.rga?.label,
-      zfe: data.zfe?.inZfe ? {
-        zones: data.zfe.zones?.length ?? 0,
-        first: data.zfe.zones?.[0]?.nom,
-      } : null,
       irep_count: data.irep?.count ?? 0,
       friches: data.cartofriches ? {
         count: data.cartofriches.count,

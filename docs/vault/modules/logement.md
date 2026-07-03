@@ -28,9 +28,14 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
    inondation / submersion à l'adresse, sismicité, gravité sécheresse (coût moyen + fréquence
    ONRN, échelle commune, gaté par la représentativité). Ce qui menace le mur et sa valeur.
 3. **L'autour immédiat (à votre porte)** : buffer de marche autour du point géocodé.
-   Sources déjà en repo, sans API : équipements BPE au point (~800-1000 m), espaces verts OSM
-   (gatés « cartographié »), distance à une infrastructure bruyante OSM (proxy d'exposition,
-   jamais un décibel). En **liste + distances**, jamais un score composite.
+   Sources déjà en repo, sans API : équipements BPE au point (~800-1000 m, type précis affiché),
+   espaces verts OSM (nature précisée : parc / bois / forêt / pelouse / terrain, via `greenKind`).
+   En **liste + distances**, jamais un score composite. L'honnêteté OSM (donnée non exhaustive)
+   est portée **une fois** par l'intro du bloc + le footer ODbL, pas répétée sur chaque item
+   (« Parc cartographié » retiré le 2026-07-03, jugé lourd et bancal). **Infra bruyante OSM
+   RETIRÉE de Logement le 2026-07-03** : le bruit est une exposition du corps → Santé (voir
+   frontière ci-dessous). Le calcul OSM `potentiallyNoisyInfrastructure` reste en place, non
+   affiché (parqué).
 4. **Ce que ça engage (le financier)** : assurance (voir règle de frontière), coûts de
    rénovation, statut réglementaire au point (PPR). Récit : le coût qu'un acquéreur doit
    documenter avant de s'engager. (Ancienne formule « le coût futur que le marché ignore
@@ -39,11 +44,21 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
 
 **Exclut** (renvoyer au module légitime) :
 - **Expositions pollution / santé → Santé** : sols pollués et friches, industrie proche,
-  radon, qualité de l'air. Logement garde ce qui menace le bâti, Santé prend ce qui expose le
-  corps.
+  radon, qualité de l'air, **bruit / infrastructures bruyantes**. Logement garde ce qui menace
+  le bâti, Santé prend ce qui expose le corps.
+  **Précision de frontière (2026-07-03, porteur) : la frontière Logement/Santé est par SUJET,
+  pas par grain.** Santé est aussi au **grain adresse** en mode résidence (« le bruit / l'industrie
+  proche de CE logement ») ; il ne retombe au grain commune qu'en mode exploratoire, quand aucune
+  adresse n'est désignée. Donc l'argument « garder le bruit dans Logement parce que Santé serait
+  communal » est FAUX : le bruit va à Santé, qui saura le lire à l'adresse. (Reste ouvert : IREP
+  industrie + friches sols pollués sont encore alimentés à la synthèse Logement ; même logique,
+  à migrer vers Santé quand le module existera. Non traité le 2026-07-03.)
 - **Agrégats communaux → Territoire / comparateur** : vie locale, calme sonore, démographie,
   typologie. Logement n'en fait la lecture qu'au grain adresse (« à votre porte »).
-- **Trajets quotidiens → Mobilité.** **Composition sociale (HLM) : exclue** (donnée dormante).
+- **Trajets quotidiens + réglementation véhicule → Mobilité.** Inclut la **ZFE (Crit'Air)**,
+  RETIRÉE de Logement le 2026-07-03 (contrainte sur le véhicule, pas sur le logement ; parquée
+  pour Mobilité, qui arrivera après Santé et avant Métier). **Composition sociale (HLM) : exclue**
+  (donnée dormante).
 - **Valeur immobilière individuelle : parquée.** Formulation corrigée le 2026-07-03 (« pas de
   donnée de marché honnête » était imprécis) : il **existe** des données de transactions
   honnêtes (DVF) et des effets statistiques observés (valeur verte notariale), mais **aucune
@@ -97,11 +112,11 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
   (mapping non codé). Bon patron de désamorçage d'inférence à réutiliser : « ce passé local ne
   fixe pas le prix de votre assurance ».
 - **Face 3 (l'autour immédiat) : BRANCHÉE (2026-07-03).** Bloc « Autour de cette adresse » =
-  buffer local au point géocodé (jamais un temps de marche), 3 briques hiérarchisées : vie
-  quotidienne **BPE** (socle, local : plus proche par catégorie santé/alimentation/éducation/
-  transports/services, distances brutes à vol d'oiseau, cap 3 km) > **infra bruyantes OSM**
-  (vigilance, « à ~X m d'un axe cartographié », jamais un dB) > **espaces verts OSM** (repère,
-  « cartographié », jamais « pas de verdure »). Architecture : shards BPE en grille
+  buffer local au point géocodé (jamais un temps de marche). Depuis le 2026-07-03, **2 briques**
+  (l'infra bruyante a migré vers Santé) : vie quotidienne **BPE** (socle, local : plus proche par
+  catégorie santé/alimentation/éducation/transports/services, distances brutes à vol d'oiseau,
+  cap 3 km) > **espaces verts OSM** (repère, nature précisée parc/bois/forêt/pelouse/terrain,
+  jamais « pas de verdure »). Architecture : shards BPE en grille
   (`data/bpe-points`, `populate-bpe.py --face3-shards`) ; OSM récupéré **à la génération** via
   Overpass `out geom`, mis en cache par cellule (`osm_tile_cache`, service-role) et **figé dans un
   snapshot** (table `logement`, artefact sauvegardé par (user, commune) + posture
