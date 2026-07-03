@@ -1,1 +1,1 @@
-{"cell":"g_273_41","points":[{"c":"education","lat":49.143545,"lon":7.462451},{"c":"education","lat":49.145984,"lon":7.469524},{"c":"alimentation","lat":49.148349,"lon":7.482334},{"c":"alimentation","lat":49.147903,"lon":7.481732}]}
+{"cell":"g_273_41","points":[{"c":"education","t":"C107","lat":49.143545,"lon":7.462451},{"c":"education","t":"C109","lat":49.145984,"lon":7.469524},{"c":"alimentation","t":"B202","lat":49.148349,"lon":7.482334},{"c":"alimentation","t":"B207","lat":49.147903,"lon":7.481732}]}

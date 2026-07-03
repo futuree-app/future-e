@@ -204,7 +204,7 @@ def write_face3_shards():
     cells = {}
     for ty, la, lo in zip(types, lats, lons):
         key = f"g_{math.floor(la / FACE3_CELL)}_{math.floor(lo / FACE3_CELL)}"
-        cells.setdefault(key, []).append({"c": code_to_cat[ty], "lat": round(float(la), 6), "lon": round(float(lo), 6)})
+        cells.setdefault(key, []).append({"c": code_to_cat[ty], "t": ty, "lat": round(float(la), 6), "lon": round(float(lo), 6)})
     os.makedirs(FACE3_DIR, exist_ok=True)
     for key, pts in cells.items():
         with open(os.path.join(FACE3_DIR, f"{key}.json"), "w") as f:

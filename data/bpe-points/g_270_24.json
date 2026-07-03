@@ -1,1 +1,1 @@
-{"cell":"g_270_24","points":[{"c":"alimentation","lat":48.740745,"lon":4.392026},{"c":"sante","lat":48.777782,"lon":4.398938},{"c":"education","lat":48.61015,"lon":4.405681}]}
+{"cell":"g_270_24","points":[{"c":"alimentation","t":"B207","lat":48.740745,"lon":4.392026},{"c":"sante","t":"D265","lat":48.777782,"lon":4.398938},{"c":"education","t":"C108","lat":48.61015,"lon":4.405681}]}

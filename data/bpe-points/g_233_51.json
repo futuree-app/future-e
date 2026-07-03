@@ -1,1 +1,1 @@
-{"cell":"g_233_51","points":[{"c":"services","lat":42.103532,"lon":9.212959},{"c":"alimentation","lat":42.103372,"lon":9.212814},{"c":"alimentation","lat":42.056354,"lon":9.300749},{"c":"sante","lat":42.02765,"lon":9.34361}]}
+{"cell":"g_233_51","points":[{"c":"services","t":"A206","lat":42.103532,"lon":9.212959},{"c":"alimentation","t":"B202","lat":42.103372,"lon":9.212814},{"c":"alimentation","t":"B202","lat":42.056354,"lon":9.300749},{"c":"sante","t":"D265","lat":42.02765,"lon":9.34361}]}

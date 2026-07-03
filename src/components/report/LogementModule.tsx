@@ -305,58 +305,103 @@ const FACE3_CAT_LABEL: Record<string, string> = {
   transports: "Transports",
   services: "Services essentiels",
 };
+// Sous-titre de brique (vie quotidienne / vigilance / repère) et libellé de famille
+// (métadonnée secondaire au-dessus du type précis). Rendent visible la hiérarchie éditoriale.
+const FACE3_SUBHEAD: React.CSSProperties = {
+  fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em",
+  textTransform: "uppercase", color: "var(--accent-dim, #7a6e60)",
+};
+const FACE3_FAMILY: React.CSSProperties = {
+  fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em",
+  textTransform: "uppercase", color: "var(--fg-4)",
+};
 function fmtDist(m: number): string {
   return m >= 1000 ? `${(m / 1000).toFixed(1).replace(".", ",")} km` : `${m} m`;
+}
+// Une ligne « type précis — env. distance ». Le type est en évidence, la distance à droite.
+function Face3Line({ label, meters }: { label: string; meters: number }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
+      <span style={{ fontSize: 15, color: "var(--fg-1)", fontWeight: 500 }}>{label}</span>
+      <span style={{ fontSize: 15, color: "var(--fg-hi)", whiteSpace: "nowrap" }}>env. {fmtDist(meters)}</span>
+    </div>
+  );
 }
 function Face3Block({ s }: { s: Face3Snapshot }) {
   const noisy = s.osm.potentiallyNoisyInfrastructure;
   const bboxKm = (s.osm.bboxRadiusMeters / 1000).toFixed(1).replace(".", ",");
+  // Un seul axe de vigilance : le plus proche (le rapport ne juge pas, il pose un repère).
+  const nearestNoisy = noisy.length > 0 ? noisy.reduce((a, b) => (b.distanceMeters < a.distanceMeters ? b : a)) : null;
   return (
     <ReportSection eyebrow="Autour de cette adresse" tone="accent">
       <GlassCard>
-        <div style={{ display: "grid", gap: 20 }}>
-          {/* Brique 1 — vie quotidienne (socle) */}
-          <div style={{ display: "grid", gap: 10 }}>
-            {s.bpe.categories.map((c) => (
-              <div key={c.category} style={{ display: "flex", justifyContent: "space-between", gap: 16, fontSize: 15, color: "var(--fg-2)", lineHeight: 1.5 }}>
-                <span>{FACE3_CAT_LABEL[c.category]}</span>
-                <span style={{ color: "var(--fg-hi)", textAlign: "right" }}>
-                  {c.nearest
-                    ? `le plus proche à environ ${fmtDist(c.nearest.distanceMeters)}`
-                    : `aucun recensé dans les ${(c.searchCapMeters / 1000)} km analysés`}
-                </span>
-              </div>
-            ))}
+        <div style={{ display: "grid", gap: 22 }}>
+          <p style={{ fontSize: 14, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
+            Les équipements et repères cartographiés les plus proches du logement.
+          </p>
+
+          {/* Brique 1 — vie quotidienne (socle) : type précis + famille en métadonnée */}
+          <div style={{ display: "grid", gap: 12 }}>
+            <div style={FACE3_SUBHEAD}>Vie quotidienne autour de l’adresse</div>
+            <div style={{ display: "grid", gap: 12 }}>
+              {s.bpe.categories.map((c) => (
+                <div key={c.category} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
+                  <div style={{ display: "grid", gap: 3, minWidth: 0 }}>
+                    <span style={FACE3_FAMILY}>{FACE3_CAT_LABEL[c.category]}</span>
+                    <span style={{ fontSize: 15, color: c.nearest ? "var(--fg-1)" : "var(--fg-4)", fontWeight: 500 }}>
+                      {c.nearest ? (c.nearest.typeLabel ?? FACE3_CAT_LABEL[c.category]) : "Aucun recensé"}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: 15, color: c.nearest ? "var(--fg-hi)" : "var(--fg-4)", whiteSpace: "nowrap" }}>
+                    {c.nearest ? `env. ${fmtDist(c.nearest.distanceMeters)}` : `dans les ${c.searchCapMeters / 1000} km analysés`}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-          {/* Brique 2 — infrastructures potentiellement bruyantes (vigilance) */}
-          <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
+
+          {/* Brique 2 — infrastructure potentiellement bruyante (vigilance) */}
+          <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 8 }}>
+            <div style={FACE3_SUBHEAD}>Point de vigilance</div>
             {s.sourceStatus.osmInfrastructure === "pending" ? (
-              <em style={{ color: "var(--fg-4)" }}>Environnement en cours de récupération…</em>
+              <em style={{ color: "var(--fg-4)", fontSize: 14 }}>Environnement en cours de récupération…</em>
             ) : s.sourceStatus.osmInfrastructure === "failed" ? (
-              <span style={{ color: "var(--fg-4)" }}>Infrastructures : donnée momentanément indisponible.</span>
-            ) : noisy.length > 0 ? (
-              noisy
-                .map((x) => `à environ ${fmtDist(x.distanceMeters)} d'un axe ${x.type === "railway" ? "ferroviaire" : "autoroutier"} cartographié`)
-                .join(" ; ")
-                .replace(/^./, (c) => c.toUpperCase()) + "."
+              <span style={{ color: "var(--fg-4)", fontSize: 14 }}>Infrastructures : donnée momentanément indisponible.</span>
+            ) : nearestNoisy ? (
+              <>
+                <Face3Line
+                  label={nearestNoisy.type === "railway" ? "Voie ferrée cartographiée" : "Axe routier cartographié"}
+                  meters={nearestNoisy.distanceMeters}
+                />
+                <span style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>
+                  Cette distance ne mesure pas le bruit réellement perçu au logement.
+                </span>
+              </>
             ) : (
-              `Aucun axe autoroutier ou ferroviaire cartographié dans l'emprise analysée de ${bboxKm} km.`
+              <span style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
+                Aucun axe autoroutier ou ferroviaire cartographié dans l’emprise analysée de {bboxKm} km.
+              </span>
             )}
           </div>
-          {/* Brique 3 — espaces verts cartographiés (repère) */}
-          <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
+
+          {/* Brique 3 — espace vert cartographié (repère) */}
+          <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 8 }}>
+            <div style={FACE3_SUBHEAD}>Repère autour du logement</div>
             {s.sourceStatus.osmGreenSpaces === "pending" ? (
-              <em style={{ color: "var(--fg-4)" }}>Environnement en cours de récupération…</em>
+              <em style={{ color: "var(--fg-4)", fontSize: 14 }}>Environnement en cours de récupération…</em>
             ) : s.sourceStatus.osmGreenSpaces === "failed" ? (
-              <span style={{ color: "var(--fg-4)" }}>Espaces verts : donnée momentanément indisponible.</span>
+              <span style={{ color: "var(--fg-4)", fontSize: 14 }}>Espaces verts : donnée momentanément indisponible.</span>
             ) : s.osm.nearestMappedGreenSpace ? (
-              `Espace vert cartographié le plus proche à environ ${fmtDist(s.osm.nearestMappedGreenSpace.distanceMeters)}.`
+              <Face3Line label="Espace vert cartographié" meters={s.osm.nearestMappedGreenSpace.distanceMeters} />
             ) : (
-              "Aucun espace vert correspondant aux catégories recherchées dans l'emprise cartographiée."
+              <span style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
+                Aucun espace vert correspondant aux catégories recherchées dans l’emprise cartographiée.
+              </span>
             )}
           </div>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.8 }}>
-            INSEE (BPE) · OpenStreetMap (ODbL) · distances à vol d&apos;oiseau
+
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.85 }}>
+            Sources : INSEE, BPE 2024 · © contributeurs OpenStreetMap — ODbL · distances approximatives à vol d’oiseau
           </div>
         </div>
       </GlassCard>
