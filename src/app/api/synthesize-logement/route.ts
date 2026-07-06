@@ -1,6 +1,7 @@
 // app/api/synthesize-logement/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { deriveThermalEvidence, thermalEvidenceSummary } from "@/lib/thermal-evidence";
 
 // ════════════════════════════════════════════════════════════════════════════
 // CETTE ROUTE GÉNÈRE LA SYNTHÈSE NARRATIVE DU MODULE LOGEMENT
@@ -27,6 +28,7 @@ VOIX ÉDITORIALE — RÈGLES ABSOLUES
 - Pas d'exclamations. Pas de questions rhétoriques.
 - Citez les sources inline quand pertinent (ANSES, ACPR, Géorisques, ADEME, ATMO).
 - Distinguez ce qui est observé, ce qui est modélisé et ce qui est incertain.
+- L'indicateur de confort d'été est réglementaire et conventionnel : ne le présentez jamais comme une garantie de confort vécu, ni ne prédisez une température intérieure.
 
 REGISTRE
 - "Le problème n'est pas X, c'est Y" plutôt que "Attention, X est dangereux"
@@ -87,6 +89,12 @@ export async function POST(req: NextRequest) {
               construction: data.selectedDpe.annee_construction,
               type: data.selectedDpe.type_batiment,
             }
+          : null,
+      // Confort d'été : résumé descriptif attribué au DPE (jamais un verdict de vécu), sous le
+      // même verrou que le DPE. Null si le DPE n'est pas attribué au logement.
+      confortEte:
+        (data.dpeSelectionStatus === "auto_confirmed" || data.dpeSelectionStatus === "user_confirmed") && data.selectedDpe
+          ? thermalEvidenceSummary(deriveThermalEvidence(data.selectedDpe))
           : null,
       audit: data.audit ? {
         scenarios_count: data.audit.scenarios?.length ?? 0,
