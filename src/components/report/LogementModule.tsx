@@ -12,6 +12,7 @@ import { MetricTooltip } from "@/components/MetricTooltip";
 import { AddressAutocomplete } from "@/components/report/AddressAutocomplete";
 import { DpeSelector } from "@/components/report/DpeSelector";
 import { ThermalComfortSection } from "@/components/report/ThermalComfortSection";
+import { LogementSynthesis } from "@/components/report/LogementSynthesis";
 import { deriveThermalEvidence } from "@/lib/thermal-evidence";
 import { dpeAttributionStatus, deriveAddressDpeContext, type DpeRecord } from "@/lib/dpe-attribution";
 import type { BanAddressResult } from "@/lib/ban";
@@ -58,13 +59,6 @@ type ApiResponse = {
   sinistralite?: OnrnSinistralite | null;
 };
 
-type SynthesisResponse = {
-  verdict: string;
-  signals: Array<{ level: "good" | "medium" | "bad" | "warn"; text: string }>;
-  reading: string;
-  actions: Array<{ title: string; description: string; href?: string }>;
-};
-
 // ════════════════════════════════════════════════════════════════════════════
 // CONSTANTES
 // ════════════════════════════════════════════════════════════════════════════
@@ -96,19 +90,6 @@ function DpeBadge({ label, size = "md" }: { label: string | null; size?: "sm" | 
       background: DPE_COLORS[label] ?? "var(--bg-elev)",
       color: "#060812", fontWeight: 700, fontSize: fs, flexShrink: 0,
     }}>{label}</span>
-  );
-}
-
-// Verdict : carte verre avec liseré haut de la couleur du niveau
-function Verdict({ level, title, detail }: { level: "good" | "medium" | "bad"; title: string; detail: string }) {
-  const tone = level === "good" ? "green" : level === "bad" ? "red" : "orange";
-  return (
-    <GlassCard accentTop={tone} className="px-7 py-6">
-      <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 17, color: "var(--fg-hi)", marginBottom: 8, letterSpacing: "-0.01em" }}>
-        {title}
-      </div>
-      <div style={{ fontSize: 14, color: "var(--fg-3)", lineHeight: 1.7 }}>{detail}</div>
-    </GlassCard>
   );
 }
 
@@ -770,18 +751,12 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autour, result]);
 
-  // État pour la synthèse Claude API
-  const [synthesis, setSynthesis] = useState<SynthesisResponse | null>(null);
-  const [synthLoading, setSynthLoading] = useState(false);
-  const [synthError, setSynthError] = useState<string | null>(null);
-
   // Déclenchée par la sélection d'une suggestion BAN (le texte libre n'analyse jamais). On
   // envoie l'adresse ATOMIQUE au serveur ; on dérive ensuite l'état d'attribution du DPE.
   async function analyzeSelected(a: BanAddressResult) {
     if (!a.id) { setError("Adresse sans identifiant BAN."); return; }
     setLoading(true);
     setError(null);
-    setSynthesis(null);
     setAutour(null);
     autourRetriedRef.current = false;
     setDpeStatus("loading");
@@ -852,37 +827,26 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
     } catch { /* échec silencieux */ }
   }
 
-  // Appel Claude API à la demande
-  async function requestSynthesis() {
-    if (!result) return;
-    setSynthLoading(true);
-    setSynthError(null);
-    try {
-      const res = await fetch("/api/synthesize-logement", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: {
-          ...result,
-          selectedDpe,
-          dpeSelectionStatus: dpeStatus === "confirmed" ? "user_confirmed" : dpeStatus,
-        } }),
-      });
-      const payload = await res.json();
-      if (!res.ok) throw new Error(payload.error ?? "Erreur de synthèse");
-      setSynthesis(payload as SynthesisResponse);
-    } catch (err) {
-      setSynthError(err instanceof Error ? err.message : "Erreur");
-    } finally {
-      setSynthLoading(false);
-    }
-  }
-
   // Le DPE « du logement » = uniquement le choix attribué (jamais un candidat non confirmé).
   const dpe = (dpeStatus === "auto_confirmed" || dpeStatus === "confirmed") ? selectedDpe : null;
   // Lecture thermique (Face 1) : dérivée du DPE attribué uniquement (sinon C_NO_DATA).
   const thermalEvidence = deriveThermalEvidence(dpe);
   const communeName = result?.address?.city ?? defaultCommune ?? "cette commune";
   const dpeYear = dpe?.date_dpe ? dpe.date_dpe.slice(0, 4) : null;
+  // Synthèse artefact : prête quand l'analyse est là ET le DPE dans un état terminal
+  // (auto_confirmed / confirmed / not_found). On attend tant que l'utilisateur choisit.
+  const dpeTerminal = dpeStatus === "auto_confirmed" || dpeStatus === "confirmed" || dpeStatus === "not_found";
+  const synthesisReady = Boolean(result) && dpeTerminal;
+  const synthesisData = {
+    address: result?.address,
+    altitude: result?.altitude,
+    dpeSelectionStatus: dpeStatus === "confirmed" ? "user_confirmed" : dpeStatus,
+    selectedDpe: dpe,
+    georisques: result?.georisques,
+    sinistralite: result?.sinistralite,
+    autour,
+    communeData: result?.communeData,
+  };
   const isPassoire = ["F", "G"].includes(dpe?.etiquette_dpe ?? "");
   const georisques = result?.georisques?.parcel ?? result?.georisques?.address;
   // Les libellés PPRN ne sont plus aplatis ici : ils sont portés, structurés (régime + zone +
@@ -1024,94 +988,16 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
           />
 
           {/* ═════════════════════ LECTURE ═════════════════════ */}
-          {(
-            <div style={{ display: "grid", gap: 28 }}>
-
-              {/* Verdict composite retiré (ADR-0001). La lecture vient de la synthèse ci-dessous. */}
-
-              {/* Synthèse Claude API */}
-              <ReportSection eyebrow="Lecture personnalisée" tone="accent">
-
-                {!synthesis && !synthLoading && (
-                  <GlassCard className="text-center">
-                    <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 16, color: "var(--fg-hi)", marginBottom: 8 }}>
-                      Une lecture narrative de votre situation.
-                    </div>
-                    <div style={{ fontSize: 14, color: "var(--fg-3)", lineHeight: 1.7, marginBottom: 20, maxWidth: 460, margin: "0 auto 20px" }}>
-                      Au-delà des chiffres, futur•e peut traduire ces données en quelques paragraphes situés dans votre contexte. Calmes, sourcés, sans alarmisme.
-                    </div>
-                    <button
-                      onClick={requestSynthesis}
-                      style={{
-                        padding: "12px 24px", background: "var(--accent, #c8b89a)", color: "#060812",
-                        border: "none", fontFamily: "var(--font-mono)", fontSize: 11,
-                        letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
-                      }}
-                    >
-                      Générer la lecture
-                    </button>
-                    {synthError && (
-                      <div style={{ marginTop: 16, fontSize: 11, color: "var(--red, #f87171)" }}>
-                        {synthError}
-                      </div>
-                    )}
-                  </GlassCard>
-                )}
-
-                {synthLoading && (
-                  <GlassCard pad="lg" className="text-center">
-                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent-dim, #7a6e60)" }}>
-                      Analyse en cours…
-                    </div>
-                    <div style={{ fontSize: 11, color: "var(--fg-4)", marginTop: 8 }}>
-                      Croisement des données et rédaction de la lecture
-                    </div>
-                  </GlassCard>
-                )}
-
-                {synthesis && (
-                  <div style={{ display: "grid", gap: 20 }}>
-                    {/* Verdict IA */}
-                    <Verdict
-                      level={
-                        synthesis.signals.some((s) => s.level === "bad")
-                          ? "bad"
-                          : synthesis.signals.some((s) => s.level === "medium" || s.level === "warn")
-                            ? "medium"
-                            : "good"
-                      }
-                      title={synthesis.verdict}
-                      detail={synthesis.reading}
-                    />
-
-                    {/* Signaux structurés */}
-                    {synthesis.signals && synthesis.signals.length > 0 && (
-                      <div style={{ display: "grid", gap: 8 }}>
-                        {synthesis.signals.map((s, i) => {
-                          const colors = {
-                            good: { bg: "rgba(74,124,89,0.06)", border: "rgba(74,124,89,0.25)", fg: "var(--green-light, #6aad7e)" },
-                            medium: { bg: "rgba(196,122,58,0.06)", border: "rgba(196,122,58,0.25)", fg: "var(--orange, #c47a3a)" },
-                            bad: { bg: "rgba(168,74,58,0.06)", border: "rgba(168,74,58,0.25)", fg: "var(--red, #f87171)" },
-                            warn: { bg: "rgba(184,160,66,0.06)", border: "rgba(184,160,66,0.25)", fg: "var(--yellow, #b8a042)" },
-                          };
-                          const c = colors[s.level];
-                          return (
-                            <div key={i} style={{ padding: "14px 18px", background: c.bg, border: `1px solid ${c.border}`, borderRadius: 10, fontSize: 15, color: "var(--fg-2)", lineHeight: 1.6 }}>
-                              <span style={{ color: c.fg, marginRight: 10, fontFamily: "var(--font-mono)", fontSize: 12 }}>
-                                {s.level === "good" ? "↓" : s.level === "bad" ? "↑" : s.level === "warn" ? "!" : "→"}
-                              </span>
-                              {s.text}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </ReportSection>
-
-            </div>
-          )}
+          {/* Verdict composite retiré (ADR-0001). Synthèse artefact : prose streamée,
+              régénérée seulement quand un fait du logement change (spec 1a). */}
+          <LogementSynthesis
+            ready={synthesisReady}
+            data={synthesisData}
+            insee={result.address?.citycode ?? ""}
+            latitude={result.address?.latitude ?? 0}
+            longitude={result.address?.longitude ?? 0}
+            dpeId={dpe?.id_dpe ?? null}
+          />
 
           {/* ═════════════════════ DIMENSIONS RÉELLES ═════════════════════ */}
           {(
@@ -1251,56 +1137,48 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
           {(
             <div style={{ display: "grid", gap: 36 }}>
 
-              {/* Actions IA générées si dispo, sinon actions par défaut selon le profil.
+              {/* Actions par défaut selon le profil (les actions IA du JSON de synthèse ont
+                  disparu avec le passage à la prose streamée, spec 1a).
                   « Quoi vérifier » lié au logement : CONSERVÉ. Seule la liste générique
                   « Pages Savoir associées » (pour aller plus loin) a été retirée le 2026-07-03
                   (décision porteur), à réévaluer à la fin de tous les modules. */}
               <ReportSection eyebrow="Actions documentées">
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
 
-                  {/* Actions générées par Claude API */}
-                  {synthesis?.actions && synthesis.actions.length > 0 ? (
-                    synthesis.actions.map((a, i) => (
-                      <ActionCard key={i} title={a.title} desc={a.description} href={a.href} primary={i === 0} />
-                    ))
-                  ) : (
-                    <>
-                      {isPassoire && (
-                        <ActionCard
-                          title="Comprendre le calendrier DPE"
-                          desc="Interdiction progressive de location des passoires thermiques d'ici 2034. Quels travaux, quelles aides, quel ordre."
-                          href="/savoir/dpe-calendrier"
-                          primary
-                        />
-                      )}
-                      {(isPassoire || dpe?.etiquette_dpe === "E") && (
-                        <ActionCard
-                          title="Évaluer le coût d'une rénovation thermique"
-                          desc="Devis-type par typologie de bien, MaPrimeRénov' applicable, retour sur investissement à 10 ans."
-                          href="/savoir/renovation-cout"
-                        />
-                      )}
-                      {(allRisks.length > 0 || hasRegulatoryZones) && (
-                        <ActionCard
-                          title="Vérifier votre couverture assurance"
-                          desc="Contacter votre assureur pour anticiper toute évolution de prime ou de garantie sur votre zone."
-                          href="/savoir/assurance-littorale"
-                        />
-                      )}
-                      {result.cartofriches?.friches.some(f => f.sol_pollue) && (
-                        <ActionCard
-                          title="Pollution des sols à proximité"
-                          desc="Que dit la réglementation, quelles vérifications faire en cas de jardin potager, à qui poser la question."
-                          href="/savoir/sols-pollues"
-                        />
-                      )}
-                      <ActionCard
-                        title="Comparer ce logement avec d'autres territoires"
-                        desc="Le comparateur futur•e permet de mesurer comment ce bien se situe face à des territoires alternatifs sur les mêmes dimensions."
-                        href="/comparateur"
-                      />
-                    </>
+                  {isPassoire && (
+                    <ActionCard
+                      title="Comprendre le calendrier DPE"
+                      desc="Interdiction progressive de location des passoires thermiques d'ici 2034. Quels travaux, quelles aides, quel ordre."
+                      href="/savoir/dpe-calendrier"
+                      primary
+                    />
                   )}
+                  {(isPassoire || dpe?.etiquette_dpe === "E") && (
+                    <ActionCard
+                      title="Évaluer le coût d'une rénovation thermique"
+                      desc="Devis-type par typologie de bien, MaPrimeRénov' applicable, retour sur investissement à 10 ans."
+                      href="/savoir/renovation-cout"
+                    />
+                  )}
+                  {(allRisks.length > 0 || hasRegulatoryZones) && (
+                    <ActionCard
+                      title="Vérifier votre couverture assurance"
+                      desc="Contacter votre assureur pour anticiper toute évolution de prime ou de garantie sur votre zone."
+                      href="/savoir/assurance-littorale"
+                    />
+                  )}
+                  {result.cartofriches?.friches.some(f => f.sol_pollue) && (
+                    <ActionCard
+                      title="Pollution des sols à proximité"
+                      desc="Que dit la réglementation, quelles vérifications faire en cas de jardin potager, à qui poser la question."
+                      href="/savoir/sols-pollues"
+                    />
+                  )}
+                  <ActionCard
+                    title="Comparer ce logement avec d'autres territoires"
+                    desc="Le comparateur futur•e permet de mesurer comment ce bien se situe face à des territoires alternatifs sur les mêmes dimensions."
+                    href="/comparateur"
+                  />
 
                 </div>
               </ReportSection>
