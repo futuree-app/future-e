@@ -24,6 +24,9 @@ export type LogementRow = {
   selected_dpe_snapshot: DpeRecord | null;
   selected_dpe_at: string | null;
   updated_at: string;
+  synthesis_text: string | null;
+  synthesis_fact_hash: string | null;
+  synthesis_generated_at: string | null;
 };
 
 // Projette l'état runtime du choix DPE vers les colonnes persistées. Ne fige un DPE (id +
@@ -74,12 +77,32 @@ export async function getLogement(
 type DpeSelectionFields =
   "dpe_selection_status" | "selected_dpe_id" | "selected_dpe_snapshot" | "selected_dpe_at";
 
+// Champs écrits par d'autres chemins (endpoint DPE, synthèse), optionnels à l'upsert « autour ».
+type OptionalUpsertFields = DpeSelectionFields | "synthesis_text" | "synthesis_fact_hash" | "synthesis_generated_at";
+
 export async function upsertLogement(
   sb: SupabaseClient,
-  row: Omit<LogementRow, "updated_at" | DpeSelectionFields>
-    & Partial<Pick<LogementRow, DpeSelectionFields>>,
+  row: Omit<LogementRow, "updated_at" | OptionalUpsertFields>
+    & Partial<Pick<LogementRow, OptionalUpsertFields>>,
 ): Promise<void> {
   await sb
     .from("logement")
     .upsert({ ...row, updated_at: new Date().toISOString() }, { onConflict: "user_id,insee" });
+}
+
+// Écrit uniquement les colonnes de synthèse sur la ligne (user, insee) existante. UPDATE ciblé
+// (pas upsert) : si la ligne n'existe pas encore (course avec la création par « autour »), c'est
+// un no-op silencieux, toléré (le client affiche quand même la synthèse ce tour-là). Limitation
+// V1 assumée, alignée sur la course DPE déjà documentée.
+export async function saveSynthesis(
+  sb: SupabaseClient,
+  userId: string,
+  insee: string,
+  fields: { synthesis_text: string; synthesis_fact_hash: string; synthesis_generated_at: string },
+): Promise<void> {
+  await sb
+    .from("logement")
+    .update(fields)
+    .eq("user_id", userId)
+    .eq("insee", insee);
 }
