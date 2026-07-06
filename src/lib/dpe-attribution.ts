@@ -18,6 +18,18 @@ export type DpeRecord = {
   type_batiment: string | null;
   etage: string | null;
   complement: string | null;
+  // Bloc confort d'été + enveloppe + méthode (lecture thermique, Face 1). Normalisés à la
+  // lecture (toRecord) : booléens pour les champs 0/1, chaînes brutes ADEME sinon.
+  confort_ete: "bon" | "moyen" | "insuffisant" | null;
+  traversant: boolean | null;
+  protection_solaire: boolean | null;
+  ventilation: string | null;
+  inertie: string | null;
+  isolation_toiture: string | null;
+  brasseur_air: boolean | null;
+  isolation_murs: string | null;
+  isolation_menuiseries: string | null;
+  methode_dpe: string | null;
 };
 
 export const LABEL_ORDER: DpeLabel[] = ["A", "B", "C", "D", "E", "F", "G"];

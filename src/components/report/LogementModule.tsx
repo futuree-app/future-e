@@ -11,6 +11,8 @@ import { ReportSection, GlassCard } from "@/components/report/kit";
 import { MetricTooltip } from "@/components/MetricTooltip";
 import { AddressAutocomplete } from "@/components/report/AddressAutocomplete";
 import { DpeSelector } from "@/components/report/DpeSelector";
+import { ThermalComfortSection } from "@/components/report/ThermalComfortSection";
+import { deriveThermalEvidence } from "@/lib/thermal-evidence";
 import { dpeAttributionStatus, deriveAddressDpeContext, type DpeRecord } from "@/lib/dpe-attribution";
 import type { BanAddressResult } from "@/lib/ban";
 import { PassportTiltScene } from "@/components/report/PassportTiltScene";
@@ -877,6 +879,10 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
 
   // Le DPE « du logement » = uniquement le choix attribué (jamais un candidat non confirmé).
   const dpe = (dpeStatus === "auto_confirmed" || dpeStatus === "confirmed") ? selectedDpe : null;
+  // Lecture thermique (Face 1) : dérivée du DPE attribué uniquement (sinon C_NO_DATA).
+  const thermalEvidence = deriveThermalEvidence(dpe);
+  const communeName = result?.address?.city ?? defaultCommune ?? "cette commune";
+  const dpeYear = dpe?.date_dpe ? dpe.date_dpe.slice(0, 4) : null;
   const isPassoire = ["F", "G"].includes(dpe?.etiquette_dpe ?? "");
   const georisques = result?.georisques?.parcel ?? result?.georisques?.address;
   // Les libellés PPRN ne sont plus aplatis ici : ils sont portés, structurés (régime + zone +
@@ -980,6 +986,13 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
             parcel={result.parcel}
             dpe={dpe}
             altitude={result.altitude}
+          />
+
+          {/* Face 1 — lecture thermique « faire face à la chaleur » (DPE attribué uniquement). */}
+          <ThermalComfortSection
+            evidence={thermalEvidence}
+            communeName={communeName}
+            dpeYear={dpeYear}
           />
 
           {/* Avertissement si l'adresse est dans une commune différente du profil */}
