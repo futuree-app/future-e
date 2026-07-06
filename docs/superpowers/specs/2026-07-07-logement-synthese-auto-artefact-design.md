@@ -28,30 +28,22 @@ Chantier #1 de reprise du module Logement = « synthèse + réordonnancement ».
 
 **Clôture posture-neutre** : la synthèse finit sur « ce qui mérite attention pour ce logement », valable quelle que soit la posture. La spécificité par projet (j'achète / j'y vis / je loue) est **déjà portée par le bloc déterministe « Ce que cela mérite de vérifier »** (`Face2Implication` + `POSTURE_FOR_PROJET`). La posture ne touche jamais le prompt.
 
-**Garde-fous de prompt (gravés) :**
-- **Oriente, n'introduit aucun fait absent d'un bloc déterministe** en dessous. Aucune donnée neuve, aucun chiffre inventé.
-- **Ni exhaustivité, ni équilibre artificiel** : « La synthèse ne cherche jamais à être exhaustive ni à équilibrer artificiellement le récit. Elle retient seulement les éléments qui structurent réellement la lecture de ce logement. » Interdit les fausses symétries (« Malgré ces points… », « En contrepartie… », « À l'inverse… ») quand les données ne les portent pas. Prolonge le « renoncer aux signaux » de Quartier et la doctrine « révéler, pas équilibrer ».
-- **≤ 3 phénomènes** structurants sur l'ensemble de la synthèse.
-- **Le DPE est lu comme une photographie réglementaire datée du logement** (pas « dette datée » : cette lecture reste à la Face Énergie, où elle est juste ; un C récent ou un A ne sont pas des dettes).
-- **Aucune température intérieure prédite** ; l'indicateur de confort d'été reste réglementaire et conventionnel (jamais une garantie de vécu).
-- **Aucun score ni verdict global calculé** (ADR-0001), jamais un « verdict de vie ».
+**Garde-fous de prompt (gravés — passe Editorial Writer 2026-07-07, rapport `docs/rapports-agents/editorial-writer/2026-07-07-synthese-logement-prompt.md`) :**
+- **Ce que la synthèse ne dit JAMAIS** (bloc pivot, le plus important) : ne jamais parler de futur•e ni des « données » / « informations croisées » ; **attaquer par le bien**, pas par le produit ; ne pas réciter le payload (les chiffres sont des preuves, pas le moteur).
+- **Renoncer, pas répartir** (règle-pivot importée de Quartier, verbatim) : « La structure sert à RENONCER aux signaux, pas à les répartir en trois paragraphes. » Une donnée qui ne structure pas la lecture reste dehors.
+- **Ni exhaustivité, ni équilibre artificiel** : « La synthèse ne cherche jamais à être exhaustive ni à équilibrer artificiellement le récit. Elle retient seulement les éléments qui structurent réellement la lecture de ce logement. » Interdit les fausses symétries (« Malgré ces points… », « En contrepartie… », « À l'inverse… ») quand les données ne les portent pas.
+- **Aucun label / verdict de BIEN** (la forme du « verdict de vie » propre à ce module) : jamais « un logement globalement sain », « une adresse à risque », « un bien sûr ». On pose des faits situés, on ne classe pas le bien (ADR-0001).
+- **Oriente, n'introduit aucun fait absent d'un bloc déterministe.** Aucune donnée neuve, aucun chiffre inventé.
+- **≤ 3 phénomènes** structurants sur l'ensemble.
+- **Le DPE est lu comme une photographie réglementaire datée du logement** (pas « dette datée » : cette lecture reste à la Face Énergie ; un C récent ou un A ne sont pas des dettes).
+- **Aucune température intérieure prédite** ; l'indicateur de confort d'été reste réglementaire et conventionnel.
+- **Sources** : pas d'attribution dans le corps (« (source ADEME) », « selon Géorisques » interdits). On peut **nommer un dispositif** quand il fait partie du récit (« le diagnostic énergétique », « un plan de prévention du risque inondation »). La liste des sources n'apparaît PAS dans le prompt système (plomberie récitable) ; le payload dit au modèle ce qu'il a.
+- **Toujours dire l'échelle** (adresse vs commune), jamais faire passer un agrégat communal pour l'adresse.
 - **Nuance plutôt que négation** (« l'enjeu tient moins à X qu'à Y » plutôt que « ce n'est pas X, c'est Y »).
-- **Voix futur•e** : vouvoiement, pas de tirets cadratin, pas de tournures IA, pas d'alarmisme ni de minimisation, sources inline quand pertinent.
+- **Longueur** : plafond souple, « rarement plus de trois paragraphes courts », jamais un compteur de mots.
+- **Voix futur•e** : vouvoiement, pas de tirets cadratin, pas de tournures IA, pas d'alarmisme ni de minimisation.
 
-**Squelette de prompt (à affiner, base = `synthesize-quartier`) :**
-```
-Tu es l'analyste éditorial de futur•e. Tu écris la synthèse d'un LOGEMENT précis à partir de
-données publiques déjà présentées à l'utilisateur (DPE, confort d'été, Géorisques, ONRN, BPE/OSM).
-
-STRUCTURE (progression, pas gabarit) : le logement lui-même, puis ses expositions, puis son
-environnement immédiat. Un ou plusieurs paragraphes par partie selon la matière ; une partie
-sans matière réelle est écourtée ou fondue, jamais gonflée. Termine sur ce qui mérite attention
-pour CE logement, sans t'adresser à un projet particulier (achat/résidence/location).
-
-RÈGLES : [garde-fous ci-dessus, verbatim].
-
-L'utilisateur te transmet un payload JSON. Utilise-le sans le réciter.
-```
+**Prompt système** : le `SYSTEM_PROMPT` complet prêt à coller est fourni par l'Editorial Writer (section B du rapport `docs/rapports-agents/editorial-writer/2026-07-07-synthese-logement-prompt.md`). Structure : rôle + question unique → « ce que vous ne dites jamais » → VOIX → STRUCTURE (progression fixe, longueur variable, « renoncer plutôt que répartir ») → RÈGLES DE FOND → CLÔTURE posture-neutre. **Le prompt système ne nomme aucune source et ne mentionne pas « futur•e »** (évite la fuite méta). Le plan d'implémentation reprend ce prompt verbatim.
 
 ## Déclenchement (règle artefact)
 
@@ -117,6 +109,6 @@ alter table public.logement
 
 ## Ouvert (hors 1a)
 
-- Wordsmithing fin du prompt : peut passer une revue **Editorial Writer** avant de figer.
+- Wordsmithing fin du prompt : **revue Editorial Writer faite (2026-07-07)**, prompt complet dans son rapport. À rouvrir dès les premières générations streamées si le modèle nomme encore des sources, remplit des cases à vide, ou pose un label de bien (durcir alors avec exemples négatifs verbatim comme Quartier).
 - Réordonnancement (spec 1b) : remontée de la synthèse en tête + `DpeSelector` avant toute lecture + ordre des faces.
 - Migration IREP/friches vers le futur module Santé (ils quittent seulement le payload synthèse ici, restent affichés ailleurs tant que Santé n'existe pas).
