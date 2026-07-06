@@ -51,6 +51,9 @@ function toRecordLegacy(r: LegacyApiRecord): DpeRecord {
     type_batiment:      r.tr002_type_batiment_description ?? null,
     etage:              null,
     complement:         null,
+    confort_ete: null, traversant: null, protection_solaire: null, ventilation: null,
+    inertie: null, isolation_toiture: null, brasseur_air: null, isolation_murs: null,
+    isolation_menuiseries: null, methode_dpe: null,
   };
 }
 
@@ -100,6 +103,16 @@ const SELECT_LOGEMENT = [
   "date_etablissement_dpe",
   "conso_5_usages_par_m2_ep",
   "emission_ges_5_usages_par_m2",
+  "indicateur_confort_ete",
+  "logement_traversant",
+  "protection_solaire_exterieure",
+  "type_ventilation",
+  "classe_inertie_batiment",
+  "isolation_toiture",
+  "presence_brasseur_air",
+  "qualite_isolation_murs",
+  "qualite_isolation_menuiseries",
+  "methode_application_dpe",
   "_geopoint",
 ].join(",");
 
@@ -117,8 +130,28 @@ type ApiRecord = {
   date_etablissement_dpe?: string | null;
   conso_5_usages_par_m2_ep?: number | null;
   emission_ges_5_usages_par_m2?: number | null;
+  indicateur_confort_ete?: string | null;
+  logement_traversant?: string | number | null;
+  protection_solaire_exterieure?: string | number | null;
+  type_ventilation?: string | null;
+  classe_inertie_batiment?: string | null;
+  isolation_toiture?: string | null;
+  presence_brasseur_air?: string | number | null;
+  qualite_isolation_murs?: string | null;
+  qualite_isolation_menuiseries?: string | null;
+  methode_application_dpe?: string | null;
   _geopoint?: string | null;
 };
+
+// 0/1 ADEME -> booléen ; null si non renseigné. Tolère string ("1") ou number (1).
+function toBool01(v: string | number | null | undefined): boolean | null {
+  if (v == null || v === "") return null;
+  return String(v) === "1";
+}
+
+function toConfort(v: string | null | undefined): DpeRecord["confort_ete"] {
+  return v === "bon" || v === "moyen" || v === "insuffisant" ? v : null;
+}
 
 function toRecord(r: ApiRecord): DpeRecord {
   return {
@@ -135,6 +168,16 @@ function toRecord(r: ApiRecord): DpeRecord {
     type_batiment:     r.type_batiment ?? null,
     etage:             r.numero_etage_appartement ?? null,
     complement:        r.complement_adresse_logement ?? null,
+    confort_ete:          toConfort(r.indicateur_confort_ete),
+    traversant:           toBool01(r.logement_traversant),
+    protection_solaire:   toBool01(r.protection_solaire_exterieure),
+    ventilation:          r.type_ventilation ?? null,
+    inertie:              r.classe_inertie_batiment ?? null,
+    isolation_toiture:    r.isolation_toiture ?? null,
+    brasseur_air:         toBool01(r.presence_brasseur_air),
+    isolation_murs:       r.qualite_isolation_murs ?? null,
+    isolation_menuiseries: r.qualite_isolation_menuiseries ?? null,
+    methode_dpe:          r.methode_application_dpe ?? null,
   };
 }
 
