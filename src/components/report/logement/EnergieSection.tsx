@@ -1,8 +1,6 @@
 import type { LogementReport } from "@/lib/logement-report-types";
 import type { DpeRecord } from "@/lib/dpe-attribution";
-import { deriveAddressDpeContext } from "@/lib/dpe-attribution";
 import { ReportSection, GlassCard } from "@/components/report/kit";
-import { DpeSelector } from "@/components/report/DpeSelector";
 import { DpeBadge, Block, DPE_LABELS } from "./kit";
 
 // Face 1 — Énergie & rénovation : attribution du DPE au logement (sélecteur / absence / rejet /
@@ -12,30 +10,16 @@ export type DpeUiStatus =
   | "loading" | "not_found" | "selection_required" | "auto_confirmed" | "confirmed" | "rejected" | "error";
 
 export function EnergieSection({
-  dpeStatus, dpe, dpeCandidates, audit, onPick, onNotInList, onReselect,
+  dpeStatus, dpe, audit, onReselect,
 }: {
   dpeStatus: DpeUiStatus;
   dpe: DpeRecord | null;
-  dpeCandidates: DpeRecord[];
   audit: LogementReport["audit"];
-  onPick: (d: DpeRecord) => void;
-  onNotInList: () => void;
   onReselect: () => void;
 }) {
-  if (dpeStatus === "selection_required") {
-    return (
-      <ReportSection eyebrow="Énergie & rénovation" tone="orange">
-        <GlassCard>
-          <DpeSelector
-            candidates={dpeCandidates}
-            context={deriveAddressDpeContext(dpeCandidates)}
-            onPick={onPick}
-            onNotInList={onNotInList}
-          />
-        </GlassCard>
-      </ReportSection>
-    );
-  }
+  // Note : la sélection multi-DPE (« selection_required ») se fait AVANT le rapport, dans
+  // PreciseLogementStep (le rapport ne se rend jamais dans cet état). Ici on ne traite que les
+  // états terminaux : diagnostic attribué, aucun DPE, ou aucun attribué.
   if (dpeStatus === "not_found") {
     return (
       <ReportSection eyebrow="Énergie & rénovation" tone="orange">

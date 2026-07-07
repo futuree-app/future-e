@@ -24,6 +24,7 @@ import { SinistraliteBlock } from "@/components/report/logement/SinistraliteSect
 import { RegulatoryStatusBlock } from "@/components/report/logement/RegulatorySection";
 import { Face3Block } from "@/components/report/logement/AutourSection";
 import { DecisionChecklist } from "@/components/report/logement/DecisionChecklist";
+import { PreciseLogementStep } from "@/components/report/logement/PreciseLogementStep";
 import { energyState, type ChecklistFacts } from "@/lib/logement-checklist";
 
 // Le contrat de réponse (ApiResponse) vit dans @/lib/logement-report-types (LogementReport),
@@ -370,8 +371,19 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
           </div>
         </section>
 
+      {/* Précisez votre logement : quand plusieurs diagnostics existent, on choisit AVANT le
+          rapport pour que le Passeport s'affiche rempli (retour porteur, 5a). */}
+      {result && dpeStatus === "selection_required" && (
+        <PreciseLogementStep
+          addressLabel={result.address?.label ?? null}
+          candidates={dpeCandidates}
+          onPick={(d) => { setSelectedDpe(d); setDpeStatus("confirmed"); void persistDpe("user_confirmed", d); }}
+          onNotInList={() => { setSelectedDpe(null); setDpeStatus("rejected"); void persistDpe("not_in_list", null); }}
+        />
+      )}
+
       {/* ── RÉSULTATS : lecture en 5 beats (spec 5a) ── */}
-      {result && (
+      {result && dpeStatus !== "selection_required" && (
         <section style={{ padding: "24px 0 96px", display: "grid", gap: 40 }}>
 
           {/* Beat 1 — Identité : quel logement ? (passeport compacté, tilt conservé) */}
@@ -414,10 +426,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
             <EnergieSection
               dpeStatus={dpeStatus}
               dpe={dpe}
-              dpeCandidates={dpeCandidates}
               audit={result.audit}
-              onPick={(d) => { setSelectedDpe(d); setDpeStatus("confirmed"); void persistDpe("user_confirmed", d); }}
-              onNotInList={() => { setSelectedDpe(null); setDpeStatus("rejected"); void persistDpe("not_in_list", null); }}
               onReselect={() => setDpeStatus("selection_required")}
             />
 

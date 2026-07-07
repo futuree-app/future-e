@@ -44,12 +44,13 @@ export function PropertyPassport({
             <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-ghost mt-1">Parcelle {parcel.parcelCode}</p>
           )}
         </div>
-        <div className="flex flex-col items-end gap-1.5 shrink-0 passport-layer-seal">
-          <DpeBadge label={dpeLetter} size="lg" />
-          {!dpeLetter && (
-            <p className="text-right font-mono text-[9px] tracking-[0.1em] uppercase text-ghost/70">DPE non trouvé</p>
-          )}
-        </div>
+        {/* Sceau DPE uniquement si un diagnostic est attribué : sans DPE, pas de « trou » ni de
+            « non trouvé » (l'absence est portée par la section Énergie). */}
+        {dpeLetter && (
+          <div className="flex flex-col items-end gap-1.5 shrink-0 passport-layer-seal">
+            <DpeBadge label={dpeLetter} size="lg" />
+          </div>
+        )}
       </div>
 
       <h3
