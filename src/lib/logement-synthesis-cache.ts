@@ -9,7 +9,7 @@
 import { deriveThermalEvidence, thermalEvidenceSummary } from "./thermal-evidence.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 
-export const SYNTHESIS_PROMPT_VERSION = "v3"; // v3 : spécificité × sobriété (traduire le détail granulaire, plancher anti-générique, croisement, tightenings) — passe Editorial v3
+export const SYNTHESIS_PROMPT_VERSION = "v4"; // v4 : + grain RGA (adresse/secteur), attribution au diagnostic, croisement non forcé, clôture non prescriptive (retours ChatGPT sur générations réelles)
 
 // Sérialisation stable (clés triées récursivement) : deux payloads égaux -> même chaîne, quel que
 // soit l'ordre d'insertion des clés. Base du hash de contenu.
