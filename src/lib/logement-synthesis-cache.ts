@@ -9,7 +9,7 @@
 import { deriveThermalEvidence, thermalEvidenceSummary } from "./thermal-evidence.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 
-export const SYNTHESIS_PROMPT_VERSION = "v2"; // v2 : langage non-expert + anti-récitation des facteurs de confort DPE (retour porteur)
+export const SYNTHESIS_PROMPT_VERSION = "v3"; // v3 : spécificité × sobriété (traduire le détail granulaire, plancher anti-générique, croisement, tightenings) — passe Editorial v3
 
 // Sérialisation stable (clés triées récursivement) : deux payloads égaux -> même chaîne, quel que
 // soit l'ordre d'insertion des clés. Base du hash de contenu.

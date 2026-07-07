@@ -1,28 +1,21 @@
-// Route de synthèse Logement — prose streamée (patron synthesize-quartier), traitée en ARTEFACT.
-// Cache par hash de faits dans la table `logement` : hit -> texte figé, zéro LLM ; miss -> stream
-// + persistance via after(). Modèle Sonnet 4.6 medium, thinking off. Routing : Anthropic direct
-// tant que le produit n'est pas en vente (cf. mémoire synthesis_model_routing).
+# Rapport éditorial — Prompt système synthèse Logement, v3 (spécificité × sobriété)
 
-import { NextRequest, after } from "next/server";
-import { streamText } from "ai";
-import { anthropic } from "@ai-sdk/anthropic";
-import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
-import { canAccessCompleteReport } from "@/lib/access";
-import { canAnalyzeCommune } from "@/lib/active-territory";
-import { getLogement, saveSynthesis } from "@/lib/logement-store";
-import { buildFactHash, buildSynthesisPayload, type SynthesisData } from "@/lib/logement-synthesis-cache";
+**Date** : 2026-07-07 · **Agent** : Editorial Writer · **Terrain** : `SYSTEM_PROMPT` de
+`src/app/api/synthesize-logement/route.ts` (à remplacer verbatim).
 
-export const dynamic = "force-dynamic";
-// Aligné sur synthesize-quartier : un stream lent ne doit pas être tronqué par la durée par
-// défaut Vercel, et after() (persistance) vit dans la même enveloppe (board, conformité stack).
-export const runtime = "nodejs";
-export const maxDuration = 60;
+Fichiers lus : le prompt actuel (`route.ts`, l.24-114), ma passe précédente
+(`2026-07-07-synthese-logement-prompt.md`), le rapport Researcher
+(`2026-07-07-moat-wow-synthese-logement.md`), le payload réel
+(`src/lib/logement-synthesis-cache.ts`, `buildSynthesisPayload`), les libellés de confort d'été
+réellement injectés (`src/lib/thermal-evidence.ts`, `confortFactors`/`envelopeFactors`/
+`thermalEvidenceSummary`), la doctrine `docs/vault/doctrine/editoriale.md`.
 
-// Prompt système : repris VERBATIM de la passe Editorial Writer v3 2026-07-07
-// (docs/rapports-agents/editorial-writer/2026-07-07-synthese-logement-prompt-v3.md, section 1).
-// v3 = spécificité × sobriété : traduire le détail granulaire (pas le supprimer), plancher
-// anti-générique, croisement sans conclusion, tightenings ChatGPT. Ne pas reformuler.
-const SYSTEM_PROMPT = `Vous êtes l'analyste éditorial de futur•e. Vous écrivez la lecture d'UN logement précis, à une
+---
+
+## 1. SYSTEM_PROMPT v3 — bloc prêt à coller
+
+```
+Vous êtes l'analyste éditorial de futur•e. Vous écrivez la lecture d'UN logement précis, à une
 adresse précise, pour la personne qui l'habite ou l'envisage. Votre question unique : « qu'est-ce
 qui structure vraiment CE logement-là, celui-ci et aucun autre, et que faut-il en retenir avant
 de décider ? »
@@ -156,122 +149,90 @@ s'adresse à aucun projet (ni achat, ni location, ni résidence), et n'ajoute ni
 d'esprit (« au sens propre », « avant toute décision » sont interdits). Si un seul phénomène
 domine, dites-le simplement, ne fabriquez pas une seconde priorité pour faire poids.
 
-L'utilisateur vous transmet un payload JSON. Servez-vous-en sans le réciter.`;
+L'utilisateur vous transmet un payload JSON. Servez-vous-en sans le réciter.
+```
 
-type Body = {
-  data?: SynthesisData;
-  logementId?: string;
-  // INSEE de l'adresse, pour la frontière de monétisation (étape 4.5). Défense en profondeur :
-  // le vrai gate autoritatif est sur georisques-logement (citycode validé serveur) ; ici on
-  // barre une génération LLM cross-commune même sur appel direct.
-  insee?: string;
-  // Force la régénération malgré un cache chaud (bouton « Régénérer »). Sans lui, re-POST -> hash
-  // identique -> cache hit -> même texte : le bouton mentirait.
-  force?: boolean;
-};
+---
 
-export async function POST(req: NextRequest) {
-  const account = await getCurrentUserAccount();
-  if (!canAccessCompleteReport(account)) {
-    return new Response("forbidden", { status: 403 });
-  }
+## 2. Ce qui change, et pourquoi
 
-  let body: Body;
-  try {
-    body = (await req.json()) as Body;
-  } catch {
-    return new Response("Invalid JSON body.", { status: 400 });
-  }
-  // Validation minimale du body (geste 1, version minimale) : les faits sont posés par le client
-  // en attendant que la ligne logement devienne la source serveur des faits. `data` doit être un
-  // objet, `logementId` une chaîne non vide. Le hash étant désormais un hash de CONTENU, la
-  // position n'est plus transmise (elle est déjà dans `data.address`).
-  if (!body?.data || typeof body.data !== "object" || Array.isArray(body.data) || typeof body.logementId !== "string" || !body.logementId) {
-    return new Response("data (objet) et logementId (chaîne) requis", { status: 400 });
-  }
+**Retiré (les deux lignes qui poussaient à la généricité, cause diagnostiquée par le Researcher)**
+- La consigne « préférez *un logement ancien, énergivore* à *une consommation de 320 kWh/m²* » :
+  supprimée. C'était la phrase-type d'un ChatGPT sans l'adresse. Le garde-fou anti-récitation de
+  CHIFFRES est conservé (« un chiffre n'apparaît que s'il éclaire une décision »), mais on ne
+  pousse plus vers la banalité qualitative.
+- L'interdit « Vous n'énumérez JAMAIS les caractéristiques techniques (traversant, inertie,
+  ventilation, brasseur) ». C'était l'erreur centrale : le prompt bannissait la SPÉCIFICITÉ
+  (le moat) en croyant bannir le JARGON. Or ces libellés sont exactement ce que
+  `thermalEvidenceSummary` injecte dans `confortEte` du payload. On les rendait indisponibles.
 
-  const { supabase, user } = await requireCurrentUser();
-  // Frontière de monétisation (étape 4.5) : commune de l'adresse lisible par l'utilisateur.
-  if (!(await canAnalyzeCommune(supabase, user.id, body.insee))) {
-    return new Response(JSON.stringify({ error: "COMMUNE_NOT_UNLOCKED", code: "COMMUNE_NOT_UNLOCKED", insee: body.insee ?? null }), {
-      status: 403,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-  const factHash = buildFactHash(body.data);
+**Ajouté**
+- **CE QUI FAIT LA VALEUR : LE DÉTAIL PRÉCIS, DIT SIMPLEMENT** + table de traduction calquée sur
+  les libellés réels de `thermal-evidence.ts` (non traversant, inertie légère/lourde, VMC simple
+  flux, ventilation naturelle, brasseurs, protections solaires) et de `editoriale.md`
+  (retrait-gonflement, sinistralité). Le détail granulaire est désormais ENCOURAGÉ, à condition
+  d'être glosé. Traduire, pas supprimer.
+- **LE PLANCHER DE SPÉCIFICITÉ** (test anti-générique E1/E2 du Researcher) : toute phrase qu'un
+  assistant sans l'adresse pourrait écrire est coupée ou spécifiée ; au moins une phrase doit
+  nommer un trait inimitable.
+- **LE CROISEMENT** (paradigme B) : rapprocher deux faits granulaires SANS fabriquer de
+  conclusion. Relier n'est pas conclure.
+- **L'ORDRE** (paradigme C) : la première phrase attaque le fait le plus singulier, jamais le DPE
+  par défaut. Fusionné avec l'ancienne section STRUCTURE (longueur suit la matière, renoncer).
+- **LA CHALEUR** : une phrase incarnée et simple, contre la phrase abstraite qui vide (« confort
+  d'été moyen »), sans jamais franchir la ligne du ressenti prédit.
 
-  // Cache touché : texte figé, zéro LLM (sauf régénération forcée).
-  const existing = await getLogement(supabase, user.id, body.logementId);
-  if (!body.force && existing?.synthesis_fact_hash === factHash && existing.synthesis_text) {
-    return new Response(existing.synthesis_text, {
-      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
-    });
-  }
+**Reformulé (tightenings ChatGPT, section RÈGLES DE FOND)**
+- Sinistralité posée comme COMMUNALE et secondaire : une phrase au plus, jamais un paragraphe ni
+  le moteur du récit ; RGA distingué comme fait de parcelle.
+- Interdiction explicite de combiner signaux faibles (altitude + stat communale + absence de
+  zonage) ; l'altitude n'est pas un phénomène.
+- Interdiction de suggérer un mécanisme/protection sans donnée (digue, protégé des crues).
+- Une absence de zonage ne se raconte pas ; on ne nomme un zonage que POSITIF.
+- Frontière Santé rendue explicite dans les règles (pollution/sols/industrie/radon hors lecture).
+- Clôture : ajout « sobrement », interdiction du trait d'esprit (« au sens propre ») et du
+  conseil générique (« avant toute décision »).
 
-  // Cache raté : streamer la prose ET persister à la fin (after()).
-  const payload = buildSynthesisPayload(body.data);
-  const userMessage = `Voici les faits déjà présentés pour ce logement. Produisez la lecture selon vos règles. Ne récitez pas le payload, servez-vous-en.
+**Conservé intact** : vouvoiement, pas de tiret cadratin, pas d'antithèse, pas de tournures d'IA,
+anti-auto-référence, pas de ressenti prédit, aucun score/verdict global (ADR-0001), échelle
+toujours dite, DPE = photographie datée, pas d'attributions de sources dans le corps, trois
+phénomènes max, clôture qui oriente sans prescrire, posture-neutre.
 
-DONNÉES :
-${JSON.stringify(payload, null, 2)}`;
+**Note d'implémentation** : le prompt change de contrat de sortie (spécificité désormais exigée).
+Penser à bumper `SYNTHESIS_PROMPT_VERSION` de `v2` à `v3` dans `logement-synthesis-cache.ts` pour
+invalider les synthèses en cache générées sous l'ancienne consigne (sinon les artefacts figés
+gardent la voix générique).
 
-  const result = streamText({
-    model: anthropic("claude-sonnet-4-6"),
-    providerOptions: { anthropic: { effort: "medium", thinking: { type: "disabled" } } },
-    system: SYSTEM_PROMPT,
-    prompt: userMessage,
-    onError: ({ error }) => console.error("[synthesize-logement] streamText error:", error),
-  });
+## Version minimale (~90 % de la valeur)
+Si on ne changeait qu'UNE chose : retirer les deux lignes bannies et les remplacer par la table de
+traduction + la phrase « au moins une phrase doit nommer un trait que seul l'accès aux données de
+CETTE adresse permet de dire ». C'est ce qui débloque le wow. Le reste (croisement, ordre, chaleur)
+amplifie ; les tightenings protègent des dérives, mais le levier du « comment ils savent ça » tient
+dans ces deux gestes.
 
-  // Probe le premier chunk : IA down -> 502 franc (le client bascule sur son état d'erreur).
-  const iter = result.textStream[Symbol.asyncIterator]();
-  let firstChunk: IteratorResult<string>;
-  try {
-    firstChunk = await iter.next();
-  } catch (err) {
-    console.error("[synthesize-logement] first chunk failed:", err);
-    return new Response("AI provider unavailable.", { status: 502 });
-  }
-  if (firstChunk.done) {
-    return new Response("Empty stream from AI provider.", { status: 502 });
-  }
+## Quand rouvrir ce sujet
+- **Dès les premières sorties réelles** : si le modèle empile les traits traduits en liste (retour
+  du travers inventaire) ou, à l'inverse, retombe dans le générique, ajuster le quota « un trait
+  par phénomène » (le durcir ou l'assouplir) et ajouter un exemple négatif verbatim.
+- **Si le croisement fabrique des conclusions** malgré l'interdit (« donc la maison est fragile ») :
+  durcir avec un exemple de croisement-sans-conclusion gravé dans le prompt.
+- **Quand la parcelle/contenance entrera dans `buildSynthesisPayload`** (aujourd'hui dans
+  l'artefact serveur, pas dans le payload de synthèse) : nouveaux ancrages E3, enrichir la table.
+- **Quand la Face Santé absorbera pollution/industrie** : le payload maigrit, revérifier que le
+  plancher de spécificité ne s'appuyait pas sur un fait qui part.
+- **Si un intake (1-2 questions : étage, orientation, pièce de vie) devient réel** : la
+  reconnaissance (D3) devient jouable, la nature du wow change, re-diverger.
 
-  const encoder = new TextEncoder();
-  let full = firstChunk.value;
-  // Gate de complétude (board critique 2c) : after() s'exécute MÊME si la réponse a échoué (doc
-  // Next). Sur un abort client en cours de stream, `full` est tronqué : sans ce flag, on
-  // persisterait un texte partiel comme artefact définitif. On ne persiste que si la boucle est
-  // sortie proprement (stream clos).
-  let completed = false;
-  const stream = new ReadableStream({
-    async start(controller) {
-      controller.enqueue(encoder.encode(firstChunk.value));
-      try {
-        while (true) {
-          const next = await iter.next();
-          if (next.done) break;
-          full += next.value;
-          controller.enqueue(encoder.encode(next.value));
-        }
-        completed = true;
-        controller.close();
-      } catch (err) {
-        try { controller.error(err); } catch { /* client déjà parti */ }
-      }
-    },
-  });
-
-  // Persistance post-réponse : seulement si le stream s'est clos proprement (texte complet).
-  after(async () => {
-    if (!completed || !full.trim()) return;
-    await saveSynthesis(supabase, user.id, body.logementId!, {
-      synthesis_text: full,
-      synthesis_fact_hash: factHash,
-      synthesis_generated_at: new Date().toISOString(),
-    }).catch((e) => console.error("[synthesize-logement] persist failed:", e));
-  });
-
-  return new Response(stream, {
-    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
-  });
-}
+## Limites de mon regard (ce run)
+- Je juge le PROMPT, pas la sortie du LLM. Je réduis ses portes de sortie, je ne garantis pas
+  l'obéissance ; la preuve se fait sur des générations réelles que je n'ai pas ici. Le risque
+  principal de CE run : en rouvrant la spécificité, je rouvre aussi la porte de l'inventaire de
+  traits ; le quota « un par phénomène » est un pari de rédaction non testé.
+- Je n'ai pas le rendu à l'écran ni la position de la synthèse dans le module : je juge le rythme
+  en lecture linéaire, pas l'effet visuel réel.
+- Je n'ai pas vu le texte exact des blocs déterministes voisins (confort d'été, sinistralité,
+  « autour ») dans leur rendu final : un chevauchement fin entre ma phrase incarnée de chaleur et
+  le bloc confort ne se verra qu'à l'intégration. Si le bloc dit déjà « l'air ne traverse pas »
+  juste sous la prose, ma consigne « incarner la chaleur » peut créer un doublon à surveiller.
+- Je n'ai pas tranché si le wow doit vivre dans la prose ou dans une bande auditable (piste D du
+  Researcher) : je travaille l'hypothèse « la prose porte le wow », qui reste à valider.
