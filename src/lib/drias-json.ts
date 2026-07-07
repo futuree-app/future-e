@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { DRIAS_CITY_FALLBACK } from "@/lib/communes";
+import type { ClimatProjete } from "@/lib/logement-synthesis-cache";
 
 // Mapping des colonnes techniques vers nos indicateurs métier.
 //
@@ -125,4 +126,40 @@ export async function getClimatDataCommune(inseeCode: string) {
       s: scenarios,
     },
   };
+}
+
+// ─── Signal climat curé pour la synthèse Logement (croisement × Territoire) ──
+// Pré-digère la trajectoire climatique en une intensité qualitative par axe, PAS de chiffre : le
+// prompt Logement ne doit jamais réciter une valeur DRIAS (cf. Editorial 2026-07-07). L'axe
+// CHALEUR se dérive du SURCROÎT projeté vs période de référence (anomalies ATR_yr = nuits
+// tropicales en plus, ATX30D_yr = jours >30 °C en plus), à l'horizon gwl20 (2050 / +2,7 °C France,
+// TRACC). Le surcroît EST la sémantique « hausse » qu'on veut, sans besoin d'une base « présent »
+// (que le JSON ne fournit pas). Seuils v1, heuristique documentée sur la distribution nationale
+// (35 006 communes, gwl20) : médiane ≈ +9 nuits / +12 jours, p90 ≈ +21 / +21.
+//   marquee = surcroît ≥ 20 (~10 % des communes les plus touchées) ; notable = 8 à 20 ; sous 8 = null.
+// chaleur = la plus forte des deux sous-tendances. L'axe SÉCHERESSE DES SOLS reste null en v1
+// (SWI absolu, distribution sans cassure de 67 à 160 j, aucune anomalie : pas de seuil défendable).
+function classeChaleur(anomalie: number | undefined | null): 0 | 1 | 2 {
+  if (anomalie == null || Number.isNaN(anomalie)) return 0;
+  if (anomalie >= 20) return 2;
+  if (anomalie >= 8) return 1;
+  return 0;
+}
+
+export async function deriveClimatProjete(inseeCode: string): Promise<ClimatProjete | null> {
+  if (!inseeCode) return null;
+  const data = await getClimatDataCommune(inseeCode);
+  const v = data?.commune.s?.gwl20?.v;
+  if (!v) return null;
+  const classe = Math.max(classeChaleur(v.ATR_yr), classeChaleur(v.ATX30D_yr)) as 0 | 1 | 2;
+  // MARQUEE-ONLY en v1 : le niveau `notable` (classe 1) est volontairement rendu SILENCIEUX
+  // (mappé à null), donc jamais émis vers le modèle. Décision porteur : à fréquence `notable`
+  // (~la moitié des communes), le croisement climat produit une charnière répétée d'un rapport à
+  // l'autre (« à mesure que les étés se réchauffent » observé 8/8 sur générations réelles) = une
+  // formule. On garde le climat RARE et DISTINCTIF (marquee ≈ 10-12 % des communes, les plus
+  // chaudes). Le type conserve "notable" (matière prête) ; on le rouvrira avec un vrai mécanisme
+  // anti-formule (rotation, phrases par famille de fait, ou synthèse en 2 passes).
+  const chaleur = classe === 2 ? "marquee" : null;
+  if (chaleur === null) return null;
+  return { horizon: "2050", chaleur, secheresse_sols: null };
 }

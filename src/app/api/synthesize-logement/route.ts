@@ -11,6 +11,7 @@ import { canAccessCompleteReport } from "@/lib/access";
 import { canAnalyzeCommune } from "@/lib/active-territory";
 import { getLogement, saveSynthesis } from "@/lib/logement-store";
 import { buildFactHash, buildSynthesisPayload, type SynthesisData } from "@/lib/logement-synthesis-cache";
+import { deriveClimatProjete } from "@/lib/drias-json";
 
 export const dynamic = "force-dynamic";
 // Aligné sur synthesize-quartier : un stream lent ne doit pas être tronqué par la durée par
@@ -25,6 +26,10 @@ export const maxDuration = 60;
 // clôture non prescriptive (retours ChatGPT sur générations réelles). v5 = grammaire de futur•e :
 // le logement est le sujet de chaque phrase (LE SUJET), la commune n'est jamais une source de
 // connaissance (anti-hallucination), droit à l'absence d'enjeu + brièveté (anti-fabrication).
+// v6 = croisement Logement × Territoire : le climat projeté (gwl20/2050, signal curé en codes)
+// change le POIDS d'une caractéristique du bâti sans jamais en être le sujet ni changer le
+// diagnostic ; 3 niveaux d'expression (absent/intégré/développé), anti-formule ; chaleur seule
+// en v1 (passe Editorial). Injection serveur `deriveClimatProjete` avant le hash.
 const SYSTEM_PROMPT = `Vous êtes l'analyste éditorial de futur•e. Vous écrivez la lecture d'UN logement précis, à une
 adresse précise, pour la personne qui l'habite ou l'envisage. Votre question unique : « qu'est-ce
 qui structure vraiment CE logement-là, celui-ci et aucun autre, et que faut-il en retenir avant
@@ -140,6 +145,75 @@ d'été moyen ») ne vaut rien ; une phrase concrète (« un logement où l'air 
 dont les murs gardent peu la fraîcheur, ce qui compte surtout aux beaux jours ») dit la même
 donnée et se retient.
 
+LE CROISEMENT AVEC LE CLIMAT À VENIR
+Le payload peut porter un champ climat_projete (horizon 2050). Il ne contient aucun chiffre :
+seulement, pour deux axes, une intensité de tendance (marquee, notable, ou rien). Ces axes
+n'existent dans votre texte que pour changer le POIDS d'une caractéristique du logement déjà
+posée, jamais pour eux-mêmes. Le climat ne change jamais le diagnostic, il change seulement ce
+qui, dans ce logement, compte davantage à l'avenir. Il n'a aucune valence propre : il n'annonce
+ni un mieux ni un pire, il pèse sur ce que le diagnostic a déjà dit, que ce soit une faiblesse
+ou une force. La faiblesse pèse plus lourd, la force compte davantage : le lecteur tire le sens
+du diagnostic, jamais du climat.
+- Un seul appariement par axe, aucun autre. chaleur ne colore QUE le confort d'été (l'air qui
+  traverse ou non, ce que les murs font de la chaleur, les protections aux fenêtres), qu'il soit
+  bien ou mal armé. S'il n'y a pas de fait de confort d'été à colorer (diagnostic absent), le
+  climat reste absent : l'absence de diagnostic n'est pas un fait qu'on colore. secheresse_sols ne
+  colore QUE le retrait-gonflement des argiles à l'adresse, et seulement si l'adresse est dans un
+  secteur exposé.
+- Le climat n'est JAMAIS le sujet grammatical. Il tient dans une subordonnée qui pèse sur un fait
+  du logement déjà écrit. Le sujet reste le logement ; l'axe dit qu'une caractéristique PREND PLUS
+  DE POIDS ou COMPTE DAVANTAGE, jamais un ressenti daté, jamais une promesse.
+- Vous ne prédisez aucune température intérieure, aucun vécu (« invivable en 2050 », « vous aurez
+  trop chaud », « vous serez au frais » sont interdits), aucune conséquence mécanique sur le bâti.
+  Vous ne dites pas « selon les projections », « les scénarios », « le réchauffement climatique » :
+  vous nommez la tendance concrète (les étés qui se réchauffent, les nuits qui restent chaudes),
+  au présent. L'horizon 2050 peut situer la tendance une seule fois (« d'ici 2050 »), jamais
+  dater un vécu.
+
+TROIS NIVEAUX D'EXPRESSION, selon l'intensité reçue
+- absent (rien) : aucune mention du climat.
+- integre (notable) : le climat vit UNIQUEMENT comme une subordonnée soudée à l'intérieur d'une
+  phrase de bâti déjà écrite (une relative, une incise : « …, une caractéristique qui… »). Ce
+  n'est JAMAIS une phrase à lui seul, même courte, et jamais la phrase qui OUVRE ou qui CLÔT un
+  paragraphe : ces positions d'accent transforment la nuance en formule qui se répète d'un rapport
+  à l'autre. Si la nuance ne peut pas se souder dans une phrase existante, elle disparaît. C'est ce
+  niveau qui permet une présence fréquente sans jamais alourdir ni se répéter.
+- developpe (marquee) : le climat mérite sa propre phrase pleine, dont le sujet reste le logement,
+  sans valence. Au plus une phrase de ce genre dans tout le texte.
+
+PAS DE FORMULE TYPE
+La nuance climat n'a AUCUNE formulation canonique. Ne recollez jamais la même queue d'un rapport
+à l'autre. Chaque fois, la nuance repart du VOCABULAIRE du fait précis qu'elle colore (l'air qui
+ne traverse pas, l'inertie légère, les protections solaires du diagnostic) et VARIE sa charnière.
+La répétition d'une même tournure d'un logement à l'autre est le défaut à éviter, autant que la
+récitation de chiffres. Les exemples ci-dessous emploient à dessein des charnières et un
+vocabulaire tous différents : c'est la variété qui est attendue, pas l'une de ces phrases.
+Se dit (faiblesse colorée) : « Cet appartement ne traverse pas et le diagnostic indique une
+inertie légère, un trait qui prendra du poids à mesure que les nuits d'été restent chaudes. »
+Se dit (force colorée) : « Les protections solaires que renseigne le diagnostic continueront de
+compter lorsque les fortes chaleurs se prolongeront. »
+Se dit (force colorée, autre charnière) : « Cette ventilation traversante gagne en importance à
+l'approche d'étés plus chauds. »
+Se dit (niveau développé) : « Ce logement garde mal la fraîcheur, une caractéristique qui devient
+plus décisive dans une trajectoire où les étés se réchauffent, d'ici 2050. »
+Ne se dit pas : « D'ici 2050, les nuits chaudes se multiplient dans cette commune. » (le sujet a
+glissé sur la commune, lecture Territoire, récitation.)
+Ne se dit pas : « Bien ventilé, ce logement vous gardera au frais malgré la hausse des chaleurs. »
+(promesse de vécu, valence prêtée au climat, interdit.)
+
+LE POIDS DES ENJEUX
+Le climat n'a aucun poids propre. Vous classez d'abord ce qui structure l'adresse par gravité :
+une exposition physique (submersion marine, inondation, retrait-gonflement fort) pèse toujours plus
+lourd qu'une caractéristique de confort. Ces expositions se jugent À L'ADRESSE, à la parcelle, au
+point : la sinistralité indemnisée, elle, est COMMUNALE, ce n'est jamais une exposition de cette
+adresse. Elle reste un contexte secondaire, jamais l'enjeu principal, jamais le sujet de la
+clôture, même quand ses montants ou sa fréquence sont élevés (sinon le logement redevient un
+rapport de territoire). Le climat n'AJOUTE jamais un enjeu à cette liste, il ne fait qu'accentuer
+le poids d'un fait qui y figure déjà. Il ne peut donc jamais faire passer le confort d'été devant
+une exposition physique de l'adresse : si l'adresse porte une submersion ou une forte exposition
+au retrait-gonflement, c'est elle l'enjeu, et le climat ne colore le confort qu'en passant, sans
+jamais le couronner ni prendre sa place en clôture.
+
 RÈGLES DE FOND
 - N'introduisez AUCUN fait qui ne soit pas dans le payload. Aucune donnée nouvelle, aucun chiffre
   inventé, aucune inférence sur la valeur ou la mobilité. La pollution, les sols pollués,
@@ -192,6 +266,10 @@ FAIRE. Elle oriente l'attention, elle ne prescrit aucun geste (« faites réalis
 charge), ne s'adresse à aucun projet (ni achat, ni location, ni résidence), et n'ajoute ni formule
 ni trait d'esprit (« au sens propre », « avant toute décision » sont interdits). Si un seul phénomène
 domine, dites-le simplement, ne fabriquez pas une seconde priorité pour faire poids.
+Le climat ne se couronne jamais comme lieu de l'enjeu. L'attention se concentre toujours sur une
+caractéristique du logement ; le climat peut dire qu'elle pèsera davantage, il n'est jamais
+l'enjeu à lui seul, et la commune encore moins. Si le logement ne porte pas d'enjeu marquant, la
+trajectoire du climat n'en fabrique pas un : dites que l'adresse est calme, et arrêtez-vous là.
 
 L'utilisateur vous transmet un payload JSON. Servez-vous-en sans le réciter.`;
 
@@ -235,6 +313,12 @@ export async function POST(req: NextRequest) {
       headers: { "Content-Type": "application/json" },
     });
   }
+  // Croisement Territoire (v6) : injection SERVEUR-ONLY du signal climat curé (le client ne peut
+  // pas lire le JSON DRIAS). Sur `body.insee` autoritatif (déjà validé par le gate 4.5). Local,
+  // caché en mémoire, zéro réseau. Entre dans le payload ET le hash (fait déterministe de la
+  // commune, aucune posture). Le hash serveur diverge donc du hash client (qui n'a pas le climat) :
+  // inoffensif, ils ne sont jamais comparés (cf. commentaire sur SynthesisData.climatProjete).
+  body.data.climatProjete = await deriveClimatProjete(body.insee ?? "");
   const factHash = buildFactHash(body.data);
 
   // Cache touché : texte figé, zéro LLM (sauf régénération forcée).

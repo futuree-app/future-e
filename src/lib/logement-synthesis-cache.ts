@@ -9,7 +9,7 @@
 import { deriveThermalEvidence, thermalEvidenceSummary } from "./thermal-evidence.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 
-export const SYNTHESIS_PROMPT_VERSION = "v5"; // v5 : grammaire de futur•e — le logement est le sujet de chaque phrase (test du sujet), le nom de commune n'est jamais une source de connaissance (anti-hallucination), droit à l'absence d'enjeu + brièveté (anti-fabrication, anti-remplissage). Vu sur 10 générations réelles post-v4.
+export const SYNTHESIS_PROMPT_VERSION = "v6"; // v6 : croisement Logement × Territoire — le climat projeté (gwl20/2050) éclaire une caractéristique du bâti sans jamais en être le sujet ni changer le diagnostic (il change le POIDS) ; poids narratif (le climat ne prend jamais l'enjeu principal, la sinistralité communale n'est jamais couronnée). MARQUEE-ONLY en v1 (notable rendu silencieux : répétition de charnière observée 8/8 à fréquence notable). Axe chaleur seul (sécheresse différée). Passe Editorial v2.
 
 // Sérialisation stable (clés triées récursivement) : deux payloads égaux -> même chaîne, quel que
 // soit l'ordre d'insertion des clés. Base du hash de contenu.
@@ -44,6 +44,16 @@ export function buildFactHash(data: SynthesisData): string {
   return `syn:${SYNTHESIS_PROMPT_VERSION}:${fnv1a(stableStringify(buildSynthesisPayload(data)))}`;
 }
 
+// Signal climat projeté (gwl20 / 2050), curé et PRÉ-DIGÉRÉ en intensité qualitative : le modèle
+// ne reçoit jamais de chiffre, seulement un code par axe. Dérivé serveur-only par
+// `deriveClimatProjete` (drias-json), injecté dans `data` avant le hash. Axe chaleur seul en v1 ;
+// `secheresse_sols` reste `null` (pas de seuil défendable sur SWI absolu, cf. décision porteur).
+export type ClimatProjete = {
+  horizon: "2050";
+  chaleur: "marquee" | "notable" | null;
+  secheresse_sols: "marquee" | "notable" | null;
+};
+
 // Forme d'entrée (sous-ensemble de ce que le client poste). Champs optionnels/défensifs.
 export type SynthesisData = {
   address?: { label?: string | null } | null;
@@ -57,6 +67,11 @@ export type SynthesisData = {
     osm?: { nearestMappedGreenSpace?: { kind?: string | null; distanceMeters?: number } | null } | null;
   } | null;
   communeData?: { commune?: { nom?: string | null; population?: number | null } } | null;
+  // Injecté serveur-only avant le hash (jamais posé par le client, qui ne peut pas lire le JSON
+  // DRIAS). Conséquence : le hash client (sans climat) et le hash serveur (avec) DIVERGENT, mais
+  // ils ne sont jamais comparés l'un à l'autre (le client dédup en local sur ses faits visibles,
+  // le serveur clé son cache sur son propre hash). Divergence inoffensive, cf. route.
+  climatProjete?: ClimatProjete | null;
   // irep / cartofriches / posture : volontairement ignorés (frontière Santé / posture ≠ fait).
 };
 
@@ -98,5 +113,7 @@ export function buildSynthesisPayload(data: SynthesisData): Record<string, unkno
     commune: data.communeData?.commune
       ? { name: data.communeData.commune.nom, population: data.communeData.commune.population }
       : null,
+    // Signal climat curé (codes, aucun chiffre). null si commune hors DRIAS ou sous plancher.
+    climat_projete: data.climatProjete ?? null,
   };
 }
