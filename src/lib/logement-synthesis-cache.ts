@@ -9,7 +9,7 @@
 import { deriveThermalEvidence, thermalEvidenceSummary } from "./thermal-evidence.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 
-export const SYNTHESIS_PROMPT_VERSION = "v4"; // v4 : + grain RGA (adresse/secteur), attribution au diagnostic, croisement non forcé, clôture non prescriptive (retours ChatGPT sur générations réelles)
+export const SYNTHESIS_PROMPT_VERSION = "v5"; // v5 : grammaire de futur•e — le logement est le sujet de chaque phrase (test du sujet), le nom de commune n'est jamais une source de connaissance (anti-hallucination), droit à l'absence d'enjeu + brièveté (anti-fabrication, anti-remplissage). Vu sur 10 générations réelles post-v4.
 
 // Sérialisation stable (clés triées récursivement) : deux payloads égaux -> même chaîne, quel que
 // soit l'ordre d'insertion des clés. Base du hash de contenu.
