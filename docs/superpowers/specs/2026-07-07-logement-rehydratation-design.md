@@ -34,7 +34,7 @@ Conséquence : **aucune migration, aucune colonne neuve.** On réutilise `getLog
 - sinon → dernier logement du user via nouvelle fonction store `getLatestLogement(user)` (tri par `synthesis_generated_at` décroissant).
 
 **Rendu :**
-1. Snapshot présent **et** `canAnalyzeCommune(user, insee)` OK → rehydrate **instantané** (Passeport, DPE, autour, posture) ; re-fetch Géorisques en arrière-plan avec un **léger loader sur le seul bloc Risques** (les autres blocs sont déjà là → pas de spinner long) ; à réception, hash-compare → synthèse cohérente affichée ou marquée périmée.
+1. **Artefact COMPLET** (snapshot + city/postcode + choix DPE **terminal**, jamais `pending`) **et** `canAnalyzeCommune(user, insee)` OK → rehydrate **instantané** (Passeport, DPE, autour, posture) ; re-fetch Géorisques en arrière-plan avec un **léger loader sur le seul bloc Risques** ; à réception, hash-compare → synthèse cohérente affichée ou marquée périmée. **Une analyse abandonnée en cours de sélection DPE (`pending`) n'est PAS un artefact** : la restaurer remet dans un écran de sélection cassé (candidats non garantis au re-fetch) → elle retombe sur la saisie normale (bug trouvé au test 2026-07-07).
 2. Commune plus accessible → **message propre + upsell** (réutilise le pattern 4.5 `COMMUNE_NOT_UNLOCKED`).
 3. Snapshot incomplet ou absent → **fallback silencieux** vers la saisie d'adresse (l'état actuel, aucune régression).
 

@@ -38,7 +38,17 @@ export default async function RapportLogementPage({
     ? await getLogement(supabase, user.id, targetId)
     : await getLatestLogement(supabase, user.id);
 
-  const rehydratable = Boolean(candidate?.snapshot && candidate?.city && candidate?.postcode);
+  // On ne restaure qu'un artefact COMPLET : snapshot autour + city/postcode (pour le re-fetch) ET
+  // un choix DPE TERMINAL. Une analyse abandonnée en cours de sélection DPE (`pending`) n'est pas
+  // un artefact : la restaurer remettrait l'utilisateur dans un écran de sélection cassé. Elle
+  // retombe donc sur la saisie normale.
+  const rehydratable = Boolean(
+    candidate?.snapshot &&
+      candidate?.city &&
+      candidate?.postcode &&
+      candidate?.dpe_selection_status &&
+      candidate.dpe_selection_status !== "pending",
+  );
   const initialRow =
     candidate && rehydratable && (await canAnalyzeCommune(supabase, user.id, candidate.insee))
       ? candidate
