@@ -477,14 +477,11 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
             <DecisionChecklist facts={checklistFacts} projet={projet} />
           </div>
 
-          {/* ═════════════════════ AGIR ═════════════════════ */}
-          {/* Ancien bloc « Actions documentées » retiré (2026-07-07, hotfix confiance) : 4 cartes
-              sur 5 pointaient vers des pages Savoir inexistantes (404 en fin de rapport payant),
-              la carte assurance contredisait la sinistralité (« anticiper la prime » alors que le
-              bloc dit ne rien prédire), la carte sols-pollués violait la frontière Santé, et la
-              carte comparateur promettait de « mesurer » un bien face à des territoires (le
-              comparateur compare des communes, sans score). La sortie du module est reconstruite
-              en « À vérifier avant de décider » (déterministe, par posture) au spec 1b. */}
+          {/* La sortie d'engagement du module = le beat 5 « À vérifier avant de décider »
+              (DecisionChecklist, déterministe par posture) ci-dessus. Il a remplacé l'ancien bloc
+              « Actions documentées » (retiré 2026-07-07, hotfix confiance : 4 cartes /savoir sur 5
+              en 404, carte assurance contredisant la sinistralité, carte sols-pollués violant la
+              frontière Santé, carte comparateur à promesse fausse). */}
 
         </section>
       )}
