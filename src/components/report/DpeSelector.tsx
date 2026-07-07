@@ -25,7 +25,7 @@ export function DpeSelector({
       <div style={{ display: "grid", gap: 8 }}>
         {candidates.map((c) => (
           <button key={c.id_dpe} type="button" onClick={() => onPick(c)}
-            style={{ textAlign: "left", padding: "12px 14px", borderRadius: 10, border: "1px solid var(--border-1)", background: "var(--bg-elev)", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
+            style={{ textAlign: "left", padding: "12px 14px", borderRadius: 10, border: "1px solid var(--border-2)", background: "var(--bg-deep)", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
             <span style={{ fontSize: 14, color: "var(--fg-1)" }}>
               {DPE_TYPE(c.type_batiment)}
               {c.surface_m2 != null ? ` · ${c.surface_m2} m²` : ""}

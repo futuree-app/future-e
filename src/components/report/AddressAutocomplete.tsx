@@ -18,6 +18,32 @@ export function AddressAutocomplete({
   const seq = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
   const listId = useId();
+  const wrapRef = useRef<HTMLDivElement>(null);
+  // Placement du menu : par défaut sous le champ ; s'il n'y a pas la place en bas de fenêtre
+  // (champ en bas de page), il bascule au-dessus. La hauteur est bornée à l'espace réel pour que
+  // TOUTES les suggestions restent atteignables au scroll interne (jamais coupées hors écran).
+  const [place, setPlace] = useState<{ up: boolean; maxH: number }>({ up: false, maxH: 280 });
+
+  useEffect(() => {
+    if (!open || items.length === 0) return;
+    const compute = () => {
+      const el = wrapRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const below = window.innerHeight - r.bottom - 12;
+      const above = r.top - 12;
+      const up = below < 240 && above > below;
+      const maxH = Math.max(120, Math.min(280, Math.floor(up ? above : below)));
+      setPlace({ up, maxH });
+    };
+    compute();
+    window.addEventListener("scroll", compute, true);
+    window.addEventListener("resize", compute);
+    return () => {
+      window.removeEventListener("scroll", compute, true);
+      window.removeEventListener("resize", compute);
+    };
+  }, [open, items.length]);
 
   // Requête trop courte / adresse déjà choisie : on ne touche pas au state (les résidus
   // éventuels sont masqués au rendu, gaté sur la longueur). Tous les setState vivent dans le
@@ -68,7 +94,7 @@ export function AddressAutocomplete({
   }
 
   return (
-    <div style={{ position: "relative" }}>
+    <div ref={wrapRef} style={{ position: "relative" }}>
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}
@@ -87,7 +113,7 @@ export function AddressAutocomplete({
       {queryReady && status === "empty" && <div style={hint}>Aucune adresse trouvée.</div>}
       {queryReady && status === "error" && <div style={hint}>Recherche d&apos;adresse momentanément indisponible.</div>}
       {queryReady && open && items.length > 0 && (
-        <ul role="listbox" id={listId} style={{ position: "absolute", zIndex: 50, left: 0, right: 0, margin: "6px 0 0", padding: 4, listStyle: "none", background: "var(--bg-deep)", border: "1px solid var(--border-2)", borderRadius: 10, maxHeight: 280, overflowY: "auto", boxShadow: "0 16px 40px rgba(0,0,0,0.55)" }}>
+        <ul role="listbox" id={listId} style={{ position: "absolute", zIndex: 50, left: 0, right: 0, ...(place.up ? { bottom: "calc(100% + 6px)" } : { top: "calc(100% + 6px)" }), padding: 4, listStyle: "none", background: "var(--bg-deep)", border: "1px solid var(--border-2)", borderRadius: 10, maxHeight: place.maxH, overflowY: "auto", boxShadow: "0 16px 40px rgba(0,0,0,0.55)" }}>
           {items.map((a, i) => (
             <li key={a.id ?? i} role="option" aria-selected={i === active}
               onMouseDown={(e) => { e.preventDefault(); choose(a); }}
