@@ -1,10 +1,8 @@
 import React from "react";
 import type { RegulatoryPlan } from "@/lib/pprn-zonage";
 import type { LogementReport } from "@/lib/logement-report-types";
-import type { OnrnSinistralite } from "@/lib/onrn-sinistralite";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { Disclosure } from "./kit";
-import { POSTURE_FOR_PROJET } from "./posture";
 
 // Statut réglementaire au point (Face 2) — exploite le zonage PPRN déjà renvoyé par
 // Géorisques (spike 2026-07-03 : /api/v2/gaspar/pprn suffit). On CONSERVE le terme
@@ -166,34 +164,6 @@ export function RegulatoryStatusBlock({ georisques }: { georisques: LogementRepo
               </Disclosure>
             </>
           )}
-        </div>
-      </GlassCard>
-    </ReportSection>
-  );
-}
-
-// « Ce que cela mérite de vérifier » — traduit la donnée en action, adaptée à la posture.
-// Déterministe, jamais un score ni une injonction alarmiste (« Qu'est-ce que j'en fais ? »).
-export function Face2Implication({ projet, georisques, sinistralite }: { projet: string | null; georisques: LogementReport["georisques"]; sinistralite: OnrnSinistralite | null | undefined }) {
-  const g = georisques?.parcel ?? georisques?.address;
-  const hasZone = (g?.regulatoryPlans?.length ?? 0) > 0;
-  const siniActive = Boolean(sinistralite) && [sinistralite!.secheresse.kind, sinistralite!.inondation.kind].some((k) => k === "lecture" || k === "faible_repr");
-  if (!hasZone && !siniActive) return null;
-  const posture = POSTURE_FOR_PROJET[projet ?? "reside"] ?? "residence";
-  return (
-    <ReportSection eyebrow="Ce que cela mérite de vérifier" tone="accent">
-      <GlassCard>
-        <div style={{ display: "grid", gap: 12 }}>
-          <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>
-            {hasZone
-              ? "Ce logement relève d’au moins une zone réglementée, et la commune a connu des sinistres indemnisés. Rien n’est certain pour ce bien, mais cela oriente ce qu’il vaut la peine de regarder."
-              : "La commune a connu des sinistres indemnisés. Rien n’est certain pour ce bien, mais cela oriente ce qu’il vaut la peine de regarder."}
-          </p>
-          <p style={{ fontSize: 14, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 }}>
-            {posture === "prospection"
-              ? "Avant d’acheter : demandez si des sinistres (fissures liées à la sécheresse, dégâts des eaux) ont déjà été déclarés, et consultez le règlement de la zone avant tout projet de travaux ou d’extension."
-              : "Si vous occupez ce logement : surveillez l’évolution d’éventuelles fissures, conservez les justificatifs de travaux et de sinistres, et vérifiez le règlement de la zone avant un projet d’extension."}
-          </p>
         </div>
       </GlassCard>
     </ReportSection>

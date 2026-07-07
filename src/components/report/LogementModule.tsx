@@ -15,14 +15,16 @@ import { deriveThermalEvidence } from "@/lib/thermal-evidence";
 import { dpeAttributionStatus, type DpeRecord } from "@/lib/dpe-attribution";
 import type { BanAddressResult } from "@/lib/ban";
 // Faces extraites (board étape 4 : une face = un fichier ; gabarit ThermalComfortSection).
-import { Block } from "@/components/report/logement/kit";
+import { Block, FamilyHeading } from "@/components/report/logement/kit";
 import { POSTURE_FOR_PROJET } from "@/components/report/logement/posture";
 import { PropertyPassport } from "@/components/report/logement/PropertyPassport";
 import { ProjectProbe } from "@/components/report/logement/ProjectProbe";
 import { EnergieSection } from "@/components/report/logement/EnergieSection";
 import { SinistraliteBlock } from "@/components/report/logement/SinistraliteSection";
-import { RegulatoryStatusBlock, Face2Implication } from "@/components/report/logement/RegulatorySection";
+import { RegulatoryStatusBlock } from "@/components/report/logement/RegulatorySection";
 import { Face3Block } from "@/components/report/logement/AutourSection";
+import { DecisionChecklist } from "@/components/report/logement/DecisionChecklist";
+import { energyState, type ChecklistFacts } from "@/lib/logement-checklist";
 
 // Le contrat de réponse (ApiResponse) vit dans @/lib/logement-report-types (LogementReport),
 // partagé avec la route qui le produit. Importé en alias ci-dessus.
@@ -263,7 +265,18 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
   const georisques = result?.georisques?.parcel ?? result?.georisques?.address;
   // Les libellés PPRN ne sont plus aplatis ici : ils sont portés, structurés (régime + zone +
   // plan), par le bloc « Statut réglementaire à cette adresse ». On garde les autres risques.
-  const allRisks = (georisques?.risks?.labels ?? []).filter((v, i, a) => a.indexOf(v) === i);
+  // Faits normalisés pour la checklist « À vérifier » (beat 5). expositionBati gate sur une
+  // exposition RGA notable (moyen/fort) pour ne pas se déclencher partout.
+  const sini = result?.sinistralite ?? null;
+  const checklistFacts: ChecklistFacts = {
+    dpe: energyState(dpe?.etiquette_dpe ?? null),
+    confortEteInsuffisant: thermalEvidence.indicator === "insuffisant",
+    expositionBati: Boolean(georisques?.rga?.label && /moyen|fort|élev/i.test(georisques.rga.label)),
+    zoneReglementee: (georisques?.regulatoryPlans?.length ?? 0) > 0,
+    sinistraliteActive:
+      sini != null &&
+      [sini.secheresse.kind, sini.inondation.kind].some((k) => k === "lecture" || k === "faible_repr"),
+  };
 
   return (
     <div className="min-h-screen bg-canvas text-label relative overflow-hidden" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
@@ -284,7 +297,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
               <span className="italic text-accent">Énergie, risques, entourage.</span>
             </h1>
             <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[560px]">
-              Une adresse suffit. Vous y lisez la performance énergétique du bien, son exposition aux risques naturels, ce que les sinistres ont déjà coûté à assurer dans la commune, et ce qui entoure la porte.
+              Une adresse suffit. Vous lisez ce qui pèse vraiment sur ce logement : sa performance énergétique, ce à quoi son adresse est exposée, et ce qui l&apos;entoure.
             </p>
             <div className="flex gap-3 flex-wrap">
               <Link href="/rapport" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
@@ -305,9 +318,6 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
             <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
               Analyser un logement précis.
             </h2>
-            <p className="text-[15px] text-muted leading-[1.65] mt-3 max-w-[640px]">
-              Entrez une adresse pour lire ce logement précis : sa performance énergétique, les risques du bâti, ce que le passé a coûté à assurer, et ce qui se trouve autour.
-            </p>
           </div>
 
           <div className="glass rounded-xl p-8 border-t-2 border-t-accent" style={{ maxWidth: 760 }}>
@@ -360,32 +370,22 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
           </div>
         </section>
 
-      {/* ── RÉSULTATS ── */}
+      {/* ── RÉSULTATS : lecture en 5 beats (spec 5a) ── */}
       {result && (
         <section style={{ padding: "24px 0 96px", display: "grid", gap: 40 }}>
 
-          {/* Passeport du bien : identité au grain adresse, DPE en sceau. */}
+          {/* Beat 1 — Identité : quel logement ? (passeport compacté, tilt conservé) */}
           <PropertyPassport
             address={result.address}
             parcel={result.parcel}
             dpe={dpe}
-            altitude={result.altitude}
           />
 
-          {/* Face 1 — lecture thermique « faire face à la chaleur » (DPE attribué uniquement). */}
-          <ThermalComfortSection
-            evidence={thermalEvidence}
-            communeName={communeName}
-            dpeYear={dpeYear}
-          />
-
-          {/* Note (pas un avertissement) si l'adresse est dans une commune différente de la
-              résidence. Depuis l'étape 4.5, atteindre ce point implique que la commune est
-              débloquée (résidence OU commune achetée) : le ton est informatif, pas un problème. */}
+          {/* Note informative si l'adresse est dans une commune ≠ résidence (commune débloquée, cf. 4.5). */}
           {defaultCommune && result.address?.city &&
             result.address.city.toLowerCase() !== defaultCommune.toLowerCase() && (
             <div style={{
-              marginBottom: 20, padding: "12px 16px",
+              padding: "12px 16px",
               background: "var(--bg-elev)", border: "1px solid var(--border-1)",
               borderRadius: 10,
               fontSize: 13, color: "var(--fg-2)", lineHeight: 1.65,
@@ -394,24 +394,11 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                 Analyse d&apos;un bien à {result.address.city}
               </strong>
               <br />
-              Cette analyse porte sur ce bien à <strong>{result.address.city}</strong>. Les modules Territoire et Santé peuvent rester calés sur votre commune principale, <strong>{defaultCommune}</strong>.
+              Cette analyse porte sur ce bien à <strong>{result.address.city}</strong>. Votre commune principale reste <strong>{defaultCommune}</strong>.
             </div>
           )}
 
-          {/* Sonde projet : mesure explicite acheteur/résident, non bloquante. */}
-          <ProjectProbe
-            answered={projet}
-            onAnswer={(v) => {
-              setProjet(v);
-              posthog?.capture("logement_projet_declare", { projet: v, insee: result.address?.citycode ?? null });
-              // La posture déclarée met à jour le logement sauvegardé (persistée, non prédictive).
-              void requestAutour(result, POSTURE_FOR_PROJET[v] ?? "residence");
-            }}
-          />
-
-          {/* ═════════════════════ LECTURE ═════════════════════ */}
-          {/* Verdict composite retiré (ADR-0001). Synthèse artefact : prose streamée,
-              régénérée seulement quand un fait du logement change (spec 1a). */}
+          {/* Beat 2 — Synthèse : qu'est-ce que je retiens ? (posture-neutre) */}
           <LogementSynthesis
             ready={synthesisReady}
             data={synthesisData}
@@ -419,66 +406,67 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
             insee={result.address?.citycode ?? ""}
           />
 
-          {/* ═════════════════════ DIMENSIONS RÉELLES ═════════════════════ */}
-          {(
-            <div style={{ display: "grid", gap: 36 }}>
+          {/* Beat 3 — Les preuves : pourquoi ? (2 sous-familles) */}
+          <div style={{ display: "grid", gap: 36 }}>
 
-              {/* Énergie — attribution du DPE au logement (sélecteur / absence / rejet / confirmé) */}
-              <EnergieSection
-                dpeStatus={dpeStatus}
-                dpe={dpe}
-                dpeCandidates={dpeCandidates}
-                audit={result.audit}
-                onPick={(d) => { setSelectedDpe(d); setDpeStatus("confirmed"); void persistDpe("user_confirmed", d); }}
-                onNotInList={() => { setSelectedDpe(null); setDpeStatus("rejected"); void persistDpe("not_in_list", null); }}
-                onReselect={() => setDpeStatus("selection_required")}
-              />
+            <FamilyHeading>Le logement lui-même</FamilyHeading>
 
-              {/* Risques */}
-              {(allRisks.length > 0 || georisques?.seismic || georisques?.rga) && (
-                <ReportSection eyebrow="Risques du bâti" tone="red">
-                  <GlassCard>
-                  <div style={{ display: "grid", gap: 16 }}>
-                    {allRisks.length > 0 && (
-                      <div>
-                        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--fg-4)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
-                          Risques référencés
-                        </div>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                          {allRisks.map((r, i) => (
-                            <span key={i} style={{ fontFamily: "var(--font-mono)", fontSize: 12, padding: "5px 11px", background: "rgba(168,74,58,0.08)", border: "1px solid rgba(168,74,58,0.25)", color: "var(--red, #f87171)" }}>
-                              {r}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+            <EnergieSection
+              dpeStatus={dpeStatus}
+              dpe={dpe}
+              dpeCandidates={dpeCandidates}
+              audit={result.audit}
+              onPick={(d) => { setSelectedDpe(d); setDpeStatus("confirmed"); void persistDpe("user_confirmed", d); }}
+              onNotInList={() => { setSelectedDpe(null); setDpeStatus("rejected"); void persistDpe("not_in_list", null); }}
+              onReselect={() => setDpeStatus("selection_required")}
+            />
+
+            <ThermalComfortSection
+              evidence={thermalEvidence}
+              communeName={communeName}
+              dpeYear={dpeYear}
+            />
+
+            <FamilyHeading>Ce à quoi cette adresse est exposée</FamilyHeading>
+
+            {/* Risques du bâti — registre sobre (dé-dramatisé) : plus de rouge, plus de chips
+                « Risques référencés » (redondantes avec le réglementaire et les Block ci-dessous). */}
+            {(georisques?.seismic?.label || georisques?.rga?.label) && (
+              <ReportSection eyebrow="Risques du bâti">
+                <GlassCard>
+                  <div style={{ display: "grid", gap: 14 }}>
+                    <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>
+                      Ce que les bases publiques recensent sur l&apos;exposition du bâti à cette adresse.
+                    </p>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px,1fr))", gap: 14 }}>
                       {georisques?.seismic?.label && <Block label="Sismicité" value={georisques.seismic.label} />}
-                      {georisques?.rga?.label && <Block label="Retrait-gonflement argiles" value={georisques.rga.label} />}
+                      {georisques?.rga?.label && <Block label="Retrait-gonflement des argiles" value={georisques.rga.label} sub="Gonflement puis rétraction des sols argileux, qui peut fissurer le bâti." />}
                     </div>
                   </div>
-                  </GlassCard>
-                </ReportSection>
-              )}
+                </GlassCard>
+              </ReportSection>
+            )}
 
-              {/* Statut réglementaire au point (PPRN) — entre l'exposition et la sinistralité communale */}
-              {result.georisques && <RegulatoryStatusBlock georisques={result.georisques} />}
+            {result.georisques && <RegulatoryStatusBlock georisques={result.georisques} />}
 
-              {/* Face 2 — matérialité assurantielle passée (ONRN) */}
-              {result.sinistralite && <SinistraliteBlock sinistralite={result.sinistralite} />}
+            {result.sinistralite && <SinistraliteBlock sinistralite={result.sinistralite} />}
+          </div>
 
-              {/* Sortie décisionnelle Face 2 : ce que cela mérite de vérifier (posture) */}
-              <Face2Implication projet={projet} georisques={result.georisques} sinistralite={result.sinistralite} />
+          {/* Beat 4 — Autour : qu'y a-t-il autour ? */}
+          {autour && <Face3Block s={autour} />}
 
-              {/* Face 3 — autour de cette adresse (buffer local au point géocodé) */}
-              {autour && <Face3Block s={autour} />}
-
-              {/* ZFE (Crit'Air) retirée : contrainte sur le véhicule, pas sur le logement.
-                  Parquée pour le futur module Mobilité. */}
-
-            </div>
-          )}
+          {/* Beat 5 — À vérifier avant de décider : et moi, je fais quoi ? */}
+          <div style={{ display: "grid", gap: 16 }}>
+            <ProjectProbe
+              answered={projet}
+              onAnswer={(v) => {
+                setProjet(v);
+                posthog?.capture("logement_projet_declare", { projet: v, insee: result.address?.citycode ?? null });
+                void requestAutour(result, POSTURE_FOR_PROJET[v] ?? "residence");
+              }}
+            />
+            <DecisionChecklist facts={checklistFacts} projet={projet} />
+          </div>
 
           {/* ═════════════════════ AGIR ═════════════════════ */}
           {/* Ancien bloc « Actions documentées » retiré (2026-07-07, hotfix confiance) : 4 cartes
