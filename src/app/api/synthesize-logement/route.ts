@@ -94,7 +94,7 @@ L'utilisateur vous transmet un payload JSON. Servez-vous-en sans le réciter.`;
 
 type Body = {
   data?: SynthesisData;
-  insee?: string;
+  logementId?: string;
   latitude?: number;
   longitude?: number;
   dpeId?: string | null;
@@ -112,8 +112,8 @@ export async function POST(req: NextRequest) {
   } catch {
     return new Response("Invalid JSON body.", { status: 400 });
   }
-  if (!body?.data || !body.insee || typeof body.latitude !== "number" || typeof body.longitude !== "number") {
-    return new Response("data/insee/latitude/longitude requis", { status: 400 });
+  if (!body?.data || !body.logementId || typeof body.latitude !== "number" || typeof body.longitude !== "number") {
+    return new Response("data/logementId/latitude/longitude requis", { status: 400 });
   }
 
   const { supabase, user } = await requireCurrentUser();
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
   });
 
   // Cache touché : texte figé, zéro LLM.
-  const existing = await getLogement(supabase, user.id, body.insee);
+  const existing = await getLogement(supabase, user.id, body.logementId);
   if (existing?.synthesis_fact_hash === factHash && existing.synthesis_text) {
     return new Response(existing.synthesis_text, {
       headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
@@ -183,7 +183,7 @@ ${JSON.stringify(payload, null, 2)}`;
   // Persistance post-réponse : le texte complet est prêt quand after() s'exécute (stream clos).
   after(async () => {
     if (!full.trim()) return;
-    await saveSynthesis(supabase, user.id, body.insee!, {
+    await saveSynthesis(supabase, user.id, body.logementId!, {
       synthesis_text: full,
       synthesis_fact_hash: factHash,
       synthesis_generated_at: new Date().toISOString(),

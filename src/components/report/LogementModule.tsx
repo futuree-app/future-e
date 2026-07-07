@@ -24,7 +24,7 @@ import { PassportTiltScene } from "@/components/report/PassportTiltScene";
 
 type ApiResponse = {
   error?: string;
-  address?: { label: string; city: string | null; citycode: string | null; postcode: string | null; latitude: number; longitude: number; };
+  address?: { id: string | null; label: string; city: string | null; citycode: string | null; postcode: string | null; latitude: number; longitude: number; };
   altitude?: number | null;
   parcel?: { parcelCode: string; nomCommune: string | null; contenance: number | null; } | null;
   dpeCandidates?: DpeRecord[];
@@ -703,12 +703,13 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
   // OSM vient du cache de tuile côté serveur ; l'affichage ne touche jamais Overpass.
   async function requestAutour(payload: ApiResponse, posture: Posture) {
     const a = payload.address;
-    if (!a?.citycode || a.latitude == null || a.longitude == null) return;
+    if (!a?.id || !a.citycode || a.latitude == null || a.longitude == null) return;
     try {
       const res = await fetch("/api/logement-autour", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          logement_id: a.id,
           insee: a.citycode,
           latitude: a.latitude,
           longitude: a.longitude,
@@ -828,12 +829,12 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
     payload?: ApiResponse,
   ) {
     const a = (payload ?? result)?.address;
-    if (!a?.citycode) return;
+    if (!a?.id) return;
     try {
       await fetch("/api/logement-dpe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ insee: a.citycode, status, dpe }),
+        body: JSON.stringify({ logement_id: a.id, status, dpe }),
       });
     } catch { /* échec silencieux */ }
   }
@@ -980,6 +981,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
           <LogementSynthesis
             ready={synthesisReady}
             data={synthesisData}
+            logementId={result.address?.id ?? ""}
             insee={result.address?.citycode ?? ""}
             latitude={result.address?.latitude ?? 0}
             longitude={result.address?.longitude ?? 0}

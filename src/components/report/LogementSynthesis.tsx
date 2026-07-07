@@ -10,10 +10,11 @@ import { buildFactHash, SYNTHESIS_PROMPT_VERSION } from "@/lib/logement-synthesi
 type State = "idle" | "streaming" | "done" | "error";
 
 export function LogementSynthesis({
-  ready, data, insee, latitude, longitude, dpeId,
+  ready, data, logementId, insee, latitude, longitude, dpeId,
 }: {
   ready: boolean;
   data: unknown;
+  logementId: string;
   insee: string;
   latitude: number;
   longitude: number;
@@ -39,7 +40,7 @@ export function LogementSynthesis({
       const res = await fetch("/api/synthesize-logement", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data, insee, latitude, longitude, dpeId }),
+        body: JSON.stringify({ data, logementId, latitude, longitude, dpeId }),
         signal: controller.signal,
       });
       if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
@@ -59,7 +60,7 @@ export function LogementSynthesis({
       setState("error");
       posthog?.capture("logement_ai_summary_failed", { insee, error: err instanceof Error ? err.message : "unknown" });
     }
-  }, [data, insee, latitude, longitude, dpeId, factHash, posthog]);
+  }, [data, logementId, insee, latitude, longitude, dpeId, factHash, posthog]);
 
   // Auto-déclenchement : données prêtes, flag actif, et le hash de faits a changé (gating).
   useEffect(() => {

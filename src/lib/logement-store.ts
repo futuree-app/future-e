@@ -12,6 +12,9 @@ export type DpeSelectionStatus =
 
 export type LogementRow = {
   user_id: string;
+  // Clé de l'artefact = l'ADRESSE (identifiant BAN), pas la commune (re-key migration 21).
+  // insee reste une colonne (lecture par commune : analytics, futur comparateur de biens).
+  logement_id: string;
   insee: string;
   address_label: string;
   latitude: number;
@@ -60,13 +63,13 @@ export function needsRecompute(
 export async function getLogement(
   sb: SupabaseClient,
   userId: string,
-  insee: string,
+  logementId: string,
 ): Promise<LogementRow | null> {
   const { data } = await sb
     .from("logement")
     .select("*")
     .eq("user_id", userId)
-    .eq("insee", insee)
+    .eq("logement_id", logementId)
     .maybeSingle();
   return (data as LogementRow) ?? null;
 }
@@ -87,22 +90,22 @@ export async function upsertLogement(
 ): Promise<void> {
   await sb
     .from("logement")
-    .upsert({ ...row, updated_at: new Date().toISOString() }, { onConflict: "user_id,insee" });
+    .upsert({ ...row, updated_at: new Date().toISOString() }, { onConflict: "user_id,logement_id" });
 }
 
-// Écrit uniquement les colonnes de synthèse sur la ligne (user, insee) existante. UPDATE ciblé
-// (pas upsert) : si la ligne n'existe pas encore (course avec la création par « autour »), c'est
-// un no-op silencieux, toléré (le client affiche quand même la synthèse ce tour-là). Limitation
-// V1 assumée, alignée sur la course DPE déjà documentée.
+// Écrit uniquement les colonnes de synthèse sur la ligne (user, logement_id) existante. UPDATE
+// ciblé (pas upsert) : si la ligne n'existe pas encore (course avec la création par « autour »),
+// c'est un no-op silencieux, toléré (le client affiche quand même la synthèse ce tour-là).
+// Limitation V1 assumée, alignée sur la course DPE déjà documentée.
 export async function saveSynthesis(
   sb: SupabaseClient,
   userId: string,
-  insee: string,
+  logementId: string,
   fields: { synthesis_text: string; synthesis_fact_hash: string; synthesis_generated_at: string },
 ): Promise<void> {
   await sb
     .from("logement")
     .update(fields)
     .eq("user_id", userId)
-    .eq("insee", insee);
+    .eq("logement_id", logementId);
 }

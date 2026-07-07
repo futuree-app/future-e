@@ -18,6 +18,7 @@ const admin = createClient(
 );
 
 type Body = {
+  logement_id: string;
   insee: string;
   latitude: number;
   longitude: number;
@@ -34,14 +35,14 @@ export async function POST(req: Request) {
   const { supabase, user } = await requireCurrentUser();
 
   const body = (await req.json()) as Body;
-  if (!body?.insee || typeof body.latitude !== "number" || typeof body.longitude !== "number") {
-    return Response.json({ error: "insee/latitude/longitude requis" }, { status: 400 });
+  if (!body?.logement_id || !body.insee || typeof body.latitude !== "number" || typeof body.longitude !== "number") {
+    return Response.json({ error: "logement_id/insee/latitude/longitude requis" }, { status: 400 });
   }
   const center = { lat: body.latitude, lon: body.longitude };
   const posture: Posture = body.posture === "prospection" ? "prospection" : "residence";
 
-  // Snapshot déjà valide en base (même point, même version) -> le renvoyer figé.
-  const existing = await getLogement(supabase, user.id, body.insee);
+  // Snapshot déjà valide en base (même adresse, même version) -> le renvoyer figé.
+  const existing = await getLogement(supabase, user.id, body.logement_id);
   if (existing && !needsRecompute(existing, center, SOURCES_VERSION)) {
     // La posture peut avoir changé (sonde ProjectProbe) sans invalider le calcul.
     if (existing.posture !== posture) {
@@ -81,6 +82,7 @@ export async function POST(req: Request) {
   const snapshot = assembleSnapshot(center, bpe, osm, osmStatus);
   await upsertLogement(supabase, {
     user_id: user.id,
+    logement_id: body.logement_id,
     insee: body.insee,
     address_label: body.address_label,
     latitude: body.latitude,
