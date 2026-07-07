@@ -24,6 +24,9 @@ type Body = {
   latitude: number;
   longitude: number;
   address_label: string;
+  // city + postcode : persistés pour la rehydratation (re-fetch Géorisques via adresse validée).
+  city?: string | null;
+  postcode?: string | null;
   parcel_code?: string | null;
   posture?: Posture;
 };
@@ -90,6 +93,8 @@ export async function POST(req: Request) {
     logement_id: body.logement_id,
     insee: body.insee,
     address_label: body.address_label,
+    city: body.city ?? null,
+    postcode: body.postcode ?? null,
     latitude: body.latitude,
     longitude: body.longitude,
     parcel_code: body.parcel_code ?? null,

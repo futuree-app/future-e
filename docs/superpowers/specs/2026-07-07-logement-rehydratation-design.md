@@ -40,9 +40,13 @@ Conséquence : **aucune migration, aucune colonne neuve.** On réutilise `getLog
 
 **Analytics :** event `logement_restored` (avec `address_token` non réversible, source `auto` vs `deeplink`).
 
-## La ligne porte déjà tout le nécessaire (aucune migration)
+## Ce que la ligne porte, et la petite migration nécessaire (décision A)
 
-Vérifié dans `LogementRow` (`logement-store.ts`) : la ligne stocke `address_label`, `latitude`, `longitude`, `parcel_code`, `posture`, `snapshot` (autour), `selected_dpe_snapshot` (DPE figé), `synthesis_text` / `synthesis_fact_hash` / `synthesis_generated_at`, et `updated_at`. **Le Passeport, le DPE, l'autour, la posture et la synthèse se reconstruisent intégralement depuis la ligne.** Seule l'exposition Géorisques manque → re-fetch. **Donc aucune migration** ; `getLatestLogement(user)` trie par `updated_at` décroissant.
+`LogementRow` stocke déjà `address_label`, `latitude`, `longitude`, `parcel_code`, `posture`, `snapshot` (autour), `selected_dpe_snapshot` + `dpe_selection_status` (DPE figé), `synthesis_text` / `synthesis_fact_hash`, `updated_at`. **Le Passeport, le DPE, l'autour, la posture et la synthèse se reconstruisent depuis la ligne.**
+
+**Sauf pour re-fetcher l'exposition Géorisques** : la route `georisques-logement` valide l'adresse via `validateSelectedBanAddress`, qui **exige `city` + `postcode` non vides** — or la ligne ne les stocke pas. **Décision A (porteur) : petite migration additive** `supabase/22_logement_address_fields.sql` (colonnes `city`, `postcode`), écrites à l'analyse (le client les a dans `payload.address`), threadées via `logement-autour`. La rehydratation re-fetch alors par la route **existante et éprouvée** (on ne touche pas au cœur du fan-out). `getLatestLogement(user)` trie par `updated_at` décroissant.
+
+**Limite assumée v1** : la ligne stocke la **posture** (résidence/prospection), pas le **projet fin** (4 boutons de la sonde). À la rehydratation, la sonde `ProjectProbe` réapparaît **non répondue** (ton par défaut, re-répondable) ; l'autour reste servi du snapshot (posture déjà figée dedans), donc re-répondre ne dégrade rien.
 
 ## Critères d'acceptation
 

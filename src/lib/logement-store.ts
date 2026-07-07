@@ -17,6 +17,11 @@ export type LogementRow = {
   logement_id: string;
   insee: string;
   address_label: string;
+  // city + postcode : nécessaires à la REHYDRATATION (re-fetch Géorisques via une adresse
+  // validée par `validateSelectedBanAddress`, qui les exige). Nullables (lignes de test
+  // antérieures ; une rehydratation sans eux retombe sur la saisie). Migration 22.
+  city: string | null;
+  postcode: string | null;
   latitude: number;
   longitude: number;
   parcel_code: string | null;
@@ -70,6 +75,23 @@ export async function getLogement(
     .select("*")
     .eq("user_id", userId)
     .eq("logement_id", logementId)
+    .maybeSingle();
+  return (data as LogementRow) ?? null;
+}
+
+// Dernier logement analysé par l'utilisateur, pour la REHYDRATATION par défaut (retour sur la
+// page sans `?logementId=`). Tri par `updated_at` : n'importe quelle écriture (autour, DPE,
+// synthèse) rafraîchit la ligne, donc le « dernier touché » = le bien qu'on regardait.
+export async function getLatestLogement(
+  sb: SupabaseClient,
+  userId: string,
+): Promise<LogementRow | null> {
+  const { data } = await sb
+    .from("logement")
+    .select("*")
+    .eq("user_id", userId)
+    .order("updated_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
   return (data as LogementRow) ?? null;
 }

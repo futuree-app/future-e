@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import type { Face3Snapshot, Posture } from "@/lib/logement-autour-types";
 import type { SynthesisData } from "@/lib/logement-synthesis-cache";
 import type { LogementReport as ApiResponse } from "@/lib/logement-report-types";
+import type { LogementRow, DpeSelectionStatus } from "@/lib/logement-store";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { AddressAutocomplete } from "@/components/report/AddressAutocomplete";
 import { ThermalComfortSection } from "@/components/report/ThermalComfortSection";
@@ -38,7 +39,25 @@ function addressToken(banId: string): string {
   return (h >>> 0).toString(36);
 }
 
-export default function LogementModule({ defaultCommune }: { defaultCommune?: string | null }) {
+// Statut DPE persisté (colonne) -> état runtime du module. Restauré tel quel à la rehydratation
+// (on ne re-dérive JAMAIS l'attribution : le choix figé de l'utilisateur fait autorité).
+const RUNTIME_DPE_STATUS: Record<DpeSelectionStatus, "auto_confirmed" | "confirmed" | "rejected" | "not_found" | "selection_required"> = {
+  auto_confirmed: "auto_confirmed",
+  user_confirmed: "confirmed",
+  not_in_list: "rejected",
+  not_found: "not_found",
+  pending: "selection_required",
+};
+
+export default function LogementModule({
+  defaultCommune,
+  initialRow = null,
+  rehydrateSource = "auto",
+}: {
+  defaultCommune?: string | null;
+  initialRow?: LogementRow | null;
+  rehydrateSource?: "auto" | "deeplink";
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Commune de l'adresse tapée non débloquée par le rapport de l'utilisateur (étape 4.5) : on
@@ -67,6 +86,8 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
   // payant que la clé actuelle (user, insee) ne sait pas encore porter : ce compteur est le
   // signal de re-key (cf. board 2026-07-07). Reset au remontage (≈ par session).
   const analyzedByInseeRef = useRef<Map<string, Set<string>>>(new Map());
+  // Rehydratation au montage : ne s'exécute qu'une fois (sinon boucle sur re-render).
+  const rehydratedRef = useRef(false);
   const posthog = usePostHog();
 
   // Face 3 : génère (ou relit, figé) le snapshot « autour de l'adresse ». La donnée
@@ -85,6 +106,8 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
           latitude: a.latitude,
           longitude: a.longitude,
           address_label: a.label,
+          city: a.city ?? null,
+          postcode: a.postcode ?? null,
           parcel_code: payload.parcel?.parcelCode ?? null,
           posture,
         }),
@@ -205,6 +228,68 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
       setLoading(false);
     }
   }
+
+  // Rehydratation d'un logement sauvegardé (spec 2026-07-07). On re-fetch UNIQUEMENT l'exposition
+  // Géorisques (le risque doit rester frais) ; le DPE figé, l'autour (snapshot) et la posture sont
+  // RESTAURÉS depuis la ligne, jamais recalculés. La cohérence de la synthèse est gérée par le
+  // cache serveur par hash de faits : si les faits re-fetchés n'ont pas bougé, la synthèse figée
+  // est renvoyée telle quelle ; s'ils ont dérivé, elle est régénérée. Aucune génération mélangée.
+  async function rehydrateFromRow(row: LogementRow) {
+    // Sans city/postcode, l'adresse ne passe pas le validateur du re-fetch : retour à la saisie.
+    if (!row.city || !row.postcode || !row.snapshot) return;
+    setLoading(true);
+    setError(null);
+    setAutourPhase("terminal");      // autour restauré du snapshot : on ne l'attend pas
+    autourRetriedRef.current = true; // et on n'enclenche aucun retry OSM
+    try {
+      const res = await fetch("/api/georisques-logement", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: {
+          banId: row.logement_id, label: row.address_label, postcode: row.postcode, city: row.city,
+          citycode: row.insee, latitude: row.latitude, longitude: row.longitude, type: null,
+        } }),
+      });
+      const payload = (await res.json()) as ApiResponse & { code?: string; commune?: string | null; insee?: string | null };
+      // Commune redevenue inaccessible depuis l'analyse : upsell honnête, jamais les données.
+      if (res.status === 403 && payload.code === "COMMUNE_NOT_UNLOCKED") {
+        setResult(null);
+        setLockedCommune({ commune: payload.commune ?? row.city, insee: payload.insee ?? row.insee });
+        return;
+      }
+      if (!res.ok) throw new Error(payload.error ?? `Erreur ${res.status}`);
+      setResult(payload);
+      setDpeCandidates(payload.dpeCandidates ?? []);
+      // Restaure le choix DPE figé + son statut (jamais de re-dérivation d'attribution).
+      setSelectedDpe(row.selected_dpe_snapshot);
+      setDpeStatus(RUNTIME_DPE_STATUS[row.dpe_selection_status] ?? "not_found");
+      // Restaure l'autour depuis le snapshot (figé par design, jamais re-fetché).
+      setAutour(row.snapshot);
+      // La posture est stockée, pas le projet fin : la sonde réapparaît non répondue (ton défaut).
+      setProjet(null);
+      posthog?.capture("logement_restored", {
+        insee: row.insee,
+        source: rehydrateSource,
+        address_token: addressToken(row.logement_id),
+      });
+    } catch {
+      // Rehydratation ratée -> retour silencieux à la saisie (aucune régression).
+      setResult(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Au montage : si la page serveur a résolu un logement rehydratable, on le restaure une fois.
+  // Déféré en microtask : la rehydratation est un chargement de données (elle setState après un
+  // fetch), on évite un setState synchrone dans le corps de l'effet (cascading renders).
+  useEffect(() => {
+    if (rehydratedRef.current || !initialRow) return;
+    rehydratedRef.current = true;
+    const row = initialRow;
+    void Promise.resolve().then(() => rehydrateFromRow(row));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Persiste le choix DPE dans l'artefact logement (échec silencieux à l'UI ; cohérence rétablie
   // au prochain chargement). `payload` fournit l'adresse quand `result` n'est pas encore posé.
