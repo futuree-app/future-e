@@ -13,7 +13,7 @@ export function ProjectProbe({ answered, onAnswer }: { answered: string | null; 
   return (
     <GlassCard pad="sm">
       <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 15, color: "var(--fg-hi)", marginBottom: 12 }}>
-        Quel est votre projet sur ce logement ?
+        Que comptez-vous faire de ce logement ?
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
         {options.map((o) => (
