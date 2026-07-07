@@ -8,10 +8,14 @@ import { streamText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { canAccessCompleteReport } from "@/lib/access";
-import { getLogement, saveSynthesis, SOURCES_VERSION } from "@/lib/logement-store";
-import { buildFactHash, buildSynthesisPayload, SYNTHESIS_PROMPT_VERSION, type SynthesisData } from "@/lib/logement-synthesis-cache";
+import { getLogement, saveSynthesis } from "@/lib/logement-store";
+import { buildFactHash, buildSynthesisPayload, type SynthesisData } from "@/lib/logement-synthesis-cache";
 
 export const dynamic = "force-dynamic";
+// Aligné sur synthesize-quartier : un stream lent ne doit pas être tronqué par la durée par
+// défaut Vercel, et after() (persistance) vit dans la même enveloppe (board, conformité stack).
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
 // Prompt système : repris VERBATIM de la passe Editorial Writer 2026-07-07
 // (docs/rapports-agents/editorial-writer/2026-07-07-synthese-logement-prompt.md, section B).
@@ -95,9 +99,9 @@ L'utilisateur vous transmet un payload JSON. Servez-vous-en sans le réciter.`;
 type Body = {
   data?: SynthesisData;
   logementId?: string;
-  latitude?: number;
-  longitude?: number;
-  dpeId?: string | null;
+  // Force la régénération malgré un cache chaud (bouton « Régénérer »). Sans lui, re-POST -> hash
+  // identique -> cache hit -> même texte : le bouton mentirait.
+  force?: boolean;
 };
 
 export async function POST(req: NextRequest) {
@@ -112,22 +116,20 @@ export async function POST(req: NextRequest) {
   } catch {
     return new Response("Invalid JSON body.", { status: 400 });
   }
-  if (!body?.data || !body.logementId || typeof body.latitude !== "number" || typeof body.longitude !== "number") {
-    return new Response("data/logementId/latitude/longitude requis", { status: 400 });
+  // Validation minimale du body (geste 1, version minimale) : les faits sont posés par le client
+  // en attendant que la ligne logement devienne la source serveur des faits. `data` doit être un
+  // objet, `logementId` une chaîne non vide. Le hash étant désormais un hash de CONTENU, la
+  // position n'est plus transmise (elle est déjà dans `data.address`).
+  if (!body?.data || typeof body.data !== "object" || Array.isArray(body.data) || typeof body.logementId !== "string" || !body.logementId) {
+    return new Response("data (objet) et logementId (chaîne) requis", { status: 400 });
   }
 
   const { supabase, user } = await requireCurrentUser();
-  const factHash = buildFactHash({
-    latitude: body.latitude,
-    longitude: body.longitude,
-    dpeId: body.dpeId ?? null,
-    sourcesVersion: SOURCES_VERSION,
-    promptVersion: SYNTHESIS_PROMPT_VERSION,
-  });
+  const factHash = buildFactHash(body.data);
 
-  // Cache touché : texte figé, zéro LLM.
+  // Cache touché : texte figé, zéro LLM (sauf régénération forcée).
   const existing = await getLogement(supabase, user.id, body.logementId);
-  if (existing?.synthesis_fact_hash === factHash && existing.synthesis_text) {
+  if (!body.force && existing?.synthesis_fact_hash === factHash && existing.synthesis_text) {
     return new Response(existing.synthesis_text, {
       headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
     });
@@ -163,6 +165,11 @@ ${JSON.stringify(payload, null, 2)}`;
 
   const encoder = new TextEncoder();
   let full = firstChunk.value;
+  // Gate de complétude (board critique 2c) : after() s'exécute MÊME si la réponse a échoué (doc
+  // Next). Sur un abort client en cours de stream, `full` est tronqué : sans ce flag, on
+  // persisterait un texte partiel comme artefact définitif. On ne persiste que si la boucle est
+  // sortie proprement (stream clos).
+  let completed = false;
   const stream = new ReadableStream({
     async start(controller) {
       controller.enqueue(encoder.encode(firstChunk.value));
@@ -173,6 +180,7 @@ ${JSON.stringify(payload, null, 2)}`;
           full += next.value;
           controller.enqueue(encoder.encode(next.value));
         }
+        completed = true;
         controller.close();
       } catch (err) {
         try { controller.error(err); } catch { /* client déjà parti */ }
@@ -180,9 +188,9 @@ ${JSON.stringify(payload, null, 2)}`;
     },
   });
 
-  // Persistance post-réponse : le texte complet est prêt quand after() s'exécute (stream clos).
+  // Persistance post-réponse : seulement si le stream s'est clos proprement (texte complet).
   after(async () => {
-    if (!full.trim()) return;
+    if (!completed || !full.trim()) return;
     await saveSynthesis(supabase, user.id, body.logementId!, {
       synthesis_text: full,
       synthesis_fact_hash: factHash,

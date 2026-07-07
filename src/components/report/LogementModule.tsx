@@ -6,6 +6,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import type { OnrnSinistralite, PerilState } from "@/lib/onrn-sinistralite";
 import type { Face3Snapshot, Posture, GreenKind } from "@/lib/logement-autour-types";
+import type { SynthesisData } from "@/lib/logement-synthesis-cache";
 import type { RegulatoryPlan } from "@/lib/pprn-zonage";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { MetricTooltip } from "@/components/MetricTooltip";
@@ -684,6 +685,11 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
   const [result, setResult] = useState<ApiResponse | null>(null);
   const [projet, setProjet] = useState<string | null>(null);
   const [autour, setAutour] = useState<Face3Snapshot | null>(null);
+  // Complétude de l'« autour » pour le gate de synthèse (board critique 2a). "terminal" = un
+  // snapshot non-pending est arrivé, OU le retry OSM est épuisé, OU la requête a échoué : dans
+  // les trois cas on ne l'attend plus. La synthèse ne se génère jamais avant ce point (sinon elle
+  // se fige sans la section « autour »).
+  const [autourPhase, setAutourPhase] = useState<"pending" | "terminal">("pending");
   // Attribution du DPE au logement (cf. spec §2). Aucun DPE affiché comme « le vôtre » tant
   // qu'il n'est pas confirmé (auto ou par l'utilisateur).
   const [dpeStatus, setDpeStatus] = useState<
@@ -703,7 +709,8 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
   // OSM vient du cache de tuile côté serveur ; l'affichage ne touche jamais Overpass.
   async function requestAutour(payload: ApiResponse, posture: Posture) {
     const a = payload.address;
-    if (!a?.id || !a.citycode || a.latitude == null || a.longitude == null) return;
+    // Adresse sans coordonnées : rien à récupérer, l'« autour » est terminal (la synthèse n'attend pas).
+    if (!a?.id || !a.citycode || a.latitude == null || a.longitude == null) { setAutourPhase("terminal"); return; }
     try {
       const res = await fetch("/api/logement-autour", {
         method: "POST",
@@ -718,9 +725,13 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
           posture,
         }),
       });
-      if (!res.ok) return;
+      if (!res.ok) { setAutourPhase("terminal"); return; }
       const { snapshot } = (await res.json()) as { snapshot: Face3Snapshot };
       setAutour(snapshot);
+      // Terminal sauf si l'OSM est revenu `pending` ET qu'on n'a pas encore fait le retry unique
+      // (le retry est gaté sur osmInfrastructure, comme l'effet ci-dessous : on aligne dessus).
+      const willRetry = snapshot.sourceStatus.osmInfrastructure === "pending" && !autourRetriedRef.current;
+      setAutourPhase(willRetry ? "pending" : "terminal");
       // Observabilité de complétude, SANS donnée localisante fine (pas de tile_key/coords).
       posthog?.capture("logement_autour", {
         insee: a.citycode,
@@ -731,6 +742,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
       });
     } catch {
       /* échec silencieux à l'UI ; l'observabilité vit dans le snapshot/serveur */
+      setAutourPhase("terminal");
     }
   }
 
@@ -758,6 +770,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
     setLoading(true);
     setError(null);
     setAutour(null);
+    setAutourPhase("pending");
     autourRetriedRef.current = false;
     setDpeStatus("loading");
     setSelectedDpe(null);
@@ -848,15 +861,20 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
   // Synthèse artefact : prête quand l'analyse est là ET le DPE dans un état terminal
   // (auto_confirmed / confirmed / not_found). On attend tant que l'utilisateur choisit.
   const dpeTerminal = dpeStatus === "auto_confirmed" || dpeStatus === "confirmed" || dpeStatus === "not_found";
-  const synthesisReady = Boolean(result) && dpeTerminal;
-  const synthesisData = {
+  // La synthèse artefact attend AUSSI que l'« autour » soit terminal (board critique 2a) : sinon
+  // elle se génère sans la section « autour » et se fige incomplète.
+  const synthesisReady = Boolean(result) && dpeTerminal && autourPhase === "terminal";
+  const synthesisData: SynthesisData = {
     address: result?.address,
     altitude: result?.altitude,
     dpeSelectionStatus: dpeStatus === "confirmed" ? "user_confirmed" : dpeStatus,
     selectedDpe: dpe,
     georisques: result?.georisques,
     sinistralite: result?.sinistralite,
-    autour,
+    // Le snapshot Face 3 (bpe.categories) est ramené à la forme attendue par buildSynthesisPayload
+    // (bpe = tableau de proximités). Sans ce mapping, `.filter` sur `bpe.categories` casse dès que
+    // l'« autour » est présent (jusqu'ici masqué par la course désormais fermée par le gate 3a).
+    autour: autour ? { bpe: autour.bpe.categories, osm: autour.osm } : null,
     communeData: result?.communeData,
   };
   const georisques = result?.georisques?.parcel ?? result?.georisques?.address;
@@ -983,9 +1001,6 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
             data={synthesisData}
             logementId={result.address?.id ?? ""}
             insee={result.address?.citycode ?? ""}
-            latitude={result.address?.latitude ?? 0}
-            longitude={result.address?.longitude ?? 0}
-            dpeId={dpe?.id_dpe ?? null}
           />
 
           {/* ═════════════════════ DIMENSIONS RÉELLES ═════════════════════ */}

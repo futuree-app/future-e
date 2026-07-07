@@ -1,5 +1,8 @@
 // Cache de la synthèse Logement traitée en ARTEFACT (cf. spec 1a). Deux fonctions pures :
-// - buildFactHash : clé stable des FAITS du logement (la posture n'y entre pas -> ne régénère jamais).
+// - buildFactHash : hash du CONTENU des faits (le payload EST le contrat : s'il change, le texte
+//   doit changer ; s'il ne change pas, cache). La posture n'entre pas dans le payload -> ne
+//   régénère jamais. Voit tout changement de fait, y compris l'arrivée tardive de l'« autour »
+//   ou une source amont modifiée (board 2026-07-07, critique 2 : ne plus hasher l'IDENTITÉ).
 // - buildSynthesisPayload : assemble les faits déjà montrés pour le prompt (+autour, -irep/friches).
 // Pas de `server-only` : buildFactHash est aussi utilisé côté client pour le gating en session.
 
@@ -8,19 +11,36 @@ import type { DpeRecord } from "./dpe-attribution.ts";
 
 export const SYNTHESIS_PROMPT_VERSION = "v1";
 
-// Clé de faits : point géocodé (arrondi ~1 m), DPE attribué, version des sources autour, version
-// du prompt. Lisible et déterministe ; sert de clé de cache ET de gate en session.
-export function buildFactHash(input: {
-  latitude: number;
-  longitude: number;
-  dpeId: string | null;
-  sourcesVersion: string;
-  promptVersion: string;
-}): string {
-  const lat = input.latitude.toFixed(5);
-  const lon = input.longitude.toFixed(5);
-  const dpe = input.dpeId ?? "none";
-  return `syn:${lat}:${lon}:${dpe}:${input.sourcesVersion}:${input.promptVersion}`;
+// Sérialisation stable (clés triées récursivement) : deux payloads égaux -> même chaîne, quel que
+// soit l'ordre d'insertion des clés. Base du hash de contenu.
+function stableStringify(value: unknown): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "null";
+  if (Array.isArray(value)) return "[" + value.map(stableStringify).join(",") + "]";
+  const obj = value as Record<string, unknown>;
+  return "{" + Object.keys(obj).sort()
+    .map((k) => JSON.stringify(k) + ":" + stableStringify(obj[k])).join(",") + "}";
+}
+
+// Empreinte 32 bits déterministe (FNV-1a). Suffisant pour une clé de cache / un détecteur de
+// changement : l'intégrité des faits est assurée côté serveur, pas par ce hash (le hash n'est
+// pas une frontière de sécurité). Synchrone à dessein : le gating client se fait au rendu, une
+// empreinte crypto asynchrone (WebCrypto) n'y aurait pas sa place.
+function fnv1a(str: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16).padStart(8, "0");
+}
+
+// Hash de CONTENU : empreinte du payload de synthèse sérialisé + version du prompt. Sert de clé
+// de cache serveur ET de gate en session. Remplace l'ancien hash d'identité
+// (lat:lon:dpeId:sourcesVersion) qui manquait les changements amont, figeait une synthèse générée
+// sans l'« autour », et couplait par erreur la version des sources Face 3 (bump Face 3 =
+// invalidation surprise de toutes les synthèses).
+export function buildFactHash(data: SynthesisData): string {
+  return `syn:${SYNTHESIS_PROMPT_VERSION}:${fnv1a(stableStringify(buildSynthesisPayload(data)))}`;
 }
 
 // Forme d'entrée (sous-ensemble de ce que le client poste). Champs optionnels/défensifs.
@@ -29,7 +49,7 @@ export type SynthesisData = {
   altitude?: number | null;
   dpeSelectionStatus?: string | null;
   selectedDpe?: DpeRecord | null;
-  georisques?: { parcel?: { risks?: { labels?: string[] }; pprn?: { labels?: string[] }; seismic?: { label?: string | null }; rga?: { label?: string | null } } } | null;
+  georisques?: { parcel?: { risks?: { labels?: string[] }; pprn?: { labels?: string[] }; seismic?: { label?: string | null } | null; rga?: { label?: string | null } | null } | null } | null;
   sinistralite?: unknown;
   autour?: {
     bpe?: Array<{ category?: string; nearest?: { typeLabel?: string | null; distanceMeters?: number } | null }>;

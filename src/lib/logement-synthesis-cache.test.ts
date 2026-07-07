@@ -2,27 +2,33 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { buildFactHash, buildSynthesisPayload, SYNTHESIS_PROMPT_VERSION } from "./logement-synthesis-cache.ts";
 
-test("buildFactHash déterministe : mêmes entrées -> même hash", () => {
-  const a = buildFactHash({ latitude: 45.75, longitude: 4.85, dpeId: "X1", sourcesVersion: "s1", promptVersion: "v1" });
-  const b = buildFactHash({ latitude: 45.75, longitude: 4.85, dpeId: "X1", sourcesVersion: "s1", promptVersion: "v1" });
-  assert.equal(a, b);
+test("buildFactHash déterministe : mêmes faits -> même hash", () => {
+  assert.equal(buildFactHash(fullData()), buildFactHash(fullData()));
+});
+
+test("buildFactHash porte la version du prompt en clair", () => {
+  assert.equal(buildFactHash(fullData()).startsWith(`syn:${SYNTHESIS_PROMPT_VERSION}:`), true);
 });
 
 test("buildFactHash change si le DPE change", () => {
-  const a = buildFactHash({ latitude: 45.75, longitude: 4.85, dpeId: "X1", sourcesVersion: "s1", promptVersion: "v1" });
-  const b = buildFactHash({ latitude: 45.75, longitude: 4.85, dpeId: "X2", sourcesVersion: "s1", promptVersion: "v1" });
+  const a = buildFactHash(fullData());
+  const b = buildFactHash(fullData({ selectedDpe: { ...fullData().selectedDpe, etiquette_dpe: "F", conso_ep_m2: 400 } }));
   assert.notEqual(a, b);
 });
 
-test("buildFactHash change si la version de prompt change", () => {
-  const a = buildFactHash({ latitude: 45.75, longitude: 4.85, dpeId: "X1", sourcesVersion: "s1", promptVersion: "v1" });
-  const b = buildFactHash({ latitude: 45.75, longitude: 4.85, dpeId: "X1", sourcesVersion: "s1", promptVersion: "v2" });
-  assert.notEqual(a, b);
+test("buildFactHash change quand l'« autour » arrive (course figée -> détectée)", () => {
+  // Board critique 2a : une synthèse générée sans la section « autour » ne doit plus rester figée.
+  const sansAutour = buildFactHash(fullData({ autour: null }));
+  const avecAutour = buildFactHash(fullData());
+  assert.notEqual(sansAutour, avecAutour);
 });
 
-test("buildFactHash : dpeId null -> 'none', stable", () => {
-  const a = buildFactHash({ latitude: 45.75, longitude: 4.85, dpeId: null, sourcesVersion: "s1", promptVersion: "v1" });
-  assert.match(a, /none/);
+test("buildFactHash NE change PAS avec la posture (jamais un fait)", () => {
+  assert.equal(buildFactHash(fullData({ posture: "residence" })), buildFactHash(fullData({ posture: "prospection" })));
+});
+
+test("buildFactHash NE change PAS avec irep/friches (frontière Santé)", () => {
+  assert.equal(buildFactHash(fullData({ irep: { count: 9 } })), buildFactHash(fullData({ irep: { count: 0 } })));
 });
 
 test("SYNTHESIS_PROMPT_VERSION exporté", () => {

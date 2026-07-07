@@ -4,21 +4,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import { ReportSection } from "@/components/report/kit";
 import { AUTO_SYNTHESIS } from "@/lib/auto-synthesis";
-import { SOURCES_VERSION } from "@/lib/logement-store";
-import { buildFactHash, SYNTHESIS_PROMPT_VERSION } from "@/lib/logement-synthesis-cache";
+import { buildFactHash, type SynthesisData } from "@/lib/logement-synthesis-cache";
 
 type State = "idle" | "streaming" | "done" | "error";
 
 export function LogementSynthesis({
-  ready, data, logementId, insee, latitude, longitude, dpeId,
+  ready, data, logementId, insee,
 }: {
   ready: boolean;
-  data: unknown;
+  data: SynthesisData;
   logementId: string;
   insee: string;
-  latitude: number;
-  longitude: number;
-  dpeId: string | null;
 }) {
   const posthog = usePostHog();
   const [text, setText] = useState("");
@@ -26,9 +22,11 @@ export function LogementSynthesis({
   const lastHashRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  const factHash = buildFactHash({ latitude, longitude, dpeId, sourcesVersion: SOURCES_VERSION, promptVersion: SYNTHESIS_PROMPT_VERSION });
+  // Hash de CONTENU : dérivé des faits eux-mêmes (même contrat que le serveur). Le gate en session
+  // ne relance donc que si un fait change (l'« autour » arrivé, un DPE confirmé), jamais la posture.
+  const factHash = buildFactHash(data);
 
-  const run = useCallback(async () => {
+  const run = useCallback(async (force = false) => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -40,7 +38,7 @@ export function LogementSynthesis({
       const res = await fetch("/api/synthesize-logement", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data, logementId, latitude, longitude, dpeId }),
+        body: JSON.stringify({ data, logementId, force }),
         signal: controller.signal,
       });
       if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
@@ -60,7 +58,7 @@ export function LogementSynthesis({
       setState("error");
       posthog?.capture("logement_ai_summary_failed", { insee, error: err instanceof Error ? err.message : "unknown" });
     }
-  }, [data, logementId, insee, latitude, longitude, dpeId, factHash, posthog]);
+  }, [data, logementId, insee, factHash, posthog]);
 
   // Auto-déclenchement : données prêtes, flag actif, et le hash de faits a changé (gating).
   useEffect(() => {
@@ -76,7 +74,7 @@ export function LogementSynthesis({
       <div style={{ padding: "4px 0" }}>
         {state === "idle" && !AUTO_SYNTHESIS && (
           <button
-            onClick={run}
+            onClick={() => run()}
             style={{ fontSize: 14, padding: "10px 18px", borderRadius: 10, border: "1px solid var(--border-1)", background: "var(--bg-elev)", color: "var(--fg-hi)", cursor: "pointer" }}
           >
             Générer la lecture
@@ -93,10 +91,10 @@ export function LogementSynthesis({
         )}
         {(state === "done" || state === "error") && (
           <button
-            onClick={run}
+            onClick={() => run(state === "error" ? false : true)}
             style={{ marginTop: 14, fontSize: 12.5, padding: "6px 12px", borderRadius: 8, border: "1px solid var(--border-1)", background: "transparent", color: "var(--fg-3)", cursor: "pointer" }}
           >
-            Régénérer
+            {state === "error" ? "Réessayer" : "Régénérer"}
           </button>
         )}
       </div>
