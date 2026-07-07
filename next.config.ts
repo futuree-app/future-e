@@ -36,9 +36,10 @@ const nextConfig: NextConfig = {
       "./data/onrn-inondation.json",
     ],
     // Face 3 « autour de cette adresse » : la lib logement-bpe.ts lit les shards
-    // de points BPE par cellule de grille au runtime de la route.
+    // de points BPE par cellule ; la lib icu.ts lit l'index îlot de chaleur (grand-IRIS).
     "/api/logement-autour": [
       "./data/bpe-points/**",
+      "./data/icu.json",
     ],
   },
   async rewrites() {

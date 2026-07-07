@@ -6,6 +6,7 @@ import { canAnalyzeCommune } from "@/lib/active-territory";
 import { loadBpePointsAround, nearestByCategory } from "@/lib/logement-bpe";
 import { getTileGeoms, computeOsmProximity, OSM_BBOX_RADIUS_M } from "@/lib/logement-osm";
 import { assembleSnapshot } from "@/lib/logement-autour";
+import { getIcuSignal } from "@/lib/icu";
 import { getLogement, upsertLogement, needsRecompute, SOURCES_VERSION } from "@/lib/logement-store";
 import type { Posture } from "@/lib/logement-autour-types";
 
@@ -59,6 +60,10 @@ export async function POST(req: Request) {
     return Response.json({ snapshot: existing.snapshot });
   }
 
+  // ICU (îlot de chaleur du quartier) : appel WFS IGN, lancé en concurrence avec OSM (silencieux
+  // si non couvert / panne -> pas de bloc). Awaité au moment d'assembler.
+  const icuPromise = getIcuSignal(center.lat, center.lon);
+
   // BPE : local, immédiat.
   const bpe = nearestByCategory(center, await loadBpePointsAround(center));
 
@@ -87,7 +92,7 @@ export async function POST(req: Request) {
     osmStatus = "failed";
   }
 
-  const snapshot = assembleSnapshot(center, bpe, osm, osmStatus);
+  const snapshot = assembleSnapshot(center, bpe, osm, osmStatus, await icuPromise);
   await upsertLogement(supabase, {
     user_id: user.id,
     logement_id: body.logement_id,

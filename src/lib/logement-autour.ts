@@ -1,5 +1,5 @@
 import type { LngLat } from "./geo-distance.ts";
-import type { BpeNearest, OsmProximity, Face3Snapshot } from "./logement-autour-types.ts";
+import type { BpeNearest, OsmProximity, Face3Snapshot, IcuSnapshot } from "./logement-autour-types.ts";
 import { SOURCES_VERSION } from "./logement-store.ts";
 import { OSM_QUERY_VERSION, OSM_BBOX_RADIUS_M } from "./logement-osm.ts";
 
@@ -10,6 +10,7 @@ export function assembleSnapshot(
   bpe: BpeNearest[],
   osm: OsmProximity | null,
   osmStatus: "complete" | "pending" | "failed",
+  icu: IcuSnapshot = null,
 ): Face3Snapshot {
   const now = new Date().toISOString();
   return {
@@ -20,6 +21,7 @@ export function assembleSnapshot(
       nearestMappedGreenSpace: null,
       bboxRadiusMeters: OSM_BBOX_RADIUS_M,
     },
+    icu,
     sourceStatus: { bpe: "complete", osmInfrastructure: osmStatus, osmGreenSpaces: osmStatus },
     sources: {
       bpeVersion: SOURCES_VERSION,

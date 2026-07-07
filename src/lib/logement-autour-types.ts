@@ -49,10 +49,16 @@ export type OsmProximity = {
   bboxRadiusMeters: number;
 };
 
+// Signal îlot de chaleur urbain du quartier (CSTB, grain grand-IRIS). null si l'adresse n'est pas
+// dans une commune couverte (596) ou si la résolution IRIS a échoué : dans les deux cas le bloc
+// « Chaleur autour du logement » n'apparaît pas (jamais de « non renseigné »). iuhi = °C.
+export type IcuSnapshot = { iuhi: number; level: "marque" | "present" } | null;
+
 export type Face3Snapshot = {
   center: LngLat;
   bpe: { categories: BpeNearest[] };
   osm: OsmProximity;
+  icu?: IcuSnapshot;
   sourceStatus: {
     bpe: "complete" | "failed";
     osmInfrastructure: "complete" | "pending" | "failed";

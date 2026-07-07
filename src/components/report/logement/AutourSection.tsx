@@ -95,6 +95,27 @@ export function Face3Block({ s }: { s: Face3Snapshot }) {
             )}
           </div>
 
+          {/* Brique 3 — îlot de chaleur du quartier (CSTB, grand-IRIS). Conditionnel : absent si
+              l'adresse n'est pas dans une commune couverte (jamais « non renseigné »). Fait
+              d'ENVIRONNEMENT, jamais la température intérieure du logement (garde-fou explicite). */}
+          {s.icu && (
+            <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 8 }}>
+              <div style={FACE3_SUBHEAD}>Chaleur autour du logement</div>
+              <span style={FACE3_FAMILY}>Îlot de chaleur urbain du quartier</span>
+              <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.6, margin: 0 }}>
+                Ce secteur présente un îlot de chaleur urbain{" "}
+                <strong style={{ color: "var(--fg-hi)" }}>{s.icu.level === "marque" ? "marqué" : "présent"}</strong>{" "}
+                : en été, l’air peut y être jusqu’à{" "}
+                <strong style={{ color: "var(--fg-hi)", fontVariantNumeric: "tabular-nums" }}>+{s.icu.iuhi.toFixed(1).replace(".", ",")} °C</strong>{" "}
+                plus chaud que dans une zone peu urbanisée de référence.
+              </p>
+              <p style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.55, margin: 0 }}>
+                Cette donnée décrit l’environnement urbain proche, pas la température à l’intérieur du logement.
+              </p>
+              <span style={FACE3_FAMILY}>Estimation modélisée · CSTB · grand-IRIS</span>
+            </div>
+          )}
+
           <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.85 }}>
             Sources : INSEE, BPE 2024 · © les contributeurs OpenStreetMap (ODbL) · distances approximatives à vol d’oiseau
           </div>

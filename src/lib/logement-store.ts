@@ -3,7 +3,7 @@ import { haversineM, type LngLat } from "./geo-distance.ts";
 import type { Posture, Face3Snapshot } from "./logement-autour-types.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 
-export const SOURCES_VERSION = "face3-2026-07-03c"; // bump = invalidation de tous les snapshots (c : nature de l'espace vert / greenKind dans le snapshot)
+export const SOURCES_VERSION = "face3-2026-07-08d"; // bump = invalidation de tous les snapshots (d : ajout du signal îlot de chaleur urbain / icu au snapshot)
 
 // Projection persistée de l'état runtime du choix DPE (cf. spec §6). `pending` tant que rien
 // de définitif ; les deux statuts « confirmés » figent un DPE daté.
