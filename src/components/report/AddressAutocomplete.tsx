@@ -7,8 +7,8 @@ import { autocompleteBanAddress, type BanAddressResult } from "@/lib/ban";
 // l'analyse en amont. Le texte libre n'est jamais pris pour une adresse validée. Requête
 // précédente annulée à chaque frappe ; réponses hors-ordre ignorées via un jeton de séquence.
 export function AddressAutocomplete({
-  onSelect, placeholder,
-}: { onSelect: (a: BanAddressResult) => void; placeholder?: string }) {
+  onSelect, placeholder, showModify = true,
+}: { onSelect: (a: BanAddressResult) => void; placeholder?: string; showModify?: boolean }) {
   const [q, setQ] = useState("");
   const [items, setItems] = useState<BanAddressResult[]>([]);
   const [active, setActive] = useState(-1);
@@ -55,10 +55,14 @@ export function AddressAutocomplete({
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
         <span style={{ fontSize: 15, color: "var(--fg-hi)", fontWeight: 500 }}>{selected.label}</span>
         <span style={{ fontSize: 12, color: "var(--fg-4)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Adresse sélectionnée</span>
-        <button type="button" onClick={() => { setSelected(null); setQ(""); }}
-          style={{ fontSize: 12.5, color: "var(--accent-dim, #7a6e60)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-          Modifier l&apos;adresse
-        </button>
+        {/* Lien « modifier » masquable : quand un appelant offre déjà cette action ailleurs
+            (ex. bloc upsell commune verrouillée), on évite le doublon. */}
+        {showModify && (
+          <button type="button" onClick={() => { setSelected(null); setQ(""); }}
+            style={{ fontSize: 12.5, color: "var(--accent-dim, #7a6e60)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+            Modifier l&apos;adresse
+          </button>
+        )}
       </div>
     );
   }

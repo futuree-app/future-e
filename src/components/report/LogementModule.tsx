@@ -41,6 +41,8 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
   // Commune de l'adresse tapée non débloquée par le rapport de l'utilisateur (étape 4.5) : on
   // affiche un upsell honnête, jamais les données Logement.
   const [lockedCommune, setLockedCommune] = useState<{ commune: string | null; insee: string | null } | null>(null);
+  // Remonte AddressAutocomplete pour repartir d'un champ vide (« Modifier l'adresse »).
+  const [addressResetKey, setAddressResetKey] = useState(0);
   const [result, setResult] = useState<ApiResponse | null>(null);
   const [projet, setProjet] = useState<string | null>(null);
   const [autour, setAutour] = useState<Face3Snapshot | null>(null);
@@ -296,8 +298,10 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
 
           <div className="glass rounded-xl p-8 border-t-2 border-t-accent" style={{ maxWidth: 760 }}>
             <AddressAutocomplete
+              key={addressResetKey}
               placeholder={`Ex. : 12 rue des Minimes${defaultCommune ? `, ${defaultCommune}` : ""}`}
               onSelect={(a) => void analyzeSelected(a)}
+              showModify={!lockedCommune}
             />
             {loading && (
               <div style={{ marginTop: 14, fontSize: 12.5, color: "var(--fg-4)", fontFamily: "var(--font-mono)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
@@ -319,14 +323,23 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                 <p style={{ margin: 0, fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6 }}>
                   Votre rapport actuel ne donne pas accès à l&apos;analyse Logement de cette commune. Débloquez {lockedCommune.commune ?? "cette commune"} pour analyser ce bien.
                 </p>
-                {lockedCommune.insee && (
-                  <Link
-                    href={`/territoire/${lockedCommune.insee}/debloquer`}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent/[0.12] text-accent text-[13.5px] no-underline border border-accent/[0.25] w-fit"
+                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 14 }}>
+                  {lockedCommune.insee && (
+                    <Link
+                      href={`/territoire/${lockedCommune.insee}/debloquer?${new URLSearchParams({ ...(lockedCommune.commune ? { nom: lockedCommune.commune } : {}), source: "logement" }).toString()}`}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent/[0.12] text-accent text-[13.5px] no-underline border border-accent/[0.25] w-fit"
+                    >
+                      Débloquer cette commune
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => { setLockedCommune(null); setAddressResetKey((k) => k + 1); }}
+                    style={{ fontSize: 12.5, color: "var(--fg-4)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0 }}
                   >
-                    Débloquer cette commune
-                  </Link>
-                )}
+                    Modifier l&apos;adresse
+                  </button>
+                </div>
               </div>
             )}
           </div>
