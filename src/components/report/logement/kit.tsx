@@ -58,3 +58,16 @@ export function Disclosure({ summary, children }: { summary: string; children: R
     </details>
   );
 }
+
+// Séparateur de sous-famille (beat 3, spec 5a). Un rang AU-DESSUS des eyebrows de bloc, discret :
+// label mono quiet + filet fin, SANS puce, jamais coloré. But : chunker les preuves, pas re-segmenter.
+export function FamilyHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 8 }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-4)", whiteSpace: "nowrap" }}>
+        {children}
+      </span>
+      <span style={{ flex: 1, height: 1, background: "var(--border-1)" }} />
+    </div>
+  );
+}
