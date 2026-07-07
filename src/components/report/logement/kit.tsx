@@ -1,0 +1,60 @@
+// Primitives partagées du module Logement (extraites de LogementModule.tsx, board étape 4).
+// Utilisées par plusieurs faces : sceau DPE, bloc label/valeur, repli <details> de divulgation
+// progressive, palette et libellés DPE.
+
+import React from "react";
+
+export const DPE_COLORS: Record<string, string> = {
+  A: "#319334", B: "#33cc33", C: "#cbee39",
+  D: "#ffff00", E: "#fbad26", F: "#f15a27", G: "#ed1c24",
+};
+
+export const DPE_LABELS: Record<string, string> = {
+  A: "Très performant", B: "Performant", C: "Assez performant",
+  D: "Peu performant", E: "Énergivore", F: "Très énergivore", G: "Passoire thermique",
+};
+
+export function DpeBadge({ label, size = "md" }: { label: string | null; size?: "sm" | "md" | "lg" }) {
+  const s = size === "lg" ? 56 : size === "md" ? 38 : 26;
+  const fs = size === "lg" ? 22 : size === "md" ? 16 : 12;
+  if (!label) return <span style={{ color: "var(--fg-4)" }}>—</span>;
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", justifyContent: "center",
+      width: s, height: s, borderRadius: 4,
+      background: DPE_COLORS[label] ?? "var(--bg-elev)",
+      color: "#060812", fontWeight: 700, fontSize: fs, flexShrink: 0,
+    }}>{label}</span>
+  );
+}
+
+export function Block({ label, value, sub }: { label: string; value: React.ReactNode; sub?: string }) {
+  return (
+    <div style={{ display: "grid", gap: 3 }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" }}>{label}</span>
+      <span style={{ fontSize: 16, fontWeight: 500, color: "var(--fg-1)" }}>{value}</span>
+      {sub && <span style={{ fontSize: 12, color: "var(--fg-4)" }}>{sub}</span>}
+    </div>
+  );
+}
+
+// Divulgation progressive : la preuve technique (méthode, sources, mentions) vit dans un repli
+// natif <details>, jamais supprimée, jamais au premier plan.
+export function Disclosure({ summary, children }: { summary: string; children: React.ReactNode }) {
+  return (
+    <details className="group" style={{ borderTop: "1px solid var(--border-1)" }}>
+      {/* Toute la ligne est cliquable (comportement natif de <summary>), avec une zone de */}
+      {/* frappe haute pour le tactile ; le chevron pivote à l'ouverture (variante Tailwind). */}
+      <summary
+        className="[&::-webkit-details-marker]:hidden"
+        style={{ cursor: "pointer", listStyle: "none", display: "flex", alignItems: "center", gap: 8, padding: "13px 0", fontSize: 13, fontWeight: 500, color: "var(--fg-3)" }}
+      >
+        <span className="transition-transform group-open:rotate-90" aria-hidden style={{ display: "inline-block", fontSize: 11, color: "var(--fg-4)" }}>▸</span>
+        {summary}
+      </summary>
+      <div style={{ marginTop: 2, marginBottom: 13, display: "grid", gap: 10, fontSize: 12.5, color: "var(--fg-3)", lineHeight: 1.6 }}>
+        {children}
+      </div>
+    </details>
+  );
+}
