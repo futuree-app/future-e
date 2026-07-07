@@ -79,6 +79,14 @@ const DPE_LABELS: Record<string, string> = {
 // affichaient une supposition comme une mesure. À refonder sur donnée réelle (ONRN coût +
 // fréquence sécheresse) selon docs/vault/modules/logement.md, jamais en prédiction du bien.
 
+// Jeton d'adresse non réversible pour l'analytics : distingue deux adresses sans stocker l'adresse
+// (djb2 → base36). Sert à compter les adresses DISTINCTES analysées par commune, sans PII.
+function addressToken(banId: string): string {
+  let h = 5381;
+  for (let i = 0; i < banId.length; i++) h = ((h << 5) + h + banId.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36);
+}
+
 function DpeBadge({ label, size = "md" }: { label: string | null; size?: "sm" | "md" | "lg" }) {
   const s = size === "lg" ? 56 : size === "md" ? 38 : 26;
   const fs = size === "lg" ? 22 : size === "md" ? 16 : 12;
@@ -101,23 +109,6 @@ function Block({ label, value, sub }: { label: string; value: React.ReactNode; s
       {sub && <span style={{ fontSize: 12, color: "var(--fg-4)" }}>{sub}</span>}
     </div>
   );
-}
-
-function ActionCard({ title, desc, href, primary }: { title: string; desc: string; href?: string; primary?: boolean }) {
-  const content = (
-    <div
-      className={primary ? "glass rounded-xl" : "rounded-xl"}
-      style={{
-        padding: 18, cursor: "pointer", transition: "all 0.15s", display: "block",
-        ...(primary ? {} : { background: "var(--bg-elev)", border: "1px solid var(--border-1)" }),
-      }}
-    >
-      <div style={{ fontSize: 13, color: "var(--fg-1)", letterSpacing: "0.03em", marginBottom: 6, fontWeight: 500 }}>{title}</div>
-      <div style={{ fontSize: 12, color: "var(--fg-4)", lineHeight: 1.55 }}>{desc}</div>
-    </div>
-  );
-  if (href) return <Link href={href} style={{ textDecoration: "none" }}>{content}</Link>;
-  return content;
 }
 
 // Passeport du bien : pendant du passeport territorial, au grain adresse. Surface
@@ -179,8 +170,8 @@ function PropertyPassport({
       >
         {address?.label ?? "Logement"}
       </h3>
-      {dpeLetter && DPE_LABELS[dpeLetter] && (
-        <p className="text-[14px] leading-[1.55] text-muted mt-2">{DPE_LABELS[dpeLetter]}.</p>
+      {dpeLetter && (
+        <p className="text-[14px] leading-[1.55] text-muted mt-2">Classé {dpeLetter} au diagnostic énergétique.</p>
       )}
 
       <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-0 mt-5 pt-2 border-t" style={{ borderColor: `${tint}26` }}>
@@ -701,6 +692,11 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
   const [selectedDpe, setSelectedDpe] = useState<DpeRecord | null>(null);
   const [dpeCandidates, setDpeCandidates] = useState<DpeRecord[]>([]);
   const autourRetriedRef = useRef(false);
+  // Instrumentation « artefact adresse » : adresses DISTINCTES analysées par commune dans la
+  // session. Un même utilisateur comparant plusieurs biens d'une même ville est le cas d'usage
+  // payant que la clé actuelle (user, insee) ne sait pas encore porter : ce compteur est le
+  // signal de re-key (cf. board 2026-07-07). Reset au remontage (≈ par session).
+  const analyzedByInseeRef = useRef<Map<string, Set<string>>>(new Map());
   const posthog = usePostHog();
 
   // Face 3 : génère (ou relit, figé) le snapshot « autour de l'adresse ». La donnée
@@ -755,6 +751,9 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
   // envoie l'adresse ATOMIQUE au serveur ; on dérive ensuite l'état d'attribution du DPE.
   async function analyzeSelected(a: BanAddressResult) {
     if (!a.id) { setError("Adresse sans identifiant BAN."); return; }
+    // Événement d'ENTRÉE (une sélection BAN, jamais le texte libre) : mesure le débit d'adresses.
+    const token = addressToken(a.id);
+    posthog?.capture("logement_address_selected", { insee: a.citycode ?? null, address_token: token });
     setLoading(true);
     setError(null);
     setAutour(null);
@@ -794,11 +793,23 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
             ? "residence"
             : "prospection"
           : "inconnue";
+      const insee = payload.address?.citycode ?? null;
+      // Adresses distinctes analysées dans CETTE commune cette session : au 2e bien distinct, on
+      // émet le signal de re-key (comparaison de biens dans une même ville = moment payant).
+      if (insee) {
+        const set = analyzedByInseeRef.current.get(insee) ?? new Set<string>();
+        set.add(token);
+        analyzedByInseeRef.current.set(insee, set);
+        if (set.size >= 2) {
+          posthog?.capture("logement_same_commune_multi", { insee, distinct_addresses_in_commune: set.size });
+        }
+      }
       posthog?.capture("logement_analyzed", {
         relation_inferee: relation,
         in_declared_commune: relation === "residence",
         dpe_attribution: attribution.status,
-        insee: payload.address?.citycode ?? null,
+        insee,
+        address_token: token,
       });
       void requestAutour(payload, "residence");
     } catch (err) {
@@ -847,12 +858,10 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
     autour,
     communeData: result?.communeData,
   };
-  const isPassoire = ["F", "G"].includes(dpe?.etiquette_dpe ?? "");
   const georisques = result?.georisques?.parcel ?? result?.georisques?.address;
   // Les libellés PPRN ne sont plus aplatis ici : ils sont portés, structurés (régime + zone +
   // plan), par le bloc « Statut réglementaire à cette adresse ». On garde les autres risques.
   const allRisks = (georisques?.risks?.labels ?? []).filter((v, i, a) => a.indexOf(v) === i);
-  const hasRegulatoryZones = (georisques?.regulatoryPlans?.length ?? 0) > 0;
 
   return (
     <div className="min-h-screen bg-canvas text-label relative overflow-hidden" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
@@ -862,18 +871,18 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
       <Navbar ctas={{ secondary: { href: "/rapport", label: "Mon rapport" }, primary: { href: "/dashboard", label: "Dashboard" } }} />
 
       <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
-        <section className="grid grid-cols-[1fr_360px] gap-14 items-start py-20">
-          <div>
+        <section className="py-20">
+          <div className="max-w-[720px]">
             <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-accent mb-5">
               <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
               Module 02 · Logement
             </div>
             <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              Ce que votre habitat devient.<br />
-              <span className="italic text-accent">Confort, risques, valeur.</span>
+              Ce logement, lu à son adresse.<br />
+              <span className="italic text-accent">Énergie, risques, entourage.</span>
             </h1>
             <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[560px]">
-              Ce module lit le bien lui-même : DPE, risques par adresse, pression assurantielle et trajectoire de valeur. Il ne raconte pas tout le territoire. Il raconte ce que ce logement absorbe, perd ou protège.
+              Une adresse suffit. Vous y lisez la performance énergétique du bien, son exposition aux risques naturels, ce que les sinistres ont déjà coûté à assurer dans la commune, et ce qui entoure la porte.
             </p>
             <div className="flex gap-3 flex-wrap">
               <Link href="/rapport" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
@@ -884,28 +893,6 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
               </Link>
             </div>
           </div>
-
-          <aside className="glass rounded-2xl p-7">
-            <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">Lecture du bien</p>
-            <h2 className="font-normal text-[22px] leading-[1.2] text-label mb-5 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              Les briques du module.
-            </h2>
-            <div className="flex flex-col gap-2.5">
-              {[
-                { label: "Performance énergétique", val: dpe?.etiquette_dpe ? `DPE ${dpe.etiquette_dpe}` : "Lecture à l'adresse", col: "var(--orange)" },
-                { label: "Risques du bâti", val: allRisks.length > 0 ? `${allRisks.length} signal${allRisks.length > 1 ? "s" : ""}` : "Après analyse", col: "var(--red)" },
-                { label: "Assurance et sécheresse", val: "Lecture à venir", col: "var(--blue)" },
-              ].map((f) => (
-                <div key={f.label} className="flex gap-3.5 items-start px-3.5 py-3 rounded-lg" style={{ background: `${f.col}0c`, border: `1px solid ${f.col}22` }}>
-                  <span className="w-[7px] h-[7px] rounded-full shrink-0 mt-[5px]" style={{ background: f.col, boxShadow: `0 0 8px ${f.col}` }} />
-                  <div>
-                    <div className="text-[13px] font-medium text-label mb-0.5 leading-[1.3]">{f.label}</div>
-                    <div className="font-mono text-[10px] tracking-[0.04em]" style={{ color: f.col }}>{f.val}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </aside>
         </section>
 
         <div className="border-t border-white/[0.08]" />
@@ -1134,57 +1121,13 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
           )}
 
           {/* ═════════════════════ AGIR ═════════════════════ */}
-          {(
-            <div style={{ display: "grid", gap: 36 }}>
-
-              {/* Actions par défaut selon le profil (les actions IA du JSON de synthèse ont
-                  disparu avec le passage à la prose streamée, spec 1a).
-                  « Quoi vérifier » lié au logement : CONSERVÉ. Seule la liste générique
-                  « Pages Savoir associées » (pour aller plus loin) a été retirée le 2026-07-03
-                  (décision porteur), à réévaluer à la fin de tous les modules. */}
-              <ReportSection eyebrow="Actions documentées">
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-
-                  {isPassoire && (
-                    <ActionCard
-                      title="Comprendre le calendrier DPE"
-                      desc="Interdiction progressive de location des passoires thermiques d'ici 2034. Quels travaux, quelles aides, quel ordre."
-                      href="/savoir/dpe-calendrier"
-                      primary
-                    />
-                  )}
-                  {(isPassoire || dpe?.etiquette_dpe === "E") && (
-                    <ActionCard
-                      title="Évaluer le coût d'une rénovation thermique"
-                      desc="Devis-type par typologie de bien, MaPrimeRénov' applicable, retour sur investissement à 10 ans."
-                      href="/savoir/renovation-cout"
-                    />
-                  )}
-                  {(allRisks.length > 0 || hasRegulatoryZones) && (
-                    <ActionCard
-                      title="Vérifier votre couverture assurance"
-                      desc="Contacter votre assureur pour anticiper toute évolution de prime ou de garantie sur votre zone."
-                      href="/savoir/assurance-littorale"
-                    />
-                  )}
-                  {result.cartofriches?.friches.some(f => f.sol_pollue) && (
-                    <ActionCard
-                      title="Pollution des sols à proximité"
-                      desc="Que dit la réglementation, quelles vérifications faire en cas de jardin potager, à qui poser la question."
-                      href="/savoir/sols-pollues"
-                    />
-                  )}
-                  <ActionCard
-                    title="Comparer ce logement avec d'autres territoires"
-                    desc="Le comparateur futur•e permet de mesurer comment ce bien se situe face à des territoires alternatifs sur les mêmes dimensions."
-                    href="/comparateur"
-                  />
-
-                </div>
-              </ReportSection>
-
-            </div>
-          )}
+          {/* Ancien bloc « Actions documentées » retiré (2026-07-07, hotfix confiance) : 4 cartes
+              sur 5 pointaient vers des pages Savoir inexistantes (404 en fin de rapport payant),
+              la carte assurance contredisait la sinistralité (« anticiper la prime » alors que le
+              bloc dit ne rien prédire), la carte sols-pollués violait la frontière Santé, et la
+              carte comparateur promettait de « mesurer » un bien face à des territoires (le
+              comparateur compare des communes, sans score). La sortie du module est reconstruite
+              en « À vérifier avant de décider » (déterministe, par posture) au spec 1b. */}
 
         </section>
       )}

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { geocodeBanAddress } from "@/lib/ban";
+import { getCurrentUserAccount } from "@/lib/user-account";
+import { canAccessCompleteReport } from "@/lib/access";
 import { findCadastreParcelByPoint } from "@/lib/cadastre";
 import {
   getGeorisquesAddressSummary,
@@ -99,27 +100,15 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
     );
 }
 
-// GET (repli) : géocodage libre `?q=`. Ne doit plus écraser une sélection BAN explicite (POST).
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const query = searchParams.get("q");
-  if (!query) {
-    return NextResponse.json({ error: "Missing q parameter." }, { status: 400 });
-  }
-  try {
-    const address = await geocodeBanAddress(query);
-    if (!address) {
-      return NextResponse.json({ error: "Address not found in BAN." }, { status: 404 });
-    }
-    return await buildReport(address, address.type);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to resolve Géorisques logement preview.";
-    return NextResponse.json({ error: message }, { status: 500 });
-  }
-}
-
 // POST : adresse BAN sélectionnée avec précision (objet atomique validé). Chemin principal.
+// (L'ancien GET `?q=` de repli géocodage libre a été retiré : non utilisé par le client, et il
+// exposait le fan-out ~10 API externes sans authentification.)
 export async function POST(request: Request) {
+  // Route coûteuse (fan-out ~10 API externes dont Géorisques token) : réservée au rapport complet.
+  const account = await getCurrentUserAccount();
+  if (!canAccessCompleteReport(account)) {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
   let body: unknown;
   try { body = await request.json(); } catch { body = null; }
   const sel = validateSelectedBanAddress((body as { address?: unknown })?.address);

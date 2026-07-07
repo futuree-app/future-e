@@ -16,6 +16,8 @@
 import { NextRequest } from "next/server";
 import { streamText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
+import { getCurrentUserAccount } from "@/lib/user-account";
+import { canAccessCompleteReport } from "@/lib/access";
 import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
 import { getTerritoryContext, getCommuneDistinctive, RECIT_DEMOGRAPHIE } from "@/lib/comparateur-vie";
 import { deriveTerritoryMood } from "@/lib/territory-mood";
@@ -214,6 +216,13 @@ function shapeWorkbook(wb: WorkbookInput | undefined) {
 }
 
 export async function POST(req: NextRequest) {
+  // Route coûteuse (fan-out enrichissement commune + Sonnet 4.6) : réservée au rapport complet,
+  // seule surface qui la consomme (/rapport/quartier, déjà gatée côté page).
+  const account = await getCurrentUserAccount();
+  if (!canAccessCompleteReport(account)) {
+    return new Response("forbidden", { status: 403 });
+  }
+
   let body: RequestBody;
   try {
     body = (await req.json()) as RequestBody;
