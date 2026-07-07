@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { getCurrentUserAccount } from "@/lib/user-account";
+import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { canAccessCompleteReport } from "@/lib/access";
+import { canAnalyzeCommune } from "@/lib/active-territory";
 import { findCadastreParcelByPoint } from "@/lib/cadastre";
 import {
   getGeorisquesAddressSummary,
@@ -114,6 +115,16 @@ export async function POST(request: Request) {
   const sel = validateSelectedBanAddress((body as { address?: unknown })?.address);
   if (!sel) {
     return NextResponse.json({ error: "Invalid selected address." }, { status: 400 });
+  }
+  // Frontière de monétisation (étape 4.5) : l'adresse doit être dans une commune que
+  // l'utilisateur a le droit de lire (résidence ou commune achetée). Chemin autoritatif :
+  // le citycode vient de l'objet BAN validé serveur, pas d'un champ client libre.
+  const { supabase, user } = await requireCurrentUser();
+  if (!(await canAnalyzeCommune(supabase, user.id, sel.citycode))) {
+    return NextResponse.json(
+      { error: "COMMUNE_NOT_UNLOCKED", code: "COMMUNE_NOT_UNLOCKED", commune: sel.city, insee: sel.citycode },
+      { status: 403 },
+    );
   }
   try {
     const address: ResolvedAddress = {

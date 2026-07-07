@@ -38,7 +38,7 @@ export function LogementSynthesis({
       const res = await fetch("/api/synthesize-logement", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data, logementId, force }),
+        body: JSON.stringify({ data, logementId, insee, force }),
         signal: controller.signal,
       });
       if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);

@@ -2,6 +2,7 @@ import { after } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { canAccessCompleteReport } from "@/lib/access";
+import { canAnalyzeCommune } from "@/lib/active-territory";
 import { loadBpePointsAround, nearestByCategory } from "@/lib/logement-bpe";
 import { getTileGeoms, computeOsmProximity, OSM_BBOX_RADIUS_M } from "@/lib/logement-osm";
 import { assembleSnapshot } from "@/lib/logement-autour";
@@ -37,6 +38,10 @@ export async function POST(req: Request) {
   const body = (await req.json()) as Body;
   if (!body?.logement_id || !body.insee || typeof body.latitude !== "number" || typeof body.longitude !== "number") {
     return Response.json({ error: "logement_id/insee/latitude/longitude requis" }, { status: 400 });
+  }
+  // Frontière de monétisation (étape 4.5) : commune de l'adresse lisible par l'utilisateur.
+  if (!(await canAnalyzeCommune(supabase, user.id, body.insee))) {
+    return Response.json({ error: "COMMUNE_NOT_UNLOCKED", code: "COMMUNE_NOT_UNLOCKED", insee: body.insee }, { status: 403 });
   }
   const center = { lat: body.latitude, lon: body.longitude };
   const posture: Posture = body.posture === "prospection" ? "prospection" : "residence";

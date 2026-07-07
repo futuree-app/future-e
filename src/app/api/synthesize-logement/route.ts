@@ -8,6 +8,7 @@ import { streamText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { canAccessCompleteReport } from "@/lib/access";
+import { canAnalyzeCommune } from "@/lib/active-territory";
 import { getLogement, saveSynthesis } from "@/lib/logement-store";
 import { buildFactHash, buildSynthesisPayload, type SynthesisData } from "@/lib/logement-synthesis-cache";
 
@@ -99,6 +100,10 @@ L'utilisateur vous transmet un payload JSON. Servez-vous-en sans le réciter.`;
 type Body = {
   data?: SynthesisData;
   logementId?: string;
+  // INSEE de l'adresse, pour la frontière de monétisation (étape 4.5). Défense en profondeur :
+  // le vrai gate autoritatif est sur georisques-logement (citycode validé serveur) ; ici on
+  // barre une génération LLM cross-commune même sur appel direct.
+  insee?: string;
   // Force la régénération malgré un cache chaud (bouton « Régénérer »). Sans lui, re-POST -> hash
   // identique -> cache hit -> même texte : le bouton mentirait.
   force?: boolean;
@@ -125,6 +130,13 @@ export async function POST(req: NextRequest) {
   }
 
   const { supabase, user } = await requireCurrentUser();
+  // Frontière de monétisation (étape 4.5) : commune de l'adresse lisible par l'utilisateur.
+  if (!(await canAnalyzeCommune(supabase, user.id, body.insee))) {
+    return new Response(JSON.stringify({ error: "COMMUNE_NOT_UNLOCKED", code: "COMMUNE_NOT_UNLOCKED", insee: body.insee ?? null }), {
+      status: 403,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
   const factHash = buildFactHash(body.data);
 
   // Cache touché : texte figé, zéro LLM (sauf régénération forcée).

@@ -38,6 +38,9 @@ function addressToken(banId: string): string {
 export default function LogementModule({ defaultCommune }: { defaultCommune?: string | null }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Commune de l'adresse tapée non débloquée par le rapport de l'utilisateur (étape 4.5) : on
+  // affiche un upsell honnête, jamais les données Logement.
+  const [lockedCommune, setLockedCommune] = useState<{ commune: string | null; insee: string | null } | null>(null);
   const [result, setResult] = useState<ApiResponse | null>(null);
   const [projet, setProjet] = useState<string | null>(null);
   const [autour, setAutour] = useState<Face3Snapshot | null>(null);
@@ -125,6 +128,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
     posthog?.capture("logement_address_selected", { insee: a.citycode ?? null, address_token: token });
     setLoading(true);
     setError(null);
+    setLockedCommune(null);
     setAutour(null);
     setAutourPhase("pending");
     autourRetriedRef.current = false;
@@ -140,7 +144,14 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
           citycode: a.citycode ?? "", latitude: a.latitude, longitude: a.longitude, type: a.type,
         } }),
       });
-      const payload = (await res.json()) as ApiResponse;
+      const payload = (await res.json()) as ApiResponse & { code?: string; commune?: string | null; insee?: string | null };
+      // Frontière de monétisation (étape 4.5) : commune non débloquée -> upsell, pas une erreur.
+      if (res.status === 403 && payload.code === "COMMUNE_NOT_UNLOCKED") {
+        setResult(null);
+        setLockedCommune({ commune: payload.commune ?? a.city ?? null, insee: payload.insee ?? a.citycode ?? null });
+        posthog?.capture("logement_commune_locked", { insee: payload.insee ?? a.citycode ?? null });
+        return;
+      }
       if (!res.ok) throw new Error(payload.error ?? `Erreur ${res.status}`);
       setResult(payload);
       setProjet(null);
@@ -299,6 +310,25 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                 {error}
               </div>
             )}
+
+            {lockedCommune && (
+              <div style={{ marginTop: 16, padding: "16px 18px", background: "var(--bg-elev)", border: "1px solid var(--border-2)", borderRadius: 12, display: "grid", gap: 12 }}>
+                <p style={{ margin: 0, fontSize: 14.5, color: "var(--fg-1)", lineHeight: 1.6 }}>
+                  Cette adresse est située à <strong style={{ color: "var(--fg-hi)" }}>{lockedCommune.commune ?? "une autre commune"}</strong>.
+                </p>
+                <p style={{ margin: 0, fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6 }}>
+                  Votre rapport actuel ne donne pas accès à l&apos;analyse Logement de cette commune. Débloquez {lockedCommune.commune ?? "cette commune"} pour analyser ce bien.
+                </p>
+                {lockedCommune.insee && (
+                  <Link
+                    href={`/territoire/${lockedCommune.insee}/debloquer`}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent/[0.12] text-accent text-[13.5px] no-underline border border-accent/[0.25] w-fit"
+                  >
+                    Débloquer cette commune
+                  </Link>
+                )}
+              </div>
+            )}
           </div>
         </section>
 
@@ -321,20 +351,22 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
             dpeYear={dpeYear}
           />
 
-          {/* Avertissement si l'adresse est dans une commune différente du profil */}
+          {/* Note (pas un avertissement) si l'adresse est dans une commune différente de la
+              résidence. Depuis l'étape 4.5, atteindre ce point implique que la commune est
+              débloquée (résidence OU commune achetée) : le ton est informatif, pas un problème. */}
           {defaultCommune && result.address?.city &&
             result.address.city.toLowerCase() !== defaultCommune.toLowerCase() && (
             <div style={{
               marginBottom: 20, padding: "12px 16px",
-              background: "rgba(184,160,66,0.06)", border: "1px solid rgba(184,160,66,0.25)",
-              borderLeft: "3px solid var(--yellow, #b8a042)", borderRadius: 10,
+              background: "var(--bg-elev)", border: "1px solid var(--border-1)",
+              borderRadius: 10,
               fontSize: 13, color: "var(--fg-2)", lineHeight: 1.65,
             }}>
-              <strong style={{ color: "var(--yellow, #b8a042)", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                Adresse hors commune
+              <strong style={{ color: "var(--fg-4)", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                Analyse d&apos;un bien à {result.address.city}
               </strong>
               <br />
-              Cette adresse est à <strong>{result.address.city}</strong>, votre commune de résidence déclarée est <strong>{defaultCommune}</strong>. L&apos;analyse porte sur ce bien, mais les modules Territoire et Santé restent calés sur votre commune principale.
+              Cette analyse porte sur ce bien à <strong>{result.address.city}</strong>. Les modules Territoire et Santé peuvent rester calés sur votre commune principale, <strong>{defaultCommune}</strong>.
             </div>
           )}
 

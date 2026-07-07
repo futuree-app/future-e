@@ -120,3 +120,33 @@ export async function resolveReadableTerritory(
     deniedCommune: territory.communeName,
   };
 }
+
+// Frontière de MONÉTISATION du module Logement (board étape 4.5). Analyser une adresse suppose
+// que l'utilisateur a le droit de LIRE la commune de cette adresse : sinon un seul achat
+// déverrouillerait l'analyse Logement de la France entière. Commune lisible = même règle que
+// resolveReadableTerritory, mais pour un INSEE arbitraire (celui de l'adresse tapée) :
+//   - résidence déclarée (home_insee_code), OU
+//   - commune achetée (rapport ou Pack) : un report_grant sur (user, insee).
+// Aucun élargissement implicite (voisines, département, Le Fil, foyer, B2B) : ce seront des
+// droits EXPLICITES plus tard. La sécurité réelle est ici, côté serveur (le client peut doubler
+// pour l'UX, jamais pour la garantie).
+export async function canAnalyzeCommune(
+  supabase: SupabaseClient,
+  userId: string,
+  insee: string | null | undefined,
+): Promise<boolean> {
+  if (!insee) return false;
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("home_insee_code")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (profile?.home_insee_code === insee) return true;
+  const { data: grant } = await supabase
+    .from("report_grants")
+    .select("insee")
+    .eq("user_id", userId)
+    .eq("insee", insee)
+    .maybeSingle();
+  return Boolean(grant);
+}
