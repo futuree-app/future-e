@@ -54,7 +54,7 @@ function zoneLabel(zoneCode: string | null, zoneName: string | null): string | n
   let name = (zoneName ?? "").trim();
   if (zoneCode && name.endsWith(`(${zoneCode})`)) name = name.slice(0, -(zoneCode.length + 2)).trim();
   name = name.replace(/^zone\s+/i, "").trim();
-  if (zoneCode && name) return `Zone ${zoneCode} — ${name}`;
+  if (zoneCode && name) return `Zone ${zoneCode} : ${name}`;
   if (zoneCode) return `Zone ${zoneCode}`;
   return name || null;
 }
@@ -144,7 +144,7 @@ export function RegulatoryStatusBlock({ georisques }: { georisques: LogementRepo
                     </div>
                   ))}
                   <div style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>
-                    Ces zonages peuvent concerner des phénomènes ou des règlements différents. Leur ordre sert la lecture.
+                    Ces zonages peuvent concerner des phénomènes ou des règlements différents.
                   </div>
                 </div>
               )}
