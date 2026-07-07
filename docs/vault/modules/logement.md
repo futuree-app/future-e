@@ -97,6 +97,27 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
 - **Toujours dire l'échelle** : ne jamais faire passer une classe communale (sécheresse ONRN)
   pour « votre adresse ».
 - **Ne jamais conclure à la place de Santé ou Territoire.**
+- **Croisement Logement × Territoire (« modules-calques », doctrine 2026-07-07).** Le territoire
+  ÉCLAIRE le logement, il n'en est jamais le sujet. La phrase-moat visée : « ce DPE ne veut pas
+  dire la même chose ici qu'ailleurs, parce que le territoire n'évolue pas de la même façon » —
+  qu'aucun site immo ni climat ne produit seul. Tenue par cinq invariants, généralisables aux
+  futurs croisements (Santé × Territoire, etc.) :
+  1. **Le nom de commune n'est jamais une source de connaissance.** Seuls les faits présents dans
+     le payload existent ; rien de ce que le modèle « croit savoir » de la ville (climat, histoire,
+     géographie). Ferme l'hallucination de culture générale.
+  2. **Le climat ne change jamais le diagnostic, il change seulement le POIDS d'une caractéristique
+     du bâti déjà établie.** C'est l'invariant central (meilleur que « ne jamais réassurer »). Le
+     climat n'a aucune valence propre : la faiblesse pèse plus lourd, la force compte davantage, le
+     lecteur tire le sens du diagnostic, jamais du climat.
+  3. **Signal en CODES pré-digérés** (intensité qualitative `marquee`/`notable`/`null`), jamais en
+     prose ni en chiffre : un code abstrait force la reformulation à sujet-logement et ferme la
+     récitation (leçon Editorial : la belle prose pré-écrite est ce qui protège le MOINS).
+  4. **Poids narratif** : le climat ne crée jamais l'enjeu principal, il n'accentue qu'un fait déjà
+     classé, jamais devant une exposition physique de l'adresse. La sinistralité communale reste un
+     contexte, jamais une exposition de l'adresse ni le sujet de la clôture.
+  5. **Le logement reste le sujet grammatical de chaque phrase** (« test du sujet » : si la réponse
+     est « la commune », on réécrit). C'est ce qui sépare une lecture Logement d'une lecture
+     Territoire.
 
 ## État de mise en œuvre
 
@@ -184,6 +205,21 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
 - **Face 1 (l'enveloppe) : non branchée** (intake étage / orientation / etc. à MESURER avant de
   construire, cf. `/memory/project_module_logement.md`). Face 2 étendue (contraste PPRI / TRI /
   nappe au point) et vision module = `docs/board/2026-07-03-vision-module-logement-chatgpt.md`.
+- **Synthèse IA — croisement climat × logement BRANCHÉ (v6, 2026-07-07, branche
+  `feat/logement-hotfix-confiance`).** Injection serveur-only du climat projeté DRIAS (gwl20/2050)
+  dans le payload de synthèse (`deriveClimatProjete`, `src/lib/drias-json.ts`), sous forme de
+  signal qualitatif curé. Applique les cinq invariants « modules-calques » ci-dessus. **v1 =
+  MARQUEE-ONLY** (le niveau `notable` est conservé dans le type mais rendu silencieux : à sa
+  fréquence, la charnière « à mesure que les étés se réchauffent » se répétait 8/8 sur générations
+  réelles = formule). **Axe chaleur seul** (surcroît de nuits tropicales + jours >30 °C ; sécheresse
+  des sols différée, SWI absolu sans seuil défendable). Prompt = `synthesize-logement/route.ts`
+  (blocs `LE CROISEMENT AVEC LE CLIMAT À VENIR`, `TROIS NIVEAUX D'EXPRESSION`, `PAS DE FORMULE
+  TYPE`, `LE POIDS DES ENJEUX`). Rapport Editorial : `docs/rapports-agents/editorial-writer/
+  2026-07-07-synthese-logement-croisement-territoire.md`. **Watch-item #1** : adresse calme + forte
+  sinistralité communale → le modèle couronne encore la commune ~1/10 malgré la règle ; fix durable
+  = passer la sinistralité en signal qualitatif (structurel, parqué), pas de la prose. **À rouvrir**
+  : `notable` quand un vrai mécanisme anti-formule existe (rotation, phrases par famille de fait,
+  synthèse 2 passes) ; axe sécheresse des sols avec une anomalie calibrée.
 
 ## Liens
 
