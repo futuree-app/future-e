@@ -64,7 +64,7 @@ function PerilLine({ peril, word, color, state, tip }: { peril: string; word: st
       </div>
       {state.kind === "lecture" && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px 48px" }}>
-          <Metric value={onrnLabel(ONRN_COUT_LABEL, state.cout)} caption="coût moyen d’un sinistre indemnisé" />
+          <Metric value={onrnLabel(ONRN_COUT_LABEL, state.cout)} caption="coût moyen d’un sinistre indemnisé dans la commune" />
           <Metric value={onrnLabel(ONRN_FREQ_PLAIN, state.frequence)} caption="fréquence des sinistres parmi les biens assurés" />
         </div>
       )}
@@ -106,7 +106,7 @@ export function SinistraliteBlock({ sinistralite }: { sinistralite: OnrnSinistra
       <div style={{ display: "grid", gap: 14 }}>
         {/* Niveau 1 — ce que ça veut dire, en langage courant, hors de la carte de faits */}
         <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>
-          Ce que les assureurs ont historiquement indemnisé dans la commune. Ces chiffres ne prédisent ni un sinistre pour ce logement, ni le prix de son assurance.
+          À l&apos;échelle de la commune, voici ce que les assureurs ont indemnisé par le passé. Ces montants ne disent rien de ce logement en particulier, ni du prix de son assurance.
         </p>
         {/* Niveau 2 — les faits, dans la carte ; la conclusion factuelle en tête */}
         <GlassCard>
