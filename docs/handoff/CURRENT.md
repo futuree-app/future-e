@@ -3,14 +3,14 @@
 **Horodatage** : 2026-07-07 · **Branche courante** : `feat/logement-hotfix-confiance` (créée depuis `main`, NON poussée, 4 commits d'avance). Arbre propre.
 
 ## Objectif en cours
-Suites de la **revue de board critique du module Logement** (2026-07-07). Un board 4 rôles (product / business / editorial / software-architect) a audité le module ; ses 4 rapports sont versionnés dans `docs/rapports-agents/*/2026-07-07-board-logement-revue-critique.md`. Le porteur a validé un **plan d'exécution en 5 étapes** (mensonges visibles → fondations → cache → extraction → spec 1b). **Étapes 1, 2 et 3 LIVRÉES** sur la branche. Reprise = **étape 4**.
+Suites de la **revue de board critique du module Logement** (2026-07-07). Un board 4 rôles (product / business / editorial / software-architect) a audité le module ; ses 4 rapports sont versionnés dans `docs/rapports-agents/*/2026-07-07-board-logement-revue-critique.md`. Le porteur a validé un **plan d'exécution en 5 étapes** (mensonges visibles → fondations → cache → extraction → spec 1b). **Étapes 1, 2, 3 et 4 LIVRÉES** sur la branche. Reprise = **étape 5 (spec 1b, brainstorm-first)**.
 
 ## Le plan en 5 étapes (référence de reprise)
 1. **Hotfix confiance + fuites** — FAIT (`5c1ce78`).
 2. **Migration adresse (re-key)** — FAIT (`2d3c056`).
 3. **Artefact serveur + contrat de cache** — FAIT (`fc7dd85`). Hash de contenu (FNV-1a sur `buildSynthesisPayload` sérialisé stable + `SYNTHESIS_PROMPT_VERSION`, fin du hash d'identité et du couplage `SOURCES_VERSION` Face 3), gate de complétude (client : `synthesisReady` attend l'« autour » terminal via `autourPhase` ; serveur : flag `completed` avant persistance `after()` + `runtime`/`maxDuration`), bouton « Régénérer » honnête (param `force`). Geste 1 en version minimale (validation inline durcie) ; rate-limit + faits source-serveur DIFFÉRÉS à la refonte complète. Bug attrapé au passage : mapping `Face3Snapshot.bpe.categories` → forme `buildSynthesisPayload` (crash `.filter` masqué par la course désormais fermée).
-4. **Extraction des faces** hors `LogementModule.tsx` (une face = un fichier ; `logement-report-types.ts` partagé route↔client ; module réduit ~300 l.). — À FAIRE (prochaine étape). Voir détail plus bas.
-5. **Spec 1b** : réordonnancement (synthèse en tête) + rehydratation (rouvrir la page sur l'artefact sauvegardé). Brainstorm-first, convoquer Design Critic + Editorial.
+4. **Extraction des faces** hors `LogementModule.tsx` — FAIT (`logement-report-types.ts` partagé route↔client + enforce sur la route ; 8 fichiers `src/components/report/logement/` ; module **1154 → 437 l.**). Extraction PURE (0 changement de rendu/logique). Section Risques + hero restés inline (petits, couplés au layout). Bug latent au passage : le contrat `ApiResponse` recopié à la main masquait la dérive avec les libs Géorisques/ONRN, désormais détectée par tsc.
+5. **Spec 1b** : réordonnancement (synthèse en tête) + rehydratation (rouvrir la page sur l'artefact sauvegardé). Brainstorm-first, convoquer Design Critic + Editorial. — À FAIRE (prochaine étape). Voir détail plus bas.
 
 ## Fait dans cette session
 - **Board 4 rapports** écrits + versionnés (`docs/rapports-agents/{product-strategist,business-strategist,editorial-writer,software-architect}/2026-07-07-board-logement-revue-critique.md`). Synthèse croisée rendue au porteur (non versionnée, vit dans le transcript).
@@ -36,16 +36,20 @@ Suites de la **revue de board critique du module Logement** (2026-07-07). Un boa
 - **Débat non tranché, à instruire par la donnée** (Product vs Business) : clôture de synthèse posture-neutre vs adressée au projet → A/B après 20 générations réelles, PAS graver. Persistance par adresse validée (fait), mais lecture des chiffres PostHog `relation_inferee`/`logement_same_commune_multi` avant d'aller plus loin sur le multi-biens.
 
 ## État git
-- Branche `feat/logement-hotfix-confiance` : 4 commits d'avance sur `main` (`5c1ce78` étape 1, `2d3c056` étape 2, commit docs des 4 rapports board, `fc7dd85` étape 3). **NON poussée. Aucune PR ouverte.**
+- Branche `feat/logement-hotfix-confiance` : plusieurs commits d'avance sur `main` (`5c1ce78` étape 1, `2d3c056` étape 2, docs 4 rapports board, `fc7dd85` étape 3, handoff, étape 4.1 types partagés, étape 4.2 extraction faces). **NON poussée. Aucune PR ouverte.**
 - `main` = `origin/main` (`8067b3e`, à jour, 0 commit d'avance). Le socle spec 1a synthèse est bien sur `origin/main`.
 - Arbre propre (rien de non commité).
 
-## Prochaine étape immédiate (sans ambiguïté) — ÉTAPE 4
-**Extraction des faces hors `LogementModule.tsx`** (god component ~1200 l., critique 5 du software-architect). Dans cet ordre (gabarit = `ThermalComfortSection.tsx`, déjà extraite) :
-1. **`src/lib/logement-report-types.ts`** : le type de réponse de `georisques-logement` (aujourd'hui `ApiResponse` écrit À LA MAIN dans le client, 60 l. recopiées de la route → dérive silencieuse). Importé PAR la route ET par le client = une seule vérité.
-2. **Une face = un fichier** : `SinistraliteSection` (+ constantes ONRN), `RegulatorySection` (+ REGIME_GLOSS/HAZARD_LABEL), `AutourSection`/`Face3Block` (+ labels Face 3), `EnergieSection` (états DPE inline), `PropertyPassport`, `ActionsSection`.
-3. **`LogementModule` ne garde que** : états, fetches, machine DPE, gating synthèse, composition. Cible ~300 l. Le réordonnancement 1b (étape 5) devient alors un déplacement de lignes.
-- **Nettoyage à faire au passage** (non bloquant, board « Ce qui peut disparaître ») : `ApiResponse` charge encore `zfe`/`irep`/`cartofriches`/`communeData` riche alors que les frontières sont fermées (ZFE→Mobilité, pollution→Santé) ; seul `cartofriches.sol_pollue` sert encore une carte. Trancher : retirer du fan-out `georisques-logement` ou documenter la carte d'usage.
+## Prochaine étape immédiate — ÉTAPE 5 (spec 1b)
+**Réordonnancement du module + rehydratation de l'artefact.** Chantier **brainstorm-first** (pas une brique) : brainstorm → spec, convoquer **Design Critic + Editorial Writer** (cf. mémoire `project-module-logement` « étoile polaire réordonnancement »). Deux volets :
+1. **Réordonnancement** = épine dorsale « ce qui ressort (synthèse) → identité (Passeport) → preuves par grain → limites → et maintenant ». Maintenant que les faces sont extraites (étape 4), c'est un **déplacement du JSX de composition** dans `LogementModule.tsx` (return final), plus l'ordre des `<...Section>`. Contrainte gravée : la synthèse **oriente sans introduire de fait absent d'un bloc déterministe**.
+2. **Rehydratation** (critique 6 board) = la page démarre `result = null` et fait ressaisir l'adresse. Cible : un chemin serveur « charge le(s) logement(s) sauvegardé(s) et rends depuis la ligne ». Se conçoit AVEC le re-key (fait, étape 2) : la table porte déjà snapshot + DPE figé + synthèse + posture. C'est le vrai chantier structurel de 1b.
+- **Sortie « À vérifier avant de décider »** : reconstruire la sortie d'engagement du module (déterministe, par posture, « quoi vérifier / demander / documenter / comparer / quelles pièces obtenir », les euros plus tard) — cf. nuances porteur ci-dessous.
+
+## Détail de l'étape 4 livrée (référence)
+- **4.1 types partagés** (`refactor …4.1`) : `src/lib/logement-report-types.ts` (`LogementReport`), importé PAR la route (`georisques-logement` annote son payload → dérive = erreur tsc) ET par le client (alias `ApiResponse`). A révélé que les libs Géorisques/ONRN renvoient plus riche que l'ancien contrat recopié (drift réel, désormais verrouillé).
+- **4.2 extraction faces** (`refactor …4.2`) : 8 fichiers `src/components/report/logement/` (`kit`, `posture`, `PropertyPassport`, `ProjectProbe`, `EnergieSection`, `SinistraliteSection`, `RegulatorySection`, `AutourSection`). Module **1154 → 437 l.** Extraction PURE. Restés inline : hero + section « Risques du bâti » (petits, couplés au layout). `EnergieSection` reçoit la machine DPE via callbacks (`onPick`/`onNotInList`/`onReselect`), l'état reste dans le module. **`ActionsSection` n'existe pas** (bloc AGIR retiré à l'étape 1).
+- **Nettoyage NON fait (non bloquant)** : `zfe`/`irep`/`cartofriches` transitent encore dans le fan-out `georisques-logement` alors que les frontières sont fermées (→ Mobilité / Santé). À trancher (retirer du fan-out ou documenter). Seul `cartofriches.sol_pollue` ne sert plus aucune carte (le bloc AGIR l'utilisait, retiré).
 
 ## Détail de l'étape 3 livrée (référence, si besoin de relire)
 Trois gestes du board (software-architect critiques 2, 2a, 2c) :
@@ -64,6 +68,6 @@ Trois gestes du board (software-architect critiques 2, 2a, 2c) :
 - **Rien n'est poussé** (ni la branche, ni de PR). `main` est à jour côté origin.
 - **Contrôles visuels toujours en attente** (session payante, `NEXT_PUBLIC_AUTO_SYNTHESIS=true`) : (a) socle thermique Face 1 A/B1/C jamais vu à l'œil ; (b) comportement artefact synthèse (auto-stream, posture ne relance rien, reload=cache, changement DPE régénère) ; (c) hero réécrit + suppression AGIR jamais vus rendus. **Débloqué : les migrations 20/21 sont passées, le module est testable en session payante** (le code branche non poussé — tester en local sur la branche `feat/logement-hotfix-confiance`).
 - **Course autour/synthèse RÉSOLUE** (étape 3, geste 3a) : `synthesisReady` attend désormais `autourPhase === "terminal"`. Contrôle visuel session payante restant : vérifier que la synthèse ne part bien qu'une fois le bloc « autour » stabilisé, et que le changement de posture ne relance pas (hash de contenu inchangé).
-- **`ApiResponse` charge encore `zfe`/`irep`/`cartofriches`/`communeData` riche** (frontières fermées côté produit, appels toujours payés côté API) : nettoyage prévu, PAS bloquant, à traiter lors de l'extraction (étape 4) ou avant.
+- **`LogementReport` charge encore `zfe`/`irep`/`cartofriches`/`communeData` riche** (frontières fermées côté produit, appels toujours payés dans le fan-out `georisques-logement`) : nettoyage PAS bloquant, à trancher (retirer du fan-out ou documenter la carte d'usage). Le type est désormais partagé (`src/lib/logement-report-types.ts`), donc le retrait se fait en un seul endroit.
 - **`AUTO_SYNTHESIS` OFF par défaut** en dev : la voie de test de la synthèse reste le bouton « Générer la lecture ».
 - **Duplication Quartier/Logement** : les prompts restent séparés (décision Architecte, NE PAS factoriser la voix) ; seule la plomberie de streaming (~50 l. verbatim, probe→502 + repompage) est à factoriser au 3e module — à garder en tête pour l'étape 3 geste 3 (le helper de stream absorberait le flag `completed`).
