@@ -7,8 +7,8 @@ import { autocompleteBanAddress, type BanAddressResult } from "@/lib/ban";
 // l'analyse en amont. Le texte libre n'est jamais pris pour une adresse validée. Requête
 // précédente annulée à chaque frappe ; réponses hors-ordre ignorées via un jeton de séquence.
 export function AddressAutocomplete({
-  onSelect, placeholder, showModify = true,
-}: { onSelect: (a: BanAddressResult) => void; placeholder?: string; showModify?: boolean }) {
+  onSelect, placeholder, showModify = true, onModify,
+}: { onSelect: (a: BanAddressResult) => void; placeholder?: string; showModify?: boolean; onModify?: () => void }) {
   const [q, setQ] = useState("");
   const [items, setItems] = useState<BanAddressResult[]>([]);
   const [active, setActive] = useState(-1);
@@ -58,7 +58,7 @@ export function AddressAutocomplete({
         {/* Lien « modifier » masquable : quand un appelant offre déjà cette action ailleurs
             (ex. bloc upsell commune verrouillée), on évite le doublon. */}
         {showModify && (
-          <button type="button" onClick={() => { setSelected(null); setQ(""); }}
+          <button type="button" onClick={() => { setSelected(null); setQ(""); onModify?.(); }}
             style={{ fontSize: 12.5, color: "var(--accent-dim, #7a6e60)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
             Modifier l&apos;adresse
           </button>
@@ -87,7 +87,7 @@ export function AddressAutocomplete({
       {queryReady && status === "empty" && <div style={hint}>Aucune adresse trouvée.</div>}
       {queryReady && status === "error" && <div style={hint}>Recherche d&apos;adresse momentanément indisponible.</div>}
       {queryReady && open && items.length > 0 && (
-        <ul role="listbox" id={listId} style={{ position: "absolute", zIndex: 40, left: 0, right: 0, margin: "6px 0 0", padding: 4, listStyle: "none", background: "var(--bg-elev)", border: "1px solid var(--border-1)", borderRadius: 10, maxHeight: 280, overflowY: "auto" }}>
+        <ul role="listbox" id={listId} style={{ position: "absolute", zIndex: 50, left: 0, right: 0, margin: "6px 0 0", padding: 4, listStyle: "none", background: "var(--bg-deep)", border: "1px solid var(--border-2)", borderRadius: 10, maxHeight: 280, overflowY: "auto", boxShadow: "0 16px 40px rgba(0,0,0,0.55)" }}>
           {items.map((a, i) => (
             <li key={a.id ?? i} role="option" aria-selected={i === active}
               onMouseDown={(e) => { e.preventDefault(); choose(a); }}

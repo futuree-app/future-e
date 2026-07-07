@@ -221,6 +221,20 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
     } catch { /* échec silencieux */ }
   }
 
+  // Retour à l'état de recherche vierge (« Modifier l'adresse ») : on efface le rapport précédent
+  // AVANT de rééditer, sinon l'ancien Passeport reste affiché sous le champ et le menu de
+  // suggestions se superpose dessus. Remonte aussi AddressAutocomplete (champ vide).
+  function resetToSearch() {
+    setResult(null);
+    setError(null);
+    setLockedCommune(null);
+    setAutour(null);
+    setAutourPhase("pending");
+    autourRetriedRef.current = false;
+    setProjet(null);
+    setAddressResetKey((k) => k + 1);
+  }
+
   // Le DPE « du logement » = uniquement le choix attribué (jamais un candidat non confirmé).
   const dpe = (dpeStatus === "auto_confirmed" || dpeStatus === "confirmed") ? selectedDpe : null;
   // Lecture thermique (Face 1) : dérivée du DPE attribué uniquement (sinon C_NO_DATA).
@@ -302,6 +316,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
               placeholder={`Ex. : 12 rue des Minimes${defaultCommune ? `, ${defaultCommune}` : ""}`}
               onSelect={(a) => void analyzeSelected(a)}
               showModify={!lockedCommune}
+              onModify={resetToSearch}
             />
             {loading && (
               <div style={{ marginTop: 14, fontSize: 12.5, color: "var(--fg-4)", fontFamily: "var(--font-mono)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
@@ -334,7 +349,7 @@ export default function LogementModule({ defaultCommune }: { defaultCommune?: st
                   )}
                   <button
                     type="button"
-                    onClick={() => { setLockedCommune(null); setAddressResetKey((k) => k + 1); }}
+                    onClick={resetToSearch}
                     style={{ fontSize: 12.5, color: "var(--fg-4)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0 }}
                   >
                     Modifier l&apos;adresse
