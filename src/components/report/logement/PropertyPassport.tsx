@@ -9,12 +9,10 @@ export function PropertyPassport({
   address,
   parcel,
   dpe,
-  altitude,
 }: {
   address: LogementReport["address"];
   parcel: LogementReport["parcel"];
   dpe: DpeRecord | null;
-  altitude: LogementReport["altitude"];
 }) {
   const tint = "#c8b89a";
   const dpeLetter = dpe?.etiquette_dpe ?? null;
@@ -24,8 +22,6 @@ export function PropertyPassport({
   if (dpe?.type_batiment) fields.push({ label: "Type de bâti", value: dpe.type_batiment });
   if (parcel?.parcelCode)
     fields.push({ label: "Parcelle", value: parcel.contenance ? `${parcel.parcelCode} · ${parcel.contenance} m²` : parcel.parcelCode });
-  if (altitude != null) fields.push({ label: "Altitude", value: `${altitude} m NGF` });
-  if (address?.citycode) fields.push({ label: "Commune", value: `${address.city ?? ""} · INSEE ${address.citycode}` });
 
   return (
     // Scène 3D : pendant du passeport territorial. Se déplie au chargement, puis
@@ -50,9 +46,9 @@ export function PropertyPassport({
         </div>
         <div className="flex flex-col items-end gap-1.5 shrink-0 passport-layer-seal">
           <DpeBadge label={dpeLetter} size="lg" />
-          <p className="text-right font-mono text-[9px] tracking-[0.1em] uppercase text-ghost/70">
-            {dpeLetter ? `DPE ${dpeLetter}` : "DPE non trouvé"}
-          </p>
+          {!dpeLetter && (
+            <p className="text-right font-mono text-[9px] tracking-[0.1em] uppercase text-ghost/70">DPE non trouvé</p>
+          )}
         </div>
       </div>
 
