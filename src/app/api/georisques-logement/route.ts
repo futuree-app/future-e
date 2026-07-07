@@ -16,6 +16,7 @@ import { getAuditByBanId, getAuditByCoordinates } from "@/lib/audit";
 import { getCartofrichesForCommune } from "@/lib/cartofriches";
 import { getCommuneFullData } from "@/lib/commune-data";
 import { getOnrnSinistralite } from "@/lib/onrn-sinistralite";
+import type { LogementReport } from "@/lib/logement-report-types";
 
 // Cœur commun : construit le rapport à partir d'une adresse déjà résolue (géocodée en GET,
 // sélectionnée en POST). Renvoie la LISTE des DPE candidats (pas un « plus récent » arbitraire)
@@ -60,44 +61,43 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         ? await getGeorisquesParcelSummary(parcel.parcelCode).catch(() => null)
         : null;
 
-    return NextResponse.json(
-      {
-        address,
-        parcel,
-        altitude,
-        dpeCandidates,
-        banFeatureType,
-        audit,
-        zfe,
-        irep,
-        cartofriches,
-        communeData,
-        sinistralite,
-        georisques: {
-          address: georisquesAddress,
-          parcel: georisquesParcel,
-          commune: georisquesCommune,
-        },
-        granularity: {
-          geocoding: "address",
-          cadastre: parcel ? "parcel" : null,
-          georisques_address: georisquesAddress ? "point" : null,
-          georisques_parcel: georisquesParcel ? "parcel" : null,
-          georisques_commune: georisquesCommune ? "commune" : null,
-        },
-        caveat:
-          georisquesParcel
-            ? "Ce résultat combine une adresse géocodée BAN, une parcelle cadastrale issue d'API Carto, une lecture Géorisques v2 par parcelle, une lecture v2 au point géocodé et un résumé communal. Ce n'est pas encore un rapport ERRIAL complet, mais c'est la base serveur pour le module logement."
-            : georisquesAddress
-              ? "Ce résultat combine une adresse géocodée BAN, une lecture Géorisques v2 au point géocodé et un résumé communal. La lecture parcellaire complète n'est pas encore disponible pour cette adresse dans l'application."
-              : "Ce résultat combine une adresse géocodée BAN et un résumé Géorisques communal. Pour activer la lecture Géorisques v2 au point géocodé et par parcelle, configurez GEORISQUES_API_TOKEN côté serveur.",
+    // Typé par le contrat partagé : toute dérive route ↔ client casse ici, pas en silence.
+    const report: LogementReport = {
+      address,
+      parcel,
+      altitude,
+      dpeCandidates,
+      banFeatureType,
+      audit,
+      zfe,
+      irep,
+      cartofriches,
+      communeData,
+      sinistralite,
+      georisques: {
+        address: georisquesAddress,
+        parcel: georisquesParcel,
+        commune: georisquesCommune,
       },
-      {
-        headers: {
-          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
-        },
+      granularity: {
+        geocoding: "address",
+        cadastre: parcel ? "parcel" : null,
+        georisques_address: georisquesAddress ? "point" : null,
+        georisques_parcel: georisquesParcel ? "parcel" : null,
+        georisques_commune: georisquesCommune ? "commune" : null,
       },
-    );
+      caveat:
+        georisquesParcel
+          ? "Ce résultat combine une adresse géocodée BAN, une parcelle cadastrale issue d'API Carto, une lecture Géorisques v2 par parcelle, une lecture v2 au point géocodé et un résumé communal. Ce n'est pas encore un rapport ERRIAL complet, mais c'est la base serveur pour le module logement."
+          : georisquesAddress
+            ? "Ce résultat combine une adresse géocodée BAN, une lecture Géorisques v2 au point géocodé et un résumé communal. La lecture parcellaire complète n'est pas encore disponible pour cette adresse dans l'application."
+            : "Ce résultat combine une adresse géocodée BAN et un résumé Géorisques communal. Pour activer la lecture Géorisques v2 au point géocodé et par parcelle, configurez GEORISQUES_API_TOKEN côté serveur.",
+    };
+    return NextResponse.json(report, {
+      headers: {
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+      },
+    });
 }
 
 // POST : adresse BAN sélectionnée avec précision (objet atomique validé). Chemin principal.

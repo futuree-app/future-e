@@ -21,10 +21,11 @@ function stableStringify(value: unknown): string {
     .map((k) => JSON.stringify(k) + ":" + stableStringify(obj[k])).join(",") + "}";
 }
 
-// Empreinte 32 bits déterministe (FNV-1a). Suffisant pour une clé de cache / un détecteur de
-// changement : l'intégrité des faits est assurée côté serveur, pas par ce hash (le hash n'est
-// pas une frontière de sécurité). Synchrone à dessein : le gating client se fait au rendu, une
-// empreinte crypto asynchrone (WebCrypto) n'y aurait pas sa place.
+// Empreinte de CACHE déterministe (FNV-1a 32 bits), PAS un mécanisme de sécurité. Le risque de
+// collision est négligeable à cette échelle ; l'intégrité des faits sera assurée par la
+// reconstruction serveur du payload depuis l'artefact logement (dette acceptée, cf. board étape 3
+// geste 1 différé), jamais par ce hash. Synchrone à dessein : le gating client se fait au rendu,
+// une empreinte crypto asynchrone (WebCrypto) n'y aurait pas sa place.
 function fnv1a(str: string): string {
   let h = 0x811c9dc5;
   for (let i = 0; i < str.length; i++) {

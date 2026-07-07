@@ -8,6 +8,7 @@ import type { OnrnSinistralite, PerilState } from "@/lib/onrn-sinistralite";
 import type { Face3Snapshot, Posture, GreenKind } from "@/lib/logement-autour-types";
 import type { SynthesisData } from "@/lib/logement-synthesis-cache";
 import type { RegulatoryPlan } from "@/lib/pprn-zonage";
+import type { LogementReport as ApiResponse } from "@/lib/logement-report-types";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { MetricTooltip } from "@/components/MetricTooltip";
 import { AddressAutocomplete } from "@/components/report/AddressAutocomplete";
@@ -19,46 +20,8 @@ import { dpeAttributionStatus, deriveAddressDpeContext, type DpeRecord } from "@
 import type { BanAddressResult } from "@/lib/ban";
 import { PassportTiltScene } from "@/components/report/PassportTiltScene";
 
-// ════════════════════════════════════════════════════════════════════════════
-// TYPES — inchangés depuis l'API existante
-// ════════════════════════════════════════════════════════════════════════════
-
-type ApiResponse = {
-  error?: string;
-  address?: { id: string | null; label: string; city: string | null; citycode: string | null; postcode: string | null; latitude: number; longitude: number; };
-  altitude?: number | null;
-  parcel?: { parcelCode: string; nomCommune: string | null; contenance: number | null; } | null;
-  dpeCandidates?: DpeRecord[];
-  banFeatureType?: string | null;
-  audit?: {
-    n_audit: string; date_audit: string | null; classe_dpe_actuel: string | null;
-    scenarios: Array<{ categorie: string | null; etape: string | null; travaux: string | null; conso_ep: number | null; emission_ges: number | null; }>;
-  } | null;
-  zfe?: { inZfe: boolean; zones: Array<{ id: string; nom: string; vp_critair: string | null; deux_rm_critair: string | null; date_debut: string | null; date_fin: string | null; }>; } | null;
-  irep?: { count: number; installations: Array<{ id: number; nom: string; distanceM: number; nombre_polluants: number; milieu_emission: string | null; }>; } | null;
-  cartofriches?: { count: number; friches: Array<{ id: string; nom: string; type: string | null; statut: string | null; sol_pollue: boolean; activite: string | null; distanceM: number | null; }>; } | null;
-  communeData?: {
-    commune: {
-      inseeCode: string; nom: string; population: number | null; vieillissement_pct: number | null;
-      logements: { vacants_2022: number | null; vacants_pct: number | null; sociaux_2023: number | null; sociaux_pct: number | null; };
-      qualite_air: { pm25: number | null; pm10: number | null; no2: number | null; o3: number | null; };
-      economie: { revenu_median: number | null; inferiorite_nationale_pct: number | null; };
-      sante: { acces_medecins: number | null; eloignement_services_pct: number | null; };
-      territoire: { densite: number | null; incendies: number | null; taux_boisement: number | null; };
-    };
-    iris: {
-      iris_count: number; passoires_taux: number | null; preca_energetique_pct: number | null;
-      taux_propriete: number | null; taux_location: number | null; taux_hlm: number | null;
-      taux_suroccupation: number | null; taux_motorisation: number | null; taux_transports_communs: number | null;
-    } | null;
-  } | null;
-  georisques?: {
-    address?: { risks: { labels: string[] }; pprn: { labels: string[] }; regulatoryPlans?: RegulatoryPlan[]; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; } | null;
-    parcel?: { parcelCode: string; risks: { labels: string[] }; pprn: { labels: string[]; zones: string[] }; regulatoryPlans?: RegulatoryPlan[]; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; } | null;
-    commune?: { communeName: string | null; riskLabels: string[]; seismic: { code: string | null; label: string | null } | null; } | null;
-  };
-  sinistralite?: OnrnSinistralite | null;
-};
+// Le contrat de réponse (ApiResponse) vit désormais dans @/lib/logement-report-types
+// (LogementReport), partagé avec la route qui le produit. Importé en alias ci-dessus.
 
 // ════════════════════════════════════════════════════════════════════════════
 // CONSTANTES
