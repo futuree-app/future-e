@@ -38,13 +38,12 @@ export function IconSun({ size = 13 }: { size?: number }) {
   );
 }
 
-// Sols en couches qui se fissurent — retrait-gonflement des argiles.
+// Sol en coupe (surface + sous-sol) — retrait-gonflement des argiles. Volontairement simple.
 export function IconStrata({ size = 13 }: { size?: number }) {
   return (
     <Svg size={size}>
-      <path d="M2 5.4c2 1 4 1 6 0s4-1 6 0" />
-      <path d="M2 10.6c2 1 4 1 6 0s4-1 6 0" />
-      <path d="M8 6.4v3.6" />
+      <path d="M2 6c1.8-1.5 3.2-1.5 5 0s3.2 1.5 5 0" />
+      <path d="M2 10h12" />
     </Svg>
   );
 }

@@ -44,28 +44,25 @@ const ONRN_REPR_LABEL: Record<string, string> = {
 const onrnLabel = (map: Record<string, string>, v: string) => map[v] ?? v; // repli = verbatim
 const SINI_EYEBROW: React.CSSProperties = { fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" };
 
-// Métrique lisible : valeur en évidence, description en dessous (une réponse, pas un tableau).
-function Metric({ value, caption }: { value: string; caption: string }) {
-  return (
-    <div style={{ display: "grid", gap: 3 }}>
-      <span style={{ fontSize: 20, fontWeight: 500, color: "var(--fg-hi)", fontVariantNumeric: "tabular-nums" }}>{value}</span>
-      <span style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.5 }}>{caption}</span>
-    </div>
-  );
-}
-
 function PerilLine({ peril, word, color, state, tip }: { peril: string; word: string; color: string; state: PerilState; tip: string }) {
   if (state.kind === "indispo") return null;
   return (
-    <div style={{ display: "grid", gap: 10 }}>
+    <div style={{ display: "grid", gap: 6 }}>
       <div style={{ ...SINI_EYEBROW, color, display: "flex", alignItems: "center", gap: 6 }}>
         <span>{peril}</span>
         <MetricTooltip text={tip} accent={color} />
       </div>
       {state.kind === "lecture" && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px 40px" }}>
-          <Metric value={onrnLabel(ONRN_COUT_LABEL, state.cout)} caption="coût moyen d’un sinistre indemnisé dans la commune" />
-          <Metric value={onrnLabel(ONRN_FREQ_PLAIN, state.frequence)} caption="fréquence des sinistres parmi les biens assurés" />
+        // Fréquence = le signal (en évidence) ; le coût moyen = preuve secondaire, en dessous
+        // (retour porteur : la fréquence relative est le message, pas le coût).
+        <div style={{ display: "grid", gap: 2 }}>
+          <span style={{ fontSize: 18, fontWeight: 500, color: "var(--fg-hi)", fontVariantNumeric: "tabular-nums" }}>
+            {onrnLabel(ONRN_FREQ_PLAIN, state.frequence)}
+          </span>
+          <span style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>
+            sinistres indemnisés pour 1 000 biens assurés · coût moyen{" "}
+            <span style={{ color: "var(--fg-1)", fontWeight: 500 }}>{onrnLabel(ONRN_COUT_LABEL, state.cout)}</span>
+          </span>
         </div>
       )}
       {state.kind === "aucun" && (
@@ -113,7 +110,7 @@ export function SinistraliteBlock({ sinistralite }: { sinistralite: OnrnSinistra
           <div style={{ display: "grid", gap: 18 }}>
             {/* Lecture transverse : conclusion factuelle en tête des faits, quand elle est fondée */}
             {freqCompare && (
-              <p style={{ fontSize: 14.5, fontWeight: 500, color: "var(--fg-hi)", lineHeight: 1.6, margin: 0 }}>
+              <p style={{ fontSize: 15.5, fontWeight: 600, color: "var(--fg-hi)", lineHeight: 1.5, margin: 0, letterSpacing: "-0.2px" }}>
                 Dans cette commune, les sinistres indemnisés liés {freqCompare.more} ont été plus fréquents que ceux liés {freqCompare.less}.
               </p>
             )}

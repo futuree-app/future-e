@@ -50,6 +50,15 @@ const RUNTIME_DPE_STATUS: Record<DpeSelectionStatus, "auto_confirmed" | "confirm
   pending: "selection_required",
 };
 
+// Harmonise le NIVEAU sismique (source « 1 - TRES FAIBLE », tout capitale) avec le style du RGA
+// (« Exposition moyenne ») : on rétablit la casse de phrase et les accents via le code de zone (1-5).
+const SEISMIC_LEVEL: Record<string, string> = { "1": "Très faible", "2": "Faible", "3": "Modérée", "4": "Moyenne", "5": "Forte" };
+function seismicValue(label: string, code: string | null | undefined): string {
+  if (code && SEISMIC_LEVEL[code]) return SEISMIC_LEVEL[code];
+  const lvl = label.replace(/^\s*\d+\s*[-–]\s*/, "").trim().toLowerCase();
+  return lvl ? lvl.charAt(0).toUpperCase() + lvl.slice(1) : label;
+}
+
 export default function LogementModule({
   defaultCommune,
   initialRow = null,
@@ -534,8 +543,8 @@ export default function LogementModule({
                       Ce que les bases publiques recensent sur l&apos;exposition du bâti à cette adresse.
                     </p>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px,1fr))", gap: 14 }}>
-                      {georisques?.seismic?.label && <Block label="Sismicité" value={georisques.seismic.label} icon={<IconSeismic />} tip="Le classement réglementaire du risque sismique de la zone, de très faible à fort. Il indique le niveau de précaution attendu pour construire, pas qu'un séisme va survenir." />}
-                      {georisques?.rga?.label && <Block label="Retrait-gonflement des argiles" value={georisques.rga.label} icon={<IconStrata />} tip="Un sol argileux qui gonfle avec l'humidité puis se rétracte en période sèche ; ces mouvements répétés peuvent fissurer les murs et les fondations." />}
+                      {georisques?.seismic?.label && <Block label="Sismicité" value={seismicValue(georisques.seismic.label, georisques.seismic.code)} icon={<span style={{ color: "var(--blue)" }}><IconSeismic /></span>} tip="Le classement réglementaire du risque sismique de la zone, de très faible à fort. Il indique le niveau de précaution attendu pour construire, pas qu'un séisme va survenir." />}
+                      {georisques?.rga?.label && <Block label="Retrait-gonflement des argiles" value={georisques.rga.label} icon={<span style={{ color: "var(--blue)" }}><IconStrata /></span>} tip="Un sol argileux qui gonfle avec l'humidité puis se rétracte en période sèche ; ces mouvements répétés peuvent fissurer les murs et les fondations." />}
                     </div>
                   </div>
                 </GlassCard>
