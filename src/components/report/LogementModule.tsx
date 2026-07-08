@@ -18,6 +18,7 @@ import type { BanAddressResult } from "@/lib/ban";
 // Faces extraites (board étape 4 : une face = un fichier ; gabarit ThermalComfortSection).
 import { Block, FamilyHeading } from "@/components/report/logement/kit";
 import { IconSeismic, IconStrata } from "@/components/report/logement/icons";
+import { IcuExposure } from "@/components/report/logement/IcuExposure";
 import { POSTURE_FOR_PROJET } from "@/components/report/logement/posture";
 import { PropertyPassport } from "@/components/report/logement/PropertyPassport";
 import { ProjectProbe } from "@/components/report/logement/ProjectProbe";
@@ -359,6 +360,9 @@ export default function LogementModule({
     communeData: result?.communeData,
   };
   const georisques = result?.georisques?.parcel ?? result?.georisques?.address;
+  // Autres risques recensés à l'adresse (Géorisques), au-delà de la sismicité/RGA déjà affichés en
+  // gradé. Radon exclu (frontière Santé). Enrichit le bloc « Risques du bâti » (retour porteur).
+  const otherRisks = Array.from(new Set((georisques?.risks?.labels ?? []).filter((l) => !/argile|s[ée]ism|radon/i.test(l))));
   // Les libellés PPRN ne sont plus aplatis ici : ils sont portés, structurés (régime + zone +
   // plan), par le bloc « Statut réglementaire à cette adresse ». On garde les autres risques.
   // Faits normalisés pour la checklist « À vérifier » (beat 5). expositionBati gate sur une
@@ -533,19 +537,31 @@ export default function LogementModule({
 
             <FamilyHeading color="var(--blue)">Ce à quoi cette adresse est exposée</FamilyHeading>
 
-            {/* Risques du bâti — registre sobre (dé-dramatisé) : plus de rouge, plus de chips
-                « Risques référencés » (redondantes avec le réglementaire et les Block ci-dessous). */}
-            {(georisques?.seismic?.label || georisques?.rga?.label) && (
+            {/* Risques du bâti — registre sobre (dé-dramatisé). Sismicité/RGA en gradé (couleur de
+                famille bleue), + autres risques recensés, + îlot de chaleur (déplacé de l'Autour). */}
+            {(georisques?.seismic?.label || georisques?.rga?.label || otherRisks.length > 0 || autour?.icu) && (
               <ReportSection eyebrow="Risques du bâti">
                 <GlassCard>
-                  <div style={{ display: "grid", gap: 14 }}>
+                  <div style={{ display: "grid", gap: 16 }}>
                     <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>
                       Ce que les bases publiques recensent sur l&apos;exposition du bâti à cette adresse.
                     </p>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px,1fr))", gap: 14 }}>
-                      {georisques?.seismic?.label && <Block label="Sismicité" value={seismicValue(georisques.seismic.label, georisques.seismic.code)} icon={<span style={{ color: "var(--blue)" }}><IconSeismic /></span>} tip="Le classement réglementaire du risque sismique de la zone, de très faible à fort. Il indique le niveau de précaution attendu pour construire, pas qu'un séisme va survenir." />}
-                      {georisques?.rga?.label && <Block label="Retrait-gonflement des argiles" value={georisques.rga.label} icon={<span style={{ color: "var(--blue)" }}><IconStrata /></span>} tip="Un sol argileux qui gonfle avec l'humidité puis se rétracte en période sèche ; ces mouvements répétés peuvent fissurer les murs et les fondations." />}
-                    </div>
+                    {(georisques?.seismic?.label || georisques?.rga?.label) && (
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px,1fr))", gap: 14 }}>
+                        {georisques?.seismic?.label && <Block label="Sismicité" value={seismicValue(georisques.seismic.label, georisques.seismic.code)} icon={<span style={{ color: "var(--blue)" }}><IconSeismic /></span>} tip="Le classement réglementaire du risque sismique de la zone, de très faible à fort. Il indique le niveau de précaution attendu pour construire, pas qu'un séisme va survenir." />}
+                        {georisques?.rga?.label && <Block label="Retrait-gonflement des argiles" value={georisques.rga.label} icon={<span style={{ color: "var(--blue)" }}><IconStrata /></span>} tip="Un sol argileux qui gonfle avec l'humidité puis se rétracte en période sèche ; ces mouvements répétés peuvent fissurer les murs et les fondations." />}
+                      </div>
+                    )}
+                    {otherRisks.length > 0 && (
+                      <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
+                        Autres risques recensés à cette adresse : {otherRisks.map((l) => l.toLowerCase()).join(", ")}.
+                      </p>
+                    )}
+                    {autour?.icu && (
+                      <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)" }}>
+                        <IcuExposure icu={autour.icu} />
+                      </div>
+                    )}
                   </div>
                 </GlassCard>
               </ReportSection>
