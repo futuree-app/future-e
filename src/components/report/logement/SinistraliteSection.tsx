@@ -67,12 +67,12 @@ function PerilLine({ peril, word, color, state, tip }: { peril: string; word: st
       )}
       {state.kind === "aucun" && (
         <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65 }}>
-          Aucun sinistre {word} n&apos;a été indemnisé dans cette commune sur la période observée. Un historique vide n&apos;exclut pas une exposition future.
+          Aucun sinistre {word} n&apos;a été remboursé dans cette commune sur la période connue. Un passé sans dégât ne garantit pas l&apos;avenir.
         </div>
       )}
       {state.kind === "faible_repr" && (
         <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65 }}>
-          Des sinistres {word} sont répertoriés ici, mais l&apos;échantillon assurantiel local est trop réduit pour en tirer une lecture fiable.
+          Des sinistres {word} ont été remboursés ici, mais trop peu de logements sont assurés dans la commune pour en tirer une lecture fiable.
         </div>
       )}
     </div>
@@ -102,9 +102,14 @@ export function SinistraliteBlock({ sinistralite }: { sinistralite: OnrnSinistra
     <ReportSection eyebrow="Sinistres indemnisés dans la commune">
       <div style={{ display: "grid", gap: 14 }}>
         {/* Niveau 1 — ce que ça veut dire, en langage courant, hors de la carte de faits */}
-        <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>
-          À l&apos;échelle de la commune, voici ce que les assureurs ont indemnisé par le passé. Ces montants ne disent rien de ce logement en particulier, ni du prix de son assurance.
-        </p>
+        <div style={{ display: "grid", gap: 6 }}>
+          <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>
+            Dans cette commune, voici ce que les assurances ont remboursé par le passé.
+          </p>
+          <p style={{ fontSize: 13, fontStyle: "italic", color: "var(--fg-4)", lineHeight: 1.6, margin: 0 }}>
+            Ces montants ne disent rien de ce logement en particulier, ni du prix de son assurance.
+          </p>
+        </div>
         {/* Niveau 2 — les faits, dans la carte ; la conclusion factuelle en tête */}
         <GlassCard>
           <div style={{ display: "grid", gap: 18 }}>
@@ -118,7 +123,7 @@ export function SinistraliteBlock({ sinistralite }: { sinistralite: OnrnSinistra
             <PerilLine peril="Inondation (tous types)" word="d’inondation" color="var(--blue, #60a5fa)" state={inondation} tip="Regroupe tous les types : débordement de cours d’eau, ruissellement de pluie, remontée de nappe et submersion marine." />
             {/* Rappel court sur l'assurance ; le détail va dans le repli */}
             <p style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
-              Ces données ne permettent pas de prévoir votre cotisation. La surprime CatNat est fixée nationalement.
+              Ces chiffres ne permettent pas de deviner le prix de votre assurance : la part qui couvre les catastrophes naturelles (la « surprime CatNat ») est la même partout en France.
             </p>
             {/* Niveau 3 — méthode et sources, repliées */}
             <Disclosure summary="Comprendre les chiffres et leurs limites">

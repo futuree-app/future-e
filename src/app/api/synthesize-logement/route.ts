@@ -45,9 +45,15 @@ CE QUI FAIT LA VALEUR : LE DÉTAIL PRÉCIS, DIT SIMPLEMENT
 Le lecteur doit sentir que quelqu'un a vraiment regardé SON logement, pas un logement type. Cela
 se joue dans le détail concret et vérifiable de ce bien : la façon dont l'air y circule, ce que
 ses murs font de la chaleur, le sol de sa parcelle, ce qui pousse à quelques dizaines de mètres,
-son année, sa surface. N'effacez pas ces détails, ce sont eux qui prouvent. Mais aucun terme
-d'ingénieur ne reste nu : chaque caractéristique technique est rendue par son sens en langage
-courant. Un trait concret par phénomène, jamais une liste de sigles.
+son année, sa surface. N'effacez pas ces détails, ce sont eux qui prouvent. Mais le vocabulaire
+d'EXPERT n'apparaît JAMAIS, même suivi d'une explication : vous le REMPLACEZ par son sens en
+langage courant. On ne lit pas « retrait-gonflement des argiles » mais « le sol argileux, qui
+gonfle quand il pleut et se rétracte quand il fait sec » ; pas « inertie légère » mais « des murs
+qui gardent mal la fraîcheur » ; jamais « conditions conventionnelles d'évaluation », « indicateur
+réglementaire », « contexte géotechnique », « représentativité », « échantillon assurantiel ». LE
+TEST : votre mère, qui n'a jamais lu un rapport de sa vie, comprend-elle chaque phrase du premier
+coup ? Si un mot la ferait tiquer, il ne va pas dans le texte. Un trait concret par phénomène,
+jamais une liste de sigles.
 - « non traversant » : l'air ne circule pas d'une façade à l'autre, la chaleur s'évacue moins
   bien.
 - « traversant » : l'air peut circuler d'une façade à l'autre.
@@ -64,9 +70,14 @@ courant. Un trait concret par phénomène, jamais une liste de sigles.
 - « sinistralité indemnisée » : ce que les assurances ont eu à rembourser par le passé.
 Si une caractéristique n'a pas d'équivalent simple et clair, laissez-la dans les blocs plutôt
 que de la citer nue. Ces caractéristiques sont ce que LE DIAGNOSTIC décrit, pas une connaissance
-directe des murs de ce logement : dites « le diagnostic indique une inertie légère », « le
-diagnostic renseigne des protections solaires », jamais « ses murs, à inertie légère » (surtout
-en appartement, où le diagnostic peut porter sur l'immeuble entier).
+directe des murs de ce logement : dites « le diagnostic décrit des murs qui gardent mal la
+fraîcheur », « le diagnostic renseigne des protections aux fenêtres », jamais « ses murs »
+présentés comme un fait direct (surtout en appartement, où le diagnostic peut porter sur
+l'immeuble entier).
+RÈGLE ABSOLUE : les gloses ci-dessus sont ce que vous ÉCRIVEZ ; le terme d'expert entre guillemets
+à gauche (« retrait-gonflement des argiles », « inertie », « VMC simple flux », « confort d'été »
+comme indicateur…) ne doit JAMAIS apparaître dans votre texte, ni entier ni raccourci (« retrait-
+gonflement » seul est aussi interdit). Vous écrivez la TRADUCTION, jamais le mot technique.
 
 LE PLANCHER DE SPÉCIFICITÉ
 Test à passer sur chaque phrase : un assistant qui n'aurait PAS accès aux diagnostics de cette

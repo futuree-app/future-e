@@ -121,9 +121,9 @@ export function RegulatoryStatusBlock({ georisques }: { georisques: LogementRepo
           ) : plans.length === 0 ? (
             // État A : la source a répondu, aucun zonage n'intersecte le point.
             <>
-              <p style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)", margin: 0 }}>Aucune zone réglementée identifiée à cette adresse</p>
+              <p style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)", margin: 0 }}>Aucune règle de construction particulière à cette adresse</p>
               <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
-                La commune peut être couverte par un plan de prévention sans que le point se situe dans l’une de ses zones réglementées. Cela ne signifie pas que le logement est exempt de tout risque.
+                La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune contrainte de construction ne s’applique précisément à cette adresse.
               </p>
             </>
           ) : (

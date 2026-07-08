@@ -99,11 +99,13 @@ export function ThermalComfortSection({
           <>
             <p style={{ fontSize: 15.5, fontWeight: 500, color: "var(--fg-hi)", lineHeight: 1.5, margin: 0 }}>
               {indicator === "insuffisant"
-                ? "Le DPE signale une capacité limitée à préserver le confort d'été dans ses conditions conventionnelles d'évaluation."
-                : `Le DPE classe l'indicateur réglementaire de confort d'été de ce logement comme ${indicator}.`}
+                ? "D'après le diagnostic, ce logement garde mal la fraîcheur quand il fait chaud."
+                : indicator === "bon"
+                  ? "D'après le diagnostic, ce logement garde plutôt bien la fraîcheur en été."
+                  : "D'après le diagnostic, ce logement garde moyennement la fraîcheur en été."}
             </p>
             <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, marginTop: 6 }}>
-              Plusieurs caractéristiques renseignées contribuent à cette évaluation.
+              Voici les caractéristiques du logement qui l&apos;expliquent.
             </p>
             <Chips factors={factors} />
             <div style={{ borderTop: "1px solid var(--border-1)", marginTop: 16, paddingTop: 14 }}>
