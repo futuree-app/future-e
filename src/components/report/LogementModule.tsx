@@ -360,9 +360,22 @@ export default function LogementModule({
     communeData: result?.communeData,
   };
   const georisques = result?.georisques?.parcel ?? result?.georisques?.address;
-  // Autres risques recensés à l'adresse (Géorisques), au-delà de la sismicité/RGA déjà affichés en
-  // gradé. Radon exclu (frontière Santé). Enrichit le bloc « Risques du bâti » (retour porteur).
-  const otherRisks = Array.from(new Set((georisques?.risks?.labels ?? []).filter((l) => !/argile|s[ée]ism|radon/i.test(l))));
+  // Autres risques recensés au POINT (via l'adresse : point-level fiable, cf. fix georisques v1),
+  // au-delà de la sismicité/RGA déjà affichés en gradé. On tient à distance :
+  //  - le DOUBLON GROSSIER : séisme, argile/tassements (déjà en Block gradé juste au-dessus) ;
+  //  - la FRONTIÈRE Santé/technologique : radon, industriel, effet thermique, matières dangereuses ;
+  //  - les SOUS-DÉTAILS « Par … » (le grand type suffit), sauf la submersion marine (relabellée).
+  const otherRisks = Array.from(new Set(
+    (result?.georisques?.address?.risks?.labels ?? [])
+      .map((l): string | null => {
+        if (/s[ée]ism|argile|tassement|radon|industriel|effet thermique|mati[èe]res dangereuses|nucl[ée]aire|transport de/i.test(l)) return null;
+        if (/submersion marine/i.test(l)) return "Submersion marine";
+        if (/^par\s/i.test(l)) return null;
+        if (/affaissement|carri[èe]re souterraine/i.test(l)) return "Cavités souterraines";
+        return l;
+      })
+      .filter((l): l is string => Boolean(l)),
+  ));
   // Les libellés PPRN ne sont plus aplatis ici : ils sont portés, structurés (régime + zone +
   // plan), par le bloc « Statut réglementaire à cette adresse ». On garde les autres risques.
   // Faits normalisés pour la checklist « À vérifier » (beat 5). expositionBati gate sur une

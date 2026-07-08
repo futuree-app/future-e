@@ -281,11 +281,11 @@ async function loadGeorisquesAddressSummary(
     pageNumber: "0",
   });
 
-  const [risksJson, pprnJson, rgaJson, seismicJson] = await Promise.all([
-    fetchJsonV2<GeorisquesV2Page<GeorisquesV2RiskItem>>(
-      "/api/v2/gaspar/risques",
-      params,
-    ),
+  const [risksV1, pprnJson, rgaJson, seismicJson] = await Promise.all([
+    // Risques recensés au POINT via l'API v1 : la v2 /gaspar/risques renvoie des PROCÉDURES
+    // (champ `libelle`, risques imbriqués dans communes[].aleas[]), pas les libellés de risque,
+    // d'où un risks.labels vide. La v1 donne data[0].risques_detail[].libelle_risque_long, propre.
+    fetchJson<GasparResponse>("/gaspar/risques", new URLSearchParams({ latlon: `${longitude},${latitude}` })),
     fetchJsonV2<GeorisquesV2Page<GeorisquesV2PprnItem>>(
       "/api/v2/gaspar/pprn",
       params,
@@ -302,8 +302,8 @@ async function loadGeorisquesAddressSummary(
 
   const riskLabels = Array.from(
     new Set(
-      (risksJson.content ?? [])
-        .map((item) => item.libelleRisqueLong || item.libelleRisque || null)
+      (risksV1?.data?.[0]?.risques_detail ?? [])
+        .map((risk) => risk?.libelle_risque_long?.trim())
         .filter((value): value is string => Boolean(value)),
     ),
   );
@@ -331,7 +331,7 @@ async function loadGeorisquesAddressSummary(
     coordinates: { latitude, longitude },
     risks: {
       labels: riskLabels,
-      total: Number(risksJson.totalElements ?? riskLabels.length),
+      total: riskLabels.length,
     },
     pprn: {
       labels: pprnLabels,
