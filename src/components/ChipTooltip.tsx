@@ -7,7 +7,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 
-export function ChipTooltip({ label, text }: { label: string; text: string }) {
+export function ChipTooltip({ label, text, color }: { label: string; text: string; color?: string }) {
   const [open, setOpen] = useState(false);
   const id = useId();
   const ref = useRef<HTMLSpanElement>(null);
@@ -39,6 +39,7 @@ export function ChipTooltip({ label, text }: { label: string; text: string }) {
       <button
         type="button"
         className="chip-tip-btn"
+        style={color ? { color } : undefined}
         aria-expanded={open}
         aria-describedby={open ? id : undefined}
         onClick={(e) => {

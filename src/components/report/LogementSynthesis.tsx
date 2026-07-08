@@ -81,7 +81,13 @@ export function LogementSynthesis({
           </button>
         )}
         {text && (
-          <div style={{ fontSize: 16, lineHeight: 1.75, color: "var(--fg-2)", whiteSpace: "pre-wrap" }}>{text}</div>
+          // Paragraphes explicites (split sur les sauts doubles) avec inter-paragraphe serré :
+          // le pre-wrap + lineHeight 1.75 laissaient des blancs trop grands entre blocs (retour porteur).
+          <div style={{ fontSize: 16, lineHeight: 1.62, color: "var(--fg-2)" }}>
+            {text.split(/\n{2,}/).map((para, i) => (
+              <p key={i} style={{ margin: i === 0 ? 0 : "0.6em 0 0" }}>{para}</p>
+            ))}
+          </div>
         )}
         {state === "streaming" && !text && (
           <p style={{ fontSize: 14, color: "var(--fg-4)" }}>Lecture en cours…</p>

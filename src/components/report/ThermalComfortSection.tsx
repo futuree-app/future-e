@@ -1,6 +1,19 @@
 import React from "react";
 import { ReportSection } from "@/components/report/kit";
+import { ChipTooltip } from "@/components/ChipTooltip";
 import type { ThermalEvidence, ThermalFactor } from "@/lib/thermal-evidence";
+
+// Glose de chaque caractéristique du confort d'été (≤2 phrases, « pourquoi ça aide à comprendre »,
+// sans méthodo ni source — doctrine tooltips). Clé = ThermalFactor.key.
+const CHIP_TOOLTIP: Record<string, string> = {
+  traversant: "Un logement traversant a des fenêtres sur deux façades opposées : l’air peut le traverser et évacuer la chaleur, surtout le soir.",
+  protection: "Volets, stores ou avancées qui bloquent une partie du soleil aux fenêtres pendant les heures chaudes.",
+  inertie: "La capacité des murs à encaisser les écarts de température : une inertie lourde garde le frais plus longtemps dans la journée.",
+  ventilation: "Le système qui renouvelle l’air intérieur du logement en continu.",
+  brasseur: "Des ventilateurs de plafond : ils ne rafraîchissent pas l’air, mais donnent une sensation de fraîcheur.",
+  murs: "La qualité d’isolation des murs, qui freine les échanges de chaleur avec l’extérieur.",
+  menuiseries: "La qualité des fenêtres et des portes, qui limite les entrées et les pertes de chaleur.",
+};
 
 // Tiroir natif <details> (même pattern que Disclosure de LogementModule), local à cette section.
 function Drawer({ summary, children }: { summary: string; children: React.ReactNode }) {
@@ -30,18 +43,22 @@ function Chips({ factors }: { factors: ThermalFactor[] }) {
   if (factors.length === 0) return null;
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
-      {factors.map((f) => (
-        <span
-          key={f.key}
-          style={{
-            fontSize: 12.5, padding: "5px 11px", borderRadius: 999,
-            border: "1px solid var(--border-1)", background: "var(--bg-elev)",
-            color: POLARITY_COLOR[f.polarity],
-          }}
-        >
-          {f.label}
-        </span>
-      ))}
+      {factors.map((f) =>
+        CHIP_TOOLTIP[f.key] ? (
+          <ChipTooltip key={f.key} label={f.label} text={CHIP_TOOLTIP[f.key]} color={POLARITY_COLOR[f.polarity]} />
+        ) : (
+          <span
+            key={f.key}
+            style={{
+              fontSize: 12.5, padding: "5px 11px", borderRadius: 999,
+              border: "1px solid var(--border-1)", background: "var(--bg-elev)",
+              color: POLARITY_COLOR[f.polarity],
+            }}
+          >
+            {f.label}
+          </span>
+        ),
+      )}
     </div>
   );
 }

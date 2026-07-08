@@ -67,11 +67,11 @@ export function Disclosure({ summary, children }: { summary: string; children: R
 export function FamilyHeading({ children, color = "var(--fg-4)" }: { children: React.ReactNode; color?: string }) {
   const colored = color !== "var(--fg-4)";
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 13, marginTop: 8 }}>
       {colored && (
-        <span style={{ width: 7, height: 7, borderRadius: "50%", background: color, flexShrink: 0, boxShadow: `0 0 10px ${color}` }} />
+        <span style={{ width: 9, height: 9, borderRadius: "50%", background: color, flexShrink: 0, boxShadow: `0 0 12px ${color}` }} />
       )}
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color, whiteSpace: "nowrap" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color, whiteSpace: "nowrap" }}>
         {children}
       </span>
       <span style={{ flex: 1, height: 1, background: "var(--border-1)" }} />

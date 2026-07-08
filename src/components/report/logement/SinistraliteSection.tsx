@@ -49,7 +49,7 @@ function Metric({ value, caption }: { value: string; caption: string }) {
   return (
     <div style={{ display: "grid", gap: 3 }}>
       <span style={{ fontSize: 20, fontWeight: 500, color: "var(--fg-hi)", fontVariantNumeric: "tabular-nums" }}>{value}</span>
-      <span style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.5, maxWidth: 240 }}>{caption}</span>
+      <span style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.5 }}>{caption}</span>
     </div>
   );
 }
@@ -63,7 +63,7 @@ function PerilLine({ peril, word, color, state, tip }: { peril: string; word: st
         <MetricTooltip text={tip} accent={color} />
       </div>
       {state.kind === "lecture" && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "16px 48px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px 40px" }}>
           <Metric value={onrnLabel(ONRN_COUT_LABEL, state.cout)} caption="coût moyen d’un sinistre indemnisé dans la commune" />
           <Metric value={onrnLabel(ONRN_FREQ_PLAIN, state.frequence)} caption="fréquence des sinistres parmi les biens assurés" />
         </div>
