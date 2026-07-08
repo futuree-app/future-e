@@ -17,6 +17,7 @@ import { dpeAttributionStatus, type DpeRecord } from "@/lib/dpe-attribution";
 import type { BanAddressResult } from "@/lib/ban";
 // Faces extraites (board étape 4 : une face = un fichier ; gabarit ThermalComfortSection).
 import { Block, FamilyHeading } from "@/components/report/logement/kit";
+import { IconSeismic, IconStrata } from "@/components/report/logement/icons";
 import { POSTURE_FOR_PROJET } from "@/components/report/logement/posture";
 import { PropertyPassport } from "@/components/report/logement/PropertyPassport";
 import { ProjectProbe } from "@/components/report/logement/ProjectProbe";
@@ -533,8 +534,8 @@ export default function LogementModule({
                       Ce que les bases publiques recensent sur l&apos;exposition du bâti à cette adresse.
                     </p>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px,1fr))", gap: 14 }}>
-                      {georisques?.seismic?.label && <Block label="Sismicité" value={georisques.seismic.label} />}
-                      {georisques?.rga?.label && <Block label="Retrait-gonflement des argiles" value={georisques.rga.label} sub="Gonflement puis rétraction des sols argileux, qui peut fissurer le bâti." />}
+                      {georisques?.seismic?.label && <Block label="Sismicité" value={georisques.seismic.label} icon={<IconSeismic />} tip="Le classement réglementaire du risque sismique de la zone, de très faible à fort. Il indique le niveau de précaution attendu pour construire, pas qu'un séisme va survenir." />}
+                      {georisques?.rga?.label && <Block label="Retrait-gonflement des argiles" value={georisques.rga.label} icon={<IconStrata />} tip="Un sol argileux qui gonfle avec l'humidité puis se rétracte en période sèche ; ces mouvements répétés peuvent fissurer les murs et les fondations." />}
                     </div>
                   </div>
                 </GlassCard>

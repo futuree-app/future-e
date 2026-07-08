@@ -3,6 +3,7 @@
 // progressive, palette et libellés DPE.
 
 import React from "react";
+import { MetricTooltip } from "@/components/MetricTooltip";
 
 export const DPE_COLORS: Record<string, string> = {
   A: "#319334", B: "#33cc33", C: "#cbee39",
@@ -28,10 +29,14 @@ export function DpeBadge({ label, size = "md" }: { label: string | null; size?: 
   );
 }
 
-export function Block({ label, value, sub }: { label: string; value: React.ReactNode; sub?: string }) {
+export function Block({ label, value, sub, icon, tip }: { label: string; value: React.ReactNode; sub?: string; icon?: React.ReactNode; tip?: string }) {
   return (
     <div style={{ display: "grid", gap: 3 }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" }}>{label}</span>
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" }}>
+        {icon}
+        {label}
+        {tip && <MetricTooltip text={tip} />}
+      </span>
       <span style={{ fontSize: 16, fontWeight: 500, color: "var(--fg-1)" }}>{value}</span>
       {sub && <span style={{ fontSize: 12, color: "var(--fg-4)" }}>{sub}</span>}
     </div>

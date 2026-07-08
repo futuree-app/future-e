@@ -1,6 +1,7 @@
 import React from "react";
 import { ReportSection } from "@/components/report/kit";
 import { ChipTooltip } from "@/components/ChipTooltip";
+import { IconSun, IconClock } from "@/components/report/logement/icons";
 import type { ThermalEvidence, ThermalFactor } from "@/lib/thermal-evidence";
 
 // Glose de chaque caractéristique du confort d'été (≤2 phrases, « pourquoi ça aide à comprendre »,
@@ -72,7 +73,8 @@ function ClimateFuture({ communeName, level }: { communeName: string; level: The
         : `Avec la progression des nuits chaudes à ${communeName}, la capacité du logement à limiter puis évacuer la chaleur deviendra plus importante. Les données retrouvées ne permettent pas encore de la qualifier.`;
   return (
     <div style={{ borderTop: "1px solid var(--border-1)", marginTop: 16, paddingTop: 14 }}>
-      <div style={{ fontSize: 11, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--fg-4)", marginBottom: 6 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 11, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--fg-4)", marginBottom: 6 }}>
+        <IconSun />
         Dans le climat futur
       </div>
       <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>{text}</p>
@@ -105,7 +107,8 @@ export function ThermalComfortSection({
             </p>
             <Chips factors={factors} />
             <div style={{ borderTop: "1px solid var(--border-1)", marginTop: 16, paddingTop: 14 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--fg-4)", marginBottom: 6 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 11, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--fg-4)", marginBottom: 6 }}>
+                <IconClock />
                 À confirmer
               </div>
               <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
