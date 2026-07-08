@@ -582,7 +582,7 @@ export default function LogementModule({
 
             {result.georisques && <RegulatoryStatusBlock georisques={result.georisques} />}
 
-            {result.sinistralite && <SinistraliteBlock sinistralite={result.sinistralite} />}
+            {result.sinistralite && <SinistraliteBlock sinistralite={result.sinistralite} commune={result.address?.city ?? null} />}
           </div>
 
           {/* Beat 4 — Autour : qu'y a-t-il autour ? */}

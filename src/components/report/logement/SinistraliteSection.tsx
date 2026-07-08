@@ -79,7 +79,7 @@ function PerilLine({ peril, word, color, state, tip }: { peril: string; word: st
   );
 }
 
-export function SinistraliteBlock({ sinistralite }: { sinistralite: OnrnSinistralite }) {
+export function SinistraliteBlock({ sinistralite, commune }: { sinistralite: OnrnSinistralite; commune?: string | null }) {
   const { secheresse, inondation } = sinistralite;
   if (secheresse.kind === "indispo" && inondation.kind === "indispo") return null;
   const reprLine = [
@@ -99,12 +99,12 @@ export function SinistraliteBlock({ sinistralite }: { sinistralite: OnrnSinistra
       : { more: "à l’inondation", less: "à la sécheresse" };
   })();
   return (
-    <ReportSection eyebrow="Sinistres indemnisés dans la commune">
+    <ReportSection eyebrow={commune ? `Sinistres indemnisés à ${commune}` : "Sinistres indemnisés dans la commune"}>
       <div style={{ display: "grid", gap: 14 }}>
         {/* Niveau 1 — ce que ça veut dire, en langage courant, hors de la carte de faits */}
         <div style={{ display: "grid", gap: 6 }}>
           <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>
-            Dans cette commune, voici ce que les assurances ont remboursé par le passé.
+            Voici ce que les assurances ont remboursé dans la commune par le passé.
           </p>
           <p style={{ fontSize: 13, fontStyle: "italic", color: "var(--fg-4)", lineHeight: 1.6, margin: 0 }}>
             Ces montants ne disent rien de ce logement en particulier, ni du prix de son assurance.
@@ -116,7 +116,7 @@ export function SinistraliteBlock({ sinistralite }: { sinistralite: OnrnSinistra
             {/* Lecture transverse : conclusion factuelle en tête des faits, quand elle est fondée */}
             {freqCompare && (
               <p style={{ fontSize: 15.5, fontWeight: 600, color: "var(--fg-hi)", lineHeight: 1.5, margin: 0, letterSpacing: "-0.2px" }}>
-                Dans cette commune, les sinistres indemnisés liés {freqCompare.more} ont été plus fréquents que ceux liés {freqCompare.less}.
+                {commune ? `À ${commune}, ` : "Dans la commune, "}les sinistres indemnisés liés {freqCompare.more} ont été plus fréquents que ceux liés {freqCompare.less}.
               </p>
             )}
             <PerilLine peril="Sécheresse (retrait-gonflement des argiles)" word="de sécheresse" color="var(--orange, #fb923c)" state={secheresse} tip="Le sol argileux gonfle avec l’humidité puis se rétracte en période sèche. Ces mouvements peuvent fissurer les murs et les fondations d’un logement." />
