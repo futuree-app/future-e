@@ -26,8 +26,11 @@ Itération **design + éditorial + data** sur le **rapport du module Logement** 
 - Aucune PR ouverte.
 
 ## Prochaine étape immédiate
-1. **Finir le geste en cours** : `npx tsc --noEmit` + `npx eslint` sur les 2 fichiers modifiés, puis **committer** la variation nom-de-commune (message prêt : « refactor(logement): sinistralité — varier la référence à la commune (nom réel, pronom, générique) »).
-2. Puis demander au porteur : **pousser** les 4 commits (`git push origin main` = déploiement prod), finir le **réglementaire avec-plans** (« Zone soumise à prescriptions / PPR / Zone B2 » encore « trop ingénieur »), ou le **spike nappe/TRI**.
+Geste sinistralité **fini + commité + poussé** (tsc/eslint OK). Prod à jour (`e6d04e7..acaadce`). Chantiers en file, au choix du porteur :
+1. **Réglementaire avec-plans** (« Zone soumise à prescriptions / PPR / Zone B2 » encore « trop ingénieur »).
+2. **Spike nappe/TRI**.
+3. **« Autour » : filtres + carte** (le plus gros). Aujourd'hui c'est une liste (BPE + espace vert). Cible = filtres (choisir les catégories) + **carte des points autour de l'adresse** = vraie feature data+UI. Donnée publique probable (points BPE déjà géolocalisés + OSM), mais carte interactive = ajout significatif → **spike avant engagement** (comme l'ÎCU). **Board d'agents lancé en background le 2026-07-09** pour cadrer AVANT le spike (data-curator + product-strategist + design-critic + software-architect) → rapports dans `docs/rapports-agents/<agent>/2026-07-09-autour-filtres-carte.md`, à relire à la reprise.
+4. **Bug PLM du gate de monétisation** (hors design, à prioriser) : `canAnalyzeCommune` ne matche pas home PLM (75056) vs adresse arrondissement (751xx).
 
 ## À lire d'abord à la reprise
 1. `/memory/MEMORY.md` puis `/memory/project_module_logement.md` (état module, très à jour ; note la ligne bug PLM + la correction nappe) et `/memory/icu_ilot_chaleur_data.md` (ÎCU, corrigé : iuhi EST en °C).
@@ -40,4 +43,4 @@ Itération **design + éditorial + data** sur le **rapport du module Logement** 
 - **Synthèse v7** : « inertie » subsiste 3×/10 (attracteur LLM). Si le porteur veut 0 : durcir encore le prompt ou post-traiter. `NEXT_PUBLIC_AUTO_SYNTHESIS` OFF en dev (bouton « Générer »), ON à cible.
 - **Réglementaire avec-plans** pas encore passé au langage habitant (seul l'état C « aucune zone » l'a été).
 - **Risques recensés** : le builder PARCELLE de `georisques.ts` reste sur la v2 cassée (risks.labels vide), mais l'affichage route depuis `address.risks` (fixé) — pas de régression, mais le **payload synthèse lit `parcel.risks`** (donc la synthèse ne voit toujours pas les risques recensés ; non demandé, à savoir).
-- **Rien n'est poussé** des 3 derniers commits + le geste non commité → prod pas encore à jour.
+- **Tout est poussé** sur `origin/main` (5 commits, jusqu'à `acaadce`) → prod à jour.
