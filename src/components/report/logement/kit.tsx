@@ -61,10 +61,17 @@ export function Disclosure({ summary, children }: { summary: string; children: R
 
 // Séparateur de sous-famille (beat 3, spec 5a). Un rang AU-DESSUS des eyebrows de bloc, discret :
 // label mono quiet + filet fin, SANS puce, jamais coloré. But : chunker les preuves, pas re-segmenter.
-export function FamilyHeading({ children }: { children: React.ReactNode }) {
+// En-tête de famille : pastille + label CODÉS PAR COULEUR (cohérent avec Territoire, où
+// vert = environnement, bleu = risques). Casse la monotonie des sections empilées et rend la
+// structure scannable (retour Design Critic 2026-07-08). `color` par défaut neutre.
+export function FamilyHeading({ children, color = "var(--fg-4)" }: { children: React.ReactNode; color?: string }) {
+  const colored = color !== "var(--fg-4)";
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 8 }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-4)", whiteSpace: "nowrap" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
+      {colored && (
+        <span style={{ width: 7, height: 7, borderRadius: "50%", background: color, flexShrink: 0, boxShadow: `0 0 10px ${color}` }} />
+      )}
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color, whiteSpace: "nowrap" }}>
         {children}
       </span>
       <span style={{ flex: 1, height: 1, background: "var(--border-1)" }} />

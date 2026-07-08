@@ -99,17 +99,22 @@ export function Face3Block({ s }: { s: Face3Snapshot }) {
               l'adresse n'est pas dans une commune couverte (jamais « non renseigné »). Fait
               d'ENVIRONNEMENT, jamais la température intérieure du logement (garde-fou explicite). */}
           {s.icu && (
-            <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 8 }}>
+            <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 10 }}>
               <div style={FACE3_SUBHEAD}>Chaleur autour du logement</div>
-              <span style={FACE3_FAMILY}>Îlot de chaleur urbain du quartier</span>
-              <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.6, margin: 0 }}>
-                Ce secteur présente un îlot de chaleur urbain{" "}
-                <strong style={{ color: "var(--fg-hi)" }}>{s.icu.level === "marque" ? "marqué" : "présent"}</strong>{" "}
-                : en été, l’air peut y être jusqu’à{" "}
-                <strong style={{ color: "var(--fg-hi)", fontVariantNumeric: "tabular-nums" }}>+{s.icu.iuhi.toFixed(1).replace(".", ",")} °C</strong>{" "}
-                plus chaud que dans une zone peu urbanisée de référence.
-              </p>
-              <p style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.55, margin: 0 }}>
+              {/* Le +X °C est le chiffre le plus viscéral et le plus spécifique à l'adresse : on le
+                  révèle (grand, chaud) au lieu de l'enterrer en prose (retour Design Critic). */}
+              <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
+                <span style={{ ...FACE3_FAMILY, alignSelf: "center" }}>Jusqu&apos;à</span>
+                <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: 42, lineHeight: 1, color: "var(--orange)", fontVariantNumeric: "tabular-nums" }}>
+                  +{s.icu.iuhi.toFixed(1).replace(".", ",")} °C
+                </span>
+                <span style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.45 }}>
+                  plus chaud qu’une zone peu urbanisée de référence, en été.
+                </span>
+              </div>
+              <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+                Îlot de chaleur urbain{" "}
+                <strong style={{ color: "var(--fg-hi)" }}>{s.icu.level === "marque" ? "marqué" : "présent"}</strong>.
                 Cette donnée décrit l’environnement urbain proche, pas la température à l’intérieur du logement.
               </p>
               <span style={FACE3_FAMILY}>Estimation modélisée · CSTB · grand-IRIS</span>

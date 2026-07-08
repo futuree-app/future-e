@@ -506,7 +506,7 @@ export default function LogementModule({
           {/* Beat 3 — Les preuves : pourquoi ? (2 sous-familles) */}
           <div style={{ display: "grid", gap: 36 }}>
 
-            <FamilyHeading>Le logement lui-même</FamilyHeading>
+            <FamilyHeading color="var(--accent)">Le logement lui-même</FamilyHeading>
 
             <EnergieSection
               dpeStatus={dpeStatus}
@@ -521,7 +521,7 @@ export default function LogementModule({
               dpeYear={dpeYear}
             />
 
-            <FamilyHeading>Ce à quoi cette adresse est exposée</FamilyHeading>
+            <FamilyHeading color="var(--blue)">Ce à quoi cette adresse est exposée</FamilyHeading>
 
             {/* Risques du bâti — registre sobre (dé-dramatisé) : plus de rouge, plus de chips
                 « Risques référencés » (redondantes avec le réglementaire et les Block ci-dessous). */}
