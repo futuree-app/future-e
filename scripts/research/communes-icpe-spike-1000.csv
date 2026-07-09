@@ -1,0 +1,1001 @@
+insee,nom,segment,source,region,dept
+75056,Paris,grande_ville,seed_100,,75
+13055,Marseille,grande_ville,seed_100,,13
+69123,Lyon,grande_ville,seed_100,,69
+31555,Toulouse,grande_ville,seed_100,Occitanie,31
+06088,Nice,grande_ville,seed_100,Provence-Alpes-Côte d'Azur,06
+44109,Nantes,grande_ville,seed_100,Pays de la Loire,44
+34172,Montpellier,grande_ville,seed_100,Occitanie,34
+67482,Strasbourg,grande_ville,seed_100,Grand Est,67
+33063,Bordeaux,grande_ville,seed_100,Nouvelle-Aquitaine,33
+59350,Lille,grande_ville,seed_100,Hauts-de-France,59
+35238,Rennes,grande_ville,seed_100,Bretagne,35
+51454,Reims,grande_ville,seed_100,Grand Est,51
+42218,Saint-Etienne,grande_ville,seed_100,Auvergne-Rhône-Alpes,42
+76351,Le Havre,industrielle_portuaire,seed_100,Normandie,76
+76540,Rouen,industrielle_portuaire,seed_100,Normandie,76
+13039,Fos-sur-Mer,industrielle_portuaire,seed_100,Provence-Alpes-Côte d'Azur,13
+13056,Martigues,industrielle_portuaire,seed_100,Provence-Alpes-Côte d'Azur,13
+69276,Feyzin,industrielle_portuaire,seed_100,Auvergne-Rhône-Alpes,69
+69149,Oullins-Pierre-Benite,industrielle_portuaire,seed_100,Auvergne-Rhône-Alpes,69
+69199,Saint-Fons,industrielle_portuaire,seed_100,Auvergne-Rhône-Alpes,69
+44052,Donges,industrielle_portuaire,seed_100,Pays de la Loire,44
+59183,Dunkerque,industrielle_portuaire,seed_100,Hauts-de-France,59
+62193,Calais,industrielle_portuaire,seed_100,Hauts-de-France,62
+64445,Pau,industrielle_portuaire,seed_100,Nouvelle-Aquitaine,64
+64300,Lacq,industrielle_portuaire,seed_100,Nouvelle-Aquitaine,64
+76305,Gonfreville-l'Orcher,industrielle_portuaire,seed_100,Normandie,76
+57672,Thionville,industrielle_portuaire,seed_100,Grand Est,57
+57221,Florange,industrielle_portuaire,seed_100,Grand Est,57
+57306,Hayange,industrielle_portuaire,seed_100,Grand Est,57
+38185,Grenoble,industrielle_portuaire,seed_100,Auvergne-Rhône-Alpes,38
+38544,Vienne,industrielle_portuaire,seed_100,Auvergne-Rhône-Alpes,38
+69266,Villeurbanne,industrielle_portuaire,seed_100,Auvergne-Rhône-Alpes,69
+93066,Saint-Denis,industrielle_portuaire,seed_100,Île-de-France,93
+17300,La Rochelle,littorale,seed_100,Nouvelle-Aquitaine,17
+56121,Lorient,littorale,seed_100,Bretagne,56
+29019,Brest,littorale,seed_100,Bretagne,29
+35288,Saint-Malo,littorale,seed_100,Bretagne,35
+44184,Saint-Nazaire,littorale,seed_100,Pays de la Loire,44
+85194,Les Sables-d'Olonne,littorale,seed_100,Pays de la Loire,85
+34301,Sete,littorale,seed_100,Occitanie,34
+66136,Perpignan,littorale,seed_100,Occitanie,66
+83069,Hyeres,littorale,seed_100,Provence-Alpes-Côte d'Azur,83
+83137,Toulon,littorale,seed_100,Provence-Alpes-Côte d'Azur,83
+06029,Cannes,littorale,seed_100,Provence-Alpes-Côte d'Azur,06
+06004,Antibes,littorale,seed_100,Provence-Alpes-Côte d'Azur,06
+2A004,Ajaccio,littorale,seed_100,Corse,2A
+2B033,Bastia,littorale,seed_100,Corse,2B
+97411,Saint-Denis,littorale,seed_100,,97
+97105,Baie-Mahault,littorale,seed_100,,97
+97209,Fort-de-France,littorale,seed_100,,97
+21231,Dijon,ville_moyenne,seed_100,Bourgogne-Franche-Comté,21
+25056,Besancon,ville_moyenne,seed_100,Bourgogne-Franche-Comté,25
+30189,Nimes,ville_moyenne,seed_100,Occitanie,30
+37261,Tours,ville_moyenne,seed_100,Centre-Val de Loire,37
+45234,Orleans,ville_moyenne,seed_100,Centre-Val de Loire,45
+49007,Angers,ville_moyenne,seed_100,Pays de la Loire,49
+57463,Metz,ville_moyenne,seed_100,Grand Est,57
+54395,Nancy,ville_moyenne,seed_100,Grand Est,54
+59512,Roubaix,ville_moyenne,seed_100,Hauts-de-France,59
+59599,Tourcoing,ville_moyenne,seed_100,Hauts-de-France,59
+63113,Clermont-Ferrand,ville_moyenne,seed_100,Auvergne-Rhône-Alpes,63
+68066,Colmar,ville_moyenne,seed_100,Grand Est,68
+68224,Mulhouse,ville_moyenne,seed_100,Grand Est,68
+72181,Le Mans,ville_moyenne,seed_100,Pays de la Loire,72
+76217,Dieppe,littorale,seed_100,Normandie,76
+80021,Amiens,ville_moyenne,seed_100,Hauts-de-France,80
+86194,Poitiers,ville_moyenne,seed_100,Nouvelle-Aquitaine,86
+87085,Limoges,ville_moyenne,seed_100,Nouvelle-Aquitaine,87
+92012,Boulogne-Billancourt,grande_ville,seed_100,Île-de-France,92
+92050,Nanterre,grande_ville,seed_100,Île-de-France,92
+93008,Bobigny,grande_ville,seed_100,Île-de-France,93
+01053,Bourg-en-Bresse,ville_moyenne,seed_100,Auvergne-Rhône-Alpes,01
+03190,Moulins,rurale_calme,seed_100,Auvergne-Rhône-Alpes,03
+05061,Gap,ville_moyenne,seed_100,Provence-Alpes-Côte d'Azur,05
+07010,Annonay,ville_moyenne,seed_100,Auvergne-Rhône-Alpes,07
+08105,Charleville-Mezieres,ville_moyenne,seed_100,Grand Est,08
+11069,Carcassonne,ville_moyenne,seed_100,Occitanie,11
+12202,Rodez,ville_moyenne,seed_100,Occitanie,12
+14118,Caen,ville_moyenne,seed_100,Normandie,14
+18033,Bourges,ville_moyenne,seed_100,Centre-Val de Loire,18
+19031,Brive-la-Gaillarde,ville_moyenne,seed_100,Nouvelle-Aquitaine,19
+23096,Gueret,rurale_calme,seed_100,Nouvelle-Aquitaine,23
+24037,Bergerac,ville_moyenne,seed_100,Nouvelle-Aquitaine,24
+27229,Evreux,ville_moyenne,seed_100,Normandie,27
+28085,Chartres,ville_moyenne,seed_100,Centre-Val de Loire,28
+32013,Auch,rurale_calme,seed_100,Occitanie,32
+36044,Chateauroux,ville_moyenne,seed_100,Centre-Val de Loire,36
+41018,Blois,ville_moyenne,seed_100,Centre-Val de Loire,41
+48095,Mende,rurale_calme,seed_100,Occitanie,48
+53130,Laval,ville_moyenne,seed_100,Pays de la Loire,53
+55029,Bar-le-Duc,rurale_calme,seed_100,Grand Est,55
+58194,Nevers,ville_moyenne,seed_100,Bourgogne-Franche-Comté,58
+61001,Alencon,ville_moyenne,seed_100,Normandie,61
+70550,Vesoul,rurale_calme,seed_100,Bourgogne-Franche-Comté,70
+71270,Macon,ville_moyenne,seed_100,Bourgogne-Franche-Comté,71
+74010,Annecy,ville_moyenne,seed_100,Auvergne-Rhône-Alpes,74
+81004,Albi,ville_moyenne,seed_100,Occitanie,81
+82121,Montauban,ville_moyenne,seed_100,Occitanie,82
+84007,Avignon,ville_moyenne,seed_100,Provence-Alpes-Côte d'Azur,84
+89024,Auxerre,ville_moyenne,seed_100,Bourgogne-Franche-Comté,89
+75115,Paris 15e Arrondissement,grande_ville,population,Île-de-France,75
+75120,Paris 20e Arrondissement,grande_ville,population,Île-de-France,75
+75118,Paris 18e Arrondissement,grande_ville,population,Île-de-France,75
+75119,Paris 19e Arrondissement,grande_ville,population,Île-de-France,75
+75113,Paris 13e Arrondissement,grande_ville,population,Île-de-France,75
+75117,Paris 17e Arrondissement,grande_ville,population,Île-de-France,75
+75116,Paris 16e Arrondissement,grande_ville,population,Île-de-France,75
+13001,Aix-en-Provence,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+75111,Paris 11e Arrondissement,grande_ville,population,Île-de-France,75
+75112,Paris 12e Arrondissement,grande_ville,population,Île-de-France,75
+75114,Paris 14e Arrondissement,grande_ville,population,Île-de-France,75
+93048,Montreuil,grande_ville,population,Île-de-France,93
+95018,Argenteuil,grande_ville,population,Île-de-France,95
+69383,Lyon 3e Arrondissement,grande_ville,population,Auvergne-Rhône-Alpes,69
+94081,Vitry-sur-Seine,grande_ville,population,Île-de-France,94
+94028,Créteil,grande_ville,population,Île-de-France,94
+13213,Marseille 13e Arrondissement,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+93001,Aubervilliers,grande_ville,population,Île-de-France,93
+92004,Asnières-sur-Seine,grande_ville,population,Île-de-France,92
+92025,Colombes,grande_ville,population,Île-de-France,92
+69388,Lyon 8e Arrondissement,grande_ville,population,Auvergne-Rhône-Alpes,69
+93005,Aulnay-sous-Bois,grande_ville,population,Île-de-France,93
+69387,Lyon 7e Arrondissement,grande_ville,population,Auvergne-Rhône-Alpes,69
+78646,Versailles,grande_ville,population,Île-de-France,78
+75110,Paris 10e Arrondissement,grande_ville,population,Île-de-France,75
+13208,Marseille 8e Arrondissement,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+92026,Courbevoie,grande_ville,population,Île-de-France,92
+34032,Béziers,grande_ville,population,Occitanie,34
+13215,Marseille 15e Arrondissement,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+92063,Rueil-Malmaison,grande_ville,population,Île-de-France,92
+50129,Cherbourg-en-Cotentin,grande_ville,population,Normandie,50
+94017,Champigny-sur-Marne,grande_ville,population,Île-de-France,94
+13209,Marseille 9e Arrondissement,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+33281,Mérignac,grande_ville,population,Nouvelle-Aquitaine,33
+94068,Saint-Maur-des-Fossés,grande_ville,population,Île-de-France,94
+93029,Drancy,grande_ville,population,Île-de-France,93
+93051,Noisy-le-Grand,grande_ville,population,Île-de-France,93
+92040,Issy-les-Moulineaux,grande_ville,population,Île-de-France,92
+95127,Cergy,grande_ville,population,Île-de-France,95
+92044,Levallois-Perret,grande_ville,population,Île-de-France,92
+33318,Pessac,grande_ville,population,Nouvelle-Aquitaine,33
+69259,Vénissieux,grande_ville,population,Auvergne-Rhône-Alpes,69
+91228,Évry-Courcouronnes,grande_ville,population,Île-de-France,91
+92024,Clichy,grande_ville,population,Île-de-France,92
+26362,Valence,grande_ville,population,Auvergne-Rhône-Alpes,26
+94041,Ivry-sur-Seine,grande_ville,population,Île-de-France,94
+29232,Quimper,grande_ville,population,Bretagne,29
+92002,Antony,grande_ville,population,Île-de-France,92
+13212,Marseille 12e Arrondissement,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+10387,Troyes,grande_ville,population,Grand Est,10
+83126,La Seyne-sur-Mer,grande_ville,population,Provence-Alpes-Côte d'Azur,83
+59009,Villeneuve-d'Ascq,grande_ville,population,Hauts-de-France,59
+93055,Pantin,grande_ville,population,Île-de-France,93
+13214,Marseille 14e Arrondissement,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+73065,Chambéry,grande_ville,population,Auvergne-Rhône-Alpes,73
+79191,Niort,grande_ville,population,Nouvelle-Aquitaine,79
+92051,Neuilly-sur-Seine,grande_ville,population,Île-de-France,92
+13210,Marseille 10e Arrondissement,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+75109,Paris 9e Arrondissement,grande_ville,population,Île-de-France,75
+95585,Sarcelles,grande_ville,population,Île-de-France,95
+93007,Le Blanc-Mesnil,grande_ville,population,Île-de-France,93
+94046,Maisons-Alfort,grande_ville,population,Île-de-France,94
+13211,Marseille 11e Arrondissement,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+94076,Villejuif,grande_ville,population,Île-de-France,94
+83061,Fréjus,grande_ville,population,Provence-Alpes-Côte d'Azur,83
+75105,Paris 5e Arrondissement,grande_ville,population,Île-de-France,75
+60057,Beauvais,grande_ville,population,Hauts-de-France,60
+11262,Narbonne,grande_ville,population,Occitanie,11
+77284,Meaux,grande_ville,population,Île-de-France,77
+85191,La Roche-sur-Yon,grande_ville,population,Pays de la Loire,85
+92023,Clamart,grande_ville,population,Île-de-France,92
+56260,Vannes,grande_ville,population,Bretagne,56
+77108,Chelles,grande_ville,population,Île-de-France,77
+49099,Cholet,grande_ville,population,Pays de la Loire,49
+93031,Épinay-sur-Seine,grande_ville,population,Île-de-France,93
+93070,Saint-Ouen-sur-Seine,grande_ville,population,Île-de-France,93
+13203,Marseille 3e Arrondissement,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+02691,Saint-Quentin,grande_ville,population,Hauts-de-France,02
+93010,Bondy,grande_ville,population,Île-de-France,93
+69389,Lyon 9e Arrondissement,grande_ville,population,Auvergne-Rhône-Alpes,69
+64102,Bayonne,grande_ville,population,Nouvelle-Aquitaine,64
+91174,Corbeil-Essonnes,grande_ville,population,Île-de-France,91
+06027,Cagnes-sur-Mer,grande_ville,population,Provence-Alpes-Côte d'Azur,06
+69256,Vaulx-en-Velin,grande_ville,population,Auvergne-Rhône-Alpes,69
+69386,Lyon 6e Arrondissement,grande_ville,population,Auvergne-Rhône-Alpes,69
+93071,Sevran,grande_ville,population,Île-de-France,93
+94033,Fontenay-sous-Bois,grande_ville,population,Île-de-France,94
+78586,Sartrouville,grande_ville,population,Île-de-France,78
+91377,Massy,grande_ville,population,Île-de-France,91
+13004,Arles,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+13204,Marseille 4e Arrondissement,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+44162,Saint-Herblain,grande_ville,population,Pays de la Loire,44
+92036,Gennevilliers,grande_ville,population,Île-de-France,92
+92073,Suresnes,grande_ville,population,Île-de-France,92
+69290,Saint-Priest,grande_ville,population,Auvergne-Rhône-Alpes,69
+94080,Vincennes,grande_ville,population,Île-de-France,94
+69385,Lyon 5e Arrondissement,grande_ville,population,Auvergne-Rhône-Alpes,69
+06069,Grasse,grande_ville,population,Provence-Alpes-Côte d'Azur,06
+75107,Paris 7e Arrondissement,grande_ville,population,Île-de-France,75
+92049,Montrouge,grande_ville,population,Île-de-France,92
+13005,Aubagne,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+93027,La Courneuve,grande_ville,population,Île-de-France,93
+92048,Meudon,grande_ville,population,Île-de-France,92
+94022,Choisy-le-Roi,grande_ville,population,Île-de-France,94
+93053,Noisy-le-Sec,grande_ville,population,Île-de-France,93
+93046,Livry-Gargan,grande_ville,population,Île-de-France,93
+93064,Rosny-sous-Bois,grande_ville,population,Île-de-France,93
+13205,Marseille 5e Arrondissement,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+33522,Talence,grande_ville,population,Nouvelle-Aquitaine,33
+90010,Belfort,grande_ville,population,Bourgogne-Franche-Comté,90
+94002,Alfortville,grande_ville,population,Île-de-France,94
+71076,Chalon-sur-Saône,grande_ville,population,Bourgogne-Franche-Comté,71
+13103,Salon-de-Provence,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+13047,Istres,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+78361,Mantes-la-Jolie,grande_ville,population,Île-de-France,78
+78551,Saint-Germain-en-Laye,grande_ville,population,Île-de-France,78
+22278,Saint-Brieuc,grande_ville,population,Bretagne,22
+65440,Tarbes,grande_ville,population,Occitanie,65
+30007,Alès,grande_ville,population,Occitanie,30
+51108,Châlons-en-Champagne,grande_ville,population,Grand Est,51
+92007,Bagneux,grande_ville,population,Île-de-France,92
+92062,Puteaux,grande_ville,population,Île-de-France,92
+69034,Caluire-et-Cuire,grande_ville,population,Auvergne-Rhône-Alpes,69
+69029,Bron,grande_ville,population,Auvergne-Rhône-Alpes,69
+44143,Rezé,grande_ville,population,Pays de la Loire,44
+59606,Valenciennes,grande_ville,population,Hauts-de-France,59
+95268,Garges-lès-Gonesse,grande_ville,population,Île-de-France,95
+81065,Castres,grande_ville,population,Occitanie,81
+62041,Arras,grande_ville,population,Hauts-de-France,62
+77288,Melun,grande_ville,population,Île-de-France,77
+06030,Le Cannet,grande_ville,population,Provence-Alpes-Côte d'Azur,06
+64024,Anglet,grande_ville,population,Nouvelle-Aquitaine,64
+16015,Angoulême,grande_ville,population,Nouvelle-Aquitaine,16
+62160,Boulogne-sur-Mer,grande_ville,population,Hauts-de-France,62
+59650,Wattrelos,grande_ville,population,Hauts-de-France,59
+33550,Villenave-d'Ornon,grande_ville,population,Nouvelle-Aquitaine,33
+26198,Montélimar,grande_ville,population,Auvergne-Rhône-Alpes,26
+60159,Compiègne,grande_ville,population,Hauts-de-France,60
+93072,Stains,grande_ville,population,Île-de-France,93
+75106,Paris 6e Arrondissement,grande_ville,population,Île-de-France,75
+93032,Gagny,grande_ville,population,Île-de-France,93
+31149,Colomiers,grande_ville,population,Occitanie,31
+78498,Poissy,grande_ville,population,Île-de-France,78
+83050,Draguignan,grande_ville,population,Provence-Alpes-Côte d'Azur,83
+59178,Douai,grande_ville,population,Hauts-de-France,59
+13206,Marseille 6e Arrondissement,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+13201,Marseille 1er Arrondissement,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+93006,Bagnolet,grande_ville,population,Île-de-France,93
+59378,Marcq-en-Barœul,grande_ville,population,Hauts-de-France,59
+93078,Villepinte,grande_ville,population,Île-de-France,93
+38421,Saint-Martin-d'Hères,grande_ville,population,Auvergne-Rhône-Alpes,38
+77373,Pontault-Combault,grande_ville,population,Île-de-France,77
+37122,Joué-lès-Tours,grande_ville,population,Centre-Val de Loire,37
+74012,Annemasse,grande_ville,population,Auvergne-Rhône-Alpes,74
+93050,Neuilly-sur-Marne,grande_ville,population,Île-de-France,93
+95252,Franconville,grande_ville,population,Île-de-France,95
+91589,Savigny-sur-Orge,grande_ville,population,Île-de-France,91
+93073,Tremblay-en-France,grande_ville,population,Île-de-France,93
+74281,Thonon-les-Bains,grande_ville,population,Auvergne-Rhône-Alpes,74
+13028,La Ciotat,grande_ville,population,Provence-Alpes-Côte d'Azur,13
+38468,Salaise-sur-Sanne,industrielle_portuaire,industrie_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,38
+21355,Longvic,industrielle_portuaire,industrie_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,21
+35281,Saint-Jacques-de-la-Lande,industrielle_portuaire,industrie_Bretagne,Bretagne,35
+18050,La Chapelle-Saint-Ursin,industrielle_portuaire,industrie_Centre-Val de Loire,Centre-Val de Loire,18
+2B120,Furiani,industrielle_portuaire,industrie_Corse,Corse,2B
+57606,Saint-Avold,industrielle_portuaire,industrie_Grand Est,Grand Est,57
+59271,Grande-Synthe,industrielle_portuaire,industrie_Hauts-de-France,Hauts-de-France,59
+76322,Le Grand-Quevilly,industrielle_portuaire,industrie_Normandie,Normandie,76
+64410,Mourenx,industrielle_portuaire,industrie_Nouvelle-Aquitaine,Nouvelle-Aquitaine,64
+31433,Portet-sur-Garonne,industrielle_portuaire,industrie_Occitanie,Occitanie,31
+72008,Arnage,industrielle_portuaire,industrie_Pays de la Loire,Pays de la Loire,72
+13077,Port-de-Bouc,industrielle_portuaire,industrie_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+92078,Villeneuve-la-Garenne,industrielle_portuaire,industrie_Île-de-France,Île-de-France,92
+69271,Chassieu,industrielle_portuaire,industrie_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+71154,Crissey,industrielle_portuaire,industrie_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,71
+35352,Vern-sur-Seiche,industrielle_portuaire,industrie_Bretagne,Bretagne,35
+37233,Saint-Pierre-des-Corps,industrielle_portuaire,industrie_Centre-Val de Loire,Centre-Val de Loire,37
+2B220,Piedigriggio,industrielle_portuaire,industrie_Corse,Corse,2B
+57336,L'Hôpital,industrielle_portuaire,industrie_Grand Est,Grand Est,57
+59028,Auby,industrielle_portuaire,industrie_Hauts-de-France,Hauts-de-France,59
+76533,Rogerville,industrielle_portuaire,industrie_Normandie,Normandie,76
+64418,Noguères,industrielle_portuaire,industrie_Nouvelle-Aquitaine,Nouvelle-Aquitaine,64
+31293,Lespinasse,industrielle_portuaire,industrie_Occitanie,Occitanie,31
+72189,Marolles-les-Braults,industrielle_portuaire,industrie_Pays de la Loire,Pays de la Loire,72
+13078,Port-Saint-Louis-du-Rhône,industrielle_portuaire,industrie_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+93039,L'Île-Saint-Denis,industrielle_portuaire,industrie_Île-de-France,Île-de-France,93
+38317,Le Pont-de-Claix,industrielle_portuaire,industrie_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,38
+21713,Vonges,industrielle_portuaire,industrie_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,21
+22136,Loudéac,industrielle_portuaire,industrie_Bretagne,Bretagne,22
+45252,Pithiviers,industrielle_portuaire,industrie_Centre-Val de Loire,Centre-Val de Loire,45
+2A006,Alata,industrielle_portuaire,industrie_Corse,Corse,2A
+57123,Carling,industrielle_portuaire,industrie_Grand Est,Grand Est,57
+59286,Haubourdin,industrielle_portuaire,industrie_Hauts-de-France,Hauts-de-France,59
+76489,Oudalle,industrielle_portuaire,industrie_Normandie,Normandie,76
+64431,Os-Marsillon,industrielle_portuaire,industrie_Nouvelle-Aquitaine,Nouvelle-Aquitaine,64
+12305,Viviez,industrielle_portuaire,industrie_Occitanie,Occitanie,12
+44103,Montoir-de-Bretagne,industrielle_portuaire,industrie_Pays de la Loire,Pays de la Loire,44
+84092,Le Pontet,industrielle_portuaire,industrie_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,84
+92009,Bois-Colombes,industrielle_portuaire,industrie_Île-de-France,Île-de-France,92
+69100,Irigny,industrielle_portuaire,industrie_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+21261,Fauverney,industrielle_portuaire,industrie_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,21
+35131,L'Hermitage,industrielle_portuaire,industrie_Bretagne,Bretagne,35
+45308,Semoy,industrielle_portuaire,industrie_Centre-Val de Loire,Centre-Val de Loire,45
+2B148,Lucciana,industrielle_portuaire,industrie_Corse,Corse,2B
+57303,Hauconcourt,industrielle_portuaire,industrie_Grand Est,Grand Est,57
+59234,Flers-en-Escrebieux,industrielle_portuaire,industrie_Hauts-de-France,Hauts-de-France,59
+76498,Le Petit-Quevilly,industrielle_portuaire,industrie_Normandie,Normandie,76
+64443,Pardies,industrielle_portuaire,industrie_Nouvelle-Aquitaine,Nouvelle-Aquitaine,64
+30004,Aigues-Vives,industrielle_portuaire,industrie_Occitanie,Occitanie,30
+72364,Vaas,industrielle_portuaire,industrie_Pays de la Loire,Pays de la Loire,72
+13081,Rognac,industrielle_portuaire,industrie_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+95572,Saint-Ouen-l'Aumône,industrielle_portuaire,industrie_Île-de-France,Île-de-France,95
+69142,La Mulatière,industrielle_portuaire,industrie_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+21452,Neuilly-Crimolois,industrielle_portuaire,industrie_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,21
+29302,Pont-de-Buis-lès-Quimerch,industrielle_portuaire,industrie_Bretagne,Bretagne,29
+45284,Saint-Jean-de-Braye,industrielle_portuaire,industrie_Centre-Val de Loire,Centre-Val de Loire,45
+2B059,Canavaggia,industrielle_portuaire,industrie_Corse,Corse,2B
+68154,Illzach,industrielle_portuaire,industrie_Grand Est,Grand Est,68
+59359,Loon-Plage,industrielle_portuaire,industrie_Hauts-de-France,Hauts-de-France,59
+76660,Sandouville,industrielle_portuaire,industrie_Normandie,Normandie,76
+33032,Bassens,industrielle_portuaire,industrie_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+31084,Boussens,industrielle_portuaire,industrie_Occitanie,Occitanie,31
+44074,Indre,industrielle_portuaire,industrie_Pays de la Loire,Pays de la Loire,44
+13014,Berre-l'Étang,industrielle_portuaire,industrie_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+95555,Saint-Gratien,industrielle_portuaire,industrie_Île-de-France,Île-de-France,95
+69204,Saint-Genis-Laval,industrielle_portuaire,industrie_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+25197,Deluz,industrielle_portuaire,industrie_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,25
+22202,Plévin,industrielle_portuaire,industrie_Bretagne,Bretagne,22
+37273,La Ville-aux-Dames,industrielle_portuaire,industrie_Centre-Val de Loire,Centre-Val de Loire,37
+2B346,Vescovato,industrielle_portuaire,industrie_Corse,Corse,2B
+57582,Richemont,industrielle_portuaire,industrie_Grand Est,Grand Est,57
+59156,Courchelettes,industrielle_portuaire,industrie_Hauts-de-France,Hauts-de-France,59
+76157,Canteleu,industrielle_portuaire,industrie_Normandie,Normandie,76
+64003,Abidos,industrielle_portuaire,industrie_Nouvelle-Aquitaine,Nouvelle-Aquitaine,64
+31169,Escalquens,industrielle_portuaire,industrie_Occitanie,Occitanie,31
+49215,Montreuil-Bellay,industrielle_portuaire,industrie_Pays de la Loire,Pays de la Loire,49
+04112,Manosque,industrielle_portuaire,industrie_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,04
+77123,Compans,industrielle_portuaire,industrie_Île-de-France,Île-de-France,77
+69273,Corbas,industrielle_portuaire,industrie_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+25267,Gennes,industrielle_portuaire,industrie_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,25
+35093,Dinard,industrielle_portuaire,industrie_Bretagne,Bretagne,35
+41091,Fossé,industrielle_portuaire,industrie_Centre-Val de Loire,Centre-Val de Loire,41
+2B343,Venzolasca,industrielle_portuaire,industrie_Corse,Corse,2B
+57765,Diesen,industrielle_portuaire,industrie_Grand Est,Grand Est,57
+59654,Waziers,industrielle_portuaire,industrie_Hauts-de-France,Hauts-de-France,59
+76497,Petit-Couronne,industrielle_portuaire,industrie_Normandie,Normandie,76
+16102,Cognac,industrielle_portuaire,industrie_Nouvelle-Aquitaine,Nouvelle-Aquitaine,16
+46029,Biars-sur-Cère,industrielle_portuaire,industrie_Occitanie,Occitanie,46
+49015,Avrillé,industrielle_portuaire,industrie_Pays de la Loire,Pays de la Loire,49
+06010,Le Bar-sur-Loup,industrielle_portuaire,industrie_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,06
+78124,Carrières-sur-Seine,industrielle_portuaire,industrie_Île-de-France,Île-de-France,78
+38298,Le Péage-de-Roussillon,industrielle_portuaire,industrie_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,38
+21233,Drambon,industrielle_portuaire,industrie_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,21
+35065,La Chapelle-Thouarault,industrielle_portuaire,industrie_Bretagne,Bretagne,35
+45030,Beaune-la-Rolande,industrielle_portuaire,industrie_Centre-Val de Loire,Centre-Val de Loire,45
+2B169,Morosaglia,industrielle_portuaire,industrie_Corse,Corse,2B
+57550,Porcelette,industrielle_portuaire,industrie_Grand Est,Grand Est,57
+59288,Haulchin,industrielle_portuaire,industrie_Hauts-de-France,Hauts-de-France,59
+76341,Harfleur,industrielle_portuaire,industrie_Normandie,Normandie,76
+64117,Bésingrand,industrielle_portuaire,industrie_Nouvelle-Aquitaine,Nouvelle-Aquitaine,64
+82123,Montbartier,industrielle_portuaire,industrie_Occitanie,Occitanie,82
+49067,Chenillé-Champteussé,industrielle_portuaire,industrie_Pays de la Loire,Pays de la Loire,49
+13054,Marignane,industrielle_portuaire,industrie_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+91027,Athis-Mons,industrielle_portuaire,industrie_Île-de-France,Île-de-France,91
+38344,Roussillon,industrielle_portuaire,industrie_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,38
+39189,Damparis,industrielle_portuaire,industrie_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,39
+35241,La Richardais,industrielle_portuaire,industrie_Bretagne,Bretagne,35
+41276,Villebarou,industrielle_portuaire,industrie_Centre-Val de Loire,Centre-Val de Loire,41
+2B337,Valle-di-Rostino,industrielle_portuaire,industrie_Corse,Corse,2B
+57647,Serémange-Erzange,industrielle_portuaire,industrie_Grand Est,Grand Est,57
+59360,Loos,industrielle_portuaire,industrie_Hauts-de-France,Hauts-de-France,59
+76282,Freneuse,industrielle_portuaire,industrie_Normandie,Normandie,76
+64396,Mont,industrielle_portuaire,industrie_Nouvelle-Aquitaine,Nouvelle-Aquitaine,64
+11266,Port-la-Nouvelle,industrielle_portuaire,industrie_Occitanie,Occitanie,11
+72003,Allonnes,industrielle_portuaire,industrie_Pays de la Loire,Pays de la Loire,72
+13102,Saint-Victoret,industrielle_portuaire,industrie_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+95210,Enghien-les-Bains,industrielle_portuaire,industrie_Île-de-France,Île-de-France,95
+01390,Saint-Vulbas,industrielle_portuaire,industrie_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,01
+21166,Chenôve,industrielle_portuaire,industrie_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,21
+56185,Quéven,industrielle_portuaire,industrie_Bretagne,Bretagne,56
+45034,Boigny-sur-Bionne,industrielle_portuaire,industrie_Centre-Val de Loire,Centre-Val de Loire,45
+2A032,Bastelicaccia,industrielle_portuaire,industrie_Corse,Corse,2A
+68063,Cernay,industrielle_portuaire,industrie_Grand Est,Grand Est,68
+62250,Courrières,industrielle_portuaire,industrie_Hauts-de-France,Hauts-de-France,62
+76486,Orival,industrielle_portuaire,industrie_Normandie,Normandie,76
+33096,Carbon-Blanc,industrielle_portuaire,industrie_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+30305,Salindres,industrielle_portuaire,industrie_Occitanie,Occitanie,30
+44020,Bouguenais,industrielle_portuaire,industrie_Pays de la Loire,Pays de la Loire,44
+04209,Sisteron,industrielle_portuaire,industrie_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,04
+78358,Maisons-Laffitte,industrielle_portuaire,industrie_Île-de-France,Île-de-France,78
+38151,Échirolles,industrielle_portuaire,industrie_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,38
+21473,Ouges,industrielle_portuaire,industrie_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,21
+22373,Tréogan,industrielle_portuaire,industrie_Bretagne,Bretagne,22
+45147,Fleury-les-Aubrais,industrielle_portuaire,industrie_Centre-Val de Loire,Centre-Val de Loire,45
+2B037,Biguglia,industrielle_portuaire,industrie_Corse,Corse,2B
+67389,Reichstett,industrielle_portuaire,industrie_Grand Est,Grand Est,67
+59566,Sequedin,industrielle_portuaire,industrie_Hauts-de-France,Hauts-de-France,59
+76384,Lillebonne,industrielle_portuaire,industrie_Normandie,Normandie,76
+64061,Artix,industrielle_portuaire,industrie_Nouvelle-Aquitaine,Nouvelle-Aquitaine,64
+34023,Balaruc-les-Bains,industrielle_portuaire,industrie_Occitanie,Occitanie,34
+44125,Piriac-sur-Mer,industrielle_portuaire,industrie_Pays de la Loire,Pays de la Loire,44
+13117,Vitrolles,industrielle_portuaire,industrie_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+94001,Ablon-sur-Seine,industrielle_portuaire,industrie_Île-de-France,Île-de-France,94
+38349,Sablons,industrielle_portuaire,industrie_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,38
+39526,Tavaux,industrielle_portuaire,industrie_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,39
+35070,Châteauneuf-d'Ille-et-Vilaine,industrielle_portuaire,industrie_Bretagne,Bretagne,35
+45197,Marigny-les-Usages,industrielle_portuaire,industrie_Centre-Val de Loire,Centre-Val de Loire,45
+2A349,Viggianello,industrielle_portuaire,industrie_Corse,Corse,2A
+68348,Vieux-Thann,industrielle_portuaire,industrie_Grand Est,Grand Est,68
+62033,Annay,industrielle_portuaire,industrie_Hauts-de-France,Hauts-de-France,62
+76561,Saint-Aubin-lès-Elbeuf,industrielle_portuaire,industrie_Normandie,Normandie,76
+64306,Lahourcade,industrielle_portuaire,industrie_Nouvelle-Aquitaine,Nouvelle-Aquitaine,64
+34108,Frontignan,industrielle_portuaire,industrie_Occitanie,Occitanie,34
+53036,Bouère,industrielle_portuaire,industrie_Pays de la Loire,Pays de la Loire,53
+04049,Château-Arnoux-Saint-Auban,industrielle_portuaire,industrie_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,04
+94077,Villeneuve-le-Roi,industrielle_portuaire,industrie_Île-de-France,Île-de-France,94
+69264,Villefranche-sur-Saône,industrielle_portuaire,industrie_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+58079,Clamecy,industrielle_portuaire,industrie_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,58
+29102,Landeleau,industrielle_portuaire,industrie_Bretagne,Bretagne,29
+37152,Mettray,industrielle_portuaire,industrie_Centre-Val de Loire,Centre-Val de Loire,37
+2A001,Afa,industrielle_portuaire,industrie_Corse,Corse,2A
+51474,Saint-Brice-Courcelles,industrielle_portuaire,industrie_Grand Est,Grand Est,51
+80024,Argœuves,industrielle_portuaire,industrie_Hauts-de-France,Hauts-de-France,80
+76178,Cléon,industrielle_portuaire,industrie_Normandie,Normandie,76
+33004,Ambès,industrielle_portuaire,industrie_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+30185,Mus,industrielle_portuaire,industrie_Occitanie,Occitanie,30
+72155,Laigné-Saint-Gervais,industrielle_portuaire,industrie_Pays de la Loire,Pays de la Loire,72
+84129,Sorgues,industrielle_portuaire,industrie_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,84
+94078,Villeneuve-Saint-Georges,industrielle_portuaire,industrie_Île-de-France,Île-de-France,94
+38449,Saint-Quentin-Fallavier,industrielle_portuaire,industrie_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,38
+70428,Pusey,industrielle_portuaire,industrie_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,70
+56118,Locmiquélic,industrielle_portuaire,industrie_Bretagne,Bretagne,56
+45053,Briare,industrielle_portuaire,industrie_Centre-Val de Loire,Centre-Val de Loire,45
+2A351,Villanova,industrielle_portuaire,industrie_Corse,Corse,2A
+68149,Huningue,industrielle_portuaire,industrie_Grand Est,Grand Est,68
+59014,Anzin,industrielle_portuaire,industrie_Hauts-de-France,Hauts-de-France,59
+76592,Saint-Jean-de-Folleville,industrielle_portuaire,industrie_Normandie,Normandie,76
+33035,Bayon-sur-Gironde,industrielle_portuaire,industrie_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+32393,Saint-Maur,industrielle_portuaire,industrie_Occitanie,Occitanie,32
+72344,Spay,industrielle_portuaire,industrie_Pays de la Loire,Pays de la Loire,72
+06033,Carros,industrielle_portuaire,industrie_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,06
+95063,Bezons,industrielle_portuaire,industrie_Île-de-France,Île-de-France,95
+69283,Mions,industrielle_portuaire,industrie_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+71040,Blanzy,industrielle_portuaire,industrie_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,71
+22155,La Motte,industrielle_portuaire,industrie_Bretagne,Bretagne,22
+18157,Morthomiers,industrielle_portuaire,industrie_Centre-Val de Loire,Centre-Val de Loire,18
+2B077,Castellare-di-Casinca,industrielle_portuaire,industrie_Corse,Corse,2B
+51504,Saint-Martin-sur-le-Pré,industrielle_portuaire,industrie_Grand Est,Grand Est,51
+59131,Cappelle-la-Grande,industrielle_portuaire,industrie_Hauts-de-France,Hauts-de-France,59
+76717,Val-de-la-Haye,industrielle_portuaire,industrie_Normandie,Normandie,76
+56098,Lanester,littorale,littoral_Bretagne,Bretagne,56
+2A247,Porto-Vecchio,littorale,littoral_Corse,Corse,2A
+80001,Abbeville,littorale,littoral_Hauts-de-France,Hauts-de-France,80
+14327,Hérouville-Saint-Clair,littorale,littoral_Normandie,Normandie,14
+33529,La Teste-de-Buch,littorale,littoral_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+34003,Agde,littorale,littoral_Occitanie,Occitanie,34
+44055,La Baule-Escoublac,littorale,littoral_Pays de la Loire,Pays de la Loire,44
+83129,Six-Fours-les-Plages,littorale,littoral_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,83
+29039,Concarneau,littorale,littoral_Bretagne,Bretagne,29
+2B050,Calvi,littorale,littoral_Corse,Corse,2B
+59155,Coudekerque-Branche,littorale,littoral_Hauts-de-France,Hauts-de-France,59
+76447,Montivilliers,littorale,littoral_Normandie,Normandie,76
+64122,Biarritz,littorale,littoral_Nouvelle-Aquitaine,Nouvelle-Aquitaine,64
+34154,Mauguio,littorale,littoral_Occitanie,Occitanie,34
+44154,Saint-Brevin-les-Pins,littorale,littoral_Pays de la Loire,Pays de la Loire,44
+83118,Saint-Raphaël,littorale,littoral_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,83
+56162,Ploemeur,littorale,littoral_Bretagne,Bretagne,56
+2A130,Grosseto-Prugna,littorale,littoral_Corse,Corse,2A
+62643,Outreau,littorale,littoral_Hauts-de-France,Hauts-de-France,62
+14341,Ifs,littorale,littoral_Normandie,Normandie,14
+33199,Gujan-Mestras,littorale,littoral_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+34157,Mèze,littorale,littoral_Occitanie,Occitanie,34
+44132,Pornichet,littorale,littoral_Pays de la Loire,Pays de la Loire,44
+13207,Marseille 7e Arrondissement,littorale,littoral_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+56083,Hennebont,littorale,littoral_Bretagne,Bretagne,56
+2A271,Sarrola-Carcopino,littorale,littoral_Corse,Corse,2A
+62758,Saint-Martin-Boulogne,littorale,littoral_Hauts-de-France,Hauts-de-France,62
+14437,Mondeville,littorale,littoral_Normandie,Normandie,14
+17306,Royan,littorale,littoral_Nouvelle-Aquitaine,Nouvelle-Aquitaine,17
+66037,Canet-en-Roussillon,littorale,littoral_Occitanie,Occitanie,66
+85288,Talmont-Saint-Hilaire,littorale,littoral_Pays de la Loire,Pays de la Loire,85
+06123,Saint-Laurent-du-Var,littorale,littoral_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,06
+29075,Guipavas,littorale,littoral_Bretagne,Bretagne,29
+2B353,Ville-di-Pietrabugno,littorale,littoral_Corse,Corse,2B
+62548,Marck,littorale,littoral_Hauts-de-France,Hauts-de-France,62
+76618,Petit-Caux,littorale,littoral_Normandie,Normandie,76
+64260,Hendaye,littorale,littoral_Nouvelle-Aquitaine,Nouvelle-Aquitaine,64
+66171,Saint-Cyprien,littorale,littoral_Occitanie,Occitanie,66
+44210,Trignac,littorale,littoral_Pays de la Loire,Pays de la Loire,44
+06083,Menton,littorale,littoral_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,06
+22187,Plérin,littorale,littoral_Bretagne,Bretagne,22
+2A041,Bonifacio,littorale,littoral_Corse,Corse,2A
+62667,Le Portel,littorale,littoral_Hauts-de-France,Hauts-de-France,62
+14488,Ouistreham,littorale,littoral_Normandie,Normandie,14
+64483,Saint-Jean-de-Luz,littorale,littoral_Nouvelle-Aquitaine,Nouvelle-Aquitaine,64
+66141,Pia,littorale,littoral_Occitanie,Occitanie,66
+44151,Saint-André-des-Eaux,littorale,littoral_Pays de la Loire,Pays de la Loire,44
+06155,Vallauris,littorale,littoral_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,06
+29212,Plouzané,littorale,littoral_Bretagne,Bretagne,29
+2B305,San-Martino-di-Lota,littorale,littoral_Corse,Corse,2B
+59588,Téteghem-Coudekerque-Village,littorale,littoral_Hauts-de-France,Hauts-de-France,59
+76552,Sainte-Adresse,littorale,littoral_Normandie,Normandie,76
+40046,Biscarrosse,littorale,littoral_Nouvelle-Aquitaine,Nouvelle-Aquitaine,40
+66028,Cabestany,littorale,littoral_Occitanie,Occitanie,66
+44187,Saint-Père-en-Retz,littorale,littoral_Pays de la Loire,Pays de la Loire,44
+83062,La Garde,littorale,littoral_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,83
+29189,Plougastel-Daoulas,littorale,littoral_Bretagne,Bretagne,29
+2B049,Calenzana,littorale,littoral_Corse,Corse,2B
+62893,Wimereux,littorale,littoral_Hauts-de-France,Hauts-de-France,62
+14167,Colombelles,littorale,littoral_Normandie,Normandie,14
+40312,Tarnos,littorale,littoral_Nouvelle-Aquitaine,Nouvelle-Aquitaine,40
+66180,Saint-Laurent-de-la-Salanque,littorale,littoral_Occitanie,Occitanie,66
+44168,Saint-Joachim,littorale,littoral_Pays de la Loire,Pays de la Loire,44
+83144,La Valette-du-Var,littorale,littoral_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,83
+56078,Guidel,littorale,littoral_Bretagne,Bretagne,56
+2B309,Santa-Maria-di-Lota,littorale,littoral_Corse,Corse,2B
+62397,Guînes,littorale,littoral_Hauts-de-France,Hauts-de-France,62
+14098,Thue et Mue,littorale,littoral_Normandie,Normandie,14
+33005,Andernos-les-Bains,littorale,littoral_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+34198,Pérols,littorale,littoral_Occitanie,Occitanie,34
+44176,Saint-Malo-de-Guersac,littorale,littoral_Pays de la Loire,Pays de la Loire,44
+13202,Marseille 2e Arrondissement,littorale,littoral_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+56206,Saint-Avé,littorale,littoral_Bretagne,Bretagne,56
+2A139,Lecci,littorale,littoral_Corse,Corse,2A
+62244,Coulogne,littorale,littoral_Hauts-de-France,Hauts-de-France,62
+76481,Octeville-sur-Mer,littorale,littoral_Normandie,Normandie,76
+33009,Arcachon,littorale,littoral_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+66065,Elne,littorale,littoral_Occitanie,Occitanie,66
+85243,Brem-sur-Mer,littorale,littoral_Pays de la Loire,Pays de la Loire,85
+13071,Les Pennes-Mirabeau,littorale,littoral_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+29235,Le Relecq-Kerhuon,littorale,littoral_Bretagne,Bretagne,29
+2B185,Oletta,littorale,littoral_Corse,Corse,2B
+62560,Marquise,littorale,littoral_Hauts-de-France,Hauts-de-France,62
+14076,Blainville-sur-Orne,littorale,littoral_Normandie,Normandie,14
+64545,Urrugne,littorale,littoral_Nouvelle-Aquitaine,Nouvelle-Aquitaine,64
+30003,Aigues-Mortes,littorale,littoral_Occitanie,Occitanie,30
+85112,L'Île-d'Olonne,littorale,littoral_Pays de la Loire,Pays de la Loire,85
+06079,Mandelieu-la-Napoule,littorale,littoral_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,06
+22215,Ploufragan,littorale,littoral_Bretagne,Bretagne,22
+2A017,Appietto,littorale,littoral_Corse,Corse,2A
+62746,Saint-Étienne-au-Mont,littorale,littoral_Hauts-de-France,Hauts-de-France,62
+14271,Fleury-sur-Orne,littorale,littoral_Normandie,Normandie,14
+17028,Aytré,littorale,littoral_Nouvelle-Aquitaine,Nouvelle-Aquitaine,17
+34344,La Grande-Motte,littorale,littoral_Occitanie,Occitanie,34
+44046,Corsept,littorale,littoral_Pays de la Loire,Pays de la Loire,44
+06085,Mougins,littorale,littoral_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,06
+29058,Fouesnant,littorale,littoral_Bretagne,Bretagne,29
+2A288,Sotta,littorale,littoral_Corse,Corse,2A
+62774,Sangatte,littorale,littoral_Hauts-de-France,Hauts-de-France,62
+14225,Dives-sur-Mer,littorale,littoral_Normandie,Normandie,14
+40065,Capbreton,littorale,littoral_Nouvelle-Aquitaine,Nouvelle-Aquitaine,40
+30133,Le Grau-du-Roi,littorale,littoral_Occitanie,Occitanie,30
+85214,Sainte-Foy,littorale,littoral_Pays de la Loire,Pays de la Loire,85
+83047,La Crau,littorale,littoral_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,83
+56243,Séné,littorale,littoral_Bretagne,Bretagne,56
+2B043,Brando,littorale,littoral_Corse,Corse,2B
+62038,Ardres,littorale,littoral_Hauts-de-France,Hauts-de-France,62
+14181,Cormelles-le-Royal,littorale,littoral_Normandie,Normandie,14
+64140,Boucau,littorale,littoral_Nouvelle-Aquitaine,Nouvelle-Aquitaine,64
+34022,Baillargues,littorale,littoral_Occitanie,Occitanie,34
+85250,Saint-Mathurin,littorale,littoral_Pays de la Loire,Pays de la Loire,85
+83123,Sanary-sur-Mer,littorale,littoral_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,83
+29051,Ergué-Gabéric,littorale,littoral_Bretagne,Bretagne,29
+2A085,Cauro,littorale,littoral_Corse,Corse,2A
+59107,Bray-Dunes,littorale,littoral_Hauts-de-France,Hauts-de-France,59
+14228,Douvres-la-Délivrande,littorale,littoral_Normandie,Normandie,14
+17274,Périgny,littorale,littoral_Nouvelle-Aquitaine,Nouvelle-Aquitaine,17
+34150,Marseillan,littorale,littoral_Occitanie,Occitanie,34
+85298,Vairé,littorale,littoral_Pays de la Loire,Pays de la Loire,85
+06161,Villeneuve-Loubet,littorale,littoral_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,06
+22360,Trégueux,littorale,littoral_Bretagne,Bretagne,22
+2B150,Lumio,littorale,littoral_Corse,Corse,2B
+59340,Leffrinckoucke,littorale,littoral_Hauts-de-France,Hauts-de-France,59
+14301,Giberville,littorale,littoral_Normandie,Normandie,14
+40310,Soustons,littorale,littoral_Nouvelle-Aquitaine,Nouvelle-Aquitaine,40
+66021,Bompas,littorale,littoral_Occitanie,Occitanie,66
+13216,Marseille 16e Arrondissement,littorale,littoral_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+56251,Theix-Noyalo,littorale,littoral_Bretagne,Bretagne,56
+2A300,San-Gavino-di-Carbini,littorale,littoral_Corse,Corse,2A
+59260,Ghyvelde,littorale,littoral_Hauts-de-France,Hauts-de-France,59
+69282,Meyzieu,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+89387,Sens,ville_moyenne,ville_moyenne_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,89
+35115,Fougères,ville_moyenne,ville_moyenne_Bretagne,Bretagne,35
+28134,Dreux,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,28
+67180,Haguenau,ville_moyenne,ville_moyenne_Grand Est,Grand Est,67
+60175,Creil,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,60
+76681,Sotteville-lès-Rouen,ville_moyenne,ville_moyenne_Normandie,Normandie,76
+33449,Saint-Médard-en-Jalles,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+31557,Tournefeuille,ville_moyenne,ville_moyenne_Occitanie,Occitanie,31
+44190,Saint-Sébastien-sur-Loire,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,44
+84031,Carpentras,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,84
+92020,Châtillon,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,92
+69384,Lyon 4e Arrondissement,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+25388,Montbéliard,ville_moyenne,ville_moyenne_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,25
+22113,Lannion,ville_moyenne,ville_moyenne_Bretagne,Bretagne,22
+18279,Vierzon,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,18
+67447,Schiltigheim,ville_moyenne,ville_moyenne_Grand Est,Grand Est,67
+62498,Lens,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,62
+76575,Saint-Étienne-du-Rouvray,ville_moyenne,ville_moyenne_Normandie,Normandie,76
+47001,Agen,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,47
+31069,Blagnac,ville_moyenne,ville_moyenne_Occitanie,Occitanie,31
+44114,Orvault,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,44
+84087,Orange,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,84
+78172,Conflans-Sainte-Honorine,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,78
+42207,Saint-Chamond,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,42
+39198,Dole,ville_moyenne,ville_moyenne_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,39
+35047,Bruz,ville_moyenne,ville_moyenne_Bretagne,Bretagne,35
+45232,Olivet,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,45
+88160,Épinal,ville_moyenne,ville_moyenne_Grand Est,Grand Est,88
+59122,Cambrai,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,59
+27681,Vernon,ville_moyenne,ville_moyenne_Normandie,Normandie,27
+86066,Châtellerault,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,86
+34145,Lunel,ville_moyenne,ville_moyenne_Occitanie,Occitanie,34
+49328,Saumur,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,49
+13063,Miramas,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+91549,Sainte-Geneviève-des-Bois,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,91
+42187,Roanne,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,42
+71153,Le Creusot,ville_moyenne,ville_moyenne_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,71
+35360,Vitré,ville_moyenne,ville_moyenne_Bretagne,Bretagne,35
+41194,Romorantin-Lanthenay,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,41
+54547,Vandœuvre-lès-Nancy,ville_moyenne,ville_moyenne_Grand Est,Grand Est,54
+62510,Liévin,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,62
+76451,Mont-Saint-Aignan,ville_moyenne,ville_moyenne_Normandie,Normandie,76
+33039,Bègles,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+31395,Muret,ville_moyenne,ville_moyenne_Occitanie,Occitanie,31
+44215,Vertou,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,44
+84035,Cavaillon,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,84
+75108,Paris 8e Arrondissement,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,75
+03185,Montluçon,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,03
+21054,Beaune,ville_moyenne,ville_moyenne_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,21
+35051,Cesson-Sévigné,ville_moyenne,ville_moyenne_Bretagne,Bretagne,35
+37214,Saint-Cyr-sur-Loire,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,37
+67218,Illkirch-Graffenstaden,ville_moyenne,ville_moyenne_Grand Est,Grand Est,67
+59392,Maubeuge,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,59
+14366,Lisieux,ville_moyenne,ville_moyenne_Normandie,Normandie,14
+40192,Mont-de-Marsan,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,40
+34057,Castelnau-le-Lez,ville_moyenne,ville_moyenne_Occitanie,Occitanie,34
+49301,Sèvremoine,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,49
+13002,Allauch,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+92019,Châtenay-Malabry,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,92
+26281,Romans-sur-Isère,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,26
+25462,Pontarlier,ville_moyenne,ville_moyenne_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,25
+22093,Lamballe-Armor,ville_moyenne,ville_moyenne_Bretagne,Bretagne,22
+45302,Saran,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,45
+52448,Saint-Dizier,ville_moyenne,ville_moyenne_Grand Est,Grand Est,52
+02722,Soissons,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,02
+50502,Saint-Lô,ville_moyenne,ville_moyenne_Normandie,Normandie,50
+24322,Périgueux,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,24
+12145,Millau,ville_moyenne,ville_moyenne_Occitanie,Occitanie,12
+49023,Beaupréau-en-Mauges,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,49
+13041,Gardanne,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+91477,Palaiseau,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,91
+73008,Aix-les-Bains,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,73
+39300,Lons-le-Saunier,ville_moyenne,ville_moyenne_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,39
+29103,Landerneau,ville_moyenne,ville_moyenne_Bretagne,Bretagne,29
+45285,Saint-Jean-de-la-Ruelle,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,45
+68297,Saint-Louis,ville_moyenne,ville_moyenne_Grand Est,Grand Est,68
+59328,Lambersart,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,59
+27375,Louviers,ville_moyenne,ville_moyenne_Normandie,Normandie,27
+33119,Cenon,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+31157,Cugnaux,ville_moyenne,ville_moyenne_Occitanie,Occitanie,31
+44047,Couëron,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,44
+84089,Pertuis,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,84
+94058,Le Perreux-sur-Marne,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,94
+69286,Rillieux-la-Pape,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+71306,Montceau-les-Mines,ville_moyenne,ville_moyenne_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,71
+29151,Morlaix,ville_moyenne,ville_moyenne_Bretagne,Bretagne,29
+41269,Vendôme,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,41
+51230,Épernay,ville_moyenne,ville_moyenne_Grand Est,Grand Est,51
+62427,Hénin-Beaumont,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,62
+76259,Fécamp,ville_moyenne,ville_moyenne_Normandie,Normandie,76
+33192,Gradignan,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+46042,Cahors,ville_moyenne,ville_moyenne_Occitanie,Occitanie,46
+85047,Challans,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,85
+84054,L'Isle-sur-la-Sorgue,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,84
+78440,Les Mureaux,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,78
+69382,Lyon 2e Arrondissement,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+25031,Audincourt,ville_moyenne,ville_moyenne_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,25
+56178,Pontivy,ville_moyenne,ville_moyenne_Bretagne,Bretagne,56
+28218,Lucé,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,28
+57480,Montigny-lès-Metz,ville_moyenne,ville_moyenne_Grand Est,Grand Est,57
+59017,Armentières,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,59
+14762,Vire Normandie,ville_moyenne,ville_moyenne_Normandie,Normandie,14
+17415,Saintes,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,17
+31424,Plaisance-du-Touch,ville_moyenne,ville_moyenne_Occitanie,Occitanie,31
+49092,Chemillé-en-Anjou,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,49
+06157,Vence,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,06
+78621,Trappes,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,78
+69275,Décines-Charpieu,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+71014,Autun,ville_moyenne,ville_moyenne_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,71
+22050,Dinan,ville_moyenne,ville_moyenne_Bretagne,Bretagne,22
+45208,Montargis,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,45
+52121,Chaumont,ville_moyenne,ville_moyenne_Grand Est,Grand Est,52
+62119,Béthune,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,62
+76231,Elbeuf,ville_moyenne,ville_moyenne_Normandie,Normandie,76
+33243,Libourne,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+30028,Bagnols-sur-Cèze,ville_moyenne,ville_moyenne_Occitanie,Occitanie,30
+85146,Montaigu-Vendée,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,85
+13026,Châteauneuf-les-Martigues,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+94052,Nogent-sur-Marne,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,94
+38053,Bourgoin-Jallieu,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,38
+56007,Auray,ville_moyenne,ville_moyenne_Bretagne,Bretagne,56
+37208,Saint-Avertin,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,37
+57227,Forbach,ville_moyenne,ville_moyenne_Grand Est,Grand Est,57
+02408,Laon,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,02
+61169,Flers,ville_moyenne,ville_moyenne_Normandie,Normandie,61
+33162,Eysines,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+34129,Lattes,ville_moyenne,ville_moyenne_Occitanie,Occitanie,34
+44026,Carquefou,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,44
+83023,Brignoles,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,83
+78311,Houilles,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,78
+69381,Lyon 1er Arrondissement,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+29046,Douarnenez,ville_moyenne,ville_moyenne_Bretagne,Bretagne,29
+45155,Gien,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,45
+57631,Sarreguemines,ville_moyenne,ville_moyenne_Grand Est,Grand Est,57
+59368,La Madeleine,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,59
+76108,Bois-Guillaume,ville_moyenne,ville_moyenne_Normandie,Normandie,76
+33069,Le Bouscat,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+31044,Balma,ville_moyenne,ville_moyenne_Occitanie,Occitanie,31
+44035,La Chapelle-sur-Erdre,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,44
+83116,Saint-Maximin-la-Sainte-Baume,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,83
+93063,Romainville,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,93
+15014,Aurillac,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,15
+35024,Betton,ville_moyenne,ville_moyenne_Bretagne,Bretagne,35
+45004,Amilly,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,45
+67267,Lingolsheim,ville_moyenne,ville_moyenne_Grand Est,Grand Est,67
+62178,Bruay-la-Buissière,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,62
+61006,Argentan,ville_moyenne,ville_moyenne_Normandie,Normandie,61
+33249,Lormont,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+09225,Pamiers,ville_moyenne,ville_moyenne_Occitanie,Occitanie,09
+49244,Mauges-sur-Loire,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,49
+04070,Digne-les-Bains,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,04
+75103,Paris 3e Arrondissement,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,75
+03310,Vichy,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,03
+29233,Quimperlé,ville_moyenne,ville_moyenne_Bretagne,Bretagne,29
+37003,Amboise,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,37
+88413,Saint-Dié-des-Vosges,ville_moyenne,ville_moyenne_Grand Est,Grand Est,88
+59295,Hazebrouck,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,59
+14047,Bayeux,ville_moyenne,ville_moyenne_Normandie,Normandie,14
+17299,Rochefort,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,17
+30032,Beaucaire,ville_moyenne,ville_moyenne_Occitanie,Occitanie,30
+44131,Pornic,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,44
+13027,Châteaurenard,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+78423,Montigny-le-Bretonneux,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,78
+38169,Fontaine,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,38
+28088,Châteaudun,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,28
+67462,Sélestat,ville_moyenne,ville_moyenne_Grand Est,Grand Est,67
+59410,Mons-en-Barœul,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,59
+27701,Val-de-Reuil,ville_moyenne,ville_moyenne_Normandie,Normandie,27
+47323,Villeneuve-sur-Lot,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,47
+81099,Gaillac,ville_moyenne,ville_moyenne_Occitanie,Occitanie,81
+49331,Segré-en-Anjou Bleu,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,49
+13108,Tarascon,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+95306,Herblay-sur-Seine,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,95
+69244,Tassin-la-Demi-Lune,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+45068,Châlette-sur-Loing,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,45
+67043,Bischheim,ville_moyenne,ville_moyenne_Grand Est,Grand Est,67
+60463,Nogent-sur-Oise,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,60
+50218,Granville,ville_moyenne,ville_moyenne_Normandie,Normandie,50
+40088,Dax,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,40
+31446,Ramonville-Saint-Agne,ville_moyenne,ville_moyenne_Occitanie,Occitanie,31
+53062,Château-Gontier-sur-Mayenne,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,53
+13015,Bouc-Bel-Air,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+94038,L'Haÿ-les-Roses,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,94
+01283,Oyonnax,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,01
+28404,Vernouillet,ville_moyenne,ville_moyenne_Centre-Val de Loire,Centre-Val de Loire,28
+54329,Lunéville,ville_moyenne,ville_moyenne_Grand Est,Grand Est,54
+59646,Wasquehal,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,59
+76484,Oissel-sur-Seine,ville_moyenne,ville_moyenne_Normandie,Normandie,76
+33075,Bruges,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+31113,Castanet-Tolosan,ville_moyenne,ville_moyenne_Occitanie,Occitanie,31
+85109,Les Herbiers,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,85
+83107,Roquebrune-sur-Argens,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,83
+78490,Plaisir,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,78
+69202,Sainte-Foy-lès-Lyon,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+57757,Yutz,ville_moyenne,ville_moyenne_Grand Est,Grand Est,57
+59279,Halluin,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,59
+76057,Barentin,ville_moyenne,ville_moyenne_Normandie,Normandie,76
+79049,Bressuire,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,79
+30258,Saint-Gilles,ville_moyenne,ville_moyenne_Occitanie,Occitanie,30
+49307,Loire-Authion,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,49
+83115,Sainte-Maxime,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,83
+95500,Pontoise,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,95
+38563,Voiron,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,38
+55545,Verdun,ville_moyenne,ville_moyenne_Grand Est,Grand Est,55
+59163,Croix,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,59
+33167,Floirac,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+82033,Castelsarrasin,ville_moyenne,ville_moyenne_Occitanie,Occitanie,82
+44069,Guérande,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,44
+83090,Ollioules,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,83
+94073,Thiais,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,94
+69091,Givors,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+08409,Sedan,ville_moyenne,ville_moyenne_Grand Est,Grand Est,08
+59172,Denain,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,59
+47157,Marmande,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,47
+31506,Saint-Orens-de-Gameville,ville_moyenne,ville_moyenne_Occitanie,Occitanie,31
+49218,Montrevault-sur-Èvre,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,49
+13097,Saint-Martin-de-Crau,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+91657,Vigneux-sur-Seine,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,91
+63124,Cournon-d'Auvergne,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,63
+54528,Toul,ville_moyenne,ville_moyenne_Grand Est,Grand Est,54
+59507,Ronchin,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,59
+33003,Ambarès-et-Lagrave,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+82112,Moissac,ville_moyenne,ville_moyenne_Occitanie,Occitanie,82
+44172,Sainte-Luce-sur-Loire,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,44
+84019,Bollène,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,84
+91687,Viry-Châtillon,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,91
+73011,Albertville,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,73
+68376,Wittenheim,ville_moyenne,ville_moyenne_Grand Est,Grand Est,68
+59299,Hem,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,59
+33122,Cestas,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+65286,Lourdes,ville_moyenne,ville_moyenne_Occitanie,Occitanie,65
+49353,Trélazé,ville_moyenne,ville_moyenne_Pays de la Loire,Pays de la Loire,49
+84080,Monteux,ville_moyenne,ville_moyenne_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,84
+78158,Le Chesnay-Rocquencourt,ville_moyenne,ville_moyenne_Île-de-France,Île-de-France,78
+26058,Bourg-lès-Valence,ville_moyenne,ville_moyenne_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,26
+54323,Longwy,ville_moyenne,ville_moyenne_Grand Est,Grand Est,54
+59220,Faches-Thumesnil,ville_moyenne,ville_moyenne_Hauts-de-France,Hauts-de-France,59
+33056,Blanquefort,ville_moyenne,ville_moyenne_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+81105,Graulhet,ville_moyenne,ville_moyenne_Occitanie,Occitanie,81
+69069,Craponne,rurale_calme,rural_geographique_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+21617,Talant,rurale_calme,rural_geographique_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,21
+35210,Pacé,rurale_calme,rural_geographique_Bretagne,Bretagne,35
+37050,Chambray-lès-Tours,rurale_calme,rural_geographique_Centre-Val de Loire,Centre-Val de Loire,37
+2B042,Borgo,rurale_calme,rural_geographique_Corse,Corse,2B
+57433,Maizières-lès-Metz,rurale_calme,rural_geographique_Grand Est,Grand Est,57
+59574,Somain,rurale_calme,rural_geographique_Hauts-de-France,Hauts-de-France,59
+27284,Gisors,rurale_calme,rural_geographique_Normandie,Normandie,27
+33200,Le Haillan,rurale_calme,rural_geographique_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+12176,Onet-le-Château,rurale_calme,rural_geographique_Occitanie,Occitanie,12
+49018,Baugé-en-Anjou,rurale_calme,rural_geographique_Pays de la Loire,Pays de la Loire,49
+83042,Cogolin,rurale_calme,rural_geographique_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,83
+77379,Provins,rurale_calme,rural_geographique_Île-de-France,Île-de-France,77
+38485,Seyssinet-Pariset,rurale_calme,rural_geographique_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,38
+21171,Chevigny-Saint-Sauveur,rurale_calme,rural_geographique_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,21
+35069,Châteaugiron,rurale_calme,rural_geographique_Bretagne,Bretagne,35
+28229,Mainvilliers,rurale_calme,rural_geographique_Centre-Val de Loire,Centre-Val de Loire,28
+2B096,Corte,rurale_calme,rural_geographique_Corse,Corse,2B
+67204,Hœnheim,rurale_calme,rural_geographique_Grand Est,Grand Est,67
+62617,Nœux-les-Mines,rurale_calme,rural_geographique_Hauts-de-France,Hauts-de-France,62
+76114,Bolbec,rurale_calme,rural_geographique_Normandie,Normandie,76
+33284,Mios,rurale_calme,rural_geographique_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+30341,Vauvert,rurale_calme,rural_geographique_Occitanie,Occitanie,30
+49125,Doué-en-Anjou,rurale_calme,rural_geographique_Pays de la Loire,Pays de la Loire,49
+13106,Septèmes-les-Vallons,rurale_calme,rural_geographique_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+91215,Épinay-sous-Sénart,rurale_calme,rural_geographique_Île-de-France,Île-de-France,91
+38474,Sassenage,rurale_calme,rural_geographique_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,38
+25580,Valentigney,rurale_calme,rural_geographique_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,25
+35055,Chantepie,rurale_calme,rural_geographique_Bretagne,Bretagne,35
+37156,Montlouis-sur-Loire,rurale_calme,rural_geographique_Centre-Val de Loire,Centre-Val de Loire,37
+2B123,Ghisonaccia,rurale_calme,rural_geographique_Corse,Corse,2B
+51649,Vitry-le-François,rurale_calme,rural_geographique_Grand Est,Grand Est,51
+02173,Chauny,rurale_calme,rural_geographique_Hauts-de-France,Hauts-de-France,02
+76758,Yvetot,rurale_calme,rural_geographique_Normandie,Normandie,76
+87154,Saint-Junien,rurale_calme,rural_geographique_Nouvelle-Aquitaine,Nouvelle-Aquitaine,87
+12300,Villefranche-de-Rouergue,rurale_calme,rural_geographique_Occitanie,Occitanie,12
+44003,Ancenis-Saint-Géréon,rurale_calme,rural_geographique_Pays de la Loire,Pays de la Loire,44
+84141,Vedène,rurale_calme,rural_geographique_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,84
+95313,L'Isle-Adam,rurale_calme,rural_geographique_Île-de-France,Île-de-France,95
+63430,Thiers,rurale_calme,rural_geographique_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,63
+70285,Héricourt,rurale_calme,rural_geographique_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,70
+56165,Ploërmel,rurale_calme,rural_geographique_Bretagne,Bretagne,56
+36088,Issoudun,rurale_calme,rural_geographique_Centre-Val de Loire,Centre-Val de Loire,36
+2A249,Propriano,rurale_calme,rural_geographique_Corse,Corse,2A
+67437,Saverne,rurale_calme,rural_geographique_Grand Est,Grand Est,67
+59249,Fourmies,rurale_calme,rural_geographique_Hauts-de-France,Hauts-de-France,59
+50041,La Hague,rurale_calme,rural_geographique_Normandie,Normandie,50
+33051,Biganos,rurale_calme,rural_geographique_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+31483,Saint-Gaudens,rurale_calme,rural_geographique_Occitanie,Occitanie,31
+44129,Pontchâteau,rurale_calme,rural_geographique_Pays de la Loire,Pays de la Loire,44
+83071,La Londe-les-Maures,rurale_calme,rural_geographique_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,83
+91573,Saint-Pierre-du-Perray,rurale_calme,rural_geographique_Île-de-France,Île-de-France,91
+74224,La Roche-sur-Foron,rurale_calme,rural_geographique_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,74
+58086,Cosne-Cours-sur-Loire,rurale_calme,rural_geographique_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,58
+35278,Saint-Grégoire,rurale_calme,rural_geographique_Bretagne,Bretagne,35
+37109,Fondettes,rurale_calme,rural_geographique_Centre-Val de Loire,Centre-Val de Loire,37
+2B251,Prunelli-di-Fiumorbo,rurale_calme,rural_geographique_Corse,Corse,2B
+68112,Guebwiller,rurale_calme,rural_geographique_Grand Est,Grand Est,68
+62570,Méricourt,rurale_calme,rural_geographique_Hauts-de-France,Hauts-de-France,62
+76410,Maromme,rurale_calme,rural_geographique_Normandie,Normandie,76
+87114,Panazol,rurale_calme,rural_geographique_Nouvelle-Aquitaine,Nouvelle-Aquitaine,87
+66172,Saint-Estève,rurale_calme,rural_geographique_Occitanie,Occitanie,66
+49050,Brissac Loire Aubance,rurale_calme,rural_geographique_Pays de la Loire,Pays de la Loire,49
+13075,Plan-de-Cuques,rurale_calme,rural_geographique_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+94075,Villecresnes,rurale_calme,rural_geographique_Île-de-France,Île-de-France,94
+07102,Guilherand-Granges,rurale_calme,rural_geographique_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,07
+71342,Paray-le-Monial,rurale_calme,rural_geographique_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,71
+35240,Le Rheu,rurale_calme,rural_geographique_Bretagne,Bretagne,35
+37195,La Riche,rurale_calme,rural_geographique_Centre-Val de Loire,Centre-Val de Loire,37
+2A272,Sartène,rurale_calme,rural_geographique_Corse,Corse,2A
+57660,Stiring-Wendel,rurale_calme,rural_geographique_Grand Est,Grand Est,57
+59112,Bruay-sur-l'Escaut,rurale_calme,rural_geographique_Hauts-de-France,Hauts-de-France,59
+76216,Déville-lès-Rouen,rurale_calme,rural_geographique_Normandie,Normandie,76
+33519,Le Taillan-Médoc,rurale_calme,rural_geographique_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+31488,Saint-Jean,rurale_calme,rural_geographique_Occitanie,Occitanie,31
+44204,Thouaré-sur-Loire,rurale_calme,rural_geographique_Pays de la Loire,Pays de la Loire,44
+83073,Le Luc,rurale_calme,rural_geographique_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,83
+93030,Dugny,rurale_calme,rural_geographique_Île-de-France,Île-de-France,93
+07324,Tournon-sur-Rhône,rurale_calme,rural_geographique_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,07
+89206,Joigny,rurale_calme,rural_geographique_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,89
+35236,Redon,rurale_calme,rural_geographique_Bretagne,Bretagne,35
+45075,La Chapelle-Saint-Mesmin,rurale_calme,rural_geographique_Centre-Val de Loire,Centre-Val de Loire,45
+2B207,Penta-di-Casinca,rurale_calme,rural_geographique_Corse,Corse,2B
+67130,Erstein,rurale_calme,rural_geographique_Grand Est,Grand Est,67
+59273,Gravelines,rurale_calme,rural_geographique_Hauts-de-France,Hauts-de-France,59
+76476,Port-Jérôme-sur-Seine,rurale_calme,rural_geographique_Normandie,Normandie,76
+33238,Léognan,rurale_calme,rural_geographique_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+11203,Lézignan-Corbières,rurale_calme,rural_geographique_Occitanie,Occitanie,11
+44209,Treillières,rurale_calme,rural_geographique_Pays de la Loire,Pays de la Loire,44
+83098,Le Pradet,rurale_calme,rural_geographique_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,83
+91552,Saint-Germain-lès-Arpajon,rurale_calme,rural_geographique_Île-de-France,Île-de-France,91
+74208,Passy,rurale_calme,rural_geographique_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,74
+58303,Varennes-Vauzelles,rurale_calme,rural_geographique_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,58
+29105,Landivisiau,rurale_calme,rural_geographique_Bretagne,Bretagne,29
+45169,Ingré,rurale_calme,rural_geographique_Centre-Val de Loire,Centre-Val de Loire,45
+2B134,L'Île-Rousse,rurale_calme,rural_geographique_Corse,Corse,2B
+57019,Amnéville,rurale_calme,rural_geographique_Grand Est,Grand Est,57
+59386,Marquette-lez-Lille,rurale_calme,rural_geographique_Hauts-de-France,Hauts-de-France,59
+50025,Avranches,rurale_calme,rural_geographique_Normandie,Normandie,50
+24053,Boulazac Isle Manoire,rurale_calme,rural_geographique_Nouvelle-Aquitaine,Nouvelle-Aquitaine,24
+31116,Castelginest,rurale_calme,rural_geographique_Occitanie,Occitanie,31
+44015,Blain,rurale_calme,rural_geographique_Pays de la Loire,Pays de la Loire,44
+13110,Trets,rurale_calme,rural_geographique_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+91021,Arpajon,rurale_calme,rural_geographique_Île-de-France,Île-de-France,91
+42184,Riorges,rurale_calme,rural_geographique_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,42
+21515,Quetigny,rurale_calme,rural_geographique_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,21
+35126,Guichen,rurale_calme,rural_geographique_Bretagne,Bretagne,35
+18205,Saint-Doulchard,rurale_calme,rural_geographique_Centre-Val de Loire,Centre-Val de Loire,18
+2A362,Zonza,rurale_calme,rural_geographique_Corse,Corse,2A
+51573,Tinqueux,rurale_calme,rural_geographique_Grand Est,Grand Est,51
+59544,Saint-Saulve,rurale_calme,rural_geographique_Hauts-de-France,Hauts-de-France,59
+50099,Carentan-les-Marais,rurale_calme,rural_geographique_Normandie,Normandie,50
+64430,Orthez,rurale_calme,rural_geographique_Nouvelle-Aquitaine,Nouvelle-Aquitaine,64
+81140,Lavaur,rurale_calme,rural_geographique_Occitanie,Occitanie,81
+85003,Aizenay,rurale_calme,rural_geographique_Pays de la Loire,Pays de la Loire,85
+84088,Pernes-les-Fontaines,rurale_calme,rural_geographique_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,84
+91200,Dourdan,rurale_calme,rural_geographique_Île-de-France,Île-de-France,91
+01160,Ferney-Voltaire,rurale_calme,rural_geographique_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,01
+21278,Fontaine-lès-Dijon,rurale_calme,rural_geographique_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,21
+56240,Sarzeau,rurale_calme,rural_geographique_Bretagne,Bretagne,56
+18197,Saint-Amand-Montrond,rurale_calme,rural_geographique_Centre-Val de Loire,Centre-Val de Loire,18
+2B342,Ventiseri,rurale_calme,rural_geographique_Corse,Corse,2B
+10362,Sainte-Savine,rurale_calme,rural_geographique_Grand Est,Grand Est,10
+62318,Étaples,rurale_calme,rural_geographique_Hauts-de-France,Hauts-de-France,62
+76165,Caudebec-lès-Elbeuf,rurale_calme,rural_geographique_Normandie,Normandie,76
+64422,Oloron-Sainte-Marie,rurale_calme,rural_geographique_Nouvelle-Aquitaine,Nouvelle-Aquitaine,64
+66008,Argelès-sur-Mer,rurale_calme,rural_geographique_Occitanie,Occitanie,66
+44009,Basse-Goulaine,rurale_calme,rural_geographique_Pays de la Loire,Pays de la Loire,44
+05023,Briançon,rurale_calme,rural_geographique_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,05
+77153,Dammartin-en-Goële,rurale_calme,rural_geographique_Île-de-France,Île-de-France,77
+63032,Beaumont,rurale_calme,rural_geographique_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,63
+39478,Saint-Claude,rurale_calme,rural_geographique_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,39
+29160,Plabennec,rurale_calme,rural_geographique_Bretagne,Bretagne,29
+45286,Saint-Jean-le-Blanc,rurale_calme,rural_geographique_Centre-Val de Loire,Centre-Val de Loire,45
+2B009,Aléria,rurale_calme,rural_geographique_Corse,Corse,2B
+68375,Wittelsheim,rurale_calme,rural_geographique_Grand Est,Grand Est,68
+59636,Wambrechies,rurale_calme,rural_geographique_Hauts-de-France,Hauts-de-France,59
+27467,Pont-Audemer,rurale_calme,rural_geographique_Normandie,Normandie,27
+33312,Parempuyre,rurale_calme,rural_geographique_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+30202,Pont-Saint-Esprit,rurale_calme,rural_geographique_Occitanie,Occitanie,30
+85128,Luçon,rurale_calme,rural_geographique_Pays de la Loire,Pays de la Loire,85
+13069,Pélissanne,rurale_calme,rural_geographique_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,13
+77487,Vaux-le-Pénil,rurale_calme,rural_geographique_Île-de-France,Île-de-France,77
+69243,Tarare,rurale_calme,rural_geographique_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,69
+71486,Saint-Vallier,rurale_calme,rural_geographique_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,71
+35334,Thorigné-Fouillard,rurale_calme,rural_geographique_Bretagne,Bretagne,35
+28280,Nogent-le-Rotrou,rurale_calme,rural_geographique_Centre-Val de Loire,Centre-Val de Loire,28
+2B087,Cervione,rurale_calme,rural_geographique_Corse,Corse,2B
+67067,Brumath,rurale_calme,rural_geographique_Grand Est,Grand Est,67
+59011,Annœullin,rurale_calme,rural_geographique_Hauts-de-France,Hauts-de-France,59
+76212,Darnétal,rurale_calme,rural_geographique_Normandie,Normandie,76
+86041,Buxerolles,rurale_calme,rural_geographique_Nouvelle-Aquitaine,Nouvelle-Aquitaine,86
+34255,Saint-Gély-du-Fesc,rurale_calme,rural_geographique_Occitanie,Occitanie,34
+44212,Vallet,rurale_calme,rural_geographique_Pays de la Loire,Pays de la Loire,44
+84003,Apt,rurale_calme,rural_geographique_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,84
+78674,Villepreux,rurale_calme,rural_geographique_Île-de-France,Île-de-France,78
+26252,Portes-lès-Valence,rurale_calme,rural_geographique_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,26
+39097,Champagnole,rurale_calme,rural_geographique_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,39
+35136,Janzé,rurale_calme,rural_geographique_Bretagne,Bretagne,35
+45089,Chécy,rurale_calme,rural_geographique_Centre-Val de Loire,Centre-Val de Loire,45
+2A209,Peri,rurale_calme,rural_geographique_Corse,Corse,2A
+68256,Pfastatt,rurale_calme,rural_geographique_Grand Est,Grand Est,68
+60141,Chantilly,rurale_calme,rural_geographique_Hauts-de-France,Hauts-de-France,60
+76319,Grand-Couronne,rurale_calme,rural_geographique_Normandie,Normandie,76
+79202,Parthenay,rurale_calme,rural_geographique_Nouvelle-Aquitaine,Nouvelle-Aquitaine,79
+34337,Villeneuve-lès-Maguelone,rurale_calme,rural_geographique_Occitanie,Occitanie,34
+49267,Saint-Barthélemy-d'Anjou,rurale_calme,rural_geographique_Pays de la Loire,Pays de la Loire,49
+06084,Mouans-Sartoux,rurale_calme,rural_geographique_Provence-Alpes-Côte d'Azur,Provence-Alpes-Côte d'Azur,06
+77067,Cesson,rurale_calme,rural_geographique_Île-de-France,Île-de-France,77
+38085,Charvieu-Chavagneux,rurale_calme,rural_geographique_Auvergne-Rhône-Alpes,Auvergne-Rhône-Alpes,38
+71105,Charnay-lès-Mâcon,rurale_calme,rural_geographique_Bourgogne-Franche-Comté,Bourgogne-Franche-Comté,71
+35152,Liffré,rurale_calme,rural_geographique_Bretagne,Bretagne,35
+45082,Châteauneuf-sur-Loire,rurale_calme,rural_geographique_Centre-Val de Loire,Centre-Val de Loire,45
+2B313,San-Nicolao,rurale_calme,rural_geographique_Corse,Corse,2B
+54482,Saint-Max,rurale_calme,rural_geographique_Grand Est,Grand Est,54
+62525,Longuenesse,rurale_calme,rural_geographique_Hauts-de-France,Hauts-de-France,62
+27056,Bernay,rurale_calme,rural_geographique_Normandie,Normandie,27
+33433,Saint-Loubès,rurale_calme,rural_geographique_Nouvelle-Aquitaine,Nouvelle-Aquitaine,33
+31588,Villeneuve-Tolosane,rurale_calme,rural_geographique_Occitanie,Occitanie,31
+85084,Essarts-en-Bocage,rurale_calme,rural_geographique_Pays de la Loire,Pays de la Loire,85

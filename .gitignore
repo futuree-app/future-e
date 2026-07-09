@@ -97,3 +97,6 @@ data/rp-mobpro-2022.parquet
 
 # Captures/scripts de debug temporaires
 .tmp-audit-screenshots/
+
+# Sorties de spikes de recherche (regenerables par scripts/research/)
+/tmp/
