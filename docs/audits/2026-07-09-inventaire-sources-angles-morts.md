@@ -70,16 +70,12 @@ en trois lignes : compter les locaux bâtis de la mutation, et l'écarter s'il y
 *Deux fausses alertes, levées par vérification.* Le `split(",")` sans gestion des guillemets est sûr :
 geo-dvf n'en contient aucun. Et l'Alsace-Moselle est déjà gérée.
 
-Deux pièges, **mesurés, non supposés** :
+#### Le second piège : les petits effectifs
 
-- **Multi-lots : 50 % des mutations.** Une vente peut porter plusieurs biens (un lot et un garage,
-  un immeuble entier). `valeur_fonciere / surface` est alors faux, presque toujours surestimé. Il
-  faut ne garder que les mutations à un seul local bâti, sans dépendance. Ce nettoyage écarte la
-  moitié du fichier.
-- **Petits effectifs.** Une médiane sur trois ventes n'est pas un prix. En imposant un seuil de 20
-  ventes sur au moins un des deux types de bien, la couverture reste à **98 % des lecteurs**
-  (79 communes sur 114). Les appartements sont mal couverts hors des villes (30 communes à n≥30),
-  les maisons le sont bien (56 communes).
+Une médiane sur trois ventes n'est pas un prix. Avec un seuil de 20 ventes sur au moins un des deux
+types de bien, la couverture atteint **98 % des lecteurs** (79 communes sur 114 de l'échantillon
+pondéré par la population). Les appartements sont mal couverts hors des villes, les maisons le sont
+bien. La production impose un seuil de 10 et se replie sur l'EPCI, ce qui traite le problème.
 
 *Le script `dvf-couverture.mjs` a lui-même produit l'artefact qu'il mesurait à son premier essai :
 il affichait « Millas, 380 €/m² » sur **une seule vente**, parce que le seuil portait sur le total
@@ -107,8 +103,9 @@ sans invention.
 #### Le calcul national, fait de bout en bout
 
 `scripts/research/dvf-prix-national.mjs` lit les fichiers nationaux en flux (88 Mo gzip par année),
-écarte les multi-lots, applique un seuil, et préfère le millésime le plus récent en ne cumulant que
-si nécessaire. Résultats sur 2024, puis 2024+2023+2022 :
+applique un seuil, et préfère le millésime le plus récent en ne cumulant que si nécessaire.
+(Il écarte les ventes à plusieurs lots, y compris les dépendances : lecture plus stricte que la
+production, retenue ici pour mesurer la couverture minimale.) Résultats sur 2024, puis 2024+2023+2022 :
 
 | | Un millésime (2024) | Trois millésimes |
 |---|---:|---:|
