@@ -78,11 +78,43 @@ async function ensureRaw() {
 }
 
 // Agrégation DVF : par commune, listes de €/m² (maison, appartement).
+//
+// `valeur_fonciere` porte sur la MUTATION entière, pas sur la ligne. Une vente peut comprendre
+// plusieurs locaux. Deux cas, à ne pas confondre :
+//
+//  - un logement + ses dépendances (garage, cave) : 42 % des ventes, c'est le cas normal. L'acheteur
+//    paie l'ensemble, et la convention du marché rapporte ce prix à la surface habitable. On garde.
+//  - PLUSIEURS logements (immeuble, deux appartements vendus ensemble) : 10 % des ventes. Rapporter
+//    le prix du tout à la surface du premier surestime le €/m². On écarte.
+//
+// Effet mesuré du second cas sur le prix médian communal (fichier national 2024, 10 297 couples
+// commune × type) : médiane +0,76 %, p90 +9,7 %, p99 +30,7 %. Un cinquième des couples surestimé de
+// plus de 5 %. Détail : docs/audits/2026-07-09-inventaire-sources-angles-morts.md
 function parseDvf(file, achat) {
   return new Promise((res) => {
     const rl = readline.createInterface({ input: fs.createReadStream(file).pipe(zlib.createGunzip()) });
     let H = null, I = {};
-    const seen = new Set(); // dedup mutation (par fichier-année)
+    // geo-dvf groupe les lignes d'une mutation. On ne s'y fie pas : `closes` détecte une reprise.
+    const closes = new Set();
+    let courante = null, lots = [];
+
+    const vider = () => {
+      if (!lots.length) return;
+      const groupe = lots;
+      lots = [];
+      const id = groupe[0][I.id];
+      if (closes.has(id)) return; // mutation déjà close : le fichier n'est plus groupé, on ne recompose pas
+      closes.add(id);
+      const logements = groupe.filter((c) => c[I.t] === "Appartement" || c[I.t] === "Maison");
+      if (logements.length !== 1) return; // 0 logement, ou plusieurs : la valeur ne se rapporte à aucun m²
+      const seul = logements[0];
+      const v = parseFloat(seul[I.v]), s = parseFloat(seul[I.s]);
+      if (!(v > 0) || !(s > 0)) return;
+      const pm = v / s;
+      if (pm < 300 || pm > 20000) return; // garde-fou aberrants
+      (achat[seul[I.c]] ??= { maison: [], appart: [] })[seul[I.t] === "Maison" ? "maison" : "appart"].push(pm);
+    };
+
     rl.on("line", (l) => {
       if (H === null) {
         H = l.split(",");
@@ -92,17 +124,10 @@ function parseDvf(file, achat) {
       }
       const c = l.split(",");
       if (c[I.n] !== "Vente") return;
-      const t = c[I.t];
-      if (t !== "Appartement" && t !== "Maison") return;
-      const v = parseFloat(c[I.v]), s = parseFloat(c[I.s]);
-      if (!(v > 0) || !(s > 0)) return;
-      if (seen.has(c[I.id])) return;
-      seen.add(c[I.id]);
-      const pm = v / s;
-      if (pm < 300 || pm > 20000) return; // garde-fou aberrants
-      (achat[c[I.c]] ??= { maison: [], appart: [] })[t === "Maison" ? "maison" : "appart"].push(pm);
+      if (c[I.id] !== courante) { vider(); courante = c[I.id]; }
+      lots.push(c);
     });
-    rl.on("close", res);
+    rl.on("close", () => { vider(); res(); });
   });
 }
 
