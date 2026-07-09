@@ -238,16 +238,35 @@ En relisant les 28 critères, cinq besoins d'un lecteur ne sont couverts par auc
 
 ### Un indicateur inédit, à partir de deux sources déjà présentes
 
-futur•e possède le prix d'achat (DVF) et le loyer (ANIL). Personne ne les croise. Leur rapport donne
-le **nombre d'années de loyer nécessaires pour payer le prix d'achat**, au mètre carré.
+futur•e possède le prix d'achat (DVF) et le loyer (ANIL), tous deux dans l'index. Personne ne les
+croise. Leur rapport donne le **nombre d'années de loyer nécessaires pour payer le prix d'achat**,
+au mètre carré.
 
 Sur 8 314 communes : médiane **17,7 ans**, p10 12,1, p90 23,8. Hirson 6,8 ans. Paris 18e 49,2 ans.
-Lège-Cap-Ferret 64,7 ans. **Chamonix 83,5 ans.**
+**Megève 85,5 ans.**
 
-Il ne juge rien, il décrit un fait : là où l'indicateur s'envole, le prix d'achat n'est plus fixé par
-ceux qui habitent, mais par des acheteurs extérieurs. C'est une information décisive pour quelqu'un
-qui veut s'installer, et elle est invisible dans le prix seul. Elle recoupe `saisonnalite`
-(résidences secondaires), déjà dans l'index, ce qui permettrait de la valider.
+**Hypothèse testée, et réfutée.** J'ai avancé que cet indicateur mesurait la captation du logement
+par des acheteurs extérieurs. Confronté à `data/residences-secondaires.json` (25 677 communes), il
+n'en est rien : la corrélation de rang est de **‑0,152**, donc nulle et de signe contraire. Le
+quartile où l'achat est le plus vite rentable compte *plus* de résidences secondaires (11,2 %) que
+celui où il est le plus cher (5,3 %) : les villages en déprise ont beaucoup de résidences secondaires
+et des prix bas.
+
+**Ce que l'indicateur fait réellement.** Il détecte un extrême, avec une précision remarquable :
+
+| | Résidences secondaires (médiane) | Part au-dessus de 40 % |
+|---|---:|---:|
+| centile supérieur | **58,5 %** | **73 %** |
+| décile supérieur | 10,3 % | 23 % |
+| tout le reste | 6,4 % | 4 % |
+
+Megève 85,5 ans et 82,9 % de résidences secondaires. Saint-Tropez 71,3 ans et 68,3 %. La Clusaz
+66,1 ans et 83,9 %.
+
+Ce n'est donc pas un indicateur continu à afficher partout : c'est un **seuil**. Au-delà d'environ
+cinquante années de loyer, le prix d'achat a décroché du loyer local, et trois communes sur quatre
+sont des communes de résidences secondaires. Pour quelqu'un qui veut s'installer et travailler là,
+c'est un fait décisif que le prix seul ne dit pas.
 
 ### Sur la Carte des loyers, une lecture à ne pas se tromper
 
