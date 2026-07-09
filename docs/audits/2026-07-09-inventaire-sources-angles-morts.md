@@ -62,6 +62,41 @@ Deux réserves de doctrine. Le prix est le **seul signal mobile** du produit : l
 sont structurels et bougent tous les cinq ans, le marché bouge tous les six mois. Et le prix
 **corrèle** avec la moitié des critères (mer, services, transports) : l'intégrer au score le ferait
 compter deux fois. Une contrainte dure, appliquée en amont du score, évite ce double comptage.
+`HardConstraints` porte déjà `communeSize: {min, max}` et `nearSea: {maxKm}` : un budget s'y insère
+sans invention.
+
+#### Le calcul national, fait de bout en bout
+
+`scripts/research/dvf-prix-national.mjs` lit les fichiers nationaux en flux (88 Mo gzip par année),
+écarte les multi-lots, applique un seuil, et préfère le millésime le plus récent en ne cumulant que
+si nécessaire. Résultats sur 2024, puis 2024+2023+2022 :
+
+| | Un millésime (2024) | Trois millésimes |
+|---|---:|---:|
+| mutations lues | 1 229 371 | 4 279 254 |
+| écartées (multi-lots) | 39 % | 40 % |
+| retenues | 23 % | 23 % |
+| **communes avec un prix** | 2 714 (7,8 %) | **8 426 (24,2 %)** |
+| **population couverte** | 60,7 % | **79,8 %** |
+
+Le cumul triple la couverture. Il coûte de l'actualité : **67 % des prix reposent alors sur trois
+ans**, dans un marché qui a baissé sur la période. Le script marque donc chaque prix de sa fenêtre
+(`"2024"` ou `"2022-2024"`), pour qu'un prix cumulé ne soit jamais présenté comme un prix de l'année.
+
+Les 26 452 communes sans prix ont une population médiane de **306 habitants**. C'est attendu : un
+village vend trois maisons par an. Un repli sur l'unité urbaine ou l'EPCI les couvrirait.
+
+#### Le trou qu'il ne faut jamais livrer en silence
+
+**DVF ne couvre pas l'Alsace-Moselle.** Moselle, Bas-Rhin et Haut-Rhin : **zéro commune sur 1 605**.
+Strasbourg, Metz, Mulhouse, Colmar, Haguenau n'ont aucun prix. Ces départements relèvent du **livre
+foncier de droit local**, non de la publicité foncière de la DGFiP, et aucune source ouverte
+équivalente n'existe.
+
+Trois millions d'habitants. Un critère prix livré sans le dire exclurait silencieusement l'Alsace et
+la Moselle des recommandations, ce qui est précisément le mode d'échec que ce projet a déjà payé une
+fois (cf. `/memory/home_insee_code_pitfall`). Il faut l'écrire dans l'interface, pas dans un
+commentaire de code.
 
 ### 2. Les servitudes et secteurs de sols ★★★
 
@@ -73,17 +108,36 @@ réelles, 51 % de la population, une adresse sur six avec une servitude à moins
 Déjà documenté dans `2026-07-09-rapport-vivant-matiere-par-critere.md`. 91 % des lecteurs, grain
 adresse, `geo_distance` disponible.
 
-### 4. L'isochrone IGN, le temps de trajet réel ★★
+### 4. Le trajet réel : isochrone et itinéraire IGN ★★
 
-`https://data.geopf.fr/navigation/isochrone?resource=bdtopo-valhalla&point={lon},{lat}&costValue=900&costType=time&profile=car`
+Deux services de la Géoplateforme répondent **sans clé** :
+`data.geopf.fr/navigation/isochrone` (polygone) et `data.geopf.fr/navigation/itineraire`
+(distance et durée réelles).
 
-Répond sans clé, rend un polygone. Or futur•e calcule aujourd'hui ses critères d'accès en
-**distance à vol d'oiseau** (haversine, rayons adaptatifs). Un isochrone est la vraie mesure : quinze
-minutes de voiture depuis une adresse, ce n'est pas un cercle.
+Or futur•e calcule ses critères d'accès en **distance à vol d'oiseau** (haversine, rayons
+adaptatifs). Sept critères sur vingt-huit reposent sur cette approximation : `acces_soins`,
+`acces_services`, `acces_ecoles`, `acces_culture`, `acces_transports`, `mobilite_quotidienne`,
+`faible_dependance_auto`.
 
-Cette source n'ajoute pas un critère. Elle **améliore la vérité** de `acces_soins`, `acces_services`,
-`acces_ecoles`, `acces_culture`, `acces_transports`, `mobilite_quotidienne`, `faible_dependance_auto`.
-Sept critères sur vingt-huit, tous fondés sur une approximation qu'on peut remplacer.
+**Ce que l'écart vaut réellement.** Mesuré sur 44 communes tirées au prorata de la population, en
+comparant la route vers la ville de plus de 50 000 habitants la plus proche à la distance à vol
+d'oiseau (indice de détour) :
+
+- médiane **1,38**, p10 1,23, p90 1,74
+- **23 % des communes dépassent 1,6**
+- extrêmes : Le Pellerin **2,21** (20,9 km à vol d'oiseau, 46,4 km et 58 minutes par la route,
+  l'estuaire de la Loire est en travers), Villette-d'Anthon 1,98, contre Épinal 1,13.
+
+Le biais est donc **modéré en médiane et sévère pour une minorité identifiable** : celles qu'un
+obstacle sépare de leur pôle (estuaire, fleuve sans pont, relief). Le remède n'est pas de tout
+recalculer, c'est de corriger là où le détour est fort.
+
+*Erreur de méthode à consigner.* J'ai d'abord mesuré le « rayon équivalent » de l'isochrone (le
+rayon du disque de même aire) et conclu à un facteur 3,4 entre communes. La métrique était fausse :
+un isochrone est une étoile dont les doigts suivent les routes, et son aire est petite quand sa
+portée est grande. Une calibration en distance (5 km de réseau donnent 3,4 km de rayon équivalent,
+10 km en donnent 7,2) a montré que le calcul d'aire était juste et que **la métrique ne l'était
+pas**. L'indice de détour, lui, répond à la question posée.
 
 ### 5. L'IPS des collèges ★ (puissant et toxique)
 
