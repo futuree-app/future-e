@@ -110,12 +110,57 @@ construire le moteur de diff**, sans quoi le moteur tourne à vide sur la donné
    Un état a une date de fin (l'arrêté de La Rochelle expire le 31 octobre 2026) : le rapport vivant
    du résident doit donc **oublier**, ce qu'un diff, qui empile, ne sait pas faire.
 
+## La source qui manquait : les logements neufs livrés (DPE, ADEME)
+
+Un DPE « logement neuf » est émis à l'achèvement. C'est donc un **logement livré, daté, géolocalisé
+à l'adresse BAN**. Le jeu compte 1 394 020 lignes, et l'API accepte `geo_distance`.
+
+Mesuré sur les mêmes 120 communes, fenêtre de 12 mois :
+
+| | Communes | Lecteurs |
+|---|---:|---:|
+| au moins 1 logement neuf livré | 96 / 120 | **98 %** |
+| au moins 10 logements neufs livrés | 60 / 120 | **91 %** |
+
+Médiane : 10 logements neufs par commune. Normalisé par la population, le taux médian est de
+**1,3 logement neuf pour 1 000 habitants et par an** (p75 : 2,9 ; p90 : 5,5), ce qui en fait un
+signal discriminant : Le Plessis-Robinson atteint 29,4 ‰, soit 859 logements pour 29 228 habitants.
+
+À l'adresse, la requête fonctionne : onze logements neufs livrés dans un rayon d'un kilomètre autour
+d'un point rochelais sur douze mois, zéro à moins de 300 mètres.
+
+**Trois réserves, à porter dans la doctrine avant tout usage.**
+
+1. **Le DPE dit le passé, pas l'avenir.** Il est établi à l'achèvement. Un lecteur qui veut savoir si
+   le champ d'en face deviendra un lotissement l'apprendra une fois le lotissement construit. Seul
+   un permis de construire (Sitadel) anticiperait, et Sitadel n'a pas d'API.
+2. **Le signal est ambivalent.** Des logements neufs valent dynamisme pour l'un, bétonisation pour
+   l'autre. La doctrine `croissance_demographique` s'applique : décrire, jamais juger.
+3. **Aucun critère ne le porte.** Comme les servitudes.
+
+## Ce que l'exploration élargie conclut
+
+Les trois sources qui feraient réellement vivre un rapport sont les **servitudes** (opposables,
+décisives, 16 % des adresses à 500 m), les **logements neufs livrés** (91 % des lecteurs) et, loin
+derrière, les **arrêtés CatNat** et les **créations d'ICPE**.
+
+Elles ont un point commun que ni Le Fil ni le rapport vivant n'avaient anticipé : **elles se lisent
+au grain ADRESSE**, et deux d'entre elles n'ont aucun critère pour les porter.
+
+Le rapport vivant n'est donc pas un produit du module Territoire (grain commune). C'est un produit
+du module **Logement** (grain adresse), là où se trouve déjà le moat. Et la Face 3 « Autour de cette
+adresse » existe, avec son snapshot figé (`logement-store.ts`, `SOURCES_VERSION`), ce qui rend le
+diff possible sans architecture nouvelle : il suffit de conserver l'ancien snapshot au lieu de
+l'invalider.
+
 ## Ce qui reste ouvert
 
-- **Sitadel** (permis de construire) n'a pas d'API, seulement des fichiers mensuels. C'est pourtant
-  la seule source qui dirait « ce qui se construit autour de chez vous ». À évaluer.
-- **DPE (ADEME)** : flux daté, grain adresse, non mesuré ici.
+- **Sitadel** (permis de construire) : la seule source qui dirait ce qui *va* se construire. Pas
+  d'API trouvée. Piste non vérifiée.
 - **Restrictions d'eau historiques** : Vigieau expose l'état courant. L'historique reste à trouver
   pour transformer une saison en série.
-- **La création d'un critère « servitudes »** au grain adresse (module Logement), qui ferait exister
-  dans le produit la donnée que le spike a désignée comme la plus décisive.
+- **Obligations légales de débroussaillement** (`/api/v1/old`) : booléen communal, sans date ni
+  géométrie. Charge légale réelle pour un propriétaire, aucun critère ne la porte. Statique, donc
+  hors rapport vivant, mais candidate pour le module Logement.
+- **La création d'un critère « servitudes »** au grain adresse, qui ferait exister dans le produit
+  la donnée que le spike a désignée comme la plus décisive.
