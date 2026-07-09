@@ -20,7 +20,7 @@ Quatre filtres, dans cet ordre. Une source ne survit que si elle les passe tous.
 `irep`, `littoral`, `onrn-sinistralite`, `pollen`, `pprn-zonage`, `renovation`, `rge`, `vigieau`,
 `zfe`, plus Géorisques, BPE, INSEE, OSM, SNCF, MESR. Le balayage ne cherche que dans les angles morts.
 
-## Les cinq découvertes
+## Les découvertes
 
 ### 1. DVF, le prix réel des ventes — CE N'ÉTAIT PAS UN ANGLE MORT
 
@@ -178,7 +178,43 @@ portée est grande. Une calibration en distance (5 km de réseau donnent 3,4 km 
 10 km en donnent 7,2) a montré que le calcul d'aire était juste et que **la métrique ne l'était
 pas**. L'indice de détour, lui, répond à la question posée.
 
-### 5. L'IPS des collèges ★ (puissant et toxique)
+### 5. Le Géoportail de l'urbanisme, à l'adresse ★★★
+
+`apicarto.ign.fr/api/gpu/{zone-urba, assiette-sup-s, prescription-surf}?geom={Point}`
+
+Le projet appelle déjà `apicarto.ign.fr/api/cadastre/parcelle` (`src/lib/cadastre.ts`) et **jamais**
+`/gpu/*`. Or `cadastre.ts` obtient déjà la géométrie de la parcelle d'une adresse : le GPU peut donc
+être interrogé sur la parcelle entière, pas seulement sur un point.
+
+Ce qu'il rend, pour une adresse :
+
+- **la zone du PLU** : `U` (urbain), `AU` (à urbaniser), `A` (agricole), `N` (naturel). Un terrain en
+  A ou N n'est pas constructible. C'est la première question d'un acheteur de terrain, et futur•e ne
+  la pose nulle part.
+- **toutes les servitudes**, non la seule famille « sols pollués » de Géorisques : monuments
+  historiques (`AC1`), sites patrimoniaux remarquables (`AC4`), sites classés (`AC2`), captages d'eau
+  (`AS1`), risques (`PM1`, `PM3`), lignes électriques, voies ferrées.
+- **les prescriptions** : espaces boisés classés, emplacements réservés.
+
+Mesuré sur 10 adresses contrastées puis 40 communes :
+
+| | |
+|---|---|
+| PLU versé au GPU | **85 %** des communes |
+| au moins une servitude sur le point | 45 % |
+| Strasbourg centre | **78 servitudes** (périmètres de monuments historiques) |
+| Cap-Ferret | zone **N**, non constructible |
+
+*Réserve de méthode : les 40 communes ont été interrogées sur leur centroïde géométrique, qui tombe
+souvent en pleine campagne. Le taux de 45 % est donc plutôt une borne basse pour une vraie adresse.*
+
+**Le lien que personne n'a fait.** Une adresse dans un périmètre `AC1` ou `AC4` est soumise à l'avis
+de l'Architecte des Bâtiments de France. En pratique, **l'isolation par l'extérieur y est le plus
+souvent refusée**. Or futur•e possède déjà une Face 1 « lecture thermique » et un module rénovation
+(`renovation.ts`, `dpe.ts`) qui recommandent des travaux. Le produit conseille aujourd'hui des
+travaux sans savoir si l'adresse a le droit de les faire.
+
+### 6. L'IPS des collèges ★ (puissant et toxique)
 
 `data.education.gouv.fr`, jeu `fr-en-ips-colleges-ap2022`. 6 973 collèges, avec `code_insee`,
 `secteur`, `effectifs`, `ips` (de 59,0 à 163,3).
