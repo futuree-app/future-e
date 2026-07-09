@@ -22,14 +22,53 @@ Quatre filtres, dans cet ordre. Une source ne survit que si elle les passe tous.
 
 ## Les cinq découvertes
 
-### 1. DVF, le prix réel des ventes ★★★
+### 1. DVF, le prix réel des ventes — CE N'ÉTAIT PAS UN ANGLE MORT
+
+> **Correction.** Ce paragraphe affirmait d'abord que le prix était absent de futur•e. C'est faux, et
+> je l'ai découvert en fin de balayage, en inspectant l'index plutôt qu'en relisant `PREFERENCE_KEYS`.
+> `scripts/populate-logement.mjs` calcule **déjà** le prix depuis DVF (millésimes 2021-2024), avec un
+> seuil de 10 ventes et un **repli sur l'EPCI**, et utilise **déjà** la Carte des loyers de l'ANIL.
+> L'index porte `logement.achat.{maison,appart}.eur_m2` et `logement.location`.
+>
+> Mieux : l'en-tête du script grave la doctrine. *« Logement = MODULE, pas critère de classement. Le
+> comparateur n'a besoin que d'un niveau de prix relatif, pas d'un chiffre, pas d'accessibilité
+> (revenu = biais, réservé au futur module). »* L'absence du prix dans les 28 critères est donc une
+> **décision arbitrée**, non un oubli. Et l'Alsace-Moselle est déjà traitée : Strasbourg, Metz et
+> Mulhouse portent `achat.dispo = false`, la location restant affichée.
+>
+> Ce qui suit garde sa valeur : la couverture nationale mesurée, le trou Alsace-Moselle documenté,
+> et surtout l'audit du calcul existant, ci-dessous.
 
 `https://files.data.gouv.fr/geo-dvf/latest/csv/{annee}/communes/{dept}/{insee}.csv`
 Millésimes 2022 à 2025. Grain **adresse**, avec coordonnées, date de mutation, surface, type de bien.
 
-**Aucun des 28 critères ne parle du prix.** C'est la première contrainte de « où vivre », et elle est
-absente. Recommander Annecy à quelqu'un qui dispose de 200 000 € n'est pas une nuance de score, c'est
-une réponse fausse. Le code a déjà le concept qu'il faut : `HardConstraints`, non `Preference`.
+#### Audit du calcul en production : un défaut réel, borné
+
+`populate-logement.mjs` déduplique les **lignes** d'une mutation (`if (seen.has(id)) return`) et
+retient la première ligne bâtie, avec la `valeur_fonciere` de la mutation **entière**.
+
+Ma première hypothèse était qu'il fallait écarter toutes les ventes multi-lots. **Les données m'ont
+donné tort** : 42 % des mutations sont des ventes avec dépendance (une maison et son garage), qui
+sont le cas normal. L'acheteur paie l'ensemble, et la convention du marché rapporte ce prix à la
+surface habitable. Écarter ces ventes ne garderait que 26 % du fichier, sur-représentant les biens
+sans dépendance. La méthode de production est donc **conforme à la convention**, et c'est ma
+« méthode stricte » qui biaisait.
+
+Le vrai défaut est plus étroit : les mutations comprenant **plusieurs logements** (un immeuble, deux
+appartements vendus ensemble). La production attribue alors le prix du tout à la surface du premier.
+
+Mesuré sur le fichier national 2024 (1 148 336 ventes) :
+
+- **10 % des ventes portent plusieurs logements.**
+- Effet sur le prix médian communal, sur 10 297 couples (commune, type) :
+  **médiane +0,76 %**, p90 **+9,7 %**, p99 **+30,7 %**.
+- **20 % des couples sont surestimés de plus de 5 %.**
+
+Négligeable en médiane, notable pour un cinquième des communes, sévère pour 1 %. Le correctif tient
+en trois lignes : compter les locaux bâtis de la mutation, et l'écarter s'il y en a plus d'un.
+
+*Deux fausses alertes, levées par vérification.* Le `split(",")` sans gestion des guillemets est sûr :
+geo-dvf n'en contient aucun. Et l'Alsace-Moselle est déjà gérée.
 
 Deux pièges, **mesurés, non supposés** :
 
@@ -158,11 +197,37 @@ En relisant les 28 critères, cinq besoins d'un lecteur ne sont couverts par auc
 
 | Angle mort | Source testée | Statut |
 |---|---|---|
-| **Le prix** (contrainte n°1) | DVF | vérifié, exploitable |
+| ~~Le prix~~ | DVF | **déjà en place** (module Logement, non-critère assumé) |
 | **La sécurité** | base communale SSMSI | fichier annuel, `xlsx`, mis à jour le 2026-07-09 |
 | **La qualité de l'école**, pas sa distance | IPS collèges | vérifié, toxique |
-| **Le temps de trajet réel** | isochrone IGN | vérifié, sans clé |
+| **Le temps de trajet réel** | isochrone et itinéraire IGN | vérifié, sans clé |
 | **Le coût récurrent** (taxe foncière, ordures) | `fiscalite-locale-des-particuliers` | incomplet, voir ci-dessous |
+
+### Un indicateur inédit, à partir de deux sources déjà présentes
+
+futur•e possède le prix d'achat (DVF) et le loyer (ANIL). Personne ne les croise. Leur rapport donne
+le **nombre d'années de loyer nécessaires pour payer le prix d'achat**, au mètre carré.
+
+Sur 8 314 communes : médiane **17,7 ans**, p10 12,1, p90 23,8. Hirson 6,8 ans. Paris 18e 49,2 ans.
+Lège-Cap-Ferret 64,7 ans. **Chamonix 83,5 ans.**
+
+Il ne juge rien, il décrit un fait : là où l'indicateur s'envole, le prix d'achat n'est plus fixé par
+ceux qui habitent, mais par des acheteurs extérieurs. C'est une information décisive pour quelqu'un
+qui veut s'installer, et elle est invisible dans le prix seul. Elle recoupe `saisonnalite`
+(résidences secondaires), déjà dans l'index, ce qui permettrait de la valider.
+
+### Sur la Carte des loyers, une lecture à ne pas se tromper
+
+Le champ `loypredm2` est un loyer **prédit** (registre « modélisé » de `doctrine/data.md`), assorti
+d'un intervalle `lwr.IPm2` / `upr.IPm2` large : **51 % de la valeur en médiane**.
+
+Cet intervalle est **plus large dans les grandes villes (68 %) que dans les petites (51 %)**. S'il
+mesurait l'incertitude d'estimation, ce serait l'inverse (plus d'annonces, moins d'incertitude). Il
+décrit donc la **dispersion des logements entre eux**, non la fiabilité du modèle. À dire au lecteur
+comme tel (« votre loyer dépendra beaucoup du bien »), jamais comme une réserve sur la donnée.
+
+Elle couvre **34 900 communes, 100 % de la population, Alsace-Moselle comprise**, là où DVF est
+structurellement aveugle.
 
 **La taxe foncière : une fausse bonne découverte.** Le jeu `fiscalite-locale-des-particuliers`
 (data.economie.gouv.fr, 174 668 lignes) expose `taux_global_tfb`, `taux_plein_teom`,
@@ -188,16 +253,20 @@ Piste réelle, donnée incomplète, conclusion suspendue.
 
 ## Ce que ce balayage suggère
 
-Trois des cinq découvertes se lisent **au grain adresse** (DVF, servitudes, logements neufs), et la
-quatrième (isochrone) part d'une adresse. Cela confirme ce que les deux audits précédents avaient
-trouvé par un autre chemin : la valeur non exploitée de futur•e est concentrée dans le module
-**Logement**, là où se trouve déjà le moat, et non dans le module Territoire.
+Les découvertes qui tiennent après vérification (servitudes, logements neufs, trajet réel) se lisent
+**au grain adresse**. Cela confirme ce que les deux audits précédents avaient trouvé par un autre
+chemin : la valeur non exploitée de futur•e est concentrée dans le module **Logement**, là où se
+trouve déjà le moat, et non dans le module Territoire.
 
-**Le prix mérite une place à part.** Ce n'est pas un vingt-neuvième critère. C'est une contrainte
-dure, absente d'un produit dont la promesse est d'aider à choisir où vivre, et sa donnée est
-publique, gratuite, datée, au grain adresse, disponible sur quatre millésimes. Un lecteur à qui l'on
-recommande une commune qu'il ne peut pas s'offrir n'a pas reçu un mauvais conseil : il a reçu un
-conseil sans objet.
+**La leçon de méthode est plus importante que l'inventaire.** J'ai annoncé le prix comme « le trou
+béant » du produit après avoir lu `PREFERENCE_KEYS`, sans regarder l'index. Le prix y était, calculé
+depuis DVF, avec repli EPCI, aux côtés des loyers de l'ANIL, et son exclusion des critères de
+classement était une doctrine écrite en tête du script.
+
+Trois fois dans ce balayage, la donnée a corrigé une conclusion que je croyais solide : le rayon
+équivalent d'un isochrone ne mesurait pas ce que je croyais ; les ventes avec dépendance ne sont pas
+un défaut mais la norme ; et le prix n'était pas absent. **Vérifier dans le code avant d'annoncer une
+découverte** coûte cinq minutes et vaut plus que le balayage entier.
 
 ## Ce que je ne recommande pas de faire tout de suite
 
