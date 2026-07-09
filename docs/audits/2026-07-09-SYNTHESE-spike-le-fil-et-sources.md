@@ -38,6 +38,7 @@ l'urbanisme.
 | Deux critères sur 28 portent un flux daté | inondation, exposition industrielle | audit 2 |
 | Logements neufs livrés (DPE ADEME) | 91 % des lecteurs, grain adresse | audit 2 |
 | Le PLU et toutes les servitudes répondent à l'adresse | PLU versé pour 85 % des communes | audit 3 |
+| Logements en périmètre ABF (isolation extérieure refusée) | **25 %**, et 55 % en ville | audit 3 |
 | DVF ne couvre pas l'Alsace-Moselle | 0 commune sur 1 605 | audit 3 |
 | Défaut du calcul de prix en production | p90 +9,7 %, p99 +30,7 % | audit 3, **corrigé** |
 | Indice de détour route / vol d'oiseau | médiane 1,38, max 2,21 | audit 3 |
@@ -76,9 +77,14 @@ Une adresse en périmètre de monument historique (`AC1`) ou de site patrimonial
 est soumise à l'avis de l'Architecte des Bâtiments de France, qui refuse le plus souvent l'isolation
 par l'extérieur. Or la Face 1 « lecture thermique » et `renovation.ts` recommandent des travaux.
 
-**futur•e conseille aujourd'hui des travaux sans savoir si l'adresse a le droit de les faire.**
-Le GPU répond à cette question, à l'adresse, gratuitement, sur la même API que `cadastre.ts` appelle
-déjà.
+Mesuré sur **210 adresses réelles de logements** (tirées des DPE, 70 communes au prorata de la
+population, chaque point interrogé auprès du GPU) : **25 % des logements sont en périmètre ABF**
+(IC 95 % : 19-31 %), et **55 % dans les communes de plus de 50 000 habitants** (IC : 38-70 %). Un
+premier run indépendant sur 60 adresses donnait 18 %, dans l'intervalle du second.
+
+**futur•e conseille aujourd'hui des travaux d'isolation à un logement sur quatre qui n'a peut-être
+pas le droit de les faire.** Le code ne mentionne nulle part l'ABF. Le GPU répond à la question, à
+l'adresse, gratuitement, sur la même API que `cadastre.ts` appelle déjà.
 
 ## Ce que j'ai livré
 

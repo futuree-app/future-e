@@ -205,11 +205,30 @@ Mesuré sur 10 adresses contrastées puis 40 communes :
 *Réserve de méthode : les 40 communes ont été interrogées sur leur centroïde géométrique, qui tombe
 souvent en pleine campagne. Le taux de 45 % est donc plutôt une borne basse pour une vraie adresse.*
 
-**Le lien que personne n'a fait.** Une adresse dans un périmètre `AC1` ou `AC4` est soumise à l'avis
-de l'Architecte des Bâtiments de France. En pratique, **l'isolation par l'extérieur y est le plus
-souvent refusée**. Or futur•e possède déjà une Face 1 « lecture thermique » et un module rénovation
-(`renovation.ts`, `dpe.ts`) qui recommandent des travaux. Le produit conseille aujourd'hui des
+**Le lien que personne n'a fait.** Une adresse dans un périmètre `AC1` (abords d'un monument
+historique) ou `AC4` (site patrimonial remarquable) est soumise à l'avis de l'Architecte des Bâtiments
+de France. En pratique, **l'isolation par l'extérieur y est le plus souvent refusée**. Or futur•e
+possède une Face 1 « lecture thermique » et un `renovation.ts` qui chiffrent des postes d'isolation.
+Le code ne mentionne **nulle part** l'ABF ni les monuments historiques (vérifié par `grep`).
+
+**Combien de logements sont concernés ?** Mesuré sur **210 adresses réelles de logements**, tirées
+des DPE de l'ADEME dans 70 communes échantillonnées au prorata de la population, puis interrogées une
+à une auprès du GPU :
+
+| | Part en périmètre ABF | IC 95 % |
+|---|---:|---|
+| toutes communes | **25 %** (52/210) | 19 % – 31 % |
+| communes ≥ 50 000 hab | **55 %** (18/33) | 38 % – 70 % |
+| communes < 50 000 hab | 19 % (34/177) | 14 % – 26 % |
+
+Un premier run indépendant sur 60 adresses donnait 18 %, dans l'intervalle du second.
+
+**Un logement sur quatre, et plus d'un sur deux en ville.** Le produit conseille aujourd'hui des
 travaux sans savoir si l'adresse a le droit de les faire.
+
+*Réserve nommée : ce sont des logements **diagnostiqués** (DPE), qui sur-représentent les biens
+vendus ou loués récemment, souvent en centre ancien. La part vraie sur l'ensemble du parc est
+probablement inférieure. L'ordre de grandeur, lui, tient.*
 
 ### 6. L'IPS des collèges ★ (puissant et toxique)
 
