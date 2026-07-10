@@ -7,7 +7,10 @@ import {
   getGeorisquesAddressSummary,
   getGeorisquesParcelSummary,
   getGeorisquesSummary,
+  fetchCavitesNearPoint,
+  fetchMvtNearPoint,
 } from "@/lib/georisques";
+import { buildPointHazards, communalResidualFromLabels, isMvtFlagged } from "@/lib/point-hazards";
 import { getAltitude } from "@/lib/ign";
 import { getDpeCandidatesByBanId, getDpeByCoordinates } from "@/lib/dpe";
 import { validateSelectedBanAddress } from "@/lib/selected-ban-address";
@@ -42,7 +45,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         : getAuditByCoordinates(address.latitude, address.longitude).catch(() => null),
     ]);
 
-    const [georisquesCommune, altitude, zfe, irep, cartofriches, communeData, sinistralite] = await Promise.all([
+    const [georisquesCommune, altitude, zfe, irep, cartofriches, communeData, sinistralite, cavites, mvt] = await Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
       getAltitude(address.latitude, address.longitude).catch(() => null),
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
@@ -50,6 +53,9 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       address.citycode ? getCartofrichesForCommune(address.citycode).catch(() => null) : null,
       address.citycode ? getCommuneFullData(address.citycode).catch(() => null) : null,
       getOnrnSinistralite(address.citycode).catch(() => null),
+      // Inventaires géolocalisés au point, en parallèle (jamais en série). Panne -> null.
+      fetchCavitesNearPoint(address.latitude, address.longitude).catch(() => null),
+      fetchMvtNearPoint(address.latitude, address.longitude).catch(() => null),
     ]);
 
     const georisquesAddress = process.env.GEORISQUES_API_TOKEN
@@ -61,6 +67,19 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       process.env.GEORISQUES_API_TOKEN && parcel?.parcelCode
         ? await getGeorisquesParcelSummary(parcel.parcelCode).catch(() => null)
         : null;
+
+    // Risques du bâti au grain point : cavités + mouvements de terrain géolocalisés, plus le résidu
+    // communal (aléas GASPAR sans source fine). Les labels GASPAR au point donnent le signalement
+    // communal MVT et le résidu ; la structuration vit dans la lib pure.
+    const gasparLabels = georisquesAddress?.risks?.labels ?? [];
+    const pointHazards = buildPointHazards({
+      point: { lat: address.latitude, lon: address.longitude },
+      radiusM: 500,
+      cavites,
+      mvt,
+      communeFlaggedMvt: isMvtFlagged(gasparLabels),
+      communalResidual: communalResidualFromLabels(gasparLabels),
+    });
 
     // Typé par le contrat partagé : toute dérive route ↔ client casse ici, pas en silence.
     const report: LogementReport = {
@@ -80,6 +99,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         parcel: georisquesParcel,
         commune: georisquesCommune,
       },
+      pointHazards,
       granularity: {
         geocoding: "address",
         cadastre: parcel ? "parcel" : null,

@@ -7,6 +7,7 @@
 import type { DpeRecord } from "./dpe-attribution.ts";
 import type { RegulatoryPlan } from "./pprn-zonage.ts";
 import type { OnrnSinistralite } from "./onrn-sinistralite.ts";
+import type { PointHazards } from "./point-hazards.ts";
 
 export type LogementReport = {
   error?: string;
@@ -43,6 +44,9 @@ export type LogementReport = {
     commune?: { communeName: string | null; riskLabels: string[]; seismic: { code: string | null; label: string | null } | null; } | null;
   };
   sinistralite?: OnrnSinistralite | null;
+  // Risques du bâti au grain point (cavités, mouvements de terrain) + résidu communal. Comme le
+  // reste de Géorisques : re-fetché à chaque rendu, jamais snapshoté. `null` = non interrogé.
+  pointHazards?: PointHazards | null;
   // Métadonnées serveur portées sur le fil, non lues par le client (diagnostic / futur usage).
   granularity?: {
     geocoding: string; cadastre: string | null; georisques_address: string | null;

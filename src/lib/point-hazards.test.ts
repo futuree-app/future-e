@@ -56,3 +56,30 @@ test("coordonnées manquantes ignorées, jamais devinées", () => {
   const out = buildPointHazards({ point: POINT, radiusM: 500, cavites, mvt: null, communeFlaggedMvt: false, communalResidual: [] });
   assert.equal(out.cavites?.count, 1);
 });
+
+import { communalResidualFromLabels, isMvtFlagged } from "./point-hazards.ts";
+
+// Libellés GASPAR réels au point (La Rochelle).
+const LR = ["Inondation", "Par submersion marine", "Mouvement de terrain", "Tassements différentiels",
+  "Séisme", "Phénomène lié à l'atmosphère", "Tempête et grains (vent)", "Transport de marchandises dangereuses"];
+
+test("isMvtFlagged : vrai si la famille mouvement de terrain est signalée", () => {
+  assert.equal(isMvtFlagged(LR), true);
+  assert.equal(isMvtFlagged(["Inondation", "Séisme"]), false);
+  assert.equal(isMvtFlagged(["Glissement de terrain"]), true);
+  assert.equal(isMvtFlagged(["Eboulement ou chutes de pierres et de blocs"]), true);
+});
+
+test("communalResidualFromLabels : exclut Santé, sous-détails, séisme/argile, MVT et cavités", () => {
+  const out = communalResidualFromLabels(LR);
+  // reste : inondation, submersion marine (relabellée), atmosphère, tempête. Pas de MVT, pas de séisme.
+  assert.ok(out.includes("Inondation"));
+  assert.ok(out.includes("Submersion marine"));
+  assert.ok(out.some((l) => /tempête/i.test(l)));
+  assert.ok(!out.some((l) => /mouvement de terrain|séisme|tassement|transport/i.test(l)));
+});
+
+test("communalResidualFromLabels : cavités et affaissement exclus (portés au point)", () => {
+  const out = communalResidualFromLabels(["Affaissements et effondrements d'origine anthropique", "Rupture de barrage"]);
+  assert.deepEqual(out, ["Rupture de barrage"]);
+});

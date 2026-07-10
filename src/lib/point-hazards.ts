@@ -29,6 +29,34 @@ export type PointHazards = {
 
 const MAX_TYPES = 3;
 
+// Famille « mouvement de terrain » (portée au point via /mvt) : à exclure du résidu communal.
+const MVT_FAMILY = /mouvement de terrain|glissement|[ée]boulement|chute[s]? de (pierre|bloc)|affaissement|effondrement|carri[èe]re souterraine|recul du trait de c[ôo]te/i;
+// Frontière Santé/technologique + doublons déjà gradés ailleurs (séisme, argile), à écarter.
+const SANTE_OU_DOUBLON = /s[ée]ism|argile|tassement|radon|industriel|effet thermique|mati[èe]res dangereuses|nucl[ée]aire|transport de/i;
+
+/** La commune est-elle signalée pour la famille « mouvement de terrain » (GASPAR au point) ? */
+export function isMvtFlagged(labels: string[] | null | undefined): boolean {
+  return (labels ?? []).some((l) => MVT_FAMILY.test(l));
+}
+
+/**
+ * Aléas GASPAR communaux SANS source fine, pour la phrase de résidu. Reprend le filtre historique
+ * (frontière Santé, sous-détails « Par … », séisme/argile, relabel submersion marine) et exclut en
+ * plus la famille mouvement de terrain et les cavités, désormais portées au grain point.
+ * L'inondation N'EST PAS retirée ici (décision éditoriale séparée, cf. spec).
+ */
+export function communalResidualFromLabels(labels: string[] | null | undefined): string[] {
+  const out: string[] = [];
+  for (const l of labels ?? []) {
+    if (/submersion marine/i.test(l)) { if (!out.includes("Submersion marine")) out.push("Submersion marine"); continue; }
+    if (/^par\s/i.test(l)) continue; // sous-détail : le grand type suffit
+    if (SANTE_OU_DOUBLON.test(l)) continue;
+    if (MVT_FAMILY.test(l)) continue; // porté au point
+    if (!out.includes(l)) out.push(l);
+  }
+  return out;
+}
+
 /** Points de l'inventaire tombant dans le rayon, avec leur distance au point, triés du plus proche. */
 function within(
   items: { type?: string | null; longitude?: number | null; latitude?: number | null }[],
