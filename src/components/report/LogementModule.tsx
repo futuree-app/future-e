@@ -581,7 +581,9 @@ export default function LogementModule({
               </ReportSection>
             )}
 
-            {result.georisques && <RegulatoryStatusBlock georisques={result.georisques} />}
+            {result.georisques && (
+              <RegulatoryStatusBlock georisques={result.georisques} heritage={result.heritage ?? null} />
+            )}
 
             {result.sinistralite && <SinistraliteBlock sinistralite={result.sinistralite} commune={result.address?.city ?? null} />}
           </div>

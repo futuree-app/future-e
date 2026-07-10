@@ -1,6 +1,7 @@
 import React from "react";
 import type { RegulatoryPlan } from "@/lib/pprn-zonage";
 import type { LogementReport } from "@/lib/logement-report-types";
+import type { HeritageProtection, HeritageStatus } from "@/lib/gpu-servitudes";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { Disclosure } from "./kit";
 
@@ -105,9 +106,47 @@ function regulatoryHeadline(plans: RegulatoryPlan[]): string {
     : "Cette adresse se situe dans une zone où certains projets et travaux peuvent être soumis à des règles particulières.";
 }
 
-export function RegulatoryStatusBlock({ georisques }: { georisques: LogementReport["georisques"] }) {
+// Patrimoine protégé au point. Les familles sont NOMMÉES chacune une fois ; la phrase de procédure
+// est portée UNE SEULE fois pour le bloc, sans quoi deux familles produiraient deux fois le même
+// paragraphe. Aucun compteur, aucun nom de monument : un point est dans autant d'assiettes qu'il y a
+// de monuments autour (134 Place Stanislas). Copie arbitrée par le porteur, ne pas reformuler.
+function HeritageBlock({
+  protections,
+  withDivider,
+}: {
+  protections: HeritageProtection[];
+  withDivider: boolean;
+}) {
+  return (
+    <div style={withDivider ? { paddingTop: 12, borderTop: "1px solid var(--border-1)" } : undefined}>
+      <p style={{ fontSize: 12.5, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--fg-4)", margin: "0 0 8px" }}>
+        Patrimoine protégé à cette adresse
+      </p>
+      <p style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)", margin: "0 0 8px" }}>
+        {protections.map((p) => p.label).join(" · ")}
+      </p>
+      <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+        Cette adresse se situe dans un périmètre patrimonial. Certains travaux modifiant l’aspect
+        extérieur du bâtiment peuvent nécessiter une autorisation et l’avis de l’Architecte des
+        Bâtiments de France. À vérifier en mairie avant devis ou dépôt de dossier.
+      </p>
+      <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, marginTop: 8 }}>
+        D’après les servitudes publiées au Géoportail de l’urbanisme.
+      </p>
+    </div>
+  );
+}
+
+export function RegulatoryStatusBlock({
+  georisques,
+  heritage,
+}: {
+  georisques: LogementReport["georisques"];
+  heritage: HeritageStatus | null;
+}) {
   const g = georisques?.parcel ?? georisques?.address;
   const plans = g?.regulatoryPlans ?? [];
+  const protections = heritage?.items ?? [];
   return (
     <ReportSection eyebrow="Statut réglementaire à cette adresse" tone="accent">
       <GlassCard>
@@ -118,8 +157,8 @@ export function RegulatoryStatusBlock({ georisques }: { georisques: LogementRepo
               <p style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)", margin: 0 }}>Statut réglementaire non déterminé</p>
               <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>Les données interrogées n’ont pas permis de qualifier cette adresse.</p>
             </>
-          ) : plans.length === 0 ? (
-            // État A : la source a répondu, aucun zonage n'intersecte le point.
+          ) : plans.length === 0 && protections.length === 0 ? (
+            // État A : la source a répondu, aucun zonage ni protection patrimoniale au point.
             <>
               <p style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)", margin: 0 }}>Aucune règle de construction particulière à cette adresse</p>
               <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
@@ -128,40 +167,45 @@ export function RegulatoryStatusBlock({ georisques }: { georisques: LogementRepo
             </>
           ) : (
             <>
-              {/* Niveau 1 — comprendre en cinq secondes */}
-              <p style={{ fontSize: 15, color: "var(--fg-hi)", lineHeight: 1.5, margin: 0 }}>{regulatoryHeadline(plans)}</p>
-              {/* Niveau 2 — le fait précis, par plan */}
-              {plans.length === 1 ? (
-                <RegulatoryPlanCard plan={plans[0]} />
-              ) : (
-                <div style={{ display: "grid", gap: 16 }}>
-                  <RegulatoryPlanCard plan={plans[0]} roleLabel="Règle la plus contraignante" />
-                  {plans.slice(1).map((p, i) => (
-                    <div key={i} style={{ paddingTop: 12, borderTop: "1px solid var(--border-1)" }}>
-                      <RegulatoryPlanCard plan={p} roleLabel="Autre zonage applicable" />
+              {plans.length > 0 && (
+                <>
+                  {/* Niveau 1 : comprendre en cinq secondes */}
+                  <p style={{ fontSize: 15, color: "var(--fg-hi)", lineHeight: 1.5, margin: 0 }}>{regulatoryHeadline(plans)}</p>
+                  {/* Niveau 2 : le fait précis, par plan */}
+                  {plans.length === 1 ? (
+                    <RegulatoryPlanCard plan={plans[0]} />
+                  ) : (
+                    <div style={{ display: "grid", gap: 16 }}>
+                      <RegulatoryPlanCard plan={plans[0]} roleLabel="Règle la plus contraignante" />
+                      {plans.slice(1).map((p, i) => (
+                        <div key={i} style={{ paddingTop: 12, borderTop: "1px solid var(--border-1)" }}>
+                          <RegulatoryPlanCard plan={p} roleLabel="Autre zonage applicable" />
+                        </div>
+                      ))}
+                      <div style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>
+                        Ces zonages peuvent concerner des phénomènes ou des règlements différents.
+                      </div>
                     </div>
-                  ))}
-                  <div style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>
-                    Ces zonages peuvent concerner des phénomènes ou des règlements différents.
-                  </div>
-                </div>
+                  )}
+                  {/* Niveau 3 : méthode et détail technique, repliés */}
+                  <Disclosure summary="Comprendre ce classement">
+                    <div>Grain : adresse (la donnée répond au point géocodé, pas à la géométrie de la parcelle).</div>
+                    {plans.map((p, i) => {
+                      const hazard = p.hazardModel ? HAZARD_LABEL[p.hazardModel] ?? null : null;
+                      return (
+                        <div key={i}>
+                          {p.plan ?? "Plan"}
+                          {hazard ? ` · risque concerné : ${hazard}` : ""}
+                          {p.zones[0]?.regime ? ` · régime officiel : ${p.zones[0].regime}` : ""}
+                          {p.updatedAt ? ` · date de référence Géorisques : ${p.updatedAt}` : ""}
+                        </div>
+                      );
+                    })}
+                    <div>Géorisques (PPRN, information réglementaire). Le classement ne résume pas le règlement : les travaux autorisés ou interdits ne se lisent que dans le règlement officiel de la zone.</div>
+                  </Disclosure>
+                </>
               )}
-              {/* Niveau 3 — méthode et détail technique, repliés */}
-              <Disclosure summary="Comprendre ce classement">
-                <div>Grain : adresse (la donnée répond au point géocodé, pas à la géométrie de la parcelle).</div>
-                {plans.map((p, i) => {
-                  const hazard = p.hazardModel ? HAZARD_LABEL[p.hazardModel] ?? null : null;
-                  return (
-                    <div key={i}>
-                      {p.plan ?? "Plan"}
-                      {hazard ? ` · risque concerné : ${hazard}` : ""}
-                      {p.zones[0]?.regime ? ` · régime officiel : ${p.zones[0].regime}` : ""}
-                      {p.updatedAt ? ` · date de référence Géorisques : ${p.updatedAt}` : ""}
-                    </div>
-                  );
-                })}
-                <div>Géorisques (PPRN, information réglementaire). Le classement ne résume pas le règlement : les travaux autorisés ou interdits ne se lisent que dans le règlement officiel de la zone.</div>
-              </Disclosure>
+              {protections.length > 0 && <HeritageBlock protections={protections} withDivider={plans.length > 0} />}
             </>
           )}
         </div>
