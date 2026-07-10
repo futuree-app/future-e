@@ -12,14 +12,18 @@ abonnement Foyer 15 €/mois. Le produit réel a évolué.
 ## État actuel (statut mixte)
 
 - **Livré** : rapport **14 €** (one-shot), **Pack Décision 39 €**.
-- **Reporté mais re-planifié** : l'abonnement récurrent (« Le Fil ») est de nouveau inscrit au
-  prévisionnel pour **T4 2026** (étude de marché du 10 juin 2026). Il n'est PAS achetable et
-  son **pricing n'est pas figé**. Direction porteur (2026-06-25) : viser plutôt un **tarif
-  annuel** qu'un mensuel (le 9 €/mois d'origine est jugé trop cher), piste d'un ordre de
-  ~49,99 €/an. Prévisionnel, aucune décision verrouillée, ne graver aucun prix comme acté.
-- **Écart prod à recaler** : la page de pré-lancement `/le-fil` (liste d'attente, `noindex`)
-  est en production et **affiche encore « 9 €/mois · 30 jours offerts »**. Elle est en retard
-  sur la direction « tarif annuel » ci-dessus : à mettre à jour quand le prix sera tranché.
+- **ABANDONNÉ (2026-07-09)** : l'abonnement récurrent « Le Fil » était inscrit au prévisionnel
+  T4 2026, à un tarif annuel de l'ordre de 49,99 €. **Ce prévisionnel tombe.** Une session de
+  mesures a établi que la veille événementielle territoriale n'a pas de matière : 87 % des communes
+  sans aucun événement décisionnel sur douze mois, un p90 de publication des arrêtés CatNat à
+  640 jours, et un prix communal dont la variation annuelle est du bruit d'échantillonnage.
+  Voir `arbitrages/le-fil-veille-evenementielle-ecartee.md`.
+  Le récurrent, s'il existe, viendra du **cycle de vie** (le lecteur change, pas le territoire), du
+  **débit d'inconnus**, ou du **produit qui grandit**, jamais d'une veille.
+- **Écart prod à recaler (urgent)** : la page de pré-lancement `/le-fil` (liste d'attente,
+  `noindex`) est en production et **affiche encore « 9 €/mois · 30 jours offerts »**, plus une
+  promesse de newsletter mensuelle et de tableau de bord. Elle vend désormais un produit que
+  futur•e ne construira pas. À recadrer ou retirer : action sans regret.
 
 ## « Le Fil » (abonnement) ≠ « Mode Foyer » (upsell) : deux axes distincts
 
