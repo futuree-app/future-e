@@ -53,6 +53,30 @@ au lieu de le combattre, est le cœur de cet arbitrage.
    marché adjacent déjà tenu (chasseurs, relocation). À tester passivement (une page, un prix, un
    Calendly), pas à construire.
 
+## Deux segments B2C, un même modèle épisodique
+
+La note de cadrage raisonnait sur le CHERCHEUR (« où devrais-je vivre ? »). Un second segment
+existe, et il ne faut pas l'écarter : l'HABITANT (« qu'est-ce que je dois comprendre de là où je
+vis ? »). Ce n'est pas le même job, mais c'est le même modèle de monétisation.
+
+**L'habitant est une audience cœur, sa monétisation est ponctuelle, pas mensuelle.** Fable a
+raison de tuer le *dashboard résident en abonnement* (rien ne déclenche d'action régulière chez un
+installé) ; cela ne retire rien à la *valeur produit* de l'habitant. Il paie non pour un suivi, mais
+pour un **moment de clarification** : « mon quartier est-il vraiment invivable l'été ? », « pourquoi
+mon logement chauffe autant ? », « rester ici dans quinze ans est-il raisonnable ? ». C'est le rapport
+commune ou logement, vendu à l'unité, avec un framing « comprendre mon lieu de vie » distinct de
+« trouver où vivre ».
+
+**L'habitant est aussi un réservoir de conversion.** Quelqu'un arrive en « je veux comprendre
+La Rochelle », puis six mois plus tard bascule en « en fait je veux partir » : il entre alors dans le
+tunnel décisionnel (Pass). L'entrée habitant nourrit donc la marque, le SEO, le bouche-à-oreille, la
+crédibilité, et le futur passage payant. Elle ne porte pas de MRR, et on ne le lui demande pas.
+
+**Garde-fou.** Ne pas ressusciter Le Fil sous couvert d'habitant. Une zone « ce qui est stable mais
+important dans votre commune » (des faits) est légitime dans un rapport habitant ; une promesse de
+suivi qui se tairait ne l'est pas (cf. « ne jamais dire rien n'a changé »,
+`le-fil-veille-evenementielle-ecartee.md`).
+
 ## Le B2B : réel, mais pas maintenant, et pas par la techno
 
 Le seul vrai MRR est B2B (rapport portefeuille en marque blanche pour agences / CGP, puis
