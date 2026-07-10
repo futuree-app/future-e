@@ -121,6 +121,28 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
 
 ## État de mise en œuvre
 
+- **Risques du bâti au grain POINT (cavités + mouvements de terrain) BRANCHÉ (2026-07-11).** La ligne
+  « Autres risques recensés à cette adresse : … » (libellés GASPAR **communaux**, sans niveau,
+  jugée « liste noire ») est remplacée. Vérifié avant conception (exigence porteur) : une source plus
+  fine que le flag communal existe pour 2 des 3 aléas résiduels. `/api/v1/cavites?latlon=` (cavités
+  géolocalisées BRGM) et `/api/v1/mvt?latlon=` (événements datés/localisés) sont appelés au point
+  (rayon 500 m), en parallèle. Preuve du grain : La Rochelle, commune signalée « mouvement de
+  terrain », a 0 événement dans 2 km ; Villerville 44. Cavités et MVT deviennent des **`Block`** dans
+  la grille « Risques du bâti » (à côté de sismicité/RGA), avec **icône au trait** (`IconCavity`,
+  `IconLandslide`) et **tooltip qui explique l'impact sur le LOGEMENT** (« cavité souterraine » est du
+  jargon ; la `value` porte le fait « N à moins de 500 m », le tooltip porte le sens). Lib pure testée
+  `src/lib/point-hazards.ts` (structuration rayon/distance/types + helpers `communalResidualFromLabels`
+  / `isMvtFlagged`), fetchers dans `georisques.ts`. **Réserves gravées** : `/mvt` = recensement
+  d'événements passés, jamais une susceptibilité ; MVT signalé sans événement au point → phrase
+  « aucun événement, mais commune signalée » (jamais « terrain stable ») ; source `null` (panne)
+  distincte de `[]` (absence) ; jamais « sous votre logement ». **Rupture de barrage** : aucune source
+  fine, reste dans la **phrase de résidu communal** discrète, jamais au même niveau que les faits au
+  point. Item de checklist « cavite » (4 buckets, texte adapté). Statut réglementaire → re-fetché,
+  jamais snapshoté. Mesure : cavités présentes pour ~une adresse urbaine sur plusieurs, à densité
+  très locale. Spec/plan : `docs/superpowers/specs/2026-07-11-logement-risques-point-fin-design.md`.
+  **Décision éditoriale PARQUÉE** : l'**inondation** apparaît encore dans le résidu communal alors
+  qu'elle a son PPRN + sa sinistralité ONRN (doublon), volontairement non retirée dans ce chantier
+  (une ligne de `communalResidualFromLabels` suffirait).
 - **Face 2 (risques du bâti / matérialité) : PARTIELLEMENT BRANCHÉE (2026-07-03).** Le bloc
   « Ce que le risque a déjà coûté ici » affiche la **sinistralité ONRN** (coût moyen + fréquence
   des sinistres CatNat indemnisés 1995-2021) pour **sécheresse** ET **inondation** (tous types),
