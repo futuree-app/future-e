@@ -86,6 +86,42 @@ premier run indépendant sur 60 adresses donnait 18 %, dans l'intervalle du seco
 pas le droit de les faire.** Le code ne mentionne nulle part l'ABF. Le GPU répond à la question, à
 l'adresse, gratuitement, sur la même API que `cadastre.ts` appelle déjà.
 
+## Post-scriptum : la dernière porte de la veille, fermée
+
+Le Researcher a proposé la **veille déléguée** (le lecteur définit une fois ce qui changerait son
+avis, futur•e se tait jusqu'à ce que le seuil soit franchi). C'est la seule mécanique qui ne ment
+jamais sur le silence. Elle semblait condamnée par la rareté des événements territoriaux, sauf sur le
+seul critère mobile du produit : **le prix**.
+
+Backtest sur les millésimes DVF 2022 à 2025, prix médian par commune et par année,
+`scripts/research/veille-prix-backtest.mjs` :
+
+- **Le prix communal ne bouge pas de façon locale.** Variation absolue médiane d'une année sur
+  l'autre : **5,8 %**. Or le bruit d'échantillonnage pur, calibré sur la dispersion réelle des prix
+  intra-commune (σ des log-prix = 0,369, mesuré sur six communes), vaut **9,4 % à 20 ventes par an,
+  6,2 % à 50, 4,7 % à 100**. La variation observée est donc **entièrement compatible avec du hasard**.
+- **Quand le prix bouge vraiment, il bouge ensemble.** 2023 → 2024 : médiane **‑4,1 %**, **69 % des
+  communes en baisse**. Les deux autres transitions : +0,6 % et +0,5 %, avec **47 %** de communes en
+  baisse, soit un tirage à pile ou face.
+
+Autrement dit, une veille sur le prix notifierait soit du **bruit d'échantillonnage** (les années
+calmes), soit une **nouvelle nationale** (2024), jamais un événement local.
+
+**Les quatre sources de flux sont maintenant toutes qualifiées** :
+
+| Flux | Verdict |
+|---|---|
+| Événements territoriaux (ICPE, CatNat, servitudes) | trop rares : 87 % des communes muettes sur un an |
+| Millésimes de référentiel (BPE, INSEE, DRIAS) | synchrones : toutes les communes le même jour |
+| Prix (le seul critère mobile) | bruit, ou mouvement national synchrone |
+| Climat qui se réalise (ERA5) | continu et honnête, mais c'est un fait au passé |
+
+**futur•e n'a pas de flux dense, et n'en aura pas.** Le récurrent ne viendra donc pas d'une veille.
+Il reste trois candidats, tous mesurés ou proposés ce jour : la **personne qui change** (le cycle de
+vie re-classe les critères sur un territoire immobile), le **débit d'inconnus** (un revenu récurrent
+porté par une population qui traverse, sans rétention), et le **produit qui grandit** (nos critères
+s'enrichissent quand la commune ne bouge pas).
+
 ## Ce que j'ai livré
 
 Un correctif : `fix(logement)` écarte les ventes de plusieurs logements dans l'agrégation DVF.
