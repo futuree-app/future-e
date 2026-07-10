@@ -26,27 +26,31 @@ test("cavités : liste vide dans le rayon → null ; source en panne (null) → 
 
 test("MVT : événements dans le rayon → kind events", () => {
   const mvt: MvtRaw[] = [{ type: "Glissement", ...near(0.001) }, { type: "Chute de blocs", ...near(0.002) }];
-  const out = buildPointHazards({ point: POINT, radiusM: 500, cavites: null, mvt, communeFlaggedMvt: true, communalResidual: [] });
-  assert.equal(out.mvt?.kind, "events");
-  assert.equal(out.mvt && out.mvt.kind === "events" ? out.mvt.count : -1, 2);
+  const out = buildPointHazards({ point: POINT, radiusM: 500, cavites: null, mvt, communeFlaggedMvt: true, communalResidual: ["Rupture de barrage"] });
+  assert.equal(out.mvt?.count, 2);
+  // événements au point → Block, JAMAIS dans le résidu.
+  assert.deepEqual(out.communalResidual, ["Rupture de barrage"]);
 });
 
-test("MVT : 0 événement mais commune signalée → flagged_none", () => {
-  const out = buildPointHazards({ point: POINT, radiusM: 500, cavites: null, mvt: [], communeFlaggedMvt: true, communalResidual: [] });
-  assert.equal(out.mvt?.kind, "flagged_none");
-});
-
-test("MVT : 0 événement et commune non signalée → null", () => {
-  const out = buildPointHazards({ point: POINT, radiusM: 500, cavites: null, mvt: [], communeFlaggedMvt: false, communalResidual: [] });
+test("MVT : 0 événement mais commune signalée → pas de Block, rejoint le résidu", () => {
+  const out = buildPointHazards({ point: POINT, radiusM: 500, cavites: null, mvt: [], communeFlaggedMvt: true, communalResidual: ["Rupture de barrage"] });
   assert.equal(out.mvt, null);
+  assert.deepEqual(out.communalResidual, ["Mouvement de terrain", "Rupture de barrage"]);
 });
 
-test("MVT : source en panne (null) → null même si commune signalée", () => {
+test("MVT : 0 événement et commune non signalée → null, résidu inchangé", () => {
+  const out = buildPointHazards({ point: POINT, radiusM: 500, cavites: null, mvt: [], communeFlaggedMvt: false, communalResidual: ["Rupture de barrage"] });
+  assert.equal(out.mvt, null);
+  assert.deepEqual(out.communalResidual, ["Rupture de barrage"]);
+});
+
+test("MVT : source en panne (null) → null ; commune signalée quand même dans le résidu", () => {
   const out = buildPointHazards({ point: POINT, radiusM: 500, cavites: null, mvt: null, communeFlaggedMvt: true, communalResidual: [] });
   assert.equal(out.mvt, null);
+  assert.deepEqual(out.communalResidual, ["Mouvement de terrain"]);
 });
 
-test("résidu communal transmis tel quel", () => {
+test("résidu communal transmis tel quel quand MVT non signalé", () => {
   const out = buildPointHazards({ point: POINT, radiusM: 500, cavites: null, mvt: null, communeFlaggedMvt: false, communalResidual: ["Rupture de barrage", "Tempête et grains (vent)"] });
   assert.deepEqual(out.communalResidual, ["Rupture de barrage", "Tempête et grains (vent)"]);
 });
@@ -70,16 +74,21 @@ test("isMvtFlagged : vrai si la famille mouvement de terrain est signalée", () 
   assert.equal(isMvtFlagged(["Eboulement ou chutes de pierres et de blocs"]), true);
 });
 
-test("communalResidualFromLabels : exclut Santé, sous-détails, séisme/argile, MVT et cavités", () => {
+test("communalResidualFromLabels : exclut Santé, sous-détails, séisme/argile, MVT, cavités, inondation", () => {
   const out = communalResidualFromLabels(LR);
-  // reste : inondation, submersion marine (relabellée), atmosphère, tempête. Pas de MVT, pas de séisme.
-  assert.ok(out.includes("Inondation"));
+  // reste : submersion marine (relabellée), atmosphère, tempête. Pas d'inondation, pas de MVT, pas de séisme.
   assert.ok(out.includes("Submersion marine"));
   assert.ok(out.some((l) => /tempête/i.test(l)));
-  assert.ok(!out.some((l) => /mouvement de terrain|séisme|tassement|transport/i.test(l)));
+  assert.ok(!out.some((l) => /inondation|mouvement de terrain|séisme|tassement|transport/i.test(l)));
 });
 
 test("communalResidualFromLabels : cavités et affaissement exclus (portés au point)", () => {
   const out = communalResidualFromLabels(["Affaissements et effondrements d'origine anthropique", "Rupture de barrage"]);
   assert.deepEqual(out, ["Rupture de barrage"]);
+});
+
+test("communalResidualFromLabels : inondation exclue (doublon PPRN + ONRN)", () => {
+  const out = communalResidualFromLabels(["Inondation", "Rupture de barrage"]);
+  assert.ok(!out.some((l) => /inondation/i.test(l)));
+  assert.ok(out.includes("Rupture de barrage"));
 });

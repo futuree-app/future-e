@@ -555,11 +555,6 @@ export default function LogementModule({
                         {pointHazards?.mvt?.kind === "events" && <Block label="Mouvements de terrain" value={`${pointHazards.mvt.count} à moins de 500 m`} icon={<span style={{ color: "var(--blue)" }}><IconLandslide /></span>} tip="Glissements, chutes de blocs ou effondrements déjà survenus tout près : ils signalent un terrain qui a bougé, ce qui peut affecter la stabilité du bâti." />}
                       </div>
                     )}
-                    {pointHazards?.mvt?.kind === "flagged_none" && (
-                      <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
-                        Aucun mouvement de terrain n&apos;est recensé à proximité immédiate. La commune est signalée pour cet aléa ; ce recensement porte sur des événements passés, pas sur la susceptibilité du terrain.
-                      </p>
-                    )}
                     {(pointHazards?.communalResidual?.length ?? 0) > 0 && (
                       <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
                         À l&apos;échelle de la commune, d&apos;autres aléas sont recensés sur de larges périmètres ({pointHazards!.communalResidual.map((l) => l.toLowerCase()).join(", ")}), sans détail disponible à cette adresse.

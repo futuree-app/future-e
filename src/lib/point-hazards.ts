@@ -19,11 +19,11 @@ export type MvtRaw = { type?: string | null; longitude?: number | null; latitude
 export type PointHazards = {
   // null = aucune cavité dans le rayon, OU source indisponible (le rendu n'affiche rien dans les deux cas).
   cavites: { count: number; nearestM: number | null; types: string[] } | null;
-  mvt:
-    | { kind: "events"; count: number; nearestM: number | null; types: string[] }
-    | { kind: "flagged_none" } // commune signalée « mouvement de terrain », aucun événement au point
-    | null; // ni événement au point, ni signalement communal, OU source indisponible
-  // Aléas GASPAR communaux sans source fine (rupture de barrage, tempête…), déjà filtrés côté route.
+  // Un mouvement de terrain n'est un fait au point QUE s'il y a des événements géolocalisés (Block).
+  // Sans événement au point, l'aléa n'est qu'un signalement communal : il rejoint `communalResidual`.
+  mvt: { kind: "events"; count: number; nearestM: number | null; types: string[] } | null;
+  // Aléas GASPAR communaux sans source fine (mouvement de terrain sans événement au point, rupture de
+  // barrage, tempête…), sur de larges périmètres, sans détail à l'adresse.
   communalResidual: string[];
 };
 
@@ -31,8 +31,9 @@ const MAX_TYPES = 3;
 
 // Famille « mouvement de terrain » (portée au point via /mvt) : à exclure du résidu communal.
 const MVT_FAMILY = /mouvement de terrain|glissement|[ée]boulement|chute[s]? de (pierre|bloc)|affaissement|effondrement|carri[èe]re souterraine|recul du trait de c[ôo]te/i;
-// Frontière Santé/technologique + doublons déjà gradés ailleurs (séisme, argile), à écarter.
-const SANTE_OU_DOUBLON = /s[ée]ism|argile|tassement|radon|industriel|effet thermique|mati[èe]res dangereuses|nucl[ée]aire|transport de/i;
+// Frontière Santé/technologique + doublons déjà montrés ailleurs (séisme, argile gradés ; inondation
+// portée par le PPRN « Statut réglementaire » + la sinistralité ONRN), à écarter.
+const SANTE_OU_DOUBLON = /s[ée]ism|argile|tassement|radon|industriel|effet thermique|mati[èe]res dangereuses|nucl[ée]aire|transport de|inondation/i;
 
 /** La commune est-elle signalée pour la famille « mouvement de terrain » (GASPAR au point) ? */
 export function isMvtFlagged(labels: string[] | null | undefined): boolean {
@@ -41,9 +42,10 @@ export function isMvtFlagged(labels: string[] | null | undefined): boolean {
 
 /**
  * Aléas GASPAR communaux SANS source fine, pour la phrase de résidu. Reprend le filtre historique
- * (frontière Santé, sous-détails « Par … », séisme/argile, relabel submersion marine) et exclut en
- * plus la famille mouvement de terrain et les cavités, désormais portées au grain point.
- * L'inondation N'EST PAS retirée ici (décision éditoriale séparée, cf. spec).
+ * (frontière Santé, sous-détails « Par … », séisme/argile, relabel submersion marine), exclut la
+ * famille mouvement de terrain et les cavités (portées au grain point), et l'inondation (doublon :
+ * déjà portée par le PPRN et la sinistralité ONRN). Le mouvement de terrain est RÉINJECTÉ par
+ * `buildPointHazards` quand la commune est signalée sans événement au point.
  */
 export function communalResidualFromLabels(labels: string[] | null | undefined): string[] {
   const out: string[] = [];
@@ -101,15 +103,16 @@ export function buildPointHazards(input: {
     }
   }
 
+  // MVT : événements géolocalisés → Block. Sinon, si la commune est signalée (source répondue ou en
+  // panne), l'aléa n'a pas de détail au point → il rejoint le résidu communal, comme rupture de barrage.
   let mvtOut: PointHazards["mvt"] = null;
-  if (mvt) {
-    const hits = within(mvt, point, radiusM);
-    if (hits.length > 0) {
-      mvtOut = { kind: "events", count: hits.length, nearestM: Math.round(hits[0].distM), types: distinctTypes(hits) };
-    } else if (communeFlaggedMvt) {
-      mvtOut = { kind: "flagged_none" };
-    }
+  let residual = communalResidual;
+  const mvtHits = mvt ? within(mvt, point, radiusM) : [];
+  if (mvtHits.length > 0) {
+    mvtOut = { kind: "events", count: mvtHits.length, nearestM: Math.round(mvtHits[0].distM), types: distinctTypes(mvtHits) };
+  } else if (communeFlaggedMvt) {
+    residual = ["Mouvement de terrain", ...communalResidual];
   }
 
-  return { cavites: cavitesOut, mvt: mvtOut, communalResidual };
+  return { cavites: cavitesOut, mvt: mvtOut, communalResidual: residual };
 }
