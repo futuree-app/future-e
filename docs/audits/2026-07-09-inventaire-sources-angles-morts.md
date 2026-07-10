@@ -213,10 +213,14 @@ patrimoine, art. L621-30 à L621-32). L'avis est certain, l'opposition ne l'est 
 « le plus souvent refusée », écrite dans une première version de cet audit, est trop forte et a été
 corrigée après vérification.
 
-Or futur•e possède une Face 1 « lecture thermique » et un `renovation.ts` qui chiffrent des postes
+Or futur•e possède une Face 1 « lecture thermique » et un `renovation.ts` qui chiffre des postes
 d'isolation. Le code ne mentionne **nulle part** l'ABF ni les monuments historiques (vérifié par
-`grep`). Ce qui manque au lecteur n'est pas un verdict, c'est le fait : *ici, l'avis de l'ABF sera
-requis, avec son délai et son aléa.*
+`grep`).
+
+*Correction, après vérification :* `/api/renovation` n'est appelé par aucune interface, et
+`ThermalComfortSection` mentionne l'isolation des murs comme une glose, non comme un conseil.
+futur•e ne **recommande** donc pas de travaux aujourd'hui. Ce qui manque au lecteur n'en reste pas
+moins un fait décisif : *ici, l'avis de l'ABF sera requis, avec son délai et son aléa.*
 
 **Combien de logements sont concernés ?** Mesuré sur **210 adresses réelles de logements**, tirées
 des DPE de l'ADEME dans 70 communes échantillonnées au prorata de la population, puis interrogées une

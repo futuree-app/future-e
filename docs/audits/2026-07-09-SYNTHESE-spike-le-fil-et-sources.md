@@ -83,9 +83,14 @@ population, chaque point interrogé auprès du GPU) : **25 % des logements sont 
 (IC 95 % : 19-31 %), et **55 % dans les communes de plus de 50 000 habitants** (IC : 38-70 %). Un
 premier run indépendant sur 60 adresses donnait 18 %, dans l'intervalle du second.
 
-**futur•e conseille aujourd'hui des travaux d'isolation à un logement sur quatre qui n'a peut-être
-pas le droit de les faire.** Le code ne mentionne nulle part l'ABF. Le GPU répond à la question, à
-l'adresse, gratuitement, sur la même API que `cadastre.ts` appelle déjà.
+Le code ne mentionne nulle part l'ABF, et le GPU répond à la question à l'adresse, gratuitement, sur
+la même API que `cadastre.ts` appelle déjà.
+
+*Correction, après vérification :* `/api/renovation` n'est appelé par aucune interface. futur•e ne
+**recommande** pas de travaux aujourd'hui ; la mention de l'isolation dans la Face 1 est une glose.
+La formulation « futur•e conseille des travaux sans savoir si l'adresse a le droit de les faire »,
+écrite dans une première version, est trop forte. Le fait reste décisif pour un acheteur, et il
+fonde la brique « Patrimoine protégé à cette adresse ».
 
 ## Post-scriptum : la dernière porte de la veille, fermée
 
