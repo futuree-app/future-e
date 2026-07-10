@@ -6,7 +6,7 @@ import {
 
 const NONE: ChecklistFacts = {
   dpe: "correct", confortEteInsuffisant: false, expositionBati: false,
-  zoneReglementee: false, sinistraliteActive: false,
+  zoneReglementee: false, sinistraliteActive: false, caviteProche: false,
 };
 
 test("energyState mappe les étiquettes", () => {
@@ -32,10 +32,10 @@ test("aucun fait saillant -> checklist vide", () => {
 test("un item par face déclenchée, dans l'ordre des preuves", () => {
   const all: ChecklistFacts = {
     dpe: "passoire", confortEteInsuffisant: true, expositionBati: true,
-    zoneReglementee: true, sinistraliteActive: true,
+    zoneReglementee: true, sinistraliteActive: true, caviteProche: true,
   };
   const ids = buildDecisionChecklist(all, "achat").map((i) => i.id);
-  assert.deepEqual(ids, ["energie", "confort", "bati", "reglementaire", "sinistralite"]);
+  assert.deepEqual(ids, ["energie", "confort", "bati", "reglementaire", "sinistralite", "cavite"]);
 });
 
 test("le texte change avec le projet ; autre == neutre", () => {
@@ -57,4 +57,28 @@ test("dpe correct ou absent -> pas d'item énergie", () => {
 test("checklistIntro distingue neutre et projet choisi", () => {
   assert.notEqual(checklistIntro(null), checklistIntro("achat"));
   assert.equal(checklistIntro("autre"), checklistIntro(null));
+});
+
+const NONE2: ChecklistFacts = {
+  dpe: "correct", confortEteInsuffisant: false, expositionBati: false,
+  zoneReglementee: false, sinistraliteActive: false, caviteProche: false,
+};
+
+test("cavité : un point, quel que soit le projet, avec un texte adapté", () => {
+  for (const projet of [null, "achat", "reside", "location"]) {
+    const items = buildDecisionChecklist({ ...NONE2, caviteProche: true }, projet);
+    assert.deepEqual(items.map((i) => i.id), ["cavite"], `projet=${projet}`);
+    assert.ok(items[0].text.length > 0);
+  }
+});
+
+test("cavité absente : aucun point", () => {
+  assert.deepEqual(buildDecisionChecklist(NONE2, "achat"), []);
+});
+
+test("texte cavité : achat parle de fondations, location de bailleur", () => {
+  const achat = buildDecisionChecklist({ ...NONE2, caviteProche: true }, "achat")[0].text;
+  const loc = buildDecisionChecklist({ ...NONE2, caviteProche: true }, "location")[0].text;
+  assert.match(achat, /fondation|sol/i);
+  assert.match(loc, /bailleur/i);
 });

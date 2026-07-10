@@ -58,3 +58,24 @@ export function IconSeismic({ size = 13 }: { size?: number }) {
     </Svg>
   );
 }
+
+// Sol hachuré au-dessus d'un vide — cavité souterraine.
+export function IconCavity({ size = 13 }: { size?: number }) {
+  return (
+    <Svg size={size}>
+      <path d="M2 5h12" />
+      <path d="M3.5 5l-1 1.5M6 5l-1 1.5M8.5 5l-1 1.5M11 5l-1 1.5M13.5 5l-1 1.5" />
+      <path d="M4.5 11a3.5 3 0 0 1 7 0" />
+    </Svg>
+  );
+}
+
+// Pente avec une masse qui glisse — mouvement de terrain.
+export function IconLandslide({ size = 13 }: { size?: number }) {
+  return (
+    <Svg size={size}>
+      <path d="M2 12l6-7 6 7" />
+      <path d="M6.5 8.5l2 1.5 1.5-1" />
+    </Svg>
+  );
+}
