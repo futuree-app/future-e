@@ -6,7 +6,7 @@ import {
 
 const NONE: ChecklistFacts = {
   dpe: "correct", confortEteInsuffisant: false, expositionBati: false,
-  zoneReglementee: false, sinistraliteActive: false,
+  zoneReglementee: false, sinistraliteActive: false, perimetrePatrimonial: false,
 };
 
 test("energyState mappe les étiquettes", () => {
@@ -32,10 +32,10 @@ test("aucun fait saillant -> checklist vide", () => {
 test("un item par face déclenchée, dans l'ordre des preuves", () => {
   const all: ChecklistFacts = {
     dpe: "passoire", confortEteInsuffisant: true, expositionBati: true,
-    zoneReglementee: true, sinistraliteActive: true,
+    zoneReglementee: true, sinistraliteActive: true, perimetrePatrimonial: true,
   };
   const ids = buildDecisionChecklist(all, "achat").map((i) => i.id);
-  assert.deepEqual(ids, ["energie", "confort", "bati", "reglementaire", "sinistralite"]);
+  assert.deepEqual(ids, ["energie", "confort", "bati", "reglementaire", "sinistralite", "patrimoine"]);
 });
 
 test("le texte change avec le projet ; autre == neutre", () => {
@@ -57,4 +57,26 @@ test("dpe correct ou absent -> pas d'item énergie", () => {
 test("checklistIntro distingue neutre et projet choisi", () => {
   assert.notEqual(checklistIntro(null), checklistIntro("achat"));
   assert.equal(checklistIntro("autre"), checklistIntro(null));
+});
+
+test("patrimoine : un point pour un projet d'achat", () => {
+  const items = buildDecisionChecklist({ ...NONE, perimetrePatrimonial: true }, "achat");
+  assert.deepEqual(items.map((i) => i.id), ["patrimoine"]);
+  assert.match(items[0].text, /mairie/);
+});
+
+test("patrimoine : aucun point pour une location", () => {
+  const items = buildDecisionChecklist({ ...NONE, perimetrePatrimonial: true }, "location");
+  assert.deepEqual(items, []);
+});
+
+test("patrimoine : un point en neutre et en résidence", () => {
+  for (const projet of [null, "reside"]) {
+    const items = buildDecisionChecklist({ ...NONE, perimetrePatrimonial: true }, projet);
+    assert.deepEqual(items.map((i) => i.id), ["patrimoine"], `projet=${projet}`);
+  }
+});
+
+test("patrimoine absent : aucun point", () => {
+  assert.deepEqual(buildDecisionChecklist(NONE, "achat"), []);
 });

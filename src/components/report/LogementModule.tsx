@@ -389,6 +389,7 @@ export default function LogementModule({
     sinistraliteActive:
       sini != null &&
       [sini.secheresse.kind, sini.inondation.kind].some((k) => k === "lecture" || k === "faible_repr"),
+    perimetrePatrimonial: (result?.heritage?.items?.length ?? 0) > 0,
   };
 
   return (
