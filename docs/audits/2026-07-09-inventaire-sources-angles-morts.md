@@ -206,10 +206,17 @@ Mesuré sur 10 adresses contrastées puis 40 communes :
 souvent en pleine campagne. Le taux de 45 % est donc plutôt une borne basse pour une vraie adresse.*
 
 **Le lien que personne n'a fait.** Une adresse dans un périmètre `AC1` (abords d'un monument
-historique) ou `AC4` (site patrimonial remarquable) est soumise à l'avis de l'Architecte des Bâtiments
-de France. En pratique, **l'isolation par l'extérieur y est le plus souvent refusée**. Or futur•e
-possède une Face 1 « lecture thermique » et un `renovation.ts` qui chiffrent des postes d'isolation.
-Le code ne mentionne **nulle part** l'ABF ni les monuments historiques (vérifié par `grep`).
+historique) ou `AC4` (site patrimonial remarquable) est soumise à l'**avis obligatoire** de
+l'Architecte des Bâtiments de France. Celui-ci **peut s'opposer** à une modification visible de
+façade, donc à une isolation par l'extérieur sur les façades vues depuis l'espace public (Code du
+patrimoine, art. L621-30 à L621-32). L'avis est certain, l'opposition ne l'est pas : la formulation
+« le plus souvent refusée », écrite dans une première version de cet audit, est trop forte et a été
+corrigée après vérification.
+
+Or futur•e possède une Face 1 « lecture thermique » et un `renovation.ts` qui chiffrent des postes
+d'isolation. Le code ne mentionne **nulle part** l'ABF ni les monuments historiques (vérifié par
+`grep`). Ce qui manque au lecteur n'est pas un verdict, c'est le fait : *ici, l'avis de l'ABF sera
+requis, avec son délai et son aléa.*
 
 **Combien de logements sont concernés ?** Mesuré sur **210 adresses réelles de logements**, tirées
 des DPE de l'ADEME dans 70 communes échantillonnées au prorata de la population, puis interrogées une
