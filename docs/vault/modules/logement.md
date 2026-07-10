@@ -121,6 +121,24 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
 
 ## État de mise en œuvre
 
+- **Brique « Patrimoine protégé à cette adresse » BRANCHÉE (2026-07-09).** En Face 2, dans le bloc
+  « Statut réglementaire à cette adresse », après les plans de prévention. Servitudes patrimoniales
+  seules (`AC1` abords d'un monument historique, `AC4` site patrimonial remarquable, `AC2` site
+  classé ou inscrit), depuis `apicarto.ign.fr/api/gpu/assiette-sup-s` (sans clé, ~641 ms, appelé en
+  parallèle des sources Géorisques). Lib pure testée `src/lib/gpu-servitudes.ts` (dédoublonnage par
+  famille : un point est dans autant d'assiettes qu'il y a de monuments autour, 134 Place Stanislas),
+  fetcher `src/lib/gpu.ts`. **Le fait est binaire** : aucun compteur, aucun nom de monument. **Ne
+  déduit jamais les travaux** : la procédure est énoncée, l'issue appartient à l'ABF. **Le silence
+  n'est jamais une absence** : rien ne s'affiche quand rien n'est trouvé (le GPU n'expose aucun
+  indicateur de publication des servitudes), et l'état « Aucune règle de construction particulière »
+  ne s'affiche plus si une protection patrimoniale existe sans PPRN. Statut réglementaire, donc
+  **re-fetché comme le PPRN, jamais snapshoté**. Un point de checklist s'ajoute pour les projets
+  d'achat et de résidence (pas en location). Mesure : 25 % des logements concernés (IC 19-31 %),
+  55 % en ville. Spec/plan : `docs/superpowers/{specs,plans}/2026-07-09-logement-patrimoine-abf*`.
+  **Version 1.1 décidée, non faite** : secteurs de sols pollués au point (SIS / SUP sols), même
+  mécanique. Mesure : 0/120 adresses dans un secteur (IC 0-3 %), 15 % à moins de 500 m. Demande une
+  nuance de la frontière Logement/Santé (le fait réglementaire à l'adresse vit en Face 2,
+  l'exposition du corps vit en Santé, le second renvoie au premier sans le répéter).
 - **Face 2 (risques du bâti / matérialité) : PARTIELLEMENT BRANCHÉE (2026-07-03).** Le bloc
   « Ce que le risque a déjà coûté ici » affiche la **sinistralité ONRN** (coût moyen + fréquence
   des sinistres CatNat indemnisés 1995-2021) pour **sécheresse** ET **inondation** (tous types),
