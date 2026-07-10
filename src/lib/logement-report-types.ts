@@ -6,6 +6,7 @@
 
 import type { DpeRecord } from "./dpe-attribution.ts";
 import type { RegulatoryPlan } from "./pprn-zonage.ts";
+import type { HeritageStatus } from "./gpu-servitudes.ts";
 import type { OnrnSinistralite } from "./onrn-sinistralite.ts";
 
 export type LogementReport = {
@@ -42,6 +43,9 @@ export type LogementReport = {
     parcel?: { parcelCode: string; risks: { labels: string[] }; pprn: { labels: string[]; zones: string[] }; regulatoryPlans?: RegulatoryPlan[]; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; } | null;
     commune?: { communeName: string | null; riskLabels: string[]; seismic: { code: string | null; label: string | null } | null; } | null;
   };
+  // Protections patrimoniales au point (AC1/AC2/AC4). Statut réglementaire, comme le PPRN :
+  // re-fetché à chaque rendu, jamais snapshoté. `null` = non interrogé.
+  heritage?: HeritageStatus | null;
   sinistralite?: OnrnSinistralite | null;
   // Métadonnées serveur portées sur le fil, non lues par le client (diagnostic / futur usage).
   granularity?: {

@@ -20,6 +20,15 @@ export type HeritageProtection = {
 
 export type RawSupFeature = { properties?: { idass?: string | null } | null };
 
+// Vit ici, dans la lib PURE, et non dans `gpu.ts` (server-only) : le contrat partagé
+// `logement-report-types.ts` est lu côté client et n'importe que des libs pures, comme il le fait
+// déjà pour `RegulatoryPlan`. `gpu.ts` le ré-exporte pour les appelants serveur.
+export type HeritageStatus = {
+  items: HeritageProtection[];
+  // Une panne n'est JAMAIS une absence de servitude : le rendu doit pouvoir les distinguer.
+  sourceStatus: "ok" | "unavailable";
+};
+
 const LABELS: Record<HeritageFamily, string> = {
   AC1: "Abords d'un monument historique",
   AC4: "Site patrimonial remarquable",
