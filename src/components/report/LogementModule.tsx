@@ -389,6 +389,7 @@ export default function LogementModule({
     sinistraliteActive:
       sini != null &&
       [sini.secheresse.kind, sini.inondation.kind].some((k) => k === "lecture" || k === "faible_repr"),
+    perimetrePatrimonial: (result?.heritage?.items?.length ?? 0) > 0,
   };
 
   return (
@@ -580,7 +581,9 @@ export default function LogementModule({
               </ReportSection>
             )}
 
-            {result.georisques && <RegulatoryStatusBlock georisques={result.georisques} />}
+            {result.georisques && (
+              <RegulatoryStatusBlock georisques={result.georisques} heritage={result.heritage ?? null} />
+            )}
 
             {result.sinistralite && <SinistraliteBlock sinistralite={result.sinistralite} commune={result.address?.city ?? null} />}
           </div>

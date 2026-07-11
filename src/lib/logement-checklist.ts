@@ -11,6 +11,7 @@ export type ChecklistFacts = {
   expositionBati: boolean; // RGA/argile à exposition notable
   zoneReglementee: boolean; // au moins un zonage PPRN au point
   sinistraliteActive: boolean; // un péril indemnisé lisible à l'échelle commune
+  perimetrePatrimonial: boolean; // AC1/AC2/AC4 au point : l'avis de l'ABF entre en jeu
 };
 
 export type ChecklistItem = { id: string; text: string };
@@ -32,7 +33,12 @@ export function projetBucket(projet: string | null): Bucket {
 
 // Une règle par face. `active` gate sur le fait ; `text` porte la formulation par bucket.
 // L'ordre du tableau = l'ordre des preuves (énergie -> chaleur -> bâti -> réglementaire -> sinistralité).
-const RULES: { id: string; active: (f: ChecklistFacts) => boolean; text: Record<Bucket, string> }[] = [
+const RULES: {
+  id: string;
+  active: (f: ChecklistFacts) => boolean;
+  buckets?: Bucket[]; // par défaut : tous. Restreint l'item aux projets où le geste a un sens.
+  text: Record<Bucket, string>;
+}[] = [
   {
     id: "energie",
     active: (f) => f.dpe === "passoire" || f.dpe === "energivore",
@@ -83,11 +89,25 @@ const RULES: { id: string; active: (f: ChecklistFacts) => boolean; text: Record<
       location: "Demandez au bailleur l'état des risques et signalez tout sinistre survenu pendant la location.",
     },
   },
+  {
+    id: "patrimoine",
+    active: (f) => f.perimetrePatrimonial,
+    // Un locataire ne fait pas ces travaux.
+    buckets: ["neutre", "achat", "reside"],
+    text: {
+      neutre: "Se renseigner en mairie sur ce que le périmètre patrimonial autorise, avant tout projet de travaux extérieurs.",
+      achat: "Si vous envisagez des travaux extérieurs, isolation, menuiseries ou toiture, faites vérifier en mairie ce que le périmètre patrimonial autorise, avant tout devis.",
+      reside: "Avant d'engager des travaux extérieurs, faites vérifier en mairie ce que le périmètre patrimonial autorise : l'avis de l'Architecte des Bâtiments de France peut être requis.",
+      location: "",
+    },
+  },
 ];
 
 export function buildDecisionChecklist(facts: ChecklistFacts, projet: string | null): ChecklistItem[] {
   const b = projetBucket(projet);
-  return RULES.filter((r) => r.active(facts)).map((r) => ({ id: r.id, text: r.text[b] }));
+  return RULES.filter((r) => r.active(facts))
+    .filter((r) => r.buckets === undefined || r.buckets.includes(b))
+    .map((r) => ({ id: r.id, text: r.text[b] }));
 }
 
 export function checklistIntro(projet: string | null): string {

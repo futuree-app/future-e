@@ -9,6 +9,7 @@ import {
   getGeorisquesSummary,
 } from "@/lib/georisques";
 import { getAltitude } from "@/lib/ign";
+import { fetchHeritageProtections } from "@/lib/gpu";
 import { getDpeCandidatesByBanId, getDpeByCoordinates } from "@/lib/dpe";
 import { validateSelectedBanAddress } from "@/lib/selected-ban-address";
 import { getZfeForPoint } from "@/lib/zfe";
@@ -42,7 +43,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         : getAuditByCoordinates(address.latitude, address.longitude).catch(() => null),
     ]);
 
-    const [georisquesCommune, altitude, zfe, irep, cartofriches, communeData, sinistralite] = await Promise.all([
+    const [georisquesCommune, altitude, zfe, irep, cartofriches, communeData, sinistralite, heritage] = await Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
       getAltitude(address.latitude, address.longitude).catch(() => null),
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
@@ -50,6 +51,10 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       address.citycode ? getCartofrichesForCommune(address.citycode).catch(() => null) : null,
       address.citycode ? getCommuneFullData(address.citycode).catch(() => null) : null,
       getOnrnSinistralite(address.citycode).catch(() => null),
+      // En parallèle, jamais en série : le GPU coûte ~641 ms et se fond dans le plus lent.
+      fetchHeritageProtections(address.latitude, address.longitude).catch(
+        () => ({ items: [], sourceStatus: "unavailable" as const }),
+      ),
     ]);
 
     const georisquesAddress = process.env.GEORISQUES_API_TOKEN
@@ -80,6 +85,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         parcel: georisquesParcel,
         commune: georisquesCommune,
       },
+      heritage,
       granularity: {
         geocoding: "address",
         cadastre: parcel ? "parcel" : null,
