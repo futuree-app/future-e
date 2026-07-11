@@ -1,180 +1,169 @@
-# Dossier de décision + registre de matérialité (slice 1) — Implementation Plan
+# Dossier de décision + registre de matérialité (slice 1) — Implementation Plan v2
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Poser une page « En une minute » déterministe au-dessus des modules payants du hub `/rapport`, qui hiérarchise les faits Territoire selon cinq rôles décisionnels pour le projet déclaré de l'utilisateur.
+**Goal:** Poser une page « En une minute » déterministe au-dessus des modules payants du hub `/rapport`, qui hiérarchise les faits Territoire selon cinq rôles décisionnels pour le projet déclaré, en étant honnête sur ce qu'elle a examiné ET sur ce qu'elle n'a pas encore examiné.
 
-**Architecture:** Un registre de règles pures (`materiality-rules.ts`) lit `(ModuleFacts × UserProject)` et émet des `DecisionFact` déjà résolus ; un assembleur pur (`decision-assembler.ts`) les range en cinq sections avec un état de conclusion à périmètre communal ; un adaptateur (`territory-facts.ts`) projette l'index commune en `ModuleFacts`. La page rend le résultat, elle ne calcule rien. Aucun appel LLM dans ce slice.
+**Architecture:** Un registre de règles pures dont chaque `evaluate()` retourne une ÉVALUATION (verdict + faits), pas seulement des faits. Le moteur agrège faits + couverture des contraintes dures + valide chaque fait (invariants). Un assembleur pur calcule un état de conclusion honnête, plafonne l'affichage, et nomme les contraintes non couvertes. La page rend, elle ne calcule rien. Aucun LLM.
 
-**Tech Stack:** TypeScript, Next.js App Router (server components), tests `node --test` (runner natif, comme `src/lib/logement-checklist.test.ts`).
+**Tech Stack:** TypeScript, Next.js App Router (server components), tests `node --test`.
+
+**Spec:** `docs/superpowers/specs/2026-07-11-dossier-decision-materialite-design.md` (v2).
 
 ## Global Constraints
 
-Copiées verbatim de la spec `docs/superpowers/specs/2026-07-11-dossier-decision-materialite-design.md`. Chaque tâche les respecte implicitement.
+- **Registre, jamais un score.** Chaque remontée est le produit d'une règle explicable.
+- **Couverture déclarée, jamais supposée.** « Aucune incompatibilité » ne se dit QUE sur les contraintes réellement examinées ; une contrainte déclarée non couverte est nommée.
+- **Absence de donnée jamais un résultat.** `catnat`/`risque` absents → `null` (jamais 0). Aucun `try/catch` autour de `subScore` (une erreur inattendue doit exploser).
+- **Conclusion communale explicite.** Toujours « À l'échelle de la commune, … ».
+- **Toute phrase porte un `ruleId` et une preuve** (`observedValue` = la valeur mesurée). La conclusion porte un `conclusionBasis`.
+- **Doctrine imposée par le type** (union discriminée) + invariants runtime (`assertFactValid`) qui JETTENT en cas de violation.
+- **Déterministe seulement**, gabarits posture-aware, hiérarchie plafonnée (2/3/3/4).
+- **Conventions projet.** Imports `.ts` explicites en lib, `@/` sans extension en composant/page. FR sans tiret cadratin, sans antithèse « X, pas Y » comme emphase.
 
-- **Registre, jamais un score.** On ne calcule JAMAIS `importance × gravité × confiance`. Chaque remontée est le produit d'une règle explicable.
-- **Toute phrase de la page porte un `ruleId` et au moins une preuve** (`evidence[]` non vide). Invariant de test.
-- **La conclusion du slice 1 est explicitement communale.** Jamais « ce lieu convient à votre projet ». Toujours « à l'échelle de la commune, … ».
-- **Déterministe seulement.** Aucun LLM dans ce slice. Gabarits, pas de prose libre.
-- **Deux vides distincts.** `no_hard_constraint_declared` (projet sans contrainte dure) n'est jamais confondu avec `insufficient_evidence` (données muettes bloquantes).
-- **Discipline compromis.** Aucun `compromise` émis sans tension explicite entre deux dimensions déclarées, preuve de chaque côté. Une section peut rester vide.
-- **Fait non matériel : aucun `DecisionFact`.** Il produit seulement une `DiagnosticEntry` interne (non rendue). Le fait reste visible dans le module Territoire.
-- **Inconnues : `impact: 'blocking' | 'scoped'`.** L'absence d'adresse est toujours `scoped` (ne bloque jamais seule la conclusion).
-- **Conventions projet.** Imports avec extension `.ts` explicite. Copie FR sans tiret cadratin (« , » ou « : » à la place), sans antithèse « X, pas Y » comme emphase. `PreferenceKey`, `UserProject`, `IndexCommune` sont les types existants.
-
-**Commandes de vérification :**
-- Typecheck : `npx tsc --noEmit`
-- Un fichier de test : `node --test src/lib/decision/<fichier>.test.ts`
+**Vérif :** `npx tsc --noEmit` (exit 0) · `node --test src/lib/decision/<fichier>.test.ts`.
 
 ---
 
 ## File Structure
 
-Neufs (tous sous `src/lib/decision/`, une responsabilité chacun) :
-- `decision-fact.ts` : les types/contrats (`DecisionFact`, `DecisionRule`, `ModuleFacts`, `Dossier`, …). Aucune logique.
-- `project-view.ts` : lecteurs purs au-dessus de `UserProject` (poids d'une préférence, limite mer, montagne dure, intention d'achat, présence d'une contrainte dure).
-- `territory-facts.ts` : adaptateur INSEE → `ModuleFacts` (pur + async) et orchestrateur `buildCommuneDossier`.
-- `materiality-rules.ts` : le registre (6 règles d'amorçage) + moteur `runRules`.
-- `decision-assembler.ts` : `assembleDossier` (sections + état de conclusion, pur).
-- `materiality-rules.test.ts`, `decision-assembler.test.ts`, `project-view.test.ts`, `territory-facts.test.ts`.
-
-Composant :
-- `src/components/report/DossierDecisionSection.tsx` : rendu déterministe, présentationnel.
-
-Touchés :
-- `src/lib/comparateur-vie.ts` : exporter `subScore` (accesseur lecture seule).
-- `src/app/(account)/rapport/page.tsx` : insertion payant après `ProjectSummaryCard`.
-
-Vault :
-- `docs/vault/arbitrages/dossier-decision-eliminatoire-contrainte-declaree.md`
-- `docs/vault/arbitrages/deterministe-selectionne-ia-formule.md`
-- `docs/vault/arbitrages/rapport-un-produit-semantique-par-posture.md`
+Neufs sous `src/lib/decision/` : `decision-fact.ts` (contrats), `project-view.ts` (lecteurs projet + couverture), `territory-facts.ts` (adaptateur + orchestrateur), `materiality-rules.ts` (registre + moteur + invariants), `decision-assembler.ts` (assembleur). Tests jumeaux.
+Composant : `src/components/report/DossierDecisionSection.tsx`.
+Touchés : `src/lib/comparateur-vie.ts` (export `subScore`), `src/app/(account)/rapport/page.tsx`.
+Vault : 3 arbitrages.
 
 ---
 
-## Task 1: Contrats + lecteurs de projet + export `subScore`
+## Task 1: Contrats + lecteurs de projet + couverture + export `subScore`
 
 **Files:**
 - Create: `src/lib/decision/decision-fact.ts`
 - Create: `src/lib/decision/project-view.ts`
 - Create: `src/lib/decision/project-view.test.ts`
-- Modify: `src/lib/comparateur-vie.ts` (une ligne : `function subScore` → `export function subScore`)
+- Modify: `src/lib/comparateur-vie.ts` (`function subScore` → `export function subScore`)
 
-**Interfaces:**
-- Produces (types consommés par toutes les tâches suivantes) :
-  - `DecisionModule`, `DecisionRole`, `EvidenceStrength`, `VerificationActionType`, `EvidenceRef`
-  - `DecisionFact`, `ModuleFacts`, `DecisionRule`, `DiagnosticEntry`, `RunResult`
-  - `ConclusionState`, `DossierSection`, `Dossier`
-  - `project-view.ts` : `preferenceWeight(project, key): number`, `nearSeaLimitKm(project): number | null`, `wantsMountainHard(project): boolean`, `isPurchaseIntent(project): boolean`, `hasAnyHardConstraint(project): boolean`
-  - `comparateur-vie.ts` : `subScore(key: PreferenceKey, c: IndexCommune): number | null` (désormais exporté)
+**Interfaces produced (consommées partout ensuite) :** tous les types de `decision-fact.ts` ; `project-view.ts` : `preferenceWeight`, `declaredPreferenceKeys`, `nearSeaLimitKm`, `communeSizeBounds`, `isBuyer`, `isStructured`, `hasAnyHardConstraint`, `declaredHardConstraintKeys`, `uncoveredConstraints`, `HARD_CONSTRAINT_LABELS` ; `comparateur-vie.ts` : `subScore` exporté.
 
-- [ ] **Step 1: Créer le fichier de contrats**
+- [ ] **Step 1: Créer les contrats**
 
 Create `src/lib/decision/decision-fact.ts` :
 
 ```ts
-// Contrats du dossier de décision (slice 1). Types PURS, aucune logique.
-// Un DecisionFact est le RÉSULTAT d'une règle, jamais la doctrine : il est bête.
-// cf. docs/superpowers/specs/2026-07-11-dossier-decision-materialite-design.md
+// Contrats du dossier de décision (slice 1, v2). Types PURS.
+// DecisionFact = union discriminée : le TYPE impose la doctrine (un unknown a un impact,
+// un compromise a deux côtés avec preuve, une verification a une action).
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { ProjectPosture, UserProject } from "../user-project.ts";
 
 export type DecisionModule = "territoire" | "logement";
-
-export type DecisionRole =
-  | "incompatibility" // contredit une contrainte non négociable déclarée
-  | "compromise" // tension explicite entre deux dimensions du projet
-  | "unknown" // une donnée déterminante manque
-  | "verification" // à vérifier / surveiller avant de s'engager
-  | "supporting_context"; // RÉSERVÉ : aucune règle du slice 1 ne l'émet, aucune section ne l'accueille
-
-export type EvidenceStrength = "established" | "indicative" | "incomplete";
-
+export type MaterialityTier = "decision_critical" | "structuring" | "secondary";
 export type VerificationActionType =
-  | "renseigner_adresse"
-  | "verifier_sur_place"
-  | "obtenir_document"
-  | "demander_confirmation";
+  | "renseigner_adresse" | "verifier_sur_place" | "obtenir_document" | "demander_confirmation";
 
-export type EvidenceRef = { module: DecisionModule; label: string; href?: string };
+export type HardConstraintKey =
+  | "departements" | "zones" | "excludeZones" | "montagne" | "reliefProche"
+  | "nearSea" | "excludeSea" | "nearPlace" | "communeSize" | "excludePlace" | "sizeRelativeTo";
 
-export type DecisionFact = {
-  id: string;
-  ruleId: string;
-  sourceFactId: string;
+export type EvidenceRef = {
+  factId: string;
   module: DecisionModule;
-  role: DecisionRole;
-  statement: string;
-  evidence: EvidenceRef[];
-  limitation?: string;
-  evidenceStrength: EvidenceStrength;
-  action?: { type: VerificationActionType; label: string };
-  relatedProjectKeys: string[];
-  // Rôle "unknown" seulement : la donnée manquante BLOQUE la conclusion, ou LIMITE
-  // seulement une dimension / un grain. Propriété RÉSOLUE lue par l'assembleur.
-  impact?: "blocking" | "scoped";
+  label: string;
+  observedValue?: string; // la valeur mesurée : "42 km", "18 000 hab.", "72/100"
+  grain: "commune" | "adresse" | "secteur";
+  href?: string; // optionnel slice 1
 };
 
-// Sac de faits normalisés, volontairement plat : les règles lisent des CHAMPS.
-// Slice 1 = grain commune seulement. Slice 1.5 ajoutera un bloc `logement?`.
+type BaseFact = {
+  id: string;
+  ruleId: string;
+  sourceFactIds: string[];
+  module: DecisionModule;
+  statement: string;
+  materialityTier: MaterialityTier;
+};
+
+export type IncompatibilityFact = BaseFact & {
+  role: "incompatibility";
+  evidenceStrength: "established" | "indicative";
+  hardConstraintKey: HardConstraintKey;
+  evidence: EvidenceRef[];
+  limitation?: string;
+};
+export type CompromiseSide = { projectKey: PreferenceKey; statement: string; evidence: EvidenceRef[] };
+export type CompromiseFact = BaseFact & { role: "compromise"; sides: [CompromiseSide, CompromiseSide] };
+export type UnknownFact = BaseFact & {
+  role: "unknown";
+  impact: "blocking" | "scoped";
+  evidence: EvidenceRef[];
+  action?: { type: VerificationActionType; label: string };
+};
+export type VerificationFact = BaseFact & {
+  role: "verification";
+  evidence: EvidenceRef[];
+  action: { type: VerificationActionType; label: string };
+  limitation?: string;
+};
+export type DecisionFact = IncompatibilityFact | CompromiseFact | UnknownFact | VerificationFact;
+
 export type ModuleFacts = {
   insee: string;
   nom: string;
   distanceCoteKm: number;
+  population: number | null;
   altitude: number | null;
-  catnatInondation: number;
-  scores: Partial<Record<PreferenceKey, number | null>>; // subScore par clé, 0-100, haut = satisfait
-  hasAddress: boolean; // slice 1 : toujours false (le profil ne stocke pas d'adresse)
+  catnatInondation: number | null;
+  inondationRisque: number | null;
+  scores: Partial<Record<PreferenceKey, number | null>>;
+  hasAddress: boolean;
+};
+
+export type RuleOutcome =
+  | "not_applicable" | "satisfied" | "incompatible" | "compromise" | "verification" | "unknown" | "uncertain";
+export type RuleEvaluation = {
+  ruleId: string;
+  projectKeys: string[];
+  outcome: RuleOutcome;
+  facts: DecisionFact[];
+  reason: string;
 };
 
 export type DecisionRule = {
   id: string;
   module: DecisionModule;
-  sourceFacts: string[]; // documente la donnée lue (audit)
-  appliesToPostures: ProjectPosture[]; // pré-filtre grossier ; active() est le vrai gate
-  active: (facts: ModuleFacts, project: UserProject) => boolean;
-  resolve: (facts: ModuleFacts, project: UserProject) => DecisionFact | DecisionFact[];
+  hardConstraint?: HardConstraintKey; // si présent : participe à la couverture de cette contrainte
+  evaluate: (facts: ModuleFacts, project: UserProject) => RuleEvaluation;
 };
 
-export type DiagnosticEntry = {
-  ruleId: string;
-  sourceFactId: string;
-  decision: "emitted" | "skipped";
-  reason: string;
+export type RunResult = {
+  facts: DecisionFact[];
+  evaluations: RuleEvaluation[];
+  coveredHardConstraints: HardConstraintKey[];
 };
-
-export type RunResult = { facts: DecisionFact[]; diagnostics: DiagnosticEntry[] };
 
 export type ConclusionState =
-  | "established_incompatibility"
-  | "compatible_with_reserves"
-  | "no_incompatibility_with_compromise"
-  | "no_hard_constraint_declared"
-  | "insufficient_evidence";
-
+  | "established_incompatibility" | "no_incompatibility_established"
+  | "insufficient_evidence" | "no_hard_constraint_declared" | "project_not_structured";
+export type UncoveredConstraint = { key: HardConstraintKey; label: string };
 export type DossierSection = {
   key: "incompatibilities" | "compromises" | "unknowns" | "verifications";
   title: string;
   facts: DecisionFact[];
 };
-
 export type Dossier = {
   scope: "commune" | "commune+adresse";
   conclusionState: ConclusionState;
   conclusion: string;
+  conclusionBasis: { ruleIds: string[]; factIds: string[]; evidence: EvidenceRef[] };
   sections: DossierSection[];
+  uncovered: UncoveredConstraint[];
 };
 ```
 
 - [ ] **Step 2: Exporter `subScore`**
 
-Modify `src/lib/comparateur-vie.ts` : trouver `function subScore(key: PreferenceKey, c: IndexCommune): number | null {` et ajouter `export ` devant.
+Modify `src/lib/comparateur-vie.ts` : ajouter `export ` devant `function subScore(key: PreferenceKey, c: IndexCommune): number | null {`.
 
-```ts
-export function subScore(key: PreferenceKey, c: IndexCommune): number | null {
-```
-
-- [ ] **Step 3: Écrire le test des lecteurs de projet (échoue)**
+- [ ] **Step 3: Écrire le test des lecteurs (échoue)**
 
 Create `src/lib/decision/project-view.test.ts` :
 
@@ -182,50 +171,56 @@ Create `src/lib/decision/project-view.test.ts` :
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  preferenceWeight, nearSeaLimitKm, wantsMountainHard, isPurchaseIntent, hasAnyHardConstraint,
+  preferenceWeight, declaredPreferenceKeys, nearSeaLimitKm, communeSizeBounds,
+  isBuyer, isStructured, hasAnyHardConstraint, declaredHardConstraintKeys, uncoveredConstraints,
 } from "./project-view.ts";
 import type { UserProject } from "../user-project.ts";
 
-function project(over: Partial<UserProject> & { parsed?: unknown } = {}): UserProject {
-  return {
-    posture: "recherche", intent: null, rawText: null,
-    parsed: null, updatedAt: "1970-01-01T00:00:00.000Z",
-    ...(over as UserProject),
-  };
+function project(parsed: unknown, over: Partial<UserProject> = {}): UserProject {
+  return { posture: "recherche", intent: null, rawText: null, parsed: parsed as UserProject["parsed"], updatedAt: "1970-01-01T00:00:00.000Z", ...over };
 }
+const HC = { reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 5 }, communeSize: { min: null, max: 20000 } }, preferences: [{ key: "faible_chaleur", weight: 3 }] };
 
-test("preferenceWeight : 0 si absent, poids sinon", () => {
-  assert.equal(preferenceWeight(project(), "faible_chaleur"), 0);
-  const p = project({ parsed: { reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_chaleur", weight: 3 }] } });
-  assert.equal(preferenceWeight(p, "faible_chaleur"), 3);
+test("isStructured : faux si parsed null", () => {
+  assert.equal(isStructured(project(null)), false);
+  assert.equal(isStructured(project(HC)), true);
 });
 
-test("nearSeaLimitKm : lit hardConstraints.nearSea", () => {
-  assert.equal(nearSeaLimitKm(project()), null);
-  const p = project({ parsed: { reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 5 } }, preferences: [] } });
-  assert.equal(nearSeaLimitKm(p), 5);
+test("isBuyer : seul intent achat, pas la posture adresse", () => {
+  assert.equal(isBuyer(project(HC, { posture: "adresse" })), false);
+  assert.equal(isBuyer(project(HC, { intent: "achat" })), true);
 });
 
-test("wantsMountainHard : vrai si montagne strength hard", () => {
-  const p = project({ parsed: { reformulation: "x", hardConstraints: { montagne: { strength: "hard" } }, preferences: [] } });
-  assert.equal(wantsMountainHard(p), true);
-  assert.equal(wantsMountainHard(project()), false);
+test("declaredHardConstraintKeys : énumère les contraintes présentes", () => {
+  assert.deepEqual([...declaredHardConstraintKeys(project(HC))].sort(), ["communeSize", "nearSea"]);
+  assert.deepEqual(declaredHardConstraintKeys(project(null)), []);
 });
 
-test("isPurchaseIntent : posture adresse OU intent achat", () => {
-  assert.equal(isPurchaseIntent(project({ intent: "achat" })), true);
-  assert.equal(isPurchaseIntent(project({ posture: "adresse" })), true);
-  assert.equal(isPurchaseIntent(project()), false);
+test("communeSizeBounds : lit min/max", () => {
+  assert.deepEqual(communeSizeBounds(project(HC)), { min: null, max: 20000 });
+  assert.equal(communeSizeBounds(project({ reformulation: "x", hardConstraints: {}, preferences: [] })), null);
 });
 
-test("hasAnyHardConstraint : vrai dès une contrainte dure", () => {
-  assert.equal(hasAnyHardConstraint(project()), false);
-  const p = project({ parsed: { reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 5 } }, preferences: [] } });
-  assert.equal(hasAnyHardConstraint(p), true);
+test("uncoveredConstraints : déclarées moins couvertes, avec label", () => {
+  const u = uncoveredConstraints(project(HC), ["nearSea"]);
+  assert.deepEqual(u.map((x) => x.key), ["communeSize"]);
+  assert.ok(u[0].label.length > 0);
+});
+
+test("declaredPreferenceKeys + preferenceWeight", () => {
+  assert.deepEqual(declaredPreferenceKeys(project(HC)), ["faible_chaleur"]);
+  assert.equal(preferenceWeight(project(HC), "faible_chaleur"), 3);
+  assert.equal(preferenceWeight(project(HC), "nature"), 0);
+});
+
+test("nearSeaLimitKm + hasAnyHardConstraint", () => {
+  assert.equal(nearSeaLimitKm(project(HC)), 5);
+  assert.equal(hasAnyHardConstraint(project(HC)), true);
+  assert.equal(hasAnyHardConstraint(project({ reformulation: "x", hardConstraints: {}, preferences: [] })), false);
 });
 ```
 
-- [ ] **Step 4: Lancer le test, vérifier l'échec**
+- [ ] **Step 4: Lancer, vérifier l'échec**
 
 Run: `node --test src/lib/decision/project-view.test.ts`
 Expected: FAIL (`Cannot find module './project-view.ts'`).
@@ -235,84 +230,100 @@ Expected: FAIL (`Cannot find module './project-view.ts'`).
 Create `src/lib/decision/project-view.ts` :
 
 ```ts
-// Lecteurs PURS au-dessus de UserProject. Les règles ne fouillent jamais parsed
-// à la main : elles passent par ici. `parsed` peut être null (rawText seul).
+// Lecteurs PURS au-dessus de UserProject + calcul de couverture des contraintes dures.
 import type { UserProject } from "../user-project.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
+import type { HardConstraintKey, UncoveredConstraint } from "./decision-fact.ts";
 
+export function isStructured(project: UserProject): boolean {
+  return project.parsed != null;
+}
+export function isBuyer(project: UserProject): boolean {
+  return project.intent === "achat"; // analyser une adresse n'est PAS acheter
+}
 export function preferenceWeight(project: UserProject, key: PreferenceKey): number {
   const p = project.parsed?.preferences?.find((x) => x.key === key);
   return p ? p.weight : 0;
 }
-
+export function declaredPreferenceKeys(project: UserProject): PreferenceKey[] {
+  return project.parsed?.preferences?.map((p) => p.key) ?? [];
+}
 export function nearSeaLimitKm(project: UserProject): number | null {
   const ns = project.parsed?.hardConstraints?.nearSea;
   if (ns?.active && typeof ns.maxKm === "number") return ns.maxKm;
   return null;
 }
-
-export function wantsMountainHard(project: UserProject): boolean {
-  return project.parsed?.hardConstraints?.montagne?.strength === "hard";
+export function communeSizeBounds(project: UserProject): { min: number | null; max: number | null } | null {
+  const cs = project.parsed?.hardConstraints?.communeSize;
+  if (!cs) return null;
+  return { min: cs.min ?? null, max: cs.max ?? null };
 }
 
-export function isPurchaseIntent(project: UserProject): boolean {
-  return project.posture === "adresse" || project.intent === "achat";
-}
+export const HARD_CONSTRAINT_LABELS: Record<HardConstraintKey, string> = {
+  departements: "les départements visés",
+  zones: "les zones géographiques visées",
+  excludeZones: "les zones à éviter",
+  montagne: "l'exigence de montagne",
+  reliefProche: "la proximité du relief",
+  nearSea: "la proximité de la mer",
+  excludeSea: "l'éloignement de la mer",
+  nearPlace: "la proximité d'un lieu",
+  communeSize: "la taille de la commune",
+  excludePlace: "les villes à quitter",
+  sizeRelativeTo: "la taille relative à une ville",
+};
 
-export function hasAnyHardConstraint(project: UserProject): boolean {
+export function declaredHardConstraintKeys(project: UserProject): HardConstraintKey[] {
   const hc = project.parsed?.hardConstraints;
-  if (!hc) return false;
-  return Boolean(
-    hc.departements?.length ||
-      hc.zones?.some((z) => z.strength === "hard") ||
-      hc.excludeZones?.length ||
-      hc.montagne?.strength === "hard" ||
-      hc.reliefProche?.strength === "hard" ||
-      hc.nearSea?.active ||
-      hc.excludeSea ||
-      hc.nearPlace ||
-      hc.communeSize ||
-      hc.excludePlace?.length ||
-      hc.sizeRelativeTo,
-  );
+  if (!hc) return [];
+  const out: HardConstraintKey[] = [];
+  if (hc.departements?.length) out.push("departements");
+  if (hc.zones?.some((z) => z.strength === "hard")) out.push("zones");
+  if (hc.excludeZones?.length) out.push("excludeZones");
+  if (hc.montagne?.strength === "hard") out.push("montagne");
+  if (hc.reliefProche?.strength === "hard") out.push("reliefProche");
+  if (hc.nearSea?.active) out.push("nearSea");
+  if (hc.excludeSea) out.push("excludeSea");
+  if (hc.nearPlace) out.push("nearPlace");
+  if (hc.communeSize) out.push("communeSize");
+  if (hc.excludePlace?.length) out.push("excludePlace");
+  if (hc.sizeRelativeTo) out.push("sizeRelativeTo");
+  return out;
+}
+export function hasAnyHardConstraint(project: UserProject): boolean {
+  return declaredHardConstraintKeys(project).length > 0;
+}
+export function uncoveredConstraints(project: UserProject, covered: HardConstraintKey[]): UncoveredConstraint[] {
+  const cov = new Set(covered);
+  return declaredHardConstraintKeys(project)
+    .filter((k) => !cov.has(k))
+    .map((k) => ({ key: k, label: HARD_CONSTRAINT_LABELS[k] }));
 }
 ```
 
-- [ ] **Step 6: Lancer le test, vérifier le succès**
+- [ ] **Step 6: Lancer, vérifier le succès + typecheck + commit**
 
-Run: `node --test src/lib/decision/project-view.test.ts`
-Expected: PASS (5 tests).
-
-- [ ] **Step 7: Typecheck**
-
-Run: `npx tsc --noEmit`
-Expected: exit 0 (aucune erreur).
-
-- [ ] **Step 8: Commit**
+Run: `node --test src/lib/decision/project-view.test.ts` → PASS (7 tests).
+Run: `npx tsc --noEmit` → exit 0.
 
 ```bash
 git add src/lib/decision/decision-fact.ts src/lib/decision/project-view.ts src/lib/decision/project-view.test.ts src/lib/comparateur-vie.ts
-git commit -m "feat(decision): contrats du dossier + lecteurs de projet + export subScore
+git commit -m "feat(decision): contrats v2 (union discriminée) + lecteurs projet + couverture
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 ---
 
-## Task 2: Adaptateur `ModuleFacts` (INSEE → faits normalisés)
+## Task 2: Adaptateur `ModuleFacts` (absence honnête, sans catch)
 
 **Files:**
 - Create: `src/lib/decision/territory-facts.ts`
 - Create: `src/lib/decision/territory-facts.test.ts`
 
-**Interfaces:**
-- Consumes: `ModuleFacts` (Task 1) ; `getCommuneEntry`, `subScore`, `PREFERENCE_KEYS`, `IndexCommune` (de `comparateur-vie.ts`).
-- Produces:
-  - `buildModuleFacts(entry: IndexCommune, opts: { hasAddress: boolean }): ModuleFacts` (pur)
-  - `loadModuleFacts(insee: string, opts: { hasAddress: boolean }): Promise<ModuleFacts | null>` (async)
-  - `buildCommuneDossier` sera ajouté en Task 7 dans ce même fichier.
+**Interfaces produced:** `buildModuleFacts(entry: IndexCommune, opts: { hasAddress: boolean }): ModuleFacts` ; `loadModuleFacts(insee, opts): Promise<ModuleFacts | null>`. (`buildCommuneDossier` viendra en Task 6.)
 
-- [ ] **Step 1: Écrire le test de l'adaptateur pur (échoue)**
+- [ ] **Step 1: Test (échoue)**
 
 Create `src/lib/decision/territory-facts.test.ts` :
 
@@ -322,7 +333,6 @@ import assert from "node:assert/strict";
 import { buildModuleFacts } from "./territory-facts.ts";
 import type { IndexCommune } from "../comparateur-vie.ts";
 
-// Entrée minimale : subScore retombe sur null pour les champs absents (il garde).
 function entry(over: Partial<IndexCommune> = {}): IndexCommune {
   return {
     insee: "17300", nom: "Fouras", dept: "17", region: "NA", lat: 46, lon: -1,
@@ -331,103 +341,80 @@ function entry(over: Partial<IndexCommune> = {}): IndexCommune {
   };
 }
 
-test("buildModuleFacts : passe-plats + hasAddress + scores en Record", () => {
-  const f = buildModuleFacts(entry({ distance_cote_km: 42, altitude: 120, inondation: { catnat: 5, tri: false, risque: 30 } }), { hasAddress: false });
-  assert.equal(f.insee, "17300");
+test("buildModuleFacts : passe-plats honnêtes", () => {
+  const f = buildModuleFacts(entry({ population: 18000, distance_cote_km: 42, inondation: { catnat: 5, tri: false, risque: 72 } }), { hasAddress: false });
+  assert.equal(f.population, 18000);
   assert.equal(f.distanceCoteKm, 42);
-  assert.equal(f.altitude, 120);
   assert.equal(f.catnatInondation, 5);
+  assert.equal(f.inondationRisque, 72);
   assert.equal(f.hasAddress, false);
-  assert.equal(typeof f.scores, "object");
 });
 
-test("buildModuleFacts : catnat par défaut 0 si inondation absente", () => {
+test("buildModuleFacts : absence d'inondation -> null (jamais 0)", () => {
   const f = buildModuleFacts(entry(), { hasAddress: true });
-  assert.equal(f.catnatInondation, 0);
+  assert.equal(f.catnatInondation, null);
+  assert.equal(f.inondationRisque, null);
   assert.equal(f.hasAddress, true);
 });
 ```
 
-- [ ] **Step 2: Lancer le test, vérifier l'échec**
-
-Run: `node --test src/lib/decision/territory-facts.test.ts`
-Expected: FAIL (`Cannot find module './territory-facts.ts'`).
+- [ ] **Step 2: Lancer, vérifier l'échec** — `node --test src/lib/decision/territory-facts.test.ts` → FAIL.
 
 - [ ] **Step 3: Écrire l'adaptateur**
 
 Create `src/lib/decision/territory-facts.ts` :
 
 ```ts
-// Adaptateur : projette une commune de l'index (grain commune) en ModuleFacts.
-// SEUL point qui touche la donnée Territoire. Les règles ne connaissent que
-// ModuleFacts. subScore(key, entry) donne la satisfaction 0-100 par préférence.
+// Adaptateur : commune de l'index (grain commune) -> ModuleFacts. Aucune valeur de repli :
+// une absence connue devient null. Pas de try/catch autour de subScore (une erreur inattendue
+// doit exploser, ce n'est pas une « donnée indisponible »).
 import { getCommuneEntry, subScore, PREFERENCE_KEYS, type IndexCommune } from "../comparateur-vie.ts";
 import type { ModuleFacts } from "./decision-fact.ts";
 
 export function buildModuleFacts(entry: IndexCommune, opts: { hasAddress: boolean }): ModuleFacts {
   const scores: ModuleFacts["scores"] = {};
-  for (const key of PREFERENCE_KEYS) {
-    // Défensif : subScore garde déjà les sous-objets optionnels, mais une donnée
-    // creuse ne doit jamais casser le hub. Score indisponible = null (honnête).
-    try {
-      scores[key] = subScore(key, entry);
-    } catch {
-      scores[key] = null;
-    }
-  }
+  for (const key of PREFERENCE_KEYS) scores[key] = subScore(key, entry);
   return {
     insee: entry.insee,
     nom: entry.nom,
     distanceCoteKm: entry.distance_cote_km,
+    population: entry.population ?? null,
     altitude: entry.altitude ?? null,
-    catnatInondation: entry.inondation?.catnat ?? 0,
+    catnatInondation: entry.inondation ? entry.inondation.catnat : null,
+    inondationRisque: entry.inondation ? entry.inondation.risque : null,
     scores,
     hasAddress: opts.hasAddress,
   };
 }
 
-export async function loadModuleFacts(
-  insee: string,
-  opts: { hasAddress: boolean },
-): Promise<ModuleFacts | null> {
+export async function loadModuleFacts(insee: string, opts: { hasAddress: boolean }): Promise<ModuleFacts | null> {
   const entry = await getCommuneEntry(insee);
-  if (!entry) return null; // PLM et communes hors index : repli null assumé
-  return buildModuleFacts(entry, opts);
+  return entry ? buildModuleFacts(entry, opts) : null;
 }
 ```
 
-- [ ] **Step 4: Lancer le test, vérifier le succès**
+- [ ] **Step 4: Lancer, vérifier le succès + typecheck + commit**
 
-Run: `node --test src/lib/decision/territory-facts.test.ts`
-Expected: PASS (2 tests).
-
-- [ ] **Step 5: Typecheck + commit**
-
-Run: `npx tsc --noEmit` (exit 0), puis :
+`node --test src/lib/decision/territory-facts.test.ts` → PASS (2). `npx tsc --noEmit` → exit 0.
 
 ```bash
 git add src/lib/decision/territory-facts.ts src/lib/decision/territory-facts.test.ts
-git commit -m "feat(decision): adaptateur index commune -> ModuleFacts
+git commit -m "feat(decision): adaptateur index -> ModuleFacts (absence en null)
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 ---
 
-## Task 3: Moteur `runRules` + règles 1 & 2 (incompatibilités)
+## Task 3: Moteur `runRules` + invariants + règles 1 & 2 (incompatibilités + couverture)
 
 **Files:**
 - Create: `src/lib/decision/materiality-rules.ts`
 - Create: `src/lib/decision/materiality-rules.test.ts`
 
-**Interfaces:**
-- Consumes: `DecisionRule`, `DecisionFact`, `ModuleFacts`, `RunResult`, `DiagnosticEntry` (Task 1) ; `project-view.ts` (Task 1).
-- Produces:
-  - `REGISTRY: DecisionRule[]`
-  - `runRules(facts: ModuleFacts, project: UserProject): RunResult`
-  - Règles `territoire.mer-hors-seuil`, `territoire.altitude-limite`.
+**Interfaces produced:** `REGISTRY: DecisionRule[]` ; `runRules(facts, project): RunResult` ; `assertFactValid(fact, project): void` ; règles `territoire.mer-hors-seuil`, `territoire.taille-hors-seuil`.
 
-- [ ] **Step 1: Écrire les tests des règles 1 & 2 (échoue)**
+- [ ] **Step 1: Tests (échoue)**
 
 Create `src/lib/decision/materiality-rules.test.ts` :
 
@@ -439,181 +426,227 @@ import type { ModuleFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 
 function facts(over: Partial<ModuleFacts> = {}): ModuleFacts {
-  return { insee: "00000", nom: "Test", distanceCoteKm: 1, altitude: 100, catnatInondation: 0, scores: {}, hasAddress: false, ...over };
+  return { insee: "00000", nom: "Test", distanceCoteKm: 1, population: 5000, altitude: 100, catnatInondation: 0, inondationRisque: 10, scores: {}, hasAddress: false, ...over };
 }
 function project(parsed: unknown, over: Partial<UserProject> = {}): UserProject {
   return { posture: "recherche", intent: null, rawText: null, parsed: parsed as UserProject["parsed"], updatedAt: "1970-01-01T00:00:00.000Z", ...over };
 }
 
-test("règle 1 mer : incompatibilité établie au-delà du seuil", () => {
+test("règle 1 mer : incompatibilité établie + couverture nearSea", () => {
   const p = project({ reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 5 } }, preferences: [] });
   const r = runRules(facts({ distanceCoteKm: 42 }), p);
   const f = r.facts.find((x) => x.ruleId === "territoire.mer-hors-seuil");
-  assert.ok(f, "un fait mer attendu");
-  assert.equal(f!.role, "incompatibility");
-  assert.equal(f!.evidenceStrength, "established");
-  assert.ok(f!.evidence.length >= 1);
-  assert.match(f!.statement, /42 km/);
+  assert.ok(f && f.role === "incompatibility");
+  assert.equal(f.evidenceStrength, "established");
+  assert.equal(f.hardConstraintKey, "nearSea");
+  assert.equal(f.evidence[0].observedValue, "42 km");
+  assert.ok(r.coveredHardConstraints.includes("nearSea"));
 });
 
-test("règle 1 mer : rien si sous le seuil", () => {
-  const p = project({ reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 5 } }, preferences: [] });
+test("règle 1 mer : satisfaite -> aucun fait mais couverture nearSea", () => {
+  const p = project({ reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 50 } }, preferences: [] });
   const r = runRules(facts({ distanceCoteKm: 2 }), p);
   assert.equal(r.facts.some((x) => x.ruleId === "territoire.mer-hors-seuil"), false);
+  assert.ok(r.coveredHardConstraints.includes("nearSea"));
 });
 
-test("règle 2 altitude : incompatibilité indicative en bande grise", () => {
-  const p = project({ reformulation: "x", hardConstraints: { montagne: { strength: "hard" } }, preferences: [] });
-  const r = runRules(facts({ altitude: 500 }), p);
-  const f = r.facts.find((x) => x.ruleId === "territoire.altitude-limite");
-  assert.ok(f, "un fait altitude attendu");
-  assert.equal(f!.evidenceStrength, "indicative");
-  assert.ok(f!.limitation);
+test("règle 1 mer : non déclarée -> pas de couverture", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [] });
+  const r = runRules(facts({ distanceCoteKm: 42 }), p);
+  assert.equal(r.coveredHardConstraints.includes("nearSea"), false);
 });
 
-test("règle 2 altitude : rien au-dessus du seuil (600 m)", () => {
-  const p = project({ reformulation: "x", hardConstraints: { montagne: { strength: "hard" } }, preferences: [] });
-  const r = runRules(facts({ altitude: 800 }), p);
-  assert.equal(r.facts.some((x) => x.ruleId === "territoire.altitude-limite"), false);
+test("règle 2 taille : incompatibilité établie au-dessus du max", () => {
+  const p = project({ reformulation: "x", hardConstraints: { communeSize: { min: null, max: 20000 } }, preferences: [] });
+  const r = runRules(facts({ population: 45000 }), p);
+  const f = r.facts.find((x) => x.ruleId === "territoire.taille-hors-seuil");
+  assert.ok(f && f.role === "incompatibility");
+  assert.equal(f.hardConstraintKey, "communeSize");
+  assert.match(f.statement, /45 000/);
 });
 
-test("chaque fait émis porte un ruleId et une preuve", () => {
+test("règle 2 taille : population absente -> inconnue scopée", () => {
+  const p = project({ reformulation: "x", hardConstraints: { communeSize: { min: null, max: 20000 } }, preferences: [] });
+  const r = runRules(facts({ population: null }), p);
+  const f = r.facts.find((x) => x.ruleId === "territoire.taille-hors-seuil");
+  assert.ok(f && f.role === "unknown");
+  assert.equal(f.impact, "scoped");
+});
+
+test("invariant : chaque fait porte ruleId + preuve", () => {
   const p = project({ reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 5 } }, preferences: [] });
   const r = runRules(facts({ distanceCoteKm: 42 }), p);
   for (const f of r.facts) {
     assert.ok(f.ruleId.length > 0);
-    assert.ok(f.evidence.length >= 1);
+    if (f.role !== "compromise") assert.ok(f.evidence.length >= 1);
   }
 });
 ```
 
-- [ ] **Step 2: Lancer, vérifier l'échec**
+- [ ] **Step 2: Lancer, vérifier l'échec** — FAIL (`Cannot find module`).
 
-Run: `node --test src/lib/decision/materiality-rules.test.ts`
-Expected: FAIL (`Cannot find module './materiality-rules.ts'`).
-
-- [ ] **Step 3: Écrire le moteur + règles 1 & 2**
+- [ ] **Step 3: Écrire le moteur + invariants + règles 1 & 2**
 
 Create `src/lib/decision/materiality-rules.ts` :
 
 ```ts
-// Registre de matérialité. Chaque règle porte la DOCTRINE projet-relative et émet
-// un DecisionFact déjà résolu. Généralise src/lib/logement-checklist.ts (active()
-// = éligibilité, resolve() émet désormais cinq rôles). PAS de score caché.
-import type { DecisionRule, DecisionFact, ModuleFacts, RunResult, DiagnosticEntry } from "./decision-fact.ts";
+// Registre de matérialité (v2). Chaque règle expose evaluate() : elle décrit toujours son verdict
+// (satisfied / incompatible / not_applicable / unknown…), même sans produire de fait. C'est ce qui
+// rend la COUVERTURE observable. Le moteur valide chaque fait (assertFactValid JETTE en cas de
+// violation de doctrine). Généralise src/lib/logement-checklist.ts.
+import type {
+  DecisionRule, DecisionFact, ModuleFacts, RunResult, RuleEvaluation,
+  IncompatibilityFact, UnknownFact, EvidenceRef, HardConstraintKey,
+} from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
-import { nearSeaLimitKm, wantsMountainHard } from "./project-view.ts";
+import { nearSeaLimitKm, communeSizeBounds, declaredHardConstraintKeys, declaredPreferenceKeys } from "./project-view.ts";
 
-const territoire = (nom: string) => ({ module: "territoire" as const, label: `Territoire · ${nom}`, href: "/rapport/quartier" });
+// Formatage déterministe des milliers (espace ASCII, jamais toLocaleString qui varie).
+function fmt(n: number): string {
+  return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+const territoireHref = "/rapport/quartier";
 
-// Règle 1 : mer hors seuil (incompatibilité établie).
-const ruleMerHorsSeuil: DecisionRule = {
-  id: "territoire.mer-hors-seuil",
+// Règle 1 : mer hors seuil.
+const RULE_MER = "territoire.mer-hors-seuil";
+const ruleMer: DecisionRule = {
+  id: RULE_MER,
   module: "territoire",
-  sourceFacts: ["distance_cote_km", "hardConstraints.nearSea"],
-  appliesToPostures: ["recherche", "adresse", "habitant", "recherche_quartier"],
-  active: (f, p) => {
+  hardConstraint: "nearSea",
+  evaluate: (f, p): RuleEvaluation => {
     const max = nearSeaLimitKm(p);
-    return max != null && f.distanceCoteKm > max;
+    if (max == null) return { ruleId: RULE_MER, projectKeys: ["nearSea"], outcome: "not_applicable", facts: [], reason: "nearSea non déclaré" };
+    if (f.distanceCoteKm > max) {
+      const ev: EvidenceRef = { factId: "distance_cote_km", module: "territoire", label: `Littoral · ${f.nom}`, observedValue: `${Math.round(f.distanceCoteKm)} km`, grain: "commune", href: territoireHref };
+      const fact: IncompatibilityFact = {
+        id: `${f.insee}:mer`, ruleId: RULE_MER, sourceFactIds: ["distance_cote_km"], module: "territoire",
+        role: "incompatibility", evidenceStrength: "established", hardConstraintKey: "nearSea",
+        materialityTier: "decision_critical",
+        statement: `Cette commune est à ${Math.round(f.distanceCoteKm)} km du littoral, au-delà de la limite de ${max} km que vous avez posée.`,
+        evidence: [ev],
+      };
+      return { ruleId: RULE_MER, projectKeys: ["nearSea"], outcome: "incompatible", facts: [fact], reason: "distance > seuil" };
+    }
+    return { ruleId: RULE_MER, projectKeys: ["nearSea"], outcome: "satisfied", facts: [], reason: "distance <= seuil" };
   },
-  resolve: (f, p) => ({
-    id: `${f.insee}:mer-hors-seuil`,
-    ruleId: "territoire.mer-hors-seuil",
-    sourceFactId: "distance_cote_km",
-    module: "territoire",
-    role: "incompatibility",
-    evidenceStrength: "established",
-    statement: `Cette commune est à ${Math.round(f.distanceCoteKm)} km du littoral, au-delà de la limite de ${nearSeaLimitKm(p)} km que vous avez posée.`,
-    evidence: [territoire(f.nom)],
-    relatedProjectKeys: ["nearSea"],
-  }),
 };
 
-// Règle 2 : altitude en bande grise (incompatibilité indicative, à confirmer).
-const ruleAltitudeLimite: DecisionRule = {
-  id: "territoire.altitude-limite",
+// Règle 2 : taille de commune hors seuil.
+const RULE_TAILLE = "territoire.taille-hors-seuil";
+const ruleTaille: DecisionRule = {
+  id: RULE_TAILLE,
   module: "territoire",
-  sourceFacts: ["altitude", "hardConstraints.montagne"],
-  appliesToPostures: ["recherche", "adresse", "habitant", "recherche_quartier"],
-  active: (f, p) => wantsMountainHard(p) && f.altitude != null && f.altitude >= 450 && f.altitude < 600,
-  resolve: (f) => ({
-    id: `${f.insee}:altitude-limite`,
-    ruleId: "territoire.altitude-limite",
-    sourceFactId: "altitude",
-    module: "territoire",
-    role: "incompatibility",
-    evidenceStrength: "indicative",
-    statement: `L'altitude ici (${Math.round(f.altitude!)} m) approche votre seuil de montagne sans l'atteindre.`,
-    limitation: "À confirmer sur le terrain : le relief perçu dépend aussi de l'environnement immédiat.",
-    evidence: [territoire(f.nom)],
-    relatedProjectKeys: ["montagne"],
-  }),
+  hardConstraint: "communeSize",
+  evaluate: (f, p): RuleEvaluation => {
+    const bounds = communeSizeBounds(p);
+    if (!bounds) return { ruleId: RULE_TAILLE, projectKeys: ["communeSize"], outcome: "not_applicable", facts: [], reason: "communeSize non déclaré" };
+    if (f.population == null) {
+      const ev: EvidenceRef = { factId: "population", module: "territoire", label: `Territoire · ${f.nom}`, grain: "commune", href: territoireHref };
+      const fact: UnknownFact = {
+        id: `${f.insee}:taille`, ruleId: RULE_TAILLE, sourceFactIds: ["population"], module: "territoire",
+        role: "unknown", impact: "scoped", materialityTier: "secondary",
+        statement: "La population de cette commune n'est pas disponible dans nos données ; la taille ne peut pas être vérifiée.",
+        evidence: [ev],
+      };
+      return { ruleId: RULE_TAILLE, projectKeys: ["communeSize"], outcome: "unknown", facts: [fact], reason: "population absente" };
+    }
+    const over = bounds.max != null && f.population > bounds.max;
+    const under = bounds.min != null && f.population < bounds.min;
+    if (over || under) {
+      const seuil = over ? `au-dessus de ${fmt(bounds.max!)}` : `en dessous de ${fmt(bounds.min!)}`;
+      const ev: EvidenceRef = { factId: "population", module: "territoire", label: `Territoire · ${f.nom}`, observedValue: `${fmt(f.population)} hab.`, grain: "commune", href: territoireHref };
+      const fact: IncompatibilityFact = {
+        id: `${f.insee}:taille`, ruleId: RULE_TAILLE, sourceFactIds: ["population"], module: "territoire",
+        role: "incompatibility", evidenceStrength: "established", hardConstraintKey: "communeSize",
+        materialityTier: "decision_critical",
+        statement: `Cette commune compte ${fmt(f.population)} habitants, ${seuil} de la taille que vous avez posée.`,
+        evidence: [ev],
+      };
+      return { ruleId: RULE_TAILLE, projectKeys: ["communeSize"], outcome: "incompatible", facts: [fact], reason: "population hors bornes" };
+    }
+    return { ruleId: RULE_TAILLE, projectKeys: ["communeSize"], outcome: "satisfied", facts: [], reason: "population dans les bornes" };
+  },
 };
 
-export const REGISTRY: DecisionRule[] = [ruleMerHorsSeuil, ruleAltitudeLimite];
+export const REGISTRY: DecisionRule[] = [ruleMer, ruleTaille];
+
+// Invariants : protègent toutes les futures règles. JETTE (fail-fast) en cas de violation.
+export function assertFactValid(fact: DecisionFact, project: UserProject): void {
+  switch (fact.role) {
+    case "incompatibility":
+      if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);
+      if (!declaredHardConstraintKeys(project).includes(fact.hardConstraintKey)) {
+        throw new Error(`[decision] ${fact.ruleId}: incompatibilité sur une contrainte non déclarée (${fact.hardConstraintKey})`);
+      }
+      break;
+    case "compromise":
+      if (fact.sides.length !== 2) throw new Error(`[decision] ${fact.ruleId}: un compromis a exactement deux côtés`);
+      for (const s of fact.sides) {
+        if (!declaredPreferenceKeys(project).includes(s.projectKey)) throw new Error(`[decision] ${fact.ruleId}: côté sur une préférence non déclarée (${s.projectKey})`);
+        if (s.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: côté sans preuve`);
+      }
+      break;
+    case "unknown":
+      if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);
+      if (fact.impact !== "blocking" && fact.impact !== "scoped") throw new Error(`[decision] ${fact.ruleId}: inconnue sans impact`);
+      break;
+    case "verification":
+      if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);
+      if (!fact.action) throw new Error(`[decision] ${fact.ruleId}: vérification sans action`);
+      break;
+  }
+}
 
 export function runRules(facts: ModuleFacts, project: UserProject): RunResult {
   const outFacts: DecisionFact[] = [];
-  const diagnostics: DiagnosticEntry[] = [];
+  const evaluations: RuleEvaluation[] = [];
+  const covered = new Set<HardConstraintKey>();
   for (const rule of REGISTRY) {
-    if (!rule.appliesToPostures.includes(project.posture)) {
-      diagnostics.push({ ruleId: rule.id, sourceFactId: rule.sourceFacts[0] ?? "", decision: "skipped", reason: "posture hors périmètre" });
-      continue;
+    const ev = rule.evaluate(facts, project);
+    evaluations.push(ev);
+    for (const fact of ev.facts) {
+      assertFactValid(fact, project);
+      outFacts.push(fact);
     }
-    if (!rule.active(facts, project)) {
-      diagnostics.push({ ruleId: rule.id, sourceFactId: rule.sourceFacts[0] ?? "", decision: "skipped", reason: "règle inactive" });
-      continue;
-    }
-    const emitted = rule.resolve(facts, project);
-    for (const fct of Array.isArray(emitted) ? emitted : [emitted]) {
-      outFacts.push(fct);
-      diagnostics.push({ ruleId: rule.id, sourceFactId: fct.sourceFactId, decision: "emitted", reason: `rôle ${fct.role}` });
-    }
+    if (rule.hardConstraint && ev.outcome !== "not_applicable") covered.add(rule.hardConstraint);
   }
-  return { facts: outFacts, diagnostics };
+  return { facts: outFacts, evaluations, coveredHardConstraints: [...covered] };
 }
 ```
 
-- [ ] **Step 4: Lancer, vérifier le succès**
+- [ ] **Step 4: Lancer, vérifier le succès + typecheck + commit**
 
-Run: `node --test src/lib/decision/materiality-rules.test.ts`
-Expected: PASS (5 tests).
-
-- [ ] **Step 5: Typecheck + commit**
-
-Run: `npx tsc --noEmit` (exit 0), puis :
+`node --test src/lib/decision/materiality-rules.test.ts` → PASS (6). `npx tsc --noEmit` → exit 0.
 
 ```bash
 git add src/lib/decision/materiality-rules.ts src/lib/decision/materiality-rules.test.ts
-git commit -m "feat(decision): moteur runRules + règles mer et altitude
+git commit -m "feat(decision): moteur runRules + invariants + règles mer et taille (couverture)
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 ---
 
-## Task 4: Règles 3, 4, 5 (compromis, inconnue scopée, vérification)
+## Task 4: Règles 3, 4, 5 (compromis à deux côtés, inconnue scopée, vérification posture-aware)
 
 **Files:**
 - Modify: `src/lib/decision/materiality-rules.ts` (ajouter 3 règles au `REGISTRY`)
-- Modify: `src/lib/decision/materiality-rules.test.ts` (ajouter les tests)
+- Modify: `src/lib/decision/materiality-rules.test.ts`
 
-**Interfaces:**
-- Consumes: tout de Task 3 ; `preferenceWeight`, `isPurchaseIntent` (Task 1).
-- Produces: règles `territoire.compromis-transport-chaleur`, `territoire.logement-sans-adresse`, `territoire.risque-a-verifier` dans `REGISTRY`.
+**Interfaces produced:** règles `territoire.compromis-transport-chaleur`, `territoire.confort-ete-sans-adresse`, `territoire.inondation-exposition`.
 
-- [ ] **Step 1: Ajouter les tests (échoue)**
-
-Append à `src/lib/decision/materiality-rules.test.ts` :
+- [ ] **Step 1: Tests (échoue)** — append à `materiality-rules.test.ts` :
 
 ```ts
-test("règle 3 compromis : émis si transports satisfait ET chaleur mal satisfaite, deux prefs déclarées", () => {
+test("règle 3 compromis : deux côtés, chacun sa preuve", () => {
   const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "acces_transports", weight: 3 }, { key: "faible_chaleur", weight: 2 }] });
   const r = runRules(facts({ scores: { acces_transports: 80, faible_chaleur: 25 } }), p);
   const f = r.facts.find((x) => x.ruleId === "territoire.compromis-transport-chaleur");
-  assert.ok(f, "un compromis attendu");
-  assert.equal(f!.role, "compromise");
-  assert.deepEqual([...f!.relatedProjectKeys].sort(), ["acces_transports", "faible_chaleur"]);
+  assert.ok(f && f.role === "compromise");
+  assert.equal(f.sides.length, 2);
+  assert.ok(f.sides[0].evidence.length >= 1 && f.sides[1].evidence.length >= 1);
+  assert.equal(f.sides[0].evidence[0].observedValue, "80/100");
+  assert.doesNotMatch(f.sides[0].statement + f.sides[1].statement, /meilleure|train/i);
 });
 
 test("règle 3 compromis : rien si une seule dimension déclarée", () => {
@@ -622,261 +655,178 @@ test("règle 3 compromis : rien si une seule dimension déclarée", () => {
   assert.equal(r.facts.some((x) => x.ruleId === "territoire.compromis-transport-chaleur"), false);
 });
 
-test("règle 4 inconnue : scopée si achat sans adresse et confort d'été déclaré", () => {
-  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_chaleur", weight: 3 }] }, { intent: "achat" });
+test("règle 4 confort : inconnue scopée sans adresse, quelle que soit l'intention", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_chaleur", weight: 3 }] });
   const r = runRules(facts({ hasAddress: false }), p);
-  const f = r.facts.find((x) => x.ruleId === "territoire.logement-sans-adresse");
-  assert.ok(f, "une inconnue attendue");
-  assert.equal(f!.role, "unknown");
-  assert.equal(f!.impact, "scoped");
-  assert.equal(f!.action?.type, "renseigner_adresse");
+  const f = r.facts.find((x) => x.ruleId === "territoire.confort-ete-sans-adresse");
+  assert.ok(f && f.role === "unknown");
+  assert.equal(f.impact, "scoped");
+  assert.equal(f.action?.type, "renseigner_adresse");
 });
 
-test("règle 4 inconnue : rien si une adresse est présente", () => {
-  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_chaleur", weight: 3 }] }, { intent: "achat" });
+test("règle 4 confort : rien si adresse présente", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_chaleur", weight: 3 }] });
   const r = runRules(facts({ hasAddress: true }), p);
-  assert.equal(r.facts.some((x) => x.ruleId === "territoire.logement-sans-adresse"), false);
+  assert.equal(r.facts.some((x) => x.ruleId === "territoire.confort-ete-sans-adresse"), false);
 });
 
-test("règle 5 vérification : émise si inondation déclarée et CatNat notable", () => {
+test("règle 5 inondation : vérification si exposition notable, texte acheteur", () => {
   const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
-  const r = runRules(facts({ catnatInondation: 6 }), p);
-  const f = r.facts.find((x) => x.ruleId === "territoire.risque-a-verifier");
-  assert.ok(f, "une vérification attendue");
-  assert.equal(f!.role, "verification");
-  assert.match(f!.statement, /6 arrêtés/);
+  const r = runRules(facts({ inondationRisque: 80, catnatInondation: 6 }), p);
+  const f = r.facts.find((x) => x.ruleId === "territoire.inondation-exposition");
+  assert.ok(f && f.role === "verification");
+  assert.ok(f.action.label.length > 0);
+  assert.match(f.statement, /avant de vous engager/);
+  assert.match(f.statement, /1982/);
 });
 
-test("règle 5 vérification : rien sous le seuil de notabilité (< 3)", () => {
+test("règle 5 inondation : posture habitant -> comprendre/surveiller, pas s'engager", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] }, { posture: "habitant" });
+  const r = runRules(facts({ inondationRisque: 80, catnatInondation: 6 }), p);
+  const f = r.facts.find((x) => x.ruleId === "territoire.inondation-exposition");
+  assert.ok(f && f.role === "verification");
+  assert.doesNotMatch(f.statement, /avant de vous engager/);
+  assert.match(f.statement, /surveiller/i);
+});
+
+test("règle 5 inondation : exposition inconnue -> aucun fait", () => {
   const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
-  const r = runRules(facts({ catnatInondation: 1 }), p);
-  assert.equal(r.facts.some((x) => x.ruleId === "territoire.risque-a-verifier"), false);
+  const r = runRules(facts({ inondationRisque: null }), p);
+  assert.equal(r.facts.some((x) => x.ruleId === "territoire.inondation-exposition"), false);
 });
 ```
 
-- [ ] **Step 2: Lancer, vérifier l'échec**
-
-Run: `node --test src/lib/decision/materiality-rules.test.ts`
-Expected: FAIL (les nouveaux tests échouent, `undefined` retournés).
+- [ ] **Step 2: Lancer, vérifier l'échec** — FAIL (nouveaux tests).
 
 - [ ] **Step 3: Ajouter les 3 règles**
 
-Dans `src/lib/decision/materiality-rules.ts`, ajouter l'import et les règles, puis les mettre dans `REGISTRY`.
-
-Modifier la ligne d'import de `project-view.ts` :
+Dans `src/lib/decision/materiality-rules.ts`, étendre l'import `project-view` :
 
 ```ts
-import { nearSeaLimitKm, wantsMountainHard, preferenceWeight, isPurchaseIntent } from "./project-view.ts";
+import { nearSeaLimitKm, communeSizeBounds, declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } from "./project-view.ts";
+```
+
+et l'import de types (ajouter `CompromiseFact`, `VerificationFact`) :
+
+```ts
+import type {
+  DecisionRule, DecisionFact, ModuleFacts, RunResult, RuleEvaluation,
+  IncompatibilityFact, UnknownFact, CompromiseFact, VerificationFact, EvidenceRef, HardConstraintKey,
+} from "./decision-fact.ts";
 ```
 
 Ajouter avant `export const REGISTRY` :
 
 ```ts
-// Règle 3 : compromis transport × chaleur. Discipline : deux dimensions DÉCLARÉES
-// (poids >= 2) en tension réelle, preuve de chaque côté. Amorçage : une seule paire.
-const ruleCompromisTransportChaleur: DecisionRule = {
-  id: "territoire.compromis-transport-chaleur",
+function scoreEvidence(nom: string, key: string, score: number): EvidenceRef {
+  return { factId: `scores.${key}`, module: "territoire", label: `Territoire · ${nom}`, observedValue: `${Math.round(score)}/100`, grain: "commune", href: territoireHref };
+}
+
+// Règle 3 : compromis transport × chaleur. Deux priorités déclarées qui tirent en sens opposés sur
+// cette commune. Texte honnête (pas de « meilleure », pas de « train »), preuve de chaque côté.
+const RULE_COMPROMIS = "territoire.compromis-transport-chaleur";
+const ruleCompromis: DecisionRule = {
+  id: RULE_COMPROMIS,
   module: "territoire",
-  sourceFacts: ["scores.acces_transports", "scores.faible_chaleur"],
-  appliesToPostures: ["recherche", "adresse", "habitant", "recherche_quartier"],
-  active: (f, p) => {
-    if (preferenceWeight(p, "acces_transports") < 2 || preferenceWeight(p, "faible_chaleur") < 2) return false;
+  evaluate: (f, p): RuleEvaluation => {
     const t = f.scores.acces_transports;
     const c = f.scores.faible_chaleur;
-    return t != null && c != null && t >= 60 && c <= 40;
-  },
-  resolve: (f) => ({
-    id: `${f.insee}:compromis-transport-chaleur`,
-    ruleId: "territoire.compromis-transport-chaleur",
-    sourceFactId: "scores.acces_transports+scores.faible_chaleur",
-    module: "territoire",
-    role: "compromise",
-    evidenceStrength: "established",
-    statement: "Meilleure accessibilité quotidienne par le train, mais exposition estivale à la chaleur plus marquée.",
-    evidence: [territoire(f.nom)],
-    relatedProjectKeys: ["acces_transports", "faible_chaleur"],
-  }),
-};
-
-// Règle 4 : confort d'été non évaluable sans adresse. Inconnue SCOPÉE (ne bloque
-// jamais la conclusion). hasAddress est toujours false en slice 1.
-const ruleLogementSansAdresse: DecisionRule = {
-  id: "territoire.logement-sans-adresse",
-  module: "territoire",
-  sourceFacts: ["hasAddress", "scores.faible_chaleur"],
-  appliesToPostures: ["recherche", "adresse", "habitant", "recherche_quartier"],
-  active: (f, p) => isPurchaseIntent(p) && !f.hasAddress && preferenceWeight(p, "faible_chaleur") >= 2,
-  resolve: (f) => ({
-    id: `${f.insee}:logement-sans-adresse`,
-    ruleId: "territoire.logement-sans-adresse",
-    sourceFactId: "hasAddress",
-    module: "territoire",
-    role: "unknown",
-    impact: "scoped",
-    evidenceStrength: "incomplete",
-    statement: "Votre priorité de confort d'été ne peut pas être évaluée au grain du bâtiment tant qu'aucune adresse n'est renseignée.",
-    evidence: [territoire(f.nom)],
-    action: { type: "renseigner_adresse", label: "Affiner avec une adresse" },
-    relatedProjectKeys: ["faible_chaleur"],
-  }),
-};
-
-// Règle 5 : historique CatNat inondation notable + priorité risque déclarée -> vérification.
-const ruleRisqueAVerifier: DecisionRule = {
-  id: "territoire.risque-a-verifier",
-  module: "territoire",
-  sourceFacts: ["inondation.catnat", "preferences.faible_risque_inondation"],
-  appliesToPostures: ["recherche", "adresse", "habitant", "recherche_quartier"],
-  active: (f, p) => preferenceWeight(p, "faible_risque_inondation") >= 2 && f.catnatInondation >= 3,
-  resolve: (f) => ({
-    id: `${f.insee}:risque-a-verifier`,
-    ruleId: "territoire.risque-a-verifier",
-    sourceFactId: "inondation.catnat",
-    module: "territoire",
-    role: "verification",
-    evidenceStrength: "established",
-    statement: `La commune a connu ${f.catnatInondation} arrêtés de catastrophe naturelle inondation. Demandez l'état des risques (ERRIAL) avant de vous engager.`,
-    evidence: [territoire(f.nom)],
-    action: { type: "obtenir_document", label: "État des risques (ERRIAL)" },
-    relatedProjectKeys: ["faible_risque_inondation"],
-  }),
-};
-```
-
-Remplacer la ligne `REGISTRY` par :
-
-```ts
-export const REGISTRY: DecisionRule[] = [
-  ruleMerHorsSeuil,
-  ruleAltitudeLimite,
-  ruleCompromisTransportChaleur,
-  ruleLogementSansAdresse,
-  ruleRisqueAVerifier,
-];
-```
-
-- [ ] **Step 4: Lancer, vérifier le succès**
-
-Run: `node --test src/lib/decision/materiality-rules.test.ts`
-Expected: PASS (11 tests).
-
-- [ ] **Step 5: Typecheck + commit**
-
-Run: `npx tsc --noEmit` (exit 0), puis :
-
-```bash
-git add src/lib/decision/materiality-rules.ts src/lib/decision/materiality-rules.test.ts
-git commit -m "feat(decision): règles compromis, inconnue scopée, vérification
-
-Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
-```
-
----
-
-## Task 5: Règle 6 (fait non matériel) — sonde diagnostique, aucun fait
-
-**Files:**
-- Modify: `src/lib/decision/materiality-rules.ts` (ajouter `nonMaterialProbe`, l'appeler dans `runRules`)
-- Modify: `src/lib/decision/materiality-rules.test.ts`
-
-**Interfaces:**
-- Consumes: tout de Task 4.
-- Produces: le comportement « attribut notable non déclaré → `DiagnosticEntry` skipped, AUCUN `DecisionFact` ».
-
-- [ ] **Step 1: Ajouter les tests (échoue)**
-
-Append à `src/lib/decision/materiality-rules.test.ts` :
-
-```ts
-test("règle 6 non matériel : nature notable non déclarée -> aucun fait, un diagnostic", () => {
-  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [] });
-  const r = runRules(facts({ scores: { nature: 85 } }), p);
-  assert.equal(r.facts.some((x) => x.ruleId === "territoire.non-materiel"), false, "aucun DecisionFact non matériel");
-  const d = r.diagnostics.find((x) => x.ruleId === "territoire.non-materiel");
-  assert.ok(d, "un diagnostic attendu");
-  assert.equal(d!.decision, "skipped");
-});
-
-test("règle 6 non matériel : rien si la dimension notable est déclarée", () => {
-  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "nature", weight: 3 }] });
-  const r = runRules(facts({ scores: { nature: 85 } }), p);
-  assert.equal(r.diagnostics.some((x) => x.ruleId === "territoire.non-materiel"), false);
-});
-```
-
-- [ ] **Step 2: Lancer, vérifier l'échec**
-
-Run: `node --test src/lib/decision/materiality-rules.test.ts`
-Expected: FAIL (le diagnostic non-materiel n'existe pas encore).
-
-- [ ] **Step 3: Ajouter la sonde**
-
-Dans `src/lib/decision/materiality-rules.ts`, ajouter `preferenceWeight` est déjà importé (Task 4). Ajouter `PreferenceKey` à l'import de types en haut :
-
-```ts
-import type { PreferenceKey } from "../comparateur-vie.ts";
-```
-
-Ajouter avant `export function runRules` :
-
-```ts
-// Sonde du non-matériel : un attribut qui score fort sur une dimension NON déclarée
-// ne produit AUCUN DecisionFact (il reste visible dans le module Territoire). On en
-// garde seulement une trace de diagnostic, pour prouver par test qu'il a été vu et écarté.
-const NOTABLE_UNDECLARED_PROBE: PreferenceKey[] = ["nature"];
-
-function nonMaterialProbe(facts: ModuleFacts, project: UserProject): DiagnosticEntry[] {
-  const out: DiagnosticEntry[] = [];
-  for (const key of NOTABLE_UNDECLARED_PROBE) {
-    const score = facts.scores[key];
-    if (score != null && score >= 70 && preferenceWeight(project, key) === 0) {
-      out.push({
-        ruleId: "territoire.non-materiel",
-        sourceFactId: `scores.${key}`,
-        decision: "skipped",
-        reason: `dimension notable (${score}) non déclarée dans le projet`,
-      });
+    if (preferenceWeight(p, "acces_transports") < 2 || preferenceWeight(p, "faible_chaleur") < 2 || t == null || c == null || !(t >= 60 && c <= 40)) {
+      return { ruleId: RULE_COMPROMIS, projectKeys: ["acces_transports", "faible_chaleur"], outcome: "not_applicable", facts: [], reason: "pas de tension déclarée" };
     }
-  }
-  return out;
-}
+    const fact: CompromiseFact = {
+      id: `${f.insee}:compromis-transport-chaleur`, ruleId: RULE_COMPROMIS,
+      sourceFactIds: ["scores.acces_transports", "scores.faible_chaleur"], module: "territoire",
+      role: "compromise", materialityTier: "structuring",
+      statement: "Deux de vos priorités tirent en sens opposés sur cette commune.",
+      sides: [
+        { projectKey: "acces_transports", statement: "L'accès aux transports ressort favorablement à l'échelle de la commune.", evidence: [scoreEvidence(f.nom, "acces_transports", t)] },
+        { projectKey: "faible_chaleur", statement: "Votre priorité de faible exposition à la chaleur est moins bien satisfaite ici.", evidence: [scoreEvidence(f.nom, "faible_chaleur", c)] },
+      ],
+    };
+    return { ruleId: RULE_COMPROMIS, projectKeys: ["acces_transports", "faible_chaleur"], outcome: "compromise", facts: [fact], reason: "tension transport/chaleur" };
+  },
+};
+
+// Règle 4 : confort d'été non évaluable au grain bâtiment sans adresse. Inconnue SCOPÉE (ne bloque
+// jamais la conclusion). Gate sur le GRAIN (priorité chaleur déclarée + pas d'adresse), pas sur l'achat.
+const RULE_CONFORT = "territoire.confort-ete-sans-adresse";
+const ruleConfort: DecisionRule = {
+  id: RULE_CONFORT,
+  module: "territoire",
+  evaluate: (f, p): RuleEvaluation => {
+    if (preferenceWeight(p, "faible_chaleur") < 2 || f.hasAddress) {
+      return { ruleId: RULE_CONFORT, projectKeys: ["faible_chaleur"], outcome: "not_applicable", facts: [], reason: "non applicable" };
+    }
+    const ev: EvidenceRef = { factId: "commune", module: "territoire", label: `Territoire · ${f.nom}`, grain: "commune", href: territoireHref };
+    const fact: UnknownFact = {
+      id: `${f.insee}:confort-sans-adresse`, ruleId: RULE_CONFORT, sourceFactIds: ["hasAddress"], module: "territoire",
+      role: "unknown", impact: "scoped", materialityTier: "secondary",
+      statement: "Votre priorité de confort d'été ne peut pas être évaluée au grain du bâtiment tant qu'aucune adresse n'est renseignée.",
+      evidence: [ev], action: { type: "renseigner_adresse", label: "Affiner avec une adresse" },
+    };
+    return { ruleId: RULE_CONFORT, projectKeys: ["faible_chaleur"], outcome: "unknown", facts: [fact], reason: "confort d'été gated sur l'adresse" };
+  },
+};
+
+// Règle 5 : exposition inondation notable + priorité risque déclarée -> vérification. Croise le score
+// d'exposition actuel (pas un comptage brut), nomme la période et la limite. Posture-aware.
+const RULE_INOND = "territoire.inondation-exposition";
+const ruleInondation: DecisionRule = {
+  id: RULE_INOND,
+  module: "territoire",
+  evaluate: (f, p): RuleEvaluation => {
+    if (preferenceWeight(p, "faible_risque_inondation") < 2) return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "not_applicable", facts: [], reason: "priorité non déclarée" };
+    if (f.inondationRisque == null) return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "uncertain", facts: [], reason: "exposition inconnue" };
+    if (f.inondationRisque < 66) return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "not_applicable", facts: [], reason: "exposition non notable" };
+    const habitant = p.posture === "habitant";
+    const catnatCtx = f.catnatInondation != null ? ` La commune a connu ${f.catnatInondation} arrêtés de catastrophe naturelle inondation depuis 1982 (comptage administratif, pas une probabilité).` : "";
+    const ev: EvidenceRef = { factId: "inondation.risque", module: "territoire", label: `Territoire · ${f.nom}`, observedValue: `${Math.round(f.inondationRisque)}/100`, grain: "commune", href: territoireHref };
+    const fact: VerificationFact = {
+      id: `${f.insee}:inondation-exposition`, ruleId: RULE_INOND, sourceFactIds: ["inondation.risque", "inondation.catnat"], module: "territoire",
+      role: "verification", materialityTier: "structuring",
+      statement: (habitant
+        ? "L'exposition de la commune à l'inondation ressort élevée, à comprendre et surveiller au fil des épisodes."
+        : "L'exposition de la commune à l'inondation ressort élevée. Consultez l'état des risques avant de vous engager.") + catnatCtx,
+      limitation: "Cette exposition est lue à l'échelle de la commune, pas de l'adresse.",
+      evidence: [ev],
+      action: habitant
+        ? { type: "demander_confirmation", label: "Consultez l'état des risques applicable à votre adresse" }
+        : { type: "obtenir_document", label: "Consultez l'état des risques (Géorisques)" },
+    };
+    return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "verification", facts: [fact], reason: "exposition inondation notable" };
+  },
+};
 ```
 
-Dans `runRules`, juste avant `return { facts: outFacts, diagnostics };`, ajouter :
+Remplacer `REGISTRY` par :
 
 ```ts
-  diagnostics.push(...nonMaterialProbe(facts, project));
+export const REGISTRY: DecisionRule[] = [ruleMer, ruleTaille, ruleCompromis, ruleConfort, ruleInondation];
 ```
 
-- [ ] **Step 4: Lancer, vérifier le succès**
+- [ ] **Step 4: Lancer, vérifier le succès + typecheck + commit**
 
-Run: `node --test src/lib/decision/materiality-rules.test.ts`
-Expected: PASS (13 tests).
-
-- [ ] **Step 5: Typecheck + commit**
-
-Run: `npx tsc --noEmit` (exit 0), puis :
+`node --test src/lib/decision/materiality-rules.test.ts` → PASS (13). `npx tsc --noEmit` → exit 0.
 
 ```bash
 git add src/lib/decision/materiality-rules.ts src/lib/decision/materiality-rules.test.ts
-git commit -m "feat(decision): sonde du non-matériel (diagnostic, aucun fait rendu)
+git commit -m "feat(decision): règles compromis (2 côtés), confort scopé, inondation posture-aware
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 ---
 
-## Task 6: Assembleur (états de conclusion + sections)
+## Task 5: Assembleur (états honnêtes + couverture + hiérarchie plafonnée)
 
 **Files:**
 - Create: `src/lib/decision/decision-assembler.ts`
 - Create: `src/lib/decision/decision-assembler.test.ts`
 
-**Interfaces:**
-- Consumes: `DecisionFact`, `Dossier`, `DossierSection`, `ConclusionState` (Task 1) ; `hasAnyHardConstraint` (Task 1).
-- Produces: `assembleDossier(facts: DecisionFact[], project: UserProject, scope: "commune" | "commune+adresse"): Dossier`.
+**Interfaces produced:** `assembleDossier(run: RunResult, project: UserProject, scope: "commune" | "commune+adresse"): Dossier`.
 
-- [ ] **Step 1: Écrire les tests de l'assembleur (échoue)**
+- [ ] **Step 1: Tests (échoue)**
 
 Create `src/lib/decision/decision-assembler.test.ts` :
 
@@ -884,207 +834,200 @@ Create `src/lib/decision/decision-assembler.test.ts` :
 import test from "node:test";
 import assert from "node:assert/strict";
 import { assembleDossier } from "./decision-assembler.ts";
-import type { DecisionFact } from "./decision-fact.ts";
+import type { DecisionFact, RunResult } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 
 function project(parsed: unknown, over: Partial<UserProject> = {}): UserProject {
   return { posture: "recherche", intent: null, rawText: null, parsed: parsed as UserProject["parsed"], updatedAt: "1970-01-01T00:00:00.000Z", ...over };
 }
-function fact(over: Partial<DecisionFact>): DecisionFact {
-  return {
-    id: "f", ruleId: "r", sourceFactId: "s", module: "territoire", role: "verification",
-    statement: "…", evidence: [{ module: "territoire", label: "T" }], evidenceStrength: "established",
-    relatedProjectKeys: [], ...over,
-  };
+function run(facts: DecisionFact[], covered: RunResult["coveredHardConstraints"] = []): RunResult {
+  return { facts, evaluations: [], coveredHardConstraints: covered };
+}
+function incompat(over: Partial<import("./decision-fact.ts").IncompatibilityFact> = {}): DecisionFact {
+  return { id: "i", ruleId: "r", sourceFactIds: ["s"], module: "territoire", role: "incompatibility", evidenceStrength: "established", hardConstraintKey: "nearSea", materialityTier: "decision_critical", statement: "trop loin", evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }], ...over };
+}
+function verif(): DecisionFact {
+  return { id: "v", ruleId: "r", sourceFactIds: ["s"], module: "territoire", role: "verification", materialityTier: "structuring", statement: "à vérifier", evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }], action: { type: "obtenir_document", label: "doc" } };
 }
 const WITH_HC = { reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 5 } }, preferences: [] };
 const NO_HC = { reformulation: "x", hardConstraints: {}, preferences: [] };
 
-test("incompatibilité établie -> état established_incompatibility, conclusion communale", () => {
-  const d = assembleDossier([fact({ role: "incompatibility", evidenceStrength: "established", statement: "trop loin de la mer" })], project(WITH_HC), "commune");
+test("parsed null -> project_not_structured", () => {
+  const d = assembleDossier(run([]), project(null), "commune");
+  assert.equal(d.conclusionState, "project_not_structured");
+  assert.equal(d.sections.length, 0);
+});
+
+test("incompatibilité établie -> established_incompatibility, conclusion communale", () => {
+  const d = assembleDossier(run([incompat()], ["nearSea"]), project(WITH_HC), "commune");
   assert.equal(d.conclusionState, "established_incompatibility");
   assert.match(d.conclusion, /à l'échelle de la commune/i);
 });
 
-test("inconnue scopée ne bascule PAS en insufficient_evidence", () => {
-  const d = assembleDossier([fact({ role: "unknown", impact: "scoped", evidenceStrength: "incomplete" })], project(WITH_HC), "commune");
-  assert.equal(d.conclusionState, "compatible_with_reserves");
-});
-
-test("inconnue bloquante -> insufficient_evidence", () => {
-  const d = assembleDossier([fact({ role: "unknown", impact: "blocking", evidenceStrength: "incomplete" })], project(WITH_HC), "commune");
-  assert.equal(d.conclusionState, "insufficient_evidence");
-});
-
-test("les deux vides sont distincts : no_hard_constraint_declared vs clean", () => {
-  const sansHC = assembleDossier([fact({ role: "compromise" })], project(NO_HC), "commune");
+test("no_hard_constraint_declared distinct de no_incompatibility_established", () => {
+  const sansHC = assembleDossier(run([verif()]), project(NO_HC), "commune");
   assert.equal(sansHC.conclusionState, "no_hard_constraint_declared");
-  const avecHCclean = assembleDossier([], project(WITH_HC), "commune");
-  assert.equal(avecHCclean.conclusionState, "compatible_with_reserves");
+  const avecHC = assembleDossier(run([verif()], ["nearSea"]), project(WITH_HC), "commune");
+  assert.equal(avecHC.conclusionState, "no_incompatibility_established");
 });
 
-test("compromis seul (avec contrainte dure, sans réserve) -> no_incompatibility_with_compromise", () => {
-  const d = assembleDossier([fact({ role: "compromise" })], project(WITH_HC), "commune");
-  assert.equal(d.conclusionState, "no_incompatibility_with_compromise");
+test("contrainte déclarée non couverte -> nommée dans uncovered + conclusion", () => {
+  const p = project({ reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 5 }, communeSize: { min: null, max: 20000 } }, preferences: [] });
+  const d = assembleDossier(run([], ["nearSea"]), p, "commune");
+  assert.deepEqual(d.uncovered.map((u) => u.key), ["communeSize"]);
+  assert.match(d.conclusion, /pas encore examiné/i);
 });
 
-test("sections : un fait par rôle range dans la bonne section, vides omises", () => {
-  const d = assembleDossier([
-    fact({ role: "incompatibility", evidenceStrength: "indicative" }),
-    fact({ role: "verification" }),
-  ], project(WITH_HC), "commune");
-  const keys = d.sections.map((s) => s.key);
-  assert.deepEqual(keys, ["incompatibilities", "verifications"]);
+test("inconnue bloquante -> insufficient_evidence ; scopée -> non", () => {
+  const blocking: DecisionFact = { id: "u", ruleId: "r", sourceFactIds: ["s"], module: "territoire", role: "unknown", impact: "blocking", materialityTier: "secondary", statement: "?", evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }] };
+  assert.equal(assembleDossier(run([blocking], ["nearSea"]), project(WITH_HC), "commune").conclusionState, "insufficient_evidence");
+  const scoped = { ...blocking, impact: "scoped" as const };
+  assert.equal(assembleDossier(run([scoped], ["nearSea"]), project(WITH_HC), "commune").conclusionState, "no_incompatibility_established");
 });
 
-test("titre section vérifications adapté à la posture habitant", () => {
-  const d = assembleDossier([fact({ role: "verification" })], project(NO_HC, { posture: "habitant" }), "commune");
-  const s = d.sections.find((x) => x.key === "verifications");
-  assert.match(s!.title, /surveiller/i);
+test("caps : au plus 2 incompatibilités affichées", () => {
+  const many = [incompat({ id: "a" }), incompat({ id: "b" }), incompat({ id: "c" })];
+  const d = assembleDossier(run(many, ["nearSea"]), project(WITH_HC), "commune");
+  const sec = d.sections.find((s) => s.key === "incompatibilities");
+  assert.equal(sec!.facts.length, 2);
+});
+
+test("titre vérifications adapté à la posture habitant", () => {
+  const d = assembleDossier(run([verif()]), project(NO_HC, { posture: "habitant" }), "commune");
+  assert.match(d.sections.find((s) => s.key === "verifications")!.title, /surveiller/i);
+});
+
+test("conclusionBasis porte ruleIds et preuves", () => {
+  const d = assembleDossier(run([incompat()], ["nearSea"]), project(WITH_HC), "commune");
+  assert.ok(d.conclusionBasis.ruleIds.length >= 1);
+  assert.ok(d.conclusionBasis.evidence.length >= 1);
 });
 ```
 
-- [ ] **Step 2: Lancer, vérifier l'échec**
-
-Run: `node --test src/lib/decision/decision-assembler.test.ts`
-Expected: FAIL (`Cannot find module './decision-assembler.ts'`).
+- [ ] **Step 2: Lancer, vérifier l'échec** — FAIL.
 
 - [ ] **Step 3: Écrire l'assembleur**
 
 Create `src/lib/decision/decision-assembler.ts` :
 
 ```ts
-// Assembleur PUR : range les DecisionFact en cinq sections et calcule l'état de
-// conclusion à périmètre COMMUNAL. Aucun LLM. Deux vides distincts (§7.3 spec).
-import type { DecisionFact, Dossier, DossierSection, ConclusionState } from "./decision-fact.ts";
+// Assembleur PUR : états de conclusion HONNÊTES (périmètre communal, deux vides distincts,
+// project_not_structured), couverture nommée, hiérarchie plafonnée. Aucun LLM.
+import type {
+  DecisionFact, Dossier, DossierSection, ConclusionState, RunResult, EvidenceRef, MaterialityTier,
+} from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
-import { hasAnyHardConstraint } from "./project-view.ts";
+import { hasAnyHardConstraint, isStructured, uncoveredConstraints } from "./project-view.ts";
 
-type PostureLabels = { engage: string; verifTitle: string };
-
-function labels(project: UserProject): PostureLabels {
+function labels(project: UserProject): { engage: string; verifTitle: string } {
   if (project.posture === "habitant") {
-    return { engage: "décider de rester ou d'adapter", verifTitle: "Ce qu'il reste utile de vérifier ou de surveiller" };
+    return { engage: "comprendre et surveiller", verifTitle: "Ce que ces données invitent à comprendre ou surveiller" };
   }
   return { engage: "vous engager", verifTitle: "À vérifier avant de vous engager" };
 }
 
-const STRENGTH_RANK: Record<DecisionFact["evidenceStrength"], number> = { established: 0, indicative: 1, incomplete: 2 };
-
-function byRole(facts: DecisionFact[], role: DecisionFact["role"]): DecisionFact[] {
-  return facts
-    .filter((f) => f.role === role)
-    .sort((a, b) => STRENGTH_RANK[a.evidenceStrength] - STRENGTH_RANK[b.evidenceStrength]);
+const TIER_RANK: Record<MaterialityTier, number> = { decision_critical: 0, structuring: 1, secondary: 2 };
+function tierRank(f: DecisionFact): number {
+  const base = TIER_RANK[f.materialityTier] * 2;
+  return f.role === "incompatibility" && f.evidenceStrength === "indicative" ? base + 1 : base;
+}
+function byRole(facts: DecisionFact[], role: DecisionFact["role"], cap: number): DecisionFact[] {
+  return facts.filter((f) => f.role === role).sort((a, b) => tierRank(a) - tierRank(b)).slice(0, cap);
 }
 
 function conclusionState(facts: DecisionFact[], project: UserProject): ConclusionState {
-  const established = facts.some((f) => f.role === "incompatibility" && f.evidenceStrength === "established");
-  const blocking = facts.some((f) => f.role === "unknown" && f.impact === "blocking");
-  const reserves = facts.some(
-    (f) =>
-      (f.role === "incompatibility" && f.evidenceStrength !== "established") ||
-      (f.role === "unknown" && f.impact === "scoped") ||
-      f.role === "verification",
-  );
-  const compromise = facts.some((f) => f.role === "compromise");
-
-  if (established) return "established_incompatibility";
-  if (blocking) return "insufficient_evidence";
+  if (!isStructured(project)) return "project_not_structured";
+  if (facts.some((f) => f.role === "incompatibility" && f.evidenceStrength === "established")) return "established_incompatibility";
+  if (facts.some((f) => f.role === "unknown" && f.impact === "blocking")) return "insufficient_evidence";
   if (!hasAnyHardConstraint(project)) return "no_hard_constraint_declared";
-  if (reserves) return "compatible_with_reserves";
-  if (compromise) return "no_incompatibility_with_compromise";
-  return "compatible_with_reserves"; // contraintes dures déclarées, rien de contredit ni signalé
+  return "no_incompatibility_established";
 }
 
-function conclusionText(state: ConclusionState, facts: DecisionFact[], project: UserProject): string {
-  const l = labels(project);
+function examinedClause(uncovered: { label: string }[]): string {
+  return uncovered.length === 0 ? "" : ` Nous n'avons pas encore examiné, à ce grain : ${uncovered.map((u) => u.label).join(", ")}.`;
+}
+
+function conclusionText(state: ConclusionState, facts: DecisionFact[], project: UserProject, uncovered: { label: string }[]): string {
   const scope = "À l'échelle de la commune,";
+  const l = labels(project);
   switch (state) {
+    case "project_not_structured":
+      return "Décrivez votre projet pour une lecture qui met en regard ce lieu et ce qui compte pour vous.";
     case "established_incompatibility": {
       const f = facts.find((x) => x.role === "incompatibility" && x.evidenceStrength === "established");
-      return `${scope} une contrainte que vous avez déclarée n'est pas respectée ici : ${f?.statement ?? ""}`;
+      return `${scope} une contrainte que vous avez déclarée n'est pas respectée ici : ${f ? f.statement : ""}`;
     }
     case "insufficient_evidence":
-      return `${scope} nous ne pouvons pas conclure honnêtement : une donnée déterminante pour votre projet manque ou reste insuffisante.`;
+      return `${scope} nous ne pouvons pas conclure honnêtement : une donnée déterminante pour votre projet manque.`;
     case "no_hard_constraint_declared":
-      return `Vous n'avez déclaré aucune contrainte non négociable. ${scope} les données examinées ne permettent donc pas d'identifier de point éliminatoire pour votre projet.`;
-    case "no_incompatibility_with_compromise": {
-      const f = facts.find((x) => x.role === "compromise");
-      return `${scope} aucune incompatibilité avec vos contraintes déclarées n'est établie. Votre décision se joue surtout sur un compromis : ${f?.statement ?? ""}`;
-    }
-    case "compatible_with_reserves": {
-      const reserves = facts.filter(
-        (x) =>
-          (x.role === "incompatibility" && x.evidenceStrength !== "established") ||
-          (x.role === "unknown" && x.impact === "scoped") ||
-          x.role === "verification",
-      );
-      if (reserves.length === 0) {
-        return `${scope} aucune incompatibilité avec vos contraintes déclarées n'est établie dans les données examinées.`;
-      }
-      return `${scope} aucune incompatibilité établie avec vos contraintes déclarées. ${reserves.length} point(s) restent à examiner avant de ${l.engage}.`;
+      return `Vous n'avez déclaré aucune contrainte non négociable. ${scope} les données examinées ne font ressortir aucun point éliminatoire pour votre projet.${examinedClause(uncovered)}`;
+    case "no_incompatibility_established": {
+      const nReserves = facts.filter((x) => x.role === "verification" || x.role === "compromise" || x.role === "unknown").length;
+      const base = `${scope} sur les contraintes que nous savons examiner, aucune n'est contredite.`;
+      const tail = nReserves > 0 ? ` ${nReserves} point${nReserves > 1 ? "s" : ""} restent à examiner avant de ${l.engage}.` : "";
+      return base + tail + examinedClause(uncovered);
     }
   }
 }
 
-export function assembleDossier(
-  facts: DecisionFact[],
-  project: UserProject,
-  scope: "commune" | "commune+adresse",
-): Dossier {
-  const l = labels(project);
+function factEvidence(f: DecisionFact): EvidenceRef[] {
+  return f.role === "compromise" ? f.sides.flatMap((s) => s.evidence) : f.evidence;
+}
+
+export function assembleDossier(run: RunResult, project: UserProject, scope: "commune" | "commune+adresse"): Dossier {
+  const { facts, coveredHardConstraints } = run;
+  const uncovered = uncoveredConstraints(project, coveredHardConstraints);
   const state = conclusionState(facts, project);
-  const candidates: DossierSection[] = [
-    { key: "incompatibilities", title: "Vos contraintes non négociables", facts: byRole(facts, "incompatibility") },
-    { key: "compromises", title: "Ce qui départage vraiment", facts: byRole(facts, "compromise") },
-    { key: "unknowns", title: "Ce que nous ne savons pas encore", facts: byRole(facts, "unknown") },
-    { key: "verifications", title: l.verifTitle, facts: byRole(facts, "verification") },
-  ];
+  const l = labels(project);
+  const sections: DossierSection[] = [
+    { key: "incompatibilities", title: "Vos contraintes non négociables", facts: byRole(facts, "incompatibility", 2) },
+    { key: "compromises", title: "Ce qui départage vraiment", facts: byRole(facts, "compromise", 3) },
+    { key: "unknowns", title: "Ce que nous ne savons pas encore", facts: byRole(facts, "unknown", 3) },
+    { key: "verifications", title: l.verifTitle, facts: byRole(facts, "verification", 4) },
+  ].filter((s) => s.facts.length > 0);
+  const shown = sections.flatMap((s) => s.facts);
   return {
     scope,
     conclusionState: state,
-    conclusion: conclusionText(state, facts, project),
-    sections: candidates.filter((s) => s.facts.length > 0),
+    conclusion: conclusionText(state, facts, project, uncovered),
+    conclusionBasis: {
+      ruleIds: [...new Set(shown.map((f) => f.ruleId))],
+      factIds: shown.map((f) => f.id),
+      evidence: shown.flatMap(factEvidence),
+    },
+    sections,
+    uncovered,
   };
 }
 ```
 
-- [ ] **Step 4: Lancer, vérifier le succès**
+- [ ] **Step 4: Lancer, vérifier le succès + typecheck + commit**
 
-Run: `node --test src/lib/decision/decision-assembler.test.ts`
-Expected: PASS (7 tests).
-
-- [ ] **Step 5: Typecheck + commit**
-
-Run: `npx tsc --noEmit` (exit 0), puis :
+`node --test src/lib/decision/decision-assembler.test.ts` → PASS (8). `npx tsc --noEmit` → exit 0.
 
 ```bash
 git add src/lib/decision/decision-assembler.ts src/lib/decision/decision-assembler.test.ts
-git commit -m "feat(decision): assembleur (états de conclusion communaux + sections)
+git commit -m "feat(decision): assembleur (états honnêtes, couverture nommée, caps)
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 ---
 
-## Task 7: Orchestrateur + composant + insertion sur le hub
+## Task 6: Orchestrateur + composant + insertion sur le hub (ouvert aux payants)
 
 **Files:**
 - Modify: `src/lib/decision/territory-facts.ts` (ajouter `buildCommuneDossier`)
 - Create: `src/components/report/DossierDecisionSection.tsx`
 - Modify: `src/app/(account)/rapport/page.tsx`
 
-**Interfaces:**
-- Consumes: `loadModuleFacts` (Task 2), `runRules` (Task 5), `assembleDossier` (Task 6), `normalizeUserProject`/`UserProject` (existants).
-- Produces:
-  - `buildCommuneDossier(insee: string, project: UserProject): Promise<Dossier | null>`
-  - `<DossierDecisionSection dossier={Dossier} />` (composant serveur présentationnel)
+**Interfaces produced:** `buildCommuneDossier(insee: string, project: UserProject): Promise<Dossier | null>` ; `<DossierDecisionSection dossier={Dossier} />`.
 
-**Note Next.js :** `/rapport/page.tsx` est déjà un `async function` server component ; on suit ce patron. Le composant est présentationnel (aucun `"use client"`, aucun état). Avant d'écrire, si un doute sur une API App Router, vérifier `node_modules/next/dist/docs/` (cf. AGENTS.md).
+**Note Next.js :** `/rapport/page.tsx` est déjà un `async` server component ; le composant est présentationnel (aucun `"use client"`). En cas de doute sur une API App Router, vérifier `node_modules/next/dist/docs/` (AGENTS.md).
 
 - [ ] **Step 1: Ajouter l'orchestrateur**
 
-Dans `src/lib/decision/territory-facts.ts`, ajouter les imports et la fonction :
+Dans `src/lib/decision/territory-facts.ts`, ajouter les imports :
 
 ```ts
 import { runRules } from "./materiality-rules.ts";
@@ -1093,33 +1036,30 @@ import type { Dossier } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 ```
 
-Ajouter en fin de fichier :
+et en fin de fichier :
 
 ```ts
-// Orchestrateur du hub : commune (grain commune) -> ModuleFacts -> règles -> assemblage.
-// Slice 1 : hasAddress toujours false (le profil ne stocke pas d'adresse), scope "commune".
+// Orchestrateur du hub : commune -> ModuleFacts -> règles -> assemblage. Slice 1 : hasAddress false,
+// scope "commune". parsed null est géré par l'assembleur (état project_not_structured).
 export async function buildCommuneDossier(insee: string, project: UserProject): Promise<Dossier | null> {
   const facts = await loadModuleFacts(insee, { hasAddress: false });
   if (!facts) return null;
-  const { facts: decisionFacts } = runRules(facts, project);
-  return assembleDossier(decisionFacts, project, "commune");
+  return assembleDossier(runRules(facts, project), project, "commune");
 }
 ```
 
-- [ ] **Step 2: Typecheck l'orchestrateur**
+- [ ] **Step 2: Typecheck** — `npx tsc --noEmit` → exit 0.
 
-Run: `npx tsc --noEmit`
-Expected: exit 0.
-
-- [ ] **Step 3: Écrire le composant présentationnel**
+- [ ] **Step 3: Écrire le composant**
 
 Create `src/components/report/DossierDecisionSection.tsx` :
 
 ```tsx
-// Rendu déterministe du dossier de décision (« En une minute »). Présentationnel :
-// reçoit un Dossier déjà assemblé, n'appelle aucun service. Pas de LLM.
+// Rendu déterministe du dossier de décision (« En une minute »). Présentationnel : reçoit un Dossier
+// déjà assemblé. Pas de LLM. Ouvert à tous les payants : le cas creux reste digne (conclusion honnête
+// + contraintes non couvertes nommées + CTA adresse).
 import Link from "next/link";
-import type { Dossier } from "@/lib/decision/decision-fact";
+import type { Dossier, DecisionFact } from "@/lib/decision/decision-fact";
 
 const SECTION_ACCENT: Record<string, string> = {
   incompatibilities: "var(--red)",
@@ -1128,59 +1068,74 @@ const SECTION_ACCENT: Record<string, string> = {
   verifications: "var(--blue)",
 };
 
+function EvidenceLine({ fact, color }: { fact: DecisionFact; color: string }) {
+  const refs = fact.role === "compromise" ? fact.sides.flatMap((s) => s.evidence) : fact.evidence;
+  return (
+    <div className="flex items-center gap-3 mt-2 flex-wrap">
+      {refs.map((e, i) => {
+        const text = e.observedValue ? `${e.label} · ${e.observedValue}` : e.label;
+        return e.href ? (
+          <Link key={i} href={e.href} className="font-mono text-[10px] tracking-[0.06em] uppercase no-underline" style={{ color }}>
+            Voir la preuve · {text}
+          </Link>
+        ) : (
+          <span key={i} className="font-mono text-[10px] tracking-[0.06em] uppercase text-ghost">{text}</span>
+        );
+      })}
+      {fact.role === "verification" || fact.role === "unknown"
+        ? fact.action && <span className="font-mono text-[10px] tracking-[0.06em] uppercase text-muted">{fact.action.label}</span>
+        : null}
+    </div>
+  );
+}
+
+function FactBody({ fact }: { fact: DecisionFact }) {
+  if (fact.role === "compromise") {
+    return (
+      <>
+        <p className="text-label">{fact.statement}</p>
+        <ul className="mt-1.5 flex flex-col gap-1">
+          {fact.sides.map((s, i) => (
+            <li key={i} className="text-muted text-[13px]">{s.statement}</li>
+          ))}
+        </ul>
+      </>
+    );
+  }
+  return (
+    <>
+      <p className="text-label">{fact.statement}</p>
+      {"limitation" in fact && fact.limitation ? <p className="text-muted text-[13px] mt-1">{fact.limitation}</p> : null}
+    </>
+  );
+}
+
 export function DossierDecisionSection({ dossier }: { dossier: Dossier }) {
+  const structured = dossier.conclusionState !== "project_not_structured";
   return (
     <section className="mt-12" id="dossier-decision">
       <div className="mb-6 max-w-[640px]">
         <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">En une minute</p>
-        <h2
-          className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
-        >
+        <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
           Ce lieu, au regard de votre projet.
         </h2>
       </div>
 
-      {/* Conclusion conditionnelle, périmètre communal */}
       <div className="glass rounded-2xl p-7 mb-4">
         <p className="text-[17px] leading-[1.7] text-label">{dossier.conclusion}</p>
       </div>
 
-      {/* Les sections non vides */}
       <div className="flex flex-col gap-3.5">
         {dossier.sections.map((s) => {
           const col = SECTION_ACCENT[s.key] ?? "var(--violet)";
           return (
             <div key={s.key} className="glass rounded-xl p-6" style={{ borderLeft: `2px solid ${col}` }}>
-              <p className="font-mono text-[10px] tracking-[0.1em] uppercase mb-3.5" style={{ color: col }}>
-                {s.title}
-              </p>
+              <p className="font-mono text-[10px] tracking-[0.1em] uppercase mb-3.5" style={{ color: col }}>{s.title}</p>
               <ul className="flex flex-col gap-4">
                 {s.facts.map((f) => (
                   <li key={f.id} className="text-[14px] leading-[1.65]">
-                    <p className="text-label">{f.statement}</p>
-                    {f.limitation ? <p className="text-muted text-[13px] mt-1">{f.limitation}</p> : null}
-                    <div className="flex items-center gap-3 mt-2 flex-wrap">
-                      {f.evidence.map((e, i) =>
-                        e.href ? (
-                          <Link
-                            key={i}
-                            href={e.href}
-                            className="font-mono text-[10px] tracking-[0.06em] uppercase no-underline"
-                            style={{ color: col }}
-                          >
-                            Voir la preuve · {e.label}
-                          </Link>
-                        ) : (
-                          <span key={i} className="font-mono text-[10px] tracking-[0.06em] uppercase text-ghost">
-                            {e.label}
-                          </span>
-                        ),
-                      )}
-                      {f.action ? (
-                        <span className="font-mono text-[10px] tracking-[0.06em] uppercase text-muted">{f.action.label}</span>
-                      ) : null}
-                    </div>
+                    <FactBody fact={f} />
+                    <EvidenceLine fact={f} color={col} />
                   </li>
                 ))}
               </ul>
@@ -1189,18 +1144,20 @@ export function DossierDecisionSection({ dossier }: { dossier: Dossier }) {
         })}
       </div>
 
-      {/* CTA décisionnel vers le grain adresse (amorce du slice 1.5) */}
-      <div className="mt-5">
-        <Link
-          href="/rapport/logement"
-          className="inline-flex flex-col gap-1 px-6 py-4 rounded-xl no-underline border border-white/[0.1] bg-white/[0.03]"
-        >
-          <span className="text-[14px] font-semibold text-label">Affiner avec une adresse</span>
-          <span className="text-[13px] text-muted">
-            Vérifiez le bâtiment, les risques localisés, les contraintes réglementaires et l&apos;environnement immédiat.
-          </span>
-        </Link>
-      </div>
+      {dossier.uncovered.length > 0 ? (
+        <p className="text-[13px] text-muted mt-4">
+          Non encore examiné à ce grain : {dossier.uncovered.map((u) => u.label).join(", ")}.
+        </p>
+      ) : null}
+
+      {structured ? (
+        <div className="mt-5">
+          <Link href="/rapport/logement" className="inline-flex flex-col gap-1 px-6 py-4 rounded-xl no-underline border border-white/[0.1] bg-white/[0.03]">
+            <span className="text-[14px] font-semibold text-label">Affiner avec une adresse</span>
+            <span className="text-[13px] text-muted">Vérifiez le bâtiment, les risques localisés, les contraintes réglementaires et l&apos;environnement immédiat.</span>
+          </Link>
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -1208,16 +1165,14 @@ export function DossierDecisionSection({ dossier }: { dossier: Dossier }) {
 
 - [ ] **Step 4: Insérer sur le hub**
 
-Dans `src/app/(account)/rapport/page.tsx` :
-
-Ajouter aux imports (après la ligne `import { normalizeUserProject } from "@/lib/user-project";`) :
+Dans `src/app/(account)/rapport/page.tsx`, ajouter aux imports (après `import { normalizeUserProject } from "@/lib/user-project";`) :
 
 ```ts
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
 ```
 
-Après la résolution de `userProject` (ligne `const userProject = normalizeUserProject(...)`), ajouter le calcul du dossier (payant + commune connue + projet présent) :
+Après `const userProject = normalizeUserProject(...)`, calculer le dossier (payant + commune connue + projet présent ; ouvert à tous les payants, pas de flag) :
 
 ```ts
   const dossier =
@@ -1226,7 +1181,7 @@ Après la résolution de `userProject` (ligne `const userProject = normalizeUser
       : null;
 ```
 
-Puis, dans le JSX, juste APRÈS le bloc `ProjectSummaryCard` (le `<div className="mt-12"><ProjectSummaryCard .../></div>`, lignes ~215-217) et AVANT la ligne `<div className="border-t border-white/[0.08] mt-14" />`, insérer :
+Puis, juste APRÈS le bloc `<div className="mt-12"><ProjectSummaryCard .../></div>` (lignes ~215-217) et AVANT `<div className="border-t border-white/[0.08] mt-14" />` :
 
 ```tsx
         {/* ── En une minute : le dossier de décision (payant, grain commune) ── */}
@@ -1235,15 +1190,11 @@ Puis, dans le JSX, juste APRÈS le bloc `ProjectSummaryCard` (le `<div className
 
 - [ ] **Step 5: Typecheck + build**
 
-Run: `npx tsc --noEmit`
-Expected: exit 0.
+`npx tsc --noEmit` → exit 0. `npm run build` → réussi.
 
-Run: `npm run build`
-Expected: build réussi (la page `/rapport` compile ; aucune erreur de type sur `Dossier`).
+- [ ] **Step 6: Vérification comportementale (skill verify)**
 
-- [ ] **Step 6: Vérification comportementale (verify skill)**
-
-Utiliser la skill `verify` pour piloter le hub avec un compte payant : la section « En une minute » apparaît entre la carte Projet et la grille des modules, la conclusion commence par « À l'échelle de la commune », chaque fait porte un lien de preuve, le CTA « Affiner avec une adresse » pointe vers `/rapport/logement`. Noter le résultat observé.
+Piloter le hub avec un compte payant : la section « En une minute » apparaît entre la carte Projet et la grille ; la conclusion commence par « À l'échelle de la commune » (ou invite à décrire le projet si non structuré) ; les contraintes non couvertes sont nommées ; chaque fait porte une preuve avec sa valeur mesurée ; le CTA « Affiner avec une adresse » pointe vers `/rapport/logement`. Noter le résultat observé.
 
 - [ ] **Step 7: Commit**
 
@@ -1256,45 +1207,42 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ---
 
-## Task 8: Graver les trois arbitrages au vault
+## Task 7: Graver les arbitrages au vault
 
 **Files:**
 - Create: `docs/vault/arbitrages/dossier-decision-eliminatoire-contrainte-declaree.md`
 - Create: `docs/vault/arbitrages/deterministe-selectionne-ia-formule.md`
 - Create: `docs/vault/arbitrages/rapport-un-produit-semantique-par-posture.md`
 
-**Interfaces:** aucune (documentation).
-
-- [ ] **Step 1: Arbitrage n°1 (éliminatoire = contrainte déclarée)**
+- [ ] **Step 1: Arbitrage n°1 (éliminatoire + couverture déclarée)**
 
 Create `docs/vault/arbitrages/dossier-decision-eliminatoire-contrainte-declaree.md` :
 
 ```markdown
-# « Éliminatoire » = incompatibilité avec une contrainte non négociable DÉCLARÉE
+# « Éliminatoire » = incompatibilité avec une contrainte déclarée ; la couverture est déclarée
 
 **Date** : 2026-07-11 · **Statut** : arbitré (porteur), branché slice 1.
 
-Dans le dossier de décision (« En une minute »), presque rien n'est éliminatoire dans l'absolu.
-Un point n'est « éliminatoire » que lorsqu'il **contredit une contrainte non négociable que le
-lecteur a lui-même déclarée**. Le critère vient du lecteur ; futur•e ne fait que constater la
-contradiction. Cela résout la tension avec l'invariant n°1 (« on ne décide jamais à sa place ») et
-avec « on ne juge jamais un territoire dans l'absolu ».
+Un point n'est « éliminatoire » que lorsqu'il contredit une contrainte non négociable que le lecteur
+a lui-même déclarée. Le critère vient du lecteur ; futur•e constate la contradiction. Trois états,
+jamais un verdict : incompatibilité établie / possible à vérifier / aucune incompatibilité établie
+dans les données examinées.
 
-Trois états, jamais un verdict :
-- **Incompatibilité établie** : une preuve suffisante contredit directement une contrainte déclarée.
-- **Incompatibilité possible à vérifier** : un signal existe, la preuve ne suffit pas encore.
-- **Aucune incompatibilité établie dans les données examinées** (jamais « aucun problème »).
+Corollaire de couverture (v2) : « aucune incompatibilité » ne se dit QUE sur les contraintes
+réellement examinées. Une contrainte déclarée qu'aucune règle ne sait encore évaluer est NOMMÉE comme
+non couverte, jamais avalée en silence. Le moteur retourne des évaluations (satisfied / incompatible /
+not_applicable / unknown…), pas seulement des faits, pour rendre la couverture observable.
 
-Corollaire : un projet **sans contrainte non négociable déclarée** ne peut produire aucun
-éliminatoire. Cet état (`no_hard_constraint_declared`) est distinct de « données insuffisantes »
-(`insufficient_evidence`). Les deux vides ne se confondent jamais.
+Deux vides distincts : projet sans contrainte dure (`no_hard_constraint_declared`) n'est jamais
+confondu avec données insuffisantes (`insufficient_evidence`) ni avec projet non structuré
+(`project_not_structured`).
 
-Implémentation : `src/lib/decision/materiality-rules.ts` (les règles `incompatibility` lisent
-`hardConstraints`), `src/lib/decision/decision-assembler.ts` (les cinq états de conclusion).
-Spec : `docs/superpowers/specs/2026-07-11-dossier-decision-materialite-design.md`.
+Implémentation : `src/lib/decision/materiality-rules.ts`, `src/lib/decision/decision-assembler.ts`,
+`src/lib/decision/project-view.ts` (couverture). Spec :
+`docs/superpowers/specs/2026-07-11-dossier-decision-materialite-design.md`.
 ```
 
-- [ ] **Step 2: Arbitrage n°2 (déterministe sélectionne, IA formule)**
+- [ ] **Step 2: Arbitrage n°2 (déterministe / IA)**
 
 Create `docs/vault/arbitrages/deterministe-selectionne-ia-formule.md` :
 
@@ -1303,25 +1251,18 @@ Create `docs/vault/arbitrages/deterministe-selectionne-ia-formule.md` :
 
 **Date** : 2026-07-11 · **Statut** : arbitré (porteur). Slice 1 = déterministe seul.
 
-Frontière nette pour le dossier de décision :
+Le déterministe (registre de règles) décide : pertinence, section, condition de matérialité, preuve,
+limite, action, état de conclusion. Le type impose la doctrine (union discriminée) et des invariants
+runtime jettent en cas de violation.
 
-**Le déterministe (registre de règles) décide** : si un fait est pertinent pour le projet, dans
-quelle section il peut apparaître, s'il remplit la condition de matérialité, quelle preuve et quelle
-limite l'accompagnent, quelle action est proposée, et l'état de conclusion.
+L'IA (slice 2) formule seulement : elle reçoit des sections déjà résolues, peut fusionner, reformuler,
+adapter à la posture, fluidifier. Elle ne peut jamais changer un rôle, inventer une incompatibilité,
+masquer une inconnue, modifier un niveau de preuve, introduire une priorité absente, ni supprimer un
+lien de preuve. La sortie déterministe reste le fallback permanent.
 
-**L'IA (slice 2) formule seulement** : elle reçoit des sections DÉJÀ résolues et peut fusionner deux
-formulations redondantes, reformuler la conclusion, adapter la voix à la posture, fluidifier. Elle
-ne peut JAMAIS changer le rôle d'un fait, inventer une incompatibilité, masquer une inconnue,
-modifier un niveau de preuve, introduire une priorité absente du projet, ni supprimer un lien de
-preuve.
-
-La sortie déterministe reste le **fallback permanent** (latence, erreur, artefact non généré). Elle
-n'est jamais du travail jeté. On prouve d'abord que futur•e pense juste, on lui apprend ensuite à
-mieux le dire.
-
-Registre, jamais un score : on ne calcule jamais `importance × gravité × confiance`, un score même
-caché décide mécaniquement et devient infalsifiable. Chaque remontée est une règle explicable.
-Spec : `docs/superpowers/specs/2026-07-11-dossier-decision-materialite-design.md`.
+Registre, jamais un score : on ne calcule jamais importance × gravité × confiance. L'absence de donnée
+reste `null` (jamais une valeur inventée), une erreur inattendue explose (jamais maquillée en « donnée
+indisponible »). Spec : `docs/superpowers/specs/2026-07-11-dossier-decision-materialite-design.md`.
 ```
 
 - [ ] **Step 3: Arbitrage n°3 (un produit, sémantique par posture)**
@@ -1333,18 +1274,17 @@ Create `docs/vault/arbitrages/rapport-un-produit-semantique-par-posture.md` :
 
 **Date** : 2026-07-11 · **Statut** : arbitré (porteur), branché slice 1.
 
-Le dossier de décision garde UNE structure canonique en cinq sections (conclusion conditionnelle,
-contraintes/incompatibilités, compromis, inconnues, vérifications) pour toutes les postures. On ne
-fabrique pas deux produits « chercheur » et « habitant » séparés maintenant.
+Le dossier garde UNE structure canonique en cinq sections pour toutes les postures. Seuls les titres,
+le verbe d'engagement et certaines phrases changent. `intent === "achat"` seul déclenche la logique
+acquéreur : analyser une adresse n'est pas acheter.
 
-Seuls les **titres et le verbe d'engagement** changent :
-- `recherche` / `adresse` / intent `achat` : « À vérifier avant de vous engager ».
-- `habitant` : conclusion « ce qu'il faut comprendre et surveiller », section « Ce qu'il reste
-  utile de vérifier ou de surveiller ».
-- `recherche_quartier` : réservée (payload non conçu), retombe sur les libellés `recherche`.
+- `recherche` / `adresse` / intent `achat` : « avant de vous engager ».
+- `habitant` : « ce que ces données invitent à comprendre ou surveiller », jamais « avant de vous
+  engager » ni « décider de rester » (le cas habitant peut seulement chercher à comprendre).
+- `recherche_quartier` : réservée, retombe sur `recherche`.
 
-Le moteur (registre + assembleur) est identique ; la posture ne change que la couche de libellés.
-La séparation éventuelle en deux produits attend le test miroir du lancement (cf.
+Le moteur est identique ; la posture ne change que la couche de libellés et la formulation des faits.
+Séparation éventuelle en deux produits : attend le test miroir du lancement (cf.
 `docs/vault/arbitrages/moat-assemblage-largeur-en-tunnel.md`).
 Spec : `docs/superpowers/specs/2026-07-11-dossier-decision-materialite-design.md`.
 ```
@@ -1353,20 +1293,16 @@ Spec : `docs/superpowers/specs/2026-07-11-dossier-decision-materialite-design.md
 
 ```bash
 git add docs/vault/arbitrages/dossier-decision-eliminatoire-contrainte-declaree.md docs/vault/arbitrages/deterministe-selectionne-ia-formule.md docs/vault/arbitrages/rapport-un-produit-semantique-par-posture.md
-git commit -m "vault(arbitrage): dossier de décision (éliminatoire déclaré, déterministe/IA, un produit par posture)
+git commit -m "vault(arbitrage): dossier de décision (éliminatoire+couverture, déterministe/IA, posture)
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 ---
 
-## Vérification finale (après toutes les tâches)
+## Vérification finale
 
-- [ ] Typecheck complet : `npx tsc --noEmit` → exit 0.
-- [ ] Tous les tests décision : `node --test src/lib/decision/*.test.ts` → tout PASS.
-- [ ] Build : `npm run build` → réussi.
-- [ ] Critère de réussite du slice 1 (spec §13) : sur trois `UserProject` réels contrastés (un
-  `recherche` sans contrainte dure, un `achat` avec `nearSea`, un `habitant`) et trois communes
-  réelles, vérifier que les dossiers diffèrent visiblement, qu'aucun fait n'est dans le mauvais
-  rôle, que la conclusion annonce toujours son périmètre communal, que les sections sans matière
-  restent vides, et que chaque phrase est traçable à un `ruleId` et à une preuve.
+- [ ] `npx tsc --noEmit` → exit 0.
+- [ ] `node --test src/lib/decision/*.test.ts` → tout PASS.
+- [ ] `npm run build` → réussi.
+- [ ] Critère de réussite (spec §15) : sur trois `UserProject` réels contrastés (un `recherche` sans contrainte dure, un `achat` avec `nearSea`, un `habitant`) et trois communes réelles : dossiers visiblement différents ; aucun fait dans le mauvais rôle ; conclusion à périmètre communal ; contraintes non couvertes nommées ; sections plafonnées ; chaque phrase traçable à un `ruleId` et une preuve avec `observedValue` ; `assertFactValid` ne jette pas ; le cas creux reste digne.
