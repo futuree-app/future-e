@@ -1,313 +1,346 @@
-# Dossier de décision + registre de matérialité (slice 1)
+# Dossier de décision + registre de matérialité (slice 1) — v2
 
-**Date** : 2026-07-11 · **Statut** : design validé (brainstorm porteur), prêt pour plan.
+**Date** : 2026-07-11 · **Statut** : design v2 (révisé après revue adversariale), prêt pour relecture porteur puis plan.
 **Ascendance** : `docs/rapports-agents/researcher/2026-07-11-architecture-rapport-payant.md`
-(pistes 1 « dossier de décision » + 10 « seuil de matérialité »), sous l'arbitrage
-`docs/vault/arbitrages/moat-assemblage-largeur-en-tunnel.md` (« le payant vend la décision, jamais
-la donnée vue gratuitement »). Suite de la clé de voûte
+(pistes 1 « dossier de décision » + 10 « seuil de matérialité »), sous
+`docs/vault/arbitrages/moat-assemblage-largeur-en-tunnel.md`. Suite de la clé de voûte
 `docs/superpowers/specs/2026-07-11-user-project-persistance-design.md` (le `UserProject` persisté).
 
----
+## Changelog v1 → v2 (revue adversariale)
+
+La v1 savait expliquer pourquoi une alerte remonte, pas prouver pourquoi aucune ne remonte. Corrigé :
+
+1. **Modèle de couverture explicite.** Les règles retournent des ÉVALUATIONS (`RuleEvaluation`), plus
+   seulement des faits. L'assembleur distingue « contrainte examinée et respectée » de « jamais
+   examinée », et NOMME les contraintes déclarées qu'aucune règle ne sait encore évaluer.
+2. **Absence de donnée jamais transformée en résultat.** `catnat ?? 0` supprimé (`number | null`).
+   Aucun `try/catch` général sur `subScore` (les erreurs inattendues doivent exploser, seules les
+   absences connues deviennent `null`).
+3. **Règles doctrinalement prouvées.** Montagne (bande d'altitude incohérente) retirée, remplacée par
+   `communeSize` (population au-delà du seuil déclaré = incompatibilité exactement démontrable). CatNat
+   brut ≥ 3 retiré, remplacé par un croisement avec le score d'exposition actuel, période et limite
+   nommées, « ERRIAL » corrigé (un service, pas le nom du document).
+4. **`DecisionFact` en union discriminée** : le type IMPOSE la doctrine (un `unknown` a un `impact`,
+   un `compromise` a deux côtés avec preuve chacun, une `verification` a une action). `sourceFactId`
+   → `sourceFactIds[]`. `EvidenceRef` porte `observedValue` + `grain` (la valeur mesurée EST la preuve).
+5. **États de conclusion honnêtes.** `compatible_with_reserves` → `no_incompatibility_established`.
+   Ajout de `project_not_structured` (rawText sans parsed). Hiérarchie plafonnée (`materialityTier` +
+   caps). Conclusion porteuse d'un `conclusionBasis` (ruleIds + factIds + preuves).
+6. **Sonde non-matériel retirée** (code de démo), remplacée par des invariants génériques dans le
+   moteur qui protègent toutes les futures règles.
+7. **Posture réellement appliquée.** `intent === "achat"` seul déclenche la logique acquéreur
+   (analyser une adresse n'est pas acheter). Les phrases sont posture-aware (habitant : comprendre et
+   surveiller, jamais « avant de vous engager »).
+
+**Décisions porteur (v2)** : le rôle reste « compromis » (texte honnête, preuve par côté) ; la page
+est **ouverte à tous les payants dès la livraison** (pas de feature flag), donc le cas creux doit
+rester digne et honnête.
 
 ## 1. Objectif
 
-Poser, au-dessus des modules de la vue payante, une page **« En une minute »** qui répond à une
-seule question pour le lecteur qui vient de payer : **ce lieu-ci tient-il pour SON projet ?**
-La page hiérarchise, pour ce projet déclaré, les faits déjà produits par l'usine (modules) selon
-cinq rôles décisionnels canoniques. La valeur payante devient visible dans la STRUCTURE : un
-sommaire qui ne peut exister que pour ce lecteur.
+Poser, au-dessus des modules payants du hub `/rapport`, une page « En une minute » qui répond à une
+seule question : **ce lieu-ci tient-il pour SON projet ?** Elle hiérarchise les faits Territoire
+selon cinq rôles décisionnels, pour le projet déclaré, de façon **déterministe et auditable**, en
+étant honnête sur ce qu'elle a examiné ET sur ce qu'elle n'a pas encore examiné. Aucun LLM dans ce
+slice.
 
-La vraie nouveauté n'est pas l'écran. C'est la capacité à dire, de façon déterministe et auditable :
-« parmi tous les faits produits par les modules, lesquels remontent pour ce projet précis, dans
-quel rôle décisionnel, et avec quel degré de preuve ? » Cette logique vit hors du composant, dans
-un **registre de règles de matérialité**.
-
-## 2. Cadrage doctrinal (trois arbitrages, gravés au vault dans cette session)
+## 2. Cadrage doctrinal (arbitrages gravés au vault)
 
 1. **« Éliminatoire » = incompatibilité avec une contrainte non négociable DÉCLARÉE**, jamais un
-   jugement absolu du territoire. Le critère vient du lecteur (il a posé la contrainte), futur•e
-   ne fait que constater la contradiction. Résout la tension avec l'invariant n°1 (« on ne décide
-   jamais à la place ») et avec « on ne juge jamais un territoire dans l'absolu ».
-2. **Le déterministe sélectionne, impose preuve et limite ; l'IA (slice 2) formule seulement.**
-   La sortie déterministe reste le fallback permanent. L'IA ne pourra jamais changer un rôle,
-   inventer une incompatibilité, masquer une inconnue, modifier un niveau de preuve, introduire
-   une priorité absente du projet, ni supprimer un lien de preuve.
-3. **Un seul produit structurel, sémantique par posture.** La structure canonique en cinq sections
-   est commune à toutes les postures (`recherche`, `adresse`, `habitant`, `recherche_quartier`) ;
-   seuls les titres et le verbe d'engagement changent.
+   jugement absolu. Le critère vient du lecteur.
+2. **Le déterministe sélectionne et impose preuve/limite ; l'IA (slice 2) formule seulement.** Sortie
+   déterministe = fallback permanent.
+3. **Un seul produit structurel, sémantique par posture.**
+4. **La couverture est déclarée, jamais supposée.** « Aucune incompatibilité » ne se dit QUE sur les
+   contraintes réellement examinées. Une contrainte déclarée qu'aucune règle ne sait évaluer est
+   nommée comme non couverte, jamais avalée en silence. Registre, jamais un score.
 
-Registre, pas score. On ne calcule JAMAIS `importance × gravité × confiance` : un score, même non
-affiché, décide mécaniquement et devient infalsifiable sur les cas limites. Chaque remontée est le
-produit d'une règle explicable, testable une à une.
+## 3. Frontière slice 1 / slice 1.5
 
-## 3. Frontière slice 1 / slice 1.5 (la décision structurante)
+Le profil stocke `home_insee_code`, jamais une adresse. Donc au hub : toujours la commune, rarement
+une adresse.
 
-Le profil stocke `home_insee_code` / `active_insee_code`, **jamais une adresse**. Le rapport
-Logement se calcule à la volée quand l'utilisateur tape une adresse sur `/rapport/logement` ; il
-n'est pas persisté. Donc au niveau du hub `/rapport`, on a **toujours la commune, rarement une
-adresse**.
-
-- **Slice 1** : source de faits = **Territoire au grain commune** (attributs de l'index par INSEE,
-  la donnée que le comparateur score déjà). Disponible, déterministe et homogène pour 100 % des
-  hubs. La conclusion porte **explicitement sur la commune** (§7.4).
-- **Slice 1.5** : quand une adresse est renseignée, on **branche un second fournisseur de faits**
-  (les faits Logement, dont `src/lib/logement-checklist.ts` est déjà le gabarit). Le registre, les
-  `DecisionFact`, l'assembleur et la page sont **identiques**. L'adresse ne crée ni page ni dossier
-  nouveau : elle **augmente la résolution du dossier existant**.
-
-Ce n'est pas une réduction opportuniste. Le slice 1 valide réellement la chaîne d'assemblage ; le
-slice 1.5 ne la réécrit pas, il ajoute un producteur de faits.
+- **Slice 1** : source = Territoire au grain commune (index par INSEE). Conclusion à périmètre
+  **communal explicite**.
+- **Slice 1.5** : quand une adresse est renseignée, on branche les faits Logement. Registre, contrats,
+  assembleur et page identiques. `hasAddress` passe à `true`, `scope` à `"commune+adresse"`.
 
 ## 4. Architecture et flux
 
 ```
 Attributs commune (INSEE, index)  +  UserProject
                     ↓
-          Registre de règles          ← la doctrine projet-relative vit ICI
+          Registre de règles          ← doctrine projet-relative
                     ↓
-     DecisionFact[] résolus (bêtes)    ← rôle / preuve / limite déjà tranchés
+  { facts: DecisionFact[], evaluations: RuleEvaluation[] }   ← ÉMISSIONS + COUVERTURE
                     ↓
-        Assembleur canonique           ← 5 états de conclusion + tri des sections
+        Assembleur canonique          ← états honnêtes + contraintes non couvertes
                     ↓
-   Page « En une minute » (gabarits)   ← entre ProjectSummaryCard et la grille modules
+   Page « En une minute » (gabarits)  ← entre ProjectSummaryCard et la grille
 ```
 
-Trois libs pures neuves, chacune testable en isolation, aucune dépendance réseau :
+Libs pures neuves sous `src/lib/decision/` : `decision-fact.ts` (contrats), `project-view.ts`
+(lecteurs `UserProject`), `territory-facts.ts` (adaptateur + orchestrateur), `materiality-rules.ts`
+(registre + moteur), `decision-assembler.ts` (assembleur).
 
-- `src/lib/decision/decision-fact.ts` : les contrats `DecisionFact`, `DecisionRule`, `ModuleFacts`.
-- `src/lib/decision/materiality-rules.ts` : le registre (les six règles d'amorçage) + le moteur
-  `runRules(moduleFacts, project) → { facts: DecisionFact[]; diagnostics: DiagnosticEntry[] }`.
-- `src/lib/decision/decision-assembler.ts` : `assembleDossier(facts, project, scope) → Dossier`
-  (les cinq sections + l'état de conclusion).
+## 5. Contrats
 
-Un adaptateur `src/lib/decision/territory-facts.ts` charge les attributs de la commune active par
-INSEE (via l'accès index existant, cf. `commune-data.ts` / `comparateur-vie.ts`) et les projette
-dans `ModuleFacts`. C'est le seul point qui touche la donnée ; les règles ne connaissent que
-`ModuleFacts`.
-
-## 5. Les contrats
-
-`DecisionRule` porte la doctrine (constante, projet-relative, auditable en un seul endroit). C'est
-la généralisation directe de `logement-checklist.ts` : `active()` = éligibilité, `resolve()` émet
-désormais **cinq rôles** au lieu de la seule vérification.
+### 5.1 ModuleFacts (absence honnête)
 
 ```ts
-type DecisionModule = "territoire" | "logement";
-type DecisionRole =
-  | "incompatibility"      // contredit une contrainte non négociable déclarée
-  | "compromise"           // tension explicite entre deux dimensions du projet
-  | "unknown"              // une donnée déterminante manque
-  | "verification"         // à vérifier / surveiller avant de s'engager
-  | "supporting_context";  // RÉSERVÉ : aucune règle du slice 1 ne l'émet, aucune section
-                           // ne l'accueille encore. Présent pour ne pas rouvrir le type
-                           // plus tard. Un fait qui « éclaire sans peser » reste, en slice 1,
-                           // dans le module Territoire (cf. §6 règle 6), pas dans le dossier.
+type ModuleFacts = {
+  insee: string;
+  nom: string;
+  distanceCoteKm: number;            // toujours présent dans l'index
+  population: number | null;
+  altitude: number | null;
+  catnatInondation: number | null;   // null = pas de bloc inondation dans l'index (jamais 0 par défaut)
+  inondationRisque: number | null;   // score d'exposition 0-100 (haut = exposé), null si absent
+  scores: Partial<Record<PreferenceKey, number | null>>; // subScore par clé ; null = non calculable
+  hasAddress: boolean;               // slice 1 : toujours false
+};
+```
 
-type EvidenceStrength = "established" | "indicative" | "incomplete";
+L'adaptateur ne met JAMAIS de valeur de repli. `subScore` n'est pas enveloppé de `try/catch` : une
+erreur inattendue doit exploser (une régression n'est pas une « donnée indisponible »).
 
-type DecisionFact = {
-  id: string;
-  ruleId: string;              // toute phrase de la page porte un ruleId (test de doctrine)
-  sourceFactId: string;        // le fait module d'origine (lien de preuve)
+### 5.2 DecisionFact (union discriminée)
+
+```ts
+type MaterialityTier = "decision_critical" | "structuring" | "secondary";
+
+type EvidenceRef = {
+  factId: string;                                  // le fait module source
   module: DecisionModule;
-  role: DecisionRole;
-  statement: string;           // le constat, déjà résolu (gabarit déterministe)
-  evidence: EvidenceRef[];     // au moins un lien vers le module / la donnée source
-  limitation?: string;         // la limite de lecture, quand elle existe
-  evidenceStrength: EvidenceStrength;
+  label: string;
+  observedValue?: string;                          // la valeur mesurée : "42 km", "18 000 hab.", "72/100"
+  grain: "commune" | "adresse" | "secteur";
+  href?: string;                                   // optionnel slice 1 (module) ; ancre exacte = ultérieur
+};
+
+type BaseFact = {
+  id: string;
+  ruleId: string;
+  sourceFactIds: string[];
+  module: DecisionModule;
+  statement: string;                               // gabarit déterministe, posture-aware
+  materialityTier: MaterialityTier;
+};
+
+type IncompatibilityFact = BaseFact & {
+  role: "incompatibility";
+  evidenceStrength: "established" | "indicative";
+  hardConstraintKey: HardConstraintKey;            // DOIT référencer une contrainte dure déclarée
+  evidence: EvidenceRef[];                          // >= 1
+  limitation?: string;
+};
+
+type CompromiseSide = { projectKey: PreferenceKey; statement: string; evidence: EvidenceRef[] };
+type CompromiseFact = BaseFact & {
+  role: "compromise";
+  sides: [CompromiseSide, CompromiseSide];         // exactement deux, preuve de chaque côté
+};
+
+type UnknownFact = BaseFact & {
+  role: "unknown";
+  impact: "blocking" | "scoped";                   // requis
+  evidence: EvidenceRef[];
   action?: { type: VerificationActionType; label: string };
-  relatedProjectKeys: string[];// PreferenceKey ou clés de hardConstraints déclarées
-  // Rôle "unknown" seulement : une donnée manquante BLOQUE la conclusion, ou LIMITE
-  // seulement une dimension / un grain. La doctrine reste dans la règle ; ceci est
-  // la propriété RÉSOLUE que l'assembleur lit.
-  impact?: "blocking" | "scoped";
+};
+
+type VerificationFact = BaseFact & {
+  role: "verification";
+  evidence: EvidenceRef[];
+  action: { type: VerificationActionType; label: string };  // requise
+  limitation?: string;
+};
+
+type DecisionFact = IncompatibilityFact | CompromiseFact | UnknownFact | VerificationFact;
+```
+
+### 5.3 Évaluation et règle
+
+```ts
+type HardConstraintKey =
+  | "departements" | "zones" | "excludeZones" | "montagne" | "reliefProche"
+  | "nearSea" | "excludeSea" | "nearPlace" | "communeSize" | "excludePlace" | "sizeRelativeTo";
+
+type RuleOutcome =
+  | "not_applicable"  // la cible n'est pas déclarée dans le projet
+  | "satisfied"       // déclarée et respectée (aucun fait)
+  | "incompatible"    // déclarée et contredite (émet un IncompatibilityFact)
+  | "compromise"      // tension entre deux préférences déclarées (émet un CompromiseFact)
+  | "verification"    // à vérifier (émet un VerificationFact)
+  | "unknown"         // donnée déterminante manquante (émet un UnknownFact)
+  | "uncertain";      // donnée présente mais insuffisante pour trancher (aucun fait)
+
+type RuleEvaluation = {
+  ruleId: string;
+  projectKeys: string[];      // clés évaluées (HardConstraintKey ou PreferenceKey)
+  outcome: RuleOutcome;
+  facts: DecisionFact[];      // 0..n
+  reason: string;             // trace de diagnostic
 };
 
 type DecisionRule = {
   id: string;
   module: DecisionModule;
-  sourceFacts: string[];                 // documente la donnée lue (audit)
-  appliesToPostures: ProjectPosture[];   // filtre par posture
-  active: (facts: ModuleFacts, project: UserProject) => boolean;
-  resolve: (facts: ModuleFacts, project: UserProject) => DecisionFact | DecisionFact[];
+  hardConstraint?: HardConstraintKey;  // si présent, la règle participe à la COUVERTURE de cette contrainte
+  evaluate: (facts: ModuleFacts, project: UserProject) => RuleEvaluation;
 };
 ```
 
-`ModuleFacts` est un sac de faits normalisés, volontairement plat et pauvre : les règles lisent des
-champs, jamais des objets métier. En slice 1 il ne contient que le grain commune (climat, littoral,
-altitude, taille, historique CatNat, scores de préférence). En slice 1.5 il gagne un bloc
-`logement?` optionnel. Aucune règle Territoire ne change quand `logement` apparaît.
+`evaluate()` remplace `active()/resolve()` : une règle décrit toujours son verdict, même quand elle
+ne produit aucun fait (satisfied / not_applicable / uncertain). C'est ce qui rend la couverture
+observable. Généralise `src/lib/logement-checklist.ts` (dont chaque règle devient un `evaluate`).
 
-Le `DecisionFact` reste **bête** : il contient le résultat de la doctrine, jamais la doctrine.
+### 5.4 Dossier (conclusion prouvée)
 
-## 6. Le registre : six règles d'amorçage (toutes sur des champs réels de l'index)
+```ts
+type ConclusionState =
+  | "established_incompatibility"
+  | "no_incompatibility_established"
+  | "insufficient_evidence"
+  | "no_hard_constraint_declared"
+  | "project_not_structured";
 
-Elles couvrent la matrice des cas, sur de la donnée déjà présente. Chacune est une fixture de test.
+type UncoveredConstraint = { key: HardConstraintKey; label: string };
 
-| # | ruleId | Rôle / force | Déclencheur (champ réel) | Émet |
-|---|--------|--------------|--------------------------|------|
-| 1 | `territoire.mer-hors-seuil` | incompatibility / `established` | `hardConstraints.nearSea{active,maxKm}` × `distance_cote_km > maxKm` | « Cette commune est à {d} km du littoral, au-delà de la limite de {maxKm} km que vous avez posée. » |
-| 2 | `territoire.altitude-limite` | incompatibility / `indicative` | `hardConstraints.montagne:{strength:'hard'}` (altitude ≥ ~600 m) × altitude commune en bande grise (450–600 m) | « L'altitude ici approche votre seuil sans l'atteindre, à confirmer sur le terrain. » |
-| 3 | `territoire.compromis-transport-chaleur` | compromise | deux `preferences` déclarées (poids ≥ 2) en tension réelle : une bien satisfaite, une mal satisfaite, preuve des deux côtés (ex. `acces_transports` fort × `faible_chaleur` faible) | « Meilleure accessibilité quotidienne, mais exposition estivale plus marquée. » |
-| 4 | `territoire.logement-sans-adresse` | unknown / `impact:'scoped'` | posture `achat`/`adresse` + priorité qui dépend du grain Logement (ex. `faible_chaleur` = confort d'été bâti, DPE) + aucune adresse au dossier | « Votre priorité de confort d'été ne peut pas être évaluée au grain du bâtiment sans adresse. » |
-| 5 | `territoire.risque-a-verifier` | verification | `faible_risque_inondation` déclaré × historique CatNat notable de la commune | « Demandez l'état des risques avant de vous engager : la commune a connu des sinistres indemnisés. » |
-| 6 | `territoire.non-materiel` (fixture) | **n'émet AUCUN DecisionFact** | un attribut qui score notablement sur une dimension NON déclarée | rien de visible ; une `DiagnosticEntry` interne (§10) |
+type Dossier = {
+  scope: "commune" | "commune+adresse";
+  conclusionState: ConclusionState;
+  conclusion: string;
+  conclusionBasis: { ruleIds: string[]; factIds: string[]; evidence: EvidenceRef[] };
+  sections: DossierSection[];
+  uncovered: UncoveredConstraint[];   // contraintes déclarées qu'aucune règle ne sait examiner
+};
+```
 
-**Discipline compromis (règle 3)**, gravée : aucun compromis n'est émis sans nommer la dimension
-préservée, la dimension fragilisée, leur relation aux priorités déclarées, et une preuve de CHAQUE
-côté. Sinon le fait redevient réserve (`verification`) ou contexte. La section compromis peut rester
-honnêtement vide : on ne la remplit jamais parce que l'interface prévoit trois lignes.
+## 6. Modèle de couverture
 
-**Fait non matériel (règle 6)** : la règle ne produit AUCUN `DecisionFact` utilisateur. Pas
-d'annexe visible « vérifié, sans enjeu pour votre projet » (elle recréerait l'encyclopédie sous une
-autre forme et alourdirait chaque règle). Le fait reste naturellement visible dans le module
-Territoire existant, son espace légitime. La page décisionnelle n'a pas à expliquer tout ce qu'elle
-a choisi de ne pas sélectionner. Le moteur conserve seulement un **journal de diagnostic interne**
-(non rendu) pour prouver, par test, que le fait a bien été vu et écarté.
+`declaredHardConstraintKeys(project): HardConstraintKey[]` énumère les contraintes dures présentes
+dans `parsed.hardConstraints`. Le moteur collecte, parmi les règles portant un `hardConstraint`,
+celles dont l'évaluation n'est pas `not_applicable` : ce sont les contraintes **couvertes**.
 
-## 7. L'assembleur
+`uncovered = declaredHardConstraintKeys − coveredKeys`. Ces contraintes déclarées, qu'aucune règle du
+slice ne sait évaluer, sont **nommées** dans le dossier (`uncovered[]`) et la conclusion s'y réfère
+(« nous n'avons pas encore examiné, à ce grain : … »). Elles ne sont jamais avalées en silence.
 
-### 7.1 Les cinq sections canoniques
+En slice 1, seules `nearSea` (R1) et `communeSize` (R2) sont couvertes. Un projet déclarant
+`departements`, `zones`, `nearPlace`, `excludePlace`, `sizeRelativeTo`, `montagne`, `reliefProche`
+verra ces contraintes listées comme non couvertes. C'est le cœur de l'honnêteté du slice.
 
-1. `conclusion` — la conclusion conditionnelle (§7.3), à périmètre de preuve annoncé (§7.4).
-2. `incompatibilities` — contraintes non négociables contredites (rôle `incompatibility`).
-3. `compromises` — compromis structurants (rôle `compromise`).
-4. `unknowns` — inconnues (rôle `unknown`), distinguées `blocking` / `scoped` (§7.2).
-5. `verifications` — à vérifier avant de s'engager (rôle `verification`).
+## 7. Le registre (5 règles v2)
 
-Chaque élément renvoie au module ou à la preuve d'origine. Bornes par section (max 3 en slice 1,
-tri par force de preuve puis par poids de la priorité déclarée). Toute section peut rester vide.
+Chaque règle est une fixture de test. Toutes lisent des champs réels de l'index.
 
-### 7.2 Inconnues bloquantes vs scopées
+| # | ruleId | hardConstraint | Comportement |
+|---|--------|----------------|--------------|
+| 1 | `territoire.mer-hors-seuil` | `nearSea` | `nearSea{maxKm}` déclaré : `distanceCoteKm > maxKm` → `incompatible` (établie, tier `decision_critical`, `observedValue` = distance). Sinon `satisfied`. Donnée absente → `unknown` scoped. |
+| 2 | `territoire.taille-hors-seuil` | `communeSize` | `communeSize{min,max}` déclaré : `population` hors bornes → `incompatible` (établie, `decision_critical`, `observedValue` = population). Dans les bornes → `satisfied`. `population` null → `unknown` scoped. |
+| 3 | `territoire.compromis-transport-chaleur` | — | `acces_transports` ET `faible_chaleur` déclarés (poids ≥ 2), scores présents, l'un ≥ 60 et l'autre ≤ 40 → `compromise` (tier `structuring`, `sides[2]` chacun avec `observedValue` = son score, texte honnête sans « meilleure » ni « train »). Sinon `not_applicable`. |
+| 4 | `territoire.confort-ete-sans-adresse` | — | `faible_chaleur` déclaré (poids ≥ 2) ET `!hasAddress` → `unknown` **scoped** (tier `secondary`, action `renseigner_adresse`). Gate SUR LE GRAIN, pas sur l'intention d'achat. |
+| 5 | `territoire.inondation-exposition` | — | `faible_risque_inondation` déclaré (poids ≥ 2) ET `inondationRisque >= 66` → `verification` (tier `structuring`, action `obtenir_document` « consultez l'état des risques via Géorisques », `observedValue` = score ; le `catnat` sert de contexte avec sa période 1982→présent et sa limite « comptage administratif, pas une probabilité »). Sinon `not_applicable`/`uncertain`. |
 
-Une adresse manquante **ne fait pas** basculer la conclusion globale en « preuves insuffisantes ».
+Texte du compromis (R3), gravé : `sides = [ { acces_transports : "L'accès aux transports ressort
+favorablement à l'échelle de la commune." }, { faible_chaleur : "Votre priorité de faible exposition
+à la chaleur est moins bien satisfaite ici." } ]`. Chaque côté porte son `observedValue` (le score).
+Aucune comparaison à un référentiel externe (single-commune), l'arbitrage revient au lecteur.
 
-- `impact: 'scoped'` : la donnée manquante limite une dimension ou un grain. La conclusion reste
-  possible, assortie d'une réserve (« sous réserve d'une analyse du logement »).
-- `impact: 'blocking'` : la donnée manquante empêche de statuer sur **une contrainte dure
-  déterminante à l'échelle de la décision examinée**. Seul ce cas déclenche l'état global
-  `insufficient_evidence`.
+## 8. Invariants du moteur
 
-La règle 4 (absence d'adresse) émet `impact: 'scoped'` : elle ne bloque jamais seule la conclusion.
+`runRules(facts, project): { facts, evaluations }` appelle chaque règle, collecte faits + évaluations,
+calcule la couverture, puis **valide chaque fait** (`assertFactValid`). La validation JETTE (fail-fast,
+dev) si :
 
-### 7.3 Les cinq états de conclusion
+- une `incompatibility` a un `hardConstraintKey` absent des contraintes déclarées ;
+- un `compromise` a des `sides` dont un `projectKey` n'est pas une préférence déclarée, ou un côté
+  sans preuve ;
+- un fait a `evidence` vide ;
+- un `unknown` sans `impact` ;
+- une `verification` sans `action`.
 
-- `established_incompatibility` — au moins un fait `incompatibility` / `established`.
-- `compatible_with_reserves` — pas d'incompatibilité établie, mais des réserves (incompatibilités
-  `indicative`, inconnues `scoped`, ou vérifications) à examiner.
-- `no_incompatibility_with_compromise` — aucune incompatibilité, la décision se joue sur un
-  compromis nommé.
-- `no_hard_constraint_declared` — le projet ne déclare **aucune** contrainte non négociable. État
-  DISTINCT du précédent : « vous n'avez déclaré aucune contrainte non négociable ; les données ne
-  permettent donc pas d'identifier de point éliminatoire ; elles font toutefois ressortir… ».
-- `insufficient_evidence` — au moins une inconnue `blocking` sur une contrainte dure déterminante.
+Ces invariants remplacent la sonde non-matériel : ils protègent toutes les futures règles, pas un
+exemple artificiel. Un fait non pertinent ne remonte pas parce qu'aucune règle ne l'émet (le
+non-matériel reste dans le module Territoire) ; on ne fabrique aucune mécanique pour le « prouver ».
 
-Les deux vides restent séparés : projet sans contrainte dure (`no_hard_constraint_declared`) n'est
-jamais confondu avec données muettes (`insufficient_evidence`).
+## 9. L'assembleur
 
-### 7.4 Périmètre de preuve : la conclusion du slice 1 est explicitement communale
+### 9.1 États de conclusion (honnêtes)
 
-Tant qu'aucune adresse n'est connue, futur•e n'écrit jamais « ce lieu convient à votre projet »
-(« ce lieu » pourrait être compris comme le logement). La conclusion annonce son grain :
+- `project_not_structured` — `parsed === null` : on ne peut évaluer aucune contrainte. Conclusion :
+  invitation à préciser le projet, aucune section fabriquée.
+- `established_incompatibility` — au moins une `incompatibility` établie.
+- `insufficient_evidence` — au moins un `unknown` `blocking` sur une contrainte dure déterminante.
+- `no_hard_constraint_declared` — projet structuré, zéro contrainte dure déclarée.
+- `no_incompatibility_established` — des contraintes dures examinées, aucune contredite. La conclusion
+  se réfère AUX CONTRAINTES EXAMINÉES et nomme les non couvertes ; elle peut porter réserves,
+  compromis, inconnues scopées. Ne dit jamais « compatible » (cinq prédicats qui ne déclenchent pas
+  ne rendent pas compatible).
 
-> « À l'échelle de la commune, les données examinées indiquent que… »
-> « Cette commune paraît compatible avec votre projet sur les dimensions examinables à ce grain. »
+### 9.2 Hiérarchie plafonnée
 
-L'assembleur porte un `scope: 'commune' | 'commune+adresse'`. En slice 1.5, quand l'adresse est là,
-il distingue : conclusion à l'échelle de la commune / réserves propres à l'adresse et au bâtiment /
-divergences éventuelles entre profil communal et bien.
+`materialityTier` (posé par la règle) ordonne d'abord (`decision_critical` → `structuring` →
+`secondary`), la force de preuve départage ensuite. Caps de rendu : **2** incompatibilités, **3**
+compromis, **3** inconnues, **4** vérifications. Le reste demeure dans les modules. Sans plafond,
+« En une minute » redevient encyclopédique.
 
-## 8. Posture
+### 9.3 conclusionBasis
 
-Une seule structure ; titres et verbe d'engagement adaptés. Table `POSTURE_LABELS` par
-`ProjectPosture` :
+La conclusion porte ses `ruleIds`, `factIds` et `evidence` : elle est auditable comme n'importe quelle
+phrase de la page (résout la contradiction de la v1).
 
-- `recherche` / `adresse` / intent `achat` : section 5 « À vérifier avant de vous engager » ; verbe
-  « s'engager ».
-- `habitant` : conclusion reformulée « ce qu'il faut comprendre et surveiller » ; section 5 « ce
-  qu'il reste utile de vérifier ou de surveiller » ; verbe « décider de rester / d'adapter ».
-- `recherche_quartier` : réservée (payload non conçu, cf. clé de voûte) ; retombe sur les libellés
-  `recherche` via `rawText`.
+## 10. Posture
 
-Le moteur est le même ; seuls les libellés changent.
+`isBuyer(project) = project.intent === "achat"` (analyser une adresse n'est pas acheter). Les phrases
+sont posture-aware, produites par la règle (qui reçoit `project`) :
 
-## 9. La page
+- `recherche` / `adresse` / intent `achat` : « avant de vous engager » ; titre section 5 « À vérifier
+  avant de vous engager ».
+- `habitant` : conclusion et vérifications reformulées « ce que ces données invitent à comprendre ou
+  à surveiller » ; action « consultez l'état des risques applicable à votre adresse ». Jamais « avant
+  de vous engager » ni « décider de rester » (le cas habitant peut seulement chercher à comprendre).
+- `recherche_quartier` : réservée, retombe sur `recherche`.
 
-Composant serveur `DossierDecisionSection` (aucun JS client, aucun LLM). Sur `/rapport`
-(`src/app/(account)/rapport/page.tsx`), **payant uniquement** (`fullReport`), inséré **après**
-`ProjectSummaryCard` (ligne ~216) et **avant** la grille des six modules. Ordre du hub : Hero →
-HorizonBar → carte Projet → **Dossier de décision** → grille modules. Le rapport existant reste
-intégralement fonctionnel dessous.
+## 11. La page
 
-Rendu : la conclusion en tête, puis les quatre sections non vides, chaque fait en une ligne
-`constat + lien-preuve + limite éventuelle + action éventuelle`. Gabarits déterministes (pas de
-prose libre) : le `statement` vient du `resolve()` de la règle.
+Composant serveur `DossierDecisionSection`, présentationnel (aucun LLM, aucun `"use client"`). Sur
+`/rapport`, payant, inséré après `ProjectSummaryCard`, avant la grille des modules. **Ouverte à tous
+les payants** (pas de flag). Rendu : conclusion (avec sa base auditable) → sections non vides
+(plafonnées) → bloc « non encore examiné » listant `uncovered` → CTA « Affiner avec une adresse ».
 
-CTA en pied de dossier, décisionnel (pas un « complétez votre rapport » générique) :
+Cas creux (fréquent, vu par de vrais utilisateurs) : `no_hard_constraint_declared` ou peu de faits.
+La copie reste digne et honnête (elle dit ce qui a été examiné, ce qui reste à préciser, et propose
+l'adresse), jamais un « aucune contrainte » sec et arbitraire. `project_not_structured` invite à
+décrire le projet plutôt que d'afficher une conclusion fabriquée.
 
-> **Affiner avec une adresse** — Vérifiez le bâtiment, les risques localisés, les contraintes
-> réglementaires et l'environnement immédiat.
+## 12. Tests de doctrine (fixtures)
 
-Il pointe vers `/rapport/logement`. C'est l'amorce visible du slice 1.5.
+À entrées identiques : mêmes faits, mêmes évaluations, même couverture, même ordre, même état de
+conclusion, aucune phrase sans `ruleId` ni preuve, `assertFactValid` ne jette pas. Cas obligatoires :
+incompatibilité établie (mer, taille) ; `satisfied` qui alimente la couverture ; contrainte déclarée
+non couverte listée dans `uncovered` ; compromis à deux côtés prouvés ; inconnue scopée qui NE
+bascule PAS en `insufficient_evidence` ; inconnue bloquante qui le fait ; `no_hard_constraint_declared`
+vs `project_not_structured` vs `no_incompatibility_established` distincts ; caps de section respectés ;
+`isBuyer` faux pour posture `adresse` sans intent achat ; phrases habitant sans « vous engager ».
 
-## 10. Tests de doctrine (fixtures)
+## 13. Hors périmètre
 
-Le slice est fortement testable par fixtures (`node --test`, comme `logement-checklist.test.ts`).
-À entrées identiques (mêmes `ModuleFacts` + même `UserProject`) :
+IA de formulation (slice 2, fallback déterministe permanent) ; faits Logement (slice 1.5) ; annexe
+visible du non-matériel (jamais) ; comparaison multi-options (reste le Pack) ; deep-links vers l'ancre
+exacte d'un fait module (chantier Territoire ultérieur, `observedValue` porte la preuve d'ici là).
 
-- mêmes `DecisionFact` émis, même rôle, même ordre ;
-- même état de conclusion ;
-- aucune variation de formulation (déterministe) ;
-- **aucune phrase sans `ruleId` ni preuve correspondante** (invariant de test) ;
-- règle 6 : `facts` ne contient rien, `diagnostics` contient l'entrée du fait vu-et-écarté ;
-- règle 4 : l'inconnue est `scoped`, la conclusion n'est PAS `insufficient_evidence` ;
-- les deux vides (`no_hard_constraint_declared` vs `insufficient_evidence`) sont testés séparément.
+## 14. Fichiers
 
-`DiagnosticEntry = { ruleId: string; sourceFactId: string; decision: "emitted" | "skipped"; reason: string }`.
-Non rendu ; sérialisable pour les tests et un futur dashboard.
+Neufs : `src/lib/decision/{decision-fact,project-view,territory-facts,materiality-rules,decision-assembler}.ts`
++ tests. `src/components/report/DossierDecisionSection.tsx`.
+Touchés : `src/lib/comparateur-vie.ts` (export `subScore`), `src/app/(account)/rapport/page.tsx`.
+Vault : trois arbitrages (§2), le 4e (couverture déclarée) inclus dans l'arbitrage éliminatoire.
 
-## 11. Hors périmètre (explicitement)
+## 15. Critère de réussite
 
-- **L'IA de formulation** (slice 2) : reçoit les sections déjà résolues, peut seulement fusionner,
-  reformuler, fluidifier, adapter à la posture. Ne peut ni changer un rôle, ni inventer une
-  incompatibilité, ni masquer une inconnue, ni modifier une preuve. Le déterministe reste le
-  fallback permanent (jamais du travail jeté). Plomberie streaming / cache / artefact calquée sur
-  la synthèse Logement, au slice 2.
-- **Les faits Logement** (slice 1.5) : DPE, risques du bâti au point, patrimoine, autour immédiat.
-  Le gabarit de leurs règles existe déjà (`logement-checklist.ts`) et migrera dans le registre.
-- **Une annexe visible du non-matériel** : jamais (§6, règle 6).
-- **La comparaison multi-options** (« lequel des trois ») : reste le Pack Décision, surface
-  distincte. Le dossier porte toujours sur UN territoire actif × le projet.
-
-## 12. Fichiers
-
-Neufs :
-- `src/lib/decision/decision-fact.ts` (contrats + types)
-- `src/lib/decision/materiality-rules.ts` (registre + `runRules`)
-- `src/lib/decision/decision-assembler.ts` (`assembleDossier`)
-- `src/lib/decision/territory-facts.ts` (adaptateur INSEE → `ModuleFacts`)
-- `src/lib/decision/materiality-rules.test.ts` (les six fixtures)
-- `src/lib/decision/decision-assembler.test.ts` (états de conclusion, vides, blocking/scoped)
-- `src/components/report/DossierDecisionSection.tsx` (rendu déterministe)
-
-Touchés :
-- `src/app/(account)/rapport/page.tsx` (insertion payant, après `ProjectSummaryCard`)
-
-Vault (arbitrages, cette session) :
-- `docs/vault/arbitrages/dossier-decision-eliminatoire-contrainte-declaree.md` (arbitrage n°1)
-- `docs/vault/arbitrages/deterministe-selectionne-ia-formule.md` (arbitrage n°2)
-- `docs/vault/arbitrages/rapport-un-produit-semantique-par-posture.md` (arbitrage n°3)
-
-## 13. Critère de réussite du slice 1
-
-Sur trois `UserProject` réels contrastés (un `recherche` sans contrainte dure, un `achat` avec
-`nearSea`, un `habitant`) et trois communes réelles, le dossier généré :
-
-1. produit des sorties visiblement différentes d'un projet à l'autre (preuve de personnalisation) ;
-2. ne place jamais un fait dans le mauvais rôle ;
-3. annonce toujours son périmètre de preuve communal ;
-4. laisse honnêtement vides les sections sans matière ;
-5. chaque phrase est traçable à un `ruleId` et à une preuve.
-
-Le manque d'élégance temporaire (pas de prose IA) est ici un outil de contrôle : on prouve d'abord
-que futur•e pense juste, on lui apprend à mieux le dire au slice 2.
+Sur trois `UserProject` réels contrastés et trois communes réelles : dossiers visiblement différents ;
+aucun fait dans le mauvais rôle ; conclusion à périmètre communal explicite ; contraintes non couvertes
+nommées ; sections plafonnées ; chaque phrase traçable à un `ruleId` et une preuve avec `observedValue` ;
+`assertFactValid` vert ; le cas creux reste digne. On prouve d'abord que futur•e pense juste ET qu'elle
+sait dire ce qu'elle n'a pas examiné, on lui apprend à mieux le dire au slice 2.
