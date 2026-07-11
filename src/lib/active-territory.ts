@@ -1,4 +1,5 @@
 import "server-only";
+import { communeParent } from "./plm";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -136,17 +137,18 @@ export async function canAnalyzeCommune(
   insee: string | null | undefined,
 ): Promise<boolean> {
   if (!insee) return false;
+  // PLM : l'adresse est géocodée sur l'arrondissement (751xx), la commune stockée sur son code
+  // commune (75056). On compare au grain COMMUNE des deux côtés (cf. src/lib/plm.ts).
+  const target = communeParent(insee);
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("home_insee_code")
     .eq("user_id", userId)
     .maybeSingle();
-  if (profile?.home_insee_code === insee) return true;
-  const { data: grant } = await supabase
+  if (profile?.home_insee_code && communeParent(profile.home_insee_code) === target) return true;
+  const { data: grants } = await supabase
     .from("report_grants")
     .select("insee")
-    .eq("user_id", userId)
-    .eq("insee", insee)
-    .maybeSingle();
-  return Boolean(grant);
+    .eq("user_id", userId);
+  return (grants ?? []).some((g) => communeParent(g.insee as string) === target);
 }
