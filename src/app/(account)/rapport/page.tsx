@@ -11,6 +11,9 @@ import HorizonBar from "@/components/report/HorizonBar";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
 import { RapportPremiereLecture } from "@/components/wizard/RapportPremiereLecture";
 import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
+import { OuVivreProjectSync } from "@/components/OuVivreProjectSync";
+import { ProjectSummaryCard } from "@/components/report/ProjectSummaryCard";
+import { normalizeUserProject } from "@/lib/user-project";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 
 const MODULE_COLORS: Record<string, string> = {
@@ -46,7 +49,7 @@ export default async function RapportPage() {
   const { supabase, user } = await requireCurrentUser();
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select(`${TERRITORY_SELECT}, wizard_answers`)
+    .select(`${TERRITORY_SELECT}, wizard_answers, user_project`)
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -58,6 +61,7 @@ export default async function RapportPage() {
   const allModules = PRODUCT_MODULES;
   // Première lecture du compte gratuit : réponses du wizard persistées (point 2).
   const serverWizardAnswers = (profile?.wizard_answers ?? null) as WizardAnswers | null;
+  const userProject = normalizeUserProject((profile as { user_project?: unknown } | null)?.user_project ?? null);
 
   return (
     <div
@@ -76,6 +80,12 @@ export default async function RapportPage() {
         {/* Persiste les réponses du wizard (sessionStorage → profil) à la 1re
             page authentifiée, si elles ne sont pas déjà en base. */}
         <WizardAnswersSync hasServerAnswers={hasWizardContent(serverWizardAnswers)} />
+        <OuVivreProjectSync hasServerProject={Boolean((profile as { user_project?: unknown } | null)?.user_project)} />
+
+        {/* ── Votre projet : Section 1 « ce que nous avons compris », éditable ── */}
+        <div className="mt-6">
+          <ProjectSummaryCard initial={userProject} />
+        </div>
 
         {/* ── Bandeau territoire refusé (activé sans rapport débloqué) ── */}
         {territory.deniedInsee && (
