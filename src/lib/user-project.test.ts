@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { normalizeUserProject, mergeProjectEdit, type UserProject } from "./user-project.ts";
+import { normalizeUserProjectInput, normalizeUserProject, stampUserProject } from "./user-project.ts";
 
 const PARSED = { reformulation: "Vous cherchez une ville au calme, proche de la mer." } as never;
 
@@ -41,25 +41,31 @@ test("normalize : rawText absent -> null (rawText), reste valide", () => {
   assert.ok(out?.parsed);
 });
 
-test("merge : conserve posture/intent, réécrit rawText/parsed/updatedAt", () => {
-  const prev: UserProject = { posture: "adresse", intent: "achat", rawText: "vieux", parsed: null, updatedAt: "2026-01-01T00:00:00.000Z" };
-  const out = mergeProjectEdit(prev, { rawText: "neuf", parsed: PARSED });
-  assert.equal(out.posture, "adresse");
-  assert.equal(out.intent, "achat");
-  assert.equal(out.rawText, "neuf");
-  assert.ok(out.parsed);
-  assert.notEqual(out.updatedAt, prev.updatedAt);
+test("input : posture absente -> null (jamais de défaut)", () => {
+  assert.equal(normalizeUserProjectInput({ rawText: "x", parsed: null }), null);
 });
 
-test("merge : prev null -> projet posture recherche par défaut", () => {
-  const out = mergeProjectEdit(null, { rawText: "neuf", parsed: PARSED });
-  assert.equal(out.posture, "recherche");
-  assert.equal(out.rawText, "neuf");
+test("input : intent invalide -> rejet (jamais coercition)", () => {
+  assert.equal(normalizeUserProjectInput({ posture: "recherche", intent: "peut-etre", rawText: "x", parsed: null }), null);
 });
 
-test("merge : posture/intent explicites priment sur prev", () => {
-  const prev: UserProject = { posture: "recherche", rawText: "x", parsed: null, updatedAt: "z" };
-  const out = mergeProjectEdit(prev, { rawText: "y", parsed: null, posture: "adresse", intent: "location" });
-  assert.equal(out.posture, "adresse");
-  assert.equal(out.intent, "location");
+test("input : intent absent/null accepté", () => {
+  assert.equal(normalizeUserProjectInput({ posture: "recherche", rawText: "x", parsed: null })?.intent, null);
+});
+
+test("input : rawText seul persistable, parsed null", () => {
+  const out = normalizeUserProjectInput({ posture: "recherche", rawText: "au calme", parsed: null });
+  assert.equal(out?.rawText, "au calme");
+  assert.equal(out?.parsed, null);
+});
+
+test("stamp : le serveur pose schemaVersion et updatedAt", () => {
+  const out = stampUserProject({ posture: "recherche", intent: null, rawText: "x", parsed: null }, "2026-07-11T10:00:00.000Z");
+  assert.equal(out.schemaVersion, 1);
+  assert.equal(out.updatedAt, "2026-07-11T10:00:00.000Z");
+});
+
+test("read : updatedAt absent -> null (jamais 1970)", () => {
+  const out = normalizeUserProject({ posture: "recherche", rawText: "x", parsed: null });
+  assert.equal(out?.updatedAt, null);
 });

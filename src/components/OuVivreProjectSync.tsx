@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 // Pousse le projet libre de /ou-vivre (localStorage) vers le compte, une seule fois, si le serveur
-// n'en a pas encore. Monté sur /rapport. Sans rendu. Fire-and-forget : un échec laisse l'objet en
-// localStorage et retente à la prochaine visite. /ou-vivre est public : la persistance a lieu ici,
-// à la première page connectée, comme WizardAnswersSync.
+// n'en a pas encore. Monté sur /rapport. rawText survit même sans parsed. Après une écriture réussie,
+// on rafraîchit pour que la carte serveur reflète le projet sans rechargement manuel.
 const SESSION_KEY = "futuree:ouvivre:session";
 
 export function OuVivreProjectSync({ hasServerProject }: { hasServerProject: boolean }) {
   const done = useRef(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (done.current || hasServerProject) return;
@@ -20,25 +21,32 @@ export function OuVivreProjectSync({ hasServerProject }: { hasServerProject: boo
     } catch {
       payload = null;
     }
-    if (!payload?.parsed) return; // rien de riche à sauvegarder
+    const rawText =
+      typeof payload?.submittedText === "string" && payload.submittedText.trim()
+        ? payload.submittedText.trim()
+        : null;
+    if (!rawText && !payload?.parsed) return; // rien à sauvegarder
     done.current = true;
     fetch("/api/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         field: "user_project_if_empty",
-        value: {
-          posture: "recherche",
-          intent: null,
-          rawText: typeof payload.submittedText === "string" ? payload.submittedText : null,
-          parsed: payload.parsed,
-          updatedAt: new Date().toISOString(),
-        },
+        value: { posture: "recherche", intent: null, rawText, parsed: payload?.parsed ?? null },
       }),
-    }).catch(() => {
-      done.current = false; // retentera
-    });
-  }, [hasServerProject]);
+    })
+      .then(async (r) => {
+        if (!r.ok) {
+          done.current = false; // retentera
+          return;
+        }
+        const data = (await r.json().catch(() => null)) as { written?: boolean } | null;
+        if (data?.written) router.refresh(); // la carte serveur reprend le projet
+      })
+      .catch(() => {
+        done.current = false; // retentera
+      });
+  }, [hasServerProject, router]);
 
   return null;
 }

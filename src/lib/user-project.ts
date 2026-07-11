@@ -1,20 +1,22 @@
-// Projet de l'utilisateur, persisté au compte (colonne jsonb user_project sur user_profiles).
-// Lib PURE (pas server-only) : normalise ce qui vient du client ou de la base, son TYPE est lu
-// côté client par le hub. Ne devine jamais : un objet non conforme est rejeté (null), un `parsed`
-// malformé retombe sur null en conservant le `rawText` (le texte libre survit au parse, comme la
-// source DVF survit à sa version).
-
+// Projet de l'utilisateur, persisté au compte (colonne jsonb user_project). Lib PURE.
+// On sépare l'ENTRÉE client (UserProjectInput) du PERSISTÉ (UserProject, estampillé serveur avec
+// schemaVersion + updatedAt). Doctrine : on ne devine jamais (posture requise, intent invalide rejeté,
+// date absente -> null jamais inventée) ; rawText survit à un parse en échec.
 import type { ParsedProject } from "./comparateur-vie.ts";
 
 export type ProjectPosture = "recherche" | "adresse" | "habitant" | "recherche_quartier";
 export type ProjectIntent = "achat" | "location";
 
-export type UserProject = {
+export type UserProjectInput = {
   posture: ProjectPosture;
-  intent?: ProjectIntent | null;
+  intent: ProjectIntent | null;
   rawText: string | null;
   parsed: ParsedProject | null;
-  updatedAt: string;
+};
+
+export type UserProject = UserProjectInput & {
+  schemaVersion?: 1; // optionnel pour l'ergonomie de construction ; le serveur l'écrit toujours
+  updatedAt: string | null; // estampille serveur ; null = inconnue (jamais une date inventée)
 };
 
 const POSTURES: ProjectPosture[] = ["recherche", "adresse", "habitant", "recherche_quartier"];
@@ -29,29 +31,34 @@ function coerceParsed(v: unknown): ParsedProject | null {
   return null;
 }
 
-export function normalizeUserProject(raw: unknown): UserProject | null {
+// Validation de l'ENTRÉE client. posture requise (rejet), intent absent/null OK / présent-invalide
+// rejet, rawText absent/null OK / présent non-string rejet, parsed malformé -> null (rawText gardé).
+export function normalizeUserProjectInput(raw: unknown): UserProjectInput | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
   if (typeof r.posture !== "string" || !POSTURES.includes(r.posture as ProjectPosture)) return null;
-  const intent = typeof r.intent === "string" && INTENTS.includes(r.intent as ProjectIntent) ? (r.intent as ProjectIntent) : null;
-  return {
-    posture: r.posture as ProjectPosture,
-    intent,
-    rawText: typeof r.rawText === "string" ? r.rawText : null,
-    parsed: coerceParsed(r.parsed),
-    updatedAt: typeof r.updatedAt === "string" ? r.updatedAt : new Date(0).toISOString(),
-  };
+  let intent: ProjectIntent | null = null;
+  if (r.intent != null) {
+    if (typeof r.intent !== "string" || !INTENTS.includes(r.intent as ProjectIntent)) return null;
+    intent = r.intent as ProjectIntent;
+  }
+  let rawText: string | null = null;
+  if (r.rawText != null) {
+    if (typeof r.rawText !== "string") return null;
+    rawText = r.rawText;
+  }
+  return { posture: r.posture as ProjectPosture, intent, rawText, parsed: coerceParsed(r.parsed) };
 }
 
-export function mergeProjectEdit(
-  prev: UserProject | null,
-  next: { rawText: string; parsed: ParsedProject | null; posture?: ProjectPosture; intent?: ProjectIntent | null },
-): UserProject {
-  return {
-    posture: next.posture ?? prev?.posture ?? "recherche",
-    intent: next.intent ?? prev?.intent ?? null,
-    rawText: next.rawText,
-    parsed: coerceParsed(next.parsed),
-    updatedAt: new Date().toISOString(),
-  };
+// Estampille SERVEUR. Le temps vient de l'appelant (lib pure, testable).
+export function stampUserProject(input: UserProjectInput, now: string): UserProject {
+  return { ...input, schemaVersion: 1, updatedAt: now };
+}
+
+// Lecture DB, tolérante au legacy. schemaVersion -> 1. updatedAt absent -> null (jamais 1970).
+export function normalizeUserProject(raw: unknown): UserProject | null {
+  const input = normalizeUserProjectInput(raw);
+  if (!input) return null;
+  const r = raw as Record<string, unknown>;
+  return { ...input, schemaVersion: 1, updatedAt: typeof r.updatedAt === "string" ? r.updatedAt : null };
 }
