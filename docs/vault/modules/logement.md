@@ -139,6 +139,27 @@ buffer autour du point, la gravité en euros d'un aléa, la dette datée d'un DP
   mécanique. Mesure : 0/120 adresses dans un secteur (IC 0-3 %), 15 % à moins de 500 m. Demande une
   nuance de la frontière Logement/Santé (le fait réglementaire à l'adresse vit en Face 2,
   l'exposition du corps vit en Santé, le second renvoie au premier sans le répéter).
+- **Risques du bâti au grain POINT (cavités + mouvements de terrain) BRANCHÉ (2026-07-11).** La ligne
+  « Autres risques recensés à cette adresse : … » (libellés GASPAR **communaux**, sans niveau,
+  jugée « liste noire ») est remplacée. Vérifié avant conception (exigence porteur) : une source plus
+  fine que le flag communal existe pour 2 des 3 aléas résiduels. `/api/v1/cavites?latlon=` (cavités
+  géolocalisées BRGM) et `/api/v1/mvt?latlon=` (événements datés/localisés) sont appelés au point
+  (rayon 500 m), en parallèle. Preuve du grain : La Rochelle, commune signalée « mouvement de
+  terrain », a 0 événement dans 2 km ; Villerville 44. Cavités et MVT deviennent des **`Block`** dans
+  la grille « Risques du bâti » (à côté de sismicité/RGA), avec **icône au trait** (`IconCavity`,
+  `IconLandslide`) et **tooltip qui explique l'impact sur le LOGEMENT** (« cavité souterraine » est du
+  jargon ; la `value` porte le fait « N à moins de 500 m », le tooltip porte le sens). Lib pure testée
+  `src/lib/point-hazards.ts` (structuration rayon/distance/types + helpers `communalResidualFromLabels`
+  / `isMvtFlagged`), fetchers dans `georisques.ts`. **Réserves gravées** : `/mvt` = recensement
+  d'événements passés, jamais une susceptibilité ; source `null` (panne) distincte de `[]` (absence) ;
+  jamais « sous votre logement ». **Une seule règle** (simplifiée sur retour porteur 2026-07-11) :
+  événements géolocalisés au point → `Block` ; sinon flag communal (mouvement de terrain sans
+  événement, rupture de barrage…) → **phrase de résidu communal** discrète (« recensés sur de larges
+  périmètres, sans détail disponible à cette adresse »), jamais au même niveau que les faits au point.
+  Pas de phrase MVT dédiée. **L'inondation est retirée du résidu** (doublon : portée par le PPRN
+  « Statut réglementaire » + la sinistralité ONRN). Item de checklist « cavite » (4 buckets, texte
+  adapté). Statut réglementaire → re-fetché, jamais snapshoté. Spec :
+  `docs/superpowers/specs/2026-07-11-logement-risques-point-fin-design.md`.
 - **Face 2 (risques du bâti / matérialité) : PARTIELLEMENT BRANCHÉE (2026-07-03).** Le bloc
   « Ce que le risque a déjà coûté ici » affiche la **sinistralité ONRN** (coût moyen + fréquence
   des sinistres CatNat indemnisés 1995-2021) pour **sécheresse** ET **inondation** (tous types),

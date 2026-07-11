@@ -695,3 +695,29 @@ export async function getGasparCatnatSummary(inseeCode: string) {
     throw error;
   }
 }
+
+// --- Inventaires géolocalisés au point (Face 2 : risques du bâti au grain point) ---------------
+// v1 /cavites et /mvt renvoient { data: [...] } avec longitude/latitude par item. On les remonte
+// bruts ; la structuration (rayon, distance, types) vit dans la lib pure `point-hazards.ts`.
+// Erreur réseau -> `null` (source indisponible), JAMAIS `[]` (qui signifierait « rien dans le rayon »).
+type GeorisquesV1List<T> = { data?: T[] | null };
+
+async function fetchV1List<T>(pathname: string, latitude: number, longitude: number): Promise<T[] | null> {
+  try {
+    const json = await fetchJson<GeorisquesV1List<T>>(
+      pathname,
+      new URLSearchParams({ latlon: `${longitude},${latitude}`, rayon: "500", page_size: "100" }),
+    );
+    return json.data ?? [];
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchCavitesNearPoint(latitude: number, longitude: number): Promise<import("./point-hazards.ts").CaviteRaw[] | null> {
+  return fetchV1List<import("./point-hazards.ts").CaviteRaw>("/cavites", latitude, longitude);
+}
+
+export async function fetchMvtNearPoint(latitude: number, longitude: number): Promise<import("./point-hazards.ts").MvtRaw[] | null> {
+  return fetchV1List<import("./point-hazards.ts").MvtRaw>("/mvt", latitude, longitude);
+}

@@ -11,6 +11,7 @@ export type ChecklistFacts = {
   expositionBati: boolean; // RGA/argile à exposition notable
   zoneReglementee: boolean; // au moins un zonage PPRN au point
   sinistraliteActive: boolean; // un péril indemnisé lisible à l'échelle commune
+  caviteProche: boolean; // une cavité souterraine recensée à proximité du point
   perimetrePatrimonial: boolean; // AC1/AC2/AC4 au point : l'avis de l'ABF entre en jeu
 };
 
@@ -87,6 +88,16 @@ const RULES: {
       achat: "Demandez au vendeur l'état des risques et l'historique des sinistres du bien : la commune en a connu, sans que cela concerne forcément ce logement.",
       reside: "Conservez les déclarations de sinistres et d'indemnisation : elles documentent l'exposition réelle du bien, au-delà de la statistique communale.",
       location: "Demandez au bailleur l'état des risques et signalez tout sinistre survenu pendant la location.",
+    },
+  },
+  {
+    id: "cavite",
+    active: (f) => f.caviteProche,
+    text: {
+      neutre: "Se renseigner sur les cavités souterraines recensées à proximité et leur éventuel suivi.",
+      achat: "Faites vérifier la présence de cavités souterraines et l'état des fondations et du sol avant de vous engager.",
+      reside: "Surveillez tout signe d'affaissement ou de fissure : une cavité souterraine est recensée à proximité.",
+      location: "Signalez au bailleur tout affaissement ou fissure : une cavité souterraine est recensée à proximité.",
     },
   },
   {

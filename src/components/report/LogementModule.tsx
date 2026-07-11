@@ -17,7 +17,7 @@ import { dpeAttributionStatus, type DpeRecord } from "@/lib/dpe-attribution";
 import type { BanAddressResult } from "@/lib/ban";
 // Faces extraites (board étape 4 : une face = un fichier ; gabarit ThermalComfortSection).
 import { Block, FamilyHeading } from "@/components/report/logement/kit";
-import { IconSeismic, IconStrata } from "@/components/report/logement/icons";
+import { IconSeismic, IconStrata, IconCavity, IconLandslide } from "@/components/report/logement/icons";
 import { IcuExposure } from "@/components/report/logement/IcuExposure";
 import { POSTURE_FOR_PROJET } from "@/components/report/logement/posture";
 import { PropertyPassport } from "@/components/report/logement/PropertyPassport";
@@ -360,24 +360,10 @@ export default function LogementModule({
     communeData: result?.communeData,
   };
   const georisques = result?.georisques?.parcel ?? result?.georisques?.address;
-  // Autres risques recensés au POINT (via l'adresse : point-level fiable, cf. fix georisques v1),
-  // au-delà de la sismicité/RGA déjà affichés en gradé. On tient à distance :
-  //  - le DOUBLON GROSSIER : séisme, argile/tassements (déjà en Block gradé juste au-dessus) ;
-  //  - la FRONTIÈRE Santé/technologique : radon, industriel, effet thermique, matières dangereuses ;
-  //  - les SOUS-DÉTAILS « Par … » (le grand type suffit), sauf la submersion marine (relabellée).
-  const otherRisks = Array.from(new Set(
-    (result?.georisques?.address?.risks?.labels ?? [])
-      .map((l): string | null => {
-        if (/s[ée]ism|argile|tassement|radon|industriel|effet thermique|mati[èe]res dangereuses|nucl[ée]aire|transport de/i.test(l)) return null;
-        if (/submersion marine/i.test(l)) return "Submersion marine";
-        if (/^par\s/i.test(l)) return null;
-        if (/affaissement|carri[èe]re souterraine/i.test(l)) return "Cavités souterraines";
-        return l;
-      })
-      .filter((l): l is string => Boolean(l)),
-  ));
-  // Les libellés PPRN ne sont plus aplatis ici : ils sont portés, structurés (régime + zone +
-  // plan), par le bloc « Statut réglementaire à cette adresse ». On garde les autres risques.
+  // Les risques du bâti au grain point (cavités, mouvements de terrain) et le résidu communal sont
+  // désormais structurés côté serveur (`pointHazards`), plus l'ancienne ligne « autres risques »
+  // aplatie ici. Les libellés PPRN sont portés par « Statut réglementaire à cette adresse ».
+  const pointHazards = result?.pointHazards ?? null;
   // Faits normalisés pour la checklist « À vérifier » (beat 5). expositionBati gate sur une
   // exposition RGA notable (moyen/fort) pour ne pas se déclencher partout.
   const sini = result?.sinistralite ?? null;
@@ -389,6 +375,7 @@ export default function LogementModule({
     sinistraliteActive:
       sini != null &&
       [sini.secheresse.kind, sini.inondation.kind].some((k) => k === "lecture" || k === "faible_repr"),
+    caviteProche: (pointHazards?.cavites?.count ?? 0) > 0,
     perimetrePatrimonial: (result?.heritage?.items?.length ?? 0) > 0,
   };
 
@@ -552,23 +539,31 @@ export default function LogementModule({
             <FamilyHeading color="var(--blue)">Ce à quoi cette adresse est exposée</FamilyHeading>
 
             {/* Risques du bâti — registre sobre (dé-dramatisé). Sismicité/RGA en gradé (couleur de
-                famille bleue), + autres risques recensés, + îlot de chaleur (déplacé de l'Autour). */}
-            {(georisques?.seismic?.label || georisques?.rga?.label || otherRisks.length > 0 || autour?.icu) && (
+                famille bleue), + cavités/mouvements de terrain au grain point, + résidu communal,
+                + îlot de chaleur (déplacé de l'Autour). */}
+            {(georisques?.seismic?.label || georisques?.rga?.label || pointHazards?.cavites || pointHazards?.mvt || (pointHazards?.communalResidual?.length ?? 0) > 0 || autour?.icu) && (
               <ReportSection eyebrow="Risques du bâti">
                 <GlassCard>
                   <div style={{ display: "grid", gap: 16 }}>
                     <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>
                       Ce que les bases publiques recensent sur l&apos;exposition du bâti à cette adresse.
                     </p>
-                    {(georisques?.seismic?.label || georisques?.rga?.label) && (
+                    {(georisques?.seismic?.label || georisques?.rga?.label || pointHazards?.cavites || (pointHazards?.mvt?.kind === "events")) && (
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px,1fr))", gap: 14 }}>
                         {georisques?.seismic?.label && <Block label="Sismicité" value={seismicValue(georisques.seismic.label, georisques.seismic.code)} icon={<span style={{ color: "var(--blue)" }}><IconSeismic /></span>} tip="Le classement réglementaire du risque sismique de la zone, de très faible à fort. Il indique le niveau de précaution attendu pour construire, pas qu'un séisme va survenir." />}
                         {georisques?.rga?.label && <Block label="Retrait-gonflement des argiles" value={georisques.rga.label} icon={<span style={{ color: "var(--blue)" }}><IconStrata /></span>} tip="Un sol argileux qui gonfle avec l'humidité puis se rétracte en période sèche ; ces mouvements répétés peuvent fissurer les murs et les fondations." />}
+                        {pointHazards?.cavites && <Block label="Cavités souterraines" value={`${pointHazards.cavites.count} à moins de 500 m`} icon={<span style={{ color: "var(--blue)" }}><IconCavity /></span>} tip="Un vide dans le sous-sol, comme une ancienne carrière ou galerie, peut fragiliser les fondations et provoquer un affaissement. À proximité, il justifie une étude de sol avant d'engager des travaux." />}
+                        {pointHazards?.mvt?.kind === "events" && <Block label="Mouvements de terrain" value={`${pointHazards.mvt.count} à moins de 500 m`} icon={<span style={{ color: "var(--blue)" }}><IconLandslide /></span>} tip="Glissements, chutes de blocs ou effondrements déjà survenus tout près : ils signalent un terrain qui a bougé, ce qui peut affecter la stabilité du bâti." />}
                       </div>
                     )}
-                    {otherRisks.length > 0 && (
+                    {(pointHazards?.communalResidual?.length ?? 0) > 0 && (
                       <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
-                        Autres risques recensés à cette adresse : {otherRisks.map((l) => l.toLowerCase()).join(", ")}.
+                        La commune est aussi recensée pour d&apos;autres aléas pouvant concerner le logement ({pointHazards!.communalResidual.map((l) => l.toLowerCase()).join(", ")}), sur de larges périmètres et sans détail disponible à cette adresse.
+                      </p>
+                    )}
+                    {(pointHazards?.cavites || pointHazards?.mvt?.kind === "events") && (
+                      <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>
+                        Cavités et mouvements de terrain recensés par le BRGM via Géorisques.
                       </p>
                     )}
                     {autour?.icu && (
