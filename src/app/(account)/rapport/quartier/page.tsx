@@ -16,7 +16,6 @@ import { ModuleTracker } from "@/components/ModuleTracker";
 import { deriveQuartierSources, buildFallbackSummary } from "@/lib/quartier-signals";
 import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
 import { AskFutureInlineMount } from "@/components/AskFutureInlineMount";
-import { FilWaitlistBlock } from "@/components/report/FilWaitlistBlock";
 import { TerritoryYearsBand } from "@/components/report/TerritoryYearsBand";
 import { deriveTerritoryMood } from "@/lib/territory-mood";
 import { getTerritoryContext } from "@/lib/comparateur-vie";
@@ -230,9 +229,6 @@ export default async function RapportQuartierPage() {
             <span className="text-[16px] leading-none">→</span>
           </Link>
         </div>
-
-        {/* Vision long terme : une fois la lecture terminée, rester informé */}
-        <FilWaitlistBlock commune={communeName} inseeCode={inseeCode} moduleId="quartier" />
 
         {/* Sortie propre */}
         <div className="mt-14">

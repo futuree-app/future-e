@@ -82,11 +82,6 @@ export default async function RapportPage() {
         <WizardAnswersSync hasServerAnswers={hasWizardContent(serverWizardAnswers)} />
         <OuVivreProjectSync hasServerProject={Boolean((profile as { user_project?: unknown } | null)?.user_project)} />
 
-        {/* ── Votre projet : Section 1 « ce que nous avons compris », éditable ── */}
-        <div className="mt-6">
-          <ProjectSummaryCard initial={userProject} />
-        </div>
-
         {/* ── Bandeau territoire refusé (activé sans rapport débloqué) ── */}
         {territory.deniedInsee && (
           <div
@@ -214,6 +209,11 @@ export default async function RapportPage() {
             locked={!fullReport}
             inseeCode={inseeCode}
           />
+        </div>
+
+        {/* ── Votre projet : Section 1 « ce que nous avons compris », éditable ── */}
+        <div className="mt-12">
+          <ProjectSummaryCard initial={userProject} />
         </div>
 
         <div className="border-t border-white/[0.08] mt-14" />
