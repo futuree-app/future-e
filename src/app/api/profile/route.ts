@@ -12,6 +12,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import type { WizardAnswers } from "@/components/wizard/types";
+import { normalizeUserProject } from "@/lib/user-project";
 
 // Normalise un objet réponses-wizard reçu du client vers la forme WizardAnswers
 // stricte (cf. src/components/wizard/types.ts). Tout champ invalide retombe sur
@@ -130,6 +131,49 @@ export async function PATCH(request: NextRequest) {
         return NextResponse.json({ error: "Erreur de sauvegarde." }, { status: 500 });
       }
       return NextResponse.json({ success: true });
+    }
+
+    // Projet de l'utilisateur : édition explicite (écrase) depuis /rapport.
+    if (field === "user_project") {
+      const normalized = normalizeUserProject(body.value);
+      if (!normalized) {
+        return NextResponse.json({ error: "Projet invalide." }, { status: 400 });
+      }
+      const { error } = await supabase
+        .from("user_profiles")
+        .update({ user_project: normalized, updated_at: new Date().toISOString() })
+        .eq("user_id", user.id);
+      if (error) {
+        console.error("[profile] PATCH user_project error:", error);
+        return NextResponse.json({ error: "Erreur de sauvegarde." }, { status: 500 });
+      }
+      return NextResponse.json({ success: true });
+    }
+
+    // Projet de l'utilisateur : amorçage depuis /ou-vivre, n'écrit QUE si aucun projet en base
+    // (ne jamais écraser un projet déjà édité). Retourne `written` pour l'observabilité.
+    if (field === "user_project_if_empty") {
+      const normalized = normalizeUserProject(body.value);
+      if (!normalized) {
+        return NextResponse.json({ error: "Projet invalide." }, { status: 400 });
+      }
+      const { data: existing } = await supabase
+        .from("user_profiles")
+        .select("user_project")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (existing?.user_project) {
+        return NextResponse.json({ success: true, written: false });
+      }
+      const { error } = await supabase
+        .from("user_profiles")
+        .update({ user_project: normalized, updated_at: new Date().toISOString() })
+        .eq("user_id", user.id);
+      if (error) {
+        console.error("[profile] PATCH user_project_if_empty error:", error);
+        return NextResponse.json({ error: "Erreur de sauvegarde." }, { status: 500 });
+      }
+      return NextResponse.json({ success: true, written: true });
     }
 
     // Cas spécial : mise à jour de la commune (deux champs atomiques).
