@@ -557,7 +557,7 @@ export default function LogementModule({
                     )}
                     {(pointHazards?.communalResidual?.length ?? 0) > 0 && (
                       <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
-                        À l&apos;échelle de la commune, d&apos;autres aléas sont recensés sur de larges périmètres ({pointHazards!.communalResidual.map((l) => l.toLowerCase()).join(", ")}), sans détail disponible à cette adresse.
+                        La commune est aussi recensée pour d&apos;autres aléas pouvant concerner le logement ({pointHazards!.communalResidual.map((l) => l.toLowerCase()).join(", ")}), sur de larges périmètres et sans détail disponible à cette adresse.
                       </p>
                     )}
                     {(pointHazards?.cavites || pointHazards?.mvt?.kind === "events") && (

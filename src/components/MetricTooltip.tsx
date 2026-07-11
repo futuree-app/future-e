@@ -53,7 +53,12 @@ export function MetricTooltip({ text, accent }: { text: string; accent?: string 
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
       >
-        ⓘ
+        {/* « i » dessiné, centré dans le cercle du bouton. Le glyphe ⓘ portait son propre cercle,
+            superposé au cercle CSS et légèrement décentré : artefact visible retiré. */}
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" aria-hidden>
+          <circle cx="6" cy="2.7" r="1.05" />
+          <rect x="5.05" y="4.7" width="1.9" height="4.8" rx="0.95" />
+        </svg>
       </button>
       {open && (
         <span role="tooltip" id={id} className="metric-tip-bubble">

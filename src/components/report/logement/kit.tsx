@@ -32,10 +32,12 @@ export function DpeBadge({ label, size = "md" }: { label: string | null; size?: 
 export function Block({ label, value, sub, icon, tip }: { label: string; value: React.ReactNode; sub?: string; icon?: React.ReactNode; tip?: string }) {
   return (
     <div style={{ display: "grid", gap: 3 }}>
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" }}>
-        {icon}
-        {label}
-        {tip && <MetricTooltip text={tip} />}
+      {/* Flux INLINE (pas flex) : quand le libellé passe sur deux lignes, la tooltip suit le dernier
+          mot avec un écart constant, au lieu d'être repoussée au bord droit de la cellule. */}
+      <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", lineHeight: 1.5, textTransform: "uppercase", color: "var(--fg-4)" }}>
+        {icon && <span style={{ display: "inline-flex", verticalAlign: "middle", marginRight: 6 }}>{icon}</span>}
+        <span style={{ verticalAlign: "middle" }}>{label}</span>
+        {tip && <span style={{ display: "inline-flex", verticalAlign: "middle", marginLeft: 6 }}><MetricTooltip text={tip} /></span>}
       </span>
       <span style={{ fontSize: 16, fontWeight: 500, color: "var(--fg-1)" }}>{value}</span>
       {sub && <span style={{ fontSize: 12, color: "var(--fg-4)" }}>{sub}</span>}
