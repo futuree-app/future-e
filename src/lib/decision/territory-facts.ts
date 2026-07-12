@@ -20,10 +20,16 @@ export async function loadModuleFacts(insee: string, opts: { hasAddress: boolean
   return entry ? buildModuleFacts(entry, opts) : null;
 }
 
-// Orchestrateur du hub : commune -> ModuleFacts -> règles -> assemblage. Slice 1 : hasAddress false,
-// scope "commune". parsed null est géré par l'assembleur (état project_not_structured).
-export async function buildCommuneDossier(insee: string, project: UserProject): Promise<Dossier | null> {
-  const facts = await loadModuleFacts(insee, { hasAddress: false });
+// Orchestrateur du hub : commune -> ModuleFacts -> règles -> assemblage. `hasAddress` reflète la
+// présence d'une analyse logement déjà sauvegardée pour cette commune (l'appelant le détermine) :
+// il coupe la règle « confort sans adresse ». Le scope reste "commune" tant que le slice 1.5 (faits
+// Logement) n'est pas branché. parsed null est géré par l'assembleur (project_not_structured).
+export async function buildCommuneDossier(
+  insee: string,
+  project: UserProject,
+  opts?: { hasAddress?: boolean },
+): Promise<Dossier | null> {
+  const facts = await loadModuleFacts(insee, { hasAddress: opts?.hasAddress ?? false });
   if (!facts) return null;
   return assembleDossier(runRules(facts, project), project, "commune");
 }

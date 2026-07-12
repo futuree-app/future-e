@@ -16,6 +16,7 @@ import { ProjectSummaryCard } from "@/components/report/ProjectSummaryCard";
 import { normalizeUserProject } from "@/lib/user-project";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
+import { getLatestLogement } from "@/lib/logement-store";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 
 const MODULE_COLORS: Record<string, string> = {
@@ -67,10 +68,17 @@ export default async function RapportPage() {
 
   // Dossier de décision (« En une minute ») : payant, commune connue, projet présent. Ouvert à tous
   // les payants (pas de flag) ; le cas creux reste digne (conclusion honnête + contraintes non couvertes).
+  // Une analyse logement déjà sauvegardée pour CETTE commune = adresse renseignée : on coupe la règle
+  // « confort sans adresse » et le CTA renvoie vers l'analyse, plutôt que d'inviter à saisir une adresse.
+  const latestLogement = fullReport && inseeCode ? await getLatestLogement(supabase, user.id) : null;
+  const logementForCommune = latestLogement && latestLogement.insee === inseeCode ? latestLogement : null;
   const dossier =
     fullReport && inseeCode && userProject
-      ? await buildCommuneDossier(inseeCode, userProject)
+      ? await buildCommuneDossier(inseeCode, userProject, { hasAddress: Boolean(logementForCommune) })
       : null;
+  const dossierLogementLink = logementForCommune
+    ? { href: `/rapport/logement?logementId=${encodeURIComponent(logementForCommune.logement_id)}`, label: logementForCommune.address_label }
+    : null;
 
   return (
     <div
@@ -226,7 +234,7 @@ export default async function RapportPage() {
         </div>
 
         {/* ── En une minute : le dossier de décision (payant, grain commune) ── */}
-        {dossier ? <DossierDecisionSection dossier={dossier} /> : null}
+        {dossier ? <DossierDecisionSection dossier={dossier} logement={dossierLogementLink} /> : null}
 
         <div className="border-t border-white/[0.08] mt-14" />
 

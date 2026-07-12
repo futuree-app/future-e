@@ -72,7 +72,14 @@ function FactBody({ fact }: { fact: DecisionFact }) {
   );
 }
 
-export function DossierDecisionSection({ dossier }: { dossier: Dossier }) {
+export function DossierDecisionSection({
+  dossier,
+  logement,
+}: {
+  dossier: Dossier;
+  // Analyse logement déjà sauvegardée pour cette commune (adresse renseignée), ou null.
+  logement?: { href: string; label: string } | null;
+}) {
   const structured = dossier.conclusionState !== "project_not_structured";
   const state = STATE_META[dossier.conclusionState];
 
@@ -127,16 +134,29 @@ export function DossierDecisionSection({ dossier }: { dossier: Dossier }) {
       ) : null}
 
       {structured ? (
-        <Link
-          href="/rapport/logement"
-          className="mt-5 group flex items-center justify-between gap-4 px-6 py-4 rounded-xl no-underline border border-white/[0.1] bg-white/[0.02] hover:border-accent/40 hover:bg-white/[0.04] transition-colors"
-        >
-          <span className="flex flex-col gap-1">
-            <span className="text-[14px] font-semibold text-label">Affiner avec une adresse</span>
-            <span className="text-[13px] text-muted">Le bâtiment, les risques localisés, les contraintes réglementaires et l&apos;environnement immédiat.</span>
-          </span>
-          <span aria-hidden className="font-mono text-[13px] text-accent transition-transform group-hover:translate-x-0.5">→</span>
-        </Link>
+        logement ? (
+          <Link
+            href={logement.href}
+            className="mt-5 group flex items-center justify-between gap-4 px-6 py-4 rounded-xl no-underline border border-white/[0.1] bg-white/[0.02] hover:border-accent/40 hover:bg-white/[0.04] transition-colors"
+          >
+            <span className="flex flex-col gap-1">
+              <span className="text-[14px] font-semibold text-label">Voir l&apos;analyse du logement</span>
+              <span className="text-[13px] text-muted">{logement.label}</span>
+            </span>
+            <span aria-hidden className="font-mono text-[13px] text-accent transition-transform group-hover:translate-x-0.5">→</span>
+          </Link>
+        ) : (
+          <Link
+            href="/rapport/logement"
+            className="mt-5 group flex items-center justify-between gap-4 px-6 py-4 rounded-xl no-underline border border-white/[0.1] bg-white/[0.02] hover:border-accent/40 hover:bg-white/[0.04] transition-colors"
+          >
+            <span className="flex flex-col gap-1">
+              <span className="text-[14px] font-semibold text-label">Affiner avec une adresse</span>
+              <span className="text-[13px] text-muted">Le bâtiment, les risques localisés, les contraintes réglementaires et l&apos;environnement immédiat.</span>
+            </span>
+            <span aria-hidden className="font-mono text-[13px] text-accent transition-transform group-hover:translate-x-0.5">→</span>
+          </Link>
+        )
       ) : null}
     </section>
   );
