@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { UserProject, ProjectPosture } from "@/lib/user-project";
 
 const POSTURE_OPTIONS: { value: ProjectPosture; label: string }[] = [
@@ -19,6 +20,7 @@ export function ProjectSummaryCard({ initial }: { initial: UserProject | null })
   const [posture, setPosture] = useState<ProjectPosture | null>(initial?.posture ?? null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   async function save() {
     const raw = text.trim();
@@ -62,6 +64,7 @@ export function ProjectSummaryCard({ initial }: { initial: UserProject | null })
       }
       setProject(data.project); // uniquement le projet confirmé par le serveur
       setEditing(false);
+      router.refresh(); // régénère le dossier de décision (rendu serveur) avec le projet à jour
     } catch {
       setError("Enregistrement impossible pour le moment. Réessayez.");
       setBusy(false);
