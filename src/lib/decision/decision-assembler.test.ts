@@ -69,3 +69,13 @@ test("conclusionBasis porte ruleIds et preuves", () => {
   assert.ok(d.conclusionBasis.ruleIds.length >= 1);
   assert.ok(d.conclusionBasis.evidence.length >= 1);
 });
+
+test("scope commune+adresse : conclusion préfixée « commune et de l'adresse »", () => {
+  const d = assembleDossier(run([verif()], ["nearSea"]), project(WITH_HC), "commune+adresse");
+  assert.match(d.conclusion, /commune et de l'adresse/i);
+});
+
+test("titre vérifications non-habitant : « À examiner avant de vous engager »", () => {
+  const d = assembleDossier(run([verif()]), project(NO_HC), "commune");
+  assert.match(d.sections.find((s) => s.key === "verifications")!.title, /à examiner/i);
+});

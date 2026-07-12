@@ -10,7 +10,7 @@ function labels(project: UserProject): { engage: string; verifTitle: string } {
   if (project.posture === "habitant") {
     return { engage: "comprendre et surveiller", verifTitle: "Ce que ces données invitent à comprendre ou surveiller" };
   }
-  return { engage: "vous engager", verifTitle: "À vérifier avant de vous engager" };
+  return { engage: "vous engager", verifTitle: "À examiner avant de vous engager" };
 }
 
 const TIER_RANK: Record<MaterialityTier, number> = { decision_critical: 0, structuring: 1, secondary: 2 };
@@ -34,8 +34,8 @@ function examinedClause(uncovered: { label: string }[]): string {
   return uncovered.length === 0 ? "" : ` Nous n'avons pas encore examiné, à ce grain : ${uncovered.map((u) => u.label).join(", ")}.`;
 }
 
-function conclusionText(state: ConclusionState, facts: DecisionFact[], project: UserProject, uncovered: { label: string }[]): string {
-  const scope = "À l'échelle de la commune,";
+function conclusionText(state: ConclusionState, facts: DecisionFact[], project: UserProject, uncovered: { label: string }[], dossierScope: "commune" | "commune+adresse"): string {
+  const scope = dossierScope === "commune+adresse" ? "À l'échelle de la commune et de l'adresse," : "À l'échelle de la commune,";
   const l = labels(project);
   switch (state) {
     case "project_not_structured":
@@ -77,7 +77,7 @@ export function assembleDossier(run: RunResult, project: UserProject, scope: "co
   return {
     scope,
     conclusionState: state,
-    conclusion: conclusionText(state, facts, project, uncovered),
+    conclusion: conclusionText(state, facts, project, uncovered, scope),
     conclusionBasis: {
       ruleIds: [...new Set(shown.map((f) => f.ruleId))],
       factIds: shown.map((f) => f.id),
