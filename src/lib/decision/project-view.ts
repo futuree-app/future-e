@@ -2,6 +2,7 @@
 import type { UserProject } from "../user-project.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { HardConstraintKey, UncoveredConstraint } from "./decision-fact.ts";
+import { PREFERENCE_LABELS, COVERED_PREFERENCE_KEYS } from "./preference-labels.ts";
 
 export function isStructured(project: UserProject): boolean {
   return project.parsed != null;
@@ -66,4 +67,13 @@ export function uncoveredConstraints(project: UserProject, covered: HardConstrai
   return declaredHardConstraintKeys(project)
     .filter((k) => !cov.has(k))
     .map((k) => ({ key: k, label: HARD_CONSTRAINT_LABELS[k] }));
+}
+
+// Priorités DÉCLARÉES qu'aucune règle du slice ne traduit encore en point de décision. Nommées
+// dans le dossier pour que le lecteur voie que son projet a été lu, même quand rien ne remonte.
+export function uncoveredPreferences(project: UserProject): { key: PreferenceKey; label: string }[] {
+  const cov = new Set(COVERED_PREFERENCE_KEYS);
+  return declaredPreferenceKeys(project)
+    .filter((k) => !cov.has(k))
+    .map((k) => ({ key: k, label: PREFERENCE_LABELS[k] }));
 }

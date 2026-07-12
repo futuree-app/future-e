@@ -4,7 +4,7 @@ import type {
   DecisionFact, Dossier, DossierSection, ConclusionState, RunResult, EvidenceRef, MaterialityTier,
 } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
-import { hasAnyHardConstraint, isStructured, uncoveredConstraints } from "./project-view.ts";
+import { hasAnyHardConstraint, isStructured, uncoveredConstraints, uncoveredPreferences } from "./project-view.ts";
 
 function labels(project: UserProject): { engage: string; verifTitle: string } {
   if (project.posture === "habitant") {
@@ -47,7 +47,7 @@ function conclusionText(state: ConclusionState, facts: DecisionFact[], project: 
     case "insufficient_evidence":
       return `${scope} nous ne pouvons pas conclure honnêtement : une donnée déterminante pour votre projet manque.`;
     case "no_hard_constraint_declared":
-      return `Vous n'avez déclaré aucune contrainte non négociable. ${scope} les données examinées ne font ressortir aucun point éliminatoire pour votre projet.${examinedClause(uncovered)}`;
+      return `Vous n'avez posé aucune condition non négociable, donc rien ne disqualifie ce lieu d'emblée. ${scope} les données examinées ne font ressortir aucun point éliminatoire pour votre projet.${examinedClause(uncovered)}`;
     case "no_incompatibility_established": {
       const nReserves = facts.filter((x) => x.role === "verification" || x.role === "compromise" || x.role === "unknown").length;
       const base = `${scope} sur les contraintes que nous savons examiner, aucune n'est contredite.`;
@@ -64,6 +64,7 @@ function factEvidence(f: DecisionFact): EvidenceRef[] {
 export function assembleDossier(run: RunResult, project: UserProject, scope: "commune" | "commune+adresse"): Dossier {
   const { facts, coveredHardConstraints } = run;
   const uncovered = uncoveredConstraints(project, coveredHardConstraints);
+  const uncoveredPriorities = uncoveredPreferences(project);
   const state = conclusionState(facts, project);
   const l = labels(project);
   const candidates: DossierSection[] = [
@@ -85,5 +86,6 @@ export function assembleDossier(run: RunResult, project: UserProject, scope: "co
     },
     sections,
     uncovered,
+    uncoveredPriorities,
   };
 }

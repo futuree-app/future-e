@@ -100,7 +100,7 @@ export function DossierDecisionSection({
         <p className="font-mono text-[10px] tracking-[0.14em] uppercase mb-2.5" style={{ color: state.color }}>
           {state.label}
         </p>
-        <p className="text-[18px] leading-[1.6] text-label max-w-[760px]">{dossier.conclusion}</p>
+        <p className="text-[18px] leading-[1.6] text-label">{dossier.conclusion}</p>
       </div>
 
       {/* Les raisons, dans l'idiome des cartes-modules (filet accent en tête) */}
@@ -130,6 +130,15 @@ export function DossierDecisionSection({
         <div className="mt-4 flex items-baseline gap-2.5 flex-wrap">
           <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-ghost shrink-0">Non encore examiné</span>
           <span className="text-[13px] text-muted">{dossier.uncovered.map((u) => u.label).join(", ")}.</span>
+        </div>
+      ) : null}
+
+      {dossier.uncoveredPriorities.length > 0 ? (
+        <div className="mt-3 flex items-baseline gap-2.5 flex-wrap">
+          <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-ghost shrink-0">Vos priorités</span>
+          <span className="text-[13px] text-muted">
+            {dossier.uncoveredPriorities.map((p) => p.label).join(", ")} : notées, pas encore traduites en points de décision dans ce résumé.
+          </span>
         </div>
       ) : null}
 

@@ -88,7 +88,7 @@ export function ProjectSummaryCard({ initial }: { initial: UserProject | null })
     return (
       <div className="glass rounded-2xl p-7">
         <Eyebrow />
-        <p className="text-[17px] leading-[1.65] text-label max-w-[680px]">{reformulation}</p>
+        <p className="text-[17px] leading-[1.65] text-label">{reformulation}</p>
         <button
           type="button"
           onClick={() => { setText(project.rawText ?? ""); setPosture(project.posture); setError(null); setEditing(true); }}
@@ -106,7 +106,7 @@ export function ProjectSummaryCard({ initial }: { initial: UserProject | null })
     return (
       <div className="glass rounded-2xl p-7">
         <Eyebrow />
-        <p className="text-[16px] leading-[1.65] text-muted max-w-[560px] mb-5">
+        <p className="text-[16px] leading-[1.65] text-muted mb-5">
           Décrivez votre projet pour une lecture qui parle de votre situation, pas d&apos;une commune en général.
         </p>
         <button
