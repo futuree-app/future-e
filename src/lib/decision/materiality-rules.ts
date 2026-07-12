@@ -8,6 +8,7 @@ import type {
 } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import { nearSeaLimitKm, communeSizeBounds, declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } from "./project-view.ts";
+import { LOGEMENT_RULES } from "./logement-rules.ts";
 
 // Formatage déterministe des milliers (espace ASCII, jamais toLocaleString qui varie).
 function fmt(n: number): string {
@@ -156,10 +157,14 @@ const ruleInondation: DecisionRule = {
   },
 };
 
-export const REGISTRY: DecisionRule[] = [ruleMer, ruleTaille, ruleCompromis, ruleConfort, ruleInondation];
+export const REGISTRY: DecisionRule[] = [ruleMer, ruleTaille, ruleCompromis, ruleConfort, ruleInondation, ...LOGEMENT_RULES];
 
 // Invariants : protègent toutes les futures règles. JETTE (fail-fast) en cas de violation.
 export function assertFactValid(fact: DecisionFact, project: UserProject): void {
+  // Arbitrage slice 1.5 : une règle Logement ne peut pas émettre incompatibility.
+  if (fact.ruleId.startsWith("logement.") && fact.role === "incompatibility") {
+    throw new Error(`[decision] ${fact.ruleId}: une règle Logement ne peut pas émettre incompatibility (arbitrage slice 1.5)`);
+  }
   switch (fact.role) {
     case "incompatibility":
       if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);
