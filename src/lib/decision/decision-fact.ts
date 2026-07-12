@@ -13,6 +13,8 @@ export type HardConstraintKey =
   | "departements" | "zones" | "excludeZones" | "montagne" | "reliefProche"
   | "nearSea" | "excludeSea" | "nearPlace" | "communeSize" | "excludePlace" | "sizeRelativeTo";
 
+export type SourceCoverage = "present" | "none" | "unavailable"; // none = source a répondu, rien trouvé
+
 export type EvidenceRef = {
   factId: string;
   module: DecisionModule;
@@ -20,6 +22,8 @@ export type EvidenceRef = {
   observedValue?: string; // la valeur mesurée : "42 km", "18 000 hab.", "72/100"
   grain: "commune" | "adresse" | "secteur";
   href?: string; // optionnel slice 1
+  sourceMode?: "persisted_snapshot" | "live_fetch"; // Logement : DPE persisté vs réglementaire frais
+  observedAt?: string; // pour live_fetch
 };
 
 type BaseFact = {
@@ -54,6 +58,17 @@ export type VerificationFact = BaseFact & {
 };
 export type DecisionFact = IncompatibilityFact | CompromiseFact | UnknownFact | VerificationFact;
 
+export type LogementFacts = {
+  dpe: "passoire" | "energivore" | "correct" | "absent"; // DPE SAUVEGARDÉ (persisté)
+  dpeLabel: string | null; // classe exacte (F/G/E…)
+  rga: SourceCoverage; expositionBati: boolean;
+  pprn: SourceCoverage; zoneReglementee: boolean;
+  cavites: SourceCoverage; caviteProche: boolean;
+  patrimoine: SourceCoverage; perimetrePatrimonial: boolean;
+  sinistralite: SourceCoverage; sinistraliteActive: boolean;
+  addressLabel: string;
+};
+
 export type ModuleFacts = {
   insee: string;
   nom: string;
@@ -64,6 +79,7 @@ export type ModuleFacts = {
   inondationRisque: number | null;
   scores: Partial<Record<PreferenceKey, number | null>>;
   hasAddress: boolean;
+  logement?: LogementFacts; // slice 1.5 : présent seulement quand une analyse adresse est là
 };
 
 export type RuleOutcome =
