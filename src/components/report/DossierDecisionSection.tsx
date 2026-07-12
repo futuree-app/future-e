@@ -75,10 +75,13 @@ function FactBody({ fact }: { fact: DecisionFact }) {
 export function DossierDecisionSection({
   dossier,
   logement,
+  logementStatus = "none",
 }: {
   dossier: Dossier;
   // Analyse logement déjà sauvegardée pour cette commune (adresse renseignée), ou null.
   logement?: { href: string; label: string } | null;
+  // Slice 1.5 : état de l'augmentation adresse en couche de rendu (pas un état de l'assembleur).
+  logementStatus?: "none" | "pending" | "done" | "unavailable";
 }) {
   const structured = dossier.conclusionState !== "project_not_structured";
   const state = STATE_META[dossier.conclusionState];
@@ -94,6 +97,18 @@ export function DossierDecisionSection({
           Ce lieu, au regard de votre projet.
         </h2>
       </div>
+
+      {logementStatus === "pending" ? (
+        <div className="glass rounded-xl p-4 mb-3.5 flex items-center gap-3" style={{ borderLeft: "2px solid var(--info)" }}>
+          <span className="w-1.5 h-1.5 rounded-full bg-info shrink-0 animate-pulse" />
+          <p className="text-[13px] text-muted">Première lecture à l&apos;échelle de la commune. L&apos;analyse du logement et de son environnement immédiat est en cours.</p>
+        </div>
+      ) : null}
+      {logementStatus === "unavailable" ? (
+        <div className="glass rounded-xl p-4 mb-3.5" style={{ borderLeft: "2px solid var(--ghost)" }}>
+          <p className="text-[13px] text-muted">L&apos;analyse réglementaire de cette adresse n&apos;a pas pu être actualisée. La conclusion ci-dessous reste limitée à la commune.</p>
+        </div>
+      ) : null}
 
       {/* Le verdict : carte glass, filet d'état à gauche, libellé d'état mono */}
       <div className="glass rounded-2xl p-7 mb-3.5" style={{ borderLeft: `2px solid ${state.color}` }}>
