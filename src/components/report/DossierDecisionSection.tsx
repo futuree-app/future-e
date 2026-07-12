@@ -133,15 +133,6 @@ export function DossierDecisionSection({
         </div>
       ) : null}
 
-      {dossier.uncoveredPriorities.length > 0 ? (
-        <div className="mt-3 flex items-baseline gap-2.5 flex-wrap">
-          <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-ghost shrink-0">Vos priorités</span>
-          <span className="text-[13px] text-muted">
-            {dossier.uncoveredPriorities.map((p) => p.label).join(", ")} : notées, pas encore traduites en points de décision dans ce résumé.
-          </span>
-        </div>
-      ) : null}
-
       {structured ? (
         logement ? (
           <Link

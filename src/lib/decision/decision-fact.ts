@@ -105,6 +105,4 @@ export type Dossier = {
   conclusionBasis: { ruleIds: string[]; factIds: string[]; evidence: EvidenceRef[] };
   sections: DossierSection[];
   uncovered: UncoveredConstraint[];
-  // Priorités déclarées (préférences) pas encore traduites en points de décision par le slice.
-  uncoveredPriorities: { key: string; label: string }[];
 };
