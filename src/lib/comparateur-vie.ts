@@ -1134,7 +1134,7 @@ function avgPct(c: IndexCommune, fields: string[]): number | null {
   return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
 }
 
-function subScore(key: PreferenceKey, c: IndexCommune): number | null {
+export function subScore(key: PreferenceKey, c: IndexCommune): number | null {
   switch (key) {
     case "faible_chaleur": {
       const p = avgPct(c, ["NORTX30D_yr", "NORTX35D_yr", "NORTR_yr", "NORTMm_seas_JJA"]);
