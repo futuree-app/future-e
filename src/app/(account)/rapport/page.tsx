@@ -14,6 +14,8 @@ import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
 import { OuVivreProjectSync } from "@/components/OuVivreProjectSync";
 import { ProjectSummaryCard } from "@/components/report/ProjectSummaryCard";
 import { normalizeUserProject } from "@/lib/user-project";
+import { buildCommuneDossier } from "@/lib/decision/territory-facts";
+import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 
 const MODULE_COLORS: Record<string, string> = {
@@ -62,6 +64,13 @@ export default async function RapportPage() {
   // Première lecture du compte gratuit : réponses du wizard persistées (point 2).
   const serverWizardAnswers = (profile?.wizard_answers ?? null) as WizardAnswers | null;
   const userProject = normalizeUserProject((profile as { user_project?: unknown } | null)?.user_project ?? null);
+
+  // Dossier de décision (« En une minute ») : payant, commune connue, projet présent. Ouvert à tous
+  // les payants (pas de flag) ; le cas creux reste digne (conclusion honnête + contraintes non couvertes).
+  const dossier =
+    fullReport && inseeCode && userProject
+      ? await buildCommuneDossier(inseeCode, userProject)
+      : null;
 
   return (
     <div
@@ -215,6 +224,9 @@ export default async function RapportPage() {
         <div className="mt-12">
           <ProjectSummaryCard initial={userProject} />
         </div>
+
+        {/* ── En une minute : le dossier de décision (payant, grain commune) ── */}
+        {dossier ? <DossierDecisionSection dossier={dossier} /> : null}
 
         <div className="border-t border-white/[0.08] mt-14" />
 
