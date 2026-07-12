@@ -10,9 +10,10 @@ const POSTURE_OPTIONS: { value: ProjectPosture; label: string }[] = [
   { value: "habitant", label: "J'y habite déjà" },
 ];
 
-// Carte « Votre projet » en tête du hub. Trois états : projet présent, absent (invitation),
-// édition. La sauvegarde explicite ne prétend JAMAIS avoir réussi sans confirmation serveur :
-// en cas d'échec l'éditeur reste ouvert avec un message. La posture est choisie, jamais devinée.
+// Carte « Votre projet » en tête du hub, dans le langage visuel de futur•e (glass, eyebrow mono,
+// Instrument Serif, accent orange). Trois états : projet présent, absent (invitation), édition. La
+// sauvegarde explicite ne prétend JAMAIS avoir réussi sans confirmation serveur : en cas d'échec
+// l'éditeur reste ouvert avec un message. La posture est choisie, jamais devinée.
 export function ProjectSummaryCard({ initial }: { initial: UserProject | null }) {
   const [project, setProject] = useState<UserProject | null>(initial);
   const [editing, setEditing] = useState(false);
@@ -73,57 +74,103 @@ export function ProjectSummaryCard({ initial }: { initial: UserProject | null })
     setBusy(false);
   }
 
+  const Eyebrow = () => (
+    <div className="flex items-center gap-2.5 font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-3">
+      <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+      Votre projet
+    </div>
+  );
+
   const reformulation = project?.parsed?.reformulation ?? project?.rawText ?? null;
 
+  // ── Projet présent ──
   if (!editing && project && reformulation) {
     return (
-      <div className="glass" style={{ padding: 18, borderRadius: 14, marginBottom: 20 }}>
-        <p style={{ fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fg-4)", margin: "0 0 6px" }}>Votre projet</p>
-        <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.6, margin: 0 }}>{reformulation}</p>
-        <button type="button" onClick={() => { setText(project.rawText ?? ""); setPosture(project.posture); setEditing(true); }}
-          style={{ marginTop: 10, background: "none", border: "none", padding: 0, color: "var(--accent)", cursor: "pointer", fontSize: 13 }}>
+      <div className="glass rounded-2xl p-7">
+        <Eyebrow />
+        <p className="text-[17px] leading-[1.65] text-label max-w-[680px]">{reformulation}</p>
+        <button
+          type="button"
+          onClick={() => { setText(project.rawText ?? ""); setPosture(project.posture); setError(null); setEditing(true); }}
+          className="mt-4 inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.08em] uppercase text-accent hover:text-label transition-colors"
+        >
           Affiner
+          <span aria-hidden className="text-[13px] leading-none">→</span>
         </button>
       </div>
     );
   }
 
+  // ── Aucun projet ──
   if (!editing && !project) {
     return (
-      <div className="glass" style={{ padding: 18, borderRadius: 14, marginBottom: 20 }}>
-        <p style={{ fontSize: 15, color: "var(--fg-2)", lineHeight: 1.6, margin: "0 0 10px" }}>
-          Décrivez votre projet pour une lecture qui parle de votre situation.
+      <div className="glass rounded-2xl p-7">
+        <Eyebrow />
+        <p className="text-[16px] leading-[1.65] text-muted max-w-[560px] mb-5">
+          Décrivez votre projet pour une lecture qui parle de votre situation, pas d&apos;une commune en général.
         </p>
-        <button type="button" onClick={() => setEditing(true)}
-          style={{ background: "none", border: "1px solid var(--border-2)", borderRadius: 10, padding: "8px 14px", color: "var(--fg-1)", cursor: "pointer", fontSize: 14 }}>
+        <button
+          type="button"
+          onClick={() => { setError(null); setEditing(true); }}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[14px] hover:opacity-90 transition-opacity"
+        >
           Décrire mon projet
         </button>
       </div>
     );
   }
 
+  // ── Édition ──
   return (
-    <div className="glass" style={{ padding: 18, borderRadius: 14, marginBottom: 20 }}>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
-        {POSTURE_OPTIONS.map((o) => (
-          <button key={o.value} type="button" onClick={() => setPosture(o.value)}
-            style={{ background: posture === o.value ? "var(--accent)" : "none", color: posture === o.value ? "#060812" : "var(--fg-1)", border: "1px solid var(--border-2)", borderRadius: 10, padding: "6px 12px", cursor: "pointer", fontSize: 13 }}>
-            {o.label}
-          </button>
-        ))}
+    <div className="glass rounded-2xl p-7">
+      <Eyebrow />
+      <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-ghost mb-2.5">Vous êtes plutôt</p>
+      <div className="flex gap-2 flex-wrap mb-5">
+        {POSTURE_OPTIONS.map((o) => {
+          const active = posture === o.value;
+          return (
+            <button
+              key={o.value}
+              type="button"
+              onClick={() => setPosture(o.value)}
+              className={
+                active
+                  ? "rounded-lg px-3.5 py-2 text-[13px] font-medium bg-accent text-canvas border border-transparent transition-colors"
+                  : "rounded-lg px-3.5 py-2 text-[13px] text-muted bg-white/[0.04] border border-white/[0.12] hover:text-label hover:border-white/25 transition-colors"
+              }
+            >
+              {o.label}
+            </button>
+          );
+        })}
       </div>
-      <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3}
+
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={3}
         placeholder="Par exemple : nous cherchons une maison au calme, proche de la mer, avec une école à pied."
-        style={{ width: "100%", background: "var(--bg-deep)", border: "1px solid var(--border-2)", borderRadius: 10, padding: 12, color: "var(--fg-1)", fontSize: 14, fontFamily: "inherit", resize: "vertical" }} />
-      {error ? <p style={{ color: "var(--red)", fontSize: 13, margin: "8px 0 0" }}>{error}</p> : null}
-      <div style={{ display: "flex", gap: 10, marginTop: 10, alignItems: "center" }}>
-        <button type="button" onClick={save} disabled={busy || !text.trim() || !posture}
-          style={{ background: "var(--accent)", border: "none", borderRadius: 10, padding: "8px 16px", color: "#060812", cursor: "pointer", fontSize: 14, fontWeight: 600, opacity: busy || !text.trim() || !posture ? 0.5 : 1 }}>
+        className="w-full rounded-xl bg-white/[0.03] border border-white/[0.12] px-4 py-3 text-[14px] text-label placeholder:text-ghost leading-[1.6] resize-y focus:outline-none focus:border-accent/60 transition-colors"
+        style={{ fontFamily: "inherit" }}
+      />
+
+      {error ? <p className="text-danger text-[13px] mt-2.5">{error}</p> : null}
+
+      <div className="flex items-center gap-4 mt-4">
+        <button
+          type="button"
+          onClick={save}
+          disabled={busy || !text.trim() || !posture}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[14px] transition-opacity disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90"
+        >
           {busy ? "Enregistrement…" : "Enregistrer"}
         </button>
         {project && (
-          <button type="button" onClick={() => { setEditing(false); setError(null); }}
-            style={{ background: "none", border: "none", padding: 0, color: "var(--fg-4)", cursor: "pointer", fontSize: 13 }}>
+          <button
+            type="button"
+            onClick={() => { setEditing(false); setError(null); }}
+            className="font-mono text-[11px] tracking-[0.08em] uppercase text-ghost hover:text-label transition-colors"
+          >
             Annuler
           </button>
         )}
