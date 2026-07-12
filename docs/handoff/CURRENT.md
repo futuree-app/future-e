@@ -1,60 +1,44 @@
 # Passation — session en cours
 
-**Horodatage** : 2026-07-09 · **Branche courante** : `main` (3 commits d'avance sur `origin/main`, NON poussés) · **Arbre NON propre** : 2 fichiers modifiés non commités (voir État git).
+**Horodatage** : 2026-07-12 · **Branche courante** : `main`. Poussée jusqu'à `6c18eec` ; **`1fadcd5` (refonte visuelle) commité localement, à pousser**. Aucune PR ouverte.
 
 ## Objectif en cours
-Itération **design + éditorial + data** sur le **rapport du module Logement** (`/rapport/logement`), pilotée par les retours du porteur en boucle courte (il regarde le rendu réel, renvoie des retours, on corrige). Suite à la revue **Design Critic** (rapport `docs/rapports-agents/design-critic/2026-07-08-module-logement-design-ui-structure.md`). Le fil du moment : polissage de la **carte Sinistralité** et passe **langage non-expert** (« test de la mère : une aide ménagère doit comprendre sans perdre la finesse »).
+Chantier **« architecture décision motivée » du rapport payant**. Le **slice 1 du dossier de décision** (« En une minute ») est LIVRÉ, validé en live et poli au design system. La suite naturelle est le **slice 1.5** (brancher les faits Logement quand une adresse est présente) puis le **slice 2** (IA de formulation bornée, fallback déterministe permanent).
 
 ## Fait dans cette session (tout sur `main`)
-1. **v6 croisement climat × Territoire + ÎCU** (déjà poussés, antérieurs) : cf. mémoire.
-2. **Design retours 1+2** (poussés : `e185ce2`, `c00929d`, `e6d04e7`) : synthèse compactée ; `FamilyHeading` colorée (accent/bleu) + agrandie ; tooltips sur les chips « Faire face à la chaleur » (`ChipTooltip` étendu d'un `color`) ; sinistralité décompressée ; **nouveau set d'icônes au trait** `src/components/report/logement/icons.tsx` (clock/soleil/onde sismique/strates — aucune icône n'existait dans le DS avant) ; Sismicité/RGA harmonisés (icône + tooltip `MetricTooltip` via `Block` étendu de `icon`+`tip`) ; **refonte sinistralité** (conclusion en titre, fréquence primaire, coût secondaire lisible en blanc).
-3. **ÎCU déplacé + allégé** (`121f212`, NON poussé) : l'îlot de chaleur quitte « Autour » (jugé positif : services/verdure) pour la famille « ce à quoi l'adresse est exposée » (carte « Risques du bâti »). Composant `src/components/report/logement/IcuExposure.tsx` (titre + ⓘ tooltip portant garde-fou+méthode+source + le +X °C en héros). Retiré d'`AutourSection.tsx`.
-4. **Risques recensés — fix DATA** (`0d66d3f`, NON poussé) : `georisques.ts` builder ADRESSE fetchait `/api/v2/gaspar/risques` (renvoie des PROCÉDURES, `risks.labels` VIDE) → bascule sur **v1 `/gaspar/risques?latlon=`** (`data[0].risques_detail[].libelle_risque_long`, propre, point-level). Affichage « Autres risques recensés à cette adresse : … » dans `LogementModule.tsx`, routé depuis `address.risks`, avec **filtre anti-doublon grossier** (écarte séisme/argile déjà gradés + frontière Santé radon/industriel/effet thermique/matières dangereuses + sous-détails « Par … », relabelle submersion marine + cavités).
-5. **Passe langage non-expert** (`7cb64b2`, NON poussé) : confort d'été (« garde mal la fraîcheur quand il fait chaud »), réglementaire état C (« Aucune règle de construction particulière »), sinistralité (caveat en italique/plus petit, surprime CatNat glosée inline, « échantillon assurantiel » → « trop peu de logements assurés », fix bug d'espace « sécheressesont ») ; **prompt synthèse v7** : le vocabulaire d'expert n'apparaît JAMAIS même glosé (le vrai coupable était la règle d'attribution v4 qui ORDONNAIT « dites inertie légère », corrigée). `SYNTHESIS_PROMPT_VERSION` v6→v7. Vérif génération : jargon éliminé sauf « inertie » (9→3 résidus).
-6. **NON COMMITÉ (le geste en cours)** : variation de la référence à la commune dans Sinistralité (« dans cette commune » répété 3× → nom réel dans l'eyebrow « Sinistres indemnisés à {commune} », pronom « y » dans l'intro, « dans la commune » dans la comparaison). Prop `commune` ajoutée à `SinistraliteBlock`, passée depuis `LogementModule` (`result.address.city`).
+1. **Merges de nettoyage** (`0e801f7`, `da807fb`) : les 2 dernières branches non mergées (Face 2 Logement patrimoine ABF + risques bâti au point) intégrées, conflits résolus, branches locales périmées supprimées, tag de sécurité `pre-merge-safety-2026-07-11`.
+2. **Durcissement de la persistance du projet** (`3b6bc85`, `6c18eec`) : contrat `UserProjectInput`/`UserProject` séparés (schemaVersion + updatedAt serveur), `/api/profile` `if_empty` atomique (garde SQL `.is(null)`) et retourne le projet enregistré, `ProjectSummaryCard` sauvegarde honnête (`response.ok`, éditeur ouvert sur échec, projet retourné par le serveur) + `router.refresh` (régénère le dossier), `OuVivreProjectSync` persiste `rawText` sans `parsed` + `router.refresh`, sélecteur de posture (aucun défaut deviné), `mergeProjectEdit` retiré. Plan : `docs/superpowers/plans/2026-07-11-persistance-projet-durcissement.md`.
+3. **Dossier de décision slice 1** (`5768229`, `42c8c95`, `0653358`) : moteur déterministe sous `src/lib/decision/` (contrats union discriminée, lecteurs projet + couverture, adaptateur `module-facts-map`/`territory-facts`, registre 5 règles `evaluate()`, invariants `assertFactValid`, assembleur), page serveur `DossierDecisionSection` insérée sur `/rapport` payant, 3 arbitrages vault. Spec v2 `docs/superpowers/specs/2026-07-11-dossier-decision-materialite-design.md`, plan v2 `.../plans/2026-07-11-dossier-decision-materialite.md`.
+4. **Refonte visuelle** (`1fadcd5`, non poussé) : `ProjectSummaryCard` + `DossierDecisionSection` réécrites dans le design system futur•e (glass, eyebrow mono à pastille, Instrument Serif, verdict à filet d'état, preuves en chips) ; **bug de visibilité des boutons de posture en mode édition corrigé**.
 
-## Décisions prises (porteur) — pas encore gravées
-- **Plus d'agent Editorial** : la passe éditoriale se fait à la main, étalon = « test de la mère ».
-- **ÎCU = exposition, pas Autour** (l'Autour est positif).
-- **Risques recensés SANS éviter les doublons finement** (porteur : montrer, juste écarter le doublon GROSSIER + la frontière Santé).
-- **Bug PLM du gate de monétisation** (mémoire `project_module_logement`, HORS scope design, À PRIORISER) : `canAnalyzeCommune` ne matche pas home PLM (75056) vs adresse arrondissement (751xx) → Paris/Lyon/Marseille ne peuvent analyser aucun logement de leur ville.
-- **Nappe ≠ simple** (mémoire corrigée) : aucun endpoint Géorisques, couche cartographique BRGM → vrai spike.
+## Décisions prises (porteur, non encore au vault au-delà des 3 arbitrages)
+- **Slice 1 = Territoire au grain commune**, Logement en extension 1.5 déclenchée par la présence d'une adresse (le profil ne stocke pas d'adresse). Même registre/contrats/assembleur/page.
+- **Compromis** conservé (pas « profil contrasté ») avec texte honnête et preuve par côté.
+- **Page ouverte à tous les payants dès la livraison** (pas de feature flag) ; le cas creux doit rester digne.
+- Revue adversariale (ChatGPT) intégrée en v2 : modèle de couverture explicite, absence de donnée en `null`, union discriminée, états de conclusion honnêtes, règles montagne/CatNat remplacées par communeSize/exposition inondation.
 
 ## État git
-- Branche `main`, **3 commits non poussés** : `7cb64b2` (langage non-expert), `0d66d3f` (risques recensés data), `121f212` (ÎCU déplacé). Tout le reste est sur `origin/main`.
-- **2 fichiers modifiés NON commités** : `src/components/report/LogementModule.tsx` + `src/components/report/logement/SinistraliteSection.tsx` (la variation nom-de-commune du point 6, prête, tsc/eslint pas encore rejoués car le commit a été interrompu).
+- `main`, arbre propre sauf ce fichier. **`1fadcd5` à pousser** (`git push origin main`).
+- Tests : `node --test src/lib/decision/*.test.ts src/lib/user-project.test.ts` → 42 verts. `npx tsc --noEmit` → 0.
 - Aucune PR ouverte.
 
+## Validé en live (compte `bonjourfuturee@gmail.com`, Toulouse, via Playwright headless-shell-1217)
+Login → hub payant → dossier affiché ; cas creux digne ; cas riche (édition « petite commune < 20 000 hab, bord de mer ») → incompatibilité établie « 504 078 habitants » avec preuve, **couverture** « Non encore examiné : la proximité de la mer » ; sélecteur de posture visible ; sauvegarde honnête ; dossier régénéré après édition ; projet restauré. Design affichage + édition re-screenshotés OK.
+
 ## Prochaine étape immédiate
-Geste sinistralité **fini + commité + poussé** (tsc/eslint OK). Prod à jour (`e6d04e7..acaadce`). Chantiers en file, au choix du porteur :
-1. **Réglementaire avec-plans** (« Zone soumise à prescriptions / PPR / Zone B2 » encore « trop ingénieur »).
-2. **Spike nappe/TRI**.
-3. **« Autour » : filtres + carte** (le plus gros). Aujourd'hui c'est une liste (BPE + espace vert). Cible = filtres (choisir les catégories) + **carte des points autour de l'adresse** = vraie feature data+UI. Donnée publique probable (points BPE déjà géolocalisés + OSM), mais carte interactive = ajout significatif → **spike avant engagement** (comme l'ÎCU). **Board d'agents lancé en background le 2026-07-09** pour cadrer AVANT le spike (data-curator + product-strategist + design-critic + software-architect) → rapports dans `docs/rapports-agents/<agent>/2026-07-09-autour-filtres-carte.md`, à relire à la reprise.
-4. **Bug PLM du gate de monétisation** (hors design, à prioriser) : `canAnalyzeCommune` ne matche pas home PLM (75056) vs adresse arrondissement (751xx).
-
-## Chantier de fond exploré (2026-07-09 soir) : « Le Fil »
-Grosse session de CADRAGE (aucun code), pilotée par le porteur en dialogue avec ChatGPT. Le Fil = couche vivante/temporelle de futur•e. **7 rapports d'agents commités** dans `docs/rapports-agents/` (branche `main`, poussés) :
-- Board initial (5) : `*/2026-07-09-le-fil-cadrage.md` (product, business, software-architect), `researcher/2026-07-09-le-fil-ouverture.md`, `data-curator/2026-07-09-le-fil-fiabilite-sources.md`.
-- Volet classe B (2) : `data-curator/2026-07-09-le-fil-classe-b-detection.md`, `editorial-writer/2026-07-09-le-fil-classe-b-grammaire.md`.
-
-**Convergence du board (5/5)** : NE PAS lancer un abonnement mensuel autonome. Le mensuel combat la discipline du silence. B2C = extension **incluse** (jamais mensuel) ; B2B = format portefeuille, après preuve B2C (ADR-0008). Moat = intégration au rapport payé + voix, PAS la donnée (flux publics copiables). **Bug PLM passe devant Le Fil** (unanime). Taux de déclenchement mesuré ~1-3 signaux/commune/an hors air (Data Curator, sur API) → **penche fonctionnalité incluse, pas abonnement**. MVP honnête = 2 flux (CatNat + sécheresse), pas 4 (Atmo → Santé ; diffs Géorisques → non diffable). Action no-regret : recadrer la page live `/le-fil` (vend encore « newsletter mensuelle » + « dashboard qui respire », promesses reniées). Product : strand déterministe « depuis votre rapport » (CatNat, sur API déjà appelées) pour tester le retour avant de construire.
-
-**Doctrine « classe B » consolidée avec le porteur (à GRAVER en arbitrage vault, pas encore fait)** : 3 couches, pas 2.
-- **A — structurée automatique** : CatNat, sécheresse (diff idempotent, zéro humain).
-- **A½ — événements locaux à ancrage officiel** : inspections ICPE + arrêtés préfectoraux. **VÉRIFIÉ ce soir sur l'API Géorisques** `installations_classees?code_insee=` : expose `inspections` (dates + rapports PDF) et `documentsHorsInspection` (arrêtés préfectoraux datés), 119 ICPE à La Rochelle, MàJ quotidienne. Détection automatisable + géo-rattachée ; QUALIFICATION humaine (rapports = PDF scannés non normalisés). Corrige le « pas sourçable » du Data Curator. **Cas d'école = chantier dépollution rue Marcel Paul, La Rochelle** (ex. donné par le porteur via article Vert.eco + rapport DREAL Géorisques).
-- **B — éditoriale pure** : presse/science, contextuelle, non sourçable hors hasard, prudence max. **Cas d'école ÉCARTÉ = fûts radioactifs Atlantique NE** (échoue au test local-direct-décisionnel + ligne rouge Editorial : mot à charge irréversible + effet local non établi).
-- **Règle d'admission** (test produit du porteur) : « un habitant/parent/acheteur aurait-il pu mieux décider s'il avait su plus tôt ? » + ancrage sur acte d'autorité + grammaire établi/rapporté/non conclu + validation humaine. « Un média déclenche l'attention, futur•e ne publie qu'après retour à la source primaire. »
-- **Restes à instruire (sans agent, le porteur économise ses tokens)** : fréquence réelle A½/commune/an (compter sur l'API), présence fiable des mises en demeure dans `documentsHorsInspection`. ADR/arbitrages prêts à graver listés en fin de chaque rapport (Business : pricing ; Product : vigilance-pas-alerte + atmo-hors-fil ; Data : inventaire-sources ; Architect : système séparé).
+1. `git push origin main` (pousser `1fadcd5`).
+2. Démarrer le **slice 1.5** : dans `buildCommuneDossier`/`loadModuleFacts`, passer `hasAddress: true` + charger les faits Logement quand une adresse est disponible, et migrer les règles de `src/lib/logement-checklist.ts` dans le registre (elles deviennent des `evaluate()` retournant des `verification`/`incompatibility`). Le contrat `ModuleFacts` gagne un bloc `logement?` optionnel ; aucune règle Territoire ne change.
 
 ## À lire d'abord à la reprise
-1. `/memory/MEMORY.md` puis `/memory/project_module_logement.md` (état module, très à jour ; note la ligne bug PLM + la correction nappe) et `/memory/icu_ilot_chaleur_data.md` (ÎCU, corrigé : iuhi EST en °C).
-2. Rapport Design Critic : `docs/rapports-agents/design-critic/2026-07-08-module-logement-design-ui-structure.md` (feuille de route design : quick wins faits, restent réglementaire + carte Autour filtres/map).
-3. Specs : `docs/superpowers/specs/2026-07-07-logement-rehydratation-design.md` (rehydratation livrée).
-4. `docs/handoff/AUTO-SNAPSHOT.md` (fraîcheur ; possiblement périmé).
+1. `/memory/MEMORY.md` puis les fiches `project_dossier_decision`, `project_persistance_projet`, `business_moat_assemblage`.
+2. Spec v2 `docs/superpowers/specs/2026-07-11-dossier-decision-materialite-design.md` (le changelog v1→v2 résume les 5 blocueurs corrigés).
+3. Plan v2 `docs/superpowers/plans/2026-07-11-dossier-decision-materialite.md` (structure du moteur, tâches).
+4. `docs/vault/arbitrages/{dossier-decision-eliminatoire-contrainte-declaree,deterministe-selectionne-ia-formule,rapport-un-produit-semantique-par-posture}.md`.
+5. `docs/handoff/AUTO-SNAPSHOT.md` (fraîcheur).
 
 ## Pièges / fils ouverts
-- **Vérification visuelle en session payante** : le compte de test `bonjourfuturee@gmail.com` (le porteur devait **changer le mot de passe** — vérifier) a `home_insee_code = 75056` (Paris) donc **ne peut analyser AUCUNE adresse** (bug PLM). Pour screenshoter un rapport peuplé, la technique employée = **bypass LOCAL TRANSITOIRE** de `canAnalyzeCommune` (`src/lib/active-territory.ts`, ajouter `if (insee) return true; // @@TEMP-SHOOT-BYPASS@@` en tête, **à RETIRER aussitôt**) + Playwright headless (`playwright-core` + Chrome, `scratchpad/shoot.mjs`) sur une adresse Toulouse (couverte ÎCU). **Toujours vérifier `git status` que le bypass est retiré après.** Ne jamais commiter le bypass.
-- **Synthèse v7** : « inertie » subsiste 3×/10 (attracteur LLM). Si le porteur veut 0 : durcir encore le prompt ou post-traiter. `NEXT_PUBLIC_AUTO_SYNTHESIS` OFF en dev (bouton « Générer »), ON à cible.
-- **Réglementaire avec-plans** pas encore passé au langage habitant (seul l'état C « aucune zone » l'a été).
-- **Risques recensés** : le builder PARCELLE de `georisques.ts` reste sur la v2 cassée (risks.labels vide), mais l'affichage route depuis `address.risks` (fixé) — pas de régression, mais le **payload synthèse lit `parcel.risks`** (donc la synthèse ne voit toujours pas les risques recensés ; non demandé, à savoir).
-- **Tout est poussé** sur `origin/main` (jusqu'à `0ccdbec` : geste sinistralité + handoff + 2 boards de rapports d'agents « Autour » et « Le Fil »). Prod à jour côté code ; les rapports d'agents sont des docs, pas du code livré.
+- **`comparateur-vie.ts` fait `import "server-only"`** : tout test `node --test` qui **value-importe** ce module casse (ERR_MODULE_NOT_FOUND). Les libs decision n'en prennent que des **types** (effacés), sauf l'adaptateur `territory-facts.ts` (value-import) qui n'est donc PAS testé en isolation ; sa logique pure vit dans `module-facts-map.ts` (testé). À respecter pour le slice 1.5.
+- **Chromium Playwright** : version installée `chromium-1217`, mais playwright-core 1.61 veut `chromium_headless_shell-1228` absent. Lancer avec `executablePath` pointant `~/Library/Caches/ms-playwright/chromium_headless_shell-1217/chrome-headless-shell-mac-x64/chrome-headless-shell`.
+- **`isBuyer`** (`project-view.ts`) n'est utilisé par aucune règle du slice 1 (les règles gatent sur le grain, pas l'intention). Gardé comme garde-fou doctrinal + testé ; le brancher quand une règle acheteur arrive, sinon candidat au retrait.
+- **Couverture partielle** : seules `nearSea` et `communeSize` sont couvertes. Un projet déclarant d'autres contraintes dures les verra listées « non examinées » (comportement voulu). Élargir la couverture (5-8 dimensions) fait partie de la maturation avant de compter sur le cas riche fréquent.
+- **Cas creux fréquent** : beaucoup de projets n'ont ni contrainte dure ni préférence couverte → dossier = conclusion seule. C'est honnête mais maigre ; l'ajout de règles (préférences → compromis/vérifications) est le levier.
