@@ -64,7 +64,9 @@ export async function fetchLogementDecisionData(address: ResolvedAddress): Promi
 
 // Timeout d'AFFICHAGE (Promise.race) : les appels sous-jacents continuent (annulation par AbortSignal
 // = suite documentée). Rejette avec une erreur typée, seule captée par l'augmentation.
-export function fetchLogementDecisionDataWithTimeout(address: ResolvedAddress, ms = 4000): Promise<LogementDecisionData> {
+// 10 s : généreux car l'augmentation est STREAMÉE (non bloquante, le dossier commune est déjà lisible) ;
+// en prod le cache Géorisques 24h rend les appels rapides. Au-delà -> repli "unavailable".
+export function fetchLogementDecisionDataWithTimeout(address: ResolvedAddress, ms = 10000): Promise<LogementDecisionData> {
   return Promise.race([
     fetchLogementDecisionData(address).catch((e) => {
       if (e instanceof LogementDataUnavailableError) throw e;

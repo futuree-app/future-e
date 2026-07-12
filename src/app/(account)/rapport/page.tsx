@@ -14,9 +14,12 @@ import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
 import { OuVivreProjectSync } from "@/components/OuVivreProjectSync";
 import { ProjectSummaryCard } from "@/components/report/ProjectSummaryCard";
 import { normalizeUserProject } from "@/lib/user-project";
+import { Suspense } from "react";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
+import { DossierAvecLogement } from "@/components/report/DossierAvecLogement";
 import { getLatestLogement } from "@/lib/logement-store";
+import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 
 const MODULE_COLORS: Record<string, string> = {
@@ -72,12 +75,16 @@ export default async function RapportPage() {
   // « confort sans adresse » et le CTA renvoie vers l'analyse, plutôt que d'inviter à saisir une adresse.
   const latestLogement = fullReport && inseeCode ? await getLatestLogement(supabase, user.id) : null;
   const logementForCommune = latestLogement && latestLogement.insee === inseeCode ? latestLogement : null;
-  const dossier =
+  const communeResult =
     fullReport && inseeCode && userProject
       ? await buildCommuneDossier(inseeCode, userProject, { hasAddress: Boolean(logementForCommune) })
       : null;
+  const dossier = communeResult?.dossier ?? null;
   const dossierLogementLink = logementForCommune
     ? { href: `/rapport/logement?logementId=${encodeURIComponent(logementForCommune.logement_id)}`, label: logementForCommune.address_label }
+    : null;
+  const dossierAddress: ResolvedAddress | null = logementForCommune
+    ? { id: logementForCommune.logement_id, label: logementForCommune.address_label, city: logementForCommune.city, citycode: logementForCommune.insee, postcode: logementForCommune.postcode, latitude: logementForCommune.latitude, longitude: logementForCommune.longitude }
     : null;
 
   return (
@@ -234,7 +241,22 @@ export default async function RapportPage() {
         </div>
 
         {/* ── En une minute : le dossier de décision (payant, grain commune) ── */}
-        {dossier ? <DossierDecisionSection dossier={dossier} logement={dossierLogementLink} /> : null}
+        {dossier && communeResult ? (
+          dossierAddress && logementForCommune ? (
+            <Suspense fallback={<DossierDecisionSection dossier={dossier} logement={dossierLogementLink} logementStatus="pending" />}>
+              <DossierAvecLogement
+                project={userProject!}
+                address={dossierAddress}
+                savedDpe={logementForCommune.selected_dpe_snapshot}
+                communeFacts={communeResult.moduleFacts}
+                communeDossier={dossier}
+                logementLink={dossierLogementLink}
+              />
+            </Suspense>
+          ) : (
+            <DossierDecisionSection dossier={dossier} logement={dossierLogementLink} logementStatus="none" />
+          )
+        ) : null}
 
         <div className="border-t border-white/[0.08] mt-14" />
 
