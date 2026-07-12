@@ -4,7 +4,7 @@ import type {
   DecisionFact, Dossier, DossierSection, ConclusionState, RunResult, EvidenceRef, MaterialityTier,
 } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
-import { hasAnyHardConstraint, isStructured, uncoveredConstraints } from "./project-view.ts";
+import { hasAnyHardConstraint, isStructured, uncoveredConstraints, uncoveredPreferences } from "./project-view.ts";
 
 function labels(project: UserProject): { engage: string; verifTitle: string } {
   if (project.posture === "habitant") {
@@ -33,10 +33,18 @@ function conclusionState(facts: DecisionFact[], project: UserProject): Conclusio
 function examinedClause(uncovered: { label: string }[]): string {
   return uncovered.length === 0 ? "" : ` Nous n'avons pas encore examiné, à ce grain : ${uncovered.map((u) => u.label).join(", ")}.`;
 }
+function reservesClause(facts: DecisionFact[]): string {
+  const n = facts.filter((x) => x.role === "verification" || x.role === "compromise" || x.role === "unknown").length;
+  return n > 0 ? ` ${n} point${n > 1 ? "s" : ""} mérite${n > 1 ? "nt" : ""} néanmoins d'être examiné${n > 1 ? "s" : ""} de près.` : "";
+}
+function prioritiesClause(priorities: { label: string }[]): string {
+  if (priorities.length === 0) return "";
+  const list = priorities.slice(0, 3).map((p) => p.label).join(", ");
+  return ` Vos priorités concernant ${list} ne sont pas encore couvertes dans cette synthèse.`;
+}
 
-function conclusionText(state: ConclusionState, facts: DecisionFact[], project: UserProject, uncovered: { label: string }[], dossierScope: "commune" | "commune+adresse"): string {
+function conclusionText(state: ConclusionState, facts: DecisionFact[], project: UserProject, uncovered: { label: string }[], priorities: { label: string }[], dossierScope: "commune" | "commune+adresse"): string {
   const scope = dossierScope === "commune+adresse" ? "À l'échelle de la commune et de l'adresse," : "À l'échelle de la commune,";
-  const l = labels(project);
   switch (state) {
     case "project_not_structured":
       return "Décrivez votre projet pour une lecture qui met en regard ce lieu et ce qui compte pour vous.";
@@ -47,13 +55,9 @@ function conclusionText(state: ConclusionState, facts: DecisionFact[], project: 
     case "insufficient_evidence":
       return `${scope} nous ne pouvons pas conclure honnêtement : une donnée déterminante pour votre projet manque.`;
     case "no_hard_constraint_declared":
-      return `Vous n'avez posé aucune condition non négociable, donc rien ne disqualifie ce lieu d'emblée. ${scope} les données examinées ne font ressortir aucun point éliminatoire pour votre projet.${examinedClause(uncovered)}`;
-    case "no_incompatibility_established": {
-      const nReserves = facts.filter((x) => x.role === "verification" || x.role === "compromise" || x.role === "unknown").length;
-      const base = `${scope} sur les contraintes que nous savons examiner, aucune n'est contredite.`;
-      const tail = nReserves > 0 ? ` ${nReserves} point${nReserves > 1 ? "s" : ""} restent à examiner avant de ${l.engage}.` : "";
-      return base + tail + examinedClause(uncovered);
-    }
+      return `Vous n'avez déclaré aucune condition comme absolument non négociable. ${scope} rien ne permet donc d'écarter ce lieu sur cette seule base.${reservesClause(facts)}${prioritiesClause(priorities)}${examinedClause(uncovered)}`;
+    case "no_incompatibility_established":
+      return `${scope} sur les contraintes que nous savons examiner, aucune n'est contredite.${reservesClause(facts)}${prioritiesClause(priorities)}${examinedClause(uncovered)}`;
   }
 }
 
@@ -64,6 +68,7 @@ function factEvidence(f: DecisionFact): EvidenceRef[] {
 export function assembleDossier(run: RunResult, project: UserProject, scope: "commune" | "commune+adresse"): Dossier {
   const { facts, coveredHardConstraints } = run;
   const uncovered = uncoveredConstraints(project, coveredHardConstraints);
+  const priorities = uncoveredPreferences(project);
   const state = conclusionState(facts, project);
   const l = labels(project);
   const candidates: DossierSection[] = [
@@ -77,7 +82,7 @@ export function assembleDossier(run: RunResult, project: UserProject, scope: "co
   return {
     scope,
     conclusionState: state,
-    conclusion: conclusionText(state, facts, project, uncovered, scope),
+    conclusion: conclusionText(state, facts, project, uncovered, priorities, scope),
     conclusionBasis: {
       ruleIds: [...new Set(shown.map((f) => f.ruleId))],
       factIds: shown.map((f) => f.id),

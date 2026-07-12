@@ -19,7 +19,7 @@ export type SourceCoverage = "present" | "none" | "unavailable"; // none = sourc
 
 export type LogementDecisionData = {
   rga: { coverage: SourceCoverage; label: string | null };
-  pprn: { coverage: SourceCoverage; count: number };
+  pprn: { coverage: SourceCoverage; count: number; label: string | null };
   cavites: { coverage: SourceCoverage; count: number };
   patrimoine: { coverage: SourceCoverage; count: number };
   sinistralite: { coverage: SourceCoverage; active: boolean };
@@ -47,6 +47,7 @@ export async function fetchLogementDecisionData(address: ResolvedAddress): Promi
 
   const rgaLabel = gParcel?.rga?.label ?? gAddr?.rga?.label ?? null; // champ par champ : parcelle puis adresse
   const plans = gParcel?.regulatoryPlans ?? gAddr?.regulatoryPlans ?? [];
+  const topPlan = plans.length ? plans.reduce((a, b) => (a.topRegimeRank <= b.topRegimeRank ? a : b)) : null; // le plus contraignant
   const georisquesDown = gAddr == null && gParcel == null; // résumé indisponible (token absent ou panne)
 
   const siniActive = sini != null && [sini.secheresse.kind, sini.inondation.kind].some((k) => k === "lecture" || k === "faible_repr");
@@ -54,7 +55,7 @@ export async function fetchLogementDecisionData(address: ResolvedAddress): Promi
 
   return {
     rga: { coverage: georisquesDown ? "unavailable" : rgaLabel ? "present" : "none", label: rgaLabel },
-    pprn: { coverage: georisquesDown ? "unavailable" : plans.length > 0 ? "present" : "none", count: plans.length },
+    pprn: { coverage: georisquesDown ? "unavailable" : plans.length > 0 ? "present" : "none", count: plans.length, label: topPlan?.plan ?? null },
     cavites: { coverage: cavites == null ? "unavailable" : cavites.length > 0 ? "present" : "none", count: cavites?.length ?? 0 },
     patrimoine: { coverage: heritage.sourceStatus === "unavailable" ? "unavailable" : heritage.items.length > 0 ? "present" : "none", count: heritage.items.length },
     sinistralite: { coverage: siniDown ? "unavailable" : siniActive ? "present" : "none", active: siniActive },

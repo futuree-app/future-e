@@ -6,7 +6,7 @@ import type { DpeRecord } from "../dpe.ts";
 
 function data(over: Partial<LogementDecisionData> = {}): LogementDecisionData {
   return {
-    rga: { coverage: "none", label: null }, pprn: { coverage: "none", count: 0 },
+    rga: { coverage: "none", label: null }, pprn: { coverage: "none", count: 0, label: null },
     cavites: { coverage: "none", count: 0 }, patrimoine: { coverage: "none", count: 0 },
     sinistralite: { coverage: "none", active: false }, fetchedAt: "2026-07-12T00:00:00.000Z", ...over,
   };

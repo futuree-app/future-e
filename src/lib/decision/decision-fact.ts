@@ -62,7 +62,7 @@ export type LogementFacts = {
   dpe: "passoire" | "energivore" | "correct" | "absent"; // DPE SAUVEGARDÉ (persisté)
   dpeLabel: string | null; // classe exacte (F/G/E…)
   rga: SourceCoverage; expositionBati: boolean;
-  pprn: SourceCoverage; zoneReglementee: boolean;
+  pprn: SourceCoverage; zoneReglementee: boolean; pprnLabel: string | null;
   cavites: SourceCoverage; caviteProche: boolean;
   patrimoine: SourceCoverage; perimetrePatrimonial: boolean;
   sinistralite: SourceCoverage; sinistraliteActive: boolean;

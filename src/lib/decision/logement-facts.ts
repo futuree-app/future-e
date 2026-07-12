@@ -12,7 +12,7 @@ export function buildLogementFacts(data: LogementDecisionData, savedDpe: DpeReco
     dpe: energyState(savedDpe?.etiquette_dpe ?? null),
     dpeLabel: savedDpe?.etiquette_dpe ?? null,
     rga: data.rga.coverage, expositionBati: rgaNotable,
-    pprn: data.pprn.coverage, zoneReglementee: data.pprn.coverage === "present" && data.pprn.count > 0,
+    pprn: data.pprn.coverage, zoneReglementee: data.pprn.coverage === "present" && data.pprn.count > 0, pprnLabel: data.pprn.label,
     cavites: data.cavites.coverage, caviteProche: data.cavites.coverage === "present" && data.cavites.count > 0,
     patrimoine: data.patrimoine.coverage, perimetrePatrimonial: data.patrimoine.coverage === "present" && data.patrimoine.count > 0,
     sinistralite: data.sinistralite.coverage, sinistraliteActive: data.sinistralite.coverage === "present" && data.sinistralite.active,

@@ -70,6 +70,15 @@ test("conclusionBasis porte ruleIds et preuves", () => {
   assert.ok(d.conclusionBasis.evidence.length >= 1);
 });
 
+test("no_hard_constraint_declared : nomme priorités non couvertes + réserves dans la conclusion", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "air_sain", weight: 3 }] });
+  const d = assembleDossier(run([verif()]), p, "commune");
+  assert.equal(d.conclusionState, "no_hard_constraint_declared");
+  assert.match(d.conclusion, /aucune condition/i);
+  assert.match(d.conclusion, /pas encore couvertes/i);
+  assert.match(d.conclusion, /1 point/);
+});
+
 test("scope commune+adresse : conclusion préfixée « commune et de l'adresse »", () => {
   const d = assembleDossier(run([verif()], ["nearSea"]), project(WITH_HC), "commune+adresse");
   assert.match(d.conclusion, /commune et de l'adresse/i);

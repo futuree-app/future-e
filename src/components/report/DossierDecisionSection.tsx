@@ -16,7 +16,7 @@ const SECTION_ACCENT: Record<string, string> = {
 const STATE_META: Record<ConclusionState, { color: string; label: string }> = {
   established_incompatibility: { color: "var(--red)", label: "Un point de blocage" },
   no_incompatibility_established: { color: "var(--accent)", label: "Aucun blocage établi" },
-  no_hard_constraint_declared: { color: "var(--accent)", label: "Aucun blocage établi" },
+  no_hard_constraint_declared: { color: "var(--accent)", label: "Aucune condition absolue déclarée" },
   insufficient_evidence: { color: "var(--ghost)", label: "Lecture incomplète" },
   project_not_structured: { color: "var(--ghost)", label: "À préciser" },
 };
@@ -48,6 +48,12 @@ function EvidenceRow({ fact, color }: { fact: DecisionFact; color: string }) {
       ) : null}
     </div>
   );
+}
+
+const GRAIN_LABEL: Record<string, string> = { commune: "À l'échelle de la commune", adresse: "À cette adresse", secteur: "Dans le secteur" };
+function factGrain(fact: DecisionFact): string | null {
+  const e = fact.role === "compromise" ? fact.sides[0]?.evidence[0] : fact.evidence[0];
+  return e ? GRAIN_LABEL[e.grain] ?? null : null;
 }
 
 function FactBody({ fact }: { fact: DecisionFact }) {
@@ -129,12 +135,16 @@ export function DossierDecisionSection({
                 {s.title}
               </div>
               <ul className="flex flex-col gap-5">
-                {s.facts.map((f) => (
-                  <li key={f.id}>
-                    <FactBody fact={f} />
-                    <EvidenceRow fact={f} color={col} />
-                  </li>
-                ))}
+                {s.facts.map((f) => {
+                  const grain = factGrain(f);
+                  return (
+                    <li key={f.id}>
+                      {grain ? <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-ghost mb-1">{grain}</p> : null}
+                      <FactBody fact={f} />
+                      <EvidenceRow fact={f} color={col} />
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           );

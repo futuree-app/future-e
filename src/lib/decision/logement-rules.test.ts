@@ -5,7 +5,7 @@ import type { ModuleFacts, LogementFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 
 function lf(over: Partial<LogementFacts> = {}): LogementFacts {
-  return { dpe: "correct", dpeLabel: null, rga: "none", expositionBati: false, pprn: "none", zoneReglementee: false, cavites: "none", caviteProche: false, patrimoine: "none", perimetrePatrimonial: false, sinistralite: "none", sinistraliteActive: false, addressLabel: "7 Rue du Taur", ...over };
+  return { dpe: "correct", dpeLabel: null, rga: "none", expositionBati: false, pprn: "none", zoneReglementee: false, pprnLabel: null, cavites: "none", caviteProche: false, patrimoine: "none", perimetrePatrimonial: false, sinistralite: "none", sinistraliteActive: false, addressLabel: "7 Rue du Taur", ...over };
 }
 function facts(logement?: LogementFacts): ModuleFacts {
   return { insee: "31555", nom: "Toulouse", distanceCoteKm: 150, population: 500000, altitude: 146, catnatInondation: 0, inondationRisque: 10, scores: {}, hasAddress: true, logement };
