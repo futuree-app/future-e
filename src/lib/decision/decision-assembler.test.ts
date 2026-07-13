@@ -13,8 +13,8 @@ function run(facts: DecisionFact[], covered: RunResult["coveredHardConstraints"]
 function incompat(over: Partial<IncompatibilityFact> = {}): DecisionFact {
   return { id: "i", ruleId: "r", sourceFactIds: ["s"], module: "territoire", role: "incompatibility", evidenceStrength: "established", hardConstraintKey: "nearSea", materialityTier: "decision_critical", statement: "trop loin", evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }], ...over };
 }
-function verif(): DecisionFact {
-  return { id: "v", ruleId: "r", sourceFactIds: ["s"], module: "territoire", role: "verification", materialityTier: "structuring", statement: "à vérifier", evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }], action: { type: "obtenir_document", label: "doc" } };
+function verif(id = "v"): DecisionFact {
+  return { id, ruleId: "r", sourceFactIds: ["s"], module: "territoire", role: "verification", materialityTier: "structuring", statement: "à vérifier", evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }], action: { type: "obtenir_document", label: "doc" } };
 }
 const WITH_HC = { reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 5 } }, preferences: [] };
 const NO_HC = { reformulation: "x", hardConstraints: {}, preferences: [] };
@@ -87,4 +87,20 @@ test("scope commune+adresse : conclusion préfixée « commune et de l'adresse �
 test("titre vérifications non-habitant : « À examiner avant de vous engager »", () => {
   const d = assembleDossier(run([verif()]), project(NO_HC), "commune");
   assert.match(d.sections.find((s) => s.key === "verifications")!.title, /à examiner/i);
+});
+
+test("les réserves annoncées sont les faits AFFICHÉS, jamais les faits émis (caps)", () => {
+  // 5 vérifications émises, section plafonnée à 4 : la conclusion doit annoncer 4, pas 5.
+  const facts = Array.from({ length: 5 }, (_, i) => verif(`v${i}`));
+  const d = assembleDossier(run(facts, ["nearSea"]), project(WITH_HC), "commune");
+  assert.equal(d.sections.find((s) => s.key === "verifications")!.facts.length, 4);
+  assert.equal(d.narrativePlan.reservesCount, 4);
+  assert.match(d.conclusion, /4 points/);
+});
+
+test("le dossier porte le plan narratif, et sa conclusion en est la concaténation", () => {
+  const d = assembleDossier(run([verif()], ["nearSea"]), project(WITH_HC), "commune");
+  assert.equal(d.conclusion, d.narrativePlan.blocks.map((b) => b.fallbackText).join(" "));
+  assert.equal(d.narrativePlan.blocks[0]!.key, "verdict");
+  assert.equal(d.narrativePlan.blocks[0]!.generable, false); // le verdict n'est jamais généré
 });

@@ -3,6 +3,7 @@
 // un compromise a deux côtés avec preuve, une verification a une action).
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { UserProject } from "../user-project.ts";
+import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
 
 export type DecisionModule = "territoire" | "logement";
 export type MaterialityTier = "decision_critical" | "structuring" | "secondary";
@@ -118,6 +119,9 @@ export type Dossier = {
   scope: "commune" | "commune+adresse";
   conclusionState: ConclusionState;
   conclusion: string;
+  // Le plan narratif (slice 2) : présence, ordre, sources, matière obligatoire et repli de chaque
+  // registre. `conclusion` en est la concaténation, gardée pour qui veut une seule phrase.
+  narrativePlan: ConclusionNarrativePlan;
   conclusionBasis: { ruleIds: string[]; factIds: string[]; evidence: EvidenceRef[] };
   sections: DossierSection[];
   uncovered: UncoveredConstraint[];
