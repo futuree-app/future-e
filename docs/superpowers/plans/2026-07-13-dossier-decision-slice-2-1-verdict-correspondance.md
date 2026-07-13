@@ -133,7 +133,29 @@ export type RuleEvaluation = {
 };
 ```
 
-- [ ] **Step 5 : Lancer les tests, vérifier qu'ils passent**
+- [ ] **Step 5 : Auditer TOUTES les règles du `REGISTRY` contre le contrat**
+
+Documenter le contrat ne garantit pas que les règles existantes le respectent. Une clé seulement
+*reliée* à une règle gonflerait la couverture d'un mensonge, et le registre (Task 3) le croirait.
+
+Relire une par une les six règles Territoire et les règles Logement, et vérifier **deux** choses :
+
+1. **`projectKeys` ne liste que des critères réellement évalués.** Cas à regarder de près :
+   `ruleCompromis` déclare `["acces_transports", "faible_chaleur"]` : légitime, elle lit les deux
+   scores pour établir la tension. Les règles Logement déclarent `projectKeys: []` : légitime aussi,
+   elles ne dépendent d'aucun critère déclaré (elles ne feront donc jamais bouger la couverture).
+2. **Aucun autre `not_applicable` ne cache un « tout va bien ».** Passer en revue chaque retour
+   `not_applicable` : il doit correspondre à « le critère n'est pas déclaré » ou « la règle ne
+   s'applique pas ici », jamais à « la donnée est là et elle est bonne ».
+
+```bash
+grep -n "not_applicable\|projectKeys" src/lib/decision/materiality-rules.ts src/lib/decision/logement-rules.ts
+```
+
+Consigner le résultat de l'audit dans le message de commit. Si une règle viole le contrat, **la
+corriger ici**, avant que le registre existe : après, le bug serait masqué par une couverture plausible.
+
+- [ ] **Step 6 : Lancer les tests, vérifier qu'ils passent**
 
 ```bash
 node --test src/lib/decision/*.test.ts && npx tsc --noEmit
@@ -141,7 +163,7 @@ node --test src/lib/decision/*.test.ts && npx tsc --noEmit
 
 Attendu : tous verts, 0 erreur TS. Si un test existant assertait `not_applicable` sur exposition faible, **c'est lui qui avait tort** : mets-le à jour vers `satisfied`.
 
-- [ ] **Step 6 : Commit**
+- [ ] **Step 7 : Commit**
 
 ```bash
 git add src/lib/decision/materiality-rules.ts src/lib/decision/decision-fact.ts src/lib/decision/materiality-rules.test.ts
@@ -232,6 +254,40 @@ node --test src/lib/insee-departement.test.ts
 ```
 
 Attendu : 4 tests verts.
+
+- [ ] **Step 4 bis : Rebrancher l'ancienne copie, et documenter celle qui doit diverger**
+
+Sinon il y aura **trois** implémentations, dont deux actives : exactement ce qu'on voulait éviter.
+
+`commune-categories.ts:47` porte la **même** sémantique (Corse `2A`/`2B`, DOM à trois chiffres) : la
+remplacer par un adaptateur du helper commun (sa signature publique rend `''` et non `null` : ne pas
+la changer, ses appelants en dépendent) :
+
+```ts
+import { departementFromInsee } from './insee-departement.ts';
+
+// Adaptateur : le helper commun rend `null` sur un code illisible, cette API historique rend ''.
+export function deptFromInsee(inseeCode: string): string {
+  return departementFromInsee(inseeCode) ?? '';
+}
+```
+
+`gissol.ts:75` **n'est PAS une copie** et ne doit pas être migrée : elle traite spécialement les codes
+`13` et `69` pour démêler les arrondissements de Marseille et Lyon dans son propre lookup. La rebrancher
+sur le helper commun changerait silencieusement son comportement. Y ajouter le commentaire qui dit
+pourquoi elle diverge :
+
+```ts
+// NE PAS remplacer par departementFromInsee (src/lib/insee-departement.ts) : cette variante démêle
+// EN PLUS les arrondissements de Marseille (131xx) et Lyon (691xx) pour son lookup RGA. Même forme,
+// contrat différent.
+```
+
+Vérifier qu'aucun appelant ne casse :
+
+```bash
+grep -rn "deptFromInsee" src/ && npx tsc --noEmit
+```
 
 - [ ] **Step 5 : Écrire le test de la règle**
 
@@ -361,14 +417,22 @@ Helper extrait des deux copies (commune-categories, gissol) : Corse 2A/2B et DOM
   export type Orientation = "favorable" | "minor_reserves" | "major_reserves" | "incompatible" | "indeterminate";
   export type CriteriaSummary = {
     registry: ProjectCriterionAssessment[];
-    coverage: CoverageLevel; orientation: Orientation; hasFavorable: boolean;
-    majorReserveCount: number; // faits de réserve structurants/critiques, pour les accords
+    coverage: CoverageLevel; orientation: Orientation;
+    hasFavorable: boolean;   // au moins un critère examiné rend `favorable`
+    favorableCount: number;  // combien : « plusieurs dimensions » exige >= 2, jamais un booléen
   };
   export const COVERAGE_HIGH_THRESHOLD = 0.7;
   export function buildCriteriaRegistry(project: UserProject, run: RunResult): CriteriaSummary;
   export function uncoveredPreferences(summary: CriteriaSummary): { key: string; label: string }[];
   export function uncoveredConstraints(summary: CriteriaSummary): { key: HardConstraintKey; label: string }[];
   ```
+
+**Le comptage des réserves majeures ne vit PAS ici.** Le registre ne connaît que les critères et les
+évaluations : il ignore le **plafonnement des sections**. Compter les réserves majeures sur toutes les
+évaluations annoncerait « 3 points structurants » là où le lecteur ne voit que 2 cartes, ce qui est
+exactement le bug corrigé au slice 1 (`decision-assembler.ts:57` : « les réserves annoncées sont celles
+qu'on MONTRE »). `majorReserveCount` est donc calculé **par l'assembleur**, sur `shownFacts`
+(post-plafonnement), pour que le lecteur puisse compter les cartes et retomber sur le chiffre.
 
 - [ ] **Step 1 : Écrire les tests**
 
@@ -464,7 +528,19 @@ test("orientation : une réserve STRUCTURANTE l'emporte sur des favorables", () 
   );
   assert.equal(s.orientation, "major_reserves");
   assert.equal(s.hasFavorable, true);   // le lieu répond à quelque chose : la phrase le dira
-  assert.equal(s.majorReserveCount, 1);
+  assert.equal(s.favorableCount, 1);    // UN seul : la phrase ne dira PAS « plusieurs dimensions »
+});
+
+test("favorableCount : « plusieurs dimensions » exige deux critères favorables, pas un booléen", () => {
+  const s = buildCriteriaRegistry(
+    project({}, [{ key: "faible_chaleur", weight: 3 }, { key: "faible_risque_inondation", weight: 3 }, { key: "acces_transports", weight: 3 }]),
+    run([
+      ev("r1", ["faible_chaleur"], "satisfied"),
+      ev("r2", ["faible_risque_inondation"], "satisfied"),
+      ev("r3", ["acces_transports"], "verification", [reserve("f6", "structuring")]),
+    ]),
+  );
+  assert.equal(s.favorableCount, 2);
 });
 
 test("orientation : des réserves SECONDAIRES sans aucun favorable ne sont PAS `major_reserves`", () => {
@@ -551,7 +627,10 @@ export type CriteriaSummary = {
   coverage: CoverageLevel;
   orientation: Orientation;
   hasFavorable: boolean;
-  majorReserveCount: number;
+  // COMBIEN de critères sont favorables, pas seulement « au moins un » : la phrase « ce lieu répond à
+  // plusieurs dimensions de votre projet » exige >= 2 pour être vraie. Un booléen l'aurait laissée
+  // s'écrire sur un unique critère satisfait.
+  favorableCount: number;
 };
 
 // Une DÉCISION, pas une intuition. Elle vit ici, nommée, couverte par une table de vérité : sinon
@@ -622,11 +701,7 @@ export function buildCriteriaRegistry(project: UserProject, run: RunResult): Cri
     : !hardUnexamined && ratio >= COVERAGE_HIGH_THRESHOLD ? "high"
     : "partial";
 
-  const hasFavorable = examined.some((c) => c.outcome === "favorable");
-  const majorReserveCount = run.evaluations
-    .filter((e) => RESERVE_OUTCOMES.has(e.outcome))
-    .flatMap((e) => e.facts)
-    .filter((f) => f.materialityTier !== "secondary").length;
+  const favorableCount = examined.filter((c) => c.outcome === "favorable").length;
 
   // L'ordre est NORMATIF : le premier qui matche gagne. Ce n'est PAS un solde : rien ne compense, un
   // critère satisfait ne rachète jamais une réserve critique.
@@ -637,7 +712,7 @@ export function buildCriteriaRegistry(project: UserProject, run: RunResult): Cri
     : examined.some((c) => c.outcome === "reserve") ? "minor_reserves"
     : "favorable";
 
-  return { registry, coverage, orientation, hasFavorable, majorReserveCount };
+  return { registry, coverage, orientation, hasFavorable: favorableCount > 0, favorableCount };
 }
 
 export function uncoveredPreferences(summary: CriteriaSummary): { key: string; label: string }[] {
@@ -669,26 +744,16 @@ Supprimer aussi, dans `project-view.test.ts`, les tests portant sur `uncoveredPr
 
 `decision-assembler.ts` casse à la compilation : c'est attendu, la Task 4 le répare.
 
-- [ ] **Step 6 : Commit**
+- [ ] **Step 6 : NE PAS COMMITER. Enchaîner sur la Task 4.**
 
-```bash
-git add src/lib/decision/criteria-registry.ts src/lib/decision/criteria-registry.test.ts src/lib/decision/project-view.ts src/lib/decision/project-view.test.ts
-git commit -m "feat(decision): le registre des critères DÉCLARÉS (couverture observée, orientation)
+Supprimer `uncoveredPreferences` de `project-view.ts` casse `decision-assembler.ts` : `tsc` est **rouge**
+tant que la Task 4 n'a pas réparé l'assembleur. Les contraintes globales exigent `tsc --noEmit` à zéro
+**à chaque commit** : un commit rouge n'est ni exécutable ni réversible proprement, et il piège
+quiconque bisecte.
 
-Couverture et orientation se calculent sur ce que le LECTEUR a déclaré, jamais
-sur le nombre de règles, de faits émis ou de cartes affichées : une préférence
-touchée par trois règles reste UNE priorité.
-
-COVERED_PREFERENCE_KEYS, la liste tenue à la main, disparaît : la couverture est
-désormais une conséquence observée des règles, plus une déclaration parallèle qui
-dérive en silence.
-
-L'orientation n'est PAS un solde : rien ne compense, un critère satisfait ne
-rachète jamais une réserve critique. hasFavorable est porté à part, pour qu'une
-phrase ne promette jamais un positif inexistant."
-```
-
-*(Ce commit laisse volontairement `tsc` rouge sur `decision-assembler.ts` : la Task 4 le répare. Si tu préfères un arbre toujours vert, fusionne les Tasks 3 et 4 en un seul commit.)*
+**Les Tasks 3 et 4 partagent donc un seul commit**, à la fin de la Task 4. Les tests du registre
+(Step 4 ci-dessus) doivent être verts avant d'enchaîner : ils le sont, `criteria-registry.ts` ne dépend
+pas de l'assembleur.
 
 ---
 
@@ -710,15 +775,22 @@ phrase ne promette jamais un positif inexistant."
     verdictLabel: string; verdictTone: VerdictTone;
   };
   export type ConclusionPlanInput = { /* … existant … */
-    coverage: CoverageLevel; orientation: Orientation; hasFavorable: boolean;
-    majorReserveCount: number;  // réserves structurantes/critiques : les accords en nombre du verdict
-    reservesShown: number;      // réserves affichées : « N points restent à examiner » (high + minor)
+    coverage: CoverageLevel; orientation: Orientation;
+    hasFavorable: boolean;      // au moins un critère favorable
+    favorableCount: number;     // combien : « plusieurs dimensions » exige >= 2
+    majorReserveCount: number;  // réserves AFFICHÉES structurantes/critiques (accords en nombre)
+    reservesShown: number;      // réserves affichées : « N points restent à examiner »
   };
   ```
 
+**`majorReserveCount` et `reservesShown` sont calculés par l'assembleur, sur `shownFacts`** (donc après
+plafonnement des sections), jamais par le registre. Le lecteur doit pouvoir compter les cartes et
+retomber sur le chiffre du verdict : annoncer un fait que les caps ont masqué recréerait le bug corrigé
+au slice 1 (`decision-assembler.ts:57`).
+
 - [ ] **Step 1 : Écrire les tests de la table de vérité**
 
-Dans `conclusion-plan.test.ts`, adapter `baseInput()` (ajouter `coverage: "partial"`, `orientation: "minor_reserves"`, `hasFavorable: false`, `majorReserveCount: 0`) puis ajouter :
+Dans `conclusion-plan.test.ts`, adapter `baseInput()` (ajouter `coverage: "partial"`, `orientation: "minor_reserves"`, `hasFavorable: true`, `favorableCount: 1`, `majorReserveCount: 0`, `reservesShown: 0`) puis ajouter :
 
 ```ts
 test("high + favorable : le lieu correspond, et on ose le dire", () => {
@@ -728,12 +800,36 @@ test("high + favorable : le lieu correspond, et on ose le dire", () => {
   assert.equal(p.verdictTone, "positive");
 });
 
-test("high + major_reserves AVEC favorable : le positif est dit, la réserve aussi", () => {
+test("high + major_reserves AVEC 2 favorables : « plusieurs dimensions » est prouvé", () => {
   const p = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "major_reserves", hasFavorable: true, majorReserveCount: 2,
+    coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 2, majorReserveCount: 2,
   }));
   assert.match(p.blocks[0]!.fallbackText, /répond à plusieurs dimensions de votre projet/);
   assert.match(p.blocks[0]!.fallbackText, /2 points structurants empêchent/);
+});
+
+test("high + major_reserves avec UN SEUL favorable : « plusieurs dimensions » serait faux", () => {
+  const p = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 1,
+  }));
+  assert.ok(!p.blocks[0]!.fallbackText.includes("plusieurs dimensions"));
+  assert.match(p.blocks[0]!.fallbackText, /présente des éléments favorables/);
+});
+
+test("high + minor_reserves SANS favorable : aucun « bien correspondre » ne s'échappe", () => {
+  const p = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0, reservesShown: 2,
+  }));
+  assert.ok(!p.blocks[0]!.fallbackText.includes("bien correspondre"));
+  assert.match(p.blocks[0]!.fallbackText, /reste à confirmer/);
+});
+
+test("partial + minor_reserves SANS favorable : rien ne « va dans le sens » de rien", () => {
+  const p = buildConclusionPlan(baseInput({
+    coverage: "partial", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0, reservesShown: 1,
+  }));
+  assert.ok(!p.blocks[0]!.fallbackText.includes("va plutôt dans le sens"));
+  assert.match(p.blocks[0]!.fallbackText, /1 point reste à examiner/); // accord au SINGULIER
 });
 
 test("high + major_reserves SANS favorable : aucun positif n'est promis", () => {
@@ -819,37 +915,55 @@ function verdict(input: ConclusionPlanInput): Verdict {
     const s = input.establishedIncompatibility?.statement ?? "";
     return {
       label: "Condition non respectée", tone: "critical",
-      text: `Une de vos conditions non négociables n'est pas respectée ici : ${s}`,
+      text: `L'une de vos conditions non négociables n'est pas respectée ici : ${s}`,
     };
   }
   if (input.coverage === "none") {
     return {
-      label: "Rien encore examiné", tone: "neutral",
-      text: "Ce lieu n'a pas encore pu être évalué au regard de vos critères.",
+      label: "Lecture non disponible", tone: "neutral",
+      // « ne peut pas encore » et non « n'a pas encore pu » : le présent parle de l'état du dossier,
+      // le passé composé raconterait un échec du moteur.
+      text: "Ce lieu ne peut pas encore être évalué au regard de vos critères.",
     };
   }
 
   const n = input.majorReserveCount;
+  const r = input.reservesShown;
+  // AUCUNE PHRASE NE PROMET UN POSITIF QUI N'EXISTE PAS. `minor_reserves` sans le moindre critère
+  // favorable est un dossier qui n'a produit QUE des réserves, fussent-elles secondaires : écrire
+  // « ce lieu semble bien correspondre » y serait précisément le mensonge que cette slice interdit.
+  // Et « plusieurs dimensions » exige DEUX critères favorables, jamais un booléen à vrai.
+  const plusieurs = input.favorableCount >= 2;
+
   if (input.coverage === "high") {
     if (input.orientation === "favorable") {
       return { label: "Bonne correspondance", tone: "positive", text: "Ce lieu semble bien correspondre à votre projet." };
     }
     if (input.orientation === "minor_reserves") {
-      const r = input.reservesShown;
+      const reste = r > 1 ? `${r} points restent` : `${r} point reste`;
+      return input.hasFavorable
+        ? {
+            label: "Correspondance favorable", tone: "positive",
+            text: `Ce lieu semble bien correspondre à votre projet. ${reste} à examiner.`,
+          }
+        : {
+            label: "Correspondance à confirmer", tone: "neutral",
+            text: `La correspondance avec votre projet reste à confirmer : ${reste} à examiner.`,
+          };
+    }
+    // major_reserves
+    if (!input.hasFavorable) {
       return {
-        label: "Correspondance favorable", tone: "positive",
-        text: `Ce lieu semble bien correspondre à votre projet. ${r > 1 ? `${r} points restent` : `${r} point reste`} à examiner.`,
+        label: "Correspondance à nuancer", tone: "caution",
+        text: `${points(n, "structurant", "empêche")} encore de considérer ce lieu comme une bonne correspondance avec votre projet.`,
       };
     }
-    return input.hasFavorable
-      ? {
-          label: "Correspondance à nuancer", tone: "caution",
-          text: `Ce lieu répond à plusieurs dimensions de votre projet, mais ${points(n, "structurant", "empêche")} encore de conclure nettement.`,
-        }
-      : {
-          label: "Correspondance à nuancer", tone: "caution",
-          text: `${points(n, "structurant", "empêche")} encore de considérer ce lieu comme une bonne correspondance avec votre projet.`,
-        };
+    return {
+      label: "Correspondance à nuancer", tone: "caution",
+      text: plusieurs
+        ? `Ce lieu répond à plusieurs dimensions de votre projet, mais ${points(n, "structurant", "empêche")} encore de conclure nettement.`
+        : `Ce lieu présente des éléments favorables pour votre projet, mais ${points(n, "structurant", "empêche")} encore de conclure nettement.`,
+    };
   }
 
   // coverage === "partial"
@@ -860,10 +974,15 @@ function verdict(input: ConclusionPlanInput): Verdict {
     };
   }
   if (input.orientation === "minor_reserves") {
-    return {
-      label: "Correspondance à confirmer", tone: "neutral",
-      text: "Ce lieu va plutôt dans le sens de votre projet sur les critères déjà couverts, mais la lecture reste incomplète.",
-    };
+    return input.hasFavorable
+      ? {
+          label: "Correspondance à confirmer", tone: "neutral",
+          text: "Ce lieu va plutôt dans le sens de votre projet sur les critères déjà couverts, mais la lecture reste incomplète.",
+        }
+      : {
+          label: "Correspondance à confirmer", tone: "neutral",
+          text: `La lecture reste incomplète, et ${r > 1 ? `${r} points restent` : `${r} point reste`} à examiner avant de pouvoir conclure sur ce lieu.`,
+        };
   }
   return {
     label: "Lecture encore partielle", tone: "caution",
@@ -883,10 +1002,19 @@ Le champ `scope` reste dans le plan (le rendu l'affiche en tête de carte), mais
 ```ts
 import { buildCriteriaRegistry, uncoveredConstraints, uncoveredPreferences } from "./criteria-registry.ts";
 
+const RESERVE_ROLES = new Set<DecisionFact["role"]>(["verification", "compromise", "unknown"]);
+
 export function assembleDossier(run: RunResult, project: UserProject, scope: "commune" | "commune+adresse"): Dossier {
   const summary = buildCriteriaRegistry(project, run);
   const uncovered = uncoveredConstraints(summary);
   // … sections, shown … (inchangé)
+
+  // Les réserves ANNONCÉES sont celles qu'on MONTRE. `shown` est post-plafonnement : compter les faits
+  // ÉMIS annoncerait « 3 points structurants » là où le lecteur ne voit que 2 cartes. C'est le bug
+  // corrigé au slice 1, et il reviendrait par une autre porte si le verdict comptait ailleurs.
+  const reservesShownFacts = shown.filter((f) => RESERVE_ROLES.has(f.role));
+  const majorReserveCount = reservesShownFacts.filter((f) => f.materialityTier !== "secondary").length;
+
   const narrativePlan = buildConclusionPlan({
     scope,
     conclusionState: state,
@@ -898,8 +1026,9 @@ export function assembleDossier(run: RunResult, project: UserProject, scope: "co
     coverage: summary.coverage,
     orientation: summary.orientation,
     hasFavorable: summary.hasFavorable,
-    majorReserveCount: summary.majorReserveCount,
-    reservesShown: shown.filter((f) => f.role !== "incompatibility").length,
+    favorableCount: summary.favorableCount,
+    majorReserveCount,
+    reservesShown: reservesShownFacts.length,
   });
   return { /* … */ criteria: summary, /* … */ };
 }
@@ -920,7 +1049,7 @@ Attendu : tous verts, 0 erreur TS. Les tests d'assembleur qui assertaient l'anci
 - [ ] **Step 6 : Commit**
 
 ```bash
-git add src/lib/decision/conclusion-plan.ts src/lib/decision/decision-assembler.ts src/lib/decision/decision-fact.ts src/lib/decision/*.test.ts
+git add src/lib/decision/criteria-registry.ts src/lib/decision/criteria-registry.test.ts src/lib/decision/project-view.ts src/lib/decision/conclusion-plan.ts src/lib/decision/decision-assembler.ts src/lib/decision/decision-fact.ts src/lib/decision/*.test.ts
 git commit -m "feat(decision): le verdict répond enfin « ce lieu correspond-il ? »
 
 Le déterministe gagne le droit de dire qu'un lieu correspond, à condition de
@@ -931,7 +1060,14 @@ sur une intuition, et jamais générée par un LLM.
 lecteur demandait si ce lieu lui convenait.
 
 Le cas « rien d'examiné » est le garde-fou : sans lui, un dossier vide aurait
-affiché « plusieurs éléments vont dans le sens de votre projet »."
+affiché « plusieurs éléments vont dans le sens de votre projet ».
+
+Aucune phrase ne promet un positif inexistant : `minor_reserves` sans le moindre
+critère favorable ne dit plus « ce lieu semble bien correspondre », et « plusieurs
+dimensions » exige deux critères favorables, jamais un booléen à vrai.
+
+Le registre remplace COVERED_PREFERENCE_KEYS, la liste tenue à la main : la
+couverture est désormais une conséquence observée des règles."
 ```
 
 ---
@@ -1185,19 +1321,30 @@ export function ConclusionBlock({ plan, blocks }: { plan: ConclusionNarrativePla
 `DossierDecisionSection.tsx` :
 - lignes 119-134 : `<ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} />` (deux occurrences), et `<ConclusionRedigee plan={…} insee={…} scopeKey={…} />` sans `state`.
 - **supprimer** le bloc `dossier.uncovered.length > 0` (lignes 163-168) : l'information vit désormais dans l'encart « Limite de ce constat », plus haut, où elle est mieux placée. La garder ici ferait croire à deux niveaux de réserve distincts.
-- **ajouter** l'intertitre au-dessus de la grille des cartes (avant `<div className="grid gap-3.5">`) :
+- **ajouter** l'intertitre au-dessus de la grille des cartes (avant `<div className="grid gap-3.5">`), avec une **table par posture** : les postures sont **quatre** (`recherche`, `adresse`, `habitant`, `recherche_quartier`), et un ternaire sur `habitant` en oublierait deux. « Avant de décider » n'a aucun sens pour quelqu'un qui habite déjà là ; il en a pour qui cherche.
+
+```tsx
+// Au-dessus du composant, à côté de SECTION_ACCENT :
+const RESERVES_HEADING: Record<ProjectPosture, string> = {
+  recherche: "à examiner avant de décider",
+  recherche_quartier: "à examiner avant de décider",
+  adresse: "à examiner avant de vous engager",
+  habitant: "à comprendre ou surveiller",
+};
+function reservesHeading(posture: ProjectPosture, count: number): string {
+  return `Les ${count} point${count > 1 ? "s" : ""} ${RESERVES_HEADING[posture]}`;
+}
+```
 
 ```tsx
 {dossier.narrativePlan.reservesCount > 0 ? (
   <p className="mt-8 mb-4 font-mono text-[11px] tracking-[0.12em] uppercase text-ghost">
-    {`Les ${dossier.narrativePlan.reservesCount} points ${
-      // La posture commande, comme dans l'assembleur : « avant de décider » n'a aucun sens pour
-      // quelqu'un qui habite déjà là.
-      dossier.narrativePlan.posture === "habitant" ? "à comprendre ou surveiller" : "à examiner avant de décider"
-    }`}
+    {reservesHeading(dossier.narrativePlan.posture, dossier.narrativePlan.reservesCount)}
   </p>
 ) : null}
 ```
+
+Importer `ProjectPosture` depuis `@/lib/user-project`.
 
 - [ ] **Step 3 : Compiler et builder**
 
