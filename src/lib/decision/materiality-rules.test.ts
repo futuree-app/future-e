@@ -118,6 +118,37 @@ test("règle 5 inondation : exposition inconnue -> aucun fait", () => {
   assert.equal(r.facts.some((x) => x.ruleId === "territoire.inondation-exposition"), false);
 });
 
+// ── Règle 3 : le département (slice 2.1) ───────────────────────────────────────
+// La donnée est DANS le code INSEE : ne pas l'examiner obligeait le dossier à écrire « nous n'avons
+// pas examiné les départements visés » sur un rapport qui porte le nom de la commune.
+
+test("règle dept : déclaré et respecté -> satisfied, contrainte couverte", () => {
+  const p = project({ reformulation: "x", hardConstraints: { departements: ["31"] }, preferences: [] });
+  const r = runRules(facts({ insee: "31555", nom: "Toulouse" }), p);
+  const ev = r.evaluations.find((e) => e.ruleId === "territoire.departement-hors-liste");
+  assert.equal(ev?.outcome, "satisfied");
+  assert.ok(r.coveredHardConstraints.includes("departements"));
+});
+
+test("règle dept : déclaré et NON respecté -> incompatibilité établie, critique", () => {
+  const p = project({ reformulation: "x", hardConstraints: { departements: ["33"] }, preferences: [] });
+  const r = runRules(facts({ insee: "31555", nom: "Toulouse" }), p);
+  const f = r.facts.find((x) => x.ruleId === "territoire.departement-hors-liste");
+  assert.ok(f && f.role === "incompatibility");
+  assert.equal(f.evidenceStrength, "established");
+  assert.equal(f.hardConstraintKey, "departements");
+  assert.equal(f.materialityTier, "decision_critical");
+  assert.match(f.statement, /31/);
+});
+
+test("règle dept : aucun département déclaré -> not_applicable, pas de couverture", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [] });
+  const r = runRules(facts({ insee: "31555" }), p);
+  const ev = r.evaluations.find((e) => e.ruleId === "territoire.departement-hors-liste");
+  assert.equal(ev?.outcome, "not_applicable");
+  assert.equal(r.coveredHardConstraints.includes("departements"), false);
+});
+
 // ── Le contrat des outcomes (slice 2.1) ────────────────────────────────────────
 // not_applicable = HORS SUJET. satisfied = déclaré, examiné, RIEN À REDIRE.
 // Les confondre faisait compter une bonne nouvelle comme un trou de couverture.

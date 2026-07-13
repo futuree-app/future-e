@@ -8,6 +8,7 @@ import type {
 } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import { nearSeaLimitKm, communeSizeBounds, declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } from "./project-view.ts";
+import { departementFromInsee } from "../insee-departement.ts";
 import { LOGEMENT_RULES } from "./logement-rules.ts";
 
 // Formatage déterministe des milliers (espace ASCII, jamais toLocaleString qui varie).
@@ -81,7 +82,40 @@ function scoreEvidence(nom: string, key: string, score: number): EvidenceRef {
   return { factId: `scores.${key}`, module: "territoire", label: `Territoire · ${nom}`, observedValue: `${Math.round(score)}/100`, grain: "commune", href: territoireHref };
 }
 
-// Règle 3 : compromis transport × chaleur. Deux priorités déclarées qui tirent en sens opposés sur
+// Règle 3 : département hors de la liste déclarée. La donnée est DANS le code INSEE : ne pas l'examiner
+// obligeait le dossier à écrire « nous n'avons pas examiné les départements visés » sur un rapport qui
+// porte le nom de la commune. Le lecteur voyait la contradiction, et elle coûtait plus de confiance que
+// n'importe quel défaut de mise en page.
+const RULE_DEPT = "territoire.departement-hors-liste";
+const ruleDepartement: DecisionRule = {
+  id: RULE_DEPT,
+  module: "territoire",
+  hardConstraint: "departements",
+  evaluate: (f, p): RuleEvaluation => {
+    const wanted = p.parsed?.hardConstraints?.departements ?? [];
+    if (wanted.length === 0) {
+      return { ruleId: RULE_DEPT, projectKeys: ["departements"], outcome: "not_applicable", facts: [], reason: "aucun département déclaré" };
+    }
+    const dept = departementFromInsee(f.insee);
+    if (dept == null) {
+      return { ruleId: RULE_DEPT, projectKeys: ["departements"], outcome: "uncertain", facts: [], reason: "code INSEE illisible" };
+    }
+    if (wanted.includes(dept)) {
+      return { ruleId: RULE_DEPT, projectKeys: ["departements"], outcome: "satisfied", facts: [], reason: "département dans la liste" };
+    }
+    const ev: EvidenceRef = { factId: "insee", module: "territoire", label: `Territoire · ${f.nom}`, observedValue: `Département ${dept}`, grain: "commune", href: territoireHref };
+    const fact: IncompatibilityFact = {
+      id: `${f.insee}:departement`, ruleId: RULE_DEPT, sourceFactIds: ["insee"], module: "territoire",
+      role: "incompatibility", evidenceStrength: "established", hardConstraintKey: "departements",
+      materialityTier: "decision_critical",
+      statement: `Cette commune est dans le département ${dept}, hors de ceux que vous avez posés comme condition (${wanted.join(", ")}).`,
+      evidence: [ev],
+    };
+    return { ruleId: RULE_DEPT, projectKeys: ["departements"], outcome: "incompatible", facts: [fact], reason: "département hors liste" };
+  },
+};
+
+// Règle 4 : compromis transport × chaleur. Deux priorités déclarées qui tirent en sens opposés sur
 // cette commune. Texte honnête (pas de « meilleure », pas de « train »), preuve de chaque côté.
 const RULE_COMPROMIS = "territoire.compromis-transport-chaleur";
 const ruleCompromis: DecisionRule = {
@@ -160,7 +194,7 @@ const ruleInondation: DecisionRule = {
   },
 };
 
-export const REGISTRY: DecisionRule[] = [ruleMer, ruleTaille, ruleCompromis, ruleConfort, ruleInondation, ...LOGEMENT_RULES];
+export const REGISTRY: DecisionRule[] = [ruleMer, ruleTaille, ruleDepartement, ruleCompromis, ruleConfort, ruleInondation, ...LOGEMENT_RULES];
 
 // Invariants : protègent toutes les futures règles. JETTE (fail-fast) en cas de violation.
 export function assertFactValid(fact: DecisionFact, project: UserProject): void {
