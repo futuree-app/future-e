@@ -199,7 +199,7 @@ export default function ChaleurPage() {
           <p className="section-sub">Un diagnostic complet, et deux guides ciblés.</p>
 
           {/* Rapport interactif — mis en avant */}
-          <Link href="/rapport" className="rapport-cta">
+          <Link href="/rapport" prefetch={false} className="rapport-cta">
             <div className="rapport-cta-eyebrow">Rapport interactif personnalisé · futur•e</div>
             <p className="rapport-cta-title">
               Votre commune, votre profil,<br />

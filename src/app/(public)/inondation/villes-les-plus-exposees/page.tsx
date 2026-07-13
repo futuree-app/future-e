@@ -274,7 +274,7 @@ export default async function InondationTop10() {
               Ces dix villes concentrent les risques les plus élevés, mais le risque d'inondation existe dans des milliers de communes françaises. Cherchez la vôtre pour voir son niveau d'exposition, puis construisez votre rapport interactif personnalisé.
             </p>
             <div className="cta-links">
-              <Link href="/rapport" className="cta-btn">Créer mon rapport interactif →</Link>
+              <Link href="/rapport" prefetch={false} className="cta-btn">Créer mon rapport interactif →</Link>
               <Link href="/inondation" className="cta-sec">Explorer par commune</Link>
               <Link href="/comparateur" className="cta-sec">Comparer deux villes</Link>
             </div>

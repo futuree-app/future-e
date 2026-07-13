@@ -3,22 +3,16 @@
 // calme coloré par l'état, preuves en chips. Présentationnel : reçoit un Dossier déjà assemblé,
 // aucun LLM. Ouvert à tous les payants : le cas creux reste digne.
 import Link from "next/link";
-import type { Dossier, DecisionFact, ConclusionState } from "@/lib/decision/decision-fact";
+import { Suspense } from "react";
+import type { Dossier, DecisionFact } from "@/lib/decision/decision-fact";
+import { ConclusionBlock, planToBlocks } from "@/components/report/ConclusionBlock";
+import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 
 const SECTION_ACCENT: Record<string, string> = {
   incompatibilities: "var(--red)",
   compromises: "var(--orange)",
   unknowns: "var(--amethyst)",
   verifications: "var(--info)",
-};
-
-// Le verdict : une couleur et un court libellé d'état, calmes (structure = information).
-const STATE_META: Record<ConclusionState, { color: string; label: string }> = {
-  established_incompatibility: { color: "var(--red)", label: "Un point de blocage" },
-  no_incompatibility_established: { color: "var(--accent)", label: "Aucun blocage établi" },
-  no_hard_constraint_declared: { color: "var(--accent)", label: "Aucune condition absolue déclarée" },
-  insufficient_evidence: { color: "var(--ghost)", label: "Lecture incomplète" },
-  project_not_structured: { color: "var(--ghost)", label: "À préciser" },
 };
 
 function Chip({ label, value, href, color }: { label: string; value?: string; href?: string; color: string }) {
@@ -82,15 +76,19 @@ export function DossierDecisionSection({
   dossier,
   logement,
   logementStatus = "none",
+  insee,
+  scopeKey,
 }: {
   dossier: Dossier;
   // Analyse logement déjà sauvegardée pour cette commune (adresse renseignée), ou null.
   logement?: { href: string; label: string } | null;
   // Slice 1.5 : état de l'augmentation adresse en couche de rendu (pas un état de l'assembleur).
   logementStatus?: "none" | "pending" | "done" | "unavailable";
+  // Slice 2 : identité de l'artefact narratif. scopeKey = "commune" | "logement:<id>".
+  insee: string;
+  scopeKey: string;
 }) {
   const structured = dossier.conclusionState !== "project_not_structured";
-  const state = STATE_META[dossier.conclusionState];
 
   return (
     <section className="mt-14" id="dossier-decision">
@@ -116,13 +114,24 @@ export function DossierDecisionSection({
         </div>
       ) : null}
 
-      {/* Le verdict : carte glass, filet d'état à gauche, libellé d'état mono */}
-      <div className="glass rounded-2xl p-7 mb-3.5" style={{ borderLeft: `2px solid ${state.color}` }}>
-        <p className="font-mono text-[10px] tracking-[0.14em] uppercase mb-2.5" style={{ color: state.color }}>
-          {state.label}
-        </p>
-        <p className="text-[18px] leading-[1.6] text-label">{dossier.conclusion}</p>
-      </div>
+      {/* Le verdict. En « pending », le dossier n'est PAS final (l'augmentation adresse arrive) :
+          générer ici coûterait un second appel Sonnet, jeté quelques secondes plus tard. */}
+      {logementStatus === "pending" ? (
+        <ConclusionBlock state={dossier.conclusionState} blocks={planToBlocks(dossier.narrativePlan)} />
+      ) : (
+        <Suspense
+          fallback={
+            <ConclusionBlock state={dossier.conclusionState} blocks={planToBlocks(dossier.narrativePlan)} />
+          }
+        >
+          <ConclusionRedigee
+            plan={dossier.narrativePlan}
+            state={dossier.conclusionState}
+            insee={insee}
+            scopeKey={scopeKey}
+          />
+        </Suspense>
+      )}
 
       {/* Les raisons, dans l'idiome des cartes-modules (filet accent en tête) */}
       <div className="grid gap-3.5">

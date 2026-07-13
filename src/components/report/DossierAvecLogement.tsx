@@ -11,7 +11,7 @@ import type { DpeRecord } from "@/lib/dpe";
 import type { UserProject } from "@/lib/user-project";
 
 export async function DossierAvecLogement({
-  project, address, savedDpe, communeFacts, communeDossier, logementLink,
+  project, address, savedDpe, communeFacts, communeDossier, logementLink, insee, scopeKey,
 }: {
   project: UserProject;
   address: ResolvedAddress;
@@ -19,16 +19,30 @@ export async function DossierAvecLogement({
   communeFacts: ModuleFacts;
   communeDossier: Dossier;
   logementLink: { href: string; label: string } | null;
+  // Slice 2 : identité de l'artefact narratif de CE dossier (augmenté de l'adresse).
+  insee: string;
+  scopeKey: string;
 }) {
   try {
     const data = await fetchLogementDecisionDataWithTimeout(address);
     const logement = buildLogementFacts(data, savedDpe, address.label);
     const facts: ModuleFacts = { ...communeFacts, hasAddress: true, logement };
     const dossier = assembleDossier(runRules(facts, project), project, "commune+adresse");
-    return <DossierDecisionSection dossier={dossier} logement={logementLink} logementStatus="done" />;
+    return (
+      <DossierDecisionSection
+        dossier={dossier} logement={logementLink} logementStatus="done"
+        insee={insee} scopeKey={scopeKey}
+      />
+    );
   } catch (error) {
     if (error instanceof LogementDataUnavailableError) {
-      return <DossierDecisionSection dossier={communeDossier} logement={logementLink} logementStatus="unavailable" />;
+      // Le dossier COMMUNE devient le dossier final : sa conclusion peut être rédigée, au scope commune.
+      return (
+        <DossierDecisionSection
+          dossier={communeDossier} logement={logementLink} logementStatus="unavailable"
+          insee={insee} scopeKey="commune"
+        />
+      );
     }
     throw error; // bug de code : reste visible (frontière d'erreur / observabilité)
   }
