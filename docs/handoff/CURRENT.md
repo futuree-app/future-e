@@ -1,44 +1,109 @@
 # Passation — session en cours
 
-**Horodatage** : 2026-07-12 · **Branche courante** : `main`. Poussée jusqu'à `6c18eec` ; **`1fadcd5` (refonte visuelle) commité localement, à pousser**. Aucune PR ouverte.
+**Horodatage** : 2026-07-13 · **Branche courante** : `feat/dossier-slice-2-conclusion-redigee`
+(10 commits d'avance sur `origin/main`, **rien de poussé**, aucune PR ouverte).
 
 ## Objectif en cours
-Chantier **« architecture décision motivée » du rapport payant**. Le **slice 1 du dossier de décision** (« En une minute ») est LIVRÉ, validé en live et poli au design system. La suite naturelle est le **slice 1.5** (brancher les faits Logement quand une adresse est présente) puis le **slice 2** (IA de formulation bornée, fallback déterministe permanent).
 
-## Fait dans cette session (tout sur `main`)
-1. **Merges de nettoyage** (`0e801f7`, `da807fb`) : les 2 dernières branches non mergées (Face 2 Logement patrimoine ABF + risques bâti au point) intégrées, conflits résolus, branches locales périmées supprimées, tag de sécurité `pre-merge-safety-2026-07-11`.
-2. **Durcissement de la persistance du projet** (`3b6bc85`, `6c18eec`) : contrat `UserProjectInput`/`UserProject` séparés (schemaVersion + updatedAt serveur), `/api/profile` `if_empty` atomique (garde SQL `.is(null)`) et retourne le projet enregistré, `ProjectSummaryCard` sauvegarde honnête (`response.ok`, éditeur ouvert sur échec, projet retourné par le serveur) + `router.refresh` (régénère le dossier), `OuVivreProjectSync` persiste `rawText` sans `parsed` + `router.refresh`, sélecteur de posture (aucun défaut deviné), `mergeProjectEdit` retiré. Plan : `docs/superpowers/plans/2026-07-11-persistance-projet-durcissement.md`.
-3. **Dossier de décision slice 1** (`5768229`, `42c8c95`, `0653358`) : moteur déterministe sous `src/lib/decision/` (contrats union discriminée, lecteurs projet + couverture, adaptateur `module-facts-map`/`territory-facts`, registre 5 règles `evaluate()`, invariants `assertFactValid`, assembleur), page serveur `DossierDecisionSection` insérée sur `/rapport` payant, 3 arbitrages vault. Spec v2 `docs/superpowers/specs/2026-07-11-dossier-decision-materialite-design.md`, plan v2 `.../plans/2026-07-11-dossier-decision-materialite.md`.
-4. **Refonte visuelle** (`1fadcd5`, non poussé) : `ProjectSummaryCard` + `DossierDecisionSection` réécrites dans le design system futur•e (glass, eyebrow mono à pastille, Instrument Serif, verdict à filet d'état, preuves en chips) ; **bug de visibilité des boutons de posture en mode édition corrigé**.
+**Slice 2 du dossier de décision** (« En une minute », hub `/rapport`) : l'IA **rédige** les registres
+de nuance de la conclusion, le déterministe **décide** tout le reste. Le code est **écrit, testé
+(100 tests verts), buildé, et validé sur le vrai modèle** (sonde : 15/15 blocs retenus sur 5 tirages).
+Il reste la **vérification à l'écran, flag allumé** : elle a été interrompue en plein milieu.
 
-## Décisions prises (porteur, non encore au vault au-delà des 3 arbitrages)
-- **Slice 1 = Territoire au grain commune**, Logement en extension 1.5 déclenchée par la présence d'une adresse (le profil ne stocke pas d'adresse). Même registre/contrats/assembleur/page.
-- **Compromis** conservé (pas « profil contrasté ») avec texte honnête et preuve par côté.
-- **Page ouverte à tous les payants dès la livraison** (pas de feature flag) ; le cas creux doit rester digne.
-- Revue adversariale (ChatGPT) intégrée en v2 : modèle de couverture explicite, absence de donnée en `null`, union discriminée, états de conclusion honnêtes, règles montagne/CatNat remplacées par communeSize/exposition inondation.
+## Fait dans cette session
+
+1. **Spec** `docs/superpowers/specs/2026-07-13-dossier-decision-slice-2-conclusion-redigee-design.md`
+   et **plan** `docs/superpowers/plans/2026-07-13-dossier-decision-slice-2-conclusion-redigee.md`
+   (commits `2e62b37`, `132731e`, durcis en `f2fc12f` après revue adversariale ChatGPT).
+2. **Moteur** (6 commits, `76c7121` → `3efdd97`) :
+   - `src/lib/stable-stringify.ts` (universel, **jette sur `undefined`**) + `src/lib/server/sha256.ts` ;
+     `logement-synthesis-cache.ts` dédupliqué et rendu **total** (`?? null` explicites).
+   - `src/lib/decision/conclusion-plan.ts` : `ConclusionNarrativePlan` porté par le `Dossier`
+     (présence, ORDRE, `sourceIds`, `requiredPhrases`, `allowedNumbers`, `fallbackText`, `generable`),
+     `selectLead` (single/tied/none), `shouldGenerateNarrative` (le gate).
+   - `src/lib/decision/conclusion-validate.ts` : le vrai contrat de sortie, 9 motifs de rejet,
+     récupération **bloc par bloc**.
+   - `src/lib/decision/conclusion-hash.ts` : SHA-256 (plan + prompt + modèle + contrat).
+   - `src/lib/decision/conclusion-prompt.ts` : le prompt, partagé composant ↔ sonde.
+   - `src/lib/server/decision-narrative-store.ts` : lecture validée, upsert **convergent**, pruning.
+   - `src/components/report/{ConclusionBlock,ConclusionRedigee}.tsx` + branchement
+     `DossierDecisionSection` / `DossierAvecLogement` / `rapport/page.tsx`.
+   - `scripts/probe-conclusion.ts` : la **sonde** (mesure le taux de survie sur le vrai modèle).
+3. **Migration appliquée en base** (MCP Supabase, projet `xkewgsccadjmondzmjxj`) :
+   `supabase/23_decision_narrative.sql` → table `decision_narrative` créée, RLS + 3 policies, 0 ligne.
+4. **Corrections trouvées par la sonde** (`3efdd97`) : au premier passage, **1 bloc sur 3** survivait,
+   tests au vert. Trois contraintes à moi ne tenaient pas (noyau du libellé sans article, copie du
+   constat du lead exigée à tort, nombres en toutes lettres). Après correction : **15/15**.
+
+## Décisions prises (porteur, hors vault)
+
+- **Le verdict n'est JAMAIS généré** (`generable: false`). C'est la phrase qui peut renverser une
+  décision perçue (« ce lieu vous correspond »). Le modèle le reçoit en lecture seule pour que les
+  registres suivants s'y articulent.
+- **Hiérarchie éditoriale des réserves** (ordre gravé) : `verdict` → `unexamined_hard_constraints` →
+  `reserves_found` → `uncovered_priorities`. Une contrainte dure non examinée et une préférence non
+  couverte ne partagent jamais un bloc.
+- **Gate par complexité narrative**, jamais pour maquiller un dossier pauvre. Conséquence assumée :
+  sur la couverture actuelle (2 contraintes Territoire sur 11), le gate rend souvent `false` et le
+  déterministe reste affiché. **Le slice 2 améliore la voix, pas la matière.**
+- **L'invariant des nombres est « aucun nombre FAUX »**, pas « aucun nombre absent du repli ».
+- **Artefact durable** (`await upsert` puis relecture canonique), clé
+  `(user, insee, scope_key, input_hash)`.
+- **Flag serveur `DOSSIER_NARRATIVE`, OFF par défaut.**
 
 ## État git
-- `main`, arbre propre sauf ce fichier. **`1fadcd5` à pousser** (`git push origin main`).
-- Tests : `node --test src/lib/decision/*.test.ts src/lib/user-project.test.ts` → 42 verts. `npx tsc --noEmit` → 0.
-- Aucune PR ouverte.
 
-## Validé en live (compte `<compte de test local>`, Toulouse, via Playwright headless-shell-1217)
-Login → hub payant → dossier affiché ; cas creux digne ; cas riche (édition « petite commune < 20 000 hab, bord de mer ») → incompatibilité établie « 504 078 habitants » avec preuve, **couverture** « Non encore examiné : la proximité de la mer » ; sélecteur de posture visible ; sauvegarde honnête ; dossier régénéré après édition ; projet restauré. Design affichage + édition re-screenshotés OK.
+- Branche `feat/dossier-slice-2-conclusion-redigee`, **10 commits non poussés**, aucune PR.
+- Non commité : **`verif-slice2.mjs`** (script Playwright de vérif live, à la racine ; à déplacer dans
+  `scripts/` ou à supprimer avant de finir).
+- `npx tsc --noEmit` → 0. `node --test src/lib/decision/*.test.ts src/lib/*.test.ts` → **100 verts**.
+  `npm run build` → compile (les « Retrying » sur `/inondation/[insee]` sont du SSG lent, préexistant).
 
 ## Prochaine étape immédiate
-1. `git push origin main` (pousser `1fadcd5`).
-2. Démarrer le **slice 1.5** : dans `buildCommuneDossier`/`loadModuleFacts`, passer `hasAddress: true` + charger les faits Logement quand une adresse est disponible, et migrer les règles de `src/lib/logement-checklist.ts` dans le registre (elles deviennent des `evaluate()` retournant des `verification`/`incompatibility`). Le contrat `ModuleFacts` gagne un bloc `logement?` optionnel ; aucune règle Territoire ne change.
+
+**Terminer la vérification à l'écran, flag allumé.** Le compte de test a un projet SANS contrainte
+dure : le gate reste donc fermé et rien ne se génère. Il faut un dossier riche. Séquence :
+
+1. Ajouter `DOSSIER_NARRATIVE=true` dans `.env.local`, puis **redémarrer** le serveur de dev
+   (Next refuse un second serveur pour le même répertoire : `kill` l'existant d'abord).
+2. Donner au compte un projet riche (contrainte dure non couverte + priorités non couvertes) :
+   la colonne est **`user_profiles.user_project`** (jsonb), PAS `profiles` (cette table n'existe pas).
+   **Sauvegarder la valeur d'origine avant de la remplacer, et la restaurer après.**
+   Ou, plus simple et sans toucher la base : éditer le projet depuis l'UI (`ProjectSummaryCard`).
+3. Ouvrir `/rapport` (compte `<compte de test local>` / `<identifiant retiré>`, Toulouse, adresse
+   7 Rue du Taur déjà analysée) et vérifier : le déterministe s'affiche, puis est **remplacé d'un
+   bloc** ; le verdict est **mot pour mot** celui du déterministe ; les registres restent distincts et
+   dans l'ordre ; aucun nombre faux ; une ligne apparaît dans `decision_narrative` ; **recharger ne
+   relance aucun appel LLM** et rend le texte identique.
+4. Vérifier le gate sur un dossier pauvre (aucune génération, aucune ligne écrite).
+5. Puis : mettre à jour `/memory/project_dossier_decision.md`, pousser la branche, ouvrir la PR.
+   **Ne pas oublier `DOSSIER_NARRATIVE` côté Vercel** si on veut que ça vive en production.
 
 ## À lire d'abord à la reprise
-1. `/memory/MEMORY.md` puis les fiches `project_dossier_decision`, `project_persistance_projet`, `business_moat_assemblage`.
-2. Spec v2 `docs/superpowers/specs/2026-07-11-dossier-decision-materialite-design.md` (le changelog v1→v2 résume les 5 blocueurs corrigés).
-3. Plan v2 `docs/superpowers/plans/2026-07-11-dossier-decision-materialite.md` (structure du moteur, tâches).
-4. `docs/vault/arbitrages/{dossier-decision-eliminatoire-contrainte-declaree,deterministe-selectionne-ia-formule,rapport-un-produit-semantique-par-posture}.md`.
-5. `docs/handoff/AUTO-SNAPSHOT.md` (fraîcheur).
+
+1. `/memory/MEMORY.md`, puis la fiche `project_dossier_decision` (slices 1 et 1.5).
+2. `docs/superpowers/specs/2026-07-13-dossier-decision-slice-2-conclusion-redigee-design.md` (§3 le
+   périmètre, §5 le gate, §6 le flux, §8 l'artefact).
+3. `docs/vault/arbitrages/deterministe-selectionne-ia-formule.md`.
+4. `docs/handoff/AUTO-SNAPSHOT.md` (fraîcheur).
 
 ## Pièges / fils ouverts
-- **`comparateur-vie.ts` fait `import "server-only"`** : tout test `node --test` qui **value-importe** ce module casse (ERR_MODULE_NOT_FOUND). Les libs decision n'en prennent que des **types** (effacés), sauf l'adaptateur `territory-facts.ts` (value-import) qui n'est donc PAS testé en isolation ; sa logique pure vit dans `module-facts-map.ts` (testé). À respecter pour le slice 1.5.
-- **Chromium Playwright** : version installée `chromium-1217`, mais playwright-core 1.61 veut `chromium_headless_shell-1228` absent. Lancer avec `executablePath` pointant `~/Library/Caches/ms-playwright/chromium_headless_shell-1217/chrome-headless-shell-mac-x64/chrome-headless-shell`.
-- **`isBuyer`** (`project-view.ts`) n'est utilisé par aucune règle du slice 1 (les règles gatent sur le grain, pas l'intention). Gardé comme garde-fou doctrinal + testé ; le brancher quand une règle acheteur arrive, sinon candidat au retrait.
-- **Couverture partielle** : seules `nearSea` et `communeSize` sont couvertes. Un projet déclarant d'autres contraintes dures les verra listées « non examinées » (comportement voulu). Élargir la couverture (5-8 dimensions) fait partie de la maturation avant de compter sur le cas riche fréquent.
-- **Cas creux fréquent** : beaucoup de projets n'ont ni contrainte dure ni préférence couverte → dossier = conclusion seule. C'est honnête mais maigre ; l'ajout de règles (préférences → compromis/vérifications) est le levier.
+
+- **La sonde est l'outil de non-régression du prompt.** `node --env-file=.env.local
+  scripts/probe-conclusion.ts`. Toute retouche du prompt impose de **bumper
+  `DECISION_NARRATIVE_PROMPT_VERSION`** (`conclusion-hash.ts`), sinon les artefacts déjà écrits
+  continuent d'être servis comme s'ils étaient courants. Idem `DECISION_NARRATIVE_CONTRACT_VERSION`
+  si `conclusion-validate` change de contrat.
+- **`server-only` n'est pas résolvable par Node** (piège maison `comparateur-vie`). C'est pourquoi
+  `src/lib/server/sha256.ts` ne porte PAS la directive : un test le value-importe. La garantie est
+  conventionnelle (un import client échouerait de toute façon au build sur `node:crypto`).
+- **`stableStringify` jette désormais sur `undefined`** et il tourne AUSSI dans le navigateur (gate en
+  session de `LogementSynthesis`). `buildSynthesisPayload` a été rendu total pour ça. Toute nouvelle
+  clé optionnelle dans ce payload doit être `?? null`, jamais laissée à `undefined`.
+- **Aucune génération quand `logementStatus === "pending"`** : le dossier n'est pas final, ce serait un
+  second appel Sonnet jeté. À préserver si on touche à `DossierDecisionSection`.
+- **Le vrai levier produit reste la COUVERTURE** (5-8 dimensions Territoire) et le module **Santé**,
+  qui devra entrer dans « En une minute » : le plan narratif l'absorbera sans changement
+  d'architecture (un fait Santé est un `DecisionFact` de plus, donc une réserve de plus).
+- Un serveur de dev tournait sur `:3000` (PID observé 16531) et un autre a été tenté sur `:3001` ;
+  vérifier qu'il n'en reste pas un orphelin (`lsof -i :3000`).
