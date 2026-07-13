@@ -1211,7 +1211,7 @@ Attendu : 0 erreur TS, build qui compile (les « Retrying » sur `/inondation/[i
 
 Le serveur de dev doit tourner avec `DOSSIER_NARRATIVE=true` dans `.env.local`.
 
-Compte `<compte de test local>` / `<identifiant retiré>`, Toulouse, adresse 7 rue du Taur déjà analysée. Le projet de test (déjà enregistré) :
+Se connecter avec le **compte de test configuré localement** (aucun identifiant n'est écrit dans ce dépôt), sur Toulouse, adresse 7 rue du Taur déjà analysée. Le projet de test (déjà enregistré) :
 
 > Nous étudions un appartement à Toulouse pour l'acheter. Nous devons impérativement rester en Haute-Garonne et habiter à moins de 30 minutes de la gare Matabiau, c'est non négociable. Nous tenons à des étés supportables et à un faible risque d'inondation. Comptent aussi beaucoup pour nous : un cadre calme, l'accès aux collèges et lycées, une vie locale animée et des espaces naturels à proximité.
 

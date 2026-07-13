@@ -70,8 +70,8 @@ dure : le gate reste donc fermé et rien ne se génère. Il faut un dossier rich
    la colonne est **`user_profiles.user_project`** (jsonb), PAS `profiles` (cette table n'existe pas).
    **Sauvegarder la valeur d'origine avant de la remplacer, et la restaurer après.**
    Ou, plus simple et sans toucher la base : éditer le projet depuis l'UI (`ProjectSummaryCard`).
-3. Ouvrir `/rapport` (compte `<compte de test local>` / `<identifiant retiré>`, Toulouse, adresse
-   7 Rue du Taur déjà analysée) et vérifier : le déterministe s'affiche, puis est **remplacé d'un
+3. Ouvrir `/rapport` (compte de test configuré localement, jamais d'identifiant dans le dépôt ;
+   Toulouse, adresse 7 Rue du Taur déjà analysée) et vérifier : le déterministe s'affiche, puis est **remplacé d'un
    bloc** ; le verdict est **mot pour mot** celui du déterministe ; les registres restent distincts et
    dans l'ordre ; aucun nombre faux ; une ligne apparaît dans `decision_narrative` ; **recharger ne
    relance aucun appel LLM** et rend le texte identique.
