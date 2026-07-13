@@ -5,6 +5,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import type { Dossier, DecisionFact } from "@/lib/decision/decision-fact";
+import type { ProjectPosture } from "@/lib/user-project";
 import { ConclusionBlock, planToBlocks } from "@/components/report/ConclusionBlock";
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 
@@ -14,6 +15,19 @@ const SECTION_ACCENT: Record<string, string> = {
   unknowns: "var(--amethyst)",
   verifications: "var(--info)",
 };
+
+// Le DÉCOMPTE des réserves a quitté la conclusion (où il doublait les cartes situées juste dessous) :
+// il coiffe désormais ces cartes. Une table par posture, jamais un ternaire : « avant de décider » n'a
+// aucun sens pour quelqu'un qui habite déjà là, et les postures sont quatre.
+const RESERVES_HEADING: Record<ProjectPosture, string> = {
+  recherche: "à examiner avant de décider",
+  recherche_quartier: "à examiner avant de décider",
+  adresse: "à examiner avant de vous engager",
+  habitant: "à comprendre ou surveiller",
+};
+function reservesHeading(posture: ProjectPosture, count: number): string {
+  return `Les ${count} point${count > 1 ? "s" : ""} ${RESERVES_HEADING[posture]}`;
+}
 
 function Chip({ label, value, href, color }: { label: string; value?: string; href?: string; color: string }) {
   const inner = (
@@ -117,21 +131,22 @@ export function DossierDecisionSection({
       {/* Le verdict. En « pending », le dossier n'est PAS final (l'augmentation adresse arrive) :
           générer ici coûterait un second appel Sonnet, jeté quelques secondes plus tard. */}
       {logementStatus === "pending" ? (
-        <ConclusionBlock state={dossier.conclusionState} blocks={planToBlocks(dossier.narrativePlan)} />
+        <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} />
       ) : (
         <Suspense
           fallback={
-            <ConclusionBlock state={dossier.conclusionState} blocks={planToBlocks(dossier.narrativePlan)} />
+            <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} />
           }
         >
-          <ConclusionRedigee
-            plan={dossier.narrativePlan}
-            state={dossier.conclusionState}
-            insee={insee}
-            scopeKey={scopeKey}
-          />
+          <ConclusionRedigee plan={dossier.narrativePlan} insee={insee} scopeKey={scopeKey} />
         </Suspense>
       )}
+
+      {dossier.narrativePlan.reservesCount > 0 ? (
+        <p className="mt-8 mb-4 font-mono text-[11px] tracking-[0.12em] uppercase text-ghost">
+          {reservesHeading(dossier.narrativePlan.posture, dossier.narrativePlan.reservesCount)}
+        </p>
+      ) : null}
 
       {/* Les raisons, dans l'idiome des cartes-modules (filet accent en tête) */}
       <div className="grid gap-3.5">
@@ -160,12 +175,10 @@ export function DossierDecisionSection({
         })}
       </div>
 
-      {dossier.uncovered.length > 0 ? (
-        <div className="mt-4 flex items-baseline gap-2.5 flex-wrap">
-          <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-ghost shrink-0">Non encore examiné</span>
-          <span className="text-[13px] text-muted">{dossier.uncovered.map((u) => u.label).join(", ")}.</span>
-        </div>
-      ) : null}
+      {/* La note « Non encore examiné » vivait ici, et disait une SECONDE fois ce que la conclusion
+          dit déjà. Deux emplacements laissaient croire à deux niveaux de réserve distincts. Une
+          contrainte dure non testée réduit la portée du verdict : elle se lit sous lui, dans « Limite
+          de ce constat », pas trente centimètres plus bas. */}
 
       {structured ? (
         logement ? (

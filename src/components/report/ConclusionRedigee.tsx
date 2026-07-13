@@ -15,7 +15,6 @@ import { headers } from "next/headers";
 import { generateObject } from "ai";
 import { anthropic, type AnthropicProviderOptions } from "@ai-sdk/anthropic";
 import { z } from "zod";
-import type { ConclusionState } from "@/lib/decision/decision-fact";
 import { shouldGenerateNarrative, type ConclusionNarrativePlan } from "@/lib/decision/conclusion-plan";
 import { validateGeneratedBlocks } from "@/lib/decision/conclusion-validate";
 import { CONCLUSION_SYSTEM_PROMPT } from "@/lib/decision/conclusion-prompt";
@@ -37,14 +36,13 @@ const transportSchema = z.object({ blocks: z.array(z.unknown()) });
 
 
 export async function ConclusionRedigee({
-  plan, state, insee, scopeKey,
+  plan, insee, scopeKey,
 }: {
   plan: ConclusionNarrativePlan;
-  state: ConclusionState;
   insee: string;
   scopeKey: string;
 }) {
-  const deterministe = <ConclusionBlock state={state} blocks={planToBlocks(plan)} />;
+  const deterministe = <ConclusionBlock plan={plan} blocks={planToBlocks(plan)} />;
 
   // 1. Le PREFETCH ne doit jamais déclencher une génération. Next précharge les routes liées par
   //    <Link> avant tout clic : sans cette garde, un simple survol coûterait un appel Sonnet. On teste
@@ -73,7 +71,7 @@ export async function ConclusionRedigee({
   }
   if (cached) {
     const { blocks } = validateGeneratedBlocks(plan, cached);
-    return <ConclusionBlock state={state} blocks={blocks} />;
+    return <ConclusionBlock plan={plan} blocks={blocks} />;
   }
 
   // 4. Génération. Le verdict n'est pas dans les registres confiés : il part en contexte seul.
@@ -131,9 +129,9 @@ export async function ConclusionRedigee({
     );
     await pruneNarratives(supabase, user.id, insee, scopeKey, 3);
     const { blocks: canonicalBlocks } = validateGeneratedBlocks(plan, canonical);
-    return <ConclusionBlock state={state} blocks={canonicalBlocks} />;
+    return <ConclusionBlock plan={plan} blocks={canonicalBlocks} />;
   } catch (error) {
     console.error("[dossier-narrative] persistance échouée", { insee, scopeKey, error });
-    return <ConclusionBlock state={state} blocks={blocks} />;
+    return <ConclusionBlock plan={plan} blocks={blocks} />;
   }
 }
