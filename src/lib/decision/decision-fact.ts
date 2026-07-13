@@ -4,6 +4,7 @@
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { UserProject } from "../user-project.ts";
 import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
+import type { CriteriaSummary } from "./criteria-registry.ts";
 
 export type DecisionModule = "territoire" | "logement";
 export type MaterialityTier = "decision_critical" | "structuring" | "secondary";
@@ -135,6 +136,10 @@ export type Dossier = {
   // Le plan narratif (slice 2) : présence, ordre, sources, matière obligatoire et repli de chaque
   // registre. `conclusion` en est la concaténation, gardée pour qui veut une seule phrase.
   narrativePlan: ConclusionNarrativePlan;
+  // Le registre des critères déclarés (slice 2.1) : couverture et orientation, mesurées sur ce que le
+  // LECTEUR a déclaré. Information de premier ordre du dossier, pas un détail interne de la conclusion :
+  // le comparateur et le PDF en auront besoin.
+  criteria: CriteriaSummary;
   conclusionBasis: { ruleIds: string[]; factIds: string[]; evidence: EvidenceRef[] };
   sections: DossierSection[];
   uncovered: UncoveredConstraint[];

@@ -21,6 +21,12 @@ function baseInput(over: Partial<ConclusionPlanInput> = {}): ConclusionPlanInput
     uncovered: [],
     uncoveredPriorities: [],
     establishedIncompatibility: null,
+    coverage: "partial",
+    orientation: "minor_reserves",
+    hasFavorable: true,
+    favorableCount: 1,
+    majorReserveCount: 0,
+    reservesShown: 0,
     ...over,
   };
 }
@@ -59,8 +65,7 @@ test("reservesCount compte les faits AFFICHÉS qu'on lui donne", () => {
   const plan = buildConclusionPlan(baseInput({
     shownFacts: [verification("f1", "structuring"), verification("f2", "secondary")],
   }));
-  assert.equal(plan.reservesCount, 2);
-  assert.match(plan.blocks.find((b) => b.key === "reserves_found")!.fallbackText, /2 points/);
+  assert.equal(plan.reservesCount, 2); // le DÉCOMPTE vit désormais dans l'intertitre des cartes
 });
 
 test("requiredPhrases : le NOYAU des libellés, sans l'article (une phrase décline, une liste pas)", () => {
@@ -83,34 +88,51 @@ test("requiredPhrases : le noyau des priorités non couvertes doit survivre", ()
   );
 });
 
-test("requiredPhrases des réserves : le NOMBRE seul, jamais la copie du constat du lead", () => {
-  // Exiger le statement mot pour mot exigerait une COPIE, et annulerait la reformulation. Inutile :
-  // le modèle ne reçoit que le lead, jamais les autres faits, donc il ne peut en couronner un autre.
+test("lead single : le repli NOMME le fait qui domine, sans exiger de nombre", () => {
+  // Le décompte est parti dans l'intertitre des cartes. Ce bloc ne garde que le POIDS.
   const plan = buildConclusionPlan(baseInput({
     shownFacts: [
       verification("f1", "decision_critical", "Le logement porte une étiquette énergétique F"),
       verification("f2", "secondary"),
     ],
   }));
-  assert.deepEqual(plan.blocks.find((b) => b.key === "reserves_found")!.requiredPhrases, ["2"]);
+  const bloc = plan.blocks.find((b) => b.key === "reserves_found")!;
+  assert.match(bloc.fallbackText, /étiquette énergétique F/);
+  assert.deepEqual(bloc.requiredPhrases, []);
+  assert.deepEqual(bloc.allowedNumbers, []);
 });
 
 test("allowedNumbers : le compte VRAI du registre, en chiffres ET en lettres", () => {
   // L'invariant est « aucun nombre faux », pas « aucun nombre absent du repli » : « deux priorités »
   // est exact quand il y en a deux, et le rejeter censurerait une tournure française naturelle.
   const plan = buildConclusionPlan(baseInput({
-    shownFacts: [verification("f1", "structuring"), verification("f2", "secondary"), verification("f3", "secondary")],
     uncoveredPriorities: [AIR, { key: "agriculture", label: "l'agriculture" }],
   }));
-  assert.deepEqual(plan.blocks.find((b) => b.key === "reserves_found")!.allowedNumbers, ["3", "trois"]);
   assert.deepEqual(plan.blocks.find((b) => b.key === "uncovered_priorities")!.allowedNumbers, ["2", "deux"]);
 });
 
-test("requiredPhrases : lead tied -> le nombre aussi (aucun fait n'est couronné)", () => {
+test("lead tied : la phrase compte les faits de TÊTE, jamais toutes les réserves", () => {
+  // `tied` dit que plusieurs faits partagent le rang MAXIMAL, pas que toutes les réserves pèsent
+  // pareil : ici deux dominent et deux sont secondaires. Annoncer « 4 points » serait faux.
   const plan = buildConclusionPlan(baseInput({
-    shownFacts: [verification("f1", "decision_critical"), verification("f2", "decision_critical")],
+    shownFacts: [
+      verification("f1", "decision_critical"), verification("f2", "decision_critical"),
+      verification("f3", "secondary"), verification("f4", "secondary"),
+    ],
   }));
-  assert.deepEqual(plan.blocks.find((b) => b.key === "reserves_found")!.requiredPhrases, ["2"]);
+  const bloc = plan.blocks.find((b) => b.key === "reserves_found")!;
+  assert.equal(plan.reservesCount, 4);
+  assert.deepEqual(bloc.requiredPhrases, ["2"]);
+  assert.deepEqual(bloc.allowedNumbers, ["2", "deux"]);
+  assert.equal(bloc.fallbackText.includes("4"), false);
+});
+
+test("lead none : le bloc des réserves N'EXISTE PAS (il n'aurait plus rien à dire)", () => {
+  const plan = buildConclusionPlan(baseInput({
+    shownFacts: [verification("f1", "secondary"), verification("f2", "secondary")],
+  }));
+  assert.equal(plan.lead.kind, "none");
+  assert.equal(plan.blocks.some((b) => b.key === "reserves_found"), false);
 });
 
 test("les sourceIds d'un bloc viennent du déterministe", () => {
@@ -178,6 +200,7 @@ test("projet non structuré : verdict d'invite, aucun autre bloc", () => {
 test("incompatibilité établie : le verdict porte le constat, et reste déterministe", () => {
   const plan = buildConclusionPlan(baseInput({
     conclusionState: "established_incompatibility",
+    orientation: "incompatible",
     establishedIncompatibility: { factId: "i1", statement: "504 078 habitants, au-delà de 20 000." },
   }));
   assert.match(plan.blocks[0]!.fallbackText, /504 078 habitants/);
@@ -185,15 +208,97 @@ test("incompatibilité établie : le verdict porte le constat, et reste détermi
   assert.equal(plan.blocks[0]!.generable, false);
 });
 
-test("le grain est explicite dans le verdict", () => {
-  assert.match(
-    buildConclusionPlan(baseInput({ scope: "commune+adresse" })).blocks[0]!.fallbackText,
-    /commune et de l'adresse/,
-  );
-  assert.match(
-    buildConclusionPlan(baseInput({ scope: "commune" })).blocks[0]!.fallbackText,
-    /À l'échelle de la commune,/,
-  );
+// ── La table de vérité du verdict (slice 2.1) ──────────────────────────────────
+// Le déterministe gagne le droit de dire qu'un lieu correspond, à condition de pouvoir le prouver.
+
+test("high + favorable : le lieu correspond, et on ose le dire", () => {
+  const p = buildConclusionPlan(baseInput({ coverage: "high", orientation: "favorable", hasFavorable: true, favorableCount: 3 }));
+  assert.equal(p.verdictLabel, "Bonne correspondance");
+  assert.equal(p.verdictTone, "positive");
+  assert.match(p.blocks[0]!.fallbackText, /semble bien correspondre à votre projet/);
+});
+
+test("high + major_reserves AVEC 2 favorables : « plusieurs dimensions » est prouvé", () => {
+  const p = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 2, majorReserveCount: 2,
+  }));
+  assert.match(p.blocks[0]!.fallbackText, /répond à plusieurs dimensions de votre projet/);
+  assert.match(p.blocks[0]!.fallbackText, /2 points structurants empêchent/);
+});
+
+test("high + major_reserves avec UN SEUL favorable : « plusieurs dimensions » serait faux", () => {
+  const p = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 1,
+  }));
+  assert.equal(p.blocks[0]!.fallbackText.includes("plusieurs dimensions"), false);
+  assert.match(p.blocks[0]!.fallbackText, /présente des éléments favorables/);
+  assert.match(p.blocks[0]!.fallbackText, /1 point structurant empêche/); // accord au SINGULIER
+});
+
+test("high + major_reserves SANS favorable : aucun positif n'est promis", () => {
+  const p = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "major_reserves", hasFavorable: false, favorableCount: 0, majorReserveCount: 1,
+  }));
+  assert.equal(p.blocks[0]!.fallbackText.includes("répond à plusieurs dimensions"), false);
+  assert.equal(p.blocks[0]!.fallbackText.includes("éléments favorables"), false);
+  assert.match(p.blocks[0]!.fallbackText, /1 point structurant empêche encore de considérer/);
+});
+
+test("high + minor_reserves SANS favorable : aucun « bien correspondre » ne s'échappe", () => {
+  const p = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0, reservesShown: 2,
+  }));
+  assert.equal(p.blocks[0]!.fallbackText.includes("bien correspondre"), false);
+  assert.match(p.blocks[0]!.fallbackText, /reste à confirmer/);
+  assert.match(p.blocks[0]!.fallbackText, /2 points restent à examiner/);
+});
+
+test("partial + minor_reserves SANS favorable : rien ne « va dans le sens » de rien", () => {
+  const p = buildConclusionPlan(baseInput({
+    coverage: "partial", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0, reservesShown: 1,
+  }));
+  assert.equal(p.blocks[0]!.fallbackText.includes("va plutôt dans le sens"), false);
+  assert.match(p.blocks[0]!.fallbackText, /1 point reste à examiner/); // accord au SINGULIER
+});
+
+test("partial + major_reserves : l'écran actuel, et il est honnête", () => {
+  const p = buildConclusionPlan(baseInput({
+    coverage: "partial", orientation: "major_reserves", hasFavorable: false, favorableCount: 0, majorReserveCount: 2,
+  }));
+  assert.equal(p.verdictLabel, "Lecture encore partielle");
+  assert.equal(p.verdictTone, "caution");
+  assert.match(p.blocks[0]!.fallbackText, /encore trop tôt pour dire que ce lieu correspond/);
+  assert.match(p.blocks[0]!.fallbackText, /2 points structurants demandent attention/);
+});
+
+test("couverture none : le GARDE-FOU, aucun positif ne s'échappe", () => {
+  const p = buildConclusionPlan(baseInput({
+    coverage: "none", orientation: "indeterminate", hasFavorable: false, favorableCount: 0,
+  }));
+  assert.equal(p.verdictLabel, "Lecture non disponible");
+  assert.match(p.blocks[0]!.fallbackText, /ne peut pas encore être évalué au regard de vos critères/);
+  assert.equal(p.blocks[0]!.fallbackText.includes("va dans le sens"), false);
+});
+
+test("incompatibilité : la condition non respectée EST la réponse", () => {
+  const p = buildConclusionPlan(baseInput({
+    conclusionState: "established_incompatibility", orientation: "incompatible",
+    establishedIncompatibility: { factId: "f1", statement: "Cette commune est à 180 km du littoral." },
+  }));
+  assert.equal(p.verdictLabel, "Condition non respectée");
+  assert.equal(p.verdictTone, "critical");
+  assert.match(p.blocks[0]!.fallbackText, /conditions non négociables n'est pas respectée ici/);
+});
+
+test("le verdict reste NON générable, quelle que soit la case", () => {
+  const p = buildConclusionPlan(baseInput({ coverage: "high", orientation: "favorable" }));
+  assert.equal(p.blocks[0]!.generable, false);
+});
+
+test("le scope SORT des phrases : il vit en tête de carte, plus en préambule du verdict", () => {
+  const p = buildConclusionPlan(baseInput({ scope: "commune+adresse" }));
+  assert.equal(p.scope, "commune+adresse");
+  assert.equal(p.blocks[0]!.fallbackText.includes("À l'échelle de la commune"), false);
 });
 
 // ── Le gate ────────────────────────────────────────────────────────────────────
@@ -227,18 +332,28 @@ test("gate : verdict + deux réserves secondaires (lead none) -> non", () => {
   assert.equal(shouldGenerateNarrative(plan), false);
 });
 
-test("gate : verdict + deux réserves dont une domine -> oui", () => {
+test("gate : verdict + deux réserves dont une domine -> non (UN registre, rien à articuler)", () => {
+  // La règle est « plusieurs éléments DÉJÀ HIÉRARCHISÉS à articuler », jamais « du texte à embellir ».
+  // Un seul registre rédigeable n'articule rien : le déterministe le dit très bien tout seul.
   const plan = buildConclusionPlan(baseInput({
     shownFacts: [verification("f1", "decision_critical"), verification("f2", "secondary")],
   }));
-  assert.equal(shouldGenerateNarrative(plan), true);
+  assert.equal(plan.blocks.filter((b) => b.generable).length, 1);
+  assert.equal(shouldGenerateNarrative(plan), false);
 });
 
-test("gate : verdict + trois réserves ou plus -> oui", () => {
+test("gate : verdict + trois réserves secondaires -> non (aucun registre : le lead est none)", () => {
   const plan = buildConclusionPlan(baseInput({
     shownFacts: [
       verification("f1", "secondary"), verification("f2", "secondary"), verification("f3", "secondary"),
     ],
+  }));
+  assert.equal(shouldGenerateNarrative(plan), false);
+});
+
+test("gate : une réserve qui domine + une contrainte non examinée -> oui (DEUX registres)", () => {
+  const plan = buildConclusionPlan(baseInput({
+    uncovered: [MER], shownFacts: [verification("f1", "decision_critical"), verification("f2", "secondary")],
   }));
   assert.equal(shouldGenerateNarrative(plan), true);
 });

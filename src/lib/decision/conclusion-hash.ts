@@ -15,7 +15,9 @@ import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
 // Le schéma de sortie + les règles de validation. À bumper quand conclusion-validate change de contrat.
 export const DECISION_NARRATIVE_CONTRACT_VERSION = "c1";
 // Le prompt système. À bumper à chaque retouche de son texte.
-export const DECISION_NARRATIVE_PROMPT_VERSION = "v1";
+// v2 (slice 2.1) : le registre des réserves porte le POIDS (le décompte est parti dans l'intertitre
+// des cartes), et il n'existe plus quand aucun point ne se détache.
+export const DECISION_NARRATIVE_PROMPT_VERSION = "v2";
 export const DECISION_NARRATIVE_MODEL = "claude-sonnet-4-6";
 
 export function hashPayload(

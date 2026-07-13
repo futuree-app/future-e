@@ -32,6 +32,7 @@ function verif(id: string, tier: MaterialityTier, statement: string): DecisionFa
 
 // Cas riche réaliste : Toulouse, adresse analysée, contrainte « bord de mer » déclarée mais non
 // examinable à ce grain, priorités air + agriculture non couvertes, 4 réserves dont une domine.
+// Couverture PARTIELLE et réserves majeures : la case la plus fréquente aujourd'hui (slice 2.1).
 const plan = buildConclusionPlan({
   scope: "commune+adresse",
   conclusionState: "no_incompatibility_established",
@@ -48,6 +49,12 @@ const plan = buildConclusionPlan({
     { key: "agriculture", label: "l'agriculture" },
   ],
   establishedIncompatibility: null,
+  coverage: "partial",
+  orientation: "major_reserves",
+  hasFavorable: false,
+  favorableCount: 0,
+  majorReserveCount: 2,
+  reservesShown: 4,
 });
 
 console.log("gate :", shouldGenerateNarrative(plan), "· lead :", JSON.stringify(plan.lead));

@@ -12,6 +12,7 @@
 // Elles ne partagent JAMAIS le même bloc.
 import type { DecisionFact, ConclusionState, MaterialityTier, UncoveredConstraint } from "./decision-fact.ts";
 import type { ProjectPosture } from "../user-project.ts";
+import type { CoverageLevel, Orientation } from "./criteria-registry.ts";
 
 export type BlockKey = "verdict" | "unexamined_hard_constraints" | "reserves_found" | "uncovered_priorities";
 
@@ -33,6 +34,8 @@ export type LeadSelection =
   | { kind: "tied"; factIds: string[]; materialityTier: MaterialityTier }
   | { kind: "none" };
 
+export type VerdictTone = "critical" | "caution" | "neutral" | "positive";
+
 export type ConclusionNarrativePlan = {
   scope: "commune" | "commune+adresse";
   conclusionState: ConclusionState;
@@ -40,6 +43,8 @@ export type ConclusionNarrativePlan = {
   blocks: NarrativeBlock[];
   reservesCount: number; // faits AFFICHÉS (post-caps), jamais faits émis
   lead: LeadSelection;
+  verdictLabel: string;   // le statut qui coiffe la carte, dérivé de la MÊME table que la phrase
+  verdictTone: VerdictTone;
 };
 
 // Ce que l'assembleur fournit. Un `Dossier` ne peut pas être l'entrée : il PORTERA ce plan (cycle).
@@ -51,6 +56,13 @@ export type ConclusionPlanInput = {
   uncovered: UncoveredConstraint[];
   uncoveredPriorities: { key: string; label: string }[];
   establishedIncompatibility: { factId: string; statement: string } | null;
+  // Les deux mesures du verdict (criteria-registry.ts), plus les comptes qui accordent ses phrases.
+  coverage: CoverageLevel;
+  orientation: Orientation;
+  hasFavorable: boolean;     // au moins un critère examiné rend `favorable`
+  favorableCount: number;    // combien : « plusieurs dimensions » exige >= 2, jamais un booléen
+  majorReserveCount: number; // réserves AFFICHÉES structurantes/critiques
+  reservesShown: number;     // réserves AFFICHÉES, tous tiers confondus
 };
 
 const TIER_ORDER: Record<MaterialityTier, number> = { decision_critical: 0, structuring: 1, secondary: 2 };
@@ -80,6 +92,12 @@ function reserves(facts: DecisionFact[]): DecisionFact[] {
   return facts.filter((f) => RESERVE_ROLES.has(f.role));
 }
 
+// Les `statement` des règles ne finissent pas tous par un point. Le repli est du texte AFFICHÉ : il ne
+// peut pas se permettre une phrase qui s'arrête net.
+function endWithPeriod(s: string): string {
+  return /[.!?]$/.test(s.trim()) ? s.trim() : `${s.trim()}.`;
+}
+
 export function selectLead(shownFacts: DecisionFact[]): LeadSelection {
   const rs = reserves(shownFacts);
   if (rs.length === 0) return { kind: "none" };
@@ -94,32 +112,129 @@ export function selectLead(shownFacts: DecisionFact[]): LeadSelection {
   return { kind: "tied", factIds: top.map((f) => f.id), materialityTier: top[0]!.materialityTier };
 }
 
-function verdictText(input: ConclusionPlanInput): string {
-  const scope = input.scope === "commune+adresse"
-    ? "À l'échelle de la commune et de l'adresse,"
-    : "À l'échelle de la commune,";
-  switch (input.conclusionState) {
-    case "project_not_structured":
-      return "Décrivez votre projet pour une lecture qui met en regard ce lieu et ce qui compte pour vous.";
-    case "established_incompatibility":
-      return `${scope} une contrainte que vous avez déclarée n'est pas respectée ici : ${input.establishedIncompatibility?.statement ?? ""}`;
-    case "insufficient_evidence":
-      return `${scope} nous ne pouvons pas conclure honnêtement : une donnée déterminante pour votre projet manque.`;
-    case "no_hard_constraint_declared":
-      return `Vous n'avez déclaré aucune condition comme absolument non négociable. ${scope} rien ne permet donc d'écarter ce lieu sur cette seule base.`;
-    case "no_incompatibility_established":
-      return `${scope} sur les contraintes que nous savons examiner, aucune n'est contredite.`;
+type Verdict = { label: string; text: string; tone: VerdictTone };
+
+// L'ACCORD EN NOMBRE est calculé, jamais laissé à une formule générique : « 1 points structurants »
+// détruit en un caractère la confiance que tout le reste essaie de construire.
+function points(n: number, adj: string, verb: string): string {
+  return n > 1 ? `${n} points ${adj}s ${verb}nt` : `${n} point ${adj} ${verb}`;
+}
+
+// LA TABLE DE VÉRITÉ DU VERDICT (spec 2.1 §5). Déterministe, mot pour mot, JAMAIS générée.
+//
+// « Aucune contrainte n'est contredite » décrivait l'absence d'un problème. Le lecteur, lui, demande si
+// ce lieu lui convient. Le déterministe gagne donc le droit de répondre « ce lieu correspond », à une
+// condition : pouvoir le PROUVER. La preuve tient en deux mesures (couverture × orientation) et un
+// couperet (une contrainte dure non examinée interdit la couverture élevée).
+//
+// LE SUJET DE LA PHRASE EST LE LIEU, OU LE LECTEUR. JAMAIS LE MOTEUR : « les éléments examinés
+// indiquent que… » ferait entendre futur•e commenter son propre travail au lieu de répondre. Seule
+// exception, celle où l'objet de la phrase EST notre incapacité (une donnée manque) : là, s'effacer
+// serait de la lâcheté, pas de l'élégance.
+//
+// Et AUCUNE PHRASE NE PROMET UN POSITIF QUI N'EXISTE PAS : sans `hasFavorable`, « ce lieu semble bien
+// correspondre » s'écrirait sur un dossier dont tous les critères examinés sont des réserves ; sans
+// `favorableCount`, « plusieurs dimensions » s'écrirait sur un unique critère satisfait.
+function verdict(input: ConclusionPlanInput): Verdict {
+  if (input.conclusionState === "project_not_structured") {
+    return {
+      label: "À préciser", tone: "neutral",
+      text: "Décrivez votre projet pour mettre ce lieu en regard de ce qui compte pour vous.",
+    };
   }
+  if (input.conclusionState === "insufficient_evidence") {
+    return {
+      label: "Impossible de conclure", tone: "neutral",
+      text: "Une donnée déterminante manque encore pour conclure sur ce lieu.",
+    };
+  }
+  if (input.orientation === "incompatible") {
+    return {
+      label: "Condition non respectée", tone: "critical",
+      text: `L'une de vos conditions non négociables n'est pas respectée ici : ${input.establishedIncompatibility?.statement ?? ""}`,
+    };
+  }
+  if (input.coverage === "none") {
+    return {
+      label: "Lecture non disponible", tone: "neutral",
+      // « ne peut pas encore » et non « n'a pas encore pu » : le présent parle de l'état du dossier,
+      // le passé composé raconterait un échec du moteur.
+      text: "Ce lieu ne peut pas encore être évalué au regard de vos critères.",
+    };
+  }
+
+  const n = input.majorReserveCount;
+  const r = input.reservesShown;
+  const reste = r > 1 ? `${r} points restent` : `${r} point reste`;
+  const plusieurs = input.favorableCount >= 2;
+
+  if (input.coverage === "high") {
+    if (input.orientation === "favorable") {
+      return {
+        label: "Bonne correspondance", tone: "positive",
+        text: "Ce lieu semble bien correspondre à votre projet.",
+      };
+    }
+    if (input.orientation === "minor_reserves") {
+      return input.hasFavorable
+        ? {
+            label: "Correspondance favorable", tone: "positive",
+            text: `Ce lieu semble bien correspondre à votre projet. ${reste} à examiner.`,
+          }
+        : {
+            label: "Correspondance à confirmer", tone: "neutral",
+            text: `La correspondance avec votre projet reste à confirmer : ${reste} à examiner.`,
+          };
+    }
+    if (!input.hasFavorable) {
+      return {
+        label: "Correspondance à nuancer", tone: "caution",
+        text: `${points(n, "structurant", "empêche")} encore de considérer ce lieu comme une bonne correspondance avec votre projet.`,
+      };
+    }
+    return {
+      label: "Correspondance à nuancer", tone: "caution",
+      text: plusieurs
+        ? `Ce lieu répond à plusieurs dimensions de votre projet, mais ${points(n, "structurant", "empêche")} encore de conclure nettement.`
+        : `Ce lieu présente des éléments favorables pour votre projet, mais ${points(n, "structurant", "empêche")} encore de conclure nettement.`,
+    };
+  }
+
+  // coverage === "partial"
+  if (input.orientation === "favorable") {
+    return {
+      label: "Signaux favorables", tone: "neutral",
+      text: "Ce lieu va dans le sens de votre projet sur les critères déjà couverts, mais la lecture reste incomplète.",
+    };
+  }
+  if (input.orientation === "minor_reserves") {
+    return input.hasFavorable
+      ? {
+          label: "Correspondance à confirmer", tone: "neutral",
+          text: "Ce lieu va plutôt dans le sens de votre projet sur les critères déjà couverts, mais la lecture reste incomplète.",
+        }
+      : {
+          label: "Correspondance à confirmer", tone: "neutral",
+          text: `La lecture reste incomplète, et ${reste} à examiner avant de pouvoir conclure sur ce lieu.`,
+        };
+  }
+  return {
+    label: "Lecture encore partielle", tone: "caution",
+    text: `Il est encore trop tôt pour dire que ce lieu correspond à votre projet : la lecture reste incomplète et ${points(n, "structurant", "demande")} attention.`,
+  };
 }
 
 export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarrativePlan {
-  // LE VERDICT N'EST JAMAIS GÉNÉRÉ. C'est la phrase qui peut renverser une décision perçue : un
-  // modèle qui reformulerait « aucune contrainte n'est contredite » en « ce lieu vous correspond »
-  // mentirait sur ce qui a été établi, et aucune validation structurelle ne le verrait passer. Il le
-  // reçoit en lecture seule, pour que les registres suivants s'y articulent.
+  const v = verdict(input);
+
+  // LE VERDICT N'EST JAMAIS GÉNÉRÉ. C'est la phrase qui peut renverser une décision perçue : un modèle
+  // qui reformulerait « la lecture reste incomplète » en « ce lieu vous correspond » mentirait sur ce
+  // qui a été établi, et aucune validation structurelle ne le verrait passer. Il le reçoit en lecture
+  // seule, pour que les registres suivants s'y articulent. Le déterministe, lui, a le droit de dire la
+  // correspondance : il la PROUVE (couverture × orientation).
   const blocks: NarrativeBlock[] = [{
     key: "verdict",
-    fallbackText: verdictText(input),
+    fallbackText: v.text,
     sourceIds: input.establishedIncompatibility ? [input.establishedIncompatibility.factId] : [],
     requiredPhrases: [],
     allowedNumbers: [],
@@ -132,6 +247,7 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
     return {
       scope: input.scope, conclusionState: input.conclusionState, posture: input.posture,
       blocks, reservesCount: 0, lead: { kind: "none" },
+      verdictLabel: v.label, verdictTone: v.tone,
     };
   }
 
@@ -149,19 +265,36 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
     });
   }
 
+  // LE DÉCOMPTE DES RÉSERVES A CHANGÉ DE FONCTION : il est devenu l'intertitre des cartes qui suivent
+  // (« Les 4 points à examiner avant de décider »). Ce registre ne garde donc que ce que le décompte ne
+  // dit pas : le POIDS RELATIF. En `lead.none`, il n'aurait plus rien à dire, et il n'existe pas.
+  //
+  // `tied` ne veut PAS dire « toutes les réserves pèsent pareil » : il dit que plusieurs faits partagent
+  // le rang MAXIMAL. Écrire « quatre points d'un poids comparable » quand deux dominent et deux sont
+  // secondaires serait faux. On compte lead.factIds, jamais rs.length.
   const rs = reserves(input.shownFacts);
   const lead = selectLead(input.shownFacts);
-  if (rs.length > 0) {
-    const n = rs.length;
+  if (lead.kind === "single") {
     blocks.push({
       key: "reserves_found",
-      fallbackText: `${n} point${n > 1 ? "s" : ""} mérite${n > 1 ? "nt" : ""} d'être examiné${n > 1 ? "s" : ""} de près.`,
-      sourceIds: rs.map((f) => f.id),
-      // Le NOMBRE, et rien d'autre. Exiger aussi le `statement` du lead mot pour mot reviendrait à
-      // exiger une COPIE (« Le logement porte une étiquette énergétique F »), ce qu'aucun rédacteur
-      // n'écrit et ce qui annulerait l'intérêt de la reformulation (sonde : rejeté 3 fois sur 3).
-      // Et c'est inutile : le modèle ne reçoit QUE le lead, jamais les autres faits, donc il lui est
-      // structurellement impossible d'en couronner un autre. La garantie tient sans la contrainte.
+      // Deux phrases, pas un deux-points : le constat est déjà une phrase, avec sa majuscule. « Un point
+      // pèse plus que les autres : Le logement porte… » mettrait une capitale au milieu d'une phrase.
+      fallbackText: `Un point pèse plus que les autres. ${endWithPeriod(lead.statement)}`,
+      sourceIds: [lead.factId],
+      // Aucune matière obligatoire : exiger le `statement` mot pour mot exigerait une COPIE, ce
+      // qu'aucun rédacteur n'écrit, et la sonde l'a rejeté 3 fois sur 3. La garantie tient sans :
+      // le modèle ne reçoit QUE le lead, il lui est structurellement impossible d'en couronner un autre.
+      requiredPhrases: [],
+      allowedNumbers: [],
+      maxChars: 300,
+      generable: true,
+    });
+  } else if (lead.kind === "tied") {
+    const n = lead.factIds.length;
+    blocks.push({
+      key: "reserves_found",
+      fallbackText: `${n} points de même importance arrivent en tête : aucun ne domine à lui seul.`,
+      sourceIds: lead.factIds,
       requiredPhrases: [String(n)],
       allowedNumbers: numberForms(n),
       maxChars: 300,
@@ -189,19 +322,20 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
     blocks,
     reservesCount: rs.length,
     lead,
+    verdictLabel: v.label,
+    verdictTone: v.tone,
   };
 }
 
 // LA RÈGLE : on appelle l'IA seulement quand plusieurs éléments DÉJÀ HIÉRARCHISÉS doivent être
-// articulés. Jamais pour maquiller un dossier pauvre : reformuler brillamment « verdict + vos
-// priorités ne sont pas couvertes » ne ferait que rendre élégante une absence de couverture.
-// Le nombre brut de blocs n'est donc pas l'indicateur.
+// ARTICULÉS. Jamais pour maquiller un dossier pauvre : reformuler brillamment « verdict + vos priorités
+// ne sont pas couvertes » ne ferait que rendre élégante une absence de couverture.
+//
+// Deux repêchages vivaient ici (reservesCount >= 3, et « une réserve domine ») : ils existaient parce
+// que le registre des réserves portait alors le DÉCOMPTE, donc de la matière même sans autre registre.
+// Le décompte est parti dans l'intertitre des cartes ; ces repêchages désignaient un bloc qui n'existe
+// plus dans ces cas. Un seul registre rédigeable n'articule rien : le déterministe le dit très bien.
 export function shouldGenerateNarrative(plan: ConclusionNarrativePlan): boolean {
   if (plan.conclusionState === "project_not_structured") return false;
-
-  const generable = plan.blocks.filter((b) => b.generable).length;
-  if (generable >= 2) return true;                                          // deux registres à articuler
-  if (plan.reservesCount >= 3) return true;                                 // beaucoup de réserves à ordonner
-  if (plan.reservesCount >= 2 && plan.lead.kind === "single") return true;  // une réserve domine : à dire
-  return false;
+  return plan.blocks.filter((b) => b.generable).length >= 2;
 }

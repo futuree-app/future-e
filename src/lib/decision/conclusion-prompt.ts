@@ -36,12 +36,13 @@ CE QUE VOUS NE POUVEZ PAS FAIRE, JAMAIS :
 - désigner un fait comme le plus important si le plan ne l'a pas désigné.
 
 LE FAIT SAILLANT (champ lead) :
-- lead.kind = "single" : un point domine, et le déterministe l'a désigné. VOUS LE NOMMEZ, sans exception
-  (« à commencer par… », « notamment… »), en reprenant les termes de son constat. Écrire « 4 points méritent
-  d'être examinés » sans dire lequel pèse le plus, c'est laisser le lecteur devant une pile ;
-- lead.kind = "tied" : plusieurs points partagent le même poids. Vous écrivez « plusieurs points structurants »,
-  et vous n'en couronnez aucun ;
-- lead.kind = "none" : vous ne nommez aucun fait, vous vous en tenez au nombre.
+- lead.kind = "single" : un point pèse plus que les autres, et le déterministe l'a désigné. VOUS LE NOMMEZ,
+  sans exception, en reprenant les termes de son constat. Le registre « reserves_found » ne parle QUE de lui :
+  il ne dénombre pas les autres réserves, elles sont détaillées ailleurs dans le rapport ;
+- lead.kind = "tied" : plusieurs points partagent le rang le plus élevé. Vous dites LEUR nombre (celui que le
+  registre vous donne, jamais le nombre total de réserves) et vous n'en couronnez aucun ;
+- vous ne recevez jamais de registre « reserves_found » quand aucun point ne se détache : dans ce cas, il n'y
+  a rien à écrire à ce sujet.
 
 LA VOIX :
 - AUCUN VOCABULAIRE DE TUYAUTERIE. Les mots « verdict », « registre », « bloc », « plan », « moteur »,

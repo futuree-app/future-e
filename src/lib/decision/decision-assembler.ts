@@ -4,7 +4,8 @@ import type {
   DecisionFact, Dossier, DossierSection, ConclusionState, RunResult, EvidenceRef, MaterialityTier,
 } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
-import { hasAnyHardConstraint, isStructured, uncoveredConstraints, uncoveredPreferences } from "./project-view.ts";
+import { hasAnyHardConstraint, isStructured } from "./project-view.ts";
+import { buildCriteriaRegistry, uncoveredConstraints, uncoveredPreferences } from "./criteria-registry.ts";
 import { buildConclusionPlan } from "./conclusion-plan.ts";
 
 function labels(project: UserProject): { engage: string; verifTitle: string } {
@@ -15,6 +16,7 @@ function labels(project: UserProject): { engage: string; verifTitle: string } {
 }
 
 const TIER_RANK: Record<MaterialityTier, number> = { decision_critical: 0, structuring: 1, secondary: 2 };
+const RESERVE_ROLES = new Set<DecisionFact["role"]>(["verification", "compromise", "unknown"]);
 function tierRank(f: DecisionFact): number {
   const base = TIER_RANK[f.materialityTier] * 2;
   return f.role === "incompatibility" && f.evidenceStrength === "indicative" ? base + 1 : base;
@@ -41,8 +43,14 @@ function factEvidence(f: DecisionFact): EvidenceRef[] {
 }
 
 export function assembleDossier(run: RunResult, project: UserProject, scope: "commune" | "commune+adresse"): Dossier {
-  const { facts, coveredHardConstraints } = run;
-  const uncovered = uncoveredConstraints(project, coveredHardConstraints);
+  const { facts } = run;
+
+  // La couverture est une CONSÉQUENCE OBSERVÉE des règles (criteria-registry), plus une liste tenue à
+  // la main. `run.coveredHardConstraints` n'est plus consulté ici : il marque une contrainte « couverte »
+  // dès que l'outcome n'est pas not_applicable, donc un `unknown` (population absente) la déclarait
+  // examinée alors que rien ne l'avait été.
+  const criteria = buildCriteriaRegistry(project, run);
+  const uncovered = uncoveredConstraints(criteria);
   const state = conclusionState(facts, project);
   const l = labels(project);
   const candidates: DossierSection[] = [
@@ -55,16 +63,24 @@ export function assembleDossier(run: RunResult, project: UserProject, scope: "co
   const shown = sections.flatMap((s) => s.facts);
 
   // Les réserves annoncées sont celles qu'on MONTRE. Compter `facts` (les faits ÉMIS) alors que les
-  // sections sont plafonnées (caps 2/3/3/4) annonçait « 5 points » et n'en affichait que 4.
+  // sections sont plafonnées (caps 2/3/3/4) annonçait « 5 points » et n'en affichait que 4. Le verdict
+  // compte donc lui aussi sur `shown` : le lecteur doit pouvoir compter les cartes et retomber dessus.
   const established = facts.find((f) => f.role === "incompatibility" && f.evidenceStrength === "established");
+  const reservesShownFacts = shown.filter((f) => RESERVE_ROLES.has(f.role));
   const narrativePlan = buildConclusionPlan({
     scope,
     conclusionState: state,
     posture: project.posture,
     shownFacts: shown,
     uncovered,
-    uncoveredPriorities: uncoveredPreferences(project),
+    uncoveredPriorities: uncoveredPreferences(criteria),
     establishedIncompatibility: established ? { factId: established.id, statement: established.statement } : null,
+    coverage: criteria.coverage,
+    orientation: criteria.orientation,
+    hasFavorable: criteria.hasFavorable,
+    favorableCount: criteria.favorableCount,
+    majorReserveCount: reservesShownFacts.filter((f) => f.materialityTier !== "secondary").length,
+    reservesShown: reservesShownFacts.length,
   });
 
   return {
@@ -72,6 +88,7 @@ export function assembleDossier(run: RunResult, project: UserProject, scope: "co
     conclusionState: state,
     conclusion: narrativePlan.blocks.map((b) => b.fallbackText).join(" "),
     narrativePlan,
+    criteria,
     conclusionBasis: {
       ruleIds: [...new Set(shown.map((f) => f.ruleId))],
       factIds: shown.map((f) => f.id),

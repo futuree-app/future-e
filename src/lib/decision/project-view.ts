@@ -1,12 +1,12 @@
-// Lecteurs PURS au-dessus de UserProject + calcul de couverture des contraintes dures.
+// Lecteurs PURS au-dessus de UserProject. Ce que le projet DÉCLARE, jamais ce que les règles savent
+// en faire : la couverture est calculée par criteria-registry.ts, à partir des évaluations observées.
+//
+// COVERED_PREFERENCE_KEYS vivait ici : une liste, tenue à la main, des préférences qu'une règle savait
+// examiner. Ajouter une règle sans y penser faisait annoncer au lecteur que sa priorité n'était pas
+// couverte alors qu'elle venait d'être examinée. Le registre l'a rendue inutile.
 import type { UserProject } from "../user-project.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
-import type { HardConstraintKey, UncoveredConstraint } from "./decision-fact.ts";
-import { PREFERENCE_LABELS } from "../comparateur-labels.ts";
-
-// Préférences qu'AU MOINS une règle du slice examine (transports/chaleur via compromis+confort,
-// inondation via vérification). Les déclarées hors de cet ensemble sont « pas encore couvertes ».
-const COVERED_PREFERENCE_KEYS: PreferenceKey[] = ["faible_chaleur", "acces_transports", "faible_risque_inondation"];
+import type { HardConstraintKey } from "./decision-fact.ts";
 
 export function isStructured(project: UserProject): boolean {
   return project.parsed != null;
@@ -66,18 +66,5 @@ export function declaredHardConstraintKeys(project: UserProject): HardConstraint
 export function hasAnyHardConstraint(project: UserProject): boolean {
   return declaredHardConstraintKeys(project).length > 0;
 }
-export function uncoveredConstraints(project: UserProject, covered: HardConstraintKey[]): UncoveredConstraint[] {
-  const cov = new Set(covered);
-  return declaredHardConstraintKeys(project)
-    .filter((k) => !cov.has(k))
-    .map((k) => ({ key: k, label: HARD_CONSTRAINT_LABELS[k] }));
-}
-
-// Priorités DÉCLARÉES qu'aucune règle du slice ne traduit encore en fait. Nommées DANS la conclusion
-// (pas un bloc séparé) : « vos priorités … ne sont pas encore couvertes ». Fidélité projet ↔ sortie.
-export function uncoveredPreferences(project: UserProject): { key: PreferenceKey; label: string }[] {
-  const cov = new Set(COVERED_PREFERENCE_KEYS);
-  return declaredPreferenceKeys(project)
-    .filter((k) => !cov.has(k))
-    .map((k) => ({ key: k, label: PREFERENCE_LABELS[k] ?? String(k) }));
-}
+// `uncoveredConstraints` et `uncoveredPreferences` vivent désormais dans criteria-registry.ts : elles
+// se DÉRIVENT du registre (couverture observée), au lieu de se déduire d'une liste parallèle.
