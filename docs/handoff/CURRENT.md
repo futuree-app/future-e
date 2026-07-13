@@ -22,7 +22,7 @@ Chantier **« architecture décision motivée » du rapport payant**. Le **slice
 - Tests : `node --test src/lib/decision/*.test.ts src/lib/user-project.test.ts` → 42 verts. `npx tsc --noEmit` → 0.
 - Aucune PR ouverte.
 
-## Validé en live (compte `bonjourfuturee@gmail.com`, Toulouse, via Playwright headless-shell-1217)
+## Validé en live (compte `<compte de test local>`, Toulouse, via Playwright headless-shell-1217)
 Login → hub payant → dossier affiché ; cas creux digne ; cas riche (édition « petite commune < 20 000 hab, bord de mer ») → incompatibilité établie « 504 078 habitants » avec preuve, **couverture** « Non encore examiné : la proximité de la mer » ; sélecteur de posture visible ; sauvegarde honnête ; dossier régénéré après édition ; projet restauré. Design affichage + édition re-screenshotés OK.
 
 ## Prochaine étape immédiate
