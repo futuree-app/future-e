@@ -7,19 +7,10 @@
 // Pas de `server-only` : buildFactHash est aussi utilisé côté client pour le gating en session.
 
 import { deriveThermalEvidence, thermalEvidenceSummary } from "./thermal-evidence.ts";
+import { stableStringify } from "./stable-stringify.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 
 export const SYNTHESIS_PROMPT_VERSION = "v7"; // v7 : passe langage non-expert renforcée — le vocabulaire d'expert n'apparaît JAMAIS même glosé (« retrait-gonflement des argiles », « inertie », « conditions conventionnelles », « représentativité » interdits), test de la mère. // v6 : croisement Logement × Territoire — le climat projeté (gwl20/2050) éclaire une caractéristique du bâti sans jamais en être le sujet ni changer le diagnostic (il change le POIDS) ; poids narratif (le climat ne prend jamais l'enjeu principal, la sinistralité communale n'est jamais couronnée). MARQUEE-ONLY en v1 (notable rendu silencieux : répétition de charnière observée 8/8 à fréquence notable). Axe chaleur seul (sécheresse différée). Passe Editorial v2.
-
-// Sérialisation stable (clés triées récursivement) : deux payloads égaux -> même chaîne, quel que
-// soit l'ordre d'insertion des clés. Base du hash de contenu.
-function stableStringify(value: unknown): string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "null";
-  if (Array.isArray(value)) return "[" + value.map(stableStringify).join(",") + "]";
-  const obj = value as Record<string, unknown>;
-  return "{" + Object.keys(obj).sort()
-    .map((k) => JSON.stringify(k) + ":" + stableStringify(obj[k])).join(",") + "}";
-}
 
 // Empreinte de CACHE déterministe (FNV-1a 32 bits), PAS un mécanisme de sécurité. Le risque de
 // collision est négligeable à cette échelle ; l'intégrité des faits sera assurée par la
@@ -84,15 +75,20 @@ export function buildSynthesisPayload(data: SynthesisData): Record<string, unkno
   return {
     address: data.address?.label ?? null,
     altitude: data.altitude ?? null,
+    // `?? null` sur chaque champ : le type promet `| null`, mais ces objets viennent d'un JSON de base
+    // où une colonne absente donne `undefined`, que le type ne voit pas. Or stableStringify JETTE sur
+    // undefined (il refuse de donner la même identité à `absent` et à `null`), et ce hash tourne AUSSI
+    // dans le navigateur. On rend donc le payload total plutôt que de l'espérer. Chaîne inchangée
+    // quand la valeur est présente : aucun artefact existant n'est invalidé.
     dpe: dpe
       ? {
-          etiquette: data.selectedDpe!.etiquette_dpe,
-          ges: data.selectedDpe!.etiquette_ges,
-          conso: data.selectedDpe!.conso_ep_m2,
-          emissions: data.selectedDpe!.emission_ges_m2,
-          surface: data.selectedDpe!.surface_m2,
-          construction: data.selectedDpe!.annee_construction,
-          type: data.selectedDpe!.type_batiment,
+          etiquette: data.selectedDpe!.etiquette_dpe ?? null,
+          ges: data.selectedDpe!.etiquette_ges ?? null,
+          conso: data.selectedDpe!.conso_ep_m2 ?? null,
+          emissions: data.selectedDpe!.emission_ges_m2 ?? null,
+          surface: data.selectedDpe!.surface_m2 ?? null,
+          construction: data.selectedDpe!.annee_construction ?? null,
+          type: data.selectedDpe!.type_batiment ?? null,
         }
       : null,
     confortEte: dpe ? thermalEvidenceSummary(deriveThermalEvidence(data.selectedDpe!)) : null,
@@ -106,12 +102,18 @@ export function buildSynthesisPayload(data: SynthesisData): Record<string, unkno
             .filter((b) => b.nearest)
             .map((b) => ({ categorie: b.category, type: b.nearest?.typeLabel ?? null, metres: b.nearest?.distanceMeters ?? null })),
           espaceVert: data.autour.osm?.nearestMappedGreenSpace
-            ? { nature: data.autour.osm.nearestMappedGreenSpace.kind, metres: data.autour.osm.nearestMappedGreenSpace.distanceMeters }
+            ? {
+                nature: data.autour.osm.nearestMappedGreenSpace.kind ?? null,
+                metres: data.autour.osm.nearestMappedGreenSpace.distanceMeters ?? null,
+              }
             : null,
         }
       : null,
     commune: data.communeData?.commune
-      ? { name: data.communeData.commune.nom, population: data.communeData.commune.population }
+      ? {
+          name: data.communeData.commune.nom ?? null,
+          population: data.communeData.commune.population ?? null,
+        }
       : null,
     // Signal climat curé (codes, aucun chiffre). null si commune hors DRIAS ou sous plancher.
     climat_projete: data.climatProjete ?? null,
