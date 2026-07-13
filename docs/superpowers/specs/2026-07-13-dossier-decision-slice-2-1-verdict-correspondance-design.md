@@ -68,18 +68,17 @@ silencieuse : elle reste **une** priorité.
 // src/lib/decision/criteria-registry.ts
 export type CriterionCoverage = "examined" | "unexamined";
 export type CriterionOutcome =
-  | "favorable"      // au moins une règle satisfaite, aucune réserve
-  | "mixed"          // favorable ET réserve sur le même critère
-  | "reserve"        // une réserve, aucune satisfaction
-  | "incompatible"   // une incompatibilité établie
-  | "indeterminate"; // règle applicable mais donnée manquante
+  | "favorable"      // examiné, rien à redire
+  | "reserve"        // examiné, une réserve (son tier est porté par maxReserveTier)
+  | "incompatible"   // examiné, une contrainte est contredite
+  | "indeterminate"; // aucune règle exploitable sur ce critère
 
 export type ProjectCriterionAssessment = {
-  criterionKey: string;                 // HardConstraintKey | PreferenceKey
+  criterionKey: string;                        // HardConstraintKey | PreferenceKey
   kind: "hard_constraint" | "preference";
   coverage: CriterionCoverage;
   outcome: CriterionOutcome;
-  maxTier: MaterialityTier | null;      // matérialité maximale des faits de ce critère
+  maxReserveTier: MaterialityTier | null;      // matérialité maximale des RÉSERVES de ce critère
   ruleIds: string[];
 };
 
@@ -90,12 +89,47 @@ Il se construit **sans toucher aux règles** : chaque `RuleEvaluation` porte dé
 (`materiality-rules.ts` : `["nearSea"]`, `["acces_transports", "faible_chaleur"]`…). On agrège les
 évaluations par critère déclaré.
 
+### 3.1 Le contrat de `projectKeys`, et le bug qu'il faut corriger d'abord
+
+Tout le registre repose sur une hypothèse : `projectKeys` liste les critères que la règle **évalue**,
+pas ceux auxquels elle est vaguement *reliée*. L'audit des cinq règles Territoire confirme que c'est le
+cas aujourd'hui, mais **rien ne le garantit** : le contrat n'est écrit nulle part. Il est donc posé
+explicitement sur le type `RuleEvaluation` (`decision-fact.ts`), et il devient opposable aux règles
+futures. Avec cinq règles et un développeur solo, un contrat documenté et audité vaut mieux qu'une
+refonte du type en `criterionEffects` : on rouvrira le sujet quand une règle le violera.
+
+**Le vrai piège est ailleurs, et il casse le registre à la racine.** `materiality-rules.ts:140` :
+
+```ts
+if (f.inondationRisque < 66) return { ...projectKeys: ["faible_risque_inondation"],
+                                      outcome: "not_applicable", reason: "exposition non notable" };
+```
+
+La priorité **est** déclarée, la donnée **est** là, le résultat **est bon** pour le lecteur, et le
+moteur rend `not_applicable`. `not_applicable` porte donc aujourd'hui **deux sens incompatibles** :
+
+- « hors sujet » : le critère n'est pas déclaré, la règle ne s'applique pas ;
+- « examiné, rien à signaler » : une bonne nouvelle, silencieuse.
+
+En l'état, une commune sans risque d'inondation ferait **baisser** la couverture et ne compterait
+**jamais** comme un point favorable. Le contrat est donc tranché, et le site corrigé :
+
+> **`not_applicable` = hors sujet. `satisfied` = déclaré, examiné, rien à redire.**
+
+C'est la bonne nouvelle du chantier : les points favorables existaient déjà dans le moteur, ils étaient
+jetés. Toute règle future qui constate silencieusement que tout va bien rend `satisfied`.
+
 **Deux états de couverture, pas trois.** Un critère est `examined` dès qu'une règle a produit une
 évaluation exploitable (`satisfied` / `incompatible` / `compromise` / `verification`). Il est
 `unexamined` si aucune règle ne le touche, ou si les seules règles qui le touchent ont rendu
 `unknown` / `uncertain` / `not_applicable` : une donnée manquante n'est pas un examen partiel, c'est
 une absence d'examen. Le cas grave (donnée bloquante) est déjà traité ailleurs, par l'état
 `insufficient_evidence`. Un troisième état que nulle phrase ne consomme serait de la complexité pure.
+
+**Agrégation d'un critère touché par plusieurs règles** (une préférence peut l'être) : `examined` dès
+qu'**une seule** évaluation exploitable existe, même si d'autres règles rendent `unknown`. Une inconnue
+scopée ne peut pas annuler un examen réel ; elle vit sa vie de fait `unknown` dans les cartes.
+L'`outcome` du critère prend le pire : `incompatible` > `reserve` > `favorable`.
 
 **Gain collatéral, et il est réel :** `COVERED_PREFERENCE_KEYS`, la liste écrite à la main dans
 `project-view.ts`, **disparaît**. Aujourd'hui, ajouter une règle sans penser à cette liste fait
@@ -106,9 +140,17 @@ parallèle qui dérive en silence.
 ## 4. Les deux axes
 
 ```
-coverage:    none | partial | high
-orientation: favorable | mixed | reserved | incompatible | indeterminate
+coverage:     none | partial | high
+orientation:  favorable | minor_reserves | major_reserves | incompatible | indeterminate
+hasFavorable: boolean   // au moins un critère examiné rend `favorable`
 ```
+
+Les noms disent ce qu'ils décrivent. `mixed` et `reserved`, testés puis écartés, **mentaient** :
+`mixed` prétend mélanger du positif et du négatif alors qu'un dossier peut n'avoir que des réserves
+secondaires et rien de positif ; `reserved` ne dit pas si les réserves sont secondaires ou
+structurantes, ce qui laisse écrire « des points structurants empêchent de conclure » sur un dossier
+qui n'en contient aucun. `hasFavorable` est porté **à part**, parce qu'il départage des variantes de
+phrase sans se confondre avec la gravité des réserves.
 
 **Couverture** (sur les critères déclarés, contraintes dures et préférences confondues) :
 
@@ -132,46 +174,67 @@ compensation : un critère satisfait ne rachète jamais une réserve critique. E
 **matérialité maximale** des réserves, jamais leur simple existence, sinon on reproduit dans la prose
 l'aplatissement qu'on corrige à l'écran.
 
-| Orientation | Condition |
-|---|---|
-| `incompatible` | au moins un critère `incompatible` |
-| `indeterminate` | aucun critère examiné avec un résultat exploitable |
-| `favorable` | au moins un critère `favorable`, **aucune** réserve |
-| `mixed` | des critères favorables **et** des réserves, toutes `secondary` |
-| `reserved` | au moins une réserve `structuring` ou `decision_critical` |
+L'ordre d'évaluation est **normatif** (le premier qui matche gagne) :
 
-## 5. La table de vérité du verdict
+| # | Orientation | Condition |
+|---|---|---|
+| 1 | `incompatible` | au moins un critère `incompatible` |
+| 2 | `indeterminate` | aucun critère examiné |
+| 3 | `major_reserves` | au moins une réserve `structuring` ou `decision_critical` |
+| 4 | `minor_reserves` | des réserves, toutes `secondary` |
+| 5 | `favorable` | aucune réserve |
 
-Le verdict reste **déterministe, mot pour mot, jamais généré**. Sujet de la phrase : le lieu ou le
-lecteur, **jamais le moteur** (« les éléments examinés indiquent que… » est proscrit par la doctrine
-éditoriale : on ne met pas l'outil en sujet). Une ligne, deux au pire : c'est un sommet de carte, pas
-un paragraphe.
+`hasFavorable` se lit indépendamment : il est vrai dès qu'un critère examiné rend `favorable`. Un
+dossier peut donc être `major_reserves` **avec** des points favorables (le lieu répond à plusieurs
+dimensions, mais un point structurant coince) ou **sans** (rien de positif n'a été établi) : ce sont
+deux phrases différentes, et les confondre ferait promettre au lecteur un positif qui n'existe pas.
 
-| État / couverture / orientation | Phrase |
-|---|---|
-| `project_not_structured` | *(inchangé)* Décrivez votre projet pour une lecture qui met en regard ce lieu et ce qui compte pour vous. |
-| `insufficient_evidence` | *(inchangé)* Une donnée déterminante pour votre projet manque : nous ne pouvons pas conclure honnêtement. |
-| orientation `incompatible` | Un élément de ce lieu ne correspond pas à une condition de votre projet : {statement}. |
-| couverture `none` | Nous n'avons pas encore pu examiner ce qui compte dans votre projet. |
-| `high` + `favorable` | Ce lieu semble bien correspondre à votre projet. |
-| `high` + `mixed` | Ce lieu semble correspondre à votre projet, avec quelques points à examiner. |
-| `high` + `reserved` | Ce lieu répond à plusieurs dimensions de votre projet, mais des points structurants empêchent de conclure nettement. |
-| `partial` + `favorable` | Ce que nous avons pu examiner va dans le sens de votre projet, mais la lecture reste incomplète. |
-| `partial` + `mixed` | Ce que nous avons pu examiner va plutôt dans le sens de votre projet, avec des points à examiner et une lecture encore incomplète. |
-| `partial` + `reserved` | *(l'écran actuel)* La lecture reste incomplète, et ce que nous avons pu examiner appelle plusieurs réserves. |
+## 5. La table de vérité du verdict, et le label qui le coiffe
 
-Le cas `none` est le **garde-fou** que la graduation par couverture seule n'avait pas : sans lui, un
-dossier où rien n'a été examiné afficherait « plusieurs éléments vont dans le sens de votre projet ».
+Le verdict reste **déterministe, mot pour mot, jamais généré**.
+
+**Le sujet de la phrase est le lieu, ou le lecteur. Jamais le moteur.** « Les éléments examinés
+indiquent que… », « ce que nous avons pu examiner va dans le sens de… » sont proscrits : le lecteur
+entend futur•e commenter son propre travail au lieu d'obtenir une réponse sur le lieu. Une seule
+exception, celle où l'objet de la phrase **est** notre incapacité (« une donnée déterminante manque ») :
+là, s'effacer serait de la lâcheté, pas de l'élégance. Une ligne, deux au pire : c'est un sommet de
+carte, pas un paragraphe.
+
+| État / couverture / orientation | Label | Phrase |
+|---|---|---|
+| `project_not_structured` | À PRÉCISER | Décrivez votre projet pour mettre ce lieu en regard de ce qui compte pour vous. |
+| `insufficient_evidence` | IMPOSSIBLE DE CONCLURE | Une donnée déterminante manque encore pour conclure sur ce lieu. |
+| `incompatible` | CONDITION NON RESPECTÉE | Une de vos conditions non négociables n'est pas respectée ici : {statement}. |
+| couverture `none` | RIEN ENCORE EXAMINÉ | Ce lieu n'a pas encore pu être évalué au regard de vos critères. |
+| `high` + `favorable` | BONNE CORRESPONDANCE | Ce lieu semble bien correspondre à votre projet. |
+| `high` + `minor_reserves` | CORRESPONDANCE FAVORABLE | Ce lieu semble bien correspondre à votre projet. {N} point{s} rest{ent} à examiner. |
+| `high` + `major_reserves` + favorable | CORRESPONDANCE À NUANCER | Ce lieu répond à plusieurs dimensions de votre projet, mais {N} point{s} structurant{s} empêche{nt} encore de conclure nettement. |
+| `high` + `major_reserves` sans favorable | CORRESPONDANCE À NUANCER | {N} point{s} structurant{s} empêche{nt} encore de considérer ce lieu comme une bonne correspondance avec votre projet. |
+| `partial` + `favorable` | SIGNAUX FAVORABLES | Ce lieu va dans le sens de votre projet sur les critères déjà couverts, mais la lecture reste incomplète. |
+| `partial` + `minor_reserves` | CORRESPONDANCE À CONFIRMER | Ce lieu va plutôt dans le sens de votre projet sur les critères déjà couverts, mais la lecture reste incomplète. |
+| `partial` + `major_reserves` | LECTURE ENCORE PARTIELLE | *(l'écran actuel)* Il est encore trop tôt pour dire que ce lieu correspond à votre projet : la lecture reste incomplète et {N} point{s} structurant{s} demande{nt} attention. |
+
+**Le label dérive de la même matrice que la phrase.** « Aucun blocage établi », qui coiffait la carte,
+est lu **avant** le verdict et continue de répondre à la mauvaise question (« peut-on écarter ce
+lieu ? » au lieu de « me correspond-il ? »). Il disparaît comme label. Un label ne promet jamais plus
+que la phrase qu'il coiffe.
+
+Les accords en nombre (`{N} point{s} structurant{s} demande{nt}`) sont calculés par le déterministe,
+jamais laissés à une formule générique : « 1 points structurants » est le genre de détail qui détruit
+la confiance qu'on essaie de construire.
 
 **Invariant à tester, pas une coïncidence heureuse** : couverture `none` et orientation
-`indeterminate` désignent la même situation (aucun critère examiné avec un résultat exploitable) et
-sont donc toujours simultanées. Les couples `partial + indeterminate` et `high + indeterminate` sont
-**impossibles par construction**. Le code doit le garantir, pas l'espérer : un test l'assert, et la
-table de vérité n'a pas de ligne pour eux.
+`indeterminate` désignent la même situation (aucun critère examiné) et sont donc toujours simultanées.
+Les couples `partial + indeterminate` et `high + indeterminate` sont **impossibles par construction**.
+Le code doit le garantir, pas l'espérer : un test l'assert, et la table n'a pas de ligne pour eux.
 
-`no_hard_constraint_declared` disparaît comme phrase de verdict : la correspondance graduée fonctionne
-sans contrainte dure (la couverture se calcule alors sur les seules préférences). L'information
-« vous n'avez déclaré aucune condition absolue » migre dans la strate « limite de ce constat ».
+`no_hard_constraint_declared` disparaît, **sans rien laisser derrière**. La correspondance graduée
+fonctionne sans contrainte dure (la couverture se calcule alors sur les seules préférences). Et
+l'information « vous n'avez déclaré aucune condition absolue » **ne migre nulle part** : ce n'est ni un
+trou de donnée, ni une absence de couverture, ni un défaut du rapport. C'est un fait sur le projet, pas
+sur le lieu, et il vit déjà dans la carte « Votre projet ». La ranger sous « limite de ce constat »,
+à côté de « la distance à Matabiau n'a pas pu être vérifiée », en ferait une faiblesse alors qu'elle
+n'en est pas une.
 
 ## 6. La règle `departements`
 
@@ -199,14 +262,16 @@ Chaque strate **porte une étiquette qui dit sa nature**. Un fait saillant qui s
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│ ● AUCUN BLOCAGE ÉTABLI                 commune + adresse │  mono 10px, coloré par l'état
+│ ● LECTURE ENCORE PARTIELLE             commune + adresse │  mono 10px, dérivé de la matrice §5
 │                                                          │
-│   La lecture reste incomplète, et ce que nous            │  LA RÉPONSE — 21px, text-label
-│   avons pu examiner appelle plusieurs réserves.          │  déterministe, mot pour mot
+│   Il est encore trop tôt pour dire que ce lieu           │  LA RÉPONSE — 21px, text-label
+│   correspond à votre projet : la lecture reste           │  déterministe, mot pour mot
+│   incomplète et deux points structurants demandent       │
+│   attention.                                             │
 │                                                          │
-│   CE QUI PÈSE LE PLUS                                    │  étiquette mono 10px, accent
-│   Quatre points structurants pèsent d'un poids           │  17px — rédigeable
-│   comparable : aucun ne domine la décision.              │
+│   DES POIDS COMPARABLES                                  │  étiquette mono 10px, accent
+│   Deux points de même importance arrivent en tête :      │  17px — rédigeable
+│   aucun ne domine à lui seul.                            │
 │                                                          │
 │ ┌──────────────────────────────────────────────────┐     │
 │ │ ⚠ LIMITE DE CE CONSTAT                           │     │  encart teinté, 15px muted
@@ -225,8 +290,14 @@ La strate « ce qui pèse le plus » est **conditionnelle**, pilotée par `plan.
 |---|---|---|
 | incompatibilité établie | *(absente)* | le blocage **est** la réponse, en haut, en rouge |
 | `lead.single` | CE QUI PÈSE LE PLUS | le fait saillant, reformulé |
-| `lead.tied` | DES POIDS COMPARABLES | l'égalité, dite comme telle, sans élire personne |
+| `lead.tied` | DES POIDS COMPARABLES | l'égalité **des faits de tête**, dite comme telle, sans élire personne |
 | `lead.none` | *(absente)* | aucun « wow » inventé |
+
+**`tied` ne veut pas dire « toutes les réserves pèsent pareil ».** Il dit que **plusieurs faits
+partagent le rang maximal** ; le dossier peut parfaitement contenir, en plus, des réserves de rang
+inférieur. Écrire « quatre points pèsent d'un poids comparable » quand deux faits sont à égalité en
+tête et deux autres sont secondaires serait **faux**. La phrase compte donc `lead.factIds.length`,
+jamais `reservesCount`.
 
 **Invariant de substitution** : le fallback déterministe et la version rédigée partagent **exactement**
 la même structure DOM, strate par strate. C'est déjà la garantie de `ConclusionBlock` ; elle doit
@@ -239,10 +310,15 @@ L'information ne s'affaiblit pas, elle **remonte** : une contrainte dure non tes
 verdict, donc elle se lit dans l'encart « limite de ce constat », juste sous le verdict, pas trente
 centimètres plus bas. Deux emplacements laisseraient croire à deux niveaux de réserve distincts.
 
-**Le comptage des réserves change de fonction.** Il devient l'intertitre des cartes qui suivent
-(« Les quatre points qui départagent ce lieu »). Le bloc de conclusion ne garde que ce que le comptage
-ne dit pas : le **poids relatif**. Le `fallbackText` de `reserves_found` porte donc désormais
-l'information de poids (`single` : le fait qui domine ; `tied` : l'égalité), plus le simple décompte.
+**Le comptage des réserves change de fonction.** Il devient l'intertitre des cartes qui suivent. Le
+bloc de conclusion ne garde que ce que le comptage ne dit pas : le **poids relatif**. Le `fallbackText`
+de `reserves_found` porte donc désormais l'information de poids (`single` : le fait qui domine ;
+`tied` : l'égalité de tête), plus le simple décompte.
+
+L'intertitre est **« Les {N} points à examiner avant de décider »**, pas « qui départagent ce lieu » :
+les cartes contiennent aussi des inconnues et des vérifications, qui ne départagent rien. Et il suit la
+posture, comme le fait déjà l'assembleur (`labels()`) : en posture `habitant`, « à examiner avant de
+décider » n'a aucun sens, ce sera « Les {N} points à comprendre ou surveiller ».
 
 ## 9. Ce que ça impose
 
@@ -254,16 +330,30 @@ l'information de poids (`single` : le fait qui domine ; `tied` : l'égalité), p
   ne tenaient pas alors que 100 tests étaient verts.
 - Le `verdictText` change, donc le plan change, donc l'`input_hash` change : les artefacts existants
   seront naturellement recalculés (le hash porte le plan). Aucune migration.
+- **`materiality-rules.ts:140` change de verdict** (`not_applicable` → `satisfied` quand l'exposition
+  inondation est faible). Ce n'est pas un détail d'implémentation : c'est le contrat de la §3.1, et il
+  fait apparaître dans le registre des points favorables que le moteur produisait déjà et jetait.
 
 ## 10. Tests
 
-- **Table de vérité du verdict** : les 11 lignes de la §5, en tests unitaires. C'est la seule
-  couverture possible pour les cases `high`, inatteignables à l'écran aujourd'hui.
+- **Table de vérité du verdict** : les 11 lignes de la §5 (label **et** phrase), en tests unitaires.
+  C'est la seule couverture possible pour les cases `high`, inatteignables à l'écran aujourd'hui.
+- **`hasFavorable` change la phrase** : à `high + major_reserves` constant, un dossier avec un critère
+  favorable et un dossier sans ne rendent **pas** la même phrase. Le second ne promet aucun positif.
+- **Accords en nombre** : une réserve structurante rend « 1 point structurant demande », pas
+  « 1 points structurants demandent ».
 - **Registre des critères** : une préférence examinée par plusieurs règles compte pour **une** ;
-  une règle `satisfied` silencieuse (aucun fait émis) rend bien le critère `examined` ; une règle qui
-  ne rend que `unknown` laisse le critère `unexamined`.
+  une règle `satisfied` silencieuse (aucun fait émis) rend bien le critère `examined` **et**
+  `favorable` ; une règle qui ne rend que `unknown` laisse le critère `unexamined` ; un critère
+  `satisfied` par une règle et `unknown` par une autre est `examined`.
+- **Non-régression du contrat `not_applicable`** : une commune à faible exposition inondation, avec la
+  priorité déclarée, rend `satisfied` (plus `not_applicable`), donc **monte** la couverture et compte
+  comme point favorable. C'est le bug de la §3.1 : sans ce test, il revient.
 - **Couperet** : une contrainte dure non examinée interdit `high`, même à 100 % de préférences
   examinées.
+- **Invariant** : `partial + indeterminate` et `high + indeterminate` sont inatteignables.
+- **`lead.tied`** : deux faits critiques en tête et deux faits secondaires → la phrase dit **deux**,
+  jamais quatre.
 - **Règle `departements`** : Toulouse (31555) contre `["31"]` → `satisfied` ; contre `["33"]` →
   `incompatible` ; Corse (`2A004`) → département `2A` ; DOM (`97411`) → `974`.
 - **Rendu** : structure DOM identique entre fallback et version rédigée, strate par strate.
