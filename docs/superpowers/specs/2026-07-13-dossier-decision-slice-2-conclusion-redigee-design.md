@@ -35,10 +35,25 @@ Corollaire assumé : tant que la couverture reste mince (2 contraintes Territoir
 inexistant), le gate rendra souvent `false` et **c'est le texte déterministe qui restera affiché**.
 Le slice 2 améliore la voix, pas la matière. La vraie priorité produit reste d'élargir la couverture.
 
-## 3. Périmètre : la conclusion, et rien d'autre
+## 3. Périmètre : les registres de nuance, et rien d'autre
 
-L'IA réécrit **la conclusion seule**. Les `statement`, `limitation`, `evidence` et `action` des
-`DecisionFact` restent déterministes, mot pour mot. Les réécrire créerait deux formulations
+L'IA réécrit **les seuls registres de nuance de la conclusion**. Deux exclusions absolues :
+
+**Le verdict n'est jamais généré.** C'est la phrase qui peut renverser une décision perçue : un modèle
+qui reformule « sur les contraintes que nous savons examiner, aucune n'est contredite » en « ce lieu
+vous correspond » aurait menti sur ce qui a été établi, et aucune validation structurelle ne l'aurait
+vu passer. Le verdict reste déterministe, mot pour mot. Le modèle le reçoit en **lecture seule**, pour
+que les registres suivants s'y articulent (« Cette conclusion reste toutefois incomplète : … »).
+
+**La matière ne peut pas disparaître à l'intérieur d'un bloc.** La structure empêche la suppression
+d'un registre entier ; elle n'empêche pas que deux contraintes non examinées deviennent « une
+condition importante reste à examiner », où la gare s'évapore sans qu'aucune clé ne manque, sans
+qu'aucun nombre ne soit inventé. Chaque bloc générable porte donc des `requiredPhrases` (les libellés
+des contraintes et des priorités, le nombre de réserves, le constat du `lead` quand il est `single`)
+qui doivent se retrouver **textuellement** dans le texte généré, sinon le bloc retombe sur son repli.
+
+Les `statement`, `limitation`, `evidence` et `action` des `DecisionFact` restent déterministes, mot
+pour mot. Les réécrire créerait deux formulations
 concurrentes du même fait (celle du moteur, celle du LLM) pour un bénéfice éditorial secondaire, alors
 que ces phrases portent des contrats sensibles : le grain géographique, le degré de certitude, la
 limitation, la distinction entre fait observé et implication, le lien à la preuve.
@@ -56,9 +71,11 @@ type BlockKey = "verdict" | "unexamined_hard_constraints" | "reserves_found" | "
 
 type NarrativeBlock = {
   key: BlockKey;
-  fallbackText: string;  // le texte déterministe de CE registre, affichable seul
-  sourceIds: string[];   // factIds / HardConstraintKey / PreferenceKey — JAMAIS produits par l'IA
-  maxChars: number;      // borne de longueur du texte généré
+  fallbackText: string;      // le texte déterministe de CE registre, affichable seul
+  sourceIds: string[];       // factIds / HardConstraintKey / PreferenceKey — JAMAIS produits par l'IA
+  requiredPhrases: string[]; // matière qui doit SURVIVRE textuellement à la rédaction (§3)
+  maxChars: number;          // borne de longueur du texte généré
+  generable: boolean;        // false sur le verdict : hors de portée du modèle (§3)
 };
 
 type LeadSelection =
@@ -140,18 +157,25 @@ Aucune route API : tout se passe dans le RSC, comme l'augmentation Logement du s
 page /rapport
  └─ <Suspense fallback={<ConclusionBlock blocks={plan.blocks} />}>   ← déterministe, immédiat
       └─ ConclusionRedigee (async RSC)
-           1. header next-router-prefetch === "1" ?  → déterministe, zéro LLM (§6.1)
+           1. header next-router-prefetch PRÉSENT ?  → déterministe, zéro LLM (§6.1)
            2. shouldGenerateNarrative(plan) === false → déterministe, zéro LLM
            3. hash = buildConclusionHash(plan)                        (§7)
            4. artefact en base pour (user, insee, scopeKey, hash) ?
-                 → safeParse avec le schéma COURANT : OK → rendu, zéro LLM
-                 → parse en échec (contrat qui a bougé) → ignoré, on régénère
-           5. generateObject (Sonnet 4.6, medium, thinking off, temp 0.3)
-           6. validateGeneratedBlocks(plan, generated)   ← fonction PURE, testée sans LLM
-           7. await upsert de l'artefact (échec → log, jamais de blocage du rendu)
-           8. rendu ATOMIQUE des 4 blocs ; after() : pruning + métriques
+                 → JSON validé contre le contrat COURANT : OK → rendu, zéro LLM
+                 → validation en échec (contrat qui a bougé) → ignoré, on régénère
+                 → base indisponible → log, on continue (elle n'est jamais nécessaire pour lire)
+           5. generateObject sur les seuls blocs GÉNÉRABLES (le verdict part en lecture seule)
+           6. validateGeneratedBlocks(plan, raw)   ← fonction PURE, testée sans LLM
+           7. await upsert, PUIS relecture de la ligne canonique (§8, convergence)
+           8. await pruning ; rendu ATOMIQUE des blocs canoniques
  </Suspense>
 ```
+
+Le pruning est **attendu**, il ne part pas dans `after()` : les API de requête (`cookies()`,
+`headers()`) n'y sont pas disponibles depuis un Server Component, et le client Supabase construit sur
+les cookies pourrait les relire paresseusement au moment de la requête différée. Deux requêtes
+attendues, sur un chemin qui vient de dépenser plusieurs secondes de LLM, coûtent moins cher qu'un
+comportement dépendant du cycle de vie du client d'authentification.
 
 Le déterministe n'est rendu **qu'en fallback du Suspense**, jamais en double hors frontière.
 `ConclusionBlock` produit la **même structure DOM** dans les deux cas, pour que la substitution ne
@@ -168,8 +192,9 @@ Next 16 précharge les routes liées par `<Link>` avant tout clic. Une générat
 n'est pas une lecture de données : elle coûte. Deux protections, dans cet ordre d'importance :
 
 1. **Garde serveur** (la vraie) : `ConclusionRedigee` lit `headers()` et rend le déterministe si
-   `next-router-prefetch === "1"` (header confirmé présent en 16.2.4). Un `<Link>` oublié ne coûte
-   plus rien.
+   `next-router-prefetch` **ou** `next-router-segment-prefetch` est **présent**. On teste la présence,
+   pas une valeur : le contrat documenté porte sur le header, pas sur `"1"`. Un `<Link>` oublié ne
+   coûte alors plus rien.
 2. **`prefetch={false}`** sur les liens menant au hub payant, en défense de surface.
 
 ### 6.2 Le modèle ne produit jamais de provenance
@@ -192,21 +217,23 @@ On ne « vérifie pas qu'un sourceId n'est pas inventé » : on rend sa fabricat
 ### 6.3 Le schéma de transport est permissif, le contrat est dans le code
 
 ```ts
-const transportSchema = z.object({
-  blocks: z.array(z.object({ key: z.string(), text: z.string() })),
-});
+const transportSchema = z.object({ blocks: z.array(z.unknown()) });
 ```
 
-Si le schéma `generateObject` exigeait strictement les quatre blocs, un seul bloc fautif ferait
-échouer **l'objet entier** et détruirait la récupération bloc par bloc. Le vrai contrat est donc
-imposé par `validateGeneratedBlocks(plan, generated)`, fonction **pure et testée sans LLM**, qui
-rejette un bloc si :
+Le schéma est permissif **jusqu'à l'élément**. Un schéma qui exigerait `{ key: string, text: string }`
+sur chaque entrée ferait échouer **l'objet entier** dès qu'une seule est malformée (`{ key: "verdict",
+text: null }`), ce qui détruirait exactement la récupération bloc par bloc que cette spec promet. La
+forme est donc vérifiée **élément par élément** (`invalid_shape`) dans `validateGeneratedBlocks(plan,
+raw: unknown[])`, fonction **pure et testée sans LLM**, qui rejette un bloc si :
 
-- sa clé n'est pas attendue par le plan, ou apparaît en double ;
+- il n'a pas la forme `{ key: string, text: string }` (`invalid_shape`) ;
+- sa clé n'est pas attendue par le plan, apparaît en double, ou vise un bloc **non générable**
+  (le verdict → `not_generable`) ;
 - son texte est vide, blanc, ou dépasse `maxChars` ;
-- il contient un **nombre, pourcentage, année ou horizon absent du `fallbackText` du bloc** (contrôle
-  simple qui attrape une grande part des hallucinations sans prétendre valider le sens) ;
-- un bloc obligatoire manque (→ son `fallbackText`) ; un bloc en trop est ignoré et journalisé.
+- il contient un **nombre, pourcentage, année ou horizon absent du `fallbackText` du bloc** ;
+- il **a perdu une `requiredPhrase`** (`missing_required_phrase`), c'est-à-dire qu'une matière que le
+  déterministe avait nommée a disparu dans la reformulation ;
+- un bloc générable manque (→ son `fallbackText`). Un bloc en trop est ignoré et journalisé.
 
 Un bloc rejeté retombe sur **son seul** `fallbackText` : une bonne reformulation du verdict survit à
 l'échec du bloc des priorités. Un échec total de l'appel rend le déterministe et se log. Aucune
@@ -225,9 +252,14 @@ const inputHash = sha256(stableStringify({
 ```
 
 - **SHA-256, pas FNV-1a.** Le `fnv1a` de `logement-synthesis-cache.ts` reste parfait pour un cache
-  léger, mais ici une collision servirait au lecteur **le texte d'un autre plan**. On est côté
-  serveur : `node:crypto` ne coûte rien. `stableStringify` est extrait dans `src/lib/stable-hash.ts`
-  et partagé ; `fnv1a` reste à sa place, pour ses usages existants.
+  léger, mais ici une collision servirait au lecteur **le texte d'un autre plan**. `stableStringify`
+  est extrait dans `src/lib/stable-stringify.ts` (**universel** : `logement-synthesis-cache` tourne
+  aussi dans le navigateur) et `sha256Hex` vit dans `src/lib/server/sha256.ts` (`server-only` +
+  `node:crypto`). On ne mélange pas les deux dans un module que le client importe, et on ne parie pas
+  sur le tree-shaking pour tenir cette frontière. `stableStringify` **jette sur `undefined`** :
+  `JSON.stringify(undefined) ?? "null"` ferait silencieusement partager une identité à `{a: undefined}`
+  et `{a: null}`, et pour une fonction d'identité, révéler une entrée mal formée vaut mieux que
+  fabriquer une collision.
 - **Les versions sont DANS la matière hachée**, pas concaténées après un hash du plan.
 - **`contractVersion` est distincte de `promptVersion`** : le schéma de sortie et les règles de
   validation peuvent bouger sans que le prompt change, et il faut alors invalider les artefacts.
@@ -269,12 +301,24 @@ logement. Revenir à un projet antérieur retrouve son texte ; deux adresses ne 
 **Artefact durable, pas cache opportuniste** : l'`upsert` est **attendu avant le rendu** (`await`),
 parce que futur•e vend un document et que le texte affiché doit être celui qu'on retrouvera. Après une
 génération de plusieurs secondes, l'écriture coûte quelques dizaines de millisecondes. Son échec est
-journalisé et **n'empêche jamais le rendu**. Deux rendus concurrents peuvent tous deux constater un
-cache miss : l'`upsert` est **idempotent** et le conflit sur la contrainte unique est un cas normal,
-pas une erreur applicative.
+journalisé et **n'empêche jamais le rendu**.
 
-Le pruning (ne garder que les **3 derniers** artefacts par `(user, insee, scope_key)`) et les
-métriques partent dans `after()`, en best effort.
+**Les générations concurrentes convergent.** Deux rendus peuvent constater le même cache miss et
+produire deux textes : A insère, B tombe sur le conflit. Si B affichait quand même **son** texte, le
+lecteur retrouverait celui de A au rechargement, ce qui contredirait la promesse « le texte affiché
+est celui qu'on retrouvera ». Donc l'`upsert` est idempotent (le conflit sur la contrainte unique est
+un cas normal, pas une erreur applicative), **et on relit la ligne canonique après l'écriture** : le
+perdant de la course affiche le texte du gagnant.
+
+**On stocke tous les blocs générables rendus**, y compris ceux retombés sur leur repli : la base
+contient alors exactement ce qui a été affiché, et une relecture ne retransforme pas un bloc absent en
+nouveau rejet. Si aucun bloc n'a été généré, on n'écrit rien (on ne fige pas un échec).
+
+Le JSON relu est **validé** contre le contrat courant, jamais casté : un artefact écrit par un contrat
+antérieur est ignoré et régénéré, il ne fait pas tomber le Server Component.
+
+Le pruning (ne garder que les **3 derniers** artefacts par `(user, insee, scope_key)`) est **attendu**
+lui aussi, pour les raisons données au §6.
 
 ## 9. Le prompt
 
@@ -282,20 +326,22 @@ Versionné `DECISION_NARRATIVE_PROMPT_VERSION`, à la manière de `SYNTHESIS_PRO
 le plan et **rien d'autre** : ni rapports sources, ni données brutes, ni index commune. Il ne peut donc
 réinterpréter aucune donnée.
 
-Cinq invariants, dont quatre sont garantis par la structure et non par la consigne :
+Ce qui est garanti par la **structure**, et vérifié plutôt qu'espéré :
 
 1. **Il ne choisit pas ce qui apparaît** — présence et ordre des blocs calculés avant l'appel.
-2. **Il ne change pas l'état de conclusion** — il ne peut jamais produire « ce lieu vous correspond »,
-   « cette adresse est adaptée », « le projet est compatible ».
+2. **Il ne touche pas au verdict** — `generable: false`, toute tentative est rejetée (`not_generable`).
+   Il ne peut donc pas produire « ce lieu vous correspond » là où rien de tel n'a été établi.
 3. **Il ne modifie pas la hiérarchie** — contraintes dures non examinées et priorités non couvertes
-   ne fusionnent jamais.
-4. **Il ne crée aucun fait** — il ne reçoit que libellés, identifiants, rôle, grain, limitation déjà
-   décidés, et le `lead`.
-5. **Il ne recommande rien** — les actions restent celles des `DecisionFact`. Il peut écrire « trois
-   points méritent d'être examinés » ; il ne peut pas inventer « faites réaliser une étude de sol ».
+   sont deux blocs distincts, qui ne fusionnent jamais.
+4. **Il ne fait pas disparaître de matière** — `requiredPhrases`, vérifiées textuellement.
+5. **Il ne fabrique aucune provenance** — il ne renvoie que `{ key, text }` ; les `sourceIds` sont
+   reconstitués depuis le plan.
+6. **Il n'invente aucun chiffre** — contrôle des nombres, §6.3.
 
-Le seul invariant réellement porté par le texte du prompt est le style ; le contrôle des nombres
-(§6.3) attrape le reste. Doctrine maison applicable : pas de tiret cadratin, pas d'antithèse
+Ce qui reste porté par le **texte du prompt** seul, et qu'il faut nommer honnêtement : la **fidélité
+sémantique à l'intérieur d'un bloc** (au-delà des phrases obligatoires), l'absence de recommandation
+inventée (« faites réaliser une étude de sol » : les actions vivent dans les `DecisionFact`), et le
+style. La structure borne le dégât possible, elle ne rend pas le prompt superflu. Doctrine maison applicable : pas de tiret cadratin, pas d'antithèse
 (« c'est X, pas Y »), l'offre n'est jamais sujet de phrase.
 
 Ce que la génération doit produire, sur le même dossier qu'en §1 :
@@ -335,13 +381,18 @@ Rappel du piège maison : `comparateur-vie.ts` fait `import "server-only"`. Tout
 ## 12. Fichiers
 
 Neufs : `src/lib/decision/conclusion-plan.ts` (+ test), `src/lib/decision/conclusion-validate.ts`
-(+ test), `src/lib/decision/conclusion-hash.ts` (+ test), `src/lib/stable-hash.ts`,
-`src/lib/server/decision-narrative-store.ts`, `src/components/report/ConclusionBlock.tsx`,
-`src/components/report/ConclusionRedigee.tsx`, `supabase/23_decision_narrative.sql`.
-Touchés : `src/lib/decision/decision-assembler.ts` (comptage des réserves affichées),
-`src/components/report/DossierDecisionSection.tsx` (le verdict devient `ConclusionBlock`),
-`src/app/(account)/rapport/page.tsx` (Suspense), `src/lib/logement-synthesis-cache.ts`
-(`stableStringify` importé du module partagé).
+(+ test), `src/lib/decision/conclusion-hash.ts` (+ test), `src/lib/stable-stringify.ts` (+ test,
+universel), `src/lib/server/sha256.ts` (`server-only`), `src/lib/server/decision-narrative-store.ts`,
+`src/components/report/ConclusionBlock.tsx`, `src/components/report/ConclusionRedigee.tsx`,
+`supabase/23_decision_narrative.sql`.
+Touchés : `src/lib/decision/decision-fact.ts` (le `Dossier` porte le plan),
+`src/lib/decision/decision-assembler.ts` (produit le plan, compte les réserves affichées),
+`src/components/report/DossierDecisionSection.tsx` (le verdict devient `ConclusionBlock` sous
+`Suspense`), `src/components/report/DossierAvecLogement.tsx` et `src/app/(account)/rapport/page.tsx`
+(`insee` + `scopeKey`), `src/lib/logement-synthesis-cache.ts` (`stableStringify` importé du module
+partagé).
+
+Plan d'implémentation : `docs/superpowers/plans/2026-07-13-dossier-decision-slice-2-conclusion-redigee.md`.
 
 ## 13. Hors périmètre
 
