@@ -83,10 +83,23 @@ export type ModuleFacts = {
   logement?: LogementFacts; // slice 1.5 : présent seulement quand une analyse adresse est là
 };
 
+// LE CONTRAT DES OUTCOMES. Le registre des critères (criteria-registry.ts) en dépend entièrement :
+//   not_applicable : HORS SUJET. Le critère n'est pas déclaré, ou la règle ne s'applique pas ici.
+//                    Le critère reste NON EXAMINÉ.
+//   satisfied      : déclaré, examiné, RIEN À REDIRE. Silencieux (aucun fait), mais c'est un point
+//                    FAVORABLE, et il fait monter la couverture. Ne JAMAIS rendre not_applicable pour
+//                    dire « tout va bien » : c'est le bug que la slice 2.1 a corrigé (une exposition
+//                    inondation faible était comptée comme un trou de couverture).
+//   unknown        : la règle s'applique, la donnée manque. Le critère reste NON EXAMINÉ.
+//   uncertain      : idem, sans même un fait à montrer.
 export type RuleOutcome =
   | "not_applicable" | "satisfied" | "incompatible" | "compromise" | "verification" | "unknown" | "uncertain";
+
 export type RuleEvaluation = {
   ruleId: string;
+  // Les critères que cette règle ÉVALUE, jamais ceux auxquels elle est seulement « reliée ». Le
+  // registre marque ces critères EXAMINÉS dès que l'outcome est exploitable : une règle qui listerait
+  // ici un critère qu'elle ne regarde pas gonflerait la couverture d'un mensonge.
   projectKeys: string[];
   outcome: RuleOutcome;
   facts: DecisionFact[];

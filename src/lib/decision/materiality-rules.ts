@@ -137,7 +137,10 @@ const ruleInondation: DecisionRule = {
   evaluate: (f, p): RuleEvaluation => {
     if (preferenceWeight(p, "faible_risque_inondation") < 2) return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "not_applicable", facts: [], reason: "priorité non déclarée" };
     if (f.inondationRisque == null) return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "uncertain", facts: [], reason: "exposition inconnue" };
-    if (f.inondationRisque < 66) return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "not_applicable", facts: [], reason: "exposition non notable" };
+    // Examiné, rien à redire : un point FAVORABLE, silencieux (aucune carte). `not_applicable` disait
+    // ici « hors sujet » d'une bonne nouvelle : le registre des critères l'aurait comptée comme un trou
+    // de couverture, et n'aurait jamais vu un seul point positif. Cf. spec 2.1 §3.1.
+    if (f.inondationRisque < 66) return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "satisfied", facts: [], reason: "exposition non notable" };
     const habitant = p.posture === "habitant";
     const catnatCtx = f.catnatInondation != null ? ` La commune a connu ${f.catnatInondation} arrêtés de catastrophe naturelle inondation depuis 1982 (comptage administratif, pas une probabilité).` : "";
     const ev: EvidenceRef = { factId: "inondation.risque", module: "territoire", label: `Territoire · ${f.nom}`, observedValue: `${Math.round(f.inondationRisque)}/100`, grain: "commune", href: territoireHref };

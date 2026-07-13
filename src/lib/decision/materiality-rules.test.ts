@@ -117,3 +117,22 @@ test("règle 5 inondation : exposition inconnue -> aucun fait", () => {
   const r = runRules(facts({ inondationRisque: null }), p);
   assert.equal(r.facts.some((x) => x.ruleId === "territoire.inondation-exposition"), false);
 });
+
+// ── Le contrat des outcomes (slice 2.1) ────────────────────────────────────────
+// not_applicable = HORS SUJET. satisfied = déclaré, examiné, RIEN À REDIRE.
+// Les confondre faisait compter une bonne nouvelle comme un trou de couverture.
+
+test("règle 5 inondation : exposition FAIBLE + priorité déclarée -> satisfied (examiné, rien à redire)", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
+  const r = runRules(facts({ inondationRisque: 20 }), p);
+  const ev = r.evaluations.find((e) => e.ruleId === "territoire.inondation-exposition");
+  assert.equal(ev?.outcome, "satisfied");
+  assert.deepEqual(ev?.facts, []); // silencieux : aucune carte, mais un point FAVORABLE
+});
+
+test("règle 5 inondation : priorité NON déclarée -> not_applicable (hors sujet)", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [] });
+  const r = runRules(facts({ inondationRisque: 20 }), p);
+  const ev = r.evaluations.find((e) => e.ruleId === "territoire.inondation-exposition");
+  assert.equal(ev?.outcome, "not_applicable");
+});
