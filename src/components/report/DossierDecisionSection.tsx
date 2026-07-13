@@ -5,7 +5,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import type { Dossier, DecisionFact } from "@/lib/decision/decision-fact";
-import type { ProjectPosture } from "@/lib/user-project";
 import { ConclusionBlock, planToBlocks } from "@/components/report/ConclusionBlock";
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 
@@ -16,18 +15,11 @@ const SECTION_ACCENT: Record<string, string> = {
   verifications: "var(--info)",
 };
 
-// Le DÉCOMPTE des réserves a quitté la conclusion (où il doublait les cartes situées juste dessous) :
-// il coiffe désormais ces cartes. Une table par posture, jamais un ternaire : « avant de décider » n'a
-// aucun sens pour quelqu'un qui habite déjà là, et les postures sont quatre.
-const RESERVES_HEADING: Record<ProjectPosture, string> = {
-  recherche: "à examiner avant de décider",
-  recherche_quartier: "à examiner avant de décider",
-  adresse: "à examiner avant de vous engager",
-  habitant: "à comprendre ou surveiller",
-};
-function reservesHeading(posture: ProjectPosture, count: number): string {
-  return `Les ${count} point${count > 1 ? "s" : ""} ${RESERVES_HEADING[posture]}`;
-}
+// Le DÉCOMPTE des réserves a quitté la conclusion : il y doublait les cartes situées juste dessous.
+// Il n'a PAS été déplacé au-dessus d'elles pour autant : l'écran a montré qu'un intertitre « Les 4
+// points à examiner avant de vous engager » répétait mot pour mot le titre de la section qui suit
+// (« À examiner avant de vous engager »). Le décompte a simplement disparu : les cartes sont là, le
+// lecteur les compte, et le verdict dit ce que le décompte ne dit pas (combien sont STRUCTURANTS).
 
 function Chip({ label, value, href, color }: { label: string; value?: string; href?: string; color: string }) {
   const inner = (
@@ -141,12 +133,6 @@ export function DossierDecisionSection({
           <ConclusionRedigee plan={dossier.narrativePlan} insee={insee} scopeKey={scopeKey} />
         </Suspense>
       )}
-
-      {dossier.narrativePlan.reservesCount > 0 ? (
-        <p className="mt-8 mb-4 font-mono text-[11px] tracking-[0.12em] uppercase text-ghost">
-          {reservesHeading(dossier.narrativePlan.posture, dossier.narrativePlan.reservesCount)}
-        </p>
-      ) : null}
 
       {/* Les raisons, dans l'idiome des cartes-modules (filet accent en tête) */}
       <div className="grid gap-3.5">
