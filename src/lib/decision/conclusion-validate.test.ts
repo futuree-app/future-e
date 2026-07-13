@@ -14,19 +14,21 @@ function plan(): ConclusionNarrativePlan {
       {
         key: "verdict",
         fallbackText: "Aucune contrainte n'est contredite.",
-        sourceIds: [], requiredPhrases: [], maxChars: 320, generable: false,
+        sourceIds: [], requiredPhrases: [], allowedNumbers: [], maxChars: 320, generable: false,
       },
       {
         key: "unexamined_hard_constraints",
         fallbackText: "Nous n'avons pas encore examiné, à ce grain : la proximité de la mer, la présence d'une gare.",
         sourceIds: ["nearSea", "nearPlace"],
         requiredPhrases: ["la proximité de la mer", "la présence d'une gare"],
+        allowedNumbers: ["2", "deux"],
         maxChars: 260, generable: true,
       },
       {
         key: "reserves_found",
         fallbackText: "3 points méritent d'être examinés de près.",
-        sourceIds: ["f1", "f2", "f3"], requiredPhrases: ["3"], maxChars: 300, generable: true,
+        sourceIds: ["f1", "f2", "f3"], requiredPhrases: ["3"], allowedNumbers: ["3", "trois"],
+        maxChars: 300, generable: true,
       },
     ],
   };
@@ -133,6 +135,36 @@ test("nombre absent du fallback : hallucination factuelle rejetée", () => {
   const r = validateGeneratedBlocks(plan(), [{ key: "reserves_found", text: "4 points demandent un regard." }]);
   assert.equal(r.blocks[2]!.generated, false);
   assert.ok(r.rejected.some((x) => x.reason === "unauthorized_number"));
+});
+
+test("l'invariant est « aucun nombre FAUX » : le compte VRAI passe, même en toutes lettres", () => {
+  // Le plan déclare 3 réserves : « trois » est exact et bien écrit, on ne censure pas une tournure fidèle.
+  const r = validateGeneratedBlocks(plan(), [
+    { key: "reserves_found", text: "3 points, soit trois regards à porter, avant d'aller plus loin." },
+  ]);
+  assert.equal(r.blocks[2]!.generated, true);
+});
+
+test("un compte FAUX en toutes lettres est rejeté (sinon « Quatre points » passerait sous le radar)", () => {
+  const r = validateGeneratedBlocks(plan(), [
+    { key: "reserves_found", text: "3 points demandent un regard, quatre si l'on compte large." },
+  ]);
+  assert.equal(r.blocks[2]!.generated, false);
+  assert.ok(r.rejected.some((x) => x.reason === "unauthorized_number"));
+});
+
+test("« un » et « une » restent des articles, jamais des nombres interdits", () => {
+  const r = validateGeneratedBlocks(plan(), [
+    { key: "unexamined_hard_constraints", text: "Une condition n'a pas pu être vérifiée : la proximité de la mer, la présence d'une gare." },
+  ]);
+  assert.equal(r.blocks[1]!.generated, true);
+});
+
+test("un mot qui CONTIENT un nombre n'est pas un nombre (septembre, sixième)", () => {
+  const r = validateGeneratedBlocks(plan(), [
+    { key: "reserves_found", text: "3 points demandent un regard, récemment mis à jour." },
+  ]);
+  assert.equal(r.blocks[2]!.generated, true);
 });
 
 test("année ou horizon inventé : rejeté", () => {

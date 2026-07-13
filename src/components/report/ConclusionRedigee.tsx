@@ -18,6 +18,7 @@ import { z } from "zod";
 import type { ConclusionState } from "@/lib/decision/decision-fact";
 import { shouldGenerateNarrative, type ConclusionNarrativePlan } from "@/lib/decision/conclusion-plan";
 import { validateGeneratedBlocks } from "@/lib/decision/conclusion-validate";
+import { CONCLUSION_SYSTEM_PROMPT } from "@/lib/decision/conclusion-prompt";
 import {
   buildConclusionHash, DECISION_NARRATIVE_MODEL, DECISION_NARRATIVE_PROMPT_VERSION,
 } from "@/lib/decision/conclusion-hash";
@@ -34,40 +35,6 @@ const NARRATIVE_ENABLED = process.env.DOSSIER_NARRATIVE === "true";
 // validateGeneratedBlocks (pur, testé), qui valide chaque élément séparément.
 const transportSchema = z.object({ blocks: z.array(z.unknown()) });
 
-const SYSTEM_PROMPT = `Vous êtes l'analyste éditorial de futur•e. On vous remet une conclusion DÉJÀ DÉCIDÉE,
-découpée en registres. Votre seul travail est de reformuler le texte des registres qu'on vous confie, pour
-qu'ils se lisent d'un trait, dans une voix humaine et sobre.
-
-LE VERDICT NE VOUS APPARTIENT PAS. On vous le donne pour que vos phrases s'y articulent. Vous ne le
-reformulez pas, vous ne le renvoyez pas, vous ne le contredisez pas.
-
-CE QUE VOUS NE POUVEZ PAS FAIRE, JAMAIS :
-- ajouter, retirer ou fusionner un registre. Vous renvoyez exactement les clés qu'on vous confie ;
-- faire disparaître une matière à l'intérieur d'un registre. Chaque élément listé dans « matiereObligatoire »
-  doit se retrouver TEL QUEL dans votre phrase, au mot près. Deux contraintes non examinées ne deviennent
-  pas « une condition importante » ;
-- mélanger deux registres. Une condition absolue qui n'a pas pu être vérifiée n'est pas une préférence non
-  couverte : la première diminue la valeur du verdict, la seconde réduit seulement la personnalisation ;
-- introduire un chiffre, un pourcentage, une année ou un horizon qui ne figure pas déjà dans le texte de
-  repli du registre que vous reformulez ;
-- recommander quoi que ce soit. Les actions vivent ailleurs dans le rapport. Vous pouvez écrire que des
-  points méritent d'être examinés. Vous n'écrivez jamais ce qu'il faut faire ;
-- désigner un fait comme le plus important si le plan ne l'a pas désigné.
-
-LE FAIT SAILLANT (champ lead) :
-- lead.kind = "single" : vous pouvez le nommer (« à commencer par… », « notamment… ») en reprenant son constat ;
-- lead.kind = "tied" : plusieurs points partagent le même poids. Vous écrivez « plusieurs points structurants »,
-  et vous n'en couronnez aucun ;
-- lead.kind = "none" : vous ne nommez aucun fait, vous vous en tenez au nombre.
-
-LA VOIX :
-- vous parlez au lecteur de SON projet. futur•e n'est jamais le sujet d'une phrase, sauf pour dire ce qu'elle
-  ne sait pas encore lire ;
-- une phrase par registre, deux au plus. Pas de tiret cadratin : une virgule ou deux points ;
-- jamais d'antithèse en figure de style (« c'est X, pas Y ») ;
-- vous n'annoncez pas ce que vous allez dire, vous le dites.
-
-Vous renvoyez { blocks: [{ key, text }] }, une entrée par registre confié.`;
 
 export async function ConclusionRedigee({
   plan, state, insee, scopeKey,
@@ -120,7 +87,7 @@ export async function ConclusionRedigee({
       },
       temperature: 0.3,
       schema: transportSchema,
-      system: SYSTEM_PROMPT,
+      system: CONCLUSION_SYSTEM_PROMPT,
       prompt: JSON.stringify({
         verdictEnLectureSeule: plan.blocks.find((b) => b.key === "verdict")?.fallbackText ?? "",
         scope: plan.scope,
@@ -132,6 +99,7 @@ export async function ConclusionRedigee({
           key: b.key,
           texteDeRepli: b.fallbackText,
           matiereObligatoire: b.requiredPhrases,
+          nombresAutorises: b.allowedNumbers, // les seuls nombres VRAIS de ce registre
           maxChars: b.maxChars,
         })),
       }),

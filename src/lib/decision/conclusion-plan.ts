@@ -17,11 +17,12 @@ export type BlockKey = "verdict" | "unexamined_hard_constraints" | "reserves_fou
 
 export type NarrativeBlock = {
   key: BlockKey;
-  fallbackText: string;      // le texte déterministe de CE registre, affichable seul
-  sourceIds: string[];       // factIds / HardConstraintKey / PreferenceKey. JAMAIS produits par l'IA.
-  requiredPhrases: string[]; // matière qui doit SURVIVRE à la rédaction, textuellement
+  fallbackText: string;       // le texte déterministe de CE registre, affichable seul
+  sourceIds: string[];        // factIds / HardConstraintKey / PreferenceKey. JAMAIS produits par l'IA.
+  requiredPhrases: string[];  // matière qui doit SURVIVRE à la rédaction, textuellement
+  allowedNumbers: string[];   // les nombres VRAIS de ce registre, en chiffres ET en lettres
   maxChars: number;
-  generable: boolean;        // false = déterministe, hors de portée du modèle
+  generable: boolean;         // false = déterministe, hors de portée du modèle
 };
 
 // Le fait saillant est DÉSIGNÉ par le déterministe, jamais élu par l'IA. `tied` existe parce que
@@ -54,6 +55,26 @@ export type ConclusionPlanInput = {
 
 const TIER_ORDER: Record<MaterialityTier, number> = { decision_critical: 0, structuring: 1, secondary: 2 };
 const RESERVE_ROLES = new Set<DecisionFact["role"]>(["verification", "compromise", "unknown"]);
+
+// La matière obligatoire porte sur le NOYAU du libellé, pas sur sa grammaire. Les libellés sont
+// écrits pour une liste (« la proximité de la mer »), mais une phrase les décline (« votre exigence
+// DE proximité de la mer »). Exiger l'article rejetterait une reformulation parfaitement fidèle :
+// c'est ce que la sonde a montré, 3 fois sur 3. On exige donc « proximité de la mer », ce qu'aucune
+// tournure honnête ne peut perdre, et ce qu'une déformation (« la proximité du littoral ») perd.
+function coreLabel(label: string): string {
+  return label.replace(/^(les |le |la |l'|un |une |des |du |de la |d')/i, "").trim();
+}
+
+// Les nombres VRAIS d'un registre, sous les deux formes qu'une phrase française peut prendre.
+// L'invariant que le slice 2 doit tenir n'est pas « aucun nombre absent du repli », c'est « aucun
+// nombre FAUX » : « Deux de vos priorités » est exact et bien écrit quand il y en a deux, et le
+// rejeter censurerait une tournure naturelle (la sonde l'a produite 2 fois sur 3). Un « Trois
+// priorités » inventé, lui, reste rejeté : seul le compte réel est déclaré ici.
+const NUMBER_WORDS = ["zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix"];
+function numberForms(n: number): string[] {
+  const word = NUMBER_WORDS[n];
+  return word ? [String(n), word] : [String(n)];
+}
 
 function reserves(facts: DecisionFact[]): DecisionFact[] {
   return facts.filter((f) => RESERVE_ROLES.has(f.role));
@@ -101,6 +122,7 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
     fallbackText: verdictText(input),
     sourceIds: input.establishedIncompatibility ? [input.establishedIncompatibility.factId] : [],
     requiredPhrases: [],
+    allowedNumbers: [],
     maxChars: 320,
     generable: false,
   }];
@@ -120,7 +142,8 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
       sourceIds: input.uncovered.map((u) => u.key),
       // Chaque contrainte doit SURVIVRE à la rédaction : « une condition importante reste à examiner »
       // ferait disparaître la gare, sans qu'aucune autre validation ne s'en aperçoive.
-      requiredPhrases: input.uncovered.map((u) => u.label),
+      requiredPhrases: input.uncovered.map((u) => coreLabel(u.label)),
+      allowedNumbers: numberForms(input.uncovered.length),
       maxChars: 260,
       generable: true,
     });
@@ -134,8 +157,13 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
       key: "reserves_found",
       fallbackText: `${n} point${n > 1 ? "s" : ""} mérite${n > 1 ? "nt" : ""} d'être examiné${n > 1 ? "s" : ""} de près.`,
       sourceIds: rs.map((f) => f.id),
-      // Le nombre exact, et le constat du fait saillant quand il y en a un. `tied` n'en couronne aucun.
-      requiredPhrases: lead.kind === "single" ? [String(n), lead.statement] : [String(n)],
+      // Le NOMBRE, et rien d'autre. Exiger aussi le `statement` du lead mot pour mot reviendrait à
+      // exiger une COPIE (« Le logement porte une étiquette énergétique F »), ce qu'aucun rédacteur
+      // n'écrit et ce qui annulerait l'intérêt de la reformulation (sonde : rejeté 3 fois sur 3).
+      // Et c'est inutile : le modèle ne reçoit QUE le lead, jamais les autres faits, donc il lui est
+      // structurellement impossible d'en couronner un autre. La garantie tient sans la contrainte.
+      requiredPhrases: [String(n)],
+      allowedNumbers: numberForms(n),
       maxChars: 300,
       generable: true,
     });
@@ -147,7 +175,8 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
       key: "uncovered_priorities",
       fallbackText: `Vos priorités concernant ${top.map((p) => p.label).join(", ")} ne sont pas encore couvertes dans cette synthèse.`,
       sourceIds: top.map((p) => p.key),
-      requiredPhrases: top.map((p) => p.label),
+      requiredPhrases: top.map((p) => coreLabel(p.label)),
+      allowedNumbers: numberForms(top.length),
       maxChars: 260,
       generable: true,
     });

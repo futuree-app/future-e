@@ -63,38 +63,50 @@ test("reservesCount compte les faits AFFICHÉS qu'on lui donne", () => {
   assert.match(plan.blocks.find((b) => b.key === "reserves_found")!.fallbackText, /2 points/);
 });
 
-test("requiredPhrases : les libellés des contraintes non examinées doivent survivre à la rédaction", () => {
+test("requiredPhrases : le NOYAU des libellés, sans l'article (une phrase décline, une liste pas)", () => {
+  // « votre exigence DE proximité de la mer » est fidèle : exiger « LA proximité de la mer » la
+  // rejetterait sur un article. On exige le noyau, qu'aucune tournure honnête ne peut perdre.
   const plan = buildConclusionPlan(baseInput({
     uncovered: [MER, { key: "nearPlace", label: "la proximité d'un lieu" }],
   }));
   assert.deepEqual(
     plan.blocks.find((b) => b.key === "unexamined_hard_constraints")!.requiredPhrases,
-    ["la proximité de la mer", "la proximité d'un lieu"],
+    ["proximité de la mer", "proximité d'un lieu"],
   );
 });
 
-test("requiredPhrases : les libellés des priorités non couvertes doivent survivre", () => {
+test("requiredPhrases : le noyau des priorités non couvertes doit survivre", () => {
   const plan = buildConclusionPlan(baseInput({ uncoveredPriorities: [AIR] }));
   assert.deepEqual(
     plan.blocks.find((b) => b.key === "uncovered_priorities")!.requiredPhrases,
-    ["la qualité de l'air"],
+    ["qualité de l'air"],
   );
 });
 
-test("requiredPhrases : le nombre de réserves, et le constat du lead quand il est single", () => {
+test("requiredPhrases des réserves : le NOMBRE seul, jamais la copie du constat du lead", () => {
+  // Exiger le statement mot pour mot exigerait une COPIE, et annulerait la reformulation. Inutile :
+  // le modèle ne reçoit que le lead, jamais les autres faits, donc il ne peut en couronner un autre.
   const plan = buildConclusionPlan(baseInput({
     shownFacts: [
-      verification("f1", "decision_critical", "L'étiquette F du logement"),
+      verification("f1", "decision_critical", "Le logement porte une étiquette énergétique F"),
       verification("f2", "secondary"),
     ],
   }));
-  assert.deepEqual(
-    plan.blocks.find((b) => b.key === "reserves_found")!.requiredPhrases,
-    ["2", "L'étiquette F du logement"],
-  );
+  assert.deepEqual(plan.blocks.find((b) => b.key === "reserves_found")!.requiredPhrases, ["2"]);
 });
 
-test("requiredPhrases : lead tied -> le nombre seul (aucun fait n'est couronné)", () => {
+test("allowedNumbers : le compte VRAI du registre, en chiffres ET en lettres", () => {
+  // L'invariant est « aucun nombre faux », pas « aucun nombre absent du repli » : « deux priorités »
+  // est exact quand il y en a deux, et le rejeter censurerait une tournure française naturelle.
+  const plan = buildConclusionPlan(baseInput({
+    shownFacts: [verification("f1", "structuring"), verification("f2", "secondary"), verification("f3", "secondary")],
+    uncoveredPriorities: [AIR, { key: "agriculture", label: "l'agriculture" }],
+  }));
+  assert.deepEqual(plan.blocks.find((b) => b.key === "reserves_found")!.allowedNumbers, ["3", "trois"]);
+  assert.deepEqual(plan.blocks.find((b) => b.key === "uncovered_priorities")!.allowedNumbers, ["2", "deux"]);
+});
+
+test("requiredPhrases : lead tied -> le nombre aussi (aucun fait n'est couronné)", () => {
   const plan = buildConclusionPlan(baseInput({
     shownFacts: [verification("f1", "decision_critical"), verification("f2", "decision_critical")],
   }));

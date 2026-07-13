@@ -25,11 +25,25 @@ export type ValidationResult = {
 
 const generatedBlockSchema = z.object({ key: z.string(), text: z.string() });
 
-// Tout nombre, pourcentage, année ou horizon d'un texte généré doit déjà figurer dans le fallbackText
-// de SON bloc. Contrôle grossier, qui attrape une grande part des hallucinations factuelles sans
-// prétendre valider le sens (ce qui serait hors de portée).
+// AUCUN NOMBRE FAUX. C'est l'invariant, et il est plus juste que « aucun nombre absent du repli » :
+// « Deux de vos priorités » est exact et bien écrit quand il y en a deux, et le rejeter censurerait
+// une tournure française naturelle. Les nombres autorisés d'un bloc sont donc ceux de son repli PLUS
+// ceux que le déterministe déclare vrais (`allowedNumbers`, en chiffres et en lettres). Tout autre
+// nombre, chiffre, pourcentage, année ou horizon est une invention, et le bloc retombe sur son repli.
+//
+// Les nombres écrits EN TOUTES LETTRES comptent : sans cela, un « Trois points » inventé passerait
+// sous le radar d'un contrôle qui ne regarde que les chiffres. « un »/« une » sont exclus de la
+// détection : ce sont d'abord des articles, et les traiter en nombres censurerait des phrases fidèles.
+const WORD_NUMBERS = [
+  "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix",
+  "onze", "douze", "vingt", "trente", "cent", "mille",
+];
+
 function numbersIn(text: string): string[] {
-  return text.match(/\d+([.,]\d+)?/g) ?? [];
+  const lower = text.toLowerCase();
+  const digits = text.match(/\d+([.,]\d+)?/g) ?? [];
+  const words = WORD_NUMBERS.filter((w) => new RegExp(`\\b${w}\\b`).test(lower));
+  return [...digits, ...words];
 }
 
 export function validateGeneratedBlocks(
@@ -68,7 +82,7 @@ export function validateGeneratedBlocks(
     if (trimmed.length === 0) { rejected.push({ key: b.key, reason: "empty" }); return fallback; }
     if (trimmed.length > b.maxChars) { rejected.push({ key: b.key, reason: "too_long" }); return fallback; }
 
-    const allowed = new Set(numbersIn(b.fallbackText));
+    const allowed = new Set([...numbersIn(b.fallbackText), ...b.allowedNumbers]);
     if (numbersIn(trimmed).some((n) => !allowed.has(n))) {
       rejected.push({ key: b.key, reason: "unauthorized_number" });
       return fallback;
