@@ -1,109 +1,75 @@
 # Passation — session en cours
 
-**Horodatage** : 2026-07-13 · **Branche courante** : `feat/dossier-slice-2-conclusion-redigee`
-(10 commits d'avance sur `origin/main`, **rien de poussé**, aucune PR ouverte).
+**Horodatage** : 2026-07-14 · **Branche** : `feat/dossier-slice-2-conclusion-redigee`
 
-## Objectif en cours
+## Où on en est
 
-**Slice 2 du dossier de décision** (« En une minute », hub `/rapport`) : l'IA **rédige** les registres
-de nuance de la conclusion, le déterministe **décide** tout le reste. Le code est **écrit, testé
-(100 tests verts), buildé, et validé sur le vrai modèle** (sonde : 15/15 blocs retenus sur 5 tirages).
-Il reste la **vérification à l'écran, flag allumé** : elle a été interrompue en plein milieu.
+**Slices 2 et 2.1 du dossier de décision LIVRÉES** : la conclusion est rédigée par l'IA sous contrat
+strict, et le verdict répond enfin à « ce lieu me correspond-il ? » au lieu de « aucune contrainte
+n'est contredite ». Codé, testé (262 verts), buildé, **sondé sur le vrai modèle (15/15)** et
+**vérifié à l'écran, flag allumé**, sur un projet riche (Toulouse, 7 rue du Taur).
 
-## Fait dans cette session
+Reste : pousser, ouvrir la PR, puis **attaquer la couverture** (c'est l'urgence, cf. plus bas).
 
-1. **Spec** `docs/superpowers/specs/2026-07-13-dossier-decision-slice-2-conclusion-redigee-design.md`
-   et **plan** `docs/superpowers/plans/2026-07-13-dossier-decision-slice-2-conclusion-redigee.md`
-   (commits `2e62b37`, `132731e`, durcis en `f2fc12f` après revue adversariale ChatGPT).
-2. **Moteur** (6 commits, `76c7121` → `3efdd97`) :
-   - `src/lib/stable-stringify.ts` (universel, **jette sur `undefined`**) + `src/lib/server/sha256.ts` ;
-     `logement-synthesis-cache.ts` dédupliqué et rendu **total** (`?? null` explicites).
-   - `src/lib/decision/conclusion-plan.ts` : `ConclusionNarrativePlan` porté par le `Dossier`
-     (présence, ORDRE, `sourceIds`, `requiredPhrases`, `allowedNumbers`, `fallbackText`, `generable`),
-     `selectLead` (single/tied/none), `shouldGenerateNarrative` (le gate).
-   - `src/lib/decision/conclusion-validate.ts` : le vrai contrat de sortie, 9 motifs de rejet,
-     récupération **bloc par bloc**.
-   - `src/lib/decision/conclusion-hash.ts` : SHA-256 (plan + prompt + modèle + contrat).
-   - `src/lib/decision/conclusion-prompt.ts` : le prompt, partagé composant ↔ sonde.
-   - `src/lib/server/decision-narrative-store.ts` : lecture validée, upsert **convergent**, pruning.
-   - `src/components/report/{ConclusionBlock,ConclusionRedigee}.tsx` + branchement
-     `DossierDecisionSection` / `DossierAvecLogement` / `rapport/page.tsx`.
-   - `scripts/probe-conclusion.ts` : la **sonde** (mesure le taux de survie sur le vrai modèle).
-3. **Migration appliquée en base** (MCP Supabase, projet `xkewgsccadjmondzmjxj`) :
-   `supabase/23_decision_narrative.sql` → table `decision_narrative` créée, RLS + 3 policies, 0 ligne.
-4. **Corrections trouvées par la sonde** (`3efdd97`) : au premier passage, **1 bloc sur 3** survivait,
-   tests au vert. Trois contraintes à moi ne tenaient pas (noyau du libellé sans article, copie du
-   constat du lead exigée à tort, nombres en toutes lettres). Après correction : **15/15**.
+## Ce que fait la slice 2.1
 
-## Décisions prises (porteur, hors vault)
+- **Le déterministe gagne le droit de dire qu'un lieu CORRESPOND, à condition de le prouver.** Deux
+  mesures dans `src/lib/decision/criteria-registry.ts` : **couverture** (part des critères DÉCLARÉS
+  réellement examinés, avec le **couperet** : une contrainte dure non examinée interdit « élevée »)
+  × **orientation** (`favorable` / `minor_reserves` / `major_reserves` / `incompatible`), jamais un
+  solde : rien ne rachète une réserve critique. `favorableCount` : « plusieurs dimensions » exige ≥ 2.
+- **La couverture est une conséquence OBSERVÉE des règles.** `COVERED_PREFERENCE_KEYS` (liste tenue à
+  la main, qui dérivait en silence) a disparu.
+- **Contrat d'outcome tranché** : `not_applicable` = hors sujet, `satisfied` = examiné, rien à redire.
+  Avant, une exposition inondation FAIBLE rendait `not_applicable` : une bonne nouvelle comptée comme
+  un trou de couverture.
+- **Règle `departements`** : le dossier annonçait « nous n'avons pas examiné les départements visés »
+  sur un rapport intitulé Toulouse, à qui avait écrit « impérativement en Haute-Garonne ».
+- **La conclusion NOMME, les cartes DÉMONTRENT.** `DecisionFact.topic` (le SUJET, 3-6 mots, distinct du
+  constat, exigé par `assertFactValid`, **sans le grain**) ; libellés de contraintes **instanciés**
+  depuis le projet (« la gare Matabiau », pas « un lieu ») ; **commune nommée** (« Toulouse »).
+- **Le rendu ne l'aplatit plus** : 5 strates étiquetées (`ConclusionBlock.tsx`), label dérivé de la
+  même table que le verdict, redondances supprimées.
 
-- **Le verdict n'est JAMAIS généré** (`generable: false`). C'est la phrase qui peut renverser une
-  décision perçue (« ce lieu vous correspond »). Le modèle le reçoit en lecture seule pour que les
-  registres suivants s'y articulent.
-- **Hiérarchie éditoriale des réserves** (ordre gravé) : `verdict` → `unexamined_hard_constraints` →
-  `reserves_found` → `uncovered_priorities`. Une contrainte dure non examinée et une préférence non
-  couverte ne partagent jamais un bloc.
-- **Gate par complexité narrative**, jamais pour maquiller un dossier pauvre. Conséquence assumée :
-  sur la couverture actuelle (2 contraintes Territoire sur 11), le gate rend souvent `false` et le
-  déterministe reste affiché. **Le slice 2 améliore la voix, pas la matière.**
-- **L'invariant des nombres est « aucun nombre FAUX »**, pas « aucun nombre absent du repli ».
-- **Artefact durable** (`await upsert` puis relecture canonique), clé
-  `(user, insee, scope_key, input_hash)`.
-- **Flag serveur `DOSSIER_NARRATIVE`, OFF par défaut.**
+## Pièges / doctrine à ne pas perdre
 
-## État git
+- **La SONDE est l'outil de non-régression du prompt** : `node --env-file=.env.local
+  scripts/probe-conclusion.ts`. Elle a rattrapé **5 contraintes qui ne tenaient pas** alors que 100+
+  tests étaient verts (dont une limite de longueur qui contredisait ce que le prompt exigeait). Toute
+  retouche du prompt impose de bumper `DECISION_NARRATIVE_PROMPT_VERSION` (`conclusion-hash.ts`), et
+  `DECISION_NARRATIVE_CONTRACT_VERSION` si `conclusion-validate` change de contrat. Actuellement v6/c2.
+- **Le `lead` (single/tied) est de la TUYAUTERIE.** Ne jamais écrire « aucun ne prend le dessus » : le
+  lecteur demande quoi regarder, pas comment le moteur trie. On LISTE.
+- **Le verdict n'est JAMAIS généré** (`generable: false`), et aucune phrase ne promet un positif
+  inexistant (`hasFavorable`, `favorableCount`, cas « rien d'examiné »).
+- `server-only` n'est pas résolvable par Node (piège maison) : `src/lib/server/sha256.ts` ne porte pas
+  la directive.
+- Aucune génération quand `logementStatus === "pending"` : le dossier n'est pas final.
 
-- Branche `feat/dossier-slice-2-conclusion-redigee`, **10 commits non poussés**, aucune PR.
-- Non commité : **`verif-slice2.mjs`** (script Playwright de vérif live, à la racine ; à déplacer dans
-  `scripts/` ou à supprimer avant de finir).
-- `npx tsc --noEmit` → 0. `node --test src/lib/decision/*.test.ts src/lib/*.test.ts` → **100 verts**.
-  `npm run build` → compile (les « Retrying » sur `/inondation/[insee]` sont du SSG lent, préexistant).
+## L'URGENCE SUIVANTE : la couverture
 
-## Prochaine étape immédiate
+**Le verdict restera tiède tant que la matière n'aura pas grandi, et aucune prose ne le corrigera.**
 
-**Terminer la vérification à l'écran, flag allumé.** Le compte de test a un projet SANS contrainte
-dure : le gate reste donc fermé et rien ne se génère. Il faut un dossier riche. Séquence :
+- 3 contraintes dures sur 11 sont examinées (mer, taille, département).
+- Sur le dossier de test, **3 priorités déclarées sur 6 ne sont examinées par aucune règle**. Le
+  registre l'a mis au jour : `faible_chaleur` n'est plus examinée **dès qu'une adresse est renseignée**
+  (la règle de confort d'été se désactive, et la règle de compromis exige que l'accès aux transports
+  soit aussi déclaré).
+- La case « couverture élevée » de la table de vérité est **inatteignable aujourd'hui** : son code n'est
+  couvert que par des tests unitaires, jamais par l'écran. C'est assumé, et c'est le signal.
+- Module **Santé** à absorber : un fait Santé est un `DecisionFact` de plus, l'architecture l'accueille
+  sans changement.
 
-1. Ajouter `DOSSIER_NARRATIVE=true` dans `.env.local`, puis **redémarrer** le serveur de dev
-   (Next refuse un second serveur pour le même répertoire : `kill` l'existant d'abord).
-2. Donner au compte un projet riche (contrainte dure non couverte + priorités non couvertes) :
-   la colonne est **`user_profiles.user_project`** (jsonb), PAS `profiles` (cette table n'existe pas).
-   **Sauvegarder la valeur d'origine avant de la remplacer, et la restaurer après.**
-   Ou, plus simple et sans toucher la base : éditer le projet depuis l'UI (`ProjectSummaryCard`).
-3. Ouvrir `/rapport` (compte de test configuré localement, jamais d'identifiant dans le dépôt ;
-   Toulouse, adresse 7 Rue du Taur déjà analysée) et vérifier : le déterministe s'affiche, puis est **remplacé d'un
-   bloc** ; le verdict est **mot pour mot** celui du déterministe ; les registres restent distincts et
-   dans l'ordre ; aucun nombre faux ; une ligne apparaît dans `decision_narrative` ; **recharger ne
-   relance aucun appel LLM** et rend le texte identique.
-4. Vérifier le gate sur un dossier pauvre (aucune génération, aucune ligne écrite).
-5. Puis : mettre à jour `/memory/project_dossier_decision.md`, pousser la branche, ouvrir la PR.
-   **Ne pas oublier `DOSSIER_NARRATIVE` côté Vercel** si on veut que ça vive en production.
+## À faire pour clore
+
+1. Pousser la branche, ouvrir la PR.
+2. **Ne pas oublier `DOSSIER_NARRATIVE=true` côté Vercel** si la conclusion rédigée doit vivre en prod.
+3. Le compte de test : le mot de passe a traîné dans le dépôt (purgé de l'historique, branche jamais
+   poussée). **Aucun identifiant ne doit être écrit dans le dépôt.**
 
 ## À lire d'abord à la reprise
 
-1. `/memory/MEMORY.md`, puis la fiche `project_dossier_decision` (slices 1 et 1.5).
-2. `docs/superpowers/specs/2026-07-13-dossier-decision-slice-2-conclusion-redigee-design.md` (§3 le
-   périmètre, §5 le gate, §6 le flux, §8 l'artefact).
+1. `/memory/MEMORY.md`, puis `project_dossier_decision`.
+2. `docs/superpowers/specs/2026-07-13-dossier-decision-slice-2-1-verdict-correspondance-design.md`
+   (§3.1 le contrat d'outcome, §5 la table de vérité du verdict).
 3. `docs/vault/arbitrages/deterministe-selectionne-ia-formule.md`.
-4. `docs/handoff/AUTO-SNAPSHOT.md` (fraîcheur).
-
-## Pièges / fils ouverts
-
-- **La sonde est l'outil de non-régression du prompt.** `node --env-file=.env.local
-  scripts/probe-conclusion.ts`. Toute retouche du prompt impose de **bumper
-  `DECISION_NARRATIVE_PROMPT_VERSION`** (`conclusion-hash.ts`), sinon les artefacts déjà écrits
-  continuent d'être servis comme s'ils étaient courants. Idem `DECISION_NARRATIVE_CONTRACT_VERSION`
-  si `conclusion-validate` change de contrat.
-- **`server-only` n'est pas résolvable par Node** (piège maison `comparateur-vie`). C'est pourquoi
-  `src/lib/server/sha256.ts` ne porte PAS la directive : un test le value-importe. La garantie est
-  conventionnelle (un import client échouerait de toute façon au build sur `node:crypto`).
-- **`stableStringify` jette désormais sur `undefined`** et il tourne AUSSI dans le navigateur (gate en
-  session de `LogementSynthesis`). `buildSynthesisPayload` a été rendu total pour ça. Toute nouvelle
-  clé optionnelle dans ce payload doit être `?? null`, jamais laissée à `undefined`.
-- **Aucune génération quand `logementStatus === "pending"`** : le dossier n'est pas final, ce serait un
-  second appel Sonnet jeté. À préserver si on touche à `DossierDecisionSection`.
-- **Le vrai levier produit reste la COUVERTURE** (5-8 dimensions Territoire) et le module **Santé**,
-  qui devra entrer dans « En une minute » : le plan narratif l'absorbera sans changement
-  d'architecture (un fait Santé est un `DecisionFact` de plus, donc une réserve de plus).
-- Un serveur de dev tournait sur `:3000` (PID observé 16531) et un autre a été tenté sur `:3001` ;
-  vérifier qu'il n'en reste pas un orphelin (`lsof -i :3000`).
