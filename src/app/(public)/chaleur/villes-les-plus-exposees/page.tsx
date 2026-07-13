@@ -266,7 +266,7 @@ export default async function ChaleurTop10() {
               Six dimensions croisées : Territoire, Santé, Logement, Métier, Mobilité, Projets.
             </p>
             <div className="cta-links">
-              <Link href="/rapport" className="cta-btn">Créer mon rapport interactif →</Link>
+              <Link href="/rapport" prefetch={false} className="cta-btn">Créer mon rapport interactif →</Link>
               <Link href="/chaleur" className="cta-sec">Explorer par commune</Link>
               <Link href="/comparateur" className="cta-sec">Comparer deux villes</Link>
             </div>

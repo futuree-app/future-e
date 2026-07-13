@@ -3,6 +3,8 @@
 // un compromise a deux côtés avec preuve, une verification a une action).
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { UserProject } from "../user-project.ts";
+import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
+import type { CriteriaSummary } from "./criteria-registry.ts";
 
 export type DecisionModule = "territoire" | "logement";
 export type MaterialityTier = "decision_critical" | "structuring" | "secondary";
@@ -31,7 +33,18 @@ type BaseFact = {
   ruleId: string;
   sourceFactIds: string[];
   module: DecisionModule;
+  // LE CONSTAT : ce que le fait établit, avec son contexte et parfois sa limite. C'est ce que la carte
+  // affiche, et il peut être long.
   statement: string;
+  // LE SUJET : de quoi ce fait parle, en 3 à 6 mots, tel qu'on le NOMME dans une phrase (« l'exposition
+  // de la commune à l'inondation », « le retrait-gonflement des argiles sous cette adresse »).
+  //
+  // Il existe parce que la conclusion doit pouvoir NOMMER un fait sans le RECOPIER. Sans lui, elle
+  // n'avait que le constat à citer, et redisait mot pour mot la carte située trois centimètres plus bas.
+  // La conclusion nomme, les cartes démontrent.
+  //
+  // Jamais une catégorie (« des risques naturels »), jamais une phrase, jamais une action.
+  topic: string;
   materialityTier: MaterialityTier;
 };
 
@@ -82,10 +95,23 @@ export type ModuleFacts = {
   logement?: LogementFacts; // slice 1.5 : présent seulement quand une analyse adresse est là
 };
 
+// LE CONTRAT DES OUTCOMES. Le registre des critères (criteria-registry.ts) en dépend entièrement :
+//   not_applicable : HORS SUJET. Le critère n'est pas déclaré, ou la règle ne s'applique pas ici.
+//                    Le critère reste NON EXAMINÉ.
+//   satisfied      : déclaré, examiné, RIEN À REDIRE. Silencieux (aucun fait), mais c'est un point
+//                    FAVORABLE, et il fait monter la couverture. Ne JAMAIS rendre not_applicable pour
+//                    dire « tout va bien » : c'est le bug que la slice 2.1 a corrigé (une exposition
+//                    inondation faible était comptée comme un trou de couverture).
+//   unknown        : la règle s'applique, la donnée manque. Le critère reste NON EXAMINÉ.
+//   uncertain      : idem, sans même un fait à montrer.
 export type RuleOutcome =
   | "not_applicable" | "satisfied" | "incompatible" | "compromise" | "verification" | "unknown" | "uncertain";
+
 export type RuleEvaluation = {
   ruleId: string;
+  // Les critères que cette règle ÉVALUE, jamais ceux auxquels elle est seulement « reliée ». Le
+  // registre marque ces critères EXAMINÉS dès que l'outcome est exploitable : une règle qui listerait
+  // ici un critère qu'elle ne regarde pas gonflerait la couverture d'un mensonge.
   projectKeys: string[];
   outcome: RuleOutcome;
   facts: DecisionFact[];
@@ -118,6 +144,13 @@ export type Dossier = {
   scope: "commune" | "commune+adresse";
   conclusionState: ConclusionState;
   conclusion: string;
+  // Le plan narratif (slice 2) : présence, ordre, sources, matière obligatoire et repli de chaque
+  // registre. `conclusion` en est la concaténation, gardée pour qui veut une seule phrase.
+  narrativePlan: ConclusionNarrativePlan;
+  // Le registre des critères déclarés (slice 2.1) : couverture et orientation, mesurées sur ce que le
+  // LECTEUR a déclaré. Information de premier ordre du dossier, pas un détail interne de la conclusion :
+  // le comparateur et le PDF en auront besoin.
+  criteria: CriteriaSummary;
   conclusionBasis: { ruleIds: string[]; factIds: string[]; evidence: EvidenceRef[] };
   sections: DossierSection[];
   uncovered: UncoveredConstraint[];

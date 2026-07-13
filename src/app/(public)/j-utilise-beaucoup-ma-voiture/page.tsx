@@ -195,7 +195,7 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
           <h2 className="section-title">Ce que le rapport interactif ajoute</h2>
           <p className="section-sub">Le niveau communal et les arbitrages personnels ne sont pas ouverts ici en libre-service.</p>
 
-          <Link href="/rapport" className="rapport-cta">
+          <Link href="/rapport" prefetch={false} className="rapport-cta">
             <div className="rapport-cta-eyebrow">Rapport interactif personnalisé · futur•e</div>
             <p className="rapport-cta-title">
               Votre territoire, votre budget,<br />

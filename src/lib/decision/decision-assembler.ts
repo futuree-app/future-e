@@ -4,7 +4,9 @@ import type {
   DecisionFact, Dossier, DossierSection, ConclusionState, RunResult, EvidenceRef, MaterialityTier,
 } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
-import { hasAnyHardConstraint, isStructured, uncoveredConstraints, uncoveredPreferences } from "./project-view.ts";
+import { hasAnyHardConstraint, isStructured } from "./project-view.ts";
+import { buildCriteriaRegistry, uncoveredConstraints, uncoveredPreferences } from "./criteria-registry.ts";
+import { buildConclusionPlan } from "./conclusion-plan.ts";
 
 function labels(project: UserProject): { engage: string; verifTitle: string } {
   if (project.posture === "habitant") {
@@ -14,6 +16,7 @@ function labels(project: UserProject): { engage: string; verifTitle: string } {
 }
 
 const TIER_RANK: Record<MaterialityTier, number> = { decision_critical: 0, structuring: 1, secondary: 2 };
+const RESERVE_ROLES = new Set<DecisionFact["role"]>(["verification", "compromise", "unknown"]);
 function tierRank(f: DecisionFact): number {
   const base = TIER_RANK[f.materialityTier] * 2;
   return f.role === "incompatibility" && f.evidenceStrength === "indicative" ? base + 1 : base;
@@ -30,45 +33,30 @@ function conclusionState(facts: DecisionFact[], project: UserProject): Conclusio
   return "no_incompatibility_established";
 }
 
-function examinedClause(uncovered: { label: string }[]): string {
-  return uncovered.length === 0 ? "" : ` Nous n'avons pas encore examiné, à ce grain : ${uncovered.map((u) => u.label).join(", ")}.`;
-}
-function reservesClause(facts: DecisionFact[]): string {
-  const n = facts.filter((x) => x.role === "verification" || x.role === "compromise" || x.role === "unknown").length;
-  return n > 0 ? ` ${n} point${n > 1 ? "s" : ""} mérite${n > 1 ? "nt" : ""} néanmoins d'être examiné${n > 1 ? "s" : ""} de près.` : "";
-}
-function prioritiesClause(priorities: { label: string }[]): string {
-  if (priorities.length === 0) return "";
-  const list = priorities.slice(0, 3).map((p) => p.label).join(", ");
-  return ` Vos priorités concernant ${list} ne sont pas encore couvertes dans cette synthèse.`;
-}
-
-function conclusionText(state: ConclusionState, facts: DecisionFact[], project: UserProject, uncovered: { label: string }[], priorities: { label: string }[], dossierScope: "commune" | "commune+adresse"): string {
-  const scope = dossierScope === "commune+adresse" ? "À l'échelle de la commune et de l'adresse," : "À l'échelle de la commune,";
-  switch (state) {
-    case "project_not_structured":
-      return "Décrivez votre projet pour une lecture qui met en regard ce lieu et ce qui compte pour vous.";
-    case "established_incompatibility": {
-      const f = facts.find((x) => x.role === "incompatibility" && x.evidenceStrength === "established");
-      return `${scope} une contrainte que vous avez déclarée n'est pas respectée ici : ${f ? f.statement : ""}`;
-    }
-    case "insufficient_evidence":
-      return `${scope} nous ne pouvons pas conclure honnêtement : une donnée déterminante pour votre projet manque.`;
-    case "no_hard_constraint_declared":
-      return `Vous n'avez déclaré aucune condition comme absolument non négociable. ${scope} rien ne permet donc d'écarter ce lieu sur cette seule base.${reservesClause(facts)}${prioritiesClause(priorities)}${examinedClause(uncovered)}`;
-    case "no_incompatibility_established":
-      return `${scope} sur les contraintes que nous savons examiner, aucune n'est contredite.${reservesClause(facts)}${prioritiesClause(priorities)}${examinedClause(uncovered)}`;
-  }
-}
+// Les textes déterministes de chaque registre vivent désormais dans conclusion-plan.ts (le PLAN est
+// la source de vérité, `conclusion` en est la concaténation). Ils y sont découpés par registre, parce
+// qu'un LLM ne peut reformuler que ce qui lui est confié bloc par bloc, et parce que la hiérarchie
+// éditoriale des réserves doit rester lisible dans la structure, pas seulement dans une phrase.
 
 function factEvidence(f: DecisionFact): EvidenceRef[] {
   return f.role === "compromise" ? f.sides.flatMap((s) => s.evidence) : f.evidence;
 }
 
-export function assembleDossier(run: RunResult, project: UserProject, scope: "commune" | "commune+adresse"): Dossier {
-  const { facts, coveredHardConstraints } = run;
-  const uncovered = uncoveredConstraints(project, coveredHardConstraints);
-  const priorities = uncoveredPreferences(project);
+export function assembleDossier(
+  run: RunResult,
+  project: UserProject,
+  scope: "commune" | "commune+adresse",
+  // Le NOM de la commune : le dossier parle de Toulouse, pas de « ce lieu ».
+  communeNom: string,
+): Dossier {
+  const { facts } = run;
+
+  // La couverture est une CONSÉQUENCE OBSERVÉE des règles (criteria-registry), plus une liste tenue à
+  // la main. `run.coveredHardConstraints` n'est plus consulté ici : il marque une contrainte « couverte »
+  // dès que l'outcome n'est pas not_applicable, donc un `unknown` (population absente) la déclarait
+  // examinée alors que rien ne l'avait été.
+  const criteria = buildCriteriaRegistry(project, run);
+  const uncovered = uncoveredConstraints(criteria);
   const state = conclusionState(facts, project);
   const l = labels(project);
   const candidates: DossierSection[] = [
@@ -79,10 +67,35 @@ export function assembleDossier(run: RunResult, project: UserProject, scope: "co
   ];
   const sections = candidates.filter((s) => s.facts.length > 0);
   const shown = sections.flatMap((s) => s.facts);
+
+  // Les réserves annoncées sont celles qu'on MONTRE. Compter `facts` (les faits ÉMIS) alors que les
+  // sections sont plafonnées (caps 2/3/3/4) annonçait « 5 points » et n'en affichait que 4. Le verdict
+  // compte donc lui aussi sur `shown` : le lecteur doit pouvoir compter les cartes et retomber dessus.
+  const established = facts.find((f) => f.role === "incompatibility" && f.evidenceStrength === "established");
+  const reservesShownFacts = shown.filter((f) => RESERVE_ROLES.has(f.role));
+  const narrativePlan = buildConclusionPlan({
+    scope,
+    communeNom,
+    conclusionState: state,
+    posture: project.posture,
+    shownFacts: shown,
+    uncovered,
+    uncoveredPriorities: uncoveredPreferences(criteria),
+    establishedIncompatibility: established ? { factId: established.id, statement: established.statement } : null,
+    coverage: criteria.coverage,
+    orientation: criteria.orientation,
+    hasFavorable: criteria.hasFavorable,
+    favorableCount: criteria.favorableCount,
+    majorReserveCount: reservesShownFacts.filter((f) => f.materialityTier !== "secondary").length,
+    reservesShown: reservesShownFacts.length,
+  });
+
   return {
     scope,
     conclusionState: state,
-    conclusion: conclusionText(state, facts, project, uncovered, priorities, scope),
+    conclusion: narrativePlan.blocks.map((b) => b.fallbackText).join(" "),
+    narrativePlan,
+    criteria,
     conclusionBasis: {
       ruleIds: [...new Set(shown.map((f) => f.ruleId))],
       factIds: shown.map((f) => f.id),

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   preferenceWeight, declaredPreferenceKeys, nearSeaLimitKm, communeSizeBounds,
-  isBuyer, isStructured, hasAnyHardConstraint, declaredHardConstraintKeys, uncoveredConstraints,
+  isBuyer, isStructured, hasAnyHardConstraint, declaredHardConstraintKeys,
 } from "./project-view.ts";
 import type { UserProject } from "../user-project.ts";
 
@@ -31,11 +31,9 @@ test("communeSizeBounds : lit min/max", () => {
   assert.equal(communeSizeBounds(project({ reformulation: "x", hardConstraints: {}, preferences: [] })), null);
 });
 
-test("uncoveredConstraints : déclarées moins couvertes, avec label", () => {
-  const u = uncoveredConstraints(project(HC), ["nearSea"]);
-  assert.deepEqual(u.map((x) => x.key), ["communeSize"]);
-  assert.ok(u[0].label.length > 0);
-});
+// `uncoveredConstraints` et `uncoveredPreferences` ont migré dans criteria-registry.ts : elles se
+// dérivent désormais de la couverture OBSERVÉE (évaluations des règles), plus d'une liste parallèle.
+// Leurs tests vivent dans criteria-registry.test.ts.
 
 test("declaredPreferenceKeys + preferenceWeight", () => {
   assert.deepEqual(declaredPreferenceKeys(project(HC)), ["faible_chaleur"]);

@@ -3,7 +3,10 @@
 // calme coloré par l'état, preuves en chips. Présentationnel : reçoit un Dossier déjà assemblé,
 // aucun LLM. Ouvert à tous les payants : le cas creux reste digne.
 import Link from "next/link";
-import type { Dossier, DecisionFact, ConclusionState } from "@/lib/decision/decision-fact";
+import { Suspense } from "react";
+import type { Dossier, DecisionFact } from "@/lib/decision/decision-fact";
+import { ConclusionBlock, planToBlocks } from "@/components/report/ConclusionBlock";
+import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 
 const SECTION_ACCENT: Record<string, string> = {
   incompatibilities: "var(--red)",
@@ -12,14 +15,11 @@ const SECTION_ACCENT: Record<string, string> = {
   verifications: "var(--info)",
 };
 
-// Le verdict : une couleur et un court libellé d'état, calmes (structure = information).
-const STATE_META: Record<ConclusionState, { color: string; label: string }> = {
-  established_incompatibility: { color: "var(--red)", label: "Un point de blocage" },
-  no_incompatibility_established: { color: "var(--accent)", label: "Aucun blocage établi" },
-  no_hard_constraint_declared: { color: "var(--accent)", label: "Aucune condition absolue déclarée" },
-  insufficient_evidence: { color: "var(--ghost)", label: "Lecture incomplète" },
-  project_not_structured: { color: "var(--ghost)", label: "À préciser" },
-};
+// Le DÉCOMPTE des réserves a quitté la conclusion : il y doublait les cartes situées juste dessous.
+// Il n'a PAS été déplacé au-dessus d'elles pour autant : l'écran a montré qu'un intertitre « Les 4
+// points à examiner avant de vous engager » répétait mot pour mot le titre de la section qui suit
+// (« À examiner avant de vous engager »). Le décompte a simplement disparu : les cartes sont là, le
+// lecteur les compte, et le verdict dit ce que le décompte ne dit pas (combien sont STRUCTURANTS).
 
 function Chip({ label, value, href, color }: { label: string; value?: string; href?: string; color: string }) {
   const inner = (
@@ -82,15 +82,19 @@ export function DossierDecisionSection({
   dossier,
   logement,
   logementStatus = "none",
+  insee,
+  scopeKey,
 }: {
   dossier: Dossier;
   // Analyse logement déjà sauvegardée pour cette commune (adresse renseignée), ou null.
   logement?: { href: string; label: string } | null;
   // Slice 1.5 : état de l'augmentation adresse en couche de rendu (pas un état de l'assembleur).
   logementStatus?: "none" | "pending" | "done" | "unavailable";
+  // Slice 2 : identité de l'artefact narratif. scopeKey = "commune" | "logement:<id>".
+  insee: string;
+  scopeKey: string;
 }) {
   const structured = dossier.conclusionState !== "project_not_structured";
-  const state = STATE_META[dossier.conclusionState];
 
   return (
     <section className="mt-14" id="dossier-decision">
@@ -100,7 +104,7 @@ export function DossierDecisionSection({
           En une minute
         </div>
         <h2 className="font-normal text-[clamp(26px,3vw,40px)] leading-[1.12] tracking-[-0.6px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-          Ce lieu, au regard de votre projet.
+          {dossier.narrativePlan.communeNom}, au regard de votre projet.
         </h2>
       </div>
 
@@ -116,13 +120,19 @@ export function DossierDecisionSection({
         </div>
       ) : null}
 
-      {/* Le verdict : carte glass, filet d'état à gauche, libellé d'état mono */}
-      <div className="glass rounded-2xl p-7 mb-3.5" style={{ borderLeft: `2px solid ${state.color}` }}>
-        <p className="font-mono text-[10px] tracking-[0.14em] uppercase mb-2.5" style={{ color: state.color }}>
-          {state.label}
-        </p>
-        <p className="text-[18px] leading-[1.6] text-label">{dossier.conclusion}</p>
-      </div>
+      {/* Le verdict. En « pending », le dossier n'est PAS final (l'augmentation adresse arrive) :
+          générer ici coûterait un second appel Sonnet, jeté quelques secondes plus tard. */}
+      {logementStatus === "pending" ? (
+        <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} />
+      ) : (
+        <Suspense
+          fallback={
+            <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} />
+          }
+        >
+          <ConclusionRedigee plan={dossier.narrativePlan} insee={insee} scopeKey={scopeKey} />
+        </Suspense>
+      )}
 
       {/* Les raisons, dans l'idiome des cartes-modules (filet accent en tête) */}
       <div className="grid gap-3.5">
@@ -151,12 +161,10 @@ export function DossierDecisionSection({
         })}
       </div>
 
-      {dossier.uncovered.length > 0 ? (
-        <div className="mt-4 flex items-baseline gap-2.5 flex-wrap">
-          <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-ghost shrink-0">Non encore examiné</span>
-          <span className="text-[13px] text-muted">{dossier.uncovered.map((u) => u.label).join(", ")}.</span>
-        </div>
-      ) : null}
+      {/* La note « Non encore examiné » vivait ici, et disait une SECONDE fois ce que la conclusion
+          dit déjà. Deux emplacements laissaient croire à deux niveaux de réserve distincts. Une
+          contrainte dure non testée réduit la portée du verdict : elle se lit sous lui, dans « Limite
+          de ce constat », pas trente centimètres plus bas. */}
 
       {structured ? (
         logement ? (

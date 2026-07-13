@@ -68,6 +68,9 @@ const DEPT_CADMIUM: Record<string, number> = {
   "2A": 0.12, "2B": 0.12,
 };
 
+// NE PAS remplacer par departementFromInsee (src/lib/insee-departement.ts) : cette variante démêle EN
+// PLUS les arrondissements de Paris, Marseille (131xx) et Lyon (691xx) pour son propre lookup RGA, et
+// tolère un code court (padStart). Même forme, contrat différent.
 function deptFromInsee(inseeCode: string): string {
   const code = inseeCode.padStart(5, "0");
   // Paris, Métropole de Lyon, Marseille arrondissements : ramener au département

@@ -512,7 +512,7 @@ export default async function TopDependanceAutoPage() {
               Une ville peut ressortir très haut au classement sans que cela dise tout de votre situation. Le rapport interactif ajoute votre commune, votre profil et les six dimensions futur•e pour comprendre où un choc énergétique pèserait vraiment sur votre quotidien.
             </p>
             <div className="cta-links">
-              <Link href="/rapport" className="cta-btn">Voir le rapport interactif →</Link>
+              <Link href="/rapport" prefetch={false} className="cta-btn">Voir le rapport interactif →</Link>
               <Link href="/j-utilise-beaucoup-ma-voiture" className="cta-sec">Retour au hub</Link>
             </div>
           </div>

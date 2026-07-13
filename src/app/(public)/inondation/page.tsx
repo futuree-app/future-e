@@ -198,7 +198,7 @@ export default function InondationPage() {
           <h2 className="section-title">Ce que vous pouvez faire maintenant</h2>
           <p className="section-sub">Un diagnostic complet, et deux guides ciblés.</p>
 
-          <Link href="/rapport" className="rapport-cta">
+          <Link href="/rapport" prefetch={false} className="rapport-cta">
             <div className="rapport-cta-eyebrow">Rapport interactif personnalisé · futur•e</div>
             <p className="rapport-cta-title">
               Votre commune, votre profil,<br />

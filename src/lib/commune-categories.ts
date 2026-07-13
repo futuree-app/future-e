@@ -7,6 +7,8 @@
 // The richer, commune-level derivation lives in deriveCategoriesFromEntry
 // (comparateur-vie.ts) and reuses the dept sets exported here.
 
+import { departementFromInsee } from './insee-departement.ts';
+
 export const DEPT_MEDITERRANEE = new Set([
   '04', '06', '11', '13', '30', '34', '66', '83', '84', '2A', '2B',
 ]);
@@ -43,11 +45,10 @@ export const DEPT_VECTORIEL = new Set([
   '21', '25', '39', '58', '70', '71', '89', '90',
 ]);
 
+// Adaptateur du helper commun (src/lib/insee-departement.ts) : il rend `null` sur un code illisible,
+// cette API historique rend '' et ses appelants en dépendent.
 export function deptFromInsee(inseeCode: string): string {
-  if (!inseeCode || inseeCode.length < 2) return '';
-  if (inseeCode.startsWith('2A') || inseeCode.startsWith('2B')) return inseeCode.slice(0, 2);
-  if (/^97[1-6]/.test(inseeCode)) return inseeCode.slice(0, 3);
-  return inseeCode.slice(0, 2);
+  return departementFromInsee(inseeCode) ?? '';
 }
 
 // Regional categories derivable from the department alone. These are genuinely

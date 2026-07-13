@@ -241,9 +241,19 @@ export default async function RapportPage() {
         </div>
 
         {/* ── En une minute : le dossier de décision (payant, grain commune) ── */}
-        {dossier && communeResult ? (
+        {dossier && communeResult && inseeCode ? (
           dossierAddress && logementForCommune ? (
-            <Suspense fallback={<DossierDecisionSection dossier={dossier} logement={dossierLogementLink} logementStatus="pending" />}>
+            <Suspense
+              fallback={
+                <DossierDecisionSection
+                  dossier={dossier}
+                  logement={dossierLogementLink}
+                  logementStatus="pending"
+                  insee={inseeCode}
+                  scopeKey="commune"
+                />
+              }
+            >
               <DossierAvecLogement
                 project={userProject!}
                 address={dossierAddress}
@@ -251,10 +261,18 @@ export default async function RapportPage() {
                 communeFacts={communeResult.moduleFacts}
                 communeDossier={dossier}
                 logementLink={dossierLogementLink}
+                insee={inseeCode}
+                scopeKey={`logement:${logementForCommune.logement_id}`}
               />
             </Suspense>
           ) : (
-            <DossierDecisionSection dossier={dossier} logement={dossierLogementLink} logementStatus="none" />
+            <DossierDecisionSection
+              dossier={dossier}
+              logement={dossierLogementLink}
+              logementStatus="none"
+              insee={inseeCode}
+              scopeKey="commune"
+            />
           )
         ) : null}
 
