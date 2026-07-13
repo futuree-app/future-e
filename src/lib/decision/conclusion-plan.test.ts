@@ -3,9 +3,9 @@ import assert from "node:assert/strict";
 import { buildConclusionPlan, shouldGenerateNarrative, type ConclusionPlanInput } from "./conclusion-plan.ts";
 import type { DecisionFact, MaterialityTier } from "./decision-fact.ts";
 
-function verification(id: string, tier: MaterialityTier, statement = `constat ${id}`): DecisionFact {
+function verification(id: string, tier: MaterialityTier, statement = `constat ${id}`, topic = `sujet ${id}`): DecisionFact {
   return {
-    id, ruleId: `rule-${id}`, sourceFactIds: [], module: "logement", statement,
+    id, ruleId: `rule-${id}`, sourceFactIds: [], module: "logement", statement, topic,
     materialityTier: tier, role: "verification",
     evidence: [{ factId: id, module: "logement", label: "DPE", observedValue: "F", grain: "adresse" }],
     action: { type: "verifier_sur_place", label: "Vérifier sur place" },
@@ -15,6 +15,7 @@ function verification(id: string, tier: MaterialityTier, statement = `constat ${
 function baseInput(over: Partial<ConclusionPlanInput> = {}): ConclusionPlanInput {
   return {
     scope: "commune",
+    communeNom: "Toulouse",
     conclusionState: "no_incompatibility_established",
     posture: "recherche",
     shownFacts: [],
@@ -122,9 +123,32 @@ test("lead tied : la phrase compte les faits de TÊTE, jamais toutes les réserv
   }));
   const bloc = plan.blocks.find((b) => b.key === "reserves_found")!;
   assert.equal(plan.reservesCount, 4);
-  assert.deepEqual(bloc.requiredPhrases, ["2"]);
   assert.deepEqual(bloc.allowedNumbers, ["2", "deux"]);
   assert.equal(bloc.fallbackText.includes("4"), false);
+});
+
+test("lead tied : les faits de tête sont NOMMÉS par leur SUJET, et leur constat n'est PAS recopié", () => {
+  // Deux défauts corrigés d'un coup : la carte annonçait « 3 points à égalité » sans en citer un seul
+  // (elle parlait d'elle-même) ; puis, en citant les constats entiers, elle redisait mot pour mot les
+  // cartes du dessous. Elle NOMME, les cartes DÉMONTRENT.
+  const plan = buildConclusionPlan(baseInput({
+    shownFacts: [
+      verification("f1", "structuring", "L'exposition de la commune à l'inondation ressort élevée. 19 arrêtés depuis 1982.", "l'exposition de Toulouse à l'inondation"),
+      verification("f2", "structuring", "À cette adresse, le sol est exposé au retrait-gonflement des argiles (aléa moyen ou fort).", "le retrait-gonflement des argiles"),
+      verification("f3", "secondary"),
+    ],
+  }));
+  const bloc = plan.blocks.find((b) => b.key === "reserves_found")!;
+  assert.match(bloc.fallbackText, /l'exposition de Toulouse à l'inondation/);
+  assert.match(bloc.fallbackText, /le retrait-gonflement des argiles/);
+  assert.equal(bloc.fallbackText.includes("19 arrêtés"), false);   // le détail reste à la carte
+  assert.equal(bloc.fallbackText.includes("aléa moyen"), false);
+  assert.deepEqual(bloc.sourceIds, ["f1", "f2"]); // les faits de tête, pas la réserve secondaire
+  // Chaque sujet doit SURVIVRE à la rédaction : « des risques naturels » les avalerait tous les deux.
+  assert.deepEqual(bloc.requiredPhrases, [
+    "exposition de Toulouse à l'inondation",
+    "retrait-gonflement des argiles",
+  ]);
 });
 
 test("lead none : le bloc des réserves N'EXISTE PAS (il n'aurait plus rien à dire)", () => {
@@ -151,7 +175,8 @@ test("lead single : un fait domine STRICTEMENT tous les autres", () => {
     shownFacts: [verification("f1", "decision_critical"), verification("f2", "structuring")],
   }));
   assert.deepEqual(plan.lead, {
-    kind: "single", factId: "f1", statement: "constat f1", materialityTier: "decision_critical",
+    kind: "single", factId: "f1", topic: "sujet f1", statement: "constat f1",
+    materialityTier: "decision_critical",
   });
 });
 
@@ -163,7 +188,11 @@ test("lead tied : deux faits partagent le rang maximal (un ordre de registre n'e
       verification("f3", "secondary"),
     ],
   }));
-  assert.deepEqual(plan.lead, { kind: "tied", factIds: ["f1", "f2"], materialityTier: "decision_critical" });
+  assert.deepEqual(plan.lead, {
+    kind: "tied",
+    facts: [{ factId: "f1", topic: "sujet f1" }, { factId: "f2", topic: "sujet f2" }],
+    materialityTier: "decision_critical",
+  });
 });
 
 test("lead none : rien d'assez matériel (rang maximal = secondary)", () => {
@@ -215,14 +244,14 @@ test("high + favorable : le lieu correspond, et on ose le dire", () => {
   const p = buildConclusionPlan(baseInput({ coverage: "high", orientation: "favorable", hasFavorable: true, favorableCount: 3 }));
   assert.equal(p.verdictLabel, "Bonne correspondance");
   assert.equal(p.verdictTone, "positive");
-  assert.match(p.blocks[0]!.fallbackText, /semble bien correspondre à votre projet/);
+  assert.match(p.blocks[0]!.fallbackText, /^Toulouse semble bien correspondre à votre projet/);
 });
 
 test("high + major_reserves AVEC 2 favorables : « plusieurs dimensions » est prouvé", () => {
   const p = buildConclusionPlan(baseInput({
     coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 2, majorReserveCount: 2,
   }));
-  assert.match(p.blocks[0]!.fallbackText, /répond à plusieurs dimensions de votre projet/);
+  assert.match(p.blocks[0]!.fallbackText, /^Toulouse répond à plusieurs dimensions de votre projet/);
   assert.match(p.blocks[0]!.fallbackText, /2 points structurants empêchent/);
 });
 
@@ -267,7 +296,7 @@ test("partial + major_reserves : l'écran actuel, et il est honnête", () => {
   }));
   assert.equal(p.verdictLabel, "Lecture encore partielle");
   assert.equal(p.verdictTone, "caution");
-  assert.match(p.blocks[0]!.fallbackText, /encore trop tôt pour dire que ce lieu correspond/);
+  assert.match(p.blocks[0]!.fallbackText, /encore trop tôt pour dire que Toulouse correspond/);
   assert.match(p.blocks[0]!.fallbackText, /2 points structurants demandent attention/);
 });
 
@@ -276,7 +305,7 @@ test("couverture none : le GARDE-FOU, aucun positif ne s'échappe", () => {
     coverage: "none", orientation: "indeterminate", hasFavorable: false, favorableCount: 0,
   }));
   assert.equal(p.verdictLabel, "Lecture non disponible");
-  assert.match(p.blocks[0]!.fallbackText, /ne peut pas encore être évalué au regard de vos critères/);
+  assert.match(p.blocks[0]!.fallbackText, /^Toulouse ne peut pas encore être évalué au regard de vos critères/);
   assert.equal(p.blocks[0]!.fallbackText.includes("va dans le sens"), false);
 });
 

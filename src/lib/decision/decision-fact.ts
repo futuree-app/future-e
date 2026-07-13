@@ -33,7 +33,18 @@ type BaseFact = {
   ruleId: string;
   sourceFactIds: string[];
   module: DecisionModule;
+  // LE CONSTAT : ce que le fait établit, avec son contexte et parfois sa limite. C'est ce que la carte
+  // affiche, et il peut être long.
   statement: string;
+  // LE SUJET : de quoi ce fait parle, en 3 à 6 mots, tel qu'on le NOMME dans une phrase (« l'exposition
+  // de la commune à l'inondation », « le retrait-gonflement des argiles sous cette adresse »).
+  //
+  // Il existe parce que la conclusion doit pouvoir NOMMER un fait sans le RECOPIER. Sans lui, elle
+  // n'avait que le constat à citer, et redisait mot pour mot la carte située trois centimètres plus bas.
+  // La conclusion nomme, les cartes démontrent.
+  //
+  // Jamais une catégorie (« des risques naturels »), jamais une phrase, jamais une action.
+  topic: string;
   materialityTier: MaterialityTier;
 };
 

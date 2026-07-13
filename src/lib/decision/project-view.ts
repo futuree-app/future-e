@@ -32,6 +32,7 @@ export function communeSizeBounds(project: UserProject): { min: number | null; m
   return { min: cs.min ?? null, max: cs.max ?? null };
 }
 
+// Le libellé GÉNÉRIQUE d'une contrainte : le repli, quand le projet ne dit rien de plus précis.
 export const HARD_CONSTRAINT_LABELS: Record<HardConstraintKey, string> = {
   departements: "les départements visés",
   zones: "les zones géographiques visées",
@@ -45,6 +46,76 @@ export const HARD_CONSTRAINT_LABELS: Record<HardConstraintKey, string> = {
   excludePlace: "les villes à quitter",
   sizeRelativeTo: "la taille relative à une ville",
 };
+
+function fmtHab(n: number): string {
+  return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+// Les libellés de lieux viennent du parse, dans une forme d'index : « Gare Matabiau, Toulouse ». Écrit
+// tel quel dans une phrase, ça donne « la proximité de Gare Matabiau, Toulouse », qui n'est pas du
+// français. On coupe la précision qui suit la virgule (la commune est déjà nommée ailleurs), et on
+// rétablit l'article quand le lieu est un nom commun (une gare, un aéroport), jamais sur un nom propre.
+const LIEUX_COMMUNS: Record<string, string> = {
+  gare: "la", aeroport: "l'", aéroport: "l'", hopital: "l'", hôpital: "l'",
+  universite: "l'", université: "l'", ecole: "l'", école: "l'", lycee: "le", lycée: "le",
+  centre: "le", campus: "le", port: "le", plage: "la", station: "la",
+};
+function lieuEnPhrase(label: string): string {
+  const court = label.split(",")[0]!.trim();
+  const premier = court.split(/\s+/)[0] ?? "";
+  const article = LIEUX_COMMUNS[premier.toLowerCase()];
+  if (!article) return court; // nom propre : « Lyon », « Matabiau »
+  const reste = court.slice(premier.length).trim();
+  const commun = `${premier.toLowerCase()}${reste ? ` ${reste}` : ""}`;
+  return article === "l'" ? `l'${commun}` : `${article} ${commun}`;
+}
+
+// LE LIBELLÉ INSTANCIÉ : la contrainte telle que LE LECTEUR l'a posée, pas sa catégorie.
+//
+// « La proximité d'un lieu » ne veut rien dire pour quelqu'un qui a écrit « à moins de 30 minutes de
+// la gare Matabiau ». Nommer la catégorie quand on connaît l'instance, c'est le même défaut que citer
+// « des risques naturels » au lieu de l'inondation : le lecteur ne se reconnaît pas dans sa propre
+// contrainte. On retombe sur le générique seulement quand le projet ne porte pas le détail.
+export function hardConstraintLabel(project: UserProject, key: HardConstraintKey): string {
+  const hc = project.parsed?.hardConstraints;
+  const generic = HARD_CONSTRAINT_LABELS[key];
+  if (!hc) return generic;
+
+  switch (key) {
+    case "nearPlace": {
+      const label = hc.nearPlace?.label;
+      return label ? `la proximité de ${lieuEnPhrase(label)}` : generic;
+    }
+    case "departements": {
+      const d = hc.departements ?? [];
+      if (d.length === 0) return generic;
+      return d.length === 1 ? `le département ${d[0]}` : `les départements ${d.join(", ")}`;
+    }
+    case "excludePlace": {
+      const villes = (hc.excludePlace ?? []).map((v) => lieuEnPhrase(v.label));
+      return villes.length > 0 ? `le fait de quitter ${villes.join(", ")}` : generic;
+    }
+    case "sizeRelativeTo": {
+      const s = hc.sizeRelativeTo;
+      if (!s) return generic;
+      return `une commune ${s.direction === "smaller" ? "plus petite" : "plus grande"} que ${s.label}`;
+    }
+    case "communeSize": {
+      const cs = hc.communeSize;
+      if (!cs) return generic;
+      if (cs.max != null && cs.min != null) return `une commune entre ${fmtHab(cs.min)} et ${fmtHab(cs.max)} habitants`;
+      if (cs.max != null) return `une commune de moins de ${fmtHab(cs.max)} habitants`;
+      if (cs.min != null) return `une commune de plus de ${fmtHab(cs.min)} habitants`;
+      return generic;
+    }
+    case "nearSea": {
+      const km = hc.nearSea?.maxKm;
+      return km != null ? `la proximité de la mer (moins de ${km} km)` : generic;
+    }
+    default:
+      return generic;
+  }
+}
 
 export function declaredHardConstraintKeys(project: UserProject): HardConstraintKey[] {
   const hc = project.parsed?.hardConstraints;

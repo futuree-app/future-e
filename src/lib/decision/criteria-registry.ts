@@ -11,7 +11,7 @@
 // des règles, plus une déclaration parallèle qui dérive en silence.
 import type { MaterialityTier, RunResult, RuleEvaluation, HardConstraintKey } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
-import { declaredHardConstraintKeys, declaredPreferenceKeys, HARD_CONSTRAINT_LABELS } from "./project-view.ts";
+import { declaredHardConstraintKeys, declaredPreferenceKeys, hardConstraintLabel } from "./project-view.ts";
 import { PREFERENCE_LABELS } from "../comparateur-labels.ts";
 
 export type CriterionCoverage = "examined" | "unexamined";
@@ -94,8 +94,9 @@ function assess(
 
 export function buildCriteriaRegistry(project: UserProject, run: RunResult): CriteriaSummary {
   const registry: ProjectCriterionAssessment[] = [
+    // Le libellé INSTANCIÉ : « la proximité de la gare Matabiau », pas « la proximité d'un lieu ».
     ...declaredHardConstraintKeys(project).map((k) =>
-      assess(k, "hard_constraint", HARD_CONSTRAINT_LABELS[k], run.evaluations)),
+      assess(k, "hard_constraint", hardConstraintLabel(project, k), run.evaluations)),
     ...declaredPreferenceKeys(project).map((k) =>
       assess(k, "preference", PREFERENCE_LABELS[k] ?? String(k), run.evaluations)),
   ];

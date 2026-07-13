@@ -31,7 +31,7 @@ const ruleMer: DecisionRule = {
       const fact: IncompatibilityFact = {
         id: `${f.insee}:mer`, ruleId: RULE_MER, sourceFactIds: ["distance_cote_km"], module: "territoire",
         role: "incompatibility", evidenceStrength: "established", hardConstraintKey: "nearSea",
-        materialityTier: "decision_critical",
+        materialityTier: "decision_critical", topic: `la distance de ${f.nom} au littoral`,
         statement: `Cette commune est à ${Math.round(f.distanceCoteKm)} km du littoral, au-delà de la limite de ${max} km que vous avez posée.`,
         evidence: [ev],
       };
@@ -54,7 +54,7 @@ const ruleTaille: DecisionRule = {
       const ev: EvidenceRef = { factId: "population", module: "territoire", label: `Territoire · ${f.nom}`, grain: "commune", href: territoireHref };
       const fact: UnknownFact = {
         id: `${f.insee}:taille`, ruleId: RULE_TAILLE, sourceFactIds: ["population"], module: "territoire",
-        role: "unknown", impact: "scoped", materialityTier: "secondary",
+        role: "unknown", impact: "scoped", materialityTier: "secondary", topic: `la taille de ${f.nom}`,
         statement: "La population de cette commune n'est pas disponible dans nos données ; la taille ne peut pas être vérifiée.",
         evidence: [ev],
       };
@@ -68,6 +68,7 @@ const ruleTaille: DecisionRule = {
       const fact: IncompatibilityFact = {
         id: `${f.insee}:taille`, ruleId: RULE_TAILLE, sourceFactIds: ["population"], module: "territoire",
         role: "incompatibility", evidenceStrength: "established", hardConstraintKey: "communeSize",
+        topic: `la taille de ${f.nom}`,
         materialityTier: "decision_critical",
         statement: `Cette commune compte ${fmt(f.population)} habitants, ${seuil} de la taille que vous avez posée.`,
         evidence: [ev],
@@ -107,7 +108,7 @@ const ruleDepartement: DecisionRule = {
     const fact: IncompatibilityFact = {
       id: `${f.insee}:departement`, ruleId: RULE_DEPT, sourceFactIds: ["insee"], module: "territoire",
       role: "incompatibility", evidenceStrength: "established", hardConstraintKey: "departements",
-      materialityTier: "decision_critical",
+      materialityTier: "decision_critical", topic: `le département de ${f.nom}`,
       statement: `Cette commune est dans le département ${dept}, hors de ceux que vous avez posés comme condition (${wanted.join(", ")}).`,
       evidence: [ev],
     };
@@ -130,7 +131,7 @@ const ruleCompromis: DecisionRule = {
     const fact: CompromiseFact = {
       id: `${f.insee}:compromis-transport-chaleur`, ruleId: RULE_COMPROMIS,
       sourceFactIds: ["scores.acces_transports", "scores.faible_chaleur"], module: "territoire",
-      role: "compromise", materialityTier: "structuring",
+      role: "compromise", materialityTier: "structuring", topic: "la tension entre transports et chaleur",
       statement: "Deux de vos priorités tirent en sens opposés sur cette commune.",
       sides: [
         { projectKey: "acces_transports", statement: "L'accès aux transports ressort favorablement à l'échelle de la commune.", evidence: [scoreEvidence(f.nom, "acces_transports", t)] },
@@ -154,7 +155,7 @@ const ruleConfort: DecisionRule = {
     const ev: EvidenceRef = { factId: "commune", module: "territoire", label: `Territoire · ${f.nom}`, grain: "commune", href: territoireHref };
     const fact: UnknownFact = {
       id: `${f.insee}:confort-sans-adresse`, ruleId: RULE_CONFORT, sourceFactIds: ["hasAddress"], module: "territoire",
-      role: "unknown", impact: "scoped", materialityTier: "secondary",
+      role: "unknown", impact: "scoped", materialityTier: "secondary", topic: "le confort d'été du bâtiment",
       statement: "Votre priorité de confort d'été ne peut pas être évaluée au grain du bâtiment tant qu'aucune adresse n'est renseignée.",
       evidence: [ev], action: { type: "renseigner_adresse", label: "Affiner avec une adresse" },
     };
@@ -180,7 +181,7 @@ const ruleInondation: DecisionRule = {
     const ev: EvidenceRef = { factId: "inondation.risque", module: "territoire", label: `Territoire · ${f.nom}`, observedValue: `${Math.round(f.inondationRisque)}/100`, grain: "commune", href: territoireHref };
     const fact: VerificationFact = {
       id: `${f.insee}:inondation-exposition`, ruleId: RULE_INOND, sourceFactIds: ["inondation.risque", "inondation.catnat"], module: "territoire",
-      role: "verification", materialityTier: "structuring",
+      role: "verification", materialityTier: "structuring", topic: `l'exposition de ${f.nom} à l'inondation`,
       statement: (habitant
         ? "L'exposition de la commune à l'inondation ressort élevée, à comprendre et surveiller au fil des épisodes."
         : "L'exposition de la commune à l'inondation ressort élevée. Consultez l'état des risques avant de vous engager.") + catnatCtx,
@@ -201,6 +202,16 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
   // Arbitrage slice 1.5 : une règle Logement ne peut pas émettre incompatibility.
   if (fact.ruleId.startsWith("logement.") && fact.role === "incompatibility") {
     throw new Error(`[decision] ${fact.ruleId}: une règle Logement ne peut pas émettre incompatibility (arbitrage slice 1.5)`);
+  }
+
+  // Slice 2.1 : tout fait porte son SUJET, court, distinct de son constat. Sans lui, la conclusion ne
+  // peut nommer un fait qu'en recopiant sa carte. Un topic vide, ou aussi long qu'une phrase, trahirait
+  // sa raison d'être : on le refuse ici plutôt que de le découvrir à l'écran.
+  if (!fact.topic || fact.topic.trim().length === 0) {
+    throw new Error(`[decision] ${fact.ruleId}: fait sans topic (le SUJET, 3-6 mots, distinct du constat)`);
+  }
+  if (fact.topic.length > 70 || /[.!?]/.test(fact.topic)) {
+    throw new Error(`[decision] ${fact.ruleId}: topic trop long ou phrasé (« ${fact.topic} ») — on NOMME, on ne raconte pas`);
   }
   switch (fact.role) {
     case "incompatibility":

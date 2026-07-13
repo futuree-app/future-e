@@ -180,3 +180,18 @@ test("sortie totalement vide : tout retombe en déterministe", () => {
   assert.equal(r.blocks.every((b) => !b.generated), true);
   assert.deepEqual(r.blocks.map((b) => b.text), plan().blocks.map((b) => b.fallbackText));
 });
+
+// ── La voix : ce que le prompt interdit, le code le corrige (slice 2.1) ─────────
+
+test("le tiret cadratin devient une virgule, sans que le bloc soit rejeté", () => {
+  // Le prompt l'interdit, le modèle le produit quand même (vu par la sonde). Rejeter un texte VRAI
+  // pour un signe de ponctuation renverrait le lecteur au repli : on paierait une virgule au prix
+  // d'une phrase. On corrige, sans changer un mot.
+  const r = validateGeneratedBlocks(plan(), [
+    { key: "reserves_found", text: "3 points pèsent autant — aucun ne domine." },
+  ]);
+  const bloc = r.blocks.find((b) => b.key === "reserves_found")!;
+  assert.equal(bloc.generated, true);
+  assert.equal(bloc.text, "3 points pèsent autant, aucun ne domine.");
+  assert.equal(bloc.text.includes("—"), false);
+});

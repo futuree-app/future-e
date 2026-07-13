@@ -46,6 +46,19 @@ function numbersIn(text: string): string[] {
   return [...digits, ...words];
 }
 
+// LE TIRET CADRATIN N'EXISTE PAS DANS LA VOIX DE futur•e. Le prompt l'interdit ; le modèle le produit
+// quand même (la sonde l'a vu). On le CORRIGE plutôt que de rejeter le bloc : renvoyer le lecteur au
+// texte de repli parce qu'un signe de ponctuation déplaît serait payer une virgule au prix d'une
+// phrase. C'est la seule retouche que ce module s'autorise sur la prose du modèle, et elle ne change
+// aucun mot.
+function normalizeTypography(text: string): string {
+  return text
+    .replace(/\s*[—–]\s*/g, ", ")
+    .replace(/\s{2,}/g, " ")
+    .replace(/,\s*,/g, ",")
+    .trim();
+}
+
 export function validateGeneratedBlocks(
   plan: ConclusionNarrativePlan,
   raw: unknown[],
@@ -78,7 +91,9 @@ export function validateGeneratedBlocks(
     const text = byKey.get(b.key);
     if (text === undefined) { rejected.push({ key: b.key, reason: "missing" }); return fallback; }
 
-    const trimmed = text.trim();
+    // La typographie est normalisée AVANT toute vérification : ce qui est mesuré (longueur, nombres,
+    // matière obligatoire) doit être exactement ce qui sera affiché et stocké.
+    const trimmed = normalizeTypography(text);
     if (trimmed.length === 0) { rejected.push({ key: b.key, reason: "empty" }); return fallback; }
     if (trimmed.length > b.maxChars) { rejected.push({ key: b.key, reason: "too_long" }); return fallback; }
 

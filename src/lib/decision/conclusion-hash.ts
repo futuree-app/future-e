@@ -13,11 +13,19 @@ import { sha256Hex } from "../server/sha256.ts";
 import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
 
 // Le schéma de sortie + les règles de validation. À bumper quand conclusion-validate change de contrat.
-export const DECISION_NARRATIVE_CONTRACT_VERSION = "c1";
+// c2 : la typographie est normalisée (le tiret cadratin, que le prompt interdit et que le modèle
+// produisait quand même, devient une virgule). Le texte validé n'est plus littéralement celui du modèle.
+export const DECISION_NARRATIVE_CONTRACT_VERSION = "c2";
 // Le prompt système. À bumper à chaque retouche de son texte.
-// v2 (slice 2.1) : le registre des réserves porte le POIDS (le décompte est parti dans l'intertitre
-// des cartes), et il n'existe plus quand aucun point ne se détache.
-export const DECISION_NARRATIVE_PROMPT_VERSION = "v2";
+// v2 (slice 2.1) : le registre des réserves porte le POIDS, et il n'existe plus quand aucun point ne
+// se détache. v3 : les faits de tête sont NOMMÉS, y compris à égalité (ne pas couronner n'est pas ne
+// pas nommer). v4 : ils sont nommés par leur SUJET (topic) et non par leur constat, qui recopiait les
+// cartes situées juste dessous. La conclusion nomme, les cartes démontrent. v5 : la hiérarchie ne se
+// COMMENTE plus (« aucun ne prend le dessus » est de la tuyauterie), et la contrainte non vérifiée est
+// le SUJET de sa phrase, nommée telle que le lecteur l'a posée (« la gare Matabiau », pas « un lieu »).
+// v6 : la COMMUNE est nommée (« Toulouse », pas « ce lieu » ni « la commune »), et les sujets ne portent
+// plus le grain (deux faits d'adresse cités côte à côte répétaient « sur cette adresse »).
+export const DECISION_NARRATIVE_PROMPT_VERSION = "v6";
 export const DECISION_NARRATIVE_MODEL = "claude-sonnet-4-6";
 
 export function hashPayload(

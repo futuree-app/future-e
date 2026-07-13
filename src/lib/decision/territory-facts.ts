@@ -32,5 +32,5 @@ export async function buildCommuneDossier(
   const facts = await loadModuleFacts(insee, { hasAddress: opts?.hasAddress ?? false });
   if (!facts) return null;
   // moduleFacts retournés pour que l'augmentation Logement reparte du MÊME socle (pas de reload).
-  return { moduleFacts: facts, dossier: assembleDossier(runRules(facts, project), project, "commune") };
+  return { moduleFacts: facts, dossier: assembleDossier(runRules(facts, project), project, "commune", facts.nom) };
 }

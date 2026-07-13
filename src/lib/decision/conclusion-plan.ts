@@ -29,15 +29,24 @@ export type NarrativeBlock = {
 // Le fait saillant est DÉSIGNÉ par le déterministe, jamais élu par l'IA. `tied` existe parce que
 // prendre le premier d'un tri à égalité transformerait un ordre de DÉCLARATION dans le registre en
 // PRIORITÉ MÉTIER : si deux faits sont decision_critical, écrire « à commencer par le PPRN » ment.
+//
+// Le lead porte le SUJET de chaque fait (`topic`), pas son constat. Deux défauts, l'un après l'autre,
+// ont conduit là. D'abord la conclusion annonçait « 3 points se placent à égalité en tête » sans en
+// citer un seul : elle parlait d'elle-même au lieu de parler du lieu (ne pas COURONNER un fait quand
+// trois pèsent pareil est juste, refuser de les NOMMER ne l'est pas). Puis, en citant les constats
+// entiers, elle recopiait mot pour mot les cartes situées trois centimètres plus bas.
+//
+// La conclusion NOMME, les cartes DÉMONTRENT.
 export type LeadSelection =
-  | { kind: "single"; factId: string; statement: string; materialityTier: MaterialityTier }
-  | { kind: "tied"; factIds: string[]; materialityTier: MaterialityTier }
+  | { kind: "single"; factId: string; topic: string; statement: string; materialityTier: MaterialityTier }
+  | { kind: "tied"; facts: { factId: string; topic: string }[]; materialityTier: MaterialityTier }
   | { kind: "none" };
 
 export type VerdictTone = "critical" | "caution" | "neutral" | "positive";
 
 export type ConclusionNarrativePlan = {
   scope: "commune" | "commune+adresse";
+  communeNom: string;
   conclusionState: ConclusionState;
   posture: ProjectPosture;
   blocks: NarrativeBlock[];
@@ -50,6 +59,10 @@ export type ConclusionNarrativePlan = {
 // Ce que l'assembleur fournit. Un `Dossier` ne peut pas être l'entrée : il PORTERA ce plan (cycle).
 export type ConclusionPlanInput = {
   scope: "commune" | "commune+adresse";
+  // Le NOM de la commune. « Ce lieu » et « la commune » sont des catégories : le lecteur regarde
+  // Toulouse, et le dossier doit le lui dire. Même exigence que les topics et les libellés de
+  // contraintes : on nomme, on ne catégorise pas.
+  communeNom: string;
   conclusionState: ConclusionState;
   posture: ProjectPosture;
   shownFacts: DecisionFact[]; // les faits réellement affichés, après plafonnement des sections
@@ -98,6 +111,16 @@ function endWithPeriod(s: string): string {
   return /[.!?]$/.test(s.trim()) ? s.trim() : `${s.trim()}.`;
 }
 
+// « a, b et c » : une énumération française, pas une liste séparée par des virgules jusqu'au bout.
+function joinFr(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? "";
+  return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
+}
+
+function capitalize(s: string): string {
+  return s.length === 0 ? s : s[0]!.toUpperCase() + s.slice(1);
+}
+
 export function selectLead(shownFacts: DecisionFact[]): LeadSelection {
   const rs = reserves(shownFacts);
   if (rs.length === 0) return { kind: "none" };
@@ -107,9 +130,16 @@ export function selectLead(shownFacts: DecisionFact[]): LeadSelection {
   const top = rs.filter((f) => TIER_ORDER[f.materialityTier] === best);
   if (top.length === 1) {
     const f = top[0]!;
-    return { kind: "single", factId: f.id, statement: f.statement, materialityTier: f.materialityTier };
+    // `single` garde le constat : UN fait cité seul peut être dit en entier sans noyer la conclusion,
+    // et le lecteur mérite de savoir ce qui pèse, pas seulement de quoi ça parle.
+    return { kind: "single", factId: f.id, topic: f.topic, statement: f.statement, materialityTier: f.materialityTier };
   }
-  return { kind: "tied", factIds: top.map((f) => f.id), materialityTier: top[0]!.materialityTier };
+  // `tied` ne garde que les SUJETS : trois constats entiers recopieraient les trois cartes qui suivent.
+  return {
+    kind: "tied",
+    facts: top.map((f) => ({ factId: f.id, topic: f.topic })),
+    materialityTier: top[0]!.materialityTier,
+  };
 }
 
 type Verdict = { label: string; text: string; tone: VerdictTone };
@@ -136,16 +166,17 @@ function points(n: number, adj: string, verb: string): string {
 // correspondre » s'écrirait sur un dossier dont tous les critères examinés sont des réserves ; sans
 // `favorableCount`, « plusieurs dimensions » s'écrirait sur un unique critère satisfait.
 function verdict(input: ConclusionPlanInput): Verdict {
+  const nom = input.communeNom;
   if (input.conclusionState === "project_not_structured") {
     return {
       label: "À préciser", tone: "neutral",
-      text: "Décrivez votre projet pour mettre ce lieu en regard de ce qui compte pour vous.",
+      text: `Décrivez votre projet pour mettre ${nom} en regard de ce qui compte pour vous.`,
     };
   }
   if (input.conclusionState === "insufficient_evidence") {
     return {
       label: "Impossible de conclure", tone: "neutral",
-      text: "Une donnée déterminante manque encore pour conclure sur ce lieu.",
+      text: `Une donnée déterminante manque encore pour conclure sur ${nom}.`,
     };
   }
   if (input.orientation === "incompatible") {
@@ -159,7 +190,7 @@ function verdict(input: ConclusionPlanInput): Verdict {
       label: "Lecture non disponible", tone: "neutral",
       // « ne peut pas encore » et non « n'a pas encore pu » : le présent parle de l'état du dossier,
       // le passé composé raconterait un échec du moteur.
-      text: "Ce lieu ne peut pas encore être évalué au regard de vos critères.",
+      text: `${nom} ne peut pas encore être évalué au regard de vos critères.`,
     };
   }
 
@@ -172,31 +203,31 @@ function verdict(input: ConclusionPlanInput): Verdict {
     if (input.orientation === "favorable") {
       return {
         label: "Bonne correspondance", tone: "positive",
-        text: "Ce lieu semble bien correspondre à votre projet.",
+        text: `${nom} semble bien correspondre à votre projet.`,
       };
     }
     if (input.orientation === "minor_reserves") {
       return input.hasFavorable
         ? {
             label: "Correspondance favorable", tone: "positive",
-            text: `Ce lieu semble bien correspondre à votre projet. ${reste} à examiner.`,
+            text: `${nom} semble bien correspondre à votre projet. ${reste} à examiner.`,
           }
         : {
             label: "Correspondance à confirmer", tone: "neutral",
-            text: `La correspondance avec votre projet reste à confirmer : ${reste} à examiner.`,
+            text: `La correspondance de ${nom} avec votre projet reste à confirmer : ${reste} à examiner.`,
           };
     }
     if (!input.hasFavorable) {
       return {
         label: "Correspondance à nuancer", tone: "caution",
-        text: `${points(n, "structurant", "empêche")} encore de considérer ce lieu comme une bonne correspondance avec votre projet.`,
+        text: `${points(n, "structurant", "empêche")} encore de considérer ${nom} comme une bonne correspondance avec votre projet.`,
       };
     }
     return {
       label: "Correspondance à nuancer", tone: "caution",
       text: plusieurs
-        ? `Ce lieu répond à plusieurs dimensions de votre projet, mais ${points(n, "structurant", "empêche")} encore de conclure nettement.`
-        : `Ce lieu présente des éléments favorables pour votre projet, mais ${points(n, "structurant", "empêche")} encore de conclure nettement.`,
+        ? `${nom} répond à plusieurs dimensions de votre projet, mais ${points(n, "structurant", "empêche")} encore de conclure nettement.`
+        : `${nom} présente des éléments favorables pour votre projet, mais ${points(n, "structurant", "empêche")} encore de conclure nettement.`,
     };
   }
 
@@ -204,23 +235,23 @@ function verdict(input: ConclusionPlanInput): Verdict {
   if (input.orientation === "favorable") {
     return {
       label: "Signaux favorables", tone: "neutral",
-      text: "Ce lieu va dans le sens de votre projet sur les critères déjà couverts, mais la lecture reste incomplète.",
+      text: `${nom} va dans le sens de votre projet sur les critères déjà couverts, mais la lecture reste incomplète.`,
     };
   }
   if (input.orientation === "minor_reserves") {
     return input.hasFavorable
       ? {
           label: "Correspondance à confirmer", tone: "neutral",
-          text: "Ce lieu va plutôt dans le sens de votre projet sur les critères déjà couverts, mais la lecture reste incomplète.",
+          text: `${nom} va plutôt dans le sens de votre projet sur les critères déjà couverts, mais la lecture reste incomplète.`,
         }
       : {
           label: "Correspondance à confirmer", tone: "neutral",
-          text: `La lecture reste incomplète, et ${reste} à examiner avant de pouvoir conclure sur ce lieu.`,
+          text: `La lecture reste incomplète, et ${reste} à examiner avant de pouvoir conclure sur ${nom}.`,
         };
   }
   return {
     label: "Lecture encore partielle", tone: "caution",
-    text: `Il est encore trop tôt pour dire que ce lieu correspond à votre projet : la lecture reste incomplète et ${points(n, "structurant", "demande")} attention.`,
+    text: `Il est encore trop tôt pour dire que ${nom} correspond à votre projet : la lecture reste incomplète et ${points(n, "structurant", "demande")} attention.`,
   };
 }
 
@@ -245,16 +276,23 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
   // Un projet non structuré n'est pas une analyse, c'est une invite. Aucun autre registre.
   if (input.conclusionState === "project_not_structured") {
     return {
-      scope: input.scope, conclusionState: input.conclusionState, posture: input.posture,
-      blocks, reservesCount: 0, lead: { kind: "none" },
+      scope: input.scope, communeNom: input.communeNom, conclusionState: input.conclusionState,
+      posture: input.posture, blocks, reservesCount: 0, lead: { kind: "none" },
       verdictLabel: v.label, verdictTone: v.tone,
     };
   }
 
   if (input.uncovered.length > 0) {
+    // LA CONTRAINTE EST LE SUJET DE LA PHRASE. « Nous n'avons pas encore examiné : la proximité d'un
+    // lieu » fait parler futur•e d'elle-même, et nomme une catégorie là où le lecteur a écrit « la gare
+    // Matabiau ». Le libellé est instancié depuis SON projet (hardConstraintLabel), et la tournure
+    // « reste à vérifier » évite l'accord de participe qu'un passif imposerait sur des libellés de
+    // genre inconnu (« le département » / « la proximité »).
+    const labels = input.uncovered.map((u) => u.label);
+    const verbe = labels.length > 1 ? "restent" : "reste";
     blocks.push({
       key: "unexamined_hard_constraints",
-      fallbackText: `Nous n'avons pas encore examiné, à ce grain : ${input.uncovered.map((u) => u.label).join(", ")}.`,
+      fallbackText: `${capitalize(joinFr(labels))} ${verbe} à vérifier à ce niveau de détail.`,
       sourceIds: input.uncovered.map((u) => u.key),
       // Chaque contrainte doit SURVIVRE à la rédaction : « une condition importante reste à examiner »
       // ferait disparaître la gare, sans qu'aucune autre validation ne s'en aperçoive.
@@ -290,14 +328,22 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
       generable: true,
     });
   } else if (lead.kind === "tied") {
-    const n = lead.factIds.length;
+    const n = lead.facts.length;
+    // ON LISTE, ON NE COMMENTE PAS LA HIÉRARCHIE. « 3 points pèsent autant, aucun ne domine » est de la
+    // TUYAUTERIE : le `lead` existe pour empêcher le moteur de couronner un fait au hasard, c'est notre
+    // problème, pas celui du lecteur. Lui demande quoi regarder ; « aucun ne prend le dessus » est une
+    // absence d'information formulée comme une information. L'égalité se DIT en listant, point.
+    // (En `single`, la phrase garde du sens : elle dit par où COMMENCER.)
     blocks.push({
       key: "reserves_found",
-      fallbackText: `${n} points de même importance arrivent en tête : aucun ne domine à lui seul.`,
-      sourceIds: lead.factIds,
-      requiredPhrases: [String(n)],
+      fallbackText: `${capitalize(numberForms(n)[1] ?? String(n))} points demandent votre attention : ${joinFr(lead.facts.map((f) => f.topic))}.`,
+      sourceIds: lead.facts.map((f) => f.factId),
+      // Chaque sujet doit SURVIVRE : c'est le seul endroit du dossier où le lecteur apprend, en une
+      // phrase, CE QUI pèse. Un « plusieurs risques naturels » qui les avalerait ramènerait la carte à
+      // son défaut d'origine (parler d'elle-même), et aucune autre validation ne le verrait.
+      requiredPhrases: lead.facts.map((f) => coreLabel(f.topic)),
       allowedNumbers: numberForms(n),
-      maxChars: 300,
+      maxChars: 340,
       generable: true,
     });
   }
@@ -317,6 +363,7 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
 
   return {
     scope: input.scope,
+    communeNom: input.communeNom,
     conclusionState: input.conclusionState,
     posture: input.posture,
     blocks,

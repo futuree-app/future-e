@@ -27,7 +27,7 @@ export async function DossierAvecLogement({
     const data = await fetchLogementDecisionDataWithTimeout(address);
     const logement = buildLogementFacts(data, savedDpe, address.label);
     const facts: ModuleFacts = { ...communeFacts, hasAddress: true, logement };
-    const dossier = assembleDossier(runRules(facts, project), project, "commune+adresse");
+    const dossier = assembleDossier(runRules(facts, project), project, "commune+adresse", facts.nom);
     return (
       <DossierDecisionSection
         dossier={dossier} logement={logementLink} logementStatus="done"

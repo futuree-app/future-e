@@ -104,7 +104,7 @@ export function DossierDecisionSection({
           En une minute
         </div>
         <h2 className="font-normal text-[clamp(26px,3vw,40px)] leading-[1.12] tracking-[-0.6px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-          Ce lieu, au regard de votre projet.
+          {dossier.narrativePlan.communeNom}, au regard de votre projet.
         </h2>
       </div>
 

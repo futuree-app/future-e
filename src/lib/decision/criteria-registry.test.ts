@@ -16,7 +16,7 @@ function ev(ruleId: string, keys: string[], outcome: RuleEvaluation["outcome"], 
 function reserve(id: string, tier: MaterialityTier): DecisionFact {
   return {
     id, ruleId: `r-${id}`, sourceFactIds: [], module: "territoire", statement: `constat ${id}`,
-    materialityTier: tier, role: "verification", evidence: [],
+    topic: `sujet ${id}`, materialityTier: tier, role: "verification", evidence: [],
     action: { type: "verifier_sur_place", label: "Vérifier" },
   };
 }
@@ -140,13 +140,22 @@ test("les priorités non couvertes se DÉRIVENT du registre, plus d'une liste é
   assert.equal(un[0]!.label, "une vie locale animée");
 });
 
-test("les contraintes dures non examinées se dérivent du registre, avec leur libellé", () => {
+test("les contraintes non examinées portent le libellé DU LECTEUR, pas une catégorie", () => {
+  // « la proximité d'un lieu » ne veut rien dire pour quelqu'un qui a écrit « la gare Matabiau ».
   const s = buildCriteriaRegistry(
-    project({ departements: ["31"], nearPlace: { label: "Gare", maxKm: null } }, []),
+    project({ departements: ["31"], nearPlace: { label: "la gare Matabiau", maxKm: null } }, []),
     run([ev("r1", ["departements"], "satisfied")]),
   );
   const un = uncoveredConstraints(s);
   assert.equal(un.length, 1);
   assert.equal(un[0]!.key, "nearPlace");
-  assert.equal(un[0]!.label, "la proximité d'un lieu");
+  assert.equal(un[0]!.label, "la proximité de la gare Matabiau");
+});
+
+test("le libellé instancié couvre aussi le département et la taille de commune", () => {
+  const dept = buildCriteriaRegistry(project({ departements: ["31"] }, []), run([]));
+  assert.equal(dept.registry[0]!.label, "le département 31");
+
+  const taille = buildCriteriaRegistry(project({ communeSize: { min: null, max: 20000 } }, []), run([]));
+  assert.equal(taille.registry[0]!.label, "une commune de moins de 20 000 habitants");
 });

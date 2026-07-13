@@ -42,7 +42,13 @@ function factEvidence(f: DecisionFact): EvidenceRef[] {
   return f.role === "compromise" ? f.sides.flatMap((s) => s.evidence) : f.evidence;
 }
 
-export function assembleDossier(run: RunResult, project: UserProject, scope: "commune" | "commune+adresse"): Dossier {
+export function assembleDossier(
+  run: RunResult,
+  project: UserProject,
+  scope: "commune" | "commune+adresse",
+  // Le NOM de la commune : le dossier parle de Toulouse, pas de « ce lieu ».
+  communeNom: string,
+): Dossier {
   const { facts } = run;
 
   // La couverture est une CONSÉQUENCE OBSERVÉE des règles (criteria-registry), plus une liste tenue à
@@ -69,6 +75,7 @@ export function assembleDossier(run: RunResult, project: UserProject, scope: "co
   const reservesShownFacts = shown.filter((f) => RESERVE_ROLES.has(f.role));
   const narrativePlan = buildConclusionPlan({
     scope,
+    communeNom,
     conclusionState: state,
     posture: project.posture,
     shownFacts: shown,
