@@ -165,7 +165,7 @@ const ruleChaleur: DecisionRule = {
     // laisser une incise ouverte au milieu de la trajectoire.
     if (nuits.notable) {
       phrases.push(
-        `${trajectoirePhrase(nuits, "Les nuits tropicales")}, ces nuits où la température ne descend pas sous 20 °C et où le corps ne récupère plus`,
+        `${trajectoirePhrase(nuits, "Les nuits tropicales", { referenceCourte: jours.notable })}, ces nuits où la température ne descend pas sous 20 °C et où le corps ne récupère plus`,
       );
     }
     const seuils = [

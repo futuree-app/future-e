@@ -17,7 +17,7 @@ const SC: GwlScenarios = {
 };
 
 test("la RÉFÉRENCE se reconstruit (projeté moins anomalie), par médiane des horizons", () => {
-  // 7-3 = 4 ; 12-8 = 4 ; 22-18 = 4 -> 4 jours à la fin du XXe siècle.
+  // 7-3 = 4 ; 12-8 = 4 ; 22-18 = 4 -> 4 jours sur la période de référence 1976-2005.
   assert.equal(reconstructReference(SC, "NORTX35D_yr", "ATX35D_yr"), 4);
   assert.equal(reconstructReference(SC, "NORTR_yr", "ATR_yr"), 11);
 });
@@ -81,10 +81,10 @@ test("aucun scénario, ou aucune valeur : buildClimatFacts rend null (rien à ex
   assert.equal(buildClimatFacts({ gwl20: { h: "2050", v: {} } }), null);
 });
 
-test("la TRAJECTOIRE dit « la fin du XXe siècle », JAMAIS « actuellement »", () => {
+test("la TRAJECTOIRE DATE sa référence (1976-2005), et ne dit JAMAIS « actuellement »", () => {
   const f = buildClimatFacts(SC)!;
   const p = trajectoirePhrase(f.joursTresChauds, "les jours au-dessus de 35 °C");
-  assert.match(p, /de 4 jours par an à la fin du XXe siècle à 12 jours à l'horizon 2050/);
+  assert.match(p, /de 4 jours par an sur la période de référence 1976-2005 à 12 jours à l'horizon 2050/);
   assert.doesNotMatch(p, /actuellement|aujourd'hui/i);
 });
 
@@ -112,7 +112,7 @@ test("L'ANOMALIE DE PLUIE EST RELATIVE : on divise, on ne soustrait pas", () => 
   // ET « PAR AN » DISPARAÎT : un cumul de pluie se mesure EN 24 HEURES. « 68 mm par an » ferait passer un
   // épisode intense pour une pluviométrie annuelle dérisoire.
   const p = trajectoirePhrase(f.pluieMax24h, "Les pluies les plus intenses");
-  assert.match(p, /de 62 mm à la fin du XXe siècle à 68 mm à l'horizon 2050/);
+  assert.match(p, /de 62 mm sur la période de référence 1976-2005 à 68 mm à l'horizon 2050/);
   assert.doesNotMatch(p, /mm par an/);
 });
 

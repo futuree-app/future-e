@@ -147,7 +147,7 @@ test("CHALEUR, exposition notable : une carte CHIFFRÉE, et jamais « actuelleme
   assert.ok(f && f.role === "verification");
   assert.match(f.statement, /14 jours/); // la valeur projetée, pas un percentile
   assert.match(f.statement, /69 (jours|nuits)/);
-  assert.match(f.statement, /fin du XXe siècle/);
+  assert.match(f.statement, /période de référence 1976-2005/);
   assert.doesNotMatch(f.statement, /actuellement|aujourd'hui/i);
   // LA CONVENTION EST DITE, et elle écrit l'opérateur qu'elle applique (le code teste `>=`).
   assert.match(f.statement, /futur•e signale cette exposition à partir de/);

@@ -25,7 +25,24 @@ export type GwlScenarios = Record<string, { h: string; v: Record<string, number>
 // les deux moteurs n'ont pas le droit de lire des horizons différents.
 export const CLIMAT_HORIZON = "gwl20";
 export const CLIMAT_HORIZON_LABEL = "2050";
-export const CLIMAT_REFERENCE_LABEL = "la fin du XXe siècle";
+
+// LA PÉRIODE DE RÉFÉRENCE EST DATÉE, pas évoquée. DRIAS l'écrit noir sur blanc : « les changements
+// correspondent à des écarts pour les températures et des écarts relatifs pour les précipitations PAR
+// RAPPORT À LA PÉRIODE DE RÉFÉRENCE 1976-2005 ». « La fin du XXe siècle » était une paraphrase : elle
+// laissait croire que la période s'arrêtait en 2000, et surtout elle n'était pas OPPOSABLE. Un lecteur
+// doit pouvoir retrouver le chiffre à la source.
+export const CLIMAT_REFERENCE_LABEL = "sur la période de référence 1976-2005";
+
+// ATTENTION AU PIÈGE DES DEUX BASES, et il est vicieux parce que les deux chiffres sont vrais.
+// Le niveau TRACC de l'horizon 2050 (« +2,7 °C en France ») est mesuré par rapport au DÉBUT DU XXe SIÈCLE
+// (1900-1930). Les valeurs locales, elles, sont comparées à 1976-2005, période où la France s'était DÉJÀ
+// réchauffée : l'écart n'y est donc que de +2,1 °C. Écrire « +2,7 °C » à côté d'une valeur locale
+// laisserait croire que cet écart-là est celui qu'on lit dans le tableau. (Table DRIAS : global +1,5 / +2 /
+// +3 °C = France +2 / +2,7 / +4 °C vs 1900-1930 = +1,4 / +2,1 / +3,4 °C vs 1976-2005.)
+export const TRACC_HORIZON_2050 = {
+  franceVsPreindustriel: 2.7, // le chiffre de la TRACC, celui que le lecteur a vu dans la presse
+  franceVsReference: 2.1, // celui qui correspond aux valeurs de ce tableau
+} as const;
 
 export const CLIMAT_CONVENTIONS_VERSION = "clim-conv-1";
 
@@ -144,12 +161,20 @@ export function fmtClimat(v: number, unit: "jours" | "mm"): string {
 //
 // « Par an » ne vaut QUE pour un compte de jours. Un cumul de pluie est mesuré EN 24 HEURES : écrire
 // « 68 mm par an » ferait passer un épisode intense pour une pluviométrie annuelle dérisoire.
-export function trajectoirePhrase(a: ClimatAxe, sujet: string): string {
+export function trajectoirePhrase(
+  a: ClimatAxe,
+  sujet: string,
+  // Quand une phrase enchaîne DEUX trajectoires (les jours très chauds, puis les nuits tropicales), redire
+  // « sur la période de référence 1976-2005 » une seconde fois alourdit sans rien apprendre : la seconde
+  // renvoie à la première. La période reste dite une fois, entièrement, et elle reste opposable.
+  opts?: { referenceCourte?: boolean },
+): string {
   if (a.projete == null) return "";
   const cadence = a.unit === "jours" ? " par an" : "";
   const proj = fmtClimat(a.projete, a.unit);
   if (a.reference == null) {
     return `${sujet} atteindraient ${proj}${cadence} à l'horizon ${CLIMAT_HORIZON_LABEL}`;
   }
-  return `${sujet} passeraient de ${fmtClimat(a.reference, a.unit)}${cadence} à ${CLIMAT_REFERENCE_LABEL} à ${proj} à l'horizon ${CLIMAT_HORIZON_LABEL}`;
+  const ref = opts?.referenceCourte ? "sur la même période" : CLIMAT_REFERENCE_LABEL;
+  return `${sujet} passeraient de ${fmtClimat(a.reference, a.unit)}${cadence} ${ref} à ${proj} à l'horizon ${CLIMAT_HORIZON_LABEL}`;
 }
