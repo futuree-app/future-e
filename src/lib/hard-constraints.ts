@@ -25,6 +25,10 @@ export const HARD_CONSTRAINT_KEYS: HardConstraintKey[] = [
   "nearSea", "excludeSea", "nearPlace", "communeSize", "excludePlace", "sizeRelativeTo",
 ];
 
+// Le moyen de transport d'un temps de trajet. C'est un PARAMÈTRE de l'évaluation : « à 30 minutes de la
+// gare » ne désigne pas le même territoire à pied et en voiture.
+export type PlaceMode = "car" | "walk" | "bike";
+
 // ── Les conventions du PRODUIT ───────────────────────────────────────────────
 // Elles ne mesurent pas une exigence du lecteur : elles définissent le SENS D'UN MOT (« la montagne »,
 // « pas au bord de la mer »). Elles sont donc légitimes, à trois conditions : centralisées, versionnées,
@@ -63,7 +67,7 @@ export type CommuneAttributes = {
 // testable, comparable, et exportable demain.
 export type ConstraintValue =
   | { kind: "distance_km"; value: number }
-  | { kind: "travel_time_min"; value: number; mode: "car" | "walk" | "bike" }
+  | { kind: "travel_time_min"; value: number; mode: PlaceMode }
   | { kind: "population"; value: number; unit: "urban_unit" | "commune" }
   | { kind: "population_range"; min: number | null; max: number | null; unit: "urban_unit" | "commune" }
   | { kind: "department"; value: string }
@@ -107,7 +111,7 @@ export type HardConstraintAssessment<K extends HardConstraintKey = HardConstrain
 export type PlaceThreshold =
   | { metric: "distance"; maxKm: number; source: "user" }
   | {
-      metric: "travel_time"; maxMinutes: number; mode: "car" | "walk" | "bike" | null;
+      metric: "travel_time"; maxMinutes: number; mode: PlaceMode | null;
       direction: "to_reference"; source: "user";
     };
 

@@ -79,3 +79,39 @@ test("une exclusion inconnue est conservée : sinon « pas dans cette zone » de
 test("aucune zone dure déclarée -> la contrainte est NON DÉCLARÉE (pas non examinée)", () => {
   assert.equal(hydrateHardConstraints({ zones: [{ zone: "sud_ouest", strength: "preferred" }] }, dir).zones, null);
 });
+
+// ── LOT 2 : le temps de trajet entre dans le contrat ──────────────────────────
+
+test("un temps de trajet déclaré produit un seuil travel_time, jamais une distance", () => {
+  const n = hydrateHardConstraints({ nearPlace: { label: "Gare Matabiau", maxMinutes: 30, mode: "car" } }, dir);
+  assert.deepEqual(n.nearPlace?.threshold, {
+    metric: "travel_time", maxMinutes: 30, mode: "car", direction: "to_reference", source: "user",
+  });
+});
+
+test("le TEMPS PRIME sur la distance quand les deux sont déclarés", () => {
+  const n = hydrateHardConstraints({ nearPlace: { label: "Brest", maxKm: 20, maxMinutes: 30, mode: "car" } }, dir);
+  assert.equal(n.nearPlace?.threshold?.metric, "travel_time");
+});
+
+test("un temps sans mode reste travel_time, mode null (le PARAMÈTRE manque, pas le lieu)", () => {
+  const t = hydrateHardConstraints({ nearPlace: { label: "Brest", maxMinutes: 30 } }, dir).nearPlace?.threshold;
+  assert.equal(t?.metric === "travel_time" ? t.mode : "absent", null);
+});
+
+test("un mode que le parse a inventé est traité comme ABSENT, jamais gardé", () => {
+  const t = hydrateHardConstraints(
+    { nearPlace: { label: "Brest", maxMinutes: 30, mode: "voiture" as never } }, dir,
+  ).nearPlace?.threshold;
+  assert.equal(t?.metric === "travel_time" ? t.mode : "absent", null);
+});
+
+test("un temps nul ou absurde n'est pas une contrainte", () => {
+  const n = hydrateHardConstraints({ nearPlace: { label: "Brest", maxMinutes: 0, mode: "car" } }, dir);
+  assert.equal(n.nearPlace?.threshold, null);
+});
+
+test("une distance seule reste une distance (le lot 1 ne bouge pas)", () => {
+  const n = hydrateHardConstraints({ nearPlace: { label: "Brest", maxKm: 20 } }, dir);
+  assert.deepEqual(n.nearPlace?.threshold, { metric: "distance", maxKm: 20, source: "user" });
+});

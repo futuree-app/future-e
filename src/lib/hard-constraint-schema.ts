@@ -29,7 +29,16 @@ export type HardConstraints = {
   reliefProche?: { strength: ZoneStrength } | null;
   nearSea?: { active: boolean; maxKm?: number | null };
   excludeSea?: boolean;
-  nearPlace?: { label: string; maxKm?: number | null } | null;
+  // « Près de {lieu} » : le lieu n'est PAS forcément une commune (une gare, un hôpital, un campus). Deux
+  // métriques, et elles ne se convertissent pas l'une dans l'autre : une distance à vol d'oiseau n'établit
+  // pas un temps de trajet. Le mode est un PARAMÈTRE de l'évaluation, pas une décoration : sans lui, « à
+  // 30 minutes » ne veut rien dire (à pied ou en voiture, ce n'est pas le même territoire).
+  nearPlace?: {
+    label: string;
+    maxKm?: number | null;
+    maxMinutes?: number | null;
+    mode?: "car" | "walk" | "bike" | null;
+  } | null;
   communeSize?: { min?: number | null; max?: number | null } | null;
   // « Quitter {ville} » : exclut l'unité urbaine de la ville (le moteur résout label -> UU).
   excludePlace?: { label: string }[];

@@ -10,7 +10,7 @@ import {
   resolveNearPlace, resolveUrbanArea, resolveSizeReference, type PlaceDirectory,
 } from "./hard-constraints-resolve.ts";
 import type {
-  NormalizedHardConstraints, PlaceThreshold, SearchExplorationHint,
+  NormalizedHardConstraints, PlaceMode, PlaceThreshold, SearchExplorationHint,
 } from "./hard-constraints.ts";
 import type { HardConstraints } from "./hard-constraint-schema.ts";
 
@@ -31,11 +31,31 @@ export function explorationHints(hc: HardConstraints | undefined | null): Search
   return out;
 }
 
-// Un maxKm PRÉSENT dans le projet vient toujours du parse, donc du texte du lecteur : les défauts
+// Un seuil PRÉSENT dans le projet vient toujours du parse, donc du texte du lecteur : les défauts
 // (?? 50, ?? 30) étaient appliqués au RUNTIME et n'ont jamais été écrits dans hardConstraints. Il n'y a
 // donc aucun « faux user » à démêler dans les projets historiques.
 function thresholdFrom(maxKm: number | null | undefined): PlaceThreshold | null {
-  return typeof maxKm === "number" ? { metric: "distance", maxKm, source: "user" } : null;
+  return typeof maxKm === "number" && Number.isFinite(maxKm) && maxKm > 0
+    ? { metric: "distance", maxKm, source: "user" }
+    : null;
+}
+
+const MODES: PlaceMode[] = ["car", "walk", "bike"];
+
+// LE TEMPS PRIME SUR LA DISTANCE quand les deux sont déclarés : « à 30 minutes, disons 20 km » est un
+// lecteur qui se paraphrase, et le temps est ce qu'il a en tête. Le choix est écrit ici, pas laissé au
+// hasard de l'ordre des `if`.
+//
+// ET LE MODE NE SE DEVINE PAS. Le parse est un LLM : il peut écrire « voiture » ou « transports ». Un mode
+// que le noyau ne connaît pas est un mode ABSENT, qui rendra missing_parameter, et que le lecteur se verra
+// demander. On ne se replie jamais sur la voiture « parce que c'est le plus fréquent ».
+function nearPlaceThreshold(np: NonNullable<HardConstraints["nearPlace"]>): PlaceThreshold | null {
+  const minutes = np.maxMinutes;
+  if (typeof minutes === "number" && Number.isFinite(minutes) && minutes > 0) {
+    const mode = MODES.includes(np.mode as PlaceMode) ? (np.mode as PlaceMode) : null;
+    return { metric: "travel_time", maxMinutes: minutes, mode, direction: "to_reference", source: "user" };
+  }
+  return thresholdFrom(np.maxKm);
 }
 
 export function hydrateHardConstraints(
@@ -79,7 +99,7 @@ export function hydrateHardConstraints(
       c.nearPlace?.label && dir
         ? {
             label: c.nearPlace.label,
-            threshold: thresholdFrom(c.nearPlace.maxKm),
+            threshold: nearPlaceThreshold(c.nearPlace),
             reference: resolveNearPlace(c.nearPlace.label, dir, input),
           }
         : null,
