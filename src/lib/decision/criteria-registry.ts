@@ -15,7 +15,7 @@ import { declaredHardConstraintKeys, declaredPreferenceKeys, hardConstraintLabel
 import { PREFERENCE_LABELS } from "../comparateur-labels.ts";
 
 export type CriterionCoverage = "examined" | "unexamined";
-export type CriterionOutcome = "favorable" | "reserve" | "incompatible" | "indeterminate";
+export type CriterionOutcome = "favorable" | "reserve" | "mismatch" | "incompatible" | "indeterminate";
 
 export type ProjectCriterionAssessment = {
   criterionKey: string;
@@ -28,13 +28,16 @@ export type ProjectCriterionAssessment = {
 };
 
 export type CoverageLevel = "none" | "partial" | "high";
-export type Orientation = "favorable" | "minor_reserves" | "major_reserves" | "incompatible" | "indeterminate";
+export type Orientation =
+  | "favorable" | "neutral" | "minor_reserves" | "major_reserves" | "arbitration" | "incompatible" | "indeterminate";
 
 export type CriteriaSummary = {
   registry: ProjectCriterionAssessment[];
   coverage: CoverageLevel;
   orientation: Orientation;
   hasFavorable: boolean;
+  mismatchStructuring: number;
+  mismatchSecondary: number;
   // COMBIEN de critères sont favorables, pas seulement « au moins un » : la phrase « ce lieu répond à
   // plusieurs dimensions de votre projet » exige >= 2 pour être vraie. Un booléen l'aurait laissée
   // s'écrire sur un unique critère satisfait.
@@ -47,10 +50,17 @@ export const COVERAGE_HIGH_THRESHOLD = 0.7;
 
 // Un outcome EXPLOITABLE prouve que le critère a été regardé. `unknown` / `uncertain` disent que la
 // donnée manque, `not_applicable` que la règle est hors sujet : aucun des deux n'est un examen.
-const EXPLOITABLE = new Set<RuleEvaluation["outcome"]>(["satisfied", "incompatible", "compromise", "verification"]);
+// mismatch et neutral prouvent l'examen (la couverture monte). RESERVE_OUTCOMES inchangé : un mismatch
+// n'est PAS une réserve (il ne s'arbitre, il ne se vérifie pas).
+const EXPLOITABLE = new Set<RuleEvaluation["outcome"]>([
+  "satisfied", "incompatible", "compromise", "verification", "mismatch", "neutral",
+]);
 const RESERVE_OUTCOMES = new Set<RuleEvaluation["outcome"]>(["compromise", "verification"]);
 const TIER_RANK: Record<MaterialityTier, number> = { decision_critical: 0, structuring: 1, secondary: 2 };
-const OUTCOME_RANK: Record<CriterionOutcome, number> = { incompatible: 0, reserve: 1, favorable: 2, indeterminate: 3 };
+// mismatch se range entre incompatible et reserve : plus grave qu'une réserve pour l'ADÉQUATION, mais
+// jamais éliminatoire.
+const OUTCOME_RANK: Record<CriterionOutcome, number> =
+  { incompatible: 0, mismatch: 1, reserve: 2, favorable: 3, indeterminate: 4 };
 
 function worse(a: CriterionOutcome, b: CriterionOutcome): CriterionOutcome {
   return OUTCOME_RANK[a] <= OUTCOME_RANK[b] ? a : b;
@@ -78,9 +88,13 @@ function assess(
           maxReserveTier = f.materialityTier;
         }
       }
+    } else if (e.outcome === "mismatch") {
+      outcome = worse(outcome, "mismatch");
     } else if (e.outcome === "satisfied") {
       outcome = worse(outcome, "favorable");
     }
+    // neutral : ni favorable, ni réserve, ni mismatch. Il ne change pas l'outcome, mais il a rendu le
+    // critère EXPLOITABLE, donc examiné (la couverture monte).
   }
 
   return {
@@ -115,16 +129,30 @@ export function buildCriteriaRegistry(project: UserProject, run: RunResult): Cri
 
   const favorableCount = examined.filter((c) => c.outcome === "favorable").length;
 
-  // L'ordre est NORMATIF : le premier qui matche gagne. Ce n'est PAS un solde : rien ne compense, un
-  // critère satisfait ne rachète jamais une réserve critique.
+  // L'ARBITRAGE dérive d'un ENSEMBLE MATÉRIEL de mismatchs, comptés sur les FAITS (run.facts), jamais sur
+  // les évaluations : un mismatch de poids 1 est un outcome mais ne produit aucun fait, il ne compte donc
+  // pas. Un mismatch structurant, ou deux secondaires, suffisent.
+  const mismatchFacts = run.facts.filter((f) => f.role === "mismatch");
+  const mismatchStructuring = mismatchFacts.filter((f) => f.materialityTier === "structuring").length;
+  const mismatchSecondary = mismatchFacts.filter((f) => f.materialityTier === "secondary").length;
+  const requiresArbitration = mismatchStructuring > 0 || mismatchSecondary >= 2;
+
+  // L'ordre est NORMATIF : le premier qui matche gagne. Ce n'est PAS un solde : rien ne compense.
+  // `favorable` exige un signal favorable MATÉRIEL ; sinon, examiné mais sans signal -> `neutral` (jamais
+  // `favorable`, qui promettrait une correspondance, ni `indeterminate`, qui dirait « pas su examiner »).
   const orientation: Orientation =
     examined.some((c) => c.outcome === "incompatible") ? "incompatible"
     : examined.length === 0 ? "indeterminate"
+    : requiresArbitration ? "arbitration"
     : examined.some((c) => c.maxReserveTier != null && c.maxReserveTier !== "secondary") ? "major_reserves"
     : examined.some((c) => c.outcome === "reserve") ? "minor_reserves"
-    : "favorable";
+    : favorableCount > 0 ? "favorable"
+    : "neutral";
 
-  return { registry, coverage, orientation, hasFavorable: favorableCount > 0, favorableCount };
+  return {
+    registry, coverage, orientation, hasFavorable: favorableCount > 0, favorableCount,
+    mismatchStructuring, mismatchSecondary,
+  };
 }
 
 export function uncoveredPreferences(summary: CriteriaSummary): { key: string; label: string }[] {

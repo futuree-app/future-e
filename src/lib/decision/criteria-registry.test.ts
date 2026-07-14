@@ -159,3 +159,54 @@ test("le libellé instancié couvre aussi le département et la taille de commun
   const taille = buildCriteriaRegistry(project({ communeSize: { min: null, max: 20000 } }, []), run([]));
   assert.equal(taille.registry[0]!.label, "une commune de moins de 20 000 habitants");
 });
+
+function mismatchFact(id: string, key: string, tier: MaterialityTier): DecisionFact {
+  return {
+    id, ruleId: `territoire.mismatch-${key}`, sourceFactIds: [`relativePosition.${key}`], module: "territoire",
+    statement: `constat ${id}`, topic: `sujet ${id}`, materialityTier: tier,
+    role: "mismatch", projectKey: key as never,
+    basis: { kind: "relative_position", rankLow: 0.05, rankHigh: 0.1, universe: "communes_france" },
+    evidence: [],
+  } as DecisionFact;
+}
+
+test("un mismatch STRUCTURANT (fait matériel) porte l'orientation à arbitration", () => {
+  const s = buildCriteriaRegistry(
+    project({}, [{ key: "nature", weight: 3 }]),
+    run([ev("territoire.mismatch-nature", ["nature"], "mismatch", [mismatchFact("m1", "nature", "structuring")])]),
+  );
+  assert.equal(s.orientation, "arbitration");
+});
+
+test("DEUX mismatchs secondaires -> arbitration ; UN seul -> pas arbitration", () => {
+  const two = buildCriteriaRegistry(
+    project({}, [{ key: "nature", weight: 2 }, { key: "vie_locale", weight: 2 }]),
+    run([
+      ev("territoire.mismatch-nature", ["nature"], "mismatch", [mismatchFact("m1", "nature", "secondary")]),
+      ev("territoire.mismatch-vie_locale", ["vie_locale"], "mismatch", [mismatchFact("m2", "vie_locale", "secondary")]),
+    ]),
+  );
+  assert.equal(two.orientation, "arbitration");
+  const one = buildCriteriaRegistry(
+    project({}, [{ key: "nature", weight: 2 }]),
+    run([ev("territoire.mismatch-nature", ["nature"], "mismatch", [mismatchFact("m1", "nature", "secondary")])]),
+  );
+  assert.notEqual(one.orientation, "arbitration");
+});
+
+test("un mismatch de POIDS 1 (aucun fait matériel) ne déclenche PAS d'arbitrage", () => {
+  const s = buildCriteriaRegistry(
+    project({}, [{ key: "nature", weight: 1 }]),
+    run([ev("territoire.mismatch-nature", ["nature"], "mismatch", [])]), // outcome mismatch, mais AUCUN fait
+  );
+  assert.notEqual(s.orientation, "arbitration");
+});
+
+test("que des neutres -> orientation NEUTRAL (examiné, aucun signal), jamais favorable ni indeterminate", () => {
+  const s = buildCriteriaRegistry(
+    project({}, [{ key: "nature", weight: 3 }]),
+    run([ev("territoire.mismatch-nature", ["nature"], "neutral", [])]),
+  );
+  assert.equal(s.registry.find((c) => c.criterionKey === "nature")!.coverage, "examined");
+  assert.equal(s.orientation, "neutral");
+});
