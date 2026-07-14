@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 
@@ -61,10 +62,10 @@ const body = { color: C.muted, fontSize: 15, lineHeight: 1.8, margin: '0 0 16px'
 /* ————— Données de page ————— */
 
 const CHIPS_HERO = [
-  { txt: '+3 semaines à plus de 35 °C d’ici 2050', tone: 'accent', top: '16%', right: -14, rot: 2 },
-  { txt: 'Retrait-gonflement des argiles : exposition moyenne', tone: 'warm', top: '38%', left: -18, rot: -2 },
-  { txt: 'Gare : 24 min à pied · bus 2 fois par jour', tone: 'blue', top: '60%', right: -10, rot: 1.5 },
-  { txt: 'Sols : vérification recommandée', tone: 'violet', top: '80%', left: -8, rot: -1 },
+  { txt: '+3 semaines à plus de 35 °C d’ici 2050', tone: 'accent', rot: 1.5, side: 'right' },
+  { txt: 'Retrait-gonflement des argiles : exposition moyenne', tone: 'warm', rot: -1.5, side: 'left' },
+  { txt: 'Gare : 24 min à pied · bus 2 fois par jour', tone: 'blue', rot: 1, side: 'right' },
+  { txt: 'Sols : vérification recommandée', tone: 'violet', rot: -1, side: 'left' },
 ];
 
 const PROFILS_DEMO = [
@@ -191,13 +192,13 @@ export default function PourquoiPage() {
         .why-chip:nth-of-type(4) { animation-delay: 4.2s; }
         @media (max-width: 768px) {
           .why-hero-grid { grid-template-columns: 1fr !important; }
-          .why-annonce-wrap { min-height: 340px !important; }
           .why-etats-grid { grid-template-columns: 1fr !important; }
           .why-offre-grid { grid-template-columns: 1fr !important; }
           .why-offre-left { border-right: none !important; border-bottom: 1px solid var(--border-1) !important; }
           .why-demo-grid { grid-template-columns: 1fr !important; }
           .why-asym-row { grid-template-columns: 1fr !important; gap: 10px !important; }
           .why-asym-num { font-size: 2.4rem !important; }
+          .why-asym-response { border-left: none !important; padding-left: 0 !important; }
           .why-page-wrap { padding: 0 20px 100px !important; }
         }
         @media (prefers-reduced-motion: reduce) {
@@ -258,12 +259,10 @@ export default function PourquoiPage() {
             </div>
 
             {/* L'annonce vs ce qu'elle ne dit pas */}
-            <div className="why-annonce-wrap" style={{ position: 'relative', minHeight: 420, padding: '0 10px' }}>
+            <div className="why-annonce-wrap" style={{ display: 'flex', flexDirection: 'column', padding: '0 6px' }}>
               <div
                 style={{
                   ...glass({ borderRadius: 16, padding: 22 }),
-                  position: 'absolute',
-                  inset: '28px 10px',
                   boxShadow: '0 28px 90px rgba(0,0,0,0.32)',
                   display: 'flex',
                   flexDirection: 'column',
@@ -274,7 +273,7 @@ export default function PourquoiPage() {
                 </span>
                 <div
                   style={{
-                    height: 96,
+                    height: 84,
                     borderRadius: 10,
                     margin: '12px 0 14px',
                     background: 'linear-gradient(135deg, rgba(96,165,250,0.16) 0%, rgba(167,139,250,0.1) 55%, rgba(248,113,113,0.08) 100%)',
@@ -287,45 +286,47 @@ export default function PourquoiPage() {
                 <span style={{ fontSize: 12.5, color: C.muted, marginTop: 6, lineHeight: 1.5 }}>
                   Lumineuse, au calme. Écoles et commerces à proximité. Coup de cœur assuré.
                 </span>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: C.text, marginTop: 'auto', paddingTop: 14 }}>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: C.text, marginTop: 14 }}>
                   289 000 €
                 </span>
               </div>
 
-              {CHIPS_HERO.map((c) => {
-                const t = chipTone[c.tone];
-                return (
-                  <span
-                    key={c.txt}
-                    className="why-chip"
-                    style={{
-                      position: 'absolute',
-                      top: c.top,
-                      ...(c.left !== undefined ? { left: c.left } : { right: c.right }),
-                      ['--rot' as never]: `${c.rot}deg`,
-                      transform: `rotate(${c.rot}deg)`,
-                      background: 'var(--bg)',
-                      border: `1px solid ${t.border}`,
-                      color: t.color,
-                      fontFamily: "'JetBrains Mono', monospace",
-                      fontSize: 9.5,
-                      lineHeight: 1.4,
-                      letterSpacing: '0.02em',
-                      padding: '7px 11px',
-                      borderRadius: 7,
-                      maxWidth: 200,
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
-                      zIndex: 3,
-                    }}
-                  >
-                    {c.txt}
-                  </span>
-                );
-              })}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: -10, position: 'relative', zIndex: 3 }}>
+                {CHIPS_HERO.map((c) => {
+                  const t = chipTone[c.tone];
+                  return (
+                    <span
+                      key={c.txt}
+                      className="why-chip"
+                      style={{
+                        alignSelf: c.side === 'left' ? 'flex-start' : 'flex-end',
+                        marginLeft: c.side === 'left' ? -6 : 0,
+                        marginRight: c.side === 'right' ? -6 : 0,
+                        '--rot': `${c.rot}deg`,
+                        transform: `rotate(${c.rot}deg)`,
+                        background: 'var(--bg)',
+                        border: `1px solid ${t.border}`,
+                        color: t.color,
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: 11,
+                        lineHeight: 1.45,
+                        letterSpacing: '0.02em',
+                        padding: '7px 11px',
+                        borderRadius: 7,
+                        maxWidth: 250,
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
+                      } as CSSProperties & { '--rot': string }}
+                    >
+                      {c.txt}
+                    </span>
+                  );
+                })}
+              </div>
               <p
                 style={{
-                  position: 'absolute', bottom: -14, left: 0, right: 0, textAlign: 'center',
-                  fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 12.5, color: C.dim, margin: 0,
+                  textAlign: 'center',
+                  fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 12.5, color: C.dim,
+                  margin: '16px 0 0',
                 }}
               >
                 Ce que la visite montre — et ce qu&apos;elle ne montre pas.
@@ -367,10 +368,14 @@ export default function PourquoiPage() {
         <section style={{ marginBottom: 72 }}>
           <span style={kicker()}>02 · La preuve par l&apos;exemple</span>
           <h2 style={h2}>Une même ville, trois projets, trois verdicts</h2>
-          <p style={{ ...body, margin: '0 0 24px' }}>
+          <p style={{ ...body, margin: '0 0 12px' }}>
             Prenez La Rochelle. Les faits sont les mêmes pour tout le monde : le climat qui vient,
             les risques documentés, la gare, les soins, les services. Mais le verdict change du
-            tout au tout selon le projet qui frappe à la porte.
+            tout au tout selon le foyer qui envisage d&apos;y vivre.
+          </p>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.06em', color: C.dim, margin: '0 0 20px' }}>
+            Exemple illustratif — les verdicts réels dépendent du projet complet et des données au
+            jour de la consultation.
           </p>
           <div className="why-demo-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
             {PROFILS_DEMO.map((d) => (
@@ -396,12 +401,8 @@ export default function PourquoiPage() {
               </div>
             ))}
           </div>
-          <p style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.05rem', color: C.text, margin: '24px 0 8px' }}>
+          <p style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.05rem', color: C.text, margin: '24px 0 0' }}>
             Les faits ne changent pas. Leur importance pour la&nbsp;décision,&nbsp;oui.
-          </p>
-          <p style={{ color: C.dim, fontSize: 12, lineHeight: 1.6, margin: 0 }}>
-            Exemple illustratif : les verdicts réels dépendent du projet complet et des données au
-            jour de la consultation.
           </p>
         </section>
 
@@ -490,7 +491,7 @@ export default function PourquoiPage() {
                   </strong>
                   <p style={{ fontSize: 13.5, color: C.muted, lineHeight: 1.65, margin: 0 }}>{a.constat}</p>
                 </div>
-                <p style={{ fontSize: 13.5, color: C.text, lineHeight: 1.65, margin: 0, paddingLeft: 16, borderLeft: `1px solid ${C.border}` }}>→ {a.reponse}</p>
+                <p className="why-asym-response" style={{ fontSize: 13.5, color: C.text, lineHeight: 1.65, margin: 0, paddingLeft: 16, borderLeft: `1px solid ${C.border}` }}>→ {a.reponse}</p>
               </div>
             ))}
           </div>
@@ -589,10 +590,11 @@ export default function PourquoiPage() {
           <h2 style={h2}>Personne ne peut modifier un verdict</h2>
           <p style={body}>
             futur•e n&apos;est ni un palmarès, ni un score qui décide à votre place, ni un média
-            d&apos;alerte. C&apos;est un produit indépendant, sans publicité, financé par ses
-            utilisateurs. Un professionnel pourra un jour distribuer un dossier futur•e à ses
-            clients ; il ne pourra jamais en modifier la conclusion. Les conclusions ne varient
-            pas selon qui paie — c&apos;est précisément ce qui leur donne de la valeur.
+            d&apos;alerte. C&apos;est un produit indépendant, sans publicité, dont le modèle
+            repose sur ses utilisateurs. Aucun vendeur, annonceur ou intermédiaire ne peut influer
+            sur ses conclusions : même lorsqu&apos;un professionnel distribue un dossier futur•e,
+            il ne peut en modifier la conclusion. Les verdicts ne varient pas selon qui paie —
+            c&apos;est précisément ce qui leur donne de la valeur.
           </p>
           <div style={{ ...glass({ padding: 28, borderRadius: 12 }), marginTop: 24 }}>
             <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.8, margin: '0 0 14px' }}>

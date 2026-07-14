@@ -41,8 +41,17 @@ aujourd'hui (les labels qui **sont** des noms de communes, « près de Brest »)
 
 ## Global Constraints
 
-- **Aucun `?? 0`, aucun test de vérité implicite** sur une donnée nullable dans un évaluateur. Une
-  altitude de 0, un relief de 0, une distance à la côte de 0 sont des **observations valides**.
+- **Aucun `?? 0`, aucun test de vérité implicite** sur une donnée nullable, **nulle part** : ni dans un
+  évaluateur, ni dans un appelant, ni dans un test. Une altitude de 0, un relief de 0, une distance à la
+  côte de 0 sont des **observations valides**. Une commune sans coordonnées repliée sur `lat: 0, lon: 0`
+  atterrit dans le golfe de Guinée, et `nearPlace` en tire une incompatibilité **établie** sur un point
+  inventé. Le point d'évaluation est donc **nullable**, et `ModuleFacts.distanceCoteKm` aussi.
+- **UNE CONTRAINTE COMPOSITE N'EST SATISFAITE QUE SI TOUTES SES COMPOSANTES ONT ÉTÉ APPLIQUÉES.**
+  `zones`, `excludeZones` et `excludePlace` portent plusieurs libellés. « Quitter Lyon et
+  Saint-Jean-de-Machin », dont seul Lyon se résout, sur une commune hors de Lyon : rendre `satisfied`
+  serait affirmer une condition dont la moitié n'a jamais été testée. La doctrine, pour les trois :
+  *une composante résolue qui matche décide (`incompatible`) ; sinon, une composante non résolue bloque
+  (`unexamined`) ; sinon seulement, `satisfied`.*
 - **Un temps de trajet n'est jamais évalué par un haversine.** En lot 1, un seuil `travel_time` rend
   toujours `unexamined`.
 - **Un seuil que le produit s'est inventé (50 km, 30 km) ne produit jamais `satisfied` ni
@@ -61,7 +70,10 @@ aujourd'hui (les labels qui **sont** des noms de communes, « près de Brest »)
 
 | Fichier | Responsabilité |
 |---|---|
+| `src/lib/hard-constraint-schema.ts` **(créé)** | PUR, NEUTRE. Le type `HardConstraints` (extrait de `comparateur-vie.ts`) et `ZoneAnchor`. **Le noyau canonique ne doit pas dépendre du moteur qu'il remplace**, fût-ce en type. |
+| `src/lib/commune-attributes.ts` **(créé)** | PUR. `tailleVilleFrom()` et `communeAttributesFrom(entry, tailleVille)` : le mapping `IndexCommune → CommuneAttributes`. **Pur pour que les tests de parité puissent le traverser** (c'est une des vraies frontières où les deux moteurs divergeaient). |
 | `src/lib/hard-constraints.ts` **(créé)** | **Le noyau.** PUR. Types du contrat, `PRODUCT_CONVENTIONS`, `NormalizedHardConstraints`, les 11 évaluateurs, le registre exhaustif, `assessHardConstraints`. |
+| `src/lib/legacy-passes-hard.ts` **(créé, TEMPORAIRE)** | Copie **gelée et fidèle** de l'ancien `passesHard` (défauts compris : `?? 0`, `?? 30`, `?? 50`). Témoin de non-régression, utilisé par un seul test. **À supprimer à la fin du lot 2.** Il ne doit JAMAIS être « amélioré » : sa valeur est d'être l'ancien comportement, exactement. |
 | `src/lib/hard-constraints-resolve.ts` **(créé)** | PUR. Résolution d'un label en référence structurée, **au-dessus d'un `PlaceDirectory`** (interface). Aucun index chargé ici. |
 | `src/lib/hard-constraints-hydrate.ts` **(créé)** | PUR. `hydrateHardConstraints(hc, directory)` : l'état hydraté des contraintes. **Reçoit** l'annuaire, ne va jamais le chercher (sinon `comparateur-vie` → hydrate → `comparateur-vie` : un cycle). |
 | `src/lib/hard-constraints-filter.ts` **(créé)** | PUR. **L'adaptateur comparateur** : `HardFilterResult` (`eligible` / `complete`). |
@@ -71,6 +83,158 @@ aujourd'hui (les labels qui **sont** des noms de communes, « près de Brest »)
 | `src/lib/decision/materiality-rules.ts` **(modifié)** | Les 3 règles à contrainte dure (`ruleMer`, `ruleTaille`, `ruleDepartement`) **retirées**, remplacées par `HARD_CONSTRAINT_RULES`. |
 | `src/lib/decision/territory-facts.ts` **(modifié)** | Construit le `EvaluationContext` et le passe à `runRules`. |
 | `src/lib/parity.test.ts` **(créé)** | Les tests de parité, dans les deux directions. |
+
+---
+
+## Task 0 : Le schéma neutre, et le mapping pur
+
+Le noyau canonique **ne doit pas dépendre du moteur qu'il remplace**, même en type : `noyau →
+comparateur` est la mauvaise direction, et elle rendrait le noyau otage d'un module `server-only` de
+3 000 lignes. Et le mapping `IndexCommune → CommuneAttributes` doit être **pur**, parce que c'est l'une
+des frontières où les deux moteurs divergeaient : les tests de parité doivent pouvoir la traverser.
+
+**Files:**
+- Create: `src/lib/hard-constraint-schema.ts`
+- Create: `src/lib/commune-attributes.ts`
+- Create: `src/lib/commune-attributes.test.ts`
+- Modify: `src/lib/comparateur-vie.ts` (importe le schéma au lieu de le déclarer ; `tailleVille` délègue)
+
+**Interfaces:**
+- Produces: `HardConstraints`, `ZoneAnchor`, `ZoneStrength` (ré-exportés par `comparateur-vie` pour ne
+  rien casser), `tailleVilleFrom`, `communeAttributesFrom`, `IndexCommuneLike`.
+
+- [ ] **Step 1 : Extraire le schéma**
+
+Créer `src/lib/hard-constraint-schema.ts` : y **déplacer** le type `HardConstraints` de
+`comparateur-vie.ts:106-135` **tel quel** (avec ses commentaires). Puis, dans `comparateur-vie.ts`,
+remplacer la déclaration par une ré-exportation, pour qu'aucun appelant existant ne casse :
+
+```ts
+export type { HardConstraints } from "./hard-constraint-schema.ts";
+```
+
+`ZoneAnchor` / `ZoneStrength` restent dans `geo-zones.ts` (déjà pur) ; le schéma les importe.
+
+- [ ] **Step 2 : Écrire le test du mapping pur**
+
+Créer `src/lib/commune-attributes.test.ts` :
+
+```ts
+import test from "node:test";
+import assert from "node:assert/strict";
+import { tailleVilleFrom, communeAttributesFrom } from "./commune-attributes.ts";
+
+const UU_POP = new Map([["00760", 1_600_000]]);
+
+test("tailleVille : une commune DANS une unité urbaine porte la population de l'agglomération", () => {
+  assert.equal(tailleVilleFrom("00760", 8_000, UU_POP), 1_600_000);
+});
+
+test("tailleVille : une commune HORS unité urbaine est son propre bassin", () => {
+  assert.equal(tailleVilleFrom(null, 11_000, UU_POP), 11_000);
+});
+
+test("tailleVille : population absente -> null, JAMAIS zéro", () => {
+  assert.equal(tailleVilleFrom(null, null, UU_POP), null);
+});
+
+test("tailleVille : UU inconnue du cache -> repli sur la population communale", () => {
+  assert.equal(tailleVilleFrom("99999", 4_200, UU_POP), 4_200);
+});
+
+test("communeAttributesFrom : les absences restent des absences (aucun repli sur zéro)", () => {
+  const a = communeAttributesFrom(
+    { insee: "99999", nom: "Sans-Donnée", dept: "31", lat: 43, lon: 1,
+      population: 3_000, uu: null, altitude: null, relief_proximite: null, distance_cote_km: 90 },
+    3_000,
+  );
+  assert.equal(a.altitude, null);
+  assert.equal(a.reliefProximite, null);
+  assert.equal(a.tailleVille, 3_000);
+});
+```
+
+- [ ] **Step 3 : Lancer, vérifier l'échec**
+
+Run: `node --test src/lib/commune-attributes.test.ts` → FAIL, module introuvable.
+
+- [ ] **Step 4 : Implémenter**
+
+Créer `src/lib/commune-attributes.ts` :
+
+```ts
+// Le mapping index -> attributs, PUR. Il est pur pour une raison précise : c'est l'une des frontières où
+// les deux moteurs divergeaient (le comparateur lisait tailleVille, le dossier la population communale).
+// Les tests de parité doivent pouvoir la TRAVERSER, pas la contourner.
+import type { CommuneAttributes } from "./hard-constraints.ts";
+
+// La forme minimale d'une entrée d'index. On ne dépend pas d'IndexCommune (server-only) : on décrit ce
+// dont on a besoin.
+export type IndexCommuneLike = {
+  insee: string; nom: string; dept: string;
+  lat: number; lon: number;
+  population?: number | null;
+  uu?: string | null;
+  altitude?: number | null;
+  relief_proximite?: number | null;
+  distance_cote_km: number;
+};
+
+// LA DOCTRINE DE LA TAILLE (chantier C) : une commune dans une unité urbaine porte la taille de son
+// agglomération ; une commune hors UU est son propre bassin. Population absente -> null, jamais 0 :
+// une commune sans population n'est pas une commune vide.
+export function tailleVilleFrom(
+  uu: string | null | undefined, population: number | null | undefined, uuPop: Map<string, number>,
+): number | null {
+  if (uu) {
+    const p = uuPop.get(uu);
+    if (p != null) return p;
+  }
+  return population ?? null;
+}
+
+export function communeAttributesFrom(c: IndexCommuneLike, tailleVille: number | null): CommuneAttributes {
+  return {
+    insee: c.insee, nom: c.nom, dept: c.dept,
+    lat: c.lat, lon: c.lon,
+    population: c.population ?? null,
+    tailleVille,
+    uu: c.uu ?? null,
+    altitude: c.altitude ?? null,
+    reliefProximite: c.relief_proximite ?? null,
+    distanceCoteKm: c.distance_cote_km,
+  };
+}
+```
+
+Dans `comparateur-vie.ts`, `tailleVille` **délègue** (une seule doctrine, un seul code) :
+
+```ts
+import { tailleVilleFrom, communeAttributesFrom } from "./commune-attributes.ts";
+
+function tailleVille(c: IndexCommune): number | null {
+  return tailleVilleFrom(c.uu, c.population, uuPopCache ?? new Map());
+}
+```
+
+- [ ] **Step 5 : Vérifier**
+
+Run: `node --test src/lib/commune-attributes.test.ts` → PASS (5 tests).
+Run: `npx tsc --noEmit` → 0. (`CommuneAttributes` n'existe pas encore : cette étape se termine **après**
+la Task 1. Enchaîner Task 1 avant de compiler, ou déclarer `CommuneAttributes` d'abord.)
+
+- [ ] **Step 6 : Commit** (après Task 1, quand le typecheck passe)
+
+```bash
+git add src/lib/hard-constraint-schema.ts src/lib/commune-attributes.ts src/lib/commune-attributes.test.ts src/lib/comparateur-vie.ts
+git commit -m "refactor: le schéma des contraintes sort du moteur, le mapping devient pur
+
+Le noyau canonique ne peut pas dépendre en type du module server-only de 3 000
+lignes qu'il remplace : la direction serait mauvaise, et le noyau otage. Et le
+mapping index -> attributs devient pur parce que c'est l'une des frontières où
+les deux moteurs divergeaient : les tests de parité doivent la traverser, pas la
+contourner."
+```
 
 ---
 
@@ -125,12 +289,13 @@ export function normalized(over: Partial<NormalizedHardConstraints> = {}): Norma
 }
 
 export function ctx(over: Partial<NormalizedHardConstraints> = {}, c = commune()): EvaluationContext {
-  return {
-    constraints: normalized(over),
-    point: { lat: c.lat!, lon: c.lon!, grain: "commune_reference", source: "commune_centroid",
-             label: `le point de référence de ${c.nom}` },
-    conventionsVersion: "hc-conv-1",
-  };
+  // Le point est NULLABLE. Une commune sans coordonnées ne se replie pas sur (0, 0) : ce point est dans
+  // le golfe de Guinée, et nearPlace en tirerait une incompatibilité ÉTABLIE sur une donnée inventée.
+  const point = c.lat != null && c.lon != null
+    ? { lat: c.lat, lon: c.lon, grain: "commune_reference" as const, source: "commune_centroid" as const,
+        label: `le point de référence de ${c.nom}` }
+    : null;
+  return { constraints: normalized(over), point, conventionsVersion: "hc-conv-1" };
 }
 
 test("departements : non déclaré -> not_declared (jamais unexamined)", () => {
@@ -184,8 +349,8 @@ Créer `src/lib/hard-constraints.ts` :
 // pour « nous ne connaissons pas son altitude ». Le dossier ne pouvait donc rien en faire.
 //
 // Ce noyau ne connaît PAS la présentation : ni EvidenceRef, ni materialityTier, ni factId. Il expose des
-// clés de provenance (evidenceKeys), que chaque moteur habille à sa façon.
-import type { HardConstraints } from "./comparateur-vie.ts"; // TYPE SEULEMENT (server-only)
+// clés de provenance (evidenceKeys), que chaque moteur habille à sa façon. Et il ne dépend PAS du moteur
+// qu'il remplace : le schéma des contraintes vit dans un module neutre (hard-constraint-schema.ts).
 
 export type HardConstraintKey =
   | "departements" | "zones" | "excludeZones" | "montagne" | "reliefProche"
@@ -297,10 +462,15 @@ import type {
 
 // L'état HYDRATÉ des contraintes : ce que le lecteur a déclaré, plus ce que la résolution a trouvé.
 // `null` (ou `false`, ou `[]`) = NON DÉCLARÉE.
+//
+// LES CONTRAINTES COMPOSITES GARDENT LEURS ABSENCES (`unresolvedLabels`). Sans ce champ, un libellé que
+// la résolution ne reconnaît pas DISPARAÎT de l'état hydraté, et la contrainte devient soit
+// « non déclarée », soit « satisfaite », alors que la moitié n'en a jamais été testée. C'est le
+// mensonge le plus discret de tout ce chantier : rien, à l'écran, ne le trahirait.
 export type NormalizedHardConstraints = {
   departements: string[] | null;
-  zones: { hardDepartements: Set<string>; labels: string[] } | null;
-  excludeZones: { departements: Set<string>; labels: string[] } | null;
+  zones: { hardDepartements: Set<string>; labels: string[]; unresolvedLabels: string[] } | null;
+  excludeZones: { departements: Set<string>; labels: string[]; unresolvedLabels: string[] } | null;
   montagne: boolean;      // seulement strength === "hard"
   reliefProche: boolean;  // seulement strength === "hard"
   nearSea: { threshold: PlaceThreshold | null } | null;
@@ -313,7 +483,10 @@ export type NormalizedHardConstraints = {
 
 export type EvaluationContext = {
   constraints: NormalizedHardConstraints;
-  point: EvaluationPoint;
+  // NULLABLE. Une commune sans coordonnées n'est pas une commune à (0, 0) : ce point est dans le golfe de
+  // Guinée, et nearPlace en tirerait une incompatibilité ÉTABLIE sur une donnée inventée. Sans point,
+  // les contraintes qui en dépendent rendent unexamined(missing_data).
+  point: EvaluationPoint | null;
   conventionsVersion: string;
 };
 
@@ -376,7 +549,11 @@ export type ResolvedPlaceReference =
 
 export type ResolvedUrbanAreaReference =
   | { status: "resolved"; originalLabel: string; canonicalLabel: string;
-      referenceCommuneInsee: string; urbanUnitCode: string | null; normalizedTerritoryCode: string;
+      // NULLABLE : la table PLM connaît l'unité urbaine de Paris / Lyon / Marseille sans passer par une
+      // commune de référence. Un objet `resolved` ne doit jamais porter un identifiant requis VIDE (`""`
+      // se compare, se sérialise et se log comme une valeur, et personne ne verra qu'elle est absente).
+      referenceCommuneInsee: string | null;
+      urbanUnitCode: string | null; normalizedTerritoryCode: string;
       source: "commune_index" | "plm_table"; meta: ResolutionMetadata }
   | { status: "unresolved"; originalLabel: string; reason: "no_result"; meta: ResolutionMetadata };
 
@@ -429,37 +606,72 @@ Ajouter à `src/lib/hard-constraints.test.ts` :
 ```ts
 import { evaluateZones, evaluateExcludeZones } from "./hard-constraints.ts";
 
+const zone = (depts: string[], labels: string[], unresolvedLabels: string[] = []) =>
+  ({ hardDepartements: new Set(depts), labels, unresolvedLabels });
+const exZone = (depts: string[], labels: string[], unresolvedLabels: string[] = []) =>
+  ({ departements: new Set(depts), labels, unresolvedLabels });
+
 test("zones : non déclarée -> not_declared", () => {
   assert.equal(evaluateZones(ctx(), commune()).status, "not_declared");
 });
 
 test("zones : le département est dans le périmètre dur -> satisfied", () => {
-  const a = evaluateZones(ctx({ zones: { hardDepartements: new Set(["31", "81"]), labels: ["le Sud-Ouest"] } }), commune());
-  assert.equal(a.status, "satisfied");
+  assert.equal(evaluateZones(ctx({ zones: zone(["31", "81"], ["le Sud-Ouest"]) }), commune()).status, "satisfied");
 });
 
 test("zones : hors du périmètre dur -> incompatible, et le périmètre est NOMMÉ", () => {
-  const a = evaluateZones(ctx({ zones: { hardDepartements: new Set(["29", "22"]), labels: ["la Bretagne"] } }), commune());
+  const a = evaluateZones(ctx({ zones: zone(["29", "22"], ["la Bretagne"]) }), commune());
   assert.ok(a.status === "incompatible");
   assert.match(a.statement, /Bretagne/);
-  assert.equal(a.topic, "la situation de Toulouse dans le périmètre visé");
+  assert.equal(a.topic, "la situation géographique de Toulouse");
 });
 
 test("zones : dept absent -> unexamined(missing_data)", () => {
-  const a = evaluateZones(ctx({ zones: { hardDepartements: new Set(["31"]), labels: ["le Sud-Ouest"] } }), commune({ dept: null }));
+  const a = evaluateZones(ctx({ zones: zone(["31"], ["le Sud-Ouest"]) }), commune({ dept: null }));
   assert.ok(a.status === "unexamined");
   assert.equal(a.reason, "missing_data");
 });
 
+test("zones : DANS le périmètre résolu, mais une ancre dure N'A PAS été reconnue -> unexamined", () => {
+  // Les ancres dures s'INTERSECTENT : celle qu'on n'a pas su résoudre ne pourrait que RÉTRÉCIR le
+  // périmètre. Dire « satisfied » sur un périmètre incomplet, c'est affirmer une condition qu'on n'a
+  // pas testée. Elle est plus large que la vraie : elle ne peut pas prouver l'appartenance.
+  const a = evaluateZones(ctx({ zones: zone(["31", "81"], ["le Sud-Ouest"], ["pays_basque_interieur"]) }), commune());
+  assert.ok(a.status === "unexamined");
+  assert.equal(a.reason, "unresolved_reference");
+});
+
+test("zones : HORS du périmètre résolu, même avec une ancre non reconnue -> incompatible (c'est SÛR)", () => {
+  // Intersecter davantage ne peut que rétrécir : une commune déjà dehors ne peut pas rentrer.
+  const a = evaluateZones(ctx({ zones: zone(["29"], ["la Bretagne"], ["zone_inconnue"]) }), commune());
+  assert.equal(a.status, "incompatible");
+});
+
+test("zones : AUCUNE ancre dure reconnue -> unexamined, jamais not_declared", () => {
+  const a = evaluateZones(ctx({ zones: zone([], [], ["zone_inconnue"]) }), commune());
+  assert.ok(a.status === "unexamined");
+  assert.equal(a.reason, "unresolved_reference");
+});
+
 test("excludeZones : le département est exclu -> incompatible", () => {
-  const a = evaluateExcludeZones(ctx({ excludeZones: { departements: new Set(["31"]), labels: ["l'Occitanie"] } }), commune());
+  const a = evaluateExcludeZones(ctx({ excludeZones: exZone(["31"], ["l'Occitanie"]) }), commune());
   assert.ok(a.status === "incompatible");
   assert.match(a.statement, /Occitanie/);
 });
 
 test("excludeZones : hors des zones exclues -> satisfied", () => {
-  const a = evaluateExcludeZones(ctx({ excludeZones: { departements: new Set(["75"]), labels: ["Paris"] } }), commune());
-  assert.equal(a.status, "satisfied");
+  assert.equal(evaluateExcludeZones(ctx({ excludeZones: exZone(["75"], ["Paris"]) }), commune()).status, "satisfied");
+});
+
+test("excludeZones : hors des exclusions RÉSOLUES, mais une exclusion n'a pas été reconnue -> unexamined", () => {
+  const a = evaluateExcludeZones(ctx({ excludeZones: exZone(["75"], ["Paris"], ["zone_inconnue"]) }), commune());
+  assert.ok(a.status === "unexamined");
+  assert.equal(a.reason, "unresolved_reference");
+});
+
+test("excludeZones : DANS une exclusion résolue -> incompatible, même s'il reste une exclusion inconnue", () => {
+  const a = evaluateExcludeZones(ctx({ excludeZones: exZone(["31"], ["l'Occitanie"], ["zone_inconnue"]) }), commune());
+  assert.equal(a.status, "incompatible");
 });
 ```
 
@@ -479,51 +691,87 @@ function joinFr(items: string[]): string {
   return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
 }
 
+// LE TOPIC A UNE LIMITE DURE : assertFactValid JETTE au-delà de 70 caractères. Un topic qui compose le
+// nom de la commune ET celui d'un lieu de référence la franchit sans prévenir :
+//   « la taille de Saint-Rémy-en-Bouzemont-Saint-Genest-et-Isson face à Bordeaux » = 72 caractères.
+// Le dossier tomberait EN PRODUCTION, sur ce lecteur-là, et sur aucun autre. On donne donc au noyau une
+// forme courte de repli : le sujet reste juste, il perd seulement le nom qu'on peut se permettre de
+// perdre (la commune est déjà nommée partout ailleurs dans le dossier).
+const TOPIC_MAX = 70;
+function topicFit(long: string, short: string): string {
+  return long.length <= TOPIC_MAX ? long : short;
+}
+
+// LA DOCTRINE DES CONTRAINTES COMPOSITES, appliquée aux zones d'INCLUSION.
+//
+// Les ancres dures s'INTERSECTENT (« le Sud-Ouest ET la montagne »). Une ancre que la table ne reconnaît
+// pas ne peut que RÉTRÉCIR le périmètre : le périmètre résolu est donc TROP LARGE.
+//   - la commune est DEHORS du périmètre résolu -> incompatible, et c'est SÛR (rétrécir ne la fera pas
+//     rentrer) ;
+//   - la commune est DEDANS, mais une ancre manque -> on ne peut RIEN affirmer : unexamined.
+// Rendre `satisfied` ici serait affirmer une appartenance à un périmètre qu'on n'a pas fini de calculer.
 export function evaluateZones(
   ctx: EvaluationContext, c: CommuneAttributes,
 ): HardConstraintAssessment<"zones"> {
   const z = ctx.constraints.zones;
-  if (z == null || z.hardDepartements.size === 0) return { key: "zones", status: "not_declared" };
+  if (z == null) return { key: "zones", status: "not_declared" };
   if (c.dept == null) return { key: "zones", status: "unexamined", reason: "missing_data" };
 
-  const perimetre = joinFr(z.labels);
-  const observedValue: ConstraintValue = { kind: "department", value: c.dept };
-  const expectedValue: ConstraintValue = { kind: "departments", value: [...z.hardDepartements] };
-  const observedLabel = `département ${c.dept}`;
-  const expectedLabel = perimetre;
-  const evidenceKeys = ["commune.dept", "project.hardConstraints.zones"];
-
-  if (z.hardDepartements.has(c.dept)) {
-    return { key: "zones", status: "satisfied", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys };
+  const dedans = z.hardDepartements.size > 0 && z.hardDepartements.has(c.dept);
+  if (!dedans && z.hardDepartements.size > 0) {
+    const perimetre = joinFr(z.labels);
+    return {
+      key: "zones", status: "incompatible",
+      observedValue: { kind: "department", value: c.dept },
+      expectedValue: { kind: "departments", value: [...z.hardDepartements] },
+      observedLabel: `département ${c.dept}`, expectedLabel: perimetre,
+      evidenceKeys: ["commune.dept", "project.hardConstraints.zones"],
+      topic: topicFit(`la situation géographique de ${c.nom}`, "la situation géographique"),
+      statement: `Cette commune est hors de ${perimetre}, le périmètre que vous avez posé comme condition.`,
+    };
+  }
+  if (z.unresolvedLabels.length > 0) {
+    return { key: "zones", status: "unexamined", reason: "unresolved_reference", detail: z.unresolvedLabels.join(", ") };
   }
   return {
-    key: "zones", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: `la situation de ${c.nom} dans le périmètre visé`,
-    statement: `Cette commune est hors de ${perimetre}, le périmètre que vous avez posé comme condition.`,
+    key: "zones", status: "satisfied",
+    observedValue: { kind: "department", value: c.dept },
+    expectedValue: { kind: "departments", value: [...z.hardDepartements] },
+    observedLabel: `département ${c.dept}`, expectedLabel: joinFr(z.labels),
+    evidenceKeys: ["commune.dept", "project.hardConstraints.zones"],
   };
 }
 
+// Zones d'EXCLUSION : une UNION. Une exclusion non reconnue ne peut qu'AJOUTER des départements exclus.
+//   - la commune est DANS une exclusion résolue -> incompatible, et c'est SÛR ;
+//   - elle est dehors, mais une exclusion manque -> unexamined (celle qui manque pourrait la viser).
 export function evaluateExcludeZones(
   ctx: EvaluationContext, c: CommuneAttributes,
 ): HardConstraintAssessment<"excludeZones"> {
   const z = ctx.constraints.excludeZones;
-  if (z == null || z.departements.size === 0) return { key: "excludeZones", status: "not_declared" };
+  if (z == null) return { key: "excludeZones", status: "not_declared" };
   if (c.dept == null) return { key: "excludeZones", status: "unexamined", reason: "missing_data" };
 
-  const zonesLabel = joinFr(z.labels);
+  const evidenceKeys = ["commune.dept", "project.hardConstraints.excludeZones"];
   const observedValue: ConstraintValue = { kind: "department", value: c.dept };
   const expectedValue: ConstraintValue = { kind: "departments", value: [...z.departements] };
-  const evidenceKeys = ["commune.dept", "project.hardConstraints.excludeZones"];
   const observedLabel = `département ${c.dept}`;
-  const expectedLabel = zonesLabel;
 
-  if (!z.departements.has(c.dept)) {
-    return { key: "excludeZones", status: "satisfied", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys };
+  if (z.departements.has(c.dept)) {
+    const zonesLabel = joinFr(z.labels);
+    return {
+      key: "excludeZones", status: "incompatible", observedValue, expectedValue, observedLabel,
+      expectedLabel: `hors de ${zonesLabel}`, evidenceKeys,
+      topic: topicFit(`la zone où se situe ${c.nom}`, "la zone où se situe cette commune"),
+      statement: `Cette commune se trouve dans ${zonesLabel}, que vous avez écarté de votre recherche.`,
+    };
+  }
+  if (z.unresolvedLabels.length > 0) {
+    return { key: "excludeZones", status: "unexamined", reason: "unresolved_reference", detail: z.unresolvedLabels.join(", ") };
   }
   return {
-    key: "excludeZones", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: `la situation de ${c.nom} dans une zone que vous écartez`,
-    statement: `Cette commune se trouve dans ${zonesLabel}, que vous avez écarté de votre recherche.`,
+    key: "excludeZones", status: "satisfied", observedValue, expectedValue, observedLabel,
+    expectedLabel: `hors de ${joinFr(z.labels)}`, evidenceKeys,
   };
 }
 ```
@@ -678,8 +926,10 @@ export function evaluateReliefProche(
   }
   return {
     key: "reliefProche", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: `la proximité du relief autour de ${c.nom}`,
-    statement: "Aucun massif n'est à portée de cette commune, alors que vous avez posé la proximité du relief comme condition.",
+    topic: `le relief autour de ${c.nom}`,
+    // « Aucun massif n'est à portée » est plus catégorique que la donnée : à 49/100, c'est faux. On dit
+    // ce qu'on mesure, et le seuil retenu. Moins séduisant, opposable.
+    statement: `Autour de cette commune, le relief reste sous le seuil retenu pour considérer qu'un massif est à portée (${Math.round(c.reliefProximite)}/100, seuil ${PRODUCT_CONVENTIONS.reliefProcheMinScore}).`,
   };
 }
 ```
@@ -799,7 +1049,9 @@ export function evaluateNearSea(
   const observedValue: ConstraintValue = { kind: "distance_km", value: c.distanceCoteKm };
   const expectedValue: ConstraintValue = { kind: "distance_km", value: max };
   const observedLabel = `${km} km`;
-  const expectedLabel = `moins de ${max} km`;
+  // « moins de 30 km » alors que le moteur accepte `<= 30` : à exactement 30 km, la commune passe et la
+  // phrase dit le contraire. On écrit l'opérateur qu'on applique.
+  const expectedLabel = `au plus ${max} km`;
   const evidenceKeys = ["commune.distanceCoteKm", "project.hardConstraints.nearSea"];
 
   if (c.distanceCoteKm <= max) {
@@ -807,7 +1059,7 @@ export function evaluateNearSea(
   }
   return {
     key: "nearSea", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: `la distance de ${c.nom} au littoral`,
+    topic: topicFit(`la distance de ${c.nom} au littoral`, "la distance au littoral"),
     statement: `Cette commune est à ${km} km du littoral, au-delà de la limite de ${max} km que vous avez posée.`,
   };
 }
@@ -831,7 +1083,7 @@ export function evaluateExcludeSea(
   }
   return {
     key: "excludeSea", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: `la proximité de ${c.nom} au littoral`,
+    topic: topicFit(`la proximité de ${c.nom} au littoral`, "la proximité du littoral"),
     statement: `Cette commune est à ${km} km de la côte. Votre souhait de ne pas habiter près du littoral est ici entendu comme une distance d'au moins ${min} km.`,
   };
 }
@@ -935,10 +1187,12 @@ export function evaluateCommuneSize(
   const observedValue: ConstraintValue = { kind: "population", value: t, unit };
   const expectedValue: ConstraintValue = { kind: "population_range", min: cs.min, max: cs.max, unit: "urban_unit" };
   const observedLabel = `${fmt(t)} hab.`;
+  // Bornes INCLUSIVES dans le moteur (`t <= max`, `t >= min`) : « moins de 25 000 habitants » ment à
+  // exactement 25 000. On écrit l'opérateur qu'on applique.
   const expectedLabel =
     cs.min != null && cs.max != null ? `entre ${fmt(cs.min)} et ${fmt(cs.max)} habitants`
-    : cs.max != null ? `moins de ${fmt(cs.max)} habitants`
-    : `plus de ${fmt(cs.min!)} habitants`;
+    : cs.max != null ? `au plus ${fmt(cs.max)} habitants`
+    : `au moins ${fmt(cs.min!)} habitants`;
   const evidenceKeys = ["commune.tailleVille", "project.hardConstraints.communeSize"];
 
   const over = cs.max != null && t > cs.max;
@@ -955,7 +1209,9 @@ export function evaluateCommuneSize(
   const seuil = over ? `au-dessus de ${fmt(cs.max!)}` : `en dessous de ${fmt(cs.min!)}`;
   return {
     key: "communeSize", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: c.uu ? `la taille de l'agglomération de ${c.nom}` : `la taille de ${c.nom}`,
+    topic: c.uu
+      ? topicFit(`la taille de l'agglomération de ${c.nom}`, "la taille de l'agglomération")
+      : topicFit(`la taille de ${c.nom}`, "la taille de la commune"),
     statement: `${sujet} ${fmt(t)} habitants, ${seuil} de la taille que vous avez posée.`,
   };
 }
@@ -1131,9 +1387,14 @@ export function resolveUrbanArea(
   const key = normalizeName(label);
   const plm = dir.plmByName(key);
   if (plm) {
+    // Paris / Lyon / Marseille : la table PLM donne l'unité urbaine PARENTE (les arrondissements ne sont
+    // pas des communes ordinaires). On récupère quand même l'INSEE de la ville quand l'index la connaît,
+    // plutôt que d'écrire une chaîne vide dans un champ requis.
+    const ville = dir.byName(key);
     return {
-      status: "resolved", originalLabel: label, canonicalLabel: label,
-      referenceCommuneInsee: "", urbanUnitCode: plm.uu, normalizedTerritoryCode: `uu:${plm.uu}`,
+      status: "resolved", originalLabel: label, canonicalLabel: ville?.nom ?? label,
+      referenceCommuneInsee: ville?.insee ?? null,
+      urbanUnitCode: plm.uu, normalizedTerritoryCode: `uu:${plm.uu}`,
       source: "plm_table", meta: m,
     };
   }
@@ -1308,6 +1569,49 @@ test("excludePlace : hors de l'agglomération -> satisfied", () => {
   assert.equal(a.status, "satisfied");
 });
 
+test("excludePlace : « quitter Lyon ET Saint-Jean », dont un seul se résout -> unexamined, JAMAIS satisfied", () => {
+  // Le mensonge le plus discret du chantier : la commune n'est pas dans Lyon, donc on serait tenté de
+  // dire « condition respectée ». Mais la moitié de la condition n'a jamais été testée.
+  const lyon: ResolvedUrbanAreaReference = {
+    status: "resolved", originalLabel: "Lyon", canonicalLabel: "Lyon", referenceCommuneInsee: "69123",
+    urbanUnitCode: "00760", normalizedTerritoryCode: "uu:00760", source: "plm_table", meta: META,
+  };
+  const inconnue: ResolvedUrbanAreaReference = {
+    status: "unresolved", originalLabel: "Saint-Jean-de-Machin", reason: "no_result", meta: META,
+  };
+  const a = evaluateExcludePlace(
+    ctx({ excludePlace: [{ label: "Lyon", reference: lyon }, { label: "Saint-Jean-de-Machin", reference: inconnue }] }),
+    commune(),
+  );
+  assert.ok(a.status === "unexamined");
+  assert.equal(a.reason, "unresolved_reference");
+  assert.match(a.detail!, /Saint-Jean/);
+});
+
+test("excludePlace : DANS une ville résolue -> incompatible, même s'il reste une ville non résolue", () => {
+  const lyon: ResolvedUrbanAreaReference = {
+    status: "resolved", originalLabel: "Lyon", canonicalLabel: "Lyon", referenceCommuneInsee: "69123",
+    urbanUnitCode: "00760", normalizedTerritoryCode: "uu:00760", source: "plm_table", meta: META,
+  };
+  const inconnue: ResolvedUrbanAreaReference = { status: "unresolved", originalLabel: "X", reason: "no_result", meta: META };
+  const dansLyon = commune({ nom: "Villeurbanne", insee: "69266", uu: "00760" });
+  const a = evaluateExcludePlace(
+    ctx({ excludePlace: [{ label: "Lyon", reference: lyon }, { label: "X", reference: inconnue }] }, dansLyon),
+    dansLyon,
+  );
+  assert.equal(a.status, "incompatible"); // c'est SÛR : aucune résolution ne l'en ferait sortir
+});
+
+test("nearPlace : commune SANS coordonnées -> unexamined(missing_data), jamais un point à (0, 0)", () => {
+  const sansCoords = commune({ lat: null, lon: null });
+  const a = evaluateNearPlace(
+    ctx({ nearPlace: { label: "Brest", threshold: { metric: "distance", maxKm: 50, source: "user" }, reference: BREST_REF } }, sansCoords),
+    sansCoords,
+  );
+  assert.ok(a.status === "unexamined");
+  assert.equal(a.reason, "missing_data");
+});
+
 test("sizeRelativeTo : plus petit que la référence -> satisfied, et la comparaison est d'AGGLO à AGGLO", () => {
   const ref: ResolvedSizeReference = {
     status: "resolved", originalLabel: "Bordeaux", canonicalLabel: "Bordeaux", urbanUnitCode: "33701",
@@ -1388,60 +1692,73 @@ export function evaluateNearPlace(
       detail: np.label,
     };
   }
+  // SANS POINT, PAS DE MESURE. Se replier sur (0, 0) placerait la commune dans le golfe de Guinée, et
+  // produirait une incompatibilité ÉTABLIE, avec sa carte et sa preuve, à partir d'une donnée inventée.
+  if (ctx.point == null) return { key: "nearPlace", status: "unexamined", reason: "missing_data" };
+
   const ref = np.reference;
   const km = haversineKm(ctx.point.lat, ctx.point.lon, ref.lat, ref.lon);
   const max = np.threshold.maxKm;
   const observedValue: ConstraintValue = { kind: "distance_km", value: km };
   const expectedValue: ConstraintValue = { kind: "distance_km", value: max };
   const observedLabel = `${Math.round(km)} km`;
-  const expectedLabel = `moins de ${max} km`;
+  const expectedLabel = `au plus ${max} km`; // le moteur applique `<=` : la phrase l'écrit
   const evidenceKeys = ["commune.lat", "commune.lon", "project.hardConstraints.nearPlace"];
 
   if (km <= max) {
     return { key: "nearPlace", status: "satisfied", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys };
   }
-  // LE GRAIN EST DIT. « à moins de 30 km » mesuré depuis le centre de la commune ne veut pas dire que
+  // LE GRAIN EST DIT. Une distance mesurée depuis le point de référence de la commune ne dit pas que
   // TOUTE la commune y est : la phrase le porte, elle ne le cache pas.
   return {
     key: "nearPlace", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: `la distance de ${c.nom} à ${ref.canonicalLabel}`,
+    topic: topicFit(`la distance de ${c.nom} à ${ref.canonicalLabel}`, `la distance à ${ref.canonicalLabel}`),
     statement: `${ctx.point.grain === "address" ? "Cette adresse" : `Le point de référence de ${c.nom}`} est à ${Math.round(km)} km de ${ref.canonicalLabel}, au-delà de la limite de ${max} km que vous avez posée.`,
   };
 }
 
+// LA DOCTRINE DES CONTRAINTES COMPOSITES, appliquée aux villes à quitter.
+//
+// « Quitter Lyon ET Saint-Jean-de-Machin », dont seul Lyon se résout, sur une commune hors de Lyon :
+// rendre `satisfied` affirmerait une condition dont la MOITIÉ n'a jamais été testée. Une ville résolue
+// qui matche décide (c'est SÛR) ; sinon, une ville non résolue bloque ; sinon seulement, satisfied.
 export function evaluateExcludePlace(
   ctx: EvaluationContext, c: CommuneAttributes,
 ): HardConstraintAssessment<"excludePlace"> {
   const list = ctx.constraints.excludePlace;
   if (list.length === 0) return { key: "excludePlace", status: "not_declared" };
 
-  const resolved = list.filter((e) => e.reference.status === "resolved");
-  if (resolved.length === 0) {
-    return { key: "excludePlace", status: "unexamined", reason: "unresolved_reference", detail: list.map((e) => e.label).join(", ") };
-  }
-
   const territoire = c.uu ? `uu:${c.uu}` : `insee:${c.insee}`;
   const evidenceKeys = ["commune.uu", "commune.insee", "project.hardConstraints.excludePlace"];
-  const villes = resolved.map((e) => e.label);
   const expectedValue: ConstraintValue = { kind: "boolean", value: false };
-  const expectedLabel = `hors de ${joinFr(villes)}`;
 
-  const hit = resolved.find((e) =>
+  const hit = list.find((e) =>
     e.reference.status === "resolved" && e.reference.normalizedTerritoryCode === territoire);
-
-  if (!hit) {
+  if (hit) {
     return {
-      key: "excludePlace", status: "satisfied",
-      observedValue: { kind: "boolean", value: false }, expectedValue,
-      observedLabel: `hors de ${joinFr(villes)}`, expectedLabel, evidenceKeys,
+      key: "excludePlace", status: "incompatible",
+      observedValue: { kind: "boolean", value: true }, expectedValue,
+      observedLabel: `dans l'agglomération de ${hit.label}`,
+      expectedLabel: `hors de ${joinFr(list.map((e) => e.label))}`,
+      evidenceKeys,
+      topic: topicFit(`l'agglomération de ${hit.label}`, "l'agglomération à quitter"),
+      statement: `Cette commune fait partie de l'agglomération de ${hit.label}, que vous avez posé comme condition de quitter.`,
+    };
+  }
+
+  const unresolved = list.filter((e) => e.reference.status !== "resolved");
+  if (unresolved.length > 0) {
+    return {
+      key: "excludePlace", status: "unexamined", reason: "unresolved_reference",
+      detail: unresolved.map((e) => e.label).join(", "),
     };
   }
   return {
-    key: "excludePlace", status: "incompatible",
-    observedValue: { kind: "boolean", value: true }, expectedValue,
-    observedLabel: `dans l'agglomération de ${hit.label}`, expectedLabel, evidenceKeys,
-    topic: `l'appartenance de ${c.nom} à l'agglomération de ${hit.label}`,
-    statement: `Cette commune fait partie de l'agglomération de ${hit.label}, que vous avez posé comme condition de quitter.`,
+    key: "excludePlace", status: "satisfied",
+    observedValue: { kind: "boolean", value: false }, expectedValue,
+    observedLabel: `hors de ${joinFr(list.map((e) => e.label))}`,
+    expectedLabel: `hors de ${joinFr(list.map((e) => e.label))}`,
+    evidenceKeys,
   };
 }
 
@@ -1469,10 +1786,13 @@ export function evaluateSizeRelativeTo(
   if (ok) {
     return { key: "sizeRelativeTo", status: "satisfied", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys };
   }
+  // Le SUJET suit la donnée : une commune hors unité urbaine n'est pas « une agglomération ». Même
+  // discipline que communeSize.
+  const sujet = c.uu ? "Cette agglomération compte" : "Cette commune compte";
   return {
     key: "sizeRelativeTo", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: `la taille de ${c.nom} au regard de ${ref.canonicalLabel}`,
-    statement: `Cette agglomération compte ${fmt(t)} habitants, ${s.direction === "smaller" ? "plus" : "moins"} que ${ref.canonicalLabel} (${fmt(ref.comparisonPopulation)} habitants en ${ref.populationYear}), alors que vous cherchez ${s.direction === "smaller" ? "plus petit" : "plus grand"}.`,
+    topic: topicFit(`la taille de ${c.nom} face à ${ref.canonicalLabel}`, `la taille face à ${ref.canonicalLabel}`),
+    statement: `${sujet} ${fmt(t)} habitants, ${s.direction === "smaller" ? "plus" : "moins"} que ${ref.canonicalLabel} (${fmt(ref.comparisonPopulation)} habitants en ${ref.populationYear}), alors que vous cherchez ${s.direction === "smaller" ? "plus petit" : "plus grand"}.`,
   };
 }
 
@@ -1626,6 +1946,23 @@ test("un lieu nommé non résolu reste dans l'état hydraté, pour être DÉCLAR
   const n = hydrateHardConstraints({ nearPlace: { label: "Gare Matabiau", maxKm: 30 } }, dir);
   assert.equal(n.nearPlace?.reference.status, "unresolved");
 });
+
+test("une ancre DURE que la table ne connaît pas ne DISPARAÎT pas : elle est conservée comme non résolue", () => {
+  const n = hydrateHardConstraints({ zones: [{ zone: "sud_ouest", strength: "hard" }, { zone: "zone_inventee", strength: "hard" }] }, dir);
+  assert.ok(n.zones);
+  assert.deepEqual(n.zones.unresolvedLabels, ["zone_inventee"]);
+  assert.ok(n.zones.hardDepartements.size > 0); // le Sud-Ouest, lui, a bien été résolu
+});
+
+test("une ancre SOUPLE inconnue ne rend PAS la contrainte dure non examinée (elle ne filtre pas)", () => {
+  const n = hydrateHardConstraints({ zones: [{ zone: "sud_ouest", strength: "hard" }, { zone: "zone_inventee", strength: "preferred" }] }, dir);
+  assert.deepEqual(n.zones?.unresolvedLabels, []);
+});
+
+test("une exclusion inconnue est conservée : sinon « pas dans cette zone » deviendrait satisfied à tort", () => {
+  const n = hydrateHardConstraints({ excludeZones: ["idf", "zone_inventee"] }, dir);
+  assert.deepEqual(n.excludeZones?.unresolvedLabels, ["zone_inventee"]);
+});
 ```
 
 - [ ] **Step 3 : Lancer, vérifier l'échec**
@@ -1644,10 +1981,10 @@ Créer `src/lib/hard-constraints-hydrate.ts` :
 // ELLE VIT AU-DESSUS DES DEUX MOTEURS. Ni le comparateur ni le dossier ne résolvent un label : ils
 // reçoivent le même objet résolu. Deux résolutions indépendantes peuvent diverger (un succès ici, un
 // échec là) ; une seule ne le peut pas.
-import { resolveZoneAnchors, resolveExclusions } from "./geo-zones.ts";
+import { resolveZoneAnchors, resolveExclusions, ZONE_TABLE } from "./geo-zones.ts";
 import { resolveNearPlace, resolveUrbanArea, resolveSizeReference, type PlaceDirectory } from "./hard-constraints-resolve.ts";
 import type { NormalizedHardConstraints, PlaceThreshold, SearchExplorationHint } from "./hard-constraints.ts";
-import type { HardConstraints } from "./comparateur-vie.ts"; // TYPE SEULEMENT (server-only)
+import type { HardConstraints } from "./hard-constraint-schema.ts";
 
 // LES RAYONS QUE LE PRODUIT S'EST INVENTÉS. Ils sortent du contrat dur : ils peuvent CADRER une
 // recherche, jamais ÉLIMINER une commune ni produire un verdict opposable au lecteur.
@@ -1684,13 +2021,24 @@ export function hydrateHardConstraints(
   // différents ne sont pas le même lieu.
   const input = { context: (c.departements ?? []).join(",") };
 
+  // LES ANCRES DURES QUE LA TABLE NE CONNAÎT PAS. `resolveZoneAnchors.unknown` ne dit pas la FORCE du
+  // jeton : une ancre souple inconnue ne doit pas rendre la contrainte dure non examinée. On les
+  // recalcule donc ici, en ne gardant que les dures. Sans ce champ, un jeton non reconnu DISPARAÎT, et
+  // la contrainte devient « non déclarée » ou « satisfaite » alors qu'elle n'a pas été testée.
+  const hardZoneAnchors = (c.zones ?? []).filter((z) => z?.strength === "hard");
+  const unresolvedHardZones = hardZoneAnchors.filter((z) => !ZONE_TABLE[z.zone]).map((z) => z.zone);
+
   return {
     departements: c.departements?.length ? c.departements : null,
-    zones: zone.hardDepartements && zone.hardDepartements.size > 0
-      ? { hardDepartements: zone.hardDepartements, labels: zone.applied.filter((a) => a.strength === "hard").map((a) => a.label) }
+    zones: hardZoneAnchors.length > 0
+      ? {
+          hardDepartements: zone.hardDepartements ?? new Set<string>(),
+          labels: zone.applied.filter((a) => a.strength === "hard").map((a) => a.label),
+          unresolvedLabels: unresolvedHardZones,
+        }
       : null,
-    excludeZones: excl.departements.size > 0
-      ? { departements: excl.departements, labels: excl.applied.map((a) => a.label) }
+    excludeZones: (c.excludeZones?.length ?? 0) > 0
+      ? { departements: excl.departements, labels: excl.applied.map((a) => a.label), unresolvedLabels: excl.unknown }
       : null,
     montagne: c.montagne?.strength === "hard",
     reliefProche: c.reliefProche?.strength === "hard",
@@ -1712,7 +2060,7 @@ export function hydrateHardConstraints(
 
 - [ ] **Step 5 : Lancer, vérifier le passage**
 
-Run: `node --test src/lib/hard-constraints-hydrate.test.ts` → PASS (6 tests).
+Run: `node --test src/lib/hard-constraints-hydrate.test.ts` → PASS (10 tests).
 Run: `npx tsc --noEmit` → 0.
 Run: `node --test src/lib/*.test.ts src/lib/decision/*.test.ts` → PASS.
 
@@ -1909,59 +2257,148 @@ L'hydratation se fait donc **dans `matchProjects` lui-même**, en tête, une seu
 communes. C'est le seul point au-dessus du filtre que traversent tous les appelants (`/match`,
 `/apercu`, `pack-decision`).
 
-- [ ] **Step 1 : Écrire le test de non-régression du filtre**
+- [ ] **Step 1 : Geler l'ANCIEN moteur, avant de le supprimer**
+
+Un test qui se contente d'affirmer quelques résultats du **nouveau** moteur ne prouve aucune
+non-régression : il ne compare rien. Il faut le **témoin**.
+
+Créer `src/lib/legacy-passes-hard.ts` : une **copie fidèle** de l'actuel `passesHard`
+(`comparateur-vie.ts:2135-2180`) **et de la résolution que `matchProjects` faisait en amont**
+(`:2584-2645`), rendue pure (elle reçoit les attributs et un annuaire), **défauts compris** :
+`(relief ?? 0)`, `nearSea.maxKm ?? 30`, `nearPlace.maxKm ?? 50`, la mutation de `communeSize` par
+`sizeRelativeTo`, et le fait de **sauter `nearPlace` quand le label ne résout pas**.
+
+```ts
+// TÉMOIN DE NON-RÉGRESSION, GELÉ. Copie fidèle de l'ancien passesHard + la résolution que matchProjects
+// faisait en amont. Il porte SES DÉFAUTS INTACTS (?? 0, ?? 30, ?? 50, nearPlace sauté en silence,
+// communeSize muté par sizeRelativeTo) : c'est toute sa valeur. Un seul test l'utilise.
+//
+// NE JAMAIS L'« AMÉLIORER ». Le jour où on le corrige, il cesse d'être un témoin.
+// À SUPPRIMER à la fin du lot 2, avec son test.
+import type { HardConstraints } from "./hard-constraint-schema.ts";
+import type { CommuneAttributes } from "./hard-constraints.ts";
+import type { PlaceDirectory } from "./hard-constraints-resolve.ts";
+import { resolveZoneAnchors, resolveExclusions } from "./geo-zones.ts";
+import { montagnosite, haversineKm } from "./hard-constraints.ts";
+import { normalizeName } from "./hard-constraints-resolve.ts";
+
+const POP_FLOOR = 1500;
+const RELIEF_PROCHE_HARD = 50;
+
+export function legacyPassesHard(c: CommuneAttributes, hcInput: HardConstraints, dir: PlaceDirectory): boolean {
+  const hc: HardConstraints = { ...hcInput }; // l'ancien code MUTAIT hc : on protège l'appelant
+
+  // ── la résolution que matchProjects faisait en amont ──
+  let placePoint: { lat: number; lon: number; maxKm: number } | null = null;
+  if (hc.nearPlace?.label) {
+    const hit = dir.byName(normalizeName(hc.nearPlace.label));
+    if (hit) placePoint = { lat: hit.lat, lon: hit.lon, maxKm: hc.nearPlace.maxKm ?? 50 };
+    // sinon : placePoint reste null, et la contrainte est SAUTÉE. C'est le défaut d'origine.
+  }
+  const excludeUU = new Set<string>();
+  const excludeInsee = new Set<string>();
+  for (const ep of hc.excludePlace ?? []) {
+    const plm = dir.plmByName(normalizeName(ep.label));
+    if (plm) { excludeUU.add(plm.uu); continue; }
+    const hit = dir.byName(normalizeName(ep.label));
+    if (!hit) continue;
+    if (hit.uu) excludeUU.add(hit.uu); else excludeInsee.add(hit.insee);
+  }
+  if (hc.sizeRelativeTo?.label) {
+    const key = normalizeName(hc.sizeRelativeTo.label);
+    const plm = dir.plmByName(key);
+    const hit = dir.byName(key);
+    const refPop = plm ? (dir.byName(key)?.tailleVille ?? null) : (hit?.tailleVille ?? null);
+    if (refPop != null) {
+      const cs = { ...(hc.communeSize ?? {}) };
+      if (hc.sizeRelativeTo.direction === "smaller") cs.max = Math.min(cs.max ?? Infinity, refPop - 1);
+      else cs.min = Math.max(cs.min ?? 0, refPop + 1);
+      hc.communeSize = cs;
+    }
+  }
+  const zone = resolveZoneAnchors(hc.zones);
+  const exclusion = resolveExclusions(hc.excludeZones);
+
+  // ── passesHard, à l'identique ──
+  if (c.population == null || c.population < POP_FLOOR) return false;
+  if (hc.departements?.length && (c.dept == null || !hc.departements.includes(c.dept))) return false;
+  if (zone.hardDepartements && (c.dept == null || !zone.hardDepartements.has(c.dept))) return false;
+  if (c.dept != null && exclusion.departements.has(c.dept)) return false;
+  if (c.uu && excludeUU.has(c.uu)) return false;
+  if (excludeInsee.has(c.insee)) return false;
+  if (hc.montagne?.strength === "hard") {
+    const m = montagnosite(c.altitude);
+    if (m == null || m < 50) return false;
+  }
+  if (hc.reliefProche?.strength === "hard") {
+    if ((c.reliefProximite ?? 0) < RELIEF_PROCHE_HARD) return false; // LE ?? 0 D'ORIGINE
+  }
+  if (hc.nearSea?.active && (c.distanceCoteKm ?? 0) > (hc.nearSea.maxKm ?? 30)) return false; // LE ?? 30
+  if (hc.excludeSea && (c.distanceCoteKm ?? 0) < 15) return false;
+  if (hc.communeSize) {
+    const t = c.tailleVille;
+    if (hc.communeSize.min != null && (t ?? 0) < hc.communeSize.min) return false;
+    if (hc.communeSize.max != null && (t ?? Infinity) > hc.communeSize.max) return false;
+  }
+  if (placePoint && c.lat != null && c.lon != null) {
+    if (haversineKm(c.lat, c.lon, placePoint.lat, placePoint.lon) > placePoint.maxKm) return false;
+  }
+  return true;
+}
+```
+
+- [ ] **Step 2 : Écrire la VRAIE non-régression (ancien contre nouveau, sur un corpus croisé)**
 
 Créer `src/lib/comparateur-hard-nonregression.test.ts` :
 
 ```ts
-// NON-RÉGRESSION DU FILTRE. Le nouvel adaptateur doit rendre le MÊME verdict d'éligibilité que l'ancien
-// passesHard, SAUF sur les cas où l'ancien comportement était précisément le défaut corrigé. Ces écarts
-// sont ÉNUMÉRÉS ici : un écart non listé est une régression.
+// NON-RÉGRESSION : l'ANCIEN moteur (témoin gelé) contre le NOUVEAU, sur tout le corpus croisé. Chaque
+// écart doit être ÉNUMÉRÉ ci-dessous. Un écart non listé est une régression, et le test tombe.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { assessHardConstraints, type CommuneAttributes, type NormalizedHardConstraints, type EvaluationContext } from "./hard-constraints.ts";
+import { assessHardConstraints, PRODUCT_CONVENTIONS_VERSION, type CommuneAttributes, type EvaluationContext } from "./hard-constraints.ts";
 import { hardFilter } from "./hard-constraints-filter.ts";
+import { hydrateHardConstraints } from "./hard-constraints-hydrate.ts";
+import { legacyPassesHard } from "./legacy-passes-hard.ts";
+import { CORPUS, PROJETS, DIRECTORY, POP_FLOOR } from "./__fixtures__/hard-corpus.ts";
 
-function ctxOf(c: CommuneAttributes, over: Partial<NormalizedHardConstraints>): EvaluationContext {
-  return {
-    constraints: {
-      departements: null, zones: null, excludeZones: null, montagne: false, reliefProche: false,
-      nearSea: null, excludeSea: false, communeSize: null, nearPlace: null, excludePlace: [], sizeRelativeTo: null,
-      ...over,
-    },
-    point: { lat: c.lat!, lon: c.lon!, grain: "commune_reference", source: "commune_centroid", label: c.nom },
-    conventionsVersion: "hc-conv-1",
-  };
-}
-const TLS: CommuneAttributes = {
-  insee: "31555", nom: "Toulouse", dept: "31", lat: 43.6045, lon: 1.4442,
-  population: 493_465, tailleVille: 1_060_000, uu: "31701", altitude: 146, reliefProximite: 0, distanceCoteKm: 150,
+// Les écarts ASSUMÉS, un par un. Clé : `${commune}/${projet}`.
+const ECARTS_ASSUMES: Record<string, string> = {
+  "Toulouse/mer sans distance": "l'ancien filtrait à 30 km inventés ; le nouveau ne filtre plus, et le dit",
+  "Briançon/mer sans distance": "idem",
+  "Brest/mer sans distance": "idem (ici l'ancien ACCEPTAIT, le nouveau aussi : pas d'écart d'éligibilité)",
+  "Toulouse/près d'un lieu non résolu": "l'ancien SAUTAIT la contrainte ; le nouveau ne filtre pas non plus, mais complete=false",
+  "Sans-Donnée/relief proche": "aucun écart : les deux excluent (le nouveau par unexamined(missing_data))",
 };
 
-test("non-régression : département hors liste -> exclue, comme avant", () => {
-  assert.equal(hardFilter(assessHardConstraints(ctxOf(TLS, { departements: ["33"] }), TLS)).eligible, false);
-});
-
-test("non-régression : relief absent -> exclue, comme avant (la prudence du filtre est préservée)", () => {
-  const sansRelief = { ...TLS, reliefProximite: null };
-  assert.equal(hardFilter(assessHardConstraints(ctxOf(sansRelief, { reliefProche: true }), sansRelief)).eligible, false);
-});
-
-test("non-régression : taille d'agglomération hors bornes -> exclue, comme avant", () => {
-  assert.equal(hardFilter(assessHardConstraints(ctxOf(TLS, { communeSize: { min: null, max: 25_000 } }), TLS)).eligible, false);
-});
-
-test("ÉCART ASSUMÉ 1 : nearSea sans distance ne filtre plus à 30 km. La commune reste éligible, complete=false.", () => {
-  const r = hardFilter(assessHardConstraints(ctxOf(TLS, { nearSea: { threshold: null } }), TLS));
-  assert.equal(r.eligible, true);   // avant : exclue (150 km > 30 km inventés)
-  assert.equal(r.complete, false);  // et le lecteur l'apprend
+test("NON-RÉGRESSION : ancien filtre == nouveau filtre, sauf écarts énumérés", () => {
+  const inattendus: string[] = [];
+  for (const c of CORPUS) {
+    for (const p of PROJETS) {
+      const normalized = hydrateHardConstraints(p.hc, DIRECTORY);
+      const ctx: EvaluationContext = {
+        constraints: normalized,
+        point: c.lat != null && c.lon != null
+          ? { lat: c.lat, lon: c.lon, grain: "commune_reference", source: "commune_centroid", label: c.nom }
+          : null,
+        conventionsVersion: PRODUCT_CONVENTIONS_VERSION,
+      };
+      const nouveau = (c.population != null && c.population >= POP_FLOOR)
+        && hardFilter(assessHardConstraints(ctx, c)).eligible;
+      const ancien = legacyPassesHard(c, p.hc, DIRECTORY);
+      const cle = `${c.nom}/${p.nom}`;
+      if (ancien !== nouveau && !(cle in ECARTS_ASSUMES)) {
+        inattendus.push(`${cle} : ancien=${ancien}, nouveau=${nouveau}`);
+      }
+    }
+  }
+  assert.deepEqual(inattendus, [], `écarts NON assumés :\n${inattendus.join("\n")}`);
 });
 ```
 
-- [ ] **Step 2 : Lancer, vérifier qu'il passe déjà** (il n'exerce que du code écrit)
-
-Run: `node --test src/lib/comparateur-hard-nonregression.test.ts`
-Expected: PASS (4 tests).
+Le corpus vit dans `src/lib/__fixtures__/hard-corpus.ts` (créé en Task 12, Step 1) : **il est partagé**
+avec les tests de parité, pour qu'aucun des deux ne puisse être « vert » sur un corpus plus facile que
+l'autre.
 
 - [ ] **Step 3 : Remplacer `passesHard` dans `comparateur-vie.ts`**
 
@@ -2026,6 +2463,56 @@ et le `candidates` :
 
 ```ts
   const candidates = communes.filter((c) => passesHardCanonical(c, normalized));
+```
+
+- [ ] **Step 3 bis : les rayons d'exploration CADRENT, ils n'éliminent pas**
+
+Sans cela, le lot 1 casse une chose qui marchait : « je veux vivre près de Brest », sans distance, ne
+filtrait plus **du tout**, et le lecteur voyait remonter des communes d'Alsace. Honnête, et absurde.
+
+Le rayon inventé devient un **bonus de classement**, borné, jamais un filtre. Une commune loin de Brest
+reste éligible ; elle passe simplement derrière. Et **on le dit**.
+
+```ts
+import { explorationHints } from "./hard-constraints-hydrate.ts";
+import { haversineKm } from "./hard-constraints.ts";
+
+// Un rayon que le PRODUIT s'est choisi ne peut pas éliminer une commune (ce serait opposer au lecteur
+// une condition qu'il n'a jamais posée). Il peut la faire remonter : c'est un penchant, pas un couperet.
+// Même mécanique que les ancres de zone souples (softZoneBonus), et le même plafond.
+const EXPLORATION_BONUS_MAX = 12;
+
+function explorationBonus(c: IndexCommune, normalized: NormalizedHardConstraints, hints: SearchExplorationHint[]): number {
+  let bonus = 0;
+  const place = hints.find((h) => h.kind === "near_place_radius");
+  const ref = normalized.nearPlace?.reference;
+  if (place && ref?.status === "resolved") {
+    const km = haversineKm(c.lat, c.lon, ref.lat, ref.lon);
+    bonus = Math.max(bonus, EXPLORATION_BONUS_MAX * Math.max(0, 1 - km / place.valueKm));
+  }
+  const sea = hints.find((h) => h.kind === "near_sea_radius");
+  if (sea) {
+    bonus = Math.max(bonus, EXPLORATION_BONUS_MAX * Math.max(0, 1 - c.distance_cote_km / sea.valueKm));
+  }
+  return bonus;
+}
+```
+
+Dans le calcul du score, l'ajouter au bonus souple **sous le même plafond** :
+
+```ts
+  const hints = explorationHints(hc);
+  …
+  const soft = Math.min(SOFT_BONUS_CAP, softZoneBonus(c.dept, zone.soft) + mountainBonus + explorationBonus(c, normalized, hints));
+```
+
+Et le dire, dans `appliedPlaces` :
+
+```ts
+  for (const h of hints) {
+    const quoi = h.kind === "near_place_radius" ? normalized.nearPlace?.label ?? "ce lieu" : "la mer";
+    appliedPlaces.push(`proximité de ${quoi} : aucune distance précisée, les communes proches remontent en tête, aucune n'est écartée`);
+  }
 ```
 
 **Garder** `appliedPlaces` (le périmètre appliqué), qui se reconstruit depuis `normalized` :
@@ -2147,16 +2634,38 @@ export type ModuleFacts = {
 `DecisionRule` gagne un 3e paramètre. **Les règles existantes ne changent pas** : en TypeScript, une
 fonction qui déclare moins de paramètres reste assignable.
 
+Le 3e paramètre porte les **évaluations DÉJÀ CALCULÉES**, pas seulement le contexte. Si chaque règle
+appelait `assessHardConstraints(...).find(...)`, onze règles feraient **121 évaluations par dossier**,
+pour n'en garder que onze.
+
 ```ts
-import type { EvaluationContext } from "../hard-constraints.ts";
+import type { EvaluationContext, HardConstraintAssessment } from "../hard-constraints.ts";
+
+// Les 11 évaluations, calculées UNE fois par runRules, plus le contexte (dont le point, dont le GRAIN).
+export type HardEvaluation = {
+  context: EvaluationContext;
+  byKey: Record<HardConstraintKey, HardConstraintAssessment>;
+};
 
 export type DecisionRule = {
   id: string;
   module: DecisionModule;
   hardConstraint?: HardConstraintKey;
-  // `hard` porte les contraintes HYDRATÉES (références résolues au-dessus des deux moteurs) et le point
-  // réellement testé. Les règles de préférence l'ignorent : elles déclarent deux paramètres.
-  evaluate: (facts: ModuleFacts, project: UserProject, hard: EvaluationContext) => RuleEvaluation;
+  // Les règles de préférence l'ignorent : elles déclarent deux paramètres, et restent assignables.
+  evaluate: (facts: ModuleFacts, project: UserProject, hard: HardEvaluation) => RuleEvaluation;
+};
+```
+
+Et `RunResult` **perd `coveredHardConstraints`** :
+
+```ts
+export type RunResult = {
+  facts: DecisionFact[];
+  evaluations: RuleEvaluation[];
+  // `coveredHardConstraints` est SUPPRIMÉ. Il marquait une contrainte « couverte » dès que l'outcome
+  // n'était pas not_applicable, donc un `uncertain` (donnée absente) la déclarait examinée : l'exact
+  // contraire de la doctrine. Il n'était consommé NULLE PART (l'assembleur passe par criteria-registry,
+  // qui l'a remplacé). On ne rafistole pas un champ faux que personne ne lit : on le retire.
 };
 ```
 
@@ -2185,14 +2694,19 @@ function project(hardConstraints: unknown): UserProject {
            parsed: { reformulation: "x", hardConstraints, preferences: [] } as UserProject["parsed"],
            updatedAt: "1970-01-01T00:00:00.000Z" };
 }
-function hard(over: Partial<NormalizedHardConstraints> = {}): EvaluationContext {
-  return {
+// Le 3e argument est une HardEvaluation : les 11 assessments DÉJÀ calculés (runRules le fait une fois).
+function hard(over: Partial<NormalizedHardConstraints> = {}, f = facts()): HardEvaluation {
+  const context: EvaluationContext = {
     constraints: { departements: null, zones: null, excludeZones: null, montagne: false, reliefProche: false,
                    nearSea: null, excludeSea: false, communeSize: null, nearPlace: null, excludePlace: [],
                    sizeRelativeTo: null, ...over },
-    point: { lat: 43.6, lon: 1.44, grain: "commune_reference", source: "commune_centroid", label: "Toulouse" },
+    point: f.lat != null && f.lon != null
+      ? { lat: f.lat, lon: f.lon, grain: "commune_reference", source: "commune_centroid", label: f.nom }
+      : null,
     conventionsVersion: "hc-conv-1",
   };
+  const list = assessHardConstraints(context, toCommuneAttributes(f));
+  return { context, byKey: Object.fromEntries(list.map((a) => [a.key, a])) as HardEvaluation["byKey"] };
 }
 const rule = (key: string) => HARD_CONSTRAINT_RULES.find((r) => r.hardConstraint === key)!;
 
@@ -2231,6 +2745,69 @@ test("unexamined -> uncertain : le critère reste NON EXAMINÉ, et le couperet m
   assert.equal(e.outcome, "uncertain");
   assert.equal(e.facts.length, 0);
 });
+
+test("la provenance n'est PAS amputée : chaque clé d'observation devient une preuve", () => {
+  const e = rule("communeSize").evaluate(
+    facts(), project({ communeSize: { max: 25_000 } }), hard({ communeSize: { min: null, max: 25_000 } }),
+  );
+  const f = e.facts[0]!;
+  assert.ok(f.role === "incompatibility");
+  // sourceFactIds porte TOUTE la provenance (observations + déclaration), evidence habille les
+  // observations : aucun sourceFactId d'observation ne reste sans preuve.
+  assert.ok(f.sourceFactIds.includes("commune.tailleVille"));
+  assert.ok(f.sourceFactIds.includes("project.hardConstraints.communeSize"));
+  assert.ok(f.evidence.some((ev) => ev.factId === "commune.tailleVille"));
+});
+
+test("le GRAIN suit le point réellement testé : une mesure depuis l'adresse n'est pas communale", () => {
+  const f = facts();
+  const h = hard({ nearPlace: { label: "Brest", threshold: { metric: "distance", maxKm: 50, source: "user" }, reference: BREST_REF } }, f);
+  const atAddress: HardEvaluation = {
+    ...h,
+    context: { ...h.context, point: { lat: 43.6, lon: 1.44, grain: "address", source: "address_geocoder", label: "7 rue du Taur" } },
+  };
+  // On recalcule les assessments au nouveau point (c'est ce que fait DossierAvecLogement).
+  const list = assessHardConstraints(atAddress.context, toCommuneAttributes(f));
+  atAddress.byKey = Object.fromEntries(list.map((a) => [a.key, a])) as HardEvaluation["byKey"];
+
+  const e = rule("nearPlace").evaluate(f, project({ nearPlace: { label: "Brest", maxKm: 50 } }), atAddress);
+  const fact = e.facts[0]!;
+  assert.ok(fact.role === "incompatibility");
+  assert.equal(fact.evidence[0]!.grain, "adresse");
+  assert.match(fact.statement, /Cette adresse/);
+});
+
+test("LES 11 INCOMPATIBILITÉS PASSENT assertFactValid, même avec un nom de commune très long", () => {
+  // Les topics ont une limite dure (70 caractères, aucune ponctuation de phrase). Un topic construit sur
+  // le nom de la commune ET sur celui d'un lieu de référence peut la dépasser sans qu'aucun test de
+  // l'évaluateur ne s'en aperçoive : c'est ici que ça doit tomber, pas en production.
+  const long = facts({ nom: "Saint-Rémy-en-Bouzemont-Saint-Genest-et-Isson", dept: "51", uu: null, tailleVille: 500 });
+  const cas: { key: string; hc: unknown; over: Partial<NormalizedHardConstraints> }[] = [
+    { key: "departements", hc: { departements: ["33"] }, over: { departements: ["33"] } },
+    { key: "zones", hc: { zones: [{ zone: "bretagne", strength: "hard" }] },
+      over: { zones: { hardDepartements: new Set(["29"]), labels: ["la Bretagne"], unresolvedLabels: [] } } },
+    { key: "excludeZones", hc: { excludeZones: ["grand_est"] },
+      over: { excludeZones: { departements: new Set(["51"]), labels: ["le Grand Est"], unresolvedLabels: [] } } },
+    { key: "montagne", hc: { montagne: { strength: "hard" } }, over: { montagne: true } },
+    { key: "reliefProche", hc: { reliefProche: { strength: "hard" } }, over: { reliefProche: true } },
+    { key: "nearSea", hc: { nearSea: { active: true, maxKm: 10 } },
+      over: { nearSea: { threshold: { metric: "distance", maxKm: 10, source: "user" } } } },
+    { key: "excludeSea", hc: { excludeSea: true }, over: { excludeSea: true } },
+    { key: "communeSize", hc: { communeSize: { min: 100_000 } }, over: { communeSize: { min: 100_000, max: null } } },
+    { key: "nearPlace", hc: { nearPlace: { label: "Brest", maxKm: 5 } },
+      over: { nearPlace: { label: "Brest", threshold: { metric: "distance", maxKm: 5, source: "user" }, reference: BREST_REF } } },
+    { key: "excludePlace", hc: { excludePlace: [{ label: "Saint-Rémy-en-Bouzemont-Saint-Genest-et-Isson" }] },
+      over: { excludePlace: [{ label: "Saint-Rémy-en-Bouzemont-Saint-Genest-et-Isson", reference: SELF_UU_REF }] } },
+    { key: "sizeRelativeTo", hc: { sizeRelativeTo: { label: "Bordeaux", direction: "larger" } },
+      over: { sizeRelativeTo: { label: "Bordeaux", direction: "larger", reference: BORDEAUX_SIZE_REF } } },
+  ];
+
+  for (const c of cas) {
+    const e = rule(c.key).evaluate(long, project(c.hc), hard(c.over, long));
+    assert.equal(e.outcome, "incompatible", `${c.key} devrait être incompatible dans ce montage`);
+    for (const f of e.facts) assertFactValid(f, project(c.hc)); // JETTE si le topic déborde
+  }
+});
 ```
 
 - [ ] **Step 3 : Lancer, vérifier l'échec**
@@ -2250,21 +2827,57 @@ Créer `src/lib/decision/hard-constraint-rules.ts` :
 //
 // Une règle par clé, fabriquée au-dessus du MÊME évaluateur que le filtre : c'est ce qui empêche les
 // deux moteurs de conclure différemment sur la même commune.
-import { HARD_CONSTRAINT_KEYS, assessHardConstraints } from "../hard-constraints.ts";
+import { HARD_CONSTRAINT_KEYS } from "../hard-constraints.ts";
 import type { HardConstraintKey, HardConstraintAssessment } from "../hard-constraints.ts";
-import type { DecisionRule, RuleEvaluation, IncompatibilityFact, EvidenceRef, ModuleFacts } from "./decision-fact.ts";
+import type { DecisionRule, RuleEvaluation, IncompatibilityFact, EvidenceRef, ModuleFacts, HardEvaluation } from "./decision-fact.ts";
 
 const territoireHref = "/rapport/quartier";
 
-function toEvidence(a: Extract<HardConstraintAssessment, { status: "incompatible" }>, f: ModuleFacts): EvidenceRef[] {
-  return [{
-    factId: a.evidenceKeys[0] ?? "commune",
-    module: "territoire",
-    label: `Territoire · ${f.nom}`,
-    observedValue: a.observedLabel,
-    grain: "commune",
-    href: territoireHref,
-  }];
+// LA PROVENANCE N'EST PAS AMPUTÉE. `sourceFactIds` reçoit TOUTES les clés (c'est sa fonction : dire d'où
+// vient le constat) ; `evidence` en habille celles qui sont des OBSERVATIONS (les `commune.*`). Les clés
+// `project.*` ne sont pas des observations : ce sont les déclarations du lecteur, elles n'ont pas de
+// carte. Ne garder que evidenceKeys[0] laissait des sourceFactIds sans preuve correspondante.
+const OBSERVATION_LABELS: Record<string, string> = {
+  "commune.dept": "Département",
+  "commune.altitude": "Altitude",
+  "commune.reliefProximite": "Relief à portée",
+  "commune.distanceCoteKm": "Distance au littoral",
+  "commune.tailleVille": "Taille de l'agglomération",
+  "commune.population": "Population",
+  "commune.uu": "Unité urbaine",
+  "commune.insee": "Commune",
+  "commune.lat": "Position",
+  "commune.lon": "Position",
+};
+
+function toEvidence(
+  a: Extract<HardConstraintAssessment, { status: "incompatible" }>,
+  f: ModuleFacts,
+  hard: HardEvaluation,
+): EvidenceRef[] {
+  // LE GRAIN SUIT LE POINT RÉELLEMENT TESTÉ. Marquer « commune » une distance mesurée depuis une adresse
+  // mentirait sur la finesse de la lecture.
+  const grain = hard.context.point?.grain === "address" ? "adresse" : "commune";
+  const keys = a.evidenceKeys.filter((k) => k.startsWith("commune."));
+  const seen = new Set<string>();
+  const refs: EvidenceRef[] = [];
+  for (const k of keys) {
+    const label = OBSERVATION_LABELS[k] ?? "Territoire";
+    if (seen.has(label)) continue; // commune.lat + commune.lon = UNE position, pas deux preuves
+    seen.add(label);
+    refs.push({
+      factId: k, module: "territoire",
+      label: `${label} · ${f.nom}`,
+      observedValue: a.observedLabel,
+      grain, href: territoireHref,
+    });
+  }
+  // assertFactValid exige au moins une preuve. Une contrainte dure sans observation communale
+  // n'existe pas ; si le cas apparaissait, il vaut mieux une preuve générique qu'un crash en prod.
+  if (refs.length === 0) {
+    refs.push({ factId: "commune", module: "territoire", label: `Territoire · ${f.nom}`, observedValue: a.observedLabel, grain, href: territoireHref });
+  }
+  return refs;
 }
 
 function makeRule(key: HardConstraintKey): DecisionRule {
@@ -2274,7 +2887,9 @@ function makeRule(key: HardConstraintKey): DecisionRule {
     module: "territoire",
     hardConstraint: key,
     evaluate: (f, _p, hard): RuleEvaluation => {
-      const a = assessHardConstraints(hard, f).find((x) => x.key === key)!;
+      // Les 11 évaluations ont été calculées UNE fois, par runRules. Rappeler assessHardConstraints ici
+      // en ferait 121 par dossier.
+      const a = hard.byKey[key];
 
       if (a.status === "not_declared") {
         return { ruleId: id, projectKeys: [key], outcome: "not_applicable", facts: [], reason: "non déclarée" };
@@ -2302,7 +2917,7 @@ function makeRule(key: HardConstraintKey): DecisionRule {
         materialityTier: "decision_critical",
         topic: a.topic,
         statement: a.statement,
-        evidence: toEvidence(a, f),
+        evidence: toEvidence(a, f, hard),
       };
       return { ruleId: id, projectKeys: [key], outcome: "incompatible", facts: [fact], reason: "contrainte non respectée" };
     },
@@ -2310,6 +2925,21 @@ function makeRule(key: HardConstraintKey): DecisionRule {
 }
 
 export const HARD_CONSTRAINT_RULES: DecisionRule[] = HARD_CONSTRAINT_KEYS.map(makeRule);
+```
+
+Et le passage `ModuleFacts → CommuneAttributes`, **pur**, dans `module-facts-map.ts` (les tests de parité
+doivent le traverser) :
+
+```ts
+// ModuleFacts est un SUR-ENSEMBLE de CommuneAttributes : cette vue ne convertit rien, elle sélectionne.
+// Si elle devait convertir, c'est que les deux moteurs auraient recommencé à diverger.
+export function toCommuneAttributes(f: ModuleFacts): CommuneAttributes {
+  return {
+    insee: f.insee, nom: f.nom, dept: f.dept, lat: f.lat, lon: f.lon,
+    population: f.population, tailleVille: f.tailleVille, uu: f.uu,
+    altitude: f.altitude, reliefProximite: f.reliefProximite, distanceCoteKm: f.distanceCoteKm,
+  };
+}
 ```
 
 - [ ] **Step 5 : Retirer les 3 anciennes règles et brancher le registre**
@@ -2320,7 +2950,9 @@ Dans `src/lib/decision/materiality-rules.ts` : supprimer `ruleMer` (lignes 20-42
 
 ```ts
 import { HARD_CONSTRAINT_RULES } from "./hard-constraint-rules.ts";
-import type { EvaluationContext } from "../hard-constraints.ts";
+import { assessHardConstraints, HARD_CONSTRAINT_KEYS, type EvaluationContext, type HardConstraintAssessment, type HardConstraintKey } from "../hard-constraints.ts";
+import { toCommuneAttributes } from "./module-facts-map.ts";
+import type { HardEvaluation } from "./decision-fact.ts";
 
 export const REGISTRY: DecisionRule[] = [
   ...HARD_CONSTRAINT_RULES,   // les 11 contraintes dures, une par clé, au-dessus de l'évaluateur partagé
@@ -2328,10 +2960,14 @@ export const REGISTRY: DecisionRule[] = [
   ...LOGEMENT_RULES,
 ];
 
-export function runRules(facts: ModuleFacts, project: UserProject, hard: EvaluationContext): RunResult {
+export function runRules(facts: ModuleFacts, project: UserProject, context: EvaluationContext): RunResult {
+  // LES 11 ÉVALUATIONS, UNE SEULE FOIS. Chaque règle allant les chercher elle-même en ferait 121.
+  const list = assessHardConstraints(context, toCommuneAttributes(facts));
+  const byKey = Object.fromEntries(list.map((a) => [a.key, a])) as Record<HardConstraintKey, HardConstraintAssessment>;
+  const hard: HardEvaluation = { context, byKey };
+
   const outFacts: DecisionFact[] = [];
   const evaluations: RuleEvaluation[] = [];
-  const covered = new Set<HardConstraintKey>();
   for (const rule of REGISTRY) {
     const ev = rule.evaluate(facts, project, hard);
     evaluations.push(ev);
@@ -2339,9 +2975,11 @@ export function runRules(facts: ModuleFacts, project: UserProject, hard: Evaluat
       assertFactValid(fact, project);
       outFacts.push(fact);
     }
-    if (rule.hardConstraint && ev.outcome !== "not_applicable") covered.add(rule.hardConstraint);
   }
-  return { facts: outFacts, evaluations, coveredHardConstraints: [...covered] };
+  // `coveredHardConstraints` a disparu : il déclarait « couverte » toute contrainte dont l'outcome
+  // n'était pas not_applicable, donc un `uncertain` aussi. La couverture se lit dans criteria-registry,
+  // qui la DÉDUIT des évaluations exploitables.
+  return { facts: outFacts, evaluations };
 }
 ```
 
@@ -2498,130 +3136,251 @@ n'en déclarent que deux : TypeScript les laisse passer, elles ne changent pas."
 
 ---
 
-## Task 12 : Les tests de parité (dans les deux directions)
+## Task 12 : Le corpus partagé, et les tests de parité (dans les deux directions)
 
 **Files:**
+- Create: `src/lib/__fixtures__/hard-corpus.ts` (partagé avec le test de non-régression de la Task 10)
 - Create: `src/lib/parity.test.ts`
 
 **Interfaces:**
-- Consumes: `assessHardConstraints`, `hardFilter`, `HARD_CONSTRAINT_RULES`.
+- Consumes: `communeAttributesFrom` (Task 0), `mapCommuneToModuleFacts` / `toCommuneAttributes`
+  (Task 11), `hydrateHardConstraints` (Task 8), `hardFilter` (Task 9), `HARD_CONSTRAINT_RULES` (Task 11).
 
 **L'invariant** : à projet, attributs, références et **point d'évaluation** identiques, le comparateur et
 le dossier produisent le même statut canonique.
 
-- [ ] **Step 1 : Écrire les tests**
+**Le test doit TRAVERSER les vraies frontières.** Un test qui partirait d'un `CommuneAttributes` déjà
+construit et le donnerait aux deux adaptateurs ne prouverait qu'une chose : deux adaptateurs au-dessus du
+**même objet** ne se contredisent pas. C'est vrai par construction, et ça ne dit rien des endroits où les
+deux moteurs divergeaient VRAIMENT : le mapping de l'index, le calcul de `tailleVille`, l'hydratation du
+projet brut, la normalisation des zones, le point d'évaluation. Le corpus part donc d'une **entrée
+d'index** et de **contraintes brutes**, et suit les deux chaînes entières :
+
+```
+IndexCommune ──► communeAttributesFrom ──► assess ──► hardFilter          (comparateur)
+     │
+     └────────► mapCommuneToModuleFacts ──► runRules ──► règle dossier    (dossier)
+
+HardConstraints brutes ──► hydrateHardConstraints ──► les DEUX
+```
+
+- [ ] **Step 1 : Le corpus, partagé**
+
+Créer `src/lib/__fixtures__/hard-corpus.ts` :
+
+```ts
+// LE CORPUS, PARTAGÉ entre la non-régression (ancien contre nouveau) et la parité (filtre contre
+// dossier). Partagé exprès : sinon l'un des deux tests pourrait être vert sur un corpus plus facile que
+// l'autre, et personne ne le verrait.
+//
+// Un cas par situation qui a DÉJÀ fait diverger les deux moteurs, ou qui le pourrait.
+import type { IndexCommuneLike } from "../commune-attributes.ts";
+import type { PlaceDirectory } from "../hard-constraints-resolve.ts";
+import type { HardConstraints } from "../hard-constraint-schema.ts";
+
+export const POP_FLOOR = 1500; // la doctrine de RECHERCHE du comparateur (anti-hameaux), pas une contrainte
+
+export const CORPUS: IndexCommuneLike[] = [
+  { insee: "31555", nom: "Toulouse", dept: "31", lat: 43.6045, lon: 1.4442, population: 493_465, uu: "31701", altitude: 146, relief_proximite: 0, distance_cote_km: 150 },
+  { insee: "29019", nom: "Brest", dept: "29", lat: 48.3904, lon: -4.4861, population: 139_456, uu: "29701", altitude: 35, relief_proximite: 5, distance_cote_km: 1 },
+  { insee: "05023", nom: "Briançon", dept: "05", lat: 44.8990, lon: 6.6450, population: 11_000, uu: null, altitude: 1326, relief_proximite: 100, distance_cote_km: 130 },
+  // Dans l'unité urbaine de Lyon : le cas qui faisait DIVERGER les deux moteurs (8 000 hab. communaux,
+  // 1,6 M dans l'agglomération).
+  { insee: "69266", nom: "Villeurbanne", dept: "69", lat: 45.7700, lon: 4.8800, population: 8_000, uu: "00760", altitude: 168, relief_proximite: 30, distance_cote_km: 250 },
+  // Données manquantes : altitude et relief absents. Le filtre exclut, le dossier doit rester uncertain.
+  { insee: "99999", nom: "Sans-Donnée", dept: "31", lat: 43.0, lon: 1.0, population: 3_000, uu: null, altitude: null, relief_proximite: null, distance_cote_km: 90 },
+  // Sous le plancher anti-hameaux : exclue par la doctrine de RECHERCHE, pas par une contrainte.
+  { insee: "09999", nom: "Hameau", dept: "09", lat: 42.9, lon: 1.5, population: 300, uu: null, altitude: 900, relief_proximite: 90, distance_cote_km: 120 },
+];
+
+export const UU_POP = new Map<string, number>([
+  ["31701", 1_060_000], ["29701", 210_000], ["00760", 1_600_000], ["33701", 1_000_000],
+]);
+
+export const DIRECTORY: PlaceDirectory = {
+  byName: (label) => {
+    const t: Record<string, { insee: string; nom: string; lat: number; lon: number; uu: string | null; tailleVille: number | null }> = {
+      brest: { insee: "29019", nom: "Brest", lat: 48.3904, lon: -4.4861, uu: "29701", tailleVille: 210_000 },
+      lyon: { insee: "69123", nom: "Lyon", lat: 45.75, lon: 4.85, uu: "00760", tailleVille: 1_600_000 },
+      bordeaux: { insee: "33063", nom: "Bordeaux", lat: 44.84, lon: -0.58, uu: "33701", tailleVille: 1_000_000 },
+    };
+    return t[label] ?? null;
+  },
+  plmByName: (label) => (label === "lyon" ? { uu: "00760", pop: 522_250 } : null),
+};
+
+// LES 11 CLÉS SONT EXERCÉES. Le test disait « les onze » ; il en couvrait six.
+export const PROJETS: { nom: string; hc: HardConstraints }[] = [
+  { nom: "département", hc: { departements: ["31"] } },
+  { nom: "zone dure", hc: { zones: [{ zone: "bretagne", strength: "hard" }] } },
+  { nom: "zone exclue", hc: { excludeZones: ["idf"] } },
+  { nom: "montagne", hc: { montagne: { strength: "hard" } } },
+  { nom: "relief proche", hc: { reliefProche: { strength: "hard" } } },
+  { nom: "mer 30 km", hc: { nearSea: { active: true, maxKm: 30 } } },
+  { nom: "mer sans distance", hc: { nearSea: { active: true } } },
+  { nom: "pas la mer", hc: { excludeSea: true } },
+  { nom: "petite agglo", hc: { communeSize: { max: 25_000 } } },
+  { nom: "près de Brest", hc: { nearPlace: { label: "Brest", maxKm: 60 } } },
+  { nom: "près d'un lieu non résolu", hc: { nearPlace: { label: "Gare Matabiau", maxKm: 30 } } },
+  { nom: "quitter Lyon", hc: { excludePlace: [{ label: "Lyon" }] } },
+  { nom: "plus petit que Bordeaux", hc: { sizeRelativeTo: { label: "Bordeaux", direction: "smaller" } } },
+  // Le cas composite : une ville résolue, une autre pas. Ne doit JAMAIS rendre satisfied.
+  { nom: "quitter Lyon et un inconnu", hc: { excludePlace: [{ label: "Lyon" }, { label: "Saint-Jean-de-Machin" }] } },
+];
+```
+
+- [ ] **Step 2 : Écrire les tests de parité**
+
+Créer `src/lib/parity.test.ts` :
 
 ```ts
 // LA PARITÉ. Le comparateur et le dossier peuvent avoir des politiques différentes face à une donnée
 // manquante. Ils n'ont pas le droit d'être en désaccord sur un CONSTAT.
 //
-// Le point d'évaluation est dans l'énoncé : une commune peut passer au comparateur sur son centroïde et
-// échouer pour une adresse à son extrémité. C'est un changement de GRAIN, pas une divergence de moteur.
+// Le test part d'une ENTRÉE D'INDEX et de CONTRAINTES BRUTES, et suit les deux chaînes entières : c'est
+// dans les mappings, dans tailleVille et dans l'hydratation que les deux moteurs divergeaient, pas dans
+// l'évaluateur (qui n'existait pas). Un test qui partirait d'attributs déjà construits ne prouverait que
+// la cohérence de deux adaptateurs au-dessus du même objet : vrai par construction, et sans valeur.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { assessHardConstraints, HARD_CONSTRAINT_KEYS, type CommuneAttributes, type EvaluationContext, type NormalizedHardConstraints } from "./hard-constraints.ts";
+import {
+  assessHardConstraints, HARD_CONSTRAINT_KEYS, PRODUCT_CONVENTIONS_VERSION,
+  type EvaluationContext, type EvaluationPoint,
+} from "./hard-constraints.ts";
+import { communeAttributesFrom, tailleVilleFrom } from "./commune-attributes.ts";
 import { hardFilter } from "./hard-constraints-filter.ts";
+import { hydrateHardConstraints } from "./hard-constraints-hydrate.ts";
+import { mapCommuneToModuleFacts } from "./decision/module-facts-map.ts";
 import { HARD_CONSTRAINT_RULES } from "./decision/hard-constraint-rules.ts";
-import type { ModuleFacts } from "./decision/decision-fact.ts";
+import { runRules } from "./decision/materiality-rules.ts";
 import type { UserProject } from "./user-project.ts";
+import { CORPUS, PROJETS, DIRECTORY, UU_POP } from "./__fixtures__/hard-corpus.ts";
 
-// Le corpus : un cas par situation qui a déjà fait diverger les deux moteurs.
-const CORPUS: CommuneAttributes[] = [
-  { insee: "31555", nom: "Toulouse", dept: "31", lat: 43.60, lon: 1.44, population: 493_465, tailleVille: 1_060_000, uu: "31701", altitude: 146, reliefProximite: 0, distanceCoteKm: 150 },
-  { insee: "29019", nom: "Brest", dept: "29", lat: 48.39, lon: -4.48, population: 139_000, tailleVille: 210_000, uu: "29701", altitude: 35, reliefProximite: 5, distanceCoteKm: 1 },
-  { insee: "05061", nom: "Briançon", dept: "05", lat: 44.90, lon: 6.64, population: 11_000, tailleVille: 11_000, uu: null, altitude: 1326, reliefProximite: 100, distanceCoteKm: 130 },
-  { insee: "69266", nom: "Villeurbanne", dept: "69", lat: 45.77, lon: 4.88, population: 155_000, tailleVille: 1_600_000, uu: "00760", altitude: 168, reliefProximite: 30, distanceCoteKm: 250 },
-  { insee: "99999", nom: "Sans-Donnée", dept: "31", lat: 43.0, lon: 1.0, population: 3_000, tailleVille: 3_000, uu: null, altitude: null, reliefProximite: null, distanceCoteKm: 90 },
-];
-
-const PROJETS: { nom: string; constraints: Partial<NormalizedHardConstraints>; hc: unknown }[] = [
-  { nom: "département", constraints: { departements: ["31"] }, hc: { departements: ["31"] } },
-  { nom: "mer 30 km", constraints: { nearSea: { threshold: { metric: "distance", maxKm: 30, source: "user" } } }, hc: { nearSea: { active: true, maxKm: 30 } } },
-  { nom: "pas la mer", constraints: { excludeSea: true }, hc: { excludeSea: true } },
-  { nom: "montagne", constraints: { montagne: true }, hc: { montagne: { strength: "hard" } } },
-  { nom: "relief proche", constraints: { reliefProche: true }, hc: { reliefProche: { strength: "hard" } } },
-  { nom: "petite agglo", constraints: { communeSize: { min: null, max: 25_000 } }, hc: { communeSize: { max: 25_000 } } },
-];
-
-function ctxOf(c: CommuneAttributes, over: Partial<NormalizedHardConstraints>): EvaluationContext {
+function projectOf(hc: unknown): UserProject {
   return {
-    constraints: { departements: null, zones: null, excludeZones: null, montagne: false, reliefProche: false,
-                   nearSea: null, excludeSea: false, communeSize: null, nearPlace: null, excludePlace: [],
-                   sizeRelativeTo: null, ...over },
-    point: { lat: c.lat!, lon: c.lon!, grain: "commune_reference", source: "commune_centroid", label: c.nom },
-    conventionsVersion: "hc-conv-1",
+    posture: "recherche", intent: null, rawText: null,
+    parsed: { reformulation: "x", hardConstraints: hc, preferences: [] } as UserProject["parsed"],
+    updatedAt: "1970-01-01T00:00:00.000Z",
   };
 }
-function factsOf(c: CommuneAttributes): ModuleFacts {
-  return { ...c, distanceCoteKm: c.distanceCoteKm ?? 0, catnatInondation: null, inondationRisque: null, scores: {}, hasAddress: false };
-}
-function projectOf(hc: unknown): UserProject {
-  return { posture: "recherche", intent: null, rawText: null,
-           parsed: { reformulation: "x", hardConstraints: hc, preferences: [] } as UserProject["parsed"],
-           updatedAt: "1970-01-01T00:00:00.000Z" };
+
+// LES DEUX CHAÎNES, chacune de bout en bout, à partir des MÊMES entrées brutes.
+function chaines(entry: (typeof CORPUS)[number], hc: unknown) {
+  const taille = tailleVilleFrom(entry.uu, entry.population, UU_POP);
+  const constraints = hydrateHardConstraints(hc as never, DIRECTORY);
+  const point: EvaluationPoint | null =
+    entry.lat != null && entry.lon != null
+      ? { lat: entry.lat, lon: entry.lon, grain: "commune_reference", source: "commune_centroid", label: entry.nom }
+      : null;
+  const context: EvaluationContext = { constraints, point, conventionsVersion: PRODUCT_CONVENTIONS_VERSION };
+
+  // Chaîne COMPARATEUR : index -> attributs -> évaluation -> filtre.
+  const attrs = communeAttributesFrom(entry, taille);
+  const assessments = assessHardConstraints(context, attrs);
+  const filtre = hardFilter(assessments);
+
+  // Chaîne DOSSIER : index -> ModuleFacts -> runRules -> évaluations de règles.
+  const facts = mapCommuneToModuleFacts(entry as never, {}, { hasAddress: false, tailleVille: taille });
+  const run = runRules(facts, projectOf(hc), context);
+
+  return { assessments, filtre, run, context };
 }
 
-test("PARITÉ : une commune EXCLUE par le filtre n'est jamais `satisfied` dans le dossier", () => {
+const outcomeFor = (run: ReturnType<typeof chaines>["run"], key: string) =>
+  run.evaluations.find((e) => e.ruleId === `territoire.hard.${key}`)!.outcome;
+
+test("PARITÉ : une commune EXCLUE par une incompatibilité est `incompatible` dans le dossier", () => {
   for (const c of CORPUS) {
     for (const p of PROJETS) {
-      const ctx = ctxOf(c, p.constraints);
-      const assessments = assessHardConstraints(ctx, c);
-      const filtre = hardFilter(assessments);
-      if (filtre.eligible) continue;
+      const { filtre, run } = chaines(c, p.hc);
       for (const a of filtre.incompatible) {
-        const rule = HARD_CONSTRAINT_RULES.find((r) => r.hardConstraint === a.key)!;
-        const e = rule.evaluate(factsOf(c), projectOf(p.hc), ctx);
-        assert.equal(e.outcome, "incompatible", `${c.nom} / ${p.nom} / ${a.key}`);
+        assert.equal(outcomeFor(run, a.key), "incompatible", `${c.nom} / ${p.nom} / ${a.key}`);
       }
     }
   }
 });
 
-test("PARITÉ : une commune RETENUE par le filtre n'est jamais `incompatible` dans le dossier", () => {
+test("PARITÉ : une commune RETENUE par le filtre n'est JAMAIS `incompatible` dans le dossier", () => {
   for (const c of CORPUS) {
     for (const p of PROJETS) {
-      const ctx = ctxOf(c, p.constraints);
-      const filtre = hardFilter(assessHardConstraints(ctx, c));
+      const { filtre, run } = chaines(c, p.hc);
       if (!filtre.eligible) continue;
       for (const key of HARD_CONSTRAINT_KEYS) {
-        const rule = HARD_CONSTRAINT_RULES.find((r) => r.hardConstraint === key)!;
-        const e = rule.evaluate(factsOf(c), projectOf(p.hc), ctx);
-        assert.notEqual(e.outcome, "incompatible", `${c.nom} / ${p.nom} / ${key}`);
+        assert.notEqual(outcomeFor(run, key), "incompatible", `${c.nom} / ${p.nom} / ${key}`);
+      }
+    }
+  }
+});
+
+test("PARITÉ : une contrainte `satisfied` au filtre est `satisfied` au dossier, et réciproquement", () => {
+  for (const c of CORPUS) {
+    for (const p of PROJETS) {
+      const { assessments, run } = chaines(c, p.hc);
+      for (const a of assessments) {
+        const attendu =
+          a.status === "satisfied" ? "satisfied"
+          : a.status === "incompatible" ? "incompatible"
+          : a.status === "not_declared" ? "not_applicable"
+          : "uncertain";
+        assert.equal(outcomeFor(run, a.key), attendu, `${c.nom} / ${p.nom} / ${a.key}`);
       }
     }
   }
 });
 
 test("PARITÉ : une donnée manquante EXCLUT au comparateur et reste `uncertain` au dossier", () => {
-  const sansRelief = CORPUS.find((c) => c.nom === "Sans-Donnée")!;
-  const ctx = ctxOf(sansRelief, { reliefProche: true });
-  assert.equal(hardFilter(assessHardConstraints(ctx, sansRelief)).eligible, false);
-  const rule = HARD_CONSTRAINT_RULES.find((r) => r.hardConstraint === "reliefProche")!;
-  const e = rule.evaluate(factsOf(sansRelief), projectOf({ reliefProche: { strength: "hard" } }), ctx);
-  assert.equal(e.outcome, "uncertain"); // JAMAIS incompatible : la divergence est assumée, et documentée
+  const sansDonnee = CORPUS.find((c) => c.nom === "Sans-Donnée")!;
+  const { filtre, run } = chaines(sansDonnee, { reliefProche: { strength: "hard" } });
+  assert.equal(filtre.eligible, false);          // le filtre exclut : dans le doute, ne pas proposer
+  assert.equal(outcomeFor(run, "reliefProche"), "uncertain"); // JAMAIS incompatible : divergence ASSUMÉE
+});
+
+test("PARITÉ : la taille se lit sur l'AGGLOMÉRATION dans les deux chaînes (le désaccord d'origine)", () => {
+  // Villeurbanne : 8 000 habitants communaux, 1,6 M dans l'agglomération de Lyon. Le comparateur
+  // l'excluait, le dossier la déclarait conforme. Les deux chaînes doivent maintenant l'exclure.
+  const villeurbanne = CORPUS.find((c) => c.nom === "Villeurbanne")!;
+  const { filtre, run } = chaines(villeurbanne, { communeSize: { max: 25_000 } });
+  assert.equal(filtre.eligible, false);
+  assert.equal(outcomeFor(run, "communeSize"), "incompatible");
+});
+
+test("PARITÉ : « quitter Lyon ET un inconnu » n'est satisfied NULLE PART", () => {
+  const toulouse = CORPUS.find((c) => c.nom === "Toulouse")!;
+  const projet = PROJETS.find((p) => p.nom === "quitter Lyon et un inconnu")!;
+  const { assessments, run, filtre } = chaines(toulouse, projet.hc);
+  const a = assessments.find((x) => x.key === "excludePlace")!;
+  assert.equal(a.status, "unexamined");
+  assert.equal(outcomeFor(run, "excludePlace"), "uncertain");
+  assert.equal(filtre.complete, false); // et le comparateur le DIT
+  assert.equal(filtre.eligible, true);  // sans pour autant vider la liste des résultats
 });
 ```
 
-- [ ] **Step 2 : Lancer**
+- [ ] **Step 3 : Lancer**
 
-Run: `node --test src/lib/parity.test.ts`
-Expected: PASS (3 tests).
+Run: `node --test src/lib/parity.test.ts` → PASS (6 tests).
+Run: `node --test src/lib/comparateur-hard-nonregression.test.ts` → PASS (le corpus est le même).
 
-- [ ] **Step 3 : Suite complète**
+- [ ] **Step 4 : Suite complète**
 
 Run: `node --test src/lib/*.test.ts src/lib/decision/*.test.ts`
 Expected: PASS. Le total doit être **supérieur à 262** (les tests des 3 règles retirées sont remplacés).
 
-- [ ] **Step 4 : Commit**
+- [ ] **Step 5 : Commit**
 
 ```bash
-git add src/lib/parity.test.ts
-git commit -m "test(parité): les deux moteurs ne peuvent plus se contredire
+git add src/lib/parity.test.ts src/lib/__fixtures__/hard-corpus.ts
+git commit -m "test(parité): les deux moteurs ne peuvent plus se contredire, sur les 11 clés
 
-Dans les DEUX directions : une commune exclue par le filtre ne peut pas être
-satisfied dans le dossier, et une commune retenue ne peut pas y être
-incompatible. La seule divergence autorisée est la donnée manquante (le filtre
-exclut, le dossier reste uncertain), et elle est nommée dans le test."
+Dans les DEUX directions, et à travers les VRAIES frontières : le test part
+d'une entrée d'index et de contraintes brutes, et suit les deux chaînes
+entières (mapping, tailleVille, hydratation, normalisation des zones, point
+d'évaluation). C'est LÀ que les deux moteurs divergeaient, pas dans un
+évaluateur qui n'existait pas encore.
+
+Le corpus est partagé avec le test de non-régression : sinon l'un des deux
+pourrait être vert sur un corpus plus facile que l'autre, et personne ne le
+verrait."
 ```
 
 ---
@@ -2693,12 +3452,40 @@ git commit -m "chore: vérification à l'écran du lot 1 (contraintes dures cano
 
 Ces quatre points sont les **critères d'entrée** du plan du lot 2.
 
-## Auto-relecture du plan (faite)
+## Ce que la relecture a durci (2e passe)
 
-- **Import circulaire évité** : l'hydratation reçoit l'annuaire au lieu d'aller le chercher. Un module
-  `hard-constraints-server.ts` aurait importé `comparateur-vie`, qui l'aurait importé en retour.
-- **Le second appelant de `runRules`** (`DossierAvecLogement.tsx:30`, le dossier commune + adresse) est
-  traité en Task 11 Step 7, et c'est lui qui porte le point à l'adresse.
-- **Le comparateur est anonyme** : il n'a pas de projet persisté à hydrater en amont, donc l'hydratation
-  vit dans `matchProjects`.
+Sept mensonges que la première version du plan aurait laissé passer :
+
+1. **Une contrainte composite partiellement résolue devenait `satisfied`.** « Quitter Lyon et
+   Saint-Jean-de-Machin », dont seul Lyon se résout, sur une commune hors de Lyon : le plan rendait
+   « condition respectée » alors que la moitié n'avait jamais été testée. Idem pour une **ancre de zone
+   dure que la table ne reconnaît pas** : elle DISPARAISSAIT de l'état hydraté. `unresolvedLabels` la
+   conserve, et la doctrine est la même pour les trois contraintes composites (`zones`, `excludeZones`,
+   `excludePlace`).
+2. **Le plan réintroduisait le `?? 0` qu'il interdit.** `lat: facts.lat ?? 0` place une commune sans
+   coordonnées dans le **golfe de Guinée**, et `nearPlace` en tire une incompatibilité **établie**, avec
+   sa carte et sa preuve. Le point d'évaluation est nullable, `ModuleFacts.distanceCoteKm` aussi.
+3. **Le « test de non-régression » ne comparait rien** à l'ancien moteur. Il faut le **témoin gelé**
+   (`legacy-passes-hard.ts`, défauts intacts), et un test qui croise l'ancien et le nouveau sur tout le
+   corpus, avec les écarts **énumérés**.
+4. **Les tests de parité étaient tautologiques** (deux adaptateurs au-dessus du même objet) et
+   n'exerçaient que 6 clés sur 11. Ils traversent maintenant les **vraies** frontières (mapping,
+   `tailleVille`, hydratation, normalisation des zones, point), là où les moteurs divergeaient.
+5. **Les `SearchExplorationHint` étaient du code mort.** Ils sont consommés par le **classement**
+   (bonus borné), jamais par le filtre, et le rayon est **dit**. Sans cela, « près de Brest » sans
+   distance aurait fait remonter des communes d'Alsace.
+6. **L'adaptateur dossier faisait 121 évaluations par dossier** (11 règles × 11 clés), amputait la
+   provenance (`evidenceKeys[0]` seul), marquait le grain « commune » même quand le point était une
+   adresse, et gardait `coveredHardConstraints`, un champ **faux** (un `uncertain` y était compté comme
+   couvert) que **personne ne lit**. Il est supprimé.
+7. **Les phrases mentaient sur l'opérateur.** Le moteur applique `<=` et la phrase disait « moins de
+   30 km » : à exactement 30 km, la commune passait et le texte disait le contraire. Et un topic
+   composant un nom de commune long avec un lieu de référence **dépasse 70 caractères**, donc
+   `assertFactValid` **jette en production** (`topicFit` donne la forme courte de repli).
+
+Trois choses que la lecture du code avait déjà apprises au plan :
+
+- **Import circulaire évité** : l'hydratation reçoit l'annuaire au lieu d'aller le chercher.
+- **Le second appelant de `runRules`** (`DossierAvecLogement.tsx:30`) porte le point à l'adresse.
+- **Le comparateur est anonyme** : l'hydratation vit dans `matchProjects`.
 - **`INDEX_POPULATION_YEAR` est à VÉRIFIER** contre l'index (Task 6, Step 5), jamais à supposer.
