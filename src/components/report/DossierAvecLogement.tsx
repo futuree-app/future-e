@@ -5,6 +5,7 @@ import { fetchLogementDecisionDataWithTimeout, LogementDataUnavailableError, typ
 import { buildLogementFacts } from "@/lib/decision/logement-facts";
 import { runRules } from "@/lib/decision/materiality-rules";
 import { assembleDossier } from "@/lib/decision/decision-assembler";
+import { withEvaluationPoint } from "@/lib/decision/territory-facts";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
 import type { Dossier, ModuleFacts } from "@/lib/decision/decision-fact";
 import type { EvaluationContext } from "@/lib/hard-constraints";
@@ -34,13 +35,14 @@ export async function DossierAvecLogement({
     // LE GRAIN CHANGE. Une commune peut passer sur son point de référence et échouer pour une adresse
     // située à son extrémité : ce n'est pas une divergence de moteur, c'est une lecture plus fine, et la
     // phrase le dit (« Cette adresse est à 42 km de… », au lieu de « Le point de référence de X… »).
-    const hardAtAddress: EvaluationContext = {
-      ...hard,
-      point: {
-        lat: address.latitude, lon: address.longitude,
-        grain: "address", source: "address_geocoder", label: address.label,
-      },
-    };
+    //
+    // ET LA DEMANDE CHANGE AVEC LUI : le temps de trajet est RECALCULÉ depuis l'adresse. Traîner celui de
+    // la commune trancherait le sort de l'adresse avec la durée d'un autre lieu (le noyau le refuserait,
+    // mais on ne s'en remet pas à ce filet : on mesure ce qu'on évalue).
+    const hardAtAddress: EvaluationContext = await withEvaluationPoint(hard, {
+      lat: address.latitude, lon: address.longitude,
+      grain: "address", source: "address_geocoder", label: address.label,
+    });
     const dossier = assembleDossier(runRules(facts, project, hardAtAddress), project, "commune+adresse", facts.nom);
     return (
       <DossierDecisionSection

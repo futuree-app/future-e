@@ -236,3 +236,56 @@ test("DOSSIER, point dans la BANDE DE TOLÉRANCE : uncertain, le critère reste 
   const e = rule("nearPlace").evaluate(commune, project(PROJET_30MIN), hard(TRENTE_MIN, commune));
   assert.equal(e.outcome, "uncertain");
 });
+
+// ── LOT 2c : le DOSSIER estime, au bon grain ──────────────────────────────────
+
+function hardAvecEstimation(
+  minutes: number,
+  f = facts(),
+  grain: "commune_reference" | "address" = "commune_reference",
+): HardEvaluation {
+  const point = {
+    lat: f.lat!, lon: f.lon!, grain,
+    source: grain === "address" ? ("address_geocoder" as const) : ("commune_centroid" as const),
+    label: grain === "address" ? "7 rue du Taur, Toulouse" : f.nom,
+  };
+  const context: EvaluationContext = {
+    constraints: normalized(TRENTE_MIN),
+    point,
+    travelTime: {
+      status: "estimated", minutes, mode: "car",
+      from: { lat: point.lat, lon: point.lon },
+      to: { lat: 43.611448, lon: 1.453496 },
+      direction: "to_reference", requestHash: "h",
+    },
+    conventionsVersion: PRODUCT_CONVENTIONS_VERSION,
+  };
+  const list = assessHardConstraints(context, toCommuneAttributes(f));
+  return { context, byKey: Object.fromEntries(list.map((a) => [a.key, a])) as HardEvaluation["byKey"] };
+}
+
+test("DOSSIER : une commune estimée SOUS le seuil est satisfied, et la couverture monte", () => {
+  const blagnac = facts({ insee: "31069", nom: "Blagnac", lat: 43.6294, lon: 1.3897 });
+  const e = rule("nearPlace").evaluate(blagnac, project(PROJET_30MIN), hardAvecEstimation(23.7, blagnac));
+  assert.equal(e.outcome, "satisfied");
+  assert.equal(e.facts.length, 0); // une contrainte respectée est silencieuse
+});
+
+test("DOSSIER : une commune estimée AU-DELÀ est incompatible, et la phrase dit la durée", () => {
+  const auch = facts({ insee: "32013", nom: "Auch", lat: 43.6465, lon: 0.5861, uu: null, tailleVille: 21_000 });
+  const e = rule("nearPlace").evaluate(auch, project(PROJET_30MIN), hardAvecEstimation(74.5, auch));
+  assert.equal(e.outcome, "incompatible");
+  const f = e.facts[0]!;
+  assert.match(f.statement, /environ 75 minutes en voiture/);
+  assert.match(f.statement, /Gare Matabiau/);
+  assert.doesNotMatch(f.statement, /km/);
+  assertFactValid(f, project(PROJET_30MIN));
+});
+
+test("DOSSIER, LE GRAIN : une estimation depuis l'ADRESSE parle de « Cette adresse »", () => {
+  const f = facts({ insee: "31069", nom: "Blagnac", lat: 43.95, lon: 1.05 }); // une adresse loin au nord-ouest
+  const e = rule("nearPlace").evaluate(f, project(PROJET_30MIN), hardAvecEstimation(46.2, f, "address"));
+  assert.equal(e.outcome, "incompatible");
+  assert.match(e.facts[0]!.statement, /^Cette adresse/);
+  assert.equal(e.facts[0]!.evidence[0]!.grain, "adresse");
+});

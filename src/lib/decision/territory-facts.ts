@@ -8,8 +8,12 @@ import {
 import { hydrateHardConstraints } from "../hard-constraints-hydrate.ts";
 import { resolveExternalReferences } from "../hard-constraints-external.ts";
 import {
-  PRODUCT_CONVENTIONS_VERSION, type EvaluationContext, type EvaluationPoint,
+  PRODUCT_CONVENTIONS_VERSION, ROUTABLE_MODES,
+  type EvaluationContext, type EvaluationPoint, type NormalizedHardConstraints,
+  type TravelTimeEstimate,
 } from "../hard-constraints.ts";
+import { estimateTravelMinutes, routeRequestHash } from "../route-time.ts";
+import { reachabilityStore } from "../reachability-store.ts";
 import { mapCommuneToModuleFacts } from "./module-facts-map.ts";
 import { runRules } from "./materiality-rules.ts";
 import { assembleDossier } from "./decision-assembler.ts";
@@ -41,22 +45,72 @@ export async function buildHardContext(
   // La MÊME chaîne que matchProjects : même annuaire, même géocodage, même isochrone, mêmes contrôles.
   const hcRaw = project.parsed?.hardConstraints;
   const dir = await placeDirectory();
+  const constraints = hydrateHardConstraints(hcRaw, dir, await resolveExternalReferences(hcRaw, dir));
+  // LE POINT RÉELLEMENT TESTÉ. Sans coordonnées, il reste NULL : une commune sans lat/lon repliée sur
+  // (0, 0) atterrit dans le golfe de Guinée, et la contrainte de proximité en tirerait une incompatibilité
+  // ÉTABLIE, avec sa carte et sa preuve, sur un point inventé.
+  const evalPoint: EvaluationPoint | null =
+    point ??
+    (facts.lat != null && facts.lon != null
+      ? {
+          lat: facts.lat, lon: facts.lon,
+          grain: "commune_reference", source: "commune_centroid",
+          label: `le point de référence de ${facts.nom}`,
+        }
+      : null);
+
   return {
-    constraints: hydrateHardConstraints(hcRaw, dir, await resolveExternalReferences(hcRaw, dir)),
-    // LE POINT RÉELLEMENT TESTÉ. Sans coordonnées, il reste NULL : une commune sans lat/lon repliée sur
-    // (0, 0) atterrit dans le golfe de Guinée, et la contrainte de proximité en tirerait une
-    // incompatibilité ÉTABLIE, avec sa carte et sa preuve, sur un point inventé.
-    point:
-      point ??
-      (facts.lat != null && facts.lon != null
-        ? {
-            lat: facts.lat, lon: facts.lon,
-            grain: "commune_reference", source: "commune_centroid",
-            label: `le point de référence de ${facts.nom}`,
-          }
-        : null),
+    constraints,
+    point: evalPoint,
+    // LE DOSSIER MESURE, LUI AUSSI. Un seul itinéraire (sa commune, ou son adresse), aucun plafond : le
+    // comparateur en calcule vingt-quatre, le dossier n'en a qu'un.
+    travelTime: await estimateTravelTimeAt(constraints, evalPoint),
     conventionsVersion: PRODUCT_CONVENTIONS_VERSION,
   };
+}
+
+// L'ESTIMATION, AU POINT RÉELLEMENT ÉVALUÉ. Une durée calculée depuis le centroïde de la commune ne vaut
+// PAS pour une adresse posée à son extrémité : les deux demandes ont des hash différents, et le noyau
+// rejette une estimation qui ne concorde pas avec le point qu'il évalue. On la recalcule donc, plutôt que
+// de resservir celle de la commune.
+export async function estimateTravelTimeAt(
+  constraints: NormalizedHardConstraints,
+  point: EvaluationPoint | null,
+): Promise<TravelTimeEstimate | null> {
+  const np = constraints.nearPlace;
+  if (!point || !np || np.reference.status !== "resolved") return null;
+  if (np.threshold?.metric !== "travel_time") return null;
+  const mode = np.threshold.mode;
+  if (mode == null || !ROUTABLE_MODES.includes(mode)) return null; // le vélo n'est pas routable chez IGN
+
+  const ref = np.reference;
+  const request = {
+    fromLat: point.lat, fromLon: point.lon,
+    toLat: ref.lat, toLon: ref.lon,
+    mode: mode as "car" | "walk",
+    direction: "to_reference" as const,
+  };
+  const minutes = await estimateTravelMinutes(request, reachabilityStore());
+  if (minutes == null) return { status: "unavailable" }; // une panne, jamais un verdict
+  return {
+    status: "estimated",
+    minutes,
+    mode,
+    from: { lat: point.lat, lon: point.lon },
+    to: { lat: ref.lat, lon: ref.lon },
+    direction: "to_reference",
+    requestHash: routeRequestHash(request),
+  };
+}
+
+// LE GRAIN CHANGE, DONC LA DEMANDE CHANGE. Le dossier commune+adresse repart du même socle (références
+// résolues une seule fois) et n'en change que le POINT : il doit donc REFAIRE l'estimation pour ce point,
+// et non traîner celle de la commune.
+export async function withEvaluationPoint(
+  hard: EvaluationContext,
+  point: EvaluationPoint,
+): Promise<EvaluationContext> {
+  return { ...hard, point, travelTime: await estimateTravelTimeAt(hard.constraints, point) };
 }
 
 // Orchestrateur du hub : commune -> ModuleFacts -> règles -> assemblage. `hasAddress` reflète la
