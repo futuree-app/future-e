@@ -15,23 +15,46 @@ import {
 import { estimateTravelMinutes, routeRequestHash } from "../route-time.ts";
 import { reachabilityStore } from "../reachability-store.ts";
 import { mapCommuneToModuleFacts } from "./module-facts-map.ts";
+import { buildClimatFacts, type ClimatFacts } from "./climat-facts.ts";
+import { getClimatDataCommune } from "../drias-json.ts";
 import { runRules } from "./materiality-rules.ts";
 import { assembleDossier } from "./decision-assembler.ts";
 import type { ModuleFacts, Dossier } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 
-export function buildModuleFacts(entry: IndexCommune, opts: { hasAddress: boolean }): ModuleFacts {
+export function buildModuleFacts(
+  entry: IndexCommune,
+  opts: { hasAddress: boolean; climat?: ClimatFacts | null },
+): ModuleFacts {
   const scores: ModuleFacts["scores"] = {};
   for (const key of PREFERENCE_KEYS) scores[key] = subScore(key, entry);
   // La taille d'agglomération vient de comparateur-vie (tailleVilleOf), jamais d'un calcul refait ici :
   // c'est exactement la divergence qu'on vient de fermer (le comparateur jugeait la taille sur l'unité
   // urbaine, le dossier sur la population communale).
-  return mapCommuneToModuleFacts(entry, scores, { hasAddress: opts.hasAddress, tailleVille: tailleVilleOf(entry) });
+  return mapCommuneToModuleFacts(entry, scores, {
+    hasAddress: opts.hasAddress,
+    tailleVille: tailleVilleOf(entry),
+    climat: opts.climat ?? null,
+  });
+}
+
+// LE CLIMAT VIENT DES SCÉNARIOS DRIAS COMPLETS, pas de l'index du comparateur : l'index ne porte que la
+// valeur projetée (gwl20), et la TRAJECTOIRE exige les anomalies (elles seules restituent la référence de
+// la fin du XXe siècle, que DRIAS n'expose en aucune colonne).
+export async function loadClimatFacts(insee: string): Promise<ClimatFacts | null> {
+  try {
+    const data = await getClimatDataCommune(insee);
+    return buildClimatFacts(data?.commune.s ?? null);
+  } catch {
+    // Une donnée climatique indisponible n'est pas une exposition faible : les règles rendront
+    // `uncertain`, et le critère restera NON EXAMINÉ. Jamais `satisfied`.
+    return null;
+  }
 }
 
 export async function loadModuleFacts(insee: string, opts: { hasAddress: boolean }): Promise<ModuleFacts | null> {
-  const entry = await getCommuneEntry(insee);
-  return entry ? buildModuleFacts(entry, opts) : null;
+  const [entry, climat] = await Promise.all([getCommuneEntry(insee), loadClimatFacts(insee)]);
+  return entry ? buildModuleFacts(entry, { hasAddress: opts.hasAddress, climat }) : null;
 }
 
 // LE CONTEXTE DES CONTRAINTES DURES, hydraté AU-DESSUS des deux moteurs : le MÊME annuaire et la MÊME

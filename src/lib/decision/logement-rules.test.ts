@@ -12,7 +12,7 @@ function facts(logement?: LogementFacts): ModuleFacts {
   return {
     insee: "31555", nom: "Toulouse", dept: "31", lat: 43.6, lon: 1.44, uu: "31701",
     tailleVille: 1_060_000, reliefProximite: 0, distanceCoteKm: 150, population: 500000, altitude: 146,
-    catnatInondation: 0, inondationRisque: 10, scores: {}, hasAddress: true, logement,
+    catnatInondation: 0, inondationRisque: 10, climat: null, scores: {}, hasAddress: true, logement,
   };
 }
 // Aucune contrainte dure déclarée : les 11 évaluations rendent not_declared, et les règles Logement

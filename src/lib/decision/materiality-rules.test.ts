@@ -15,7 +15,7 @@ function facts(over: Partial<ModuleFacts> = {}): ModuleFacts {
   return {
     insee: "31555", nom: "Toulouse", dept: "31", lat: 43.6045, lon: 1.4442, uu: "31701",
     tailleVille: 1_060_000, reliefProximite: 0, distanceCoteKm: 1, population: 5000, altitude: 100,
-    catnatInondation: 0, inondationRisque: 10, scores: {}, hasAddress: false, ...over,
+    catnatInondation: 0, inondationRisque: 10, climat: null, scores: {}, hasAddress: false, ...over,
   };
 }
 function project(parsed: unknown, over: Partial<UserProject> = {}): UserProject {
@@ -64,21 +64,6 @@ test("règle compromis : rien si une seule dimension déclarée", () => {
   const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "acces_transports", weight: 3 }] });
   const r = run(facts({ scores: { acces_transports: 80, faible_chaleur: 25 } }), p);
   assert.equal(r.facts.some((x) => x.ruleId === "territoire.compromis-transport-chaleur"), false);
-});
-
-test("règle confort : inconnue scopée sans adresse, quelle que soit l'intention", () => {
-  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_chaleur", weight: 3 }] });
-  const r = run(facts({ hasAddress: false }), p);
-  const f = r.facts.find((x) => x.ruleId === "territoire.confort-ete-sans-adresse");
-  assert.ok(f && f.role === "unknown");
-  assert.equal(f.impact, "scoped");
-  assert.equal(f.action?.type, "renseigner_adresse");
-});
-
-test("règle confort : rien si adresse présente", () => {
-  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_chaleur", weight: 3 }] });
-  const r = run(facts({ hasAddress: true }), p);
-  assert.equal(r.facts.some((x) => x.ruleId === "territoire.confort-ete-sans-adresse"), false);
 });
 
 test("règle inondation : vérification si exposition notable, texte acheteur", () => {
@@ -135,4 +120,117 @@ test("le registre porte les 11 contraintes dures, et le dossier les examine", ()
   assert.equal(r.evaluations.find((e) => e.ruleId === "territoire.hard.nearSea")?.outcome, "incompatible");
   // Les dix autres ne sont pas déclarées : HORS SUJET, pas un trou de couverture.
   assert.equal(hardEvals.filter((e) => e.outcome === "not_applicable").length, 10);
+});
+
+// ── LES RÈGLES CLIMAT ────────────────────────────────────────────────────────
+
+import { buildClimatFacts, type GwlScenarios } from "./climat-facts.ts";
+
+// Une commune EXPOSÉE (des chiffres réalistes, du type de Nîmes) et une commune ÉPARGNÉE (type Brest).
+const SC_EXPOSEE: GwlScenarios = {
+  gwl15: { h: "2030", v: { NORTX35D_yr: 8, ATX35D_yr: 5, NORTR_yr: 48, ATR_yr: 15, NORIFM40_yr: 40, AIFM40_yr: 6, NORRx1d_yr: 70, ARRx1d_yr: 0.08 } },
+  gwl20: { h: "2050", v: { NORTX35D_yr: 14, ATX35D_yr: 11, NORTR_yr: 69, ATR_yr: 36, NORIFM40_yr: 50, AIFM40_yr: 16, NORRx1d_yr: 74, ARRx1d_yr: 0.14 } },
+  gwl30: { h: "2100", v: { NORTX35D_yr: 26, ATX35D_yr: 23, NORTR_yr: 95, ATR_yr: 62, NORIFM40_yr: 70, AIFM40_yr: 36, NORRx1d_yr: 84, ARRx1d_yr: 0.29 } },
+};
+const SC_EPARGNEE: GwlScenarios = {
+  gwl20: { h: "2050", v: { NORTX35D_yr: 0, ATX35D_yr: 0, NORTR_yr: 3, ATR_yr: 3, NORIFM40_yr: 1, AIFM40_yr: 0, NORRx1d_yr: 43, ARRx1d_yr: 0.13 } },
+};
+const EXPOSEE = buildClimatFacts(SC_EXPOSEE)!;
+const EPARGNEE = buildClimatFacts(SC_EPARGNEE)!;
+
+const projetClimat = (key: string, weight = 3) =>
+  project({ reformulation: "x", hardConstraints: {}, preferences: [{ key, weight }] });
+
+test("CHALEUR, exposition notable : une carte CHIFFRÉE, et jamais « actuellement »", () => {
+  const r = run(facts({ climat: EXPOSEE }), projetClimat("faible_chaleur"));
+  const f = r.facts.find((x) => x.ruleId === "territoire.climat-chaleur");
+  assert.ok(f && f.role === "verification");
+  assert.match(f.statement, /14 jours/); // la valeur projetée, pas un percentile
+  assert.match(f.statement, /69 (jours|nuits)/);
+  assert.match(f.statement, /fin du XXe siècle/);
+  assert.doesNotMatch(f.statement, /actuellement|aujourd'hui/i);
+  // LA CONVENTION EST DITE, et elle écrit l'opérateur qu'elle applique (le code teste `>=`).
+  assert.match(f.statement, /futur•e signale cette exposition à partir de/);
+  assert.match(f.statement, /à partir de 8 jours par an au-dessus de 35 °C, ou de 25 nuits tropicales par an/);
+  assert.ok(f.limitation?.includes("commune"));
+  assert.equal(f.action?.type, "renseigner_adresse"); // sans adresse : il y a quelque chose à affiner
+});
+
+test("CHALEUR, avec une ADRESSE : le critère est TOUJOURS examiné (le fil de ruleConfort est refermé)", () => {
+  // ruleConfort désactivait faible_chaleur dès qu'une adresse existait : le critère cessait d'être examiné
+  // au moment où le dossier devenait le plus riche.
+  const r = run(facts({ climat: EXPOSEE, hasAddress: true }), projetClimat("faible_chaleur"));
+  const e = r.evaluations.find((x) => x.ruleId === "territoire.climat-chaleur")!;
+  assert.equal(e.outcome, "verification");
+  assert.equal(r.facts.find((x) => x.ruleId === "territoire.climat-chaleur")!.action?.type, "verifier_sur_place");
+});
+
+test("CHALEUR, exposition faible : satisfied SILENCIEUX, et la couverture monte", () => {
+  const r = run(facts({ climat: EPARGNEE }), projetClimat("faible_chaleur"));
+  const e = r.evaluations.find((x) => x.ruleId === "territoire.climat-chaleur")!;
+  assert.equal(e.outcome, "satisfied"); // JAMAIS not_applicable : ce serait un trou de couverture
+  assert.equal(r.facts.some((x) => x.ruleId === "territoire.climat-chaleur"), false);
+});
+
+test("CHALEUR, UN AXE MANQUANT : uncertain, jamais « tout va bien »", () => {
+  // 5 jours (sous le seuil) mais les nuits tropicales n'ont pas été lues : l'axe manquant POUVAIT être
+  // celui qui déclenchait la réserve. Conclure `satisfied` serait le `?? 0` du chantier A, déguisé.
+  const partiel = buildClimatFacts({ gwl20: { h: "2050", v: { NORTX35D_yr: 5 } } })!;
+  const r = run(facts({ climat: partiel }), projetClimat("faible_chaleur"));
+  assert.equal(r.evaluations.find((x) => x.ruleId === "territoire.climat-chaleur")!.outcome, "uncertain");
+});
+
+test("CHALEUR, climat indisponible : uncertain (une donnée absente n'est pas une exposition faible)", () => {
+  const r = run(facts({ climat: null }), projetClimat("faible_chaleur"));
+  assert.equal(r.evaluations.find((x) => x.ruleId === "territoire.climat-chaleur")!.outcome, "uncertain");
+});
+
+test("CHALEUR, critère non déclaré : not_applicable, aucune carte", () => {
+  const r = run(facts({ climat: EXPOSEE }), project({ reformulation: "x", hardConstraints: {}, preferences: [] }));
+  assert.equal(r.evaluations.find((x) => x.ruleId === "territoire.climat-chaleur")!.outcome, "not_applicable");
+});
+
+test("FEU : la phrase dit un DANGER MÉTÉOROLOGIQUE, jamais une probabilité d'incendie", () => {
+  const r = run(facts({ climat: EXPOSEE }), projetClimat("faible_risque_feu"));
+  const f = r.facts.find((x) => x.ruleId === "territoire.climat-feu")!;
+  assert.match(f.statement, /indice forêt-météo/);
+  assert.match(f.statement, /danger météorologique très sévère/);
+  assert.match(f.statement, /50 jours/);
+  assert.match(f.statement, /à partir de 9 jours par an/);
+  assert.match(f.action!.label, /débroussaillement/);
+});
+
+test("PLUIES : un cumul en 24 heures, jamais « par an »", () => {
+  const r = run(facts({ climat: EXPOSEE }), projetClimat("faible_precip_extremes"));
+  const f = r.facts.find((x) => x.ruleId === "territoire.climat-pluies")!;
+  assert.match(f.statement, /74 mm/);
+  assert.match(f.statement, /sur 24 heures/);
+  assert.doesNotMatch(f.statement, /mm par an/);
+  assert.match(f.statement, /à partir de 65 mm/);
+});
+
+test("PLUIES et INONDATION peuvent COEXISTER sans dire deux fois la même chose", () => {
+  const p = project({
+    reformulation: "x", hardConstraints: {},
+    preferences: [{ key: "faible_precip_extremes", weight: 3 }, { key: "faible_risque_inondation", weight: 3 }],
+  });
+  const r = run(facts({ climat: EXPOSEE, inondationRisque: 80 }), p);
+  const pluies = r.facts.find((x) => x.ruleId === "territoire.climat-pluies")!;
+  const inond = r.facts.find((x) => x.ruleId === "territoire.inondation-exposition")!;
+  assert.ok(pluies && inond);
+  // Deux sujets DISTINCTS : ce que le ciel déverse, et ce que le territoire en fait.
+  assert.notEqual(pluies.topic, inond.topic);
+  assert.match(pluies.action!.label, /ruissellement/);
+  assert.match(inond.action!.label, /état des risques/);
+});
+
+test("LA MATÉRIALITÉ SUIT LE POIDS DÉCLARÉ, jamais l'intensité seule", () => {
+  const fort = run(facts({ climat: EXPOSEE }), projetClimat("faible_chaleur", 3));
+  const tiede = run(facts({ climat: EXPOSEE }), projetClimat("faible_chaleur", 2));
+  assert.equal(fort.facts.find((x) => x.ruleId === "territoire.climat-chaleur")!.materialityTier, "structuring");
+  assert.equal(tiede.facts.find((x) => x.ruleId === "territoire.climat-chaleur")!.materialityTier, "secondary");
+  // JAMAIS decision_critical : une préférence n'est pas une condition non négociable.
+  for (const f of [...fort.facts, ...tiede.facts]) {
+    if (f.ruleId.startsWith("territoire.climat-")) assert.notEqual(f.materialityTier, "decision_critical");
+  }
 });

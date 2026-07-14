@@ -4,6 +4,7 @@
 import type { IndexCommune, PreferenceKey } from "../comparateur-vie.ts";
 import type { CommuneAttributes } from "../hard-constraints.ts";
 import type { ModuleFacts } from "./decision-fact.ts";
+import type { ClimatFacts } from "./climat-facts.ts";
 
 export function mapCommuneToModuleFacts(
   entry: IndexCommune,
@@ -11,7 +12,9 @@ export function mapCommuneToModuleFacts(
   // `tailleVille` est RÉSOLUE PAR L'APPELANT (l'index des unités urbaines vit dans comparateur-vie).
   // Le dossier n'a pas le droit de la recalculer autrement : ce serait rouvrir la divergence qu'on vient
   // de fermer (le comparateur jugeait la taille sur l'agglomération, le dossier sur la commune).
-  opts: { hasAddress: boolean; tailleVille: number | null },
+  // `climat` est chargé PAR L'APPELANT (les scénarios DRIAS vivent dans un fichier, et ce mapping doit
+  // rester pur donc testable), exactement comme `tailleVille`.
+  opts: { hasAddress: boolean; tailleVille: number | null; climat?: ClimatFacts | null },
 ): ModuleFacts {
   return {
     insee: entry.insee,
@@ -27,6 +30,7 @@ export function mapCommuneToModuleFacts(
     altitude: entry.altitude ?? null,
     catnatInondation: entry.inondation ? entry.inondation.catnat : null,
     inondationRisque: entry.inondation ? entry.inondation.risque : null,
+    climat: opts.climat ?? null,
     scores,
     hasAddress: opts.hasAddress,
   };

@@ -10,13 +10,17 @@
 // verdicts, un seul lecteur. cf. hard-constraint-rules.ts.
 import type {
   DecisionRule, DecisionFact, ModuleFacts, RunResult, RuleEvaluation, HardEvaluation,
-  UnknownFact, CompromiseFact, VerificationFact, EvidenceRef,
+  CompromiseFact, VerificationFact, EvidenceRef,
 } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
+import type { PreferenceKey } from "../comparateur-vie.ts";
 import { declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } from "./project-view.ts";
 import { LOGEMENT_RULES } from "./logement-rules.ts";
 import { HARD_CONSTRAINT_RULES } from "./hard-constraint-rules.ts";
 import { toCommuneAttributes } from "./module-facts-map.ts";
+import {
+  trajectoirePhrase, fmtClimat, CLIMAT_HORIZON_LABEL, type ClimatAxe,
+} from "./climat-facts.ts";
 import {
   assessHardConstraints,
   type EvaluationContext, type HardConstraintAssessment, type HardConstraintKey,
@@ -55,26 +59,6 @@ const ruleCompromis: DecisionRule = {
 };
 
 // Règle 4 : confort d'été non évaluable au grain bâtiment sans adresse. Inconnue SCOPÉE (ne bloque
-// jamais la conclusion). Gate sur le GRAIN (priorité chaleur déclarée + pas d'adresse), pas sur l'achat.
-const RULE_CONFORT = "territoire.confort-ete-sans-adresse";
-const ruleConfort: DecisionRule = {
-  id: RULE_CONFORT,
-  module: "territoire",
-  evaluate: (f, p): RuleEvaluation => {
-    if (preferenceWeight(p, "faible_chaleur") < 2 || f.hasAddress) {
-      return { ruleId: RULE_CONFORT, projectKeys: ["faible_chaleur"], outcome: "not_applicable", facts: [], reason: "non applicable" };
-    }
-    const ev: EvidenceRef = { factId: "commune", module: "territoire", label: `Territoire · ${f.nom}`, grain: "commune", href: territoireHref };
-    const fact: UnknownFact = {
-      id: `${f.insee}:confort-sans-adresse`, ruleId: RULE_CONFORT, sourceFactIds: ["hasAddress"], module: "territoire",
-      role: "unknown", impact: "scoped", materialityTier: "secondary", topic: "le confort d'été du bâtiment",
-      statement: "Votre priorité de confort d'été ne peut pas être évaluée au grain du bâtiment tant qu'aucune adresse n'est renseignée.",
-      evidence: [ev], action: { type: "renseigner_adresse", label: "Affiner avec une adresse" },
-    };
-    return { ruleId: RULE_CONFORT, projectKeys: ["faible_chaleur"], outcome: "unknown", facts: [fact], reason: "confort d'été gated sur l'adresse" };
-  },
-};
-
 // Règle 5 : exposition inondation notable + priorité risque déclarée -> vérification. Croise le score
 // d'exposition actuel (pas un comptage brut), nomme la période et la limite. Posture-aware.
 const RULE_INOND = "territoire.inondation-exposition";
@@ -107,12 +91,179 @@ const ruleInondation: DecisionRule = {
   },
 };
 
+
+// ── LES RÈGLES CLIMAT ────────────────────────────────────────────────────────
+//
+// UN RISQUE N'EST PAS UNE INCERTITUDE. Le constat est ÉTABLI (la trajectoire est mesurée) ; c'est sa
+// PORTÉE DÉCISIONNELLE qui s'instruit à une échelle plus fine. On n'écrit donc jamais « le risque de
+// fortes chaleurs est à vérifier » (il est mesuré), mais : voici ce que le climat fait ici, et voici ce
+// qu'il faut aller regarder pour savoir ce que cela change pour vous.
+//
+// LA TABLE DE VÉRITÉ, et elle vaut pour les trois :
+//   critère non déclaré (poids < 2)              -> not_applicable  (non examiné)
+//   aucune valeur projetée lisible               -> uncertain       (non examiné : une donnée absente
+//                                                                    n'est JAMAIS une exposition faible)
+//   au moins un axe NOTABLE                      -> verification    (carte + chiffre + action)
+//   tous les axes lus, aucun notable             -> satisfied       (silencieux, la COUVERTURE MONTE)
+//   aucun notable MAIS un axe manquant           -> uncertain       (l'axe manquant pouvait être notable)
+//
+// LA CONVENTION DE SIGNALEMENT EST DITE DANS LE TEXTE (« à partir de 8 jours par an »), jamais appliquée
+// en silence : c'est un seuil de SIGNALEMENT futur•e, pas une limite officielle de danger sanitaire. Et
+// la phrase écrit l'opérateur qu'elle applique (le code teste `>=`, le texte dit « à partir de »).
+//
+// LA MATÉRIALITÉ SUIT LE POIDS DÉCLARÉ, jamais l'intensité seule : `structuring` si le lecteur a pesé le
+// critère à 3, `secondary` s'il l'a posé à 2. JAMAIS `decision_critical` : une préférence n'est pas une
+// condition non négociable, et le verdict ne doit pas basculer sur un souhait.
+
+const climatEvidence = (nom: string, key: string, axe: ClimatAxe): EvidenceRef => ({
+  factId: `climat.${key}`,
+  module: "territoire",
+  label: `Climat · ${nom}`,
+  observedValue:
+    axe.projete != null ? `${fmtClimat(axe.projete, axe.unit)} à l'horizon ${CLIMAT_HORIZON_LABEL}` : undefined,
+  grain: "commune",
+  href: territoireHref,
+});
+
+const tierFor = (p: UserProject, key: PreferenceKey): "structuring" | "secondary" =>
+  preferenceWeight(p, key) >= 3 ? "structuring" : "secondary";
+
+// La limitation est la MÊME pour les trois : le climat se lit au grain de la commune, et ce que le lecteur
+// vivra dépend de son logement et de son adresse. Le dire, c'est ce qui rend la vérification utile.
+const LIMITATION_CLIMAT = "Cette trajectoire est lue à l'échelle de la commune, pas de l'adresse ni du logement.";
+
+const RULE_CHALEUR = "territoire.climat-chaleur";
+const ruleChaleur: DecisionRule = {
+  id: RULE_CHALEUR,
+  module: "territoire",
+  evaluate: (f, p): RuleEvaluation => {
+    const key: PreferenceKey = "faible_chaleur";
+    const ret = (outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
+      ({ ruleId: RULE_CHALEUR, projectKeys: [key], outcome, facts, reason });
+
+    if (preferenceWeight(p, key) < 2) return ret("not_applicable", [], "priorité non déclarée");
+    const c = f.climat;
+    if (!c) return ret("uncertain", [], "trajectoire climatique indisponible");
+
+    const jours = c.joursTresChauds;
+    const nuits = c.nuitsTropicales;
+
+    // UNE DONNÉE MANQUANTE N'EST PAS UNE BONNE NOUVELLE. Si l'un des deux axes n'a pas été lu, on ne peut
+    // pas conclure « rien à signaler » : l'axe manquant pouvait être celui qui déclenchait la réserve.
+    if (!jours.notable && !nuits.notable) {
+      const complet = jours.projete != null && nuits.projete != null;
+      return complet
+        ? ret("satisfied", [], "exposition sous le seuil de signalement")
+        : ret("uncertain", [], "un axe de chaleur n'a pas pu être lu");
+    }
+
+    // LE CONSTAT SUIT CE QUI DÉCLENCHE. Nommer systématiquement les deux métriques alourdirait la phrase
+    // quand une seule explique la réserve ; l'autre reste dans la preuve.
+    const phrases: string[] = [];
+    if (jours.notable) phrases.push(trajectoirePhrase(jours, "Les jours au-dessus de 35 °C"));
+    // « Nuit tropicale » est un terme technique (Météo-France) : on le donne, puis on le traduit, sans
+    // laisser une incise ouverte au milieu de la trajectoire.
+    if (nuits.notable) {
+      phrases.push(
+        `${trajectoirePhrase(nuits, "Les nuits tropicales")}, ces nuits où la température ne descend pas sous 20 °C et où le corps ne récupère plus`,
+      );
+    }
+    const seuils = [
+      jours.notable ? `${jours.threshold} jours par an au-dessus de 35 °C` : null,
+      nuits.notable ? `${nuits.threshold} nuits tropicales par an` : null,
+    ].filter(Boolean).join(", ou de ");
+
+    const fact: VerificationFact = {
+      id: `${f.insee}:climat-chaleur`, ruleId: RULE_CHALEUR,
+      sourceFactIds: ["climat.joursTresChauds", "climat.nuitsTropicales"], module: "territoire",
+      role: "verification", materialityTier: tierFor(p, key),
+      topic: `les fortes chaleurs à ${f.nom}`,
+      statement: `${phrases.join(". ")}. futur•e signale cette exposition à partir de ${seuils}.`,
+      limitation: LIMITATION_CLIMAT,
+      evidence: [climatEvidence(f.nom, "joursTresChauds", jours), climatEvidence(f.nom, "nuitsTropicales", nuits)],
+      // L'ACTION EST SPÉCIFIQUE, et c'est ce qui rend la vérification légitime : à l'échelle de la commune
+      // le constat est établi, mais l'inconfort réellement vécu se joue sur le bâtiment.
+      action: f.hasAddress
+        ? { type: "verifier_sur_place", label: "Vérifiez le confort d'été : orientation, dernier étage, inertie des murs, protections solaires, possibilité de rafraîchir la nuit" }
+        : { type: "renseigner_adresse", label: "Renseignez une adresse pour évaluer le confort d'été du logement" },
+    };
+    return ret("verification", [fact], "exposition à la chaleur notable");
+  },
+};
+
+const RULE_FEU = "territoire.climat-feu";
+const ruleFeu: DecisionRule = {
+  id: RULE_FEU,
+  module: "territoire",
+  evaluate: (f, p): RuleEvaluation => {
+    const key: PreferenceKey = "faible_risque_feu";
+    const ret = (outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
+      ({ ruleId: RULE_FEU, projectKeys: [key], outcome, facts, reason });
+
+    if (preferenceWeight(p, key) < 2) return ret("not_applicable", [], "priorité non déclarée");
+    const axe = f.climat?.joursFeu;
+    if (!axe || axe.projete == null) return ret("uncertain", [], "indice forêt-météo indisponible");
+    if (!axe.notable) return ret("satisfied", [], "danger météorologique sous le seuil de signalement");
+
+    const fact: VerificationFact = {
+      id: `${f.insee}:climat-feu`, ruleId: RULE_FEU, sourceFactIds: ["climat.joursFeu"], module: "territoire",
+      role: "verification", materialityTier: tierFor(p, key),
+      topic: `le danger d'incendie à ${f.nom}`,
+      // L'INDICE MESURE UN DANGER MÉTÉOROLOGIQUE, pas la probabilité qu'un incendie survienne. La phrase ne
+      // promet donc pas plus que la donnée ne sait dire.
+      statement: `${trajectoirePhrase(axe, "Les jours où l'indice forêt-météo dépasse 40, seuil de danger météorologique très sévère,")}. futur•e signale cette exposition à partir de ${axe.threshold} jours par an.`,
+      limitation: LIMITATION_CLIMAT,
+      evidence: [climatEvidence(f.nom, "joursFeu", axe)],
+      action: { type: "verifier_sur_place", label: "Vérifiez la végétation autour du terrain, l'éventuelle obligation légale de débroussaillement, l'accès des secours et les matériaux de la toiture" },
+    };
+    return ret("verification", [fact], "danger météorologique de feu notable");
+  },
+};
+
+const RULE_PLUIES = "territoire.climat-pluies";
+const rulePluies: DecisionRule = {
+  id: RULE_PLUIES,
+  module: "territoire",
+  evaluate: (f, p): RuleEvaluation => {
+    const key: PreferenceKey = "faible_precip_extremes";
+    const ret = (outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
+      ({ ruleId: RULE_PLUIES, projectKeys: [key], outcome, facts, reason });
+
+    if (preferenceWeight(p, key) < 2) return ret("not_applicable", [], "priorité non déclarée");
+    const axe = f.climat?.pluieMax24h;
+    if (!axe || axe.projete == null) return ret("uncertain", [], "cumul de pluie indisponible");
+    if (!axe.notable) return ret("satisfied", [], "intensité sous le seuil de signalement");
+
+    const fact: VerificationFact = {
+      id: `${f.insee}:climat-pluies`, ruleId: RULE_PLUIES, sourceFactIds: ["climat.pluieMax24h"], module: "territoire",
+      role: "verification", materialityTier: tierFor(p, key),
+      topic: `les pluies intenses à ${f.nom}`,
+      // DISTINCT DE L'INONDATION, et les deux peuvent coexister sans se répéter : ici l'INTENSITÉ
+      // climatique des précipitations (ce que le ciel déverse), là l'exposition du TERRITOIRE (ce que le
+      // sol et les cours d'eau en font). Les actions le disent : le ruissellement d'un côté, l'état des
+      // risques de l'autre.
+      statement: `${trajectoirePhrase(axe, "Les épisodes de pluie les plus intenses, mesurés sur 24 heures,")}. futur•e signale cette intensité à partir de ${axe.threshold} mm.`,
+      limitation: LIMITATION_CLIMAT,
+      evidence: [climatEvidence(f.nom, "pluieMax24h", axe)],
+      action: { type: "verifier_sur_place", label: "Vérifiez le ruissellement autour de l'adresse : pente du terrain, sous-sol, réseaux d'évacuation, historique des dégâts des eaux" },
+    };
+    return ret("verification", [fact], "pluies extrêmes notables");
+  },
+};
+
 export const REGISTRY: DecisionRule[] = [
   // Les 11 contraintes dures, une règle par clé, toutes au-dessus de l'évaluateur PARTAGÉ avec le
   // comparateur. Le dossier n'en examinait que 3 (mer, taille, département).
   ...HARD_CONSTRAINT_RULES,
   ruleCompromis,
-  ruleConfort,
+  // ruleConfort A DISPARU. Elle DÉSACTIVAIT `faible_chaleur` dès qu'une adresse était renseignée
+  // (`f.hasAddress` -> not_applicable) : le critère cessait d'être examiné au moment précis où le dossier
+  // devenait le plus riche, et le lecteur lisait « priorité non couverte » sur un rapport complet. Son
+  // seul apport (inviter à renseigner une adresse) vit désormais dans l'ACTION de ruleChaleur, et
+  // seulement quand il y a réellement quelque chose à affiner.
+  ruleChaleur,
+  ruleFeu,
+  rulePluies,
   ruleInondation,
   ...LOGEMENT_RULES,
 ];

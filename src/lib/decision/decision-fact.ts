@@ -3,6 +3,7 @@
 // un compromise a deux côtés avec preuve, une verification a une action).
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { UserProject } from "../user-project.ts";
+import type { ClimatFacts } from "./climat-facts.ts";
 import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
 import type { CriteriaSummary } from "./criteria-registry.ts";
 import type {
@@ -95,6 +96,10 @@ export type LogementFacts = {
 export type ModuleFacts = CommuneAttributes & {
   catnatInondation: number | null;
   inondationRisque: number | null;
+  // La trajectoire climatique (DRIAS), chargée par l'APPELANT comme `tailleVille` : le mapping reste pur.
+  // NULLABLE mais NON OPTIONNEL : `undefined` créerait un troisième état entre « la donnée est là » et
+  // « on l'a cherchée sans la trouver », et une règle finirait par confondre les deux.
+  climat: ClimatFacts | null;
   scores: Partial<Record<PreferenceKey, number | null>>;
   hasAddress: boolean;
   logement?: LogementFacts; // slice 1.5 : présent seulement quand une analyse adresse est là
