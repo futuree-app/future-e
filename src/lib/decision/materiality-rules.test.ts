@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { runRules } from "./materiality-rules.ts";
+import { runRules, assertFactValid } from "./materiality-rules.ts";
 import type { ModuleFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import { PRODUCT_CONVENTIONS_VERSION, type EvaluationContext } from "../hard-constraints.ts";
@@ -15,7 +15,7 @@ function facts(over: Partial<ModuleFacts> = {}): ModuleFacts {
   return {
     insee: "31555", nom: "Toulouse", dept: "31", lat: 43.6045, lon: 1.4442, uu: "31701",
     tailleVille: 1_060_000, reliefProximite: 0, distanceCoteKm: 1, population: 5000, altitude: 100,
-    catnatInondation: 0, inondationRisque: 10, climat: null, scores: {}, hasAddress: false, ...over,
+    catnatInondation: 0, inondationRisque: 10, climat: null, sante: null, scores: {}, hasAddress: false, ...over,
   };
 }
 function project(parsed: unknown, over: Partial<UserProject> = {}): UserProject {
@@ -233,4 +233,101 @@ test("LA MATÉRIALITÉ SUIT LE POIDS DÉCLARÉ, jamais l'intensité seule", () =
   for (const f of [...fort.facts, ...tiede.facts]) {
     if (f.ruleId.startsWith("territoire.climat-")) assert.notEqual(f.materialityTier, "decision_critical");
   }
+});
+
+// ── LES RÈGLES DE SANTÉ ENVIRONNEMENTALE ─────────────────────────────────────
+
+import { buildSanteFacts } from "./sante-facts.ts";
+
+// Des valeurs RÉELLES : Toulouse (PM2,5 8,65 ; NO2 14,46 ; un aéroport à 6,5 km ; un Seveso seuil haut).
+const SANTE_EXPOSEE = buildSanteFacts({
+  viv: { pm25: 8.65, no2: 14.46 },
+  calmeSonore: { score: 18, sourceDominante: "auto", distanceKm: 0.8 },
+  expoIndustrielle: { score: 44, sourceDominante: "seveso_haut" },
+});
+const SANTE_EPARGNEE = buildSanteFacts({
+  viv: { pm25: 6.2, no2: 3.4 },
+  calmeSonore: { score: 100, sourceDominante: null, distanceKm: null },
+  expoIndustrielle: { score: 96, sourceDominante: "industrie" },
+});
+
+test("AIR : au-delà d'un seuil SANITAIRE OFFICIEL, une carte chiffrée et sourcée", () => {
+  const r = run(facts({ sante: SANTE_EXPOSEE }), projetClimat("air_sain"));
+  const f = r.facts.find((x) => x.ruleId === "territoire.sante-air")!;
+  assert.equal(f.role, "verification");
+  assert.match(f.statement, /14,5 µg\/m³/); // la valeur mesurée, pas un percentile
+  assert.match(f.statement, /Organisation mondiale de la santé/);
+  assert.match(f.statement, /10 µg\/m³/); // le seuil, nommé
+  // LE GRAIN EST LA VRAIE LIMITE : le NO2 est le marqueur du trafic, il s'effondre à quelques dizaines
+  // de mètres d'un axe. Une moyenne communale ne dit rien de la rue, et la carte le dit.
+  assert.match(f.limitation!, /d'une rue à l'autre/);
+});
+
+test("AIR : sous les seuils, satisfied SILENCIEUX (mais ce n'est PAS « l'air est pur »)", () => {
+  // Aucune commune française ne descend sous la recommandation OMS pour les particules fines (5 µg/m³).
+  // `satisfied` dit « aucun seuil officiel dépassé », jamais « l'air est pur » : la nuance appelle mismatch.
+  const r = run(facts({ sante: SANTE_EPARGNEE }), projetClimat("air_sain"));
+  assert.equal(r.evaluations.find((x) => x.ruleId === "territoire.sante-air")!.outcome, "satisfied");
+  assert.equal(r.facts.some((x) => x.ruleId === "territoire.sante-air"), false);
+});
+
+test("AIR : un polluant non lu -> uncertain, jamais « rien à signaler »", () => {
+  const partiel = buildSanteFacts({ viv: { pm25: 7.1 } }); // pas de NO2
+  const r = run(facts({ sante: partiel }), projetClimat("air_sain"));
+  assert.equal(r.evaluations.find((x) => x.ruleId === "territoire.sante-air")!.outcome, "uncertain");
+});
+
+test("BRUIT : le FAIT est absolu (une autoroute, une distance), le SCORE n'est jamais affiché", () => {
+  const r = run(facts({ sante: SANTE_EXPOSEE }), projetClimat("calme_sonore"));
+  const f = r.facts.find((x) => x.ruleId === "territoire.sante-bruit")!;
+  assert.match(f.statement, /autoroute ou une voie rapide/);
+  assert.match(f.statement, /800 mètres/); // sous le kilomètre, le mètre est l'unité qu'on habite
+  assert.match(f.statement, /futur•e signale ce type de source à partir de 1 km/);
+  assert.doesNotMatch(f.statement, /18|\/100|score/); // le score maison ne sort JAMAIS
+  assert.match(f.action!.label, /carte de bruit stratégique/);
+});
+
+test("BRUIT : loin de toute infrastructure, c'est une BONNE NOUVELLE, pas une donnée manquante", () => {
+  const r = run(facts({ sante: SANTE_EPARGNEE }), projetClimat("calme_sonore"));
+  assert.equal(r.evaluations.find((x) => x.ruleId === "territoire.sante-bruit")!.outcome, "satisfied");
+});
+
+test("INDUSTRIE : la phrase dit la CATÉGORIE LÉGALE, que le lecteur peut retrouver sur Géorisques", () => {
+  const r = run(facts({ sante: SANTE_EXPOSEE }), projetClimat("faible_exposition_industrielle"));
+  const f = r.facts.find((x) => x.ruleId === "territoire.sante-industrie")!;
+  assert.match(f.statement, /Seveso seuil haut/);
+  assert.doesNotMatch(f.statement, /44|score/); // le score hybride maison n'est qu'un déclencheur
+  assert.match(f.action!.label, /Géorisques/);
+});
+
+test("INDUSTRIE : un site banal et lointain ne déclenche rien", () => {
+  const r = run(facts({ sante: SANTE_EPARGNEE }), projetClimat("faible_exposition_industrielle"));
+  assert.equal(r.evaluations.find((x) => x.ruleId === "territoire.sante-industrie")!.outcome, "satisfied");
+});
+
+test("SANTÉ : les trois cartes passent assertFactValid, et aucune n'est decision_critical", () => {
+  const p = project({
+    reformulation: "x", hardConstraints: {},
+    preferences: [
+      { key: "air_sain", weight: 3 }, { key: "calme_sonore", weight: 3 },
+      { key: "faible_exposition_industrielle", weight: 3 },
+    ],
+  });
+  const r = run(facts({ sante: SANTE_EXPOSEE }), p);
+  const santeFacts = r.facts.filter((x) => x.ruleId.startsWith("territoire.sante-"));
+  assert.equal(santeFacts.length, 3);
+  for (const f of santeFacts) {
+    assertFactValid(f, p);
+    assert.notEqual(f.materialityTier, "decision_critical"); // une préférence n'est pas une condition dure
+    assert.ok(f.limitation, "chaque carte dit à quelle maille elle est vraie");
+    assert.ok(f.action, "et ce qu'il reste à aller regarder");
+  }
+});
+
+test("AGRICULTURE : le critère reste NON EXAMINÉ, et c'est assumé", () => {
+  // Aucun seuil défendable au grain commune (l'IFT n'a pas de palier officiel, la part de surface agricole
+  // de l'index monte à 152 %), et le risque réel (la dérive de pulvérisation) dépend des PARCELLES voisines
+  // du logement : il est vrai à une autre maille. Le forcer ici reproduirait la faute de la sécheresse.
+  const r = run(facts({ sante: SANTE_EXPOSEE }), projetClimat("faible_pression_agricole"));
+  assert.equal(r.evaluations.some((e) => e.projectKeys.includes("faible_pression_agricole")), false);
 });

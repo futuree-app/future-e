@@ -5,6 +5,7 @@ import type { IndexCommune, PreferenceKey } from "../comparateur-vie.ts";
 import type { CommuneAttributes } from "../hard-constraints.ts";
 import type { ModuleFacts } from "./decision-fact.ts";
 import type { ClimatFacts } from "./climat-facts.ts";
+import { buildSanteFacts } from "./sante-facts.ts";
 
 export function mapCommuneToModuleFacts(
   entry: IndexCommune,
@@ -31,6 +32,9 @@ export function mapCommuneToModuleFacts(
     catnatInondation: entry.inondation ? entry.inondation.catnat : null,
     inondationRisque: entry.inondation ? entry.inondation.risque : null,
     climat: opts.climat ?? null,
+    // La santé se construit ICI, sans I/O : air, bruit et exposition industrielle sont déjà dans l'index.
+    // (Le climat, lui, exige les scénarios DRIAS complets, qui vivent dans un fichier à part.)
+    sante: buildSanteFacts(entry),
     scores,
     hasAddress: opts.hasAddress,
   };

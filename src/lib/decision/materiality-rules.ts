@@ -22,6 +22,18 @@ import {
   trajectoirePhrase, fmtClimat, CLIMAT_HORIZON_LABEL, type ClimatAxe,
 } from "./climat-facts.ts";
 import {
+  bruitEnPhrase, industrieEnPhrase, industrieGlose, distanceEnPhrase,
+  AIR_NO2_OMS, AIR_PM25_UE_2030, BRUIT_MAX_KM, type BruitSource,
+} from "./sante-facts.ts";
+
+// Majuscule en tête de phrase (les libellés de sante-facts sont des fragments réutilisables).
+const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
+
+// La forme COURTE, pour la preuve (l'observedValue n'est pas une phrase).
+const BRUIT_LABEL_COURT: Record<BruitSource, string> = {
+  auto: "autoroute", rail: "voie ferrée", aero: "aéroport",
+};
+import {
   assessHardConstraints,
   type EvaluationContext, type HardConstraintAssessment, type HardConstraintKey,
 } from "../hard-constraints.ts";
@@ -251,6 +263,129 @@ const rulePluies: DecisionRule = {
   },
 };
 
+
+// ── LES RÈGLES DE SANTÉ ENVIRONNEMENTALE ─────────────────────────────────────
+//
+// Même grammaire que le climat : un risque n'est pas une incertitude. Le constat est ÉTABLI ; c'est sa
+// portée décisionnelle qui s'instruit plus finement. Et même table de vérité, avec le même piège : une
+// donnée absente n'est JAMAIS une bonne nouvelle.
+//
+// `faible_pression_agricole` N'EST PAS ICI, et c'est délibéré : aucun seuil défendable au grain commune,
+// et le risque réel (la dérive de pulvérisation) dépend des PARCELLES voisines du logement. Il est vrai à
+// une autre maille. cf. sante-facts.ts et ADR-0010.
+
+const RULE_AIR = "territoire.sante-air";
+const ruleAir: DecisionRule = {
+  id: RULE_AIR,
+  module: "territoire",
+  evaluate: (f, p): RuleEvaluation => {
+    const key: PreferenceKey = "air_sain";
+    const ret = (outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
+      ({ ruleId: RULE_AIR, projectKeys: [key], outcome, facts, reason });
+
+    if (preferenceWeight(p, key) < 2) return ret("not_applicable", [], "priorité non déclarée");
+    const air = f.sante?.air;
+    if (!air) return ret("uncertain", [], "qualité de l'air indisponible");
+
+    if (!air.notable) {
+      // ATTENTION AU SENS DE CE `satisfied`. Il ne dit PAS « l'air est pur ici » : AUCUNE commune française
+      // ne descend sous la recommandation OMS pour les particules fines (5 µg/m³ ; minimum national :
+      // 5,6). Il dit « l'air ne dépasse aucun seuil sanitaire officiel ». La nuance entre les deux est
+      // exactement ce que le cinquième rôle de fait (`mismatch`) devra savoir dire.
+      return air.complet
+        ? ret("satisfied", [], "aucun seuil sanitaire officiel dépassé")
+        : ret("uncertain", [], "un polluant n'a pas pu être lu");
+    }
+
+    const bouts: string[] = [];
+    if (air.no2 != null && air.no2 >= AIR_NO2_OMS) {
+      bouts.push(`le dioxyde d'azote atteint ${air.no2.toFixed(1).replace(".", ",")} µg/m³ en moyenne annuelle, au-delà de la recommandation de l'Organisation mondiale de la santé (${AIR_NO2_OMS} µg/m³)`);
+    }
+    if (air.pm25 != null && air.pm25 >= AIR_PM25_UE_2030) {
+      bouts.push(`les particules fines atteignent ${air.pm25.toFixed(1).replace(".", ",")} µg/m³, au-delà de la valeur limite européenne applicable en 2030 (${AIR_PM25_UE_2030} µg/m³)`);
+    }
+
+    const fact: VerificationFact = {
+      id: `${f.insee}:sante-air`, ruleId: RULE_AIR, sourceFactIds: ["viv.pm25", "viv.no2"], module: "territoire",
+      role: "verification", materialityTier: tierFor(p, key),
+      topic: `la qualité de l'air à ${f.nom}`,
+      statement: `Sur cette commune, ${bouts.join(", et ")}.`,
+      // LE GRAIN EST LA VRAIE LIMITE ICI, et il faut le dire : le dioxyde d'azote est le marqueur du
+      // trafic, et il s'effondre à quelques dizaines de mètres d'un axe. Une moyenne communale ne dit rien
+      // de la rue.
+      limitation: "Cette moyenne est communale. Le dioxyde d'azote, marqueur du trafic, varie fortement d'une rue à l'autre : il chute de moitié à quelques dizaines de mètres d'un axe passant.",
+      evidence: [{ factId: "viv.pm25", module: "territoire", label: `Air · ${f.nom}`, observedValue: air.pm25 != null ? `PM2,5 ${air.pm25.toFixed(1).replace(".", ",")} µg/m³` : undefined, grain: "commune", href: territoireHref }],
+      action: { type: "verifier_sur_place", label: "Regardez la position exacte du logement par rapport aux axes routiers, et la façade sur laquelle donnent les chambres" },
+    };
+    return ret("verification", [fact], "seuil sanitaire officiel dépassé");
+  },
+};
+
+const RULE_BRUIT = "territoire.sante-bruit";
+const ruleBruit: DecisionRule = {
+  id: RULE_BRUIT,
+  module: "territoire",
+  evaluate: (f, p): RuleEvaluation => {
+    const key: PreferenceKey = "calme_sonore";
+    const ret = (outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
+      ({ ruleId: RULE_BRUIT, projectKeys: [key], outcome, facts, reason });
+
+    if (preferenceWeight(p, key) < 2) return ret("not_applicable", [], "priorité non déclarée");
+    const b = f.sante?.bruit;
+    if (!b?.lu) return ret("uncertain", [], "exposition sonore indisponible");
+    // Une commune SANS source dominante n'est pas une commune non lue : elle est loin de toute
+    // infrastructure bruyante, et c'est une bonne nouvelle qu'on a le droit de dire.
+    if (!b.notable || b.source == null || b.distanceKm == null) {
+      return ret("satisfied", [], "aucune infrastructure bruyante à portée");
+    }
+
+    const seuil = BRUIT_MAX_KM[b.source];
+    const fact: VerificationFact = {
+      id: `${f.insee}:sante-bruit`, ruleId: RULE_BRUIT, sourceFactIds: ["calmeSonore.sourceDominante", "calmeSonore.distanceKm"], module: "territoire",
+      role: "verification", materialityTier: tierFor(p, key),
+      topic: `le bruit des infrastructures à ${f.nom}`,
+      // LE FAIT EST ABSOLU (une infrastructure, une distance) ; le SEUIL est une convention de produit, et
+      // elle est dite. Le score maison, lui, n'est jamais affiché : il n'est qu'un déclencheur.
+      statement: `${cap(bruitEnPhrase(b.source, b.distanceKm))}. futur•e signale ce type de source à partir de ${distanceEnPhrase(seuil)}.`,
+      // Ce qui rend cette vérification LÉGITIME : la donnée qui trancherait vraiment (les décibels à la
+      // façade) existe, elle est publique, et nous ne pouvons pas la lire à la place du lecteur.
+      limitation: "Cette distance est mesurée depuis le point de référence de la commune, pas depuis une adresse. Le bruit réellement perçu dépend de la façade, de l'étage, du relief et de l'isolation.",
+      evidence: [{ factId: "calmeSonore", module: "territoire", label: `Bruit · ${f.nom}`, observedValue: `${BRUIT_LABEL_COURT[b.source]} à ${distanceEnPhrase(b.distanceKm)}`, grain: "commune", href: territoireHref }],
+      action: { type: "verifier_sur_place", label: "Consultez la carte de bruit stratégique de la commune, et allez écouter sur place à plusieurs heures, fenêtres ouvertes" },
+    };
+    return ret("verification", [fact], "infrastructure bruyante à portée");
+  },
+};
+
+const RULE_INDUSTRIE = "territoire.sante-industrie";
+const ruleIndustrie: DecisionRule = {
+  id: RULE_INDUSTRIE,
+  module: "territoire",
+  evaluate: (f, p): RuleEvaluation => {
+    const key: PreferenceKey = "faible_exposition_industrielle";
+    const ret = (outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
+      ({ ruleId: RULE_INDUSTRIE, projectKeys: [key], outcome, facts, reason });
+
+    if (preferenceWeight(p, key) < 2) return ret("not_applicable", [], "priorité non déclarée");
+    const i = f.sante?.industrie;
+    if (!i?.lu) return ret("uncertain", [], "exposition industrielle indisponible");
+    if (!i.notable || i.classe == null) return ret("satisfied", [], "aucun site industriel à risque à portée");
+
+    const fact: VerificationFact = {
+      id: `${f.insee}:sante-industrie`, ruleId: RULE_INDUSTRIE, sourceFactIds: ["expoIndustrielle.sourceDominante"], module: "territoire",
+      role: "verification", materialityTier: tierFor(p, key),
+      topic: `l'exposition industrielle à ${f.nom}`,
+      // LA CATÉGORIE EST LÉGALE, donc opposable, et le lecteur peut la retrouver sur Géorisques. Le score
+      // maison (exposition hybride, rayon de 8 km) n'est qu'un déclencheur : il n'est jamais affiché.
+      statement: `${cap(industrieEnPhrase(i.classe))} est recensé à proximité de cette commune. ${industrieGlose(i.classe)}`.trim(),
+      limitation: "Cette exposition est lue dans un rayon autour du point de référence de la commune. La distance réelle depuis un logement, et le plan de prévention qui s'y applique, se vérifient à l'adresse.",
+      evidence: [{ factId: "expoIndustrielle", module: "territoire", label: `Industrie · ${f.nom}`, grain: "commune", href: territoireHref }],
+      action: { type: "obtenir_document", label: "Consultez l'état des risques et le plan de prévention des risques technologiques applicables à l'adresse (Géorisques)" },
+    };
+    return ret("verification", [fact], "site industriel à risque à portée");
+  },
+};
+
 export const REGISTRY: DecisionRule[] = [
   // Les 11 contraintes dures, une règle par clé, toutes au-dessus de l'évaluateur PARTAGÉ avec le
   // comparateur. Le dossier n'en examinait que 3 (mer, taille, département).
@@ -264,6 +399,9 @@ export const REGISTRY: DecisionRule[] = [
   ruleChaleur,
   ruleFeu,
   rulePluies,
+  ruleAir,
+  ruleBruit,
+  ruleIndustrie,
   ruleInondation,
   ...LOGEMENT_RULES,
 ];

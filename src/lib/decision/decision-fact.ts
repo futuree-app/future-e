@@ -4,6 +4,7 @@
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { UserProject } from "../user-project.ts";
 import type { ClimatFacts } from "./climat-facts.ts";
+import type { SanteFacts } from "./sante-facts.ts";
 import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
 import type { CriteriaSummary } from "./criteria-registry.ts";
 import type {
@@ -100,6 +101,10 @@ export type ModuleFacts = CommuneAttributes & {
   // NULLABLE mais NON OPTIONNEL : `undefined` créerait un troisième état entre « la donnée est là » et
   // « on l'a cherchée sans la trouver », et une règle finirait par confondre les deux.
   climat: ClimatFacts | null;
+  // La santé environnementale au grain COMMUNE (air, bruit des infrastructures, exposition industrielle).
+  // Elle n'est pas un module (ADR-0010) : c'est une lecture, et ses autres faits (radon, argiles, bruit de
+  // façade) sont vrais au grain ADRESSE, dans Logement.
+  sante: SanteFacts | null;
   scores: Partial<Record<PreferenceKey, number | null>>;
   hasAddress: boolean;
   logement?: LogementFacts; // slice 1.5 : présent seulement quand une analyse adresse est là
