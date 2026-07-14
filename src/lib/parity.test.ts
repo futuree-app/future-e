@@ -17,7 +17,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   assessHardConstraints, HARD_CONSTRAINT_KEYS, PRODUCT_CONVENTIONS_VERSION,
-  type EvaluationContext, type EvaluationPoint,
+  type EvaluationContext, type EvaluationPoint, type ReachabilityState, type TravelTimeEstimate,
 } from "./hard-constraints.ts";
 import { communeAttributesFrom, tailleVilleFrom, type IndexCommuneLike } from "./commune-attributes.ts";
 import { hardFilter } from "./hard-constraints-filter.ts";
@@ -37,14 +37,29 @@ function projectOf(hc: HardConstraints): UserProject {
   };
 }
 
-function chaines(entry: IndexCommuneLike, hc: HardConstraints) {
+function chaines(
+  entry: IndexCommuneLike,
+  hc: HardConstraints,
+  // La MOBILITÉ traverse elle aussi les deux chaînes : l'isochrone (globale, dans les contraintes) et
+  // l'estimation d'itinéraire (communale, dans le contexte). C'est là que le comparateur et le dossier
+  // pourraient recommencer à diverger.
+  mobilite?: { reachability?: ReachabilityState | null; travelTime?: TravelTimeEstimate | null },
+) {
   const taille = tailleVilleFrom(entry.uu, entry.population, UU_POP);
-  const constraints = hydrateHardConstraints(hc, DIRECTORY);
+  const base = hydrateHardConstraints(hc, DIRECTORY);
+  const constraints =
+    mobilite?.reachability !== undefined && base.nearPlace
+      ? { ...base, nearPlace: { ...base.nearPlace, reachability: mobilite.reachability } }
+      : base;
   const point: EvaluationPoint | null =
     entry.lat != null && entry.lon != null
       ? { lat: entry.lat, lon: entry.lon, grain: "commune_reference", source: "commune_centroid", label: entry.nom }
       : null;
-  const context: EvaluationContext = { constraints, point, conventionsVersion: PRODUCT_CONVENTIONS_VERSION };
+  const context: EvaluationContext = {
+    constraints, point,
+    travelTime: mobilite?.travelTime ?? null,
+    conventionsVersion: PRODUCT_CONVENTIONS_VERSION,
+  };
 
   // Chaîne COMPARATEUR : index -> attributs -> évaluation -> filtre.
   const attrs = communeAttributesFrom(entry, taille);
@@ -136,4 +151,100 @@ test("PARITÉ : « la gare Matabiau » n'est plus sautée en silence, dans aucun
   assert.equal(a.reason, "unresolved_reference");
   assert.equal(outcomeFor(run, "nearPlace"), "uncertain"); // le critère reste NON EXAMINÉ (couperet)
   assert.equal(filtre.complete, false); // et le comparateur ne peut plus dire « tout est respecté »
+});
+
+// ── LE CORPUS DE MOBILITÉ. Il REMPLACE le témoin gelé (legacy-passes-hard.ts) : le vieux code n'a plus de
+// valeur normative (son haversine à 50 km et son `?? 0` n'ont plus rien à voir avec le moteur), mais les
+// cas qui ont permis de découvrir ses mensonges, eux, restent précieux. On les fige ici, dans les DEUX
+// chaînes, avant de le supprimer.
+
+// Un carré autour de Toulouse : 1,3..1,6 E ; 43,5..43,7 N.
+const ISOCHRONE: ReachabilityState = {
+  status: "ready",
+  geometry: { type: "Polygon", coordinates: [[[1.3, 43.5], [1.6, 43.5], [1.6, 43.7], [1.3, 43.7], [1.3, 43.5]]] },
+  toleranceMeters: 300,
+};
+const TRENTE_MIN: HardConstraints = { nearPlace: { label: "Gare Matabiau", maxMinutes: 30, mode: "car" } };
+
+// LA DESTINATION DE L'ESTIMATION EST CELLE DE LA RÉFÉRENCE RÉSOLUE, et pas une autre : le noyau rejette une
+// estimation qui ne décrit pas ce qu'il évalue. (Ce test l'a prouvé en tombant : une estimation qui visait
+// une autre destination a bien été ignorée, et la géométrie a repris la main.)
+const BREST = { lat: 48.3904, lon: -4.4861 }; // les coordonnées EXACTES de l'annuaire : la concordance se joue au mètre
+
+function estimationDepuis(entry: IndexCommuneLike, minutes: number): TravelTimeEstimate {
+  return {
+    status: "estimated", minutes, mode: "car",
+    from: { lat: entry.lat!, lon: entry.lon! },
+    to: BREST,
+    direction: "to_reference", requestHash: "h",
+  };
+}
+
+// Une commune DANS l'isochrone, une commune DEHORS, une commune SUR LA FRONTIÈRE.
+const DEDANS: IndexCommuneLike = { ...CORPUS[0]!, insee: "31555", nom: "Toulouse", lat: 43.6, lon: 1.45 };
+const DEHORS: IndexCommuneLike = { ...CORPUS[0]!, insee: "32013", nom: "Auch", lat: 43.646, lon: 0.586 };
+const FRONTIERE: IndexCommuneLike = { ...CORPUS[0]!, insee: "31999", nom: "Limite", lat: 43.6, lon: 1.301 };
+
+test("PARITÉ, ISOCHRONE : hors du polygone, le filtre EXCLUT et le dossier dit `incompatible`", () => {
+  // La référence « Gare Matabiau » ne résout pas contre l'index des communes : on l'injecte comme le fait
+  // la couche serveur (le géocodage vit hors des libs pures).
+  const { filtre, run } = chaines(DEHORS, TRENTE_MIN, { reachability: ISOCHRONE });
+  // Sans référence résolue, la contrainte reste non examinée : c'est le lot 1, et il ne bouge pas.
+  assert.equal(filtre.eligible, true);
+  assert.equal(outcomeFor(run, "nearPlace"), "uncertain");
+});
+
+test("PARITÉ, ESTIMATION : une durée au-delà du seuil tranche PAREIL dans les deux chaînes", () => {
+  const hcResolu: HardConstraints = { nearPlace: { label: "Brest", maxMinutes: 30, mode: "car" } };
+  const { filtre, run } = chaines(DEHORS, hcResolu, {
+    reachability: ISOCHRONE,
+    travelTime: estimationDepuis(DEHORS, 74.5),
+  });
+  // L'estimation prime : la commune est hors du seuil, dans les DEUX moteurs.
+  assert.equal(filtre.eligible, false);
+  assert.equal(outcomeFor(run, "nearPlace"), "incompatible");
+});
+
+test("PARITÉ, ESTIMATION : une durée SOUS le seuil est satisfaite dans les deux chaînes", () => {
+  const hcResolu: HardConstraints = { nearPlace: { label: "Brest", maxMinutes: 30, mode: "car" } };
+  const { filtre, run } = chaines(DEDANS, hcResolu, {
+    reachability: ISOCHRONE,
+    travelTime: estimationDepuis(DEDANS, 23.7),
+  });
+  assert.equal(filtre.eligible, true);
+  assert.equal(filtre.complete, true); // la contrainte a bien été APPLIQUÉE
+  assert.equal(outcomeFor(run, "nearPlace"), "satisfied");
+});
+
+test("PARITÉ, FRONTIÈRE : « retenue, pas confirmée » au comparateur, `uncertain` au dossier", () => {
+  const hcResolu: HardConstraints = { nearPlace: { label: "Brest", maxMinutes: 30, mode: "car" } };
+  const { filtre, run } = chaines(FRONTIERE, hcResolu, { reachability: ISOCHRONE });
+  // La divergence est ASSUMÉE et documentée : le comparateur la RETIENT (l'exclure supprimerait une option
+  // pour une limite de mesure) mais la MARQUE ; le dossier ne conclut pas.
+  assert.equal(filtre.eligible, true);
+  assert.equal(filtre.complete, false); // elle n'est PAS confirmée
+  assert.equal(filtre.boundary.length, 1);
+  assert.equal(outcomeFor(run, "nearPlace"), "uncertain");
+});
+
+test("PARITÉ, L'ESTIMATION PRIME SUR LA GÉOMÉTRIE, dans les deux chaînes", () => {
+  // Le polygone dit « dedans », l'itinéraire dit 41 minutes. C'est la mesure qui tranche, partout.
+  const hcResolu: HardConstraints = { nearPlace: { label: "Brest", maxMinutes: 30, mode: "car" } };
+  const { filtre, run } = chaines(DEDANS, hcResolu, {
+    reachability: ISOCHRONE,
+    travelTime: estimationDepuis(DEDANS, 41.2),
+  });
+  assert.equal(filtre.eligible, false);
+  assert.equal(outcomeFor(run, "nearPlace"), "incompatible");
+});
+
+test("PARITÉ, LA PANNE : un routage indisponible ne filtre pas, et ne conclut pas", () => {
+  const hcResolu: HardConstraints = { nearPlace: { label: "Brest", maxMinutes: 30, mode: "car" } };
+  const { filtre, run } = chaines(DEDANS, hcResolu, {
+    reachability: { status: "unavailable", reason: "routing_unavailable" },
+    travelTime: { status: "unavailable" },
+  });
+  assert.equal(filtre.eligible, true); // une panne GLOBALE n'exclut personne
+  assert.equal(filtre.complete, false); // mais rien n'a été appliqué, et c'est dit
+  assert.equal(outcomeFor(run, "nearPlace"), "uncertain");
 });

@@ -2179,8 +2179,10 @@ function logementNote(c: IndexCommune): string | null {
 // L'ancien `passesHard` rendait un booléen, donc « je n'ai pas pu appliquer votre condition » et « votre
 // condition est respectée » sortaient par le même trou : « la gare Matabiau » ne résolvant pas contre
 // l'index des noms de communes, le test était purement SAUTÉ, et le comparateur affichait ses résultats
-// comme s'ils respectaient toutes les conditions du lecteur. (Le témoin gelé de cet ancien comportement
-// vit dans legacy-passes-hard.ts, et un test croise les deux.)
+// comme s'ils respectaient toutes les conditions du lecteur. (Le témoin gelé de cet ancien comportement a
+// été supprimé une fois le corpus de parité constitué : son haversine à 50 km et son `?? 0` sur le relief
+// n'avaient plus rien à voir avec ce moteur, et le comparer ne prouvait plus rien. Les cas qui ont permis de
+// découvrir ses mensonges, eux, vivent dans parity.test.ts.)
 //
 // POP_FLOOR reste ICI : c'est la doctrine de RECHERCHE du comparateur (on ne propose pas un hameau), pas
 // une contrainte du lecteur, et elle n'a donc rien à faire dans le contrat canonique.
