@@ -248,8 +248,9 @@ export default function PourquoiPage() {
                   margin: '0 0 28px',
                 }}
               >
-                Votre futur lieu de vie ne tient pas{' '}
-                <em style={{ color: C.muted, fontStyle: 'italic' }}>dans&nbsp;une&nbsp;annonce</em>
+                Votre futur lieu de vie
+                <br />
+                ne tient pas <em style={{ color: C.muted, fontStyle: 'italic' }}>dans&nbsp;une&nbsp;annonce</em>
               </h1>
               <p style={{ fontSize: '1.18rem', color: C.muted, lineHeight: 1.75, margin: 0 }}>
                 Une commune, un quartier, un logement : futur•e rassemble ce qui est connu,
@@ -623,39 +624,6 @@ export default function PourquoiPage() {
           </div>
         </section>
 
-        {/* ————— PONT RÉSIDENT ————— */}
-        <section
-          style={{
-            ...glass({ padding: '26px 28px', borderRadius: 12 }),
-            borderColor: 'rgba(96, 165, 250, 0.25)',
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            gap: '16px 28px',
-            marginBottom: 8,
-          }}
-        >
-          <div style={{ flex: '1 1 380px' }}>
-            <h2 style={{ ...h2, fontSize: '1.45rem', margin: '0 0 10px' }}>Vous y vivez déjà ?</h2>
-            <p style={{ fontSize: 15.5, color: C.muted, lineHeight: 1.7, margin: 0 }}>
-              La démarche est la même. Comprendre ce qui est connu sur votre commune, ce qui
-              change avec le climat, ce qui ne vous a pas été dit au moment d&apos;arriver,
-              parce que rester, adapter son logement ou partir est aussi
-              une&nbsp;décision.
-            </p>
-          </div>
-          <Link
-            href="/"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 500,
-              padding: '10px 20px', borderRadius: 8, textDecoration: 'none', whiteSpace: 'nowrap',
-              background: 'transparent', color: C.text, border: `1px solid ${C.borderHi}`,
-            }}
-          >
-            Analyser ma commune →
-          </Link>
-        </section>
-
         {/* ————— CLÔTURE ————— */}
         <section style={{ marginTop: 72, paddingTop: 48, borderTop: `1px solid ${C.border}` }}>
           <p
@@ -673,14 +641,14 @@ export default function PourquoiPage() {
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <Link
-              href="/comparateur"
+              href="/"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 500,
                 padding: '10px 20px', borderRadius: 8, textDecoration: 'none',
                 background: 'transparent', color: C.muted, border: `1px solid ${C.borderHi}`,
               }}
             >
-              Comparer des territoires
+              Analyser une commune
             </Link>
             <Link
               href="/ou-vivre"
