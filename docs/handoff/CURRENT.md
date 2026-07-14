@@ -1,193 +1,149 @@
-# Passation — reprise sur la COUVERTURE du dossier de décision
+# Passation — le lot 2 des contraintes dures (BAN + isochrone), puis `mismatch`
 
-**Horodatage** : 2026-07-14 · **Branche** : `main` (propre, à jour, rien en attente)
-**Dernier commit** : `1d986f4` (merge PR #19) · **Aucune PR ouverte.**
-
----
-
-## Objectif en cours
-
-Le dossier de décision (« En une minute », hub `/rapport`) sait désormais **décider honnêtement** et
-**bien dire** ce qu'il décide. Il ne sait pas encore **regarder grand-chose** : le moteur n'examine que
-3 contraintes dures sur 11, et sur un projet réel la moitié des priorités déclarées ne sont examinées
-par **aucune règle**.
-
-**Le chantier à ouvrir est donc la COUVERTURE : ajouter des règles.** C'est ce qui rend le verdict
-tiède aujourd'hui, et aucune amélioration de la prose ne le corrigera.
+**Horodatage** : 2026-07-14 · **Branche** : `main` (propre, poussée, rien en attente)
+**Derniers commits** : `f069c24` (chantier A lot 1) · `13a356c` (réécriture `/pourquoi`) · **Aucune PR ouverte.**
 
 ---
 
-## Fait dans la session précédente (livré et mergé sur `main`)
+## Fait dans la session précédente
 
-**Slices 2 + 2.1 du dossier de décision**, PR #19 mergée (`1d986f4`). Spec et plan :
-`docs/superpowers/specs/2026-07-13-dossier-decision-slice-2-1-verdict-correspondance-design.md`
-`docs/superpowers/plans/2026-07-13-dossier-decision-slice-2-1-verdict-correspondance.md`
+**Chantier A, lot 1 : les contraintes dures deviennent des évaluations canoniques.** Livré, poussé
+sur `main`, vérifié à l'écran. Spec et plan :
+`docs/superpowers/specs/2026-07-14-contraintes-dures-evaluations-canoniques-design.md`
+`docs/superpowers/plans/2026-07-14-contraintes-dures-evaluations-canoniques.md`
 
-- **Slice 2** : la conclusion est rédigée par un LLM sous contrat strict. Le déterministe DÉCIDE
-  (`conclusion-plan.ts` : présence, ordre gravé, sources, matière obligatoire, texte de repli), l'IA
-  ARTICULE, et `conclusion-validate.ts` VÉRIFIE (9 motifs de rejet, récupération bloc par bloc, repli
-  permanent). **Le verdict n'est jamais généré.** Artefact persisté (`decision_narrative`).
-- **Slice 2.1** : le déterministe gagne le droit de dire qu'un lieu **correspond**, à condition de le
-  prouver. `criteria-registry.ts` mesure **couverture × orientation** sur les critères DÉCLARÉS.
-- **Production** : flag `DOSSIER_NARRATIVE=true` posé sur Vercel (Production) et **redéployé**. La
-  conclusion rédigée est donc **ACTIVE en prod**.
+Le handoff précédent disait « le chantier à ouvrir est la COUVERTURE : ajouter des règles ».
+L'inventaire a montré que le manque de couverture cachait un problème de **vérité**, et il a remonté
+quatre mensonges que le produit servait au lecteur :
 
----
+1. **Le comparateur laissait tomber une condition non négociable, en silence.** « La gare Matabiau »
+   n'étant pas un nom de commune, `passesHard` **sautait purement le test**, et le comparateur
+   affichait ses résultats comme s'ils respectaient toutes les conditions du lecteur.
+2. **Les deux moteurs divergeaient déjà sur la taille** (agglomération pour le filtre, population
+   communale pour le dossier) : une commune de 8 000 habitants dans l'unité urbaine de Lyon était
+   **exclue par l'un et déclarée conforme par l'autre**, pour le même projet.
+3. **Trois seuils étaient inventés en silence** : 30 km pour la mer, 50 km autour d'un lieu nommé, et
+   la mutation de `communeSize` par `sizeRelativeTo`.
+4. **Une contrainte composite partiellement résolue se déclarait satisfaite** (« quitter Lyon ET
+   Saint-Jean », dont seul Lyon se résout).
 
-## Décisions prises (porteur), pas encore dans le vault
+L'architecture qui en sort, et qu'il faut respecter en ajoutant quoi que ce soit :
 
-1. **Le verdict répond à la correspondance, plus à l'absence de contradiction.** « Aucune contrainte
-   n'est contredite » décrivait l'absence d'un problème ; le lecteur demande si le lieu lui convient.
-   Le déterministe le dit, **adossé à deux mesures** (couverture × orientation), jamais à une intuition.
-2. **Ce n'est PAS un solde** : rien ne compense. Un critère satisfait ne rachète jamais une réserve
-   critique. **Couperet** : tant qu'une contrainte dure n'a pas été testée, la couverture ne peut pas
-   être dite « élevée », quel que soit le ratio.
-3. **Aucune phrase ne promet un positif qui n'existe pas** (`hasFavorable`, `favorableCount ≥ 2` pour
-   « plusieurs dimensions », cas « rien d'examiné »).
-4. **La conclusion NOMME, les cartes DÉMONTRENT.** D'où `DecisionFact.topic`. Et on nomme **tout** :
-   la commune (« Toulouse », pas « ce lieu »), les contraintes telles que le lecteur les a posées
-   (« la gare Matabiau », pas « un lieu »).
-5. **Le `lead` (single/tied) est de la TUYAUTERIE.** Ne JAMAIS écrire « aucun ne prend le dessus » /
-   « des poids comparables » : le lecteur demande quoi regarder, pas comment le moteur trie. On LISTE.
-
----
-
-## PROCHAINE ÉTAPE IMMÉDIATE : élargir la couverture
-
-**Le geste à faire** : ajouter des règles au registre (`src/lib/decision/materiality-rules.ts`), en
-priorité sur les critères que les lecteurs déclarent le plus et que personne n'examine.
-
-### Ce qui manque, mesuré sur un projet réel (Toulouse, 7 rue du Taur)
-
-Projet de test enregistré sur le compte de test : *« rester impérativement en Haute-Garonne, à moins de
-30 minutes de la gare Matabiau, étés supportables, faible risque d'inondation, cadre calme, collèges et
-lycées, vie locale, espaces naturels. »*
-
-| Critère déclaré | Examiné ? |
-|---|---|
-| `departements` (Haute-Garonne) | ✅ règle `territoire.departement-hors-liste` |
-| `nearPlace` (gare Matabiau) | ❌ **aucune règle** (il faudrait géocoder le label + les coords commune) |
-| `faible_risque_inondation` | ✅ règle `territoire.inondation-exposition` |
-| `faible_chaleur` (étés plus frais) | ❌ **plus examinée dès qu'une adresse est renseignée** (piège ci-dessous) |
-| `cadre_calme` | ❌ aucune règle (le score `calme_sonore` existe pourtant) |
-| `acces_ecoles` | ❌ aucune règle (score BPE existant) |
-| `vie_locale` | ❌ aucune règle (score existant) |
-| `nature` | ❌ aucune règle (score existant) |
-
-**Le gisement est là** : l'index du comparateur porte déjà ~28 scores de préférence (cf.
-`PREFERENCE_LABELS` dans `src/lib/comparateur-labels.ts`), et `ModuleFacts.scores` les expose **déjà**
-aux règles. Beaucoup de critères peuvent être couverts par une règle de quelques lignes, **sans
-nouvelle source de données**. Commencer par là avant de chercher de la donnée neuve.
-
-Contraintes dures couvertes : 3 sur 11 (`nearSea`, `communeSize`, `departements`). Non couvertes :
-`zones`, `excludeZones`, `montagne`, `reliefProche`, `excludeSea`, `nearPlace`, `excludePlace`,
-`sizeRelativeTo`.
-
-### Comment ajouter une règle (le contrat, à respecter à la lettre)
-
-Dans `src/lib/decision/materiality-rules.ts`, ajouter un `DecisionRule` et l'inscrire dans `REGISTRY`.
-
-```ts
-const RULE_X = "territoire.mon-critere";
-const ruleX: DecisionRule = {
-  id: RULE_X,
-  module: "territoire",
-  hardConstraint: "maCleDure",           // SEULEMENT si la règle examine une contrainte dure
-  evaluate: (f, p): RuleEvaluation => {
-    // f = ModuleFacts (insee, nom, scores, population, logement?…) ; p = UserProject
-    if (/* le critère n'est pas déclaré */) {
-      return { ruleId: RULE_X, projectKeys: ["ma_cle"], outcome: "not_applicable", facts: [], reason: "non déclaré" };
-    }
-    if (/* la donnée manque */) {
-      return { ruleId: RULE_X, projectKeys: ["ma_cle"], outcome: "uncertain", facts: [], reason: "donnée absente" };
-    }
-    if (/* tout va bien */) {
-      return { ruleId: RULE_X, projectKeys: ["ma_cle"], outcome: "satisfied", facts: [], reason: "rien à redire" };
-    }
-    const fact: VerificationFact = { /* … */ topic: "…", statement: "…", /* … */ };
-    return { ruleId: RULE_X, projectKeys: ["ma_cle"], outcome: "verification", facts: [fact], reason: "…" };
-  },
-};
+```
+contrainte déclarée
+  → ÉVALUATION CANONIQUE       (la vérité métier : ce qui est constaté)
+    → politique du comparateur (RECHERCHE : dans le doute, ne pas proposer)
+    → politique du dossier     (RAPPORT : une absence n'est JAMAIS une incompatibilité)
 ```
 
-**Les quatre invariants qui mordent, et qui sont testés :**
+---
 
-1. **`not_applicable` = HORS SUJET** (le critère n'est pas déclaré, la règle ne s'applique pas).
-   **`satisfied` = déclaré, examiné, rien à redire** : silencieux (aucun fait), mais c'est un point
-   **favorable** et il **fait monter la couverture**. Ne JAMAIS rendre `not_applicable` pour dire « tout
-   va bien » : c'était le bug corrigé en 2.1 (une exposition inondation faible était comptée comme un
-   trou de couverture, et aucun point favorable n'existait jamais).
-2. **`projectKeys` liste les critères que la règle ÉVALUE**, jamais ceux auxquels elle est vaguement
-   « reliée ». Le registre marque ces critères EXAMINÉS : y lister un critère qu'on ne regarde pas
-   gonfle la couverture d'un mensonge.
-3. **Tout fait porte un `topic`** : son SUJET, 3-6 mots, distinct du constat, **sans le grain**
-   (« le retrait-gonflement des argiles », pas « … sous cette adresse » : deux faits d'adresse cités
-   côte à côte répétaient le grain). `assertFactValid` **jette** si le topic manque, dépasse 70
-   caractères ou contient une ponctuation de phrase. Le topic peut porter le nom de la commune quand
-   c'est ELLE qu'il décrit (`` topic: `l'exposition de ${f.nom} à l'inondation` ``).
-4. **Une règle Logement ne peut jamais émettre `incompatibility`** (arbitrage slice 1.5, garde runtime).
+## PROCHAINE ÉTAPE : le lot 2 (les références nommées, pour de vrai)
 
-**Après toute règle ajoutée** :
+Tout est déjà spécifié : **spec §4, §5.1 à §5.7**. Le lot 1 a posé le contrat ; le lot 2 le remplit.
+
+1. **Géocodage BAN** des lieux qui ne sont pas des communes (« la gare Matabiau », « l'hôpital de
+   Purpan »), avec ses **contrôles** (type du résultat, concordance du libellé, proximité du
+   territoire déclaré, score). Un résultat seulement *plausible* ne devient jamais `resolved`.
+2. **Isochrone IGN** (`data.geopf.fr/navigation/isochrone`, Valhalla, sans clé) : un polygone calculé
+   **une fois depuis le lieu**, puis un test point-dans-polygone. **Un temps de trajet n'est jamais
+   évalué par un haversine** : aujourd'hui, « à 30 minutes de la gare Matabiau » rend
+   `unexamined(unsupported_metric)`, et c'est honnête. Bande de tolérance autour de la frontière
+   (`insufficient_precision`) : une incompatibilité ne se décide pas sur quelques mètres de
+   simplification.
+3. **Persistance de la référence résolue** dans le projet (`ResolvedPlaceReference`,
+   `ReachabilityReference` + table `reachability_artifact`), avec `inputHash` et `resolverVersion` :
+   sans l'empreinte de l'ENTRÉE, remplacer « gare Matabiau » par « gare Saint-Jean » garderait en
+   silence les coordonnées de Toulouse.
+4. **Read repair** des projets historiques, **au-dessus** des deux moteurs (jamais dans l'un d'eux).
+5. **L'ambiguïté posée au lecteur** au parse (`ParsedProject.ambiguities` existe déjà) : « vos 30
+   minutes de la gare : à pied, à vélo, en voiture ? », « près de Brest : à quelle distance ? ».
+
+**Piège d'architecture, déjà rencontré** : le comparateur est **ANONYME** (`matchProjects` reçoit un
+`ParsedProject` venu du client, sans compte ni projet persisté). La persistance ne peut donc pas être
+le seul chemin de résolution : `matchProjects` reste le point d'hydratation de ce moteur.
+
+---
+
+## ENSUITE : le chantier B, `mismatch` (la grammaire est incomplète)
+
+Décidé avec le porteur, **pas encore spécifié**. Les quatre rôles de fait existants ne savent pas dire
+la situation la plus fréquente : **un lieu répond MAL à une priorité déclarée, sans que ce soit
+éliminatoire.** Ce n'est ni une incompatibilité (la préférence n'était pas non négociable), ni un
+compromis (rien ne tire en sens inverse), ni une inconnue (la donnée est là, elle est mauvaise), ni
+une vérification (il n'y a rien à aller vérifier : c'est établi).
+
+> **`mismatch` est l'opposé non éliminatoire de `satisfied`.** Un critère déclaré a été effectivement
+> examiné, la donnée est disponible et robuste, et le résultat se situe du côté défavorable de la
+> préférence.
+
+Il entraîne : un nouvel outcome de règle, une **orientation refondue** (`favorable` / `mixed` /
+`unfavorable` / `reserved` / `incompatible` / `indeterminate`), une **table de vérité du verdict
+réécrite**, une **section propre** (un mismatch ne demande pas d'être examiné : il demande d'être
+**arbitré**), et donc un **bump de `DECISION_NARRATIVE_PROMPT_VERSION`** + un re-passage de la sonde.
+La matérialité doit dépendre du **poids déclaré** par le lecteur, pas seulement de l'écart.
+
+C'est seulement après B que les préférences à score (`cadre_calme`, `vie_locale`, `nature`,
+`acces_ecoles`) pourront être couvertes honnêtement : sans `mismatch`, une règle qui les examine
+n'aurait **aucun outcome honnête à rendre** quand le score est mauvais.
+
+---
+
+## Ce qu'il ne faut PAS casser (les invariants du lot 1)
+
+- **Aucun `?? 0`** sur une donnée nullable, nulle part : ni dans un évaluateur, ni dans un appelant,
+  ni dans un test. Le relief absent n'est pas un relief nul ; une commune sans coordonnées n'est pas
+  un point à (0, 0), qui est dans le golfe de Guinée et produirait une incompatibilité **établie**.
+- **Une contrainte composite n'est satisfaite que si TOUTES ses composantes ont été appliquées**
+  (`zones`, `excludeZones`, `excludePlace`) : une composante résolue qui matche décide ; sinon une
+  composante non résolue bloque ; sinon seulement, `satisfied`.
+- **Un seuil que le produit s'est choisi ne produit ni verdict ni filtre.** Les rayons legacy
+  (50 / 30 km) sont des `SearchExplorationHint` : ils classent, ils n'éliminent pas, et ils sont dits.
+- **Les phrases écrivent l'opérateur qu'elles appliquent** (`<=` → « au plus 30 km », jamais « moins
+  de 30 km »).
+- **Le témoin gelé** (`src/lib/legacy-passes-hard.ts`) porte l'ANCIEN filtre avec ses défauts intacts.
+  **Ne jamais l'« améliorer »** : le jour où on le corrige, il cesse d'être un témoin. À supprimer à la
+  fin du lot 2, avec son test.
+- **Les tests de parité** (`src/lib/parity.test.ts`) doivent traverser les **vraies frontières**
+  (mapping, `tailleVille`, hydratation, point d'évaluation). Un test qui partirait d'attributs déjà
+  construits ne prouverait que la cohérence de deux adaptateurs au-dessus du même objet : vrai par
+  construction, et sans valeur.
+- **`server-only` n'est pas résolvable par `node --test`** : tout module qui importe `comparateur-vie`
+  en VALEUR devient non testable. Les libs pures ne l'importent qu'en **type**.
+
+**Après toute modification** :
 ```bash
-node --test src/lib/decision/*.test.ts src/lib/*.test.ts   # 262 verts aujourd'hui
+node --test src/lib/*.test.ts src/lib/decision/*.test.ts   # 350 verts aujourd'hui
 npx tsc --noEmit                                            # doit rendre 0
 ```
 
 ---
 
-## État git
+## Pièges / fils ouverts
 
-- Branche `main`, **propre**, à jour avec `origin/main`. Rien de non commité, rien de non poussé.
-- **Aucune PR ouverte.** PR #19 mergée (`1d986f4`).
-- L'historique a été réécrit une fois (purge d'un mot de passe qui traînait dans le dépôt).
-  **N'écrire aucun identifiant dans le dépôt**, jamais, y compris dans un handoff ou un script de
-  vérification (mettre les scripts jetables hors du dépôt, identifiants par variables d'environnement).
+- **`faible_chaleur` cesse d'être examinée dès qu'une adresse est renseignée** (la règle
+  `territoire.confort-ete-sans-adresse` se désactive sur `hasAddress`). Toujours ouvert : c'est un
+  candidat naturel pour le chantier B.
+- **La sonde reste l'outil de non-régression du prompt** : `node --env-file=.env.local
+  scripts/probe-conclusion.ts` (attendu 15/15). Le lot 1 n'a **pas** touché au prompt, donc pas de
+  bump. Le chantier B, lui, l'imposera.
+- **Le hash de la conclusion porte sur le PLAN narratif**, donc ajouter des règles invalide bien les
+  artefacts déjà persistés. Vérifié.
+- **La conclusion rédigée est ACTIVE en production** (`DOSSIER_NARRATIVE=true` sur Vercel).
+- **Ne jamais utiliser `git add -A`** dans ce dépôt : le porteur édite en parallèle, et trois commits
+  d'un chantier ont avalé une réécriture de `/pourquoi` qui n'avait rien à y faire. Stager les fichiers
+  nommément.
+- L'historique a été réécrit une fois (purge d'un mot de passe). **N'écrire aucun identifiant dans le
+  dépôt**, jamais, y compris dans un handoff ou un script de vérification.
 
 ---
 
 ## À lire d'abord à la reprise
 
-1. `/memory/MEMORY.md`, puis la fiche `project_dossier_decision` (elle porte toute la doctrine des
-   slices 1 → 2.1).
-2. `docs/superpowers/specs/2026-07-13-dossier-decision-slice-2-1-verdict-correspondance-design.md` :
-   **§3.1** (le contrat `not_applicable` / `satisfied`, indispensable AVANT d'écrire une règle),
-   **§4** (couverture × orientation), **§5** (la table de vérité du verdict).
-3. `docs/vault/arbitrages/deterministe-selectionne-ia-formule.md` et
-   `docs/vault/arbitrages/dossier-decision-eliminatoire-contrainte-declaree.md`.
-4. `docs/handoff/AUTO-SNAPSHOT.md` (fraîcheur).
-
-Code à lire dans cet ordre : `decision-fact.ts` (les contrats) → `materiality-rules.ts` (les 6 règles
-existantes, à imiter) → `criteria-registry.ts` (ce que la couverture mesure) → `conclusion-plan.ts`
-(comment un fait devient une phrase).
-
----
-
-## Pièges / fils ouverts
-
-- **`faible_chaleur` cesse d'être examinée dès qu'une adresse est renseignée.** La règle
-  `territoire.confort-ete-sans-adresse` se désactive sur `hasAddress`, et la règle de compromis exige
-  que `acces_transports` soit AUSSI déclaré. Résultat : un lecteur qui déclare « des étés supportables »
-  et donne son adresse voit sa priorité listée comme **non couverte**, à l'écran. C'est honnête, et
-  **c'est le premier trou à boucher**.
-- **La sonde est l'outil de non-régression du prompt** : `node --env-file=.env.local
-  scripts/probe-conclusion.ts` (5 tirages sur le vrai modèle, attendu 15/15). Elle a rattrapé **5
-  contraintes qui ne tenaient pas** alors que tous les tests unitaires étaient verts. **Toute retouche
-  du prompt impose de bumper `DECISION_NARRATIVE_PROMPT_VERSION`** (`conclusion-hash.ts`, actuellement
-  `v6`), et `DECISION_NARRATIVE_CONTRACT_VERSION` (`c2`) si `conclusion-validate` change de contrat.
-  Sans bump, les artefacts déjà écrits continuent d'être servis comme s'ils étaient courants.
-- **Ajouter des règles CHANGE le verdict**, mécaniquement : la couverture monte, l'orientation bouge, et
-  des cases jusqu'ici inatteignables (« Toulouse semble bien correspondre à votre projet ») vont
-  commencer à s'afficher. **Vérifier à l'écran, pas seulement en tests** : les trois derniers défauts de
-  la slice 2.1 (conclusion qui parlait d'elle-même, puis qui recopiait les cartes, puis qui disait « ce
-  lieu » à quelqu'un qui regarde Toulouse) étaient **invisibles en lisant le code**.
-- **`server-only` n'est pas résolvable par `node --test`** : `comparateur-vie.ts` le porte, donc un test
-  qui le VALUE-importe casse (les imports type-only passent). C'est pourquoi le mapping pur vit dans
-  `module-facts-map.ts`.
-- **Aucune génération quand `logementStatus === "pending"`** : le dossier n'est pas final, ce serait un
-  appel Sonnet jeté. À préserver dans `DossierDecisionSection`.
-- **La conclusion rédigée est ACTIVE en production** (`DOSSIER_NARRATIVE=true` sur Vercel). Chaque
-  dossier riche d'un lecteur payant coûte un appel Sonnet, une fois, puis il est persisté et resservi.
-- `run.coveredHardConstraints` (dans `RunResult`) est **legacy et faux** : il marque une contrainte
-  « couverte » dès que l'outcome n'est pas `not_applicable`, donc un `unknown` la déclare examinée.
-  L'assembleur ne s'en sert plus (il passe par le registre). **Ne pas s'y fier ; envisager de le
-  supprimer.**
+1. `/memory/MEMORY.md`, puis la fiche `project_dossier_decision`.
+2. La spec du chantier A : **§4** (le contrat canonique), **§5** (les références nommées et
+   l'isochrone : c'est le lot 2), **§6** (les deux adaptateurs et la parité).
+3. Code, dans cet ordre : `src/lib/hard-constraints.ts` (le noyau et ses 11 évaluateurs) →
+   `hard-constraints-hydrate.ts` (la résolution, au-dessus des moteurs) → `hard-constraints-filter.ts`
+   (la politique du comparateur) → `decision/hard-constraint-rules.ts` (la politique du dossier) →
+   `parity.test.ts` (ce qu'ils n'ont plus le droit de faire).
