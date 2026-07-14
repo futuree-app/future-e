@@ -27,3 +27,14 @@ test("mapping : absence d'inondation -> null (jamais 0)", () => {
   assert.equal(f.inondationRisque, null);
   assert.equal(f.hasAddress, true);
 });
+
+test("le mapping reconstitue rankBands depuis la forme COMPACTE (points de base)", () => {
+  const entry = { insee: "1", nom: "X", dept: "01", lat: 0, lon: 0, distance_cote_km: 0,
+    rankBands: { nature: [1234, 1258] } } as never;
+  const mf = mapCommuneToModuleFacts(entry, {}, { hasAddress: false, tailleVille: 1000, climat: null });
+  assert.deepEqual(mf.rankBands, { nature: { low: 0.1234, high: 0.1258 } });
+});
+test("une commune SANS rankBands rend null (jamais un objet vide)", () => {
+  const entry = { insee: "1", nom: "X", dept: "01", lat: 0, lon: 0, distance_cote_km: 0 } as never;
+  assert.equal(mapCommuneToModuleFacts(entry, {}, { hasAddress: false, tailleVille: 1000, climat: null }).rankBands, null);
+});

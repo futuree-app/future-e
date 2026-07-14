@@ -6,6 +6,7 @@ import type { CommuneAttributes } from "../hard-constraints.ts";
 import type { ModuleFacts } from "./decision-fact.ts";
 import type { ClimatFacts } from "./climat-facts.ts";
 import { buildSanteFacts } from "./sante-facts.ts";
+import type { RankBand } from "./mismatch-facts.ts";
 
 export function mapCommuneToModuleFacts(
   entry: IndexCommune,
@@ -35,6 +36,17 @@ export function mapCommuneToModuleFacts(
     // La santé se construit ICI, sans I/O : air, bruit et exposition industrielle sont déjà dans l'index.
     // (Le climat, lui, exige les scénarios DRIAS complets, qui vivent dans un fichier à part.)
     sante: buildSanteFacts(entry),
+    // Le rang est DANS l'index (forme COMPACTE : points de base 0..10000, l'index fait déjà 67 Mo). On le
+    // reconstitue en fractions, sans le recalculer : la distribution nationale a été figée à l'enrichissement.
+    rankBands: (() => {
+      const raw = (entry as { rankBands?: Record<string, [number, number]> }).rankBands;
+      if (!raw) return null;
+      const out: Record<string, RankBand> = {};
+      for (const [k, band] of Object.entries(raw)) {
+        if (Array.isArray(band) && band.length === 2) out[k] = { low: band[0] / 10000, high: band[1] / 10000 };
+      }
+      return out;
+    })(),
     scores,
     hasAddress: opts.hasAddress,
   };

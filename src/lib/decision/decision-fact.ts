@@ -5,6 +5,7 @@ import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { UserProject } from "../user-project.ts";
 import type { ClimatFacts } from "./climat-facts.ts";
 import type { SanteFacts } from "./sante-facts.ts";
+import type { RankBand } from "./mismatch-facts.ts";
 import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
 import type { CriteriaSummary } from "./criteria-registry.ts";
 import type {
@@ -75,7 +76,18 @@ export type VerificationFact = BaseFact & {
   action: { type: VerificationActionType; label: string };
   limitation?: string;
 };
-export type DecisionFact = IncompatibilityFact | CompromiseFact | UnknownFact | VerificationFact;
+// MISMATCH : le lieu répond MOINS BIEN à une priorité déclarée, sans que ce soit éliminatoire. Pas
+// d'action (rien à vérifier, le constat est établi) ; sa seule limitation possible est le grain.
+export type MismatchFact = BaseFact & {
+  role: "mismatch";
+  projectKey: PreferenceKey;
+  basis: { kind: "relative_position"; rankLow: number; rankHigh: number; universe: "communes_france" };
+  evidence: EvidenceRef[];
+  limitation?: string;
+};
+
+export type DecisionFact =
+  IncompatibilityFact | CompromiseFact | UnknownFact | VerificationFact | MismatchFact;
 
 export type LogementFacts = {
   dpe: "passoire" | "energivore" | "correct" | "absent"; // DPE SAUVEGARDÉ (persisté)
@@ -101,6 +113,9 @@ export type ModuleFacts = CommuneAttributes & {
   // NULLABLE mais NON OPTIONNEL : `undefined` créerait un troisième état entre « la donnée est là » et
   // « on l'a cherchée sans la trouver », et une règle finirait par confondre les deux.
   climat: ClimatFacts | null;
+  // Le rang national à deux bornes, chargé par l'appelant (comme tailleVille, climat). NULLABLE mais NON
+  // optionnel : `undefined` créerait un troisième état entre « lu » et « non lu ».
+  rankBands: Record<string, RankBand> | null;
   // La santé environnementale au grain COMMUNE (air, bruit des infrastructures, exposition industrielle).
   // Elle n'est pas un module (ADR-0010) : c'est une lecture, et ses autres faits (radon, argiles, bruit de
   // façade) sont vrais au grain ADRESSE, dans Logement.
@@ -120,7 +135,11 @@ export type ModuleFacts = CommuneAttributes & {
 //   unknown        : la règle s'applique, la donnée manque. Le critère reste NON EXAMINÉ.
 //   uncertain      : idem, sans même un fait à montrer.
 export type RuleOutcome =
-  | "not_applicable" | "satisfied" | "incompatible" | "compromise" | "verification" | "unknown" | "uncertain";
+  | "not_applicable" | "satisfied" | "incompatible" | "compromise" | "verification" | "unknown" | "uncertain"
+  // MISMATCH : critère examiné, donnée robuste, résultat nettement DÉFAVORABLE, non éliminatoire. Peut être
+  // MATÉRIEL (produit une carte) ou SILENCIEUX (poids 1 : facts vides). NEUTRAL : examiné, aucun signal
+  // marqué (fait monter la couverture, aucune carte, aucun effet sur l'orientation).
+  | "mismatch" | "neutral";
 
 export type RuleEvaluation = {
   ruleId: string;
@@ -165,7 +184,7 @@ export type ConclusionState =
   | "insufficient_evidence" | "no_hard_constraint_declared" | "project_not_structured";
 export type UncoveredConstraint = { key: HardConstraintKey; label: string };
 export type DossierSection = {
-  key: "incompatibilities" | "compromises" | "unknowns" | "verifications";
+  key: "incompatibilities" | "mismatches" | "compromises" | "unknowns" | "verifications";
   title: string;
   facts: DecisionFact[];
 };
