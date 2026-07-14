@@ -1,140 +1,135 @@
-# Passation — le lot 2a est livré ; la suite est le lot 2b (persistance), puis `mismatch`
+# Passation — les lots 2a et 2c sont livrés ; il reste 1 migration à appliquer, puis `mismatch`
 
-**Horodatage** : 2026-07-14 · **Branche** : `main` (9 commits d'avance sur `origin`, **non poussés**)
-**Dernier commit** : `0ef7090` (retenue, pas confirmée) · **Aucune PR ouverte.**
+**Horodatage** : 2026-07-14 · **Branche** : `main` (17 commits d'avance sur `origin`, **non poussés**)
+**Dernier commit** : `6f593b7` (corpus de parité, témoin gelé supprimé) · **Aucune PR ouverte.**
 
 ---
 
-## Fait dans cette session : le lot 2a des contraintes dures
+## ⚠️ LA SEULE ACTION BLOQUANTE : appliquer la migration
 
-« À 30 minutes en voiture de la gare Matabiau » est désormais **posable** par le lecteur, **résolue** (la
-gare, pas la rue), **évaluée** (point dans l'isochrone), et le comparateur **filtre** dessus. Plan exécuté :
-`docs/superpowers/plans/2026-07-14-lot2a-references-nommees.md` (il contient la doctrine complète).
+`supabase/24_reachability_artifact.sql` **n'est pas appliquée** (Supabase > SQL Editor). Sans elle, le cache
+des artefacts de mobilité vit **en mémoire du process** : il fonctionne, mais il meurt à chaque redémarrage
+et n'est pas partagé entre instances. Le code le gère sans tomber (`reachabilityStore()` rend `null` sans
+clés, et une base indisponible fait simplement rappeler l'API), donc **rien n'est cassé** ; c'est du confort
+et de la protection contre le rate-limit d'IGN qu'on n'a pas encore.
 
-**Six faits d'enquête ont corrigé la spec avant d'écrire une ligne.** Ils sont vérifiés à la main, contre
-les API réelles, et ils commandent le code :
+---
 
-1. **La BAN ne sait pas géocoder une gare.** Sur « gare Matabiau », elle rend « **Rue** Matabiau » (type
-   `street`, score 0,71) : plausible, à 500 m, et faux. C'est la **Géoplateforme** (`index=poi`, BDTOPO)
-   qui connaît la gare, avec sa catégorie et un identifiant stable (`cleabs`).
-2. **LE SCORE NE DÉCIDE PAS, LA CATÉGORIE DÉCIDE.** Sur « hôpital de Purpan », le **mieux classé** (0,65)
-   est le *Centre de Formation Métiers de la Santé CHU Hôpital de Purpan*. Le vrai hôpital est à **0,42**.
-   Les deux portent les deux mots du lecteur : ni le score ni le libellé ne les séparent. Un plancher de
-   score à 0,6 aurait **tué l'hôpital**.
-3. **Deux lieux à 2,5 km sont deux lieux.** « Gare de Lyon » rend **cinq** gares, toutes à 0,85 (Paris,
-   Perrache, Guillotière…). Le seuil de déduplication est **300 m**, jamais 5 km, et le cas normal est
-   `ambiguous`.
-4. **Le vélo n'existe pas** chez IGN (HTTP 400 sur toutes les ressources) : `unsupported_metric`, et le
-   produit **ne le propose pas** dans la question qu'il pose au lecteur.
-5. **Le parse ne savait pas exprimer la contrainte** (`nearPlace` était `{ label, maxKm }`, et le prompt
-   disait « label = nom de commune »). Rien n'empêchait le LLM d'écrire `maxKm: 30` pour « 30 minutes ».
-6. **L'isochrone rate-limite** (429). Le cache n'est pas une optimisation : il doit **dédoublonner les
-   appels en vol**, sinon deux lecteurs simultanés sur la même gare partent tous les deux vers IGN.
+## Ce qui a été livré
 
-**Architecture livrée** (le noyau reste PUR : ni `server-only`, ni `fetch`) :
+**Lot 2a** (`docs/superpowers/plans/2026-07-14-lot2a-references-nommees.md`) : « à 30 minutes de la gare
+Matabiau » devient **posable**, **résoluble** et **évaluable**. Parse étendu (temps + mode + lieu non
+communal), géocodage POI Géoplateforme + BAN avec ses contrôles, isochrone IGN, point-dans-polygone.
+
+**Lot 2c** (`docs/superpowers/plans/2026-07-14-lot2c-itineraire-tranche-la-bande.md`) : **l'itinéraire
+tranche la bande**. Chaque commune affichée porte une **durée estimée**.
+
+Sur « à moins de 30 minutes en voiture de la gare Matabiau, au calme » :
+
+| | avant le lot 2c | après |
+|---|---|---|
+| communes proposées | 27 | **16** (onze étaient au-delà de 30 min : proposées à tort) |
+| confirmées | 7 | **14** |
+| « à la limite du seuil » | 20 | **2** |
+| durée affichée | aucune | **oui, sur chaque carte** |
+
+## Les faits d'enquête qui commandent le code (vérifiés contre les API, pas supposés)
+
+1. **La BAN ne sait pas géocoder une gare** : elle rend « **Rue** Matabiau » (`street`, 0,71). C'est la
+   Géoplateforme (`index=poi`, BDTOPO) qui connaît la gare.
+2. **LE SCORE NE DÉCIDE PAS, LA CATÉGORIE DÉCIDE.** Sur « hôpital de Purpan », le **mieux classé** (0,65) est
+   le *Centre de Formation Métiers de la Santé CHU Hôpital de Purpan*. Le vrai hôpital est à **0,42**. Un
+   plancher de score à 0,6 l'aurait **tué**. Ne jamais remonter `MIN_SCORE` sans refaire ce test.
+3. **Deux lieux à 2,5 km sont deux lieux** : « gare de Lyon » en rend cinq, toutes au même score. Dédup à
+   **300 m**, jamais 5 km, et le cas normal est `ambiguous`.
+4. **Le vélo n'existe pas** chez IGN (HTTP 400 partout) : `unsupported_metric`, et le produit ne le propose
+   pas dans sa question. Vérifié à l'écran : le comparateur **annonce** qu'il n'a pas pu appliquer la
+   condition, au lieu de l'approximer.
+5. **Les deux services IGN sont COHÉRENTS** : sonde sur les 12 communes les plus proches de la gare,
+   isochrone 12 min contre itinéraire, **zéro désaccord**. Donc `outside → exclusion` est un filtre
+   **fiable**, et aucun filet de sauvetage n'est nécessaire.
+6. **Le rate-limit, mesuré** : concurrence 3 → 0 erreur ; 6 → un 429 ; **12 → douze 429**. D'où le limiteur
+   **global au process** (`ign-limiter.ts`), qui respecte `Retry-After`. Ne jamais le contourner.
+
+## L'architecture, et ce qu'elle promet (et ne promet pas)
 
 ```
 parse (temps + mode + lieu non communal)
-  → resolveExternalReferences (SERVEUR, le seul module qui touche le réseau)
-      geocode-place.ts   : Géoplateforme POI + BAN, en parallèle, candidats FUSIONNÉS
-      place-screening.ts : LES CONTRÔLES (type attendu, CATÉGORIE, libellé, territoire, plancher)
-      isochrone.ts       : un polygone depuis le LIEU, cache + dédup en vol
-  → hydrateHardConstraints (PURE, appelée 2 fois : une pour savoir quoi résoudre, une avec le sac)
-      → noyau : evaluateNearPlace (point-dans-polygone, bande de tolérance)
-          → comparateur : filtre + « retenue, pas confirmée »
-          → dossier     : satisfied / incompatible / uncertain
+  → resolveExternalReferences (SERVEUR : le seul module qui touche le réseau)
+      geocode-place.ts   : POI + BAN en parallèle, candidats FUSIONNÉS, `degraded` si un service est tombé
+      place-screening.ts : LES CONTRÔLES (type attendu, CATÉGORIE, libellé, territoire, plancher anti-bruit)
+      isochrone.ts       : un polygone depuis le LIEU  ─┐
+      route-time.ts      : un itinéraire par commune   ─┴─ tous deux via ign-limiter (concurrence 3)
+  → hydrateHardConstraints (PURE)
+      → noyau : evaluateNearPlace
+            l'ESTIMATION prime sur la GÉOMÉTRIE, si elle CONCORDE (même départ, arrivée, mode)
+          → comparateur : affine les 24 meilleures par score, retire celles hors seuil, marque le reste
+          → dossier     : estime SA commune (ou SON adresse : demande distincte), satisfied/incompatible
 ```
 
-## L'arbitrage produit de la session : « retenue, pas confirmée »
+**Ce que le cache promet** : mémoire (le process ne recalcule pas), en vol (deux lecteurs simultanés ne
+partent pas tous les deux), table (deux instances partagent, et un redémarrage ne perd rien).
+**Ce qu'il NE promet PAS** : il ne déduplique pas deux premiers calculs **strictement concurrents** sur deux
+instances (pas de verrou distribué). Ne pas l'annoncer autrement.
 
-La bande de tolérance happait **24 des 31 communes** de l'aire toulousaine (la frontière des 30 minutes
-traverse la couronne où le lecteur cherche). Les deux conduites simples étaient fausses : les exclure
-supprimait 77 % des candidats pour une limite de **mesure** ; les laisser passer les faisait passer pour
-conformes. Doctrine tranchée avec le porteur :
+## Invariants à ne PAS casser
 
-- le **noyau** ne bouge pas : `unexamined(insufficient_precision)` ne devient **jamais** `satisfied` ;
-- l'**adaptateur comparateur** la **retient** et la **marque** (« À la limite du seuil ») ;
-- les **confirmées passent avant** au tri : sur une condition non négociable, le score de préférences n'a
-  pas le droit de faire disparaître l'incertitude ;
-- elle garde `complete: false`, reste `uncertain` au dossier, **ne fait pas monter la couverture** ;
-- le bandeau ne fond pas les deux populations : « 7 communes se situent clairement dans votre seuil…, nous
-  vous en proposons aussi 20 à la limite du calcul ».
-
-> **La souplesse de l'affichage ne contamine pas la vérité du moteur.**
-
----
-
-## PROCHAINE ÉTAPE : le lot 2b (la persistance)
-
-1. **`ResolvedPlaceReference` persistée** dans `UserProject`, avec son `inputHash` et son
-   `resolverVersion` (`RESOLVER_VERSION` est passé à `resolve-2`).
-2. **Table `reachability_artifact`** : l'artefact partagé **entre instances**, survivant aux redémarrages.
-   C'est elle, et elle seule, qui permettra de promettre que les deux moteurs lisent le **même objet gelé**.
-   Aujourd'hui ils traversent la même **chaîne**, avec le même cache **de process** : un géocodage réussi
-   ici et un 429 là restent possibles. **Ne pas annoncer la garantie avant qu'elle existe.**
-3. **Read repair** des projets historiques, **au-dessus** des deux moteurs.
-4. **Suppression du témoin gelé** `src/lib/legacy-passes-hard.ts` et de son test.
-
-**INTERDIT ABSOLU du lot 2b** : `geocoding_unavailable` et `routing_unavailable` sont des **pannes**, pas
-des constats. Elles ne doivent **jamais** être persistées : un incident réseau deviendrait une impossibilité
-sémantique stable (« ce lieu n'existe pas »).
-
-## Les deux limites connues, à traiter (elles ne sont pas des bugs)
-
-- **Sous ~15 minutes, le grain communal ne suffit plus.** À 12 minutes de la gare Matabiau, **aucune commune
-  de France** n'a son centroïde dans l'isochrone, pas même Toulouse (dont le point de l'index, 43,6007 /
-  1,4328, tombe dehors) : le comparateur rend 0 résultat avec un message qui ne dit pas la vraie raison.
-  L'isochrone est alors **plus petite que la commune**. Cible : évaluer la **géométrie communale** (la spec
-  §3.3 la nomme déjà « la bonne cible, hors de ce spec »).
-- **Les 300 m de tolérance sont une convention prudente PROVISOIRE, pas une précision mesurée.** L'espacement
-  des sommets (267 m médian, 539 m au p90) montre que la géométrie est grossière ; il ne démontre pas que
-  l'erreur vaut 300 m. La valider demandera une géométrie moins simplifiée, ou de vrais itinéraires calculés
-  sur un échantillon de points frontaliers. Piste : n'affiner (appel de routage ponctuel) que les **communes
-  de la bande**, en gardant l'avantage « un polygone, pas 35 000 appels ».
-
-## ENSUITE : le chantier B, `mismatch` (inchangé)
-
-Un lieu répond **mal** à une priorité déclarée, sans que ce soit éliminatoire : ce n'est ni une
-incompatibilité, ni un compromis, ni une inconnue, ni une vérification. Il entraîne un nouvel outcome, une
-orientation refondue, une table de vérité réécrite, un **bump de `DECISION_NARRATIVE_PROMPT_VERSION`** et un
-re-passage de la sonde. C'est seulement après B que les préférences à score (`cadre_calme`, `vie_locale`,
-`nature`, `acces_ecoles`) pourront être couvertes honnêtement.
-
----
-
-## Ce qu'il ne faut PAS casser (invariants, lots 1 et 2a)
-
-- **Aucun `?? 0`** sur une donnée nullable. Une commune sans coordonnées n'est pas un point à (0, 0).
-- **Un temps de trajet n'est JAMAIS évalué par un haversine**, et aucune minute n'est **jamais** convertie
-  en kilomètres, ni dans le code, ni dans le prompt.
+- **Un temps de trajet n'est JAMAIS évalué par un haversine**, et aucune minute n'est **jamais** convertie en
+  kilomètres, ni dans le code, ni dans le prompt.
+- **« Estimé à environ »**, jamais un temps posé comme un fait : le moteur calcule sur son graphe (ni trafic,
+  ni stationnement, ni attente). On a corrigé un filtre qui mentait, on ne le remplace pas par une fausse
+  précision.
+- **L'estimation se PROUVE** : elle ne prime que si son départ, son arrivée et son mode correspondent à ce
+  qu'on évalue (concordance au mètre). Sans ce garde-fou, une durée calculée depuis le **centroïde**
+  trancherait le sort d'une **adresse**. Un test de parité est tombé sur exactement ce piège.
+- **L'arrondi ne masque JAMAIS le franchissement** : 30,4 min ne s'affiche pas « 30 minutes, au-delà de la
+  limite de 30 minutes ». La décimale apparaît quand l'arrondi contredirait le verdict.
 - **Une panne n'est jamais un constat** : `geocoding_unavailable` ≠ `no_result` ; `routing_unavailable` ≠
-  `incompatible`. Les deux sont retentables, ne filtrent pas, et ne se persistent pas.
-- **Une valeur structurée ne dit que ce qu'elle établit** : `travel_time_threshold` porte `within` (un
-  côté de la frontière), jamais « 30 minutes mesurées ».
-- **La catégorie décide, le score est un plancher** (0,3). Ne jamais remonter `MIN_SCORE` sans refaire le
-  test de l'hôpital de Purpan.
-- **Une géométrie illisible rend `unusable`, jamais `outside`** (un anneau invalide, un trou illisible, une
-  coordonnée hors bornes : toute la géométrie est déclarée inutilisable).
-- **Une contrainte composite n'est satisfaite que si TOUTES ses composantes ont été appliquées.**
-- **Le témoin gelé** (`legacy-passes-hard.ts`) porte l'ANCIEN filtre avec ses défauts intacts. **Ne jamais
-  l'« améliorer »** : le jour où on le corrige, il cesse d'être un témoin.
-- **`server-only` n'est pas résolvable par `node --test`** : les libs pures ne l'importent qu'en **type**
-  (c'est pourquoi `hard-constraints-hydrate.ts` importe `ExternalResolutions` en `import type`).
-- **Ne jamais utiliser `git add -A`** : le porteur édite en parallèle. Stager les fichiers nommément.
+  `incompatible`. Retentables, ne filtrent pas, **ne se persistent jamais**.
+- **Aucun plafond silencieux** : une commune non affinée **faute de budget** n'est pas une commune dont le
+  routage a **échoué**. Les deux états sont distincts, et tous deux sont dits (bandeau + badge).
+- **Une géométrie illisible rend `unusable`, jamais `outside`.**
+- **Le noyau reste PUR** : ni `server-only`, ni `fetch`. Les libs pures n'importent le reste qu'en **type**.
+- **Ne jamais utiliser `git add -A`** : le porteur édite en parallèle.
 
 **Après toute modification** :
 ```bash
-node --test src/lib/*.test.ts src/lib/decision/*.test.ts   # 421 verts aujourd'hui
-npx tsc --noEmit                                            # doit rendre 0
-node --env-file=.env.local scripts/probe-conclusion.ts      # 15/15 (le prompt n'a pas bougé)
+node --test src/lib/*.test.ts src/lib/decision/*.test.ts   # 450 verts aujourd'hui
+npx tsc --noEmit                                            # 0
+node --env-file=.env.local scripts/probe-conclusion.ts      # 15/15
 ```
+
+## Limites connues (ce ne sont pas des bugs)
+
+- **Le grain reste le CENTROÏDE communal.** À 12 minutes de la gare Matabiau, aucune commune de France n'est
+  retenue, **pas même Toulouse** (son point de référence est à 14,8 minutes, vérifié par itinéraire) alors
+  que la gare est *dans* Toulouse et que des quartiers entiers sont à 5 minutes. La cible est la **géométrie
+  communale** (la spec §3.3 la nomme déjà « la bonne cible, hors de ce spec »).
+- **Latence du comparateur** : ~6,8 s à froid (24 itinéraires, concurrence 3), ~1,5 s ensuite. La migration
+  étendra ce gain à tous les lecteurs. Si c'est trop, baisser `REFINE_BAND_CAP` (12 → 4,9 s, mais 9 communes
+  restent incertaines au lieu de 2).
+- **Les 300 m de tolérance sont une convention prudente PROVISOIRE**, pas une précision mesurée. Depuis le
+  lot 2c, elle compte moins : l'itinéraire tranche la bande.
+
+## PROCHAINE ÉTAPE : le chantier B, `mismatch`
+
+Un lieu répond **mal** à une priorité déclarée, sans que ce soit éliminatoire : ce n'est ni une
+incompatibilité, ni un compromis, ni une inconnue, ni une vérification. Il entraîne un nouvel outcome de
+règle, une **orientation refondue**, une **table de vérité réécrite**, une **section propre** (un mismatch
+demande d'être **arbitré**, pas examiné), un **bump de `DECISION_NARRATIVE_PROMPT_VERSION`** et un
+re-passage de la sonde. C'est seulement après B que les préférences à score (`cadre_calme`, `vie_locale`,
+`nature`, `acces_ecoles`) pourront être couvertes honnêtement : sans `mismatch`, une règle qui les examine
+n'aurait **aucun outcome honnête à rendre** quand le score est mauvais.
+
+**Reste aussi en réserve** (le lot 2b d'origine, jamais fait, et sa valeur est faible) : persister
+`ResolvedPlaceReference` dans `UserProject` + read repair. Le comparateur étant **anonyme**, cela ne le sert
+pas ; et le géocodage est déjà mis en cache. À ne faire que si un besoin d'**opposabilité** (tracer ce que
+futur•e a affirmé, avec quelle référence) le justifie.
 
 ## À lire d'abord à la reprise
 
 1. `/memory/MEMORY.md`, puis la fiche `project_dossier_decision`.
-2. Le plan du lot 2a : `docs/superpowers/plans/2026-07-14-lot2a-references-nommees.md` (les six faits
-   d'enquête, et pourquoi chaque contrôle existe).
-3. Code, dans cet ordre : `place-screening.ts` (les contrôles, le cœur de l'honnêteté) →
-   `geocode-place.ts` (le réseau, et `degraded`) → `isochrone.ts` (le cache et la dédup en vol) →
-   `hard-constraints-external.ts` (l'orchestration au-dessus des deux moteurs) → `hard-constraints.ts`
-   (`evaluateNearPlace`) → `hard-constraints-filter.ts` (« retenue, pas confirmée »).
+2. Les deux plans (les faits d'enquête y sont, avec la raison de chaque contrôle).
+3. Code : `place-screening.ts` (les contrôles) → `ign-limiter.ts` (le rate-limit) → `route-time.ts` →
+   `hard-constraints.ts` (`evaluateNearPlace`, `estimationConcorde`) → `hard-constraints-filter.ts`
+   (« retenue, pas confirmée ») → `parity.test.ts` (le corpus qui a remplacé le témoin gelé).
