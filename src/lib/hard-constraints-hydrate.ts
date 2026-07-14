@@ -13,6 +13,9 @@ import type {
   NormalizedHardConstraints, PlaceMode, PlaceThreshold, SearchExplorationHint,
 } from "./hard-constraints.ts";
 import type { HardConstraints } from "./hard-constraint-schema.ts";
+// TYPE SEULEMENT : hard-constraints-external.ts fait du réseau. L'importer en VALEUR rendrait
+// l'hydratation non testable sous node --test, et ferait entrer un fetch dans une lib pure.
+import type { ExternalResolutions } from "./hard-constraints-external.ts";
 
 // LES RAYONS QUE LE PRODUIT S'EST INVENTÉS. Ils sortent du contrat dur : ils peuvent CADRER une
 // recherche, jamais ÉLIMINER une commune ni produire un verdict opposable au lecteur.
@@ -61,6 +64,9 @@ function nearPlaceThreshold(np: NonNullable<HardConstraints["nearPlace"]>): Plac
 export function hydrateHardConstraints(
   hc: HardConstraints | undefined | null,
   dir: PlaceDirectory | null,
+  // LE SAC, déjà résolu par la couche serveur (géocodage, isochrone). Absent = personne n'a rien résolu
+  // au-delà de l'index : c'est le cas du lot 1, et il continue de marcher tel quel.
+  ext?: ExternalResolutions,
 ): NormalizedHardConstraints {
   const c = hc ?? {};
   const zone = resolveZoneAnchors(c.zones);
@@ -100,8 +106,10 @@ export function hydrateHardConstraints(
         ? {
             label: c.nearPlace.label,
             threshold: nearPlaceThreshold(c.nearPlace),
-            reference: resolveNearPlace(c.nearPlace.label, dir, input),
-            reachability: null, // la couche serveur (hard-constraints-external.ts) l'injectera
+            // LE SAC PRIME sur l'index, et il ne contient QUE ce que l'index ne savait pas résoudre :
+            // « près de Brest » n'est donc jamais parti géocoder.
+            reference: ext?.place ?? resolveNearPlace(c.nearPlace.label, dir, input),
+            reachability: ext?.reachability ?? null,
           }
         : null,
     excludePlace: dir

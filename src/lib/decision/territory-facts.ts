@@ -6,6 +6,7 @@ import {
   getCommuneEntry, subScore, PREFERENCE_KEYS, placeDirectory, tailleVilleOf, type IndexCommune,
 } from "../comparateur-vie.ts";
 import { hydrateHardConstraints } from "../hard-constraints-hydrate.ts";
+import { resolveExternalReferences } from "../hard-constraints-external.ts";
 import {
   PRODUCT_CONVENTIONS_VERSION, type EvaluationContext, type EvaluationPoint,
 } from "../hard-constraints.ts";
@@ -37,8 +38,11 @@ export async function buildHardContext(
   facts: ModuleFacts,
   point?: EvaluationPoint,
 ): Promise<EvaluationContext> {
+  // La MÊME chaîne que matchProjects : même annuaire, même géocodage, même isochrone, mêmes contrôles.
+  const hcRaw = project.parsed?.hardConstraints;
+  const dir = await placeDirectory();
   return {
-    constraints: hydrateHardConstraints(project.parsed?.hardConstraints, await placeDirectory()),
+    constraints: hydrateHardConstraints(hcRaw, dir, await resolveExternalReferences(hcRaw, dir)),
     // LE POINT RÉELLEMENT TESTÉ. Sans coordonnées, il reste NULL : une commune sans lat/lon repliée sur
     // (0, 0) atterrit dans le golfe de Guinée, et la contrainte de proximité en tirerait une
     // incompatibilité ÉTABLIE, avec sa carte et sa preuve, sur un point inventé.

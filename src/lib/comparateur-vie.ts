@@ -13,6 +13,7 @@ import { getLittoralIndex, type LittoralSummary } from "@/lib/littoral";
 import { tailleVilleFrom, communeAttributesFrom } from "@/lib/commune-attributes";
 import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
 import { hydrateHardConstraints, explorationHints } from "@/lib/hard-constraints-hydrate";
+import { resolveExternalReferences } from "@/lib/hard-constraints-external";
 import {
   assessHardConstraints,
   haversineKm as haversineCanonical,
@@ -2608,10 +2609,14 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
 
   // L'HYDRATATION, AU-DESSUS DU FILTRE. Le comparateur est ANONYME (il reçoit un ParsedProject venu du
   // client, sans compte ni projet persisté) : matchProjects est le seul point que traversent tous ses
-  // appelants. La résolution des lieux nommés se fait donc ici, UNE fois, et le dossier appellera
-  // exactement la même (hydrateHardConstraints + placeDirectory) : c'est ce qui interdit aux deux
-  // moteurs de résoudre « Brest » différemment.
-  const constraints = hydrateHardConstraints(hc, await placeDirectory());
+  // appelants. La résolution des lieux nommés se fait donc ici, UNE fois, et le dossier appelle exactement
+  // la même chaîne : c'est ce qui interdit aux deux moteurs de résoudre « Brest » différemment.
+  //
+  // resolveExternalReferences est le SEUL endroit qui touche le réseau (géocodage d'un lieu non communal,
+  // isochrone). Un appel de chaque, au plus, par recherche : la référence est GLOBALE, pas communale, et le
+  // polygone est calculé une fois depuis le lieu avant que les 35 000 communes ne soient testées localement.
+  const dir = await placeDirectory();
+  const constraints = hydrateHardConstraints(hc, dir, await resolveExternalReferences(hc, dir));
   const hints = explorationHints(hc);
 
   // Libellés de périmètre ville/taille effectivement appliqués (affichage honnête du périmètre).
