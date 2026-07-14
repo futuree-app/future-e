@@ -33,11 +33,20 @@ const COLUMN_MAP: Record<string, string> = {
   NORSWI04_yr:      "column18", // Soil dryness days (SWI < 0.4) (days/yr)
   // Anomalies (delta projeté vs période de référence DRIAS) — face avant
   // « mouvement » du module Territoire. indicator_order[i] -> column{i+4}.
+  //
+  // ELLES SERVENT AUSSI À RECONSTRUIRE LA RÉFÉRENCE (projeté moins anomalie) : DRIAS n'expose aucune
+  // colonne « fin du XXe siècle », et le dossier de décision en a besoin pour dire une TRAJECTOIRE plutôt
+  // qu'une valeur nue. Toute anomalie manquante ici rend la référence de son axe non reconstructible, et
+  // le constat perd sa comparaison, en silence : c'est pourquoi les trois anomalies du dossier (chaleur,
+  // feu, pluie) sont désormais mappées.
   ATMm_seas_JJA:    "column20", // Summer mean temperature anomaly (°C)
   ATMm_seas_DJF:    "column21", // Winter mean temperature anomaly (°C)
+  ATX35D_yr:        "column23", // Anomaly of days with Tmax > 35°C (days/yr)
   ATX30D_yr:        "column24", // Anomaly of days with Tmax > 30°C (days/yr)
   ATR_yr:           "column25", // Anomaly of tropical nights (days/yr)
-  // column19/22/23/26+ = autres anomalies — non utilisées en UI à ce stade.
+  AIFM40_yr:        "column27", // Anomaly of fire weather index days > 40 (days/yr)
+  ARRx1d_yr:        "column33", // Anomaly of maximum 1-day precipitation (mm)
+  // column19/22/26/28+ = autres anomalies — non utilisées à ce stade.
 };
 
 type RawRow = Record<string, string | number | null>;

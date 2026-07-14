@@ -1,0 +1,155 @@
+// LA DOCTRINE CLIMATIQUE DU DOSSIER. Lib PURE : aucune I/O, aucun LLM, aucun chargement de fichier.
+//
+// TROIS FAITS COMMANDENT CE FICHIER, et ils sont vérifiés (DRIAS-TRACC, 2026-07-14) :
+//
+// 1. DRIAS N'EXPOSE AUCUNE VALEUR PRÉSENTE. Sa période de référence est 1976-2005, et ses horizons sont
+//    +2 °C (2030), +2,7 °C (2050) et +4 °C (2100) EN FRANCE. La référence se RECONSTRUIT (valeur projetée
+//    moins anomalie), et le module Territoire l'affiche déjà sous le libellé « Fin du XXe siècle ».
+//    IL EST DONC INTERDIT D'ÉCRIRE « la commune connaît ACTUELLEMENT tant de jours à plus de 35 °C ».
+//
+// 2. LA GRANDEUR EST OFFICIELLE, LA FRÉQUENCE EST UNE CONVENTION. « Un jour à plus de 35 °C », « une nuit
+//    tropicale » (Tmin >= 20 °C, définition Météo-France), « un jour d'indice forêt-météo supérieur à 40 »
+//    sont des grandeurs absolues et signifiantes. Mais le NOMBRE de jours à partir duquel futur•e signale
+//    une exposition est NOTRE décision, calibrée sur les 34 788 communes. Elle est donc nommée, versionnée,
+//    et DITE dans le texte, jamais appliquée en silence.
+//
+// 3. LA SÉCHERESSE DES SOLS N'A PAS DE SEUIL DÉFENDABLE (distribution continue de 67 à 160 jours, et
+//    « 115 jours de sol sec » ne dit rien à un lecteur). Elle n'est donc PAS ici, et `faible_secheresse`
+//    reste non examiné. Le retrait-gonflement des argiles est une CONSÉQUENCE géotechnique sur certains
+//    sols, pas une mesure de la sécheresse : il est couvert par le module Logement, au grain adresse.
+
+// La forme rendue par `getClimatDataCommune` (drias-json.ts).
+export type GwlScenarios = Record<string, { h: string; v: Record<string, number> }>;
+
+// L'horizon de décision : +2,7 °C en France, soit 2050. C'est aussi celui de l'index du comparateur, et
+// les deux moteurs n'ont pas le droit de lire des horizons différents.
+export const CLIMAT_HORIZON = "gwl20";
+export const CLIMAT_HORIZON_LABEL = "2050";
+export const CLIMAT_REFERENCE_LABEL = "la fin du XXe siècle";
+
+export const CLIMAT_CONVENTIONS_VERSION = "clim-conv-1";
+
+// LE MAPPING DES CLÉS DRIAS, GRAVÉ. Deux indicateurs voisins mal branchés (les jours > 30 °C au lieu des
+// jours > 35 °C) produiraient un chiffre plausible et faux, que rien ne trahirait à l'écran.
+export type ClimatMetricKey = "joursTresChauds" | "nuitsTropicales" | "joursFeu" | "pluieMax24h";
+
+export type ClimatMetricDefinition = {
+  absoluteKey: string; // la valeur PROJETÉE à l'horizon
+  anomalyKey: string; // l'écart à la période de référence (c'est lui qui restitue la référence)
+  // LE PIÈGE QUI A FAILLI PASSER. DRIAS exprime les écarts de TEMPÉRATURE en absolu (des jours, des °C)
+  // et ceux de PRÉCIPITATION en RELATIF (une fraction : 0,11 = +11 %). Soustraire 0,11 à 74 mm donnait
+  // « les pluies passeraient de 74 mm à 74 mm » : un constat faux, absurde, et parfaitement silencieux.
+  // Vérifié sur les 35 006 communes : ARRx1d_yr va de -0,04 à +0,25, quand ATR_yr va de 0 à 47,6 jours.
+  anomalyKind: "absolute" | "relative";
+  threshold: number; // la convention de SIGNALEMENT futur•e (pas une limite officielle de danger)
+  unit: "jours" | "mm";
+};
+
+export const CLIMAT_METRICS: Record<ClimatMetricKey, ClimatMetricDefinition> = {
+  // 9,6 % des communes (médiane nationale : 3,6 j/an à l'horizon 2050 ; maximum : 22,7).
+  joursTresChauds: { absoluteKey: "NORTX35D_yr", anomalyKey: "ATX35D_yr", anomalyKind: "absolute", threshold: 8, unit: "jours" },
+  // 12,5 % des communes. Une nuit qui ne descend pas sous 20 °C empêche la récupération nocturne : c'est
+  // le marqueur sanitaire des canicules, davantage que le pic de l'après-midi.
+  nuitsTropicales: { absoluteKey: "NORTR_yr", anomalyKey: "ATR_yr", anomalyKind: "absolute", threshold: 25, unit: "jours" },
+  // 10,4 % des communes. L'indice forêt-météo mesure un DANGER MÉTÉOROLOGIQUE favorable aux incendies, pas
+  // la probabilité qu'un incendie survienne : la phrase ne doit pas promettre plus que la donnée.
+  joursFeu: { absoluteKey: "NORIFM40_yr", anomalyKey: "AIFM40_yr", anomalyKind: "absolute", threshold: 9, unit: "jours" },
+  // 10,2 % des communes (médiane : 41 mm ; p90 : 65 mm).
+  // L'anomalie est RELATIVE (+11 % en médiane) : la référence se retrouve en DIVISANT, pas en soustrayant.
+  pluieMax24h: { absoluteKey: "NORRx1d_yr", anomalyKey: "ARRx1d_yr", anomalyKind: "relative", threshold: 65, unit: "mm" },
+};
+
+export type ClimatAxe = {
+  reference: number | null; // fin du XXe siècle, RECONSTRUITE. `null` = non reconstructible.
+  projete: number | null; // à l'horizon 2050. `null` = la décision ne peut pas se prendre.
+  notable: boolean; // projete >= seuil. Un projete ABSENT n'est jamais « non notable ».
+  threshold: number;
+  unit: "jours" | "mm";
+};
+
+export type ClimatFacts = {
+  joursTresChauds: ClimatAxe;
+  nuitsTropicales: ClimatAxe;
+  joursFeu: ClimatAxe;
+  pluieMax24h: ClimatAxe;
+};
+
+const HORIZONS = ["gwl15", "gwl20", "gwl30"];
+
+function fini(v: unknown): v is number {
+  return typeof v === "number" && Number.isFinite(v);
+}
+
+// LA RÉFÉRENCE, RECONSTRUITE. DRIAS ne la donne pas en colonne, mais l'anomalie la restitue à chaque
+// horizon (même période de référence), d'où la médiane : elle lisse le bruit de la médiane des modèles.
+//
+// On ne retient QUE les couples dont la valeur ET l'anomalie sont finies. Un couple boiteux donnerait une
+// référence fausse, et personne ne le verrait : le chiffre resterait plausible.
+export function reconstructReference(
+  sc: GwlScenarios | null | undefined,
+  absoluteKey: string,
+  anomalyKey: string,
+  anomalyKind: "absolute" | "relative" = "absolute",
+): number | null {
+  const refs = HORIZONS.map((h) => {
+    const p = sc?.[h]?.v?.[absoluteKey];
+    const a = sc?.[h]?.v?.[anomalyKey];
+    if (!fini(p) || !fini(a)) return null;
+    // Écart ABSOLU (jours, °C) : on soustrait. Écart RELATIF (une fraction) : on divise. Une division par
+    // zéro ou par un négatif rendrait une référence absurde : on refuse plutôt que d'inventer.
+    if (anomalyKind === "absolute") return p - a;
+    return 1 + a > 0 ? p / (1 + a) : null;
+  })
+    .filter((x): x is number => x != null)
+    .sort((a, b) => a - b);
+  return refs.length ? refs[Math.floor((refs.length - 1) / 2)]! : null;
+}
+
+function axe(sc: GwlScenarios | null | undefined, def: ClimatMetricDefinition): ClimatAxe {
+  const projeteRaw = sc?.[CLIMAT_HORIZON]?.v?.[def.absoluteKey];
+  const projete = fini(projeteRaw) ? projeteRaw : null;
+  return {
+    reference: reconstructReference(sc, def.absoluteKey, def.anomalyKey, def.anomalyKind),
+    projete,
+    // LA DÉCISION SE PREND SUR LA VALEUR PROJETÉE, jamais sur la référence reconstruite. Et une valeur
+    // ABSENTE n'est pas une exposition faible : `notable` reste faux, mais la règle, elle, saura qu'elle
+    // n'a rien lu (projete === null) et rendra `uncertain` plutôt que `satisfied`.
+    notable: projete != null && projete >= def.threshold,
+    threshold: def.threshold,
+    unit: def.unit,
+  };
+}
+
+// `null` = aucun axe n'a de valeur projetée : il n'y a rien à examiner, et la règle rendra `uncertain`.
+export function buildClimatFacts(sc: GwlScenarios | null | undefined): ClimatFacts | null {
+  const facts: ClimatFacts = {
+    joursTresChauds: axe(sc, CLIMAT_METRICS.joursTresChauds),
+    nuitsTropicales: axe(sc, CLIMAT_METRICS.nuitsTropicales),
+    joursFeu: axe(sc, CLIMAT_METRICS.joursFeu),
+    pluieMax24h: axe(sc, CLIMAT_METRICS.pluieMax24h),
+  };
+  const rienDuTout = Object.values(facts).every((a) => a.projete == null);
+  return rienDuTout ? null : facts;
+}
+
+// ── Le texte ─────────────────────────────────────────────────────────────────
+
+// Formatage FR, sans décimale inutile : « 12 jours », « 78 mm ».
+export function fmtClimat(v: number, unit: "jours" | "mm"): string {
+  return unit === "mm" ? `${Math.round(v)} mm` : `${Math.round(v)} ${Math.round(v) <= 1 ? "jour" : "jours"}`;
+}
+
+// LA TRAJECTOIRE, DITE HONNÊTEMENT. La référence est la FIN DU XXe SIÈCLE, jamais « aujourd'hui ». Quand
+// elle n'est pas reconstructible, on ne fabrique pas de comparaison : on donne la valeur projetée seule.
+//
+// « Par an » ne vaut QUE pour un compte de jours. Un cumul de pluie est mesuré EN 24 HEURES : écrire
+// « 68 mm par an » ferait passer un épisode intense pour une pluviométrie annuelle dérisoire.
+export function trajectoirePhrase(a: ClimatAxe, sujet: string): string {
+  if (a.projete == null) return "";
+  const cadence = a.unit === "jours" ? " par an" : "";
+  const proj = fmtClimat(a.projete, a.unit);
+  if (a.reference == null) {
+    return `${sujet} atteindraient ${proj}${cadence} à l'horizon ${CLIMAT_HORIZON_LABEL}`;
+  }
+  return `${sujet} passeraient de ${fmtClimat(a.reference, a.unit)}${cadence} à ${CLIMAT_REFERENCE_LABEL} à ${proj} à l'horizon ${CLIMAT_HORIZON_LABEL}`;
+}

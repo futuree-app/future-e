@@ -1,0 +1,122 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {
+  buildClimatFacts, reconstructReference, trajectoirePhrase, CLIMAT_METRICS,
+  type GwlScenarios,
+} from "./climat-facts.ts";
+
+// Un jeu réaliste : la valeur projetée croît avec l'horizon, l'anomalie aussi, et la référence
+// (projeté moins anomalie) reste STABLE d'un horizon à l'autre. C'est cette stabilité qui autorise la
+// reconstruction.
+// Les anomalies de TEMPÉRATURE et de FEU sont absolues (des jours) ; celle de PLUIE est RELATIVE (une
+// fraction), comme dans la vraie donnée. Un jeu d'essai qui mélangerait les deux ne prouverait rien.
+const SC: GwlScenarios = {
+  gwl15: { h: "2030", v: { NORTX35D_yr: 7, ATX35D_yr: 3, NORTR_yr: 18, ATR_yr: 7, NORIFM40_yr: 9, AIFM40_yr: 3, NORRx1d_yr: 71, ARRx1d_yr: 0.06 } },
+  gwl20: { h: "2050", v: { NORTX35D_yr: 12, ATX35D_yr: 8, NORTR_yr: 31, ATR_yr: 20, NORIFM40_yr: 14, AIFM40_yr: 8, NORRx1d_yr: 78, ARRx1d_yr: 0.17 } },
+  gwl30: { h: "2100", v: { NORTX35D_yr: 22, ATX35D_yr: 18, NORTR_yr: 55, ATR_yr: 44, NORIFM40_yr: 26, AIFM40_yr: 20, NORRx1d_yr: 89, ARRx1d_yr: 0.34 } },
+};
+
+test("la RÉFÉRENCE se reconstruit (projeté moins anomalie), par médiane des horizons", () => {
+  // 7-3 = 4 ; 12-8 = 4 ; 22-18 = 4 -> 4 jours à la fin du XXe siècle.
+  assert.equal(reconstructReference(SC, "NORTX35D_yr", "ATX35D_yr"), 4);
+  assert.equal(reconstructReference(SC, "NORTR_yr", "ATR_yr"), 11);
+});
+
+test("un couple BOITEUX (valeur sans anomalie) est écarté, jamais complété", () => {
+  const boiteux: GwlScenarios = {
+    gwl15: { h: "2030", v: { NORTX35D_yr: 7 } }, // pas d'anomalie : inutilisable
+    gwl20: { h: "2050", v: { NORTX35D_yr: 12, ATX35D_yr: 8 } },
+  };
+  assert.equal(reconstructReference(boiteux, "NORTX35D_yr", "ATX35D_yr"), 4); // le seul couple valide
+});
+
+test("aucune anomalie nulle part : la référence est null, JAMAIS zéro", () => {
+  const sansAnom: GwlScenarios = { gwl20: { h: "2050", v: { NORTX35D_yr: 12 } } };
+  assert.equal(reconstructReference(sansAnom, "NORTX35D_yr", "ATX35D_yr"), null);
+});
+
+test("les axes portent la valeur PROJETÉE (2050), la référence, et le seuil", () => {
+  const f = buildClimatFacts(SC)!;
+  assert.equal(f.joursTresChauds.projete, 12);
+  assert.equal(f.joursTresChauds.reference, 4);
+  assert.equal(f.joursTresChauds.threshold, CLIMAT_METRICS.joursTresChauds.threshold);
+  assert.equal(f.nuitsTropicales.projete, 31);
+  assert.equal(f.joursFeu.projete, 14);
+  assert.equal(f.pluieMax24h.projete, 78);
+});
+
+test("« notable » se décide sur la valeur PROJETÉE, au seuil exact (>=)", () => {
+  const f = buildClimatFacts(SC)!;
+  assert.equal(f.joursTresChauds.notable, true); // 12 >= 8
+  assert.equal(f.nuitsTropicales.notable, true); // 31 >= 25
+  assert.equal(f.joursFeu.notable, true); // 14 >= 9
+  assert.equal(f.pluieMax24h.notable, true); // 78 >= 65
+
+  // Au seuil EXACT : la convention est « à partir de », le code applique `>=`, la phrase le dira.
+  const auSeuil: GwlScenarios = { gwl20: { h: "2050", v: { NORTX35D_yr: 8, NORTR_yr: 25 } } };
+  const g = buildClimatFacts(auSeuil)!;
+  assert.equal(g.joursTresChauds.notable, true);
+  assert.equal(g.nuitsTropicales.notable, true);
+
+  const sous: GwlScenarios = { gwl20: { h: "2050", v: { NORTX35D_yr: 7.9, NORTR_yr: 24.9 } } };
+  const h = buildClimatFacts(sous)!;
+  assert.equal(h.joursTresChauds.notable, false);
+  assert.equal(h.nuitsTropicales.notable, false);
+});
+
+test("UNE VALEUR ABSENTE N'EST PAS UNE EXPOSITION FAIBLE : projete null, notable faux", () => {
+  // Le piège du `?? 0` : une donnée manquante ne doit pas devenir « zéro jour de chaleur ». La règle
+  // verra `projete === null` et rendra `uncertain`, jamais `satisfied`.
+  const partiel: GwlScenarios = { gwl20: { h: "2050", v: { NORTX35D_yr: 5 } } }; // pas de nuits tropicales
+  const f = buildClimatFacts(partiel)!;
+  assert.equal(f.joursTresChauds.projete, 5);
+  assert.equal(f.joursTresChauds.notable, false);
+  assert.equal(f.nuitsTropicales.projete, null);
+  assert.equal(f.nuitsTropicales.notable, false); // et la règle ne pourra PAS conclure « tout va bien »
+});
+
+test("aucun scénario, ou aucune valeur : buildClimatFacts rend null (rien à examiner)", () => {
+  assert.equal(buildClimatFacts(null), null);
+  assert.equal(buildClimatFacts({}), null);
+  assert.equal(buildClimatFacts({ gwl20: { h: "2050", v: {} } }), null);
+});
+
+test("la TRAJECTOIRE dit « la fin du XXe siècle », JAMAIS « actuellement »", () => {
+  const f = buildClimatFacts(SC)!;
+  const p = trajectoirePhrase(f.joursTresChauds, "les jours au-dessus de 35 °C");
+  assert.match(p, /de 4 jours par an à la fin du XXe siècle à 12 jours à l'horizon 2050/);
+  assert.doesNotMatch(p, /actuellement|aujourd'hui/i);
+});
+
+test("sans référence reconstructible, on ne FABRIQUE pas de comparaison", () => {
+  const sansAnom: GwlScenarios = { gwl20: { h: "2050", v: { NORTX35D_yr: 12 } } };
+  const f = buildClimatFacts(sansAnom)!;
+  const p = trajectoirePhrase(f.joursTresChauds, "les jours au-dessus de 35 °C");
+  assert.match(p, /atteindraient 12 jours par an à l'horizon 2050/);
+  assert.doesNotMatch(p, /passeraient|contre/);
+});
+
+test("L'ANOMALIE DE PLUIE EST RELATIVE : on divise, on ne soustrait pas", () => {
+  // LE PIÈGE QUI A FAILLI PASSER À L'ÉCRAN. DRIAS exprime les écarts de précipitation en FRACTION (0,11 =
+  // +11 %), pas en millimètres. Soustraire 0,11 à 74 mm donnait « les pluies passeraient de 74 mm à
+  // 74 mm » : faux, absurde, et parfaitement silencieux.
+  const sc: GwlScenarios = {
+    gwl15: { h: "2030", v: { NORRx1d_yr: 62, ARRx1d_yr: 0.06 } },
+    gwl20: { h: "2050", v: { NORRx1d_yr: 68.4, ARRx1d_yr: 0.1 } },
+    gwl30: { h: "2100", v: { NORRx1d_yr: 75, ARRx1d_yr: 0.2 } },
+  };
+  const f = buildClimatFacts(sc)!;
+  assert.equal(f.pluieMax24h.projete, 68.4);
+  // 68,4 / 1,1 = 62,2 : la référence est BIEN PLUS BASSE que la projection, comme attendu.
+  assert.ok(f.pluieMax24h.reference! > 61 && f.pluieMax24h.reference! < 63, `reçu ${f.pluieMax24h.reference}`);
+  // ET « PAR AN » DISPARAÎT : un cumul de pluie se mesure EN 24 HEURES. « 68 mm par an » ferait passer un
+  // épisode intense pour une pluviométrie annuelle dérisoire.
+  const p = trajectoirePhrase(f.pluieMax24h, "Les pluies les plus intenses");
+  assert.match(p, /de 62 mm à la fin du XXe siècle à 68 mm à l'horizon 2050/);
+  assert.doesNotMatch(p, /mm par an/);
+});
+
+test("une anomalie relative de -100 % ne produit pas une référence infinie", () => {
+  const absurde: GwlScenarios = { gwl20: { h: "2050", v: { NORRx1d_yr: 70, ARRx1d_yr: -1 } } };
+  assert.equal(buildClimatFacts(absurde)!.pluieMax24h.reference, null);
+});
