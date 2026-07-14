@@ -25,7 +25,11 @@ const LEGACY_NEAR_SEA_KM = 30;
 export function explorationHints(hc: HardConstraints | undefined | null): SearchExplorationHint[] {
   const c = hc ?? {};
   const out: SearchExplorationHint[] = [];
-  if (c.nearPlace?.label && c.nearPlace.maxKm == null) {
+  // LE RAYON D'EXPLORATION NE VAUT QUE FAUTE DE SEUIL DÉCLARÉ, quelle que soit sa MÉTRIQUE. Un lecteur qui
+  // dit « à 30 minutes » a posé sa limite : afficher « aucune distance précisée, aucune commune n'est
+  // écartée » pendant que l'isochrone filtre serait exactement le genre de phrase fausse que ce chantier
+  // démonte. Le hint ne connaissait que les kilomètres.
+  if (c.nearPlace?.label && c.nearPlace.maxKm == null && c.nearPlace.maxMinutes == null) {
     out.push({ kind: "near_place_radius", valueKm: LEGACY_NEAR_PLACE_KM, source: "legacy_default", confirmedByUser: false });
   }
   if (c.nearSea?.active && c.nearSea.maxKm == null) {

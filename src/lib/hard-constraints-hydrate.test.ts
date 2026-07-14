@@ -115,3 +115,9 @@ test("une distance seule reste une distance (le lot 1 ne bouge pas)", () => {
   const n = hydrateHardConstraints({ nearPlace: { label: "Brest", maxKm: 20 } }, dir);
   assert.deepEqual(n.nearPlace?.threshold, { metric: "distance", maxKm: 20, source: "user" });
 });
+
+test("un TEMPS déclaré supprime le rayon d'exploration : le lecteur a posé sa limite", () => {
+  // Sans ce garde-fou, le comparateur affichait « aucune distance précisée, aucune commune n'est écartée »
+  // pendant que l'isochrone, elle, filtrait bel et bien.
+  assert.deepEqual(explorationHints({ nearPlace: { label: "la gare Matabiau", maxMinutes: 30, mode: "car" } }), []);
+});

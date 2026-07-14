@@ -84,8 +84,15 @@ const TOOL_INPUT_SCHEMA = {
         excludeSea: { type: "boolean", description: "true si l'utilisateur ne veut PAS le littoral." },
         nearPlace: {
           type: ["object", "null"],
-          properties: { label: { type: "string" }, maxKm: { type: ["number", "null"] } },
-          description: "Proximité d'un lieu nommé (famille, ville). label = nom de commune/ville. Le moteur le géolocalise, n'inventez pas de coordonnées.",
+          properties: {
+            label: { type: "string" },
+            maxKm: { type: ["number", "null"] },
+            maxMinutes: { type: ["number", "null"] },
+            mode: { type: ["string", "null"], enum: ["car", "walk", "bike", null] },
+          },
+          required: ["label"],
+          description:
+            "Proximité d'un lieu nommé. Le lieu N'EST PAS forcément une commune : ce peut être une gare (« la gare Matabiau »), un hôpital, une université, une adresse. Recopiez le lieu TEL QUE l'utilisateur le nomme, sans le remplacer par la ville qui le contient. NE CONVERTISSEZ JAMAIS un temps en distance : « à 30 minutes » va dans maxMinutes (jamais dans maxKm), « à 20 km » va dans maxKm. Le moteur sait calculer un vrai temps de trajet. mode = le moyen de transport SEULEMENT s'il est dit (« en voiture » car, « à pied » walk, « à vélo » bike) ; sinon null. Le moteur géolocalise le lieu : n'inventez pas de coordonnées.",
         },
         communeSize: {
           type: ["object", "null"],
@@ -207,6 +214,12 @@ ANCRES GÉOGRAPHIQUES (zones / excludeZones) : règles spécifiques
 - Exclusion de VILLE → excludePlace. "quitter Lyon", "fuir Bordeaux", "ne plus vivre à Lille", "partir de Nantes" → excludePlace:[{label:"Lyon"}] etc. (le moteur exclut l'agglomération). Une ville n'est PAS un jeton de zone : ne la mettez jamais dans excludeZones.
 - TAILLE RELATIVE → sizeRelativeTo. "plus petit que Lyon", "pas plus grand que Bordeaux" → {label:"Lyon", direction:"smaller"}. "plus grand que Niort" → {label:"Niort", direction:"larger"}. Donnez le label brut, jamais une population.
 - Vous ne fournissez QUE des jetons et leur force. N'écrivez jamais vous-même de liste de départements.
+
+PROXIMITÉ D'UN LIEU (nearPlace) : le lieu n'est pas forcément une ville
+- « près de Brest », « à 20 km de la gare Matabiau », « à 30 minutes de l'hôpital de Purpan », « pas loin du campus de Jussieu » → nearPlace. Le label est le lieu TEL QUE NOMMÉ (« la gare Matabiau »), jamais la ville qui le contient : le moteur sait identifier une gare, un hôpital, une université, une adresse.
+- Un TEMPS va dans maxMinutes, une DISTANCE dans maxKm. NE CONVERTISSEZ JAMAIS l'un en l'autre : « 30 minutes » n'est pas « 30 km ». Le moteur calcule un vrai temps de trajet, il n'a pas besoin que vous l'approximiez.
+- Le mode de transport n'est renseigné que s'il est DIT (« en voiture », « à pied », « à vélo »). S'il manque alors qu'un temps est donné, laissez mode à null et POSEZ UNE AMBIGUÏTÉ : topic « le trajet vers {lieu} », question « Vos {N} minutes de {lieu} : à pied ou en voiture ? ». Ne proposez pas d'autre option dans cette question.
+- Une proximité sans chiffre (« près de Brest ») laisse maxKm ET maxMinutes à null : n'inventez aucun rayon, le moteur s'en charge honnêtement.
 
 COMMUNE-ANCRE (communeAncre) : « partir d'une ville qu'on aime »
 - Quand l'utilisateur s'appuie sur une ville comme POINT DE DÉPART de ses goûts (« une ville comme Brest », « dans le genre de Lorient », « le même esprit que Bayonne », « j'aime Brest, je veux retrouver ça ailleurs »), ajoutez-la dans communeAncre:[{label:"Brest"}]. Le système en dérivera lui-même des préférences ; vous n'extrayez QUE le label.
