@@ -12,6 +12,7 @@
 // Ce noyau ne connaît PAS la présentation : ni EvidenceRef, ni materialityTier, ni factId. Il expose des
 // clés de provenance (evidenceKeys), que chaque moteur habille à sa façon. Et il ne dépend PAS du moteur
 // qu'il remplace : le schéma des contraintes vit dans un module neutre (hard-constraint-schema.ts).
+import { pointInPolygon, type PolygonGeometry } from "./geo-polygon.ts";
 import type {
   ResolvedPlaceReference, ResolvedUrbanAreaReference, ResolvedSizeReference,
 } from "./hard-constraints-resolve.ts";
@@ -33,12 +34,30 @@ export type PlaceMode = "car" | "walk" | "bike";
 // Elles ne mesurent pas une exigence du lecteur : elles définissent le SENS D'UN MOT (« la montagne »,
 // « pas au bord de la mer »). Elles sont donc légitimes, à trois conditions : centralisées, versionnées,
 // et NOMMÉES dans le texte qui les applique. Un seuil qu'on n'ose pas dire est un seuil qu'on invente.
-export const PRODUCT_CONVENTIONS_VERSION = "hc-conv-1";
+export const PRODUCT_CONVENTIONS_VERSION = "hc-conv-2"; // conv-2 : la bande de tolérance de l'isochrone
 export const PRODUCT_CONVENTIONS = {
   excludeSeaMinKm: 15, // « pas le littoral » = au moins 15 km de la côte
   montagneMinScore: 50, // « à la montagne » = montagnosité >= 50, soit environ 600 m
   reliefProcheMinScore: 50, // « proche d'une montagne » = un massif à portée
+  // La géométrie d'une isochrone est SIMPLIFIÉE : ses sommets sont espacés d'environ 150 m sur un polygone
+  // de 30 minutes en voiture. Sous cette bande, le verdict serait décidé par la simplification, pas par le
+  // territoire. On ne tranche pas, et on le dit.
+  reachabilityBorderToleranceM: 300,
 } as const;
+
+// CE QUE LE MOTEUR DE ROUTAGE SAIT VRAIMENT FAIRE. Vérifié contre l'API IGN le 2026-07-14 : `bike` rend
+// HTTP 400 sur TOUTES les ressources de navigation (bdtopo-valhalla, bdtopo-pgr, les graphes routiers).
+// Ce n'est pas une panne (routing_unavailable, qu'on retente), c'est une LIMITE stable : elle appartient
+// au noyau, et elle est dite au lecteur plutôt qu'approximée par la marche.
+export const ROUTABLE_MODES: PlaceMode[] = ["car", "walk"];
+
+// L'ATTEIGNABILITÉ, telle que le noyau la REÇOIT (il ne la calcule pas : il est pur). La géométrie est
+// calculée UNE fois depuis le lieu, puis les 35 000 communes sont testées localement.
+export type ReachabilityState =
+  | { status: "ready"; geometry: PolygonGeometry; toleranceMeters: number }
+  | { status: "unavailable"; reason: "routing_unavailable" | "unsupported_metric" };
+
+const MODE_LABEL: Record<PlaceMode, string> = { car: "en voiture", walk: "à pied", bike: "à vélo" };
 
 // Le seuil de montagne, exprimé en MÈTRES pour le lecteur : la montagnosité est un score interne, et
 // « votre exigence de montagne n'est pas respectée, montagnosité 12/100 » ne veut rien dire pour lui.
@@ -68,6 +87,13 @@ export type CommuneAttributes = {
 export type ConstraintValue =
   | { kind: "distance_km"; value: number }
   | { kind: "travel_time_min"; value: number; mode: PlaceMode }
+  // UN POINT-DANS-POLYGONE N'ÉTABLIT PAS UN TEMPS. Il établit un CÔTÉ de la frontière. Écrire
+  // { kind: "travel_time_min", value: 30 } quand on a seulement testé une appartenance mettrait dans le
+  // noyau une mesure qui n'a jamais été faite, et le lot 2b la persisterait.
+  | {
+      kind: "travel_time_threshold"; maxMinutes: number; mode: PlaceMode;
+      within: boolean; direction: "to_reference";
+    }
   | { kind: "population"; value: number; unit: "urban_unit" | "commune" }
   | { kind: "population_range"; min: number | null; max: number | null; unit: "urban_unit" | "commune" }
   | { kind: "department"; value: string }
@@ -80,6 +106,7 @@ export type ConstraintValue =
 export type UnexaminedReason =
   | "missing_data" // la donnée de CETTE commune manque
   | "unresolved_reference" // le lieu nommé n'a pas pu être identifié
+  | "geocoding_unavailable" // les GÉOCODEURS n'ont pas répondu. Une panne, pas un lieu introuvable.
   | "ambiguous_reference" // plusieurs lieux correspondent au nom
   | "missing_parameter" // le lieu est identifié, un PARAMÈTRE manque (le mode, la distance)
   | "unsupported_metric" // la métrique n'est pas calculable honnêtement aujourd'hui
@@ -149,7 +176,14 @@ export type NormalizedHardConstraints = {
   nearSea: { threshold: PlaceThreshold | null } | null;
   excludeSea: boolean;
   communeSize: { min: number | null; max: number | null } | null;
-  nearPlace: { label: string; threshold: PlaceThreshold | null; reference: ResolvedPlaceReference } | null;
+  nearPlace: {
+    label: string;
+    threshold: PlaceThreshold | null;
+    reference: ResolvedPlaceReference;
+    // L'isochrone, DÉJÀ CALCULÉE par la couche serveur (hard-constraints-external.ts). Le noyau ne fait
+    // pas de réseau : il reçoit. `null` = personne n'a même eu à essayer (aucun seuil de temps).
+    reachability: ReachabilityState | null;
+  } | null;
   excludePlace: { label: string; reference: ResolvedUrbanAreaReference }[];
   sizeRelativeTo: { label: string; direction: "smaller" | "larger"; reference: ResolvedSizeReference } | null;
 };
@@ -509,30 +543,103 @@ export function evaluateNearPlace(
   // LE DÉFAUT D'ORIGINE. matchProjects résolvait le label contre l'index des NOMS DE COMMUNES : « la gare
   // Matabiau » ne résolvait pas, placePoint restait null, et passesHard SAUTAIT le test. La condition non
   // négociable du lecteur n'était appliquée nulle part, et rien ne le lui disait.
+  //
+  // TROIS RAISONS DISTINCTES de ne pas avoir de référence, et le lecteur a le droit de savoir laquelle :
+  // le lieu est introuvable, plusieurs lieux portent ce nom, ou nos géocodeurs n'ont pas répondu. La
+  // dernière est une PANNE : elle se retente, elle ne se persiste pas, et elle ne dit rien du monde.
   if (np.reference.status !== "resolved") {
-    return {
-      key: "nearPlace", status: "unexamined",
-      reason: np.reference.status === "ambiguous" ? "ambiguous_reference" : "unresolved_reference",
-      detail: np.label,
-    };
+    const reason: UnexaminedReason =
+      np.reference.status === "ambiguous"
+        ? "ambiguous_reference"
+        : np.reference.reason === "geocoding_unavailable"
+          ? "geocoding_unavailable"
+          : "unresolved_reference";
+    return { key: "nearPlace", status: "unexamined", reason, detail: np.label };
   }
   if (np.threshold == null) {
     return { key: "nearPlace", status: "unexamined", reason: "missing_parameter", detail: np.label };
   }
+
+  const ref = np.reference;
+  const evidenceKeys0 = ["commune.lat", "commune.lon", "project.hardConstraints.nearPlace"];
+
+  // ── LE TEMPS DE TRAJET, évalué par point-dans-isochrone ──
+  //
+  // L'ORDRE DES GARDES EST DÉLIBÉRÉ : le mode se teste AVANT le point. Un lecteur qui n'a pas dit « en
+  // voiture » doit lire « il nous manque le mode », pas « nous ne connaissons pas les coordonnées de cette
+  // commune ». Ce qu'on nomme doit être la cause qu'il peut lever.
   if (np.threshold.metric === "travel_time") {
-    // Une distance à vol d'oiseau n'établit PAS un temps de trajet. Le mode manquant est un paramètre, pas
-    // une ambiguïté du lieu : la gare est parfaitement identifiée.
+    const { maxMinutes, mode } = np.threshold;
+    // Le lieu est parfaitement identifié : c'est un PARAMÈTRE d'évaluation qui manque, pas le lieu.
+    if (mode == null) {
+      return { key: "nearPlace", status: "unexamined", reason: "missing_parameter", detail: np.label };
+    }
+    // Le vélo (et demain les transports collectifs) : une limite du moteur, dite plutôt qu'approximée.
+    if (!ROUTABLE_MODES.includes(mode)) {
+      return { key: "nearPlace", status: "unexamined", reason: "unsupported_metric", detail: np.label };
+    }
+    // UN TEMPS N'EST JAMAIS ÉVALUÉ PAR UN HAVERSINE. Sans polygone, on ne se rabat pas sur la distance à
+    // vol d'oiseau « pour donner une idée » : on dit qu'on n'a pas pu router, et on retentera.
+    if (np.reachability == null || np.reachability.status === "unavailable") {
+      return {
+        key: "nearPlace", status: "unexamined",
+        reason: np.reachability?.reason ?? "routing_unavailable",
+        detail: np.label,
+      };
+    }
+    // SANS POINT, PAS DE MESURE : (0, 0) est dans le golfe de Guinée.
+    if (ctx.point == null) return { key: "nearPlace", status: "unexamined", reason: "missing_data" };
+
+    const pos = pointInPolygon(
+      ctx.point.lat, ctx.point.lon, np.reachability.geometry, np.reachability.toleranceMeters,
+    );
+    // Une géométrie qu'on n'a pas su lire n'est PAS une commune trop loin : c'est un échec technique.
+    if (pos === "unusable") {
+      return { key: "nearPlace", status: "unexamined", reason: "routing_unavailable", detail: np.label };
+    }
+    // La bande de tolérance : une incompatibilité ne se décide pas sur quelques mètres de simplification.
+    if (pos === "border") {
+      return { key: "nearPlace", status: "unexamined", reason: "insufficient_precision", detail: np.label };
+    }
+
+    const within = pos === "inside";
+    // LA VALEUR NE DIT QUE CE QU'ELLE ÉTABLIT : un côté de la frontière, jamais « 30 minutes mesurées ».
+    const observedValue: ConstraintValue = {
+      kind: "travel_time_threshold", maxMinutes, mode, within, direction: "to_reference",
+    };
+    const expectedValue: ConstraintValue = {
+      kind: "travel_time_threshold", maxMinutes, mode, within: true, direction: "to_reference",
+    };
+    const observedLabel = within
+      ? `dans les ${maxMinutes} minutes ${MODE_LABEL[mode]}`
+      : `au-delà de ${maxMinutes} minutes ${MODE_LABEL[mode]}`;
+    const expectedLabel = `au plus ${maxMinutes} minutes ${MODE_LABEL[mode]}`;
+
+    if (within) {
+      return {
+        key: "nearPlace", status: "satisfied",
+        observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys: evidenceKeys0,
+      };
+    }
+    // LE GRAIN EST DIT. Une isochrone testée sur le point de référence de la commune ne dit pas que TOUTE
+    // la commune y est. Et on ne convertit JAMAIS ce temps en kilomètres pour « donner un ordre d'idée ».
+    const sujet = ctx.point.grain === "address" ? "Cette adresse" : `Le point de référence de ${c.nom}`;
     return {
-      key: "nearPlace", status: "unexamined",
-      reason: np.threshold.mode == null ? "missing_parameter" : "unsupported_metric",
-      detail: np.label,
+      key: "nearPlace", status: "incompatible",
+      observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys: evidenceKeys0,
+      topic: topicFit(
+        `le temps de trajet de ${c.nom} à ${ref.canonicalLabel}`,
+        `le temps de trajet à ${ref.canonicalLabel}`,
+      ),
+      statement: `${sujet} se situe hors des ${maxMinutes} minutes ${MODE_LABEL[mode]} de ${ref.canonicalLabel} que vous avez posées comme limite.`,
     };
   }
+
+  // ── LA DISTANCE, à vol d'oiseau : inchangée depuis le lot 1 ──
   // SANS POINT, PAS DE MESURE. Se replier sur (0, 0) placerait la commune dans le golfe de Guinée, et
   // produirait une incompatibilité ÉTABLIE, avec sa carte et sa preuve, à partir d'une donnée inventée.
   if (ctx.point == null) return { key: "nearPlace", status: "unexamined", reason: "missing_data" };
 
-  const ref = np.reference;
   const km = haversineKm(ctx.point.lat, ctx.point.lon, ref.lat, ref.lon);
   const max = np.threshold.maxKm;
   const observedValue: ConstraintValue = { kind: "distance_km", value: km };

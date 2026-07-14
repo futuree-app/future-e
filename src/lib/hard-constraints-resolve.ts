@@ -24,7 +24,10 @@ export type ResolvedPlaceReference =
       kind: "commune" | "station" | "address" | "poi";
       lat: number;
       lon: number;
-      source: "commune_index" | "ban";
+      // LA PROVENANCE N'EST PAS COSMÉTIQUE. Elle servira au read repair (lot 2b), à l'audit, et à
+      // l'explication : un POI de la Géoplateforme (avec son cleabs stable) n'est pas une adresse de la
+      // BAN, et notre index de communes n'est ni l'un ni l'autre.
+      source: "commune_index" | "geoplateforme_poi" | "ban";
       sourceId: string | null;
       confidence: "exact" | "high";
       meta: ResolutionMetadata;
@@ -38,7 +41,10 @@ export type ResolvedPlaceReference =
   | {
       status: "unresolved";
       originalLabel: string;
-      reason: "no_result" | "low_confidence" | "unsupported_type";
+      // UNE PANNE N'EST PAS UN CONSTAT. `geocoding_unavailable` dit que les services n'ont pas répondu :
+      // c'est retentable, et le lot 2b ne devra JAMAIS le persister. Le confondre avec `no_result` ferait
+      // dire au produit « ce lieu n'existe pas » parce qu'un serveur a hoqueté.
+      reason: "no_result" | "low_confidence" | "unsupported_type" | "geocoding_unavailable";
       meta: ResolutionMetadata;
     };
 
@@ -87,7 +93,9 @@ export type PlaceDirectory = {
   plmByName(label: string): { uu: string; pop: number } | null; // Paris / Lyon / Marseille
 };
 
-export const RESOLVER_VERSION = "resolve-1"; // lot 1 : index des communes seulement, aucun géocodage
+// resolve-2 : le résolveur ne se contente plus de l'index des communes, il géocode (POI Géoplateforme,
+// puis BAN) et il CONTRÔLE. Un inputHash d'hier ne dit donc plus la même chose : la version le déclare.
+export const RESOLVER_VERSION = "resolve-2";
 // L'année de la population de l'index (INSEE, millésime 2021 : cf. scripts/populate-*, croissance
 // 2015-2021). Vérifiée contre l'index, jamais supposée.
 export const INDEX_POPULATION_YEAR = 2021;

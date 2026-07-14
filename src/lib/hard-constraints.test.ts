@@ -5,9 +5,11 @@ import {
   evaluateMontagne, evaluateReliefProche, montagnosite,
   evaluateNearSea, evaluateExcludeSea, evaluateCommuneSize,
   evaluateNearPlace, evaluateExcludePlace, evaluateSizeRelativeTo,
-  assessHardConstraints, HARD_CONSTRAINT_KEYS, HARD_CONSTRAINT_EVALUATORS,
+  assessHardConstraints, HARD_CONSTRAINT_KEYS, HARD_CONSTRAINT_EVALUATORS, PRODUCT_CONVENTIONS_VERSION,
   type CommuneAttributes, type EvaluationContext, type NormalizedHardConstraints,
+  type EvaluationPoint, type PlaceMode, type ReachabilityState,
 } from "./hard-constraints.ts";
+import type { PolygonGeometry } from "./geo-polygon.ts";
 import type {
   ResolvedPlaceReference, ResolvedUrbanAreaReference, ResolvedSizeReference,
 } from "./hard-constraints-resolve.ts";
@@ -301,7 +303,7 @@ test("communeSize : tailleVille absente -> unexamined(missing_data)", () => {
 test("nearPlace : dans le rayon déclaré -> satisfied", () => {
   // Toulouse est à 701 km de Brest (haversine) : le rayon doit l'englober.
   const a = evaluateNearPlace(
-    ctx({ nearPlace: { label: "Brest", threshold: { metric: "distance", maxKm: 800, source: "user" }, reference: BREST_REF } }),
+    ctx({ nearPlace: { label: "Brest", threshold: { metric: "distance", maxKm: 800, source: "user" }, reference: BREST_REF, reachability: null } }),
     commune(),
   );
   assert.equal(a.status, "satisfied");
@@ -309,7 +311,7 @@ test("nearPlace : dans le rayon déclaré -> satisfied", () => {
 
 test("nearPlace : hors du rayon -> incompatible, et le lieu est NOMMÉ", () => {
   const a = evaluateNearPlace(
-    ctx({ nearPlace: { label: "Brest", threshold: { metric: "distance", maxKm: 50, source: "user" }, reference: BREST_REF } }),
+    ctx({ nearPlace: { label: "Brest", threshold: { metric: "distance", maxKm: 50, source: "user" }, reference: BREST_REF, reachability: null } }),
     commune(),
   );
   assert.ok(a.status === "incompatible");
@@ -321,7 +323,7 @@ test("nearPlace : hors du rayon -> incompatible, et le lieu est NOMMÉ", () => {
 
 test("nearPlace : référence NON RÉSOLUE -> unexamined(unresolved_reference). Jamais sautée en silence.", () => {
   const a = evaluateNearPlace(
-    ctx({ nearPlace: { label: "Gare Matabiau", threshold: { metric: "distance", maxKm: 30, source: "user" }, reference: MATABIAU_REF } }),
+    ctx({ nearPlace: { label: "Gare Matabiau", threshold: { metric: "distance", maxKm: 30, source: "user" }, reference: MATABIAU_REF, reachability: null } }),
     commune(),
   );
   assert.ok(a.status === "unexamined");
@@ -330,25 +332,28 @@ test("nearPlace : référence NON RÉSOLUE -> unexamined(unresolved_reference). 
 
 test("nearPlace : SANS seuil -> unexamined(missing_parameter). Jamais les 50 km inventés.", () => {
   const a = evaluateNearPlace(
-    ctx({ nearPlace: { label: "Brest", threshold: null, reference: BREST_REF } }),
+    ctx({ nearPlace: { label: "Brest", threshold: null, reference: BREST_REF, reachability: null } }),
     commune(),
   );
   assert.ok(a.status === "unexamined");
   assert.equal(a.reason, "missing_parameter");
 });
 
-test("nearPlace : un TEMPS DE TRAJET n'est jamais évalué par un haversine (lot 1)", () => {
+test("nearPlace : un TEMPS DE TRAJET n'est jamais évalué par un haversine (sans isochrone, on ne se rabat pas)", () => {
+  // Le mode est supporté (voiture) : ce n'est donc plus « métrique non calculable » comme au lot 1, c'est
+  // « nous n'avons pas pu router ». Une panne, retentable. L'invariant, lui, ne bouge pas : PAS de repli
+  // sur la distance à vol d'oiseau.
   const a = evaluateNearPlace(
-    ctx({ nearPlace: { label: "Brest", threshold: { metric: "travel_time", maxMinutes: 30, mode: "car", direction: "to_reference", source: "user" }, reference: BREST_REF } }),
+    ctx({ nearPlace: { label: "Brest", threshold: { metric: "travel_time", maxMinutes: 30, mode: "car", direction: "to_reference", source: "user" }, reference: BREST_REF, reachability: null } }),
     commune(),
   );
   assert.ok(a.status === "unexamined");
-  assert.equal(a.reason, "unsupported_metric");
+  assert.equal(a.reason, "routing_unavailable");
 });
 
 test("nearPlace : mode absent -> missing_parameter (le lieu est identifié, c'est le MODE qui manque)", () => {
   const a = evaluateNearPlace(
-    ctx({ nearPlace: { label: "Brest", threshold: { metric: "travel_time", maxMinutes: 30, mode: null, direction: "to_reference", source: "user" }, reference: BREST_REF } }),
+    ctx({ nearPlace: { label: "Brest", threshold: { metric: "travel_time", maxMinutes: 30, mode: null, direction: "to_reference", source: "user" }, reference: BREST_REF, reachability: null } }),
     commune(),
   );
   assert.ok(a.status === "unexamined");
@@ -358,7 +363,7 @@ test("nearPlace : mode absent -> missing_parameter (le lieu est identifié, c'es
 test("nearPlace : commune SANS coordonnées -> unexamined(missing_data), jamais un point à (0, 0)", () => {
   const sansCoords = commune({ lat: null, lon: null });
   const a = evaluateNearPlace(
-    ctx({ nearPlace: { label: "Brest", threshold: { metric: "distance", maxKm: 50, source: "user" }, reference: BREST_REF } }, sansCoords),
+    ctx({ nearPlace: { label: "Brest", threshold: { metric: "distance", maxKm: 50, source: "user" }, reference: BREST_REF, reachability: null } }, sansCoords),
     sansCoords,
   );
   assert.ok(a.status === "unexamined");
@@ -450,7 +455,7 @@ test("les topics tiennent dans la limite dure d'assertFactValid (70 car.), même
     normalized({ nearSea: { threshold: { metric: "distance", maxKm: 10, source: "user" } } }),
     normalized({ excludeSea: true, }),
     normalized({ communeSize: { min: 100_000, max: null } }),
-    normalized({ nearPlace: { label: "Brest", threshold: { metric: "distance", maxKm: 5, source: "user" }, reference: BREST_REF } }),
+    normalized({ nearPlace: { label: "Brest", threshold: { metric: "distance", maxKm: 5, source: "user" }, reference: BREST_REF, reachability: null } }),
     normalized({ sizeRelativeTo: { label: "Bordeaux", direction: "larger", reference: bordeaux } }),
   ];
   // excludeSea ne devient incompatible que sur une commune littorale : on lui donne son cas.
@@ -475,4 +480,138 @@ test("les topics tiennent dans la limite dure d'assertFactValid (70 car.), même
     }
   }
   assert.ok(vus >= 11, `seulement ${vus} incompatibilités exercées : le test ne prouve rien`);
+});
+
+// ── LOT 2 : le temps de trajet, évalué par point-dans-isochrone ───────────────
+
+const GARE_REF: ResolvedPlaceReference = {
+  status: "resolved", originalLabel: "la gare Matabiau", canonicalLabel: "Gare Matabiau",
+  kind: "station", lat: 43.611448, lon: 1.453496, source: "geoplateforme_poi",
+  sourceId: "EQ_RESEA0000000073015866", confidence: "high", meta: META,
+};
+
+// Un carré autour de Toulouse : 1,3..1,6 E ; 43,5..43,7 N. Toulouse (43,6045 ; 1,4442) est dedans.
+const ISO: PolygonGeometry = {
+  type: "Polygon",
+  coordinates: [[[1.3, 43.5], [1.6, 43.5], [1.6, 43.7], [1.3, 43.7], [1.3, 43.5]]],
+};
+const PRETE: ReachabilityState = { status: "ready", geometry: ISO, toleranceMeters: 300 };
+
+function ctxTemps(
+  reachability: ReachabilityState | null,
+  mode: PlaceMode | null = "car",
+  point: EvaluationPoint | null = {
+    lat: 43.6045, lon: 1.4442, grain: "commune_reference", source: "commune_centroid", label: "Toulouse",
+  },
+): EvaluationContext {
+  return {
+    constraints: normalized({
+      nearPlace: {
+        label: "la gare Matabiau",
+        threshold: { metric: "travel_time", maxMinutes: 30, mode, direction: "to_reference", source: "user" },
+        reference: GARE_REF,
+        reachability,
+      },
+    }),
+    point,
+    conventionsVersion: PRODUCT_CONVENTIONS_VERSION,
+  };
+}
+
+test("dans l'isochrone : satisfied, et la valeur observée dit CE QU'ELLE ÉTABLIT (un côté, pas un temps)", () => {
+  const a = evaluateNearPlace(ctxTemps(PRETE), commune());
+  assert.equal(a.status, "satisfied");
+  if (a.status !== "satisfied") return;
+  assert.deepEqual(a.observedValue, {
+    kind: "travel_time_threshold", maxMinutes: 30, mode: "car", within: true, direction: "to_reference",
+  });
+  assert.equal(a.expectedLabel, "au plus 30 minutes en voiture");
+});
+
+test("hors de l'isochrone : incompatible, la phrase nomme le lieu, le mode et le temps, et JAMAIS des km", () => {
+  const auch = commune({ insee: "32013", nom: "Auch", lat: 43.646, lon: 0.586 });
+  const ctxAuch = ctxTemps(PRETE, "car", {
+    lat: 43.646, lon: 0.586, grain: "commune_reference", source: "commune_centroid", label: "Auch",
+  });
+  const a = evaluateNearPlace(ctxAuch, auch);
+  assert.equal(a.status, "incompatible");
+  if (a.status !== "incompatible") return;
+  assert.match(a.statement, /Gare Matabiau/);
+  assert.match(a.statement, /30 minutes en voiture/);
+  assert.doesNotMatch(a.statement, /km/); // on ne convertit JAMAIS un temps en distance
+  assert.equal(a.observedValue.kind === "travel_time_threshold" ? a.observedValue.within : null, false);
+});
+
+test("UN TEMPS N'EST JAMAIS ÉVALUÉ PAR UN HAVERSINE : sans isochrone, c'est routing_unavailable", () => {
+  const a = evaluateNearPlace(ctxTemps({ status: "unavailable", reason: "routing_unavailable" }), commune());
+  assert.equal(a.status === "unexamined" && a.reason, "routing_unavailable");
+});
+
+test("le VÉLO n'est pas calculable par le moteur IGN : unsupported_metric", () => {
+  const a = evaluateNearPlace(ctxTemps(null, "bike"), commune());
+  assert.equal(a.status === "unexamined" && a.reason, "unsupported_metric");
+});
+
+test("le mode manquant est un PARAMÈTRE, pas une ambiguïté du lieu", () => {
+  const a = evaluateNearPlace(ctxTemps(null, null), commune());
+  assert.equal(a.status === "unexamined" && a.reason, "missing_parameter");
+});
+
+test("ABSENCES COMBINÉES : sans mode ET sans point, c'est le MODE qu'on nomme (la cause que le lecteur peut lever)", () => {
+  const a = evaluateNearPlace(ctxTemps(null, null, null), commune());
+  assert.equal(a.status === "unexamined" && a.reason, "missing_parameter");
+});
+
+test("ABSENCES COMBINÉES : mode connu, isochrone prête, commune sans coordonnées -> missing_data", () => {
+  const a = evaluateNearPlace(ctxTemps(PRETE, "car", null), commune({ lat: null, lon: null }));
+  assert.equal(a.status === "unexamined" && a.reason, "missing_data");
+});
+
+test("dans la bande de tolérance : insufficient_precision, JAMAIS incompatible", () => {
+  // 1,301 E est à ~80 m du bord ouest de l'isochrone.
+  const a = evaluateNearPlace(
+    ctxTemps(PRETE, "car", {
+      lat: 43.6, lon: 1.301, grain: "commune_reference", source: "commune_centroid", label: "Frontière",
+    }),
+    commune(),
+  );
+  assert.equal(a.status === "unexamined" && a.reason, "insufficient_precision");
+});
+
+test("une géométrie illisible ne devient pas une incompatibilité", () => {
+  const a = evaluateNearPlace(
+    ctxTemps({ status: "ready", geometry: { type: "Polygon", coordinates: [] }, toleranceMeters: 300 }),
+    commune(),
+  );
+  assert.equal(a.status === "unexamined" && a.reason, "routing_unavailable");
+});
+
+test("UNE PANNE DE GÉOCODAGE N'EST PAS UN LIEU INTROUVABLE", () => {
+  const panne: ResolvedPlaceReference = {
+    status: "unresolved", originalLabel: "la gare Matabiau", reason: "geocoding_unavailable", meta: META,
+  };
+  const a = evaluateNearPlace(
+    ctx({
+      nearPlace: {
+        label: "la gare Matabiau",
+        threshold: { metric: "distance", maxKm: 20, source: "user" },
+        reference: panne,
+        reachability: null,
+      },
+    }),
+    commune(),
+  );
+  assert.equal(a.status === "unexamined" && a.reason, "geocoding_unavailable");
+});
+
+test("le grain est dit : depuis une ADRESSE, la phrase commence par « Cette adresse »", () => {
+  const a = evaluateNearPlace(
+    ctxTemps(PRETE, "car", {
+      lat: 43.646, lon: 0.586, grain: "address", source: "address_geocoder", label: "7 rue X",
+    }),
+    commune(),
+  );
+  assert.equal(a.status, "incompatible");
+  if (a.status !== "incompatible") return;
+  assert.match(a.statement, /^Cette adresse/);
 });

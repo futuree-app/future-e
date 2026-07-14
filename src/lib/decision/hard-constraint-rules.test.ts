@@ -110,7 +110,7 @@ test("la provenance n'est PAS amputée : chaque clé d'observation devient une p
 test("le GRAIN suit le point réellement testé : une mesure depuis l'adresse n'est pas communale", () => {
   const f = facts();
   const h = hard(
-    { nearPlace: { label: "Brest", threshold: { metric: "distance", maxKm: 50, source: "user" }, reference: BREST_REF } },
+    { nearPlace: { label: "Brest", threshold: { metric: "distance", maxKm: 50, source: "user" }, reference: BREST_REF, reachability: null } },
     f,
     "address",
   );
@@ -149,7 +149,7 @@ test("LES 11 INCOMPATIBILITÉS PASSENT assertFactValid, même avec un nom de com
     { key: "excludeSea", hc: { excludeSea: true }, over: { excludeSea: true }, f: facts({ nom, distanceCoteKm: 4 }) },
     { key: "communeSize", hc: { communeSize: { min: 100_000 } }, over: { communeSize: { min: 100_000, max: null } }, f: facts({ nom, tailleVille: 500 }) },
     { key: "nearPlace", hc: { nearPlace: { label: "Brest", maxKm: 5 } },
-      over: { nearPlace: { label: "Brest", threshold: { metric: "distance", maxKm: 5, source: "user" }, reference: BREST_REF } }, f: facts({ nom }) },
+      over: { nearPlace: { label: "Brest", threshold: { metric: "distance", maxKm: 5, source: "user" }, reference: BREST_REF, reachability: null } }, f: facts({ nom }) },
     { key: "excludePlace", hc: { excludePlace: [{ label: nom }] },
       over: { excludePlace: [{ label: nom, reference: selfUU }] }, f: facts({ nom, uu: "51701" }) },
     { key: "sizeRelativeTo", hc: { sizeRelativeTo: { label: "Bordeaux", direction: "larger" } },

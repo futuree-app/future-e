@@ -101,6 +101,7 @@ export function hydrateHardConstraints(
             label: c.nearPlace.label,
             threshold: nearPlaceThreshold(c.nearPlace),
             reference: resolveNearPlace(c.nearPlace.label, dir, input),
+            reachability: null, // la couche serveur (hard-constraints-external.ts) l'injectera
           }
         : null,
     excludePlace: dir
