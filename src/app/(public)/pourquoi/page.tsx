@@ -26,6 +26,63 @@ function glass(extra = {}) {
   };
 }
 
+const ASYMETRIES = [
+  {
+    n: '1',
+    nom: 'Transactionnelle',
+    constat:
+      'Celui qui vend ou loue un bien connaît son environnement mieux que la personne qui arrive. Le logement est montré sous son meilleur jour ; le territoire, rarement raconté en entier.',
+    reponse:
+      'futur•e rassemble les faits documentés sur le territoire — climat, risques, mobilité, santé, services — sourcés, datés, vérifiables.',
+    fort: false,
+  },
+  {
+    n: '2',
+    nom: 'Professionnelle',
+    constat:
+      'Agences, promoteurs, notaires, assureurs, collectivités manient des documents et des compétences que le particulier ne maîtrise pas toujours. Personne n’a besoin d’être malveillant pour que ce déséquilibre existe.',
+    reponse:
+      'futur•e traduit ces informations en langage clair, sans jargon, pour que vous arriviez aux visites en sachant quoi demander.',
+    fort: false,
+  },
+  {
+    n: '3',
+    nom: 'Technique',
+    constat:
+      'Les données publiques existent, mais dispersées dans des dizaines de bases, avec des échelles, des horizons et des méthodes difficiles à interpréter.',
+    reponse:
+      'futur•e les croise et affiche pour chaque donnée sa source, sa date et son échelle — commune, quartier ou adresse.',
+    fort: false,
+  },
+  {
+    n: '4',
+    nom: 'Temporelle',
+    constat:
+      'La transaction porte sur le présent. Vous engagez vingt ou trente ans de votre vie et de votre patrimoine. La commune que vous achetez aujourd’hui n’est pas celle que vous habiterez en 2050.',
+    reponse:
+      'futur•e intègre les projections climatiques officielles à l’horizon de votre engagement, pas seulement l’état des lieux du jour de la vente.',
+    fort: true,
+  },
+  {
+    n: '5',
+    nom: 'De capacité',
+    constat:
+      'Deux personnes peuvent recevoir exactement le même document sans avoir les mêmes moyens d’en comprendre les conséquences pour leur propre vie.',
+    reponse:
+      'futur•e relie chaque fait à votre projet précis : le même constat ne pèse pas pareil selon votre santé, votre mobilité, votre budget, votre horizon.',
+    fort: true,
+  },
+];
+
+const ETATS = [
+  ['Établi', 'Le fait est documenté dans une source officielle. Nous le citons, avec sa portée et ses limites.'],
+  ['Absent des données', 'Aucune source consultée ne couvre ce point. Nous le disons, au lieu de nous taire.'],
+  ['Donnée ancienne', 'L’information existe mais date. Nous affichons son âge plutôt que de la faire passer pour actuelle.'],
+  ['Indice seulement', 'Un signal existe, sans preuve suffisante. Nous ne rassurons pas, nous ne condamnons pas.'],
+  ['Sources contradictoires', 'Deux bases se contredisent. Nous montrons la contradiction au lieu de choisir en silence.'],
+  ['Vérification nécessaire', 'La donnée ne permet pas de conclure pour votre situation. Nous vous disons quoi vérifier, et auprès de qui.'],
+];
+
 export default function PourquoiPage() {
   return (
     <div
@@ -44,63 +101,17 @@ export default function PourquoiPage() {
           0%, 100% { transform: scale(1) translate(0, 0); }
           50% { transform: scale(1.12) translate(18px, -25px); }
         }
-        @keyframes traceLine {
-          0%   { opacity: 0; stroke-dashoffset: 400; }
-          20%  { opacity: 1; }
-          100% { opacity: 1; stroke-dashoffset: 0; }
-        }
-        @keyframes traceFinal {
-          0%   { opacity: 0; stroke-dashoffset: 200; }
-          20%  { opacity: 1; }
-          100% { opacity: 1; stroke-dashoffset: 0; }
-        }
-        @keyframes cardIn {
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 0.35; transform: scale(1); }
-          50% { opacity: 0.6; transform: scale(1.08); }
-        }
         .why-orb-2 { animation: breathe 16s ease-in-out infinite; }
-        .why-trace-up,
-        .why-trace-down,
-        .why-trace-final {
-          fill: none;
-          opacity: 0;
-        }
-        .why-trace-up,
-        .why-trace-down {
-          stroke-dasharray: 400;
-          stroke-dashoffset: 400;
-        }
-        .why-trace-final {
-          stroke-dasharray: 200;
-          stroke-dashoffset: 200;
-        }
-        .why-schema-visible .why-trace-up { animation: traceLine 1.6s ease forwards; }
-        .why-schema-visible .why-trace-up:nth-of-type(1) { animation-delay: 0.2s; }
-        .why-schema-visible .why-trace-up:nth-of-type(2) { animation-delay: 0.35s; }
-        .why-schema-visible .why-trace-up:nth-of-type(3) { animation-delay: 0.5s; }
-        .why-schema-visible .why-trace-up:nth-of-type(4) { animation-delay: 0.65s; }
-        .why-schema-visible .why-trace-up:nth-of-type(5) { animation-delay: 0.8s; }
-        .why-schema-visible .why-trace-down { animation: traceLine 1.4s ease forwards; }
-        .why-schema-visible .why-trace-down:nth-of-type(1) { animation-delay: 1.1s; }
-        .why-schema-visible .why-trace-down:nth-of-type(2) { animation-delay: 1.2s; }
-        .why-schema-visible .why-trace-down:nth-of-type(3) { animation-delay: 1.3s; }
-        .why-schema-visible .why-trace-down:nth-of-type(4) { animation-delay: 1.4s; }
-        .why-schema-visible .why-trace-down:nth-of-type(5) { animation-delay: 1.5s; }
-        .why-schema-visible .why-trace-down:nth-of-type(6) { animation-delay: 1.6s; }
-        .why-schema-visible .why-trace-final { animation: traceFinal 1.2s ease 2.1s forwards; }
-        .why-final-card { opacity: 0; transform: translateY(8px); animation: cardIn 0.7s ease 2.4s forwards; }
-        .why-core-pulse { transform-origin: 360px 250px; animation: pulse 3s ease-in-out infinite; }
         @media (max-width: 768px) {
           .why-hero-grid { grid-template-columns: 1fr !important; }
           .why-contrast-grid { grid-template-columns: 1fr !important; }
-          .why-schema-footer { grid-template-columns: 1fr !important; }
+          .why-etats-grid { grid-template-columns: 1fr !important; }
+          .why-offre-grid { grid-template-columns: 1fr !important; }
+          .why-asym-card { grid-template-columns: 1fr !important; }
           .why-page-wrap { padding: 0 20px 100px !important; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .why-orb-2, .why-trace-up, .why-trace-down, .why-trace-final, .why-final-card, .why-core-pulse { animation: none; }
+          .why-orb-2 { animation: none; }
         }
       `}</style>
 
@@ -189,7 +200,7 @@ export default function PourquoiPage() {
               <h1
                 style={{
                   fontFamily: "'Instrument Serif', serif",
-                  fontSize: 'clamp(2.2rem, 5vw, 3.4rem)',
+                  fontSize: 'clamp(2.2rem, 5vw, 3.2rem)',
                   fontWeight: 400,
                   lineHeight: 1.18,
                   letterSpacing: '-0.02em',
@@ -197,12 +208,13 @@ export default function PourquoiPage() {
                   maxWidth: 600,
                 }}
               >
-                De la clarté, <em style={{ color: C.muted, fontStyle: 'italic' }}>sans l&apos;alarme</em>
+                La même adresse n&apos;a pas le même sens{' '}
+                <em style={{ color: C.muted, fontStyle: 'italic' }}>pour&nbsp;tout&nbsp;le&nbsp;monde</em>
               </h1>
               <p style={{ fontSize: '1.05rem', color: C.muted, maxWidth: 560, lineHeight: 1.75, margin: 0 }}>
-                Cadmium dans les sols, pics de pollution, canicules, inondations :
-                l&apos;information existe, mais elle arrive en rafales, sans contexte,
-                sans lien avec votre vie réelle. futur•e est là pour faire ce travail.
+                Une commune n&apos;est ni bonne ni mauvaise en soi. Tout dépend de la vie que
+                vous voulez y mener. futur•e existe pour vous donner, avant de vous engager,
+                l&apos;information que d&apos;autres ont déjà.
               </p>
             </div>
 
@@ -250,53 +262,260 @@ export default function PourquoiPage() {
             01 · Le constat
           </span>
           <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.55rem', fontWeight: 400, lineHeight: 1.3, margin: '0 0 20px' }}>
-            Trop d&apos;alertes, pas assez de repères
+            Décider avec moins d&apos;informations que les autres
           </h2>
           <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.8, margin: '0 0 16px' }}>
-            Chaque semaine, une nouvelle étude sur les pesticides. Chaque été, des cartes de canicule.
-            Chaque automne, des rapports sur la qualité de l&apos;air. L&apos;information climatique et
-            sanitaire n&apos;a jamais été aussi abondante. Elle n&apos;a jamais été aussi difficile à habiter.
+            Choisir où vivre est l&apos;une des décisions les plus engageantes qui soient :
+            des années de vie, une grande partie d&apos;un patrimoine, parfois la santé
+            d&apos;une famille. Et c&apos;est pourtant une décision que l&apos;on prend presque
+            toujours en sachant moins que les autres acteurs de la transaction.
+          </p>
+          <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.8, margin: '0 0 16px' }}>
+            Certaines données sont publiques mais illisibles. D&apos;autres n&apos;ont jamais
+            été produites. D&apos;autres encore ne sont pas transmises alors qu&apos;elles sont
+            connues. Personne n&apos;a besoin d&apos;être malveillant pour que ce déséquilibre
+            existe : le système le produit tout seul.
           </p>
           <div style={{ borderLeft: `2px solid rgba(248, 113, 113, 0.25)`, padding: '6px 0 6px 24px', margin: '28px 0' }}>
             <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.15rem', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
-              On ne manque pas de données. On manque d&apos;une lecture qui nous concerne vraiment :
-              notre commune, notre foyer, notre situation.
+              futur•e construit le dossier que chacun devrait pouvoir consulter avant de choisir
+              un endroit où engager sa&nbsp;vie, son&nbsp;argent et&nbsp;parfois
+              la&nbsp;santé de&nbsp;sa&nbsp;famille.
             </p>
           </div>
-          <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.8, margin: '0 0 16px' }}>
-            Le changement climatique souffre aussi d&apos;une autre forme d&apos;invisibilité :
-            il est oublié par cycles. Chaque été, les canicules et les incendies reviennent
-            dans l&apos;actualité. Chaque automne, l&apos;attention s&apos;efface.
-          </p>
           <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.8, margin: 0 }}>
-            futur•e existe pour combler cet intervalle. Une présence calme, continue, qui maintient
-            le climat de votre vie dans votre conscience active toute l&apos;année, sans peser, sans
-            attendre la prochaine alerte pour redevenir utile.
+            Ce déséquilibre n&apos;est pas une fatalité. Il a des formes précises — nous en
+            avons identifié cinq — et chacune peut être réduite.
           </p>
         </section>
 
         <section style={{ marginBottom: 64 }}>
           <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: C.dim, letterSpacing: '0.1em', marginBottom: 16 }}>
-            02 · Ce que futur•e est
+            02 · Les cinq asymétries
           </span>
           <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.55rem', fontWeight: 400, lineHeight: 1.3, margin: '0 0 20px' }}>
-            Une traduction, pas un commentaire
+            Cinq déséquilibres, une réponse à chacun
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 28 }}>
+            {ASYMETRIES.map((a) => (
+              <div
+                key={a.n}
+                className="why-asym-card"
+                style={{
+                  ...glass({
+                    padding: '22px 24px',
+                    borderRadius: 12,
+                    borderColor: a.fort ? 'rgba(248, 113, 113, 0.35)' : C.border,
+                  }),
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 20,
+                }}
+              >
+                <div>
+                  <span
+                    style={{
+                      display: 'block',
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: 10,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      color: a.fort ? C.accent : C.dim,
+                      marginBottom: 10,
+                    }}
+                  >
+                    {a.n} · L&apos;asymétrie {a.nom.toLowerCase()}
+                  </span>
+                  <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.7, margin: 0 }}>{a.constat}</p>
+                </div>
+                <div style={{ borderLeft: `1px solid ${C.border}`, paddingLeft: 20 }}>
+                  <span
+                    style={{
+                      display: 'block',
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: 10,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      color: C.dim,
+                      marginBottom: 10,
+                    }}
+                  >
+                    → Ce que futur•e y répond
+                  </span>
+                  <p style={{ fontSize: 14, color: C.text, lineHeight: 1.7, margin: 0 }}>{a.reponse}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p style={{ color: C.dim, fontSize: 13, lineHeight: 1.7, margin: '20px 0 0' }}>
+            Les deux dernières sont celles que presque personne ne traite : le temps long de
+            votre engagement, et le lien entre l&apos;information et votre propre vie. C&apos;est
+            là que futur•e concentre son travail.
+          </p>
+        </section>
+
+        <section style={{ marginBottom: 64 }}>
+          <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: C.dim, letterSpacing: '0.1em', marginBottom: 16 }}>
+            03 · La chaîne de décision
+          </span>
+          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.55rem', fontWeight: 400, lineHeight: 1.3, margin: '0 0 20px' }}>
+            Un fragment ne suffit pas
+          </h2>
+          <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.8, margin: '0 0 24px' }}>
+            La plupart des outils n&apos;éclairent qu&apos;un morceau de la décision : la commune,
+            les risques, le prix, le logement ou le climat. Or vous ne décidez pas par morceaux.
+            Une décision résidentielle traverse quatre questions, dans l&apos;ordre — et futur•e
+            est construit pour les relier.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {[
+              ['Le territoire', 'Est-ce que ce territoire correspond à la vie que je veux mener — aujourd’hui, et à l’horizon de mon engagement ?'],
+              ['Le quotidien', 'Est-ce que la vie de tous les jours autour de cette adresse convient à mon foyer — déplacements, soins, services, école ?'],
+              ['Le logement', 'Est-ce que ce logement précis expose mon foyer à des risques ou à des contraintes que je n’ai pas vus ?'],
+              ['La vérification', 'Qu’est-ce que je sais réellement, et qu’est-ce que je dois encore vérifier avant de signer ?'],
+            ].map(([titre, question], i, arr) => (
+              <div key={titre} style={{ display: 'flex', gap: 18, alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                  <div
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      border: `1px solid ${i === arr.length - 1 ? 'rgba(248, 113, 113, 0.6)' : C.borderHi}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: 11,
+                      color: i === arr.length - 1 ? C.accent : C.muted,
+                    }}
+                  >
+                    {i + 1}
+                  </div>
+                  {i < arr.length - 1 && <div style={{ width: 1, height: 34, background: C.border }} />}
+                </div>
+                <div style={{ paddingBottom: i < arr.length - 1 ? 18 : 0 }}>
+                  <strong style={{ display: 'block', fontSize: 14, fontWeight: 600, color: C.text, marginBottom: 3, paddingTop: 4 }}>{titre}</strong>
+                  <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.65, margin: 0 }}>{question}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.8, margin: '28px 0 16px' }}>
+            C&apos;est là que l&apos;aide devient concrète. Pas seulement « mieux informer », mais
+            permettre à quelqu&apos;un d&apos;éviter une erreur qui l&apos;engagerait pendant des
+            années, de poser les bonnes questions lors d&apos;une visite, de repérer un compromis
+            qu&apos;il peut accepter, de renoncer à temps à une option séduisante mais inadaptée —
+            ou, au contraire, de choisir avec davantage de confiance.
+          </p>
+          <p style={{ color: C.dim, fontSize: 13, lineHeight: 1.7, margin: 0 }}>
+            futur•e ne promet pas de décider à votre place. Il vous redonne les moyens de décider
+            vous-même.
+          </p>
+        </section>
+
+        <section style={{ marginBottom: 64 }}>
+          <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: C.dim, letterSpacing: '0.1em', marginBottom: 16 }}>
+            04 · La méthode
+          </span>
+          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.55rem', fontWeight: 400, lineHeight: 1.3, margin: '0 0 20px' }}>
+            Qualifier les preuves, plutôt que noter les lieux
           </h2>
           <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.8, margin: '0 0 16px' }}>
-            Les données publiques françaises couvrent déjà la plupart des risques climatiques et sanitaires :
-            projections de température, qualité des sols, exposition aux polluants, risques d&apos;inondation,
-            qualité de l&apos;eau potable.
+            futur•e ne produit ni note de A à F, ni classement des villes où il ferait
+            universellement bon vivre. Un score doit toujours conclure, même quand les données
+            ne le permettent pas. Nous faisons l&apos;inverse : chaque affirmation porte son
+            statut de connaissance.
           </p>
-          <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.8, margin: '0 0 16px' }}>
-            Elles sont simplement éparpillées entre des dizaines de bases incompatibles, rédigées pour des experts,
-            et jamais croisées avec la réalité d&apos;une personne précise dans une commune précise.
-          </p>
+          <div
+            className="why-etats-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 10,
+              margin: '28px 0',
+            }}
+          >
+            {ETATS.map(([nom, desc]) => (
+              <div key={nom} style={glass({ padding: '16px 18px', borderRadius: 10 })}>
+                <strong style={{ display: 'block', fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 4 }}>{nom}</strong>
+                <span style={{ fontSize: 12.5, color: C.dim, lineHeight: 1.6 }}>{desc}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ borderLeft: `2px solid rgba(248, 113, 113, 0.25)`, padding: '6px 0 6px 24px', margin: '28px 0' }}>
+            <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.15rem', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
+              « Aucun risque confirmé dans les données consultées » n&apos;est pas
+              la&nbsp;même chose qu&apos;«&nbsp;aucun&nbsp;risque&nbsp;». La plupart des outils
+              confondent les&nbsp;deux. Pas&nbsp;nous.
+            </p>
+          </div>
           <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.8, margin: 0 }}>
-            futur•e fait ce croisement. Votre commune, votre logement, votre métier, votre situation de santé :
-            six modules qui traduisent des données publiques en lecture personnalisée. Chaque affirmation distingue
-            ce qui est observé, ce qui est modélisé et ce qui reste incertain.
+            Et une règle ne varie jamais : les faits sont les mêmes pour tout le monde. Nous ne
+            cachons rien selon votre profil. Ce qui change avec votre projet, c&apos;est
+            l&apos;importance de chaque fait pour <em>votre</em> décision — vingt minutes de
+            voiture jusqu&apos;à un hôpital ne pèsent pas pareil selon votre santé. En résumé :
+            ce que nous savons, ce que cela change pour vous, ce qu&apos;il reste à vérifier.
           </p>
+        </section>
 
+        <section style={{ marginBottom: 64 }}>
+          <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: C.dim, letterSpacing: '0.1em', marginBottom: 16 }}>
+            05 · Notre modèle
+          </span>
+          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.55rem', fontWeight: 400, lineHeight: 1.3, margin: '0 0 20px' }}>
+            L&apos;information essentielle n&apos;est pas à vendre
+          </h2>
+          <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.8, margin: '0 0 24px' }}>
+            Si notre mission est de réduire une asymétrie d&apos;information, nous ne pouvons pas
+            la reconstruire derrière un paywall. Notre modèle suit une ligne simple :
+          </p>
+          <div
+            className="why-offre-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 2,
+              border: `1px solid ${C.border}`,
+              borderRadius: 10,
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{ ...glass({ padding: 24 }), borderRight: `1px solid ${C.border}` }}>
+              <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.dim, marginBottom: 16 }}>
+                Gratuit — la mission
+              </span>
+              <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.7, margin: 0 }}>
+                Comprendre les grandes caractéristiques d&apos;un territoire, identifier ses
+                compatibilités avec votre projet et ses principaux compromis. L&apos;accès à
+                l&apos;information et une première orientation appartiennent à tout le monde.
+              </p>
+            </div>
+            <div style={glass({ padding: 24 })}>
+              <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.accent, marginBottom: 16 }}>
+                Payant — la capacité de décision
+              </span>
+              <p style={{ fontSize: 14, color: C.text, lineHeight: 1.7, margin: 0 }}>
+                Le travail qui transforme cette information en dossier personnel : la profondeur,
+                la comparaison entre territoires, les vérifications à mener, la traçabilité de
+                chaque conclusion — et le temps que vous ne passerez pas dans trente bases de
+                données.
+              </p>
+            </div>
+          </div>
+          <p style={{ color: C.dim, fontSize: 13, lineHeight: 1.7, margin: '20px 0 0' }}>
+            Le payant ne vend pas des risques cachés que nous aurions gardés pour nous. Il vend
+            le travail de les appliquer rigoureusement à votre décision.
+          </p>
+        </section>
+
+        <section style={{ marginBottom: 64 }}>
+          <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: C.dim, letterSpacing: '0.1em', marginBottom: 16 }}>
+            06 · En clair
+          </span>
+          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.55rem', fontWeight: 400, lineHeight: 1.3, margin: '0 0 20px' }}>
+            Ce que futur•e est, et n&apos;est pas
+          </h2>
           <div
             className="why-contrast-grid"
             style={{
@@ -315,11 +534,11 @@ export default function PourquoiPage() {
               </span>
               <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {[
-                  "Un média d'alerte ou d'opinion",
-                  'Une ONG déguisée en produit',
-                  'Un outil réservé aux experts',
-                  'Un générateur de scores ou de classements',
-                  "Une machine à produire de l'angoisse",
+                  'Un palmarès des villes où il fait bon vivre',
+                  'Un score qui décide à votre place',
+                  "Un média d'alerte ou une machine à angoisse",
+                  'Un outil qui affirme plus que ce que les données permettent',
+                  'Un produit dont les conclusions varient selon qui le paie',
                 ].map((item) => (
                   <li key={item} style={{ fontSize: 14, color: C.muted, lineHeight: 1.5, paddingLeft: 14, position: 'relative' }}>
                     <span style={{ position: 'absolute', left: 0, color: C.dim }}>–</span>
@@ -334,11 +553,11 @@ export default function PourquoiPage() {
               </span>
               <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {[
-                  'Une lecture personnalisée et localisée',
-                  'Une mise en récit sobre des données publiques',
-                  'Un outil accessible, sans jargon',
-                  'Un suivi mensuel, continu, pour votre foyer',
+                  'Une lecture des territoires reliée à votre projet de vie',
+                  'Des données publiques françaises, citées et vérifiables',
+                  'Des conclusions explicables, avec leurs limites affichées',
                   'Un point de départ pour décider, pas une prescription',
+                  'Un produit indépendant : personne ne peut modifier un verdict',
                 ].map((item) => (
                   <li key={item} style={{ fontSize: 14, color: C.text, lineHeight: 1.5, paddingLeft: 14, position: 'relative' }}>
                     <span style={{ position: 'absolute', left: 0, color: C.accent }}>→</span>
@@ -352,143 +571,7 @@ export default function PourquoiPage() {
 
         <section style={{ marginBottom: 64 }}>
           <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: C.dim, letterSpacing: '0.1em', marginBottom: 16 }}>
-            03 · Les données et le suivi
-          </span>
-          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.55rem', fontWeight: 400, lineHeight: 1.3, margin: '0 0 20px' }}>
-            Des sources publiques. Un suivi dans la durée.
-          </h2>
-          <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.8, margin: '0 0 16px' }}>
-            Toutes les données mobilisées par futur•e sont publiques, françaises et citées systématiquement.
-            Projections climatiques DRIAS, données de sols GisSol, polluants atmosphériques ATMO,
-            risques naturels Géorisques, données de santé environnementale ANSES et Santé publique France :
-            rien qui ne soit vérifiable.
-          </p>
-          <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.8, margin: '0 0 16px' }}>
-            Le rapport interactif initial donne une lecture de votre situation aujourd&apos;hui. Mais les données évoluent,
-            les risques se précisent, votre vie change. C&apos;est pourquoi futur•e propose un suivi mensuel :
-            une newsletter personnalisée pour votre commune, des notifications ciblées quand une donnée qui vous
-            concerne évolue, et un tableau de bord que vous pouvez consulter à tout moment.
-          </p>
-          <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.8, margin: 0 }}>
-            Le mode foyer permet d&apos;étendre cette lecture à plusieurs personnes du même foyer, chacune avec son profil,
-            pour prendre des décisions de vie vraiment éclairées : déménagement, achat immobilier, projet familial,
-            préparation à la retraite.
-          </p>
-
-          <div
-            className="why-schema-visible"
-            style={{
-              ...glass({
-                marginTop: 48,
-                padding: '32px 16px',
-                borderRadius: 16,
-              }),
-              position: 'relative',
-              overflow: 'hidden',
-            }}
-          >
-            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: C.dim, textAlign: 'center', margin: '0 0 6px' }}>
-              Schéma de croisement
-            </p>
-            <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.1rem', fontStyle: 'italic', color: C.muted, textAlign: 'center', margin: '0 0 24px' }}>
-              Comment futur•e transforme les données publiques en lecture personnalisée
-            </p>
-
-            <svg viewBox="0 0 720 560" xmlns="http://www.w3.org/2000/svg" aria-label="Schéma du fonctionnement de futur•e" style={{ display: 'block', width: '100%', height: 'auto', maxWidth: 720, margin: '0 auto' }}>
-              <path d="M 90 195 A 280 280 0 0 1 630 195" stroke="rgba(248, 113, 113, 0.25)" strokeWidth="1" fill="none" strokeDasharray="3 4" />
-              <text x="360" y="22" textAnchor="middle" fill={C.dim} fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="0.1em">01 · Données publiques françaises</text>
-
-              <path className="why-trace-up" d="M 100 175 Q 230 230 360 215" stroke="rgba(167, 139, 250, 0.4)" strokeWidth="0.9" />
-              <path className="why-trace-up" d="M 200 105 Q 280 165 360 215" stroke="rgba(167, 139, 250, 0.4)" strokeWidth="0.9" />
-              <path className="why-trace-up" d="M 360 75 L 360 215" stroke="rgba(167, 139, 250, 0.4)" strokeWidth="0.9" />
-              <path className="why-trace-up" d="M 520 105 Q 440 165 360 215" stroke="rgba(167, 139, 250, 0.4)" strokeWidth="0.9" />
-              <path className="why-trace-up" d="M 620 175 Q 490 230 360 215" stroke="rgba(167, 139, 250, 0.4)" strokeWidth="0.9" />
-
-              {[
-                ['Climat', 'DRIAS · COPERNICUS', 100, 175, 153, 140],
-                ['Sols', 'GISSOL · RMQS', 200, 105, 83, 70],
-                ['Air et eau', "ATMO · HUB'EAU · ARS", 360, 75, 53, 40],
-                ['Risques', 'GÉORISQUES · BRGM', 520, 105, 83, 70],
-                ['Santé', 'ANSES · SPF · INRAE', 620, 175, 153, 140],
-              ].map(([label, sub, cx, cy, y1, y2]) => (
-                <g key={String(label)}>
-                  <circle cx={cx} cy={cy} r="3.5" fill={C.accent} />
-                  <text x={cx} y={y1} textAnchor="middle" fill={C.text} fontFamily="'Instrument Sans', sans-serif" fontSize="11" fontWeight="500">{label}</text>
-                  <text x={cx} y={y2} textAnchor="middle" fill={C.dim} fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="0.04em">{sub}</text>
-                </g>
-              ))}
-
-              <text x="200" y="218" textAnchor="middle" fill={C.dim} fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="0.1em" opacity="0.55">02 · Croisement</text>
-
-              <g className="why-core-pulse">
-                <circle cx="360" cy="250" r="64" fill="rgba(248,113,113,0.08)" stroke="rgba(248,113,113,0.3)" strokeWidth="1" />
-              </g>
-              <circle cx="360" cy="250" r="48" fill="rgba(248,113,113,0.12)" stroke="rgba(248,113,113,0.5)" strokeWidth="1" />
-              <text x="360" y="244" textAnchor="middle" fill={C.text} fontFamily="'Instrument Serif', serif" fontSize="13" fontStyle="italic">votre commune</text>
-              <text x="360" y="260" textAnchor="middle" fill={C.accent} fontFamily="'Instrument Serif', serif" fontSize="14" fontStyle="italic">+</text>
-              <text x="360" y="276" textAnchor="middle" fill={C.text} fontFamily="'Instrument Serif', serif" fontSize="13" fontStyle="italic">votre profil</text>
-
-              <text x="360" y="335" textAnchor="middle" fill={C.dim} fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="0.1em">03 · Six modules de lecture</text>
-
-              <path className="why-trace-down" d="M 360 298 Q 230 340 100 380" stroke="rgba(96, 165, 250, 0.4)" strokeWidth="0.9" />
-              <path className="why-trace-down" d="M 360 298 Q 290 350 230 390" stroke="rgba(96, 165, 250, 0.4)" strokeWidth="0.9" />
-              <path className="why-trace-down" d="M 360 298 Q 340 360 320 400" stroke="rgba(96, 165, 250, 0.4)" strokeWidth="0.9" />
-              <path className="why-trace-down" d="M 360 298 Q 380 360 400 400" stroke="rgba(96, 165, 250, 0.4)" strokeWidth="0.9" />
-              <path className="why-trace-down" d="M 360 298 Q 430 350 490 390" stroke="rgba(96, 165, 250, 0.4)" strokeWidth="0.9" />
-              <path className="why-trace-down" d="M 360 298 Q 490 340 620 380" stroke="rgba(96, 165, 250, 0.4)" strokeWidth="0.9" />
-
-              {[
-                ['Territoire', 100, 380],
-                ['Logement', 230, 390],
-                ['Métier', 320, 400],
-                ['Santé', 400, 400],
-                ['Mobilité', 490, 390],
-                ['Projets', 620, 380],
-              ].map(([label, x, y]) => (
-                <g key={String(label)} transform={`translate(${x}, ${y})`}>
-                  <circle cx="0" cy="0" r="9" fill="none" stroke="rgba(96, 165, 250, 0.85)" strokeWidth="1.2" />
-                  <circle cx="0" cy="0" r="2.5" fill="rgba(96, 165, 250, 0.85)" />
-                  <text x="0" y="24" textAnchor="middle" fill={C.text} fontFamily="'Instrument Sans', sans-serif" fontSize="10.5" fontWeight="500">{label}</text>
-                </g>
-              ))}
-
-              <path className="why-trace-final" d="M 100 410 Q 230 460 360 470" stroke="rgba(251, 146, 60, 0.5)" strokeWidth="1" />
-              <path className="why-trace-final" d="M 230 420 Q 290 460 360 470" stroke="rgba(251, 146, 60, 0.5)" strokeWidth="1" />
-              <path className="why-trace-final" d="M 320 430 Q 340 460 360 470" stroke="rgba(251, 146, 60, 0.5)" strokeWidth="1" />
-              <path className="why-trace-final" d="M 400 430 Q 380 460 360 470" stroke="rgba(251, 146, 60, 0.5)" strokeWidth="1" />
-              <path className="why-trace-final" d="M 490 420 Q 430 460 360 470" stroke="rgba(251, 146, 60, 0.5)" strokeWidth="1" />
-              <path className="why-trace-final" d="M 620 410 Q 490 460 360 470" stroke="rgba(251, 146, 60, 0.5)" strokeWidth="1" />
-
-              <g className="why-final-card">
-                <rect x="180" y="470" width="360" height="74" rx="10" fill="rgba(251, 146, 60, 0.06)" stroke="rgba(251, 146, 60, 0.4)" strokeWidth="1" />
-                <text x="360" y="491" textAnchor="middle" fill={C.warm} fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="0.12em">04 · Votre lecture personnalisée</text>
-                <text x="360" y="513" textAnchor="middle" fill={C.text} fontFamily="'Instrument Serif', serif" fontSize="13" fontStyle="italic">Une lecture située, sourcée, mensuelle.</text>
-                <text x="360" y="531" textAnchor="middle" fill={C.muted} fontFamily="'Instrument Sans', sans-serif" fontSize="9.5">Rapport interactif initial, suivi continu, mode foyer.</text>
-              </g>
-            </svg>
-
-            <div className="why-schema-footer" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 24, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>
-              <div style={{ ...glass({ padding: '14px 16px', borderRadius: 8 }), display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.warm, marginTop: 7, flexShrink: 0 }} />
-                <div>
-                  <strong style={{ display: 'block', fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 2 }}>Le Fil</strong>
-                  <span style={{ fontSize: 12, color: C.dim, lineHeight: 1.5 }}>Newsletter et notifications quand une donnée évolue.</span>
-                </div>
-              </div>
-              <div style={{ ...glass({ padding: '14px 16px', borderRadius: 8 }), display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.violet, marginTop: 7, flexShrink: 0 }} />
-                <div>
-                  <strong style={{ display: 'block', fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 2 }}>Mode foyer</strong>
-                  <span style={{ fontSize: 12, color: C.dim, lineHeight: 1.5 }}>Plusieurs profils, une lecture croisée pour les décisions communes.</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section style={{ marginBottom: 64 }}>
-          <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: C.dim, letterSpacing: '0.1em', marginBottom: 16 }}>
-            04 · Qui nous sommes
+            07 · Qui nous sommes
           </span>
           <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.55rem', fontWeight: 400, lineHeight: 1.3, margin: '0 0 20px' }}>
             Derrière futur•e
@@ -518,19 +601,24 @@ export default function PourquoiPage() {
             marginTop: 72,
             paddingTop: 48,
             borderTop: `1px solid ${C.border}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 24,
           }}
         >
-          <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.2rem', fontStyle: 'italic', color: C.muted, maxWidth: 380, lineHeight: 1.5, margin: 0 }}>
-            Voir ce que futur•e produit concrètement.
+          <p
+            style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: 'clamp(1.35rem, 3vw, 1.7rem)',
+              fontStyle: 'italic',
+              lineHeight: 1.5,
+              color: C.text,
+              margin: '0 0 36px',
+            }}
+          >
+            Le pouvoir ne vient pas d&apos;un score qui dit où&nbsp;vivre. Il vient
+            d&apos;une information complète, honnête et&nbsp;reliée à&nbsp;sa&nbsp;propre&nbsp;vie.
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <Link
-              href="/savoir/cadmium"
+              href="/comparateur"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -545,7 +633,7 @@ export default function PourquoiPage() {
                 border: `1px solid ${C.borderHi}`,
               }}
             >
-              Lire une page Savoir
+              Comparer des territoires
             </Link>
             <Link
               href="/"
