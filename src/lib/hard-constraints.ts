@@ -39,9 +39,15 @@ export const PRODUCT_CONVENTIONS = {
   excludeSeaMinKm: 15, // « pas le littoral » = au moins 15 km de la côte
   montagneMinScore: 50, // « à la montagne » = montagnosité >= 50, soit environ 600 m
   reliefProcheMinScore: 50, // « proche d'une montagne » = un massif à portée
-  // La géométrie d'une isochrone est SIMPLIFIÉE : ses sommets sont espacés d'environ 150 m sur un polygone
-  // de 30 minutes en voiture. Sous cette bande, le verdict serait décidé par la simplification, pas par le
-  // territoire. On ne tranche pas, et on le dit.
+  // La géométrie d'une isochrone est SIMPLIFIÉE : sur le polygone des 30 minutes en voiture depuis la gare
+  // Matabiau, ses sommets sont espacés de 267 m en médiane, 539 m au 9e décile. Sous cette bande, un verdict
+  // serait décidé par la simplification plutôt que par le territoire.
+  //
+  // CE CHIFFRE EST UNE CONVENTION PRUDENTE, PAS UNE PRÉCISION MESURÉE, et il ne faut pas le présenter
+  // autrement : l'espacement des sommets n'est pas l'erreur géométrique (un long segment peut décrire
+  // fidèlement une frontière droite). Le valider demandera de comparer avec une géométrie moins simplifiée,
+  // ou de calculer de vrais itinéraires sur un échantillon de points proches de la frontière. En attendant,
+  // les communes de cette bande sont RETENUES et MARQUÉES (retained_boundary), jamais confirmées.
   reachabilityBorderToleranceM: 300,
 } as const;
 
@@ -58,6 +64,16 @@ export type ReachabilityState =
   | { status: "unavailable"; reason: "routing_unavailable" | "unsupported_metric" };
 
 const MODE_LABEL: Record<PlaceMode, string> = { car: "en voiture", walk: "à pied", bike: "à vélo" };
+
+// LE SEUIL, NOMMÉ. Il vit dans le noyau parce que les DEUX moteurs le nomment (le dossier dans sa
+// conclusion, le comparateur quand il annonce ce qu'il n'a pas pu confirmer) : ils n'ont pas le droit de
+// le dire différemment. « 30 minutes en voiture depuis la gare Matabiau ».
+export function travelThresholdLabel(threshold: PlaceThreshold, placeLabel: string): string {
+  const lieu = lieuEnPhrase(placeLabel);
+  if (threshold.metric === "distance") return `${threshold.maxKm} km de ${lieu}`;
+  const mode = threshold.mode ? ` ${MODE_LABEL[threshold.mode]}` : "";
+  return `${threshold.maxMinutes} minutes${mode} depuis ${lieu}`;
+}
 
 // Le seuil de montagne, exprimé en MÈTRES pour le lecteur : la montagnosité est un score interne, et
 // « votre exigence de montagne n'est pas respectée, montagnosité 12/100 » ne veut rien dire pour lui.

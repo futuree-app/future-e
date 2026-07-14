@@ -24,6 +24,7 @@ import {
   type SearchExplorationHint,
 } from "@/lib/hard-constraints";
 import { hardFilter, unappliedLabels } from "@/lib/hard-constraints-filter";
+import { travelThresholdLabel } from "@/lib/hard-constraints";
 import {
   deptRegionalCategories,
   deptFromInsee,
@@ -158,6 +159,11 @@ export type MatchResult = {
   region: string | null;
   compatibility: number; // 0–100
   reasons: string[];
+  // RETENUE, PAS CONFIRMÉE : le point de référence de cette commune tombe dans la bande de tolérance de la
+  // géométrie (l'isochrone), et le moteur n'a donc PAS pu trancher pour elle. Elle est proposée (l'exclure
+  // supprimerait une possibilité à cause d'une limite de mesure), et elle est marquée. Elle ne peut jamais
+  // être présentée comme respectant la condition.
+  boundary?: true;
   // Signature territoriale : couche DISTINCTE des reasons. Ne justifie pas le
   // score, donne une image du territoire (géo → bassin → climat/relief, max 3),
   // à partir des seuls attributs mesurés. cf. buildSignature.
@@ -324,6 +330,15 @@ export type MatchOutcome = {
   // Tant que ce champ est renseigné, la phrase « ces communes respectent toutes vos conditions » est
   // INTERDITE.
   unappliedConstraints?: string[];
+  // LES DEUX POPULATIONS, JAMAIS FONDUES EN UNE SEULE. Certaines communes sont clairement dans le seuil
+  // posé par le lecteur ; d'autres sont RETENUES sans avoir pu être tranchées (leur point de référence
+  // tombe dans la bande de tolérance de la géométrie calculée). Annoncer « 31 résultats » sans distinguer
+  // laisserait entendre que les 31 respectent la condition.
+  boundaryNotice?: {
+    confirmed: number; // communes dont la condition est ÉTABLIE
+    boundary: number; // communes RETENUES, mais non confirmées
+    thresholdLabel: string; // « 30 minutes en voiture depuis la gare Matabiau »
+  };
 };
 
 // Tailles de ville (V1) — utilisées par le parse pour traduire "petite / moyenne
@@ -2172,11 +2187,18 @@ function evaluationContext(c: IndexCommune, constraints: NormalizedHardConstrain
   };
 }
 
-function passesHardCanonical(c: IndexCommune, constraints: NormalizedHardConstraints): boolean {
+// RETENUE, PAS CONFIRMÉE. Une commune dont le point tombe dans la bande de tolérance de l'isochrone est
+// gardée (l'exclure supprimerait une possibilité à cause d'une limite de MESURE, et la frontière des
+// 30 minutes traverse précisément la couronne où le lecteur cherche), mais elle est MARQUÉE : le
+// comparateur ne la fera jamais passer pour conforme.
+type HardVerdict = { eligible: boolean; boundary: boolean };
+
+function passesHardCanonical(c: IndexCommune, constraints: NormalizedHardConstraints): HardVerdict {
   // Population nulle = commune fantôme / donnée manquante : exclue comme sous le plancher (sinon le
   // critère nature pourrait faire remonter des communes quasi inhabitées).
-  if (c.population == null || c.population < POP_FLOOR) return false;
-  return hardFilter(assessHardConstraints(evaluationContext(c, constraints), communeAttributes(c))).eligible;
+  if (c.population == null || c.population < POP_FLOOR) return { eligible: false, boundary: false };
+  const r = hardFilter(assessHardConstraints(evaluationContext(c, constraints), communeAttributes(c)));
+  return { eligible: r.eligible, boundary: r.boundary.length > 0 };
 }
 
 // LES RAYONS QUE LE PRODUIT S'EST INVENTÉS (50 km autour d'un lieu, 30 km de la mer) ne peuvent plus
@@ -2692,7 +2714,16 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   }
   const totalW = prefs.reduce((s, p) => s + p.weight, 0) || 1;
 
-  const candidates = communes.filter((c) => passesHardCanonical(c, constraints));
+  // Deux populations, jamais mélangées : celles dont la condition est CONFIRMÉE, et celles que le moteur
+  // retient sans avoir pu trancher (le point tombe dans la bande de tolérance de la géométrie).
+  const verdicts = new Map<string, HardVerdict>();
+  const candidates = communes.filter((c) => {
+    const v = passesHardCanonical(c, constraints);
+    if (v.eligible) verdicts.set(c.insee, v);
+    return v.eligible;
+  });
+  const boundaryCount = [...verdicts.values()].filter((v) => v.boundary).length;
+  const confirmedCount = candidates.length - boundaryCount;
 
   type Sub = { key: PreferenceKey; weight: number; baseline?: boolean; s: number };
   const scored = candidates.map((c) => {
@@ -2749,20 +2780,24 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     const worst = [...visible].sort((a, b) => a.weight * a.s - b.weight * b.s)[0];
     const tradeoffKey: PreferenceKey | null = worst && worst.s < 50 ? worst.key : null;
     const tradeoff = tradeoffKey ? REASON_NEG[tradeoffKey] : null;
+    const boundary = verdicts.get(c.insee)?.boundary === true;
+    const built = baseResult(c, { compatibility, reasons, tradeoff }, littoralIndex);
     return {
       cityKey: cityKey(c.insee),
       sortScore: rawScore,
+      boundary,
       pref,
       // Clé du compromis absolu (pref demandée scorant < 50), conservée pour l'unicité
       // par dimension dans le trio (assignCompromis). null = pas de faiblesse absolue.
       tradeoffKey,
-      result: baseResult(c, { compatibility, reasons, tradeoff }, littoralIndex),
+      result: boundary ? { ...built, boundary: true as const } : built,
     };
   });
 
-  // Tri sur le score brut (bonus d'ancre souple inclus, non plafonné) : le n°1
-  // reste le meilleur, et une ancre préférée départage à saturation.
-  scored.sort((a, b) => b.sortScore - a.sortScore);
+  // LES CONFIRMÉES D'ABORD, ET LE SCORE ENSUITE. Sur une condition NON NÉGOCIABLE, le score de préférences
+  // n'a pas le droit de faire disparaître l'incertitude : une commune que le moteur n'a pas su trancher ne
+  // passe pas devant une commune dont la condition est établie, si séduisante soit-elle par ailleurs.
+  scored.sort((a, b) => Number(a.boundary) - Number(b.boundary) || b.sortScore - a.sortScore);
 
   const TARGET = 5;
   const DISPLAY = 3; // cartes réellement affichées (le client tranche à 3)
@@ -2926,6 +2961,14 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     appliedExclusions: exclusion.applied,
     appliedPlaces: appliedPlaces.length ? appliedPlaces : undefined,
     unappliedConstraints: unapplied.length ? unapplied : undefined,
+    boundaryNotice:
+      boundaryCount > 0 && constraints.nearPlace?.threshold
+        ? {
+            confirmed: confirmedCount,
+            boundary: boundaryCount,
+            thresholdLabel: travelThresholdLabel(constraints.nearPlace.threshold, constraints.nearPlace.label),
+          }
+        : undefined,
   };
 }
 

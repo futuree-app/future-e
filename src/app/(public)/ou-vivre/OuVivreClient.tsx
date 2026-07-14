@@ -1195,6 +1195,17 @@ export function OuVivreClient() {
                   <p className={`mt-4 font-mono text-[9px] tracking-[0.06em] uppercase ${matchTierClass(r.compatibility)}`}>
                     {matchTier(r.compatibility)}
                   </p>
+                  {/* RETENUE, PAS CONFIRMÉE. Le point de référence de cette commune tombe dans la bande de
+                      tolérance de la géométrie : le moteur n'a pas pu trancher pour elle. On la propose
+                      (l'écarter supprimerait une option pour une limite de mesure), et on le dit ici, sur
+                      la carte, pas seulement dans le bandeau : c'est cette commune-là qui est concernée.
+                      Le libellé parle du SEUIL, pas d'un temps : nous connaissons une position par rapport
+                      à une frontière calculée, pas un temps de trajet. */}
+                  {r.boundary && (
+                    <p className="mt-1.5 font-mono text-[9px] tracking-[0.06em] uppercase text-amber-300/80">
+                      À la limite du seuil
+                    </p>
+                  )}
                   {forces(r).length > 0 && (
                     <ul className="mt-2 flex flex-col gap-1.5">
                       {forces(r).map((f) => (
@@ -1292,6 +1303,21 @@ export function OuVivreClient() {
                 ? "Des conditions que vous avez posées n'ont pas pu être appliquées à ces résultats : "
                 : "Une condition que vous avez posée n'a pas pu être appliquée à ces résultats : "}
               {outcome.unappliedConstraints.join(", ")}.
+            </p>
+          ) : null}
+
+          {/* LES DEUX POPULATIONS, JAMAIS FONDUES. Certaines communes sont clairement dans le seuil posé
+              par le lecteur ; d'autres sont RETENUES sans avoir pu être tranchées (leur point de référence
+              tombe dans la bande de tolérance de la géométrie calculée). Les taire supprimerait des options
+              à cause d'une limite de mesure ; les compter avec les autres laisserait croire qu'elles
+              respectent la condition. On dit les deux nombres, et on nomme la limite. */}
+          {outcome?.boundaryNotice ? (
+            <p className="mt-3 text-[12px] leading-[1.6] text-label/70">
+              {outcome.boundaryNotice.confirmed > 0
+                ? `${outcome.boundaryNotice.confirmed} ${outcome.boundaryNotice.confirmed > 1 ? "communes se situent" : "commune se situe"} clairement dans votre seuil de ${outcome.boundaryNotice.thresholdLabel}. Nous vous en proposons aussi ${outcome.boundaryNotice.boundary} à la limite du calcul : `
+                : `${outcome.boundaryNotice.boundary} ${outcome.boundaryNotice.boundary > 1 ? "communes se situent" : "commune se situe"} à la limite de votre seuil de ${outcome.boundaryNotice.thresholdLabel} : `}
+              leur point de référence est trop proche de la frontière calculée pour que nous puissions
+              trancher. Elles peuvent convenir, nous ne pouvons pas encore le confirmer.
             </p>
           ) : null}
 

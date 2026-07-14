@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { parseIsochrone } from "../isochrone.ts";
 import { HARD_CONSTRAINT_RULES } from "./hard-constraint-rules.ts";
 import { assertFactValid } from "./materiality-rules.ts";
 import { toCommuneAttributes } from "./module-facts-map.ts";
@@ -161,4 +163,76 @@ test("LES 11 INCOMPATIBILITÉS PASSENT assertFactValid, même avec un nom de com
     assert.equal(e.outcome, "incompatible", `${c.key} devrait être incompatible dans ce montage`);
     for (const f of e.facts) assertFactValid(f, project(c.hc)); // JETTE si le topic déborde
   }
+});
+
+// ── LOT 2a : LE DOSSIER, sur la VRAIE isochrone IGN (30 min en voiture depuis la gare Matabiau) ────
+// Le lot branche les DEUX moteurs. Vérifier le seul comparateur laisserait la moitié du chantier sans
+// preuve, et c'est précisément ici que se voit l'apport du moteur partagé : le CHANGEMENT DE GRAIN.
+
+const ISO_REELLE = parseIsochrone(
+  JSON.parse(readFileSync(new URL("../__fixtures__/isochrone-matabiau-30min-car.json", import.meta.url), "utf8")),
+)!;
+const GARE_REF: ResolvedPlaceReference = {
+  status: "resolved", originalLabel: "la gare Matabiau", canonicalLabel: "Gare Matabiau",
+  kind: "station", lat: 43.611448, lon: 1.453496, source: "geoplateforme_poi",
+  sourceId: "EQ_RESEA0000000073015866", confidence: "high",
+  meta: { inputHash: "h", resolverVersion: "resolve-2" },
+};
+const TRENTE_MIN: Partial<NormalizedHardConstraints> = {
+  nearPlace: {
+    label: "la gare Matabiau",
+    threshold: { metric: "travel_time", maxMinutes: 30, mode: "car", direction: "to_reference", source: "user" },
+    reference: GARE_REF,
+    reachability: { status: "ready", geometry: ISO_REELLE, toleranceMeters: 300 },
+  },
+};
+const PROJET_30MIN = { nearPlace: { label: "la gare Matabiau", maxMinutes: 30, mode: "car" } };
+
+test("DOSSIER, commune DANS l'isochrone : satisfied, la couverture monte, aucune carte", () => {
+  const blagnac = facts({ insee: "31069", nom: "Blagnac", lat: 43.6294, lon: 1.3897 });
+  const e = rule("nearPlace").evaluate(blagnac, project(PROJET_30MIN), hard(TRENTE_MIN, blagnac));
+  assert.equal(e.outcome, "satisfied");
+  assert.equal(e.facts.length, 0); // une contrainte respectée est silencieuse : elle ne fabrique pas de carte
+});
+
+test("DOSSIER, commune HORS de l'isochrone : incompatible, et la phrase ne parle JAMAIS de kilomètres", () => {
+  // Auch est à 1 h 15 de route : dehors, et sans discussion possible.
+  const auch = facts({ insee: "32013", nom: "Auch", lat: 43.6465, lon: 0.5861, uu: null, tailleVille: 21_000 });
+  const e = rule("nearPlace").evaluate(auch, project(PROJET_30MIN), hard(TRENTE_MIN, auch));
+  assert.equal(e.outcome, "incompatible");
+  const f = e.facts[0]!;
+  assert.equal(f.role, "incompatibility");
+  assert.match(f.statement, /30 minutes en voiture/);
+  assert.match(f.statement, /Gare Matabiau/);
+  assert.doesNotMatch(f.statement, /km/); // un temps ne se convertit jamais en distance
+  assertFactValid(f, project(PROJET_30MIN));
+});
+
+test("DOSSIER, LE CHANGEMENT DE GRAIN : le centre communal est dedans, l'ADRESSE est dehors", () => {
+  // Ce n'est pas une divergence de moteur : c'est le POINT D'ÉVALUATION qui change. Une commune peut
+  // passer avec son centroïde et échouer pour une adresse posée hors de l'isochrone, et le texte doit le
+  // porter (« Cette adresse », jamais « le point de référence de »).
+  const blagnac = facts({ insee: "31069", nom: "Blagnac", lat: 43.6294, lon: 1.3897, uu: null, tailleVille: 25_000 });
+  const parLeCentre = rule("nearPlace").evaluate(blagnac, project(PROJET_30MIN), hard(TRENTE_MIN, blagnac));
+  assert.equal(parLeCentre.outcome, "satisfied");
+
+  // Le lecteur a renseigné une adresse, et elle tombe hors de l'isochrone.
+  const adresse = facts({ ...blagnac, lat: 43.95, lon: 1.05, hasAddress: true });
+  const parLAdresse = rule("nearPlace").evaluate(adresse, project(PROJET_30MIN), hard(TRENTE_MIN, adresse, "address"));
+  assert.equal(parLAdresse.outcome, "incompatible");
+  assert.match(parLAdresse.facts[0]!.statement, /^Cette adresse/);
+  assert.equal(parLAdresse.facts[0]!.evidence[0]!.grain, "adresse");
+});
+
+test("DOSSIER, point dans la BANDE DE TOLÉRANCE : uncertain, le critère reste NON EXAMINÉ", () => {
+  // Une incompatibilité ne se décide pas sur quelques mètres de simplification de la géométrie. Le dossier
+  // ne conclut donc pas : il dit qu'il n'a pas pu trancher, et le couperet de la couverture mord.
+  const iso = ISO_REELLE.type === "Polygon" ? ISO_REELLE.coordinates[0]! : [];
+  const surLaFrontiere = iso[0]!; // un sommet du polygone : le point est EXACTEMENT sur la frontière
+  const commune = facts({
+    insee: "31000", nom: "Commune frontière", lat: surLaFrontiere[1]!, lon: surLaFrontiere[0]!,
+    uu: null, tailleVille: 6_000,
+  });
+  const e = rule("nearPlace").evaluate(commune, project(PROJET_30MIN), hard(TRENTE_MIN, commune));
+  assert.equal(e.outcome, "uncertain");
 });

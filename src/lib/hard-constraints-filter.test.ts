@@ -53,3 +53,28 @@ test("unappliedLabels : nomme la contrainte non appliquée AVEC LE MOT DU LECTEU
   const r = hardFilter([{ key: "nearPlace", status: "unexamined", reason: "unresolved_reference", detail: "Gare Matabiau, Toulouse" }]);
   assert.deepEqual(unappliedLabels(r), ["la proximité de la gare Matabiau"]);
 });
+
+test("UNE COMMUNE EN BORDURE EST RETENUE, PAS CONFIRMÉE", () => {
+  // Le point de CETTE commune tombe dans la bande de tolérance de la géométrie : le moteur n'a pas pu
+  // trancher pour elle. L'exclure supprimerait une possibilité à cause d'une limite de MESURE (la frontière
+  // des 30 minutes traverse la couronne où le lecteur cherche : 24 des 31 communes de l'aire toulousaine y
+  // tombent). La laisser passer sans rien dire la ferait passer pour conforme. Donc : retenue, et marquée.
+  const r = hardFilter([
+    { key: "nearPlace", status: "unexamined", reason: "insufficient_precision", detail: "la gare Matabiau" },
+  ]);
+  assert.equal(r.eligible, true); // elle est PROPOSÉE
+  assert.equal(r.complete, false); // mais la condition n'a PAS été appliquée pour elle
+  assert.equal(r.boundary.length, 1); // et c'est dit
+  assert.equal(r.unapplied.length, 0); // ce n'est pas une contrainte non appliquée GLOBALEMENT
+});
+
+test("une PANNE de géocodage, elle, est GLOBALE : elle ne filtre pas, et elle est annoncée", () => {
+  // Exclure sur une panne exclurait les 35 000 communes, et le lecteur recevrait zéro résultat sans
+  // comprendre pourquoi.
+  const r = hardFilter([
+    { key: "nearPlace", status: "unexamined", reason: "geocoding_unavailable", detail: "la gare Matabiau" },
+  ]);
+  assert.equal(r.eligible, true);
+  assert.equal(r.complete, false);
+  assert.deepEqual(unappliedLabels(r), ["la proximité de la gare Matabiau"]);
+});
