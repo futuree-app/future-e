@@ -7,11 +7,12 @@ import { runRules } from "@/lib/decision/materiality-rules";
 import { assembleDossier } from "@/lib/decision/decision-assembler";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
 import type { Dossier, ModuleFacts } from "@/lib/decision/decision-fact";
+import type { EvaluationContext } from "@/lib/hard-constraints";
 import type { DpeRecord } from "@/lib/dpe";
 import type { UserProject } from "@/lib/user-project";
 
 export async function DossierAvecLogement({
-  project, address, savedDpe, communeFacts, communeDossier, logementLink, insee, scopeKey,
+  project, address, savedDpe, communeFacts, communeDossier, logementLink, insee, scopeKey, hard,
 }: {
   project: UserProject;
   address: ResolvedAddress;
@@ -22,12 +23,25 @@ export async function DossierAvecLogement({
   // Slice 2 : identité de l'artefact narratif de CE dossier (augmenté de l'adresse).
   insee: string;
   scopeKey: string;
+  // Les contraintes dures déjà hydratées au grain de la commune (références résolues une seule fois,
+  // au-dessus des deux moteurs). On n'en change que le POINT.
+  hard: EvaluationContext;
 }) {
   try {
     const data = await fetchLogementDecisionDataWithTimeout(address);
     const logement = buildLogementFacts(data, savedDpe, address.label);
     const facts: ModuleFacts = { ...communeFacts, hasAddress: true, logement };
-    const dossier = assembleDossier(runRules(facts, project), project, "commune+adresse", facts.nom);
+    // LE GRAIN CHANGE. Une commune peut passer sur son point de référence et échouer pour une adresse
+    // située à son extrémité : ce n'est pas une divergence de moteur, c'est une lecture plus fine, et la
+    // phrase le dit (« Cette adresse est à 42 km de… », au lieu de « Le point de référence de X… »).
+    const hardAtAddress: EvaluationContext = {
+      ...hard,
+      point: {
+        lat: address.latitude, lon: address.longitude,
+        grain: "address", source: "address_geocoder", label: address.label,
+      },
+    };
+    const dossier = assembleDossier(runRules(facts, project, hardAtAddress), project, "commune+adresse", facts.nom);
     return (
       <DossierDecisionSection
         dossier={dossier} logement={logementLink} logementStatus="done"

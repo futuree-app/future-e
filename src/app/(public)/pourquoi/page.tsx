@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 
 export const metadata: Metadata = {
-  title: 'Pourquoi futur•e — décider où vivre, à armes égales',
+  title: 'Pourquoi futur•e : décider où vivre, à armes égales',
   description:
     'Choisir un logement, c’est souvent décider avec moins d’informations que ceux qui le vendent. futur•e rassemble ce qui est connu, rend visibles les angles morts et vous aide à savoir ce qu’il reste à vérifier avant de vous engager.',
   openGraph: {
@@ -42,7 +42,7 @@ function glass(extra = {}) {
 const kicker = (color: string = C.dim) => ({
   display: 'block' as const,
   fontFamily: "'JetBrains Mono', monospace",
-  fontSize: 10,
+  fontSize: 12,
   color,
   letterSpacing: '0.1em',
   textTransform: 'uppercase' as const,
@@ -51,21 +51,21 @@ const kicker = (color: string = C.dim) => ({
 
 const h2 = {
   fontFamily: "'Instrument Serif', serif",
-  fontSize: '1.55rem',
+  fontSize: '1.9rem',
   fontWeight: 400,
   lineHeight: 1.3,
   margin: '0 0 20px',
 };
 
-const body = { color: C.muted, fontSize: 15, lineHeight: 1.8, margin: '0 0 16px' };
+const body = { color: C.muted, fontSize: 16.5, lineHeight: 1.8, margin: '0 0 18px' };
 
 /* ————— Données de page ————— */
 
 const CHIPS_HERO = [
   { txt: '+3 semaines à plus de 35 °C d’ici 2050', tone: 'accent', rot: 1.5, side: 'right' },
-  { txt: 'Retrait-gonflement des argiles : exposition moyenne', tone: 'warm', rot: -1.5, side: 'left' },
+  { txt: 'Îlot de chaleur : jusqu’à +4 °C la nuit en été', tone: 'warm', rot: -1.5, side: 'left' },
   { txt: 'Gare : 24 min à pied · bus 2 fois par jour', tone: 'blue', rot: 1, side: 'right' },
-  { txt: 'Sols : vérification recommandée', tone: 'violet', rot: -1, side: 'left' },
+  { txt: 'Cadmium : vérification recommandée', tone: 'violet', rot: -1, side: 'left' },
 ];
 
 const PROFILS_DEMO = [
@@ -98,7 +98,7 @@ const PROFILS_DEMO = [
 const CHAINE = [
   {
     titre: 'La commune et le territoire',
-    question: 'Est-ce que cette trajectoire territoriale correspond à mon projet — aujourd’hui, et à l’horizon de mon engagement ?',
+    question: 'Est-ce que cette trajectoire territoriale correspond à mon projet, aujourd’hui et à l’horizon de mon engagement ?',
   },
   {
     titre: 'Le quartier et le quotidien',
@@ -118,7 +118,7 @@ const ASYMETRIES = [
   {
     nom: 'Transactionnelle',
     constat: 'Celui qui vend ou loue connaît le bien et son environnement mieux que la personne qui arrive.',
-    reponse: 'Les faits documentés sur le territoire, sourcés et datés — avant la visite, pas après la signature.',
+    reponse: 'Les faits documentés sur le territoire, sourcés et datés, avant la visite plutôt qu’après la signature.',
     fort: false,
   },
   {
@@ -197,7 +197,7 @@ export default function PourquoiPage() {
           .why-offre-left { border-right: none !important; border-bottom: 1px solid var(--border-1) !important; }
           .why-demo-grid { grid-template-columns: 1fr !important; }
           .why-asym-row { grid-template-columns: 1fr !important; gap: 10px !important; }
-          .why-asym-num { font-size: 2.4rem !important; }
+          .why-asym-num { font-size: 2.8rem !important; }
           .why-asym-response { border-left: none !important; padding-left: 0 !important; }
           .why-page-wrap { padding: 0 20px 100px !important; }
         }
@@ -226,22 +226,22 @@ export default function PourquoiPage() {
 
       <main
         className="why-page-wrap"
-        style={{ position: 'relative', zIndex: 2, maxWidth: 760, margin: '0 auto', padding: '0 24px 120px' }}
+        style={{ position: 'relative', zIndex: 2, maxWidth: 920, margin: '0 auto', padding: '0 24px 120px' }}
       >
         {/* ————— HERO ————— */}
         <section style={{ padding: '72px 0 56px' }}>
           <div
             className="why-hero-grid"
-            style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: 36, alignItems: 'center' }}
+            style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 380px', gap: 36, alignItems: 'center' }}
           >
             <div>
-              <p style={{ ...kicker(C.accent), fontSize: 11, letterSpacing: '0.12em', marginBottom: 24 }}>
+              <p style={{ ...kicker(C.accent), fontSize: 13, letterSpacing: '0.12em', marginBottom: 24 }}>
                 Pourquoi futur•e
               </p>
               <h1
                 style={{
                   fontFamily: "'Instrument Serif', serif",
-                  fontSize: 'clamp(2.2rem, 5vw, 3.2rem)',
+                  fontSize: 'clamp(2.4rem, 5.5vw, 3.7rem)',
                   fontWeight: 400,
                   lineHeight: 1.18,
                   letterSpacing: '-0.02em',
@@ -251,7 +251,7 @@ export default function PourquoiPage() {
                 Votre futur lieu de vie ne tient pas{' '}
                 <em style={{ color: C.muted, fontStyle: 'italic' }}>dans&nbsp;une&nbsp;annonce</em>
               </h1>
-              <p style={{ fontSize: '1.05rem', color: C.muted, lineHeight: 1.75, margin: 0 }}>
+              <p style={{ fontSize: '1.18rem', color: C.muted, lineHeight: 1.75, margin: 0 }}>
                 Une commune, un quartier, un logement : futur•e rassemble ce qui est connu,
                 rend visibles les angles morts et vous aide à savoir ce qu&apos;il reste
                 à vérifier avant de&nbsp;vous&nbsp;engager.
@@ -268,7 +268,7 @@ export default function PourquoiPage() {
                   flexDirection: 'column',
                 }}
               >
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: C.dim }}>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: C.dim }}>
                   L&apos;annonce
                 </span>
                 <div
@@ -280,13 +280,13 @@ export default function PourquoiPage() {
                     border: `1px solid ${C.border}`,
                   }}
                 />
-                <strong style={{ fontFamily: "'Instrument Serif', serif", fontSize: 17, fontWeight: 400, lineHeight: 1.3 }}>
+                <strong style={{ fontFamily: "'Instrument Serif', serif", fontSize: 19, fontWeight: 400, lineHeight: 1.3 }}>
                   Maison 4 pièces, jardin, proche&nbsp;mer
                 </strong>
-                <span style={{ fontSize: 12.5, color: C.muted, marginTop: 6, lineHeight: 1.5 }}>
+                <span style={{ fontSize: 14, color: C.muted, marginTop: 6, lineHeight: 1.5 }}>
                   Lumineuse, au calme. Écoles et commerces à proximité. Coup de cœur assuré.
                 </span>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: C.text, marginTop: 14 }}>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: C.text, marginTop: 14 }}>
                   289 000 €
                 </span>
               </div>
@@ -308,12 +308,12 @@ export default function PourquoiPage() {
                         border: `1px solid ${t.border}`,
                         color: t.color,
                         fontFamily: "'JetBrains Mono', monospace",
-                        fontSize: 11,
+                        fontSize: 12,
                         lineHeight: 1.45,
                         letterSpacing: '0.02em',
                         padding: '7px 11px',
                         borderRadius: 7,
-                        maxWidth: 250,
+                        maxWidth: 280,
                         boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
                       } as CSSProperties & { '--rot': string }}
                     >
@@ -325,11 +325,11 @@ export default function PourquoiPage() {
               <p
                 style={{
                   textAlign: 'center',
-                  fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 12.5, color: C.dim,
+                  fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 14, color: C.dim,
                   margin: '16px 0 0',
                 }}
               >
-                Ce que la visite montre — et ce qu&apos;elle ne montre pas.
+                Ce que la visite montre. Et ce qu&apos;elle ne montre pas.
               </p>
             </div>
           </div>
@@ -340,7 +340,7 @@ export default function PourquoiPage() {
         {/* ————— 01 · LE CONSTAT ————— */}
         <section style={{ marginBottom: 72 }}>
           <span style={kicker()}>01 · Le constat</span>
-          <h2 style={h2}>Décider avec moins d&apos;informations que les autres</h2>
+          <h2 style={h2}>Pourquoi devriez-vous décider avec moins d&apos;informations que les autres&nbsp;?</h2>
           <p style={body}>
             Choisir où vivre est l&apos;une des décisions les plus engageantes qui soient :
             des années de vie, une grande partie d&apos;un patrimoine, parfois la santé
@@ -358,7 +358,7 @@ export default function PourquoiPage() {
             la moins bien informée.
           </p>
           <div style={{ borderLeft: `2px solid rgba(248, 113, 113, 0.25)`, padding: '6px 0 6px 24px', margin: '28px 0 0' }}>
-            <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.15rem', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.3rem', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
               futur•e construit le dossier que chacun devrait pouvoir consulter avant de choisir
               un endroit où engager sa&nbsp;vie, son&nbsp;argent et&nbsp;parfois
               la&nbsp;santé de&nbsp;sa&nbsp;famille.
@@ -370,24 +370,20 @@ export default function PourquoiPage() {
         <section style={{ marginBottom: 72 }}>
           <span style={kicker()}>02 · La preuve par l&apos;exemple</span>
           <h2 style={h2}>Une même ville, trois projets, trois verdicts</h2>
-          <p style={{ ...body, margin: '0 0 12px' }}>
+          <p style={{ ...body, margin: '0 0 24px' }}>
             Prenez La Rochelle. Les faits sont les mêmes pour tout le monde : le climat qui vient,
             les risques documentés, la gare, les soins, les services. Mais le verdict change du
             tout au tout selon le foyer qui envisage d&apos;y vivre.
           </p>
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.06em', color: C.dim, margin: '0 0 20px' }}>
-            Exemple illustratif — les verdicts réels dépendent du projet complet et des données au
-            jour de la consultation.
-          </p>
           <div className="why-demo-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
             {PROFILS_DEMO.map((d) => (
               <div key={d.profil} style={{ ...glass({ padding: '20px 18px', borderRadius: 12 }), display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <span style={{ fontSize: 13.5, fontWeight: 600, color: C.text, lineHeight: 1.45 }}>{d.profil}</span>
+                <span style={{ fontSize: 15, fontWeight: 600, color: C.text, lineHeight: 1.45 }}>{d.profil}</span>
                 <span
                   style={{
                     alignSelf: 'flex-start',
                     fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: 10,
+                    fontSize: 11,
                     letterSpacing: '0.04em',
                     color: d.tone,
                     background: d.toneBg,
@@ -399,12 +395,16 @@ export default function PourquoiPage() {
                 >
                   {d.verdict}
                 </span>
-                <span style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.6 }}>{d.detail}</span>
+                <span style={{ fontSize: 14, color: C.muted, lineHeight: 1.6 }}>{d.detail}</span>
               </div>
             ))}
           </div>
-          <p style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.05rem', color: C.text, margin: '24px 0 0' }}>
+          <p style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.2rem', color: C.text, margin: '24px 0 0' }}>
             Les faits ne changent pas. Leur importance pour la&nbsp;décision,&nbsp;oui.
+          </p>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: '0.06em', color: C.dim, margin: '14px 0 0' }}>
+            Exemple illustratif : les verdicts réels dépendent du projet complet et des données au
+            jour de la consultation.
           </p>
         </section>
 
@@ -415,7 +415,7 @@ export default function PourquoiPage() {
           <p style={{ ...body, margin: '0 0 28px' }}>
             La plupart des outils n&apos;éclairent qu&apos;un morceau : la commune, les risques,
             le prix, le logement ou le climat. Or vous ne décidez pas par morceaux. Une décision
-            résidentielle traverse quatre questions, dans l&apos;ordre — futur•e est construit
+            résidentielle traverse quatre questions, dans l&apos;ordre. futur•e est construit
             pour les relier.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -427,7 +427,7 @@ export default function PourquoiPage() {
                       width: 30, height: 30, borderRadius: '50%',
                       border: `1px solid ${i === CHAINE.length - 1 ? 'rgba(248, 113, 113, 0.6)' : C.borderHi}`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+                      fontFamily: "'JetBrains Mono', monospace", fontSize: 12,
                       color: i === CHAINE.length - 1 ? C.accent : C.muted,
                       background: i === CHAINE.length - 1 ? 'rgba(248,113,113,0.07)' : 'transparent',
                     }}
@@ -437,8 +437,8 @@ export default function PourquoiPage() {
                   {i < CHAINE.length - 1 && <div style={{ width: 1, height: 40, background: C.border }} />}
                 </div>
                 <div style={{ paddingBottom: i < CHAINE.length - 1 ? 20 : 0 }}>
-                  <strong style={{ display: 'block', fontSize: 14, fontWeight: 600, color: C.text, marginBottom: 3, paddingTop: 5 }}>{etape.titre}</strong>
-                  <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.65, margin: 0 }}>{etape.question}</p>
+                  <strong style={{ display: 'block', fontSize: 15.5, fontWeight: 600, color: C.text, marginBottom: 3, paddingTop: 5 }}>{etape.titre}</strong>
+                  <p style={{ fontSize: 15.5, color: C.muted, lineHeight: 1.65, margin: 0 }}>{etape.question}</p>
                 </div>
               </div>
             ))}
@@ -446,7 +446,7 @@ export default function PourquoiPage() {
           <p style={{ ...body, margin: '28px 0 0' }}>
             Concrètement : éviter une erreur qui engagerait des années, poser les bonnes questions
             lors d&apos;une visite, repérer un compromis acceptable, renoncer à temps à une option
-            séduisante mais inadaptée — ou choisir avec davantage de confiance. futur•e ne décide
+            séduisante mais inadaptée, ou choisir avec davantage de confiance. futur•e ne décide
             pas à votre place. Il vous redonne les moyens de décider vous-même.
           </p>
         </section>
@@ -473,7 +473,7 @@ export default function PourquoiPage() {
                   className="why-asym-num"
                   style={{
                     fontFamily: "'Instrument Serif', serif",
-                    fontSize: '2.9rem',
+                    fontSize: '3.4rem',
                     lineHeight: 0.9,
                     color: a.fort ? C.accent : 'transparent',
                     WebkitTextStroke: a.fort ? undefined : `1px ${C.borderHi}`,
@@ -483,7 +483,7 @@ export default function PourquoiPage() {
                   {String(i + 1).padStart(2, '0')}
                 </div>
                 <div>
-                  <strong style={{ display: 'block', fontSize: 13.5, fontWeight: 600, color: C.text, marginBottom: 5 }}>
+                  <strong style={{ display: 'block', fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 5 }}>
                     {a.nom}
                     {a.fort && (
                       <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, letterSpacing: '0.08em', color: C.accent, marginLeft: 8, textTransform: 'uppercase' }}>
@@ -491,9 +491,9 @@ export default function PourquoiPage() {
                       </span>
                     )}
                   </strong>
-                  <p style={{ fontSize: 13.5, color: C.muted, lineHeight: 1.65, margin: 0 }}>{a.constat}</p>
+                  <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.65, margin: 0 }}>{a.constat}</p>
                 </div>
-                <p className="why-asym-response" style={{ fontSize: 13.5, color: C.text, lineHeight: 1.65, margin: 0, paddingLeft: 16, borderLeft: `1px solid ${C.border}` }}>→ {a.reponse}</p>
+                <p className="why-asym-response" style={{ fontSize: 15, color: C.text, lineHeight: 1.65, margin: 0, paddingLeft: 16, borderLeft: `1px solid ${C.border}` }}>→ {a.reponse}</p>
               </div>
             ))}
           </div>
@@ -508,30 +508,30 @@ export default function PourquoiPage() {
             universellement bon vivre. Un score résume la réalité en une valeur unique et peut
             masquer la qualité très inégale des données qui la composent. Nous faisons
             l&apos;inverse : chaque conclusion doit pouvoir être reliée à ses sources, à son
-            échelle et aux règles qui l&apos;ont produite — et porter son statut de connaissance.
+            échelle et aux règles qui l&apos;ont produite, et porter son statut de connaissance.
           </p>
           <div className="why-etats-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, margin: '28px 0' }}>
             {ETATS.map(([nom, desc], i) => (
               <div key={nom} style={{ ...glass({ padding: '15px 17px', borderRadius: 10 }), display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: i === 5 ? C.accent : C.dim, paddingTop: 2 }}>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: i === 5 ? C.accent : C.dim, paddingTop: 2 }}>
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <div>
-                  <strong style={{ display: 'block', fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 3 }}>{nom}</strong>
-                  <span style={{ fontSize: 12.5, color: C.dim, lineHeight: 1.55 }}>{desc}</span>
+                  <strong style={{ display: 'block', fontSize: 14, fontWeight: 600, color: C.text, marginBottom: 3 }}>{nom}</strong>
+                  <span style={{ fontSize: 14, color: C.dim, lineHeight: 1.55 }}>{desc}</span>
                 </div>
               </div>
             ))}
           </div>
           <div style={{ borderLeft: `2px solid rgba(248, 113, 113, 0.25)`, padding: '6px 0 6px 24px', margin: '0 0 24px' }}>
-            <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.15rem', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.3rem', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
               « Aucun risque confirmé dans les données consultées » n&apos;est pas
               la&nbsp;même chose qu&apos;«&nbsp;aucun&nbsp;risque&nbsp;». Nous refusons
               de&nbsp;confondre les&nbsp;deux.
             </p>
           </div>
           <p style={{ ...body, margin: 0 }}>
-            Et une règle ne varie jamais : les faits sont les mêmes pour tout le monde — nous ne
+            Et une règle ne varie jamais : les faits sont les mêmes pour tout le monde : nous ne
             cachons rien selon votre profil. Ce qui change avec votre projet, c&apos;est le poids
             de chaque fait pour <em>votre</em> décision.
           </p>
@@ -545,7 +545,7 @@ export default function PourquoiPage() {
             borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`,
           }}
         >
-          <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: 'clamp(1.05rem, 2.4vw, 1.3rem)', lineHeight: 1.55, margin: 0, width: '100%' }}>
+          <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: 'clamp(1.2rem, 2.6vw, 1.5rem)', lineHeight: 1.55, margin: 0, width: '100%' }}>
             <span style={{ color: C.text }}>Ce que nous savons.</span>{' '}
             <span style={{ color: C.muted }}>Ce que cela change pour&nbsp;vous.</span>{' '}
             <span style={{ color: C.accent, fontStyle: 'italic' }}>Ce qu&apos;il reste à&nbsp;vérifier.</span>
@@ -558,29 +558,29 @@ export default function PourquoiPage() {
           <h2 style={h2}>L&apos;information essentielle n&apos;est pas à vendre</h2>
           <p style={{ ...body, margin: '0 0 24px' }}>
             Si notre mission est de réduire une asymétrie d&apos;information, nous ne pouvons pas
-            la reconstruire derrière un paywall. La ligne est simple — et si un point de vigilance
+            la reconstruire derrière un paywall. La ligne est simple. Et si un point de vigilance
             important existe, le gratuit vous le dit toujours.
           </p>
           <div className="why-offre-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden' }}>
             <div className="why-offre-left" style={{ ...glass({ padding: 24 }), borderRight: `1px solid ${C.border}` }}>
-              <span style={kicker()}>Gratuit — la mission</span>
-              <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.7, margin: 0 }}>
+              <span style={kicker()}>Gratuit · la mission</span>
+              <p style={{ fontSize: 15.5, color: C.muted, lineHeight: 1.7, margin: 0 }}>
                 Les grandes caractéristiques d&apos;un territoire, ses compatibilités avec votre
-                projet, ses compromis majeurs — et l&apos;indication claire lorsqu&apos;un point
+                projet, ses compromis majeurs, et l&apos;indication claire lorsqu&apos;un point
                 mérite vérification ou qu&apos;une conclusion importante est impossible.
               </p>
             </div>
             <div style={glass({ padding: 24 })}>
-              <span style={kicker(C.accent)}>Payant — la capacité de décision</span>
-              <p style={{ fontSize: 14, color: C.text, lineHeight: 1.7, margin: 0 }}>
+              <span style={kicker(C.accent)}>Payant · la capacité de décision</span>
+              <p style={{ fontSize: 15.5, color: C.text, lineHeight: 1.7, margin: 0 }}>
                 Le dossier complet : l&apos;inventaire approfondi, la hiérarchisation des
-                vérifications — pourquoi, auprès de qui, avec quels documents —, la comparaison
+                vérifications (pourquoi, auprès de qui, avec quels documents), la comparaison
                 entre territoires, la traçabilité de chaque conclusion, et le temps que vous ne
                 passerez pas dans trente bases de données.
               </p>
             </div>
           </div>
-          <p style={{ color: C.dim, fontSize: 13, lineHeight: 1.7, margin: '20px 0 0' }}>
+          <p style={{ color: C.dim, fontSize: 14, lineHeight: 1.7, margin: '20px 0 0' }}>
             Le payant ne vend pas des risques cachés que nous aurions gardés pour nous. Il vend le
             travail de les appliquer rigoureusement à votre décision.
           </p>
@@ -595,22 +595,22 @@ export default function PourquoiPage() {
             d&apos;alerte. C&apos;est un produit indépendant, sans publicité, dont le modèle
             repose sur ses utilisateurs. Aucun vendeur, annonceur ou intermédiaire ne peut influer
             sur ses conclusions : même lorsqu&apos;un professionnel distribue un dossier futur•e,
-            il ne peut en modifier la conclusion. Les verdicts ne varient pas selon qui paie —
+            il ne peut en modifier la conclusion. Les verdicts ne varient pas selon qui paie :
             c&apos;est précisément ce qui leur donne de la valeur.
           </p>
           <div style={{ ...glass({ padding: 28, borderRadius: 12 }), marginTop: 24 }}>
-            <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.8, margin: '0 0 14px' }}>
+            <p style={{ fontSize: 16.5, color: C.muted, lineHeight: 1.8, margin: '0 0 14px' }}>
               futur•e a été fondé par Quentin Brache, professionnel de la communication et de la
               transition écologique. Après des années à voir les données climatiques et sanitaires
               circuler entre institutions, rapports et bases publiques sans jamais atteindre les
               personnes qu&apos;elles concernent, un constat s&apos;est imposé :{' '}
               <strong style={{ color: C.text, fontWeight: 500 }}>
-                des données existent, de nombreux risques sont documentés — mais l&apos;information
+                des données existent, de nombreux risques sont documentés. Mais l&apos;information
                 reste dispersée, incomplète, et rarement reliée à la vie concrète de ceux qui
                 devront habiter le lieu.
               </strong>
             </p>
-            <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.8, margin: 0 }}>
+            <p style={{ fontSize: 16.5, color: C.muted, lineHeight: 1.8, margin: 0 }}>
               futur•e existe pour faire ce travail de liaison. Pas de jargon, pas de
               catastrophisme : chaque conclusion reliée à ses sources, à son échelle et aux règles
               qui l&apos;ont produite.
@@ -631,10 +631,10 @@ export default function PourquoiPage() {
           }}
         >
           <div style={{ flex: '1 1 380px' }}>
-            <h2 style={{ ...h2, fontSize: '1.25rem', margin: '0 0 10px' }}>Vous y vivez déjà ?</h2>
-            <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.7, margin: 0 }}>
+            <h2 style={{ ...h2, fontSize: '1.45rem', margin: '0 0 10px' }}>Vous y vivez déjà ?</h2>
+            <p style={{ fontSize: 15.5, color: C.muted, lineHeight: 1.7, margin: 0 }}>
               La démarche est la même. Comprendre ce qui est connu sur votre commune, ce qui
-              change avec le climat, ce qui ne vous a pas été dit au moment d&apos;arriver —
+              change avec le climat, ce qui ne vous a pas été dit au moment d&apos;arriver,
               parce que rester, adapter son logement ou partir est aussi
               une&nbsp;décision.
             </p>
@@ -642,7 +642,7 @@ export default function PourquoiPage() {
           <Link
             href="/"
             style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 500,
+              display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 500,
               padding: '10px 20px', borderRadius: 8, textDecoration: 'none', whiteSpace: 'nowrap',
               background: 'transparent', color: C.text, border: `1px solid ${C.borderHi}`,
             }}
@@ -656,7 +656,7 @@ export default function PourquoiPage() {
           <p
             style={{
               fontFamily: "'Instrument Serif', serif",
-              fontSize: 'clamp(1.35rem, 3vw, 1.7rem)',
+              fontSize: 'clamp(1.5rem, 3.2vw, 1.95rem)',
               fontStyle: 'italic',
               lineHeight: 1.5,
               color: C.text,
@@ -670,7 +670,7 @@ export default function PourquoiPage() {
             <Link
               href="/comparateur"
               style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 500,
+                display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 500,
                 padding: '10px 20px', borderRadius: 8, textDecoration: 'none',
                 background: 'transparent', color: C.muted, border: `1px solid ${C.borderHi}`,
               }}
@@ -680,7 +680,7 @@ export default function PourquoiPage() {
             <Link
               href="/ou-vivre"
               style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 600,
+                display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 600,
                 padding: '10px 20px', borderRadius: 8, textDecoration: 'none',
                 background: C.accent, color: '#fff', border: '1px solid transparent',
               }}

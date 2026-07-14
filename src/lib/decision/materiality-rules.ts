@@ -2,119 +2,31 @@
 // (satisfied / incompatible / not_applicable / unknown…), même sans produire de fait. C'est ce qui
 // rend la COUVERTURE observable. Le moteur valide chaque fait (assertFactValid JETTE en cas de
 // violation de doctrine). Généralise src/lib/logement-checklist.ts.
+//
+// LES CONTRAINTES DURES N'ONT PLUS DE RÈGLES ÉCRITES À LA MAIN ICI. Elles sont fabriquées au-dessus de
+// l'ÉVALUATEUR PARTAGÉ (src/lib/hard-constraints.ts), celui-là même dont le comparateur dérive son
+// filtre. Trois règles vivaient ici (mer, taille, département), et l'une d'elles jugeait la taille sur
+// la population COMMUNALE quand le comparateur la jugeait sur l'AGGLOMÉRATION : deux moteurs, deux
+// verdicts, un seul lecteur. cf. hard-constraint-rules.ts.
 import type {
-  DecisionRule, DecisionFact, ModuleFacts, RunResult, RuleEvaluation,
-  IncompatibilityFact, UnknownFact, CompromiseFact, VerificationFact, EvidenceRef, HardConstraintKey,
+  DecisionRule, DecisionFact, ModuleFacts, RunResult, RuleEvaluation, HardEvaluation,
+  UnknownFact, CompromiseFact, VerificationFact, EvidenceRef,
 } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
-import { nearSeaLimitKm, communeSizeBounds, declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } from "./project-view.ts";
-import { departementFromInsee } from "../insee-departement.ts";
+import { declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } from "./project-view.ts";
 import { LOGEMENT_RULES } from "./logement-rules.ts";
+import { HARD_CONSTRAINT_RULES } from "./hard-constraint-rules.ts";
+import { toCommuneAttributes } from "./module-facts-map.ts";
+import {
+  assessHardConstraints,
+  type EvaluationContext, type HardConstraintAssessment, type HardConstraintKey,
+} from "../hard-constraints.ts";
 
-// Formatage déterministe des milliers (espace ASCII, jamais toLocaleString qui varie).
-function fmt(n: number): string {
-  return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-}
 const territoireHref = "/rapport/quartier";
-
-// Règle 1 : mer hors seuil.
-const RULE_MER = "territoire.mer-hors-seuil";
-const ruleMer: DecisionRule = {
-  id: RULE_MER,
-  module: "territoire",
-  hardConstraint: "nearSea",
-  evaluate: (f, p): RuleEvaluation => {
-    const max = nearSeaLimitKm(p);
-    if (max == null) return { ruleId: RULE_MER, projectKeys: ["nearSea"], outcome: "not_applicable", facts: [], reason: "nearSea non déclaré" };
-    if (f.distanceCoteKm > max) {
-      const ev: EvidenceRef = { factId: "distance_cote_km", module: "territoire", label: `Littoral · ${f.nom}`, observedValue: `${Math.round(f.distanceCoteKm)} km`, grain: "commune", href: territoireHref };
-      const fact: IncompatibilityFact = {
-        id: `${f.insee}:mer`, ruleId: RULE_MER, sourceFactIds: ["distance_cote_km"], module: "territoire",
-        role: "incompatibility", evidenceStrength: "established", hardConstraintKey: "nearSea",
-        materialityTier: "decision_critical", topic: `la distance de ${f.nom} au littoral`,
-        statement: `Cette commune est à ${Math.round(f.distanceCoteKm)} km du littoral, au-delà de la limite de ${max} km que vous avez posée.`,
-        evidence: [ev],
-      };
-      return { ruleId: RULE_MER, projectKeys: ["nearSea"], outcome: "incompatible", facts: [fact], reason: "distance > seuil" };
-    }
-    return { ruleId: RULE_MER, projectKeys: ["nearSea"], outcome: "satisfied", facts: [], reason: "distance <= seuil" };
-  },
-};
-
-// Règle 2 : taille de commune hors seuil.
-const RULE_TAILLE = "territoire.taille-hors-seuil";
-const ruleTaille: DecisionRule = {
-  id: RULE_TAILLE,
-  module: "territoire",
-  hardConstraint: "communeSize",
-  evaluate: (f, p): RuleEvaluation => {
-    const bounds = communeSizeBounds(p);
-    if (!bounds) return { ruleId: RULE_TAILLE, projectKeys: ["communeSize"], outcome: "not_applicable", facts: [], reason: "communeSize non déclaré" };
-    if (f.population == null) {
-      const ev: EvidenceRef = { factId: "population", module: "territoire", label: `Territoire · ${f.nom}`, grain: "commune", href: territoireHref };
-      const fact: UnknownFact = {
-        id: `${f.insee}:taille`, ruleId: RULE_TAILLE, sourceFactIds: ["population"], module: "territoire",
-        role: "unknown", impact: "scoped", materialityTier: "secondary", topic: `la taille de ${f.nom}`,
-        statement: "La population de cette commune n'est pas disponible dans nos données ; la taille ne peut pas être vérifiée.",
-        evidence: [ev],
-      };
-      return { ruleId: RULE_TAILLE, projectKeys: ["communeSize"], outcome: "unknown", facts: [fact], reason: "population absente" };
-    }
-    const over = bounds.max != null && f.population > bounds.max;
-    const under = bounds.min != null && f.population < bounds.min;
-    if (over || under) {
-      const seuil = over ? `au-dessus de ${fmt(bounds.max!)}` : `en dessous de ${fmt(bounds.min!)}`;
-      const ev: EvidenceRef = { factId: "population", module: "territoire", label: `Territoire · ${f.nom}`, observedValue: `${fmt(f.population)} hab.`, grain: "commune", href: territoireHref };
-      const fact: IncompatibilityFact = {
-        id: `${f.insee}:taille`, ruleId: RULE_TAILLE, sourceFactIds: ["population"], module: "territoire",
-        role: "incompatibility", evidenceStrength: "established", hardConstraintKey: "communeSize",
-        topic: `la taille de ${f.nom}`,
-        materialityTier: "decision_critical",
-        statement: `Cette commune compte ${fmt(f.population)} habitants, ${seuil} de la taille que vous avez posée.`,
-        evidence: [ev],
-      };
-      return { ruleId: RULE_TAILLE, projectKeys: ["communeSize"], outcome: "incompatible", facts: [fact], reason: "population hors bornes" };
-    }
-    return { ruleId: RULE_TAILLE, projectKeys: ["communeSize"], outcome: "satisfied", facts: [], reason: "population dans les bornes" };
-  },
-};
 
 function scoreEvidence(nom: string, key: string, score: number): EvidenceRef {
   return { factId: `scores.${key}`, module: "territoire", label: `Territoire · ${nom}`, observedValue: `${Math.round(score)}/100`, grain: "commune", href: territoireHref };
 }
-
-// Règle 3 : département hors de la liste déclarée. La donnée est DANS le code INSEE : ne pas l'examiner
-// obligeait le dossier à écrire « nous n'avons pas examiné les départements visés » sur un rapport qui
-// porte le nom de la commune. Le lecteur voyait la contradiction, et elle coûtait plus de confiance que
-// n'importe quel défaut de mise en page.
-const RULE_DEPT = "territoire.departement-hors-liste";
-const ruleDepartement: DecisionRule = {
-  id: RULE_DEPT,
-  module: "territoire",
-  hardConstraint: "departements",
-  evaluate: (f, p): RuleEvaluation => {
-    const wanted = p.parsed?.hardConstraints?.departements ?? [];
-    if (wanted.length === 0) {
-      return { ruleId: RULE_DEPT, projectKeys: ["departements"], outcome: "not_applicable", facts: [], reason: "aucun département déclaré" };
-    }
-    const dept = departementFromInsee(f.insee);
-    if (dept == null) {
-      return { ruleId: RULE_DEPT, projectKeys: ["departements"], outcome: "uncertain", facts: [], reason: "code INSEE illisible" };
-    }
-    if (wanted.includes(dept)) {
-      return { ruleId: RULE_DEPT, projectKeys: ["departements"], outcome: "satisfied", facts: [], reason: "département dans la liste" };
-    }
-    const ev: EvidenceRef = { factId: "insee", module: "territoire", label: `Territoire · ${f.nom}`, observedValue: `Département ${dept}`, grain: "commune", href: territoireHref };
-    const fact: IncompatibilityFact = {
-      id: `${f.insee}:departement`, ruleId: RULE_DEPT, sourceFactIds: ["insee"], module: "territoire",
-      role: "incompatibility", evidenceStrength: "established", hardConstraintKey: "departements",
-      materialityTier: "decision_critical", topic: `le département de ${f.nom}`,
-      statement: `Cette commune est dans le département ${dept}, hors de ceux que vous avez posés comme condition (${wanted.join(", ")}).`,
-      evidence: [ev],
-    };
-    return { ruleId: RULE_DEPT, projectKeys: ["departements"], outcome: "incompatible", facts: [fact], reason: "département hors liste" };
-  },
-};
 
 // Règle 4 : compromis transport × chaleur. Deux priorités déclarées qui tirent en sens opposés sur
 // cette commune. Texte honnête (pas de « meilleure », pas de « train »), preuve de chaque côté.
@@ -195,7 +107,15 @@ const ruleInondation: DecisionRule = {
   },
 };
 
-export const REGISTRY: DecisionRule[] = [ruleMer, ruleTaille, ruleDepartement, ruleCompromis, ruleConfort, ruleInondation, ...LOGEMENT_RULES];
+export const REGISTRY: DecisionRule[] = [
+  // Les 11 contraintes dures, une règle par clé, toutes au-dessus de l'évaluateur PARTAGÉ avec le
+  // comparateur. Le dossier n'en examinait que 3 (mer, taille, département).
+  ...HARD_CONSTRAINT_RULES,
+  ruleCompromis,
+  ruleConfort,
+  ruleInondation,
+  ...LOGEMENT_RULES,
+];
 
 // Invariants : protègent toutes les futures règles. JETTE (fail-fast) en cas de violation.
 export function assertFactValid(fact: DecisionFact, project: UserProject): void {
@@ -238,18 +158,25 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
   }
 }
 
-export function runRules(facts: ModuleFacts, project: UserProject): RunResult {
+export function runRules(facts: ModuleFacts, project: UserProject, context: EvaluationContext): RunResult {
+  // LES 11 ÉVALUATIONS DE CONTRAINTES DURES, UNE SEULE FOIS. Si chaque règle allait chercher la sienne
+  // en rappelant assessHardConstraints, onze règles en feraient 121 par dossier.
+  const list = assessHardConstraints(context, toCommuneAttributes(facts));
+  const byKey = Object.fromEntries(list.map((a) => [a.key, a])) as Record<HardConstraintKey, HardConstraintAssessment>;
+  const hard: HardEvaluation = { context, byKey };
+
   const outFacts: DecisionFact[] = [];
   const evaluations: RuleEvaluation[] = [];
-  const covered = new Set<HardConstraintKey>();
   for (const rule of REGISTRY) {
-    const ev = rule.evaluate(facts, project);
+    const ev = rule.evaluate(facts, project, hard);
     evaluations.push(ev);
     for (const fact of ev.facts) {
       assertFactValid(fact, project);
       outFacts.push(fact);
     }
-    if (rule.hardConstraint && ev.outcome !== "not_applicable") covered.add(rule.hardConstraint);
   }
-  return { facts: outFacts, evaluations, coveredHardConstraints: [...covered] };
+  // `coveredHardConstraints` a disparu : il déclarait « couverte » toute contrainte dont l'outcome
+  // n'était pas not_applicable, donc un `uncertain` aussi. La couverture se lit dans criteria-registry,
+  // qui la DÉDUIT des évaluations exploitables.
+  return { facts: outFacts, evaluations };
 }

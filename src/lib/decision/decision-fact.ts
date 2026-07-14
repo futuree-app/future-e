@@ -5,15 +5,19 @@ import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { UserProject } from "../user-project.ts";
 import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
 import type { CriteriaSummary } from "./criteria-registry.ts";
+import type {
+  CommuneAttributes, EvaluationContext, HardConstraintAssessment, HardConstraintKey,
+} from "../hard-constraints.ts";
 
 export type DecisionModule = "territoire" | "logement";
 export type MaterialityTier = "decision_critical" | "structuring" | "secondary";
 export type VerificationActionType =
   | "renseigner_adresse" | "verifier_sur_place" | "obtenir_document" | "demander_confirmation";
 
-export type HardConstraintKey =
-  | "departements" | "zones" | "excludeZones" | "montagne" | "reliefProche"
-  | "nearSea" | "excludeSea" | "nearPlace" | "communeSize" | "excludePlace" | "sizeRelativeTo";
+// La clé vit désormais dans le NOYAU PARTAGÉ (src/lib/hard-constraints.ts) : le dossier et le
+// comparateur doivent parler des mêmes contraintes, sous les mêmes noms, ou ils recommenceront à
+// diverger.
+export type { HardConstraintKey } from "../hard-constraints.ts";
 
 export type SourceCoverage = "present" | "none" | "unavailable"; // none = source a répondu, rien trouvé
 
@@ -82,12 +86,13 @@ export type LogementFacts = {
   addressLabel: string;
 };
 
-export type ModuleFacts = {
-  insee: string;
-  nom: string;
-  distanceCoteKm: number;
-  population: number | null;
-  altitude: number | null;
+// ModuleFacts est un SUR-ENSEMBLE de CommuneAttributes : le dossier et le comparateur lisent les mêmes
+// champs, sous les mêmes noms, et `toCommuneAttributes` ne fait que SÉLECTIONNER (si elle devait
+// convertir, c'est que les deux moteurs auraient recommencé à diverger).
+//
+// `distanceCoteKm` est NULLABLE, comme dans CommuneAttributes : le forcer à `number` obligerait ses
+// appelants à inventer une valeur, et une distance inconnue deviendrait une commune littorale.
+export type ModuleFacts = CommuneAttributes & {
   catnatInondation: number | null;
   inondationRisque: number | null;
   scores: Partial<Record<PreferenceKey, number | null>>;
@@ -118,17 +123,31 @@ export type RuleEvaluation = {
   reason: string;
 };
 
+// Les 11 évaluations de contraintes dures, calculées UNE fois par runRules, plus le contexte (dont le
+// point réellement testé, donc le GRAIN). Si chaque règle allait les chercher elle-même, onze règles
+// feraient 121 évaluations par dossier, pour n'en garder que onze.
+export type HardEvaluation = {
+  context: EvaluationContext;
+  byKey: Record<HardConstraintKey, HardConstraintAssessment>;
+};
+
 export type DecisionRule = {
   id: string;
   module: DecisionModule;
-  hardConstraint?: HardConstraintKey; // si présent : participe à la couverture de cette contrainte
-  evaluate: (facts: ModuleFacts, project: UserProject) => RuleEvaluation;
+  hardConstraint?: HardConstraintKey; // si présent : la règle PORTE cette contrainte
+  // Les règles de PRÉFÉRENCE ignorent le 3e paramètre : elles n'en déclarent que deux, et restent
+  // assignables (TypeScript accepte une fonction qui déclare moins de paramètres).
+  evaluate: (facts: ModuleFacts, project: UserProject, hard: HardEvaluation) => RuleEvaluation;
 };
 
 export type RunResult = {
   facts: DecisionFact[];
   evaluations: RuleEvaluation[];
-  coveredHardConstraints: HardConstraintKey[];
+  // `coveredHardConstraints` a été SUPPRIMÉ. Il marquait une contrainte « couverte » dès que l'outcome
+  // n'était pas not_applicable : un `uncertain` (donnée absente, référence non résolue) y était donc
+  // compté comme EXAMINÉ, l'exact contraire de la doctrine. Il n'était consommé nulle part (l'assembleur
+  // passe par criteria-registry, qui déduit la couverture des évaluations exploitables). On ne rafistole
+  // pas un champ faux que personne ne lit : on le retire.
 };
 
 export type ConclusionState =

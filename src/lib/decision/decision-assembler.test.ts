@@ -12,8 +12,11 @@ function project(parsed: unknown, over: Partial<UserProject> = {}): UserProject 
 function ev(ruleId: string, keys: string[], outcome: RuleEvaluation["outcome"], facts: DecisionFact[] = []): RuleEvaluation {
   return { ruleId, projectKeys: keys, outcome, facts, reason: "test" };
 }
-function run(facts: DecisionFact[], covered: RunResult["coveredHardConstraints"] = [], evaluations: RuleEvaluation[] = []): RunResult {
-  return { facts, evaluations, coveredHardConstraints: covered };
+// `covered` n'existe plus dans RunResult (il déclarait « couverte » toute contrainte dont l'outcome
+// n'était pas not_applicable, donc un `uncertain` aussi). On garde le paramètre pour ne pas réécrire les
+// appels, mais il est IGNORÉ : la couverture se déduit des évaluations.
+function run(facts: DecisionFact[], _covered: unknown = [], evaluations: RuleEvaluation[] = []): RunResult {
+  return { facts, evaluations };
 }
 function incompat(over: Partial<IncompatibilityFact> = {}): DecisionFact {
   return { id: "i", ruleId: "r", sourceFactIds: ["s"], module: "territoire", role: "incompatibility", evidenceStrength: "established", hardConstraintKey: "nearSea", materialityTier: "decision_critical", topic: "la distance au littoral", statement: "trop loin", evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }], ...over };

@@ -263,6 +263,9 @@ export default async function RapportPage() {
                 logementLink={dossierLogementLink}
                 insee={inseeCode}
                 scopeKey={`logement:${logementForCommune.logement_id}`}
+                // Les contraintes dures, hydratées UNE fois : la section n'en change que le point
+                // d'évaluation (l'adresse), elle ne re-résout aucune référence.
+                hard={communeResult.hard}
               />
             </Suspense>
           ) : (
