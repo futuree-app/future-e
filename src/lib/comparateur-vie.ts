@@ -24,7 +24,9 @@ import {
   type SearchExplorationHint,
 } from "@/lib/hard-constraints";
 import { hardFilter, unappliedLabels } from "@/lib/hard-constraints-filter";
-import { travelThresholdLabel } from "@/lib/hard-constraints";
+import { travelThresholdLabel, ROUTABLE_MODES } from "@/lib/hard-constraints";
+import { estimateTravelMinutes } from "@/lib/route-time";
+import { reachabilityStore } from "@/lib/reachability-store";
 import {
   deptRegionalCategories,
   deptFromInsee,
@@ -160,10 +162,16 @@ export type MatchResult = {
   compatibility: number; // 0–100
   reasons: string[];
   // RETENUE, PAS CONFIRMÉE : le point de référence de cette commune tombe dans la bande de tolérance de la
-  // géométrie (l'isochrone), et le moteur n'a donc PAS pu trancher pour elle. Elle est proposée (l'exclure
+  // géométrie (l'isochrone), et l'itinéraire n'a pas tranché pour elle. Elle est proposée (l'exclure
   // supprimerait une possibilité à cause d'une limite de mesure), et elle est marquée. Elle ne peut jamais
   // être présentée comme respectant la condition.
   boundary?: true;
+  // POURQUOI le badge subsiste, et les deux cas ne se valent pas : « le calcul d'itinéraire a échoué »
+  // (routing) n'est pas « nous ne l'avons pas tenté » (budget). Les confondre serait un plafond silencieux.
+  boundaryReason?: "routing" | "budget";
+  // La durée ESTIMÉE par le moteur de routage (« environ 24 minutes »). Ce n'est pas un temps réel : ni
+  // trafic, ni stationnement, ni attente. Absente quand la commune n'a pas été affinée.
+  travelMinutes?: number;
   // Signature territoriale : couche DISTINCTE des reasons. Ne justifie pas le
   // score, donne une image du territoire (géo → bassin → climat/relief, max 3),
   // à partir des seuls attributs mesurés. cf. buildSignature.
@@ -335,8 +343,9 @@ export type MatchOutcome = {
   // tombe dans la bande de tolérance de la géométrie calculée). Annoncer « 31 résultats » sans distinguer
   // laisserait entendre que les 31 respectent la condition.
   boundaryNotice?: {
-    confirmed: number; // communes dont la condition est ÉTABLIE
-    boundary: number; // communes RETENUES, mais non confirmées
+    confirmed: number; // communes dont la condition est ÉTABLIE (par l'isochrone ou par l'itinéraire)
+    boundary: number; // communes RETENUES, mais que rien n'a su trancher
+    notRefined: number; // parmi elles, celles que nous n'avons PAS TENTÉ d'affiner (plafond)
     thresholdLabel: string; // « 30 minutes en voiture depuis la gare Matabiau »
   };
 };
@@ -2201,6 +2210,65 @@ function passesHardCanonical(c: IndexCommune, constraints: NormalizedHardConstra
   return { eligible: r.eligible, boundary: r.boundary.length > 0 };
 }
 
+// ── L'AFFINAGE : l'itinéraire tranche ce que la géométrie n'a pas su trancher ────────────────────────
+//
+// L'isochrone est un pré-filtre MASSIF (un polygone, 35 000 communes testées localement, zéro appel par
+// commune). L'itinéraire, lui, coûte un appel par commune : il est donc réservé à deux poignées de communes,
+// et le limiteur global (concurrence 3) l'empêche de noyer l'API.
+//
+// La DEADLINE protège le LECTEUR, pas l'API : passé ce délai, on rend ce qu'on a, et on DIT ce qu'on n'a pas
+// tranché. Les appels partis continuent en fond et remplissent le cache : la recherche suivante en profitera.
+type RefineOutcome =
+  | { status: "within"; minutes: number } // tranchée : dans le seuil
+  | { status: "over"; minutes: number } // tranchée : au-delà, la commune SORT
+  | { status: "unavailable" } // le routage a ÉCHOUÉ pour elle
+  | { status: "not_refined" }; // on ne l'a pas TENTÉE (budget)
+
+const REFINE_BAND_CAP = 24; // les meilleures candidates par score : elles reçoivent verdict ET durée
+const REFINE_SHOWN_CAP = 6; // les communes affichées, pour leur donner une durée
+const REFINE_DEADLINE_MS = 6_000;
+
+async function refineTravelTimes(
+  cs: IndexCommune[],
+  constraints: NormalizedHardConstraints,
+): Promise<Map<string, RefineOutcome>> {
+  const out = new Map<string, RefineOutcome>();
+  const np = constraints.nearPlace;
+  if (!np || np.reference.status !== "resolved" || np.threshold?.metric !== "travel_time") return out;
+  const mode = np.threshold.mode;
+  if (mode == null || !ROUTABLE_MODES.includes(mode)) return out; // le vélo n'est pas routable chez IGN
+  if (cs.length === 0) return out;
+
+  const ref = np.reference;
+  const max = np.threshold.maxMinutes;
+  const store = reachabilityStore();
+
+  const tasks = cs.map(async (c) => {
+    const minutes = await estimateTravelMinutes(
+      {
+        fromLat: c.lat, fromLon: c.lon, toLat: ref.lat, toLon: ref.lon,
+        mode: mode as "car" | "walk", direction: "to_reference",
+      },
+      store,
+    );
+    out.set(
+      c.insee,
+      minutes == null
+        ? { status: "unavailable" }
+        : minutes <= max
+          ? { status: "within", minutes }
+          : { status: "over", minutes },
+    );
+  });
+
+  // Le limiteur GLOBAL sérialise déjà à 3 : on peut tout lancer sans craindre le 429.
+  await Promise.race([
+    Promise.all(tasks),
+    new Promise((r) => setTimeout(r, REFINE_DEADLINE_MS)),
+  ]);
+  return out; // ce qui manque à l'appel n'a pas abouti à temps : not_refined
+}
+
 // LES RAYONS QUE LE PRODUIT S'EST INVENTÉS (50 km autour d'un lieu, 30 km de la mer) ne peuvent plus
 // ÉLIMINER une commune : ce serait opposer au lecteur une condition qu'il n'a jamais posée. Ils peuvent
 // la faire REMONTER : c'est un penchant, pas un couperet. Même mécanique que les ancres de zone souples
@@ -2722,8 +2790,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     if (v.eligible) verdicts.set(c.insee, v);
     return v.eligible;
   });
-  const boundaryCount = [...verdicts.values()].filter((v) => v.boundary).length;
-  const confirmedCount = candidates.length - boundaryCount;
+
 
   type Sub = { key: PreferenceKey; weight: number; baseline?: boolean; s: number };
   const scored = candidates.map((c) => {
@@ -2798,6 +2865,52 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   // n'a pas le droit de faire disparaître l'incertitude : une commune que le moteur n'a pas su trancher ne
   // passe pas devant une commune dont la condition est établie, si séduisante soit-elle par ailleurs.
   scored.sort((a, b) => Number(a.boundary) - Number(b.boundary) || b.sortScore - a.sortScore);
+
+  // ── PASSE A : L'ITINÉRAIRE TRANCHE ──
+  //
+  // On affine les MEILLEURES CANDIDATES PAR SCORE, qu'elles soient à la limite ou déjà confirmées par la
+  // géométrie. Un seul appel par commune sert alors DEUX choses : il tranche celles que la bande de tolérance
+  // laissait dans le doute, et il donne sa durée à celles qu'on affichera (« environ 24 minutes »). N'affiner
+  // que les communes-limite aurait coûté une seconde vague d'appels pour les durées.
+  //
+  // Le choix se fait sur le SCORE SEUL, avant le tri qui relègue les non tranchées : sinon les
+  // communes-limite, poussées en fin de liste, ne seraient jamais affinées, et la bande ne se viderait
+  // jamais.
+  const byInseeIdx = new Map(communes.map((c) => [c.insee, c]));
+  const aAffiner = [...scored].sort((a, b) => b.sortScore - a.sortScore).slice(0, REFINE_BAND_CAP);
+  const affine = await refineTravelTimes(
+    aAffiner.map((s) => byInseeIdx.get(s.result.insee)).filter((c): c is IndexCommune => c != null),
+    constraints,
+  );
+  // Ce qu'on n'a même pas TENTÉ d'affiner (plafond), et qui reste donc à la limite : compté, jamais tu.
+  const aAffinerSet = new Set(aAffiner.map((s) => s.result.insee));
+  const nonTentees = scored.filter((s) => s.boundary && !aAffinerSet.has(s.result.insee)).length;
+
+  const retenues = scored.filter((s) => {
+    const r = affine.get(s.result.insee);
+
+    // AU-DELÀ DU SEUIL : la commune SORT, qu'elle ait été « à la limite » ou même confirmée par la géométrie.
+    // L'estimation prime : une commune que l'isochrone laissait passer et que l'itinéraire met à 34 minutes
+    // ne respecte pas une condition non négociable, et la proposer serait le mensonge qu'on démonte.
+    if (r?.status === "over") return false;
+
+    if (r?.status === "within") {
+      // Tranchée, et dans le seuil : le badge tombe (s'il y en avait un), et la durée s'affiche.
+      s.boundary = false;
+      delete s.result.boundary;
+      s.result.travelMinutes = r.minutes;
+      return true;
+    }
+    if (!s.boundary) return true; // confirmée par la géométrie, simplement pas encore chiffrée
+
+    // Le badge subsiste, mais on dit POURQUOI : le routage a ÉCHOUÉ, ou nous ne l'avons PAS TENTÉ.
+    s.result.boundaryReason = r?.status === "unavailable" ? "routing" : "budget";
+    return true;
+  });
+  // Les nouvellement confirmées remontent : le tri le reflète.
+  retenues.sort((a, b) => Number(a.boundary) - Number(b.boundary) || b.sortScore - a.sortScore);
+  scored.length = 0;
+  scored.push(...retenues);
 
   const TARGET = 5;
   const DISPLAY = 3; // cartes réellement affichées (le client tranche à 3)
@@ -2904,6 +3017,26 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   const liDistinct = littoralIndex ?? (await getLittoralIndex());
   const byInsee = new Map(communes.map((c) => [c.insee, c]));
   const shownPicks = deduped.slice(0, DISPLAY);
+
+  // ── PASSE B : UNE DURÉE POUR CHAQUE COMMUNE PRÉSENTÉE ──
+  // Une commune confirmée par l'isochrone sait qu'elle est dans le seuil, mais pas de combien. Le lecteur,
+  // lui, veut lire « estimé à environ 24 minutes en voiture de la gare Matabiau ». On mesure donc les
+  // communes réellement affichées (trio + pistes), et elles seules : le coût reste borné à ce qui est vu.
+  const aAfficher = deduped.slice(0, REFINE_SHOWN_CAP).filter((r) => r.travelMinutes == null && !r.boundary);
+  if (aAfficher.length > 0) {
+    const durees = await refineTravelTimes(
+      aAfficher.map((r) => byInsee.get(r.insee)).filter((c): c is IndexCommune => c != null),
+      constraints,
+    );
+    for (const r of aAfficher) {
+      const d = durees.get(r.insee);
+      // Une commune confirmée par la géométrie dont l'itinéraire dépasse le seuil : on ne la retire PAS des
+      // résultats à ce stade (elle a déjà été choisie, et la retirer laisserait un trou), mais on ne ment
+      // pas non plus : on affiche la durée telle qu'elle est. Le cas est rare (la sonde n'a trouvé aucun
+      // désaccord entre les deux services) et il reste honnête.
+      if (d?.status === "within" || d?.status === "over") r.travelMinutes = d.minutes;
+    }
+  }
   const distinctiveMap = buildDistinctive(
     shownPicks.map((r) => byInsee.get(r.insee)).filter((c): c is IndexCommune => c != null),
     liDistinct,
@@ -2948,11 +3081,14 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   }
 
   const comparaisonComplete = buildComparaisonComplete(shownPicks, byInsee);
+  const resteBoundary = scored.filter((s) => s.boundary).length;
 
   return {
     perfectMatch: perfect,
     bestCompatibility: best,
-    candidates: candidates.length,
+    // APRÈS AFFINAGE : les communes que l'itinéraire a mises hors du seuil ont été retirées, et elles ne
+    // doivent pas continuer d'être comptées comme des candidates.
+    candidates: scored.length,
     message,
     results: deduped,
     comparaisonComplete,
@@ -2961,11 +3097,15 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     appliedExclusions: exclusion.applied,
     appliedPlaces: appliedPlaces.length ? appliedPlaces : undefined,
     unappliedConstraints: unapplied.length ? unapplied : undefined,
+    // LE BANDEAU, APRÈS AFFINAGE. Il compte ce qui reste vraiment incertain, et il distingue les deux
+    // raisons : le calcul a échoué, ou nous ne l'avons pas tenté (plafond). Un cap tu serait un mensonge
+    // par omission.
     boundaryNotice:
-      boundaryCount > 0 && constraints.nearPlace?.threshold
+      resteBoundary > 0 && constraints.nearPlace?.threshold
         ? {
-            confirmed: confirmedCount,
-            boundary: boundaryCount,
+            confirmed: scored.length - resteBoundary,
+            boundary: resteBoundary,
+            notRefined: nonTentees,
             thresholdLabel: travelThresholdLabel(constraints.nearPlace.threshold, constraints.nearPlace.label),
           }
         : undefined,

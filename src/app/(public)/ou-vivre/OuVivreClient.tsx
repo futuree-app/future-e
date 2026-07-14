@@ -1195,15 +1195,24 @@ export function OuVivreClient() {
                   <p className={`mt-4 font-mono text-[9px] tracking-[0.06em] uppercase ${matchTierClass(r.compatibility)}`}>
                     {matchTier(r.compatibility)}
                   </p>
-                  {/* RETENUE, PAS CONFIRMÉE. Le point de référence de cette commune tombe dans la bande de
-                      tolérance de la géométrie : le moteur n'a pas pu trancher pour elle. On la propose
-                      (l'écarter supprimerait une option pour une limite de mesure), et on le dit ici, sur
-                      la carte, pas seulement dans le bandeau : c'est cette commune-là qui est concernée.
-                      Le libellé parle du SEUIL, pas d'un temps : nous connaissons une position par rapport
-                      à une frontière calculée, pas un temps de trajet. */}
+                  {/* LA DURÉE ESTIMÉE. Ce n'est pas un temps réel : le moteur de routage calcule sur son
+                      graphe, sans trafic, sans stationnement, sans attente. La phrase le dit (« environ »),
+                      et le grain aussi (le point de référence de la commune, pas toute la commune). */}
+                  {r.travelMinutes != null && (
+                    <p className="mt-1.5 text-[12px] leading-[1.5] text-label/80">
+                      Environ {Math.round(r.travelMinutes)} minutes de trajet estimées depuis le point de
+                      référence de la commune.
+                    </p>
+                  )}
+                  {/* RETENUE, PAS CONFIRMÉE, et on dit POURQUOI. Le point de référence de cette commune tombe
+                      dans la bande de tolérance de la géométrie, et l'itinéraire n'a pas tranché : soit le
+                      calcul a échoué, soit nous ne l'avons pas tenté. Les confondre serait un plafond
+                      silencieux. Le libellé parle du SEUIL, pas d'un temps : sans itinéraire, nous ne
+                      connaissons qu'une position par rapport à une frontière calculée. */}
                   {r.boundary && (
                     <p className="mt-1.5 font-mono text-[9px] tracking-[0.06em] uppercase text-amber-300/80">
                       À la limite du seuil
+                      {r.boundaryReason === "routing" ? " · calcul indisponible" : ""}
                     </p>
                   )}
                   {forces(r).length > 0 && (
@@ -1314,10 +1323,16 @@ export function OuVivreClient() {
           {outcome?.boundaryNotice ? (
             <p className="mt-3 text-[12px] leading-[1.6] text-label/70">
               {outcome.boundaryNotice.confirmed > 0
-                ? `${outcome.boundaryNotice.confirmed} ${outcome.boundaryNotice.confirmed > 1 ? "communes se situent" : "commune se situe"} clairement dans votre seuil de ${outcome.boundaryNotice.thresholdLabel}. Nous vous en proposons aussi ${outcome.boundaryNotice.boundary} à la limite du calcul : `
-                : `${outcome.boundaryNotice.boundary} ${outcome.boundaryNotice.boundary > 1 ? "communes se situent" : "commune se situe"} à la limite de votre seuil de ${outcome.boundaryNotice.thresholdLabel} : `}
-              leur point de référence est trop proche de la frontière calculée pour que nous puissions
-              trancher. Elles peuvent convenir, nous ne pouvons pas encore le confirmer.
+                ? `${outcome.boundaryNotice.confirmed} ${outcome.boundaryNotice.confirmed > 1 ? "communes se situent" : "commune se situe"} dans votre seuil de ${outcome.boundaryNotice.thresholdLabel}. `
+                : ""}
+              {outcome.boundaryNotice.boundary}{" "}
+              {outcome.boundaryNotice.boundary > 1 ? "autres n'ont" : "autre n'a"} pas pu être
+              {outcome.boundaryNotice.boundary > 1 ? " tranchées" : " tranchée"} : leur point de référence est
+              trop proche de la frontière calculée, et{" "}
+              {outcome.boundaryNotice.notRefined > 0
+                ? "nous n'avons pas affiné leur itinéraire dans cette recherche"
+                : "le calcul d'itinéraire n'a pas abouti"}
+              . Elles peuvent convenir, nous ne pouvons pas le confirmer.
             </p>
           ) : null}
 
