@@ -73,7 +73,7 @@ test("un 429 rend routing_unavailable, N'EST PAS MIS EN CACHE, et se retente", a
   let appels = 0;
   globalThis.fetch = (async () => {
     appels++;
-    return new Response("Too Many Requests", { status: 429 });
+    return new Response("Too Many Requests", { status: 429, headers: { "retry-after": "0" } });
   }) as typeof fetch;
   try {
     const r = { lat: 44.1, lon: 1.9, maxMinutes: 15, mode: "walk", direction: "to_reference" } as const;
@@ -82,7 +82,8 @@ test("un 429 rend routing_unavailable, N'EST PAS MIS EN CACHE, et se retente", a
     if (a.status !== "unavailable") return;
     assert.equal(a.reason, "routing_unavailable");
     await getReachability(r); // une panne se RETENTE : elle n'a pas été gravée
-    assert.equal(appels, 2);
+    // 4 appels : DEUX demandes, et le limiteur retente UNE fois chacune après le Retry-After du serveur.
+    assert.equal(appels, 4);
   } finally {
     globalThis.fetch = vrai;
   }

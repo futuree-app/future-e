@@ -1,18 +1,21 @@
 // L'ATTEIGNABILITÉ. Un polygone calculé UNE fois depuis le lieu, puis les 35 000 communes testées
 // localement. Jamais un appel par commune, et jamais un haversine déguisé en temps de trajet.
 //
-// LE CACHE N'EST PAS UNE OPTIMISATION : l'API IGN rate-limite (HTTP 429 vérifié le 2026-07-14, après
-// quelques appels rapprochés). Et garder les succès ne suffit pas : il faut DÉDOUBLONNER LES APPELS EN VOL,
-// sinon deux lecteurs simultanés sur la même gare partent tous les deux vers IGN avant que le premier n'ait
-// rempli le cache. (Le lot 2b le remplacera par la table reachability_artifact, partagée entre instances et
-// survivant aux redémarrages : c'est elle, et elle seule, qui permettra de promettre que les deux moteurs
-// lisent le même objet gelé.)
+// LE CACHE N'EST PAS UNE OPTIMISATION : l'API IGN rate-limite (HTTP 429 vérifié le 2026-07-14). Trois
+// étages, et chacun répond à un défaut distinct :
+//   mémoire  : le même process ne recalcule pas ;
+//   en vol   : deux lecteurs simultanés sur la même gare ne partent pas tous les deux vers IGN ;
+//   table    : deux INSTANCES partagent l'artefact, et un redémarrage ne le perd pas.
+// La table ne déduplique PAS deux premiers calculs strictement concurrents sur deux instances (il n'y a pas
+// de verrou distribué) : elle partage les RÉSULTATS, pas le premier calcul. Ne pas l'annoncer autrement.
 //
 // Un échec ne rend JAMAIS de géométrie de repli, et ne se convertit JAMAIS en kilomètres : il rend
 // routing_unavailable, un état technique, retentable, que le lecteur voit comme « non examiné ».
 import { createHash } from "node:crypto";
 import type { PolygonGeometry } from "./geo-polygon.ts";
 import { PRODUCT_CONVENTIONS, type ReachabilityState } from "./hard-constraints.ts";
+import { ignFetch } from "./ign-limiter.ts";
+import type { ArtifactStore } from "./reachability-store.ts";
 
 const ISOCHRONE_URL = "https://data.geopf.fr/navigation/isochrone";
 const RESOURCE = "bdtopo-valhalla";
@@ -77,21 +80,18 @@ async function fetchGeometry(r: ReachabilityRequest): Promise<PolygonGeometry | 
     profile: PROFILE[r.mode],
     direction: "arrival",
   })}`;
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
-  try {
-    const res = await fetch(url, { headers: { accept: "application/json" }, signal: controller.signal });
-    if (!res.ok) return null; // 429 compris : une panne, pas un territoire
-    return parseIsochrone(await res.json());
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timeout);
-  }
+  // Le limiteur GLOBAL au process (concurrence 3, Retry-After respecté) : isochrones et itinéraires
+  // partagent la MÊME file. Sans cela, une recherche qui affine douze communes noierait l'isochrone de la
+  // recherche voisine, et l'API rendrait des 429 aux deux.
+  const res = await ignFetch(url, TIMEOUT_MS);
+  if (!res.ok) return null; // rate_limited ou error : une panne, pas un territoire
+  return parseIsochrone(res.json);
 }
 
-export async function getReachability(r: ReachabilityRequest): Promise<ReachabilityState> {
+export async function getReachability(
+  r: ReachabilityRequest,
+  store?: ArtifactStore | null,
+): Promise<ReachabilityState> {
   const key = reachabilityRequestHash(r);
 
   const hit = cache.get(key);
@@ -100,7 +100,21 @@ export async function getReachability(r: ReachabilityRequest): Promise<Reachabil
 
   let pending = inFlight.get(key);
   if (!pending) {
-    pending = fetchGeometry(r);
+    // MÉMOIRE -> TABLE -> RÉSEAU. Le cache est un CONFORT, pas une dépendance : une base indisponible ne
+    // fait pas tomber une recherche, elle fait rappeler l'API.
+    pending = (async () => {
+      const enTable = store ? await store.getIsochrone(key).catch(() => null) : null;
+      if (enTable) return enTable;
+      const g = await fetchGeometry(r);
+      if (g && store) {
+        await store
+          .putIsochrone(key, g, {
+            engine: "ign-valhalla", resource: RESOURCE, integrationVersion: ISOCHRONE_VERSION,
+          })
+          .catch(() => {});
+      }
+      return g;
+    })();
     inFlight.set(key, pending);
   }
 
