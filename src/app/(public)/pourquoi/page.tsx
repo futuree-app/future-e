@@ -486,14 +486,19 @@ export default function PourquoiPage() {
                   <strong style={{ display: 'block', fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 5 }}>
                     {a.nom}
                     {a.fort && (
-                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, letterSpacing: '0.08em', color: C.accent, marginLeft: 8, textTransform: 'uppercase' }}>
-                        · là où presque personne ne va
+                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.08em', color: C.accent, marginLeft: 8, textTransform: 'uppercase' }}>
+                        · le cœur de futur•e
                       </span>
                     )}
                   </strong>
                   <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.65, margin: 0 }}>{a.constat}</p>
                 </div>
-                <p className="why-asym-response" style={{ fontSize: 15, color: C.text, lineHeight: 1.65, margin: 0, paddingLeft: 16, borderLeft: `1px solid ${C.border}` }}>→ {a.reponse}</p>
+                <div className="why-asym-response" style={{ paddingLeft: 16, borderLeft: `1px solid ${C.border}` }}>
+                  <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: C.accent, marginBottom: 5 }}>
+                    → La réponse futur•e
+                  </span>
+                  <p style={{ fontSize: 15, color: C.text, lineHeight: 1.65, margin: 0 }}>{a.reponse}</p>
+                </div>
               </div>
             ))}
           </div>
