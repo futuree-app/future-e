@@ -1,149 +1,140 @@
-# Passation — le lot 2 des contraintes dures (BAN + isochrone), puis `mismatch`
+# Passation — le lot 2a est livré ; la suite est le lot 2b (persistance), puis `mismatch`
 
-**Horodatage** : 2026-07-14 · **Branche** : `main` (propre, poussée, rien en attente)
-**Derniers commits** : `f069c24` (chantier A lot 1) · `13a356c` (réécriture `/pourquoi`) · **Aucune PR ouverte.**
+**Horodatage** : 2026-07-14 · **Branche** : `main` (9 commits d'avance sur `origin`, **non poussés**)
+**Dernier commit** : `0ef7090` (retenue, pas confirmée) · **Aucune PR ouverte.**
 
 ---
 
-## Fait dans la session précédente
+## Fait dans cette session : le lot 2a des contraintes dures
 
-**Chantier A, lot 1 : les contraintes dures deviennent des évaluations canoniques.** Livré, poussé
-sur `main`, vérifié à l'écran. Spec et plan :
-`docs/superpowers/specs/2026-07-14-contraintes-dures-evaluations-canoniques-design.md`
-`docs/superpowers/plans/2026-07-14-contraintes-dures-evaluations-canoniques.md`
+« À 30 minutes en voiture de la gare Matabiau » est désormais **posable** par le lecteur, **résolue** (la
+gare, pas la rue), **évaluée** (point dans l'isochrone), et le comparateur **filtre** dessus. Plan exécuté :
+`docs/superpowers/plans/2026-07-14-lot2a-references-nommees.md` (il contient la doctrine complète).
 
-Le handoff précédent disait « le chantier à ouvrir est la COUVERTURE : ajouter des règles ».
-L'inventaire a montré que le manque de couverture cachait un problème de **vérité**, et il a remonté
-quatre mensonges que le produit servait au lecteur :
+**Six faits d'enquête ont corrigé la spec avant d'écrire une ligne.** Ils sont vérifiés à la main, contre
+les API réelles, et ils commandent le code :
 
-1. **Le comparateur laissait tomber une condition non négociable, en silence.** « La gare Matabiau »
-   n'étant pas un nom de commune, `passesHard` **sautait purement le test**, et le comparateur
-   affichait ses résultats comme s'ils respectaient toutes les conditions du lecteur.
-2. **Les deux moteurs divergeaient déjà sur la taille** (agglomération pour le filtre, population
-   communale pour le dossier) : une commune de 8 000 habitants dans l'unité urbaine de Lyon était
-   **exclue par l'un et déclarée conforme par l'autre**, pour le même projet.
-3. **Trois seuils étaient inventés en silence** : 30 km pour la mer, 50 km autour d'un lieu nommé, et
-   la mutation de `communeSize` par `sizeRelativeTo`.
-4. **Une contrainte composite partiellement résolue se déclarait satisfaite** (« quitter Lyon ET
-   Saint-Jean », dont seul Lyon se résout).
+1. **La BAN ne sait pas géocoder une gare.** Sur « gare Matabiau », elle rend « **Rue** Matabiau » (type
+   `street`, score 0,71) : plausible, à 500 m, et faux. C'est la **Géoplateforme** (`index=poi`, BDTOPO)
+   qui connaît la gare, avec sa catégorie et un identifiant stable (`cleabs`).
+2. **LE SCORE NE DÉCIDE PAS, LA CATÉGORIE DÉCIDE.** Sur « hôpital de Purpan », le **mieux classé** (0,65)
+   est le *Centre de Formation Métiers de la Santé CHU Hôpital de Purpan*. Le vrai hôpital est à **0,42**.
+   Les deux portent les deux mots du lecteur : ni le score ni le libellé ne les séparent. Un plancher de
+   score à 0,6 aurait **tué l'hôpital**.
+3. **Deux lieux à 2,5 km sont deux lieux.** « Gare de Lyon » rend **cinq** gares, toutes à 0,85 (Paris,
+   Perrache, Guillotière…). Le seuil de déduplication est **300 m**, jamais 5 km, et le cas normal est
+   `ambiguous`.
+4. **Le vélo n'existe pas** chez IGN (HTTP 400 sur toutes les ressources) : `unsupported_metric`, et le
+   produit **ne le propose pas** dans la question qu'il pose au lecteur.
+5. **Le parse ne savait pas exprimer la contrainte** (`nearPlace` était `{ label, maxKm }`, et le prompt
+   disait « label = nom de commune »). Rien n'empêchait le LLM d'écrire `maxKm: 30` pour « 30 minutes ».
+6. **L'isochrone rate-limite** (429). Le cache n'est pas une optimisation : il doit **dédoublonner les
+   appels en vol**, sinon deux lecteurs simultanés sur la même gare partent tous les deux vers IGN.
 
-L'architecture qui en sort, et qu'il faut respecter en ajoutant quoi que ce soit :
+**Architecture livrée** (le noyau reste PUR : ni `server-only`, ni `fetch`) :
 
 ```
-contrainte déclarée
-  → ÉVALUATION CANONIQUE       (la vérité métier : ce qui est constaté)
-    → politique du comparateur (RECHERCHE : dans le doute, ne pas proposer)
-    → politique du dossier     (RAPPORT : une absence n'est JAMAIS une incompatibilité)
+parse (temps + mode + lieu non communal)
+  → resolveExternalReferences (SERVEUR, le seul module qui touche le réseau)
+      geocode-place.ts   : Géoplateforme POI + BAN, en parallèle, candidats FUSIONNÉS
+      place-screening.ts : LES CONTRÔLES (type attendu, CATÉGORIE, libellé, territoire, plancher)
+      isochrone.ts       : un polygone depuis le LIEU, cache + dédup en vol
+  → hydrateHardConstraints (PURE, appelée 2 fois : une pour savoir quoi résoudre, une avec le sac)
+      → noyau : evaluateNearPlace (point-dans-polygone, bande de tolérance)
+          → comparateur : filtre + « retenue, pas confirmée »
+          → dossier     : satisfied / incompatible / uncertain
 ```
 
----
+## L'arbitrage produit de la session : « retenue, pas confirmée »
 
-## PROCHAINE ÉTAPE : le lot 2 (les références nommées, pour de vrai)
+La bande de tolérance happait **24 des 31 communes** de l'aire toulousaine (la frontière des 30 minutes
+traverse la couronne où le lecteur cherche). Les deux conduites simples étaient fausses : les exclure
+supprimait 77 % des candidats pour une limite de **mesure** ; les laisser passer les faisait passer pour
+conformes. Doctrine tranchée avec le porteur :
 
-Tout est déjà spécifié : **spec §4, §5.1 à §5.7**. Le lot 1 a posé le contrat ; le lot 2 le remplit.
+- le **noyau** ne bouge pas : `unexamined(insufficient_precision)` ne devient **jamais** `satisfied` ;
+- l'**adaptateur comparateur** la **retient** et la **marque** (« À la limite du seuil ») ;
+- les **confirmées passent avant** au tri : sur une condition non négociable, le score de préférences n'a
+  pas le droit de faire disparaître l'incertitude ;
+- elle garde `complete: false`, reste `uncertain` au dossier, **ne fait pas monter la couverture** ;
+- le bandeau ne fond pas les deux populations : « 7 communes se situent clairement dans votre seuil…, nous
+  vous en proposons aussi 20 à la limite du calcul ».
 
-1. **Géocodage BAN** des lieux qui ne sont pas des communes (« la gare Matabiau », « l'hôpital de
-   Purpan »), avec ses **contrôles** (type du résultat, concordance du libellé, proximité du
-   territoire déclaré, score). Un résultat seulement *plausible* ne devient jamais `resolved`.
-2. **Isochrone IGN** (`data.geopf.fr/navigation/isochrone`, Valhalla, sans clé) : un polygone calculé
-   **une fois depuis le lieu**, puis un test point-dans-polygone. **Un temps de trajet n'est jamais
-   évalué par un haversine** : aujourd'hui, « à 30 minutes de la gare Matabiau » rend
-   `unexamined(unsupported_metric)`, et c'est honnête. Bande de tolérance autour de la frontière
-   (`insufficient_precision`) : une incompatibilité ne se décide pas sur quelques mètres de
-   simplification.
-3. **Persistance de la référence résolue** dans le projet (`ResolvedPlaceReference`,
-   `ReachabilityReference` + table `reachability_artifact`), avec `inputHash` et `resolverVersion` :
-   sans l'empreinte de l'ENTRÉE, remplacer « gare Matabiau » par « gare Saint-Jean » garderait en
-   silence les coordonnées de Toulouse.
-4. **Read repair** des projets historiques, **au-dessus** des deux moteurs (jamais dans l'un d'eux).
-5. **L'ambiguïté posée au lecteur** au parse (`ParsedProject.ambiguities` existe déjà) : « vos 30
-   minutes de la gare : à pied, à vélo, en voiture ? », « près de Brest : à quelle distance ? ».
-
-**Piège d'architecture, déjà rencontré** : le comparateur est **ANONYME** (`matchProjects` reçoit un
-`ParsedProject` venu du client, sans compte ni projet persisté). La persistance ne peut donc pas être
-le seul chemin de résolution : `matchProjects` reste le point d'hydratation de ce moteur.
+> **La souplesse de l'affichage ne contamine pas la vérité du moteur.**
 
 ---
 
-## ENSUITE : le chantier B, `mismatch` (la grammaire est incomplète)
+## PROCHAINE ÉTAPE : le lot 2b (la persistance)
 
-Décidé avec le porteur, **pas encore spécifié**. Les quatre rôles de fait existants ne savent pas dire
-la situation la plus fréquente : **un lieu répond MAL à une priorité déclarée, sans que ce soit
-éliminatoire.** Ce n'est ni une incompatibilité (la préférence n'était pas non négociable), ni un
-compromis (rien ne tire en sens inverse), ni une inconnue (la donnée est là, elle est mauvaise), ni
-une vérification (il n'y a rien à aller vérifier : c'est établi).
+1. **`ResolvedPlaceReference` persistée** dans `UserProject`, avec son `inputHash` et son
+   `resolverVersion` (`RESOLVER_VERSION` est passé à `resolve-2`).
+2. **Table `reachability_artifact`** : l'artefact partagé **entre instances**, survivant aux redémarrages.
+   C'est elle, et elle seule, qui permettra de promettre que les deux moteurs lisent le **même objet gelé**.
+   Aujourd'hui ils traversent la même **chaîne**, avec le même cache **de process** : un géocodage réussi
+   ici et un 429 là restent possibles. **Ne pas annoncer la garantie avant qu'elle existe.**
+3. **Read repair** des projets historiques, **au-dessus** des deux moteurs.
+4. **Suppression du témoin gelé** `src/lib/legacy-passes-hard.ts` et de son test.
 
-> **`mismatch` est l'opposé non éliminatoire de `satisfied`.** Un critère déclaré a été effectivement
-> examiné, la donnée est disponible et robuste, et le résultat se situe du côté défavorable de la
-> préférence.
+**INTERDIT ABSOLU du lot 2b** : `geocoding_unavailable` et `routing_unavailable` sont des **pannes**, pas
+des constats. Elles ne doivent **jamais** être persistées : un incident réseau deviendrait une impossibilité
+sémantique stable (« ce lieu n'existe pas »).
 
-Il entraîne : un nouvel outcome de règle, une **orientation refondue** (`favorable` / `mixed` /
-`unfavorable` / `reserved` / `incompatible` / `indeterminate`), une **table de vérité du verdict
-réécrite**, une **section propre** (un mismatch ne demande pas d'être examiné : il demande d'être
-**arbitré**), et donc un **bump de `DECISION_NARRATIVE_PROMPT_VERSION`** + un re-passage de la sonde.
-La matérialité doit dépendre du **poids déclaré** par le lecteur, pas seulement de l'écart.
+## Les deux limites connues, à traiter (elles ne sont pas des bugs)
 
-C'est seulement après B que les préférences à score (`cadre_calme`, `vie_locale`, `nature`,
-`acces_ecoles`) pourront être couvertes honnêtement : sans `mismatch`, une règle qui les examine
-n'aurait **aucun outcome honnête à rendre** quand le score est mauvais.
+- **Sous ~15 minutes, le grain communal ne suffit plus.** À 12 minutes de la gare Matabiau, **aucune commune
+  de France** n'a son centroïde dans l'isochrone, pas même Toulouse (dont le point de l'index, 43,6007 /
+  1,4328, tombe dehors) : le comparateur rend 0 résultat avec un message qui ne dit pas la vraie raison.
+  L'isochrone est alors **plus petite que la commune**. Cible : évaluer la **géométrie communale** (la spec
+  §3.3 la nomme déjà « la bonne cible, hors de ce spec »).
+- **Les 300 m de tolérance sont une convention prudente PROVISOIRE, pas une précision mesurée.** L'espacement
+  des sommets (267 m médian, 539 m au p90) montre que la géométrie est grossière ; il ne démontre pas que
+  l'erreur vaut 300 m. La valider demandera une géométrie moins simplifiée, ou de vrais itinéraires calculés
+  sur un échantillon de points frontaliers. Piste : n'affiner (appel de routage ponctuel) que les **communes
+  de la bande**, en gardant l'avantage « un polygone, pas 35 000 appels ».
+
+## ENSUITE : le chantier B, `mismatch` (inchangé)
+
+Un lieu répond **mal** à une priorité déclarée, sans que ce soit éliminatoire : ce n'est ni une
+incompatibilité, ni un compromis, ni une inconnue, ni une vérification. Il entraîne un nouvel outcome, une
+orientation refondue, une table de vérité réécrite, un **bump de `DECISION_NARRATIVE_PROMPT_VERSION`** et un
+re-passage de la sonde. C'est seulement après B que les préférences à score (`cadre_calme`, `vie_locale`,
+`nature`, `acces_ecoles`) pourront être couvertes honnêtement.
 
 ---
 
-## Ce qu'il ne faut PAS casser (les invariants du lot 1)
+## Ce qu'il ne faut PAS casser (invariants, lots 1 et 2a)
 
-- **Aucun `?? 0`** sur une donnée nullable, nulle part : ni dans un évaluateur, ni dans un appelant,
-  ni dans un test. Le relief absent n'est pas un relief nul ; une commune sans coordonnées n'est pas
-  un point à (0, 0), qui est dans le golfe de Guinée et produirait une incompatibilité **établie**.
-- **Une contrainte composite n'est satisfaite que si TOUTES ses composantes ont été appliquées**
-  (`zones`, `excludeZones`, `excludePlace`) : une composante résolue qui matche décide ; sinon une
-  composante non résolue bloque ; sinon seulement, `satisfied`.
-- **Un seuil que le produit s'est choisi ne produit ni verdict ni filtre.** Les rayons legacy
-  (50 / 30 km) sont des `SearchExplorationHint` : ils classent, ils n'éliminent pas, et ils sont dits.
-- **Les phrases écrivent l'opérateur qu'elles appliquent** (`<=` → « au plus 30 km », jamais « moins
-  de 30 km »).
-- **Le témoin gelé** (`src/lib/legacy-passes-hard.ts`) porte l'ANCIEN filtre avec ses défauts intacts.
-  **Ne jamais l'« améliorer »** : le jour où on le corrige, il cesse d'être un témoin. À supprimer à la
-  fin du lot 2, avec son test.
-- **Les tests de parité** (`src/lib/parity.test.ts`) doivent traverser les **vraies frontières**
-  (mapping, `tailleVille`, hydratation, point d'évaluation). Un test qui partirait d'attributs déjà
-  construits ne prouverait que la cohérence de deux adaptateurs au-dessus du même objet : vrai par
-  construction, et sans valeur.
-- **`server-only` n'est pas résolvable par `node --test`** : tout module qui importe `comparateur-vie`
-  en VALEUR devient non testable. Les libs pures ne l'importent qu'en **type**.
+- **Aucun `?? 0`** sur une donnée nullable. Une commune sans coordonnées n'est pas un point à (0, 0).
+- **Un temps de trajet n'est JAMAIS évalué par un haversine**, et aucune minute n'est **jamais** convertie
+  en kilomètres, ni dans le code, ni dans le prompt.
+- **Une panne n'est jamais un constat** : `geocoding_unavailable` ≠ `no_result` ; `routing_unavailable` ≠
+  `incompatible`. Les deux sont retentables, ne filtrent pas, et ne se persistent pas.
+- **Une valeur structurée ne dit que ce qu'elle établit** : `travel_time_threshold` porte `within` (un
+  côté de la frontière), jamais « 30 minutes mesurées ».
+- **La catégorie décide, le score est un plancher** (0,3). Ne jamais remonter `MIN_SCORE` sans refaire le
+  test de l'hôpital de Purpan.
+- **Une géométrie illisible rend `unusable`, jamais `outside`** (un anneau invalide, un trou illisible, une
+  coordonnée hors bornes : toute la géométrie est déclarée inutilisable).
+- **Une contrainte composite n'est satisfaite que si TOUTES ses composantes ont été appliquées.**
+- **Le témoin gelé** (`legacy-passes-hard.ts`) porte l'ANCIEN filtre avec ses défauts intacts. **Ne jamais
+  l'« améliorer »** : le jour où on le corrige, il cesse d'être un témoin.
+- **`server-only` n'est pas résolvable par `node --test`** : les libs pures ne l'importent qu'en **type**
+  (c'est pourquoi `hard-constraints-hydrate.ts` importe `ExternalResolutions` en `import type`).
+- **Ne jamais utiliser `git add -A`** : le porteur édite en parallèle. Stager les fichiers nommément.
 
 **Après toute modification** :
 ```bash
-node --test src/lib/*.test.ts src/lib/decision/*.test.ts   # 350 verts aujourd'hui
+node --test src/lib/*.test.ts src/lib/decision/*.test.ts   # 421 verts aujourd'hui
 npx tsc --noEmit                                            # doit rendre 0
+node --env-file=.env.local scripts/probe-conclusion.ts      # 15/15 (le prompt n'a pas bougé)
 ```
-
----
-
-## Pièges / fils ouverts
-
-- **`faible_chaleur` cesse d'être examinée dès qu'une adresse est renseignée** (la règle
-  `territoire.confort-ete-sans-adresse` se désactive sur `hasAddress`). Toujours ouvert : c'est un
-  candidat naturel pour le chantier B.
-- **La sonde reste l'outil de non-régression du prompt** : `node --env-file=.env.local
-  scripts/probe-conclusion.ts` (attendu 15/15). Le lot 1 n'a **pas** touché au prompt, donc pas de
-  bump. Le chantier B, lui, l'imposera.
-- **Le hash de la conclusion porte sur le PLAN narratif**, donc ajouter des règles invalide bien les
-  artefacts déjà persistés. Vérifié.
-- **La conclusion rédigée est ACTIVE en production** (`DOSSIER_NARRATIVE=true` sur Vercel).
-- **Ne jamais utiliser `git add -A`** dans ce dépôt : le porteur édite en parallèle, et trois commits
-  d'un chantier ont avalé une réécriture de `/pourquoi` qui n'avait rien à y faire. Stager les fichiers
-  nommément.
-- L'historique a été réécrit une fois (purge d'un mot de passe). **N'écrire aucun identifiant dans le
-  dépôt**, jamais, y compris dans un handoff ou un script de vérification.
-
----
 
 ## À lire d'abord à la reprise
 
 1. `/memory/MEMORY.md`, puis la fiche `project_dossier_decision`.
-2. La spec du chantier A : **§4** (le contrat canonique), **§5** (les références nommées et
-   l'isochrone : c'est le lot 2), **§6** (les deux adaptateurs et la parité).
-3. Code, dans cet ordre : `src/lib/hard-constraints.ts` (le noyau et ses 11 évaluateurs) →
-   `hard-constraints-hydrate.ts` (la résolution, au-dessus des moteurs) → `hard-constraints-filter.ts`
-   (la politique du comparateur) → `decision/hard-constraint-rules.ts` (la politique du dossier) →
-   `parity.test.ts` (ce qu'ils n'ont plus le droit de faire).
+2. Le plan du lot 2a : `docs/superpowers/plans/2026-07-14-lot2a-references-nommees.md` (les six faits
+   d'enquête, et pourquoi chaque contrôle existe).
+3. Code, dans cet ordre : `place-screening.ts` (les contrôles, le cœur de l'honnêteté) →
+   `geocode-place.ts` (le réseau, et `degraded`) → `isochrone.ts` (le cache et la dédup en vol) →
+   `hard-constraints-external.ts` (l'orchestration au-dessus des deux moteurs) → `hard-constraints.ts`
+   (`evaluateNearPlace`) → `hard-constraints-filter.ts` (« retenue, pas confirmée »).
