@@ -6,11 +6,23 @@ import {
   resolveExclusions,
   ZONE_TABLE,
   type AppliedZone,
-  type ZoneAnchor,
   type ZoneStrength,
   type SoftZone,
 } from "@/lib/geo-zones";
 import { getLittoralIndex, type LittoralSummary } from "@/lib/littoral";
+import { tailleVilleFrom, communeAttributesFrom } from "@/lib/commune-attributes";
+import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
+import { hydrateHardConstraints, explorationHints } from "@/lib/hard-constraints-hydrate";
+import {
+  assessHardConstraints,
+  haversineKm as haversineCanonical,
+  PRODUCT_CONVENTIONS_VERSION,
+  type CommuneAttributes,
+  type EvaluationContext,
+  type NormalizedHardConstraints,
+  type SearchExplorationHint,
+} from "@/lib/hard-constraints";
+import { hardFilter, unappliedLabels } from "@/lib/hard-constraints-filter";
 import {
   deptRegionalCategories,
   deptFromInsee,
@@ -103,36 +115,11 @@ export type PreferenceKey = (typeof PREFERENCE_KEYS)[number];
 
 export type Preference = { key: PreferenceKey; weight: number };
 
-export type HardConstraints = {
-  departements?: string[];
-  // Ancres géographiques avec gradient de force (cf. geo-zones.ts). Chaque ancre
-  // porte une force : hard (filtre, définit le périmètre, ancres dures
-  // intersectées), preferred / inspiration (bonus de score, sans exclusion). Les
-  // régions administratives sont des jetons de zone comme les autres (plus de champ
-  // region séparé). excludeZones = ancres négatives, dures en V1. Le parse n'émet
-  // que des jetons d'une liste fermée ; le moteur détient la table jeton → départements.
-  zones?: ZoneAnchor[];
-  excludeZones?: string[];
-  // Montagne générique = critère d'ALTITUDE propre à la commune (distinct des
-  // massifs nommés, qui sont des zones). Même gradient de force : hard = filtre
-  // (altitude ≥ ~600 m), preferred / inspiration = bonus proportionnel à la
-  // montagnosité.
-  montagne?: { strength: ZoneStrength } | null;
-  // « Proche d'une montagne » = PROXIMITÉ au relief (massif à portée), distincte de
-  // l'altitude propre (montagne). Grenoble (214 m) est proche d'une montagne sans
-  // être en altitude. Même gradient : hard = filtre (relief_proximite ≥ 50),
-  // preferred / inspiration = bonus proportionnel. Adossé à relief_proximite (index).
-  reliefProche?: { strength: ZoneStrength } | null;
-  nearSea?: { active: boolean; maxKm?: number | null };
-  excludeSea?: boolean;
-  nearPlace?: { label: string; maxKm?: number | null } | null;
-  communeSize?: { min?: number | null; max?: number | null } | null;
-  // « Quitter {ville} » : exclut l'unité urbaine de la ville (le moteur résout label -> UU).
-  excludePlace?: { label: string }[];
-  // « Plus petit / grand que {ville} » : le moteur résout label -> population communale de
-  // référence et pose communeSize (V1 : comparaison COMMUNALE, pas d'agglomération, cf. spec).
-  sizeRelativeTo?: { label: string; direction: "smaller" | "larger" } | null;
-};
+// Le schéma des contraintes dures vit désormais dans un module NEUTRE (hard-constraint-schema.ts) : le
+// noyau canonique en a besoin, et il ne peut pas dépendre en type de ce module server-only. On le
+// réexporte ici pour qu'aucun appelant ne change.
+export type { HardConstraints } from "./hard-constraint-schema.ts";
+import type { HardConstraints } from "./hard-constraint-schema.ts";
 
 export type HorsMesureKind = "ecoles" | "culture" | "affectif";
 
@@ -330,6 +317,12 @@ export type MatchOutcome = {
   // Contraintes ville/taille résolues (« exclusion de l'agglomération de Lyon »,
   // « communes plus petites que Bordeaux »), pour l'affichage honnête du périmètre.
   appliedPlaces?: string[];
+  // CE QUE LE MOTEUR N'A PAS PU APPLIQUER. Il affichait ses résultats comme s'ils respectaient TOUTES
+  // les conditions non négociables du lecteur, alors qu'il en sautait parfois une en silence (« la gare
+  // Matabiau » ne résout pas contre l'index des noms de communes : le test était purement ignoré).
+  // Tant que ce champ est renseigné, la phrase « ces communes respectent toutes vos conditions » est
+  // INTERDITE.
+  unappliedConstraints?: string[];
 };
 
 // Tailles de ville (V1) — utilisées par le parse pour traduire "petite / moyenne
@@ -536,12 +529,18 @@ function buildUuPop(communes: IndexCommune[]): void {
 }
 // Taille du « bassin de ville » : pop d'UU si la commune est dans une UU, sinon sa pop
 // communale (une commune hors UU est son propre bassin). cf. spec chantier C.
+//
+// La DOCTRINE vit désormais dans commune-attributes.ts (pure, donc testable, et traversable par les
+// tests de parité) : ici, on ne fait que lui passer le cache. Le dossier lisait la population COMMUNALE
+// là où ce moteur lisait l'agglomération ; les deux appellent maintenant la même fonction.
 function tailleVille(c: IndexCommune): number | null {
-  if (c.uu && uuPopCache) {
-    const p = uuPopCache.get(c.uu);
-    if (p != null) return p;
-  }
-  return c.population ?? null;
+  return tailleVilleFrom(c.uu, c.population, uuPopCache ?? new Map());
+}
+
+// La taille d'agglomération, EXPOSÉE : le dossier en a besoin pour bâtir ses ModuleFacts, et il n'a pas
+// le droit de la recalculer autrement (ce serait rouvrir la divergence qu'on vient de fermer).
+export function tailleVilleOf(c: IndexCommune): number | null {
+  return tailleVille(c);
 }
 
 async function loadIndex(): Promise<IndexCommune[]> {
@@ -1067,6 +1066,24 @@ async function nameIndex(): Promise<Map<string, IndexCommune>> {
   }
   nameCache = m;
   return nameCache;
+}
+
+// L'ANNUAIRE, exposé au noyau des contraintes dures. Le noyau ne charge aucun index : il REÇOIT cette
+// interface. C'est ce qui le garde pur (donc testable), et c'est ce qui garantit que le comparateur et
+// le dossier résolvent « Brest » exactement de la même façon : ils appellent le MÊME annuaire.
+export async function placeDirectory(): Promise<PlaceDirectory> {
+  const names = await nameIndex(); // nameIndex() appelle loadIndex(), qui construit uuPopCache
+  return {
+    byName: (label) => {
+      const hit = names.get(normalizeName(label));
+      if (!hit) return null;
+      return {
+        insee: hit.insee, nom: hit.nom, lat: hit.lat, lon: hit.lon,
+        uu: hit.uu ?? null, tailleVille: tailleVille(hit),
+      };
+    },
+    plmByName: (label) => PLM_VILLES[normalizeName(label)] ?? null,
+  };
 }
 
 // ── Géo ───────────────────────────────────────────────────────────────────────
@@ -2132,51 +2149,59 @@ function logementNote(c: IndexCommune): string | null {
   return LOGEMENT_LOCATION[lN!] ?? null;
 }
 
-function passesHard(
-  c: IndexCommune,
-  hc: HardConstraints,
-  placePoint: { lat: number; lon: number; maxKm: number } | null,
-  zoneDepts: Set<string> | null,
-  excludeDepts: Set<string>,
-  excludeUU: Set<string>,
-  excludeInsee: Set<string>,
-): boolean {
-  // Population nulle = commune fantôme/donnée manquante : exclue comme sous le plancher
-  // (sinon le critère nature pourrait faire remonter des communes quasi inhabitées).
+// LE FILTRE DUR, désormais adossé à l'ÉVALUATION CANONIQUE (src/lib/hard-constraints.ts).
+//
+// L'ancien `passesHard` rendait un booléen, donc « je n'ai pas pu appliquer votre condition » et « votre
+// condition est respectée » sortaient par le même trou : « la gare Matabiau » ne résolvant pas contre
+// l'index des noms de communes, le test était purement SAUTÉ, et le comparateur affichait ses résultats
+// comme s'ils respectaient toutes les conditions du lecteur. (Le témoin gelé de cet ancien comportement
+// vit dans legacy-passes-hard.ts, et un test croise les deux.)
+//
+// POP_FLOOR reste ICI : c'est la doctrine de RECHERCHE du comparateur (on ne propose pas un hameau), pas
+// une contrainte du lecteur, et elle n'a donc rien à faire dans le contrat canonique.
+function communeAttributes(c: IndexCommune): CommuneAttributes {
+  return communeAttributesFrom(c, tailleVille(c));
+}
+
+function evaluationContext(c: IndexCommune, constraints: NormalizedHardConstraints): EvaluationContext {
+  return {
+    constraints,
+    point: { lat: c.lat, lon: c.lon, grain: "commune_reference", source: "commune_centroid", label: c.nom },
+    conventionsVersion: PRODUCT_CONVENTIONS_VERSION,
+  };
+}
+
+function passesHardCanonical(c: IndexCommune, constraints: NormalizedHardConstraints): boolean {
+  // Population nulle = commune fantôme / donnée manquante : exclue comme sous le plancher (sinon le
+  // critère nature pourrait faire remonter des communes quasi inhabitées).
   if (c.population == null || c.population < POP_FLOOR) return false;
-  if (hc.departements?.length && !hc.departements.includes(c.dept)) return false;
-  // Ancres dures : zoneDepts (intersection des ancres hard) restreint le périmètre ;
-  // excludeDepts (union des ancres négatives) le rogne. Les ancres souples ne
-  // filtrent pas (elles bonifient le score, hors de cette fonction).
-  if (zoneDepts && !zoneDepts.has(c.dept)) return false;
-  if (excludeDepts.has(c.dept)) return false;
-  // Exclusion de ville par unité urbaine (« quitter Lyon ») et par commune (ville hors-UU).
-  if (c.uu && excludeUU.has(c.uu)) return false;
-  if (excludeInsee.has(c.insee)) return false;
-  // Montagne dure : altitude ≥ ~600 m (montagnosité ≥ 50). Les communes sans
-  // altitude (îles, littoral) sont exclues, ce qui est correct pour « à la montagne ».
-  if (hc.montagne?.strength === "hard") {
-    const m = montagnosite(c.altitude);
-    if (m == null || m < 50) return false;
+  return hardFilter(assessHardConstraints(evaluationContext(c, constraints), communeAttributes(c))).eligible;
+}
+
+// LES RAYONS QUE LE PRODUIT S'EST INVENTÉS (50 km autour d'un lieu, 30 km de la mer) ne peuvent plus
+// ÉLIMINER une commune : ce serait opposer au lecteur une condition qu'il n'a jamais posée. Ils peuvent
+// la faire REMONTER : c'est un penchant, pas un couperet. Même mécanique que les ancres de zone souples
+// (softZoneBonus), sous le même plafond. Sans cela, « près de Brest » sans distance ne cadrerait plus
+// rien du tout, et des communes d'Alsace remonteraient en tête.
+const EXPLORATION_BONUS_MAX = 12;
+
+function explorationBonus(
+  c: IndexCommune,
+  constraints: NormalizedHardConstraints,
+  hints: SearchExplorationHint[],
+): number {
+  let bonus = 0;
+  const place = hints.find((h) => h.kind === "near_place_radius");
+  const ref = constraints.nearPlace?.reference;
+  if (place && ref?.status === "resolved") {
+    const km = haversineCanonical(c.lat, c.lon, ref.lat, ref.lon);
+    bonus = Math.max(bonus, EXPLORATION_BONUS_MAX * Math.max(0, 1 - km / place.valueKm));
   }
-  // « Proche d'une montagne » dur : un massif doit être à portée (relief_proximite
-  // ≥ seuil). Capture les villes au pied du relief (Grenoble), que le filtre
-  // d'altitude propre exclurait à tort.
-  if (hc.reliefProche?.strength === "hard") {
-    if ((c.relief_proximite ?? 0) < RELIEF_PROCHE_HARD) return false;
+  const sea = hints.find((h) => h.kind === "near_sea_radius");
+  if (sea) {
+    bonus = Math.max(bonus, EXPLORATION_BONUS_MAX * Math.max(0, 1 - c.distance_cote_km / sea.valueKm));
   }
-  if (hc.nearSea?.active && c.distance_cote_km > (hc.nearSea.maxKm ?? 30)) return false;
-  if (hc.excludeSea && c.distance_cote_km < 15) return false;
-  if (hc.communeSize) {
-    // Évalué en TAILLE D'AGGLOMÉRATION (UU), pas en population communale (cf. chantier C).
-    const t = tailleVille(c);
-    if (hc.communeSize.min != null && (t ?? 0) < hc.communeSize.min) return false;
-    if (hc.communeSize.max != null && (t ?? Infinity) > hc.communeSize.max) return false;
-  }
-  if (placePoint) {
-    if (haversineKm(c.lat, c.lon, placePoint.lat, placePoint.lon) > placePoint.maxKm) return false;
-  }
-  return true;
+  return bonus;
 }
 
 // Intention littorale (déclencheur du signal littoral, narratif). Large : mer
@@ -2581,68 +2606,40 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
 
   const hc = parsed.hardConstraints ?? {};
 
-  // nameIndex partagé : nearPlace (proximité), excludePlace (exclusion agglo), sizeRelativeTo (taille).
-  const needNames =
-    !!hc.nearPlace?.label || (hc.excludePlace?.length ?? 0) > 0 || !!hc.sizeRelativeTo?.label;
-  const names = needNames ? await nameIndex() : null;
+  // L'HYDRATATION, AU-DESSUS DU FILTRE. Le comparateur est ANONYME (il reçoit un ParsedProject venu du
+  // client, sans compte ni projet persisté) : matchProjects est le seul point que traversent tous ses
+  // appelants. La résolution des lieux nommés se fait donc ici, UNE fois, et le dossier appellera
+  // exactement la même (hydrateHardConstraints + placeDirectory) : c'est ce qui interdit aux deux
+  // moteurs de résoudre « Brest » différemment.
+  const constraints = hydrateHardConstraints(hc, await placeDirectory());
+  const hints = explorationHints(hc);
 
-  // Résolution nearPlace (label → coords d'une commune de l'index)
-  let placePoint: { lat: number; lon: number; maxKm: number } | null = null;
-  if (hc.nearPlace?.label && names) {
-    const hit = names.get(normalizeName(hc.nearPlace.label));
-    if (hit) placePoint = { lat: hit.lat, lon: hit.lon, maxKm: hc.nearPlace.maxKm ?? 50 };
-  }
-
-  // Libellés de périmètre ville/taille effectivement appliqués (pour l'outcome, cf. Task 5).
+  // Libellés de périmètre ville/taille effectivement appliqués (affichage honnête du périmètre).
   const appliedPlaces: string[] = [];
-
-  // Exclusion de ville (« quitter {ville} ») par unité urbaine ; ville hors-UU → la commune seule.
-  const excludeUU = new Set<string>();
-  const excludeInsee = new Set<string>();
-  for (const ep of hc.excludePlace ?? []) {
-    const raw = ep?.label ?? "";
-    const key = normalizeName(raw);
-    if (!key) continue;
-    const plm = PLM_VILLES[key];
-    if (plm) {
-      excludeUU.add(plm.uu);
-      appliedPlaces.push(`exclusion de l'agglomération de ${raw}`);
-      continue;
-    }
-    const hit = names?.get(key);
-    if (!hit) continue; // ville inconnue : ignorée (pas de filtre, pas d'erreur)
-    if (hit.uu) excludeUU.add(hit.uu);
-    else excludeInsee.add(hit.insee);
-    appliedPlaces.push(`exclusion de l'agglomération de ${raw}`);
+  for (const e of constraints.excludePlace) {
+    if (e.reference.status === "resolved") appliedPlaces.push(`exclusion de l'agglomération de ${e.label}`);
+  }
+  if (constraints.sizeRelativeTo?.reference.status === "resolved") {
+    const s = constraints.sizeRelativeTo;
+    appliedPlaces.push(`communes plus ${s.direction === "smaller" ? "petites" : "grandes"} que ${s.label}`);
+  }
+  // Le rayon que le produit s'est choisi est DIT, et sa portée exacte avec lui.
+  for (const h of hints) {
+    const quoi = h.kind === "near_place_radius" ? constraints.nearPlace?.label ?? "ce lieu" : "la mer";
+    appliedPlaces.push(
+      `proximité de ${quoi} : aucune distance précisée, les communes proches remontent en tête, aucune n'est écartée`,
+    );
   }
 
-  // Taille relative (« plus petit/grand que {ville} ») → population communale de référence.
-  if (hc.sizeRelativeTo?.label && names) {
-    const raw = hc.sizeRelativeTo.label;
-    const key = normalizeName(raw);
-    // Référence en TAILLE D'AGGLOMÉRATION : pop d'UU (PLM via leur UU parente ; sinon
-    // tailleVille de la commune de référence). Corrige la limite B (comparaison communale).
-    const plm = PLM_VILLES[key];
-    const refHit = names.get(key);
-    const refPop = plm
-      ? uuPopCache?.get(plm.uu) ?? null
-      : refHit
-        ? tailleVille(refHit)
-        : null;
-    if (refPop != null) {
-      const cs = hc.communeSize ?? {};
-      // Bornes STRICTEMENT exclusives : « plus petit que Lyon » exclut l'agglo lyonnaise
-      // elle-même (taille d'UU égale), pas seulement ce qui la dépasse.
-      if (hc.sizeRelativeTo.direction === "smaller") {
-        cs.max = Math.min(cs.max ?? Infinity, refPop - 1);
-        appliedPlaces.push(`communes plus petites que ${raw}`);
-      } else {
-        cs.min = Math.max(cs.min ?? 0, refPop + 1);
-        appliedPlaces.push(`communes plus grandes que ${raw}`);
-      }
-      hc.communeSize = cs;
-    }
-  }
+  // CE QUE LE MOTEUR N'A PAS PU APPLIQUER. Les références non résolues sont GLOBALES (elles ne dépendent
+  // pas de la commune testée) : on les lit une fois, sur une commune quelconque, pour pouvoir le DIRE au
+  // lecteur. Il les ignorait en silence.
+  const probe = communes[0];
+  const unapplied = probe
+    ? unappliedLabels(
+        hardFilter(assessHardConstraints(evaluationContext(probe, constraints), communeAttributes(probe))),
+      )
+    : [];
 
   // Ancres géographiques : résolution jeton → départements avec gradient de force.
   // hard → périmètre dur (intersection) ; preferred / inspiration → bonus de score.
@@ -2690,9 +2687,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   }
   const totalW = prefs.reduce((s, p) => s + p.weight, 0) || 1;
 
-  const candidates = communes.filter((c) =>
-    passesHard(c, hc, placePoint, zone.hardDepartements, exclusion.departements, excludeUU, excludeInsee),
-  );
+  const candidates = communes.filter((c) => passesHardCanonical(c, constraints));
 
   type Sub = { key: PreferenceKey; weight: number; baseline?: boolean; s: number };
   const scored = candidates.map((c) => {
@@ -2715,7 +2710,12 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
       montagneBonus(c.altitude, montagne?.strength),
       reliefBonus(c.relief_proximite, reliefProche?.strength),
     );
-    const soft = Math.min(SOFT_BONUS_CAP, softZoneBonus(c.dept, zone.soft) + mountainBonus);
+    // Le rayon d'exploration (celui que le PRODUIT s'est choisi, faute de distance déclarée) entre ICI,
+    // dans le classement, et nulle part ailleurs : il n'a pas le droit d'éliminer une commune.
+    const soft = Math.min(
+      SOFT_BONUS_CAP,
+      softZoneBonus(c.dept, zone.soft) + mountainBonus + explorationBonus(c, constraints, hints),
+    );
     const rawScore = base + soft;
     const compatibility = clamp(Math.round(rawScore), 0, 100);
     // « In-zone » pour l'étalement échelonné. Quand zone ET montagne sont toutes
@@ -2920,6 +2920,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     appliedZones,
     appliedExclusions: exclusion.applied,
     appliedPlaces: appliedPlaces.length ? appliedPlaces : undefined,
+    unappliedConstraints: unapplied.length ? unapplied : undefined,
   };
 }
 

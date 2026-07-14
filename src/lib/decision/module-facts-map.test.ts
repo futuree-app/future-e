@@ -12,7 +12,7 @@ function entry(over: Partial<IndexCommune> = {}): IndexCommune {
 }
 
 test("mapping : passe-plats honnêtes", () => {
-  const f = mapCommuneToModuleFacts(entry({ population: 18000, distance_cote_km: 42, inondation: { catnat: 5, tri: false, risque: 72 } }), { faible_chaleur: 40 }, { hasAddress: false });
+  const f = mapCommuneToModuleFacts(entry({ population: 18000, distance_cote_km: 42, inondation: { catnat: 5, tri: false, risque: 72 } }), { faible_chaleur: 40 }, { hasAddress: false, tailleVille: 18000 });
   assert.equal(f.population, 18000);
   assert.equal(f.distanceCoteKm, 42);
   assert.equal(f.catnatInondation, 5);
@@ -22,7 +22,7 @@ test("mapping : passe-plats honnêtes", () => {
 });
 
 test("mapping : absence d'inondation -> null (jamais 0)", () => {
-  const f = mapCommuneToModuleFacts(entry(), {}, { hasAddress: true });
+  const f = mapCommuneToModuleFacts(entry(), {}, { hasAddress: true, tailleVille: 4000 });
   assert.equal(f.catnatInondation, null);
   assert.equal(f.inondationRisque, null);
   assert.equal(f.hasAddress, true);

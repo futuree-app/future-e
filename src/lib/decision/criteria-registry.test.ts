@@ -21,7 +21,7 @@ function reserve(id: string, tier: MaterialityTier): DecisionFact {
   };
 }
 function run(evaluations: RuleEvaluation[]): RunResult {
-  return { evaluations, facts: evaluations.flatMap((e) => e.facts), coveredHardConstraints: [] };
+  return { evaluations, facts: evaluations.flatMap((e) => e.facts) };
 }
 
 test("un critère satisfied SILENCIEUSEMENT est examiné, et favorable", () => {

@@ -7,6 +7,8 @@
 import type { UserProject } from "../user-project.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { HardConstraintKey } from "./decision-fact.ts";
+import { lieuEnPhrase } from "../hard-constraints.ts";
+import { ZONE_TABLE } from "../geo-zones.ts";
 
 export function isStructured(project: UserProject): boolean {
   return project.parsed != null;
@@ -51,23 +53,14 @@ function fmtHab(n: number): string {
   return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
-// Les libellés de lieux viennent du parse, dans une forme d'index : « Gare Matabiau, Toulouse ». Écrit
-// tel quel dans une phrase, ça donne « la proximité de Gare Matabiau, Toulouse », qui n'est pas du
-// français. On coupe la précision qui suit la virgule (la commune est déjà nommée ailleurs), et on
-// rétablit l'article quand le lieu est un nom commun (une gare, un aéroport), jamais sur un nom propre.
-const LIEUX_COMMUNS: Record<string, string> = {
-  gare: "la", aeroport: "l'", aéroport: "l'", hopital: "l'", hôpital: "l'",
-  universite: "l'", université: "l'", ecole: "l'", école: "l'", lycee: "le", lycée: "le",
-  centre: "le", campus: "le", port: "le", plage: "la", station: "la",
-};
-function lieuEnPhrase(label: string): string {
-  const court = label.split(",")[0]!.trim();
-  const premier = court.split(/\s+/)[0] ?? "";
-  const article = LIEUX_COMMUNS[premier.toLowerCase()];
-  if (!article) return court; // nom propre : « Lyon », « Matabiau »
-  const reste = court.slice(premier.length).trim();
-  const commun = `${premier.toLowerCase()}${reste ? ` ${reste}` : ""}`;
-  return article === "l'" ? `l'${commun}` : `${article} ${commun}`;
+// `lieuEnPhrase` vit désormais dans le NOYAU (src/lib/hard-constraints.ts) : le dossier ET le
+// comparateur nomment ce lieu (l'un dans sa conclusion, l'autre quand il annonce la condition qu'il n'a
+// pas pu appliquer), et ils ne peuvent pas le nommer différemment.
+//
+// « a, b et c » : une énumération française, pas une liste de virgules jusqu'au bout.
+function joinFr(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? "";
+  return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
 }
 
 // LE LIBELLÉ INSTANCIÉ : la contrainte telle que LE LECTEUR l'a posée, pas sa catégorie.
@@ -85,6 +78,22 @@ export function hardConstraintLabel(project: UserProject, key: HardConstraintKey
     case "nearPlace": {
       const label = hc.nearPlace?.label;
       return label ? `la proximité de ${lieuEnPhrase(label)}` : generic;
+    }
+    // « Les zones géographiques visées » ne veut rien dire pour quelqu'un qui a écrit « en Bretagne ».
+    // Le moteur détient la table des jetons : il connaît le mot du lecteur, il n'a aucune raison de lui
+    // rendre une catégorie.
+    case "zones": {
+      const labels = (hc.zones ?? [])
+        .filter((z) => z?.strength === "hard")
+        .map((z) => ZONE_TABLE[z.zone]?.label)
+        .filter((l): l is string => Boolean(l));
+      return labels.length > 0 ? joinFr(labels) : generic;
+    }
+    case "excludeZones": {
+      const labels = (hc.excludeZones ?? [])
+        .map((t) => ZONE_TABLE[t]?.label)
+        .filter((l): l is string => Boolean(l));
+      return labels.length > 0 ? `le fait d'éviter ${joinFr(labels)}` : generic;
     }
     case "departements": {
       const d = hc.departements ?? [];

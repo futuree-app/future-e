@@ -1276,6 +1276,24 @@ export function OuVivreClient() {
               s&apos;y limiter.
             </p>
           )}
+          {outcome?.appliedPlaces?.length ? (
+            <p className="mt-3 text-[12px] leading-[1.6] text-ghost">
+              {outcome.appliedPlaces.join(" · ")}.
+            </p>
+          ) : null}
+
+          {/* CE QUE NOUS N'AVONS PAS PU APPLIQUER. Le moteur sautait en silence une condition qu'il
+              n'avait pas su résoudre (« la gare Matabiau » n'est pas un nom de commune), et affichait
+              ses résultats comme s'ils respectaient TOUT ce que le lecteur avait posé. Ce n'est pas une
+              panne, c'est une limite : elle se dit ici, avec le périmètre, pas dans un bandeau d'erreur. */}
+          {outcome?.unappliedConstraints?.length ? (
+            <p className="mt-3 text-[12px] leading-[1.6] text-label/70">
+              {outcome.unappliedConstraints.length > 1
+                ? "Des conditions que vous avez posées n'ont pas pu être appliquées à ces résultats : "
+                : "Une condition que vous avez posée n'a pas pu être appliquée à ces résultats : "}
+              {outcome.unappliedConstraints.join(", ")}.
+            </p>
+          ) : null}
 
           {/* Décider : un seul pont vers la comparaison approfondie payante, juste sous
               les 3 fiches (l'œil vient de voir les options et leurs compromis). L'ancienne
