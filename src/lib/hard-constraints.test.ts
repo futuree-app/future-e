@@ -7,7 +7,7 @@ import {
   evaluateNearPlace, evaluateExcludePlace, evaluateSizeRelativeTo,
   assessHardConstraints, HARD_CONSTRAINT_KEYS, HARD_CONSTRAINT_EVALUATORS, PRODUCT_CONVENTIONS_VERSION,
   type CommuneAttributes, type EvaluationContext, type NormalizedHardConstraints,
-  type EvaluationPoint, type PlaceMode, type ReachabilityState,
+  type EvaluationPoint, type PlaceMode, type ReachabilityState, type TravelTimeEstimate,
 } from "./hard-constraints.ts";
 import type { PolygonGeometry } from "./geo-polygon.ts";
 import type {
@@ -614,4 +614,112 @@ test("le grain est dit : depuis une ADRESSE, la phrase commence par « Cette adr
   assert.equal(a.status, "incompatible");
   if (a.status !== "incompatible") return;
   assert.match(a.statement, /^Cette adresse/);
+});
+
+// ── LOT 2c : l'ESTIMATION prime sur la géométrie, et se prouve ────────────────
+
+const TLSE_PT: EvaluationPoint = {
+  lat: 43.6045, lon: 1.4442, grain: "commune_reference", source: "commune_centroid", label: "Toulouse",
+};
+
+function estimation(
+  minutes: number,
+  over: Partial<Extract<TravelTimeEstimate, { status: "estimated" }>> = {},
+): TravelTimeEstimate {
+  return {
+    status: "estimated", minutes, mode: "car",
+    from: { lat: TLSE_PT.lat, lon: TLSE_PT.lon },
+    to: { lat: GARE_REF.status === "resolved" ? GARE_REF.lat : 0, lon: GARE_REF.status === "resolved" ? GARE_REF.lon : 0 },
+    direction: "to_reference", requestHash: "h",
+    ...over,
+  };
+}
+
+function ctxEstime(
+  travelTime: TravelTimeEstimate | null,
+  reachability: ReachabilityState | null = PRETE,
+  point: EvaluationPoint | null = TLSE_PT,
+): EvaluationContext {
+  return {
+    constraints: normalized({
+      nearPlace: {
+        label: "la gare Matabiau",
+        threshold: { metric: "travel_time", maxMinutes: 30, mode: "car", direction: "to_reference", source: "user" },
+        reference: GARE_REF,
+        reachability,
+      },
+    }),
+    point,
+    travelTime,
+    conventionsVersion: PRODUCT_CONVENTIONS_VERSION,
+  };
+}
+
+test("une estimation SOUS le seuil : satisfied, et la valeur est enfin une VRAIE DURÉE", () => {
+  const a = evaluateNearPlace(ctxEstime(estimation(23.7)), commune());
+  assert.equal(a.status, "satisfied");
+  if (a.status !== "satisfied") return;
+  assert.deepEqual(a.observedValue, { kind: "travel_time_min", value: 23.7, mode: "car" });
+  assert.equal(a.observedLabel, "environ 24 minutes en voiture");
+});
+
+test("une estimation AU-DELÀ du seuil : incompatible, la phrase dit « environ », jamais des km", () => {
+  const a = evaluateNearPlace(ctxEstime(estimation(41.2)), commune());
+  assert.equal(a.status, "incompatible");
+  if (a.status !== "incompatible") return;
+  assert.match(a.statement, /environ 41 minutes en voiture/);
+  assert.match(a.statement, /Gare Matabiau/);
+  assert.doesNotMatch(a.statement, /km/);
+});
+
+test("L'ESTIMATION PRIME SUR LA GÉOMÉTRIE : le polygone dit dedans, l'itinéraire dit 41 minutes", () => {
+  // Toulouse est DANS l'isochrone de test (PRETE), mais l'itinéraire la met au-delà du seuil. C'est la
+  // mesure qui tranche : une durée calculée sur le graphe vaut mieux qu'une appartenance à un polygone
+  // simplifié.
+  const a = evaluateNearPlace(ctxEstime(estimation(41.2), PRETE), commune());
+  assert.equal(a.status, "incompatible");
+});
+
+test("L'ARRONDI NE MASQUE JAMAIS LE FRANCHISSEMENT : 30,4 minutes ne s'affiche pas « 30 minutes »", () => {
+  // Sans ce garde-fou : « à 30 minutes, au-delà de la limite de 30 minutes que vous avez posée ».
+  const a = evaluateNearPlace(ctxEstime(estimation(30.4)), commune());
+  assert.equal(a.status, "incompatible");
+  if (a.status !== "incompatible") return;
+  assert.match(a.statement, /environ 30,4 minutes/);
+  assert.doesNotMatch(a.statement, /environ 30 minutes/);
+});
+
+test("une estimation calculée depuis un AUTRE POINT est IGNORÉE (le centroïde n'est pas l'adresse)", () => {
+  // L'estimation vient du centroïde de Toulouse ; on évalue une adresse à 40 km de là. La resservir
+  // trancherait le sort de l'adresse avec la durée d'un autre lieu.
+  const adresse: EvaluationPoint = {
+    lat: 43.95, lon: 1.05, grain: "address", source: "address_geocoder", label: "7 rue X",
+  };
+  const a = evaluateNearPlace(ctxEstime(estimation(23.7), PRETE, adresse), commune());
+  // On retombe sur la géométrie : l'adresse est hors du polygone de test.
+  assert.equal(a.status, "incompatible");
+  if (a.status !== "incompatible") return;
+  assert.doesNotMatch(a.statement, /23|24 minutes/); // surtout pas la durée d'un autre point
+});
+
+test("une estimation d'un AUTRE MODE est IGNORÉE (« à pied » ne tranche pas « en voiture »)", () => {
+  const a = evaluateNearPlace(ctxEstime(estimation(23.7, { mode: "walk" })), commune());
+  assert.equal(a.status, "satisfied"); // la géométrie a repris la main (Toulouse est dans le polygone)
+  if (a.status !== "satisfied") return;
+  assert.equal(a.observedValue.kind, "travel_time_threshold"); // pas une durée : la géométrie, donc un côté
+});
+
+test("le routage a échoué pour CETTE commune : on retombe sur la géométrie", () => {
+  const a = evaluateNearPlace(ctxEstime({ status: "unavailable" }, PRETE), commune());
+  assert.equal(a.status, "satisfied");
+});
+
+test("routage échoué ET pas de géométrie : routing_unavailable, jamais un verdict", () => {
+  const a = evaluateNearPlace(ctxEstime({ status: "unavailable" }, null), commune());
+  assert.equal(a.status === "unexamined" && a.reason, "routing_unavailable");
+});
+
+test("une estimation tranche même SANS isochrone (elle n'en a pas besoin)", () => {
+  const a = evaluateNearPlace(ctxEstime(estimation(12), null), commune());
+  assert.equal(a.status, "satisfied");
 });

@@ -63,6 +63,27 @@ export type ReachabilityState =
   | { status: "ready"; geometry: PolygonGeometry; toleranceMeters: number }
   | { status: "unavailable"; reason: "routing_unavailable" | "unsupported_metric" };
 
+// L'ESTIMATION D'UN TEMPS DE TRAJET, et elle est LIÉE À SA DEMANDE.
+//
+// Ce n'est PAS un temps réel : c'est un temps calculé par un moteur de routage sur son graphe (ni trafic,
+// ni stationnement, ni attente, ni variabilité horaire). Les phrases disent donc « estimé à environ », et
+// jamais un temps posé comme un fait observé.
+//
+// `from` / `to` / `mode` ne sont pas décoratifs : sans eux, une durée calculée depuis le CENTROÏDE de la
+// commune pourrait être resservie pour une ADRESSE située à son extrémité, ou une durée « à pied » pour un
+// seuil « en voiture ». L'évaluateur VÉRIFIE la concordance avant de s'en servir (cf. estimationConcorde).
+export type TravelTimeEstimate =
+  | {
+      status: "estimated";
+      minutes: number;
+      mode: PlaceMode;
+      from: { lat: number; lon: number };
+      to: { lat: number; lon: number };
+      direction: "to_reference";
+      requestHash: string;
+    }
+  | { status: "unavailable" };
+
 const MODE_LABEL: Record<PlaceMode, string> = { car: "en voiture", walk: "à pied", bike: "à vélo" };
 
 // LE SEUIL, NOMMÉ. Il vit dans le noyau parce que les DEUX moteurs le nomment (le dossier dans sa
@@ -206,6 +227,9 @@ export type NormalizedHardConstraints = {
 
 export type EvaluationContext = {
   constraints: NormalizedHardConstraints;
+  // L'estimation est COMMUNALE (l'isochrone, elle, est GLOBALE : un polygone pour les 35 000). Elle vit donc
+  // dans le contexte, à côté du point évalué, et jamais dans les contraintes.
+  travelTime?: TravelTimeEstimate | null;
   // NULLABLE. Une commune sans coordonnées n'est pas une commune à (0, 0) : ce point est dans le golfe de
   // Guinée, et nearPlace en tirerait une incompatibilité ÉTABLIE sur une donnée inventée. Sans point, les
   // contraintes qui en dépendent rendent unexamined(missing_data).
@@ -549,6 +573,81 @@ export function evaluateCommuneSize(
   };
 }
 
+// UNE ESTIMATION NE VAUT QUE POUR LA DEMANDE QUI L'A PRODUITE. Elle est calculée entre DEUX points, dans un
+// mode : la resservir pour un autre point (le centroïde de la commune, quand on évalue une adresse) ou pour
+// un autre mode serait un mensonge d'autant plus dangereux qu'il est invisible. On tolère quelques mètres
+// (les coordonnées transitent par des arrondis), rien de plus.
+const ESTIMATION_TOLERANCE_DEG = 0.0001; // ~11 m
+
+function memePoint(a: { lat: number; lon: number }, b: { lat: number; lon: number }): boolean {
+  return (
+    Math.abs(a.lat - b.lat) <= ESTIMATION_TOLERANCE_DEG && Math.abs(a.lon - b.lon) <= ESTIMATION_TOLERANCE_DEG
+  );
+}
+
+function estimationConcorde(
+  est: Extract<TravelTimeEstimate, { status: "estimated" }>,
+  point: EvaluationPoint,
+  ref: { lat: number; lon: number },
+  mode: PlaceMode,
+): boolean {
+  return (
+    est.mode === mode &&
+    est.direction === "to_reference" &&
+    memePoint(est.from, point) &&
+    memePoint(est.to, ref)
+  );
+}
+
+// L'ARRONDI NE MASQUE JAMAIS LE FRANCHISSEMENT. Le verdict se décide sur la valeur BRUTE (30,4 > 30), mais
+// l'affichage arrondit : « 30 minutes, au-delà de la limite de 30 minutes » serait absurde pour le lecteur,
+// et lui donnerait raison de ne pas nous croire. Quand l'arrondi contredit le verdict, on montre la décimale.
+function dureeEnPhrase(minutes: number, maxMinutes: number, within: boolean): string {
+  const arrondi = Math.round(minutes);
+  const contredit = within ? arrondi > maxMinutes : arrondi <= maxMinutes;
+  return contredit ? minutes.toFixed(1).replace(".", ",") : String(arrondi);
+}
+
+function verdictParEstimation(
+  est: Extract<TravelTimeEstimate, { status: "estimated" }>,
+  maxMinutes: number,
+  mode: PlaceMode,
+  point: EvaluationPoint,
+  c: CommuneAttributes,
+  ref: { canonicalLabel: string },
+  evidenceKeys: string[],
+): HardConstraintAssessment<"nearPlace"> {
+  const within = est.minutes <= maxMinutes; // le verdict, sur la valeur brute
+  const duree = dureeEnPhrase(est.minutes, maxMinutes, within);
+
+  // ENFIN UNE VRAIE VALEUR. Le point-dans-polygone n'établissait qu'un côté de frontière
+  // (travel_time_threshold) ; l'itinéraire établit une durée, et le noyau la porte.
+  const observedValue: ConstraintValue = { kind: "travel_time_min", value: est.minutes, mode };
+  const expectedValue: ConstraintValue = { kind: "travel_time_min", value: maxMinutes, mode };
+  const observedLabel = `environ ${duree} minutes ${MODE_LABEL[mode]}`;
+  const expectedLabel = `au plus ${maxMinutes} minutes ${MODE_LABEL[mode]}`;
+
+  if (within) {
+    return {
+      key: "nearPlace", status: "satisfied",
+      observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
+    };
+  }
+  // « ESTIMÉ À ENVIRON », jamais un temps posé comme un fait : le moteur de routage calcule sur son graphe,
+  // sans trafic, sans stationnement, sans attente. Et le GRAIN est dit : une durée calculée depuis le point
+  // de référence de la commune ne vaut pas pour toute la commune.
+  const sujet = point.grain === "address" ? "Cette adresse" : `Le point de référence de ${c.nom}`;
+  return {
+    key: "nearPlace", status: "incompatible",
+    observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
+    topic: topicFit(
+      `le temps de trajet de ${c.nom} à ${ref.canonicalLabel}`,
+      `le temps de trajet à ${ref.canonicalLabel}`,
+    ),
+    statement: `${sujet} est à environ ${duree} minutes ${MODE_LABEL[mode]} de ${ref.canonicalLabel}, au-delà de la limite de ${maxMinutes} minutes que vous avez posée.`,
+  };
+}
+
 export function evaluateNearPlace(
   ctx: EvaluationContext,
   c: CommuneAttributes,
@@ -594,8 +693,25 @@ export function evaluateNearPlace(
     if (!ROUTABLE_MODES.includes(mode)) {
       return { key: "nearPlace", status: "unexamined", reason: "unsupported_metric", detail: np.label };
     }
-    // UN TEMPS N'EST JAMAIS ÉVALUÉ PAR UN HAVERSINE. Sans polygone, on ne se rabat pas sur la distance à
-    // vol d'oiseau « pour donner une idée » : on dit qu'on n'a pas pu router, et on retentera.
+    // SANS POINT, PAS DE MESURE : (0, 0) est dans le golfe de Guinée.
+    if (ctx.point == null) return { key: "nearPlace", status: "unexamined", reason: "missing_data" };
+
+    // L'ESTIMATION PRIME SUR LA GÉOMÉTRIE, et elle passe donc AVANT la garde de l'isochrone : une commune
+    // tranchée par un vrai itinéraire n'a plus besoin du polygone, et le déclarer « non routable » parce que
+    // l'isochrone manque serait absurde.
+    //
+    // Une durée calculée sur le graphe routier vaut mieux qu'une appartenance à un polygone simplifié : c'est
+    // elle qui tranche les communes que la bande de tolérance laissait dans le doute. Mais elle ne prime que
+    // si elle DÉCRIT CE QU'ON ÉVALUE (même départ, même destination, même mode) : sinon, une durée calculée
+    // depuis le centroïde de la commune trancherait le sort d'une adresse posée à son extrémité.
+    const est = ctx.travelTime;
+    if (est?.status === "estimated" && estimationConcorde(est, ctx.point, ref, mode)) {
+      return verdictParEstimation(est, maxMinutes, mode, ctx.point, c, ref, evidenceKeys0);
+    }
+
+    // UN TEMPS N'EST JAMAIS ÉVALUÉ PAR UN HAVERSINE. Sans estimation ET sans polygone, on ne se rabat pas
+    // sur la distance à vol d'oiseau « pour donner une idée » : on dit qu'on n'a pas pu router, et on
+    // retentera.
     if (np.reachability == null || np.reachability.status === "unavailable") {
       return {
         key: "nearPlace", status: "unexamined",
@@ -603,8 +719,6 @@ export function evaluateNearPlace(
         detail: np.label,
       };
     }
-    // SANS POINT, PAS DE MESURE : (0, 0) est dans le golfe de Guinée.
-    if (ctx.point == null) return { key: "nearPlace", status: "unexamined", reason: "missing_data" };
 
     const pos = pointInPolygon(
       ctx.point.lat, ctx.point.lon, np.reachability.geometry, np.reachability.toleranceMeters,
