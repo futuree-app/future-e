@@ -24,6 +24,7 @@ import {
   type SearchExplorationHint,
 } from "@/lib/hard-constraints";
 import { hardFilter, unappliedLabels } from "@/lib/hard-constraints-filter";
+import { mismatchRawScore, MISMATCH_RANK_KEYS } from "@/lib/comparateur-scores";
 import { travelThresholdLabel, ROUTABLE_MODES } from "@/lib/hard-constraints";
 import { estimateTravelMinutes } from "@/lib/route-time";
 import { reachabilityStore } from "@/lib/reachability-store";
@@ -2457,11 +2458,13 @@ const ANCRE_SIZE_BAND = 2.5;   // gabarit : [pop/2.5, pop*2.5] autour de la tail
 // signature à partir d'un champ manquant. Dans subScore, calme_sonore/expo défaut=100,
 // vie_locale/mobilite défaut=0 ; ici on les neutralise si la donnée brute manque.
 function signatureScore(key: PreferenceKey, c: IndexCommune): number | null {
+  // Les 10 critères de RANG délèguent à la lib PURE (comparateur-scores) : une seule implémentation, donc
+  // le dossier (qui bâtit son rang sur mismatchRawScore) ne peut pas ordonner autrement que le comparateur.
+  if (MISMATCH_RANK_KEYS.includes(key)) return mismatchRawScore(key, c);
   switch (key) {
     case "calme_sonore": if (c.calmeSonore?.score == null) return null; break;
     case "faible_exposition_industrielle": if (c.expoIndustrielle?.score == null) return null; break;
     case "mobilite_quotidienne": if (c.reseauLocal?.acces == null) return null; break;
-    case "vie_locale": if (c.vieLocale?.score == null) return null; break;
   }
   return subScore(key, c);
 }
