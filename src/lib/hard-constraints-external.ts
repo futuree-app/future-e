@@ -2,10 +2,12 @@
 // contraintes dures touche le réseau.
 //
 // Ni le comparateur ni le dossier ne résolvent un label eux-mêmes : ils traversent la MÊME chaîne, avec le
-// même contrat, les mêmes contrôles et le même cache de process. (Ils ne reçoivent pas encore le même objet
-// GELÉ : un géocodage réussi ici et un 429 là restent possibles, et deux instances ont deux caches. C'est la
-// persistance du lot 2b, avec sa table d'artefacts partagée, qui apportera cette garantie-là. Il ne faut pas
-// l'annoncer avant.)
+// même contrat, les mêmes contrôles, et les mêmes artefacts de mobilité (table reachability_artifact,
+// partagée entre instances et survivant aux redémarrages).
+//
+// CE QUI N'EST TOUJOURS PAS PROMIS : la table partage les RÉSULTATS, elle ne déduplique pas deux premiers
+// calculs strictement CONCURRENTS sur deux instances (il n'y a pas de verrou distribué), et le GÉOCODAGE,
+// lui, n'est pas persisté. Un géocodage réussi ici et une panne là restent donc possibles.
 //
 // L'HYDRATATION RESTE PURE, et elle est appelée DEUX fois : une première ici, pour savoir ce qu'il faut
 // résoudre (l'index suffit-il ? y a-t-il un seuil de temps ?), une seconde par les moteurs, avec le sac.
@@ -19,6 +21,7 @@ import { hydrateHardConstraints } from "./hard-constraints-hydrate.ts";
 import { geocodePlace as geocodePlaceImpl, type GeocodeOutcome } from "./geocode-place.ts";
 import { screenCandidates } from "./place-screening.ts";
 import { getReachability as getReachabilityImpl, type ReachabilityRequest } from "./isochrone.ts";
+import { reachabilityStore } from "./reachability-store.ts";
 import {
   resolutionInputHash, RESOLVER_VERSION,
   type PlaceDirectory, type ResolvedPlaceReference,
@@ -40,7 +43,11 @@ export type ExternalDeps = {
 
 const DEFAULT_DEPS: ExternalDeps = {
   geocodePlace: geocodePlaceImpl,
-  getReachability: getReachabilityImpl,
+  // LE STORE PARTAGÉ EST BRANCHÉ ICI. Sans lui, l'isochrone était bien mise en cache en mémoire du process,
+  // mais jamais dans la table : elle mourait à chaque redémarrage, et deux instances la recalculaient chacune
+  // de leur côté. (Défaut trouvé en vérifiant la base après une recherche : 24 itinéraires écrits, ZÉRO
+  // isochrone.)
+  getReachability: (r) => getReachabilityImpl(r, reachabilityStore()),
 };
 
 export async function resolveExternalReferences(
