@@ -248,13 +248,13 @@ export default function PourquoiPage() {
                   margin: '0 0 28px',
                 }}
               >
-                La même adresse n&apos;a pas le même sens{' '}
-                <em style={{ color: C.muted, fontStyle: 'italic' }}>pour&nbsp;tout&nbsp;le&nbsp;monde</em>
+                Votre futur lieu de vie ne tient pas{' '}
+                <em style={{ color: C.muted, fontStyle: 'italic' }}>dans&nbsp;une&nbsp;annonce</em>
               </h1>
               <p style={{ fontSize: '1.05rem', color: C.muted, lineHeight: 1.75, margin: 0 }}>
-                Une commune n&apos;est ni bonne ni mauvaise en soi. Tout dépend de la vie que vous
-                voulez y mener. futur•e rassemble ce qui est connu, rend visibles les angles morts
-                et vous aide à savoir ce qu&apos;il reste à vérifier avant de&nbsp;vous&nbsp;engager.
+                Une commune, un quartier, un logement : futur•e rassemble ce qui est connu,
+                rend visibles les angles morts et vous aide à savoir ce qu&apos;il reste
+                à vérifier avant de&nbsp;vous&nbsp;engager.
               </p>
             </div>
 
@@ -345,7 +345,9 @@ export default function PourquoiPage() {
             Choisir où vivre est l&apos;une des décisions les plus engageantes qui soient :
             des années de vie, une grande partie d&apos;un patrimoine, parfois la santé
             d&apos;une famille. Et c&apos;est pourtant une décision que l&apos;on prend presque
-            toujours en sachant moins que les autres acteurs de la transaction.
+            toujours en sachant moins que les autres acteurs de la transaction. Quant à ceux qui
+            vivent déjà sur place, il leur arrive de découvrir après des années ce qui ne leur
+            a jamais été transmis.
           </p>
           <p style={body}>
             Certaines données sont publiques mais illisibles. D&apos;autres n&apos;ont jamais été
@@ -614,6 +616,39 @@ export default function PourquoiPage() {
               qui l&apos;ont produite.
             </p>
           </div>
+        </section>
+
+        {/* ————— PONT RÉSIDENT ————— */}
+        <section
+          style={{
+            ...glass({ padding: '26px 28px', borderRadius: 12 }),
+            borderColor: 'rgba(96, 165, 250, 0.25)',
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: '16px 28px',
+            marginBottom: 8,
+          }}
+        >
+          <div style={{ flex: '1 1 380px' }}>
+            <h2 style={{ ...h2, fontSize: '1.25rem', margin: '0 0 10px' }}>Vous y vivez déjà ?</h2>
+            <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.7, margin: 0 }}>
+              La démarche est la même. Comprendre ce qui est connu sur votre commune, ce qui
+              change avec le climat, ce qui ne vous a pas été dit au moment d&apos;arriver —
+              parce que rester, adapter son logement ou partir est aussi
+              une&nbsp;décision.
+            </p>
+          </div>
+          <Link
+            href="/"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 500,
+              padding: '10px 20px', borderRadius: 8, textDecoration: 'none', whiteSpace: 'nowrap',
+              background: 'transparent', color: C.text, border: `1px solid ${C.borderHi}`,
+            }}
+          >
+            Analyser ma commune →
+          </Link>
         </section>
 
         {/* ————— CLÔTURE ————— */}
