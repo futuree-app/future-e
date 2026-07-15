@@ -6,7 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "index:unpack": "node scripts/index-unpack.mjs",
+    "index:pack": "node scripts/index-pack.mjs",
+    "index:verify": "node scripts/index-verify.mjs",
+    "prebuild": "node scripts/index-verify.mjs",
+    "hooks:install": "node scripts/install-git-hooks.mjs"
+  },
+  "engines": {
+    "node": ">=25"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.81",
