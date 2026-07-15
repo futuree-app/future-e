@@ -85,7 +85,18 @@ export type RelativePositionBasis = {
   universe: "communes_france";
   distributionVersion: string;
 };
-export type MismatchBasis = NamedAbsenceBasis | RelativePositionBasis;
+// MESURE PHYSIQUE ABSOLUE (lot 3a, mer) : la grandeur brute EST le fait, auto-suffisante (pas de
+// nationalContext, contrairement à named_absence). `unit` = "km" SEUL : doctrine « seulement le productible »
+// appliquée À L'INTÉRIEUR du fondement (autoriser "min" créerait un état que le moteur ne sait ni produire ni
+// expliquer, et qu'assertFactValid rejette). `value` = la distance BRUTE, auditable indépendamment de la
+// convention.
+export type AbsoluteMeasureBasis = {
+  kind: "absolute_measure";
+  value: number;
+  unit: "km";
+  conventionId: string;
+};
+export type MismatchBasis = NamedAbsenceBasis | RelativePositionBasis | AbsoluteMeasureBasis;
 
 // MISMATCH : le lieu répond MOINS BIEN à une priorité déclarée, sans que ce soit éliminatoire. Pas
 // d'action (rien à vérifier, le constat est établi) ; sa seule limitation possible est le grain.

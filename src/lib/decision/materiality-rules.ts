@@ -19,6 +19,7 @@ import { LOGEMENT_RULES } from "./logement-rules.ts";
 import { HARD_CONSTRAINT_RULES } from "./hard-constraint-rules.ts";
 import { MISMATCH_RULES } from "./mismatch-rules.ts";
 import { ABSENCE_RULES } from "./absence-rules.ts";
+import { COAST_RULES } from "./coast-rules.ts";
 import { toCommuneAttributes } from "./module-facts-map.ts";
 import {
   trajectoirePhrase, fmtClimat, CLIMAT_HORIZON_LABEL, type ClimatAxe,
@@ -406,6 +407,7 @@ export const REGISTRY: DecisionRule[] = [
   ruleIndustrie,
   ...MISMATCH_RULES,
   ...ABSENCE_RULES,
+  ...COAST_RULES,
   ruleInondation,
   ...LOGEMENT_RULES,
 ];
@@ -448,15 +450,29 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
       if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);
       if (!fact.action) throw new Error(`[decision] ${fact.ruleId}: vérification sans action`);
       break;
-    case "mismatch":
+    case "mismatch": {
       if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);
-      if (fact.basis.kind !== "relative_position" && fact.basis.kind !== "named_absence") {
-        throw new Error(`[decision] ${fact.ruleId}: basis de mismatch inconnu (${(fact.basis as { kind: string }).kind})`);
+      const basis = fact.basis;
+      if (basis.kind === "absolute_measure") {
+        // On VALIDE la mesure, pas seulement son nom : cette garde protège tous les futurs producteurs de
+        // MismatchFact, pas uniquement la règle mer (dont le classifieur garantit déjà la validité).
+        if (!Number.isFinite(basis.value) || basis.value < 0) {
+          throw new Error(`[decision] ${fact.ruleId}: mesure absolue invalide`);
+        }
+        if (basis.unit !== "km") {
+          throw new Error(`[decision] ${fact.ruleId}: unité de mesure absolue inconnue (${basis.unit})`);
+        }
+        if (!basis.conventionId) {
+          throw new Error(`[decision] ${fact.ruleId}: convention de mesure absente`);
+        }
+      } else if (basis.kind !== "relative_position" && basis.kind !== "named_absence") {
+        throw new Error(`[decision] ${fact.ruleId}: basis de mismatch inconnu (${(basis as { kind: string }).kind})`);
       }
       if (!declaredPreferenceKeys(project).includes(fact.projectKey)) {
         throw new Error(`[decision] ${fact.ruleId}: mismatch sur une préférence non déclarée (${fact.projectKey})`);
       }
       break;
+    }
   }
 }
 
