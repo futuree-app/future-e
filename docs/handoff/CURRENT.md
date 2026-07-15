@@ -1,91 +1,90 @@
-# Passation — mismatch v1 livré (couverture 19/28) ; reste le lot 2 des états absolus
+# Passation — mismatch lot 2a (absences attestées) LIVRÉ sur branche ; reste 2b / lot 3
 
-**Horodatage** : 2026-07-15 · **Branche** : `main` (nombreux commits d'avance, **non poussés**)
-**Aucune PR ouverte.**
+**Horodatage** : 2026-07-15 · **Branche** : `feat/mismatch-lot2a-absences-attestees` (NON mergée, NON poussée)
+**Base** : `main` (`4968cc9`, docs spec+plan committés). **Aucune PR ouverte.**
 
-## ⚠ Rien de bloquant, mais à savoir
+## Objectif en cours
 
-`data/comparateur-index.json` a été **enrichi** (rang mismatch) et fait maintenant **77,5 Mo** (avant :
-67,7). L'enrichissement se rejoue avec `npx tsx scripts/populate-mismatch-rank.mts` (atomique, refuse sur
-anomalie). Si une source de critère (nature, écoles…) est ré-enrichie, **relancer ce script** pour que les
-bandes ne deviennent pas obsolètes.
+Le **lot 2a de `mismatch`** est **terminé** sur sa branche : le dossier sait dire qu'un lieu répond mal à une
+priorité déclarée parce qu'un élément recherché **n'existe pas** à portée, et qu'il peut le **prouver**. Deux
+critères : `mobilite_quotidienne` (aucun réseau de TC du quotidien à portée de marche) et `vie_etudiante`
+(aucun établissement du supérieur dans le rayon). Couverture **19 → 21 sur 28**. Il reste à **décider du
+merge** (finishing-a-development-branch), puis les lots suivants.
 
-**Index gzip (livré) :** l'artefact canonique est `data/comparateur-index.json.gz` (~10 Mo, sous le seuil
-GitHub de 50 Mo). Après un clone frais ou avant une session d'enrichissement : `npm run index:unpack` (écrit
-la copie de travail `data/comparateur-index.json`, gitignorée). Après un enrichissement : `npm run
-index:pack`, puis committer le `.gz`. `npm run hooks:install` pose le hook pre-commit de vérification.
-Doctrine complète : `docs/superpowers/specs/2026-07-15-compression-index-gzip-design.md`.
+## Fait dans cette session (branche `feat/mismatch-lot2a-absences-attestees`, 11 commits)
 
-## Ce qui a été livré : le chantier B, `mismatch`
+- **Doctrine** : nouveau fondement `named_absence` pour le rôle `mismatch` (rôle unique, basis en union
+  discriminée `NamedAbsenceBasis | RelativePositionBasis`). Spec `docs/superpowers/specs/2026-07-15-mismatch-lot2a-absences-attestees-design.md`, plan `docs/superpowers/plans/2026-07-15-mismatch-lot2a-absences-attestees.md`.
+- **Attestation en CHAMPS FRÈRES** (décision porteur, révision majeure) : on ne déforme pas la donnée
+  historique. `IndexCommune.reseauLocalMeasured?: boolean` (reseauLocal INCHANGÉ) et `IndexCommune.etudesSup`
+  (`{ measured, weightedAccess, radiusKm, establishmentCount? }`). **Zéro collatéral** dans `comparateur-vie`
+  (server-only), tests entièrement purs. Convention dans `index.meta.absenceAttestations`, pas par commune.
+- **Libs pures** : `src/lib/decision/absence-facts.ts` (attestations union discriminée sur `measured`,
+  `classifyNetworkAbsence`/`classifyHigherEdAbsence` avec gardes de valeurs + null-safe, `ABSENCE_NATIONAL_CONTEXT`),
+  `src/lib/decision/absence-rules.ts` (fabrique des 2 règles, doctrine asymétrique absence→mismatch /
+  présent→neutral / non-mesuré→uncertain, poids 1 silencieux). `count` = **accès pondéré** (`weightedAccess`),
+  PAS un compte ; absence = `establishmentCount === 0` si présent, sinon `weightedAccess === 0`.
+- **Câblage** : `decision-fact.ts` (basis union + `ModuleFacts.localNetwork`/`higherEd`), `module-facts-map.ts`
+  (mapping, pré-patch → `measured:false`), `materiality-rules.ts` (`...ABSENCE_RULES` au REGISTRY + `case
+  "mismatch"` dans `assertFactValid`). L'aval (section « mismatches », orientation `arbitration`/`neutral`,
+  comptage matériel) était DÉJÀ livré par la v1.
+- **Enrichissement de l'index** : `scripts/populate-absence-attestations.mts` (lit les 2 caches, aucun re-fetch
+  OSM/BPE ; set-equality strict, garde de prévalence contre les constantes TS, tmp unique + finally + garde
+  clone frais, `index.meta` avec numérateurs + sha256). **LANCÉ** : 82,8 % sous plancher réseau, 40,4 % sans
+  supérieur ; `.gz` re-packé (10 Mo) et committé. Parité rayon prouvée aux points de rupture.
+- **Producteurs préventifs (NON re-tournés)** : `populate-reseau-local.py` (champ frère + cache `{meta,communes}`),
+  `populate-bpe.py` (`etudesSup` + `establishmentCount = int(win.sum())` + cache meta ; selftest d'équivalence).
+  Invariant OSM prouvé : test `scripts/populate-reseau-local.test.mjs` (échec de tuile propage hors `load_osm`).
+- **Prompt** : `DECISION_NARRATIVE_PROMPT_VERSION` `v7 → v8`, consigne « absence attestée » (fait dans le
+  périmètre mesuré, jamais un jugement absolu, jamais « aucune vie étudiante »). **Sonde 25/25 blocs retenus.**
+- **E2E** : `src/lib/decision/absence-e2e.test.ts` (chaîne index → mapping → runRules → assembleDossier :
+  absence structurante → carte + arbitrage ; présent → neutral ; non-mesuré → uncertain).
 
-Le dossier sait enfin dire qu'un lieu répond **mal** à une priorité déclarée, sans que ce soit
-éliminatoire. **Couverture 9 → 19 critères sur 28.** Spec et plan :
-`docs/superpowers/specs/2026-07-15-mismatch-design.md`, `docs/superpowers/plans/2026-07-15-mismatch.md`.
+## Vérification finale (toute verte)
 
-Vérifié à l'écran (dossiers réels) :
-- **Roubaix**, projet nature+calme+vie locale+soins → orientation **`arbitration`** : nature « parmi les
-  10 % les moins favorables de France », calme « les 5 % », mais vie locale et soins **favorables**. Le lieu
-  est possible, il demande un arbitrage. Phrases **comparatives**, jamais absolues.
-- **Digne-les-Bains** (bien dotée) → `favorable`, deux `satisfied` silencieux (la symétrie tient, pas de
-  dégradation mécanique).
-- **Arbigny** (nature et écoles médianes) → **`neutral`** : examiné, la couverture monte, aucune carte.
+`node --test src/lib/*.test.ts src/lib/decision/*.test.ts` = **536/536** ; `node --test scripts/lib/*.test.mjs
+scripts/*.test.mjs` = **22/22** ; `npx tsc --noEmit` = 0 ; `npm run index:verify` OK ; `npm run build` exit 0
+(2255/2255 pages).
 
-**Sonde : 20/20** (2 plans × 5 tirages). Sur le cas mismatch, le modèle nomme « les espaces naturels et le
-cadre calme », en comparatif, parle d'**arbitrage** (jamais « à vérifier »).
+## Décisions prises (porteur, révisions successives intégrées)
 
-## Les décisions structurantes (prises avec le porteur pendant le brainstorm)
+1. **Découpage** : lot 2a (absences attestées, 2 critères) LIVRÉ ; puis **2b** (`acces_services` en
+   `relative_position`, réutilise la v1) ; puis **lot 3** (mer = `absolute_measure`, taille d'agglo =
+   `categorical_state`, formes propres). Ne PAS mélanger dans un sac `absolute_state`.
+2. **Champ frère** (pas d'enrichissement en place de reseauLocal) : révélé par le piège server-only, mais
+   surtout meilleure séparation résultat/provenance, zéro collatéral, tests purs.
+3. **`weightedAccess` ≠ count** : conserver la grandeur brute + porter le vrai `establishmentCount` (airtight,
+   préféré par le dossier quand présent), cas-frontière rural `d==DMAX` documenté (mesure nulle).
+4. **Prévalence** : source unique = constantes TS, GARDÉES par le patch (refus si divergence > 0,5 pt) ;
+   `index.meta` porte les numérateurs, pas une prévalence arrondie.
+5. **Doctrine asymétrique** : jamais `satisfied` (pas de seuil de « présence forte » inventé).
 
-1. **Un mismatch a le droit au percentile**, là où l'incompatibilité ne l'a pas : il dit une POSITION
-   RELATIVE et l'assume, l'incompatibilité oppose un FAIT DU MONDE.
-2. **Deux fondements de preuve** (spec) : `relative_position` (livré) et `absolute_state` (lot 2). Le rang à
-   deux bornes gère les ex æquo : à cheval sur un seuil → `neutral`.
-3. **`neutral` est une 7e orientation**, pas un `favorable` déguisé : absence de signal défavorable ≠
-   correspondance favorable. `favorable` exige un signal favorable MATÉRIEL.
-4. **Le poids gouverne la matérialité, jamais l'examinabilité** : poids 0 → not_applicable ; **poids 1 →
-   examiné mais SILENCIEUX** (couverture +1, aucune carte, pas d'arbitrage) ; 2 → secondary ; 3 → structuring.
-5. **`arbitration` dérive d'un ENSEMBLE MATÉRIEL** (`run.facts`, pas les évaluations) : 1 structurant ou 2
-   secondaires. Jamais `decision_critical`.
+## Prochaine étape immédiate
 
-## Invariants à ne PAS casser
-
-- **Le dossier ne re-dérive AUCUNE formule de critère.** Le rang se bâtit sur `mismatchRawScore`
-  (`comparateur-scores.ts`, lib pure), auquel `signatureScore` DÉLÈGUE pour les 10 clés : une seule
-  implémentation, divergence structurellement impossible. Ne jamais recopier une formule ailleurs.
-- **Aucune valeur brute inventée**, aucun `?? 0`/`?? 100` dans le dossier : `band == null` → `uncertain`.
-- **Provenance `relativePosition.${key}`**, jamais `scores.*` (le dossier ne lit pas `scores`, qui replie).
-- **Le rang est NATIONAL** (34 788 communes), jamais sur la shortlist.
-- **`classifyPosition` a des gardes runtime** : NaN, hors `[0,1]`, `low > high` → `uncertain` (une bande
-  d'index corrompue ne devient jamais un verdict).
-- **Un mismatch se dit en COMPARATIF** (« moins bien qu'ailleurs »), jamais en absolu (« insuffisant »).
-- **Le verdict compte le TOTAL** des mismatchs (pas l'affiché, cap 3).
-- **`DECISION_NARRATIVE_PROMPT_VERSION = "v7"`** : les artefacts persistés d'avant sont invalidés (vérifié).
-
-**Après toute modification** :
-```bash
-node --test src/lib/*.test.ts src/lib/decision/*.test.ts   # 505 verts
-npx tsc --noEmit                                            # 0
-node --env-file=.env.local scripts/probe-conclusion.ts      # 20/20
-```
-
-## PROCHAINE ÉTAPE : le lot 2 de mismatch (les états absolus)
-
-La forme `absolute_state` (spec §5.1) : mobilité quotidienne, mer, services, isolement, vie étudiante… Ce
-sont les critères à **distribution dégénérée** (mobilité : 83 % des communes à 0) où le rang de position
-n'apprend rien, mais où un FAIT ABSOLU parle (« aucun réseau de transports en commun à portée »). Chaque
-critère demande sa doctrine (« que signifie une valeur de 0 ? »). Couverture 19 → 24+.
-
-## Puis, en réserve
-
-- **L'harmonisation du poids 1** sur les règles climat/santé (elles gardent `< 2` = `not_applicable` ; le
-  mismatch, lui, examine au poids 1). Petit chantier transversal.
-- **La fusion de deux mismatchs en tension en un compromis narratif** (spec §7).
-- **La séparation `ProjectFit` × `DecisionConfidence`** (l'orientation reste un enum à 7 valeurs) : la
-  refonte que le porteur a délibérément reportée. Elle touche le verdict, la sonde, l'UI, les analytics.
+**Décider du sort de la branche** (finishing-a-development-branch) : merge fast-forward sur `main` + push, ou
+PR. La branche est propre, tout est vert. Après merge, attaquer le **lot 2b** (`acces_services`).
 
 ## À lire d'abord à la reprise
 
-1. `/memory/MEMORY.md`, puis `project_dossier_decision`.
-2. La spec (§2 le percentile assumé, §3 le piège de `scores`, §4 les deux bornes, §8 l'orientation).
-3. Code : `mismatch-facts.ts` (classification + gardes) → `mismatch-rules.ts` (la fabrique, la doctrine du
-   poids) → `comparateur-scores.ts` (l'anti-divergence) → `criteria-registry.ts` (`arbitration`/`neutral`) →
-   `conclusion-plan.ts` (le bloc `mismatches_found` + les verdicts).
+1. `/memory/MEMORY.md`, `project_dossier_decision.md`, `project_module_logement.md`.
+2. `docs/superpowers/specs/2026-07-15-mismatch-lot2a-absences-attestees-design.md` (doctrine à jour) et son plan.
+3. Spec v1 `docs/superpowers/specs/2026-07-15-mismatch-design.md` (§11 périmètre : lots 2b/3 figés).
+4. Code : `src/lib/decision/absence-facts.ts` → `absence-rules.ts` → `materiality-rules.ts` (REGISTRY) ;
+   enrichissement `scripts/lib/absence-attestations.mjs` + `scripts/populate-absence-attestations.mts`.
+
+## Pièges / fils ouverts
+
+- **Piège server-only/node --test** : ne PAS value-importer `comparateur-vie.ts` dans un test (il fait
+  `import "server-only"`, absent de node_modules). Les tests du lot restent purs (libs décision + mapping).
+- **Après tout ré-enrichissement des attestations** : `node scripts/populate-absence-attestations.mts` PUIS
+  `npm run index:pack` PUIS committer le `.gz` (le hook pre-commit refuse sinon). Sur clone frais :
+  `npm run index:unpack` d'abord.
+- **Si la prévalence réelle bouge** (MAJ caches BPE/OSM) : le patch REFUSE tant que `ABSENCE_NATIONAL_CONTEXT`
+  (dans `absence-facts.ts`) + `ABSENCE_DISTRIBUTION_VERSION` ne sont pas mis à jour aux vraies valeurs.
+- **Producteurs pas re-tournés** : `establishmentCount` et les caches `{meta,communes}` n'existent QUE pour un
+  futur rebuild ; l'index actuel a `etudesSup` SANS `establishmentCount` (le dossier retombe sur
+  `weightedAccess === 0`, équivalent hors cas-frontière rural).
+- **Reste mismatch** : lot 2b (`acces_services`), lot 3 (mer/taille), fusion de deux mismatchs en compromis
+  narratif, séparation `ProjectFit × DecisionConfidence` (reportée par le porteur).
+- **Mémoire à MAJ** (pas encore fait) : aucune fiche `/memory` ne couvre le lot 2a `named_absence` ni les
+  champs frères d'attestation. Envisager une fiche ou une ligne dans `project_dossier_decision`.
