@@ -89,6 +89,40 @@ const planMismatch = buildConclusionPlan({
   mismatchTotal: 2, mismatchShown: 2,
 });
 
+// Un fait d'ABSENCE ATTESTÉE (named_absence) : un élément recherché n'existe pas à portée, la recherche a
+// été faite. Le modèle doit le NOMMER dans son périmètre, jamais généraliser en jugement absolu.
+function absence(id: string, tier: MaterialityTier, topic: string, statement: string): DecisionFact {
+  return {
+    id, ruleId: `territoire.absence-${id}`, sourceFactIds: [`absenceAttestation.${id}`], module: "territoire",
+    topic, statement,
+    materialityTier: tier, role: "mismatch", projectKey: id as never,
+    basis: {
+      kind: "named_absence",
+      observedStateId: id === "vie_etudiante" ? "no_higher_education_establishment_in_radius" : "network_below_daily_credibility_floor",
+      conventionId: id === "vie_etudiante" ? "higher-education-radius-adaptive-v1" : "daily-transit-access-v1",
+      nationalContext: { prevalence: id === "vie_etudiante" ? 0.404 : 0.828, validCount: 34788, totalCount: 34788, universe: "communes_france", distributionVersion: "absence-dist-2026-07-15" },
+    },
+    evidence: [{ factId: `absenceAttestation.${id}`, module: "territoire", label: "Territoire", grain: "commune" }],
+  } as DecisionFact;
+}
+
+// Cas ABSENCE ATTESTÉE : deux priorités dont l'élément recherché n'existe pas à portée (réseau du quotidien,
+// établissements du supérieur). Orientation arbitrage. Le modèle doit NOMMER l'absence dans son périmètre,
+// jamais dire « aucune vie étudiante » ni « à vérifier ».
+const planAbsence = buildConclusionPlan({
+  scope: "commune", communeNom: "Roubaix", conclusionState: "no_incompatibility_established", posture: "recherche",
+  shownFacts: [
+    absence("mobilite_quotidienne", "structuring", "les transports en commun du quotidien",
+      "Aucune desserte de transports en commun considérée comme praticable au quotidien n'est identifiée à distance de marche du point de référence retenu pour Roubaix."),
+    absence("vie_etudiante", "secondary", "les établissements du supérieur",
+      "Aucun établissement d'enseignement supérieur n'est identifié dans un rayon de 25 km autour du point de référence retenu pour Roubaix."),
+  ],
+  uncovered: [], uncoveredPriorities: [],
+  establishedIncompatibility: null, coverage: "high", orientation: "arbitration",
+  hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 0,
+  mismatchTotal: 2, mismatchShown: 2,
+});
+
 console.log("gate :", shouldGenerateNarrative(plan), "· lead :", JSON.stringify(plan.lead));
 console.log("\n──── DÉTERMINISTE (ce que le lecteur voit sans IA) ────");
 console.log(plan.blocks.map((b) => b.fallbackText).join(" "));
@@ -137,5 +171,6 @@ for (let i = 1; i <= TIRAGES; i++) {
 
 const a = await probe(plan, "réserves majeures");
 const b = await probe(planMismatch, "mismatch / arbitrage");
-const R = a.retenus + b.retenus, T = a.total + b.total;
+const c = await probe(planAbsence, "absence attestée / arbitrage");
+const R = a.retenus + b.retenus + c.retenus, T = a.total + b.total + c.total;
 console.log(`\n════ TAUX DE SURVIE : ${R}/${T} blocs ════`);

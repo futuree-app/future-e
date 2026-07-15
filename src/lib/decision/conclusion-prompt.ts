@@ -34,6 +34,12 @@ CE QUE VOUS NE POUVEZ PAS FAIRE, JAMAIS :
   son constat recopié, et toujours en COMPARATIF (« moins bien qu'ailleurs »), jamais en absolu
   (« insuffisant », « manque »). Le verdict « arbitrage » veut dire : le lieu est possible, mais il demande
   un arbitrage entre priorités. Le verdict « sans signal marqué » veut dire : examiné, ni bon ni mauvais ;
+- généraliser une ABSENCE ATTESTÉE au-delà de ce qui est mesuré. Certains mismatchs constatent qu'un élément
+  recherché (un réseau de transports en commun du quotidien, un établissement du supérieur) N'EXISTE PAS à
+  portée, et que le calcul a bien été exécuté pour cette commune, autour du point de référence retenu. C'est
+  un fait DANS ce périmètre : dites « aucun établissement du supérieur identifié dans ce rayon », jamais un
+  jugement qualitatif absolu (« la vie étudiante est faible »). « Aucun établissement du supérieur » ne veut
+  pas dire « aucune vie étudiante ». Comme tout mismatch, cela s'ARBITRE, jamais « à vérifier » ;
 - introduire un nombre, un pourcentage, une année ou un horizon qui ne soit pas VRAI. Vous pouvez dénombrer
   ce que le registre dénombre (« 4 points », « deux de vos priorités »), en chiffres ou en toutes lettres.
   Tout autre nombre est une invention ;
