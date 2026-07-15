@@ -38,3 +38,26 @@ test("une commune SANS rankBands rend null (jamais un objet vide)", () => {
   const entry = { insee: "1", nom: "X", dept: "01", lat: 0, lon: 0, distance_cote_km: 0 } as never;
   assert.equal(mapCommuneToModuleFacts(entry, {}, { hasAddress: false, tailleVille: 1000, climat: null }).rankBands, null);
 });
+
+// ── Attestations d'absence (lot 2a) : champs frères + provenance ──────────────
+test("réseau MESURÉ sous plancher (marqueur true, reseauLocal null) -> absence attestable", () => {
+  const f = mapCommuneToModuleFacts(entry({ reseauLocal: null, reseauLocalMeasured: true }), {}, { hasAddress: false, tailleVille: 1000 });
+  assert.deepEqual(f.localNetwork, { measured: true, access: null });
+});
+test("réseau MESURÉ avec desserte -> présence attestée", () => {
+  const f = mapCommuneToModuleFacts(entry({ reseauLocal: { acces: 72, tram: true, metro: false, arret_km: 0.4 }, reseauLocalMeasured: true }), {}, { hasAddress: false, tailleVille: 1000 });
+  assert.deepEqual(f.localNetwork, { measured: true, access: 72 });
+});
+test("DÉFENSIF : résultat présent mais marqueur ABSENT -> non mesuré", () => {
+  const f = mapCommuneToModuleFacts(entry({ reseauLocal: { acces: 72, tram: false, metro: false, arret_km: 0.9 } }), {}, { hasAddress: false, tailleVille: 1000 });
+  assert.equal(f.localNetwork.measured, false);
+});
+test("études : weightedAccess + establishmentCount (null si absent du champ)", () => {
+  const f = mapCommuneToModuleFacts(entry({ etudesSup: { measured: true, weightedAccess: 0, radiusKm: 25 } }), {}, { hasAddress: false, tailleVille: 1000 });
+  assert.deepEqual(f.higherEd, { measured: true, weightedAccess: 0, radiusKm: 25, establishmentCount: null });
+});
+test("index PRÉ-PATCH (aucune attestation) -> measured:false (jamais une absence inventée)", () => {
+  const f = mapCommuneToModuleFacts(entry(), {}, { hasAddress: false, tailleVille: 1000 });
+  assert.equal(f.localNetwork.measured, false);
+  assert.equal(f.higherEd.measured, false);
+});

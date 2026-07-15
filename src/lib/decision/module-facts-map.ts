@@ -47,10 +47,17 @@ export function mapCommuneToModuleFacts(
       }
       return out;
     })(),
-    // Attestations d'absence (lot 2a) : placeholder « non mesurée » posé en Task 3 pour la barrière de types ;
-    // le VRAI mapping (depuis reseauLocalMeasured / etudesSup) est implémenté et testé en Task 4.
-    localNetwork: { measured: false, access: null },
-    higherEd: { measured: false },
+    // Attestations d'absence (lot 2a), champs FRÈRES. On sépare le RÉSULTAT (reseauLocal, etudes_acces) de la
+    // PROVENANCE (reseauLocalMeasured, etudesSup.measured). Sans marqueur -> measured:false -> uncertain : le
+    // nouveau moteur ne considère jamais une donnée historique comme attestée sans sa provenance.
+    localNetwork: entry.reseauLocalMeasured === true
+      ? { measured: true, access: entry.reseauLocal?.acces ?? null }
+      : { measured: false, access: null },
+    higherEd: (() => {
+      const e = entry.etudesSup;
+      if (e == null || e.measured !== true) return { measured: false as const };
+      return { measured: true as const, weightedAccess: e.weightedAccess, radiusKm: e.radiusKm, establishmentCount: e.establishmentCount ?? null };
+    })(),
     scores,
     hasAddress: opts.hasAddress,
   };
