@@ -1,15 +1,26 @@
-# Passation — mismatch lot 2a (absences attestées) LIVRÉ sur branche ; reste 2b / lot 3
+# Passation — mismatch lots 2a (absences attestées) + 2b (acces_services) LIVRÉS ET POUSSÉS ; reste lot 3
 
-**Horodatage** : 2026-07-15 · **Branche** : `feat/mismatch-lot2a-absences-attestees` (NON mergée, NON poussée)
-**Base** : `main` (`4968cc9`, docs spec+plan committés). **Aucune PR ouverte.**
+**Horodatage** : 2026-07-16 · **Branche** : `main` (à jour avec `origin/main`, `ea1b160`, **rien à pousser**).
+**Aucune PR ouverte.**
 
 ## Objectif en cours
 
-Le **lot 2a de `mismatch`** est **terminé** sur sa branche : le dossier sait dire qu'un lieu répond mal à une
-priorité déclarée parce qu'un élément recherché **n'existe pas** à portée, et qu'il peut le **prouver**. Deux
-critères : `mobilite_quotidienne` (aucun réseau de TC du quotidien à portée de marche) et `vie_etudiante`
-(aucun établissement du supérieur dans le rayon). Couverture **19 → 21 sur 28**. Il reste à **décider du
-merge** (finishing-a-development-branch), puis les lots suivants.
+Les **lots 2a ET 2b de `mismatch`** sont **livrés et poussés sur `main`**. La prochaine pièce est le **lot 3**
+(mer = `absolute_measure`, taille d'agglo = `categorical_state`) — deux NOUVELLES formes de preuve qui
+demandent leur propre conception (conventions de distance/catégories versionnées, contrats éditoriaux
+distincts), donc un brainstorm, pas une extension mécanique.
+
+**Lot 2b (LIVRÉ+poussé, `ea1b160`)** : `acces_services` ajouté à la forme `relative_position` de la v1
+(extension mécanique : `MISMATCH_RANK_KEYS` + `MISMATCH_KEYS` + `MISMATCH_LABELS`). Distribution dégénérée au
+PLAFOND (80,3 % au score 100 = services complets = table-stakes → `neutral` via la bande à deux bornes) mais
+queue défavorable continue (6 853 communes, 19,7 %, en `mismatch`). Rang recalculé (`populate-mismatch-rank.mts`)
++ index re-packé. Couverture **21 → 22 sur 28**.
+
+## Lot 2a (LIVRÉ+poussé, dans `52b159e`)
+
+Le dossier sait dire qu'un lieu répond mal à une priorité parce qu'un élément recherché **n'existe pas** à
+portée, et qu'il peut le **prouver**. Deux critères : `mobilite_quotidienne` (aucun réseau de TC du quotidien à
+portée de marche) et `vie_etudiante` (aucun établissement du supérieur dans le rayon). Couverture 19 → 21.
 
 ## Fait dans cette session (branche `feat/mismatch-lot2a-absences-attestees`, 11 commits)
 
@@ -61,8 +72,11 @@ scripts/*.test.mjs` = **22/22** ; `npx tsc --noEmit` = 0 ; `npm run index:verify
 
 ## Prochaine étape immédiate
 
-**Décider du sort de la branche** (finishing-a-development-branch) : merge fast-forward sur `main` + push, ou
-PR. La branche est propre, tout est vert. Après merge, attaquer le **lot 2b** (`acces_services`).
+**Lot 3** (mer + taille d'agglo), qui demande un **brainstorm** (formes `absolute_measure` / `categorical_state`
+figées dans la spec §11 mais à concevoir : conventions de distance versionnées, 3 contrats éditoriaux distincts
+pour eviter_grandes_villes / prefere_grande_ville / eviter_isolement, lus depuis `ModuleFacts.tailleVille`).
+Reste ensuite 2 critères pour atteindre 28, la fusion de deux mismatchs en compromis narratif, et la séparation
+`ProjectFit × DecisionConfidence`.
 
 ## À lire d'abord à la reprise
 
