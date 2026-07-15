@@ -70,14 +70,20 @@ scripts/*.test.mjs` = **22/22** ; `npx tsc --noEmit` = 0 ; `npm run build` exit 
 - Distance **arrondie** au texte (`Math.round`), valeur **brute** dans le basis. C'est la **distance** qui est
   estimée, pas « la côte ».
 
+## Sonde LANCÉE (contrôle éditorial passé)
+
+`node --env-file=.env.local scripts/probe-conclusion.ts` : cas « mer / éloignement » **5/5** (« La distance à
+la mer ressort moins favorable qu'ailleurs : c'est un point à arbitrer… », comparatif, aucun chiffre, jamais
+« la mer est à X km »). Total 28/30 (2 ratés stochastiques dans les plans pré-existants, hors mer). **La sonde
+a trouvé un défaut** (1er run) : la 1re consigne mer disait « gardez "estimée à environ" », ce qui poussait la
+CONCLUSION (qui n'a pas le chiffre) à écrire « estimée à environ une valeur moins favorable ». Consigne
+recentrée (commit `fix`) : la conclusion nomme le sujet en comparatif, le chiffre reste dans la carte. `v9`
+inchangé (déjà le bon label du prompt final).
+
 ## Prochaine étape immédiate
 
-1. **Lancer la sonde manuelle** (contrôle éditorial, ~25 appels API, nécessite `ANTHROPIC_API_KEY`) :
-   `npx tsx scripts/probe-conclusion.ts`. Attendu : le cas « mer / éloignement » produit des blocs retenus, le
-   modèle nomme la distance en comparatif, jamais « la mer est à X km », taux de survie global au niveau des
-   lots précédents.
-2. **Merge** de `feat/mismatch-lot3a-mer` vers `main` + push.
-3. **Lot 3b** — catégorie d'agglomération (`eviter_grandes_villes`, `prefere_grande_ville`, `eviter_isolement`,
+1. **Merge** de `feat/mismatch-lot3a-mer` vers `main` + push.
+2. **Lot 3b** — catégorie d'agglomération (`eviter_grandes_villes`, `prefere_grande_ville`, `eviter_isolement`,
    lues depuis `ModuleFacts.tailleVille`). Fondement `CategoricalStateBasis = { kind:"categorical_state";
    observedCategory:string; conventionId:string }`. **Trois contrats éditoriaux DISTINCTS** (une agglo moyenne
    peut satisfaire `eviter_grandes_villes` sans être favorable à `prefere_grande_ville`) : pas une seule règle
