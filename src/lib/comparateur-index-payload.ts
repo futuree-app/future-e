@@ -1,4 +1,4 @@
-import type { IndexCommune } from "./comparateur-vie";
+import type { IndexCommune } from "./comparateur-vie.ts";
 
 // Valide la structure racine (objet { communes: [...] }) au lieu de caster : un
 // cast satisferait TS mais pourrait retourner le mauvais niveau. Module PUR
