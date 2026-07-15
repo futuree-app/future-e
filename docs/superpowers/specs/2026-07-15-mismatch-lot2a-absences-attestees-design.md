@@ -61,18 +61,25 @@ cache de sortie complet. On s'appuie sur ces caches, sans aucune requête OSM/BP
 mode. Sous le plancher `ACCESS_FLOOR = 1.0`, le résultat est `null` (« pas un réseau du quotidien crédible »).
 Le cache porte les 34 788 communes : `null` (sous plancher) ou `{acces, tram, metro, arret_km}` (desservie).
 
-**Attestation cible dans l'index** (le champ `acces` est CONSERVÉ tel quel : `subScore` le lit, `?? 0`
-inchangé, aucun impact sur le comparateur) :
+**On ne déforme pas la donnée historique pour y encoder son statut de mesure.** `reseauLocal` reste EXACTEMENT
+ce qu'il est (le résultat du scoring : `null` sous plancher, objet `{acces, tram, metro, arret_km}` desservie).
+On ajoute un **champ frère** de provenance, `reseauLocalMeasured: boolean`, qui répond à la seule question
+nouvelle : *« le calcul réseau a-t-il réellement été exécuté pour cette commune ? »*
 
 ```
-desservie          -> reseauLocal = { acces: <1..100>, tram, metro, arret_km, measured: true, conventionVersion }
-mesurée sous plancher -> reseauLocal = { acces: null, measured: true, conventionVersion }
-non géolocalisée   -> reseauLocal = null            (ou absent) = NON mesurée
+reseauLocal INCHANGÉ         : null (sous plancher) | { acces, tram, metro, arret_km } (desservie)
+reseauLocalMeasured = true   : commune effectivement mesurée
+absent / false               : aucune attestation de mesure -> jamais d'absence déduite
 ```
 
-Le dossier lit : `measured === true && acces == null` → **absence attestée** ; `measured && acces != null` →
-**présent** ; sinon → **non mesuré** (uncertain). L'`access` valide vaut `null` (sous plancher) ou `[1,100]` ;
-toute valeur non finie ou hors bornes est traitée `uncertain`, jamais un verdict.
+Le dossier lit : `reseauLocalMeasured && reseauLocal == null` → **absence attestée** ; `reseauLocalMeasured &&
+reseauLocal != null` → **présent** ; sinon → **non mesuré** (uncertain).
+
+**Bénéfice décisif** : `subScore`, `buildTerritorySignals`, `deriveCategories` et les labels distinctifs
+restent INCHANGÉS (le sous-plancher reste `null`, donc `if (c.reseauLocal)` reste falsy exactement comme
+aujourd'hui). Aucun collatéral dans le module `server-only` `comparateur-vie.ts`, et les tests du lot restent
+PURS (rien à importer en valeur depuis `comparateur-vie`). C'est la symétrie de `etudesSup` (§3.2), qui est
+lui aussi un champ frère.
 
 ### 3.2 Enseignement supérieur (`communes-bpe.json`)
 
@@ -94,12 +101,14 @@ quand il est présent** (airtight) ; sinon il retombe sur `weightedAccess == 0` 
 mesure nulle, est accepté et documenté). Le cache actuel n'ayant que `weightedAccess`, ce lot fonctionne
 dessus ; un futur rebuild rendra `establishmentCount` disponible.
 
-**Attestation cible dans l'index** (le champ `etudes_acces` score est CONSERVÉ ; on AJOUTE) :
+**Attestation cible dans l'index** (le champ `etudes_acces` score est CONSERVÉ ; on AJOUTE un champ frère) :
 
 ```
-etudesSup = { measured: true, weightedAccess: <float>, radiusKm: <5|10|15|25>,
-              establishmentCount?: <entier|absent>, conventionVersion }
+etudesSup = { measured: true, weightedAccess: <float>, radiusKm: <5|10|15|25>, establishmentCount?: <entier|absent> }
 ```
+
+La convention (`conventionId`) n'est PAS répétée par commune (34 788 fois) : elle est commune à tout
+l'artefact et vit dans `index.meta` (§8). Une commune non mesurée n'a pas de champ `etudesSup`.
 
 `radiusKm` est déterministe (`radius_for(tailleVille)`), mais **recomputé côté patch** : sa parité avec le
 producteur Python (mêmes seuils `30k/100k/500k`, même `taille_ville = uupop[uu] sinon population`) est
@@ -138,15 +147,16 @@ type RelativePositionBasis = {  // la v1, adaptée à la forme union (kind ajout
 // L'UNION ACTIVE ne porte QUE les fondements que le moteur sait produire aujourd'hui.
 type MismatchBasis = NamedAbsenceBasis | RelativePositionBasis;
 
-// LES ATTESTATIONS (domaine, portées par ModuleFacts). À STATUT DISCRIMINÉ : « unavailable » n'a AUCUN champ
-// de mesure, il est donc impossible de lire un weightedAccess sur une donnée non mesurée (une garantie de
-// type, pas une convention). Le mapping pré-patch rend « unavailable ».
+// LES ATTESTATIONS (domaine, portées par ModuleFacts). Union DISCRIMINÉE sur `measured` : la branche
+// `measured: false` n'a AUCUN champ de mesure, il est donc impossible par TYPE de lire un weightedAccess sur
+// une donnée non mesurée (elle interdit aussi un état incohérent comme `{ measured: false, access: 72 }`). Le
+// mapping pré-patch (marqueur absent) rend `measured: false`.
 type LocalNetworkAttestation =
-  | { status: "measured"; access: number | null }   // null = sous plancher ; [1,100] = desservie
-  | { status: "unavailable" };
+  | { measured: true; access: number | null }   // null = sous plancher ; [1,100] = desservie
+  | { measured: false; access: null };
 type HigherEdAttestation =
-  | { status: "measured"; weightedAccess: number; radiusKm: number; establishmentCount: number | null }
-  | { status: "unavailable" };
+  | { measured: true; weightedAccess: number; radiusKm: number; establishmentCount: number | null }
+  | { measured: false };
 ```
 
 **`nationalContext` est dissocié de `conventionId`** : la prévalence (« ~83 % des communes ») n'est pas une
@@ -277,6 +287,8 @@ travail manque.
 absenceAttestations: {
   version: "absence-attestations-v1";
   distributionVersion: "absence-dist-2026-07-15";
+  networkConventionId: "daily-transit-access-v1";           // la convention, une fois pour l'artefact
+  higherEdConventionId: "higher-education-radius-adaptive-v1";
   communeCount: 34788;
   network:  { measuredCount: 34788; absentCount: 28803 };
   higherEd: { measuredCount: 34788; absentCount: 14069 };
@@ -318,14 +330,14 @@ Décision « hybride propre » (porteur) : le patch enrichit l'index **maintenan
 en parallèle, on modifie les producteurs pour qu'un **futur** rebuild conserve directement ces champs, **sans
 les relancer aujourd'hui**. Le patch devient une migration reproductible, pas une étape oubliée.
 
-- `populate-reseau-local.py` — `--write-index` écrit désormais `reseauLocal = { acces, …, measured: true,
-  conventionVersion }` (desservie) / `{ acces: null, measured: true, conventionVersion }` (sous plancher, pour
-  toute commune géolocalisée) / `null` (non géolocalisée) ; le cache gagne le bloc `meta` de complétude.
+- `populate-reseau-local.py` — `--write-index` laisse `reseauLocal` INCHANGÉ et écrit le champ frère
+  `reseauLocalMeasured = true` (commune géolocalisée) / `false` (non géolocalisée) ; le cache gagne le bloc
+  `meta` de complétude.
 - `populate-bpe.py` — `--write-index` ajoute `etudesSup = { measured: true, weightedAccess, radiusKm,
-  establishmentCount, conventionVersion }` où `establishmentCount = int(win.sum())` (le VRAI compte, airtight)
-  et `weightedAccess` = l'accès pondéré brut (le champ `etudes_acces` score reste inchangé) ; le cache gagne le
-  bloc `meta`. **Test d'équivalence côté producteur** : `establishmentCount == 0 ⟺ weightedAccess == 0` sur
-  toutes les communes SAUF le cas-frontière rural documenté (§3.2).
+  establishmentCount }` où `establishmentCount = int(win.sum())` (le VRAI compte, airtight) et `weightedAccess`
+  = l'accès pondéré brut (le champ `etudes_acces` score reste inchangé) ; le cache gagne le bloc `meta`.
+  **Test d'équivalence côté producteur** : `establishmentCount == 0 ⟺ weightedAccess == 0` sur toutes les
+  communes SAUF le cas-frontière rural documenté (§3.2).
 
 **On ne re-tourne pas les producteurs dans ce lot** : re-tourner `populate-bpe` recompute les percentiles
 depuis la source BPE et risquerait une dérive silencieuse d'`ecoles`/`culture`/`etudes_acces`. La reproduction
@@ -366,7 +378,7 @@ Couverture **19 → 21 sur 28**.
    de rupture).
 4. Réseau/études **présents** → `neutral` silencieux (couverture acquise, aucune carte, aucun effet
    orientation). Jamais `satisfied`.
-5. Mesure **indisponible** (`status: "unavailable"` / champ absent) → `uncertain` : couverture NON acquise,
+5. Mesure **indisponible** (`measured: false` / marqueur absent) → `uncertain` : couverture NON acquise,
    aucune valeur inventée. Aucun repli `?? 0` ne traverse le dossier. Une attestation à valeur corrompue
    (`NaN`/négatif/hors bornes/rayon ≤ 0) → `uncertain`, jamais un verdict.
 6. Poids 1 → examiné (couverture +1), silencieux (aucune carte, pas d'arbitrage). Poids 2 → secondary, poids 3

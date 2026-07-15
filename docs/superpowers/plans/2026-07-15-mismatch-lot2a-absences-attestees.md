@@ -11,7 +11,7 @@ dans le rayon). Couverture 19 → 21 sur 28.
 
 **Architecture:** Un deuxième **fondement** pour le rôle `mismatch` existant : `named_absence`. Le `basis` de
 `MismatchFact` devient une union discriminée (`NamedAbsenceBasis | RelativePositionBasis`). Une **attestation
-positive à statut discriminé** (`measured` vs `unavailable`) est portée dans l'index par un script de patch
+positive en champs frères** (`reseauLocalMeasured`, `etudesSup`, union discriminée sur `measured` côté domaine) est portée dans l'index par un script de patch
 lisant les caches producteurs (aucun re-fetch OSM/BPE). Une **fabrique de règles** produit les 2 règles
 d'absence, avec la doctrine asymétrique (absence → mismatch, présence → neutral, jamais satisfied). Tout l'aval
 (section « mismatches », orientation `arbitration`/`neutral`, comptage matériel) est **déjà livré par la v1**.
@@ -54,8 +54,8 @@ d'absence, avec la doctrine asymétrique (absence → mismatch, présence → ne
 
 | Fichier | Responsabilité |
 |---|---|
-| `src/lib/comparateur-vie.ts` **(modifié)** | `IndexCommune.reseauLocal` (acces nullable + `measured` + `conventionVersion`) ; `IndexCommune.etudesSup` ; gardes des 3 sites lecteurs (714, 758, 2027). |
-| `src/lib/decision/absence-facts.ts` **(créé)** | PUR. Conventions/versions, attestations à statut discriminé, `classifyNetworkAbsence`/`classifyHigherEdAbsence` (avec gardes), `NamedAbsenceBasis`, `ABSENCE_NATIONAL_CONTEXT`. |
+| `src/lib/comparateur-vie.ts` **(modifié)** | `IndexCommune` gagne 2 champs frères : `reseauLocalMeasured?: boolean` (reseauLocal INCHANGÉ) et `etudesSup`. Aucun collatéral, aucun lecteur touché. |
+| `src/lib/decision/absence-facts.ts` **(créé)** | PUR. Conventions/versions, attestations (union discriminée sur `measured`), `classifyNetworkAbsence`/`classifyHigherEdAbsence` (avec gardes), `NamedAbsenceBasis`, `ABSENCE_NATIONAL_CONTEXT`. |
 | `src/lib/decision/decision-fact.ts` **(modifié)** | `MismatchBasis` union ; `MismatchFact.basis` typé union ; `ModuleFacts.localNetwork` + `ModuleFacts.higherEd`. |
 | `src/lib/decision/mismatch-rules.ts` **(modifié)** | Le littéral `relative_position` gagne `distributionVersion`. |
 | `src/lib/decision/module-facts-map.ts` **(modifié)** | Mappe `localNetwork`/`higherEd` (statut) depuis `entry`. |
@@ -70,114 +70,58 @@ d'absence, avec la doctrine asymétrique (absence → mismatch, présence → ne
 
 ---
 
-## Task 1 : Les types côté index, et le collatéral `comparateur-vie`
+## Task 1 : Les types côté index (attestations en champs frères)
 
 **Files:**
-- Modify: `src/lib/comparateur-vie.ts` (type `IndexCommune`, lignes ~488-493 et ~514 ; sites lecteurs 714, 758, 2027)
-- Test: `src/lib/comparateur-vie-reseau-shape.test.ts` **(créé)**
+- Modify: `src/lib/comparateur-vie.ts` (type `IndexCommune` uniquement, ~ligne 493 et ~515)
 
 **Interfaces:**
-- Produces: `IndexCommune.reseauLocal` = `{ acces: number | null; tram?: boolean; metro?: boolean; arret_km?: number; measured?: boolean; conventionVersion?: string } | null` ; `IndexCommune.etudesSup?: { measured: boolean; weightedAccess: number; radiusKm: number; establishmentCount?: number; conventionVersion?: string } | null`.
+- Produces: `IndexCommune.reseauLocalMeasured?: boolean` (champ frère de `reseauLocal`, laissé INCHANGÉ) ;
+  `IndexCommune.etudesSup?: { measured: boolean; weightedAccess: number; radiusKm: number; establishmentCount?: number } | null`.
 
-**Pourquoi cette tâche existe :** passer les communes sous plancher de `reseauLocal = null` à `{ acces: null,
-measured: true }` rend `acces` nullable et l'objet présent pour 82,8 % des communes, ce qui change la
-truthiness de `if (c.reseauLocal)` à 3 endroits. Ligne 758 (`buildTerritorySignals`) régresserait
-sémantiquement (« desservie: true » pour une commune sans réseau). On corrige AVANT d'écrire l'attestation.
+**Pourquoi cette tâche existe (et pourquoi elle est petite) :** on ne déforme pas la donnée historique pour y
+encoder son statut de mesure. `reseauLocal` reste le résultat du scoring (`null` sous plancher, objet
+desservie). On ajoute UNIQUEMENT deux champs frères de provenance. Conséquence : AUCUN collatéral dans le
+module `server-only` `comparateur-vie.ts` (subScore, `buildTerritorySignals`, `deriveCategories`, labels
+distinctifs inchangés — le sous-plancher reste `null`, donc `if (c.reseauLocal)` reste falsy), et AUCUN test à
+écrire ici (rien de comportemental n'a changé ; `comparateur-vie` est server-only, non value-importable sous
+`node --test` de toute façon). La couverture comportementale du réseau vient de `module-facts-map.test.ts`
+(Task 4), pure.
 
-- [ ] **Step 1 : Écrire le test qui échoue**
-
-```ts
-// src/lib/comparateur-vie-reseau-shape.test.ts
-import test from "node:test";
-import assert from "node:assert/strict";
-import { buildTerritorySignals, signatureScore } from "./comparateur-vie.ts";
-import type { IndexCommune } from "./comparateur-vie.ts";
-
-const base = { insee: "x", nom: "X", dept: "01", lat: 48, lon: 2 } as unknown as IndexCommune;
-
-test("une commune MESURÉE SOUS PLANCHER (acces null, measured) n'est PAS desservie", () => {
-  const c = { ...base, reseauLocal: { acces: null, measured: true } } as IndexCommune;
-  const s = buildTerritorySignals(c) as { transports_commun: { desservie: boolean } };
-  assert.equal(s.transports_commun.desservie, false);
-  assert.equal(signatureScore("mobilite_quotidienne", c), null); // rang canonique reste null, pas de repli
-});
-
-test("une commune DESSERVIE (acces number) reste desservie", () => {
-  const c = { ...base, reseauLocal: { acces: 72, tram: true, metro: false, arret_km: 0.4, measured: true } } as IndexCommune;
-  const s = buildTerritorySignals(c) as { transports_commun: { desservie: boolean; tramway: boolean } };
-  assert.equal(s.transports_commun.desservie, true);
-  assert.equal(s.transports_commun.tramway, true);
-});
-```
-
-- [ ] **Step 2 : Lancer, vérifier l'échec** — Run: `node --test src/lib/comparateur-vie-reseau-shape.test.ts`
-  Expected: FAIL (tsc/runtime sur `acces: null`, ou `desservie` vaut `true` au premier test).
-
-- [ ] **Step 3 : Modifier le type `IndexCommune`** (lignes ~488-493) :
+- [ ] **Step 1 : Modifier le type `IndexCommune`.** `reseauLocal` INCHANGÉ ; AJOUTER juste après son bloc
+  (~ligne 493) :
 
 ```ts
-  reseauLocal?: {
-    acces: number | null; // null = mesurée SOUS le plancher de crédibilité (aucun réseau du quotidien)
-    tram?: boolean;
-    metro?: boolean;
-    arret_km?: number;
-    measured?: boolean; // true = commune effectivement mesurée (attestation lot 2a)
-    conventionVersion?: string;
-  } | null;
+  // Attestation de PROVENANCE (lot 2a), champ FRÈRE de reseauLocal (qu'on ne déforme pas). true = le calcul
+  // réseau a bien été exécuté pour cette commune ; si reseauLocal est null, elle est mesurée SOUS le plancher
+  // (absence attestée). absent/false = aucune attestation -> jamais d'absence déduite. La convention vit dans
+  // index.meta.absenceAttestations, pas répétée par commune.
+  reseauLocalMeasured?: boolean;
 ```
 
   Et AJOUTER, près de `etudes_acces` (~ligne 515) :
 
 ```ts
-  // Attestation « établissements du supérieur » (lot 2a). weightedAccess = accès pondéré BRUT (somme 1 - d/DMAX ;
-  // 0 <=> aucun établissement dans le rayon, hors cas-frontière rural). establishmentCount = vrai compte
-  // (int(win.sum())), porté à terme par le producteur. radiusKm = rayon adaptatif effectif. Distinct de
-  // etudes_acces (percentile de score).
-  etudesSup?: { measured: boolean; weightedAccess: number; radiusKm: number; establishmentCount?: number; conventionVersion?: string } | null;
+  // Attestation « établissements du supérieur » (lot 2a), champ FRÈRE de etudes_acces (score, inchangé).
+  // weightedAccess = accès pondéré BRUT (somme 1 - d/DMAX ; 0 <=> aucun établissement dans le rayon, hors
+  // cas-frontière rural). establishmentCount = vrai compte (int(win.sum())), porté à terme par le producteur.
+  // radiusKm = rayon adaptatif effectif. Une commune non mesurée n'a pas ce champ.
+  etudesSup?: { measured: boolean; weightedAccess: number; radiusKm: number; establishmentCount?: number } | null;
 ```
 
-- [ ] **Step 4 : Corriger les 3 sites lecteurs** (tsc les signalera). Ligne ~714 :
+- [ ] **Step 2 : Vérifier** — Run: `npx tsc --noEmit && node --test src/lib/comparateur-scores.test.ts`
+  Expected: tsc 0 (l'ajout de champs optionnels ne casse aucun lecteur existant), parité scoring intacte.
 
-```ts
-  if (c.reseauLocal && (c.reseauLocal.tram || c.reseauLocal.metro || (c.reseauLocal.acces ?? 0) >= 60)) {
-    cats.add('reseau_tc');
-  }
-```
-
-  Ligne ~758 (`buildTerritorySignals`) — **la desserte se juge sur `acces != null`, pas sur la présence de
-  l'objet** :
-
-```ts
-  if (c.reseauLocal && c.reseauLocal.acces != null) {
-    const a = c.reseauLocal.acces;
-    s.transports_commun = {
-      desservie: true,
-      tramway: c.reseauLocal.tram,
-      metro: c.reseauLocal.metro,
-      niveau: a >= 70 ? "réseau dense à portée de marche" : a >= 40 ? "réseau correct à portée de marche" : "réseau limité",
-    };
-  } else {
-    s.transports_commun = { desservie: false };
-  }
-```
-
-  Ligne ~2027 (label distinctif `mobilite_quotidienne`, `const r = c.reseauLocal; const mode = r?.metro ? …`)
-  : `r?.metro`/`r?.tram` sont déjà nullable-safe, ce label n'est émis que pour un critère FAVORABLE (une
-  commune sous plancher n'y parvient pas). **Ne rien changer** ; vérifier seulement que tsc ne le signale pas.
-
-- [ ] **Step 5 : Lancer, vérifier** — Run: `node --test src/lib/comparateur-vie-reseau-shape.test.ts && npx tsc --noEmit`
-  Expected: PASS, tsc 0. Puis la parité scoring intacte : `node --test src/lib/comparateur-scores.test.ts`.
-
-- [ ] **Step 6 : Commit**
+- [ ] **Step 3 : Commit**
 
 ```bash
-git add src/lib/comparateur-vie.ts src/lib/comparateur-vie-reseau-shape.test.ts
-git commit -m "feat(absence): IndexCommune porte l'attestation reseau/etudesSup, gardes des sites lecteurs"
+git add src/lib/comparateur-vie.ts
+git commit -m "feat(absence): IndexCommune porte les attestations (champs frères reseauLocalMeasured + etudesSup)"
 ```
 
 ---
 
-## Task 2 : La classification d'absence (pure, à statut discriminé)
+## Task 2 : La classification d'absence (pure, union discriminée sur `measured`)
 
 **Files:**
 - Create: `src/lib/decision/absence-facts.ts`, `src/lib/decision/absence-facts.test.ts`
@@ -188,8 +132,8 @@ git commit -m "feat(absence): IndexCommune porte l'attestation reseau/etudesSup,
 export const NETWORK_CONVENTION_ID = "daily-transit-access-v1";
 export const HIGHER_ED_CONVENTION_ID = "higher-education-radius-adaptive-v1";
 export const ABSENCE_DISTRIBUTION_VERSION = "absence-dist-2026-07-15";
-export type LocalNetworkAttestation = { status: "measured"; access: number | null } | { status: "unavailable" };
-export type HigherEdAttestation = { status: "measured"; weightedAccess: number; radiusKm: number; establishmentCount: number | null } | { status: "unavailable" };
+export type LocalNetworkAttestation = { measured: true; access: number | null } | { measured: false; access: null };
+export type HigherEdAttestation = { measured: true; weightedAccess: number; radiusKm: number; establishmentCount: number | null } | { measured: false };
 export type AbsenceVerdict = "mismatch" | "neutral" | "uncertain";
 export type NamedAbsenceBasis = { kind: "named_absence"; observedStateId: "network_below_daily_credibility_floor" | "no_higher_education_establishment_in_radius"; conventionId: string; nationalContext: { prevalence: number; validCount: number; totalCount: number; universe: "communes_france"; distributionVersion: string } | null };
 export function classifyNetworkAbsence(a: LocalNetworkAttestation): AbsenceVerdict;
@@ -205,29 +149,29 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { classifyNetworkAbsence, classifyHigherEdAbsence, ABSENCE_NATIONAL_CONTEXT } from "./absence-facts.ts";
 
-test("réseau : mesuré sous plancher -> mismatch ; présent -> neutral ; unavailable -> uncertain", () => {
-  assert.equal(classifyNetworkAbsence({ status: "measured", access: null }), "mismatch");
-  assert.equal(classifyNetworkAbsence({ status: "measured", access: 42 }), "neutral");
-  assert.equal(classifyNetworkAbsence({ status: "unavailable" }), "uncertain");
+test("réseau : mesuré sous plancher -> mismatch ; présent -> neutral ; non mesuré -> uncertain", () => {
+  assert.equal(classifyNetworkAbsence({ measured: true, access: null }), "mismatch");
+  assert.equal(classifyNetworkAbsence({ measured: true, access: 42 }), "neutral");
+  assert.equal(classifyNetworkAbsence({ measured: false, access: null }), "uncertain");
 });
 test("réseau : access corrompu -> uncertain (jamais neutral)", () => {
-  assert.equal(classifyNetworkAbsence({ status: "measured", access: Number.NaN }), "uncertain");
-  assert.equal(classifyNetworkAbsence({ status: "measured", access: -1 }), "uncertain");
-  assert.equal(classifyNetworkAbsence({ status: "measured", access: 101 }), "uncertain");
+  assert.equal(classifyNetworkAbsence({ measured: true, access: Number.NaN }), "uncertain");
+  assert.equal(classifyNetworkAbsence({ measured: true, access: -1 }), "uncertain");
+  assert.equal(classifyNetworkAbsence({ measured: true, access: 101 }), "uncertain");
 });
 test("études : establishmentCount PRÉFÉRÉ quand présent (airtight)", () => {
-  assert.equal(classifyHigherEdAbsence({ status: "measured", weightedAccess: 0, radiusKm: 25, establishmentCount: 1 }), "neutral"); // count>0 gagne sur wa==0
-  assert.equal(classifyHigherEdAbsence({ status: "measured", weightedAccess: 3.4, radiusKm: 10, establishmentCount: 0 }), "mismatch"); // count==0 gagne
+  assert.equal(classifyHigherEdAbsence({ measured: true, weightedAccess: 0, radiusKm: 25, establishmentCount: 1 }), "neutral"); // count>0 gagne sur wa==0
+  assert.equal(classifyHigherEdAbsence({ measured: true, weightedAccess: 3.4, radiusKm: 10, establishmentCount: 0 }), "mismatch"); // count==0 gagne
 });
 test("études : repli sur weightedAccess quand establishmentCount absent", () => {
-  assert.equal(classifyHigherEdAbsence({ status: "measured", weightedAccess: 0, radiusKm: 25, establishmentCount: null }), "mismatch");
-  assert.equal(classifyHigherEdAbsence({ status: "measured", weightedAccess: 2.7, radiusKm: 15, establishmentCount: null }), "neutral");
+  assert.equal(classifyHigherEdAbsence({ measured: true, weightedAccess: 0, radiusKm: 25, establishmentCount: null }), "mismatch");
+  assert.equal(classifyHigherEdAbsence({ measured: true, weightedAccess: 2.7, radiusKm: 15, establishmentCount: null }), "neutral");
 });
-test("études : unavailable / valeurs corrompues -> uncertain", () => {
-  assert.equal(classifyHigherEdAbsence({ status: "unavailable" }), "uncertain");
-  assert.equal(classifyHigherEdAbsence({ status: "measured", weightedAccess: Number.NaN, radiusKm: 25, establishmentCount: null }), "uncertain");
-  assert.equal(classifyHigherEdAbsence({ status: "measured", weightedAccess: 0, radiusKm: 0, establishmentCount: null }), "uncertain"); // rayon nul
-  assert.equal(classifyHigherEdAbsence({ status: "measured", weightedAccess: 1, radiusKm: 25, establishmentCount: -1 }), "uncertain");
+test("études : non mesuré / valeurs corrompues -> uncertain", () => {
+  assert.equal(classifyHigherEdAbsence({ measured: false }), "uncertain");
+  assert.equal(classifyHigherEdAbsence({ measured: true, weightedAccess: Number.NaN, radiusKm: 25, establishmentCount: null }), "uncertain");
+  assert.equal(classifyHigherEdAbsence({ measured: true, weightedAccess: 0, radiusKm: 0, establishmentCount: null }), "uncertain"); // rayon nul
+  assert.equal(classifyHigherEdAbsence({ measured: true, weightedAccess: 1, radiusKm: 25, establishmentCount: -1 }), "uncertain");
 });
 test("le contexte national est daté et dissocié des conventions", () => {
   assert.equal(ABSENCE_NATIONAL_CONTEXT.network!.distributionVersion, "absence-dist-2026-07-15");
@@ -245,21 +189,22 @@ test("le contexte national est daté et dissocié des conventions", () => {
 // LA DOCTRINE DE L'ABSENCE ATTESTÉE. Lib PURE : aucune I/O, aucun LLM.
 //
 // Une absence n'est un fait opposable que si la recherche a été PROUVÉE. On ne rend « mismatch » que sur une
-// mesure RÉUSSIE (status "measured") dont le résultat atteint le plancher d'absence ; « unavailable » ou une
+// mesure RÉUSSIE (measured: true) dont le résultat atteint le plancher d'absence ; measured: false ou une
 // valeur corrompue restent « uncertain » (jamais un ?? 0 déguisé en verdict).
 
 export const NETWORK_CONVENTION_ID = "daily-transit-access-v1";
 export const HIGHER_ED_CONVENTION_ID = "higher-education-radius-adaptive-v1";
 export const ABSENCE_DISTRIBUTION_VERSION = "absence-dist-2026-07-15";
 
-// STATUT DISCRIMINÉ : « unavailable » n'a AUCUN champ de mesure -> impossible de lire un weightedAccess sur
-// une donnée non mesurée (garantie de type, pas convention).
+// Union DISCRIMINÉE sur `measured` : la branche `measured: false` n'a AUCUN champ de mesure -> impossible de
+// lire un weightedAccess sur une donnée non mesurée (garantie de type ; interdit aussi { measured: false,
+// access: 72 }).
 export type LocalNetworkAttestation =
-  | { status: "measured"; access: number | null }
-  | { status: "unavailable" };
+  | { measured: true; access: number | null }
+  | { measured: false; access: null };
 export type HigherEdAttestation =
-  | { status: "measured"; weightedAccess: number; radiusKm: number; establishmentCount: number | null }
-  | { status: "unavailable" };
+  | { measured: true; weightedAccess: number; radiusKm: number; establishmentCount: number | null }
+  | { measured: false };
 
 export type AbsenceVerdict = "mismatch" | "neutral" | "uncertain";
 
@@ -273,14 +218,14 @@ export type NamedAbsenceBasis = {
 };
 
 export function classifyNetworkAbsence(a: LocalNetworkAttestation): AbsenceVerdict {
-  if (a.status !== "measured") return "uncertain";       // non mesuré : jamais une absence inventée
+  if (!a.measured) return "uncertain";                   // non mesuré : jamais une absence inventée
   if (a.access == null) return "mismatch";               // sous plancher = absence attestée
   if (!Number.isFinite(a.access) || a.access < 0 || a.access > 100) return "uncertain"; // corrompu
   return "neutral";                                      // présent
 }
 
 export function classifyHigherEdAbsence(a: HigherEdAttestation): AbsenceVerdict {
-  if (a.status !== "measured") return "uncertain";
+  if (!a.measured) return "uncertain";
   if (!Number.isFinite(a.radiusKm) || a.radiusKm <= 0) return "uncertain";
   // On PRÉFÈRE le vrai compte d'établissements (airtight) quand il est là ; sinon weightedAccess == 0
   // (équivalent hors le cas-frontière rural d == DMAX, de mesure nulle).
@@ -307,7 +252,7 @@ export const ABSENCE_NATIONAL_CONTEXT: Record<"network" | "higherEd", NamedAbsen
 
 ```bash
 git add src/lib/decision/absence-facts.ts src/lib/decision/absence-facts.test.ts
-git commit -m "feat(absence): classification d'absence à statut discriminé (gardes de valeurs, count préféré)"
+git commit -m "feat(absence): classification d'absence (union discriminée sur measured, gardes, count préféré)"
 ```
 
 ---
@@ -371,8 +316,8 @@ export type MismatchFact = BaseFact & {
   `mismatch-rules.test.ts`, `mismatch-facts.test.ts`, et tout autre helper). Ajouter à CHAQUE helper signalé :
 
 ```ts
-    localNetwork: { status: "unavailable" },
-    higherEd: { status: "unavailable" },
+    localNetwork: { measured: false, access: null },
+    higherEd: { measured: false },
 ```
 
   Re-lancer jusqu'à tsc 0.
@@ -402,23 +347,35 @@ git commit -m "feat(absence): basis en union discriminée (named_absence | relat
 
 ```ts
 // module-facts-map.test.ts — AJOUTER
-test("mappe l'attestation réseau : sous plancher -> {status:measured, access:null}", () => {
+test("réseau MESURÉ sous plancher (marqueur true, reseauLocal null) -> absence attestable", () => {
   const entry = { insee: "1", nom: "X", dept: "01", lat: 0, lon: 0, distance_cote_km: 0,
-    reseauLocal: { acces: null, measured: true } } as never;
+    reseauLocal: null, reseauLocalMeasured: true } as never;
   const mf = mapCommuneToModuleFacts(entry, {}, { hasAddress: false, tailleVille: 1000, climat: null });
-  assert.deepEqual(mf.localNetwork, { status: "measured", access: null });
+  assert.deepEqual(mf.localNetwork, { measured: true, access: null });
+});
+test("réseau MESURÉ avec desserte -> présence attestée", () => {
+  const entry = { insee: "1", nom: "X", dept: "01", lat: 0, lon: 0, distance_cote_km: 0,
+    reseauLocal: { acces: 72 }, reseauLocalMeasured: true } as never;
+  const mf = mapCommuneToModuleFacts(entry, {}, { hasAddress: false, tailleVille: 1000, climat: null });
+  assert.deepEqual(mf.localNetwork, { measured: true, access: 72 });
+});
+test("DÉFENSIF : résultat présent mais marqueur ABSENT -> non mesuré (le nouveau moteur ne le prend pas pour attesté)", () => {
+  const entry = { insee: "1", nom: "X", dept: "01", lat: 0, lon: 0, distance_cote_km: 0,
+    reseauLocal: { acces: 72 } } as never; // pré-patch : reseauLocal existe, pas de marqueur
+  const mf = mapCommuneToModuleFacts(entry, {}, { hasAddress: false, tailleVille: 1000, climat: null });
+  assert.equal(mf.localNetwork.measured, false);
 });
 test("mappe l'attestation études : weightedAccess + establishmentCount (null si absent du champ)", () => {
   const entry = { insee: "1", nom: "X", dept: "01", lat: 0, lon: 0, distance_cote_km: 0,
     etudesSup: { measured: true, weightedAccess: 0, radiusKm: 25 } } as never;
   const mf = mapCommuneToModuleFacts(entry, {}, { hasAddress: false, tailleVille: 1000, climat: null });
-  assert.deepEqual(mf.higherEd, { status: "measured", weightedAccess: 0, radiusKm: 25, establishmentCount: null });
+  assert.deepEqual(mf.higherEd, { measured: true, weightedAccess: 0, radiusKm: 25, establishmentCount: null });
 });
-test("index PRÉ-PATCH (aucune attestation) -> status unavailable (jamais une absence inventée)", () => {
+test("index PRÉ-PATCH (aucune attestation) -> measured:false (jamais une absence inventée)", () => {
   const entry = { insee: "1", nom: "X", dept: "01", lat: 0, lon: 0, distance_cote_km: 0 } as never;
   const mf = mapCommuneToModuleFacts(entry, {}, { hasAddress: false, tailleVille: 1000, climat: null });
-  assert.deepEqual(mf.localNetwork, { status: "unavailable" });
-  assert.deepEqual(mf.higherEd, { status: "unavailable" });
+  assert.equal(mf.localNetwork.measured, false);
+  assert.equal(mf.higherEd.measured, false);
 });
 ```
 
@@ -428,17 +385,16 @@ test("index PRÉ-PATCH (aucune attestation) -> status unavailable (jamais une ab
 - [ ] **Step 3 : Implémenter** — dans le retour de `mapCommuneToModuleFacts`, après `rankBands` :
 
 ```ts
-    // Attestations d'absence (lot 2a). Un index PRÉ-PATCH (champ absent, ou objet sans `measured`) rend
-    // status "unavailable" -> uncertain : jamais une absence inventée sur une donnée non attestée.
-    localNetwork: (() => {
-      const r = entry.reseauLocal;
-      if (r == null || r.measured !== true) return { status: "unavailable" as const };
-      return { status: "measured" as const, access: r.acces };
-    })(),
+    // Attestations d'absence (lot 2a), champs FRÈRES. On sépare le RÉSULTAT (reseauLocal, etudes_acces) de la
+    // PROVENANCE (reseauLocalMeasured, etudesSup.measured). Sans marqueur -> measured:false -> uncertain : le
+    // nouveau moteur ne considère jamais une donnée historique comme attestée sans sa provenance.
+    localNetwork: entry.reseauLocalMeasured === true
+      ? { measured: true as const, access: entry.reseauLocal?.acces ?? null }
+      : { measured: false as const, access: null },
     higherEd: (() => {
       const e = entry.etudesSup;
-      if (e == null || e.measured !== true) return { status: "unavailable" as const };
-      return { status: "measured" as const, weightedAccess: e.weightedAccess, radiusKm: e.radiusKm, establishmentCount: e.establishmentCount ?? null };
+      if (e == null || e.measured !== true) return { measured: false as const };
+      return { measured: true as const, weightedAccess: e.weightedAccess, radiusKm: e.radiusKm, establishmentCount: e.establishmentCount ?? null };
     })(),
 ```
 
@@ -483,7 +439,7 @@ function facts(over: Partial<ModuleFacts>): ModuleFacts {
     insee: "59512", nom: "Roubaix", dept: "59", lat: 50.69, lon: 3.18, uu: "59702",
     tailleVille: 1_050_000, reliefProximite: 0, distanceCoteKm: 90, population: 98_000, altitude: 30,
     catnatInondation: 0, inondationRisque: 10, climat: null, sante: null, rankBands: null,
-    localNetwork: { status: "unavailable" }, higherEd: { status: "unavailable" },
+    localNetwork: { measured: false, access: null }, higherEd: { measured: false },
     scores: {}, hasAddress: false, ...over,
   };
 }
@@ -500,7 +456,7 @@ test("la fabrique produit 2 règles", () => { assert.equal(ABSENCE_RULES.length,
 
 test("mobilité sous plancher + poids 3 -> mismatch STRUCTURANT, named_absence, jamais un jugement absolu", () => {
   const p = project([{ key: "mobilite_quotidienne", weight: 3 }]);
-  const e = rule("mobilite_quotidienne").evaluate(facts({ localNetwork: { status: "measured", access: null } }), p, undefined as never);
+  const e = rule("mobilite_quotidienne").evaluate(facts({ localNetwork: { measured: true, access: null } }), p, undefined as never);
   assert.equal(e.outcome, "mismatch");
   const f = e.facts[0]!;
   assert.equal(f.basis.kind, "named_absence");
@@ -513,25 +469,25 @@ test("mobilité sous plancher + poids 3 -> mismatch STRUCTURANT, named_absence, 
 
 test("mobilité PRÉSENTE -> neutral ; NON MESURÉE -> uncertain", () => {
   const p = project([{ key: "mobilite_quotidienne", weight: 3 }]);
-  assert.equal(rule("mobilite_quotidienne").evaluate(facts({ localNetwork: { status: "measured", access: 55 } }), p, undefined as never).outcome, "neutral");
-  assert.equal(rule("mobilite_quotidienne").evaluate(facts({ localNetwork: { status: "unavailable" } }), p, undefined as never).outcome, "uncertain");
+  assert.equal(rule("mobilite_quotidienne").evaluate(facts({ localNetwork: { measured: true, access: 55 } }), p, undefined as never).outcome, "neutral");
+  assert.equal(rule("mobilite_quotidienne").evaluate(facts({ localNetwork: { measured: false, access: null } }), p, undefined as never).outcome, "uncertain");
 });
 
 test("LE POIDS 1 : mismatch calculé mais SILENCIEUX", () => {
   const p = project([{ key: "mobilite_quotidienne", weight: 1 }]);
-  const e = rule("mobilite_quotidienne").evaluate(facts({ localNetwork: { status: "measured", access: null } }), p, undefined as never);
+  const e = rule("mobilite_quotidienne").evaluate(facts({ localNetwork: { measured: true, access: null } }), p, undefined as never);
   assert.equal(e.outcome, "mismatch");
   assert.equal(e.facts.length, 0);
 });
 
 test("priorité absente (poids 0) -> not_applicable", () => {
-  const e = rule("mobilite_quotidienne").evaluate(facts({ localNetwork: { status: "measured", access: null } }), project([]), undefined as never);
+  const e = rule("mobilite_quotidienne").evaluate(facts({ localNetwork: { measured: true, access: null } }), project([]), undefined as never);
   assert.equal(e.outcome, "not_applicable");
 });
 
 test("études : establishmentCount 0 + poids 2 -> mismatch SECONDARY citant le rayon exact", () => {
   const p = project([{ key: "vie_etudiante", weight: 2 }]);
-  const e = rule("vie_etudiante").evaluate(facts({ higherEd: { status: "measured", weightedAccess: 0, radiusKm: 25, establishmentCount: 0 } }), p, undefined as never);
+  const e = rule("vie_etudiante").evaluate(facts({ higherEd: { measured: true, weightedAccess: 0, radiusKm: 25, establishmentCount: 0 } }), p, undefined as never);
   assert.equal(e.outcome, "mismatch");
   const f = e.facts[0]!;
   assert.equal(f.materialityTier, "secondary");
@@ -577,8 +533,8 @@ type AbsenceSpec = {
 };
 
 // Rayon effectif de la commune (pour la phrase études) : narrowing sûr, car statement/observedValue ne sont
-// appelés qu'après un verdict "mismatch" (donc status "measured").
-const radiusKmOf = (f: ModuleFacts): number => (f.higherEd.status === "measured" ? f.higherEd.radiusKm : 0);
+// appelés qu'après un verdict "mismatch" (donc measured: true).
+const radiusKmOf = (f: ModuleFacts): number => (f.higherEd.measured ? f.higherEd.radiusKm : 0);
 
 const SPECS: AbsenceSpec[] = [
   {
@@ -676,7 +632,7 @@ git commit -m "feat(absence): fabrique des 2 règles d'absence (asymétrique, po
 ```ts
 // materiality-rules.test.ts — AJOUTER (adapter au helper de ModuleFacts/projet/contexte du fichier)
 test("un projet priorisant la mobilité sur une commune SANS réseau produit un mismatch d'absence", () => {
-  const f = moduleFacts({ localNetwork: { status: "measured", access: null } }); // helper existant du fichier
+  const f = moduleFacts({ localNetwork: { measured: true, access: null } }); // helper existant du fichier
   const run = runRules(f, projectWith([{ key: "mobilite_quotidienne", weight: 3 }]), context());
   const mm = run.facts.find((x) => x.role === "mismatch" && x.ruleId === "territoire.absence-mobilite_quotidienne");
   assert.ok(mm, "un fait d'absence mobilité doit être émis");
@@ -772,14 +728,15 @@ function fixture() {
   return { communes, networkRecords, bpeRecords };
 }
 
-test("porte measured, access null sous plancher, weightedAccess brut, rayon adaptatif", () => {
+test("pose le marqueur frère sans déformer reseauLocal, weightedAccess brut, rayon adaptatif", () => {
   const { communes, networkRecords, bpeRecords } = fixture();
   buildAbsenceAttestations({ communes, networkRecords, bpeRecords });
-  assert.equal(communes[0].reseauLocal.measured, true);
-  assert.equal(communes[1].reseauLocal.acces, null);
-  assert.equal(communes[1].reseauLocal.measured, true);
-  assert.deepEqual(communes[0].etudesSup, { measured: true, weightedAccess: 12, radiusKm: 5, conventionVersion: "higher-education-radius-adaptive-v1" });
-  assert.deepEqual(communes[1].etudesSup, { measured: true, weightedAccess: 0, radiusKm: 25, conventionVersion: "higher-education-radius-adaptive-v1" });
+  assert.equal(communes[0].reseauLocalMeasured, true);
+  assert.deepEqual(communes[0].reseauLocal, { acces: 80, tram: true, metro: false, arret_km: 0.3 }); // inchangé
+  assert.equal(communes[1].reseauLocalMeasured, true);
+  assert.equal(communes[1].reseauLocal, null); // sous plancher, inchangé
+  assert.deepEqual(communes[0].etudesSup, { measured: true, weightedAccess: 12, radiusKm: 5 });
+  assert.deepEqual(communes[1].etudesSup, { measured: true, weightedAccess: 0, radiusKm: 25 });
 });
 
 test("REFUSE si un INSEE de l'index manque dans un record", () => {
@@ -817,9 +774,8 @@ test("tailleVilleFrom : uuPop si uu connu, sinon population (réplique Python)",
 ```js
 // scripts/lib/absence-attestations.mjs
 // Jointure PURE records -> attestations d'absence, avec validation stricte. Aucune I/O : reçoit les objets
-// déjà lus (SANS leur bloc meta éventuel), mute `communes` en place, jette sur anomalie.
-const NETWORK_CONVENTION = "daily-transit-access-v1";
-const HIGHER_ED_CONVENTION = "higher-education-radius-adaptive-v1";
+// déjà lus (SANS leur bloc meta éventuel), mute `communes` en place (champs FRÈRES, sans déformer reseauLocal),
+// jette sur anomalie. La convention n'est PAS écrite par commune : elle vit dans index.meta (côté script).
 
 // Réplique EXACTE de radius_for (populate-bpe.py) : seuils 30k/100k/500k, rural par défaut.
 export function radiusFor(taille) {
@@ -847,20 +803,22 @@ export function buildAbsenceAttestations({ communes, networkRecords, bpeRecords 
     if (!(c.insee in networkRecords)) throw new Error(`INSEE ${c.insee} absent du record réseau`);
     if (!(c.insee in bpeRecords)) throw new Error(`INSEE ${c.insee} absent du record BPE`);
 
+    // Champ FRÈRE : on atteste la mesure sans déformer reseauLocal (résultat du scoring, source = le cache).
+    c.reseauLocalMeasured = true;
     const r = networkRecords[c.insee];
     if (r == null) {
-      c.reseauLocal = { acces: null, measured: true, conventionVersion: NETWORK_CONVENTION };
+      c.reseauLocal = null; // sous plancher, inchangé
       netBelow++;
     } else {
       if (!Number.isFinite(r.acces) || r.acces < 1 || r.acces > 100) throw new Error(`acces invalide pour ${c.insee}: ${r.acces}`);
-      c.reseauLocal = { ...r, measured: true, conventionVersion: NETWORK_CONVENTION };
+      c.reseauLocal = r; // desservie, valeur du cache (identique à l'index enrichi d'origine)
     }
 
     const weightedAccess = bpeRecords[c.insee]?.etudes_acces?.count;
     if (!Number.isFinite(weightedAccess) || weightedAccess < 0) throw new Error(`weightedAccess (count) invalide pour ${c.insee}: ${weightedAccess}`);
     const radiusKm = radiusFor(tailleVilleFrom(c.uu ?? null, c.population ?? null, uuPop));
     // establishmentCount ABSENT du cache actuel : le producteur le portera (Task 8). classify retombe sur weightedAccess.
-    c.etudesSup = { measured: true, weightedAccess, radiusKm, conventionVersion: HIGHER_ED_CONVENTION };
+    c.etudesSup = { measured: true, weightedAccess, radiusKm };
     if (weightedAccess === 0) supAbsent++;
   }
 
@@ -892,7 +850,7 @@ import crypto from "node:crypto";
 import path from "node:path";
 import { buildAbsenceAttestations } from "./lib/absence-attestations.mjs";
 import { assertIndexWorktree } from "./lib/require-index-worktree.mjs";
-import { ABSENCE_NATIONAL_CONTEXT, ABSENCE_DISTRIBUTION_VERSION } from "../src/lib/decision/absence-facts.ts";
+import { ABSENCE_NATIONAL_CONTEXT, ABSENCE_DISTRIBUTION_VERSION, NETWORK_CONVENTION_ID, HIGHER_ED_CONVENTION_ID } from "../src/lib/decision/absence-facts.ts";
 
 const ROOT = process.cwd();
 const INDEX = path.join(ROOT, "data", "comparateur-index.json");
@@ -945,6 +903,7 @@ async function main() {
 
   idx.meta = { ...(idx.meta ?? {}), absenceAttestations: {
     version: "absence-attestations-v1", distributionVersion: ABSENCE_DISTRIBUTION_VERSION,
+    networkConventionId: NETWORK_CONVENTION_ID, higherEdConventionId: HIGHER_ED_CONVENTION_ID,
     communeCount: out.prevalence.communeCount,
     network: { measuredCount: out.prevalence.communeCount, absentCount: out.prevalence.networkAbsent },
     higherEd: { measuredCount: out.prevalence.communeCount, absentCount: out.prevalence.higherEdAbsent },
@@ -957,7 +916,7 @@ async function main() {
   try {
     await fs.writeFile(tmp, JSON.stringify(idx));
     const check = JSON.parse(await fs.readFile(tmp, "utf8"));
-    if (!check.communes.some((c: { reseauLocal?: { measured?: boolean } }) => c.reseauLocal?.measured) ||
+    if (!check.communes.some((c: { reseauLocalMeasured?: boolean }) => c.reseauLocalMeasured) ||
         !check.communes.some((c: { etudesSup?: unknown }) => c.etudesSup)) {
       console.error("REFUS: attestation perdue à l'écriture"); process.exit(1);
     }
@@ -1013,21 +972,16 @@ git commit -m "feat(absence): enrichissement des attestations (atomique, set-equ
     json.dump({"meta": {"complete": True, "failedTiles": [], "communeCount": len(idx["communes"])}, "communes": rec}, open(OUT_CACHE, "w"))
 ```
 
-  `--write-index` :
+  `--write-index` — champ FRÈRE `reseauLocalMeasured`, reseauLocal INCHANGÉ (résultat du scoring) :
 ```python
     if args.write_index:
         geoloc = {c["insee"] for c in communes}  # communes réellement mesurées (lat/lon présents)
         for c in idx["communes"]:
             ins = c["insee"]
-            r = rec.get(ins)
-            if r is not None:
-                c["reseauLocal"] = {**r, "measured": True, "conventionVersion": "daily-transit-access-v1"}
-            elif ins in geoloc:
-                c["reseauLocal"] = {"acces": None, "measured": True, "conventionVersion": "daily-transit-access-v1"}
-            else:
-                c["reseauLocal"] = None  # non géolocalisée = NON mesurée
+            c["reseauLocal"] = rec.get(ins)          # objet desservie, ou None sous plancher (inchangé)
+            c["reseauLocalMeasured"] = ins in geoloc # provenance : mesurée (True) / non géolocalisée (False)
         json.dump(idx, open(INDEX, "w"))
-        print("✓ index patché (reseauLocal + measured)", file=sys.stderr)
+        print("✓ index patché (reseauLocal inchangé + reseauLocalMeasured)", file=sys.stderr)
 ```
 
   **Note :** `rec` est maintenant lu ailleurs sous `{"meta", "communes"}`. Le patch (Task 7) accepte déjà les
@@ -1068,7 +1022,7 @@ git commit -m "feat(absence): enrichissement des attestations (atomique, set-equ
                     "weightedAccess": r["etudes_acces"]["count"], # accès pondéré brut (== 0 <=> aucun étab, hors bord)
                     "establishmentCount": ecount.get(c["insee"], 0), # vrai compte, airtight
                     "radiusKm": rfor.get(c["insee"], 25),
-                    "conventionVersion": "higher-education-radius-adaptive-v1",
+                    # pas de conventionVersion par commune : elle vit dans index.meta.absenceAttestations
                 }
             else:
                 c["etudesSup"] = None
@@ -1180,7 +1134,7 @@ git commit -m "feat(absence): le prompt nomme une absence attestée (fait dans l
   (silencieux), la couverture monte, aucune carte d'absence, l'orientation ne se dégrade PAS ; vie étudiante
   avec un établissement à portée → `neutral`.
 
-- [ ] **Step 3 : Le cas « non mesuré »** — forcer un `localNetwork: { status: "unavailable" }` (commune
+- [ ] **Step 3 : Le cas « non mesuré »** — forcer un `localNetwork: { measured: false, access: null }` (commune
   pré-patch simulée) → `uncertain`, aucune carte, couverture NON acquise.
 
 - [ ] **Step 4 : Build + suite complète** — Run:
@@ -1205,7 +1159,7 @@ node --test src/lib/*.test.ts src/lib/decision/*.test.ts && node --test scripts/
 3. Vie étudiante, absence attestée (`establishmentCount === 0` si présent, sinon `weightedAccess === 0`) →
    `mismatch` citant le `radiusKm` exact (parité prouvée) ; jamais « aucune vie étudiante ».
 4. Présent → `neutral` silencieux (couverture acquise, aucune carte). Jamais `satisfied`.
-5. `status: "unavailable"` ou valeur corrompue → `uncertain` (couverture non acquise, aucune valeur inventée).
+5. `measured: false` ou valeur corrompue → `uncertain` (couverture non acquise, aucune valeur inventée).
 6. Poids 1 → examiné + silencieux (test d'orientation) ; poids 2 → secondary ; poids 3 → structuring ; jamais
    `decision_critical` ; ensemble matériel → `arbitration` (comptage sur `run.facts`).
 7. Le patch : set-equality strict sur `records = cache.communes ?? cache`, refus sur anomalie / `meta.complete`
