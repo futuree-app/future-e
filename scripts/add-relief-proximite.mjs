@@ -30,6 +30,9 @@
  */
 import fs from "node:fs/promises";
 import path from "node:path";
+import { assertIndexWorktree } from "./lib/require-index-worktree.mjs";
+
+assertIndexWorktree();
 
 const RAYON_KM = 35;
 // Courbe altitude max alentour → score. 500 m = plaine (0), 2500 m = haute

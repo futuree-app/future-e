@@ -20,6 +20,9 @@
  */
 import fs from "node:fs/promises";
 import path from "node:path";
+import { assertIndexWorktree } from "./lib/require-index-worktree.mjs";
+
+assertIndexWorktree();
 
 async function main() {
   const root = process.cwd();

@@ -35,6 +35,9 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import zlib from "node:zlib";
 import readline from "node:readline";
+import { assertIndexWorktree } from "./lib/require-index-worktree.mjs";
+
+assertIndexWorktree();
 
 const ROOT = process.cwd();
 const CACHE = path.join(ROOT, "data", "cache-logement");

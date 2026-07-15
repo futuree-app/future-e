@@ -16,6 +16,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { mismatchRawScore, MISMATCH_RANK_KEYS } from "../src/lib/comparateur-scores.ts";
 import type { IndexCommune } from "../src/lib/comparateur-vie.ts";
+import { assertIndexWorktree } from "./lib/require-index-worktree.mjs";
+
+assertIndexWorktree();
 
 const idxPath = path.join(process.cwd(), "data", "comparateur-index.json");
 const idx = JSON.parse(await fs.readFile(idxPath, "utf8")) as {

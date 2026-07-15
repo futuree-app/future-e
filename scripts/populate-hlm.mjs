@@ -22,6 +22,9 @@
  */
 import fs from "node:fs/promises";
 import path from "node:path";
+import { assertIndexWorktree } from "./lib/require-index-worktree.mjs";
+
+assertIndexWorktree();
 
 const DS = "https://data.ademe.fr/data-fair/api/v1/datasets/8ggfo546-mtjxy4lbqxcl462";
 const SELECT = [
