@@ -123,6 +123,31 @@ const planAbsence = buildConclusionPlan({
   mismatchTotal: 2, mismatchShown: 2,
 });
 
+// Un fait de MESURE PHYSIQUE (absolute_measure) : la mer est loin. Le modèle doit nommer l'éloignement au
+// périmètre mesuré, en comparatif, sans le confondre avec « à vérifier », et sans transformer la distance
+// en temps de trajet ni écrire « la mer est à X km ».
+function coast(id: string, tier: MaterialityTier, topic: string, statement: string): DecisionFact {
+  return {
+    id, ruleId: `territoire.mer-${id}`, sourceFactIds: [`coastDistance.${id}`], module: "territoire",
+    topic, statement,
+    materialityTier: tier, role: "mismatch", projectKey: id as never,
+    basis: { kind: "absolute_measure", value: 240, unit: "km", conventionId: "coast-proximity-v1" },
+    evidence: [{ factId: `coastDistance.${id}`, module: "territoire", label: "Territoire", grain: "commune" }],
+  } as DecisionFact;
+}
+
+const planCoast = buildConclusionPlan({
+  scope: "commune", communeNom: "Roubaix", conclusionState: "no_incompatibility_established", posture: "recherche",
+  shownFacts: [
+    coast("proximite_mer", "structuring", "la distance à la mer",
+      "La distance au littoral est estimée à environ 240 km depuis le point de référence retenu pour Roubaix."),
+  ],
+  uncovered: [], uncoveredPriorities: [],
+  establishedIncompatibility: null, coverage: "high", orientation: "arbitration",
+  hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 0,
+  mismatchTotal: 1, mismatchShown: 1,
+});
+
 console.log("gate :", shouldGenerateNarrative(plan), "· lead :", JSON.stringify(plan.lead));
 console.log("\n──── DÉTERMINISTE (ce que le lecteur voit sans IA) ────");
 console.log(plan.blocks.map((b) => b.fallbackText).join(" "));
@@ -172,5 +197,6 @@ for (let i = 1; i <= TIRAGES; i++) {
 const a = await probe(plan, "réserves majeures");
 const b = await probe(planMismatch, "mismatch / arbitrage");
 const c = await probe(planAbsence, "absence attestée / arbitrage");
-const R = a.retenus + b.retenus + c.retenus, T = a.total + b.total + c.total;
+const dCoast = await probe(planCoast, "mer / éloignement");
+const R = a.retenus + b.retenus + c.retenus + dCoast.retenus, T = a.total + b.total + c.total + dCoast.total;
 console.log(`\n════ TAUX DE SURVIE : ${R}/${T} blocs ════`);
