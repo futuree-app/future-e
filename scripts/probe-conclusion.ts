@@ -69,7 +69,7 @@ function mismatch(id: string, tier: MaterialityTier, topic: string): DecisionFac
     id, ruleId: `territoire.mismatch-${id}`, sourceFactIds: [`relativePosition.${id}`], module: "territoire",
     topic, statement: `Sur cet indicateur, Roubaix se situe parmi les 20 % de communes les moins favorables de France.`,
     materialityTier: tier, role: "mismatch", projectKey: id as never,
-    basis: { kind: "relative_position", rankLow: 0.05, rankHigh: 0.12, universe: "communes_france" },
+    basis: { kind: "relative_position", rankLow: 0.05, rankHigh: 0.12, universe: "communes_france", distributionVersion: "mismatch-dist-2026-07-15" },
     evidence: [{ factId: `relativePosition.${id}`, module: "territoire", label: "Territoire", grain: "commune" }],
   } as DecisionFact;
 }

@@ -47,6 +47,10 @@ export function mapCommuneToModuleFacts(
       }
       return out;
     })(),
+    // Attestations d'absence (lot 2a) : placeholder « non mesurée » posé en Task 3 pour la barrière de types ;
+    // le VRAI mapping (depuis reseauLocalMeasured / etudesSup) est implémenté et testé en Task 4.
+    localNetwork: { measured: false, access: null },
+    higherEd: { measured: false },
     scores,
     hasAddress: opts.hasAddress,
   };

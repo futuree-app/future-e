@@ -6,6 +6,7 @@ import type { UserProject } from "../user-project.ts";
 import type { ClimatFacts } from "./climat-facts.ts";
 import type { SanteFacts } from "./sante-facts.ts";
 import type { RankBand } from "./mismatch-facts.ts";
+import type { NamedAbsenceBasis, LocalNetworkAttestation, HigherEdAttestation } from "./absence-facts.ts";
 import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
 import type { CriteriaSummary } from "./criteria-registry.ts";
 import type {
@@ -76,12 +77,22 @@ export type VerificationFact = BaseFact & {
   action: { type: VerificationActionType; label: string };
   limitation?: string;
 };
+// LE FONDEMENT d'un mismatch : union discriminée. On ne porte QUE les fondements productibles aujourd'hui.
+// La mesure physique (mer) et la catégorie d'agglo (taille) viendront au lot 3, avec leur propre kind.
+export type RelativePositionBasis = {
+  kind: "relative_position";
+  rankLow: number; rankHigh: number;
+  universe: "communes_france";
+  distributionVersion: string;
+};
+export type MismatchBasis = NamedAbsenceBasis | RelativePositionBasis;
+
 // MISMATCH : le lieu répond MOINS BIEN à une priorité déclarée, sans que ce soit éliminatoire. Pas
 // d'action (rien à vérifier, le constat est établi) ; sa seule limitation possible est le grain.
 export type MismatchFact = BaseFact & {
   role: "mismatch";
   projectKey: PreferenceKey;
-  basis: { kind: "relative_position"; rankLow: number; rankHigh: number; universe: "communes_france" };
+  basis: MismatchBasis;
   evidence: EvidenceRef[];
   limitation?: string;
 };
@@ -116,6 +127,10 @@ export type ModuleFacts = CommuneAttributes & {
   // Le rang national à deux bornes, chargé par l'appelant (comme tailleVille, climat). NULLABLE mais NON
   // optionnel : `undefined` créerait un troisième état entre « lu » et « non lu ».
   rankBands: Record<string, RankBand> | null;
+  // Attestations d'absence (lot 2a), chargées par le mapping depuis l'index. NON optionnelles : la branche
+  // `measured: false` porte explicitement « non mesurée », il n'y a pas de troisième état implicite.
+  localNetwork: LocalNetworkAttestation;
+  higherEd: HigherEdAttestation;
   // La santé environnementale au grain COMMUNE (air, bruit des infrastructures, exposition industrielle).
   // Elle n'est pas un module (ADR-0010) : c'est une lecture, et ses autres faits (radon, argiles, bruit de
   // façade) sont vrais au grain ADRESSE, dans Logement.

@@ -73,7 +73,7 @@ function makeMismatchRule(key: PreferenceKey): DecisionRule {
         // COMPARATIF, jamais un jugement absolu. L'univers est nommé (« de France »), le lien au projet
         // explicite. « moins bien » ne dit pas « mauvais » : il dit « moins qu'ailleurs ».
         statement: `Vous avez placé ${lab.projectPhrase} parmi vos priorités. Sur ${lab.indicator}, ${f.nom} se situe parmi ${rankPhrase(band.high)} les moins favorables de France. Cela répond moins bien à cette dimension de votre projet, sans rendre ${f.nom} incompatible avec lui.`,
-        basis: { kind: "relative_position", rankLow: band.low, rankHigh: band.high, universe: "communes_france" },
+        basis: { kind: "relative_position", rankLow: band.low, rankHigh: band.high, universe: "communes_france", distributionVersion: MISMATCH_DISTRIBUTION_VERSION },
         evidence: [ev],
       };
       return ret("mismatch", [fact], "position relative défavorable");
