@@ -10,6 +10,9 @@
 anomalie). Si une source de critère (nature, écoles…) est ré-enrichie, **relancer ce script** pour que les
 bandes ne deviennent pas obsolètes.
 
+**GitHub avertit** (non bloquant) que l'index dépasse 50 Mo. Il grossira encore au lot 2. Piste à instruire
+avant que ça ne coince : Git LFS pour l'index, ou sortir `rankBands` dans un fichier annexe chargé à part.
+
 ## Ce qui a été livré : le chantier B, `mismatch`
 
 Le dossier sait enfin dire qu'un lieu répond **mal** à une priorité déclarée, sans que ce soit
