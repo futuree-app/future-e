@@ -4,22 +4,25 @@
 
 **Goal:** Ramener `data/comparateur-index.json` de 77,5 Mo à ~10 Mo dans git en versionnant un `.gz` canonique, sans casser le runtime ni migrer les 25 scripts qui touchent l'index.
 
-**Architecture:** `data/comparateur-index.json.gz` devient l'artefact canonique versionné et lu au runtime ; `data/comparateur-index.json` devient une copie de travail locale gitignorée. Trois scripts `pack`/`unpack`/`verify` (atomiques, round-trip SHA-256, gzip niveau 9 déterministe) et une logique pure partagée dans `scripts/lib/index-io.mjs`. Le runtime `loadIndex()` gunzip + mémoïse par promise + valide la structure racine.
+**Architecture:** `data/comparateur-index.json.gz` devient l'artefact canonique versionné et lu au runtime ; `data/comparateur-index.json` devient une copie de travail locale gitignorée. Logique pure partagée dans `scripts/lib/index-io.mjs` (pack/unpack/verify atomiques, round-trip SHA-256, gzip niveau 9 déterministe). Le chargement runtime est extrait dans un module pur `src/lib/compressed-index-loader.ts` (gunzip + mémoïsation par promise + validation racine), branché en deux lignes dans `comparateur-vie.ts`.
 
-**Tech Stack:** Node 25 (strip-types natif pour `node --test *.test.ts`), `node:zlib` (gzip/gunzip), `node:crypto` (SHA-256), Next.js (outputFileTracingIncludes), scripts ESM `.mjs`.
+**Tech Stack:** Node 25 (strip-types natif pour `node --test *.test.ts`), `node:zlib`, `node:crypto`, Next.js (outputFileTracingIncludes), scripts ESM `.mjs`.
 
 ## Global Constraints
 
 - **Le `.gz` est l'unique artefact canonique** ; le JSON local n'est jamais distribué (copie de travail régénérable). Réf. spec `docs/superpowers/specs/2026-07-15-compression-index-gzip-design.md`.
-- **`pack`/`unpack` écrivent atomiquement** : `<cible>.tmp` puis `rename`. Jamais d'écriture en place.
-- **Round-trip obligatoire** : après compression, `pack` relit le `.tmp`, décompresse, et compare le **SHA-256** aux octets source ; refuse si divergence.
+- **L'infra `index-io` reste générique** : elle ne connaît PAS `rankBands` ni aucune fonctionnalité métier. La validation d'enrichissement métier reste chez `populate-mismatch-rank.mts` (atomique, refuse sur anomalie).
+- **`pack`/`unpack` écrivent atomiquement** : `<cible>.<pid>.<uuid>.tmp` puis `rename`, avec nettoyage du `.tmp` en `finally`. Jamais d'écriture en place.
+- **Round-trip obligatoire** : après compression, `pack` relit le `.tmp`, décompresse, compare le **SHA-256** aux octets source ; refuse si divergence.
+- **`unpack` valide le canonique** (racine + invariants) AVANT de publier la copie de travail.
 - **Synchronisation vérifiée par contenu (SHA-256), jamais par `mtime`.**
-- **gzip niveau 9, déterministe** (vérifié : `MTIME=0`, deux packs → même SHA). Un pack sans changement de données ne produit **aucun** diff git.
-- **Doctrine de la promise rejetée (à graver) :** si le premier chargement échoue, la promesse rejetée reste mémoïsée ; tous les appels suivants échouent sans retry. **Ne jamais** ajouter de retry silencieux.
+- **gzip niveau 9, déterministe** (vérifié : `MTIME=0`, deux packs → même SHA). Un pack sans changement de données ne produit **aucun** diff git. Le déterminisme dépend de la version de zlib : `pack` doit tourner avec la version Node du projet (`engines`).
+- **Doctrine de la promise rejetée (à graver) :** un premier chargement en échec reste mémoïsé ; les appels suivants échouent sans retry. **Ne jamais** ajouter de retry silencieux.
 - **Runtime Node** (`fs` + `zlib`) : aucune route concernée n'est en `edge`.
-- Type racine de l'index : `type IndexFile = { meta: unknown; communes: IndexCommune[] }` (déjà défini `src/lib/comparateur-vie.ts:540`). `IndexCommune` est exporté (`:403`).
-- Format des messages/erreurs en français, sans tiret cadratin (virgule ou deux points).
-- Vérif de non-régression du projet, après le lot : `node --test src/lib/*.test.ts src/lib/decision/*.test.ts` (505 verts), `npx tsc --noEmit` (0), `node --env-file=.env.local scripts/probe-conclusion.ts` (20/20).
+- **Cutover atomique** : la bascule runtime (lecture du `.gz`), l'ajout du `.gz` au suivi git et le retrait du JSON se font dans **un seul commit** (jamais d'état intermédiaire cassé dans l'historique).
+- Type racine : `type IndexFile = { meta: unknown; communes: IndexCommune[] }` (`src/lib/comparateur-vie.ts:540`). `IndexCommune` exporté (`:403`).
+- Messages/erreurs en français, sans tiret cadratin (virgule ou deux points).
+- Non-régression du projet, après le lot : `node --test src/lib/*.test.ts src/lib/decision/*.test.ts` (505 verts), `npx tsc --noEmit` (0), `node --env-file=.env.local scripts/probe-conclusion.ts` (20/20).
 
 ---
 
@@ -31,12 +34,12 @@
 
 **Interfaces:**
 - Produces :
-  - `INDEX_JSON_PATH: string`, `INDEX_GZ_PATH: string` (chemins absolus dérivés de `process.cwd()`)
-  - `sha256(buf: Buffer): string` (hex)
+  - `INDEX_JSON_PATH: string`, `INDEX_GZ_PATH: string`
+  - `sha256(buf: Buffer): string`
   - `packJson(jsonBuffer: Buffer): Buffer` (gzip niveau 9)
   - `unpackGz(gzBuffer: Buffer): Buffer`
   - `parseCommunes(jsonBuffer: Buffer): object[]` (JSON.parse + `.communes` est un tableau, sinon throw)
-  - `assertIndexInvariants(communes: object[], opts?: { minCount?: number, maxCount?: number }): void`
+  - `assertIndexInvariants(communes: object[], opts?: { minCount?: number, maxCount?: number }): void` — **générique, sans connaissance métier**
 
 - [ ] **Step 1 : Écrire les tests qui échouent**
 
@@ -48,10 +51,7 @@ import { sha256, packJson, unpackGz, parseCommunes, assertIndexInvariants } from
 
 const smallFixture = Buffer.from(JSON.stringify({
   meta: {},
-  communes: [
-    { insee: "01001", nom: "A", rankBands: { nature: [10, 20] } },
-    { insee: "01002", nom: "B" },
-  ],
+  communes: [{ insee: "01001", nom: "A" }, { insee: "01002", nom: "B" }],
 }));
 
 test("round-trip pack -> unpack rend les octets d'origine", () => {
@@ -71,26 +71,21 @@ test("parseCommunes renvoie le tableau communes", () => {
 });
 
 test("invariants : rejette un code INSEE dupliqué", () => {
-  const dup = [{ insee: "01001", rankBands: {} }, { insee: "01001" }];
+  const dup = [{ insee: "01001" }, { insee: "01001" }];
   assert.throws(() => assertIndexInvariants(dup, { minCount: 1, maxCount: 10 }), /dupliqué/);
 });
 
 test("invariants : rejette une commune sans code INSEE", () => {
-  const bad = [{ insee: "01001", rankBands: {} }, { nom: "sans insee" }];
+  const bad = [{ insee: "01001" }, { nom: "sans insee" }];
   assert.throws(() => assertIndexInvariants(bad, { minCount: 1, maxCount: 10 }), /INSEE/);
 });
 
 test("invariants : rejette un effectif hors bornes (défaut 30000..40000)", () => {
-  assert.throws(() => assertIndexInvariants([{ insee: "01001", rankBands: {} }]), /effectif|communes/i);
-});
-
-test("invariants : rejette l'absence totale de rankBands", () => {
-  const noBands = [{ insee: "01001" }, { insee: "01002" }];
-  assert.throws(() => assertIndexInvariants(noBands, { minCount: 1, maxCount: 10 }), /rankBands|enrichissement/i);
+  assert.throws(() => assertIndexInvariants([{ insee: "01001" }]), /effectif|communes/i);
 });
 
 test("invariants : accepte un index plausible", () => {
-  const ok = [{ insee: "01001", rankBands: { nature: [1, 2] } }, { insee: "01002" }];
+  const ok = [{ insee: "01001" }, { insee: "01002" }];
   assert.doesNotThrow(() => assertIndexInvariants(ok, { minCount: 1, maxCount: 10 }));
 });
 ```
@@ -105,9 +100,9 @@ Expected: FAIL (`Cannot find module './index-io.mjs'`)
 Create `scripts/lib/index-io.mjs` :
 ```js
 // Logique PURE d'I/O de l'index comparateur (gzip canonique). Aucune écriture de
-// fichier ici : ces fonctions opèrent sur des Buffers, ce qui les rend testables
-// sans toucher l'index réel de 81 Mo. Les scripts index-pack/unpack/verify.mjs
-// orchestrent l'I/O réelle par-dessus.
+// fichier ici : ces fonctions opèrent sur des Buffers, testables sans toucher
+// l'index réel de 81 Mo. GÉNÉRIQUE : aucune connaissance métier (pas de rankBands).
+// Les scripts index-pack/unpack/verify.mjs orchestrent l'I/O réelle par-dessus.
 import zlib from "node:zlib";
 import crypto from "node:crypto";
 import path from "node:path";
@@ -137,6 +132,7 @@ export function parseCommunes(jsonBuffer) {
   return parsed.communes;
 }
 
+// Invariants STRUCTURELS génériques (aucune fonctionnalité métier).
 export function assertIndexInvariants(communes, opts = {}) {
   const { minCount = 30000, maxCount = 40000 } = opts;
   if (!Array.isArray(communes)) {
@@ -155,38 +151,35 @@ export function assertIndexInvariants(communes, opts = {}) {
     }
     seen.add(c.insee);
   }
-  if (!communes.some((c) => c.rankBands && Object.keys(c.rankBands).length > 0)) {
-    throw new Error("Index invalide : aucun enrichissement rankBands present (rebuild non enrichi ?).");
-  }
 }
 ```
 
 - [ ] **Step 4 : Lancer le test, vérifier le succès**
 
 Run: `node --test scripts/lib/index-io.test.mjs`
-Expected: PASS (9 tests)
+Expected: PASS (8 tests)
 
 - [ ] **Step 5 : Commit**
 
 ```bash
 git add scripts/lib/index-io.mjs scripts/lib/index-io.test.mjs
-git commit -m "feat(index): logique pure d'I/O gzip partagee (pack/unpack/invariants)"
+git commit -m "feat(index): logique pure d'I/O gzip partagee, generique (pack/unpack/invariants)"
 ```
 
 ---
 
-### Task 2 : Opérations fichier atomiques (`pack`/`unpack`/`verify` de niveau fichier)
+### Task 2 : Opérations fichier atomiques (`packFile`/`unpackFile`/`verifyIndex`)
 
 **Files:**
-- Modify: `scripts/lib/index-io.mjs` (ajout de 3 fonctions au fichier de la Task 1)
+- Modify: `scripts/lib/index-io.mjs` (ajout de 3 fonctions)
 - Test: `scripts/lib/index-io.test.mjs` (ajout de tests d'intégration sur répertoire temporaire)
 
 **Interfaces:**
 - Consumes : `packJson`, `unpackGz`, `parseCommunes`, `assertIndexInvariants`, `sha256` (Task 1)
 - Produces :
-  - `packFile(jsonPath: string, gzPath: string, opts?): void` — JSON -> gz canonique, atomique, round-trip
-  - `unpackFile(gzPath: string, jsonPath: string): void` — gz -> JSON de travail, atomique
-  - `verifyIndex(jsonPath: string, gzPath: string, opts?): void` — intégrité (+ synchro si JSON présent)
+  - `packFile(jsonPath, gzPath, opts?): void` — JSON -> gz, atomique (tmp unique + finally), round-trip
+  - `unpackFile(gzPath, jsonPath, opts?): void` — gz -> JSON, atomique, **valide invariants avant publication**
+  - `verifyIndex(jsonPath, gzPath, opts?): void` — intégrité (+ synchro si JSON présent)
 
 - [ ] **Step 1 : Écrire les tests qui échouent**
 
@@ -195,15 +188,14 @@ Append to `scripts/lib/index-io.test.mjs` :
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import zlib from "node:zlib";
 import { packFile, unpackFile, verifyIndex } from "./index-io.mjs";
 
 function tmpDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "idx-io-"));
 }
 const bounds = { minCount: 1, maxCount: 10 };
-const validIndex = JSON.stringify({
-  meta: {}, communes: [{ insee: "01001", rankBands: { nature: [1, 2] } }, { insee: "01002" }],
-});
+const validIndex = JSON.stringify({ meta: {}, communes: [{ insee: "01001" }, { insee: "01002" }] });
 
 test("packFile puis unpackFile : round-trip fichier identique", () => {
   const d = tmpDir();
@@ -211,7 +203,7 @@ test("packFile puis unpackFile : round-trip fichier identique", () => {
   fs.writeFileSync(jsonP, validIndex);
   packFile(jsonP, gzP, bounds);
   fs.rmSync(jsonP);
-  unpackFile(gzP, jsonP);
+  unpackFile(gzP, jsonP, bounds);
   assert.equal(fs.readFileSync(jsonP, "utf8"), validIndex);
 });
 
@@ -223,6 +215,23 @@ test("packFile est déterministe : deuxième pack identique octet pour octet", (
   const first = fs.readFileSync(gzP);
   packFile(jsonP, gzP, bounds);
   assert.ok(fs.readFileSync(gzP).equals(first));
+});
+
+test("packFile ne laisse aucun .tmp résiduel", () => {
+  const d = tmpDir();
+  const jsonP = path.join(d, "idx.json"), gzP = path.join(d, "idx.json.gz");
+  fs.writeFileSync(jsonP, validIndex);
+  packFile(jsonP, gzP, bounds);
+  assert.ok(fs.readdirSync(d).every((f) => !f.endsWith(".tmp")));
+});
+
+test("unpackFile refuse un canonique aux invariants violés (avant publication)", () => {
+  const d = tmpDir();
+  const jsonP = path.join(d, "idx.json"), gzP = path.join(d, "idx.json.gz");
+  // gz d'un index à 2 communes, mais on exige minCount 100 -> doit refuser
+  fs.writeFileSync(gzP, zlib.gzipSync(Buffer.from(validIndex)));
+  assert.throws(() => unpackFile(gzP, jsonP, { minCount: 100, maxCount: 200 }), /effectif|communes/i);
+  assert.ok(!fs.existsSync(jsonP)); // rien publié
 });
 
 test("verifyIndex : gz valide + JSON absent -> intégrité OK (pas de throw)", () => {
@@ -260,9 +269,13 @@ Expected: FAIL (`packFile is not a function`)
 
 Append to `scripts/lib/index-io.mjs` :
 ```js
-import { existsSync, readFileSync, writeFileSync, renameSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, renameSync, rmSync } from "node:fs";
 
-// JSON de travail -> gz canonique. Atomique (.tmp + rename) et round-trip verifié.
+function uniqueTmp(target) {
+  return `${target}.${process.pid}.${crypto.randomUUID()}.tmp`;
+}
+
+// JSON de travail -> gz canonique. Atomique (tmp unique + rename), round-trip verifié.
 export function packFile(jsonPath, gzPath, opts) {
   if (!existsSync(jsonPath)) {
     throw new Error("La copie de travail de l'index n'existe pas. Lancez `npm run index:unpack`.");
@@ -270,21 +283,30 @@ export function packFile(jsonPath, gzPath, opts) {
   const jsonBuffer = readFileSync(jsonPath);
   assertIndexInvariants(parseCommunes(jsonBuffer), opts);
   const gz = packJson(jsonBuffer);
-  const tmp = `${gzPath}.tmp`;
-  writeFileSync(tmp, gz);
-  if (sha256(unpackGz(readFileSync(tmp))) !== sha256(jsonBuffer)) {
-    throw new Error("Round-trip gzip échoué : les octets décompressés diffèrent de la source.");
+  const tmp = uniqueTmp(gzPath);
+  try {
+    writeFileSync(tmp, gz);
+    if (sha256(unpackGz(readFileSync(tmp))) !== sha256(jsonBuffer)) {
+      throw new Error("Round-trip gzip échoué : les octets décompressés diffèrent de la source.");
+    }
+    renameSync(tmp, gzPath);
+  } finally {
+    if (existsSync(tmp)) rmSync(tmp);
   }
-  renameSync(tmp, gzPath);
 }
 
-// gz canonique -> JSON de travail. Atomique. Valide la structure avant de publier.
-export function unpackFile(gzPath, jsonPath) {
+// gz canonique -> JSON de travail. Atomique. Valide la structure ET les invariants
+// AVANT de publier (le canonique doit être sain avant de devenir base de travail).
+export function unpackFile(gzPath, jsonPath, opts) {
   const jsonBuffer = unpackGz(readFileSync(gzPath));
-  parseCommunes(jsonBuffer); // throw si structure invalide
-  const tmp = `${jsonPath}.tmp`;
-  writeFileSync(tmp, jsonBuffer);
-  renameSync(tmp, jsonPath);
+  assertIndexInvariants(parseCommunes(jsonBuffer), opts);
+  const tmp = uniqueTmp(jsonPath);
+  try {
+    writeFileSync(tmp, jsonBuffer);
+    renameSync(tmp, jsonPath);
+  } finally {
+    if (existsSync(tmp)) rmSync(tmp);
+  }
 }
 
 // Vérifie l'intégrité du gz (+ la synchro avec le JSON local s'il existe).
@@ -302,28 +324,28 @@ export function verifyIndex(jsonPath, gzPath, opts) {
 - [ ] **Step 4 : Lancer le test, vérifier le succès**
 
 Run: `node --test scripts/lib/index-io.test.mjs`
-Expected: PASS (14 tests au total)
+Expected: PASS (15 tests au total)
 
 - [ ] **Step 5 : Commit**
 
 ```bash
 git add scripts/lib/index-io.mjs scripts/lib/index-io.test.mjs
-git commit -m "feat(index): operations fichier atomiques pack/unpack/verify (round-trip, deux regimes)"
+git commit -m "feat(index): operations fichier atomiques (tmp unique, round-trip, unpack valide le canonique)"
 ```
 
 ---
 
-### Task 3 : Scripts d'entrée + garde clone frais + commandes npm
+### Task 3 : Scripts d'entrée + garde clone frais + commandes npm + pin Node
 
 **Files:**
 - Create: `scripts/index-pack.mjs`, `scripts/index-unpack.mjs`, `scripts/index-verify.mjs`
 - Create: `scripts/lib/require-index-worktree.mjs`
 - Test: `scripts/lib/require-index-worktree.test.mjs`
-- Modify: `package.json` (bloc `scripts`)
+- Modify: `package.json` (`scripts` + `engines`)
 
 **Interfaces:**
 - Consumes : `packFile`, `unpackFile`, `verifyIndex`, `INDEX_JSON_PATH`, `INDEX_GZ_PATH` (Tasks 1-2)
-- Produces : `assertIndexWorktree(jsonPath?: string): void` (throw le message métier si le JSON de travail manque) ; commandes `index:pack`, `index:unpack`, `index:verify`, `prebuild`.
+- Produces : `assertIndexWorktree(jsonPath?): void` ; commandes `index:pack`, `index:unpack`, `index:verify`, `prebuild`.
 
 - [ ] **Step 1 : Écrire le test du garde qui échoue**
 
@@ -348,8 +370,8 @@ Expected: FAIL (module introuvable)
 Create `scripts/lib/require-index-worktree.mjs` :
 ```js
 // Garde optionnelle pour les scripts d'enrichissement : remplace un ENOENT brut
-// par un message métier. Câblée au fil de l'eau (une ligne), sans toucher la
-// logique I/O des scripts. Couverture best-effort assumée (cf. spec §4.6).
+// par un message métier. Câblée au fil de l'eau (une ligne). Couverture best-effort
+// assumée (cf. spec §4.6).
 import { existsSync } from "node:fs";
 import { INDEX_JSON_PATH } from "./index-io.mjs";
 
@@ -399,16 +421,21 @@ try {
 }
 ```
 
-- [ ] **Step 4 : Ajouter les commandes npm**
+- [ ] **Step 4 : Commandes npm + pin de version Node**
 
-Modify `package.json`, bloc `scripts` (actuel : `dev`, `build`, `start`, `lint`). Ajouter :
+Modify `package.json`. Ajouter au bloc `scripts` :
 ```json
     "index:unpack": "node scripts/index-unpack.mjs",
     "index:pack": "node scripts/index-pack.mjs",
     "index:verify": "node scripts/index-verify.mjs",
     "prebuild": "node scripts/index-verify.mjs"
 ```
-(`prebuild` est lancé automatiquement par npm avant `build`, donc par Vercel à chaque déploiement : régime intégrité, checkout frais sans JSON local.)
+Ajouter (le déterminisme gzip dépend de la version zlib de Node ; le `pack` doit tourner avec la version projet) :
+```json
+  "engines": {
+    "node": ">=25"
+  }
+```
 
 - [ ] **Step 5 : Lancer le test du garde, vérifier le succès**
 
@@ -419,7 +446,7 @@ Expected: PASS
 
 ```bash
 git add scripts/index-pack.mjs scripts/index-unpack.mjs scripts/index-verify.mjs scripts/lib/require-index-worktree.mjs scripts/lib/require-index-worktree.test.mjs package.json
-git commit -m "feat(index): scripts pack/unpack/verify + garde clone frais + commandes npm (prebuild)"
+git commit -m "feat(index): scripts pack/unpack/verify + garde clone frais + commandes npm (prebuild) + engines node"
 ```
 
 ---
@@ -468,7 +495,7 @@ Expected: FAIL (module introuvable)
 Create `src/lib/memoize-promise.ts` :
 ```ts
 // Mémoïse une fonction async sans argument : déduplique les appels concurrents
-// (une seule exécution), et CONSERVE une promesse rejetée (pas de retry). Pour un
+// (une seule exécution) et CONSERVE une promesse rejetée (pas de retry). Pour un
 // artefact canonique corrompu, l'échec doit être fatal : réparer puis redémarrer.
 // Ne pas transformer ceci en retry silencieux.
 export function memoizePromise<T>(fn: () => Promise<T>): () => Promise<T> {
@@ -498,7 +525,7 @@ git commit -m "feat(index): memoizePromise (dedup concurrent + rejet persistant)
 - Test: `src/lib/comparateur-index-payload.test.ts`
 
 **Interfaces:**
-- Consumes : `type IndexCommune` (import type-only depuis `./comparateur-vie`, effacé à l'exécution : le module `server-only` n'est pas chargé)
+- Consumes : `type IndexCommune` (import type-only depuis `./comparateur-vie`, effacé à l'exécution : `server-only` non chargé)
 - Produces : `communesFromPayload(text: string): IndexCommune[]`
 
 - [ ] **Step 1 : Écrire les tests qui échouent**
@@ -535,9 +562,9 @@ Create `src/lib/comparateur-index-payload.ts` :
 ```ts
 import type { IndexCommune } from "./comparateur-vie";
 
-// Valide la structure racine de l'index (objet { communes: [...] }) au lieu de
-// caster : un cast satisferait TS mais pourrait retourner le mauvais niveau.
-// Module PUR (aucun server-only) : testable en isolation.
+// Valide la structure racine (objet { communes: [...] }) au lieu de caster : un
+// cast satisferait TS mais pourrait retourner le mauvais niveau. Module PUR
+// (aucun server-only) : testable en isolation.
 export function communesFromPayload(text: string): IndexCommune[] {
   const parsed: unknown = JSON.parse(text);
   if (
@@ -565,37 +592,149 @@ git commit -m "feat(index): communesFromPayload (validation structure racine, mo
 
 ---
 
-### Task 6 : Bascule runtime — `loadIndex()` lit le gz + `next.config.ts`
+### Task 6 : Loader runtime testable (`src/lib/compressed-index-loader.ts`)
+
+Extrait tout le chargement hors de `comparateur-vie.ts` (server-only) pour prouver le **branchement réel** (le défaut « deux appels concurrents lisent deux fois » se teste ici, pas seulement sur la brique `memoizePromise`).
 
 **Files:**
-- Modify: `src/lib/comparateur-vie.ts` (imports en tête ; bloc `loadIndex` `:542`, `:572-580`)
-- Modify: `next.config.ts` (3 occurrences)
+- Create: `src/lib/compressed-index-loader.ts`
+- Test: `src/lib/compressed-index-loader.test.ts`
 
 **Interfaces:**
 - Consumes : `memoizePromise` (Task 4), `communesFromPayload` (Task 5)
-- Produces : `loadIndex(): Promise<IndexCommune[]>` inchangé en signature (le reste du fichier n'est pas touché)
+- Produces : `createCompressedIndexLoader(gzPath: string, afterLoad?: (communes: IndexCommune[]) => void): () => Promise<IndexCommune[]>`
 
-- [ ] **Step 1 : Ajouter les imports**
+- [ ] **Step 1 : Écrire les tests qui échouent**
 
-In `src/lib/comparateur-vie.ts`, après la ligne `import path from "node:path";` (`:3`), ajouter :
+Create `src/lib/compressed-index-loader.test.ts` :
 ```ts
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import zlib from "node:zlib";
-import { memoizePromise } from "@/lib/memoize-promise";
-import { communesFromPayload } from "@/lib/comparateur-index-payload";
+import { createCompressedIndexLoader } from "./compressed-index-loader.ts";
+
+function writeGz(obj: unknown): string {
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), "cil-"));
+  const p = path.join(d, "idx.json.gz");
+  fs.writeFileSync(p, zlib.gzipSync(Buffer.from(JSON.stringify(obj))));
+  return p;
+}
+
+test("charge et décompresse une seule fois sous appels concurrents ; afterLoad 1x", async () => {
+  const gz = writeGz({ meta: {}, communes: [{ insee: "01001" }, { insee: "01002" }] });
+  let afterCalls = 0;
+  const load = createCompressedIndexLoader(gz, () => { afterCalls++; });
+  const [a, b, c] = await Promise.all([load(), load(), load()]);
+  assert.equal(afterCalls, 1);
+  assert.equal(a.length, 2);
+  assert.equal(b, a);
+  assert.equal(c, a);
+});
+
+test("rejette une racine invalide", async () => {
+  const gz = writeGz({ meta: {} });
+  const load = createCompressedIndexLoader(gz);
+  await assert.rejects(load(), /communes/);
+});
+
+test("mémoïse le rejet (fichier absent) : afterLoad jamais atteint, pas de retry", async () => {
+  let afterCalls = 0;
+  const load = createCompressedIndexLoader("/inexistant/idx.json.gz", () => { afterCalls++; });
+  await assert.rejects(load());
+  await assert.rejects(load());
+  assert.equal(afterCalls, 0);
+});
 ```
 
-- [ ] **Step 2 : Remplacer le cache et loadIndex**
+- [ ] **Step 2 : Lancer le test, vérifier l'échec**
 
-Replace `src/lib/comparateur-vie.ts:542` :
+Run: `node --test src/lib/compressed-index-loader.test.ts`
+Expected: FAIL (module introuvable)
+
+- [ ] **Step 3 : Écrire l'implémentation**
+
+Create `src/lib/compressed-index-loader.ts` :
+```ts
+import { readFile } from "node:fs/promises";
+import zlib from "node:zlib";
+import { memoizePromise } from "./memoize-promise";
+import { communesFromPayload } from "./comparateur-index-payload";
+import type { IndexCommune } from "./comparateur-vie";
+
+// Assemble le chargement de l'index gzip : lecture + gunzip + validation racine,
+// dédupliqué/mémoïsé (une seule lecture disque, rejet persistant). `afterLoad`
+// permet à l'appelant de peupler ses caches dérivés (buildUuPop) une seule fois.
+export function createCompressedIndexLoader(
+  gzPath: string,
+  afterLoad: (communes: IndexCommune[]) => void = () => {},
+): () => Promise<IndexCommune[]> {
+  return memoizePromise(async () => {
+    const compressed = await readFile(gzPath);
+    const communes = communesFromPayload(zlib.gunzipSync(compressed).toString("utf8"));
+    afterLoad(communes);
+    return communes;
+  });
+}
+```
+
+- [ ] **Step 4 : Lancer le test, vérifier le succès**
+
+Run: `node --test src/lib/compressed-index-loader.test.ts`
+Expected: PASS (3 tests)
+
+- [ ] **Step 5 : Commit**
+
+```bash
+git add src/lib/compressed-index-loader.ts src/lib/compressed-index-loader.test.ts
+git commit -m "feat(index): createCompressedIndexLoader (chargement gzip memoise, teste de bout en bout)"
+```
+
+---
+
+### Task 7 : Cutover atomique — runtime + tracing + git + hook + doc (UN commit)
+
+Bascule la source canonique en un seul commit cohérent : aucun état intermédiaire cassé dans l'historique. Le JSON reste physiquement sur disque (copie de travail) pendant toute la vérification.
+
+**Files:**
+- Modify: `src/lib/comparateur-vie.ts` (imports en tête ; cache `:542` ; `loadIndex` `:572-580`)
+- Modify: `next.config.ts` (3 occurrences)
+- Modify: `.gitignore`
+- Create: `scripts/install-git-hooks.mjs`
+- Modify: `package.json` (ajout `hooks:install`)
+- Modify: `docs/handoff/CURRENT.md`
+- Git: `git rm --cached data/comparateur-index.json` ; add `data/comparateur-index.json.gz`
+
+**Interfaces:**
+- Consumes : `createCompressedIndexLoader` (Task 6), `index:verify` (Task 3)
+
+- [ ] **Step 1 : Générer le `.gz` canonique (JSON encore présent, non basculé)**
+
+Run:
+```bash
+node scripts/index-pack.mjs
+ls -la data/comparateur-index.json.gz
+```
+Expected: `Index packé` ; fichier `.gz` ~10 Mo présent.
+
+- [ ] **Step 2 : Brancher `loadIndex` sur le loader**
+
+In `src/lib/comparateur-vie.ts`, après `import path from "node:path";` (`:3`), ajouter :
+```ts
+import { createCompressedIndexLoader } from "@/lib/compressed-index-loader";
+```
+Remplacer `src/lib/comparateur-vie.ts:542` :
 ```ts
 let indexCache: IndexCommune[] | null = null;
 ```
 par :
 ```ts
-let indexPromise: Promise<IndexCommune[]> | null = null;
+const INDEX_GZ_PATH = path.join(process.cwd(), "data", "comparateur-index.json.gz");
+const loadIndexOnce = createCompressedIndexLoader(INDEX_GZ_PATH, buildUuPop);
 ```
-
-Replace the body of `loadIndex` (`:572-580`) :
+Remplacer le corps de `loadIndex` (`:572-580`) :
 ```ts
 async function loadIndex(): Promise<IndexCommune[]> {
   if (indexCache) return indexCache;
@@ -607,34 +746,17 @@ async function loadIndex(): Promise<IndexCommune[]> {
   return indexCache;
 }
 ```
-par :
+par (on conserve `function loadIndex` pour le hoisting et un diff minimal chez les appelants) :
 ```ts
 // L'index canonique est un .gz versionné (cf. spec compression-index-gzip).
-// Lire 10 Mo + gunzip coûte moins que lire 81 Mo de JSON clair. La mémoïsation
-// par promise dédoublonne les appels concurrents ; une promesse rejetée reste
-// mémoïsée (échec fatal, pas de retry : réparer l'artefact puis redémarrer).
-const loadIndex = memoizePromise(readAndParseCompressedIndex);
-
-async function readAndParseCompressedIndex(): Promise<IndexCommune[]> {
-  const gzPath = path.join(process.cwd(), "data", "comparateur-index.json.gz");
-  const compressed = await fs.readFile(gzPath);
-  const communes = communesFromPayload(zlib.gunzipSync(compressed).toString("utf8"));
-  buildUuPop(communes);
-  return communes;
+// Le loader gunzip + mémoïse + valide la racine, et appelle buildUuPop une fois.
+async function loadIndex(): Promise<IndexCommune[]> {
+  return loadIndexOnce();
 }
 ```
-Note : `IndexFile` (`:540`) n'est plus utilisé par `loadIndex` ; le laisser s'il sert ailleurs, sinon `tsc` le signalera comme inutilisé (le supprimer alors). Vérifier avec `grep -n "IndexFile" src/lib/comparateur-vie.ts`.
+Puis vérifier `IndexFile` : `grep -n "IndexFile" src/lib/comparateur-vie.ts`. S'il n'est plus référencé, supprimer sa déclaration (`:540`) ; sinon la laisser. Idem `fs` (`node:fs/promises`) : s'il n'est plus utilisé ailleurs, `tsc`/lint le signalera, le retirer alors.
 
-- [ ] **Step 3 : Générer le .gz et vérifier que tsc passe**
-
-Run:
-```bash
-node scripts/index-pack.mjs   # crée data/comparateur-index.json.gz depuis le JSON encore présent
-npx tsc --noEmit
-```
-Expected: `Index packé : data/comparateur-index.json.gz` puis 0 erreur tsc.
-
-- [ ] **Step 4 : Repointer outputFileTracingIncludes**
+- [ ] **Step 3 : Repointer `outputFileTracingIncludes`**
 
 In `next.config.ts`, remplacer les **3** occurrences de :
 ```ts
@@ -644,35 +766,18 @@ par :
 ```ts
 "./data/comparateur-index.json.gz",
 ```
-(lignes 14, 20, 26 environ : routes `/api/comparateur-vie/match`, `/rapport/quartier`, `/api/synthesize-quartier`.)
+(routes `/api/comparateur-vie/match`, `/rapport/quartier`, `/api/synthesize-quartier`.)
 
-- [ ] **Step 5 : Vérifier le chargement runtime à l'écran**
+- [ ] **Step 4 : Vérifier tsc + runtime à l'écran**
 
-Run: `npm run dev`, puis charger un dossier réel (ex. `/ou-vivre` avec une commune, ou `/rapport/quartier` pour Roubaix). Vérifier que la commune se charge et rend comme avant (l'index lu est identique au JSON d'origine, garanti par le round-trip SHA-256).
-Expected: page rendue sans erreur `ENOENT`/`gunzip`.
-
-- [ ] **Step 6 : Commit**
-
+Run:
 ```bash
-git add src/lib/comparateur-vie.ts next.config.ts
-git commit -m "feat(index): loadIndex lit le .gz (gunzip memoise, structure validee) + trace serverless"
+npx tsc --noEmit
+npm run dev
 ```
+Charger un dossier réel (`/rapport/quartier` Roubaix, ou `/ou-vivre`). Expected: 0 erreur tsc ; page rendue sans `ENOENT`/`gunzip`.
 
----
-
-### Task 7 : Cutover git — gitignore le JSON, versionner le gz, hook, doc
-
-**Files:**
-- Modify: `.gitignore`
-- Create: `scripts/install-git-hooks.mjs`
-- Modify: `package.json` (ajout `hooks:install`)
-- Modify: `docs/handoff/CURRENT.md` (note de prérequis)
-- Git: `git rm --cached data/comparateur-index.json`, ajout de `data/comparateur-index.json.gz`
-
-**Interfaces:**
-- Consumes : `index:verify` (Task 3)
-
-- [ ] **Step 1 : Gitignorer le JSON de travail**
+- [ ] **Step 5 : Gitignore le JSON + script d'installation du hook**
 
 In `.gitignore`, sous le bloc « Caches bruts régénérables » (`:60`), ajouter :
 ```
@@ -680,48 +785,44 @@ In `.gitignore`, sous le bloc « Caches bruts régénérables » (`:60`), ajoute
 data/comparateur-index.json
 ```
 
-- [ ] **Step 2 : Retirer le JSON du suivi git, versionner le gz**
-
-Run:
-```bash
-git rm --cached data/comparateur-index.json
-git add data/comparateur-index.json.gz .gitignore
-git status --short   # doit montrer: D data/comparateur-index.json (cached), A data/comparateur-index.json.gz
-```
-Expected: le JSON n'est plus suivi (mais reste sur disque comme copie de travail) ; le `.gz` (~10 Mo) est stagé.
-
-- [ ] **Step 3 : Script d'installation du hook pre-commit**
-
 Create `scripts/install-git-hooks.mjs` :
 ```js
 #!/usr/bin/env node
 // Installe un hook git pre-commit natif (pas de husky) qui lance index:verify.
-// Idempotent : réécrit le hook. Dissuasif seulement (contournable par --no-verify).
-import { writeFileSync, chmodSync, mkdirSync } from "node:fs";
+// Dissuasif seulement (contournable par --no-verify). Non destructif : refuse
+// d'écraser un hook existant non géré par futur•e.
+import { readFileSync, writeFileSync, chmodSync, existsSync } from "node:fs";
+import { execSync } from "node:child_process";
 import path from "node:path";
 
-const hookDir = path.join(process.cwd(), ".git", "hooks");
-const hookPath = path.join(hookDir, "pre-commit");
-mkdirSync(hookDir, { recursive: true });
-writeFileSync(hookPath, "#!/bin/sh\nnpm run index:verify\n");
-chmodSync(hookPath, 0o755);
-console.log("Hook pre-commit installé : npm run index:verify");
-```
+const MARKER = "# futur-e-managed-index-hook";
+const BODY = `#!/bin/sh\n${MARKER}\nnpm run index:verify\n`;
 
+// git rev-parse gère worktrees et configs particulières (plutôt que supposer .git/hooks).
+const hooksDir = execSync("git rev-parse --git-path hooks").toString().trim();
+const hookPath = path.join(path.resolve(hooksDir), "pre-commit");
+
+if (existsSync(hookPath) && !readFileSync(hookPath, "utf8").includes(MARKER)) {
+  console.error("Un hook pre-commit existe déjà sans marqueur futur•e. Intégrez `npm run index:verify` manuellement, ou supprimez le hook puis relancez `npm run hooks:install`.");
+  process.exit(1);
+}
+writeFileSync(hookPath, BODY);
+chmodSync(hookPath, 0o755);
+console.log("Hook pre-commit installé (futur•e-managed) : npm run index:verify");
+```
 Add to `package.json` scripts :
 ```json
     "hooks:install": "node scripts/install-git-hooks.mjs"
 ```
-
 Run:
 ```bash
 npm run hooks:install
 ```
 Expected: `Hook pre-commit installé`.
 
-- [ ] **Step 4 : Note de prérequis dans le handoff**
+- [ ] **Step 6 : Note de prérequis dans le handoff**
 
-In `docs/handoff/CURRENT.md`, ajouter une ligne dans la section d'avertissement (le passage « GitHub avertit » devient caduc) :
+In `docs/handoff/CURRENT.md`, remplacer l'avertissement « GitHub avertit … >50 Mo » (devenu caduc) par :
 ```markdown
 **Index gzip :** l'artefact canonique est `data/comparateur-index.json.gz` (~10 Mo). Après un clone frais
 ou avant une session d'enrichissement : `npm run index:unpack` (écrit la copie de travail
@@ -729,23 +830,25 @@ ou avant une session d'enrichissement : `npm run index:unpack` (écrit la copie 
 `.gz`. `npm run hooks:install` pose le hook pre-commit de vérification.
 ```
 
-- [ ] **Step 5 : Vérifier verify + build**
+- [ ] **Step 7 : Retirer le JSON du suivi, vérifier verify + build**
 
 Run:
 ```bash
-node scripts/index-verify.mjs   # JSON local présent -> régime synchro, doit passer (on vient de packer)
-npm run build                   # prebuild = index:verify ; build Next complet
+git rm --cached data/comparateur-index.json
+node scripts/index-verify.mjs   # JSON local présent -> régime synchro, doit passer
+npm run build                   # prebuild = index:verify (intégrité) puis build Next complet
+git status --short              # D (cached) comparateur-index.json ; A comparateur-index.json.gz ; M autres
 ```
-Expected: `Index vérifié.` puis build réussi.
+Expected: `Index vérifié.` ; build réussi ; le JSON n'est plus suivi (mais reste sur disque).
 
-- [ ] **Step 6 : Commit du cutover**
+- [ ] **Step 8 : Commit unique du cutover**
 
 ```bash
-git add .gitignore data/comparateur-index.json.gz scripts/install-git-hooks.mjs package.json docs/handoff/CURRENT.md
-git commit -m "feat(index): cutover gzip (77,5 Mo -> ~10 Mo) : gz canonique versionne, JSON gitignore, hook pre-commit"
+git add src/lib/comparateur-vie.ts next.config.ts .gitignore data/comparateur-index.json.gz scripts/install-git-hooks.mjs package.json docs/handoff/CURRENT.md
+git commit -m "feat(index): cutover atomique gzip (77,5 Mo -> ~10 Mo) : gz canonique versionne, runtime + tracing, JSON gitignore, hook pre-commit"
 ```
 
-- [ ] **Step 7 : Test d'acceptation déterminisme (aucun diff git au re-pack)**
+- [ ] **Step 9 : Test d'acceptation déterminisme (aucun diff git au re-pack)**
 
 Run:
 ```bash
@@ -759,39 +862,31 @@ Expected: exit 0 (aucun diff : gzip déterministe, pas de re-commit fantôme).
 ### Task 8 : Garde clone frais câblée sur les scripts d'enrichissement ESM actifs (best-effort)
 
 **Files:**
-- Modify: `scripts/populate-mismatch-rank.mts` (script vivant du dernier chantier)
-- Modify: `scripts/populate-logement.mjs`, `scripts/populate-hlm.mjs`, `scripts/populate-rayonnement-index.mjs`, `scripts/populate-uu-pop.mjs`, `scripts/add-relief-proximite.mjs` (scripts ESM d'enrichissement actifs)
+- Modify: `scripts/populate-mismatch-rank.mts`, `scripts/populate-logement.mjs`, `scripts/populate-hlm.mjs`, `scripts/populate-rayonnement-index.mjs`, `scripts/populate-uu-pop.mjs`, `scripts/add-relief-proximite.mjs`
 
 **Interfaces:**
 - Consumes : `assertIndexWorktree` (Task 3)
 
 - [ ] **Step 1 : Câbler la garde en tête de chaque script**
 
-Dans chaque fichier listé, juste après les imports et **avant** la première lecture de l'index, ajouter :
+Dans chaque fichier, après les imports et **avant** la première lecture de l'index, ajouter :
 ```js
 import { assertIndexWorktree } from "./lib/require-index-worktree.mjs";
 assertIndexWorktree();
 ```
-(Pour `populate-mismatch-rank.mts`, l'import relatif `./lib/require-index-worktree.mjs` fonctionne sous tsx.) Ne **pas** toucher la logique I/O existante des scripts : c'est une garde d'une ligne, pas une migration. Les scripts `.js` CommonJS et `research/*` restent hors périmètre (ENOENT toléré, documenté au §4.6 de la spec).
+Ne **pas** toucher la logique I/O. Les scripts `.js` CommonJS et `research/*` restent hors périmètre (ENOENT toléré, documenté au §4.6 de la spec).
 
-- [ ] **Step 2 : Vérifier qu'un script refuse proprement sans copie de travail**
-
-Run (sans supprimer la vraie copie ; test à blanc du message via un chemin bidon si besoin, ou simple lecture du diff) :
-```bash
-grep -l "assertIndexWorktree" scripts/populate-*.mjs scripts/populate-mismatch-rank.mts
-```
-Expected: les fichiers modifiés listés.
-
-- [ ] **Step 3 : Vérifier que le pack/enrichissement fonctionne toujours (copie de travail présente)**
+- [ ] **Step 2 : Vérifier le câblage + non-régression des types**
 
 Run:
 ```bash
+grep -l "assertIndexWorktree" scripts/populate-*.mjs scripts/populate-mismatch-rank.mts scripts/add-relief-proximite.mjs
 node scripts/index-unpack.mjs   # s'assurer que la copie de travail existe
-npx tsc --noEmit                # aucune régression de types
+npx tsc --noEmit
 ```
-Expected: copie de travail présente, 0 erreur tsc.
+Expected: fichiers modifiés listés ; copie de travail présente ; 0 erreur tsc.
 
-- [ ] **Step 4 : Commit**
+- [ ] **Step 3 : Commit**
 
 ```bash
 git add scripts/populate-mismatch-rank.mts scripts/populate-logement.mjs scripts/populate-hlm.mjs scripts/populate-rayonnement-index.mjs scripts/populate-uu-pop.mjs scripts/add-relief-proximite.mjs
@@ -808,10 +903,11 @@ git commit -m "feat(index): garde clone frais sur les scripts d'enrichissement E
 
 Run:
 ```bash
-node --test scripts/lib/index-io.test.mjs scripts/lib/require-index-worktree.test.mjs src/lib/memoize-promise.test.ts src/lib/comparateur-index-payload.test.ts
+node --test scripts/lib/index-io.test.mjs scripts/lib/require-index-worktree.test.mjs \
+  src/lib/memoize-promise.test.ts src/lib/comparateur-index-payload.test.ts src/lib/compressed-index-loader.test.ts
 node --test src/lib/*.test.ts src/lib/decision/*.test.ts
 ```
-Expected: tous verts (dont les 505 existants).
+Expected: tous verts (dont les 505 existants + les nouveaux).
 
 - [ ] **Step 2 : Types + sonde métier**
 
@@ -822,25 +918,24 @@ node --env-file=.env.local scripts/probe-conclusion.ts
 ```
 Expected: 0 erreur tsc ; sonde 20/20 (le dossier lit le même index, le round-trip garantit l'identité).
 
-- [ ] **Step 3 : Taille finale + historique**
+- [ ] **Step 3 : Taille finale + surveillance historique**
 
 Run:
 ```bash
 git cat-file -s HEAD:data/comparateur-index.json.gz | awk '{printf "%.1f Mo\n", $1/1024/1024}'
 git count-objects -vH | grep size-pack
 ```
-Expected: `.gz` ~10 Mo (bien sous 50). Noter la taille du pack pour la surveillance du risque deltas git (spec §6).
+Expected: `.gz` ~10 Mo (bien sous 50). Noter `size-pack` pour surveiller le risque deltas git (spec §6).
 
-- [ ] **Step 4 : Vérification à l'écran (dossier réel)**
+- [ ] **Step 4 : Vérification à l'écran (dossiers réels)**
 
-Charger Roubaix (`arbitration`), Digne-les-Bains (`favorable`), Arbigny (`neutral`) et confirmer que les orientations et la synthèse sont identiques à avant la bascule.
-Expected: comportement inchangé.
+Charger Roubaix (`arbitration`), Digne-les-Bains (`favorable`), Arbigny (`neutral`). Expected: orientations et synthèse identiques à avant la bascule.
 
 ---
 
 ## Notes de séquencement
 
-- Tasks 1 à 5 sont **indépendantes du runtime** (l'app lit encore le JSON clair inchangé) : livrables isolés, aucun risque de casse.
-- **Task 6** bascule le runtime sur le `.gz` : elle génère le `.gz` (`index:pack`) **avant** de rebrancher `loadIndex`, donc l'app ne se retrouve jamais sans artefact.
-- **Task 7** est le cutover git irréversible en un commit (gitignore + `git rm --cached` + `.gz` versionné) : à faire seulement une fois la Task 6 vérifiée à l'écran.
-- **Task 8** est un raffinement best-effort, sans valeur runtime : peut être reportée sans bloquer le reste.
+- **Tasks 1 à 6 n'affectent pas la production** : l'app lit encore le JSON clair inchangé. Livrables isolés, aucun risque de casse. Tout le mécanisme (I/O, invariants, loader) est écrit ET testé avant de toucher au chemin de production.
+- **Task 7 est le cutover atomique de la source canonique** (un seul commit : runtime + tracing + git + hook + doc). Revertable (revert du commit + JSON remis sous suivi) ; le sérieux vient de l'interdiction d'un état intermédiaire incohérent, pas d'une irréversibilité.
+- **Task 8** est un raffinement best-effort, sans impact runtime : reportable sans bloquer le reste.
+- **À confirmer post-déploiement** (hors périmètre code, spec §9) : le gain runtime (935 ms local chaud) au premier chargement réel sur Vercel (disque froid).
