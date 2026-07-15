@@ -109,8 +109,10 @@ variante. Le rôle reste `mismatch` unique.
 export type AbsoluteMeasureBasis = {
   kind: "absolute_measure";
   value: number;              // la grandeur BRUTE (la distance mesurée)
-  unit: "km" | "min";         // figé au lot 2a §11 ; ce lot ne produit QUE "km" (unit n'est pas un
-                              //   discriminant : aucun switch exhaustif dessus, il est rendu comme texte)
+  unit: "km";                 // "km" SEUL : on applique la doctrine « seulement le productible » (lot 2a)
+                              //   À L'INTÉRIEUR du fondement. Autoriser "min" créerait un état que le moteur
+                              //   ne sait ni produire ni expliquer, et qu'assertFactValid rejetterait (§10).
+                              //   Le jour où une durée réelle entre, on élargit en connaissance de cause.
   conventionId: string;       // "coast-proximity-v1" : LA DOCTRINE des seuils, versionnée
 };
 
@@ -179,13 +181,20 @@ jamais « la mer est à 146 km » (fausse précision).
 
 ### Mer (mismatch, distance ≥ 100 km)
 
-- **statement** : « Vous avez placé la proximité de la mer parmi vos priorités. La côte est estimée à environ
-  {km} km du point de référence retenu pour {commune}. Cette distance répond moins bien à cette dimension de
-  votre projet, sans rendre {commune} incompatible avec lui. »
-- **limitation** : « La distance est estimée à vol d'oiseau depuis une liste de localités côtières. Elle ne
-  représente ni la distance routière ni le temps de trajet, et pourra être affinée avec le trait de côte IGN. »
+C'est la **distance** qui est estimée, pas « la côte » : la formulation le dit exactement.
+
+- **statement** : « Vous avez placé la proximité de la mer parmi vos priorités. La distance au littoral est
+  estimée à environ {km} km depuis le point de référence retenu pour {commune}. Cette distance répond moins
+  bien à cette dimension de votre projet, sans rendre {commune} incompatible avec lui. »
+- **limitation** : « Cette estimation est calculée à vol d'oiseau depuis un ensemble de localités côtières de
+  référence. Elle ne correspond ni à la distance minimale au trait de côte, ni à la distance routière, ni au
+  temps de trajet. Une version ultérieure pourra utiliser directement le trait de côte IGN. »
 - **topic** : « la distance à la mer ».
-- **observedValue** (sur l'`EvidenceRef`) : « à environ {km} km de la côte ».
+- **observedValue** (sur l'`EvidenceRef`) : « distance au littoral estimée à environ {km} km ». La prudence
+  « estimée à environ » est portée par le statement, la preuve ET la consigne de prompt (§10), sans exception.
+- **grain** : `"commune"` (l'enum `EvidenceRef.grain` est `"commune" | "adresse" | "secteur"` : on ne l'élargit
+  pas ici). La précision « point de référence retenu » est portée par le statement et la limitation, pas par
+  le grain : le contrat de preuve n'affirme jamais une mesure surfacique sur toute la commune.
 
 ## 9. Périmètre exact
 
@@ -211,12 +220,17 @@ impossible. L'union grandit quand la forme devient réelle (même doctrine qu'au
 - **Lib pure** : `src/lib/decision/coast-facts.ts` (`COAST_PROXIMITY_CONVENTION`, `classifyCoastDistance`).
 - **Règle** : `src/lib/decision/coast-rules.ts` (fabrique sur le patron d'`absence-rules.ts`), exportant
   `COAST_RULES` (une règle `territoire.mer-proximite_mer`) et `COAST_KEYS`.
-- **REGISTRY** : `...COAST_RULES` ajouté dans `materiality-rules.ts`, et `case "mismatch"` d'`assertFactValid`
-  accepte `basis.kind === "absolute_measure"` (aujourd'hui `relative_position` / `named_absence`).
-- **Prompt** : `DECISION_NARRATIVE_PROMPT_VERSION` `v8 → v9` (`conclusion-hash.ts`) : la conclusion sait nommer
-  un mismatch de distance à la mer (via son `topic`), sans recopier la carte. Artefacts persistés invalidés.
-- **Sonde** : `scripts/probe-conclusion.ts` gagne le cas mer (mismatch de distance) ; on retrouve le vert avant
-  de livrer.
+- **REGISTRY + validation réelle** : `...COAST_RULES` ajouté dans `materiality-rules.ts`. `case "mismatch"`
+  d'`assertFactValid` ne se contente PAS d'ajouter `absolute_measure` à une whitelist de noms : il **valide la
+  mesure** (`value` fini et ≥ 0, `unit === "km"`, `conventionId` non vide). Le classifieur protège la règle ;
+  le validateur protège tous les futurs producteurs de `MismatchFact`.
+- **Prompt (vraiment modifié)** : `conclusion-prompt.ts` gagne une consigne mer dédiée (nommer la grandeur et
+  son estimation, garder « estimée à environ », jamais transformer une distance en temps de trajet, jamais
+  « la mer est à X km », ça s'ARBITRE jamais « à vérifier »), PUIS bump `DECISION_NARRATIVE_PROMPT_VERSION`
+  `v8 → v9` (`conclusion-hash.ts`). Bumper sans modifier le prompt invaliderait tout sans rien apprendre au
+  modèle : les deux vont ensemble. Artefacts persistés invalidés.
+- **Sonde** : `scripts/probe-conclusion.ts` gagne le cas mer (mismatch de distance) ; contrôle éditorial manuel
+  (appels API) avant de livrer.
 
 ## 11. Critères d'acceptation
 
@@ -225,10 +239,13 @@ impossible. L'union grandit quand la forme devient réelle (même doctrine qu'au
 2. `proximite_mer` déclarée (poids 2/3), `distanceCoteKm >= 100` → `mismatch` matériel : carte nommant la
    distance estimée au **point de référence**, `basis.kind === "absolute_measure"`, `basis.value` = distance
    brute, `basis.conventionId === "coast-proximity-v1"`, `unit === "km"` ; jamais « la mer est à X km » (toujours
-   « estimée à environ ») ; la `limitation` porte la nuance vol-d'oiseau / trait de côte IGN.
-3. `distanceCoteKm <= 15` → `satisfied` silencieux (couverture acquise, favorable, aucune carte) ;
-   `15 < d < 100` → `neutral` silencieux (couverture acquise, aucune carte). Aucun `DecisionFact` produit dans
-   les deux cas, quel que soit le poids.
+   « estimée à environ ») ; la `limitation` porte la nuance vol-d'oiseau / trait de côte IGN. **La valeur brute
+   du basis n'est pas arrondie** : `distanceCoteKm = 146.4` → `basis.value === 146.4` ET statement « environ
+   146 km » (fait auditable = valeur brute, restitution humaine = valeur arrondie).
+3. `distanceCoteKm <= 15` → `satisfied` silencieux : aucune carte, mais **couverture `examined`, outcome de
+   critère `favorable`, orientation `favorable`** (le débat doctrinal se grave dans le test E2E). `15 < d < 100`
+   → `neutral` silencieux : aucune carte, **couverture `examined`, orientation `neutral`** (valeur de l'enum
+   `Orientation` qui existe bien). Aucun `DecisionFact` produit dans les deux cas, quel que soit le poids.
 4. `distanceCoteKm` null / NaN / négatif → `uncertain` : couverture NON acquise, aucune valeur inventée, aucun
    repli `?? 0`.
 5. `proximite_mer` non déclarée → `not_applicable`.

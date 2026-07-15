@@ -67,6 +67,12 @@ test("donnée absente ou corrompue -> uncertain, jamais un verdict", () => {
   assert.equal(classifyCoastDistance(Number.POSITIVE_INFINITY), "uncertain");
   assert.equal(classifyCoastDistance(-5), "uncertain");
 });
+
+test("la classification se fait sur la valeur EXACTE, avant tout arrondi (bornes décimales)", () => {
+  assert.equal(classifyCoastDistance(15.001), "neutral");   // > 15, pas satisfied
+  assert.equal(classifyCoastDistance(99.999), "neutral");   // < 100, pas mismatch
+  assert.equal(classifyCoastDistance(100), "mismatch");
+});
 ```
 
 - [ ] **Step 2 : Lancer le test pour vérifier l'échec**
@@ -110,7 +116,7 @@ export function classifyCoastDistance(
 - [ ] **Step 4 : Lancer le test pour vérifier le succès**
 
 Run : `node --test src/lib/decision/coast-facts.test.ts`
-Expected : PASS (5 tests).
+Expected : PASS (6 tests).
 
 - [ ] **Step 5 : Commit**
 
@@ -184,12 +190,22 @@ test("loin (>=100) + poids 3 -> mismatch STRUCTURANT, absolute_measure, distance
   assert.equal(basis.unit, "km");
   assert.equal(basis.conventionId, "coast-proximity-v1");
   assert.equal(f.materialityTier, "structuring");
-  assert.match(f.statement, /estimée à environ 146 km/);
+  assert.match(f.statement, /distance au littoral est estimée à environ 146 km/);
   assert.match(f.statement, /point de référence retenu/);
   assert.doesNotMatch(f.statement, /la mer est à/i);
   assert.doesNotMatch(f.statement, /insuffisant|manque|médiocre/i);
   assert.equal(f.evidence[0]!.factId, "coastDistance.proximite_mer");
+  assert.match(f.evidence[0]!.observedValue!, /distance au littoral estimée à environ 146 km/);
   assertFactValid(f, p);
+});
+
+test("la valeur du basis est BRUTE (non arrondie) ; seul le texte arrondit", () => {
+  const p = project([{ key: "proximite_mer", weight: 3 }]);
+  const e = rule.evaluate(facts({ distanceCoteKm: 146.4 }), p, undefined as never);
+  const f = e.facts[0]!;
+  const basis = (f as { basis: { value: number } }).basis;
+  assert.equal(basis.value, 146.4);                        // fait auditable : valeur brute
+  assert.match(f.statement, /environ 146 km/);             // restitution humaine : arrondie
 });
 
 test("loin + poids 2 -> mismatch SECONDARY", () => {
@@ -257,12 +273,14 @@ export type RelativePositionBasis = {
   distributionVersion: string;
 };
 // MESURE PHYSIQUE ABSOLUE (lot 3a, mer) : la grandeur brute EST le fait, auto-suffisante (pas de
-// nationalContext, contrairement à named_absence). `unit` figé "km" | "min" au lot 2a §11 ; ce lot ne
-// produit que "km". `value` = la distance BRUTE, auditable indépendamment de la convention.
+// nationalContext, contrairement à named_absence). `unit` = "km" SEUL : doctrine « seulement le productible »
+// appliquée À L'INTÉRIEUR du fondement (autoriser "min" créerait un état que le moteur ne sait ni produire ni
+// expliquer, et qu'assertFactValid rejette). `value` = la distance BRUTE, auditable indépendamment de la
+// convention.
 export type AbsoluteMeasureBasis = {
   kind: "absolute_measure";
   value: number;
-  unit: "km" | "min";
+  unit: "km";
   conventionId: string;
 };
 export type MismatchBasis = NamedAbsenceBasis | RelativePositionBasis | AbsoluteMeasureBasis;
@@ -302,7 +320,8 @@ function makeCoastRule(): DecisionRule {
       const weight = preferenceWeight(p, "proximite_mer");
       if (weight === 0) return ret("not_applicable", [], "priorité non déclarée");
 
-      const verdict = classifyCoastDistance(f.distanceCoteKm);
+      const distanceKm = f.distanceCoteKm;
+      const verdict = classifyCoastDistance(distanceKm);
       if (verdict === "uncertain") return ret("uncertain", [], "distance à la côte indisponible");
 
       // neutral (intermédiaire) et satisfied (proche) toujours silencieux ; mismatch de poids 1 examiné
@@ -313,22 +332,26 @@ function makeCoastRule(): DecisionRule {
         return ret(verdict, [], reason);
       }
 
-      const dist = f.distanceCoteKm as number; // narrowing sûr : verdict "mismatch" => distance finie >= 100
-      const km = Math.round(dist);
+      // verdict "mismatch" && weight >= 2 : distanceKm est fini >= 100 par construction de classifyCoastDistance.
+      // Une garde d'invariant NARROW distanceKm de `number | null` à `number`, sans cast qui masquerait la relation.
+      if (distanceKm == null || !Number.isFinite(distanceKm)) {
+        throw new Error(`[decision] ${id}: invariant interne, distance valide attendue`);
+      }
+      const km = Math.round(distanceKm);
       const tier = weight >= 3 ? "structuring" : "secondary";
       const ev: EvidenceRef = {
         factId: "coastDistance.proximite_mer", module: "territoire", label: `Territoire · ${f.nom}`,
-        observedValue: `à environ ${km} km de la côte`, grain: "commune", href: territoireHref,
+        observedValue: `distance au littoral estimée à environ ${km} km`, grain: "commune", href: territoireHref,
       };
       const fact: MismatchFact = {
         id: `${f.insee}:mismatch-proximite_mer`, ruleId: id, sourceFactIds: ["coastDistance.proximite_mer"],
         module: "territoire", role: "mismatch", projectKey: "proximite_mer", materialityTier: tier,
         topic: "la distance à la mer",
-        statement: `Vous avez placé la proximité de la mer parmi vos priorités. La côte est estimée à environ ${km} km du point de référence retenu pour ${f.nom}. Cette distance répond moins bien à cette dimension de votre projet, sans rendre ${f.nom} incompatible avec lui.`,
-        basis: { kind: "absolute_measure", value: dist, unit: "km", conventionId: COAST_PROXIMITY_CONVENTION.id },
+        statement: `Vous avez placé la proximité de la mer parmi vos priorités. La distance au littoral est estimée à environ ${km} km depuis le point de référence retenu pour ${f.nom}. Cette distance répond moins bien à cette dimension de votre projet, sans rendre ${f.nom} incompatible avec lui.`,
+        basis: { kind: "absolute_measure", value: distanceKm, unit: "km", conventionId: COAST_PROXIMITY_CONVENTION.id },
         evidence: [ev],
         limitation:
-          "La distance est estimée à vol d'oiseau depuis une liste de localités côtières. Elle ne représente ni la distance routière ni le temps de trajet, et pourra être affinée avec le trait de côte IGN.",
+          "Cette estimation est calculée à vol d'oiseau depuis un ensemble de localités côtières de référence. Elle ne correspond ni à la distance minimale au trait de côte, ni à la distance routière, ni au temps de trajet. Une version ultérieure pourra utiliser directement le trait de côte IGN.",
       };
       return ret("mismatch", [fact], "éloignement attesté de la côte");
     },
@@ -357,22 +380,31 @@ import { COAST_RULES } from "./coast-rules.ts";
   ruleInondation,
 ```
 
-3. Dans `assertFactValid`, `case "mismatch"` (~ligne 453), remplacer la garde :
+3. Dans `assertFactValid`, `case "mismatch"` (~ligne 453), remplacer le bloc de garde (le `if (fact.basis.kind !== "relative_position" && fact.basis.kind !== "named_absence") { throw … }`) par une **validation réelle** de la mesure absolue (pas une simple whitelist de noms : elle protège tous les futurs producteurs de `MismatchFact`) :
 
 ```ts
-      if (fact.basis.kind !== "relative_position" && fact.basis.kind !== "named_absence") {
+      const basis = fact.basis;
+      if (basis.kind === "absolute_measure") {
+        if (!Number.isFinite(basis.value) || basis.value < 0) {
+          throw new Error(`[decision] ${fact.ruleId}: mesure absolue invalide`);
+        }
+        if (basis.unit !== "km") {
+          throw new Error(`[decision] ${fact.ruleId}: unité de mesure absolue inconnue (${basis.unit})`);
+        }
+        if (!basis.conventionId) {
+          throw new Error(`[decision] ${fact.ruleId}: convention de mesure absente`);
+        }
+      } else if (basis.kind !== "relative_position" && basis.kind !== "named_absence") {
+        throw new Error(`[decision] ${fact.ruleId}: basis de mismatch inconnu (${(basis as { kind: string }).kind})`);
+      }
 ```
 
-par :
-
-```ts
-      if (fact.basis.kind !== "relative_position" && fact.basis.kind !== "named_absence" && fact.basis.kind !== "absolute_measure") {
-```
+Le `basis.unit !== "km"` est une garde de runtime (le type interdit déjà « min » à la compilation) qui défend contre une construction non typée (JSON, cast).
 
 - [ ] **Step 6 : Lancer les tests pour vérifier le succès**
 
 Run : `node --test src/lib/decision/coast-rules.test.ts`
-Expected : PASS (7 tests).
+Expected : PASS (8 tests).
 
 - [ ] **Step 7 : Vérifier le typage global**
 
@@ -448,16 +480,29 @@ test("E2E mer loin (>=100, poids 3) -> carte absolute_measure dans « mismatches
   assert.ok(sec, "la section « mismatches » doit exister");
   const mer = sec!.facts.find((f) => f.role === "mismatch" && (f as { basis: { kind: string } }).basis.kind === "absolute_measure");
   assert.ok(mer, "une carte de distance à la mer doit être présente");
-  assert.match(mer!.statement, /estimée à environ 240 km/);
+  assert.match(mer!.statement, /distance au littoral est estimée à environ 240 km/);
   assert.equal(d.criteria.orientation, "arbitration");
 });
 
-test("E2E mer proche (<=15) -> satisfied, aucune carte, jamais arbitrage sur la mer", () => {
+test("E2E mer proche (<=15) -> satisfied : couverture examinée, outcome favorable, orientation favorable, aucune carte", () => {
   const d = dossierFor(entry({ distance_cote_km: 4 }), project([{ key: "proximite_mer", weight: 3 }]));
   const sec = d.sections.find((s) => s.key === "mismatches");
   const mer = (sec?.facts ?? []).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "absolute_measure");
   assert.equal(mer.length, 0, "aucune carte quand la commune est proche du littoral");
-  assert.notEqual(d.criteria.orientation, "arbitration");
+  const crit = d.criteria.registry.find((c) => c.criterionKey === "proximite_mer");
+  assert.equal(crit?.coverage, "examined");
+  assert.equal(crit?.outcome, "favorable"); // satisfied (RuleOutcome) -> favorable (CriterionOutcome)
+  assert.equal(d.criteria.orientation, "favorable");
+});
+
+test("E2E mer intermédiaire (15 < d < 100) -> neutral : couverture examinée, orientation neutral, aucune carte", () => {
+  const d = dossierFor(entry({ distance_cote_km: 50 }), project([{ key: "proximite_mer", weight: 3 }]));
+  const sec = d.sections.find((s) => s.key === "mismatches");
+  const mer = (sec?.facts ?? []).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "absolute_measure");
+  assert.equal(mer.length, 0, "aucune carte en zone intermédiaire");
+  const crit = d.criteria.registry.find((c) => c.criterionKey === "proximite_mer");
+  assert.equal(crit?.coverage, "examined");
+  assert.equal(d.criteria.orientation, "neutral"); // examiné, aucun signal favorable matériel
 });
 
 test("E2E poids 1 : loin -> couverture acquise, aucune carte, pas d'arbitrage", () => {
@@ -474,9 +519,9 @@ test("E2E poids 1 : loin -> couverture acquise, aucune carte, pas d'arbitrage", 
 - [ ] **Step 2 : Lancer le test**
 
 Run : `node --test src/lib/decision/coast-e2e.test.ts`
-Expected : PASS (3 tests).
+Expected : PASS (4 tests).
 
-> Si le 1er test échoue sur `orientation !== "arbitration"`, vérifier que `...COAST_RULES` est bien dans le REGISTRY (Task 2 Step 5) : un mismatch structurant seul suffit à `arbitration` (`hasStructuringMismatch`). Si le 3e échoue sur `coverage`, confirmer que `mismatch` est dans `EXPLOITABLE` de `criteria-registry.ts` (il l'est depuis la v1, ne rien changer).
+> Si le 1er test échoue sur `orientation !== "arbitration"`, vérifier que `...COAST_RULES` est bien dans le REGISTRY (Task 2 Step 5) : un mismatch structurant seul suffit à `arbitration` (`mismatchStructuring > 0`). Si un test échoue sur `coverage`, confirmer que `mismatch`/`neutral`/`satisfied` sont dans `EXPLOITABLE` de `criteria-registry.ts` (ils le sont depuis la v1, ne rien changer).
 
 - [ ] **Step 3 : Commit**
 
@@ -492,9 +537,10 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ---
 
-### Task 4 : bump du prompt (v8 → v9) et sonde de conclusion
+### Task 4 : consigne mer dans le prompt, bump (v8 → v9), sonde de conclusion
 
 **Files:**
+- Modify: `src/lib/decision/conclusion-prompt.ts` (ajouter une consigne mer dans la liste des interdits mismatch)
 - Modify: `src/lib/decision/conclusion-hash.ts:28` (bump de version)
 - Modify: `scripts/probe-conclusion.ts` (ajouter le cas mer)
 
@@ -502,9 +548,22 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 - Consumes : `buildConclusionPlan`, `MaterialityTier`, `DecisionFact`, `probe(...)` (déjà dans le fichier).
 - Produces : rien.
 
-Le bump de `DECISION_NARRATIVE_PROMPT_VERSION` invalide les artefacts de conclusion persistés (par conception : la grammaire narrative gagne un mismatch de distance). La sonde est une vérification **manuelle** (appels API), pas un `node --test`.
+**Le prompt est VRAIMENT modifié, puis bumpé.** Bumper la version sans toucher au prompt invaliderait tous les artefacts persistés sans donner aucune nouvelle instruction au modèle. On grave d'abord la prudence éditoriale propre à cette mesure imparfaite (mer), puis on bump. La sonde est une vérification **manuelle** (appels API), pas un `node --test`.
 
-- [ ] **Step 1 : Bumper la version du prompt**
+- [ ] **Step 1 : Ajouter la consigne mer au prompt**
+
+Dans `src/lib/decision/conclusion-prompt.ts`, repérer le bullet qui traite l'ABSENCE ATTESTÉE (il commence par « - généraliser une ABSENCE ATTESTÉE au-delà de ce qui est mesuré. » et se termine par « Comme tout mismatch, cela s'ARBITRE, jamais « à vérifier » ; »). **Juste après ce bullet**, insérer :
+
+```ts
+- transformer une MESURE PHYSIQUE en autre chose que ce qu'elle mesure. Certains mismatchs reposent sur une
+  grandeur mesurée (la distance à la mer). Nommez la grandeur et son estimation, gardez la prudence « estimée
+  à environ », ne transformez jamais une distance en temps de trajet, n'écrivez jamais « la mer est à X km »,
+  et comme tout mismatch, cela s'ARBITRE, jamais « à vérifier » ;
+```
+
+(Insérer la ligne comme partie intégrante de la chaîne de texte du prompt, au même niveau d'indentation et dans les mêmes délimiteurs que les bullets voisins.)
+
+- [ ] **Step 2 : Bumper la version du prompt**
 
 Dans `src/lib/decision/conclusion-hash.ts`, ligne 28, remplacer :
 
@@ -518,12 +577,12 @@ par :
 export const DECISION_NARRATIVE_PROMPT_VERSION = "v9";
 ```
 
-- [ ] **Step 2 : Vérifier que le test de hash suit**
+- [ ] **Step 3 : Vérifier que le test de hash suit**
 
 Run : `node --test src/lib/decision/conclusion-hash.test.ts`
 Expected : PASS. (Si un test fige la valeur `"v8"`, le mettre à jour à `"v9"` — c'est le comportement attendu, le bump invalide bien les hash.)
 
-- [ ] **Step 3 : Ajouter le cas mer à la sonde**
+- [ ] **Step 4 : Ajouter le cas mer à la sonde**
 
 Dans `scripts/probe-conclusion.ts`, après la définition de `planAbsence` (juste avant la ligne `console.log("gate :", ...)`), ajouter le helper et le plan :
 
@@ -574,26 +633,27 @@ const R = a.retenus + b.retenus + c.retenus + d.retenus, T = a.total + b.total +
 console.log(`\n════ TAUX DE SURVIE : ${R}/${T} blocs ════`);
 ```
 
-- [ ] **Step 4 : Vérifier le typage**
+- [ ] **Step 5 : Vérifier le typage**
 
 Run : `npx tsc --noEmit`
 Expected : 0 erreur.
 
-- [ ] **Step 5 : Lancer la sonde (vérification manuelle, nécessite ANTHROPIC_API_KEY)**
+- [ ] **Step 6 : Lancer la sonde (vérification manuelle, nécessite ANTHROPIC_API_KEY)**
 
 Run : `npx tsx scripts/probe-conclusion.ts` (ou la commande de sonde du projet, cf. `package.json`).
 Expected : le cas « mer / éloignement » produit des blocs retenus (le modèle nomme la distance en comparatif, sans dire « à vérifier »), et le taux de survie global reste au niveau des lots précédents (≈ 25/25). Contrôle visuel des tirages : jamais « la mer est à X km », toujours « estimée à environ ».
 
 > Cette étape est un contrôle éditorial manuel. Si un bloc mer est rejeté par `validateGeneratedBlocks`, lire le motif affiché et ajuster la consigne de prompt (nommer un mismatch de distance sans recopier la carte), pas les seuils.
 
-- [ ] **Step 6 : Commit**
+- [ ] **Step 7 : Commit**
 
 ```bash
-git add src/lib/decision/conclusion-hash.ts scripts/probe-conclusion.ts
-git commit -m "feat(mismatch): prompt v8 -> v9 (mismatch de distance mer) + cas de sonde
+git add src/lib/decision/conclusion-prompt.ts src/lib/decision/conclusion-hash.ts scripts/probe-conclusion.ts
+git commit -m "feat(mismatch): consigne mer dans le prompt + v8 -> v9 + cas de sonde
 
-Bump invalide les artefacts de conclusion persistés (grammaire narrative
-gagne l'éloignement mer). Sonde: cas 'mer / éloignement' ajouté.
+Prompt: consigne dédiée (nommer la grandeur, 'estimée à environ', jamais de
+temps de trajet ni 'la mer est à X km'). Bump invalide les artefacts persistés.
+Sonde: cas 'mer / éloignement' ajouté.
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -643,6 +703,6 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 - **§6 doctrine de résultat + poids** → Task 2 (règle) + tests poids 1/2/3, satisfied/neutral/uncertain/not_applicable.
 - **§7 satisfied silencieux, aucun fait favorable** → Task 2 (aucune branche ne produit de fait hors mismatch ≥ 2) + test « satisfied … aucun fait ».
 - **§8 formulation (statement, limitation, topic, observedValue, « estimée à environ », `Math.round`)** → Task 2 Step 4 + assertions du test.
-- **§10 câblage REGISTRY + assertFactValid + prompt v9 + sonde** → Task 2 Step 5, Task 4.
+- **§10 câblage REGISTRY + assertFactValid (validation RÉELLE value/unit/conventionId) + prompt réellement modifié puis v9 + sonde** → Task 2 Step 5, Task 4 (Steps 1-2).
 - **§11 critères d'acceptation 1-8** → Tasks 1-4 (unitaires + e2e) ; §11.6 orientation poids-1 → Task 3 test 3.
 - **Hors périmètre (lot 3b taille)** : aucune tâche, `CategoricalStateBasis` NON déclaré (Task 2 n'ajoute que `absolute_measure`).
