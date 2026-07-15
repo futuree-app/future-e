@@ -11,18 +11,18 @@ const nextConfig: NextConfig = {
   // local, fichier introuvable en prod).
   outputFileTracingIncludes: {
     "/api/comparateur-vie/match": [
-      "./data/comparateur-index.json",
+      "./data/comparateur-index.json.gz",
       "./data/ze-emploi-na38.json",
     ],
     // Module Territoire : la page et la synthèse lisent l'index (carte d'identité,
     // trait distinctif, démographie, couvert naturel) et la saisonnalité.
     "/rapport/quartier": [
-      "./data/comparateur-index.json",
+      "./data/comparateur-index.json.gz",
       "./data/residences-secondaires.json",
       "./data/communes-baignade.json",
     ],
     "/api/synthesize-quartier": [
-      "./data/comparateur-index.json",
+      "./data/comparateur-index.json.gz",
       "./data/residences-secondaires.json",
       "./data/communes-baignade.json",
     ],

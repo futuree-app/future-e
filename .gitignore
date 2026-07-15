@@ -61,6 +61,9 @@ Photos/
 data/communes-population.json
 data/communes-vivabilite.json
 
+# Copie de travail de l'index (artefact canonique = comparateur-index.json.gz)
+data/comparateur-index.json
+
 # Sources INSEE emploi brutes (~250 Mo) — non versionnées ; les caches dérivés
 # data/communes-emploi.json et data/ze-emploi-na38.json le sont (cf. altitude).
 data/source/DS_FLORES_A38_2024_CSV_FR.zip

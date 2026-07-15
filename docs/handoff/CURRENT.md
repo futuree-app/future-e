@@ -10,8 +10,11 @@
 anomalie). Si une source de critère (nature, écoles…) est ré-enrichie, **relancer ce script** pour que les
 bandes ne deviennent pas obsolètes.
 
-**GitHub avertit** (non bloquant) que l'index dépasse 50 Mo. Il grossira encore au lot 2. Piste à instruire
-avant que ça ne coince : Git LFS pour l'index, ou sortir `rankBands` dans un fichier annexe chargé à part.
+**Index gzip (livré) :** l'artefact canonique est `data/comparateur-index.json.gz` (~10 Mo, sous le seuil
+GitHub de 50 Mo). Après un clone frais ou avant une session d'enrichissement : `npm run index:unpack` (écrit
+la copie de travail `data/comparateur-index.json`, gitignorée). Après un enrichissement : `npm run
+index:pack`, puis committer le `.gz`. `npm run hooks:install` pose le hook pre-commit de vérification.
+Doctrine complète : `docs/superpowers/specs/2026-07-15-compression-index-gzip-design.md`.
 
 ## Ce qui a été livré : le chantier B, `mismatch`
 

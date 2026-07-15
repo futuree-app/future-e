@@ -1,6 +1,7 @@
 import "server-only";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { createCompressedIndexLoader } from "@/lib/compressed-index-loader";
 import {
   resolveZoneAnchors,
   resolveExclusions,
@@ -537,9 +538,11 @@ export type IndexCommune = {
     distanceKm: number;
   } | null;
 };
-type IndexFile = { meta: unknown; communes: IndexCommune[] };
+const INDEX_GZ_PATH = path.join(process.cwd(), "data", "comparateur-index.json.gz");
+// L'index canonique est un .gz versionné (cf. spec compression-index-gzip). Le loader
+// gunzip + mémoïse + valide la racine, et appelle buildUuPop une seule fois.
+const loadIndexOnce = createCompressedIndexLoader(INDEX_GZ_PATH, buildUuPop);
 
-let indexCache: IndexCommune[] | null = null;
 let nameCache: Map<string, IndexCommune> | null = null;
 
 // Population d'unité urbaine = somme des populations communales par code UU. Dérivée au
@@ -570,13 +573,7 @@ export function tailleVilleOf(c: IndexCommune): number | null {
 }
 
 async function loadIndex(): Promise<IndexCommune[]> {
-  if (indexCache) return indexCache;
-  const filePath = path.join(process.cwd(), "data", "comparateur-index.json");
-  const raw = await fs.readFile(filePath, "utf8");
-  const parsed = JSON.parse(raw) as IndexFile;
-  indexCache = parsed.communes;
-  buildUuPop(indexCache);
-  return indexCache;
+  return loadIndexOnce();
 }
 
 // ════════════════════════════════════════════════════════════════════════════
