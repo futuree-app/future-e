@@ -51,3 +51,54 @@ export function assertIndexInvariants(communes, opts = {}) {
     seen.add(c.insee);
   }
 }
+
+import { existsSync, readFileSync, writeFileSync, renameSync, rmSync } from "node:fs";
+
+function uniqueTmp(target) {
+  return `${target}.${process.pid}.${crypto.randomUUID()}.tmp`;
+}
+
+// JSON de travail -> gz canonique. Atomique (tmp unique + rename), round-trip verifié.
+export function packFile(jsonPath, gzPath, opts) {
+  if (!existsSync(jsonPath)) {
+    throw new Error("La copie de travail de l'index n'existe pas. Lancez `npm run index:unpack`.");
+  }
+  const jsonBuffer = readFileSync(jsonPath);
+  assertIndexInvariants(parseCommunes(jsonBuffer), opts);
+  const gz = packJson(jsonBuffer);
+  const tmp = uniqueTmp(gzPath);
+  try {
+    writeFileSync(tmp, gz);
+    if (sha256(unpackGz(readFileSync(tmp))) !== sha256(jsonBuffer)) {
+      throw new Error("Round-trip gzip échoué : les octets décompressés diffèrent de la source.");
+    }
+    renameSync(tmp, gzPath);
+  } finally {
+    if (existsSync(tmp)) rmSync(tmp);
+  }
+}
+
+// gz canonique -> JSON de travail. Atomique. Valide la structure ET les invariants
+// AVANT de publier (le canonique doit être sain avant de devenir base de travail).
+export function unpackFile(gzPath, jsonPath, opts) {
+  const jsonBuffer = unpackGz(readFileSync(gzPath));
+  assertIndexInvariants(parseCommunes(jsonBuffer), opts);
+  const tmp = uniqueTmp(jsonPath);
+  try {
+    writeFileSync(tmp, jsonBuffer);
+    renameSync(tmp, jsonPath);
+  } finally {
+    if (existsSync(tmp)) rmSync(tmp);
+  }
+}
+
+// Vérifie l'intégrité du gz (+ la synchro avec le JSON local s'il existe).
+export function verifyIndex(jsonPath, gzPath, opts) {
+  const jsonBuffer = unpackGz(readFileSync(gzPath)); // throw si gz illisible/tronqué
+  assertIndexInvariants(parseCommunes(jsonBuffer), opts);
+  if (existsSync(jsonPath)) {
+    if (sha256(readFileSync(jsonPath)) !== sha256(jsonBuffer)) {
+      throw new Error("L'index local a été modifié mais l'artefact versionné n'a pas été repacké. Lancez `npm run index:pack`.");
+    }
+  }
+}
