@@ -24,8 +24,8 @@ function project(prefs: { key: string; weight: number }[]): UserProject {
 const rule = (key: string) => MISMATCH_RULES.find((r) => r.id === `territoire.mismatch-${key}`)!;
 const evalRule = (key: string, f: ModuleFacts, p: UserProject) => rule(key).evaluate(f, p, undefined as never);
 
-test("la fabrique produit 10 règles", () => {
-  assert.equal(MISMATCH_RULES.length, 10);
+test("la fabrique produit 11 règles", () => {
+  assert.equal(MISMATCH_RULES.length, 11);
 });
 test("extrême défavorable + poids 3 -> mismatch STRUCTURANT, phrase comparative, jamais un jugement absolu", () => {
   const e = evalRule("nature", facts({ nature: { low: 0.08, high: 0.14 } }), project([{ key: "nature", weight: 3 }]));
@@ -58,4 +58,13 @@ test("poids 2 -> secondary ; poids 3 -> structuring", () => {
   const f = facts({ vie_locale: { low: 0.03, high: 0.07 } });
   assert.equal(evalRule("vie_locale", f, project([{ key: "vie_locale", weight: 2 }])).facts[0]!.materialityTier, "secondary");
   assert.equal(evalRule("vie_locale", f, project([{ key: "vie_locale", weight: 3 }])).facts[0]!.materialityTier, "structuring");
+});
+test("lot 2b : acces_services en queue basse (poids 3) -> mismatch structurant, comparatif", () => {
+  const e = evalRule("acces_services", facts({ acces_services: { low: 0.01, high: 0.04 } }), project([{ key: "acces_services", weight: 3 }]));
+  assert.equal(e.outcome, "mismatch");
+  const f = e.facts[0]!;
+  assert.equal(f.materialityTier, "structuring");
+  assert.match(f.statement, /les 5 % de communes|de France/);
+  assert.doesNotMatch(f.statement, /insuffisant|manque/i);
+  assert.equal(f.evidence[0]!.factId, "relativePosition.acces_services");
 });

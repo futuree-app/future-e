@@ -20,6 +20,7 @@ const territoireHref = "/rapport/quartier";
 export const MISMATCH_KEYS: PreferenceKey[] = [
   "nature", "acces_ecoles", "acces_soins", "acces_culture", "acces_transports",
   "faible_dependance_auto", "croissance_demographique", "vie_locale", "cadre_calme", "viabilite_emploi",
+  "acces_services", // lot 2b : plafond dégénéré (services complets = table-stakes -> neutral), queue basse propre
 ];
 
 function relativeFact(f: ModuleFacts, key: PreferenceKey): RelativeCriterionFact {

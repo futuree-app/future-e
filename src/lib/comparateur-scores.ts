@@ -18,6 +18,7 @@ import type { IndexCommune, PreferenceKey } from "./comparateur-vie.ts";
 export const MISMATCH_RANK_KEYS: PreferenceKey[] = [
   "nature", "acces_ecoles", "acces_soins", "acces_culture", "acces_transports",
   "faible_dependance_auto", "croissance_demographique", "vie_locale", "cadre_calme", "viabilite_emploi",
+  "acces_services", // lot 2b : mécanique v1, plafond dégénéré neutralisé par la bande à deux bornes
 ];
 
 type Anchors = [number, number][];
@@ -66,6 +67,10 @@ export function mismatchRawScore(key: PreferenceKey, c: IndexCommune): number | 
       return lerp(CALME, c.densite);
     case "viabilite_emploi":
       return c.emploi == null ? null : 0.6 * c.emploi.taille + 0.4 * c.emploi.diversite;
+    case "acces_services":
+      // COPIE FIDÈLE de subScore("acces_services") : éloignement bas = mieux. Le test de parité garantit
+      // qu'elles restent identiques (sinon le rang du dossier ordonnerait autrement que le comparateur).
+      return c.vivpct?.eloignement == null ? null : 100 - c.vivpct.eloignement;
     default:
       return null; // hors des 10 clés de mismatch : non couvert ici
   }
