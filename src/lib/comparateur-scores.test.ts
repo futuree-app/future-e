@@ -1,14 +1,17 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
 import { mismatchRawScore, MISMATCH_RANK_KEYS } from "./comparateur-scores.ts";
 import type { IndexCommune } from "./comparateur-vie.ts";
 
 // La lib est PURE : le test lit l'index directement, sans passer par comparateur-vie (server-only). La
 // parité avec signatureScore est garantie STRUCTURELLEMENT (signatureScore délègue à mismatchRawScore pour
 // ces 10 clés) ; ce test vérifie que la lib tient ses invariants sur données réelles.
+// L'index canonique est le .gz versionné (cf. spec compression-index-gzip) : présent en CI et sur clone
+// frais, contrairement au JSON clair qui est une copie de travail gitignorée.
 const communes: IndexCommune[] = JSON.parse(
-  readFileSync("data/comparateur-index.json", "utf8"),
+  gunzipSync(readFileSync("data/comparateur-index.json.gz")).toString("utf8"),
 ).communes.slice(0, 800);
 
 test("une commune SANS la donnée rend null (aucun repli ?? 0 / ?? 100)", () => {
