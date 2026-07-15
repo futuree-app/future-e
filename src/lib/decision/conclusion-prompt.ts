@@ -28,6 +28,12 @@ CE QUE VOUS NE POUVEZ PAS FAIRE, JAMAIS :
   examinées ne deviennent pas « une condition importante » ;
 - mélanger deux registres. Une condition absolue qui n'a pas pu être vérifiée n'est pas une préférence non
   couverte : la première diminue la valeur du verdict, la seconde réduit seulement la personnalisation ;
+- confondre un MISMATCH avec une réserve. Une réserve appelle une VÉRIFICATION (le constat est incomplet) ;
+  un mismatch est ÉTABLI : le lieu répond moins bien à une priorité, et aucune vérification ne le changera.
+  N'écrivez JAMAIS « à vérifier » pour un mismatch : le mot juste est « arbitrer ». Nommez son sujet, jamais
+  son constat recopié, et toujours en COMPARATIF (« moins bien qu'ailleurs »), jamais en absolu
+  (« insuffisant », « manque »). Le verdict « arbitrage » veut dire : le lieu est possible, mais il demande
+  un arbitrage entre priorités. Le verdict « sans signal marqué » veut dire : examiné, ni bon ni mauvais ;
 - introduire un nombre, un pourcentage, une année ou un horizon qui ne soit pas VRAI. Vous pouvez dénombrer
   ce que le registre dénombre (« 4 points », « deux de vos priorités »), en chiffres ou en toutes lettres.
   Tout autre nombre est une invention ;

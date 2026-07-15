@@ -63,13 +63,40 @@ const plan = buildConclusionPlan({
   mismatchShown: 0,
 });
 
+// Un fait de MISMATCH (établi, à arbitrer, jamais à vérifier).
+function mismatch(id: string, tier: MaterialityTier, topic: string): DecisionFact {
+  return {
+    id, ruleId: `territoire.mismatch-${id}`, sourceFactIds: [`relativePosition.${id}`], module: "territoire",
+    topic, statement: `Sur cet indicateur, Roubaix se situe parmi les 20 % de communes les moins favorables de France.`,
+    materialityTier: tier, role: "mismatch", projectKey: id as never,
+    basis: { kind: "relative_position", rankLow: 0.05, rankHigh: 0.12, universe: "communes_france" },
+    evidence: [{ factId: `relativePosition.${id}`, module: "territoire", label: "Territoire", grain: "commune" }],
+  } as DecisionFact;
+}
+
+// Cas MISMATCH : deux priorités nettement moins bien servies (nature, calme), plus une réserve. Le modèle
+// doit NOMMER les deux mismatchs, les dire en COMPARATIF, et ne pas les confondre avec « à vérifier ».
+const planMismatch = buildConclusionPlan({
+  scope: "commune", communeNom: "Roubaix", conclusionState: "no_incompatibility_established", posture: "recherche",
+  shownFacts: [
+    mismatch("nature", "structuring", "les espaces naturels"),
+    mismatch("cadre_calme", "structuring", "le cadre calme"),
+    verif("f1", "secondary", "le retrait-gonflement des argiles", "À cette adresse, le sol est exposé au retrait-gonflement des argiles."),
+  ],
+  uncovered: [], uncoveredPriorities: [],
+  establishedIncompatibility: null, coverage: "high", orientation: "arbitration",
+  hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 1,
+  mismatchTotal: 2, mismatchShown: 2,
+});
+
 console.log("gate :", shouldGenerateNarrative(plan), "· lead :", JSON.stringify(plan.lead));
 console.log("\n──── DÉTERMINISTE (ce que le lecteur voit sans IA) ────");
 console.log(plan.blocks.map((b) => b.fallbackText).join(" "));
 
+async function probe(plan: ReturnType<typeof buildConclusionPlan>, label: string): Promise<{ retenus: number; total: number }> {
 const generables = plan.blocks.filter((b) => b.generable);
 let retenus = 0;
-
+console.log(`\n════════ PLAN : ${label} (${generables.length} blocs générables) ════════`);
 for (let i = 1; i <= TIRAGES; i++) {
   const { object } = await generateObject({
     model: anthropic("claude-sonnet-4-6"),
@@ -105,4 +132,10 @@ for (let i = 1; i <= TIRAGES; i++) {
   }
 }
 
-console.log(`\n════ TAUX DE SURVIE : ${retenus}/${TIRAGES * generables.length} blocs ════`);
+  return { retenus, total: TIRAGES * generables.length };
+}
+
+const a = await probe(plan, "réserves majeures");
+const b = await probe(planMismatch, "mismatch / arbitrage");
+const R = a.retenus + b.retenus, T = a.total + b.total;
+console.log(`\n════ TAUX DE SURVIE : ${R}/${T} blocs ════`);
