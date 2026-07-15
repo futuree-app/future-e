@@ -331,3 +331,12 @@ test("AGRICULTURE : le critère reste NON EXAMINÉ, et c'est assumé", () => {
   const r = run(facts({ sante: SANTE_EXPOSEE }), projetClimat("faible_pression_agricole"));
   assert.equal(r.evaluations.some((e) => e.projectKeys.includes("faible_pression_agricole")), false);
 });
+
+test("un projet priorisant la mobilité sur une commune SANS réseau produit un mismatch d'absence", () => {
+  const f = facts({ localNetwork: { measured: true, access: null } });
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "mobilite_quotidienne", weight: 3 }] });
+  const r = run(f, p);
+  const mm = r.facts.find((x) => x.role === "mismatch" && x.ruleId === "territoire.absence-mobilite_quotidienne");
+  assert.ok(mm, "un fait d'absence mobilité doit être émis");
+  assert.equal((mm as { basis: { kind: string } }).basis.kind, "named_absence");
+});

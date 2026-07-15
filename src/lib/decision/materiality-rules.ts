@@ -18,6 +18,7 @@ import { declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } 
 import { LOGEMENT_RULES } from "./logement-rules.ts";
 import { HARD_CONSTRAINT_RULES } from "./hard-constraint-rules.ts";
 import { MISMATCH_RULES } from "./mismatch-rules.ts";
+import { ABSENCE_RULES } from "./absence-rules.ts";
 import { toCommuneAttributes } from "./module-facts-map.ts";
 import {
   trajectoirePhrase, fmtClimat, CLIMAT_HORIZON_LABEL, type ClimatAxe,
@@ -404,6 +405,7 @@ export const REGISTRY: DecisionRule[] = [
   ruleBruit,
   ruleIndustrie,
   ...MISMATCH_RULES,
+  ...ABSENCE_RULES,
   ruleInondation,
   ...LOGEMENT_RULES,
 ];
@@ -445,6 +447,15 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
     case "verification":
       if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);
       if (!fact.action) throw new Error(`[decision] ${fact.ruleId}: vérification sans action`);
+      break;
+    case "mismatch":
+      if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);
+      if (fact.basis.kind !== "relative_position" && fact.basis.kind !== "named_absence") {
+        throw new Error(`[decision] ${fact.ruleId}: basis de mismatch inconnu (${(fact.basis as { kind: string }).kind})`);
+      }
+      if (!declaredPreferenceKeys(project).includes(fact.projectKey)) {
+        throw new Error(`[decision] ${fact.ruleId}: mismatch sur une préférence non déclarée (${fact.projectKey})`);
+      }
       break;
   }
 }

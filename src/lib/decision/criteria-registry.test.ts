@@ -210,3 +210,12 @@ test("que des neutres -> orientation NEUTRAL (examiné, aucun signal), jamais fa
   assert.equal(s.registry.find((c) => c.criterionKey === "nature")!.coverage, "examined");
   assert.equal(s.orientation, "neutral");
 });
+
+test("un mismatch d'absence de POIDS 1 monte la couverture mais ne déclenche PAS d'arbitrage", () => {
+  const s = buildCriteriaRegistry(
+    project({}, [{ key: "mobilite_quotidienne", weight: 1 }]),
+    run([ev("territoire.absence-mobilite_quotidienne", ["mobilite_quotidienne"], "mismatch", [])]),
+  );
+  assert.equal(s.registry.find((c) => c.criterionKey === "mobilite_quotidienne")!.coverage, "examined");
+  assert.notEqual(s.orientation, "arbitration");
+});

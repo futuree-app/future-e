@@ -30,14 +30,14 @@ export type NamedAbsenceBasis = {
 };
 
 export function classifyNetworkAbsence(a: LocalNetworkAttestation): AbsenceVerdict {
-  if (!a.measured) return "uncertain";                   // non mesuré : jamais une absence inventée
+  if (!a?.measured) return "uncertain";                  // non mesuré / absent : jamais une absence inventée
   if (a.access == null) return "mismatch";               // sous plancher = absence attestée
   if (!Number.isFinite(a.access) || a.access < 0 || a.access > 100) return "uncertain"; // corrompu
   return "neutral";                                      // présent
 }
 
 export function classifyHigherEdAbsence(a: HigherEdAttestation): AbsenceVerdict {
-  if (!a.measured) return "uncertain";
+  if (!a?.measured) return "uncertain";
   if (!Number.isFinite(a.radiusKm) || a.radiusKm <= 0) return "uncertain";
   // On PRÉFÈRE le vrai compte d'établissements (airtight) quand il est là ; sinon weightedAccess == 0
   // (équivalent hors le cas-frontière rural d == DMAX, de mesure nulle).

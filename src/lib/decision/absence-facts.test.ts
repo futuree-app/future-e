@@ -30,3 +30,8 @@ test("le contexte national est daté et dissocié des conventions", () => {
   assert.equal(ABSENCE_NATIONAL_CONTEXT.network!.distributionVersion, "absence-dist-2026-07-15");
   assert.ok(ABSENCE_NATIONAL_CONTEXT.higherEd!.prevalence > 0.3 && ABSENCE_NATIONAL_CONTEXT.higherEd!.prevalence < 0.5);
 });
+
+test("DÉFENSIF : attestation undefined -> uncertain (jamais un crash ni une absence inventée)", () => {
+  assert.equal(classifyNetworkAbsence(undefined as never), "uncertain");
+  assert.equal(classifyHigherEdAbsence(undefined as never), "uncertain");
+});
