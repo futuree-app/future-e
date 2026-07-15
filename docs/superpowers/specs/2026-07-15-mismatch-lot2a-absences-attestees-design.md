@@ -71,26 +71,40 @@ non géolocalisée   -> reseauLocal = null            (ou absent) = NON mesurée
 ```
 
 Le dossier lit : `measured === true && acces == null` → **absence attestée** ; `measured && acces != null` →
-**présent** ; sinon → **non mesuré** (uncertain).
+**présent** ; sinon → **non mesuré** (uncertain). L'`access` valide vaut `null` (sous plancher) ou `[1,100]` ;
+toute valeur non finie ou hors bornes est traitée `uncertain`, jamais un verdict.
 
 ### 3.2 Enseignement supérieur (`communes-bpe.json`)
 
 `populate-bpe` compte les équipements C5xx dans un rayon **adaptatif** à la taille d'agglomération
-(`5 / 10 / 15 / 25 km`), puis en fait un percentile national. Le cache porte `etudes_acces: { score, count }`
-pour les 34 788 communes. **`count == 0` ⟺ zéro établissement du supérieur dans le rayon** (un `count > 0`
-produit un percentile strictement supérieur au plancher). **Aujourd'hui l'index ne stocke que le `score`**
-(le `count` est jeté à l'écriture, ligne 265 de `populate-bpe.py`) : c'est la donnée brute qu'il faut porter.
+(`5 / 10 / 15 / 25 km`). Le cache porte `etudes_acces: { score, count }` pour les 34 788 communes, où **`count`
+est un ACCÈS PONDÉRÉ** (`somme des 1 - d/DMAX`, `DMAX = 25 km` fixe), **PAS un nombre d'établissements**. On ne
+le renomme donc jamais « count » dans le dossier : c'est un `weightedAccess`.
+
+**L'équivalence de l'absence, et son cas-frontière.** `weightedAccess == 0` signifie « aucun établissement
+du supérieur retenu dans le rayon », à une réserve près : le poids `1 - d/DMAX` s'annule à `d = DMAX = 25 km`.
+Pour une commune **non rurale** (rayon 5/10/15 < 25), tout établissement dans le rayon a `d < 25` donc un poids
+`> 0` : `weightedAccess == 0` ⟺ **zéro établissement** (équivalence exacte). Pour une commune **rurale**
+(rayon = 25 = DMAX), un établissement à **exactement 25,000 km** compterait dans la fenêtre en contribuant `0`
+: l'égalité flottante `d == 25.0` est de **mesure nulle**, mais l'équivalence n'y est pas strictement airtight.
+
+**La correction, sans re-run coûteux.** Le producteur calcule déjà `int(win.sum())` = le VRAI compte
+d'établissements dans le rayon. On le porte en **préventif** (`establishmentCount`), et le dossier le **préfère
+quand il est présent** (airtight) ; sinon il retombe sur `weightedAccess == 0` (le cas-frontière rural, de
+mesure nulle, est accepté et documenté). Le cache actuel n'ayant que `weightedAccess`, ce lot fonctionne
+dessus ; un futur rebuild rendra `establishmentCount` disponible.
 
 **Attestation cible dans l'index** (le champ `etudes_acces` score est CONSERVÉ ; on AJOUTE) :
 
 ```
-etudesSup = { measured: true, count: <entier>, radiusKm: <5|10|15|25>, conventionVersion }
-present = count > 0   (dérivé sans perte)
+etudesSup = { measured: true, weightedAccess: <float>, radiusKm: <5|10|15|25>,
+              establishmentCount?: <entier|absent>, conventionVersion }
 ```
 
-On stocke le `count` brut, pas seulement un booléen : ce lot vient précisément de découvrir le coût d'avoir
-jeté cette donnée une première fois. `radiusKm` est déterministe (`radius_for(tailleVille)`) et permet à la
-carte de citer le rayon exact.
+`radiusKm` est déterministe (`radius_for(tailleVille)`), mais **recomputé côté patch** : sa parité avec le
+producteur Python (mêmes seuils `30k/100k/500k`, même `taille_ville = uupop[uu] sinon population`) est
+**prouvée par un test aux points de rupture** (une fonction en escalier est fixée par ses seuils). La carte ne
+cite le rayon qu'à cette condition.
 
 ## 4. Le fondement en union discriminée : `named_absence`
 
@@ -123,6 +137,16 @@ type RelativePositionBasis = {  // la v1, adaptée à la forme union (kind ajout
 
 // L'UNION ACTIVE ne porte QUE les fondements que le moteur sait produire aujourd'hui.
 type MismatchBasis = NamedAbsenceBasis | RelativePositionBasis;
+
+// LES ATTESTATIONS (domaine, portées par ModuleFacts). À STATUT DISCRIMINÉ : « unavailable » n'a AUCUN champ
+// de mesure, il est donc impossible de lire un weightedAccess sur une donnée non mesurée (une garantie de
+// type, pas une convention). Le mapping pré-patch rend « unavailable ».
+type LocalNetworkAttestation =
+  | { status: "measured"; access: number | null }   // null = sous plancher ; [1,100] = desservie
+  | { status: "unavailable" };
+type HigherEdAttestation =
+  | { status: "measured"; weightedAccess: number; radiusKm: number; establishmentCount: number | null }
+  | { status: "unavailable" };
 ```
 
 **`nationalContext` est dissocié de `conventionId`** : la prévalence (« ~83 % des communes ») n'est pas une
@@ -155,6 +179,11 @@ ou métro/tram présent) qui réintroduit un seuil inventé, exactement ce que c
 `neutral` : critère examiné, absence non constatée, mais pas assez d'éléments pour qualifier une
 correspondance favorable.
 
+**Gardes de valeurs (une donnée corrompue n'est jamais un verdict).** La classification rend `uncertain`, pas
+`neutral`, sur : `access` non fini / négatif / `> 100` ; `weightedAccess` non fini / négatif ; `radiusKm` non
+fini / `<= 0` ; `establishmentCount` (si présent) non fini / négatif. Seule une attestation propre produit
+`mismatch` ou `neutral`.
+
 ## 6. Le poids : la doctrine déjà gravée, inchangée
 
 `named_absence` ne touche pas la matérialité : elle porte sur la **signification de la donnée**, pas sur le
@@ -178,8 +207,10 @@ sur `MismatchFact`) porte la nuance méthodologique. Le grain est **le point de 
 centroïde communal utilisé par les producteurs), jamais « partout dans la commune » : la donnée ne prouve pas
 l'absence sur toute la superficie communale.
 
-Contraintes de voix (mémoire) : pas de tiret cadratin ; pas d'antithèse « c'est X, pas Y » ; comparatif jamais
-absolu (« aucun … identifié », pas « insuffisant » / « manque »).
+Contraintes de voix (mémoire) : pas de tiret cadratin ; pas d'antithèse « c'est X, pas Y ». **Absence
+factuelle autorisée dans le périmètre mesuré, jugement qualitatif absolu interdit** : « aucun établissement
+n'est identifié dans ce rayon » est un fait (permis) ; « la vie étudiante est insuffisante » est un jugement
+(interdit). L'absence est un fait absolu DANS son périmètre, pas un verdict sur la qualité du territoire.
 
 ### Mobilité du quotidien
 
@@ -209,15 +240,26 @@ Un script de patch dédié `scripts/populate-absence-attestations.mjs`, sur le p
 rename), refuse sur anomalie.
 
 **Complétude pour CHAQUE commune, jamais seulement les absences.** Le patch transporte un statut pour les
-34 788 communes (mesurée + accès, mesurée + count). Sinon l'absence de marqueur resterait ambiguë entre
-présence, non-calcul et « commune oubliée par le patch ».
+34 788 communes. Sinon l'absence de marqueur resterait ambiguë entre présence, non-calcul et « commune oubliée
+par le patch ».
+
+**Schéma de cache tolérant.** Les caches producteurs gagneront un bloc `meta` (§9) ; un `Object.keys(cache)`
+naïf compterait alors `"meta"` comme un faux INSEE. Le patch lit donc `records = cache.communes ?? cache`
+(accepte la forme plate actuelle ET la forme `{ meta, communes }` future), et ne fait le set-equality que sur
+les codes INSEE.
+
+**Écriture robuste (réutilise le patron du chantier gzip).** Temporaire **unique**
+(`${INDEX}.${pid}.${uuid}.tmp`), nettoyage en `finally`, round-trip de relecture avant `rename`, et **garde
+clone frais** (`scripts/lib/require-index-worktree.mjs`) pour ne pas rendre un `ENOENT` brut si la copie de
+travail manque.
 
 **Refus stricts (exit 1)** :
 - les ensembles INSEE ne coïncident pas exactement : `index == cache réseau == cache BPE == 34 788 codes uniques` ;
 - doublon, commune manquante, commune supplémentaire ;
-- `count` négatif ou non fini, `acces` non nul hors `[1,100]` (le `null` sous plancher est valide) ;
+- `weightedAccess` négatif ou non fini, `acces` non nul hors `[1,100]` (le `null` sous plancher est valide) ;
 - cache dépourvu des données attendues ;
-- (si présent) une liste de tuiles OSM en erreur non vide.
+- (si `meta` présent) `complete !== true` ou une liste de tuiles en erreur non vide ;
+- **les constantes de prévalence TS divergent du calcul** (voir ci-dessous).
 
 **Rapport explicite** (contrôle visuel avant publication) :
 
@@ -228,18 +270,26 @@ présence, non-calcul et « commune oubliée par le patch ».
 0 manquante · 0 doublon · 0 cache incomplet
 ```
 
-**Audit dans `index.meta`** (auditabilité + reproductibilité) :
+**Audit dans `index.meta`, avec NUMÉRATEURS (pas une prévalence arrondie).** `28803 / 34788` est reproductible,
+`0.828` ne l'est pas.
 
 ```ts
 absenceAttestations: {
   version: "absence-attestations-v1";
+  distributionVersion: "absence-dist-2026-07-15";
+  communeCount: 34788;
+  network:  { measuredCount: 34788; absentCount: 28803 };
+  higherEd: { measuredCount: 34788; absentCount: 14069 };
   networkCacheSha256: string;
   bpeCacheSha256: string;
-  communeCount: 34788;
-  builtAt: string;   // date ISO du jour ; NOTE : n'introduire ce champ QUE lors d'un vrai ré-enrichissement
-                     //   (le .gz est déterministe ; un builtAt mouvant casserait « re-pack sans diff »).
 };
 ```
+
+**Source unique de la prévalence.** Les constantes `ABSENCE_NATIONAL_CONTEXT` (dans `absence-facts.ts`)
+alimentent la carte ; pour éviter deux vérités, le patch **recalcule** la prévalence et **refuse** si elle
+diverge des constantes TS au-delà d'une tolérance. Une MAJ des caches force donc à mettre à jour les constantes
+(et `ABSENCE_DISTRIBUTION_VERSION`) sous peine de refus : le texte ne peut plus dire « 83 % » quand l'index en
+mesure 80 %.
 
 Pipeline : `caches → populate-absence-attestations.mjs → validation stricte → écriture atomique →
 npm run index:pack → npm run index:verify` puis commit du `.gz`.
@@ -251,14 +301,16 @@ un échec de tuile **interrompt le script**, l'index/cache n'est jamais écrit p
 existe et couvre 34 788 communes »* ⟹ *« aucune tuile n'a échoué de façon fatale »*. C'est l'invariant qui
 autorise à traiter `null` comme « sous plancher » plutôt que « non lu ».
 
-- **On PROUVE** cet invariant par un test qui asserte le comportement crash-on-failure de `fetch_tile` /
-  `load_osm` (un échec ne peut pas produire un cache partiel), + le set-equality strict du patch (§8).
+- **On PROUVE l'invariant au bon niveau** : le test asserte que `load_osm` (l'ORCHESTRATEUR des tuiles, pas
+  seulement `fetch_tile`) **propage** l'échec d'une tuile et n'écrit AUCUN cache. Prouver seulement que
+  `fetch_tile` lève ne suffirait pas : c'est le niveau qui boucle et écrit qui doit échouer avant publication.
+  Complété par le set-equality strict du patch (§8).
 - **On DOCUMENTE** le risque résiduel : une tuile terrestre renvoyant HTTP 200 avec `elements: []` (anomalie
   Overpass) serait cachée à vide et lue comme « absence » à tort. Ce risque **préexiste** (il fausse déjà le
   score du comparateur via `?? 0` aujourd'hui) ; il est accepté pour ce lot.
-- **Durcissement futur (préventif)** : les producteurs écriront dans leur cache un bloc
-  `meta: { complete: true, failedTiles: [], tileNodeCounts, communeCount }` ; quand ce bloc est présent, le
-  patch le vérifie et refuse sur `failedTiles` non vide. Non re-tourné aujourd'hui (voir §10).
+- **Durcissement futur (préventif)** : les producteurs écriront leur cache en `tmp → validation → rename` avec
+  un bloc `meta: { complete: true, failedTiles: [], communeCount, builtAt }` ; quand ce bloc est présent, le
+  patch refuse sur `complete !== true` ou `failedTiles` non vide. Non re-tourné aujourd'hui (voir §10).
 
 ## 10. Les producteurs modifiés, sans re-run (migration reproductible)
 
@@ -269,8 +321,11 @@ les relancer aujourd'hui**. Le patch devient une migration reproductible, pas un
 - `populate-reseau-local.py` — `--write-index` écrit désormais `reseauLocal = { acces, …, measured: true,
   conventionVersion }` (desservie) / `{ acces: null, measured: true, conventionVersion }` (sous plancher, pour
   toute commune géolocalisée) / `null` (non géolocalisée) ; le cache gagne le bloc `meta` de complétude.
-- `populate-bpe.py` — `--write-index` ajoute `etudesSup = { measured: true, count, radiusKm, conventionVersion }`
-  (le champ `etudes_acces` score reste inchangé) ; le cache gagne le bloc `meta`.
+- `populate-bpe.py` — `--write-index` ajoute `etudesSup = { measured: true, weightedAccess, radiusKm,
+  establishmentCount, conventionVersion }` où `establishmentCount = int(win.sum())` (le VRAI compte, airtight)
+  et `weightedAccess` = l'accès pondéré brut (le champ `etudes_acces` score reste inchangé) ; le cache gagne le
+  bloc `meta`. **Test d'équivalence côté producteur** : `establishmentCount == 0 ⟺ weightedAccess == 0` sur
+  toutes les communes SAUF le cas-frontière rural documenté (§3.2).
 
 **On ne re-tourne pas les producteurs dans ce lot** : re-tourner `populate-bpe` recompute les percentiles
 depuis la source BPE et risquerait une dérive silencieuse d'`ecoles`/`culture`/`etudes_acces`. La reproduction
@@ -305,21 +360,27 @@ Couverture **19 → 21 sur 28**.
 2. `mobilite_quotidienne` déclarée (poids 2/3), réseau mesuré sous plancher → `mismatch` matériel : carte
    nommant l'absence au **point de référence**, `basis.kind === "named_absence"`,
    `observedStateId === "network_below_daily_credibility_floor"`, jamais un jugement absolu.
-3. `vie_etudiante` déclarée, `etudesSup.count === 0` → `mismatch` citant le `radiusKm` exact ; jamais « aucune
-   vie étudiante » ; la `limitation` porte la nuance campus voisin.
+3. `vie_etudiante` déclarée, absence attestée (`establishmentCount === 0` si présent, sinon `weightedAccess
+   === 0`) → `mismatch` citant le `radiusKm` exact ; jamais « aucune vie étudiante » ; la `limitation` porte la
+   nuance campus voisin. Le `radiusKm` recomputé a une **parité prouvée** avec le producteur (test aux points
+   de rupture).
 4. Réseau/études **présents** → `neutral` silencieux (couverture acquise, aucune carte, aucun effet
    orientation). Jamais `satisfied`.
-5. Mesure **indisponible** (`measured` faux / champ absent) → `uncertain` : couverture NON acquise, aucune
-   valeur inventée. Aucun repli `?? 0` ne traverse le dossier.
+5. Mesure **indisponible** (`status: "unavailable"` / champ absent) → `uncertain` : couverture NON acquise,
+   aucune valeur inventée. Aucun repli `?? 0` ne traverse le dossier. Une attestation à valeur corrompue
+   (`NaN`/négatif/hors bornes/rayon ≤ 0) → `uncertain`, jamais un verdict.
 6. Poids 1 → examiné (couverture +1), silencieux (aucune carte, pas d'arbitrage). Poids 2 → secondary, poids 3
    → structuring. Jamais `decision_critical`. Un ensemble matériel → `arbitration` (comptage sur `run.facts`).
+   **Un test d'orientation** prouve qu'un mismatch d'absence de poids 1 : monte la couverture, ne crée aucune
+   section, ne compte pas comme matériel, ne déclenche pas `arbitration`.
 7. `populate-absence-attestations.mjs` : set-equality strict des INSEE (index == réseau == BPE == 34 788
-   uniques), refus sur doublon/manquante/supplémentaire/valeur invalide ; écriture atomique ; rapport ;
-   `index.meta.absenceAttestations` (sha256 des deux caches + communeCount). Le scoring du comparateur
-   (`subScore`) est **inchangé** (champ `acces` conservé, `etudes_acces` score conservé).
-8. Un test asserte le crash-on-failure de `populate-reseau-local` (un échec de tuile ne peut pas produire un
-   cache partiel).
-9. `DECISION_NARRATIVE_PROMPT_VERSION` bumpée (nouveau fondement à nommer), sonde repassée (cas absence
-   attestée : mobilité, vie étudiante, + présence → neutral), artefacts invalidés.
-10. `node --test src/lib/*.test.ts src/lib/decision/*.test.ts` vert, `npx tsc --noEmit` rend 0,
-    `npm run index:verify` OK, `npm run build` exit 0.
+   uniques) sur `records = cache.communes ?? cache` ; refus sur doublon/manquante/supplémentaire/valeur
+   invalide / `meta.complete` faux / prévalence TS divergente ; temporaire **unique** + `finally` + garde clone
+   frais ; rapport ; `index.meta.absenceAttestations` avec **numérateurs** (`absentCount`/`measuredCount`) +
+   sha256 des caches. Le scoring du comparateur (`subScore`) est **inchangé**.
+8. Un test au niveau `load_osm` prouve qu'un échec de tuile **propage** et n'écrit aucun cache (pas de cache
+   partiel).
+9. `DECISION_NARRATIVE_PROMPT_VERSION` bumpée `v7 → v8`, sonde repassée (cas absence attestée : mobilité, vie
+   étudiante, + présence → neutral), artefacts invalidés.
+10. `node --test src/lib/*.test.ts src/lib/decision/*.test.ts` + `node --test scripts/lib/*.test.mjs` verts,
+    `npx tsc --noEmit` rend 0, `npm run index:verify` OK, `npm run build` exit 0.
