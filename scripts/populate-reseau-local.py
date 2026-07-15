@@ -314,7 +314,9 @@ def main():
         rec[c["insee"]] = None if acces[i] is None else {
             "acces": acces[i], "tram": trams[i], "metro": metros[i], "arret_km": aks[i]}
     os.makedirs(CACHE, exist_ok=True)
-    json.dump(rec, open(OUT_CACHE, "w"))
+    # Forme { meta, communes } : le meta de complétude autorise le patch d'attestations (lot 2a) à refuser un
+    # cache partiel. Le patch accepte aussi la forme plate héritée (records = cache.communes ?? cache).
+    json.dump({"meta": {"complete": True, "failedTiles": [], "communeCount": len(idx["communes"])}, "communes": rec}, open(OUT_CACHE, "w"))
     print(f"✓ cache écrit : {OUT_CACHE}", file=sys.stderr)
 
     if args.matrix:
@@ -333,10 +335,16 @@ def main():
         print(f"desservies min/max : {min(served_scores)}/{max(served_scores)}", file=sys.stderr)
 
     if args.write_index:
+        # Champ FRÈRE reseauLocalMeasured (lot 2a) : reseauLocal INCHANGÉ (résultat du scoring), on atteste
+        # seulement la PROVENANCE (mesurée = géolocalisée). Une commune sous plancher a reseauLocal None ET
+        # reseauLocalMeasured True (absence attestée) ; une commune non géolocalisée a measured False.
+        geoloc = {c["insee"] for c in communes}
         for c in idx["communes"]:
-            c["reseauLocal"] = rec.get(c["insee"])
+            ins = c["insee"]
+            c["reseauLocal"] = rec.get(ins)          # objet desservie, ou None sous plancher (inchangé)
+            c["reseauLocalMeasured"] = ins in geoloc  # provenance : mesurée (True) / non géolocalisée (False)
         json.dump(idx, open(INDEX, "w"))
-        print("✓ index patché (reseauLocal)", file=sys.stderr)
+        print("✓ index patché (reseauLocal inchangé + reseauLocalMeasured)", file=sys.stderr)
 
 
 if __name__ == "__main__":

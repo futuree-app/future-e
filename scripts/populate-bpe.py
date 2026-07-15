@@ -120,13 +120,15 @@ DMAX = 25.0
 
 
 def count_within_radius(clat, clon, elat, elon, radius):
-    """Pour chaque commune i : accès BPE PONDÉRÉ par la proximité. Chaque équipement à
-    distance d <= radius[i] compte pour (1 - d/DMAX) ; au-delà du rayon accepté, 0.
-    Grille spatiale sur les équipements pour éviter le O(n*m)."""
+    """Pour chaque commune i : (accès pondéré, compte d'équipements). L'accès PONDÉRÉ compte chaque
+    équipement à distance d <= radius[i] pour (1 - d/DMAX) ; le COMPTE est le simple nombre d'équipements
+    dans le rayon (int((d <= radius[i]).sum())), distinct de la somme pondérée : il vaut 0 ssi aucun
+    équipement, sans le cas-frontière du poids nul à d == DMAX. Grille spatiale pour éviter le O(n*m)."""
     grid = {}
     for j in range(len(elat)):
         grid.setdefault((int(elat[j] // CELL), int(elon[j] // CELL)), []).append(j)
     out = np.zeros(len(clat), dtype=np.float64)
+    counts = np.zeros(len(clat), dtype=np.int64)
     for i in range(len(clat)):
         ci, cj = int(clat[i] // CELL), int(clon[i] // CELL)
         idxs = []
@@ -139,7 +141,8 @@ def count_within_radius(clat, clon, elat, elon, radius):
         d = haversine_np(clat[i], clon[i], elat[idxs], elon[idxs])
         win = d <= radius[i]
         out[i] = float((1.0 - d[win] / DMAX).sum())
-    return out
+        counts[i] = int(win.sum())
+    return out, counts
 
 
 def percentile_scores(counts):
@@ -172,6 +175,16 @@ def selftest():
     assert taille_ville({"uu": "00851", "population": 100}, up) == 150
     assert taille_ville({"uu": None, "population": 800}, up) == 800
     assert taille_ville({"uu": "99999", "population": 700}, up) == 700
+    # ÉQUIVALENCE absence (lot 2a) : establishmentCount == 0 <=> weightedAccess == 0, hors le cas-frontière
+    # rural (poids nul à d == DMAX). Communes à (0,0) et (0,1) ; un équipement à ~5 km de la première.
+    clat = np.array([0.0, 0.0]); clon = np.array([0.0, 1.0])
+    elat = np.array([0.0]); elon = np.array([5.0 / 111.195])  # ~5 km à l'est de la 1re commune
+    rad = np.array([25.0, 25.0])
+    wa, cnt = count_within_radius(clat, clon, elat, elon, rad)
+    assert cnt[0] == 1 and wa[0] > 0, (cnt.tolist(), wa.tolist())  # présent -> compte 1, poids > 0
+    assert cnt[1] == 0 and wa[1] == 0, (cnt.tolist(), wa.tolist())  # absent -> compte 0, poids 0
+    for i in range(2):
+        assert (cnt[i] == 0) == (wa[i] == 0)  # l'équivalence tient hors cas-frontière
     print("✓ selftest OK", file=sys.stderr)
 
 
@@ -243,28 +256,45 @@ def main():
           + ", ".join(f"{int(k)}:{v}" for k, v in sorted(dist.items())), file=sys.stderr)
 
     rec = {code: {} for code in codes}
+    est_counts = None  # vrai compte d'établissements du supérieur par commune (aligné sur codes), lot 2a
     for field, typeset in (("ecoles", ECOLES_TYPEQU), ("culture", CULTURE_TYPEQU), ("etudes_acces", SUP_TYPEQU)):
         elat, elon = load_equip_points(typeset)
         print(f"{field} : {len(elat)} équipements géolocalisés", file=sys.stderr)
-        counts = count_within_radius(clat, clon, elat, elon, radius)
+        counts, ecount = count_within_radius(clat, clon, elat, elon, radius)  # (accès pondéré, compte)
         scores = percentile_scores(counts)
+        if field == "etudes_acces":
+            est_counts = ecount
         for i, code in enumerate(codes):
             # count = accès pondéré (somme des 1 - d/DMAX), debug only, plus un entier.
             rec[code][field] = {"score": scores[i], "count": round(float(counts[i]), 2)}
 
     os.makedirs(CACHE, exist_ok=True)
-    json.dump(rec, open(OUT, "w"))
+    # Forme { meta, communes } : le meta de complétude sert au patch d'attestations (lot 2a).
+    json.dump({"meta": {"complete": True, "communeCount": len(idx["communes"])}, "communes": rec}, open(OUT, "w"))
     print(f"✓ cache écrit : {OUT} ({len(rec)} communes)", file=sys.stderr)
 
     if args.write_index:
+        rfor = {code: int(radius[i]) for i, code in enumerate(codes)}        # rayon effectif (5/10/15/25) par commune
+        ecnt = {code: int(est_counts[i]) for i, code in enumerate(codes)}    # vrai compte d'établissements sup
         for c in idx["communes"]:
             r = rec.get(c["insee"])
             c["ecoles"] = r["ecoles"] if r else None
             c["culture"] = r["culture"] if r else None
             # etudes_acces : on n'expose que le percentile (number), pas le count.
             c["etudes_acces"] = r["etudes_acces"]["score"] if r else None
+            if r is not None:
+                # Attestation champ FRÈRE (lot 2a). weightedAccess = accès pondéré brut ; establishmentCount =
+                # vrai compte (airtight). Pas de conventionVersion par commune (elle vit dans index.meta).
+                c["etudesSup"] = {
+                    "measured": True,
+                    "weightedAccess": r["etudes_acces"]["count"],
+                    "establishmentCount": ecnt.get(c["insee"], 0),
+                    "radiusKm": rfor.get(c["insee"], 25),
+                }
+            else:
+                c["etudesSup"] = None
         json.dump(idx, open(INDEX, "w"))
-        print("✓ index patché (ecoles + culture + etudes_acces)", file=sys.stderr)
+        print("✓ index patché (ecoles + culture + etudes_acces + etudesSup)", file=sys.stderr)
 
 
 if __name__ == "__main__":
