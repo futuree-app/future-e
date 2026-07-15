@@ -76,6 +76,8 @@ export type ConclusionPlanInput = {
   favorableCount: number;    // combien : « plusieurs dimensions » exige >= 2, jamais un booléen
   majorReserveCount: number; // réserves AFFICHÉES structurantes/critiques
   reservesShown: number;     // réserves AFFICHÉES, tous tiers confondus
+  mismatchTotal: number;     // mismatchs ÉMIS (le verdict compte dessus, pas sur l'affiché)
+  mismatchShown: number;     // mismatchs AFFICHÉS (post-cap 3)
 };
 
 const TIER_ORDER: Record<MaterialityTier, number> = { decision_critical: 0, structuring: 1, secondary: 2 };
@@ -191,6 +193,28 @@ function verdict(input: ConclusionPlanInput): Verdict {
       // « ne peut pas encore » et non « n'a pas encore pu » : le présent parle de l'état du dossier,
       // le passé composé raconterait un échec du moteur.
       text: `${nom} ne peut pas encore être évalué au regard de vos critères.`,
+    };
+  }
+  // ARBITRAGE : le lieu est possible, mais des priorités y sont nettement moins bien servies. On compte le
+  // TOTAL des mismatchs, pas l'affiché (cap 3) : 5 déclenchés ne doivent pas dire « trois ». Double registre
+  // si des réserves coexistent, pour ne pas perdre l'autre information sous l'ordre de l'enum.
+  if (input.orientation === "arbitration") {
+    const m = input.mismatchTotal;
+    const combien = m > 1 ? `${m} de vos priorités sont` : `une de vos priorités est`;
+    const suite = input.reservesShown > 0
+      ? ` ${input.reservesShown > 1 ? `${input.reservesShown} points restent` : "un point reste"} par ailleurs à vérifier.`
+      : "";
+    return {
+      label: "Arbitrage", tone: "neutral",
+      text: `Aucune incompatibilité n'a été établie sur ${nom}, mais ${combien} nettement moins bien servie${m > 1 ? "s" : ""} qu'ailleurs. Cela appelle un arbitrage entre vos priorités, sans rendre ${nom} incompatible avec votre projet.${suite}`,
+    };
+  }
+  // NEUTRAL : examiné, données disponibles, mais aucun signal marqué. Ni « bien correspondre » (aucun
+  // avantage net), ni « impossible de conclure » (l'analyse a abouti).
+  if (input.orientation === "neutral") {
+    return {
+      label: "Correspondance sans signal marqué", tone: "neutral",
+      text: `Vos priorités ont pu être examinées, mais ${nom} ne se distingue nettement ni favorablement ni défavorablement sur ces dimensions. Aucun écart notable n'apparaît, ni avantage net.`,
     };
   }
 

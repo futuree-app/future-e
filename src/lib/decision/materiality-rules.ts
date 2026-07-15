@@ -17,6 +17,7 @@ import type { PreferenceKey } from "../comparateur-vie.ts";
 import { declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } from "./project-view.ts";
 import { LOGEMENT_RULES } from "./logement-rules.ts";
 import { HARD_CONSTRAINT_RULES } from "./hard-constraint-rules.ts";
+import { MISMATCH_RULES } from "./mismatch-rules.ts";
 import { toCommuneAttributes } from "./module-facts-map.ts";
 import {
   trajectoirePhrase, fmtClimat, CLIMAT_HORIZON_LABEL, type ClimatAxe,
@@ -402,6 +403,7 @@ export const REGISTRY: DecisionRule[] = [
   ruleAir,
   ruleBruit,
   ruleIndustrie,
+  ...MISMATCH_RULES,
   ruleInondation,
   ...LOGEMENT_RULES,
 ];

@@ -61,6 +61,9 @@ export function assembleDossier(
   const l = labels(project);
   const candidates: DossierSection[] = [
     { key: "incompatibilities", title: "Vos contraintes non négociables", facts: byRole(facts, "incompatibility", 2) },
+    // MISMATCH : établi, non éliminatoire, à ARBITRER (jamais à vérifier). Sa propre section, entre les
+    // incompatibilités et les compromis. Un mismatch n'est pas un compromis (pas de contrepartie).
+    { key: "mismatches", title: "Ce qui correspond moins bien", facts: byRole(facts, "mismatch", 3) },
     { key: "compromises", title: "Ce qui départage vraiment", facts: byRole(facts, "compromise", 3) },
     { key: "unknowns", title: "Ce que nous ne savons pas encore", facts: byRole(facts, "unknown", 3) },
     { key: "verifications", title: l.verifTitle, facts: byRole(facts, "verification", 4) },
@@ -73,6 +76,10 @@ export function assembleDossier(
   // compte donc lui aussi sur `shown` : le lecteur doit pouvoir compter les cartes et retomber dessus.
   const established = facts.find((f) => f.role === "incompatibility" && f.evidenceStrength === "established");
   const reservesShownFacts = shown.filter((f) => RESERVE_ROLES.has(f.role));
+  // Le TOTAL des mismatchs ÉMIS (le verdict compte dessus), et l'AFFICHÉ (post-cap 3) : 5 déclenchés ne
+  // doivent pas faire dire « trois ».
+  const mismatchTotal = facts.filter((f) => f.role === "mismatch").length;
+  const mismatchShown = shown.filter((f) => f.role === "mismatch").length;
   const narrativePlan = buildConclusionPlan({
     scope,
     communeNom,
@@ -86,6 +93,8 @@ export function assembleDossier(
     orientation: criteria.orientation,
     hasFavorable: criteria.hasFavorable,
     favorableCount: criteria.favorableCount,
+    mismatchTotal,
+    mismatchShown,
     majorReserveCount: reservesShownFacts.filter((f) => f.materialityTier !== "secondary").length,
     reservesShown: reservesShownFacts.length,
   });

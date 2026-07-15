@@ -28,6 +28,8 @@ function baseInput(over: Partial<ConclusionPlanInput> = {}): ConclusionPlanInput
     favorableCount: 1,
     majorReserveCount: 0,
     reservesShown: 0,
+    mismatchTotal: 0,
+    mismatchShown: 0,
     ...over,
   };
 }
@@ -397,4 +399,19 @@ test("gate : verdict + contrainte dure non examinée + réserves -> oui", () => 
     uncovered: [MER], shownFacts: [verification("f1", "structuring")],
   }));
   assert.equal(shouldGenerateNarrative(plan), true);
+});
+
+test("verdict arbitration : compte le TOTAL, pas l'affiché, et porte le double registre", () => {
+  const seul = buildConclusionPlan(baseInput({ orientation: "arbitration", mismatchTotal: 5, mismatchShown: 3, reservesShown: 0 }));
+  const v = seul.blocks.find((b) => b.key === "verdict")!;
+  assert.match(v.fallbackText, /arbitr/i);
+  assert.match(v.fallbackText, /5 de vos priorités/);
+  const mixte = buildConclusionPlan(baseInput({ orientation: "arbitration", mismatchTotal: 2, mismatchShown: 2, reservesShown: 2 }));
+  assert.match(mixte.blocks.find((b) => b.key === "verdict")!.fallbackText, /vérifier/i);
+});
+
+test("verdict neutral : ni « bien correspondre » ni « impossible de conclure »", () => {
+  const v = buildConclusionPlan(baseInput({ orientation: "neutral", mismatchTotal: 0, mismatchShown: 0 })).blocks.find((b) => b.key === "verdict")!;
+  assert.doesNotMatch(v.fallbackText, /bien correspond|impossible/i);
+  assert.match(v.fallbackText, /ni favorablement ni défavorablement|aucun écart notable/i);
 });

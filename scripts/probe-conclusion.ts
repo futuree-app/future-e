@@ -59,6 +59,8 @@ const plan = buildConclusionPlan({
   favorableCount: 0,
   majorReserveCount: 2,
   reservesShown: 4,
+  mismatchTotal: 0,
+  mismatchShown: 0,
 });
 
 console.log("gate :", shouldGenerateNarrative(plan), "· lead :", JSON.stringify(plan.lead));
