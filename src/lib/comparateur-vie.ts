@@ -491,6 +491,11 @@ export type IndexCommune = {
     metro: boolean;
     arret_km: number;
   } | null;
+  // Attestation de PROVENANCE (lot 2a), champ FRÈRE de reseauLocal (qu'on ne déforme pas). true = le calcul
+  // réseau a bien été exécuté pour cette commune ; si reseauLocal est null, elle est mesurée SOUS le plancher
+  // (absence attestée). absent/false = aucune attestation -> jamais d'absence déduite. La convention vit dans
+  // index.meta.absenceAttestations, pas répétée par commune. cf. spec 2026-07-15-mismatch-lot2a.
+  reseauLocalMeasured?: boolean;
   // Vie locale (cf. scripts/populate-vie-locale.py). score = 0.7 lieux de sociabilité (OSM) +
   // 0.3 tissu associatif (RNA + AMALIA), densité par habitant lissée (masse critique K=1000).
   // null = pas de vie locale mesurable. Présence d'une vie sociale, PAS l'événementiel.
@@ -513,6 +518,11 @@ export type IndexCommune = {
   // populate-etudiants.py). Combinés dans subScore("vie_etudiante").
   etudes_acces?: number | null;
   etudes_dyn?: number | null;
+  // Attestation « établissements du supérieur » (lot 2a), champ FRÈRE de etudes_acces (score, inchangé).
+  // weightedAccess = accès pondéré BRUT (somme 1 - d/DMAX ; 0 <=> aucun établissement dans le rayon, hors
+  // cas-frontière rural). establishmentCount = vrai compte (int(win.sum())), porté à terme par le producteur.
+  // radiusKm = rayon adaptatif effectif. Une commune non mesurée n'a pas ce champ. cf. spec 2026-07-15-mismatch-lot2a.
+  etudesSup?: { measured: boolean; weightedAccess: number; radiusKm: number; establishmentCount?: number } | null;
   // Calme sonore (cf. scripts/populate-calme-sonore.py). score = exposition cumulée saturée
   // (densité d'infra bruyantes dans R_EXPO, jamais la distance à la plus proche) -> loin de
   // tout = 100, JAMAIS null au sens « non noté ». sourceDominante ∈ {auto,rail,aero} | null +
