@@ -69,7 +69,12 @@ function FactBody({ fact }: { fact: DecisionFact }) {
       </>
     );
   }
-  const limitation = fact.role === "incompatibility" || fact.role === "verification" ? fact.limitation : undefined;
+  // `mismatch` porte aussi une `limitation` (named_absence, absolute_measure, ensoleillement) : elle était
+  // silencieusement jetée. La conclusion ne la reçoit pas (card-only) ; la carte, si.
+  const limitation =
+    fact.role === "incompatibility" || fact.role === "verification" || fact.role === "mismatch"
+      ? fact.limitation
+      : undefined;
   return (
     <>
       <p className="text-label text-[14px] leading-[1.6]">{fact.statement}</p>
