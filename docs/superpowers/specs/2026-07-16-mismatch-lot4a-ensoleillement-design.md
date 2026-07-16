@@ -100,8 +100,9 @@ générique (« Sur {indicator}, {commune} se situe parmi {rang} les moins favor
   `npm run index:verify` + commit du `.gz`. Sur clone frais : `npm run index:unpack` d'abord.
 - **`MISMATCH_DISTRIBUTION_VERSION` inchangée** : la constante est `"mismatch-dist-2026-07-15" // le MILLÉSIME`
   (vérifié : méthodologie + millésime des données classées, PAS un schéma d'artefact ni une clé de cache).
-  L'ajout d'une clé ne change pas le millésime. `index.meta` **enregistre néanmoins** la nouvelle clé (son
-  `validCount` et le hash de ses données sources), pour l'auditabilité.
+  L'ajout d'une clé ne change pas le millésime. **Auditabilité** : le `rankBands` lui-même est le registre (la
+  clé EST le critère) et le **rapport du script** porte `validCount` + l'écart percentile↔rang. `populate-mismatch-rank`
+  n'écrit pas de bloc `index.meta` aujourd'hui ; en ajouter un serait un motif hors périmètre 4a.
 
 ## 5. Pas de bump de prompt, mais une sonde ciblée non bloquante
 
@@ -162,7 +163,7 @@ extrême défavorable, poids 3              -> mismatch + carte structuring (+ l
 5. **Preuve percentile ↔ rang** : le rapport du script montre `validCount = 34 788`, `nullCount = 0`, bornes
    `[0,100]`, monotonie, écart `|rankMid − rayonnement_pct/100|` sous tolérance.
 6. **Diff sémantique avant repack** : les bandes des 11 critères existants sont **strictement identiques**
-   avant/après ; seule `rankBands.ensoleillement_recherche` s'ajoute (+ métadonnées `index.meta`). `MISMATCH_DISTRIBUTION_VERSION`
-   inchangée. `populate-mismatch-rank.mts` + `index:pack` + `index:verify` OK ; `.gz` committé.
+   avant/après ; seule `rankBands.ensoleillement_recherche` s'ajoute. `MISMATCH_DISTRIBUTION_VERSION` inchangée.
+   `populate-mismatch-rank.mts` + `index:pack` + `index:verify` OK ; `.gz` committé.
 7. `node --test src/lib/*.test.ts src/lib/decision/*.test.ts` vert, `npx tsc --noEmit` 0, `npm run build`
    exit 0. **Aucun** bump de prompt. Sonde ensoleillement lancée (non bloquante) : pas de promesse future.
