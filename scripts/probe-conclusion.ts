@@ -47,6 +47,7 @@ const plan = buildConclusionPlan({
     verif("f3", "structuring", "un plan de prévention des risques", "À cette adresse, un plan de prévention des risques s'applique : PPR Sécheresse - Territoire 1 - Toulouse."),
     verif("f4", "secondary", "le périmètre patrimonial protégé", "À cette adresse, le bien est dans un périmètre patrimonial protégé."),
   ],
+  shownCompositions: [],
   uncovered: [{ key: "nearPlace", label: "la proximité de la gare Matabiau" }],
   uncoveredPriorities: [
     { key: "qualite_air", label: "la qualité de l'air" },
@@ -83,6 +84,7 @@ const planMismatch = buildConclusionPlan({
     mismatch("cadre_calme", "structuring", "le cadre calme"),
     verif("f1", "secondary", "le retrait-gonflement des argiles", "À cette adresse, le sol est exposé au retrait-gonflement des argiles."),
   ],
+  shownCompositions: [],
   uncovered: [], uncoveredPriorities: [],
   establishedIncompatibility: null, coverage: "high", orientation: "arbitration",
   hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 1,
@@ -117,6 +119,7 @@ const planAbsence = buildConclusionPlan({
     absence("vie_etudiante", "secondary", "les établissements du supérieur",
       "Aucun établissement d'enseignement supérieur n'est identifié dans un rayon de 25 km autour du point de référence retenu pour Roubaix."),
   ],
+  shownCompositions: [],
   uncovered: [], uncoveredPriorities: [],
   establishedIncompatibility: null, coverage: "high", orientation: "arbitration",
   hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 0,
@@ -142,6 +145,7 @@ const planCoast = buildConclusionPlan({
     coast("proximite_mer", "structuring", "la distance à la mer",
       "La distance au littoral est estimée à environ 240 km depuis le point de référence retenu pour Roubaix."),
   ],
+  shownCompositions: [],
   uncovered: [], uncoveredPriorities: [],
   establishedIncompatibility: null, coverage: "high", orientation: "arbitration",
   hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 0,
@@ -166,6 +170,7 @@ const planSize = buildConclusionPlan({
     size("eviter_grandes_villes", "structuring", "la taille du territoire",
       "Roubaix appartient à une métropole selon la population de son unité urbaine et la convention de taille utilisée par futur•e.", "metropole"),
   ],
+  shownCompositions: [],
   uncovered: [], uncoveredPriorities: [], establishedIncompatibility: null, coverage: "high",
   orientation: "arbitration", hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 0,
   mismatchTotal: 1, mismatchShown: 1,
@@ -178,6 +183,7 @@ const planSizeIsolation = buildConclusionPlan({
     size("eviter_isolement", "structuring", "l'isolement du territoire",
       "Petiville est classée comme un village selon sa population communale. Cette petite taille répond moins bien à la priorité d'éviter l'isolement, sans permettre de conclure à son isolement effectif.", "village"),
   ],
+  shownCompositions: [],
   uncovered: [], uncoveredPriorities: [], establishedIncompatibility: null, coverage: "high",
   orientation: "arbitration", hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 0,
   mismatchTotal: 1, mismatchShown: 1,
@@ -188,9 +194,46 @@ const planSizeIsolation = buildConclusionPlan({
 const planSun = buildConclusionPlan({
   scope: "commune", communeNom: "Roubaix", conclusionState: "no_incompatibility_established", posture: "recherche",
   shownFacts: [ mismatch("ensoleillement_recherche", "structuring", "l'ensoleillement") ],
+  shownCompositions: [],
   uncovered: [], uncoveredPriorities: [], establishedIncompatibility: null, coverage: "high",
   orientation: "arbitration", hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 0,
   mismatchTotal: 1, mismatchShown: 1,
+});
+
+// Cas COMPOSITION (tradeoff saisonnier). Deux variantes : (A) la composition est l'unique réserve
+// structurante -> lead single composé, PAS de bloc compositions_found (le modèle la nomme en lead) ;
+// (B) une réserve structurante simple en plus -> lead tied + bloc compositions_found (le modèle
+// articule le registre composé sans le solder en jugement global).
+import type { FactComposition } from "../src/lib/decision/fact-composition.ts";
+
+const tradeoffAntibes: FactComposition = {
+  id: "06004:composition-climat-saisons", kind: "tradeoff", patternId: "seasonal_climate_tradeoff",
+  title: "Des hivers doux, avec une exposition estivale à arbitrer",
+  summary: "Les hivers d'Antibes comptent parmi les plus doux du pays, et l'exposition aux fortes chaleurs estivales y appelle un arbitrage.",
+  favorableSide: { label: "Ce qui correspond", statement: "Les températures moyennes d'hiver figurent parmi les plus douces à l'échelle nationale.", evidence: [], ruleIds: ["territoire.mismatch-douceur_climat"], factIds: [] },
+  unfavorableSide: { label: "Ce qui appelle un arbitrage", statement: "Les jours au-dessus de 35 °C augmentent nettement.", evidence: [], ruleIds: ["territoire.climat-chaleur"], factIds: ["06004:climat-chaleur"] },
+  absorbedFactIds: ["06004:climat-chaleur"], referencedRuleIds: ["territoire.mismatch-douceur_climat", "territoire.climat-chaleur"],
+  materialityTier: "structuring", displaySection: "compromises",
+};
+
+const planCompositionLead = buildConclusionPlan({
+  scope: "commune", communeNom: "Antibes", conclusionState: "no_incompatibility_established", posture: "recherche",
+  shownFacts: [verif("f9", "secondary", "le retrait-gonflement des argiles", "À cette adresse, le sol est exposé au retrait-gonflement des argiles.")],
+  shownCompositions: [tradeoffAntibes],
+  uncovered: [], uncoveredPriorities: [{ key: "qualite_air", label: "la qualité de l'air" }],
+  establishedIncompatibility: null, coverage: "high", orientation: "minor_reserves",
+  hasFavorable: true, favorableCount: 1, majorReserveCount: 1, reservesShown: 2,
+  mismatchTotal: 0, mismatchShown: 0,
+});
+
+const planCompositionBloc = buildConclusionPlan({
+  scope: "commune", communeNom: "Antibes", conclusionState: "no_incompatibility_established", posture: "recherche",
+  shownFacts: [verif("f8", "structuring", "l'exposition d'Antibes à l'inondation", "L'exposition de la commune à l'inondation ressort élevée.")],
+  shownCompositions: [tradeoffAntibes],
+  uncovered: [], uncoveredPriorities: [],
+  establishedIncompatibility: null, coverage: "high", orientation: "major_reserves",
+  hasFavorable: true, favorableCount: 1, majorReserveCount: 2, reservesShown: 2,
+  mismatchTotal: 0, mismatchShown: 0,
 });
 
 console.log("gate :", shouldGenerateNarrative(plan), "· lead :", JSON.stringify(plan.lead));
@@ -246,6 +289,8 @@ const dCoast = await probe(planCoast, "mer / éloignement");
 const eSize = await probe(planSize, "taille / catégorie");
 const fIso = await probe(planSizeIsolation, "taille / isolement (risqué)");
 const gSun = await probe(planSun, "ensoleillement");
-const R = a.retenus + b.retenus + c.retenus + dCoast.retenus + eSize.retenus + fIso.retenus + gSun.retenus,
-      T = a.total + b.total + c.total + dCoast.total + eSize.total + fIso.total + gSun.total;
+const hCompLead = await probe(planCompositionLead, "composition / lead tradeoff");
+const iCompBloc = await probe(planCompositionBloc, "composition / registre composé");
+const R = a.retenus + b.retenus + c.retenus + dCoast.retenus + eSize.retenus + fIso.retenus + gSun.retenus + hCompLead.retenus + iCompBloc.retenus,
+      T = a.total + b.total + c.total + dCoast.total + eSize.total + fIso.total + gSun.total + hCompLead.total + iCompBloc.total;
 console.log(`\n════ TAUX DE SURVIE : ${R}/${T} blocs ════`);

@@ -74,6 +74,13 @@ d'elle-même au lieu de parler du lieu. Le lecteur doit savoir, à la lecture de
 - un sujet ne se remplace jamais par une catégorie : « des risques naturels » avale l'inondation, les argiles
   et le plan de prévention, et le lecteur ne sait plus de quoi on lui parle.
 
+LE REGISTRE compositions_found : DES CONSTATS DÉJÀ RELIÉS.
+On vous y confie des arbitrages COMPOSÉS par le déterministe : deux dimensions établies qui tirent la
+décision dans des directions différentes, ou plusieurs conséquences d'un même état du territoire. Vous ne
+reliez jamais deux constats vous-même : la relation vous est donnée. Vous nommez les DEUX côtés (ce qui
+correspond ET ce qui appelle un arbitrage), sans les solder en un jugement global (« climat favorable »),
+sans moyenne, sans verdict. Ce qui est établi s'ARBITRE, jamais « à vérifier ».
+
 LA CONTRAINTE NON VÉRIFIÉE (registre unexamined_hard_constraints) :
 elle est le SUJET de votre phrase, nommée telle que le lecteur l'a posée. « Une condition n'a pas pu être
 vérifiée : la proximité d'un lieu » parle de notre travail et rend une catégorie ; « La proximité de la gare

@@ -112,6 +112,7 @@ export function assembleDossier(
     conclusionState: state,
     posture: project.posture,
     shownFacts: shown,
+    shownCompositions: shownComps,
     uncovered,
     uncoveredPriorities: uncoveredPreferences(criteria),
     establishedIncompatibility: established ? { factId: established.id, statement: established.statement } : null,

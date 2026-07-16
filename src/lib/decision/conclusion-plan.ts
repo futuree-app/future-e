@@ -11,10 +11,11 @@
 // Une contrainte dure non examinée et une préférence non couverte sont deux absences de couverture.
 // Elles ne partagent JAMAIS le même bloc.
 import type { DecisionFact, ConclusionState, MaterialityTier, UncoveredConstraint } from "./decision-fact.ts";
+import type { FactComposition } from "./fact-composition.ts";
 import type { ProjectPosture } from "../user-project.ts";
 import type { CoverageLevel, Orientation } from "./criteria-registry.ts";
 
-export type BlockKey = "verdict" | "unexamined_hard_constraints" | "mismatches_found" | "reserves_found" | "uncovered_priorities";
+export type BlockKey = "verdict" | "unexamined_hard_constraints" | "compositions_found" | "mismatches_found" | "reserves_found" | "uncovered_priorities";
 
 export type NarrativeBlock = {
   key: BlockKey;
@@ -66,6 +67,9 @@ export type ConclusionPlanInput = {
   conclusionState: ConclusionState;
   posture: ProjectPosture;
   shownFacts: DecisionFact[]; // les faits réellement affichés, après plafonnement des sections
+  // Les compositions AFFICHÉES. REQUIS, jamais optionnel : un optionnel créerait un troisième état
+  // entre « aucune composition » et « champ oublié par l'appelant ».
+  shownCompositions: FactComposition[];
   uncovered: UncoveredConstraint[];
   uncoveredPriorities: { key: string; label: string }[];
   establishedIncompatibility: { factId: string; statement: string } | null;
@@ -123,23 +127,34 @@ function capitalize(s: string): string {
   return s.length === 0 ? s : s[0]!.toUpperCase() + s.slice(1);
 }
 
-export function selectLead(shownFacts: DecisionFact[]): LeadSelection {
-  const rs = reserves(shownFacts);
-  if (rs.length === 0) return { kind: "none" };
-  const best = Math.min(...rs.map((f) => TIER_ORDER[f.materialityTier]));
+// LE LEAD PEUT ÊTRE UN TRADEOFF (spec composition §7), JAMAIS un shared_evidence : les mismatchs sont
+// exclus du lead par doctrine (RESERVE_ROLES), et un mismatch COMPOSÉ n'obtient pas un accès que les
+// mismatchs simples n'ont pas. Si un jour les mismatchs doivent pouvoir mener la conclusion, la
+// décision se prend ICI, pour tous, jamais par effet de bord d'un patron. Le candidat composé porte
+// son TITRE en topic et son SUMMARY en statement.
+type LeadCandidate = { factId: string; topic: string; statement: string; materialityTier: MaterialityTier };
+
+export function selectLead(shownFacts: DecisionFact[], shownCompositions: FactComposition[] = []): LeadSelection {
+  const candidates: LeadCandidate[] = [
+    ...reserves(shownFacts).map((f) => ({ factId: f.id, topic: f.topic, statement: f.statement, materialityTier: f.materialityTier })),
+    ...shownCompositions.filter((c) => c.kind === "tradeoff")
+      .map((c) => ({ factId: c.id, topic: c.title, statement: c.summary, materialityTier: c.materialityTier })),
+  ];
+  if (candidates.length === 0) return { kind: "none" };
+  const best = Math.min(...candidates.map((f) => TIER_ORDER[f.materialityTier]));
   // secondary ne couronne rien : il n'y a alors rien d'assez matériel pour être cité.
   if (best === TIER_ORDER.secondary) return { kind: "none" };
-  const top = rs.filter((f) => TIER_ORDER[f.materialityTier] === best);
+  const top = candidates.filter((f) => TIER_ORDER[f.materialityTier] === best);
   if (top.length === 1) {
     const f = top[0]!;
     // `single` garde le constat : UN fait cité seul peut être dit en entier sans noyer la conclusion,
     // et le lecteur mérite de savoir ce qui pèse, pas seulement de quoi ça parle.
-    return { kind: "single", factId: f.id, topic: f.topic, statement: f.statement, materialityTier: f.materialityTier };
+    return { kind: "single", factId: f.factId, topic: f.topic, statement: f.statement, materialityTier: f.materialityTier };
   }
   // `tied` ne garde que les SUJETS : trois constats entiers recopieraient les trois cartes qui suivent.
   return {
     kind: "tied",
-    facts: top.map((f) => ({ factId: f.id, topic: f.topic })),
+    facts: top.map((f) => ({ factId: f.factId, topic: f.topic })),
     materialityTier: top[0]!.materialityTier,
   };
 }
@@ -335,7 +350,28 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
   // le rang MAXIMAL. Écrire « quatre points d'un poids comparable » quand deux dominent et deux sont
   // secondaires serait faux. On compte lead.factIds, jamais rs.length.
   const rs = reserves(input.shownFacts);
-  const lead = selectLead(input.shownFacts);
+  const lead = selectLead(input.shownFacts, input.shownCompositions);
+
+  // LES COMPOSITIONS NOMMÉES. Une composition désignée lead single est déjà narrée : la re-narrer ici
+  // la dirait deux fois (le défaut exact que la composition existe pour éviter). Placement : une
+  // composition est ÉTABLIE (elle limite moins le verdict qu'une contrainte non vérifiée, elle pèse
+  // plus qu'une réserve à vérifier), d'où sa place entre les deux.
+  const leadCompId = lead.kind === "single" ? lead.factId : null;
+  const narratedComps = input.shownCompositions.filter((c) => c.id !== leadCompId);
+  if (narratedComps.length > 0) {
+    blocks.push({
+      key: "compositions_found",
+      fallbackText: narratedComps.map((c) => endWithPeriod(c.summary)).join(" "),
+      sourceIds: narratedComps.flatMap((c) => [c.id, ...c.absorbedFactIds]),
+      requiredPhrases: [],
+      // Les nombres du fallback sont autorisés par construction (conclusion-validate) ; on n'autorise
+      // en plus que le compte des compositions.
+      allowedNumbers: numberForms(narratedComps.length),
+      maxChars: 340,
+      generable: true,
+    });
+  }
+
   if (lead.kind === "single") {
     blocks.push({
       key: "reserves_found",
