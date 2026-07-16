@@ -5,6 +5,7 @@ import { fetchLogementDecisionDataWithTimeout, LogementDataUnavailableError, typ
 import { buildLogementFacts } from "@/lib/decision/logement-facts";
 import { runRules } from "@/lib/decision/materiality-rules";
 import { assembleDossier } from "@/lib/decision/decision-assembler";
+import { composeFacts } from "@/lib/decision/fact-compositions";
 import { withEvaluationPoint } from "@/lib/decision/territory-facts";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
 import type { Dossier, ModuleFacts } from "@/lib/decision/decision-fact";
@@ -43,7 +44,8 @@ export async function DossierAvecLogement({
       lat: address.latitude, lon: address.longitude,
       grain: "address", source: "address_geocoder", label: address.label,
     });
-    const dossier = assembleDossier(runRules(facts, project, hardAtAddress), project, "commune+adresse", facts.nom);
+    const run = runRules(facts, project, hardAtAddress);
+    const dossier = assembleDossier(run, project, "commune+adresse", facts.nom, composeFacts(run, facts, project));
     return (
       <DossierDecisionSection
         dossier={dossier} logement={logementLink} logementStatus="done"

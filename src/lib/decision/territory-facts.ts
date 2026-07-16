@@ -19,6 +19,7 @@ import { buildClimatFacts, type ClimatFacts } from "./climat-facts.ts";
 import { getClimatDataCommune } from "../drias-json.ts";
 import { runRules } from "./materiality-rules.ts";
 import { assembleDossier } from "./decision-assembler.ts";
+import { composeFacts } from "./fact-compositions.ts";
 import type { ModuleFacts, Dossier } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 
@@ -153,9 +154,10 @@ export async function buildCommuneDossier(
   if (!facts) return null;
   const hard = await buildHardContext(project, facts);
   // moduleFacts retournés pour que l'augmentation Logement reparte du MÊME socle (pas de reload).
+  const run = runRules(facts, project, hard);
   return {
     moduleFacts: facts,
-    dossier: assembleDossier(runRules(facts, project, hard), project, "commune", facts.nom),
+    dossier: assembleDossier(run, project, "commune", facts.nom, composeFacts(run, facts, project)),
     hard,
   };
 }

@@ -39,6 +39,12 @@ export function buildWinterMildnessEvidence(facts: ModuleFacts): EvidenceRef | n
   };
 }
 
+// « de Antibes » est une faute : élision devant voyelle (« d'Antibes », « d'Orléans »). Les h et les
+// articles (« Le Havre ») restent en « de », le cas voyelle est le seul tranché sans ambiguïté.
+function deCommune(nom: string): string {
+  return /^[aeéèêiouy]/i.test(nom) ? `d'${nom}` : `de ${nom}`;
+}
+
 function composeSeasonalClimateTradeoff(
   run: RunResult, facts: ModuleFacts, project: UserProject,
 ): TradeoffComposition | null {
@@ -59,7 +65,7 @@ function composeSeasonalClimateTradeoff(
     kind: "tradeoff",
     patternId: "seasonal_climate_tradeoff",
     title: "Des hivers doux, avec une exposition estivale à arbitrer",
-    summary: `Les hivers de ${facts.nom} comptent parmi les plus doux du pays, et l'exposition aux fortes chaleurs estivales y appelle un arbitrage.`,
+    summary: `Les hivers ${deCommune(facts.nom)} comptent parmi les plus doux du pays, et l'exposition aux fortes chaleurs estivales y appelle un arbitrage.`,
     favorableSide: {
       label: "Ce qui correspond",
       statement: "Les températures moyennes d'hiver figurent parmi les plus douces à l'échelle nationale.",
@@ -122,7 +128,7 @@ function composeTerritorySizeSharedEvidence(run: RunResult, facts: ModuleFacts):
     kind: "shared_evidence",
     patternId: "territory-size-multiple-consequences",
     title: "Une même petite taille touche plusieurs dimensions de votre projet",
-    summary: `La catégorie de taille de ${facts.nom} répond moins bien à ${ordered.length === 2 ? "deux" : String(ordered.length)} de vos priorités, pour la même raison.`,
+    summary: `La catégorie de taille ${deCommune(facts.nom)} répond moins bien à ${ordered.length === 2 ? "deux" : String(ordered.length)} de vos priorités, pour la même raison.`,
     sharedEvidence: top.evidence,
     consequences: ordered.map((f) => ({
       projectKey: f.projectKey,
