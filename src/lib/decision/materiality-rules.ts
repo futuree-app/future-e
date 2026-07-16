@@ -149,7 +149,9 @@ const tierFor = (p: UserProject, key: PreferenceKey): "structuring" | "secondary
 // vivra dépend de son logement et de son adresse. Le dire, c'est ce qui rend la vérification utile.
 const LIMITATION_CLIMAT = "Cette trajectoire est lue à l'échelle de la commune, pas de l'adresse ni du logement.";
 
-const RULE_CHALEUR = "territoire.climat-chaleur";
+// Exporté : la couche de composition (fact-compositions.ts) référence cette règle ; l'importer
+// garantit qu'un renommage casse le typecheck, jamais silencieusement une composition.
+export const RULE_CHALEUR = "territoire.climat-chaleur";
 const ruleChaleur: DecisionRule = {
   id: RULE_CHALEUR,
   module: "territoire",

@@ -38,8 +38,12 @@ function relativeFact(f: ModuleFacts, key: PreferenceKey): RelativeCriterionFact
   };
 }
 
+// L'IDENTIFIANT CANONIQUE d'une règle de mismatch relative. Exporté : la couche de composition le
+// référence, et l'importer garantit qu'un renommage casse le typecheck, jamais silencieusement l'UI.
+export const mismatchRuleId = (key: PreferenceKey): string => `territoire.mismatch-${key}`;
+
 function makeMismatchRule(key: PreferenceKey): DecisionRule {
-  const id = `territoire.mismatch-${key}`;
+  const id = mismatchRuleId(key);
   const lab = MISMATCH_LABELS[key]!;
   return {
     id,
