@@ -25,8 +25,18 @@ function project(prefs: { key: string; weight: number }[]): UserProject {
 const rule = (key: string) => MISMATCH_RULES.find((r) => r.id === `territoire.mismatch-${key}`)!;
 const evalRule = (key: string, f: ModuleFacts, p: UserProject) => rule(key).evaluate(f, p, undefined as never);
 
-test("la fabrique produit 12 règles", () => {
-  assert.equal(MISMATCH_RULES.length, 12);
+test("la fabrique produit 13 règles", () => {
+  assert.equal(MISMATCH_RULES.length, 13);
+});
+
+test("douceur_climat : hiver froid + poids 3 -> mismatch relative_position, limitation hivernale 1976-2005", () => {
+  const p = project([{ key: "douceur_climat", weight: 3 }]);
+  const f = evalRule("douceur_climat", facts({ douceur_climat: { low: 0.03, high: 0.12 } }), p).facts[0]!;
+  assert.equal((f as { basis: { kind: string } }).basis.kind, "relative_position");
+  assert.match(f.limitation!, /1976-2005/);
+  assert.match(f.limitation!, /décembre à février|hivernale/);
+  assert.doesNotMatch(f.limitation!, /agréable/);
+  assert.match(f.topic, /hivers/);
 });
 
 test("ensoleillement : extrême défavorable + poids 3 -> mismatch structurant PORTANT la limitation ERA5-Land", () => {

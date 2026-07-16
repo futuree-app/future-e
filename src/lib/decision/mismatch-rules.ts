@@ -22,6 +22,7 @@ export const MISMATCH_KEYS: PreferenceKey[] = [
   "faible_dependance_auto", "croissance_demographique", "vie_locale", "cadre_calme", "viabilite_emploi",
   "acces_services", // lot 2b : plafond dégénéré (services complets = table-stakes -> neutral), queue basse propre
   "ensoleillement_recherche", // lot 4a : relative_position + limitation ERA5-Land (card-only)
+  "douceur_climat", // lot 4b : douceur hivernale (relative_position + limitation 1976-2005)
 ];
 
 function relativeFact(f: ModuleFacts, key: PreferenceKey): RelativeCriterionFact {

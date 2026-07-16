@@ -75,4 +75,10 @@ export const MISMATCH_LABELS: Record<string, MismatchLabel> = {
     indicator: "l'ensoleillement du territoire",
     limitation: "Cette position décrit la climatologie solaire de référence issue de la réanalyse ERA5-Land, normale 1991-2020. Elle ne constitue pas une projection de l'ensoleillement futur.",
   },
+  douceur_climat: {
+    topic: "la douceur des hivers",
+    projectPhrase: "des hivers doux",
+    indicator: "la douceur des hivers",
+    limitation: "Cette position décrit la douceur hivernale (température moyenne de décembre à février) sur la période de référence 1976-2005. Les fortes chaleurs estivales, notamment futures, sont traitées à part.",
+  },
 };
