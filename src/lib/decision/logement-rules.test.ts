@@ -11,7 +11,7 @@ function lf(over: Partial<LogementFacts> = {}): LogementFacts {
 function facts(logement?: LogementFacts): ModuleFacts {
   return {
     insee: "31555", nom: "Toulouse", dept: "31", lat: 43.6, lon: 1.44, uu: "31701",
-    tailleVille: 1_060_000, reliefProximite: 0, distanceCoteKm: 150, population: 500000, altitude: 146,
+    tailleVille: 1_060_000, tailleVilleSource: "urban_unit", reliefProximite: 0, distanceCoteKm: 150, population: 500000, altitude: 146,
     catnatInondation: 0, inondationRisque: 10, climat: null, scores: {}, hasAddress: true, logement,
   };
 }

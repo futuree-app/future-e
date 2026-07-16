@@ -148,6 +148,41 @@ const planCoast = buildConclusionPlan({
   mismatchTotal: 1, mismatchShown: 1,
 });
 
+// Un fait d'ÉTAT CATÉGORIEL (categorical_state) : la commune relève d'une catégorie de taille en écart avec
+// la préférence. Le modèle nomme la catégorie, jamais « trop grand » ; pour l'isolement, jamais « isolée ».
+function size(id: string, tier: MaterialityTier, topic: string, statement: string, cat: "metropole" | "village"): DecisionFact {
+  return {
+    id, ruleId: `territoire.taille-${id}`, sourceFactIds: ["territorySize.classification"], module: "territoire",
+    topic, statement,
+    materialityTier: tier, role: "mismatch", projectKey: id as never,
+    basis: { kind: "categorical_state", observedCategory: cat, conventionId: "agglomeration-size-v1" },
+    evidence: [{ factId: "territorySize.classification", module: "territoire", label: "Territoire", grain: "commune" }],
+  } as DecisionFact;
+}
+
+const planSize = buildConclusionPlan({
+  scope: "commune", communeNom: "Roubaix", conclusionState: "no_incompatibility_established", posture: "recherche",
+  shownFacts: [
+    size("eviter_grandes_villes", "structuring", "la taille du territoire",
+      "Roubaix appartient à une métropole selon la population de son unité urbaine et la convention de taille utilisée par futur•e.", "metropole"),
+  ],
+  uncovered: [], uncoveredPriorities: [], establishedIncompatibility: null, coverage: "high",
+  orientation: "arbitration", hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 0,
+  mismatchTotal: 1, mismatchShown: 1,
+});
+
+// LE CAS RISQUÉ : le modèle ne doit PAS conclure « la commune est isolée » (généralisation interdite).
+const planSizeIsolation = buildConclusionPlan({
+  scope: "commune", communeNom: "Petiville", conclusionState: "no_incompatibility_established", posture: "recherche",
+  shownFacts: [
+    size("eviter_isolement", "structuring", "l'isolement du territoire",
+      "Petiville est classée comme un village selon sa population communale. Cette petite taille répond moins bien à la priorité d'éviter l'isolement, sans permettre de conclure à son isolement effectif.", "village"),
+  ],
+  uncovered: [], uncoveredPriorities: [], establishedIncompatibility: null, coverage: "high",
+  orientation: "arbitration", hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 0,
+  mismatchTotal: 1, mismatchShown: 1,
+});
+
 console.log("gate :", shouldGenerateNarrative(plan), "· lead :", JSON.stringify(plan.lead));
 console.log("\n──── DÉTERMINISTE (ce que le lecteur voit sans IA) ────");
 console.log(plan.blocks.map((b) => b.fallbackText).join(" "));
@@ -198,5 +233,8 @@ const a = await probe(plan, "réserves majeures");
 const b = await probe(planMismatch, "mismatch / arbitrage");
 const c = await probe(planAbsence, "absence attestée / arbitrage");
 const dCoast = await probe(planCoast, "mer / éloignement");
-const R = a.retenus + b.retenus + c.retenus + dCoast.retenus, T = a.total + b.total + c.total + dCoast.total;
+const eSize = await probe(planSize, "taille / catégorie");
+const fIso = await probe(planSizeIsolation, "taille / isolement (risqué)");
+const R = a.retenus + b.retenus + c.retenus + dCoast.retenus + eSize.retenus + fIso.retenus,
+      T = a.total + b.total + c.total + dCoast.total + eSize.total + fIso.total;
 console.log(`\n════ TAUX DE SURVIE : ${R}/${T} blocs ════`);

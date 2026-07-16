@@ -25,7 +25,7 @@ export const DECISION_NARRATIVE_CONTRACT_VERSION = "c2";
 // le SUJET de sa phrase, nommée telle que le lecteur l'a posée (« la gare Matabiau », pas « un lieu »).
 // v6 : la COMMUNE est nommée (« Toulouse », pas « ce lieu » ni « la commune »), et les sujets ne portent
 // plus le grain (deux faits d'adresse cités côte à côte répétaient « sur cette adresse »).
-export const DECISION_NARRATIVE_PROMPT_VERSION = "v9";
+export const DECISION_NARRATIVE_PROMPT_VERSION = "v10";
 export const DECISION_NARRATIVE_MODEL = "claude-sonnet-4-6";
 
 export function hashPayload(

@@ -20,6 +20,8 @@ import { HARD_CONSTRAINT_RULES } from "./hard-constraint-rules.ts";
 import { MISMATCH_RULES } from "./mismatch-rules.ts";
 import { ABSENCE_RULES } from "./absence-rules.ts";
 import { COAST_RULES } from "./coast-rules.ts";
+import { AGGLOMERATION_RULES } from "./agglomeration-rules.ts";
+import { AGGLOMERATION_CATEGORIES } from "./agglomeration-facts.ts";
 import { toCommuneAttributes } from "./module-facts-map.ts";
 import {
   trajectoirePhrase, fmtClimat, CLIMAT_HORIZON_LABEL, type ClimatAxe,
@@ -408,6 +410,7 @@ export const REGISTRY: DecisionRule[] = [
   ...MISMATCH_RULES,
   ...ABSENCE_RULES,
   ...COAST_RULES,
+  ...AGGLOMERATION_RULES,
   ruleInondation,
   ...LOGEMENT_RULES,
 ];
@@ -465,6 +468,11 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
         if (!basis.conventionId) {
           throw new Error(`[decision] ${fact.ruleId}: convention de mesure absente`);
         }
+      } else if (basis.kind === "categorical_state") {
+        if (!(AGGLOMERATION_CATEGORIES as readonly string[]).includes(basis.observedCategory)) {
+          throw new Error(`[decision] ${fact.ruleId}: catégorie de taille inconnue (${basis.observedCategory})`);
+        }
+        if (!basis.conventionId) throw new Error(`[decision] ${fact.ruleId}: convention de catégorie absente`);
       } else if (basis.kind !== "relative_position" && basis.kind !== "named_absence") {
         throw new Error(`[decision] ${fact.ruleId}: basis de mismatch inconnu (${(basis as { kind: string }).kind})`);
       }

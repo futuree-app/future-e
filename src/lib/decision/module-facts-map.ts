@@ -16,7 +16,7 @@ export function mapCommuneToModuleFacts(
   // de fermer (le comparateur jugeait la taille sur l'agglomération, le dossier sur la commune).
   // `climat` est chargé PAR L'APPELANT (les scénarios DRIAS vivent dans un fichier, et ce mapping doit
   // rester pur donc testable), exactement comme `tailleVille`.
-  opts: { hasAddress: boolean; tailleVille: number | null; climat?: ClimatFacts | null },
+  opts: { hasAddress: boolean; tailleVille: number | null; tailleVilleSource: "urban_unit" | "commune" | null; climat?: ClimatFacts | null },
 ): ModuleFacts {
   return {
     insee: entry.insee,
@@ -26,6 +26,7 @@ export function mapCommuneToModuleFacts(
     lon: entry.lon,
     uu: entry.uu ?? null,
     tailleVille: opts.tailleVille,
+    tailleVilleSource: opts.tailleVilleSource,
     reliefProximite: entry.relief_proximite ?? null,
     distanceCoteKm: entry.distance_cote_km,
     population: entry.population ?? null,

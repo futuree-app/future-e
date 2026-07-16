@@ -7,6 +7,7 @@ import type { ClimatFacts } from "./climat-facts.ts";
 import type { SanteFacts } from "./sante-facts.ts";
 import type { RankBand } from "./mismatch-facts.ts";
 import type { NamedAbsenceBasis, LocalNetworkAttestation, HigherEdAttestation } from "./absence-facts.ts";
+import type { AgglomerationCategory } from "./agglomeration-facts.ts";
 import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
 import type { CriteriaSummary } from "./criteria-registry.ts";
 import type {
@@ -30,7 +31,7 @@ export type EvidenceRef = {
   module: DecisionModule;
   label: string;
   observedValue?: string; // la valeur mesurée : "42 km", "18 000 hab.", "72/100"
-  grain: "commune" | "adresse" | "secteur";
+  grain: "commune" | "adresse" | "secteur" | "unite_urbaine";
   href?: string; // optionnel slice 1
   sourceMode?: "persisted_snapshot" | "live_fetch"; // Logement : DPE persisté vs réglementaire frais
   observedAt?: string; // pour live_fetch
@@ -96,7 +97,15 @@ export type AbsoluteMeasureBasis = {
   unit: "km";
   conventionId: string;
 };
-export type MismatchBasis = NamedAbsenceBasis | RelativePositionBasis | AbsoluteMeasureBasis;
+// ÉTAT CATÉGORIEL (lot 3b, taille) : l'appartenance à une catégorie de taille EST le fait (pas un
+// percentile). Le nombre brut et sa provenance vivent dans l'EvidenceRef, pas dans le basis.
+export type CategoricalStateBasis = {
+  kind: "categorical_state";
+  observedCategory: AgglomerationCategory;
+  conventionId: string;
+};
+export type MismatchBasis =
+  NamedAbsenceBasis | RelativePositionBasis | AbsoluteMeasureBasis | CategoricalStateBasis;
 
 // MISMATCH : le lieu répond MOINS BIEN à une priorité déclarée, sans que ce soit éliminatoire. Pas
 // d'action (rien à vérifier, le constat est établi) ; sa seule limitation possible est le grain.
@@ -135,6 +144,10 @@ export type ModuleFacts = CommuneAttributes & {
   // NULLABLE mais NON OPTIONNEL : `undefined` créerait un troisième état entre « la donnée est là » et
   // « on l'a cherchée sans la trouver », et une règle finirait par confondre les deux.
   climat: ClimatFacts | null;
+  // PROVENANCE de tailleVille, chargée par l'appelant (comme tailleVille). NON optionnelle, nullable :
+  // "urban_unit" autorise « agglomération » ; "commune" impose « population communale » ; null (taille
+  // absente OU anomalie de cache) -> uncertain, jamais une catégorie ni un repli communal.
+  tailleVilleSource: "urban_unit" | "commune" | null;
   // Le rang national à deux bornes, chargé par l'appelant (comme tailleVille, climat). NULLABLE mais NON
   // optionnel : `undefined` créerait un troisième état entre « lu » et « non lu ».
   rankBands: Record<string, RankBand> | null;

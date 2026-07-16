@@ -14,7 +14,7 @@ import type { PlaceDirectory } from "../hard-constraints-resolve.ts";
 function facts(over: Partial<ModuleFacts> = {}): ModuleFacts {
   return {
     insee: "31555", nom: "Toulouse", dept: "31", lat: 43.6045, lon: 1.4442, uu: "31701",
-    tailleVille: 1_060_000, reliefProximite: 0, distanceCoteKm: 1, population: 5000, altitude: 100,
+    tailleVille: 1_060_000, tailleVilleSource: "urban_unit", reliefProximite: 0, distanceCoteKm: 1, population: 5000, altitude: 100,
     catnatInondation: 0, inondationRisque: 10, climat: null, sante: null, scores: {}, hasAddress: false, ...over,
   };
 }

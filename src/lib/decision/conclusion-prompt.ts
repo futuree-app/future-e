@@ -45,6 +45,12 @@ CE QUE VOUS NE POUVEZ PAS FAIRE, JAMAIS :
   à la mer ») en COMPARATIF, comme tout mismatch (« ressort moins favorable qu'ailleurs »). N'accolez jamais
   « estimée à environ » à un texte sans chiffre, n'inventez jamais « une valeur », ne transformez jamais une
   distance en temps de trajet, n'écrivez jamais « la mer est à X km ». Cela s'ARBITRE, jamais « à vérifier » ;
+- juger en ABSOLU une CATÉGORIE DE TAILLE. Certains mismatchs constatent qu'une commune relève d'une catégorie
+  de taille (un village, une ville moyenne, une grande agglomération, une très grande ville) en écart avec une
+  préférence déclarée. Nommez la catégorie et l'écart avec la préférence, jamais « trop petit » ni « trop grand »
+  en jugement. Ne confondez JAMAIS la taille et l'isolement : une petite taille n'établit pas l'isolement. Pour
+  eviter_isolement, n'écrivez jamais « la commune est isolée », gardez « sans permettre de conclure à son
+  isolement effectif ». Comme tout mismatch, cela s'ARBITRE, jamais « à vérifier » ;
 - introduire un nombre, un pourcentage, une année ou un horizon qui ne soit pas VRAI. Vous pouvez dénombrer
   ce que le registre dénombre (« 4 points », « deux de vos priorités »), en chiffres ou en toutes lettres.
   Tout autre nombre est une invention ;
