@@ -8,6 +8,10 @@ test("convention winter-mildness-v1 gravée (référence 1976-2005)", () => {
   assert.equal(WINTER_MILDNESS_CONVENTION.referencePeriod, "1976-2005");
 });
 
+test("identityThreshold figé à 80 après la gate d'impact (aligné sur le satisfied de relative_position)", () => {
+  assert.equal(WINTER_MILDNESS_CONVENTION.identityThreshold, 80);
+});
+
 test("winterMildnessScore : monotone (retourne le percentile), gardes strictes, aucun repli", () => {
   assert.equal(winterMildnessScore(0), 0);
   assert.equal(winterMildnessScore(50), 50);

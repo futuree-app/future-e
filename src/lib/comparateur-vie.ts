@@ -12,7 +12,7 @@ import {
 } from "@/lib/geo-zones";
 import { getLittoralIndex, type LittoralSummary } from "@/lib/littoral";
 import { tailleVilleFrom, resolveTailleVille, communeAttributesFrom } from "@/lib/commune-attributes";
-import { winterMildnessScore } from "@/lib/climate/winter-mildness";
+import { winterMildnessScore, WINTER_MILDNESS_CONVENTION } from "@/lib/climate/winter-mildness";
 import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
 import { hydrateHardConstraints, explorationHints } from "@/lib/hard-constraints-hydrate";
 import { resolveExternalReferences } from "@/lib/hard-constraints-external";
@@ -1001,7 +1001,9 @@ function buildIdentiteCandidates(c: IndexCommune): string[] {
   const sudOuest = c.region === "Nouvelle-Aquitaine";
   const sud = c.region === "Occitanie" || c.region === "Provence-Alpes-Côte d'Azur";
   const frais = (subScore("faible_chaleur", c) ?? 0) >= 60;
-  const doux = (subScore("douceur_climat", c) ?? 0) >= 65;
+  const douceurScore = subScore("douceur_climat", c);
+  // Condition EXPLICITE (pas de repli `?? 0` : une donnée absente n'établit pas l'identité « hivers doux »).
+  const doux = douceurScore != null && douceurScore >= WINTER_MILDNESS_CONVENTION.identityThreshold;
   const vieLocaleForte = (subScore("vie_locale", c) ?? 0) >= 60;
   const natureForte = (subScore("nature", c) ?? 0) >= 60;
   const calmeForte = Math.max(subScore("cadre_calme", c) ?? 0, subScore("calme_sonore", c) ?? 0) >= 62;
