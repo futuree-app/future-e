@@ -1024,7 +1024,7 @@ function buildIdentiteCandidates(c: IndexCommune): string[] {
   if (frais && sudOuest) push("Pour rester dans le Sud-Ouest sans subir les plus fortes chaleurs.");
   if (frais && sud) push("Pour rester dans le Sud sans subir les plus fortes chaleurs.");
   if (frais) push("Pour chercher davantage de fraîcheur et un rythme plus posé.");
-  if (doux) push("Pour un climat doux une bonne partie de l'année.");
+  if (doux) push("Pour des hivers parmi les plus doux du pays.");
   // Traits de caractère (départagent deux communes de même géographie).
   if (etudianteForte) push("Pour une ville étudiante à taille humaine.");
   if (croissanceForte) push("Pour s'installer dans un territoire qui attire.");
@@ -1357,8 +1357,8 @@ export const THEME_ORDER: { id: string; titre: string; gp: string; court: string
 // dont le pire tier s'affiche en rouge si une autre commune fait mieux. directionnel=false
 // = préférence non universelle (pas de gagnant). Premier jet, à calibrer.
 const DIMENSIONS: ComparaisonDim[] = [
-  { id: "etes_frais", label: "Étés frais", themeId: "climat", key: "faible_chaleur", paliers: ["Étés frais", "Étés tempérés", "Étés chauds"], gp: "les étés frais", forte: "ses étés frais", aide: "Spécifiquement les étés : à quel point la chaleur y reste supportable. La douceur d'ensemble (hivers et étés) est notée à part.", risque: false, directionnel: true },
-  { id: "douceur", label: "Douceur à l'année", themeId: "climat", key: "douceur_climat", paliers: ["Climat doux", "Climat contrasté", "Hivers rigoureux"], gp: "la douceur du climat", forte: "la douceur de son climat", aide: "La douceur d'ensemble sur l'année : hivers tempérés autant qu'étés sans excès. Les étés seuls sont notés à part.", risque: false, directionnel: true },
+  { id: "etes_frais", label: "Étés frais", themeId: "climat", key: "faible_chaleur", paliers: ["Étés frais", "Étés tempérés", "Étés chauds"], gp: "les étés frais", forte: "ses étés frais", aide: "Spécifiquement les étés : l'exposition aux fortes chaleurs, actuelle et future. Les hivers sont notés à part (Hivers doux).", risque: false, directionnel: true },
+  { id: "douceur", label: "Hivers doux", themeId: "climat", key: "douceur_climat", paliers: ["Hivers parmi les plus doux", "Situation intermédiaire", "Hivers parmi les moins doux"], gp: "la douceur des hivers", forte: "la douceur de ses hivers", aide: "La douceur des hivers (température moyenne de décembre à février), à l'échelle nationale. Les étés sont notés à part (Étés frais).", risque: false, directionnel: true },
   { id: "ensoleillement", label: "Ensoleillement", themeId: "climat", key: "ensoleillement_recherche", paliers: ["Très ensoleillé", "Moyennement ensoleillé", "Peu ensoleillé"], gp: "l'ensoleillement", forte: "son ensoleillement", aide: "Le rayonnement solaire reçu au sol (ERA5), exprimé sans nombre d'heures. Affiché sans gagnant : l'ensoleillement idéal dépend de vos goûts.", risque: false, directionnel: false },
   { id: "inondation", label: "Inondation", themeId: "risques", key: "faible_risque_inondation", paliers: ["Risque d'inondation faible", "Risque modéré", "Risque élevé"], gp: "le risque d'inondation", forte: "son faible risque d'inondation", aide: "Ce que dit l'historique d'inondations du territoire.", risque: true, directionnel: true },
   { id: "feu", label: "Feu", themeId: "risques", key: "faible_risque_feu", paliers: ["Risque de feu faible", "Risque modéré", "Risque élevé"], gp: "le risque de feu", forte: "son faible risque de feu", aide: "L'exposition du secteur au risque d'incendie.", risque: true, directionnel: true },
@@ -2009,7 +2009,7 @@ function assignSignaux(
 
 const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> = {
   faible_chaleur: "étés plus frais",
-  douceur_climat: "climat doux, hivers tempérés",
+  douceur_climat: "hivers parmi les plus doux",
   ensoleillement_recherche: "plus ensoleillé",
   faible_secheresse: "sols peu exposés à la sécheresse",
   faible_risque_feu: "faible risque de feu",
@@ -2069,7 +2069,7 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
 };
 const REASON_NEG: Record<PreferenceKey, string> = {
   faible_chaleur: "chaleur en hausse",
-  douceur_climat: "hivers rudes ou étés marqués",
+  douceur_climat: "hivers parmi les moins doux",
   ensoleillement_recherche: "moins ensoleillé",
   faible_secheresse: "sols exposés à la sécheresse",
   faible_risque_feu: "risque de feu notable",

@@ -27,7 +27,7 @@ export const maxDuration = 60;
 // Glose humaine des clés de préférence (jamais le terme technique côté prompt).
 const PREF_LABELS: Record<string, string> = {
   faible_chaleur: "des étés plus frais",
-  douceur_climat: "un climat doux",
+  douceur_climat: "des hivers doux",
   ensoleillement_recherche: "un climat plus ensoleillé",
   faible_secheresse: "des sols peu exposés à la sécheresse",
   faible_risque_feu: "un faible risque de feu",

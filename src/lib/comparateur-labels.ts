@@ -11,7 +11,7 @@
 
 export const PREFERENCE_LABELS: Record<string, string> = {
   faible_chaleur: "des étés plus frais",
-  douceur_climat: "un climat doux",
+  douceur_climat: "des hivers doux",
   ensoleillement_recherche: "un climat plus ensoleillé",
   faible_secheresse: "des sols peu exposés à la sécheresse",
   faible_risque_feu: "un faible risque de feu",
@@ -51,7 +51,7 @@ export const PREFERENCE_TOOLTIP: Record<string, string | null> = {
   mobilite_quotidienne: "Indique si un réseau de bus, tram ou métro dessert les environs immédiats. Mesure la possibilité de s'y déplacer au quotidien sans voiture.",
   faible_dependance_auto: "Part des trajets domicile-travail faits autrement qu'en voiture.",
   cadre_calme: "Environnement peu dense, propice à un rythme plus calme.",
-  douceur_climat: "Hivers tempérés, étés sans excès.",
+  douceur_climat: "Hivers relativement doux à l'échelle nationale.",
   ensoleillement_recherche: "Plus ensoleillé.",
   proximite_mer: "Accès rapide à la côte.",
   eviter_isolement: "Présence d'un bassin de vie offrant services et activités du quotidien.",
