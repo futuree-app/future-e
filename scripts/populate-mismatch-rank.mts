@@ -62,20 +62,31 @@ for (const key of MISMATCH_RANK_KEYS) {
     return lo;
   };
 
+  // Preuve percentile <-> rang pour les clés dont le score EST déjà un percentile national 0-100
+  // (rang recalculé ~= score/100). Seuils d'échec DURS (« faible » n'est pas testable).
+  const PERCENTILE_KEYS = ["ensoleillement_recherche", "douceur_climat"];
+  const isPct = PERCENTILE_KEYS.includes(key);
   let tieMax = 0;
-  let sunErrMax = 0; // preuve percentile <-> rang : |rankMid - rayonnement_pct/100| (ensoleillement)
+  const errs: number[] = [];
   for (const c of communes) {
     const v = mismatchRawScore(key, c);
     if (v == null) continue;
     const low = lowIdx(v) / N, high = highIdx(v) / N;
     if (low < 0 || high > 1 || low > high) die(`${key} produit une bande invalide sur ${c.insee}`);
     tieMax = Math.max(tieMax, high - low);
-    if (key === "ensoleillement_recherche") sunErrMax = Math.max(sunErrMax, Math.abs((low + high) / 2 - v / 100));
+    if (isPct) errs.push(Math.abs((low + high) / 2 - v / 100));
     if (!c.rankBands) c.rankBands = {};
     c.rankBands[key] = [Math.round(low * 10000), Math.round(high * 10000)];
   }
-  const sunProof = key === "ensoleillement_recherche" ? ` · |rankMid - pct/100| max ${(sunErrMax * 100).toFixed(2)} pt` : "";
-  report.push(`${key.padEnd(26)} ${String(N).padStart(6)} valeurs · ex æquo max ${(tieMax * 100).toFixed(1)} %${sunProof}`);
+  let pctProof = "";
+  if (isPct) {
+    errs.sort((a, b) => a - b);
+    const errMax = errs[errs.length - 1] ?? 0, errP95 = errs[Math.floor(errs.length * 0.95)] ?? 0;
+    if (N !== communes.length) die(`${key}: validCount ${N} != ${communes.length} (percentile doit couvrir toutes les communes)`);
+    if (errMax > 0.02) die(`${key}: |rankMid - pct/100| max ${errMax.toFixed(4)} > 0.02 (le rang ne colle plus au percentile source)`);
+    pctProof = ` · errMax ${(errMax * 100).toFixed(2)} pt · errP95 ${(errP95 * 100).toFixed(2)} pt`;
+  }
+  report.push(`${key.padEnd(26)} ${String(N).padStart(6)} valeurs · ex æquo max ${(tieMax * 100).toFixed(1)} %${pctProof}`);
 }
 
 // DIFF SÉMANTIQUE : aucune bande d'une clé existante ne doit avoir changé (seule ensoleillement s'ajoute).
@@ -85,7 +96,7 @@ for (const k of OLD_KEYS) {
   for (const c of communes) if (JSON.stringify(c.rankBands?.[k]) !== m.get(c.insee)) changed++;
 }
 if (changed > 0) die(`régression: ${changed} bandes de clés EXISTANTES ont changé (attendu 0)`);
-report.push(`diff sémantique OK : 0 bande existante modifiée (${OLD_KEYS.length} clés) · seule ensoleillement_recherche ajoutée`);
+report.push(`diff sémantique OK : 0 bande existante modifiée (${OLD_KEYS.length} clés) · seule douceur_climat ajoutée`);
 
 console.log(report.join("\n"));
 
