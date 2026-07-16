@@ -19,6 +19,7 @@ export const MISMATCH_RANK_KEYS: PreferenceKey[] = [
   "nature", "acces_ecoles", "acces_soins", "acces_culture", "acces_transports",
   "faible_dependance_auto", "croissance_demographique", "vie_locale", "cadre_calme", "viabilite_emploi",
   "acces_services", // lot 2b : mécanique v1, plafond dégénéré neutralisé par la bande à deux bornes
+  "ensoleillement_recherche", // lot 4a : percentile ERA5-Land uniforme, relative_position symétrique
 ];
 
 type Anchors = [number, number][];
@@ -71,7 +72,11 @@ export function mismatchRawScore(key: PreferenceKey, c: IndexCommune): number | 
       // COPIE FIDÈLE de subScore("acces_services") : éloignement bas = mieux. Le test de parité garantit
       // qu'elles restent identiques (sinon le rang du dossier ordonnerait autrement que le comparateur).
       return c.vivpct?.eloignement == null ? null : 100 - c.vivpct.eloignement;
+    case "ensoleillement_recherche":
+      // COPIE FIDÈLE de subScore("ensoleillement_recherche") : rayonnement solaire ERA5-Land, percentile
+      // national. Plus de soleil = rang plus haut. Le test de parité garantit l'identité avec le comparateur.
+      return c.rayonnement_pct ?? null;
     default:
-      return null; // hors des 10 clés de mismatch : non couvert ici
+      return null; // hors des clés de mismatch : non couvert ici
   }
 }
