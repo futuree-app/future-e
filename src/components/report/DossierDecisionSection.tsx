@@ -150,7 +150,9 @@ export function DossierDecisionSection({
                 {s.title}
               </div>
               <ul className="flex flex-col gap-5">
-                {s.facts.map((f) => {
+                {s.cards.map((card) => {
+                  if (card.kind === "composition") return null; {/* rendu Task 5 (FactCompositionCard) */}
+                  const f = card.fact;
                   const grain = factGrain(f);
                   return (
                     <li key={f.id}>

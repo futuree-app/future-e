@@ -9,6 +9,12 @@ import { PRODUCT_CONVENTIONS_VERSION, type EvaluationContext } from "../hard-con
 import { hydrateHardConstraints } from "../hard-constraints-hydrate.ts";
 import type { PlaceDirectory } from "../hard-constraints-resolve.ts";
 
+// Les sections portent désormais des CARTES (faits simples ou compositions) : les e2e lisent les faits.
+function sectionFacts(s?: { cards?: import("./decision-fact.ts").DossierCard[] }) {
+  return (s?.cards ?? []).flatMap((c) => (c.kind === "fact" ? [c.fact] : []));
+}
+
+
 // BOUT EN BOUT : index (rankBand) -> mapping -> runRules -> dossier. On prouve que la douceur hivernale
 // (relative_position, lot 4b) traverse la chaîne et ressort en carte / satisfied / uncertain.
 const DIR: PlaceDirectory = { byName: () => null, plmByName: () => null };
@@ -33,7 +39,7 @@ function dossierFor(e: IndexCommune, p: UserProject) {
 test("E2E hiver parmi les moins doux (rang bas), poids 3 -> carte relative_position, arbitrage, limitation 1976-2005", () => {
   const d = dossierFor(entry({ rankBands: { douceur_climat: [300, 1200] } } as Partial<IndexCommune>), project([{ key: "douceur_climat", weight: 3 }]));
   const sec = d.sections.find((s) => s.key === "mismatches");
-  const f = (sec?.facts ?? []).find((x) => (x as { basis?: { kind: string } }).basis?.kind === "relative_position" && x.projectKey === "douceur_climat");
+  const f = sectionFacts(sec).find((x) => (x as { basis?: { kind: string } }).basis?.kind === "relative_position" && x.projectKey === "douceur_climat");
   assert.ok(f, "carte douceur attendue");
   assert.match(f!.limitation!, /1976-2005/);
   assert.equal(d.criteria.orientation, "arbitration");
@@ -42,7 +48,7 @@ test("E2E hiver parmi les moins doux (rang bas), poids 3 -> carte relative_posit
 test("E2E hiver parmi les plus doux (rang haut), poids 3 -> satisfied favorable, aucune carte", () => {
   const d = dossierFor(entry({ rankBands: { douceur_climat: [8800, 9700] } } as Partial<IndexCommune>), project([{ key: "douceur_climat", weight: 3 }]));
   const sec = d.sections.find((s) => s.key === "mismatches");
-  assert.equal((sec?.facts ?? []).filter((x) => (x as { basis?: { kind: string } }).basis?.kind === "relative_position" && x.projectKey === "douceur_climat").length, 0);
+  assert.equal(sectionFacts(sec).filter((x) => (x as { basis?: { kind: string } }).basis?.kind === "relative_position" && x.projectKey === "douceur_climat").length, 0);
   const crit = d.criteria.registry.find((c) => c.criterionKey === "douceur_climat");
   assert.equal(crit?.outcome, "favorable");
   assert.equal(d.criteria.orientation, "favorable");

@@ -7,6 +7,7 @@ import type { ClimatFacts } from "./climat-facts.ts";
 import type { SanteFacts } from "./sante-facts.ts";
 import type { RankBand } from "./mismatch-facts.ts";
 import type { NamedAbsenceBasis, LocalNetworkAttestation, HigherEdAttestation } from "./absence-facts.ts";
+import type { FactComposition } from "./fact-composition.ts";
 import type { AgglomerationCategory } from "./agglomeration-facts.ts";
 import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
 import type { CriteriaSummary } from "./criteria-registry.ts";
@@ -222,10 +223,16 @@ export type ConclusionState =
   | "established_incompatibility" | "no_incompatibility_established"
   | "insufficient_evidence" | "no_hard_constraint_declared" | "project_not_structured";
 export type UncoveredConstraint = { key: HardConstraintKey; label: string };
+// LA CARTE DE PRÉSENTATION : fait simple ou composition, dans UNE liste commune. Une composition
+// compte pour une carte, donc elle vit dans la même liste, sous le même tri et le même cap : elle ne
+// passe jamais devant une carte plus matérielle du seul fait d'être composée.
+export type DossierCard =
+  | { kind: "fact"; fact: DecisionFact }
+  | { kind: "composition"; composition: FactComposition };
 export type DossierSection = {
   key: "incompatibilities" | "mismatches" | "compromises" | "unknowns" | "verifications";
   title: string;
-  facts: DecisionFact[];
+  cards: DossierCard[];
 };
 export type Dossier = {
   scope: "commune" | "commune+adresse";
@@ -240,5 +247,12 @@ export type Dossier = {
   criteria: CriteriaSummary;
   conclusionBasis: { ruleIds: string[]; factIds: string[]; evidence: EvidenceRef[] };
   sections: DossierSection[];
+  // Les compositions AFFICHÉES (post-cap) et les faits qu'elles ont absorbés : ceux-ci quittent les
+  // sections mais restent lisibles au dépliable d'audit de leur composition (invariant 4).
+  compositions: FactComposition[];
+  absorbedFacts: DecisionFact[];
+  // Comptes de PRÉSENTATION (cartes affichées), distincts des faits émis : le lecteur doit pouvoir
+  // compter les cartes et retomber dessus.
+  presentation: { elementaryFactShown: number; compositionShown: number; absorbedFactTotal: number };
   uncovered: UncoveredConstraint[];
 };

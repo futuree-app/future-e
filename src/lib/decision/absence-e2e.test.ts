@@ -9,6 +9,12 @@ import { PRODUCT_CONVENTIONS_VERSION, type EvaluationContext } from "../hard-con
 import { hydrateHardConstraints } from "../hard-constraints-hydrate.ts";
 import type { PlaceDirectory } from "../hard-constraints-resolve.ts";
 
+// Les sections portent désormais des CARTES (faits simples ou compositions) : les e2e lisent les faits.
+function sectionFacts(s?: { cards?: import("./decision-fact.ts").DossierCard[] }) {
+  return (s?.cards ?? []).flatMap((c) => (c.kind === "fact" ? [c.fact] : []));
+}
+
+
 // BOUT EN BOUT : IndexCommune -> mapCommuneToModuleFacts -> runRules -> assembleDossier. On prouve que
 // l'attestation d'absence traverse toute la chaîne câblée et ressort en carte dans la section « mismatches ».
 const DIR: PlaceDirectory = { byName: () => null, plmByName: () => null };
@@ -36,7 +42,7 @@ test("E2E absence structurante : réseau mesuré sous plancher (poids 3) -> cart
   const d = dossierFor(e, project([{ key: "mobilite_quotidienne", weight: 3 }, { key: "vie_etudiante", weight: 2 }]));
   const sec = d.sections.find((s) => s.key === "mismatches");
   assert.ok(sec, "la section « mismatches » doit exister");
-  const mobil = sec!.facts.find((f) => f.role === "mismatch" && (f as { basis: { kind: string } }).basis.kind === "named_absence");
+  const mobil = sectionFacts(sec).find((f) => f.role === "mismatch" && (f as { basis: { kind: string } }).basis.kind === "named_absence");
   assert.ok(mobil, "une carte d'absence attestée doit être présente");
   assert.match(mobil!.statement, /point de référence retenu/);
   assert.doesNotMatch(mobil!.statement, /insuffisant|aucune vie étudiante/i);
@@ -48,7 +54,7 @@ test("E2E symétrique : réseau desservi + établissement présent -> neutral, a
     etudesSup: { measured: true, weightedAccess: 5, radiusKm: 10, establishmentCount: 3 } });
   const d = dossierFor(e, project([{ key: "mobilite_quotidienne", weight: 3 }, { key: "vie_etudiante", weight: 2 }]));
   const sec = d.sections.find((s) => s.key === "mismatches");
-  const absences = (sec?.facts ?? []).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "named_absence");
+  const absences = sectionFacts(sec).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "named_absence");
   assert.equal(absences.length, 0, "aucune carte d'absence quand l'élément est présent");
   assert.notEqual(d.criteria.orientation, "arbitration");
 });
@@ -57,7 +63,7 @@ test("E2E non mesuré : marqueur absent -> uncertain, aucune carte, couverture n
   const e = entry(); // pas de reseauLocalMeasured ni etudesSup
   const d = dossierFor(e, project([{ key: "mobilite_quotidienne", weight: 3 }]));
   const sec = d.sections.find((s) => s.key === "mismatches");
-  const absences = (sec?.facts ?? []).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "named_absence");
+  const absences = sectionFacts(sec).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "named_absence");
   assert.equal(absences.length, 0);
   const crit = d.criteria.registry.find((c) => c.criterionKey === "mobilite_quotidienne");
   assert.notEqual(crit?.coverage, "examined"); // non examiné : une absence n'est jamais inventée
