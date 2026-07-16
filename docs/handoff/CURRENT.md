@@ -50,9 +50,31 @@ scripts/*.test.mjs` = **22/22** ; `npx tsc --noEmit` = 0 ; `npm run build` exit 
 **Sonde LANCÉE** : cas « ensoleillement » **5/5** au présent comparatif, aucune promesse future. Total 41/45
 (rejets stochastiques hors ensoleillement).
 
+## Déploiement Vercel (2 blocages, dont 1 réparé)
+
+- **`engines` (RÉPARÉ, `d6a7a66` sur main)** : `package.json` déclarait `node: ">=25"` (calé sur la machine
+  locale) ; Vercel ne propose que la LTS 24 et rejetait `>=25` AVANT le build (« Found invalid or discontinued
+  Node.js Version »). C'était le vrai blocage répété. Corrigé en `"24.x"`. Le build passe maintenant (2255 pages).
+- **Taille de fonction (À FAIRE côté Vercel)** : la fonction `rapport` fait **250,67 Mo** (limite 250). ≈ 239 Mo
+  node_modules+code + 11 Mo index `.gz` embarqué (via `outputFileTracingIncludes` dans `next.config.ts`, lecture
+  runtime légitime). Le ré-enrichissement d'index du lot 4a (+1 Mo pour la bande ensoleillement sur 34 788
+  communes) a fait basculer une fonction déjà à ~249,7 Mo. **Décision porteur : activer
+  `VERCEL_SUPPORT_LARGE_FUNCTIONS=1`** (Production + Preview) dans les env vars Vercel puis redeploy (prérequis :
+  Fluid Compute + Active CPU). Large Functions montent à 5 Go ; ne s'applique qu'aux fonctions >250 Mo. **Ne PAS**
+  sortir l'index vers Blob (le gzip local garde code + données déployés ensemble, pas de désync de version, pour
+  0,67 Mo le risque/bénéfice est mauvais).
+- **Chantier d'amaigrissement séparé (à prévoir, cible 200-220 Mo)** : relancer avec
+  `VERCEL_ANALYZE_BUILD_OUTPUT=1` (et/ou `VERCEL_BUILDER_DEBUG=1`) pour voir les plus gros contributeurs des
+  ~239 Mo hors index ; auditer les imports serveur de `/rapport` (un barrel peut embarquer une pile IA/PDF
+  entière) ; chercher les deps dupliquées / imports dynamiques larges. **Piste préférée** : un `decision-index`
+  compact (seuls les champs que le dossier consomme) plutôt qu'un Blob — l'index complet reste pour le
+  classement/exploration.
+
 ## Prochaine étape immédiate
 
-1. **Merge** de `feat/mismatch-lot4a-ensoleillement` vers `main` + push (l'index `.gz` est committé).
+1. **[Vercel] Activer `VERCEL_SUPPORT_LARGE_FUNCTIONS=1`** + redeploy (débloque le déploiement).
+2. **Merge** de `feat/mismatch-lot4a-ensoleillement` vers `main` + push (l'index `.gz` est committé). **FAIT**
+   (`f0ec794`), + hotfix engines `d6a7a66`.
 2. **Lot 4b — refonte canonique de `douceur_climat`** (décision porteur : UNE seule définition, refondue
    PARTOUT ; migration mesurée). L'audit a confirmé le problème : `douceur_climat = 0.6·douceur_hivernale +
    0.4·(été non extrême)`, et sa composante estivale (`NORTX35D_yr`) **double compte** avec `faible_chaleur`.
