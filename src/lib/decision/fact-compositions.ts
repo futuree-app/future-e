@@ -4,16 +4,19 @@
 // (invariant 5). Une composition réorganise ce qui aurait été visible séparément ; elle ne rend jamais
 // visible ce qui était silencieux (invariant 7). Le côté favorable n'est jamais re-dérivé : outcome
 // depuis l'évaluation existante, preuve par helper canonique, aucun seuil recalculé (invariant 9).
-import type { RunResult, RuleEvaluation, ModuleFacts, EvidenceRef, VerificationFact } from "./decision-fact.ts";
+import type { RunResult, RuleEvaluation, ModuleFacts, EvidenceRef, VerificationFact, MismatchFact, MaterialityTier } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
-import type { FactComposition, TradeoffComposition } from "./fact-composition.ts";
+import type { FactComposition, TradeoffComposition, SharedEvidenceComposition } from "./fact-composition.ts";
 import { preferenceWeight } from "./project-view.ts";
 import { rankPhrase, bandValide } from "./mismatch-facts.ts";
 import { mismatchRuleId } from "./mismatch-rules.ts";
 import { RULE_CHALEUR } from "./materiality-rules.ts";
+import { TERRITORY_SIZE_FACT_ID } from "./agglomeration-rules.ts";
 import { WINTER_MILDNESS_CONVENTION } from "../climate/winter-mildness.ts";
 
 const RULE_DOUCEUR = mismatchRuleId("douceur_climat");
+
+const TIER_ORDER: Record<MaterialityTier, number> = { decision_critical: 0, structuring: 1, secondary: 2 };
 
 function evaluation(run: RunResult, ruleId: string): RuleEvaluation | null {
   return run.evaluations.find((e) => e.ruleId === ruleId) ?? null;
@@ -80,6 +83,61 @@ function composeSeasonalClimateTradeoff(
   };
 }
 
+// LE PATRON EST STRICT (invariant 5) : source canonique + clés autorisées + basis catégoriel de la MÊME
+// catégorie observée. Le titre affirme « une même petite taille » : le patron n'a le droit de se
+// déclencher que si c'est vrai. eviter_grandes_villes est ABSENT : sur un village il est satisfied, il
+// ne produit jamais un mismatch à regrouper ici.
+const TERRITORY_SIZE_PATTERN = {
+  sourceFactId: TERRITORY_SIZE_FACT_ID,
+  allowedProjectKeys: new Set(["prefere_grande_ville", "eviter_isolement"]),
+  requiredBasisKind: "categorical_state" as const,
+  composableCategories: new Set(["village"]), // v1 : le seul cas réellement produit par les règles
+};
+
+function composeTerritorySizeSharedEvidence(run: RunResult, facts: ModuleFacts): SharedEvidenceComposition | null {
+  // Seuls les faits MATÉRIELS ÉMIS comptent (poids >= 2 par construction des règles de taille) :
+  // une évaluation silencieuse de poids 1 n'est jamais repêchée (invariant 7).
+  const eligible = run.facts.filter((f): f is MismatchFact =>
+    f.role === "mismatch" &&
+    f.sourceFactIds.includes(TERRITORY_SIZE_PATTERN.sourceFactId) &&
+    TERRITORY_SIZE_PATTERN.allowedProjectKeys.has(f.projectKey) &&
+    f.basis.kind === TERRITORY_SIZE_PATTERN.requiredBasisKind &&
+    TERRITORY_SIZE_PATTERN.composableCategories.has(f.basis.observedCategory),
+  );
+  if (eligible.length < 2) return null;
+  // L'ÉTAT COMMUN doit être commun : même catégorie observée sur tous les faits regroupés.
+  const categories = new Set(eligible.map((f) => (f.basis as { observedCategory: string }).observedCategory));
+  if (categories.size !== 1) return null;
+
+  // TRI TOTALEMENT DÉTERMINISTE : cette couche entre dans le hash narratif ; l'ordre d'enregistrement
+  // des règles ne doit jamais changer une composition.
+  const ordered = [...eligible].sort((a, b) =>
+    TIER_ORDER[a.materialityTier] - TIER_ORDER[b.materialityTier] ||
+    a.projectKey.localeCompare(b.projectKey) ||
+    a.id.localeCompare(b.id),
+  );
+  const top = ordered[0]!;
+  return {
+    id: `${facts.insee}:composition-taille-consequences`,
+    kind: "shared_evidence",
+    patternId: "territory-size-multiple-consequences",
+    title: "Une même petite taille touche plusieurs dimensions de votre projet",
+    summary: `La catégorie de taille de ${facts.nom} répond moins bien à ${ordered.length === 2 ? "deux" : String(ordered.length)} de vos priorités, pour la même raison.`,
+    sharedEvidence: top.evidence,
+    consequences: ordered.map((f) => ({
+      projectKey: f.projectKey,
+      statement: f.statement,
+      materialityTier: f.materialityTier,
+      factId: f.id,
+      ...(f.limitation ? { limitation: f.limitation } : {}),
+    })),
+    absorbedFactIds: ordered.map((f) => f.id),
+    referencedRuleIds: [...new Set(ordered.map((f) => f.ruleId))],
+    materialityTier: top.materialityTier,
+    displaySection: "mismatches",
+  };
+}
+
 // LE VALIDATEUR : l'assembleur ne fait pas confiance au constructeur (même doctrine qu'assertFactValid).
 // Jette : un patron futur qui absorberait deux fois une carte ou masquerait un fait inexistant doit
 // exploser en développement, jamais rendre une UI silencieusement incohérente.
@@ -112,6 +170,8 @@ export function composeFacts(run: RunResult, facts: ModuleFacts, project: UserPr
   const out: FactComposition[] = [];
   const seasonal = composeSeasonalClimateTradeoff(run, facts, project);
   if (seasonal) out.push(seasonal);
+  const size = composeTerritorySizeSharedEvidence(run, facts);
+  if (size) out.push(size);
   assertCompositionsValid(run, out); // toujours : le jeu est minuscule, l'incohérence silencieuse coûte plus
   return out;
 }

@@ -106,3 +106,66 @@ test("assertCompositionsValid : id dupliqué, absorbé inexistant, mauvaise sect
   assert.throws(() => assertCompositionsValid(r, [{ ...c!, absorbedFactIds: ["inexistant"] } as never]));
   assert.throws(() => assertCompositionsValid(r, [{ ...c!, displaySection: "mismatches" } as never]));
 });
+
+// ── Patron 2 : territory-size-multiple-consequences ──────────────────────────────────────────────
+
+import type { MismatchFact } from "./decision-fact.ts";
+import { TERRITORY_SIZE_FACT_ID } from "./agglomeration-rules.ts";
+import { AGGLOMERATION_SIZE_CONVENTION } from "./agglomeration-facts.ts";
+
+function tailleMismatch(key: string, tier: "secondary" | "structuring", over: Partial<MismatchFact> = {}): MismatchFact {
+  return {
+    id: `01001:mismatch-${key}`, ruleId: `territoire.taille-${key}`,
+    sourceFactIds: [TERRITORY_SIZE_FACT_ID], module: "territoire",
+    role: "mismatch", materialityTier: tier,
+    topic: key === "eviter_isolement" ? "l'isolement du territoire" : "la taille du territoire",
+    statement: `Constat taille pour ${key}.`, projectKey: key as never,
+    basis: { kind: "categorical_state", observedCategory: "village", conventionId: AGGLOMERATION_SIZE_CONVENTION.id },
+    evidence: [{ factId: TERRITORY_SIZE_FACT_ID, module: "territoire", label: "Territoire · Ceyzériat", grain: "unite_urbaine" }],
+    ...over,
+  } as MismatchFact;
+}
+const tailleEval = (f: MismatchFact): RuleEvaluation =>
+  ({ ruleId: f.ruleId, projectKeys: [f.projectKey], outcome: "mismatch", facts: [f], reason: "catégorie en écart" });
+
+test("shared_evidence : 2 mismatchs taille matériels village -> composition, tier max, tiers propres conservés", () => {
+  const a = tailleMismatch("prefere_grande_ville", "structuring");
+  const b = tailleMismatch("eviter_isolement", "secondary", { limitation: "La catégorie de taille utilisée ne décrit pas à elle seule l'accès aux services." });
+  const out = composeFacts(run([tailleEval(a), tailleEval(b)]), moduleFacts, project({ prefere_grande_ville: 3, eviter_isolement: 2 }));
+  assert.equal(out.length, 1);
+  const c = out[0]!;
+  assert.equal(c.kind, "shared_evidence");
+  if (c.kind !== "shared_evidence") return;
+  assert.equal(c.materialityTier, "structuring");
+  assert.equal(c.consequences.length, 2);
+  assert.equal(c.consequences[0]!.materialityTier, "structuring"); // hiérarchie interne : structurant d'abord
+  assert.equal(c.consequences[1]!.limitation, b.limitation); // la limitation reste sur SA conséquence
+  assert.deepEqual(new Set(c.absorbedFactIds), new Set([a.id, b.id]));
+  assert.equal(c.displaySection, "mismatches");
+});
+
+test("shared_evidence : ordre d'entrée inversé -> composition strictement identique (déterminisme total)", () => {
+  const a = tailleMismatch("prefere_grande_ville", "structuring");
+  const b = tailleMismatch("eviter_isolement", "structuring"); // même tier : le tie-break doit trancher
+  const p = project({ prefere_grande_ville: 3, eviter_isolement: 3 });
+  const out1 = composeFacts(run([tailleEval(a), tailleEval(b)]), moduleFacts, p);
+  const out2 = composeFacts(run([tailleEval(b), tailleEval(a)]), moduleFacts, p);
+  assert.deepEqual(out1, out2);
+  assert.equal(out1.length, 1);
+});
+
+test("shared_evidence : 1 seul fait matériel -> pas de composition (rien à dédupliquer)", () => {
+  const a = tailleMismatch("prefere_grande_ville", "structuring");
+  const out = composeFacts(run([tailleEval(a)]), moduleFacts, project({ prefere_grande_ville: 3, eviter_isolement: 1 }));
+  assert.equal(out.length, 0);
+});
+
+test("shared_evidence : sources différentes, basis non catégoriel, ou catégories divergentes -> pas de composition", () => {
+  const a = tailleMismatch("prefere_grande_ville", "structuring");
+  const autreSource = tailleMismatch("eviter_isolement", "secondary", { sourceFactIds: ["autre.source"] });
+  assert.equal(composeFacts(run([tailleEval(a), tailleEval(autreSource)]), moduleFacts, project({ prefere_grande_ville: 3, eviter_isolement: 2 })).length, 0);
+  const mauvaisBasis = tailleMismatch("eviter_isolement", "secondary", { basis: { kind: "relative_position", rankLow: 0.1, rankHigh: 0.2, universe: "communes_france", distributionVersion: "x" } as never });
+  assert.equal(composeFacts(run([tailleEval(a), tailleEval(mauvaisBasis)]), moduleFacts, project({ prefere_grande_ville: 3, eviter_isolement: 2 })).length, 0);
+  const autreCategorie = tailleMismatch("eviter_isolement", "secondary", { basis: { kind: "categorical_state", observedCategory: "petite", conventionId: AGGLOMERATION_SIZE_CONVENTION.id } as never });
+  assert.equal(composeFacts(run([tailleEval(a), tailleEval(autreCategorie)]), moduleFacts, project({ prefere_grande_ville: 3, eviter_isolement: 2 })).length, 0);
+});
