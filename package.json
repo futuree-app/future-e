@@ -14,7 +14,7 @@
     "hooks:install": "node scripts/install-git-hooks.mjs"
   },
   "engines": {
-    "node": ">=25"
+    "node": "24.x"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.81",
