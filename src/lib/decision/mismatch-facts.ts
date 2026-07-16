@@ -53,7 +53,11 @@ export function rankPhrase(high: number): string {
 // LA TABLE DE PHRASES. PREFERENCE_LABELS n'est pas grammatical dans « Vous avez placé {…} parmi vos
 // priorités ». topic = le SUJET nommé (<= 70 car., cf. assertFactValid). projectPhrase = la priorité,
 // tournée pour l'ouverture. indicator = ce sur quoi porte la comparaison.
-export const MISMATCH_LABELS: Record<string, { topic: string; projectPhrase: string; indicator: string }> = {
+export type MismatchLabel = { topic: string; projectPhrase: string; indicator: string; limitation?: string };
+// Record<string, MismatchLabel> : vérifie la FORME de chaque valeur (une limitation mal typée échoue) tout en
+// restant indexable par PreferenceKey dans la fabrique. L'exhaustivité (chaque MISMATCH_KEY a un label) est
+// garantie par un test de garde (mismatch-rules.test.ts), pas par le type (éviterait un cycle facts<->rules).
+export const MISMATCH_LABELS: Record<string, MismatchLabel> = {
   nature: { topic: "les espaces naturels", projectPhrase: "la proximité des espaces naturels", indicator: "l'accès aux espaces naturels" },
   acces_ecoles: { topic: "l'accès aux collèges et lycées", projectPhrase: "l'accès aux collèges et lycées", indicator: "l'accès aux collèges et lycées" },
   acces_soins: { topic: "l'accès aux soins", projectPhrase: "un bon accès aux soins", indicator: "l'accès aux soins" },
@@ -65,4 +69,10 @@ export const MISMATCH_LABELS: Record<string, { topic: string; projectPhrase: str
   cadre_calme: { topic: "le cadre calme", projectPhrase: "un cadre calme", indicator: "le calme du cadre de vie" },
   viabilite_emploi: { topic: "le bassin d'emploi", projectPhrase: "un bassin d'emploi dynamique", indicator: "le dynamisme du bassin d'emploi" },
   acces_services: { topic: "l'accès aux services du quotidien", projectPhrase: "un bon accès aux services du quotidien", indicator: "l'accès aux services et commerces du quotidien" },
+  ensoleillement_recherche: {
+    topic: "l'ensoleillement",
+    projectPhrase: "un territoire ensoleillé",
+    indicator: "l'ensoleillement du territoire",
+    limitation: "Cette position décrit la climatologie solaire de référence issue de la réanalyse ERA5-Land, normale 1991-2020. Elle ne constitue pas une projection de l'ensoleillement futur.",
+  },
 };
