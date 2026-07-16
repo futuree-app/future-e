@@ -12,6 +12,7 @@ import {
 } from "@/lib/geo-zones";
 import { getLittoralIndex, type LittoralSummary } from "@/lib/littoral";
 import { tailleVilleFrom, resolveTailleVille, communeAttributesFrom } from "@/lib/commune-attributes";
+import { winterMildnessScore } from "@/lib/climate/winter-mildness";
 import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
 import { hydrateHardConstraints, explorationHints } from "@/lib/hard-constraints-hydrate";
 import { resolveExternalReferences } from "@/lib/hard-constraints-external";
@@ -392,7 +393,6 @@ const ISOLEMENT: Anchors = [[0, 0], [1000, 5], [2000, 15], [5000, 45], [10000, 6
 const GRANDE_VILLE_MIN: Anchors = [[0, 100], [2000, 100], [25000, 85], [100000, 55], [300000, 25], [500000, 12], [1000000, 3]];
 const GRANDE_VILLE_MAX: Anchors = [[0, 0], [25000, 10], [100000, 40], [300000, 70], [500000, 85], [1000000, 97], [2000000, 100]];
 const CALME: Anchors = [[0, 55], [30, 65], [80, 85], [150, 95], [400, 100], [800, 95], [1500, 80], [3000, 55], [6000, 30], [12000, 12], [30000, 3]];
-const WINTER_MILD: Anchors = [[-3, 5], [1, 30], [4, 60], [7, 88], [9, 100], [12, 95], [16, 80]];
 // Montagnosité : altitude (m) → score 0-100, recalée « vivre à la montagne » (pas
 // que la haute montagne). Pivot 600 m = 50 (= seuil du filtre dur). cf. ANCRES.
 const MONTAGNE: Anchors = [[300, 0], [600, 50], [1000, 85], [1400, 100]];
@@ -1219,12 +1219,10 @@ export function subScore(key: PreferenceKey, c: IndexCommune): number | null {
       return lerp(CALME, c.densite);
     case "eviter_isolement":
       return lerp(ISOLEMENT, tailleVille(c)); // taille d'agglomération, pas la commune seule
-    case "douceur_climat": {
-      const w = lerp(WINTER_MILD, c.clim.NORTMm_seas_DJF);
-      if (w == null) return null;
-      const s = c.pct.NORTX35D_yr == null ? 50 : 100 - c.pct.NORTX35D_yr;
-      return Math.round(0.6 * w + 0.4 * s);
-    }
+    case "douceur_climat":
+      // Douceur HIVERNALE seule (lot 4b) : position nationale de la T° moyenne DJF (1976-2005), monotone.
+      // L'été (NORTX35D) est traité par faible_chaleur ; il n'entre plus ici (fin du double comptage).
+      return winterMildnessScore(c.pct?.NORTMm_seas_DJF);
     case "ensoleillement_recherche":
       // Rayonnement solaire réel (ERA5), percentile national. Remplace l'ancien
       // proxy FAUX (été chaud + peu de pluie, qui ne mesurait pas le soleil).

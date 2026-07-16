@@ -51,3 +51,17 @@ test("ensoleillement_recherche : rayonnement_pct, null sans donnée (anti-diverg
   assert.equal(mismatchRawScore("ensoleillement_recherche", sans), null);
   assert.ok(MISMATCH_RANK_KEYS.includes("ensoleillement_recherche"));
 });
+
+test("douceur_climat ne dépend plus de la chaleur estivale (dé-doublonnage, lot 4b)", () => {
+  const a = { pct: { NORTMm_seas_DJF: 70, NORTX35D_yr: 0 } } as unknown as IndexCommune;
+  const b = { pct: { NORTMm_seas_DJF: 70, NORTX35D_yr: 100 } } as unknown as IndexCommune;
+  assert.equal(mismatchRawScore("douceur_climat", a), mismatchRawScore("douceur_climat", b));
+  assert.equal(mismatchRawScore("douceur_climat", a), 70);
+});
+
+test("douceur_climat : monotone (percentile hivernal), null sans donnée", () => {
+  assert.equal(mismatchRawScore("douceur_climat", { pct: { NORTMm_seas_DJF: 20 } } as unknown as IndexCommune), 20);
+  assert.equal(mismatchRawScore("douceur_climat", { pct: { NORTMm_seas_DJF: 90 } } as unknown as IndexCommune), 90);
+  assert.equal(mismatchRawScore("douceur_climat", { pct: {} } as unknown as IndexCommune), null);
+  assert.ok(MISMATCH_RANK_KEYS.includes("douceur_climat"));
+});

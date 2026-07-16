@@ -13,6 +13,7 @@
 // prouve sur données réelles. Toucher subScore lui-même serait plus risqué (28 critères, moteur de
 // 3 000 lignes) : on fige la parité, on ne fusionne pas.
 import type { IndexCommune, PreferenceKey } from "./comparateur-vie.ts";
+import { winterMildnessScore } from "./climate/winter-mildness.ts";
 
 // Les 10 critères de position à distribution saine, vérifiés sur 34 788 communes.
 export const MISMATCH_RANK_KEYS: PreferenceKey[] = [
@@ -20,6 +21,7 @@ export const MISMATCH_RANK_KEYS: PreferenceKey[] = [
   "faible_dependance_auto", "croissance_demographique", "vie_locale", "cadre_calme", "viabilite_emploi",
   "acces_services", // lot 2b : mécanique v1, plafond dégénéré neutralisé par la bande à deux bornes
   "ensoleillement_recherche", // lot 4a : percentile ERA5-Land uniforme, relative_position symétrique
+  "douceur_climat", // lot 4b : douceur hivernale monotone (position DJF), fin du double comptage été
 ];
 
 type Anchors = [number, number][];
@@ -76,6 +78,9 @@ export function mismatchRawScore(key: PreferenceKey, c: IndexCommune): number | 
       // COPIE FIDÈLE de subScore("ensoleillement_recherche") : rayonnement solaire ERA5-Land, percentile
       // national. Plus de soleil = rang plus haut. Le test de parité garantit l'identité avec le comparateur.
       return c.rayonnement_pct ?? null;
+    case "douceur_climat":
+      // COPIE FIDÈLE de subScore("douceur_climat") : douceur hivernale = position DJF, monotone (lot 4b).
+      return winterMildnessScore(c.pct?.NORTMm_seas_DJF);
     default:
       return null; // hors des clés de mismatch : non couvert ici
   }
