@@ -43,3 +43,11 @@ test("cadre_calme rend un score, ou null si la densité manque", () => {
   const sans = { insee: "z", nom: "Z", densite: null } as unknown as IndexCommune;
   assert.equal(mismatchRawScore("cadre_calme", sans), null);
 });
+
+test("ensoleillement_recherche : rayonnement_pct, null sans donnée (anti-divergence, lot 4a)", () => {
+  const avec = { insee: "s", nom: "S", rayonnement_pct: 42 } as unknown as IndexCommune;
+  assert.equal(mismatchRawScore("ensoleillement_recherche", avec), 42);
+  const sans = { insee: "s", nom: "S" } as unknown as IndexCommune;
+  assert.equal(mismatchRawScore("ensoleillement_recherche", sans), null);
+  assert.ok(MISMATCH_RANK_KEYS.includes("ensoleillement_recherche"));
+});

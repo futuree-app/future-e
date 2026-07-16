@@ -21,6 +21,7 @@ export const MISMATCH_KEYS: PreferenceKey[] = [
   "nature", "acces_ecoles", "acces_soins", "acces_culture", "acces_transports",
   "faible_dependance_auto", "croissance_demographique", "vie_locale", "cadre_calme", "viabilite_emploi",
   "acces_services", // lot 2b : plafond dégénéré (services complets = table-stakes -> neutral), queue basse propre
+  "ensoleillement_recherche", // lot 4a : relative_position + limitation ERA5-Land (card-only)
 ];
 
 function relativeFact(f: ModuleFacts, key: PreferenceKey): RelativeCriterionFact {
@@ -76,6 +77,8 @@ function makeMismatchRule(key: PreferenceKey): DecisionRule {
         statement: `Vous avez placé ${lab.projectPhrase} parmi vos priorités. Sur ${lab.indicator}, ${f.nom} se situe parmi ${rankPhrase(band.high)} les moins favorables de France. Cela répond moins bien à cette dimension de votre projet, sans rendre ${f.nom} incompatible avec lui.`,
         basis: { kind: "relative_position", rankLow: band.low, rankHigh: band.high, universe: "communes_france", distributionVersion: MISMATCH_DISTRIBUTION_VERSION },
         evidence: [ev],
+        // Certains critères (ensoleillement) portent une nuance méthodologique card-only.
+        ...(lab.limitation ? { limitation: lab.limitation } : {}),
       };
       return ret("mismatch", [fact], "position relative défavorable");
     },

@@ -183,6 +183,16 @@ const planSizeIsolation = buildConclusionPlan({
   mismatchTotal: 1, mismatchShown: 1,
 });
 
+// Cas ENSOLEILLEMENT (relative_position, lot 4a) : le modèle doit rester au PRÉSENT COMPARATIF, jamais une
+// promesse future (« restera moins ensoleillée », « l'ensoleillement futur sera faible »).
+const planSun = buildConclusionPlan({
+  scope: "commune", communeNom: "Roubaix", conclusionState: "no_incompatibility_established", posture: "recherche",
+  shownFacts: [ mismatch("ensoleillement_recherche", "structuring", "l'ensoleillement") ],
+  uncovered: [], uncoveredPriorities: [], establishedIncompatibility: null, coverage: "high",
+  orientation: "arbitration", hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 0,
+  mismatchTotal: 1, mismatchShown: 1,
+});
+
 console.log("gate :", shouldGenerateNarrative(plan), "· lead :", JSON.stringify(plan.lead));
 console.log("\n──── DÉTERMINISTE (ce que le lecteur voit sans IA) ────");
 console.log(plan.blocks.map((b) => b.fallbackText).join(" "));
@@ -235,6 +245,7 @@ const c = await probe(planAbsence, "absence attestée / arbitrage");
 const dCoast = await probe(planCoast, "mer / éloignement");
 const eSize = await probe(planSize, "taille / catégorie");
 const fIso = await probe(planSizeIsolation, "taille / isolement (risqué)");
-const R = a.retenus + b.retenus + c.retenus + dCoast.retenus + eSize.retenus + fIso.retenus,
-      T = a.total + b.total + c.total + dCoast.total + eSize.total + fIso.total;
+const gSun = await probe(planSun, "ensoleillement");
+const R = a.retenus + b.retenus + c.retenus + dCoast.retenus + eSize.retenus + fIso.retenus + gSun.retenus,
+      T = a.total + b.total + c.total + dCoast.total + eSize.total + fIso.total + gSun.total;
 console.log(`\n════ TAUX DE SURVIE : ${R}/${T} blocs ════`);

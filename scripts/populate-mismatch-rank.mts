@@ -32,6 +32,16 @@ const die = (msg: string): never => {
   process.exit(1);
 };
 
+// SNAPSHOT des bandes existantes AVANT recalcul : le diff sémantique (après la boucle) prouve qu'aucune
+// bande d'une clé déjà présente ne bouge (migration mesurée, pas seulement « déterministe »).
+const OLD_KEYS = MISMATCH_RANK_KEYS.filter((k) => communes.some((c) => c.rankBands?.[k]));
+const oldBands = new Map<string, Map<string, string>>();
+for (const k of OLD_KEYS) {
+  const m = new Map<string, string>();
+  for (const c of communes) if (c.rankBands?.[k]) m.set(c.insee, JSON.stringify(c.rankBands[k]));
+  oldBands.set(k, m);
+}
+
 for (const key of MISMATCH_RANK_KEYS) {
   const vals = communes
     .map((c) => mismatchRawScore(key, c))
@@ -53,17 +63,29 @@ for (const key of MISMATCH_RANK_KEYS) {
   };
 
   let tieMax = 0;
+  let sunErrMax = 0; // preuve percentile <-> rang : |rankMid - rayonnement_pct/100| (ensoleillement)
   for (const c of communes) {
     const v = mismatchRawScore(key, c);
     if (v == null) continue;
     const low = lowIdx(v) / N, high = highIdx(v) / N;
     if (low < 0 || high > 1 || low > high) die(`${key} produit une bande invalide sur ${c.insee}`);
     tieMax = Math.max(tieMax, high - low);
+    if (key === "ensoleillement_recherche") sunErrMax = Math.max(sunErrMax, Math.abs((low + high) / 2 - v / 100));
     if (!c.rankBands) c.rankBands = {};
     c.rankBands[key] = [Math.round(low * 10000), Math.round(high * 10000)];
   }
-  report.push(`${key.padEnd(26)} ${String(N).padStart(6)} valeurs · ex æquo max ${(tieMax * 100).toFixed(1)} %`);
+  const sunProof = key === "ensoleillement_recherche" ? ` · |rankMid - pct/100| max ${(sunErrMax * 100).toFixed(2)} pt` : "";
+  report.push(`${key.padEnd(26)} ${String(N).padStart(6)} valeurs · ex æquo max ${(tieMax * 100).toFixed(1)} %${sunProof}`);
 }
+
+// DIFF SÉMANTIQUE : aucune bande d'une clé existante ne doit avoir changé (seule ensoleillement s'ajoute).
+let changed = 0;
+for (const k of OLD_KEYS) {
+  const m = oldBands.get(k)!;
+  for (const c of communes) if (JSON.stringify(c.rankBands?.[k]) !== m.get(c.insee)) changed++;
+}
+if (changed > 0) die(`régression: ${changed} bandes de clés EXISTANTES ont changé (attendu 0)`);
+report.push(`diff sémantique OK : 0 bande existante modifiée (${OLD_KEYS.length} clés) · seule ensoleillement_recherche ajoutée`);
 
 console.log(report.join("\n"));
 

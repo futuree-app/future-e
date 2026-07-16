@@ -1,10 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { MISMATCH_RULES } from "./mismatch-rules.ts";
+import { MISMATCH_RULES, MISMATCH_KEYS } from "./mismatch-rules.ts";
 import { assertFactValid } from "./materiality-rules.ts";
 import type { ModuleFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
-import type { RankBand } from "./mismatch-facts.ts";
+import { MISMATCH_LABELS, type RankBand } from "./mismatch-facts.ts";
+import { MISMATCH_RANK_KEYS } from "../comparateur-scores.ts";
 
 function facts(bands: Record<string, RankBand> | null): ModuleFacts {
   return {
@@ -24,8 +25,26 @@ function project(prefs: { key: string; weight: number }[]): UserProject {
 const rule = (key: string) => MISMATCH_RULES.find((r) => r.id === `territoire.mismatch-${key}`)!;
 const evalRule = (key: string, f: ModuleFacts, p: UserProject) => rule(key).evaluate(f, p, undefined as never);
 
-test("la fabrique produit 11 règles", () => {
-  assert.equal(MISMATCH_RULES.length, 11);
+test("la fabrique produit 12 règles", () => {
+  assert.equal(MISMATCH_RULES.length, 12);
+});
+
+test("ensoleillement : extrême défavorable + poids 3 -> mismatch structurant PORTANT la limitation ERA5-Land", () => {
+  const p = project([{ key: "ensoleillement_recherche", weight: 3 }]);
+  const f = evalRule("ensoleillement_recherche", facts({ ensoleillement_recherche: { low: 0.03, high: 0.12 } }), p).facts[0]!;
+  assert.equal(f.role, "mismatch");
+  assert.equal((f as { basis: { kind: string } }).basis.kind, "relative_position");
+  assert.match(f.limitation!, /réanalyse ERA5-Land, normale 1991-2020/);
+  assert.match(f.limitation!, /ne constitue pas une projection/);
+  assertFactValid(f, p);
+});
+
+test("garde : MISMATCH_KEYS et MISMATCH_RANK_KEYS coïncident", () => {
+  assert.deepEqual([...MISMATCH_KEYS].sort(), [...MISMATCH_RANK_KEYS].sort());
+});
+
+test("garde : chaque MISMATCH_KEY a une entrée MISMATCH_LABELS", () => {
+  for (const k of MISMATCH_KEYS) assert.ok(MISMATCH_LABELS[k], `label manquant pour ${k}`);
 });
 test("extrême défavorable + poids 3 -> mismatch STRUCTURANT, phrase comparative, jamais un jugement absolu", () => {
   const e = evalRule("nature", facts({ nature: { low: 0.08, high: 0.14 } }), project([{ key: "nature", weight: 3 }]));
