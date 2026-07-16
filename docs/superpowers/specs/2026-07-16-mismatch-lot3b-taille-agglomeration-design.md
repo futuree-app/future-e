@@ -50,24 +50,27 @@ signal.
 D'où une lib **pure** dédiée, avec les **mêmes bornes** (versionnées), parité prouvée par des tests de bornes
 (la duplication est délibérée, comme la parité `radiusKm` du 2a) :
 
+**La convention PILOTE le classifieur (revue porteur)** : les seuils ne sont pas répétés dans les `if`, et les
+catégories sont une **constante unique** (partagée par le type dérivé ET le validateur), pour interdire toute
+dérive.
+
 ```ts
 // src/lib/decision/agglomeration-facts.ts
+export const AGGLOMERATION_CATEGORIES = ["village", "petite", "moyenne", "grande", "metropole"] as const;
+export type AgglomerationCategory = (typeof AGGLOMERATION_CATEGORIES)[number];
+
 export const AGGLOMERATION_SIZE_CONVENTION = {
   id: "agglomeration-size-v1",
-  // population de l'unité urbaine si disponible, sinon population communale (cf. tailleVilleSource).
-  thresholds: { village: 2_000, petite: 25_000, moyenne: 100_000, grande: 500_000 },
+  thresholds: { villageMaxExclusive: 2_000, petiteMaxExclusive: 25_000, moyenneMaxExclusive: 100_000, grandeMaxExclusive: 500_000 },
 } as const;
 
-export type AgglomerationCategory = "village" | "petite" | "moyenne" | "grande" | "metropole";
-
-export function classifyAgglomerationSize(
-  population: number | null,
-): AgglomerationCategory | "uncertain" {
+export function classifyAgglomerationSize(population: number | null): AgglomerationCategory | "uncertain" {
   if (population == null || !Number.isFinite(population) || population < 0) return "uncertain";
-  if (population < 2_000) return "village";
-  if (population < 25_000) return "petite";
-  if (population < 100_000) return "moyenne";
-  if (population < 500_000) return "grande";
+  const t = AGGLOMERATION_SIZE_CONVENTION.thresholds;
+  if (population < t.villageMaxExclusive) return "village";
+  if (population < t.petiteMaxExclusive) return "petite";
+  if (population < t.moyenneMaxExclusive) return "moyenne";
+  if (population < t.grandeMaxExclusive) return "grande";
   return "metropole";
 }
 ```
@@ -112,29 +115,33 @@ On ajoute donc à `ModuleFacts` un champ frère **NON optionnel, nullable** (com
 tailleVilleSource: "urban_unit" | "commune" | null;
 ```
 
-**Câblage DRY, sans toucher l'index** (`c.uu` + le cache UU existent déjà). Dans
-`src/lib/commune-attributes.ts`, une fonction unique porte la vérité, et `tailleVilleFrom` y délègue (zéro
-divergence possible entre la valeur et sa source) :
+**Provenance EXIGÉE, jamais un repli communal silencieux (revue porteur).** Deux règles dures :
+
+1. **`resolveTailleVille` tient l'invariant `value != null ⟺ source != null`.** Un code UU **déclaré mais absent
+   ou invalide du cache** est une **anomalie** : `{ value: null, source: null }`, jamais un repli sur la
+   population communale. Sinon une défaillance du cache d'unités urbaines deviendrait silencieusement une
+   classification communale fausse. (Impact comparateur négligeable : cas d'incohérence de données, déjà mal
+   scoré ; `tailleVilleFrom` délègue, donc son comportement d'anomalie devient « null » de façon cohérente.)
+2. **`opts.tailleVilleSource` est OBLIGATOIRE au mapping** (pas de `?`, pas de `?? null`) : tout appelant est
+   forcé de traiter la provenance. Et la règle **exige** la source : `tailleVille` présent mais
+   `tailleVilleSource == null` (anomalie) rend **`uncertain`**, jamais un mismatch fondé sur un repli commune.
+
+**Résolution UNIQUE (revue porteur).** `comparateur-vie.ts` expose `tailleVilleResolvedOf(entry): { value,
+source }` ; `tailleVilleOf` et `tailleVilleSourceOf` en délèguent ; `territory-facts.ts` résout **une fois**
+et passe les deux à `mapCommuneToModuleFacts`. Zéro divergence possible valeur/source.
 
 ```ts
-export function resolveTailleVille(
-  uu: string | null | undefined,
-  population: number | null | undefined,
-  uuPop: Map<string, number>,
-): { value: number | null; source: "urban_unit" | "commune" | null } {
+export function resolveTailleVille(uu, population, uuPop): { value: number | null; source: ... | null } {
   if (uu) {
     const p = uuPop.get(uu);
-    if (p != null) return { value: p, source: "urban_unit" };
+    if (p == null || !Number.isFinite(p) || p < 0) return { value: null, source: null }; // anomalie
+    return { value: p, source: "urban_unit" };
   }
-  return population != null
-    ? { value: population, source: "commune" }
-    : { value: null, source: null };
+  if (population == null || !Number.isFinite(population) || population < 0) return { value: null, source: null };
+  return { value: population, source: "commune" };
 }
 export function tailleVilleFrom(uu, population, uuPop) { return resolveTailleVille(uu, population, uuPop).value; }
 ```
-
-`comparateur-vie.ts` exporte `tailleVilleSourceOf(entry)` (miroir de `tailleVilleOf`) ; `territory-facts.ts`
-passe `tailleVilleSource: tailleVilleSourceOf(entry)` à `mapCommuneToModuleFacts`, qui le pose sur `ModuleFacts`.
 
 ## 6. Le fondement : `categorical_state`
 
@@ -151,8 +158,15 @@ export type MismatchBasis =
 Pas de `nationalContext` (comme `absolute_measure` : le fait EST la catégorie). Le **nombre brut et sa
 provenance** vivent dans l'`EvidenceRef` (`observedValue`, `grain`), pas dans le `basis`.
 
-`assertFactValid` case `"mismatch"` valide la nouvelle variante : `observedCategory` ∈ les 5 catégories,
-`conventionId` non vide.
+**Fait source CANONIQUE unique (revue porteur).** Les trois règles interprètent le **même** état territorial
+(`tailleVille` + `tailleVilleSource` → catégorie). Elles partagent donc `sourceFactIds:
+["territorySize.classification"]` (et le même `factId` d'`EvidenceRef`) ; seuls `fact.id`, `ruleId`,
+`projectKey` diffèrent. Quand un village déclenche à la fois `prefere_grande_ville` et `eviter_isolement`, la
+future fusion narrative verra immédiatement deux mismatchs du **même** état, pas deux observations
+indépendantes.
+
+`assertFactValid` case `"mismatch"` valide la nouvelle variante : `observedCategory` ∈ `AGGLOMERATION_CATEGORIES`
+(constante unique, partagée avec le classifieur et le type), `conventionId` non vide.
 
 ## 7. Les formulations : catégorie nommée, provenance honnête, jamais un jugement absolu
 
@@ -161,8 +175,16 @@ périmètre et sa provenance. Le mot « agglomération » n'apparaît que pour `
 de voix (mémoire) : pas de tiret cadratin ; pas d'antithèse « c'est X, pas Y » ; catégorie factuelle autorisée,
 jugement qualitatif absolu (« trop petit », « trop grand ») interdit.
 
-**Libellés dépendants de la source** (`labelForCategory(cat, source)`) : le mot « agglomération » (source UU)
-devient neutre en repli commune.
+**Un FRAGMENT de phrase complet, dépendant de la source (revue porteur)** : une commune n'« appartient » pas à
+une catégorie de taille communale, elle « est classée comme ». D'où `categoryStatementFragment(nom, cat,
+source)`, pas un simple `label + clause` recollés :
+
+- source `urban_unit` → « {commune} **appartient à** {libellé UU} selon la population de son unité urbaine et
+  la convention de taille utilisée par futur•e » ;
+- source `commune` → « {commune} **est classée comme** {libellé communal} selon sa population communale ».
+
+**Libellés** (`labelForCategory(cat, source)`) : « agglomération » ET « métropole » n'apparaissent qu'en source
+UU ; en repli commune, libellé neutre.
 
 | Catégorie | source `urban_unit` | source `commune` |
 |---|---|---|
@@ -170,39 +192,32 @@ devient neutre en repli commune.
 | petite    | une petite agglomération | une petite commune |
 | moyenne   | une ville moyenne | une ville moyenne |
 | grande    | une grande agglomération | une grande ville |
-| métropole | une métropole | une métropole |
+| métropole | une métropole | **une très grande ville** |
 
-**Clause de provenance** : source UU → « selon la convention de taille utilisée par futur•e » ; source commune
-→ « selon sa population communale ; l'unité urbaine n'a pas été utilisée pour cette classification ».
+### `eviter_grandes_villes` (mismatch : grande, métropole) et `prefere_grande_ville` (mismatch : village, petite)
 
-### `eviter_grandes_villes` (mismatch : grande, métropole)
-
-- **statement** : « Vous avez placé le fait d'éviter les grandes villes parmi vos priorités. {commune} relève
-  de {libellé} {clause de provenance}. Cela répond moins bien à cette dimension de votre projet, sans rendre
+- **statement** : « Vous avez placé {le fait d'éviter les grandes villes | le fait de vivre dans une grande
+  ville} parmi vos priorités. {fragment}. Cela répond moins bien à cette dimension de votre projet, sans rendre
   {commune} incompatible avec lui. »
-- **topic** : « la taille de l'agglomération ».
-
-### `prefere_grande_ville` (mismatch : village, petite)
-
-- **statement** : « Vous avez placé le fait de vivre dans une grande ville parmi vos priorités. {commune}
-  relève de {libellé} {clause de provenance}. Cela répond moins bien à cette dimension de votre projet, sans
-  rendre {commune} incompatible avec lui. »
-- **topic** : « la taille de l'agglomération ».
+- **topic** : « la taille du territoire » (**neutre** : la conclusion peut le reprendre quelle que soit la
+  source).
 
 ### `eviter_isolement` (mismatch : village SEUL)
 
-- **statement** : « Vous avez placé le fait d'éviter un environnement isolé parmi vos priorités. {commune}
-  relève d'un village {clause de provenance}. Cette petite taille répond moins bien à cette dimension de votre
-  projet, sans permettre de conclure à son isolement effectif. »
-- **limitation** : « La taille de l'agglomération ne décrit pas à elle seule l'accès aux services, aux
+- **statement** : « Vous avez placé le fait d'éviter un environnement isolé parmi vos priorités. {fragment}.
+  Cette petite taille répond moins bien à cette dimension de votre projet, sans permettre de conclure à son
+  isolement effectif. »
+- **limitation** : « La **catégorie de taille utilisée** ne décrit pas à elle seule l'accès aux services, aux
   transports ou aux pôles voisins. Un village peut être bien connecté à une ville proche. »
 - **topic** : « l'isolement du territoire ». **Distinct** des deux autres : `eviter_isolement` peut co-occurrer
   avec `eviter_grandes_villes` (la cloche « petit mais pas isolé »), la conclusion doit pouvoir les nommer sans
   les confondre.
 
-**`observedValue` de la preuve** (exemple, source UU) : « Grande agglomération, environ 184 000 habitants dans
-l'unité urbaine » ; **grain** : `"commune"` (l'enum `EvidenceRef.grain` reste inchangé ; la provenance UU/commune
-est portée par le texte, pas par le grain).
+**`observedValue` de la preuve** (exemple, source UU) : « une grande agglomération, population de l'unité
+urbaine : environ 184 000 habitants » ; **`grain` dépendant de la source (revue porteur)** :
+`source === "urban_unit"` → **`"unite_urbaine"`** (nouvelle valeur de l'enum `EvidenceRef.grain`), sinon
+`"commune"`. Le contrat de preuve ne prétend pas mesurer la commune quand la population affichée est celle de
+l'UU.
 
 ## 8. Le poids, et la dette poids-1 baseline (notée, non corrigée)
 
@@ -231,8 +246,9 @@ dans le registre, exclure les `satisfied` implicites du calcul favorable) est un
 - **Prompt** : `conclusion-prompt.ts` gagne une consigne « mismatch de catégorie de taille » (nommer la
   catégorie, jamais « trop petit / trop grand » en jugement absolu, distinguer taille et isolement), PUIS bump
   `DECISION_NARRATIVE_PROMPT_VERSION` `v9 → v10` (`conclusion-hash.ts`). Artefacts invalidés.
-- **Sonde** : `scripts/probe-conclusion.ts` gagne un cas taille (mismatch de catégorie) ; contrôle éditorial
-  manuel.
+- **Sonde** : `scripts/probe-conclusion.ts` gagne DEUX cas (revue porteur) : un mismatch de catégorie
+  (métropole / `eviter_grandes_villes`) ET **le cas risqué** village / `eviter_isolement`, où le modèle ne doit
+  JAMAIS écrire « la commune est isolée ». Contrôle éditorial manuel, lecture visuelle critique sur le second.
 - **AUCUN enrichissement d'index** : `tailleVille` déjà mappé ; `tailleVilleSource` dérivé au mapping.
 
 ## 10. Périmètre exact
@@ -255,11 +271,16 @@ DecisionConfidence` ; la dette générale du `satisfied` implicite/poids-1.
    `neutral`. Symétrique.
 5. `eviter_isolement` : village → `mismatch` avec la `limitation` « un village peut être bien connecté » ;
    petite/moyenne/grande/métropole → `neutral`. **Jamais `satisfied`.**
-6. Provenance : `source === "commune"` → le statement dit « selon sa population communale », **sans** le mot
-   « agglomération » ; `source === "urban_unit"` → « agglomération » autorisé. Un test le prouve pour chaque
-   côté.
-7. `tailleVille` null → `uncertain` sur les trois, aucune catégorie inventée. `resolveTailleVille` et
-   `tailleVilleFrom` s'accordent (le second délègue au premier).
+6. Provenance : `source === "commune"` → « est classée comme … selon sa population communale », **sans**
+   « agglomération » ni « appartient à », grain `"commune"`, métropole → « une très grande ville » ;
+   `source === "urban_unit"` → « appartient à … », « agglomération »/« métropole » autorisés, grain
+   `"unite_urbaine"`. Un test le prouve pour chaque côté.
+7. **Provenance EXIGÉE** : `tailleVille` null → `uncertain` ; `tailleVille` présent mais
+   `tailleVilleSource == null` (anomalie) → `uncertain`, **jamais un repli commune**. `resolveTailleVille` tient
+   l'invariant `value != null ⟺ source != null` (UU déclarée absente du cache → null/null) ; `tailleVilleFrom`
+   délègue ; `opts.tailleVilleSource` est obligatoire au mapping.
+7b. Les trois règles émettent `sourceFactIds: ["territorySize.classification"]` (fait source canonique) ; un
+   test prouve que deux mismatchs d'un même village le partagent.
 8. Poids 1 → mismatch silencieux (couverture +1, pas de carte, pas d'arbitrage) ; poids 2 → secondary ; poids 3
    → structuring. Un ensemble matériel → `arbitration` (comptage `run.facts`). Test d'orientation.
 9. `topic` d'`eviter_isolement` distinct de celui des deux préférences de taille.
