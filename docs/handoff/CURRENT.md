@@ -1,79 +1,84 @@
-# Passation — mismatch lot 4b (refonte douceur hivernale) MERGÉ sur `main` ; chantier climat mismatch TERMINÉ
+# Passation — chantier « composition narrative de faits liés », Task 5/6 en cours
 
-**Horodatage** : 2026-07-16 · **Branche** : `main` (`13947b5`, à jour avec `origin/main`, **rien à pousser**).
-**Aucune PR ouverte.** `vercel.json` (Large Functions) + engines 24.x sur main. Lots 3a/3b/4a/4b tous mergés.
+**Horodatage** : 2026-07-17 · **Branche** : `feat/composition-faits-lies` (4 commits feat au-dessus de
+`main` ; spec + plan commités SUR `main` avant branchement : `203c7c8`, `084fa88`, `be58a0d`).
+**Rien n'est poussé** (ni main ni la branche). Aucune PR ouverte.
 
-## Objectif : la MIGRATION est LIVRÉE
+## Objectif en cours
 
-Le **lot 4b** refond `douceur_climat` d'un composite annuel opaque en **douceur hivernale monotone** — livré et
-mergé sur `main`. **Couverture 26 → 27 sur 28** (dernier critère couvrable ; `faible_secheresse` reste exclu par
-décision). Le chantier climat du rôle `mismatch` est terminé.
+Implémenter la couche de composition post-évaluation du dossier de décision : deux patrons
+(`seasonal_climate_tradeoff` : douceur satisfaite × réserve chaleur ; `territory-size-multiple-consequences` :
+deux mismatchs taille du même état village) qui composent des cartes plus intelligibles SANS toucher
+couverture/outcome/orientation. Spec `docs/superpowers/specs/2026-07-17-composition-faits-lies-design.md`
+(10 invariants), plan v2 `docs/superpowers/plans/2026-07-17-composition-faits-lies.md` (6 tâches TDD),
+exécution INLINE (choix porteur), tâche par tâche.
 
-## Ce que le lot change
+## Fait dans cette session
 
-Ancien `douceur_climat` = `0.6·cloche_hivernale(pic 9°C) + 0.4·(100 - NORTX35D)` — la cloche **pénalisait les
-hivers les plus doux** (Nice/Corse > 9°C), et `NORTX35D` **double-comptait `faible_chaleur`**. Le libellé du
-critère promettait « Douceur à l'année » (hiver + été).
+- Clôture lot 4b : seuil identitaire 80 vérifié figé ; impact-B minimal prouvé au matcher réel
+  (douceur seule → Antibes/41 j chauds ; douceur+chaleur → Gouesnou/Cherbourg, façade Manche).
+- Mémoire : fiche `mismatch_formes_fondement` gravée, `project_dossier_decision` mise à jour (27/28),
+  `MEMORY.md` compacté 19,8 → 12,7 Ko, fiche `feedback_questions_doctrinales_developpees` ajoutée.
+- Spec écrite + validée porteur (brainstorm complet, 3 AskUserQuestion tranchées) ; plan v1 puis v2
+  après revue croisée ChatGPT (6 points intégrés, 4 rejetés preuve au code, 1 rejet doctrinal).
+- **Tasks 1-4 TERMINÉES et commitées** (tests verts 281/281 decision, tsc 0 à chaque commit) :
+  - `e5cadd0` : `fact-composition.ts` (types), `fact-compositions.ts` (patron 1 + `buildWinterMildnessEvidence`
+    + `assertCompositionsValid`), exports `RULE_CHALEUR`/`mismatchRuleId`/`bandValide`.
+  - `1207be6` : patron 2 (basis `categorical_state` requis, catégorie `village` seule, tri déterministe
+    tie-break projectKey/id, `eviter_grandes_villes` exclu).
+  - `5e59c03` : assembleur (param 5 `compositions`, `DossierCard` liste unique triée `cardTier` puis
+    cappée, absorbés retirés avant caps → `dossier.absorbedFacts`, comptes `presentation`,
+    `conclusionBasis` enrichi, 4 fichiers e2e adaptés à `section.cards` via helper `sectionFacts`).
+  - `2b85a46` : plan narratif (`shownCompositions` REQUIS dans `ConclusionPlanInput`, registre
+    `compositions_found` entre unexamined et reserves, `selectLead(facts, comps)` candidats tradeoff
+    UNIQUEMENT, skip du bloc si lead single composé), prompt v11 (paragraphe compositions_found),
+    sonde : 7 cas existants + `planCompositionLead` + `planCompositionBloc`.
 
-Nouveau : `douceur_climat = winterMildnessScore(pct.NORTMm_seas_DJF)` — **position nationale de la température
-moyenne hivernale (DJF), monotone, historique 1976-2005**. L'été est rendu à `faible_chaleur`. Le critère
-devient « Hivers doux ». Forme dossier `relative_position` (comme l'ensoleillement). Convention pure
-`src/lib/climate/winter-mildness.ts` (source unique comparateur + dossier).
+## Décisions prises (porteur, pas encore au vault)
 
-## Le rapport d'impact (la preuve du lot)
+- `FactComposition` = VUE hors `DecisionFact` ; gates poids ≥ 2 partout ; jamais repêcher un silencieux.
+- Liste unique de cartes triée par tier puis cappée ; à tier égal la composition passe d'abord.
+- Lead : tradeoff oui, shared_evidence JAMAIS (les mismatchs sont exclus du lead par doctrine).
+- Titre retenu : « Des hivers doux, avec une exposition estivale à arbitrer ».
+- Constructeur : outcome depuis l'évaluation seule ; preuve favorable par helper canonique, jamais re-dérivée.
 
-`node scripts/analysis/douceur-impact.mts` : **corrélation old↔new = 0,330** (le composite déformait vraiment).
-Les 10 plus gros mouvements sont des **villages de montagne** (DJF ~3°C) passant de **70 à 5** : l'ancien score
-les disait « doux » à cause de leurs étés frais (double-comptage rendu visible). Nice 90→100, Bastia 75→99, La
-Rochelle 83→95 (Méditerranée/Atlantique montent) ; Chamonix 43→0, Strasbourg 58→29 (montagne/continental
-descendent). Arbitrage désormais lisible (Ariège : douceur haute ET chaleur haute, deux signaux séparés).
+## État git
 
-## Décisions (gate + revues, 2 tours de revue porteur)
-
-- **Seuil identitaire = 80** (le cinquième supérieur, 20,5 %), figé APRÈS le rapport d'impact (gate), dans
-  `WINTER_MILDNESS_CONVENTION.identityThreshold`. S'aligne sur le `satisfied` de `relative_position` (≥ 0,80).
-- **Parser : douceur annuelle → douceur_climat + faible_chaleur** (sonde 5 cas, cas critique OK).
-- **Cas A** : aucun projet persistant à préserver (pré-lancement).
-- **`doux` sans `?? 0`** (condition explicite). **Paliers relatifs** (« parmi les plus doux / intermédiaire /
-  parmi les moins doux »). **`faible_chaleur`** : « exposition aux fortes chaleurs » (pas « supportable »).
-
-## Fichiers (branche `feat/mismatch-lot4b-douceur`, 6 commits)
-
-- Spec/plan : `docs/superpowers/specs/2026-07-16-mismatch-lot4b-douceur-hivernale-design.md`, `…/plans/…`.
-- `src/lib/climate/winter-mildness.ts` (NOUVEAU, pur) : convention + `winterMildnessScore` + test (seuil 80 figé).
-- `comparateur-vie.ts` : `subScore` refondu, `WINTER_MILD` supprimée, critère/aide/paliers/identité/`doux` alignés.
-- `comparateur-scores.ts` : `MISMATCH_RANK_KEYS` + cas + tests comportementaux (dé-doublonnage, monotonie).
-- `comparateur-labels.ts`, `synthesize/route.ts`, `parse/route.ts` : éditorial + parser.
-- `mismatch-facts.ts` (LABELS.douceur_climat), `mismatch-rules.ts` (MISMATCH_KEYS), `winter-mildness-e2e.test.ts`.
-- `scripts/populate-mismatch-rank.mts` (preuve percentile↔rang à seuils durs), `data/comparateur-index.json.gz`.
-- `scripts/analysis/douceur-impact.mts` (rapport d'impact).
-
-## Vérification (toute verte en local)
-
-`node --test src/lib/*.test.ts src/lib/decision/*.test.ts src/lib/climate/*.test.ts` = **591/591** ;
-`node --test scripts/lib/*.test.mjs scripts/*.test.mjs` = **22/22** ; `npx tsc --noEmit` = 0 ; `npm run build`
-exit 0 (2255 pages) ; index gzip 10,56 → **10,75 Mo** (+0,2 Mo pour la bande douceur). Sonde parser : cas
-critique (annuel → 2 critères) OK.
+- Branche `feat/composition-faits-lies`, 4 commits feat NON poussés ; `main` local a 3 commits docs
+  NON poussés (spec + plan x2).
+- **Non commité (Task 5 en cours, step 4 interrompu avant build)** :
+  - `src/components/report/DecisionFactRenderParts.tsx` (NOUVEAU : Chip/EvidenceRow/FactBody extraits, exportés)
+  - `src/components/report/FactCompositionCard.tsx` (NOUVEAU : 2 variantes + dépliable `<details>`)
+  - `src/components/report/DossierDecisionSection.tsx` (modifié : importe les briques + rend les
+    compositions dans la boucle `s.cards`)
+- `Futur.e Design System.zip` : fichier étranger du porteur à la racine, NE PAS committer.
 
 ## Prochaine étape immédiate
 
-Chantier climat mismatch **terminé et mergé** (27/28 couverts + `faible_secheresse` exclu assumé). Options pour
-la suite : capitaliser la **mémoire `/memory`** (4 formes de fondement mismatch, non couvertes), la **fusion de
-deux mismatchs** en compromis narratif, ou le **régime de la fonction `/rapport`**.
+Terminer Task 5 step 4 : `npx tsc --noEmit && npm run build` (le build a été interrompu par le porteur,
+PAS en échec). Si vert : committer les 3 fichiers rendu
+(`feat(dossier): FactCompositionCard (2 variantes + dépliable d'audit) sur briques partagées`).
+Puis Task 6 (plan §Task 6) : brancher `composeFacts` dans `territory-facts.ts:158` et
+`DossierAvecLogement.tsx:46`, suites complètes, vérification vivante (Antibes 06004 douceur 3 + chaleur 3 ;
+Gouesnou 29061 ; un village avec prefere_grande_ville 3 + eviter_isolement 2), sonde
+`node --env-file=.env.local scripts/probe-conclusion.ts` (2 cas composés ajoutés).
 
-(NB : le porteur n'utilise PAS les déploiements Preview Vercel ; ne pas ajouter d'étape Preview aux plans. Le
-déploiement de prod se fait sur push `main`.)
+## À lire d'abord à la reprise
 
-## Fils ouverts / dettes
+1. `MEMORY.md` (index mémoire, compacté cette session).
+2. La spec `docs/superpowers/specs/2026-07-17-composition-faits-lies-design.md` puis le plan
+   `docs/superpowers/plans/2026-07-17-composition-faits-lies.md` (v2 : les révisions y sont notées en tête).
+3. `docs/handoff/AUTO-SNAPSHOT.md` pour vérifier la fraîcheur.
 
-- **impact-B (3 profils sur le vrai matcher)** : le plan prévoyait une comparaison baseline vs migration (même
-  code, `git stash`) via `/api/comparateur-vie/match`. Le rapport d'impact (script) prouve déjà le score + la
-  lisibilité de l'arbitrage per-commune ; la comparaison top-N multi-critères reste à faire manuellement si
-  désiré (non bloquant : la refonte est prouvée au grain score + arbitrage).
-- **Parser** : « je supporte la chaleur mais pas le froid » ajoute `ensoleillement_recherche(2)` (tendance
-  PRÉ-EXISTANTE, non touchée par 4b) — à recalibrer un jour.
-- **Identité via `rankBand.low ≥ 0,80`** plutôt que `score ≥ 80` (raffinement porteur, ex æquo frontière) :
-  `buildIdentiteCandidates` n'a pas les bandes sous la main, parqué.
-- **Reste chantier B** : fusion de deux mismatchs en compromis narratif ; `ProjectFit × DecisionConfidence` ;
-  dettes poids-1 / baseline implicite ; régime fonction `/rapport` (cible 200-220 Mo).
-- **Mémoire `/memory`** : aucune fiche ne couvre les 4 formes de fondement mismatch — à graver.
+## Pièges / fils ouverts
+
+- `node --test` : jamais value-importer `comparateur-vie.ts` (server-only) depuis un fichier testé.
+- Écart spec assumé (noté dans l'auto-revue du plan) : `DossierSection.cards` remplace `facts` ;
+  reporter dans la spec au moment du merge.
+- Après merge : bump prompt v11 invalide les artefacts narratifs existants (voulu) ; la sonde doit
+  tourner AVANT livraison (cas composés jamais encore éprouvés face au vrai modèle).
+- `mismatchShown` (ConclusionPlanInput) n'est consommé par aucun texte ; sémantique désormais
+  « cartes mismatch visibles » (fait simple + shared_evidence), documentée dans l'assembleur.
+- Le porteur n'utilise PAS les Preview Vercel ; prod = push `main`. Ne pas pousser `main` sans demande.
+- Mémoire : les décisions de composition (vue vs fait, gates, lead) mériteront une fiche `/memory` +
+  éventuel passage archiviste une fois le chantier livré.
