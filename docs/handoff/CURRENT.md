@@ -1,15 +1,13 @@
-# Passation — mismatch lot 4b (refonte douceur hivernale) LIVRÉ sur branche ; Preview Vercel à confirmer avant merge
+# Passation — mismatch lot 4b (refonte douceur hivernale) MERGÉ sur `main` ; chantier climat mismatch TERMINÉ
 
-**Horodatage** : 2026-07-16 · **Branche** : `feat/mismatch-lot4b-douceur` (poussée, **Preview Vercel en cours**,
-**non mergée**). Base `main` `f3f9ad7` (inclut `vercel.json` Large Functions + engines 24.x). Lots 3a/3b/4a
-mergés sur `main`.
+**Horodatage** : 2026-07-16 · **Branche** : `main` (`13947b5`, à jour avec `origin/main`, **rien à pousser**).
+**Aucune PR ouverte.** `vercel.json` (Large Functions) + engines 24.x sur main. Lots 3a/3b/4a/4b tous mergés.
 
-## Objectif : la MIGRATION est faite, reste à confirmer le Preview
+## Objectif : la MIGRATION est LIVRÉE
 
-Le **lot 4b** refond `douceur_climat` d'un composite annuel opaque en **douceur hivernale monotone**. Tout est
-vert en local ; la seule chose restante est **confirmer que le Preview Vercel est vert** (la taille de fonction
-est un risque réel, cf. lot 4a) AVANT de merger. **Couverture 26 → 27 sur 28** (dernier critère couvrable ;
-`faible_secheresse` reste exclu par décision).
+Le **lot 4b** refond `douceur_climat` d'un composite annuel opaque en **douceur hivernale monotone** — livré et
+mergé sur `main`. **Couverture 26 → 27 sur 28** (dernier critère couvrable ; `faible_secheresse` reste exclu par
+décision). Le chantier climat du rôle `mismatch` est terminé.
 
 ## Ce que le lot change
 
@@ -59,11 +57,12 @@ critique (annuel → 2 critères) OK.
 
 ## Prochaine étape immédiate
 
-1. **[BLOQUANT] Confirmer le Preview Vercel vert** (branche `feat/mismatch-lot4b-douceur`) : fonction `rapport`
-   créée sans erreur de taille (Large Functions via `vercel.json`), pas d'inclusion du JSON clair. Ne PAS merger
-   sinon.
-2. **Merge** `feat/mismatch-lot4b-douceur` → `main` + push (l'index `.gz` est committé).
-3. Chantier climat mismatch **terminé** : 27/28 couverts + `faible_secheresse` exclu assumé.
+Chantier climat mismatch **terminé et mergé** (27/28 couverts + `faible_secheresse` exclu assumé). Options pour
+la suite : capitaliser la **mémoire `/memory`** (4 formes de fondement mismatch, non couvertes), la **fusion de
+deux mismatchs** en compromis narratif, ou le **régime de la fonction `/rapport`**.
+
+(NB : le porteur n'utilise PAS les déploiements Preview Vercel ; ne pas ajouter d'étape Preview aux plans. Le
+déploiement de prod se fait sur push `main`.)
 
 ## Fils ouverts / dettes
 
