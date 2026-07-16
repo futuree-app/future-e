@@ -16,7 +16,7 @@ import type { ResolvedPlaceReference, ResolvedSizeReference, ResolvedUrbanAreaRe
 function facts(over: Partial<ModuleFacts> = {}): ModuleFacts {
   return {
     insee: "31555", nom: "Toulouse", dept: "31", lat: 43.6045, lon: 1.4442, uu: "31701",
-    tailleVille: 1_060_000, reliefProximite: 0, distanceCoteKm: 150, population: 493_465, altitude: 146,
+    tailleVille: 1_060_000, tailleVilleSource: "urban_unit", reliefProximite: 0, distanceCoteKm: 150, population: 493_465, altitude: 146,
     catnatInondation: 0, inondationRisque: 10, climat: null, scores: {}, hasAddress: false, ...over,
   };
 }

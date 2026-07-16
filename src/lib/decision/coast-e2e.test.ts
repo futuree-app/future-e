@@ -26,7 +26,7 @@ function context(f: { lat: number; lon: number; nom: string }): EvaluationContex
     conventionsVersion: PRODUCT_CONVENTIONS_VERSION };
 }
 function dossierFor(e: IndexCommune, p: UserProject) {
-  const mf = mapCommuneToModuleFacts(e, {}, { hasAddress: false, tailleVille: e.population ?? null });
+  const mf = mapCommuneToModuleFacts(e, {}, { hasAddress: false, tailleVille: e.population ?? null, tailleVilleSource: "commune" });
   return assembleDossier(runRules(mf, p, context(mf)), p, "commune", e.nom);
 }
 

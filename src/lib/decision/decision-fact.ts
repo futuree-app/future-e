@@ -135,6 +135,10 @@ export type ModuleFacts = CommuneAttributes & {
   // NULLABLE mais NON OPTIONNEL : `undefined` créerait un troisième état entre « la donnée est là » et
   // « on l'a cherchée sans la trouver », et une règle finirait par confondre les deux.
   climat: ClimatFacts | null;
+  // PROVENANCE de tailleVille, chargée par l'appelant (comme tailleVille). NON optionnelle, nullable :
+  // "urban_unit" autorise « agglomération » ; "commune" impose « population communale » ; null (taille
+  // absente OU anomalie de cache) -> uncertain, jamais une catégorie ni un repli communal.
+  tailleVilleSource: "urban_unit" | "commune" | null;
   // Le rang national à deux bornes, chargé par l'appelant (comme tailleVille, climat). NULLABLE mais NON
   // optionnel : `undefined` créerait un troisième état entre « lu » et « non lu ».
   rankBands: Record<string, RankBand> | null;

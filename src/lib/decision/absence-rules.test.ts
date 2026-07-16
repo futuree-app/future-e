@@ -8,7 +8,7 @@ import type { UserProject } from "../user-project.ts";
 function facts(over: Partial<ModuleFacts>): ModuleFacts {
   return {
     insee: "59512", nom: "Roubaix", dept: "59", lat: 50.69, lon: 3.18, uu: "59702",
-    tailleVille: 1_050_000, reliefProximite: 0, distanceCoteKm: 90, population: 98_000, altitude: 30,
+    tailleVille: 1_050_000, tailleVilleSource: "urban_unit", reliefProximite: 0, distanceCoteKm: 90, population: 98_000, altitude: 30,
     catnatInondation: 0, inondationRisque: 10, climat: null, sante: null, rankBands: null,
     localNetwork: { measured: false, access: null }, higherEd: { measured: false },
     scores: {}, hasAddress: false, ...over,

@@ -3,7 +3,7 @@
 // valeur de repli : subScore garde déjà les absences, on ne les enveloppe pas d'un try/catch (une
 // erreur inattendue doit exploser, ce n'est pas une « donnée indisponible »).
 import {
-  getCommuneEntry, subScore, PREFERENCE_KEYS, placeDirectory, tailleVilleOf, type IndexCommune,
+  getCommuneEntry, subScore, PREFERENCE_KEYS, placeDirectory, tailleVilleResolvedOf, type IndexCommune,
 } from "../comparateur-vie.ts";
 import { hydrateHardConstraints } from "../hard-constraints-hydrate.ts";
 import { resolveExternalReferences } from "../hard-constraints-external.ts";
@@ -31,9 +31,11 @@ export function buildModuleFacts(
   // La taille d'agglomération vient de comparateur-vie (tailleVilleOf), jamais d'un calcul refait ici :
   // c'est exactement la divergence qu'on vient de fermer (le comparateur jugeait la taille sur l'unité
   // urbaine, le dossier sur la population communale).
+  const resolvedSize = tailleVilleResolvedOf(entry);
   return mapCommuneToModuleFacts(entry, scores, {
     hasAddress: opts.hasAddress,
-    tailleVille: tailleVilleOf(entry),
+    tailleVille: resolvedSize.value,
+    tailleVilleSource: resolvedSize.source,
     climat: opts.climat ?? null,
   });
 }

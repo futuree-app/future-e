@@ -11,7 +11,7 @@ import {
   type SoftZone,
 } from "@/lib/geo-zones";
 import { getLittoralIndex, type LittoralSummary } from "@/lib/littoral";
-import { tailleVilleFrom, communeAttributesFrom } from "@/lib/commune-attributes";
+import { tailleVilleFrom, resolveTailleVille, communeAttributesFrom } from "@/lib/commune-attributes";
 import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
 import { hydrateHardConstraints, explorationHints } from "@/lib/hard-constraints-hydrate";
 import { resolveExternalReferences } from "@/lib/hard-constraints-external";
@@ -572,14 +572,28 @@ function buildUuPop(communes: IndexCommune[]): void {
 // La DOCTRINE vit désormais dans commune-attributes.ts (pure, donc testable, et traversable par les
 // tests de parité) : ici, on ne fait que lui passer le cache. Le dossier lisait la population COMMUNALE
 // là où ce moteur lisait l'agglomération ; les deux appellent maintenant la même fonction.
+// Résolution UNIQUE de la taille ET de sa provenance (jamais deux résolutions qui pourraient diverger). On
+// garde `uuPopCache ?? new Map()` : `tailleVille` interne est sur le chemin chaud du scoring et ne doit
+// jamais jeter ; en pratique le cache est toujours chargé avec l'index.
+export function tailleVilleResolvedOf(
+  c: IndexCommune,
+): { value: number | null; source: "urban_unit" | "commune" | null } {
+  return resolveTailleVille(c.uu, c.population, uuPopCache ?? new Map());
+}
 function tailleVille(c: IndexCommune): number | null {
-  return tailleVilleFrom(c.uu, c.population, uuPopCache ?? new Map());
+  return tailleVilleResolvedOf(c).value;
 }
 
 // La taille d'agglomération, EXPOSÉE : le dossier en a besoin pour bâtir ses ModuleFacts, et il n'a pas
 // le droit de la recalculer autrement (ce serait rouvrir la divergence qu'on vient de fermer).
 export function tailleVilleOf(c: IndexCommune): number | null {
-  return tailleVille(c);
+  return tailleVilleResolvedOf(c).value;
+}
+
+// La PROVENANCE de la taille (unité urbaine vs population communale), EXPOSÉE : le dossier n'emploie
+// « agglomération » que lorsque la classification repose sur l'UU.
+export function tailleVilleSourceOf(c: IndexCommune): "urban_unit" | "commune" | null {
+  return tailleVilleResolvedOf(c).source;
 }
 
 async function loadIndex(): Promise<IndexCommune[]> {
