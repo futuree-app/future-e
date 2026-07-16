@@ -1,102 +1,80 @@
-# Passation — mismatch lot 4a (ensoleillement) LIVRÉ sur branche ; reste = lot 4b (douceur) + fusion + dettes
+# Passation — mismatch lot 4b (refonte douceur hivernale) LIVRÉ sur branche ; Preview Vercel à confirmer avant merge
 
-**Horodatage** : 2026-07-16 · **Branche** : `feat/mismatch-lot4a-ensoleillement` (au-dessus de `main` `7309071`,
-**non poussée, non mergée**). **Aucune PR ouverte.** Lots 3a/3b déjà mergés sur `main`.
+**Horodatage** : 2026-07-16 · **Branche** : `feat/mismatch-lot4b-douceur` (poussée, **Preview Vercel en cours**,
+**non mergée**). Base `main` `f3f9ad7` (inclut `vercel.json` Large Functions + engines 24.x). Lots 3a/3b/4a
+mergés sur `main`.
 
-## Objectif en cours
+## Objectif : la MIGRATION est faite, reste à confirmer le Preview
 
-Le **lot 4a de `mismatch`** est **livré sur la branche** (tests + build + sonde verts). Il étend
-`relative_position` au critère `ensoleillement_recherche`, ajoute un **hook `limitation`** par critère, et
-**corrige un bug de carte** qui masquait les limitations de tous les mismatchs. Reste : merge, puis **lot 4b**
-(refonte canonique de `douceur_climat`, migration mesurée), la fusion de deux mismatchs, les dettes.
+Le **lot 4b** refond `douceur_climat` d'un composite annuel opaque en **douceur hivernale monotone**. Tout est
+vert en local ; la seule chose restante est **confirmer que le Preview Vercel est vert** (la taille de fonction
+est un risque réel, cf. lot 4a) AVANT de merger. **Couverture 26 → 27 sur 28** (dernier critère couvrable ;
+`faible_secheresse` reste exclu par décision).
 
-## Ce que fait le lot 4a
+## Ce que le lot change
 
-`ensoleillement_recherche` (rayonnement solaire ERA5-Land, percentile national uniforme) rejoint la forme
-`relative_position` (symétrique : très ensoleillé → satisfied, peu → mismatch). La direction vient de la
-préférence déclarée (« recherché »), même si le comparateur l'affiche « sans gagnant ». Couverture **+1**.
+Ancien `douceur_climat` = `0.6·cloche_hivernale(pic 9°C) + 0.4·(100 - NORTX35D)` — la cloche **pénalisait les
+hivers les plus doux** (Nice/Corse > 9°C), et `NORTX35D` **double-comptait `faible_chaleur`**. Le libellé du
+critère promettait « Douceur à l'année » (hiver + été).
 
-**Hook `limitation` par critère** : `MISMATCH_LABELS` gagne un champ `limitation?` optionnel, threadé sur le
-`MismatchFact`. Ensoleillement porte : « Cette position décrit la climatologie solaire de référence issue de la
-**réanalyse ERA5-Land, normale 1991-2020**. Elle ne constitue pas une projection de l'ensoleillement futur. »
+Nouveau : `douceur_climat = winterMildnessScore(pct.NORTMm_seas_DJF)` — **position nationale de la température
+moyenne hivernale (DJF), monotone, historique 1976-2005**. L'été est rendu à `faible_chaleur`. Le critère
+devient « Hivers doux ». Forme dossier `relative_position` (comme l'ensoleillement). Convention pure
+`src/lib/climate/winter-mildness.ts` (source unique comparateur + dossier).
 
-## Bug pré-existant CORRIGÉ (révélé par la revue porteur)
+## Le rapport d'impact (la preuve du lot)
 
-`DossierDecisionSection.tsx` ne rendait `limitation` que pour `incompatibility`/`verification` : les limitations
-des **mismatchs 2a (`named_absence`) et 3a (`absolute_measure`) étaient silencieusement jetées depuis leur
-livraison**. Le lot ajoute `|| fact.role === "mismatch"` → 2a/3a/4a réparés. `buildConclusionPlan` ne lit
-jamais `limitation` (0 occurrence) : les limitations sont **card-only par conception**, la conclusion ne les a
-jamais vues. D'où **pas de bump de prompt** (grammaire inchangée).
+`node scripts/analysis/douceur-impact.mts` : **corrélation old↔new = 0,330** (le composite déformait vraiment).
+Les 10 plus gros mouvements sont des **villages de montagne** (DJF ~3°C) passant de **70 à 5** : l'ancien score
+les disait « doux » à cause de leurs étés frais (double-comptage rendu visible). Nice 90→100, Bastia 75→99, La
+Rochelle 83→95 (Méditerranée/Atlantique montent) ; Chamonix 43→0, Strasbourg 58→29 (montagne/continental
+descendent). Arbitrage désormais lisible (Ariège : douceur haute ET chaleur haute, deux signaux séparés).
 
-## Fichiers (branche `feat/mismatch-lot4a-ensoleillement`, 6 commits)
+## Décisions (gate + revues, 2 tours de revue porteur)
 
-- **Spec/plan** : `docs/superpowers/specs/2026-07-16-mismatch-lot4a-ensoleillement-design.md`,
-  `docs/superpowers/plans/2026-07-16-mismatch-lot4a-ensoleillement.md` (révisés après revue).
-- **Score** : `comparateur-scores.ts` — `ensoleillement_recherche` dans `MISMATCH_RANK_KEYS` + cas
-  `mismatchRawScore` (`c.rayonnement_pct ?? null`, parité `subScore` prouvée par le test).
-- **Labels/règle** : `mismatch-facts.ts` (type `MismatchLabel` + `limitation?`, entrée ensoleillement),
-  `mismatch-rules.ts` (`MISMATCH_KEYS` + threading `...(lab.limitation ? { limitation } : {})`). Gardes :
-  `MISMATCH_KEYS === MISMATCH_RANK_KEYS` + chaque clé a un label.
-- **Carte** : `DossierDecisionSection.tsx` — rend `limitation` pour `mismatch`.
-- **Index** : `populate-mismatch-rank.mts` — **diff sémantique** (0 bande existante modifiée sur 11 clés) +
-  **preuve percentile↔rang** (`|rankMid - pct/100| max 0.25 pt`). `.gz` re-packé. `MISMATCH_DISTRIBUTION_VERSION`
-  inchangée (= millésime). ensoleillement ex æquo max 1,0 % (distribution saine).
-- **Sonde** : `probe-conclusion.ts` gagne le cas ensoleillement.
+- **Seuil identitaire = 80** (le cinquième supérieur, 20,5 %), figé APRÈS le rapport d'impact (gate), dans
+  `WINTER_MILDNESS_CONVENTION.identityThreshold`. S'aligne sur le `satisfied` de `relative_position` (≥ 0,80).
+- **Parser : douceur annuelle → douceur_climat + faible_chaleur** (sonde 5 cas, cas critique OK).
+- **Cas A** : aucun projet persistant à préserver (pré-lancement).
+- **`doux` sans `?? 0`** (condition explicite). **Paliers relatifs** (« parmi les plus doux / intermédiaire /
+  parmi les moins doux »). **`faible_chaleur`** : « exposition aux fortes chaleurs » (pas « supportable »).
 
-## Vérification (toute verte)
+## Fichiers (branche `feat/mismatch-lot4b-douceur`, 6 commits)
 
-`node --test src/lib/*.test.ts src/lib/decision/*.test.ts` = **582/582** ; `node --test scripts/lib/*.test.mjs
-scripts/*.test.mjs` = **22/22** ; `npx tsc --noEmit` = 0 ; `npm run build` exit 0 (2255/2255 pages).
-**Sonde LANCÉE** : cas « ensoleillement » **5/5** au présent comparatif, aucune promesse future. Total 41/45
-(rejets stochastiques hors ensoleillement).
+- Spec/plan : `docs/superpowers/specs/2026-07-16-mismatch-lot4b-douceur-hivernale-design.md`, `…/plans/…`.
+- `src/lib/climate/winter-mildness.ts` (NOUVEAU, pur) : convention + `winterMildnessScore` + test (seuil 80 figé).
+- `comparateur-vie.ts` : `subScore` refondu, `WINTER_MILD` supprimée, critère/aide/paliers/identité/`doux` alignés.
+- `comparateur-scores.ts` : `MISMATCH_RANK_KEYS` + cas + tests comportementaux (dé-doublonnage, monotonie).
+- `comparateur-labels.ts`, `synthesize/route.ts`, `parse/route.ts` : éditorial + parser.
+- `mismatch-facts.ts` (LABELS.douceur_climat), `mismatch-rules.ts` (MISMATCH_KEYS), `winter-mildness-e2e.test.ts`.
+- `scripts/populate-mismatch-rank.mts` (preuve percentile↔rang à seuils durs), `data/comparateur-index.json.gz`.
+- `scripts/analysis/douceur-impact.mts` (rapport d'impact).
 
-## Déploiement Vercel (2 blocages, dont 1 réparé)
+## Vérification (toute verte en local)
 
-- **`engines` (RÉPARÉ, `d6a7a66` sur main)** : `package.json` déclarait `node: ">=25"` (calé sur la machine
-  locale) ; Vercel ne propose que la LTS 24 et rejetait `>=25` AVANT le build (« Found invalid or discontinued
-  Node.js Version »). C'était le vrai blocage répété. Corrigé en `"24.x"`. Le build passe maintenant (2255 pages).
-- **Taille de fonction (RÉSOLU, `0af4353` sur main)** : la fonction `rapport` faisait **250,67 Mo** (limite 250).
-  ≈ 239 Mo node_modules+code + 11 Mo index `.gz` embarqué (via `outputFileTracingIncludes` dans `next.config.ts`,
-  lecture runtime légitime). Le ré-enrichissement d'index du lot 4a (+1 Mo pour la bande ensoleillement) a fait
-  basculer une fonction déjà à ~249,7 Mo. **Fix : `VERCEL_SUPPORT_LARGE_FUNCTIONS=1` posé dans `vercel.json`
-  (`build.env`)** — repo-tracked, indépendant du dashboard. NB : la variable de dashboard seule N'AVAIT PAS
-  suffi car un « Redeploy » réutilise le snapshot d'env de la tentative échouée ; il faut un déploiement FRAIS
-  (git push), ce que le commit `vercel.json` a fait. Large Functions montent à 5 Go, ne s'appliquent qu'aux
-  fonctions >250 Mo (prérequis Fluid Compute + Active CPU, déjà ON). **Ne PAS** sortir l'index vers Blob (le
-  gzip local garde code + données déployés ensemble, pas de désync de version).
-- **Chantier d'amaigrissement séparé (à prévoir, cible 200-220 Mo)** : relancer avec
-  `VERCEL_ANALYZE_BUILD_OUTPUT=1` (et/ou `VERCEL_BUILDER_DEBUG=1`) pour voir les plus gros contributeurs des
-  ~239 Mo hors index ; auditer les imports serveur de `/rapport` (un barrel peut embarquer une pile IA/PDF
-  entière) ; chercher les deps dupliquées / imports dynamiques larges. **Piste préférée** : un `decision-index`
-  compact (seuls les champs que le dossier consomme) plutôt qu'un Blob — l'index complet reste pour le
-  classement/exploration.
+`node --test src/lib/*.test.ts src/lib/decision/*.test.ts src/lib/climate/*.test.ts` = **591/591** ;
+`node --test scripts/lib/*.test.mjs scripts/*.test.mjs` = **22/22** ; `npx tsc --noEmit` = 0 ; `npm run build`
+exit 0 (2255 pages) ; index gzip 10,56 → **10,75 Mo** (+0,2 Mo pour la bande douceur). Sonde parser : cas
+critique (annuel → 2 critères) OK.
 
 ## Prochaine étape immédiate
 
-1. **Déploiement Vercel : RÉTABLI** (`0af4353` déployé avec succès). Lot 4a + hotfixs déploiement sur `main`.
-2. **Lot 4b — refonte canonique de `douceur_climat`** (décision porteur : UNE seule définition, refondue
-   PARTOUT ; migration mesurée). L'audit a confirmé le problème : `douceur_climat = 0.6·douceur_hivernale +
-   0.4·(été non extrême)`, et sa composante estivale (`NORTX35D_yr`) **double compte** avec `faible_chaleur`.
-   Question ouverte à brainstormer : douceur **monotone** (plus chaud = plus doux) vs **confort autour d'un
-   optimum** (→ renommer `confort_hivernal`/`hiver_tempere` ; la cloche `WINTER_MILD` actuelle à 9 °C relève du
-   confort, pas de la douceur). Migration : recalcul du score partagé (comparateur + rankBand + deriveCategories
-   + labels `Hivers doux`), mesure d'impact (corrélation avant/après, communes emblématiques), invalidation des
-   artefacts. Puis la règle mismatch (`relative_position`).
-3. Fusion de deux mismatchs en compromis narratif ; séparation `ProjectFit × DecisionConfidence`.
+1. **[BLOQUANT] Confirmer le Preview Vercel vert** (branche `feat/mismatch-lot4b-douceur`) : fonction `rapport`
+   créée sans erreur de taille (Large Functions via `vercel.json`), pas d'inclusion du JSON clair. Ne PAS merger
+   sinon.
+2. **Merge** `feat/mismatch-lot4b-douceur` → `main` + push (l'index `.gz` est committé).
+3. Chantier climat mismatch **terminé** : 27/28 couverts + `faible_secheresse` exclu assumé.
 
-## Dettes / exclusions
+## Fils ouverts / dettes
 
-- **`faible_secheresse`** reste **exclu par décision documentée** (`climat-facts.ts` : distribution continue
-  67-160 j, aucun seuil défendable ; RGA chez Logement). La couverture ne vise pas 28/28 artificiellement.
-- **`satisfied` de poids 1 compté comme favorable** (toutes règles) + **plancher implicite `eviter_isolement`**
-  (`system_default`) : dettes transversales de provenance/orientation, non corrigées.
-- **Mémoire `/memory`** : aucune fiche ne couvre encore les lots 2a/2b/3a/3b/4a ni les 4 formes de fondement
-  (`relative_position` / `named_absence` / `absolute_measure` / `categorical_state`). Une fiche « formes de
-  fondement mismatch » serait très utile.
-
-## À lire d'abord à la reprise
-
-1. `/memory/MEMORY.md`, `project_dossier_decision.md`.
-2. Spec + plan 4a ; specs 3a/3b/2a pour les autres fondements.
-3. Code : `comparateur-scores.ts` (mismatchRawScore) → `mismatch-facts.ts` (MISMATCH_LABELS + limitation) →
-   `mismatch-rules.ts` → correctif `DossierDecisionSection.tsx`.
+- **impact-B (3 profils sur le vrai matcher)** : le plan prévoyait une comparaison baseline vs migration (même
+  code, `git stash`) via `/api/comparateur-vie/match`. Le rapport d'impact (script) prouve déjà le score + la
+  lisibilité de l'arbitrage per-commune ; la comparaison top-N multi-critères reste à faire manuellement si
+  désiré (non bloquant : la refonte est prouvée au grain score + arbitrage).
+- **Parser** : « je supporte la chaleur mais pas le froid » ajoute `ensoleillement_recherche(2)` (tendance
+  PRÉ-EXISTANTE, non touchée par 4b) — à recalibrer un jour.
+- **Identité via `rankBand.low ≥ 0,80`** plutôt que `score ≥ 80` (raffinement porteur, ex æquo frontière) :
+  `buildIdentiteCandidates` n'a pas les bandes sous la main, parqué.
+- **Reste chantier B** : fusion de deux mismatchs en compromis narratif ; `ProjectFit × DecisionConfidence` ;
+  dettes poids-1 / baseline implicite ; régime fonction `/rapport` (cible 200-220 Mo).
+- **Mémoire `/memory`** : aucune fiche ne couvre les 4 formes de fondement mismatch — à graver.
