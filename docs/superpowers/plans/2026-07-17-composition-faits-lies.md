@@ -1,14 +1,16 @@
-# Composition narrative de faits liés : plan d'implémentation
+# Composition narrative de faits liés : plan d'implémentation (v2, post-revue)
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Couche de composition post-évaluation du dossier de décision : deux patrons (`seasonal_climate_tradeoff`, `territory-size-multiple-consequences`) qui composent des évaluations liées en cartes plus intelligibles, sans toucher couverture/outcome/orientation.
 
-**Architecture:** `composeFacts(run, facts, project)` (pur, appelé par les deux appelants de `runRules`) produit des `FactComposition` (vue, hors `DecisionFact`) ; `assembleDossier` retire les faits absorbés des sections avant les caps et compte les cartes visibles ; `buildConclusionPlan` gagne un registre `compositions_found` et des candidats de lead composés ; `FactCompositionCard` rend les deux variantes avec dépliable d'audit.
+**Architecture:** `composeFacts(run, facts, project)` (pur) produit des `FactComposition` (vue, hors `DecisionFact`), validées par `assertCompositionsValid` ; `assembleDossier` fusionne faits non absorbés et compositions en une liste unique de `DossierCard` triée par matérialité puis cappée ; `buildConclusionPlan` gagne un registre `compositions_found` et des candidats de lead tradeoff ; `FactCompositionCard` rend les deux variantes avec dépliable d'audit, sur des briques partagées extraites dans `DecisionFactRenderParts.tsx`.
 
 **Tech Stack:** TypeScript pur (`node --test`), Next.js App Router (Server Components), aucun LLM dans la composition.
 
-**Spec:** `docs/superpowers/specs/2026-07-17-composition-faits-lies-design.md` (10 invariants §9, tables de comportement §4-5).
+**Spec:** `docs/superpowers/specs/2026-07-17-composition-faits-lies-design.md` (10 invariants §9).
+
+**Révisions v2 (revue croisée porteur/ChatGPT, vérifiée contre le code)** : liste unique de cartes triée puis cappée (une composition secondary ne passe jamais devant un fait structurant, le cap s'applique aussi aux compositions) ; extraction `DecisionFactRenderParts.tsx` (boucle d'import) ; `assertCompositionsValid` ; patron taille borné au basis `categorical_state` + même `observedCategory` (et `eviter_grandes_villes` retiré : `satisfied` sur village, jamais composable) ; tri totalement déterministe (tie-break `projectKey` puis `id`) ; ruleIds exportés par leurs modules au lieu de littéraux recopiés ; gardes complètes de bande (export `bandValide`). Non retenus, preuve au code : `allowedNumbers` (le validateur autorise déjà les nombres du fallback, `conclusion-validate.ts:100`) ; interactivité des actions (l'existant rend l'action en `<span>` non cliquable, parité exacte) ; lead pour `shared_evidence` (les mismatchs sont exclus du lead par doctrine ; un mismatch composé n'obtient pas un accès que les simples n'ont pas) ; température DJF dans la preuve (absente de `ModuleFacts`, pas de nouveau câblage pour une carte).
 
 ## Global Constraints
 
@@ -16,9 +18,9 @@
 - Fichiers de `src/lib/decision/` : PURS, testables par `node --test` (jamais de value-import de `comparateur-vie.ts`, qui importe `server-only`).
 - `FactComposition` n'entre JAMAIS dans l'union `DecisionFact`.
 - Gate global : jamais narrer un élément de poids < 2, ni un outcome autre que celui de l'évaluation existante.
-- Le côté favorable n'est jamais re-dérivé : preuve via helper canonique sur `rankBands` + `WINTER_MILDNESS_CONVENTION`, aucun seuil recalculé ; preuve non fabricable = patron non déclenché.
+- Le côté favorable n'est jamais re-dérivé : preuve via helper canonique sur `rankBands` + `WINTER_MILDNESS_CONVENTION`, aucun seuil recalculé ; preuve non fabricable = patron non déclenché. La preuve favorable porte UNIQUEMENT la position nationale et la période 1976-2005 (pas de température : elle n'est pas dans `ModuleFacts`).
 - Textes de cartes 100 % déterministes.
-- Tests : `node --test src/lib/decision/*.test.ts src/lib/*.test.ts src/lib/climate/*.test.ts` doit rester vert (591 tests existants + les nouveaux) ; `npx tsc --noEmit` = 0.
+- Tests : `node --test src/lib/decision/*.test.ts src/lib/*.test.ts src/lib/climate/*.test.ts` doit rester vert (591 existants + nouveaux) ; `npx tsc --noEmit` = 0.
 - Commits fréquents, messages `feat(dossier): …` / `test(dossier): …`, suffixe Co-Authored-By habituel de la session.
 
 ---
@@ -27,14 +29,35 @@
 
 **Files:**
 - Create: `src/lib/decision/fact-composition.ts` (types purs)
-- Create: `src/lib/decision/fact-compositions.ts` (constructeur)
+- Create: `src/lib/decision/fact-compositions.ts` (constructeur + validateur)
+- Modify: `src/lib/decision/materiality-rules.ts` (exporter `RULE_CHALEUR`)
+- Modify: `src/lib/decision/mismatch-rules.ts` (exporter `mismatchRuleId`)
+- Modify: `src/lib/decision/mismatch-facts.ts` (exporter `bandValide`)
 - Test: `src/lib/decision/fact-compositions.test.ts`
 
 **Interfaces:**
-- Consomme : `RunResult`, `ModuleFacts`, `EvidenceRef`, `MaterialityTier`, `VerificationActionType` (`decision-fact.ts`) ; `preferenceWeight(p, key)` (`project-view.ts`) ; `rankPhrase(share)` , `type RankBand` (`mismatch-facts.ts`) ; `WINTER_MILDNESS_CONVENTION` (`../climate/winter-mildness.ts`) ; `PreferenceKey` (type-only, `../comparateur-vie.ts`).
-- Produit : `export type FactComposition`, `TradeoffComposition`, `SharedEvidenceComposition`, `CompositionSide`, `SharedEvidenceConsequence` (fact-composition.ts) ; `export function composeFacts(run: RunResult, facts: ModuleFacts, project: UserProject): FactComposition[]` et `export function buildWinterMildnessEvidence(facts: ModuleFacts): EvidenceRef | null` (fact-compositions.ts). Les tâches 2-6 en dépendent.
+- Consomme : `RunResult`, `ModuleFacts`, `EvidenceRef`, `MaterialityTier`, `VerificationActionType`, `VerificationFact` (`decision-fact.ts`) ; `preferenceWeight(p, key)` (`project-view.ts`) ; `rankPhrase`, `bandValide`, `type RankBand` (`mismatch-facts.ts`) ; `WINTER_MILDNESS_CONVENTION` (`../climate/winter-mildness.ts`) ; `PreferenceKey` (type-only, `../comparateur-vie.ts`).
+- Produit : `FactComposition`, `TradeoffComposition`, `SharedEvidenceComposition`, `CompositionSide`, `SharedEvidenceConsequence` (fact-composition.ts) ; `composeFacts(run, facts, project): FactComposition[]`, `buildWinterMildnessEvidence(facts): EvidenceRef | null`, `assertCompositionsValid(run, compositions): void` (fact-compositions.ts) ; `RULE_CHALEUR` (materiality-rules.ts) ; `mismatchRuleId(key: PreferenceKey): string` (mismatch-rules.ts).
 
-- [ ] **Step 1 : écrire les types**
+- [ ] **Step 1 : exporter les identifiants canoniques**
+
+Quand un autre module doit connaître l'identifiant d'une règle, il l'importe, il ne le recopie pas.
+
+`materiality-rules.ts` : préfixer `export` sur `const RULE_CHALEUR = "territoire.climat-chaleur"` (ligne 152, aucun autre changement).
+
+`mismatch-rules.ts` : extraire la construction de l'id de `makeMismatchRule` :
+
+```ts
+// L'IDENTIFIANT CANONIQUE d'une règle de mismatch relative. Exporté : la couche de composition le
+// référence, et l'importer garantit qu'un renommage casse le typecheck, jamais silencieusement l'UI.
+export const mismatchRuleId = (key: PreferenceKey): string => `territoire.mismatch-${key}`;
+```
+
+et utiliser `const id = mismatchRuleId(key);` dans `makeMismatchRule` (`mismatch-rules.ts:42`).
+
+`mismatch-facts.ts` : préfixer `export` sur `function bandValide` (ligne 27, aucun autre changement).
+
+- [ ] **Step 2 : écrire les types**
 
 `src/lib/decision/fact-composition.ts` :
 
@@ -94,19 +117,20 @@ export type SharedEvidenceComposition = {
 export type FactComposition = TradeoffComposition | SharedEvidenceComposition;
 ```
 
-- [ ] **Step 2 : écrire les tests du patron 1 (échouent)**
+- [ ] **Step 3 : écrire les tests du patron 1 (échouent)**
 
-`src/lib/decision/fact-compositions.test.ts`. Fabriquer des entrées minimales : un `RunResult` avec les deux évaluations et un `ModuleFacts` partiel casté. Les ruleIds réels sont `territoire.mismatch-douceur_climat` et `territoire.climat-chaleur`.
+`src/lib/decision/fact-compositions.test.ts` :
 
 ```ts
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { composeFacts, buildWinterMildnessEvidence } from "./fact-compositions.ts";
+import { composeFacts, buildWinterMildnessEvidence, assertCompositionsValid } from "./fact-compositions.ts";
+import { RULE_CHALEUR } from "./materiality-rules.ts";
+import { mismatchRuleId } from "./mismatch-rules.ts";
 import type { RunResult, RuleEvaluation, ModuleFacts, VerificationFact } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 
-const RULE_DOUCEUR = "territoire.mismatch-douceur_climat";
-const RULE_CHALEUR = "territoire.climat-chaleur";
+const RULE_DOUCEUR = mismatchRuleId("douceur_climat");
 
 function project(prefs: Record<string, number>): UserProject {
   return {
@@ -118,7 +142,7 @@ function project(prefs: Record<string, number>): UserProject {
 
 function chaleurFact(tier: "secondary" | "structuring" = "structuring"): VerificationFact {
   return {
-    id: "31555:climat-chaleur", ruleId: RULE_CHALEUR,
+    id: "06004:climat-chaleur", ruleId: RULE_CHALEUR,
     sourceFactIds: ["climat.joursTresChauds", "climat.nuitsTropicales"], module: "territoire",
     role: "verification", materialityTier: tier,
     topic: "les fortes chaleurs à Antibes",
@@ -177,10 +201,11 @@ test("tradeoff : aucun fait chaleur émis -> rien (on ne compose que l'affichabl
   assert.equal(out.length, 0);
 });
 
-test("tradeoff : bande douceur absente -> preuve non fabricable -> pas de composition (invariant 9)", () => {
+test("tradeoff : bande douceur absente ou corrompue -> pas de composition (invariant 9)", () => {
   const sansBande = { ...moduleFacts, rankBands: null } as unknown as ModuleFacts;
-  const out = composeFacts(run([douceurSatisfied, chaleurEval(chaleurFact())]), sansBande, project({ douceur_climat: 3, faible_chaleur: 3 }));
-  assert.equal(out.length, 0);
+  assert.equal(composeFacts(run([douceurSatisfied, chaleurEval(chaleurFact())]), sansBande, project({ douceur_climat: 3, faible_chaleur: 3 })).length, 0);
+  const corrompue = { ...moduleFacts, rankBands: { douceur_climat: { low: 1.4, high: 0.2 } } } as unknown as ModuleFacts;
+  assert.equal(composeFacts(run([douceurSatisfied, chaleurEval(chaleurFact())]), corrompue, project({ douceur_climat: 3, faible_chaleur: 3 })).length, 0);
 });
 
 test("buildWinterMildnessEvidence : bande -> preuve avec part supérieure et période de référence", () => {
@@ -190,14 +215,24 @@ test("buildWinterMildnessEvidence : bande -> preuve avec part supérieure et pé
   assert.match(e!.observedValue!, /1976-2005/);
   assert.equal(buildWinterMildnessEvidence({ ...moduleFacts, rankBands: {} } as unknown as ModuleFacts), null);
 });
+
+test("assertCompositionsValid : id dupliqué, absorbé inexistant, double absorption, mauvaise section -> jette", () => {
+  const f = chaleurFact();
+  const r = run([douceurSatisfied, chaleurEval(f)]);
+  const [c] = composeFacts(r, moduleFacts, project({ douceur_climat: 3, faible_chaleur: 3 }));
+  assert.doesNotThrow(() => assertCompositionsValid(r, [c!]));
+  assert.throws(() => assertCompositionsValid(r, [c!, c!])); // id dupliqué + double absorption
+  assert.throws(() => assertCompositionsValid(r, [{ ...c!, absorbedFactIds: ["inexistant"] } as never]));
+  assert.throws(() => assertCompositionsValid(r, [{ ...c!, displaySection: "mismatches" } as never]));
+});
 ```
 
-- [ ] **Step 3 : vérifier l'échec**
+- [ ] **Step 4 : vérifier l'échec**
 
 Run : `node --test src/lib/decision/fact-compositions.test.ts`
-Attendu : FAIL (module `fact-compositions.ts` inexistant).
+Attendu : FAIL (module inexistant).
 
-- [ ] **Step 4 : implémenter**
+- [ ] **Step 5 : implémenter**
 
 `src/lib/decision/fact-compositions.ts` :
 
@@ -208,28 +243,27 @@ Attendu : FAIL (module `fact-compositions.ts` inexistant).
 // (invariant 5). Une composition réorganise ce qui aurait été visible séparément ; elle ne rend jamais
 // visible ce qui était silencieux (invariant 7). Le côté favorable n'est jamais re-dérivé : outcome
 // depuis l'évaluation existante, preuve par helper canonique, aucun seuil recalculé (invariant 9).
-import type { RunResult, RuleEvaluation, ModuleFacts, EvidenceRef, VerificationFact, MismatchFact } from "./decision-fact.ts";
+import type { RunResult, RuleEvaluation, ModuleFacts, EvidenceRef, VerificationFact } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import type { FactComposition, TradeoffComposition } from "./fact-composition.ts";
 import { preferenceWeight } from "./project-view.ts";
-import { rankPhrase } from "./mismatch-facts.ts";
+import { rankPhrase, bandValide } from "./mismatch-facts.ts";
+import { mismatchRuleId } from "./mismatch-rules.ts";
+import { RULE_CHALEUR } from "./materiality-rules.ts";
 import { WINTER_MILDNESS_CONVENTION } from "../climate/winter-mildness.ts";
 
-// Les ruleIds sont des littéraux construits par leurs fabriques ; un test de garde (Step 2, dernier
-// test de la tâche 2) casse si l'un d'eux change.
-const RULE_DOUCEUR = "territoire.mismatch-douceur_climat";
-const RULE_CHALEUR = "territoire.climat-chaleur";
+const RULE_DOUCEUR = mismatchRuleId("douceur_climat");
 
 function evaluation(run: RunResult, ruleId: string): RuleEvaluation | null {
   return run.evaluations.find((e) => e.ruleId === ruleId) ?? null;
 }
 
 // LA PREUVE DU CÔTÉ SATISFAIT. Un satisfied n'émet aucun fait : sa preuve est construite ici, depuis la
-// bande canonique (jamais recalculée). Bande absente ou incohérente avec l'outcome -> null, jamais une
-// preuve inventée pour satisfaire une carte.
+// bande canonique (jamais recalculée, gardes complètes via bandValide). Bande absente ou corrompue ->
+// null, jamais une preuve inventée pour satisfaire une carte.
 export function buildWinterMildnessEvidence(facts: ModuleFacts): EvidenceRef | null {
   const band = facts.rankBands?.["douceur_climat"] ?? null;
-  if (!band || !Number.isFinite(band.low)) return null;
+  if (!bandValide(band)) return null;
   const topShare = 1 - band.low; // part supérieure : borne basse 0,90 -> parmi les 10 %
   return {
     factId: "relativePosition.douceur_climat",
@@ -260,7 +294,7 @@ function composeSeasonalClimateTradeoff(
     id: `${facts.insee}:composition-climat-saisons`,
     kind: "tradeoff",
     patternId: "seasonal_climate_tradeoff",
-    title: "Des hivers doux, avec une contrepartie estivale",
+    title: "Des hivers doux, avec une exposition estivale à arbitrer",
     summary: `Les hivers de ${facts.nom} comptent parmi les plus doux du pays, et l'exposition aux fortes chaleurs estivales y appelle un arbitrage.`,
     favorableSide: {
       label: "Ce qui correspond",
@@ -285,37 +319,63 @@ function composeSeasonalClimateTradeoff(
   };
 }
 
+// LE VALIDATEUR : l'assembleur ne fait pas confiance au constructeur (même doctrine qu'assertFactValid).
+// Jette : un patron futur qui absorberait deux fois une carte ou masquerait un fait inexistant doit
+// exploser en développement, jamais rendre une UI silencieusement incohérente.
+export function assertCompositionsValid(run: RunResult, compositions: FactComposition[]): void {
+  const factIds = new Set(run.facts.map((f) => f.id));
+  const ruleIds = new Set(run.evaluations.map((e) => e.ruleId));
+  const seenCompIds = new Set<string>();
+  const seenAbsorbed = new Set<string>();
+  for (const c of compositions) {
+    if (seenCompIds.has(c.id)) throw new Error(`composition dupliquée : ${c.id}`);
+    seenCompIds.add(c.id);
+    if (c.kind === "tradeoff" && c.displaySection !== "compromises") throw new Error(`tradeoff hors compromises : ${c.id}`);
+    if (c.kind === "shared_evidence" && c.displaySection !== "mismatches") throw new Error(`shared_evidence hors mismatches : ${c.id}`);
+    if (c.absorbedFactIds.length === 0) throw new Error(`composition sans absorbé : ${c.id}`);
+    for (const id of c.absorbedFactIds) {
+      if (!factIds.has(id)) throw new Error(`fait absorbé inexistant : ${id} (${c.id})`);
+      if (seenAbsorbed.has(id)) throw new Error(`fait absorbé deux fois : ${id}`);
+      seenAbsorbed.add(id);
+    }
+    for (const rid of c.referencedRuleIds) {
+      if (!ruleIds.has(rid)) throw new Error(`ruleId référencé inexistant : ${rid} (${c.id})`);
+    }
+  }
+}
+
 export function composeFacts(run: RunResult, facts: ModuleFacts, project: UserProject): FactComposition[] {
   const out: FactComposition[] = [];
   const seasonal = composeSeasonalClimateTradeoff(run, facts, project);
   if (seasonal) out.push(seasonal);
+  assertCompositionsValid(run, out); // toujours : le jeu est minuscule, l'incohérence silencieuse coûte plus
   return out;
 }
 ```
 
-- [ ] **Step 5 : vérifier le vert + typecheck**
+- [ ] **Step 6 : vérifier le vert + typecheck**
 
-Run : `node --test src/lib/decision/fact-compositions.test.ts && npx tsc --noEmit`
-Attendu : tous PASS, tsc = 0.
+Run : `node --test src/lib/decision/fact-compositions.test.ts src/lib/decision/mismatch-rules.test.ts src/lib/decision/materiality-rules.test.ts && npx tsc --noEmit`
+Attendu : tous PASS (les exports n'ont rien changé au comportement), tsc = 0.
 
-- [ ] **Step 6 : commit**
+- [ ] **Step 7 : commit**
 
 ```bash
-git add src/lib/decision/fact-composition.ts src/lib/decision/fact-compositions.ts src/lib/decision/fact-compositions.test.ts
-git commit -m "feat(dossier): FactComposition + patron seasonal_climate_tradeoff (vue, gates poids>=2, preuve canonique)"
+git add src/lib/decision/fact-composition.ts src/lib/decision/fact-compositions.ts src/lib/decision/fact-compositions.test.ts src/lib/decision/materiality-rules.ts src/lib/decision/mismatch-rules.ts src/lib/decision/mismatch-facts.ts
+git commit -m "feat(dossier): FactComposition + patron seasonal_climate_tradeoff + validateur (gates poids>=2, preuve canonique)"
 ```
 
 ---
 
-### Task 2 : Patron 2 (`territory-size-multiple-consequences`) + tests de garde
+### Task 2 : Patron 2 (`territory-size-multiple-consequences`)
 
 **Files:**
 - Modify: `src/lib/decision/fact-compositions.ts`
 - Test: `src/lib/decision/fact-compositions.test.ts` (ajouts)
 
 **Interfaces:**
-- Consomme : `TERRITORY_SIZE_FACT_ID` et `AGGLOMERATION_KEYS` (`agglomeration-rules.ts`, exportés), `runRules` (test de garde uniquement, `materiality-rules.ts`).
-- Produit : `composeFacts` renvoie aussi des `SharedEvidenceComposition` (le patron 2 est interne au module).
+- Consomme : `TERRITORY_SIZE_FACT_ID` (`agglomeration-rules.ts`, exporté) ; `AGGLOMERATION_SIZE_CONVENTION` (vérifier son export réel dans `agglomeration-facts.ts` ; s'il s'appelle autrement, utiliser le nom réel).
+- Produit : `composeFacts` renvoie aussi des `SharedEvidenceComposition`.
 
 - [ ] **Step 1 : tests (échouent)**
 
@@ -324,9 +384,8 @@ Ajouts dans `fact-compositions.test.ts` :
 ```ts
 import type { MismatchFact } from "./decision-fact.ts";
 import { TERRITORY_SIZE_FACT_ID } from "./agglomeration-rules.ts";
-import { runRules } from "./materiality-rules.ts";
 
-function tailleMismatch(key: string, tier: "secondary" | "structuring", limitation?: string): MismatchFact {
+function tailleMismatch(key: string, tier: "secondary" | "structuring", over: Partial<MismatchFact> = {}): MismatchFact {
   return {
     id: `01001:mismatch-${key}`, ruleId: `territoire.taille-${key}`,
     sourceFactIds: [TERRITORY_SIZE_FACT_ID], module: "territoire",
@@ -335,15 +394,15 @@ function tailleMismatch(key: string, tier: "secondary" | "structuring", limitati
     statement: `Constat taille pour ${key}.`, projectKey: key as never,
     basis: { kind: "categorical_state", observedCategory: "village", conventionId: "agglomeration-size-v1" },
     evidence: [{ factId: TERRITORY_SIZE_FACT_ID, module: "territoire", label: "Territoire · Ceyzériat", grain: "unite_urbaine" }],
-    ...(limitation ? { limitation } : {}),
+    ...over,
   } as MismatchFact;
 }
 const tailleEval = (f: MismatchFact): RuleEvaluation =>
   ({ ruleId: f.ruleId, projectKeys: [f.projectKey], outcome: "mismatch", facts: [f], reason: "catégorie en écart" });
 
-test("shared_evidence : 2 mismatchs taille matériels -> composition, tier max, tiers propres conservés", () => {
+test("shared_evidence : 2 mismatchs taille matériels village -> composition, tier max, tiers propres conservés", () => {
   const a = tailleMismatch("prefere_grande_ville", "structuring");
-  const b = tailleMismatch("eviter_isolement", "secondary", "La catégorie de taille utilisée ne décrit pas à elle seule l'accès aux services.");
+  const b = tailleMismatch("eviter_isolement", "secondary", { limitation: "La catégorie de taille utilisée ne décrit pas à elle seule l'accès aux services." });
   const out = composeFacts(run([tailleEval(a), tailleEval(b)]), moduleFacts, project({ prefere_grande_ville: 3, eviter_isolement: 2 }));
   assert.equal(out.length, 1);
   const c = out[0]!;
@@ -356,49 +415,40 @@ test("shared_evidence : 2 mismatchs taille matériels -> composition, tier max, 
   assert.deepEqual(new Set(c.absorbedFactIds), new Set([a.id, b.id]));
 });
 
+test("shared_evidence : ordre d'entrée inversé -> composition strictement identique (déterminisme total)", () => {
+  const a = tailleMismatch("prefere_grande_ville", "structuring");
+  const b = tailleMismatch("eviter_isolement", "structuring"); // même tier : le tie-break doit trancher
+  const p = project({ prefere_grande_ville: 3, eviter_isolement: 3 });
+  const out1 = composeFacts(run([tailleEval(a), tailleEval(b)]), moduleFacts, p);
+  const out2 = composeFacts(run([tailleEval(b), tailleEval(a)]), moduleFacts, p);
+  assert.deepEqual(out1, out2);
+});
+
 test("shared_evidence : 1 seul fait matériel -> pas de composition (rien à dédupliquer)", () => {
   const a = tailleMismatch("prefere_grande_ville", "structuring");
   const out = composeFacts(run([tailleEval(a)]), moduleFacts, project({ prefere_grande_ville: 3, eviter_isolement: 1 }));
   assert.equal(out.length, 0);
 });
 
-test("shared_evidence : 2 faits mais sources différentes -> pas de composition", () => {
+test("shared_evidence : sources différentes, basis non catégoriel, ou catégories divergentes -> pas de composition", () => {
   const a = tailleMismatch("prefere_grande_ville", "structuring");
-  const b = { ...tailleMismatch("eviter_isolement", "secondary"), sourceFactIds: ["autre.source"] } as MismatchFact;
-  const out = composeFacts(run([tailleEval(a), tailleEval(b)]), moduleFacts, project({ prefere_grande_ville: 3, eviter_isolement: 2 }));
-  assert.equal(out.length, 0);
-});
-
-// TEST DE GARDE des littéraux ruleId : le vrai moteur, sur un vrai profil, doit produire les
-// évaluations que le module référence par littéral. S'il est renommé côté fabrique, ce test casse.
-test("garde : les ruleIds littéraux du module existent dans un vrai run", () => {
-  const p = project({ douceur_climat: 2, faible_chaleur: 2, prefere_grande_ville: 2, eviter_isolement: 2 });
-  const facts = {
-    insee: "06004", nom: "Antibes", hasAddress: false, rankBands: { douceur_climat: { low: 0.9, high: 1 } },
-    climat: null, tailleVille: null, tailleVilleSource: null, sante: null, scores: {},
-    localNetwork: { measured: false }, higherEd: { measured: false },
-    catnatInondation: null, inondationRisque: null,
-  } as unknown as ModuleFacts;
-  const result = runRules(facts, p, { evaluations: [], unappliedConstraints: [] } as never);
-  const ids = new Set(result.evaluations.map((e) => e.ruleId));
-  assert.ok(ids.has("territoire.mismatch-douceur_climat"));
-  assert.ok(ids.has("territoire.climat-chaleur"));
-  assert.ok(ids.has("territoire.taille-prefere_grande_ville"));
+  const autreSource = tailleMismatch("eviter_isolement", "secondary", { sourceFactIds: ["autre.source"] });
+  assert.equal(composeFacts(run([tailleEval(a), tailleEval(autreSource)]), moduleFacts, project({ prefere_grande_ville: 3, eviter_isolement: 2 })).length, 0);
+  const mauvaisBasis = tailleMismatch("eviter_isolement", "secondary", { basis: { kind: "relative_position", rankLow: 0.1, rankHigh: 0.2, universe: "communes_france", distributionVersion: "x" } as never });
+  assert.equal(composeFacts(run([tailleEval(a), tailleEval(mauvaisBasis)]), moduleFacts, project({ prefere_grande_ville: 3, eviter_isolement: 2 })).length, 0);
+  const autreCategorie = tailleMismatch("eviter_isolement", "secondary", { basis: { kind: "categorical_state", observedCategory: "petite", conventionId: "agglomeration-size-v1" } as never });
+  assert.equal(composeFacts(run([tailleEval(a), tailleEval(autreCategorie)]), moduleFacts, project({ prefere_grande_ville: 3, eviter_isolement: 2 })).length, 0);
 });
 ```
 
-NOTE exécutant : le test de garde appelle `runRules` avec un `EvaluationContext` minimal ; lire la
-signature réelle de `runRules` (`materiality-rules.ts:487`) et de `EvaluationContext`
-(`hard-constraints.ts`) et construire le contexte comme le fait `territory-facts.ts:158` (ou réutiliser
-un helper existant des tests `materiality-rules.test.ts` s'il y en a un). Si la construction du contexte
-exige du réseau ou des données, remplacer ce test de garde par une assertion sur les fabriques :
-`makeMismatchRule` et les SPECS produisent des ids `territoire.mismatch-<key>` / `territoire.taille-<key>`
-(importer les règles et lire `rule.id`).
+NOTE exécutant : le `conventionId` "agglomeration-size-v1" des fabriques de test doit être remplacé par
+la valeur RÉELLE de la convention (lire `agglomeration-facts.ts`, importer la constante plutôt que
+recopier la chaîne).
 
 - [ ] **Step 2 : vérifier l'échec**
 
 Run : `node --test src/lib/decision/fact-compositions.test.ts`
-Attendu : FAIL sur les nouveaux tests (patron 2 absent).
+Attendu : FAIL sur les nouveaux tests.
 
 - [ ] **Step 3 : implémenter le patron 2**
 
@@ -407,15 +457,20 @@ Ajouts dans `fact-compositions.ts` :
 ```ts
 import { TERRITORY_SIZE_FACT_ID } from "./agglomeration-rules.ts";
 import type { SharedEvidenceComposition } from "./fact-composition.ts";
-import type { MaterialityTier } from "./decision-fact.ts";
+import type { MaterialityTier, MismatchFact } from "./decision-fact.ts";
+// + importer la constante de convention d'agglo (nom réel dans agglomeration-facts.ts)
 
 const TIER_ORDER: Record<MaterialityTier, number> = { decision_critical: 0, structuring: 1, secondary: 2 };
 
-// LE PATRON EST STRICT : source canonique déclarée + clés autorisées. Deux faits partageant une source
-// technique hors patron ne se composent pas (invariant 5).
+// LE PATRON EST STRICT (invariant 5) : source canonique + clés autorisées + basis catégoriel de la même
+// convention et de la MÊME catégorie observée. Le titre affirme « une même petite taille » : le patron
+// n'a le droit de se déclencher que si c'est vrai. eviter_grandes_villes est ABSENT : sur un village il
+// est satisfied, il ne produit jamais un mismatch à regrouper ici.
 const TERRITORY_SIZE_PATTERN = {
   sourceFactId: TERRITORY_SIZE_FACT_ID,
-  allowedProjectKeys: new Set(["prefere_grande_ville", "eviter_isolement", "eviter_grandes_villes"]),
+  allowedProjectKeys: new Set(["prefere_grande_ville", "eviter_isolement"]),
+  requiredBasisKind: "categorical_state" as const,
+  composableCategories: new Set(["village"]), // v1 : le seul cas réellement produit par les règles
 };
 
 function composeTerritorySizeSharedEvidence(run: RunResult, facts: ModuleFacts): SharedEvidenceComposition | null {
@@ -424,11 +479,22 @@ function composeTerritorySizeSharedEvidence(run: RunResult, facts: ModuleFacts):
   const eligible = run.facts.filter((f): f is MismatchFact =>
     f.role === "mismatch" &&
     f.sourceFactIds.includes(TERRITORY_SIZE_PATTERN.sourceFactId) &&
-    TERRITORY_SIZE_PATTERN.allowedProjectKeys.has(f.projectKey),
+    TERRITORY_SIZE_PATTERN.allowedProjectKeys.has(f.projectKey) &&
+    f.basis.kind === TERRITORY_SIZE_PATTERN.requiredBasisKind &&
+    TERRITORY_SIZE_PATTERN.composableCategories.has(f.basis.observedCategory),
   );
   if (eligible.length < 2) return null;
+  // L'ÉTAT COMMUN doit être commun : même catégorie observée sur tous les faits regroupés.
+  const categories = new Set(eligible.map((f) => (f.basis as { observedCategory: string }).observedCategory));
+  if (categories.size !== 1) return null;
 
-  const ordered = [...eligible].sort((a, b) => TIER_ORDER[a.materialityTier] - TIER_ORDER[b.materialityTier]);
+  // TRI TOTALEMENT DÉTERMINISTE : cette couche entre dans le hash narratif ; l'ordre d'enregistrement
+  // des règles ne doit jamais changer une composition.
+  const ordered = [...eligible].sort((a, b) =>
+    TIER_ORDER[a.materialityTier] - TIER_ORDER[b.materialityTier] ||
+    a.projectKey.localeCompare(b.projectKey) ||
+    a.id.localeCompare(b.id),
+  );
   const top = ordered[0]!;
   return {
     id: `${facts.insee}:composition-taille-consequences`,
@@ -452,17 +518,11 @@ function composeTerritorySizeSharedEvidence(run: RunResult, facts: ModuleFacts):
 }
 ```
 
-Et dans `composeFacts` :
+Et dans `composeFacts`, avant le `assertCompositionsValid` :
 
 ```ts
-export function composeFacts(run: RunResult, facts: ModuleFacts, project: UserProject): FactComposition[] {
-  const out: FactComposition[] = [];
-  const seasonal = composeSeasonalClimateTradeoff(run, facts, project);
-  if (seasonal) out.push(seasonal);
-  const size = composeTerritorySizeSharedEvidence(run, facts);
-  if (size) out.push(size);
-  return out;
-}
+const size = composeTerritorySizeSharedEvidence(run, facts);
+if (size) out.push(size);
 ```
 
 - [ ] **Step 4 : vérifier le vert**
@@ -474,122 +534,138 @@ Attendu : PASS, tsc = 0.
 
 ```bash
 git add src/lib/decision/fact-compositions.ts src/lib/decision/fact-compositions.test.ts
-git commit -m "feat(dossier): patron territory-size-multiple-consequences (shared_evidence, registre strict)"
+git commit -m "feat(dossier): patron territory-size-multiple-consequences (basis catégoriel requis, tri déterministe)"
 ```
 
 ---
 
-### Task 3 : Assembleur (absorbés, caps, comptes de présentation)
+### Task 3 : Assembleur (liste unique de cartes, absorbés, caps, comptes)
 
 **Files:**
 - Modify: `src/lib/decision/decision-assembler.ts`
-- Modify: `src/lib/decision/decision-fact.ts` (type `Dossier` et `DossierSection`)
+- Modify: `src/lib/decision/decision-fact.ts` (types `Dossier`, `DossierSection`, `DossierCard`)
 - Test: `src/lib/decision/decision-assembler.test.ts` (ajouts)
 
 **Interfaces:**
-- Consomme : `FactComposition` (Task 1).
-- Produit : `assembleDossier(run, project, scope, communeNom, compositions: FactComposition[] = [])` ; `Dossier` gagne `compositions: FactComposition[]` et `presentation: { elementaryFactShown: number; compositionShown: number; absorbedFactTotal: number }` ; `DossierSection` gagne `compositions: FactComposition[]`. Task 4 consomme les comptes ; Task 5 rend `section.compositions`.
+- Consomme : `FactComposition`, `assertCompositionsValid` (Task 1).
+- Produit : `assembleDossier(run, project, scope, communeNom, compositions: FactComposition[] = [])` ; `DossierCard = { kind: "fact"; fact: DecisionFact } | { kind: "composition"; composition: FactComposition }` ; `DossierSection.cards: DossierCard[]` (remplace `facts`) ; `Dossier` gagne `compositions`, `absorbedFacts: DecisionFact[]`, `presentation: { elementaryFactShown: number; compositionShown: number; absorbedFactTotal: number }`. Tasks 4-5 en dépendent.
 
 - [ ] **Step 1 : tests (échouent)**
 
-Ajouts dans `decision-assembler.test.ts` (réutiliser les fabriques de faits du fichier existant ; le lire d'abord). Cas à couvrir, avec un run contenant un `VerificationFact` chaleur + deux mismatchs taille + un mismatch quelconque non absorbé :
+Lire d'abord `decision-assembler.test.ts` et réutiliser ses fabriques. Cas à couvrir :
 
 ```ts
-// 1. Les faits absorbés quittent les sections (aucun f.id absorbé dans sections[].facts).
-// 2. La composition apparaît dans la section déclarée par displaySection (compromises / mismatches)
-//    via section.compositions, et compte pour UNE carte : cap mismatches = 3 cartes TOTAL
-//    (compositions + faits). Construire 4 mismatchs non absorbés + 1 composition mismatches et
-//    vérifier que sections.mismatches contient 1 composition + 2 faits.
-// 3. dossier.presentation = { elementaryFactShown, compositionShown, absorbedFactTotal } exacts.
-// 4. INVARIANT 3 : même run, avec et sans compositions -> dossier.criteria.coverage et
-//    dossier.criteria.orientation strictement identiques.
-// 5. conclusionBasis : les absorbedFactIds restent dans conclusionBasis.factIds, et l'evidence des
-//    compositions (sides / sharedEvidence) est incluse dans conclusionBasis.evidence.
+// 1. Les faits absorbés ne sont dans AUCUNE section.cards ; ils sont dans dossier.absorbedFacts.
+// 2. UNE LISTE UNIQUE TRIÉE PUIS CAPPÉE : dans la section mismatches (cap 3), avec
+//    1 composition shared_evidence SECONDARY + 3 faits mismatch STRUCTURING non absorbés,
+//    les 3 cartes affichées sont les 3 faits structurants : la composition secondary ne passe
+//    jamais devant un fait plus matériel. À tier égal, la composition passe d'abord.
+// 3. 4 compositions dans une section cap 3 -> 3 cartes seulement (le cap s'applique aussi à elles).
+// 4. dossier.presentation = { elementaryFactShown, compositionShown, absorbedFactTotal } exacts,
+//    comptés sur les cartes AFFICHÉES.
+// 5. INVARIANT 3 : même run, avec et sans compositions -> criteria.coverage et criteria.orientation
+//    strictement identiques.
+// 6. conclusionBasis : absorbedFactIds présents dans factIds ; evidence inclut les preuves des
+//    compositions affichées (sides / sharedEvidence) ; ruleIds inclut referencedRuleIds.
+// 7. compositions = [] (défaut) -> sections identiques à l'existant (non-régression, cartes kind "fact").
 ```
-
-Écrire ces cinq tests avec de vraies assertions (mêmes conventions que le fichier existant).
 
 - [ ] **Step 2 : vérifier l'échec**
 
 Run : `node --test src/lib/decision/decision-assembler.test.ts`
-Attendu : FAIL (signature et champs absents).
+Attendu : FAIL.
 
 - [ ] **Step 3 : implémenter**
 
-Dans `decision-fact.ts`, étendre les types (import type-only depuis `fact-composition.ts`) :
+`decision-fact.ts` :
 
 ```ts
 import type { FactComposition } from "./fact-composition.ts";
 
-export type DossierSection = {
-  key: string; title: string;
-  facts: DecisionFact[];
-  compositions: FactComposition[]; // les cartes composées de CETTE section, rendues avant les faits
-};
+// LA CARTE DE PRÉSENTATION : fait simple ou composition, dans UNE liste commune. Une composition
+// compte pour une carte, donc elle vit dans la même liste, sous le même tri et le même cap : elle ne
+// passe jamais devant une carte plus matérielle du seul fait d'être composée.
+export type DossierCard =
+  | { kind: "fact"; fact: DecisionFact }
+  | { kind: "composition"; composition: FactComposition };
+
+export type DossierSection = { key: string; title: string; cards: DossierCard[] };
 
 // Dans Dossier, ajouter :
-//   compositions: FactComposition[];
+//   compositions: FactComposition[];            // les compositions AFFICHÉES
+//   absorbedFacts: DecisionFact[];              // pour le dépliable d'audit (invariant 4)
 //   presentation: { elementaryFactShown: number; compositionShown: number; absorbedFactTotal: number };
 ```
 
-Dans `decision-assembler.ts` :
+`decision-assembler.ts` :
 
 ```ts
 import type { FactComposition } from "./fact-composition.ts";
+import { assertCompositionsValid } from "./fact-compositions.ts";
+
+function cardTier(c: DossierCard): number {
+  // Même échelle que tierRank ; à TIER ÉGAL la composition passe d'abord (elle porte plus
+  // d'information par carte), d'où le -1 sur une échelle x2.
+  return c.kind === "fact" ? tierRank(c.fact) : TIER_RANK[c.composition.materialityTier] * 2 - 1;
+}
+
+function sectionCards(
+  facts: DecisionFact[], comps: FactComposition[],
+  role: DecisionFact["role"], sectionKey: string, cap: number,
+): DossierCard[] {
+  const cards: DossierCard[] = [
+    ...facts.filter((f) => f.role === role).map((f) => ({ kind: "fact" as const, fact: f })),
+    ...comps.filter((c) => c.displaySection === sectionKey).map((c) => ({ kind: "composition" as const, composition: c })),
+  ];
+  return cards.sort((a, b) => cardTier(a) - cardTier(b)).slice(0, cap);
+}
 
 export function assembleDossier(
-  run: RunResult,
-  project: UserProject,
-  scope: "commune" | "commune+adresse",
-  communeNom: string,
+  run: RunResult, project: UserProject,
+  scope: "commune" | "commune+adresse", communeNom: string,
   compositions: FactComposition[] = [],
 ): Dossier {
+  assertCompositionsValid(run, compositions);
   // AVANT LES CAPS (spec §6) : un fait absorbé quitte sa section ; il reste dans le dossier interne
   // (couverture, orientation, preuves) et au dépliable de sa composition.
   const absorbed = new Set(compositions.flatMap((c) => c.absorbedFactIds));
   const facts = run.facts.filter((f) => !absorbed.has(f.id));
 
-  const compsBySection = (key: string) =>
-    compositions
-      .filter((c) => c.displaySection === key)
-      .sort((a, b) => TIER_RANK[a.materialityTier] - TIER_RANK[b.materialityTier]);
-
-  // Une composition COMPTE POUR UNE CARTE dans le cap de sa section.
-  const section = (key: string, title: string, role: DecisionFact["role"], cap: number): DossierSection => {
-    const comps = compsBySection(key);
-    return { key, title, compositions: comps, facts: byRole(facts, role, Math.max(0, cap - comps.length)) };
-  };
-
   const candidates: DossierSection[] = [
-    section("incompatibilities", "Vos contraintes non négociables", "incompatibility", 2),
-    section("mismatches", "Ce qui correspond moins bien", "mismatch", 3),
-    section("compromises", "Ce qui départage vraiment", "compromise", 3),
-    section("unknowns", "Ce que nous ne savons pas encore", "unknown", 3),
-    section("verifications", l.verifTitle, "verification", 4),
+    { key: "incompatibilities", title: "Vos contraintes non négociables", cards: sectionCards(facts, compositions, "incompatibility", "incompatibilities", 2) },
+    { key: "mismatches", title: "Ce qui correspond moins bien", cards: sectionCards(facts, compositions, "mismatch", "mismatches", 3) },
+    { key: "compromises", title: "Ce qui départage vraiment", cards: sectionCards(facts, compositions, "compromise", "compromises", 3) },
+    { key: "unknowns", title: "Ce que nous ne savons pas encore", cards: sectionCards(facts, compositions, "unknown", "unknowns", 3) },
+    { key: "verifications", title: l.verifTitle, cards: sectionCards(facts, compositions, "verification", "verifications", 4) },
   ];
-  const sections = candidates.filter((s) => s.facts.length > 0 || s.compositions.length > 0);
-  const shown = sections.flatMap((s) => s.facts);
-  const shownComps = sections.flatMap((s) => s.compositions);
-  // … (le reste de la fonction, adapté comme ci-dessous)
+  const sections = candidates.filter((s) => s.cards.length > 0);
+  const shown = sections.flatMap((s) => s.cards).filter((c) => c.kind === "fact").map((c) => c.fact);
+  const shownComps = sections.flatMap((s) => s.cards).filter((c) => c.kind === "composition").map((c) => c.composition);
+  // … suite : comptes, plan, retour (ci-dessous)
 }
 ```
 
-Comptes transmis à `buildConclusionPlan` (les cartes VISIBLES, spec §7) :
+Comptes transmis à `buildConclusionPlan` (les cartes VISIBLES, spec §7). NB : `mismatchShown` n'est
+consommé par AUCUN texte aujourd'hui (vérifié) ; sa sémantique devient « cartes mismatch visibles »,
+documentée sur le champ :
 
 ```ts
 const tradeoffShown = shownComps.filter((c) => c.kind === "tradeoff");
 const sharedShown = shownComps.filter((c) => c.kind === "shared_evidence");
 // mismatchTotal reste sur les faits ÉMIS (run.facts, AVANT absorption) : « N de vos priorités » reste vrai.
 const mismatchTotal = run.facts.filter((f) => f.role === "mismatch").length;
+// CARTES mismatch visibles (faits simples + compositions shared_evidence).
 const mismatchShown = shown.filter((f) => f.role === "mismatch").length + sharedShown.length;
 const reservesShownFacts = shown.filter((f) => RESERVE_ROLES.has(f.role));
+// Un tradeoff porte une réserve (son côté défavorable est une verification) : il compte pour UNE
+// carte-réserve, comme un compromise aujourd'hui.
 const reservesShown = reservesShownFacts.length + tradeoffShown.length;
 const majorReserveCount =
   reservesShownFacts.filter((f) => f.materialityTier !== "secondary").length +
   tradeoffShown.filter((c) => c.materialityTier !== "secondary").length;
 ```
 
-`conclusionBasis` (les absorbés fondent toujours la conclusion) :
+`conclusionBasis` et retour :
 
 ```ts
 conclusionBasis: {
@@ -602,20 +678,27 @@ conclusionBasis: {
       : c.sharedEvidence),
   ],
 },
+compositions: shownComps,
+absorbedFacts: run.facts.filter((f) => absorbed.has(f.id)),
+presentation: { elementaryFactShown: shown.length, compositionShown: shownComps.length, absorbedFactTotal: absorbed.size },
 ```
 
-Et dans l'objet retourné : `compositions: shownComps`, `presentation: { elementaryFactShown: shown.length, compositionShown: shownComps.length, absorbedFactTotal: absorbed.size }`. Passer aussi `shownCompositions: shownComps` à `buildConclusionPlan` (le champ est ajouté en Task 4 ; pour garder cette tâche verte isolément, ne l'ajouter à l'appel qu'en Task 4).
+L'appel `buildConclusionPlan` ne change PAS dans cette tâche (le champ `shownCompositions` arrive en
+Task 4 ; garder la suite verte tâche par tâche).
 
 - [ ] **Step 4 : vérifier le vert (suite complète)**
 
 Run : `node --test src/lib/decision/*.test.ts && npx tsc --noEmit`
-Attendu : PASS (les tests existants de l'assembleur restent verts : `compositions = []` par défaut reproduit l'ancien comportement à l'identique), tsc = 0.
+Attendu : PASS ; adapter les tests existants de l'assembleur qui lisent `section.facts` (devenu
+`section.cards`), tsc = 0. NOTE : `DossierDecisionSection.tsx` casse au typecheck à cette étape si on
+lance `tsc` sur tout le repo ; adapter son rendu MINIMALEMENT ici (mapper `s.cards` et rendre les
+`kind === "fact"` comme avant, ignorer temporairement les compositions), le rendu complet arrive en Task 5.
 
 - [ ] **Step 5 : commit**
 
 ```bash
-git add src/lib/decision/decision-assembler.ts src/lib/decision/decision-fact.ts src/lib/decision/decision-assembler.test.ts
-git commit -m "feat(dossier): assembleur compose (absorbés retirés avant caps, 1 composition = 1 carte, comptes de présentation)"
+git add src/lib/decision/decision-assembler.ts src/lib/decision/decision-fact.ts src/lib/decision/decision-assembler.test.ts src/components/report/DossierDecisionSection.tsx
+git commit -m "feat(dossier): assembleur compose (DossierCard, liste unique triée puis cappée, comptes de présentation)"
 ```
 
 ---
@@ -627,7 +710,7 @@ git commit -m "feat(dossier): assembleur compose (absorbés retirés avant caps,
 - Modify: `src/lib/decision/conclusion-prompt.ts`
 - Modify: `src/lib/decision/conclusion-hash.ts` (bump version)
 - Modify: `src/lib/decision/decision-assembler.ts` (passer `shownCompositions`)
-- Modify: `scripts/probe-conclusion.ts` (champ requis + cas composé)
+- Modify: `scripts/probe-conclusion.ts` (champ requis + cas composés)
 - Test: `src/lib/decision/conclusion-plan.test.ts` (ajouts)
 
 **Interfaces:**
@@ -636,22 +719,20 @@ git commit -m "feat(dossier): assembleur compose (absorbés retirés avant caps,
 
 - [ ] **Step 1 : tests (échouent)**
 
-Ajouts dans `conclusion-plan.test.ts` (réutiliser les fabriques existantes du fichier ; construire une `TradeoffComposition` et une `SharedEvidenceComposition` minimales comme dans les tests des tâches 1-2) :
+Ajouts dans `conclusion-plan.test.ts` (réutiliser les fabriques existantes ; construire une
+`TradeoffComposition` et une `SharedEvidenceComposition` minimales comme dans les tests des tâches 1-2) :
 
 ```ts
 // 1. shownCompositions: [tradeoff structuring] + aucune autre réserve structurante ->
 //    lead.kind === "single", lead.factId === composition.id, lead.topic === composition.title ;
 //    et AUCUN bloc compositions_found (le lead la narre déjà : pas de double narration).
-// 2. shownCompositions: [shared_evidence] + une réserve structurante en fait simple ->
-//    bloc "compositions_found" présent, APRÈS unexamined_hard_constraints et AVANT reserves_found ;
-//    fallbackText contient le summary ; sourceIds = [composition.id, ...absorbedFactIds] ;
-//    allowedNumbers inclut le compte des compositions.
+// 2. shownCompositions: [shared_evidence structuring] seul -> lead.kind === "none" (les mismatchs,
+//    composés ou simples, ne mènent jamais la conclusion) ; bloc compositions_found présent,
+//    APRÈS unexamined_hard_constraints et AVANT reserves_found ; fallbackText contient le summary ;
+//    sourceIds = [composition.id, ...absorbedFactIds].
 // 3. INVARIANT hash : deux plans identiques sauf shownCompositions -> buildConclusionHash différent.
-// 4. shownCompositions: [] -> plan strictement identique à l'existant (aucun bloc ajouté,
-//    lead inchangé) : non-régression.
+// 4. shownCompositions: [] -> plan strictement identique à l'existant (non-régression).
 ```
-
-Écrire ces quatre tests avec de vraies assertions.
 
 - [ ] **Step 2 : vérifier l'échec**
 
@@ -667,12 +748,13 @@ import type { FactComposition } from "./fact-composition.ts";
 
 export type BlockKey = "verdict" | "unexamined_hard_constraints" | "compositions_found" | "mismatches_found" | "reserves_found" | "uncovered_priorities";
 
-// ConclusionPlanInput gagne (requis, jamais optionnel : un champ optionnel créerait un troisième état) :
+// ConclusionPlanInput gagne (REQUIS, jamais optionnel : un optionnel créerait un troisième état) :
 //   shownCompositions: FactComposition[];
 
-// LE LEAD PEUT ÊTRE UNE COMPOSITION (spec §7). Les candidats sont les réserves AFFICHÉES plus les
-// compositions tradeoff (un shared_evidence est un mismatch : il a son propre registre, comme les
-// mismatchs simples). Le candidat composé porte son TITRE en topic et son SUMMARY en statement.
+// LE LEAD PEUT ÊTRE UN TRADEOFF (spec §7), JAMAIS un shared_evidence : les mismatchs sont exclus du
+// lead par doctrine (RESERVE_ROLES), et un mismatch COMPOSÉ n'obtient pas un accès que les mismatchs
+// simples n'ont pas. Si un jour les mismatchs doivent pouvoir mener la conclusion, la décision se
+// prend ICI, pour tous, jamais par effet de bord d'un patron.
 type LeadCandidate = { factId: string; topic: string; statement: string; materialityTier: MaterialityTier };
 
 export function selectLead(shownFacts: DecisionFact[], shownCompositions: FactComposition[] = []): LeadSelection {
@@ -681,11 +763,11 @@ export function selectLead(shownFacts: DecisionFact[], shownCompositions: FactCo
     ...shownCompositions.filter((c) => c.kind === "tradeoff")
       .map((c) => ({ factId: c.id, topic: c.title, statement: c.summary, materialityTier: c.materialityTier })),
   ];
-  // (même logique qu'aujourd'hui, sur candidates au lieu de rs)
+  // (même logique de sélection qu'aujourd'hui, sur candidates au lieu de rs)
 }
 ```
 
-Dans `buildConclusionPlan`, après le bloc `unexamined_hard_constraints` et avant `reserves_found` :
+Dans `buildConclusionPlan`, après le bloc `unexamined_hard_constraints`, avant `reserves_found` :
 
 ```ts
 // LES COMPOSITIONS NOMMÉES. Une composition désignée lead single est déjà narrée : la re-narrer ici
@@ -698,6 +780,8 @@ if (narratedComps.length > 0) {
     fallbackText: narratedComps.map((c) => endWithPeriod(c.summary)).join(" "),
     sourceIds: narratedComps.flatMap((c) => [c.id, ...c.absorbedFactIds]),
     requiredPhrases: [],
+    // Les nombres du fallback sont autorisés par construction (conclusion-validate.ts:100) ; on
+    // n'autorise en plus que le compte des compositions.
     allowedNumbers: numberForms(narratedComps.length),
     maxChars: 340,
     generable: true,
@@ -705,9 +789,12 @@ if (narratedComps.length > 0) {
 }
 ```
 
-Adapter l'appel `selectLead(input.shownFacts, input.shownCompositions)` et, côté `decision-assembler.ts`, passer `shownCompositions: shownComps` dans l'input. Le bloc `mismatches_found` continue de compter les faits mismatch AFFICHÉS (les absorbés n'y sont plus, le registre compositions porte les leurs).
+Adapter l'appel `selectLead(input.shownFacts, input.shownCompositions)` et, côté
+`decision-assembler.ts`, passer `shownCompositions: shownComps` dans l'input. Le bloc
+`mismatches_found` continue de compter les faits mismatch AFFICHÉS (les absorbés n'y sont plus, le
+registre compositions porte les leurs).
 
-`conclusion-prompt.ts` : ajouter après le paragraphe « LES FAITS DE TÊTE » :
+`conclusion-prompt.ts`, après le paragraphe « LES FAITS DE TÊTE » :
 
 ```
 LE REGISTRE compositions_found : DES CONSTATS DÉJÀ RELIÉS.
@@ -721,74 +808,92 @@ sans moyenne, sans verdict. Ce qui est établi s'ARBITRE, jamais « à vérifier
 `conclusion-hash.ts` : `DECISION_NARRATIVE_PROMPT_VERSION = "v11"` (commentaire : v11 = registre
 compositions_found + lead composable).
 
-`scripts/probe-conclusion.ts` : ajouter `shownCompositions: []` aux cas existants, plus un cas composé :
+`scripts/probe-conclusion.ts` : ajouter `shownCompositions: []` à tous les cas existants, plus DEUX cas
+composés câblés dans la boucle de tirages comme les cas existants :
 
 ```ts
-const planComposition = buildConclusionPlan({
+const tradeoffAntibes = {
+  id: "06004:composition-climat-saisons", kind: "tradeoff" as const, patternId: "seasonal_climate_tradeoff" as const,
+  title: "Des hivers doux, avec une exposition estivale à arbitrer",
+  summary: "Les hivers d'Antibes comptent parmi les plus doux du pays, et l'exposition aux fortes chaleurs estivales y appelle un arbitrage.",
+  favorableSide: { label: "Ce qui correspond", statement: "Les températures moyennes d'hiver figurent parmi les plus douces à l'échelle nationale.", evidence: [], ruleIds: ["territoire.mismatch-douceur_climat"], factIds: [] },
+  unfavorableSide: { label: "Ce qui appelle un arbitrage", statement: "Les jours au-dessus de 35 °C augmentent nettement.", evidence: [], ruleIds: ["territoire.climat-chaleur"], factIds: ["06004:climat-chaleur"] },
+  absorbedFactIds: ["06004:climat-chaleur"], referencedRuleIds: ["territoire.mismatch-douceur_climat", "territoire.climat-chaleur"],
+  materialityTier: "structuring" as const, displaySection: "compromises" as const,
+};
+
+// Cas A : la composition est l'unique réserve structurante -> lead single composé, PAS de bloc
+// compositions_found. Éprouve : le modèle nomme la composition en lead.
+const planCompositionLead = buildConclusionPlan({
   scope: "commune", communeNom: "Antibes", conclusionState: "no_incompatibility_established", posture: "recherche",
   shownFacts: [verif("f9", "secondary", "le retrait-gonflement des argiles", "À cette adresse, le sol est exposé au retrait-gonflement des argiles.")],
-  shownCompositions: [{
-    id: "06004:composition-climat-saisons", kind: "tradeoff", patternId: "seasonal_climate_tradeoff",
-    title: "Des hivers doux, avec une contrepartie estivale",
-    summary: "Les hivers d'Antibes comptent parmi les plus doux du pays, et l'exposition aux fortes chaleurs estivales y appelle un arbitrage.",
-    favorableSide: { label: "Ce qui correspond", statement: "Les températures moyennes d'hiver figurent parmi les plus douces à l'échelle nationale.", evidence: [], ruleIds: ["territoire.mismatch-douceur_climat"], factIds: [] },
-    unfavorableSide: { label: "Ce qui appelle un arbitrage", statement: "Les jours au-dessus de 35 °C augmentent nettement.", evidence: [], ruleIds: ["territoire.climat-chaleur"], factIds: ["06004:climat-chaleur"] },
-    absorbedFactIds: ["06004:climat-chaleur"], referencedRuleIds: ["territoire.mismatch-douceur_climat", "territoire.climat-chaleur"],
-    materialityTier: "structuring", displaySection: "compromises",
-  }],
+  shownCompositions: [tradeoffAntibes],
   uncovered: [], uncoveredPriorities: [{ key: "qualite_air", label: "la qualité de l'air" }],
   establishedIncompatibility: null, coverage: "high", orientation: "minor_reserves",
   hasFavorable: true, favorableCount: 1, majorReserveCount: 1, reservesShown: 2,
   mismatchTotal: 0, mismatchShown: 0,
 });
-```
 
-NOTE : avec ce cas, la composition est l'unique réserve structurante -> lead single composé -> PAS de
-bloc compositions_found ; le prompt est éprouvé sur « le modèle nomme la composition en lead ». Ajouter
-une variante avec une réserve structurante simple en plus pour éprouver AUSSI le bloc compositions_found
-(lead tied ou single sur l'autre fait). Câbler les deux cas dans la boucle de tirages du script comme les
-cas existants.
+// Cas B : une réserve structurante SIMPLE en plus -> lead tied (ou single sur l'autre fait) ET bloc
+// compositions_found. Éprouve : le modèle articule le registre composé sans le solder.
+const planCompositionBloc = buildConclusionPlan({
+  scope: "commune", communeNom: "Antibes", conclusionState: "no_incompatibility_established", posture: "recherche",
+  shownFacts: [verif("f8", "structuring", "l'exposition d'Antibes à l'inondation", "L'exposition de la commune à l'inondation ressort élevée.")],
+  shownCompositions: [tradeoffAntibes],
+  uncovered: [], uncoveredPriorities: [],
+  establishedIncompatibility: null, coverage: "high", orientation: "major_reserves",
+  hasFavorable: true, favorableCount: 1, majorReserveCount: 2, reservesShown: 2,
+  mismatchTotal: 0, mismatchShown: 0,
+});
+```
 
 - [ ] **Step 4 : vérifier le vert**
 
 Run : `node --test src/lib/decision/*.test.ts && npx tsc --noEmit`
-Attendu : PASS (adapter tout appelant de `buildConclusionPlan`/`selectLead` dans les tests existants : champ `shownCompositions: []`), tsc = 0.
+Attendu : PASS (adapter tout appelant de `buildConclusionPlan`/`selectLead` dans les tests existants :
+champ `shownCompositions: []`), tsc = 0.
 
 - [ ] **Step 5 : commit**
 
 ```bash
 git add src/lib/decision/conclusion-plan.ts src/lib/decision/conclusion-prompt.ts src/lib/decision/conclusion-hash.ts src/lib/decision/decision-assembler.ts src/lib/decision/conclusion-plan.test.ts scripts/probe-conclusion.ts
-git commit -m "feat(dossier): registre compositions_found + lead composable, prompt v11, sonde étendue"
+git commit -m "feat(dossier): registre compositions_found + lead tradeoff, prompt v11, sonde étendue"
 ```
 
 ---
 
-### Task 5 : Rendu (`FactCompositionCard` + intégration section)
+### Task 5 : Rendu (briques partagées + `FactCompositionCard` + sections)
 
 **Files:**
+- Create: `src/components/report/DecisionFactRenderParts.tsx`
 - Create: `src/components/report/FactCompositionCard.tsx`
 - Modify: `src/components/report/DossierDecisionSection.tsx`
 
 **Interfaces:**
-- Consomme : `FactComposition` (Task 1), `DossierSection.compositions` (Task 3), `FactBody`/`EvidenceRow`/`Chip` (à EXPORTER depuis `DossierDecisionSection.tsx`).
-- Produit : `<FactCompositionCard composition={c} color={col} absorbedFacts={facts} />`.
+- Consomme : `FactComposition`, `CompositionSide` (Task 1), `DossierSection.cards` + `dossier.absorbedFacts` (Task 3).
+- Produit : `Chip`, `EvidenceRow`, `FactBody` (DecisionFactRenderParts.tsx) ; `<FactCompositionCard composition color absorbedFacts />`.
 
-- [ ] **Step 1 : exporter les briques de rendu**
+- [ ] **Step 1 : extraire les briques partagées**
 
-Dans `DossierDecisionSection.tsx`, préfixer `export` sur `Chip`, `EvidenceRow`, `FactBody` (aucun autre changement de ces fonctions).
+DÉPLACER (pas copier) `Chip`, `EvidenceRow`, `FactBody` de `DossierDecisionSection.tsx` vers
+`src/components/report/DecisionFactRenderParts.tsx`, avec `export` sur chacun, imports ajustés.
+`DossierDecisionSection.tsx` les importe désormais. Aucune boucle : les deux composants de cartes
+dépendent des briques, jamais l'inverse.
 
 - [ ] **Step 2 : écrire `FactCompositionCard.tsx`**
 
-Server Component présentationnel, deux variantes par `kind`, dépliable `<details>` natif (pas de client component). Idiome existant : eyebrows mono uppercase, texte `text-label 14px`, preuves en chips, pas de code couleur bon/mauvais tranché.
+Server Component présentationnel, deux variantes par `kind`, dépliable `<details>` natif. Idiome
+existant : eyebrows mono uppercase, texte `text-label 14px`, preuves en chips, pas de code couleur
+bon/mauvais tranché.
 
 ```tsx
 // Carte COMPOSÉE : une vue qui relie des constats établis (tradeoff / shared_evidence). Présentationnelle.
 // Les faits absorbés restent lisibles au dépliable, dans leur forme d'origine (audit, invariant 4).
-import type { FactComposition } from "@/lib/decision/fact-composition";
+import type { FactComposition, CompositionSide } from "@/lib/decision/fact-composition";
 import type { DecisionFact } from "@/lib/decision/decision-fact";
-import { Chip, EvidenceRow, FactBody } from "@/components/report/DossierDecisionSection";
+import { Chip, EvidenceRow, FactBody } from "@/components/report/DecisionFactRenderParts";
 
-function SideBlock({ side, color }: { side: FactComposition & { kind: "tradeoff" } extends never ? never : import("@/lib/decision/fact-composition").CompositionSide; color: string }) {
+function SideBlock({ side, color }: { side: CompositionSide; color: string }) {
   return (
     <div>
       <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-ghost mb-1">{side.label}</p>
@@ -862,34 +967,30 @@ export function FactCompositionCard({
 }
 ```
 
-NOTE exécutant : le type de `SideBlock` ci-dessus doit simplement être
-`{ side: CompositionSide; color: string }` avec `import type { CompositionSide } from "@/lib/decision/fact-composition"` ;
-ne pas reproduire le type conditionnel de l'esquisse.
+- [ ] **Step 3 : rendre les cartes dans `DossierDecisionSection.tsx`**
 
-- [ ] **Step 3 : intégrer dans `DossierDecisionSection.tsx`**
-
-La liste des sections rend les compositions AVANT les faits. Il faut retrouver les faits absorbés pour le
-dépliable : ils ne sont plus dans les sections. Ajouter une prop au composant existant, ou (plus simple,
-zéro changement d'appelants) porter les faits absorbés DANS le Dossier : dans `decision-assembler.ts`
-(Task 3), ajouter au Dossier `absorbedFacts: DecisionFact[]` (`run.facts.filter((f) => absorbed.has(f.id))`).
-Faire ce petit ajout ici si non fait en Task 3, avec son assertion dans le test assembleur. Puis :
+La boucle de section rend `s.cards` dans l'ordre de la liste (déjà triée par l'assembleur) :
 
 ```tsx
 <ul className="flex flex-col gap-5">
-  {s.compositions.map((c) => (
-    <FactCompositionCard
-      key={c.id}
-      composition={c}
-      color={col}
-      absorbedFacts={dossier.absorbedFacts.filter((f) => c.absorbedFactIds.includes(f.id))}
-    />
-  ))}
-  {s.facts.map((f) => { /* rendu existant inchangé */ })}
+  {s.cards.map((card) =>
+    card.kind === "composition" ? (
+      <FactCompositionCard
+        key={card.composition.id}
+        composition={card.composition}
+        color={col}
+        absorbedFacts={dossier.absorbedFacts.filter((f) => card.composition.absorbedFactIds.includes(f.id))}
+      />
+    ) : (
+      <li key={card.fact.id}>
+        {/* rendu existant du fait (grain + FactBody + EvidenceRow), inchangé */}
+      </li>
+    ),
+  )}
 </ul>
 ```
 
-Ajouter aussi `mismatches: "var(--orange)"` est INUTILE : `SECTION_ACCENT` n'a pas la clé `mismatches`
-aujourd'hui (repli améthyste) ; ne pas y toucher.
+Ne PAS toucher `SECTION_ACCENT` (la clé `mismatches` absente tombe déjà sur le repli améthyste).
 
 - [ ] **Step 4 : vérifier build**
 
@@ -899,8 +1000,8 @@ Attendu : 0 erreur, build exit 0.
 - [ ] **Step 5 : commit**
 
 ```bash
-git add src/components/report/FactCompositionCard.tsx src/components/report/DossierDecisionSection.tsx src/lib/decision/decision-assembler.ts src/lib/decision/decision-fact.ts src/lib/decision/decision-assembler.test.ts
-git commit -m "feat(dossier): FactCompositionCard (2 variantes + dépliable d'audit) branchée aux sections"
+git add src/components/report/DecisionFactRenderParts.tsx src/components/report/FactCompositionCard.tsx src/components/report/DossierDecisionSection.tsx
+git commit -m "feat(dossier): FactCompositionCard (2 variantes + dépliable d'audit) sur briques partagées"
 ```
 
 ---
@@ -946,22 +1047,22 @@ Attendu : tout vert (>= 591 + nouveaux), tsc 0, build exit 0.
 - [ ] **Step 3 : vérification vivante (invoquer le skill verify si disponible)**
 
 Dev server (`npm run dev`), puis exercer les deux patrons sur le VRAI parcours :
-1. Un compte avec projet `douceur_climat` poids 3 + `faible_chaleur` poids 3, commune active Antibes
-   (06004) : la page `/rapport` doit montrer la carte « Des hivers doux, avec une contrepartie estivale »
-   dans « Ce qui départage vraiment », SANS carte chaleur dans « À examiner… », avec action et dépliable.
+1. Projet `douceur_climat` poids 3 + `faible_chaleur` poids 3, commune active Antibes (06004) : la page
+   `/rapport` doit montrer « Des hivers doux, avec une exposition estivale à arbitrer » dans « Ce qui
+   départage vraiment », SANS carte chaleur dans « À examiner… », avec action et dépliable.
 2. Même projet, commune Gouesnou (29061) : AUCUNE composition (pas de fait chaleur), douceur silencieuse.
-3. Projet `prefere_grande_ville` poids 3 + `eviter_isolement` poids 2, un village : carte
-   « Une même petite taille… » dans « Ce qui correspond moins bien », conséquences hiérarchisées,
-   limitation sous la conséquence isolement.
-Si l'accès au parcours authentifié est trop coûteux en local, au minimum : appeler la fonction
-d'assemblage via un petit script jetable dans le scratchpad qui charge les ModuleFacts réels d'Antibes
-(même chemin que `territory-facts.ts`) et imprime les sections. Rapporter honnêtement ce qui a été vérifié.
+3. Projet `prefere_grande_ville` poids 3 + `eviter_isolement` poids 2, un village : carte « Une même
+   petite taille… » dans « Ce qui correspond moins bien », conséquences hiérarchisées, limitation sous
+   la conséquence isolement.
+Si l'accès au parcours authentifié est trop coûteux en local, au minimum : un petit script jetable dans
+le scratchpad qui charge les ModuleFacts réels d'Antibes (même chemin que `territory-facts.ts`) et
+imprime les sections. Rapporter honnêtement ce qui a été vérifié.
 
 - [ ] **Step 4 : sonde (nécessite `.env.local`)**
 
 Run : `node --env-file=.env.local scripts/probe-conclusion.ts`
-Attendu : les cas composés survivent à la validation sur la majorité des tirages (5) ; sinon itérer le
-paragraphe prompt (et garder v11 tant que la session n'est pas livrée).
+Attendu : les cas composés survivent à la validation sur la majorité des 5 tirages ; sinon itérer le
+paragraphe prompt (rester en v11 tant que la session n'est pas livrée).
 
 - [ ] **Step 5 : commit final**
 
@@ -972,7 +1073,8 @@ git commit -m "feat(dossier): composition branchée aux deux parcours (commune, 
 
 ---
 
-## Auto-revue du plan (faite à l'écriture)
+## Auto-revue du plan (v2)
 
-- Couverture spec : §1-2 -> Task 1 ; §3-4 -> Task 1 ; §5 -> Task 2 ; §6 -> Task 3 ; §7 -> Task 4 ; §8 -> Task 5 ; §10 -> chaque tâche + Task 6 ; invariants §9 : 1-2 (types, Task 1), 3 (test assembleur, Task 3), 4 (dépliable, Task 5 + test Task 3), 5 (registre strict, Task 2), 6-7 (gates, Tasks 1-2), 8 (action/limitation, tests Tasks 1-2), 9 (helper canonique + test bande absente, Task 1), 10 (textes déterministes sans verdict global, Tasks 1-2 + prompt Task 4).
-- Cohérence de types : `compositions` param 5 de `assembleDossier` (Tasks 3, 6) ; `DossierSection.compositions` (Tasks 3, 5) ; `absorbedFacts` sur Dossier (Tasks 3/5, noté explicitement) ; `shownCompositions` requis (Task 4, avec adaptation des call sites existants).
+- Couverture spec : §1-2 -> Task 1 ; §3-4 -> Task 1 ; §5 -> Task 2 ; §6 -> Task 3 ; §7 -> Task 4 ; §8 -> Task 5 ; §10 -> chaque tâche + Task 6 ; invariants §9 : 1-2 (types, Task 1), 3 (test assembleur, Task 3), 4 (dépliable + absorbedFacts, Tasks 3/5), 5 (registre strict + basis requis, Task 2), 6-7 (gates, Tasks 1-2), 8 (action/limitation, tests Tasks 1-2), 9 (helper canonique + bandes corrompues, Task 1), 10 (textes déterministes, prompt Task 4).
+- Écart spec assumé (revue v2) : `DossierSection.cards` remplace `facts` + `compositions` séparés ; la spec §6 disait « insérée dans sa displaySection où elle compte pour une carte », la liste unique triée est la manière correcte de le faire (une composition secondary ne déplace pas un fait structurant). À reporter dans la spec au moment du merge.
+- Cohérence de types : `DossierCard` (Tasks 3, 5) ; `absorbedFacts` sur Dossier (Tasks 3, 5) ; `shownCompositions` requis (Task 4) ; `mismatchRuleId`/`RULE_CHALEUR`/`bandValide` exportés (Task 1) et consommés (Tasks 1-2).
