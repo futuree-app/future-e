@@ -12,6 +12,7 @@ import {
 } from "@/lib/geo-zones";
 import { getLittoralIndex, type LittoralSummary } from "@/lib/littoral";
 import { tailleVilleFrom, resolveTailleVille, communeAttributesFrom } from "@/lib/commune-attributes";
+import { winterMildnessScore, WINTER_MILDNESS_CONVENTION } from "@/lib/climate/winter-mildness";
 import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
 import { hydrateHardConstraints, explorationHints } from "@/lib/hard-constraints-hydrate";
 import { resolveExternalReferences } from "@/lib/hard-constraints-external";
@@ -392,7 +393,6 @@ const ISOLEMENT: Anchors = [[0, 0], [1000, 5], [2000, 15], [5000, 45], [10000, 6
 const GRANDE_VILLE_MIN: Anchors = [[0, 100], [2000, 100], [25000, 85], [100000, 55], [300000, 25], [500000, 12], [1000000, 3]];
 const GRANDE_VILLE_MAX: Anchors = [[0, 0], [25000, 10], [100000, 40], [300000, 70], [500000, 85], [1000000, 97], [2000000, 100]];
 const CALME: Anchors = [[0, 55], [30, 65], [80, 85], [150, 95], [400, 100], [800, 95], [1500, 80], [3000, 55], [6000, 30], [12000, 12], [30000, 3]];
-const WINTER_MILD: Anchors = [[-3, 5], [1, 30], [4, 60], [7, 88], [9, 100], [12, 95], [16, 80]];
 // Montagnosité : altitude (m) → score 0-100, recalée « vivre à la montagne » (pas
 // que la haute montagne). Pivot 600 m = 50 (= seuil du filtre dur). cf. ANCRES.
 const MONTAGNE: Anchors = [[300, 0], [600, 50], [1000, 85], [1400, 100]];
@@ -1001,7 +1001,9 @@ function buildIdentiteCandidates(c: IndexCommune): string[] {
   const sudOuest = c.region === "Nouvelle-Aquitaine";
   const sud = c.region === "Occitanie" || c.region === "Provence-Alpes-Côte d'Azur";
   const frais = (subScore("faible_chaleur", c) ?? 0) >= 60;
-  const doux = (subScore("douceur_climat", c) ?? 0) >= 65;
+  const douceurScore = subScore("douceur_climat", c);
+  // Condition EXPLICITE (pas de repli `?? 0` : une donnée absente n'établit pas l'identité « hivers doux »).
+  const doux = douceurScore != null && douceurScore >= WINTER_MILDNESS_CONVENTION.identityThreshold;
   const vieLocaleForte = (subScore("vie_locale", c) ?? 0) >= 60;
   const natureForte = (subScore("nature", c) ?? 0) >= 60;
   const calmeForte = Math.max(subScore("cadre_calme", c) ?? 0, subScore("calme_sonore", c) ?? 0) >= 62;
@@ -1024,7 +1026,7 @@ function buildIdentiteCandidates(c: IndexCommune): string[] {
   if (frais && sudOuest) push("Pour rester dans le Sud-Ouest sans subir les plus fortes chaleurs.");
   if (frais && sud) push("Pour rester dans le Sud sans subir les plus fortes chaleurs.");
   if (frais) push("Pour chercher davantage de fraîcheur et un rythme plus posé.");
-  if (doux) push("Pour un climat doux une bonne partie de l'année.");
+  if (doux) push("Pour des hivers parmi les plus doux du pays.");
   // Traits de caractère (départagent deux communes de même géographie).
   if (etudianteForte) push("Pour une ville étudiante à taille humaine.");
   if (croissanceForte) push("Pour s'installer dans un territoire qui attire.");
@@ -1219,12 +1221,10 @@ export function subScore(key: PreferenceKey, c: IndexCommune): number | null {
       return lerp(CALME, c.densite);
     case "eviter_isolement":
       return lerp(ISOLEMENT, tailleVille(c)); // taille d'agglomération, pas la commune seule
-    case "douceur_climat": {
-      const w = lerp(WINTER_MILD, c.clim.NORTMm_seas_DJF);
-      if (w == null) return null;
-      const s = c.pct.NORTX35D_yr == null ? 50 : 100 - c.pct.NORTX35D_yr;
-      return Math.round(0.6 * w + 0.4 * s);
-    }
+    case "douceur_climat":
+      // Douceur HIVERNALE seule (lot 4b) : position nationale de la T° moyenne DJF (1976-2005), monotone.
+      // L'été (NORTX35D) est traité par faible_chaleur ; il n'entre plus ici (fin du double comptage).
+      return winterMildnessScore(c.pct?.NORTMm_seas_DJF);
     case "ensoleillement_recherche":
       // Rayonnement solaire réel (ERA5), percentile national. Remplace l'ancien
       // proxy FAUX (été chaud + peu de pluie, qui ne mesurait pas le soleil).
@@ -1359,8 +1359,8 @@ export const THEME_ORDER: { id: string; titre: string; gp: string; court: string
 // dont le pire tier s'affiche en rouge si une autre commune fait mieux. directionnel=false
 // = préférence non universelle (pas de gagnant). Premier jet, à calibrer.
 const DIMENSIONS: ComparaisonDim[] = [
-  { id: "etes_frais", label: "Étés frais", themeId: "climat", key: "faible_chaleur", paliers: ["Étés frais", "Étés tempérés", "Étés chauds"], gp: "les étés frais", forte: "ses étés frais", aide: "Spécifiquement les étés : à quel point la chaleur y reste supportable. La douceur d'ensemble (hivers et étés) est notée à part.", risque: false, directionnel: true },
-  { id: "douceur", label: "Douceur à l'année", themeId: "climat", key: "douceur_climat", paliers: ["Climat doux", "Climat contrasté", "Hivers rigoureux"], gp: "la douceur du climat", forte: "la douceur de son climat", aide: "La douceur d'ensemble sur l'année : hivers tempérés autant qu'étés sans excès. Les étés seuls sont notés à part.", risque: false, directionnel: true },
+  { id: "etes_frais", label: "Étés frais", themeId: "climat", key: "faible_chaleur", paliers: ["Étés frais", "Étés tempérés", "Étés chauds"], gp: "les étés frais", forte: "ses étés frais", aide: "Spécifiquement les étés : l'exposition aux fortes chaleurs, actuelle et future. Les hivers sont notés à part (Hivers doux).", risque: false, directionnel: true },
+  { id: "douceur", label: "Hivers doux", themeId: "climat", key: "douceur_climat", paliers: ["Hivers parmi les plus doux", "Situation intermédiaire", "Hivers parmi les moins doux"], gp: "la douceur des hivers", forte: "la douceur de ses hivers", aide: "La douceur des hivers (température moyenne de décembre à février), à l'échelle nationale. Les étés sont notés à part (Étés frais).", risque: false, directionnel: true },
   { id: "ensoleillement", label: "Ensoleillement", themeId: "climat", key: "ensoleillement_recherche", paliers: ["Très ensoleillé", "Moyennement ensoleillé", "Peu ensoleillé"], gp: "l'ensoleillement", forte: "son ensoleillement", aide: "Le rayonnement solaire reçu au sol (ERA5), exprimé sans nombre d'heures. Affiché sans gagnant : l'ensoleillement idéal dépend de vos goûts.", risque: false, directionnel: false },
   { id: "inondation", label: "Inondation", themeId: "risques", key: "faible_risque_inondation", paliers: ["Risque d'inondation faible", "Risque modéré", "Risque élevé"], gp: "le risque d'inondation", forte: "son faible risque d'inondation", aide: "Ce que dit l'historique d'inondations du territoire.", risque: true, directionnel: true },
   { id: "feu", label: "Feu", themeId: "risques", key: "faible_risque_feu", paliers: ["Risque de feu faible", "Risque modéré", "Risque élevé"], gp: "le risque de feu", forte: "son faible risque de feu", aide: "L'exposition du secteur au risque d'incendie.", risque: true, directionnel: true },
@@ -2011,7 +2011,7 @@ function assignSignaux(
 
 const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> = {
   faible_chaleur: "étés plus frais",
-  douceur_climat: "climat doux, hivers tempérés",
+  douceur_climat: "hivers parmi les plus doux",
   ensoleillement_recherche: "plus ensoleillé",
   faible_secheresse: "sols peu exposés à la sécheresse",
   faible_risque_feu: "faible risque de feu",
@@ -2071,7 +2071,7 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
 };
 const REASON_NEG: Record<PreferenceKey, string> = {
   faible_chaleur: "chaleur en hausse",
-  douceur_climat: "hivers rudes ou étés marqués",
+  douceur_climat: "hivers parmi les moins doux",
   ensoleillement_recherche: "moins ensoleillé",
   faible_secheresse: "sols exposés à la sécheresse",
   faible_risque_feu: "risque de feu notable",
