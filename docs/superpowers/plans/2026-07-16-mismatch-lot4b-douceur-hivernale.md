@@ -70,6 +70,9 @@ Créer `src/lib/climate/winter-mildness.ts` :
 // douceur_climat mesure EXCLUSIVEMENT la douceur des hivers : position nationale de la température moyenne
 // DJF (NORTMm_seas_DJF), normale de référence DRIAS 1976-2005. Monotone (plus chaud = plus doux). L'été est
 // traité par faible_chaleur. Le pct est déjà orienté 0 = plus froid, 100 = plus doux (vérifié sur la donnée).
+// PAS d'`identityThreshold` ici : une décision absente ne doit pas être représentée par une fausse valeur
+// provisoire. Le champ est AJOUTÉ à cette convention par la Task 5, APRÈS le rapport d'impact + validation
+// porteur (la gate). Tant qu'il n'existe pas, `doux` garde son ancien seuil (non expédié).
 export const WINTER_MILDNESS_CONVENTION = {
   id: "winter-mildness-v1",
   indicator: "NORTMm_seas_DJF",
@@ -77,8 +80,6 @@ export const WINTER_MILDNESS_CONVENTION = {
   direction: "higher_is_milder",
   scoring: "national_percentile",
   referencePeriod: "1976-2005",
-  // FIXÉ après la gate d'impact (Task 5). Valeur provisoire NON utilisée tant que `doux` n'est pas recâblé.
-  identityThreshold: 75,
 } as const;
 
 // Trivial mais grave les GARDES, la DIRECTION, l'ABSENCE DE REPLI (jamais un 50), la convention partagée.
@@ -234,11 +235,43 @@ Dans `src/lib/decision/mismatch-rules.ts`, dans `MISMATCH_KEYS`, après `"ensole
 
 - [ ] **Step 4 : Lancer (passe) + typage** — `node --test src/lib/decision/mismatch-rules.test.ts` → PASS ; `npx tsc --noEmit` → 0. Les gardes (`MISMATCH_KEYS === MISMATCH_RANK_KEYS`, labels exhaustifs) restent vertes.
 
-- [ ] **Step 5 : Commit**
+- [ ] **Step 5 : E2E décisionnel (chaîne complète, comme 3a/3b)**
+
+Créer `src/lib/decision/winter-mildness-e2e.test.ts` (patron `coast-e2e.test.ts` : `entry`/`project`/`context`/
+`dossierFor`, mais injecter le rang via `rankBands`). L'`entry` doit porter `clim`/`pct` pour que
+`mapCommuneToModuleFacts` construise les `rankBands` — plus simple : passer `rankBands` directement dans l'entry
+si le mapping les lit, sinon injecter via un `mapCommuneToModuleFacts(entry, ...)` où l'entry a
+`rankBands: { douceur_climat: [low*1e4, high*1e4] }`. Trois cas :
+
+```ts
+test("E2E hiver parmi les moins doux (rang bas), poids 3 -> carte relative_position, arbitrage, limitation 1976-2005", () => {
+  const d = dossierFor(entry({ rankBands: { douceur_climat: [300, 1200] } }), project([{ key: "douceur_climat", weight: 3 }]));
+  const sec = d.sections.find((s) => s.key === "mismatches");
+  const f = (sec?.facts ?? []).find((x) => (x as { basis?: { kind: string } }).basis?.kind === "relative_position" && x.projectKey === "douceur_climat");
+  assert.ok(f, "carte douceur attendue");
+  assert.match(f!.limitation!, /1976-2005/);
+  assert.equal(d.criteria.orientation, "arbitration");
+});
+test("E2E hiver parmi les plus doux (rang haut), poids 3 -> satisfied favorable, aucune carte", () => {
+  const d = dossierFor(entry({ rankBands: { douceur_climat: [8800, 9700] } }), project([{ key: "douceur_climat", weight: 3 }]));
+  const crit = d.criteria.registry.find((c) => c.criterionKey === "douceur_climat");
+  assert.equal(crit?.outcome, "favorable");
+  assert.equal(d.criteria.orientation, "favorable");
+});
+test("E2E rang absent -> uncertain, aucune carte", () => {
+  const d = dossierFor(entry({ rankBands: {} }), project([{ key: "douceur_climat", weight: 3 }]));
+  const crit = d.criteria.registry.find((c) => c.criterionKey === "douceur_climat");
+  assert.notEqual(crit?.coverage, "examined");
+});
+```
+
+> Vérifier la forme exacte que `mapCommuneToModuleFacts` attend pour `rankBands` (index `[low, high]` en points de base → `{low, high}` fractions) et adapter l'entry/injection. Lancer : `node --test src/lib/decision/winter-mildness-e2e.test.ts` → PASS.
+
+- [ ] **Step 6 : Commit**
 
 ```bash
-git add src/lib/decision/mismatch-facts.ts src/lib/decision/mismatch-rules.ts src/lib/decision/mismatch-rules.test.ts
-git commit -m "feat(mismatch): douceur_climat en relative_position (limitation hivernale 1976-2005)
+git add src/lib/decision/mismatch-facts.ts src/lib/decision/mismatch-rules.ts src/lib/decision/mismatch-rules.test.ts src/lib/decision/winter-mildness-e2e.test.ts
+git commit -m "feat(mismatch): douceur_climat en relative_position (limitation hivernale 1976-2005) + E2E
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -271,7 +304,10 @@ par :
 
 - [ ] **Step 2 : Réécrire l'aide de `faible_chaleur` (comparateur-vie ~1362)**
 
-Dans l'entrée `etes_frais`, l'aide « Spécifiquement les étés… La douceur d'ensemble (hivers et étés) est notée à part. » → « Spécifiquement les étés : à quel point la chaleur y reste supportable. Les hivers sont notés à part (Hivers doux). » (le concept « douceur d'ensemble » disparaît).
+Dans l'entrée `etes_frais`, l'aide « Spécifiquement les étés… La douceur d'ensemble (hivers et étés) est notée
+à part. » → **« Spécifiquement les étés : l'exposition aux fortes chaleurs, actuelle et future. Les hivers sont
+notés à part (Hivers doux). »** (« supportable » est un jugement subjectif — on décrit l'exposition, on ne juge
+pas ; le concept « douceur d'ensemble » disparaît).
 
 - [ ] **Step 3 : Textes d'identité (comparateur-vie ~1027, ~2014, ~2074)**
 
@@ -293,14 +329,32 @@ Dans l'entrée `etes_frais`, l'aide « Spécifiquement les étés… La douceur 
 - ~189 : remplacer « "rechercher la douceur" (douceur_climat, hivers tempérés) … "climat doux" et "agréable" relèvent de douceur_climat, pas de faible_chaleur. » par : « "rechercher la douceur des hivers" (douceur_climat = température moyenne hivernale). Une douceur ANNUELLE ("climat doux et agréable toute l'année") se traduit par DEUX préférences : douceur_climat (hivers) + faible_chaleur (étés). »
 - ~238 : `- douceur_climat : hivers tempérés, climat doux et agréable` → `- douceur_climat : hivers doux (température moyenne de décembre à février) ; une douceur annuelle ajoute aussi faible_chaleur`
 
-- [ ] **Step 7 : Audit exhaustif + typage + build**
+- [ ] **Step 7 : Audit exhaustif (deux passes) + typage + build**
 
-Run : `rg -n "Douceur à l'année|climat doux et agréable|étés sans excès|douceur d'ensemble|hivers tempérés autant|WINTER_MILD"`
-Expected : plus AUCUN résultat de code présentant douceur comme annuelle (hors specs/handoff/docs historiques).
+Passe 1 (formulations annuelles) : `rg -n "Douceur à l'année|climat doux et agréable|étés sans excès|douceur d'ensemble|hivers tempérés autant|WINTER_MILD"` → plus AUCUN résultat de CODE (hors specs/handoff/docs historiques).
+
+Passe 2 (toute occurrence de la clé/concept, pour ne rien rater) : `rg -n "douceur_climat|Douceur|climat doux|hiver" src docs scripts` → examiner chaque hit : wizard, prompts extraction/synthèse, exemples de projets/seeds, SEO/métadonnées, fixtures/snapshots, analytics affichant un nom de critère. **NB vérifié : le projet n'a PAS d'i18n (aucune traduction EN/ES à migrer).**
 
 Run : `npx tsc --noEmit` → 0 ; `npm run build` → exit 0.
 
-- [ ] **Step 8 : Commit**
+- [ ] **Step 8 : Sonde du parser (le prompt d'extraction change VRAIMENT ; le texte seul ne prouve rien)**
+
+Le parser n'a ni version ni cache (vérifié) : le changement prend effet direct. Mais modifier l'instruction ne
+prouve pas que le modèle l'applique. Sonde manuelle (API) — écrire/étendre un petit script qui envoie ces
+formulations à la logique de parse et vérifie le mapping (contrôle VISUEL) :
+
+| Formulation | Attendu |
+|---|---|
+| « Je veux des hivers doux » | `douceur_climat` (sans `faible_chaleur`) |
+| « Je veux éviter les étés très chauds » | `faible_chaleur` (sans douceur) |
+| « Je veux un climat doux et agréable toute l'année » | `douceur_climat` **+** `faible_chaleur` |
+| « Je supporte la chaleur mais pas le froid » | `douceur_climat`, PAS `faible_chaleur` |
+| « Je veux du soleil » | `ensoleillement_recherche`, PAS de douceur automatique |
+
+Vérifier aussi les poids et l'absence d'association indue avec `ensoleillement_recherche`. **Bloquant** : le cas
+« climat doux toute l'année → deux critères » doit passer (c'est le cœur de la migration parser).
+
+- [ ] **Step 9 : Commit**
 
 ```bash
 git add src/lib/comparateur-vie.ts src/lib/comparateur-labels.ts src/app/api/comparateur-vie/synthesize/route.ts src/app/api/comparateur-vie/parse/route.ts
@@ -354,10 +408,12 @@ console.log("\n10 plus gros mouvements :"); for(const r of movers) console.log(`
 // A. label par seuil (gate §6.1)
 console.log("\nlabel « doux » par seuil (part des communes) :");
 for(const t of [65,70,75,80,85]) console.log(`  seuil ${t} : ${(100*rows.filter((r:any)=>r.neo>=t).length/rows.length).toFixed(1)} %`);
-// A. communes emblématiques
-const embl=["Nice","Bastia","Brest","Chamonix-Mont-Blanc","Strasbourg","Ajaccio","La Rochelle"];
+// Défensif : afficher les valeurs region réelles (noms complets confirmés : "Corse", "Occitanie"…).
+console.log("\nvaleurs region présentes :", [...new Set(rows.map((r:any)=>r.region))].sort());
+// A. communes emblématiques par INSEE (les noms varient/accentuent ; l'INSEE est stable)
+const EMBL: Record<string,string> = { Nice:"06088", Ajaccio:"2A004", Bastia:"2B033", Brest:"29019", "Chamonix":"74056", Strasbourg:"67482", "La Rochelle":"17300" };
 console.log("\ncommunes emblématiques (old -> new douceur, chaleur pct) :");
-for(const nom of embl){const r=rows.find((x:any)=>x.nom===nom); if(r) console.log(`  ${nom} DJF ${r.djf}°C : douceur ${r.old} -> ${r.neo} · chaleur(NORTX35D pct) ${r.chaleur}`);}
+for(const [label,insee] of Object.entries(EMBL)){const r=rows.find((x:any)=>x.insee===insee); if(r) console.log(`  ${label} DJF ${r.djf}°C : douceur ${r.old} -> ${r.neo} · chaleur(NORTX35D pct) ${r.chaleur}`); else console.log(`  ${label} (${insee}) ABSENT`);}
 // B. lisibilité de l'arbitrage (Méditerranée : douceur HAUTE + chaleur HAUTE, deux signaux séparés)
 console.log("\narbitrage désormais lisible (Méditerranée : hivers doux ET étés exposés) :");
 const med=rows.filter((r:any)=>["Provence-Alpes-Côte d'Azur","Corse","Occitanie"].includes(r.region)&&r.neo>=80&&r.chaleur>=80).slice(0,5);
@@ -375,29 +431,43 @@ Attendu : corrélation positive mais < 1 (la cloche + l'été déformaient), la 
 
 Présenter au porteur le tableau par seuil (65/70/75/80/85) : part de communes, communes emblématiques incluses/exclues, cohérence avec « Hivers doux ». **Attendre qu'il fige UN seuil.** Ne pas continuer sans.
 
-- [ ] **Step 4 : `impact-B` faithful (manuel, endpoint réel) — 3 profils avant/après**
+- [ ] **Step 4 : `impact-B` faithful — baseline vs migration sur le MÊME code/données (revue porteur)**
 
-Contrôle produit sur le VRAI moteur (le script ne reimplémente pas le matcher). Sur la prod actuelle (ancienne définition) ET en local (`npm run dev`, nouvelle définition), lancer les 3 profils via `/api/comparateur-vie/match` et comparer top-10 / top-3 :
-1. `douceur_climat` poids 3 seul ;
-2. `douceur_climat` poids 2 + 2-3 autres priorités ;
-3. **`douceur_climat` poids 3 + `faible_chaleur` poids 3** (le critique : l'arbitrage hivers doux / étés exposés doit apparaître, la Méditerranée ne doit plus être artificiellement favorisée par le double-avantage).
-Consigner les écarts dans le handoff. (Non bloquant si l'endpoint prod n'est pas commodément requêtable ; dans ce cas, documenter au moins le profil 3 en local + l'illustration per-commune du script.)
+**Ne PAS comparer prod ↔ local** (ça mélangerait douceur avec d'autres diffs de code/index/prompts). On fait
+varier UNIQUEMENT la fonction de score, même moteur, même index, mêmes payloads :
 
-- [ ] **Step 5 : Figer le seuil + recâbler `doux`**
+1. Sur la branche, `git stash` (les changements de score sont remisés) OU `git checkout <commit AVANT Task 2>`
+   dans un second worktree → **baseline** (ancienne douceur). `npm run dev`, lancer les 3 profils via
+   `/api/comparateur-vie/match`, sauver top-10/top-3.
+2. Restaurer la migration (`git stash pop` / worktree de la branche) → **migration** (nouvelle douceur).
+   Relancer les MÊMES 3 payloads. Comparer.
 
-Dans `src/lib/climate/winter-mildness.ts`, mettre `identityThreshold` au seuil validé.
-Dans `src/lib/comparateur-vie.ts` (~1004), remplacer `const doux = (subScore("douceur_climat", c) ?? 0) >= 65;` par :
+Profils : (1) `douceur_climat` poids 3 seul ; (2) poids 2 + 2-3 autres priorités ; (3) **`douceur_climat`
+poids 3 + `faible_chaleur` poids 3 — BLOQUANT** : l'arbitrage hivers doux / étés exposés doit apparaître, la
+Méditerranée ne doit plus être artificiellement favorisée par le double-avantage. Consigner les écarts
+(top-10 stable ?, entrées/sorties du top-3, amplitude) dans le handoff. Les profils 1-2 sont documentés ;
+le profil 3 est **la preuve produit du lot**, non facultatif.
+
+- [ ] **Step 5 : AJOUTER le seuil validé + recâbler `doux` (sans `?? 0`)**
+
+Dans `src/lib/climate/winter-mildness.ts`, **ajouter** le champ à la convention (il n'existait pas avant la
+gate) : `identityThreshold: <SEUIL VALIDÉ>,`.
+Dans `src/lib/comparateur-vie.ts` (~1004), remplacer `const doux = (subScore("douceur_climat", c) ?? 0) >= 65;`
+par une condition **explicite** (pas de repli `?? 0`, qui est le patron que les chantiers ont supprimé — une
+donnée absente ne doit pas devenir un score 0) :
 
 ```ts
-const doux = (subScore("douceur_climat", c) ?? 0) >= WINTER_MILDNESS_CONVENTION.identityThreshold;
+const douceurScore = subScore("douceur_climat", c);
+const doux = douceurScore != null && douceurScore >= WINTER_MILDNESS_CONVENTION.identityThreshold;
 ```
 
 (importer `WINTER_MILDNESS_CONVENTION` en haut de `comparateur-vie.ts`.)
-Dans `src/lib/climate/winter-mildness.test.ts`, ajouter un test qui fige la valeur retenue :
+Dans `src/lib/climate/winter-mildness.test.ts`, ajouter un test qui fige la valeur retenue (remplacer par le
+seuil validé à la gate) :
 
 ```ts
 test("identityThreshold figé après la gate d'impact", () => {
-  assert.equal(WINTER_MILDNESS_CONVENTION.identityThreshold, /* SEUIL VALIDÉ */);
+  assert.equal(WINTER_MILDNESS_CONVENTION.identityThreshold, /* SEUIL VALIDÉ à la Step 3 */);
 });
 ```
 
@@ -423,9 +493,25 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 - Modify: `scripts/populate-mismatch-rank.mts` (généraliser la preuve percentile↔rang aux clés percentile)
 - Modify (données) : `data/comparateur-index.json.gz`
 
-- [ ] **Step 1 : Généraliser la preuve percentile↔rang**
+- [ ] **Step 1 : Généraliser la preuve percentile↔rang, AVEC des seuils d'échec durs (revue porteur)**
 
-Dans `scripts/populate-mismatch-rank.mts`, la preuve était spécifique à `ensoleillement_recherche` (`sunErrMax`). La généraliser aux clés dont le `mismatchRawScore` est déjà un percentile 0-100 : remplacer la condition `key === "ensoleillement_recherche"` par `["ensoleillement_recherche", "douceur_climat"].includes(key)` (mêmes calcul `|rankMid - v/100|` et affichage). Le diff sémantique (12 bandes existantes inchangées) est déjà en place ; il vérifiera que seule `douceur_climat` s'ajoute.
+Dans `scripts/populate-mismatch-rank.mts`, généraliser la preuve `|rankMid - v/100|` aux clés dont le
+`mismatchRawScore` est déjà un percentile 0-100 : `["ensoleillement_recherche", "douceur_climat"].includes(key)`.
+« Faible » n'est pas testable → transformer en **gate qui REFUSE** (comme le reste du script). Pour ces clés,
+calculer `errMax`, `errP95`, la plus grosse masse d'ex æquo, et **refuser** au-delà de bornes documentées :
+
+```ts
+if (["ensoleillement_recherche","douceur_climat"].includes(key)) {
+  if (N !== communes.length) die(`${key}: validCount ${N} != ${communes.length}`);
+  if (errMax > 0.02) die(`${key}: |rankMid - pct/100| max ${errMax.toFixed(4)} > 0.02 (rang ≠ percentile source)`);
+  // (0.02 calibré sur la quantification 0-100 : ex æquo ~1,3 % => erreur bornée ~0,0065 ; marge x3.)
+}
+report.push(`${key.padEnd(26)} … · errMax ${(errMax*100).toFixed(2)} pt · errP95 ${(errP95*100).toFixed(2)} pt · ex æquo max ${(tieMax*100).toFixed(1)} %`);
+```
+
+Le seuil `0.02` est un point de départ : si le run réel le dépasse, INVESTIGUER (pas relâcher aveuglément). Le
+diff sémantique (12 bandes existantes inchangées) est déjà en place ; il vérifie que seule `douceur_climat`
+s'ajoute. Ne PAS figer « ~1,3 % » comme attendu avant la mesure : le rapport l'affiche, le run le confirme.
 
 - [ ] **Step 2 : Enrichir + vérifier**
 
@@ -456,9 +542,22 @@ Run : `node --test src/lib/*.test.ts src/lib/decision/*.test.ts src/lib/climate/
 Run : `node --test scripts/lib/*.test.mjs scripts/*.test.mjs` → 22/22.
 Run : `npx tsc --noEmit` → 0 ; `npm run build` → exit 0.
 
-- [ ] **Step 2 : Preview Vercel (la taille de fonction est un vrai risque, cf. lot 4a)**
+- [ ] **Step 2 : Preview Vercel — BLOQUANT (la taille de fonction est un vrai risque, cf. lot 4a)**
 
-Pousser la branche et déclencher un **Preview** Vercel (ou `vercel` CLI). Vérifier : déploiement réussi, la fonction `rapport` déployée (Large Functions actives via `vercel.json`), pas d'inclusion du JSON clair. Noter dans le handoff : gzip index avant/après, taille fonction `/rapport` avant/après (si visible via `VERCEL_ANALYZE_BUILD_OUTPUT=1`). **Bloquant** : ne pas merger tant que le Preview n'est pas vert.
+Pousser la branche → **Preview** Vercel automatique. Le mécanisme Large Functions est porté par
+`vercel.json` (`build.env: VERCEL_SUPPORT_LARGE_FUNCTIONS=1`, déjà committé au lot précédent) — vérifier qu'il
+est présent sur la branche, pas se fier à une variable de dashboard. Checklist concrète, tout doit être vrai :
+
+```
+[ ] Preview déployé (état Ready)
+[ ] fonction /rapport effectivement créée (pas d'erreur de taille au « Deploying outputs »)
+[ ] JSON clair (comparateur-index.json, 86 Mo) ABSENT du bundle (gitignoré → jamais tracé)
+[ ] gzip présent une seule fois dans la fonction
+[ ] gzip index avant/après consigné (delta douceur ~+1 Mo attendu)
+[ ] taille fonction /rapport avant/après (via VERCEL_ANALYZE_BUILD_OUTPUT=1 si besoin)
+```
+
+**Ne pas merger tant que le Preview n'est pas vert.**
 
 - [ ] **Step 3 : Handoff**
 
