@@ -9,6 +9,12 @@ import { PRODUCT_CONVENTIONS_VERSION, type EvaluationContext } from "../hard-con
 import { hydrateHardConstraints } from "../hard-constraints-hydrate.ts";
 import type { PlaceDirectory } from "../hard-constraints-resolve.ts";
 
+// Les sections portent désormais des CARTES (faits simples ou compositions) : les e2e lisent les faits.
+function sectionFacts(s?: { cards?: import("./decision-fact.ts").DossierCard[] }) {
+  return (s?.cards ?? []).flatMap((c) => (c.kind === "fact" ? [c.fact] : []));
+}
+
+
 // BOUT EN BOUT : IndexCommune -> mapCommuneToModuleFacts -> runRules -> assembleDossier. On prouve que la
 // catégorie de taille traverse la chaîne et ressort en carte dans « mismatches ».
 const DIR: PlaceDirectory = { byName: () => null, plmByName: () => null };
@@ -33,7 +39,7 @@ function dossierFor(e: IndexCommune, p: UserProject, tailleVille: number | null,
 test("E2E eviter_grandes_villes, métropole UU, poids 3 -> carte categorical_state, arbitrage", () => {
   const d = dossierFor(entry(), project([{ key: "eviter_grandes_villes", weight: 3 }]), 1_050_000, "urban_unit");
   const sec = d.sections.find((s) => s.key === "mismatches");
-  const taille = (sec?.facts ?? []).find((f) => (f as { basis?: { kind: string } }).basis?.kind === "categorical_state");
+  const taille = sectionFacts(sec).find((f) => (f as { basis?: { kind: string } }).basis?.kind === "categorical_state");
   assert.ok(taille, "une carte de taille doit être présente");
   assert.match(taille!.statement, /appartient à une métropole/);
   assert.equal(d.criteria.orientation, "arbitration");
@@ -42,7 +48,7 @@ test("E2E eviter_grandes_villes, métropole UU, poids 3 -> carte categorical_sta
 test("E2E eviter_grandes_villes, village -> satisfied favorable, aucune carte", () => {
   const d = dossierFor(entry(), project([{ key: "eviter_grandes_villes", weight: 3 }]), 1_200, "commune");
   const sec = d.sections.find((s) => s.key === "mismatches");
-  assert.equal((sec?.facts ?? []).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "categorical_state").length, 0);
+  assert.equal(sectionFacts(sec).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "categorical_state").length, 0);
   const crit = d.criteria.registry.find((c) => c.criterionKey === "eviter_grandes_villes");
   assert.equal(crit?.coverage, "examined");
   assert.equal(crit?.outcome, "favorable");
@@ -52,7 +58,7 @@ test("E2E eviter_grandes_villes, village -> satisfied favorable, aucune carte", 
 test("E2E eviter_isolement, village source commune -> carte SANS 'agglomération', jamais 'isolée'", () => {
   const d = dossierFor(entry({ nom: "Petiville" }), project([{ key: "eviter_isolement", weight: 2 }]), 900, "commune");
   const sec = d.sections.find((s) => s.key === "mismatches");
-  const taille = (sec?.facts ?? []).find((f) => (f as { basis?: { kind: string } }).basis?.kind === "categorical_state");
+  const taille = sectionFacts(sec).find((f) => (f as { basis?: { kind: string } }).basis?.kind === "categorical_state");
   assert.ok(taille, "village -> carte isolement");
   assert.doesNotMatch(taille!.statement, /agglomération/);
   assert.match(taille!.statement, /population communale/);
@@ -62,7 +68,7 @@ test("E2E eviter_isolement, village source commune -> carte SANS 'agglomération
 test("E2E anomalie : taille présente, source null -> uncertain (aucune carte, non examiné)", () => {
   const d = dossierFor(entry(), project([{ key: "eviter_grandes_villes", weight: 3 }]), 1_050_000, null);
   const sec = d.sections.find((s) => s.key === "mismatches");
-  assert.equal((sec?.facts ?? []).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "categorical_state").length, 0);
+  assert.equal(sectionFacts(sec).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "categorical_state").length, 0);
   const crit = d.criteria.registry.find((c) => c.criterionKey === "eviter_grandes_villes");
   assert.notEqual(crit?.coverage, "examined");
 });

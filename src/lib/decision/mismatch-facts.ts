@@ -24,7 +24,7 @@ export type RelativeCriterionFact = {
 
 export type PositionVerdict = "mismatch" | "satisfied" | "neutral" | "uncertain";
 
-function bandValide(b: RankBand | null): b is RankBand {
+export function bandValide(b: RankBand | null): b is RankBand {
   return (
     b != null &&
     Number.isFinite(b.low) && Number.isFinite(b.high) &&

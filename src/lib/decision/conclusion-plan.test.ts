@@ -19,6 +19,7 @@ function baseInput(over: Partial<ConclusionPlanInput> = {}): ConclusionPlanInput
     conclusionState: "no_incompatibility_established",
     posture: "recherche",
     shownFacts: [],
+    shownCompositions: [],
     uncovered: [],
     uncoveredPriorities: [],
     establishedIncompatibility: null,
@@ -414,4 +415,77 @@ test("verdict neutral : ni « bien correspondre » ni « impossible de conclure 
   const v = buildConclusionPlan(baseInput({ orientation: "neutral", mismatchTotal: 0, mismatchShown: 0 })).blocks.find((b) => b.key === "verdict")!;
   assert.doesNotMatch(v.fallbackText, /bien correspond|impossible/i);
   assert.match(v.fallbackText, /ni favorablement ni défavorablement|aucun écart notable/i);
+});
+
+// ── Compositions dans le plan (registre compositions_found + lead tradeoff) ──────────────────────
+
+import { buildConclusionHash } from "./conclusion-hash.ts";
+import type { FactComposition } from "./fact-composition.ts";
+
+function tradeoff(tier: MaterialityTier = "structuring"): FactComposition {
+  return {
+    id: "06004:composition-climat-saisons", kind: "tradeoff", patternId: "seasonal_climate_tradeoff",
+    title: "Des hivers doux, avec une exposition estivale à arbitrer",
+    summary: "Les hivers d'Antibes comptent parmi les plus doux du pays, et l'exposition aux fortes chaleurs estivales y appelle un arbitrage.",
+    favorableSide: { label: "Ce qui correspond", statement: "doux", evidence: [], ruleIds: ["r1"], factIds: [] },
+    unfavorableSide: { label: "Ce qui appelle un arbitrage", statement: "chaud", evidence: [], ruleIds: ["r2"], factIds: ["f-ch"] },
+    absorbedFactIds: ["f-ch"], referencedRuleIds: ["r1", "r2"], materialityTier: tier, displaySection: "compromises",
+  };
+}
+function shared(tier: MaterialityTier = "structuring"): FactComposition {
+  return {
+    id: "01001:composition-taille-consequences", kind: "shared_evidence", patternId: "territory-size-multiple-consequences",
+    title: "Une même petite taille touche plusieurs dimensions de votre projet",
+    summary: "La catégorie de taille de Ceyzériat répond moins bien à deux de vos priorités, pour la même raison.",
+    sharedEvidence: [], consequences: [
+      { projectKey: "prefere_grande_ville" as never, statement: "a", materialityTier: "structuring", factId: "f-a" },
+      { projectKey: "eviter_isolement" as never, statement: "b", materialityTier: "secondary", factId: "f-b" },
+    ],
+    absorbedFactIds: ["f-a", "f-b"], referencedRuleIds: ["r3"], materialityTier: tier, displaySection: "mismatches",
+  };
+}
+
+test("lead : un tradeoff structurant seul devient le fait de tête, sans bloc compositions_found", () => {
+  const plan = buildConclusionPlan(baseInput({
+    shownFacts: [verification("f9", "secondary")],
+    shownCompositions: [tradeoff("structuring")],
+  }));
+  assert.equal(plan.lead.kind, "single");
+  if (plan.lead.kind !== "single") return;
+  assert.equal(plan.lead.factId, "06004:composition-climat-saisons");
+  assert.equal(plan.lead.topic, "Des hivers doux, avec une exposition estivale à arbitrer");
+  assert.equal(plan.blocks.some((b) => b.key === "compositions_found"), false); // déjà narré par le lead
+});
+
+test("lead : un shared_evidence structurant ne mène JAMAIS la conclusion, il a son registre", () => {
+  const plan = buildConclusionPlan(baseInput({
+    shownCompositions: [shared("structuring")],
+  }));
+  assert.equal(plan.lead.kind, "none");
+  const bloc = plan.blocks.find((b) => b.key === "compositions_found");
+  assert.ok(bloc);
+  assert.match(bloc!.fallbackText, /deux de vos priorités/);
+  assert.deepEqual(bloc!.sourceIds, ["01001:composition-taille-consequences", "f-a", "f-b"]);
+  // Placement : après unexamined_hard_constraints, avant reserves_found.
+  const plan2 = buildConclusionPlan(baseInput({
+    shownFacts: [verification("f1", "structuring")],
+    shownCompositions: [shared("structuring")],
+    uncovered: [MER],
+  }));
+  assert.deepEqual(plan2.blocks.map((b) => b.key), [
+    "verdict", "unexamined_hard_constraints", "compositions_found", "reserves_found",
+  ]);
+});
+
+test("hash : deux plans identiques sauf shownCompositions -> hashes différents", () => {
+  const sans = buildConclusionPlan(baseInput({ shownFacts: [verification("f1", "structuring")] }));
+  const avec = buildConclusionPlan(baseInput({ shownFacts: [verification("f1", "structuring")], shownCompositions: [shared()] }));
+  assert.notEqual(buildConclusionHash(sans), buildConclusionHash(avec));
+});
+
+test("shownCompositions vide -> plan strictement identique à l'existant (non-régression)", () => {
+  const plan = buildConclusionPlan(baseInput({ shownFacts: [verification("f1", "structuring")], uncovered: [MER], uncoveredPriorities: [AIR] }));
+  assert.deepEqual(plan.blocks.map((b) => b.key), [
+    "verdict", "unexamined_hard_constraints", "reserves_found", "uncovered_priorities",
+  ]);
 });

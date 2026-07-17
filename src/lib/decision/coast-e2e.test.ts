@@ -9,6 +9,12 @@ import { PRODUCT_CONVENTIONS_VERSION, type EvaluationContext } from "../hard-con
 import { hydrateHardConstraints } from "../hard-constraints-hydrate.ts";
 import type { PlaceDirectory } from "../hard-constraints-resolve.ts";
 
+// Les sections portent désormais des CARTES (faits simples ou compositions) : les e2e lisent les faits.
+function sectionFacts(s?: { cards?: import("./decision-fact.ts").DossierCard[] }) {
+  return (s?.cards ?? []).flatMap((c) => (c.kind === "fact" ? [c.fact] : []));
+}
+
+
 // BOUT EN BOUT : IndexCommune -> mapCommuneToModuleFacts -> runRules -> assembleDossier. On prouve que la
 // mesure de distance à la mer traverse toute la chaîne et ressort en carte dans la section « mismatches ».
 const DIR: PlaceDirectory = { byName: () => null, plmByName: () => null };
@@ -34,7 +40,7 @@ test("E2E mer loin (>=100, poids 3) -> carte absolute_measure dans « mismatches
   const d = dossierFor(entry({ distance_cote_km: 240 }), project([{ key: "proximite_mer", weight: 3 }]));
   const sec = d.sections.find((s) => s.key === "mismatches");
   assert.ok(sec, "la section « mismatches » doit exister");
-  const mer = sec!.facts.find((f) => f.role === "mismatch" && (f as { basis: { kind: string } }).basis.kind === "absolute_measure");
+  const mer = sectionFacts(sec).find((f) => f.role === "mismatch" && (f as { basis: { kind: string } }).basis.kind === "absolute_measure");
   assert.ok(mer, "une carte de distance à la mer doit être présente");
   assert.match(mer!.statement, /distance au littoral est estimée à environ 240 km/);
   assert.equal(d.criteria.orientation, "arbitration");
@@ -43,7 +49,7 @@ test("E2E mer loin (>=100, poids 3) -> carte absolute_measure dans « mismatches
 test("E2E mer proche (<=15) -> satisfied : couverture examinée, outcome favorable, orientation favorable, aucune carte", () => {
   const d = dossierFor(entry({ distance_cote_km: 4 }), project([{ key: "proximite_mer", weight: 3 }]));
   const sec = d.sections.find((s) => s.key === "mismatches");
-  const mer = (sec?.facts ?? []).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "absolute_measure");
+  const mer = sectionFacts(sec).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "absolute_measure");
   assert.equal(mer.length, 0, "aucune carte quand la commune est proche du littoral");
   const crit = d.criteria.registry.find((c) => c.criterionKey === "proximite_mer");
   assert.equal(crit?.coverage, "examined");
@@ -54,7 +60,7 @@ test("E2E mer proche (<=15) -> satisfied : couverture examinée, outcome favorab
 test("E2E mer intermédiaire (15 < d < 100) -> neutral : couverture examinée, orientation neutral, aucune carte", () => {
   const d = dossierFor(entry({ distance_cote_km: 50 }), project([{ key: "proximite_mer", weight: 3 }]));
   const sec = d.sections.find((s) => s.key === "mismatches");
-  const mer = (sec?.facts ?? []).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "absolute_measure");
+  const mer = sectionFacts(sec).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "absolute_measure");
   assert.equal(mer.length, 0, "aucune carte en zone intermédiaire");
   const crit = d.criteria.registry.find((c) => c.criterionKey === "proximite_mer");
   assert.equal(crit?.coverage, "examined");
@@ -64,7 +70,7 @@ test("E2E mer intermédiaire (15 < d < 100) -> neutral : couverture examinée, o
 test("E2E poids 1 : loin -> couverture acquise, aucune carte, pas d'arbitrage", () => {
   const d = dossierFor(entry({ distance_cote_km: 240 }), project([{ key: "proximite_mer", weight: 1 }]));
   const sec = d.sections.find((s) => s.key === "mismatches");
-  const mer = (sec?.facts ?? []).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "absolute_measure");
+  const mer = sectionFacts(sec).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "absolute_measure");
   assert.equal(mer.length, 0, "poids 1 : silencieux");
   assert.notEqual(d.criteria.orientation, "arbitration");
   const crit = d.criteria.registry.find((c) => c.criterionKey === "proximite_mer");

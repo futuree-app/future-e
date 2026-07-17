@@ -83,7 +83,7 @@ test("caps : au plus 2 incompatibilités affichées", () => {
   const many = [incompat({ id: "a" }), incompat({ id: "b" }), incompat({ id: "c" })];
   const d = assembleDossier(run(many, ["nearSea"]), project(WITH_HC), "commune", "Toulouse");
   const sec = d.sections.find((s) => s.key === "incompatibilities");
-  assert.equal(sec!.facts.length, 2);
+  assert.equal(sec!.cards.length, 2);
 });
 
 test("titre vérifications adapté à la posture habitant", () => {
@@ -125,7 +125,7 @@ test("les réserves annoncées sont les faits AFFICHÉS, jamais les faits émis 
   // pouvoir compter les cartes et retomber sur le chiffre, y compris dans le verdict.
   const facts = Array.from({ length: 5 }, (_, i) => verif(`v${i}`));
   const d = assembleDossier(run(facts, ["nearSea"]), project(WITH_HC), "commune", "Toulouse");
-  assert.equal(d.sections.find((s) => s.key === "verifications")!.facts.length, 4);
+  assert.equal(d.sections.find((s) => s.key === "verifications")!.cards.length, 4);
   assert.equal(d.narrativePlan.reservesCount, 4);
 });
 
@@ -134,4 +134,101 @@ test("le dossier porte le plan narratif, et sa conclusion en est la concaténati
   assert.equal(d.conclusion, d.narrativePlan.blocks.map((b) => b.fallbackText).join(" "));
   assert.equal(d.narrativePlan.blocks[0]!.key, "verdict");
   assert.equal(d.narrativePlan.blocks[0]!.generable, false); // le verdict n'est jamais généré
+});
+
+// ── Compositions (couche de présentation) ─────────────────────────────────────────────────────────
+
+import type { FactComposition } from "./fact-composition.ts";
+
+function mism(id: string, tier: "secondary" | "structuring" = "structuring"): DecisionFact {
+  return {
+    id, ruleId: "r", sourceFactIds: ["s"], module: "territoire", role: "mismatch",
+    materialityTier: tier, topic: "les espaces naturels", statement: "moins bien servi",
+    projectKey: "nature" as never,
+    basis: { kind: "relative_position", rankLow: 0.05, rankHigh: 0.1, universe: "communes_france", distributionVersion: "d" },
+    evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }],
+  } as DecisionFact;
+}
+function sharedComp(id: string, absorbed: string[], tier: "secondary" | "structuring"): FactComposition {
+  return {
+    id, kind: "shared_evidence", patternId: "territory-size-multiple-consequences",
+    title: "Une même petite taille", summary: "Deux priorités touchées pour la même raison.",
+    sharedEvidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune", observedValue: "village" }],
+    consequences: absorbed.map((fid) => ({ projectKey: "nature" as never, statement: "conséquence", materialityTier: tier, factId: fid })),
+    absorbedFactIds: absorbed, referencedRuleIds: ["r"], materialityTier: tier, displaySection: "mismatches",
+  };
+}
+function tradeoffComp(id: string, absorbed: string[], tier: "secondary" | "structuring"): FactComposition {
+  return {
+    id, kind: "tradeoff", patternId: "seasonal_climate_tradeoff",
+    title: "Des hivers doux, avec une exposition estivale à arbitrer",
+    summary: "Hivers doux, exposition estivale à arbitrer.",
+    favorableSide: { label: "Ce qui correspond", statement: "doux", evidence: [{ factId: "b", module: "territoire", label: "T", grain: "commune", observedValue: "parmi les 10 %" }], ruleIds: ["r"], factIds: [] },
+    unfavorableSide: { label: "Ce qui appelle un arbitrage", statement: "chaud", evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }], ruleIds: ["r"], factIds: absorbed },
+    absorbedFactIds: absorbed, referencedRuleIds: ["r"], materialityTier: tier, displaySection: "compromises",
+  };
+}
+// Un run où le ruleId "r" existe (le validateur vérifie les referencedRuleIds).
+function runR(facts: DecisionFact[]): RunResult {
+  return { facts, evaluations: [ev("r", ["nature"], "mismatch", facts)] };
+}
+
+test("compositions : les faits absorbés quittent les sections et vivent dans absorbedFacts", () => {
+  const v = verif("v1");
+  const d = assembleDossier(runR([v]), project(WITH_HC), "commune", "Toulouse", [tradeoffComp("c1", ["v1"], "structuring")]);
+  const allCards = d.sections.flatMap((s) => s.cards);
+  assert.equal(allCards.some((c) => c.kind === "fact" && c.fact.id === "v1"), false);
+  assert.deepEqual(d.absorbedFacts.map((f) => f.id), ["v1"]);
+  const compromises = d.sections.find((s) => s.key === "compromises");
+  assert.equal(compromises!.cards[0]!.kind, "composition");
+});
+
+test("liste unique triée puis cappée : une composition secondary ne passe jamais devant un fait structurant", () => {
+  const facts = [mism("m1"), mism("m2"), mism("m3"), mism("abs", "secondary")];
+  const d = assembleDossier(runR(facts), project(WITH_HC), "commune", "Toulouse", [sharedComp("c1", ["abs"], "secondary")]);
+  const sec = d.sections.find((s) => s.key === "mismatches");
+  assert.equal(sec!.cards.length, 3); // cap 3
+  assert.ok(sec!.cards.every((c) => c.kind === "fact")); // les 3 structurants passent, la composition secondary non
+});
+
+test("à tier égal, la composition passe d'abord", () => {
+  const facts = [mism("m1"), mism("abs")];
+  const d = assembleDossier(runR(facts), project(WITH_HC), "commune", "Toulouse", [sharedComp("c1", ["abs"], "structuring")]);
+  const sec = d.sections.find((s) => s.key === "mismatches");
+  assert.equal(sec!.cards.length, 2);
+  assert.equal(sec!.cards[0]!.kind, "composition");
+});
+
+test("le cap s'applique aussi aux compositions", () => {
+  const facts = [mism("a1"), mism("a2"), mism("a3"), mism("a4")];
+  const comps = ["a1", "a2", "a3", "a4"].map((fid, i) => sharedComp(`c${i}`, [fid], "structuring"));
+  const d = assembleDossier(runR(facts), project(WITH_HC), "commune", "Toulouse", comps);
+  const sec = d.sections.find((s) => s.key === "mismatches");
+  assert.equal(sec!.cards.length, 3);
+  assert.equal(d.presentation.compositionShown, 3);
+});
+
+test("presentation : comptes exacts sur l'affiché", () => {
+  const v = verif("v1");
+  const d = assembleDossier(runR([v, mism("m1")]), project(WITH_HC), "commune", "Toulouse", [tradeoffComp("c1", ["v1"], "structuring")]);
+  assert.equal(d.presentation.compositionShown, 1);
+  assert.equal(d.presentation.elementaryFactShown, 1); // m1
+  assert.equal(d.presentation.absorbedFactTotal, 1);
+});
+
+test("invariant 3 : couverture et orientation identiques avec et sans compositions", () => {
+  const v = verif("v1");
+  const facts = [v, mism("m1")];
+  const sans = assembleDossier(runR(facts), project(WITH_HC), "commune", "Toulouse");
+  const avec = assembleDossier(runR(facts), project(WITH_HC), "commune", "Toulouse", [tradeoffComp("c1", ["v1"], "structuring")]);
+  assert.equal(avec.criteria.coverage, sans.criteria.coverage);
+  assert.equal(avec.criteria.orientation, sans.criteria.orientation);
+});
+
+test("conclusionBasis : absorbés dans factIds, preuves et ruleIds des compositions inclus", () => {
+  const v = verif("v1");
+  const d = assembleDossier(runR([v]), project(WITH_HC), "commune", "Toulouse", [tradeoffComp("c1", ["v1"], "structuring")]);
+  assert.ok(d.conclusionBasis.factIds.includes("v1"));
+  assert.ok(d.conclusionBasis.ruleIds.includes("r"));
+  assert.ok(d.conclusionBasis.evidence.some((e) => e.observedValue === "parmi les 10 %"));
 });

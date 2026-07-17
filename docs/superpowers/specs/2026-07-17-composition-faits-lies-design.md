@@ -196,6 +196,10 @@ reste attachée à SA conséquence, jamais généralisée à la carte.
   `{ elementaryFactShown, compositionShown, absorbedFactTotal }`.
 - **Couverture et orientation intouchées** : `criteria-registry` lit les évaluations, la composition n'y touche
   pas. Invariant testé : même run, avec et sans composition, mêmes `coverage`/`orientation`.
+- **Écart assumé à l'implémentation** (revue plan v2, reporté ici au merge) : `DossierSection` ne porte plus
+  `facts` + `compositions` séparés mais UNE liste `cards: DossierCard[]` (fait simple ou composition), triée
+  par tier puis cappée ; à tier égal la composition passe d'abord. C'est la manière correcte de faire « compte
+  pour une carte » : une composition secondary ne déplace jamais un fait structurant.
 
 ## 7. Plan narratif (`conclusion-plan.ts`, modifié)
 
