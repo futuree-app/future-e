@@ -115,10 +115,13 @@ test("allowedNumbers : le compte VRAI du registre, en chiffres ET en lettres", (
   assert.deepEqual(plan.blocks.find((b) => b.key === "uncovered_priorities")!.allowedNumbers, ["2", "deux"]);
 });
 
-test("lead tied : la phrase compte les faits de TÊTE, jamais toutes les réserves", () => {
+test("lead tied : la TÊTE reste comptée à part, et le total n'apparaît que porté par la relation", () => {
   // `tied` dit que plusieurs faits partagent le rang MAXIMAL, pas que toutes les réserves pèsent
-  // pareil : ici deux dominent et deux sont secondaires. Annoncer « 4 points » serait faux.
+  // pareil : ici deux dominent et deux sont secondaires. « 4 points d'un poids comparable » serait
+  // faux ; « Parmi ces quatre points, deux pèsent le plus » est vrai, et c'est la seule forme sous
+  // laquelle le total a le droit d'apparaître ici.
   const plan = buildConclusionPlan(baseInput({
+    reservesShown: 4,
     shownFacts: [
       verification("f1", "decision_critical"), verification("f2", "decision_critical"),
       verification("f3", "secondary"), verification("f4", "secondary"),
@@ -126,8 +129,31 @@ test("lead tied : la phrase compte les faits de TÊTE, jamais toutes les réserv
   }));
   const bloc = plan.blocks.find((b) => b.key === "reserves_found")!;
   assert.equal(plan.reservesCount, 4);
-  assert.deepEqual(bloc.allowedNumbers, ["2", "deux"]);
-  assert.equal(bloc.fallbackText.includes("4"), false);
+  assert.match(bloc.fallbackText, /^Parmi ces quatre points, deux pèsent le plus : /);
+  assert.deepEqual(bloc.allowedNumbers, ["2", "deux", "4", "quatre"]);
+});
+
+test("lead tied : quand le verdict annonce plus de points, la phrase porte la relation « N parmi M »", () => {
+  // Le verdict dit « 4 points restent à vérifier », la strate en nommait 3 : le lecteur lisait une
+  // contradiction (les 3 sont un sous-ensemble, rien ne le disait). La phrase porte la relation.
+  const plan = buildConclusionPlan(baseInput({
+    reservesShown: 4,
+    shownFacts: [
+      verification("f1", "structuring", "s1", "l'exposition de Toulouse à l'inondation"),
+      verification("f2", "structuring", "s2", "le retrait-gonflement des argiles"),
+      verification("f3", "structuring", "s3", "un plan de prévention des risques"),
+      verification("f4", "secondary"),
+    ],
+  }));
+  const bloc = plan.blocks.find((b) => b.key === "reserves_found")!;
+  assert.match(bloc.fallbackText, /^Parmi ces quatre points, trois pèsent le plus : /);
+  assert.deepEqual(bloc.allowedNumbers, ["3", "trois", "4", "quatre"]);
+  // À égalité de comptes (tous au rang max), la phrase actuelle reste : il n'y a pas de relation à porter.
+  const egal = buildConclusionPlan(baseInput({
+    reservesShown: 2,
+    shownFacts: [verification("f1", "structuring", "s1", "sujet un"), verification("f2", "structuring", "s2", "sujet deux")],
+  }));
+  assert.match(egal.blocks.find((b) => b.key === "reserves_found")!.fallbackText, /^Deux points demandent votre attention : /);
 });
 
 test("lead tied : les faits de tête sont NOMMÉS par leur SUJET, et leur constat n'est PAS recopié", () => {

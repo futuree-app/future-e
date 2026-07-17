@@ -405,15 +405,24 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
     // problème, pas celui du lecteur. Lui demande quoi regarder ; « aucun ne prend le dessus » est une
     // absence d'information formulée comme une information. L'égalité se DIT en listant, point.
     // (En `single`, la phrase garde du sens : elle dit par où COMMENCER.)
+    //
+    // QUAND LE VERDICT ANNONCE PLUS DE POINTS QUE LA TÊTE N'EN COMPTE (« 4 points restent à vérifier »
+    // puis « 3 points demandent votre attention »), le lecteur lit une contradiction : les 3 sont un
+    // sous-ensemble des 4, mais rien ne le disait. La phrase porte alors la relation, avec les deux
+    // comptes VRAIS déclarés. À comptes égaux, il n'y a pas de relation à porter : phrase courte.
+    const total = input.reservesShown;
+    const sujets = joinFr(lead.facts.map((f) => f.topic));
     blocks.push({
       key: "reserves_found",
-      fallbackText: `${capitalize(numberForms(n)[1] ?? String(n))} points demandent votre attention : ${joinFr(lead.facts.map((f) => f.topic))}.`,
+      fallbackText: total > n
+        ? `Parmi ces ${numberForms(total)[1] ?? String(total)} points, ${numberForms(n)[1] ?? String(n)} pèsent le plus : ${sujets}.`
+        : `${capitalize(numberForms(n)[1] ?? String(n))} points demandent votre attention : ${sujets}.`,
       sourceIds: lead.facts.map((f) => f.factId),
       // Chaque sujet doit SURVIVRE : c'est le seul endroit du dossier où le lecteur apprend, en une
       // phrase, CE QUI pèse. Un « plusieurs risques naturels » qui les avalerait ramènerait la carte à
       // son défaut d'origine (parler d'elle-même), et aucune autre validation ne le verrait.
       requiredPhrases: lead.facts.map((f) => coreLabel(f.topic)),
-      allowedNumbers: numberForms(n),
+      allowedNumbers: total > n ? [...numberForms(n), ...numberForms(total)] : numberForms(n),
       maxChars: 340,
       generable: true,
     });
