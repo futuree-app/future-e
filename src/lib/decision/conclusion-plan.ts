@@ -14,6 +14,7 @@ import type { DecisionFact, ConclusionState, MaterialityTier, UncoveredConstrain
 import type { FactComposition } from "./fact-composition.ts";
 import type { ProjectPosture } from "../user-project.ts";
 import type { CoverageLevel, Orientation } from "./criteria-registry.ts";
+import { deCommune } from "../typography.ts";
 
 export type BlockKey = "verdict" | "unexamined_hard_constraints" | "compositions_found" | "mismatches_found" | "reserves_found" | "uncovered_priorities";
 
@@ -253,7 +254,7 @@ function verdict(input: ConclusionPlanInput): Verdict {
           }
         : {
             label: "Correspondance à confirmer", tone: "neutral",
-            text: `La correspondance de ${nom} avec votre projet reste à confirmer : ${reste} à examiner.`,
+            text: `La correspondance ${deCommune(nom)} avec votre projet reste à confirmer : ${reste} à examiner.`,
           };
     }
     if (!input.hasFavorable) {

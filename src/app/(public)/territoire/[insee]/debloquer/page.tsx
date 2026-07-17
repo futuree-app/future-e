@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { deCommune } from "@/lib/typography";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
@@ -29,7 +30,7 @@ export async function generateMetadata({
   const { nom } = await searchParams;
   const commune = typeof nom === "string" && nom.trim() ? nom.trim() : "ce territoire";
   return {
-    title: `Débloquer le rapport de ${commune} · futur•e`,
+    title: `Débloquer le rapport ${deCommune(commune)} · futur•e`,
     robots: { index: false, follow: false },
   };
 }
@@ -114,7 +115,7 @@ export default async function TerritoryUnlockPage({
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4" style={reveal(1)}>
           {[
             { n: "01", t: "Comprendre le territoire", d: `Ce que les données permettent de dire sur ${displayName} aujourd'hui, et ce qui peut évoluer dans les prochaines décennies.` },
-            { n: "02", t: "Identifier les points de vigilance", d: `Ce qui joue en faveur de ${displayName}, ce qui demande attention, et ce qui dépend vraiment de votre projet.` },
+            { n: "02", t: "Identifier les points de vigilance", d: `Ce qui joue en faveur ${deCommune(displayName)}, ce qui demande attention, et ce qui dépend vraiment de votre projet.` },
             { n: "03", t: "Poser vos questions", d: "3 questions à AskFuture pour approfondir cette option avec votre situation." },
           ].map((c) => (
             <div key={c.t} className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
@@ -205,7 +206,7 @@ export default async function TerritoryUnlockPage({
                 commune={commune}
                 rank={rank}
                 amount={product.amount}
-                submitLabel={`Débloquer le rapport de ${displayName}`}
+                submitLabel={`Débloquer le rapport ${deCommune(displayName)}`}
               />
             ) : (
               <div className="flex flex-col gap-4">

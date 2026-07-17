@@ -22,6 +22,7 @@ import { ABSENCE_RULES } from "./absence-rules.ts";
 import { COAST_RULES } from "./coast-rules.ts";
 import { AGGLOMERATION_RULES } from "./agglomeration-rules.ts";
 import { AGGLOMERATION_CATEGORIES } from "./agglomeration-facts.ts";
+import { deCommune } from "../typography.ts";
 import { toCommuneAttributes } from "./module-facts-map.ts";
 import {
   trajectoirePhrase, fmtClimat, CLIMAT_HORIZON_LABEL, type ClimatAxe,
@@ -94,7 +95,7 @@ const ruleInondation: DecisionRule = {
     const ev: EvidenceRef = { factId: "inondation.risque", module: "territoire", label: `Territoire · ${f.nom}`, observedValue: `${Math.round(f.inondationRisque)}/100`, grain: "commune", href: territoireHref };
     const fact: VerificationFact = {
       id: `${f.insee}:inondation-exposition`, ruleId: RULE_INOND, sourceFactIds: ["inondation.risque", "inondation.catnat"], module: "territoire",
-      role: "verification", materialityTier: "structuring", topic: `l'exposition de ${f.nom} à l'inondation`,
+      role: "verification", materialityTier: "structuring", topic: `l'exposition ${deCommune(f.nom)} à l'inondation`,
       statement: (habitant
         ? "L'exposition de la commune à l'inondation ressort élevée, à comprendre et surveiller au fil des épisodes."
         : "L'exposition de la commune à l'inondation ressort élevée. Consultez l'état des risques avant de vous engager.") + catnatCtx,

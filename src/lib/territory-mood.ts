@@ -7,6 +7,7 @@
 // remplacée par la ligne des années (TerritoryYearsBand), qui ne dépend pas du mood.
 
 import { deriveCategories } from "@/lib/commune-categories";
+import { deCommune } from "@/lib/typography";
 
 export type TerritoryType =
   | "littoral_atlantique"
@@ -149,7 +150,7 @@ export function deriveTerritoryMood(params: {
 // généré puis mis en cache par commune (cf. approche 2 recommandée).
 export function buildImagePrompt(m: TerritoryMood): string {
   return [
-    `Illustration éditoriale, style carte postale contemporaine / sérigraphie, du territoire de ${m.title}.`,
+    `Illustration éditoriale, style carte postale contemporaine / sérigraphie, du territoire ${deCommune(m.title)}.`,
     `Ambiance ${m.atmosphere}. Palette : ${m.palette.join(", ")}.`,
     `Motifs : ${m.motifs.join(", ")}.`,
     "Ligne d'horizon douce, formes simplifiées en aplats, léger grain, format bandeau horizontal.",

@@ -4,6 +4,7 @@
 // Pur formatage : aucune conclusion logement / santé / mobilité / métier / projets.
 
 import { RECIT_DEMOGRAPHIE, type TerritoryContext, type IndexCommune } from "@/lib/comparateur-vie";
+import { deCommune } from "@/lib/typography";
 
 export type TerritoryIdentity = {
   // Phrase de synthèse descriptive (compose les champs, sans interprétation).
@@ -49,7 +50,7 @@ function roleLabel(ctx: TerritoryContext): string | null {
     }
     case "agglo": {
       const base = ctx.uuLabel
-        ? `Dans l'agglomération de ${ctx.uuLabel}`
+        ? `Dans l'agglomération ${deCommune(ctx.uuLabel)}`
         : "Dans une agglomération";
       return uuPop ? `${base} (${uuPop} habitants)` : base;
     }
@@ -205,7 +206,7 @@ function summaryRole(ctx: TerritoryContext): string {
     case "pole":
       return "concentre les fonctions urbaines de son bassin de vie";
     case "agglo":
-      return ctx.uuLabel ? `s'inscrit dans l'agglomération de ${ctx.uuLabel}` : "s'inscrit dans une agglomération";
+      return ctx.uuLabel ? `s'inscrit dans l'agglomération ${deCommune(ctx.uuLabel)}` : "s'inscrit dans une agglomération";
     case "isolee":
       return "structure la vie locale d'un territoire plus rural";
   }

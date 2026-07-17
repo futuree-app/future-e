@@ -13,6 +13,7 @@ import {
 import { getLittoralIndex, type LittoralSummary } from "@/lib/littoral";
 import { tailleVilleFrom, resolveTailleVille, communeAttributesFrom } from "@/lib/commune-attributes";
 import { winterMildnessScore, WINTER_MILDNESS_CONVENTION } from "@/lib/climate/winter-mildness";
+import { deCommune } from "@/lib/typography";
 import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
 import { hydrateHardConstraints, explorationHints } from "@/lib/hard-constraints-hydrate";
 import { resolveExternalReferences } from "@/lib/hard-constraints-external";
@@ -2597,7 +2598,7 @@ export function anchorReformulationSuffix(anchorLabels: string[], traits: string
   if (anchorLabels.length === 0) return "";
   const villes = listFr(anchorLabels);
   if (traits.length === 0) {
-    return `Vous partez de ${villes}. Voici des communes à explorer dans cet esprit.`;
+    return `Vous partez ${deCommune(villes)}. Voici des communes à explorer dans cet esprit.`;
   }
   const objet = anchorLabels.length > 1 ? "ce que ces villes ont en commun" : `ce qui fait ${anchorLabels[0]}`;
   return `Vous aimez ${villes} pour ${listFr(traits)}. Voici des communes qui portent ${objet}.`;
@@ -2738,7 +2739,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   // Libellés de périmètre ville/taille effectivement appliqués (affichage honnête du périmètre).
   const appliedPlaces: string[] = [];
   for (const e of constraints.excludePlace) {
-    if (e.reference.status === "resolved") appliedPlaces.push(`exclusion de l'agglomération de ${e.label}`);
+    if (e.reference.status === "resolved") appliedPlaces.push(`exclusion de l'agglomération ${deCommune(e.label)}`);
   }
   if (constraints.sizeRelativeTo?.reference.status === "resolved") {
     const s = constraints.sizeRelativeTo;
@@ -2748,7 +2749,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   for (const h of hints) {
     const quoi = h.kind === "near_place_radius" ? constraints.nearPlace?.label ?? "ce lieu" : "la mer";
     appliedPlaces.push(
-      `proximité de ${quoi} : aucune distance précisée, les communes proches remontent en tête, aucune n'est écartée`,
+      `proximité ${deCommune(quoi)} : aucune distance précisée, les communes proches remontent en tête, aucune n'est écartée`,
     );
   }
 

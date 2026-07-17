@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { deCommune } from "@/lib/typography";
 import { useEffect, useState } from "react";
 import type { LogementAge, WizardAnswers } from "./types";
 import type { WizardPreviewData } from "@/app/api/wizard-preview/route";
@@ -268,7 +269,7 @@ function computeSignals(
     signals.push({
       icon: "📊",
       headline: `Pour activer vos signaux locaux, renseignez votre commune dans la liste de l'étape 1.`,
-      stat: `Profil de ${ville} en attente`,
+      stat: `Profil ${deCommune(ville)} en attente`,
       precision: "Données DRIAS, risques officiels et qualité de l'air seront chargés automatiquement.",
       source: "Sources publiques françaises",
     });

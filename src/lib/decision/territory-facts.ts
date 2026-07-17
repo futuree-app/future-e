@@ -22,6 +22,7 @@ import { assembleDossier } from "./decision-assembler.ts";
 import { composeFacts } from "./fact-compositions.ts";
 import type { ModuleFacts, Dossier } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
+import { deCommune } from "../typography.ts";
 
 export function buildModuleFacts(
   entry: IndexCommune,
@@ -81,7 +82,7 @@ export async function buildHardContext(
       ? {
           lat: facts.lat, lon: facts.lon,
           grain: "commune_reference", source: "commune_centroid",
-          label: `le point de référence de ${facts.nom}`,
+          label: `le point de référence ${deCommune(facts.nom)}`,
         }
       : null);
 

@@ -16,6 +16,13 @@ const HIGH_PUNCT = new Set([":", ";", "!", "?", "»"]);
 
 const NBSP = " ";
 
+// « de Antibes » est une faute : élision devant voyelle (« d'Antibes », « d'Orléans »). Les h
+// (Honfleur) et les articles (« Le Havre ») restent en « de », le cas voyelle est le seul tranché
+// sans ambiguïté. Couvre les voyelles accentuées (É, Î…) et la ligature œ (Œting).
+export function deCommune(nom: string): string {
+  return /^[aàâäeéèêëiîïoôöuùûüyœ]/i.test(nom) ? `d'${nom}` : `de ${nom}`;
+}
+
 export function bindOrphans(text: string): string {
   const parts = text.split(" ");
   return parts

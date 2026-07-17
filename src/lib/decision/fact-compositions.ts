@@ -13,6 +13,7 @@ import { mismatchRuleId } from "./mismatch-rules.ts";
 import { RULE_CHALEUR } from "./materiality-rules.ts";
 import { TERRITORY_SIZE_FACT_ID } from "./agglomeration-rules.ts";
 import { WINTER_MILDNESS_CONVENTION } from "../climate/winter-mildness.ts";
+import { deCommune } from "../typography.ts";
 
 const RULE_DOUCEUR = mismatchRuleId("douceur_climat");
 
@@ -37,12 +38,6 @@ export function buildWinterMildnessEvidence(facts: ModuleFacts): EvidenceRef | n
     grain: "commune",
     href: "/rapport/quartier",
   };
-}
-
-// « de Antibes » est une faute : élision devant voyelle (« d'Antibes », « d'Orléans »). Les h et les
-// articles (« Le Havre ») restent en « de », le cas voyelle est le seul tranché sans ambiguïté.
-function deCommune(nom: string): string {
-  return /^[aeéèêiouy]/i.test(nom) ? `d'${nom}` : `de ${nom}`;
 }
 
 function composeSeasonalClimateTradeoff(

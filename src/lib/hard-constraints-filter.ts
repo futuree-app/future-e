@@ -8,6 +8,7 @@
 // (« la gare Matabiau ») laissait la commune éligible, et le comparateur affichait ses résultats comme
 // s'ils respectaient toutes les conditions du lecteur. `complete: false` lui interdit cette phrase.
 import { lieuEnPhrase } from "./hard-constraints.ts";
+import { deCommune } from "./typography.ts";
 import type { HardConstraintAssessment, HardConstraintKey, UnexaminedReason } from "./hard-constraints.ts";
 
 export type HardFilterResult = {
@@ -79,7 +80,7 @@ const UNAPPLIED_LABELS: Record<HardConstraintKey, (detail?: string) => string> =
   excludeSea: () => "l'éloignement de la mer",
   // Le lieu est NOMMÉ comme le lecteur l'a posé : « la proximité de la gare Matabiau », jamais
   // « la proximité de Gare Matabiau, Toulouse » (la forme d'index), ni « la proximité d'un lieu ».
-  nearPlace: (d) => (d ? `la proximité de ${lieuEnPhrase(d)}` : "la proximité d'un lieu"),
+  nearPlace: (d) => (d ? `la proximité ${deCommune(lieuEnPhrase(d))}` : "la proximité d'un lieu"),
   communeSize: () => "la taille de la commune",
   excludePlace: (d) => (d ? `le fait de quitter ${lieuEnPhrase(d)}` : "les villes à quitter"),
   sizeRelativeTo: (d) => (d ? `la taille relative à ${lieuEnPhrase(d)}` : "la taille relative à une ville"),

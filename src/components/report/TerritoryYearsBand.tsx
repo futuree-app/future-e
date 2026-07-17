@@ -19,6 +19,7 @@
 // - La légende situe la commune dans la distribution nationale (médiane, p90).
 
 import { useEffect, useRef } from "react";
+import { deCommune } from "@/lib/typography";
 import type { CatnatBandFamily } from "@/lib/georisques";
 
 const FAMILIES: Record<CatnatBandFamily, { color: string; label: string }> = {
@@ -146,7 +147,7 @@ export function TerritoryYearsBand({
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
           role="img"
-          aria-label={`Mémoire de ${communeName} : années reconnues en catastrophe naturelle depuis ${YSTART}`}
+          aria-label={`Mémoire ${deCommune(communeName)} : années reconnues en catastrophe naturelle depuis ${YSTART}`}
           style={{ display: "block", width: "100%", height: "100%" }}
         >
           {Array.from({ length: n }, (_, i) => {

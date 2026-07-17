@@ -8,6 +8,7 @@ import type { UserProject } from "../user-project.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { HardConstraintKey } from "./decision-fact.ts";
 import { lieuEnPhrase } from "../hard-constraints.ts";
+import { deCommune } from "../typography.ts";
 import { ZONE_TABLE } from "../geo-zones.ts";
 
 export function isStructured(project: UserProject): boolean {
@@ -77,7 +78,7 @@ export function hardConstraintLabel(project: UserProject, key: HardConstraintKey
   switch (key) {
     case "nearPlace": {
       const label = hc.nearPlace?.label;
-      return label ? `la proximité de ${lieuEnPhrase(label)}` : generic;
+      return label ? `la proximité ${deCommune(lieuEnPhrase(label))}` : generic;
     }
     // « Les zones géographiques visées » ne veut rien dire pour quelqu'un qui a écrit « en Bretagne ».
     // Le moteur détient la table des jetons : il connaît le mot du lecteur, il n'a aucune raison de lui

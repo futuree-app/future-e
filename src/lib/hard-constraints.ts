@@ -13,6 +13,7 @@
 // clés de provenance (evidenceKeys), que chaque moteur habille à sa façon. Et il ne dépend PAS du moteur
 // qu'il remplace : le schéma des contraintes vit dans un module neutre (hard-constraint-schema.ts).
 import { pointInPolygon, type PolygonGeometry } from "./geo-polygon.ts";
+import { deCommune } from "./typography.ts";
 import type {
   ResolvedPlaceReference, ResolvedUrbanAreaReference, ResolvedSizeReference,
 } from "./hard-constraints-resolve.ts";
@@ -91,7 +92,7 @@ const MODE_LABEL: Record<PlaceMode, string> = { car: "en voiture", walk: "à pie
 // le dire différemment. « 30 minutes en voiture depuis la gare Matabiau ».
 export function travelThresholdLabel(threshold: PlaceThreshold, placeLabel: string): string {
   const lieu = lieuEnPhrase(placeLabel);
-  if (threshold.metric === "distance") return `${threshold.maxKm} km de ${lieu}`;
+  if (threshold.metric === "distance") return `${threshold.maxKm} km ${deCommune(lieu)}`;
   const mode = threshold.mode ? ` ${MODE_LABEL[threshold.mode]}` : "";
   return `${threshold.maxMinutes} minutes${mode} depuis ${lieu}`;
 }
@@ -334,7 +335,7 @@ export function evaluateDepartements(
   }
   return {
     key: "departements", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: topicFit(`le département de ${c.nom}`, "le département de cette commune"),
+    topic: topicFit(`le département ${deCommune(c.nom)}`, "le département de cette commune"),
     statement: `Cette commune est dans le département ${c.dept}, hors de ceux que vous avez posés comme condition (${wanted.join(", ")}).`,
   };
 }
@@ -365,8 +366,8 @@ export function evaluateZones(
       observedLabel: `département ${c.dept}`,
       expectedLabel: perimetre,
       evidenceKeys: ["commune.dept", "project.hardConstraints.zones"],
-      topic: topicFit(`la situation géographique de ${c.nom}`, "la situation géographique"),
-      statement: `Cette commune est hors de ${perimetre}, le périmètre que vous avez posé comme condition.`,
+      topic: topicFit(`la situation géographique ${deCommune(c.nom)}`, "la situation géographique"),
+      statement: `Cette commune est hors ${deCommune(perimetre)}, le périmètre que vous avez posé comme condition.`,
     };
   }
   if (z.unresolvedLabels.length > 0) {
@@ -402,7 +403,7 @@ export function evaluateExcludeZones(
     const zonesLabel = joinFr(z.labels);
     return {
       key: "excludeZones", status: "incompatible", observedValue, expectedValue, observedLabel,
-      expectedLabel: `hors de ${zonesLabel}`, evidenceKeys,
+      expectedLabel: `hors ${deCommune(zonesLabel)}`, evidenceKeys,
       topic: topicFit(`la zone où se situe ${c.nom}`, "la zone où se situe cette commune"),
       statement: `Cette commune se trouve dans ${zonesLabel}, que vous avez écarté de votre recherche.`,
     };
@@ -412,7 +413,7 @@ export function evaluateExcludeZones(
   }
   return {
     key: "excludeZones", status: "satisfied", observedValue, expectedValue, observedLabel,
-    expectedLabel: `hors de ${joinFr(z.labels)}`, evidenceKeys,
+    expectedLabel: `hors ${deCommune(joinFr(z.labels))}`, evidenceKeys,
   };
 }
 
@@ -435,7 +436,7 @@ export function evaluateMontagne(
   }
   return {
     key: "montagne", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: topicFit(`l'altitude de ${c.nom}`, "l'altitude de cette commune"),
+    topic: topicFit(`l'altitude ${deCommune(c.nom)}`, "l'altitude de cette commune"),
     statement: `Cette commune se situe à ${Math.round(c.altitude)} m d'altitude. Votre exigence de montagne est ici entendue comme une altitude d'au moins ${MONTAGNE_MIN_M} m.`,
   };
 }
@@ -461,7 +462,7 @@ export function evaluateReliefProche(
   }
   return {
     key: "reliefProche", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: topicFit(`le relief autour de ${c.nom}`, "le relief autour de cette commune"),
+    topic: topicFit(`le relief autour ${deCommune(c.nom)}`, "le relief autour de cette commune"),
     // « Aucun massif n'est à portée » est plus catégorique que la donnée : à 49/100, c'est faux. On dit
     // ce qu'on mesure, et le seuil retenu. Moins séduisant, opposable.
     statement: `Autour de cette commune, le relief reste sous le seuil retenu pour considérer qu'un massif est à portée (${Math.round(c.reliefProximite)}/100, seuil ${PRODUCT_CONVENTIONS.reliefProcheMinScore}).`,
@@ -497,7 +498,7 @@ export function evaluateNearSea(
   }
   return {
     key: "nearSea", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: topicFit(`la distance de ${c.nom} au littoral`, "la distance au littoral"),
+    topic: topicFit(`la distance ${deCommune(c.nom)} au littoral`, "la distance au littoral"),
     statement: `Cette commune est à ${km} km du littoral, au-delà de la limite de ${max} km que vous avez posée.`,
   };
 }
@@ -522,7 +523,7 @@ export function evaluateExcludeSea(
   }
   return {
     key: "excludeSea", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: topicFit(`la proximité de ${c.nom} au littoral`, "la proximité du littoral"),
+    topic: topicFit(`la proximité ${deCommune(c.nom)} au littoral`, "la proximité du littoral"),
     statement: `Cette commune est à ${km} km de la côte. Votre souhait de ne pas habiter près du littoral est ici entendu comme une distance d'au moins ${min} km.`,
   };
 }
@@ -567,8 +568,8 @@ export function evaluateCommuneSize(
   return {
     key: "communeSize", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
     topic: c.uu
-      ? topicFit(`la taille de l'agglomération de ${c.nom}`, "la taille de l'agglomération")
-      : topicFit(`la taille de ${c.nom}`, "la taille de la commune"),
+      ? topicFit(`la taille de l'agglomération ${deCommune(c.nom)}`, "la taille de l'agglomération")
+      : topicFit(`la taille ${deCommune(c.nom)}`, "la taille de la commune"),
     statement: `${sujet} ${fmt(t)} habitants, ${seuil} de la taille que vous avez posée.`,
   };
 }
@@ -636,15 +637,15 @@ function verdictParEstimation(
   // « ESTIMÉ À ENVIRON », jamais un temps posé comme un fait : le moteur de routage calcule sur son graphe,
   // sans trafic, sans stationnement, sans attente. Et le GRAIN est dit : une durée calculée depuis le point
   // de référence de la commune ne vaut pas pour toute la commune.
-  const sujet = point.grain === "address" ? "Cette adresse" : `Le point de référence de ${c.nom}`;
+  const sujet = point.grain === "address" ? "Cette adresse" : `Le point de référence ${deCommune(c.nom)}`;
   return {
     key: "nearPlace", status: "incompatible",
     observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
     topic: topicFit(
-      `le temps de trajet de ${c.nom} à ${ref.canonicalLabel}`,
+      `le temps de trajet ${deCommune(c.nom)} à ${ref.canonicalLabel}`,
       `le temps de trajet à ${ref.canonicalLabel}`,
     ),
-    statement: `${sujet} est à environ ${duree} minutes ${MODE_LABEL[mode]} de ${ref.canonicalLabel}, au-delà de la limite de ${maxMinutes} minutes que vous avez posée.`,
+    statement: `${sujet} est à environ ${duree} minutes ${MODE_LABEL[mode]} ${deCommune(ref.canonicalLabel)}, au-delà de la limite de ${maxMinutes} minutes que vous avez posée.`,
   };
 }
 
@@ -753,15 +754,15 @@ export function evaluateNearPlace(
     }
     // LE GRAIN EST DIT. Une isochrone testée sur le point de référence de la commune ne dit pas que TOUTE
     // la commune y est. Et on ne convertit JAMAIS ce temps en kilomètres pour « donner un ordre d'idée ».
-    const sujet = ctx.point.grain === "address" ? "Cette adresse" : `Le point de référence de ${c.nom}`;
+    const sujet = ctx.point.grain === "address" ? "Cette adresse" : `Le point de référence ${deCommune(c.nom)}`;
     return {
       key: "nearPlace", status: "incompatible",
       observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys: evidenceKeys0,
       topic: topicFit(
-        `le temps de trajet de ${c.nom} à ${ref.canonicalLabel}`,
+        `le temps de trajet ${deCommune(c.nom)} à ${ref.canonicalLabel}`,
         `le temps de trajet à ${ref.canonicalLabel}`,
       ),
-      statement: `${sujet} se situe hors des ${maxMinutes} minutes ${MODE_LABEL[mode]} de ${ref.canonicalLabel} que vous avez posées comme limite.`,
+      statement: `${sujet} se situe hors des ${maxMinutes} minutes ${MODE_LABEL[mode]} ${deCommune(ref.canonicalLabel)} que vous avez posées comme limite.`,
     };
   }
 
@@ -785,8 +786,8 @@ export function evaluateNearPlace(
   // la commune y est : la phrase le porte, elle ne le cache pas.
   return {
     key: "nearPlace", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: topicFit(`la distance de ${c.nom} à ${ref.canonicalLabel}`, `la distance à ${ref.canonicalLabel}`),
-    statement: `${ctx.point.grain === "address" ? "Cette adresse" : `Le point de référence de ${c.nom}`} est à ${Math.round(km)} km de ${ref.canonicalLabel}, au-delà de la limite de ${max} km que vous avez posée.`,
+    topic: topicFit(`la distance ${deCommune(c.nom)} à ${ref.canonicalLabel}`, `la distance à ${ref.canonicalLabel}`),
+    statement: `${ctx.point.grain === "address" ? "Cette adresse" : `Le point de référence ${deCommune(c.nom)}`} est à ${Math.round(km)} km ${deCommune(ref.canonicalLabel)}, au-delà de la limite de ${max} km que vous avez posée.`,
   };
 }
 
@@ -815,11 +816,11 @@ export function evaluateExcludePlace(
     return {
       key: "excludePlace", status: "incompatible",
       observedValue: { kind: "boolean", value: true }, expectedValue,
-      observedLabel: `dans l'agglomération de ${label}`,
-      expectedLabel: `hors de ${tousLabels}`,
+      observedLabel: `dans l'agglomération ${deCommune(label)}`,
+      expectedLabel: `hors ${deCommune(tousLabels)}`,
       evidenceKeys,
-      topic: topicFit(`l'agglomération de ${label}`, "l'agglomération à quitter"),
-      statement: `Cette commune fait partie de l'agglomération de ${label}, que vous avez posé comme condition de quitter.`,
+      topic: topicFit(`l'agglomération ${deCommune(label)}`, "l'agglomération à quitter"),
+      statement: `Cette commune fait partie de l'agglomération ${deCommune(label)}, que vous avez posé comme condition de quitter.`,
     };
   }
 
@@ -833,8 +834,8 @@ export function evaluateExcludePlace(
   return {
     key: "excludePlace", status: "satisfied",
     observedValue: { kind: "boolean", value: false }, expectedValue,
-    observedLabel: `hors de ${tousLabels}`,
-    expectedLabel: `hors de ${tousLabels}`,
+    observedLabel: `hors ${deCommune(tousLabels)}`,
+    expectedLabel: `hors ${deCommune(tousLabels)}`,
     evidenceKeys,
   };
 }
@@ -871,7 +872,7 @@ export function evaluateSizeRelativeTo(
   const sujet = c.uu ? "Cette agglomération compte" : "Cette commune compte";
   return {
     key: "sizeRelativeTo", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: topicFit(`la taille de ${c.nom} face à ${ref.canonicalLabel}`, `la taille face à ${ref.canonicalLabel}`),
+    topic: topicFit(`la taille ${deCommune(c.nom)} face à ${ref.canonicalLabel}`, `la taille face à ${ref.canonicalLabel}`),
     statement: `${sujet} ${fmt(t)} habitants, ${s.direction === "smaller" ? "plus" : "moins"} que ${ref.canonicalLabel} (${fmt(ref.comparisonPopulation)} habitants en ${ref.populationYear}), alors que vous cherchez ${s.direction === "smaller" ? "plus petit" : "plus grand"}.`,
   };
 }

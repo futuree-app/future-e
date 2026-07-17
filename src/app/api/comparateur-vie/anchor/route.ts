@@ -7,6 +7,7 @@
 // ════════════════════════════════════════════════════════════════════════════
 
 import { NextResponse, type NextRequest } from "next/server";
+import { deCommune } from "@/lib/typography";
 import {
   getCommuneEntry,
   deriveAnchorPreferences,
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
 
   // chips affichées : traits gardés (keyés) + puce taille en dernier si gardée.
   const chips: { key: string; text: string }[] = traits.map((t) => ({ key: t.key, text: t.text }));
-  if (keepSize) chips.push({ key: SIZE_KEY, text: `~ taille de ${entry.nom}` });
+  if (keepSize) chips.push({ key: SIZE_KEY, text: `~ taille ${deCommune(entry.nom)}` });
 
   const parsed: ParsedProject = {
     reformulation: anchorReformulationSuffix([entry.nom], traits.map((t) => t.text)),

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { deCommune } from "@/lib/typography";
 import { signOutAction } from "@/app/auth/actions";
 import Navbar from "@/components/Navbar";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
@@ -75,7 +76,7 @@ export default async function ComptePage() {
               className="font-normal text-[clamp(34px,3.8vw,52px)] leading-[1.1] tracking-[-1.2px] mb-5 text-label"
               style={{ fontFamily: "'Instrument Serif', serif" }}
             >
-              {commune ? `Votre lecture de ${commune}` : "Votre espace personnel"}<br />
+              {commune ? `Votre lecture ${deCommune(commune)}` : "Votre espace personnel"}<br />
               <span className="italic text-accent">{fullAccess ? "module par module." : "ne disparaît plus."}</span>
             </h1>
             <p className="text-[17px] leading-[1.72] text-muted mb-8 max-w-[480px]">

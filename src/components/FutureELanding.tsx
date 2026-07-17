@@ -11,6 +11,7 @@ import Navbar from '@/components/Navbar';
 import { CookieSettingsLink } from '@/components/CookieSettingsLink';
 import { SAVOIR_HUB_ARTICLES } from '@/config/navigation';
 import { deriveCategories } from '@/lib/commune-categories';
+import { deCommune } from '@/lib/typography';
 import posthog from 'posthog-js';
 import { HorizonSwitch, type Horizon } from '@/components/HorizonSwitch';
 import HeroProjetTerritoires from '@/components/HeroProjetTerritoires';
@@ -437,7 +438,7 @@ function feuxNarrative(firedays: number, name: string, horizon: Horizon): { val:
   const note = (horizon !== 'today') ? `≈ ${Math.round(firedays)} jours/an à risque incendie` : null;
   if (horizon === 'today') return { val: `Les périodes à risque restent concentrées sur les étés secs.`, note };
   if (horizon === '2030') return { val: `Les conditions favorables aux incendies deviennent plus fréquentes.`, note };
-  if (horizon === '2050') return { val: `Le risque d'incendie pourrait fortement progresser autour de ${name}.`, note };
+  if (horizon === '2050') return { val: `Le risque d'incendie pourrait fortement progresser autour ${deCommune(name)}.`, note };
   return { val: `Les périodes à risque élevé pourraient durer une grande partie de l'été.`, note };
 }
 
@@ -465,24 +466,24 @@ function vigneNarrative(summerTemp: number, name: string, horizon: Horizon): { v
   const note = (horizon !== 'today') ? `≈ ${t} °C en moyenne l'été` : null;
 
   if (horizon === 'today') {
-    if (summerTemp >= 24) return { val: `Les vignes autour de ${name} sont déjà soumises à des étés chauds.`, note };
-    return { val: `La chaleur pourrait modifier les équilibres viticoles autour de ${name}.`, note };
+    if (summerTemp >= 24) return { val: `Les vignes autour ${deCommune(name)} sont déjà soumises à des étés chauds.`, note };
+    return { val: `La chaleur pourrait modifier les équilibres viticoles autour ${deCommune(name)}.`, note };
   }
 
   if (horizon === '2030') {
-    if (summerTemp >= 24) return { val: `Les vignes autour de ${name} pourraient voir leurs conditions d'été changer d'ici 2030.`, note };
-    return { val: `La maturité des raisins autour de ${name} pourrait s'avancer progressivement.`, note };
+    if (summerTemp >= 24) return { val: `Les vignes autour ${deCommune(name)} pourraient voir leurs conditions d'été changer d'ici 2030.`, note };
+    return { val: `La maturité des raisins autour ${deCommune(name)} pourrait s'avancer progressivement.`, note };
   }
 
   if (horizon === '2050') {
-    if (summerTemp >= 26) return { val: `Les cépages traditionnels autour de ${name} pourraient ne plus être adaptés aux étés de 2050.`, note };
-    if (summerTemp >= 24) return { val: `Le réchauffement des étés autour de ${name} pourrait transformer les vins du territoire.`, note };
-    return { val: `Les parcelles viticoles autour de ${name} pourraient nécessiter une adaptation profonde d'ici 2050.`, note };
+    if (summerTemp >= 26) return { val: `Les cépages traditionnels autour ${deCommune(name)} pourraient ne plus être adaptés aux étés de 2050.`, note };
+    if (summerTemp >= 24) return { val: `Le réchauffement des étés autour ${deCommune(name)} pourrait transformer les vins du territoire.`, note };
+    return { val: `Les parcelles viticoles autour ${deCommune(name)} pourraient nécessiter une adaptation profonde d'ici 2050.`, note };
   }
 
   // 2100
-  if (summerTemp >= 28) return { val: `La viticulture autour de ${name} pourrait migrer vers des altitudes ou des cépages très différents.`, note };
-  return { val: `Les vignes autour de ${name} pourraient connaître des étés sans précédent historique d'ici 2100.`, note };
+  if (summerTemp >= 28) return { val: `La viticulture autour ${deCommune(name)} pourrait migrer vers des altitudes ou des cépages très différents.`, note };
+  return { val: `Les vignes autour ${deCommune(name)} pourraient connaître des étés sans précédent historique d'ici 2100.`, note };
 }
 
 // Narratives neige / montagne (NORTMm_seas_DJF = température moyenne hiver)
@@ -508,7 +509,7 @@ function neigeNarrative(winterTemp: number, name: string, horizon: Horizon): { v
 
   // 2100
   if (winterTemp >= 6) return { val: `${name} pourrait connaître des hivers sans neige fiable en fin de siècle.`, note };
-  if (winterTemp >= 3) return { val: `L'économie montagnarde autour de ${name} pourrait être fragilisée par des hivers trop doux.`, note };
+  if (winterTemp >= 3) return { val: `L'économie montagnarde autour ${deCommune(name)} pourrait être fragilisée par des hivers trop doux.`, note };
   return { val: `Les hivers à ${name} pourraient être méconnaissables d'ici la fin du siècle.`, note };
 }
 
@@ -517,12 +518,12 @@ function submersionNarrative(name: string, horizon: Horizon): { val: string } {
   if (horizon === 'today') return { val: `${name} figure parmi les communes exposées au risque de submersion marine.` };
   if (horizon === '2030') return { val: `La montée des eaux pourrait aggraver le risque de submersion marine à ${name} d'ici 2030.` };
   if (horizon === '2050') return { val: `La submersion marine à ${name} pourrait s'étendre à de nouvelles zones d'ici 2050.` };
-  return { val: `En fin de siècle, des quartiers de ${name} pourraient être régulièrement submergés par la mer.` };
+  return { val: `En fin de siècle, des quartiers ${deCommune(name)} pourraient être régulièrement submergés par la mer.` };
 }
 
 // Narratives inondation fluviale (horizon-aware)
 function inondationNarrative(name: string, horizon: Horizon): { val: string } {
-  if (horizon === 'today') return { val: `Certaines zones de ${name} sont exposées aux inondations.` };
+  if (horizon === 'today') return { val: `Certaines zones ${deCommune(name)} sont exposées aux inondations.` };
   if (horizon === '2030') return { val: `Les épisodes de crues à ${name} pourraient devenir plus fréquents d'ici 2030.` };
   if (horizon === '2050') return { val: `Le risque d'inondation à ${name} pourrait s'intensifier avec des pluies plus violentes.` };
   return { val: `Les inondations à ${name} pourraient toucher des zones aujourd'hui épargnées d'ici 2100.` };
@@ -530,7 +531,7 @@ function inondationNarrative(name: string, horizon: Horizon): { val: string } {
 
 // Narratives argiles/sécheresse géotechnique (horizon-aware)
 function argilesNarrative(name: string, horizon: Horizon): { val: string } {
-  if (horizon === 'today') return { val: `Les sols argileux de ${name} peuvent provoquer des fissures dans les bâtiments lors des sécheresses.` };
+  if (horizon === 'today') return { val: `Les sols argileux ${deCommune(name)} peuvent provoquer des fissures dans les bâtiments lors des sécheresses.` };
   if (horizon === '2030') return { val: `Les sécheresses plus fréquentes à ${name} pourraient aggraver le retrait-gonflement des argiles.` };
   if (horizon === '2050') return { val: `Le risque de fissuration lié aux argiles à ${name} pourrait s'accroître avec l'allongement des sécheresses.` };
   return { val: `Les épisodes de retrait-gonflement des argiles à ${name} pourraient devenir nettement plus fréquents d'ici 2100.` };
@@ -596,7 +597,7 @@ function getGeorisquesCard(communeName, georisques, horizon: Horizon = 'today') 
   if (georisques.flags?.landslide) {
     return {
       label: `Terrain à ${communeName}`,
-      val: `Le territoire de ${communeName} présente une sensibilité aux mouvements de terrain.`,
+      val: `Le territoire ${deCommune(communeName)} présente une sensibilité aux mouvements de terrain.`,
       col: C.orange,
       src: 'Géorisques / BRGM',
     };
@@ -637,7 +638,7 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
     const firedays = getLandingIndicatorValue(indicators, 'NORIFM40_yr', gwlId);
     if (firedays !== null && firedays !== undefined) {
       const { val, note } = feuxNarrative(firedays, name, horizon);
-      climate.push({ label: `Feux autour de ${name}`, val, note, col: C.red, src: 'DRIAS / Météo-France' });
+      climate.push({ label: `Feux autour ${deCommune(name)}`, val, note, col: C.red, src: 'DRIAS / Météo-France' });
     }
   }
 
@@ -711,7 +712,7 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
   } else if (hasCategory('montagne')) {
     depth.push({ label: `Nature à ${name}`, val: `À ${name}, le relief et le plein air façonnent le cadre de vie.`, col: C.green, src: 'OSM / IGN' });
   } else if (hasAny('rural_forestier', 'rural_agricole', 'rural_viticole')) {
-    depth.push({ label: `Nature à ${name}`, val: `Autour de ${name}, espaces agricoles et nature rythment le quotidien.`, col: C.green, src: 'OSM / IGN' });
+    depth.push({ label: `Nature à ${name}`, val: `Autour ${deCommune(name)}, espaces agricoles et nature rythment le quotidien.`, col: C.green, src: 'OSM / IGN' });
   } else if (hasCategory('tourisme_urbain')) {
     depth.push({ label: `Vie locale à ${name}`, val: `À ${name}, commerces, services et vie culturelle animent le quotidien.`, col: C.green, src: 'INSEE BPE / RNA' });
   } else {
@@ -725,10 +726,10 @@ function getPreviewCards(communeName, categories, indicators, georisques, gissol
     const cdScore = gissol.cadmium.score ?? 0;
     const cdCol = cdScore >= 65 ? C.red : cdScore >= 45 ? C.orange : C.green;
     const cdLevel = cdScore >= 65
-      ? `Les données disponibles montrent une vigilance élevée sur les sols de ${name}.`
+      ? `Les données disponibles montrent une vigilance élevée sur les sols ${deCommune(name)}.`
       : cdScore >= 45
-        ? `Un niveau de vigilance modéré a été relevé dans les sols autour de ${name}.`
-        : `Les données disponibles montrent un niveau de vigilance faible pour les sols de ${name}.`;
+        ? `Un niveau de vigilance modéré a été relevé dans les sols autour ${deCommune(name)}.`
+        : `Les données disponibles montrent un niveau de vigilance faible pour les sols ${deCommune(name)}.`;
     fillers.push({ label: `Qualité des sols à ${name}`, val: cdLevel, col: cdCol, src: 'GisSol / RMQS' });
   }
 
@@ -771,7 +772,7 @@ function getHeroCopy(communeName, categories, usedFallback) {
   const hasCategory = (category) => safeCategories.includes(category);
 
   if (usedFallback) {
-    return `futur•e décode les données publiques pour lire ce que le changement climatique change déjà dans votre quotidien. Accédez à une première lecture personnalisée de l'évolution de ${name} à travers le prisme du climat, de la santé et de l'immobilier.`;
+    return `futur•e décode les données publiques pour lire ce que le changement climatique change déjà dans votre quotidien. Accédez à une première lecture personnalisée de l'évolution ${deCommune(name)} à travers le prisme du climat, de la santé et de l'immobilier.`;
   }
 
   if (hasCategory('littoral')) {
@@ -790,7 +791,7 @@ function getHeroCopy(communeName, categories, usedFallback) {
     return `futur•e lit ${name} à partir de vos contraintes réelles : dépendance à la voiture, chaleur, ressource en eau, valeur du logement et capacité d'adaptation du territoire.`;
   }
 
-  return `futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution de ${name} à travers le prisme du climat, de la santé et de l'immobilier.`;
+  return `futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution ${deCommune(name)} à travers le prisme du climat, de la santé et de l'immobilier.`;
 }
 
 function getQuestionIntro(communeName, categories, usedFallback) {

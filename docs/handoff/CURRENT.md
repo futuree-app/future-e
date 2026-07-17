@@ -40,7 +40,6 @@ Les 6 tâches du plan `docs/superpowers/plans/2026-07-17-composition-faits-lies.
 2. Après merge : le bump prompt v11 invalide les artefacts narratifs existants (voulu).
 3. Mémoire : fiche `/memory` sur les décisions de composition (vue hors DecisionFact, gates poids >= 2,
    lead tradeoff oui / shared_evidence jamais) + éventuel passage archiviste, une fois livré.
-4. `Futur.e Design System.zip` à la racine : fichier du porteur, NE PAS committer.
 
 ## Pièges connus (inchangés)
 
