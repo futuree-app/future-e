@@ -214,15 +214,25 @@ function verdict(input: ConclusionPlanInput): Verdict {
   // ARBITRAGE : le lieu est possible, mais des priorités y sont nettement moins bien servies. On compte le
   // TOTAL des mismatchs, pas l'affiché (cap 3) : 5 déclenchés ne doivent pas dire « trois ». Double registre
   // si des réserves coexistent, pour ne pas perdre l'autre information sous l'ordre de l'enum.
+  //
+  // UN ARBITRAGE A DEUX CÔTÉS. N'en nommer qu'un (« moins bien servies ») décrivait un renoncement, pas
+  // un arbitrage : le lecteur ne voyait jamais ce que le lieu offre en échange. Le côté favorable est
+  // nommé quand il est PROUVÉ (hasFavorable/favorableCount, les mêmes garanties que coverage=high), et
+  // seulement là : sans preuve, promettre un positif reste interdit.
   if (input.orientation === "arbitration") {
     const m = input.mismatchTotal;
     const combien = m > 1 ? `${m} de vos priorités sont` : `une de vos priorités est`;
     const suite = input.reservesShown > 0
       ? ` ${input.reservesShown > 1 ? `${input.reservesShown} points restent` : "un point reste"} par ailleurs à vérifier.`
       : "";
+    const ouverture = input.hasFavorable
+      ? (input.favorableCount >= 2
+          ? `${nom} répond à plusieurs dimensions de votre projet et aucune incompatibilité n'a été établie`
+          : `${nom} présente un élément favorable pour votre projet et aucune incompatibilité n'a été établie`)
+      : `Aucune incompatibilité n'a été établie sur ${nom}`;
     return {
       label: "Arbitrage", tone: "neutral",
-      text: `Aucune incompatibilité n'a été établie sur ${nom}, mais ${combien} nettement moins bien servie${m > 1 ? "s" : ""} qu'ailleurs. Cela appelle un arbitrage entre vos priorités, sans rendre ${nom} incompatible avec votre projet.${suite}`,
+      text: `${ouverture}, mais ${combien} nettement moins bien servie${m > 1 ? "s" : ""} qu'ailleurs. Cela appelle un arbitrage entre vos priorités, sans rendre ${nom} incompatible avec votre projet.${suite}`,
     };
   }
   // NEUTRAL : examiné, données disponibles, mais aucun signal marqué. Ni « bien correspondre » (aucun

@@ -411,6 +411,20 @@ test("verdict arbitration : compte le TOTAL, pas l'affiché, et porte le double 
   assert.match(mixte.blocks.find((b) => b.key === "verdict")!.fallbackText, /vérifier/i);
 });
 
+test("verdict arbitration : nomme le côté favorable PROUVÉ (un demi-arbitrage ne suffit pas)", () => {
+  const plusieurs = buildConclusionPlan(baseInput({ orientation: "arbitration", mismatchTotal: 2, mismatchShown: 2, hasFavorable: true, favorableCount: 3 }));
+  const vp = plusieurs.blocks.find((b) => b.key === "verdict")!;
+  assert.match(vp.fallbackText, /répond à plusieurs dimensions de votre projet/);
+  assert.match(vp.fallbackText, /nettement moins bien servies/);
+  const un = buildConclusionPlan(baseInput({ orientation: "arbitration", mismatchTotal: 2, mismatchShown: 2, hasFavorable: true, favorableCount: 1 }));
+  assert.match(un.blocks.find((b) => b.key === "verdict")!.fallbackText, /présente un élément favorable pour votre projet/);
+  // Sans favorable prouvé, aucune promesse : le texte reste celui de l'absence d'incompatibilité.
+  const aucun = buildConclusionPlan(baseInput({ orientation: "arbitration", mismatchTotal: 2, mismatchShown: 2, hasFavorable: false, favorableCount: 0 }));
+  const va = aucun.blocks.find((b) => b.key === "verdict")!;
+  assert.match(va.fallbackText, /^Aucune incompatibilité n'a été établie sur Toulouse/);
+  assert.doesNotMatch(va.fallbackText, /favorable|répond à/);
+});
+
 test("verdict neutral : ni « bien correspondre » ni « impossible de conclure »", () => {
   const v = buildConclusionPlan(baseInput({ orientation: "neutral", mismatchTotal: 0, mismatchShown: 0 })).blocks.find((b) => b.key === "verdict")!;
   assert.doesNotMatch(v.fallbackText, /bien correspond|impossible/i);

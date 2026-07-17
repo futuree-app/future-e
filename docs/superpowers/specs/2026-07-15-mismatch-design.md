@@ -221,6 +221,12 @@ La grammaire narrative change : nouveau rôle, nouvelle section, nouvelle orient
 > calme y sont relativement moins favorables. Deux autres points doivent encore être vérifiés avant de
 > décider.
 
+**RÉALISÉ (2026-07-17, chantier prose).** La deuxième phrase visée est entrée dans la table déterministe :
+la branche `arbitration` ouvre sur le côté favorable quand il est PROUVÉ (`hasFavorable`), avec l'accord de
+`favorableCount` (« répond à plusieurs dimensions » exige >= 2, « présente un élément favorable » à 1) ;
+sans favorable prouvé, l'ouverture reste « Aucune incompatibilité n'a été établie sur {nom} ». Un arbitrage
+nomme ses deux côtés dès que les deux sont établis.
+
 ## 10. Le rang précalculé (décision d'implémentation)
 
 Le dossier ne peut pas trier 34 788 communes à chaud à chaque requête. Les deux bornes de rang des 10
