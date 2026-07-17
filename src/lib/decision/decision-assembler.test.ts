@@ -234,3 +234,42 @@ test("conclusionBasis : absorbés dans factIds, preuves et ruleIds des compositi
   assert.ok(d.conclusionBasis.ruleIds.includes("r"));
   assert.ok(d.conclusionBasis.evidence.some((e) => e.observedValue === "parmi les 10 %"));
 });
+
+// ── Composition grouped_verification (argiles + PPR) dans l'assembleur ──────────────────────────
+
+function groupedComp(id: string, absorbed: string[], tier: "secondary" | "structuring"): FactComposition {
+  return {
+    id, kind: "grouped_verification", patternId: "clay_regulation_grouped",
+    title: "Un sol argileux, et la règle qui l'encadre",
+    summary: "Le sol argileux expose le bâti, un plan de prévention encadre les travaux.",
+    items: absorbed.map((fid) => ({
+      label: "item", statement: "constat", ruleIds: ["r"], factIds: [fid],
+      evidence: [{ factId: "s", module: "logement" as const, label: "A", grain: "adresse" as const }],
+      action: { type: "verifier_sur_place" as const, label: "Regardez le bâti." },
+    })),
+    absorbedFactIds: absorbed, referencedRuleIds: ["r"], materialityTier: tier, displaySection: "verifications",
+  };
+}
+
+test("grouped_verification : une carte en section verifications, comptée comme UNE réserve", () => {
+  const facts = [verif("v1"), verif("v2"), verif("v3")];
+  // La contrainte déclarée est EXAMINÉE (couverture réelle) : le verdict a le droit de compter.
+  const r: RunResult = { facts, evaluations: [ev("r", ["nearSea"], "verification", facts)] };
+  const d = assembleDossier(r, project(WITH_HC), "commune+adresse", "Toulouse", [groupedComp("g1", ["v1", "v2"], "structuring")]);
+  const sec = d.sections.find((s) => s.key === "verifications")!;
+  assert.equal(sec.cards.length, 2); // la carte composée + v3
+  assert.equal(sec.cards.some((c) => c.kind === "composition" && c.composition.id === "g1"), true);
+  // Le verdict compte l'AFFICHÉ : 1 carte composée + 1 fait = 2 réserves structurantes, jamais 3.
+  assert.match(d.narrativePlan.blocks.find((b) => b.key === "verdict")!.fallbackText, /2 points structurants/);
+  // Les preuves des items fondent la conclusion.
+  assert.equal(d.conclusionBasis.evidence.some((e) => e.label === "A"), true);
+});
+
+test("grouped_verification : candidate au lead comme le tradeoff (elle porte des réserves)", () => {
+  const d = assembleDossier(runR([verif("v1"), verif("v2")]), project(WITH_HC), "commune+adresse", "Toulouse", [groupedComp("g1", ["v1", "v2"], "structuring")]);
+  const lead = d.narrativePlan.lead;
+  assert.equal(lead.kind, "single");
+  if (lead.kind !== "single") return;
+  assert.equal(lead.factId, "g1");
+  assert.equal(lead.topic, "Un sol argileux, et la règle qui l'encadre");
+});

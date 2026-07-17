@@ -169,3 +169,56 @@ test("shared_evidence : sources différentes, basis non catégoriel, ou catégor
   const autreCategorie = tailleMismatch("eviter_isolement", "secondary", { basis: { kind: "categorical_state", observedCategory: "petite", conventionId: AGGLOMERATION_SIZE_CONVENTION.id } as never });
   assert.equal(composeFacts(run([tailleEval(a), tailleEval(autreCategorie)]), moduleFacts, project({ prefere_grande_ville: 3, eviter_isolement: 2 })).length, 0);
 });
+
+// ── Patron 3 : grouped_verification argiles + PPR sécheresse (grain adresse) ────────────────────
+
+function logementVerif(id: "exposition-bati" | "zone-reglementee", statement: string, over: Partial<VerificationFact> = {}): VerificationFact {
+  return {
+    id: `logement:${id}`, ruleId: `logement.${id}`, sourceFactIds: [`logement.${id}`], module: "logement",
+    role: "verification", materialityTier: "structuring",
+    topic: id === "exposition-bati" ? "le retrait-gonflement des argiles" : "un plan de prévention des risques",
+    statement,
+    evidence: [{ factId: `logement.${id}`, module: "logement", label: "12 rue des Argiles", grain: "adresse", href: "/rapport/logement" }],
+    action: { type: id === "exposition-bati" ? "verifier_sur_place" : "obtenir_document", label: id === "exposition-bati" ? "Regardez les signes visibles sur le bâti." : "Lisez le règlement de la zone en mairie." },
+    ...over,
+  };
+}
+const logementEval = (f: VerificationFact): RuleEvaluation =>
+  ({ ruleId: f.ruleId, projectKeys: [], outcome: "verification", facts: [f], reason: "verification" });
+
+function moduleFactsAvecPpr(pprnLabel: string | null): ModuleFacts {
+  return { ...moduleFacts, logement: { pprnLabel } } as unknown as ModuleFacts;
+}
+
+test("grouped argiles+PPR : les deux faits émis + PPR sécheresse -> une carte, deux items complets", () => {
+  const argiles = logementVerif("exposition-bati", "À cette adresse, le sol est exposé au retrait-gonflement des argiles (aléa moyen ou fort).", { limitation: "L'exposition de la zone ne prouve pas un dommage sur ce bien." });
+  const ppr = logementVerif("zone-reglementee", "À cette adresse, un plan de prévention des risques s'applique : PPR Sécheresse - Territoire 1 - Toulouse.");
+  const out = composeFacts(run([logementEval(argiles), logementEval(ppr)]), moduleFactsAvecPpr("PPR Sécheresse - Territoire 1 - Toulouse"), project({}));
+  assert.equal(out.length, 1);
+  const c = out[0]!;
+  assert.equal(c.kind, "grouped_verification");
+  if (c.kind !== "grouped_verification") return;
+  assert.equal(c.displaySection, "verifications");
+  assert.equal(c.materialityTier, "structuring");
+  assert.deepEqual(c.absorbedFactIds, [argiles.id, ppr.id]);
+  assert.equal(c.items.length, 2);
+  assert.equal(c.items[0]!.statement, argiles.statement);
+  assert.equal(c.items[0]!.limitation, argiles.limitation);       // invariant 8 : la limitation reste sur SON item
+  assert.equal(c.items[0]!.action?.label, argiles.action.label);  // invariant 8 : l'action survit
+  assert.equal(c.items[1]!.action?.label, ppr.action.label);
+});
+
+test("grouped argiles+PPR : un PPR d'une AUTRE nature ne compose jamais (sujet décisionnel différent)", () => {
+  const argiles = logementVerif("exposition-bati", "s1");
+  const ppr = logementVerif("zone-reglementee", "À cette adresse, un plan de prévention des risques s'applique : PPRI Garonne.");
+  assert.equal(composeFacts(run([logementEval(argiles), logementEval(ppr)]), moduleFactsAvecPpr("PPRI Garonne"), project({})).length, 0);
+  // Libellé absent : la nature du PPR est invérifiable, on ne compose pas.
+  assert.equal(composeFacts(run([logementEval(argiles), logementEval(ppr)]), moduleFactsAvecPpr(null), project({})).length, 0);
+});
+
+test("grouped argiles+PPR : un seul des deux faits -> pas de composition", () => {
+  const argiles = logementVerif("exposition-bati", "s1");
+  assert.equal(composeFacts(run([logementEval(argiles)]), moduleFactsAvecPpr("PPR Sécheresse"), project({})).length, 0);
+  const ppr = logementVerif("zone-reglementee", "s2");
+  assert.equal(composeFacts(run([logementEval(ppr)]), moduleFactsAvecPpr("PPR Sécheresse"), project({})).length, 0);
+});

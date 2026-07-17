@@ -37,6 +37,14 @@ export function FactCompositionCard({
           <SideBlock side={composition.favorableSide} color={color} />
           <SideBlock side={composition.unfavorableSide} color={color} />
         </div>
+      ) : composition.kind === "grouped_verification" ? (
+        // Deux constats établis, un même sujet décisionnel : chaque item garde son constat, sa preuve,
+        // son action et sa limitation (invariant 8), la même brique que les côtés d'un tradeoff.
+        <div className="mt-2.5 flex flex-col gap-3.5">
+          {composition.items.map((item, i) => (
+            <SideBlock key={i} side={item} color={color} />
+          ))}
+        </div>
       ) : (
         <div className="mt-2.5 flex flex-col gap-3">
           <div className="flex items-center gap-2 flex-wrap">

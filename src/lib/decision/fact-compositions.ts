@@ -6,7 +6,8 @@
 // depuis l'évaluation existante, preuve par helper canonique, aucun seuil recalculé (invariant 9).
 import type { RunResult, RuleEvaluation, ModuleFacts, EvidenceRef, VerificationFact, MismatchFact, MaterialityTier } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
-import type { FactComposition, TradeoffComposition, SharedEvidenceComposition } from "./fact-composition.ts";
+import type { FactComposition, TradeoffComposition, SharedEvidenceComposition, GroupedVerificationComposition } from "./fact-composition.ts";
+import { RULE_EXPOSITION_BATI, RULE_ZONE_REGLEMENTEE } from "./logement-rules.ts";
 import { preferenceWeight } from "./project-view.ts";
 import { rankPhrase, bandValide } from "./mismatch-facts.ts";
 import { mismatchRuleId } from "./mismatch-rules.ts";
@@ -139,6 +140,45 @@ function composeTerritorySizeSharedEvidence(run: RunResult, facts: ModuleFacts):
   };
 }
 
+// LA NATURE DU PPR EST VÉRIFIÉE, jamais supposée : composer les argiles avec un PPR inondation
+// grouperait deux sujets décisionnels différents sous un titre qui affirme la sécheresse. Le patron ne
+// se déclenche que si le libellé du plan le dit (invariant 5 : la relation se déclare).
+const PPR_SECHERESSE = /sécheresse|argile|tassement/i;
+
+function composeClayRegulationGrouped(run: RunResult, facts: ModuleFacts): GroupedVerificationComposition | null {
+  // GATE : les deux faits RÉELLEMENT émis (les règles logement portent déjà posture et couverture),
+  // et un PPR dont le libellé atteste la nature sécheresse/argiles. Libellé absent = invérifiable = rien.
+  const argiles = (evaluation(run, RULE_EXPOSITION_BATI)?.facts ?? []).find((f) => f.role === "verification") as VerificationFact | undefined;
+  const ppr = (evaluation(run, RULE_ZONE_REGLEMENTEE)?.facts ?? []).find((f) => f.role === "verification") as VerificationFact | undefined;
+  if (!argiles || !ppr) return null;
+  const label = facts.logement?.pprnLabel;
+  if (!label || !PPR_SECHERESSE.test(label)) return null;
+
+  const item = (f: VerificationFact, itemLabel: string) => ({
+    label: itemLabel,
+    statement: f.statement,
+    evidence: f.evidence,
+    ruleIds: [f.ruleId],
+    factIds: [f.id],
+    ...(f.action ? { action: f.action } : {}),
+    ...(f.limitation ? { limitation: f.limitation } : {}),
+  });
+  const tier: MaterialityTier =
+    TIER_ORDER[argiles.materialityTier] <= TIER_ORDER[ppr.materialityTier] ? argiles.materialityTier : ppr.materialityTier;
+  return {
+    id: `${facts.insee}:composition-argiles-ppr`,
+    kind: "grouped_verification",
+    patternId: "clay_regulation_grouped",
+    title: "Un sol argileux, et la règle qui l'encadre",
+    summary: "Le sol argileux expose le bâti à cette adresse, et un plan de prévention sécheresse y encadre les travaux.",
+    items: [item(argiles, "L'exposition du sol"), item(ppr, "La règle applicable")],
+    absorbedFactIds: [argiles.id, ppr.id],
+    referencedRuleIds: [RULE_EXPOSITION_BATI, RULE_ZONE_REGLEMENTEE],
+    materialityTier: tier,
+    displaySection: "verifications",
+  };
+}
+
 // LE VALIDATEUR : l'assembleur ne fait pas confiance au constructeur (même doctrine qu'assertFactValid).
 // Jette : un patron futur qui absorberait deux fois une carte ou masquerait un fait inexistant doit
 // exploser en développement, jamais rendre une UI silencieusement incohérente.
@@ -155,6 +195,7 @@ export function assertCompositionsValid(run: RunResult, compositions: FactCompos
     const section = (c as { displaySection: string }).displaySection;
     if (c.kind === "tradeoff" && section !== "compromises") throw new Error(`tradeoff hors compromises : ${c.id}`);
     if (c.kind === "shared_evidence" && section !== "mismatches") throw new Error(`shared_evidence hors mismatches : ${c.id}`);
+    if (c.kind === "grouped_verification" && section !== "verifications") throw new Error(`grouped_verification hors verifications : ${c.id}`);
     if (c.absorbedFactIds.length === 0) throw new Error(`composition sans absorbé : ${c.id}`);
     for (const id of c.absorbedFactIds) {
       if (!factIds.has(id)) throw new Error(`fait absorbé inexistant : ${id} (${c.id})`);
@@ -173,6 +214,8 @@ export function composeFacts(run: RunResult, facts: ModuleFacts, project: UserPr
   if (seasonal) out.push(seasonal);
   const size = composeTerritorySizeSharedEvidence(run, facts);
   if (size) out.push(size);
+  const clay = composeClayRegulationGrouped(run, facts);
+  if (clay) out.push(clay);
   assertCompositionsValid(run, out); // toujours : le jeu est minuscule, l'incohérence silencieuse coûte plus
   return out;
 }

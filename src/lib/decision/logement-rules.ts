@@ -76,6 +76,11 @@ const ruleDpe: DecisionRule = {
   },
 };
 
+// Les deux règles que le patron de composition argiles+PPR référence (fact-compositions.ts) : la
+// constante est la source unique du ruleId, jamais une chaîne recopiée là-bas.
+export const RULE_EXPOSITION_BATI = "logement.exposition-bati";
+export const RULE_ZONE_REGLEMENTEE = "logement.zone-reglementee";
+
 export const LOGEMENT_RULES: DecisionRule[] = [
   ruleDpe,
   coverageRule({ id: "exposition-bati", tier: "structuring", topic: () => "le retrait-gonflement des argiles", coverage: (l) => l.rga, flag: (l) => l.expositionBati,

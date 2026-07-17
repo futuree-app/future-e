@@ -128,17 +128,17 @@ function capitalize(s: string): string {
   return s.length === 0 ? s : s[0]!.toUpperCase() + s.slice(1);
 }
 
-// LE LEAD PEUT ÊTRE UN TRADEOFF (spec composition §7), JAMAIS un shared_evidence : les mismatchs sont
-// exclus du lead par doctrine (RESERVE_ROLES), et un mismatch COMPOSÉ n'obtient pas un accès que les
-// mismatchs simples n'ont pas. Si un jour les mismatchs doivent pouvoir mener la conclusion, la
-// décision se prend ICI, pour tous, jamais par effet de bord d'un patron. Le candidat composé porte
-// son TITRE en topic et son SUMMARY en statement.
+// LE LEAD PEUT ÊTRE UNE COMPOSITION PORTEUSE DE RÉSERVES (tradeoff, grouped_verification), JAMAIS un
+// shared_evidence : les mismatchs sont exclus du lead par doctrine (RESERVE_ROLES), et un mismatch
+// COMPOSÉ n'obtient pas un accès que les mismatchs simples n'ont pas. Si un jour les mismatchs doivent
+// pouvoir mener la conclusion, la décision se prend ICI, pour tous, jamais par effet de bord d'un
+// patron. Le candidat composé porte son TITRE en topic et son SUMMARY en statement.
 type LeadCandidate = { factId: string; topic: string; statement: string; materialityTier: MaterialityTier };
 
 export function selectLead(shownFacts: DecisionFact[], shownCompositions: FactComposition[] = []): LeadSelection {
   const candidates: LeadCandidate[] = [
     ...reserves(shownFacts).map((f) => ({ factId: f.id, topic: f.topic, statement: f.statement, materialityTier: f.materialityTier })),
-    ...shownCompositions.filter((c) => c.kind === "tradeoff")
+    ...shownCompositions.filter((c) => c.kind === "tradeoff" || c.kind === "grouped_verification")
       .map((c) => ({ factId: c.id, topic: c.title, statement: c.summary, materialityTier: c.materialityTier })),
   ];
   if (candidates.length === 0) return { kind: "none" };

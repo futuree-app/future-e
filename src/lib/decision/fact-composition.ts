@@ -50,4 +50,21 @@ export type SharedEvidenceComposition = {
   displaySection: "mismatches";
 };
 
-export type FactComposition = TradeoffComposition | SharedEvidenceComposition;
+// DEUX VÉRIFICATIONS, UN MÊME SUJET DÉCISIONNEL. Le patron regroupe des faits établis dont les actions
+// se mènent ensemble (v1 : la vulnérabilité du bâti aux mouvements de sol, argiles + PPR sécheresse).
+// Chaque item réutilise la brique CompositionSide : constat, preuves, action et limitation restent
+// portés par LEUR item (invariant 8), rien n'est fusionné en un paragraphe.
+export type GroupedVerificationComposition = {
+  id: string;
+  kind: "grouped_verification";
+  patternId: "clay_regulation_grouped";
+  title: string;
+  summary: string;
+  items: CompositionSide[];
+  absorbedFactIds: string[];
+  referencedRuleIds: string[];
+  materialityTier: MaterialityTier; // max des tiers absorbés
+  displaySection: "verifications";
+};
+
+export type FactComposition = TradeoffComposition | SharedEvidenceComposition | GroupedVerificationComposition;

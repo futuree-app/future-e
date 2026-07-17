@@ -102,7 +102,9 @@ export function assembleDossier(
   // sections sont plafonnées (caps 2/3/3/4) annonçait « 5 points » et n'en affichait que 4. Le verdict
   // compte donc lui aussi sur l'affiché : le lecteur doit pouvoir compter les cartes et retomber dessus.
   const established = run.facts.find((f) => f.role === "incompatibility" && f.evidenceStrength === "established");
-  const tradeoffShown = shownComps.filter((c) => c.kind === "tradeoff");
+  // Les compositions porteuses de réserves : un tradeoff (son côté défavorable est une verification) et
+  // une grouped_verification (deux verifications sous une carte) comptent chacun pour UNE carte-réserve.
+  const reserveComps = shownComps.filter((c) => c.kind === "tradeoff" || c.kind === "grouped_verification");
   const sharedShown = shownComps.filter((c) => c.kind === "shared_evidence");
   const reservesShownFacts = shown.filter((f) => RESERVE_ROLES.has(f.role));
   // Le TOTAL des mismatchs ÉMIS (le verdict compte dessus, « N de vos priorités » reste vrai même
@@ -125,12 +127,10 @@ export function assembleDossier(
     favorableCount: criteria.favorableCount,
     mismatchTotal,
     mismatchShown,
-    // Un tradeoff porte une réserve (son côté défavorable est une verification) : il compte pour UNE
-    // carte-réserve, comme un compromise aujourd'hui.
     majorReserveCount:
       reservesShownFacts.filter((f) => f.materialityTier !== "secondary").length +
-      tradeoffShown.filter((c) => c.materialityTier !== "secondary").length,
-    reservesShown: reservesShownFacts.length + tradeoffShown.length,
+      reserveComps.filter((c) => c.materialityTier !== "secondary").length,
+    reservesShown: reservesShownFacts.length + reserveComps.length,
   });
 
   return {
@@ -146,9 +146,11 @@ export function assembleDossier(
       factIds: [...shown.map((f) => f.id), ...shownComps.flatMap((c) => c.absorbedFactIds)],
       evidence: [
         ...shown.flatMap(factEvidence),
-        ...shownComps.flatMap((c) => c.kind === "tradeoff"
-          ? [...c.favorableSide.evidence, ...c.unfavorableSide.evidence]
-          : c.sharedEvidence),
+        ...shownComps.flatMap((c) => {
+          if (c.kind === "tradeoff") return [...c.favorableSide.evidence, ...c.unfavorableSide.evidence];
+          if (c.kind === "grouped_verification") return c.items.flatMap((i) => i.evidence);
+          return c.sharedEvidence;
+        }),
       ],
     },
     sections,

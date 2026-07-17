@@ -184,6 +184,30 @@ reste attachée à SA conséquence, jamais généralisée à la carte.
 | 2 faits émis, sources différentes | deux cartes simples |
 | 2 faits, source partagée mais hors patron | deux cartes simples |
 
+## 5bis. Patron 3 : `clay_regulation_grouped` (ajouté 2026-07-17, chantier prose)
+
+Troisième kind : `grouped_verification`. Deux VÉRIFICATIONS établies au grain adresse qui parlent du même
+sujet décisionnel (la vulnérabilité du bâti aux mouvements de sol) et dont les actions se mènent ensemble :
+`logement:exposition-bati` (argiles) + `logement:zone-reglementee` (PPR). Les items réutilisent la brique
+`CompositionSide` : chaque constat garde sa preuve, son action et sa limitation (invariant 8).
+
+**Gate** : les deux faits RÉELLEMENT émis (les règles logement portent déjà posture et couverture), ET
+`pprnLabel` attesté sécheresse/argiles (`/sécheresse|argile|tassement/i`). Un PPR d'une autre nature
+(inondation…) ne compose JAMAIS : le titre affirme la sécheresse, le patron n'a le droit de se déclencher
+que si le libellé le prouve. Libellé absent = nature invérifiable = pas de composition.
+
+**Section** : `verifications`. **Matérialité** : max des absorbés (les deux sont structuring en v1).
+**Comptes** : une grouped_verification compte pour UNE carte-réserve (`reservesShown`, `majorReserveCount`),
+comme le tradeoff. **Lead** : candidate comme le tradeoff (titre en topic, summary en statement) : elle
+porte des réserves, un shared_evidence reste exclu.
+
+| Faits logement émis | Résultat |
+|---|---|
+| argiles + PPR « PPR Sécheresse - … » | composition, 2 items, 2 absorbés |
+| argiles + PPR « PPRI Garonne » | deux cartes simples |
+| argiles + PPR, pprnLabel null | deux cartes simples |
+| argiles seul, ou PPR seul | carte simple |
+
 ## 6. Assembleur (`decision-assembler.ts`, modifié)
 
 `assembleDossier` gagne une entrée `compositions: FactComposition[]`.
