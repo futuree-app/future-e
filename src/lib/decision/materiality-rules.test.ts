@@ -76,6 +76,20 @@ test("règle inondation : vérification si exposition notable, texte acheteur", 
   assert.match(f.statement, /1982/);
 });
 
+test("règle inondation : la preuve est OPPOSABLE, jamais un score interne (100/100 illisible)", () => {
+  // « 100/100 » pouvait se lire comme une probabilité ou une certitude. La preuve affiche la matière
+  // que le lecteur peut vérifier (arrêtés CatNat) ; le score reste interne au moteur.
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
+  const avec = run(facts({ inondationRisque: 80, catnatInondation: 6 }), p)
+    .facts.find((x) => x.ruleId === "territoire.inondation-exposition");
+  assert.ok(avec && avec.role === "verification");
+  assert.equal(avec.evidence[0]?.observedValue, "exposition élevée · 6 arrêtés CatNat depuis 1982");
+  const sans = run(facts({ inondationRisque: 80, catnatInondation: null }), p)
+    .facts.find((x) => x.ruleId === "territoire.inondation-exposition");
+  assert.ok(sans && sans.role === "verification");
+  assert.equal(sans.evidence[0]?.observedValue, "exposition élevée");
+});
+
 test("règle inondation : posture habitant -> comprendre/surveiller, pas s'engager", () => {
   const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] }, { posture: "habitant" });
   const r = run(facts({ inondationRisque: 80, catnatInondation: 6 }), p);

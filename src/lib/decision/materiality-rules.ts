@@ -92,7 +92,12 @@ const ruleInondation: DecisionRule = {
     if (f.inondationRisque < 66) return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "satisfied", facts: [], reason: "exposition non notable" };
     const habitant = p.posture === "habitant";
     const catnatCtx = f.catnatInondation != null ? ` La commune a connu ${f.catnatInondation} arrêtés de catastrophe naturelle inondation depuis 1982 (comptage administratif, pas une probabilité).` : "";
-    const ev: EvidenceRef = { factId: "inondation.risque", module: "territoire", label: `Territoire · ${f.nom}`, observedValue: `${Math.round(f.inondationRisque)}/100`, grain: "commune", href: territoireHref };
+    // LA PREUVE EST OPPOSABLE, jamais un score interne : « 100/100 » se lisait comme une probabilité ou
+    // une certitude. On affiche la matière vérifiable (arrêtés CatNat) ; le score reste au moteur.
+    const observed = f.catnatInondation != null
+      ? `exposition élevée · ${f.catnatInondation} arrêtés CatNat depuis 1982`
+      : "exposition élevée";
+    const ev: EvidenceRef = { factId: "inondation.risque", module: "territoire", label: `Territoire · ${f.nom}`, observedValue: observed, grain: "commune", href: territoireHref };
     const fact: VerificationFact = {
       id: `${f.insee}:inondation-exposition`, ruleId: RULE_INOND, sourceFactIds: ["inondation.risque", "inondation.catnat"], module: "territoire",
       role: "verification", materialityTier: "structuring", topic: `l'exposition ${deCommune(f.nom)} à l'inondation`,
