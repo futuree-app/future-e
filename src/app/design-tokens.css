@@ -35,6 +35,15 @@
   --green:          #4ade80;   --green-soft: #86efac; --green-tint: rgba(74, 222, 128, 0.14);
   --violet:         #a78bfa;   --violet-tint: rgba(167, 139, 250, 0.18);
   --yellow:         #fbbf24;   --yellow-tint: rgba(251, 191, 36, 0.14);
+
+  /* ALIAS GLOBAUX des noms du @theme Tailwind (globals.css). Le @theme n'émet que --color-* : les
+     composants du rapport consomment var(--accent)/--ghost/--info/--amethyst, qui ne se résolvaient
+     NULLE PART hors des pages savoir (qui scopent leur propre --accent, et gardent la priorité).
+     Sans ces alias, eyebrows et pastilles héritaient silencieusement de la couleur du parent. */
+  --accent:         #fb923c;   /* = --color-accent */
+  --ghost:          #6b7388;   /* = --color-ghost */
+  --info:           #60a5fa;   /* = --color-info */
+  --amethyst:       #a78bfa;   /* = --color-amethyst */
 }
 
 /* ============ DARK MODE (default) ============ */
