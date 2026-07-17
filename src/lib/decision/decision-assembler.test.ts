@@ -115,9 +115,11 @@ test("le scope SORT des phrases : il vit dans le plan, affiché en tête de cart
   assert.equal(d.conclusion.includes("À l'échelle de la commune"), false);
 });
 
-test("titre vérifications non-habitant : « À examiner avant de vous engager »", () => {
+test("titre vérifications non-habitant : le statut (établi) AVANT l'action (à contrôler)", () => {
+  // « À examiner » appliquait le doute à des constats PROUVÉS : le lecteur pouvait ranger un fait
+  // établi parmi les hypothèses. Le titre dit le statut, puis l'action, et garde l'ancrage décisionnel.
   const d = assembleDossier(run([verif()]), project(NO_HC), "commune", "Toulouse");
-  assert.match(d.sections.find((s) => s.key === "verifications")!.title, /à examiner/i);
+  assert.equal(d.sections.find((s) => s.key === "verifications")!.title, "Ce qui est établi, à contrôler avant de vous engager");
 });
 
 test("les réserves annoncées sont les faits AFFICHÉS, jamais les faits émis (caps)", () => {

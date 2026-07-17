@@ -20,7 +20,8 @@ const SECTION_ACCENT: Record<string, string> = {
 // Le DÉCOMPTE des réserves a quitté la conclusion : il y doublait les cartes situées juste dessous.
 // Il n'a PAS été déplacé au-dessus d'elles pour autant : l'écran a montré qu'un intertitre « Les 4
 // points à examiner avant de vous engager » répétait mot pour mot le titre de la section qui suit
-// (« À examiner avant de vous engager »). Le décompte a simplement disparu : les cartes sont là, le
+// (aujourd'hui « Ce qui est établi, à contrôler avant de vous engager »). Le décompte a simplement
+// disparu : les cartes sont là, le
 // lecteur les compte, et le verdict dit ce que le décompte ne dit pas (combien sont STRUCTURANTS).
 
 // Chip / EvidenceRow / FactBody vivent dans DecisionFactRenderParts.tsx (partagées avec la carte

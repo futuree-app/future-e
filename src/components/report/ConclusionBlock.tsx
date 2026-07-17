@@ -44,11 +44,11 @@ export function ConclusionBlock({
   blocks: RenderedBlock[];
 }) {
   const color = TONE_COLOR[plan.verdictTone];
-  const byKey = new Map(blocks.map((b) => [b.key, b.text]));
-  const verdict = byKey.get("verdict") ?? "";
-  const poids = byKey.get("reserves_found");
-  const limite = byKey.get("unexamined_hard_constraints");
-  const nonCouvert = byKey.get("uncovered_priorities");
+  const byKey = new Map(blocks.map((b) => [b.key, b]));
+  const verdict = byKey.get("verdict")?.text ?? "";
+  const poids = byKey.get("reserves_found")?.text;
+  const condition = byKey.get("unexamined_hard_constraints");
+  const nonCouvert = byKey.get("uncovered_priorities")?.text;
 
   // Le fait saillant n'est pas affiché en cas d'incompatibilité : le blocage EST la réponse, en haut.
   //
@@ -77,24 +77,29 @@ export function ConclusionBlock({
       {/* LA RÉPONSE. Déterministe, mot pour mot : jamais générée. */}
       <p className="text-[21px] leading-[1.45] text-label">{verdict}</p>
 
+      {/* Une contrainte dure non testée réduit la PORTÉE du verdict : elle se lit juste sous lui,
+          AVANT le poids (registre 2 de conclusion-plan.ts). C'est une condition posée par le lecteur,
+          non encore examinée : la teinte est celle du non-savoir (violet), jamais celle d'une alerte
+          établie (orange), qui affirmerait au-delà de la preuve. La gravité vient de la position. */}
+      {condition ? (
+        <div
+          className="mt-5 rounded-xl px-4 py-3 border"
+          style={{
+            borderColor: "color-mix(in srgb, var(--violet) 30%, transparent)",
+            background: "color-mix(in srgb, var(--violet) 6%, transparent)",
+          }}
+        >
+          <Eyebrow color="var(--violet)">
+            {condition.sourceIds.length > 1 ? "Conditions à vérifier" : "Condition à vérifier"}
+          </Eyebrow>
+          <p className="text-[15px] leading-[1.55] text-muted">{condition.text}</p>
+        </div>
+      ) : null}
+
       {showPoids ? (
         <div className="mt-5">
           <Eyebrow color="var(--accent)">{poidsLabel}</Eyebrow>
           <p className="text-[17px] leading-[1.55] text-label">{poids}</p>
-        </div>
-      ) : null}
-
-      {/* Une contrainte dure non testée réduit la PORTÉE du verdict : elle se lit juste sous lui. */}
-      {limite ? (
-        <div
-          className="mt-5 rounded-xl px-4 py-3 border"
-          style={{
-            borderColor: "color-mix(in srgb, var(--orange) 30%, transparent)",
-            background: "color-mix(in srgb, var(--orange) 6%, transparent)",
-          }}
-        >
-          <Eyebrow color="var(--orange)">Limite de ce constat</Eyebrow>
-          <p className="text-[15px] leading-[1.55] text-muted">{limite}</p>
         </div>
       ) : null}
 

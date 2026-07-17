@@ -14,7 +14,10 @@ function labels(project: UserProject): { engage: string; verifTitle: string } {
   if (project.posture === "habitant") {
     return { engage: "comprendre et surveiller", verifTitle: "Ce que ces données invitent à comprendre ou surveiller" };
   }
-  return { engage: "vous engager", verifTitle: "À examiner avant de vous engager" };
+  // Le statut (établi) AVANT l'action (à contrôler) : « À examiner » appliquait le doute à des constats
+  // prouvés. « Vérifier » reste réservé au non-examiné (condition de la conclusion) ; « contrôler » dit
+  // la conséquence d'un fait établi, au grain du bien.
+  return { engage: "vous engager", verifTitle: "Ce qui est établi, à contrôler avant de vous engager" };
 }
 
 const TIER_RANK: Record<MaterialityTier, number> = { decision_critical: 0, structuring: 1, secondary: 2 };
