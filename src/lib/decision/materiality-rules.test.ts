@@ -159,13 +159,23 @@ test("CHALEUR, exposition notable : une carte CHIFFRÉE, et jamais « actuelleme
   const r = run(facts({ climat: EXPOSEE }), projetClimat("faible_chaleur"));
   const f = r.facts.find((x) => x.ruleId === "territoire.climat-chaleur");
   assert.ok(f && f.role === "verification");
-  assert.match(f.statement, /14 jours/); // la valeur projetée, pas un percentile
-  assert.match(f.statement, /69 (jours|nuits)/);
-  assert.match(f.statement, /période de référence 1976-2005/);
+  // LE SUJET PORTE L'UNITÉ : la valeur projetée n'est plus suivie de « jours » (fini « jours jours jours »).
+  assert.match(f.statement, /passeraient de 3 par an sur la période de référence 1976-2005 à 14 à l'horizon 2050/);
+  assert.doesNotMatch(f.statement, /\d+ jours/); // aucun nombre suivi de « jours »
+  // LA 2e TRAJECTOIRE HÉRITE DU CADRE : « de 33 à 69 par an », sans redire la période ni l'horizon.
+  assert.match(f.statement, /Les nuits tropicales, elles, passeraient de 33 à 69 par an/);
+  assert.match(f.statement, /des nuits où la température ne redescend pas sous 20 °C, et où le corps peine à récupérer/);
+  assert.doesNotMatch(f.statement, /ne récupère plus/); // l'absolu est tombé (invariant n°5)
   assert.doesNotMatch(f.statement, /actuellement|aujourd'hui/i);
-  // LA CONVENTION EST DITE, et elle écrit l'opérateur qu'elle applique (le code teste `>=`).
-  assert.match(f.statement, /futur•e signale cette exposition à partir de/);
-  assert.match(f.statement, /à partir de 8 jours par an au-dessus de 35 °C, ou de 25 nuits tropicales par an/);
+  // LA CONVENTION DE SIGNALEMENT quitte le constat pour son propre champ, et elle écrit l'opérateur qu'elle
+  // applique (le code teste `>=`, le texte dit « à partir de »). Elle ne disparaît d'aucune surface.
+  assert.doesNotMatch(f.statement, /futur•e signale/); // plus dans le constat
+  assert.equal(f.signalConvention, "futur•e signale cette exposition à partir de 8 jours par an au-dessus de 35 °C, ou de 25 nuits tropicales par an.");
+  // LES CHIPS DISENT LA BONNE UNITÉ : « 69 nuits », jamais « 69 jours » (le bug d'unité).
+  const nuitsChip = f.evidence.find((e) => e.factId === "climat.nuitsTropicales");
+  assert.equal(nuitsChip?.observedValue, "69 nuits à l'horizon 2050");
+  const joursChip = f.evidence.find((e) => e.factId === "climat.joursTresChauds");
+  assert.equal(joursChip?.observedValue, "14 jours à l'horizon 2050");
   assert.ok(f.limitation?.includes("commune"));
   assert.equal(f.action?.type, "renseigner_adresse"); // sans adresse : il y a quelque chose à affiner
 });
@@ -207,20 +217,26 @@ test("CHALEUR, critère non déclaré : not_applicable, aucune carte", () => {
 test("FEU : la phrase dit un DANGER MÉTÉOROLOGIQUE, jamais une probabilité d'incendie", () => {
   const r = run(facts({ climat: EXPOSEE }), projetClimat("faible_risque_feu"));
   const f = r.facts.find((x) => x.ruleId === "territoire.climat-feu")!;
+  assert.ok(f.role === "verification");
   assert.match(f.statement, /indice forêt-météo/);
   assert.match(f.statement, /danger météorologique très sévère/);
-  assert.match(f.statement, /50 jours/);
-  assert.match(f.statement, /à partir de 9 jours par an/);
+  assert.match(f.statement, /à 50 à l'horizon 2050/); // le sujet porte « jours »
+  assert.doesNotMatch(f.statement, /\d+ jours/);
+  // La convention de signalement vit dans son propre champ, pas dans le constat.
+  assert.doesNotMatch(f.statement, /futur•e signale/);
+  assert.equal(f.signalConvention, "futur•e signale cette exposition à partir de 9 jours par an.");
   assert.match(f.action!.label, /débroussaillement/);
 });
 
-test("PLUIES : un cumul en 24 heures, jamais « par an »", () => {
+test("PLUIES : un cumul en 24 heures, jamais « par an » ; le « mm » reste (le sujet ne le porte pas)", () => {
   const r = run(facts({ climat: EXPOSEE }), projetClimat("faible_precip_extremes"));
   const f = r.facts.find((x) => x.ruleId === "territoire.climat-pluies")!;
+  assert.ok(f.role === "verification");
   assert.match(f.statement, /74 mm/);
   assert.match(f.statement, /sur 24 heures/);
   assert.doesNotMatch(f.statement, /mm par an/);
-  assert.match(f.statement, /à partir de 65 mm/);
+  assert.doesNotMatch(f.statement, /futur•e signale/);
+  assert.equal(f.signalConvention, "futur•e signale cette intensité à partir de 65 mm.");
 });
 
 test("PLUIES et INONDATION peuvent COEXISTER sans dire deux fois la même chose", () => {

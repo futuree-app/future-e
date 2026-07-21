@@ -78,6 +78,12 @@ export type VerificationFact = BaseFact & {
   evidence: EvidenceRef[];
   action: { type: VerificationActionType; label: string };
   limitation?: string;
+  // POURQUOI futur•e SIGNALE ce fait : la convention de seuil (« signale cette exposition à partir de
+  // 8 jours par an… »). DISTINCTE de `limitation` (ce que le constat ne permet pas de conclure) : la
+  // mélanger au constat noyait la trajectoire, la mélanger à la limite réunissait deux natures. Champ
+  // propre, rendu en ligne discrète sur la carte. La conclusion rédigée ne la reçoit pas (card-only) :
+  // une conclusion n'a pas à réciter une convention de produit.
+  signalConvention?: string;
 };
 // LE FONDEMENT d'un mismatch : union discriminée. On ne porte QUE les fondements productibles aujourd'hui.
 // La mesure physique (mer) et la catégorie d'agglo (taille) viendront au lot 3, avec leur propre kind.

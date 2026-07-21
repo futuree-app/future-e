@@ -54,7 +54,7 @@ function makeCoastRule(): DecisionRule {
         id: `${f.insee}:mismatch-proximite_mer`, ruleId: id, sourceFactIds: ["coastDistance.proximite_mer"],
         module: "territoire", role: "mismatch", projectKey: "proximite_mer", materialityTier: tier,
         topic: "la distance à la mer",
-        statement: `Vous avez placé la proximité de la mer parmi vos priorités. La distance au littoral est estimée à environ ${km} km depuis le point de référence retenu pour ${f.nom}. Cette distance répond moins bien à cette dimension de votre projet, sans rendre ${f.nom} incompatible avec lui.`,
+        statement: `Vous avez placé la proximité de la mer parmi vos priorités. La distance au littoral est estimée à environ ${km} km depuis le point de référence retenu pour ${f.nom}. Cet écart appelle un arbitrage. Il ne rend pas ${f.nom} incompatible avec votre projet.`,
         basis: { kind: "absolute_measure", value: distanceKm, unit: "km", conventionId: COAST_PROXIMITY_CONVENTION.id },
         evidence: [ev],
         limitation:

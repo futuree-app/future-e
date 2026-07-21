@@ -12,6 +12,7 @@ export type CompositionSide = {
   factIds: string[]; // [] pour un côté satisfait (aucun fait émis)
   action?: { type: VerificationActionType; label: string }; // invariant 8 : l'action survit
   limitation?: string; // la limitation du fait absorbé reste sur SON côté
+  signalConvention?: string; // la convention de seuil du fait absorbé survit sur SON côté (invariant 8)
 };
 
 export type TradeoffComposition = {

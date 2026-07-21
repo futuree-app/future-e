@@ -39,7 +39,7 @@ const SPECS: AbsenceSpec[] = [
     classify: (f) => classifyNetworkAbsence(f.localNetwork),
     observedValue: () => "aucune desserte crédible à portée de marche",
     statement: (nom) =>
-      `Vous avez placé les déplacements du quotidien sans voiture parmi vos priorités. Aucune desserte de transports en commun considérée comme praticable au quotidien n'est identifiée à distance de marche du point de référence retenu pour ${nom}. Cela répond moins bien à cette dimension de votre projet, sans rendre ${nom} incompatible avec lui.`,
+      `Vous avez placé les déplacements du quotidien sans voiture parmi vos priorités. Aucune desserte de transports en commun considérée comme praticable au quotidien n'est identifiée à distance de marche du point de référence retenu pour ${nom}. Cet écart appelle un arbitrage. Il ne rend pas ${nom} incompatible avec votre projet.`,
     limitation:
       "Une desserte trop faible pour constituer une solution régulière au quotidien n'est pas comptée comme accessible. Cette situation concerne environ 83 % des communes françaises.",
   },

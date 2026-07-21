@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  buildClimatFacts, reconstructReference, trajectoirePhrase, CLIMAT_METRICS,
+  buildClimatFacts, reconstructReference, trajectoirePhrase, fmtClimatCount, CLIMAT_METRICS,
   type GwlScenarios,
 } from "./climat-facts.ts";
 
@@ -84,7 +84,10 @@ test("aucun scénario, ou aucune valeur : buildClimatFacts rend null (rien à ex
 test("la TRAJECTOIRE DATE sa référence (1976-2005), et ne dit JAMAIS « actuellement »", () => {
   const f = buildClimatFacts(SC)!;
   const p = trajectoirePhrase(f.joursTresChauds, "les jours au-dessus de 35 °C");
-  assert.match(p, /de 4 jours par an sur la période de référence 1976-2005 à 12 jours à l'horizon 2050/);
+  // LE SUJET PORTE L'UNITÉ (« les jours au-dessus de 35 °C ») : la trajectoire n'écrit que le nombre,
+  // « par an » reste la cadence. Fini le « 4 jours par an à 12 jours » (jours jours jours).
+  assert.match(p, /de 4 par an sur la période de référence 1976-2005 à 12 à l'horizon 2050/);
+  assert.doesNotMatch(p, /\d+ jours/); // le nombre n'est jamais suivi de « jours » : le sujet le dit déjà
   assert.doesNotMatch(p, /actuellement|aujourd'hui/i);
 });
 
@@ -92,8 +95,33 @@ test("sans référence reconstructible, on ne FABRIQUE pas de comparaison", () =
   const sansAnom: GwlScenarios = { gwl20: { h: "2050", v: { NORTX35D_yr: 12 } } };
   const f = buildClimatFacts(sansAnom)!;
   const p = trajectoirePhrase(f.joursTresChauds, "les jours au-dessus de 35 °C");
-  assert.match(p, /atteindraient 12 jours par an à l'horizon 2050/);
+  assert.match(p, /atteindraient 12 par an à l'horizon 2050/);
   assert.doesNotMatch(p, /passeraient|contre/);
+});
+
+test("le CADRE HÉRITÉ : la 2e trajectoire ne redit ni la période ni le second horizon", () => {
+  // Quand une phrase enchaîne deux trajectoires, la seconde hérite du cadre posé par la première :
+  // « de 11 à 31 par an », sans « sur la période de référence », sans second « à l'horizon 2050 ».
+  const f = buildClimatFacts(SC)!;
+  const p = trajectoirePhrase(f.nuitsTropicales, "Les nuits tropicales, elles,", { heriteCadre: true });
+  assert.match(p, /^Les nuits tropicales, elles, passeraient de 11 à 31 par an$/);
+  assert.doesNotMatch(p, /période de référence|horizon/);
+});
+
+test("fmtClimatCount : une chip isolée DIT son unité, et « nuits » n'est PAS « jours »", () => {
+  // Le bug d'unité : fmtClimat, aveugle au type de compte, rendait les nuits tropicales en « jours ».
+  const f = buildClimatFacts(SC)!;
+  assert.equal(fmtClimatCount(f.nuitsTropicales.projete!, f.nuitsTropicales), "31 nuits");
+  assert.equal(fmtClimatCount(f.joursTresChauds.projete!, f.joursTresChauds), "12 jours");
+  assert.equal(fmtClimatCount(f.pluieMax24h.projete!, f.pluieMax24h), "78 mm");
+  assert.equal(fmtClimatCount(1, f.nuitsTropicales), "1 nuit"); // singulier
+});
+
+test("chaque axe porte le NOM de son compte (jour / nuit), source unique CLIMAT_METRICS", () => {
+  const f = buildClimatFacts(SC)!;
+  assert.equal(f.nuitsTropicales.countNoun, "nuit");
+  assert.equal(f.joursTresChauds.countNoun, "jour");
+  assert.equal(f.joursFeu.countNoun, "jour");
 });
 
 test("L'ANOMALIE DE PLUIE EST RELATIVE : on divise, on ne soustrait pas", () => {

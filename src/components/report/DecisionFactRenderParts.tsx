@@ -52,10 +52,14 @@ export function FactBody({ fact }: { fact: DecisionFact }) {
     fact.role === "incompatibility" || fact.role === "verification" || fact.role === "mismatch"
       ? fact.limitation
       : undefined;
+  // POURQUOI futur•e signale ce fait (convention de seuil). Ligne discrète, distincte de la limitation :
+  // deux natures, deux lignes, jamais fondues dans le constat.
+  const signalConvention = fact.role === "verification" ? fact.signalConvention : undefined;
   return (
     <>
       <p className="text-label text-[14px] leading-[1.6]">{fact.statement}</p>
       {limitation ? <p className="text-ghost text-[12.5px] leading-[1.5] mt-1">{limitation}</p> : null}
+      {signalConvention ? <p className="text-ghost text-[12.5px] leading-[1.5] mt-1">{signalConvention}</p> : null}
     </>
   );
 }

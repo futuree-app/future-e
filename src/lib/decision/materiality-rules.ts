@@ -25,7 +25,7 @@ import { AGGLOMERATION_CATEGORIES } from "./agglomeration-facts.ts";
 import { deCommune } from "../typography.ts";
 import { toCommuneAttributes } from "./module-facts-map.ts";
 import {
-  trajectoirePhrase, fmtClimat, CLIMAT_HORIZON_LABEL, type ClimatAxe,
+  trajectoirePhrase, fmtClimatCount, CLIMAT_HORIZON_LABEL, type ClimatAxe,
 } from "./climat-facts.ts";
 import {
   bruitEnPhrase, industrieEnPhrase, industrieGlose, distanceEnPhrase,
@@ -130,9 +130,11 @@ const ruleInondation: DecisionRule = {
 //   tous les axes lus, aucun notable             -> satisfied       (silencieux, la COUVERTURE MONTE)
 //   aucun notable MAIS un axe manquant           -> uncertain       (l'axe manquant pouvait être notable)
 //
-// LA CONVENTION DE SIGNALEMENT EST DITE DANS LE TEXTE (« à partir de 8 jours par an »), jamais appliquée
-// en silence : c'est un seuil de SIGNALEMENT futur•e, pas une limite officielle de danger sanitaire. Et
-// la phrase écrit l'opérateur qu'elle applique (le code teste `>=`, le texte dit « à partir de »).
+// LA CONVENTION DE SIGNALEMENT EST DITE SUR LA CARTE, dans son propre champ (`signalConvention`, ligne
+// discrète sous le constat), jamais appliquée en silence, et jamais noyée au milieu du constat où elle
+// alourdissait la trajectoire : c'est un seuil de SIGNALEMENT futur•e, pas une limite officielle de danger
+// sanitaire. Elle écrit l'opérateur qu'elle applique (le code teste `>=`, le texte dit « à partir de »).
+// Elle ne remonte PAS à la conclusion rédigée (card-only) : une conclusion n'a pas à réciter une convention.
 //
 // LA MATÉRIALITÉ SUIT LE POIDS DÉCLARÉ, jamais l'intensité seule : `structuring` si le lecteur a pesé le
 // critère à 3, `secondary` s'il l'a posé à 2. JAMAIS `decision_critical` : une préférence n'est pas une
@@ -142,8 +144,10 @@ const climatEvidence = (nom: string, key: string, axe: ClimatAxe): EvidenceRef =
   factId: `climat.${key}`,
   module: "territoire",
   label: `Climat · ${nom}`,
+  // fmtClimatCount porte le NOM du compte (« 44 nuits », pas « 44 jours ») : hors phrase, la chip doit dire
+  // son unité, et « unit » (« jours ») ne distingue pas jour et nuit.
   observedValue:
-    axe.projete != null ? `${fmtClimat(axe.projete, axe.unit)} à l'horizon ${CLIMAT_HORIZON_LABEL}` : undefined,
+    axe.projete != null ? `${fmtClimatCount(axe.projete, axe)} à l'horizon ${CLIMAT_HORIZON_LABEL}` : undefined,
   grain: "commune",
   href: territoireHref,
 });
@@ -186,11 +190,15 @@ const ruleChaleur: DecisionRule = {
     // quand une seule explique la réserve ; l'autre reste dans la preuve.
     const phrases: string[] = [];
     if (jours.notable) phrases.push(trajectoirePhrase(jours, "Les jours au-dessus de 35 °C"));
-    // « Nuit tropicale » est un terme technique (Météo-France) : on le donne, puis on le traduit, sans
-    // laisser une incise ouverte au milieu de la trajectoire.
+    // « Nuit tropicale » est un terme technique (Météo-France) : on le donne, puis on le TRADUIT dans le
+    // corps du lecteur (la signature de futur•e), après deux points, sans incise ouverte au milieu de la
+    // trajectoire. La traduction reste charnelle mais SANS absolu (« peine à récupérer », pas « ne récupère
+    // plus » : la littérature établit une récupération dégradée, pas nulle). Quand les jours sont aussi
+    // notables, la 2e trajectoire hérite du cadre (« de 33 à 69 par an »), et « elles » la relie à la 1re.
     if (nuits.notable) {
+      const sujetNuits = jours.notable ? "Les nuits tropicales, elles," : "Les nuits tropicales";
       phrases.push(
-        `${trajectoirePhrase(nuits, "Les nuits tropicales", { referenceCourte: jours.notable })}, ces nuits où la température ne descend pas sous 20 °C et où le corps ne récupère plus`,
+        `${trajectoirePhrase(nuits, sujetNuits, { heriteCadre: jours.notable })} : des nuits où la température ne redescend pas sous 20 °C, et où le corps peine à récupérer`,
       );
     }
     const seuils = [
@@ -203,7 +211,8 @@ const ruleChaleur: DecisionRule = {
       sourceFactIds: ["climat.joursTresChauds", "climat.nuitsTropicales"], module: "territoire",
       role: "verification", materialityTier: tierFor(p, key),
       topic: `les fortes chaleurs à ${f.nom}`,
-      statement: `${phrases.join(". ")}. futur•e signale cette exposition à partir de ${seuils}.`,
+      statement: `${phrases.join(". ")}.`,
+      signalConvention: `futur•e signale cette exposition à partir de ${seuils}.`,
       limitation: LIMITATION_CLIMAT,
       evidence: [climatEvidence(f.nom, "joursTresChauds", jours), climatEvidence(f.nom, "nuitsTropicales", nuits)],
       // L'ACTION EST SPÉCIFIQUE, et c'est ce qui rend la vérification légitime : à l'échelle de la commune
@@ -236,7 +245,8 @@ const ruleFeu: DecisionRule = {
       topic: `le danger d'incendie à ${f.nom}`,
       // L'INDICE MESURE UN DANGER MÉTÉOROLOGIQUE, pas la probabilité qu'un incendie survienne. La phrase ne
       // promet donc pas plus que la donnée ne sait dire.
-      statement: `${trajectoirePhrase(axe, "Les jours où l'indice forêt-météo dépasse 40, seuil de danger météorologique très sévère,")}. futur•e signale cette exposition à partir de ${axe.threshold} jours par an.`,
+      statement: `${trajectoirePhrase(axe, "Les jours où l'indice forêt-météo dépasse 40, seuil de danger météorologique très sévère,")}.`,
+      signalConvention: `futur•e signale cette exposition à partir de ${axe.threshold} jours par an.`,
       limitation: LIMITATION_CLIMAT,
       evidence: [climatEvidence(f.nom, "joursFeu", axe)],
       action: { type: "verifier_sur_place", label: "Vérifiez la végétation autour du terrain, l'éventuelle obligation légale de débroussaillement, l'accès des secours et les matériaux de la toiture" },
@@ -267,7 +277,8 @@ const rulePluies: DecisionRule = {
       // climatique des précipitations (ce que le ciel déverse), là l'exposition du TERRITOIRE (ce que le
       // sol et les cours d'eau en font). Les actions le disent : le ruissellement d'un côté, l'état des
       // risques de l'autre.
-      statement: `${trajectoirePhrase(axe, "Les épisodes de pluie les plus intenses, mesurés sur 24 heures,")}. futur•e signale cette intensité à partir de ${axe.threshold} mm.`,
+      statement: `${trajectoirePhrase(axe, "Les épisodes de pluie les plus intenses, mesurés sur 24 heures,")}.`,
+      signalConvention: `futur•e signale cette intensité à partir de ${axe.threshold} mm.`,
       limitation: LIMITATION_CLIMAT,
       evidence: [climatEvidence(f.nom, "pluieMax24h", axe)],
       action: { type: "verifier_sur_place", label: "Vérifiez le ruissellement autour de l'adresse : pente du terrain, sous-sol, réseaux d'évacuation, historique des dégâts des eaux" },

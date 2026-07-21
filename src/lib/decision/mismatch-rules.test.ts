@@ -88,6 +88,24 @@ test("poids 2 -> secondary ; poids 3 -> structuring", () => {
   assert.equal(evalRule("vie_locale", f, project([{ key: "vie_locale", weight: 2 }])).facts[0]!.materialityTier, "secondary");
   assert.equal(evalRule("vie_locale", f, project([{ key: "vie_locale", weight: 3 }])).facts[0]!.materialityTier, "structuring");
 });
+test("la CLÔTURE appelle un arbitrage, sans réciter « cette dimension de votre projet »", () => {
+  // La phrase de trop (« Cela répond moins bien à cette dimension de votre projet ») répétait le titre de
+  // section et parlait d'abstraction administrative. La clôture nomme l'arbitrage et garde la seule
+  // doctrine indispensable (mismatch != incompatibilité), dite en deux phrases.
+  const f = evalRule("nature", facts({ nature: { low: 0.08, high: 0.14 } }), project([{ key: "nature", weight: 3 }])).facts[0]!;
+  assert.match(f.statement, /Cet écart appelle un arbitrage\. Il ne rend pas Roubaix incompatible avec votre projet\.$/);
+  assert.doesNotMatch(f.statement, /répond moins bien à cette dimension/);
+  assert.doesNotMatch(f.statement, /incompatible avec lui/); // l'ancienne tournure a disparu
+});
+
+test("G3 : quand la priorité et l'indicateur coïncident (acces_ecoles), « Sur ce point » évite la répétition", () => {
+  // Pour acces_ecoles, projectPhrase === indicator (« l'accès aux collèges et lycées ») : le gabarit
+  // générique redisait le libellé deux fois de suite. « Sur ce point » le remplace côté constat.
+  const f = evalRule("acces_ecoles", facts({ acces_ecoles: { low: 0.02, high: 0.06 } }), project([{ key: "acces_ecoles", weight: 3 }])).facts[0]!;
+  assert.match(f.statement, /Vous avez placé l'accès aux collèges et lycées parmi vos priorités\. Sur ce point, Roubaix se situe/);
+  assert.doesNotMatch(f.statement, /Sur l'accès aux collèges et lycées/); // plus de duplication
+});
+
 test("lot 2b : acces_services en queue basse (poids 3) -> mismatch structurant, comparatif", () => {
   const e = evalRule("acces_services", facts({ acces_services: { low: 0.01, high: 0.04 } }), project([{ key: "acces_services", weight: 3 }]));
   assert.equal(e.outcome, "mismatch");

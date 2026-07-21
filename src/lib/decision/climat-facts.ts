@@ -60,17 +60,22 @@ export type ClimatMetricDefinition = {
   anomalyKind: "absolute" | "relative";
   threshold: number; // la convention de SIGNALEMENT futur•e (pas une limite officielle de danger)
   unit: "jours" | "mm";
+  // LE NOM DU COMPTE, distinct de l'unité. Trois métriques se comptent en « jours » (unit), mais une chip
+  // isolée doit dire « 44 NUITS » pour les nuits tropicales : « unit » ne suffit pas à trancher jour/nuit,
+  // et fmtClimat, aveugle à cette distinction, rendait « 44 jours » (le bug d'unité). Absent pour la pluie
+  // (mm), dont l'unité EST le nom.
+  countNoun?: "jour" | "nuit";
 };
 
 export const CLIMAT_METRICS: Record<ClimatMetricKey, ClimatMetricDefinition> = {
   // 9,6 % des communes (médiane nationale : 3,6 j/an à l'horizon 2050 ; maximum : 22,7).
-  joursTresChauds: { absoluteKey: "NORTX35D_yr", anomalyKey: "ATX35D_yr", anomalyKind: "absolute", threshold: 8, unit: "jours" },
+  joursTresChauds: { absoluteKey: "NORTX35D_yr", anomalyKey: "ATX35D_yr", anomalyKind: "absolute", threshold: 8, unit: "jours", countNoun: "jour" },
   // 12,5 % des communes. Une nuit qui ne descend pas sous 20 °C empêche la récupération nocturne : c'est
   // le marqueur sanitaire des canicules, davantage que le pic de l'après-midi.
-  nuitsTropicales: { absoluteKey: "NORTR_yr", anomalyKey: "ATR_yr", anomalyKind: "absolute", threshold: 25, unit: "jours" },
+  nuitsTropicales: { absoluteKey: "NORTR_yr", anomalyKey: "ATR_yr", anomalyKind: "absolute", threshold: 25, unit: "jours", countNoun: "nuit" },
   // 10,4 % des communes. L'indice forêt-météo mesure un DANGER MÉTÉOROLOGIQUE favorable aux incendies, pas
   // la probabilité qu'un incendie survienne : la phrase ne doit pas promettre plus que la donnée.
-  joursFeu: { absoluteKey: "NORIFM40_yr", anomalyKey: "AIFM40_yr", anomalyKind: "absolute", threshold: 9, unit: "jours" },
+  joursFeu: { absoluteKey: "NORIFM40_yr", anomalyKey: "AIFM40_yr", anomalyKind: "absolute", threshold: 9, unit: "jours", countNoun: "jour" },
   // 10,2 % des communes (médiane : 41 mm ; p90 : 65 mm).
   // L'anomalie est RELATIVE (+11 % en médiane) : la référence se retrouve en DIVISANT, pas en soustrayant.
   pluieMax24h: { absoluteKey: "NORRx1d_yr", anomalyKey: "ARRx1d_yr", anomalyKind: "relative", threshold: 65, unit: "mm" },
@@ -82,6 +87,7 @@ export type ClimatAxe = {
   notable: boolean; // projete >= seuil. Un projete ABSENT n'est jamais « non notable ».
   threshold: number;
   unit: "jours" | "mm";
+  countNoun?: "jour" | "nuit"; // hérité de la définition : porte « nuit » pour les nuits tropicales.
 };
 
 export type ClimatFacts = {
@@ -134,6 +140,7 @@ function axe(sc: GwlScenarios | null | undefined, def: ClimatMetricDefinition): 
     notable: projete != null && projete >= def.threshold,
     threshold: def.threshold,
     unit: def.unit,
+    ...(def.countNoun ? { countNoun: def.countNoun } : {}),
   };
 }
 
@@ -151,30 +158,46 @@ export function buildClimatFacts(sc: GwlScenarios | null | undefined): ClimatFac
 
 // ── Le texte ─────────────────────────────────────────────────────────────────
 
-// Formatage FR, sans décimale inutile : « 12 jours », « 78 mm ».
-export function fmtClimat(v: number, unit: "jours" | "mm"): string {
-  return unit === "mm" ? `${Math.round(v)} mm` : `${Math.round(v)} ${Math.round(v) <= 1 ? "jour" : "jours"}`;
+// LE COMPTE AVEC SON UNITÉ, pour une chip de preuve ISOLÉE : « 44 nuits », « 9 jours », « 78 mm ». Une
+// phrase porte l'unité dans son SUJET (« Les nuits tropicales ») et n'écrit que le nombre ; une chip, hors
+// phrase, doit la dire. Et pour une nuit tropicale, ce n'est pas « jours » : `countNoun` tranche jour/nuit
+// là où `unit` (« jours ») les confond (le bug que fmtClimat, aveugle, laissait passer).
+export function fmtClimatCount(v: number, a: ClimatAxe): string {
+  const r = Math.round(v);
+  if (a.unit === "mm") return `${r} mm`;
+  const noun = a.countNoun ?? "jour";
+  return `${r} ${r <= 1 ? noun : `${noun}s`}`;
 }
 
 // LA TRAJECTOIRE, DITE HONNÊTEMENT. La référence est la FIN DU XXe SIÈCLE, jamais « aujourd'hui ». Quand
 // elle n'est pas reconstructible, on ne fabrique pas de comparaison : on donne la valeur projetée seule.
 //
-// « Par an » ne vaut QUE pour un compte de jours. Un cumul de pluie est mesuré EN 24 HEURES : écrire
-// « 68 mm par an » ferait passer un épisode intense pour une pluviométrie annuelle dérisoire.
+// LE SUJET PORTE L'UNITÉ. « Les jours au-dessus de 35 °C » dit déjà « jours » : la trajectoire n'écrit que
+// le nombre (« passeraient de 2 par an à 9 »), sinon « jours » revient trois fois dans une phrase. Le cumul
+// de pluie garde « mm » : son sujet (« les épisodes les plus intenses ») ne porte pas l'unité. « Par an » ne
+// vaut QUE pour un compte de jours : « 68 mm par an » ferait passer un épisode de 24 heures pour une
+// pluviométrie annuelle dérisoire.
 export function trajectoirePhrase(
   a: ClimatAxe,
   sujet: string,
-  // Quand une phrase enchaîne DEUX trajectoires (les jours très chauds, puis les nuits tropicales), redire
-  // « sur la période de référence 1976-2005 » une seconde fois alourdit sans rien apprendre : la seconde
-  // renvoie à la première. La période reste dite une fois, entièrement, et elle reste opposable.
-  opts?: { referenceCourte?: boolean },
+  // CADRE HÉRITÉ : quand une phrase enchaîne DEUX trajectoires (les jours très chauds, puis les nuits
+  // tropicales), la seconde hérite du cadre posé par la première. On compresse : « de {ref} à {proj} par
+  // an », sans redire « sur la période de référence 1976-2005 » ni un second « à l'horizon 2050 ». La
+  // période reste dite une fois, entièrement, sur la première trajectoire, et elle reste opposable.
+  opts?: { heriteCadre?: boolean },
 ): string {
   if (a.projete == null) return "";
+  // Le nombre NU pour un compte de jours/nuits (le sujet porte l'unité) ; « X mm » pour un cumul de pluie.
+  const num = (v: number): string => (a.unit === "mm" ? `${Math.round(v)} mm` : String(Math.round(v)));
   const cadence = a.unit === "jours" ? " par an" : "";
-  const proj = fmtClimat(a.projete, a.unit);
+  const proj = num(a.projete);
+  if (opts?.heriteCadre) {
+    return a.reference == null
+      ? `${sujet} atteindraient ${proj}${cadence}`
+      : `${sujet} passeraient de ${num(a.reference)} à ${proj}${cadence}`;
+  }
   if (a.reference == null) {
     return `${sujet} atteindraient ${proj}${cadence} à l'horizon ${CLIMAT_HORIZON_LABEL}`;
   }
-  const ref = opts?.referenceCourte ? "sur la même période" : CLIMAT_REFERENCE_LABEL;
-  return `${sujet} passeraient de ${fmtClimat(a.reference, a.unit)}${cadence} ${ref} à ${proj} à l'horizon ${CLIMAT_HORIZON_LABEL}`;
+  return `${sujet} passeraient de ${num(a.reference)}${cadence} ${CLIMAT_REFERENCE_LABEL} à ${proj} à l'horizon ${CLIMAT_HORIZON_LABEL}`;
 }

@@ -77,6 +77,7 @@ function composeSeasonalClimateTradeoff(
       factIds: [chaleurFact.id],
       action: chaleurFact.action,
       ...(chaleurFact.limitation ? { limitation: chaleurFact.limitation } : {}),
+      ...(chaleurFact.signalConvention ? { signalConvention: chaleurFact.signalConvention } : {}),
     },
     absorbedFactIds: [chaleurFact.id],
     referencedRuleIds: [RULE_DOUCEUR, RULE_CHALEUR],
@@ -162,6 +163,7 @@ function composeClayRegulationGrouped(run: RunResult, facts: ModuleFacts): Group
     factIds: [f.id],
     ...(f.action ? { action: f.action } : {}),
     ...(f.limitation ? { limitation: f.limitation } : {}),
+    ...(f.signalConvention ? { signalConvention: f.signalConvention } : {}),
   });
   const tier: MaterialityTier =
     TIER_ORDER[argiles.materialityTier] <= TIER_ORDER[ppr.materialityTier] ? argiles.materialityTier : ppr.materialityTier;

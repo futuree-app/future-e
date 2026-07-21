@@ -10,6 +10,7 @@ function SideBlock({ side, color }: { side: CompositionSide; color: string }) {
       <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-ghost mb-1">{side.label}</p>
       <p className="text-label text-[14px] leading-[1.6]">{side.statement}</p>
       {side.limitation ? <p className="text-ghost text-[12.5px] leading-[1.5] mt-1">{side.limitation}</p> : null}
+      {side.signalConvention ? <p className="text-ghost text-[12.5px] leading-[1.5] mt-1">{side.signalConvention}</p> : null}
       <div className="flex items-center gap-2 mt-2 flex-wrap">
         {side.evidence.map((e, i) => (
           <Chip key={i} label={e.href ? "Preuve" : e.label} value={e.observedValue} href={e.href} color={color} />

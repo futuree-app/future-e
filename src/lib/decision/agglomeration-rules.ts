@@ -32,14 +32,14 @@ const SPECS: SizeSpec[] = [
     topic: "la taille du territoire",
     outcomes: { village: "satisfied", petite: "satisfied", moyenne: "neutral", grande: "mismatch", metropole: "mismatch" },
     buildStatement: (nom, fragment) =>
-      `Vous avez placé le fait d'éviter les grandes villes parmi vos priorités. ${fragment}. Cela répond moins bien à cette dimension de votre projet, sans rendre ${nom} incompatible avec lui.`,
+      `Vous avez placé le fait d'éviter les grandes villes parmi vos priorités. ${fragment}. Cet écart appelle un arbitrage. Il ne rend pas ${nom} incompatible avec votre projet.`,
   },
   {
     key: "prefere_grande_ville",
     topic: "la taille du territoire",
     outcomes: { village: "mismatch", petite: "mismatch", moyenne: "neutral", grande: "satisfied", metropole: "satisfied" },
     buildStatement: (nom, fragment) =>
-      `Vous avez placé le fait de vivre dans une grande ville parmi vos priorités. ${fragment}. Cela répond moins bien à cette dimension de votre projet, sans rendre ${nom} incompatible avec lui.`,
+      `Vous avez placé le fait de vivre dans une grande ville parmi vos priorités. ${fragment}. Cet écart appelle un arbitrage. Il ne rend pas ${nom} incompatible avec votre projet.`,
   },
   {
     key: "eviter_isolement",

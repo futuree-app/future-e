@@ -73,13 +73,20 @@ function makeMismatchRule(key: PreferenceKey): DecisionRule {
         factId: `relativePosition.${key}`, module: "territoire", label: `Territoire · ${f.nom}`,
         observedValue: `parmi ${rankPhrase(band.high)} les moins favorables`, grain: "commune", href: territoireHref,
       };
+      // G3 : quand la priorité et l'indicateur portent le MÊME libellé (acces_ecoles), le gabarit générique
+      // redirait « … parmi vos priorités. Sur l'accès aux collèges et lycées, … » : « Sur ce point » évite
+      // la répétition, sans rien perdre du constat.
+      const surIndicateur = lab.projectPhrase === lab.indicator ? "Sur ce point" : `Sur ${lab.indicator}`;
       const fact: MismatchFact = {
         id: `${f.insee}:mismatch-${key}`, ruleId: id, sourceFactIds: [`relativePosition.${key}`], module: "territoire",
         role: "mismatch", projectKey: key, materialityTier: tier,
         topic: lab.topic,
         // COMPARATIF, jamais un jugement absolu. L'univers est nommé (« de France »), le lien au projet
-        // explicite. « moins bien » ne dit pas « mauvais » : il dit « moins qu'ailleurs ».
-        statement: `Vous avez placé ${lab.projectPhrase} parmi vos priorités. Sur ${lab.indicator}, ${f.nom} se situe parmi ${rankPhrase(band.high)} les moins favorables de France. Cela répond moins bien à cette dimension de votre projet, sans rendre ${f.nom} incompatible avec lui.`,
+        // explicite. « moins bien » ne dit pas « mauvais » : il dit « moins qu'ailleurs ». La clôture nomme
+        // l'ARBITRAGE (le vocabulaire du verdict) et garde la seule doctrine indispensable, en deux phrases :
+        // un mismatch n'est pas une incompatibilité. Fini « répond moins bien à cette dimension de votre
+        // projet » (qui répétait le titre de section et parlait d'abstraction administrative).
+        statement: `Vous avez placé ${lab.projectPhrase} parmi vos priorités. ${surIndicateur}, ${f.nom} se situe parmi ${rankPhrase(band.high)} les moins favorables de France. Cet écart appelle un arbitrage. Il ne rend pas ${f.nom} incompatible avec votre projet.`,
         basis: { kind: "relative_position", rankLow: band.low, rankHigh: band.high, universe: "communes_france", distributionVersion: MISMATCH_DISTRIBUTION_VERSION },
         evidence: [ev],
         // Certains critères (ensoleillement) portent une nuance méthodologique card-only.

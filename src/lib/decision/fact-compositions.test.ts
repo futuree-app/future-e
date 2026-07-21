@@ -26,6 +26,7 @@ function chaleurFact(tier: "secondary" | "structuring" = "structuring"): Verific
     role: "verification", materialityTier: tier,
     topic: "les fortes chaleurs à Antibes",
     statement: "Les jours au-dessus de 35 °C augmentent nettement.",
+    signalConvention: "futur•e signale cette exposition à partir de 8 jours par an au-dessus de 35 °C.",
     limitation: "Cette trajectoire est lue à l'échelle de la commune, pas de l'adresse ni du logement.",
     evidence: [{ factId: "climat.joursTresChauds", module: "territoire", label: "Territoire · Antibes", grain: "commune" }],
     action: { type: "renseigner_adresse", label: "Renseignez une adresse pour évaluer le confort d'été du logement" },
@@ -59,6 +60,7 @@ test("tradeoff saisonnier : poids >= 2 des deux côtés, satisfied + fait chaleu
   assert.deepEqual(c.absorbedFactIds, [f.id]);
   assert.equal(c.unfavorableSide.action?.label, f.action.label); // invariant 8 : l'action survit
   assert.equal(c.unfavorableSide.limitation, f.limitation); // la limitation reste sur SON côté
+  assert.equal(c.unfavorableSide.signalConvention, f.signalConvention); // invariant 8 : la convention survit
   assert.equal(c.favorableSide.factIds.length, 0); // aucun fait fabriqué côté satisfait
   assert.ok(c.favorableSide.evidence.length > 0);
   assert.equal(c.displaySection, "compromises");
@@ -191,7 +193,7 @@ function moduleFactsAvecPpr(pprnLabel: string | null): ModuleFacts {
 }
 
 test("grouped argiles+PPR : les deux faits émis + PPR sécheresse -> une carte, deux items complets", () => {
-  const argiles = logementVerif("exposition-bati", "À cette adresse, le sol est exposé au retrait-gonflement des argiles (aléa moyen ou fort).", { limitation: "L'exposition de la zone ne prouve pas un dommage sur ce bien." });
+  const argiles = logementVerif("exposition-bati", "À cette adresse, le sol est exposé au retrait-gonflement des argiles (aléa moyen ou fort).", { limitation: "L'exposition de la zone ne prouve pas un dommage sur ce bien.", signalConvention: "futur•e signale cette exposition à partir d'un aléa moyen." });
   const ppr = logementVerif("zone-reglementee", "À cette adresse, un plan de prévention des risques s'applique : PPR Sécheresse - Territoire 1 - Toulouse.");
   const out = composeFacts(run([logementEval(argiles), logementEval(ppr)]), moduleFactsAvecPpr("PPR Sécheresse - Territoire 1 - Toulouse"), project({}));
   assert.equal(out.length, 1);
@@ -204,6 +206,7 @@ test("grouped argiles+PPR : les deux faits émis + PPR sécheresse -> une carte,
   assert.equal(c.items.length, 2);
   assert.equal(c.items[0]!.statement, argiles.statement);
   assert.equal(c.items[0]!.limitation, argiles.limitation);       // invariant 8 : la limitation reste sur SON item
+  assert.equal(c.items[0]!.signalConvention, argiles.signalConvention); // invariant 8 : la convention survit
   assert.equal(c.items[0]!.action?.label, argiles.action.label);  // invariant 8 : l'action survit
   assert.equal(c.items[1]!.action?.label, ppr.action.label);
 });
