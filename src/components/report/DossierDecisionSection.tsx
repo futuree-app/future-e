@@ -52,110 +52,118 @@ export function DossierDecisionSection({
 
   return (
     <section className="mt-14" id="dossier-decision">
-      <div className="mb-7 max-w-[640px]">
-        <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-accent mb-4">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
-          En une minute
+      {/* LA COLONNE DE LECTURE. Le conteneur de page (1100 px) est PARTAGÉ avec Territoire et la page
+          quartier : on ne le resserre pas. On resserre le BLOC, et le texte continue de remplir chaque
+          carte, donc aucune phrase ne se coupe à mi-bloc. Aligné à gauche : centrer 860 px dans les
+          1044 px utiles décalerait le bloc de 92 px, assez pour rompre l'axe de la page, trop peu pour
+          se lire comme une composition voulue. Un SEUL wrapper : la colonne est une propriété du bloc,
+          et le prochain élément ajouté ici en hérite au lieu de l'oublier. */}
+      <div className="max-w-[860px]">
+        {/* Le titre « {Commune}, au regard de votre projet. » a disparu : le plus grand texte de l'écran
+            était un cadrage sans réponse, posé au-dessus d'un verdict deux fois plus petit. Le nom de la
+            commune est tissé dans le headline, qui porte désormais le <h2> de la section. */}
+        <div className="mb-7">
+          <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-accent">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+            En une minute
+          </div>
         </div>
-        <h2 className="font-normal text-[clamp(26px,3vw,40px)] leading-[1.12] tracking-[-0.6px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-          {dossier.narrativePlan.communeNom}, au regard de votre projet.
-        </h2>
-      </div>
 
-      {logementStatus === "pending" ? (
-        <div className="glass rounded-xl p-4 mb-3.5 flex items-center gap-3" style={{ borderLeft: "2px solid var(--info)" }}>
-          <span className="w-1.5 h-1.5 rounded-full bg-info shrink-0 animate-pulse" />
-          <p className="text-[13px] text-muted">Première lecture à l&apos;échelle de la commune. L&apos;analyse du logement et de son environnement immédiat est en cours.</p>
-        </div>
-      ) : null}
-      {logementStatus === "unavailable" ? (
-        <div className="glass rounded-xl p-4 mb-3.5" style={{ borderLeft: "2px solid var(--ghost)" }}>
-          <p className="text-[13px] text-muted">L&apos;analyse réglementaire de cette adresse n&apos;a pas pu être actualisée. La conclusion ci-dessous reste limitée à la commune.</p>
-        </div>
-      ) : null}
+        {logementStatus === "pending" ? (
+          <div className="glass rounded-xl p-4 mb-3.5 flex items-center gap-3" style={{ borderLeft: "2px solid var(--info)" }}>
+            <span className="w-1.5 h-1.5 rounded-full bg-info shrink-0 animate-pulse" />
+            <p className="text-[13px] text-muted">Première lecture à l&apos;échelle de la commune. L&apos;analyse du logement et de son environnement immédiat est en cours.</p>
+          </div>
+        ) : null}
+        {logementStatus === "unavailable" ? (
+          <div className="glass rounded-xl p-4 mb-3.5" style={{ borderLeft: "2px solid var(--ghost)" }}>
+            <p className="text-[13px] text-muted">L&apos;analyse réglementaire de cette adresse n&apos;a pas pu être actualisée. La conclusion ci-dessous reste limitée à la commune.</p>
+          </div>
+        ) : null}
 
-      {/* Le verdict. En « pending », le dossier n'est PAS final (l'augmentation adresse arrive) :
-          générer ici coûterait un second appel Sonnet, jeté quelques secondes plus tard. */}
-      {logementStatus === "pending" ? (
-        <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} />
-      ) : (
-        <Suspense
-          fallback={
-            <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} />
-          }
-        >
-          <ConclusionRedigee plan={dossier.narrativePlan} insee={insee} scopeKey={scopeKey} />
-        </Suspense>
-      )}
-
-      {/* Les raisons, dans l'idiome des cartes-modules (filet accent en tête) */}
-      <div className="grid gap-3.5">
-        {dossier.sections.map((s) => {
-          const col = SECTION_ACCENT[s.key] ?? "var(--amethyst)";
-          return (
-            <div key={s.key} className="glass rounded-xl p-6" style={{ borderTop: `2px solid ${col}` }}>
-              <div className="flex items-center gap-2 font-mono text-[10px] tracking-[0.1em] uppercase mb-4" style={{ color: col }}>
-                <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
-                {s.title}
-              </div>
-              <ul className="flex flex-col gap-5">
-                {s.cards.map((card) => {
-                  if (card.kind === "composition") {
-                    return (
-                      <FactCompositionCard
-                        key={card.composition.id}
-                        composition={card.composition}
-                        color={col}
-                        absorbedFacts={dossier.absorbedFacts.filter((f) => card.composition.absorbedFactIds.includes(f.id))}
-                      />
-                    );
-                  }
-                  const f = card.fact;
-                  const grain = factGrain(f);
-                  return (
-                    <li key={f.id}>
-                      {grain ? <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-ghost mb-1">{grain}</p> : null}
-                      <FactBody fact={f} />
-                      <EvidenceRow fact={f} color={col} />
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* La note « Non encore examiné » vivait ici, et disait une SECONDE fois ce que la conclusion
-          dit déjà. Deux emplacements laissaient croire à deux niveaux de réserve distincts. Une
-          contrainte dure non testée réduit la portée du verdict : elle se lit sous lui, dans « Limite
-          de ce constat », pas trente centimètres plus bas. */}
-
-      {structured ? (
-        logement ? (
-          <Link
-            href={logement.href}
-            className="mt-5 group flex items-center justify-between gap-4 px-6 py-4 rounded-xl no-underline border border-white/[0.1] bg-white/[0.02] hover:border-accent/40 hover:bg-white/[0.04] transition-colors"
-          >
-            <span className="flex flex-col gap-1">
-              <span className="text-[14px] font-semibold text-label">Voir l&apos;analyse du logement</span>
-              <span className="text-[13px] text-muted">{logement.label}</span>
-            </span>
-            <span aria-hidden className="font-mono text-[13px] text-accent transition-transform group-hover:translate-x-0.5">→</span>
-          </Link>
+        {/* Le verdict. En « pending », le dossier n'est PAS final (l'augmentation adresse arrive) :
+            générer ici coûterait un second appel Sonnet, jeté quelques secondes plus tard. */}
+        {logementStatus === "pending" ? (
+          <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} />
         ) : (
-          <Link
-            href="/rapport/logement"
-            className="mt-5 group flex items-center justify-between gap-4 px-6 py-4 rounded-xl no-underline border border-white/[0.1] bg-white/[0.02] hover:border-accent/40 hover:bg-white/[0.04] transition-colors"
+          <Suspense
+            fallback={
+              <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} />
+            }
           >
-            <span className="flex flex-col gap-1">
-              <span className="text-[14px] font-semibold text-label">Affiner avec une adresse</span>
-              <span className="text-[13px] text-muted">Le bâtiment, les risques localisés, les contraintes réglementaires et l&apos;environnement immédiat.</span>
-            </span>
-            <span aria-hidden className="font-mono text-[13px] text-accent transition-transform group-hover:translate-x-0.5">→</span>
-          </Link>
-        )
-      ) : null}
+            <ConclusionRedigee plan={dossier.narrativePlan} insee={insee} scopeKey={scopeKey} />
+          </Suspense>
+        )}
+
+        {/* Les raisons, dans l'idiome des cartes-modules (filet accent en tête) */}
+        <div className="grid gap-3.5">
+          {dossier.sections.map((s) => {
+            const col = SECTION_ACCENT[s.key] ?? "var(--amethyst)";
+            return (
+              <div key={s.key} className="glass rounded-xl p-6" style={{ borderTop: `2px solid ${col}` }}>
+                <div className="flex items-center gap-2 font-mono text-[10px] tracking-[0.1em] uppercase mb-4" style={{ color: col }}>
+                  <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
+                  {s.title}
+                </div>
+                <ul className="flex flex-col gap-5">
+                  {s.cards.map((card) => {
+                    if (card.kind === "composition") {
+                      return (
+                        <FactCompositionCard
+                          key={card.composition.id}
+                          composition={card.composition}
+                          color={col}
+                          absorbedFacts={dossier.absorbedFacts.filter((f) => card.composition.absorbedFactIds.includes(f.id))}
+                        />
+                      );
+                    }
+                    const f = card.fact;
+                    const grain = factGrain(f);
+                    return (
+                      <li key={f.id}>
+                        {grain ? <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-ghost mb-1">{grain}</p> : null}
+                        <FactBody fact={f} />
+                        <EvidenceRow fact={f} color={col} />
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* La note « Non encore examiné » vivait ici, et disait une SECONDE fois ce que la conclusion
+            dit déjà. Deux emplacements laissaient croire à deux niveaux de réserve distincts. Une
+            contrainte dure non testée réduit la portée du verdict : elle se lit sous lui, dans « Limite
+            de ce constat », pas trente centimètres plus bas. */}
+
+        {structured ? (
+          logement ? (
+            <Link
+              href={logement.href}
+              className="mt-5 group flex items-center justify-between gap-4 px-6 py-4 rounded-xl no-underline border border-white/[0.1] bg-white/[0.02] hover:border-accent/40 hover:bg-white/[0.04] transition-colors"
+            >
+              <span className="flex flex-col gap-1">
+                <span className="text-[14px] font-semibold text-label">Voir l&apos;analyse du logement</span>
+                <span className="text-[13px] text-muted">{logement.label}</span>
+              </span>
+              <span aria-hidden className="font-mono text-[13px] text-accent transition-transform group-hover:translate-x-0.5">→</span>
+            </Link>
+          ) : (
+            <Link
+              href="/rapport/logement"
+              className="mt-5 group flex items-center justify-between gap-4 px-6 py-4 rounded-xl no-underline border border-white/[0.1] bg-white/[0.02] hover:border-accent/40 hover:bg-white/[0.04] transition-colors"
+            >
+              <span className="flex flex-col gap-1">
+                <span className="text-[14px] font-semibold text-label">Affiner avec une adresse</span>
+                <span className="text-[13px] text-muted">Le bâtiment, les risques localisés, les contraintes réglementaires et l&apos;environnement immédiat.</span>
+              </span>
+              <span aria-hidden className="font-mono text-[13px] text-accent transition-transform group-hover:translate-x-0.5">→</span>
+            </Link>
+          )
+        ) : null}
+      </div>
     </section>
   );
 }

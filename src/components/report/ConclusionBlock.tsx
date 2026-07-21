@@ -9,6 +9,7 @@
 // Suspense ne doit pas faire sauter la page. Aucun LLM ici.
 import type { ConclusionNarrativePlan, VerdictTone } from "@/lib/decision/conclusion-plan";
 import type { RenderedBlock } from "@/lib/decision/conclusion-validate";
+import { bindOrphans } from "@/lib/typography";
 
 const TONE_COLOR: Record<VerdictTone, string> = {
   critical: "var(--red)",
@@ -45,7 +46,8 @@ export function ConclusionBlock({
 }) {
   const color = TONE_COLOR[plan.verdictTone];
   const byKey = new Map(blocks.map((b) => [b.key, b]));
-  const verdict = byKey.get("verdict")?.text ?? "";
+  // Le bloc `verdict` porte le DÉTAIL ; le headline vit sur le plan (jamais confié au modèle).
+  const detail = byKey.get("verdict")?.text ?? plan.verdict.detail;
   const poids = byKey.get("reserves_found")?.text;
   const condition = byKey.get("unexamined_hard_constraints");
   const nonCouvert = byKey.get("uncovered_priorities")?.text;
@@ -65,7 +67,7 @@ export function ConclusionBlock({
   return (
     <div
       className="glass rounded-2xl p-7 mb-3.5"
-      style={{ borderLeft: `2px solid ${color}`, minHeight: "132px" }}
+      style={{ borderLeft: `2px solid ${color}`, minHeight: "168px" }}
     >
       <div className="flex items-baseline justify-between gap-4 mb-3">
         <Eyebrow color={color}>{plan.verdictLabel}</Eyebrow>
@@ -74,8 +76,22 @@ export function ConclusionBlock({
         </span>
       </div>
 
-      {/* LA RÉPONSE. Déterministe, mot pour mot : jamais générée. */}
-      <p className="text-[21px] leading-[1.45] text-label">{verdict}</p>
+      {/* LE HÉROS, et le TITRE de la section : l'ancien H2 de cadrage a disparu, un <p> aurait laissé
+          le bloc sans titre accessible. Déterministe, mot pour mot, jamais généré. Le `max-width` est
+          l'usage prévu de l'exception de la doctrine de largeur (un titre de hero mesuré en espace
+          ouvert) : une phrase de héros qui traverse toute la carte perd son impact. Il ne s'applique
+          JAMAIS aux paragraphes. */}
+      <h2
+        className="font-normal text-[clamp(24px,2.6vw,32px)] leading-[1.2] tracking-[-0.4px] text-label max-w-[540px]"
+        style={{ fontFamily: "'Instrument Serif', serif" }}
+      >
+        {bindOrphans(plan.verdict.headline.text)}
+      </h2>
+
+      {/* Le détail : construit AVEC le headline, jamais une troncature de lui. */}
+      {detail ? (
+        <p className="mt-3.5 text-[17px] leading-[1.6] text-muted">{detail}</p>
+      ) : null}
 
       {/* Une contrainte dure non testée réduit la PORTÉE du verdict : elle se lit juste sous lui,
           AVANT le poids (registre 2 de conclusion-plan.ts). C'est une condition posée par le lecteur,
