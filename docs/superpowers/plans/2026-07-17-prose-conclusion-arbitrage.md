@@ -161,10 +161,10 @@ export type GroupedVerificationComposition = {
 - Modify: `src/lib/decision/mismatch-facts.ts`, `src/lib/decision/materiality-rules.ts` (chaleur), éventuellement titre de section `decision-assembler.ts:91`
 - Test: suites existantes des fichiers touchés
 
-- [ ] **Step 1 :** lire les deux rapports sur disque. Appliquer ce qui est défendable dans les contraintes (gabarits déterministes, opposabilité, seuils de signalement conservés quelque part de visible). TDD par changement de gabarit.
-- [ ] **Step 2 :** suites + tsc + build. **Commit.**
+- [x] **Step 1 :** rapports lus. Appliqué (TDD par gabarit) : chaleur (le sujet porte l'unité, cadre hérité, « le corps peine à récupérer »), chip d'unité (`countNoun`, « 69 nuits »), champ dédié `signalConvention` (chaleur/feu/pluies + recopie tradeoff/grouped + rendu discret), clôture mismatch « Cet écart appelle un arbitrage. Il ne rend pas {nom} incompatible avec votre projet. » (mismatch + absence mobilité + littoral + taille, les 2 clôtures prudentes intactes), G3 « Sur ce point » (acces_ecoles). DIFFÉRÉ : variantes de série (« aussi »/« plus net »/portée dite une fois), à borner rang≠poids≠tier.
+- [x] **Step 2 :** suite 629/629, `tsc` 0, build compilé. **Commit `3f9d514`** (avec les 2 rapports d'agents).
 
 ### Vérification finale
 
-- [ ] `npx tsc --noEmit` = 0 ; suite complète verte ; `npm run build` vert.
-- [ ] Sonde `node --env-file=.env.local scripts/probe-conclusion.ts` si l'environnement est disponible (le bloc tied généré a changé de fallback). Sinon le dire dans le handoff.
+- [x] `npx tsc --noEmit` = 0 ; suite complète 629/629 ; `npm run build` compilé (les timeouts SSG `/inondation/[insee]` sont environnementaux, pré-existants, hors périmètre).
+- [ ] Sonde `node --env-file=.env.local scripts/probe-conclusion.ts` NON lancée (coût API : demander au porteur). Les fallbacks generables ont changé (mismatch, tradeoff chaleur) : le hash de conclusion les invalide seul, **pas de bump `DECISION_NARRATIVE_PROMPT_VERSION`** (le texte du prompt n'a pas changé, il est déjà aligné « arbitrer »).
