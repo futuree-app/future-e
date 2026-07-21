@@ -747,3 +747,76 @@ test("consommation NARRATIVE seulement : les comptes ne bougent pas", () => {
   assert.equal(plan.verdict.headline.kind, "named_issues");
   assert.equal(plan.reservesCount, 1);
 });
+
+// ── La strate résiduelle ───────────────────────────────────────────────────────
+
+test("la strate se reconstruit sur ce que le headline n'a pas consommé", () => {
+  const plan = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "minor_reserves", hasFavorable: false,
+    shownFacts: [
+      verification("f1", "decision_critical", "constat f1", "la chaleur estivale"),
+      verification("f2", "structuring", "constat f2", "le retrait-gonflement des argiles"),
+      verification("f3", "structuring", "constat f3", "l'exposition au bruit"),
+    ],
+    reservesShown: 3, majorReserveCount: 3,
+  }));
+  assert.equal(plan.verdict.headline.consumedFactIds.includes("f1"), true);
+  const strate = plan.blocks.find((b) => b.key === "reserves_found")!;
+  assert.equal(strate.fallbackText.includes("la chaleur estivale"), false);
+  assert.match(strate.fallbackText, /argiles/);
+  assert.match(strate.fallbackText, /bruit/);
+});
+
+test("même pool : la strate est la SUITE, jamais une seconde hiérarchie", () => {
+  const plan = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "minor_reserves", hasFavorable: false,
+    shownFacts: [
+      verification("f1", "decision_critical", "constat f1", "la chaleur estivale"),
+      verification("f2", "structuring", "constat f2", "le retrait-gonflement des argiles"),
+      verification("f3", "structuring", "constat f3", "l'exposition au bruit"),
+    ],
+    reservesShown: 3, majorReserveCount: 3,
+  }));
+  const strate = plan.blocks.find((b) => b.key === "reserves_found")!;
+  // Le héros vient de désigner LE principal point : annoncer que deux autres « pèsent le plus »
+  // ouvrirait une hiérarchie concurrente.
+  assert.equal(strate.fallbackText.includes("pèsent le plus"), false);
+  assert.match(strate.fallbackText, /^À regarder ensuite/);
+  assert.deepEqual(strate.allowedNumbers, []);
+});
+
+test("pool différent : la strate garde son moule de poids", () => {
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration",
+    shownFacts: [
+      mismatchFact("m1", "structuring", "cadre_calme", "le calme"),
+      verification("f1", "decision_critical", "constat f1", "la chaleur estivale"),
+      verification("f2", "decision_critical", "constat f2", "l'exposition au bruit"),
+    ],
+    mismatchTotal: 1, mismatchShown: 1, reservesShown: 2, majorReserveCount: 2,
+  }));
+  assert.equal(plan.verdict.headline.consumedFrom, "mismatches");
+  const strate = plan.blocks.find((b) => b.key === "reserves_found")!;
+  assert.match(strate.fallbackText, /demandent votre attention|pèsent le plus/);
+});
+
+test("pas de résiduel, pas de strate", () => {
+  const plan = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "minor_reserves", hasFavorable: false,
+    shownFacts: [verification("f1", "decision_critical", "constat f1", "la chaleur estivale")],
+    reservesShown: 1, majorReserveCount: 1,
+  }));
+  assert.equal(plan.verdict.headline.kind, "named_issues");
+  assert.equal(plan.lead.kind, "none");
+  assert.equal(plan.blocks.some((b) => b.key === "reserves_found"), false);
+});
+
+test("un headline de posture ne consomme rien : la strate est complète", () => {
+  const plan = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "minor_reserves", hasFavorable: false,
+    shownFacts: [verification("f1", "decision_critical"), verification("f2", "decision_critical")],
+    reservesShown: 2, majorReserveCount: 2,
+  }));
+  assert.equal(plan.verdict.headline.kind, "posture");
+  assert.equal(plan.lead.kind, "tied");
+});

@@ -206,6 +206,27 @@ export function selectLead(shownFacts: DecisionFact[], shownCompositions: FactCo
   return leadFromCandidates(rankLeadCandidates(shownFacts, shownCompositions));
 }
 
+// LA STRATE DE POIDS EST RÉSIDUELLE. Le headline a déjà nommé ce qui définit la décision ; cette
+// strate dit la PROCHAINE priorité à instruire. Répéter un sujet nommé trois centimètres plus haut
+// ferait lire deux fois la même chose, et laisserait croire à deux niveaux de réserve distincts.
+//
+// La consommation est NARRATIVE : elle retire un sujet d'un résumé voisin, jamais d'un compteur, d'un
+// état métier ou d'une carte. Le résiduel n'est jamais exhaustif : il nomme les dominants restants.
+export function selectResidualLead(
+  shownFacts: DecisionFact[],
+  shownCompositions: FactComposition[],
+  consumed: { consumedFactIds: string[]; consumedCompositionIds: string[] },
+): LeadSelection {
+  const out = new Set([...consumed.consumedFactIds, ...consumed.consumedCompositionIds]);
+  if (out.size === 0) return selectLead(shownFacts, shownCompositions);
+  // On filtre AVANT le rang : le survivant d'un tier inférieur devient légitimement le dominant
+  // résiduel quand le tier supérieur est entièrement consommé, ce qui est exactement le cas visé.
+  return leadFromCandidates(rankLeadCandidates(
+    shownFacts.filter((f) => !out.has(f.id)),
+    shownCompositions.filter((c) => !out.has(c.id)),
+  ));
+}
+
 function leadFromCandidates(top: LeadCandidate[]): LeadSelection {
   if (top.length === 0) return { kind: "none" };
   if (top.length === 1) {
@@ -403,7 +424,13 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
   // rien à couronner, et la strate de poids fait son travail plus bas.
   const dominants = rankLeadCandidates(input.shownFacts, input.shownCompositions);
   const dominant = dominants.length === 1 ? dominants[0]! : null;
-  const namedReserve = dominant
+  // QUAND LE DOSSIER PENCHE FAVORABLEMENT, LE HÉROS DIT LA CORRESPONDANCE, PAS LA VIGILANCE. Nommer
+  // « le principal point à contrôler » sur un dossier à réserves mineures dont un côté favorable est
+  // PROUVÉ reléguerait au détail le cœur de la décision (ce lieu correspond) et noircirait le dossier
+  // par le seul effet de la mise en forme. La réserve redescend alors dans la strate de poids, à sa
+  // place. Le héros ne nomme une réserve que lorsque la réserve EST le message.
+  const penchFavorable = input.orientation === "minor_reserves" && input.hasFavorable;
+  const namedReserve = dominant && !penchFavorable
     ? nameIssues(`Le principal point à contrôler ${a} : ${dominant.subject}.`, [dominant], "reserves")
     : null;
   const nommee = namedReserve != null;
@@ -512,7 +539,11 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
   // le rang MAXIMAL. Écrire « quatre points d'un poids comparable » quand deux dominent et deux sont
   // secondaires serait faux. On compte lead.factIds, jamais rs.length.
   const rs = reserves(input.shownFacts);
-  const lead = selectLead(input.shownFacts, input.shownCompositions);
+  const lead = selectResidualLead(input.shownFacts, input.shownCompositions, v.headline);
+  // Le héros a-t-il déjà couronné un point de CE pool ? Alors cette strate est la SUITE d'une
+  // hiérarchie ouverte, et n'en ouvre pas une seconde : « deux pèsent le plus » juste après « le
+  // principal point à contrôler » ferait lire deux classements concurrents.
+  const suiteDuHeros = v.headline.consumedFrom === "reserves";
 
   // LES COMPOSITIONS NOMMÉES. Une composition désignée lead single est déjà narrée : la re-narrer ici
   // la dirait deux fois (le défaut exact que la composition existe pour éviter). Placement : une
@@ -539,7 +570,9 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
       key: "reserves_found",
       // Deux phrases, pas un deux-points : le constat est déjà une phrase, avec sa majuscule. « Un point
       // pèse plus que les autres : Le logement porte… » mettrait une capitale au milieu d'une phrase.
-      fallbackText: `Un point pèse plus que les autres. ${endWithPeriod(lead.statement)}`,
+      fallbackText: suiteDuHeros
+        ? `À regarder ensuite : ${lead.topic}.`
+        : `Un point pèse plus que les autres. ${endWithPeriod(lead.statement)}`,
       sourceIds: [lead.factId],
       // Aucune matière obligatoire : exiger le `statement` mot pour mot exigerait une COPIE, ce
       // qu'aucun rédacteur n'écrit, et la sonde l'a rejeté 3 fois sur 3. La garantie tient sans :
@@ -565,15 +598,19 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
     const sujets = joinFr(lead.facts.map((f) => f.topic));
     blocks.push({
       key: "reserves_found",
-      fallbackText: total > n
-        ? `Parmi ces ${numberForms(total)[1] ?? String(total)} points, ${numberForms(n)[1] ?? String(n)} pèsent le plus : ${sujets}.`
-        : `${capitalize(numberForms(n)[1] ?? String(n))} points demandent votre attention : ${sujets}.`,
+      fallbackText: suiteDuHeros
+        ? `À regarder ensuite : ${sujets}.`
+        : total > n
+          ? `Parmi ces ${numberForms(total)[1] ?? String(total)} points, ${numberForms(n)[1] ?? String(n)} pèsent le plus : ${sujets}.`
+          : `${capitalize(numberForms(n)[1] ?? String(n))} points demandent votre attention : ${sujets}.`,
       sourceIds: lead.facts.map((f) => f.factId),
       // Chaque sujet doit SURVIVRE : c'est le seul endroit du dossier où le lecteur apprend, en une
       // phrase, CE QUI pèse. Un « plusieurs risques naturels » qui les avalerait ramènerait la carte à
       // son défaut d'origine (parler d'elle-même), et aucune autre validation ne le verrait.
       requiredPhrases: lead.facts.map((f) => coreLabel(f.topic)),
-      allowedNumbers: total > n ? [...numberForms(n), ...numberForms(total)] : numberForms(n),
+      // En mode suite, la phrase ne porte AUCUN nombre : en autoriser un ouvrirait la porte à un
+      // compte inventé par le modèle, que rien n'irait contredire.
+      allowedNumbers: suiteDuHeros ? [] : total > n ? [...numberForms(n), ...numberForms(total)] : numberForms(n),
       maxChars: 340,
       generable: true,
     });
