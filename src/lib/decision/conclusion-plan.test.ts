@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildConclusionPlan, shouldGenerateNarrative, rankLeadCandidates, type ConclusionPlanInput } from "./conclusion-plan.ts";
+import { buildConclusionPlan, shouldGenerateNarrative, rankLeadCandidates, HEADLINE_MAX_CHARS, type ConclusionPlanInput } from "./conclusion-plan.ts";
 import type { DecisionFact, MaterialityTier } from "./decision-fact.ts";
 import type { FactComposition } from "./fact-composition.ts";
 
@@ -284,7 +284,7 @@ test("high + favorable : le lieu correspond, et on ose le dire", () => {
   const p = buildConclusionPlan(baseInput({ coverage: "high", orientation: "favorable", hasFavorable: true, favorableCount: 3 }));
   assert.equal(p.verdictLabel, "Bonne correspondance");
   assert.equal(p.verdictTone, "positive");
-  assert.match(p.blocks[0]!.fallbackText, /^Toulouse semble bien correspondre à votre projet/);
+  assert.match(p.verdict.headline.text, /^Toulouse semble bien correspondre à votre projet/);
 });
 
 test("high + major_reserves AVEC 2 favorables : « plusieurs dimensions » est prouvé", () => {
@@ -317,9 +317,10 @@ test("high + minor_reserves SANS favorable : aucun « bien correspondre » ne s'
   const p = buildConclusionPlan(baseInput({
     coverage: "high", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0, reservesShown: 2,
   }));
-  assert.equal(p.blocks[0]!.fallbackText.includes("bien correspondre"), false);
-  assert.match(p.blocks[0]!.fallbackText, /reste à confirmer/);
-  assert.match(p.blocks[0]!.fallbackText, /2 points restent à examiner/);
+  const tout = `${p.verdict.headline.text} ${p.blocks[0]!.fallbackText}`;
+  assert.equal(tout.includes("bien correspondre"), false);
+  assert.match(p.verdict.headline.text, /reste à confirmer/);
+  assert.match(p.blocks[0]!.fallbackText, /2 constats restent à contrôler/);
 });
 
 test("partial + minor_reserves SANS favorable : rien ne « va dans le sens » de rien", () => {
@@ -327,7 +328,7 @@ test("partial + minor_reserves SANS favorable : rien ne « va dans le sens » de
     coverage: "partial", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0, reservesShown: 1,
   }));
   assert.equal(p.blocks[0]!.fallbackText.includes("va plutôt dans le sens"), false);
-  assert.match(p.blocks[0]!.fallbackText, /1 point reste à examiner/); // accord au SINGULIER
+  assert.match(p.blocks[0]!.fallbackText, /Un constat reste à contrôler/); // accord au SINGULIER
 });
 
 test("partial + major_reserves : l'écran actuel, et il est honnête", () => {
@@ -336,7 +337,7 @@ test("partial + major_reserves : l'écran actuel, et il est honnête", () => {
   }));
   assert.equal(p.verdictLabel, "Lecture encore partielle");
   assert.equal(p.verdictTone, "caution");
-  assert.match(p.blocks[0]!.fallbackText, /encore trop tôt pour dire que Toulouse correspond/);
+  assert.match(p.verdict.headline.text, /encore trop tôt pour dire que Toulouse correspond/);
   assert.match(p.blocks[0]!.fallbackText, /2 points structurants demandent attention/);
 });
 
@@ -345,18 +346,19 @@ test("couverture none : le GARDE-FOU, aucun positif ne s'échappe", () => {
     coverage: "none", orientation: "indeterminate", hasFavorable: false, favorableCount: 0,
   }));
   assert.equal(p.verdictLabel, "Lecture non disponible");
-  assert.match(p.blocks[0]!.fallbackText, /^Toulouse ne peut pas encore être évalué au regard de vos critères/);
-  assert.equal(p.blocks[0]!.fallbackText.includes("va dans le sens"), false);
+  assert.match(p.verdict.headline.text, /^Toulouse ne peut pas encore être évalué au regard de vos critères/);
+  assert.equal(`${p.verdict.headline.text} ${p.blocks[0]!.fallbackText}`.includes("va dans le sens"), false);
 });
 
 test("incompatibilité : la condition non respectée EST la réponse", () => {
   const p = buildConclusionPlan(baseInput({
     conclusionState: "established_incompatibility", orientation: "incompatible",
-    establishedIncompatibility: { factId: "f1", statement: "Cette commune est à 180 km du littoral." },
+    establishedIncompatibility: { factId: "f1", statement: "Cette commune est à 180 km du littoral.", topic: "la proximité de la mer" },
   }));
   assert.equal(p.verdictLabel, "Condition non respectée");
   assert.equal(p.verdictTone, "critical");
-  assert.match(p.blocks[0]!.fallbackText, /conditions non négociables n'est pas respectée ici/);
+  assert.match(p.verdict.headline.text, /Une contrainte de votre projet n'est pas satisfaite à Toulouse : la proximité de la mer/);
+  assert.match(p.blocks[0]!.fallbackText, /180 km du littoral/);
 });
 
 test("le verdict reste NON générable, quelle que soit la case", () => {
@@ -445,21 +447,23 @@ test("verdict arbitration : compte le TOTAL, pas l'affiché, et porte le double 
   assert.match(v.fallbackText, /arbitr/i);
   assert.match(v.fallbackText, /5 de vos priorités/);
   const mixte = buildConclusionPlan(baseInput({ orientation: "arbitration", mismatchTotal: 2, mismatchShown: 2, reservesShown: 2 }));
-  assert.match(mixte.blocks.find((b) => b.key === "verdict")!.fallbackText, /vérifier/i);
+  // Les réserves sont à CONTRÔLER (constats établis), la contrainte non examinée est à vérifier.
+  assert.match(mixte.blocks.find((b) => b.key === "verdict")!.fallbackText, /à contrôler/i);
 });
 
 test("verdict arbitration : nomme le côté favorable PROUVÉ (un demi-arbitrage ne suffit pas)", () => {
+  // Aucun mismatch AFFICHÉ ici (shownFacts vide) : le héros reste en posture, et le détail porte le
+  // total émis. L'ouverture favorable a quitté cette branche : nommer un positif exigerait un fait
+  // favorable déterministe, que l'architecture ne produit pas.
   const plusieurs = buildConclusionPlan(baseInput({ orientation: "arbitration", mismatchTotal: 2, mismatchShown: 2, hasFavorable: true, favorableCount: 3 }));
   const vp = plusieurs.blocks.find((b) => b.key === "verdict")!;
-  assert.match(vp.fallbackText, /répond à plusieurs dimensions de votre projet/);
+  assert.equal(plusieurs.verdict.headline.kind, "posture");
   assert.match(vp.fallbackText, /nettement moins bien servies/);
-  const un = buildConclusionPlan(baseInput({ orientation: "arbitration", mismatchTotal: 2, mismatchShown: 2, hasFavorable: true, favorableCount: 1 }));
-  assert.match(un.blocks.find((b) => b.key === "verdict")!.fallbackText, /présente un élément favorable pour votre projet/);
-  // Sans favorable prouvé, aucune promesse : le texte reste celui de l'absence d'incompatibilité.
+  assert.doesNotMatch(vp.fallbackText, /répond à plusieurs dimensions/);
+  // Sans favorable prouvé, aucune promesse non plus.
   const aucun = buildConclusionPlan(baseInput({ orientation: "arbitration", mismatchTotal: 2, mismatchShown: 2, hasFavorable: false, favorableCount: 0 }));
   const va = aucun.blocks.find((b) => b.key === "verdict")!;
-  assert.match(va.fallbackText, /^Aucune incompatibilité n'a été établie sur Toulouse/);
-  assert.doesNotMatch(va.fallbackText, /favorable|répond à/);
+  assert.doesNotMatch(`${aucun.verdict.headline.text} ${va.fallbackText}`, /favorable|répond à/);
 });
 
 test("verdict neutral : ni « bien correspondre » ni « impossible de conclure »", () => {
@@ -559,4 +563,187 @@ test("rankLeadCandidates rend un tableau vide quand rien ne dépasse secondary",
 test("un candidat de réserve porte son topic comme sujet", () => {
   const out = rankLeadCandidates([verification("f1", "structuring", "constat", "la chaleur estivale")], []);
   assert.equal(out[0]!.subject, "la chaleur estivale");
+});
+
+// ── Le headline ────────────────────────────────────────────────────────────────
+
+test("arbitrage : deux mismatchs affichés sont NOMMÉS après un deux-points", () => {
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration",
+    shownFacts: [
+      mismatchFact("m1", "structuring", "cadre_calme", "le calme"),
+      mismatchFact("m2", "structuring", "nature", "l'accès aux espaces naturels"),
+    ],
+    mismatchTotal: 2, mismatchShown: 2,
+  }));
+  assert.equal(plan.verdict.headline.kind, "named_issues");
+  assert.equal(
+    plan.verdict.headline.text,
+    "Deux priorités correspondent moins bien à Toulouse : le calme et l'accès aux espaces naturels.",
+  );
+  assert.deepEqual(plan.verdict.headline.consumedFactIds, ["m1", "m2"]);
+  assert.equal(plan.verdict.headline.consumedFrom, "mismatches");
+});
+
+test("arbitrage : un seul mismatch, le singulier est accordé partout", () => {
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration",
+    shownFacts: [mismatchFact("m1", "structuring", "cadre_calme", "le calme")],
+    mismatchTotal: 1, mismatchShown: 1,
+  }));
+  assert.equal(plan.verdict.headline.text, "Une priorité correspond moins bien à Toulouse : le calme.");
+  assert.match(plan.verdict.detail, /Cet écart appelle/);
+});
+
+test("arbitrage : deux mismatchs, le détail accorde le pluriel", () => {
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration",
+    shownFacts: [
+      mismatchFact("m1", "structuring", "cadre_calme", "le calme"),
+      mismatchFact("m2", "structuring", "nature", "l'accès aux espaces naturels"),
+    ],
+    mismatchTotal: 2, mismatchShown: 2,
+  }));
+  assert.match(plan.verdict.detail, /Ces écarts appellent/);
+});
+
+test("arbitrage : une composition shared_evidence est candidate au headline", () => {
+  // Les mismatchs élémentaires sont ABSORBÉS : shownFacts n'en contient aucun, et sans cette branche
+  // le héros retomberait en posture alors qu'une carte visible nomme l'enjeu.
+  const comp = {
+    id: "comp-taille", kind: "shared_evidence", title: "Une même petite taille touche plusieurs dimensions de votre projet",
+    summary: "résumé", headlineSubject: "la taille du territoire", materialityTier: "structuring",
+    absorbedFactIds: ["m1", "m2"], displaySection: "mismatches",
+  } as unknown as FactComposition;
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration", shownFacts: [], shownCompositions: [comp],
+    mismatchTotal: 2, mismatchShown: 1,
+  }));
+  assert.equal(plan.verdict.headline.kind, "named_issues");
+  assert.equal(plan.verdict.headline.text, "Une priorité correspond moins bien à Toulouse : la taille du territoire.");
+  assert.deepEqual(plan.verdict.headline.consumedFactIds, ["m1", "m2"]);
+  assert.deepEqual(plan.verdict.headline.consumedCompositionIds, ["comp-taille"]);
+});
+
+test("gate 2 enjeux : trois mismatchs affichés basculent en posture", () => {
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration",
+    shownFacts: [
+      mismatchFact("m1", "structuring", "cadre_calme", "le calme"),
+      mismatchFact("m2", "structuring", "nature", "l'accès aux espaces naturels"),
+      mismatchFact("m3", "structuring", "acces_soins", "l'accès aux soins"),
+    ],
+    mismatchTotal: 3, mismatchShown: 3,
+  }));
+  assert.equal(plan.verdict.headline.kind, "posture");
+  assert.equal(plan.verdict.headline.text, "Un arbitrage réel à Toulouse, sans incompatibilité établie.");
+  assert.deepEqual(plan.verdict.headline.consumedFactIds, []);
+  assert.equal(plan.verdict.headline.consumedFrom, null);
+});
+
+test("gate de longueur : deux sujets longs et un nom long basculent en posture", () => {
+  const plan = buildConclusionPlan(baseInput({
+    communeNom: "Saint-Rémy-de-Provence",
+    orientation: "arbitration",
+    shownFacts: [
+      mismatchFact("m1", "structuring", "acces_ecoles", "l'accès aux collèges et lycées"),
+      mismatchFact("m2", "structuring", "faible_dependance_auto", "la faible dépendance à la voiture"),
+    ],
+    mismatchTotal: 2, mismatchShown: 2,
+  }));
+  assert.equal(plan.verdict.headline.kind, "posture");
+  assert.ok(plan.verdict.headline.text.length <= HEADLINE_MAX_CHARS);
+});
+
+test("réserve dominante unique : le sujet est nommé, le fait consommé", () => {
+  const plan = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "minor_reserves", hasFavorable: false,
+    shownFacts: [verification("f1", "decision_critical", "constat f1", "la chaleur estivale"), verification("f2", "secondary")],
+    reservesShown: 2, majorReserveCount: 1,
+  }));
+  assert.equal(plan.verdict.headline.kind, "named_issues");
+  assert.equal(plan.verdict.headline.text, "Le principal point à contrôler à Toulouse : la chaleur estivale.");
+  assert.deepEqual(plan.verdict.headline.consumedFactIds, ["f1"]);
+  assert.equal(plan.verdict.headline.consumedFrom, "reserves");
+});
+
+test("réserves à égalité : aucune ne domine, le headline reste en posture", () => {
+  const plan = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "minor_reserves", hasFavorable: false,
+    shownFacts: [verification("f1", "decision_critical"), verification("f2", "decision_critical")],
+    reservesShown: 2, majorReserveCount: 2,
+  }));
+  assert.equal(plan.verdict.headline.kind, "posture");
+  assert.deepEqual(plan.verdict.headline.consumedFactIds, []);
+});
+
+test("cas favorable : posture, jamais un positif nommé", () => {
+  const plan = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "favorable", hasFavorable: true, favorableCount: 3,
+  }));
+  assert.equal(plan.verdict.headline.kind, "posture");
+  assert.equal(plan.verdict.headline.text, "Toulouse semble bien correspondre à votre projet.");
+});
+
+test("incompatibilité : la contrainte est nommée, le fait consommé", () => {
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "incompatible",
+    establishedIncompatibility: { factId: "i1", statement: "La mer est à 240 km.", topic: "la proximité de la mer" },
+  }));
+  assert.equal(plan.verdict.headline.kind, "named_issues");
+  assert.equal(
+    plan.verdict.headline.text,
+    "Une contrainte de votre projet n'est pas satisfaite à Toulouse : la proximité de la mer.",
+  );
+  assert.deepEqual(plan.verdict.headline.consumedFactIds, ["i1"]);
+  assert.equal(plan.verdict.headline.consumedFrom, "constraint");
+  assert.match(plan.verdict.detail, /240 km/);
+});
+
+test("couverture insuffisante : posture", () => {
+  const plan = buildConclusionPlan(baseInput({ conclusionState: "insufficient_evidence" }));
+  assert.equal(plan.verdict.headline.kind, "posture");
+  assert.equal(plan.verdict.headline.text, "Des éléments essentiels manquent encore pour trancher à Toulouse.");
+});
+
+test("le détail ne redit aucun sujet nommé par le headline", () => {
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration",
+    shownFacts: [
+      mismatchFact("m1", "structuring", "cadre_calme", "le calme"),
+      mismatchFact("m2", "structuring", "nature", "l'accès aux espaces naturels"),
+    ],
+    mismatchTotal: 2, mismatchShown: 2, reservesShown: 4,
+  }));
+  assert.equal(plan.verdict.detail.includes("le calme"), false);
+  assert.equal(plan.verdict.detail.includes("espaces naturels"), false);
+  assert.match(plan.verdict.detail, /arbitrage/i);
+});
+
+test("les réserves sont à CONTRÔLER, la contrainte non examinée est à VÉRIFIER", () => {
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration",
+    shownFacts: [mismatchFact("m1", "structuring", "cadre_calme", "le calme")],
+    mismatchTotal: 1, mismatchShown: 1, reservesShown: 4,
+    uncovered: [MER],
+  }));
+  assert.match(plan.verdict.detail, /4 constats restent par ailleurs à contrôler/);
+  assert.match(plan.blocks.find((b) => b.key === "unexamined_hard_constraints")!.fallbackText, /à vérifier/);
+});
+
+test("le bloc verdict porte le DÉTAIL, et reste non générable", () => {
+  const plan = buildConclusionPlan(baseInput());
+  assert.equal(plan.blocks[0]?.key, "verdict");
+  assert.equal(plan.blocks[0]!.generable, false);
+  assert.equal(plan.blocks[0]!.fallbackText, plan.verdict.detail);
+});
+
+test("consommation NARRATIVE seulement : les comptes ne bougent pas", () => {
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration",
+    shownFacts: [mismatchFact("m1", "structuring", "cadre_calme", "le calme"), verification("f1", "decision_critical")],
+    mismatchTotal: 1, mismatchShown: 1, reservesShown: 1, majorReserveCount: 1,
+  }));
+  assert.equal(plan.verdict.headline.kind, "named_issues");
+  assert.equal(plan.reservesCount, 1);
 });

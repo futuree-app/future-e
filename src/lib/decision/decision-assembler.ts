@@ -120,7 +120,7 @@ export function assembleDossier(
     shownCompositions: shownComps,
     uncovered,
     uncoveredPriorities: uncoveredPreferences(criteria),
-    establishedIncompatibility: established ? { factId: established.id, statement: established.statement } : null,
+    establishedIncompatibility: established ? { factId: established.id, statement: established.statement, topic: established.topic } : null,
     coverage: criteria.coverage,
     orientation: criteria.orientation,
     hasFavorable: criteria.hasFavorable,

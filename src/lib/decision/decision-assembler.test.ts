@@ -36,11 +36,12 @@ test("parsed null -> project_not_structured", () => {
 test("incompatibilité établie -> established_incompatibility, et le verdict le dit", () => {
   const d = assembleDossier(
     run([incompat()], ["nearSea"], [ev("r", ["nearSea"], "incompatible", [incompat()])]),
-    project(WITH_HC), "commune",
+    project(WITH_HC), "commune", "Toulouse",
   );
   assert.equal(d.conclusionState, "established_incompatibility");
   assert.equal(d.criteria.orientation, "incompatible");
-  assert.match(d.conclusion, /conditions non négociables n'est pas respectée ici/i);
+  // Le héros NOMME la contrainte, le détail porte le constat qui l'établit.
+  assert.match(d.narrativePlan.verdict.headline.text, /Une contrainte de votre projet n'est pas satisfaite à Toulouse : la distance au littoral/);
   assert.match(d.conclusion, /trop loin/);
 });
 
@@ -105,8 +106,10 @@ test("sans contrainte dure : la conclusion nomme les priorités non couvertes et
   // donnée ni un défaut. La correspondance graduée fonctionne sur les seules préférences.
   assert.equal(d.conclusion.includes("aucune condition"), false);
   assert.match(d.conclusion, /pas encore couvertes/i);
+  // Couverture nulle : le héros reste en POSTURE et ne consomme rien, donc la strate de poids nomme
+  // encore le fait qui domine.
   assert.match(d.conclusion, /Un point pèse plus que les autres/);
-  assert.match(d.conclusion, /Toulouse/); // la commune est NOMMÉE, jamais « ce lieu »
+  assert.match(d.narrativePlan.verdict.headline.text, /Toulouse/); // la commune est NOMMÉE, jamais « ce lieu »
 });
 
 test("le scope SORT des phrases : il vit dans le plan, affiché en tête de carte", () => {
