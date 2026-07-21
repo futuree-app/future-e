@@ -3,11 +3,11 @@
 // calme coloré par l'état, preuves en chips. Présentationnel : reçoit un Dossier déjà assemblé,
 // aucun LLM. Ouvert à tous les payants : le cas creux reste digne.
 import Link from "next/link";
-import { Suspense } from "react";
+import { Fragment, Suspense } from "react";
 import type { Dossier, DecisionFact } from "@/lib/decision/decision-fact";
 import { ConclusionBlock, planToBlocks } from "@/components/report/ConclusionBlock";
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
-import { FactBody, EvidenceRow } from "@/components/report/DecisionFactRenderParts";
+import { FactBody, EvidenceRow, MethodDetails } from "@/components/report/DecisionFactRenderParts";
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
 
 const SECTION_ACCENT: Record<string, string> = {
@@ -25,7 +25,7 @@ const SECTION_ACCENT: Record<string, string> = {
 // lecteur les compte, et le verdict dit ce que le décompte ne dit pas (combien sont STRUCTURANTS).
 
 // Chip / EvidenceRow / FactBody vivent dans DecisionFactRenderParts.tsx (partagées avec la carte
-// composée). Le grain reste ici : seul l'affichage élémentaire le porte en tête de carte.
+// composée). Le grain reste ici : c'est un fait de PRÉSENTATION de la carte élémentaire.
 const GRAIN_LABEL: Record<string, string> = { commune: "À l'échelle de la commune", adresse: "À cette adresse", secteur: "Dans le secteur" };
 function factGrain(fact: DecisionFact): string | null {
   const e = fact.role === "compromise" ? fact.sides[0]?.evidence[0] : fact.evidence[0];
@@ -99,27 +99,47 @@ export function DossierDecisionSection({
                 {s.title}
               </div>
               <ul className="flex flex-col gap-5">
-                {s.cards.map((card) => {
-                  if (card.kind === "composition") {
+                {(() => {
+                  // Le grain (« À cette adresse » / « À l'échelle de la commune ») ne se répète plus sur
+                  // chaque carte : il ne s'affiche QUE si la section MÉLANGE des grains, et alors comme un
+                  // intertitre de groupe posé une fois, quand le grain change d'une carte élémentaire à la
+                  // suivante. Déterministe et stable : aucun tri, l'ordre des cartes est préservé. Les
+                  // cartes composées n'ont pas de grain propre, elles n'interrompent pas le suivi.
+                  const elemGrains = s.cards
+                    .filter((c): c is Extract<typeof c, { kind: "fact" }> => c.kind === "fact")
+                    .map((c) => factGrain(c.fact));
+                  const showGrain = new Set(elemGrains.filter(Boolean)).size > 1;
+                  let prevGrain: string | null = null;
+                  return s.cards.map((card) => {
+                    if (card.kind === "composition") {
+                      return (
+                        <FactCompositionCard
+                          key={card.composition.id}
+                          composition={card.composition}
+                          color={col}
+                          absorbedFacts={dossier.absorbedFacts.filter((f) => card.composition.absorbedFactIds.includes(f.id))}
+                        />
+                      );
+                    }
+                    const f = card.fact;
+                    const grain = factGrain(f);
+                    const grainHeader = showGrain && grain && grain !== prevGrain ? grain : null;
+                    prevGrain = grain;
+                    const conventions = f.role === "verification" && f.signalConvention ? [f.signalConvention] : [];
                     return (
-                      <FactCompositionCard
-                        key={card.composition.id}
-                        composition={card.composition}
-                        color={col}
-                        absorbedFacts={dossier.absorbedFacts.filter((f) => card.composition.absorbedFactIds.includes(f.id))}
-                      />
+                      <Fragment key={f.id}>
+                        {grainHeader ? (
+                          <li className="list-none font-mono text-[10px] tracking-[0.12em] uppercase text-ghost -mb-2 first:mt-0">{grainHeader}</li>
+                        ) : null}
+                        <li>
+                          <FactBody fact={f} />
+                          <EvidenceRow fact={f} color={col} />
+                          <MethodDetails conventions={conventions} />
+                        </li>
+                      </Fragment>
                     );
-                  }
-                  const f = card.fact;
-                  const grain = factGrain(f);
-                  return (
-                    <li key={f.id}>
-                      {grain ? <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-ghost mb-1">{grain}</p> : null}
-                      <FactBody fact={f} />
-                      <EvidenceRow fact={f} color={col} />
-                    </li>
-                  );
-                })}
+                  });
+                })()}
               </ul>
             </div>
           );

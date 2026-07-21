@@ -2,7 +2,7 @@
 // Les faits absorbés restent lisibles au dépliable, dans leur forme d'origine (audit, invariant 4).
 import type { FactComposition, CompositionSide } from "@/lib/decision/fact-composition";
 import type { DecisionFact } from "@/lib/decision/decision-fact";
-import { Chip, EvidenceRow, FactBody } from "@/components/report/DecisionFactRenderParts";
+import { Chip, EvidenceRow, FactBody, ActionCue, MethodDetails } from "@/components/report/DecisionFactRenderParts";
 
 function SideBlock({ side, color }: { side: CompositionSide; color: string }) {
   return (
@@ -10,17 +10,31 @@ function SideBlock({ side, color }: { side: CompositionSide; color: string }) {
       <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-ghost mb-1">{side.label}</p>
       <p className="text-label text-[14px] leading-[1.6]">{side.statement}</p>
       {side.limitation ? <p className="text-ghost text-[12.5px] leading-[1.5] mt-1">{side.limitation}</p> : null}
-      {side.signalConvention ? <p className="text-ghost text-[12.5px] leading-[1.5] mt-1">{side.signalConvention}</p> : null}
-      <div className="flex items-center gap-2 mt-2 flex-wrap">
-        {side.evidence.map((e, i) => (
-          <Chip key={i} label={e.href ? "Preuve" : e.label} value={e.observedValue} href={e.href} color={color} />
-        ))}
-        {side.action ? (
-          <span className="font-mono text-[10px] tracking-[0.06em] uppercase text-muted">{side.action.label} →</span>
+      {/* `signalConvention` a quitté la face : il est regroupé dans le dépliable « Méthode et détails » de la carte. */}
+      <div className="mt-2 flex flex-col gap-2">
+        {side.evidence.length > 0 ? (
+          <div className="flex items-center gap-2 flex-wrap">
+            {side.evidence.map((e, i) => (
+              <Chip key={i} label={e.href && e.observedValue ? "Preuve" : e.label} value={e.observedValue} href={e.href} color={color} />
+            ))}
+          </div>
         ) : null}
+        {side.action ? <ActionCue label={side.action.label} color={color} /> : null}
       </div>
     </div>
   );
+}
+
+// Les conventions de signalement des côtés/items, dédupliquées (un tradeoff saisonnier partage la même
+// convention entre ses deux saisons). Rendues une fois, dans le dépliable « Méthode et détails ».
+function compositionConventions(composition: FactComposition): string[] {
+  const sides: CompositionSide[] =
+    composition.kind === "tradeoff"
+      ? [composition.favorableSide, composition.unfavorableSide]
+      : composition.kind === "grouped_verification"
+        ? composition.items
+        : [];
+  return sides.map((s) => s.signalConvention).filter((c): c is string => Boolean(c));
 }
 
 export function FactCompositionCard({
@@ -51,7 +65,7 @@ export function FactCompositionCard({
           <div className="flex items-center gap-2 flex-wrap">
             <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-ghost">État observé</p>
             {composition.sharedEvidence.map((e, i) => (
-              <Chip key={i} label={e.href ? "Preuve" : e.label} value={e.observedValue} href={e.href} color={color} />
+              <Chip key={i} label={e.href && e.observedValue ? "Preuve" : e.label} value={e.observedValue} href={e.href} color={color} />
             ))}
           </div>
           <ul className="flex flex-col gap-2.5">
@@ -67,6 +81,7 @@ export function FactCompositionCard({
           </ul>
         </div>
       )}
+      <MethodDetails conventions={compositionConventions(composition)} />
       {absorbedFacts.length > 0 ? (
         <details className="mt-3">
           <summary className="cursor-pointer font-mono text-[10px] tracking-[0.06em] uppercase text-muted hover:text-label transition-colors">
