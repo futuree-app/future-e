@@ -73,8 +73,14 @@ export type VerdictPresentation = { headline: VerdictHeadline; detail: string };
 
 // Deux enjeux nommés au maximum : trois en grand Serif recréeraient le paragraphe qu'on supprime.
 // Et un plafond de longueur, nom de commune compris : deux sujets longs débordent la mesure du héros.
+//
+// Le plafond est calé sur les phrases RÉELLEMENT produites, pas sur une intuition. À 95, deux cas
+// courants basculaient à tort en posture : l'incompatibilité nommée sur une commune à article
+// (« … n'est pas satisfaite aux Sables-d'Olonne : la proximité d'une gare. », 103 car.), soit le cas
+// le plus grave privé de son nom, et l'arbitrage nominal qui passait à 94 sur 95. À 110, la mesure de
+// 540 px tient trois lignes courtes en Serif, ce qui reste un signal.
 export const HEADLINE_MAX_ISSUES = 2;
-export const HEADLINE_MAX_CHARS = 95;
+export const HEADLINE_MAX_CHARS = 110;
 
 export type ConclusionNarrativePlan = {
   scope: "commune" | "commune+adresse";
@@ -449,9 +455,11 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
             ? `${nom} semble bien correspondre à votre projet, sous réserve.`
             : `La correspondance ${deCommune(nom)} avec votre projet reste à confirmer.`,
         ),
-        detail: input.hasFavorable
-          ? `${nom} semble bien correspondre à votre projet.${resteAControler(r, nommee)}`
-          : `La correspondance ${deCommune(nom)} avec votre projet reste à confirmer.${resteAControler(r, nommee)}`,
+        // Le détail ne REDIT PAS le héros : en posture, le héros porte déjà « semble bien
+        // correspondre » ou « reste à confirmer », et le détail n'a plus qu'à dire ce qui reste.
+        detail: nommee
+          ? `${input.hasFavorable ? `${nom} semble bien correspondre à votre projet.` : `La correspondance ${deCommune(nom)} avec votre projet reste à confirmer.`}${resteAControler(r, true)}`
+          : resteAControler(r, false).trim() || "Les critères de votre projet qui ont pu être examinés vont dans ce sens.",
       };
     }
     return {
@@ -470,9 +478,12 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
     return {
       label: "Correspondance à confirmer", tone: "neutral",
       headline: namedReserve ?? POSTURE(`La lecture ${deCommune(nom)} reste incomplète pour trancher.`),
-      detail: input.hasFavorable
-        ? `${nom} va plutôt dans le sens de votre projet sur les critères déjà couverts, mais la lecture reste incomplète.${resteAControler(r, nommee)}`
-        : `La lecture reste incomplète.${resteAControler(r, nommee)}`,
+      // Idem : le héros porte déjà l'incomplétude quand il est en posture.
+      detail: nommee
+        ? `La lecture ${deCommune(nom)} reste incomplète.${resteAControler(r, true)}`
+        : input.hasFavorable
+          ? `${nom} va plutôt dans le sens de votre projet sur les critères déjà couverts.${resteAControler(r, false)}`
+          : `D'autres critères de votre projet n'ont pas encore pu être examinés.${resteAControler(r, false)}`,
     };
   }
   return {

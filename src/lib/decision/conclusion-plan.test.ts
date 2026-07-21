@@ -833,3 +833,26 @@ test("le registre mismatches_found n'existe plus : sa matière est dans le héro
   assert.equal(plan.blocks.some((b) => b.key === "mismatches_found"), false);
   assert.match(plan.verdict.headline.text, /le calme/);
 });
+
+test("gate calée sur le réel : une incompatibilité sur commune à article reste NOMMÉE", () => {
+  // À 95 caractères, cette phrase (98) basculait en posture : le cas le plus grave perdait son nom.
+  const plan = buildConclusionPlan(baseInput({
+    communeNom: "Les Sables-d'Olonne", orientation: "incompatible",
+    establishedIncompatibility: { factId: "i1", statement: "La gare la plus proche est à 42 km.", topic: "la proximité d'une gare" },
+  }));
+  assert.equal(plan.verdict.headline.kind, "named_issues");
+  assert.match(plan.verdict.headline.text, /aux Sables-d'Olonne : la proximité d'une gare/);
+});
+
+test("le détail ne redit JAMAIS la phrase du héros", () => {
+  // Le héros porte « semble bien correspondre » ; le détail le répétait mot pour mot, soit exactement
+  // les deux strates de même poids que ce lot supprime.
+  const plan = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2,
+    reservesShown: 2, majorReserveCount: 1,
+    shownFacts: [verification("f1", "decision_critical"), verification("f2", "secondary")],
+  }));
+  assert.equal(plan.verdict.headline.kind, "posture");
+  assert.equal(plan.verdict.detail.includes("semble bien correspondre"), false);
+  assert.match(plan.verdict.detail, /2 constats restent à contrôler/);
+});
