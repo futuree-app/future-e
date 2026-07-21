@@ -820,3 +820,16 @@ test("un headline de posture ne consomme rien : la strate est complète", () => 
   assert.equal(plan.verdict.headline.kind, "posture");
   assert.equal(plan.lead.kind, "tied");
 });
+
+test("le registre mismatches_found n'existe plus : sa matière est dans le héros", () => {
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration",
+    shownFacts: [
+      mismatchFact("m1", "structuring", "cadre_calme", "le calme"),
+      mismatchFact("m2", "structuring", "nature", "l'accès aux espaces naturels"),
+    ],
+    mismatchTotal: 2, mismatchShown: 2,
+  }));
+  assert.equal(plan.blocks.some((b) => b.key === "mismatches_found"), false);
+  assert.match(plan.verdict.headline.text, /le calme/);
+});

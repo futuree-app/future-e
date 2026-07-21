@@ -16,7 +16,7 @@ import type { ProjectPosture } from "../user-project.ts";
 import type { CoverageLevel, Orientation } from "./criteria-registry.ts";
 import { deCommune, aCommune } from "../typography.ts";
 
-export type BlockKey = "verdict" | "unexamined_hard_constraints" | "compositions_found" | "mismatches_found" | "reserves_found" | "uncovered_priorities";
+export type BlockKey = "verdict" | "unexamined_hard_constraints" | "compositions_found" | "reserves_found" | "uncovered_priorities";
 
 export type NarrativeBlock = {
   key: BlockKey;
@@ -616,23 +616,9 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
     });
   }
 
-  // LES MISMATCHS NOMMÉS. Distinct de reserves_found (à VÉRIFIER) : ceux-ci sont établis, à ARBITRER. Le
-  // lecteur apprend ici, en une phrase, QUELLES priorités sont moins bien servies. Un « plusieurs
-  // dimensions » qui les avalerait ramènerait la carte à son défaut d'origine.
-  const mismatchShownFacts = input.shownFacts.filter((f) => f.role === "mismatch");
-  if (mismatchShownFacts.length > 0) {
-    const topics = mismatchShownFacts.map((f) => f.topic);
-    const verbe = topics.length > 1 ? "sont" : "est";
-    blocks.push({
-      key: "mismatches_found",
-      fallbackText: `${capitalize(joinFr(topics))} ${verbe} moins bien ${topics.length > 1 ? "servis" : "servi"} ici qu'ailleurs, à arbitrer au regard de vos priorités.`,
-      sourceIds: mismatchShownFacts.map((f) => f.id),
-      requiredPhrases: topics.map((t) => coreLabel(t)),
-      allowedNumbers: numberForms(topics.length),
-      maxChars: 300,
-      generable: true,
-    });
-  }
+  // LES MISMATCHS NE SONT PLUS UN REGISTRE. Leur matière (les priorités moins bien servies) est
+  // nommée par le HEADLINE du verdict, en tête du bloc. Un registre construit, généré, validé et
+  // stocké, mais rendu nulle part, coûtait un appel au modèle pour un texte que personne ne lisait.
 
   if (input.uncoveredPriorities.length > 0) {
     const top = input.uncoveredPriorities.slice(0, 3);
