@@ -3,7 +3,7 @@
 // les h (Honfleur) et les articles (Le Havre) restent en « de ».
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { deCommune } from "./typography.ts";
+import { deCommune, aCommune } from "./typography.ts";
 
 test("deCommune : élision devant voyelle simple", () => {
   assert.equal(deCommune("Antibes"), "d'Antibes");
@@ -24,4 +24,33 @@ test("deCommune : consonne, h et article restent en « de »", () => {
   assert.equal(deCommune("Honfleur"), "de Honfleur");
   assert.equal(deCommune("Le Havre"), "de Le Havre");
   assert.equal(deCommune("Saint-Cirq-Lapopie"), "de Saint-Cirq-Lapopie");
+});
+
+test("aCommune : contraction avec l'article défini masculin", () => {
+  assert.equal(aCommune("Le Havre"), "au Havre");
+  assert.equal(aCommune("Le Mans"), "au Mans");
+  assert.equal(aCommune("Le Touquet-Paris-Plage"), "au Touquet-Paris-Plage");
+});
+
+test("aCommune : contraction avec l'article défini pluriel", () => {
+  assert.equal(aCommune("Les Sables-d'Olonne"), "aux Sables-d'Olonne");
+  assert.equal(aCommune("Les Herbiers"), "aux Herbiers");
+});
+
+test("aCommune : l'article féminin et l'article élidé ne se contractent pas", () => {
+  assert.equal(aCommune("La Rochelle"), "à La Rochelle");
+  assert.equal(aCommune("La Baule-Escoublac"), "à La Baule-Escoublac");
+  assert.equal(aCommune("L'Haÿ-les-Roses"), "à L'Haÿ-les-Roses");
+  assert.equal(aCommune("L'Île-Rousse"), "à L'Île-Rousse");
+});
+
+test("aCommune : « à » ne s'élide pas devant une voyelle", () => {
+  assert.equal(aCommune("Antibes"), "à Antibes");
+  assert.equal(aCommune("Orléans"), "à Orléans");
+  assert.equal(aCommune("Toulouse"), "à Toulouse");
+});
+
+test("aCommune : un nom qui commence par les mêmes lettres reste intact", () => {
+  assert.equal(aCommune("Lespinasse"), "à Lespinasse");
+  assert.equal(aCommune("Lehaucourt"), "à Lehaucourt");
 });
