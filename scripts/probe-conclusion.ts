@@ -69,7 +69,7 @@ function mismatch(id: string, tier: MaterialityTier, topic: string): DecisionFac
   return {
     id, ruleId: `territoire.mismatch-${id}`, sourceFactIds: [`relativePosition.${id}`], module: "territoire",
     topic, statement: `Sur cet indicateur, Roubaix se situe parmi les 20 % de communes les moins favorables de France.`,
-    materialityTier: tier, role: "mismatch", projectKey: id as never,
+    materialityTier: tier, role: "mismatch", projectKey: id as never, headlineSubject: topic,
     basis: { kind: "relative_position", rankLow: 0.05, rankHigh: 0.12, universe: "communes_france", distributionVersion: "mismatch-dist-2026-07-15" },
     evidence: [{ factId: `relativePosition.${id}`, module: "territoire", label: "Territoire", grain: "commune" }],
   } as DecisionFact;
@@ -97,7 +97,7 @@ function absence(id: string, tier: MaterialityTier, topic: string, statement: st
   return {
     id, ruleId: `territoire.absence-${id}`, sourceFactIds: [`absenceAttestation.${id}`], module: "territoire",
     topic, statement,
-    materialityTier: tier, role: "mismatch", projectKey: id as never,
+    materialityTier: tier, role: "mismatch", projectKey: id as never, headlineSubject: topic,
     basis: {
       kind: "named_absence",
       observedStateId: id === "vie_etudiante" ? "no_higher_education_establishment_in_radius" : "network_below_daily_credibility_floor",
@@ -133,7 +133,7 @@ function coast(id: string, tier: MaterialityTier, topic: string, statement: stri
   return {
     id, ruleId: `territoire.mer-${id}`, sourceFactIds: [`coastDistance.${id}`], module: "territoire",
     topic, statement,
-    materialityTier: tier, role: "mismatch", projectKey: id as never,
+    materialityTier: tier, role: "mismatch", projectKey: id as never, headlineSubject: topic,
     basis: { kind: "absolute_measure", value: 240, unit: "km", conventionId: "coast-proximity-v1" },
     evidence: [{ factId: `coastDistance.${id}`, module: "territoire", label: "Territoire", grain: "commune" }],
   } as DecisionFact;
@@ -158,7 +158,7 @@ function size(id: string, tier: MaterialityTier, topic: string, statement: strin
   return {
     id, ruleId: `territoire.taille-${id}`, sourceFactIds: ["territorySize.classification"], module: "territoire",
     topic, statement,
-    materialityTier: tier, role: "mismatch", projectKey: id as never,
+    materialityTier: tier, role: "mismatch", projectKey: id as never, headlineSubject: topic,
     basis: { kind: "categorical_state", observedCategory: cat, conventionId: "agglomeration-size-v1" },
     evidence: [{ factId: "territorySize.classification", module: "territoire", label: "Territoire", grain: "commune" }],
   } as DecisionFact;

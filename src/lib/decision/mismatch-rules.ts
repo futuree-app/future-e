@@ -81,6 +81,7 @@ function makeMismatchRule(key: PreferenceKey): DecisionRule {
         id: `${f.insee}:mismatch-${key}`, ruleId: id, sourceFactIds: [`relativePosition.${key}`], module: "territoire",
         role: "mismatch", projectKey: key, materialityTier: tier,
         topic: lab.topic,
+        headlineSubject: lab.subject,
         // COMPARATIF, jamais un jugement absolu. L'univers est nommé (« de France »), le lien au projet
         // explicite. « moins bien » ne dit pas « mauvais » : il dit « moins qu'ailleurs ». La clôture nomme
         // l'ARBITRAGE (le vocabulaire du verdict) et garde la seule doctrine indispensable, en deux phrases :

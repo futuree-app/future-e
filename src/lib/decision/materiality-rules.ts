@@ -474,6 +474,15 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
       break;
     case "mismatch": {
       if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);
+      // Le SUJET DU HEADLINE, la priorité du lecteur telle qu'elle se lit après un deux-points. Une
+      // règle qui l'oublie ferait nommer au héros l'indicateur défavorable (« la distance à la mer »
+      // là où le lecteur a demandé la proximité) : on le refuse ici plutôt qu'à l'écran.
+      if (!fact.headlineSubject || fact.headlineSubject.trim().length === 0) {
+        throw new Error(`[decision] ${fact.ruleId}: mismatch sans headlineSubject (la PRIORITÉ du lecteur, à lire après un deux-points)`);
+      }
+      if (fact.headlineSubject.length > 45 || /[.!?]/.test(fact.headlineSubject)) {
+        throw new Error(`[decision] ${fact.ruleId}: headlineSubject trop long ou phrasé (« ${fact.headlineSubject} »)`);
+      }
       const basis = fact.basis;
       if (basis.kind === "absolute_measure") {
         // On VALIDE la mesure, pas seulement son nom : cette garde protège tous les futurs producteurs de

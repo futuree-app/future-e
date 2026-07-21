@@ -21,6 +21,9 @@ type Outcome = "satisfied" | "neutral" | "mismatch";
 type SizeSpec = {
   key: PreferenceKey;
   topic: string;
+  // La PRIORITÉ du lecteur, telle qu'elle se lit après un deux-points dans le headline du verdict.
+  // « l'isolement du territoire » nommerait l'indicateur défavorable, jamais ce qui a été demandé.
+  subject: string;
   outcomes: Record<AgglomerationCategory, Outcome>;
   buildStatement: (nom: string, fragment: string) => string;
   limitation?: string;
@@ -30,6 +33,7 @@ const SPECS: SizeSpec[] = [
   {
     key: "eviter_grandes_villes",
     topic: "la taille du territoire",
+    subject: "la taille de la ville",
     outcomes: { village: "satisfied", petite: "satisfied", moyenne: "neutral", grande: "mismatch", metropole: "mismatch" },
     buildStatement: (nom, fragment) =>
       `Vous avez placé le fait d'éviter les grandes villes parmi vos priorités. ${fragment}. Cet écart appelle un arbitrage. Il ne rend pas ${nom} incompatible avec votre projet.`,
@@ -37,6 +41,7 @@ const SPECS: SizeSpec[] = [
   {
     key: "prefere_grande_ville",
     topic: "la taille du territoire",
+    subject: "la taille de la ville",
     outcomes: { village: "mismatch", petite: "mismatch", moyenne: "neutral", grande: "satisfied", metropole: "satisfied" },
     buildStatement: (nom, fragment) =>
       `Vous avez placé le fait de vivre dans une grande ville parmi vos priorités. ${fragment}. Cet écart appelle un arbitrage. Il ne rend pas ${nom} incompatible avec votre projet.`,
@@ -44,6 +49,7 @@ const SPECS: SizeSpec[] = [
   {
     key: "eviter_isolement",
     topic: "l'isolement du territoire",
+    subject: "la taille du bassin de vie",
     outcomes: { village: "mismatch", petite: "neutral", moyenne: "neutral", grande: "neutral", metropole: "neutral" },
     buildStatement: (_nom, fragment) =>
       `Vous avez placé le fait d'éviter un environnement isolé parmi vos priorités. ${fragment}. Cette petite taille répond moins bien à cette dimension de votre projet, sans permettre de conclure à son isolement effectif.`,
@@ -93,6 +99,7 @@ function makeSizeRule(spec: SizeSpec): DecisionRule {
         id: `${f.insee}:mismatch-${spec.key}`, ruleId: id, sourceFactIds: [TERRITORY_SIZE_FACT_ID],
         module: "territoire", role: "mismatch", projectKey: spec.key, materialityTier: tier,
         topic: spec.topic,
+        headlineSubject: spec.subject,
         statement: spec.buildStatement(f.nom, categoryStatementFragment(f.nom, cat, source)),
         basis: { kind: "categorical_state", observedCategory: cat, conventionId: AGGLOMERATION_SIZE_CONVENTION.id },
         evidence: [ev],
