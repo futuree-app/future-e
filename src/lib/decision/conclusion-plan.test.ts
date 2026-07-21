@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildConclusionPlan, shouldGenerateNarrative, type ConclusionPlanInput } from "./conclusion-plan.ts";
+import { buildConclusionPlan, shouldGenerateNarrative, rankLeadCandidates, type ConclusionPlanInput } from "./conclusion-plan.ts";
 import type { DecisionFact, MaterialityTier } from "./decision-fact.ts";
+import type { FactComposition } from "./fact-composition.ts";
 
 function verification(id: string, tier: MaterialityTier, statement = `constat ${id}`, topic = `sujet ${id}`): DecisionFact {
   return {
@@ -9,6 +10,16 @@ function verification(id: string, tier: MaterialityTier, statement = `constat ${
     materialityTier: tier, role: "verification",
     evidence: [{ factId: id, module: "logement", label: "DPE", observedValue: "F", grain: "adresse" }],
     action: { type: "verifier_sur_place", label: "Vérifier sur place" },
+  };
+}
+
+function mismatchFact(id: string, tier: MaterialityTier, key: string, subject: string, topic = `sujet ${id}`): DecisionFact {
+  return {
+    id, ruleId: `territoire.mismatch-${key}`, sourceFactIds: [], module: "territoire",
+    statement: `constat ${id}`, topic, headlineSubject: subject, materialityTier: tier, role: "mismatch",
+    projectKey: key as never,
+    basis: { kind: "relative_position", rankLow: 0.02, rankHigh: 0.08, universe: "communes_france", distributionVersion: "test" },
+    evidence: [{ factId: id, module: "territoire", label: "Territoire", grain: "commune" }],
   };
 }
 
@@ -528,4 +539,24 @@ test("shownCompositions vide -> plan strictement identique à l'existant (non-r�
   assert.deepEqual(plan.blocks.map((b) => b.key), [
     "verdict", "unexamined_hard_constraints", "reserves_found", "uncovered_priorities",
   ]);
+});
+
+// ── La primitive de tri des candidats ──────────────────────────────────────────
+
+test("rankLeadCandidates ne rend que les candidats du meilleur tier, dans l'ordre d'entrée", () => {
+  const out = rankLeadCandidates(
+    [verification("a", "structuring"), verification("b", "decision_critical"), verification("c", "decision_critical")],
+    [],
+  );
+  assert.deepEqual(out.map((c) => c.factId), ["b", "c"]);
+});
+
+test("rankLeadCandidates rend un tableau vide quand rien ne dépasse secondary", () => {
+  assert.deepEqual(rankLeadCandidates([verification("a", "secondary")], []), []);
+  assert.deepEqual(rankLeadCandidates([], []), []);
+});
+
+test("un candidat de réserve porte son topic comme sujet", () => {
+  const out = rankLeadCandidates([verification("f1", "structuring", "constat", "la chaleur estivale")], []);
+  assert.equal(out[0]!.subject, "la chaleur estivale");
 });

@@ -133,19 +133,50 @@ function capitalize(s: string): string {
 // COMPOSÉ n'obtient pas un accès que les mismatchs simples n'ont pas. Si un jour les mismatchs doivent
 // pouvoir mener la conclusion, la décision se prend ICI, pour tous, jamais par effet de bord d'un
 // patron. Le candidat composé porte son TITRE en topic et son SUMMARY en statement.
-type LeadCandidate = { factId: string; topic: string; statement: string; materialityTier: MaterialityTier };
+export type LeadCandidate = {
+  factId: string;
+  topic: string;
+  // Le sujet à NOMMER dans le headline. Un mismatch et une composition de mismatchs portent leur
+  // `headlineSubject` (la priorité du lecteur) ; toute autre réserve est nommée par son `topic`,
+  // déjà écrit comme un groupe nominal court.
+  subject: string;
+  statement: string;
+  materialityTier: MaterialityTier;
+  role: DecisionFact["role"] | "composition";
+  absorbedFactIds?: string[];
+};
+
+// LA PRIMITIVE DE TRI, partagée par les deux sélecteurs (headline et strate résiduelle). Elle rend
+// les candidats du MEILLEUR tier, dans l'ordre d'entrée : l'ordre des sections EST l'ordre éditorial,
+// et retrier à l'intérieur d'un tier transformerait une déclaration en priorité métier. Le tier
+// `secondary` ne couronne rien : il n'y a alors rien d'assez matériel pour être cité.
+export function rankLeadCandidates(
+  shownFacts: DecisionFact[],
+  shownCompositions: FactComposition[] = [],
+): LeadCandidate[] {
+  const candidates: LeadCandidate[] = [
+    ...reserves(shownFacts).map((f) => ({
+      factId: f.id, topic: f.topic, subject: f.topic, statement: f.statement,
+      materialityTier: f.materialityTier, role: f.role,
+    })),
+    ...shownCompositions.filter((c) => c.kind === "tradeoff" || c.kind === "grouped_verification")
+      .map((c) => ({
+        factId: c.id, topic: c.title, subject: c.title, statement: c.summary,
+        materialityTier: c.materialityTier, role: "composition" as const, absorbedFactIds: c.absorbedFactIds,
+      })),
+  ];
+  if (candidates.length === 0) return [];
+  const best = Math.min(...candidates.map((f) => TIER_ORDER[f.materialityTier]));
+  if (best === TIER_ORDER.secondary) return [];
+  return candidates.filter((f) => TIER_ORDER[f.materialityTier] === best);
+}
 
 export function selectLead(shownFacts: DecisionFact[], shownCompositions: FactComposition[] = []): LeadSelection {
-  const candidates: LeadCandidate[] = [
-    ...reserves(shownFacts).map((f) => ({ factId: f.id, topic: f.topic, statement: f.statement, materialityTier: f.materialityTier })),
-    ...shownCompositions.filter((c) => c.kind === "tradeoff" || c.kind === "grouped_verification")
-      .map((c) => ({ factId: c.id, topic: c.title, statement: c.summary, materialityTier: c.materialityTier })),
-  ];
-  if (candidates.length === 0) return { kind: "none" };
-  const best = Math.min(...candidates.map((f) => TIER_ORDER[f.materialityTier]));
-  // secondary ne couronne rien : il n'y a alors rien d'assez matériel pour être cité.
-  if (best === TIER_ORDER.secondary) return { kind: "none" };
-  const top = candidates.filter((f) => TIER_ORDER[f.materialityTier] === best);
+  return leadFromCandidates(rankLeadCandidates(shownFacts, shownCompositions));
+}
+
+function leadFromCandidates(top: LeadCandidate[]): LeadSelection {
+  if (top.length === 0) return { kind: "none" };
   if (top.length === 1) {
     const f = top[0]!;
     // `single` garde le constat : UN fait cité seul peut être dit en entier sans noyer la conclusion,
