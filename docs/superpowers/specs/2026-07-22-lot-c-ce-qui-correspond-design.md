@@ -231,3 +231,146 @@ titre que les autres.
   cinq au maximum) : registre séparé et secondaire, jamais mélangé aux critères demandés.
 - Les positifs de risque et de réglementaire (voir la liste blanche).
 - Le module Logement : aucune de ses règles ne produit de `satisfied` aujourd'hui.
+
+---
+
+# Invariant transversal : une dimension, un signal autonome
+
+**Valable pour ce lot et toutes ses extensions.** Une même dimension ne peut jamais produire à la fois
+un alignement et un signal défavorable dans le même dossier : l'écran dirait blanc et noir sur le même
+sujet, et le lecteur n'aurait aucun moyen de trancher.
+
+```
+1. chercher un signal négatif matériel sur la dimension
+2. s'il existe, aucun alignement autonome sur cette dimension
+3. le rang favorable peut alors NUANCER la carte négative, jamais l'annuler
+4. sinon, évaluer l'alignement
+5. sinon, neutral, silencieux
+```
+
+Exemple de la nuance (étape 3), une seule carte :
+
+> L'exposition future ressort élevée, même si sa progression est plus contenue que dans de nombreuses
+> communes.
+
+**Doctrine d'ajout des fondements.** Une variante de base probante n'entre dans le type que lorsqu'au
+moins une règle sait réellement la produire, la valider et l'expliquer. Pas d'union anticipée
+contenant `favorable_trajectory` ou `verified_scoped_absence` avant leur lot. C'est la doctrine déjà
+écrite pour `AbsoluteMeasureBasis` : autoriser une variante non produite « créerait un état que le
+moteur ne sait ni produire ni expliquer, et qu'`assertFactValid` rejette ».
+
+---
+
+# Extensions prévues, hors périmètre de ce lot
+
+Le lot C est livrable et testable seul. Ce qui suit est un **contrat**, pas une liste de tâches : il
+existe pour ne pas reperdre des décisions déjà prises, et pour que chaque extension parte d'une règle
+écrite plutôt que d'une intuition.
+
+## C+ — États présents comparables (air, bruit, industrie)
+
+Trois critères ont une valeur mesurée continue dans l'index mais aucun rang national :
+`air_sain`, `calme_sonore`, `faible_exposition_industrielle`. Les rendre classables demande d'étendre
+le `switch` de `mismatchRawScore` (`comparateur-scores.ts:50`) et de relancer
+`populate-mismatch-rank.mts`. Le fondement `relative_position` s'applique alors tel quel.
+
+**Le veto absolu, invariant central de ce lot :**
+
+```
+rang favorable + donnée valide + AUCUN signal absolu matériel sur la même dimension  → alignement
+rang favorable + signal absolu défavorable sur la même dimension                     → rien
+```
+
+Un rang ne blanchit jamais un niveau préoccupant : une commune peut être parmi les moins mauvaises et
+rester exposée en valeur absolue.
+
+**Formulations gravées.** Le vocabulaire reste strictement borné à ce qui est mesuré, conformément aux
+doctrines existantes de ces trois critères (le calme sonore mesure l'exposition cumulée aux grandes
+infrastructures, pas le calme de la rue ; l'exposition industrielle est une présence administrative,
+pas un niveau de pollution).
+
+| Critère | À écrire | À ne jamais écrire |
+|---|---|---|
+| Air | L'exposition annuelle aux PM2,5 est relativement faible par rapport aux autres communes françaises. | L'air est sain. |
+| Bruit | La commune est relativement peu exposée aux grandes infrastructures de transport. | Le cadre est calme. |
+| Industrie | La commune compte parmi les territoires les moins exposés aux sites industriels recensés. | Il n'y a pas de pollution industrielle. |
+
+**Ce lot n'est pas « trois `case` et un script ».** Le code est court, le gate de qualité ne l'est pas :
+distribution de chaque critère, valeurs extrêmes, communes sans donnée, seuil du veto, formulation
+positive, **formulation négative créée symétriquement** (classer un critère crée aussi des mismatchs
+sur lui, donc de nouvelles cartes défavorables), et cas où les deux moteurs pourraient se contredire.
+
+## D — Trajectoires climatiques
+
+`ClimatFacts` porte quatre axes (`joursTresChauds`, `nuitsTropicales`, `joursFeu`, `pluieMax24h`),
+chacun avec sa valeur ET son anomalie par horizon GWL : le niveau futur et la trajectoire sont tous
+deux disponibles, sans nouvelle donnée.
+
+**Le piège que ce lot existe pour éviter** : un rang relatif sur une grandeur en aggravation absolue se
+lit « il ne fera pas chaud ici », alors que toutes les communes chauffent. Et une commune déjà très
+chaude peut afficher une hausse faible précisément parce qu'elle part de haut.
+
+**Double gate obligatoire, niveau futur × trajectoire :**
+
+| Niveau projeté | Trajectoire | Résultat |
+|---|---|---|
+| Sous le seuil de signalement | Hausse contenue | Alignement fort |
+| Sous le seuil | Hausse ordinaire | Alignement possible (le niveau suffit) |
+| Sous le seuil | Hausse forte | Neutral, éventuellement une limitation |
+| Au-dessus du seuil | Hausse contenue | Signal défavorable, nuancé |
+| Au-dessus du seuil | Hausse forte | Signal défavorable |
+
+> **Invariant : un bon rang de trajectoire ne neutralise jamais un niveau futur matériellement
+> défavorable.**
+
+Le seuil de signalement est celui des règles de matérialité existantes : si la règle chaleur ne se
+déclenche pas **alors que la donnée est présente**, le niveau est sous seuil. C'est une mesure qui
+reste sous une borne, jamais un silence de source.
+
+**Périmètre initial** : fortes chaleurs et nuits tropicales, probablement sous une composition unique
+(« confort thermique futur »). Feu, pluies extrêmes et sécheresse suivent après audit de leurs
+données. L'inondation sort de ce groupe : elle demanderait une donnée prospective comparable, que les
+CatNat et le score communal actuel ne fournissent pas.
+
+**Aucun objectif de couverture.** Les chiffres évoqués (22 à 24 critères) sont un potentiel, jamais un
+engagement : la symétrie comptable n'est pas le but.
+
+## E — Rassurances au grain adresse (module Logement)
+
+Le code distingue déjà trois états de source, et `"none"` signifie exactement « la requête a réussi,
+rien trouvé » (`logement-decision-data.ts:57-61`), distinct de `"unavailable"` (source en panne). Une
+absence vérifiée est donc productible aujourd'hui, sans nouvelle donnée.
+
+**Ce n'est PAS un alignement.** « Aucune cavité recensée à moins de 500 m » ne dit aucune
+correspondance avec une priorité de lieu de vie : c'est une **rassurance de due diligence**, utile au
+moment de signer, inutile pour arbitrer entre deux communes (la plupart des adresses n'ont pas de
+cavité). Elle prend donc un contrat distinct, `role: "reassurance"` ou une vue hors `DecisionFact`, et
+elle vit dans le module **Logement**, jamais dans « En une minute ».
+
+Elle ne doit **jamais** : porter le rôle `alignment`, exiger artificiellement une `projectKey`,
+augmenter `favorableCount`, influencer l'orientation, entrer dans le héros, ni apparaître dans « Ce
+qui correspond à votre projet ».
+
+**Formulation strictement bornée.** `none` dit que la base consultée n'a rien renvoyé sur ce
+périmètre, jamais que la base recense parfaitement tout ce qui existe :
+
+```
+à écrire   Aucune cavité n'est recensée dans la base consultée à moins de 500 mètres de l'adresse.
+           (limitation : une absence dans la base ne garantit pas qu'aucune cavité inconnue n'existe)
+jamais     Il n'y a aucune cavité à proximité.
+```
+
+**Le garde-fou du sujet soulevé, rendu déterministe.** Sans lui, le rapport devient une liste de
+soulagements sur tous les risques imaginables. Une rassurance ne s'affiche que si **au moins une** de
+ces conditions est vraie :
+
+1. le lecteur a exprimé une préoccupation liée à ce sujet dans son projet ;
+2. un signal au grain supérieur rend la famille pertinente ici (la commune est classée en aléa
+   argiles, mais pas cette adresse) ;
+3. un fait voisin établi au même grain rend cette absence utile à la compréhension du dossier ;
+4. le lecteur ouvre volontairement ce contrôle dans le module Logement.
+
+La posture « achat » ne suffit **pas** : elle afficherait toutes les absences possibles.
+
+**Placement** : dans le sujet auquel elle répond, dans un encadré secondaire, ou dans le dépliable.
+Jamais une grande carte verte systématique.
