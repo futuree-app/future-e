@@ -43,6 +43,11 @@ export type SharedEvidenceComposition = {
   patternId: "territory-size-multiple-consequences";
   title: string;
   summary: string;
+  // Le sujet à nommer dans le headline du verdict. Le `title` raconte le patron (« Une même petite
+  // taille touche plusieurs dimensions de votre projet »), trop long pour une phrase de héros : la
+  // composition nomme ici la CAUSE COMMUNE, courte. Elle est une carte de mismatch (displaySection),
+  // donc candidate au headline d'arbitrage, alors que ses faits élémentaires sont absorbés.
+  headlineSubject: string;
   sharedEvidence: EvidenceRef[]; // l'état commun (classification, provenance)
   consequences: SharedEvidenceConsequence[];
   absorbedFactIds: string[];

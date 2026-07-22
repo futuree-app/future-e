@@ -369,4 +369,24 @@ test("un projet priorisant la mobilité sur une commune SANS réseau produit un 
   const mm = r.facts.find((x) => x.role === "mismatch" && x.ruleId === "territoire.absence-mobilite_quotidienne");
   assert.ok(mm, "un fait d'absence mobilité doit être émis");
   assert.equal((mm as { basis: { kind: string } }).basis.kind, "named_absence");
+  // Le sujet du headline nomme la PRIORITÉ du lecteur, jamais l'indicateur défavorable.
+  assert.equal((mm as { headlineSubject: string }).headlineSubject, "les transports du quotidien");
+  assertFactValid(mm!, p);
+});
+
+test("assertFactValid refuse un mismatch sans headlineSubject", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "cadre_calme", weight: 3 }] });
+  const base = {
+    id: "x", ruleId: "territoire.mismatch-cadre_calme", sourceFactIds: [], module: "territoire" as const,
+    role: "mismatch" as const, projectKey: "cadre_calme" as const, materialityTier: "structuring" as const,
+    topic: "le cadre calme", statement: "constat",
+    basis: { kind: "relative_position" as const, rankLow: 0, rankHigh: 0.1, universe: "communes_france" as const, distributionVersion: "v" },
+    evidence: [{ factId: "x", module: "territoire" as const, label: "T", grain: "commune" as const }],
+  };
+  assert.throws(() => assertFactValid({ ...base, headlineSubject: "" }, p), /headlineSubject/);
+  assert.throws(
+    () => assertFactValid({ ...base, headlineSubject: "un sujet beaucoup trop long pour tenir dans une phrase de héros" }, p),
+    /headlineSubject/,
+  );
+  assert.throws(() => assertFactValid({ ...base, headlineSubject: "le calme." }, p), /headlineSubject/);
 });

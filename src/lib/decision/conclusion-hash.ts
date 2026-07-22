@@ -27,7 +27,11 @@ export const DECISION_NARRATIVE_CONTRACT_VERSION = "c2";
 // plus le grain (deux faits d'adresse cités côte à côte répétaient « sur cette adresse »).
 // v11 : registre compositions_found (constats déjà reliés par le déterministe) + le lead peut être une
 // composition tradeoff, nommée par son titre.
-export const DECISION_NARRATIVE_PROMPT_VERSION = "v11";
+// v12 (lot « verdict héros ») : trois natures, trois verbes. Un constat établi est à CONTRÔLER, une
+// condition non testée est à VÉRIFIER, un mismatch s'ARBITRE ; « examiner » décrit ce que futur•e a
+// déjà fait. Le prompt invitait jusqu'ici à écrire « des points méritent d'être examinés », que le
+// modèle reprenait pendant que le déterministe disait « à contrôler ».
+export const DECISION_NARRATIVE_PROMPT_VERSION = "v12";
 export const DECISION_NARRATIVE_MODEL = "claude-sonnet-4-6";
 
 export function hashPayload(

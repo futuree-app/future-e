@@ -53,32 +53,38 @@ export function rankPhrase(high: number): string {
 // LA TABLE DE PHRASES. PREFERENCE_LABELS n'est pas grammatical dans « Vous avez placé {…} parmi vos
 // priorités ». topic = le SUJET nommé (<= 70 car., cf. assertFactValid). projectPhrase = la priorité,
 // tournée pour l'ouverture. indicator = ce sur quoi porte la comparaison.
-export type MismatchLabel = { topic: string; projectPhrase: string; indicator: string; limitation?: string };
+// subject = le groupe nominal qui se lit APRÈS un deux-points dans le headline du verdict
+// (« … correspondent moins bien à Toulouse : le calme et l'accès aux espaces naturels. »). Il nomme
+// LA PRIORITÉ DU LECTEUR, jamais l'indicateur défavorable : « la faible dépendance à la voiture »,
+// et non « la dépendance à la voiture », que le lecteur n'a jamais demandée. Borné à 45 caractères.
+export type MismatchLabel = { topic: string; projectPhrase: string; indicator: string; subject: string; limitation?: string };
 // Record<string, MismatchLabel> : vérifie la FORME de chaque valeur (une limitation mal typée échoue) tout en
 // restant indexable par PreferenceKey dans la fabrique. L'exhaustivité (chaque MISMATCH_KEY a un label) est
 // garantie par un test de garde (mismatch-rules.test.ts), pas par le type (éviterait un cycle facts<->rules).
 export const MISMATCH_LABELS: Record<string, MismatchLabel> = {
-  nature: { topic: "les espaces naturels", projectPhrase: "la proximité des espaces naturels", indicator: "l'accès aux espaces naturels" },
-  acces_ecoles: { topic: "l'accès aux collèges et lycées", projectPhrase: "l'accès aux collèges et lycées", indicator: "l'accès aux collèges et lycées" },
-  acces_soins: { topic: "l'accès aux soins", projectPhrase: "un bon accès aux soins", indicator: "l'accès aux soins" },
-  acces_culture: { topic: "l'accès à la culture", projectPhrase: "l'accès à une offre culturelle", indicator: "l'accès à l'offre culturelle" },
-  acces_transports: { topic: "l'accès au train", projectPhrase: "l'accès au train et aux gares", indicator: "la desserte ferroviaire" },
-  faible_dependance_auto: { topic: "la dépendance à la voiture", projectPhrase: "une faible dépendance à la voiture", indicator: "la possibilité de se déplacer sans voiture" },
-  croissance_demographique: { topic: "la trajectoire démographique", projectPhrase: "un territoire qui gagne des habitants", indicator: "la trajectoire démographique" },
-  vie_locale: { topic: "la vie locale", projectPhrase: "une vie locale animée", indicator: "l'intensité de la vie locale" },
-  cadre_calme: { topic: "le cadre calme", projectPhrase: "un cadre calme", indicator: "le calme du cadre de vie" },
-  viabilite_emploi: { topic: "le bassin d'emploi", projectPhrase: "un bassin d'emploi dynamique", indicator: "le dynamisme du bassin d'emploi" },
-  acces_services: { topic: "l'accès aux services du quotidien", projectPhrase: "un bon accès aux services du quotidien", indicator: "l'accès aux services et commerces du quotidien" },
+  nature: { topic: "les espaces naturels", projectPhrase: "la proximité des espaces naturels", indicator: "l'accès aux espaces naturels", subject: "l'accès aux espaces naturels" },
+  acces_ecoles: { topic: "l'accès aux collèges et lycées", projectPhrase: "l'accès aux collèges et lycées", indicator: "l'accès aux collèges et lycées", subject: "l'accès aux collèges et lycées" },
+  acces_soins: { topic: "l'accès aux soins", projectPhrase: "un bon accès aux soins", indicator: "l'accès aux soins", subject: "l'accès aux soins" },
+  acces_culture: { topic: "l'accès à la culture", projectPhrase: "l'accès à une offre culturelle", indicator: "l'accès à l'offre culturelle", subject: "l'accès à la culture" },
+  acces_transports: { topic: "l'accès au train", projectPhrase: "l'accès au train et aux gares", indicator: "la desserte ferroviaire", subject: "l'accès au train" },
+  faible_dependance_auto: { topic: "la dépendance à la voiture", projectPhrase: "une faible dépendance à la voiture", indicator: "la possibilité de se déplacer sans voiture", subject: "la faible dépendance à la voiture" },
+  croissance_demographique: { topic: "la trajectoire démographique", projectPhrase: "un territoire qui gagne des habitants", indicator: "la trajectoire démographique", subject: "la trajectoire démographique" },
+  vie_locale: { topic: "la vie locale", projectPhrase: "une vie locale animée", indicator: "l'intensité de la vie locale", subject: "la vie locale" },
+  cadre_calme: { topic: "le cadre calme", projectPhrase: "un cadre calme", indicator: "le calme du cadre de vie", subject: "le calme" },
+  viabilite_emploi: { topic: "le bassin d'emploi", projectPhrase: "un bassin d'emploi dynamique", indicator: "le dynamisme du bassin d'emploi", subject: "le bassin d'emploi" },
+  acces_services: { topic: "l'accès aux services du quotidien", projectPhrase: "un bon accès aux services du quotidien", indicator: "l'accès aux services et commerces du quotidien", subject: "les services du quotidien" },
   ensoleillement_recherche: {
     topic: "l'ensoleillement",
     projectPhrase: "un territoire ensoleillé",
     indicator: "l'ensoleillement du territoire",
+    subject: "l'ensoleillement",
     limitation: "Cette position décrit la climatologie solaire de référence issue de la réanalyse ERA5-Land, normale 1991-2020. Elle ne constitue pas une projection de l'ensoleillement futur.",
   },
   douceur_climat: {
     topic: "la douceur des hivers",
     projectPhrase: "des hivers doux",
     indicator: "la douceur des hivers",
+    subject: "la douceur des hivers",
     limitation: "Cette position décrit la douceur hivernale (température moyenne de décembre à février) sur la période de référence 1976-2005. Les fortes chaleurs estivales, notamment futures, sont traitées à part.",
   },
 };

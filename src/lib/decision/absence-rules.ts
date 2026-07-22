@@ -16,6 +16,8 @@ const territoireHref = "/rapport/quartier";
 type AbsenceSpec = {
   key: PreferenceKey;
   topic: string;
+  // La PRIORITÉ du lecteur, telle qu'elle se lit après un deux-points dans le headline du verdict.
+  subject: string;
   observedStateId: NamedAbsenceBasis["observedStateId"];
   conventionId: string;
   nationalContext: NamedAbsenceBasis["nationalContext"];
@@ -33,6 +35,7 @@ const SPECS: AbsenceSpec[] = [
   {
     key: "mobilite_quotidienne",
     topic: "les transports en commun du quotidien",
+    subject: "les transports du quotidien",
     observedStateId: "network_below_daily_credibility_floor",
     conventionId: NETWORK_CONVENTION_ID,
     nationalContext: ABSENCE_NATIONAL_CONTEXT.network,
@@ -46,6 +49,7 @@ const SPECS: AbsenceSpec[] = [
   {
     key: "vie_etudiante",
     topic: "les établissements du supérieur",
+    subject: "l'environnement étudiant",
     observedStateId: "no_higher_education_establishment_in_radius",
     conventionId: HIGHER_ED_CONVENTION_ID,
     nationalContext: ABSENCE_NATIONAL_CONTEXT.higherEd,
@@ -89,6 +93,7 @@ function makeAbsenceRule(spec: AbsenceSpec): DecisionRule {
         id: `${f.insee}:mismatch-${spec.key}`, ruleId: id, sourceFactIds: [`absenceAttestation.${spec.key}`],
         module: "territoire", role: "mismatch", projectKey: spec.key, materialityTier: tier,
         topic: spec.topic,
+        headlineSubject: spec.subject,
         statement: spec.statement(f.nom, f),
         basis: { kind: "named_absence", observedStateId: spec.observedStateId, conventionId: spec.conventionId, nationalContext: spec.nationalContext },
         evidence: [ev],

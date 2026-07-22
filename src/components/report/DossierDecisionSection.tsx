@@ -52,14 +52,19 @@ export function DossierDecisionSection({
 
   return (
     <section className="mt-14" id="dossier-decision">
-      <div className="mb-7 max-w-[640px]">
-        <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-accent mb-4">
+      {/* LARGEUR DE LECTURE : QUESTION OUVERTE. Une colonne de 860 px a été essayée puis retirée :
+          la page entière fait 1044 px utiles, et rien d'autre ne partageait cette largeur, si bien que
+          le bloc se lisait comme un élément mal aligné plutôt que comme une colonne éditoriale. La
+          mesure de ligne reste trop longue sur desktop ; elle se réglera à l'échelle de la PAGE, pas
+          de ce bloc seul. Seul le headline garde sa mesure propre (titre en espace ouvert). */}
+      {/* Le titre « {Commune}, au regard de votre projet. » a disparu : le plus grand texte de l'écran
+          était un cadrage sans réponse, posé au-dessus d'un verdict deux fois plus petit. Le nom de la
+          commune est tissé dans le headline, qui porte désormais le <h2> de la section. */}
+      <div className="mb-7">
+        <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-accent">
           <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
           En une minute
         </div>
-        <h2 className="font-normal text-[clamp(26px,3vw,40px)] leading-[1.12] tracking-[-0.6px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-          {dossier.narrativePlan.communeNom}, au regard de votre projet.
-        </h2>
       </div>
 
       {logementStatus === "pending" ? (

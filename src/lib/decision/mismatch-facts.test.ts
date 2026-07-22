@@ -44,3 +44,18 @@ test("chaque critère de la v1 a un libellé grammatical", () => {
     assert.ok(MISMATCH_LABELS[k]!.topic.length <= 70);
   }
 });
+
+test("chaque libellé de mismatch porte un subject qui se lit APRÈS un deux-points", () => {
+  for (const [key, lab] of Object.entries(MISMATCH_LABELS)) {
+    assert.ok(lab.subject && lab.subject.trim().length > 0, `subject manquant pour ${key}`);
+    assert.ok(lab.subject.length <= 45, `subject trop long pour ${key} : « ${lab.subject} »`);
+    assert.equal(/[.!?]/.test(lab.subject), false, `subject phrasé pour ${key}`);
+    assert.equal(lab.subject[0], lab.subject[0]!.toLowerCase(), `subject capitalisé pour ${key}`);
+  }
+});
+
+test("le subject nomme la PRIORITÉ du lecteur, jamais l'indicateur défavorable", () => {
+  // Le lecteur a déclaré vouloir moins dépendre de la voiture. Nommer « la dépendance à la voiture »
+  // comme sa priorité inverserait ce qu'il a demandé.
+  assert.equal(MISMATCH_LABELS.faible_dependance_auto!.subject, "la faible dépendance à la voiture");
+});

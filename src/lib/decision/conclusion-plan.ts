@@ -14,9 +14,9 @@ import type { DecisionFact, ConclusionState, MaterialityTier, UncoveredConstrain
 import type { FactComposition } from "./fact-composition.ts";
 import type { ProjectPosture } from "../user-project.ts";
 import type { CoverageLevel, Orientation } from "./criteria-registry.ts";
-import { deCommune } from "../typography.ts";
+import { deCommune, aCommune } from "../typography.ts";
 
-export type BlockKey = "verdict" | "unexamined_hard_constraints" | "compositions_found" | "mismatches_found" | "reserves_found" | "uncovered_priorities";
+export type BlockKey = "verdict" | "unexamined_hard_constraints" | "compositions_found" | "reserves_found" | "uncovered_priorities";
 
 export type NarrativeBlock = {
   key: BlockKey;
@@ -46,6 +46,42 @@ export type LeadSelection =
 
 export type VerdictTone = "critical" | "caution" | "neutral" | "positive";
 
+// LE HÉROS DU BLOC. Il dit le cœur de la décision, en une phrase que le lecteur saisit d'un coup
+// d'œil. Il n'est JAMAIS généré : un texte aussi visible ne peut pas changer de ton selon un tirage.
+//
+// `consumed*` porte l'invariant de NON-RÉPÉTITION : tout sujet nommé ici est consommé et ne peut plus
+// être nommé par une strate voisine. Il réapparaît librement dans les cartes plus bas, qui portent la
+// preuve. La comparaison se fait sur des IDENTIFIANTS, jamais sur des textes. Les identifiants de
+// faits (y compris les absorbés d'une composition) vont dans `consumedFactIds` ; ceux de compositions
+// dans `consumedCompositionIds`.
+//
+// `consumedFrom` dit DANS QUEL POOL le headline a puisé. La strate voisine en a besoin : si elle
+// puise dans le même pool, elle est la SUITE d'une hiérarchie déjà ouverte (« À regarder ensuite »),
+// et non une seconde hiérarchie globale (« Parmi ces 4 points, 2 pèsent le plus ») qui contredirait
+// le « principal point » que le héros vient de désigner.
+export type VerdictHeadline = {
+  kind: "named_issues" | "posture";
+  text: string;
+  consumedFactIds: string[];
+  consumedCompositionIds: string[];
+  consumedFrom: "reserves" | "mismatches" | "constraint" | null;
+};
+
+// Le headline et le détail sont deux sorties COORDONNÉES d'un même constructeur, jamais l'une dérivée
+// de l'autre par manipulation de chaîne (fragile dès qu'une formulation évolue).
+export type VerdictPresentation = { headline: VerdictHeadline; detail: string };
+
+// Deux enjeux nommés au maximum : trois en grand Serif recréeraient le paragraphe qu'on supprime.
+// Et un plafond de longueur, nom de commune compris : deux sujets longs débordent la mesure du héros.
+//
+// Le plafond est calé sur les phrases RÉELLEMENT produites, pas sur une intuition. À 95, deux cas
+// courants basculaient à tort en posture : l'incompatibilité nommée sur une commune à article
+// (« … n'est pas satisfaite aux Sables-d'Olonne : la proximité d'une gare. », 103 car.), soit le cas
+// le plus grave privé de son nom, et l'arbitrage nominal qui passait à 94 sur 95. À 110, la mesure de
+// 540 px tient trois lignes courtes en Serif, ce qui reste un signal.
+export const HEADLINE_MAX_ISSUES = 2;
+export const HEADLINE_MAX_CHARS = 110;
+
 export type ConclusionNarrativePlan = {
   scope: "commune" | "commune+adresse";
   communeNom: string;
@@ -54,6 +90,7 @@ export type ConclusionNarrativePlan = {
   blocks: NarrativeBlock[];
   reservesCount: number; // faits AFFICHÉS (post-caps), jamais faits émis
   lead: LeadSelection;
+  verdict: VerdictPresentation;
   verdictLabel: string;   // le statut qui coiffe la carte, dérivé de la MÊME table que la phrase
   verdictTone: VerdictTone;
 };
@@ -73,7 +110,7 @@ export type ConclusionPlanInput = {
   shownCompositions: FactComposition[];
   uncovered: UncoveredConstraint[];
   uncoveredPriorities: { key: string; label: string }[];
-  establishedIncompatibility: { factId: string; statement: string } | null;
+  establishedIncompatibility: { factId: string; statement: string; topic: string } | null;
   // Les deux mesures du verdict (criteria-registry.ts), plus les comptes qui accordent ses phrases.
   coverage: CoverageLevel;
   orientation: Orientation;
@@ -133,19 +170,71 @@ function capitalize(s: string): string {
 // COMPOSÉ n'obtient pas un accès que les mismatchs simples n'ont pas. Si un jour les mismatchs doivent
 // pouvoir mener la conclusion, la décision se prend ICI, pour tous, jamais par effet de bord d'un
 // patron. Le candidat composé porte son TITRE en topic et son SUMMARY en statement.
-type LeadCandidate = { factId: string; topic: string; statement: string; materialityTier: MaterialityTier };
+export type LeadCandidate = {
+  factId: string;
+  topic: string;
+  // Le sujet à NOMMER dans le headline. Un mismatch et une composition de mismatchs portent leur
+  // `headlineSubject` (la priorité du lecteur) ; toute autre réserve est nommée par son `topic`,
+  // déjà écrit comme un groupe nominal court.
+  subject: string;
+  statement: string;
+  materialityTier: MaterialityTier;
+  role: DecisionFact["role"] | "composition";
+  absorbedFactIds?: string[];
+};
+
+// LA PRIMITIVE DE TRI, partagée par les deux sélecteurs (headline et strate résiduelle). Elle rend
+// les candidats du MEILLEUR tier, dans l'ordre d'entrée : l'ordre des sections EST l'ordre éditorial,
+// et retrier à l'intérieur d'un tier transformerait une déclaration en priorité métier. Le tier
+// `secondary` ne couronne rien : il n'y a alors rien d'assez matériel pour être cité.
+export function rankLeadCandidates(
+  shownFacts: DecisionFact[],
+  shownCompositions: FactComposition[] = [],
+): LeadCandidate[] {
+  const candidates: LeadCandidate[] = [
+    ...reserves(shownFacts).map((f) => ({
+      factId: f.id, topic: f.topic, subject: f.topic, statement: f.statement,
+      materialityTier: f.materialityTier, role: f.role,
+    })),
+    ...shownCompositions.filter((c) => c.kind === "tradeoff" || c.kind === "grouped_verification")
+      .map((c) => ({
+        factId: c.id, topic: c.title, subject: c.title, statement: c.summary,
+        materialityTier: c.materialityTier, role: "composition" as const, absorbedFactIds: c.absorbedFactIds,
+      })),
+  ];
+  if (candidates.length === 0) return [];
+  const best = Math.min(...candidates.map((f) => TIER_ORDER[f.materialityTier]));
+  if (best === TIER_ORDER.secondary) return [];
+  return candidates.filter((f) => TIER_ORDER[f.materialityTier] === best);
+}
 
 export function selectLead(shownFacts: DecisionFact[], shownCompositions: FactComposition[] = []): LeadSelection {
-  const candidates: LeadCandidate[] = [
-    ...reserves(shownFacts).map((f) => ({ factId: f.id, topic: f.topic, statement: f.statement, materialityTier: f.materialityTier })),
-    ...shownCompositions.filter((c) => c.kind === "tradeoff" || c.kind === "grouped_verification")
-      .map((c) => ({ factId: c.id, topic: c.title, statement: c.summary, materialityTier: c.materialityTier })),
-  ];
-  if (candidates.length === 0) return { kind: "none" };
-  const best = Math.min(...candidates.map((f) => TIER_ORDER[f.materialityTier]));
-  // secondary ne couronne rien : il n'y a alors rien d'assez matériel pour être cité.
-  if (best === TIER_ORDER.secondary) return { kind: "none" };
-  const top = candidates.filter((f) => TIER_ORDER[f.materialityTier] === best);
+  return leadFromCandidates(rankLeadCandidates(shownFacts, shownCompositions));
+}
+
+// LA STRATE DE POIDS EST RÉSIDUELLE. Le headline a déjà nommé ce qui définit la décision ; cette
+// strate dit la PROCHAINE priorité à instruire. Répéter un sujet nommé trois centimètres plus haut
+// ferait lire deux fois la même chose, et laisserait croire à deux niveaux de réserve distincts.
+//
+// La consommation est NARRATIVE : elle retire un sujet d'un résumé voisin, jamais d'un compteur, d'un
+// état métier ou d'une carte. Le résiduel n'est jamais exhaustif : il nomme les dominants restants.
+export function selectResidualLead(
+  shownFacts: DecisionFact[],
+  shownCompositions: FactComposition[],
+  consumed: { consumedFactIds: string[]; consumedCompositionIds: string[] },
+): LeadSelection {
+  const out = new Set([...consumed.consumedFactIds, ...consumed.consumedCompositionIds]);
+  if (out.size === 0) return selectLead(shownFacts, shownCompositions);
+  // On filtre AVANT le rang : le survivant d'un tier inférieur devient légitimement le dominant
+  // résiduel quand le tier supérieur est entièrement consommé, ce qui est exactement le cas visé.
+  return leadFromCandidates(rankLeadCandidates(
+    shownFacts.filter((f) => !out.has(f.id)),
+    shownCompositions.filter((c) => !out.has(c.id)),
+  ));
+}
+
+function leadFromCandidates(top: LeadCandidate[]): LeadSelection {
+  if (top.length === 0) return { kind: "none" };
   if (top.length === 1) {
     const f = top[0]!;
     // `single` garde le constat : UN fait cité seul peut être dit en entier sans noyer la conclusion,
@@ -160,7 +249,60 @@ export function selectLead(shownFacts: DecisionFact[], shownCompositions: FactCo
   };
 }
 
-type Verdict = { label: string; text: string; tone: VerdictTone };
+type VerdictBuild = { label: string; tone: VerdictTone; headline: VerdictHeadline; detail: string };
+
+const POSTURE = (text: string): VerdictHeadline =>
+  ({ kind: "posture", text, consumedFactIds: [], consumedCompositionIds: [], consumedFrom: null });
+
+// LA DOUBLE GATE. Un headline qui nomme doit tenir les DEUX conditions, sinon la branche entière
+// retombe en posture : jamais un héros à moitié nommé, jamais une phrase qui déborde sa mesure.
+function nameIssues(
+  text: string,
+  candidates: LeadCandidate[],
+  from: "reserves" | "mismatches" | "constraint",
+): VerdictHeadline | null {
+  if (candidates.length === 0 || candidates.length > HEADLINE_MAX_ISSUES) return null;
+  if (text.length > HEADLINE_MAX_CHARS) return null;
+  return {
+    kind: "named_issues",
+    text,
+    // Une composition consommée emporte ses faits absorbés : ce sont des FAITS, et ils vont donc dans
+    // `consumedFactIds`. Son propre identifiant est le seul à entrer dans `consumedCompositionIds`.
+    consumedFactIds: candidates.flatMap((c) =>
+      c.role === "composition" ? (c.absorbedFactIds ?? []) : [c.factId]),
+    consumedCompositionIds: candidates.filter((c) => c.role === "composition").map((c) => c.factId),
+    consumedFrom: from,
+  };
+}
+
+// LES CANDIDATS DU HEADLINE D'ARBITRAGE. Une composition `shared_evidence` est une CARTE de mismatch
+// (displaySection: "mismatches") qui a ABSORBÉ ses faits élémentaires : les chercher seulement dans
+// `shownFacts` ferait retomber le héros en posture sur un dossier dont une carte nomme pourtant très
+// bien l'enjeu. Elle porte son `headlineSubject` propre : son `title` raconte le patron, trop long
+// pour une phrase de héros.
+function mismatchCandidates(
+  shownFacts: DecisionFact[],
+  shownCompositions: FactComposition[],
+): LeadCandidate[] {
+  return [
+    ...shownFacts.filter((f) => f.role === "mismatch").map((f) => ({
+      factId: f.id, topic: f.topic, subject: f.role === "mismatch" ? f.headlineSubject : f.topic,
+      statement: f.statement, materialityTier: f.materialityTier, role: f.role,
+    })),
+    ...shownCompositions.filter((c) => c.kind === "shared_evidence").map((c) => ({
+      factId: c.id, topic: c.title, subject: c.headlineSubject, statement: c.summary,
+      materialityTier: c.materialityTier, role: "composition" as const, absorbedFactIds: c.absorbedFactIds,
+    })),
+  ];
+}
+
+// Ce qui reste à contrôler, dit sans jamais laisser croire que le point nommé par le héros s'ajoute
+// au compte. `named` = le headline a déjà nommé un élément de CE pool.
+function resteAControler(r: number, named: boolean): string {
+  if (r === 0) return "";
+  if (named) return r > 1 ? ` Ce point fait partie de ${r} constats à contrôler.` : " C'est le seul constat à contrôler.";
+  return r > 1 ? ` ${r} constats restent à contrôler.` : " Un constat reste à contrôler.";
+}
 
 // L'ACCORD EN NOMBRE est calculé, jamais laissé à une formule générique : « 1 points structurants »
 // détruit en un caractère la confiance que tout le reste essaie de construire.
@@ -168,154 +310,231 @@ function points(n: number, adj: string, verb: string): string {
   return n > 1 ? `${n} points ${adj}s ${verb}nt` : `${n} point ${adj} ${verb}`;
 }
 
-// LA TABLE DE VÉRITÉ DU VERDICT (spec 2.1 §5). Déterministe, mot pour mot, JAMAIS générée.
+// LA TABLE DE VÉRITÉ DU VERDICT (spec 2.1 §5, révisée par le lot « verdict héros »). Déterministe,
+// mot pour mot, JAMAIS générée. Chaque branche produit EXPLICITEMENT son couple headline + détail :
+// le détail n'est jamais une version tronquée du headline, ce qui serait fragile dès qu'une
+// formulation évolue.
 //
-// « Aucune contrainte n'est contredite » décrivait l'absence d'un problème. Le lecteur, lui, demande si
-// ce lieu lui convient. Le déterministe gagne donc le droit de répondre « ce lieu correspond », à une
-// condition : pouvoir le PROUVER. La preuve tient en deux mesures (couverture × orientation) et un
-// couperet (une contrainte dure non examinée interdit la couverture élevée).
+// « Aucune contrainte n'est contredite » décrivait l'absence d'un problème. Le lecteur, lui, demande
+// si ce lieu lui convient. Le déterministe gagne donc le droit de répondre « ce lieu correspond », à
+// une condition : pouvoir le PROUVER. La preuve tient en deux mesures (couverture × orientation) et
+// un couperet (une contrainte dure non examinée interdit la couverture élevée).
 //
 // LE SUJET DE LA PHRASE EST LE LIEU, OU LE LECTEUR. JAMAIS LE MOTEUR : « les éléments examinés
 // indiquent que… » ferait entendre futur•e commenter son propre travail au lieu de répondre. Seule
 // exception, celle où l'objet de la phrase EST notre incapacité (une donnée manque) : là, s'effacer
 // serait de la lâcheté, pas de l'élégance.
 //
-// Et AUCUNE PHRASE NE PROMET UN POSITIF QUI N'EXISTE PAS : sans `hasFavorable`, « ce lieu semble bien
-// correspondre » s'écrirait sur un dossier dont tous les critères examinés sont des réserves ; sans
-// `favorableCount`, « plusieurs dimensions » s'écrirait sur un unique critère satisfait.
-function verdict(input: ConclusionPlanInput): Verdict {
+// Et AUCUNE PHRASE NE PROMET UN POSITIF QUI N'EXISTE PAS. L'architecture ne produit aucun fait
+// favorable déterministe (cf. coast-rules) : les cas favorables tombent donc en POSTURE, et nommer
+// les positifs reste hors périmètre.
+function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
   const nom = input.communeNom;
+  const a = aCommune(nom);
+
   if (input.conclusionState === "project_not_structured") {
     return {
       label: "À préciser", tone: "neutral",
-      text: `Décrivez votre projet pour mettre ${nom} en regard de ce qui compte pour vous.`,
+      headline: POSTURE(`Décrivez votre projet pour mettre ${nom} en regard de ce qui compte pour vous.`),
+      detail: "",
     };
   }
   if (input.conclusionState === "insufficient_evidence") {
     return {
       label: "Impossible de conclure", tone: "neutral",
-      text: `Une donnée déterminante manque encore pour conclure sur ${nom}.`,
+      headline: POSTURE(`Des éléments essentiels manquent encore pour trancher ${a}.`),
+      detail: `Une donnée déterminante manque encore pour conclure sur ${nom}.`,
     };
   }
+
+  // INCOMPATIBILITÉ. Le blocage EST la réponse : le headline nomme la contrainte, le détail porte le
+  // constat qui l'établit.
   if (input.orientation === "incompatible") {
+    const inc = input.establishedIncompatibility;
+    const named = inc
+      ? nameIssues(`Une contrainte de votre projet n'est pas satisfaite ${a} : ${inc.topic}.`, [{
+          factId: inc.factId, topic: inc.topic, subject: inc.topic, statement: inc.statement,
+          materialityTier: "decision_critical", role: "incompatibility",
+        }], "constraint")
+      : null;
     return {
       label: "Condition non respectée", tone: "critical",
-      text: `L'une de vos conditions non négociables n'est pas respectée ici : ${input.establishedIncompatibility?.statement ?? ""}`,
+      headline: named ?? POSTURE(`Une contrainte de votre projet n'est pas satisfaite ${a}.`),
+      detail: inc ? endWithPeriod(inc.statement) : "L'une de vos conditions non négociables n'est pas respectée ici.",
     };
   }
+
   if (input.coverage === "none") {
     return {
       label: "Lecture non disponible", tone: "neutral",
       // « ne peut pas encore » et non « n'a pas encore pu » : le présent parle de l'état du dossier,
       // le passé composé raconterait un échec du moteur.
-      text: `${nom} ne peut pas encore être évalué au regard de vos critères.`,
+      headline: POSTURE(`${nom} ne peut pas encore être évalué au regard de vos critères.`),
+      detail: "Les critères de votre projet n'ont pas encore de lecture disponible sur cette commune.",
     };
   }
-  // ARBITRAGE : le lieu est possible, mais des priorités y sont nettement moins bien servies. On compte le
-  // TOTAL des mismatchs, pas l'affiché (cap 3) : 5 déclenchés ne doivent pas dire « trois ». Double registre
-  // si des réserves coexistent, pour ne pas perdre l'autre information sous l'ordre de l'enum.
-  //
-  // UN ARBITRAGE A DEUX CÔTÉS. N'en nommer qu'un (« moins bien servies ») décrivait un renoncement, pas
-  // un arbitrage : le lecteur ne voyait jamais ce que le lieu offre en échange. Le côté favorable est
-  // nommé quand il est PROUVÉ (hasFavorable/favorableCount, les mêmes garanties que coverage=high), et
-  // seulement là : sans preuve, promettre un positif reste interdit.
+
+  // ARBITRAGE. Le headline NOMME les priorités moins bien servies (1 ou 2), et le détail cesse alors
+  // de les décrire : il porte l'articulation. La branche de posture compte le TOTAL des mismatchs
+  // ÉMIS, jamais l'affiché : 5 déclenchés ne doivent pas dire « trois ».
   if (input.orientation === "arbitration") {
-    const m = input.mismatchTotal;
-    const combien = m > 1 ? `${m} de vos priorités sont` : `une de vos priorités est`;
+    const candidates = mismatchCandidates(input.shownFacts, input.shownCompositions);
+    // LE COMPTE VIENT DES MISMATCHS ÉMIS, jamais du nombre de cartes : une composition
+    // shared_evidence en absorbe plusieurs sous une seule, et compter les cartes ferait dire
+    // « Deux priorités » là où le lecteur en a trois. Un nombre faux, dans le plus grand texte de
+    // l'écran, que rien n'irait contredire.
+    const m = Math.max(input.mismatchTotal, candidates.length);
+    // QUI EST NOMMÉ. Tant que tout tient dans le plafond, on nomme tout : aucune sélection, donc
+    // aucun arbitraire. Au-delà, seuls les candidats du MEILLEUR tier sont nommables, et seulement
+    // s'ils tiennent eux-mêmes dans le plafond : couronner deux candidats parmi trois de même tier
+    // transformerait un ordre de déclaration en priorité métier (doctrine du lead `tied`).
+    //
+    // Le tier `secondary` n'est PAS exclu ici, à la différence de rankLeadCandidates : un mismatch
+    // affiché est matériel par construction (les poids 1 sont silencieux dans les règles), alors
+    // qu'une réserve secondaire ne l'est pas.
+    const best = Math.min(...candidates.map((c) => TIER_ORDER[c.materialityTier]));
+    const top = candidates.filter((c) => TIER_ORDER[c.materialityTier] === best);
+    const nommes = candidates.length <= HEADLINE_MAX_ISSUES ? candidates
+      : top.length <= HEADLINE_MAX_ISSUES ? top
+      : [];
+    const sujets = joinFr(nommes.map((c) => c.subject));
+    const compte = capitalize(numberForms(m)[1] ?? String(m));
+    // Deux-points quand le héros nomme TOUT ce qu'il compte ; « dont » quand il n'en nomme qu'une
+    // partie. « dont » ne suppose aucun ordre entre les sujets nommés.
+    const phrase = m === 1
+      ? `Une priorité correspond moins bien ${a} : ${sujets}.`
+      : nommes.length === m
+        ? `${compte} priorités correspondent moins bien ${a} : ${sujets}.`
+        : `${compte} priorités correspondent moins bien ${a}, dont ${sujets}.`;
+    const named = nameIssues(phrase, nommes, "mismatches");
+
+    // Le pool des réserves est DISTINCT de celui des mismatchs : le point nommé par le héros n'en
+    // fait pas partie, d'où « par ailleurs », et jamais « ce point fait partie de ».
     const suite = input.reservesShown > 0
-      ? ` ${input.reservesShown > 1 ? `${input.reservesShown} points restent` : "un point reste"} par ailleurs à vérifier.`
+      ? ` ${input.reservesShown > 1 ? `${input.reservesShown} constats restent` : "Un constat reste"} par ailleurs à contrôler.`
       : "";
+    const ecarts = m > 1 ? "Ces écarts appellent un arbitrage" : "Cet écart appelle un arbitrage";
+    // UN ARBITRAGE A DEUX CÔTÉS. N'en nommer qu'un décrit un renoncement : le lecteur ne voit jamais
+    // ce que le lieu offre en échange. Le côté favorable est nommé quand il est PROUVÉ (hasFavorable
+    // et favorableCount, les mêmes garanties que coverage=high), et seulement là.
     const ouverture = input.hasFavorable
       ? (input.favorableCount >= 2
-          ? `${nom} répond à plusieurs dimensions de votre projet et aucune incompatibilité n'a été établie`
-          : `${nom} présente un élément favorable pour votre projet et aucune incompatibilité n'a été établie`)
-      : `Aucune incompatibilité n'a été établie sur ${nom}`;
+          ? `${nom} répond à plusieurs dimensions de votre projet, et aucune incompatibilité n'a été établie`
+          : `${nom} présente un élément favorable pour votre projet, et aucune incompatibilité n'a été établie`)
+      : `Aucune incompatibilité n'a été établie ${a}`;
     return {
       label: "Arbitrage", tone: "neutral",
-      text: `${ouverture}, mais ${combien} nettement moins bien servie${m > 1 ? "s" : ""} qu'ailleurs. Cela appelle un arbitrage entre vos priorités, sans rendre ${nom} incompatible avec votre projet.${suite}`,
+      headline: named ?? POSTURE(`Un arbitrage réel ${a}, sans incompatibilité établie.`),
+      detail: named
+        ? `${ouverture}. ${ecarts} entre vos priorités, sans rendre ${nom} incompatible avec votre projet.${suite}`
+        : `${ouverture}, mais ${m > 1 ? `${m} de vos priorités sont` : "une de vos priorités est"} nettement moins bien servie${m > 1 ? "s" : ""} qu'ailleurs. Cela appelle un arbitrage entre vos priorités, sans rendre ${nom} incompatible avec votre projet.${suite}`,
     };
   }
-  // NEUTRAL : examiné, données disponibles, mais aucun signal marqué. Ni « bien correspondre » (aucun
-  // avantage net), ni « impossible de conclure » (l'analyse a abouti).
+
+  // NEUTRAL : examiné, données disponibles, mais aucun signal marqué. Rien à nommer.
   if (input.orientation === "neutral") {
     return {
       label: "Correspondance sans signal marqué", tone: "neutral",
-      text: `Vos priorités ont pu être examinées, mais ${nom} ne se distingue nettement ni favorablement ni défavorablement sur ces dimensions. Aucun écart notable n'apparaît, ni avantage net.`,
+      headline: POSTURE(`${nom} ne se distingue nettement ni favorablement ni défavorablement.`),
+      detail: "Vos priorités ont pu être examinées sur ces dimensions. Aucun écart notable n'apparaît, ni avantage net.",
     };
   }
 
+  // FAVORABLE : posture, toujours. Nommer un positif exigerait un fait favorable déterministe, que
+  // l'architecture ne produit pas.
+  if (input.orientation === "favorable") {
+    return input.coverage === "high"
+      ? {
+          label: "Bonne correspondance", tone: "positive",
+          headline: POSTURE(`${nom} semble bien correspondre à votre projet.`),
+          detail: "Les critères de votre projet qui ont pu être examinés vont dans ce sens.",
+        }
+      : {
+          label: "Signaux favorables", tone: "neutral",
+          headline: POSTURE(`${nom} va dans le sens de votre projet sur les critères déjà couverts.`),
+          detail: "La lecture reste incomplète : d'autres critères de votre projet n'ont pas encore pu être examinés.",
+        };
+  }
+
+  // RÉSERVES. Le headline nomme la réserve DOMINANTE quand une seule domine ; à égalité, il n'y a
+  // rien à couronner, et la strate de poids fait son travail plus bas.
+  const dominants = rankLeadCandidates(input.shownFacts, input.shownCompositions);
+  const dominant = dominants.length === 1 ? dominants[0]! : null;
+  // QUAND LE DOSSIER PENCHE FAVORABLEMENT, LE HÉROS DIT LA CORRESPONDANCE, PAS LA VIGILANCE. Nommer
+  // « le principal point à contrôler » sur un dossier à réserves mineures dont un côté favorable est
+  // PROUVÉ reléguerait au détail le cœur de la décision (ce lieu correspond) et noircirait le dossier
+  // par le seul effet de la mise en forme. La réserve redescend alors dans la strate de poids, à sa
+  // place. Le héros ne nomme une réserve que lorsque la réserve EST le message.
+  const penchFavorable = input.orientation === "minor_reserves" && input.hasFavorable;
+  const namedReserve = dominant && !penchFavorable
+    ? nameIssues(`Le principal point à contrôler ${a} : ${dominant.subject}.`, [dominant], "reserves")
+    : null;
+  const nommee = namedReserve != null;
+
   const n = input.majorReserveCount;
   const r = input.reservesShown;
-  const reste = r > 1 ? `${r} points restent` : `${r} point reste`;
   const plusieurs = input.favorableCount >= 2;
 
   if (input.coverage === "high") {
-    if (input.orientation === "favorable") {
-      return {
-        label: "Bonne correspondance", tone: "positive",
-        text: `${nom} semble bien correspondre à votre projet.`,
-      };
-    }
     if (input.orientation === "minor_reserves") {
-      return input.hasFavorable
-        ? {
-            label: "Correspondance favorable", tone: "positive",
-            text: `${nom} semble bien correspondre à votre projet. ${reste} à examiner.`,
-          }
-        : {
-            label: "Correspondance à confirmer", tone: "neutral",
-            text: `La correspondance ${deCommune(nom)} avec votre projet reste à confirmer : ${reste} à examiner.`,
-          };
-    }
-    if (!input.hasFavorable) {
       return {
-        label: "Correspondance à nuancer", tone: "caution",
-        text: `${points(n, "structurant", "empêche")} encore de considérer ${nom} comme une bonne correspondance avec votre projet.`,
+        label: input.hasFavorable ? "Correspondance favorable" : "Correspondance à confirmer",
+        tone: input.hasFavorable ? "positive" : "neutral",
+        headline: namedReserve ?? POSTURE(
+          input.hasFavorable
+            ? `${nom} semble bien correspondre à votre projet, sous réserve.`
+            : `La correspondance ${deCommune(nom)} avec votre projet reste à confirmer.`,
+        ),
+        // Le détail ne REDIT PAS le héros : en posture, le héros porte déjà « semble bien
+        // correspondre » ou « reste à confirmer », et le détail n'a plus qu'à dire ce qui reste.
+        detail: nommee
+          ? `${input.hasFavorable ? `${nom} semble bien correspondre à votre projet.` : `La correspondance ${deCommune(nom)} avec votre projet reste à confirmer.`}${resteAControler(r, true)}`
+          : resteAControler(r, false).trim() || "Les critères de votre projet qui ont pu être examinés vont dans ce sens.",
       };
     }
     return {
       label: "Correspondance à nuancer", tone: "caution",
-      text: plusieurs
-        ? `${nom} répond à plusieurs dimensions de votre projet, mais ${points(n, "structurant", "empêche")} encore de conclure nettement.`
-        : `${nom} présente des éléments favorables pour votre projet, mais ${points(n, "structurant", "empêche")} encore de conclure nettement.`,
+      headline: namedReserve ?? POSTURE(`${capitalize(points(n, "structurant", "empêche"))} de conclure nettement ${a}.`),
+      detail: !input.hasFavorable
+        ? `${capitalize(points(n, "structurant", "empêche"))} encore de considérer ${nom} comme une bonne correspondance avec votre projet.`
+        : plusieurs
+          ? `${nom} répond à plusieurs dimensions de votre projet, mais ${points(n, "structurant", "empêche")} encore de conclure nettement.`
+          : `${nom} présente des éléments favorables pour votre projet, mais ${points(n, "structurant", "empêche")} encore de conclure nettement.`,
     };
   }
 
   // coverage === "partial"
-  if (input.orientation === "favorable") {
-    return {
-      label: "Signaux favorables", tone: "neutral",
-      text: `${nom} va dans le sens de votre projet sur les critères déjà couverts, mais la lecture reste incomplète.`,
-    };
-  }
   if (input.orientation === "minor_reserves") {
-    return input.hasFavorable
-      ? {
-          label: "Correspondance à confirmer", tone: "neutral",
-          text: `${nom} va plutôt dans le sens de votre projet sur les critères déjà couverts, mais la lecture reste incomplète.`,
-        }
-      : {
-          label: "Correspondance à confirmer", tone: "neutral",
-          text: `La lecture reste incomplète, et ${reste} à examiner avant de pouvoir conclure sur ${nom}.`,
-        };
+    return {
+      label: "Correspondance à confirmer", tone: "neutral",
+      headline: namedReserve ?? POSTURE(`La lecture ${deCommune(nom)} reste incomplète pour trancher.`),
+      // Idem : le héros porte déjà l'incomplétude quand il est en posture.
+      detail: nommee
+        ? `La lecture ${deCommune(nom)} reste incomplète.${resteAControler(r, true)}`
+        : input.hasFavorable
+          ? `${nom} va plutôt dans le sens de votre projet sur les critères déjà couverts.${resteAControler(r, false)}`
+          : `D'autres critères de votre projet n'ont pas encore pu être examinés.${resteAControler(r, false)}`,
+    };
   }
   return {
     label: "Lecture encore partielle", tone: "caution",
-    text: `Il est encore trop tôt pour dire que ${nom} correspond à votre projet : la lecture reste incomplète et ${points(n, "structurant", "demande")} attention.`,
+    headline: namedReserve ?? POSTURE(`Il est encore trop tôt pour dire que ${nom} correspond à votre projet.`),
+    detail: `La lecture reste incomplète et ${points(n, "structurant", "demande")} attention.`,
   };
 }
 
 export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarrativePlan {
-  const v = verdict(input);
+  const v = verdictPresentation(input);
 
   // LE VERDICT N'EST JAMAIS GÉNÉRÉ. C'est la phrase qui peut renverser une décision perçue : un modèle
   // qui reformulerait « la lecture reste incomplète » en « ce lieu vous correspond » mentirait sur ce
   // qui a été établi, et aucune validation structurelle ne le verrait passer. Il le reçoit en lecture
   // seule, pour que les registres suivants s'y articulent. Le déterministe, lui, a le droit de dire la
-  // correspondance : il la PROUVE (couverture × orientation).
+  // correspondance : il la PROUVE (couverture × orientation). Le bloc porte le DÉTAIL ; le headline
+  // vit à part sur le plan, il n'est pas un registre confié au modèle.
   const blocks: NarrativeBlock[] = [{
     key: "verdict",
-    fallbackText: v.text,
+    fallbackText: v.detail,
     sourceIds: input.establishedIncompatibility ? [input.establishedIncompatibility.factId] : [],
     requiredPhrases: [],
     allowedNumbers: [],
@@ -327,7 +546,7 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
   if (input.conclusionState === "project_not_structured") {
     return {
       scope: input.scope, communeNom: input.communeNom, conclusionState: input.conclusionState,
-      posture: input.posture, blocks, reservesCount: 0, lead: { kind: "none" },
+      posture: input.posture, blocks, reservesCount: 0, lead: { kind: "none" }, verdict: v,
       verdictLabel: v.label, verdictTone: v.tone,
     };
   }
@@ -361,7 +580,11 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
   // le rang MAXIMAL. Écrire « quatre points d'un poids comparable » quand deux dominent et deux sont
   // secondaires serait faux. On compte lead.factIds, jamais rs.length.
   const rs = reserves(input.shownFacts);
-  const lead = selectLead(input.shownFacts, input.shownCompositions);
+  const lead = selectResidualLead(input.shownFacts, input.shownCompositions, v.headline);
+  // Le héros a-t-il déjà couronné un point de CE pool ? Alors cette strate est la SUITE d'une
+  // hiérarchie ouverte, et n'en ouvre pas une seconde : « deux pèsent le plus » juste après « le
+  // principal point à contrôler » ferait lire deux classements concurrents.
+  const suiteDuHeros = v.headline.consumedFrom === "reserves";
 
   // LES COMPOSITIONS NOMMÉES. Une composition désignée lead single est déjà narrée : la re-narrer ici
   // la dirait deux fois (le défaut exact que la composition existe pour éviter). Placement : une
@@ -388,7 +611,9 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
       key: "reserves_found",
       // Deux phrases, pas un deux-points : le constat est déjà une phrase, avec sa majuscule. « Un point
       // pèse plus que les autres : Le logement porte… » mettrait une capitale au milieu d'une phrase.
-      fallbackText: `Un point pèse plus que les autres. ${endWithPeriod(lead.statement)}`,
+      fallbackText: suiteDuHeros
+        ? `À regarder ensuite : ${lead.topic}.`
+        : `Un point pèse plus que les autres. ${endWithPeriod(lead.statement)}`,
       sourceIds: [lead.factId],
       // Aucune matière obligatoire : exiger le `statement` mot pour mot exigerait une COPIE, ce
       // qu'aucun rédacteur n'écrit, et la sonde l'a rejeté 3 fois sur 3. La garantie tient sans :
@@ -414,37 +639,27 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
     const sujets = joinFr(lead.facts.map((f) => f.topic));
     blocks.push({
       key: "reserves_found",
-      fallbackText: total > n
-        ? `Parmi ces ${numberForms(total)[1] ?? String(total)} points, ${numberForms(n)[1] ?? String(n)} pèsent le plus : ${sujets}.`
-        : `${capitalize(numberForms(n)[1] ?? String(n))} points demandent votre attention : ${sujets}.`,
+      fallbackText: suiteDuHeros
+        ? `À regarder ensuite : ${sujets}.`
+        : total > n
+          ? `Parmi ces ${numberForms(total)[1] ?? String(total)} points, ${numberForms(n)[1] ?? String(n)} pèsent le plus : ${sujets}.`
+          : `${capitalize(numberForms(n)[1] ?? String(n))} points demandent votre attention : ${sujets}.`,
       sourceIds: lead.facts.map((f) => f.factId),
       // Chaque sujet doit SURVIVRE : c'est le seul endroit du dossier où le lecteur apprend, en une
       // phrase, CE QUI pèse. Un « plusieurs risques naturels » qui les avalerait ramènerait la carte à
       // son défaut d'origine (parler d'elle-même), et aucune autre validation ne le verrait.
       requiredPhrases: lead.facts.map((f) => coreLabel(f.topic)),
-      allowedNumbers: total > n ? [...numberForms(n), ...numberForms(total)] : numberForms(n),
+      // En mode suite, la phrase ne porte AUCUN nombre : en autoriser un ouvrirait la porte à un
+      // compte inventé par le modèle, que rien n'irait contredire.
+      allowedNumbers: suiteDuHeros ? [] : total > n ? [...numberForms(n), ...numberForms(total)] : numberForms(n),
       maxChars: 340,
       generable: true,
     });
   }
 
-  // LES MISMATCHS NOMMÉS. Distinct de reserves_found (à VÉRIFIER) : ceux-ci sont établis, à ARBITRER. Le
-  // lecteur apprend ici, en une phrase, QUELLES priorités sont moins bien servies. Un « plusieurs
-  // dimensions » qui les avalerait ramènerait la carte à son défaut d'origine.
-  const mismatchShownFacts = input.shownFacts.filter((f) => f.role === "mismatch");
-  if (mismatchShownFacts.length > 0) {
-    const topics = mismatchShownFacts.map((f) => f.topic);
-    const verbe = topics.length > 1 ? "sont" : "est";
-    blocks.push({
-      key: "mismatches_found",
-      fallbackText: `${capitalize(joinFr(topics))} ${verbe} moins bien ${topics.length > 1 ? "servis" : "servi"} ici qu'ailleurs, à arbitrer au regard de vos priorités.`,
-      sourceIds: mismatchShownFacts.map((f) => f.id),
-      requiredPhrases: topics.map((t) => coreLabel(t)),
-      allowedNumbers: numberForms(topics.length),
-      maxChars: 300,
-      generable: true,
-    });
-  }
+  // LES MISMATCHS NE SONT PLUS UN REGISTRE. Leur matière (les priorités moins bien servies) est
+  // nommée par le HEADLINE du verdict, en tête du bloc. Un registre construit, généré, validé et
+  // stocké, mais rendu nulle part, coûtait un appel au modèle pour un texte que personne ne lisait.
 
   if (input.uncoveredPriorities.length > 0) {
     const top = input.uncoveredPriorities.slice(0, 3);
@@ -467,6 +682,7 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
     blocks,
     reservesCount: rs.length,
     lead,
+    verdict: v,
     verdictLabel: v.label,
     verdictTone: v.tone,
   };

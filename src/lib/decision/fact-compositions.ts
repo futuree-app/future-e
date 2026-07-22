@@ -125,6 +125,7 @@ function composeTerritorySizeSharedEvidence(run: RunResult, facts: ModuleFacts):
     kind: "shared_evidence",
     patternId: "territory-size-multiple-consequences",
     title: "Une même petite taille touche plusieurs dimensions de votre projet",
+    headlineSubject: "la taille du territoire",
     summary: `La catégorie de taille ${deCommune(facts.nom)} répond moins bien à ${ordered.length === 2 ? "deux" : String(ordered.length)} de vos priorités, pour la même raison.`,
     sharedEvidence: top.evidence,
     consequences: ordered.map((f) => ({

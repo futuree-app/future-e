@@ -1,95 +1,99 @@
-# Passation — chantier « prose de la conclusion du dossier », Tasks 1-6 TERMINÉES
+# Passation — refonte mise en forme « En une minute » (Lot A livré non mergé, Lot B en design)
 
-**Horodatage** : 2026-07-21 · **Branche** : `feat/prose-conclusion-dossier`
-(9 commits au-dessus de `main`=`514acea`, qui est poussé ; la branche N'EST PAS poussée, aucune PR).
+**Horodatage** : 2026-07-22 · **Branche courante** : `feat/verdict-heros`
 
-## Objectif (atteint)
+## Objectif en cours
 
-Corriger les défauts de prose du dossier « En une minute » validés sur le cas Toulouse (relecture
-ChatGPT du porteur, rapports editorial-writer + design-critic, contre-relecture ChatGPT des rapports).
-Plan exécuté en TDD : `docs/superpowers/plans/2026-07-17-prose-conclusion-arbitrage.md` (6/6 tâches cochées).
+Refondre la mise en forme du dossier « En une minute » (tête de /rapport), jugé « AI slop / pâté »
+par le porteur : pas de hiérarchie, pas d'exergue, trop de secondaire. Deux lots : **Lot A** =
+désengorger les cartes (livré, non mergé) ; **Lot B** = promouvoir le verdict en héros (en design).
+On est à la fin du brainstorm du Lot B : le spec est écrit et révisé, **en attente de relecture du
+porteur** avant de passer au plan d'implémentation.
 
-## Fait dans cette session (Task 6, commit `3f9d514`)
+## Fait dans cette session
 
-Passe éditoriale mismatch + chaleur, en TDD, un seul commit feature avec les 2 rapports d'agents :
+- **Task 6 (chantier prose) MERGÉE sur `main` et déployée en prod** : passe éditoriale mismatch +
+  chaleur (commits `3f9d514` feat + `c844b49` docs), sonde `probe-conclusion.ts` = **65/65 blocs**
+  (aucune régression). Branche `feat/prose-conclusion-dossier` supprimée après merge.
+- **Rapport Design Critic 2026-07-21** sur « En une minute » (problème d'ÉCHELLE, pas de contenu) :
+  `docs/rapports-agents/design-critic/2026-07-21-en-une-minute-hierarchie.md`.
+- **Lot A implémenté par un sous-agent, NON mergé** : branche `feat/lot-a-depate-en-une-minute`
+  (commit `65480b4`, depuis `main`). Contenu : `signalConvention` sortie de la face vers un dépliable
+  « Méthode et détails » (`MethodDetails`) ; bug de la puce « PREUVE » vide corrigé (une preuve
+  sans valeur porte le libellé de sa source) ; action dé-emphasée (`ActionCue`, `→ label` casse
+  basse) ; grain en intertitre de groupe au lieu d'une étiquette par carte. `tsc` 0, tests décision
+  294/294, build compilé. Note d'impl : `docs/rapports-agents/implementation/2026-07-21-lot-a-depate-en-une-minute.md`.
+- **Lot B : spec de design écrit et révisé** (branche `feat/verdict-heros`, commit `03de6f0`) :
+  `docs/superpowers/specs/2026-07-22-verdict-heros-design.md`. Révisé après contre-relecture ChatGPT.
 
-- **Chaleur** : le SUJET porte l'unité, la trajectoire n'écrit que le nombre (fini « jours jours jours ») ;
-  la 2e trajectoire hérite du cadre (`heriteCadre` dans `trajectoirePhrase`, « de 33 à 69 par an », sans
-  redire période ni horizon) ; la traduction charnelle perd son absolu (« le corps peine à récupérer »,
-  option validée par le porteur, plus « ne récupère plus »).
-- **Chips d'unité** : bug corrigé. `countNoun` (jour/nuit) par métrique dans `CLIMAT_METRICS`, porté dans
-  `ClimatAxe` ; `fmtClimatCount` remplace `fmtClimat` ; les chips disent « 69 nuits », plus « 69 jours ».
-- **`signalConvention`** : champ dédié sur `VerificationFact` + `CompositionSide`. Les seuils quittent le
-  constat de chaleur/feu/pluies pour ce champ ; rendu en ligne ghost discrète, distincte de la limitation
-  (`FactBody`, `SideBlock`) ; recopié par le tradeoff saisonnier (côté défavorable) et le
-  grouped_verification (`item()`). Card-only : la conclusion rédigée ne le reçoit pas. Commentaire
-  doctrinal `materiality-rules.ts` mis à jour (« dite SUR LA CARTE, dans son champ »).
-- **Clôture mismatch** : « Cet écart appelle un arbitrage. Il ne rend pas {nom} incompatible avec votre
-  projet. » (2 phrases, arbitrée par la contre-relecture ; « s'arbitre » écarté). Même remplacement dans
-  `mismatch-rules.ts`, `absence-rules.ts` (mobilité), `coast-rules.ts`, `agglomeration-rules.ts`
-  (grandes villes + grande ville). Les 2 clôtures PRUDENTES intactes (`absence-rules.ts:55` vie étudiante,
-  `agglomeration-rules.ts:49` isolement).
-- **G3** : quand `projectPhrase === indicator` (acces_ecoles), « Sur ce point, » remplace « Sur {indicator}, »
-  (évitait la duplication « l'accès aux collèges et lycées » deux fois).
+## Décisions prises (non encore dans le vault)
 
-## Décisions prises pendant la session
-
-- Formulation nuits tropicales : « et où le corps peine à récupérer » (le porteur a tranché en direct, via
-  AskUserQuestion ; garde le registre charnel « le corps », « peine » atténue l'absolu). Les 2 variantes
-  ChatGPT plus prudentes (« ce qui peut rendre la récupération… », « limitant les possibilités de
-  rafraîchissement… ») écartées.
-- **Pas de bump `DECISION_NARRATIVE_PROMPT_VERSION`** (reste `v11`) : le texte du prompt système n'a pas
-  changé, il est déjà aligné (« arbitrer » pour un mismatch, l.33). Les fallbacks generables ont changé
-  (statements mismatch, tradeoff chaleur), mais le hash de conclusion (`buildConclusionHash`, qui inclut
-  tout le `plan`) les invalide SEUL : le compteur manuel ne sert qu'aux changements de texte du prompt.
-- `signalConvention` rendu comme 2e ligne ghost parallèle à la limitation (distinctes par leur contenu),
-  PAS de dépliable « Pourquoi ce signal » labellisé (le design-critic n'a pas sanctionné d'élément visuel
-  nouveau ; à rouvrir si un test navigateur le demande).
-
-## DIFFÉRÉ (à spécifier avant dev, cohérent handoff + contre-relecture ChatGPT)
-
-- **Variantes de série mismatch** (« aussi » sur les cartes k≥2, « l'écart est ici plus net », portée
-  d'incompatibilité dite UNE fois sur la dernière carte visible) : sélection de PRÉSENTATION dans
-  l'assembleur (`decision-assembler.ts`, `sectionCards`), JAMAIS dans `fact.statement`. Appliquée aux
-  seules cartes `kind:"fact"` de la section mismatches, APRÈS compositions/absorption/tri/caps. Bloquant :
-  borner « plus net » (rang ≠ poids ≠ tier ; gate = bandes non chevauchantes ET matérialité égale ; ne
-  jamais modifier l'ordre ni le tier depuis cette relation).
-- **`compositions_found` / `mismatches_found` construits, générés, stockés, JAMAIS rendus** (découverte
-  design-critic). Trancher : réutiliser leur MATIÈRE (nommer les priorités dans le verdict d'arbitrage)
-  plutôt qu'afficher 2 paragraphes, ou cesser de les générer/stocker. Choix porteur.
-- **Bruit** : la phrase de seuils (`materiality-rules.ts` règle bruit) est en MILIEU de statement ; même
-  déménagement vers `signalConvention` possible, DIFFÉRÉ (non fait ce commit).
+Design du Lot B, co-construit avec le porteur (tranché par lui via AskUserQuestion) :
+- **Headline hybride** : nomme 1-2 enjeux quand une matière déterministe suffit, sinon posture. Jamais
+  généré par le LLM. Cascade : incompatibilité nommable → 1-2 mismatches → réserve dominante → posture.
+- **Strate de poids résiduelle** (option 2) : tout sujet nommé par le headline est CONSOMMÉ et ne se
+  répète pas dans la strate ; celle-ci se reconstruit sur le résidu, disparaît s'il ne reste rien.
+- **Titre cartouche « {Commune}, au regard de votre projet. » supprimé** ; le nom de la commune est
+  tissé dans le headline ; le scope (commune/adresse) reste en haut à droite (il y était déjà).
+- Ajustements de contrat adoptés (proposés par contre-relecture, validés dans la révision du spec) :
+  constructeur déterministe commun `{ headline, detail }` (pas de verdict « trimmé »), sélection
+  depuis les cartes AFFICHÉES (post-compositions/caps), consommation NARRATIVE seulement (comptes/
+  couverture/orientation intacts), le headline arbitrage SUBSUME et retire `mismatches_found`, gabarit
+  à deux-points (« … à Toulouse : le calme, l'accès aux espaces naturels ») qui résout l'accord,
+  double gate (2 enjeux ET ~95 car.), helper `aCommune`, `max-width` du héros posé comme l'exception
+  légitime de la doctrine de largeur.
+- **Consigne porteur : « on ne touche pas au Lot A pour l'instant »** — le Lot A reste sur sa branche,
+  non mergé.
+- **3 points du Lot A NON tranchés** (laissés au porteur) : (1) puce preuve sans valeur renommée par
+  sa source (vs style distinct) ; (2) actions longues non réécrites, signalées pour l'Editorial Writer
+  (`materiality-rules.ts:342`, `logement-rules.ts:59`) ; (3) largeur de lecture NON appliquée, reco =
+  `max-w` ~860px sur la grille des cartes (pas sur les paragraphes), **à décider avec le Lot B**.
 
 ## État git
 
-- Branche `feat/prose-conclusion-dossier`, 9 commits locaux NON poussés, aucune PR.
-- `main` = `514acea`, poussé, prod déployée. Ne pas pousser `main` sans demande explicite (prod = push main).
-- Non suivi : `Futur.e Design System.zip` (fichier du porteur, NE PAS committer).
-- Le handoff (ce fichier) et le plan mis à jour : à committer en docs.
+- Branche courante `feat/verdict-heros` : 1 commit non poussé (`03de6f0`, le spec Lot B).
+- `main` = `c844b49`, poussé, prod déployée (Task 6). Ne pas pousser `main` sans demande (prod = push main).
+- Branche `feat/lot-a-depate-en-une-minute` (`65480b4`) : Lot A livré, **NON mergé** (consigne porteur).
+- Branche `worktree-agent-a34fa3e0af58bf46f` : résidu du worktree du sous-agent Lot A, à nettoyer.
+- Branche `feat/composition-faits-lies` : ancienne, sans rapport, non nettoyée.
+- Non suivis : `Futur.e Design System.zip` (fichier porteur, NE JAMAIS committer) ; le rapport
+  Design Critic 2026-07-21 (committé avec ce handoff).
+- **Aucune PR ouverte.**
 
-## Reste (hors chantier prose)
+## Prochaine étape immédiate
 
-- Sonde `node --env-file=.env.local scripts/probe-conclusion.ts` non lancée (coût API) : les fallbacks
-  generables ont changé, elle confirmerait que les blocs survivent toujours à la validation.
-- Contraste du violet à 6 % sur verre sombre (réserve design-critic) : à valider à l'œil par le porteur.
-- Vérification au navigateur des variables `--accent/--info/--amethyst` (fix alias posé commit `665368a`,
-  à confirmer visuellement).
+Attendre la relecture du spec Lot B par le porteur (`docs/superpowers/specs/2026-07-22-verdict-heros-design.md`).
+- S'il valide : lancer la skill **superpowers:writing-plans** pour en faire un plan d'implémentation,
+  en intégrant une passe **Editorial Writer** sur les `subject` par critère et les textes headline/détail
+  (copie déterministe sensible), et en tranchant la largeur (verdict + cartes ensemble) avec le Lot A.
+- S'il demande des changements : les appliquer, re-committer le spec (amend), re-présenter.
+- **Ne pas merger le Lot A** tant que le porteur ne le redemande pas.
 
 ## À lire d'abord à la reprise
 
-- `MEMORY.md` ; fiches `project_dossier_decision.md`, `mismatch_formes_fondement.md`,
-  `project_composition_faits_lies.md`.
-- Le plan : `docs/superpowers/plans/2026-07-17-prose-conclusion-arbitrage.md` (6/6 cochées).
-- Les 2 rapports : `docs/rapports-agents/editorial-writer/2026-07-17-mismatch-chaleur.md`,
-  `docs/rapports-agents/design-critic/2026-07-17-conclusion-block.md`.
+- `MEMORY.md` (index) puis les fiches : `project_dossier_decision.md`, `project_frontiere_savoir_agir.md`,
+  `project_territoire_redesign.md` (doctrine « grands signaux lisibles »), `project_composition_faits_lies.md`.
+- Doctrine design : `docs/vault/recherches/inventaire-design.md` ; doctrine éditoriale :
+  `docs/vault/doctrine/editoriale.md`.
+- Le spec du Lot B : `docs/superpowers/specs/2026-07-22-verdict-heros-design.md` (la matière de reprise).
+- Les rapports agents : `docs/rapports-agents/design-critic/2026-07-21-en-une-minute-hierarchie.md`
+  (le diagnostic d'échelle), `docs/rapports-agents/design-critic/2026-07-17-conclusion-block.md`,
+  `docs/rapports-agents/editorial-writer/2026-07-17-mismatch-chaleur.md`, et la note d'impl Lot A
+  `docs/rapports-agents/implementation/2026-07-21-lot-a-depate-en-une-minute.md`.
+- `docs/handoff/AUTO-SNAPSHOT.md` pour vérifier la fraîcheur.
 
 ## Pièges / fils ouverts
 
+- **Lot A et Lot B touchent tous deux `DossierDecisionSection.tsx`** (Lot A : regroupement par grain ;
+  Lot B : retrait du titre cartouche). Réconcilier à l'intégration, **Lot A d'abord**.
+- **La largeur de lecture se décide en une fois** (verdict héros + grille des cartes), pas séparément :
+  c'est le point 3 non tranché du Lot A, renvoyé au Lot B.
+- **Retrait de `mismatches_found`** (le registre construit/généré/stocké/jamais rendu) : tâche finale du
+  Lot B, à ne faire qu'après avoir vérifié qu'aucun autre consommateur ne le lit (validation, stockage,
+  sonde).
+- `max-width` du héros : c'est l'exception de doctrine (`feedback_text_maxwidth`, « sous-titre de hero en
+  espace ouvert »), pas une violation — ne pas l'appliquer aux paragraphes des cartes.
 - `node --test` : jamais value-importer `comparateur-vie.ts` (server-only) depuis un fichier testé.
-- `plan.reservesCount` (conclusion-plan.ts) compte les seuls FAITS, pas les compositions-réserves : écart
-  connu avec `reservesShown`, hérité du tradeoff, non traité.
-- Le pluriel de « Condition(s) à vérifier » repose sur le contrat « 1 sourceId = 1 contrainte » : contrat à
-  documenter dans ConclusionBlock.tsx (demande contre-relecture, pas encore fait ; ChatGPT suggérait un
-  champ `unexaminedConstraintCount` explicite plutôt que déduire de `sourceIds.length`).
-- Le build local time-out sur le pré-rendu SSG `/inondation/[insee]` (>60 s/page, données externes) :
-  environnemental, pré-existant, sans rapport avec le dossier.
+- Le sous-agent Lot A a buildé via `npx next build --webpack` (Turbopack refuse un symlink hors racine FS
+  dans le worktree) ; l'échec `supabaseUrl is required` était un défaut d'ENV du worktree, pas un bug.
+- Nettoyer la branche `worktree-agent-a34fa3e0af58bf46f`.
