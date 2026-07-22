@@ -1054,11 +1054,12 @@ a {
    `--tone` est posé en style inline par ConclusionBlock (TONE_COLOR). Le repli sur --accent existe
    pour qu'un futur appelant qui l'oublierait rende un bloc correct plutôt qu'un bloc sans relief. */
 .card-verdict {
-  /* L'ÉCART DE SURFACE EST LE SIGNAL. À 0.055 contre 0.03 pour les cartes, il ne se voyait pas : le
-     bloc de réponse, une carte et le lien d'action se lisaient comme trois boîtes identiques. Le
-     verdict passe à 0.09, soit trois fois la surface des cartes, et un dégradé très court lui donne
-     du volume par en haut. Aucun halo : c'est la SURFACE qui dit la hiérarchie, pas une auréole. */
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.105) 0%, rgba(255, 255, 255, 0.062) 100%);
+  /* L'ENCRE DU VERDICT. Une surface de blanc transparent posée sur ce fond bleu-noir rend un gris
+     désaturé : à 3 % personne ne le voit, à 10 % c'est une plaque grise qui n'appartient à rien.
+     Le filet de ton DIFFUSE donc dans la surface, comme une encre qui prend dans le papier : le bloc
+     est teinté par ce qu'il annonce, et sa couleur cesse d'être un décor pour devenir l'information.
+     Le lavis se dissout avant la moitié de la hauteur — le texte se lit toujours sur du neutre. */
+  background: rgba(255, 255, 255, 0.045);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border-2);
@@ -1070,6 +1071,21 @@ a {
   box-shadow:
     0 16px 40px -16px rgba(0, 0, 0, 0.55),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Le lavis lui-même, isolé derrière @supports : un navigateur sans color-mix garde la surface neutre
+   ci-dessus plutôt qu'un bloc sans fond. */
+@supports (background: color-mix(in oklab, red 10%, transparent)) {
+  .card-verdict {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--tone, var(--accent)) 15%, transparent) 0%,
+        color-mix(in oklab, var(--tone, var(--accent)) 4%, transparent) 42%,
+        transparent 72%
+      ),
+      rgba(255, 255, 255, 0.035);
+  }
 }
 
 /* Dialog natif — styles non reproductibles en Tailwind */
