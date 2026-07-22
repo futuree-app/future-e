@@ -512,7 +512,7 @@ function shared(tier: MaterialityTier = "structuring"): FactComposition {
   return {
     id: "01001:composition-taille-consequences", kind: "shared_evidence", patternId: "territory-size-multiple-consequences",
     title: "Une même petite taille touche plusieurs dimensions de votre projet",
-    headlineSubject: "la taille du territoire",
+    headlineCause: "sa petite taille",
     summary: "La catégorie de taille de Ceyzériat répond moins bien à deux de vos priorités, pour la même raison.",
     sharedEvidence: [], consequences: [
       { projectKey: "prefere_grande_ville" as never, statement: "a", materialityTier: "structuring", factId: "f-a" },
@@ -658,7 +658,7 @@ test("arbitrage : une composition shared_evidence est candidate au headline", ()
   // le héros retomberait en posture alors qu'une carte visible nomme l'enjeu.
   const comp = {
     id: "comp-taille", kind: "shared_evidence", title: "Une même petite taille touche plusieurs dimensions de votre projet",
-    summary: "résumé", headlineSubject: "la taille du territoire", materialityTier: "structuring",
+    summary: "résumé", headlineCause: "sa petite taille", materialityTier: "structuring",
     absorbedFactIds: ["m1", "m2"], displaySection: "mismatches",
   } as unknown as FactComposition;
   const plan = buildConclusionPlan(baseInput({
@@ -666,11 +666,33 @@ test("arbitrage : une composition shared_evidence est candidate au headline", ()
     mismatchTotal: 2, mismatchShown: 1,
   }));
   assert.equal(plan.verdict.headline.kind, "named_issues");
-  // DEUX mismatchs sont émis, réunis sous UNE carte : le compte dit deux, et « dont » signale que le
-  // héros ne nomme que la cause commune. Compter les cartes aurait écrit « Une priorité ».
-  assert.equal(plan.verdict.headline.text, "Toulouse répond moins bien à deux de vos priorités, dont la taille du territoire.");
+  // DEUX mismatchs sont émis, réunis sous UNE carte : le compte dit deux, et « pour la même raison »
+  // dit ce que la composition affirme. « dont la taille du territoire » faisait passer la CAUSE pour
+  // une troisième priorité, que le lecteur n'avait jamais écrite. Compter les cartes aurait par
+  // ailleurs écrit « une priorité ».
+  assert.equal(plan.verdict.headline.text, "Toulouse répond moins bien à deux de vos priorités, pour la même raison : sa petite taille.");
   assert.deepEqual(plan.verdict.headline.consumedFactIds, ["m1", "m2"]);
   assert.deepEqual(plan.verdict.headline.consumedCompositionIds, ["comp-taille"]);
+});
+
+// La cause a son gabarit, et elle s'y lit SEULE. Mélangée à un mismatch simple dans un « dont », elle
+// redeviendrait une priorité parmi d'autres : on nomme alors les priorités, et la cause reste à sa carte.
+test("arbitrage : une cause commune ne s'énumère jamais avec des priorités", () => {
+  const comp = {
+    id: "comp-taille", kind: "shared_evidence", title: "Une même petite taille joue sur plusieurs de vos priorités",
+    summary: "résumé", headlineCause: "sa petite taille", materialityTier: "structuring",
+    absorbedFactIds: ["m2", "m3"], displaySection: "mismatches",
+  } as unknown as FactComposition;
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration",
+    shownFacts: [mismatchFact("m1", "structuring", "cadre_calme", "le calme")],
+    shownCompositions: [comp],
+    mismatchTotal: 3, mismatchShown: 2,
+  }));
+  assert.equal(plan.verdict.headline.text, "Toulouse répond moins bien à trois de vos priorités, dont le calme.");
+  assert.equal(plan.verdict.headline.text.includes("petite taille"), false);
+  // La cause n'étant pas nommée, elle n'est pas consommée : sa carte garde tout son rôle.
+  assert.deepEqual(plan.verdict.headline.consumedCompositionIds, []);
 });
 
 test("gate 2 enjeux : trois mismatchs affichés basculent en posture", () => {
@@ -937,7 +959,7 @@ test("le compte vient des mismatchs ÉMIS, jamais du nombre de cartes", () => {
   // texte de l'écran.
   const comp = {
     id: "comp-taille", kind: "shared_evidence", title: "titre long du patron",
-    summary: "résumé", headlineSubject: "la taille du territoire", materialityTier: "structuring",
+    summary: "résumé", headlineCause: "sa petite taille", materialityTier: "structuring",
     absorbedFactIds: ["m2", "m3"], displaySection: "mismatches",
   } as unknown as FactComposition;
   const plan = buildConclusionPlan(baseInput({

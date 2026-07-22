@@ -44,11 +44,30 @@ function toChips(refs: { label: string; observedValue?: string; href?: string }[
   const seen = new Set<string>();
   const out: { label: string; value?: string; href?: string }[] = [];
   for (const e of refs) {
-    const label = e.href && e.observedValue ? "Preuve" : e.label;
-    const cle = `${label}|${e.observedValue ?? ""}|${e.href ?? ""}`;
+    // SANS VALEUR MESURÉE, PAS DE PASTILLE (doctrine du lot A). Une référence qui ne porte que le nom
+    // de sa source n'établit rien : elle descend dans « Méthode et détails » (cf. factSources). Les
+    // cartes du logement affichaient ainsi l'adresse du lecteur quatre fois sur le même écran, sous
+    // un intertitre qui disait déjà « À cette adresse ».
+    if (!e.observedValue) continue;
+    const label = e.href ? "Preuve" : e.label;
+    const cle = `${label}|${e.observedValue}|${e.href ?? ""}`;
     if (seen.has(cle)) continue;
     seen.add(cle);
     out.push({ label, value: e.observedValue, href: e.href });
+  }
+  return out;
+}
+
+// LES SOURCES SANS VALEUR, pour le dépliable. Dédupliquées : quatre cartes de la même adresse ne
+// répètent pas quatre fois d'où vient la donnée.
+export function factSources(fact: DecisionFact): string[] {
+  const refs = fact.role === "compromise" ? fact.sides.flatMap((s) => s.evidence) : fact.evidence;
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const e of refs) {
+    if (e.observedValue || seen.has(e.label)) continue;
+    seen.add(e.label);
+    out.push(`Source : ${e.label}`);
   }
   return out;
 }

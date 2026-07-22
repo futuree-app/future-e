@@ -424,3 +424,20 @@ test("aucun topic de réserve ne répète le nom de la commune", () => {
     assert.equal(f.topic.includes(NOM), false, `${f.ruleId} : le topic répète le nom (« ${f.topic} »)`);
   }
 });
+
+// UNE PASTILLE CHIFFRÉE QU'AUCUNE PHRASE N'EXPLIQUE se lit comme un chiffre lâché là. Vu à Antibes :
+// le constat ne parlait que des nuits tropicales, et la carte affichait quand même « 5 jours à
+// l'horizon 2050 ». Les deux axes étaient mis en preuve, notables ou non.
+test("chaleur : seul l'axe dont le constat parle entre en preuve", () => {
+  // Des nuits tropicales très marquées, des jours qui ne franchissent pas le seuil de signalement.
+  const nuitsSeules = buildClimatFacts({
+    gwl20: { h: "2050", v: { NORTX35D_yr: 0, ATX35D_yr: 0, NORTR_yr: 39, ATR_yr: 39, NORIFM40_yr: 1, AIFM40_yr: 0, NORRx1d_yr: 43, ARRx1d_yr: 0.13 } },
+  })!;
+  const r = run(facts({ climat: nuitsSeules }), projetClimat("faible_chaleur"));
+  const f = r.facts.find((x) => x.ruleId === "territoire.climat-chaleur");
+  if (!f) return; // la commune ne déclenche pas la règle : rien à vérifier ici
+  assert.match(f.statement, /nuits tropicales/);
+  assert.equal(f.statement.includes("35 °C"), false);
+  assert.equal(f.evidence.some((e) => e.factId === "climat.joursTresChauds"), false);
+  assert.equal(f.evidence.some((e) => e.factId === "climat.nuitsTropicales"), true);
+});

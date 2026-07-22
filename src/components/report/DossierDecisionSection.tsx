@@ -8,7 +8,7 @@ import type { Dossier, DecisionFact } from "@/lib/decision/decision-fact";
 import { ConclusionBlock, planToBlocks } from "@/components/report/ConclusionBlock";
 import { conditionPorteeParLeBloc, sectionsAffichees } from "@/lib/decision/dossier-view";
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
-import { FactBody, EvidenceRow, MethodDetails } from "@/components/report/DecisionFactRenderParts";
+import { FactBody, EvidenceRow, MethodDetails, factSources } from "@/components/report/DecisionFactRenderParts";
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
 
 const SECTION_ACCENT: Record<string, string> = {
@@ -143,7 +143,12 @@ export function DossierDecisionSection({
                     const grain = factGrain(f);
                     const grainHeader = showGrain && grain && grain !== prevGrain ? grain : null;
                     prevGrain = grain;
-                    const conventions = f.role === "verification" && f.signalConvention ? [f.signalConvention] : [];
+                    // La convention de signalement ET la provenance descendent au même endroit : ce
+                    // sont les deux choses qu'on veut pouvoir vérifier sans les lire à chaque carte.
+                    const conventions = [
+                      ...(f.role === "verification" && f.signalConvention ? [f.signalConvention] : []),
+                      ...factSources(f),
+                    ];
                     return (
                       <Fragment key={f.id}>
                         {grainHeader ? (

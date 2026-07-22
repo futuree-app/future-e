@@ -48,11 +48,16 @@ export type SharedEvidenceComposition = {
   patternId: "territory-size-multiple-consequences";
   title: string;
   summary: string;
-  // Le sujet à nommer dans le headline du verdict. Le `title` raconte le patron (« Une même petite
-  // taille touche plusieurs dimensions de votre projet »), trop long pour une phrase de héros : la
-  // composition nomme ici la CAUSE COMMUNE, courte. Elle est une carte de mismatch (displaySection),
-  // donc candidate au headline d'arbitrage, alors que ses faits élémentaires sont absorbés.
-  headlineSubject: string;
+  // LA CAUSE COMMUNE, pas un sujet. Le champ s'appelait `headlineSubject` et le héros le servait comme
+  // les autres : « Salers répond moins bien à deux de vos priorités, dont la taille du territoire. »
+  // Erreur de catégorie, vue à l'écran : « la taille du territoire » n'est PAS une priorité du lecteur,
+  // c'est ce qui en dessert deux. Le gabarit « dont » la faisait passer pour l'une d'elles, et le
+  // lecteur qui a coché « une grande ville » et « ne pas être isolé » lisait un troisième mot qu'il
+  // n'avait jamais écrit, en perdant les deux siens.
+  //
+  // Elle se lit après « pour la même raison : », jamais dans une énumération de priorités. Le nom du
+  // champ le dit, pour qu'aucun futur appelant ne la remette dans un « dont ».
+  headlineCause: string;
   sharedEvidence: EvidenceRef[]; // l'état commun (classification, provenance)
   consequences: SharedEvidenceConsequence[];
   absorbedFactIds: string[];

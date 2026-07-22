@@ -159,7 +159,7 @@ function mism(id: string, tier: "secondary" | "structuring" = "structuring"): De
 function sharedComp(id: string, absorbed: string[], tier: "secondary" | "structuring"): FactComposition {
   return {
     id, kind: "shared_evidence", patternId: "territory-size-multiple-consequences",
-    title: "Une même petite taille", headlineSubject: "la taille du territoire",
+    title: "Une même petite taille", headlineCause: "sa petite taille",
     summary: "Deux priorités touchées pour la même raison.",
     sharedEvidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune", observedValue: "village" }],
     consequences: absorbed.map((fid) => ({ projectKey: "nature" as never, statement: "conséquence", materialityTier: tier, factId: fid })),

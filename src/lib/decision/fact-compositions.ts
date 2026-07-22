@@ -136,7 +136,10 @@ function composeTerritorySizeSharedEvidence(run: RunResult, facts: ModuleFacts):
     // summary les nomme donc avec LES MÊMES MOTS que le héros (SIZE_SUBJECTS), ce qui rend aussi
     // visible ce que la composition affirme : une cause, plusieurs conséquences.
     title: "Une même petite taille joue sur plusieurs de vos priorités",
-    headlineSubject: "la taille du territoire",
+    // LA CAUSE, nommée comme telle. « la taille du territoire » se lisait comme une priorité de plus
+    // dans un « dont » ; « sa petite taille » se lit après « pour la même raison : », et dit ce que la
+    // composition affirme : une raison, deux conséquences.
+    headlineCause: "sa petite taille",
     summary: `La petite taille ${deCommune(facts.nom)} dessert ${ordered.length === 2 ? "deux" : String(ordered.length)} de vos priorités à la fois : ${joinFr(ordered.map((f) => SIZE_SUBJECTS[f.projectKey] ?? f.topic))}.`,
     sharedEvidence: top.evidence,
     consequences: ordered.map((f) => ({
@@ -216,15 +219,20 @@ export function assertCompositionsValid(run: RunResult, compositions: FactCompos
     if (c.kind === "shared_evidence" && section !== "mismatches") throw new Error(`shared_evidence hors mismatches : ${c.id}`);
     if (c.kind === "grouped_verification" && section !== "verifications") throw new Error(`grouped_verification hors verifications : ${c.id}`);
     if (c.absorbedFactIds.length === 0) throw new Error(`composition sans absorbé : ${c.id}`);
-    // Le SUJET est obligatoire, comme sur un mismatch : sans lui, la conclusion nommait la composition
-    // par son `title` (majuscule au milieu de la phrase) ou plantait sur un `undefined`. La garde est
-    // ici parce que `tsconfig` exclut les fichiers de test du typecheck : une fixture à qui il manque
-    // ce champ doit échouer avec un message qui le dit, pas avec un TypeError trois couches plus loin.
-    if (!c.headlineSubject || c.headlineSubject.trim().length === 0) {
-      throw new Error(`composition sans headlineSubject : ${c.id} (le sujet court, bas de casse, lu après un deux-points)`);
+    // Le texte que le HÉROS servira est obligatoire : un sujet pour les patrons qui nomment une
+    // réserve, une CAUSE pour shared_evidence (deux natures, deux champs, cf. fact-composition.ts).
+    // Sans lui, la conclusion nommait la composition par son `title` (majuscule au milieu de la
+    // phrase) ou plantait sur un `undefined`. La garde est ici parce que `tsconfig` exclut les
+    // fichiers de test du typecheck : une fixture à qui il manque ce champ doit échouer avec un
+    // message qui le dit, pas avec un TypeError trois couches plus loin.
+    const [champ, texte] = c.kind === "shared_evidence"
+      ? ["headlineCause", c.headlineCause] as const
+      : ["headlineSubject", c.headlineSubject] as const;
+    if (!texte || texte.trim().length === 0) {
+      throw new Error(`composition sans ${champ} : ${c.id} (court, bas de casse, lu après un deux-points)`);
     }
-    if (c.headlineSubject.length > 45 || /[.!?]/.test(c.headlineSubject)) {
-      throw new Error(`composition au headlineSubject trop long ou phrasé : ${c.id} (« ${c.headlineSubject} »)`);
+    if (texte.length > 45 || /[.!?]/.test(texte)) {
+      throw new Error(`composition au ${champ} trop long ou phrasé : ${c.id} (« ${texte} »)`);
     }
     for (const id of c.absorbedFactIds) {
       if (!factIds.has(id)) throw new Error(`fait absorbé inexistant : ${id} (${c.id})`);

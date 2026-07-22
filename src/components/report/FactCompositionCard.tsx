@@ -35,7 +35,16 @@ function compositionConventions(composition: FactComposition): string[] {
       : composition.kind === "grouped_verification"
         ? composition.items
         : [];
-  return sides.map((s) => s.signalConvention).filter((c): c is string => Boolean(c));
+  // La convention de seuil, PUIS la provenance des références qui n'établissent aucune valeur : même
+  // règle que la carte élémentaire (sans valeur mesurée, pas de pastille sur la face).
+  const seen = new Set<string>();
+  const sources: string[] = [];
+  for (const e of [...sides.flatMap((s) => s.evidence), ...(composition.kind === "shared_evidence" ? composition.sharedEvidence : [])]) {
+    if (e.observedValue || seen.has(e.label)) continue;
+    seen.add(e.label);
+    sources.push(`Source : ${e.label}`);
+  }
+  return [...sides.map((s) => s.signalConvention).filter((c): c is string => Boolean(c)), ...sources];
 }
 
 export function FactCompositionCard({

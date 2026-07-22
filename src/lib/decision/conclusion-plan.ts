@@ -197,6 +197,9 @@ export type LeadCandidate = {
   materialityTier: MaterialityTier;
   role: DecisionFact["role"] | "composition";
   absorbedFactIds?: string[];
+  // Ce candidat porte une CAUSE COMMUNE, pas une priorité du lecteur (shared_evidence). Il ne peut
+  // donc pas entrer dans une énumération de priorités : il a son propre gabarit, et il s'y lit seul.
+  causeCommune?: boolean;
 };
 
 // LA PRIMITIVE DE TRI, partagée par les deux sélecteurs (headline et strate résiduelle). Elle rend
@@ -309,8 +312,9 @@ function mismatchCandidates(
       statement: f.statement, materialityTier: f.materialityTier, role: f.role,
     })),
     ...shownCompositions.filter((c) => c.kind === "shared_evidence").map((c) => ({
-      factId: c.id, topic: c.title, subject: c.headlineSubject, statement: c.summary,
+      factId: c.id, topic: c.title, subject: c.headlineCause, statement: c.summary,
       materialityTier: c.materialityTier, role: "composition" as const, absorbedFactIds: c.absorbedFactIds,
+      causeCommune: true,
     })),
   ];
 }
@@ -426,9 +430,19 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
     // Le tier `secondary` n'est PAS exclu ici, à la différence de rankLeadCandidates : un mismatch
     // affiché est matériel par construction (les poids 1 sont silencieux dans les règles), alors
     // qu'une réserve secondaire ne l'est pas.
-    const best = Math.min(...candidates.map((c) => TIER_ORDER[c.materialityTier]));
-    const top = candidates.filter((c) => TIER_ORDER[c.materialityTier] === best);
-    const nommes = candidates.length <= HEADLINE_MAX_ISSUES ? candidates
+    // UNE CAUSE COMMUNE NE S'ÉNUMÈRE PAS AVEC DES PRIORITÉS. Une composition `shared_evidence` porte
+    // la RAISON qui en dessert plusieurs (« sa petite taille »), pas une priorité de plus : servie
+    // dans un « dont », elle se faisait passer pour l'une d'elles, et le lecteur qui avait coché « une
+    // grande ville » et « ne pas être isolé » lisait un troisième mot qu'il n'avait jamais écrit.
+    //
+    // Elle a donc son propre gabarit, et elle s'y lit SEULE. Quand d'autres mismatchs coexistent, on
+    // nomme ceux-là et la cause reste à sa carte : mieux vaut nommer moins que nommer faux.
+    const cause = candidates.find((c) => c.causeCommune) ?? null;
+    const simples = candidates.filter((c) => !c.causeCommune);
+    const pool = cause && simples.length === 0 ? [cause] : simples;
+    const best = pool.length > 0 ? Math.min(...pool.map((c) => TIER_ORDER[c.materialityTier])) : 0;
+    const top = pool.filter((c) => TIER_ORDER[c.materialityTier] === best);
+    const nommes = pool.length <= HEADLINE_MAX_ISSUES ? pool
       : top.length <= HEADLINE_MAX_ISSUES ? top
       : [];
     const sujets = joinFr(nommes.map((c) => c.subject));
@@ -438,12 +452,17 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
     // ce qui se passe. C'est le lieu qui répond, ou non, à ce que le lecteur demande.
     //
     // Deux-points quand le héros nomme TOUT ce qu'il compte ; « dont » quand il n'en nomme qu'une
-    // partie. « dont » ne suppose aucun ordre entre les sujets nommés.
-    const phrase = m === 1
-      ? `${nom} répond moins bien à une de vos priorités : ${sujets}.`
-      : nommes.length === m
-        ? `${nom} répond moins bien à ${compte} de vos priorités : ${sujets}.`
-        : `${nom} répond moins bien à ${compte} de vos priorités, dont ${sujets}.`;
+    // partie. « dont » ne suppose aucun ordre entre les sujets nommés. Et « pour la même raison »
+    // quand une cause unique explique tout le compte : la phrase dit alors ce que la composition
+    // affirme, une raison et plusieurs conséquences.
+    const parCause = nommes.length === 1 && nommes[0]!.causeCommune === true && m > 1;
+    const phrase = parCause
+      ? `${nom} répond moins bien à ${compte} de vos priorités, pour la même raison : ${sujets}.`
+      : m === 1
+        ? `${nom} répond moins bien à une de vos priorités : ${sujets}.`
+        : nommes.length === m
+          ? `${nom} répond moins bien à ${compte} de vos priorités : ${sujets}.`
+          : `${nom} répond moins bien à ${compte} de vos priorités, dont ${sujets}.`;
     const named = nameIssues(phrase, nommes, "mismatches");
 
     // Le pool des réserves est DISTINCT de celui des mismatchs : le point nommé par le héros n'en
@@ -469,7 +488,8 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
     // pas le droit de faire disparaître du dossier l'information qu'on possède. En 17 px, trois sujets
     // tiennent sans faire paragraphe. Le gabarit est SANS ACCORD à dériver (« ces priorités … servies »
     // porte le féminin pluriel quels que soient les sujets listés), et la liste tombe en fin de phrase.
-    const tousLesSujets = joinFr(candidates.map((c) => c.subject));
+    // Même règle dans le détail : on liste des PRIORITÉS, jamais une cause au milieu d'elles.
+    const tousLesSujets = joinFr(simples.map((c) => c.subject));
     return {
       label: "Arbitrage", tone: "neutral",
       // « Un arbitrage réel à X, sans incompatibilité établie. » : une phrase sans verbe, qui commente

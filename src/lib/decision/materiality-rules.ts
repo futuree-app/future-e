@@ -213,7 +213,15 @@ const ruleChaleur: DecisionRule = {
       statement: `${phrases.join(". ")}.`,
       signalConvention: `futur•e signale cette exposition à partir de ${seuils}.`,
       limitation: LIMITATION_CLIMAT,
-      evidence: [climatEvidence(f.nom, "joursTresChauds", jours), climatEvidence(f.nom, "nuitsTropicales", nuits)],
+      // LA PREUVE SUIT LE TEXTE. Les deux axes étaient toujours mis en preuve, y compris celui dont le
+      // constat ne parle pas : sur une commune où seules les nuits tropicales sont notables, la carte
+      // affichait « 9 jours à l'horizon 2050 » sous une phrase qui n'évoquait que les nuits. Une
+      // pastille chiffrée qu'aucune phrase n'explique se lit comme un chiffre lâché là.
+      // (`sourceFactIds` garde les deux : les deux axes ont bien été LUS, c'est ce qu'il déclare.)
+      evidence: [
+        ...(jours.notable ? [climatEvidence(f.nom, "joursTresChauds", jours)] : []),
+        ...(nuits.notable ? [climatEvidence(f.nom, "nuitsTropicales", nuits)] : []),
+      ],
       // L'ACTION EST SPÉCIFIQUE, et c'est ce qui rend la vérification légitime : à l'échelle de la commune
       // le constat est établi, mais l'inconfort réellement vécu se joue sur le bâtiment.
       action: f.hasAddress
