@@ -18,7 +18,15 @@ import { validateGeneratedBlocks } from "../src/lib/decision/conclusion-validate
 import { CONCLUSION_SYSTEM_PROMPT } from "../src/lib/decision/conclusion-prompt.ts";
 import type { DecisionFact, MaterialityTier } from "../src/lib/decision/decision-fact.ts";
 
-const TIRAGES = 5; // une contrainte qui ne passe qu'une fois sur trois est une contrainte qui ne tient pas
+// 5 tirages par plan : une contrainte qui ne passe qu'une fois sur trois est une contrainte qui ne
+// tient pas. La passe complète coûte 9 plans x 5 tirages = 45 appels RÉELS. Après un changement qui
+// ne touche qu'un registre, on cible :
+//
+//   PROBE_TIRAGES=2 PROBE_ONLY=strate-suite,réserves node --env-file=.env.local scripts/probe-conclusion.ts
+//
+// PROBE_ONLY filtre sur une sous-chaîne du label du plan. Sans lui, tout tourne.
+const TIRAGES = Number(process.env.PROBE_TIRAGES ?? 5);
+const ONLY = (process.env.PROBE_ONLY ?? "").split(",").map((x) => x.trim()).filter(Boolean);
 const transportSchema = z.object({ blocks: z.array(z.unknown()) });
 
 function verif(id: string, tier: MaterialityTier, topic: string, statement: string): DecisionFact {
@@ -42,7 +50,7 @@ const plan = buildConclusionPlan({
   // nommer TOUS les trois, sans en couronner aucun. Le premier constat porte des nombres (19, 1982) :
   // ils viennent du repli, donc ils sont autorisés, mais aucun autre ne l'est.
   shownFacts: [
-    verif("f1", "structuring", "l'exposition de Toulouse à l'inondation", "L'exposition de la commune à l'inondation ressort élevée. La commune a connu 19 arrêtés de catastrophe naturelle inondation depuis 1982."),
+    verif("f1", "structuring", "l'exposition à l'inondation", "L'exposition de la commune à l'inondation ressort élevée. La commune a connu 19 arrêtés de catastrophe naturelle inondation depuis 1982."),
     verif("f2", "structuring", "le retrait-gonflement des argiles", "À cette adresse, le sol est exposé au retrait-gonflement des argiles (aléa moyen ou fort)."),
     verif("f3", "structuring", "un plan de prévention des risques", "À cette adresse, un plan de prévention des risques s'applique : PPR Sécheresse - Territoire 1 - Toulouse."),
     verif("f4", "secondary", "le périmètre patrimonial protégé", "À cette adresse, le bien est dans un périmètre patrimonial protégé."),
@@ -58,7 +66,9 @@ const plan = buildConclusionPlan({
   orientation: "major_reserves",
   hasFavorable: false,
   favorableCount: 0,
-  majorReserveCount: 2,
+  // TROIS faits non secondaires sont affichés : c'est ce que l'assembleur compterait. Une fixture à 2
+  // faisait lire « deux points demandent votre attention » juste au-dessus d'une liste de trois.
+  majorReserveCount: 3,
   reservesShown: 4,
   mismatchTotal: 0,
   mismatchShown: 0,
@@ -73,11 +83,11 @@ const HEADLINE_SUBJECTS: Record<string, string> = {
   nature: "l'accès aux espaces naturels",
   cadre_calme: "le calme",
   ensoleillement_recherche: "l'ensoleillement",
-  mobilite_quotidienne: "les transports du quotidien",
+  mobilite_quotidienne: "les transports en commun du quotidien",
   vie_etudiante: "l'environnement étudiant",
   proximite_mer: "la proximité de la mer",
-  eviter_grandes_villes: "la taille de la ville",
-  eviter_isolement: "la taille du bassin de vie",
+  eviter_grandes_villes: "une ville à taille humaine",
+  eviter_isolement: "le fait de ne pas être isolé",
 };
 
 // Un fait de MISMATCH (établi, à arbitrer, jamais à vérifier).
@@ -259,6 +269,7 @@ console.log(`HÉROS  ${plan.verdict.headline.text}  [${plan.verdict.headline.kin
 console.log(plan.blocks.map((b) => b.fallbackText).join(" "));
 
 async function probe(plan: ReturnType<typeof buildConclusionPlan>, label: string): Promise<{ retenus: number; total: number }> {
+if (ONLY.length > 0 && !ONLY.some((o) => label.includes(o))) return { retenus: 0, total: 0 };
 const generables = plan.blocks.filter((b) => b.generable);
 let retenus = 0;
 console.log(`\n════════ PLAN : ${label} (${generables.length} blocs générables) ════════`);
@@ -278,7 +289,10 @@ for (let i = 1; i <= TIRAGES; i++) {
       conclusionState: plan.conclusionState,
       posture: plan.posture,
       reservesCount: plan.reservesCount,
-      lead: plan.lead,
+      // Projeté comme en production (cf. ConclusionRedigee) : le modèle ne reçoit que les SUJETS.
+      lead: plan.lead.kind === "single" ? { kind: "single", sujets: [plan.lead.subject] }
+        : plan.lead.kind === "tied" ? { kind: "tied", sujets: plan.lead.facts.map((f) => f.subject) }
+        : { kind: "none", sujets: [] },
       registresAConfier: generables.map((b) => ({
         key: b.key,
         texteDeRepli: b.fallbackText,
@@ -303,6 +317,26 @@ for (let i = 1; i <= TIRAGES; i++) {
   return { retenus, total: TIRAGES * generables.length };
 }
 
+// LE CAS CRÉÉ PAR LE LOT D : le héros nomme la réserve dominante, donc la strate est la SUITE d'une
+// hiérarchie ouverte (« À regarder ensuite »). Le modèle doit garder cette variante, ne nommer que le
+// résiduel, et n'écrire aucun nombre.
+const planStrateSuite = buildConclusionPlan({
+  scope: "commune+adresse", communeNom: "Toulouse",
+  conclusionState: "no_incompatibility_established", posture: "recherche",
+  shownFacts: [
+    verif("s1", "decision_critical", "l'exposition à l'inondation", "L'exposition de la commune à l'inondation ressort élevée. La commune a connu 19 arrêtés de catastrophe naturelle inondation depuis 1982."),
+    verif("s2", "structuring", "le retrait-gonflement des argiles", "À cette adresse, le sol est exposé au retrait-gonflement des argiles (aléa moyen ou fort)."),
+    verif("s3", "structuring", "le bruit des infrastructures", "Une autoroute passe à 300 mètres de cette adresse."),
+  ],
+  shownCompositions: [],
+  uncovered: [{ key: "nearPlace", label: "la proximité de la gare Matabiau" }],
+  uncoveredPriorities: [{ key: "qualite_air", label: "la qualité de l'air" }],
+  establishedIncompatibility: null, coverage: "high", orientation: "minor_reserves",
+  hasFavorable: false, favorableCount: 0, majorReserveCount: 3, reservesShown: 3,
+  mismatchTotal: 0, mismatchShown: 0,
+});
+
+const jSuite = await probe(planStrateSuite, "strate-suite");
 const a = await probe(plan, "réserves majeures");
 const b = await probe(planMismatch, "mismatch / arbitrage");
 const c = await probe(planAbsence, "absence attestée / arbitrage");
@@ -312,6 +346,6 @@ const fIso = await probe(planSizeIsolation, "taille / isolement (risqué)");
 const gSun = await probe(planSun, "ensoleillement");
 const hCompLead = await probe(planCompositionLead, "composition / lead tradeoff");
 const iCompBloc = await probe(planCompositionBloc, "composition / registre composé");
-const R = a.retenus + b.retenus + c.retenus + dCoast.retenus + eSize.retenus + fIso.retenus + gSun.retenus + hCompLead.retenus + iCompBloc.retenus,
-      T = a.total + b.total + c.total + dCoast.total + eSize.total + fIso.total + gSun.total + hCompLead.total + iCompBloc.total;
+const R = jSuite.retenus + a.retenus + b.retenus + c.retenus + dCoast.retenus + eSize.retenus + fIso.retenus + gSun.retenus + hCompLead.retenus + iCompBloc.retenus,
+      T = jSuite.total + a.total + b.total + c.total + dCoast.total + eSize.total + fIso.total + gSun.total + hCompLead.total + iCompBloc.total;
 console.log(`\n════ TAUX DE SURVIE : ${R}/${T} blocs ════`);
