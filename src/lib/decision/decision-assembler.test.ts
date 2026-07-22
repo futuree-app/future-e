@@ -120,11 +120,18 @@ test("le scope SORT des phrases : il vit dans le plan, affiché en tête de cart
   assert.equal(d.conclusion.includes("À l'échelle de la commune"), false);
 });
 
-test("titre vérifications non-habitant : le statut (établi) AVANT l'action (à contrôler)", () => {
-  // « À examiner » appliquait le doute à des constats PROUVÉS : le lecteur pouvait ranger un fait
-  // établi parmi les hypothèses. Le titre dit le statut, puis l'action, et garde l'ancrage décisionnel.
+test("un titre de section porte UNE idée, et dit ce que le lecteur en fait", () => {
+  // « Ce qui est établi, à contrôler avant de vous engager » en portait deux, collées par une virgule,
+  // et c'était le seul des cinq dans ce cas. Le statut est passé sous le titre, en toutes lettres
+  // (SECTION_INTRO) ; le titre garde l'action. « Contrôler » reste le verbe des constats établis,
+  // « vérifier » celui du non-examiné.
   const d = assembleDossier(run([verif()]), project(NO_HC), "commune", "Toulouse");
-  assert.equal(d.sections.find((s) => s.key === "verifications")!.title, "Ce qui est établi, à contrôler avant de vous engager");
+  assert.equal(d.sections.find((s) => s.key === "verifications")!.title, "À contrôler avant de vous engager");
+  // Aucun titre ne doit empiler deux propositions : la virgule est le signe qui le trahit.
+  for (const s of d.sections) {
+    assert.doesNotMatch(s.title, /,/, `le titre « ${s.title} » porte deux idées`);
+    assert.ok(s.title.length <= 40, `« ${s.title} » : ${s.title.length} caractères`);
+  }
 });
 
 test("les réserves annoncées sont les faits AFFICHÉS, jamais les faits émis (caps)", () => {

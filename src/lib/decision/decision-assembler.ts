@@ -11,14 +11,23 @@ import { hasAnyHardConstraint, isStructured, hardConstraintLabel } from "./proje
 import { buildCriteriaRegistry, uncoveredConstraints, uncoveredPreferences } from "./criteria-registry.ts";
 import { buildConclusionPlan } from "./conclusion-plan.ts";
 
+// UN TITRE, UNE IDÉE. « Ce qui est établi, à contrôler avant de vous engager » en portait deux,
+// collées par une virgule, et c'était le seul des cinq titres dans ce cas : « Vos conditions non
+// négociables », « Ce qui correspond moins bien », « Ce qui départage vraiment », « Ce que nous ne
+// savons pas encore » en portent une chacun.
+//
+// Le statut (« ce qui est établi ») n'a plus à être dans le titre : la ligne posée sous lui le dit
+// mieux et en toutes lettres (« Ces points ne viennent pas de vos critères : ils sont établis sur ce
+// lieu », cf. SECTION_INTRO). Le titre garde ce que le lecteur en FAIT.
+//
+// « Contrôler » reste le verbe des constats établis ; « vérifier » demeure réservé au non-examiné
+// (les conditions que la conclusion n'a pas pu tester). Un habitant ne s'engage pas : il connaît son
+// logement et le surveille.
 function labels(project: UserProject): { engage: string; verifTitle: string } {
   if (project.posture === "habitant") {
-    return { engage: "comprendre et surveiller", verifTitle: "Ce que ces données invitent à comprendre ou surveiller" };
+    return { engage: "comprendre et surveiller", verifTitle: "À connaître et à surveiller" };
   }
-  // Le statut (établi) AVANT l'action (à contrôler) : « À examiner » appliquait le doute à des constats
-  // prouvés. « Vérifier » reste réservé au non-examiné (condition de la conclusion) ; « contrôler » dit
-  // la conséquence d'un fait établi, au grain du bien.
-  return { engage: "vous engager", verifTitle: "Ce qui est établi, à contrôler avant de vous engager" };
+  return { engage: "vous engager", verifTitle: "À contrôler avant de vous engager" };
 }
 
 const TIER_RANK: Record<MaterialityTier, number> = { decision_critical: 0, structuring: 1, secondary: 2 };
