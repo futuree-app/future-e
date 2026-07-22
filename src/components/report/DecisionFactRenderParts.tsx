@@ -2,7 +2,7 @@
 // partagées entre la carte élémentaire (DossierDecisionSection) et la carte composée
 // (FactCompositionCard). Les deux cartes dépendent des briques, jamais l'inverse : aucune boucle d'import.
 import Link from "next/link";
-import type { DecisionFact } from "@/lib/decision/decision-fact";
+import type { DecisionFact, VerificationActionType } from "@/lib/decision/decision-fact";
 
 export function Chip({ label, value, href, color }: { label: string; value?: string; href?: string; color: string }) {
   const inner = (
@@ -18,15 +18,37 @@ export function Chip({ label, value, href, color }: { label: string; value?: str
   );
 }
 
-// Le REPÈRE d'action : à mener, jamais établi. Il vit sur SA propre ligne (plus dans la rangée des
-// preuves) et se lit comme un pointeur, plus comme un second paragraphe pleine largeur en capitales
-// qui rivalise avec le constat : casse basse, flèche colorée de l'état en tête. Le TEXTE du label
-// vient des règles (éditorial), on n'y touche pas, seule la présentation change.
-export function ActionCue({ label, color }: { label: string; color: string }) {
+// LE GESTE A UNE NATURE, ET ELLE SE VOIT. `VerificationActionType` distingue quatre gestes depuis le
+// premier jour ; l'écran les rendait tous par la même flèche. Un trait par nature dit, avant même la
+// lecture, si le lecteur devra regarder de ses yeux, obtenir un document, faire confirmer, ou
+// compléter son projet ici. Ce n'est pas une décoration : c'est le seul champ de l'action que la
+// prose ne porte pas.
+const ACTION_GLYPH: Record<VerificationActionType, string> = {
+  // un œil : ce qui se constate de ses yeux, sur place
+  verifier_sur_place: "M1 8s2.5-4.5 7-4.5S15 8 15 8s-2.5 4.5-7 4.5S1 8 1 8Z M9.8 8a1.8 1.8 0 1 1-3.6 0 1.8 1.8 0 0 1 3.6 0Z",
+  // une feuille cornée : ce qui s'obtient auprès d'un tiers
+  obtenir_document: "M4 1.8h5l3 3v9.4H4V1.8Z M9 1.8v3h3",
+  // une question posée : ce qui se demande à quelqu'un
+  demander_confirmation: "M5.7 5.7a2.3 2.3 0 1 1 3.1 2.2c-.5.2-.8.6-.8 1.1v.4 M8 12.3h.01",
+  // une flèche : ce qui se complète dans le produit
+  renseigner_adresse: "M2.5 8h10 M8.8 4.3 13 8l-4.2 3.7",
+};
+
+// Le REPÈRE d'action : à mener, jamais établi. Il vit sur SA propre ligne, et il est passé du mono à
+// la fonte de lecture : c'est une phrase adressée au lecteur, la plus actionnable de la carte, et le
+// mono en faisait la moins lisible — une étiquette de données parmi les étiquettes de données. Le
+// TEXTE vient des règles (éditorial), on n'y touche pas.
+export function ActionCue({ label, color, type }: { label: string; color: string; type?: VerificationActionType }) {
   return (
-    <p className="font-mono text-[11px] tracking-[0.03em] text-muted leading-[1.5]">
-      <span aria-hidden style={{ color }} className="mr-1">→</span>
-      {label}
+    <p className="flex items-start gap-2.5 text-[14px] leading-[1.5] text-muted">
+      <svg
+        viewBox="0 0 16 16" width="15" height="15" aria-hidden focusable="false"
+        className="shrink-0 mt-[3px]"
+        fill="none" stroke={color} strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"
+      >
+        <path d={ACTION_GLYPH[type ?? "renseigner_adresse"]} />
+      </svg>
+      <span>{label}</span>
     </p>
   );
 }
@@ -85,7 +107,7 @@ export function EvidenceRow({ fact, color }: { fact: DecisionFact; color: string
           ))}
         </div>
       ) : null}
-      {action ? <ActionCue label={action.label} color={color} /> : null}
+      {action ? <ActionCue label={action.label} color={color} type={action.type} /> : null}
     </div>
   );
 }
@@ -163,7 +185,7 @@ export function FactBody({ fact }: { fact: DecisionFact }) {
   return (
     <>
       <p className="text-label text-[15px] leading-[1.6]">{fact.statement}</p>
-      {limitation ? <p className="text-ghost text-[13px] leading-[1.5] mt-1">{limitation}</p> : null}
+      {limitation ? <p className="text-muted/85 text-[13px] leading-[1.55] mt-1.5">{limitation}</p> : null}
     </>
   );
 }

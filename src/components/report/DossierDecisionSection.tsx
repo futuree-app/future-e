@@ -138,7 +138,12 @@ export function DossierDecisionSection({
               ) : (
                 <div className="mb-2" />
               )}
-              <ul className="flex flex-col gap-5">
+              {/* UN FILET ENTRE LES CONSTATS. Quatre constats s'enchaînaient dans la même carte,
+                  séparés par un seul intertitre gris : on ne voyait pas où l'un finissait. Le filet
+                  et l'air le disent, sans ajouter ni bordure ni fond (ce serait des cartes dans des
+                  cartes). Il ne s'applique pas au premier élément ni aux intertitres de grain, qui
+                  ouvrent un groupe au lieu de clore le précédent. */}
+              <ul className="flex flex-col gap-6 [&>li:not(:first-child):not(.grain-header)]:border-t [&>li:not(:first-child):not(.grain-header)]:border-white/[0.07] [&>li:not(:first-child):not(.grain-header)]:pt-6">
                 {(() => {
                   // Le grain (« À cette adresse » / « À l'échelle de la commune ») ne se répète plus sur
                   // chaque carte : il ne s'affiche QUE si la section MÉLANGE des grains, et alors comme un
@@ -174,7 +179,10 @@ export function DossierDecisionSection({
                     return (
                       <Fragment key={f.id}>
                         {grainHeader ? (
-                          <li className="list-none font-mono text-[11px] tracking-[0.12em] uppercase text-ghost -mb-2 first:mt-0">{grainHeader}</li>
+                          <li className="grain-header list-none flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-muted -mb-3 pt-2 first:pt-0">
+                            <span aria-hidden className="h-px w-4 bg-white/25 shrink-0" />
+                            {grainHeader}
+                          </li>
                         ) : null}
                         <li>
                           <FactBody fact={f} />
