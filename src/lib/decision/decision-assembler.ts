@@ -86,7 +86,11 @@ export function assembleDossier(
   const state = conclusionState(run.facts, project);
   const l = labels(project);
   const candidates: DossierSection[] = [
-    { key: "incompatibilities", title: "Vos contraintes non négociables", cards: sectionCards(facts, compositions, "incompatibility", "incompatibilities", 2) },
+    // « CONDITION », pas « contrainte » : c'est le mot du lexique tranché, celui que l'étiquette du
+    // verdict (« Condition non respectée ») et le bloc des non examinées (« Condition à vérifier »)
+    // emploient déjà. Ce titre était le dernier endroit de l'écran à dire « contrainte », et il se
+    // lisait à trois centimètres d'un héros qui dit « condition ».
+    { key: "incompatibilities", title: "Vos conditions non négociables", cards: sectionCards(facts, compositions, "incompatibility", "incompatibilities", 2) },
     // MISMATCH : établi, non éliminatoire, à ARBITRER (jamais à vérifier). Sa propre section, entre les
     // incompatibilités et les compromis. Un mismatch n'est pas un compromis (pas de contrepartie).
     { key: "mismatches", title: "Ce qui correspond moins bien", cards: sectionCards(facts, compositions, "mismatch", "mismatches", 3) },

@@ -282,3 +282,21 @@ test("grouped_verification : candidate au lead comme le tradeoff (elle porte des
   assert.equal(lead.factId, "g1");
   assert.equal(lead.topic, "Un sol argileux, et la règle qui l'encadre");
 });
+
+// UN SEUL MOT POUR UNE SEULE CHOSE. « Condition » est le mot du lexique tranché : le verdict dit
+// « Condition non respectée », le bloc des non examinées « Condition à vérifier », le héros « une
+// condition de votre projet n'est pas remplie ». Le titre de section disait encore « contrainte », à
+// trois centimètres du héros. Aucun test ne le tenait, et le passage de contrainte -> condition dans
+// le verdict avait laissé cet écart derrière lui.
+test("le vocabulaire de l'écran ne mélange pas « condition » et « contrainte »", () => {
+  const d = assembleDossier(
+    run([incompat()], ["nearSea"], [ev("r", ["nearSea"], "incompatible", [incompat()])]),
+    project(WITH_HC), "commune", "Toulouse",
+  );
+  assert.equal(d.sections.find((s) => s.key === "incompatibilities")!.title, "Vos conditions non négociables");
+  for (const s of d.sections) {
+    assert.doesNotMatch(s.title, /contrainte/i, `le titre « ${s.title} » emploie « contrainte »`);
+  }
+  assert.doesNotMatch(d.narrativePlan.verdictLabel, /contrainte/i);
+  assert.doesNotMatch(d.narrativePlan.verdict.headline.text, /contrainte/i);
+});
