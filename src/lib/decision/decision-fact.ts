@@ -54,6 +54,11 @@ type BaseFact = {
   // La conclusion nomme, les cartes démontrent.
   //
   // Jamais une catégorie (« des risques naturels »), jamais une phrase, jamais une action.
+  //
+  // Et JAMAIS LE NOM DE LA COMMUNE. Le topic n'est lu qu'à un seul endroit, la conclusion, qui nomme
+  // déjà le lieu dans la même phrase : « Le principal point à contrôler à Toulouse : les fortes
+  // chaleurs à Toulouse. » Huit règles portaient ce doublon. Le grain non plus n'y entre pas (deux
+  // faits d'adresse cités côte à côte répétaient « sur cette adresse »).
   topic: string;
   materialityTier: MaterialityTier;
 };

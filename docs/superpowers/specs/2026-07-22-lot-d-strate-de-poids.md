@@ -85,7 +85,7 @@ au milieu de phrase et la recopie du `summary` d'un coup.
 
 ## 4. Trois questions à trancher avant d'écrire
 
-### Q1. Huit `topic` portent le nom de la commune (défaut de production, découvert ici)
+### Q1. Huit `topic` portaient le nom de la commune — TRANCHÉ, corrigé (option A)
 
 Le héros de réserve dominante et la strate nomment tous deux par le `topic`. Or :
 
@@ -110,9 +110,13 @@ réserves. Il touche le héros ET la strate, donc il vaut mieux le régler avant
 `topic` n'est consommé nulle part ailleurs que dans `conclusion-plan.ts` (vérifié : aucun composant ne
 le rend). Retirer le nom de commune des huit libellés est donc sans effet de bord.
 
-**Option A** (recommandée) : retirer `${nom}` de ces huit `topic`. Une ligne par règle.
-**Option B** : ajouter un `headlineSubject` aux faits de réserve, comme aux mismatchs. Plus lourd, et
-crée un second libellé à entretenir pour un champ qui n'a qu'un consommateur.
+**Option A retenue et livrée** : `${nom}` retiré des huit `topic`, la règle documentée sur le champ
+lui-même (`decision-fact.ts`), et une garde comportementale ajoutée (`materiality-rules.test.ts`) qui
+fait tourner les règles sur une commune au nom improbable et relit ce qu'elles écrivent. Vérifiée par
+réintroduction du défaut : elle échoue.
+
+Option B écartée : ajouter un `headlineSubject` aux faits de réserve créait un second libellé à
+entretenir pour un champ qui n'a qu'un consommateur.
 
 ### Q2. Le cas incompatible
 
@@ -127,7 +131,8 @@ dans le vault). Faut-il la supprimer ? Le blocage est la réponse, et donner un 
 dossier bloqué peut se lire comme une invitation à continuer. À l'inverse, les cartes restent
 affichées plus bas : les taire dans la synthèse crée un écart entre la tête et le corps.
 
-**À trancher.** Je n'ai pas d'avis tranché ; c'est une question de doctrine, pas de code.
+**TRANCHÉ : la strate reste affichée.** La « doctrine existante » invoquée en amont n'existait pas
+(vérifié : rien dans le code, rien dans le vault). Aucun changement de comportement sur cette branche.
 
 ### Q3. La gate, après l'allongement des sujets (§3 livré)
 

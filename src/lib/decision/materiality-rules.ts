@@ -22,7 +22,6 @@ import { ABSENCE_RULES } from "./absence-rules.ts";
 import { COAST_RULES } from "./coast-rules.ts";
 import { AGGLOMERATION_RULES } from "./agglomeration-rules.ts";
 import { AGGLOMERATION_CATEGORIES } from "./agglomeration-facts.ts";
-import { deCommune } from "../typography.ts";
 import { toCommuneAttributes } from "./module-facts-map.ts";
 import {
   trajectoirePhrase, fmtClimatCount, CLIMAT_HORIZON_LABEL, type ClimatAxe,
@@ -100,7 +99,7 @@ const ruleInondation: DecisionRule = {
     const ev: EvidenceRef = { factId: "inondation.risque", module: "territoire", label: `Territoire · ${f.nom}`, observedValue: observed, grain: "commune", href: territoireHref };
     const fact: VerificationFact = {
       id: `${f.insee}:inondation-exposition`, ruleId: RULE_INOND, sourceFactIds: ["inondation.risque", "inondation.catnat"], module: "territoire",
-      role: "verification", materialityTier: "structuring", topic: `l'exposition ${deCommune(f.nom)} à l'inondation`,
+      role: "verification", materialityTier: "structuring", topic: "l'exposition à l'inondation",
       statement: (habitant
         ? "L'exposition de la commune à l'inondation ressort élevée, à comprendre et surveiller au fil des épisodes."
         : "L'exposition de la commune à l'inondation ressort élevée. Consultez l'état des risques avant de vous engager.") + catnatCtx,
@@ -210,7 +209,7 @@ const ruleChaleur: DecisionRule = {
       id: `${f.insee}:climat-chaleur`, ruleId: RULE_CHALEUR,
       sourceFactIds: ["climat.joursTresChauds", "climat.nuitsTropicales"], module: "territoire",
       role: "verification", materialityTier: tierFor(p, key),
-      topic: `les fortes chaleurs à ${f.nom}`,
+      topic: "les fortes chaleurs",
       statement: `${phrases.join(". ")}.`,
       signalConvention: `futur•e signale cette exposition à partir de ${seuils}.`,
       limitation: LIMITATION_CLIMAT,
@@ -242,7 +241,7 @@ const ruleFeu: DecisionRule = {
     const fact: VerificationFact = {
       id: `${f.insee}:climat-feu`, ruleId: RULE_FEU, sourceFactIds: ["climat.joursFeu"], module: "territoire",
       role: "verification", materialityTier: tierFor(p, key),
-      topic: `le danger d'incendie à ${f.nom}`,
+      topic: "le danger d'incendie",
       // L'INDICE MESURE UN DANGER MÉTÉOROLOGIQUE, pas la probabilité qu'un incendie survienne. La phrase ne
       // promet donc pas plus que la donnée ne sait dire.
       statement: `${trajectoirePhrase(axe, "Les jours où l'indice forêt-météo dépasse 40, seuil de danger météorologique très sévère,")}.`,
@@ -272,7 +271,7 @@ const rulePluies: DecisionRule = {
     const fact: VerificationFact = {
       id: `${f.insee}:climat-pluies`, ruleId: RULE_PLUIES, sourceFactIds: ["climat.pluieMax24h"], module: "territoire",
       role: "verification", materialityTier: tierFor(p, key),
-      topic: `les pluies intenses à ${f.nom}`,
+      topic: "les pluies intenses",
       // DISTINCT DE L'INONDATION, et les deux peuvent coexister sans se répéter : ici l'INTENSITÉ
       // climatique des précipitations (ce que le ciel déverse), là l'exposition du TERRITOIRE (ce que le
       // sol et les cours d'eau en font). Les actions le disent : le ruissellement d'un côté, l'état des
@@ -332,7 +331,7 @@ const ruleAir: DecisionRule = {
     const fact: VerificationFact = {
       id: `${f.insee}:sante-air`, ruleId: RULE_AIR, sourceFactIds: ["viv.pm25", "viv.no2"], module: "territoire",
       role: "verification", materialityTier: tierFor(p, key),
-      topic: `la qualité de l'air à ${f.nom}`,
+      topic: "la qualité de l'air",
       statement: `Sur cette commune, ${bouts.join(", et ")}.`,
       // LE GRAIN EST LA VRAIE LIMITE ICI, et il faut le dire : le dioxyde d'azote est le marqueur du
       // trafic, et il s'effondre à quelques dizaines de mètres d'un axe. Une moyenne communale ne dit rien
@@ -367,7 +366,7 @@ const ruleBruit: DecisionRule = {
     const fact: VerificationFact = {
       id: `${f.insee}:sante-bruit`, ruleId: RULE_BRUIT, sourceFactIds: ["calmeSonore.sourceDominante", "calmeSonore.distanceKm"], module: "territoire",
       role: "verification", materialityTier: tierFor(p, key),
-      topic: `le bruit des infrastructures à ${f.nom}`,
+      topic: "le bruit des infrastructures",
       // LE FAIT EST ABSOLU (une infrastructure, une distance) ; le SEUIL est une convention de produit, et
       // elle est dite. Le score maison, lui, n'est jamais affiché : il n'est qu'un déclencheur.
       statement: `${cap(bruitEnPhrase(b.source, b.distanceKm))}. futur•e signale ce type de source à partir de ${distanceEnPhrase(seuil)}.`,
@@ -398,7 +397,7 @@ const ruleIndustrie: DecisionRule = {
     const fact: VerificationFact = {
       id: `${f.insee}:sante-industrie`, ruleId: RULE_INDUSTRIE, sourceFactIds: ["expoIndustrielle.sourceDominante"], module: "territoire",
       role: "verification", materialityTier: tierFor(p, key),
-      topic: `l'exposition industrielle à ${f.nom}`,
+      topic: "l'exposition industrielle",
       // LA CATÉGORIE EST LÉGALE, donc opposable, et le lecteur peut la retrouver sur Géorisques. Le score
       // maison (exposition hybride, rayon de 8 km) n'est qu'un déclencheur : il n'est jamais affiché.
       statement: `${cap(industrieEnPhrase(i.classe))} est recensé à proximité de cette commune. ${industrieGlose(i.classe)}`.trim(),

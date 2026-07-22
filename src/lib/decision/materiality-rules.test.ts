@@ -390,3 +390,37 @@ test("assertFactValid refuse un mismatch sans headlineSubject", () => {
   );
   assert.throws(() => assertFactValid({ ...base, headlineSubject: "le calme." }, p), /headlineSubject/);
 });
+
+// LE NOM DE LA COMMUNE N'ENTRE JAMAIS DANS UN TOPIC. Le topic n'est lu qu'à un seul endroit, la
+// conclusion, qui nomme déjà le lieu dans la même phrase : « Le principal point à contrôler à
+// Toulouse : les fortes chaleurs à Toulouse. » Huit règles portaient ce doublon, invisible tant que
+// les fixtures de test employaient des sujets fabriqués. Ce test les fait tourner sur une commune au
+// nom impossible à confondre, et lit ce qu'elles écrivent vraiment.
+//
+// Les incompatibilités sont exclues : leur topic décrit le LIEU (« la distance de X au littoral »),
+// et la conclusion ne le lit plus depuis qu'elle rend la condition telle que le lecteur l'a posée
+// (`constraintLabel`, cf. conclusion-plan.ts).
+test("aucun topic de réserve ne répète le nom de la commune", () => {
+  const NOM = "Zzyzxville";
+  const sante = {
+    air: { pm25: 22, no2: 55, notable: true, complet: true },
+    bruit: { source: "auto" as const, distanceKm: 0.3, notable: true, lu: true },
+    industrie: { classe: "seveso_seuil_haut" as const, notable: true, lu: true },
+  };
+  const p = project({
+    reformulation: "x",
+    hardConstraints: {},
+    preferences: [
+      { key: "faible_chaleur", weight: 3 }, { key: "faible_risque_feu", weight: 3 },
+      { key: "faible_precip_extremes", weight: 3 }, { key: "air_sain", weight: 3 },
+      { key: "calme_sonore", weight: 3 }, { key: "faible_expo_industrielle", weight: 3 },
+      { key: "faible_risque_inondation", weight: 3 },
+    ],
+  });
+  const r = run(facts({ nom: NOM, climat: EXPOSEE, sante, inondationRisque: 80, catnatInondation: 12 }), p);
+  const reserves = r.facts.filter((f) => f.role !== "incompatibility");
+  assert.ok(reserves.length >= 5, `attendu plusieurs réserves, obtenu ${reserves.length}`);
+  for (const f of reserves) {
+    assert.equal(f.topic.includes(NOM), false, `${f.ruleId} : le topic répète le nom (« ${f.topic} »)`);
+  }
+});

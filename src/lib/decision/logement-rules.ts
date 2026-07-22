@@ -98,7 +98,7 @@ export const LOGEMENT_RULES: DecisionRule[] = [
   coverageRule({ id: "patrimoine", tier: "secondary", buckets: ["neutre", "achat", "reside"], topic: () => "le périmètre patrimonial protégé", coverage: (l) => l.patrimoine, flag: (l) => l.perimetrePatrimonial,
     statement: () => "À cette adresse, le bien est dans un périmètre patrimonial protégé.", actionType: "obtenir_document", action: patrimoineAction,
     unavailableStatement: "Les protections patrimoniales n'ont pas pu être vérifiées à cette adresse." }),
-  coverageRule({ id: "sinistralite", tier: "secondary", grain: "commune", topic: (nom) => `les indemnisations recensées à ${nom}`, coverage: (l) => l.sinistralite, flag: (l) => l.sinistraliteActive,
+  coverageRule({ id: "sinistralite", tier: "secondary", grain: "commune", topic: () => "les indemnisations recensées", coverage: (l) => l.sinistralite, flag: (l) => l.sinistraliteActive,
     statement: () => "À l'échelle de la commune, des indemnisations liées à la sécheresse ou aux inondations sont recensées.",
     limitation: "Ces données ne permettent pas d'établir l'historique de ce logement.", actionType: "obtenir_document", action: siniAction,
     unavailableStatement: "La sinistralité de la commune n'a pas pu être établie." }),
