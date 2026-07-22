@@ -35,7 +35,7 @@ const SPECS: AbsenceSpec[] = [
   {
     key: "mobilite_quotidienne",
     topic: "les transports en commun du quotidien",
-    subject: "les transports du quotidien",
+    subject: "les transports en commun du quotidien",
     observedStateId: "network_below_daily_credibility_floor",
     conventionId: NETWORK_CONVENTION_ID,
     nationalContext: ABSENCE_NATIONAL_CONTEXT.network,

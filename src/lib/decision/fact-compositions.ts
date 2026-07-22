@@ -12,13 +12,19 @@ import { preferenceWeight } from "./project-view.ts";
 import { rankPhrase, bandValide } from "./mismatch-facts.ts";
 import { mismatchRuleId } from "./mismatch-rules.ts";
 import { RULE_CHALEUR } from "./materiality-rules.ts";
-import { TERRITORY_SIZE_FACT_ID } from "./agglomeration-rules.ts";
+import { TERRITORY_SIZE_FACT_ID, SIZE_SUBJECTS } from "./agglomeration-rules.ts";
 import { WINTER_MILDNESS_CONVENTION } from "../climate/winter-mildness.ts";
 import { deCommune } from "../typography.ts";
 
 const RULE_DOUCEUR = mismatchRuleId("douceur_climat");
 
 const TIER_ORDER: Record<MaterialityTier, number> = { decision_critical: 0, structuring: 1, secondary: 2 };
+
+// « a, b et c » : une énumération française, pas une liste de virgules jusqu'au bout.
+function joinFr(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? "";
+  return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
+}
 
 function evaluation(run: RunResult, ruleId: string): RuleEvaluation | null {
   return run.evaluations.find((e) => e.ruleId === ruleId) ?? null;
@@ -125,9 +131,13 @@ function composeTerritorySizeSharedEvidence(run: RunResult, facts: ModuleFacts):
     id: `${facts.insee}:composition-taille-consequences`,
     kind: "shared_evidence",
     patternId: "territory-size-multiple-consequences",
-    title: "Une même petite taille touche plusieurs dimensions de votre projet",
+    // « dimensions » est le mot de la matrice interne, « la catégorie de taille » la classification :
+    // le lecteur a des priorités, et il a écrit « une grande ville », pas « une catégorie ». Le
+    // summary les nomme donc avec LES MÊMES MOTS que le héros (SIZE_SUBJECTS), ce qui rend aussi
+    // visible ce que la composition affirme : une cause, plusieurs conséquences.
+    title: "Une même petite taille joue sur plusieurs de vos priorités",
     headlineSubject: "la taille du territoire",
-    summary: `La catégorie de taille ${deCommune(facts.nom)} répond moins bien à ${ordered.length === 2 ? "deux" : String(ordered.length)} de vos priorités, pour la même raison.`,
+    summary: `La petite taille ${deCommune(facts.nom)} dessert ${ordered.length === 2 ? "deux" : String(ordered.length)} de vos priorités à la fois : ${joinFr(ordered.map((f) => SIZE_SUBJECTS[f.projectKey] ?? f.topic))}.`,
     sharedEvidence: top.evidence,
     consequences: ordered.map((f) => ({
       projectKey: f.projectKey,

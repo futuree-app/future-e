@@ -266,7 +266,7 @@ test("grouped_verification : une carte en section verifications, comptée comme 
   assert.equal(sec.cards.some((c) => c.kind === "composition" && c.composition.id === "g1"), true);
   // Le verdict compte l'AFFICHÉ : 1 carte composée + 1 fait = 2 réserves matérielles, jamais 3. Le
   // compte vit dans le héros ; le détail dit ce qu'il implique, sans nommer le tier interne.
-  assert.equal(d.narrativePlan.verdict.headline.text, "Deux points restent à contrôler avant de conclure à Toulouse.");
+  assert.equal(d.narrativePlan.verdict.headline.text, "Deux points restent à contrôler avant de conclure sur Toulouse.");
   // Les preuves des items fondent la conclusion.
   assert.equal(d.conclusionBasis.evidence.some((e) => e.label === "A"), true);
 });

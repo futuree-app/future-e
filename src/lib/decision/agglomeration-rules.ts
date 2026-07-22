@@ -33,7 +33,7 @@ const SPECS: SizeSpec[] = [
   {
     key: "eviter_grandes_villes",
     topic: "la taille du territoire",
-    subject: "la taille de la ville",
+    subject: "une ville à taille humaine",
     outcomes: { village: "satisfied", petite: "satisfied", moyenne: "neutral", grande: "mismatch", metropole: "mismatch" },
     buildStatement: (nom, fragment) =>
       `Vous avez placé le fait d'éviter les grandes villes parmi vos priorités. ${fragment}. Cet écart appelle un arbitrage. Il ne rend pas ${nom} incompatible avec votre projet.`,
@@ -41,7 +41,7 @@ const SPECS: SizeSpec[] = [
   {
     key: "prefere_grande_ville",
     topic: "la taille du territoire",
-    subject: "la taille de la ville",
+    subject: "une grande ville",
     outcomes: { village: "mismatch", petite: "mismatch", moyenne: "neutral", grande: "satisfied", metropole: "satisfied" },
     buildStatement: (nom, fragment) =>
       `Vous avez placé le fait de vivre dans une grande ville parmi vos priorités. ${fragment}. Cet écart appelle un arbitrage. Il ne rend pas ${nom} incompatible avec votre projet.`,
@@ -49,7 +49,7 @@ const SPECS: SizeSpec[] = [
   {
     key: "eviter_isolement",
     topic: "l'isolement du territoire",
-    subject: "la taille du bassin de vie",
+    subject: "le fait de ne pas être isolé",
     outcomes: { village: "mismatch", petite: "neutral", moyenne: "neutral", grande: "neutral", metropole: "neutral" },
     buildStatement: (_nom, fragment) =>
       `Vous avez placé le fait d'éviter un environnement isolé parmi vos priorités. ${fragment}. Cette petite taille répond moins bien à cette dimension de votre projet, sans permettre de conclure à son isolement effectif.`,
@@ -59,6 +59,10 @@ const SPECS: SizeSpec[] = [
 ];
 
 export const AGGLOMERATION_KEYS: PreferenceKey[] = SPECS.map((s) => s.key);
+// Le sujet d'une priorité de taille, lisible depuis la composition qui absorbe ces faits : elle doit
+// pouvoir nommer les priorités desservies avec LES MÊMES MOTS que le héros, jamais une seconde
+// formulation entretenue en parallèle.
+export const SIZE_SUBJECTS: Record<string, string> = Object.fromEntries(SPECS.map((s) => [s.key, s.subject]));
 
 function makeSizeRule(spec: SizeSpec): DecisionRule {
   const id = `territoire.taille-${spec.key}`;

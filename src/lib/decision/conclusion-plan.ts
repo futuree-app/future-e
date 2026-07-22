@@ -488,7 +488,9 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
       // distribution : trois adverbes en -ment et une double négation corrélative, pour l'information
       // la MOINS dense du produit affichée dans le plus grand corps de l'écran. L'information est
       // réelle (rien ici ne tranche), elle se dit du point de vue de la décision.
-      headline: POSTURE(`Rien, dans ce que vous avez demandé, ne penche pour ou contre ${nom}.`),
+      // « Rien, dans ce que vous avez demandé » serait trop absolu quand la couverture est partielle :
+      // la restriction passe en tête et qualifie tout ce qui suit, comme dans la branche favorable.
+      headline: POSTURE(`Dans ce qui a pu être examiné, rien ne penche nettement pour ou contre ${nom}.`),
       // « dimensions » est le mot de la matrice interne (les 27 dimensions du Pack) : le lecteur a des
       // priorités. Et pas de « toutes » : `neutral` ne garantit pas une couverture élevée.
       detail: "Vos priorités ont pu être examinées ici. Aucun écart marqué n'apparaît, aucun avantage net non plus.",
@@ -509,7 +511,7 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
           // La restriction passe EN TÊTE : elle qualifie tout ce qui suit, et la phrase se termine sur
           // le lecteur au lieu de finir sur « les critères déjà couverts », vocabulaire de couverture
           // qui recevait l'accent de fin de phrase.
-          headline: POSTURE(`Sur ce qui a pu être regardé, ${nom} va dans le sens de votre projet.`),
+          headline: POSTURE(`Sur ce qui a pu être examiné, ${nom} va dans le sens de votre projet.`),
           detail: "La lecture reste incomplète : d'autres critères de votre projet n'ont pas encore pu être examinés.",
         };
   }
@@ -565,18 +567,19 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
     // phrase EST notre incapacité.
     return {
       label: "Correspondance à nuancer", tone: "caution",
+      // « conclure à Toulouse » se lit comme « tirer une conclusion sur place » : la conclusion porte
+      // SUR la commune, elle ne s'y tient pas.
       headline: namedReserve ?? POSTURE(
         n > 1
-          ? `${capitalize(enLettres(n))} points restent à contrôler avant de conclure ${a}.`
-          : `Un point reste à contrôler avant de conclure ${a}.`,
+          ? `${capitalize(enLettres(n))} points restent à contrôler avant de conclure sur ${nom}.`
+          : `Un point reste à contrôler avant de conclure sur ${nom}.`,
       ),
-      // « des points qui pèsent » dit `structuring` sans le jargon ; « rien ne permet de dire » garde
-      // l'honnêteté épistémique sans faire de futur•e le sujet de la phrase.
+      // « Ces contrôles portent sur des points qui pèsent » reste le moteur qui décrit son propre
+      // travail. La phrase dit maintenant ce que le lecteur en fait : ils pèsent dans SA décision.
+      // « rien ne permet de dire » garde l'honnêteté épistémique sans faire de futur•e le sujet.
       detail: !input.hasFavorable
         ? `Tant que ${n > 1 ? "ces points ne sont pas levés" : "ce point n'est pas levé"}, rien ne permet de dire que ${nom} correspond à votre projet.`
-        : plusieurs
-          ? `${nom} répond bien à plusieurs de vos priorités. Ces contrôles portent sur des points qui pèsent.`
-          : `${nom} présente un élément favorable pour votre projet. Ces contrôles portent sur des points qui pèsent.`,
+        : `${plusieurs ? `${nom} répond bien à plusieurs de vos priorités.` : `${nom} présente un élément favorable pour votre projet.`} ${n > 1 ? "Ils peuvent encore peser" : "Il peut encore peser"} dans votre décision.`,
     };
   }
 
@@ -589,7 +592,7 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
       detail: nommee
         ? `La lecture ${deCommune(nom)} reste incomplète.${resteAControler(r, true)}`
         : input.hasFavorable
-          ? `Sur ce qui a pu être regardé, ${nom} va plutôt dans le sens de votre projet.${resteAControler(r, false)}`
+          ? `Sur ce qui a pu être examiné, ${nom} va plutôt dans le sens de votre projet.${resteAControler(r, false)}`
           : `D'autres critères de votre projet n'ont pas encore pu être examinés.${resteAControler(r, false)}`,
     };
   }

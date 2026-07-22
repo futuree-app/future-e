@@ -370,7 +370,7 @@ test("un projet priorisant la mobilité sur une commune SANS réseau produit un 
   assert.ok(mm, "un fait d'absence mobilité doit être émis");
   assert.equal((mm as { basis: { kind: string } }).basis.kind, "named_absence");
   // Le sujet du headline nomme la PRIORITÉ du lecteur, jamais l'indicateur défavorable.
-  assert.equal((mm as { headlineSubject: string }).headlineSubject, "les transports du quotidien");
+  assert.equal((mm as { headlineSubject: string }).headlineSubject, "les transports en commun du quotidien");
   assertFactValid(mm!, p);
 });
 

@@ -293,9 +293,9 @@ test("high + major_reserves AVEC 2 favorables : « plusieurs dimensions » est p
   }));
   assert.match(p.blocks[0]!.fallbackText, /^Toulouse répond bien à plusieurs de vos priorités\./);
   // « des points qui pèsent » dit le tier sans le nommer, et le détail ne recopie plus le héros.
-  assert.match(p.blocks[0]!.fallbackText, /Ces contrôles portent sur des points qui pèsent\./);
+  assert.match(p.blocks[0]!.fallbackText, /Ils peuvent encore peser dans votre décision\./);
   assert.equal(p.blocks[0]!.fallbackText.includes("structurant"), false);
-  assert.match(p.verdict.headline.text, /^Deux points restent à contrôler avant de conclure à Toulouse\.$/);
+  assert.match(p.verdict.headline.text, /^Deux points restent à contrôler avant de conclure sur Toulouse\.$/);
 });
 
 test("high + major_reserves avec UN SEUL favorable : « plusieurs dimensions » serait faux", () => {
@@ -304,7 +304,7 @@ test("high + major_reserves avec UN SEUL favorable : « plusieurs dimensions » 
   }));
   assert.equal(p.blocks[0]!.fallbackText.includes("plusieurs"), false);
   assert.match(p.blocks[0]!.fallbackText, /présente un élément favorable pour votre projet/);
-  assert.equal(p.verdict.headline.text, "Un point reste à contrôler avant de conclure à Toulouse."); // accord au SINGULIER
+  assert.equal(p.verdict.headline.text, "Un point reste à contrôler avant de conclure sur Toulouse."); // accord au SINGULIER
 });
 
 test("high + major_reserves SANS favorable : aucun positif n'est promis", () => {
@@ -687,7 +687,7 @@ test("gate de longueur : deux sujets longs et un nom long basculent en posture",
     orientation: "arbitration",
     shownFacts: [
       mismatchFact("m1", "structuring", "acces_ecoles", "l'accès aux collèges et lycées"),
-      mismatchFact("m2", "structuring", "faible_dependance_auto", "la faible dépendance à la voiture"),
+      mismatchFact("m2", "structuring", "faible_dependance_auto", "la possibilité de se passer de la voiture"),
     ],
     mismatchTotal: 2, mismatchShown: 2,
   }));
@@ -1004,7 +1004,7 @@ test("le singulier est accordé partout : un écart, un point, un constat", () =
   const unPoint = buildConclusionPlan(baseInput({
     coverage: "high", orientation: "major_reserves", hasFavorable: false, favorableCount: 0, majorReserveCount: 1,
   }));
-  assert.match(unPoint.verdict.headline.text, /^Un point reste à contrôler avant de conclure à Toulouse\.$/);
+  assert.match(unPoint.verdict.headline.text, /^Un point reste à contrôler avant de conclure sur Toulouse\.$/);
   assert.match(unPoint.verdict.detail, /^Tant que ce point n'est pas levé,/);
 
   const unConstat = buildConclusionPlan(baseInput({
