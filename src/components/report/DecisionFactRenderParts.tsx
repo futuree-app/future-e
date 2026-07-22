@@ -178,7 +178,9 @@ export function factChecks(fact: DecisionFact): string[] {
 }
 
 export function FactBody({ fact, color }: { fact: DecisionFact; color?: string }) {
-  const status = (fact.role === "verification" || fact.role === "unknown") ? fact.status : undefined;
+  // Un mismatch porte aussi son état (« 20 % les moins favorables », « Un village ») : la section
+  // « Ce qui correspond moins bien » se lit alors comme celle des constats établis, même repère visuel.
+  const status = (fact.role === "verification" || fact.role === "unknown" || fact.role === "mismatch") ? fact.status : undefined;
   if (fact.role === "compromise") {
     return (
       <>

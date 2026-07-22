@@ -14,6 +14,7 @@ import {
 const territoireHref = "/rapport/quartier";
 
 type AbsenceSpec = {
+  status: string; // l'état scannable (« Pas de desserte à portée »)
   key: PreferenceKey;
   topic: string;
   // La PRIORITÉ du lecteur, telle qu'elle se lit après un deux-points dans le headline du verdict.
@@ -34,6 +35,7 @@ const radiusKmOf = (f: ModuleFacts): number => (f.higherEd.measured ? f.higherEd
 const SPECS: AbsenceSpec[] = [
   {
     key: "mobilite_quotidienne",
+    status: "Pas de desserte à portée",
     topic: "les transports en commun du quotidien",
     subject: "les transports en commun du quotidien",
     observedStateId: "network_below_daily_credibility_floor",
@@ -48,6 +50,7 @@ const SPECS: AbsenceSpec[] = [
   },
   {
     key: "vie_etudiante",
+    status: "Pas d'établissement à portée",
     topic: "les établissements du supérieur",
     subject: "l'environnement étudiant",
     observedStateId: "no_higher_education_establishment_in_radius",
@@ -94,6 +97,7 @@ function makeAbsenceRule(spec: AbsenceSpec): DecisionRule {
         module: "territoire", role: "mismatch", projectKey: spec.key, materialityTier: tier,
         topic: spec.topic,
         headlineSubject: spec.subject,
+        status: spec.status,
         statement: spec.statement(f.nom, f),
         basis: { kind: "named_absence", observedStateId: spec.observedStateId, conventionId: spec.conventionId, nationalContext: spec.nationalContext },
         evidence: [ev],

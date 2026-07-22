@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { classifyPosition, rankPhrase, MISMATCH_LABELS, type RelativeCriterionFact } from "./mismatch-facts.ts";
+import { classifyPosition, rankPhrase, rankStatus, MISMATCH_LABELS, type RelativeCriterionFact } from "./mismatch-facts.ts";
 
 const fact = (over: Partial<RelativeCriterionFact>): RelativeCriterionFact => ({
   key: "nature", rawValue: 42, band: { low: 0.1, high: 0.12 },
@@ -84,5 +84,18 @@ test("aucun subject ne porte de coordination de haut niveau", () => {
   for (const [key, lab] of Object.entries(MISMATCH_LABELS)) {
     if (BINOMES_LEXICAUX.has(lab.subject)) continue;
     assert.doesNotMatch(lab.subject, / et /, `${key} : « ${lab.subject} » se coordonnerait avec l'énumération`);
+  }
+});
+
+// L'ÉTAT SCANNABLE d'une position relative, tourné pour une étiquette. Il harmonise la section
+// « ce qui correspond moins bien » avec celle des constats établis : même repère visuel avant la phrase.
+test("rankStatus : une bande, un état court, sans « Parmi les » que la phrase porte déjà", () => {
+  assert.equal(rankStatus(0.04), "5 % les moins favorables");
+  assert.equal(rankStatus(0.10), "10 % les moins favorables");
+  assert.equal(rankStatus(0.18), "20 % les moins favorables");
+  assert.equal(rankStatus(0.24), "Quart le moins favorable");
+  for (const h of [0.04, 0.1, 0.18, 0.24]) {
+    assert.ok(rankStatus(h).length <= 32, `« ${rankStatus(h)} » trop long pour une étiquette`);
+    assert.doesNotMatch(rankStatus(h), /[.!?]$/);
   }
 });

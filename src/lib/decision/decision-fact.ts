@@ -154,6 +154,11 @@ export type MismatchFact = BaseFact & {
   // le sens à cette place. Obligatoire : une règle qui l'oublierait ferait retomber le héros sur
   // une formulation inversée, sans qu'aucune validation ne s'en aperçoive.
   headlineSubject: string;
+  // L'ÉTAT MESURÉ, SCANNABLE (« Parmi les 20 % les moins favorables », « Un village »). Même rôle que
+  // sur VerificationFact : le lecteur voit la position avant de lire la phrase. Un mismatch EST une
+  // position établie, donc il en porte une, comme les cartes « à contrôler » — cohérence entre les
+  // deux sections. Produit par la règle depuis le `basis`, jamais découpé dans le statement.
+  status?: string;
 };
 
 export type DecisionFact =

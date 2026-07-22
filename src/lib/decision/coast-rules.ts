@@ -56,6 +56,7 @@ function makeCoastRule(): DecisionRule {
         topic: "la distance à la mer",
         // Le lecteur a déclaré vouloir la PROXIMITÉ de la mer ; « la distance » nommerait l'écart.
         headlineSubject: "la proximité de la mer",
+        status: `À ${km} km du littoral`,
         statement: `Vous avez placé la proximité de la mer parmi vos priorités. La distance au littoral est estimée à environ ${km} km depuis le point de référence retenu pour ${f.nom}.`,
         basis: { kind: "absolute_measure", value: distanceKm, unit: "km", conventionId: COAST_PROXIMITY_CONVENTION.id },
         evidence: [ev],

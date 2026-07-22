@@ -11,7 +11,7 @@ import type { UserProject } from "../user-project.ts";
 import { preferenceWeight } from "./project-view.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import {
-  classifyPosition, rankPhrase, MISMATCH_LABELS, MISMATCH_DISTRIBUTION_VERSION,
+  classifyPosition, rankPhrase, rankStatus, MISMATCH_LABELS, MISMATCH_DISTRIBUTION_VERSION,
   type RelativeCriterionFact,
 } from "./mismatch-facts.ts";
 
@@ -82,6 +82,7 @@ function makeMismatchRule(key: PreferenceKey): DecisionRule {
         role: "mismatch", projectKey: key, materialityTier: tier,
         topic: lab.topic,
         headlineSubject: lab.subject,
+        status: rankStatus(band.high),
         // COMPARATIF, jamais un jugement absolu. L'univers est nommé (« de France »), le lien au projet
         // explicite. « moins bien » ne dit pas « mauvais » : il dit « moins qu'ailleurs ». La clôture nomme
         // l'ARBITRAGE (le vocabulaire du verdict) et garde la seule doctrine indispensable, en deux phrases :

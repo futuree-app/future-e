@@ -471,6 +471,15 @@ export const REGISTRY: DecisionRule[] = [
   ...LOGEMENT_RULES,
 ];
 
+// L'ÉTAT SCANNABLE est une ÉTIQUETTE, pas une phrase : court (le lecteur le lit d'un coup d'œil, avant
+// le constat) et sans point final. Optionnel : un fait sans état franc n'en porte pas.
+function assertStatus(fact: { ruleId: string; status?: string }): void {
+  if (fact.status === undefined) return;
+  if (fact.status.length === 0 || fact.status.length > 32 || /[.!?]$/.test(fact.status)) {
+    throw new Error(`[decision] ${fact.ruleId}: status trop long, vide ou ponctué (« ${fact.status} »)`);
+  }
+}
+
 // Invariants : protègent toutes les futures règles. JETTE (fail-fast) en cas de violation.
 export function assertFactValid(fact: DecisionFact, project: UserProject): void {
   // Arbitrage slice 1.5 : une règle Logement ne peut pas émettre incompatibility.
@@ -508,6 +517,7 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
     case "verification":
       if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);
       if (!fact.action) throw new Error(`[decision] ${fact.ruleId}: vérification sans action`);
+      assertStatus(fact);
       // LA LIGNE D'ACTION EST UNE LIGNE. Elle tient sur la face de la carte, seule, et un libellé de
       // 117 caractères (l'exposition industrielle en portait un) y devenait un second paragraphe qui
       // rivalisait avec le constat. Le point final la ferait lire comme une phrase de plus : c'est un
@@ -518,6 +528,7 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
       break;
     case "mismatch": {
       if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);
+      assertStatus(fact);
       // Le SUJET DU HEADLINE, la priorité du lecteur telle qu'elle se lit après un deux-points. Une
       // règle qui l'oublie ferait nommer au héros l'indicateur défavorable (« la distance à la mer »
       // là où le lecteur a demandé la proximité) : on le refuse ici plutôt qu'à l'écran.

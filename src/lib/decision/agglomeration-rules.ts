@@ -104,6 +104,8 @@ function makeSizeRule(spec: SizeSpec): DecisionRule {
         module: "territoire", role: "mismatch", projectKey: spec.key, materialityTier: tier,
         topic: spec.topic,
         headlineSubject: spec.subject,
+        // L'état scannable : la catégorie observée, capitalisée (« Un village », « Une grande ville »).
+        status: labelForCategory(cat, source).charAt(0).toUpperCase() + labelForCategory(cat, source).slice(1),
         statement: spec.buildStatement(f.nom, categoryStatementFragment(f.nom, cat, source)),
         basis: { kind: "categorical_state", observedCategory: cat, conventionId: AGGLOMERATION_SIZE_CONVENTION.id },
         evidence: [ev],

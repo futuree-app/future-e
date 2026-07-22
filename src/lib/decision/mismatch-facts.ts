@@ -50,6 +50,17 @@ export function rankPhrase(high: number): string {
   return (FRACTIONS.find((x) => high <= x.max) ?? { label: "le quart des communes" }).label;
 }
 
+// L'ÉTAT SCANNABLE d'une position relative : la même bande que rankPhrase, mais tournée pour une
+// étiquette (« 20 % les moins favorables »), sans « Parmi les » que la phrase porte déjà.
+const RANK_STATUS: { max: number; label: string }[] = [
+  { max: 0.05, label: "5 % les moins favorables" },
+  { max: 0.1, label: "10 % les moins favorables" },
+  { max: 0.2, label: "20 % les moins favorables" },
+];
+export function rankStatus(high: number): string {
+  return (RANK_STATUS.find((x) => high <= x.max)?.label) ?? "Quart le moins favorable";
+}
+
 // LA TABLE DE PHRASES. PREFERENCE_LABELS n'est pas grammatical dans « Vous avez placé {…} parmi vos
 // priorités ». topic = le SUJET nommé (<= 70 car., cf. assertFactValid). projectPhrase = la priorité,
 // tournée pour l'ouverture. indicator = ce sur quoi porte la comparaison.
