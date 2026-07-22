@@ -35,7 +35,7 @@ export const PREFERENCE_LABELS: Record<string, string> = {
   prefere_grande_ville: "une grande ville",
   vie_etudiante: "une ville étudiante",
   vie_locale: "une vie locale animée",
-  croissance_demographique: "Un territoire qui gagne des habitants",
+  croissance_demographique: "un territoire qui gagne des habitants",
   calme_sonore: "l'éloignement des grandes sources de bruit (axes, rail, aéroports)",
   faible_exposition_industrielle: "être loin des sites industriels à risque",
 };
