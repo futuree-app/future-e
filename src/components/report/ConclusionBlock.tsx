@@ -7,6 +7,7 @@
 //
 // Structure DOM IDENTIQUE que les blocs soient déterministes ou générés : la substitution sous
 // Suspense ne doit pas faire sauter la page. Aucun LLM ici.
+import type React from "react";
 import type { ConclusionNarrativePlan, VerdictTone } from "@/lib/decision/conclusion-plan";
 import type { RenderedBlock } from "@/lib/decision/conclusion-validate";
 import type { EvidenceRef } from "@/lib/decision/decision-fact";
@@ -40,7 +41,7 @@ export function planToBlocks(plan: ConclusionNarrativePlan): RenderedBlock[] {
 
 function Eyebrow({ children, color }: { children: React.ReactNode; color: string }) {
   return (
-    <p className="font-mono text-[10px] tracking-[0.14em] uppercase mb-1.5" style={{ color }}>
+    <p className="font-mono text-[11px] tracking-[0.14em] uppercase mb-1.5" style={{ color }}>
       {children}
     </p>
   );
@@ -73,13 +74,16 @@ export function ConclusionBlock({
   const showPoids = poids != null && poidsLabel != null && plan.verdictTone !== "critical";
 
   return (
+    // Le bloc ne se distingue plus par un filet à gauche sur le MÊME verre que les cartes du dessous :
+    // il porte le verre surélevé du système (cf. .card-verdict), et son halo suit le ton du verdict.
+    // La mesure de 168 px, calibrée à l'écran, ne bouge pas.
     <div
-      className="glass rounded-2xl p-7 mb-3.5"
-      style={{ borderLeft: `2px solid ${color}`, minHeight: "168px" }}
+      className="card-verdict rounded-2xl p-8 mb-5"
+      style={{ "--tone": color, minHeight: "168px" } as React.CSSProperties}
     >
       <div className="flex items-baseline justify-between gap-4 mb-3">
         <Eyebrow color={color}>{plan.verdictLabel}</Eyebrow>
-        <span className="font-mono text-[10px] tracking-[0.08em] uppercase text-ghost shrink-0">
+        <span className="font-mono text-[11px] tracking-[0.08em] uppercase text-ghost shrink-0">
           {SCOPE_LABEL[plan.scope]}
         </span>
       </div>
@@ -132,7 +136,7 @@ export function ConclusionBlock({
       {conditionEvidence ? (
         <div className="mt-4">
           {conditionEvidence.limitation ? (
-            <p className="text-ghost text-[12.5px] leading-[1.5] mb-2">{conditionEvidence.limitation}</p>
+            <p className="text-ghost text-[13px] leading-[1.5] mb-2">{conditionEvidence.limitation}</p>
           ) : null}
           {conditionEvidence.evidence.length > 0 ? (
             <div className="flex items-center gap-2 flex-wrap">
@@ -152,7 +156,7 @@ export function ConclusionBlock({
 
       {/* Une priorité non couverte réduit la personnalisation, jamais la validité du verdict. */}
       {nonCouvert ? (
-        <p className="mt-4 text-[12.5px] leading-[1.5] text-ghost">{nonCouvert}</p>
+        <p className="mt-4 text-[13px] leading-[1.5] text-ghost">{nonCouvert}</p>
       ) : null}
     </div>
   );

@@ -112,7 +112,7 @@ export function DossierDecisionSection({
           const col = SECTION_ACCENT[s.key] ?? "var(--amethyst)";
           return (
             <div key={s.key} className="glass rounded-xl p-6" style={{ borderTop: `2px solid ${col}` }}>
-              <div className="flex items-center gap-2 font-mono text-[10px] tracking-[0.1em] uppercase mb-4" style={{ color: col }}>
+              <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mb-4" style={{ color: col }}>
                 <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
                 {s.title}
               </div>
@@ -152,7 +152,7 @@ export function DossierDecisionSection({
                     return (
                       <Fragment key={f.id}>
                         {grainHeader ? (
-                          <li className="list-none font-mono text-[10px] tracking-[0.12em] uppercase text-ghost -mb-2 first:mt-0">{grainHeader}</li>
+                          <li className="list-none font-mono text-[11px] tracking-[0.12em] uppercase text-ghost -mb-2 first:mt-0">{grainHeader}</li>
                         ) : null}
                         <li>
                           <FactBody fact={f} />

@@ -1045,6 +1045,26 @@ a {
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
+/* LE BLOC « EN UNE MINUTE » : la RÉPONSE de l'écran, et le seul endroit du rapport où le lecteur
+   pressé s'arrête. Il partage le verre surélevé de .card-answer (le cœur d'un écran) avec une
+   différence qui compte : son halo suit le TON DU VERDICT, jamais l'accent. Un dossier bloqué ne
+   s'auréole pas de vert, et un dossier favorable ne s'auréole pas de rouge — la couleur porte déjà
+   une information, la lui faire mentir serait pire que ne pas en mettre.
+
+   `--tone` est posé en style inline par ConclusionBlock (TONE_COLOR). Le repli sur --accent existe
+   pour qu'un futur appelant qui l'oublierait rende un bloc correct plutôt qu'un bloc sans relief. */
+.card-verdict {
+  background: rgba(255, 255, 255, 0.055);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-2);
+  border-top: 2px solid var(--tone, var(--accent));
+  box-shadow:
+    0 18px 44px -12px rgba(0, 0, 0, 0.6),
+    0 0 64px -20px var(--tone, var(--accent)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
 /* Dialog natif — styles non reproductibles en Tailwind */
 dialog.wizard-dialog {
   margin: auto;

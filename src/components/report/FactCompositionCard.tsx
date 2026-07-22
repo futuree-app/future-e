@@ -9,9 +9,9 @@ import { factsNonNarresParLaFace } from "@/lib/decision/dossier-view";
 function SideBlock({ side, color }: { side: CompositionSide; color: string }) {
   return (
     <div>
-      <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-ghost mb-1">{side.label}</p>
-      <p className="text-label text-[14px] leading-[1.6]">{side.statement}</p>
-      {side.limitation ? <p className="text-ghost text-[12.5px] leading-[1.5] mt-1">{side.limitation}</p> : null}
+      <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-1">{side.label}</p>
+      <p className="text-label text-[15px] leading-[1.6]">{side.statement}</p>
+      {side.limitation ? <p className="text-ghost text-[13px] leading-[1.5] mt-1">{side.limitation}</p> : null}
       {/* `signalConvention` a quitté la face : il est regroupé dans le dépliable « Méthode et détails » de la carte. */}
       <div className="mt-2 flex flex-col gap-2">
         {/* Sans valeur mesurée, pas de pastille (doctrine du lot A) : la provenance descend dans
@@ -62,7 +62,7 @@ export function FactCompositionCard({
   const nonNarres = factsNonNarresParLaFace(composition, absorbedFacts);
   return (
     <li>
-      <p className="text-label text-[15px] font-semibold leading-[1.4]">{composition.title}</p>
+      <p className="text-label text-[16px] font-semibold leading-[1.4]">{composition.title}</p>
       {composition.kind === "tradeoff" ? (
         <div className="mt-2.5 flex flex-col gap-3.5">
           <SideBlock side={composition.favorableSide} color={color} />
@@ -79,7 +79,7 @@ export function FactCompositionCard({
       ) : (
         <div className="mt-2.5 flex flex-col gap-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-ghost">État observé</p>
+            <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost">État observé</p>
             {composition.sharedEvidence.map((e, i) => (
               <Chip key={i} label={e.href && e.observedValue ? "Preuve" : e.label} value={e.observedValue} href={e.href} color={color} />
             ))}
@@ -94,11 +94,11 @@ export function FactCompositionCard({
                     Elle nomme désormais LA PRIORITÉ concernée, ce que le lecteur a écrit lui-même :
                     la composition dit « une cause, plusieurs conséquences », et le lecteur voit
                     lesquelles des SIENNES sont touchées. */}
-                <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-ghost mb-0.5">
+                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-0.5">
                   {PREFERENCE_LABELS[c.projectKey] ?? "Une de vos priorités"}
                 </p>
-                <p className="text-muted text-[13px] leading-[1.55]">{c.statement}</p>
-                {c.limitation ? <p className="text-ghost text-[12px] leading-[1.5] mt-0.5">{c.limitation}</p> : null}
+                <p className="text-muted text-[15px] leading-[1.55]">{c.statement}</p>
+                {c.limitation ? <p className="text-ghost text-[13px] leading-[1.5] mt-0.5">{c.limitation}</p> : null}
               </li>
             ))}
           </ul>
@@ -107,7 +107,7 @@ export function FactCompositionCard({
       <MethodDetails conventions={compositionConventions(composition)} />
       {nonNarres.length > 0 ? (
         <details className="mt-3">
-          <summary className="cursor-pointer font-mono text-[10px] tracking-[0.06em] uppercase text-muted hover:text-label transition-colors">
+          <summary className="cursor-pointer font-mono text-[11px] tracking-[0.06em] uppercase text-muted hover:text-label transition-colors">
             Voir {nonNarres.length > 1 ? `les ${nonNarres.length} constats détaillés` : "le constat détaillé"}
           </summary>
           <ul className="mt-3 flex flex-col gap-4 pl-3 border-l border-white/[0.08]">
