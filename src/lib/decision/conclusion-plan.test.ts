@@ -620,7 +620,9 @@ test("arbitrage : une composition shared_evidence est candidate au headline", ()
     mismatchTotal: 2, mismatchShown: 1,
   }));
   assert.equal(plan.verdict.headline.kind, "named_issues");
-  assert.equal(plan.verdict.headline.text, "Une priorité correspond moins bien à Toulouse : la taille du territoire.");
+  // DEUX mismatchs sont émis, réunis sous UNE carte : le compte dit deux, et « dont » signale que le
+  // héros ne nomme que la cause commune. Compter les cartes aurait écrit « Une priorité ».
+  assert.equal(plan.verdict.headline.text, "Deux priorités correspondent moins bien à Toulouse, dont la taille du territoire.");
   assert.deepEqual(plan.verdict.headline.consumedFactIds, ["m1", "m2"]);
   assert.deepEqual(plan.verdict.headline.consumedCompositionIds, ["comp-taille"]);
 });
@@ -855,4 +857,73 @@ test("le détail ne redit JAMAIS la phrase du héros", () => {
   assert.equal(plan.verdict.headline.kind, "posture");
   assert.equal(plan.verdict.detail.includes("semble bien correspondre"), false);
   assert.match(plan.verdict.detail, /2 constats restent à contrôler/);
+});
+
+// ── Le compte des priorités, et la sélection quand il y en a plus de deux ───────
+
+test("le compte vient des mismatchs ÉMIS, jamais du nombre de cartes", () => {
+  // Une composition shared_evidence absorbe plusieurs mismatchs en UNE carte : compter les candidats
+  // ferait dire « Deux priorités » là où le lecteur en a trois. Un nombre faux, dans le plus grand
+  // texte de l'écran.
+  const comp = {
+    id: "comp-taille", kind: "shared_evidence", title: "titre long du patron",
+    summary: "résumé", headlineSubject: "la taille du territoire", materialityTier: "structuring",
+    absorbedFactIds: ["m2", "m3"], displaySection: "mismatches",
+  } as unknown as FactComposition;
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration",
+    shownFacts: [mismatchFact("m1", "structuring", "cadre_calme", "le calme")],
+    shownCompositions: [comp],
+    mismatchTotal: 3, mismatchShown: 2,
+  }));
+  assert.equal(plan.verdict.headline.kind, "named_issues");
+  assert.match(plan.verdict.headline.text, /^Trois priorités correspondent moins bien à Toulouse, dont /);
+  assert.equal(plan.verdict.headline.text.includes("Deux priorités"), false);
+});
+
+test("trois mismatchs dont deux dominent par le tier : les deux sont nommés, le total est dit", () => {
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration",
+    shownFacts: [
+      mismatchFact("m1", "structuring", "cadre_calme", "le calme"),
+      mismatchFact("m2", "structuring", "nature", "l'accès aux espaces naturels"),
+      mismatchFact("m3", "secondary", "acces_soins", "l'accès aux soins"),
+    ],
+    mismatchTotal: 3, mismatchShown: 3,
+  }));
+  assert.equal(plan.verdict.headline.kind, "named_issues");
+  assert.equal(
+    plan.verdict.headline.text,
+    "Trois priorités correspondent moins bien à Toulouse, dont le calme et l'accès aux espaces naturels.",
+  );
+  // Le troisième n'est pas nommé, mais il est CONSOMMÉ : le héros parle bien des trois.
+  assert.deepEqual(plan.verdict.headline.consumedFactIds, ["m1", "m2"]);
+});
+
+test("trois mismatchs à ÉGALITÉ de tier : posture, on ne couronne pas au hasard", () => {
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration",
+    shownFacts: [
+      mismatchFact("m1", "structuring", "cadre_calme", "le calme"),
+      mismatchFact("m2", "structuring", "nature", "l'accès aux espaces naturels"),
+      mismatchFact("m3", "structuring", "acces_soins", "l'accès aux soins"),
+    ],
+    mismatchTotal: 3, mismatchShown: 3,
+  }));
+  assert.equal(plan.verdict.headline.kind, "posture");
+});
+
+test("deux mismatchs de tiers différents : les deux sont nommés (aucune sélection à faire)", () => {
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration",
+    shownFacts: [
+      mismatchFact("m1", "structuring", "cadre_calme", "le calme"),
+      mismatchFact("m2", "secondary", "nature", "l'accès aux espaces naturels"),
+    ],
+    mismatchTotal: 2, mismatchShown: 2,
+  }));
+  assert.equal(
+    plan.verdict.headline.text,
+    "Deux priorités correspondent moins bien à Toulouse : le calme et l'accès aux espaces naturels.",
+  );
 });

@@ -379,19 +379,41 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
   // ÉMIS, jamais l'affiché : 5 déclenchés ne doivent pas dire « trois ».
   if (input.orientation === "arbitration") {
     const candidates = mismatchCandidates(input.shownFacts, input.shownCompositions);
-    const sujets = joinFr(candidates.map((c) => c.subject));
-    const phrase = candidates.length > 1
-      ? `Deux priorités correspondent moins bien ${a} : ${sujets}.`
-      : `Une priorité correspond moins bien ${a} : ${sujets}.`;
-    const named = nameIssues(phrase, candidates, "mismatches");
+    // LE COMPTE VIENT DES MISMATCHS ÉMIS, jamais du nombre de cartes : une composition
+    // shared_evidence en absorbe plusieurs sous une seule, et compter les cartes ferait dire
+    // « Deux priorités » là où le lecteur en a trois. Un nombre faux, dans le plus grand texte de
+    // l'écran, que rien n'irait contredire.
+    const m = Math.max(input.mismatchTotal, candidates.length);
+    // QUI EST NOMMÉ. Tant que tout tient dans le plafond, on nomme tout : aucune sélection, donc
+    // aucun arbitraire. Au-delà, seuls les candidats du MEILLEUR tier sont nommables, et seulement
+    // s'ils tiennent eux-mêmes dans le plafond : couronner deux candidats parmi trois de même tier
+    // transformerait un ordre de déclaration en priorité métier (doctrine du lead `tied`).
+    //
+    // Le tier `secondary` n'est PAS exclu ici, à la différence de rankLeadCandidates : un mismatch
+    // affiché est matériel par construction (les poids 1 sont silencieux dans les règles), alors
+    // qu'une réserve secondaire ne l'est pas.
+    const best = Math.min(...candidates.map((c) => TIER_ORDER[c.materialityTier]));
+    const top = candidates.filter((c) => TIER_ORDER[c.materialityTier] === best);
+    const nommes = candidates.length <= HEADLINE_MAX_ISSUES ? candidates
+      : top.length <= HEADLINE_MAX_ISSUES ? top
+      : [];
+    const sujets = joinFr(nommes.map((c) => c.subject));
+    const compte = capitalize(numberForms(m)[1] ?? String(m));
+    // Deux-points quand le héros nomme TOUT ce qu'il compte ; « dont » quand il n'en nomme qu'une
+    // partie. « dont » ne suppose aucun ordre entre les sujets nommés.
+    const phrase = m === 1
+      ? `Une priorité correspond moins bien ${a} : ${sujets}.`
+      : nommes.length === m
+        ? `${compte} priorités correspondent moins bien ${a} : ${sujets}.`
+        : `${compte} priorités correspondent moins bien ${a}, dont ${sujets}.`;
+    const named = nameIssues(phrase, nommes, "mismatches");
 
-    const m = input.mismatchTotal;
     // Le pool des réserves est DISTINCT de celui des mismatchs : le point nommé par le héros n'en
     // fait pas partie, d'où « par ailleurs », et jamais « ce point fait partie de ».
     const suite = input.reservesShown > 0
       ? ` ${input.reservesShown > 1 ? `${input.reservesShown} constats restent` : "Un constat reste"} par ailleurs à contrôler.`
       : "";
-    const ecarts = candidates.length > 1 ? "Ces écarts appellent un arbitrage" : "Cet écart appelle un arbitrage";
+    const ecarts = m > 1 ? "Ces écarts appellent un arbitrage" : "Cet écart appelle un arbitrage";
     return {
       label: "Arbitrage", tone: "neutral",
       headline: named ?? POSTURE(`Un arbitrage réel ${a}, sans incompatibilité établie.`),
