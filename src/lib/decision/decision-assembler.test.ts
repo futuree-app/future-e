@@ -248,7 +248,7 @@ function groupedComp(id: string, absorbed: string[], tier: "secondary" | "struct
   return {
     id, kind: "grouped_verification", patternId: "clay_regulation_grouped",
     title: "Un sol argileux, et la règle qui l'encadre",
-    headlineSubject: "le sol argileux et ce qu'il impose",
+    headlineSubject: "ce qu'impose le sol argileux",
     summary: "Le sol argileux expose le bâti, un plan de prévention encadre les travaux.",
     items: absorbed.map((fid) => ({
       label: "item", statement: "constat", ruleIds: ["r"], factIds: [fid],

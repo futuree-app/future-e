@@ -184,7 +184,11 @@ function composeClayRegulationGrouped(run: RunResult, facts: ModuleFacts): Group
     kind: "grouped_verification",
     patternId: "clay_regulation_grouped",
     title: "Un sol argileux, et la règle qui l'encadre",
-    headlineSubject: "le sol argileux et ce qu'il impose",
+    // « le sol argileux ET ce qu'il impose » se coordonnait avec le « et » de l'énumération :
+    // « l'exposition à l'inondation et le sol argileux et ce qu'il impose » faisait lire TROIS sujets
+    // là où il y en a deux. Un sujet destiné à être énuméré ne porte pas sa propre coordination de
+    // haut niveau. La tournure garde les deux faces du patron (le sol, et la règle qui l'encadre).
+    headlineSubject: "ce qu'impose le sol argileux",
     summary: "Le sol argileux expose le bâti à cette adresse, et un plan de prévention sécheresse y encadre les travaux.",
     items: [item(argiles, "L'exposition du sol"), item(ppr, "La règle applicable")],
     absorbedFactIds: [argiles.id, ppr.id],

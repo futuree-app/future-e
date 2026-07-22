@@ -70,7 +70,11 @@ export type GroupedVerificationComposition = {
   kind: "grouped_verification";
   patternId: "clay_regulation_grouped";
   title: string;
-  headlineSubject: string; // même contrat que les autres patrons : court, bas de casse, pas le titre
+  // Même contrat que les autres patrons : court, bas de casse, jamais le titre. Et SANS coordination
+  // de haut niveau : ce sujet est énuméré avec d'autres par un « et », et un « et » interne ferait
+  // lire trois sujets là où il y en a deux. Un binôme lexical (« collèges et lycées ») reste lisible ;
+  // deux concepts distincts, non.
+  headlineSubject: string;
   summary: string;
   items: CompositionSide[];
   absorbedFactIds: string[];

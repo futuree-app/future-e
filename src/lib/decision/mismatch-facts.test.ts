@@ -70,3 +70,19 @@ test("aucun subject ne dépasse la garde de 45 caractères ni ne se termine en p
     assert.doesNotMatch(lab.subject, /[.!?]/, `${key} : le subject se lit après un deux-points`);
   }
 });
+
+// UN SUJET NE PORTE PAS SA PROPRE COORDINATION. Il est énuméré avec d'autres par un « et » :
+// « l'exposition à l'inondation et le sol argileux et ce qu'il impose » faisait lire TROIS sujets là
+// où il y en avait deux. Défaut vu à l'écran, sur la vraie page, après que tests, build et sonde
+// soient passés au vert : aucun d'eux ne regarde une phrase composée de deux libellés.
+//
+// L'exception est nommée, pas devinée : « collèges et lycées » est un binôme lexical, un seul objet
+// pour le lecteur. Toute NOUVELLE exception doit être ajoutée ici sciemment.
+const BINOMES_LEXICAUX = new Set(["l'accès aux collèges et lycées"]);
+
+test("aucun subject ne porte de coordination de haut niveau", () => {
+  for (const [key, lab] of Object.entries(MISMATCH_LABELS)) {
+    if (BINOMES_LEXICAUX.has(lab.subject)) continue;
+    assert.doesNotMatch(lab.subject, / et /, `${key} : « ${lab.subject} » se coordonnerait avec l'énumération`);
+  }
+});

@@ -76,7 +76,7 @@ suiteDuHeros === false   `À regarder d'abord : ${sujets}.`
 |---|---|---|
 | fait de réserve | son `topic` | son `topic` |
 | `tradeoff` | son `title` | son `headlineSubject` (« l'exposition aux fortes chaleurs ») |
-| `grouped_verification` | son `title` | son `headlineSubject` (« le sol argileux et ce qu'il impose ») |
+| `grouped_verification` | son `title` | son `headlineSubject` (« ce qu'impose le sol argileux ») |
 
 C'est la même règle que le héros applique déjà depuis `rankLeadCandidates`. Elle règle la majuscule
 au milieu de phrase et la recopie du `summary` d'un coup.
