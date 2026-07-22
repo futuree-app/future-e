@@ -18,6 +18,18 @@ const SECTION_ACCENT: Record<string, string> = {
   verifications: "var(--info)",
 };
 
+// D'OÙ VIENT CE QU'ON MONTRE. Trois sections répondent aux critères du lecteur : ses conditions non
+// négociables, ce qui correspond moins bien, ce qui départage. Deux ne répondent à rien qu'il ait
+// demandé : les constats établis sur le lieu, et ce qu'on n'a pas pu lire. C'est là toute la valeur
+// du dossier — il apporte ce que personne n'aurait pensé à chercher — mais rien ne le disait, et un
+// lecteur venu pour « une ville moyenne » découvrait un sol argileux sans comprendre pourquoi.
+//
+// Une ligne, sous le titre, seulement sur ces deux sections.
+const SECTION_INTRO: Record<string, string> = {
+  verifications: "Ces points ne viennent pas de vos critères : ils sont établis sur ce lieu.",
+  unknowns: "Ces points ne viennent pas de vos critères : ce sont des données que nous n'avons pas pu lire ici.",
+};
+
 // Le DÉCOMPTE des réserves a quitté la conclusion : il y doublait les cartes situées juste dessous.
 // Il n'a PAS été déplacé au-dessus d'elles pour autant : l'écran a montré qu'un intertitre « Les 4
 // points à examiner avant de vous engager » répétait mot pour mot le titre de la section qui suit
@@ -117,10 +129,15 @@ export function DossierDecisionSection({
                L'œil allait aux pièces à examiner plutôt qu'à la réponse. La couleur de section
                survit là où elle suffit : la pastille en tête de titre, qui la porte déjà. */
             <div key={s.key} className="glass rounded-xl p-6">
-              <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mb-4" style={{ color: col }}>
+              <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mb-2" style={{ color: col }}>
                 <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
                 {s.title}
               </div>
+              {SECTION_INTRO[s.key] ? (
+                <p className="text-[13px] leading-[1.5] text-ghost mb-4">{SECTION_INTRO[s.key]}</p>
+              ) : (
+                <div className="mb-2" />
+              )}
               <ul className="flex flex-col gap-5">
                 {(() => {
                   // Le grain (« À cette adresse » / « À l'échelle de la commune ») ne se répète plus sur

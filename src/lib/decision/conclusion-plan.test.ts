@@ -1138,3 +1138,33 @@ test("arbitrage : aucune condition posée, on ne rassure pas sur un risque inexi
   }));
   assert.match(avec.verdict.detail, /^Aucune de vos conditions n'est contredite ici\./);
 });
+
+// ── La posture « j'y habite déjà » ──────────────────────────────────────────────
+
+// Quelqu'un qui a coché « j'y habite déjà » n'a pas de projet : il a un lieu de vie et des questions
+// dessus. La posture vivait sur le plan sans être lue, et il lisait « Il est encore trop tôt pour dire
+// que Toulouse correspond à votre projet ».
+test("posture habitant : le verdict ne parle plus de « projet »", () => {
+  const branches: Partial<ConclusionPlanInput>[] = [
+    { conclusionState: "project_not_structured" },
+    { orientation: "incompatible", conclusionState: "established_incompatibility", establishedIncompatibility: { factId: "i1", statement: "s.", constraintLabel: "la proximité de la mer" } },
+    { coverage: "high", orientation: "favorable", hasFavorable: true, favorableCount: 3 },
+    { coverage: "partial", orientation: "favorable" },
+    { coverage: "high", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2, reservesShown: 2 },
+    { coverage: "high", orientation: "major_reserves", hasFavorable: false, favorableCount: 0, majorReserveCount: 1 },
+    { coverage: "partial", orientation: "major_reserves", hasFavorable: false, favorableCount: 0, majorReserveCount: 2 },
+    { coverage: "partial", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0, reservesShown: 1 },
+  ];
+  for (const over of branches) {
+    const p = buildConclusionPlan(baseInput({ posture: "habitant", ...over }));
+    const tout = `${p.verdict.headline.text} ${p.verdict.detail}`;
+    assert.doesNotMatch(tout, /projet/i, `posture habitant : « ${tout} »`);
+    // Et la phrase reste une phrase : pas de fragment vide laissé par la substitution.
+    assert.ok(p.verdict.headline.text.length > 20, `héros trop court : « ${p.verdict.headline.text} »`);
+  }
+});
+
+test("posture recherche : « votre projet » reste, c'est le mot juste", () => {
+  const p = buildConclusionPlan(baseInput({ coverage: "high", orientation: "favorable", hasFavorable: true, favorableCount: 3 }));
+  assert.equal(p.verdict.headline.text, "Toulouse semble bien correspondre à votre projet.");
+});

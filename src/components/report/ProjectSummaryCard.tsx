@@ -14,6 +14,15 @@ const POSTURE_OPTIONS: { value: ProjectPosture; label: string }[] = [
 // Instrument Serif, accent orange). Trois états : projet présent, absent (invitation), édition. La
 // sauvegarde explicite ne prétend JAMAIS avoir réussi sans confirmation serveur : en cas d'échec
 // l'éditeur reste ouvert avec un message. La posture est choisie, jamais devinée.
+function ProjectEyebrow({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.14em] uppercase text-ghost mb-3">
+      <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+      {label}
+    </div>
+  );
+}
+
 export function ProjectSummaryCard({ initial }: { initial: UserProject | null }) {
   const [project, setProject] = useState<UserProject | null>(initial);
   const [editing, setEditing] = useState(false);
@@ -74,12 +83,11 @@ export function ProjectSummaryCard({ initial }: { initial: UserProject | null })
     setBusy(false);
   }
 
-  const Eyebrow = () => (
-    <div className="flex items-center gap-2.5 font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-3">
-      <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
-      Votre projet
-    </div>
-  );
+  // « VOTRE PROJET » N'EST PAS LE MOT D'UN HABITANT. Quelqu'un qui a coché « j'y habite déjà » n'a pas
+  // de projet : il a un lieu de vie et des questions dessus. Le titre suit donc la posture choisie,
+  // comme le fait déjà le verdict et le titre des vérifications. Déclaré hors du rendu : une
+  // fonction-composant créée pendant le rendu est recréée à chaque passe.
+  const eyebrowLabel = (project?.posture ?? posture) === "habitant" ? "Ce qui compte pour vous" : "Votre projet";
 
   const reformulation = project?.parsed?.reformulation ?? project?.rawText ?? null;
 
@@ -87,7 +95,7 @@ export function ProjectSummaryCard({ initial }: { initial: UserProject | null })
   if (!editing && project && reformulation) {
     return (
       <div className="glass rounded-2xl p-7">
-        <Eyebrow />
+        <ProjectEyebrow label={eyebrowLabel} />
         <p className="text-[17px] leading-[1.65] text-label">{reformulation}</p>
         <button
           type="button"
@@ -105,7 +113,7 @@ export function ProjectSummaryCard({ initial }: { initial: UserProject | null })
   if (!editing && !project) {
     return (
       <div className="glass rounded-2xl p-7">
-        <Eyebrow />
+        <ProjectEyebrow label={eyebrowLabel} />
         <p className="text-[16px] leading-[1.65] text-muted mb-5">
           Décrivez votre projet pour une lecture qui parle de votre situation, pas d&apos;une commune en général.
         </p>
@@ -123,7 +131,7 @@ export function ProjectSummaryCard({ initial }: { initial: UserProject | null })
   // ── Édition ──
   return (
     <div className="glass rounded-2xl p-7">
-      <Eyebrow />
+      <ProjectEyebrow label={eyebrowLabel} />
       <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-ghost mb-2.5">Vous êtes plutôt</p>
       <div className="flex gap-2 flex-wrap mb-5">
         {POSTURE_OPTIONS.map((o) => {

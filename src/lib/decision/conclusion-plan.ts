@@ -340,6 +340,51 @@ function resteAControler(r: number, named: boolean): string {
 // que le score que le lot A retire des pastilles. Les branches qui l'appelaient disent maintenant
 // « des points qui pèsent », en prose, et accordent elles-mêmes leur nombre.
 
+// LE PROJET D'UN HABITANT N'EST PAS UN PROJET. La posture vivait sur le plan sans être lue : quelqu'un
+// qui a coché « j'y habite déjà » lisait « Il est encore trop tôt pour dire que Toulouse correspond à
+// votre projet » — il n'a pas de projet, il a un lieu de vie, et la question n'est pas s'il
+// correspond mais ce qu'il faut en savoir.
+//
+// Deux fragments suffisent à couvrir les onze branches : ce que le lecteur a POSÉ, et le verbe qui le
+// relie au lieu. Les autres postures (recherche, adresse, quartier) décrivent bien un projet.
+// `habitant` est la seule à basculer ; l'écrire comme un défaut d'aiguillage plutôt qu'en dupliquant
+// la table évite d'entretenir deux tables de vérité qui divergeront.
+// SIX FRAGMENTS, PAS UN SEUL MOT SUBSTITUÉ. Un unique « ce que vous avez demandé » glissé partout où
+// se lisait « votre projet » rendait « les critères DE ce que vous avez demandé » et « une condition
+// DE ce que vous avez demandé » : la substitution marche sur le sens, jamais sur la syntaxe. Chaque
+// tournure a donc son fragment, et chacune se lit bien dans les deux postures.
+//
+// Le hedge en fait partie : « Toulouse correspond à votre projet, semble-t-il » est plus lourd que
+// « Toulouse semble bien correspondre à votre projet ». La nuance se place dans le verbe, pas en
+// incise de fin de phrase.
+type Vocabulaire = {
+  repond: (nom: string) => string;        // « … correspond à votre projet »
+  sembleRepondre: (nom: string) => string; // avec le hedge, dans le verbe
+  condition: string;                       // ouvre la branche incompatibilité
+  criteresExamines: string;                // sujet complet : la relative est DANS le fragment
+  autresCriteres: string;                  // « … d'autres critères … »
+  elementFavorable: (nom: string) => string;
+};
+function vocabulaire(posture: ProjectPosture): Vocabulaire {
+  return posture === "habitant"
+    ? {
+        repond: (nom) => `${nom} répond à ce que vous avez demandé`,
+        sembleRepondre: (nom) => `${nom} répond bien à ce que vous avez demandé`,
+        condition: "Une condition que vous avez posée",
+        criteresExamines: "Les critères que vous avez posés, et qui ont pu être examinés,",
+        autresCriteres: "d'autres critères que vous avez posés",
+        elementFavorable: (nom) => `${nom} présente un élément favorable`,
+      }
+    : {
+        repond: (nom) => `${nom} correspond à votre projet`,
+        sembleRepondre: (nom) => `${nom} semble bien correspondre à votre projet`,
+        condition: "Une condition de votre projet",
+        criteresExamines: "Les critères de votre projet qui ont pu être examinés",
+        autresCriteres: "d'autres critères de votre projet",
+        elementFavorable: (nom) => `${nom} présente un élément favorable pour votre projet`,
+      };
+}
+
 // LA TABLE DE VÉRITÉ DU VERDICT (spec 2.1 §5, révisée par le lot « verdict héros »). Déterministe,
 // mot pour mot, JAMAIS générée. Chaque branche produit EXPLICITEMENT son couple headline + détail :
 // le détail n'est jamais une version tronquée du headline, ce qui serait fragile dès qu'une
@@ -361,11 +406,16 @@ function resteAControler(r: number, named: boolean): string {
 function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
   const nom = input.communeNom;
   const a = aCommune(nom);
+  const voc = vocabulaire(input.posture);
 
   if (input.conclusionState === "project_not_structured") {
     return {
       label: "À préciser", tone: "neutral",
-      headline: POSTURE(`Décrivez votre projet pour mettre ${nom} en regard de ce qui compte pour vous.`),
+      headline: POSTURE(
+        input.posture === "habitant"
+          ? `Dites ce qui compte pour vous, et ${nom} se lira à cette aune.`
+          : `Décrivez votre projet pour mettre ${nom} en regard de ce qui compte pour vous.`,
+      ),
       detail: "",
     };
   }
@@ -388,14 +438,14 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
     // garde est la seule qui vaille au runtime.
     const label = inc?.constraintLabel?.trim();
     const named = inc && label
-      ? nameIssues(`Une condition de votre projet n'est pas remplie ${a} : ${label}.`, [{
+      ? nameIssues(`${voc.condition} n'est pas remplie ${a} : ${label}.`, [{
           factId: inc.factId, topic: label, subject: label, statement: inc.statement,
           materialityTier: "decision_critical", role: "incompatibility",
         }], "constraint")
       : null;
     return {
       label: "Condition non respectée", tone: "critical",
-      headline: named ?? POSTURE(`Une condition de votre projet n'est pas remplie ${a}.`),
+      headline: named ?? POSTURE(`${voc.condition} n'est pas remplie ${a}.`),
       detail: inc ? endWithPeriod(inc.statement) : "L'une de vos conditions non négociables n'est pas respectée ici.",
     };
   }
@@ -538,16 +588,16 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
     return input.coverage === "high"
       ? {
           label: "Bonne correspondance", tone: "positive",
-          headline: POSTURE(`${nom} semble bien correspondre à votre projet.`),
-          detail: "Les critères de votre projet qui ont pu être examinés vont dans ce sens.",
+          headline: POSTURE(`${voc.sembleRepondre(nom)}.`),
+          detail: `${voc.criteresExamines} vont dans ce sens.`,
         }
       : {
           label: "Signaux favorables", tone: "neutral",
           // La restriction passe EN TÊTE : elle qualifie tout ce qui suit, et la phrase se termine sur
           // le lecteur au lieu de finir sur « les critères déjà couverts », vocabulaire de couverture
           // qui recevait l'accent de fin de phrase.
-          headline: POSTURE(`Sur ce qui a pu être examiné, ${nom} va dans le sens de votre projet.`),
-          detail: "La lecture reste incomplète : d'autres critères de votre projet n'ont pas encore pu être examinés.",
+          headline: POSTURE(`Sur ce qui a pu être examiné, ${nom} va dans le sens de ce que vous avez demandé.`),
+          detail: `La lecture reste incomplète : ${voc.autresCriteres} n'ont pas encore pu être examinés.`,
         };
   }
 
@@ -579,18 +629,18 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
         // cela deux lignes plus bas. Trois niveaux (héros, détail, strate) disaient une seule chose.
         headline: namedReserve ?? POSTURE(
           input.hasFavorable
-            ? `${nom} semble bien correspondre à votre projet.`
-            : `La correspondance ${deCommune(nom)} avec votre projet reste à confirmer.`,
+            ? `${voc.sembleRepondre(nom)}.`
+            : `Ce que ${nom} vaut sur ce que vous avez demandé reste à confirmer.`,
         ),
         // Le détail ne REDIT PAS le héros : en posture, le héros porte déjà la correspondance, et le
         // détail n'a plus qu'à dire ce qui reste, avec le but du contrôle (« avant de conclure »).
         detail: nommee
-          ? `${input.hasFavorable ? `${nom} semble bien correspondre à votre projet.` : `Rien ne permet encore de dire que ${nom} correspond à votre projet.`}${resteAControler(r, true)}`
+          ? `${input.hasFavorable ? `${voc.sembleRepondre(nom)}.` : `Rien ne permet encore de dire que ${voc.repond(nom)}.`}${resteAControler(r, true)}`
           : r > 1
             ? `${capitalize(enLettres(r))} constats restent à contrôler avant de conclure.`
             : r === 1
               ? "Un constat reste à contrôler avant de conclure."
-              : "Les critères de votre projet qui ont pu être examinés vont dans ce sens.",
+              : `${voc.criteresExamines} vont dans ce sens.`,
       };
     }
     // Le détail recopiait le héros mot pour mot (« 2 points structurants empêchent … de conclure
@@ -613,8 +663,8 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
       // travail. La phrase dit maintenant ce que le lecteur en fait : ils pèsent dans SA décision.
       // « rien ne permet de dire » garde l'honnêteté épistémique sans faire de futur•e le sujet.
       detail: !input.hasFavorable
-        ? `Tant que ${n > 1 ? "ces points ne sont pas levés" : "ce point n'est pas levé"}, rien ne permet de dire que ${nom} correspond à votre projet.`
-        : `${plusieurs ? `${nom} répond bien à plusieurs de vos priorités.` : `${nom} présente un élément favorable pour votre projet.`} ${n > 1 ? "Ils peuvent encore peser" : "Il peut encore peser"} dans votre décision.`,
+        ? `Tant que ${n > 1 ? "ces points ne sont pas levés" : "ce point n'est pas levé"}, rien ne permet de dire que ${voc.repond(nom)}.`
+        : `${plusieurs ? `${nom} répond bien à plusieurs de vos priorités.` : `${voc.elementFavorable(nom)}.`} ${n > 1 ? "Ils peuvent encore peser" : "Il peut encore peser"} dans votre décision.`,
     };
   }
 
@@ -627,13 +677,13 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
       detail: nommee
         ? `La lecture ${deCommune(nom)} reste incomplète.${resteAControler(r, true)}`
         : input.hasFavorable
-          ? `Sur ce qui a pu être examiné, ${nom} va plutôt dans le sens de votre projet.${resteAControler(r, false)}`
-          : `D'autres critères de votre projet n'ont pas encore pu être examinés.${resteAControler(r, false)}`,
+          ? `Sur ce qui a pu être examiné, ${nom} va plutôt dans le sens de ce que vous avez demandé.${resteAControler(r, false)}`
+          : `${capitalize(voc.autresCriteres)} n'ont pas encore pu être examinés.${resteAControler(r, false)}`,
     };
   }
   return {
     label: "Lecture encore partielle", tone: "caution",
-    headline: namedReserve ?? POSTURE(`Il est encore trop tôt pour dire que ${nom} correspond à votre projet.`),
+    headline: namedReserve ?? POSTURE(`Il est encore trop tôt pour dire que ${voc.repond(nom)}.`),
     // « 2 points structurants demandent attention » : sans déterminant, la phrase n'est pas française,
     // et « structurants » est le nom d'un materialityTier, soit la tuyauterie que le lot A retire
     // partout ailleurs. Le compte se dit en lettres, comme dans le reste du bloc.
