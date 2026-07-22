@@ -73,3 +73,44 @@ test("texte posture-aware : achat parle de fondations, location de bailleur (RGA
   assert.match(achat.action.label, /fondation|sinistre|antécédent/i);
   assert.match(loc.action.label, /bailleur/i);
 });
+
+// LES 23 VARIANTES POSTURE-AWARE. Le lot A2 les a réécrites d'un bloc : ce test tient le contrat que
+// la table doit respecter, plutôt que de recopier vingt-trois libellés qu'il faudrait maintenir deux
+// fois. Ce qui compte n'est pas le mot exact, c'est qu'aucune variante ne redevienne une ligne de
+// formulaire ni un pavé qui rivalise avec le constat.
+test("les libellés d'action tiennent leur contrat, dans les quatre postures", () => {
+  // Toutes les familles déclenchées d'un coup, pour balayer les six tables.
+  const tout = lf({
+    dpe: "passoire", dpeLabel: "G",
+    rga: "present", expositionBati: true,
+    pprn: "present", zoneReglementee: true, pprnLabel: "PPR Sécheresse",
+    cavites: "present", caviteProche: true,
+    patrimoine: "present", perimetrePatrimonial: true,
+    sinistralite: "present", sinistraliteActive: true,
+  });
+  const POSTURES: Partial<UserProject>[] = [
+    {},                                                  // neutre
+    { intent: "achat" },                                 // achat
+    { intent: "location" },                              // location
+    { posture: "habitant" },                             // réside
+  ];
+  const vus: string[] = [];
+  for (const over of POSTURES) {
+    for (const f of runRules(facts(tout), project(over), HARD).facts) {
+      if (!f.ruleId.startsWith("logement.")) continue;
+      const a = (f as { action?: { label: string; detail?: string } }).action;
+      if (!a) continue;
+      vus.push(a.label);
+      assert.ok(a.label.length > 0, `${f.ruleId} : libellé vide dans cette posture`);
+      assert.ok(a.label.length <= 70, `« ${a.label} » : ${a.label.length} caractères`);
+      assert.doesNotMatch(a.label, /[.!?]$/, `« ${a.label} » se termine comme une phrase`);
+      // Le detail, lui, EST une phrase : il descend au dépliable, sous « À vérifier ».
+      if (a.detail) assert.match(a.detail, /[.!?]$/, `le detail n'est pas ponctué : « ${a.detail} »`);
+    }
+  }
+  assert.ok(vus.length >= 20, `attendu au moins 20 actions balayées, obtenu ${vus.length}`);
+  // « Vérifiez » ne doit plus ouvrir toute la colonne : cinq libellés sur sept le faisaient, et une
+  // page de cartes se lisait comme un formulaire.
+  const verifiez = vus.filter((l) => /^Vérifiez/.test(l)).length;
+  assert.ok(verifiez <= 2, `${verifiez} libellés commencent par « Vérifiez » : la colonne redevient un formulaire`);
+});

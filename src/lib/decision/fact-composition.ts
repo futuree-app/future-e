@@ -1,7 +1,7 @@
 // LA COMPOSITION : un PLAN DE PRÉSENTATION, jamais un fait. Hors de l'union DecisionFact (invariant 1).
 // Elle référence les objets canoniques (factIds, ruleIds, evidence) et ne recopie jamais leur vérité
 // sous une seconde forme indépendante (invariant 2). Types PURS.
-import type { EvidenceRef, MaterialityTier, VerificationActionType } from "./decision-fact.ts";
+import type { EvidenceRef, MaterialityTier, DecisionAction } from "./decision-fact.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 
 export type CompositionSide = {
@@ -10,7 +10,7 @@ export type CompositionSide = {
   evidence: EvidenceRef[];
   ruleIds: string[]; // les évaluations référencées (RuleEvaluation n'a pas d'id propre)
   factIds: string[]; // [] pour un côté satisfait (aucun fait émis)
-  action?: { type: VerificationActionType; label: string }; // invariant 8 : l'action survit
+  action?: DecisionAction; // invariant 8 : l'action survit, avec son detail
   limitation?: string; // la limitation du fait absorbé reste sur SON côté
   signalConvention?: string; // la convention de seuil du fait absorbé survit sur SON côté (invariant 8)
 };

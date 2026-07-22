@@ -93,22 +93,50 @@ export function EvidenceRow({ fact, color }: { fact: DecisionFact; color: string
 // La convention de signalement (« futur•e signale cette exposition à partir de… ») a quitté la face :
 // deux lignes ghost par carte faisaient le « pâté ». Elle vit ici, à un clic, dans un dépliable
 // discret réutilisant le style du `<details>` des cartes composées. Rien ne disparaît.
-export function MethodDetails({ conventions }: { conventions: string[] }) {
-  const seen = new Set<string>();
-  const uniq = conventions.filter((c) => c && !seen.has(c) && seen.add(c));
-  if (uniq.length === 0) return null;
+// Déclaré HORS du composant : une fonction-composant créée pendant le rendu est recréée à chaque
+// passe, et React la traite comme un type différent (elle perdrait son état, et eslint le refuse).
+function MethodZone({ titre, lignes }: { titre: string; lignes: string[] }) {
+  if (lignes.length === 0) return null;
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-ghost">{titre}</p>
+      {lignes.map((c, i) => (
+        <p key={i} className="text-ghost text-[13px] leading-[1.5]">{c}</p>
+      ))}
+    </div>
+  );
+}
+
+// DEUX ZONES NOMMÉES, parce que deux natures. « À vérifier » dit ce que le lecteur va REGARDER dans le
+// monde ; « Méthode du signal » dit pourquoi futur•e signale ce point et ce que la mesure ne dit pas.
+// Les mélanger en une liste indifférenciée obligeait à deviner, à chaque ligne, si on lisait une
+// consigne ou une convention de produit. Le dépliable ne s'ouvre que s'il a quelque chose à montrer.
+export function MethodDetails({ conventions, checks = [] }: { conventions: string[]; checks?: string[] }) {
+  const uniq = (xs: string[]) => {
+    const seen = new Set<string>();
+    return xs.filter((c) => c && !seen.has(c) && seen.add(c));
+  };
+  const aVerifier = uniq(checks);
+  const methode = uniq(conventions);
+  if (aVerifier.length === 0 && methode.length === 0) return null;
   return (
     <details className="mt-2.5">
       <summary className="cursor-pointer font-mono text-[11px] tracking-[0.06em] uppercase text-muted hover:text-label transition-colors">
         Méthode et détails
       </summary>
-      <div className="mt-2 flex flex-col gap-1.5 pl-3 border-l border-white/[0.08]">
-        {uniq.map((c, i) => (
-          <p key={i} className="text-ghost text-[13px] leading-[1.5]">{c}</p>
-        ))}
+      <div className="mt-2 flex flex-col gap-3 pl-3 border-l border-white/[0.08]">
+        <MethodZone titre="À vérifier" lignes={aVerifier} />
+        <MethodZone titre="Méthode du signal" lignes={methode} />
       </div>
     </details>
   );
+}
+
+// Ce que la carte a de concret à faire regarder : le `detail` de l'action, jamais son `label` (déjà
+// sur la face). Une composition porte les actions de ses côtés ou de ses items.
+export function factChecks(fact: DecisionFact): string[] {
+  const action = fact.role === "verification" || fact.role === "unknown" ? fact.action : undefined;
+  return action?.detail ? [action.detail] : [];
 }
 
 export function FactBody({ fact }: { fact: DecisionFact }) {

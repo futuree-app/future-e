@@ -8,7 +8,7 @@ import type { Dossier, DecisionFact } from "@/lib/decision/decision-fact";
 import { ConclusionBlock, planToBlocks } from "@/components/report/ConclusionBlock";
 import { conditionPorteeParLeBloc, sectionsAffichees } from "@/lib/decision/dossier-view";
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
-import { FactBody, EvidenceRow, MethodDetails, factSources } from "@/components/report/DecisionFactRenderParts";
+import { FactBody, EvidenceRow, MethodDetails, factSources, factChecks } from "@/components/report/DecisionFactRenderParts";
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
 
 const SECTION_ACCENT: Record<string, string> = {
@@ -162,7 +162,7 @@ export function DossierDecisionSection({
                         <li>
                           <FactBody fact={f} />
                           <EvidenceRow fact={f} color={col} />
-                          <MethodDetails conventions={conventions} />
+                          <MethodDetails conventions={conventions} checks={factChecks(f)} />
                         </li>
                       </Fragment>
                     );

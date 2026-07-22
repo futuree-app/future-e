@@ -63,6 +63,19 @@ type BaseFact = {
   materialityTier: MaterialityTier;
 };
 
+// L'ACTION : le geste que le lecteur va faire, et rien d'autre.
+//
+// `label` est la LIGNE DE FACE, une par carte : c'est là que la voix se joue, et elle est bornée
+// (70 caractères, pas de point final, cf. assertFactValid). Le verbe nomme le geste RÉEL — regardez,
+// demandez, consultez, écoutez, situez, faites chiffrer — jamais un « vérifiez » générique répété de
+// carte en carte, qui transforme une colonne de constats en formulaire et contredit le lexique du
+// dossier (un constat établi se CONTRÔLE, une condition non testée se VÉRIFIE).
+//
+// `detail` porte ce qu'il faut regarder concrètement. Il ne tient pas sur la face : il vit dans le
+// dépliable, sous « À vérifier », séparé de la méthode du signal. Il ne promet aucun résultat et
+// n'affirme ni droit ni délai (invariants 3 et 5) : il décrit la pratique, jamais la règle de droit.
+export type DecisionAction = { type: VerificationActionType; label: string; detail?: string };
+
 export type IncompatibilityFact = BaseFact & {
   role: "incompatibility";
   evidenceStrength: "established" | "indicative";
@@ -76,12 +89,12 @@ export type UnknownFact = BaseFact & {
   role: "unknown";
   impact: "blocking" | "scoped";
   evidence: EvidenceRef[];
-  action?: { type: VerificationActionType; label: string };
+  action?: DecisionAction;
 };
 export type VerificationFact = BaseFact & {
   role: "verification";
   evidence: EvidenceRef[];
-  action: { type: VerificationActionType; label: string };
+  action: DecisionAction;
   limitation?: string;
   // POURQUOI futur•e SIGNALE ce fait : la convention de seuil (« signale cette exposition à partir de
   // 8 jours par an… »). DISTINCTE de `limitation` (ce que le constat ne permet pas de conclure) : la

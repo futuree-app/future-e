@@ -225,7 +225,8 @@ test("FEU : la phrase dit un DANGER MÉTÉOROLOGIQUE, jamais une probabilité d'
   // La convention de signalement vit dans son propre champ, pas dans le constat.
   assert.doesNotMatch(f.statement, /futur•e signale/);
   assert.equal(f.signalConvention, "futur•e signale cette exposition à partir de 9 jours par an.");
-  assert.match(f.action!.label, /débroussaillement/);
+  assert.match(f.action!.label, /^Regardez la végétation autour du terrain$/);
+  assert.match(f.action!.detail!, /débroussaillement/);
 });
 
 test("PLUIES : un cumul en 24 heures, jamais « par an » ; le « mm » reste (le sujet ne le porte pas)", () => {
@@ -250,7 +251,8 @@ test("PLUIES et INONDATION peuvent COEXISTER sans dire deux fois la même chose"
   assert.ok(pluies && inond);
   // Deux sujets DISTINCTS : ce que le ciel déverse, et ce que le territoire en fait.
   assert.notEqual(pluies.topic, inond.topic);
-  assert.match(pluies.action!.label, /ruissellement/);
+  assert.match(pluies.action!.label, /^Regardez où va l'eau autour de l'adresse$/);
+  assert.match(pluies.action!.detail!, /réseaux d'évacuation/);
   assert.match(inond.action!.label, /état des risques/);
 });
 
@@ -314,7 +316,8 @@ test("BRUIT : le FAIT est absolu (une autoroute, une distance), le SCORE n'est j
   assert.match(f.statement, /800 mètres/); // sous le kilomètre, le mètre est l'unité qu'on habite
   assert.match(f.statement, /futur•e signale ce type de source à partir de 1 km/);
   assert.doesNotMatch(f.statement, /18|\/100|score/); // le score maison ne sort JAMAIS
-  assert.match(f.action!.label, /carte de bruit stratégique/);
+  assert.match(f.action!.label, /^Écoutez sur place, à plusieurs heures$/);
+  assert.match(f.action!.detail!, /carte de bruit de la commune/);
 });
 
 test("BRUIT : loin de toute infrastructure, c'est une BONNE NOUVELLE, pas une donnée manquante", () => {
@@ -327,7 +330,7 @@ test("INDUSTRIE : la phrase dit la CATÉGORIE LÉGALE, que le lecteur peut retro
   const f = r.facts.find((x) => x.ruleId === "territoire.sante-industrie")!;
   assert.match(f.statement, /Seveso seuil haut/);
   assert.doesNotMatch(f.statement, /44|score/); // le score hybride maison n'est qu'un déclencheur
-  assert.match(f.action!.label, /Géorisques/);
+  assert.match(f.action!.detail!, /Géorisques/);
 });
 
 test("INDUSTRIE : un site banal et lointain ne déclenche rien", () => {

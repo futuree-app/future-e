@@ -50,6 +50,18 @@ function compositionConventions(composition: FactComposition): string[] {
   return [...sides.map((s) => s.signalConvention).filter((c): c is string => Boolean(c)), ...sources];
 }
 
+// Le concret à regarder, côté composition : le `detail` des actions portées par ses côtés ou ses
+// items. Une shared_evidence n'en a pas (ses conséquences sont des mismatchs, qui n'ont pas d'action).
+function compositionChecks(composition: FactComposition): string[] {
+  const sides: CompositionSide[] =
+    composition.kind === "tradeoff"
+      ? [composition.favorableSide, composition.unfavorableSide]
+      : composition.kind === "grouped_verification"
+        ? composition.items
+        : [];
+  return sides.map((s) => s.action?.detail).filter((d): d is string => Boolean(d));
+}
+
 export function FactCompositionCard({
   composition, color, absorbedFacts,
 }: {
@@ -104,7 +116,7 @@ export function FactCompositionCard({
           </ul>
         </div>
       )}
-      <MethodDetails conventions={compositionConventions(composition)} />
+      <MethodDetails conventions={compositionConventions(composition)} checks={compositionChecks(composition)} />
       {nonNarres.length > 0 ? (
         <details className="mt-3">
           <summary className="cursor-pointer font-mono text-[11px] tracking-[0.06em] uppercase text-muted hover:text-label transition-colors">

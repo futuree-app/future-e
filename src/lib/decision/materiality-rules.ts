@@ -225,8 +225,14 @@ const ruleChaleur: DecisionRule = {
       // L'ACTION EST SPÉCIFIQUE, et c'est ce qui rend la vérification légitime : à l'échelle de la commune
       // le constat est établi, mais l'inconfort réellement vécu se joue sur le bâtiment.
       action: f.hasAddress
-        ? { type: "verifier_sur_place", label: "Vérifiez le confort d'été : orientation, dernier étage, inertie des murs, protections solaires, possibilité de rafraîchir la nuit" }
-        : { type: "renseigner_adresse", label: "Renseignez une adresse pour évaluer le confort d'été du logement" },
+        ? {
+            type: "verifier_sur_place",
+            label: "Regardez comment le logement tient l'été",
+            detail: "L'orientation, l'étage, l'épaisseur des murs, les protections solaires et la possibilité d'ouvrir la nuit pèsent sur l'inconfort ressenti.",
+          }
+        // La seule action qui demande une manœuvre DANS le produit plutôt que dans le monde : elle
+        // mérite un ton d'invitation, pas d'injonction.
+        : { type: "renseigner_adresse", label: "Renseignez votre adresse pour descendre au niveau du logement" },
     };
     return ret("verification", [fact], "exposition à la chaleur notable");
   },
@@ -256,7 +262,11 @@ const ruleFeu: DecisionRule = {
       signalConvention: `futur•e signale cette exposition à partir de ${axe.threshold} jours par an.`,
       limitation: LIMITATION_CLIMAT,
       evidence: [climatEvidence(f.nom, "joursFeu", axe)],
-      action: { type: "verifier_sur_place", label: "Vérifiez la végétation autour du terrain, l'éventuelle obligation légale de débroussaillement, l'accès des secours et les matériaux de la toiture" },
+      action: {
+        type: "verifier_sur_place",
+        label: "Regardez la végétation autour du terrain",
+        detail: "Renseignez-vous sur l'obligation de débroussaillement, l'accès des secours et les matériaux de la toiture.",
+      },
     };
     return ret("verification", [fact], "danger météorologique de feu notable");
   },
@@ -288,7 +298,11 @@ const rulePluies: DecisionRule = {
       signalConvention: `futur•e signale cette intensité à partir de ${axe.threshold} mm.`,
       limitation: LIMITATION_CLIMAT,
       evidence: [climatEvidence(f.nom, "pluieMax24h", axe)],
-      action: { type: "verifier_sur_place", label: "Vérifiez le ruissellement autour de l'adresse : pente du terrain, sous-sol, réseaux d'évacuation, historique des dégâts des eaux" },
+      action: {
+        type: "verifier_sur_place",
+        label: "Regardez où va l'eau autour de l'adresse",
+        detail: "Pente du terrain, présence d'un sous-sol, réseaux d'évacuation, historique des dégâts des eaux.",
+      },
     };
     return ret("verification", [fact], "pluies extrêmes notables");
   },
@@ -346,7 +360,15 @@ const ruleAir: DecisionRule = {
       // de la rue.
       limitation: "Cette moyenne est communale. Le dioxyde d'azote, marqueur du trafic, varie fortement d'une rue à l'autre : il chute de moitié à quelques dizaines de mètres d'un axe passant.",
       evidence: [{ factId: "viv.pm25", module: "territoire", label: `Air · ${f.nom}`, observedValue: air.pm25 != null ? `PM2,5 ${air.pm25.toFixed(1).replace(".", ",")} µg/m³` : undefined, grain: "commune", href: territoireHref }],
-      action: { type: "verifier_sur_place", label: "Regardez la position exacte du logement par rapport aux axes routiers, et la façade sur laquelle donnent les chambres" },
+      // CE FAIT EST L'AIR, PAS LE BRUIT. Le spec du lot A2 lui attribuait « Vérifiez l'exposition du
+      // logement au bruit routier » : sur une carte qui affiche « PM2,5 12,4 µg/m³ », l'étiquette se
+      // décrocherait de la mesure qu'elle coiffe. Le geste, lui, reste le bon (se situer par rapport
+      // aux axes), parce que le NO2 chute de moitié à quelques dizaines de mètres d'une voie passante.
+      action: {
+        type: "verifier_sur_place",
+        label: "Situez le logement par rapport aux axes passants",
+        detail: "Repérez la distance aux voies passantes et la façade sur laquelle donnent les chambres.",
+      },
     };
     return ret("verification", [fact], "seuil sanitaire officiel dépassé");
   },
@@ -382,7 +404,11 @@ const ruleBruit: DecisionRule = {
       // façade) existe, elle est publique, et nous ne pouvons pas la lire à la place du lecteur.
       limitation: "Cette distance est mesurée depuis le point de référence de la commune, pas depuis une adresse. Le bruit réellement perçu dépend de la façade, de l'étage, du relief et de l'isolation.",
       evidence: [{ factId: "calmeSonore", module: "territoire", label: `Bruit · ${f.nom}`, observedValue: `${BRUIT_LABEL_COURT[b.source]} à ${distanceEnPhrase(b.distanceKm)}`, grain: "commune", href: territoireHref }],
-      action: { type: "verifier_sur_place", label: "Consultez la carte de bruit stratégique de la commune, et allez écouter sur place à plusieurs heures, fenêtres ouvertes" },
+      action: {
+        type: "verifier_sur_place",
+        label: "Écoutez sur place, à plusieurs heures",
+        detail: "La carte de bruit de la commune donne le fond ; le reste s'entend depuis le logement, fenêtres ouvertes.",
+      },
     };
     return ret("verification", [fact], "infrastructure bruyante à portée");
   },
@@ -411,7 +437,11 @@ const ruleIndustrie: DecisionRule = {
       statement: `${cap(industrieEnPhrase(i.classe))} est recensé à proximité de cette commune. ${industrieGlose(i.classe)}`.trim(),
       limitation: "Cette exposition est lue dans un rayon autour du point de référence de la commune. La distance réelle depuis un logement, et le plan de prévention qui s'y applique, se vérifient à l'adresse.",
       evidence: [{ factId: "expoIndustrielle", module: "territoire", label: `Industrie · ${f.nom}`, grain: "commune", href: territoireHref }],
-      action: { type: "obtenir_document", label: "Consultez l'état des risques et le plan de prévention des risques technologiques applicables à l'adresse (Géorisques)" },
+      action: {
+        type: "obtenir_document",
+        label: "Consultez l'état des risques applicable à l'adresse",
+        detail: "Le plan de prévention des risques technologiques, s'il existe, précise ce qui s'applique autour du site (Géorisques).",
+      },
     };
     return ret("verification", [fact], "site industriel à risque à portée");
   },
@@ -478,6 +508,13 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
     case "verification":
       if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);
       if (!fact.action) throw new Error(`[decision] ${fact.ruleId}: vérification sans action`);
+      // LA LIGNE D'ACTION EST UNE LIGNE. Elle tient sur la face de la carte, seule, et un libellé de
+      // 117 caractères (l'exposition industrielle en portait un) y devenait un second paragraphe qui
+      // rivalisait avec le constat. Le point final la ferait lire comme une phrase de plus : c'est un
+      // repère, pas une phrase. Ce qu'il faut regarder concrètement vit dans `detail`, au dépliable.
+      if (fact.action.label.length > 70 || /[.!?]$/.test(fact.action.label)) {
+        throw new Error(`[decision] ${fact.ruleId}: action.label trop long ou ponctué (« ${fact.action.label} »)`);
+      }
       break;
     case "mismatch": {
       if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);

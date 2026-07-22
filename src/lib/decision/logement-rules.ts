@@ -11,11 +11,13 @@ function bucket(p: UserProject): Bucket {
   if (p.posture === "habitant") return "reside";
   return "neutre";
 }
+type ActionCopy = { label: string; detail: string };
+
 function ev(l: LogementFacts, factId: string, mode: "persisted_snapshot" | "live_fetch", grain: "adresse" | "commune" = "adresse", observedValue?: string): EvidenceRef {
   return { factId, module: "logement", label: l.addressLabel, observedValue, grain, href: "/rapport/logement", sourceMode: mode };
 }
-function logementVerification(id: string, evidence: EvidenceRef, tier: MaterialityTier, topic: string, statement: string, actionType: VerificationActionType, actionLabel: string, limitation?: string): VerificationFact {
-  return { id: `logement:${id}`, ruleId: `logement.${id}`, sourceFactIds: [`logement.${id}`], module: "logement", role: "verification", materialityTier: tier, topic, statement, evidence: [evidence], action: { type: actionType, label: actionLabel }, ...(limitation ? { limitation } : {}) };
+function logementVerification(id: string, evidence: EvidenceRef, tier: MaterialityTier, topic: string, statement: string, actionType: VerificationActionType, action: ActionCopy, limitation?: string): VerificationFact {
+  return { id: `logement:${id}`, ruleId: `logement.${id}`, sourceFactIds: [`logement.${id}`], module: "logement", role: "verification", materialityTier: tier, topic, statement, evidence: [evidence], action: { type: actionType, label: action.label, ...(action.detail ? { detail: action.detail } : {}) }, ...(limitation ? { limitation } : {}) };
 }
 function logementScopedUnknown(id: string, evidence: EvidenceRef, topic: string, statement: string): UnknownFact {
   return { id: `logement:${id}:unknown`, ruleId: `logement.${id}`, sourceFactIds: [`logement.${id}`], module: "logement", role: "unknown", impact: "scoped", materialityTier: "secondary", topic, statement, evidence: [evidence] };
@@ -35,7 +37,7 @@ function coverageRule(cfg: {
   // cette adresse et un plan de prévention des risques sur cette adresse ». Le sujet est nu ; il reçoit
   // le nom de la commune quand c'est ELLE qu'il décrit.
   topic: (nom: string) => string;
-  statement: (l: LogementFacts) => string; limitation?: string; actionType: VerificationActionType; action: Record<Bucket, string>;
+  statement: (l: LogementFacts) => string; limitation?: string; actionType: VerificationActionType; action: Record<Bucket, ActionCopy>;
   observedValue?: (l: LogementFacts) => string | undefined; unavailableStatement: string;
 }): DecisionRule {
   const grain = cfg.grain ?? "adresse";
@@ -56,11 +58,59 @@ function coverageRule(cfg: {
   };
 }
 
-const batiAction: Record<Bucket, string> = { achat: "Demandez l'historique des fissures et sinistres, faites vérifier les fondations.", location: "Signalez au bailleur toute fissure apparente.", reside: "Surveillez et photographiez d'éventuelles fissures dans le temps.", neutre: "Regardez les signes visibles sur le bâti." };
-const pprnAction: Record<Bucket, string> = { achat: "Consultez le règlement de la zone en mairie avant tout projet de travaux ou d'extension.", location: "Demandez au bailleur si le logement est concerné par des prescriptions particulières.", reside: "Vérifiez le règlement de la zone avant une extension ou une rénovation lourde.", neutre: "Lisez le règlement de la zone en mairie." };
-const caviteAction: Record<Bucket, string> = { achat: "Faites vérifier l'état du sol et des fondations avant de vous engager.", location: "Signalez au bailleur tout affaissement ou fissure.", reside: "Surveillez tout signe d'affaissement ou de fissure.", neutre: "Renseignez-vous sur les cavités recensées et leur suivi." };
-const patrimoineAction: Record<Bucket, string> = { achat: "Avant des travaux extérieurs, vérifiez en mairie ce que le périmètre autorise (avis de l'ABF possible).", location: "", reside: "Avant des travaux extérieurs, vérifiez en mairie ce que le périmètre autorise.", neutre: "Renseignez-vous en mairie sur ce que le périmètre patrimonial autorise." };
-const siniAction: Record<Bucket, string> = { achat: "Demandez l'état des risques et l'historique des sinistres du bien.", location: "Demandez au bailleur l'état des risques et signalez tout sinistre survenu.", reside: "Renseignez-vous sur l'historique des sinistres et des indemnisations du logement.", neutre: "Consultez l'état des risques de la commune." };
+// LES 23 VARIANTES POSTURE-AWARE (6 tables x 4 postures, moins patrimoine/location que la règle
+// exclut). Le `label` est la ligne de FACE, bornée à 70 caractères, sans point final ; le `detail`
+// descend dans le dépliable, sous « À vérifier ».
+//
+// LE VERBE NOMME LE GESTE RÉEL. Cinq libellés sur sept commençaient par « Vérifiez » : empilés sur une
+// colonne de cartes, ils se lisaient comme un formulaire, et ils contredisaient le lexique que le
+// dossier applique dix lignes plus haut (un constat établi se CONTRÔLE, une condition non testée se
+// VÉRIFIE). Regardez / Demandez / Consultez / Signalez / Suivez / Faites chiffrer : chaque verbe dit
+// ce que la personne va effectivement faire.
+//
+// TROIS PRÉCAUTIONS TENUES DANS TOUTE LA TABLE :
+//   - aucun detail n'affirme un droit ni un délai (« le diagnostic vaut dix ans ») : ce sont des
+//     affirmations juridiques non sourcées dans le produit (invariant 3). On décrit la PRATIQUE ;
+//   - aucun detail ne promet un résultat (« un diagnostic lève le doute ») : invariant 5 ;
+//   - aucune posture n'est culpabilisée. La variante `reside` ne dit jamais « vous auriez dû », elle
+//     documente ce qu'il reste à faire.
+const batiAction: Record<Bucket, ActionCopy> = {
+  achat: { label: "Demandez l'historique des fissures et des sinistres", detail: "Faites contrôler les fondations si un doute subsiste." },
+  location: { label: "Signalez les fissures apparentes au bailleur", detail: "Photographiez ce qui est visible et signalez-le par écrit." },
+  reside: { label: "Suivez les fissures dans le temps", detail: "Photographiez-les avec une date, et comparez d'une saison à l'autre." },
+  neutre: { label: "Regardez les signes visibles sur le bâti", detail: "Fissures en escalier sur les façades, portes ou fenêtres qui coincent, sol qui se déforme." },
+};
+const pprnAction: Record<Bucket, ActionCopy> = {
+  achat: { label: "Consultez le règlement de la zone en mairie", detail: "Il fixe ce qui est autorisé en cas de travaux ou d'extension, et ce qu'il impose au bâti existant." },
+  location: { label: "Demandez au bailleur les prescriptions qui s'appliquent", detail: "L'état des risques remis à la signature indique le zonage et ce qu'il impose au logement." },
+  reside: { label: "Lisez le règlement avant une extension", detail: "Une rénovation lourde peut être conditionnée par le zonage." },
+  neutre: { label: "Lisez le règlement de la zone en mairie", detail: "Il dit ce que le zonage autorise, interdit ou impose à cette adresse." },
+};
+const caviteAction: Record<Bucket, ActionCopy> = {
+  achat: { label: "Faites examiner la stabilité du sol avant de vous engager", detail: "Le recensement porte sur des ouvrages connus alentour, pas sous ce logement : seul un avis technique tranche." },
+  location: { label: "Signalez tout affaissement au bailleur", detail: "Un affaissement du terrain ou une fissure nouvelle se signale par écrit." },
+  reside: { label: "Surveillez les signes d'affaissement", detail: "Affaissement du terrain, fissures nouvelles, portes qui se bloquent : notez la date." },
+  neutre: { label: "Renseignez-vous sur les cavités recensées", detail: "La mairie et Géorisques indiquent les cavités connues et le suivi dont elles font l'objet." },
+};
+// `location` est exclue par la règle elle-même (buckets) : la chaîne vide n'est jamais lue.
+const patrimoineAction: Record<Bucket, ActionCopy> = {
+  achat: { label: "Demandez en mairie ce que le périmètre autorise", detail: "Façade, menuiseries, toiture : les travaux visibles peuvent demander un accord, avec l'avis de l'Architecte des Bâtiments de France." },
+  location: { label: "", detail: "" },
+  reside: { label: "Vérifiez en mairie avant des travaux extérieurs", detail: "Le périmètre encadre ce qui se voit depuis l'espace public." },
+  neutre: { label: "Renseignez-vous sur ce que le périmètre autorise", detail: "Il encadre les travaux visibles depuis l'espace public : façade, menuiseries, toiture." },
+};
+const siniAction: Record<Bucket, ActionCopy> = {
+  achat: { label: "Demandez l'état des risques et les sinistres indemnisés", detail: "Le vendeur indique les sinistres indemnisés au titre d'une catastrophe naturelle pendant qu'il occupait le bien." },
+  location: { label: "Demandez au bailleur l'état des risques", detail: "Il est remis à la signature. Signalez sans tarder tout sinistre survenu pendant le bail." },
+  reside: { label: "Renseignez-vous sur les indemnisations déjà versées", detail: "Les arrêtés de catastrophe naturelle pris sur la commune disent quels épisodes ont donné lieu à indemnisation." },
+  neutre: { label: "Consultez l'état des risques de la commune", detail: "Il récapitule les arrêtés de catastrophe naturelle et les zonages qui s'appliquent." },
+};
+const dpeAction: Record<Bucket, ActionCopy> = {
+  achat: { label: "Faites chiffrer les travaux d'amélioration", detail: "Demandez des devis avant de vous engager : isolation, chauffage, ventilation." },
+  location: { label: "Demandez la date du diagnostic et les factures réelles", detail: "L'étiquette date d'un diagnostic ; les factures des derniers hivers disent ce que ça coûte vraiment." },
+  reside: { label: "Gardez la trace des travaux déjà engagés", detail: "Devis et factures d'isolation ou de chauffage documentent l'écart avec l'étiquette affichée." },
+  neutre: { label: "Regardez le détail du diagnostic et sa date", detail: "L'étiquette résume ; le détail dit d'où viennent les pertes." },
+};
 
 // DPE : fait PERSISTÉ (pas de coverage), jamais unavailable. Formulé depuis la classe exacte.
 const ruleDpe: DecisionRule = {
@@ -70,9 +120,8 @@ const ruleDpe: DecisionRule = {
     if (!l || (l.dpe !== "passoire" && l.dpe !== "energivore")) return na("dpe-faible");
     const desc = l.dpe === "passoire" ? "une passoire énergétique" : "un logement énergivore";
     const cls = l.dpeLabel ? `${l.dpeLabel}, ${desc}` : desc;
-    const action: Record<Bucket, string> = { achat: "Faites chiffrer les travaux d'amélioration avant de vous engager.", location: "Vérifiez la date du diagnostic et les charges auprès du bailleur avant signature.", reside: "Documentez les travaux d'amélioration engagés.", neutre: "Regardez le détail du diagnostic énergétique et sa date." };
     const evidence = ev(l, "logement.dpe", "persisted_snapshot", "adresse", l.dpeLabel ? `DPE ${l.dpeLabel}` : undefined);
-    return out("dpe-faible", logementVerification("dpe-faible", evidence, "structuring", "l'étiquette énergétique du logement", `À cette adresse, le diagnostic choisi classe ce logement ${cls}.`, "demander_confirmation", action[bucket(p)]));
+    return out("dpe-faible", logementVerification("dpe-faible", evidence, "structuring", "l'étiquette énergétique du logement", `À cette adresse, le diagnostic choisi classe ce logement ${cls}.`, "demander_confirmation", dpeAction[bucket(p)]));
   },
 };
 
