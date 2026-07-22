@@ -305,19 +305,26 @@ function mismatchCandidates(
   ];
 }
 
+// LES NOMBRES SE DISENT EN LETTRES dans ce bloc, jusqu'à dix. Le héros écrivait « Deux priorités » et
+// le détail « 2 constats » à deux lignes d'écart : deux registres typographiques dans le même bloc.
+// `numberForms` déclare les deux formes, donc la validation accepte l'une comme l'autre.
+function enLettres(n: number): string {
+  return numberForms(n)[1] ?? String(n);
+}
+
 // Ce qui reste à contrôler, dit sans jamais laisser croire que le point nommé par le héros s'ajoute
 // au compte. `named` = le headline a déjà nommé un élément de CE pool.
 function resteAControler(r: number, named: boolean): string {
   if (r === 0) return "";
-  if (named) return r > 1 ? ` Ce point fait partie de ${r} constats à contrôler.` : " C'est le seul constat à contrôler.";
-  return r > 1 ? ` ${r} constats restent à contrôler.` : " Un constat reste à contrôler.";
+  if (named) return r > 1 ? ` Ce point fait partie de ${enLettres(r)} constats à contrôler.` : " C'est le seul constat à contrôler.";
+  return r > 1 ? ` ${capitalize(enLettres(r))} constats restent à contrôler.` : " Un constat reste à contrôler.";
 }
 
-// L'ACCORD EN NOMBRE est calculé, jamais laissé à une formule générique : « 1 points structurants »
-// détruit en un caractère la confiance que tout le reste essaie de construire.
-function points(n: number, adj: string, verb: string): string {
-  return n > 1 ? `${n} points ${adj}s ${verb}nt` : `${n} point ${adj} ${verb}`;
-}
+// `points(n, adj, verb)` vivait ici : il accordait « N points structurants empêchent/demandent ».
+// « structurants » est le nom d'un materialityTier, c'est-à-dire une décision interne de matérialité
+// que le lecteur ne peut ni expliquer ni opposer : de la tuyauterie affichée en 32 px, au même titre
+// que le score que le lot A retire des pastilles. Les branches qui l'appelaient disent maintenant
+// « des points qui pèsent », en prose, et accordent elles-mêmes leur nombre.
 
 // LA TABLE DE VÉRITÉ DU VERDICT (spec 2.1 §5, révisée par le lot « verdict héros »). Déterministe,
 // mot pour mot, JAMAIS générée. Chaque branche produit EXPLICITEMENT son couple headline + détail :
@@ -352,7 +359,9 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
     return {
       label: "Impossible de conclure", tone: "neutral",
       headline: POSTURE(`Des éléments essentiels manquent encore pour trancher ${a}.`),
-      detail: `Une donnée déterminante manque encore pour conclure sur ${nom}.`,
+      // Aucun détail : « Une donnée déterminante manque encore pour conclure sur Toulouse » redisait le
+      // héros au singulier. Un bloc qui répète n'ajoute rien, il dilue.
+      detail: "",
     };
   }
 
@@ -380,10 +389,12 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
   if (input.coverage === "none") {
     return {
       label: "Lecture non disponible", tone: "neutral",
-      // « ne peut pas encore » et non « n'a pas encore pu » : le présent parle de l'état du dossier,
-      // le passé composé raconterait un échec du moteur.
-      headline: POSTURE(`${nom} ne peut pas encore être évalué au regard de vos critères.`),
-      detail: "Les critères de votre projet n'ont pas encore de lecture disponible sur cette commune.",
+      // LE SUJET EST LE CRITÈRE DU LECTEUR, et le verbe est « lire ». « Toulouse ne peut pas encore
+      // être évalué » posait deux problèmes : un accord instable d'une commune à l'autre, dont le genre
+      // n'est pas dérivable, et le mot « évalué », que le positionnement récuse (on lit des données, on
+      // n'attribue pas de note à un lieu).
+      headline: POSTURE(`Vos critères n'ont pas encore pu être lus ${a}.`),
+      detail: "Les données qui permettraient de répondre manquent encore pour cette commune.",
     };
   }
 
@@ -411,7 +422,7 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
       : top.length <= HEADLINE_MAX_ISSUES ? top
       : [];
     const sujets = joinFr(nommes.map((c) => c.subject));
-    const compte = numberForms(m)[1] ?? String(m);
+    const compte = enLettres(m);
     // LE SUJET DE LA PHRASE EST LE LIEU. « Deux priorités correspondent moins bien à Toulouse » fait
     // des priorités du lecteur les sujets qui échouent, et de la commune un décor : c'est l'inverse de
     // ce qui se passe. C'est le lieu qui répond, ou non, à ce que le lecteur demande.
@@ -428,23 +439,44 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
     // Le pool des réserves est DISTINCT de celui des mismatchs : le point nommé par le héros n'en
     // fait pas partie, d'où « par ailleurs », et jamais « ce point fait partie de ».
     const suite = input.reservesShown > 0
-      ? ` ${input.reservesShown > 1 ? `${input.reservesShown} constats restent` : "Un constat reste"} par ailleurs à contrôler.`
+      ? ` ${input.reservesShown > 1 ? `${capitalize(enLettres(input.reservesShown))} constats restent` : "Un constat reste"} par ailleurs à contrôler.`
       : "";
-    const ecarts = m > 1 ? "Ces écarts appellent un arbitrage" : "Cet écart appelle un arbitrage";
     // UN ARBITRAGE A DEUX CÔTÉS. N'en nommer qu'un décrit un renoncement : le lecteur ne voit jamais
     // ce que le lieu offre en échange. Le côté favorable est nommé quand il est PROUVÉ (hasFavorable
     // et favorableCount, les mêmes garanties que coverage=high), et seulement là.
-    const ouverture = input.hasFavorable
+    //
+    // « vos AUTRES priorités » : sans « autres », le lecteur peut croire que le favorable et l'écart
+    // portent sur les mêmes critères, et l'arbitrage devient illisible. « à peser contre ce que vous y
+    // gagnez » nomme les deux côtés, ce que « appelle un arbitrage » annonçait sans le faire. Le « y »
+    // évite à la fois une seconde occurrence du nom de commune et un accord de genre indérivable.
+    const ecart = m > 1 ? "Ces écarts sont" : "Cet écart est";
+    const arbitrage = input.hasFavorable
       ? (input.favorableCount >= 2
-          ? `${nom} répond à plusieurs dimensions de votre projet, et aucune incompatibilité n'a été établie`
-          : `${nom} présente un élément favorable pour votre projet, et aucune incompatibilité n'a été établie`)
-      : `Aucune incompatibilité n'a été établie ${a}`;
+          ? `${nom} répond bien à plusieurs de vos autres priorités. ${ecart} à peser contre ce que vous y gagnez.`
+          : `${nom} répond bien à une autre de vos priorités. ${ecart} à peser contre ce que vous y gagnez.`)
+      : `Aucune de vos conditions n'est contredite ici. ${ecart} à peser avant de vous décider.`;
+    // QUAND LE HÉROS RENONCE À NOMMER, LE DÉTAIL NOMME. La gate protège la mesure du héros ; elle n'a
+    // pas le droit de faire disparaître du dossier l'information qu'on possède. En 17 px, trois sujets
+    // tiennent sans faire paragraphe. Le gabarit est SANS ACCORD à dériver (« ces priorités … servies »
+    // porte le féminin pluriel quels que soient les sujets listés), et la liste tombe en fin de phrase.
+    const tousLesSujets = joinFr(candidates.map((c) => c.subject));
     return {
       label: "Arbitrage", tone: "neutral",
-      headline: named ?? POSTURE(`Un arbitrage réel ${a}, sans incompatibilité établie.`),
+      // « Un arbitrage réel à X, sans incompatibilité établie. » : une phrase sans verbe, qui commente
+      // le statut du calcul et décrit l'absence d'un problème par une double négation. La posture dit
+      // maintenant le compte qu'elle connaît déjà, dans la même famille sonore que la version nommée.
+      headline: named ?? POSTURE(
+        m === 1
+          ? `${nom} répond moins bien à une de vos priorités.`
+          : `${nom} répond moins bien à ${compte} de vos priorités.`,
+      ),
+      // En posture, NOMMER PASSE AVANT le côté favorable : trois phrases feraient reparaître le
+      // paragraphe que la refonte supprime, et l'information qui manque au lecteur est la liste.
       detail: named
-        ? `${ouverture}. ${ecarts} entre vos priorités, sans rendre ${nom} incompatible avec votre projet.${suite}`
-        : `${ouverture}, mais ${m > 1 ? `${m} de vos priorités sont` : "une de vos priorités est"} nettement moins bien servie${m > 1 ? "s" : ""} qu'ailleurs. Cela appelle un arbitrage entre vos priorités, sans rendre ${nom} incompatible avec votre projet.${suite}`,
+        ? `${arbitrage}${suite}`
+        : tousLesSujets
+          ? `Ces priorités sont moins bien servies ici qu'ailleurs : ${tousLesSujets}. ${ecart} à peser avant de vous décider.${suite}`
+          : `${arbitrage}${suite}`,
     };
   }
 
@@ -452,8 +484,14 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
   if (input.orientation === "neutral") {
     return {
       label: "Correspondance sans signal marqué", tone: "neutral",
-      headline: POSTURE(`${nom} ne se distingue nettement ni favorablement ni défavorablement.`),
-      detail: "Vos priorités ont pu être examinées sur ces dimensions. Aucun écart notable n'apparaît, ni avantage net.",
+      // « ne se distingue nettement ni favorablement ni défavorablement » est du langage de
+      // distribution : trois adverbes en -ment et une double négation corrélative, pour l'information
+      // la MOINS dense du produit affichée dans le plus grand corps de l'écran. L'information est
+      // réelle (rien ici ne tranche), elle se dit du point de vue de la décision.
+      headline: POSTURE(`Rien, dans ce que vous avez demandé, ne penche pour ou contre ${nom}.`),
+      // « dimensions » est le mot de la matrice interne (les 27 dimensions du Pack) : le lecteur a des
+      // priorités. Et pas de « toutes » : `neutral` ne garantit pas une couverture élevée.
+      detail: "Vos priorités ont pu être examinées ici. Aucun écart marqué n'apparaît, aucun avantage net non plus.",
     };
   }
 
@@ -468,7 +506,10 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
         }
       : {
           label: "Signaux favorables", tone: "neutral",
-          headline: POSTURE(`${nom} va dans le sens de votre projet sur les critères déjà couverts.`),
+          // La restriction passe EN TÊTE : elle qualifie tout ce qui suit, et la phrase se termine sur
+          // le lecteur au lieu de finir sur « les critères déjà couverts », vocabulaire de couverture
+          // qui recevait l'accent de fin de phrase.
+          headline: POSTURE(`Sur ce qui a pu être regardé, ${nom} va dans le sens de votre projet.`),
           detail: "La lecture reste incomplète : d'autres critères de votre projet n'ont pas encore pu être examinés.",
         };
   }
@@ -497,26 +538,45 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
       return {
         label: input.hasFavorable ? "Correspondance favorable" : "Correspondance à confirmer",
         tone: input.hasFavorable ? "positive" : "neutral",
+        // « sous réserve » est un mot d'acte notarié, et il PRÉ-ANNONÇAIT le détail qui dit exactement
+        // cela deux lignes plus bas. Trois niveaux (héros, détail, strate) disaient une seule chose.
         headline: namedReserve ?? POSTURE(
           input.hasFavorable
-            ? `${nom} semble bien correspondre à votre projet, sous réserve.`
+            ? `${nom} semble bien correspondre à votre projet.`
             : `La correspondance ${deCommune(nom)} avec votre projet reste à confirmer.`,
         ),
-        // Le détail ne REDIT PAS le héros : en posture, le héros porte déjà « semble bien
-        // correspondre » ou « reste à confirmer », et le détail n'a plus qu'à dire ce qui reste.
+        // Le détail ne REDIT PAS le héros : en posture, le héros porte déjà la correspondance, et le
+        // détail n'a plus qu'à dire ce qui reste, avec le but du contrôle (« avant de conclure »).
         detail: nommee
-          ? `${input.hasFavorable ? `${nom} semble bien correspondre à votre projet.` : `La correspondance ${deCommune(nom)} avec votre projet reste à confirmer.`}${resteAControler(r, true)}`
-          : resteAControler(r, false).trim() || "Les critères de votre projet qui ont pu être examinés vont dans ce sens.",
+          ? `${input.hasFavorable ? `${nom} semble bien correspondre à votre projet.` : `Rien ne permet encore de dire que ${nom} correspond à votre projet.`}${resteAControler(r, true)}`
+          : r > 1
+            ? `${capitalize(enLettres(r))} constats restent à contrôler avant de conclure.`
+            : r === 1
+              ? "Un constat reste à contrôler avant de conclure."
+              : "Les critères de votre projet qui ont pu être examinés vont dans ce sens.",
       };
     }
+    // Le détail recopiait le héros mot pour mot (« 2 points structurants empêchent … de conclure
+    // nettement »), à un adverbe près : l'invariant « le détail n'est jamais une version tronquée du
+    // héros » n'était nulle part violé aussi littéralement. Deux autres fautes tombent avec :
+    // « structurants » (un nom de tier, cf. enLettres/points plus haut) et « empêchent de conclure »,
+    // qui met l'incapacité du côté de futur•e alors que la couverture est ÉLEVÉE : les données sont
+    // là, c'est la situation qui est mitigée. L'effacement n'est légitime que quand l'objet de la
+    // phrase EST notre incapacité.
     return {
       label: "Correspondance à nuancer", tone: "caution",
-      headline: namedReserve ?? POSTURE(`${capitalize(points(n, "structurant", "empêche"))} de conclure nettement ${a}.`),
+      headline: namedReserve ?? POSTURE(
+        n > 1
+          ? `${capitalize(enLettres(n))} points restent à contrôler avant de conclure ${a}.`
+          : `Un point reste à contrôler avant de conclure ${a}.`,
+      ),
+      // « des points qui pèsent » dit `structuring` sans le jargon ; « rien ne permet de dire » garde
+      // l'honnêteté épistémique sans faire de futur•e le sujet de la phrase.
       detail: !input.hasFavorable
-        ? `${capitalize(points(n, "structurant", "empêche"))} encore de considérer ${nom} comme une bonne correspondance avec votre projet.`
+        ? `Tant que ${n > 1 ? "ces points ne sont pas levés" : "ce point n'est pas levé"}, rien ne permet de dire que ${nom} correspond à votre projet.`
         : plusieurs
-          ? `${nom} répond à plusieurs dimensions de votre projet, mais ${points(n, "structurant", "empêche")} encore de conclure nettement.`
-          : `${nom} présente des éléments favorables pour votre projet, mais ${points(n, "structurant", "empêche")} encore de conclure nettement.`,
+          ? `${nom} répond bien à plusieurs de vos priorités. Ces contrôles portent sur des points qui pèsent.`
+          : `${nom} présente un élément favorable pour votre projet. Ces contrôles portent sur des points qui pèsent.`,
     };
   }
 
@@ -529,7 +589,7 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
       detail: nommee
         ? `La lecture ${deCommune(nom)} reste incomplète.${resteAControler(r, true)}`
         : input.hasFavorable
-          ? `${nom} va plutôt dans le sens de votre projet sur les critères déjà couverts.${resteAControler(r, false)}`
+          ? `Sur ce qui a pu être regardé, ${nom} va plutôt dans le sens de votre projet.${resteAControler(r, false)}`
           : `D'autres critères de votre projet n'ont pas encore pu être examinés.${resteAControler(r, false)}`,
     };
   }
@@ -540,7 +600,7 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
     // et « structurants » est le nom d'un materialityTier, soit la tuyauterie que le lot A retire
     // partout ailleurs. Le compte se dit en lettres, comme dans le reste du bloc.
     detail: n >= 1
-      ? `La lecture reste incomplète, et ${n > 1 ? `${numberForms(n)[1] ?? String(n)} points demandent` : "un point demande"} votre attention.`
+      ? `La lecture reste incomplète, et ${n > 1 ? `${enLettres(n)} points demandent` : "un point demande"} votre attention.`
       : "La lecture reste incomplète.",
   };
 }
