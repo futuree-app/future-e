@@ -1054,7 +1054,11 @@ a {
    `--tone` est posé en style inline par ConclusionBlock (TONE_COLOR). Le repli sur --accent existe
    pour qu'un futur appelant qui l'oublierait rende un bloc correct plutôt qu'un bloc sans relief. */
 .card-verdict {
-  background: rgba(255, 255, 255, 0.055);
+  /* L'ÉCART DE SURFACE EST LE SIGNAL. À 0.055 contre 0.03 pour les cartes, il ne se voyait pas : le
+     bloc de réponse, une carte et le lien d'action se lisaient comme trois boîtes identiques. Le
+     verdict passe à 0.09, soit trois fois la surface des cartes, et un dégradé très court lui donne
+     du volume par en haut. Aucun halo : c'est la SURFACE qui dit la hiérarchie, pas une auréole. */
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.105) 0%, rgba(255, 255, 255, 0.062) 100%);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border-2);

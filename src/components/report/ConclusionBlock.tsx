@@ -20,11 +20,15 @@ import { bindOrphans } from "@/lib/typography";
 // trois centimètres d'écart. Le blocage est la réponse, il se lit une fois.
 export type ConditionEvidence = { evidence: EvidenceRef[]; limitation?: string };
 
+// LES QUATRE TONS DOIVENT ÊTRE QUATRE COULEURS. `caution` et `positive` rendaient EXACTEMENT la même
+// (--orange et --accent valent tous deux #fb923c) : deux états opposés du verdict, « à nuancer » et
+// « bonne correspondance », portaient le même signal. `positive` prend le vert de la palette, qui n'a
+// pas d'autre emploi et que personne ne lit comme une mise en garde.
 const TONE_COLOR: Record<VerdictTone, string> = {
   critical: "var(--red)",
   caution: "var(--orange)",
   neutral: "var(--ghost)",
-  positive: "var(--accent)",
+  positive: "var(--green)",
 };
 
 const SCOPE_LABEL: Record<ConclusionNarrativePlan["scope"], string> = {
