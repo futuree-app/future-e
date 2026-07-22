@@ -106,12 +106,17 @@ export function DossierDecisionSection({
         </Suspense>
       )}
 
-      {/* Les raisons, dans l'idiome des cartes-modules (filet accent en tête) */}
+      {/* Les raisons : des pièces à examiner, dans un verre neutre. Leur couleur de section vit dans
+          la pastille du titre, plus dans un filet qui rivalisait avec la réponse. */}
       <div className="grid gap-3.5">
         {sections.map((s) => {
           const col = SECTION_ACCENT[s.key] ?? "var(--amethyst)";
           return (
-            <div key={s.key} className="glass rounded-xl p-6" style={{ borderTop: `2px solid ${col}` }}>
+            /* LE LISERÉ COLORÉ DE 2 px A ÉTÉ RENDU AU VERDICT. Il courait en tête de CHAQUE section :
+               quatre traits vifs sous un bloc de réponse qui, lui, porte souvent un ton neutre (gris).
+               L'œil allait aux pièces à examiner plutôt qu'à la réponse. La couleur de section
+               survit là où elle suffit : la pastille en tête de titre, qui la porte déjà. */
+            <div key={s.key} className="glass rounded-xl p-6">
               <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mb-4" style={{ color: col }}>
                 <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
                 {s.title}

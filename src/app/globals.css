@@ -1059,10 +1059,13 @@ a {
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border-2);
   border-top: 2px solid var(--tone, var(--accent));
+  /* Une ombre de POSE, pas un halo. Le halo coloré ajouté ici d'abord était un pansement sur une
+     hiérarchie inversée : le verdict portait un gris terne (ton neutre) pendant que les cartes du
+     dessous portaient un liseré vif, et l'œil allait aux cartes. On corrige la cause (les cartes
+     rendent leur liseré coloré, cf. DossierDecisionSection) au lieu de monter le volume ici. */
   box-shadow:
-    0 18px 44px -12px rgba(0, 0, 0, 0.6),
-    0 0 64px -20px var(--tone, var(--accent)),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    0 16px 40px -16px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 /* Dialog natif — styles non reproductibles en Tailwind */
