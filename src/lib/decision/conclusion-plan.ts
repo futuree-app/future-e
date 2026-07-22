@@ -39,9 +39,14 @@ export type NarrativeBlock = {
 // entiers, elle recopiait mot pour mot les cartes situées trois centimètres plus bas.
 //
 // La conclusion NOMME, les cartes DÉMONTRENT.
+//
+// `subject` est CE QUI S'ÉCRIT ; `topic` reste l'identité du candidat (tri, journalisation). Pour un
+// fait les deux coïncident ; pour une composition le `topic` est son `title`, écrit pour coiffer une
+// carte, donc capitalisé et long : servi tel quel après un deux-points, il mettait une majuscule au
+// milieu de la phrase (« À regarder ensuite : Un sol argileux, et la règle qui l'encadre. »).
 export type LeadSelection =
-  | { kind: "single"; factId: string; topic: string; statement: string; materialityTier: MaterialityTier }
-  | { kind: "tied"; facts: { factId: string; topic: string }[]; materialityTier: MaterialityTier }
+  | { kind: "single"; factId: string; topic: string; subject: string; statement: string; materialityTier: MaterialityTier }
+  | { kind: "tied"; facts: { factId: string; topic: string; subject: string }[]; materialityTier: MaterialityTier }
   | { kind: "none" };
 
 export type VerdictTone = "critical" | "caution" | "neutral" | "positive";
@@ -78,10 +83,15 @@ export type VerdictPresentation = { headline: VerdictHeadline; detail: string };
 // courants passaient à un caractère de basculer à tort en posture : l'incompatibilité nommée sur une
 // commune à article (« Une condition de votre projet n'est pas remplie aux Sables-d'Olonne : la
 // proximité d'une gare. », 94 car.), soit le cas le plus grave privé de son nom, et l'arbitrage
-// nominal à deux sujets (94 aussi). À 110, la mesure de 540 px tient trois lignes courtes en Serif,
-// ce qui reste un signal.
+// nominal à deux sujets (94 aussi).
+//
+// 110 -> 130 après la passe sur les SUJETS : nommer la priorité du lecteur plutôt que la mesure les a
+// allongés (« la taille de la ville » 21 -> « une ville à taille humaine » 26 ; « la faible dépendance
+// à la voiture » 33 -> « la possibilité de se passer de la voiture » 41), et la part des arbitrages à
+// deux priorités qui restaient nommés tombait de 85 % à 55 % sur une commune de longueur médiane.
+// Mesure validée à l'écran : la colonne de 540 px tient la phrase la plus longue.
 export const HEADLINE_MAX_ISSUES = 2;
-export const HEADLINE_MAX_CHARS = 110;
+export const HEADLINE_MAX_CHARS = 130;
 
 export type ConclusionNarrativePlan = {
   scope: "commune" | "commune+adresse";
@@ -246,14 +256,14 @@ function leadFromCandidates(top: LeadCandidate[]): LeadSelection {
   if (top.length === 0) return { kind: "none" };
   if (top.length === 1) {
     const f = top[0]!;
-    // `single` garde le constat : UN fait cité seul peut être dit en entier sans noyer la conclusion,
-    // et le lecteur mérite de savoir ce qui pèse, pas seulement de quoi ça parle.
-    return { kind: "single", factId: f.factId, topic: f.topic, statement: f.statement, materialityTier: f.materialityTier };
+    // `statement` reste porté (des consommateurs hors strate peuvent en avoir besoin), mais la strate
+    // ne l'écrit plus : elle recopiait mot pour mot la carte affichée trois centimètres plus bas.
+    return { kind: "single", factId: f.factId, topic: f.topic, subject: f.subject, statement: f.statement, materialityTier: f.materialityTier };
   }
   // `tied` ne garde que les SUJETS : trois constats entiers recopieraient les trois cartes qui suivent.
   return {
     kind: "tied",
-    facts: top.map((f) => ({ factId: f.factId, topic: f.topic })),
+    facts: top.map((f) => ({ factId: f.factId, topic: f.topic, subject: f.subject })),
     materialityTier: top[0]!.materialityTier,
   };
 }
@@ -691,53 +701,43 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
     });
   }
 
-  if (lead.kind === "single") {
+  // UN SEUL MOULE, DEUX VARIANTES D'ORDRE (lot D). Quatre moules coexistaient ici, dont deux qui
+  // faisaient le travail de quelqu'un d'autre :
+  //
+  //   « Parmi ces quatre points, deux pèsent le plus : … » demandait au lecteur de tenir deux comptes
+  //   en tête pour lui dire quoi regarder d'abord, et le compte est DÉJÀ dit deux fois autour (le
+  //   détail du verdict, et l'intertitre des cartes). Trois occurrences du même nombre dans un écran
+  //   d'une minute.
+  //
+  //   « Un point pèse plus que les autres. {statement} » recopiait la carte située juste dessous, ce
+  //   que le commentaire de selectResidualLead interdit explicitement pour les sujets.
+  //
+  // Reste une phrase de NAVIGATION, qui ne recompte rien et ne recouronne rien. « ensuite » quand le
+  // héros a déjà nommé le principal constat de ce registre ; « d'abord » quand il n'en a nommé aucun
+  // (héros de posture, ou héros qui a puisé dans les mismatchs ou la contrainte dure).
+  const sujetsDeLaStrate =
+    lead.kind === "single" ? [lead.subject]
+    : lead.kind === "tied" ? lead.facts.map((f) => f.subject)
+    : [];
+  if (sujetsDeLaStrate.length > 0) {
     blocks.push({
       key: "reserves_found",
-      // Deux phrases, pas un deux-points : le constat est déjà une phrase, avec sa majuscule. « Un point
-      // pèse plus que les autres : Le logement porte… » mettrait une capitale au milieu d'une phrase.
-      fallbackText: suiteDuHeros
-        ? `À regarder ensuite : ${lead.topic}.`
-        : `Un point pèse plus que les autres. ${endWithPeriod(lead.statement)}`,
-      sourceIds: [lead.factId],
-      // Aucune matière obligatoire : exiger le `statement` mot pour mot exigerait une COPIE, ce
-      // qu'aucun rédacteur n'écrit, et la sonde l'a rejeté 3 fois sur 3. La garantie tient sans :
-      // le modèle ne reçoit QUE le lead, il lui est structurellement impossible d'en couronner un autre.
-      requiredPhrases: [],
-      allowedNumbers: [],
-      maxChars: 300,
-      generable: true,
-    });
-  } else if (lead.kind === "tied") {
-    const n = lead.facts.length;
-    // ON LISTE, ON NE COMMENTE PAS LA HIÉRARCHIE. « 3 points pèsent autant, aucun ne domine » est de la
-    // TUYAUTERIE : le `lead` existe pour empêcher le moteur de couronner un fait au hasard, c'est notre
-    // problème, pas celui du lecteur. Lui demande quoi regarder ; « aucun ne prend le dessus » est une
-    // absence d'information formulée comme une information. L'égalité se DIT en listant, point.
-    // (En `single`, la phrase garde du sens : elle dit par où COMMENCER.)
-    //
-    // QUAND LE VERDICT ANNONCE PLUS DE POINTS QUE LA TÊTE N'EN COMPTE (« 4 points restent à vérifier »
-    // puis « 3 points demandent votre attention »), le lecteur lit une contradiction : les 3 sont un
-    // sous-ensemble des 4, mais rien ne le disait. La phrase porte alors la relation, avec les deux
-    // comptes VRAIS déclarés. À comptes égaux, il n'y a pas de relation à porter : phrase courte.
-    const total = input.reservesShown;
-    const sujets = joinFr(lead.facts.map((f) => f.topic));
-    blocks.push({
-      key: "reserves_found",
-      fallbackText: suiteDuHeros
-        ? `À regarder ensuite : ${sujets}.`
-        : total > n
-          ? `Parmi ces ${numberForms(total)[1] ?? String(total)} points, ${numberForms(n)[1] ?? String(n)} pèsent le plus : ${sujets}.`
-          : `${capitalize(numberForms(n)[1] ?? String(n))} points demandent votre attention : ${sujets}.`,
-      sourceIds: lead.facts.map((f) => f.factId),
+      fallbackText: `${suiteDuHeros ? "À regarder ensuite" : "À regarder d'abord"} : ${joinFr(sujetsDeLaStrate)}.`,
+      sourceIds: lead.kind === "single" ? [lead.factId] : lead.kind === "tied" ? lead.facts.map((f) => f.factId) : [],
       // Chaque sujet doit SURVIVRE : c'est le seul endroit du dossier où le lecteur apprend, en une
-      // phrase, CE QUI pèse. Un « plusieurs risques naturels » qui les avalerait ramènerait la carte à
-      // son défaut d'origine (parler d'elle-même), et aucune autre validation ne le verrait.
-      requiredPhrases: lead.facts.map((f) => coreLabel(f.topic)),
-      // En mode suite, la phrase ne porte AUCUN nombre : en autoriser un ouvrirait la porte à un
+      // phrase, CE QUI pèse. Un « plusieurs risques naturels » qui les avalerait ramènerait le bloc à
+      // son défaut d'origine (parler de lui-même), et aucune autre validation ne le verrait.
+      //
+      // L'exigence vaut maintenant AUSSI pour un sujet seul. Elle était impossible tant que `single`
+      // portait le `statement` entier : l'exiger mot pour mot réclamait une COPIE, qu'aucun rédacteur
+      // n'écrit et que la sonde a rejetée 3 fois sur 3. Sur un groupe nominal court, elle est tenable.
+      requiredPhrases: sujetsDeLaStrate.map(coreLabel),
+      // AUCUN NOMBRE. Les deux moules n'en portent pas : en autoriser un ouvrirait la porte à un
       // compte inventé par le modèle, que rien n'irait contredire.
-      allowedNumbers: suiteDuHeros ? [] : total > n ? [...numberForms(n), ...numberForms(total)] : numberForms(n),
-      maxChars: 340,
+      allowedNumbers: [],
+      // 340 était la mesure d'un registre. C'est une phrase : trois sujets longs et le préfixe font
+      // ~150, et un plafond bas empêche le modèle d'y ajouter du commentaire.
+      maxChars: 220,
       generable: true,
     });
   }

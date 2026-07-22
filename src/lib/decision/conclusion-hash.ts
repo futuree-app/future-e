@@ -31,7 +31,10 @@ export const DECISION_NARRATIVE_CONTRACT_VERSION = "c2";
 // condition non testée est à VÉRIFIER, un mismatch s'ARBITRE ; « examiner » décrit ce que futur•e a
 // déjà fait. Le prompt invitait jusqu'ici à écrire « des points méritent d'être examinés », que le
 // modèle reprenait pendant que le déterministe disait « à contrôler ».
-export const DECISION_NARRATIVE_PROMPT_VERSION = "v12";
+// v13 (lot D) : le registre reserves_found devient une phrase de NAVIGATION. Quatre moules deviennent
+// deux (« À regarder d'abord / ensuite »), les faits de tête sont donnés par leur SUJET même quand un
+// seul domine (le constat entier recopiait la carte), et le registre ne porte plus AUCUN nombre.
+export const DECISION_NARRATIVE_PROMPT_VERSION = "v13";
 export const DECISION_NARRATIVE_MODEL = "claude-sonnet-4-6";
 
 export function hashPayload(

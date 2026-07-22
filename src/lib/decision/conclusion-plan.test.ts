@@ -103,18 +103,23 @@ test("requiredPhrases : le noyau des priorités non couvertes doit survivre", ()
   );
 });
 
-test("lead single : le repli NOMME le fait qui domine, sans exiger de nombre", () => {
-  // Le décompte est parti dans l'intertitre des cartes. Ce bloc ne garde que le POIDS.
+test("lead single : le repli NOMME le sujet, jamais le constat de la carte", () => {
+  // Le décompte est parti dans l'intertitre des cartes ; le constat, lui, vit dans la carte située
+  // juste dessous. Le recopier ici disait deux fois la même phrase à trois centimètres d'écart.
   const plan = buildConclusionPlan(baseInput({
     shownFacts: [
-      verification("f1", "decision_critical", "Le logement porte une étiquette énergétique F"),
+      verification("f1", "decision_critical", "Le logement porte une étiquette énergétique F", "l'étiquette énergétique du logement"),
       verification("f2", "secondary"),
     ],
   }));
   const bloc = plan.blocks.find((b) => b.key === "reserves_found")!;
-  assert.match(bloc.fallbackText, /étiquette énergétique F/);
-  assert.deepEqual(bloc.requiredPhrases, []);
+  assert.equal(bloc.fallbackText, "À regarder d'abord : l'étiquette énergétique du logement.");
+  assert.equal(bloc.fallbackText.includes("Le logement porte"), false);
+  // La matière obligatoire vaut AUSSI pour un sujet seul : elle n'était impossible que tant que le
+  // bloc portait un constat entier, dont l'exiger mot pour mot réclamait une copie.
+  assert.deepEqual(bloc.requiredPhrases, ["étiquette énergétique du logement"]);
   assert.deepEqual(bloc.allowedNumbers, []);
+  assert.equal(bloc.maxChars, 220);
 });
 
 test("allowedNumbers : le compte VRAI du registre, en chiffres ET en lettres", () => {
@@ -126,11 +131,10 @@ test("allowedNumbers : le compte VRAI du registre, en chiffres ET en lettres", (
   assert.deepEqual(plan.blocks.find((b) => b.key === "uncovered_priorities")!.allowedNumbers, ["2", "deux"]);
 });
 
-test("lead tied : la TÊTE reste comptée à part, et le total n'apparaît que porté par la relation", () => {
-  // `tied` dit que plusieurs faits partagent le rang MAXIMAL, pas que toutes les réserves pèsent
-  // pareil : ici deux dominent et deux sont secondaires. « 4 points d'un poids comparable » serait
-  // faux ; « Parmi ces quatre points, deux pèsent le plus » est vrai, et c'est la seule forme sous
-  // laquelle le total a le droit d'apparaître ici.
+test("lead tied : la strate LISTE, elle ne compte pas (aucun nombre autorisé)", () => {
+  // « Parmi ces quatre points, deux pèsent le plus » demandait au lecteur de tenir deux comptes en
+  // tête pour lui dire quoi regarder d'abord, et le nombre est déjà dit par le détail du verdict et
+  // par l'intertitre des cartes. La strate navigue ; le compte vit ailleurs.
   const plan = buildConclusionPlan(baseInput({
     reservesShown: 4,
     shownFacts: [
@@ -139,14 +143,15 @@ test("lead tied : la TÊTE reste comptée à part, et le total n'apparaît que p
     ],
   }));
   const bloc = plan.blocks.find((b) => b.key === "reserves_found")!;
-  assert.equal(plan.reservesCount, 4);
-  assert.match(bloc.fallbackText, /^Parmi ces quatre points, deux pèsent le plus : /);
-  assert.deepEqual(bloc.allowedNumbers, ["2", "deux", "4", "quatre"]);
+  assert.equal(plan.reservesCount, 4); // le compte existe toujours, il ne s'écrit plus ici
+  assert.equal(bloc.fallbackText, "À regarder d'abord : sujet f1 et sujet f2.");
+  assert.deepEqual(bloc.allowedNumbers, []);
+  assert.doesNotMatch(bloc.fallbackText, /\b(un|deux|trois|quatre|points?)\b/i);
 });
 
-test("lead tied : quand le verdict annonce plus de points, la phrase porte la relation « N parmi M »", () => {
-  // Le verdict dit « 4 points restent à vérifier », la strate en nommait 3 : le lecteur lisait une
-  // contradiction (les 3 sont un sous-ensemble, rien ne le disait). La phrase porte la relation.
+test("lead tied : aucun moule ne porte de nombre, quels que soient les comptes", () => {
+  // La phrase portait la relation « trois parmi quatre » pour éviter une contradiction avec le
+  // verdict. Le moule de navigation la rend sans objet : ne comptant plus, il ne peut plus diverger.
   const plan = buildConclusionPlan(baseInput({
     reservesShown: 4,
     shownFacts: [
@@ -157,14 +162,17 @@ test("lead tied : quand le verdict annonce plus de points, la phrase porte la re
     ],
   }));
   const bloc = plan.blocks.find((b) => b.key === "reserves_found")!;
-  assert.match(bloc.fallbackText, /^Parmi ces quatre points, trois pèsent le plus : /);
-  assert.deepEqual(bloc.allowedNumbers, ["3", "trois", "4", "quatre"]);
-  // À égalité de comptes (tous au rang max), la phrase actuelle reste : il n'y a pas de relation à porter.
+  assert.equal(
+    bloc.fallbackText,
+    "À regarder d'abord : l'exposition de Toulouse à l'inondation, le retrait-gonflement des argiles et un plan de prévention des risques.",
+  );
+  assert.deepEqual(bloc.allowedNumbers, []);
+  // À comptes égaux (tous au rang max), le même moule, sans exception à retenir.
   const egal = buildConclusionPlan(baseInput({
     reservesShown: 2,
     shownFacts: [verification("f1", "structuring", "s1", "sujet un"), verification("f2", "structuring", "s2", "sujet deux")],
   }));
-  assert.match(egal.blocks.find((b) => b.key === "reserves_found")!.fallbackText, /^Deux points demandent votre attention : /);
+  assert.equal(egal.blocks.find((b) => b.key === "reserves_found")!.fallbackText, "À regarder d'abord : sujet un et sujet deux.");
 });
 
 test("lead tied : les faits de tête sont NOMMÉS par leur SUJET, et leur constat n'est PAS recopié", () => {
@@ -215,7 +223,7 @@ test("lead single : un fait domine STRICTEMENT tous les autres", () => {
     shownFacts: [verification("f1", "decision_critical"), verification("f2", "structuring")],
   }));
   assert.deepEqual(plan.lead, {
-    kind: "single", factId: "f1", topic: "sujet f1", statement: "constat f1",
+    kind: "single", factId: "f1", topic: "sujet f1", subject: "sujet f1", statement: "constat f1",
     materialityTier: "decision_critical",
   });
 });
@@ -230,7 +238,10 @@ test("lead tied : deux faits partagent le rang maximal (un ordre de registre n'e
   }));
   assert.deepEqual(plan.lead, {
     kind: "tied",
-    facts: [{ factId: "f1", topic: "sujet f1" }, { factId: "f2", topic: "sujet f2" }],
+    facts: [
+      { factId: "f1", topic: "sujet f1", subject: "sujet f1" },
+      { factId: "f2", topic: "sujet f2", subject: "sujet f2" },
+    ],
     materialityTier: "decision_critical",
   });
 });
@@ -691,8 +702,29 @@ test("gate de longueur : deux sujets longs et un nom long basculent en posture",
     ],
     mismatchTotal: 2, mismatchShown: 2,
   }));
-  assert.equal(plan.verdict.headline.kind, "posture");
+  assert.equal(plan.verdict.headline.kind, "posture"); // la phrase nommée ferait 143 caractères
   assert.ok(plan.verdict.headline.text.length <= HEADLINE_MAX_CHARS);
+});
+
+// LA FRONTIÈRE, des deux côtés. Le test précédent montre qu'une phrase trop longue bascule ; celui-ci
+// montre qu'une phrase qui TIENT reste nommée, sur le même gabarit et le même nom de commune. Sans
+// les deux, une gate abaissée par erreur passerait inaperçue : tout basculerait, et « posture » est
+// un état valide que rien ne signale.
+test("gate de longueur : la même commune garde son héros nommé quand la phrase tient", () => {
+  const plan = buildConclusionPlan(baseInput({
+    communeNom: "Saint-Rémy-de-Provence",
+    orientation: "arbitration",
+    shownFacts: [
+      mismatchFact("m1", "structuring", "cadre_calme", "le calme"),
+      mismatchFact("m2", "structuring", "acces_soins", "l'accès aux soins"),
+    ],
+    mismatchTotal: 2, mismatchShown: 2,
+  }));
+  assert.equal(plan.verdict.headline.kind, "named_issues");
+  assert.equal(
+    plan.verdict.headline.text,
+    "Saint-Rémy-de-Provence répond moins bien à deux de vos priorités : le calme et l'accès aux soins.",
+  );
 });
 
 test("réserve dominante unique : le sujet est nommé, le fait consommé", () => {
@@ -837,7 +869,7 @@ test("pool différent : la strate garde son moule de poids", () => {
   }));
   assert.equal(plan.verdict.headline.consumedFrom, "mismatches");
   const strate = plan.blocks.find((b) => b.key === "reserves_found")!;
-  assert.match(strate.fallbackText, /demandent votre attention|pèsent le plus/);
+  assert.match(strate.fallbackText, /^À regarder d'abord : /);
 });
 
 test("pas de résiduel, pas de strate", () => {
@@ -1011,4 +1043,55 @@ test("le singulier est accordé partout : un écart, un point, un constat", () =
     coverage: "high", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0, reservesShown: 1,
   }));
   assert.equal(unConstat.verdict.detail, "Un constat reste à contrôler avant de conclure.");
+});
+
+// ── La strate de poids : un moule, deux variantes d'ordre (lot D) ────────────────
+
+test("strate : « ensuite » quand le héros a déjà nommé un point de CE registre", () => {
+  const plan = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0,
+    shownFacts: [
+      verification("f1", "decision_critical", "c1", "l'exposition à l'inondation"),
+      verification("f2", "structuring", "c2", "le retrait-gonflement des argiles"),
+    ],
+    reservesShown: 2, majorReserveCount: 2,
+  }));
+  assert.equal(plan.verdict.headline.consumedFrom, "reserves");
+  assert.equal(
+    plan.blocks.find((b) => b.key === "reserves_found")!.fallbackText,
+    "À regarder ensuite : le retrait-gonflement des argiles.",
+  );
+});
+
+test("strate : « d'abord » quand le héros a puisé dans un AUTRE pool", () => {
+  // Le héros nomme des mismatchs ; les réserves sont un pool distinct, que personne n'a encore ouvert.
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration",
+    shownFacts: [
+      mismatchFact("m1", "structuring", "cadre_calme", "le calme"),
+      verification("f1", "decision_critical", "c1", "l'exposition à l'inondation"),
+    ],
+    mismatchTotal: 1, mismatchShown: 1, reservesShown: 1,
+  }));
+  assert.equal(plan.verdict.headline.consumedFrom, "mismatches");
+  assert.equal(
+    plan.blocks.find((b) => b.key === "reserves_found")!.fallbackText,
+    "À regarder d'abord : l'exposition à l'inondation.",
+  );
+});
+
+// Le défaut que le lot D ferme : une composition entrait en strate par son `title` (capitalisé, écrit
+// pour coiffer une carte) ou par son `summary` (la carte recopiée).
+test("strate : une composition est nommée par son sujet, jamais par son titre ni son résumé", () => {
+  const plan = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2,
+    shownFacts: [verification("f9", "secondary")],
+    shownCompositions: [tradeoff("structuring")],
+    reservesShown: 2,
+  }));
+  const strate = plan.blocks.find((b) => b.key === "reserves_found")!;
+  assert.equal(strate.fallbackText, "À regarder d'abord : l'exposition aux fortes chaleurs.");
+  assert.equal(strate.fallbackText.includes("Des hivers doux"), false); // le title
+  assert.equal(strate.fallbackText.includes("comptent parmi les plus doux"), false); // le summary
+  assert.deepEqual(strate.requiredPhrases, ["exposition aux fortes chaleurs"]);
 });

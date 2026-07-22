@@ -54,14 +54,13 @@ export function ConclusionBlock({
 
   // Le fait saillant n'est pas affiché en cas d'incompatibilité : le blocage EST la réponse, en haut.
   //
-  // En `tied`, l'étiquette ne parle PAS d'égalité ni de poids : le lead est une mécanique qui empêche
-  // le moteur de couronner un fait au hasard, et « des poids comparables » exposait cette tuyauterie
-  // au lecteur, qui n'en fait rien. En `single`, en revanche, dire qu'un point pèse plus lui dit par où
-  // commencer : c'est une information, pas un aveu de méthode.
-  const poidsLabel =
-    plan.lead.kind === "single" ? "Ce qui pèse le plus"
-    : plan.lead.kind === "tied" ? "Ce qui demande votre attention"
-    : null;
+  // UNE SEULE ÉTIQUETTE. Elle distinguait `single` (« Ce qui pèse le plus ») de `tied` (« Ce qui
+  // demande votre attention ») parce que la phrase, elle, ne disait pas par où commencer. Depuis le
+  // lot D elle le dit (« À regarder d'abord / ensuite »), et une étiquette qui reprendrait cet ordre
+  // le répéterait deux fois en deux lignes. Elle dit donc la NATURE du bloc, l'ordre reste au texte.
+  // Le lead reste une mécanique interne : l'égalité de poids ne s'affiche pas, elle se lit dans la
+  // liste.
+  const poidsLabel = plan.lead.kind === "none" ? null : "Ce qui demande votre attention";
   const showPoids = poids != null && poidsLabel != null && plan.verdictTone !== "critical";
 
   return (

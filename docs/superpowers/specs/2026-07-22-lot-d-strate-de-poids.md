@@ -1,6 +1,6 @@
-# Lot D : la strate de poids (`reserves_found`) — PROPOSITION, NON VALIDÉE
+# Lot D : la strate de poids (`reserves_found`) — LIVRÉ
 
-**Date** : 2026-07-22 · **État** : soumise au porteur, aucune ligne écrite
+**Date** : 2026-07-22 · **État** : validé par le porteur, implémenté, en production
 **Origine** : §4 du rapport `docs/rapports-agents/editorial-writer/2026-07-22-verdict-heros-copie.md`
 
 Ce lot ne touche pas qu'au style : il change le CONTRAT de validation du modèle
@@ -134,7 +134,7 @@ affichées plus bas : les taire dans la synthèse crée un écart entre la tête
 **TRANCHÉ : la strate reste affichée.** La « doctrine existante » invoquée en amont n'existait pas
 (vérifié : rien dans le code, rien dans le vault). Aucun changement de comportement sur cette branche.
 
-### Q3. La gate, après l'allongement des sujets (§3 livré)
+### Q3. La gate — TRANCHÉ : 110 -> 130
 
 Les nouveaux sujets sont plus longs. Part des héros d'arbitrage qui restent NOMMÉS (le reste bascule
 en posture), mesurée sur toutes les paires de priorités :
@@ -154,13 +154,35 @@ duos. Trois choses atténuent, sans annuler :
   elle descend de 32 px à 17 px ;
 - la posture dit le compte, ce qu'elle ne faisait pas avant.
 
-**Options** : (a) ne rien faire, la posture est devenue peu coûteuse ; (b) monter la gate (130 ferait
-4 lignes en Serif à 540 px, à revoir à l'écran) ; (c) raccourcir les 3 sujets les plus longs, au prix
-de la fidélité au libellé du wizard.
+**Retenu : 130.** Les duos nommés remontent à 98 % (Toulouse), 99 % (Rodez), 84 % (Le Kremlin-Bicêtre),
+75 % (Saint-Rémy-de-Provence) — au-dessus des taux d'avant la passe sur les sujets. Un test de
+frontière verrouille les deux côtés : une phrase qui tient reste nommée, une phrase trop longue
+bascule. Sans les deux, une gate abaissée par erreur passerait inaperçue, « posture » étant un état
+valide que rien ne signale.
+
+Écartées : ne rien faire (30 points de héros nommés perdus pour rien) ; raccourcir les sujets (on
+venait de les aligner sur les libellés du wizard).
 
 ---
 
-## 5. Impact sur les tests
+## 5. Écarts entre la proposition et ce qui a été livré
+
+Trois choses qui ne figuraient pas dans la proposition et qui ont été traitées à l'implémentation :
+
+- **L'étiquette du bloc** (`ConclusionBlock.tsx`) distinguait « Ce qui pèse le plus » (single) de
+  « Ce qui demande votre attention » (tied). Cette distinction existait parce que la phrase, elle, ne
+  disait pas par où commencer ; elle le dit maintenant. Étiquette unique, l'ordre reste au texte.
+- **Le prompt système** décrivait l'ancien contrat (« vous le nommez en reprenant les termes de son
+  constat »). Réécrit, et `DECISION_NARRATIVE_PROMPT_VERSION` bumpée v12 -> v13.
+- **Ce que le modèle reçoit** : `lead` lui était transmis entier, `statement` compris. Lui tendre la
+  phrase de la carte en lui demandant de ne pas la recopier était une garantie de papier : il reçoit
+  désormais une projection sur les seuls sujets.
+
+Et une garde ajoutée : `assertCompositionsValid` exige un `headlineSubject` non vide et borné. Une
+fixture de test à qui il manquait ce champ faisait planter le code sur un `TypeError` trois couches
+plus loin, `tsconfig` excluant les tests du typecheck.
+
+## 6. Impact sur les tests
 
 Tests à réécrire (assertions de copie) : `lead tied : la TÊTE reste comptée à part`, `lead tied : quand
 le verdict annonce plus de points…`, `lead single : le repli NOMME le fait qui domine`, plus les

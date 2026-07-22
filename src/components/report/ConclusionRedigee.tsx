@@ -92,7 +92,12 @@ export async function ConclusionRedigee({
         conclusionState: plan.conclusionState,
         posture: plan.posture,
         reservesCount: plan.reservesCount,
-        lead: plan.lead,
+        // Le lead est envoyé PROJETÉ sur ce que le modèle a le droit d'écrire : les sujets. Lui
+        // transmettre le `statement` entier, comme avant le lot D, c'était lui tendre la phrase de la
+        // carte située juste dessous en lui demandant de ne pas la recopier.
+        lead: plan.lead.kind === "single" ? { kind: "single", sujets: [plan.lead.subject] }
+          : plan.lead.kind === "tied" ? { kind: "tied", sujets: plan.lead.facts.map((f) => f.subject) }
+          : { kind: "none", sujets: [] },
         registresAConfier: generables.map((b) => ({
           key: b.key,
           texteDeRepli: b.fallbackText,

@@ -108,9 +108,9 @@ test("sans contrainte dure : la conclusion nomme les priorités non couvertes et
   // donnée ni un défaut. La correspondance graduée fonctionne sur les seules préférences.
   assert.equal(d.conclusion.includes("aucune condition"), false);
   assert.match(d.conclusion, /pas encore couvertes/i);
-  // Couverture nulle : le héros reste en POSTURE et ne consomme rien, donc la strate de poids nomme
-  // encore le fait qui domine.
-  assert.match(d.conclusion, /Un point pèse plus que les autres/);
+  // Couverture nulle : le héros reste en POSTURE et ne consomme rien de ce registre, donc la strate
+  // ouvre la marche (« d'abord ») et nomme le fait qui domine par son SUJET.
+  assert.match(d.conclusion, /À regarder d'abord : un point à vérifier\./);
   assert.match(d.narrativePlan.verdict.headline.text, /Toulouse/); // la commune est NOMMÉE, jamais « ce lieu »
 });
 
@@ -159,7 +159,8 @@ function mism(id: string, tier: "secondary" | "structuring" = "structuring"): De
 function sharedComp(id: string, absorbed: string[], tier: "secondary" | "structuring"): FactComposition {
   return {
     id, kind: "shared_evidence", patternId: "territory-size-multiple-consequences",
-    title: "Une même petite taille", summary: "Deux priorités touchées pour la même raison.",
+    title: "Une même petite taille", headlineSubject: "la taille du territoire",
+    summary: "Deux priorités touchées pour la même raison.",
     sharedEvidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune", observedValue: "village" }],
     consequences: absorbed.map((fid) => ({ projectKey: "nature" as never, statement: "conséquence", materialityTier: tier, factId: fid })),
     absorbedFactIds: absorbed, referencedRuleIds: ["r"], materialityTier: tier, displaySection: "mismatches",
@@ -169,6 +170,7 @@ function tradeoffComp(id: string, absorbed: string[], tier: "secondary" | "struc
   return {
     id, kind: "tradeoff", patternId: "seasonal_climate_tradeoff",
     title: "Des hivers doux, avec une exposition estivale à arbitrer",
+    headlineSubject: "l'exposition aux fortes chaleurs",
     summary: "Hivers doux, exposition estivale à arbitrer.",
     favorableSide: { label: "Ce qui correspond", statement: "doux", evidence: [{ factId: "b", module: "territoire", label: "T", grain: "commune", observedValue: "parmi les 10 %" }], ruleIds: ["r"], factIds: [] },
     unfavorableSide: { label: "Ce qui appelle un arbitrage", statement: "chaud", evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }], ruleIds: ["r"], factIds: absorbed },
@@ -246,6 +248,7 @@ function groupedComp(id: string, absorbed: string[], tier: "secondary" | "struct
   return {
     id, kind: "grouped_verification", patternId: "clay_regulation_grouped",
     title: "Un sol argileux, et la règle qui l'encadre",
+    headlineSubject: "le sol argileux et ce qu'il impose",
     summary: "Le sol argileux expose le bâti, un plan de prévention encadre les travaux.",
     items: absorbed.map((fid) => ({
       label: "item", statement: "constat", ruleIds: ["r"], factIds: [fid],

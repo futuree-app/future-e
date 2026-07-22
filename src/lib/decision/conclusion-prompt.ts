@@ -58,18 +58,19 @@ CE QUE VOUS NE POUVEZ PAS FAIRE, JAMAIS :
   constats restent à contrôler. Vous n'écrivez jamais ce qu'il faut faire ;
 - désigner un fait comme le plus important si le plan ne l'a pas désigné.
 
-LES FAITS DE TÊTE (champ lead) : VOUS LES NOMMEZ. TOUJOURS.
-Une conclusion qui annonce « trois points méritent attention » sans dire lesquels ne dit rien : elle parle
-d'elle-même au lieu de parler du lieu. Le lecteur doit savoir, à la lecture de ce seul registre, CE QUI pèse.
-- lead.kind = "single" : un point pèse plus que les autres, et le déterministe l'a désigné. Vous le nommez, en
-  reprenant les termes de son constat. Ce registre ne parle QUE de lui : il ne dénombre pas les autres
-  réserves, elles sont détaillées ailleurs dans le rapport ;
-- lead.kind = "tied" : plusieurs points comptent, et aucun ne se détache. On vous donne leur SUJET, pas leur
-  constat. Vous les LISTEZ, tous, sans en couronner aucun. Vous NE COMMENTEZ PAS leur hiérarchie : « ils
-  pèsent autant », « aucun ne prend le dessus », « à égalité » ne disent RIEN au lecteur, qui demande quoi
-  regarder. Vous les nommez, cela suffit à dire qu'aucun ne prime.
-  Vous les NOMMEZ sans les DÉTAILLER : ni chiffre, ni date, ni preuve, ni conséquence. Les cartes qui suivent
-  portent le détail, et redire leur contenu ici ne servirait qu'à le dire deux fois ;
+LE REGISTRE reserves_found : UNE PHRASE DE NAVIGATION, ET RIEN D'AUTRE.
+Elle dit au lecteur PAR OÙ COMMENCER, en nommant un ou plusieurs sujets. Elle ne compte pas, ne classe pas,
+ne raconte pas. Une conclusion qui annonce « trois points méritent attention » sans dire lesquels ne dit rien :
+elle parle d'elle-même au lieu de parler du lieu.
+- vous recevez des SUJETS (champ lead), jamais des constats. Vous les LISTEZ, tous, sans en couronner aucun,
+  et sans les DÉTAILLER : ni chiffre, ni date, ni preuve, ni conséquence. Les cartes qui suivent portent le
+  détail, et le redire ici ne servirait qu'à le dire deux fois ;
+- « À regarder d'abord » quand rien de ce registre n'a encore été nommé plus haut, « À regarder ensuite »
+  quand le début du bloc en a déjà nommé un. Le texte de repli porte la bonne variante : gardez-la ;
+- AUCUN NOMBRE dans ce registre. Ni « deux points », ni « parmi ces quatre ». Le compte est déjà dit deux fois
+  autour (le début du bloc, et l'intertitre des cartes) ;
+- vous NE COMMENTEZ PAS la hiérarchie : « ils pèsent autant », « aucun ne prend le dessus », « à égalité » ne
+  disent RIEN au lecteur, qui demande quoi regarder. Nommer suffit à dire qu'aucun ne prime ;
 - vous ne recevez jamais ce registre quand aucun point ne se détache : dans ce cas, il n'y a rien à en dire.
 - un sujet ne se remplace jamais par une catégorie : « des risques naturels » avale l'inondation, les argiles
   et le plan de prévention, et le lecteur ne sait plus de quoi on lui parle.

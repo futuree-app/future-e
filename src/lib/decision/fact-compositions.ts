@@ -212,6 +212,16 @@ export function assertCompositionsValid(run: RunResult, compositions: FactCompos
     if (c.kind === "shared_evidence" && section !== "mismatches") throw new Error(`shared_evidence hors mismatches : ${c.id}`);
     if (c.kind === "grouped_verification" && section !== "verifications") throw new Error(`grouped_verification hors verifications : ${c.id}`);
     if (c.absorbedFactIds.length === 0) throw new Error(`composition sans absorbé : ${c.id}`);
+    // Le SUJET est obligatoire, comme sur un mismatch : sans lui, la conclusion nommait la composition
+    // par son `title` (majuscule au milieu de la phrase) ou plantait sur un `undefined`. La garde est
+    // ici parce que `tsconfig` exclut les fichiers de test du typecheck : une fixture à qui il manque
+    // ce champ doit échouer avec un message qui le dit, pas avec un TypeError trois couches plus loin.
+    if (!c.headlineSubject || c.headlineSubject.trim().length === 0) {
+      throw new Error(`composition sans headlineSubject : ${c.id} (le sujet court, bas de casse, lu après un deux-points)`);
+    }
+    if (c.headlineSubject.length > 45 || /[.!?]/.test(c.headlineSubject)) {
+      throw new Error(`composition au headlineSubject trop long ou phrasé : ${c.id} (« ${c.headlineSubject} »)`);
+    }
     for (const id of c.absorbedFactIds) {
       if (!factIds.has(id)) throw new Error(`fait absorbé inexistant : ${id} (${c.id})`);
       if (seenAbsorbed.has(id)) throw new Error(`fait absorbé deux fois : ${id}`);
