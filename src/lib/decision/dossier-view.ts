@@ -4,7 +4,8 @@
 // La frontière est nette et vaut d'être tenue : une règle de présentation ne retire jamais un fait du
 // dossier. Le fait reste dans `conclusionBasis`, dans les comptes, dans la couverture. On masque une
 // carte ; on ne réécrit pas ce qui a été établi.
-import type { Dossier, DossierSection, IncompatibilityFact } from "./decision-fact.ts";
+import type { Dossier, DossierSection, DecisionFact, IncompatibilityFact } from "./decision-fact.ts";
+import type { FactComposition } from "./fact-composition.ts";
 
 // LA CONDITION QUE LE BLOC DE TÊTE PORTE DÉJÀ ENTIÈREMENT.
 //
@@ -33,4 +34,32 @@ export function sectionsAffichees(dossier: Dossier): DossierSection[] {
   return conditionPorteeParLeBloc(dossier)
     ? dossier.sections.filter((s) => s.key !== "incompatibilities")
     : dossier.sections;
+}
+
+// CE QUE LE DÉPLIABLE D'UNE COMPOSITION A ENCORE À MONTRER.
+//
+// Chaque patron recopie le constat de ses faits absorbés sur sa FACE : un tradeoff sur ses deux côtés,
+// une grouped_verification sur ses items, une shared_evidence sur ses conséquences. Le dépliable
+// « Voir les N constats détaillés » les redisait donc une seconde fois, mot pour mot, à dix
+// centimètres, avec la même preuve deux ou trois fois. Vu à l'écran sur Salers.
+//
+// L'invariant d'audit (« les faits absorbés restent lisibles dans leur forme d'origine ») est tenu par
+// la face dès qu'elle porte leur constat. Le dépliable ne garde donc que les faits qu'elle ne narre
+// PAS : il disparaît quand il n'en reste aucun, et reviendra seul si un futur patron absorbe un fait
+// sans le montrer.
+//
+// La comparaison porte sur des IDENTIFIANTS, jamais sur des textes : chaque patron déclare déjà quels
+// faits chaque partie de sa face porte (`factIds`, `factId`).
+export function factsNonNarresParLaFace(
+  composition: FactComposition,
+  absorbedFacts: DecisionFact[],
+): DecisionFact[] {
+  const narres = new Set(
+    composition.kind === "tradeoff"
+      ? [...composition.favorableSide.factIds, ...composition.unfavorableSide.factIds]
+      : composition.kind === "grouped_verification"
+        ? composition.items.flatMap((i) => i.factIds)
+        : composition.consequences.map((c) => c.factId),
+  );
+  return absorbedFacts.filter((f) => !narres.has(f.id));
 }

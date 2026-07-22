@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { assembleDossier } from "./decision-assembler.ts";
-import { conditionPorteeParLeBloc, sectionsAffichees } from "./dossier-view.ts";
+import { conditionPorteeParLeBloc, sectionsAffichees, factsNonNarresParLaFace } from "./dossier-view.ts";
 import type { DecisionFact, RunResult, RuleEvaluation } from "./decision-fact.ts";
+import type { FactComposition } from "./fact-composition.ts";
 import type { UserProject } from "../user-project.ts";
 
 function project(parsed: unknown): UserProject {
@@ -70,4 +71,42 @@ test("sans condition : toutes les sections s'affichent, rien n'est masqué", () 
   const d = assembleDossier(run, project(WITH_HC), "commune", "Toulouse");
   assert.equal(conditionPorteeParLeBloc(d), null);
   assert.deepEqual(sectionsAffichees(d).map((s) => s.key), d.sections.map((s) => s.key));
+});
+
+// ── Le dépliable d'une composition ──────────────────────────────────────────────
+
+function absorbe(id: string): DecisionFact {
+  return {
+    id, ruleId: "r", sourceFactIds: [], module: "territoire", role: "verification",
+    materialityTier: "structuring", topic: "un sujet", statement: "un constat",
+    evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }],
+    action: { type: "obtenir_document", label: "doc" },
+  } as DecisionFact;
+}
+
+test("les trois patrons narrent leurs absorbés : le dépliable n'a plus rien à montrer", () => {
+  const tradeoff = {
+    kind: "tradeoff",
+    favorableSide: { factIds: [] }, unfavorableSide: { factIds: ["a"] },
+  } as unknown as FactComposition;
+  assert.deepEqual(factsNonNarresParLaFace(tradeoff, [absorbe("a")]), []);
+
+  const grouped = {
+    kind: "grouped_verification",
+    items: [{ factIds: ["a"] }, { factIds: ["b"] }],
+  } as unknown as FactComposition;
+  assert.deepEqual(factsNonNarresParLaFace(grouped, [absorbe("a"), absorbe("b")]), []);
+
+  const shared = {
+    kind: "shared_evidence",
+    consequences: [{ factId: "a" }, { factId: "b" }],
+  } as unknown as FactComposition;
+  assert.deepEqual(factsNonNarresParLaFace(shared, [absorbe("a"), absorbe("b")]), []);
+});
+
+test("un fait absorbé SANS être narré revient au dépliable", () => {
+  // Le jour où un patron absorbe un fait sans le montrer sur sa face, le dépliable le reprend seul :
+  // c'est ce qui garde l'invariant d'audit vrai sans le payer en redites.
+  const shared = { kind: "shared_evidence", consequences: [{ factId: "a" }] } as unknown as FactComposition;
+  assert.deepEqual(factsNonNarresParLaFace(shared, [absorbe("a"), absorbe("muet")]).map((f) => f.id), ["muet"]);
 });

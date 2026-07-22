@@ -4,6 +4,7 @@ import type { FactComposition, CompositionSide } from "@/lib/decision/fact-compo
 import type { DecisionFact } from "@/lib/decision/decision-fact";
 import { Chip, EvidenceRow, FactBody, ActionCue, MethodDetails } from "@/components/report/DecisionFactRenderParts";
 import { PREFERENCE_LABELS } from "@/lib/comparateur-labels";
+import { factsNonNarresParLaFace } from "@/lib/decision/dossier-view";
 
 function SideBlock({ side, color }: { side: CompositionSide; color: string }) {
   return (
@@ -13,10 +14,12 @@ function SideBlock({ side, color }: { side: CompositionSide; color: string }) {
       {side.limitation ? <p className="text-ghost text-[12.5px] leading-[1.5] mt-1">{side.limitation}</p> : null}
       {/* `signalConvention` a quitté la face : il est regroupé dans le dépliable « Méthode et détails » de la carte. */}
       <div className="mt-2 flex flex-col gap-2">
-        {side.evidence.length > 0 ? (
+        {/* Sans valeur mesurée, pas de pastille (doctrine du lot A) : la provenance descend dans
+            « Méthode et détails », où elle est dédupliquée. */}
+        {side.evidence.some((e) => e.observedValue) ? (
           <div className="flex items-center gap-2 flex-wrap">
-            {side.evidence.map((e, i) => (
-              <Chip key={i} label={e.href && e.observedValue ? "Preuve" : e.label} value={e.observedValue} href={e.href} color={color} />
+            {side.evidence.filter((e) => e.observedValue).map((e, i) => (
+              <Chip key={i} label={e.href ? "Preuve" : e.label} value={e.observedValue} href={e.href} color={color} />
             ))}
           </div>
         ) : null}
@@ -54,6 +57,9 @@ export function FactCompositionCard({
   color: string;
   absorbedFacts: DecisionFact[]; // les faits absorbés de CETTE composition, pour le dépliable
 }) {
+  // Le dépliable ne garde que ce que la face ne dit pas déjà. La règle et son « pourquoi » vivent
+  // dans dossier-view.ts, où elles sont testables.
+  const nonNarres = factsNonNarresParLaFace(composition, absorbedFacts);
   return (
     <li>
       <p className="text-label text-[15px] font-semibold leading-[1.4]">{composition.title}</p>
@@ -99,13 +105,13 @@ export function FactCompositionCard({
         </div>
       )}
       <MethodDetails conventions={compositionConventions(composition)} />
-      {absorbedFacts.length > 0 ? (
+      {nonNarres.length > 0 ? (
         <details className="mt-3">
           <summary className="cursor-pointer font-mono text-[10px] tracking-[0.06em] uppercase text-muted hover:text-label transition-colors">
-            Voir {absorbedFacts.length > 1 ? `les ${absorbedFacts.length} constats détaillés` : "le constat détaillé"}
+            Voir {nonNarres.length > 1 ? `les ${nonNarres.length} constats détaillés` : "le constat détaillé"}
           </summary>
           <ul className="mt-3 flex flex-col gap-4 pl-3 border-l border-white/[0.08]">
-            {absorbedFacts.map((f) => (
+            {nonNarres.map((f) => (
               <li key={f.id}>
                 <FactBody fact={f} />
                 <EvidenceRow fact={f} color={color} />
