@@ -67,7 +67,7 @@ function toChips(refs: { label: string; observedValue?: string; href?: string }[
   const out: { label: string; value?: string; href?: string }[] = [];
   for (const e of refs) {
     // SANS VALEUR MESURÉE, PAS DE PASTILLE (doctrine du lot A). Une référence qui ne porte que le nom
-    // de sa source n'établit rien : elle descend dans « Méthode et détails » (cf. factSources). Les
+    // de sa source n'établit rien : elle descend dans « Données et limites » (cf. factSources). Les
     // cartes du logement affichaient ainsi l'adresse du lecteur quatre fois sur le même écran, sous
     // un intertitre qui disait déjà « À cette adresse ».
     if (!e.observedValue) continue;
@@ -92,6 +92,22 @@ export function factSources(fact: DecisionFact): string[] {
     out.push(`Source : ${e.label}`);
   }
   return out;
+}
+
+// L'ÉTAT ÉTABLI, SCANNABLE. Une petite étiquette éditoriale, non cliquable, posée AVANT le constat :
+// le lecteur voit l'information (« Aléa moyen ou fort ») puis lit la phrase qui la développe, au lieu
+// de lire la phrase pour trouver l'information. Elle emprunte la couleur de la section (le ton du
+// registre), sur un fond très léger de cette même couleur. Ce n'est pas une pastille de preuve : pas
+// de « Preuve · », pas de valeur mesurée, pas de source.
+export function StatusTag({ label, color }: { label: string; color: string }) {
+  return (
+    <span
+      className="inline-block font-mono text-[11px] tracking-[0.06em] uppercase rounded-md px-2 py-1 mb-2"
+      style={{ color, background: `color-mix(in oklab, ${color} 14%, transparent)` }}
+    >
+      {label}
+    </span>
+  );
 }
 
 export function EvidenceRow({ fact, color }: { fact: DecisionFact; color: string }) {
@@ -144,7 +160,7 @@ export function MethodDetails({ conventions, checks = [] }: { conventions: strin
   return (
     <details className="mt-2.5">
       <summary className="cursor-pointer font-mono text-[11px] tracking-[0.06em] uppercase text-muted hover:text-label transition-colors">
-        Méthode et détails
+        Données et limites
       </summary>
       <div className="mt-2 flex flex-col gap-3 pl-3 border-l border-white/[0.08]">
         <MethodZone titre="À vérifier" lignes={aVerifier} />
@@ -161,7 +177,8 @@ export function factChecks(fact: DecisionFact): string[] {
   return action?.detail ? [action.detail] : [];
 }
 
-export function FactBody({ fact }: { fact: DecisionFact }) {
+export function FactBody({ fact, color }: { fact: DecisionFact; color?: string }) {
+  const status = (fact.role === "verification" || fact.role === "unknown") ? fact.status : undefined;
   if (fact.role === "compromise") {
     return (
       <>
@@ -184,6 +201,7 @@ export function FactBody({ fact }: { fact: DecisionFact }) {
   // par MethodDetails, à côté de FactBody (voir les appelants), plus sur la face.
   return (
     <>
+      {status ? <StatusTag label={status} color={color ?? "var(--muted)"} /> : null}
       <p className="text-label text-[15px] leading-[1.6]">{fact.statement}</p>
       {limitation ? <p className="text-muted/85 text-[13px] leading-[1.55] mt-1.5">{limitation}</p> : null}
     </>

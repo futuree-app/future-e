@@ -179,6 +179,7 @@ function composeClayRegulationGrouped(run: RunResult, facts: ModuleFacts): Group
     ...(f.action ? { action: f.action } : {}),
     ...(f.limitation ? { limitation: f.limitation } : {}),
     ...(f.signalConvention ? { signalConvention: f.signalConvention } : {}),
+    ...(f.status ? { status: f.status } : {}), // l'état établi survit sur son côté (invariant 8)
   });
   const tier: MaterialityTier =
     TIER_ORDER[argiles.materialityTier] <= TIER_ORDER[ppr.materialityTier] ? argiles.materialityTier : ppr.materialityTier;
@@ -186,7 +187,7 @@ function composeClayRegulationGrouped(run: RunResult, facts: ModuleFacts): Group
     id: `${facts.insee}:composition-argiles-ppr`,
     kind: "grouped_verification",
     patternId: "clay_regulation_grouped",
-    title: "Un sol argileux, et la règle qui l'encadre",
+    title: "Un sol argileux et la règle qui l'encadre",
     // « le sol argileux ET ce qu'il impose » se coordonnait avec le « et » de l'énumération :
     // « l'exposition à l'inondation et le sol argileux et ce qu'il impose » faisait lire TROIS sujets
     // là où il y en a deux. Un sujet destiné à être énuméré ne porte pas sa propre coordination de

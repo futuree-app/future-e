@@ -12,6 +12,7 @@ export type CompositionSide = {
   factIds: string[]; // [] pour un côté satisfait (aucun fait émis)
   action?: DecisionAction; // invariant 8 : l'action survit, avec son detail
   limitation?: string; // la limitation du fait absorbé reste sur SON côté
+  status?: string; // l'état établi du fait absorbé (« Aléa moyen ou fort »), survit sur SON côté
   signalConvention?: string; // la convention de seuil du fait absorbé survit sur SON côté (invariant 8)
 };
 

@@ -114,3 +114,22 @@ test("les libellés d'action tiennent leur contrat, dans les quatre postures", (
   const verifiez = vus.filter((l) => /^Vérifiez/.test(l)).length;
   assert.ok(verifiez <= 2, `${verifiez} libellés commencent par « Vérifiez » : la colonne redevient un formulaire`);
 });
+
+// L'ÉTAT ÉTABLI, SCANNABLE. Chaque fait logement porte une observation courte (« Aléa moyen ou fort »)
+// que l'écran affiche avant le constat, pour qu'on VOIE l'information avant de lire la phrase. Le
+// contrat : court, sans point final (ce n'est pas une phrase), et présent sur les cinq familles + DPE.
+test("chaque fait logement porte un état établi court", () => {
+  const tout = lf({
+    dpe: "passoire", dpeLabel: "G", rga: "present", expositionBati: true,
+    pprn: "present", zoneReglementee: true, pprnLabel: "PPR", cavites: "present", caviteProche: true,
+    patrimoine: "present", perimetrePatrimonial: true, sinistralite: "present", sinistraliteActive: true,
+  });
+  const emis = runRules(facts(tout), project({ intent: "achat" }), HARD).facts.filter((f) => f.ruleId.startsWith("logement."));
+  assert.ok(emis.length >= 6, `attendu 6 familles, obtenu ${emis.length}`);
+  for (const f of emis) {
+    const st = (f as { status?: string }).status;
+    assert.ok(st && st.length > 0, `${f.ruleId} : pas d'état établi`);
+    assert.ok(st!.length <= 30, `${f.ruleId} : état trop long (« ${st} »)`);
+    assert.doesNotMatch(st!, /[.!?]$/, `${f.ruleId} : l'état se termine comme une phrase`);
+  }
+});

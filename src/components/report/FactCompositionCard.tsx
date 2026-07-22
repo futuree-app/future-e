@@ -1,21 +1,22 @@
 // Carte COMPOSÉE : une vue qui relie des constats établis (tradeoff / shared_evidence). Présentationnelle.
 // Les faits absorbés restent lisibles au dépliable, dans leur forme d'origine (audit, invariant 4).
-import type { FactComposition, CompositionSide } from "@/lib/decision/fact-composition";
+import type { FactComposition, CompositionSide, TradeoffComposition } from "@/lib/decision/fact-composition";
 import type { DecisionFact } from "@/lib/decision/decision-fact";
-import { Chip, EvidenceRow, FactBody, ActionCue, MethodDetails } from "@/components/report/DecisionFactRenderParts";
+import { Chip, EvidenceRow, FactBody, ActionCue, MethodDetails, StatusTag } from "@/components/report/DecisionFactRenderParts";
 import { PREFERENCE_LABELS } from "@/lib/comparateur-labels";
 import { factsNonNarresParLaFace } from "@/lib/decision/dossier-view";
 
 function SideBlock({ side, color }: { side: CompositionSide; color: string }) {
   return (
     <div>
-      <p className="text-[13px] font-semibold text-muted mb-1">{side.label}</p>
+      <p className="text-[13px] font-semibold text-muted mb-1.5">{side.label}</p>
+      {side.status ? <StatusTag label={side.status} color={color} /> : null}
       <p className="text-label text-[15px] leading-[1.6]">{side.statement}</p>
       {side.limitation ? <p className="text-muted/85 text-[13px] leading-[1.55] mt-1.5">{side.limitation}</p> : null}
-      {/* `signalConvention` a quitté la face : il est regroupé dans le dépliable « Méthode et détails » de la carte. */}
+      {/* `signalConvention` a quitté la face : il est regroupé dans le dépliable « Données et limites » de la carte. */}
       <div className="mt-2 flex flex-col gap-2">
         {/* Sans valeur mesurée, pas de pastille (doctrine du lot A) : la provenance descend dans
-            « Méthode et détails », où elle est dédupliquée. */}
+            « Données et limites », où elle est dédupliquée. */}
         {side.evidence.some((e) => e.observedValue) ? (
           <div className="flex items-center gap-2 flex-wrap">
             {side.evidence.filter((e) => e.observedValue).map((e, i) => (
@@ -30,7 +31,7 @@ function SideBlock({ side, color }: { side: CompositionSide; color: string }) {
 }
 
 // Les conventions de signalement des côtés/items, dédupliquées (un tradeoff saisonnier partage la même
-// convention entre ses deux saisons). Rendues une fois, dans le dépliable « Méthode et détails ».
+// convention entre ses deux saisons). Rendues une fois, dans le dépliable « Données et limites ».
 function compositionConventions(composition: FactComposition): string[] {
   const sides: CompositionSide[] =
     composition.kind === "tradeoff"
@@ -62,6 +63,23 @@ function compositionChecks(composition: FactComposition): string[] {
   return sides.map((s) => s.action?.detail).filter((d): d is string => Boolean(d));
 }
 
+// LE COMPOSANT SIGNATURE : un tradeoff est le SEUL patron où deux côtés s'opposent vraiment et où le
+// lecteur doit peser l'un contre l'autre. Le rendre en deux paragraphes empilés cachait ce qui en
+// fait sa valeur. Deux colonnes (empilées sur mobile), chacune dans SON ton — le côté favorable en
+// vert, le côté à arbitrer en orange — donnent une forme visible à l'arbitrage : ce que le lieu
+// donne, ce qu'il prend, à peser ensemble. Ce n'est pas décoratif, c'est la relation elle-même.
+//
+// grouped_verification garde l'empilement : ses items ne s'opposent pas, ils se complètent (le sol,
+// et la règle qui l'encadre). Les mettre face à face suggérerait une tension qui n'existe pas.
+function TradeoffFaceoff({ composition }: { composition: TradeoffComposition }) {
+  return (
+    <div className="mt-4 grid gap-x-6 gap-y-6 md:grid-cols-2 md:[&>*:first-child]:pr-6 md:[&>*:last-child]:border-l md:[&>*:last-child]:border-white/[0.08] md:[&>*:last-child]:pl-6">
+      <SideBlock side={composition.favorableSide} color="var(--green)" />
+      <SideBlock side={composition.unfavorableSide} color="var(--orange)" />
+    </div>
+  );
+}
+
 export function FactCompositionCard({
   composition, color, absorbedFacts,
 }: {
@@ -76,10 +94,7 @@ export function FactCompositionCard({
     <li>
       <p className="text-label text-[16px] font-semibold leading-[1.4]">{composition.title}</p>
       {composition.kind === "tradeoff" ? (
-        <div className="mt-3 flex flex-col gap-5">
-          <SideBlock side={composition.favorableSide} color={color} />
-          <SideBlock side={composition.unfavorableSide} color={color} />
-        </div>
+        <TradeoffFaceoff composition={composition} />
       ) : composition.kind === "grouped_verification" ? (
         // Deux constats établis, un même sujet décisionnel : chaque item garde son constat, sa preuve,
         // son action et sa limitation (invariant 8), la même brique que les côtés d'un tradeoff.

@@ -90,12 +90,20 @@ export type UnknownFact = BaseFact & {
   impact: "blocking" | "scoped";
   evidence: EvidenceRef[];
   action?: DecisionAction;
+  status?: string; // « Donnée non disponible » et consorts : même rôle que sur VerificationFact
 };
 export type VerificationFact = BaseFact & {
   role: "verification";
   evidence: EvidenceRef[];
   action: DecisionAction;
   limitation?: string;
+  // L'ÉTAT ÉTABLI, EN DEUX À QUATRE MOTS. « Aléa moyen ou fort », « Périmètre protégé » : ce que le
+  // fait constate, rendu SCANNABLE avant le constat. Ce n'est ni un score ni une preuve (pas de
+  // valeur mesurée, pas de source, non cliquable) : c'est l'observation nue, pour que le lecteur voie
+  // l'information avant de lire la phrase qui la développe. Produit par la règle, jamais découpé dans
+  // le statement par l'UI (ce serait raconter ce qu'on ne mesure pas). Optionnel : un fait sans état
+  // franc (une trajectoire, une exposition graduée) n'en porte pas plutôt qu'un état fabriqué.
+  status?: string;
   // POURQUOI futur•e SIGNALE ce fait : la convention de seuil (« signale cette exposition à partir de
   // 8 jours par an… »). DISTINCTE de `limitation` (ce que le constat ne permet pas de conclure) : la
   // mélanger au constat noyait la trajectoire, la mélanger à la limite réunissait deux natures. Champ
