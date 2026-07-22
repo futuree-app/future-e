@@ -13,7 +13,7 @@
 import { generateObject } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
-import { buildConclusionPlan, shouldGenerateNarrative } from "../src/lib/decision/conclusion-plan.ts";
+import { buildConclusionPlan, shouldGenerateNarrative, HEADLINE_MAX_CHARS } from "../src/lib/decision/conclusion-plan.ts";
 import { validateGeneratedBlocks } from "../src/lib/decision/conclusion-validate.ts";
 import { CONCLUSION_SYSTEM_PROMPT } from "../src/lib/decision/conclusion-prompt.ts";
 import type { DecisionFact, MaterialityTier } from "../src/lib/decision/decision-fact.ts";
@@ -64,12 +64,28 @@ const plan = buildConclusionPlan({
   mismatchShown: 0,
 });
 
+
+// LES SUJETS DE HÉROS, recopiés des tables de production (MISMATCH_LABELS pour les critères à position
+// relative, les SPECS d'absence, de taille et de mer pour les autres). La sonde doit montrer CE QUE LE
+// LECTEUR VERRA : tant qu'elle recopiait le `topic`, elle affichait « la distance à la mer » là où la
+// production dit « la proximité de la mer », soit exactement l'inversion que le champ corrige.
+const HEADLINE_SUBJECTS: Record<string, string> = {
+  nature: "l'accès aux espaces naturels",
+  cadre_calme: "le calme",
+  ensoleillement_recherche: "l'ensoleillement",
+  mobilite_quotidienne: "les transports du quotidien",
+  vie_etudiante: "l'environnement étudiant",
+  proximite_mer: "la proximité de la mer",
+  eviter_grandes_villes: "la taille de la ville",
+  eviter_isolement: "la taille du bassin de vie",
+};
+
 // Un fait de MISMATCH (établi, à arbitrer, jamais à vérifier).
 function mismatch(id: string, tier: MaterialityTier, topic: string): DecisionFact {
   return {
     id, ruleId: `territoire.mismatch-${id}`, sourceFactIds: [`relativePosition.${id}`], module: "territoire",
     topic, statement: `Sur cet indicateur, Roubaix se situe parmi les 20 % de communes les moins favorables de France.`,
-    materialityTier: tier, role: "mismatch", projectKey: id as never, headlineSubject: topic,
+    materialityTier: tier, role: "mismatch", projectKey: id as never, headlineSubject: HEADLINE_SUBJECTS[id] ?? topic,
     basis: { kind: "relative_position", rankLow: 0.05, rankHigh: 0.12, universe: "communes_france", distributionVersion: "mismatch-dist-2026-07-15" },
     evidence: [{ factId: `relativePosition.${id}`, module: "territoire", label: "Territoire", grain: "commune" }],
   } as DecisionFact;
@@ -97,7 +113,7 @@ function absence(id: string, tier: MaterialityTier, topic: string, statement: st
   return {
     id, ruleId: `territoire.absence-${id}`, sourceFactIds: [`absenceAttestation.${id}`], module: "territoire",
     topic, statement,
-    materialityTier: tier, role: "mismatch", projectKey: id as never, headlineSubject: topic,
+    materialityTier: tier, role: "mismatch", projectKey: id as never, headlineSubject: HEADLINE_SUBJECTS[id] ?? topic,
     basis: {
       kind: "named_absence",
       observedStateId: id === "vie_etudiante" ? "no_higher_education_establishment_in_radius" : "network_below_daily_credibility_floor",
@@ -133,7 +149,7 @@ function coast(id: string, tier: MaterialityTier, topic: string, statement: stri
   return {
     id, ruleId: `territoire.mer-${id}`, sourceFactIds: [`coastDistance.${id}`], module: "territoire",
     topic, statement,
-    materialityTier: tier, role: "mismatch", projectKey: id as never, headlineSubject: topic,
+    materialityTier: tier, role: "mismatch", projectKey: id as never, headlineSubject: HEADLINE_SUBJECTS[id] ?? topic,
     basis: { kind: "absolute_measure", value: 240, unit: "km", conventionId: "coast-proximity-v1" },
     evidence: [{ factId: `coastDistance.${id}`, module: "territoire", label: "Territoire", grain: "commune" }],
   } as DecisionFact;
@@ -158,7 +174,7 @@ function size(id: string, tier: MaterialityTier, topic: string, statement: strin
   return {
     id, ruleId: `territoire.taille-${id}`, sourceFactIds: ["territorySize.classification"], module: "territoire",
     topic, statement,
-    materialityTier: tier, role: "mismatch", projectKey: id as never, headlineSubject: topic,
+    materialityTier: tier, role: "mismatch", projectKey: id as never, headlineSubject: HEADLINE_SUBJECTS[id] ?? topic,
     basis: { kind: "categorical_state", observedCategory: cat, conventionId: "agglomeration-size-v1" },
     evidence: [{ factId: "territorySize.classification", module: "territoire", label: "Territoire", grain: "commune" }],
   } as DecisionFact;
@@ -238,12 +254,16 @@ const planCompositionBloc = buildConclusionPlan({
 
 console.log("gate :", shouldGenerateNarrative(plan), "· lead :", JSON.stringify(plan.lead));
 console.log("\n──── DÉTERMINISTE (ce que le lecteur voit sans IA) ────");
+console.log(`HÉROS  ${plan.verdict.headline.text}  [${plan.verdict.headline.kind}, ${plan.verdict.headline.text.length}/${HEADLINE_MAX_CHARS}]`);
 console.log(plan.blocks.map((b) => b.fallbackText).join(" "));
 
 async function probe(plan: ReturnType<typeof buildConclusionPlan>, label: string): Promise<{ retenus: number; total: number }> {
 const generables = plan.blocks.filter((b) => b.generable);
 let retenus = 0;
 console.log(`\n════════ PLAN : ${label} (${generables.length} blocs générables) ════════`);
+// Le HÉROS n'est pas un bloc : il est déterministe et hors du chemin génératif. La sonde l'imprime
+// quand même, sans quoi elle ne montrerait plus la tête de ce que le lecteur lit.
+console.log(`HÉROS  ${plan.verdict.headline.text}  [${plan.verdict.headline.kind}, ${plan.verdict.headline.text.length}/${HEADLINE_MAX_CHARS}]`);
 for (let i = 1; i <= TIRAGES; i++) {
   const { object } = await generateObject({
     model: anthropic("claude-sonnet-4-6"),
