@@ -40,8 +40,10 @@ test("incompatibilité établie -> established_incompatibility, et le verdict le
   );
   assert.equal(d.conclusionState, "established_incompatibility");
   assert.equal(d.criteria.orientation, "incompatible");
-  // Le héros NOMME la contrainte, le détail porte le constat qui l'établit.
-  assert.match(d.narrativePlan.verdict.headline.text, /Une contrainte de votre projet n'est pas satisfaite à Toulouse : la distance au littoral/);
+  // Le héros NOMME la CONDITION telle que le lecteur l'a posée (hardConstraintLabel, résolu depuis le
+  // projet), et non le `topic` du fait : celui-ci porte le nom de la commune, que le héros nomme déjà.
+  assert.match(d.narrativePlan.verdict.headline.text, /Une condition de votre projet n'est pas remplie à Toulouse : la proximité de la mer \(moins de 5 km\)\./);
+  assert.equal(d.narrativePlan.verdict.headline.text.includes(incompat().topic), false);
   assert.match(d.conclusion, /trop loin/);
 });
 

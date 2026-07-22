@@ -123,7 +123,7 @@ export type MismatchFact = BaseFact & {
   evidence: EvidenceRef[];
   limitation?: string;
   // LE SUJET DU HEADLINE : la PRIORITÉ du lecteur, telle qu'elle se lit après un deux-points
-  // (« Une priorité correspond moins bien à Toulouse : la proximité de la mer. »). Distinct de
+  // (« Toulouse répond moins bien à une de vos priorités : la proximité de la mer. »). Distinct de
   // `topic`, qui nomme parfois l'indicateur défavorable (« la distance à la mer ») et inverserait
   // le sens à cette place. Obligatoire : une règle qui l'oublierait ferait retomber le héros sur
   // une formulation inversée, sans qu'aucune validation ne s'en aperçoive.

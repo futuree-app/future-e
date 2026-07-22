@@ -54,7 +54,7 @@ export function rankPhrase(high: number): string {
 // priorités ». topic = le SUJET nommé (<= 70 car., cf. assertFactValid). projectPhrase = la priorité,
 // tournée pour l'ouverture. indicator = ce sur quoi porte la comparaison.
 // subject = le groupe nominal qui se lit APRÈS un deux-points dans le headline du verdict
-// (« … correspondent moins bien à Toulouse : le calme et l'accès aux espaces naturels. »). Il nomme
+// (« Toulouse répond moins bien à deux de vos priorités : le calme et l'accès aux espaces naturels. »). Il nomme
 // LA PRIORITÉ DU LECTEUR, jamais l'indicateur défavorable : « la faible dépendance à la voiture »,
 // et non « la dépendance à la voiture », que le lecteur n'a jamais demandée. Borné à 45 caractères.
 export type MismatchLabel = { topic: string; projectPhrase: string; indicator: string; subject: string; limitation?: string };

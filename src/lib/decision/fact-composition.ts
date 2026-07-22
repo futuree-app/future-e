@@ -20,6 +20,11 @@ export type TradeoffComposition = {
   kind: "tradeoff";
   patternId: "seasonal_climate_tradeoff";
   title: string;
+  // Le sujet à nommer dans le headline du verdict, en BAS DE CASSE (il se lit après un deux-points).
+  // Un `title` de tradeoff annonce les DEUX côtés (« Des hivers doux, avec une exposition estivale à
+  // arbitrer ») : servi comme « le principal point à contrôler », il ferait des hivers doux un
+  // problème. Le sujet ne nomme donc que le côté qui appelle l'arbitrage.
+  headlineSubject: string;
   summary: string;
   favorableSide: CompositionSide;
   unfavorableSide: CompositionSide;
@@ -65,6 +70,7 @@ export type GroupedVerificationComposition = {
   kind: "grouped_verification";
   patternId: "clay_regulation_grouped";
   title: string;
+  headlineSubject: string; // même contrat que les autres patrons : court, bas de casse, pas le titre
   summary: string;
   items: CompositionSide[];
   absorbedFactIds: string[];

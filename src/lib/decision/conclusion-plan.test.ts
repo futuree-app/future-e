@@ -270,7 +270,7 @@ test("incompatibilité établie : le verdict porte le constat, et reste détermi
   const plan = buildConclusionPlan(baseInput({
     conclusionState: "established_incompatibility",
     orientation: "incompatible",
-    establishedIncompatibility: { factId: "i1", statement: "504 078 habitants, au-delà de 20 000." },
+    establishedIncompatibility: { factId: "i1", statement: "504 078 habitants, au-delà de 20 000.", constraintLabel: "une commune de moins de 20 000 habitants" },
   }));
   assert.match(plan.blocks[0]!.fallbackText, /504 078 habitants/);
   assert.deepEqual(plan.blocks[0]!.sourceIds, ["i1"]);
@@ -338,7 +338,7 @@ test("partial + major_reserves : l'écran actuel, et il est honnête", () => {
   assert.equal(p.verdictLabel, "Lecture encore partielle");
   assert.equal(p.verdictTone, "caution");
   assert.match(p.verdict.headline.text, /encore trop tôt pour dire que Toulouse correspond/);
-  assert.match(p.blocks[0]!.fallbackText, /2 points structurants demandent attention/);
+  assert.match(p.blocks[0]!.fallbackText, /La lecture reste incomplète, et deux points demandent votre attention\./);
 });
 
 test("couverture none : le GARDE-FOU, aucun positif ne s'échappe", () => {
@@ -353,11 +353,11 @@ test("couverture none : le GARDE-FOU, aucun positif ne s'échappe", () => {
 test("incompatibilité : la condition non respectée EST la réponse", () => {
   const p = buildConclusionPlan(baseInput({
     conclusionState: "established_incompatibility", orientation: "incompatible",
-    establishedIncompatibility: { factId: "f1", statement: "Cette commune est à 180 km du littoral.", topic: "la proximité de la mer" },
+    establishedIncompatibility: { factId: "f1", statement: "Cette commune est à 180 km du littoral.", constraintLabel: "la proximité de la mer" },
   }));
   assert.equal(p.verdictLabel, "Condition non respectée");
   assert.equal(p.verdictTone, "critical");
-  assert.match(p.verdict.headline.text, /Une contrainte de votre projet n'est pas satisfaite à Toulouse : la proximité de la mer/);
+  assert.match(p.verdict.headline.text, /Une condition de votre projet n'est pas remplie à Toulouse : la proximité de la mer/);
   assert.match(p.blocks[0]!.fallbackText, /180 km du littoral/);
 });
 
@@ -483,6 +483,7 @@ function tradeoff(tier: MaterialityTier = "structuring"): FactComposition {
   return {
     id: "06004:composition-climat-saisons", kind: "tradeoff", patternId: "seasonal_climate_tradeoff",
     title: "Des hivers doux, avec une exposition estivale à arbitrer",
+    headlineSubject: "l'exposition aux fortes chaleurs",
     summary: "Les hivers d'Antibes comptent parmi les plus doux du pays, et l'exposition aux fortes chaleurs estivales y appelle un arbitrage.",
     favorableSide: { label: "Ce qui correspond", statement: "doux", evidence: [], ruleIds: ["r1"], factIds: [] },
     unfavorableSide: { label: "Ce qui appelle un arbitrage", statement: "chaud", evidence: [], ruleIds: ["r2"], factIds: ["f-ch"] },
@@ -493,6 +494,7 @@ function shared(tier: MaterialityTier = "structuring"): FactComposition {
   return {
     id: "01001:composition-taille-consequences", kind: "shared_evidence", patternId: "territory-size-multiple-consequences",
     title: "Une même petite taille touche plusieurs dimensions de votre projet",
+    headlineSubject: "la taille du territoire",
     summary: "La catégorie de taille de Ceyzériat répond moins bien à deux de vos priorités, pour la même raison.",
     sharedEvidence: [], consequences: [
       { projectKey: "prefere_grande_ville" as never, statement: "a", materialityTier: "structuring", factId: "f-a" },
@@ -512,6 +514,28 @@ test("lead : un tradeoff structurant seul devient le fait de tête, sans bloc co
   assert.equal(plan.lead.factId, "06004:composition-climat-saisons");
   assert.equal(plan.lead.topic, "Des hivers doux, avec une exposition estivale à arbitrer");
   assert.equal(plan.blocks.some((b) => b.key === "compositions_found"), false); // déjà narré par le lead
+});
+
+// Le héros prenait le `title` de la composition comme sujet : « … : Des hivers doux, avec une
+// exposition estivale à arbitrer. » Une majuscule au milieu de la phrase, et un compromis présenté
+// comme un problème. Le sujet vient désormais du `headlineSubject`, bas de casse et sans le côté
+// favorable.
+test("héros : une composition en tête nomme son headlineSubject, jamais son titre", () => {
+  const plan = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "minor_reserves", hasFavorable: false,
+    shownFacts: [verification("f9", "secondary")],
+    shownCompositions: [tradeoff("decision_critical")],
+    reservesShown: 2, majorReserveCount: 1,
+  }));
+  assert.equal(plan.verdict.headline.kind, "named_issues");
+  assert.equal(
+    plan.verdict.headline.text,
+    "Le principal point à contrôler à Toulouse : l'exposition aux fortes chaleurs.",
+  );
+  assert.equal(plan.verdict.headline.text.includes("Des hivers doux"), false);
+  // La composition consommée emporte ses faits absorbés, jamais son propre id dans les faits.
+  assert.deepEqual(plan.verdict.headline.consumedFactIds, ["f-ch"]);
+  assert.deepEqual(plan.verdict.headline.consumedCompositionIds, ["06004:composition-climat-saisons"]);
 });
 
 test("lead : un shared_evidence structurant ne mène JAMAIS la conclusion, il a son registre", () => {
@@ -581,7 +605,7 @@ test("arbitrage : deux mismatchs affichés sont NOMMÉS après un deux-points", 
   assert.equal(plan.verdict.headline.kind, "named_issues");
   assert.equal(
     plan.verdict.headline.text,
-    "Deux priorités correspondent moins bien à Toulouse : le calme et l'accès aux espaces naturels.",
+    "Toulouse répond moins bien à deux de vos priorités : le calme et l'accès aux espaces naturels.",
   );
   assert.deepEqual(plan.verdict.headline.consumedFactIds, ["m1", "m2"]);
   assert.equal(plan.verdict.headline.consumedFrom, "mismatches");
@@ -593,7 +617,7 @@ test("arbitrage : un seul mismatch, le singulier est accordé partout", () => {
     shownFacts: [mismatchFact("m1", "structuring", "cadre_calme", "le calme")],
     mismatchTotal: 1, mismatchShown: 1,
   }));
-  assert.equal(plan.verdict.headline.text, "Une priorité correspond moins bien à Toulouse : le calme.");
+  assert.equal(plan.verdict.headline.text, "Toulouse répond moins bien à une de vos priorités : le calme.");
   assert.match(plan.verdict.detail, /Cet écart appelle/);
 });
 
@@ -624,7 +648,7 @@ test("arbitrage : une composition shared_evidence est candidate au headline", ()
   assert.equal(plan.verdict.headline.kind, "named_issues");
   // DEUX mismatchs sont émis, réunis sous UNE carte : le compte dit deux, et « dont » signale que le
   // héros ne nomme que la cause commune. Compter les cartes aurait écrit « Une priorité ».
-  assert.equal(plan.verdict.headline.text, "Deux priorités correspondent moins bien à Toulouse, dont la taille du territoire.");
+  assert.equal(plan.verdict.headline.text, "Toulouse répond moins bien à deux de vos priorités, dont la taille du territoire.");
   assert.deepEqual(plan.verdict.headline.consumedFactIds, ["m1", "m2"]);
   assert.deepEqual(plan.verdict.headline.consumedCompositionIds, ["comp-taille"]);
 });
@@ -692,12 +716,12 @@ test("cas favorable : posture, jamais un positif nommé", () => {
 test("incompatibilité : la contrainte est nommée, le fait consommé", () => {
   const plan = buildConclusionPlan(baseInput({
     orientation: "incompatible",
-    establishedIncompatibility: { factId: "i1", statement: "La mer est à 240 km.", topic: "la proximité de la mer" },
+    establishedIncompatibility: { factId: "i1", statement: "La mer est à 240 km.", constraintLabel: "la proximité de la mer" },
   }));
   assert.equal(plan.verdict.headline.kind, "named_issues");
   assert.equal(
     plan.verdict.headline.text,
-    "Une contrainte de votre projet n'est pas satisfaite à Toulouse : la proximité de la mer.",
+    "Une condition de votre projet n'est pas remplie à Toulouse : la proximité de la mer.",
   );
   assert.deepEqual(plan.verdict.headline.consumedFactIds, ["i1"]);
   assert.equal(plan.verdict.headline.consumedFrom, "constraint");
@@ -842,7 +866,7 @@ test("gate calée sur le réel : une incompatibilité sur commune à article res
   // À 95 caractères, cette phrase (98) basculait en posture : le cas le plus grave perdait son nom.
   const plan = buildConclusionPlan(baseInput({
     communeNom: "Les Sables-d'Olonne", orientation: "incompatible",
-    establishedIncompatibility: { factId: "i1", statement: "La gare la plus proche est à 42 km.", topic: "la proximité d'une gare" },
+    establishedIncompatibility: { factId: "i1", statement: "La gare la plus proche est à 42 km.", constraintLabel: "la proximité d'une gare" },
   }));
   assert.equal(plan.verdict.headline.kind, "named_issues");
   assert.match(plan.verdict.headline.text, /aux Sables-d'Olonne : la proximité d'une gare/);
@@ -879,7 +903,7 @@ test("le compte vient des mismatchs ÉMIS, jamais du nombre de cartes", () => {
     mismatchTotal: 3, mismatchShown: 2,
   }));
   assert.equal(plan.verdict.headline.kind, "named_issues");
-  assert.match(plan.verdict.headline.text, /^Trois priorités correspondent moins bien à Toulouse, dont /);
+  assert.match(plan.verdict.headline.text, /^Toulouse répond moins bien à trois de vos priorités, dont /);
   assert.equal(plan.verdict.headline.text.includes("Deux priorités"), false);
 });
 
@@ -896,7 +920,7 @@ test("trois mismatchs dont deux dominent par le tier : les deux sont nommés, le
   assert.equal(plan.verdict.headline.kind, "named_issues");
   assert.equal(
     plan.verdict.headline.text,
-    "Trois priorités correspondent moins bien à Toulouse, dont le calme et l'accès aux espaces naturels.",
+    "Toulouse répond moins bien à trois de vos priorités, dont le calme et l'accès aux espaces naturels.",
   );
   // Le troisième n'est pas nommé, mais il est CONSOMMÉ : le héros parle bien des trois.
   assert.deepEqual(plan.verdict.headline.consumedFactIds, ["m1", "m2"]);
@@ -926,7 +950,7 @@ test("deux mismatchs de tiers différents : les deux sont nommés (aucune sélec
   }));
   assert.equal(
     plan.verdict.headline.text,
-    "Deux priorités correspondent moins bien à Toulouse : le calme et l'accès aux espaces naturels.",
+    "Toulouse répond moins bien à deux de vos priorités : le calme et l'accès aux espaces naturels.",
   );
 });
 

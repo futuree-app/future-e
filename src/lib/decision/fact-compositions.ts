@@ -61,6 +61,7 @@ function composeSeasonalClimateTradeoff(
     kind: "tradeoff",
     patternId: "seasonal_climate_tradeoff",
     title: "Des hivers doux, avec une exposition estivale à arbitrer",
+    headlineSubject: "l'exposition aux fortes chaleurs",
     summary: `Les hivers ${deCommune(facts.nom)} comptent parmi les plus doux du pays, et l'exposition aux fortes chaleurs estivales y appelle un arbitrage.`,
     favorableSide: {
       label: "Ce qui correspond",
@@ -173,6 +174,7 @@ function composeClayRegulationGrouped(run: RunResult, facts: ModuleFacts): Group
     kind: "grouped_verification",
     patternId: "clay_regulation_grouped",
     title: "Un sol argileux, et la règle qui l'encadre",
+    headlineSubject: "le sol argileux et ce qu'il impose",
     summary: "Le sol argileux expose le bâti à cette adresse, et un plan de prévention sécheresse y encadre les travaux.",
     items: [item(argiles, "L'exposition du sol"), item(ppr, "La règle applicable")],
     absorbedFactIds: [argiles.id, ppr.id],

@@ -75,10 +75,11 @@ export type VerdictPresentation = { headline: VerdictHeadline; detail: string };
 // Et un plafond de longueur, nom de commune compris : deux sujets longs débordent la mesure du héros.
 //
 // Le plafond est calé sur les phrases RÉELLEMENT produites, pas sur une intuition. À 95, deux cas
-// courants basculaient à tort en posture : l'incompatibilité nommée sur une commune à article
-// (« … n'est pas satisfaite aux Sables-d'Olonne : la proximité d'une gare. », 103 car.), soit le cas
-// le plus grave privé de son nom, et l'arbitrage nominal qui passait à 94 sur 95. À 110, la mesure de
-// 540 px tient trois lignes courtes en Serif, ce qui reste un signal.
+// courants passaient à un caractère de basculer à tort en posture : l'incompatibilité nommée sur une
+// commune à article (« Une condition de votre projet n'est pas remplie aux Sables-d'Olonne : la
+// proximité d'une gare. », 94 car.), soit le cas le plus grave privé de son nom, et l'arbitrage
+// nominal à deux sujets (94 aussi). À 110, la mesure de 540 px tient trois lignes courtes en Serif,
+// ce qui reste un signal.
 export const HEADLINE_MAX_ISSUES = 2;
 export const HEADLINE_MAX_CHARS = 110;
 
@@ -110,7 +111,12 @@ export type ConclusionPlanInput = {
   shownCompositions: FactComposition[];
   uncovered: UncoveredConstraint[];
   uncoveredPriorities: { key: string; label: string }[];
-  establishedIncompatibility: { factId: string; statement: string; topic: string } | null;
+  // LA CONDITION TELLE QUE LE LECTEUR L'A POSÉE, jamais le `topic` du fait. Les topics de contraintes
+  // dures portent déjà le nom de la commune (hard-constraints.ts, tous en `deCommune(c.nom)`), et le
+  // héros le nomme lui aussi : « … n'est pas satisfaite à Toulouse : la distance de Toulouse au
+  // littoral. » L'appelant résout donc le libellé (hardConstraintLabel) et le passe ici, comme le
+  // bloc `unexamined_hard_constraints` le fait déjà pour les contraintes non examinées.
+  establishedIncompatibility: { factId: string; statement: string; constraintLabel: string } | null;
   // Les deux mesures du verdict (criteria-registry.ts), plus les comptes qui accordent ses phrases.
   coverage: CoverageLevel;
   orientation: Orientation;
@@ -196,9 +202,12 @@ export function rankLeadCandidates(
       factId: f.id, topic: f.topic, subject: f.topic, statement: f.statement,
       materialityTier: f.materialityTier, role: f.role,
     })),
+    // Le `subject` vient du `headlineSubject`, JAMAIS du `title` : un titre est écrit pour coiffer une
+    // carte, donc capitalisé (« … : Des hivers doux, avec … » mettait une majuscule au milieu de la
+    // phrase du héros), et un titre de tradeoff annonce les deux côtés du compromis.
     ...shownCompositions.filter((c) => c.kind === "tradeoff" || c.kind === "grouped_verification")
       .map((c) => ({
-        factId: c.id, topic: c.title, subject: c.title, statement: c.summary,
+        factId: c.id, topic: c.title, subject: c.headlineSubject, statement: c.summary,
         materialityTier: c.materialityTier, role: "composition" as const, absorbedFactIds: c.absorbedFactIds,
       })),
   ];
@@ -351,15 +360,19 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
   // constat qui l'établit.
   if (input.orientation === "incompatible") {
     const inc = input.establishedIncompatibility;
-    const named = inc
-      ? nameIssues(`Une contrainte de votre projet n'est pas satisfaite ${a} : ${inc.topic}.`, [{
-          factId: inc.factId, topic: inc.topic, subject: inc.topic, statement: inc.statement,
+    // Libellé vide = rien à nommer : la branche retombe en posture plutôt que d'ouvrir un deux-points
+    // sur le vide. Les fixtures de test échappent au typecheck (tsconfig exclut *.test.ts) : cette
+    // garde est la seule qui vaille au runtime.
+    const label = inc?.constraintLabel?.trim();
+    const named = inc && label
+      ? nameIssues(`Une condition de votre projet n'est pas remplie ${a} : ${label}.`, [{
+          factId: inc.factId, topic: label, subject: label, statement: inc.statement,
           materialityTier: "decision_critical", role: "incompatibility",
         }], "constraint")
       : null;
     return {
       label: "Condition non respectée", tone: "critical",
-      headline: named ?? POSTURE(`Une contrainte de votre projet n'est pas satisfaite ${a}.`),
+      headline: named ?? POSTURE(`Une condition de votre projet n'est pas remplie ${a}.`),
       detail: inc ? endWithPeriod(inc.statement) : "L'une de vos conditions non négociables n'est pas respectée ici.",
     };
   }
@@ -398,14 +411,18 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
       : top.length <= HEADLINE_MAX_ISSUES ? top
       : [];
     const sujets = joinFr(nommes.map((c) => c.subject));
-    const compte = capitalize(numberForms(m)[1] ?? String(m));
+    const compte = numberForms(m)[1] ?? String(m);
+    // LE SUJET DE LA PHRASE EST LE LIEU. « Deux priorités correspondent moins bien à Toulouse » fait
+    // des priorités du lecteur les sujets qui échouent, et de la commune un décor : c'est l'inverse de
+    // ce qui se passe. C'est le lieu qui répond, ou non, à ce que le lecteur demande.
+    //
     // Deux-points quand le héros nomme TOUT ce qu'il compte ; « dont » quand il n'en nomme qu'une
     // partie. « dont » ne suppose aucun ordre entre les sujets nommés.
     const phrase = m === 1
-      ? `Une priorité correspond moins bien ${a} : ${sujets}.`
+      ? `${nom} répond moins bien à une de vos priorités : ${sujets}.`
       : nommes.length === m
-        ? `${compte} priorités correspondent moins bien ${a} : ${sujets}.`
-        : `${compte} priorités correspondent moins bien ${a}, dont ${sujets}.`;
+        ? `${nom} répond moins bien à ${compte} de vos priorités : ${sujets}.`
+        : `${nom} répond moins bien à ${compte} de vos priorités, dont ${sujets}.`;
     const named = nameIssues(phrase, nommes, "mismatches");
 
     // Le pool des réserves est DISTINCT de celui des mismatchs : le point nommé par le héros n'en
@@ -519,7 +536,12 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
   return {
     label: "Lecture encore partielle", tone: "caution",
     headline: namedReserve ?? POSTURE(`Il est encore trop tôt pour dire que ${nom} correspond à votre projet.`),
-    detail: `La lecture reste incomplète et ${points(n, "structurant", "demande")} attention.`,
+    // « 2 points structurants demandent attention » : sans déterminant, la phrase n'est pas française,
+    // et « structurants » est le nom d'un materialityTier, soit la tuyauterie que le lot A retire
+    // partout ailleurs. Le compte se dit en lettres, comme dans le reste du bloc.
+    detail: n >= 1
+      ? `La lecture reste incomplète, et ${n > 1 ? `${numberForms(n)[1] ?? String(n)} points demandent` : "un point demande"} votre attention.`
+      : "La lecture reste incomplète.",
   };
 }
 

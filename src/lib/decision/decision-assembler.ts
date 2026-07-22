@@ -2,11 +2,12 @@
 // project_not_structured), couverture nommée, hiérarchie plafonnée. Aucun LLM.
 import type {
   DecisionFact, Dossier, DossierSection, DossierCard, ConclusionState, RunResult, EvidenceRef, MaterialityTier,
+  IncompatibilityFact,
 } from "./decision-fact.ts";
 import type { FactComposition } from "./fact-composition.ts";
 import { assertCompositionsValid } from "./fact-compositions.ts";
 import type { UserProject } from "../user-project.ts";
-import { hasAnyHardConstraint, isStructured } from "./project-view.ts";
+import { hasAnyHardConstraint, isStructured, hardConstraintLabel } from "./project-view.ts";
 import { buildCriteriaRegistry, uncoveredConstraints, uncoveredPreferences } from "./criteria-registry.ts";
 import { buildConclusionPlan } from "./conclusion-plan.ts";
 
@@ -101,7 +102,8 @@ export function assembleDossier(
   // Les réserves annoncées sont celles qu'on MONTRE. Compter `facts` (les faits ÉMIS) alors que les
   // sections sont plafonnées (caps 2/3/3/4) annonçait « 5 points » et n'en affichait que 4. Le verdict
   // compte donc lui aussi sur l'affiché : le lecteur doit pouvoir compter les cartes et retomber dessus.
-  const established = run.facts.find((f) => f.role === "incompatibility" && f.evidenceStrength === "established");
+  const established = run.facts.find((f): f is IncompatibilityFact =>
+    f.role === "incompatibility" && f.evidenceStrength === "established");
   // Les compositions porteuses de réserves : un tradeoff (son côté défavorable est une verification) et
   // une grouped_verification (deux verifications sous une carte) comptent chacun pour UNE carte-réserve.
   const reserveComps = shownComps.filter((c) => c.kind === "tradeoff" || c.kind === "grouped_verification");
@@ -120,7 +122,16 @@ export function assembleDossier(
     shownCompositions: shownComps,
     uncovered,
     uncoveredPriorities: uncoveredPreferences(criteria),
-    establishedIncompatibility: established ? { factId: established.id, statement: established.statement, topic: established.topic } : null,
+    // Le libellé est résolu ICI, depuis le projet : le `topic` du fait nomme la commune (« la distance
+    // de Toulouse au littoral »), et le héros la nomme déjà. `hardConstraintLabel` rend la condition
+    // telle que le lecteur l'a posée, exactement comme pour les contraintes non examinées.
+    establishedIncompatibility: established
+      ? {
+          factId: established.id,
+          statement: established.statement,
+          constraintLabel: hardConstraintLabel(project, established.hardConstraintKey),
+        }
+      : null,
     coverage: criteria.coverage,
     orientation: criteria.orientation,
     hasFavorable: criteria.hasFavorable,
