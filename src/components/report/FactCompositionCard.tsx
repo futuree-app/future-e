@@ -3,6 +3,7 @@
 import type { FactComposition, CompositionSide } from "@/lib/decision/fact-composition";
 import type { DecisionFact } from "@/lib/decision/decision-fact";
 import { Chip, EvidenceRow, FactBody, ActionCue, MethodDetails } from "@/components/report/DecisionFactRenderParts";
+import { PREFERENCE_LABELS } from "@/lib/comparateur-labels";
 
 function SideBlock({ side, color }: { side: CompositionSide; color: string }) {
   return (
@@ -71,8 +72,15 @@ export function FactCompositionCard({
           <ul className="flex flex-col gap-2.5">
             {composition.consequences.map((c) => (
               <li key={c.factId} className="pl-3 border-l border-white/[0.12]">
+                {/* L'étiquette nommait le materialityTier (« Priorité structurante », « Point
+                    secondaire »), deux fois dans la même carte : une décision interne de matérialité,
+                    que le lecteur ne peut ni expliquer ni opposer, affichée comme une information.
+                    C'est la tuyauterie que le lot A retire des pastilles et le lot D du verdict.
+                    Elle nomme désormais LA PRIORITÉ concernée, ce que le lecteur a écrit lui-même :
+                    la composition dit « une cause, plusieurs conséquences », et le lecteur voit
+                    lesquelles des SIENNES sont touchées. */}
                 <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-ghost mb-0.5">
-                  {c.materialityTier === "secondary" ? "Point secondaire" : "Priorité structurante"}
+                  {PREFERENCE_LABELS[c.projectKey] ?? "Une de vos priorités"}
                 </p>
                 <p className="text-muted text-[13px] leading-[1.55]">{c.statement}</p>
                 {c.limitation ? <p className="text-ghost text-[12px] leading-[1.5] mt-0.5">{c.limitation}</p> : null}

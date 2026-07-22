@@ -723,3 +723,17 @@ test("une estimation tranche même SANS isochrone (elle n'en a pas besoin)", () 
   const a = evaluateNearPlace(ctxEstime(estimation(12), null), commune());
   assert.equal(a.status, "satisfied");
 });
+
+// LES CONSTATS SONT DES PHRASES FRANÇAISES. Deux fautes vues à l'écran, sur des rapports réels :
+//   « Cette commune compte 316 habitants, en dessous de 100 000 de la taille que vous avez posée. »
+//   « … fait partie de l'agglomération de Lyon, que vous avez posé comme condition de quitter. »
+// La première télescopait le seuil et son complément ; la seconde laissait un participe non accordé
+// sur un COD féminin. Aucune n'était visible d'un test unitaire : ils vérifiaient des faits, pas des
+// phrases. Ces deux-là lisent le texte produit.
+test("communeSize : le seuil porte sa propre subordonnée, la phrase se tient", () => {
+  const c = commune({ uu: null, tailleVille: 316, population: 316 });
+  const a = evaluateCommuneSize(ctx({ communeSize: { min: 100_000, max: null } }, c), c);
+  assert.ok(a.status === "incompatible");
+  assert.equal(a.statement, "Cette commune compte 316 habitants, en dessous des 100 000 que vous avez posés comme limite.");
+  assert.equal(a.statement.includes("de la taille que vous avez posée"), false);
+});

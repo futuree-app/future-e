@@ -564,13 +564,17 @@ export function evaluateCommuneSize(
   // commune quand elle est son propre bassin. Juger sur une donnée et en montrer une autre serait pire
   // que la divergence elle-même.
   const sujet = c.uu ? `L'agglomération à laquelle appartient ${c.nom} compte` : "Cette commune compte";
-  const seuil = over ? `au-dessus de ${fmt(cs.max!)}` : `en dessous de ${fmt(cs.min!)}`;
+  // « en dessous de 100 000 de la taille que vous avez posée » n'est pas une phrase française : le
+  // seuil et son complément se télescopaient. Le seuil porte maintenant sa propre subordonnée.
+  const seuil = over
+    ? `au-dessus des ${fmt(cs.max!)} que vous avez posés comme limite`
+    : `en dessous des ${fmt(cs.min!)} que vous avez posés comme limite`;
   return {
     key: "communeSize", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
     topic: c.uu
       ? topicFit(`la taille de l'agglomération ${deCommune(c.nom)}`, "la taille de l'agglomération")
       : topicFit(`la taille ${deCommune(c.nom)}`, "la taille de la commune"),
-    statement: `${sujet} ${fmt(t)} habitants, ${seuil} de la taille que vous avez posée.`,
+    statement: `${sujet} ${fmt(t)} habitants, ${seuil}.`,
   };
 }
 
@@ -820,7 +824,10 @@ export function evaluateExcludePlace(
       expectedLabel: `hors ${deCommune(tousLabels)}`,
       evidenceKeys,
       topic: topicFit(`l'agglomération ${deCommune(label)}`, "l'agglomération à quitter"),
-      statement: `Cette commune fait partie de l'agglomération ${deCommune(label)}, que vous avez posé comme condition de quitter.`,
+      // « que vous avez posé comme condition de quitter » laissait un participe non accordé sur un COD
+      // féminin, dans une tournure qui faisait de l'agglomération la chose « posée ». C'est le DÉPART
+      // qui est la condition. Un présent simple supprime l'accord et dit la même chose.
+      statement: `Cette commune fait partie de l'agglomération ${deCommune(label)}, que vous souhaitez quitter.`,
     };
   }
 

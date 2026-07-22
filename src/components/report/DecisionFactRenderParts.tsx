@@ -31,18 +31,38 @@ export function ActionCue({ label, color }: { label: string; color: string }) {
   );
 }
 
+// DEUX PREUVES QUI SE RENDENT PAREIL N'EN FONT QU'UNE. Les références sont dédupliquées en amont sur
+// leur LABEL (« Département · Toulouse »), mais l'affichage remplace ce label par « Preuve » dès qu'il
+// y a une valeur et une source : deux observations distinctes portant la même valeur devenaient deux
+// chips identiques (« Preuve · dans l'agglomération de Lyon » deux fois, vu à l'écran). On déduplique
+// donc sur ce qui est RÉELLEMENT RENDU, pas sur ce qui le produit.
+//
+// Une référence SANS valeur mesurée (un simple lien vers sa source) ne se fait pas passer pour
+// l'étiquette « Preuve » : elle porte le libellé de sa source. « Preuve · valeur » reste réservé à une
+// preuve établie, chiffrée.
+function toChips(refs: { label: string; observedValue?: string; href?: string }[]) {
+  const seen = new Set<string>();
+  const out: { label: string; value?: string; href?: string }[] = [];
+  for (const e of refs) {
+    const label = e.href && e.observedValue ? "Preuve" : e.label;
+    const cle = `${label}|${e.observedValue ?? ""}|${e.href ?? ""}`;
+    if (seen.has(cle)) continue;
+    seen.add(cle);
+    out.push({ label, value: e.observedValue, href: e.href });
+  }
+  return out;
+}
+
 export function EvidenceRow({ fact, color }: { fact: DecisionFact; color: string }) {
   const refs = fact.role === "compromise" ? fact.sides.flatMap((s) => s.evidence) : fact.evidence;
+  const chips = toChips(refs);
   const action = fact.role === "verification" || fact.role === "unknown" ? fact.action : undefined;
   return (
     <div className="mt-2.5 flex flex-col gap-2">
-      {refs.length > 0 ? (
+      {chips.length > 0 ? (
         <div className="flex items-center gap-2 flex-wrap">
-          {refs.map((e, i) => (
-            // Une référence de preuve SANS valeur mesurée (un simple lien vers sa source) ne se fait
-            // plus passer pour l'étiquette « Preuve » collée à l'action : elle porte le libellé de sa
-            // source. « Preuve · valeur » reste réservé à une preuve établie, chiffrée.
-            <Chip key={i} label={e.href && e.observedValue ? "Preuve" : e.label} value={e.observedValue} href={e.href} color={color} />
+          {chips.map((c, i) => (
+            <Chip key={i} label={c.label} value={c.value} href={c.href} color={color} />
           ))}
         </div>
       ) : null}
