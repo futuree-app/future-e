@@ -88,14 +88,14 @@ test("poids 2 -> secondary ; poids 3 -> structuring", () => {
   assert.equal(evalRule("vie_locale", f, project([{ key: "vie_locale", weight: 2 }])).facts[0]!.materialityTier, "secondary");
   assert.equal(evalRule("vie_locale", f, project([{ key: "vie_locale", weight: 3 }])).facts[0]!.materialityTier, "structuring");
 });
-test("la CLÔTURE appelle un arbitrage, sans réciter « cette dimension de votre projet »", () => {
-  // La phrase de trop (« Cela répond moins bien à cette dimension de votre projet ») répétait le titre de
-  // section et parlait d'abstraction administrative. La clôture nomme l'arbitrage et garde la seule
-  // doctrine indispensable (mismatch != incompatibilité), dite en deux phrases.
+test("le constat S'ARRÊTE au constat : une carte ne conclut jamais", () => {
+  // La carte finissait sur « Cet écart appelle un arbitrage. Il ne rend pas Roubaix incompatible avec
+  // votre projet. » Deux conclusions, dans un bloc qui n'a pas à conclure : le verdict le fait, et il
+  // peut dire l'inverse. Vu à l'écran sur Salers, où le verdict annonçait « aucun écart marqué » au-
+  // dessus d'une carte qui affirmait « Cet écart appelle un arbitrage ».
   const f = evalRule("nature", facts({ nature: { low: 0.08, high: 0.14 } }), project([{ key: "nature", weight: 3 }])).facts[0]!;
-  assert.match(f.statement, /Cet écart appelle un arbitrage\. Il ne rend pas Roubaix incompatible avec votre projet\.$/);
-  assert.doesNotMatch(f.statement, /répond moins bien à cette dimension/);
-  assert.doesNotMatch(f.statement, /incompatible avec lui/); // l'ancienne tournure a disparu
+  assert.match(f.statement, /se situe parmi les 20 % de communes les moins favorables de France\.$/);
+  assert.doesNotMatch(f.statement, /appelle un arbitrage|incompatible|répond moins bien à cette dimension/);
 });
 
 test("G3 : quand la priorité et l'indicateur coïncident (acces_ecoles), « Sur ce point » évite la répétition", () => {

@@ -62,7 +62,7 @@ test("E2E eviter_isolement, village source commune -> carte SANS 'agglomération
   assert.ok(taille, "village -> carte isolement");
   assert.doesNotMatch(taille!.statement, /agglomération/);
   assert.match(taille!.statement, /population communale/);
-  assert.match(taille!.statement, /sans permettre de conclure/);
+  assert.match(taille!.limitation!, /ne permet pas de conclure à un isolement effectif/);
 });
 
 test("E2E anomalie : taille présente, source null -> uncertain (aucune carte, non examiné)", () => {

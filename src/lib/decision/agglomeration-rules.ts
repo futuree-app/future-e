@@ -36,7 +36,7 @@ const SPECS: SizeSpec[] = [
     subject: "une ville à taille humaine",
     outcomes: { village: "satisfied", petite: "satisfied", moyenne: "neutral", grande: "mismatch", metropole: "mismatch" },
     buildStatement: (nom, fragment) =>
-      `Vous avez placé le fait d'éviter les grandes villes parmi vos priorités. ${fragment}. Cet écart appelle un arbitrage. Il ne rend pas ${nom} incompatible avec votre projet.`,
+      `Vous avez placé le fait d'éviter les grandes villes parmi vos priorités. ${fragment}.`,
   },
   {
     key: "prefere_grande_ville",
@@ -44,7 +44,7 @@ const SPECS: SizeSpec[] = [
     subject: "une grande ville",
     outcomes: { village: "mismatch", petite: "mismatch", moyenne: "neutral", grande: "satisfied", metropole: "satisfied" },
     buildStatement: (nom, fragment) =>
-      `Vous avez placé le fait de vivre dans une grande ville parmi vos priorités. ${fragment}. Cet écart appelle un arbitrage. Il ne rend pas ${nom} incompatible avec votre projet.`,
+      `Vous avez placé le fait de vivre dans une grande ville parmi vos priorités. ${fragment}.`,
   },
   {
     key: "eviter_isolement",
@@ -52,9 +52,9 @@ const SPECS: SizeSpec[] = [
     subject: "le fait de ne pas être isolé",
     outcomes: { village: "mismatch", petite: "neutral", moyenne: "neutral", grande: "neutral", metropole: "neutral" },
     buildStatement: (_nom, fragment) =>
-      `Vous avez placé le fait d'éviter un environnement isolé parmi vos priorités. ${fragment}. Cette petite taille répond moins bien à cette dimension de votre projet, sans permettre de conclure à son isolement effectif.`,
+      `Vous avez placé le fait d'éviter un environnement isolé parmi vos priorités. ${fragment}.`,
     limitation:
-      "La catégorie de taille utilisée ne décrit pas à elle seule l'accès aux services, aux transports ou aux pôles voisins. Un village peut être bien connecté à une ville proche.",
+      "Cela ne permet pas de conclure à un isolement effectif : la catégorie de taille ne décrit pas à elle seule l'accès aux services, aux transports ou aux pôles voisins. Un village peut être bien connecté à une ville proche.",
   },
 ];
 

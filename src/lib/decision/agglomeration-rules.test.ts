@@ -58,7 +58,10 @@ test("eviter_isolement : village -> mismatch + limitation + topic isolement ; JA
   const p = project([{ key: "eviter_isolement", weight: 3 }]);
   const vil = rule("eviter_isolement").evaluate(facts({ tailleVille: 1_500, tailleVilleSource: "commune" }), p, undefined as never);
   assert.equal(vil.outcome, "mismatch");
-  assert.match(vil.facts[0]!.statement, /sans permettre de conclure à son isolement/);
+  // La limite épistémique n'a pas disparu avec la conclusion : elle a rejoint la LIMITATION, où elle
+  // se lit une fois, en ghost, au lieu de clore le constat.
+  assert.doesNotMatch(vil.facts[0]!.statement, /appelle un arbitrage|répond moins bien|conclure/);
+  assert.match(vil.facts[0]!.limitation!, /ne permet pas de conclure à un isolement effectif/);
   assert.match(vil.facts[0]!.limitation!, /bien connecté à une ville proche/);
   assert.match(vil.facts[0]!.topic, /isolement/);
   for (const [pop, src] of [[1_500, "commune"], [10_000, "urban_unit"], [50_000, "urban_unit"], [200_000, "urban_unit"], [1_050_000, "urban_unit"]] as const) {

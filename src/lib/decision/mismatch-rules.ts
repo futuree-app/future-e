@@ -87,7 +87,7 @@ function makeMismatchRule(key: PreferenceKey): DecisionRule {
         // l'ARBITRAGE (le vocabulaire du verdict) et garde la seule doctrine indispensable, en deux phrases :
         // un mismatch n'est pas une incompatibilité. Fini « répond moins bien à cette dimension de votre
         // projet » (qui répétait le titre de section et parlait d'abstraction administrative).
-        statement: `Vous avez placé ${lab.projectPhrase} parmi vos priorités. ${surIndicateur}, ${f.nom} se situe parmi ${rankPhrase(band.high)} les moins favorables de France. Cet écart appelle un arbitrage. Il ne rend pas ${f.nom} incompatible avec votre projet.`,
+        statement: `Vous avez placé ${lab.projectPhrase} parmi vos priorités. ${surIndicateur}, ${f.nom} se situe parmi ${rankPhrase(band.high)} les moins favorables de France.`,
         basis: { kind: "relative_position", rankLow: band.low, rankHigh: band.high, universe: "communes_france", distributionVersion: MISMATCH_DISTRIBUTION_VERSION },
         evidence: [ev],
         // Certains critères (ensoleillement) portent une nuance méthodologique card-only.

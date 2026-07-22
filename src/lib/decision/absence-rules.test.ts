@@ -64,7 +64,7 @@ test("études : establishmentCount 0 + poids 2 -> mismatch SECONDARY citant le r
   const f = e.facts[0]!;
   assert.equal(f.materialityTier, "secondary");
   assert.match(f.statement, /rayon de 25 km/);
-  assert.match(f.statement, /sans permettre de conclure à l'absence de vie étudiante/);
+  assert.match(f.limitation!, /ne permet pas de conclure à l'absence de vie étudiante/);
   assert.doesNotMatch(f.statement, /aucune vie étudiante/i);
   assertFactValid(f, p);
 });

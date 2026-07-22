@@ -1117,3 +1117,24 @@ test("strate : une composition est nommée par son sujet, jamais par son titre n
   assert.equal(strate.fallbackText.includes("comptent parmi les plus doux"), false); // le summary
   assert.deepEqual(strate.requiredPhrases, ["exposition aux fortes chaleurs"]);
 });
+
+// « Aucune de vos conditions n'est contredite ici » rassure sur un risque que le lecteur n'a jamais
+// soulevé quand il n'a posé AUCUNE condition non négociable. Vu à l'écran sur Salers.
+test("arbitrage : aucune condition posée, on ne rassure pas sur un risque inexistant", () => {
+  const sans = buildConclusionPlan(baseInput({
+    conclusionState: "no_hard_constraint_declared",
+    orientation: "arbitration", hasFavorable: false, favorableCount: 0,
+    shownFacts: [mismatchFact("m1", "structuring", "cadre_calme", "le calme")],
+    mismatchTotal: 1, mismatchShown: 1,
+  }));
+  assert.equal(sans.verdict.detail, "Cet écart est à peser avant de vous décider.");
+
+  // Une condition posée et non contredite, elle, mérite d'être dite : c'est une information.
+  const avec = buildConclusionPlan(baseInput({
+    conclusionState: "no_incompatibility_established",
+    orientation: "arbitration", hasFavorable: false, favorableCount: 0,
+    shownFacts: [mismatchFact("m1", "structuring", "cadre_calme", "le calme")],
+    mismatchTotal: 1, mismatchShown: 1,
+  }));
+  assert.match(avec.verdict.detail, /^Aucune de vos conditions n'est contredite ici\./);
+});

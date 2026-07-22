@@ -483,7 +483,12 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
       ? (input.favorableCount >= 2
           ? `${nom} répond bien à plusieurs de vos autres priorités. ${ecart} à peser contre ce que vous y gagnez.`
           : `${nom} répond bien à une autre de vos priorités. ${ecart} à peser contre ce que vous y gagnez.`)
-      : `Aucune de vos conditions n'est contredite ici. ${ecart} à peser avant de vous décider.`;
+      // « Aucune de vos conditions n'est contredite ici » rassure sur un risque INEXISTANT quand le
+      // lecteur n'a posé aucune condition non négociable : c'est décrire l'absence d'un problème qu'il
+      // n'a jamais soulevé. L'état `no_hard_constraint_declared` le dit déjà, sans champ nouveau.
+      : input.conclusionState === "no_hard_constraint_declared"
+        ? `${ecart} à peser avant de vous décider.`
+        : `Aucune de vos conditions n'est contredite ici. ${ecart} à peser avant de vous décider.`;
     // QUAND LE HÉROS RENONCE À NOMMER, LE DÉTAIL NOMME. La gate protège la mesure du héros ; elle n'a
     // pas le droit de faire disparaître du dossier l'information qu'on possède. En 17 px, trois sujets
     // tiennent sans faire paragraphe. Le gabarit est SANS ACCORD à dériver (« ces priorités … servies »

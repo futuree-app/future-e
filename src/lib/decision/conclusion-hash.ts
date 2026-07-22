@@ -34,7 +34,10 @@ export const DECISION_NARRATIVE_CONTRACT_VERSION = "c2";
 // v13 (lot D) : le registre reserves_found devient une phrase de NAVIGATION. Quatre moules deviennent
 // deux (« À regarder d'abord / ensuite »), les faits de tête sont donnés par leur SUJET même quand un
 // seul domine (le constat entier recopiait la carte), et le registre ne porte plus AUCUN nombre.
-export const DECISION_NARRATIVE_PROMPT_VERSION = "v13";
+// v14 : les cartes ne CONCLUENT plus (« Cet écart appelle un arbitrage. Il ne rend pas X incompatible
+// avec votre projet. » retiré des sept statements de mismatch). Le verdict conclut, la carte démontre :
+// une carte qui concluait pouvait contredire le verdict, et le faisait.
+export const DECISION_NARRATIVE_PROMPT_VERSION = "v14";
 export const DECISION_NARRATIVE_MODEL = "claude-sonnet-4-6";
 
 export function hashPayload(

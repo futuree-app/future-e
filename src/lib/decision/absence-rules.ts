@@ -42,7 +42,7 @@ const SPECS: AbsenceSpec[] = [
     classify: (f) => classifyNetworkAbsence(f.localNetwork),
     observedValue: () => "aucune desserte crédible à portée de marche",
     statement: (nom) =>
-      `Vous avez placé les déplacements du quotidien sans voiture parmi vos priorités. Aucune desserte de transports en commun considérée comme praticable au quotidien n'est identifiée à distance de marche du point de référence retenu pour ${nom}. Cet écart appelle un arbitrage. Il ne rend pas ${nom} incompatible avec votre projet.`,
+      `Vous avez placé les déplacements du quotidien sans voiture parmi vos priorités. Aucune desserte de transports en commun considérée comme praticable au quotidien n'est identifiée à distance de marche du point de référence retenu pour ${nom}.`,
     limitation:
       "Une desserte trop faible pour constituer une solution régulière au quotidien n'est pas comptée comme accessible. Cette situation concerne environ 83 % des communes françaises.",
   },
@@ -56,9 +56,9 @@ const SPECS: AbsenceSpec[] = [
     classify: (f) => classifyHigherEdAbsence(f.higherEd),
     observedValue: (f) => `aucun établissement du supérieur dans un rayon de ${radiusKmOf(f)} km`,
     statement: (nom, f) =>
-      `Vous avez placé la présence d'un environnement étudiant parmi vos priorités. Aucun établissement d'enseignement supérieur n'est identifié dans un rayon de ${radiusKmOf(f)} km autour du point de référence retenu pour ${nom}. Cet indicateur répond moins bien à cette dimension de votre projet, sans permettre de conclure à l'absence de vie étudiante.`,
+      `Vous avez placé la présence d'un environnement étudiant parmi vos priorités. Aucun établissement d'enseignement supérieur n'est identifié dans un rayon de ${radiusKmOf(f)} km autour du point de référence retenu pour ${nom}.`,
     limitation:
-      "Une commune peut accueillir des étudiants ou bénéficier de l'influence d'un campus voisin sans accueillir elle-même d'établissement dans le périmètre mesuré.",
+      "Cela ne permet pas de conclure à l'absence de vie étudiante : une commune peut accueillir des étudiants ou bénéficier de l'influence d'un campus voisin sans accueillir elle-même d'établissement dans le périmètre mesuré.",
   },
 ];
 
