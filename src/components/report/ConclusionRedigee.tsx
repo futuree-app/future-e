@@ -23,7 +23,7 @@ import {
 } from "@/lib/decision/conclusion-hash";
 import { readNarrative, saveNarrative, pruneNarratives } from "@/lib/server/decision-narrative-store";
 import { requireCurrentUser } from "@/lib/user-account";
-import { ConclusionBlock, planToBlocks } from "@/components/report/ConclusionBlock";
+import { ConclusionBlock, planToBlocks, type ConditionEvidence } from "@/components/report/ConclusionBlock";
 
 // Défaut sûr : « ne dépense pas » (doctrine AUTO_SYNTHESIS). On livre, on observe les artefacts, on
 // allume ensuite. Tant que le flag est absent, le déterministe EST le produit.
@@ -36,13 +36,16 @@ const transportSchema = z.object({ blocks: z.array(z.unknown()) });
 
 
 export async function ConclusionRedigee({
-  plan, insee, scopeKey,
+  plan, insee, scopeKey, condition = null,
 }: {
   plan: ConclusionNarrativePlan;
   insee: string;
   scopeKey: string;
+  // La preuve de la condition non remplie, quand sa section ne s'affiche pas (cf. ConclusionBlock).
+  // Elle traverse ce composant sans jamais entrer dans le plan : le modèle ne la voit pas.
+  condition?: ConditionEvidence | null;
 }) {
-  const deterministe = <ConclusionBlock plan={plan} blocks={planToBlocks(plan)} />;
+  const deterministe = <ConclusionBlock plan={plan} blocks={planToBlocks(plan)} condition={condition} />;
 
   // 1. Le PREFETCH ne doit jamais déclencher une génération. Next précharge les routes liées par
   //    <Link> avant tout clic : sans cette garde, un simple survol coûterait un appel Sonnet. On teste
@@ -71,7 +74,7 @@ export async function ConclusionRedigee({
   }
   if (cached) {
     const { blocks } = validateGeneratedBlocks(plan, cached);
-    return <ConclusionBlock plan={plan} blocks={blocks} />;
+    return <ConclusionBlock plan={plan} blocks={blocks} condition={condition} />;
   }
 
   // 4. Génération. Le verdict n'est pas dans les registres confiés : il part en contexte seul.
@@ -134,9 +137,9 @@ export async function ConclusionRedigee({
     );
     await pruneNarratives(supabase, user.id, insee, scopeKey, 3);
     const { blocks: canonicalBlocks } = validateGeneratedBlocks(plan, canonical);
-    return <ConclusionBlock plan={plan} blocks={canonicalBlocks} />;
+    return <ConclusionBlock plan={plan} blocks={canonicalBlocks} condition={condition} />;
   } catch (error) {
     console.error("[dossier-narrative] persistance échouée", { insee, scopeKey, error });
-    return <ConclusionBlock plan={plan} blocks={blocks} />;
+    return <ConclusionBlock plan={plan} blocks={blocks} condition={condition} />;
   }
 }

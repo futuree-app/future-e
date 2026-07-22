@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Fragment, Suspense } from "react";
 import type { Dossier, DecisionFact } from "@/lib/decision/decision-fact";
 import { ConclusionBlock, planToBlocks } from "@/components/report/ConclusionBlock";
+import { conditionPorteeParLeBloc, sectionsAffichees } from "@/lib/decision/dossier-view";
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 import { FactBody, EvidenceRow, MethodDetails } from "@/components/report/DecisionFactRenderParts";
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
@@ -50,6 +51,18 @@ export function DossierDecisionSection({
 }) {
   const structured = dossier.conclusionState !== "project_not_structured";
 
+  // Une condition non remplie se LIT UNE FOIS : quand le bloc de tête la porte déjà entièrement, sa
+  // section s'efface et sa preuve remonte dans le bloc. La règle et son « pourquoi » vivent dans
+  // dossier-view.ts, où elles sont testables : ici on ne fait que la consommer.
+  const conditionDuBloc = conditionPorteeParLeBloc(dossier);
+  const conditionEvidence = conditionDuBloc
+    ? {
+        evidence: conditionDuBloc.evidence,
+        ...(conditionDuBloc.limitation ? { limitation: conditionDuBloc.limitation } : {}),
+      }
+    : null;
+  const sections = sectionsAffichees(dossier);
+
   return (
     <section className="mt-14" id="dossier-decision">
       {/* LARGEUR DE LECTURE : QUESTION OUVERTE. Une colonne de 860 px a été essayée puis retirée :
@@ -82,20 +95,20 @@ export function DossierDecisionSection({
       {/* Le verdict. En « pending », le dossier n'est PAS final (l'augmentation adresse arrive) :
           générer ici coûterait un second appel Sonnet, jeté quelques secondes plus tard. */}
       {logementStatus === "pending" ? (
-        <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} />
+        <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} />
       ) : (
         <Suspense
           fallback={
-            <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} />
+            <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} />
           }
         >
-          <ConclusionRedigee plan={dossier.narrativePlan} insee={insee} scopeKey={scopeKey} />
+          <ConclusionRedigee plan={dossier.narrativePlan} insee={insee} scopeKey={scopeKey} condition={conditionEvidence} />
         </Suspense>
       )}
 
       {/* Les raisons, dans l'idiome des cartes-modules (filet accent en tête) */}
       <div className="grid gap-3.5">
-        {dossier.sections.map((s) => {
+        {sections.map((s) => {
           const col = SECTION_ACCENT[s.key] ?? "var(--amethyst)";
           return (
             <div key={s.key} className="glass rounded-xl p-6" style={{ borderTop: `2px solid ${col}` }}>

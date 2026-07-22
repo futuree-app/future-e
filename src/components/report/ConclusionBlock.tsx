@@ -9,7 +9,15 @@
 // Suspense ne doit pas faire sauter la page. Aucun LLM ici.
 import type { ConclusionNarrativePlan, VerdictTone } from "@/lib/decision/conclusion-plan";
 import type { RenderedBlock } from "@/lib/decision/conclusion-validate";
+import type { EvidenceRef } from "@/lib/decision/decision-fact";
+import { Chip } from "@/components/report/DecisionFactRenderParts";
 import { bindOrphans } from "@/lib/typography";
+
+// CE QUE LA CONDITION NON REMPLIE APPORTE EN PLUS DU TEXTE : sa preuve, et la limite du constat.
+// Quand une seule condition est en cause, le bloc de tête la porte ENTIÈREMENT et la section
+// « Vos conditions non négociables » ne s'affiche pas : elle recopiait le constat au mot près, à
+// trois centimètres d'écart. Le blocage est la réponse, il se lit une fois.
+export type ConditionEvidence = { evidence: EvidenceRef[]; limitation?: string };
 
 const TONE_COLOR: Record<VerdictTone, string> = {
   critical: "var(--red)",
@@ -39,10 +47,11 @@ function Eyebrow({ children, color }: { children: React.ReactNode; color: string
 }
 
 export function ConclusionBlock({
-  plan, blocks,
+  plan, blocks, condition: conditionEvidence = null,
 }: {
   plan: ConclusionNarrativePlan;
   blocks: RenderedBlock[];
+  condition?: ConditionEvidence | null;
 }) {
   const color = TONE_COLOR[plan.verdictTone];
   const byKey = new Map(blocks.map((b) => [b.key, b]));
@@ -115,6 +124,29 @@ export function ConclusionBlock({
         <div className="mt-5">
           <Eyebrow color="var(--accent)">{poidsLabel}</Eyebrow>
           <p className="text-[17px] leading-[1.55] text-label">{poids}</p>
+        </div>
+      ) : null}
+
+      {/* La preuve de la condition non remplie, quand la section correspondante ne s'affiche pas.
+          Même idiome que les cartes : la limite d'abord, la preuve chiffrée ensuite. */}
+      {conditionEvidence ? (
+        <div className="mt-4">
+          {conditionEvidence.limitation ? (
+            <p className="text-ghost text-[12.5px] leading-[1.5] mb-2">{conditionEvidence.limitation}</p>
+          ) : null}
+          {conditionEvidence.evidence.length > 0 ? (
+            <div className="flex items-center gap-2 flex-wrap">
+              {conditionEvidence.evidence.map((e, i) => (
+                <Chip
+                  key={i}
+                  label={e.href && e.observedValue ? "Preuve" : e.label}
+                  value={e.observedValue}
+                  href={e.href}
+                  color={color}
+                />
+              ))}
+            </div>
+          ) : null}
         </div>
       ) : null}
 
