@@ -453,16 +453,18 @@ test("verdict arbitration : compte le TOTAL, pas l'affiché, et porte le double 
 
 test("verdict arbitration : nomme le côté favorable PROUVÉ (un demi-arbitrage ne suffit pas)", () => {
   // Aucun mismatch AFFICHÉ ici (shownFacts vide) : le héros reste en posture, et le détail porte le
-  // total émis. L'ouverture favorable a quitté cette branche : nommer un positif exigerait un fait
-  // favorable déterministe, que l'architecture ne produit pas.
+  // total émis, avec le côté favorable quand il est PROUVÉ.
   const plusieurs = buildConclusionPlan(baseInput({ orientation: "arbitration", mismatchTotal: 2, mismatchShown: 2, hasFavorable: true, favorableCount: 3 }));
   const vp = plusieurs.blocks.find((b) => b.key === "verdict")!;
   assert.equal(plusieurs.verdict.headline.kind, "posture");
+  assert.match(vp.fallbackText, /répond à plusieurs dimensions de votre projet/);
   assert.match(vp.fallbackText, /nettement moins bien servies/);
-  assert.doesNotMatch(vp.fallbackText, /répond à plusieurs dimensions/);
-  // Sans favorable prouvé, aucune promesse non plus.
+  const un = buildConclusionPlan(baseInput({ orientation: "arbitration", mismatchTotal: 2, mismatchShown: 2, hasFavorable: true, favorableCount: 1 }));
+  assert.match(un.blocks.find((b) => b.key === "verdict")!.fallbackText, /présente un élément favorable pour votre projet/);
+  // Sans favorable prouvé, aucune promesse : le texte reste celui de l'absence d'incompatibilité.
   const aucun = buildConclusionPlan(baseInput({ orientation: "arbitration", mismatchTotal: 2, mismatchShown: 2, hasFavorable: false, favorableCount: 0 }));
   const va = aucun.blocks.find((b) => b.key === "verdict")!;
+  assert.match(va.fallbackText, /^Aucune incompatibilité n'a été établie à Toulouse/);
   assert.doesNotMatch(`${aucun.verdict.headline.text} ${va.fallbackText}`, /favorable|répond à/);
 });
 
@@ -926,4 +928,27 @@ test("deux mismatchs de tiers différents : les deux sont nommés (aucune sélec
     plan.verdict.headline.text,
     "Deux priorités correspondent moins bien à Toulouse : le calme et l'accès aux espaces naturels.",
   );
+});
+
+test("arbitrage : le côté favorable PROUVÉ est nommé, un arbitrage a deux côtés", () => {
+  const plusieurs = buildConclusionPlan(baseInput({
+    orientation: "arbitration", hasFavorable: true, favorableCount: 3,
+    shownFacts: [mismatchFact("m1", "structuring", "cadre_calme", "le calme")],
+    mismatchTotal: 1, mismatchShown: 1,
+  }));
+  assert.match(plusieurs.verdict.detail, /^Toulouse répond à plusieurs dimensions de votre projet/);
+  const un = buildConclusionPlan(baseInput({
+    orientation: "arbitration", hasFavorable: true, favorableCount: 1,
+    shownFacts: [mismatchFact("m1", "structuring", "cadre_calme", "le calme")],
+    mismatchTotal: 1, mismatchShown: 1,
+  }));
+  assert.match(un.verdict.detail, /^Toulouse présente un élément favorable pour votre projet/);
+  // Sans favorable PROUVÉ, aucune promesse : l'ouverture se limite à l'absence d'incompatibilité.
+  const aucun = buildConclusionPlan(baseInput({
+    orientation: "arbitration", hasFavorable: false, favorableCount: 0,
+    shownFacts: [mismatchFact("m1", "structuring", "cadre_calme", "le calme")],
+    mismatchTotal: 1, mismatchShown: 1,
+  }));
+  assert.match(aucun.verdict.detail, /^Aucune incompatibilité n'a été établie à Toulouse/);
+  assert.doesNotMatch(aucun.verdict.detail, /favorable|répond à/);
 });

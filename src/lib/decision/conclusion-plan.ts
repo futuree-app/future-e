@@ -414,12 +414,20 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
       ? ` ${input.reservesShown > 1 ? `${input.reservesShown} constats restent` : "Un constat reste"} par ailleurs à contrôler.`
       : "";
     const ecarts = m > 1 ? "Ces écarts appellent un arbitrage" : "Cet écart appelle un arbitrage";
+    // UN ARBITRAGE A DEUX CÔTÉS. N'en nommer qu'un décrit un renoncement : le lecteur ne voit jamais
+    // ce que le lieu offre en échange. Le côté favorable est nommé quand il est PROUVÉ (hasFavorable
+    // et favorableCount, les mêmes garanties que coverage=high), et seulement là.
+    const ouverture = input.hasFavorable
+      ? (input.favorableCount >= 2
+          ? `${nom} répond à plusieurs dimensions de votre projet, et aucune incompatibilité n'a été établie`
+          : `${nom} présente un élément favorable pour votre projet, et aucune incompatibilité n'a été établie`)
+      : `Aucune incompatibilité n'a été établie ${a}`;
     return {
       label: "Arbitrage", tone: "neutral",
       headline: named ?? POSTURE(`Un arbitrage réel ${a}, sans incompatibilité établie.`),
       detail: named
-        ? `Aucune incompatibilité n'a été établie ${a}. ${ecarts} entre vos priorités, sans rendre ${nom} incompatible avec votre projet.${suite}`
-        : `${m > 1 ? `${m} de vos priorités sont` : "Une de vos priorités est"} nettement moins bien servie${m > 1 ? "s" : ""} qu'ailleurs. Cela appelle un arbitrage entre vos priorités, sans rendre ${nom} incompatible avec votre projet.${suite}`,
+        ? `${ouverture}. ${ecarts} entre vos priorités, sans rendre ${nom} incompatible avec votre projet.${suite}`
+        : `${ouverture}, mais ${m > 1 ? `${m} de vos priorités sont` : "une de vos priorités est"} nettement moins bien servie${m > 1 ? "s" : ""} qu'ailleurs. Cela appelle un arbitrage entre vos priorités, sans rendre ${nom} incompatible avec votre projet.${suite}`,
     };
   }
 
