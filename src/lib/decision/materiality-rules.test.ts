@@ -394,6 +394,26 @@ test("assertFactValid refuse un mismatch sans headlineSubject", () => {
   assert.throws(() => assertFactValid({ ...base, headlineSubject: "le calme." }, p), /headlineSubject/);
 });
 
+test("assertFactValid : alignment — headlineSubject et preuve exigés, fondement DANS la liste blanche", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "acces_soins", weight: 3 }] });
+  const base = {
+    id: "a", ruleId: "territoire.alignment-acces_soins", sourceFactIds: [], module: "territoire" as const,
+    role: "alignment" as const, projectKey: "acces_soins" as const, materialityTier: "structuring" as const,
+    topic: "l'accès aux soins", headlineSubject: "l'accès aux soins",
+    statement: "Parmi les 10 % de communes où il est le plus favorable en France",
+    basis: { kind: "relative_position" as const, rankLow: 0.9, rankHigh: 0.99, universe: "communes_france" as const, distributionVersion: "v" },
+    evidence: [{ factId: "x", module: "territoire" as const, label: "T", grain: "commune" as const }],
+  };
+  assertFactValid(base, p); // valide
+  assert.throws(() => assertFactValid({ ...base, headlineSubject: "" }, p), /headlineSubject/);
+  assert.throws(() => assertFactValid({ ...base, evidence: [] }, p), /preuve/);
+  // named_absence n'est JAMAIS un fondement d'alignment : une absence de signal ne prouve pas un positif.
+  assert.throws(
+    () => assertFactValid({ ...base, basis: { kind: "named_absence" } as unknown as typeof base.basis }, p),
+    /liste blanche/,
+  );
+});
+
 // LE NOM DE LA COMMUNE N'ENTRE JAMAIS DANS UN TOPIC. Le topic n'est lu qu'à un seul endroit, la
 // conclusion, qui nomme déjà le lieu dans la même phrase : « Le principal point à contrôler à
 // Toulouse : les fortes chaleurs à Toulouse. » Huit règles portaient ce doublon, invisible tant que

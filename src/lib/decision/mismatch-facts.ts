@@ -61,6 +61,18 @@ export function rankStatus(high: number): string {
   return (RANK_STATUS.find((x) => high <= x.max)?.label) ?? "Quart le moins favorable";
 }
 
+// LE PERCENTILE FAVORABLE, NU (« 10 % »), pour injecter dans un gabarit de rang. Miroir de rankPhrase,
+// tourné pour le HAUT : on passe (1 - low). Un alignment n'est produit que sur `satisfied`
+// (band.low >= 0.8), donc (1 - low) <= 0.2 : toujours 5 / 10 / 20 %, jamais le quart.
+const RANK_FRACTION_FAVORABLE: { max: number; label: string }[] = [
+  { max: 0.05, label: "5 %" },
+  { max: 0.1, label: "10 %" },
+  { max: 0.2, label: "20 %" },
+];
+export function rankFractionFavorable(low: number): string {
+  return RANK_FRACTION_FAVORABLE.find((x) => 1 - low <= x.max)?.label ?? "20 %";
+}
+
 // LA TABLE DE PHRASES. PREFERENCE_LABELS n'est pas grammatical dans « Vous avez placé {…} parmi vos
 // priorités ». topic = le SUJET nommé (<= 70 car., cf. assertFactValid). projectPhrase = la priorité,
 // tournée pour l'ouverture. indicator = ce sur quoi porte la comparaison.
@@ -101,4 +113,32 @@ export const MISMATCH_LABELS: Record<string, MismatchLabel> = {
     subject: "la douceur des hivers",
     limitation: "Cette position décrit la douceur hivernale (température moyenne de décembre à février) sur la période de référence 1976-2005. Les fortes chaleurs estivales, notamment futures, sont traitées à part.",
   },
+};
+
+// LA COPIE DE L'ALIGNMENT, en DEUX champs — décision éditoriale du porteur (2026-07-23). On ne force PAS
+// les treize critères dans un même adjectif accordé avec « communes » : « dotées » parle d'équipements
+// quand le critère mesure un ACCÈS, « pourvues » une quantité quand la nature mesure un accès. Là où
+// l'adjectif direct est honnête (animées, desservies, ensoleillées, aux hivers les plus doux), on le
+// garde ; ailleurs, une proposition relative reste exacte (« où il est le plus favorable »).
+//
+// La cohérence vient de la STRUCTURE de la carte (titre + phrase de rang), pas d'un adjectif
+// artificiellement identique. On répète quand la preuve est de même nature (soins/écoles/culture/services),
+// on ne varie que quand la mesure l'exige (démographie ≠ emploi). `{rank}` reste paramétrique (le
+// percentile est injecté par la règle : 5 / 10 / 20 %). « de communes » est TOUJOURS présent : sans lui la
+// phrase de rang est grammaticalement suspendue.
+export type AlignmentLabel = { heading: string; rankingTemplate: string };
+export const ALIGNMENT_LABELS: Record<string, AlignmentLabel> = {
+  acces_soins: { heading: "L'accès aux soins", rankingTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
+  acces_ecoles: { heading: "L'accès aux collèges et lycées", rankingTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
+  acces_culture: { heading: "L'accès à la culture", rankingTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
+  acces_services: { heading: "L'accès aux services du quotidien", rankingTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
+  acces_transports: { heading: "L'accès au train", rankingTemplate: "Parmi les {rank} de communes les mieux desservies par le train en France" },
+  nature: { heading: "L'accès aux espaces naturels", rankingTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
+  vie_locale: { heading: "La vie locale", rankingTemplate: "Parmi les {rank} de communes les plus animées de France" },
+  faible_dependance_auto: { heading: "La possibilité de se déplacer sans voiture", rankingTemplate: "Parmi les {rank} de communes où elle est la plus favorable en France" },
+  croissance_demographique: { heading: "La trajectoire démographique", rankingTemplate: "Parmi les {rank} de communes où la population progresse le plus en France" },
+  viabilite_emploi: { heading: "Le bassin d'emploi", rankingTemplate: "Parmi les {rank} de communes aux bassins d'emploi les plus dynamiques de France" },
+  cadre_calme: { heading: "Le calme du cadre de vie", rankingTemplate: "Parmi les {rank} de communes où le cadre de vie est le plus calme en France" },
+  ensoleillement_recherche: { heading: "L'ensoleillement", rankingTemplate: "Parmi les {rank} de communes les plus ensoleillées de France" },
+  douceur_climat: { heading: "La douceur des hivers", rankingTemplate: "Parmi les {rank} de communes aux hivers les plus doux de France" },
 };

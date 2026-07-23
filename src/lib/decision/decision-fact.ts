@@ -161,8 +161,27 @@ export type MismatchFact = BaseFact & {
   status?: string;
 };
 
+// ALIGNMENT : le lieu répond à une priorité déclarée, et c'est ÉTABLI. MIROIR EXACT du mismatch (même
+// fondement, mêmes gardes), là où le mismatch dit « moins bien », l'alignment dit « parmi les mieux ».
+// `alignment` et non `match` : `role === "match"` / `role === "mismatch"` se confondent à la relecture,
+// et la collision se paierait en bug. `alignment` et non `positive` : il dit une correspondance avec une
+// priorité DÉCLARÉE, jamais une qualité absolue du territoire (ça, c'est la pente du dépliant touristique).
+//
+// Aucune `action` (rien à mener), aucune `limitation` DE PORTÉE, aucun `signalConvention` : un fait établi
+// qui n'appelle aucune vérification n'a rien à border. Seule exception, `limitation` : la nuance
+// MÉTHODOLOGIQUE card-only héritée du critère (ERA5-Land pour l'ensoleillement, 1976-2005 pour la douceur).
+export type AlignmentFact = BaseFact & {
+  role: "alignment";
+  projectKey: PreferenceKey;
+  basis: MismatchBasis; // le MÊME fondement, avec les mêmes gardes qu'assertFactValid — mais JAMAIS named_absence
+  evidence: EvidenceRef[];
+  headlineSubject: string; // la priorité du lecteur, à lire après un deux-points, comme sur le mismatch
+  status?: string; // l'état scannable favorable (« 10 % les plus favorables »)
+  limitation?: string; // UNIQUEMENT la nuance méthodologique card-only du critère, jamais une limite de portée
+};
+
 export type DecisionFact =
-  IncompatibilityFact | CompromiseFact | UnknownFact | VerificationFact | MismatchFact;
+  IncompatibilityFact | CompromiseFact | UnknownFact | VerificationFact | MismatchFact | AlignmentFact;
 
 export type LogementFacts = {
   dpe: "passoire" | "energivore" | "correct" | "absent"; // DPE SAUVEGARDÉ (persisté)
@@ -273,7 +292,7 @@ export type DossierCard =
   | { kind: "fact"; fact: DecisionFact }
   | { kind: "composition"; composition: FactComposition };
 export type DossierSection = {
-  key: "incompatibilities" | "mismatches" | "compromises" | "unknowns" | "verifications";
+  key: "incompatibilities" | "alignments" | "mismatches" | "compromises" | "unknowns" | "verifications";
   title: string;
   cards: DossierCard[];
 };

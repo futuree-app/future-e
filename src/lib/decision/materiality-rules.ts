@@ -18,6 +18,7 @@ import { declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } 
 import { LOGEMENT_RULES } from "./logement-rules.ts";
 import { HARD_CONSTRAINT_RULES } from "./hard-constraint-rules.ts";
 import { MISMATCH_RULES } from "./mismatch-rules.ts";
+import { ALIGNMENT_RULES } from "./alignment-rules.ts";
 import { ABSENCE_RULES } from "./absence-rules.ts";
 import { COAST_RULES } from "./coast-rules.ts";
 import { AGGLOMERATION_RULES } from "./agglomeration-rules.ts";
@@ -464,6 +465,7 @@ export const REGISTRY: DecisionRule[] = [
   ruleBruit,
   ruleIndustrie,
   ...MISMATCH_RULES,
+  ...ALIGNMENT_RULES,
   ...ABSENCE_RULES,
   ...COAST_RULES,
   ...AGGLOMERATION_RULES,
@@ -561,6 +563,36 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
       }
       if (!declaredPreferenceKeys(project).includes(fact.projectKey)) {
         throw new Error(`[decision] ${fact.ruleId}: mismatch sur une préférence non déclarée (${fact.projectKey})`);
+      }
+      break;
+    }
+    case "alignment": {
+      if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);
+      if (!fact.headlineSubject || fact.headlineSubject.trim().length === 0) {
+        throw new Error(`[decision] ${fact.ruleId}: alignment sans headlineSubject (la PRIORITÉ du lecteur, à lire après un deux-points)`);
+      }
+      if (fact.headlineSubject.length > 45 || /[.!?]/.test(fact.headlineSubject)) {
+        throw new Error(`[decision] ${fact.ruleId}: headlineSubject trop long ou phrasé (« ${fact.headlineSubject} »)`);
+      }
+      // LA LISTE BLANCHE des fondements probants : un positif ne s'affiche que si son fondement PROUVE la
+      // correspondance. `named_absence` est EXCLU (contrairement au mismatch) — une absence de signal ne
+      // prouve JAMAIS un positif. C'est le cœur de la doctrine du lot C : on matérialise une connaissance
+      // établie, on ne fabrique pas de rassurance à partir d'un silence de source.
+      const b = fact.basis;
+      if (b.kind === "absolute_measure") {
+        if (!Number.isFinite(b.value) || b.value < 0) throw new Error(`[decision] ${fact.ruleId}: mesure absolue invalide`);
+        if (b.unit !== "km") throw new Error(`[decision] ${fact.ruleId}: unité de mesure absolue inconnue (${b.unit})`);
+        if (!b.conventionId) throw new Error(`[decision] ${fact.ruleId}: convention de mesure absente`);
+      } else if (b.kind === "categorical_state") {
+        if (!(AGGLOMERATION_CATEGORIES as readonly string[]).includes(b.observedCategory)) {
+          throw new Error(`[decision] ${fact.ruleId}: catégorie de taille inconnue (${b.observedCategory})`);
+        }
+        if (!b.conventionId) throw new Error(`[decision] ${fact.ruleId}: convention de catégorie absente`);
+      } else if (b.kind !== "relative_position") {
+        throw new Error(`[decision] ${fact.ruleId}: fondement d'alignment hors liste blanche (${(b as { kind: string }).kind})`);
+      }
+      if (!declaredPreferenceKeys(project).includes(fact.projectKey)) {
+        throw new Error(`[decision] ${fact.ruleId}: alignment sur une préférence non déclarée (${fact.projectKey})`);
       }
       break;
     }
