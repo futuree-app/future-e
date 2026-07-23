@@ -1,15 +1,24 @@
 // Carte COMPOSÉE : une vue qui relie des constats établis (tradeoff / shared_evidence). Présentationnelle.
 // Les faits absorbés restent lisibles au dépliable, dans leur forme d'origine (audit, invariant 4).
+import type { CSSProperties } from "react";
 import type { FactComposition, CompositionSide, TradeoffComposition } from "@/lib/decision/fact-composition";
 import type { DecisionFact } from "@/lib/decision/decision-fact";
 import { Chip, EvidenceRow, FactBody, ActionCue, MethodDetails, StatusTag } from "@/components/report/DecisionFactRenderParts";
 import { PREFERENCE_LABELS } from "@/lib/comparateur-labels";
 import { factsNonNarresParLaFace } from "@/lib/decision/dossier-view";
 
-function SideBlock({ side, color }: { side: CompositionSide; color: string }) {
-  return (
-    <div>
-      <p className="text-[13px] font-semibold text-muted mb-1.5">{side.label}</p>
+// `panel` : le côté est rendu en PANNEAU À LAVIS (tradeoff). Chaque côté porte alors son ton comme le
+// verdict porte le sien — l'encre diffuse dans la surface (.tradeoff-side), et le label devient un
+// eyebrow mono à la couleur du côté. Hors tradeoff (grouped_verification, où les items se COMPLÈTENT
+// au lieu de s'opposer), `panel` reste faux : label neutre, aucun fond, aucune tension suggérée.
+function SideBlock({ side, color, panel = false }: { side: CompositionSide; color: string; panel?: boolean }) {
+  const inner = (
+    <>
+      {panel ? (
+        <p className="font-mono text-[11px] tracking-[0.08em] uppercase mb-2" style={{ color }}>{side.label}</p>
+      ) : (
+        <p className="text-[13px] font-semibold text-muted mb-1.5">{side.label}</p>
+      )}
       {side.status ? <StatusTag label={side.status} color={color} /> : null}
       <p className="text-label text-[15px] leading-[1.6]">{side.statement}</p>
       {side.limitation ? <p className="text-muted/85 text-[13px] leading-[1.55] mt-1.5">{side.limitation}</p> : null}
@@ -26,8 +35,11 @@ function SideBlock({ side, color }: { side: CompositionSide; color: string }) {
         ) : null}
         {side.action ? <ActionCue label={side.action.label} color={color} type={side.action.type} /> : null}
       </div>
-    </div>
+    </>
   );
+  return panel
+    ? <div className="tradeoff-side" style={{ "--tone": color } as CSSProperties}>{inner}</div>
+    : <div>{inner}</div>;
 }
 
 // Les conventions de signalement des côtés/items, dédupliquées (un tradeoff saisonnier partage la même
@@ -65,17 +77,24 @@ function compositionChecks(composition: FactComposition): string[] {
 
 // LE COMPOSANT SIGNATURE : un tradeoff est le SEUL patron où deux côtés s'opposent vraiment et où le
 // lecteur doit peser l'un contre l'autre. Le rendre en deux paragraphes empilés cachait ce qui en
-// fait sa valeur. Deux colonnes (empilées sur mobile), chacune dans SON ton — le côté favorable en
-// vert, le côté à arbitrer en orange — donnent une forme visible à l'arbitrage : ce que le lieu
-// donne, ce qu'il prend, à peser ensemble. Ce n'est pas décoratif, c'est la relation elle-même.
+// fait sa valeur. Deux PANNEAUX À LAVIS (empilés sur mobile), chacun teinté par SON ton — le côté
+// favorable en vert, le côté à arbitrer en orange — donnent une forme visible à l'arbitrage : ce que
+// le lieu donne, ce qu'il prend, à peser ensemble. La couleur DIFFUSE dans la surface (même encre que
+// le verdict), elle ne borde pas : ce n'est pas un décor, c'est la relation elle-même. Le filet
+// central d'avant disparaissait au stacking ; chaque panneau, lui, s'auto-identifie une fois empilé.
 //
-// grouped_verification garde l'empilement : ses items ne s'opposent pas, ils se complètent (le sol,
-// et la règle qui l'encadre). Les mettre face à face suggérerait une tension qui n'existe pas.
+// `items-start` : les deux côtés huggent leur contenu au lieu de s'étirer à la même hauteur — un côté
+// court ne se paie pas d'une plaque teintée à moitié vide. Ils se lisent comme une paire par le ton,
+// pas par une hauteur forcée.
+//
+// grouped_verification garde l'empilement SANS panneau : ses items ne s'opposent pas, ils se complètent
+// (le sol, et la règle qui l'encadre). Les mettre face à face, ou les teinter, suggérerait une tension
+// qui n'existe pas.
 function TradeoffFaceoff({ composition }: { composition: TradeoffComposition }) {
   return (
-    <div className="mt-4 grid gap-x-6 gap-y-6 md:grid-cols-2 md:[&>*:first-child]:pr-6 md:[&>*:last-child]:border-l md:[&>*:last-child]:border-white/[0.08] md:[&>*:last-child]:pl-6">
-      <SideBlock side={composition.favorableSide} color="var(--green)" />
-      <SideBlock side={composition.unfavorableSide} color="var(--orange)" />
+    <div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start">
+      <SideBlock side={composition.favorableSide} color="var(--green)" panel />
+      <SideBlock side={composition.unfavorableSide} color="var(--orange)" panel />
     </div>
   );
 }

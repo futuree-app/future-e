@@ -1088,6 +1088,32 @@ a {
   }
 }
 
+/* LE CÔTÉ D'UN TRADEOFF. La MÊME encre que le verdict, en plus discret : deux petits panneaux côte à
+   côte pèsent moins qu'un héros unique, donc le lavis est plus léger (12/3 % contre 15/4 %). Le filet
+   supérieur nomme le ton, le lavis diffuse depuis le haut et se dissout avant la moitié — le constat
+   se lit toujours sur du neutre. `--tone` est posé inline par SideBlock (var(--green) / var(--orange)) ;
+   le repli sur --accent rend un panneau correct si un appelant l'oubliait. */
+.tradeoff-side {
+  border-top: 2px solid var(--tone, var(--accent));
+  border-radius: 12px;
+  padding: 14px 16px 16px;
+  background: rgba(255, 255, 255, 0.025);
+}
+/* Le lavis lui-même, isolé derrière @supports : un navigateur sans color-mix garde la surface neutre
+   ci-dessus plutôt qu'un panneau sans fond. */
+@supports (background: color-mix(in oklab, red 10%, transparent)) {
+  .tradeoff-side {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--tone, var(--accent)) 12%, transparent) 0%,
+        color-mix(in oklab, var(--tone, var(--accent)) 3%, transparent) 40%,
+        transparent 70%
+      ),
+      rgba(255, 255, 255, 0.02);
+  }
+}
+
 /* Dialog natif — styles non reproductibles en Tailwind */
 dialog.wizard-dialog {
   margin: auto;

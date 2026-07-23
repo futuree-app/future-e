@@ -31,6 +31,9 @@ export function classifyAgglomerationSize(
 
 // « agglomération » et « métropole » ne sont légitimes que si la classification repose sur l'unité urbaine.
 // En repli « population communale », libellé neutre (« grande ville », « très grande ville », « petite commune »).
+// UN SEUL MOT face au lecteur pour le périmètre UU : « agglomération » (celui du héros et des libellés
+// ci-dessous). « unité urbaine » reste le terme de PROVENANCE (ici en commentaire, et la source en
+// « Données et limites »), jamais un second nom pour la même mesure à trois centimètres d'écart.
 export function labelForCategory(cat: AgglomerationCategory, source: "urban_unit" | "commune"): string {
   const uu = source === "urban_unit";
   switch (cat) {
@@ -48,6 +51,6 @@ export function categoryStatementFragment(
   nom: string, cat: AgglomerationCategory, source: "urban_unit" | "commune",
 ): string {
   return source === "urban_unit"
-    ? `${nom} appartient à ${labelForCategory(cat, "urban_unit")} selon la population de son unité urbaine et la convention de taille utilisée par futur•e`
+    ? `${nom} appartient à ${labelForCategory(cat, "urban_unit")} selon la population de son agglomération et la convention de taille utilisée par futur•e`
     : `${nom} est classée comme ${labelForCategory(cat, "commune")} selon sa population communale`;
 }

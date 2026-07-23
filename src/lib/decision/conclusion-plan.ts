@@ -662,9 +662,14 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
       // « Ces contrôles portent sur des points qui pèsent » reste le moteur qui décrit son propre
       // travail. La phrase dit maintenant ce que le lecteur en fait : ils pèsent dans SA décision.
       // « rien ne permet de dire » garde l'honnêteté épistémique sans faire de futur•e le sujet.
+      //
+      // Le sujet de la 2e phrase est NOMMÉ (« Ces points / Ce point ») et non un pronom : « Ils »
+      // tombait juste après une clause favorable (« un élément favorable »), donc se lisait comme un
+      // désaccord de nombre et un antécédent flottant. « Ces points » renvoie sans équivoque aux points
+      // à contrôler que le héros vient de compter, et l'accord suit toujours le nombre de réserves (n).
       detail: !input.hasFavorable
         ? `Tant que ${n > 1 ? "ces points ne sont pas levés" : "ce point n'est pas levé"}, rien ne permet de dire que ${voc.repond(nom)}.`
-        : `${plusieurs ? `${nom} répond bien à plusieurs de vos priorités.` : `${voc.elementFavorable(nom)}.`} ${n > 1 ? "Ils peuvent encore peser" : "Il peut encore peser"} dans votre décision.`,
+        : `${plusieurs ? `${nom} répond bien à plusieurs de vos priorités.` : `${voc.elementFavorable(nom)}.`} ${n > 1 ? "Ces points peuvent encore peser" : "Ce point peut encore peser"} dans votre décision.`,
     };
   }
 

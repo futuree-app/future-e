@@ -73,6 +73,77 @@ test("sans condition : toutes les sections s'affichent, rien n'est masqué", () 
   assert.deepEqual(sectionsAffichees(d).map((s) => s.key), d.sections.map((s) => s.key));
 });
 
+// ── Le mismatch de taille que le verdict porte déjà ──────────────────────────────
+//
+// Le lecteur peut poser DEUX critères sur la même dimension : une contrainte dure communeSize (une
+// fourchette) ET une priorité souple symétrique (eviter_grandes_villes / prefere_grande_ville). Quand
+// la contrainte dure est établie incompatible, elle porte le verdict avec le même chiffre et la même
+// conclusion. La carte mismatch de taille redit alors mot pour mot ce que le héros vient de dire.
+
+const WITH_SIZE = {
+  reformulation: "x",
+  hardConstraints: { communeSize: { min: 25_000, max: 100_000 } },
+  preferences: [{ key: "eviter_grandes_villes", weight: 2 }, { key: "eviter_isolement", weight: 2 }],
+};
+
+function sizeIncompat(over: Partial<DecisionFact> = {}): DecisionFact {
+  return incompat({
+    hardConstraintKey: "communeSize",
+    topic: "la taille de l'agglomération de Toulouse",
+    statement: "L'agglomération à laquelle appartient Toulouse compte 1 063 235 habitants, au-dessus des 100 000 que vous avez posés comme limite.",
+    ...over,
+  });
+}
+function sizeMismatch(over: Partial<DecisionFact> = {}): DecisionFact {
+  return {
+    id: "m", ruleId: "rm", sourceFactIds: ["territorySize.classification"], module: "territoire",
+    role: "mismatch", projectKey: "eviter_grandes_villes", materialityTier: "structuring",
+    topic: "la taille du territoire", headlineSubject: "une ville à taille humaine", status: "Une métropole",
+    statement: "Vous avez placé le fait d'éviter les grandes villes parmi vos priorités. Toulouse appartient à une métropole.",
+    basis: { kind: "categorical_state", observedCategory: "metropole", conventionId: "agglomeration-size-v1" },
+    evidence: [{ factId: "territorySize.classification", module: "territoire", label: "Territoire · Toulouse", grain: "unite_urbaine", observedValue: "une métropole" }],
+    ...over,
+  } as DecisionFact;
+}
+function dossierTaille(facts: DecisionFact[]) {
+  const run: RunResult = {
+    facts,
+    evaluations: [
+      ev("rhc", ["communeSize"], "incompatible", facts.filter((f) => f.role === "incompatibility")),
+      ev("rm", ["eviter_grandes_villes"], "mismatch", facts.filter((f) => f.role === "mismatch")),
+    ],
+  };
+  return assembleDossier(run, project(WITH_SIZE), "commune", "Toulouse");
+}
+
+test("taille : la fourchette établie porte le verdict, le mismatch symétrique ne se réaffiche pas", () => {
+  const d = dossierTaille([sizeIncompat(), sizeMismatch()]);
+  // La seule carte mismatch était celle de taille : la section disparaît une fois masquée.
+  assert.equal(sectionsAffichees(d).some((s) => s.key === "mismatches"), false);
+  // Mais le fait RESTE dans le dossier : on masque une carte, on ne retire pas un fait.
+  assert.equal(d.sections.some((s) => s.key === "mismatches"), true);
+  assert.equal(d.conclusionBasis.factIds.includes("m"), true);
+});
+
+test("taille : le mismatch ASYMÉTRIQUE (eviter_isolement) n'est jamais masqué — il porte sa propre limite", () => {
+  const isolement = sizeMismatch({
+    id: "m2", projectKey: "eviter_isolement", headlineSubject: "le fait de ne pas être isolé",
+    limitation: "Cela ne permet pas de conclure à un isolement effectif.",
+  });
+  const d = dossierTaille([sizeIncompat(), isolement]);
+  const mismatches = sectionsAffichees(d).find((s) => s.key === "mismatches");
+  assert.equal(mismatches?.cards.length, 1);
+});
+
+test("taille : sans incompatibilité de taille établie, le mismatch symétrique s'affiche normalement", () => {
+  const run: RunResult = {
+    facts: [sizeMismatch()],
+    evaluations: [ev("rm", ["eviter_grandes_villes"], "mismatch", [sizeMismatch()])],
+  };
+  const d = assembleDossier(run, project(WITH_SIZE), "commune", "Toulouse");
+  assert.equal(sectionsAffichees(d).some((s) => s.key === "mismatches"), true);
+});
+
 // ── Le dépliable d'une composition ──────────────────────────────────────────────
 
 function absorbe(id: string): DecisionFact {

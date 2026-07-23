@@ -4,7 +4,7 @@
 // La frontière est nette et vaut d'être tenue : une règle de présentation ne retire jamais un fait du
 // dossier. Le fait reste dans `conclusionBasis`, dans les comptes, dans la couverture. On masque une
 // carte ; on ne réécrit pas ce qui a été établi.
-import type { Dossier, DossierSection, DecisionFact, IncompatibilityFact } from "./decision-fact.ts";
+import type { Dossier, DossierSection, DossierCard, DecisionFact, IncompatibilityFact } from "./decision-fact.ts";
 import type { FactComposition } from "./fact-composition.ts";
 
 // LA CONDITION QUE LE BLOC DE TÊTE PORTE DÉJÀ ENTIÈREMENT.
@@ -29,11 +29,46 @@ export function conditionPorteeParLeBloc(dossier: Dossier): IncompatibilityFact 
   return f.role === "incompatibility" && f.evidenceStrength === "established" ? f : null;
 }
 
+// LE MISMATCH DE TAILLE QUE LE VERDICT PORTE DÉJÀ.
+//
+// Le lecteur peut poser DEUX critères sur la même dimension : une contrainte dure communeSize (une
+// fourchette) ET une priorité souple de taille. Quand la contrainte dure est ÉTABLIE incompatible, elle
+// porte le verdict (« Condition non respectée ») avec le même chiffre et la même conclusion que le
+// mismatch souple. La carte « Une métropole » redit alors, trois centimètres plus bas, ce que le héros
+// vient de dire. On la masque — le fait reste dans le dossier (couverture, base de conclusion,
+// orientation), c'est la même frontière que conditionPorteeParLeBloc : on masque une carte, jamais un fait.
+//
+// Deux garde-fous à la portée :
+//   - SYMÉTRIQUES seulement (eviter_grandes_villes / prefere_grande_ville) : la catégorie d'agglo dit
+//     directement la préférence, donc le mismatch conclut dans le MÊME sens que la fourchette. eviter_isolement
+//     est un proxy ASYMÉTRIQUE qui porte sa propre limite (« ne prouve pas un isolement effectif ») : il dit
+//     ce que le seuil brut ne dit pas, on ne le masque jamais.
+//   - Cartes-FAITS seulement : un mismatch absorbé dans une composition (shared_evidence de taille) n'est pas
+//     une carte isolée, et cette composition peut porter aussi un fait non redondant.
+const CLES_TAILLE_SYMETRIQUES = new Set<string>(["eviter_grandes_villes", "prefere_grande_ville"]);
+
+function tailleEtabliePorteeParLeVerdict(dossier: Dossier): boolean {
+  const incompatibilites = dossier.sections.find((s) => s.key === "incompatibilities")?.cards ?? [];
+  return incompatibilites.some(
+    (c) => c.kind === "fact" && c.fact.role === "incompatibility"
+      && c.fact.evidenceStrength === "established" && c.fact.hardConstraintKey === "communeSize",
+  );
+}
+function estCarteMismatchTailleSymetrique(card: DossierCard): boolean {
+  return card.kind === "fact" && card.fact.role === "mismatch"
+    && card.fact.basis.kind === "categorical_state"
+    && CLES_TAILLE_SYMETRIQUES.has(card.fact.projectKey);
+}
+
 // Les sections réellement rendues. `dossier.sections` reste la vérité de ce qui a été assemblé.
 export function sectionsAffichees(dossier: Dossier): DossierSection[] {
-  return conditionPorteeParLeBloc(dossier)
+  const base = conditionPorteeParLeBloc(dossier)
     ? dossier.sections.filter((s) => s.key !== "incompatibilities")
     : dossier.sections;
+  if (!tailleEtabliePorteeParLeVerdict(dossier)) return base;
+  return base
+    .map((s) => s.key === "mismatches" ? { ...s, cards: s.cards.filter((c) => !estCarteMismatchTailleSymetrique(c)) } : s)
+    .filter((s) => s.cards.length > 0);
 }
 
 // CE QUE LE DÉPLIABLE D'UNE COMPOSITION A ENCORE À MONTRER.

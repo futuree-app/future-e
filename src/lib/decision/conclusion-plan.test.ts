@@ -303,9 +303,22 @@ test("high + major_reserves AVEC 2 favorables : « plusieurs dimensions » est p
     coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 2, majorReserveCount: 2,
   }));
   assert.match(p.blocks[0]!.fallbackText, /^Toulouse répond bien à plusieurs de vos priorités\./);
-  // « des points qui pèsent » dit le tier sans le nommer, et le détail ne recopie plus le héros.
-  assert.match(p.blocks[0]!.fallbackText, /Ils peuvent encore peser dans votre décision\./);
+  // Le sujet de la 2e phrase est NOMMÉ (« ces points » = les points à contrôler du héros), plus un
+  // « Ils » orphelin collé après une clause favorable, qui se lisait comme un désaccord de nombre.
+  assert.match(p.blocks[0]!.fallbackText, /Ces points peuvent encore peser dans votre décision\./);
   assert.equal(p.blocks[0]!.fallbackText.includes("structurant"), false);
+  assert.match(p.verdict.headline.text, /^Deux points restent à contrôler avant de conclure sur Toulouse\.$/);
+});
+
+test("high + major_reserves : UN favorable mais DEUX points — l'antécédent est nommé, pas de « Ils » orphelin", () => {
+  // Le cas vu à l'écran : « Toulouse présente un élément favorable… Ils peuvent encore peser », où
+  // « Ils » (2 points) tombait juste après « un élément favorable » (singulier) et sonnait faux.
+  const p = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 2,
+  }));
+  assert.match(p.blocks[0]!.fallbackText, /présente un élément favorable pour votre projet\./);
+  assert.match(p.blocks[0]!.fallbackText, /Ces points peuvent encore peser dans votre décision\./);
+  assert.equal(p.blocks[0]!.fallbackText.includes("Ils peuvent"), false);
   assert.match(p.verdict.headline.text, /^Deux points restent à contrôler avant de conclure sur Toulouse\.$/);
 });
 

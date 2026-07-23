@@ -42,7 +42,10 @@ test("libellés dépendants de la source ('agglomération' + 'métropole' seulem
 test("fragment de phrase : 'appartient à' (UU) vs 'est classée comme' (commune)", () => {
   const uu = categoryStatementFragment("Lyon", "metropole", "urban_unit");
   assert.match(uu, /Lyon appartient à une métropole/);
-  assert.match(uu, /unité urbaine/);
+  // Un seul mot pour le périmètre UU face au lecteur : « agglomération », comme le héros et labelForCategory.
+  // « unité urbaine » reste le terme de provenance (commentaires, source), jamais deux noms pour une mesure.
+  assert.match(uu, /agglomération/);
+  assert.doesNotMatch(uu, /unité urbaine/);
   const co = categoryStatementFragment("Petiville", "village", "commune");
   assert.match(co, /Petiville est classée comme un village/);
   assert.match(co, /population communale/);

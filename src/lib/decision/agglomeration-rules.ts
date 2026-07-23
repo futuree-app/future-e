@@ -91,8 +91,9 @@ function makeSizeRule(spec: SizeSpec): DecisionRule {
       }
 
       const tier = weight >= 3 ? "structuring" : "secondary";
+      // UN SEUL MOT face au lecteur pour le périmètre UU : « agglomération » (cf. agglomeration-facts.ts).
       const popText = source === "urban_unit"
-        ? `population de l'unité urbaine : environ ${f.tailleVille!.toLocaleString("fr-FR")} habitants`
+        ? `population de l'agglomération : environ ${f.tailleVille!.toLocaleString("fr-FR")} habitants`
         : `population communale : environ ${f.tailleVille!.toLocaleString("fr-FR")} habitants`;
       const ev: EvidenceRef = {
         factId: TERRITORY_SIZE_FACT_ID, module: "territoire", label: `Territoire · ${f.nom}`,
