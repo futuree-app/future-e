@@ -133,3 +133,14 @@ test("chaque fait logement porte un état établi court", () => {
     assert.doesNotMatch(st!, /[.!?]$/, `${f.ruleId} : l'état se termine comme une phrase`);
   }
 });
+
+// L'état scannable étant rendu en étiquette AU-DESSUS du constat, le constat ne doit pas le recopier.
+// Les argiles finissaient par « (aléa moyen ou fort) », mot pour mot le StatusTag à un centimètre.
+test("argiles : la sévérité vit dans l'état scannable, pas recopiée en parenthèse dans le constat", () => {
+  const f = runRules(facts(lf({ rga: "present", expositionBati: true })), project({ intent: "achat" }), HARD)
+    .facts.find((x) => x.ruleId === "logement.exposition-bati");
+  assert.ok(f && f.role === "verification");
+  assert.equal((f as { status?: string }).status, "Aléa moyen ou fort");
+  assert.match(f.statement, /retrait-gonflement des argiles/);
+  assert.doesNotMatch(f.statement, /aléa/i); // plus de « (aléa moyen ou fort) » : le StatusTag le porte
+});

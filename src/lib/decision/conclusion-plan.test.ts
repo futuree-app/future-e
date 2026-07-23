@@ -182,7 +182,7 @@ test("lead tied : les faits de tête sont NOMMÉS par leur SUJET, et leur consta
   const plan = buildConclusionPlan(baseInput({
     shownFacts: [
       verification("f1", "structuring", "L'exposition de la commune à l'inondation ressort élevée. 19 arrêtés depuis 1982.", "l'exposition de Toulouse à l'inondation"),
-      verification("f2", "structuring", "À cette adresse, le sol est exposé au retrait-gonflement des argiles (aléa moyen ou fort).", "le retrait-gonflement des argiles"),
+      verification("f2", "structuring", "À cette adresse, le sol est exposé au retrait-gonflement des argiles.", "le retrait-gonflement des argiles"),
       verification("f3", "secondary"),
     ],
   }));

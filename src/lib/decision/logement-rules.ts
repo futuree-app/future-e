@@ -137,7 +137,9 @@ export const RULE_ZONE_REGLEMENTEE = "logement.zone-reglementee";
 export const LOGEMENT_RULES: DecisionRule[] = [
   ruleDpe,
   coverageRule({ id: "exposition-bati", tier: "structuring", topic: () => "le retrait-gonflement des argiles", status: "Aléa moyen ou fort", coverage: (l) => l.rga, flag: (l) => l.expositionBati,
-    statement: () => "À cette adresse, le sol est exposé au retrait-gonflement des argiles (aléa moyen ou fort).",
+    // La sévérité (« aléa moyen ou fort ») est portée par le StatusTag rendu au-dessus du constat : la
+    // recopier ici en parenthèse la disait deux fois à un centimètre d'écart.
+    statement: () => "À cette adresse, le sol est exposé au retrait-gonflement des argiles.",
     limitation: "L'exposition de la zone ne prouve pas un dommage sur ce bien.", actionType: "verifier_sur_place", action: batiAction,
     unavailableStatement: "L'exposition du bâti (retrait-gonflement des argiles) n'a pas pu être vérifiée à cette adresse." }),
   coverageRule({ id: "zone-reglementee", tier: "structuring", topic: () => "un plan de prévention des risques", status: "Plan applicable", coverage: (l) => l.pprn, flag: (l) => l.zoneReglementee,

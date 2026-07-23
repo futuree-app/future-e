@@ -193,7 +193,7 @@ function moduleFactsAvecPpr(pprnLabel: string | null): ModuleFacts {
 }
 
 test("grouped argiles+PPR : les deux faits émis + PPR sécheresse -> une carte, deux items complets", () => {
-  const argiles = logementVerif("exposition-bati", "À cette adresse, le sol est exposé au retrait-gonflement des argiles (aléa moyen ou fort).", { limitation: "L'exposition de la zone ne prouve pas un dommage sur ce bien.", signalConvention: "futur•e signale cette exposition à partir d'un aléa moyen." });
+  const argiles = logementVerif("exposition-bati", "À cette adresse, le sol est exposé au retrait-gonflement des argiles.", { limitation: "L'exposition de la zone ne prouve pas un dommage sur ce bien.", signalConvention: "futur•e signale cette exposition à partir d'un aléa moyen." });
   const ppr = logementVerif("zone-reglementee", "À cette adresse, un plan de prévention des risques s'applique : PPR Sécheresse - Territoire 1 - Toulouse.");
   const out = composeFacts(run([logementEval(argiles), logementEval(ppr)]), moduleFactsAvecPpr("PPR Sécheresse - Territoire 1 - Toulouse"), project({}));
   assert.equal(out.length, 1);
