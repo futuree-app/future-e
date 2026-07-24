@@ -69,7 +69,7 @@ export type VerdictHeadline = {
   text: string;
   consumedFactIds: string[];
   consumedCompositionIds: string[];
-  consumedFrom: "reserves" | "mismatches" | "constraint" | null;
+  consumedFrom: "reserves" | "mismatches" | "constraint" | "alignments" | null;
 };
 
 // Le headline et le détail sont deux sorties COORDONNÉES d'un même constructeur, jamais l'une dérivée
@@ -281,7 +281,7 @@ const POSTURE = (text: string): VerdictHeadline =>
 function nameIssues(
   text: string,
   candidates: LeadCandidate[],
-  from: "reserves" | "mismatches" | "constraint",
+  from: "reserves" | "mismatches" | "constraint" | "alignments",
 ): VerdictHeadline | null {
   if (candidates.length === 0 || candidates.length > HEADLINE_MAX_ISSUES) return null;
   if (text.length > HEADLINE_MAX_CHARS) return null;
@@ -317,6 +317,17 @@ function mismatchCandidates(
       causeCommune: true,
     })),
   ];
+}
+
+// LES SUJETS FAVORABLES AFFICHÉS (lot C). On ne nomme QUE des faits à l'écran (doctrine de séquencement
+// du lot B) : un AlignmentFact absorbé par un tradeoff reste dans `shownFacts` (l'absorption est un masquage
+// d'affichage, pas un retrait), donc le verdict continue à pouvoir le nommer. `favorableCount` garde son
+// rôle de COMPTE, il ne fournit jamais un sujet.
+function alignmentCandidates(shownFacts: DecisionFact[]): LeadCandidate[] {
+  return shownFacts.filter((f) => f.role === "alignment").map((f) => ({
+    factId: f.id, topic: f.topic, subject: f.role === "alignment" ? f.headlineSubject : f.topic,
+    statement: f.statement, materialityTier: f.materialityTier, role: f.role,
+  }));
 }
 
 // LES NOMBRES SE DISENT EN LETTRES dans ce bloc, jusqu'à dix. Le héros écrivait « Deux priorités » et
@@ -529,10 +540,15 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
     // gagnez » nomme les deux côtés, ce que « appelle un arbitrage » annonçait sans le faire. Le « y »
     // évite à la fois une seconde occurrence du nom de commune et un accord de genre indérivable.
     const ecart = m > 1 ? "Ces écarts sont" : "Cet écart est";
-    const arbitrage = input.hasFavorable
-      ? (input.favorableCount >= 2
-          ? `${nom} répond bien à plusieurs de vos autres priorités. ${ecart} à peser contre ce que vous y gagnez.`
-          : `${nom} répond bien à une autre de vos priorités. ${ecart} à peser contre ce que vous y gagnez.`)
+    // LE CÔTÉ FAVORABLE EST NOMMÉ (lot C), depuis les faits AFFICHÉS, jamais depuis `favorableCount` : « L'accès
+    // aux soins et la vie locale répondent en revanche à votre projet. » Avant, un compteur disait
+    // « plusieurs de vos autres priorités » sans dire lesquelles. Repli sur l'ancien registre quand aucun
+    // alignment n'est affiché (le compte peut être >0 sur un satisfied de poids 1, silencieux).
+    const favSujets = alignmentCandidates(input.shownFacts).slice(0, HEADLINE_MAX_ISSUES).map((c) => c.subject);
+    const arbitrage = favSujets.length > 0
+      ? `${capitalize(joinFr(favSujets))} ${favSujets.length > 1 ? "répondent" : "répond"} en revanche à votre projet. ${ecart} à peser contre ${favSujets.length > 1 ? "ces avantages" : "cet avantage"}.`
+      : input.hasFavorable
+        ? `${nom} répond bien à ${input.favorableCount >= 2 ? "plusieurs de vos autres priorités" : "une autre de vos priorités"}. ${ecart} à peser contre ce que vous y gagnez.`
       // « Aucune de vos conditions n'est contredite ici » rassure sur un risque INEXISTANT quand le
       // lecteur n'a posé aucune condition non négociable : c'est décrire l'absence d'un problème qu'il
       // n'a jamais soulevé. L'état `no_hard_constraint_declared` le dit déjà, sans champ nouveau.
@@ -582,9 +598,30 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
     };
   }
 
-  // FAVORABLE : posture, toujours. Nommer un positif exigerait un fait favorable déterministe, que
-  // l'architecture ne produit pas.
+  // FAVORABLE. CAS 4 (lot C) : le héros NOMME le positif, quand des faits d'alignement STRUCTURANTS sont
+  // affichés. Avant le lot C, cette branche restait en posture faute de fait favorable déterministe —
+  // l'AlignmentFact en fournit un. Un poids 2 (secondary) reste visible dans la carte « Ce qui correspond »
+  // mais NE couronne PAS le héros (le cas 4 exige un tier structurant, sans quoi le héros couronnerait un
+  // signal faible). `favorableCount` reste le COMPTE ; les SUJETS viennent des faits affichés, jamais de lui.
   if (input.orientation === "favorable") {
+    const structurants = alignmentCandidates(input.shownFacts).filter((c) => c.materialityTier === "structuring");
+    if (structurants.length > 0) {
+      const nommes = structurants.slice(0, HEADLINE_MAX_ISSUES);
+      const compte = input.favorableCount;
+      const sujets = joinFr(nommes.map((c) => c.subject));
+      // « l'une de vos priorités » et non « votre priorité » : le lecteur peut en avoir déclaré plusieurs,
+      // même si une seule est nommable (décision D2 du porteur). Deux-points quand on nomme TOUT ce qu'on
+      // compte, « dont » quand on n'en nomme qu'une partie — même règle que l'arbitrage.
+      const phrase = compte === 1
+        ? `${nom} répond à l'une de vos priorités : ${sujets}.`
+        : nommes.length === compte
+          ? `${nom} répond à ${enLettres(compte)} de vos priorités : ${sujets}.`
+          : `${nom} répond à ${enLettres(compte)} de vos priorités, dont ${sujets}.`;
+      const named = nameIssues(phrase, nommes, "alignments");
+      if (named) {
+        return { label: "Correspondance favorable", tone: "positive", headline: named, detail: `${voc.criteresExamines} vont dans ce sens.` };
+      }
+    }
     return input.coverage === "high"
       ? {
           label: "Bonne correspondance", tone: "positive",

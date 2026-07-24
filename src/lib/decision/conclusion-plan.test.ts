@@ -46,8 +46,65 @@ function baseInput(over: Partial<ConclusionPlanInput> = {}): ConclusionPlanInput
   };
 }
 
+function alignmentFact(id: string, tier: MaterialityTier, key: string, subject: string): DecisionFact {
+  return {
+    id, ruleId: `territoire.alignment-${key}`, sourceFactIds: [], module: "territoire",
+    statement: `Pour ${subject}, Toulouse se situe parmi les 10 % de communes les plus favorables de France.`,
+    topic: subject, headlineSubject: subject, materialityTier: tier, role: "alignment", projectKey: key as never,
+    basis: { kind: "relative_position", rankLow: 0.92, rankHigh: 0.99, universe: "communes_france", distributionVersion: "test" },
+    evidence: [{ factId: id, module: "territoire", label: "Territoire", grain: "commune", href: "/rapport/quartier" }],
+  };
+}
+
 const AIR = { key: "qualite_air", label: "la qualité de l'air" };
 const MER = { key: "nearSea" as const, label: "la proximité de la mer" };
+
+// ── Lot C : le verdict nomme le côté favorable ───────────────────────────────────
+
+test("favorable + deux alignments structuring : le héros NOMME les priorités (D2 pluriel)", () => {
+  const p = buildConclusionPlan(baseInput({
+    orientation: "favorable", coverage: "high", hasFavorable: true, favorableCount: 2, reservesShown: 0, majorReserveCount: 0,
+    shownFacts: [alignmentFact("a1", "structuring", "acces_soins", "l'accès aux soins"), alignmentFact("a2", "structuring", "vie_locale", "la vie locale")],
+  }));
+  assert.equal(p.verdictTone, "positive");
+  assert.equal(p.verdict.headline.kind, "named_issues");
+  assert.match(p.verdict.headline.text, /^Toulouse répond à deux de vos priorités : l'accès aux soins et la vie locale\.$/);
+});
+
+test("favorable + un alignment structuring : héros singulier « l'une de vos priorités »", () => {
+  const p = buildConclusionPlan(baseInput({
+    orientation: "favorable", coverage: "high", favorableCount: 1, reservesShown: 0, majorReserveCount: 0,
+    shownFacts: [alignmentFact("a1", "structuring", "acces_soins", "l'accès aux soins")],
+  }));
+  assert.match(p.verdict.headline.text, /^Toulouse répond à l'une de vos priorités : l'accès aux soins\.$/);
+});
+
+test("favorable + seulement secondary : le héros ne couronne pas un signal faible (posture)", () => {
+  const p = buildConclusionPlan(baseInput({
+    orientation: "favorable", coverage: "high", favorableCount: 1, reservesShown: 0, majorReserveCount: 0,
+    shownFacts: [alignmentFact("a1", "secondary", "acces_soins", "l'accès aux soins")],
+  }));
+  assert.equal(p.verdict.headline.kind, "posture");
+  assert.doesNotMatch(p.verdict.headline.text, /répond à l'une|répond à deux/);
+});
+
+test("favorable SANS alignment affiché : posture (favorableCount seul ne donne pas de sujet)", () => {
+  const p = buildConclusionPlan(baseInput({ orientation: "favorable", coverage: "high", favorableCount: 2, shownFacts: [] }));
+  assert.equal(p.verdict.headline.kind, "posture");
+});
+
+test("arbitrage : le détail NOMME les sujets favorables affichés, pas « plusieurs de vos autres priorités »", () => {
+  const p = buildConclusionPlan(baseInput({
+    orientation: "arbitration", coverage: "high", mismatchTotal: 1, mismatchShown: 1, hasFavorable: true, favorableCount: 2,
+    shownFacts: [
+      mismatchFact("m1", "structuring", "cadre_calme", "le calme"),
+      alignmentFact("a1", "structuring", "acces_soins", "l'accès aux soins"),
+      alignmentFact("a2", "structuring", "vie_locale", "la vie locale"),
+    ],
+  }));
+  assert.match(p.verdict.detail, /L'accès aux soins et la vie locale répond(ent)? en revanche à votre projet/);
+  assert.doesNotMatch(p.verdict.detail, /plusieurs de vos autres priorités/);
+});
 
 // ── Le plan ────────────────────────────────────────────────────────────────────
 
