@@ -62,20 +62,20 @@ export function ConclusionBlock({
   const byKey = new Map(blocks.map((b) => [b.key, b]));
   // Le bloc `verdict` porte le DÉTAIL ; le headline vit sur le plan (jamais confié au modèle).
   const detail = byKey.get("verdict")?.text ?? plan.verdict.detail;
-  const poids = byKey.get("reserves_found")?.text;
   const condition = byKey.get("unexamined_hard_constraints");
   const nonCouvert = byKey.get("uncovered_priorities")?.text;
 
-  // Le fait saillant n'est pas affiché en cas d'incompatibilité : le blocage EST la réponse, en haut.
-  //
-  // UNE SEULE ÉTIQUETTE. Elle distinguait `single` (« Ce qui pèse le plus ») de `tied` (« Ce qui
-  // demande votre attention ») parce que la phrase, elle, ne disait pas par où commencer. Depuis le
-  // lot D elle le dit (« À regarder d'abord / ensuite »), et une étiquette qui reprendrait cet ordre
-  // le répéterait deux fois en deux lignes. Elle dit donc la NATURE du bloc, l'ordre reste au texte.
-  // Le lead reste une mécanique interne : l'égalité de poids ne s'affiche pas, elle se lit dans la
-  // liste.
-  const poidsLabel = plan.lead.kind === "none" ? null : "Ce qui demande votre attention";
-  const showPoids = poids != null && poidsLabel != null && plan.verdictTone !== "critical";
+  // LA PROCHAINE DÉMARCHE, déterministe. L'étiquette dit la NATURE (des CONTRÔLES à mener, pas un second
+  // point défavorable) : « Ce qui demande votre attention » rejouait un jugement et, sous un verdict
+  // d'arbitrage, annexait ces contrôles au registre défavorable. Elle porte aussi l'ORDRE — « À contrôler
+  // ensuite » quand le héros a DÉJÀ nommé le principal contrôle (il a puisé dans les réserves),
+  // « en priorité » sinon. Le CORPS reprend l'action mot pour mot depuis la carte (une seule source de
+  // vérité) : une ou deux lignes verbatim, « Puis » ajouté par le renderer, jamais de recomposition.
+  const control = plan.priorityControl;
+  const suiteDuHeros = plan.verdict.headline.consumedFrom === "reserves";
+  const controlLabel = suiteDuHeros ? "À contrôler ensuite" : "À contrôler en priorité";
+  const showControl = control != null && control.actions.length > 0 && plan.verdictTone !== "critical";
+  const lowerFirst = (s: string): string => (s.length === 0 ? s : s[0]!.toLowerCase() + s.slice(1));
 
   return (
     // Le bloc ne se distingue plus par un filet à gauche sur le MÊME verre que les cartes du dessous :
@@ -128,10 +128,19 @@ export function ConclusionBlock({
         </div>
       ) : null}
 
-      {showPoids ? (
-        <div className="mt-5">
-          <Eyebrow color="var(--accent)">{poidsLabel}</Eyebrow>
-          <p className="text-[17px] leading-[1.55] text-label">{poids}</p>
+      {/* LE REGISTRE BLEU DES CONTRÔLES. Distinct du verdict (orange) : ce sont des faits ÉTABLIS dont les
+          conséquences se contrôlent, pas des écarts au projet. La teinte info + l'étiquette de nature
+          suffisent à séparer les deux registres — pas de second halo. Une ou deux DÉMARCHES concrètes,
+          reprises mot pour mot de la carte ; « Puis » relie la seconde. Plus d'air avant, pour que ça se
+          lise comme la suite à mener, jamais comme une seconde conclusion. */}
+      {showControl ? (
+        <div className="mt-7">
+          <Eyebrow color="var(--info)">{controlLabel}</Eyebrow>
+          {control!.actions.map((a, i) => (
+            <p key={i} className="text-[15px] leading-[1.55] text-muted">
+              {i === 0 ? a.label : `Puis ${lowerFirst(a.label)}`}
+            </p>
+          ))}
         </div>
       ) : null}
 

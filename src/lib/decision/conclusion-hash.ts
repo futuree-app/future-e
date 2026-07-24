@@ -37,7 +37,15 @@ export const DECISION_NARRATIVE_CONTRACT_VERSION = "c2";
 // v14 : les cartes ne CONCLUENT plus (« Cet écart appelle un arbitrage. Il ne rend pas X incompatible
 // avec votre projet. » retiré des sept statements de mismatch). Le verdict conclut, la carte démontre :
 // une carte qui concluait pouvait contredire le verdict, et le faisait.
-export const DECISION_NARRATIVE_PROMPT_VERSION = "v14";
+// v15 : le registre reserves_found ne porte PLUS l'ordre dans son corps (« À regarder d'abord / ensuite »
+// retiré). Le corps est une phrase-liste de sujets ; l'ordre et la nature (« Contrôle prioritaire » /
+// « À contrôler ensuite ») vivent dans l'étiquette de l'UI, depuis `consumedFrom`. Un contrôle résiduel
+// ne se lisait plus comme un second point défavorable sous un verdict d'arbitrage.
+// v16 : reserves_found DISPARAÎT comme registre généré. Un sujet abstrait (« ce qu'impose le sol
+// argileux ») ne disait pas la démarche à mener, et le modèle ne peut pas porter une action (elle doit
+// être exacte). C'est désormais `priorityControl`, DÉTERMINISTE : il reprend mot pour mot l'`action` du
+// fait/composition de tête. Le modèle ne reçoit ni ne rédige plus ce registre.
+export const DECISION_NARRATIVE_PROMPT_VERSION = "v16";
 export const DECISION_NARRATIVE_MODEL = "claude-sonnet-4-6";
 
 export function hashPayload(

@@ -4,12 +4,25 @@ import { buildConclusionPlan, shouldGenerateNarrative, rankLeadCandidates, HEADL
 import type { DecisionFact, MaterialityTier } from "./decision-fact.ts";
 import type { FactComposition } from "./fact-composition.ts";
 
-function verification(id: string, tier: MaterialityTier, statement = `constat ${id}`, topic = `sujet ${id}`): DecisionFact {
+function verification(
+  id: string, tier: MaterialityTier, statement = `constat ${id}`, topic = `sujet ${id}`,
+  actionLabel = "Vérifier sur place",
+): DecisionFact {
   return {
     id, ruleId: `rule-${id}`, sourceFactIds: [], module: "logement", statement, topic,
     materialityTier: tier, role: "verification",
     evidence: [{ factId: id, module: "logement", label: "DPE", observedValue: "F", grain: "adresse" }],
-    action: { type: "verifier_sur_place", label: "Vérifier sur place" },
+    action: { type: "verifier_sur_place", label: actionLabel },
+  };
+}
+
+// Une réserve qui n'a AUCUNE démarche à mener : `action` est optionnelle sur un `unknown` scopé (elle
+// est requise sur une verification). Sert à couvrir le cas « rien à orienter » de priorityControl.
+function unknownSansAction(id: string, tier: MaterialityTier, topic = `sujet ${id}`): DecisionFact {
+  return {
+    id, ruleId: `rule-${id}`, sourceFactIds: [], module: "logement", statement: `constat ${id}`, topic,
+    materialityTier: tier, role: "unknown", impact: "scoped",
+    evidence: [{ factId: id, module: "logement", label: "DPE", grain: "adresse" }],
   };
 }
 
@@ -103,8 +116,22 @@ test("arbitrage : le détail NOMME les sujets favorables affichés, pas « plusi
     ],
   }));
   assert.match(p.verdict.detail, /L'accès aux soins et la vie locale répondent en revanche à votre projet/);
-  assert.match(p.verdict.detail, /La décision se joue entre ces correspondances et les écarts relevés/);
+  // UN SEUL écart (m1) -> singulier « l'écart relevé », accordé sur le compte comme la branche voisine.
+  assert.match(p.verdict.detail, /La décision se joue entre ces correspondances et l'écart relevé\./);
+  assert.doesNotMatch(p.verdict.detail, /les écarts relevés/);
   assert.doesNotMatch(p.verdict.detail, /plusieurs de vos autres priorités/);
+});
+
+test("arbitrage : DEUX écarts + côté favorable nommé -> « les écarts relevés » (pluriel accordé sur le compte)", () => {
+  const p = buildConclusionPlan(baseInput({
+    orientation: "arbitration", coverage: "high", mismatchTotal: 2, mismatchShown: 2, hasFavorable: true, favorableCount: 1,
+    shownFacts: [
+      mismatchFact("m1", "structuring", "cadre_calme", "le calme"),
+      mismatchFact("m2", "structuring", "nature", "l'accès aux espaces naturels"),
+      alignmentFact("a1", "structuring", "acces_soins", "l'accès aux soins"),
+    ],
+  }));
+  assert.match(p.verdict.detail, /La décision se joue entre ces correspondances et les écarts relevés\./);
 });
 
 test("minor_reserves + alignment structuring : le positif prime dans le héros, la réserve secondaire au détail", () => {
@@ -144,12 +171,15 @@ test("l'ordre des blocs suit la hiérarchie éditoriale des réserves", () => {
     uncovered: [MER],
     uncoveredPriorities: [AIR],
   }));
+  // Le résiduel N'EST PLUS un bloc rédigé : il est sorti de la narration pour devenir `priorityControl`,
+  // déterministe. Deux registres générables subsistent, et l'ordre des absences de couverture est intact.
   assert.deepEqual(plan.blocks.map((b) => b.key), [
-    "verdict", "unexamined_hard_constraints", "reserves_found", "uncovered_priorities",
+    "verdict", "unexamined_hard_constraints", "uncovered_priorities",
   ]);
   assert.deepEqual(plan.blocks.filter((b) => b.generable).map((b) => b.key), [
-    "unexamined_hard_constraints", "reserves_found", "uncovered_priorities",
+    "unexamined_hard_constraints", "uncovered_priorities",
   ]);
+  assert.equal(plan.blocks.some((b) => b.key === "reserves_found" as never), false);
 });
 
 test("un registre vide ne produit aucun bloc", () => {
@@ -183,23 +213,23 @@ test("requiredPhrases : le noyau des priorités non couvertes doit survivre", ()
   );
 });
 
-test("lead single : le repli NOMME le sujet, jamais le constat de la carte", () => {
-  // Le décompte est parti dans l'intertitre des cartes ; le constat, lui, vit dans la carte située
-  // juste dessous. Le recopier ici disait deux fois la même phrase à trois centimètres d'écart.
+test("lead single : la démarche prioritaire reprend l'ACTION du fait de tête, mot pour mot", () => {
+  // Le résiduel nommait un sujet (« L'étiquette énergétique du logement. ») : sous un verdict
+  // d'arbitrage il se lisait comme un second point défavorable, et il ne disait AUCUNE démarche. Il
+  // porte désormais l'action déjà écrite sur la carte — jamais une reformulation.
   const plan = buildConclusionPlan(baseInput({
     shownFacts: [
       verification("f1", "decision_critical", "Le logement porte une étiquette énergétique F", "l'étiquette énergétique du logement"),
       verification("f2", "secondary"),
     ],
   }));
-  const bloc = plan.blocks.find((b) => b.key === "reserves_found")!;
-  assert.equal(bloc.fallbackText, "À regarder d'abord : l'étiquette énergétique du logement.");
-  assert.equal(bloc.fallbackText.includes("Le logement porte"), false);
-  // La matière obligatoire vaut AUSSI pour un sujet seul : elle n'était impossible que tant que le
-  // bloc portait un constat entier, dont l'exiger mot pour mot réclamait une copie.
-  assert.deepEqual(bloc.requiredPhrases, ["étiquette énergétique du logement"]);
-  assert.deepEqual(bloc.allowedNumbers, []);
-  assert.equal(bloc.maxChars, 220);
+  assert.deepEqual(plan.priorityControl, {
+    sourceIds: ["f1"],
+    actions: [{ label: "Vérifier sur place" }],
+  });
+  // Ni le constat de la carte, ni le sujet : une action, et rien d'autre.
+  assert.equal(plan.priorityControl!.actions[0]!.label.includes("Le logement porte"), false);
+  assert.equal(plan.priorityControl!.actions[0]!.label.includes("étiquette"), false);
 });
 
 test("allowedNumbers : le compte VRAI du registre, en chiffres ET en lettres", () => {
@@ -211,54 +241,48 @@ test("allowedNumbers : le compte VRAI du registre, en chiffres ET en lettres", (
   assert.deepEqual(plan.blocks.find((b) => b.key === "uncovered_priorities")!.allowedNumbers, ["2", "deux"]);
 });
 
-test("lead tied : la strate LISTE, elle ne compte pas (aucun nombre autorisé)", () => {
-  // « Parmi ces quatre points, deux pèsent le plus » demandait au lecteur de tenir deux comptes en
-  // tête pour lui dire quoi regarder d'abord, et le nombre est déjà dit par le détail du verdict et
-  // par l'intertitre des cartes. La strate navigue ; le compte vit ailleurs.
+test("lead tied : DEUX faits à égalité donnent DEUX démarches, dans l'ordre éditorial", () => {
+  // À égalité, ne garder que le premier fabriquerait une hiérarchie que le moteur ne connaît pas — et
+  // une composition, à la même place dans le rendu, obtenait déjà ses deux lignes.
   const plan = buildConclusionPlan(baseInput({
     reservesShown: 4,
     shownFacts: [
-      verification("f1", "decision_critical"), verification("f2", "decision_critical"),
+      verification("f1", "decision_critical", "c1", "le sol argileux", "Regardez les signes visibles sur le bâti"),
+      verification("f2", "decision_critical", "c2", "l'inondation", "Consultez l'exposition de l'adresse aux inondations"),
       verification("f3", "secondary"), verification("f4", "secondary"),
     ],
   }));
-  const bloc = plan.blocks.find((b) => b.key === "reserves_found")!;
-  assert.equal(plan.reservesCount, 4); // le compte existe toujours, il ne s'écrit plus ici
-  assert.equal(bloc.fallbackText, "À regarder d'abord : sujet f1 et sujet f2.");
-  assert.deepEqual(bloc.allowedNumbers, []);
-  assert.doesNotMatch(bloc.fallbackText, /\b(un|deux|trois|quatre|points?)\b/i);
+  assert.equal(plan.lead.kind, "tied");
+  assert.equal(plan.reservesCount, 4); // le compte existe toujours, il ne s'écrit pas ici
+  assert.deepEqual(plan.priorityControl, {
+    sourceIds: ["f1", "f2"],
+    actions: [
+      { label: "Regardez les signes visibles sur le bâti" },
+      { label: "Consultez l'exposition de l'adresse aux inondations" },
+    ],
+  });
 });
 
-test("lead tied : aucun moule ne porte de nombre, quels que soient les comptes", () => {
-  // La phrase portait la relation « trois parmi quatre » pour éviter une contradiction avec le
-  // verdict. Le moule de navigation la rend sans objet : ne comptant plus, il ne peut plus diverger.
+test("lead tied : un MÊME geste prescrit deux fois ne s'affiche qu'une fois (et sa seule carte est source)", () => {
+  // Deux règles voisines peuvent prescrire le même geste dans les mêmes mots. Deux lignes identiques
+  // feraient lire deux démarches là où il n'y en a qu'une, et pointeraient vers deux cartes pour un même
+  // contrôle. La comparaison est normalisée (casse, espaces, point final) ; l'affichage reste verbatim.
   const plan = buildConclusionPlan(baseInput({
-    reservesShown: 4,
     shownFacts: [
-      verification("f1", "structuring", "s1", "l'exposition de Toulouse à l'inondation"),
-      verification("f2", "structuring", "s2", "le retrait-gonflement des argiles"),
-      verification("f3", "structuring", "s3", "un plan de prévention des risques"),
-      verification("f4", "secondary"),
+      verification("f1", "decision_critical", "c1", "le sol argileux", "Vérifier sur place"),
+      verification("f2", "decision_critical", "c2", "l'inondation", "vérifier sur place."),
     ],
   }));
-  const bloc = plan.blocks.find((b) => b.key === "reserves_found")!;
-  assert.equal(
-    bloc.fallbackText,
-    "À regarder d'abord : l'exposition de Toulouse à l'inondation, le retrait-gonflement des argiles et un plan de prévention des risques.",
-  );
-  assert.deepEqual(bloc.allowedNumbers, []);
-  // À comptes égaux (tous au rang max), le même moule, sans exception à retenir.
-  const egal = buildConclusionPlan(baseInput({
-    reservesShown: 2,
-    shownFacts: [verification("f1", "structuring", "s1", "sujet un"), verification("f2", "structuring", "s2", "sujet deux")],
-  }));
-  assert.equal(egal.blocks.find((b) => b.key === "reserves_found")!.fallbackText, "À regarder d'abord : sujet un et sujet deux.");
+  assert.equal(plan.lead.kind, "tied");
+  assert.deepEqual(plan.priorityControl, {
+    sourceIds: ["f1"], // f2 n'a rien apporté : l'y renvoyer enverrait le lecteur sur une carte muette
+    actions: [{ label: "Vérifier sur place" }], // le libellé d'origine, jamais la forme normalisée
+  });
 });
 
-test("lead tied : les faits de tête sont NOMMÉS par leur SUJET, et leur constat n'est PAS recopié", () => {
-  // Deux défauts corrigés d'un coup : la carte annonçait « 3 points à égalité » sans en citer un seul
-  // (elle parlait d'elle-même) ; puis, en citant les constats entiers, elle redisait mot pour mot les
-  // cartes du dessous. Elle NOMME, les cartes DÉMONTRENT.
+test("lead tied : les faits de tête restent NOMMÉS par leur SUJET, leur constat n'est jamais recopié", () => {
+  // Le `lead` désigne QUELS sujets viennent ensuite ; il les nomme par leur groupe nominal court, et
+  // ne recopie pas les cartes situées juste dessous (« 19 arrêtés depuis 1982 » reste à la carte).
   const plan = buildConclusionPlan(baseInput({
     shownFacts: [
       verification("f1", "structuring", "L'exposition de la commune à l'inondation ressort élevée. 19 arrêtés depuis 1982.", "l'exposition de Toulouse à l'inondation"),
@@ -266,33 +290,41 @@ test("lead tied : les faits de tête sont NOMMÉS par leur SUJET, et leur consta
       verification("f3", "secondary"),
     ],
   }));
-  const bloc = plan.blocks.find((b) => b.key === "reserves_found")!;
-  assert.match(bloc.fallbackText, /l'exposition de Toulouse à l'inondation/);
-  assert.match(bloc.fallbackText, /le retrait-gonflement des argiles/);
-  assert.equal(bloc.fallbackText.includes("19 arrêtés"), false);   // le détail reste à la carte
-  assert.equal(bloc.fallbackText.includes("aléa moyen"), false);
-  assert.deepEqual(bloc.sourceIds, ["f1", "f2"]); // les faits de tête, pas la réserve secondaire
-  // Chaque sujet doit SURVIVRE à la rédaction : « des risques naturels » les avalerait tous les deux.
-  assert.deepEqual(bloc.requiredPhrases, [
-    "exposition de Toulouse à l'inondation",
-    "retrait-gonflement des argiles",
+  assert.equal(plan.lead.kind, "tied");
+  if (plan.lead.kind !== "tied") return;
+  assert.deepEqual(plan.lead.facts.map((f) => f.factId), ["f1", "f2"]); // les faits de tête, pas la réserve secondaire
+  assert.deepEqual(plan.lead.facts.map((f) => f.subject), [
+    "l'exposition de Toulouse à l'inondation",
+    "le retrait-gonflement des argiles",
   ]);
+  assert.equal(JSON.stringify(plan.lead).includes("19 arrêtés"), false);
 });
 
-test("lead none : le bloc des réserves N'EXISTE PAS (il n'aurait plus rien à dire)", () => {
+test("lead none : AUCUNE démarche prioritaire (il n'y aurait rien à orienter)", () => {
   const plan = buildConclusionPlan(baseInput({
     shownFacts: [verification("f1", "secondary"), verification("f2", "secondary")],
   }));
   assert.equal(plan.lead.kind, "none");
-  assert.equal(plan.blocks.some((b) => b.key === "reserves_found"), false);
+  assert.equal(plan.priorityControl, null);
 });
 
-test("les sourceIds d'un bloc viennent du déterministe", () => {
+test("un fait de tête SANS action ne produit aucune démarche (jamais un sujet nu en repli)", () => {
+  // Un `unknown` scopé peut n'avoir aucune action à mener. Plutôt que retomber sur le sujet — le défaut
+  // d'origine, « Ce qu'impose le sol argileux. », qui ne dit aucune démarche —, le bloc disparaît.
+  const plan = buildConclusionPlan(baseInput({
+    shownFacts: [unknownSansAction("u1", "decision_critical"), verification("f2", "secondary")],
+  }));
+  assert.equal(plan.lead.kind, "single");
+  assert.equal(plan.priorityControl, null);
+});
+
+test("les sourceIds viennent du déterministe (bloc ET démarche prioritaire)", () => {
   const plan = buildConclusionPlan(baseInput({
     shownFacts: [verification("f1", "structuring")],
     uncovered: [MER],
   }));
-  assert.deepEqual(plan.blocks.find((b) => b.key === "reserves_found")!.sourceIds, ["f1"]);
+  // `sourceIds` porte le lien vers la carte source (phase 2 : le raccourci cliquable).
+  assert.deepEqual(plan.priorityControl!.sourceIds, ["f1"]);
   assert.deepEqual(plan.blocks.find((b) => b.key === "unexamined_hard_constraints")!.sourceIds, ["nearSea"]);
 });
 
@@ -512,13 +544,14 @@ test("gate : verdict + deux réserves secondaires (lead none) -> non", () => {
   assert.equal(shouldGenerateNarrative(plan), false);
 });
 
-test("gate : verdict + deux réserves dont une domine -> non (UN registre, rien à articuler)", () => {
+test("gate : verdict + deux réserves dont une domine -> non (AUCUN registre rédigeable)", () => {
   // La règle est « plusieurs éléments DÉJÀ HIÉRARCHISÉS à articuler », jamais « du texte à embellir ».
-  // Un seul registre rédigeable n'articule rien : le déterministe le dit très bien tout seul.
+  // Les réserves ne sont plus un registre rédigé (leur démarche est déterministe) : il ne reste ici
+  // rien à générer du tout.
   const plan = buildConclusionPlan(baseInput({
     shownFacts: [verification("f1", "decision_critical"), verification("f2", "secondary")],
   }));
-  assert.equal(plan.blocks.filter((b) => b.generable).length, 1);
+  assert.equal(plan.blocks.filter((b) => b.generable).length, 0);
   assert.equal(shouldGenerateNarrative(plan), false);
 });
 
@@ -531,11 +564,16 @@ test("gate : verdict + trois réserves secondaires -> non (aucun registre : le l
   assert.equal(shouldGenerateNarrative(plan), false);
 });
 
-test("gate : une réserve qui domine + une contrainte non examinée -> oui (DEUX registres)", () => {
+// LA SURFACE DE GÉNÉRATION SE RÉDUIT AVEC LE RÉSIDUEL. Les réserves comptaient pour un registre
+// rédigeable : leur strate écrite ayant cédé la place à une démarche déterministe, un dossier
+// « réserves + contrainte non examinée » n'a plus qu'UN registre à écrire, et la gate le refuse. C'est
+// l'effet voulu : rien à articuler entre deux registres quand il n'en reste qu'un.
+test("gate : une réserve qui domine + une contrainte non examinée -> non (le résiduel n'est plus un registre)", () => {
   const plan = buildConclusionPlan(baseInput({
     uncovered: [MER], shownFacts: [verification("f1", "decision_critical"), verification("f2", "secondary")],
   }));
-  assert.equal(shouldGenerateNarrative(plan), true);
+  assert.deepEqual(plan.blocks.filter((b) => b.generable).map((b) => b.key), ["unexamined_hard_constraints"]);
+  assert.equal(shouldGenerateNarrative(plan), false);
 });
 
 test("gate : verdict + deux registres non-verdict -> oui", () => {
@@ -543,9 +581,11 @@ test("gate : verdict + deux registres non-verdict -> oui", () => {
   assert.equal(shouldGenerateNarrative(plan), true);
 });
 
-test("gate : verdict + contrainte dure non examinée + réserves -> oui", () => {
+test("gate : contrainte dure non examinée + réserves + priorités non couvertes -> oui (DEUX registres)", () => {
+  // Les deux registres restants sont deux ABSENCES DE COUVERTURE de natures différentes : là, il y a
+  // bien quelque chose à articuler. Les réserves ne pèsent plus dans ce compte.
   const plan = buildConclusionPlan(baseInput({
-    uncovered: [MER], shownFacts: [verification("f1", "structuring")],
+    uncovered: [MER], uncoveredPriorities: [AIR], shownFacts: [verification("f1", "structuring")],
   }));
   assert.equal(shouldGenerateNarrative(plan), true);
 });
@@ -597,8 +637,36 @@ function tradeoff(tier: MaterialityTier = "structuring"): FactComposition {
     headlineSubject: "l'exposition aux fortes chaleurs",
     summary: "Les hivers d'Antibes comptent parmi les plus doux du pays, et l'exposition aux fortes chaleurs estivales y appelle un arbitrage.",
     favorableSide: { label: "Ce qui correspond", statement: "doux", evidence: [], ruleIds: ["r1"], factIds: [] },
-    unfavorableSide: { label: "Ce qui appelle un arbitrage", statement: "chaud", evidence: [], ruleIds: ["r2"], factIds: ["f-ch"] },
+    // Le côté défavorable porte l'ACTION (le vrai patron la restaure au grain adresse : un mismatch
+    // absorbé n'en porte pas). C'est elle, et elle seule, que reprend `priorityControl`.
+    unfavorableSide: {
+      label: "Ce qui appelle un arbitrage", statement: "chaud", evidence: [], ruleIds: ["r2"], factIds: ["f-ch"],
+      action: { type: "verifier_sur_place", label: "Regardez comment le logement tient l'été" },
+    },
     absorbedFactIds: ["f-ch"], referencedRuleIds: ["r1", "r2"], materialityTier: tier, displaySection: "compromises",
+  };
+}
+
+// DEUX VÉRIFICATIONS QUI SE MÈNENT ENSEMBLE (argiles + PPR sécheresse) : le seul patron dont la démarche
+// prioritaire compte DEUX actions, une par item, dans l'ordre de la carte.
+function grouped(tier: MaterialityTier = "structuring"): FactComposition {
+  return {
+    id: "31555:composition-argiles-ppr", kind: "grouped_verification", patternId: "clay_regulation_grouped",
+    title: "Un sol argileux et la règle qui l'encadre",
+    headlineSubject: "ce qu'impose le sol argileux",
+    summary: "Le sol argileux expose le bâti à cette adresse, et un plan de prévention sécheresse y encadre les travaux.",
+    items: [
+      {
+        label: "L'exposition du sol", statement: "argiles", evidence: [], ruleIds: ["r-argiles"], factIds: ["f-argiles"],
+        action: { type: "verifier_sur_place", label: "Regardez les signes visibles sur le bâti" },
+      },
+      {
+        label: "La règle applicable", statement: "ppr", evidence: [], ruleIds: ["r-ppr"], factIds: ["f-ppr"],
+        action: { type: "obtenir_document", label: "Lisez le règlement de la zone en mairie" },
+      },
+    ],
+    absorbedFactIds: ["f-argiles", "f-ppr"], referencedRuleIds: ["r-argiles", "r-ppr"],
+    materialityTier: tier, displaySection: "verifications",
   };
 }
 function shared(tier: MaterialityTier = "structuring"): FactComposition {
@@ -658,14 +726,15 @@ test("lead : un shared_evidence structurant ne mène JAMAIS la conclusion, il a 
   assert.ok(bloc);
   assert.match(bloc!.fallbackText, /deux de vos priorités/);
   assert.deepEqual(bloc!.sourceIds, ["01001:composition-taille-consequences", "f-a", "f-b"]);
-  // Placement : après unexamined_hard_constraints, avant reserves_found.
+  // Placement : après unexamined_hard_constraints, avant les priorités non couvertes.
   const plan2 = buildConclusionPlan(baseInput({
     shownFacts: [verification("f1", "structuring")],
     shownCompositions: [shared("structuring")],
     uncovered: [MER],
+    uncoveredPriorities: [AIR],
   }));
   assert.deepEqual(plan2.blocks.map((b) => b.key), [
-    "verdict", "unexamined_hard_constraints", "compositions_found", "reserves_found",
+    "verdict", "unexamined_hard_constraints", "compositions_found", "uncovered_priorities",
   ]);
 });
 
@@ -678,8 +747,9 @@ test("hash : deux plans identiques sauf shownCompositions -> hashes différents"
 test("shownCompositions vide -> plan strictement identique à l'existant (non-régression)", () => {
   const plan = buildConclusionPlan(baseInput({ shownFacts: [verification("f1", "structuring")], uncovered: [MER], uncoveredPriorities: [AIR] }));
   assert.deepEqual(plan.blocks.map((b) => b.key), [
-    "verdict", "unexamined_hard_constraints", "reserves_found", "uncovered_priorities",
+    "verdict", "unexamined_hard_constraints", "uncovered_priorities",
   ]);
+  assert.deepEqual(plan.priorityControl, { sourceIds: ["f1"], actions: [{ label: "Vérifier sur place" }] });
 });
 
 // ── La primitive de tri des candidats ──────────────────────────────────────────
@@ -970,7 +1040,7 @@ test("consommation NARRATIVE seulement : les comptes ne bougent pas", () => {
 
 // ── La strate résiduelle ───────────────────────────────────────────────────────
 
-test("la strate se reconstruit sur ce que le headline n'a pas consommé", () => {
+test("la démarche se reconstruit sur ce que le headline n'a pas consommé", () => {
   const plan = buildConclusionPlan(baseInput({
     coverage: "high", orientation: "minor_reserves", hasFavorable: false,
     shownFacts: [
@@ -981,13 +1051,12 @@ test("la strate se reconstruit sur ce que le headline n'a pas consommé", () => 
     reservesShown: 3, majorReserveCount: 3,
   }));
   assert.equal(plan.verdict.headline.consumedFactIds.includes("f1"), true);
-  const strate = plan.blocks.find((b) => b.key === "reserves_found")!;
-  assert.equal(strate.fallbackText.includes("la chaleur estivale"), false);
-  assert.match(strate.fallbackText, /argiles/);
-  assert.match(strate.fallbackText, /bruit/);
+  // Le sujet déjà nommé par le héros ne revient pas : la démarche part du premier dominant RESTANT.
+  assert.deepEqual(plan.priorityControl!.sourceIds, ["f2"]);
+  assert.deepEqual(plan.priorityControl!.actions, [{ label: "Vérifier sur place" }]);
 });
 
-test("même pool : la strate est la SUITE, jamais une seconde hiérarchie", () => {
+test("même pool : l'ordre vit dans l'étiquette de l'UI, jamais dans le corps", () => {
   const plan = buildConclusionPlan(baseInput({
     coverage: "high", orientation: "minor_reserves", hasFavorable: false,
     shownFacts: [
@@ -997,15 +1066,14 @@ test("même pool : la strate est la SUITE, jamais une seconde hiérarchie", () =
     ],
     reservesShown: 3, majorReserveCount: 3,
   }));
-  const strate = plan.blocks.find((b) => b.key === "reserves_found")!;
-  // Le héros vient de désigner LE principal point : annoncer que deux autres « pèsent le plus »
-  // ouvrirait une hiérarchie concurrente.
-  assert.equal(strate.fallbackText.includes("pèsent le plus"), false);
-  assert.match(strate.fallbackText, /^À regarder ensuite/);
-  assert.deepEqual(strate.allowedNumbers, []);
+  // Le héros vient de désigner LE principal point de CE pool : l'UI rendra « À contrôler ensuite »,
+  // depuis `consumedFrom`. Les actions, elles, ne portent aucune formule d'ordre ni de hiérarchie.
+  assert.equal(plan.verdict.headline.consumedFrom, "reserves");
+  const labels = plan.priorityControl!.actions.map((a) => a.label).join(" ");
+  assert.doesNotMatch(labels, /À regarder|ensuite|pèsent le plus/);
 });
 
-test("pool différent : la strate garde son moule de poids", () => {
+test("pool différent : la démarche existe quand même (le pool des réserves reste entier)", () => {
   const plan = buildConclusionPlan(baseInput({
     orientation: "arbitration",
     shownFacts: [
@@ -1015,12 +1083,12 @@ test("pool différent : la strate garde son moule de poids", () => {
     ],
     mismatchTotal: 1, mismatchShown: 1, reservesShown: 2, majorReserveCount: 2,
   }));
+  // consumedFrom « mismatches » (pas « reserves ») -> l'UI rendra « À contrôler en priorité ».
   assert.equal(plan.verdict.headline.consumedFrom, "mismatches");
-  const strate = plan.blocks.find((b) => b.key === "reserves_found")!;
-  assert.match(strate.fallbackText, /^À regarder d'abord : /);
+  assert.deepEqual(plan.priorityControl!.sourceIds, ["f1"]); // le premier dominant, aucun n'a été consommé
 });
 
-test("pas de résiduel, pas de strate", () => {
+test("pas de résiduel, pas de démarche", () => {
   const plan = buildConclusionPlan(baseInput({
     coverage: "high", orientation: "minor_reserves", hasFavorable: false,
     shownFacts: [verification("f1", "decision_critical", "constat f1", "la chaleur estivale")],
@@ -1028,7 +1096,7 @@ test("pas de résiduel, pas de strate", () => {
   }));
   assert.equal(plan.verdict.headline.kind, "named_issues");
   assert.equal(plan.lead.kind, "none");
-  assert.equal(plan.blocks.some((b) => b.key === "reserves_found"), false);
+  assert.equal(plan.priorityControl, null);
 });
 
 test("un headline de posture ne consomme rien : la strate est complète", () => {
@@ -1193,9 +1261,9 @@ test("le singulier est accordé partout : un écart, un point, un constat", () =
   assert.equal(unConstat.verdict.detail, "Un constat reste à contrôler avant de conclure.");
 });
 
-// ── La strate de poids : un moule, deux variantes d'ordre (lot D) ────────────────
+// ── La démarche prioritaire : déterministe, verbatim, une ou deux lignes ─────────
 
-test("strate : « ensuite » quand le héros a déjà nommé un point de CE registre", () => {
+test("démarche : consumedFrom « reserves » (le héros a déjà nommé un point de CE registre) -> l'UI rendra « À contrôler ensuite »", () => {
   const plan = buildConclusionPlan(baseInput({
     coverage: "high", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0,
     shownFacts: [
@@ -1204,14 +1272,12 @@ test("strate : « ensuite » quand le héros a déjà nommé un point de CE regi
     ],
     reservesShown: 2, majorReserveCount: 2,
   }));
-  assert.equal(plan.verdict.headline.consumedFrom, "reserves");
-  assert.equal(
-    plan.blocks.find((b) => b.key === "reserves_found")!.fallbackText,
-    "À regarder ensuite : le retrait-gonflement des argiles.",
-  );
+  assert.equal(plan.verdict.headline.consumedFrom, "reserves"); // -> étiquette « À contrôler ensuite »
+  // La démarche porte le geste du sujet résiduel, pas son nom (l'ordre, lui, est dans l'étiquette).
+  assert.deepEqual(plan.priorityControl, { sourceIds: ["f2"], actions: [{ label: "Vérifier sur place" }] });
 });
 
-test("strate : « d'abord » quand le héros a puisé dans un AUTRE pool", () => {
+test("démarche : consumedFrom « mismatches » (le héros a puisé dans un AUTRE pool) -> l'UI rendra « À contrôler en priorité »", () => {
   // Le héros nomme des mismatchs ; les réserves sont un pool distinct, que personne n'a encore ouvert.
   const plan = buildConclusionPlan(baseInput({
     orientation: "arbitration",
@@ -1221,27 +1287,84 @@ test("strate : « d'abord » quand le héros a puisé dans un AUTRE pool", () =>
     ],
     mismatchTotal: 1, mismatchShown: 1, reservesShown: 1,
   }));
-  assert.equal(plan.verdict.headline.consumedFrom, "mismatches");
-  assert.equal(
-    plan.blocks.find((b) => b.key === "reserves_found")!.fallbackText,
-    "À regarder d'abord : l'exposition à l'inondation.",
-  );
+  assert.equal(plan.verdict.headline.consumedFrom, "mismatches"); // -> étiquette « À contrôler en priorité »
+  assert.deepEqual(plan.priorityControl, { sourceIds: ["f1"], actions: [{ label: "Vérifier sur place" }] });
 });
 
-// Le défaut que le lot D ferme : une composition entrait en strate par son `title` (capitalisé, écrit
-// pour coiffer une carte) ou par son `summary` (la carte recopiée).
-test("strate : une composition est nommée par son sujet, jamais par son titre ni son résumé", () => {
+// Une composition ne portait qu'un SUJET dans la strate (« Ce qu'impose le sol argileux. ») : rien à
+// faire, et sous un verdict d'arbitrage un second point défavorable. Elle porte maintenant les gestes.
+test("démarche : un tradeoff en tête reprend l'action de son côté DÉFAVORABLE, jamais son titre ni son résumé", () => {
   const plan = buildConclusionPlan(baseInput({
     coverage: "high", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2,
     shownFacts: [verification("f9", "secondary")],
     shownCompositions: [tradeoff("structuring")],
     reservesShown: 2,
   }));
-  const strate = plan.blocks.find((b) => b.key === "reserves_found")!;
-  assert.equal(strate.fallbackText, "À regarder d'abord : l'exposition aux fortes chaleurs.");
-  assert.equal(strate.fallbackText.includes("Des hivers doux"), false); // le title
-  assert.equal(strate.fallbackText.includes("comptent parmi les plus doux"), false); // le summary
-  assert.deepEqual(strate.requiredPhrases, ["exposition aux fortes chaleurs"]);
+  // La composition ET ses faits absorbés : la phase 2 (raccourci cliquable) doit pouvoir viser la carte.
+  assert.deepEqual(plan.priorityControl, {
+    sourceIds: ["06004:composition-climat-saisons", "f-ch"],
+    actions: [{ label: "Regardez comment le logement tient l'été" }],
+  });
+  const labels = plan.priorityControl!.actions.map((a) => a.label).join(" ");
+  assert.equal(labels.includes("Des hivers doux"), false);            // le title
+  assert.equal(labels.includes("comptent parmi les plus doux"), false); // le summary
+});
+
+test("démarche : un grouped_verification en tête rend DEUX actions, une par item, dans l'ordre de la carte", () => {
+  const plan = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2,
+    shownFacts: [verification("f9", "secondary")],
+    shownCompositions: [grouped("decision_critical")],
+    reservesShown: 2,
+  }));
+  assert.deepEqual(plan.priorityControl, {
+    sourceIds: ["31555:composition-argiles-ppr", "f-argiles", "f-ppr"],
+    actions: [
+      { label: "Regardez les signes visibles sur le bâti" },
+      { label: "Lisez le règlement de la zone en mairie" },
+    ],
+  });
+});
+
+test("démarche : le plafond tronque le DERNIER candidat, y compris une composition (les faits passent avant)", () => {
+  // `rankLeadCandidates` liste les FAITS avant les compositions : à égalité de tier, le fait ouvre la
+  // démarche et la composition n'apporte que son premier geste. Le plafond tronque donc le dernier
+  // candidat servi, exactement comme il tronque une composition à trois items. Les deux cartes restent
+  // sources : chacune a fourni une ligne.
+  const plan = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2,
+    shownFacts: [
+      verification("f7", "structuring", "c7", "l'inondation", "Consultez l'exposition de l'adresse aux inondations"),
+      verification("f9", "secondary"),
+    ],
+    shownCompositions: [grouped("structuring")],
+    reservesShown: 3,
+  }));
+  assert.equal(plan.lead.kind, "tied");
+  assert.deepEqual(plan.priorityControl!.actions, [
+    { label: "Consultez l'exposition de l'adresse aux inondations" },
+    { label: "Regardez les signes visibles sur le bâti" },
+  ]);
+  assert.deepEqual(plan.priorityControl!.sourceIds, ["f7", "31555:composition-argiles-ppr", "f-argiles", "f-ppr"]);
+});
+
+test("démarche : DEUX actions au plus (une orientation, jamais une checklist)", () => {
+  const troisItems = grouped("decision_critical") as Extract<FactComposition, { kind: "grouped_verification" }>;
+  troisItems.items = [
+    ...troisItems.items,
+    {
+      label: "Un troisième item", statement: "s3", evidence: [], ruleIds: ["r3"], factIds: ["f3"],
+      action: { type: "demander_confirmation", label: "Demandez confirmation au vendeur" },
+    },
+  ];
+  const plan = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2,
+    shownFacts: [verification("f9", "secondary")],
+    shownCompositions: [troisItems],
+    reservesShown: 2,
+  }));
+  assert.equal(plan.priorityControl!.actions.length, 2);
+  assert.equal(plan.priorityControl!.actions.some((a) => a.label.includes("vendeur")), false);
 });
 
 // « Aucune de vos conditions n'est contredite ici » rassure sur un risque que le lecteur n'a jamais

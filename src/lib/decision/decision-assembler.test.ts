@@ -108,9 +108,11 @@ test("sans contrainte dure : la conclusion nomme les priorités non couvertes et
   // donnée ni un défaut. La correspondance graduée fonctionne sur les seules préférences.
   assert.equal(d.conclusion.includes("aucune condition"), false);
   assert.match(d.conclusion, /pas encore couvertes/i);
-  // Couverture nulle : le héros reste en POSTURE et ne consomme rien de ce registre, donc la strate
-  // ouvre la marche (« d'abord ») et nomme le fait qui domine par son SUJET.
-  assert.match(d.conclusion, /À regarder d'abord : un point à vérifier\./);
+  // Couverture nulle : le héros reste en POSTURE et ne consomme rien de ce registre. Le fait qui domine
+  // n'entre plus dans la narration : `conclusion` est le join des blocs RÉDIGÉS, et la démarche à mener
+  // est déterministe, hors de ce texte. Elle vit sur le plan, avec l'action verbatim de la carte.
+  assert.equal(d.conclusion.includes("Un point à vérifier."), false);
+  assert.deepEqual(d.narrativePlan.priorityControl, { sourceIds: ["v"], actions: [{ label: "doc" }] });
   assert.match(d.narrativePlan.verdict.headline.text, /Toulouse/); // la commune est NOMMÉE, jamais « ce lieu »
 });
 

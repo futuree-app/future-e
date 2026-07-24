@@ -6,8 +6,9 @@
 //   1. verdict                     l'état de conclusion, borné au périmètre réellement examiné
 //   2. unexamined_hard_constraints une condition ABSOLUE n'a pas pu être testée : elle diminue la
 //                                  valeur du verdict, donc elle le suit immédiatement
-//   3. reserves_found              ce qu'on a examiné et qui appelle un regard
-//   4. uncovered_priorities        réduit la personnalisation, n'invalide pas le verdict
+//   3. uncovered_priorities        réduit la personnalisation, n'invalide pas le verdict
+// La prochaine démarche à mener (l'ancien `reserves_found`) n'est PLUS un registre généré : c'est
+// `priorityControl`, déterministe, porté par le plan (voir son type), rendu entre 2 et 3.
 // Une contrainte dure non examinée et une préférence non couverte sont deux absences de couverture.
 // Elles ne partagent JAMAIS le même bloc.
 import type { DecisionFact, ConclusionState, MaterialityTier, UncoveredConstraint } from "./decision-fact.ts";
@@ -16,7 +17,7 @@ import type { ProjectPosture } from "../user-project.ts";
 import type { CoverageLevel, Orientation } from "./criteria-registry.ts";
 import { deCommune, aCommune } from "../typography.ts";
 
-export type BlockKey = "verdict" | "unexamined_hard_constraints" | "compositions_found" | "reserves_found" | "uncovered_priorities";
+export type BlockKey = "verdict" | "unexamined_hard_constraints" | "compositions_found" | "uncovered_priorities";
 
 export type NarrativeBlock = {
   key: BlockKey;
@@ -42,8 +43,8 @@ export type NarrativeBlock = {
 //
 // `subject` est CE QUI S'ÉCRIT ; `topic` reste l'identité du candidat (tri, journalisation). Pour un
 // fait les deux coïncident ; pour une composition le `topic` est son `title`, écrit pour coiffer une
-// carte, donc capitalisé et long : servi tel quel après un deux-points, il mettait une majuscule au
-// milieu de la phrase (« À regarder ensuite : Un sol argileux, et la règle qui l'encadre. »).
+// carte, donc capitalisé et long : servi tel quel dans la phrase-liste de la strate, il y insérait une
+// capitale au mauvais endroit (« … et Un sol argileux, et la règle qui l'encadre. »).
 export type LeadSelection =
   | { kind: "single"; factId: string; topic: string; subject: string; statement: string; materialityTier: MaterialityTier }
   | { kind: "tied"; facts: { factId: string; topic: string; subject: string }[]; materialityTier: MaterialityTier }
@@ -60,10 +61,10 @@ export type VerdictTone = "critical" | "caution" | "neutral" | "positive";
 // faits (y compris les absorbés d'une composition) vont dans `consumedFactIds` ; ceux de compositions
 // dans `consumedCompositionIds`.
 //
-// `consumedFrom` dit DANS QUEL POOL le headline a puisé. La strate voisine en a besoin : si elle
-// puise dans le même pool, elle est la SUITE d'une hiérarchie déjà ouverte (« À regarder ensuite »),
-// et non une seconde hiérarchie globale (« Parmi ces 4 points, 2 pèsent le plus ») qui contredirait
-// le « principal point » que le héros vient de désigner.
+// `consumedFrom` dit DANS QUEL POOL le headline a puisé. La strate voisine en a besoin, et l'UI aussi :
+// si le héros a déjà nommé un point des RÉSERVES, la strate en est la SUITE, et son étiquette le dit
+// (« À contrôler ensuite » plutôt que « Contrôle prioritaire »). Sans ça, elle ouvrirait une seconde
+// hiérarchie qui contredirait le « principal point » que le héros vient de désigner.
 export type VerdictHeadline = {
   kind: "named_issues" | "posture";
   text: string;
@@ -93,6 +94,24 @@ export type VerdictPresentation = { headline: VerdictHeadline; detail: string };
 export const HEADLINE_MAX_ISSUES = 2;
 export const HEADLINE_MAX_CHARS = 130;
 
+// LA PROCHAINE DÉMARCHE CONCRÈTE, DÉTERMINISTE (jamais générée par le modèle). La strate résiduelle ne
+// nommait qu'un SUJET abstrait (« Ce qu'impose le sol argileux. ») : sans démarche, elle ne remplissait
+// plus sa fonction, et sous un verdict d'arbitrage elle se lisait comme un second point défavorable. Elle
+// porte désormais l'ACTION à mener, tirée MOT POUR MOT de l'`action` du fait/composition de tête — source
+// UNIQUE de vérité, déjà relue et adaptée à la posture (la recopier dans un champ éditorial divergerait).
+// Une ou deux actions au plus (une orientation, pas une checklist). Le bloc n'est PAS généré : le modèle
+// paraphraserait « lisez le règlement » et une action doit être exacte. Il n'existe pas si le ou les faits
+// de tête ne portent aucune action.
+export type PriorityControl = {
+  // Les ancres permettant de retrouver et de mettre en évidence les CARTES VISIBLES d'où viennent les
+  // actions retenues (phase 2 : le raccourci cliquable). Ce ne sont pas exactement les faits qui portent
+  // chaque action : une composition est UNE carte qui a absorbé ses faits élémentaires, donc elle porte
+  // son propre id ET ses `absorbedFactIds` — ces faits-là n'ont aucune carte propre où pointer. À
+  // l'inverse, un candidat de tête dont aucune action n'a survécu au plafond n'entre pas ici.
+  sourceIds: string[];
+  actions: { label: string }[];
+};
+
 export type ConclusionNarrativePlan = {
   scope: "commune" | "commune+adresse";
   communeNom: string;
@@ -101,6 +120,10 @@ export type ConclusionNarrativePlan = {
   blocks: NarrativeBlock[];
   reservesCount: number; // faits AFFICHÉS (post-caps), jamais faits émis
   lead: LeadSelection;
+  // La prochaine démarche concrète, déterministe. Distincte de `lead` (qui choisit QUEL sujet vient
+  // ensuite) : elle dit QUOI FAIRE à son propos, depuis l'action déjà écrite sur le fait. `null` quand
+  // le fait de tête ne porte aucune action (rien à orienter).
+  priorityControl: PriorityControl | null;
   verdict: VerdictPresentation;
   verdictLabel: string;   // le statut qui coiffe la carte, dérivé de la MÊME table que la phrase
   verdictTone: VerdictTone;
@@ -163,6 +186,82 @@ function numberForms(n: number): string[] {
 
 function reserves(facts: DecisionFact[]): DecisionFact[] {
   return facts.filter((f) => RESERVE_ROLES.has(f.role));
+}
+
+// L'action déjà écrite sur un fait (verification, ou unknown scopé) : sa `label` est le geste réel, relu
+// et adapté à la posture. Un compromis n'en porte pas.
+function factActionLabel(f: DecisionFact): string | null {
+  return (f.role === "verification" || f.role === "unknown") && f.action ? f.action.label : null;
+}
+
+// DEUX DÉMARCHES AU PLUS. Une orientation, jamais une checklist : au-delà, la ligne cesse de dire par où
+// commencer. Le rendu tient déjà deux lignes (« Puis … »).
+const MAX_PRIORITY_ACTIONS = 2;
+
+// La forme COMPARABLE d'un libellé. Deux règles voisines peuvent prescrire le même geste dans les mêmes
+// mots (« Vérifier sur place ») : l'afficher deux fois ferait lire deux démarches là où il n'y en a
+// qu'une. La comparaison seule est normalisée — la ligne affichée reste le libellé d'origine, mot pour mot.
+function actionKey(label: string): string {
+  return label.trim().toLowerCase().replace(/[.!?…]+$/, "");
+}
+
+// Les actions d'UN candidat de tête, avec l'ancre de la ou des cartes qui les portent (cf. `sourceIds`).
+// Une composition expose les actions de ses éléments (grouped) ou de son côté défavorable (tradeoff),
+// dans l'ordre de la carte. `null` quand ce candidat n'a aucune démarche à proposer.
+function candidateActions(
+  id: string, shownFacts: DecisionFact[], shownCompositions: FactComposition[],
+): { anchors: string[]; labels: string[] } | null {
+  const comp = shownCompositions.find((c) => c.id === id);
+  if (comp) {
+    const labels =
+      comp.kind === "grouped_verification" ? comp.items.flatMap((i) => (i.action ? [i.action.label] : []))
+      : comp.kind === "tradeoff" ? (comp.unfavorableSide.action ? [comp.unfavorableSide.action.label] : [])
+      : [];
+    return labels.length > 0 ? { anchors: [comp.id, ...comp.absorbedFactIds], labels } : null;
+  }
+  const fact = shownFacts.find((f) => f.id === id);
+  if (!fact) return null;
+  const label = factActionLabel(fact);
+  return label ? { anchors: [fact.id], labels: [label] } : null;
+}
+
+// LA PROCHAINE DÉMARCHE, dérivée des faits/compositions DE TÊTE, MOT POUR MOT depuis l'action existante.
+//
+// TOUS les candidats de tête sont parcourus, dans l'ordre déterministe (qui EST l'ordre éditorial des
+// sections). Ne prendre que le premier fabriquait une hiérarchie que le moteur ne connaît pas : `tied`
+// veut dire À ÉGALITÉ, et une `grouped_verification` obtenait déjà deux lignes là où deux faits ex æquo
+// n'en obtenaient qu'une — même place dans le rendu, deux traitements. On dédoublonne, et on s'arrête à
+// deux : une composition qui fournit ses deux gestes consomme naturellement le plafond, et le candidat
+// suivant ne remonte pas (sa carte propose déjà les deux prochaines démarches).
+//
+// `null` s'il n'y a rien de concret à orienter : le bloc disparaît plutôt que de retomber sur un sujet nu.
+function priorityControlFrom(
+  lead: LeadSelection, shownFacts: DecisionFact[], shownCompositions: FactComposition[],
+): PriorityControl | null {
+  const topIds = lead.kind === "single" ? [lead.factId]
+    : lead.kind === "tied" ? lead.facts.map((f) => f.factId)
+    : [];
+
+  const sourceIds: string[] = [];
+  const actions: { label: string }[] = [];
+  const seen = new Set<string>();
+  for (const id of topIds) {
+    if (actions.length >= MAX_PRIORITY_ACTIONS) break;
+    const candidate = candidateActions(id, shownFacts, shownCompositions);
+    if (!candidate) continue;
+    const avant = actions.length;
+    for (const label of candidate.labels) {
+      if (actions.length >= MAX_PRIORITY_ACTIONS) break;
+      const key = actionKey(label);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      actions.push({ label });
+    }
+    // Une carte dont AUCUNE action n'a survécu (doublon, ou plafond déjà atteint) n'est pas une source :
+    // pointer vers elle enverrait le lecteur sur une carte qui ne dit rien de ce qu'il vient de lire.
+    if (actions.length > avant) sourceIds.push(...candidate.anchors);
+  }
+  return actions.length > 0 ? { sourceIds, actions } : null;
 }
 
 // Les `statement` des règles ne finissent pas tous par un point. Le repli est du texte AFFICHÉ : il ne
@@ -575,8 +674,11 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
     // « plusieurs de vos autres priorités » sans dire lesquelles. Repli sur l'ancien registre quand aucun
     // alignment n'est affiché (le compte peut être >0 sur un satisfied de poids 1, silencieux).
     const favSujets = alignmentCandidates(input.shownFacts).slice(0, HEADLINE_MAX_ISSUES).map((c) => c.subject);
+    // « écart(s) relevé(s) » s'accorde sur le COMPTE (m), comme `ecart` juste au-dessus : un mismatch unique
+    // routé par l'arbitrage (cas fréquent depuis le lot D) donnait « les écarts relevés » au singulier réel.
+    const ecartsReleves = m > 1 ? "les écarts relevés" : "l'écart relevé";
     const arbitrage = favSujets.length > 0
-      ? `${capitalize(joinFr(favSujets))} ${favSujets.length > 1 ? "répondent" : "répond"} en revanche à votre projet. La décision se joue entre ces correspondances et les écarts relevés.`
+      ? `${capitalize(joinFr(favSujets))} ${favSujets.length > 1 ? "répondent" : "répond"} en revanche à votre projet. La décision se joue entre ces correspondances et ${ecartsReleves}.`
       : input.hasFavorable
         ? `${nom} répond bien à ${input.favorableCount >= 2 ? "plusieurs de vos autres priorités" : "une autre de vos priorités"}. ${ecart} à peser contre ce que vous y gagnez.`
       // « Aucune de vos conditions n'est contredite ici » rassure sur un risque INEXISTANT quand le
@@ -792,7 +894,7 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
   if (input.conclusionState === "project_not_structured") {
     return {
       scope: input.scope, communeNom: input.communeNom, conclusionState: input.conclusionState,
-      posture: input.posture, blocks, reservesCount: 0, lead: { kind: "none" }, verdict: v,
+      posture: input.posture, blocks, reservesCount: 0, lead: { kind: "none" }, priorityControl: null, verdict: v,
       verdictLabel: v.label, verdictTone: v.tone,
     };
   }
@@ -827,10 +929,6 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
   // secondaires serait faux. On compte lead.factIds, jamais rs.length.
   const rs = reserves(input.shownFacts);
   const lead = selectResidualLead(input.shownFacts, input.shownCompositions, v.headline);
-  // Le héros a-t-il déjà couronné un point de CE pool ? Alors cette strate est la SUITE d'une
-  // hiérarchie ouverte, et n'en ouvre pas une seconde : « deux pèsent le plus » juste après « le
-  // principal point à contrôler » ferait lire deux classements concurrents.
-  const suiteDuHeros = v.headline.consumedFrom === "reserves";
 
   // LES COMPOSITIONS NOMMÉES. Une composition désignée lead single est déjà narrée : la re-narrer ici
   // la dirait deux fois (le défaut exact que la composition existe pour éviter). Placement : une
@@ -852,46 +950,11 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
     });
   }
 
-  // UN SEUL MOULE, DEUX VARIANTES D'ORDRE (lot D). Quatre moules coexistaient ici, dont deux qui
-  // faisaient le travail de quelqu'un d'autre :
-  //
-  //   « Parmi ces quatre points, deux pèsent le plus : … » demandait au lecteur de tenir deux comptes
-  //   en tête pour lui dire quoi regarder d'abord, et le compte est DÉJÀ dit deux fois autour (le
-  //   détail du verdict, et l'intertitre des cartes). Trois occurrences du même nombre dans un écran
-  //   d'une minute.
-  //
-  //   « Un point pèse plus que les autres. {statement} » recopiait la carte située juste dessous, ce
-  //   que le commentaire de selectResidualLead interdit explicitement pour les sujets.
-  //
-  // Reste une phrase de NAVIGATION, qui ne recompte rien et ne recouronne rien. « ensuite » quand le
-  // héros a déjà nommé le principal constat de ce registre ; « d'abord » quand il n'en a nommé aucun
-  // (héros de posture, ou héros qui a puisé dans les mismatchs ou la contrainte dure).
-  const sujetsDeLaStrate =
-    lead.kind === "single" ? [lead.subject]
-    : lead.kind === "tied" ? lead.facts.map((f) => f.subject)
-    : [];
-  if (sujetsDeLaStrate.length > 0) {
-    blocks.push({
-      key: "reserves_found",
-      fallbackText: `${suiteDuHeros ? "À regarder ensuite" : "À regarder d'abord"} : ${joinFr(sujetsDeLaStrate)}.`,
-      sourceIds: lead.kind === "single" ? [lead.factId] : lead.kind === "tied" ? lead.facts.map((f) => f.factId) : [],
-      // Chaque sujet doit SURVIVRE : c'est le seul endroit du dossier où le lecteur apprend, en une
-      // phrase, CE QUI pèse. Un « plusieurs risques naturels » qui les avalerait ramènerait le bloc à
-      // son défaut d'origine (parler de lui-même), et aucune autre validation ne le verrait.
-      //
-      // L'exigence vaut maintenant AUSSI pour un sujet seul. Elle était impossible tant que `single`
-      // portait le `statement` entier : l'exiger mot pour mot réclamait une COPIE, qu'aucun rédacteur
-      // n'écrit et que la sonde a rejetée 3 fois sur 3. Sur un groupe nominal court, elle est tenable.
-      requiredPhrases: sujetsDeLaStrate.map(coreLabel),
-      // AUCUN NOMBRE. Les deux moules n'en portent pas : en autoriser un ouvrirait la porte à un
-      // compte inventé par le modèle, que rien n'irait contredire.
-      allowedNumbers: [],
-      // 340 était la mesure d'un registre. C'est une phrase : trois sujets longs et le préfixe font
-      // ~150, et un plafond bas empêche le modèle d'y ajouter du commentaire.
-      maxChars: 220,
-      generable: true,
-    });
-  }
+  // LE RÉSIDUEL N'EST PLUS UN REGISTRE GÉNÉRÉ. Il ne nommait qu'un sujet abstrait, et le modèle ne peut
+  // pas porter une ACTION (elle doit être exacte). C'est désormais `priorityControl`, DÉTERMINISTE, dérivé
+  // de l'action déjà écrite sur le fait/composition de tête (que `selectResidualLead` a choisi). L'ordre et
+  // la nature vivent dans l'étiquette de l'UI (« À contrôler en priorité / ensuite », depuis consumedFrom).
+  const priorityControl = priorityControlFrom(lead, input.shownFacts, input.shownCompositions);
 
   // LES MISMATCHS NE SONT PLUS UN REGISTRE. Leur matière (les priorités moins bien servies) est
   // nommée par le HEADLINE du verdict, en tête du bloc. Un registre construit, généré, validé et
@@ -918,6 +981,7 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
     blocks,
     reservesCount: rs.length,
     lead,
+    priorityControl,
     verdict: v,
     verdictLabel: v.label,
     verdictTone: v.tone,
@@ -932,6 +996,13 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
 // que le registre des réserves portait alors le DÉCOMPTE, donc de la matière même sans autre registre.
 // Le décompte est parti dans l'intertitre des cartes ; ces repêchages désignaient un bloc qui n'existe
 // plus dans ces cas. Un seul registre rédigeable n'articule rien : le déterministe le dit très bien.
+//
+// L'INVARIANT, à tenir quand un bloc déterministe s'ajoutera au plan : SEULS LES REGISTRES GÉNÉRABLES
+// COMPTENT. Un bloc déterministe — `priorityControl`, le verdict, le headline — ne déclenche JAMAIS la
+// génération : sa matière est déjà écrite, et un tour de modèle ne l'articulerait à rien. C'est pourquoi
+// la sortie du résiduel de la narration (lot D) a mécaniquement rétréci la surface de génération : un
+// dossier « réserves + contrainte non examinée » n'a plus qu'UN registre à écrire. Effet voulu, pas
+// dommage collatéral. Le compter ici rouvrirait un appel LLM sur un dossier qui n'a rien à articuler.
 export function shouldGenerateNarrative(plan: ConclusionNarrativePlan): boolean {
   if (plan.conclusionState === "project_not_structured") return false;
   return plan.blocks.filter((b) => b.generable).length >= 2;
