@@ -276,19 +276,83 @@ test("chaleur AMBIANTE : la verification non déclarée ne touche NI couverture 
   assert.equal(summary.orientation, "favorable"); // la chaleur ambiante n'a pas dégradé le dossier en réserves
 });
 
-test("FEU : la phrase dit un DANGER MÉTÉOROLOGIQUE, jamais une probabilité d'incendie", () => {
+test("FEU, priorité déclarée + danger notable : un MISMATCH, plus une verification (lot feu)", () => {
+  // Le pendant du lot D pour l'incendie : un danger qui s'aggrave et que le lecteur a placé parmi ses
+  // priorités est un ÉCART AU PROJET, pas un constat territorial « au-delà de vos priorités ».
   const r = run(facts({ climat: EXPOSEE }), projetClimat("faible_risque_feu"));
   const f = r.facts.find((x) => x.ruleId === "territoire.climat-feu")!;
-  assert.ok(f.role === "verification");
+  assert.ok(f.role === "mismatch");
+  assert.equal(f.projectKey, "faible_risque_feu");
+  // Le fondement est MONO-AXE : une seule mesure, l'indice forêt-météo.
+  assert.equal(f.basis.kind, "climate_threshold");
+  assert.equal(f.basis.kind === "climate_threshold" && f.basis.measures.length, 1);
+  assert.equal(f.basis.kind === "climate_threshold" && f.basis.measures[0]!.key, "fire_weather_days");
+  // Le héros nomme l'OBJET DU PROJET, et reste MESURÉ : l'indice dit un danger météorologique, pas une
+  // probabilité d'incendie — « à l'abri des feux » promettrait ce que la donnée ne sait pas dire.
+  assert.equal(f.headlineSubject, "un environnement peu exposé aux incendies");
+  assert.doesNotMatch(f.headlineSubject, /à l'abri|sûr|sans risque/);
   assert.match(f.statement, /indice forêt-météo/);
   assert.match(f.statement, /danger météorologique très sévère/);
   assert.match(f.statement, /à 50 à l'horizon 2050/); // le sujet porte « jours »
   assert.doesNotMatch(f.statement, /\d+ jours/);
-  // La convention de signalement vit dans son propre champ, pas dans le constat.
   assert.doesNotMatch(f.statement, /futur•e signale/);
+  // UN MISMATCH N'A NI action NI signalConvention : le constat est établi. Le renvoi au terrain est
+  // restauré par la composition (cf. fact-compositions), jamais porté par le fait.
+  assert.equal("action" in f, false);
+  assert.equal("signalConvention" in f, false);
+  assert.ok(f.limitation?.includes("commune"));
+});
+
+test("FEU, poids 1 + danger défavorable : outcome mismatch, mais SILENCIEUX (aucun fait)", () => {
+  const r = run(facts({ climat: EXPOSEE }), projetClimat("faible_risque_feu", 1));
+  const e = r.evaluations.find((x) => x.ruleId === "territoire.climat-feu")!;
+  assert.equal(e.outcome, "mismatch");
+  assert.equal(e.facts.length, 0);
+});
+
+test("FEU, indice non lu : uncertain, JAMAIS « satisfied » (une donnée absente n'est pas une bonne nouvelle)", () => {
+  const r = run(facts({ climat: EPARGNEE }), projetClimat("faible_risque_feu"));
+  const e = r.evaluations.find((x) => x.ruleId === "territoire.climat-feu")!;
+  assert.ok(e.outcome === "satisfied" || e.outcome === "uncertain");
+  assert.equal(e.facts.length, 0);
+});
+
+test("FEU AMBIANT : non déclaré, le constat existe quand même — en verification SECONDARY, avec son geste", () => {
+  // Symétrique de la chaleur ambiante : un phénomène important du lieu se dit même sans avoir été
+  // priorisé, mais il ne se mêle jamais aux écarts au projet.
+  const r = run(facts({ climat: EXPOSEE, hasAddress: true }), project({ reformulation: "x", hardConstraints: {}, preferences: [] }));
+  const f = r.facts.find((x) => x.ruleId === "territoire.verification-feu-futur")!;
+  assert.ok(f && f.role === "verification");
+  assert.equal(f.materialityTier, "secondary");
   assert.equal(f.signalConvention, "futur•e signale cette exposition à partir de 9 jours par an.");
   assert.match(f.action!.label, /^Regardez la végétation autour du terrain$/);
   assert.match(f.action!.detail!, /débroussaillement/);
+  // Ses projectKeys sont VIDES : aucun effet sur la couverture ni sur l'orientation.
+  const e = r.evaluations.find((x) => x.ruleId === "territoire.verification-feu-futur")!;
+  assert.deepEqual(e.projectKeys, []);
+
+  // SANS ADRESSE, le geste change de nature : on ne peut rien dire des abords d'un terrain inconnu.
+  const sansAdresse = run(facts({ climat: EXPOSEE }), project({ reformulation: "x", hardConstraints: {}, preferences: [] }));
+  const fSans = sansAdresse.facts.find((x) => x.ruleId === "territoire.verification-feu-futur")!;
+  assert.equal(fSans.role === "verification" && fSans.action.type, "renseigner_adresse");
+});
+
+test("FEU : DÉCLARÉ, la règle ambiante se tait (une dimension, un signal)", () => {
+  const r = run(facts({ climat: EXPOSEE }), projetClimat("faible_risque_feu"));
+  assert.equal(r.facts.some((x) => x.ruleId === "territoire.verification-feu-futur"), false);
+  // Même à poids 1, où ruleFeu est silencieuse : l'ambiante ne prend pas le relais, sinon le dossier
+  // dirait en « constat du territoire » ce que le lecteur a explicitement priorisé.
+  const r1 = run(facts({ climat: EXPOSEE }), projetClimat("faible_risque_feu", 1));
+  assert.equal(r1.facts.some((x) => x.ruleId === "territoire.verification-feu-futur"), false);
+});
+
+test("ORIENTATION : le danger d'incendie déclaré bascule le dossier en arbitrage", () => {
+  const p = projetClimat("faible_risque_feu");
+  const r = run(facts({ climat: EXPOSEE }), p);
+  const summary = buildCriteriaRegistry(p, r);
+  assert.equal(summary.orientation, "arbitration");
+  const feu = summary.registry.find((c) => c.criterionKey === "faible_risque_feu")!;
+  assert.equal(feu.outcome, "mismatch");
 });
 
 test("PLUIES : un cumul en 24 heures, jamais « par an » ; le « mm » reste (le sujet ne le porte pas)", () => {

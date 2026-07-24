@@ -156,7 +156,11 @@ export type ClimateThresholdBasis = {
   conventionId: string;
   trigger: "any";          // une seule mesure défavorable suffit
   measures: Array<{
-    key: "days_over_35" | "tropical_nights";
+    // `fire_weather_days` : les jours où l'indice forêt-météo dépasse 40. Il partage ce fondement avec la
+    // chaleur parce que c'est la MÊME nature de preuve — une trajectoire DRIAS franchissant un seuil de
+    // signalement —, pas parce que c'est le même phénomène : le classifieur, la règle et la carte restent
+    // distincts (cf. classifyWildfireDanger).
+    key: "days_over_35" | "tropical_nights" | "fire_weather_days";
     projectedValue: number;
     threshold: number;
     unit: "days" | "nights";

@@ -130,7 +130,7 @@ export function assembleDossier(
   // Les compositions qui PRÉSENTENT un mismatch : shared_evidence (taille), climate_comfort (chaleur) et
   // le tradeoff saisonnier (douceur + chaleur). Chacune compte pour UNE carte mismatch visible.
   const mismatchComps = shownComps.filter(
-    (c) => c.kind === "tradeoff" || c.kind === "shared_evidence" || c.kind === "climate_comfort",
+    (c) => c.kind === "tradeoff" || c.kind === "shared_evidence" || c.kind === "mismatch_with_action",
   );
   const reservesShownFacts = shown.filter((f) => RESERVE_ROLES.has(f.role));
   // Le TOTAL des mismatchs ÉMIS (le verdict compte dessus, « N de vos priorités » reste vrai même
@@ -184,7 +184,7 @@ export function assembleDossier(
         ...shownComps.flatMap((c) => {
           if (c.kind === "tradeoff") return [...c.favorableSide.evidence, ...c.unfavorableSide.evidence];
           if (c.kind === "grouped_verification") return c.items.flatMap((i) => i.evidence);
-          if (c.kind === "climate_comfort") return c.evidence;
+          if (c.kind === "mismatch_with_action") return c.evidence;
           return c.sharedEvidence;
         }),
       ],

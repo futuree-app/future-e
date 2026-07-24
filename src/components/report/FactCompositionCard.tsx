@@ -60,7 +60,7 @@ function compositionConventions(composition: FactComposition): string[] {
   const sources: string[] = [];
   const extraEvidence =
     composition.kind === "shared_evidence" ? composition.sharedEvidence
-      : composition.kind === "climate_comfort" ? composition.evidence
+      : composition.kind === "mismatch_with_action" ? composition.evidence
       : [];
   for (const e of [...sides.flatMap((s) => s.evidence), ...extraEvidence]) {
     if (e.observedValue || seen.has(e.label)) continue;
@@ -81,7 +81,7 @@ function compositionChecks(composition: FactComposition): string[] {
         : [];
   const checks = sides.map((s) => s.action?.detail).filter((d): d is string => Boolean(d));
   // climate_comfort n'a pas de côtés : son action (le renvoi logement) porte le concret à regarder.
-  if (composition.kind === "climate_comfort" && composition.action.detail) checks.push(composition.action.detail);
+  if (composition.kind === "mismatch_with_action" && composition.action.detail) checks.push(composition.action.detail);
   return checks;
 }
 
@@ -134,7 +134,7 @@ export function FactCompositionCard({
             <SideBlock key={i} side={item} color={color} />
           ))}
         </div>
-      ) : composition.kind === "climate_comfort" ? (
+      ) : composition.kind === "mismatch_with_action" ? (
         // Le fallback confort d'été : un seul côté (le mismatch chaleur absorbé), plus le renvoi au
         // logement qu'un mismatch ne porte pas. Constat commune, preuve chiffrée, action au grain adresse.
         <div className="mt-3 flex flex-col gap-2">

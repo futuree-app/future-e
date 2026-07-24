@@ -194,7 +194,7 @@ function runR(facts: DecisionFact[]): RunResult {
 }
 function climateComfortComp(id: string, absorbed: string[], tier: "secondary" | "structuring"): FactComposition {
   return {
-    id, kind: "climate_comfort", patternId: "climate_comfort",
+    id, kind: "mismatch_with_action", patternId: "climate_comfort",
     title: "Des étés plus difficiles à concilier avec votre projet",
     headlineSubject: "des étés supportables",
     summary: "À Toulouse : jours au-dessus de 35 °C et nuits tropicales en hausse.",
@@ -221,6 +221,35 @@ test("lot D : chaleur mismatch absorbé dans un climate_comfort -> arbitrage, le
   assert.deepEqual(d.absorbedFacts.map((f) => f.id), ["ch1"]);
   // Le mismatch nommé n'est pas AUSSI recompté comme une réserve « par ailleurs à contrôler ».
   assert.doesNotMatch(d.narrativePlan.verdict.detail, /par ailleurs à contrôler/);
+});
+
+test("lot FEU : le danger d'incendie déclaré -> arbitrage, le héros NOMME l'objet du projet", () => {
+  // Le pendant du lot D pour l'incendie, bout en bout : la bascule en mismatch change l'ORIENTATION du
+  // dossier (arbitrage, plus « correspondance favorable ») et rend l'enjeu nommable par le héros.
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_feu", weight: 3 }] });
+  const feu = { ...mism("feu1"), projectKey: "faible_risque_feu" } as DecisionFact;
+  const comp: FactComposition = {
+    id: "31555:composition-danger-incendie", kind: "mismatch_with_action", patternId: "wildfire_exposure",
+    title: "Un danger d'incendie difficile à concilier avec votre projet",
+    headlineSubject: "un environnement peu exposé aux incendies",
+    summary: "Les jours où l'indice forêt-météo dépasse 40 augmentent nettement.",
+    evidence: [{ factId: "s", module: "territoire", label: "Climat · Toulouse", grain: "commune", observedValue: "50 jours à l'horizon 2050" }],
+    action: { type: "verifier_sur_place", label: "Regardez la végétation autour du terrain" },
+    absorbedFactIds: ["feu1"], referencedRuleIds: ["r"], materialityTier: "structuring", displaySection: "mismatches",
+  };
+  const d = assembleDossier(
+    run([feu], [], [ev("r", ["faible_risque_feu"], "mismatch", [feu])]),
+    p, "commune", "Toulouse", [comp],
+  );
+  assert.equal(d.criteria.orientation, "arbitration");
+  assert.equal(
+    d.narrativePlan.verdict.headline.text,
+    "Toulouse répond moins bien à une de vos priorités : un environnement peu exposé aux incendies.",
+  );
+  // Le geste que le mismatch ne peut pas porter est bien à l'écran, sur la carte composée.
+  const mismatches = d.sections.find((s) => s.key === "mismatches");
+  assert.ok(mismatches!.cards.some((c) => c.kind === "composition" && c.composition.id === comp.id));
+  assert.deepEqual(d.absorbedFacts.map((f) => f.id), ["feu1"]);
 });
 
 test("compositions : les faits absorbés quittent les sections et vivent dans absorbedFacts", () => {

@@ -93,18 +93,24 @@ export type GroupedVerificationComposition = {
   displaySection: "verifications";
 };
 
-// LE CONFORT D'ÉTÉ, quand la douceur d'hiver n'est pas un contrepoids (lot D, Task 2). Fallback du
-// tradeoff saisonnier : sans côté favorable à opposer, la composition ne montre qu'UN côté — le mismatch
-// chaleur absorbé —, mais elle existe pour une raison précise : un MismatchFact ne porte PAS d'action, et
-// le renvoi au confort du logement (au grain adresse) doit être restauré quelque part. C'est ici.
+// UN MISMATCH, ENRICHI DU GESTE QU'IL NE PEUT PAS PORTER. Un MismatchFact n'a pas d'`action` : son constat
+// est établi, il n'y a rien à « vérifier ». Mais certains écarts appellent quand même une démarche au grain
+// du logement ou du terrain — et sans elle, le dossier dit au lecteur que ce lieu correspond moins bien
+// sans lui dire ce qu'il peut y regarder. Ce patron restaure ce geste, en gardant le mismatch nommable par
+// le héros.
+//
+// LE `kind` S'APPELAIT `climate_comfort`, du nom de son PREMIER usage (le confort d'été, lot D). Le lot feu
+// a montré que la forme n'avait rien de climatique : c'est le `patternId` qui dit quel patron a produit la
+// carte, le `kind` ne dit que COMMENT elle se rend. Deux patrons le partagent aujourd'hui — le confort d'été
+// et l'exposition au danger d'incendie —, sur le modèle de `tradeoff` / `seasonal_climate_tradeoff`.
 //
 // Invariant « une seule composition climatique par dossier » : ce patron ne se déclenche QUE si le tradeoff
 // saisonnier n'a pas été produit (cf. composeFacts). Le mismatch absorbé reste nommable par le héros
 // (Task 3) via `headlineSubject` + `absorbedFactIds`, exactement comme le tradeoff.
-export type ClimateComfortComposition = {
+export type MismatchWithActionComposition = {
   id: string;
-  kind: "climate_comfort";
-  patternId: "climate_comfort";
+  kind: "mismatch_with_action";
+  patternId: "climate_comfort" | "wildfire_exposure";
   title: string;
   // Court, bas de casse, lu après un deux-points par le héros (« des étés supportables ») — hérité du
   // mismatch absorbé, jamais le titre. Même contrat que les autres patrons qui nomment une réserve.
@@ -122,4 +128,4 @@ export type ClimateComfortComposition = {
 };
 
 export type FactComposition =
-  TradeoffComposition | SharedEvidenceComposition | GroupedVerificationComposition | ClimateComfortComposition;
+  TradeoffComposition | SharedEvidenceComposition | GroupedVerificationComposition | MismatchWithActionComposition;

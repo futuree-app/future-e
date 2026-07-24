@@ -26,7 +26,8 @@ import { AGGLOMERATION_RULES } from "./agglomeration-rules.ts";
 import { AGGLOMERATION_CATEGORIES } from "./agglomeration-facts.ts";
 import { toCommuneAttributes } from "./module-facts-map.ts";
 import {
-  trajectoirePhrase, fmtClimatCount, classifyClimateComfort, summerComfortAction, CLIMAT_HORIZON_LABEL, type ClimatAxe,
+  trajectoirePhrase, fmtClimatCount, classifyClimateComfort, classifyWildfireDanger,
+  summerComfortAction, wildfireExposureAction, CLIMAT_HORIZON_LABEL, type ClimatAxe,
 } from "./climat-facts.ts";
 import {
   bruitEnPhrase, industrieEnPhrase, industrieGlose, distanceEnPhrase,
@@ -152,6 +153,7 @@ const ruleInondation: DecisionRule = {
 // démonstration inexistante est pire que le lien de repli vers le module (cf. evidence-targets.ts).
 const CLIMAT_TARGET: Record<string, EvidenceTargetKey | undefined> = {
   joursTresChauds: "climate.extreme_heat",
+  joursFeu: "risk.wildfire",
   nuitsTropicales: "climate.tropical_nights",
   temperatureMoyenne: "climate.mean_temperature",
   pluieIntense: "climate.heavy_rain",
@@ -300,7 +302,12 @@ const ruleChaleurAmbiante: DecisionRule = {
   },
 };
 
-const RULE_FEU = "territoire.climat-feu";
+// LE DANGER D'INCENDIE DÉCLARÉ = UN ÉCART AU PROJET (lot feu). Même bascule que la chaleur au lot D : une
+// priorité posée par le lecteur et matériellement contredite n'est pas un « constat du territoire à
+// vérifier », c'est un point où ce lieu correspond MOINS BIEN à ce qu'il cherche. La distinction n'est pas
+// cosmétique — elle change l'orientation du verdict (arbitration), le registre de la carte, et le fait que
+// le héros puisse ou non nommer l'enjeu.
+export const RULE_FEU = "territoire.climat-feu";
 const ruleFeu: DecisionRule = {
   id: RULE_FEU,
   module: "territoire",
@@ -309,28 +316,78 @@ const ruleFeu: DecisionRule = {
     const ret = (outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
       ({ ruleId: RULE_FEU, projectKeys: [key], outcome, facts, reason });
 
-    if (preferenceWeight(p, key) < 2) return ret("not_applicable", [], "priorité non déclarée");
-    const axe = f.climat?.joursFeu;
-    if (!axe || axe.projete == null) return ret("uncertain", [], "indice forêt-météo indisponible");
-    if (!axe.notable) return ret("satisfied", [], "danger météorologique sous le seuil de signalement");
+    // POIDS 0 = NON DÉCLARÉ : le constat existe peut-être, mais il relève de la règle AMBIANTE, jamais d'un
+    // écart au projet (même séparation que chaleur / chaleur ambiante).
+    const weight = preferenceWeight(p, key);
+    if (weight === 0) return ret("not_applicable", [], "priorité non déclarée");
+    const c = f.climat;
+    if (!c) return ret("uncertain", [], "trajectoire climatique indisponible");
 
-    const fact: VerificationFact = {
+    const { verdict, basis } = classifyWildfireDanger(c);
+    if (verdict === "uncertain") return ret("uncertain", [], "indice forêt-météo indisponible");
+    if (verdict === "under_threshold") return ret("satisfied", [], "danger météorologique sous le seuil de signalement");
+
+    // Poids 1 : l'écart est réel et compte dans la couverture, mais il ne mérite pas une carte.
+    if (weight < 2) return ret("mismatch", [], "danger d'incendie défavorable, silencieux (poids 1)");
+    if (!basis) throw new Error(`[decision] ${RULE_FEU}: invariant interne, fondement climatique attendu`);
+
+    const axe = c.joursFeu;
+    const fact: MismatchFact = {
       id: `${f.insee}:climat-feu`, ruleId: RULE_FEU, sourceFactIds: ["climat.joursFeu"], module: "territoire",
-      role: "verification", materialityTier: tierFor(p, key),
+      role: "mismatch", projectKey: key, materialityTier: tierFor(p, key),
       topic: "le danger d'incendie",
+      // LE SUJET DU HÉROS nomme l'OBJET DU PROJET, pas l'instruction du lecteur (« éviter le risque de
+      // feu ») ni l'indicateur. Il reste MESURÉ : l'indice dit un danger météorologique, pas une
+      // probabilité d'incendie — « à l'abri des feux » promettrait ce que la donnée ne sait pas dire.
+      headlineSubject: "un environnement peu exposé aux incendies",
       // L'INDICE MESURE UN DANGER MÉTÉOROLOGIQUE, pas la probabilité qu'un incendie survienne. La phrase ne
       // promet donc pas plus que la donnée ne sait dire.
+      statement: `${trajectoirePhrase(axe, "Les jours où l'indice forêt-météo dépasse 40, seuil de danger météorologique très sévère,")}.`,
+      basis,
+      limitation: LIMITATION_CLIMAT,
+      evidence: [climatEvidence(f.nom, "joursFeu", axe)],
+      // NI action NI signalConvention : un mismatch porte un constat établi. Le renvoi au terrain, qu'il ne
+      // peut pas porter, est restauré par la composition `wildfire_exposure` (cf. fact-compositions.ts).
+    };
+    return ret("mismatch", [fact], "danger d'incendie défavorable, priorité déclarée");
+  },
+};
+
+// LE DANGER D'INCENDIE NON DÉCLARÉ (lot feu). Symétrique de `ruleChaleurAmbiante`, et pour la même raison :
+// un phénomène important du lieu mérite d'être dit même sans avoir été priorisé, mais il ne se mêle jamais
+// aux écarts au projet. `projectKeys` VIDES : le constat n'est rattaché à aucune priorité, donc il ne pèse
+// ni sur la couverture, ni sur l'orientation, ni sur le compte favorable.
+export const RULE_FEU_AMBIANT = "territoire.verification-feu-futur";
+const ruleFeuAmbiant: DecisionRule = {
+  id: RULE_FEU_AMBIANT,
+  module: "territoire",
+  evaluate: (f, p): RuleEvaluation => {
+    const ret = (outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
+      ({ ruleId: RULE_FEU_AMBIANT, projectKeys: [], outcome, facts, reason });
+
+    // Déclaré (poids >= 1, y compris le poids 1 silencieux) : ruleFeu porte le signal, pas ici.
+    if (preferenceWeight(p, "faible_risque_feu") > 0) return ret("not_applicable", [], "feu déclaré : ruleFeu porte le signal");
+    const c = f.climat;
+    if (!c) return ret("uncertain", [], "trajectoire climatique indisponible");
+
+    const { verdict } = classifyWildfireDanger(c);
+    if (verdict === "uncertain") return ret("uncertain", [], "indice forêt-météo indisponible");
+    if (verdict === "under_threshold") return ret("satisfied", [], "danger météorologique sous le seuil de signalement");
+
+    const axe = c.joursFeu;
+    const fact: VerificationFact = {
+      id: `${f.insee}:verification-feu-futur`, ruleId: RULE_FEU_AMBIANT,
+      sourceFactIds: ["climat.joursFeu"], module: "territoire",
+      // SECONDARY : le lecteur ne l'a pas priorisé. Le constat se lit, il ne couronne rien.
+      role: "verification", materialityTier: "secondary",
+      topic: "le danger d'incendie",
       statement: `${trajectoirePhrase(axe, "Les jours où l'indice forêt-météo dépasse 40, seuil de danger météorologique très sévère,")}.`,
       signalConvention: `futur•e signale cette exposition à partir de ${axe.threshold} jours par an.`,
       limitation: LIMITATION_CLIMAT,
       evidence: [climatEvidence(f.nom, "joursFeu", axe)],
-      action: {
-        type: "verifier_sur_place",
-        label: "Regardez la végétation autour du terrain",
-        detail: "Renseignez-vous sur l'obligation de débroussaillement, l'accès des secours et les matériaux de la toiture.",
-      },
+      action: wildfireExposureAction(f.hasAddress),
     };
-    return ret("verification", [fact], "danger météorologique de feu notable");
+    return ret("verification", [fact], "danger d'incendie notable, non déclaré");
   },
 };
 
@@ -522,6 +579,7 @@ export const REGISTRY: DecisionRule[] = [
   ruleChaleur,
   ruleChaleurAmbiante,
   ruleFeu,
+  ruleFeuAmbiant,
   rulePluies,
   ruleAir,
   ruleBruit,

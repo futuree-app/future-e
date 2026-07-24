@@ -6,13 +6,13 @@
 // depuis l'évaluation existante, preuve par helper canonique, aucun seuil recalculé (invariant 9).
 import type { RunResult, RuleEvaluation, ModuleFacts, EvidenceRef, VerificationFact, MismatchFact, MaterialityTier } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
-import type { FactComposition, TradeoffComposition, SharedEvidenceComposition, GroupedVerificationComposition, ClimateComfortComposition } from "./fact-composition.ts";
+import type { FactComposition, TradeoffComposition, SharedEvidenceComposition, GroupedVerificationComposition, MismatchWithActionComposition } from "./fact-composition.ts";
 import { RULE_EXPOSITION_BATI, RULE_ZONE_REGLEMENTEE } from "./logement-rules.ts";
 import { preferenceWeight } from "./project-view.ts";
 import { rankPhrase, bandValide } from "./mismatch-facts.ts";
 import { mismatchRuleId } from "./mismatch-rules.ts";
-import { RULE_CHALEUR } from "./materiality-rules.ts";
-import { summerComfortAction } from "./climat-facts.ts";
+import { RULE_CHALEUR, RULE_FEU } from "./materiality-rules.ts";
+import { summerComfortAction, wildfireExposureAction } from "./climat-facts.ts";
 import { TERRITORY_SIZE_FACT_ID, SIZE_SUBJECTS } from "./agglomeration-rules.ts";
 import { WINTER_MILDNESS_CONVENTION } from "../climate/winter-mildness.ts";
 import { deCommune } from "../typography.ts";
@@ -103,7 +103,7 @@ function composeSeasonalClimateTradeoff(
 // qu'un MismatchFact ne peut pas porter, tout en gardant le mismatch nommable par le héros (Task 3).
 function composeClimateComfort(
   run: RunResult, facts: ModuleFacts, project: UserProject,
-): ClimateComfortComposition | null {
+): MismatchWithActionComposition | null {
   if (preferenceWeight(project, "faible_chaleur") < 2) return null;
   const chaleur = evaluation(run, RULE_CHALEUR);
   // Seul un mismatch RÉELLEMENT émis se compose : un poids 1 (silencieux, aucun fait) n'est jamais repêché.
@@ -112,7 +112,7 @@ function composeClimateComfort(
 
   return {
     id: `${facts.insee}:composition-confort-ete`,
-    kind: "climate_comfort",
+    kind: "mismatch_with_action",
     patternId: "climate_comfort",
     title: "Des étés plus difficiles à concilier avec votre projet",
     headlineSubject: chaleurFact.headlineSubject, // « des étés supportables », hérité du mismatch
@@ -123,6 +123,39 @@ function composeClimateComfort(
     absorbedFactIds: [chaleurFact.id],
     referencedRuleIds: [RULE_CHALEUR],
     materialityTier: chaleurFact.materialityTier,
+    displaySection: "mismatches",
+  };
+}
+
+// L'EXPOSITION AU DANGER D'INCENDIE (lot feu). Même patron que le confort d'été, pour la même raison : le
+// mismatch feu porte le constat établi, mais pas le geste — or « regardez la végétation autour du terrain »
+// est précisément ce qu'un lecteur peut faire de cette information. Sans cette composition, la bascule en
+// mismatch aurait FAIT PERDRE l'action que la verification portait auparavant : une régression pour le
+// lecteur, au nom d'une justesse de registre qui ne lui sert à rien tout seul.
+function composeWildfireExposure(
+  run: RunResult, facts: ModuleFacts, project: UserProject,
+): MismatchWithActionComposition | null {
+  if (preferenceWeight(project, "faible_risque_feu") < 2) return null;
+  const feu = evaluation(run, RULE_FEU);
+  // Seul un mismatch RÉELLEMENT émis se compose : un poids 1 (silencieux, aucun fait) n'est jamais repêché.
+  const feuFact = (feu?.facts ?? []).find((f) => f.role === "mismatch") as MismatchFact | undefined;
+  if (!feuFact) return null;
+
+  return {
+    id: `${facts.insee}:composition-danger-incendie`,
+    kind: "mismatch_with_action",
+    patternId: "wildfire_exposure",
+    // Le titre nomme la TENSION avec le projet, comme son homologue chaleur. Il reste mesuré : c'est un
+    // danger météorologique qui s'aggrave, jamais l'annonce d'un incendie.
+    title: "Un danger d'incendie difficile à concilier avec votre projet",
+    headlineSubject: feuFact.headlineSubject, // « un environnement peu exposé aux incendies »
+    summary: feuFact.statement,
+    evidence: feuFact.evidence,
+    action: wildfireExposureAction(facts.hasAddress),
+    ...(feuFact.limitation ? { limitation: feuFact.limitation } : {}),
+    absorbedFactIds: [feuFact.id],
+    referencedRuleIds: [RULE_FEU],
+    materialityTier: feuFact.materialityTier,
     displaySection: "mismatches",
   };
 }
@@ -253,7 +286,7 @@ export function assertCompositionsValid(run: RunResult, compositions: FactCompos
     if (c.kind === "tradeoff" && section !== "compromises") throw new Error(`tradeoff hors compromises : ${c.id}`);
     if (c.kind === "shared_evidence" && section !== "mismatches") throw new Error(`shared_evidence hors mismatches : ${c.id}`);
     if (c.kind === "grouped_verification" && section !== "verifications") throw new Error(`grouped_verification hors verifications : ${c.id}`);
-    if (c.kind === "climate_comfort" && section !== "mismatches") throw new Error(`climate_comfort hors mismatches : ${c.id}`);
+    if (c.kind === "mismatch_with_action" && section !== "mismatches") throw new Error(`mismatch_with_action hors mismatches : ${c.id}`);
     if (c.absorbedFactIds.length === 0) throw new Error(`composition sans absorbé : ${c.id}`);
     // Le texte que le HÉROS servira est obligatoire : un sujet pour les patrons qui nomment une
     // réserve, une CAUSE pour shared_evidence (deux natures, deux champs, cf. fact-composition.ts).
@@ -292,6 +325,12 @@ export function composeFacts(run: RunResult, facts: ModuleFacts, project: UserPr
     const comfort = composeClimateComfort(run, facts, project);
     if (comfort) out.push(comfort);
   }
+  // LE FEU EST INDÉPENDANT DES PATRONS CHALEUR. L'invariant « une seule composition climatique par
+  // dossier » vise la CHALEUR : le tradeoff saisonnier et le fallback confort absorbent le MÊME mismatch,
+  // donc ils s'excluent. Le danger d'incendie est un autre phénomène, que le lecteur peut prioriser
+  // séparément, et il absorbe son propre mismatch : rien à arbitrer entre les deux.
+  const feu = composeWildfireExposure(run, facts, project);
+  if (feu) out.push(feu);
   const size = composeTerritorySizeSharedEvidence(run, facts);
   if (size) out.push(size);
   const clay = composeClayRegulationGrouped(run, facts);

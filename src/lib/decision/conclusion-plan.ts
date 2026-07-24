@@ -428,7 +428,7 @@ function mismatchCandidates(
     // `shownFacts` et le héros ne peut plus nommer la chaleur (même Issue 2 que shared_evidence). Elles
     // portent une PRIORITÉ (« des étés supportables »), pas une cause commune : `causeCommune` reste faux,
     // et le sujet vient de `headlineSubject`, jamais du `title` (écrit pour coiffer une carte).
-    ...shownCompositions.filter((c) => c.kind === "tradeoff" || c.kind === "climate_comfort").map((c) => ({
+    ...shownCompositions.filter((c) => c.kind === "tradeoff" || c.kind === "mismatch_with_action").map((c) => ({
       factId: c.id, topic: c.title, subject: c.headlineSubject, statement: c.summary,
       materialityTier: c.materialityTier, role: "composition" as const, absorbedFactIds: c.absorbedFactIds,
     })),

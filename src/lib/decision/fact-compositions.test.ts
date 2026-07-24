@@ -77,14 +77,14 @@ test("tradeoff : douceur poids 1 ne se compose pas en tradeoff (silencieux non r
   // Pas de côté favorable opposable (douceur poids 1) -> pas de tradeoff, mais le mismatch chaleur reste
   // porté par le fallback (Task 2), qui restaure l'action logement.
   assert.equal(out.some((c) => c.kind === "tradeoff"), false);
-  assert.equal(out.some((c) => c.kind === "climate_comfort"), true);
+  assert.equal(out.some((c) => c.kind === "mismatch_with_action"), true);
 });
 
 test("tradeoff : douceur neutral ne compose pas de tradeoff ; fallback climate_comfort", () => {
   const neutral: RuleEvaluation = { ...douceurSatisfied, outcome: "neutral" };
   const out = composeFacts(run([neutral, chaleurEval(chaleurFact())]), moduleFacts, project({ douceur_climat: 3, faible_chaleur: 3 }));
   assert.equal(out.some((c) => c.kind === "tradeoff"), false);
-  assert.equal(out.some((c) => c.kind === "climate_comfort"), true);
+  assert.equal(out.some((c) => c.kind === "mismatch_with_action"), true);
 });
 
 test("aucun fait chaleur émis -> aucune composition climatique (on ne compose que l'affichable seul)", () => {
@@ -97,11 +97,11 @@ test("tradeoff : bande douceur absente ou corrompue -> pas de tradeoff (invarian
   const sansBande = { ...moduleFacts, rankBands: null } as unknown as ModuleFacts;
   const a = composeFacts(run([douceurSatisfied, chaleurEval(chaleurFact())]), sansBande, project({ douceur_climat: 3, faible_chaleur: 3 }));
   assert.equal(a.some((c) => c.kind === "tradeoff"), false); // preuve favorable non fabricable
-  assert.equal(a.some((c) => c.kind === "climate_comfort"), true); // le fallback n'a pas besoin du côté favorable
+  assert.equal(a.some((c) => c.kind === "mismatch_with_action"), true); // le fallback n'a pas besoin du côté favorable
   const corrompue = { ...moduleFacts, rankBands: { douceur_climat: { low: 1.4, high: 0.2 } } } as unknown as ModuleFacts;
   const b = composeFacts(run([douceurSatisfied, chaleurEval(chaleurFact())]), corrompue, project({ douceur_climat: 3, faible_chaleur: 3 }));
   assert.equal(b.some((c) => c.kind === "tradeoff"), false);
-  assert.equal(b.some((c) => c.kind === "climate_comfort"), true);
+  assert.equal(b.some((c) => c.kind === "mismatch_with_action"), true);
 });
 
 test("buildWinterMildnessEvidence : bande -> preuve avec part supérieure et période de référence", () => {
@@ -125,14 +125,15 @@ test("assertCompositionsValid : id dupliqué, absorbé inexistant, mauvaise sect
 
 // ── climate_comfort : le fallback SANS douceur favorable (Task 2) ────────────────────────────────
 
-test("climate_comfort : chaleur mismatch SANS douceur favorable -> une composition qui restaure l'action logement", () => {
+test("confort d'été : chaleur mismatch SANS douceur favorable -> une composition qui restaure l'action logement", () => {
   const f = chaleurFact();
   // faible_chaleur seule déclarée (pas de douceur_climat) : le tradeoff saisonnier ne se déclenche pas.
   const out = composeFacts(run([chaleurEval(f)]), moduleFacts, project({ faible_chaleur: 3 }));
   assert.equal(out.length, 1);
   const c = out[0]!;
-  assert.equal(c.kind, "climate_comfort");
-  if (c.kind !== "climate_comfort") return;
+  assert.equal(c.kind, "mismatch_with_action");
+  if (c.kind !== "mismatch_with_action") return;
+  assert.equal(c.patternId, "climate_comfort"); // le KIND est générique, le PATRON reste identifié
   assert.equal(c.displaySection, "mismatches");
   assert.deepEqual(c.absorbedFactIds, [f.id]);
   // Le héros pourra NOMMER le mismatch absorbé (Task 3) : le sujet vient du fait, pas du titre.
@@ -143,12 +144,12 @@ test("climate_comfort : chaleur mismatch SANS douceur favorable -> une compositi
   assert.equal(c.materialityTier, f.materialityTier);
 });
 
-test("climate_comfort : l'action suit le grain (adresse -> confort du logement)", () => {
+test("confort d'été : l'action suit le grain (adresse -> confort du logement)", () => {
   const withAddress = { ...moduleFacts, hasAddress: true } as unknown as ModuleFacts;
   const out = composeFacts(run([chaleurEval(chaleurFact())]), withAddress, project({ faible_chaleur: 3 }));
   const c = out[0]!;
-  assert.equal(c.kind, "climate_comfort");
-  if (c.kind !== "climate_comfort") return;
+  assert.equal(c.kind, "mismatch_with_action");
+  if (c.kind !== "mismatch_with_action") return;
   assert.equal(c.action.type, "verifier_sur_place");
   assert.equal(c.action.label, summerComfortAction(true).label);
 });
@@ -164,7 +165,7 @@ test("une seule composition climatique par dossier : douceur favorable + chaleur
   const out = composeFacts(run([douceurSatisfied, chaleurEval(chaleurFact())]), moduleFacts, project({ douceur_climat: 3, faible_chaleur: 3 }));
   assert.equal(out.length, 1);
   assert.equal(out[0]!.kind, "tradeoff"); // le tradeoff gagne, jamais AUSSI climate_comfort
-  assert.equal(out.filter((c) => c.kind === "climate_comfort").length, 0);
+  assert.equal(out.filter((c) => c.kind === "mismatch_with_action").length, 0);
 });
 
 // ── Patron 2 : territory-size-multiple-consequences ──────────────────────────────────────────────
@@ -281,4 +282,65 @@ test("grouped argiles+PPR : un seul des deux faits -> pas de composition", () =>
   assert.equal(composeFacts(run([logementEval(argiles)]), moduleFactsAvecPpr("PPR Sécheresse"), project({})).length, 0);
   const ppr = logementVerif("zone-reglementee", "s2");
   assert.equal(composeFacts(run([logementEval(ppr)]), moduleFactsAvecPpr("PPR Sécheresse"), project({})).length, 0);
+});
+
+// ── wildfire_exposure : le danger d'incendie déclaré (lot feu) ───────────────────
+
+import { RULE_FEU } from "./materiality-rules.ts";
+import { wildfireExposureAction } from "./climat-facts.ts";
+
+function feuFact(tier: "secondary" | "structuring" = "structuring"): MismatchFact {
+  return {
+    id: "06004:climat-feu", ruleId: RULE_FEU, sourceFactIds: ["climat.joursFeu"], module: "territoire",
+    role: "mismatch", materialityTier: tier, projectKey: "faible_risque_feu",
+    topic: "le danger d'incendie",
+    headlineSubject: "un environnement peu exposé aux incendies",
+    statement: "Les jours où l'indice forêt-météo dépasse 40 passeraient de 12 à 50 à l'horizon 2050.",
+    basis: { kind: "climate_threshold", horizon: 2050, referencePeriod: "1976-2005", conventionId: "clim-conv-1", trigger: "any", measures: [{ key: "fire_weather_days", projectedValue: 50, threshold: 9, unit: "days", isUnfavorable: true }] },
+    limitation: "Cette trajectoire est lue à l'échelle de la commune, pas de l'adresse ni du logement.",
+    evidence: [{ factId: "climat.joursFeu", module: "territoire", label: "Climat · Antibes", observedValue: "50 jours à l'horizon 2050", grain: "commune" }],
+  } as unknown as MismatchFact;
+}
+const feuEval = (f: MismatchFact): RuleEvaluation => ({
+  ruleId: RULE_FEU, projectKeys: ["faible_risque_feu"], outcome: "mismatch", facts: [f], reason: "danger défavorable",
+});
+
+test("feu : le mismatch RETROUVE son geste — sans la composition, la bascule aurait fait perdre l'action", () => {
+  const f = feuFact();
+  const out = composeFacts(run([feuEval(f)]), moduleFacts, project({ faible_risque_feu: 3 }));
+  assert.equal(out.length, 1);
+  const c = out[0]!;
+  assert.equal(c.kind, "mismatch_with_action");
+  if (c.kind !== "mismatch_with_action") return;
+  assert.equal(c.patternId, "wildfire_exposure");
+  assert.equal(c.displaySection, "mismatches");
+  assert.deepEqual(c.absorbedFactIds, [f.id]);
+  assert.equal(c.headlineSubject, "un environnement peu exposé aux incendies");
+  assert.equal(c.action.label, wildfireExposureAction(false).label); // sans adresse -> renseigner
+  assert.equal(c.limitation, f.limitation);
+});
+
+test("feu : l'action suit le grain (adresse -> la végétation autour du terrain)", () => {
+  const withAddress = { ...moduleFacts, hasAddress: true } as unknown as ModuleFacts;
+  const out = composeFacts(run([feuEval(feuFact())]), withAddress, project({ faible_risque_feu: 3 }));
+  const c = out[0]!;
+  assert.equal(c.kind === "mismatch_with_action" && c.action.type, "verifier_sur_place");
+  assert.equal(c.kind === "mismatch_with_action" && c.action.label, "Regardez la végétation autour du terrain");
+});
+
+test("feu : poids 1 (mismatch silencieux, aucun fait) -> AUCUNE composition", () => {
+  const vide: RuleEvaluation = { ruleId: RULE_FEU, projectKeys: ["faible_risque_feu"], outcome: "mismatch", facts: [], reason: "silencieux" };
+  assert.deepEqual(composeFacts(run([vide]), moduleFacts, project({ faible_risque_feu: 1 })), []);
+});
+
+test("feu et chaleur COEXISTENT : deux phénomènes, deux priorités, deux compositions", () => {
+  // L'invariant « une seule composition climatique par dossier » vise les patrons qui absorbent le MÊME
+  // mismatch chaleur. Le feu absorbe le sien : rien à arbitrer entre les deux.
+  const out = composeFacts(
+    run([chaleurEval(chaleurFact()), feuEval(feuFact())]),
+    moduleFacts,
+    project({ faible_chaleur: 3, faible_risque_feu: 3 }),
+  );
+  assert.equal(out.length, 2);
+  assert.deepEqual(out.map((c) => c.kind === "mismatch_with_action" && c.patternId).sort(), ["climate_comfort", "wildfire_exposure"]);
 });

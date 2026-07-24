@@ -181,6 +181,49 @@ export function summerComfortAction(hasAddress: boolean): DecisionAction {
     : { type: "renseigner_adresse", label: "Renseignez votre adresse pour descendre au niveau du logement" };
 }
 
+// LE RENVOI AU TERRAIN, PARTAGÉ (lot feu). Même rôle que `summerComfortAction` pour la chaleur : un
+// mismatch de danger d'incendie ne porte AUCUNE action (le constat est établi), et c'est une COMPOSITION
+// qui restaure ce geste. L'action vivait inline dans ruleFeu ; extraite ici, elle devient la source unique,
+// partagée par la règle ambiante et par le patron de composition.
+//
+// Sans adresse, le geste change de nature : on ne peut rien dire des abords d'un terrain qu'on ne connaît
+// pas. On invite alors à la seule manœuvre qui se fait DANS le produit, exactement comme pour la chaleur.
+export function wildfireExposureAction(hasAddress: boolean): DecisionAction {
+  return hasAddress
+    ? {
+        type: "verifier_sur_place",
+        label: "Regardez la végétation autour du terrain",
+        detail: "L'obligation de débroussaillement, l'accès des secours et les matériaux de la toiture pèsent sur ce qu'un départ de feu proche peut atteindre.",
+      }
+    : { type: "renseigner_adresse", label: "Renseignez votre adresse pour descendre au niveau du terrain" };
+}
+
+// LE DANGER D'INCENDIE, CLASSIFIÉ (lot feu). Même forme que `classifyClimateComfort`, mais MONO-AXE : le
+// danger météorologique de feu se lit sur le seul indice forêt-météo (jours où l'IFM dépasse 40). Deux
+// fonctions plutôt qu'une paramétrée : la chaleur croise deux axes avec un déclencheur « any » qui n'a pas
+// de sens ici, et surtout ce sont deux phénomènes que le lecteur peut prioriser séparément.
+//
+// LE MÊME PIÈGE EST TENU : une donnée absente n'est jamais une bonne nouvelle (`uncertain`, pas
+// `under_threshold`). Un indice non lu ne prouve pas un territoire épargné.
+export function classifyWildfireDanger(
+  climat: ClimatFacts,
+): { verdict: "unfavorable" | "under_threshold" | "uncertain"; basis: ClimateThresholdBasis | null } {
+  const axe = climat.joursFeu;
+  if (axe.projete == null) return { verdict: "uncertain", basis: null };
+  if (!axe.notable) return { verdict: "under_threshold", basis: null };
+  return {
+    verdict: "unfavorable",
+    basis: {
+      kind: "climate_threshold", horizon: 2050, referencePeriod: "1976-2005",
+      conventionId: CLIMAT_CONVENTIONS_VERSION, trigger: "any",
+      measures: [{
+        key: "fire_weather_days", projectedValue: axe.projete, threshold: axe.threshold,
+        unit: "days", isUnfavorable: true,
+      }],
+    },
+  };
+}
+
 export function classifyClimateComfort(
   climat: ClimatFacts,
 ): { verdict: "unfavorable" | "under_threshold" | "uncertain"; basis: ClimateThresholdBasis | null } {

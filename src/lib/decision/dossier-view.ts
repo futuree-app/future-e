@@ -137,7 +137,7 @@ export function factsNonNarresParLaFace(
         ? composition.items.flatMap((i) => i.factIds)
         // climate_comfort : sa face narre le mismatch absorbé (le summary EST son statement), rien ne reste
         // à lister au dépliable d'audit.
-        : composition.kind === "climate_comfort"
+        : composition.kind === "mismatch_with_action"
           ? composition.absorbedFactIds
           : composition.consequences.map((c) => c.factId),
   );

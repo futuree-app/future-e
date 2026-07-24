@@ -24,6 +24,7 @@ export type EvidenceTargetKey =
   | "climate.heavy_rain"
   // risques
   | "risk.flooding"
+  | "risk.wildfire"
   // Le catalogue ne contient QUE des phénomènes reliés des deux côtés : une preuve qui les vise, et une
   // carte qui les démontre. Submersion marine, feu de forêt, sécheresse des sols et taux de boisement ont
   // leur carte dans le module Territoire mais aucune règle ne les cite encore : les inscrire ici ferait
@@ -45,6 +46,7 @@ export const EVIDENCE_TARGET_MODULE: Record<EvidenceTargetKey, "territoire" | "l
   "climate.mean_temperature": "territoire",
   "climate.heavy_rain": "territoire",
   "risk.flooding": "territoire",
+  "risk.wildfire": "territoire",
   "nature.green_spaces": "territoire",
   "housing.energy_label": "logement",
   "housing.clay_shrink_swell": "logement",

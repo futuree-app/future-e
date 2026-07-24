@@ -196,3 +196,45 @@ test("classifyClimateComfort : les deux axes sous le seuil, tous présents -> un
 test("classifyClimateComfort : un axe absent (et aucun défavorable) -> uncertain", () => {
   assert.equal(classifyClimateComfort(climat(null, 10)).verdict, "uncertain");
 });
+
+// ── Lot FEU : classifyWildfireDanger (mismatch / sous seuil / uncertain) ─────────
+
+import { classifyWildfireDanger, wildfireExposureAction } from "./climat-facts.ts";
+
+function climatFeu(joursFeuProjete: number | null): ClimatFacts {
+  return { ...climat(3, 10), joursFeu: cx(joursFeuProjete, 9, "jour") };
+}
+
+test("classifyWildfireDanger : au-dessus du seuil -> unfavorable, UNE mesure", () => {
+  const r = classifyWildfireDanger(climatFeu(21));
+  assert.equal(r.verdict, "unfavorable");
+  assert.equal(r.basis?.kind, "climate_threshold");
+  assert.equal(r.basis?.measures.length, 1); // mono-axe, contrairement à la chaleur
+  assert.deepEqual(r.basis?.measures[0], {
+    key: "fire_weather_days", projectedValue: 21, threshold: 9, unit: "days", isUnfavorable: true,
+  });
+});
+
+test("classifyWildfireDanger : égalité au seuil -> défavorable (même convention >= que la chaleur)", () => {
+  assert.equal(classifyWildfireDanger(climatFeu(9)).verdict, "unfavorable");
+});
+
+test("classifyWildfireDanger : sous le seuil -> under_threshold, aucun fondement", () => {
+  const r = classifyWildfireDanger(climatFeu(4));
+  assert.equal(r.verdict, "under_threshold");
+  assert.equal(r.basis, null);
+});
+
+test("classifyWildfireDanger : indice non lu -> uncertain, JAMAIS « sous le seuil »", () => {
+  // Le piège que le lot D a fermé pour la chaleur : une donnée absente n'est pas une bonne nouvelle.
+  // Un indice forêt-météo qu'on n'a pas pu lire ne prouve pas un territoire épargné.
+  const r = classifyWildfireDanger(climatFeu(null));
+  assert.equal(r.verdict, "uncertain");
+  assert.equal(r.basis, null);
+});
+
+test("wildfireExposureAction : le geste dépend du GRAIN disponible", () => {
+  assert.equal(wildfireExposureAction(true).label, "Regardez la végétation autour du terrain");
+  // Sans adresse, on ne peut rien dire des abords : la seule manœuvre est dans le produit.
+  assert.equal(wildfireExposureAction(false).type, "renseigner_adresse");
+});

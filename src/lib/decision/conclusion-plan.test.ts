@@ -862,7 +862,7 @@ test("arbitrage : une composition climate_comfort est candidate au headline (« 
   // Le mismatch chaleur est ABSORBÉ dans la composition : shownFacts n'en contient aucun. Sans cette
   // branche, le héros retomberait en posture alors qu'une carte visible nomme l'enjeu (Issue 2, lot C).
   const comp = {
-    id: "31555:composition-confort-ete", kind: "climate_comfort", patternId: "climate_comfort",
+    id: "31555:composition-confort-ete", kind: "mismatch_with_action", patternId: "climate_comfort",
     title: "Des étés plus difficiles à concilier avec votre projet",
     headlineSubject: "des étés supportables", summary: "résumé chaleur",
     evidence: [], action: { type: "renseigner_adresse", label: "Renseignez votre adresse" },

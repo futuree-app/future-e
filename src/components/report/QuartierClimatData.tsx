@@ -493,6 +493,7 @@ function buildFactors(
     {
       // Registre B (niveau) : le chiffre porte son échelle, on garde l'absolu.
       label: "Conditions favorables au feu",
+      targets: ["risk.wildfire"],
       val: fireDays != null ? `${fireDays} jours/an en ${meta.year}` : "—",
       col: "var(--orange)",
       src: "DRIAS · IFM > 40 · indice météo, pas risque réel",
