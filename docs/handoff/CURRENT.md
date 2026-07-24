@@ -1,6 +1,6 @@
-# Passation — Lot D, `priorityControl` et la NAVIGATION vers les preuves EN PROD. Lot FEU en cours.
+# Passation — Lot D, `priorityControl`, la NAVIGATION vers les preuves et le LOT FEU en prod.
 
-**Horodatage** : 2026-07-25 · **Branche** : `main` = `03ebd4c` (poussé). **Tree propre** côté code : il ne
+**Horodatage** : 2026-07-25 · **Branche** : `main` = `6157d31` (poussé). **Tree propre** côté code : il ne
 reste que ce fichier et deux non suivis à NE JAMAIS committer — `Futur.e Design System.zip` et
 `src/app/dev/` (harnais de rendu, voir plus bas).
 
@@ -50,6 +50,20 @@ preuve, il n'en est pas la source détaillée.
   NATIF (`#evidence-risk-flooding`) : le saut marche sans JS, `EvidenceArrival` n'ajoute que focus et
   repère. Sans clé, repli sur le module. **Neuf phénomènes** reliés bout en bout.
 
+### Lot FEU (`6157d31`)
+Le danger d'incendie DÉCLARÉ (poids ≥ 2) + trajectoire défavorable = **mismatch**, plus une verification :
+orientation `arbitration`, carte dans les mismatchs, enjeu nommable par le héros. Calqué tâche par tâche sur
+le lot D : `classifyWildfireDanger` (classifieur pur MONO-AXE) → `ruleFeu` (mismatch / silencieux à poids 1)
+→ `ruleFeuAmbiant` (non déclaré, verification secondary, `projectKeys` vides) → `composeWildfireExposure`.
+
+- `headlineSubject` = « un environnement peu exposé aux incendies ». MESURÉ : l'indice dit un danger
+  météorologique, jamais une probabilité d'incendie. **Copie jamais relue par le porteur.**
+- Le kind `climate_comfort` devient **`mismatch_with_action`** : le lot feu a montré que ce patron n'avait
+  rien de climatique. Le `patternId` dit toujours quel patron a produit la carte.
+- `risk.wildfire` revient au catalogue de clés (la carte existait, la preuve manquait).
+- **Jamais vu à l'écran** : 783 tests dont un d'intégration bout en bout, mais aucune lecture sur un dossier
+  réel. Une commune du Sud exposée (IFM projeté > 9 j/an) le montrerait.
+
 ## Doctrine (à ne pas re-litiger)
 - **Une action = une seule source de vérité** : la carte porte l'`action` (relue, posture-aware) ; la ligne
   bleue la RÉUTILISE mot pour mot, jamais une copie éditoriale.
@@ -69,6 +83,9 @@ preuve, il n'en est pas la source détaillée.
   aucune preuve. Elles reviendront AVEC la preuve qui les portera.
 - **Un repère posé hors de React se pose en `data-`, jamais en classe** : React réécrit `className` à la
   réconciliation et effaçait le halo dans la milliseconde (vu au MutationObserver).
+- **Une bascule verification -> mismatch FAIT PERDRE l'action** que la verification portait (un mismatch n'en
+  a pas). Sans composition pour la restaurer, c'est une régression pour le lecteur au nom d'une justesse de
+  registre. Vrai pour la chaleur, vrai pour le feu, vrai pour le prochain.
 - **`prefers-reduced-motion` gouverne le défilement ET le halo** — un réglage anti-vertige ne se respecte
   pas à moitié. L'anneau de focus, lui, est ASSUMÉ : Chrome classe un focus programmatique comme
   focus-visible, et il dit où le focus est parti.
@@ -80,15 +97,14 @@ apparaître en trente secondes le défaut d'espacement des deux démarches (invi
 `notFound()` hors développement. **Ne pas le committer** ; il n'est protégé par rien contre un `git add -A`.
 
 ## La suite
-1. **LE LOT FEU — EN COURS** (le plus gros gain produit). Le risque de feu de forêt déclaré + trajectoire
-   sévère traité en **mismatch**, sur le patron du lot D chaleur. Buildable, aucune donnée nouvelle.
-   Cf. `project_futuree_feu_mismatch`. Ramènera `risk.wildfire` au catalogue de clés (la carte
-   « Conditions favorables au feu » existe déjà côté module, il ne manque que la preuve).
-2. **Dette lint** : `npx eslint` sort ~5400 erreurs / 70000 warnings sur le dépôt (préexistant, hors de
-   ce chantier). Plus personne ne peut s'en servir comme signal. À traiter à part.
-3. **Ordre faits-avant-compositions** dans `rankLeadCandidates` : il ne reflète pas forcément l'ordre des
-   cartes à l'écran. Sans conséquence visible tant que le plafond de démarches est à 2 — mais c'est ce
-   qui produira un jour une ligne bleue dans un ordre que l'écran contredit.
+1. **Voir le lot feu à l'écran** sur une commune du Sud réellement exposée — le seul maillon non vérifié.
+2. **Étendre le patron** aux axes suivants : pluies extrêmes et sécheresse des sols passeraient de « constat
+   du territoire » à « écart au projet », leurs cartes existent déjà côté module. Le gabarit est éprouvé
+   deux fois (chaleur, feu) ; ne pas oublier la composition qui restaure le geste.
+3. **Dette lint** : `npx eslint` sort ~5400 erreurs / 70000 warnings (préexistant, hors chantier). Plus
+   personne ne peut s'en servir comme signal. À traiter à part.
+4. **Ordre faits-avant-compositions** dans `rankLeadCandidates` : il ne reflète pas forcément l'ordre des
+   cartes à l'écran. Sans conséquence tant que le plafond de démarches est à 2.
 
 ## Pièges
 - `tsconfig.json` exclut `**/*.test.ts` du typecheck : une fixture mal formée ne casse pas tsc, seulement le run.
