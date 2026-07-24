@@ -10,7 +10,7 @@
 // verdicts, un seul lecteur. cf. hard-constraint-rules.ts.
 import type {
   DecisionRule, DecisionFact, ModuleFacts, RunResult, RuleEvaluation, HardEvaluation,
-  CompromiseFact, VerificationFact, EvidenceRef,
+  CompromiseFact, VerificationFact, MismatchFact, EvidenceRef,
 } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
@@ -25,7 +25,7 @@ import { AGGLOMERATION_RULES } from "./agglomeration-rules.ts";
 import { AGGLOMERATION_CATEGORIES } from "./agglomeration-facts.ts";
 import { toCommuneAttributes } from "./module-facts-map.ts";
 import {
-  trajectoirePhrase, fmtClimatCount, CLIMAT_HORIZON_LABEL, type ClimatAxe,
+  trajectoirePhrase, fmtClimatCount, classifyClimateComfort, CLIMAT_HORIZON_LABEL, type ClimatAxe,
 } from "./climat-facts.ts";
 import {
   bruitEnPhrase, industrieEnPhrase, industrieGlose, distanceEnPhrase,
@@ -122,13 +122,19 @@ const ruleInondation: DecisionRule = {
 // fortes chaleurs est à vérifier » (il est mesuré), mais : voici ce que le climat fait ici, et voici ce
 // qu'il faut aller regarder pour savoir ce que cela change pour vous.
 //
-// LA TABLE DE VÉRITÉ, et elle vaut pour les trois :
+// LA TABLE DE VÉRITÉ vaut pour LE FEU ET LES PLUIES :
 //   critère non déclaré (poids < 2)              -> not_applicable  (non examiné)
 //   aucune valeur projetée lisible               -> uncertain       (non examiné : une donnée absente
 //                                                                    n'est JAMAIS une exposition faible)
 //   au moins un axe NOTABLE                      -> verification    (carte + chiffre + action)
 //   tous les axes lus, aucun notable             -> satisfied       (silencieux, la COUVERTURE MONTE)
 //   aucun notable MAIS un axe manquant           -> uncertain       (l'axe manquant pouvait être notable)
+//
+// LA CHALEUR A DIVERGÉ (lot D). Une priorité de faible chaleur CONTREDITE n'est pas un constat territorial à
+// « vérifier » : c'est un ÉCART AU PROJET. `ruleChaleur` produit donc un MISMATCH (poids >= 2, orientation
+// arbitration) ou un mismatch SILENCIEUX (poids 1), jamais une verification ; le renvoi au confort du
+// logement, qu'un mismatch ne peut pas porter, est restauré par une composition. La chaleur NON déclarée
+// (poids 0) reviendra en verification AMBIANTE, dans une règle séparée (Task 4).
 //
 // LA CONVENTION DE SIGNALEMENT EST DITE SUR LA CARTE, dans son propre champ (`signalConvention`, ligne
 // discrète sous le constat), jamais appliquée en silence, et jamais noyée au milieu du constat où elle
@@ -170,72 +176,66 @@ const ruleChaleur: DecisionRule = {
     const ret = (outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
       ({ ruleId: RULE_CHALEUR, projectKeys: [key], outcome, facts, reason });
 
-    if (preferenceWeight(p, key) < 2) return ret("not_applicable", [], "priorité non déclarée");
+    // POIDS 0 = NON DÉCLARÉE : hors sujet ici. Le constat de chaleur NON demandé sera porté par une règle
+    // AMBIANTE séparée (Task 4), pour ne jamais mêler « contredit une priorité » et « phénomène du lieu ».
+    const weight = preferenceWeight(p, key);
+    if (weight === 0) return ret("not_applicable", [], "priorité non déclarée");
     const c = f.climat;
     if (!c) return ret("uncertain", [], "trajectoire climatique indisponible");
+
+    // LE VERDICT ET SON FONDEMENT viennent du classifieur PUR (Task 0), qui garde le même piège : une donnée
+    // absente n'est jamais une bonne nouvelle (uncertain), sous le seuil est silencieux (satisfied), et un
+    // seul axe défavorable suffit à déclencher (unfavorable).
+    const { verdict, basis } = classifyClimateComfort(c);
+    if (verdict === "uncertain") return ret("uncertain", [], "un axe de chaleur n'a pas pu être lu");
+    if (verdict === "under_threshold") return ret("satisfied", [], "exposition sous le seuil de signalement");
+
+    // verdict === "unfavorable" : la priorité déclarée est CONTREDITE. C'est un ÉCART AU PROJET (mismatch),
+    // orientation « arbitration », jamais un constat territorial « au-delà de vos priorités » (verification).
+    // Poids 1 : examiné, l'écart est réel, mais il ne mérite pas une carte (silencieux, aucun fait).
+    if (weight < 2) return ret("mismatch", [], "exposition défavorable, silencieuse (poids 1)");
+    // basis est non-null par construction (unfavorable => basis renseigné) ; la garde protège tout appelant.
+    if (!basis) throw new Error(`[decision] ${RULE_CHALEUR}: invariant interne, fondement climatique attendu`);
 
     const jours = c.joursTresChauds;
     const nuits = c.nuitsTropicales;
 
-    // UNE DONNÉE MANQUANTE N'EST PAS UNE BONNE NOUVELLE. Si l'un des deux axes n'a pas été lu, on ne peut
-    // pas conclure « rien à signaler » : l'axe manquant pouvait être celui qui déclenchait la réserve.
-    if (!jours.notable && !nuits.notable) {
-      const complet = jours.projete != null && nuits.projete != null;
-      return complet
-        ? ret("satisfied", [], "exposition sous le seuil de signalement")
-        : ret("uncertain", [], "un axe de chaleur n'a pas pu être lu");
-    }
-
     // LE CONSTAT SUIT CE QUI DÉCLENCHE. Nommer systématiquement les deux métriques alourdirait la phrase
-    // quand une seule explique la réserve ; l'autre reste dans la preuve.
+    // quand une seule explique l'écart ; l'autre reste dans la preuve. Le statement garde EXACTEMENT les
+    // trajectoires jours/nuits d'avant : seul le RÔLE du fait change (verification -> mismatch).
+    // « Nuit tropicale » est un terme technique (Météo-France) : on le donne, puis on le TRADUIT dans le
+    // corps du lecteur, après deux points, SANS absolu (« peine à récupérer », pas « ne récupère plus »).
+    // Quand les jours sont aussi notables, la 2e trajectoire hérite du cadre (« de 33 à 69 par an »).
     const phrases: string[] = [];
     if (jours.notable) phrases.push(trajectoirePhrase(jours, "Les jours au-dessus de 35 °C"));
-    // « Nuit tropicale » est un terme technique (Météo-France) : on le donne, puis on le TRADUIT dans le
-    // corps du lecteur (la signature de futur•e), après deux points, sans incise ouverte au milieu de la
-    // trajectoire. La traduction reste charnelle mais SANS absolu (« peine à récupérer », pas « ne récupère
-    // plus » : la littérature établit une récupération dégradée, pas nulle). Quand les jours sont aussi
-    // notables, la 2e trajectoire hérite du cadre (« de 33 à 69 par an »), et « elles » la relie à la 1re.
     if (nuits.notable) {
       const sujetNuits = jours.notable ? "Les nuits tropicales, elles," : "Les nuits tropicales";
       phrases.push(
         `${trajectoirePhrase(nuits, sujetNuits, { heriteCadre: jours.notable })} : des nuits où la température ne redescend pas sous 20 °C, et où le corps peine à récupérer`,
       );
     }
-    const seuils = [
-      jours.notable ? `${jours.threshold} jours par an au-dessus de 35 °C` : null,
-      nuits.notable ? `${nuits.threshold} nuits tropicales par an` : null,
-    ].filter(Boolean).join(", ou de ");
 
-    const fact: VerificationFact = {
+    const fact: MismatchFact = {
       id: `${f.insee}:climat-chaleur`, ruleId: RULE_CHALEUR,
       sourceFactIds: ["climat.joursTresChauds", "climat.nuitsTropicales"], module: "territoire",
-      role: "verification", materialityTier: tierFor(p, key),
+      role: "mismatch", projectKey: key, materialityTier: tierFor(p, key),
       topic: "les fortes chaleurs",
+      // LE SUJET DU HÉROS nomme l'OBJET DU PROJET (« des étés supportables »), pas l'instruction du lecteur
+      // (« éviter les fortes chaleurs ») ni l'indicateur défavorable. À faire relire à l'Editorial Writer.
+      headlineSubject: "des étés supportables",
       statement: `${phrases.join(". ")}.`,
-      signalConvention: `futur•e signale cette exposition à partir de ${seuils}.`,
+      basis,
       limitation: LIMITATION_CLIMAT,
-      // LA PREUVE SUIT LE TEXTE. Les deux axes étaient toujours mis en preuve, y compris celui dont le
-      // constat ne parle pas : sur une commune où seules les nuits tropicales sont notables, la carte
-      // affichait « 9 jours à l'horizon 2050 » sous une phrase qui n'évoquait que les nuits. Une
-      // pastille chiffrée qu'aucune phrase n'explique se lit comme un chiffre lâché là.
-      // (`sourceFactIds` garde les deux : les deux axes ont bien été LUS, c'est ce qu'il déclare.)
+      // LA PREUVE SUIT LE TEXTE : seul l'axe dont le constat parle entre en preuve (le bug d'Antibes, où une
+      // pastille « 5 jours » s'affichait sous une phrase qui ne parlait que des nuits).
       evidence: [
         ...(jours.notable ? [climatEvidence(f.nom, "joursTresChauds", jours)] : []),
         ...(nuits.notable ? [climatEvidence(f.nom, "nuitsTropicales", nuits)] : []),
       ],
-      // L'ACTION EST SPÉCIFIQUE, et c'est ce qui rend la vérification légitime : à l'échelle de la commune
-      // le constat est établi, mais l'inconfort réellement vécu se joue sur le bâtiment.
-      action: f.hasAddress
-        ? {
-            type: "verifier_sur_place",
-            label: "Regardez comment le logement tient l'été",
-            detail: "L'orientation, l'étage, l'épaisseur des murs, les protections solaires et la possibilité d'ouvrir la nuit pèsent sur l'inconfort ressenti.",
-          }
-        // La seule action qui demande une manœuvre DANS le produit plutôt que dans le monde : elle
-        // mérite un ton d'invitation, pas d'injonction.
-        : { type: "renseigner_adresse", label: "Renseignez votre adresse pour descendre au niveau du logement" },
+      // NI action NI signalConvention : un mismatch a le constat établi (rien à vérifier), et le renvoi au
+      // confort du logement est restauré par une composition (Task 2), via summerComfortAction.
     };
-    return ret("verification", [fact], "exposition à la chaleur notable");
+    return ret("mismatch", [fact], "exposition à la chaleur défavorable, priorité déclarée");
   },
 };
 

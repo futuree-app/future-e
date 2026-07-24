@@ -139,6 +139,7 @@ test("le registre porte les 11 contraintes dures, et le dossier les examine", ()
 // ── LES RÈGLES CLIMAT ────────────────────────────────────────────────────────
 
 import { buildClimatFacts, type GwlScenarios } from "./climat-facts.ts";
+import { buildCriteriaRegistry } from "./criteria-registry.ts";
 
 // Une commune EXPOSÉE (des chiffres réalistes, du type de Nîmes) et une commune ÉPARGNÉE (type Brest).
 const SC_EXPOSEE: GwlScenarios = {
@@ -155,10 +156,17 @@ const EPARGNEE = buildClimatFacts(SC_EPARGNEE)!;
 const projetClimat = (key: string, weight = 3) =>
   project({ reformulation: "x", hardConstraints: {}, preferences: [{ key, weight }] });
 
-test("CHALEUR, exposition notable : une carte CHIFFRÉE, et jamais « actuellement »", () => {
+test("CHALEUR, priorité déclarée + exposition notable : un MISMATCH chiffré, jamais « actuellement »", () => {
+  // Le bug qui a déclenché le lot D : une priorité de faible chaleur défavorable est un ÉCART AU PROJET
+  // (mismatch), pas un constat territorial « au-delà de vos priorités » (verification).
   const r = run(facts({ climat: EXPOSEE }), projetClimat("faible_chaleur"));
   const f = r.facts.find((x) => x.ruleId === "territoire.climat-chaleur");
-  assert.ok(f && f.role === "verification");
+  assert.ok(f && f.role === "mismatch");
+  // LE FONDEMENT est le seuil climatique multivarié (Task 0), pas une mesure aplatie.
+  assert.equal(f.basis.kind, "climate_threshold");
+  assert.equal(f.projectKey, "faible_chaleur");
+  // Le héros NOMME la priorité du lecteur (« des étés supportables »), jamais l'indicateur défavorable.
+  assert.equal(f.headlineSubject, "des étés supportables");
   // LE SUJET PORTE L'UNITÉ : la valeur projetée n'est plus suivie de « jours » (fini « jours jours jours »).
   assert.match(f.statement, /passeraient de 3 par an sur la période de référence 1976-2005 à 14 à l'horizon 2050/);
   assert.doesNotMatch(f.statement, /\d+ jours/); // aucun nombre suivi de « jours »
@@ -167,26 +175,45 @@ test("CHALEUR, exposition notable : une carte CHIFFRÉE, et jamais « actuelleme
   assert.match(f.statement, /des nuits où la température ne redescend pas sous 20 °C, et où le corps peine à récupérer/);
   assert.doesNotMatch(f.statement, /ne récupère plus/); // l'absolu est tombé (invariant n°5)
   assert.doesNotMatch(f.statement, /actuellement|aujourd'hui/i);
-  // LA CONVENTION DE SIGNALEMENT quitte le constat pour son propre champ, et elle écrit l'opérateur qu'elle
-  // applique (le code teste `>=`, le texte dit « à partir de »). Elle ne disparaît d'aucune surface.
-  assert.doesNotMatch(f.statement, /futur•e signale/); // plus dans le constat
-  assert.equal(f.signalConvention, "futur•e signale cette exposition à partir de 8 jours par an au-dessus de 35 °C, ou de 25 nuits tropicales par an.");
+  // UN MISMATCH N'A NI action NI signalConvention (champs absents du type) : le constat est établi (rien à
+  // vérifier), et le renvoi logement est restauré par une composition (Task 2), pas porté par le fait.
+  assert.equal("action" in f, false);
+  assert.equal("signalConvention" in f, false);
   // LES CHIPS DISENT LA BONNE UNITÉ : « 69 nuits », jamais « 69 jours » (le bug d'unité).
   const nuitsChip = f.evidence.find((e) => e.factId === "climat.nuitsTropicales");
   assert.equal(nuitsChip?.observedValue, "69 nuits à l'horizon 2050");
   const joursChip = f.evidence.find((e) => e.factId === "climat.joursTresChauds");
   assert.equal(joursChip?.observedValue, "14 jours à l'horizon 2050");
   assert.ok(f.limitation?.includes("commune"));
-  assert.equal(f.action?.type, "renseigner_adresse"); // sans adresse : il y a quelque chose à affiner
 });
 
-test("CHALEUR, avec une ADRESSE : le critère est TOUJOURS examiné (le fil de ruleConfort est refermé)", () => {
+test("CHALEUR, poids 1 + exposition défavorable : outcome mismatch, mais SILENCIEUX (aucun fait)", () => {
+  // Déclarée faiblement (poids 1) : examinée, l'écart est réel, mais il ne mérite pas une carte. La table
+  // de vérité du plan : outcome mismatch, facts vides.
+  const r = run(facts({ climat: EXPOSEE }), projetClimat("faible_chaleur", 1));
+  const e = r.evaluations.find((x) => x.ruleId === "territoire.climat-chaleur")!;
+  assert.equal(e.outcome, "mismatch");
+  assert.equal(e.facts.length, 0);
+});
+
+test("CHALEUR, avec une ADRESSE : le critère est TOUJOURS examiné, en mismatch (le fil de ruleConfort est refermé)", () => {
   // ruleConfort désactivait faible_chaleur dès qu'une adresse existait : le critère cessait d'être examiné
   // au moment où le dossier devenait le plus riche.
   const r = run(facts({ climat: EXPOSEE, hasAddress: true }), projetClimat("faible_chaleur"));
   const e = r.evaluations.find((x) => x.ruleId === "territoire.climat-chaleur")!;
-  assert.equal(e.outcome, "verification");
-  assert.equal(r.facts.find((x) => x.ruleId === "territoire.climat-chaleur")!.action?.type, "verifier_sur_place");
+  assert.equal(e.outcome, "mismatch");
+  assert.equal(r.facts.find((x) => x.ruleId === "territoire.climat-chaleur")!.role, "mismatch");
+});
+
+test("ORIENTATION : la chaleur défavorable sur priorité déclarée bascule le dossier en arbitrage (le bug Toulouse)", () => {
+  // Le cœur du lot D : avec le mismatch, criteria-registry compte faible_chaleur en mismatch (pas reserve),
+  // et l'orientation devient « arbitration » — le verdict n'est plus « Correspondance favorable ».
+  const p = projetClimat("faible_chaleur");
+  const r = run(facts({ climat: EXPOSEE }), p);
+  const summary = buildCriteriaRegistry(p, r);
+  assert.equal(summary.orientation, "arbitration");
+  const chaleur = summary.registry.find((c) => c.criterionKey === "faible_chaleur")!;
+  assert.equal(chaleur.outcome, "mismatch");
 });
 
 test("CHALEUR, exposition faible : satisfied SILENCIEUX, et la couverture monte", () => {

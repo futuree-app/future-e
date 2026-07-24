@@ -164,7 +164,22 @@ export function buildClimatFacts(sc: GwlScenarios | null | undefined): ClimatFac
 // une valeur unique aplatie. `under_threshold` exige les DEUX axes lus (un axe absent n'est pas une bonne
 // nouvelle) ; sinon `uncertain`. La branche FAVORABLE (alignment) est différée : elle exige un rang de
 // trajectoire qui n'existe pas encore (lot D, increment 2).
-import type { ClimateThresholdBasis } from "./decision-fact.ts";
+import type { ClimateThresholdBasis, DecisionAction } from "./decision-fact.ts";
+
+// LE RENVOI AU LOGEMENT, PARTAGÉ. Un mismatch de chaleur ne porte AUCUNE action (le constat est établi) :
+// le contrôle du confort d'été se joue au grain du bâtiment, et c'est une COMPOSITION qui le restaure
+// (lot D, Task 2). Cette action vivait inline dans ruleChaleur ; extraite ici, elle est la seule source de
+// vérité, utilisée par les patrons de composition climatique. Avec adresse : « Regardez comment le logement
+// tient l'été » ; sans adresse : la seule manœuvre qui se fait DANS le produit, sur un ton d'invitation.
+export function summerComfortAction(hasAddress: boolean): DecisionAction {
+  return hasAddress
+    ? {
+        type: "verifier_sur_place",
+        label: "Regardez comment le logement tient l'été",
+        detail: "L'orientation, l'étage, l'épaisseur des murs, les protections solaires et la possibilité d'ouvrir la nuit pèsent sur l'inconfort ressenti.",
+      }
+    : { type: "renseigner_adresse", label: "Renseignez votre adresse pour descendre au niveau du logement" };
+}
 
 export function classifyClimateComfort(
   climat: ClimatFacts,

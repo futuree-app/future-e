@@ -3,8 +3,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { composeFacts, buildWinterMildnessEvidence, assertCompositionsValid } from "./fact-compositions.ts";
 import { RULE_CHALEUR } from "./materiality-rules.ts";
+import { summerComfortAction } from "./climat-facts.ts";
 import { mismatchRuleId } from "./mismatch-rules.ts";
-import type { RunResult, RuleEvaluation, ModuleFacts, VerificationFact } from "./decision-fact.ts";
+import type { RunResult, RuleEvaluation, ModuleFacts, VerificationFact, MismatchFact } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 
 const RULE_DOUCEUR = mismatchRuleId("douceur_climat");
@@ -19,17 +20,20 @@ function project(prefs: Record<string, number>): UserProject {
   } as unknown as UserProject;
 }
 
-function chaleurFact(tier: "secondary" | "structuring" = "structuring"): VerificationFact {
+function chaleurFact(tier: "secondary" | "structuring" = "structuring"): MismatchFact {
   return {
     id: "06004:climat-chaleur", ruleId: RULE_CHALEUR,
     sourceFactIds: ["climat.joursTresChauds", "climat.nuitsTropicales"], module: "territoire",
-    role: "verification", materialityTier: tier,
+    role: "mismatch", materialityTier: tier,
+    projectKey: "faible_chaleur",
     topic: "les fortes chaleurs à Antibes",
+    headlineSubject: "des étés supportables",
     statement: "Les jours au-dessus de 35 °C augmentent nettement.",
-    signalConvention: "futur•e signale cette exposition à partir de 8 jours par an au-dessus de 35 °C.",
+    // Un mismatch ne porte NI action NI signalConvention : le renvoi logement est restauré ici, par la
+    // composition, via summerComfortAction (invariant 8 revisité, lot D).
+    basis: { kind: "climate_threshold", horizon: 2050, referencePeriod: "1976-2005", conventionId: "clim-conv-1", trigger: "any", measures: [{ key: "days_over_35", projectedValue: 14, threshold: 8, unit: "days", isUnfavorable: true }] },
     limitation: "Cette trajectoire est lue à l'échelle de la commune, pas de l'adresse ni du logement.",
     evidence: [{ factId: "climat.joursTresChauds", module: "territoire", label: "Territoire · Antibes", grain: "commune" }],
-    action: { type: "renseigner_adresse", label: "Renseignez une adresse pour évaluer le confort d'été du logement" },
   };
 }
 
@@ -40,8 +44,8 @@ function run(evals: RuleEvaluation[]): RunResult {
 const douceurSatisfied: RuleEvaluation = {
   ruleId: RULE_DOUCEUR, projectKeys: ["douceur_climat"], outcome: "satisfied", facts: [], reason: "position satisfied",
 };
-const chaleurEval = (f: VerificationFact): RuleEvaluation => ({
-  ruleId: RULE_CHALEUR, projectKeys: ["faible_chaleur"], outcome: "verification", facts: [f], reason: "exposition notable",
+const chaleurEval = (f: MismatchFact): RuleEvaluation => ({
+  ruleId: RULE_CHALEUR, projectKeys: ["faible_chaleur"], outcome: "mismatch", facts: [f], reason: "exposition défavorable",
 });
 
 const moduleFacts = {
@@ -58,9 +62,11 @@ test("tradeoff saisonnier : poids >= 2 des deux côtés, satisfied + fait chaleu
   if (c.kind !== "tradeoff") return;
   assert.equal(c.materialityTier, "structuring"); // hérité du côté défavorable
   assert.deepEqual(c.absorbedFactIds, [f.id]);
-  assert.equal(c.unfavorableSide.action?.label, f.action.label); // invariant 8 : l'action survit
+  // L'action ne vient PLUS du fait (un mismatch n'en a pas) : la composition la restaure via
+  // summerComfortAction, au grain adresse (ici sans adresse -> « Renseignez votre adresse… »).
+  assert.equal(c.unfavorableSide.action?.label, summerComfortAction(false).label);
   assert.equal(c.unfavorableSide.limitation, f.limitation); // la limitation reste sur SON côté
-  assert.equal(c.unfavorableSide.signalConvention, f.signalConvention); // invariant 8 : la convention survit
+  assert.equal(c.unfavorableSide.signalConvention, undefined); // un mismatch n'a pas de convention de signalement
   assert.equal(c.favorableSide.factIds.length, 0); // aucun fait fabriqué côté satisfait
   assert.ok(c.favorableSide.evidence.length > 0);
   assert.equal(c.displaySection, "compromises");
@@ -111,7 +117,6 @@ test("assertCompositionsValid : id dupliqué, absorbé inexistant, mauvaise sect
 
 // ── Patron 2 : territory-size-multiple-consequences ──────────────────────────────────────────────
 
-import type { MismatchFact } from "./decision-fact.ts";
 import { TERRITORY_SIZE_FACT_ID } from "./agglomeration-rules.ts";
 import { AGGLOMERATION_SIZE_CONVENTION } from "./agglomeration-facts.ts";
 

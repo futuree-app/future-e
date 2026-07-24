@@ -12,6 +12,7 @@ import { preferenceWeight } from "./project-view.ts";
 import { rankPhrase, bandValide } from "./mismatch-facts.ts";
 import { mismatchRuleId } from "./mismatch-rules.ts";
 import { RULE_CHALEUR } from "./materiality-rules.ts";
+import { summerComfortAction } from "./climat-facts.ts";
 import { TERRITORY_SIZE_FACT_ID, SIZE_SUBJECTS } from "./agglomeration-rules.ts";
 import { WINTER_MILDNESS_CONVENTION } from "../climate/winter-mildness.ts";
 import { deCommune } from "../typography.ts";
@@ -57,7 +58,8 @@ function composeSeasonalClimateTradeoff(
   const douceur = evaluation(run, RULE_DOUCEUR);
   if (!douceur || douceur.outcome !== "satisfied") return null;
   const chaleur = evaluation(run, RULE_CHALEUR);
-  const chaleurFact = (chaleur?.facts ?? []).find((f) => f.role === "verification") as VerificationFact | undefined;
+  // Lot D : la chaleur défavorable sur priorité déclarée est désormais un MISMATCH (plus une verification).
+  const chaleurFact = (chaleur?.facts ?? []).find((f) => f.role === "mismatch") as MismatchFact | undefined;
   if (!chaleurFact) return null;
   const favorableEvidence = buildWinterMildnessEvidence(facts);
   if (!favorableEvidence) return null; // invariant 9 : preuve non fabricable = patron non déclenché
@@ -83,9 +85,10 @@ function composeSeasonalClimateTradeoff(
       evidence: chaleurFact.evidence,
       ruleIds: [RULE_CHALEUR],
       factIds: [chaleurFact.id],
-      action: chaleurFact.action,
+      // L'ACTION NE VIENT PLUS DU FAIT : un mismatch n'en porte pas. Le renvoi au confort du logement est
+      // restauré ICI, au grain adresse, par la source de vérité partagée (summerComfortAction).
+      action: summerComfortAction(facts.hasAddress),
       ...(chaleurFact.limitation ? { limitation: chaleurFact.limitation } : {}),
-      ...(chaleurFact.signalConvention ? { signalConvention: chaleurFact.signalConvention } : {}),
     },
     absorbedFactIds: [chaleurFact.id],
     referencedRuleIds: [RULE_DOUCEUR, RULE_CHALEUR],
