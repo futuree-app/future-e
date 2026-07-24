@@ -98,6 +98,20 @@ export function sectionsAffichees(dossier: Dossier): DossierSection[] {
     .filter((s) => s.cards.length > 0);
 }
 
+// LES CARTES QUI PORTENT UNE ANCRE, dans l'ordre du rendu. Une carte de fait et une carte de composition
+// en posent une (cf. DossierDecisionSection / FactCompositionCard) ; la section « Ce qui correspond »
+// n'en pose pas — elle rend des lignes groupées, pas des cartes, et un alignment ne porte de toute façon
+// aucune action à cibler.
+//
+// Sert à n'activer un renvoi que vers une carte RÉELLEMENT à l'écran : le plan désigne une carte source,
+// mais c'est la section qui décide de ce qu'elle rend (masquages d'absorption, plafonds). Calculé ici,
+// avec `sectionsAffichees`, pour que les deux ne puissent pas diverger.
+export function ancresRendues(dossier: Dossier): string[] {
+  return sectionsAffichees(dossier)
+    .filter((s) => s.key !== "alignments")
+    .flatMap((s) => s.cards.map((c) => (c.kind === "composition" ? c.composition.id : c.fact.id)));
+}
+
 // CE QUE LE DÉPLIABLE D'UNE COMPOSITION A ENCORE À MONTRER.
 //
 // Chaque patron recopie le constat de ses faits absorbés sur sa FACE : un tradeoff sur ses deux côtés,

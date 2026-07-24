@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { assembleDossier } from "./decision-assembler.ts";
-import { conditionPorteeParLeBloc, sectionsAffichees, factsNonNarresParLaFace } from "./dossier-view.ts";
+import { conditionPorteeParLeBloc, sectionsAffichees, factsNonNarresParLaFace, ancresRendues } from "./dossier-view.ts";
 import type { DecisionFact, RunResult, RuleEvaluation, Dossier } from "./decision-fact.ts";
 import type { FactComposition } from "./fact-composition.ts";
 import type { UserProject } from "../user-project.ts";
@@ -210,4 +210,38 @@ test("alignment NON absorbé si le tradeoff affiché porte une AUTRE clé favora
   const autre = { kind: "tradeoff", favorableProjectKey: "ensoleillement_recherche" } as unknown as FactComposition;
   const d = dossierAlignmentTradeoff([autre]);
   assert.equal(sectionsAffichees(d).some((s) => s.key === "alignments"), true);
+});
+
+// ── Les ancres de navigation interne (renvois de « À contrôler en priorité ») ────
+
+test("ancresRendues donne les cartes RÉELLEMENT rendues, dans l'ordre du document", () => {
+  const d = dossierAvec([verif("v1"), verif("v2")]);
+  const ancres = ancresRendues(d);
+  assert.deepEqual(ancres, ["v1", "v2"]);
+});
+
+test("une carte MASQUÉE à l'affichage ne porte aucune ancre (sinon le renvoi tomberait dans le vide)", () => {
+  // La condition établie est portée par le bloc de tête : sa section ne s'affiche pas. Un renvoi vers
+  // elle enverrait le lecteur nulle part — c'est exactement ce que cette fonction empêche.
+  const d = dossierAvec([incompat()]);
+  assert.equal(conditionPorteeParLeBloc(d)?.id, "i");
+  assert.equal(ancresRendues(d).includes("i"), false);
+});
+
+test("la section « Ce qui correspond » ne porte pas d'ancre : elle rend des lignes, pas des cartes", () => {
+  const d = dossierAlignmentTradeoff([]);
+  assert.equal(sectionsAffichees(d).some((s) => s.key === "alignments"), true);
+  assert.deepEqual(ancresRendues(d), []);
+});
+
+test("une composition porte SON id comme ancre, jamais ceux de ses faits absorbés", () => {
+  // Une composition est UNE carte. Ses faits absorbés n'ont aucune carte propre où pointer.
+  const d = {
+    sections: [{
+      key: "verifications", title: "t",
+      cards: [{ kind: "composition" as const, composition: { id: "31555:composition-argiles-ppr", absorbedFactIds: ["f-a", "f-b"] } as unknown as FactComposition }],
+    }],
+    compositions: [],
+  } as unknown as Dossier;
+  assert.deepEqual(ancresRendues(d), ["31555:composition-argiles-ppr"]);
 });

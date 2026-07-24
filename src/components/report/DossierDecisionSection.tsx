@@ -6,10 +6,11 @@ import Link from "next/link";
 import { Fragment, Suspense } from "react";
 import type { Dossier, DecisionFact, DossierCard } from "@/lib/decision/decision-fact";
 import { ConclusionBlock, planToBlocks } from "@/components/report/ConclusionBlock";
-import { conditionPorteeParLeBloc, sectionsAffichees } from "@/lib/decision/dossier-view";
+import { conditionPorteeParLeBloc, sectionsAffichees, ancresRendues } from "@/lib/decision/dossier-view";
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 import { FactBody, EvidenceRow, MethodDetails, factSources, factChecks } from "@/components/report/DecisionFactRenderParts";
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
+import { dossierAnchorId } from "@/lib/decision/dossier-anchors";
 
 const SECTION_ACCENT: Record<string, string> = {
   incompatibilities: "var(--red)",
@@ -89,6 +90,9 @@ export function DossierDecisionSection({
       }
     : null;
   const sections = sectionsAffichees(dossier);
+  // Les cartes que CETTE section rend : la ligne « À contrôler en priorité » n'active un renvoi que
+  // vers l'une d'elles. Le plan ne peut pas le savoir — il ignore les masquages d'affichage.
+  const renderedIds = ancresRendues(dossier);
 
   return (
     <section className="mt-14" id="dossier-decision">
@@ -122,14 +126,14 @@ export function DossierDecisionSection({
       {/* Le verdict. En « pending », le dossier n'est PAS final (l'augmentation adresse arrive) :
           générer ici coûterait un second appel Sonnet, jeté quelques secondes plus tard. */}
       {logementStatus === "pending" ? (
-        <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} />
+        <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} renderedIds={renderedIds} />
       ) : (
         <Suspense
           fallback={
-            <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} />
+            <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} renderedIds={renderedIds} />
           }
         >
-          <ConclusionRedigee plan={dossier.narrativePlan} insee={insee} scopeKey={scopeKey} condition={conditionEvidence} />
+          <ConclusionRedigee plan={dossier.narrativePlan} insee={insee} scopeKey={scopeKey} condition={conditionEvidence} renderedIds={renderedIds} />
         </Suspense>
       )}
 
@@ -245,7 +249,9 @@ export function DossierDecisionSection({
                     return (
                       <Fragment key={f.id}>
                         {grainLi}
-                        <li>
+                        {/* Même ancre que les compositions (cf. FactCompositionCard) : la ligne
+                            « À contrôler en priorité » vise la carte qui porte l'action citée. */}
+                        <li id={dossierAnchorId(f.id)} tabIndex={-1} className="scroll-mt-24 focus:outline-none">
                           <FactBody fact={f} color={col} />
                           <EvidenceRow fact={f} color={col} />
                           <MethodDetails conventions={conventions} checks={factChecks(f)} />

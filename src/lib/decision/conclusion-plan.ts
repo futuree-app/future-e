@@ -104,12 +104,16 @@ export const HEADLINE_MAX_CHARS = 130;
 // de tête ne portent aucune action.
 export type PriorityControl = {
   // Les ancres permettant de retrouver et de mettre en évidence les CARTES VISIBLES d'où viennent les
-  // actions retenues (phase 2 : le raccourci cliquable). Ce ne sont pas exactement les faits qui portent
-  // chaque action : une composition est UNE carte qui a absorbé ses faits élémentaires, donc elle porte
-  // son propre id ET ses `absorbedFactIds` — ces faits-là n'ont aucune carte propre où pointer. À
-  // l'inverse, un candidat de tête dont aucune action n'a survécu au plafond n'entre pas ici.
+  // actions retenues. Ce ne sont pas exactement les faits qui portent chaque action : une composition
+  // est UNE carte qui a absorbé ses faits élémentaires, donc elle porte son propre id ET ses
+  // `absorbedFactIds` — ces faits-là n'ont aucune carte propre où pointer. À l'inverse, un candidat de
+  // tête dont aucune action n'a survécu au plafond n'entre pas ici. Sert au highlight de GROUPE.
   sourceIds: string[];
-  actions: { label: string }[];
+  // `anchorId` est l'ancre de LA carte qui porte CETTE action — l'id de la composition, ou celui du
+  // fait. `sourceIds` ne peut pas jouer ce rôle : à deux candidats de tête, il aplatit les ancres des
+  // deux cartes en une seule liste, où plus rien ne dit laquelle appartient à quelle ligne. Le lien
+  // se pose donc ici, par action, jamais depuis la liste plate.
+  actions: { label: string; anchorId: string }[];
 };
 
 export type ConclusionNarrativePlan = {
@@ -205,24 +209,28 @@ function actionKey(label: string): string {
   return label.trim().toLowerCase().replace(/[.!?…]+$/, "");
 }
 
-// Les actions d'UN candidat de tête, avec l'ancre de la ou des cartes qui les portent (cf. `sourceIds`).
-// Une composition expose les actions de ses éléments (grouped) ou de son côté défavorable (tradeoff),
-// dans l'ordre de la carte. `null` quand ce candidat n'a aucune démarche à proposer.
+// Les actions d'UN candidat de tête. `anchorId` est LA carte à atteindre au clic (une composition est
+// une seule carte, quel que soit le nombre de faits qu'elle a absorbés) ; `anchors` est l'ensemble des
+// identifiants qu'elle recouvre, pour `sourceIds`. Une composition expose les actions de ses éléments
+// (grouped) ou de son côté défavorable (tradeoff), dans l'ordre de la carte. `null` quand ce candidat
+// n'a aucune démarche à proposer.
 function candidateActions(
   id: string, shownFacts: DecisionFact[], shownCompositions: FactComposition[],
-): { anchors: string[]; labels: string[] } | null {
+): { anchorId: string; anchors: string[]; labels: string[] } | null {
   const comp = shownCompositions.find((c) => c.id === id);
   if (comp) {
     const labels =
       comp.kind === "grouped_verification" ? comp.items.flatMap((i) => (i.action ? [i.action.label] : []))
       : comp.kind === "tradeoff" ? (comp.unfavorableSide.action ? [comp.unfavorableSide.action.label] : [])
       : [];
-    return labels.length > 0 ? { anchors: [comp.id, ...comp.absorbedFactIds], labels } : null;
+    return labels.length > 0
+      ? { anchorId: comp.id, anchors: [comp.id, ...comp.absorbedFactIds], labels }
+      : null;
   }
   const fact = shownFacts.find((f) => f.id === id);
   if (!fact) return null;
   const label = factActionLabel(fact);
-  return label ? { anchors: [fact.id], labels: [label] } : null;
+  return label ? { anchorId: fact.id, anchors: [fact.id], labels: [label] } : null;
 }
 
 // LA PROCHAINE DÉMARCHE, dérivée des faits/compositions DE TÊTE, MOT POUR MOT depuis l'action existante.
@@ -243,7 +251,7 @@ function priorityControlFrom(
     : [];
 
   const sourceIds: string[] = [];
-  const actions: { label: string }[] = [];
+  const actions: { label: string; anchorId: string }[] = [];
   const seen = new Set<string>();
   for (const id of topIds) {
     if (actions.length >= MAX_PRIORITY_ACTIONS) break;
@@ -255,7 +263,7 @@ function priorityControlFrom(
       const key = actionKey(label);
       if (seen.has(key)) continue;
       seen.add(key);
-      actions.push({ label });
+      actions.push({ label, anchorId: candidate.anchorId });
     }
     // Une carte dont AUCUNE action n'a survécu (doublon, ou plafond déjà atteint) n'est pas une source :
     // pointer vers elle enverrait le lecteur sur une carte qui ne dit rien de ce qu'il vient de lire.

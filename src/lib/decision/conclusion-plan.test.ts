@@ -225,7 +225,7 @@ test("lead single : la démarche prioritaire reprend l'ACTION du fait de tête, 
   }));
   assert.deepEqual(plan.priorityControl, {
     sourceIds: ["f1"],
-    actions: [{ label: "Vérifier sur place" }],
+    actions: [{ label: "Vérifier sur place", anchorId: "f1" }],
   });
   // Ni le constat de la carte, ni le sujet : une action, et rien d'autre.
   assert.equal(plan.priorityControl!.actions[0]!.label.includes("Le logement porte"), false);
@@ -257,8 +257,8 @@ test("lead tied : DEUX faits à égalité donnent DEUX démarches, dans l'ordre 
   assert.deepEqual(plan.priorityControl, {
     sourceIds: ["f1", "f2"],
     actions: [
-      { label: "Regardez les signes visibles sur le bâti" },
-      { label: "Consultez l'exposition de l'adresse aux inondations" },
+      { label: "Regardez les signes visibles sur le bâti", anchorId: "f1" },
+      { label: "Consultez l'exposition de l'adresse aux inondations", anchorId: "f2" },
     ],
   });
 });
@@ -276,7 +276,7 @@ test("lead tied : un MÊME geste prescrit deux fois ne s'affiche qu'une fois (et
   assert.equal(plan.lead.kind, "tied");
   assert.deepEqual(plan.priorityControl, {
     sourceIds: ["f1"], // f2 n'a rien apporté : l'y renvoyer enverrait le lecteur sur une carte muette
-    actions: [{ label: "Vérifier sur place" }], // le libellé d'origine, jamais la forme normalisée
+    actions: [{ label: "Vérifier sur place", anchorId: "f1" }], // le libellé d'origine, jamais la forme normalisée
   });
 });
 
@@ -749,7 +749,7 @@ test("shownCompositions vide -> plan strictement identique à l'existant (non-r�
   assert.deepEqual(plan.blocks.map((b) => b.key), [
     "verdict", "unexamined_hard_constraints", "uncovered_priorities",
   ]);
-  assert.deepEqual(plan.priorityControl, { sourceIds: ["f1"], actions: [{ label: "Vérifier sur place" }] });
+  assert.deepEqual(plan.priorityControl, { sourceIds: ["f1"], actions: [{ label: "Vérifier sur place", anchorId: "f1" }] });
 });
 
 // ── La primitive de tri des candidats ──────────────────────────────────────────
@@ -1053,7 +1053,7 @@ test("la démarche se reconstruit sur ce que le headline n'a pas consommé", () 
   assert.equal(plan.verdict.headline.consumedFactIds.includes("f1"), true);
   // Le sujet déjà nommé par le héros ne revient pas : la démarche part du premier dominant RESTANT.
   assert.deepEqual(plan.priorityControl!.sourceIds, ["f2"]);
-  assert.deepEqual(plan.priorityControl!.actions, [{ label: "Vérifier sur place" }]);
+  assert.deepEqual(plan.priorityControl!.actions, [{ label: "Vérifier sur place", anchorId: "f2" }]);
 });
 
 test("même pool : l'ordre vit dans l'étiquette de l'UI, jamais dans le corps", () => {
@@ -1274,7 +1274,7 @@ test("démarche : consumedFrom « reserves » (le héros a déjà nommé un poin
   }));
   assert.equal(plan.verdict.headline.consumedFrom, "reserves"); // -> étiquette « À contrôler ensuite »
   // La démarche porte le geste du sujet résiduel, pas son nom (l'ordre, lui, est dans l'étiquette).
-  assert.deepEqual(plan.priorityControl, { sourceIds: ["f2"], actions: [{ label: "Vérifier sur place" }] });
+  assert.deepEqual(plan.priorityControl, { sourceIds: ["f2"], actions: [{ label: "Vérifier sur place", anchorId: "f2" }] });
 });
 
 test("démarche : consumedFrom « mismatches » (le héros a puisé dans un AUTRE pool) -> l'UI rendra « À contrôler en priorité »", () => {
@@ -1288,7 +1288,7 @@ test("démarche : consumedFrom « mismatches » (le héros a puisé dans un AUTR
     mismatchTotal: 1, mismatchShown: 1, reservesShown: 1,
   }));
   assert.equal(plan.verdict.headline.consumedFrom, "mismatches"); // -> étiquette « À contrôler en priorité »
-  assert.deepEqual(plan.priorityControl, { sourceIds: ["f1"], actions: [{ label: "Vérifier sur place" }] });
+  assert.deepEqual(plan.priorityControl, { sourceIds: ["f1"], actions: [{ label: "Vérifier sur place", anchorId: "f1" }] });
 });
 
 // Une composition ne portait qu'un SUJET dans la strate (« Ce qu'impose le sol argileux. ») : rien à
@@ -1303,7 +1303,7 @@ test("démarche : un tradeoff en tête reprend l'action de son côté DÉFAVORAB
   // La composition ET ses faits absorbés : la phase 2 (raccourci cliquable) doit pouvoir viser la carte.
   assert.deepEqual(plan.priorityControl, {
     sourceIds: ["06004:composition-climat-saisons", "f-ch"],
-    actions: [{ label: "Regardez comment le logement tient l'été" }],
+    actions: [{ label: "Regardez comment le logement tient l'été", anchorId: "06004:composition-climat-saisons" }],
   });
   const labels = plan.priorityControl!.actions.map((a) => a.label).join(" ");
   assert.equal(labels.includes("Des hivers doux"), false);            // le title
@@ -1320,8 +1320,10 @@ test("démarche : un grouped_verification en tête rend DEUX actions, une par it
   assert.deepEqual(plan.priorityControl, {
     sourceIds: ["31555:composition-argiles-ppr", "f-argiles", "f-ppr"],
     actions: [
-      { label: "Regardez les signes visibles sur le bâti" },
-      { label: "Lisez le règlement de la zone en mairie" },
+      // MÊME carte pour les deux lignes : une composition est une carte unique, quel que soit le
+      // nombre de faits qu'elle a absorbés.
+      { label: "Regardez les signes visibles sur le bâti", anchorId: "31555:composition-argiles-ppr" },
+      { label: "Lisez le règlement de la zone en mairie", anchorId: "31555:composition-argiles-ppr" },
     ],
   });
 });
@@ -1342,8 +1344,8 @@ test("démarche : le plafond tronque le DERNIER candidat, y compris une composit
   }));
   assert.equal(plan.lead.kind, "tied");
   assert.deepEqual(plan.priorityControl!.actions, [
-    { label: "Consultez l'exposition de l'adresse aux inondations" },
-    { label: "Regardez les signes visibles sur le bâti" },
+    { label: "Consultez l'exposition de l'adresse aux inondations", anchorId: "f7" },
+    { label: "Regardez les signes visibles sur le bâti", anchorId: "31555:composition-argiles-ppr" },
   ]);
   assert.deepEqual(plan.priorityControl!.sourceIds, ["f7", "31555:composition-argiles-ppr", "f-argiles", "f-ppr"]);
 });

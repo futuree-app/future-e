@@ -12,6 +12,7 @@ import type { ConclusionNarrativePlan, VerdictTone } from "@/lib/decision/conclu
 import type { RenderedBlock } from "@/lib/decision/conclusion-validate";
 import type { EvidenceRef } from "@/lib/decision/decision-fact";
 import { Chip } from "@/components/report/DecisionFactRenderParts";
+import { PriorityControlActions } from "@/components/report/PriorityControlActions";
 import { bindOrphans } from "@/lib/typography";
 
 // CE QUE LA CONDITION NON REMPLIE APPORTE EN PLUS DU TEXTE : sa preuve, et la limite du constat.
@@ -52,11 +53,14 @@ function Eyebrow({ children, color }: { children: React.ReactNode; color: string
 }
 
 export function ConclusionBlock({
-  plan, blocks, condition: conditionEvidence = null,
+  plan, blocks, condition: conditionEvidence = null, renderedIds = [],
 }: {
   plan: ConclusionNarrativePlan;
   blocks: RenderedBlock[];
   condition?: ConditionEvidence | null;
+  // Les cartes rendues sous ce bloc, pour n'activer un renvoi que vers ce qui existe (cf.
+  // PriorityControlActions). Vide par défaut : sans elles, les démarches restent du texte.
+  renderedIds?: string[];
 }) {
   const color = TONE_COLOR[plan.verdictTone];
   const byKey = new Map(blocks.map((b) => [b.key, b]));
@@ -75,7 +79,6 @@ export function ConclusionBlock({
   const suiteDuHeros = plan.verdict.headline.consumedFrom === "reserves";
   const controlLabel = suiteDuHeros ? "À contrôler ensuite" : "À contrôler en priorité";
   const showControl = control != null && control.actions.length > 0 && plan.verdictTone !== "critical";
-  const lowerFirst = (s: string): string => (s.length === 0 ? s : s[0]!.toLowerCase() + s.slice(1));
 
   return (
     // Le bloc ne se distingue plus par un filet à gauche sur le MÊME verre que les cartes du dessous :
@@ -139,11 +142,7 @@ export function ConclusionBlock({
       {showControl ? (
         <div className="mt-7 space-y-1">
           <Eyebrow color="var(--info)">{controlLabel}</Eyebrow>
-          {control!.actions.map((a, i) => (
-            <p key={i} className="text-[15px] leading-[1.55] text-muted">
-              {i === 0 ? a.label : `Puis ${lowerFirst(a.label)}`}
-            </p>
-          ))}
+          <PriorityControlActions actions={control!.actions} renderedIds={renderedIds} />
         </div>
       ) : null}
 

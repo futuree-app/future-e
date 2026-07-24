@@ -6,6 +6,8 @@ import type { DecisionFact } from "@/lib/decision/decision-fact";
 import { Chip, EvidenceRow, FactBody, ActionCue, MethodDetails, StatusTag } from "@/components/report/DecisionFactRenderParts";
 import { PREFERENCE_LABELS } from "@/lib/comparateur-labels";
 import { factsNonNarresParLaFace } from "@/lib/decision/dossier-view";
+import { dossierAnchorId } from "@/lib/decision/dossier-anchors";
+import { evidenceHref } from "@/lib/decision/evidence-targets";
 
 // `panel` : le côté est rendu en côté de TRADEOFF (teinte plate discrète, .tradeoff-side). Le libellé y
 // est en SANS-SERIF casse normale, coloré à son ton — plus l'eyebrow mono capitale d'avant, qui rejouait
@@ -30,7 +32,7 @@ function SideBlock({ side, color, panel = false }: { side: CompositionSide; colo
         {side.evidence.some((e) => e.observedValue) ? (
           <div className="flex items-center gap-2 flex-wrap">
             {side.evidence.filter((e) => e.observedValue).map((e, i) => (
-              <Chip key={i} label={e.href ? "Preuve" : e.label} value={e.observedValue} href={e.href} color={color} />
+              <Chip key={i} label={e.href ? "Preuve" : e.label} value={e.observedValue} href={e.href ? evidenceHref(e.targetKey, e.href) : undefined} color={color} />
             ))}
           </div>
         ) : null}
@@ -116,7 +118,11 @@ export function FactCompositionCard({
   // dans dossier-view.ts, où elles sont testables.
   const nonNarres = factsNonNarresParLaFace(composition, absorbedFacts);
   return (
-    <li>
+    // L'ancre de navigation interne au dossier : la ligne « À contrôler en priorité » y renvoie. Une
+    // composition est UNE carte, quel que soit le nombre de faits qu'elle a absorbés — c'est son id qui
+    // porte l'ancre. `tabIndex={-1}` la rend focusable par programme (jamais au Tab) : sans focus, un
+    // lecteur d'écran resterait sur le lien pendant que la page a scrollé ailleurs.
+    <li id={dossierAnchorId(composition.id)} tabIndex={-1} className="scroll-mt-24 focus:outline-none">
       <p className="text-label text-[16px] font-semibold leading-[1.4]">{composition.title}</p>
       {composition.kind === "tradeoff" ? (
         <TradeoffFaceoff composition={composition} />
@@ -137,7 +143,7 @@ export function FactCompositionCard({
           {composition.evidence.some((e) => e.observedValue) ? (
             <div className="mt-1 flex items-center gap-2 flex-wrap">
               {composition.evidence.filter((e) => e.observedValue).map((e, i) => (
-                <Chip key={i} label={e.href ? "Preuve" : e.label} value={e.observedValue} href={e.href} color={color} />
+                <Chip key={i} label={e.href ? "Preuve" : e.label} value={e.observedValue} href={e.href ? evidenceHref(e.targetKey, e.href) : undefined} color={color} />
               ))}
             </div>
           ) : null}

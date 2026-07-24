@@ -112,7 +112,9 @@ test("sans contrainte dure : la conclusion nomme les priorités non couvertes et
   // n'entre plus dans la narration : `conclusion` est le join des blocs RÉDIGÉS, et la démarche à mener
   // est déterministe, hors de ce texte. Elle vit sur le plan, avec l'action verbatim de la carte.
   assert.equal(d.conclusion.includes("Un point à vérifier."), false);
-  assert.deepEqual(d.narrativePlan.priorityControl, { sourceIds: ["v"], actions: [{ label: "doc" }] });
+  assert.deepEqual(d.narrativePlan.priorityControl, {
+    sourceIds: ["v"], actions: [{ label: "doc", anchorId: "v" }],
+  });
   assert.match(d.narrativePlan.verdict.headline.text, /Toulouse/); // la commune est NOMMÉE, jamais « ce lieu »
 });
 
