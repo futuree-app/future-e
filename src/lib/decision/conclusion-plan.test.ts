@@ -788,6 +788,39 @@ test("arbitrage : une cause commune ne s'énumère jamais avec des priorités", 
   assert.deepEqual(plan.verdict.headline.consumedCompositionIds, []);
 });
 
+test("arbitrage : une composition climate_comfort est candidate au headline (« des étés supportables »)", () => {
+  // Le mismatch chaleur est ABSORBÉ dans la composition : shownFacts n'en contient aucun. Sans cette
+  // branche, le héros retomberait en posture alors qu'une carte visible nomme l'enjeu (Issue 2, lot C).
+  const comp = {
+    id: "31555:composition-confort-ete", kind: "climate_comfort", patternId: "climate_comfort",
+    title: "Des étés plus difficiles à concilier avec votre projet",
+    headlineSubject: "des étés supportables", summary: "résumé chaleur",
+    evidence: [], action: { type: "renseigner_adresse", label: "Renseignez votre adresse" },
+    absorbedFactIds: ["ch1"], referencedRuleIds: ["territoire.climat-chaleur"],
+    materialityTier: "structuring", displaySection: "mismatches",
+  } as unknown as FactComposition;
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration", shownFacts: [], shownCompositions: [comp],
+    mismatchTotal: 1, mismatchShown: 1, reservesShown: 0,
+  }));
+  assert.equal(plan.verdict.headline.kind, "named_issues");
+  assert.equal(plan.verdict.headline.text, "Toulouse répond moins bien à une de vos priorités : des étés supportables.");
+  assert.deepEqual(plan.verdict.headline.consumedFactIds, ["ch1"]);
+  assert.deepEqual(plan.verdict.headline.consumedCompositionIds, ["31555:composition-confort-ete"]);
+});
+
+test("arbitrage : le tradeoff saisonnier est candidat au headline (« l'exposition aux fortes chaleurs »), le mismatch absorbé n'est pas une réserve « par ailleurs »", () => {
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "arbitration", shownFacts: [], shownCompositions: [tradeoff("structuring")],
+    mismatchTotal: 1, mismatchShown: 1, reservesShown: 0, hasFavorable: true, favorableCount: 1,
+  }));
+  assert.equal(plan.verdict.headline.kind, "named_issues");
+  assert.equal(plan.verdict.headline.text, "Toulouse répond moins bien à une de vos priorités : l'exposition aux fortes chaleurs.");
+  assert.deepEqual(plan.verdict.headline.consumedFactIds, ["f-ch"]);
+  assert.deepEqual(plan.verdict.headline.consumedCompositionIds, ["06004:composition-climat-saisons"]);
+  assert.doesNotMatch(plan.verdict.detail, /par ailleurs à contrôler/);
+});
+
 test("gate 2 enjeux : trois mismatchs affichés basculent en posture", () => {
   const plan = buildConclusionPlan(baseInput({
     orientation: "arbitration",

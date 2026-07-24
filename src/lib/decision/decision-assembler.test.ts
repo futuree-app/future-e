@@ -188,6 +188,36 @@ function tradeoffComp(id: string, absorbed: string[], tier: "secondary" | "struc
 function runR(facts: DecisionFact[]): RunResult {
   return { facts, evaluations: [ev("r", ["nature"], "mismatch", facts)] };
 }
+function climateComfortComp(id: string, absorbed: string[], tier: "secondary" | "structuring"): FactComposition {
+  return {
+    id, kind: "climate_comfort", patternId: "climate_comfort",
+    title: "Des étés plus difficiles à concilier avec votre projet",
+    headlineSubject: "des étés supportables",
+    summary: "À Toulouse : jours au-dessus de 35 °C et nuits tropicales en hausse.",
+    evidence: [{ factId: "s", module: "territoire", label: "Climat · Toulouse", grain: "commune", observedValue: "9 jours à l'horizon 2050" }],
+    action: { type: "renseigner_adresse", label: "Renseignez votre adresse pour descendre au niveau du logement" },
+    absorbedFactIds: absorbed, referencedRuleIds: ["r"], materialityTier: tier, displaySection: "mismatches",
+  };
+}
+
+test("lot D : chaleur mismatch absorbé dans un climate_comfort -> arbitrage, le héros NOMME « des étés supportables », la carte reste dans les mismatches", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_chaleur", weight: 3 }] });
+  const chaleur = { ...mism("ch1"), projectKey: "faible_chaleur" } as DecisionFact;
+  const d = assembleDossier(
+    run([chaleur], [], [ev("r", ["faible_chaleur"], "mismatch", [chaleur])]),
+    p, "commune", "Toulouse",
+    [climateComfortComp("31555:composition-confort-ete", ["ch1"], "structuring")],
+  );
+  assert.equal(d.criteria.orientation, "arbitration");
+  assert.equal(d.narrativePlan.verdict.headline.text, "Toulouse répond moins bien à une de vos priorités : des étés supportables.");
+  // La carte composée est retrouvable dans la section mismatches, et le fait absorbé a quitté les sections.
+  const mismatches = d.sections.find((s) => s.key === "mismatches");
+  assert.ok(mismatches!.cards.some((c) => c.kind === "composition" && c.composition.id === "31555:composition-confort-ete"));
+  assert.equal(d.sections.flatMap((s) => s.cards).some((c) => c.kind === "fact" && c.fact.id === "ch1"), false);
+  assert.deepEqual(d.absorbedFacts.map((f) => f.id), ["ch1"]);
+  // Le mismatch nommé n'est pas AUSSI recompté comme une réserve « par ailleurs à contrôler ».
+  assert.doesNotMatch(d.narrativePlan.verdict.detail, /par ailleurs à contrôler/);
+});
 
 test("compositions : les faits absorbés quittent les sections et vivent dans absorbedFacts", () => {
   const v = verif("v1");

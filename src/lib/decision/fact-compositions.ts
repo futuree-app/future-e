@@ -6,7 +6,7 @@
 // depuis l'évaluation existante, preuve par helper canonique, aucun seuil recalculé (invariant 9).
 import type { RunResult, RuleEvaluation, ModuleFacts, EvidenceRef, VerificationFact, MismatchFact, MaterialityTier } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
-import type { FactComposition, TradeoffComposition, SharedEvidenceComposition, GroupedVerificationComposition } from "./fact-composition.ts";
+import type { FactComposition, TradeoffComposition, SharedEvidenceComposition, GroupedVerificationComposition, ClimateComfortComposition } from "./fact-composition.ts";
 import { RULE_EXPOSITION_BATI, RULE_ZONE_REGLEMENTEE } from "./logement-rules.ts";
 import { preferenceWeight } from "./project-view.ts";
 import { rankPhrase, bandValide } from "./mismatch-facts.ts";
@@ -94,6 +94,36 @@ function composeSeasonalClimateTradeoff(
     referencedRuleIds: [RULE_DOUCEUR, RULE_CHALEUR],
     materialityTier: chaleurFact.materialityTier, // la douceur n'aggrave jamais la réserve
     displaySection: "compromises",
+  };
+}
+
+// LE FALLBACK CLIMATIQUE : chaleur mismatch SANS douceur favorable à opposer. Ne se déclenche que si le
+// tradeoff saisonnier n'a pas été produit (garanti par composeFacts) — invariant « une seule composition
+// climatique par dossier ». Sa raison d'être : restaurer le renvoi au confort du logement (au grain adresse)
+// qu'un MismatchFact ne peut pas porter, tout en gardant le mismatch nommable par le héros (Task 3).
+function composeClimateComfort(
+  run: RunResult, facts: ModuleFacts, project: UserProject,
+): ClimateComfortComposition | null {
+  if (preferenceWeight(project, "faible_chaleur") < 2) return null;
+  const chaleur = evaluation(run, RULE_CHALEUR);
+  // Seul un mismatch RÉELLEMENT émis se compose : un poids 1 (silencieux, aucun fait) n'est jamais repêché.
+  const chaleurFact = (chaleur?.facts ?? []).find((f) => f.role === "mismatch") as MismatchFact | undefined;
+  if (!chaleurFact) return null;
+
+  return {
+    id: `${facts.insee}:composition-confort-ete`,
+    kind: "climate_comfort",
+    patternId: "climate_comfort",
+    title: "Des étés plus difficiles à concilier avec votre projet",
+    headlineSubject: chaleurFact.headlineSubject, // « des étés supportables », hérité du mismatch
+    summary: chaleurFact.statement,
+    evidence: chaleurFact.evidence,
+    action: summerComfortAction(facts.hasAddress),
+    ...(chaleurFact.limitation ? { limitation: chaleurFact.limitation } : {}),
+    absorbedFactIds: [chaleurFact.id],
+    referencedRuleIds: [RULE_CHALEUR],
+    materialityTier: chaleurFact.materialityTier,
+    displaySection: "mismatches",
   };
 }
 
@@ -223,6 +253,7 @@ export function assertCompositionsValid(run: RunResult, compositions: FactCompos
     if (c.kind === "tradeoff" && section !== "compromises") throw new Error(`tradeoff hors compromises : ${c.id}`);
     if (c.kind === "shared_evidence" && section !== "mismatches") throw new Error(`shared_evidence hors mismatches : ${c.id}`);
     if (c.kind === "grouped_verification" && section !== "verifications") throw new Error(`grouped_verification hors verifications : ${c.id}`);
+    if (c.kind === "climate_comfort" && section !== "mismatches") throw new Error(`climate_comfort hors mismatches : ${c.id}`);
     if (c.absorbedFactIds.length === 0) throw new Error(`composition sans absorbé : ${c.id}`);
     // Le texte que le HÉROS servira est obligatoire : un sujet pour les patrons qui nomment une
     // réserve, une CAUSE pour shared_evidence (deux natures, deux champs, cf. fact-composition.ts).
@@ -252,8 +283,15 @@ export function assertCompositionsValid(run: RunResult, compositions: FactCompos
 
 export function composeFacts(run: RunResult, facts: ModuleFacts, project: UserProject): FactComposition[] {
   const out: FactComposition[] = [];
+  // PRIORITÉ DES PATRONS CLIMATIQUES (invariant « une seule par dossier ») : douceur favorable -> le tradeoff
+  // saisonnier gagne (il oppose le côté favorable) ; sinon -> le fallback climate_comfort. Jamais les deux :
+  // ils absorbent le MÊME mismatch chaleur, et assertCompositionsValid rejetterait la double absorption.
   const seasonal = composeSeasonalClimateTradeoff(run, facts, project);
   if (seasonal) out.push(seasonal);
+  else {
+    const comfort = composeClimateComfort(run, facts, project);
+    if (comfort) out.push(comfort);
+  }
   const size = composeTerritorySizeSharedEvidence(run, facts);
   if (size) out.push(size);
   const clay = composeClayRegulationGrouped(run, facts);

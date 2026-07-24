@@ -93,4 +93,33 @@ export type GroupedVerificationComposition = {
   displaySection: "verifications";
 };
 
-export type FactComposition = TradeoffComposition | SharedEvidenceComposition | GroupedVerificationComposition;
+// LE CONFORT D'ÉTÉ, quand la douceur d'hiver n'est pas un contrepoids (lot D, Task 2). Fallback du
+// tradeoff saisonnier : sans côté favorable à opposer, la composition ne montre qu'UN côté — le mismatch
+// chaleur absorbé —, mais elle existe pour une raison précise : un MismatchFact ne porte PAS d'action, et
+// le renvoi au confort du logement (au grain adresse) doit être restauré quelque part. C'est ici.
+//
+// Invariant « une seule composition climatique par dossier » : ce patron ne se déclenche QUE si le tradeoff
+// saisonnier n'a pas été produit (cf. composeFacts). Le mismatch absorbé reste nommable par le héros
+// (Task 3) via `headlineSubject` + `absorbedFactIds`, exactement comme le tradeoff.
+export type ClimateComfortComposition = {
+  id: string;
+  kind: "climate_comfort";
+  patternId: "climate_comfort";
+  title: string;
+  // Court, bas de casse, lu après un deux-points par le héros (« des étés supportables ») — hérité du
+  // mismatch absorbé, jamais le titre. Même contrat que les autres patrons qui nomment une réserve.
+  headlineSubject: string;
+  summary: string; // le constat à l'échelle de la commune (le statement du mismatch absorbé)
+  evidence: EvidenceRef[]; // les chips du mismatch (jours / nuits notables)
+  // LE RENVOI AU LOGEMENT que le mismatch ne peut pas porter : restauré ici, au grain adresse
+  // (summerComfortAction). C'est la raison d'être de ce patron.
+  action: DecisionAction;
+  limitation?: string;
+  absorbedFactIds: string[];
+  referencedRuleIds: string[];
+  materialityTier: MaterialityTier;
+  displaySection: "mismatches";
+};
+
+export type FactComposition =
+  TradeoffComposition | SharedEvidenceComposition | GroupedVerificationComposition | ClimateComfortComposition;

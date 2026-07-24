@@ -123,15 +123,20 @@ export function assembleDossier(
   // compte donc lui aussi sur l'affiché : le lecteur doit pouvoir compter les cartes et retomber dessus.
   const established = run.facts.find((f): f is IncompatibilityFact =>
     f.role === "incompatibility" && f.evidenceStrength === "established");
-  // Les compositions porteuses de réserves : un tradeoff (son côté défavorable est une verification) et
-  // une grouped_verification (deux verifications sous une carte) comptent chacun pour UNE carte-réserve.
-  const reserveComps = shownComps.filter((c) => c.kind === "tradeoff" || c.kind === "grouped_verification");
-  const sharedShown = shownComps.filter((c) => c.kind === "shared_evidence");
+  // Les compositions porteuses de RÉSERVES : seule grouped_verification (deux verifications sous une
+  // carte). Le tradeoff saisonnier a changé de nature au lot D — son côté défavorable est désormais un
+  // MISMATCH chaleur, pas une verification —, il compte donc comme une carte-mismatch, pas une réserve.
+  const reserveComps = shownComps.filter((c) => c.kind === "grouped_verification");
+  // Les compositions qui PRÉSENTENT un mismatch : shared_evidence (taille), climate_comfort (chaleur) et
+  // le tradeoff saisonnier (douceur + chaleur). Chacune compte pour UNE carte mismatch visible.
+  const mismatchComps = shownComps.filter(
+    (c) => c.kind === "tradeoff" || c.kind === "shared_evidence" || c.kind === "climate_comfort",
+  );
   const reservesShownFacts = shown.filter((f) => RESERVE_ROLES.has(f.role));
   // Le TOTAL des mismatchs ÉMIS (le verdict compte dessus, « N de vos priorités » reste vrai même
-  // absorbé), et les CARTES mismatch visibles (faits simples + compositions shared_evidence).
+  // absorbé), et les CARTES mismatch visibles (faits simples + compositions de mismatch).
   const mismatchTotal = run.facts.filter((f) => f.role === "mismatch").length;
-  const mismatchShown = shown.filter((f) => f.role === "mismatch").length + sharedShown.length;
+  const mismatchShown = shown.filter((f) => f.role === "mismatch").length + mismatchComps.length;
   const narrativePlan = buildConclusionPlan({
     scope,
     communeNom,
@@ -179,6 +184,7 @@ export function assembleDossier(
         ...shownComps.flatMap((c) => {
           if (c.kind === "tradeoff") return [...c.favorableSide.evidence, ...c.unfavorableSide.evidence];
           if (c.kind === "grouped_verification") return c.items.flatMap((i) => i.evidence);
+          if (c.kind === "climate_comfort") return c.evidence;
           return c.sharedEvidence;
         }),
       ],

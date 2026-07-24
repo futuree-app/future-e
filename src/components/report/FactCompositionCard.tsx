@@ -56,7 +56,11 @@ function compositionConventions(composition: FactComposition): string[] {
   // règle que la carte élémentaire (sans valeur mesurée, pas de pastille sur la face).
   const seen = new Set<string>();
   const sources: string[] = [];
-  for (const e of [...sides.flatMap((s) => s.evidence), ...(composition.kind === "shared_evidence" ? composition.sharedEvidence : [])]) {
+  const extraEvidence =
+    composition.kind === "shared_evidence" ? composition.sharedEvidence
+      : composition.kind === "climate_comfort" ? composition.evidence
+      : [];
+  for (const e of [...sides.flatMap((s) => s.evidence), ...extraEvidence]) {
     if (e.observedValue || seen.has(e.label)) continue;
     seen.add(e.label);
     sources.push(`Source : ${e.label}`);
@@ -73,7 +77,10 @@ function compositionChecks(composition: FactComposition): string[] {
       : composition.kind === "grouped_verification"
         ? composition.items
         : [];
-  return sides.map((s) => s.action?.detail).filter((d): d is string => Boolean(d));
+  const checks = sides.map((s) => s.action?.detail).filter((d): d is string => Boolean(d));
+  // climate_comfort n'a pas de côtés : son action (le renvoi logement) porte le concret à regarder.
+  if (composition.kind === "climate_comfort" && composition.action.detail) checks.push(composition.action.detail);
+  return checks;
 }
 
 // LE COMPOSANT SIGNATURE : un tradeoff est le SEUL patron où deux côtés s'opposent vraiment et où le
@@ -120,6 +127,23 @@ export function FactCompositionCard({
           {composition.items.map((item, i) => (
             <SideBlock key={i} side={item} color={color} />
           ))}
+        </div>
+      ) : composition.kind === "climate_comfort" ? (
+        // Le fallback confort d'été : un seul côté (le mismatch chaleur absorbé), plus le renvoi au
+        // logement qu'un mismatch ne porte pas. Constat commune, preuve chiffrée, action au grain adresse.
+        <div className="mt-3 flex flex-col gap-2">
+          <p className="text-label text-[15px] leading-[1.6]">{composition.summary}</p>
+          {composition.limitation ? <p className="text-muted/85 text-[13px] leading-[1.55]">{composition.limitation}</p> : null}
+          {composition.evidence.some((e) => e.observedValue) ? (
+            <div className="mt-1 flex items-center gap-2 flex-wrap">
+              {composition.evidence.filter((e) => e.observedValue).map((e, i) => (
+                <Chip key={i} label={e.href ? "Preuve" : e.label} value={e.observedValue} href={e.href} color={color} />
+              ))}
+            </div>
+          ) : null}
+          <div className="mt-1">
+            <ActionCue label={composition.action.label} color={color} type={composition.action.type} />
+          </div>
         </div>
       ) : (
         <div className="mt-3 flex flex-col gap-4">

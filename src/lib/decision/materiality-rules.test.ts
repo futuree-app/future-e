@@ -241,6 +241,41 @@ test("CHALEUR, critère non déclaré : not_applicable, aucune carte", () => {
   assert.equal(r.evaluations.find((x) => x.ruleId === "territoire.climat-chaleur")!.outcome, "not_applicable");
 });
 
+// ── La verification AMBIANTE (chaleur non déclarée), règle séparée (lot D, Task 4) ────────────────
+
+test("chaleur AMBIANTE : non déclarée + exposition notable -> une verification (grain commune) + action logement", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [] }); // faible_chaleur NON déclarée
+  const r = run(facts({ climat: EXPOSEE }), p);
+  const f = r.facts.find((x) => x.ruleId === "territoire.verification-chaleur-future");
+  assert.ok(f && f.role === "verification");
+  assert.match(f.statement, /Les jours au-dessus de 35 °C/);
+  assert.match(f.statement, /Les nuits tropicales/);
+  assert.equal(f.action?.type, "renseigner_adresse"); // sans adresse : la seule manœuvre dans le produit
+  assert.ok(f.limitation?.includes("commune"));
+  assert.equal(f.signalConvention, "futur•e signale cette exposition à partir de 8 jours par an au-dessus de 35 °C, ou de 25 nuits tropicales par an.");
+  // UNE DIMENSION, UN SIGNAL : ruleChaleur ne dit rien (non déclarée), donc aucun mismatch chaleur.
+  assert.equal(r.evaluations.find((x) => x.ruleId === "territoire.climat-chaleur")!.outcome, "not_applicable");
+  assert.equal(r.facts.some((x) => x.ruleId === "territoire.climat-chaleur"), false);
+});
+
+test("chaleur AMBIANTE : déclarée -> la règle ambiante rend not_applicable (une dimension, un signal)", () => {
+  const r = run(facts({ climat: EXPOSEE }), projetClimat("faible_chaleur")); // déclarée poids 3
+  assert.equal(r.evaluations.find((x) => x.ruleId === "territoire.verification-chaleur-future")!.outcome, "not_applicable");
+  assert.equal(r.facts.some((x) => x.ruleId === "territoire.verification-chaleur-future"), false);
+  // C'est ruleChaleur qui porte le signal, en mismatch.
+  assert.equal(r.facts.some((x) => x.ruleId === "territoire.climat-chaleur" && x.role === "mismatch"), true);
+});
+
+test("chaleur AMBIANTE : la verification non déclarée ne touche NI couverture NI orientation (criteria-registry n'agrège que le déclaré)", () => {
+  // faible_chaleur non déclarée (ambiante) ; une autre priorité satisfaite donne l'orientation.
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
+  const r = run(facts({ climat: EXPOSEE, inondationRisque: 10 }), p);
+  assert.ok(r.facts.some((x) => x.ruleId === "territoire.verification-chaleur-future" && x.role === "verification"));
+  const summary = buildCriteriaRegistry(p, r);
+  assert.equal(summary.registry.some((c) => c.criterionKey === "faible_chaleur"), false); // pas un critère
+  assert.equal(summary.orientation, "favorable"); // la chaleur ambiante n'a pas dégradé le dossier en réserves
+});
+
 test("FEU : la phrase dit un DANGER MÉTÉOROLOGIQUE, jamais une probabilité d'incendie", () => {
   const r = run(facts({ climat: EXPOSEE }), projetClimat("faible_risque_feu"));
   const f = r.facts.find((x) => x.ruleId === "territoire.climat-feu")!;

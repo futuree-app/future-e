@@ -72,28 +72,36 @@ test("tradeoff saisonnier : poids >= 2 des deux côtés, satisfied + fait chaleu
   assert.equal(c.displaySection, "compromises");
 });
 
-test("tradeoff : douceur poids 1 ne compose jamais (le silencieux n'est pas repêché)", () => {
+test("tradeoff : douceur poids 1 ne se compose pas en tradeoff (silencieux non repêché) ; le fallback climate_comfort prend le relais", () => {
   const out = composeFacts(run([douceurSatisfied, chaleurEval(chaleurFact())]), moduleFacts, project({ douceur_climat: 1, faible_chaleur: 3 }));
-  assert.equal(out.length, 0);
+  // Pas de côté favorable opposable (douceur poids 1) -> pas de tradeoff, mais le mismatch chaleur reste
+  // porté par le fallback (Task 2), qui restaure l'action logement.
+  assert.equal(out.some((c) => c.kind === "tradeoff"), false);
+  assert.equal(out.some((c) => c.kind === "climate_comfort"), true);
 });
 
-test("tradeoff : douceur neutral ne compose pas", () => {
+test("tradeoff : douceur neutral ne compose pas de tradeoff ; fallback climate_comfort", () => {
   const neutral: RuleEvaluation = { ...douceurSatisfied, outcome: "neutral" };
   const out = composeFacts(run([neutral, chaleurEval(chaleurFact())]), moduleFacts, project({ douceur_climat: 3, faible_chaleur: 3 }));
-  assert.equal(out.length, 0);
+  assert.equal(out.some((c) => c.kind === "tradeoff"), false);
+  assert.equal(out.some((c) => c.kind === "climate_comfort"), true);
 });
 
-test("tradeoff : aucun fait chaleur émis -> rien (on ne compose que l'affichable seul)", () => {
+test("aucun fait chaleur émis -> aucune composition climatique (on ne compose que l'affichable seul)", () => {
   const naChaleur: RuleEvaluation = { ruleId: RULE_CHALEUR, projectKeys: ["faible_chaleur"], outcome: "not_applicable", facts: [], reason: "priorité non déclarée" };
   const out = composeFacts(run([douceurSatisfied, naChaleur]), moduleFacts, project({ douceur_climat: 3, faible_chaleur: 1 }));
   assert.equal(out.length, 0);
 });
 
-test("tradeoff : bande douceur absente ou corrompue -> pas de composition (invariant 9)", () => {
+test("tradeoff : bande douceur absente ou corrompue -> pas de tradeoff (invariant 9) ; fallback climate_comfort", () => {
   const sansBande = { ...moduleFacts, rankBands: null } as unknown as ModuleFacts;
-  assert.equal(composeFacts(run([douceurSatisfied, chaleurEval(chaleurFact())]), sansBande, project({ douceur_climat: 3, faible_chaleur: 3 })).length, 0);
+  const a = composeFacts(run([douceurSatisfied, chaleurEval(chaleurFact())]), sansBande, project({ douceur_climat: 3, faible_chaleur: 3 }));
+  assert.equal(a.some((c) => c.kind === "tradeoff"), false); // preuve favorable non fabricable
+  assert.equal(a.some((c) => c.kind === "climate_comfort"), true); // le fallback n'a pas besoin du côté favorable
   const corrompue = { ...moduleFacts, rankBands: { douceur_climat: { low: 1.4, high: 0.2 } } } as unknown as ModuleFacts;
-  assert.equal(composeFacts(run([douceurSatisfied, chaleurEval(chaleurFact())]), corrompue, project({ douceur_climat: 3, faible_chaleur: 3 })).length, 0);
+  const b = composeFacts(run([douceurSatisfied, chaleurEval(chaleurFact())]), corrompue, project({ douceur_climat: 3, faible_chaleur: 3 }));
+  assert.equal(b.some((c) => c.kind === "tradeoff"), false);
+  assert.equal(b.some((c) => c.kind === "climate_comfort"), true);
 });
 
 test("buildWinterMildnessEvidence : bande -> preuve avec part supérieure et période de référence", () => {
@@ -113,6 +121,50 @@ test("assertCompositionsValid : id dupliqué, absorbé inexistant, mauvaise sect
   assert.throws(() => assertCompositionsValid(r, [c!, c!])); // id dupliqué + double absorption
   assert.throws(() => assertCompositionsValid(r, [{ ...c!, absorbedFactIds: ["inexistant"] } as never]));
   assert.throws(() => assertCompositionsValid(r, [{ ...c!, displaySection: "mismatches" } as never]));
+});
+
+// ── climate_comfort : le fallback SANS douceur favorable (Task 2) ────────────────────────────────
+
+test("climate_comfort : chaleur mismatch SANS douceur favorable -> une composition qui restaure l'action logement", () => {
+  const f = chaleurFact();
+  // faible_chaleur seule déclarée (pas de douceur_climat) : le tradeoff saisonnier ne se déclenche pas.
+  const out = composeFacts(run([chaleurEval(f)]), moduleFacts, project({ faible_chaleur: 3 }));
+  assert.equal(out.length, 1);
+  const c = out[0]!;
+  assert.equal(c.kind, "climate_comfort");
+  if (c.kind !== "climate_comfort") return;
+  assert.equal(c.displaySection, "mismatches");
+  assert.deepEqual(c.absorbedFactIds, [f.id]);
+  // Le héros pourra NOMMER le mismatch absorbé (Task 3) : le sujet vient du fait, pas du titre.
+  assert.equal(c.headlineSubject, "des étés supportables");
+  // L'action logement, qu'un mismatch ne porte pas, est restaurée ici (sans adresse -> renseigner).
+  assert.equal(c.action.label, summerComfortAction(false).label);
+  assert.equal(c.limitation, f.limitation);
+  assert.equal(c.materialityTier, f.materialityTier);
+});
+
+test("climate_comfort : l'action suit le grain (adresse -> confort du logement)", () => {
+  const withAddress = { ...moduleFacts, hasAddress: true } as unknown as ModuleFacts;
+  const out = composeFacts(run([chaleurEval(chaleurFact())]), withAddress, project({ faible_chaleur: 3 }));
+  const c = out[0]!;
+  assert.equal(c.kind, "climate_comfort");
+  if (c.kind !== "climate_comfort") return;
+  assert.equal(c.action.type, "verifier_sur_place");
+  assert.equal(c.action.label, summerComfortAction(true).label);
+});
+
+test("climate_comfort : poids 1 (mismatch silencieux, aucun fait) -> aucune composition", () => {
+  // Le mismatch de poids 1 n'émet aucun fait : rien à absorber, on ne fabrique pas de carte.
+  const silencieux: RuleEvaluation = { ruleId: RULE_CHALEUR, projectKeys: ["faible_chaleur"], outcome: "mismatch", facts: [], reason: "silencieux (poids 1)" };
+  const out = composeFacts(run([silencieux]), moduleFacts, project({ faible_chaleur: 1 }));
+  assert.equal(out.length, 0);
+});
+
+test("une seule composition climatique par dossier : douceur favorable + chaleur mismatch -> tradeoff SEUL", () => {
+  const out = composeFacts(run([douceurSatisfied, chaleurEval(chaleurFact())]), moduleFacts, project({ douceur_climat: 3, faible_chaleur: 3 }));
+  assert.equal(out.length, 1);
+  assert.equal(out[0]!.kind, "tradeoff"); // le tradeoff gagne, jamais AUSSI climate_comfort
+  assert.equal(out.filter((c) => c.kind === "climate_comfort").length, 0);
 });
 
 // ── Patron 2 : territory-size-multiple-consequences ──────────────────────────────────────────────

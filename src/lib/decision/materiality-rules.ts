@@ -25,7 +25,7 @@ import { AGGLOMERATION_RULES } from "./agglomeration-rules.ts";
 import { AGGLOMERATION_CATEGORIES } from "./agglomeration-facts.ts";
 import { toCommuneAttributes } from "./module-facts-map.ts";
 import {
-  trajectoirePhrase, fmtClimatCount, classifyClimateComfort, CLIMAT_HORIZON_LABEL, type ClimatAxe,
+  trajectoirePhrase, fmtClimatCount, classifyClimateComfort, summerComfortAction, CLIMAT_HORIZON_LABEL, type ClimatAxe,
 } from "./climat-facts.ts";
 import {
   bruitEnPhrase, industrieEnPhrase, industrieGlose, distanceEnPhrase,
@@ -165,6 +165,34 @@ const tierFor = (p: UserProject, key: PreferenceKey): "structuring" | "secondary
 // vivra dépend de son logement et de son adresse. Le dire, c'est ce qui rend la vérification utile.
 const LIMITATION_CLIMAT = "Cette trajectoire est lue à l'échelle de la commune, pas de l'adresse ni du logement.";
 
+// LA NARRATION CHALEUR, PARTAGÉE par le mismatch (priorité déclarée, ruleChaleur) et la verification
+// AMBIANTE (non déclarée, ruleChaleurAmbiante) : mêmes trajectoires jours/nuits, même preuve suivant le
+// texte (le bug d'Antibes), même convention de seuil. Ce qui DIFFÈRE entre les deux, c'est le RÔLE du fait
+// (un écart au projet vs un constat du territoire), pas ce qu'il raconte du climat.
+function chaleurNarration(nom: string, jours: ClimatAxe, nuits: ClimatAxe): { statement: string; evidence: EvidenceRef[]; seuils: string } {
+  const phrases: string[] = [];
+  if (jours.notable) phrases.push(trajectoirePhrase(jours, "Les jours au-dessus de 35 °C"));
+  // « Nuit tropicale » est un terme technique (Météo-France) : on le donne, puis on le TRADUIT dans le corps
+  // du lecteur, après deux points, SANS absolu (« peine à récupérer », pas « ne récupère plus »). Quand les
+  // jours sont aussi notables, la 2e trajectoire hérite du cadre (« de 33 à 69 par an »).
+  if (nuits.notable) {
+    const sujetNuits = jours.notable ? "Les nuits tropicales, elles," : "Les nuits tropicales";
+    phrases.push(
+      `${trajectoirePhrase(nuits, sujetNuits, { heriteCadre: jours.notable })} : des nuits où la température ne redescend pas sous 20 °C, et où le corps peine à récupérer`,
+    );
+  }
+  const seuils = [
+    jours.notable ? `${jours.threshold} jours par an au-dessus de 35 °C` : null,
+    nuits.notable ? `${nuits.threshold} nuits tropicales par an` : null,
+  ].filter(Boolean).join(", ou de ");
+  // LA PREUVE SUIT LE TEXTE : seul l'axe dont le constat parle entre en preuve (le bug d'Antibes).
+  const evidence = [
+    ...(jours.notable ? [climatEvidence(nom, "joursTresChauds", jours)] : []),
+    ...(nuits.notable ? [climatEvidence(nom, "nuitsTropicales", nuits)] : []),
+  ];
+  return { statement: `${phrases.join(". ")}.`, evidence, seuils };
+}
+
 // Exporté : la couche de composition (fact-compositions.ts) référence cette règle ; l'importer
 // garantit qu'un renommage casse le typecheck, jamais silencieusement une composition.
 export const RULE_CHALEUR = "territoire.climat-chaleur";
@@ -197,24 +225,7 @@ const ruleChaleur: DecisionRule = {
     // basis est non-null par construction (unfavorable => basis renseigné) ; la garde protège tout appelant.
     if (!basis) throw new Error(`[decision] ${RULE_CHALEUR}: invariant interne, fondement climatique attendu`);
 
-    const jours = c.joursTresChauds;
-    const nuits = c.nuitsTropicales;
-
-    // LE CONSTAT SUIT CE QUI DÉCLENCHE. Nommer systématiquement les deux métriques alourdirait la phrase
-    // quand une seule explique l'écart ; l'autre reste dans la preuve. Le statement garde EXACTEMENT les
-    // trajectoires jours/nuits d'avant : seul le RÔLE du fait change (verification -> mismatch).
-    // « Nuit tropicale » est un terme technique (Météo-France) : on le donne, puis on le TRADUIT dans le
-    // corps du lecteur, après deux points, SANS absolu (« peine à récupérer », pas « ne récupère plus »).
-    // Quand les jours sont aussi notables, la 2e trajectoire hérite du cadre (« de 33 à 69 par an »).
-    const phrases: string[] = [];
-    if (jours.notable) phrases.push(trajectoirePhrase(jours, "Les jours au-dessus de 35 °C"));
-    if (nuits.notable) {
-      const sujetNuits = jours.notable ? "Les nuits tropicales, elles," : "Les nuits tropicales";
-      phrases.push(
-        `${trajectoirePhrase(nuits, sujetNuits, { heriteCadre: jours.notable })} : des nuits où la température ne redescend pas sous 20 °C, et où le corps peine à récupérer`,
-      );
-    }
-
+    const { statement, evidence } = chaleurNarration(f.nom, c.joursTresChauds, c.nuitsTropicales);
     const fact: MismatchFact = {
       id: `${f.insee}:climat-chaleur`, ruleId: RULE_CHALEUR,
       sourceFactIds: ["climat.joursTresChauds", "climat.nuitsTropicales"], module: "territoire",
@@ -223,19 +234,57 @@ const ruleChaleur: DecisionRule = {
       // LE SUJET DU HÉROS nomme l'OBJET DU PROJET (« des étés supportables »), pas l'instruction du lecteur
       // (« éviter les fortes chaleurs ») ni l'indicateur défavorable. À faire relire à l'Editorial Writer.
       headlineSubject: "des étés supportables",
-      statement: `${phrases.join(". ")}.`,
+      statement,
       basis,
       limitation: LIMITATION_CLIMAT,
-      // LA PREUVE SUIT LE TEXTE : seul l'axe dont le constat parle entre en preuve (le bug d'Antibes, où une
-      // pastille « 5 jours » s'affichait sous une phrase qui ne parlait que des nuits).
-      evidence: [
-        ...(jours.notable ? [climatEvidence(f.nom, "joursTresChauds", jours)] : []),
-        ...(nuits.notable ? [climatEvidence(f.nom, "nuitsTropicales", nuits)] : []),
-      ],
+      evidence,
       // NI action NI signalConvention : un mismatch a le constat établi (rien à vérifier), et le renvoi au
       // confort du logement est restauré par une composition (Task 2), via summerComfortAction.
     };
     return ret("mismatch", [fact], "exposition à la chaleur défavorable, priorité déclarée");
+  },
+};
+
+// LA VERIFICATION AMBIANTE (lot D, D-2) : la chaleur future NON demandée. Règle SÉPARÉE de ruleChaleur, par
+// clarté — « contredit une priorité » (mismatch) et « phénomène important du lieu » (verification) sont deux
+// natures, et les mêler sous une seule règle rendrait le code illisible. Elle ne s'applique QUE si
+// faible_chaleur n'est pas déclarée (poids 0) : sinon ruleChaleur porte déjà le signal, et « une dimension,
+// un signal » interdit d'en ajouter un second. Ses `projectKeys` sont VIDES : le constat n'est rattaché à
+// aucune priorité du lecteur, donc criteria-registry (qui n'agrège que les clés déclarées) ne le consulte
+// jamais — aucun effet sur la couverture, l'orientation ou le compte favorable.
+export const RULE_CHALEUR_AMBIANTE = "territoire.verification-chaleur-future";
+const ruleChaleurAmbiante: DecisionRule = {
+  id: RULE_CHALEUR_AMBIANTE,
+  module: "territoire",
+  evaluate: (f, p): RuleEvaluation => {
+    const ret = (outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
+      ({ ruleId: RULE_CHALEUR_AMBIANTE, projectKeys: [], outcome, facts, reason });
+
+    // Déclarée (poids >= 1, y compris le poids 1 silencieux) : ruleChaleur porte le signal, pas ici.
+    if (preferenceWeight(p, "faible_chaleur") > 0) return ret("not_applicable", [], "chaleur déclarée : ruleChaleur porte le signal");
+    const c = f.climat;
+    if (!c) return ret("uncertain", [], "trajectoire climatique indisponible");
+
+    const { verdict } = classifyClimateComfort(c);
+    if (verdict === "uncertain") return ret("uncertain", [], "un axe de chaleur n'a pas pu être lu");
+    if (verdict === "under_threshold") return ret("satisfied", [], "exposition sous le seuil de signalement");
+
+    // verdict "unfavorable" : un constat AMBIANT du territoire, au grain commune. Il est SECONDARY : le
+    // lecteur ne l'a pas priorisé, il ne couronne donc jamais un héros ni ne pèse comme une priorité.
+    const { statement, evidence, seuils } = chaleurNarration(f.nom, c.joursTresChauds, c.nuitsTropicales);
+    const fact: VerificationFact = {
+      id: `${f.insee}:verification-chaleur-future`, ruleId: RULE_CHALEUR_AMBIANTE,
+      sourceFactIds: ["climat.joursTresChauds", "climat.nuitsTropicales"], module: "territoire",
+      role: "verification", materialityTier: "secondary",
+      topic: "les fortes chaleurs",
+      statement,
+      signalConvention: `futur•e signale cette exposition à partir de ${seuils}.`,
+      limitation: LIMITATION_CLIMAT,
+      evidence,
+      // Le renvoi au confort du logement : même geste que partout (source de vérité partagée).
+      action: summerComfortAction(f.hasAddress),
+    };
+    return ret("verification", [fact], "exposition à la chaleur notable, non déclarée");
   },
 };
 
@@ -459,6 +508,7 @@ export const REGISTRY: DecisionRule[] = [
   // seul apport (inviter à renseigner une adresse) vit désormais dans l'ACTION de ruleChaleur, et
   // seulement quand il y a réellement quelque chose à affiner.
   ruleChaleur,
+  ruleChaleurAmbiante,
   ruleFeu,
   rulePluies,
   ruleAir,
