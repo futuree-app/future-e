@@ -1,87 +1,77 @@
-# Passation — Lot C « Ce qui correspond à votre projet » LIVRÉ + tradeoff calmé : EN PROD
+# Passation — Lot C EN PROD ; Lot D en cours (Task 0 livrée, Task 1 à reprendre)
 
-**Horodatage** : 2026-07-24 · **Branche** : `main` = `ed5e20f`, **poussée**, prod déployée. **0 commit en attente.**
+**Horodatage** : 2026-07-24 · **Branche** : `main` = `43ae027`, **poussée**. **Tree propre** (seul non suivi :
+`Futur.e Design System.zip`, NE JAMAIS COMMITTER). **735 tests, tsc/eslint 0.**
 
-## Ce qui a été fait cette session
+## État par lot
 
-### Lot C — le côté FAVORABLE, prouvé et nommé (6 commits, `c6c7e97` → `5d14929`)
+### Lot C — « Ce qui correspond à votre projet » : COMPLET, EN PROD
+Rôle `AlignmentFact` (liste blanche au type), carte « Ce qui correspond », absorption d'affichage, verdict
+positif (héros cas 4 + réserves mineures), fondements taille + mer, `faceStatement`. + tradeoff **calmé**
+(fin des « mini-héros » : teinte plate, libellés sans-serif). Détails : commits `c6c7e97` → `ed5e20f`.
 
-Le dossier ne produisait que des griefs (les 5 rôles de `DecisionFact` sont des formes de problème). Le
-moteur calculait déjà les `satisfied` (top 20 %) puis les jetait. Le lot C les **matérialise** en un
-nouveau rôle `AlignmentFact`, miroir exact du mismatch.
+### Lot D — trajectoires chaleur : PLAN v2 + Task 0 livrées, Task 1 à reprendre
+**Le bug qui a déclenché le lot D** : projet « éviter les fortes chaleurs » sur Toulouse → la chaleur tombait
+en « À contrôler avant de vous engager » (`verification`, intro « au-delà de vos priorités » FAUSSE) et le
+verdict lisait « Correspondance favorable ». Doit être un **mismatch** (« Ce qui correspond moins bien »,
+orientation `arbitration`).
 
-- **Tâche 1** — `AlignmentFact` (role `"alignment"`, `basis: AlignmentBasis` = liste blanche AU TYPE,
-  `named_absence` interdit) ; famille `alignment-rules.ts` (13 critères relative_position) ; copie du porteur
-  en deux champs `{ headlineSubject, favorableStatusTemplate }` dans `ALIGNMENT_LABELS` (mismatch-facts.ts).
-- **Tâche 3** — section « Ce qui correspond à votre projet » dans l'assembleur : **placement porté par
-  l'ordre** (ouvre les cartes, sauf derrière une incompatibilité), cap 3, `conclusionBasis`. Rendu SOBRE
-  (pastille verte, deux lignes titre + phrase de rang) dans `DossierDecisionSection.tsx`.
-- **Tâche 4** — **absorption d'AFFICHAGE** (dossier-view.ts, jumeau du masquage taille) : un alignment sur
-  la clé favorable d'un tradeoff AFFICHÉ (`favorableProjectKey`) est masqué. Le fait RESTE dans `shown`
-  (le verdict ne le perd jamais). `dossier.compositions` = post-caps → une composition plafonnée n'absorbe rien.
-- **Tâche 5** — **le verdict nomme le positif** (conclusion-plan.ts, `herosPositif()`) : branche favorable
-  + cas 4 en **réserves mineures** (le positif prime quand seules des réserves secondaires subsistent).
-  « {commune} répond à deux de vos priorités : … » / « … à l'une de vos priorités : … ». Détail d'arbitrage :
-  « … répondent en revanche à votre projet. La décision se joue entre ces correspondances et les écarts
-  relevés. » Sujets depuis les faits AFFICHÉS, jamais `favorableCount`. Verdict `generable: false` (aucun LLM).
-- **Tâche 2** — fondements **taille** (categorical_state : prefere_grande_ville, eviter_grandes_villes) et
-  **mer** (absolute_measure). Refactor : `AlignmentFact.faceStatement` (2e ligne de carte, produite par la
-  règle) distinct de `statement` (phrase autonome).
+**Plan v2** (revue ChatGPT + Claude intégrée) : `docs/superpowers/plans/2026-07-24-lot-d-trajectoires-chaleur.md`.
+À LIRE en premier à la reprise. Décisions tranchées : base dédiée `climate_threshold` (pas `unit: "jours"`) ;
+conflit avec `seasonal_climate_tradeoff` résolu (UNE seule composition climatique/dossier) ; poids 1 explicite ;
+verification ambiante en règle séparée ; l'intro de section devient **caduque** après reclassement (pas à
+réécrire) ; alignment favorable différé (increment 2, attend un rang chaleur).
 
-**Revue archi du porteur intégrée** : D1 (face par critère / fait autonome), D2 (« l'une de vos priorités »),
-Issue 4 (AlignmentBasis au type), Issue 8 (limitation bornée à ensoleillement/douceur/mer), Issue 1 (non
-bloquant — criteria-registry agrège par clé — verrouillé par un test d'invariance). Plan + revue :
-`docs/superpowers/plans/2026-07-23-lot-c-alignment.md`.
+**Task 0 — LIVRÉE** (commit `43ae027`, poussée) :
+- `ClimateThresholdBasis` (multivarié jours/nuits) ajouté à `MismatchBasis` (`decision-fact.ts`).
+- `classifyClimateComfort(climat)` PUR dans `climat-facts.ts` → `{ verdict: "unfavorable" | "under_threshold" |
+  "uncertain", basis }`. Un axe défavorable suffit (trigger any) ; sous seuil si les 2 axes lus ; sinon uncertain.
+- `assertFactValid` : garde `climate_threshold` (≥1 mesure, ≥1 axe défavorable pour un mismatch).
 
-### Design — le tradeoff calmé (`ed5e20f`)
+## Reprise immédiate : Lot D Task 1 (elle avait été commencée puis ANNULÉE — tree remis propre)
 
-Les deux côtés du tradeoff rejouaient le halo/filet/lavis du VERDICT (« deux mini-héros »). Doctrine gravée :
-**un traitement de signal complet par niveau de lecture** (héros = effet complet ; composition = teinte plate
-discrète). `.tradeoff-side` : plus de filet ni de lavis, teinte plate 4 %, libellés sans-serif casse normale.
+**But** : `ruleChaleur` (`materiality-rules.ts` ~L165) produit un **MISMATCH** au lieu d'un `VerificationFact`.
+Suivre le plan Task 1, avec ces points APPRIS pendant la tentative :
 
-### Plus tôt dans la session (déjà en prod avant le lot C)
+1. **Nouveau gating** : `weight === 0` → `not_applicable` (la règle AMBIANTE, Task 4, gère le non-déclaré).
+   `weight >= 1` → examiné : appeler `classifyClimateComfort(c)` → `uncertain`/`under_threshold`(satisfied) ;
+   `unfavorable` + `weight < 2` → `outcome "mismatch"`, **aucun fait** (poids 1 silencieux) ; `unfavorable` +
+   `weight >= 2` → un `MismatchFact` (`basis` = le climate_threshold du classifieur, `projectKey:
+   "faible_chaleur"`, `headlineSubject: "des étés supportables"`, `topic: "les fortes chaleurs"`, `limitation`
+   = `LIMITATION_CLIMAT`, evidence = les `climatEvidence` des axes notables). Réutiliser le bloc `phrases`
+   existant pour le `statement`. **Pas d'`action`** (un mismatch n'en a pas). Pas de `signalConvention`
+   (absent de MismatchFact) ni de `seuils` (devient inutilisé — le retirer sinon eslint casse).
 
-Tradeoff à lavis (Direction A, depuis calmée) · masquage du doublon de taille (mismatch symétrique) ·
-unification « agglomération » · verdict « Ces points » (fin du « Ils » orphelin) · fix argiles (la sévérité
-ne se recopie plus en parenthèse).
+2. **COUPLAGE À TRAITER DANS LA MÊME TÂCHE (sinon rouge)** : `composeSeasonalClimateTradeoff`
+   (`fact-compositions.ts` ~L60) cherche le fait chaleur par **`role === "verification"`**. En passant la
+   chaleur en mismatch, le tradeoff casse (retourne null, ses tests échouent). Il faut :
+   - changer le lookup en `role === "mismatch"` ;
+   - l'`action` du côté défavorable ne vient plus du fait (mismatch sans action) → **extraire un helper partagé
+     `summerComfortAction(hasAddress): DecisionAction`** (« Regardez comment le logement tient l'été » /
+     « Renseignez votre adresse… », le détail actuellement inline dans ruleChaleur) et l'utiliser dans le
+     tradeoff (via `facts.hasAddress`). J'avais commencé cette extraction (annulée).
+   - MAJ des fixtures `fact-compositions.test.ts` : `chaleurFact()` (→ role mismatch, basis climate_threshold)
+     et `chaleurEval` (→ `outcome: "mismatch"`).
 
-**Vérifs** : `tsc` 0, `eslint` 0, **729 tests**.
+3. **Vérifier l'orientation** : avec le mismatch, `criteria-registry` compte `faible_chaleur` en mismatch (pas
+   reserve), orientation `arbitration`, le verdict n'est plus « Correspondance favorable ». (Toulouse n'a pas
+   `douceur_climat` → PAS de tradeoff → le mismatch chaleur est SEUL, sans action, jusqu'à la Task 2
+   `climate_comfort` qui restaure l'action. C'est l'état intermédiaire assumé par le plan.)
 
-## À regarder à la reprise (prod)
+Puis **Task 2** (climate_comfort + priorité des patrons : une seule composition/dossier), **Task 3** (le héros
+voit le mismatch absorbé — `mismatchCandidates` lit les compositions climatiques, comme il lit shared_evidence),
+**Task 4** (verification ambiante, règle séparée), **Task 5** (vérifier que l'intro est redevenue correcte),
+**Increment 2 différé** (rangs jours/nuits + alignment favorable). Les 9 tests à graver sont dans le plan.
 
-Recharger `/rapport` sur un projet où la commune est top 20 % (soins, vie locale…) : la carte « Ce qui
-correspond », le héros positif, et le tradeoff calmé. Les défauts de COMPOSITION sont invisibles aux tests —
-regarder l'écran.
+## À lire d'abord
+- `docs/superpowers/plans/2026-07-24-lot-d-trajectoires-chaleur.md` (v2, le plan actif).
+- `MEMORY.md` + `project_dossier_decision.md`, `mismatch_formes_fondement.md`, `project_composition_faits_lies.md`.
 
-## Ce qui reste (extensions du lot C, spec §Extensions)
-
-- **Lot C+ — air / bruit / industrie** : 3 critères à valeur continue sans rang national. Étendre le `switch`
-  de `mismatchRawScore` (comparateur-scores.ts) + relancer `populate-mismatch-rank.mts`. Le `relative_position`
-  s'applique ensuite. **VETO ABSOLU** obligatoire : un bon rang ne blanchit jamais un niveau absolu préoccupant.
-  Formulations gravées dans la spec (ne jamais écrire « l'air est sain »).
-- **Lot D — trajectoires climatiques** (chaleur, nuits tropicales) : **double gate niveau futur × trajectoire**.
-  Piège : un bon rang de trajectoire sur une grandeur en aggravation se lit « il ne fera pas chaud ici ». Un
-  bon rang ne neutralise jamais un niveau futur défavorable.
-- **Lot E — rassurances au grain adresse (Logement)** : « aucune cavité recensée… ». Ce n'est PAS un alignment
-  (role `reassurance` distinct) ; garde-fou du sujet soulevé ; jamais dans « En une minute ».
-- **A1** (mécanique du lot A) : débloqué, jamais commencé.
-
-## Design — points de la critique ChatGPT NON retenus (à rouvrir si voulu)
-
-- **Recomposition verticale du tradeoff** (bandeau positif compact + compromis dessous) : réglerait
-  l'asymétrie de volume. Le porteur a choisi « calmer les 2 colonnes », pas la recompo.
-- **Redesign des chips « PREUVE »** du côté favorable du tradeoff (répètent le constat) : hors périmètre choisi.
-
-## Pièges / doctrine tenue
-
-- **`tsconfig.json` exclut `**/*.test.ts` du typecheck.** Les fixtures n'ont aucun filet de type : un champ
-  obligatoire ajouté à un fait (ex. `faceStatement`) ne fait pas échouer `tsc` sur les tests. Ajouter une garde
-  nommée dans `assertFactValid`.
-- **Le terminal ne montre pas les défauts de COMPOSITION.** Regarder l'écran.
-- **Liste blanche des fondements d'alignment** : jamais `named_absence` (une absence de signal ne prouve pas un
-  positif). Toute famille ajoutée entre explicitement dans la table.
-- **Invariant transversal** (pour C+/D) : une dimension ne porte jamais à la fois un alignment et un signal
-  défavorable ; le VETO ABSOLU prime (un rang ne blanchit pas un niveau absolu).
-- **Absorption = affichage**, jamais un retrait : le fait reste dans `shown` / `conclusionBasis` / verdict.
-- Suite : `node --test --experimental-strip-types "src/**/*.test.ts"`. Push direct sur `main` (prod sur push).
-- Non suivi : `Futur.e Design System.zip` (**NE JAMAIS COMMITTER**).
+## Pièges / doctrine
+- **`tsconfig.json` exclut `**/*.test.ts` du typecheck** : un champ obligatoire ajouté à un fait n'échoue pas
+  sur les fixtures. Garde nommée dans `assertFactValid`.
+- **Le terminal ne montre pas les défauts de composition** : regarder l'écran (le porteur n'a pas encore vu le
+  lot C ni le lot D en prod).
+- **Une dimension, un signal** : jamais mismatch chaleur + verification chaleur visibles ensemble.
+- **Absorption = affichage** : le fait reste dans `shown`/`conclusionBasis`/verdict (le héros doit pouvoir le nommer).
+- Suite : `node --test --experimental-strip-types "src/**/*.test.ts"`. Push direct sur `main`.
