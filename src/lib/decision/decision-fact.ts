@@ -137,8 +137,28 @@ export type CategoricalStateBasis = {
   observedCategory: AgglomerationCategory;
   conventionId: string;
 };
+// SEUIL CLIMATIQUE MULTIVARIÉ (lot D, chaleur). La chaleur est jugée sur DEUX mesures (jours au-dessus de
+// 35 °C, nuits tropicales), chacune avec son seuil de signalement et sa valeur projetée à un horizon. Une
+// SEULE mesure défavorable suffit à déclencher (`trigger: "any"`), et le fondement le rend LISIBLE : quel axe
+// a déclenché, quels seuils, quel horizon. On n'aplatit pas cette décision dans `absolute_measure` (une
+// distance unique) — doctrine « on n'ajoute à l'union que le productible » : une règle sait désormais produire
+// et expliquer cet état. `measures` non vide, chaque mesure auditable indépendamment de la convention.
+export type ClimateThresholdBasis = {
+  kind: "climate_threshold";
+  horizon: number;         // 2050
+  referencePeriod: string; // "1976-2005"
+  conventionId: string;
+  trigger: "any";          // une seule mesure défavorable suffit
+  measures: Array<{
+    key: "days_over_35" | "tropical_nights";
+    projectedValue: number;
+    threshold: number;
+    unit: "days" | "nights";
+    isUnfavorable: boolean;
+  }>;
+};
 export type MismatchBasis =
-  NamedAbsenceBasis | RelativePositionBasis | AbsoluteMeasureBasis | CategoricalStateBasis;
+  NamedAbsenceBasis | RelativePositionBasis | AbsoluteMeasureBasis | CategoricalStateBasis | ClimateThresholdBasis;
 
 // LE FONDEMENT D'UN ALIGNMENT : la LISTE BLANCHE, portée par le TYPE. `named_absence` en est EXCLU — une
 // absence de signal ne prouve jamais un positif —, et TypeScript l'interdit désormais à la CONSTRUCTION,

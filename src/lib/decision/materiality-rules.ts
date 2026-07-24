@@ -563,6 +563,19 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
           throw new Error(`[decision] ${fact.ruleId}: catégorie de taille inconnue (${basis.observedCategory})`);
         }
         if (!basis.conventionId) throw new Error(`[decision] ${fact.ruleId}: convention de catégorie absente`);
+      } else if (basis.kind === "climate_threshold") {
+        // Multivarié : au moins une mesure, chacune auditable (seuil + valeur projetée finis), et AU MOINS UNE
+        // défavorable — un mismatch climatique sans axe défavorable serait un état que le moteur ne sait pas expliquer.
+        if (basis.measures.length === 0) throw new Error(`[decision] ${fact.ruleId}: fondement climatique sans mesure`);
+        if (!basis.conventionId) throw new Error(`[decision] ${fact.ruleId}: convention climatique absente`);
+        for (const m of basis.measures) {
+          if (!Number.isFinite(m.projectedValue) || !Number.isFinite(m.threshold)) {
+            throw new Error(`[decision] ${fact.ruleId}: mesure climatique invalide (${m.key})`);
+          }
+        }
+        if (!basis.measures.some((m) => m.isUnfavorable)) {
+          throw new Error(`[decision] ${fact.ruleId}: mismatch climatique sans axe défavorable`);
+        }
       } else if (basis.kind !== "relative_position" && basis.kind !== "named_absence") {
         throw new Error(`[decision] ${fact.ruleId}: basis de mismatch inconnu (${(basis as { kind: string }).kind})`);
       }

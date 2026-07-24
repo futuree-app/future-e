@@ -148,3 +148,51 @@ test("une anomalie relative de -100 % ne produit pas une référence infinie", (
   const absurde: GwlScenarios = { gwl20: { h: "2050", v: { NORRx1d_yr: 70, ARRx1d_yr: -1 } } };
   assert.equal(buildClimatFacts(absurde)!.pluieMax24h.reference, null);
 });
+
+// ── Lot D : classifyClimateComfort (mismatch / sous seuil / uncertain) ───────────
+
+import { classifyClimateComfort, type ClimatFacts, type ClimatAxe } from "./climat-facts.ts";
+
+function cx(projete: number | null, threshold: number, countNoun: "jour" | "nuit"): ClimatAxe {
+  return { reference: null, projete, notable: projete != null && projete >= threshold, threshold, unit: "jours", countNoun };
+}
+function climat(joursProjete: number | null, nuitsProjete: number | null): ClimatFacts {
+  return {
+    joursTresChauds: cx(joursProjete, 8, "jour"),
+    nuitsTropicales: cx(nuitsProjete, 25, "nuit"),
+    joursFeu: cx(null, 9, "jour"),
+    pluieMax24h: { reference: null, projete: null, notable: false, threshold: 65, unit: "mm" },
+  };
+}
+
+test("classifyClimateComfort : les deux axes défavorables -> unfavorable, deux mesures", () => {
+  const r = classifyClimateComfort(climat(12, 44));
+  assert.equal(r.verdict, "unfavorable");
+  assert.equal(r.basis?.kind, "climate_threshold");
+  assert.equal(r.basis?.trigger, "any");
+  assert.equal(r.basis?.measures.length, 2);
+  assert.ok(r.basis?.measures.every((m) => m.isUnfavorable));
+});
+
+test("classifyClimateComfort : un SEUL axe défavorable suffit (trigger any)", () => {
+  const r = classifyClimateComfort(climat(12, 10)); // jours notable (>=8), nuits sous seuil (25)
+  assert.equal(r.verdict, "unfavorable");
+  const jours = r.basis?.measures.find((m) => m.key === "days_over_35");
+  const nuits = r.basis?.measures.find((m) => m.key === "tropical_nights");
+  assert.equal(jours?.isUnfavorable, true);
+  assert.equal(nuits?.isUnfavorable, false);
+});
+
+test("classifyClimateComfort : égalité au seuil -> défavorable (convention >=)", () => {
+  assert.equal(classifyClimateComfort(climat(8, 10)).verdict, "unfavorable"); // 8 === seuil 8
+});
+
+test("classifyClimateComfort : les deux axes sous le seuil, tous présents -> under_threshold", () => {
+  const r = classifyClimateComfort(climat(3, 10));
+  assert.equal(r.verdict, "under_threshold");
+  assert.equal(r.basis, null);
+});
+
+test("classifyClimateComfort : un axe absent (et aucun défavorable) -> uncertain", () => {
+  assert.equal(classifyClimateComfort(climat(null, 10)).verdict, "uncertain");
+});

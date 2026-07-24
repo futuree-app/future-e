@@ -156,6 +156,44 @@ export function buildClimatFacts(sc: GwlScenarios | null | undefined): ClimatFac
   return rienDuTout ? null : facts;
 }
 
+// ── Lot D : le confort thermique futur (chaleur), classé ─────────────────────────
+//
+// La chaleur est jugée sur DEUX axes (jours au-dessus de 35 °C, nuits tropicales), chacun avec son seuil de
+// signalement. UNE seule mesure défavorable suffit (`trigger: "any"`). Le classifieur PUR rend le verdict et,
+// pour un cas défavorable, le fondement multivarié (quel axe a déclenché, quels seuils, quel horizon) — pas
+// une valeur unique aplatie. `under_threshold` exige les DEUX axes lus (un axe absent n'est pas une bonne
+// nouvelle) ; sinon `uncertain`. La branche FAVORABLE (alignment) est différée : elle exige un rang de
+// trajectoire qui n'existe pas encore (lot D, increment 2).
+import type { ClimateThresholdBasis } from "./decision-fact.ts";
+
+export function classifyClimateComfort(
+  climat: ClimatFacts,
+): { verdict: "unfavorable" | "under_threshold" | "uncertain"; basis: ClimateThresholdBasis | null } {
+  const axes = [
+    { key: "days_over_35" as const, unit: "days" as const, axe: climat.joursTresChauds },
+    { key: "tropical_nights" as const, unit: "nights" as const, axe: climat.nuitsTropicales },
+  ];
+  // On ne met en mesure que les axes RÉELLEMENT lus (projete fini) : une valeur absente n'invente pas de mesure.
+  const measures = axes
+    .filter((x) => x.axe.projete != null)
+    .map((x) => ({
+      key: x.key, projectedValue: x.axe.projete!, threshold: x.axe.threshold, unit: x.unit, isUnfavorable: x.axe.notable,
+    }));
+
+  if (measures.some((m) => m.isUnfavorable)) {
+    return {
+      verdict: "unfavorable",
+      basis: {
+        kind: "climate_threshold", horizon: 2050, referencePeriod: "1976-2005",
+        conventionId: CLIMAT_CONVENTIONS_VERSION, trigger: "any", measures,
+      },
+    };
+  }
+  // Aucune mesure défavorable : « sous le seuil » seulement si les DEUX axes ont été lus ; sinon on n'a pas tout vu.
+  const complet = climat.joursTresChauds.projete != null && climat.nuitsTropicales.projete != null;
+  return { verdict: complet ? "under_threshold" : "uncertain", basis: null };
+}
+
 // ── Le texte ─────────────────────────────────────────────────────────────────
 
 // LE COMPTE AVEC SON UNITÉ, pour une chip de preuve ISOLÉE : « 44 nuits », « 9 jours », « 78 mm ». Une

@@ -394,6 +394,21 @@ test("assertFactValid refuse un mismatch sans headlineSubject", () => {
   assert.throws(() => assertFactValid({ ...base, headlineSubject: "le calme." }, p), /headlineSubject/);
 });
 
+test("assertFactValid : mismatch climate_threshold — au moins une mesure, au moins un axe défavorable", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_chaleur", weight: 3 }] });
+  const mesure = { key: "days_over_35" as const, projectedValue: 9, threshold: 8, unit: "days" as const, isUnfavorable: true };
+  const base = {
+    id: "c", ruleId: "territoire.climat-chaleur", sourceFactIds: [], module: "territoire" as const,
+    role: "mismatch" as const, projectKey: "faible_chaleur" as const, materialityTier: "structuring" as const,
+    topic: "les fortes chaleurs", headlineSubject: "des étés supportables", statement: "…",
+    basis: { kind: "climate_threshold" as const, horizon: 2050, referencePeriod: "1976-2005", conventionId: "clim-conv-1", trigger: "any" as const, measures: [mesure] },
+    evidence: [{ factId: "x", module: "territoire" as const, label: "T", grain: "commune" as const }],
+  };
+  assertFactValid(base, p); // valide
+  assert.throws(() => assertFactValid({ ...base, basis: { ...base.basis, measures: [] } }, p), /sans mesure/);
+  assert.throws(() => assertFactValid({ ...base, basis: { ...base.basis, measures: [{ ...mesure, isUnfavorable: false }] } }, p), /sans axe défavorable/);
+});
+
 test("assertFactValid : alignment — headlineSubject et preuve exigés, fondement DANS la liste blanche", () => {
   const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "acces_soins", weight: 3 }] });
   const base = {
