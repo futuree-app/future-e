@@ -102,8 +102,31 @@ test("arbitrage : le détail NOMME les sujets favorables affichés, pas « plusi
       alignmentFact("a2", "structuring", "vie_locale", "la vie locale"),
     ],
   }));
-  assert.match(p.verdict.detail, /L'accès aux soins et la vie locale répond(ent)? en revanche à votre projet/);
+  assert.match(p.verdict.detail, /L'accès aux soins et la vie locale répondent en revanche à votre projet/);
+  assert.match(p.verdict.detail, /La décision se joue entre ces correspondances et les écarts relevés/);
   assert.doesNotMatch(p.verdict.detail, /plusieurs de vos autres priorités/);
+});
+
+test("minor_reserves + alignment structuring : le positif prime dans le héros, la réserve secondaire au détail", () => {
+  const p = buildConclusionPlan(baseInput({
+    orientation: "minor_reserves", coverage: "high", favorableCount: 2, reservesShown: 2, majorReserveCount: 0,
+    shownFacts: [
+      alignmentFact("a1", "structuring", "acces_soins", "l'accès aux soins"),
+      alignmentFact("a2", "structuring", "vie_locale", "la vie locale"),
+      verification("v1", "secondary"), verification("v2", "secondary"),
+    ],
+  }));
+  assert.equal(p.verdictTone, "positive");
+  assert.match(p.verdict.headline.text, /^Toulouse répond à deux de vos priorités : l'accès aux soins et la vie locale\.$/);
+  assert.match(p.verdict.detail, /^Deux constats restent néanmoins à contrôler avant de vous engager\.$/);
+});
+
+test("minor_reserves SANS alignment structuring : le héros garde la réserve (repli inchangé)", () => {
+  const p = buildConclusionPlan(baseInput({
+    orientation: "minor_reserves", coverage: "high", favorableCount: 1, reservesShown: 1, hasFavorable: true,
+    shownFacts: [verification("v1", "secondary")],
+  }));
+  assert.doesNotMatch(p.verdict.headline.text, /répond à l'une|répond à deux/);
 });
 
 // ── Le plan ────────────────────────────────────────────────────────────────────

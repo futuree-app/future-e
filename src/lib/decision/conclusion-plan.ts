@@ -330,6 +330,27 @@ function alignmentCandidates(shownFacts: DecisionFact[]): LeadCandidate[] {
   }));
 }
 
+// LE HÉROS POSITIF (cas 4). Il nomme jusqu'à 2 sujets favorables STRUCTURANTS affichés — un poids 2
+// (secondary) reste visible en carte mais ne couronne jamais le héros. Deux-points quand on nomme TOUT ce
+// qu'on compte, « dont » sinon (même règle que l'arbitrage). `favorableCount` donne le COMPTE ; les SUJETS
+// viennent des faits affichés, jamais de lui. Null si aucun alignment structurant : la branche appelante
+// garde alors sa formulation de repli (posture). Partagé par la branche favorable ET les réserves mineures.
+function herosPositif(input: ConclusionPlanInput, nom: string): VerdictHeadline | null {
+  const structurants = alignmentCandidates(input.shownFacts).filter((c) => c.materialityTier === "structuring");
+  if (structurants.length === 0) return null;
+  const nommes = structurants.slice(0, HEADLINE_MAX_ISSUES);
+  const compte = input.favorableCount;
+  const sujets = joinFr(nommes.map((c) => c.subject));
+  // « l'une de vos priorités » et non « votre priorité » : le lecteur peut en avoir déclaré plusieurs,
+  // même si une seule est nommable (décision D2 du porteur).
+  const phrase = compte === 1
+    ? `${nom} répond à l'une de vos priorités : ${sujets}.`
+    : nommes.length === compte
+      ? `${nom} répond à ${enLettres(compte)} de vos priorités : ${sujets}.`
+      : `${nom} répond à ${enLettres(compte)} de vos priorités, dont ${sujets}.`;
+  return nameIssues(phrase, nommes, "alignments");
+}
+
 // LES NOMBRES SE DISENT EN LETTRES dans ce bloc, jusqu'à dix. Le héros écrivait « Deux priorités » et
 // le détail « 2 constats » à deux lignes d'écart : deux registres typographiques dans le même bloc.
 // `numberForms` déclare les deux formes, donc la validation accepte l'une comme l'autre.
@@ -546,7 +567,7 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
     // alignment n'est affiché (le compte peut être >0 sur un satisfied de poids 1, silencieux).
     const favSujets = alignmentCandidates(input.shownFacts).slice(0, HEADLINE_MAX_ISSUES).map((c) => c.subject);
     const arbitrage = favSujets.length > 0
-      ? `${capitalize(joinFr(favSujets))} ${favSujets.length > 1 ? "répondent" : "répond"} en revanche à votre projet. ${ecart} à peser contre ${favSujets.length > 1 ? "ces avantages" : "cet avantage"}.`
+      ? `${capitalize(joinFr(favSujets))} ${favSujets.length > 1 ? "répondent" : "répond"} en revanche à votre projet. La décision se joue entre ces correspondances et les écarts relevés.`
       : input.hasFavorable
         ? `${nom} répond bien à ${input.favorableCount >= 2 ? "plusieurs de vos autres priorités" : "une autre de vos priorités"}. ${ecart} à peser contre ce que vous y gagnez.`
       // « Aucune de vos conditions n'est contredite ici » rassure sur un risque INEXISTANT quand le
@@ -604,23 +625,9 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
   // mais NE couronne PAS le héros (le cas 4 exige un tier structurant, sans quoi le héros couronnerait un
   // signal faible). `favorableCount` reste le COMPTE ; les SUJETS viennent des faits affichés, jamais de lui.
   if (input.orientation === "favorable") {
-    const structurants = alignmentCandidates(input.shownFacts).filter((c) => c.materialityTier === "structuring");
-    if (structurants.length > 0) {
-      const nommes = structurants.slice(0, HEADLINE_MAX_ISSUES);
-      const compte = input.favorableCount;
-      const sujets = joinFr(nommes.map((c) => c.subject));
-      // « l'une de vos priorités » et non « votre priorité » : le lecteur peut en avoir déclaré plusieurs,
-      // même si une seule est nommable (décision D2 du porteur). Deux-points quand on nomme TOUT ce qu'on
-      // compte, « dont » quand on n'en nomme qu'une partie — même règle que l'arbitrage.
-      const phrase = compte === 1
-        ? `${nom} répond à l'une de vos priorités : ${sujets}.`
-        : nommes.length === compte
-          ? `${nom} répond à ${enLettres(compte)} de vos priorités : ${sujets}.`
-          : `${nom} répond à ${enLettres(compte)} de vos priorités, dont ${sujets}.`;
-      const named = nameIssues(phrase, nommes, "alignments");
-      if (named) {
-        return { label: "Correspondance favorable", tone: "positive", headline: named, detail: `${voc.criteresExamines} vont dans ce sens.` };
-      }
+    const named = herosPositif(input, nom);
+    if (named) {
+      return { label: "Correspondance favorable", tone: "positive", headline: named, detail: `${voc.criteresExamines} vont dans ce sens.` };
     }
     return input.coverage === "high"
       ? {
@@ -636,6 +643,24 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
           headline: POSTURE(`Sur ce qui a pu être examiné, ${nom} va dans le sens de ce que vous avez demandé.`),
           detail: `La lecture reste incomplète : ${voc.autresCriteres} n'ont pas encore pu être examinés.`,
         };
+  }
+
+  // CAS 4 EN RÉSERVES MINEURES (décision porteur). L'orientation `minor_reserves` garantit que seules des
+  // réserves SECONDAIRES subsistent (aucune structurante/critique — sinon ce serait `major_reserves`). Quand
+  // des alignments STRUCTURANTS sont affichés, le POSITIF prime dans le héros : le secondaire ne reprend
+  // jamais le héros, il descend au détail (« N constats restent néanmoins à contrôler »).
+  if (input.orientation === "minor_reserves") {
+    const named = herosPositif(input, nom);
+    if (named) {
+      const r = input.reservesShown;
+      const engage = input.posture === "habitant" ? "à surveiller" : "à contrôler avant de vous engager";
+      const detail = r > 1
+        ? `${capitalize(enLettres(r))} constats restent néanmoins ${engage}.`
+        : r === 1
+          ? `Un constat reste néanmoins ${engage}.`
+          : `${voc.criteresExamines} vont dans ce sens.`;
+      return { label: "Correspondance favorable", tone: "positive", headline: named, detail };
+    }
   }
 
   // RÉSERVES. Le headline nomme la réserve DOMINANTE quand une seule domine ; à égalité, il n'y a
