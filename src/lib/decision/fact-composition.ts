@@ -29,6 +29,10 @@ export type TradeoffComposition = {
   summary: string;
   favorableSide: CompositionSide;
   unfavorableSide: CompositionSide;
+  // LA PRIORITÉ que le côté FAVORABLE présente déjà. Sert à l'absorption d'affichage (lot C) : un
+  // AlignmentFact sur cette même clé redirait, dans la carte « Ce qui correspond », ce que ce tradeoff
+  // montre déjà favorablement. La carte alignment est alors masquée si CE tradeoff est affiché.
+  favorableProjectKey: PreferenceKey;
   absorbedFactIds: string[];
   referencedRuleIds: string[];
   materialityTier: MaterialityTier; // hérité du côté défavorable, jamais aggravé par le favorable

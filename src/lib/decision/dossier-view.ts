@@ -60,14 +60,41 @@ function estCarteMismatchTailleSymetrique(card: DossierCard): boolean {
     && CLES_TAILLE_SYMETRIQUES.has(card.fact.projectKey);
 }
 
+// UN ALIGNMENT QUE LE CÔTÉ FAVORABLE D'UNE COMPOSITION AFFICHÉE PORTE DÉJÀ.
+//
+// Un tradeoff climatique montre la douceur des hivers sur son côté favorable. Un AlignmentFact sur la
+// MÊME priorité redirait, dans la carte « Ce qui correspond », ce que le tradeoff démontre déjà. On masque
+// la carte alignment — le fait RESTE dans le dossier (shown, conclusionBasis, verdict) : c'est de la
+// présentation, jamais une perte, donc le verdict continue à pouvoir le nommer. L'absorption ne dépend QUE
+// des compositions AFFICHÉES (`dossier.compositions` = les cartes retenues, post-caps) : une composition
+// plafonnée n'absorbe rien, et l'alignment reparaît alors dans sa section.
+function clesFavorablesDesCompositionsAffichees(dossier: Dossier): Set<string> {
+  return new Set(
+    dossier.compositions.filter((c) => c.kind === "tradeoff").map((c) => c.favorableProjectKey),
+  );
+}
+function estCarteAlignmentAbsorbee(card: DossierCard, cles: Set<string>): boolean {
+  return card.kind === "fact" && card.fact.role === "alignment" && cles.has(card.fact.projectKey);
+}
+
 // Les sections réellement rendues. `dossier.sections` reste la vérité de ce qui a été assemblé.
 export function sectionsAffichees(dossier: Dossier): DossierSection[] {
   const base = conditionPorteeParLeBloc(dossier)
     ? dossier.sections.filter((s) => s.key !== "incompatibilities")
     : dossier.sections;
-  if (!tailleEtabliePorteeParLeVerdict(dossier)) return base;
+  const masqueTaille = tailleEtabliePorteeParLeVerdict(dossier);
+  const clesAbsorbees = clesFavorablesDesCompositionsAffichees(dossier);
+  if (!masqueTaille && clesAbsorbees.size === 0) return base;
   return base
-    .map((s) => s.key === "mismatches" ? { ...s, cards: s.cards.filter((c) => !estCarteMismatchTailleSymetrique(c)) } : s)
+    .map((s) => {
+      if (s.key === "mismatches" && masqueTaille) {
+        return { ...s, cards: s.cards.filter((c) => !estCarteMismatchTailleSymetrique(c)) };
+      }
+      if (s.key === "alignments" && clesAbsorbees.size > 0) {
+        return { ...s, cards: s.cards.filter((c) => !estCarteAlignmentAbsorbee(c, clesAbsorbees)) };
+      }
+      return s;
+    })
     .filter((s) => s.cards.length > 0);
 }
 

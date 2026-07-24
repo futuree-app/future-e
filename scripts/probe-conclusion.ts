@@ -236,6 +236,7 @@ const tradeoffAntibes: FactComposition = {
   id: "06004:composition-climat-saisons", kind: "tradeoff", patternId: "seasonal_climate_tradeoff",
   title: "Des hivers doux, avec une exposition estivale à arbitrer",
   headlineSubject: "l'exposition aux fortes chaleurs",
+  favorableProjectKey: "douceur_climat",
   summary: "Les hivers d'Antibes comptent parmi les plus doux du pays, et l'exposition aux fortes chaleurs estivales y appelle un arbitrage.",
   favorableSide: { label: "Ce qui correspond", statement: "Les températures moyennes d'hiver figurent parmi les plus douces à l'échelle nationale.", evidence: [], ruleIds: ["territoire.mismatch-douceur_climat"], factIds: [] },
   unfavorableSide: { label: "Ce qui appelle un arbitrage", statement: "Les jours au-dessus de 35 °C augmentent nettement.", evidence: [], ruleIds: ["territoire.climat-chaleur"], factIds: ["06004:climat-chaleur"] },

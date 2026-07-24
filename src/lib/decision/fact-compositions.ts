@@ -69,6 +69,7 @@ function composeSeasonalClimateTradeoff(
     title: "Des hivers doux, avec une exposition estivale à arbitrer",
     headlineSubject: "l'exposition aux fortes chaleurs",
     summary: `Les hivers ${deCommune(facts.nom)} comptent parmi les plus doux du pays, et l'exposition aux fortes chaleurs estivales y appelle un arbitrage.`,
+    favorableProjectKey: "douceur_climat", // le côté favorable EST la douceur des hivers (RULE_DOUCEUR)
     favorableSide: {
       label: "Ce qui correspond",
       statement: "Les températures moyennes d'hiver figurent parmi les plus douces à l'échelle nationale.",

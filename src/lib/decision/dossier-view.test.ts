@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { assembleDossier } from "./decision-assembler.ts";
 import { conditionPorteeParLeBloc, sectionsAffichees, factsNonNarresParLaFace } from "./dossier-view.ts";
-import type { DecisionFact, RunResult, RuleEvaluation } from "./decision-fact.ts";
+import type { DecisionFact, RunResult, RuleEvaluation, Dossier } from "./decision-fact.ts";
 import type { FactComposition } from "./fact-composition.ts";
 import type { UserProject } from "../user-project.ts";
 
@@ -180,4 +180,34 @@ test("un fait absorbé SANS être narré revient au dépliable", () => {
   // c'est ce qui garde l'invariant d'audit vrai sans le payer en redites.
   const shared = { kind: "shared_evidence", consequences: [{ factId: "a" }] } as unknown as FactComposition;
   assert.deepEqual(factsNonNarresParLaFace(shared, [absorbe("a"), absorbe("muet")]).map((f) => f.id), ["muet"]);
+});
+
+// ── Lot C : absorption d'affichage d'un alignment par un tradeoff affiché ────────
+
+function dossierAlignmentTradeoff(compositions: FactComposition[]): Dossier {
+  const carte = { kind: "fact" as const, fact: { id: "al", role: "alignment", projectKey: "douceur_climat" } as unknown as DecisionFact };
+  return {
+    sections: [{ key: "alignments", title: "Ce qui correspond à votre projet", cards: [carte] }],
+    compositions,
+  } as unknown as Dossier;
+}
+
+test("alignment absorbé par le côté favorable d'un tradeoff AFFICHÉ : la carte est masquée, le fait reste", () => {
+  const tradeoff = { kind: "tradeoff", favorableProjectKey: "douceur_climat" } as unknown as FactComposition;
+  const d = dossierAlignmentTradeoff([tradeoff]);
+  // La seule carte alignment est absorbée : la section disparaît.
+  assert.equal(sectionsAffichees(d).some((s) => s.key === "alignments"), false);
+  // Mais le fait RESTE dans le dossier canonique (shown, conclusionBasis, verdict).
+  assert.equal(d.sections.some((s) => s.key === "alignments"), true);
+});
+
+test("alignment NON absorbé si aucune composition affichée ne porte sa clé (ex. tradeoff plafonné)", () => {
+  const d = dossierAlignmentTradeoff([]); // dossier.compositions = les cartes retenues ; vide = rien n'absorbe
+  assert.equal(sectionsAffichees(d).some((s) => s.key === "alignments"), true);
+});
+
+test("alignment NON absorbé si le tradeoff affiché porte une AUTRE clé favorable", () => {
+  const autre = { kind: "tradeoff", favorableProjectKey: "ensoleillement_recherche" } as unknown as FactComposition;
+  const d = dossierAlignmentTradeoff([autre]);
+  assert.equal(sectionsAffichees(d).some((s) => s.key === "alignments"), true);
 });
