@@ -1,6 +1,6 @@
-# Passation — Lot D + `priorityControl` EN PROD, validés à l'écran. Rien en cours.
+# Passation — Lot D, `priorityControl` et la NAVIGATION vers les preuves EN PROD. Lot FEU en cours.
 
-**Horodatage** : 2026-07-24 · **Branche** : `main` = `cbac598` (poussé). **Tree propre** côté code : il ne
+**Horodatage** : 2026-07-25 · **Branche** : `main` = `03ebd4c` (poussé). **Tree propre** côté code : il ne
 reste que ce fichier et deux non suivis à NE JAMAIS committer — `Futur.e Design System.zip` et
 `src/app/dev/` (harnais de rendu, voir plus bas).
 
@@ -34,6 +34,22 @@ et sous un verdict d'arbitrage il se lisait comme un second point défavorable. 
 (« Regardez les signes visibles sur le bâti / Puis lisez le règlement de la zone en mairie ») ; deux faits
 ex æquo ; dédoublonnage ; bascule « À contrôler ensuite » ; absence de bloc sans action.
 
+### Navigation vers les preuves (`65a523b`, `03ebd4c`)
+Deux liens de natures DIFFÉRENTES, à ne pas confondre : `priorityControl` dit **où continuer dans le
+dossier** ; une chip « Preuve » mène **à l'endroit où la donnée est démontrée**. Le dossier résume la
+preuve, il n'en est pas la source détaillée.
+
+- **Intra-dossier** — chaque ligne de « À contrôler en priorité » renvoie à SA carte (scroll centré,
+  focus, liseré bref). L'ancre est portée **par action** (`actions[].anchorId`) : `sourceIds` aplatit
+  les ancres de deux candidats de tête en une liste où plus rien ne dit laquelle va à quelle ligne.
+  `dossier-anchors.ts` POSE et VISE l'ancre par la même fonction (un `:` d'id de composition casse
+  `querySelector`). Le lien n'est actif que vers une carte réellement rendue : `ancresRendues(dossier)`
+  descend depuis la section — le serveur SAIT, le client n'a pas à deviner par le DOM.
+- **Vers les modules** — `EvidenceTargetKey` nomme le PHÉNOMÈNE (ni la règle ni la carte). Déclarée des
+  deux côtés : `targetKey` sur la preuve, `targets` / `evidenceAnchorId(…)` sur la carte. Fragment
+  NATIF (`#evidence-risk-flooding`) : le saut marche sans JS, `EvidenceArrival` n'ajoute que focus et
+  repère. Sans clé, repli sur le module. **Neuf phénomènes** reliés bout en bout.
+
 ## Doctrine (à ne pas re-litiger)
 - **Une action = une seule source de vérité** : la carte porte l'`action` (relue, posture-aware) ; la ligne
   bleue la RÉUTILISE mot pour mot, jamais une copie éditoriale.
@@ -47,6 +63,15 @@ ex æquo ; dédoublonnage ; bascule « À contrôler ensuite » ; absence de blo
 - **Pas de bump manuel du hash** pour un champ du plan : `hashPayload` sérialise le plan entier, il
   s'invalide seul. Les versions manuelles ne couvrent que le prompt et le contrat de validation.
 - Sonde `probe-conclusion.ts` : **NE PAS lancer** (45 appels LLM facturés, jugé trop coûteux par le porteur).
+- **Le catalogue de clés n'accepte que ce qui est relié des DEUX bouts** : une preuve qui la vise ET une
+  carte qui la démontre. `evidence-targets.test.ts` le fait échouer sinon — il a d'emblée écarté cinq
+  clés (submersion, feu, sécheresse des sols, boisement, historique CatNat) qui avaient une carte mais
+  aucune preuve. Elles reviendront AVEC la preuve qui les portera.
+- **Un repère posé hors de React se pose en `data-`, jamais en classe** : React réécrit `className` à la
+  réconciliation et effaçait le halo dans la milliseconde (vu au MutationObserver).
+- **`prefers-reduced-motion` gouverne le défilement ET le halo** — un réglage anti-vertige ne se respecte
+  pas à moitié. L'anneau de focus, lui, est ASSUMÉ : Chrome classe un focus programmatique comme
+  focus-visible, et il dit où le focus est parti.
 
 ## Le harnais `/dev/conclusion` (local, NON commité — décision du porteur)
 `src/app/dev/conclusion/page.tsx` : six dossiers fictifs passés dans le VRAI `buildConclusionPlan` et rendus
@@ -54,22 +79,22 @@ par le VRAI `ConclusionBlock`, sur une page. Ni Supabase, ni compte payant, ni a
 apparaître en trente secondes le défaut d'espacement des deux démarches (invisible dans le HTML seul).
 `notFound()` hors développement. **Ne pas le committer** ; il n'est protégé par rien contre un `git add -A`.
 
-## La suite (rien n'est commencé)
-1. **Phase 2 de `priorityControl`** : le rendre CLIQUABLE vers la carte source (scroll + highlight).
-   `sourceIds` porte déjà les bonnes ancres, compositions comprises. Le travail réel est ailleurs : des
-   ancres DOM stables sur `FactCompositionCard` et les cartes de faits. Vrai chantier front.
-2. **Le lot FEU** (le plus gros gain produit) : risque de feu de forêt déclaré + trajectoire sévère traité en
-   **mismatch**, sur le patron du lot D chaleur. Buildable, aucune donnée nouvelle. Cf. `project_futuree_feu_mismatch`.
-3. **Dette lint** : `npx eslint` sort ~5400 erreurs / 70000 warnings sur le dépôt (préexistant, hors de ce
-   chantier). Plus personne ne peut s'en servir comme signal. À traiter à part.
-4. **Ordre faits-avant-compositions** dans `rankLeadCandidates` : il ne reflète pas forcément l'ordre des
-   cartes à l'écran (une `grouped_verification` est en `displaySection: "verifications"`, comme les faits
-   qu'elle voisine). Sans conséquence visible tant que le plafond est à 2 — mais c'est ce qui produira un
-   jour une ligne bleue dans un ordre que l'écran contredit.
+## La suite
+1. **LE LOT FEU — EN COURS** (le plus gros gain produit). Le risque de feu de forêt déclaré + trajectoire
+   sévère traité en **mismatch**, sur le patron du lot D chaleur. Buildable, aucune donnée nouvelle.
+   Cf. `project_futuree_feu_mismatch`. Ramènera `risk.wildfire` au catalogue de clés (la carte
+   « Conditions favorables au feu » existe déjà côté module, il ne manque que la preuve).
+2. **Dette lint** : `npx eslint` sort ~5400 erreurs / 70000 warnings sur le dépôt (préexistant, hors de
+   ce chantier). Plus personne ne peut s'en servir comme signal. À traiter à part.
+3. **Ordre faits-avant-compositions** dans `rankLeadCandidates` : il ne reflète pas forcément l'ordre des
+   cartes à l'écran. Sans conséquence visible tant que le plafond de démarches est à 2 — mais c'est ce
+   qui produira un jour une ligne bleue dans un ordre que l'écran contredit.
 
 ## Pièges
 - `tsconfig.json` exclut `**/*.test.ts` du typecheck : une fixture mal formée ne casse pas tsc, seulement le run.
 - eslint **ignore aussi les `*.test.ts`** : un lint vert ne dit rien d'eux.
 - Un commentaire JSX `{/* … */}` DANS un ternaire y met deux enfants et casse le build (fait, réparé).
+- Chrome **headless** ne reproduit pas tout : mesurer un halo de 2 s après `networkidle` le rate (il est
+  déjà retiré). Attendre l'état (`waitForFunction`), pas une durée.
 - Le hook pre-commit lance `index:verify` (OK).
 - Push direct sur `main`, pas de PR.
