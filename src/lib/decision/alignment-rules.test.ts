@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { ALIGNMENT_RULES, alignmentRuleId } from "./alignment-rules.ts";
 import { MISMATCH_KEYS } from "./mismatch-rules.ts";
 import { assertFactValid } from "./materiality-rules.ts";
+import { buildCriteriaRegistry } from "./criteria-registry.ts";
+import type { RunResult } from "./decision-fact.ts";
 import type { ModuleFacts, AlignmentFact } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import type { RankBand } from "./mismatch-facts.ts";
@@ -42,10 +44,27 @@ test("satisfied + poids 3 -> un fait alignment, fondement relative_position, tie
   assert.equal(f.materialityTier, "structuring");
   assert.ok(f.headlineSubject.length > 0);
   assert.ok(f.evidence.length > 0);
-  // La phrase de rang porte TOUJOURS « de communes » et le percentile injecté.
+  // Le fait canonique est AUTONOME (« Pour {thème}, {commune} se situe … »), porte TOUJOURS « de
+  // communes » et le percentile injecté.
+  assert.match(f.statement, /^Pour l'accès aux soins, Toulouse se situe parmi les 10 % de communes/);
   assert.match(f.statement, /de communes/);
-  assert.match(f.statement, /les 10 % de communes/);
   assertFactValid(f, p);
+});
+
+test("invariance des comptes : deux évaluations « satisfied » (mismatch + alignment) pour une clé -> UN favorable", () => {
+  // Le point de vigilance de la revue archi : deux familles de règles touchent la même projectKey. La
+  // couverture agrège PAR CLÉ (criteria-registry), donc favorableCount ne double pas.
+  const p = project([{ key: "acces_soins", weight: 3 }]);
+  const run: RunResult = {
+    facts: [],
+    evaluations: [
+      { ruleId: "territoire.mismatch-acces_soins", projectKeys: ["acces_soins"], outcome: "satisfied", facts: [], reason: "" },
+      { ruleId: "territoire.alignment-acces_soins", projectKeys: ["acces_soins"], outcome: "satisfied", facts: [], reason: "" },
+    ],
+  };
+  const c = buildCriteriaRegistry(p, run);
+  assert.equal(c.favorableCount, 1);
+  assert.equal(c.hasFavorable, true);
 });
 
 test("le percentile est paramétrique : band.low 0.95 -> « 5 % », 0.85 -> « 20 % »", () => {

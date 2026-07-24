@@ -140,6 +140,13 @@ export type CategoricalStateBasis = {
 export type MismatchBasis =
   NamedAbsenceBasis | RelativePositionBasis | AbsoluteMeasureBasis | CategoricalStateBasis;
 
+// LE FONDEMENT D'UN ALIGNMENT : la LISTE BLANCHE, portée par le TYPE. `named_absence` en est EXCLU — une
+// absence de signal ne prouve jamais un positif —, et TypeScript l'interdit désormais à la CONSTRUCTION,
+// pas seulement assertFactValid à l'exécution. Même doctrine que pour AbsoluteMeasureBasis : « ne pas
+// autoriser dans l'union un état que le moteur ne sait ni produire ni expliquer ».
+export type AlignmentBasis =
+  RelativePositionBasis | AbsoluteMeasureBasis | CategoricalStateBasis;
+
 // MISMATCH : le lieu répond MOINS BIEN à une priorité déclarée, sans que ce soit éliminatoire. Pas
 // d'action (rien à vérifier, le constat est établi) ; sa seule limitation possible est le grain.
 export type MismatchFact = BaseFact & {
@@ -173,7 +180,7 @@ export type MismatchFact = BaseFact & {
 export type AlignmentFact = BaseFact & {
   role: "alignment";
   projectKey: PreferenceKey;
-  basis: MismatchBasis; // le MÊME fondement, avec les mêmes gardes qu'assertFactValid — mais JAMAIS named_absence
+  basis: AlignmentBasis; // liste blanche portée par le TYPE : jamais named_absence (voir AlignmentBasis)
   evidence: EvidenceRef[];
   headlineSubject: string; // la priorité du lecteur, à lire après un deux-points, comme sur le mismatch
   status?: string; // l'état scannable favorable (« 10 % les plus favorables »)

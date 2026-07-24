@@ -10,13 +10,19 @@ import { conditionPorteeParLeBloc, sectionsAffichees } from "@/lib/decision/doss
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 import { FactBody, EvidenceRow, MethodDetails, factSources, factChecks } from "@/components/report/DecisionFactRenderParts";
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
+import { ALIGNMENT_LABELS, rankFractionFavorable } from "@/lib/decision/mismatch-facts";
 
 const SECTION_ACCENT: Record<string, string> = {
   incompatibilities: "var(--red)",
+  // ALIGNMENT (lot C) : le côté favorable, en VERT — un accent distinct des sections de problème
+  // (rouge/orange/améthyste/bleu). Même ton que le côté favorable d'un tradeoff : la couleur porte le sens.
+  alignments: "var(--green)",
   compromises: "var(--orange)",
   unknowns: "var(--amethyst)",
   verifications: "var(--info)",
 };
+
+const cap = (s: string): string => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
 // D'OÙ VIENT CE QU'ON MONTRE. Trois sections répondent aux critères du lecteur : ses conditions non
 // négociables, ce qui correspond moins bien, ce qui départage. Deux ne répondent à rien qu'il ait
@@ -133,6 +139,51 @@ export function DossierDecisionSection({
       <div className="grid gap-3.5">
         {sections.map((s) => {
           const col = SECTION_ACCENT[s.key] ?? "var(--amethyst)";
+
+          // CE QUI CORRESPOND (alignments) : une carte GROUPÉE, courte. Un point fort n'appelle aucune
+          // action, donc pas la structure complète d'une carte de problème — deux lignes suffisent :
+          // le TITRE (la priorité, en mini-titre) puis la PHRASE DE RANG. Le grain n'est montré qu'UNE
+          // fois, en intertitre, et SEULEMENT si toutes les lignes le partagent (sinon omis) : à ce
+          // grain unique répond un sous-titre unique, pas une répétition par ligne.
+          if (s.key === "alignments") {
+            const grains = s.cards.map((c) => (c.kind === "fact" ? factGrain(c.fact) : null));
+            const partages = new Set(grains.filter(Boolean));
+            const grainCommun = partages.size === 1 ? [...partages][0]! : null;
+            return (
+              <div key={s.key} className="glass rounded-xl p-6">
+                <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mb-2" style={{ color: col }}>
+                  <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
+                  {s.title}
+                </div>
+                {grainCommun ? (
+                  <p className="text-[13px] leading-[1.5] text-ghost mb-4">{grainCommun}</p>
+                ) : (
+                  <div className="mb-2" />
+                )}
+                <ul className="flex flex-col gap-5">
+                  {s.cards.map((card) => {
+                    if (card.kind !== "fact") return null;
+                    const f = card.fact;
+                    // Deux champs (décision D1) : le TITRE (headlineSubject, rendu CAPITALISÉ) puis la
+                    // PHRASE DE RANG propre au critère. Le fait porte, lui, une phrase AUTONOME dans son
+                    // statement (conclusion / export) — la carte n'en montre que le fragment scannable.
+                    const copy = f.role === "alignment" ? ALIGNMENT_LABELS[f.projectKey] : undefined;
+                    const heading = copy?.headlineSubject ?? cap(f.topic);
+                    const rang = copy && f.role === "alignment" && f.basis.kind === "relative_position"
+                      ? copy.favorableStatusTemplate.replace("{rank}", rankFractionFavorable(f.basis.rankLow))
+                      : f.statement;
+                    return (
+                      <li key={f.id}>
+                        <p className="font-mono text-[11px] tracking-[0.08em] uppercase text-label mb-1">{heading}</p>
+                        <p className="text-[15px] leading-[1.55] text-muted">{rang}</p>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            );
+          }
+
           return (
             /* LE LISERÉ COLORÉ DE 2 px A ÉTÉ RENDU AU VERDICT. Il courait en tête de CHAQUE section :
                quatre traits vifs sous un bloc de réponse qui, lui, porte souvent un ton neutre (gris).

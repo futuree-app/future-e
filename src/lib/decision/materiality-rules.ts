@@ -483,6 +483,10 @@ function assertStatus(fact: { ruleId: string; status?: string }): void {
 }
 
 // Invariants : protègent toutes les futures règles. JETTE (fail-fast) en cas de violation.
+// Les seuls critères dont un alignment peut porter une limitation (nuance MÉTHODOLOGIQUE de la mesure :
+// climatologie ERA5-Land, période 1976-2005). Tout autre critère avec une limitation est un abus de portée.
+const ALIGNMENT_LIMITATION_KEYS = new Set<string>(["ensoleillement_recherche", "douceur_climat"]);
+
 export function assertFactValid(fact: DecisionFact, project: UserProject): void {
   // Arbitrage slice 1.5 : une règle Logement ne peut pas émettre incompatibility.
   if (fact.ruleId.startsWith("logement.") && fact.role === "incompatibility") {
@@ -590,6 +594,12 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
         if (!b.conventionId) throw new Error(`[decision] ${fact.ruleId}: convention de catégorie absente`);
       } else if (b.kind !== "relative_position") {
         throw new Error(`[decision] ${fact.ruleId}: fondement d'alignment hors liste blanche (${(b as { kind: string }).kind})`);
+      }
+      // La `limitation` d'un alignment est UNIQUEMENT la nuance MÉTHODOLOGIQUE card-only héritée du critère
+      // (période de référence). Jamais une limite de portée. On la borne aux deux seuls critères qui en
+      // portent une, sinon une future règle glisserait une limite de résultat sous ce champ sans débat.
+      if (fact.limitation && !ALIGNMENT_LIMITATION_KEYS.has(fact.projectKey)) {
+        throw new Error(`[decision] ${fact.ruleId}: un alignment ne porte de limitation que pour une nuance méthodologique (${fact.projectKey})`);
       }
       if (!declaredPreferenceKeys(project).includes(fact.projectKey)) {
         throw new Error(`[decision] ${fact.ruleId}: alignment sur une préférence non déclarée (${fact.projectKey})`);

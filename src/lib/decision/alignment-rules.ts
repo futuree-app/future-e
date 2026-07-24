@@ -20,8 +20,8 @@ const territoireHref = "/rapport/quartier";
 // le référencent, et l'importer garantit qu'un renommage casse le typecheck, jamais silencieusement l'UI.
 export const alignmentRuleId = (key: PreferenceKey): string => `territoire.alignment-${key}`;
 
-// La minuscule initiale : le heading est un titre (« L'accès aux soins ») ; la priorité que le héros
-// nomme après un deux-points se lit en bas de casse (« … répond à votre priorité : l'accès aux soins »).
+// La minuscule initiale : le gabarit de rang commence par « Parmi » ; enveloppé dans « … se situe … »,
+// il se lit « se situe parmi ».
 const bdc = (s: string): string => (s ? s.charAt(0).toLowerCase() + s.slice(1) : s);
 
 function relativeFact(f: ModuleFacts, key: PreferenceKey): RelativeCriterionFact {
@@ -64,15 +64,16 @@ function makeAlignmentRule(key: PreferenceKey): DecisionRule {
         factId: `relativePosition.${key}`, module: "territoire", label: `Territoire · ${f.nom}`,
         grain: "commune", href: territoireHref,
       };
-      const priorite = bdc(copy.heading);
+      const rang = copy.favorableStatusTemplate.replace("{rank}", rankFractionFavorable(band.low));
       const fact: AlignmentFact = {
         id: `${f.insee}:alignment-${key}`, ruleId: id, sourceFactIds: [`relativePosition.${key}`], module: "territoire",
         role: "alignment", projectKey: key, materialityTier: tier,
-        topic: priorite,
-        headlineSubject: priorite,
-        // La phrase de RANG (2e ligne de la carte, sous le heading). « de communes » toujours présent,
-        // percentile injecté. Le heading (1re ligne) est lu par la carte depuis ALIGNMENT_LABELS[projectKey].
-        statement: copy.rankingTemplate.replace("{rank}", rankFractionFavorable(band.low)),
+        topic: copy.headlineSubject,
+        headlineSubject: copy.headlineSubject,
+        // Le fait canonique est AUTONOME : « Pour {thème}, {commune} se situe {phrase de rang}. » Il se
+        // relit sans le heading de la carte (conclusion, export, audit). La carte, elle, rend le heading
+        // en mini-titre + la seule phrase de rang (favorableStatusTemplate), lus depuis ALIGNMENT_LABELS.
+        statement: `Pour ${copy.headlineSubject}, ${f.nom} se situe ${bdc(rang)}.`,
         basis: { kind: "relative_position", rankLow: band.low, rankHigh: band.high, universe: "communes_france", distributionVersion: MISMATCH_DISTRIBUTION_VERSION },
         evidence: [ev],
         // Nuance MÉTHODOLOGIQUE card-only héritée du critère (ERA5-Land, 1976-2005) : elle vaut pour la

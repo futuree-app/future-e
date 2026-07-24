@@ -412,6 +412,12 @@ test("assertFactValid : alignment — headlineSubject et preuve exigés, fondeme
     () => assertFactValid({ ...base, basis: { kind: "named_absence" } as unknown as typeof base.basis }, p),
     /liste blanche/,
   );
+  // La limitation d'un alignment est réservée aux nuances méthodologiques (ensoleillement / douceur).
+  const pCalme = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "cadre_calme", weight: 3 }] });
+  assert.throws(
+    () => assertFactValid({ ...base, projectKey: "cadre_calme" as const, limitation: "une limite de portée interdite" }, pCalme),
+    /limitation/,
+  );
 });
 
 // LE NOM DE LA COMMUNE N'ENTRE JAMAIS DANS UN TOPIC. Le topic n'est lu qu'à un seul endroit, la

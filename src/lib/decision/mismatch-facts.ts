@@ -126,19 +126,26 @@ export const MISMATCH_LABELS: Record<string, MismatchLabel> = {
 // on ne varie que quand la mesure l'exige (démographie ≠ emploi). `{rank}` reste paramétrique (le
 // percentile est injecté par la règle : 5 / 10 / 20 %). « de communes » est TOUJOURS présent : sans lui la
 // phrase de rang est grammaticalement suspendue.
-export type AlignmentLabel = { heading: string; rankingTemplate: string };
+// DEUX champs (décision D1 du porteur, revue archi 2026-07-23) :
+//   - headlineSubject : LE THÈME, en bas de casse. Il sert au héros (« … répond à vos priorités :
+//     l'accès aux soins »), et la carte le rend en mini-titre CAPITALISÉ (via CSS `uppercase`).
+//   - favorableStatusTemplate : la PHRASE DE RANG propre au critère (option B), pour la FACE de la carte.
+//     `{rank}` paramétrique, « de communes » toujours présent.
+// Le fait canonique reste AUTONOME : la règle enveloppe ce gabarit dans « Pour {thème}, {commune} se
+// situe … » (statement réutilisable en conclusion / export / audit sans dépendre du heading de la carte).
+export type AlignmentLabel = { headlineSubject: string; favorableStatusTemplate: string };
 export const ALIGNMENT_LABELS: Record<string, AlignmentLabel> = {
-  acces_soins: { heading: "L'accès aux soins", rankingTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
-  acces_ecoles: { heading: "L'accès aux collèges et lycées", rankingTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
-  acces_culture: { heading: "L'accès à la culture", rankingTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
-  acces_services: { heading: "L'accès aux services du quotidien", rankingTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
-  acces_transports: { heading: "L'accès au train", rankingTemplate: "Parmi les {rank} de communes les mieux desservies par le train en France" },
-  nature: { heading: "L'accès aux espaces naturels", rankingTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
-  vie_locale: { heading: "La vie locale", rankingTemplate: "Parmi les {rank} de communes les plus animées de France" },
-  faible_dependance_auto: { heading: "La possibilité de se déplacer sans voiture", rankingTemplate: "Parmi les {rank} de communes où elle est la plus favorable en France" },
-  croissance_demographique: { heading: "La trajectoire démographique", rankingTemplate: "Parmi les {rank} de communes où la population progresse le plus en France" },
-  viabilite_emploi: { heading: "Le bassin d'emploi", rankingTemplate: "Parmi les {rank} de communes aux bassins d'emploi les plus dynamiques de France" },
-  cadre_calme: { heading: "Le calme du cadre de vie", rankingTemplate: "Parmi les {rank} de communes où le cadre de vie est le plus calme en France" },
-  ensoleillement_recherche: { heading: "L'ensoleillement", rankingTemplate: "Parmi les {rank} de communes les plus ensoleillées de France" },
-  douceur_climat: { heading: "La douceur des hivers", rankingTemplate: "Parmi les {rank} de communes aux hivers les plus doux de France" },
+  acces_soins: { headlineSubject: "l'accès aux soins", favorableStatusTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
+  acces_ecoles: { headlineSubject: "l'accès aux collèges et lycées", favorableStatusTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
+  acces_culture: { headlineSubject: "l'accès à la culture", favorableStatusTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
+  acces_services: { headlineSubject: "l'accès aux services du quotidien", favorableStatusTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
+  acces_transports: { headlineSubject: "l'accès au train", favorableStatusTemplate: "Parmi les {rank} de communes les mieux desservies par le train en France" },
+  nature: { headlineSubject: "l'accès aux espaces naturels", favorableStatusTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
+  vie_locale: { headlineSubject: "la vie locale", favorableStatusTemplate: "Parmi les {rank} de communes les plus animées de France" },
+  faible_dependance_auto: { headlineSubject: "la possibilité de se déplacer sans voiture", favorableStatusTemplate: "Parmi les {rank} de communes où elle est la plus favorable en France" },
+  croissance_demographique: { headlineSubject: "la trajectoire démographique", favorableStatusTemplate: "Parmi les {rank} de communes où la population progresse le plus en France" },
+  viabilite_emploi: { headlineSubject: "le bassin d'emploi", favorableStatusTemplate: "Parmi les {rank} de communes aux bassins d'emploi les plus dynamiques de France" },
+  cadre_calme: { headlineSubject: "le calme du cadre de vie", favorableStatusTemplate: "Parmi les {rank} de communes où le cadre de vie est le plus calme en France" },
+  ensoleillement_recherche: { headlineSubject: "l'ensoleillement", favorableStatusTemplate: "Parmi les {rank} de communes les plus ensoleillées de France" },
+  douceur_climat: { headlineSubject: "la douceur des hivers", favorableStatusTemplate: "Parmi les {rank} de communes aux hivers les plus doux de France" },
 };

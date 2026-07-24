@@ -100,6 +100,12 @@ export function assembleDossier(
     // emploient déjà. Ce titre était le dernier endroit de l'écran à dire « contrainte », et il se
     // lisait à trois centimètres d'un héros qui dit « condition ».
     { key: "incompatibilities", title: "Vos conditions non négociables", cards: sectionCards(facts, compositions, "incompatibility", "incompatibilities", 2) },
+    // ALIGNMENT (lot C) : ce que le lieu offre, ÉTABLI, en miroir du mismatch. Le PLACEMENT est porté par
+    // l'ORDRE ici : la carte OUVRE les cartes, sauf quand une section incompatibilités existe — auquel cas
+    // elle vient juste après (une condition non négociable violée est la seule chose qui compte, rien ne
+    // passe devant le motif du blocage). Partout ailleurs, elle ouvre : le détail du verdict affirme déjà
+    // « répond à plusieurs dimensions », et cette carte en est la preuve, juste sous le verdict.
+    { key: "alignments", title: "Ce qui correspond à votre projet", cards: sectionCards(facts, compositions, "alignment", "alignments", 3) },
     // MISMATCH : établi, non éliminatoire, à ARBITRER (jamais à vérifier). Sa propre section, entre les
     // incompatibilités et les compromis. Un mismatch n'est pas un compromis (pas de contrepartie).
     { key: "mismatches", title: "Ce qui correspond moins bien", cards: sectionCards(facts, compositions, "mismatch", "mismatches", 3) },

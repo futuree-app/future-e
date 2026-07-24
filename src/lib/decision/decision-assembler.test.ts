@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { assembleDossier } from "./decision-assembler.ts";
-import type { DecisionFact, RunResult, RuleEvaluation, IncompatibilityFact } from "./decision-fact.ts";
+import type { DecisionFact, RunResult, RuleEvaluation, IncompatibilityFact, AlignmentFact, MismatchFact } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 
 function project(parsed: unknown, over: Partial<UserProject> = {}): UserProject {
@@ -306,4 +306,63 @@ test("le vocabulaire de l'écran ne mélange pas « condition » et « contraint
   }
   assert.doesNotMatch(d.narrativePlan.verdictLabel, /contrainte/i);
   assert.doesNotMatch(d.narrativePlan.verdict.headline.text, /contrainte/i);
+});
+
+// ── Lot C : la carte « Ce qui correspond » (alignments) ─────────────────────────
+
+function align(over: Partial<AlignmentFact> = {}): DecisionFact {
+  return {
+    id: "a", ruleId: "territoire.alignment-acces_soins", sourceFactIds: ["relativePosition.acces_soins"],
+    module: "territoire", role: "alignment", projectKey: "acces_soins", materialityTier: "structuring",
+    topic: "l'accès aux soins", headlineSubject: "l'accès aux soins",
+    statement: "Parmi les 10 % de communes où il est le plus favorable en France",
+    basis: { kind: "relative_position", rankLow: 0.9, rankHigh: 0.99, universe: "communes_france", distributionVersion: "v" },
+    evidence: [{ factId: "relativePosition.acces_soins", module: "territoire", label: "Territoire", grain: "commune", href: "/rapport/quartier" }],
+    ...over,
+  } as DecisionFact;
+}
+function mismatch(over: Partial<MismatchFact> = {}): DecisionFact {
+  return {
+    id: "m", ruleId: "territoire.mismatch-cadre_calme", sourceFactIds: ["relativePosition.cadre_calme"],
+    module: "territoire", role: "mismatch", projectKey: "cadre_calme", materialityTier: "structuring",
+    topic: "le cadre calme", headlineSubject: "le calme", statement: "moins bien",
+    basis: { kind: "relative_position", rankLow: 0.02, rankHigh: 0.1, universe: "communes_france", distributionVersion: "v" },
+    evidence: [{ factId: "relativePosition.cadre_calme", module: "territoire", label: "Territoire", grain: "commune", observedValue: "20 %" }],
+    ...over,
+  } as DecisionFact;
+}
+const PREFS = { reformulation: "x", hardConstraints: {}, preferences: [{ key: "acces_soins", weight: 3 }, { key: "cadre_calme", weight: 3 }] };
+
+test("alignment + mismatch : la carte « Ce qui correspond » s'affiche AVANT « Ce qui correspond moins bien »", () => {
+  const d = assembleDossier(
+    run([align(), mismatch()], [], [ev("territoire.alignment-acces_soins", ["acces_soins"], "satisfied", [align()]), ev("territoire.mismatch-cadre_calme", ["cadre_calme"], "mismatch", [mismatch()])]),
+    project(PREFS), "commune", "Toulouse",
+  );
+  const keys = d.sections.map((s) => s.key);
+  assert.ok(keys.includes("alignments"), "la section alignments existe");
+  assert.ok(keys.indexOf("alignments") < keys.indexOf("mismatches"), "alignments avant mismatches");
+  assert.equal(d.sections.find((s) => s.key === "alignments")!.title, "Ce qui correspond à votre projet");
+});
+
+test("incompatibilité + alignment : les incompatibilités priment, l'alignment vient juste après", () => {
+  const p = project({ reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 5 } }, preferences: [{ key: "acces_soins", weight: 3 }] });
+  const d = assembleDossier(
+    run([incompat(), align()], ["nearSea"], [ev("r", ["nearSea"], "incompatible", [incompat()]), ev("territoire.alignment-acces_soins", ["acces_soins"], "satisfied", [align()])]),
+    p, "commune", "Toulouse",
+  );
+  const keys = d.sections.map((s) => s.key);
+  assert.ok(keys.indexOf("incompatibilities") < keys.indexOf("alignments"), "incompatibilités avant alignment");
+});
+
+test("cap à 3 : quatre alignments -> trois cartes", () => {
+  const quatre = ["acces_soins", "vie_locale", "cadre_calme", "nature"].map((k, i) =>
+    align({ id: `a${i}`, ruleId: `territoire.alignment-${k}`, projectKey: k as AlignmentFact["projectKey"] }));
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: quatre.map((_, i) => ({ key: ["acces_soins", "vie_locale", "cadre_calme", "nature"][i], weight: 3 })) });
+  const d = assembleDossier(run(quatre, [], quatre.map((f) => ev(f.ruleId, [(f as AlignmentFact).projectKey], "satisfied", [f]))), p, "commune", "Toulouse");
+  assert.equal(d.sections.find((s) => s.key === "alignments")!.cards.length, 3);
+});
+
+test("conclusionBasis porte les alignments affichés", () => {
+  const d = assembleDossier(run([align()], [], [ev("territoire.alignment-acces_soins", ["acces_soins"], "satisfied", [align()])]), project(PREFS), "commune", "Toulouse");
+  assert.ok(d.conclusionBasis.factIds.includes("a"));
 });

@@ -390,3 +390,61 @@ se lisent depuis les `shownFacts` de `role === "alignment"` (leur `headlineSubje
 - Hors périmètre (forces absolues, positifs de risque, Logement, C+/D/E) → non traités, conformes ✅
 
 **Décisions ouvertes bloquantes** : D1 (voix du constat, avant Task 1), D2 (voix du héros, avant Task 5).
+
+---
+
+# Corrections de la revue d'architecture du porteur (2026-07-24)
+
+**D1 — tranchée : face par critère, fait autonome.** `AlignmentLabel = { headlineSubject; favorableStatusTemplate }`.
+Le fait canonique porte une phrase AUTONOME (« Pour {thème}, {commune} se situe {phrase de rang}. »),
+réutilisable en conclusion/export. La carte rend `headlineSubject` (capitalisé) + `favorableStatusTemplate`
+(fragment). *Fait dans la tâche 1.*
+
+**D2 — tranchée.** Héros pluriel : « {commune} répond à deux de vos priorités : {s1} et {s2}. » ;
+singulier : « {commune} répond à **l'une de vos priorités** : {s1}. » (« l'une de », pas « votre »).
+*À appliquer en tâche 5.*
+
+**Issue 4 — fait (tâche 1).** `AlignmentBasis = RelativePositionBasis | AbsoluteMeasureBasis |
+CategoricalStateBasis` : `named_absence` interdit AU TYPE, pas seulement à l'exécution.
+
+**Issue 8 — fait (tâche 1).** `assertFactValid` : la `limitation` d'un alignment n'est autorisée que pour
+`ensoleillement_recherche` / `douceur_climat` (nuance méthodologique). Ailleurs → jette.
+
+**Issue 1 — vérifié, non bloquant.** `buildCriteriaRegistry` agrège PAR CLÉ (criteria-registry.ts:75,
+112-116) : deux évaluations « satisfied » (mismatch + alignment) sur une même clé donnent UN favorable.
+Les deux familles restent séparées (fusionner forcerait l'AlignmentFact à porter un ruleId « mismatch »).
+Verrouillé par un test d'invariance (`alignment-rules.test.ts`).
+
+## Task 4 (RÉVISÉE) — absorption : contrat « composition VISIBLE », et l'absorbé reste nommable
+
+- **Issue 3** : l'absorption ne doit dépendre que des compositions **réellement affichées** (après tri +
+  caps), jamais d'une composition créée puis plafonnée. Invariant : *une composition n'absorbe un fait que
+  si elle survit dans les cartes retenues*. Placer le calcul d'absorption des alignments APRÈS la sélection
+  des cartes visibles (dans l'assembleur, sur `shownComps`), pas dans `fact-compositions.ts` avant les caps.
+  - Test : composition créée mais plafonnée → alignment NON absorbé → visible dans sa section.
+- **Issue 2** : un alignment absorbé par un `favorableSide` de composition ne doit PAS disparaître du
+  verdict. Écrire un extracteur commun `selectVisibleAlignmentSubjects(shownFacts, shownComps)` qui rend les
+  sujets favorables (1) des AlignmentFact visibles ET (2) des `favorableSide` de compositions visibles ayant
+  absorbé un alignment. Le verdict (tâche 5) lit CET extracteur, pas `shownFacts.filter(role alignment)` seul.
+
+## Task 5 (RÉVISÉE) — héros positif borné par l'ORIENTATION, pas seulement par les cartes visibles
+
+- **Issue 5** : le cas 4 (héros positif) n'est autorisé que pour une **liste blanche d'orientations** :
+  `favorable`, `neutral`, ou `minor_reserves` SI aucune réserve `structuring`/`decision_critical` visible.
+  JAMAIS `incompatible`, `arbitration`, `major_reserves`, `indeterminate`. Dans `arbitration`, les
+  alignments alimentent le DÉTAIL bilatéral, jamais le héros. « Aucun négatif visible » ne contourne jamais
+  l'orientation métier.
+- Détail + héros lisent `selectVisibleAlignmentSubjects` (Issue 2), gate 2 sujets, tier `structuring` requis
+  pour le héros (poids 2 = visible en carte, jamais couronné).
+
+## Task 3 (COMPLÉMENT) — grain mixte : ne jamais SUPPRIMER l'information (Issue 6)
+
+Contrat actuel (grain commun → intertitre ; sinon rien) valide tant que tous les alignments sont au grain
+commune. Dès que la taille (grain `unite_urbaine`, tâche 2) entre : grain uniforme → un intertitre ; grains
+multiples → **sous-groupes par grain OU petit label par ligne**, jamais l'omission. À traiter en tâche 2.
+
+## Issue 7 — potentiel réel : 16, pas 17
+
+`eviter_isolement` ne produit jamais `satisfied` (village → mismatch, autres → neutral). La famille taille
+apporte **2** alignments (`prefere_grande_ville`, `eviter_grandes_villes`), pas 3. Total immédiat : 13
+relatifs + mer + 2 tailles = **16**. Ne graver aucun total sans un test listant les clés capables de `satisfied`.
