@@ -17,6 +17,7 @@ import { reachabilityStore } from "../reachability-store.ts";
 import { mapCommuneToModuleFacts } from "./module-facts-map.ts";
 import { buildClimatFacts, type ClimatFacts } from "./climat-facts.ts";
 import { getClimatDataCommune } from "../drias-json.ts";
+import { getGeorisquesSummary } from "../georisques.ts";
 import { runRules } from "./materiality-rules.ts";
 import { assembleDossier } from "./decision-assembler.ts";
 import { composeFacts } from "./fact-compositions.ts";
@@ -26,7 +27,7 @@ import { deCommune } from "../typography.ts";
 
 export function buildModuleFacts(
   entry: IndexCommune,
-  opts: { hasAddress: boolean; climat?: ClimatFacts | null },
+  opts: { hasAddress: boolean; climat?: ClimatFacts | null; risquesDeclares?: { wildfire: boolean } | null },
 ): ModuleFacts {
   const scores: ModuleFacts["scores"] = {};
   for (const key of PREFERENCE_KEYS) scores[key] = subScore(key, entry);
@@ -39,6 +40,7 @@ export function buildModuleFacts(
     tailleVille: resolvedSize.value,
     tailleVilleSource: resolvedSize.source,
     climat: opts.climat ?? null,
+    risquesDeclares: opts.risquesDeclares ?? null,
   });
 }
 
@@ -57,8 +59,20 @@ export async function loadClimatFacts(insee: string): Promise<ClimatFacts | null
 }
 
 export async function loadModuleFacts(insee: string, opts: { hasAddress: boolean }): Promise<ModuleFacts | null> {
-  const [entry, climat] = await Promise.all([getCommuneEntry(insee), loadClimatFacts(insee)]);
-  return entry ? buildModuleFacts(entry, { hasAddress: opts.hasAddress, climat }) : null;
+  // LES RISQUES DÉCLARÉS entrent dans le socle du dossier. Ils étaient chargés par le module Territoire
+  // (l'écran) mais restaient invisibles au MOTEUR : le dossier concluait sur le risque d'incendie à partir
+  // du seul indice météo projeté, pendant que Géorisques déclarait « Feu de forêt » sur la même commune.
+  // Vu à l'écran sur Lège-Cap-Ferret, en pleins incendies : « Bonne correspondance ».
+  //
+  // La source est déjà mise en cache par commune (getGeorisquesSummary) : aucun appel supplémentaire pour
+  // un lecteur qui ouvre aussi le module Territoire. Une panne rend `null` — jamais `false`.
+  const [entry, climat, georisques] = await Promise.all([
+    getCommuneEntry(insee),
+    loadClimatFacts(insee),
+    getGeorisquesSummary(insee).catch(() => null),
+  ]);
+  const risquesDeclares = georisques ? { wildfire: georisques.flags.wildfire } : null;
+  return entry ? buildModuleFacts(entry, { hasAddress: opts.hasAddress, climat, risquesDeclares }) : null;
 }
 
 // LE CONTEXTE DES CONTRAINTES DURES, hydraté AU-DESSUS des deux moteurs : le MÊME annuaire et la MÊME

@@ -243,6 +243,15 @@ export type LogementFacts = {
 // appelants à inventer une valeur, et une distance inconnue deviendrait une commune littorale.
 export type ModuleFacts = CommuneAttributes & {
   catnatInondation: number | null;
+  // LES RISQUES DÉCLARÉS PAR L'ÉTAT (GASPAR / Géorisques), au grain commune. Distincts des indicateurs
+  // PROJETÉS (DRIAS) : ceux-ci disent une trajectoire météorologique, celui-là dit ce que l'autorité a
+  // officiellement recensé pour ce territoire. Les deux peuvent diverger — et quand ils divergent, c'est
+  // précisément l'information la plus utile au lecteur, jamais une contradiction à arbitrer en silence.
+  //
+  // NULLABLE, non optionnel : `null` = la source n'a pas répondu (on ne sait pas), `{ wildfire: false }`
+  // = elle a répondu et ne déclare pas ce risque. Confondre les deux ferait passer une panne pour une
+  // bonne nouvelle — le piège que tout ce moteur s'emploie à fermer.
+  risquesDeclares: { wildfire: boolean } | null;
   inondationRisque: number | null;
   // La trajectoire climatique (DRIAS), chargée par l'APPELANT comme `tailleVille` : le mapping reste pur.
   // NULLABLE mais NON OPTIONNEL : `undefined` créerait un troisième état entre « la donnée est là » et

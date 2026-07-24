@@ -16,7 +16,7 @@ export function mapCommuneToModuleFacts(
   // de fermer (le comparateur jugeait la taille sur l'agglomération, le dossier sur la commune).
   // `climat` est chargé PAR L'APPELANT (les scénarios DRIAS vivent dans un fichier, et ce mapping doit
   // rester pur donc testable), exactement comme `tailleVille`.
-  opts: { hasAddress: boolean; tailleVille: number | null; tailleVilleSource: "urban_unit" | "commune" | null; climat?: ClimatFacts | null },
+  opts: { hasAddress: boolean; tailleVille: number | null; tailleVilleSource: "urban_unit" | "commune" | null; climat?: ClimatFacts | null; risquesDeclares?: { wildfire: boolean } | null },
 ): ModuleFacts {
   return {
     insee: entry.insee,
@@ -32,6 +32,8 @@ export function mapCommuneToModuleFacts(
     population: entry.population ?? null,
     altitude: entry.altitude ?? null,
     catnatInondation: entry.inondation ? entry.inondation.catnat : null,
+    // Chargé par l'APPELANT (comme le climat) : le mapping reste pur, sans I/O.
+    risquesDeclares: opts.risquesDeclares ?? null,
     inondationRisque: entry.inondation ? entry.inondation.risque : null,
     climat: opts.climat ?? null,
     // La santé se construit ICI, sans I/O : air, bruit et exposition industrielle sont déjà dans l'index.

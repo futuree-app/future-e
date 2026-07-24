@@ -15,6 +15,7 @@ import type {
 import type { UserProject } from "../user-project.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { EvidenceTargetKey } from "./evidence-targets.ts";
+import { aCommune } from "../typography.ts";
 import { declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } from "./project-view.ts";
 import { LOGEMENT_RULES } from "./logement-rules.ts";
 import { HARD_CONSTRAINT_RULES } from "./hard-constraint-rules.ts";
@@ -323,7 +324,46 @@ const ruleFeu: DecisionRule = {
     const c = f.climat;
     if (!c) return ret("uncertain", [], "trajectoire climatique indisponible");
 
+    // LE RISQUE DÉCLARÉ PAR L'ÉTAT PRIME SUR LE SILENCE. Vu à l'écran sur Lège-Cap-Ferret, pendant les
+    // incendies de juillet 2026 : indice météo projeté à 4,5 jours/an (sous notre seuil de 9), donc
+    // `satisfied` SILENCIEUX — et un verdict « Bonne correspondance » sur un projet qui demandait
+    // explicitement d'être à l'abri des incendies, dans une commune couverte de forêt à 85 % où
+    // Géorisques déclare « Feu de forêt ».
+    //
+    // L'indice forêt-météo mesure un DANGER MÉTÉOROLOGIQUE (chaleur, sécheresse, vent). Il ne voit ni le
+    // massif, ni l'interface habitat-forêt, ni l'histoire du territoire. Sur une côte océanique tempérée
+    // il reste bas, quelle que soit la forêt qui l'entoure. Il ne peut donc JAMAIS, seul, fonder un
+    // « votre priorité est satisfaite ».
+    //
+    // La règle ne moyenne pas les deux sources et n'arbitre rien en silence : quand elles divergent, c'est
+    // l'information la plus utile au lecteur, et elle se lit telle quelle.
+    const declare = f.risquesDeclares?.wildfire === true;
     const { verdict, basis } = classifyWildfireDanger(c);
+    if (verdict === "uncertain" && !declare) return ret("uncertain", [], "indice forêt-météo indisponible");
+    if (verdict === "under_threshold" && !declare) return ret("satisfied", [], "danger météorologique sous le seuil de signalement");
+
+    // RISQUE DÉCLARÉ, INDICE SOUS LE SEUIL (ou illisible) : ni un écart chiffré, ni une bonne nouvelle. Un
+    // constat ÉTABLI par l'autorité, que le lecteur doit voir — avec la limite de notre propre indicateur.
+    if (declare && verdict !== "unfavorable") {
+      if (weight < 2) return ret("mismatch", [], "risque de feu déclaré, silencieux (poids 1)");
+      const fait: VerificationFact = {
+        id: `${f.insee}:feu-declare`, ruleId: RULE_FEU, sourceFactIds: ["georisques.feu"], module: "territoire",
+        role: "verification", materialityTier: tierFor(p, key),
+        topic: "le risque de feu de forêt déclaré",
+        status: "Risque déclaré",
+        statement: `${cap(aCommune(f.nom))}, le risque de feu de forêt est officiellement recensé par l'État (Géorisques).`,
+        // LA LIMITE EST LE CŒUR DE CETTE CARTE : sans elle, le lecteur ne peut pas comprendre pourquoi le
+        // reste du dossier ne s'en alarme pas. On dit ce que notre indicateur ne voit pas.
+        limitation: "L'indice de danger météorologique que futur•e projette reste sous son seuil de signalement ici : il mesure des conditions de feu (chaleur, sécheresse, vent), pas la présence d'un massif forestier ni la proximité des habitations.",
+        evidence: [{
+          factId: "georisques.feu", module: "territoire", label: `Géorisques · ${f.nom}`,
+          observedValue: "feu de forêt recensé", grain: "commune", href: territoireHref,
+          targetKey: "risk.wildfire",
+        }],
+        action: wildfireExposureAction(f.hasAddress),
+      };
+      return ret("verification", [fait], "risque de feu déclaré par l'État, indice météo sous le seuil");
+    }
     if (verdict === "uncertain") return ret("uncertain", [], "indice forêt-météo indisponible");
     if (verdict === "under_threshold") return ret("satisfied", [], "danger météorologique sous le seuil de signalement");
 

@@ -346,6 +346,62 @@ test("FEU : DÉCLARÉ, la règle ambiante se tait (une dimension, un signal)", (
   assert.equal(r1.facts.some((x) => x.ruleId === "territoire.verification-feu-futur"), false);
 });
 
+// ── LE CAS LÈGE-CAP-FERRET (juillet 2026) ───────────────────────────────────────
+//
+// Le lecteur demande « à l'abri des risques d'incendie ». L'indice forêt-météo projeté vaut 4,5 jours/an
+// à 2050 — sous notre seuil de 9. La règle concluait `satisfied` SILENCIEUX, et le dossier affichait
+// « Bonne correspondance », pendant que la commune brûlait et que Géorisques y déclare « Feu de forêt ».
+//
+// Ces tests tiennent la règle générale : un risque PRIORISÉ ne se conclut jamais en silence sur le seul
+// indicateur météo.
+
+const CAP_FERRET = { ...facts({ nom: "Lège-Cap-Ferret", insee: "33236" }), risquesDeclares: { wildfire: true } };
+
+test("FEU DÉCLARÉ + indice sous le seuil : une CARTE, jamais un « satisfait » silencieux", () => {
+  const r = run({ ...CAP_FERRET, climat: EPARGNEE }, projetClimat("faible_risque_feu"));
+  const e = r.evaluations.find((x) => x.ruleId === "territoire.climat-feu")!;
+  assert.equal(e.outcome, "verification");
+  assert.notEqual(e.outcome, "satisfied"); // le faux positif d'origine
+  const f = r.facts.find((x) => x.ruleId === "territoire.climat-feu")!;
+  assert.ok(f.role === "verification");
+  assert.match(f.statement, /officiellement recensé par l'État/);
+  assert.equal(f.status, "Risque déclaré");
+  // LA LIMITE DE NOTRE PROPRE INDICATEUR est dite : sans elle, le lecteur ne peut pas comprendre pourquoi
+  // le reste du dossier ne s'en alarme pas.
+  assert.match(f.limitation!, /pas la présence d'un massif forestier/);
+  assert.match(f.action!.label, /végétation|adresse/);
+});
+
+test("FEU DÉCLARÉ + indice AU-DESSUS du seuil : le mismatch reste prioritaire (le chiffre parle)", () => {
+  const r = run({ ...CAP_FERRET, climat: EXPOSEE }, projetClimat("faible_risque_feu"));
+  const f = r.facts.find((x) => x.ruleId === "territoire.climat-feu")!;
+  assert.equal(f.role, "mismatch"); // pas la carte « risque déclaré » : l'écart chiffré prime
+});
+
+test("FEU NON déclaré + indice sous le seuil : satisfied silencieux, et c'est légitime", () => {
+  const r = run(facts({ climat: EPARGNEE, risquesDeclares: { wildfire: false } }), projetClimat("faible_risque_feu"));
+  const e = r.evaluations.find((x) => x.ruleId === "territoire.climat-feu")!;
+  assert.equal(e.outcome, "satisfied");
+  assert.equal(e.facts.length, 0);
+});
+
+test("SOURCE MUETTE (null) : on ne conclut pas à sa place — le silence de Géorisques n'est pas un « non »", () => {
+  // `null` = la source n'a pas répondu. Elle ne vaut pas `{ wildfire: false }` : sinon une panne
+  // deviendrait une bonne nouvelle, exactement le piège que ce moteur ferme partout ailleurs.
+  const r = run(facts({ climat: EPARGNEE, risquesDeclares: null }), projetClimat("faible_risque_feu"));
+  const e = r.evaluations.find((x) => x.ruleId === "territoire.climat-feu")!;
+  assert.equal(e.outcome, "satisfied"); // comportement actuel, faute de mieux
+  // MAIS le jour où l'on saura distinguer « pas de risque » de « pas de réponse », ce test devra changer.
+  // Il documente une limite connue, il ne la bénit pas.
+});
+
+test("FEU DÉCLARÉ, poids 1 : silencieux (l'écart est réel, il ne mérite pas de carte)", () => {
+  const r = run({ ...CAP_FERRET, climat: EPARGNEE }, projetClimat("faible_risque_feu", 1));
+  const e = r.evaluations.find((x) => x.ruleId === "territoire.climat-feu")!;
+  assert.equal(e.outcome, "mismatch");
+  assert.equal(e.facts.length, 0);
+});
+
 test("ORIENTATION : le danger d'incendie déclaré bascule le dossier en arbitrage", () => {
   const p = projetClimat("faible_risque_feu");
   const r = run(facts({ climat: EXPOSEE }), p);
