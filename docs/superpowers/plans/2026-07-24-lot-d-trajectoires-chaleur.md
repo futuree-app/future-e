@@ -1,205 +1,274 @@
-# Lot D — Trajectoires climatiques (chaleur) : l'écart au projet vs la vérification du logement
+# Lot D — Trajectoires climatiques (chaleur) : l'écart au projet vs la vérification du logement (v2)
 
-> **Pour l'exécutant :** implémenter tâche par tâche en TDD. Spec source : la roadmap du lot C
-> (`docs/superpowers/specs/2026-07-22-lot-c-ce-qui-correspond-design.md`, §D) + la direction du porteur
-> (2026-07-24) tranchée dans ce plan.
+> **Pour l'exécutant :** implémenter tâche par tâche en TDD. Spec source : roadmap du lot C §D
+> (`docs/superpowers/specs/2026-07-22-lot-c-ce-qui-correspond-design.md`) + direction du porteur
+> (2026-07-24) + revue (ChatGPT + Claude) intégrée dans cette v2.
 
 **Objectif :** quand le lecteur a déclaré `faible_chaleur` et que la chaleur future de la commune est
-matériellement défavorable, le dossier doit le lire comme un **écart au projet** (`mismatch`, section
-« Ce qui correspond moins bien », orientation `arbitration`), **pas** comme un constat territorial
-« au-delà de vos priorités » (`verification`). Le lot D distingue proprement **la contradiction avec une
-priorité** (mismatch) du **phénomène important non relié à une priorité** (verification), et du **contrôle
-du logement** (action au grain adresse, jamais un second fait qui doublerait la carte).
+matériellement défavorable, le dossier le lit comme un **écart au projet** (`mismatch`, « Ce qui correspond
+moins bien », orientation `arbitration`), **pas** comme un constat territorial « au-delà de vos priorités »
+(`verification`). Le lot D distingue proprement : **contradiction avec une priorité** (mismatch), **phénomène
+important non demandé** (verification ambiante), **capacité du logement à atténuer** (action au grain adresse,
+jamais un second fait qui doublerait la dimension).
 
-**Le bug observé (2026-07-24).** Projet « grande ville animée en Occitanie, bon bassin d'emploi, éviter les
-fortes chaleurs ». Toulouse (9 j > 35 °C, 44 nuits tropicales en 2050) : la chaleur tombait en « À contrôler
-avant de vous engager » (verification), et le verdict lisait « Correspondance favorable ». Faux : la priorité
-clé du lecteur n'est pas satisfaite.
+**Le bug (2026-07-24).** Projet « grande ville animée en Occitanie, bon bassin d'emploi, éviter les fortes
+chaleurs ». Toulouse (9 j > 35 °C, 44 nuits tropicales en 2050) : chaleur en « À contrôler avant de vous
+engager » (verification), verdict « Correspondance favorable ». Faux : la priorité clé n'est pas satisfaite.
 
-## Contraintes globales (les 8 invariants du porteur + 3 précisions vérifiées — valent pour TOUTES les tâches)
+## Ce qui change entre v1 et v2 (revue intégrée)
 
-1. `faible_chaleur` déclarée (poids ≥ 2) + niveau futur **défavorable** (`projete >= seuil`, `notable`) → **mismatch**.
-2. Le mismatch est le **seul signal autonome** sur cette dimension (une dimension, un signal — jamais un
-   mismatch ET une verification chaleur en même temps).
-3. Le contrôle du logement est conservé comme **action/renvoi** (grain adresse), porté par une composition,
-   jamais comme un second fait visible qui doublerait la dimension.
-4. **Seule la partie mismatch influence l'orientation** (criteria-registry : outcome `mismatch`, pas `verification`).
-5. `faible_chaleur` **non déclarée** + niveau défavorable → **verification** territoriale (voir DÉCISION D-2 :
-   aujourd'hui il n'y a AUCUN fait chaleur dans ce cas ; c'est une addition).
-6. `alignment` (chaleur favorable) **uniquement** avec **double gate** niveau futur × trajectoire.
-7. Une **métrique thermique défavorable oppose un VETO ABSOLU** à l'alignment (jours OU nuits défavorable suffit).
-8. Corriger l'**intro de section** indépendamment du lot D (« Au-delà de vos priorités… » est faux dès qu'une
-   verification touche une priorité).
+- **La chaleur ne rentre PAS dans `absolute_measure`.** C'est bi-métrique (jours + nuits, deux seuils, un
+  horizon). On crée une **base dédiée `climate_threshold`** (Task 0). [revue #1]
+- **Conflit avec `seasonal_climate_tradeoff`** (qui associe déjà douceur favorable + chaleur + action) : à
+  résoudre par une **priorité de patrons**, pas deux builders indépendants. Invariant : **une seule composition
+  climatique visible par dossier pour cette dimension**. [revue #2]
+- La composition doit garder le **mismatch nommable par le héros** (sinon absorbé de `shownFacts`) — exactement
+  l'Issue 2 du lot C. [revue #3]
+- Le **poids 1** est explicite dans la table de vérité (déclaré + défavorable + poids 1 → outcome mismatch,
+  **aucun fait**, silencieux). [revue #5]
+- L'**intro de section n'est PLUS à réécrire** : « au-delà de vos priorités » redevient VRAIE une fois la
+  chaleur reclassée (aucune autre verification n'est une priorité déclarée). Le fix devient une **vérification**,
+  pas une réécriture. [correction Claude #6]
+- La verification **ambiante** (non déclarée) va dans une **règle séparée** — par clarté, **pas** pour un bug de
+  comptes : `criteria-registry` n'agrège que les clés DÉCLARÉES, une évaluation non déclarée n'est jamais
+  consultée. [correction Claude #4]
 
-**Précisions vérifiées dans le code (2026-07-24) :**
-- **P-1.** Il n'existe **aucun `VerificationFact` chaleur au grain logement** à absorber. Le confort d'été
-  (orientation, étage, inertie, ventilation) est le **module Logement**, atteint par une action/lien
-  (« Regardez comment le logement tient l'été »). La composition porte donc **le mismatch commune + une
-  action**, pas deux faits.
-- **P-2.** `faible_chaleur` n'a **aucun rang national** (absent de `MISMATCH_RANK_KEYS`, comparateur-scores.ts).
-  `ClimatAxe` porte `projete` (niveau 2050), `anomalie` (trajectoire) et `notable` (`projete >= threshold`),
-  mais **pas de percentile opposable**. Donc : le **mismatch** (niveau défavorable) ne demande AUCUNE donnée
-  nouvelle ; l'**alignment favorable** (double gate, « trajectoire favorable selon un rang ») exige un rang
-  chaleur à **peupler** — c'est l'increment 2, différé, comme le lot C+.
-- **P-3.** Un `MismatchFact` **n'a pas de champ `action`** (doctrine « le constat est établi, rien à
-  vérifier »). La chaleur est l'exception (niveau établi + atténuation à contrôler au logement) → l'action
-  est portée par une **composition** (DÉCISION D-1, reco).
+## Contraintes globales (invariants du porteur + précisions — valent pour TOUTES les tâches)
 
-**Vérifs de fin de chaque tâche :** `npx tsc --noEmit` = 0 ; `eslint` = 0 sur le périmètre ;
-`node --test --experimental-strip-types "src/**/*.test.ts"` tout vert ; sonde `probe-conclusion.ts` si le
-verdict change (déterministe).
+1. `faible_chaleur` déclarée (poids ≥ 2) + niveau futur **défavorable** (au moins un axe `notable`) → **mismatch**.
+2. Le mismatch est le **seul signal autonome** sur cette dimension (jamais mismatch ET verification chaleur ensemble).
+3. Le contrôle du logement est conservé comme **action/renvoi** (grain adresse), porté par une **composition**
+   (D-1), jamais comme un second fait visible.
+4. **Seule la partie mismatch influence l'orientation** (outcome `mismatch`, pas `verification`).
+5. `faible_chaleur` **non déclarée** + défavorable → **verification ambiante** (règle séparée, D-2).
+6. `alignment` (chaleur favorable) **uniquement** avec **double gate** niveau × trajectoire, **deux rangs
+   distincts** jours/nuits (jamais un composite opaque). → increment 2, différé.
+7. **Veto absolu** : une seule métrique thermique défavorable interdit l'alignment (jours OU nuits).
+8. **Une seule composition climatique visible par dossier** pour la dimension chaleur/confort.
 
-## DÉCISIONS à trancher au fil de l'exécution
+**Précisions vérifiées dans le code :**
+- **P-1.** Aucun `VerificationFact` chaleur « au grain logement » à absorber : le confort d'été est le module
+  Logement, atteint par une action/lien. La composition porte le mismatch commune + une action, pas deux faits.
+- **P-2.** `faible_chaleur` n'a aucun rang national (absent de `MISMATCH_RANK_KEYS`) ; `ClimatAxe` porte
+  `projete`, `anomalie`, `notable` (`projete >= threshold`), sans percentile. Le **mismatch** ne demande aucune
+  donnée nouvelle ; l'**alignment favorable** exige des rangs à peupler → increment 2.
+- **P-3.** Un `MismatchFact` n'a pas de champ `action`. L'action est portée par la composition (D-1).
 
-- **D-1 (porteur du contrôle logement).** Reco : **composition « confort thermique futur »** (garde la
-  doctrine « mismatch sans action » intacte, extensible quand le grain logement deviendra un vrai fait).
-  Alternative écartée sauf blocage : champ `action` optionnel sur le MismatchFact chaleur. À reconfirmer en Task 2.
-- **D-2 (chaleur non déclarée).** Faut-il AJOUTER une verification chaleur territoriale pour les lecteurs qui
-  n'ont pas déclaré `faible_chaleur` (aujourd'hui : aucun fait) ? Cohérent avec la section « constats établis
-  pour ce lieu » (comme argiles/PPR), mais montre la chaleur à qui ne l'a pas demandée. À trancher en Task 3.
+**Vérifs de fin de tâche :** `tsc` 0 ; `eslint` 0 sur le périmètre ; `node --test --experimental-strip-types
+"src/**/*.test.ts"` vert ; sonde `probe-conclusion.ts` si le verdict change.
 
-## La table de vérité (priorité `faible_chaleur` déclarée)
+## Table de vérité (priorité `faible_chaleur`)
 
-| Niveau futur (`projete`) | Trajectoire (`anomalie`, rang) | Résultat |
-|---|---|---|
-| Défavorable (`notable`) | quelle qu'elle soit | **`mismatch`** (increment 1) |
-| Sous le seuil | hausse parmi les plus contenues (rang favorable) | `alignment` possible (increment 2) |
-| Sous le seuil | hausse ordinaire | `neutral` |
-| Sous le seuil | forte hausse | `neutral` (jamais alignment) |
-| Donnée insuffisante | — | `uncertain` |
+| Poids | Niveau futur | Trajectoire (rang) | Outcome | Fait / carte |
+|---|---|---|---|---|
+| 0 (non déclarée) | défavorable | — | `verification` (règle ambiante, D-2) | verification, **aucun effet projet** |
+| 1 | défavorable | — | `mismatch` | **aucun fait** (examiné, silencieux) |
+| ≥ 2 | défavorable (≥1 axe `notable`) | — | `mismatch` | MismatchFact (`climate_threshold`), visible |
+| ≥ 2 | sous le seuil (0 axe notable) | favorable sur les axes requis | `satisfied` | alignment (**increment 2**, rang requis) |
+| ≥ 2 | sous le seuil | hausse ordinaire/forte | `neutral` | silencieux |
+| ≥ 2 | donnée insuffisante | — | `uncertain` | silencieux |
 
-**Veto absolu :** un niveau futur défavorable interdit tout alignment, même si la hausse relative est modérée.
-Jours diurnes ET nuits tropicales évalués ensemble : l'une défavorable suffit au veto ; toutes doivent être
-favorables pour un alignment.
+**Veto absolu** : un niveau futur défavorable (≥1 axe notable) interdit tout alignment, quelle que soit la trajectoire.
+
+## DÉCISIONS
+
+- **D-1** — porteur du contrôle logement : **composition** (garde « mismatch sans action » intacte). Validée.
+- **D-2** — verification ambiante non déclarée : **oui**, dans une **règle séparée** (`territoire.verification-chaleur-future`),
+  qui ne s'applique QUE si `faible_chaleur` n'est pas matérielle. Confirmée.
+- **Copie** — headlineSubject : « des étés supportables » (objet de projet) plutôt que « éviter les fortes
+  chaleurs » (instruction). À faire passer par l'Editorial Writer au moment du rendu.
 
 ---
 
 ## Carte des fichiers
 
-- `src/lib/decision/materiality-rules.ts` — **modifier** : `ruleChaleur` (émet un mismatch quand déclarée +
-  défavorable ; verification sinon selon D-2).
-- `src/lib/decision/decision-fact.ts` — **modifier si D-1 = action-sur-mismatch** (sinon inchangé).
-- `src/lib/decision/fact-composition.ts` + `fact-compositions.ts` — **modifier** : nouveau patron
-  « confort thermique futur » (mismatch chaleur + action logement absorbée/portée).
-- `src/components/report/DossierDecisionSection.tsx` — **modifier** : intro de section (Task 3).
-- `src/lib/comparateur-scores.ts` + `scripts/populate-mismatch-rank.mts` — **modifier (increment 2)** :
-  peupler un rang chaleur.
-- Tests : `materiality-rules.test.ts`, `fact-compositions.test.ts`, `conclusion-plan.test.ts`,
-  `decision-assembler.test.ts`.
+- `src/lib/decision/climat-facts.ts` — **modifier** : la fonction pure de classification confort (Task 0).
+- `src/lib/decision/decision-fact.ts` — **modifier** : `ClimateThresholdBasis`, ajout à `MismatchBasis` (Task 0).
+- `src/lib/decision/materiality-rules.ts` — **modifier** : `ruleChaleur` (mismatch déclaré, Task 1) ; `assertFactValid`
+  (climate_threshold, Task 0) ; nouvelle règle ambiante (Task 4).
+- `src/lib/decision/fact-composition.ts` + `fact-compositions.ts` — **modifier** : évolution de
+  `seasonal_climate_tradeoff`, nouveau `climate_comfort`, priorité des patrons (Task 2).
+- `src/lib/decision/conclusion-plan.ts` — **modifier** : les compositions climatiques nommables au héros (Task 3).
+- `src/components/report/DossierDecisionSection.tsx` — **vérifier** l'intro (Task 5, sans doute no-op).
+- `src/lib/comparateur-scores.ts` + `scripts/populate-mismatch-rank.mts` — **increment 2** : rangs jours/nuits.
 
 ---
 
-## Task 1 : la chaleur défavorable sur priorité déclarée devient un MISMATCH
+## Task 0 : la base `climate_threshold` + le classifieur pur
 
-**Files :** `src/lib/decision/materiality-rules.ts` (`ruleChaleur`, ~ligne 165) ; test `materiality-rules.test.ts`.
+**Files :** `decision-fact.ts` (type + union), `climat-facts.ts` (classifieur), `materiality-rules.ts`
+(`assertFactValid`) ; tests `climat-facts.test.ts`, `materiality-rules.test.ts`.
 
-**Interfaces :** `ruleChaleur.evaluate` rend `outcome: "mismatch"` + un `MismatchFact` (basis
-`absolute_measure`, `projectKey: "faible_chaleur"`, `headlineSubject: "éviter les fortes chaleurs"`) quand
-`faible_chaleur` déclarée (poids ≥ 2) et au moins un axe `notable`. Le `topic` reste « les fortes chaleurs ».
+**Interfaces produites :**
+```ts
+export type ClimateThresholdBasis = {
+  kind: "climate_threshold";
+  horizon: number;           // 2050
+  referencePeriod: string;   // "1976-2005"
+  conventionId: string;      // millésime de la convention climat
+  trigger: "any";            // un axe défavorable suffit
+  measures: Array<{ key: "days_over_35" | "tropical_nights"; projectedValue: number; threshold: number; unit: "days" | "nights"; isUnfavorable: boolean }>;
+};
+// classifyClimateComfort(climat) -> { verdict: "unfavorable" | "under_threshold" | "uncertain"; basis: ClimateThresholdBasis | null }
+```
 
-- [ ] **Step 1 — RED** (`materiality-rules.test.ts`) : projet `faible_chaleur` poids 3, `climat` avec
-  `joursTresChauds.notable = true` (projete >= seuil). Attendre : `outcome === "mismatch"`, `facts[0].role
-  === "mismatch"`, `basis.kind === "absolute_measure"`, `projectKey === "faible_chaleur"`,
-  `headlineSubject` non vide. (Aujourd'hui : `role === "verification"`.)
-- [ ] **Step 2 — Vérifier RED** : `node --test … materiality-rules.test.ts` → échoue (rôle verification).
-- [ ] **Step 3 — GREEN** : dans `ruleChaleur`, remplacer la construction du `VerificationFact` par un
-  `MismatchFact` quand déclarée + notable. Le `statement` garde la trajectoire (les phrases jours/nuits
-  existantes) ; `basis: { kind: "absolute_measure", value: <projete pertinent>, unit: ?, conventionId: ? }`.
-  ⚠️ `absolute_measure.unit` est aujourd'hui `"km"` SEUL (decision-fact.ts + assertFactValid). La chaleur est
-  en JOURS/NUITS → il faut **étendre l'unité autorisée** (`"jours"`) dans le type ET dans `assertFactValid`,
-  sinon la garde rejette (doctrine « seulement le productible » : on n'ajoute l'unité que parce qu'une règle
-  la produit vraiment). Choisir la `value` (jours projetés, ou un index) et le `conventionId`
-  (`climat-facts.ts` porte déjà une convention/millésime).
-- [ ] **Step 4 — assertFactValid** : autoriser `unit: "jours"` pour `absolute_measure`. Test de garde.
-- [ ] **Step 5 — Vérifier GREEN** + suite complète.
-- [ ] **Step 6 — Orientation** : test `conclusion-plan.test.ts` ou `decision-assembler.test.ts` : avec ce
-  mismatch, l'orientation devient `arbitration` et le héros nomme l'écart (« … correspond moins bien à …
-  éviter les fortes chaleurs »), plus jamais « Correspondance favorable ». (Vérifie que criteria-registry
-  compte bien `faible_chaleur` en mismatch et non en reserve.)
-- [ ] **Step 7 — Commit** : `feat(chaleur): la chaleur défavorable sur priorité déclarée devient un mismatch`.
-
-> NOTE : à ce stade l'action « Regardez comment le logement tient l'été » DISPARAÎT (un mismatch n'a pas
-> d'action). Elle est restaurée en Task 2. Ne pas la bricoler ici.
+- [ ] **Step 1 — Type.** Ajouter `ClimateThresholdBasis` à `decision-fact.ts` et à `MismatchBasis` (PAS encore
+  à `AlignmentBasis` : l'alignment favorable est l'increment 2). Commentaire de doctrine : « on n'ajoute à
+  l'union que le productible — une règle sait désormais produire et expliquer cet état multivarié ».
+- [ ] **Step 2 — RED classifieur** (`climat-facts.test.ts`) : `classifyClimateComfort` — les deux axes notables
+  → `unfavorable`, basis avec 2 mesures dont `isUnfavorable` ; un seul axe notable → `unfavorable`, `trigger:"any"` ;
+  aucun axe notable + les deux `projete` présents → `under_threshold` ; un `projete` absent → `uncertain`.
+- [ ] **Step 3 — GREEN classifieur** dans `climat-facts.ts`, à partir de `joursTresChauds`/`nuitsTropicales`
+  (`projete`, `threshold`, `notable`). `conventionId`/`referencePeriod` depuis la convention climat existante.
+- [ ] **Step 4 — assertFactValid** : `case "climate_threshold"` — `measures` non vide, chaque mesure a un
+  `threshold` fini et un `projectedValue` fini, au moins une `isUnfavorable` pour un MISMATCH. Test de garde.
+- [ ] **Step 5 — Vérifs + Commit** : `feat(chaleur): base climate_threshold + classifieur pur`.
 
 ---
 
-## Task 2 : la composition « confort thermique futur » (porte le mismatch + l'action logement)
+## Task 1 : la chaleur défavorable sur priorité déclarée devient un MISMATCH (avec le poids 1)
 
-**Files :** `src/lib/decision/fact-composition.ts` (nouveau kind), `fact-compositions.ts` (le builder),
-`materiality-rules.ts` (l'action à porter), rendu si besoin ; tests `fact-compositions.test.ts`.
+**Files :** `materiality-rules.ts` (`ruleChaleur`) ; test `materiality-rules.test.ts`.
 
-**Interfaces :** un nouveau `FactComposition` `kind: "climate_comfort"` (ou réutilisation motivée d'un kind
-existant), `displaySection: "mismatches"`, qui **absorbe le mismatch chaleur** (`absorbedFactIds`) et porte
-l'**action logement** + la **limitation climat**. Le mismatch reste le signal qui gouverne l'orientation
-(criteria-registry lit l'outcome de la règle, pas la composition).
+**Interface :** `ruleChaleur.evaluate` — déclarée (poids ≥ 2) + `classifyClimateComfort` `unfavorable` →
+`outcome: "mismatch"` + `MismatchFact` (basis `climate_threshold`, `projectKey: "faible_chaleur"`,
+`headlineSubject: "des étés supportables"`, `topic: "les fortes chaleurs"`). Poids 1 + unfavorable →
+`outcome: "mismatch"`, `facts: []`. `under_threshold` → satisfied/neutral silencieux (comme aujourd'hui).
 
-- [ ] **Step 1 — Résoudre D-1** : composition (reco) vs action-sur-mismatch. Si composition : lire les 3
-  kinds existants (`tradeoff`, `shared_evidence`, `grouped_verification`) — aucun ne colle (mismatch unique +
-  action), donc **nouveau kind**. Structure cible (rendu) :
+- [ ] **Step 1 — RED** : projet `faible_chaleur` poids 3, `climat` avec un axe `notable`. Attendre `role
+  "mismatch"`, `basis.kind "climate_threshold"`, `projectKey "faible_chaleur"`, `headlineSubject` non vide,
+  `assertFactValid` OK. (Aujourd'hui : `role "verification"`.)
+- [ ] **Step 2 — RED poids 1** : poids 1 + un axe notable → `outcome "mismatch"`, `facts.length === 0`.
+- [ ] **Step 3 — Vérifier RED**.
+- [ ] **Step 4 — GREEN** : dans `ruleChaleur`, remplacer la branche verification par le mismatch (poids ≥ 2)
+  / mismatch silencieux (poids 1), via `classifyClimateComfort`. Le `statement` garde les phrases jours/nuits
+  existantes ; l'`action`/renvoi logement N'EST PLUS ici (un mismatch n'a pas d'action) — restauré en Task 2.
+- [ ] **Step 5 — Orientation** (`decision-assembler.test.ts` ou `conclusion-plan.test.ts`) : avec ce mismatch,
+  l'orientation devient `arbitration`, `criteria-registry` compte `faible_chaleur` en mismatch (pas reserve),
+  le verdict n'est plus « Correspondance favorable ».
+- [ ] **Step 6 — Vérifs + Commit** : `feat(chaleur): priorité déclarée + chaleur défavorable -> mismatch`.
+
+---
+
+## Task 2 : les compositions climatiques (évolution du tradeoff, PUIS climate_comfort) — invariant « une seule »
+
+**Files :** `fact-composition.ts`, `fact-compositions.ts` ; test `fact-compositions.test.ts`.
+
+**Invariant :** une seule composition climatique visible par dossier pour cette dimension. Priorité des patrons :
+douceur favorable → **`seasonal_climate_tradeoff`** (évolué) ; sinon → **`climate_comfort`**.
+
+- [ ] **Step 1 — Évoluer `seasonal_climate_tradeoff`** : aujourd'hui son côté défavorable absorbe un
+  `VerificationFact` chaleur. Il doit désormais absorber le **MismatchFact** chaleur (Task 1). Vérifier
+  `favorableSide` (douceur alignment, cf. lot C `favorableProjectKey`) / `unfavorableSide` (mismatch chaleur) /
+  l'action logement conservée. Le mismatch absorbé reste le signal d'orientation.
+  - RED/GREEN : douceur alignment + chaleur mismatch → UN `seasonal_climate_tradeoff`, `absorbedFactIds` inclut
+    le mismatch chaleur, l'action logement est portée.
+- [ ] **Step 2 — Nouveau `climate_comfort`** (fallback, sans douceur favorable) : `kind: "climate_comfort"`,
+  `displaySection: "mismatches"`, absorbe le mismatch chaleur, porte l'action logement + la limitation.
+  Structure de rendu :
   ```
   Des étés plus difficiles à concilier avec votre projet
-  À l'échelle de {commune} : les jours > 35 °C passeraient de X à Y, les nuits tropicales de A à B.
-  Pour ce logement : le confort réel dépend de l'orientation, l'étage, l'inertie, les protections solaires.
-  → Regardez comment le logement tient l'été   (ou, sans adresse : « Renseignez une adresse pour évaluer… »)
+  À l'échelle de {commune} : jours > 35 °C de X à Y, nuits tropicales de A à B.
+  Pour ce logement : le confort dépend de l'orientation, l'étage, l'inertie, les protections solaires.
+  → Regardez comment le logement tient l'été   (sans adresse : « Renseignez une adresse pour évaluer… »)
   ```
-- [ ] **Step 2 — RED** (`fact-compositions.test.ts`) : sur un run où le mismatch chaleur est émis, le builder
-  produit la composition `climate_comfort`, `displaySection: "mismatches"`, `absorbedFactIds` contient l'id du
-  mismatch chaleur, et l'action logement est portée. Sans adresse (`hasAddress: false`), l'action bascule sur
-  « Renseignez une adresse… ».
-- [ ] **Step 3 — GREEN** : type + builder + `assertCompositionsValid`. L'absorption suit le modèle existant
-  (l'assembleur retire les faits absorbés avant les caps).
-- [ ] **Step 4 — Non-régression orientation** : la composition n'ajoute pas un second signal ; le mismatch
-  absorbé reste dans `conclusionBasis` et compte pour l'orientation (invariant 4).
-- [ ] **Step 5 — Vérifs + Commit** : `feat(chaleur): composition « confort thermique futur » (mismatch + action logement)`.
+  - RED/GREEN : chaleur mismatch SANS douceur favorable → `climate_comfort` ; `absorbedFactIds` inclut le mismatch ;
+    action selon `hasAddress`.
+- [ ] **Step 3 — Priorité des patrons** : RED — un dossier avec douceur favorable + chaleur mismatch produit
+  **exactement une** composition climatique (`seasonal_climate_tradeoff`), **jamais** aussi `climate_comfort`.
+  GREEN : le builder de `climate_comfort` ne se déclenche que si `seasonal_climate_tradeoff` n'est pas produit.
+- [ ] **Step 4 — Vérifs + Commit** : `feat(chaleur): compositions climatiques (tradeoff évolué + climate_comfort), une seule par dossier`.
 
-> NOTE exécutant : vérifier comment l'action « regardez le logement » / le renvoi au module Logement est
-> construit aujourd'hui (dans le VerificationFact de ruleChaleur, champ `action` + `href`). La composition le
-> reprend ; `hasAddress` (ModuleFacts) décide de l'action alternative.
+> NOTE exécutant : lire comment l'action/renvoi logement est construit aujourd'hui dans le VerificationFact de
+> `ruleChaleur` (champ `action` + `href`) et comment `hasAddress` (ModuleFacts) est disponible côté composition.
 
 ---
 
-## Task 3 : chaleur non déclarée → verification (D-2) + l'intro de section corrigée
+## Task 3 : les compositions climatiques nommables au héros (le mismatch absorbé n'est pas perdu)
 
-**Files :** `materiality-rules.ts` (`ruleChaleur` applicabilité), `DossierDecisionSection.tsx` (SECTION_INTRO).
+**Files :** `conclusion-plan.ts` (`mismatchCandidates`) ; test `conclusion-plan.test.ts`.
 
-- [ ] **Step 1 — Intro de section (indépendant, quick win)** : dans `DossierDecisionSection.tsx`, remplacer
-  `SECTION_INTRO.verifications` (« Au-delà de vos priorités, ces constats sont établis pour ce lieu. ») par une
-  formulation qui ne prétend pas l'indépendance au projet, ex. : « Ces constats sont établis sur ce lieu. Leur
-  effet concret reste à contrôler avant de vous engager. » (Pas de test — chaîne de présentation ; vérifier à
-  l'écran.) Commit possible seul.
-- [ ] **Step 2 — D-2** : trancher si `ruleChaleur` produit une `verification` territoriale quand
-  `faible_chaleur` n'est PAS déclarée (aujourd'hui : `not_applicable`, aucun fait). Si OUI : la règle s'évalue
-  indépendamment de la déclaration, rend `verification` (non déclarée) / `mismatch` (déclarée + défavorable).
-  Tests des deux branches. Si NON : statu quo (aucun fait non déclaré), documenter le choix.
-- [ ] **Step 3 — Vérifs + Commit**.
+**Interface :** `mismatchCandidates(shownFacts, shownCompositions)` lit AUSSI les compositions climatiques
+(`seasonal_climate_tradeoff`, `climate_comfort`) qui ont absorbé un mismatch chaleur, et expose leur
+`headlineSubject` (« des étés supportables ») + `absorbedFactIds`. Sans ça, le mismatch absorbé quitte
+`shownFacts` et le héros ne peut plus nommer la chaleur (Issue 2 du lot C).
 
----
-
-## Increment 2 (DIFFÉRÉ) — l'alignment favorable de chaleur (double gate)
-
-**Bloqué par la donnée.** Exige un **rang de trajectoire chaleur opposable** (P-2), qui n'existe pas : il faut
-l'ajouter comme le lot C+ (étendre `mismatchRawScore`/`MISMATCH_RANK_KEYS` pour une métrique chaleur, relancer
-`populate-mismatch-rank.mts`). C'est un **contrat**, pas une tâche prête :
-
-- Une fois le rang présent : `alignment` chaleur SEULEMENT si (a) niveau futur NON défavorable (`!notable`
-  sur les deux axes) ET (b) trajectoire favorable selon le rang ET (c) **aucune** métrique thermique
-  défavorable (veto absolu). Idéalement jours + nuits sous une composition unique « confort thermique futur »
-  (côté favorable), symétrique de la carte négative.
-- **Gate positive prudente** : juste sous le seuil (ex. 7 j > 35 °C, 24 nuits) n'est PAS une force. L'alignment
-  exige un niveau bas ET une trajectoire favorable, pas seulement « sous le seuil d'alerte ».
-- Formulations bornées à la mesure (jamais « il ne fera pas chaud ici » — toutes les communes chauffent).
+- [ ] **Step 1 — RED** : dossier avec chaleur mismatch absorbé dans une composition climatique affichée →
+  orientation `arbitration`, `p.verdict.headline.text` NOMME « des étés supportables », la carte composée est
+  retrouvable plus bas.
+- [ ] **Step 2 — GREEN** : étendre `mismatchCandidates` (comme il lit déjà `shared_evidence`) pour les
+  compositions climatiques. `causeCommune` = false (c'est une priorité, pas une cause commune).
+- [ ] **Step 3 — Vérifs + Commit** : `feat(chaleur): le héros nomme le mismatch chaleur absorbé dans une composition`.
 
 ---
 
-## Auto-revue (couverture de la direction du porteur)
+## Task 4 : la verification AMBIANTE (chaleur non déclarée) — règle séparée
 
-- Chaleur défavorable + priorité déclarée → mismatch → Task 1 ✅
-- Un seul signal autonome sur la dimension (mismatch, pas mismatch+verification) → Task 2 (absorption) ✅
-- Contrôle logement conservé comme action, absorbé dans une composition → Task 2 ✅
-- Seule la partie mismatch influence l'orientation → Task 1/2 (tests non-régression) ✅
-- Chaleur non déclarée → verification → Task 3 (D-2) ✅
-- Alignment uniquement double gate + veto absolu → Increment 2 (différé, contrat) ✅
-- Intro de section corrigée indépendamment → Task 3 Step 1 ✅
-- Précisions P-1/P-2/P-3 → Contraintes globales ✅
+**Files :** `materiality-rules.ts` (nouvelle règle `territoire.verification-chaleur-future`) ; test.
 
-**Décisions ouvertes :** D-1 (Task 2), D-2 (Task 3). **Bloqueur de données :** rang chaleur (increment 2).
+- [ ] **Step 1 — RED** : `faible_chaleur` NON déclarée + un axe notable → une règle ambiante produit un
+  `VerificationFact` (grain commune) ; `faible_chaleur` DÉCLARÉE → la règle ambiante rend `not_applicable`
+  (l'invariant « une dimension, un signal » : la préférence a déjà produit le mismatch).
+- [ ] **Step 2 — GREEN** : règle `verification-chaleur-future`, applicable SEULEMENT si
+  `preferenceWeight(faible_chaleur) < 2`. Réutilise le statement/limitation climat existants.
+- [ ] **Step 3 — Non-régression comptes** : test — la verification ambiante (clé non déclarée) ne change NI
+  couverture, NI orientation, NI favorableCount (criteria-registry n'agrège que les clés déclarées).
+- [ ] **Step 4 — Vérifs + Commit** : `feat(chaleur): verification ambiante quand la chaleur n'est pas une priorité`.
+
+---
+
+## Task 5 : vérifier l'intro de section (probablement no-op)
+
+**Files :** `DossierDecisionSection.tsx` (SECTION_INTRO).
+
+- [ ] **Step 1** : après les Tasks 1-4, la section « À contrôler » ne contient plus que des faits **ambiants**
+  (argiles, PPR, sinistralité, verification chaleur non déclarée). L'intro « Au-delà de vos priorités, ces
+  constats sont établis pour ce lieu » redevient VRAIE. **Vérifier à l'écran** qu'aucune verification sur une
+  priorité déclarée n'y subsiste. Si c'est le cas → **aucune modification** (l'intro est correcte). Ne réécrire
+  QUE si un contre-exemple apparaît.
+
+---
+
+## Increment 2 (DIFFÉRÉ) — l'alignment favorable de chaleur (double gate, deux rangs)
+
+**Bloqué par la donnée** : exige des **rangs de trajectoire** jours ET nuits (P-2). À peupler comme le lot C+ :
+étendre `MISMATCH_RANK_KEYS`/`mismatchRawScore` pour deux métriques chaleur, relancer `populate-mismatch-rank.mts`.
+**Deux rangs distincts, jamais un composite opaque** [revue #7].
+
+Contrat de la gate favorable :
+```
+niveau futur NON défavorable sur les DEUX axes (0 axe notable)
++ trajectoire favorable sur les axes requis (rang opposable)
++ AUCUNE métrique thermique n'oppose un veto
+→ alignment (idéalement côté favorable d'une composition « confort thermique futur »)
+```
+Gate prudente : « juste sous le seuil » (ex. 7 j, 24 nuits) n'est PAS une force. Formulations bornées à la
+mesure (jamais « il ne fera pas chaud ici »). Ajouter `ClimateThresholdBasis` à `AlignmentBasis` à ce moment-là.
+
+---
+
+## Tests à graver (revue #8)
+
+1. Un seul axe défavorable suffit (jours sous seuil, nuits au-dessus → mismatch).
+2. Égalité au seuil (`projete === threshold` → mismatch, convention `>=`).
+3. Composition saisonnière prioritaire (douceur alignment + chaleur mismatch → un seul `seasonal_climate_tradeoff`).
+4. Composition simple sans douceur (chaleur mismatch seule → `climate_comfort`).
+5. Le héros voit la composition (mismatch absorbé toujours nommable).
+6. Aucun double signal (jamais mismatch chaleur + verification chaleur visibles ensemble).
+7. Règle ambiante sans effet métier (verification non déclarée : ni couverture, ni orientation, ni favorableCount).
+8. Action selon le grain (adresse → confort du logement ; pas d'adresse → renseigner une adresse).
+9. Poids 1 (déclaré + défavorable → outcome mismatch, aucun fait, aucune carte).
+
+## Auto-revue (couverture)
+
+- Bug Toulouse (déclarée + défavorable → mismatch) → Task 0/1 ✅
+- Base probante dédiée (bi-métrique) → Task 0 ✅
+- Conflit tradeoff / une seule composition → Task 2 ✅
+- Héros voit le mismatch absorbé → Task 3 ✅
+- Verification ambiante séparée, sans effet comptes → Task 4 ✅
+- Poids 1 explicite → Task 1 + test 9 ✅
+- Intro : caduque après reclassification → Task 5 (vérif) ✅
+- Alignment favorable + double gate + deux rangs → Increment 2 (différé) ✅
+
+**Décisions tranchées :** D-1 (composition), D-2 (règle ambiante séparée), copie « des étés supportables »
+(Editorial Writer). **Bloqueur de données :** rangs chaleur (increment 2).
