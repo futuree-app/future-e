@@ -7,15 +7,16 @@ import { Chip, EvidenceRow, FactBody, ActionCue, MethodDetails, StatusTag } from
 import { PREFERENCE_LABELS } from "@/lib/comparateur-labels";
 import { factsNonNarresParLaFace } from "@/lib/decision/dossier-view";
 
-// `panel` : le côté est rendu en PANNEAU À LAVIS (tradeoff). Chaque côté porte alors son ton comme le
-// verdict porte le sien — l'encre diffuse dans la surface (.tradeoff-side), et le label devient un
-// eyebrow mono à la couleur du côté. Hors tradeoff (grouped_verification, où les items se COMPLÈTENT
-// au lieu de s'opposer), `panel` reste faux : label neutre, aucun fond, aucune tension suggérée.
+// `panel` : le côté est rendu en côté de TRADEOFF (teinte plate discrète, .tradeoff-side). Le libellé y
+// est en SANS-SERIF casse normale, coloré à son ton — plus l'eyebrow mono capitale d'avant, qui rejouait
+// le geste du verdict à un niveau inférieur (le mono uppercase signale un changement de REGISTRE, pas
+// chaque paragraphe). Hors tradeoff (grouped_verification, où les items se COMPLÈTENT au lieu de
+// s'opposer), `panel` reste faux : label neutre, aucun fond, aucune tension suggérée.
 function SideBlock({ side, color, panel = false }: { side: CompositionSide; color: string; panel?: boolean }) {
   const inner = (
     <>
       {panel ? (
-        <p className="font-mono text-[11px] tracking-[0.08em] uppercase mb-2" style={{ color }}>{side.label}</p>
+        <p className="text-[13px] font-semibold mb-2" style={{ color }}>{side.label}</p>
       ) : (
         <p className="text-[13px] font-semibold text-muted mb-1.5">{side.label}</p>
       )}
@@ -76,16 +77,14 @@ function compositionChecks(composition: FactComposition): string[] {
 }
 
 // LE COMPOSANT SIGNATURE : un tradeoff est le SEUL patron où deux côtés s'opposent vraiment et où le
-// lecteur doit peser l'un contre l'autre. Le rendre en deux paragraphes empilés cachait ce qui en
-// fait sa valeur. Deux PANNEAUX À LAVIS (empilés sur mobile), chacun teinté par SON ton — le côté
-// favorable en vert, le côté à arbitrer en orange — donnent une forme visible à l'arbitrage : ce que
-// le lieu donne, ce qu'il prend, à peser ensemble. La couleur DIFFUSE dans la surface (même encre que
-// le verdict), elle ne borde pas : ce n'est pas un décor, c'est la relation elle-même. Le filet
-// central d'avant disparaissait au stacking ; chaque panneau, lui, s'auto-identifie une fois empilé.
+// lecteur doit peser l'un contre l'autre. Deux côtés côte à côte (empilés sur mobile), chacun porté par
+// une teinte PLATE très discrète à son ton — vert pour ce qui correspond, orange pour ce qui appelle un
+// arbitrage. La couleur suffit à dire la relation ; elle ne rejoue PLUS le halo/filet/lavis du verdict
+// (« un traitement de signal complet par niveau de lecture » : le héros garde l'effet, la composition se
+// calme). Chaque côté s'auto-identifie par sa teinte une fois empilé.
 //
 // `items-start` : les deux côtés huggent leur contenu au lieu de s'étirer à la même hauteur — un côté
-// court ne se paie pas d'une plaque teintée à moitié vide. Ils se lisent comme une paire par le ton,
-// pas par une hauteur forcée.
+// court ne se paie pas d'une plaque teintée à moitié vide. Ils se lisent comme une paire par le ton.
 //
 // grouped_verification garde l'empilement SANS panneau : ses items ne s'opposent pas, ils se complètent
 // (le sol, et la règle qui l'encadre). Les mettre face à face, ou les teinter, suggérerait une tension
