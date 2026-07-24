@@ -132,9 +132,12 @@ export function ConclusionBlock({
           conséquences se contrôlent, pas des écarts au projet. La teinte info + l'étiquette de nature
           suffisent à séparer les deux registres — pas de second halo. Une ou deux DÉMARCHES concrètes,
           reprises mot pour mot de la carte ; « Puis » relie la seconde. Plus d'air avant, pour que ça se
-          lise comme la suite à mener, jamais comme une seconde conclusion. */}
+          lise comme la suite à mener, jamais comme une seconde conclusion.
+          `space-y-1` : sans lui, deux démarches à l'interligne du texte courant se lisent comme UNE
+          phrase qui passe à la ligne (vu à l'écran sur le cas argiles + PPR). Quatre pixels suffisent à
+          en faire deux gestes, sans les détacher au point de rompre le groupe. */}
       {showControl ? (
-        <div className="mt-7">
+        <div className="mt-7 space-y-1">
           <Eyebrow color="var(--info)">{controlLabel}</Eyebrow>
           {control!.actions.map((a, i) => (
             <p key={i} className="text-[15px] leading-[1.55] text-muted">
