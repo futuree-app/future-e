@@ -14,6 +14,7 @@ import type {
 } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
+import type { EvidenceTargetKey } from "./evidence-targets.ts";
 import { declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } from "./project-view.ts";
 import { LOGEMENT_RULES } from "./logement-rules.ts";
 import { HARD_CONSTRAINT_RULES } from "./hard-constraint-rules.ts";
@@ -97,7 +98,7 @@ const ruleInondation: DecisionRule = {
     const observed = f.catnatInondation != null
       ? `exposition élevée · ${f.catnatInondation} arrêtés CatNat depuis 1982`
       : "exposition élevée";
-    const ev: EvidenceRef = { factId: "inondation.risque", module: "territoire", label: `Territoire · ${f.nom}`, observedValue: observed, grain: "commune", href: territoireHref };
+    const ev: EvidenceRef = { factId: "inondation.risque", module: "territoire", label: `Territoire · ${f.nom}`, observedValue: observed, grain: "commune", href: territoireHref, targetKey: "risk.flooding" };
     const fact: VerificationFact = {
       id: `${f.insee}:inondation-exposition`, ruleId: RULE_INOND, sourceFactIds: ["inondation.risque", "inondation.catnat"], module: "territoire",
       role: "verification", materialityTier: "structuring", topic: "l'exposition à l'inondation",
@@ -146,6 +147,16 @@ const ruleInondation: DecisionRule = {
 // critère à 3, `secondary` s'il l'a posé à 2. JAMAIS `decision_critical` : une préférence n'est pas une
 // condition non négociable, et le verdict ne doit pas basculer sur un souhait.
 
+// LE PHÉNOMÈNE VISÉ, par axe climatique : la preuve renvoie à la carte du module Territoire qui le
+// DÉMONTRE, pas au haut du module. Un axe sans carte n'entre pas ici — un lien qui promet une
+// démonstration inexistante est pire que le lien de repli vers le module (cf. evidence-targets.ts).
+const CLIMAT_TARGET: Record<string, EvidenceTargetKey | undefined> = {
+  joursTresChauds: "climate.extreme_heat",
+  nuitsTropicales: "climate.tropical_nights",
+  temperatureMoyenne: "climate.mean_temperature",
+  pluieIntense: "climate.heavy_rain",
+};
+
 const climatEvidence = (nom: string, key: string, axe: ClimatAxe): EvidenceRef => ({
   factId: `climat.${key}`,
   module: "territoire",
@@ -156,6 +167,7 @@ const climatEvidence = (nom: string, key: string, axe: ClimatAxe): EvidenceRef =
     axe.projete != null ? `${fmtClimatCount(axe.projete, axe)} à l'horizon ${CLIMAT_HORIZON_LABEL}` : undefined,
   grain: "commune",
   href: territoireHref,
+  ...(CLIMAT_TARGET[key] ? { targetKey: CLIMAT_TARGET[key] } : {}),
 });
 
 const tierFor = (p: UserProject, key: PreferenceKey): "structuring" | "secondary" =>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { evidenceAnchorId, type EvidenceTargetKey } from "@/lib/decision/evidence-targets";
 import { useHorizon, HORIZON_META, type HorizonKey } from "@/hooks/useHorizon";
 import { MetricDrawer, type CardDetail } from "@/components/MetricDrawer";
 import { MetricTooltip } from "@/components/MetricTooltip";
@@ -49,6 +50,15 @@ type Factor = {
   detail?: CardDetail;
   /** Glose courte au survol/focus (seuil ou sens à expliquer, mais pas d'histoire). */
   tip?: string;
+  /**
+   * LE PHÉNOMÈNE que cette carte démontre, dans le vocabulaire partagé avec le moteur de décision. La
+   * carte pose alors une ancre stable, et une preuve du dossier peut y renvoyer directement.
+   *
+   * Déclarée ICI, sur la carte qui la construit, et non dans une table `clé -> composant` tenue
+   * ailleurs : une carte supprimée emporte sa déclaration, au lieu de laisser un lien qui vise le vide.
+   * Une carte peut porter plusieurs phénomènes ; le tableau les liste tous.
+   */
+  targets?: EvidenceTargetKey[];
 };
 
 type Drought = NonNullable<EaufranceSummary["drought"]>;
@@ -459,6 +469,7 @@ function buildFactors(
       // Registre A (mouvement) : face avant = delta projeté, garde-fou montagne
       // (delta quasi nul -> « Restent rares »). Le drawer absorbe la chaleur extrême.
       label: "Chaleurs estivales",
+      targets: ["climate.extreme_heat"],
       val: movementOrLevel(gwlData?.["NORTX30D_yr"], hotDaysAnom, "jours chauds", "Restent rares", meta.year),
       col: "var(--orange)",
       src: `DRIAS / Météo-France · France ${meta.france}`,
@@ -469,6 +480,7 @@ function buildFactors(
       // Registre A (mouvement) : « +9 nuits d'ici 2050 ». Drawer gabarit si le
       // phénomène est réel ; sinon tooltip (commune froide où il reste rare).
       label: "Nuits tropicales",
+      targets: ["climate.tropical_nights"],
       val: movementOrLevel(gwlData?.["NORTR_yr"], tropicalNightsAnom, "nuits", "Quasi inexistantes", meta.year),
       col: "var(--orange)",
       src: "DRIAS / Météo-France · Tmin > 20°C",
@@ -504,6 +516,7 @@ function buildFactors(
     },
     {
       label: "Inondation fluviale",
+      targets: ["risk.flooding"],
       val: georisques ? (georisques.flags.flood ? "Une partie du territoire est concernée" : "Aucun périmètre recensé") : "—",
       col: "var(--blue)",
       src: "Géorisques · échelle communale",
@@ -530,6 +543,7 @@ function buildFactors(
     couvertNaturel
       ? {
           label: "Espaces naturels",
+      targets: ["nature.green_spaces"],
           val: couvertNaturel.headlineLabel,
           col: "var(--green)",
           src: "OSO · ADEME · échelle communale",
@@ -676,6 +690,7 @@ function buildFactors(
   });
   factors.push({
     label: "Températures moyennes",
+    targets: ["climate.mean_temperature"],
     val:
       summerAnom != null && winterAnom != null
         ? `Été ${signed(summerAnom)} °C · hiver ${signed(winterAnom)} °C d'ici ${meta.year}`
@@ -728,6 +743,7 @@ function buildFactors(
     heavyRain != null ? [{ label: "Pluie intense en 24h", value: `Jusqu'à ${Math.round(heavyRain)} mm en une journée` }] : [];
   factors.push({
     label: "Jours de pluie intense",
+    targets: ["climate.heavy_rain"],
     val: heavyRainDays != null ? `${heavyRainDays} par an en ${meta.year}` : "—",
     col: "var(--orange)",
     src: "DRIAS / Météo-France · jours de pluie intense",
@@ -1094,7 +1110,12 @@ export function QuartierAside({ communeName, scenarios, georisques, territoire, 
                   return (
                     <div
                       key={f.label}
-                      className={`glass rounded-xl px-4 py-3.5${clickable ? " metric-card-clickable" : ""}`}
+                      // L'ANCRE DU PHÉNOMÈNE : une preuve du dossier (« En une minute ») renvoie ici,
+                      // sur la carte qui la DÉMONTRE, plutôt qu'en haut du module. Une carte peut
+                      // présenter plusieurs phénomènes ; seul le premier porte l'`id` (un élément n'en
+                      // a qu'un), les suivants sont posés en ancres vides juste avant, ci-dessous.
+                      id={f.targets?.[0] ? evidenceAnchorId(f.targets[0]) : undefined}
+                      className={`glass rounded-xl px-4 py-3.5 scroll-mt-24${clickable ? " metric-card-clickable" : ""}`}
                       style={{
                         position: "relative",
                         borderTop: `2px solid ${f.missing ? "var(--ghost)" : col}`,
@@ -1115,6 +1136,14 @@ export function QuartierAside({ communeName, scenarios, georisques, territoire, 
                           : undefined
                       }
                     >
+                      {/* Les phénomènes SUPPLÉMENTAIRES de cette carte : un élément ne porte qu'un
+                          `id`, donc les clés au-delà de la première deviennent des ancres vides, au
+                          même endroit. Une carte climatique qui présente la chaleur ET les nuits
+                          tropicales est atteignable par les deux liens, sans prétendre que ces deux
+                          phénomènes n'en font qu'un. */}
+                      {f.targets?.slice(1).map((t) => (
+                        <span key={t} id={evidenceAnchorId(t)} aria-hidden className="block h-0 scroll-mt-24" />
+                      ))}
                       <div className="text-[13px] font-medium text-label mb-2 leading-[1.3]">{f.label}</div>
                       <div className="font-mono text-[12px] tracking-[0.02em] mb-0.5" style={{ color: f.missing ? "var(--ghost)" : col }}>{f.val}</div>
                       {f.sub && <div className="text-[12px] text-label tracking-[0.01em] leading-[1.4] mb-0.5">{f.sub}</div>}

@@ -29,6 +29,7 @@ import { Face3Block } from "@/components/report/logement/AutourSection";
 import { DecisionChecklist } from "@/components/report/logement/DecisionChecklist";
 import { PreciseLogementStep } from "@/components/report/logement/PreciseLogementStep";
 import { energyState, type ChecklistFacts } from "@/lib/logement-checklist";
+import { evidenceAnchorId } from "@/lib/decision/evidence-targets";
 
 // Le contrat de réponse (ApiResponse) vit dans @/lib/logement-report-types (LogementReport),
 // partagé avec la route qui le produit. Importé en alias ci-dessus.
@@ -523,12 +524,17 @@ export default function LogementModule({
 
             <FamilyHeading color="var(--accent)">Le logement lui-même</FamilyHeading>
 
+            {/* Ancre de phénomène : une preuve « Preuve · DPE F » du dossier renvoie ici (cf.
+                evidence-targets.ts). Posée sur un conteneur, pas dans la section : celle-ci est
+                partagée et n'a pas à connaître le vocabulaire de navigation. */}
+            <div id={evidenceAnchorId("housing.energy_label")} className="scroll-mt-24">
             <EnergieSection
               dpeStatus={dpeStatus}
               dpe={dpe}
               audit={result.audit}
               onReselect={() => setDpeStatus("selection_required")}
             />
+            </div>
 
             <ThermalComfortSection
               evidence={thermalEvidence}
@@ -551,7 +557,7 @@ export default function LogementModule({
                     {(georisques?.seismic?.label || georisques?.rga?.label || pointHazards?.cavites || (pointHazards?.mvt?.kind === "events")) && (
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px,1fr))", gap: 14 }}>
                         {georisques?.seismic?.label && <Block label="Sismicité" value={seismicValue(georisques.seismic.label, georisques.seismic.code)} icon={<span style={{ color: "var(--blue)" }}><IconSeismic /></span>} tip="Le classement réglementaire du risque sismique de la zone, de très faible à fort. Il indique le niveau de précaution attendu pour construire, pas qu'un séisme va survenir." />}
-                        {georisques?.rga?.label && <Block label="Retrait-gonflement des argiles" value={georisques.rga.label} icon={<span style={{ color: "var(--blue)" }}><IconStrata /></span>} tip="Un sol argileux qui gonfle avec l'humidité puis se rétracte en période sèche ; ces mouvements répétés peuvent fissurer les murs et les fondations." />}
+                        {georisques?.rga?.label && <div id={evidenceAnchorId("housing.clay_shrink_swell")} className="scroll-mt-24"><Block label="Retrait-gonflement des argiles" value={georisques.rga.label} icon={<span style={{ color: "var(--blue)" }}><IconStrata /></span>} tip="Un sol argileux qui gonfle avec l'humidité puis se rétracte en période sèche ; ces mouvements répétés peuvent fissurer les murs et les fondations." /></div>}
                         {pointHazards?.cavites && <Block label="Cavités souterraines" value={`${pointHazards.cavites.count} à moins de 500 m`} icon={<span style={{ color: "var(--blue)" }}><IconCavity /></span>} tip="Un vide dans le sous-sol, comme une ancienne carrière ou galerie, peut fragiliser les fondations et provoquer un affaissement. À proximité, il justifie une étude de sol avant d'engager des travaux." />}
                         {pointHazards?.mvt?.kind === "events" && <Block label="Mouvements de terrain" value={`${pointHazards.mvt.count} à moins de 500 m`} icon={<span style={{ color: "var(--blue)" }}><IconLandslide /></span>} tip="Glissements, chutes de blocs ou effondrements déjà survenus tout près : ils signalent un terrain qui a bougé, ce qui peut affecter la stabilité du bâti." />}
                       </div>
@@ -577,7 +583,9 @@ export default function LogementModule({
             )}
 
             {result.georisques && (
-              <RegulatoryStatusBlock georisques={result.georisques} heritage={result.heritage ?? null} />
+              <div id={evidenceAnchorId("housing.regulated_zone")} className="scroll-mt-24">
+                <RegulatoryStatusBlock georisques={result.georisques} heritage={result.heritage ?? null} />
+              </div>
             )}
 
             {result.sinistralite && <SinistraliteBlock sinistralite={result.sinistralite} commune={result.address?.city ?? null} />}

@@ -11,6 +11,7 @@ import type { FactComposition } from "./fact-composition.ts";
 import type { AgglomerationCategory } from "./agglomeration-facts.ts";
 import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
 import type { CriteriaSummary } from "./criteria-registry.ts";
+import type { EvidenceTargetKey } from "./evidence-targets.ts";
 import type {
   CommuneAttributes, EvaluationContext, HardConstraintAssessment, HardConstraintKey,
 } from "../hard-constraints.ts";
@@ -34,6 +35,11 @@ export type EvidenceRef = {
   observedValue?: string; // la valeur mesurée : "42 km", "18 000 hab.", "72/100"
   grain: "commune" | "adresse" | "secteur" | "unite_urbaine";
   href?: string; // optionnel slice 1
+  // LE PHÉNOMÈNE que cette preuve établit, dans le vocabulaire partagé avec les modules. Porte le lien
+  // vers l'endroit où la donnée est DÉMONTRÉE (une carte précise), là où `href` seul ne menait qu'en
+  // haut du module. Optionnel : tous les phénomènes n'ont pas encore de carte qui les présente, et un
+  // lien absent vaut mieux qu'un lien qui promet une démonstration inexistante (cf. evidence-targets.ts).
+  targetKey?: EvidenceTargetKey;
   sourceMode?: "persisted_snapshot" | "live_fetch"; // Logement : DPE persisté vs réglementaire frais
   observedAt?: string; // pour live_fetch
 };

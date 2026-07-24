@@ -3,6 +3,7 @@
 // (FactCompositionCard). Les deux cartes dépendent des briques, jamais l'inverse : aucune boucle d'import.
 import Link from "next/link";
 import type { DecisionFact, VerificationActionType } from "@/lib/decision/decision-fact";
+import { evidenceHref, type EvidenceTargetKey } from "@/lib/decision/evidence-targets";
 
 export function Chip({ label, value, href, color }: { label: string; value?: string; href?: string; color: string }) {
   const inner = (
@@ -62,7 +63,11 @@ export function ActionCue({ label, color, type }: { label: string; color: string
 // Une référence SANS valeur mesurée (un simple lien vers sa source) ne se fait pas passer pour
 // l'étiquette « Preuve » : elle porte le libellé de sa source. « Preuve · valeur » reste réservé à une
 // preuve établie, chiffrée.
-function toChips(refs: { label: string; observedValue?: string; href?: string }[]) {
+// LE LIEN VISE LA DÉMONSTRATION, PAS LE HAUT DU MODULE. `href` seul menait devant le hero de
+// /rapport/quartier, au lecteur de retrouver la carte qui parlait de son sujet. Quand la preuve porte
+// une clé de phénomène, le lien pointe la carte qui le démontre ; sinon il retombe sur le module — le
+// fallback assumé (cf. evidence-targets.ts), jamais une promesse de mesure précise.
+function toChips(refs: { label: string; observedValue?: string; href?: string; targetKey?: EvidenceTargetKey }[]) {
   const seen = new Set<string>();
   const out: { label: string; value?: string; href?: string }[] = [];
   for (const e of refs) {
@@ -72,10 +77,13 @@ function toChips(refs: { label: string; observedValue?: string; href?: string }[
     // un intertitre qui disait déjà « À cette adresse ».
     if (!e.observedValue) continue;
     const label = e.href ? "Preuve" : e.label;
-    const cle = `${label}|${e.observedValue}|${e.href ?? ""}`;
+    const href = e.href ? evidenceHref(e.targetKey, e.href) : undefined;
+    // La dédup porte sur le rendu FINAL : deux preuves de même valeur qui visent deux phénomènes
+    // distincts mènent à deux cartes, ce sont deux chips.
+    const cle = `${label}|${e.observedValue}|${href ?? ""}`;
     if (seen.has(cle)) continue;
     seen.add(cle);
-    out.push({ label, value: e.observedValue, href: e.href });
+    out.push({ label, value: e.observedValue, href });
   }
   return out;
 }

@@ -3,6 +3,7 @@
 // Posture-aware. Chaque fait porte le constat établi (statement) + l'action propre.
 import type { DecisionRule, VerificationFact, UnknownFact, EvidenceRef, RuleEvaluation, MaterialityTier, LogementFacts, SourceCoverage, VerificationActionType } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
+import type { EvidenceTargetKey } from "./evidence-targets.ts";
 
 type Bucket = "neutre" | "achat" | "reside" | "location";
 function bucket(p: UserProject): Bucket {
@@ -13,8 +14,8 @@ function bucket(p: UserProject): Bucket {
 }
 type ActionCopy = { label: string; detail: string };
 
-function ev(l: LogementFacts, factId: string, mode: "persisted_snapshot" | "live_fetch", grain: "adresse" | "commune" = "adresse", observedValue?: string): EvidenceRef {
-  return { factId, module: "logement", label: l.addressLabel, observedValue, grain, href: "/rapport/logement", sourceMode: mode };
+function ev(l: LogementFacts, factId: string, mode: "persisted_snapshot" | "live_fetch", grain: "adresse" | "commune" = "adresse", observedValue?: string, targetKey?: EvidenceTargetKey): EvidenceRef {
+  return { factId, module: "logement", label: l.addressLabel, observedValue, grain, href: "/rapport/logement", sourceMode: mode, ...(targetKey ? { targetKey } : {}) };
 }
 function logementVerification(id: string, evidence: EvidenceRef, tier: MaterialityTier, topic: string, statement: string, actionType: VerificationActionType, action: ActionCopy, status?: string, limitation?: string): VerificationFact {
   return { id: `logement:${id}`, ruleId: `logement.${id}`, sourceFactIds: [`logement.${id}`], module: "logement", role: "verification", materialityTier: tier, topic, statement, evidence: [evidence], action: { type: actionType, label: action.label, ...(action.detail ? { detail: action.detail } : {}) }, ...(status ? { status } : {}), ...(limitation ? { limitation } : {}) };
@@ -41,6 +42,10 @@ function coverageRule(cfg: {
   // L'ÉTAT ÉTABLI, scannable (« Aléa moyen ou fort »). Une chaîne, pas une fonction : ces cinq faits
   // n'émettent QUE quand leur flag est vrai, donc l'état est toujours le même quand la carte existe.
   status?: string;
+  // LE PHÉNOMÈNE que la preuve établit, pour renvoyer vers la carte du module Logement qui le DÉMONTRE.
+  // Absent quand aucune carte ne le présente encore : le lien retombe alors sur le module (cf.
+  // evidence-targets.ts), il ne promet pas une démonstration qui n'existe pas.
+  targetKey?: EvidenceTargetKey;
   observedValue?: (l: LogementFacts) => string | undefined; unavailableStatement: string;
 }): DecisionRule {
   const grain = cfg.grain ?? "adresse";
@@ -52,9 +57,9 @@ function coverageRule(cfg: {
       const b = bucket(p);
       if (cfg.buckets && !cfg.buckets.includes(b)) return na(cfg.id);
       const cov = cfg.coverage(l);
-      if (cov === "unavailable") return out(cfg.id, logementScopedUnknown(cfg.id, ev(l, `logement.${cfg.id}`, "live_fetch", grain), cfg.topic(f.nom), cfg.unavailableStatement));
+      if (cov === "unavailable") return out(cfg.id, logementScopedUnknown(cfg.id, ev(l, `logement.${cfg.id}`, "live_fetch", grain, undefined, cfg.targetKey), cfg.topic(f.nom), cfg.unavailableStatement));
       if (cov === "present" && cfg.flag(l)) {
-        return out(cfg.id, logementVerification(cfg.id, ev(l, `logement.${cfg.id}`, "live_fetch", grain, cfg.observedValue?.(l)), cfg.tier, cfg.topic(f.nom), cfg.statement(l), cfg.actionType, cfg.action[b], cfg.status, cfg.limitation));
+        return out(cfg.id, logementVerification(cfg.id, ev(l, `logement.${cfg.id}`, "live_fetch", grain, cfg.observedValue?.(l), cfg.targetKey), cfg.tier, cfg.topic(f.nom), cfg.statement(l), cfg.actionType, cfg.action[b], cfg.status, cfg.limitation));
       }
       return na(cfg.id);
     },
@@ -123,7 +128,7 @@ const ruleDpe: DecisionRule = {
     if (!l || (l.dpe !== "passoire" && l.dpe !== "energivore")) return na("dpe-faible");
     const desc = l.dpe === "passoire" ? "une passoire énergétique" : "un logement énergivore";
     const cls = l.dpeLabel ? `${l.dpeLabel}, ${desc}` : desc;
-    const evidence = ev(l, "logement.dpe", "persisted_snapshot", "adresse", l.dpeLabel ? `DPE ${l.dpeLabel}` : undefined);
+    const evidence = ev(l, "logement.dpe", "persisted_snapshot", "adresse", l.dpeLabel ? `DPE ${l.dpeLabel}` : undefined, "housing.energy_label");
     const dpeStatus = l.dpeLabel ? `DPE ${l.dpeLabel}` : (l.dpe === "passoire" ? "Passoire énergétique" : "Logement énergivore");
     return out("dpe-faible", logementVerification("dpe-faible", evidence, "structuring", "l'étiquette énergétique du logement", `À cette adresse, le diagnostic choisi classe ce logement ${cls}.`, "demander_confirmation", dpeAction[bucket(p)], dpeStatus));
   },
@@ -136,13 +141,13 @@ export const RULE_ZONE_REGLEMENTEE = "logement.zone-reglementee";
 
 export const LOGEMENT_RULES: DecisionRule[] = [
   ruleDpe,
-  coverageRule({ id: "exposition-bati", tier: "structuring", topic: () => "le retrait-gonflement des argiles", status: "Aléa moyen ou fort", coverage: (l) => l.rga, flag: (l) => l.expositionBati,
+  coverageRule({ id: "exposition-bati", tier: "structuring", targetKey: "housing.clay_shrink_swell", topic: () => "le retrait-gonflement des argiles", status: "Aléa moyen ou fort", coverage: (l) => l.rga, flag: (l) => l.expositionBati,
     // La sévérité (« aléa moyen ou fort ») est portée par le StatusTag rendu au-dessus du constat : la
     // recopier ici en parenthèse la disait deux fois à un centimètre d'écart.
     statement: () => "À cette adresse, le sol est exposé au retrait-gonflement des argiles.",
     limitation: "L'exposition de la zone ne prouve pas un dommage sur ce bien.", actionType: "verifier_sur_place", action: batiAction,
     unavailableStatement: "L'exposition du bâti (retrait-gonflement des argiles) n'a pas pu être vérifiée à cette adresse." }),
-  coverageRule({ id: "zone-reglementee", tier: "structuring", topic: () => "un plan de prévention des risques", status: "Plan applicable", coverage: (l) => l.pprn, flag: (l) => l.zoneReglementee,
+  coverageRule({ id: "zone-reglementee", tier: "structuring", targetKey: "housing.regulated_zone", topic: () => "un plan de prévention des risques", status: "Plan applicable", coverage: (l) => l.pprn, flag: (l) => l.zoneReglementee,
     statement: (l) => l.pprnLabel ? `À cette adresse, un plan de prévention des risques s'applique : ${l.pprnLabel}.` : "À cette adresse, au moins un plan de prévention des risques s'applique.",
     actionType: "obtenir_document", action: pprnAction,
     unavailableStatement: "Le zonage réglementaire (plans de prévention) n'a pas pu être vérifié à cette adresse." }),

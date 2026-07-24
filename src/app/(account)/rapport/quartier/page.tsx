@@ -9,6 +9,7 @@ import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
 import { QuartierAside } from "@/components/report/QuartierClimatData";
+import { EvidenceArrival } from "@/components/report/EvidenceArrival";
 import QuartierSynthesis, {
   type WorkbookQuartier,
 } from "@/components/report/QuartierSynthesis";
@@ -196,6 +197,9 @@ export default async function RapportQuartierPage() {
 
         {/* Ce que montrent les données (cartes) */}
         <section className="pt-14">
+          {/* Une preuve du dossier « En une minute » peut viser une carte précise de cette section :
+              le saut est natif (fragment), ce composant n'ajoute que le repère et le focus. */}
+          <EvidenceArrival />
           <h2
             className="font-normal italic text-[clamp(22px,2vw,28px)] leading-[1.25] tracking-[-0.3px] text-label mb-6"
             style={{ fontFamily: "'Instrument Serif', serif" }}

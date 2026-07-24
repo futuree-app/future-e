@@ -1480,3 +1480,29 @@ body:has(dialog.wizard-dialog[open]) {
     font-size: 13px;
   }
 }
+
+/* LA CARTE VISÉE par un renvoi (ligne « À contrôler en priorité », ou arrivée depuis une preuve).
+
+   CIBLÉE PAR ATTRIBUT, pas par classe : le repère est posé hors de React, et React réécrit `className`
+   quand il réconcilie l'élément — l'hydratation effaçait le halo dans la milliseconde qui suivait (vu
+   au MutationObserver). Un attribut `data-` qu'aucune prop ne décrit survit à la réconciliation. Le lecteur vient de cliquer une démarche :
+   la page défile, et sans repère il doit relire pour savoir OÙ elle s'est arrêtée. Un liseré bleu
+   (--info, la teinte du bloc d'où vient le clic) fait ce repère, puis s'efface — la carte n'a aucune
+   raison de rester marquée une fois trouvée.
+
+   Ni fond ni glow : ces cartes vivent déjà dans un verre teinté et portent la couleur de leur section.
+   Un halo de plus rivaliserait avec le verdict. Le retrait animé est porté par une transition sur la
+   sortie de classe, et la règle reduced-motion ci-dessous n'a rien à neutraliser puisque le composant
+   ne pose pas la classe du tout dans ce mode (cf. PriorityControlActions). */
+[data-visee] {
+  /* Un box-shadow ne prend AUCUNE place : le liseré se dessine hors de la boîte, sans reflow. Une
+     première version décalait la carte (padding + margin négative) pour lui faire de la place — la
+     carte désignée sautait latéralement au moment même où l'œil arrivait dessus. Un repère ne
+     déplace pas ce qu'il désigne. */
+  box-shadow: -10px 0 0 -7px var(--info);
+  transition: box-shadow 0.5s ease-out;
+}
+/* L'ANNEAU DE FOCUS EST ASSUMÉ sur la carte d'arrivée. Une tentative de le neutraliser par
+   `:not(:focus-visible)` a été retirée : Chrome classe un focus PROGRAMMATIQUE comme focus-visible
+   (vérifié — `matches(":focus-visible")` vaut true), donc la règle ne faisait rien. Et elle visait le
+   mauvais objectif : l'anneau dit où le focus est parti, ce qui est exactement l'intention. */

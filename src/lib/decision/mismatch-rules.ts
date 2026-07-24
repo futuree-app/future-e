@@ -10,12 +10,23 @@ import type { DecisionRule, RuleEvaluation, MismatchFact, EvidenceRef, ModuleFac
 import type { UserProject } from "../user-project.ts";
 import { preferenceWeight } from "./project-view.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
+import type { EvidenceTargetKey } from "./evidence-targets.ts";
 import {
   classifyPosition, rankPhrase, rankStatus, MISMATCH_LABELS, MISMATCH_DISTRIBUTION_VERSION,
   type RelativeCriterionFact,
 } from "./mismatch-facts.ts";
 
 const territoireHref = "/rapport/quartier";
+
+// LA CARTE QUI DÉMONTRE CHAQUE ÉCART. Un mismatch dit « vous êtes parmi les 10 % les moins favorables » ;
+// la preuve renvoie à la carte du module Territoire qui montre la mesure. Seules les priorités dont une
+// carte présente RÉELLEMENT le phénomène entrent ici — les autres gardent le repli vers le module, et le
+// test de couverture (evidence-targets.test.ts) empêche d'en déclarer une qui n'existerait pas.
+const MISMATCH_TARGET: Partial<Record<PreferenceKey, EvidenceTargetKey>> = {
+  faible_chaleur: "climate.extreme_heat",
+  faible_risque_inondation: "risk.flooding",
+  nature: "nature.green_spaces",
+};
 
 export const MISMATCH_KEYS: PreferenceKey[] = [
   "nature", "acces_ecoles", "acces_soins", "acces_culture", "acces_transports",
@@ -72,6 +83,7 @@ function makeMismatchRule(key: PreferenceKey): DecisionRule {
       const ev: EvidenceRef = {
         factId: `relativePosition.${key}`, module: "territoire", label: `Territoire · ${f.nom}`,
         observedValue: `parmi ${rankPhrase(band.high)} les moins favorables`, grain: "commune", href: territoireHref,
+        ...(MISMATCH_TARGET[key] ? { targetKey: MISMATCH_TARGET[key] } : {}),
       };
       // G3 : quand la priorité et l'indicateur portent le MÊME libellé (acces_ecoles), le gabarit générique
       // redirait « … parmi vos priorités. Sur l'accès aux collèges et lycées, … » : « Sur ce point » évite
