@@ -4,7 +4,7 @@
 // loin -> mismatch ; entre-deux -> neutral ; donnée absente/corrompue -> uncertain. satisfied/neutral sont
 // SILENCIEUX (aucun fait) ; le POIDS gouverne la seule face mismatch (1 = silencieux, 2 = secondary, 3 =
 // structuring). Jamais satisfied matériel : l'architecture n'a pas de fait favorable (cf. spec §7).
-import type { DecisionRule, RuleEvaluation, MismatchFact, EvidenceRef, ModuleFacts } from "./decision-fact.ts";
+import type { DecisionRule, RuleEvaluation, MismatchFact, AlignmentFact, DecisionFact, EvidenceRef, ModuleFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import { preferenceWeight } from "./project-view.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
@@ -21,7 +21,7 @@ function makeCoastRule(): DecisionRule {
     id,
     module: "territoire",
     evaluate: (f: ModuleFacts, p: UserProject): RuleEvaluation => {
-      const ret = (outcome: RuleEvaluation["outcome"], facts: MismatchFact[], reason: string): RuleEvaluation =>
+      const ret = (outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
         ({ ruleId: id, projectKeys: ["proximite_mer"], outcome, facts, reason });
 
       const weight = preferenceWeight(p, "proximite_mer");
@@ -31,7 +31,31 @@ function makeCoastRule(): DecisionRule {
       const verdict = classifyCoastDistance(distanceKm);
       if (verdict === "uncertain") return ret("uncertain", [], "distance à la côte indisponible");
 
-      // neutral (intermédiaire) et satisfied (proche) toujours silencieux ; mismatch de poids 1 examiné
+      // ALIGNMENT (lot C) : proche du littoral + poids >= 2 -> fait favorable (absolute_measure). Miroir du
+      // mismatch d'éloignement, avec la MÊME limitation méthodologique (distance à vol d'oiseau).
+      if (verdict === "satisfied" && weight >= 2 && distanceKm != null && Number.isFinite(distanceKm)) {
+        const km = Math.round(distanceKm);
+        const tier = weight >= 3 ? "structuring" : "secondary";
+        const face = `Le littoral est à environ ${km} km, dans ce que vous recherchez.`;
+        const ev: EvidenceRef = {
+          factId: "coastDistance.proximite_mer", module: "territoire", label: `Territoire · ${f.nom}`,
+          observedValue: `distance au littoral estimée à environ ${km} km`, grain: "commune", href: territoireHref,
+        };
+        const alignment: AlignmentFact = {
+          id: `${f.insee}:alignment-proximite_mer`, ruleId: id, sourceFactIds: ["coastDistance.proximite_mer"],
+          module: "territoire", role: "alignment", projectKey: "proximite_mer", materialityTier: tier,
+          topic: "la proximité de la mer", headlineSubject: "la proximité de la mer",
+          statement: `Pour la proximité de la mer, ${f.nom} est à environ ${km} km du littoral, dans ce que vous recherchez.`,
+          faceStatement: face,
+          basis: { kind: "absolute_measure", value: distanceKm, unit: "km", conventionId: COAST_PROXIMITY_CONVENTION.id },
+          evidence: [ev],
+          limitation:
+            "Cette estimation est calculée à vol d'oiseau depuis un ensemble de localités côtières de référence. Elle ne correspond ni à la distance minimale au trait de côte, ni à la distance routière, ni au temps de trajet.",
+        };
+        return ret("satisfied", [alignment], "proche du littoral, matérialisé");
+      }
+
+      // neutral (intermédiaire) et satisfied (proche, poids 1) silencieux ; mismatch de poids 1 examiné
       // mais silencieux (non matériel).
       if (verdict !== "mismatch" || weight < 2) {
         const reason = verdict === "mismatch" ? "éloignement mineur, silencieux (poids 1)"

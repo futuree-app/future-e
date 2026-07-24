@@ -183,7 +183,11 @@ export type AlignmentFact = BaseFact & {
   basis: AlignmentBasis; // liste blanche portée par le TYPE : jamais named_absence (voir AlignmentBasis)
   evidence: EvidenceRef[];
   headlineSubject: string; // la priorité du lecteur, à lire après un deux-points, comme sur le mismatch
-  status?: string; // l'état scannable favorable (« 10 % les plus favorables »)
+  // LA 2e LIGNE DE LA CARTE « Ce qui correspond ». Le fait porte deux surfaces (décision D1 du porteur) :
+  // `statement` est la phrase AUTONOME (conclusion / export / audit) ; `faceStatement` est le fragment
+  // scannable rendu sous le titre sur la carte (« Parmi les 10 % de communes… », « Le littoral est à
+  // environ 8 km… »). La règle les produit toutes deux ; le composant n'a rien à recalculer.
+  faceStatement: string;
   limitation?: string; // UNIQUEMENT la nuance méthodologique card-only du critère, jamais une limite de portée
 };
 

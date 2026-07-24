@@ -102,3 +102,31 @@ test("deux mismatchs (village : prefere_grande + eviter_isolement) partagent le 
   assert.deepEqual(a.sourceFactIds, ["territorySize.classification"]);
   assert.deepEqual(b.sourceFactIds, ["territorySize.classification"]);
 });
+
+// ── Lot C : alignment de taille (categorical_state) ──────────────────────────────
+
+test("prefere_grande_ville : métropole UU + poids 3 -> ALIGNMENT structurant, face « ce que vous recherchez »", () => {
+  const p = project([{ key: "prefere_grande_ville", weight: 3 }]);
+  const f = rule("prefere_grande_ville").evaluate(facts({ tailleVille: 1_050_000, tailleVilleSource: "urban_unit" }), p, undefined as never).facts[0]!;
+  assert.equal(f.role, "alignment");
+  assert.equal(f.materialityTier, "structuring");
+  assert.equal((f as { basis: { kind: string } }).basis.kind, "categorical_state");
+  assert.match((f as { faceStatement: string }).faceStatement, /appartient à une métropole, ce que vous recherchez/);
+  assertFactValid(f, p);
+});
+
+test("eviter_grandes_villes : village + poids 2 -> ALIGNMENT secondary, face « à taille humaine »", () => {
+  const p = project([{ key: "eviter_grandes_villes", weight: 2 }]);
+  const f = rule("eviter_grandes_villes").evaluate(facts({ tailleVille: 1_500, tailleVilleSource: "urban_unit" }), p, undefined as never).facts[0]!;
+  assert.equal(f.role, "alignment");
+  assert.equal(f.materialityTier, "secondary");
+  assert.match((f as { faceStatement: string }).faceStatement, /est un village, à taille humaine/);
+  assertFactValid(f, p);
+});
+
+test("catégorie recherchée mais poids 1 -> silencieux (aucun fait)", () => {
+  const p = project([{ key: "prefere_grande_ville", weight: 1 }]);
+  const e = rule("prefere_grande_ville").evaluate(facts({ tailleVille: 1_050_000, tailleVilleSource: "urban_unit" }), p, undefined as never);
+  assert.equal(e.outcome, "satisfied");
+  assert.equal(e.facts.length, 0);
+});

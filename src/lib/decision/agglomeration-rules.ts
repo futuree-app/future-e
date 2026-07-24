@@ -3,7 +3,7 @@
 // Trois contrats DISTINCTS : eviter_grandes_villes et prefere_grande_ville SYMÉTRIQUES (la catégorie mesure
 // directement la préférence) ; eviter_isolement ASYMÉTRIQUE (proxy faible : village -> mismatch, jamais
 // satisfied). Le POIDS gouverne la matérialité. Provenance EXIGÉE : source absente -> uncertain.
-import type { DecisionRule, RuleEvaluation, MismatchFact, EvidenceRef, ModuleFacts } from "./decision-fact.ts";
+import type { DecisionRule, RuleEvaluation, MismatchFact, AlignmentFact, DecisionFact, EvidenceRef, ModuleFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import { preferenceWeight } from "./project-view.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
@@ -26,6 +26,9 @@ type SizeSpec = {
   subject: string;
   outcomes: Record<AgglomerationCategory, Outcome>;
   buildStatement: (nom: string, fragment: string) => string;
+  // LA FACE FAVORABLE (lot C) : la 2e ligne de la carte quand la catégorie observée EST celle recherchée.
+  // Absente sur eviter_isolement, qui ne produit jamais de `satisfied` (village -> mismatch, reste neutral).
+  favorableFace?: (nom: string, catLabel: string) => string;
   limitation?: string;
 };
 
@@ -37,6 +40,7 @@ const SPECS: SizeSpec[] = [
     outcomes: { village: "satisfied", petite: "satisfied", moyenne: "neutral", grande: "mismatch", metropole: "mismatch" },
     buildStatement: (nom, fragment) =>
       `Vous avez placé le fait d'éviter les grandes villes parmi vos priorités. ${fragment}.`,
+    favorableFace: (nom, cat) => `${nom} est ${cat}, à taille humaine.`,
   },
   {
     key: "prefere_grande_ville",
@@ -45,6 +49,7 @@ const SPECS: SizeSpec[] = [
     outcomes: { village: "mismatch", petite: "mismatch", moyenne: "neutral", grande: "satisfied", metropole: "satisfied" },
     buildStatement: (nom, fragment) =>
       `Vous avez placé le fait de vivre dans une grande ville parmi vos priorités. ${fragment}.`,
+    favorableFace: (nom, cat) => `${nom} appartient à ${cat}, ce que vous recherchez.`,
   },
   {
     key: "eviter_isolement",
@@ -70,7 +75,7 @@ function makeSizeRule(spec: SizeSpec): DecisionRule {
     id,
     module: "territoire",
     evaluate: (f: ModuleFacts, p: UserProject): RuleEvaluation => {
-      const ret = (outcome: RuleEvaluation["outcome"], facts: MismatchFact[], reason: string): RuleEvaluation =>
+      const ret = (outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
         ({ ruleId: id, projectKeys: [spec.key], outcome, facts, reason });
 
       const weight = preferenceWeight(p, spec.key);
@@ -84,6 +89,26 @@ function makeSizeRule(spec: SizeSpec): DecisionRule {
       const source = f.tailleVilleSource;
 
       const outcome = spec.outcomes[cat];
+      // ALIGNMENT (lot C) : la catégorie observée EST celle recherchée + poids >= 2 -> fait favorable.
+      // Miroir exact du mismatch de taille. faceStatement = la face validée (« … appartient à une
+      // métropole, ce que vous recherchez »), statement = la même phrase, déjà autonome (elle nomme la commune).
+      if (outcome === "satisfied" && weight >= 2 && spec.favorableFace) {
+        const tier = weight >= 3 ? "structuring" : "secondary";
+        const face = spec.favorableFace(f.nom, labelForCategory(cat, source));
+        const ev: EvidenceRef = {
+          factId: TERRITORY_SIZE_FACT_ID, module: "territoire", label: `Territoire · ${f.nom}`,
+          grain: source === "urban_unit" ? "unite_urbaine" : "commune", href: territoireHref,
+        };
+        const alignment: AlignmentFact = {
+          id: `${f.insee}:alignment-${spec.key}`, ruleId: id, sourceFactIds: [TERRITORY_SIZE_FACT_ID],
+          module: "territoire", role: "alignment", projectKey: spec.key, materialityTier: tier,
+          topic: spec.subject, headlineSubject: spec.subject,
+          statement: face, faceStatement: face,
+          basis: { kind: "categorical_state", observedCategory: cat, conventionId: AGGLOMERATION_SIZE_CONVENTION.id },
+          evidence: [ev],
+        };
+        return ret("satisfied", [alignment], "catégorie recherchée, matérialisée");
+      }
       if (outcome !== "mismatch" || weight < 2) {
         const reason = outcome === "mismatch" ? "écart mineur, silencieux (poids 1)"
           : outcome === "satisfied" ? "catégorie recherchée" : "catégorie intermédiaire";

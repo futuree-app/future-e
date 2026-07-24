@@ -62,12 +62,12 @@ test("loin + poids 2 -> mismatch SECONDARY", () => {
   assert.equal(e.facts[0]!.materialityTier, "secondary");
 });
 
-test("proche (<=15) -> satisfied silencieux ; intermédiaire -> neutral silencieux ; aucun fait", () => {
-  const p = project([{ key: "proximite_mer", weight: 3 }]);
-  const near = rule.evaluate(facts({ distanceCoteKm: 4 }), p, undefined as never);
+test("proche poids 1 -> satisfied silencieux ; intermédiaire -> neutral silencieux ; aucun fait", () => {
+  // Depuis le lot C, `satisfied` de poids >= 2 produit un ALIGNMENT ; il n'est silencieux qu'au poids 1.
+  const near = rule.evaluate(facts({ distanceCoteKm: 4 }), project([{ key: "proximite_mer", weight: 1 }]), undefined as never);
   assert.equal(near.outcome, "satisfied");
   assert.equal(near.facts.length, 0);
-  const mid = rule.evaluate(facts({ distanceCoteKm: 50 }), p, undefined as never);
+  const mid = rule.evaluate(facts({ distanceCoteKm: 50 }), project([{ key: "proximite_mer", weight: 3 }]), undefined as never);
   assert.equal(mid.outcome, "neutral");
   assert.equal(mid.facts.length, 0);
 });
@@ -88,4 +88,24 @@ test("LE POIDS 1 : loin -> mismatch calculé mais SILENCIEUX (facts vides)", () 
 test("priorité absente (poids 0) -> not_applicable", () => {
   const e = rule.evaluate(facts({ distanceCoteKm: 240 }), project([]), undefined as never);
   assert.equal(e.outcome, "not_applicable");
+});
+
+// ── Lot C : alignment de proximité mer (absolute_measure) ────────────────────────
+
+test("proche du littoral (<=15) + poids 3 -> ALIGNMENT structurant, absolute_measure, face « Le littoral est à environ X km »", () => {
+  const p = project([{ key: "proximite_mer", weight: 3 }]);
+  const f = rule.evaluate(facts({ distanceCoteKm: 8 }), p, undefined as never).facts[0]!;
+  assert.equal(f.role, "alignment");
+  assert.equal(f.materialityTier, "structuring");
+  assert.equal((f as { basis: { kind: string } }).basis.kind, "absolute_measure");
+  assert.match((f as { faceStatement: string }).faceStatement, /Le littoral est à environ 8 km, dans ce que vous recherchez/);
+  assert.ok((f as { limitation?: string }).limitation);
+  assertFactValid(f, p);
+});
+
+test("proche mais poids 1 -> silencieux (aucun fait)", () => {
+  const p = project([{ key: "proximite_mer", weight: 1 }]);
+  const e = rule.evaluate(facts({ distanceCoteKm: 8 }), p, undefined as never);
+  assert.equal(e.outcome, "satisfied");
+  assert.equal(e.facts.length, 0);
 });

@@ -71,9 +71,10 @@ function makeAlignmentRule(key: PreferenceKey): DecisionRule {
         topic: copy.headlineSubject,
         headlineSubject: copy.headlineSubject,
         // Le fait canonique est AUTONOME : « Pour {thème}, {commune} se situe {phrase de rang}. » Il se
-        // relit sans le heading de la carte (conclusion, export, audit). La carte, elle, rend le heading
-        // en mini-titre + la seule phrase de rang (favorableStatusTemplate), lus depuis ALIGNMENT_LABELS.
+        // relit sans le heading de la carte (conclusion, export, audit). La carte, elle, rend le titre
+        // (headlineSubject capitalisé) + `faceStatement` (le fragment scannable), sans rien recalculer.
         statement: `Pour ${copy.headlineSubject}, ${f.nom} se situe ${bdc(rang)}.`,
+        faceStatement: rang,
         basis: { kind: "relative_position", rankLow: band.low, rankHigh: band.high, universe: "communes_france", distributionVersion: MISMATCH_DISTRIBUTION_VERSION },
         evidence: [ev],
         // Nuance MÉTHODOLOGIQUE card-only héritée du critère (ERA5-Land, 1976-2005) : elle vaut pour la

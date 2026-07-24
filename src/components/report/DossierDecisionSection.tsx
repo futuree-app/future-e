@@ -10,7 +10,6 @@ import { conditionPorteeParLeBloc, sectionsAffichees } from "@/lib/decision/doss
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 import { FactBody, EvidenceRow, MethodDetails, factSources, factChecks } from "@/components/report/DecisionFactRenderParts";
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
-import { ALIGNMENT_LABELS, rankFractionFavorable } from "@/lib/decision/mismatch-facts";
 
 const SECTION_ACCENT: Record<string, string> = {
   incompatibilities: "var(--red)",
@@ -162,20 +161,16 @@ export function DossierDecisionSection({
                 )}
                 <ul className="flex flex-col gap-5">
                   {s.cards.map((card) => {
-                    if (card.kind !== "fact") return null;
+                    if (card.kind !== "fact" || card.fact.role !== "alignment") return null;
                     const f = card.fact;
-                    // Deux champs (décision D1) : le TITRE (headlineSubject, rendu CAPITALISÉ) puis la
-                    // PHRASE DE RANG propre au critère. Le fait porte, lui, une phrase AUTONOME dans son
-                    // statement (conclusion / export) — la carte n'en montre que le fragment scannable.
-                    const copy = f.role === "alignment" ? ALIGNMENT_LABELS[f.projectKey] : undefined;
-                    const heading = copy?.headlineSubject ?? cap(f.topic);
-                    const rang = copy && f.role === "alignment" && f.basis.kind === "relative_position"
-                      ? copy.favorableStatusTemplate.replace("{rank}", rankFractionFavorable(f.basis.rankLow))
-                      : f.statement;
+                    // Deux champs (décision D1) : le TITRE (headlineSubject, rendu CAPITALISÉ via CSS) puis
+                    // `faceStatement`, le fragment scannable que la RÈGLE a déjà produit (rang, catégorie de
+                    // taille, distance mer). Le composant ne recalcule rien ; la phrase autonome du fait
+                    // (statement) vit ailleurs (conclusion / export).
                     return (
                       <li key={f.id}>
-                        <p className="font-mono text-[11px] tracking-[0.08em] uppercase text-label mb-1">{heading}</p>
-                        <p className="text-[15px] leading-[1.55] text-muted">{rang}</p>
+                        <p className="font-mono text-[11px] tracking-[0.08em] uppercase text-label mb-1">{cap(f.headlineSubject)}</p>
+                        <p className="text-[15px] leading-[1.55] text-muted">{f.faceStatement}</p>
                       </li>
                     );
                   })}
