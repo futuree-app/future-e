@@ -1,92 +1,87 @@
-# Passation — Tradeoff à lavis, masquage du doublon de taille, verdict sans « Ils » orphelin : EN PROD
+# Passation — Lot C « Ce qui correspond à votre projet » LIVRÉ + tradeoff calmé : EN PROD
 
-**Horodatage** : 2026-07-23 · **Branche courante** : `main` = `a447a7f`, **poussée**, prod déployée. **0 commit en attente.**
+**Horodatage** : 2026-07-24 · **Branche** : `main` = `ed5e20f`, **poussée**, prod déployée. **0 commit en attente.**
 
-## Objectif de la session
+## Ce qui a été fait cette session
 
-Reprise sur le retour visuel attendu du porteur (handoff précédent, commit `2f4f9e2`). Le porteur a
-regardé `/rapport` sur un projet climat (Toulouse) et deux points de design/copie ont été traités, plus
-un correctif éditorial du verdict. Un seul commit couvre tout : `a447a7f`.
+### Lot C — le côté FAVORABLE, prouvé et nommé (6 commits, `c6c7e97` → `5d14929`)
 
-## Fait dans cette session (1 commit, poussé)
+Le dossier ne produisait que des griefs (les 5 rôles de `DecisionFact` sont des formes de problème). Le
+moteur calculait déjà les `satisfied` (top 20 %) puis les jetait. Le lot C les **matérialise** en un
+nouveau rôle `AlignmentFact`, miroir exact du mismatch.
 
-**1. Tradeoff en face-à-face — lavis de ton (Direction A validée par le porteur).**
-- Chaque côté devient un **panneau à lavis** : la MÊME encre que `.card-verdict` en plus léger
-  (12/3 % vs 15/4 %), `color-mix` derrière `@supports`, filet supérieur coloré 2px, **eyebrow mono
-  capitale à son ton** (vert / orange). Le ton se VOIT enfin (avant il ne vivait que dans les pastilles).
-- Filet central retiré (il disparaissait au stacking mobile) ; `md:grid-cols-2` + `items-start` : chaque
-  panneau hugge son contenu et **s'auto-identifie une fois empilé**. `grouped_verification` reste SANS
-  panneau (ses items se complètent, ne s'opposent pas).
-- Fichiers : `src/components/report/FactCompositionCard.tsx` (prop `panel` sur `SideBlock`),
-  `src/app/globals.css` (classe `.tradeoff-side`).
+- **Tâche 1** — `AlignmentFact` (role `"alignment"`, `basis: AlignmentBasis` = liste blanche AU TYPE,
+  `named_absence` interdit) ; famille `alignment-rules.ts` (13 critères relative_position) ; copie du porteur
+  en deux champs `{ headlineSubject, favorableStatusTemplate }` dans `ALIGNMENT_LABELS` (mismatch-facts.ts).
+- **Tâche 3** — section « Ce qui correspond à votre projet » dans l'assembleur : **placement porté par
+  l'ordre** (ouvre les cartes, sauf derrière une incompatibilité), cap 3, `conclusionBasis`. Rendu SOBRE
+  (pastille verte, deux lignes titre + phrase de rang) dans `DossierDecisionSection.tsx`.
+- **Tâche 4** — **absorption d'AFFICHAGE** (dossier-view.ts, jumeau du masquage taille) : un alignment sur
+  la clé favorable d'un tradeoff AFFICHÉ (`favorableProjectKey`) est masqué. Le fait RESTE dans `shown`
+  (le verdict ne le perd jamais). `dossier.compositions` = post-caps → une composition plafonnée n'absorbe rien.
+- **Tâche 5** — **le verdict nomme le positif** (conclusion-plan.ts, `herosPositif()`) : branche favorable
+  + cas 4 en **réserves mineures** (le positif prime quand seules des réserves secondaires subsistent).
+  « {commune} répond à deux de vos priorités : … » / « … à l'une de vos priorités : … ». Détail d'arbitrage :
+  « … répondent en revanche à votre projet. La décision se joue entre ces correspondances et les écarts
+  relevés. » Sujets depuis les faits AFFICHÉS, jamais `favorableCount`. Verdict `generable: false` (aucun LLM).
+- **Tâche 2** — fondements **taille** (categorical_state : prefere_grande_ville, eviter_grandes_villes) et
+  **mer** (absolute_measure). Refactor : `AlignmentFact.faceStatement` (2e ligne de carte, produite par la
+  règle) distinct de `statement` (phrase autonome).
 
-**2. Masquage du doublon de taille.**
-- Le lecteur peut poser DEUX critères sur la même dimension : contrainte dure `communeSize` (fourchette)
-  + priorité souple de taille. Quand la dure est établie incompatible, elle porte le verdict avec le même
-  chiffre et la même conclusion que le mismatch souple (« Une métropole »). On **masque** ce mismatch.
-- Lecteur PUR `sectionsAffichees` étendu dans `src/lib/decision/dossier-view.ts`
-  (`tailleEtabliePorteeParLeVerdict`, `estCarteMismatchTailleSymetrique`), jumeau de
-  `conditionPorteeParLeBloc`. **Le fait reste dans le dossier** (couverture, base de conclusion).
-- Portée STRICTE : clés **symétriques** seulement (`eviter_grandes_villes` / `prefere_grande_ville`) ;
-  `eviter_isolement` (asymétrique, limite propre « ne prouve pas un isolement effectif ») **jamais masqué**.
-  Cartes-FAITS seulement (une composition shared_evidence peut porter aussi un fait non redondant).
+**Revue archi du porteur intégrée** : D1 (face par critère / fait autonome), D2 (« l'une de vos priorités »),
+Issue 4 (AlignmentBasis au type), Issue 8 (limitation bornée à ensoleillement/douceur/mer), Issue 1 (non
+bloquant — criteria-registry agrège par clé — verrouillé par un test d'invariance). Plan + revue :
+`docs/superpowers/plans/2026-07-23-lot-c-alignment.md`.
 
-**3. Unification du lexique du périmètre UU → « agglomération ».**
-- Un seul mot face au lecteur : « agglomération » (celui du héros et de `labelForCategory`).
-  « unité urbaine » reste le terme de PROVENANCE (commentaires, ligne source).
-- Fichiers : `agglomeration-facts.ts` (`categoryStatementFragment`), `agglomeration-rules.ts` (`popText`).
+### Design — le tradeoff calmé (`ed5e20f`)
 
-**4. Verdict : « Ces points / Ce point » au lieu d'un « Ils » orphelin.**
-- `conclusion-plan.ts`, branche `major_reserves` + favorable : le « Ils » (n = réserves) tombait juste
-  après une clause favorable (« un élément favorable », singulier), lu comme désaccord de nombre et
-  antécédent flottant. Sujet désormais NOMMÉ, renvoie aux points à contrôler comptés par le héros.
+Les deux côtés du tradeoff rejouaient le halo/filet/lavis du VERDICT (« deux mini-héros »). Doctrine gravée :
+**un traitement de signal complet par niveau de lecture** (héros = effet complet ; composition = teinte plate
+discrète). `.tradeoff-side` : plus de filet ni de lavis, teinte plate 4 %, libellés sans-serif casse normale.
 
-**Vérifs** : `tsc` 0, `eslint` 0, **700 tests** (695 + 5 nouveaux).
+### Plus tôt dans la session (déjà en prod avant le lot C)
 
-## Points du handoff précédent — résolus
+Tradeoff à lavis (Direction A, depuis calmée) · masquage du doublon de taille (mismatch symétrique) ·
+unification « agglomération » · verdict « Ces points » (fin du « Ils » orphelin) · fix argiles (la sévérité
+ne se recopie plus en parenthèse).
 
-- **Tradeoff 2 colonnes sur mobile** : traité par les panneaux à lavis auto-identifiants (`items-start`,
-  plus de filet central qui disparaissait). Non re-vérifié sur mobile réel depuis le terminal, mais la
-  structure ne dépend plus d'un séparateur qui saute au stacking.
-- **StatusTag doublon** : le porteur a tranché **OK, on garde** (pas de doublon avec le titre de composition).
+**Vérifs** : `tsc` 0, `eslint` 0, **729 tests**.
 
-## Décisions prises (à verser au vault si utile)
+## À regarder à la reprise (prod)
 
-- Design tradeoff = **lavis de ton par côté** (pas de fond plat, pas de filet central) : la couleur diffuse
-  dans la surface, cohérente avec le verdict.
-- Doublon dure+souple de taille : **on masque le souple** quand la dure porte le verdict (symétriques
-  seulement). L'asymétrie de hauteur des deux côtés du tradeoff est **assumée** (le côté favorable a
-  réellement moins à dire ; l'étirer laisserait une plaque teintée à moitié vide).
-- Lexique : **« agglomération »** gagne face à « unité urbaine » pour la prose face-lecteur.
+Recharger `/rapport` sur un projet où la commune est top 20 % (soins, vie locale…) : la carte « Ce qui
+correspond », le héros positif, et le tradeoff calmé. Les défauts de COMPOSITION sont invisibles aux tests —
+regarder l'écran.
 
-## Prochaine étape immédiate
+## Ce qui reste (extensions du lot C, spec §Extensions)
 
-Le gros chantier restant est le **lot C** (le côté FAVORABLE, prouvé et nommé) : spec écrit, **non codé**.
-C'est le seul chantier qui AJOUTE de l'information au lecteur — aujourd'hui la branche `favorable` du
-verdict ne nomme rien de spécifique (« Toulouse présente un élément favorable » sans dire lequel), faute
-de fait favorable déterministe. Spec : `docs/superpowers/specs/2026-07-22-lot-c-ce-qui-correspond-design.md`.
+- **Lot C+ — air / bruit / industrie** : 3 critères à valeur continue sans rang national. Étendre le `switch`
+  de `mismatchRawScore` (comparateur-scores.ts) + relancer `populate-mismatch-rank.mts`. Le `relative_position`
+  s'applique ensuite. **VETO ABSOLU** obligatoire : un bon rang ne blanchit jamais un niveau absolu préoccupant.
+  Formulations gravées dans la spec (ne jamais écrire « l'air est sain »).
+- **Lot D — trajectoires climatiques** (chaleur, nuits tropicales) : **double gate niveau futur × trajectoire**.
+  Piège : un bon rang de trajectoire sur une grandeur en aggravation se lit « il ne fera pas chaud ici ». Un
+  bon rang ne neutralise jamais un niveau futur défavorable.
+- **Lot E — rassurances au grain adresse (Logement)** : « aucune cavité recensée… ». Ce n'est PAS un alignment
+  (role `reassurance` distinct) ; garde-fou du sujet soulevé ; jamais dans « En une minute ».
+- **A1** (mécanique du lot A) : débloqué, jamais commencé.
 
-## À lire d'abord à la reprise
+## Design — points de la critique ChatGPT NON retenus (à rouvrir si voulu)
 
-- `MEMORY.md` (index), puis : `project_dossier_decision.md`, `project_composition_faits_lies.md`,
-  `mismatch_formes_fondement.md`, `project_module_logement.md`.
-- Doctrine voix : `feedback_no_em_dash.md`, `feedback_no_antithese.md`, `feedback_offre_pas_sujet.md`,
-  `feedback_positionnement_compatibilite.md`, `feedback_tooltip_no_sources.md`.
-- Specs : `docs/superpowers/specs/2026-07-22-lot-c-ce-qui-correspond-design.md` (prochain chantier).
+- **Recomposition verticale du tradeoff** (bandeau positif compact + compromis dessous) : réglerait
+  l'asymétrie de volume. Le porteur a choisi « calmer les 2 colonnes », pas la recompo.
+- **Redesign des chips « PREUVE »** du côté favorable du tradeoff (répètent le constat) : hors périmètre choisi.
 
-## Pièges / fils ouverts
+## Pièges / doctrine tenue
 
 - **`tsconfig.json` exclut `**/*.test.ts` du typecheck.** Les fixtures n'ont aucun filet de type : un champ
-  obligatoire ajouté à un fait ne fait pas échouer `tsc` sur les tests et plante à l'exécution. Toujours
-  une garde nommée dans `assertFactValid` / `assertCompositionsValid`.
-- **Le terminal ne montre pas les défauts de COMPOSITION.** Faire regarder l'écran, pas seulement le vert.
-- **Masquage de taille = symétriques uniquement.** Ne jamais étendre à `eviter_isolement` (asymétrique,
-  porte une limite propre) ni aux compositions (elles peuvent porter un fait non redondant).
-- **Le champ `status` (état scannable)** n'existe que sur les 5 familles logement + DPE. Les faits
-  `territoire` (chaleur, air…) n'en portent pas : exposition graduée, pas un état franc.
-- **Lot C** : spec prêt, la branche `favorable` ne nomme toujours rien de spécifique.
-- **A1** (mécanique du lot A) : débloqué, jamais commencé.
-- `node --test` : ne jamais value-importer `comparateur-vie.ts` (server-only) depuis un fichier testé.
-- Doctrine : push direct sur `main` assumé (prod sur push, pas de Preview Vercel). Suite : `node --test
-  --experimental-strip-types "src/**/*.test.ts"`.
-- Non suivi : `Futur.e Design System.zip` (fichier porteur, **NE JAMAIS COMMITTER**).
+  obligatoire ajouté à un fait (ex. `faceStatement`) ne fait pas échouer `tsc` sur les tests. Ajouter une garde
+  nommée dans `assertFactValid`.
+- **Le terminal ne montre pas les défauts de COMPOSITION.** Regarder l'écran.
+- **Liste blanche des fondements d'alignment** : jamais `named_absence` (une absence de signal ne prouve pas un
+  positif). Toute famille ajoutée entre explicitement dans la table.
+- **Invariant transversal** (pour C+/D) : une dimension ne porte jamais à la fois un alignment et un signal
+  défavorable ; le VETO ABSOLU prime (un rang ne blanchit pas un niveau absolu).
+- **Absorption = affichage**, jamais un retrait : le fait reste dans `shown` / `conclusionBasis` / verdict.
+- Suite : `node --test --experimental-strip-types "src/**/*.test.ts"`. Push direct sur `main` (prod sur push).
+- Non suivi : `Futur.e Design System.zip` (**NE JAMAIS COMMITTER**).
