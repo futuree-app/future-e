@@ -86,6 +86,20 @@ function rangRole(role: Role, orientation: Orientation): number {
 // une projection. Pas « un fait établi prime toujours une projection » : un fait établi mais anodin vaut
 // moins qu'une projection robuste et sévère.
 //
+// ⚠ CE QUE CET ORDRE SUPPOSE ET NE VÉRIFIE PAS. La doctrine dit « à matérialité décisionnelle
+// COMPARABLE ». Or rien ici n'établit que le feu recensé et une chaleur au p95 le sont : le recensement
+// est communal et binaire — il ne dit ni l'intensité, ni l'étendue concernée, ni la distance à l'habitat,
+// ni s'il s'applique à ce logement. Dans certains dossiers, 40 nuits tropicales projetées changeraient
+// davantage une décision résidentielle. La chute de la chaleur (7,8 % → 2,6 % des minutes) n'est donc pas
+// seulement le prix du plafond à une carte : c'est aussi le prix de cette préséance.
+//
+// LA VÉRIFICATION QUI TRANCHERAIT, à faire avant de considérer cet ordre comme acquis : prendre les
+// communes où le feu recensé évince la chaleur et regarder de quoi le recensement y est fait. GASPAR
+// distingue une mention communale large d'un PPRIF approuvé — c'est la qualification mesurable la plus
+// proche de « suffisamment important pour la décision ». Si la plupart des recensements sont de simples
+// mentions, le feu devra rester devant l'indice forêt-météo, mais pas nécessairement devant une chaleur
+// au p95. S'ils correspondent à une exposition réglementaire nette, l'ordre actuel est confirmé.
+//
 // Un axe ambiant qui ne figure pas ici passe en dernier, dans l'ordre du registre. C'est le comportement
 // d'avant, mais assumé pour les seuls cas non tranchés au lieu de gouverner tous les cas par accident.
 const ORDRE_AMBIANT: readonly string[] = [

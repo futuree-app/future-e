@@ -125,3 +125,23 @@ avec le rang du feu.
 L'indice conserve son cas propre. Ce que coûte le changement, c'est la chaleur : de 7,8 % à 2,6 % des
 dossiers. Elle n'est pas perdue — elle reste dans le dossier complet — mais elle cède la place unique au
 constat établi dans 5,2 % des dossiers. C'est le prix assumé du plafond à une carte.
+
+---
+
+# Dette ouverte : la préséance feu / chaleur n'est pas vérifiée
+
+L'ordre `feu recensé > chaleur` applique la doctrine « à matérialité décisionnelle **comparable**, un
+constat établi et directement vérifiable prime une projection ». Rien n'établit que la condition est
+remplie : le recensement est communal et binaire, il ne dit ni l'intensité, ni l'étendue, ni la distance à
+l'habitat. Quarante nuits tropicales projetées pourraient peser davantage sur une décision résidentielle.
+
+**Mesure qui trancherait** : sur les communes où le feu recensé évince la chaleur, quelle part des
+recensements correspond à un **PPRIF approuvé** plutôt qu'à une mention communale large ? GASPAR expose
+les deux (`/gaspar/ppr`). C'est la qualification mesurable la plus proche de « suffisamment important pour
+la décision ».
+
+- Beaucoup de mentions simples → le feu reste devant l'indice, pas nécessairement devant une chaleur au p95.
+- Exposition réglementaire nette → l'ordre actuel est confirmé.
+
+**Non faite** : à moins de quatre semaines du 20/08/2026, la priorité est le parcours de bout en bout, pas
+une règle de plus. Coût estimé : ~90 appels API sur les communes déjà échantillonnées.

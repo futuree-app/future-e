@@ -77,6 +77,23 @@ export type ClimatMetricDefinition = {
   // OUVRIR UN NOUVEL AXE AMBIANT N'EST PAS UNE OPÉRATION DE CALIBRATION. La rareté statistique rend une
   // métrique CANDIDATE ; elle ne dit pas qu'elle est assez interprétable pour interrompre le lecteur, ni
   // comment elle se départage des autres candidates pour l'unique place de la minute.
+  //
+  // ⚠ CE SEUIL NE GOUVERNE PAS TOUT L'AMBIANT — et le croire serait une erreur de lecture coûteuse.
+  //
+  // Il existe DEUX PORTES vers un constat non demandé, et celle-ci n'en est qu'une :
+  //
+  //   1. LA RARETÉ (ce fichier). Une PROJECTION doit être exceptionnelle — le p95, ~5 % des communes —
+  //      pour ne pas devenir un bruit permanent. C'est ce que calibre `ambientThreshold`.
+  //   2. LE FAIT ÉTABLI (materiality-rules.ts, `ruleFeuAmbiant`). Un fait administratif — un risque
+  //      recensé par l'État — entre sans franchir aucun percentile : il est binaire, il n'y a pas de
+  //      seuil à franchir. Ce qui le borne est sa CONSÉQUENCE DÉCISIONNELLE : directement vérifiable,
+  //      déclenchant une action concrète, et suffisamment important pour la décision. Sans ce dernier
+  //      mot, mouvement de terrain (58,6 % des communes), séisme (57,2 %) et inondation (51,4 %)
+  //      entreraient aussi — officiels et vérifiables, mais si universels qu'ils ne distinguent rien.
+  //
+  // Mesuré le 26/07/2026 : 96,7 % des cartes ambiantes feu passent par la porte 2 (17,6 % de communes
+  // contre 0,6 % pour l'indice). Un lecteur qui ne connaîtrait que `ambientThreshold` conclurait que
+  // l'ambiant concerne ~5 % des dossiers ; il en concerne 20,8 %.
   ambientThreshold?: number;
   unit: "jours" | "mm";
   // LE NOM DU COMPTE, distinct de l'unité. Trois métriques se comptent en « jours » (unit), mais une chip
