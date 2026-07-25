@@ -414,23 +414,26 @@ test("high + major_reserves AVEC 2 favorables : « plusieurs dimensions » est p
   const p = buildConclusionPlan(baseInput({
     coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 2, majorReserveCount: 2,
   }));
-  assert.match(p.blocks[0]!.fallbackText, /^Toulouse répond bien à plusieurs de vos priorités\./);
-  // Le sujet de la 2e phrase est NOMMÉ (« ces points » = les points à contrôler du héros), plus un
-  // « Ils » orphelin collé après une clause favorable, qui se lisait comme un désaccord de nombre.
-  assert.match(p.blocks[0]!.fallbackText, /Ces points peuvent encore peser dans votre décision\./);
+  // LA RÉSERVE D'ABORD, le favorable ensuite. « Ces points » suit immédiatement le héros qui vient de
+  // les nommer : aucun antécédent concurrent ne s'intercale (cf. le commentaire de la branche).
+  assert.match(p.blocks[0]!.fallbackText, /^Ces points pèsent dans votre décision\./);
+  assert.match(p.blocks[0]!.fallbackText, /Par ailleurs, Toulouse répond bien à plusieurs de vos priorités\.$/);
   assert.equal(p.blocks[0]!.fallbackText.includes("structurant"), false);
   assert.match(p.verdict.headline.text, /^Deux points restent à contrôler avant de conclure sur Toulouse\.$/);
 });
 
-test("high + major_reserves : UN favorable mais DEUX points — l'antécédent est nommé, pas de « Ils » orphelin", () => {
+test("high + major_reserves : UN favorable mais DEUX points — le démonstratif suit le héros, jamais le favorable", () => {
   // Le cas vu à l'écran : « Toulouse présente un élément favorable… Ils peuvent encore peser », où
   // « Ils » (2 points) tombait juste après « un élément favorable » (singulier) et sonnait faux.
   const p = buildConclusionPlan(baseInput({
     coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 2,
   }));
-  assert.match(p.blocks[0]!.fallbackText, /présente un élément favorable pour votre projet\./);
-  assert.match(p.blocks[0]!.fallbackText, /Ces points peuvent encore peser dans votre décision\./);
+  assert.match(p.blocks[0]!.fallbackText, /Par ailleurs, Toulouse présente un élément favorable pour votre projet\.$/);
+  assert.match(p.blocks[0]!.fallbackText, /^Ces points pèsent dans votre décision\./);
   assert.equal(p.blocks[0]!.fallbackText.includes("Ils peuvent"), false);
+  // LE DÉFAUT D'ORIGINE, verrouillé : le favorable ne peut plus PRÉCÉDER le démonstratif, sans quoi
+  // « ces points » se lit comme désignant l'élément favorable.
+  assert.equal(/élément favorable[^.]*\. Ces points/.test(p.blocks[0]!.fallbackText), false);
   assert.match(p.verdict.headline.text, /^Deux points restent à contrôler avant de conclure sur Toulouse\.$/);
 });
 

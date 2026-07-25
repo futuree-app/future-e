@@ -844,13 +844,23 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
       // travail. La phrase dit maintenant ce que le lecteur en fait : ils pèsent dans SA décision.
       // « rien ne permet de dire » garde l'honnêteté épistémique sans faire de futur•e le sujet.
       //
-      // Le sujet de la 2e phrase est NOMMÉ (« Ces points / Ce point ») et non un pronom : « Ils »
-      // tombait juste après une clause favorable (« un élément favorable »), donc se lisait comme un
-      // désaccord de nombre et un antécédent flottant. « Ces points » renvoie sans équivoque aux points
-      // à contrôler que le héros vient de compter, et l'accord suit toujours le nombre de réserves (n).
+      // L'ORDRE DES DEUX CLAUSES A ÉTÉ INVERSÉ. La réserve venait après le favorable :
+      //
+      //   « Lège-Cap-Ferret présente un élément favorable pour votre projet. Ce point peut encore peser
+      //     dans votre décision. »
+      //
+      // « Ce point » avait alors DEUX antécédents possibles, et le plus proche était le mauvais : le
+      // lecteur comprenait que c'est l'élément FAVORABLE qui pèse. Vu à l'écran sur un dossier dont le
+      // héros nommait pourtant un risque de feu de forêt. Une première correction avait remplacé « Ils »
+      // par « Ces points » — elle réglait l'accord, pas l'ambiguïté d'antécédent.
+      //
+      // Le démonstratif suit désormais IMMÉDIATEMENT le héros, qui vient de nommer ces points : plus
+      // aucun candidat concurrent entre les deux. Le favorable passe en second, introduit par « Par
+      // ailleurs », qui dit explicitement le changement de registre. C'est aussi l'ordre juste pour un
+      // dossier en réserves majeures : il ne s'ouvre pas sur le positif.
       detail: !input.hasFavorable
         ? `Tant que ${n > 1 ? "ces points ne sont pas levés" : "ce point n'est pas levé"}, rien ne permet de dire que ${voc.repond(nom)}.`
-        : `${plusieurs ? `${nom} répond bien à plusieurs de vos priorités.` : `${voc.elementFavorable(nom)}.`} ${n > 1 ? "Ces points peuvent encore peser" : "Ce point peut encore peser"} dans votre décision.`,
+        : `${n > 1 ? "Ces points pèsent" : "Ce point pèse"} dans votre décision. Par ailleurs, ${plusieurs ? `${nom} répond bien à plusieurs de vos priorités` : voc.elementFavorable(nom)}.`,
     };
   }
 
