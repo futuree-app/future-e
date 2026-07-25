@@ -14,7 +14,8 @@
 // d'ÉLIGIBILITÉ — ils décident qu'un fait mérite d'exister — mais de mauvais critères de SÉLECTION :
 // mesuré sur quatre dossiers réels, un projet à 15 priorités fortes produit des faits TOUS `structuring`
 // et TOUS rattachés à une priorité. Ils s'aplatissent exactement là où on aurait besoin d'eux.
-import type { Dossier, DossierCard, DecisionFact } from "./decision-fact.ts";
+import type { DecisionFact } from "./decision-fact.ts";
+import type { FactComposition } from "./fact-composition.ts";
 import type { Orientation } from "./criteria-registry.ts";
 
 // QUATRE CARTES, plafond GLOBAL. Le chiffre vient de la MESURE, pas d'un principe : sur quatre dossiers
@@ -54,27 +55,46 @@ type Candidat = {
   sujet: string;    // pour la non-redondance
 };
 
-function candidats(dossier: Dossier): Candidat[] {
-  const h = dossier.narrativePlan.verdict.headline;
-  const nommes = new Set([...h.consumedFactIds, ...h.consumedCompositionIds]);
-  const reglesDeclarees = new Set(dossier.criteria.registry.flatMap((c) => c.ruleIds));
-  return dossier.sections.flatMap((s) => s.cards.map((card): Candidat =>
-    card.kind === "composition"
-      ? {
-          cle: card.composition.id, role: "composition",
-          heros: nommes.has(card.composition.id),
-          prio: card.composition.referencedRuleIds.some((r) => reglesDeclarees.has(r)),
-          sujet: (card.composition.kind === "shared_evidence"
-            ? card.composition.headlineCause
-            : card.composition.headlineSubject) ?? card.composition.title,
-        }
-      : {
-          cle: card.fact.id, role: card.fact.role,
-          heros: nommes.has(card.fact.id),
-          prio: reglesDeclarees.has(card.fact.ruleId),
-          sujet: card.fact.role === "mismatch" || card.fact.role === "alignment"
-            ? card.fact.headlineSubject : card.fact.topic,
-        }));
+// CE DONT LA SÉLECTION A BESOIN — et rien de plus. Elle prend les faits AFFICHÉS, pas le dossier
+// assemblé : c'est ce qui lève la circularité entre elle et le verdict. Le verdict doit connaître le
+// périmètre de la synthèse pour en parler juste (« deux points à contrôler ici, trois autres dans le
+// dossier »), et la sélection doit connaître le héros pour savoir ce qui fonde la conclusion. En
+// travaillant sur les mêmes entrées que le plan, elle s'insère AU MILIEU de sa construction : après le
+// héros, avant le détail.
+export type EntreesSelection = {
+  faits: DecisionFact[];
+  compositions: FactComposition[];
+  orientation: Orientation;
+  // Les identifiants que le HÉROS nomme (faits et compositions confondus).
+  nommes: Set<string>;
+  // Les règles qui ont examiné un critère DÉCLARÉ : c'est ce qui rattache une carte à une priorité,
+  // y compris pour les rôles qui ne portent pas de `projectKey` (une verification, par exemple).
+  reglesDeclarees: Set<string>;
+};
+
+// LE SUJET SERT À LA NON-REDONDANCE, et il doit toujours exister : un fait dont le sujet manquerait
+// ferait planter la sélection — donc l'écran entier — pour une comparaison de chaînes. Repli sur
+// l'identifiant, qui est unique par construction : deux cartes sans sujet ne se dédoublonnent pas
+// entre elles, ce qui est le comportement le moins destructeur.
+function sujetDe(x: { headlineSubject?: string; topic?: string; title?: string; id: string }): string {
+  return x.headlineSubject ?? x.topic ?? x.title ?? x.id;
+}
+
+function candidats(e: EntreesSelection): Candidat[] {
+  return [
+    ...e.faits.map((f): Candidat => ({
+      cle: f.id, role: f.role, heros: e.nommes.has(f.id), prio: e.reglesDeclarees.has(f.ruleId),
+      sujet: sujetDe(f.role === "mismatch" || f.role === "alignment" ? f : { topic: f.topic, id: f.id }),
+    })),
+    ...e.compositions.map((c): Candidat => ({
+      cle: c.id, role: "composition", heros: e.nommes.has(c.id),
+      // `referencedRuleIds` est obligatoire sur le type, mais une composition mal formée ne doit pas
+      // faire tomber l'écran entier pour un rattachement de priorité : sans elle, la carte est
+      // simplement considérée comme non rattachée.
+      prio: (c.referencedRuleIds ?? []).some((r) => e.reglesDeclarees.has(r)),
+      sujet: c.kind === "shared_evidence" ? (c.headlineCause ?? c.title ?? c.id) : sujetDe(c),
+    })),
+  ];
 }
 
 // LES CLÉS DES CARTES RETENUES POUR LA MINUTE.
@@ -82,9 +102,9 @@ function candidats(dossier: Dossier): Candidat[] {
 // Tri LEXICOGRAPHIQUE, jamais un score : chaque critère domine le suivant, et l'inclusion de chaque carte
 // se raconte en une phrase. Une addition pondérée produirait des inversions que personne ne saurait
 // expliquer — dans un produit dont c'est justement la promesse.
-export function selectionMinute(dossier: Dossier): Set<string> {
-  const orientation = dossier.criteria.orientation;
-  const tries = candidats(dossier).sort((a, b) => {
+export function selectionMinute(entrees: EntreesSelection): Set<string> {
+  const orientation = entrees.orientation;
+  const tries = candidats(entrees).sort((a, b) => {
     if (a.heros !== b.heros) return a.heros ? -1 : 1;        // 1. il fonde le verdict
     const ra = rangRole(a.role, orientation), rb = rangRole(b.role, orientation);
     if (ra !== rb) return ra - rb;                            // 2. sa nature explique l'orientation
@@ -130,6 +150,7 @@ export function selectionMinute(dossier: Dossier): Set<string> {
 // LES SECTIONS DE LA MINUTE : les mêmes que le dossier, réduites aux cartes retenues. Les sections vides
 // disparaissent. `dossier.sections` n'est jamais modifié — il reste la restitution complète, et c'est lui
 // que le dossier détaillé affichera.
-export function cartesDeLaMinute(dossier: Dossier, retenues: Set<string>): (card: DossierCard) => boolean {
-  return (card) => retenues.has(card.kind === "composition" ? card.composition.id : card.fact.id);
+export function estDansLaMinute(retenues: ReadonlySet<string>) {
+  return (card: { kind: "fact"; fact: { id: string } } | { kind: "composition"; composition: { id: string } }): boolean =>
+    retenues.has(card.kind === "composition" ? card.composition.id : card.fact.id);
 }

@@ -1092,7 +1092,7 @@ test("les réserves sont à CONTRÔLER, la contrainte non examinée est à VÉRI
     mismatchTotal: 1, mismatchShown: 1, reservesShown: 4,
     uncovered: [MER],
   }));
-  assert.match(plan.verdict.detail, /Quatre constats restent par ailleurs à contrôler/);
+  assert.match(plan.verdict.detail, /Quatre constats figurent dans le dossier complet/);
   assert.match(plan.blocks.find((b) => b.key === "unexamined_hard_constraints")!.fallbackText, /à vérifier/);
 });
 
@@ -1322,7 +1322,7 @@ test("le singulier est accordé partout : un écart, un point, un constat", () =
     shownFacts: [mismatchFact("m1", "structuring", "cadre_calme", "le calme")],
     mismatchTotal: 1, mismatchShown: 1, reservesShown: 1,
   }));
-  assert.match(unEcart.verdict.detail, /Cet écart est à peser avant de vous décider\. Un constat reste par ailleurs à contrôler\.$/);
+  assert.match(unEcart.verdict.detail, /Cet écart est à peser avant de vous décider\. Un constat figure dans le dossier complet\.$/);
 
   const unPoint = buildConclusionPlan(baseInput({
     coverage: "high", orientation: "major_reserves", hasFavorable: false, favorableCount: 0, majorReserveCount: 1,

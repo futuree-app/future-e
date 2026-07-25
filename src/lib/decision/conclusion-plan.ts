@@ -16,6 +16,7 @@ import type { FactComposition } from "./fact-composition.ts";
 import type { ProjectPosture } from "../user-project.ts";
 import type { CoverageLevel, Orientation } from "./criteria-registry.ts";
 import { deCommune, aCommune } from "../typography.ts";
+import { selectionMinute } from "./minute-selection.ts";
 
 export type BlockKey = "verdict" | "unexamined_hard_constraints" | "compositions_found" | "uncovered_priorities";
 
@@ -128,6 +129,11 @@ export type ConclusionNarrativePlan = {
   // ensuite) : elle dit QUOI FAIRE à son propos, depuis l'action déjà écrite sur le fait. `null` quand
   // le fait de tête ne porte aucune action (rien à orienter).
   priorityControl: PriorityControl | null;
+  // LES CARTES DE LA SYNTHÈSE (« En une minute »). Le plan la porte parce que le VERDICT en dépend :
+  // il annonce le nombre de contrôles visibles et le nombre restant dans le dossier complet. La laisser
+  // à la vue rendait le verdict incapable de parler juste de ce que le lecteur a sous les yeux.
+  // `dossier.sections` reste la restitution complète.
+  minute: string[];
   verdict: VerdictPresentation;
   verdictLabel: string;   // le statut qui coiffe la carte, dérivé de la MÊME table que la phrase
   verdictTone: VerdictTone;
@@ -146,6 +152,9 @@ export type ConclusionPlanInput = {
   // Les compositions AFFICHÉES. REQUIS, jamais optionnel : un optionnel créerait un troisième état
   // entre « aucune composition » et « champ oublié par l'appelant ».
   shownCompositions: FactComposition[];
+  // LES RÈGLES QUI ONT EXAMINÉ UN CRITÈRE DÉCLARÉ. Sert à la sélection de la synthèse : c'est ce qui
+  // rattache une carte à une priorité, y compris pour les rôles sans `projectKey` (une verification).
+  reglesDeclarees?: string[];
   uncovered: UncoveredConstraint[];
   uncoveredPriorities: { key: string; label: string }[];
   // LA CONDITION TELLE QUE LE LECTEUR L'A POSÉE, jamais le `topic` du fait. Les topics de contraintes
@@ -579,7 +588,29 @@ function favorableNomme(input: ConclusionPlanInput): string | null {
 // Et AUCUNE PHRASE NE PROMET UN POSITIF QUI N'EXISTE PAS. L'architecture ne produit aucun fait
 // favorable déterministe (cf. coast-rules) : les cas favorables tombent donc en POSTURE, et nommer
 // les positifs reste hors périmètre.
-function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
+// LE PÉRIMÈTRE DES CONTRÔLES : ce que la SYNTHÈSE montre, et ce que le dossier contient en plus.
+// Deux nombres, jamais un seul : n'annoncer que le visible laisserait croire que le reste n'existe pas ;
+// n'annoncer que le total contredit l'écran.
+export type PerimetreControles = { visibles: number; enPlus: number };
+
+// « Deux points sont par ailleurs à contrôler. Trois autres figurent dans le dossier complet. »
+//
+// Les deux clauses sont indépendantes : une synthèse peut ne montrer aucun contrôle et le dossier en
+// contenir cinq — c'est même le cas le plus fréquent depuis que la sélection privilégie ce qui fonde le
+// verdict. On ne dit alors QUE la seconde, et on ne prétend pas que rien ne reste à faire.
+function suiteControles(p: PerimetreControles): string {
+  const ici = p.visibles > 0
+    ? ` ${p.visibles > 1 ? `${capitalize(enLettres(p.visibles))} constats restent` : "Un constat reste"} par ailleurs à contrôler.`
+    : "";
+  const ailleurs = p.enPlus > 0
+    ? ` ${p.enPlus > 1
+        ? `${p.visibles > 0 ? capitalize(enLettres(p.enPlus)) + " autres constats" : capitalize(enLettres(p.enPlus)) + " constats"} figurent`
+        : `${p.visibles > 0 ? "Un autre constat" : "Un constat"} figure`} dans le dossier complet.`
+    : "";
+  return `${ici}${ailleurs}`;
+}
+
+function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreControles): VerdictBuild {
   const nom = input.communeNom;
   const a = aCommune(nom);
   const voc = vocabulaire(input.posture);
@@ -693,9 +724,12 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
 
     // Le pool des réserves est DISTINCT de celui des mismatchs : le point nommé par le héros n'en
     // fait pas partie, d'où « par ailleurs », et jamais « ce point fait partie de ».
-    const suite = input.reservesShown > 0
-      ? ` ${input.reservesShown > 1 ? `${capitalize(enLettres(input.reservesShown))} constats restent` : "Un constat reste"} par ailleurs à contrôler.`
-      : "";
+    // LE VERDICT PARLE DU PÉRIMÈTRE QU'IL A SOUS LES YEUX. Il annonçait le compte du DOSSIER (« trois
+    // constats restent par ailleurs à contrôler ») au-dessus d'une synthèse qui n'en montre parfois
+    // aucun : vrai à l'échelle du dossier, faux à l'échelle de ce que le lecteur voit. Depuis que la
+    // synthèse est une SÉLECTION et non un dossier raccourci, les deux périmètres ne coïncident plus,
+    // et le verdict doit dire lequel il décrit — sans laisser croire que le reste n'existe pas.
+    const suite = suiteControles(controles);
     // UN ARBITRAGE A DEUX CÔTÉS. N'en nommer qu'un décrit un renoncement : le lecteur ne voit jamais
     // ce que le lieu offre en échange. Le côté favorable est nommé quand il est PROUVÉ (hasFavorable
     // et favorableCount, les mêmes garanties que coverage=high), et seulement là.
@@ -931,7 +965,40 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
 }
 
 export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarrativePlan {
-  const v = verdictPresentation(input);
+  // LA SÉLECTION S'INSÈRE AU MILIEU DE LA CONSTRUCTION DU VERDICT, et c'est ce qui lève la circularité :
+  // elle a besoin du HÉROS (pour savoir ce qui fonde la conclusion), et le DÉTAIL a besoin d'elle (pour
+  // annoncer le bon nombre de contrôles). On construit donc le verdict une première fois — seul le
+  // héros nous intéresse —, on sélectionne, puis on rebâtit le verdict avec son périmètre.
+  //
+  // Deux passes plutôt qu'un champ mutable : `verdictPresentation` reste une fonction pure de son
+  // entrée, et le périmètre est un paramètre comme un autre. Le coût est nul (aucune I/O, aucun LLM).
+  const heros = verdictPresentation(input, { visibles: 0, enPlus: 0 }).headline;
+  const minute = selectionMinute({
+    faits: input.shownFacts,
+    compositions: input.shownCompositions,
+    orientation: input.orientation,
+    nommes: new Set([...heros.consumedFactIds, ...heros.consumedCompositionIds]),
+    reglesDeclarees: new Set(input.reglesDeclarees ?? []),
+  });
+  // LE PÉRIMÈTRE DES CONTRÔLES. `reservesShown` reste le TOTAL — il est calculé par l'assembleur, qui
+  // seul connaît les compositions porteuses de réserves. Ce qui est nouveau, c'est de savoir combien de
+  // ces contrôles la SYNTHÈSE retient : le reste vit dans le dossier complet, et le verdict le dit.
+  //
+  // Sans les faits sous la main (appelant partiel, test unitaire du verdict seul), les deux périmètres
+  // ne sont pas distinguables : on décrit alors le total, comme avant. Mieux vaut l'ancienne phrase,
+  // vraie à l'échelle du dossier, qu'une répartition inventée.
+  const controles: PerimetreControles = (() => {
+    if (input.shownFacts.length === 0 && input.shownCompositions.length === 0) {
+      return { visibles: input.reservesShown, enPlus: 0 };
+    }
+    const estControle = (id: string): boolean =>
+      input.shownFacts.some((f) => f.id === id && f.role === "verification")
+      || input.shownCompositions.some((c) => c.id === id && c.kind === "grouped_verification");
+    const visibles = [...minute].filter(estControle).length;
+    return { visibles, enPlus: Math.max(0, input.reservesShown - visibles) };
+  })();
+
+  const v = verdictPresentation(input, controles);
 
   // LE VERDICT N'EST JAMAIS GÉNÉRÉ. C'est la phrase qui peut renverser une décision perçue : un modèle
   // qui reformulerait « la lecture reste incomplète » en « ce lieu vous correspond » mentirait sur ce
@@ -953,7 +1020,8 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
   if (input.conclusionState === "project_not_structured") {
     return {
       scope: input.scope, communeNom: input.communeNom, conclusionState: input.conclusionState,
-      posture: input.posture, blocks, reservesCount: 0, lead: { kind: "none" }, priorityControl: null, verdict: v,
+      posture: input.posture, blocks, reservesCount: 0, lead: { kind: "none" }, priorityControl: null,
+      minute: [], verdict: v,
       verdictLabel: v.label, verdictTone: v.tone,
     };
   }
@@ -1041,6 +1109,7 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
     reservesCount: rs.length,
     lead,
     priorityControl,
+    minute: [...minute],
     verdict: v,
     verdictLabel: v.label,
     verdictTone: v.tone,

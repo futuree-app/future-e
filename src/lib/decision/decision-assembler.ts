@@ -147,6 +147,9 @@ export function assembleDossier(
   const mismatchTotal = run.facts.filter((f) => f.role === "mismatch").length;
   const mismatchShown = shown.filter((f) => f.role === "mismatch").length + mismatchComps.length;
   const narrativePlan = buildConclusionPlan({
+    // Les règles qui ont examiné un critère DÉCLARÉ : la sélection de la synthèse s'en sert pour
+    // rattacher une carte à une priorité, y compris quand le rôle ne porte pas de `projectKey`.
+    reglesDeclarees: criteria.registry.flatMap((c) => c.ruleIds),
     scope,
     communeNom,
     conclusionState: state,
