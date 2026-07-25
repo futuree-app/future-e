@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Fragment, Suspense } from "react";
 import type { Dossier, DecisionFact, DossierCard } from "@/lib/decision/decision-fact";
 import { ConclusionBlock, planToBlocks } from "@/components/report/ConclusionBlock";
-import { conditionPorteeParLeBloc, sectionsAffichees, ancresRendues } from "@/lib/decision/dossier-view";
+import { conditionPorteeParLeBloc, sectionsAffichees, ancresRendues, sectionHorsPriorites } from "@/lib/decision/dossier-view";
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 import { FactBody, EvidenceRow, MethodDetails, factSources, factChecks } from "@/components/report/DecisionFactRenderParts";
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
@@ -193,7 +193,10 @@ export function DossierDecisionSection({
                 <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
                 {s.title}
               </div>
-              {SECTION_INTRO[s.key] ? (
+              {/* L'intro « Au-delà de vos priorités » ne s'affiche que si la section n'en porte
+                  aucune : plusieurs règles y déposent des constats rattachés à une priorité déclarée
+                  (inondation, air, bruit, industrie). Cf. sectionHorsPriorites. */}
+              {SECTION_INTRO[s.key] && sectionHorsPriorites(dossier, s) ? (
                 <p className="text-[13px] leading-[1.5] text-ghost mb-4">{SECTION_INTRO[s.key]}</p>
               ) : (
                 <div className="mb-2" />

@@ -396,11 +396,50 @@ test("FEU DÉCLARÉ + indice AU-DESSUS du seuil : le mismatch reste prioritaire 
   assert.equal(f.role, "mismatch"); // pas la carte « risque déclaré » : l'écart chiffré prime
 });
 
-test("FEU NON déclaré + indice sous le seuil : satisfied silencieux, et c'est légitime", () => {
-  const r = run(facts({ climat: EPARGNEE, risquesDeclares: { wildfire: false } }), projetClimat("faible_risque_feu"));
+test("FEU NON recensé + indice sous le seuil + commune PEU boisée : satisfied silencieux, légitime", () => {
+  const r = run(facts({ climat: EPARGNEE, risquesDeclares: { wildfire: false }, boisementPct: 12 }), projetClimat("faible_risque_feu"));
   const e = r.evaluations.find((x) => x.ruleId === "territoire.climat-feu")!;
   assert.equal(e.outcome, "satisfied");
   assert.equal(e.facts.length, 0);
+});
+
+// ── LE BOISEMENT : un facteur de CONTEXTE, jamais une preuve de risque ───────────
+
+test("BOISEMENT élevé sans risque recensé : une VERIFICATION, et plus aucun « satisfait »", () => {
+  // GASPAR ne recense pas partout et notre indice météo est aveugle au massif : deux silences ne font
+  // pas une bonne nouvelle. Le couvert forestier interdit de conclure, il n'établit rien.
+  const r = run(facts({ climat: EPARGNEE, risquesDeclares: { wildfire: false }, boisementPct: 84.7 }), projetClimat("faible_risque_feu"));
+  const e = r.evaluations.find((x) => x.ruleId === "territoire.climat-feu")!;
+  assert.equal(e.outcome, "verification");
+  assert.notEqual(e.outcome, "satisfied");
+  const f = r.facts.find((x) => x.ruleId === "territoire.climat-feu")!;
+  assert.ok(f.role === "verification");
+  assert.equal(f.materialityTier, "secondary");
+  assert.match(f.statement, /la forêt couvre 85 % du territoire communal/);
+  assert.match(f.statement, /10 % de communes les plus boisées/);
+  // JAMAIS un mismatch : un boisement élevé n'est pas un écart au projet établi.
+  assert.notEqual(f.role, "mismatch");
+  // LA LIMITE dit ce que la donnée ne dit pas — sans elle, le lecteur y lirait un risque établi.
+  assert.match(f.limitation!, /ne suffit pas à établir un risque d'incendie/);
+  assert.equal(f.signalConvention, "futur•e signale cet environnement à partir de 70 % de couvert forestier.");
+});
+
+test("BOISEMENT : sous le seuil, aucun signal sur cette seule base", () => {
+  const r = run(facts({ climat: EPARGNEE, risquesDeclares: { wildfire: false }, boisementPct: 55 }), projetClimat("faible_risque_feu"));
+  assert.equal(r.evaluations.find((x) => x.ruleId === "territoire.climat-feu")!.outcome, "satisfied");
+});
+
+test("BOISEMENT : le risque RECENSÉ prime — un seul signal feu, jamais deux", () => {
+  const r = run({ ...CAP_FERRET, climat: EPARGNEE, boisementPct: 84.7 }, projetClimat("faible_risque_feu"));
+  const feux = r.facts.filter((x) => x.ruleId === "territoire.climat-feu");
+  assert.equal(feux.length, 1);
+  assert.equal(feux[0]!.role, "mismatch"); // le recensement, pas le contexte
+});
+
+test("BOISEMENT élevé + indice INDISPONIBLE : la carte de contexte s'affiche quand même", () => {
+  // Une donnée climatique absente ne doit pas faire disparaître le seul signal qui reste.
+  const r = run(facts({ climat: null, risquesDeclares: { wildfire: false }, boisementPct: 84.7 }), projetClimat("faible_risque_feu"));
+  assert.equal(r.evaluations.find((x) => x.ruleId === "territoire.climat-feu")!.outcome, "uncertain");
 });
 
 test("SOURCE MUETTE (null) : on ne conclut pas à sa place — le silence de Géorisques n'est pas un « non »", () => {

@@ -34,6 +34,11 @@ export function mapCommuneToModuleFacts(
     catnatInondation: entry.inondation ? entry.inondation.catnat : null,
     // Chargé par l'APPELANT (comme le climat) : le mapping reste pur, sans I/O.
     risquesDeclares: opts.risquesDeclares ?? null,
+    // La composition du couvert naturel vit dans l'index (OSO 2023) : aucune I/O de plus.
+    boisementPct: (() => {
+      const f = entry.nature?.composition?.foret;
+      return typeof f === "number" ? f : null;
+    })(),
     inondationRisque: entry.inondation ? entry.inondation.risque : null,
     climat: opts.climat ?? null,
     // La santé se construit ICI, sans I/O : air, bruit et exposition industrielle sont déjà dans l'index.

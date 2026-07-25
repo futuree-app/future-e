@@ -112,6 +112,28 @@ export function ancresRendues(dossier: Dossier): string[] {
     .flatMap((s) => s.cards.map((c) => (c.kind === "composition" ? c.composition.id : c.fact.id)));
 }
 
+// « AU-DELÀ DE VOS PRIORITÉS » N'EST VRAI QUE SI LA SECTION NE PORTE AUCUNE PRIORITÉ.
+//
+// Les sections « À contrôler » et « Ce que nous ne savons pas encore » s'introduisent par « Au-delà de
+// vos priorités, … » — ce qui est leur raison d'être : apporter ce que le lecteur n'aurait pas pensé à
+// chercher. Mais plusieurs règles y déposent des constats rattachés à une priorité DÉCLARÉE :
+// l'inondation, l'air, le bruit, l'exposition industrielle. La section affirmait alors le contraire de
+// ce qu'elle montrait — vu à l'écran sur Lège-Cap-Ferret, « le principal point à contrôler :
+// l'exposition à l'inondation » rangé sous « au-delà de vos priorités », sur une priorité posée à 3.
+//
+// Le rattachement se lit dans le REGISTRE : il ne contient que les critères déclarés, et chacun porte
+// les `ruleIds` qui l'ont examiné. Aucune heuristique, aucune liste à tenir à jour.
+//
+// Cas mixte (une carte de priorité + une carte hors priorité) : l'intro tombe. Mieux vaut pas d'intro
+// qu'une intro fausse pour la moitié des cartes.
+export function sectionHorsPriorites(dossier: Dossier, section: DossierSection): boolean {
+  const declarees = new Set(dossier.criteria.registry.flatMap((c) => c.ruleIds));
+  return !section.cards.some((card) =>
+    card.kind === "fact"
+      ? declarees.has(card.fact.ruleId)
+      : card.composition.referencedRuleIds.some((r) => declarees.has(r)));
+}
+
 // CE QUE LE DÉPLIABLE D'UNE COMPOSITION A ENCORE À MONTRER.
 //
 // Chaque patron recopie le constat de ses faits absorbés sur sa FACE : un tradeoff sur ses deux côtés,

@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { assembleDossier } from "./decision-assembler.ts";
-import { conditionPorteeParLeBloc, sectionsAffichees, factsNonNarresParLaFace, ancresRendues } from "./dossier-view.ts";
-import type { DecisionFact, RunResult, RuleEvaluation, Dossier } from "./decision-fact.ts";
+import { conditionPorteeParLeBloc, sectionsAffichees, factsNonNarresParLaFace, ancresRendues, sectionHorsPriorites } from "./dossier-view.ts";
+import type { DecisionFact, RunResult, RuleEvaluation, Dossier, DossierSection } from "./decision-fact.ts";
 import type { FactComposition } from "./fact-composition.ts";
 import type { UserProject } from "../user-project.ts";
 
@@ -244,4 +244,40 @@ test("une composition porte SON id comme ancre, jamais ceux de ses faits absorb�
     compositions: [],
   } as unknown as Dossier;
   assert.deepEqual(ancresRendues(d), ["31555:composition-argiles-ppr"]);
+});
+
+// ── « Au-delà de vos priorités » ne peut pas coiffer une priorité ────────────────
+
+test("une section qui porte une PRIORITÉ déclarée perd son intro « au-delà de vos priorités »", () => {
+  // Vu à l'écran sur Lège-Cap-Ferret : « le principal point à contrôler : l'exposition à l'inondation »
+  // — une priorité posée à 3 — rangé sous « Au-delà de vos priorités, ces constats sont établis ».
+  const d = dossierAvec([verif("v1")]);
+  const section = sectionsAffichees(d).find((s) => s.key === "verifications")!;
+  // Le critère déclaré du fixture (nearSea) a été examiné par la règle "rv" ? non : on le force ici.
+  const avecPriorite = {
+    ...d,
+    criteria: { ...d.criteria, registry: [{ criterionKey: "faible_risque_inondation", kind: "preference", label: "x", coverage: "examined", outcome: "reserve", maxReserveTier: "structuring", ruleIds: ["rv"] }] },
+  } as unknown as Dossier;
+  assert.equal(sectionHorsPriorites(avecPriorite, section), false);
+});
+
+test("une section qui ne porte AUCUNE priorité garde son intro", () => {
+  const d = dossierAvec([verif("v1")]);
+  const section = sectionsAffichees(d).find((s) => s.key === "verifications")!;
+  const sansPriorite = {
+    ...d,
+    criteria: { ...d.criteria, registry: [{ criterionKey: "nature", kind: "preference", label: "x", coverage: "examined", outcome: "favorable", maxReserveTier: null, ruleIds: ["autre.regle"] }] },
+  } as unknown as Dossier;
+  assert.equal(sectionHorsPriorites(sansPriorite, section), true);
+});
+
+test("une COMPOSITION rattachée à une priorité compte aussi", () => {
+  const section = {
+    key: "verifications", title: "t",
+    cards: [{ kind: "composition" as const, composition: { id: "c", referencedRuleIds: ["r-argiles"], absorbedFactIds: [] } as unknown as FactComposition }],
+  } as unknown as DossierSection;
+  const d = {
+    criteria: { registry: [{ criterionKey: "k", ruleIds: ["r-argiles"] }] },
+  } as unknown as Dossier;
+  assert.equal(sectionHorsPriorites(d, section), false);
 });

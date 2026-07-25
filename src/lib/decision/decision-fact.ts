@@ -267,6 +267,11 @@ export type ModuleFacts = CommuneAttributes & {
   // = elle a répondu et ne déclare pas ce risque. Confondre les deux ferait passer une panne pour une
   // bonne nouvelle — le piège que tout ce moteur s'emploie à fermer.
   risquesDeclares: { wildfire: boolean } | null;
+  // LA PART BOISÉE DE LA COMMUNE (OSO 2023, %). Un FACTEUR D'EXPOSITION, jamais une reconnaissance de
+  // risque : une commune très boisée n'est pas une commune à risque d'incendie établi. Le moteur ne
+  // s'en sert donc que pour refuser de conclure « priorité satisfaite » là où l'État n'a rien recensé
+  // et où le contexte, lui, appelle un regard. `null` = donnée absente.
+  boisementPct: number | null;
   inondationRisque: number | null;
   // La trajectoire climatique (DRIAS), chargée par l'APPELANT comme `tailleVille` : le mapping reste pur.
   // NULLABLE mais NON OPTIONNEL : `undefined` créerait un troisième état entre « la donnée est là » et

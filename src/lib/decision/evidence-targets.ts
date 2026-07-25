@@ -32,6 +32,7 @@ export type EvidenceTargetKey =
   // exemple, avec le lot « feu en mismatch »).
   // cadre
   | "nature.green_spaces"
+  | "nature.forest_cover"
   // logement (grain adresse)
   | "housing.energy_label"
   | "housing.clay_shrink_swell"
@@ -48,6 +49,7 @@ export const EVIDENCE_TARGET_MODULE: Record<EvidenceTargetKey, "territoire" | "l
   "risk.flooding": "territoire",
   "risk.wildfire": "territoire",
   "nature.green_spaces": "territoire",
+  "nature.forest_cover": "territoire",
   "housing.energy_label": "logement",
   "housing.clay_shrink_swell": "logement",
   "housing.regulated_zone": "logement",

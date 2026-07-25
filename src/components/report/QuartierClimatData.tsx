@@ -581,6 +581,7 @@ function buildFactors(
         }
       : {
           label: "Taux de boisement",
+    targets: ["nature.forest_cover"],
           val: boisementPct != null ? `${boisementPct}%` : "—",
           col: "var(--green)",
           src: "ADEME · données communales",

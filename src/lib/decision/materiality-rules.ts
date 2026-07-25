@@ -308,6 +308,12 @@ const ruleChaleurAmbiante: DecisionRule = {
 // vérifier », c'est un point où ce lieu correspond MOINS BIEN à ce qu'il cherche. La distinction n'est pas
 // cosmétique — elle change l'orientation du verdict (arbitration), le registre de la carte, et le fait que
 // le héros puisse ou non nommer l'enjeu.
+// LE SEUIL DE COUVERT FORESTIER. 70 % signale 9,4 % des communes (médiane nationale : 27 %, p95 : 79 %) —
+// la même calibration que les quatre axes climatiques, autour d'un dixième du pays. Un seuil plus bas
+// (50 % : 23 % des communes) noierait le signal ; un seuil qu'on n'ose pas dire est un seuil qu'on invente,
+// donc il est écrit sur la carte (`signalConvention`).
+const BOISEMENT_NOTABLE = 70;
+
 export const RULE_FEU = "territoire.climat-feu";
 const ruleFeu: DecisionRule = {
   id: RULE_FEU,
@@ -339,6 +345,41 @@ const ruleFeu: DecisionRule = {
     // l'information la plus utile au lecteur, et elle se lit telle quelle.
     const declare = f.risquesDeclares?.wildfire === true;
     const { verdict, basis } = classifyWildfireDanger(c);
+    // LE CONTEXTE SE TESTE AVANT LES SORTIES PRÉCOCES. Placé après, il n'était jamais atteint : les deux
+    // lignes ci-dessous rendent `satisfied` ou `uncertain` dès que rien n'est recensé — c'est-à-dire
+    // exactement le cas que le boisement existe pour couvrir.
+    const boise = f.boisementPct;
+    const contexteBoise = !declare && verdict !== "unfavorable"
+      && boise != null && boise >= BOISEMENT_NOTABLE;
+    // NI RECENSÉ, NI AU-DESSUS DU SEUIL : reste le CONTEXTE. Un couvert forestier très élevé n'établit
+    // AUCUN risque — l'affirmer serait le symétrique exact du faux positif qu'on vient de fermer, une
+    // affirmation au-delà de ce que la donnée dit. Mais il interdit de conclure « votre priorité est
+    // satisfaite » sur la seule absence de recensement : GASPAR ne recense pas partout, et notre indice
+    // météo est aveugle au massif. Deux silences ne font pas une bonne nouvelle.
+    //
+    // Donc une VERIFICATION (un constat du territoire), jamais un mismatch, et un `satisfied` qui
+    // n'arrive plus. Le seuil de 70 % signale 9,4 % des communes — la calibration des axes climatiques
+    // (médiane nationale : 27 %).
+    if (contexteBoise) {
+      const fait: VerificationFact = {
+        id: `${f.insee}:boisement-contexte`, ruleId: RULE_FEU, sourceFactIds: ["nature.foret"], module: "territoire",
+        role: "verification", materialityTier: "secondary",
+        topic: "l'environnement boisé de la commune",
+        status: "Fortement boisée",
+        statement: `${cap(aCommune(f.nom))}, la forêt couvre ${Math.round(boise!)} % du territoire communal, ce qui la place parmi les 10 % de communes les plus boisées de France.`,
+        // LA LIMITE EST LE CŒUR DE CETTE CARTE, comme pour le risque recensé : sans elle, un lecteur y
+        // lirait un risque établi. On dit ce que la donnée NE dit pas.
+        limitation: "Un couvert forestier élevé ne suffit pas à établir un risque d'incendie : il dépend aussi de l'essence des peuplements, de l'entretien et de la distance entre les habitations et la lisière.",
+        signalConvention: `futur•e signale cet environnement à partir de ${BOISEMENT_NOTABLE} % de couvert forestier.`,
+        evidence: [{
+          factId: "nature.foret", module: "territoire", label: `Couvert naturel · ${f.nom}`,
+          observedValue: `forêt sur ${Math.round(boise!)} % du territoire`, grain: "commune",
+          href: territoireHref, targetKey: "nature.forest_cover",
+        }],
+        action: wildfireExposureAction(f.hasAddress),
+      };
+      return ret("verification", [fait], "couvert forestier notable, aucun risque recensé");
+    }
     if (verdict === "uncertain" && !declare) return ret("uncertain", [], "indice forêt-météo indisponible");
     if (verdict === "under_threshold" && !declare) return ret("satisfied", [], "danger météorologique sous le seuil de signalement");
 
