@@ -772,7 +772,9 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
       // centimètres — vu sur un dossier où un risque de feu recensé, déclaré à poids 1, s'affichait juste
       // en dessous. Le verdict reste le même : ce qui change, c'est qu'on ne nie plus ce qu'on montre.
       detail: input.mismatchShown > 0
-        ? `${input.mismatchShown > 1 ? "Des écarts apparaissent" : "Un écart apparaît"} sans peser assez pour trancher, et aucun avantage net n'y répond.`
+        // « aucun avantage net n'y RÉPOND » faisait de l'avantage la réponse à l'écart : on ne répond pas
+        // à un écart, on le met en balance. Les deux constats sont juxtaposés, pas mis en relation.
+        ? `${input.mismatchShown > 1 ? "Des écarts apparaissent" : "Un écart apparaît"} sans peser assez pour trancher. Aucun avantage net ne se dégage par ailleurs.`
         : "Vos priorités ont pu être examinées ici. Aucun écart marqué n'apparaît, aucun avantage net non plus.",
     };
   }

@@ -313,6 +313,9 @@ test("feu : le mismatch RETROUVE son geste — sans la composition, la bascule a
   assert.equal(c.kind, "mismatch_with_action");
   if (c.kind !== "mismatch_with_action") return;
   assert.equal(c.patternId, "wildfire_exposure");
+  // LE TITRE SUIT LE FONDEMENT et reste factuel : une trajectoire chiffrée n'est pas un recensement,
+  // et il ne s'annonce pas plus fort que ce que le dossier en conclut (le poids peut être secondaire).
+  assert.equal(c.title, "Une trajectoire de danger d'incendie qui s'aggrave");
   assert.equal(c.displaySection, "mismatches");
   assert.deepEqual(c.absorbedFactIds, [f.id]);
   assert.equal(c.headlineSubject, "un environnement peu exposé aux incendies");
@@ -343,4 +346,17 @@ test("feu et chaleur COEXISTENT : deux phénomènes, deux priorités, deux compo
   );
   assert.equal(out.length, 2);
   assert.deepEqual(out.map((c) => c.kind === "mismatch_with_action" && c.patternId).sort(), ["climate_comfort", "wildfire_exposure"]);
+});
+
+test("feu : un risque RECENSÉ porte un titre de recensement, pas de trajectoire", () => {
+  const recense = {
+    ...feuFact(),
+    basis: { kind: "declared_hazard", hazard: "wildfire", source: "gaspar", observedLabel: "Feu de forêt" },
+    statement: "À Antibes, le risque de feu de forêt est officiellement recensé par l'État (Géorisques).",
+  } as unknown as MismatchFact;
+  const out = composeFacts(run([feuEval(recense)]), moduleFacts, project({ faible_risque_feu: 3 }));
+  const c = out[0]!;
+  assert.equal(c.kind === "mismatch_with_action" && c.title, "Un risque de feu de forêt recensé pour la commune");
+  // Aucune interprétation dans le titre : la section porte déjà le jugement relatif au projet.
+  assert.equal(c.title.includes("difficile à concilier"), false);
 });

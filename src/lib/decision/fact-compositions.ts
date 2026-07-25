@@ -148,9 +148,17 @@ function composeWildfireExposure(
     id: `${facts.insee}:composition-danger-incendie`,
     kind: "mismatch_with_action",
     patternId: "wildfire_exposure",
-    // Le titre nomme la TENSION avec le projet, comme son homologue chaleur. Il reste mesuré : c'est un
-    // danger météorologique qui s'aggrave, jamais l'annonce d'un incendie.
-    title: "Un danger d'incendie difficile à concilier avec votre projet",
+    // LE TITRE SUIT LE FONDEMENT, et reste FACTUEL. « Un danger d'incendie difficile à concilier avec
+    // votre projet » portait une interprétation — et la même quel que soit le poids déclaré, si bien
+    // qu'un écart SECONDAIRE (poids 1) s'annonçait comme un signal structurant. La section « Ce qui
+    // correspond moins bien » porte déjà le jugement relatif au projet ; le titre du fait n'a pas à le
+    // redire, et surtout pas plus fort que ce que le dossier en conclut.
+    //
+    // Deux fondements, deux titres : le recensement de l'État n'est pas la trajectoire météo, et écrire
+    // « recensé » sur un mismatch chiffré serait faux.
+    title: feuFact.basis.kind === "declared_hazard"
+      ? "Un risque de feu de forêt recensé pour la commune"
+      : "Une trajectoire de danger d'incendie qui s'aggrave",
     headlineSubject: feuFact.headlineSubject, // « un environnement peu exposé aux incendies »
     summary: feuFact.statement,
     evidence: feuFact.evidence,
