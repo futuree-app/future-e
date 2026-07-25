@@ -135,7 +135,10 @@ function composeClimateComfort(
 function composeWildfireExposure(
   run: RunResult, facts: ModuleFacts, project: UserProject,
 ): MismatchWithActionComposition | null {
-  if (preferenceWeight(project, "faible_risque_feu") < 2) return null;
+  // AUCUN SEUIL DE POIDS ICI. Le seul critère est qu'un mismatch feu ait été ÉMIS : la règle a déjà
+  // tranché ce qui mérite une carte, et le geste doit accompagner la carte partout où elle apparaît —
+  // y compris à poids 1, où un risque recensé reste visible (cf. ruleFeu). Un test `>= 2` recopiait ici
+  // une décision prise là-bas, et il aurait privé de son geste exactement la carte la plus discrète.
   const feu = evaluation(run, RULE_FEU);
   // Seul un mismatch RÉELLEMENT émis se compose : un poids 1 (silencieux, aucun fait) n'est jamais repêché.
   const feuFact = (feu?.facts ?? []).find((f) => f.role === "mismatch") as MismatchFact | undefined;

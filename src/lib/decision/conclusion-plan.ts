@@ -765,7 +765,15 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
       headline: POSTURE(`Dans ce qui a pu être examiné, rien ne penche nettement pour ou contre ${nom}.`),
       // « dimensions » est le mot de la matrice interne (les 27 dimensions du Pack) : le lecteur a des
       // priorités. Et pas de « toutes » : `neutral` ne garantit pas une couverture élevée.
-      detail: "Vos priorités ont pu être examinées ici. Aucun écart marqué n'apparaît, aucun avantage net non plus.",
+      //
+      // « AUCUN ÉCART N'APPARAÎT » NE PEUT PAS S'ÉCRIRE AU-DESSUS D'UNE CARTE D'ÉCART. `neutral` couvre
+      // deux situations : rien à signaler du tout, ou des écarts trop peu matériels pour basculer le
+      // dossier (un seul mismatch secondaire). Dans le second cas la phrase contredisait l'écran, à trois
+      // centimètres — vu sur un dossier où un risque de feu recensé, déclaré à poids 1, s'affichait juste
+      // en dessous. Le verdict reste le même : ce qui change, c'est qu'on ne nie plus ce qu'on montre.
+      detail: input.mismatchShown > 0
+        ? `${input.mismatchShown > 1 ? "Des écarts apparaissent" : "Un écart apparaît"} sans peser assez pour trancher, et aucun avantage net n'y répond.`
+        : "Vos priorités ont pu être examinées ici. Aucun écart marqué n'apparaît, aucun avantage net non plus.",
     };
   }
 

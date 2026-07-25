@@ -413,8 +413,26 @@ test("SOURCE MUETTE (null) : on ne conclut pas à sa place — le silence de Gé
   // Il documente une limite connue, il ne la bénit pas.
 });
 
-test("FEU DÉCLARÉ, poids 1 : silencieux (l'écart est réel, il ne mérite pas de carte)", () => {
+test("FEU RECENSÉ, poids 1 : VISIBLE quand même, mais en secondaire — le dossier ne bascule pas", () => {
+  // La seule exception à la doctrine du silence à poids 1. Un écart GRADUÉ se tait légitimement ; un
+  // risque RECENSÉ est binaire, et le taire cache un fait officiel à qui l'a nommé, même faiblement.
+  // Vu à l'écran : « rien ne penche nettement pour ou contre », sur une commune qui brûlait.
   const r = run({ ...CAP_FERRET, climat: EPARGNEE }, projetClimat("faible_risque_feu", 1));
+  const e = r.evaluations.find((x) => x.ruleId === "territoire.climat-feu")!;
+  assert.equal(e.outcome, "mismatch");
+  const f = r.facts.find((x) => x.ruleId === "territoire.climat-feu")!;
+  assert.ok(f, "le risque recensé doit produire une carte, même à poids 1");
+  assert.equal(f.materialityTier, "secondary"); // la matérialité suit le poids déclaré
+  // UN mismatch secondaire SEUL ne bascule pas le dossier : le lecteur a dit que ça comptait peu, on ne
+  // réécrit pas son verdict pour autant (cf. criteria-registry : il en faut deux, ou un structurant).
+  const summary = buildCriteriaRegistry(projetClimat("faible_risque_feu", 1), r);
+  assert.notEqual(summary.orientation, "arbitration");
+});
+
+test("FEU, poids 1 SANS risque recensé : silencieux, la doctrine générale s'applique", () => {
+  // L'exception ne vaut QUE pour un risque recensé. Un danger météo au-dessus du seuil, déclaré à poids
+  // 1, reste silencieux comme la chaleur : c'est un écart gradué, et le lecteur a dit son importance.
+  const r = run(facts({ climat: EXPOSEE, risquesDeclares: { wildfire: false } }), projetClimat("faible_risque_feu", 1));
   const e = r.evaluations.find((x) => x.ruleId === "territoire.climat-feu")!;
   assert.equal(e.outcome, "mismatch");
   assert.equal(e.facts.length, 0);

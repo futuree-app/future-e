@@ -677,6 +677,22 @@ test("verdict arbitration : nomme le côté favorable PROUVÉ (un demi-arbitrage
   assert.doesNotMatch(`${aucun.verdict.headline.text} ${va.fallbackText}`, /favorable|répond bien/);
 });
 
+test("verdict neutral : la phrase ne NIE pas une carte d'écart affichée", () => {
+  // Vu à l'écran : « Aucun écart marqué n'apparaît » écrit trois centimètres au-dessus d'une carte
+  // « Ce qui correspond moins bien » (un risque de feu recensé, déclaré à poids 1). Le verdict reste
+  // neutre — un mismatch secondaire seul ne tranche pas — mais il ne nie plus ce qu'il montre.
+  const avec = buildConclusionPlan(baseInput({ orientation: "neutral", mismatchTotal: 1, mismatchShown: 1 }));
+  assert.match(avec.verdict.detail, /^Un écart apparaît sans peser assez pour trancher/);
+  assert.equal(avec.verdict.detail.includes("Aucun écart"), false);
+
+  const deux = buildConclusionPlan(baseInput({ orientation: "neutral", mismatchTotal: 2, mismatchShown: 2 }));
+  assert.match(deux.verdict.detail, /^Des écarts apparaissent/);
+
+  // Sans carte d'écart, la phrase d'origine est juste et ne bouge pas.
+  const sans = buildConclusionPlan(baseInput({ orientation: "neutral", mismatchTotal: 0, mismatchShown: 0 }));
+  assert.match(sans.verdict.detail, /Aucun écart marqué n'apparaît/);
+});
+
 test("verdict neutral : ni « bien correspondre » ni « impossible de conclure »", () => {
   const v = buildConclusionPlan(baseInput({ orientation: "neutral", mismatchTotal: 0, mismatchShown: 0 })).blocks.find((b) => b.key === "verdict")!;
   assert.doesNotMatch(v.fallbackText, /bien correspond|impossible/i);

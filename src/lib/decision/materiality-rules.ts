@@ -353,7 +353,18 @@ const ruleFeu: DecisionRule = {
     // peut pas porter est restaurée par la composition `wildfire_exposure`, qui l'absorbe sans rien savoir
     // de laquelle des deux branches l'a produit.
     if (declare && verdict !== "unfavorable") {
-      if (weight < 2) return ret("mismatch", [], "risque de feu recensé, silencieux (poids 1)");
+      // POIDS 1 : LE SEUL CAS OÙ LA DOCTRINE DU SILENCE NE S'APPLIQUE PAS. Ailleurs, « examiné, l'écart est
+      // réel, mais il ne mérite pas une carte » est juste : l'écart est GRADUÉ (« un peu moins bien
+      // classée »), et le taire à poids 1 respecte ce que le lecteur a dit de son importance.
+      //
+      // Un risque RECENSÉ par l'État n'est pas gradué : il est binaire, et le taire revient à cacher un
+      // fait officiel à quelqu'un qui l'a nommé — même faiblement. Vu à l'écran sur Lège-Cap-Ferret, feu
+      // à poids 1 : « rien ne penche nettement pour ou contre », sur une commune qui brûlait.
+      //
+      // Aucune exception à inventer pour autant : la matérialité suit le poids (poids 1 -> `secondary` via
+      // tierFor), et le moteur sait déjà quoi en faire — un mismatch secondaire SEUL ne bascule pas le
+      // dossier en arbitrage (il en faut deux, ou un structurant : cf. criteria-registry). Le lecteur voit
+      // le fait, à sa juste place, sans que son dossier soit réécrit par une priorité qu'il a dite faible.
       const fait: MismatchFact = {
         id: `${f.insee}:climat-feu`, ruleId: RULE_FEU, sourceFactIds: ["georisques.feu"], module: "territoire",
         role: "mismatch", projectKey: key, materialityTier: tierFor(p, key),
@@ -371,7 +382,7 @@ const ruleFeu: DecisionRule = {
           targetKey: "risk.wildfire",
         }],
       };
-      return ret("mismatch", [fait], "risque de feu recensé par l'État, indice météo sous le seuil");
+      return ret("mismatch", [fait], `risque de feu recensé par l'État, indice météo sous le seuil (poids ${weight})`);
     }
     if (verdict === "uncertain") return ret("uncertain", [], "indice forêt-météo indisponible");
     if (verdict === "under_threshold") return ret("satisfied", [], "danger météorologique sous le seuil de signalement");
