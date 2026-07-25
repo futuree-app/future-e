@@ -349,7 +349,10 @@ const ruleFeu: DecisionRule = {
       const fait: VerificationFact = {
         id: `${f.insee}:feu-declare`, ruleId: RULE_FEU, sourceFactIds: ["georisques.feu"], module: "territoire",
         role: "verification", materialityTier: tierFor(p, key),
-        topic: "le risque de feu de forêt déclaré",
+        // « RECENSÉ », le mot du constat, pas « déclaré ». Le statement dit « officiellement recensé par
+        // l'État » : le topic — celui que le héros affiche en tête d'écran — disait « déclaré », plus
+        // flou (déclaré par qui ?) et incohérent avec la carte qu'il annonce, trois lignes plus bas.
+        topic: "le risque de feu de forêt recensé",
         status: "Risque déclaré",
         statement: `${cap(aCommune(f.nom))}, le risque de feu de forêt est officiellement recensé par l'État (Géorisques).`,
         // LA LIMITE EST LE CŒUR DE CETTE CARTE : sans elle, le lecteur ne peut pas comprendre pourquoi le

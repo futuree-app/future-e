@@ -533,6 +533,25 @@ function vocabulaire(posture: ProjectPosture): Vocabulaire {
       };
 }
 
+// LE CÔTÉ FAVORABLE, NOMMÉ QUAND ON PEUT. « présente un élément favorable pour votre projet » ne dit rien
+// au lecteur : il doit descendre dans les cartes pour savoir DE QUOI on parle, alors que le sujet tient en
+// trois mots. La doctrine du lot C vaut ici comme ailleurs — la conclusion NOMME, les cartes démontrent.
+//
+// UNIQUEMENT DES ALIGNMENTS STRUCTURANTS, la même barre que le héros positif : nommer un signal secondaire
+// dans le verdict le couronnerait alors que le produit a justement décidé qu'il ne le méritait pas. Sans
+// alignment structurant affiché, on garde le repli générique — il est vague, mais il ne promet rien de faux.
+//
+// UN SEUL SUJET : cette phrase est un contrepoint, pas un second registre. Deux sujets et le favorable
+// prendrait le pas sur les points à contrôler, dans un dossier qui porte des réserves majeures.
+function favorableNomme(input: ConclusionPlanInput): string | null {
+  const structurant = alignmentCandidates(input.shownFacts).find((c) => c.materialityTier === "structuring");
+  // PAS DE capitalize : cette phrase s'insère APRÈS « Par ailleurs, », donc en milieu de phrase. Les
+  // sujets sont écrits en bas de casse précisément pour ça (cf. `headlineSubject`) — les capitaliser ici
+  // produisait « Par ailleurs, La vie locale répond bien… », le défaut que le lot D avait déjà fermé
+  // ailleurs en servant un `title` de composition au milieu d'une phrase.
+  return structurant ? `${structurant.subject} répond bien à votre projet` : null;
+}
+
 // LA TABLE DE VÉRITÉ DU VERDICT (spec 2.1 §5, révisée par le lot « verdict héros »). Déterministe,
 // mot pour mot, JAMAIS générée. Chaque branche produit EXPLICITEMENT son couple headline + détail :
 // le détail n'est jamais une version tronquée du headline, ce qui serait fragile dès qu'une
@@ -860,7 +879,7 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
       // dossier en réserves majeures : il ne s'ouvre pas sur le positif.
       detail: !input.hasFavorable
         ? `Tant que ${n > 1 ? "ces points ne sont pas levés" : "ce point n'est pas levé"}, rien ne permet de dire que ${voc.repond(nom)}.`
-        : `${n > 1 ? "Ces points pèsent" : "Ce point pèse"} dans votre décision. Par ailleurs, ${plusieurs ? `${nom} répond bien à plusieurs de vos priorités` : voc.elementFavorable(nom)}.`,
+        : `${n > 1 ? "Ces points pèsent" : "Ce point pèse"} dans votre décision. Par ailleurs, ${favorableNomme(input) ?? (plusieurs ? `${nom} répond bien à plusieurs de vos priorités` : voc.elementFavorable(nom))}.`,
     };
   }
 

@@ -437,6 +437,35 @@ test("high + major_reserves : UN favorable mais DEUX points — le démonstratif
   assert.match(p.verdict.headline.text, /^Deux points restent à contrôler avant de conclure sur Toulouse\.$/);
 });
 
+test("major_reserves : le contrepoint NOMME le sujet favorable quand il est structurant", () => {
+  // « présente un élément favorable pour votre projet » ne dit rien : le lecteur doit descendre dans les
+  // cartes pour savoir de quoi on parle. La conclusion NOMME, les cartes démontrent.
+  const p = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 1,
+    shownFacts: [
+      verification("f1", "decision_critical", "c1", "le risque de feu de forêt recensé"),
+      alignmentFact("a1", "structuring", "vie_locale", "la vie locale"),
+    ],
+  }));
+  assert.match(p.blocks[0]!.fallbackText, /Par ailleurs, la vie locale répond bien à votre projet\.$/);
+  // BAS DE CASSE : le sujet s'insère en milieu de phrase, après « Par ailleurs, ».
+  assert.equal(p.blocks[0]!.fallbackText.includes("Par ailleurs, La"), false);
+  assert.equal(p.blocks[0]!.fallbackText.includes("un élément favorable"), false);
+});
+
+test("major_reserves : un favorable SECONDAIRE n'est pas nommé (on ne couronne pas un signal faible)", () => {
+  // Même barre que le héros positif : un poids 2 reste visible en carte, il ne monte pas au verdict.
+  const p = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 1,
+    shownFacts: [
+      verification("f1", "decision_critical"),
+      alignmentFact("a1", "secondary", "vie_locale", "la vie locale"),
+    ],
+  }));
+  assert.match(p.blocks[0]!.fallbackText, /présente un élément favorable pour votre projet\.$/);
+  assert.equal(p.blocks[0]!.fallbackText.includes("La vie locale"), false);
+});
+
 test("high + major_reserves avec UN SEUL favorable : « plusieurs dimensions » serait faux", () => {
   const p = buildConclusionPlan(baseInput({
     coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 1,
