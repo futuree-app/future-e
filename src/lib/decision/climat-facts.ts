@@ -39,10 +39,11 @@ export const CLIMAT_REFERENCE_LABEL = "sur la période de référence 1976-2005"
 // réchauffée : l'écart n'y est donc que de +2,1 °C. Écrire « +2,7 °C » à côté d'une valeur locale
 // laisserait croire que cet écart-là est celui qu'on lit dans le tableau. (Table DRIAS : global +1,5 / +2 /
 // +3 °C = France +2 / +2,7 / +4 °C vs 1900-1930 = +1,4 / +2,1 / +3,4 °C vs 1976-2005.)
-export const TRACC_HORIZON_2050 = {
-  franceVsPreindustriel: 2.7, // le chiffre de la TRACC, celui que le lecteur a vu dans la presse
-  franceVsReference: 2.1, // celui qui correspond aux valeurs de ce tableau
-} as const;
+// (Les deux chiffres de l'horizon 2050 vivaient ici dans une constante que rien ne lisait : +2,7 °C
+// France vs préindustriel — celui de la TRACC, vu dans la presse — et +2,1 °C vs 1976-2005, celui qui
+// correspond aux valeurs de ce tableau. Ils restent dans le commentaire ci-dessus, à leur place : une
+// note documentaire n'a pas à prendre la forme d'un `export const`, qui laisse croire qu'un calcul en
+// dépend.)
 
 export const CLIMAT_CONVENTIONS_VERSION = "clim-conv-1";
 
@@ -104,7 +105,10 @@ export const CLIMAT_METRICS: Record<ClimatMetricKey, ClimatMetricDefinition> = {
 export type ClimatAxe = {
   reference: number | null; // fin du XXe siècle, RECONSTRUITE. `null` = non reconstructible.
   projete: number | null; // à l'horizon 2050. `null` = la décision ne peut pas se prendre.
-  notable: boolean; // projete >= seuil. Un projete ABSENT n'est jamais « non notable ».
+  // ATTENTION : `notable` est figé sur le seuil DÉCLARÉ, au moment de construire les faits. Il répond à
+  // « cet axe mérite-t-il d'être dit à qui l'a priorisé ? », jamais à « … à qui ne l'a pas demandé ? ».
+  // Pour cette seconde question, passer par `seuilApplicable` avec l'exigence voulue.
+  notable: boolean; // projete >= seuil DÉCLARÉ. Un projete ABSENT n'est jamais « non notable ».
   threshold: number;
   unit: "jours" | "mm";
   countNoun?: "jour" | "nuit"; // hérité de la définition : porte « nuit » pour les nuits tropicales.
@@ -227,11 +231,18 @@ export function wildfireExposureAction(hasAddress: boolean): DecisionAction {
 // `under_threshold`). Un indice non lu ne prouve pas un territoire épargné.
 // LE SEUIL QUI S'APPLIQUE, selon qu'on répond à une question posée ou qu'on en pose une.
 //
+// EXPORTÉ, et il doit l'être : dès qu'un seuil devient conditionnel, TOUT CE QUI LE CITE le devient —
+// le texte du constat, les preuves qui l'accompagnent, la convention affichée sur la carte. Le premier
+// jet ne l'avait rendu conditionnel qu'au POINT DE DÉCISION : la carte chaleur ambiante apparaissait
+// aux bons seuils (10 j / 39 nuits) mais racontait les axes retenus par `axe.notable`, figé sur les
+// seuils déclarés (8 / 25). Sur 31 % des 2 683 communes concernées, le texte parlait donc d'un axe qui
+// ne franchissait pas le seuil appliqué, et annonçait une convention qu'on n'appliquait pas.
+//
 // Un axe SANS `ambientThreshold` n'a pas de comportement ambiant : demander son seuil ambiant est une
 // erreur de programmation, pas un cas de donnée. Plutôt que de replier silencieusement sur le seuil
 // déclaré — ce qui produirait exactement le constat trop bavard qu'on vient de fermer — on lève. Le
 // défaut se voit en test, jamais à l'écran d'un lecteur.
-function seuilApplicable(
+export function seuilApplicable(
   m: ClimatMetricDefinition, axe: ClimatAxe, exigence: "declaree" | "ambiante",
 ): number {
   if (exigence === "declaree") return axe.threshold;

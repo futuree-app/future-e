@@ -63,7 +63,10 @@ const SPECS: SizeSpec[] = [
   },
 ];
 
-export const AGGLOMERATION_KEYS: PreferenceKey[] = SPECS.map((s) => s.key);
+// (Il exista ici un `AGGLOMERATION_KEYS` listant les clés couvertes. Rien ne le lisait : la couverture des critères se
+// dérive des `projectKeys` que chaque ÉVALUATION rend (cf. criteria-registry.ts), c'est-à-dire de ce que
+// les règles ont réellement examiné sur ce dossier — pas d'une liste tenue en parallèle, qui aurait pu
+// diverger sans que rien ne le dise.)
 // Le sujet d'une priorité de taille, lisible depuis la composition qui absorbe ces faits : elle doit
 // pouvoir nommer les priorités desservies avec LES MÊMES MOTS que le héros, jamais une seconde
 // formulation entretenue en parallèle.

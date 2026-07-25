@@ -65,7 +65,10 @@ const SPECS: AbsenceSpec[] = [
   },
 ];
 
-export const ABSENCE_KEYS: PreferenceKey[] = SPECS.map((s) => s.key);
+// (Il exista ici un `ABSENCE_KEYS` listant les clés couvertes. Rien ne le lisait : la couverture des critères se
+// dérive des `projectKeys` que chaque ÉVALUATION rend (cf. criteria-registry.ts), c'est-à-dire de ce que
+// les règles ont réellement examiné sur ce dossier — pas d'une liste tenue en parallèle, qui aurait pu
+// diverger sans que rien ne le dise.)
 
 function makeAbsenceRule(spec: AbsenceSpec): DecisionRule {
   const id = `territoire.absence-${spec.key}`;

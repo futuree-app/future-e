@@ -13,7 +13,10 @@ import { COAST_PROXIMITY_CONVENTION, classifyCoastDistance } from "./coast-facts
 const territoireHref = "/rapport/quartier";
 const RULE_ID = "territoire.mer-proximite_mer";
 
-export const COAST_KEYS: PreferenceKey[] = ["proximite_mer"];
+// (Il exista ici un `COAST_KEYS` listant les clés couvertes. Rien ne le lisait : la couverture des critères se
+// dérive des `projectKeys` que chaque ÉVALUATION rend (cf. criteria-registry.ts), c'est-à-dire de ce que
+// les règles ont réellement examiné sur ce dossier — pas d'une liste tenue en parallèle, qui aurait pu
+// diverger sans que rien ne le dise.)
 
 function makeCoastRule(): DecisionRule {
   const id = RULE_ID;

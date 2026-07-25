@@ -15,7 +15,11 @@
 // habitations). C'est vrai au grain PARCELLE, pas commune. Le forcer ici reproduirait la faute qu'on a
 // refusée sur la sécheresse.
 
-export const SANTE_CONVENTIONS_VERSION = "sante-conv-1";
+// PAS DE VERSION DE CONVENTION ICI, et c'est volontaire. Il en existait une (`sante-conv-1`) que rien
+// ne posait jamais : les faits de santé sont des VERIFICATIONS, qui ne portent pas de `basis`, donc pas
+// de `conventionId`. Une version que rien n'estampille ne verrouille rien — elle donne seulement
+// l'illusion qu'un cache saurait s'invalider. Le jour où un fait de santé portera une base versionnée,
+// la version naîtra avec elle.
 
 // ── L'AIR ────────────────────────────────────────────────────────────────────
 //
@@ -31,7 +35,10 @@ export const SANTE_CONVENTIONS_VERSION = "sante-conv-1";
 // « aussi pur que l'OMS le recommande », il y a un espace que notre grammaire ne sait pas encore dire.
 export const AIR_NO2_OMS = 10; // µg/m³, moyenne annuelle (OMS 2021)
 export const AIR_PM25_UE_2030 = 10; // µg/m³, moyenne annuelle (valeur limite UE applicable en 2030)
-export const AIR_PM25_OMS = 5; // µg/m³ : la recommandation OMS. AUCUNE commune française ne l'atteint.
+// (La recommandation OMS pour les particules fines — 5 µg/m³ — n'est PAS une constante du code : aucune
+// règle ne s'y compare, puisque aucune commune française ne l'atteint. Elle est dite dans le commentaire
+// ci-dessus, où elle explique pourquoi un `satisfied` sur l'air ne veut pas dire « l'air est pur ici ».
+// Le seuil réellement opposé aux PM2,5 est la valeur limite européenne 2030, ci-dessus.)
 
 // ── LE BRUIT ─────────────────────────────────────────────────────────────────
 //

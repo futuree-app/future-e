@@ -8,7 +8,9 @@
 // bande [low, high] est large, et une commune à cheval sur un seuil rend neutral : la bande ne prétend
 // jamais à une précision qu'un score arrondi n'a pas.
 
-export const MISMATCH_CONVENTIONS_VERSION = "mismatch-conv-1"; // la DOCTRINE (extrême, ex æquo)
+// (Il exista un `MISMATCH_CONVENTIONS_VERSION` pour la doctrine — extrême, ex æquo — que rien ne posait
+// sur un fait : les bases relatives portent `distributionVersion`, le millésime des données, pas une
+// version de doctrine. Retiré. Ce qui n'estampille rien ne verrouille rien.)
 export const MISMATCH_DISTRIBUTION_VERSION = "mismatch-dist-2026-07-15"; // le MILLÉSIME des données classées
 export const EXTREME_SHARE = 0.2;
 

@@ -261,7 +261,9 @@ test("chaleur AMBIANTE : non déclarée + exposition notable -> une verification
   assert.match(f.statement, /Les nuits tropicales/);
   assert.equal(f.action?.type, "renseigner_adresse"); // sans adresse : la seule manœuvre dans le produit
   assert.ok(f.limitation?.includes("commune"));
-  assert.equal(f.signalConvention, "futur•e signale cette exposition à partir de 8 jours par an au-dessus de 35 °C, ou de 25 nuits tropicales par an.");
+  // LE SEUIL AFFICHÉ EST CELUI QU'ON APPLIQUE : 10 et 39 (constats non demandés), pas 8 et 25 (priorités
+  // déclarées). Une convention qu'on n'applique pas est pire qu'une convention absente.
+  assert.equal(f.signalConvention, "futur•e signale cette exposition à partir de 10 jours par an au-dessus de 35 °C, ou de 39 nuits tropicales par an, hors priorité déclarée.");
   // UNE DIMENSION, UN SIGNAL : ruleChaleur ne dit rien (non déclarée), donc aucun mismatch chaleur.
   assert.equal(r.evaluations.find((x) => x.ruleId === "territoire.climat-chaleur")!.outcome, "not_applicable");
   assert.equal(r.facts.some((x) => x.ruleId === "territoire.climat-chaleur"), false);
@@ -831,4 +833,41 @@ test("INVARIANT : sous son seuil ambiant, un axe ambiant ne produit AUCUNE carte
     const r = run(facts({ climat: buildClimatFacts(sc)!, hasAddress: true }), sansPriorite);
     assert.equal(r.facts.length, 0, `« ${nom} » parle sous son seuil ambiant`);
   }
+});
+
+test("AMBIANT : le TEXTE ne parle QUE des axes qui franchissent le seuil appliqué", () => {
+  // LE CAS 04004 (Barcelonnette), chiffres DRIAS réels : 11,4 jours > 35 °C — au-dessus du seuil ambiant
+  // (10), donc la carte existe — et 34,5 nuits tropicales, SOUS le seuil ambiant (39). La narration
+  // filtrait sur `axe.notable`, figé sur les seuils déclarés (8 / 25) : elle racontait donc les nuits
+  // tropicales, et annonçait une convention à 8 et 25 que la règle n'appliquait pas. Mesuré à l'époque
+  // sur 31,4 % des 2 683 communes où cette carte apparaît.
+  const sc: GwlScenarios = { gwl20: { h: "2050", v: {
+    NORTX35D_yr: 11.4, ATX35D_yr: 8, NORTR_yr: 34.5, ATR_yr: 20, NORIFM40_yr: 0, AIFM40_yr: 0,
+    NORRx1d_yr: 0, ARRx1d_yr: 0,
+  } } };
+  const r = run(facts({ climat: buildClimatFacts(sc)! }), project({ reformulation: "x", hardConstraints: {}, preferences: [] }));
+  const f = r.facts.find((x) => x.ruleId === "territoire.verification-chaleur-future")!;
+  assert.ok(f, "11,4 jours > 35 °C franchit le seuil ambiant : la carte existe");
+  assert.match(f.statement, /Les jours au-dessus de 35 °C/);
+  assert.doesNotMatch(f.statement, /nuits tropicales/,
+    "34,5 nuits ne franchissent pas le seuil ambiant (39) : la carte n'en parle pas");
+  // LA PREUVE SUIT LE TEXTE (le bug d'Antibes) : un seul axe raconté, une seule preuve.
+  assert.equal(f.evidence!.length, 1);
+  // ET LA CONVENTION AUSSI : elle ne cite pas un seuil pour un axe dont la carte ne parle pas.
+  assert.equal(f.signalConvention, "futur•e signale cette exposition à partir de 10 jours par an au-dessus de 35 °C, hors priorité déclarée.");
+});
+
+test("DÉCLARÉ : la même commune, priorité posée, obtient sa réponse au seuil déclaré", () => {
+  // Le pendant : 34,5 nuits tropicales dépassent bien le seuil déclaré (25). À qui l'a demandé, on répond.
+  const sc: GwlScenarios = { gwl20: { h: "2050", v: {
+    NORTX35D_yr: 11.4, ATX35D_yr: 8, NORTR_yr: 34.5, ATR_yr: 20, NORIFM40_yr: 0, AIFM40_yr: 0,
+    NORRx1d_yr: 0, ARRx1d_yr: 0,
+  } } };
+  const r = run(facts({ climat: buildClimatFacts(sc)! }), projetClimat("faible_chaleur"));
+  const f = r.facts.find((x) => x.ruleId === "territoire.climat-chaleur")!;
+  assert.equal(f.role, "mismatch");
+  // Les deux axes sont racontés : au seuil déclaré, 34,5 nuits sont notables. Pas de `signalConvention`
+  // ici — un mismatch porte un constat ÉTABLI, il n'annonce pas une convention de signalement.
+  assert.match(f.statement, /nuits tropicales/);
+  assert.match(f.statement, /Les jours au-dessus de 35 °C/);
 });

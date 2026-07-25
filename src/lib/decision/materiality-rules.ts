@@ -28,7 +28,8 @@ import { AGGLOMERATION_CATEGORIES } from "./agglomeration-facts.ts";
 import { toCommuneAttributes } from "./module-facts-map.ts";
 import {
   trajectoirePhrase, fmtClimatCount, classifyClimateComfort, classifyWildfireDanger,
-  summerComfortAction, wildfireExposureAction, CLIMAT_HORIZON_LABEL, CLIMAT_METRICS, type ClimatAxe,
+  summerComfortAction, wildfireExposureAction, CLIMAT_HORIZON_LABEL, CLIMAT_METRICS, seuilApplicable,
+  type ClimatAxe,
 } from "./climat-facts.ts";
 import {
   bruitEnPhrase, industrieEnPhrase, industrieGlose, distanceEnPhrase,
@@ -184,26 +185,41 @@ const LIMITATION_CLIMAT = "Cette trajectoire est lue à l'échelle de la commune
 // AMBIANTE (non déclarée, ruleChaleurAmbiante) : mêmes trajectoires jours/nuits, même preuve suivant le
 // texte (le bug d'Antibes), même convention de seuil. Ce qui DIFFÈRE entre les deux, c'est le RÔLE du fait
 // (un écart au projet vs un constat du territoire), pas ce qu'il raconte du climat.
-function chaleurNarration(nom: string, jours: ClimatAxe, nuits: ClimatAxe): { statement: string; evidence: EvidenceRef[]; seuils: string } {
+// LA NARRATION SUIT L'EXIGENCE APPLIQUÉE, pas `axe.notable`.
+//
+// `notable` est figé sur le seuil DÉCLARÉ. Utilisé tel quel par la règle AMBIANTE, il faisait parler la
+// carte d'axes qui ne franchissaient pas le seuil appliqué : mesuré sur les 2 683 communes où la carte
+// ambiante apparaît, 31,4 % étaient dans ce cas (04004 : 11,4 jours > 35 °C, légitime, mais 34,5 nuits
+// tropicales racontées alors que le seuil ambiant est à 39). Le texte, les preuves et la convention
+// affichée se déduisent donc tous les trois du MÊME seuil que la décision d'afficher.
+function chaleurNarration(
+  nom: string, jours: ClimatAxe, nuits: ClimatAxe, exigence: "declaree" | "ambiante" = "declaree",
+): { statement: string; evidence: EvidenceRef[]; seuils: string } {
+  const seuilJours = seuilApplicable(CLIMAT_METRICS.joursTresChauds, jours, exigence);
+  const seuilNuits = seuilApplicable(CLIMAT_METRICS.nuitsTropicales, nuits, exigence);
+  const retenu = (a: ClimatAxe, seuil: number): boolean => a.projete != null && a.projete >= seuil;
+  const jRetenu = retenu(jours, seuilJours), nRetenu = retenu(nuits, seuilNuits);
+
   const phrases: string[] = [];
-  if (jours.notable) phrases.push(trajectoirePhrase(jours, "Les jours au-dessus de 35 °C"));
+  if (jRetenu) phrases.push(trajectoirePhrase(jours, "Les jours au-dessus de 35 °C"));
   // « Nuit tropicale » est un terme technique (Météo-France) : on le donne, puis on le TRADUIT dans le corps
   // du lecteur, après deux points, SANS absolu (« peine à récupérer », pas « ne récupère plus »). Quand les
   // jours sont aussi notables, la 2e trajectoire hérite du cadre (« de 33 à 69 par an »).
-  if (nuits.notable) {
-    const sujetNuits = jours.notable ? "Les nuits tropicales, elles," : "Les nuits tropicales";
+  if (nRetenu) {
+    const sujetNuits = jRetenu ? "Les nuits tropicales, elles," : "Les nuits tropicales";
     phrases.push(
-      `${trajectoirePhrase(nuits, sujetNuits, { heriteCadre: jours.notable })} : des nuits où la température ne redescend pas sous 20 °C, et où le corps peine à récupérer`,
+      `${trajectoirePhrase(nuits, sujetNuits, { heriteCadre: jRetenu })} : des nuits où la température ne redescend pas sous 20 °C, et où le corps peine à récupérer`,
     );
   }
+  // LA CONVENTION DIT LE SEUIL RÉELLEMENT APPLIQUÉ, et seulement pour les axes dont la carte parle.
   const seuils = [
-    jours.notable ? `${jours.threshold} jours par an au-dessus de 35 °C` : null,
-    nuits.notable ? `${nuits.threshold} nuits tropicales par an` : null,
+    jRetenu ? `${seuilJours} jours par an au-dessus de 35 °C` : null,
+    nRetenu ? `${seuilNuits} nuits tropicales par an` : null,
   ].filter(Boolean).join(", ou de ");
   // LA PREUVE SUIT LE TEXTE : seul l'axe dont le constat parle entre en preuve (le bug d'Antibes).
   const evidence = [
-    ...(jours.notable ? [climatEvidence(nom, "joursTresChauds", jours)] : []),
-    ...(nuits.notable ? [climatEvidence(nom, "nuitsTropicales", nuits)] : []),
+    ...(jRetenu ? [climatEvidence(nom, "joursTresChauds", jours)] : []),
+    ...(nRetenu ? [climatEvidence(nom, "nuitsTropicales", nuits)] : []),
   ];
   return { statement: `${phrases.join(". ")}.`, evidence, seuils };
 }
@@ -289,14 +305,14 @@ const ruleChaleurAmbiante: DecisionRule = {
 
     // verdict "unfavorable" : un constat AMBIANT du territoire, au grain commune. Il est SECONDARY : le
     // lecteur ne l'a pas priorisé, il ne couronne donc jamais un héros ni ne pèse comme une priorité.
-    const { statement, evidence, seuils } = chaleurNarration(f.nom, c.joursTresChauds, c.nuitsTropicales);
+    const { statement, evidence, seuils } = chaleurNarration(f.nom, c.joursTresChauds, c.nuitsTropicales, "ambiante");
     const fact: VerificationFact = {
       id: `${f.insee}:verification-chaleur-future`, ruleId: RULE_CHALEUR_AMBIANTE,
       sourceFactIds: ["climat.joursTresChauds", "climat.nuitsTropicales"], module: "territoire",
       role: "verification", materialityTier: "secondary",
       topic: "les fortes chaleurs",
       statement,
-      signalConvention: `futur•e signale cette exposition à partir de ${seuils}.`,
+      signalConvention: `futur•e signale cette exposition à partir de ${seuils}, hors priorité déclarée.`,
       limitation: LIMITATION_CLIMAT,
       evidence,
       // Le renvoi au confort du logement : même geste que partout (source de vérité partagée).
