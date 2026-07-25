@@ -1,4 +1,5 @@
 import "server-only";
+import { riskFlagsFromLabels, normalizeLabel } from "./georisques-flags.ts";
 import { buildRegulatoryPlans, type RegulatoryPlan } from "./pprn-zonage.ts";
 
 type GasparRiskDetail = {
@@ -142,13 +143,6 @@ const summaryCache = new Map<string, Promise<GeorisquesSummary>>();
 const addressSummaryCache = new Map<string, Promise<GeorisquesAddressSummary>>();
 const parcelSummaryCache = new Map<string, Promise<GeorisquesParcelSummary>>();
 
-function normalizeLabel(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
-
 async function fetchJson<T>(pathname: string, searchParams: URLSearchParams) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -232,29 +226,7 @@ async function loadGeorisquesSummary(inseeCode: string): Promise<GeorisquesSumma
     ),
   );
 
-  const normalizedLabels = riskLabels.map(normalizeLabel);
-  const flags = {
-    flood: normalizedLabels.some((label) => label.includes("inondation")),
-    marineSubmersion: normalizedLabels.some((label) =>
-      label.includes("submersion marine"),
-    ),
-    landslide: normalizedLabels.some((label) =>
-      label.includes("mouvement de terrain"),
-    ),
-    clay: normalizedLabels.some(
-      (label) =>
-        label.includes("tassements differentiels") ||
-        label.includes("argile"),
-    ),
-    storm: normalizedLabels.some((label) => label.includes("tempete")),
-    seismic:
-      Boolean(seismicItem?.code_zone) ||
-      normalizedLabels.some((label) => label.includes("seisme")),
-    // PPRIF ou risque incendie déclaré dans GASPAR
-    wildfire: normalizedLabels.some(
-      (label) => label.includes("incendie") || label.includes("feux de foret"),
-    ),
-  };
+  const flags = riskFlagsFromLabels(riskLabels, Boolean(seismicItem?.code_zone));
 
   return {
     inseeCode,
