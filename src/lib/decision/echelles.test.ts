@@ -97,3 +97,16 @@ test("les trois échelles sont bien distinctes et exhaustives", () => {
   const obtenues = [...new Set(Object.values(ECHELLE_PAR_GRAIN))];
   assert.deepEqual(obtenues.sort(), [...attendues].sort());
 });
+
+test("LIMITE CONNUE : une distance ancrée sur l'adresse part aujourd'hui dans « logement »", () => {
+  // Le grain dit l'ANCRE du calcul, pas le SUPPORT du constat. Pour une surface (grand-IRIS) ou un
+  // attribut du bâtiment (DPE), les deux coïncident. Pour une distance, ils divergent : « la gare est à
+  // 8 minutes » se mesure DEPUIS l'adresse mais décrit l'environnement.
+  //
+  // Ce test FIGE l'état actuel plutôt qu'il ne le bénit : il tombera le jour où l'on distinguera ancre
+  // et support — ce qu'il faudra faire avant de faire entrer l'Autour dans le moteur.
+  const distanceDepuisAdresse = fait("adresse", {
+    ruleId: "hard.nearPlace", topic: "la proximité de la gare",
+  } as Partial<DecisionFact>);
+  assert.equal(echelleDuFait(distanceDepuisAdresse), "logement");
+});

@@ -24,6 +24,20 @@ import type { FactComposition } from "./fact-composition.ts";
 
 export type Echelle = "territoire" | "quartier" | "logement";
 
+// ⚠ LIMITE CONNUE : `grain` dit aujourd'hui L'ANCRE DU CALCUL, pas le SUPPORT SPATIAL du constat.
+//
+// Les deux coïncident pour une surface (le grand-IRIS de l'îlot de chaleur : ancre et support sont le
+// secteur) et pour un attribut du bâtiment (le DPE : ancre et support sont l'adresse). Ils DIVERGENT pour
+// une distance : « la gare est à 8 minutes » est ANCRÉE sur l'adresse — c'est de là qu'on mesure — mais
+// DÉCRIT l'environnement proche, pas le logement. `hard-constraint-rules` pose d'ailleurs déjà
+// `grain: "adresse"` dès qu'un point d'adresse existe : ces faits partiraient donc dans « logement ».
+//
+// Ce n'est pas encore un bug visible : aucune règle de distance n'alimente le dossier aujourd'hui, et le
+// premier fait sectoriel (l'îlot de chaleur) est une SURFACE, sans ambiguïté. Mais il faudra distinguer
+// l'ancre du support AVANT de faire entrer l'Autour (commerces, écoles, espaces verts) dans le moteur —
+// et surtout ne pas résoudre ça par une exception « telle règle va dans Quartier », qui rétablirait
+// l'appartenance que cette projection existe pour supprimer.
+
 // `unite_urbaine` est du TERRITOIRE, pas du quartier : c'est une maille PLUS LARGE que la commune
 // (l'agglomération), jamais plus fine. La confondre avec le voisinage inverserait le sens de lecture.
 export const ECHELLE_PAR_GRAIN: Record<EvidenceRef["grain"], Echelle> = {
