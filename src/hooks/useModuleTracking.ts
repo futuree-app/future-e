@@ -12,7 +12,12 @@ type UseModuleTrackingOptions = GeoContext & {
 };
 
 export function useModuleTracking({ moduleId, source = "page", commune, inseeCode, reportId }: UseModuleTrackingOptions) {
-  const startRef = useRef(Date.now());
+  // PAS DE `Date.now()` PENDANT LE RENDU : une valeur impure calculée là peut changer d'un passage à
+  // l'autre, et React ne garantit pas qu'un rendu soit conservé. L'effet ci-dessous pose déjà le vrai
+  // départ (`startRef.current = Date.now()`) : l'initialisation au rendu était redondante ET instable.
+  // `null` tant que l'effet n'a pas couru ; les durées retombent alors sur 0 plutôt que sur un écart
+  // calculé depuis un instant arbitraire.
+  const startRef = useRef<number | null>(null);
   const firedRef = useRef(new Set<number>());
   const maxScrollRef = useRef(0);
 
@@ -46,7 +51,7 @@ export function useModuleTracking({ moduleId, source = "page", commune, inseeCod
             scroll_depth: threshold,
             scroll_percent: threshold,
             scroll_percentage: threshold,
-            time_spent_seconds: Math.round((Date.now() - startRef.current) / 1000),
+            time_spent_seconds: Math.round((Date.now() - (startRef.current ?? Date.now())) / 1000),
             ...mod,
             report_id: geo.report_id,
             commune: geo.commune,
@@ -69,8 +74,8 @@ export function useModuleTracking({ moduleId, source = "page", commune, inseeCod
         scroll_depth_pct: maxScrollRef.current,
         scroll_percent: maxScrollRef.current,
         scroll_percentage: maxScrollRef.current,
-        time_spent_seconds: Math.round((Date.now() - startRef.current) / 1000),
-        time_spent_sec: Math.round((Date.now() - startRef.current) / 1000),
+        time_spent_seconds: Math.round((Date.now() - (startRef.current ?? Date.now())) / 1000),
+        time_spent_sec: Math.round((Date.now() - (startRef.current ?? Date.now())) / 1000),
         ...mod,
         report_id: geo.report_id,
         commune: geo.commune,

@@ -127,7 +127,12 @@ export default function QuartierSynthesis({
   const seedDiscovery = !isResidence && initialDiscovery ? initialDiscovery : { priority: "", concern: "" };
   const [discovery, setDiscovery] = useState(seedDiscovery);
   const discoveryRef = useRef(discovery);
-  discoveryRef.current = discovery;
+  // LA REF SE MET À JOUR APRÈS LE COMMIT, pas pendant le rendu. Écrire une ref en plein rendu la rend
+  // dépendante d'un passage que React peut abandonner ou rejouer. Le comportement est identique ici :
+  // `fetchSynthesis` la lit depuis un gestionnaire d'événement, donc toujours après cet effet.
+  useEffect(() => {
+    discoveryRef.current = discovery;
+  });
   const [usedDiscoveryKey, setUsedDiscoveryKey] = useState("");
   const [discoveryOpen, setDiscoveryOpen] = useState(false);
 

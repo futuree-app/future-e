@@ -26,6 +26,18 @@ const eslintConfig = defineConfig([
     // Archive de design décompressée, jamais suivie par git :
     "Futur.e Design System/**",
   ]),
+  {
+    rules: {
+      // L'APOSTROPHE N'EST PAS ÉCHAPPÉE. La règle protège d'un rendu ambigu pour `>`, `"` et `}` ;
+      // pour `'`, elle n'apporte aucune correction utile et coûte cher à un produit dont les textes
+      // français sont la matière première : 82 occurrences, et un JSX où « L&apos;exposition
+      // n&apos;est pas établie » remplace « L'exposition n'est pas établie ». On garde donc la règle
+      // pour les caractères réellement ambigus, et on autorise l'apostrophe.
+      //
+      // Le corollaire : plus d'incohérence entre fichiers (certains échappaient, d'autres non).
+      "react/no-unescaped-entities": ["error", { forbid: [">", "\"", "}"] }],
+    },
+  },
 ]);
 
 export default eslintConfig;

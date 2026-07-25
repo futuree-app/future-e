@@ -4,6 +4,7 @@ import { useRef } from "react";
 import posthog from "posthog-js";
 import { useHorizon, type HorizonKey } from "@/hooks/useHorizon";
 import { buildGeoProps } from "@/lib/posthog-props";
+import Link from "next/link";
 
 export interface HorizonBarProps {
   communeName: string;
@@ -180,13 +181,13 @@ export default function HorizonBar({ communeName, locked = false, inseeCode, mod
           <p className="text-[14px] text-muted leading-[1.6]">
             Les horizons 2030 et 2100 sont accessibles avec le rapport complet. Vous lisez le scénario médian 2050.
           </p>
-          <a
+          <Link
             href="/#pricing"
             className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-canvas font-semibold text-[13px] no-underline"
             style={{ fontFamily: "'Instrument Sans', sans-serif", color: "var(--canvas, #1a1814)" }}
           >
             Ouvrir le rapport
-          </a>
+          </Link>
         </div>
       )}
     </section>

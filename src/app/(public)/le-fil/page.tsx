@@ -361,8 +361,8 @@ export default function LeFilPage() {
                 marginInline: 'auto',
               }}
             >
-              "Ce n'est plus une projection qu'on consulte. C'est une relation
-              qu'on tient avec son territoire."
+              « Ce n'est plus une projection qu'on consulte. C'est une relation
+              qu'on tient avec son territoire. »
             </p>
             <p
               style={{

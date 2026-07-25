@@ -173,7 +173,7 @@ export default function ProfessionnelsPage() {
         {/* ── TENSION ──────────────────────────────────────────────────── */}
         <div style={{ padding: '80px 28px', maxWidth: 760, margin: '0 auto' }}>
           <blockquote style={{ fontFamily: "'Instrument Serif', serif", fontSize: 'clamp(22px,2.6vw,30px)', lineHeight: 1.45, color: '#e9ecf2', fontStyle: 'italic', margin: '0 0 24px', paddingLeft: 24, borderLeft: `2px solid ${ACCENT}` }}>
-            "Nos clients nous posent des questions sur le risque climatique de leurs actifs immobiliers. Mais nous n'avons pas les outils pour leur répondre rapidement et sérieusement."
+            « Nos clients nous posent des questions sur le risque climatique de leurs actifs immobiliers. Mais nous n'avons pas les outils pour leur répondre rapidement et sérieusement. »
           </blockquote>
           <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#6b7388', marginLeft: 24, marginBottom: 48 }}>
             Un constat partagé par de nombreux professionnels
@@ -186,7 +186,7 @@ export default function ProfessionnelsPage() {
               <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>Pour qu'elles soient utilisables en rendez-vous client, il faut les agréger, les contextualiser, les traduire en langage accessible.</strong> C'est un travail d'éditorialisation que les bases publiques ne font pas, et que vous n'avez pas le temps de faire vous-même pour chaque dossier.
             </p>
             <p style={{ margin: 0 }}>
-              futur•e fait ce travail. Vous tapez une commune. En dix secondes, vous avez une lecture sur sept thèmes territoriaux avec les sources citées et la mention "données publiques officielles". Pas de score opaque. Pas d'alarme. Une contextualisation factuelle.
+              futur•e fait ce travail. Vous tapez une commune. En dix secondes, vous avez une lecture sur sept thèmes territoriaux avec les sources citées et la mention « données publiques officielles ». Pas de score opaque. Pas d'alarme. Une contextualisation factuelle.
             </p>
           </div>
         </div>
@@ -274,7 +274,7 @@ export default function ProfessionnelsPage() {
                 <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#6b7388', marginBottom: 14 }}>Avant, sans futur•e</div>
                 {[
                   { time: 'Min 02', text: <><strong style={{ color: '#e9ecf2', fontWeight: 500 }}>Le client demande</strong> si le bien qu'il envisage à Saint-Jean-de-Luz sera encore assurable dans 20 ans.</> },
-                  { time: 'Min 03', text: <>Vous évoquez la submersion, le retrait du trait de côte, "ça dépend des zones"… Sans chiffre précis.</> },
+                  { time: 'Min 03', text: <>Vous évoquez la submersion, le retrait du trait de côte, « ça dépend des zones »… Sans chiffre précis.</> },
                   { time: 'Min 12', text: <>Le client repart <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>avec plus de questions que de réponses</strong>. Il consultera Google. Vous perdez la main.</> },
                   { time: 'J + 7', text: <>Le client revient avec des informations contradictoires lues en ligne. Vous passez 30 minutes à les démêler.</> },
                 ].map((s) => (
@@ -288,7 +288,7 @@ export default function ProfessionnelsPage() {
                 <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#6b7388', marginBottom: 14 }}>Avec futur•e</div>
                 {[
                   { time: 'Min 02', text: <><strong style={{ color: '#e9ecf2', fontWeight: 500 }}>Le client pose la même question.</strong></> },
-                  { time: 'Min 02 + 10s', text: <>Vous tapez "Saint-Jean-de-Luz" dans futur•e. La fiche s'affiche : submersion, qualité air, vulnérabilité économique, projection 2050. Sources citées.</> },
+                  { time: 'Min 02 + 10s', text: <>Vous tapez « Saint-Jean-de-Luz » dans futur•e. La fiche s'affiche : submersion, qualité air, vulnérabilité économique, projection 2050. Sources citées.</> },
                   { time: 'Min 04', text: <>Vous montrez l'écran. <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>Vous expliquez les données ensemble.</strong> Le client comprend. La décision se prend en connaissance.</> },
                   { time: 'Min 10', text: <>Vous exportez le PDF. <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>Vous avez une trace.</strong> Le client a une référence.</> },
                 ].map((s) => (
@@ -323,7 +323,7 @@ export default function ProfessionnelsPage() {
             {
               num: '03',
               title: 'Ni alarmisme, ni minimisation',
-              body: <p style={{ fontSize: 15, color: '#9ba3b4', lineHeight: 1.7, margin: 0 }}>La voix éditoriale est sobre, calme, lucide. Pas de "danger imminent", pas de "tout va bien". <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>L'incertitude est nommée comme telle. Les positifs sont signalés quand ils existent.</strong> C'est la seule voix qu'un professionnel peut transmettre à son client sans s'exposer à la contradiction.</p>,
+              body: <p style={{ fontSize: 15, color: '#9ba3b4', lineHeight: 1.7, margin: 0 }}>La voix éditoriale est sobre, calme, lucide. Pas de « danger imminent », pas de « tout va bien ». <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>L'incertitude est nommée comme telle. Les positifs sont signalés quand ils existent.</strong> C'est la seule voix qu'un professionnel peut transmettre à son client sans s'exposer à la contradiction.</p>,
             },
           ].map((p) => (
             <div key={p.num} className="principle">
