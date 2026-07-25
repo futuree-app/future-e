@@ -167,7 +167,22 @@ export type ClimateThresholdBasis = {
     isUnfavorable: boolean;
   }>;
 };
+// UN RISQUE RECENSÉ PAR L'AUTORITÉ (GASPAR / Géorisques). Le fait n'est ni une position relative ni une
+// mesure : c'est une RECONNAISSANCE OFFICIELLE, et le fondement doit dire d'où elle vient plutôt que de
+// se déguiser en mesure qu'on n'a pas. `observedLabel` porte le libellé EXACT reçu de la source — c'est
+// lui qui rend le fait auditable, et c'est ce qu'un futur changement de nomenclature fera bouger.
+//
+// Il ne remplace jamais un indicateur quand celui-ci parle : quand la trajectoire mesurée est
+// défavorable, c'est elle qui fonde le mismatch (elle chiffre l'écart). Ce fondement sert le cas où
+// l'autorité reconnaît un risque que notre indicateur ne voit pas.
+export type DeclaredHazardBasis = {
+  kind: "declared_hazard";
+  hazard: "wildfire"; // v1 : le seul que le moteur sait produire aujourd'hui
+  source: "gaspar";
+  observedLabel: string;
+};
 export type MismatchBasis =
+  DeclaredHazardBasis |
   NamedAbsenceBasis | RelativePositionBasis | AbsoluteMeasureBasis | CategoricalStateBasis | ClimateThresholdBasis;
 
 // LE FONDEMENT D'UN ALIGNMENT : la LISTE BLANCHE, portée par le TYPE. `named_absence` en est EXCLU — une

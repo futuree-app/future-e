@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { composeFacts } from "./fact-compositions.ts";
 import { runRules, assertFactValid } from "./materiality-rules.ts";
 import type { ModuleFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
@@ -357,19 +358,36 @@ test("FEU : DÉCLARÉ, la règle ambiante se tait (une dimension, un signal)", (
 
 const CAP_FERRET = { ...facts({ nom: "Lège-Cap-Ferret", insee: "33236" }), risquesDeclares: { wildfire: true } };
 
-test("FEU DÉCLARÉ + indice sous le seuil : une CARTE, jamais un « satisfait » silencieux", () => {
+test("FEU RECENSÉ + indice sous le seuil : un MISMATCH, jamais un « satisfait » silencieux", () => {
+  // ET JAMAIS UNE VERIFICATION : la première version en émettait une, si bien que la carte tombait dans
+  // « À contrôler avant de vous engager », dont l'intro dit « au-delà de vos priorités ». Or c'est
+  // exactement une priorité — la seule que ce lecteur avait posée. La section mentait sur son contenu.
   const r = run({ ...CAP_FERRET, climat: EPARGNEE }, projetClimat("faible_risque_feu"));
   const e = r.evaluations.find((x) => x.ruleId === "territoire.climat-feu")!;
-  assert.equal(e.outcome, "verification");
-  assert.notEqual(e.outcome, "satisfied"); // le faux positif d'origine
+  assert.equal(e.outcome, "mismatch");
   const f = r.facts.find((x) => x.ruleId === "territoire.climat-feu")!;
-  assert.ok(f.role === "verification");
+  assert.ok(f.role === "mismatch");
+  assert.equal(f.projectKey, "faible_risque_feu");
+  assert.equal(f.headlineSubject, "un environnement peu exposé aux incendies");
   assert.match(f.statement, /officiellement recensé par l'État/);
-  assert.equal(f.status, "Risque déclaré");
-  // LA LIMITE DE NOTRE PROPRE INDICATEUR est dite : sans elle, le lecteur ne peut pas comprendre pourquoi
-  // le reste du dossier ne s'en alarme pas.
+  assert.equal(f.status, "Risque recensé");
+  // LE FONDEMENT dit d'où vient la vérité — une reconnaissance officielle — plutôt que de se déguiser en
+  // mesure qu'on n'a pas. Le libellé de la source est conservé : c'est ce qui rend le fait auditable.
+  assert.equal(f.basis.kind, "declared_hazard");
+  assert.equal(f.basis.kind === "declared_hazard" && f.basis.observedLabel, "Feu de forêt");
   assert.match(f.limitation!, /pas la présence d'un massif forestier/);
-  assert.match(f.action!.label, /végétation|adresse/);
+  // Un mismatch ne porte PAS d'action : le geste est restauré par la composition.
+  assert.equal("action" in f, false);
+});
+
+test("FEU RECENSÉ : la composition restaure le geste que le mismatch ne peut pas porter", () => {
+  const facts_ = { ...CAP_FERRET, climat: EPARGNEE, hasAddress: true };
+  const p = projetClimat("faible_risque_feu");
+  const r = run(facts_, p);
+  const comps = composeFacts(r, facts_, p);
+  const c = comps.find((x) => x.kind === "mismatch_with_action");
+  assert.ok(c, "la composition doit absorber le mismatch recensé, comme elle absorbe le mismatch chiffré");
+  assert.equal(c!.kind === "mismatch_with_action" && c!.action.label, "Regardez la végétation autour du terrain");
 });
 
 test("FEU DÉCLARÉ + indice AU-DESSUS du seuil : le mismatch reste prioritaire (le chiffre parle)", () => {

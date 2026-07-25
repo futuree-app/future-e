@@ -342,19 +342,26 @@ const ruleFeu: DecisionRule = {
     if (verdict === "uncertain" && !declare) return ret("uncertain", [], "indice forêt-météo indisponible");
     if (verdict === "under_threshold" && !declare) return ret("satisfied", [], "danger météorologique sous le seuil de signalement");
 
-    // RISQUE DÉCLARÉ, INDICE SOUS LE SEUIL (ou illisible) : ni un écart chiffré, ni une bonne nouvelle. Un
-    // constat ÉTABLI par l'autorité, que le lecteur doit voir — avec la limite de notre propre indicateur.
+    // RISQUE RECENSÉ, INDICE SOUS LE SEUIL (ou illisible) : c'est un ÉCART AU PROJET, pas un « constat du
+    // territoire ». La première version émettait une verification — la carte tombait alors dans « À
+    // contrôler avant de vous engager », dont l'intro dit « AU-DELÀ DE VOS PRIORITÉS, ces constats sont
+    // établis pour ce lieu ». Or c'est exactement une priorité, et la seule que ce lecteur avait posée.
+    // La section mentait sur son propre contenu.
+    //
+    // Le fondement n'est ni une position ni une mesure : c'est une RECONNAISSANCE OFFICIELLE, et il le dit
+    // (`declared_hazard`) plutôt que de se déguiser en chiffre qu'on n'a pas. L'action que le mismatch ne
+    // peut pas porter est restaurée par la composition `wildfire_exposure`, qui l'absorbe sans rien savoir
+    // de laquelle des deux branches l'a produit.
     if (declare && verdict !== "unfavorable") {
-      if (weight < 2) return ret("mismatch", [], "risque de feu déclaré, silencieux (poids 1)");
-      const fait: VerificationFact = {
-        id: `${f.insee}:feu-declare`, ruleId: RULE_FEU, sourceFactIds: ["georisques.feu"], module: "territoire",
-        role: "verification", materialityTier: tierFor(p, key),
-        // « RECENSÉ », le mot du constat, pas « déclaré ». Le statement dit « officiellement recensé par
-        // l'État » : le topic — celui que le héros affiche en tête d'écran — disait « déclaré », plus
-        // flou (déclaré par qui ?) et incohérent avec la carte qu'il annonce, trois lignes plus bas.
+      if (weight < 2) return ret("mismatch", [], "risque de feu recensé, silencieux (poids 1)");
+      const fait: MismatchFact = {
+        id: `${f.insee}:climat-feu`, ruleId: RULE_FEU, sourceFactIds: ["georisques.feu"], module: "territoire",
+        role: "mismatch", projectKey: key, materialityTier: tierFor(p, key),
         topic: "le risque de feu de forêt recensé",
-        status: "Risque déclaré",
+        headlineSubject: "un environnement peu exposé aux incendies",
+        status: "Risque recensé",
         statement: `${cap(aCommune(f.nom))}, le risque de feu de forêt est officiellement recensé par l'État (Géorisques).`,
+        basis: { kind: "declared_hazard", hazard: "wildfire", source: "gaspar", observedLabel: "Feu de forêt" },
         // LA LIMITE EST LE CŒUR DE CETTE CARTE : sans elle, le lecteur ne peut pas comprendre pourquoi le
         // reste du dossier ne s'en alarme pas. On dit ce que notre indicateur ne voit pas.
         limitation: "L'indice de danger météorologique que futur•e projette reste sous son seuil de signalement ici : il mesure des conditions de feu (chaleur, sécheresse, vent), pas la présence d'un massif forestier ni la proximité des habitations.",
@@ -363,9 +370,8 @@ const ruleFeu: DecisionRule = {
           observedValue: "feu de forêt recensé", grain: "commune", href: territoireHref,
           targetKey: "risk.wildfire",
         }],
-        action: wildfireExposureAction(f.hasAddress),
       };
-      return ret("verification", [fait], "risque de feu déclaré par l'État, indice météo sous le seuil");
+      return ret("mismatch", [fait], "risque de feu recensé par l'État, indice météo sous le seuil");
     }
     if (verdict === "uncertain") return ret("uncertain", [], "indice forêt-météo indisponible");
     if (verdict === "under_threshold") return ret("satisfied", [], "danger météorologique sous le seuil de signalement");
@@ -738,6 +744,15 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
         }
         if (!basis.measures.some((m) => m.isUnfavorable)) {
           throw new Error(`[decision] ${fact.ruleId}: mismatch climatique sans axe défavorable`);
+        }
+      } else if (basis.kind === "declared_hazard") {
+        // Le LIBELLÉ de la source est la preuve : sans lui, le fait n'est plus auditable et un
+        // changement de nomenclature passerait inaperçu (cf. le « Feu de forêt » singulier/pluriel).
+        if (!basis.observedLabel || basis.observedLabel.trim().length === 0) {
+          throw new Error(`[decision] ${fact.ruleId}: risque recensé sans le libellé de sa source`);
+        }
+        if (basis.source !== "gaspar") {
+          throw new Error(`[decision] ${fact.ruleId}: source de risque recensé inconnue (${basis.source})`);
         }
       } else if (basis.kind !== "relative_position" && basis.kind !== "named_absence") {
         throw new Error(`[decision] ${fact.ruleId}: basis de mismatch inconnu (${(basis as { kind: string }).kind})`);

@@ -710,11 +710,14 @@ function verdictPresentation(input: ConclusionPlanInput): VerdictBuild {
     // « plusieurs de vos autres priorités » sans dire lesquelles. Repli sur l'ancien registre quand aucun
     // alignment n'est affiché (le compte peut être >0 sur un satisfied de poids 1, silencieux).
     const favSujets = alignmentCandidates(input.shownFacts).slice(0, HEADLINE_MAX_ISSUES).map((c) => c.subject);
-    // « écart(s) relevé(s) » s'accorde sur le COMPTE (m), comme `ecart` juste au-dessus : un mismatch unique
-    // routé par l'arbitrage (cas fréquent depuis le lot D) donnait « les écarts relevés » au singulier réel.
+    // LES DEUX CÔTÉS DE LA BALANCE S'ACCORDENT SUR LEUR PROPRE COMPTE. « écart(s) relevé(s) » suit m ;
+    // « cette correspondance / ces correspondances » suit le nombre de sujets favorables NOMMÉS. Le
+    // pluriel était codé en dur des deux côtés : un dossier à un favorable et un écart — le cas le plus
+    // fréquent depuis le lot D — écrivait « entre ces correspondances et les écarts relevés » là où il
+    // n'y avait qu'une correspondance et qu'un écart.
     const ecartsReleves = m > 1 ? "les écarts relevés" : "l'écart relevé";
     const arbitrage = favSujets.length > 0
-      ? `${capitalize(joinFr(favSujets))} ${favSujets.length > 1 ? "répondent" : "répond"} en revanche à votre projet. La décision se joue entre ces correspondances et ${ecartsReleves}.`
+      ? `${capitalize(joinFr(favSujets))} ${favSujets.length > 1 ? "répondent" : "répond"} en revanche à votre projet. La décision se joue entre ${favSujets.length > 1 ? "ces correspondances" : "cette correspondance"} et ${ecartsReleves}.`
       : input.hasFavorable
         ? `${nom} répond bien à ${input.favorableCount >= 2 ? "plusieurs de vos autres priorités" : "une autre de vos priorités"}. ${ecart} à peser contre ce que vous y gagnez.`
       // « Aucune de vos conditions n'est contredite ici » rassure sur un risque INEXISTANT quand le

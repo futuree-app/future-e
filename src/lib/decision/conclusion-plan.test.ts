@@ -117,9 +117,25 @@ test("arbitrage : le détail NOMME les sujets favorables affichés, pas « plusi
   }));
   assert.match(p.verdict.detail, /L'accès aux soins et la vie locale répondent en revanche à votre projet/);
   // UN SEUL écart (m1) -> singulier « l'écart relevé », accordé sur le compte comme la branche voisine.
+  // DEUX favorables nommés -> « ces correspondances » ; UN SEUL écart -> « l'écart relevé ». Chaque côté
+  // de la balance s'accorde sur son propre compte.
   assert.match(p.verdict.detail, /La décision se joue entre ces correspondances et l'écart relevé\./);
   assert.doesNotMatch(p.verdict.detail, /les écarts relevés/);
   assert.doesNotMatch(p.verdict.detail, /plusieurs de vos autres priorités/);
+});
+
+test("arbitrage : UN favorable + UN écart -> tout au singulier (le cas le plus fréquent)", () => {
+  // Vu à l'écran sur Lège-Cap-Ferret : « entre ces correspondances et l'écart relevé » alors qu'une seule
+  // correspondance était nommée. Le pluriel était codé en dur de ce côté-ci de la balance.
+  const p = buildConclusionPlan(baseInput({
+    orientation: "arbitration", coverage: "high", mismatchTotal: 1, mismatchShown: 1, hasFavorable: true, favorableCount: 1,
+    shownFacts: [
+      mismatchFact("m1", "structuring", "faible_risque_feu", "un environnement peu exposé aux incendies"),
+      alignmentFact("a1", "secondary", "vie_locale", "la vie locale"),
+    ],
+  }));
+  assert.match(p.verdict.detail, /La décision se joue entre cette correspondance et l'écart relevé\./);
+  assert.doesNotMatch(p.verdict.detail, /ces correspondances/);
 });
 
 test("arbitrage : DEUX écarts + côté favorable nommé -> « les écarts relevés » (pluriel accordé sur le compte)", () => {
@@ -131,7 +147,8 @@ test("arbitrage : DEUX écarts + côté favorable nommé -> « les écarts relev
       alignmentFact("a1", "structuring", "acces_soins", "l'accès aux soins"),
     ],
   }));
-  assert.match(p.verdict.detail, /La décision se joue entre ces correspondances et les écarts relevés\./);
+  // UN SEUL favorable nommé, DEUX écarts : chaque côté suit son propre compte, indépendamment de l'autre.
+  assert.match(p.verdict.detail, /La décision se joue entre cette correspondance et les écarts relevés\./);
 });
 
 test("minor_reserves + alignment structuring : le positif prime dans le héros, la réserve secondaire au détail", () => {
