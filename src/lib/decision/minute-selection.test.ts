@@ -129,3 +129,34 @@ test("un dossier court n'est pas rempli artificiellement", () => {
   });
   assert.equal(selectionMinute(d).size, 1);
 });
+
+test("UNE SEULE carte AMBIANTE : la minute reste la réponse au projet déclaré", () => {
+  // Le cas Magné : un projet portant sur l'inondation dont la minute se remplissait de constats du
+  // territoire — chaleur, feu, sécheresse — tous justes, aucun demandé.
+  const d = entrees({
+    orientation: "arbitration",
+    reglesDeclarees: ["declaree"],
+    cartes: [
+      { id: "prio", role: "mismatch", sujet: "l'inondation", regle: "declaree" },
+      { id: "amb1", role: "verification", sujet: "la chaleur", regle: "ambiante" },
+      { id: "amb2", role: "verification", sujet: "le feu", regle: "ambiante" },
+      { id: "amb3", role: "verification", sujet: "la sécheresse", regle: "ambiante" },
+    ],
+  });
+  const sel = selectionMinute(d);
+  assert.ok(sel.has("prio"), "ce qui a été demandé passe toujours");
+  assert.equal([...sel].filter((k) => k.startsWith("amb")).length, 1);
+});
+
+test("SANS aucune priorité déclarée, le plafond ambiant ne s'applique pas", () => {
+  // Sinon la minute d'un dossier exploratoire tiendrait en une seule carte : sans « demandé », l'ambiant
+  // ne prend la place de rien.
+  const d = entrees({
+    orientation: "arbitration",
+    reglesDeclarees: [],
+    cartes: Array.from({ length: 5 }, (_, i) => ({
+      id: `a${i}`, role: "verification", sujet: `sujet ${i}`, regle: "ambiante",
+    })),
+  });
+  assert.equal(selectionMinute(d).size, MINUTE_MAX_CARTES);
+});

@@ -31,6 +31,17 @@ import type { Orientation } from "./criteria-registry.ts";
 // tiroir » à « les faits les plus importants du dossier ».
 export const MINUTE_MAX_CARTES = 4;
 
+// UNE SEULE CARTE POUR CE QU'ON N'A PAS DEMANDÉ. Le reste de la minute appartient au projet déclaré.
+//
+// Trois cartes sur les priorités, une vigilance sur le lieu : c'est la répartition qui garde à « en une
+// minute » le sens d'une RÉPONSE. Sans ce plafond, un projet précis (l'inondation, disons) pouvait voir
+// sa minute occupée par la chaleur, le feu et la sécheresse — trois constats justes, aucun demandé, et
+// la réponse à la question posée reléguée au dossier.
+//
+// Le plafond ne s'applique QUE si le dossier a des cartes rattachées à une priorité : sur un projet sans
+// aucun critère déclaré, tout est ambiant par construction, et n'en montrer qu'une viderait l'écran.
+export const MINUTE_MAX_AMBIANTES = 1;
+
 type Role = DecisionFact["role"] | "composition";
 
 // LE RÔLE SE LIT PAR RAPPORT À L'ORIENTATION. Une hiérarchie universelle (« écart > vérification >
@@ -125,13 +136,19 @@ export function selectionMinute(entrees: EntreesSelection): Set<string> {
   // rediraient ce qu'il vient de dire.
   const maxAlignments = orientation === "favorable" ? 3 : 1;
 
+  // Cf. MINUTE_MAX_AMBIANTES : sans carte rattachée à une priorité, il n'y a pas de « demandé » dont
+  // l'ambiant prendrait la place.
+  const maxAmbiantes = tries.some((c) => c.prio) ? MINUTE_MAX_AMBIANTES : MINUTE_MAX_CARTES;
+
   const retenues = new Set<string>();
   const sujets = new Set<string>();
   let alignments = 0;
+  let ambiantes = 0;
   const prendre = (c: Candidat): void => {
     retenues.add(c.cle);
     sujets.add(c.sujet.toLowerCase());
     if (c.role === "alignment") alignments++;
+    if (!c.prio) ambiantes++;
   };
   if (contrepoids) prendre(contrepoids); // sa place est acquise avant le remplissage
 
@@ -142,6 +159,7 @@ export function selectionMinute(entrees: EntreesSelection): Set<string> {
     // mieux qu'une : la sélection n'est pas un classement, c'est un ensemble qui doit COUVRIR.
     if (sujets.has(c.sujet.toLowerCase())) continue;
     if (c.role === "alignment" && alignments >= maxAlignments) continue;
+    if (!c.prio && ambiantes >= maxAmbiantes) continue;
     prendre(c);
   }
   return retenues;

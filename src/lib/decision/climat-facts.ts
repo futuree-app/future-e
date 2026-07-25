@@ -59,6 +59,17 @@ export type ClimatMetricDefinition = {
   // Vérifié sur les 35 006 communes : ARRx1d_yr va de -0,04 à +0,25, quand ATR_yr va de 0 à 47,6 jours.
   anomalyKind: "absolute" | "relative";
   threshold: number; // la convention de SIGNALEMENT futur•e (pas une limite officielle de danger)
+  // LE SEUIL DES CONSTATS NON DEMANDÉS, plus exigeant que celui des priorités déclarées.
+  //
+  // Dire quelque chose qu'on ne vous a PAS demandé doit coûter plus cher que répondre à ce que vous avez
+  // demandé. Les deux seuils étaient identiques : à Magné, un projet ne portant QUE sur l'inondation
+  // recevait une carte sur l'indice forêt-météo à 11 jours/an — à peine au-dessus du seuil déclaré (9),
+  // et sans rapport avec ce que le lecteur cherchait.
+  //
+  // Calibration : le seuil DÉCLARÉ vise ~10 % des communes (p90), l'AMBIANT ~5 % (p95). Interrompre un
+  // parcours personnalisé demande d'être parmi les plus concernés, pas parmi les concernés.
+  // Mesuré le 25/07/2026 sur les 35 006 communes à l'horizon 2050.
+  ambientThreshold: number;
   unit: "jours" | "mm";
   // LE NOM DU COMPTE, distinct de l'unité. Trois métriques se comptent en « jours » (unit), mais une chip
   // isolée doit dire « 44 NUITS » pour les nuits tropicales : « unit » ne suffit pas à trancher jour/nuit,
@@ -69,16 +80,16 @@ export type ClimatMetricDefinition = {
 
 export const CLIMAT_METRICS: Record<ClimatMetricKey, ClimatMetricDefinition> = {
   // 9,6 % des communes (médiane nationale : 3,6 j/an à l'horizon 2050 ; maximum : 22,7).
-  joursTresChauds: { absoluteKey: "NORTX35D_yr", anomalyKey: "ATX35D_yr", anomalyKind: "absolute", threshold: 8, unit: "jours", countNoun: "jour" },
+  joursTresChauds: { absoluteKey: "NORTX35D_yr", anomalyKey: "ATX35D_yr", anomalyKind: "absolute", threshold: 8, ambientThreshold: 10, unit: "jours", countNoun: "jour" },
   // 12,5 % des communes. Une nuit qui ne descend pas sous 20 °C empêche la récupération nocturne : c'est
   // le marqueur sanitaire des canicules, davantage que le pic de l'après-midi.
-  nuitsTropicales: { absoluteKey: "NORTR_yr", anomalyKey: "ATR_yr", anomalyKind: "absolute", threshold: 25, unit: "jours", countNoun: "nuit" },
+  nuitsTropicales: { absoluteKey: "NORTR_yr", anomalyKey: "ATR_yr", anomalyKind: "absolute", threshold: 25, ambientThreshold: 39, unit: "jours", countNoun: "nuit" },
   // 10,4 % des communes. L'indice forêt-météo mesure un DANGER MÉTÉOROLOGIQUE favorable aux incendies, pas
   // la probabilité qu'un incendie survienne : la phrase ne doit pas promettre plus que la donnée.
-  joursFeu: { absoluteKey: "NORIFM40_yr", anomalyKey: "AIFM40_yr", anomalyKind: "absolute", threshold: 9, unit: "jours", countNoun: "jour" },
+  joursFeu: { absoluteKey: "NORIFM40_yr", anomalyKey: "AIFM40_yr", anomalyKind: "absolute", threshold: 9, ambientThreshold: 15, unit: "jours", countNoun: "jour" },
   // 10,2 % des communes (médiane : 41 mm ; p90 : 65 mm).
   // L'anomalie est RELATIVE (+11 % en médiane) : la référence se retrouve en DIVISANT, pas en soustrayant.
-  pluieMax24h: { absoluteKey: "NORRx1d_yr", anomalyKey: "ARRx1d_yr", anomalyKind: "relative", threshold: 65, unit: "mm" },
+  pluieMax24h: { absoluteKey: "NORRx1d_yr", anomalyKey: "ARRx1d_yr", anomalyKind: "relative", threshold: 65, ambientThreshold: 78, unit: "mm" },
 };
 
 export type ClimatAxe = {
@@ -207,17 +218,20 @@ export function wildfireExposureAction(hasAddress: boolean): DecisionAction {
 // `under_threshold`). Un indice non lu ne prouve pas un territoire épargné.
 export function classifyWildfireDanger(
   climat: ClimatFacts,
+  // « ambiante » applique le seuil des constats NON DEMANDÉS (cf. `ambientThreshold`).
+  exigence: "declaree" | "ambiante" = "declaree",
 ): { verdict: "unfavorable" | "under_threshold" | "uncertain"; basis: ClimateThresholdBasis | null } {
   const axe = climat.joursFeu;
+  const seuil = exigence === "ambiante" ? CLIMAT_METRICS.joursFeu.ambientThreshold : axe.threshold;
   if (axe.projete == null) return { verdict: "uncertain", basis: null };
-  if (!axe.notable) return { verdict: "under_threshold", basis: null };
+  if (axe.projete < seuil) return { verdict: "under_threshold", basis: null };
   return {
     verdict: "unfavorable",
     basis: {
       kind: "climate_threshold", horizon: 2050, referencePeriod: "1976-2005",
       conventionId: CLIMAT_CONVENTIONS_VERSION, trigger: "any",
       measures: [{
-        key: "fire_weather_days", projectedValue: axe.projete, threshold: axe.threshold,
+        key: "fire_weather_days", projectedValue: axe.projete, threshold: seuil,
         unit: "days", isUnfavorable: true,
       }],
     },
@@ -226,16 +240,20 @@ export function classifyWildfireDanger(
 
 export function classifyClimateComfort(
   climat: ClimatFacts,
+  exigence: "declaree" | "ambiante" = "declaree",
 ): { verdict: "unfavorable" | "under_threshold" | "uncertain"; basis: ClimateThresholdBasis | null } {
+  const seuilDe = (m: ClimatMetricDefinition, a: ClimatAxe): number =>
+    exigence === "ambiante" ? m.ambientThreshold : a.threshold;
   const axes = [
-    { key: "days_over_35" as const, unit: "days" as const, axe: climat.joursTresChauds },
-    { key: "tropical_nights" as const, unit: "nights" as const, axe: climat.nuitsTropicales },
+    { key: "days_over_35" as const, unit: "days" as const, axe: climat.joursTresChauds, seuil: seuilDe(CLIMAT_METRICS.joursTresChauds, climat.joursTresChauds) },
+    { key: "tropical_nights" as const, unit: "nights" as const, axe: climat.nuitsTropicales, seuil: seuilDe(CLIMAT_METRICS.nuitsTropicales, climat.nuitsTropicales) },
   ];
   // On ne met en mesure que les axes RÉELLEMENT lus (projete fini) : une valeur absente n'invente pas de mesure.
   const measures = axes
     .filter((x) => x.axe.projete != null)
     .map((x) => ({
-      key: x.key, projectedValue: x.axe.projete!, threshold: x.axe.threshold, unit: x.unit, isUnfavorable: x.axe.notable,
+      key: x.key, projectedValue: x.axe.projete!, threshold: x.seuil, unit: x.unit,
+      isUnfavorable: x.axe.projete! >= x.seuil,
     }));
 
   if (measures.some((m) => m.isUnfavorable)) {

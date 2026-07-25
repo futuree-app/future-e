@@ -151,7 +151,15 @@ const SC_EXPOSEE: GwlScenarios = {
 const SC_EPARGNEE: GwlScenarios = {
   gwl20: { h: "2050", v: { NORTX35D_yr: 0, ATX35D_yr: 0, NORTR_yr: 3, ATR_yr: 3, NORIFM40_yr: 1, AIFM40_yr: 0, NORRx1d_yr: 43, ARRx1d_yr: 0.13 } },
 };
+// UNE COMMUNE MOYENNEMENT CONCERNÉE — les chiffres réels de Magné (79), relevés le 25/07/2026.
+// Son indice forêt-météo (11 j/an) dépasse le seuil des priorités DÉCLARÉES (9) sans atteindre celui
+// des constats non demandés (15). C'est le cas qui a motivé le seuil ambiant : un projet ne portant
+// que sur l'inondation y recevait une carte sur le danger d'incendie.
+const SC_MODEREE: GwlScenarios = {
+  gwl20: { h: "2050", v: { NORTX35D_yr: 5.6, ATX35D_yr: 4.2, NORTR_yr: 18.4, ATR_yr: 14, NORIFM40_yr: 11, AIFM40_yr: 4, NORRx1d_yr: 52, ARRx1d_yr: 0.11 } },
+};
 const EXPOSEE = buildClimatFacts(SC_EXPOSEE)!;
+const MODEREE = buildClimatFacts(SC_MODEREE)!;
 const EPARGNEE = buildClimatFacts(SC_EPARGNEE)!;
 
 const projetClimat = (key: string, weight = 3) =>
@@ -325,7 +333,9 @@ test("FEU AMBIANT : non déclaré, le constat existe quand même — en verifica
   const f = r.facts.find((x) => x.ruleId === "territoire.verification-feu-futur")!;
   assert.ok(f && f.role === "verification");
   assert.equal(f.materialityTier, "secondary");
-  assert.equal(f.signalConvention, "futur•e signale cette exposition à partir de 9 jours par an.");
+  // LA CONVENTION DIT LE SEUIL RÉELLEMENT APPLIQUÉ — celui des constats non demandés, pas celui des
+  // priorités déclarées.
+  assert.equal(f.signalConvention, "futur•e signale cette exposition à partir de 15 jours par an, hors priorité déclarée.");
   assert.match(f.action!.label, /^Regardez la végétation autour du terrain$/);
   assert.match(f.action!.detail!, /débroussaillement/);
   // Ses projectKeys sont VIDES : aucun effet sur la couverture ni sur l'orientation.
@@ -336,6 +346,21 @@ test("FEU AMBIANT : non déclaré, le constat existe quand même — en verifica
   const sansAdresse = run(facts({ climat: EXPOSEE }), project({ reformulation: "x", hardConstraints: {}, preferences: [] }));
   const fSans = sansAdresse.facts.find((x) => x.ruleId === "territoire.verification-feu-futur")!;
   assert.equal(fSans.role === "verification" && fSans.action.type, "renseigner_adresse");
+});
+
+test("AMBIANT : le seuil des constats NON DEMANDÉS est plus exigeant que celui des priorités déclarées", () => {
+  // LE CAS MAGNÉ. Dire quelque chose qu'on ne vous a PAS demandé doit coûter plus cher que répondre à
+  // ce que vous avez demandé : le seuil déclaré vise les ~10 % des communes les plus exposées, le seuil
+  // ambiant les ~5 %. À 11 jours par an, Magné est au-dessus du premier, sous le second.
+  const sansPriorite = project({ reformulation: "x", hardConstraints: {}, preferences: [] });
+  const r = run(facts({ climat: MODEREE, hasAddress: true }), sansPriorite);
+  assert.equal(r.facts.some((x) => x.ruleId === "territoire.verification-feu-futur"), false,
+    "un danger d'incendie moyen ne s'invite pas dans un dossier qui ne l'a pas demandé");
+
+  // LA MÊME COMMUNE, la même donnée : DÉCLARÉE, elle répond — le seuil déclaré, lui, est franchi.
+  const declaree = run(facts({ climat: MODEREE }), projetClimat("faible_risque_feu"));
+  const f = declaree.facts.find((x) => x.ruleId === "territoire.climat-feu");
+  assert.ok(f, "une priorité déclarée obtient sa réponse au seuil déclaré");
 });
 
 test("FEU : DÉCLARÉ, la règle ambiante se tait (une dimension, un signal)", () => {

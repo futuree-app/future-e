@@ -28,7 +28,7 @@ import { AGGLOMERATION_CATEGORIES } from "./agglomeration-facts.ts";
 import { toCommuneAttributes } from "./module-facts-map.ts";
 import {
   trajectoirePhrase, fmtClimatCount, classifyClimateComfort, classifyWildfireDanger,
-  summerComfortAction, wildfireExposureAction, CLIMAT_HORIZON_LABEL, type ClimatAxe,
+  summerComfortAction, wildfireExposureAction, CLIMAT_HORIZON_LABEL, CLIMAT_METRICS, type ClimatAxe,
 } from "./climat-facts.ts";
 import {
   bruitEnPhrase, industrieEnPhrase, industrieGlose, distanceEnPhrase,
@@ -280,9 +280,12 @@ const ruleChaleurAmbiante: DecisionRule = {
     const c = f.climat;
     if (!c) return ret("uncertain", [], "trajectoire climatique indisponible");
 
-    const { verdict } = classifyClimateComfort(c);
+    // LE SEUIL DES CONSTATS NON DEMANDÉS est plus exigeant (cf. `ambientThreshold`) : interrompre un
+    // parcours personnalisé demande d'être parmi les communes les plus concernées, pas parmi les
+    // concernées.
+    const { verdict } = classifyClimateComfort(c, "ambiante");
     if (verdict === "uncertain") return ret("uncertain", [], "un axe de chaleur n'a pas pu être lu");
-    if (verdict === "under_threshold") return ret("satisfied", [], "exposition sous le seuil de signalement");
+    if (verdict === "under_threshold") return ret("satisfied", [], "exposition sous le seuil ambiant");
 
     // verdict "unfavorable" : un constat AMBIANT du territoire, au grain commune. Il est SECONDARY : le
     // lecteur ne l'a pas priorisé, il ne couronne donc jamais un héros ni ne pèse comme une priorité.
@@ -471,7 +474,12 @@ const ruleFeuAmbiant: DecisionRule = {
     const c = f.climat;
     if (!c) return ret("uncertain", [], "trajectoire climatique indisponible");
 
-    const { verdict } = classifyWildfireDanger(c);
+    // LE SEUIL DES CONSTATS NON DEMANDÉS est plus exigeant (cf. `ambientThreshold`). Vu à l'écran sur
+    // Magné : un projet portant uniquement sur l'inondation recevait une carte sur l'indice forêt-météo
+    // à 11 jours/an, à peine au-dessus du seuil DÉCLARÉ (9). Le seuil ambiant est à 15 — les 5 % des
+    // communes les plus exposées. Interrompre un parcours personnalisé demande d'être parmi les plus
+    // concernées, pas parmi les concernées.
+    const { verdict } = classifyWildfireDanger(c, "ambiante");
     if (verdict === "uncertain") return ret("uncertain", [], "indice forêt-météo indisponible");
     if (verdict === "under_threshold") return ret("satisfied", [], "danger météorologique sous le seuil de signalement");
 
@@ -483,7 +491,9 @@ const ruleFeuAmbiant: DecisionRule = {
       role: "verification", materialityTier: "secondary",
       topic: "le danger d'incendie",
       statement: `${trajectoirePhrase(axe, "Les jours où l'indice forêt-météo dépasse 40, seuil de danger météorologique très sévère,")}.`,
-      signalConvention: `futur•e signale cette exposition à partir de ${axe.threshold} jours par an.`,
+      // LA CONVENTION DIT LE SEUIL RÉELLEMENT APPLIQUÉ : afficher 9 alors que la carte n'apparaît qu'à
+      // partir de 15 serait une convention qu'on n'applique pas.
+      signalConvention: `futur•e signale cette exposition à partir de ${CLIMAT_METRICS.joursFeu.ambientThreshold} jours par an, hors priorité déclarée.`,
       limitation: LIMITATION_CLIMAT,
       evidence: [climatEvidence(f.nom, "joursFeu", axe)],
       action: wildfireExposureAction(f.hasAddress),
