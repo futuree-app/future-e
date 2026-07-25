@@ -49,3 +49,52 @@ ne correspond pas à `/forets?/` à cause de l'accent circonflexe. C'est la faut
 documente depuis le matin, refaite dans l'outil chargé de la mesurer. Le script normalise désormais
 comme le produit (`normalizeLabel`, NFD + suppression des diacritiques). Le code produit, lui, était
 correct — vérifié.
+
+---
+
+# Recouvrements et cartes réellement affichées
+
+Ajouté le 25/07/2026. La prévalence isolée ne dit pas ce que verra le lecteur : la minute n'a qu'une
+place ambiante, donc ce qui compte est la carte qui **gagne l'arbitrage**, pas celle qui serait éligible.
+Croisement des 500 communes GASPAR avec leurs valeurs DRIAS.
+
+## Recouvrements
+
+| | part des communes |
+|---|---|
+| risque recensé (G) | 17,6 % |
+| chaleur ambiante (CH) | 7,8 % |
+| indice forêt-météo ≥ 15 (IFM) | 5,2 % |
+| G ∩ CH | 4,6 % |
+| G ∩ IFM | 4,6 % |
+| CH ∩ IFM | 4,4 % |
+| les trois | 3,8 % |
+
+## La carte ambiante finalement affichée
+
+Ordre simulé : `risque recensé > chaleur > indice forêt-météo`.
+
+| carte affichée | avant | après |
+|---|---:|---:|
+| risque feu recensé | — | 17,6 % |
+| chaleur | 7,8 % | 3,2 % |
+| indice forêt-météo | 0,8 % | **0,0 %** |
+| aucune | 91,4 % | 79,2 % |
+
+**Effet réel** : 12,2 % des dossiers gagnent une carte là où ils n'en avaient aucune ; 5,4 % voient leur
+carte remplacée. Pas +17,6 %, comme la prévalence isolée le laissait croire.
+
+## Le résultat qui change la décision
+
+**L'indice forêt-météo disparaît entièrement de la minute** — 0,8 % → 0,0 %. Et le chiffre qui l'explique :
+
+> Sur 500 communes, **aucune** commune à indice ≥ 15 n'est dépourvue à la fois du risque recensé et de la
+> chaleur ambiante. La règle feu ambiante n'a **aucun cas propre** dans l'échantillon.
+
+Autrement dit, ouvrir le risque recensé ne fait pas que réordonner : il rend `ruleFeuAmbiant` muette dans
+la minute. Elle continue d'exister dans le dossier complet, mais elle ne gagnerait plus jamais l'unique
+place. Le seuil de 15 j/an calibré ce matin gouvernerait alors une carte que la minute n'affiche jamais.
+
+Ce n'est pas un argument contre l'ouverture — le risque recensé est plus intelligible et plus directement
+vérifiable que l'indice. C'est un argument pour décider explicitement du sort de la règle ambiante feu au
+lieu de la laisser devenir un seuil mort d'un genre nouveau : vivant, testé, et sans effet à l'écran.

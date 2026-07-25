@@ -7,6 +7,7 @@
 // Échantillon aléatoire REPRODUCTIBLE (PRNG à graine fixe) sur les communes de France métropolitaine et
 // d'outre-mer présentes dans data/communes-population.json.
 import { readFileSync, writeFileSync } from "node:fs";
+import { riskFlagsFromLabels } from "../src/lib/georisques-flags.ts";
 
 const N = Number(process.argv[2] ?? 400);
 const pop = JSON.parse(readFileSync("data/communes-population.json", "utf8"));
@@ -19,12 +20,18 @@ const tirage = [...codes];
 for (let i = tirage.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [tirage[i], tirage[j]] = [tirage[j], tirage[i]]; }
 const echantillon = tirage.slice(0, N);
 
-// La même normalisation que src/lib/georisques-flags.ts — la mesure doit compter ce que le produit lit.
-// LA NORMALISATION EST CELLE DU PRODUIT, accents compris. Premier jet : le libellé brut passé à la
-// regex — « Feu de forêt » ne matchait pas /forets?/ et la mesure annonçait 0 %. La faute même qu'on
-// documente depuis ce matin, refaite dans l'outil qui va la mesurer.
-const norm = (v) => (v ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-const estFeu = (l) => { const x = norm(l); return x.includes("incendie") || /feux? de forets?/.test(x); };
+// LA DÉTECTION EST CELLE DU PRODUIT, IMPORTÉE et non recopiée.
+//
+// Premier jet : la normalisation était recopiée ici, et le libellé brut passait à la regex. « Feu de
+// forêt » ne correspond pas à /forets?/ — l'accent circonflexe — et la mesure annonçait 0 % là où la
+// distribution brute affichait 6,7 %. La faute même que ce chantier documente, refaite dans l'outil
+// chargé de la mesurer.
+//
+// Une normalisation recopiée dans un script d'audit permet la pire des combinaisons : un moteur correct,
+// une mesure fausse, et une décision produit prise sur cette mesure. En important la dérivation du
+// produit, le script ne peut plus diverger — il compte exactement ce que le produit lit.
+// (D'où l'exécution avec `node --experimental-strip-types`.)
+const estFeuLot = (labels) => riskFlagsFromLabels(labels).wildfire;
 
 async function risques(insee) {
   const url = `https://georisques.gouv.fr/api/v1/gaspar/risques?code_insee=${insee}`;
@@ -53,7 +60,7 @@ await Promise.all(Array.from({ length: CONC }, async () => {
 }));
 
 const lus = res.filter((r) => r.labels != null);
-const feu = lus.filter((r) => r.labels.some(estFeu));
+const feu = lus.filter((r) => estFeuLot(r.labels));
 const popTot = lus.reduce((a, r) => a + r.pop, 0), popFeu = feu.reduce((a, r) => a + r.pop, 0);
 
 // Toutes les familles observées, pour situer le feu par rapport aux autres risques.
