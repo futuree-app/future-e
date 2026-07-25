@@ -537,14 +537,23 @@ function vocabulaire(posture: ProjectPosture): Vocabulaire {
 // au lecteur : il doit descendre dans les cartes pour savoir DE QUOI on parle, alors que le sujet tient en
 // trois mots. La doctrine du lot C vaut ici comme ailleurs — la conclusion NOMME, les cartes démontrent.
 //
-// UNIQUEMENT DES ALIGNMENTS STRUCTURANTS, la même barre que le héros positif : nommer un signal secondaire
-// dans le verdict le couronnerait alors que le produit a justement décidé qu'il ne le méritait pas. Sans
-// alignment structurant affiché, on garde le repli générique — il est vague, mais il ne promet rien de faux.
+// TOUT ALIGNMENT AFFICHÉ, pas seulement les structurants. La première version reprenait la barre du héros
+// positif (`structuring` seul) — c'était la mauvaise barre, et un dossier réel l'a montré : « la vie locale,
+// parmi les 5 % de communes les plus animées » s'affichait en carte, nommée, pendant que le verdict disait
+// « présente un élément favorable » trois centimètres plus haut.
+//
+// La barre du héros existe pour ne pas COURONNER un signal faible — en faire LA réponse du dossier. Ici on
+// ne couronne rien : c'est un contrepoint en fin de détail, sur un fait DÉJÀ à l'écran et déjà nommé par sa
+// carte. Le repli générique ne protège de rien ; il parle du même fait sans le nommer, ce qui est
+// strictement pire pour le lecteur.
+//
+// L'ordre des candidats est celui des cartes (trié par matérialité) : on prend le premier, donc le plus
+// matériel des favorables affichés.
 //
 // UN SEUL SUJET : cette phrase est un contrepoint, pas un second registre. Deux sujets et le favorable
 // prendrait le pas sur les points à contrôler, dans un dossier qui porte des réserves majeures.
 function favorableNomme(input: ConclusionPlanInput): string | null {
-  const structurant = alignmentCandidates(input.shownFacts).find((c) => c.materialityTier === "structuring");
+  const structurant = alignmentCandidates(input.shownFacts)[0];
   // PAS DE capitalize : cette phrase s'insère APRÈS « Par ailleurs, », donc en milieu de phrase. Les
   // sujets sont écrits en bas de casse précisément pour ça (cf. `headlineSubject`) — les capitaliser ici
   // produisait « Par ailleurs, La vie locale répond bien… », le défaut que le lot D avait déjà fermé

@@ -453,8 +453,10 @@ test("major_reserves : le contrepoint NOMME le sujet favorable quand il est stru
   assert.equal(p.blocks[0]!.fallbackText.includes("un élément favorable"), false);
 });
 
-test("major_reserves : un favorable SECONDAIRE n'est pas nommé (on ne couronne pas un signal faible)", () => {
-  // Même barre que le héros positif : un poids 2 reste visible en carte, il ne monte pas au verdict.
+test("major_reserves : un favorable SECONDAIRE est nommé aussi — il est déjà à l'écran", () => {
+  // La première version reprenait la barre du héros (structuring seul). Un dossier réel l'a démentie :
+  // « la vie locale, parmi les 5 % de communes les plus animées » s'affichait en carte pendant que le
+  // verdict disait « présente un élément favorable ». On ne couronne pas ici, on désigne.
   const p = buildConclusionPlan(baseInput({
     coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 1,
     shownFacts: [
@@ -462,8 +464,16 @@ test("major_reserves : un favorable SECONDAIRE n'est pas nommé (on ne couronne 
       alignmentFact("a1", "secondary", "vie_locale", "la vie locale"),
     ],
   }));
+  assert.match(p.blocks[0]!.fallbackText, /Par ailleurs, la vie locale répond bien à votre projet\.$/);
+  assert.equal(p.blocks[0]!.fallbackText.includes("un élément favorable"), false);
+});
+
+test("major_reserves : AUCUN alignment affiché -> le repli générique, qui ne promet rien de faux", () => {
+  const p = buildConclusionPlan(baseInput({
+    coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 1,
+    shownFacts: [verification("f1", "decision_critical")],
+  }));
   assert.match(p.blocks[0]!.fallbackText, /présente un élément favorable pour votre projet\.$/);
-  assert.equal(p.blocks[0]!.fallbackText.includes("La vie locale"), false);
 });
 
 test("high + major_reserves avec UN SEUL favorable : « plusieurs dimensions » serait faux", () => {
