@@ -1,6 +1,6 @@
-# Passation — Lot D, `priorityControl`, la NAVIGATION vers les preuves et le LOT FEU en prod.
+# Passation — le dossier « En une minute » : une JOURNÉE DE FAUX POSITIFS fermés. Outil de vérification livré.
 
-**Horodatage** : 2026-07-25 · **Branche** : `main` = `6157d31` (poussé). **Tree propre** côté code : il ne
+**Horodatage** : 2026-07-25 (soir) · **Branche** : `main` = `596a2c9` (poussé). **Tree propre** côté code : il ne
 reste que ce fichier et deux non suivis à NE JAMAIS committer — `Futur.e Design System.zip` et
 `src/app/dev/` (harnais de rendu, voir plus bas).
 
@@ -64,6 +64,29 @@ le lot D : `classifyWildfireDanger` (classifieur pur MONO-AXE) → `ruleFeu` (mi
 - **Jamais vu à l'écran** : 783 tests dont un d'intégration bout en bout, mais aucune lecture sur un dossier
   réel. Une commune du Sud exposée (IFM projeté > 9 j/an) le montrerait.
 
+### LA JOURNÉE DU 25/07 : neuf correctifs, tous nés d'UN dossier à l'écran
+Le porteur ouvre Lège-Cap-Ferret **pendant que la commune brûle**, sur un projet qui demande d'être
+« à l'abri des risques d'incendie ». Le dossier affiche **« Bonne correspondance »**. Enquête :
+
+1. `flags.wildfire` cherchait « feux de foret » AU PLURIEL ; GASPAR écrit « Feu de forêt » au SINGULIER.
+   Le drapeau était faux **pour toutes les communes de France**, depuis toujours (`5674613`). La
+   dérivation vivait dans une fonction d'I/O `server-only`, donc intestable : elle est passée dans un
+   module PUR (`georisques-flags.ts`) avec les libellés RÉELS de l'API en fixtures.
+2. Le moteur ne voyait AUCUN risque recensé : `risquesDeclares` est né (`498a66b`).
+3. Le risque recensé était émis en `verification` — donc rangé sous « **au-delà de vos priorités** »
+   alors que c'était LA priorité du lecteur. C'est un mismatch, avec un fondement propre
+   `declared_hazard` qui dit une reconnaissance officielle au lieu de se déguiser en mesure (`ee13539`).
+4. À poids 1 il redevenait muet. Un écart GRADUÉ se tait légitimement ; un risque RECENSÉ est binaire.
+   **Aucune exception inventée** : le fait sort en `secondary`, et un mismatch secondaire seul ne bascule
+   pas l'orientation (`8b15f5e`). → **Le poids décide si un écart TRANCHE, pas s'il a le droit d'EXISTER.**
+5. Copie : antécédent ambigu, barre du héros transposée à tort, titre de carte plus fort que le verdict,
+   accord « cette correspondance / ces correspondances » (`03ad249`, `4bda61e`, `9869423`, `596a2c9`).
+6. Trouvés ENSUITE par le harnais, sur d'autres communes : la preuve de l'air était PM2,5 en dur (Lille
+   affichait une valeur qui ne dépassait rien, sur un polluant dont le constat ne parlait pas), et un
+   compromis était compté comme « constat à contrôler » alors qu'il a sa propre section (`b15d2ae`).
+
+**AUCUN de ces neuf défauts n'était visible dans les ~800 tests.** Tous ont été vus à l'écran.
+
 ## Doctrine (à ne pas re-litiger)
 - **Une action = une seule source de vérité** : la carte porte l'`action` (relue, posture-aware) ; la ligne
   bleue la RÉUTILISE mot pour mot, jamais une copie éditoriale.
@@ -83,6 +106,19 @@ le lot D : `classifyWildfireDanger` (classifieur pur MONO-AXE) → `ruleFeu` (mi
   aucune preuve. Elles reviendront AVEC la preuve qui les portera.
 - **Un repère posé hors de React se pose en `data-`, jamais en classe** : React réécrit `className` à la
   réconciliation et effaçait le halo dans la milliseconde (vu au MutationObserver).
+- **LE SILENCE EST UN MENSONGE quand il porte sur une priorité.** Un `satisfied` muet sur un risque que
+  le lecteur a nommé produit une affirmation invérifiable : il lit « bonne correspondance » sans pouvoir
+  savoir sur quoi le produit s'est prononcé. Vaut aussi à poids 1 pour un risque RECENSÉ (binaire), pas
+  pour un écart gradué.
+- **Le rôle d'un fait suit sa NATURE pour le lecteur, jamais la forme de sa preuve.** Émettre une
+  verification faute de mesure chiffrée range un écart au projet sous « au-delà de vos priorités ».
+- **AVANT D'AJOUTER UN SIGNAL, MESURER SA FRÉQUENCE.** Un signal qui se déclenche partout ne dit rien.
+  Mesuré le 25/07 sur 14 communes : feu recensé 6/14 (discriminant, croisement légitime) ; inondation
+  **12/14**, mouvement de terrain **11/12** (universels — les croiser produirait du bruit) ; submersion
+  2/12 mais AUCUN critère déclarable. Boisement ≥ 70 % = 9,4 % des communes (discriminant).
+- **Un croisement avec une source externe ne vaut que si elle SAIT ce que notre indicateur ne peut pas
+  voir.** Vrai pour le feu (indice météo aveugle au massif). Faux pour l'inondation, où notre score est
+  gradué là où GASPAR est binaire : le croisement dégraderait le signal.
 - **Une bascule verification -> mismatch FAIT PERDRE l'action** que la verification portait (un mismatch n'en
   a pas). Sans composition pour la restaurer, c'est une régression pour le lecteur au nom d'une justesse de
   registre. Vrai pour la chaleur, vrai pour le feu, vrai pour le prochain.
@@ -90,21 +126,39 @@ le lot D : `classifyWildfireDanger` (classifieur pur MONO-AXE) → `ruleFeu` (mi
   pas à moitié. L'anneau de focus, lui, est ASSUMÉ : Chrome classe un focus programmatique comme
   focus-visible, et il dit où le focus est parti.
 
-## Le harnais `/dev/conclusion` (local, NON commité — décision du porteur)
+## LES DEUX HARNAIS (locaux, NON commités — décision du porteur)
+**`/dev/dossier` — LA BOUCLE DE VÉRIFICATION, à utiliser en premier.** Un code INSEE + des priorités
+(`cle:poids`) et le VRAI dossier apparaît : mêmes données (index, DRIAS, Géorisques), mêmes règles, même
+composant. Aucun appel LLM. **Sa table « Ce que chaque règle a conclu » est le cœur de l'outil** : un
+critère muet à l'écran y montre son outcome et sa règle. C'est là qu'on aurait lu `satisfied` en deux
+secondes le matin du 25/07. Une campagne sur 11 dossiers a trouvé 2 défauts de plus en quelques minutes.
+Le bandeau « analyse du logement en cours » est un artefact du mode déterministe, pas un état.
+
+## Le harnais `/dev/conclusion` (local, NON commité)
 `src/app/dev/conclusion/page.tsx` : six dossiers fictifs passés dans le VRAI `buildConclusionPlan` et rendus
 par le VRAI `ConclusionBlock`, sur une page. Ni Supabase, ni compte payant, ni appel LLM. C'est ce qui a fait
 apparaître en trente secondes le défaut d'espacement des deux démarches (invisible dans le HTML seul).
 `notFound()` hors développement. **Ne pas le committer** ; il n'est protégé par rien contre un `git add -A`.
 
 ## La suite
-1. **Voir le lot feu à l'écran** sur une commune du Sud réellement exposée — le seul maillon non vérifié.
-2. **Étendre le patron** aux axes suivants : pluies extrêmes et sécheresse des sols passeraient de « constat
-   du territoire » à « écart au projet », leurs cartes existent déjà côté module. Le gabarit est éprouvé
-   deux fois (chaleur, feu) ; ne pas oublier la composition qui restaure le geste.
-3. **Dette lint** : `npx eslint` sort ~5400 erreurs / 70000 warnings (préexistant, hors chantier). Plus
-   personne ne peut s'en servir comme signal. À traiter à part.
-4. **Ordre faits-avant-compositions** dans `rankLeadCandidates` : il ne reflète pas forcément l'ordre des
-   cartes à l'écran. Sans conséquence tant que le plafond de démarches est à 2.
+1. **Le BOISEMENT comme facteur de contexte** (mesuré : ≥ 70 % = 9,4 % des communes, médiane 27 %,
+   Lège-Cap-Ferret à 84,7 %). JAMAIS un mismatch : un boisement élevé est un facteur d'exposition, pas
+   une reconnaissance de risque — l'affirmer serait le symétrique du bug du 25/07. Table de vérité :
+   risque recensé -> mismatch (fait) ; pas recensé + boisement élevé -> `verification` de contexte ET
+   **veto à un « priorité satisfaite »** ; ni l'un ni l'autre -> aucun signal. Rend le feu indépendant
+   du bon vouloir de GASPAR. ~1 h.
+2. **Contrats de données externes** : le bug GASPAR a tenu des mois faute de tests sur les chaînes
+   RÉELLES des API. Géorisques est fait ; restent DRIAS, BAN, ADEME/DPE, Eaufrance, BPE. 10-20 valeurs
+   figées par source, formes nulles et variantes déjà observées comprises. ~1/2 journée.
+3. **Cadrer le reclassement Territoire / Quartier / Logement.** Le module « quartier » est à EXTRAIRE du
+   module Logement (l'Autour, l'ÎCU, le confort thermique), pas à créer. Décision structurante à
+   prendre : ces données entrent-elles dans le MOTEUR ? Sinon le dossier continuera de les ignorer,
+   comme aujourd'hui.
+4. **NE PAS étendre le croisement GASPAR aux autres risques** (mesuré, cf. doctrine). Pour l'inondation,
+   le levier est le grain ADRESSE (le PPRN y est déjà lu), pas un drapeau communal universel.
+5. Sécheresse : le seuil manquant existe (150 j/an = 10,4 % des communes) mais l'axe est PEU
+   discriminant (médiane 115) et « 150 jours de sol sec » ne parle pas. Le seuil n'était peut-être pas
+   le seul obstacle. Décision produit en attente.
 
 ## Pièges
 - `tsconfig.json` exclut `**/*.test.ts` du typecheck : une fixture mal formée ne casse pas tsc, seulement le run.
