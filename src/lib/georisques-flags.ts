@@ -35,3 +35,36 @@ export function normalizeLabel(value: string) {
     .toLowerCase();
 }
 
+
+// Couche de traduction utilisateur — point UNIQUE de conversion des libellés
+// administratifs GASPAR/Géorisques en familles compréhensibles sans jargon.
+// Réutilisable partout (carte, drawer, synthèse, AskFuture passent par byRisk).
+export function simplifyCatnatRisk(raw: string): string {
+  const n = normalizeLabel(raw);
+  if (n.includes("submersion")) return "Submersion marine";
+  if (n.includes("vague") || n.includes("chocs mecaniques")) return "Érosion et impact des vagues";
+  if (
+    n.includes("inondation") ||
+    n.includes("coulee") ||
+    n.includes("nappe") ||
+    n.includes("crue") ||
+    n.includes("torrentiel")
+  )
+    return "Inondations";
+  if (n.includes("secheresse") || n.includes("retrait") || n.includes("argile"))
+    return "Sécheresse des sols";
+  if (
+    n.includes("mouvement de terrain") ||
+    n.includes("glissement") ||
+    n.includes("eboulement") ||
+    n.includes("affaissement")
+  )
+    return "Mouvements de terrain";
+  if (n.includes("cyclo") || n.includes("ouragan")) return "Cyclone";
+  if (n.includes("tempete") || n.includes("grains")) return "Tempête";
+  if (n.includes("seisme") || n.includes("sismi")) return "Séisme";
+  if (n.includes("avalanche")) return "Avalanche";
+  if (n.includes("grele")) return "Grêle";
+  if (n.includes("neige")) return "Neige";
+  return raw.trim();
+}

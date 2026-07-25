@@ -1,4 +1,5 @@
 import "server-only";
+import { estACec } from "./eaufrance-ecoulement.ts";
 
 const HUBEAU_BASE = "https://hubeau.eaufrance.fr/api";
 const REQUEST_TIMEOUT_MS = 8000;
@@ -17,7 +18,12 @@ type EauPotableRecord = {
 
 type EcoulementRecord = {
   date_observation?: string | null;
-  libelle_observation?: string | null;
+  // LE CHAMP S'APPELLE `libelle_ecoulement`. Le code lisait `libelle_observation`, qui n'existe pas dans
+  // la réponse Hub'Eau : la valeur était donc toujours `undefined`, et `isDry` toujours FAUX — un cours
+  // d'eau à sec n'a jamais pu être signalé. Même signature que le bug « feux de forêt » de Géorisques :
+  // une chaîne d'API jamais confrontée à la réalité de la source. Vérifié le 25/07/2026 sur
+  // /v1/ecoulement/observations (300 observations, 6 valeurs distinctes).
+  libelle_ecoulement?: string | null;
   libelle_cours_eau?: string | null;
 };
 
@@ -140,18 +146,11 @@ async function loadDrought(inseeCode: string) {
   if (!records.length) return null;
 
   const latest = records[0];
-  const obs = latest.libelle_observation?.toLowerCase() ?? "";
-  // ONDE renvoie des libellés normalisés : "Écoulement visible acceptable",
-  // "Écoulement visible faible", "Écoulement non visible", "Assec",
-  // "Observation impossible". Seuls "Assec" et "Écoulement non visible"
-  // signalent un cours d'eau effectivement à sec.
-  const isDry = obs.includes("assec") || obs.includes("non visible");
-
   return {
     lastObservationDate: latest.date_observation ?? null,
     riverName: latest.libelle_cours_eau ?? null,
-    status: latest.libelle_observation ?? null,
-    isDry,
+    status: latest.libelle_ecoulement ?? null,
+    isDry: estACec(latest.libelle_ecoulement),
   };
 }
 
