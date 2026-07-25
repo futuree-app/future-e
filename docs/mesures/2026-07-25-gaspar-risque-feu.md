@@ -98,3 +98,30 @@ place. Le seuil de 15 j/an calibré ce matin gouvernerait alors une carte que la
 Ce n'est pas un argument contre l'ouverture — le risque recensé est plus intelligible et plus directement
 vérifiable que l'indice. C'est un argument pour décider explicitement du sort de la règle ambiante feu au
 lieu de la laisser devenir un seuil mort d'un genre nouveau : vivant, testé, et sans effet à l'écran.
+
+---
+
+# Après implémentation : la fusion sauve l'indice au lieu de le tuer
+
+Mesuré le 26/07/2026 sur les mêmes 500 communes, avec le code livré.
+
+La simulation précédente supposait **deux règles ambiantes séparées** — le risque recensé devant, l'indice
+forêt-météo derrière la chaleur. Dans ce montage, l'indice tombait à 0,0 % : il ne gagnait plus jamais
+l'unique place.
+
+Le code livré ne fait pas cela. Il fusionne les deux sources dans **une seule règle feu**, comme la règle
+déclarée le fait déjà. L'indice n'a donc plus à disputer la place à la chaleur : quand il parle, il parle
+avec le rang du feu.
+
+| carte affichée | avant | après |
+|---|---:|---:|
+| feu · risque recensé | — | 17,6 % |
+| feu · indice forêt-météo | 0,8 % | **0,6 %** |
+| chaleur | 7,8 % | 2,6 % |
+| aucune | 91,4 % | 79,2 % |
+
+**Dossiers portant une carte ambiante : 8,6 % → 20,8 %.**
+
+L'indice conserve son cas propre. Ce que coûte le changement, c'est la chaleur : de 7,8 % à 2,6 % des
+dossiers. Elle n'est pas perdue — elle reste dans le dossier complet — mais elle cède la place unique au
+constat établi dans 5,2 % des dossiers. C'est le prix assumé du plafond à une carte.

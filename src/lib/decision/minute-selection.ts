@@ -71,16 +71,26 @@ function rangRole(role: Role, orientation: Orientation): number {
 // aux autres, jamais l'importance de la chose pour celui qui y vivra — et c'est bien cette importance
 // qu'il faut pour prendre l'unique place.
 //
-// CE QUI ARBITRE, donc : un ordre ÉDITORIAL, déclaré ici et motivé. La chaleur passe avant le feu parce
-// qu'elle se subit tous les étés, à toutes les adresses de la commune, sans condition — là où le danger
-// météorologique d'incendie ne devient un risque vécu qu'en présence d'un massif, que le climat seul
-// n'établit pas (c'est la limitation portée par la carte elle-même).
+// CE QUI ARBITRE, donc : un ordre ÉDITORIAL, déclaré ici et motivé.
+//
+// LE FEU AVANT LA CHALEUR. Le premier jet disait l'inverse, et pour une raison qui se tenait : la chaleur
+// se subit tous les étés, à toutes les adresses, sans condition, là où l'indice forêt-météo ne devient un
+// risque vécu qu'en présence d'un massif que le climat seul n'établit pas. Ce raisonnement portait sur la
+// SEULE source qu'avait alors la règle feu — une projection statistique. Depuis, elle lit d'abord le
+// risque RECENSÉ par l'État, et le rapport de force s'inverse : le recensement est intelligible sans
+// traduction statistique, il ne dépend d'aucun horizon ni scénario, il se vérifie auprès de la mairie, et
+// il relève de la diligence minimale avant d'acheter.
+//
+// LA RÈGLE QUI EN SORT — et sa formulation compte, parce qu'une version trop large ferait entrer n'importe
+// quel arrêté : à MATÉRIALITÉ DÉCISIONNELLE COMPARABLE, un constat établi et directement vérifiable prime
+// une projection. Pas « un fait établi prime toujours une projection » : un fait établi mais anodin vaut
+// moins qu'une projection robuste et sévère.
 //
 // Un axe ambiant qui ne figure pas ici passe en dernier, dans l'ordre du registre. C'est le comportement
 // d'avant, mais assumé pour les seuls cas non tranchés au lieu de gouverner tous les cas par accident.
 const ORDRE_AMBIANT: readonly string[] = [
-  "territoire.verification-chaleur-future",
   "territoire.verification-feu-futur",
+  "territoire.verification-chaleur-future",
 ];
 
 function rangAmbiant(ruleId: string): number {

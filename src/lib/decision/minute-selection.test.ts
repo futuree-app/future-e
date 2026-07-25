@@ -163,21 +163,24 @@ test("SANS aucune priorité déclarée, le plafond ambiant ne s'applique pas", (
 
 test("UNE PLACE, DEUX CANDIDATS AMBIANTS : l'ordre est ÉDITORIAL, pas celui du registre", () => {
   // Le défaut qu'a créé le plafond : deux constats non demandés retournaient 0 au comparateur, donc le
-  // tri stable tranchait — l'ordre de déclaration des règles. Le feu perdait sa place parce qu'il est
-  // déclaré trois lignes sous la chaleur. Ici on présente le feu EN PREMIER dans les données : la
-  // chaleur doit quand même l'emporter, sinon c'est encore la position qui décide.
+  // tri stable tranchait — l'ordre de déclaration des règles dans le registre.
+  //
+  // Ici la chaleur est présentée EN PREMIER dans les données ET déclarée avant le feu dans le registre :
+  // le feu doit quand même l'emporter, sinon c'est encore la position qui décide. La raison éditoriale
+  // est que la règle feu lit d'abord le risque RECENSÉ par l'État — établi, vérifiable en mairie,
+  // indépendant de tout scénario — là où la chaleur reste une projection.
   const d = entrees({
     orientation: "arbitration",
     reglesDeclarees: ["declaree"],
     cartes: [
       { id: "prio", role: "mismatch", sujet: "l'inondation", regle: "declaree" },
-      { id: "feu", role: "verification", sujet: "le feu", regle: "territoire.verification-feu-futur" },
       { id: "chaleur", role: "verification", sujet: "la chaleur", regle: "territoire.verification-chaleur-future" },
+      { id: "feu", role: "verification", sujet: "le feu", regle: "territoire.verification-feu-futur" },
     ],
   });
   const sel = selectionMinute(d);
-  assert.ok(sel.has("chaleur"), "la chaleur se subit sans condition : elle passe avant le danger d'incendie");
-  assert.ok(!sel.has("feu"));
+  assert.ok(sel.has("feu"), "le constat établi et vérifiable passe avant la projection");
+  assert.ok(!sel.has("chaleur"));
 });
 
 test("l'ordre ambiant ne départage JAMAIS deux cartes rattachées à une priorité", () => {

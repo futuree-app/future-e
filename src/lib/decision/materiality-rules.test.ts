@@ -871,3 +871,68 @@ test("DÉCLARÉ : la même commune, priorité posée, obtient sa réponse au seu
   assert.match(f.statement, /nuits tropicales/);
   assert.match(f.statement, /Les jours au-dessus de 35 °C/);
 });
+
+// ── LE FEU AMBIANT LIT DEUX SOURCES ──────────────────────────────────────────
+
+test("FEU AMBIANT : le risque RECENSÉ parle, même sans priorité déclarée et sans indice", () => {
+  // LE TROU DE LÈGE-CAP-FERRET, deuxième version. Le faux « Bonne correspondance » a été fermé le matin
+  // même, mais la commune redevenait silencieuse par un autre chemin : sans priorité feu déclarée, la
+  // règle ambiante ne lisait QUE l'indice forêt-météo (4,5 j/an, sous le seuil ambiant de 15). Le risque
+  // recensé par l'État et les 84,7 % de forêt n'étaient lus que par la règle déclarée.
+  const sansPriorite = project({ reformulation: "x", hardConstraints: {}, preferences: [] });
+  const r = run(
+    { ...facts({ nom: "Lège-Cap-Ferret", insee: "33236", climat: EPARGNEE, hasAddress: true }),
+      risquesDeclares: { wildfire: true } },
+    sansPriorite,
+  );
+  const f = r.facts.find((x) => x.ruleId === "territoire.verification-feu-futur")!;
+  assert.ok(f, "un risque recensé par l'État se dit, même à qui ne l'a pas demandé");
+  assert.equal(f.role, "verification");
+  assert.match(f.statement, /officiellement recensé par l'État/);
+
+  // CE QUE LA CARTE NE DOIT PAS DIRE. Le recensement vaut pour la COMMUNE : il n'établit ni l'intensité,
+  // ni la proximité d'un massif, ni l'exposition de ce logement-ci. Sans cette limite, le lecteur y lirait
+  // une exposition établie de son bien.
+  assert.match(f.limitation!, /commune/);
+  assert.doesNotMatch(f.statement, /exposé|menacé|fortement/);
+  // AUCUNE CONVENTION DE SEUIL : un arrêté existe ou n'existe pas. En annoncer une le déguiserait en mesure.
+  assert.equal(f.signalConvention, undefined);
+  // Constat non demandé : aucun effet sur la couverture ni sur l'orientation.
+  assert.deepEqual(r.evaluations.find((x) => x.ruleId === "territoire.verification-feu-futur")!.projectKeys, []);
+});
+
+test("FEU AMBIANT : sans recensement, l'indice prend le relais — son cas propre existe encore", () => {
+  // Mesuré : 190 communes (0,54 %) ont l'indice >= 15 sans chaleur ambiante, dont la plupart ont aussi le
+  // recensement. Le cas propre est minuscule, mais c'est là que la divergence des deux sources est la plus
+  // instructive : un danger météorologique très sévère là où rien n'est recensé.
+  const r = run(
+    { ...facts({ climat: EXPOSEE, hasAddress: true }), risquesDeclares: { wildfire: false } },
+    project({ reformulation: "x", hardConstraints: {}, preferences: [] }),
+  );
+  const f = r.facts.find((x) => x.ruleId === "territoire.verification-feu-futur")!;
+  assert.match(f.statement, /indice forêt-météo/);
+  assert.match(f.signalConvention!, /15 jours par an/);
+});
+
+test("FEU AMBIANT : le recensement PRIME l'indice — une dimension, un signal", () => {
+  // Les deux sources présentes : une seule carte, celle du fait établi. Deux cartes sur le feu diraient
+  // deux fois la même chose au lecteur, en se disputant l'unique place ambiante de la minute.
+  const r = run(
+    { ...facts({ climat: EXPOSEE, hasAddress: true }), risquesDeclares: { wildfire: true } },
+    project({ reformulation: "x", hardConstraints: {}, preferences: [] }),
+  );
+  const feux = r.facts.filter((x) => x.ruleId === "territoire.verification-feu-futur");
+  assert.equal(feux.length, 1);
+  assert.match(feux[0].statement, /officiellement recensé/);
+});
+
+test("FEU AMBIANT : priorité déclarée, la règle ambiante se tait — recensement compris", () => {
+  // La séparation d'origine tient pour la nouvelle source aussi : ce que le lecteur a priorisé se dit en
+  // écart au projet (ruleFeu), jamais en « constat du territoire au-delà de vos priorités ».
+  const r = run(
+    { ...facts({ climat: EPARGNEE }), risquesDeclares: { wildfire: true } },
+    projetClimat("faible_risque_feu"),
+  );
+  assert.equal(r.facts.some((x) => x.ruleId === "territoire.verification-feu-futur"), false);
+  assert.ok(r.facts.some((x) => x.ruleId === "territoire.climat-feu"), "ruleFeu porte le signal");
+});

@@ -473,10 +473,36 @@ const ruleFeu: DecisionRule = {
   },
 };
 
-// LE DANGER D'INCENDIE NON DÉCLARÉ (lot feu). Symétrique de `ruleChaleurAmbiante`, et pour la même raison :
-// un phénomène important du lieu mérite d'être dit même sans avoir été priorisé, mais il ne se mêle jamais
+// LE FEU NON DÉCLARÉ (lot feu). Symétrique de `ruleChaleurAmbiante`, et pour la même raison : un
+// phénomène important du lieu mérite d'être dit même sans avoir été priorisé, mais il ne se mêle jamais
 // aux écarts au projet. `projectKeys` VIDES : le constat n'est rattaché à aucune priorité, donc il ne pèse
 // ni sur la couverture, ni sur l'orientation, ni sur le compte favorable.
+//
+// DEUX SOURCES, UNE SEULE RÈGLE — la symétrie avec `ruleFeu` (déclarée), qui manquait.
+//
+// Le premier jet ne lisait que l'indice forêt-météo, c'est-à-dire la PLUS FAIBLE des trois sources dont
+// dispose la règle déclarée : une projection statistique. Le risque recensé par l'État et le couvert
+// forestier restaient réservés à qui avait déclaré la priorité. C'était à l'envers de la doctrine qu'on
+// venait de poser — exiger davantage pour interrompre quelqu'un, tout en n'ayant gardé que la source la
+// moins solide. À Lège-Cap-Ferret, sans priorité feu déclarée, le dossier ne disait rien : indice à
+// 4,5 j/an (sous le seuil ambiant de 15), 84,7 % de forêt non lus, « Feu de forêt » recensé non lu.
+//
+// LE CALIBRAGE DE RARETÉ NE S'APPLIQUE PAS AU RISQUE RECENSÉ. Un percentile filtre une PROJECTION pour
+// l'empêcher de devenir un bruit permanent ; il n'a pas à filtrer un fait administratif établi. Mesuré le
+// 25/07/2026 sur 500 communes tirées au sort (docs/mesures/) : le risque est recensé dans 17,6 % d'entre
+// elles (IC 95 % : 14,3-20,9). C'est trois fois le calibrage ambiant, et ce n'est pas la même grandeur.
+//
+// Ce qui borne l'ouverture n'est donc pas la rareté mais la CONSÉQUENCE DÉCISIONNELLE : un constat non
+// demandé se présente s'il est directement vérifiable et déclenche une action concrète. C'est ce critère,
+// et non « fait établi > projection », qui tient à distance les risques qu'on ne montrera jamais ainsi —
+// mouvement de terrain (58,6 % des communes), séisme (57,2 %), inondation (51,4 %) : recensés eux aussi,
+// mais si universels qu'ils ne distinguent plus rien.
+//
+// L'INDICE RESTE, en second. Sur les 500 communes mesurées, aucune commune à indice >= 15 n'était
+// dépourvue à la fois du risque recensé et de la chaleur ambiante ; à l'échelle nationale, 190 communes
+// (0,54 %) ont l'indice sans la chaleur, dont l'immense majorité a aussi le recensement. Son cas propre
+// est donc minuscule — mais il existe, et c'est là que la divergence des deux sources est la plus
+// instructive : un danger météorologique très sévère là où rien n'est recensé.
 export const RULE_FEU_AMBIANT = "territoire.verification-feu-futur";
 const ruleFeuAmbiant: DecisionRule = {
   id: RULE_FEU_AMBIANT,
@@ -495,9 +521,33 @@ const ruleFeuAmbiant: DecisionRule = {
     // à 11 jours/an, à peine au-dessus du seuil DÉCLARÉ (9). Le seuil ambiant est à 15 — les 5 % des
     // communes les plus exposées. Interrompre un parcours personnalisé demande d'être parmi les plus
     // concernées, pas parmi les concernées.
+    // LE RISQUE RECENSÉ PASSE EN PREMIER, et il ne dépend d'aucun seuil : il est binaire. Ce qu'il permet
+    // de dire est strictement borné — l'État a inscrit ce risque pour cette commune. Rien sur l'intensité,
+    // rien sur la proximité du combustible, rien sur ce logement-ci. La limitation porte cette frontière,
+    // faute de quoi le lecteur y lirait une exposition établie de son bien.
+    if (f.risquesDeclares?.wildfire === true) {
+      const fait: VerificationFact = {
+        id: `${f.insee}:verification-feu-recense`, ruleId: RULE_FEU_AMBIANT,
+        sourceFactIds: ["georisques.feu"], module: "territoire",
+        role: "verification", materialityTier: "secondary",
+        topic: "le risque de feu de forêt recensé",
+        status: "Risque recensé",
+        statement: `${cap(aCommune(f.nom))}, le risque de feu de forêt est officiellement recensé par l'État (Géorisques).`,
+        limitation: "Ce recensement vaut pour la commune : il n'établit ni l'intensité du risque, ni la proximité d'un massif, ni l'exposition d'un logement en particulier.",
+        // PAS DE `signalConvention` : il n'y a pas de seuil à annoncer. Un arrêté existe ou n'existe pas,
+        // et prétendre le contraire fabriquerait une convention pour lui donner l'air d'une mesure.
+        evidence: [{
+          factId: "georisques.feu", module: "territoire", label: `Géorisques · ${f.nom}`,
+          observedValue: "risque de feu de forêt recensé", grain: "commune", href: territoireHref,
+        }],
+        action: wildfireExposureAction(f.hasAddress),
+      };
+      return ret("verification", [fait], "risque de feu recensé, non déclaré");
+    }
+
     const { verdict } = classifyWildfireDanger(c, "ambiante");
     if (verdict === "uncertain") return ret("uncertain", [], "indice forêt-météo indisponible");
-    if (verdict === "under_threshold") return ret("satisfied", [], "danger météorologique sous le seuil de signalement");
+    if (verdict === "under_threshold") return ret("satisfied", [], "danger météorologique sous le seuil ambiant, aucun risque recensé");
 
     const axe = c.joursFeu;
     const fact: VerificationFact = {
