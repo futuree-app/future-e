@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { assembleDossier } from "./decision-assembler.ts";
-import { conditionPorteeParLeBloc, sectionsAffichees, factsNonNarresParLaFace, ancresRendues, sectionHorsPriorites } from "./dossier-view.ts";
+import { conditionPorteeParLeBloc, sectionsAffichees, factsNonNarresParLaFace, ancresRendues, sectionHorsPriorites, sectionMixte, carteHorsPriorites } from "./dossier-view.ts";
 import type { DecisionFact, RunResult, RuleEvaluation, Dossier, DossierSection } from "./decision-fact.ts";
 import type { FactComposition } from "./fact-composition.ts";
 import type { UserProject } from "../user-project.ts";
@@ -311,4 +311,36 @@ test("deux cartes, une seule rattachée à une priorité -> l'intro tombe (pas d
     criteria: { registry: [{ criterionKey: "faible_risque_inondation", ruleIds: ["territoire.inondation-exposition"] }] },
   } as unknown as Dossier;
   assert.equal(sectionHorsPriorites(d, section), false);
+});
+
+test("une section MIXTE est détectée : une priorité et un constat ambiant cohabitent", () => {
+  // Vu à l'écran sur Magné : un projet qui ne demande QUE l'inondation, et une carte sur l'indice
+  // forêt-météo juste en dessous, sans un mot pour dire pourquoi elle est là. L'intro de section était
+  // tombée (elle mentirait pour l'inondation) et avec elle la seule explication du constat ambiant.
+  const section = {
+    key: "verifications", title: "t",
+    cards: [
+      { kind: "fact" as const, fact: { id: "inond", ruleId: "territoire.inondation-exposition" } as unknown as DecisionFact },
+      { kind: "fact" as const, fact: { id: "feu", ruleId: "territoire.verification-feu-futur" } as unknown as DecisionFact },
+    ],
+  } as unknown as DossierSection;
+  const d = {
+    criteria: { registry: [{ criterionKey: "faible_risque_inondation", ruleIds: ["territoire.inondation-exposition"] }] },
+  } as unknown as Dossier;
+  assert.equal(sectionMixte(d, section), true);
+  const hors = carteHorsPriorites(d);
+  assert.equal(hors(section.cards[1]!), true, "le constat ambiant doit être marqué");
+  assert.equal(hors(section.cards[0]!), false, "la priorité déclarée ne l'est pas");
+});
+
+test("une section HOMOGÈNE n'est pas mixte : l'intro suffit, pas d'étiquette redondante", () => {
+  const ambiante = {
+    key: "verifications", title: "t",
+    cards: [{ kind: "fact" as const, fact: { id: "feu", ruleId: "territoire.verification-feu-futur" } as unknown as DecisionFact }],
+  } as unknown as DossierSection;
+  const d = {
+    criteria: { registry: [{ criterionKey: "nature", ruleIds: ["territoire.mismatch-nature"] }] },
+  } as unknown as Dossier;
+  assert.equal(sectionMixte(d, ambiante), false);
+  assert.equal(sectionHorsPriorites(d, ambiante), true); // l'intro s'affiche
 });

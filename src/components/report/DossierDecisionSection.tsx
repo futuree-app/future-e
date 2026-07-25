@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Fragment, Suspense } from "react";
 import type { Dossier, DecisionFact, DossierCard } from "@/lib/decision/decision-fact";
 import { ConclusionBlock, planToBlocks } from "@/components/report/ConclusionBlock";
-import { conditionPorteeParLeBloc, sectionsDeLaMinute, ancresRendues, sectionHorsPriorites } from "@/lib/decision/dossier-view";
+import { conditionPorteeParLeBloc, sectionsDeLaMinute, ancresRendues, sectionHorsPriorites, sectionMixte, carteHorsPriorites } from "@/lib/decision/dossier-view";
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 import { FactBody, EvidenceRow, MethodDetails, factSources, factChecks } from "@/components/report/DecisionFactRenderParts";
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
@@ -223,6 +223,11 @@ export function DossierDecisionSection({
                   const grains = s.cards.map((c) => cardGrain(c, absorbedOf));
                   const showGrain = new Set(grains.filter(Boolean)).size > 1;
                   let prevGrain: string | null = null;
+                  // DANS UNE SECTION MIXTE, chaque constat AMBIANT se signale lui-même. L'intro de
+                  // section est tombée (elle mentirait pour la priorité qui cohabite ici), et sans elle
+                  // rien n'explique pourquoi ce constat apparaît alors que le lecteur ne l'a pas demandé.
+                  // Hors section mixte, l'intro suffit : pas d'étiquette redondante.
+                  const marquerAmbiant = sectionMixte(dossier, s) ? carteHorsPriorites(dossier) : () => false;
                   return s.cards.map((card, i) => {
                     const grain = grains[i]!;
                     const grainHeader = showGrain && grain && grain !== prevGrain ? grain : null;
@@ -258,6 +263,11 @@ export function DossierDecisionSection({
                         {/* Même ancre que les compositions (cf. FactCompositionCard) : la ligne
                             « À contrôler en priorité » vise la carte qui porte l'action citée. */}
                         <li id={dossierAnchorId(f.id)} tabIndex={-1} className="scroll-mt-24 focus:outline-none">
+                          {marquerAmbiant(card) ? (
+                            <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-ghost mb-1.5">
+                              Au-delà de vos priorités
+                            </p>
+                          ) : null}
                           <FactBody fact={f} color={col} />
                           <EvidenceRow fact={f} color={col} />
                           <MethodDetails conventions={conventions} checks={factChecks(f)} />

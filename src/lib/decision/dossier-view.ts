@@ -142,12 +142,27 @@ export function ancresRendues(dossier: Dossier): string[] {
 //
 // Cas mixte (une carte de priorité + une carte hors priorité) : l'intro tombe. Mieux vaut pas d'intro
 // qu'une intro fausse pour la moitié des cartes.
-export function sectionHorsPriorites(dossier: Dossier, section: DossierSection): boolean {
+export function carteHorsPriorites(dossier: Dossier): (card: DossierCard) => boolean {
   const declarees = new Set(dossier.criteria.registry.flatMap((c) => c.ruleIds));
-  return !section.cards.some((card) =>
-    card.kind === "fact"
-      ? declarees.has(card.fact.ruleId)
-      : card.composition.referencedRuleIds.some((r) => declarees.has(r)));
+  return (card) => !(card.kind === "fact"
+    ? declarees.has(card.fact.ruleId)
+    : card.composition.referencedRuleIds.some((r) => declarees.has(r)));
+}
+
+export function sectionHorsPriorites(dossier: Dossier, section: DossierSection): boolean {
+  return section.cards.every(carteHorsPriorites(dossier));
+}
+
+// UNE SECTION MIXTE : elle porte À LA FOIS une priorité déclarée et un constat ambiant. C'est le cas
+// qui a besoin d'être marqué CARTE PAR CARTE — l'intro de section est tombée (elle mentirait pour la
+// priorité), et sans elle rien n'explique la présence du constat ambiant.
+//
+// Vu à l'écran sur Magné : un projet qui ne demande QUE l'inondation, et une carte sur l'indice
+// forêt-météo juste en dessous, sans un mot pour dire pourquoi elle est là. La correction du matin
+// avait supprimé un mensonge et créé un silence.
+export function sectionMixte(dossier: Dossier, section: DossierSection): boolean {
+  const hors = carteHorsPriorites(dossier);
+  return section.cards.some(hors) && section.cards.some((c) => !hors(c));
 }
 
 // CE QUE LE DÉPLIABLE D'UNE COMPOSITION A ENCORE À MONTRER.
