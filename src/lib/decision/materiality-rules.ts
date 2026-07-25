@@ -510,12 +510,28 @@ const ruleAir: DecisionRule = {
         : ret("uncertain", [], "un polluant n'a pas pu être lu");
     }
 
+    // LA PREUVE SUIT LE TEXTE — la même règle que pour la chaleur (le « bug d'Antibes »), qui n'avait
+    // jamais été appliquée ici. La preuve était PM2,5 EN DUR, quel que soit le polluant en cause : à
+    // Lille, le constat parle du dioxyde d'azote (15,9 µg/m³, au-delà de la recommandation OMS) et la
+    // chip affichait « PM2,5 9,9 µg/m³ » — une valeur qui ne dépasse rien, sur un polluant dont le
+    // constat ne dit pas un mot. Le lecteur qui vérifie la preuve ne retrouve pas ce qu'il vient de lire.
+    //
+    // Chaque polluant en dépassement porte donc SA phrase ET SA preuve, dans le même ordre.
     const bouts: string[] = [];
+    const preuves: EvidenceRef[] = [];
     if (air.no2 != null && air.no2 >= AIR_NO2_OMS) {
       bouts.push(`le dioxyde d'azote atteint ${air.no2.toFixed(1).replace(".", ",")} µg/m³ en moyenne annuelle, au-delà de la recommandation de l'Organisation mondiale de la santé (${AIR_NO2_OMS} µg/m³)`);
+      preuves.push({
+        factId: "viv.no2", module: "territoire", label: `Air · ${f.nom}`,
+        observedValue: `NO₂ ${air.no2.toFixed(1).replace(".", ",")} µg/m³`, grain: "commune", href: territoireHref,
+      });
     }
     if (air.pm25 != null && air.pm25 >= AIR_PM25_UE_2030) {
       bouts.push(`les particules fines atteignent ${air.pm25.toFixed(1).replace(".", ",")} µg/m³, au-delà de la valeur limite européenne applicable en 2030 (${AIR_PM25_UE_2030} µg/m³)`);
+      preuves.push({
+        factId: "viv.pm25", module: "territoire", label: `Air · ${f.nom}`,
+        observedValue: `PM2,5 ${air.pm25.toFixed(1).replace(".", ",")} µg/m³`, grain: "commune", href: territoireHref,
+      });
     }
 
     const fact: VerificationFact = {
@@ -527,7 +543,7 @@ const ruleAir: DecisionRule = {
       // trafic, et il s'effondre à quelques dizaines de mètres d'un axe. Une moyenne communale ne dit rien
       // de la rue.
       limitation: "Cette moyenne est communale. Le dioxyde d'azote, marqueur du trafic, varie fortement d'une rue à l'autre : il chute de moitié à quelques dizaines de mètres d'un axe passant.",
-      evidence: [{ factId: "viv.pm25", module: "territoire", label: `Air · ${f.nom}`, observedValue: air.pm25 != null ? `PM2,5 ${air.pm25.toFixed(1).replace(".", ",")} µg/m³` : undefined, grain: "commune", href: territoireHref }],
+      evidence: preuves,
       // CE FAIT EST L'AIR, PAS LE BRUIT. Le spec du lot A2 lui attribuait « Vérifiez l'exposition du
       // logement au bruit routier » : sur une carte qui affiche « PM2,5 12,4 µg/m³ », l'étiquette se
       // décrocherait de la mesure qu'elle coiffe. Le geste, lui, reste le bon (se situer par rapport

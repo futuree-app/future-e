@@ -429,3 +429,39 @@ test("conclusionBasis porte les alignments affichés", () => {
   const d = assembleDossier(run([align()], [], [ev("territoire.alignment-acces_soins", ["acces_soins"], "satisfied", [align()])]), project(PREFS), "commune", "Toulouse");
   assert.ok(d.conclusionBasis.factIds.includes("a"));
 });
+
+// ── Le compte annoncé par le verdict vise la SECTION « À contrôler » ─────────────
+
+test("un COMPROMIS n'est pas un « constat à contrôler » : il a sa propre section", () => {
+  // Vu à l'écran sur Aix-en-Provence : « Un constat reste par ailleurs à contrôler » sous un dossier
+  // qui n'affichait aucune section « À contrôler ». Le compromis vit dans « Ce qui départage vraiment ».
+  const c = {
+    id: "c1", ruleId: "r", sourceFactIds: ["s"], module: "territoire", role: "compromise",
+    materialityTier: "structuring", topic: "une tension", statement: "Deux priorités s'opposent.",
+    sides: [
+      { projectKey: "acces_transports", statement: "a", evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }] },
+      { projectKey: "faible_chaleur", statement: "b", evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }] },
+    ],
+  } as unknown as DecisionFact;
+  const d = assembleDossier(run([c], [], [ev("r", ["acces_transports"], "compromise", [c])]), project(NO_HC), "commune", "Toulouse");
+  assert.ok(d.sections.some((s) => s.key === "compromises"));
+  assert.equal(d.sections.some((s) => s.key === "verifications"), false);
+  assert.doesNotMatch(d.narrativePlan.verdict.detail, /à contrôler/);
+});
+
+test("une INCONNUE n'est pas un « constat à contrôler » non plus", () => {
+  const u = {
+    id: "u1", ruleId: "r", sourceFactIds: ["s"], module: "territoire", role: "unknown", impact: "scoped",
+    materialityTier: "secondary", topic: "une donnée", statement: "La donnée n'est pas disponible.",
+    evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }],
+  } as unknown as DecisionFact;
+  const d = assembleDossier(run([u], [], [ev("r", ["nature"], "unknown", [u])]), project(NO_HC), "commune", "Toulouse");
+  assert.ok(d.sections.some((s) => s.key === "unknowns"));
+  assert.doesNotMatch(d.narrativePlan.verdict.detail, /à contrôler/);
+});
+
+test("une VERIFICATION, elle, est bien annoncée (le compte reste juste)", () => {
+  const d = assembleDossier(run([verif("v1")], [], [ev("r", ["nature"], "verification", [verif("v1")])]), project(NO_HC), "commune", "Toulouse");
+  assert.ok(d.sections.some((s) => s.key === "verifications"));
+  assert.equal(d.narrativePlan.reservesCount, 1);
+});

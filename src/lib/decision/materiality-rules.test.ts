@@ -495,6 +495,29 @@ test("AIR : au-delà d'un seuil SANITAIRE OFFICIEL, une carte chiffrée et sourc
   assert.match(f.limitation!, /d'une rue à l'autre/);
 });
 
+test("AIR : la PREUVE suit le constat — le polluant en cause, jamais PM2,5 par défaut", () => {
+  // Vu à l'écran sur Lille : le constat parlait du dioxyde d'azote (au-delà de la recommandation OMS) et
+  // la chip affichait « PM2,5 9,9 µg/m³ » — une valeur qui ne dépasse rien, sur un polluant dont le
+  // constat ne dit pas un mot. Même défaut que le « bug d'Antibes » pour la chaleur, jamais corrigé ici.
+  const no2Seul = facts({ sante: { air: { no2: 15.9, pm25: 9.9, notable: true, complet: true } } as never });
+  const r = run(no2Seul, projetClimat("air_sain"));
+  const f = r.facts.find((x) => x.ruleId === "territoire.sante-air")!;
+  assert.ok(f.role === "verification");
+  assert.match(f.statement, /dioxyde d'azote/);
+  assert.equal(f.statement.includes("particules fines"), false);
+  // UNE seule preuve, celle du polluant qui a déclenché.
+  assert.equal(f.evidence.length, 1);
+  assert.equal(f.evidence[0]!.factId, "viv.no2");
+  assert.match(f.evidence[0]!.observedValue!, /^NO₂ 15,9/);
+});
+
+test("AIR : les DEUX polluants en dépassement -> deux phrases, deux preuves, dans le même ordre", () => {
+  const deux = facts({ sante: { air: { no2: 15.9, pm25: 12.4, notable: true, complet: true } } as never });
+  const f = run(deux, projetClimat("air_sain")).facts.find((x) => x.ruleId === "territoire.sante-air")!;
+  assert.ok(f.role === "verification");
+  assert.deepEqual(f.evidence.map((e) => e.factId), ["viv.no2", "viv.pm25"]);
+});
+
 test("AIR : sous les seuils, satisfied SILENCIEUX (mais ce n'est PAS « l'air est pur »)", () => {
   // Aucune commune française ne descend sous la recommandation OMS pour les particules fines (5 µg/m³).
   // `satisfied` dit « aucun seuil officiel dépassé », jamais « l'air est pur » : la nuance appelle mismatch.

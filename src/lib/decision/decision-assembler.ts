@@ -31,7 +31,16 @@ function labels(project: UserProject): { engage: string; verifTitle: string } {
 }
 
 const TIER_RANK: Record<MaterialityTier, number> = { decision_critical: 0, structuring: 1, secondary: 2 };
-const RESERVE_ROLES = new Set<DecisionFact["role"]>(["verification", "compromise", "unknown"]);
+// LES CARTES QUE LE VERDICT ANNONCE COMME « À CONTRÔLER ». Ce sont EXACTEMENT celles de la section du
+// même nom — des constats établis sur le lieu —, pas toutes les cartes qui ne sont ni un écart ni une
+// correspondance.
+//
+// `compromise` et `unknown` en faisaient partie et n'auraient jamais dû : un compromis vit dans « Ce qui
+// départage vraiment », une inconnue dans « Ce que nous ne savons pas encore ». Vu à l'écran sur
+// Aix-en-Provence — « Un constat reste par ailleurs à contrôler » sous un dossier qui n'affichait AUCUNE
+// section « À contrôler ». Le lecteur cherche une section qui n'existe pas, et le compte qu'il pourrait
+// faire sur les cartes ne retombe jamais.
+const RESERVE_ROLES = new Set<DecisionFact["role"]>(["verification"]);
 function tierRank(f: DecisionFact): number {
   const base = TIER_RANK[f.materialityTier] * 2;
   return f.role === "incompatibility" && f.evidenceStrength === "indicative" ? base + 1 : base;
