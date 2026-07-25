@@ -21,3 +21,15 @@ Le résultat d'un sous-agent ne vit que dans le transcript de la session. Une co
 2. **Lancement en arrière-plan.** Lancer les agents avec `run_in_background: true` : ils tournent détachés, ne bloquent pas, et la notification de fin re-déclenche le relais.
 
 Au retour, l'orchestrateur relit `docs/rapports-agents/` plutôt que de se fier au transcript. Repartir de zéro n'est jamais nécessaire si les fichiers existent.
+
+# Un seuil qui devient conditionnel rend conditionnel tout ce qui le cite
+
+Le 25/07/2026, le seuil de signalement du climat a été dédoublé : un seuil pour répondre à une priorité **déclarée**, un plus exigeant pour un constat **non demandé**. Le paramètre a été branché au point de décision — la carte apparaissait bien aux bons seuils. Mais le TEXTE de la carte se construisait toujours avec `axe.notable`, figé sur le seuil déclaré, et la convention affichée annonçait ce même ancien seuil. Sur 31 % des communes concernées, la carte racontait un axe qu'elle n'avait pas retenu, sous une convention qu'elle n'appliquait pas.
+
+Les tests passaient : ils vérifiaient qu'une carte **apparaît**, jamais ce qu'elle **raconte**.
+
+Règle : quand une valeur qui gouvernait une décision devient conditionnelle (un paramètre, un mode, une exigence), chercher **tous** ses points de citation avant de committer — le point de décision, le texte rendu, les preuves jointes, la convention ou le seuil affichés au lecteur, les messages d'erreur. La liste se fait par `grep` sur la constante ET sur les champs dérivés (`notable`, `threshold`, un booléen pré-calculé au moment de construire les faits), pas de mémoire.
+
+Corollaire : un champ pré-calculé en amont (`notable = projete >= seuil`) est un seuil figé qui se déguise en donnée. Dès qu'un seuil se dédouble, tout champ dérivé de l'ancien devient un piège — il continue de répondre à une question qu'on ne pose plus.
+
+Corollaire de test : « la carte apparaît » et « la carte dit vrai » sont deux assertions distinctes. La seconde ne se déduit jamais de la première.
