@@ -281,3 +281,34 @@ test("une COMPOSITION rattachée à une priorité compte aussi", () => {
   } as unknown as Dossier;
   assert.equal(sectionHorsPriorites(d, section), false);
 });
+
+test("un constat AMBIANT ne masque pas l'intro, même si d'autres priorités sont déclarées", () => {
+  // L'INVARIANT : la décision est LOCALE à la section. Elle part des cartes rendues, remonte à leur
+  // règle émettrice, et ne consulte le registre que pour résoudre ce rattachement. La seule présence
+  // d'un critère déclaré ailleurs dans le dossier ne doit jamais masquer l'intro de constats qui, eux,
+  // sont bien « au-delà de vos priorités » — c'est exactement le cas des règles ambiantes, dont les
+  // `projectKeys` sont vides par construction.
+  const section = {
+    key: "verifications", title: "t",
+    cards: [{ kind: "fact" as const, fact: { id: "amb", ruleId: "territoire.verification-chaleur-future" } as unknown as DecisionFact }],
+  } as unknown as DossierSection;
+  const d = {
+    // Une priorité déclarée, examinée par une AUTRE règle : elle n'a produit aucune carte ici.
+    criteria: { registry: [{ criterionKey: "nature", ruleIds: ["territoire.mismatch-nature"] }] },
+  } as unknown as Dossier;
+  assert.equal(sectionHorsPriorites(d, section), true);
+});
+
+test("deux cartes, une seule rattachée à une priorité -> l'intro tombe (pas d'intro à moitié vraie)", () => {
+  const section = {
+    key: "verifications", title: "t",
+    cards: [
+      { kind: "fact" as const, fact: { id: "amb", ruleId: "territoire.verification-chaleur-future" } as unknown as DecisionFact },
+      { kind: "fact" as const, fact: { id: "inond", ruleId: "territoire.inondation-exposition" } as unknown as DecisionFact },
+    ],
+  } as unknown as DossierSection;
+  const d = {
+    criteria: { registry: [{ criterionKey: "faible_risque_inondation", ruleIds: ["territoire.inondation-exposition"] }] },
+  } as unknown as Dossier;
+  assert.equal(sectionHorsPriorites(d, section), false);
+});
