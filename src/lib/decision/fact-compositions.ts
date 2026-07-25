@@ -133,7 +133,7 @@ function composeClimateComfort(
 // mismatch aurait FAIT PERDRE l'action que la verification portait auparavant : une régression pour le
 // lecteur, au nom d'une justesse de registre qui ne lui sert à rien tout seul.
 function composeWildfireExposure(
-  run: RunResult, facts: ModuleFacts, project: UserProject,
+  run: RunResult, facts: ModuleFacts,
 ): MismatchWithActionComposition | null {
   // AUCUN SEUIL DE POIDS ICI. Le seul critère est qu'un mismatch feu ait été ÉMIS : la règle a déjà
   // tranché ce qui mérite une carte, et le geste doit accompagner la carte partout où elle apparaît —
@@ -332,7 +332,7 @@ export function composeFacts(run: RunResult, facts: ModuleFacts, project: UserPr
   // dossier » vise la CHALEUR : le tradeoff saisonnier et le fallback confort absorbent le MÊME mismatch,
   // donc ils s'excluent. Le danger d'incendie est un autre phénomène, que le lecteur peut prioriser
   // séparément, et il absorbe son propre mismatch : rien à arbitrer entre les deux.
-  const feu = composeWildfireExposure(run, facts, project);
+  const feu = composeWildfireExposure(run, facts);
   if (feu) out.push(feu);
   const size = composeTerritorySizeSharedEvidence(run, facts);
   if (size) out.push(size);
