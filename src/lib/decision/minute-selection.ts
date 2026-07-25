@@ -58,12 +58,43 @@ function rangRole(role: Role, orientation: Orientation): number {
   return (orientation === "favorable" ? favorable : autre)[role] ?? 9;
 }
 
+// L'ORDRE DES CONSTATS NON DEMANDÉS, quand il n'y a qu'une place et plusieurs candidats.
+//
+// Le plafond d'une carte ambiante a créé une concurrence sans arbitre : deux candidats de même rôle et
+// de même rattachement retournaient 0 au comparateur, donc le TRI STABLE tranchait — c'est-à-dire
+// l'ordre de déclaration des règles dans le registre. Sur une commune à la fois très chaude et très
+// exposée au feu, le feu disparaissait de la minute parce que `ruleFeuAmbiant` est déclarée trois lignes
+// sous `ruleChaleurAmbiante`. Un arbitrage éditorial rendu par la position d'un `export const`.
+//
+// CE QUI NE PEUT PAS ARBITRER : le dépassement relatif du seuil. 42 nuits tropicales, 30 jours d'indice
+// forêt-météo et 82 mm de pluie ne se comparent pas. Le percentile mesure la RARETÉ du lieu par rapport
+// aux autres, jamais l'importance de la chose pour celui qui y vivra — et c'est bien cette importance
+// qu'il faut pour prendre l'unique place.
+//
+// CE QUI ARBITRE, donc : un ordre ÉDITORIAL, déclaré ici et motivé. La chaleur passe avant le feu parce
+// qu'elle se subit tous les étés, à toutes les adresses de la commune, sans condition — là où le danger
+// météorologique d'incendie ne devient un risque vécu qu'en présence d'un massif, que le climat seul
+// n'établit pas (c'est la limitation portée par la carte elle-même).
+//
+// Un axe ambiant qui ne figure pas ici passe en dernier, dans l'ordre du registre. C'est le comportement
+// d'avant, mais assumé pour les seuls cas non tranchés au lieu de gouverner tous les cas par accident.
+const ORDRE_AMBIANT: readonly string[] = [
+  "territoire.verification-chaleur-future",
+  "territoire.verification-feu-futur",
+];
+
+function rangAmbiant(ruleId: string): number {
+  const i = ORDRE_AMBIANT.indexOf(ruleId);
+  return i === -1 ? ORDRE_AMBIANT.length : i;
+}
+
 type Candidat = {
   cle: string;      // l'identifiant de la carte (fait ou composition)
   role: Role;
   heros: boolean;   // le verdict le NOMME : il fonde la conclusion
   prio: boolean;    // il répond à une priorité déclarée
   sujet: string;    // pour la non-redondance
+  rangAmbiant: number; // cf. ORDRE_AMBIANT — ne départage QUE les constats non demandés
 };
 
 // CE DONT LA SÉLECTION A BESOIN — et rien de plus. Elle prend les faits AFFICHÉS, pas le dossier
@@ -95,6 +126,7 @@ function candidats(e: EntreesSelection): Candidat[] {
   return [
     ...e.faits.map((f): Candidat => ({
       cle: f.id, role: f.role, heros: e.nommes.has(f.id), prio: e.reglesDeclarees.has(f.ruleId),
+      rangAmbiant: rangAmbiant(f.ruleId),
       sujet: sujetDe(f.role === "mismatch" || f.role === "alignment" ? f : { topic: f.topic, id: f.id }),
     })),
     ...e.compositions.map((c): Candidat => ({
@@ -103,6 +135,7 @@ function candidats(e: EntreesSelection): Candidat[] {
       // faire tomber l'écran entier pour un rattachement de priorité : sans elle, la carte est
       // simplement considérée comme non rattachée.
       prio: (c.referencedRuleIds ?? []).some((r) => e.reglesDeclarees.has(r)),
+      rangAmbiant: Math.min(...[...(c.referencedRuleIds ?? []).map(rangAmbiant), ORDRE_AMBIANT.length]),
       sujet: c.kind === "shared_evidence" ? (c.headlineCause ?? c.title ?? c.id) : sujetDe(c),
     })),
   ];
@@ -120,6 +153,10 @@ export function selectionMinute(entrees: EntreesSelection): Set<string> {
     const ra = rangRole(a.role, orientation), rb = rangRole(b.role, orientation);
     if (ra !== rb) return ra - rb;                            // 2. sa nature explique l'orientation
     if (a.prio !== b.prio) return a.prio ? -1 : 1;            // 3. il répond à une priorité déclarée
+    // 4. entre CONSTATS NON DEMANDÉS seulement : l'ordre éditorial déclaré (cf. ORDRE_AMBIANT). Le test
+    // `a.prio` suffit à borner la portée — deux cartes rattachées à une priorité ne sont jamais
+    // départagées par ce rang, elles gardent l'ordre des sections.
+    if (!a.prio && a.rangAmbiant !== b.rangAmbiant) return a.rangAmbiant - b.rangAmbiant;
     return 0;                                                 // sinon : l'ordre éditorial des sections
   });
 

@@ -160,3 +160,36 @@ test("SANS aucune priorité déclarée, le plafond ambiant ne s'applique pas", (
   });
   assert.equal(selectionMinute(d).size, MINUTE_MAX_CARTES);
 });
+
+test("UNE PLACE, DEUX CANDIDATS AMBIANTS : l'ordre est ÉDITORIAL, pas celui du registre", () => {
+  // Le défaut qu'a créé le plafond : deux constats non demandés retournaient 0 au comparateur, donc le
+  // tri stable tranchait — l'ordre de déclaration des règles. Le feu perdait sa place parce qu'il est
+  // déclaré trois lignes sous la chaleur. Ici on présente le feu EN PREMIER dans les données : la
+  // chaleur doit quand même l'emporter, sinon c'est encore la position qui décide.
+  const d = entrees({
+    orientation: "arbitration",
+    reglesDeclarees: ["declaree"],
+    cartes: [
+      { id: "prio", role: "mismatch", sujet: "l'inondation", regle: "declaree" },
+      { id: "feu", role: "verification", sujet: "le feu", regle: "territoire.verification-feu-futur" },
+      { id: "chaleur", role: "verification", sujet: "la chaleur", regle: "territoire.verification-chaleur-future" },
+    ],
+  });
+  const sel = selectionMinute(d);
+  assert.ok(sel.has("chaleur"), "la chaleur se subit sans condition : elle passe avant le danger d'incendie");
+  assert.ok(!sel.has("feu"));
+});
+
+test("l'ordre ambiant ne départage JAMAIS deux cartes rattachées à une priorité", () => {
+  // Sa portée est bornée aux constats non demandés : appliqué aux réponses au projet, il ferait remonter
+  // la chaleur devant l'inondation dans un dossier où les deux ont été explicitement priorisées.
+  const d = entrees({
+    orientation: "arbitration",
+    reglesDeclarees: ["territoire.inondation-exposition", "territoire.verification-chaleur-future"],
+    cartes: [
+      { id: "inond", role: "mismatch", sujet: "l'inondation", regle: "territoire.inondation-exposition" },
+      { id: "chaleur", role: "mismatch", sujet: "la chaleur", regle: "territoire.verification-chaleur-future" },
+    ],
+  });
+  assert.deepEqual([...selectionMinute(d)], ["inond", "chaleur"]);
+});
