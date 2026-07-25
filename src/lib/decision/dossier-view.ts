@@ -5,6 +5,7 @@
 // dossier. Le fait reste dans `conclusionBasis`, dans les comptes, dans la couverture. On masque une
 // carte ; on ne réécrit pas ce qui a été établi.
 import type { Dossier, DossierSection, DossierCard, DecisionFact, IncompatibilityFact } from "./decision-fact.ts";
+import { selectionMinute, cartesDeLaMinute } from "./minute-selection.ts";
 import type { FactComposition } from "./fact-composition.ts";
 
 // LA CONDITION QUE LE BLOC DE TÊTE PORTE DÉJÀ ENTIÈREMENT.
@@ -75,6 +76,20 @@ function clesFavorablesDesCompositionsAffichees(dossier: Dossier): Set<string> {
 }
 function estCarteAlignmentAbsorbee(card: DossierCard, cles: Set<string>): boolean {
   return card.kind === "fact" && card.fact.role === "alignment" && cles.has(card.fact.projectKey);
+}
+
+// LES SECTIONS DE « EN UNE MINUTE » : celles du dossier, réduites aux cartes que la sélection retient
+// (cf. minute-selection.ts). Les sections vides tombent. `dossier.sections` n'est jamais modifié — il
+// reste la restitution complète, celle que le dossier détaillé affichera.
+//
+// C'est ICI que les plafonds par section cessent d'agir : ils vivent encore dans l'assembleur (2/3/3/3/3/4)
+// pour borner le dossier lui-même, mais ils ne décident plus de ce que le lecteur voit en premier.
+export function sectionsDeLaMinute(dossier: Dossier): DossierSection[] {
+  const retenues = selectionMinute(dossier);
+  const garde = cartesDeLaMinute(dossier, retenues);
+  return sectionsAffichees(dossier)
+    .map((s) => ({ ...s, cards: s.cards.filter(garde) }))
+    .filter((s) => s.cards.length > 0);
 }
 
 // Les sections réellement rendues. `dossier.sections` reste la vérité de ce qui a été assemblé.

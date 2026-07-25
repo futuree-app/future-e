@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Fragment, Suspense } from "react";
 import type { Dossier, DecisionFact, DossierCard } from "@/lib/decision/decision-fact";
 import { ConclusionBlock, planToBlocks } from "@/components/report/ConclusionBlock";
-import { conditionPorteeParLeBloc, sectionsAffichees, ancresRendues, sectionHorsPriorites } from "@/lib/decision/dossier-view";
+import { conditionPorteeParLeBloc, sectionsDeLaMinute, ancresRendues, sectionHorsPriorites } from "@/lib/decision/dossier-view";
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 import { FactBody, EvidenceRow, MethodDetails, factSources, factChecks } from "@/components/report/DecisionFactRenderParts";
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
@@ -89,7 +89,10 @@ export function DossierDecisionSection({
         ...(conditionDuBloc.limitation ? { limitation: conditionDuBloc.limitation } : {}),
       }
     : null;
-  const sections = sectionsAffichees(dossier);
+  // LA MINUTE EST UNE SÉLECTION, pas un dossier raccourci : un plafond GLOBAL de cinq cartes, trié par
+  // ce qui explique le verdict, avec une place réservée au contrepoids quand le dossier arbitre. Le
+  // dossier complet (toutes les cartes) reste dans `dossier.sections`.
+  const sections = sectionsDeLaMinute(dossier);
   // Les cartes que CETTE section rend : la ligne « À contrôler en priorité » n'active un renvoi que
   // vers l'une d'elles. Le plan ne peut pas le savoir — il ignore les masquages d'affichage.
   const renderedIds = ancresRendues(dossier);
