@@ -69,7 +69,14 @@ export type ClimatMetricDefinition = {
   // Calibration : le seuil DÉCLARÉ vise ~10 % des communes (p90), l'AMBIANT ~5 % (p95). Interrompre un
   // parcours personnalisé demande d'être parmi les plus concernés, pas parmi les concernés.
   // Mesuré le 25/07/2026 sur les 35 006 communes à l'horizon 2050.
-  ambientThreshold: number;
+  // OPTIONNEL, et il doit le rester : tous les axes n'ont pas de comportement ambiant. Un seuil déclaré
+  // ici sans règle pour le lire est du code qui a l'air de gouverner quelque chose et ne gouverne rien —
+  // `pluieMax24h` en a porté un pendant une heure. Un test d'invariant interdit désormais son retour.
+  //
+  // OUVRIR UN NOUVEL AXE AMBIANT N'EST PAS UNE OPÉRATION DE CALIBRATION. La rareté statistique rend une
+  // métrique CANDIDATE ; elle ne dit pas qu'elle est assez interprétable pour interrompre le lecteur, ni
+  // comment elle se départage des autres candidates pour l'unique place de la minute.
+  ambientThreshold?: number;
   unit: "jours" | "mm";
   // LE NOM DU COMPTE, distinct de l'unité. Trois métriques se comptent en « jours » (unit), mais une chip
   // isolée doit dire « 44 NUITS » pour les nuits tropicales : « unit » ne suffit pas à trancher jour/nuit,
@@ -89,7 +96,9 @@ export const CLIMAT_METRICS: Record<ClimatMetricKey, ClimatMetricDefinition> = {
   joursFeu: { absoluteKey: "NORIFM40_yr", anomalyKey: "AIFM40_yr", anomalyKind: "absolute", threshold: 9, ambientThreshold: 15, unit: "jours", countNoun: "jour" },
   // 10,2 % des communes (médiane : 41 mm ; p90 : 65 mm).
   // L'anomalie est RELATIVE (+11 % en médiane) : la référence se retrouve en DIVISANT, pas en soustrayant.
-  pluieMax24h: { absoluteKey: "NORRx1d_yr", anomalyKey: "ARRx1d_yr", anomalyKind: "relative", threshold: 65, ambientThreshold: 78, unit: "mm" },
+  // PAS DE SEUIL AMBIANT sur la pluie : aucune règle ne produit de constat non demandé sur cet axe. Le
+  // p95 mesuré vaut 78 mm (médiane 41) — la dispersion est là, la doctrine ne l'est pas encore.
+  pluieMax24h: { absoluteKey: "NORRx1d_yr", anomalyKey: "ARRx1d_yr", anomalyKind: "relative", threshold: 65, unit: "mm" },
 };
 
 export type ClimatAxe = {
@@ -216,13 +225,29 @@ export function wildfireExposureAction(hasAddress: boolean): DecisionAction {
 //
 // LE MÊME PIÈGE EST TENU : une donnée absente n'est jamais une bonne nouvelle (`uncertain`, pas
 // `under_threshold`). Un indice non lu ne prouve pas un territoire épargné.
+// LE SEUIL QUI S'APPLIQUE, selon qu'on répond à une question posée ou qu'on en pose une.
+//
+// Un axe SANS `ambientThreshold` n'a pas de comportement ambiant : demander son seuil ambiant est une
+// erreur de programmation, pas un cas de donnée. Plutôt que de replier silencieusement sur le seuil
+// déclaré — ce qui produirait exactement le constat trop bavard qu'on vient de fermer — on lève. Le
+// défaut se voit en test, jamais à l'écran d'un lecteur.
+function seuilApplicable(
+  m: ClimatMetricDefinition, axe: ClimatAxe, exigence: "declaree" | "ambiante",
+): number {
+  if (exigence === "declaree") return axe.threshold;
+  if (m.ambientThreshold == null) {
+    throw new Error(`Aucun seuil ambiant sur « ${m.absoluteKey} » : cet axe ne produit pas de constat non demandé.`);
+  }
+  return m.ambientThreshold;
+}
+
 export function classifyWildfireDanger(
   climat: ClimatFacts,
   // « ambiante » applique le seuil des constats NON DEMANDÉS (cf. `ambientThreshold`).
   exigence: "declaree" | "ambiante" = "declaree",
 ): { verdict: "unfavorable" | "under_threshold" | "uncertain"; basis: ClimateThresholdBasis | null } {
   const axe = climat.joursFeu;
-  const seuil = exigence === "ambiante" ? CLIMAT_METRICS.joursFeu.ambientThreshold : axe.threshold;
+  const seuil = seuilApplicable(CLIMAT_METRICS.joursFeu, axe, exigence);
   if (axe.projete == null) return { verdict: "uncertain", basis: null };
   if (axe.projete < seuil) return { verdict: "under_threshold", basis: null };
   return {
@@ -242,11 +267,9 @@ export function classifyClimateComfort(
   climat: ClimatFacts,
   exigence: "declaree" | "ambiante" = "declaree",
 ): { verdict: "unfavorable" | "under_threshold" | "uncertain"; basis: ClimateThresholdBasis | null } {
-  const seuilDe = (m: ClimatMetricDefinition, a: ClimatAxe): number =>
-    exigence === "ambiante" ? m.ambientThreshold : a.threshold;
   const axes = [
-    { key: "days_over_35" as const, unit: "days" as const, axe: climat.joursTresChauds, seuil: seuilDe(CLIMAT_METRICS.joursTresChauds, climat.joursTresChauds) },
-    { key: "tropical_nights" as const, unit: "nights" as const, axe: climat.nuitsTropicales, seuil: seuilDe(CLIMAT_METRICS.nuitsTropicales, climat.nuitsTropicales) },
+    { key: "days_over_35" as const, unit: "days" as const, axe: climat.joursTresChauds, seuil: seuilApplicable(CLIMAT_METRICS.joursTresChauds, climat.joursTresChauds, exigence) },
+    { key: "tropical_nights" as const, unit: "nights" as const, axe: climat.nuitsTropicales, seuil: seuilApplicable(CLIMAT_METRICS.nuitsTropicales, climat.nuitsTropicales, exigence) },
   ];
   // On ne met en mesure que les axes RÉELLEMENT lus (projete fini) : une valeur absente n'invente pas de mesure.
   const measures = axes

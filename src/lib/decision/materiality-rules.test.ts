@@ -139,7 +139,7 @@ test("le registre porte les 11 contraintes dures, et le dossier les examine", ()
 
 // ── LES RÈGLES CLIMAT ────────────────────────────────────────────────────────
 
-import { buildClimatFacts, type GwlScenarios } from "./climat-facts.ts";
+import { buildClimatFacts, CLIMAT_METRICS, type GwlScenarios } from "./climat-facts.ts";
 import { buildCriteriaRegistry } from "./criteria-registry.ts";
 
 // Une commune EXPOSÉE (des chiffres réalistes, du type de Nîmes) et une commune ÉPARGNÉE (type Brest).
@@ -789,4 +789,46 @@ test("chaleur : seul l'axe dont le constat parle entre en preuve", () => {
   assert.equal(f.statement.includes("35 °C"), false);
   assert.equal(f.evidence.some((e) => e.factId === "climat.joursTresChauds"), false);
   assert.equal(f.evidence.some((e) => e.factId === "climat.nuitsTropicales"), true);
+});
+
+// ── L'INVARIANT DES SEUILS AMBIANTS ──────────────────────────────────────────
+
+test("INVARIANT : tout seuil ambiant déclaré est CONSOMMÉ par une règle atteignable", () => {
+  // `pluieMax24h` a porté un `ambientThreshold: 78` pendant une heure sans qu'aucune règle ne le lise :
+  // du code qui a l'air de gouverner quelque chose et ne gouverne rien. Un seuil mort ne casse rien le
+  // jour où on l'écrit — il ment le jour où quelqu'un le lit et croit qu'un constat ambiant existe.
+  //
+  // Le test le prouve PAR L'EFFET, pas par la lecture du source : pour chaque axe portant un seuil
+  // ambiant, une commune juste au-dessus doit produire une carte sur un projet SANS aucune priorité.
+  const sansPriorite = project({ reformulation: "x", hardConstraints: {}, preferences: [] });
+  const axesAmbiants = Object.entries(CLIMAT_METRICS).filter(([, m]) => m.ambientThreshold != null);
+  assert.ok(axesAmbiants.length > 0);
+
+  for (const [nom, m] of axesAmbiants) {
+    const seuil = m.ambientThreshold!;
+    const sc: GwlScenarios = { gwl20: { h: "2050", v: {
+      // tout au plancher, sauf l'axe éprouvé — la carte produite ne peut venir que de lui
+      NORTX35D_yr: 0, ATX35D_yr: 0, NORTR_yr: 0, ATR_yr: 0, NORIFM40_yr: 0, AIFM40_yr: 0,
+      NORRx1d_yr: 0, ARRx1d_yr: 0, [m.absoluteKey]: seuil + 1,
+    } } };
+    const r = run(facts({ climat: buildClimatFacts(sc)!, hasAddress: true }), sansPriorite);
+    assert.ok(r.facts.length > 0,
+      `« ${nom} » déclare un seuil ambiant (${seuil}) qu'aucune règle ne lit : soit créer la règle, `
+      + "soit retirer le seuil. Ouvrir un axe ambiant est une décision produit, pas une calibration.");
+  }
+});
+
+test("INVARIANT : sous son seuil ambiant, un axe ambiant ne produit AUCUNE carte", () => {
+  // Le pendant du précédent : la preuve que le seuil est bien celui qui gouverne, et pas une décoration
+  // au-dessus d'une règle qui déclencherait de toute façon.
+  const sansPriorite = project({ reformulation: "x", hardConstraints: {}, preferences: [] });
+  for (const [nom, m] of Object.entries(CLIMAT_METRICS)) {
+    if (m.ambientThreshold == null) continue;
+    const sc: GwlScenarios = { gwl20: { h: "2050", v: {
+      NORTX35D_yr: 0, ATX35D_yr: 0, NORTR_yr: 0, ATR_yr: 0, NORIFM40_yr: 0, AIFM40_yr: 0,
+      NORRx1d_yr: 0, ARRx1d_yr: 0, [m.absoluteKey]: m.ambientThreshold - 1,
+    } } };
+    const r = run(facts({ climat: buildClimatFacts(sc)!, hasAddress: true }), sansPriorite);
+    assert.equal(r.facts.length, 0, `« ${nom} » parle sous son seuil ambiant`);
+  }
 });
