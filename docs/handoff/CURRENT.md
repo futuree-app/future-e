@@ -1,10 +1,10 @@
 # Passation — journée du 25/07 : faux positifs fermés, la MINUTE devient une sélection, six sources sous contrat
 
-**Horodatage** : 2026-07-25 (fin de session) · **Branche** : `main` = `d6a5335` (poussé, 24 commits depuis
+**Horodatage** : 2026-07-25 (fin de session) · **Branche** : `main` = `a1d2d50` (poussé, 27 commits depuis
 la dernière passation). **Tree propre** côté code : deux non suivis à NE JAMAIS committer —
 `Futur.e Design System.zip` et `src/app/dev/` (les harnais, voir plus bas).
 
-**864 tests · tsc 0 · lint propre sur les fichiers touchés.**
+**864 tests · tsc 0 · lint global à 40 problèmes** (contre 75 887 ce matin — voir §6).
 
 ---
 
@@ -113,6 +113,38 @@ dans Quartier ».
 
 ---
 
+## 6. LE LINT N'ÉTAIT PAS ROUGE, IL ÉTAIT POLLUÉ (`50d3319`, `a1d2d50`)
+
+`npx eslint` rendait **5 421 erreurs et 70 466 warnings** : plus personne ne pouvait s'en servir, et un
+vrai défaut y avait exactement la même visibilité qu'une extension Chrome minifiée.
+
+**99,8 % du bruit venait de trois dossiers qui n'ont jamais été écrits ici** : `.tmp-audit-screenshots`
+(profils Chrome jetables laissés par les captures, 58 533 problèmes), `.claude` (outillage, 17 219) et
+l'archive du design system. Le code du produit en comptait **104**. Ils sont désormais ignorés.
+
+**75 887 → 125 → 40.** Ce que le signal restauré a permis de corriger :
+- `HorizonBar` naviguait avec un `<a>` : rechargement complet au lieu du routing client ;
+- `useModuleTracking` appelait `Date.now()` PENDANT LE RENDU — impur, et redondant puisque l'effet
+  posait déjà le vrai départ ;
+- `QuartierSynthesis` écrivait une ref en plein rendu.
+
+**L'apostrophe n'est plus échappée** (82 occurrences) : `react/no-unescaped-entities` garde `>`, `"` et
+`}`, qui sont réellement ambigus, et autorise `'` — « L&apos;exposition n&apos;est pas établie » coûte
+cher à un produit dont les textes français sont la matière première. Fin de l'incohérence entre fichiers.
+
+Et une trouvaille du signal enfin lisible : les 14 alertes restantes n'étaient pas des échappements
+manquants mais des **guillemets droits dans du texte français**, quand le produit écrit « … » partout
+ailleurs. Le lint révélait une incohérence typographique.
+
+**Les 40 restants**, à reprendre comme des sujets de comportement React et non comme un nettoyage :
+18 `any`, 12 variables inutilisées, **4 setState dans des effets** (hydratation, préférences navigateur,
+consentement — les corriger mécaniquement introduirait des divergences serveur-client) et **2 try/catch
+autour de JSX** (`ConclusionRedigee`, `DossierAvecLogement`). Ce dernier point est le plus important :
+le catch ne rattrape PAS les erreurs de rendu, donc sa présence donne l'impression qu'un fallback
+existe alors qu'il n'y en a pas — un mensonge de code, de la famille de ceux fermés aujourd'hui.
+
+---
+
 ## Doctrine (à ne pas re-litiger)
 - **LE SILENCE EST UN MENSONGE quand il porte sur une priorité.** Un `satisfied` muet sur un risque
   nommé produit une affirmation invérifiable. Vaut aussi à poids 1 pour un risque RECENSÉ (binaire),
@@ -132,6 +164,8 @@ dans Quartier ».
 - **Une action = une seule source de vérité** ; **ce bloc n'est PAS généré par le LLM** ; **la gate ne
   compte que les registres GÉNÉRABLES** ; **pas de bump manuel du hash** pour un champ du plan.
 - **Un repère posé hors de React se pose en `data-`, jamais en classe.**
+- **Un instrument de contrôle illisible ne protège de rien.** Le lint rendait 75 887 lignes dont 99,8 %
+  de bruit ; restauré, il a livré trois défauts réels et une incohérence typographique en dix minutes.
 - Sonde `probe-conclusion.ts` : **NE PAS lancer** (45 appels LLM facturés).
 
 ## La suite
@@ -144,6 +178,8 @@ dans Quartier ».
 3. **La sécheresse** : seuil trouvable (150 j/an = 10,4 % des communes) mais axe PEU discriminant
    (médiane 115) et « 150 jours de sol sec » ne parle pas. Décision produit en attente.
 4. **La submersion marine** : discriminante (2/12, littoral), recensée mais AUCUN critère déclarable.
+5. **Les 40 alertes de lint restantes**, en particulier les deux try/catch autour de JSX et les quatre
+   setState dans des effets — un par un, avec le comportement React en tête.
 
 ## Pièges
 - `tsconfig.json` exclut `**/*.test.ts` du typecheck ; **eslint les ignore aussi** — un lint vert ne dit
