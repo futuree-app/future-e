@@ -73,38 +73,35 @@ function rangRole(role: Role, orientation: Orientation): number {
 //
 // CE QUI ARBITRE, donc : un ordre ÉDITORIAL, déclaré ici et motivé.
 //
-// LE FEU AVANT LA CHALEUR. Le premier jet disait l'inverse, et pour une raison qui se tenait : la chaleur
-// se subit tous les étés, à toutes les adresses, sans condition, là où l'indice forêt-météo ne devient un
-// risque vécu qu'en présence d'un massif que le climat seul n'établit pas. Ce raisonnement portait sur la
-// SEULE source qu'avait alors la règle feu — une projection statistique. Depuis, elle lit d'abord le
-// risque RECENSÉ par l'État, et le rapport de force s'inverse : le recensement est intelligible sans
-// traduction statistique, il ne dépend d'aucun horizon ni scénario, il se vérifie auprès de la mairie, et
-// il relève de la diligence minimale avant d'acheter.
+// LA CHALEUR AVANT LE FEU — et cet ordre a été inversé deux fois, la seconde sur une MESURE.
 //
-// LA RÈGLE QUI EN SORT — et sa formulation compte, parce qu'une version trop large ferait entrer n'importe
-// quel arrêté : à MATÉRIALITÉ DÉCISIONNELLE COMPARABLE, un constat établi et directement vérifiable prime
-// une projection. Pas « un fait établi prime toujours une projection » : un fait établi mais anodin vaut
-// moins qu'une projection robuste et sévère.
+// Premier jet : chaleur devant, au motif qu'elle se subit tous les étés à toutes les adresses là où
+// l'indice forêt-météo ne devient un risque vécu qu'en présence d'un massif.
 //
-// ⚠ CE QUE CET ORDRE SUPPOSE ET NE VÉRIFIE PAS. La doctrine dit « à matérialité décisionnelle
-// COMPARABLE ». Or rien ici n'établit que le feu recensé et une chaleur au p95 le sont : le recensement
-// est communal et binaire — il ne dit ni l'intensité, ni l'étendue concernée, ni la distance à l'habitat,
-// ni s'il s'applique à ce logement. Dans certains dossiers, 40 nuits tropicales projetées changeraient
-// davantage une décision résidentielle. La chute de la chaleur (7,8 % → 2,6 % des minutes) n'est donc pas
-// seulement le prix du plafond à une carte : c'est aussi le prix de cette préséance.
+// Deuxième : feu devant, quand la règle a commencé à lire le risque RECENSÉ par l'État — un fait établi,
+// vérifiable en mairie, indépendant de tout scénario. La doctrine invoquée était « à matérialité
+// décisionnelle COMPARABLE, un constat établi et directement vérifiable prime une projection ».
 //
-// LA VÉRIFICATION QUI TRANCHERAIT, à faire avant de considérer cet ordre comme acquis : prendre les
-// communes où le feu recensé évince la chaleur et regarder de quoi le recensement y est fait. GASPAR
-// distingue une mention communale large d'un PPRIF approuvé — c'est la qualification mesurable la plus
-// proche de « suffisamment important pour la décision ». Si la plupart des recensements sont de simples
-// mentions, le feu devra rester devant l'indice forêt-météo, mais pas nécessairement devant une chaleur
-// au p95. S'ils correspondent à une exposition réglementaire nette, l'ordre actuel est confirmé.
+// Troisième, celui-ci : la condition « comparable » a été MESURÉE, et elle n'est pas remplie. Sur les 88
+// communes à risque feu recensé de l'échantillon (docs/mesures/), 97,7 % n'ont AUCUN plan de prévention
+// incendie — une seule porte un PPRIF avec servitude opposable, une autre un PPRIF prescrit. Le
+// recensement est donc, presque toujours, une mention communale : ni intensité, ni étendue, ni zonage,
+// ni distance à l'habitat. Face à 39 nuits tropicales projetées — les 5 % de communes les plus exposées,
+// un phénomène subi chaque été à toutes les adresses — sa matérialité décisionnelle est plus faible.
+//
+// CE QUE CETTE MESURE NE REMET PAS EN CAUSE : l'ouverture du recensement en constat non demandé. Une
+// mention communale reste vérifiable et actionnable, et Lège-Cap-Ferret continue de parler à qui n'a
+// rien déclaré. Elle ne prime simplement pas une projection exceptionnelle.
+//
+// DETTE : un PPRIF OPPOSABLE, lui, mériterait la première place — c'est une servitude qui contraint ce
+// qu'on peut bâtir. Il concerne 1,1 % des communes à risque recensé, et le produit ne lit pas les plans
+// par commune aujourd'hui. À rouvrir quand la distinction sera lisible, pas avant.
 //
 // Un axe ambiant qui ne figure pas ici passe en dernier, dans l'ordre du registre. C'est le comportement
 // d'avant, mais assumé pour les seuls cas non tranchés au lieu de gouverner tous les cas par accident.
 const ORDRE_AMBIANT: readonly string[] = [
-  "territoire.verification-feu-futur",
   "territoire.verification-chaleur-future",
+  "territoire.verification-feu-futur",
 ];
 
 function rangAmbiant(ruleId: string): number {

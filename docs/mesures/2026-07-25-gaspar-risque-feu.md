@@ -128,20 +128,62 @@ constat établi dans 5,2 % des dossiers. C'est le prix assumé du plafond à une
 
 ---
 
-# Dette ouverte : la préséance feu / chaleur n'est pas vérifiée
+# Dette soldée : la préséance feu / chaleur était fondée sur une condition non remplie
 
-L'ordre `feu recensé > chaleur` applique la doctrine « à matérialité décisionnelle **comparable**, un
-constat établi et directement vérifiable prime une projection ». Rien n'établit que la condition est
+**Mesuré le 26/07/2026.** Script rejouable : `scripts/mesure-gaspar-pprif.mjs` (prend en entrée le JSON
+des 500 communes écrit par `mesure-gaspar-feu.mjs`, ~90 appels GASPAR).
+
+## La question
+
+L'ordre `feu recensé > chaleur` appliquait la doctrine « à matérialité décisionnelle **comparable**, un
+constat établi et directement vérifiable prime une projection ». Rien n'établissait que la condition était
 remplie : le recensement est communal et binaire, il ne dit ni l'intensité, ni l'étendue, ni la distance à
-l'habitat. Quarante nuits tropicales projetées pourraient peser davantage sur une décision résidentielle.
+l'habitat. La question mesurable la plus proche de « suffisamment important pour la décision » : quelle
+part de ces recensements correspond à un **PPRIF** plutôt qu'à une mention communale large ?
 
-**Mesure qui trancherait** : sur les communes où le feu recensé évince la chaleur, quelle part des
-recensements correspond à un **PPRIF approuvé** plutôt qu'à une mention communale large ? GASPAR expose
-les deux (`/gaspar/ppr`). C'est la qualification mesurable la plus proche de « suffisamment important pour
-la décision ».
+Trois états, du moins au plus contraignant :
 
-- Beaucoup de mentions simples → le feu reste devant l'indice, pas nécessairement devant une chaleur au p95.
-- Exposition réglementaire nette → l'ordre actuel est confirmé.
+- **aucun PPRIF** — mention communale, rien d'opposable ;
+- **PPRIF prescrit** — procédure ouverte, ni servitude ni zonage ;
+- **PPRIF opposable** — servitude d'utilité publique **et** zonage réglementaire : ça contraint ce qu'on
+  peut bâtir, et ça se vérifie en mairie.
 
-**Non faite** : à moins de quatre semaines du 20/08/2026, la priorité est le parcours de bout en bout, pas
-une règle de plus. Coût estimé : ~90 appels API sur les communes déjà échantillonnées.
+## Le résultat
+
+88 communes à risque feu recensé (les mêmes 500 tirées au sort), 88 lues, **0 échec**.
+
+| | communes | part |
+|---|---:|---:|
+| aucun PPRIF — mention communale | 86 | **97,7 %** |
+| PPRIF prescrit, non opposable | 1 | 1,1 % |
+| PPRIF **opposable** (SUP + zonage) | 1 | 1,1 % |
+
+Qualifié (prescrit ou opposable) : **2,3 %**, IC 95 % (Wilson) **0,6 – 7,9 %** ; 4,8 % pondéré par la
+population. Le seul PPRIF opposable de l'échantillon est **La Cadière-d'Azur (83027)**, plan de 2014.
+
+**La condition « comparable » n'est pas remplie.** Dans 97,7 % des cas, le recensement est une mention
+communale : elle dit qu'un aléa existe quelque part sur le territoire, rien de plus. Face à 39 nuits
+tropicales projetées — les 5 % de communes les plus exposées, un phénomène subi chaque été à toutes les
+adresses — sa matérialité décisionnelle est plus faible. **L'ordre a été inversé : la chaleur repasse
+devant le feu** dans `ORDRE_AMBIANT` (`src/lib/decision/minute-selection.ts`).
+
+## Le chiffre qui ferme la porte de sortie
+
+L'objection naturelle serait : « GASPAR ne recense peut-être pas bien les plans ». Elle ne tient pas.
+**39 des 86 communes sans PPRIF portent d'autres PPRN** (inondation, multi-risques, mouvement de
+terrain) ; 47 n'ont aucun plan du tout. Là où l'État a fait un plan, il ne l'a pas fait pour le feu.
+L'absence de PPRIF n'est donc pas un trou de données : c'est l'information.
+
+## Ce que la mesure ne remet PAS en cause
+
+L'ouverture du risque recensé en constat non demandé. Une mention communale reste vérifiable et
+actionnable, et Lège-Cap-Ferret continue de parler à qui n'a rien déclaré. Elle ne prime simplement pas
+une projection exceptionnelle. Les parts d'affichage mesurées plus haut (feu 17,6 % + 0,6 %, chaleur
+2,6 %) se rééquilibrent en faveur de la chaleur sur les 4,6 % de communes où les deux se recouvrent.
+
+## Dette qui reste ouverte, et bornée
+
+**Un PPRIF opposable mériterait la première place** — c'est une servitude, pas une mention. Il concerne
+1,1 % des communes à risque recensé, et le produit ne lit pas les plans par commune aujourd'hui (un appel
+GASPAR de plus par dossier). À rouvrir quand la distinction sera lisible, pas avant : à ce volume, elle
+change l'ordre sur environ une commune sur mille.

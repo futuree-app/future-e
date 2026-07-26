@@ -165,22 +165,22 @@ test("UNE PLACE, DEUX CANDIDATS AMBIANTS : l'ordre est ÉDITORIAL, pas celui du 
   // Le défaut qu'a créé le plafond : deux constats non demandés retournaient 0 au comparateur, donc le
   // tri stable tranchait — l'ordre de déclaration des règles dans le registre.
   //
-  // Ici la chaleur est présentée EN PREMIER dans les données ET déclarée avant le feu dans le registre :
-  // le feu doit quand même l'emporter, sinon c'est encore la position qui décide. La raison éditoriale
-  // est que la règle feu lit d'abord le risque RECENSÉ par l'État — établi, vérifiable en mairie,
-  // indépendant de tout scénario — là où la chaleur reste une projection.
+  // Ici le feu est présenté EN PREMIER dans les données : la chaleur doit quand même l'emporter, sinon
+  // c'est encore la position qui décide. La raison éditoriale est MESURÉE — 97,7 % des risques feu
+  // recensés sont des mentions communales sans plan de prévention, quand 39 nuits tropicales sont les
+  // 5 % les plus exposées d'un phénomène subi chaque été à toutes les adresses.
   const d = entrees({
     orientation: "arbitration",
     reglesDeclarees: ["declaree"],
     cartes: [
       { id: "prio", role: "mismatch", sujet: "l'inondation", regle: "declaree" },
-      { id: "chaleur", role: "verification", sujet: "la chaleur", regle: "territoire.verification-chaleur-future" },
       { id: "feu", role: "verification", sujet: "le feu", regle: "territoire.verification-feu-futur" },
+      { id: "chaleur", role: "verification", sujet: "la chaleur", regle: "territoire.verification-chaleur-future" },
     ],
   });
   const sel = selectionMinute(d);
-  assert.ok(sel.has("feu"), "le constat établi et vérifiable passe avant la projection");
-  assert.ok(!sel.has("chaleur"));
+  assert.ok(sel.has("chaleur"), "la projection exceptionnelle prime la mention communale");
+  assert.ok(!sel.has("feu"));
 });
 
 test("l'ordre ambiant ne départage JAMAIS deux cartes rattachées à une priorité", () => {
