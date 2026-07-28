@@ -5,6 +5,22 @@ import { bboxAround } from "./geo-distance";
 
 const BASE = "https://data.ademe.fr/data-fair/api/v1/datasets/59gkmzgmbjypm6yjqzunjmto";
 
+/**
+ * LE RAYON DE RECHERCHE, et rien d'autre. Il dit « nous cherchons les friches recensées à moins d'un
+ * kilomètre » — il ne dit PAS « au-delà, une friche est sans enjeu ». La portée réelle d'un site
+ * dépend de sa nature, de sa taille, du type de pollution et des voies de transfert, qu'aucune de
+ * nos sources ne décrit.
+ *
+ * Convention de produit calibrée sur une mesure (10 adresses réelles, 29/07/2026) : à 3 km il y a
+ * 38,6 friches par adresse en moyenne — 157 autour d'une adresse lilloise — soit le mur de bruit que
+ * la doctrine appelle crier au loup. À 1 km : 6,2 friches, dont 0,3 en pollution avérée ou supposée.
+ */
+export const CARTOFRICHES_RAYON_RECHERCHE_M = 1000;
+
+// Plafond de récupération, très au-dessus du pire cas observé (157 friches dans 3 km à Lille). Il
+// n'est pas une garantie : `tronque` dit si la fenêtre en contenait davantage.
+const FETCH_MAX = 500;
+
 // ── Types ────────────────────────────────────────────────────────────────────
 
 export type Friche = {
@@ -16,6 +32,15 @@ export type Friche = {
   adresse: string | null;
   latitude: number | null;
   longitude: number | null;
+  /**
+   * DISTANCE AU POINT DE RÉFÉRENCE DU SITE, jamais à sa limite. Cartofriches ne diffuse qu'un point
+   * (`_geopoint`), pas un contour : une friche étendue dont le point est à 1,1 km peut commencer à
+   * 400 m, et l'inverse est vrai aussi. Toute formulation doit donc dire « une friche est recensée à
+   * environ 420 m », jamais « le terrain pollué commence à 420 m ».
+   *
+   * `null` = coordonnées absentes ou illisibles. Ce n'est PAS une distance nulle : ces lignes sont
+   * écartées du classement et comptées dans `sansCoordonnees`.
+   */
   distanceM: number | null;
   // L'ÉTAT DE CONNAISSANCE + LE LIBELLÉ BRUT, pas un booléen. `sol_pollue: boolean` a valu `false`
   // pour les 28 373 friches de France, parce qu'il testait des valeurs que le champ ne porte jamais
@@ -34,6 +59,19 @@ export type Friche = {
 export type CartofrichesResult = {
   count: number;
   friches: Friche[];
+  /**
+   * LA LISTE DES CANDIDATS A-T-ELLE PU ÊTRE COUPÉE avant le tri par distance ? Si oui, « la friche
+   * la plus proche » n'est PAS une réponse : c'est la plus proche d'un sous-ensemble. C'est
+   * exactement le défaut que `size: 20` produisait — le relever à 500 le rend improbable, pas
+   * impossible. L'invariant : ne jamais prétendre au plus proche quand ce drapeau est levé.
+   */
+  tronque: boolean;
+  /**
+   * Lignes écartées faute de coordonnées lisibles. Elles ne sont ni proches ni lointaines : elles ne
+   * sont pas situables, et une distance nulle les mettrait en tête. Comptées pour qu'une source qui
+   * se dégrade se voie, plutôt que de disparaître dans un filtre.
+   */
+  sansCoordonnees: number;
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -114,23 +152,35 @@ function toFriche(r: ApiRecord, refLat?: number, refLon?: number): Friche {
   };
 }
 
-async function fetchLines(params: Record<string, string>): Promise<ApiRecord[]> {
+/**
+ * Rend les lignes ET le total annoncé par l'API. Le total n'est pas décoratif : c'est lui qui permet
+ * de savoir si la fenêtre contenait plus d'objets qu'on n'en a reçus — donc si un tri par distance
+ * porte sur l'ensemble des candidats ou sur un échantillon.
+ */
+async function fetchLines(params: Record<string, string>): Promise<{ rows: ApiRecord[]; total: number | null }> {
   const url = new URL(`${BASE}/lines`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
   url.searchParams.set("select", SELECT);
   const res = await fetch(url.toString(), { next: { revalidate: 86400 } });
-  if (!res.ok) return [];
-  const json = (await res.json()) as { results?: ApiRecord[] };
-  return json.results ?? [];
+  if (!res.ok) return { rows: [], total: null };
+  const json = (await res.json()) as { results?: ApiRecord[]; total?: number };
+  return { rows: json.results ?? [], total: typeof json.total === "number" ? json.total : null };
 }
 
 // ── Public API ───────────────────────────────────────────────────────────────
 
+/**
+ * Les friches D'UNE COMMUNE. Aucune distance : ces friches sont quelque part dans la commune, et rien
+ * ne dit qu'elles sont près d'une adresse donnée. Pour une lecture d'adresse, utiliser
+ * `getCartofrichesNearPoint` — c'est la correction du 29/07/2026.
+ */
 export async function getCartofrichesForCommune(inseeCode: string): Promise<CartofrichesResult> {
-  const rows = await fetchLines({ qs: `comm_insee:"${inseeCode}"`, size: "50" });
+  const { rows, total } = await fetchLines({ qs: `comm_insee:"${inseeCode}"`, size: "50" });
   return {
     count:   rows.length,
     friches: rows.map((r) => toFriche(r)),
+    tronque: total != null && total > rows.length,
+    sansCoordonnees: 0, // sans point de référence, la question ne se pose pas ici
   };
 }
 
@@ -152,16 +202,27 @@ export async function getCartofrichesForCommune(inseeCode: string): Promise<Cart
 export async function getCartofrichesNearPoint(
   latitude: number,
   longitude: number,
-  radiusM = 3000,
+  radiusM = CARTOFRICHES_RAYON_RECHERCHE_M,
   max = 20,
 ): Promise<CartofrichesResult> {
   const b = bboxAround({ lat: latitude, lon: longitude }, radiusM);
   const bbox = `${b.minLon},${b.minLat},${b.maxLon},${b.maxLat}`;
-  const rows = await fetchLines({ bbox, size: "500" });
-  const friches = rows
-    .map((r) => toFriche(r, latitude, longitude))
-    .filter((f) => f.distanceM == null || f.distanceM <= radiusM)
-    .sort((a, b) => (a.distanceM ?? Infinity) - (b.distanceM ?? Infinity))
+  const { rows, total } = await fetchLines({ bbox, size: String(FETCH_MAX) });
+
+  // LA FENÊTRE PRÉSÉLECTIONNE, ELLE NE CONCLUT PAS : ses coins sont hors du disque. Seule la
+  // distance géodésique décide de l'appartenance au rayon.
+  const situables = rows.map((r) => toFriche(r, latitude, longitude)).filter((f) => f.distanceM != null);
+  const friches = situables
+    .filter((f) => f.distanceM! <= radiusM)
+    .sort((a, b2) => a.distanceM! - b2.distanceM!)
     .slice(0, max);
-  return { count: friches.length, friches };
+
+  return {
+    count: friches.length,
+    friches,
+    // Le total porte sur la FENÊTRE, pas sur le disque : si elle a été coupée, des objets plus
+    // proches ont pu ne jamais arriver, et le tri ne porte alors que sur un échantillon.
+    tronque: total != null && total > rows.length,
+    sansCoordonnees: rows.length - situables.length,
+  };
 }

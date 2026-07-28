@@ -25,7 +25,11 @@ export type LogementReport = {
   } | null;
   zfe?: { inZfe: boolean; zones: Array<{ id: string; nom: string; vp_critair: string | null; deux_rm_critair: string | null; date_debut: string | null; date_fin: string | null; }>; } | null;
   irep?: { count: number; installations: Array<{ id: number; nom: string; distanceM: number; nombre_polluants: number; milieu_emission: string | null; }>; } | null;
-  cartofriches?: { count: number; friches: Array<{ id: string; nom: string; type: string | null; statut: string | null; solPollution: SolPollutionLu; activite: string | null; distanceM: number | null; }>; } | null;
+  // Friches recensées AUTOUR DE L'ADRESSE (rayon `CARTOFRICHES_RAYON_RECHERCHE_M`), triées de la plus
+  // proche. `distanceM` est la distance au POINT DE RÉFÉRENCE du site, jamais à sa limite : une
+  // friche étendue peut commencer bien avant. `tronque` dit que le tri n'a peut-être pas vu tous les
+  // candidats — dans ce cas, ne pas présenter la première comme « la plus proche ».
+  cartofriches?: { count: number; tronque: boolean; sansCoordonnees: number; friches: Array<{ id: string; nom: string; type: string | null; statut: string | null; solPollution: SolPollutionLu; activite: string | null; distanceM: number | null; }>; } | null;
   communeData?: {
     commune: {
       inseeCode: string; nom: string; population: number | null; vieillissement_pct: number | null;

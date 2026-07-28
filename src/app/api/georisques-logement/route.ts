@@ -18,7 +18,7 @@ import { validateSelectedBanAddress } from "@/lib/selected-ban-address";
 import { getZfeForPoint } from "@/lib/zfe";
 import { getIrepNearPoint } from "@/lib/irep";
 import { getAuditByBanId, getAuditByCoordinates } from "@/lib/audit";
-import { getCartofrichesNearPoint } from "@/lib/cartofriches";
+import { getCartofrichesNearPoint, CARTOFRICHES_RAYON_RECHERCHE_M } from "@/lib/cartofriches";
 import { getCommuneFullData } from "@/lib/commune-data";
 import { getOnrnSinistralite } from "@/lib/onrn-sinistralite";
 import type { LogementReport } from "@/lib/logement-report-types";
@@ -55,12 +55,9 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       // cinquante friches situées n'importe où dans la commune, SANS distance : « une friche
       // polluée quelque part à Nantes » n'est pas une information sur un logement nantais.
       //
-      // LE RAYON EST UNE CONVENTION DE PRODUIT, et il est calibré sur une mesure (10 adresses
-      // réelles, 29/07/2026) : à 3 km il y a 38,6 friches par adresse en moyenne — 123 autour d'une
-      // adresse lilloise — soit un mur de bruit que la doctrine appelle crier au loup. À 1 km, 6,2
-      // friches, dont 0,3 en pollution avérée ou supposée. C'est le rayon qui laisse le signal rare
-      // rester rare. À rouvrir le jour où ce fait s'affiche ou décide.
-      getCartofrichesNearPoint(address.latitude, address.longitude, 1000).catch(() => null),
+      // Le rayon est une convention nommée et versionnée : cf. `CARTOFRICHES_RAYON_RECHERCHE_M`,
+      // qui dit ce qu'il est (un périmètre de recherche) et ce qu'il n'est pas (un seuil sanitaire).
+      getCartofrichesNearPoint(address.latitude, address.longitude, CARTOFRICHES_RAYON_RECHERCHE_M).catch(() => null),
       // AVEC LE POINT : les indicateurs IRIS décrivent alors le SECTEUR de l'adresse, pas la moyenne
       // de la commune. L'écart n'est pas cosmétique — La Rochelle centre affiche 7,3 % de HLM là où
       // la commune entière en affiche 31,1 %. `irisScope` dit toujours à quelle échelle lire.

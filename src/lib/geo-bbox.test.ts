@@ -65,3 +65,35 @@ test("Rayon nul : la fenêtre se réduit au point", () => {
   assert.equal(b.minLat, v.lat);
   assert.equal(b.maxLon, v.lon);
 });
+
+test("LES COINS DE LA FENÊTRE SONT HORS DU RAYON : le filtre géodésique est obligatoire", () => {
+  // Sans filtre par distance réelle, un objet dans un coin serait retenu comme « à moins de 1 km ».
+  // Ce test fige la raison d'être de l'étape de filtrage dans `getCartofrichesNearPoint`.
+  for (const v of VILLES) {
+    const b = bboxAround(v, 1000);
+    for (const coin of [
+      { lat: b.maxLat, lon: b.maxLon }, { lat: b.maxLat, lon: b.minLon },
+      { lat: b.minLat, lon: b.maxLon }, { lat: b.minLat, lon: b.minLon },
+    ]) {
+      assert.ok(haversineM(v, coin) > 1000, `${v.nom} : un coin tombe dans le rayon, le filtre serait inutile`);
+    }
+  }
+});
+
+test("UN POINT À LA LIMITE EXACTE reste dans la fenêtre, dans les quatre directions", () => {
+  // La fenêtre ne doit pas exclure ce que le rayon inclut : c'est le sens du majorant.
+  const v = VILLES[1]!; // La Rochelle
+  const b = bboxAround(v, 1000);
+  const degLat = 1000 / 111_000;
+  const degLon = 1000 / (111_000 * Math.cos((v.lat * Math.PI) / 180));
+  assert.ok(v.lat + degLat <= b.maxLat + 1e-9 && v.lat - degLat >= b.minLat - 1e-9);
+  assert.ok(v.lon + degLon <= b.maxLon + 1e-9 && v.lon - degLon >= b.minLon - 1e-9);
+});
+
+test("Une coordonnée aberrante ne produit pas de fenêtre exploitable par erreur", () => {
+  // (0, 0) est la valeur de remplissage classique : la fenêtre existe, mais elle est au large de
+  // l'Afrique. C'est à l'appelant de rejeter le point, pas à la bbox de deviner.
+  const b = bboxAround({ lat: 0, lon: 0 }, 1000);
+  assert.ok(Number.isFinite(b.minLat) && Number.isFinite(b.maxLon));
+  assert.ok(haversineM({ lat: 0, lon: 0 }, { lat: 46.16, lon: -1.15 }) > 5_000_000);
+});
