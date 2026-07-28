@@ -52,7 +52,12 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
       getIrepNearPoint(address.latitude, address.longitude).catch(() => null),
       address.citycode ? getCartofrichesForCommune(address.citycode).catch(() => null) : null,
-      address.citycode ? getCommuneFullData(address.citycode).catch(() => null) : null,
+      // AVEC LE POINT : les indicateurs IRIS décrivent alors le SECTEUR de l'adresse, pas la moyenne
+      // de la commune. L'écart n'est pas cosmétique — La Rochelle centre affiche 7,3 % de HLM là où
+      // la commune entière en affiche 31,1 %. `irisScope` dit toujours à quelle échelle lire.
+      address.citycode
+        ? getCommuneFullData(address.citycode, { lat: address.latitude, lon: address.longitude }).catch(() => null)
+        : null,
       getOnrnSinistralite(address.citycode).catch(() => null),
       // Inventaires géolocalisés au point, en parallèle (jamais en série). Panne -> null.
       fetchCavitesNearPoint(address.latitude, address.longitude).catch(() => null),

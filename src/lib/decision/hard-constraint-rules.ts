@@ -17,6 +17,17 @@ const territoireHref = "/rapport/quartier";
 // vient le constat) ; `evidence` habille celles qui sont des OBSERVATIONS (les `commune.*`). Les clés
 // `project.*` ne sont pas des observations : ce sont les déclarations du lecteur, elles n'ont pas de
 // carte. Ne garder que `evidenceKeys[0]` laissait des sourceFactIds sans preuve correspondante.
+// CE QUE CHAQUE OBSERVATION MESURE. L'altitude ou la population sont des ATTRIBUTS du lieu ; le relief
+// à portée, la distance au littoral et la position (qui sert l'itinéraire) sont des PROXIMITÉS — elles
+// décrivent l'environnement. Mesurées depuis une adresse, ces dernières relèvent du quartier, pas du
+// logement : c'est `echelles.ts` qui en tire la conséquence, pas cette table.
+const OBSERVATIONS_DE_PROXIMITE = new Set([
+  "commune.reliefProximite",
+  "commune.distanceCoteKm",
+  "commune.lat",
+  "commune.lon",
+]);
+
 const OBSERVATION_LABELS: Record<string, string> = {
   "commune.dept": "Département",
   "commune.altitude": "Altitude",
@@ -51,6 +62,7 @@ function toEvidence(
       label: `${label} · ${f.nom}`,
       observedValue: a.observedLabel,
       grain,
+      relation: OBSERVATIONS_DE_PROXIMITE.has(k) ? "proximite" : "attribut",
       href: territoireHref,
     });
   }

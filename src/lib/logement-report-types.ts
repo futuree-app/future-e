@@ -9,6 +9,7 @@ import type { RegulatoryPlan } from "./pprn-zonage.ts";
 import type { HeritageStatus } from "./gpu-servitudes.ts";
 import type { OnrnSinistralite } from "./onrn-sinistralite.ts";
 import type { PointHazards } from "./point-hazards.ts";
+import type { IrisScope } from "./iris-scope.ts";
 
 export type LogementReport = {
   error?: string;
@@ -36,8 +37,12 @@ export type LogementReport = {
     iris: {
       iris_count: number; passoires_taux: number | null; preca_energetique_pct: number | null;
       taux_propriete: number | null; taux_location: number | null; taux_hlm: number | null;
-      taux_suroccupation: number | null; taux_motorisation: number | null; taux_transports_communs: number | null;
+      taux_suroccupation: number | null; part_deplacements_motorises: number | null; taux_transports_communs: number | null;
     } | null;
+    // À QUELLE ÉCHELLE `iris` VAUT. `point` = le secteur de l'adresse ; `commune` = la moyenne des
+    // IRIS de la commune. Les deux chiffres se ressemblent et ne disent pas la même chose : ne
+    // jamais afficher l'un sans avoir lu ce champ.
+    irisScope: IrisScope;
   } | null;
   georisques?: {
     address?: { risks: { labels: string[] }; pprn: { labels: string[] }; regulatoryPlans?: RegulatoryPlan[]; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; } | null;

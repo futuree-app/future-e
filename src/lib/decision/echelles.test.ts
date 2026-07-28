@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { echelleDuFait, echelleDeLaComposition, ECHELLE_PAR_GRAIN, type Echelle } from "./echelles.ts";
+import { echelleDuFait, echelleDeLaComposition, echelleDeLaPreuve, ECHELLE_PAR_GRAIN, type Echelle } from "./echelles.ts";
 import type { DecisionFact, EvidenceRef } from "./decision-fact.ts";
 import type { FactComposition } from "./fact-composition.ts";
 import { readFileSync } from "node:fs";
@@ -98,15 +98,59 @@ test("les trois échelles sont bien distinctes et exhaustives", () => {
   assert.deepEqual(obtenues.sort(), [...attendues].sort());
 });
 
-test("LIMITE CONNUE : une distance ancrée sur l'adresse part aujourd'hui dans « logement »", () => {
-  // Le grain dit l'ANCRE du calcul, pas le SUPPORT du constat. Pour une surface (grand-IRIS) ou un
-  // attribut du bâtiment (DPE), les deux coïncident. Pour une distance, ils divergent : « la gare est à
-  // 8 minutes » se mesure DEPUIS l'adresse mais décrit l'environnement.
-  //
-  // Ce test FIGE l'état actuel plutôt qu'il ne le bénit : il tombera le jour où l'on distinguera ancre
-  // et support — ce qu'il faudra faire avant de faire entrer l'Autour dans le moteur.
+test("LIMITE LEVÉE (28/07/2026) : une distance ancrée sur l'adresse va dans « quartier »", () => {
+  // Ce test figeait l'ancien comportement en annonçant qu'il tomberait le jour où l'on distinguerait
+  // l'ancre du support. C'est fait : `relation` porte cette distinction, et l'échelle se dérive du
+  // couple. « La gare est à 8 minutes » se mesure DEPUIS l'adresse et décrit l'environnement.
   const distanceDepuisAdresse = fait("adresse", {
     ruleId: "hard.nearPlace", topic: "la proximité de la gare",
   } as Partial<DecisionFact>);
-  assert.equal(echelleDuFait(distanceDepuisAdresse), "logement");
+  distanceDepuisAdresse.evidence[0]!.relation = "proximite";
+  assert.equal(echelleDuFait(distanceDepuisAdresse), "quartier");
+
+  // Et le défaut reste sûr : sans `relation` déclarée, une preuve d'adresse ne migre pas toute seule.
+  const attributDuBien = fait("adresse", { ruleId: "logement.dpe" } as Partial<DecisionFact>);
+  assert.equal(echelleDuFait(attributDuBien), "logement");
+});
+
+// ── ANCRE × RELATION (28/07/2026) ────────────────────────────────────────────
+
+test("ÉCHELLE : une proximité mesurée depuis l'adresse décrit le QUARTIER, pas le logement", () => {
+  const proche: EvidenceRef = {
+    factId: "commune.distanceCoteKm", module: "territoire", label: "Distance au littoral",
+    grain: "adresse", relation: "proximite",
+  };
+  assert.equal(echelleDeLaPreuve(proche), "quartier");
+});
+
+test("ÉCHELLE : un attribut mesuré à l'adresse décrit bien le LOGEMENT", () => {
+  const attribut: EvidenceRef = {
+    factId: "logement.dpe", module: "logement", label: "DPE", grain: "adresse", relation: "attribut",
+  };
+  assert.equal(echelleDeLaPreuve(attribut), "logement");
+});
+
+test("ÉCHELLE : sans `relation`, une preuve d'adresse reste au logement (défaut sûr)", () => {
+  const sansRelation: EvidenceRef = {
+    factId: "logement.rga", module: "logement", label: "Argiles", grain: "adresse",
+  };
+  assert.equal(echelleDeLaPreuve(sansRelation), "logement");
+});
+
+test("ÉCHELLE : une proximité mesurée depuis la COMMUNE reste du territoire", () => {
+  // Le centroïde communal ne décrit aucun voisinage réel : c'est ce que la règle « bruit » dit déjà
+  // au lecteur dans sa limitation. La promouvoir en « quartier » serait le mensonge inverse.
+  const depuisCommune: EvidenceRef = {
+    factId: "calmeSonore", module: "territoire", label: "Bruit", grain: "commune", relation: "proximite",
+  };
+  assert.equal(echelleDeLaPreuve(depuisCommune), "territoire");
+});
+
+test("ÉCHELLE : le secteur reste le quartier, quelle que soit la relation", () => {
+  for (const relation of ["attribut", "proximite"] as const) {
+    assert.equal(
+      echelleDeLaPreuve({ factId: "icu", module: "territoire", label: "ICU", grain: "secteur", relation }),
+      "quartier",
+    );
+  }
 });

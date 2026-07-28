@@ -31,9 +31,43 @@ const MAX_TYPES = 3;
 
 // Famille « mouvement de terrain » (portée au point via /mvt) : à exclure du résidu communal.
 const MVT_FAMILY = /mouvement de terrain|glissement|[ée]boulement|chute[s]? de (pierre|bloc)|affaissement|effondrement|carri[èe]re souterraine|recul du trait de c[ôo]te/i;
-// Frontière Santé/technologique + doublons déjà montrés ailleurs (séisme, argile gradés ; inondation
-// portée par le PPRN « Statut réglementaire » + la sinistralité ONRN), à écarter.
-const SANTE_OU_DOUBLON = /s[ée]ism|argile|tassement|radon|industriel|effet thermique|mati[èe]res dangereuses|nucl[ée]aire|transport de|inondation/i;
+// DEUX RAISONS D'ÉCARTER, QU'UNE SEULE REGEX CONFONDAIT. Les distinguer n'change rien au filtrage —
+// leur union est identique — mais rend chaque exclusion relisable, et l'une des deux est devenue caduque.
+//
+// 1. DÉJÀ MONTRÉ AILLEURS, dans ce même dossier : le séisme et les argiles y sont gradés, l'inondation
+//    est portée par le PPRN (« Statut réglementaire ») et la sinistralité ONRN. Les répéter en résidu
+//    serait un doublon pour le lecteur. Raison toujours valable.
+const DEJA_MONTRE_AILLEURS = /s[ée]ism|argile|tassement|inondation/i;
+
+// 2. RENVOYÉ AU MODULE SANTÉ — qui n'existe plus (passage à trois modules : Commune, Autour, Logement).
+//    Ces aléas restent écartés ICI parce qu'ils sont vrais au grain COMMUNE et que ce résidu est celui
+//    d'un module d'ADRESSE : les y afficher vendrait de la commune pour de l'adresse.
+//
+//    ⚠ MAIS ILS NE SONT NULLE PART. Le radon en particulier : `sante-facts.ts` affirme qu'il « vit dans
+//    Logement », ce filtre l'en écarte, et le prompt de synthèse dit de ne pas en parler — chaque module
+//    le renvoie à un autre. Mesuré le 28/07/2026 sur 200 communes tirées de l'index : classe 3
+//    (potentiel significatif) = 19,5 %, classe 2 = 5,5 %, classe 1 = 75,0 %. À 19,5 %, le signal
+//    DISCRIMINE (repères de la doctrine : feu recensé 43 %, boisement ≥ 70 % 9,4 %, inondation 86 % =
+//    universel donc écartée). L'API `georisques.gouv.fr/api/v1/radon` est publique, sans jeton, et rend
+//    la classe par code INSEE — donc le grain est COMMUNAL, contrairement à ce qu'affirme `sante-facts`.
+//
+//    PAS DE GRAIN PLUS FIN, VÉRIFIÉ. `/radon` REFUSE `latlon` (400 : « Required parameter code_insee »).
+//    `resultats_rapport_risque?latlon=` porte bien un bloc radon avec DEUX champs distincts,
+//    `libelleStatutAdresse` et `libelleStatutCommune` — mais sur neuf points testés (Clermont, Brest,
+//    La Rochelle, Paris, Nice, Toulouse, Nancy, Creuse) ils sont TOUJOURS ÉGAUX : l'API recopie le
+//    statut communal à l'adresse. Le champ promet une finesse qu'il ne livre pas, et s'y fier
+//    afficherait « à cette adresse » un fait communal. (L'IRSN cartographie par formation géologique,
+//    donc plus fin existe en amont ; ce n'est pas ce que cette API diffuse.)
+//
+//    Sa place est donc dans le module Commune, sans ambiguïté. Décision produit en attente.
+//
+//    Bonus relevé au passage : `resultats_rapport_risque` COUVRE PARIS (« faible ») là où
+//    `/radon?code_insee=75056` rend zéro résultat — le même angle mort PLM que sur les IRIS.
+const HORS_PERIMETRE_ADRESSE = /radon|industriel|effet thermique|mati[èe]res dangereuses|nucl[ée]aire|transport de/i;
+
+function ecarteDuResidu(label: string): boolean {
+  return DEJA_MONTRE_AILLEURS.test(label) || HORS_PERIMETRE_ADRESSE.test(label);
+}
 
 /** La commune est-elle signalée pour la famille « mouvement de terrain » (GASPAR au point) ? */
 export function isMvtFlagged(labels: string[] | null | undefined): boolean {
@@ -52,7 +86,7 @@ export function communalResidualFromLabels(labels: string[] | null | undefined):
   for (const l of labels ?? []) {
     if (/submersion marine/i.test(l)) { if (!out.includes("Submersion marine")) out.push("Submersion marine"); continue; }
     if (/^par\s/i.test(l)) continue; // sous-détail : le grand type suffit
-    if (SANTE_OU_DOUBLON.test(l)) continue;
+    if (ecarteDuResidu(l)) continue;
     if (MVT_FAMILY.test(l)) continue; // porté au point
     if (!out.includes(l)) out.push(l);
   }

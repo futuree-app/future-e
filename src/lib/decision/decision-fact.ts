@@ -33,7 +33,18 @@ export type EvidenceRef = {
   module: DecisionModule;
   label: string;
   observedValue?: string; // la valeur mesurée : "42 km", "18 000 hab.", "72/100"
+  // L'ANCRE DU CALCUL : d'où la mesure a été prise. « adresse » ne veut pas dire « décrit le logement ».
   grain: "commune" | "adresse" | "secteur" | "unite_urbaine";
+  // CE QUE LA PREUVE MESURE, et c'est ce qui manquait pour ranger les faits.
+  //
+  //   `attribut`  — une propriété du lieu lui-même : l'étiquette du DPE, l'aléa argile sous la parcelle,
+  //                 le climat projeté de la commune. Ancre et support coïncident.
+  //   `proximite` — une RELATION à quelque chose d'autre : « la gare est à 8 minutes », « une cavité est
+  //                 recensée à 300 m ». La mesure part du lieu, mais elle décrit l'ENVIRONNEMENT.
+  //
+  // Une règle déclare ce qu'elle MESURE, jamais où elle s'affiche : l'échelle reste dérivée
+  // (cf. `echelles.ts`). Absent = `attribut`, qui est le cas de l'immense majorité des faits.
+  relation?: "attribut" | "proximite";
   href?: string; // optionnel slice 1
   // LE PHÉNOMÈNE que cette preuve établit, dans le vocabulaire partagé avec les modules. Porte le lien
   // vers l'endroit où la donnée est DÉMONTRÉE (une carte précise), là où `href` seul ne menait qu'en

@@ -250,12 +250,20 @@ function formatAdemeBlock(data: CommuneFullData | null): string {
   push("Logements vacants (%)", pct(commune.logements.vacants_pct));
   push("Logements sociaux (%)", pct(commune.logements.sociaux_pct));
   if (iris) {
-    push("Passoires thermiques IRIS (%)", pct(iris.passoires_taux));
+    // L'ÉCHELLE EST DITE AU MODÈLE. Ces indicateurs valent soit pour le secteur de l'adresse, soit
+    // pour la commune entière — et l'écart est massif (HLM : 0,3 % à 85,1 % entre IRIS de La
+    // Rochelle). Les annoncer « IRIS » quand c'est une moyenne communale ferait raconter du local.
+    const echelle =
+      data.irisScope.kind === "point"
+        ? `secteur de l'adresse, IRIS ${data.irisScope.irisCode}`
+        : `moyenne des ${iris.iris_count} IRIS de la commune`;
+    out.push(`- Profil résidentiel (${echelle}) :`);
+    push("Passoires thermiques (%)", pct(iris.passoires_taux));
     push("Précarité énergétique logement (%)", pct(iris.preca_energetique_pct));
     push("Taux propriété (%)", pct(iris.taux_propriete));
     push("Taux HLM (%)", pct(iris.taux_hlm));
     push("Taux suroccupation (%)", pct(iris.taux_suroccupation));
-    push("Motorisation des ménages (%)", pct(iris.taux_motorisation));
+    push("Actifs utilisant un mode motorisé pour aller travailler (%)", pct(iris.part_deplacements_motorises));
     push("Usage transports en commun (%)", pct(iris.taux_transports_communs));
   }
   push("Revenu médian (€)", num(commune.economie.revenu_median));

@@ -42,7 +42,8 @@ function makeCoastRule(): DecisionRule {
         const face = `Le littoral est à environ ${km} km, dans ce que vous recherchez.`;
         const ev: EvidenceRef = {
           factId: "coastDistance.proximite_mer", module: "territoire", label: `Territoire · ${f.nom}`,
-          observedValue: `distance au littoral estimée à environ ${km} km`, grain: "commune", href: territoireHref,
+          observedValue: `distance au littoral estimée à environ ${km} km`, grain: "commune",
+          relation: "proximite", href: territoireHref,
         };
         const alignment: AlignmentFact = {
           id: `${f.insee}:alignment-proximite_mer`, ruleId: id, sourceFactIds: ["coastDistance.proximite_mer"],

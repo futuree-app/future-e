@@ -699,9 +699,24 @@ const ruleBruit: DecisionRule = {
     const b = f.sante?.bruit;
     if (!b?.lu) return ret("uncertain", [], "exposition sonore indisponible");
     // Une commune SANS source dominante n'est pas une commune non lue : elle est loin de toute
-    // infrastructure bruyante, et c'est une bonne nouvelle qu'on a le droit de dire.
+    // infrastructure bruyante, et c'est une bonne nouvelle qu'on a le droit de dire — À L'ÉCHELLE OÙ
+    // ELLE A ÉTÉ MESURÉE.
+    //
+    // DÈS QU'UNE ADRESSE EXISTE, CE `satisfied` DEVIENT UN MENSONGE SILENCIEUX. Il ne porte AUCUN fait
+    // (tableau vide), donc aucune carte, donc la limitation « mesurée depuis le point de référence de la
+    // commune » — que la branche `verification` affiche bien, elle — n'apparaît nulle part. Or
+    // `criteria-registry` en tire `favorable` et fait monter la couverture : le lecteur reçoit une bonne
+    // nouvelle sur SON adresse, tirée d'un centroïde communal, sans aucun moyen de le savoir. C'est
+    // exactement « le silence est un mensonge quand il porte sur une priorité ».
+    //
+    // La distance part du centre de la commune : une adresse peut être à plusieurs kilomètres de là, du
+    // bon comme du mauvais côté d'une infrastructure. On ne conclut donc pas. `uncertain` n'est pas
+    // EXPLOITABLE : le critère cesse d'être favorable et la couverture ne monte plus — ce qui est la
+    // vérité, puisque rien n'a été examiné à cette adresse.
     if (!b.notable || b.source == null || b.distanceKm == null) {
-      return ret("satisfied", [], "aucune infrastructure bruyante à portée");
+      return f.hasAddress
+        ? ret("uncertain", [], "calme sonore non concluant à l'adresse : mesure ancrée sur le centroïde communal")
+        : ret("satisfied", [], "aucune infrastructure bruyante à portée");
     }
 
     const seuil = BRUIT_MAX_KM[b.source];

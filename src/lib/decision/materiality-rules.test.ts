@@ -628,8 +628,33 @@ test("BRUIT : le FAIT est absolu (une autoroute, une distance), le SCORE n'est j
 });
 
 test("BRUIT : loin de toute infrastructure, c'est une BONNE NOUVELLE, pas une donnée manquante", () => {
-  const r = run(facts({ sante: SANTE_EPARGNEE }), projetClimat("calme_sonore"));
+  // SANS ADRESSE seulement : la mesure part du centroïde communal, donc elle décrit la commune.
+  const r = run(facts({ sante: SANTE_EPARGNEE, hasAddress: false }), projetClimat("calme_sonore"));
   assert.equal(r.evaluations.find((x) => x.ruleId === "territoire.sante-bruit")!.outcome, "satisfied");
+});
+
+test("BRUIT : avec une ADRESSE, le calme ne se conclut plus depuis le centroïde communal", () => {
+  // Le défaut que ce test ferme : ce `satisfied` ne porte AUCUN fait, donc aucune carte, donc la
+  // limitation « mesurée depuis le point de référence de la commune » n'apparaissait nulle part —
+  // alors que `criteria-registry` en tirait « favorable » et faisait monter la couverture. Une bonne
+  // nouvelle sur l'adresse du lecteur, tirée d'un centroïde, sans moyen de le savoir.
+  const r = run(facts({ sante: SANTE_EPARGNEE, hasAddress: true }), projetClimat("calme_sonore"));
+  const e = r.evaluations.find((x) => x.ruleId === "territoire.sante-bruit")!;
+  assert.equal(e.outcome, "uncertain");
+  assert.equal(e.facts.length, 0);
+  // `uncertain` n'est pas EXPLOITABLE : le critère cesse d'être favorable, la couverture ne monte pas.
+  assert.notEqual(e.outcome, "satisfied");
+});
+
+test("BRUIT : une infrastructure RÉELLEMENT à portée reste dite, avec ou sans adresse", () => {
+  // La correction ne doit pas rendre le produit muet : seul le cas SANS constat était en cause.
+  // Quand une source dominante existe, la carte est émise et porte sa limitation.
+  for (const hasAddress of [false, true]) {
+    const r = run(facts({ sante: SANTE_EXPOSEE, hasAddress }), projetClimat("calme_sonore"));
+    const e = r.evaluations.find((x) => x.ruleId === "territoire.sante-bruit")!;
+    assert.equal(e.outcome, "verification", `hasAddress=${hasAddress}`);
+    assert.match(e.facts[0]!.limitation!, /point de référence de la commune/);
+  }
 });
 
 test("INDUSTRIE : la phrase dit la CATÉGORIE LÉGALE, que le lecteur peut retrouver sur Géorisques", () => {

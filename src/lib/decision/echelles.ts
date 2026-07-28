@@ -24,19 +24,28 @@ import type { FactComposition } from "./fact-composition.ts";
 
 export type Echelle = "territoire" | "quartier" | "logement";
 
-// ⚠ LIMITE CONNUE : `grain` dit aujourd'hui L'ANCRE DU CALCUL, pas le SUPPORT SPATIAL du constat.
+// ANCRE ET SUPPORT, RÉSOLU LE 28/07/2026.
 //
-// Les deux coïncident pour une surface (le grand-IRIS de l'îlot de chaleur : ancre et support sont le
-// secteur) et pour un attribut du bâtiment (le DPE : ancre et support sont l'adresse). Ils DIVERGENT pour
-// une distance : « la gare est à 8 minutes » est ANCRÉE sur l'adresse — c'est de là qu'on mesure — mais
-// DÉCRIT l'environnement proche, pas le logement. `hard-constraint-rules` pose d'ailleurs déjà
-// `grain: "adresse"` dès qu'un point d'adresse existe : ces faits partiraient donc dans « logement ».
+// `grain` dit L'ANCRE DU CALCUL : d'où la mesure est prise. Il ne suffit pas à ranger un fait, parce que
+// l'ancre et le SUPPORT du constat divergent dès qu'on mesure une RELATION. Les deux coïncident pour une
+// surface (le grand-IRIS de l'îlot de chaleur) et pour un attribut du bâtiment (le DPE) ; ils divergent
+// pour une distance : « la gare est à 8 minutes » est ancrée sur l'adresse — c'est de là qu'on mesure —
+// mais décrit l'ENVIRONNEMENT, pas le logement. `hard-constraint-rules` pose `grain: "adresse"` dès qu'un
+// point d'adresse existe : sans correctif, ces faits partaient dans « logement ».
 //
-// Ce n'est pas encore un bug visible : aucune règle de distance n'alimente le dossier aujourd'hui, et le
-// premier fait sectoriel (l'îlot de chaleur) est une SURFACE, sans ambiguïté. Mais il faudra distinguer
-// l'ancre du support AVANT de faire entrer l'Autour (commerces, écoles, espaces verts) dans le moteur —
-// et surtout ne pas résoudre ça par une exception « telle règle va dans Quartier », qui rétablirait
-// l'appartenance que cette projection existe pour supprimer.
+// LA SOLUTION N'EST PAS UNE EXCEPTION PAR RÈGLE — ce serait rétablir l'appartenance que cette projection
+// existe pour supprimer. C'est une DEUXIÈME PROPRIÉTÉ DE LA PREUVE : `relation` dit ce que la mesure
+// établit (un attribut du lieu, ou une proximité à autre chose), et l'échelle se dérive du couple.
+// Une règle déclare ce qu'elle mesure ; elle ne choisit toujours pas son module.
+//
+// ⚠ `relation` N'EST PAS « LA PREUVE EST-ELLE UN RAYON ». Un rayon peut porter sur l'environnement (les
+// équipements, une infrastructure bruyante) ou sur l'INTÉGRITÉ DU BIEN (une cavité souterraine recensée
+// à 300 m, un mouvement de terrain). Les seconds restent des attributs du logement : les basculer en
+// « quartier » parce que leur preuve est une distance, ce serait faire suivre au fait la FORME de sa
+// preuve au lieu de sa NATURE pour le lecteur — ce que la doctrine interdit explicitement.
+//
+// Le test : est-ce que le constat parle de ce que le lecteur VIVRA AUTOUR (trajets, services, bruit,
+// chaleur du quartier), ou de ce qui ATTEINT SON BIEN (sol, bâti, réglementation de la parcelle) ?
 
 // `unite_urbaine` est du TERRITOIRE, pas du quartier : c'est une maille PLUS LARGE que la commune
 // (l'agglomération), jamais plus fine. La confondre avec le voisinage inverserait le sens de lecture.
@@ -46,6 +55,17 @@ export const ECHELLE_PAR_GRAIN: Record<EvidenceRef["grain"], Echelle> = {
   secteur: "quartier",
   adresse: "logement",
 };
+
+// L'ÉCHELLE D'UNE PREUVE : son ancre, corrigée par ce qu'elle mesure.
+//
+// Une proximité mesurée DEPUIS une adresse décrit le voisinage, donc le quartier — jamais le logement.
+// Depuis une commune, elle reste du territoire : le centroïde communal ne décrit aucun voisinage réel
+// (c'est ce que la règle « bruit » dit déjà au lecteur dans sa `limitation`).
+export function echelleDeLaPreuve(evidence: EvidenceRef): Echelle | null {
+  const base = ECHELLE_PAR_GRAIN[evidence.grain] ?? null;
+  if (base === "logement" && evidence.relation === "proximite") return "quartier";
+  return base;
+}
 
 // LA PREUVE QUI PORTE L'ÉCHELLE. Un compromis n'a pas d'`evidence` propre : ses deux côtés en ont, et ils
 // partagent le même grain par construction (ils comparent deux priorités sur le MÊME lieu).
@@ -58,7 +78,7 @@ function premierePreuve(fact: DecisionFact): EvidenceRef | undefined {
 // rien ne fonde (le défaut même que cette projection existe pour éviter).
 export function echelleDuFait(fact: DecisionFact): Echelle | null {
   const e = premierePreuve(fact);
-  return e ? ECHELLE_PAR_GRAIN[e.grain] ?? null : null;
+  return e ? echelleDeLaPreuve(e) : null;
 }
 
 // L'ÉCHELLE D'UNE COMPOSITION. Elle vient de ses faits ABSORBÉS, qui partagent le même grain par
@@ -74,5 +94,5 @@ export function echelleDeLaComposition(
     : composition.kind === "tradeoff" ? composition.unfavorableSide.evidence[0]
     : composition.kind === "grouped_verification" ? composition.items[0]?.evidence[0]
     : composition.sharedEvidence[0];
-  return propre ? ECHELLE_PAR_GRAIN[propre.grain] ?? null : null;
+  return propre ? echelleDeLaPreuve(propre) : null;
 }
