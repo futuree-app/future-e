@@ -3096,7 +3096,7 @@ export default function FutureELanding() {
               Votre rapport interactif en 2 minutes.
             </h2>
             <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.65, margin: 0 }}>
-              Répondez à 6 questions. Obtenez un aperçu personnalisé de vos expositions climatiques, logement, métier, santé, mobilité, projets.
+              Répondez à 6 questions. Obtenez un aperçu personnalisé de ce que devient votre commune, de ce qui entoure votre adresse et de ce qui pèse sur votre logement.
             </p>
           </div>
           <div style={{ flexShrink: 0, textAlign: 'center' }}>
@@ -3396,7 +3396,7 @@ export default function FutureELanding() {
             </div>
             <div style={styles.planFeatures}>
               {[
-                '6 analyses personnalisées : logement, territoire, santé, mobilité, métier, projets',
+                'Trois échelles : la commune, le secteur autour de votre adresse, le logement',
                 'AskFuture : 3 questions incluses',
                 'Dashboard simplifié en lecture seule',
                 'Export PDF, à conserver',

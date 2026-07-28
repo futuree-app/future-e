@@ -7,7 +7,7 @@
 // quitter la page. Contenu court et éditorial : chiffre phare → répartition →
 // faits → « pourquoi ce chiffre compte » → (optionnel) question AskFuture.
 //
-// Agnostique du module : Quartier, Logement, Santé… fournissent juste un CardDetail.
+// Agnostique du module : Territoire, Autour de l'adresse et Logement fournissent juste un CardDetail.
 
 import { useEffect } from "react";
 
