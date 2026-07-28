@@ -1,6 +1,7 @@
 import React from "react";
 import type { Face3Snapshot, GreenKind } from "@/lib/logement-autour-types";
 import { ReportSection, GlassCard } from "@/components/report/kit";
+import { ecartAuCommune, partSansVoiture, type CarOwnership } from "@/lib/iris-logement";
 
 // Face 3 — « Autour de cette adresse » (buffer local au point géocodé). Hiérarchie :
 // vie quotidienne (BPE, socle) > verts (repère). Infra de transport (bruit) déplacée vers le
@@ -35,6 +36,13 @@ const FACE3_FAMILY: React.CSSProperties = {
   fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em",
   textTransform: "uppercase", color: "var(--fg-4)",
 };
+/** Pourcentage en typographie française : virgule décimale, espace insécable avant le %. */
+function pct(v: number, sansUnite = false): string {
+  const n = Math.round(v * 10) / 10;
+  const txt = (Number.isInteger(n) ? String(n) : n.toFixed(1)).replace(".", ",");
+  return sansUnite ? `${txt} points` : `${txt}\u00a0%`;
+}
+
 function fmtDist(m: number): string {
   return m >= 1000 ? `${(m / 1000).toFixed(1).replace(".", ",")} km` : `${m} m`;
 }
@@ -48,7 +56,80 @@ function Face3Line({ label, meters }: { label: string; meters: number }) {
     </div>
   );
 }
-export function Face3Block({ s }: { s: Face3Snapshot }) {
+
+// ── Équipement automobile des ménages (INSEE, recensement 2022, au secteur de l'adresse) ─────────
+//
+// QUATRE ÉTATS, ET AUCUN N'EST « PAS DE DONNÉE ». Un IRIS d'activité ou une commune non découpée ne
+// sont pas des trous : ce sont des réponses, et les taire ferait croire à un oubli. Le chiffre nu ne
+// dit rien non plus — 46 % n'est ni bas ni haut tant qu'on ne sait pas ce que fait la commune : la
+// comparaison EST l'information.
+//
+// LE MOT « MOTORISATION » EST BANNI. On dit ce que la donnée mesure : des ménages qui DISPOSENT d'une
+// voiture. Ni leur dépendance, ni leur besoin, ni la possibilité de vivre sans.
+function CarOwnershipBlock({ car }: { car: CarOwnership }) {
+  if (car.kind === "unknown") return null;
+
+  const ecart = ecartAuCommune(car);
+  return (
+    <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 8 }}>
+      <div style={FACE3_SUBHEAD}>Ménages et voiture</div>
+
+      {car.kind === "secteur" && (
+        <>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
+            <span style={{ fontSize: 15, color: "var(--fg-1)", fontWeight: 500 }}>
+              Ménages disposant d’au moins une voiture
+            </span>
+            <span style={{ fontSize: 15, color: "var(--fg-hi)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+              {pct(car.share)}
+            </span>
+          </div>
+          <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+            {ecart != null && Math.abs(ecart) >= 1
+              ? `Soit ${pct(Math.abs(ecart), true)} ${ecart < 0 ? "de moins" : "de plus"} que dans l’ensemble de la commune. `
+              : ecart != null
+                ? "C’est le niveau de l’ensemble de la commune. "
+                : ""}
+            {`À l’inverse, ${pct(partSansVoiture(car.share))} des ménages de ce secteur n’en ont aucune.`}
+          </p>
+        </>
+      )}
+
+      {car.kind === "commune_entiere" && (
+        <>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
+            <span style={{ fontSize: 15, color: "var(--fg-1)", fontWeight: 500 }}>
+              Ménages disposant d’au moins une voiture
+            </span>
+            <span style={{ fontSize: 15, color: "var(--fg-hi)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+              {pct(car.share)}
+            </span>
+          </div>
+          <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+            Cette commune n’est pas découpée en secteurs : la valeur porte sur la commune entière,
+            et aucune variation locale ne peut être établie.
+          </p>
+        </>
+      )}
+
+      {car.kind === "secteur_non_residentiel" && (
+        <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+          Cette adresse se situe dans un secteur principalement consacré à l’activité. Le profil
+          automobile des ménages n’y est pas établissable.
+          {car.communeShare != null
+            ? ` Sur l’ensemble de la commune, ${pct(car.communeShare)} des ménages disposent d’au moins une voiture.`
+            : ""}
+        </p>
+      )}
+
+      <p style={{ ...FACE3_FAMILY, margin: 0 }}>
+        Insee, recensement 2022 · estimation
+      </p>
+    </div>
+  );
+}
+
+export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | null }) {
   return (
     <ReportSection eyebrow="Autour de cette adresse" tone="accent">
       <GlassCard>
@@ -77,6 +158,9 @@ export function Face3Block({ s }: { s: Face3Snapshot }) {
               ))}
             </div>
           </div>
+
+          {/* Brique 2 bis — équipement automobile du secteur (INSEE). */}
+          {car ? <CarOwnershipBlock car={car} /> : null}
 
           {/* Brique 2 — espace vert (repère). Infra de transport (bruit/nuisance) déplacée
               vers le futur module Santé, au grain adresse. */}

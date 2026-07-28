@@ -7,6 +7,7 @@ import { loadBpePointsAround, nearestByCategory } from "@/lib/logement-bpe";
 import { getTileGeoms, computeOsmProximity, OSM_BBOX_RADIUS_M } from "@/lib/logement-osm";
 import { assembleSnapshot } from "@/lib/logement-autour";
 import { getIcuSignal } from "@/lib/icu";
+import { buildAutourResponse } from "@/lib/server/autour-response";
 import { getLogement, upsertLogement, needsRecompute, SOURCES_VERSION } from "@/lib/logement-store";
 import type { Posture } from "@/lib/logement-autour-types";
 
@@ -52,12 +53,18 @@ export async function POST(req: Request) {
 
   // Snapshot déjà valide en base (même adresse, même version) -> le renvoyer figé.
   const existing = await getLogement(supabase, user.id, body.logement_id);
-  if (existing && !needsRecompute(existing, center, SOURCES_VERSION)) {
+  // `existing.snapshot` est nullable en base (ligne écrite avant le calcul) : on l'exige
+  // explicitement plutôt que de le forcer — sans lui, il n'y a rien à renvoyer, donc on recalcule.
+  if (existing?.snapshot && !needsRecompute(existing, center, SOURCES_VERSION)) {
     // La posture peut avoir changé (sonde ProjectProbe) sans invalider le calcul.
     if (existing.posture !== posture) {
       await upsertLogement(supabase, { ...existing, posture });
     }
-    return Response.json({ snapshot: existing.snapshot });
+    // AUCUN chemin ne renvoie le snapshot directement : tous passent par l'assembleur (cf.
+    // `autour-response.ts`). C'est ce qui empêche un enrichissement de dépendre de la branche.
+    return Response.json(
+      await buildAutourResponse({ snapshot: existing.snapshot, lat: center.lat, lon: center.lon, insee: body.insee }),
+    );
   }
 
   // ICU (îlot de chaleur du quartier) : appel WFS IGN, lancé en concurrence avec OSM (silencieux
@@ -93,6 +100,7 @@ export async function POST(req: Request) {
   }
 
   const snapshot = assembleSnapshot(center, bpe, osm, osmStatus, await icuPromise);
+
   await upsertLogement(supabase, {
     user_id: user.id,
     logement_id: body.logement_id,
@@ -107,5 +115,7 @@ export async function POST(req: Request) {
     snapshot,
   });
 
-  return Response.json({ snapshot });
+  return Response.json(
+    await buildAutourResponse({ snapshot, lat: center.lat, lon: center.lon, insee: body.insee }),
+  );
 }

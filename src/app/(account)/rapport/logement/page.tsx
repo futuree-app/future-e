@@ -7,6 +7,7 @@ import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { resolveReadableTerritory, TERRITORY_SELECT, canAnalyzeCommune } from "@/lib/active-territory";
 import { getLogement, getLatestLogement, type LogementRow } from "@/lib/logement-store";
 import { ModuleTracker } from "@/components/ModuleTracker";
+import { buildAutourResponse } from "@/lib/server/autour-response";
 
 export default async function RapportLogementPage({
   searchParams,
@@ -54,12 +55,31 @@ export default async function RapportLogementPage({
       ? candidate
       : null;
 
+  // L'ÉQUIPEMENT AUTOMOBILE N'EST PAS DANS LE SNAPSHOT, et c'est voulu : il vient d'un artefact
+  // versionné (INSEE RP) régénéré à chaque millésime, que figer ferait cohabiter des dossiers
+  // annonçant des millésimes différents sans le dire. Conséquence : la REHYDRATATION doit le
+  // recalculer, sinon toute adresse déjà analysée rouvre sans lui — le défaut constaté le 28/07 sur
+  // « 1 rue Saint-Dominique, La Rochelle ». Ici plutôt que côté client : la page est déjà un Server
+  // Component, la lecture est locale, et ça évite une route et un aller-retour de plus.
+  const initialCarOwnership =
+    initialRow && initialRow.snapshot
+      ? (
+          await buildAutourResponse({
+            snapshot: initialRow.snapshot,
+            lat: initialRow.latitude,
+            lon: initialRow.longitude,
+            insee: initialRow.insee,
+          })
+        ).carOwnership
+      : null;
+
   return (
     <>
       <ModuleTracker moduleId="logement" commune={territory.communeName} inseeCode={territory.inseeCode} source="page" />
       <LogementModule
         defaultCommune={territory.communeName}
         initialRow={initialRow}
+        initialCarOwnership={initialCarOwnership}
         rehydrateSource={targetId ? "deeplink" : "auto"}
       />
     </>

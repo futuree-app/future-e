@@ -385,3 +385,42 @@ administrative) · APL médecins (indicateur construit à la commune).
 **Déjà fins, rien à chercher** : PPRN et plans réglementaires, RGA, sismique, périmètres ABF (zonages
 géométriques lus au point), cavités et mouvements de terrain (inventaires géolocalisés), BPE et OSM
 (au point), ICU (grand-IRIS), DRIAS (maille ~8 km, plus fine que la commune).
+
+---
+
+## 8. Dettes ouvertes par ce chantier (28/07/2026)
+
+À traiter, ou au moins à ne pas découvrir par surprise.
+
+### 8.1 — `data/iris-logement.json` n'est régénéré par aucun automatisme
+
+Le script `scripts/build-iris-logement.mjs` existe et fonctionne, mais **rien ne le lance** : ni le
+build, ni un cron, ni le hook pre-commit. L'INSEE publie une nouvelle base infracommunale chaque
+année (2022 est sortie en octobre 2025). Sans rappel, l'artefact vieillira en silence — et un
+millésime périmé ne se voit pas à l'écran.
+
+Trois options, par coût croissant : une ligne dans le README de reprise · une vérification de
+fraîcheur au build qui avertit au-delà de N mois · un cron annuel. **Aucune n'est faite.**
+
+Piège à connaître : l'URL contient l'identifiant de publication (`8647012`), qui change à chaque
+millésime. Le script devra donc être édité, pas seulement relancé.
+
+### 8.2 — Le contrat client porte des champs que rien n'affiche
+
+`LogementReport.communeData.irisScope` et `part_deplacements_motorises` voyagent jusqu'au client
+depuis le 28/07 sans qu'aucun composant ne les lise. Ce n'est pas un bug, mais un champ transporté
+que personne ne consomme finit par être supprimé « parce qu'il ne sert à rien », ou pire, branché
+plus tard par quelqu'un qui n'a pas lu ce que `irisScope` protège.
+
+### 8.3 — `LAB_IRIS` est transporté sans sémantique
+
+Volontaire (cf. §7), mais c'est une dette : tant que l'INSEE ne publie pas ses modalités, ce champ
+occupe de la place sans rien gouverner. À rouvrir seulement si la documentation apparaît — **pas**
+à déduire par corrélation.
+
+### 8.4 — Les indicateurs IRIS de l'ADEME restent affichés tels quels
+
+Sept indicateurs (passoires, précarité, propriété, location, HLM, suroccupation, transports) sont
+servis au grain secteur depuis le 28/07 alors qu'ils sont **estimés** (ENL 2022 par sondage,
+GEODIP 2017). Seul l'équipement automobile a été basculé vers une source mesurée. Les autres
+mériteraient le même examen — en particulier les passoires, qui portent une décision produit.

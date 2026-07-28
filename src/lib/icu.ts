@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { resolveIrisByPoint } from "./iris-point.ts";
 import path from "node:path";
 
 // ─── Îlot de chaleur urbain (ICU) au grain grand-IRIS, pour le module Logement ───
@@ -30,25 +31,8 @@ async function getIndex(): Promise<Record<string, number>> {
   return indexCache;
 }
 
-// lat/lon -> code_iris (9 car.) via IGN Géoplateforme WFS. null si non résolu ou panne (silencieux :
-// le bloc ICU disparaît, jamais d'erreur UI). PIÈGE : WFS 2.0 en EPSG:4326 attend l'ordre
-// POINT(lat lon) — l'ordre inverse renvoie 0 feature.
-async function resolveIrisByPoint(lat: number, lon: number): Promise<string | null> {
-  const cql = `INTERSECTS(geometrie,POINT(${lat} ${lon}))`;
-  const url =
-    "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature" +
-    "&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&count=1" +
-    `&CQL_FILTER=${encodeURIComponent(cql)}`;
-  try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
-    if (!res.ok) return null;
-    const data = (await res.json()) as { features?: Array<{ properties?: { code_iris?: string } }> };
-    return data.features?.[0]?.properties?.code_iris ?? null;
-  } catch {
-    return null;
-  }
-}
-
+// La résolution IRIS au point vit dans `iris-point.ts` : elle sert AUSSI à l'équipement automobile
+// du secteur (`iris-logement.ts`), et une adresse ne doit être résolue qu'une fois.
 // Signal ICU pour une adresse. null = non couvert / non résolu / panne (le bloc n'apparaît pas).
 export async function getIcuSignal(lat: number, lon: number): Promise<IcuSignal | null> {
   const codeIris = await resolveIrisByPoint(lat, lon);

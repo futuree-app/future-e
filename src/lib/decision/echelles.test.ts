@@ -77,19 +77,26 @@ test("sans absorbé rendu, la composition retombe sur SA preuve", () => {
 
 // ── L'ÉTAT RÉEL DU MOTEUR, mesuré sur les règles ────────────────────────────────
 
-test("aucune règle n'émet encore le grain SECTEUR — le quartier est une échelle VIDE", () => {
-  // Ce test documente le chantier plutôt qu'il ne le contraint : le modèle sait nommer l'échelle du
-  // quartier, mais les données de proximité (Autour, îlot de chaleur, confort thermique) ne franchissent
-  // pas le moteur. Le jour où une règle émettra `secteur`, ce test tombera — et ce sera la bonne
-  // nouvelle qu'on attend. Le mettre à jour alors, ne pas le supprimer.
-  const sources = [
+test("L'ÉCHELLE QUARTIER N'EST PLUS VIDE (29/07/2026) — une règle émet le grain SECTEUR", () => {
+  // Ce test documentait un chantier : « le jour où une règle émettra `secteur`, ce test tombera — et
+  // ce sera la bonne nouvelle qu'on attend. Le mettre à jour alors, ne pas le supprimer. » C'est ce
+  // jour : `secteur-rules.ts` porte l'équipement automobile du quartier (INSEE RP 2022).
+  //
+  // Il vérifie maintenant l'inverse, et il garde son utilité : que le grain `secteur` ne soit émis
+  // QUE par les règles de secteur. Une règle de commune ou de logement qui se mettrait à l'émettre
+  // signalerait une confusion d'échelle, pas un progrès.
+  const secteurSources = ["src/lib/decision/secteur-rules.ts"];
+  const autresSources = [
     "src/lib/decision/materiality-rules.ts", "src/lib/decision/logement-rules.ts",
     "src/lib/decision/mismatch-rules.ts", "src/lib/decision/alignment-rules.ts",
     "src/lib/decision/absence-rules.ts", "src/lib/decision/coast-rules.ts",
     "src/lib/decision/agglomeration-rules.ts", "src/lib/decision/hard-constraint-rules.ts",
   ];
-  const emetSecteur = sources.some((f) => /grain:\s*"secteur"/.test(readFileSync(f, "utf8")));
-  assert.equal(emetSecteur, false, "une règle émet enfin le grain « secteur » : mettre ce test à jour");
+  const emet = (f: string) => /grain:\s*"secteur"/.test(readFileSync(f, "utf8"));
+  assert.ok(secteurSources.some(emet), "aucune règle de secteur n'émet le grain « secteur »");
+  for (const f of autresSources) {
+    assert.equal(emet(f), false, `${f} émet le grain « secteur » : confusion d'échelle`);
+  }
 });
 
 test("les trois échelles sont bien distinctes et exhaustives", () => {

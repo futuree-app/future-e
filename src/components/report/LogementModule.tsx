@@ -26,6 +26,7 @@ import { EnergieSection } from "@/components/report/logement/EnergieSection";
 import { SinistraliteBlock } from "@/components/report/logement/SinistraliteSection";
 import { RegulatoryStatusBlock } from "@/components/report/logement/RegulatorySection";
 import { Face3Block } from "@/components/report/logement/AutourSection";
+import type { CarOwnership } from "@/lib/iris-logement";
 import { DecisionChecklist } from "@/components/report/logement/DecisionChecklist";
 import { PreciseLogementStep } from "@/components/report/logement/PreciseLogementStep";
 import { energyState, type ChecklistFacts } from "@/lib/logement-checklist";
@@ -64,10 +65,13 @@ function seismicValue(label: string, code: string | null | undefined): string {
 export default function LogementModule({
   defaultCommune,
   initialRow = null,
+  initialCarOwnership = null,
   rehydrateSource = "auto",
 }: {
   defaultCommune?: string | null;
   initialRow?: LogementRow | null;
+  // Calculé par la page (Server Component) : le snapshot ne le porte pas, par choix.
+  initialCarOwnership?: CarOwnership | null;
   rehydrateSource?: "auto" | "deeplink";
 }) {
   const [loading, setLoading] = useState(false);
@@ -80,6 +84,8 @@ export default function LogementModule({
   const [result, setResult] = useState<ApiResponse | null>(null);
   const [projet, setProjet] = useState<string | null>(null);
   const [autour, setAutour] = useState<Face3Snapshot | null>(null);
+  // Équipement automobile du secteur (INSEE RP). Hors snapshot : recalculé à chaque rendu, jamais figé.
+  const [carOwnership, setCarOwnership] = useState<CarOwnership | null>(null);
   // Complétude de l'« autour » pour le gate de synthèse (board critique 2a). "terminal" = un
   // snapshot non-pending est arrivé, OU le retry OSM est épuisé, OU la requête a échoué : dans
   // les trois cas on ne l'attend plus. La synthèse ne se génère jamais avant ce point (sinon elle
@@ -125,8 +131,11 @@ export default function LogementModule({
         }),
       });
       if (!res.ok) { setAutourPhase("terminal"); return; }
-      const { snapshot } = (await res.json()) as { snapshot: Face3Snapshot };
+      const { snapshot, carOwnership: car } = (await res.json()) as {
+        snapshot: Face3Snapshot; carOwnership?: CarOwnership;
+      };
       setAutour(snapshot);
+      setCarOwnership(car ?? null);
       // Terminal sauf si l'OSM est revenu `pending` ET qu'on n'a pas encore fait le retry unique
       // (le retry est gaté sur osmInfrastructure, comme l'effet ci-dessous : on aligne dessus).
       const willRetry = snapshot.sourceStatus.osmInfrastructure === "pending" && !autourRetriedRef.current;
@@ -277,6 +286,8 @@ export default function LogementModule({
       setDpeStatus(RUNTIME_DPE_STATUS[row.dpe_selection_status] ?? "not_found");
       // Restaure l'autour depuis le snapshot (figé par design, jamais re-fetché).
       setAutour(row.snapshot);
+      // L'équipement automobile, LUI, n'est pas figé : la page l'a recalculé pour cette adresse.
+      setCarOwnership(initialCarOwnership);
       // La posture est stockée, pas le projet fin : la sonde réapparaît non répondue (ton défaut).
       setProjet(null);
       posthog?.capture("logement_restored", {
@@ -592,7 +603,7 @@ export default function LogementModule({
           </div>
 
           {/* Beat 4 — Autour : qu'y a-t-il autour ? */}
-          {autour && <Face3Block s={autour} />}
+          {autour && <Face3Block s={autour} car={carOwnership} />}
 
           {/* Beat 5 — À vérifier avant de décider : et moi, je fais quoi ? */}
           <div style={{ display: "grid", gap: 16 }}>

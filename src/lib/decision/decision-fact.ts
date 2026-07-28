@@ -306,6 +306,32 @@ export type ModuleFacts = CommuneAttributes & {
   scores: Partial<Record<PreferenceKey, number | null>>;
   hasAddress: boolean;
   logement?: LogementFacts; // slice 1.5 : présent seulement quand une analyse adresse est là
+  // LE PREMIER FAIT DU GRAIN SECTEUR (29/07/2026). L'équipement automobile des ménages de l'IRIS qui
+  // contient l'adresse, comparé à sa commune. Absent = pas d'adresse, IRIS non résolu, secteur non
+  // résidentiel, ou artefact indisponible : dans tous ces cas la règle ne dit rien.
+  secteur?: SecteurFacts;
+};
+
+/**
+ * Les faits vrais à l'échelle du SECTEUR (l'IRIS qui contient l'adresse). Ils ne décrivent ni la
+ * commune ni le logement : c'est l'échelle intermédiaire que `echelles.ts` savait nommer sans avoir
+ * rien à y mettre.
+ */
+export type SecteurFacts = {
+  /**
+   * Part des ménages disposant d'au moins une voiture (INSEE, RP 2022).
+   *
+   * LES DEUX NOMBRES SONT PORTÉS ENSEMBLE, et c'est le cœur de la conception. Mesuré sur les 1 704
+   * IRIS à écart ≥ 15 points : 16 % de ceux qui sont SOUS leur commune restent au-dessus de 60 %
+   * d'équipement. « Moins équipé que sa commune » peut donc vouloir dire « trois ménages sur cinq
+   * ont quand même une voiture ». Le signe de l'écart, seul, induirait en erreur un cas sur six.
+   */
+  equipementAuto?: {
+    share: number;        // % dans le secteur
+    communeShare: number; // % dans la commune entière
+    ecart: number;        // points, signé
+    irisCode: string;
+  };
 };
 
 // LE CONTRAT DES OUTCOMES. Le registre des critères (criteria-registry.ts) en dépend entièrement :

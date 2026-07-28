@@ -3,6 +3,8 @@
 // reçus en prop (mêmes que le fallback, pas de reload).
 import { fetchLogementDecisionDataWithTimeout, LogementDataUnavailableError, type ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { buildLogementFacts } from "@/lib/decision/logement-facts";
+import { buildSecteurFacts } from "@/lib/decision/secteur-facts";
+import { getCarOwnershipAtPoint } from "@/lib/server/iris-logement-store";
 import { runRules } from "@/lib/decision/materiality-rules";
 import { assembleDossier } from "@/lib/decision/decision-assembler";
 import { composeFacts } from "@/lib/decision/fact-compositions";
@@ -32,7 +34,13 @@ export async function DossierAvecLogement({
   try {
     const data = await fetchLogementDecisionDataWithTimeout(address);
     const logement = buildLogementFacts(data, savedDpe, address.label);
-    const facts: ModuleFacts = { ...communeFacts, hasAddress: true, logement };
+    // LE SECTEUR ENTRE DANS LE MOTEUR. Lecture locale (artefact INSEE + résolution IRIS au point) :
+    // en panne, elle rend `unknown` et la règle se tait — jamais d'erreur qui coûterait le dossier.
+    const car = await getCarOwnershipAtPoint(address.latitude, address.longitude, address.citycode)
+      .catch(() => null);
+    const facts: ModuleFacts = {
+      ...communeFacts, hasAddress: true, logement, secteur: buildSecteurFacts(car),
+    };
     // LE GRAIN CHANGE. Une commune peut passer sur son point de référence et échouer pour une adresse
     // située à son extrémité : ce n'est pas une divergence de moteur, c'est une lecture plus fine, et la
     // phrase le dit (« Cette adresse est à 42 km de… », au lieu de « Le point de référence de X… »).

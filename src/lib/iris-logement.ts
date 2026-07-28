@@ -1,5 +1,9 @@
 // LES MÉNAGES DISPOSANT D'AU MOINS UNE VOITURE, au secteur de l'adresse (INSEE, RP 2022).
 //
+// LIB PURE : aucune I/O, aucun `node:`. Elle est importée PAR LE CLIENT (la carte du module Logement
+// formule l'écart et la part inverse). L'accès à l'artefact vit dans `server/iris-logement-store.ts`
+// — même séparation que `dpe-attribution.ts` (pur) / `dpe.ts` (I/O).
+//
 // CE QUE CE FAIT EST, ET LE NOM QU'IL NE PORTE PAS. C'est la part des résidences principales dont le
 // ménage dispose d'au moins une voiture (`P22_RP_VOIT1P / P22_RP`). Ce n'est PAS un « taux de
 // motorisation » — mot ambigu qui peut désigner le nombre de véhicules, l'équipement ou les
@@ -16,9 +20,6 @@
 // C'EST UNE ESTIMATION, pas un comptage. Dans les communes de 10 000 habitants et plus, le
 // recensement enquête ~8 % des logements par an, cumulés sur cinq ans ; les effectifs sont pondérés.
 // La phrase juste est « estimation issue du recensement », jamais « comptage des ménages du quartier ».
-
-import fs from "node:fs/promises";
-import path from "node:path";
 
 /** Ligne brute de l'artefact : [TYP_IRIS, LAB_IRIS, part ≥1 voiture, résidences principales]. */
 export type IrisLogementRow = [string, string, number, number];
@@ -84,42 +85,4 @@ export function ecartAuCommune(o: CarOwnership): number | null {
 /** La part de ménages SANS voiture, dérivée pour la restitution — la donnée canonique reste positive. */
 export function partSansVoiture(share: number): number {
   return Math.round((100 - share) * 10) / 10;
-}
-
-// ── Accès à l'artefact ───────────────────────────────────────────────────────
-
-type Artefact = {
-  dataYear: number;
-  secteurs: Record<string, IrisLogementRow>;
-  communes: Record<string, number>;
-};
-
-let cache: Artefact | null = null;
-
-async function load(): Promise<Artefact | null> {
-  if (cache) return cache;
-  try {
-    const raw = await fs.readFile(path.join(process.cwd(), "data", "iris-logement.json"), "utf8");
-    cache = JSON.parse(raw) as Artefact;
-    return cache;
-  } catch {
-    return null; // artefact non généré : `unknown`, jamais une valeur inventée
-  }
-}
-
-/**
- * La lecture pour une adresse, à partir de l'IRIS déjà résolu au point (cf. `icu.ts`, WFS IGN) et du
- * code commune. Les jointures se font sur les CODES, jamais sur les libellés — cf. le bug des quatre
- * Saint-Denis.
- */
-export async function getCarOwnership(irisCode: string | null, insee: string | null): Promise<CarOwnership> {
-  const a = await load();
-  if (!a) return { kind: "unknown" };
-  const communeShare = insee ? a.communes[insee] ?? null : null;
-  const row = irisCode ? a.secteurs[irisCode] ?? null : null;
-  return readCarOwnership(row, communeShare, irisCode, insee);
-}
-
-export async function getIrisLogementDataYear(): Promise<number | null> {
-  return (await load())?.dataYear ?? null;
 }
