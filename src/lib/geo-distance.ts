@@ -62,3 +62,25 @@ export function distancePointToPolygonM(p: LngLat, ring: LngLat[]): number {
   const closed = ring[0] === ring[ring.length - 1] ? ring : [...ring, ring[0]];
   return distancePointToPolylineM(p, closed);
 }
+
+/**
+ * LA FENÊTRE QUI CONTIENT UN DISQUE, pour interroger une API qui ne sait filtrer que par rectangle.
+ *
+ * ELLE EXISTE PARCE QU'UN APPELANT S'EST TROMPÉ. `cartofriches` appliquait `rayon / 111 000` aux DEUX
+ * axes. Un degré de LATITUDE vaut bien ~111 km partout ; un degré de LONGITUDE vaut
+ * `111 km × cos(lat)`, donc moins dès qu'on quitte l'équateur. La fenêtre ne couvrait ainsi que 63 à
+ * 74 % du rayon demandé vers l'est et l'ouest aux latitudes françaises (Lille : −37 %), et les
+ * objets situés au-delà étaient silencieusement absents — jamais une erreur, juste un résultat
+ * incomplet qui a l'air complet.
+ *
+ * La fenêtre rendue est un MAJORANT : elle contient le disque, avec des coins en trop. L'appelant
+ * doit donc toujours filtrer les résultats par distance réelle — le rectangle sélectionne, il ne
+ * conclut pas.
+ */
+export function bboxAround(p: LngLat, radiusM: number): { minLon: number; minLat: number; maxLon: number; maxLat: number } {
+  const degLat = radiusM / 111_000;
+  // cos(lat) borné : près des pôles la division exploserait au lieu de rendre une fenêtre utilisable.
+  // Les latitudes françaises (42° à 51°) sont très loin de cette borne.
+  const degLon = radiusM / (111_000 * Math.max(0.1, Math.cos(toRad(p.lat))));
+  return { minLon: p.lon - degLon, minLat: p.lat - degLat, maxLon: p.lon + degLon, maxLat: p.lat + degLat };
+}

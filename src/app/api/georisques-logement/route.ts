@@ -18,7 +18,7 @@ import { validateSelectedBanAddress } from "@/lib/selected-ban-address";
 import { getZfeForPoint } from "@/lib/zfe";
 import { getIrepNearPoint } from "@/lib/irep";
 import { getAuditByBanId, getAuditByCoordinates } from "@/lib/audit";
-import { getCartofrichesForCommune } from "@/lib/cartofriches";
+import { getCartofrichesNearPoint } from "@/lib/cartofriches";
 import { getCommuneFullData } from "@/lib/commune-data";
 import { getOnrnSinistralite } from "@/lib/onrn-sinistralite";
 import type { LogementReport } from "@/lib/logement-report-types";
@@ -51,7 +51,16 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       getAltitude(address.latitude, address.longitude).catch(() => null),
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
       getIrepNearPoint(address.latitude, address.longitude).catch(() => null),
-      address.citycode ? getCartofrichesForCommune(address.citycode).catch(() => null) : null,
+      // AUTOUR DE L'ADRESSE, PLUS AUTOUR DE LA COMMUNE (29/07/2026). L'appel communal rendait
+      // cinquante friches situées n'importe où dans la commune, SANS distance : « une friche
+      // polluée quelque part à Nantes » n'est pas une information sur un logement nantais.
+      //
+      // LE RAYON EST UNE CONVENTION DE PRODUIT, et il est calibré sur une mesure (10 adresses
+      // réelles, 29/07/2026) : à 3 km il y a 38,6 friches par adresse en moyenne — 123 autour d'une
+      // adresse lilloise — soit un mur de bruit que la doctrine appelle crier au loup. À 1 km, 6,2
+      // friches, dont 0,3 en pollution avérée ou supposée. C'est le rayon qui laisse le signal rare
+      // rester rare. À rouvrir le jour où ce fait s'affiche ou décide.
+      getCartofrichesNearPoint(address.latitude, address.longitude, 1000).catch(() => null),
       // AVEC LE POINT : les indicateurs IRIS décrivent alors le SECTEUR de l'adresse, pas la moyenne
       // de la commune. L'écart n'est pas cosmétique — La Rochelle centre affiche 7,3 % de HLM là où
       // la commune entière en affiche 31,1 %. `irisScope` dit toujours à quelle échelle lire.

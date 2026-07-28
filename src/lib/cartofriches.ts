@@ -1,6 +1,7 @@
 import "server-only";
 
 import { readSolPollution, type SolPollutionLu } from "./cartofriches-pollution";
+import { bboxAround } from "./geo-distance";
 
 const BASE = "https://data.ademe.fr/data-fair/api/v1/datasets/59gkmzgmbjypm6yjqzunjmto";
 
@@ -133,17 +134,34 @@ export async function getCartofrichesForCommune(inseeCode: string): Promise<Cart
   };
 }
 
+/**
+ * Les friches AUTOUR D'UN POINT, triées de la plus proche. Deux défauts corrigés le 29/07/2026, tous
+ * deux mesurés — et tous deux produisaient une fausse « friche la plus proche ».
+ *
+ * 1. LA BBOX ÉTAIT PLUS ÉTROITE QUE LE RAYON, d'est en ouest. Le calcul vit désormais dans
+ *    `bboxAround` (`geo-distance.ts`, pure et testée) : la logique qui a menti ne doit pas rester
+ *    enfermée dans une fonction d'I/O.
+ *
+ * 2. LE PLAFOND MORDAIT AVANT LE TRI. `size: 20` prenait vingt lignes dans l'ordre de l'API, et le
+ *    tri par distance venait après : la « plus proche » n'était que la plus proche de vingt friches
+ *    tirées arbitrairement. Mesuré sur une adresse lilloise : 314 m annoncés, 78 m réels.
+ *
+ * Le plafond reste (une adresse dense peut voir des centaines de friches), mais il s'applique
+ * APRÈS le tri, donc il coupe la queue, jamais la tête.
+ */
 export async function getCartofrichesNearPoint(
   latitude: number,
   longitude: number,
   radiusM = 3000,
+  max = 20,
 ): Promise<CartofrichesResult> {
-  const deg  = radiusM / 111_000;
-  const bbox = `${longitude - deg},${latitude - deg},${longitude + deg},${latitude + deg}`;
-  const rows = await fetchLines({ bbox, size: "20" });
+  const b = bboxAround({ lat: latitude, lon: longitude }, radiusM);
+  const bbox = `${b.minLon},${b.minLat},${b.maxLon},${b.maxLat}`;
+  const rows = await fetchLines({ bbox, size: "500" });
   const friches = rows
     .map((r) => toFriche(r, latitude, longitude))
     .filter((f) => f.distanceM == null || f.distanceM <= radiusM)
-    .sort((a, b) => (a.distanceM ?? 0) - (b.distanceM ?? 0));
+    .sort((a, b) => (a.distanceM ?? Infinity) - (b.distanceM ?? Infinity))
+    .slice(0, max);
   return { count: friches.length, friches };
 }
