@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { canAccessCompleteReport } from "@/lib/access";
-import { PRODUCT_MODULES } from "@/lib/product";
+import { PRODUCT_MODULES, MODULE_HREF } from "@/lib/product";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
 import { TrackedModuleLink, TrackedUpgradeLink } from "./RapportTrackedLinks";
@@ -22,30 +22,23 @@ import { getLatestLogement } from "@/lib/logement-store";
 import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 
+// Une couleur par échelle, et elle ne bouge plus d'un écran à l'autre : bleu pour la commune
+// (l'ADN Territoire), vert pour le secteur, taupe accent pour le bâti (l'ADN Logement).
 const MODULE_COLORS: Record<string, string> = {
   quartier: "var(--blue)",
-  logement: "var(--orange)",
-  metier: "var(--violet)",
-  sante: "var(--green)",
-  mobilite: "var(--red)",
-  projets: "var(--orange)",
+  autour: "var(--green)",
+  logement: "var(--accent)",
 };
 
 const MODULE_ICONS: Record<string, string> = {
   quartier: "🏘",
+  autour: "🚶",
   logement: "🏠",
-  metier: "💼",
-  sante: "🫁",
-  mobilite: "🚗",
-  projets: "🗓",
 };
 
 const MODULE_BENEFIT: Record<string, string> = {
-  logement: "DPE, risques par adresse, coût d'assurance, valeur à 20 ans. Ce que votre logement vaut vraiment dans ce contexte.",
-  metier: "Votre secteur face aux transformations qui viennent. Ce qui se renforce, ce qui se fragilise selon l'horizon.",
-  sante: "Chaleur, pollens, air, sols. Ce que cet environnement fait à votre corps aujourd'hui et selon les décennies à venir.",
-  mobilite: "Voiture, transports, trajets quotidiens. Ce que ça coûte réellement de vivre ici sans remettre en cause vos habitudes.",
-  projets: "Achat, installation, retraite. Ce que ce territoire va devenir et ce que ça implique pour vos décisions.",
+  autour: "Commerces, école, gare, espace vert, chaleur du quartier, place de la voiture. Ce qui se mesure autour du point, et pas à l'échelle de la commune.",
+  logement: "Diagnostic, confort d'été, sol de la parcelle, sinistres indemnisés. Ce que ce logement précis absorbe ou laisse passer.",
 };
 
 export default async function RapportPage() {
@@ -201,17 +194,26 @@ export default async function RapportPage() {
               <h2 className="font-normal text-[22px] leading-[1.2] text-label mb-5 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
                 Rapport interactif · {displayName}
               </h2>
+              {/* Le panneau est devenu un SOMMAIRE CLIQUABLE. Il listait six lignes dont quatre
+                  affichaient un tiret : un inventaire de ce qu'on n'a pas. Les trois échelles
+                  s'ouvrent, donc chaque ligne mène quelque part. */}
               <div className="flex flex-col gap-2.5">
                 {allModules.map((m) => {
                   const col = MODULE_COLORS[m.id] ?? "var(--violet)";
-                  const status =
-                    m.id === "quartier" || m.id === "logement" ? "Accessible" : "—";
                   return (
-                    <div key={m.id} className="flex items-center gap-3 px-3 py-2.5 rounded-lg" style={{ background: `${col}0a`, border: `1px solid ${col}1a` }}>
+                    <TrackedModuleLink
+                      key={m.id}
+                      href={MODULE_HREF[m.id]}
+                      moduleId={m.id}
+                      commune={displayName}
+                      inseeCode={inseeCode}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg no-underline"
+                      style={{ background: `${col}0a`, border: `1px solid ${col}1a` }}
+                    >
                       <span className="text-[16px]">{MODULE_ICONS[m.id]}</span>
                       <span className="text-[14px] text-label font-medium">{m.name}</span>
-                      <span className="ml-auto font-mono text-[10px] tracking-[0.06em] uppercase" style={{ color: col }}>{status}</span>
-                    </div>
+                      <span className="ml-auto font-mono text-[10px] tracking-[0.06em] uppercase" style={{ color: col }}>Ouvrir</span>
+                    </TrackedModuleLink>
                   );
                 })}
               </div>
@@ -299,8 +301,13 @@ export default async function RapportPage() {
           <section className="pt-14">
             <div className="mb-8">
               <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                Vos six dimensions, pour vous.
+                Trois échelles, de la commune à vos murs.
               </h2>
+              <p className="text-[15px] text-muted leading-[1.7] mt-3">
+                Elles se lisent dans cet ordre, et chacune peut contredire la précédente : une
+                commune qui tient bien peut abriter un secteur mal desservi, et un secteur agréable
+                un logement qui souffrira de l&apos;été.
+              </p>
             </div>
 
             <div className="grid grid-cols-3 gap-3.5">
@@ -309,12 +316,7 @@ export default async function RapportPage() {
                 const benefit = module.id === "quartier"
                   ? `Chaleur, inondations, érosion côtière. Ce que ${displayName} devient selon l'horizon choisi, données climatiques publiques à l'appui.`
                   : MODULE_BENEFIT[module.id] ?? module.summary;
-                const href =
-                  module.id === "quartier"
-                    ? "/rapport/quartier"
-                    : module.id === "logement"
-                      ? "/rapport/logement"
-                      : null;
+                const href = MODULE_HREF[module.id];
                 return (
                   <article
                     key={module.id}
@@ -330,15 +332,13 @@ export default async function RapportPage() {
                     <p className="text-[13px] text-muted leading-[1.65] mb-3.5">{benefit}</p>
                     <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase" style={{ color: col }}>
                       <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
-                      {href ? "Accessible" : "—"}
+                      Accessible
                     </span>
-                    {href ? (
-                      <div className="mt-4">
-                        <TrackedModuleLink href={href} moduleId={module.id} commune={displayName} inseeCode={inseeCode} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: col, border: `1px solid ${col}33`, background: `${col}0d` }}>
-                          Ouvrir le module
-                        </TrackedModuleLink>
-                      </div>
-                    ) : null}
+                    <div className="mt-4">
+                      <TrackedModuleLink href={href} moduleId={module.id} commune={displayName} inseeCode={inseeCode} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: col, border: `1px solid ${col}33`, background: `${col}0d` }}>
+                        Ouvrir le module
+                      </TrackedModuleLink>
+                    </div>
                   </article>
                 );
               })}

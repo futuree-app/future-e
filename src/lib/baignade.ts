@@ -1,8 +1,10 @@
 // ─── Qualité des eaux de baignade (commune) ───────────────────────────────
 // Source : Ministère de la Santé, rapportage saison balnéaire (directive
 // 2006/7/CE), agrégée par commune dans data/communes-baignade.json via
-// scripts/populate-baignade.mjs. Donnée MODULE-AGNOSTIQUE : graine du futur
-// module Santé environnementale, surfacée aujourd'hui via le socle d'enrichissement.
+// scripts/populate-baignade.mjs. Donnée MODULE-AGNOSTIQUE, surfacée via le socle
+// d'enrichissement. (Elle attendait un « module Santé » qui n'existera pas : le produit se lit à
+// trois échelles depuis le 29/07/2026, et la qualité des eaux est une donnée de commune —
+// Territoire est sa place.)
 //
 // Honnêteté (à rappeler au récit) : classement PLURIANNUEL (4 saisons) ≠
 // baignabilité du jour J ; n'inclut PAS les algues vertes ; couverture = communes

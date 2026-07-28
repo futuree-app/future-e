@@ -377,7 +377,7 @@ function formatGeorisquesBlock(g: GeorisquesSummary | null): string {
       : "- Aucun périmètre de risque naturel majeur recensé à l'échelle communale.",
   );
   if (g.seismic?.label) out.push(`- Zone sismique : ${g.seismic.label}.`);
-  out.push("- Échelle commune. L'exposition précise d'une adresse relève du module Logement.");
+  out.push("- Échelle commune. L'exposition précise d'une adresse relève des modules Autour de l'adresse et Logement.");
   return out.join("\n");
 }
 

@@ -9,22 +9,21 @@ import {
   canAccessInteractiveDashboard,
   getPlanLabel,
 } from "@/lib/access";
-import { PRODUCT_MODULES } from "@/lib/product";
+import { PRODUCT_MODULES, MODULE_HREF } from "@/lib/product";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 
+// Une icône par ÉCHELLE, du plus large au plus resserré : la commune, le voisinage, le bâtiment.
 const MODULE_ICONS: Record<string, string> = {
-  quartier: "🏘", logement: "🏠", metier: "💼",
-  sante: "🫁", mobilite: "🚗", projets: "🗓",
+  quartier: "🏘", autour: "🚶", logement: "🏠",
 };
 
+// Le bénéfice dit ce que le module TRANCHE, pas ce qu'il contient.
 const MODULE_BENEFIT: Record<string, string> = {
-  logement: "Votre logement vaut-il encore ce que vous pensez en 2040 ? DPE, assurance, risques physiques par adresse.",
-  metier: "Ce que le changement climatique fait à votre secteur. Certains métiers se fragilisent. D'autres gagnent en importance.",
-  sante: "Cadmium, pollens, chaleur, qualité de l'air. Ce que votre environnement fait à votre corps, données à l'appui.",
-  mobilite: "Votre dépendance à la voiture est-elle une fragilité ? Une lecture honnête du territoire.",
-  projets: "Achat, déménagement, retraite. Est-ce que vos projets sont cohérents avec ce que ce lieu va devenir ?",
+  quartier: "Ce que devient cette commune : chaleur, eau, feux, trajectoire de population. La lecture d'ensemble avant tout le reste.",
+  autour: "Ce qui se trouve à proximité et ce qui varie d'un secteur à l'autre : commerces, école, gare, espace vert, chaleur du quartier, place de la voiture.",
+  logement: "Ce que ce logement précis absorbe ou laisse passer : diagnostic, confort d'été, sol de la parcelle, sinistres indemnisés.",
 };
 
 export default async function ComptePage() {
@@ -32,8 +31,8 @@ export default async function ComptePage() {
   const hasDashboard = canAccessDashboard(account);
   const isInteractive = canAccessInteractiveDashboard(account);
   const fullAccess = canAccessCompleteReport(account);
-  // Doctrine 2026-06-11 : le gratuit n'ouvre plus aucun module (Quartier compris).
-  // Les 6 modules sont premium ; le gratuit garde la mini-analyse post-wizard.
+  // Doctrine 2026-06-11 : le gratuit n'ouvre plus aucun module (Territoire compris).
+  // Les trois modules sont premium ; le gratuit garde la mini-analyse post-wizard.
   const LOCKED_MODULES = PRODUCT_MODULES;
 
   const { supabase, user } = await requireCurrentUser();
@@ -77,12 +76,12 @@ export default async function ComptePage() {
               style={{ fontFamily: "'Instrument Serif', serif" }}
             >
               {commune ? `Votre lecture ${deCommune(commune)}` : "Votre espace personnel"}<br />
-              <span className="italic text-accent">{fullAccess ? "module par module." : "ne disparaît plus."}</span>
+              <span className="italic text-accent">{fullAccess ? "de la commune aux murs." : "ne disparaît plus."}</span>
             </h1>
             <p className="text-[17px] leading-[1.72] text-muted mb-8 max-w-[480px]">
               {fullAccess
-                ? "Le rapport interactif est ici. Six dimensions, toutes ouvertes. Commencez par le module de votre choix."
-                : "Votre première lecture personnalisée est sauvegardée ici, sans limite de temps. Le rapport interactif, lui, ouvre les six modules."}
+                ? "Le rapport interactif est ici. Trois échelles, toutes ouvertes : la commune, le secteur, le logement."
+                : "Votre première lecture personnalisée est sauvegardée ici, sans limite de temps. Le rapport interactif, lui, ouvre les trois échelles."}
             </p>
             <div className="flex gap-2 flex-wrap mb-7">
               <span className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] font-mono text-[11px] text-ghost">
@@ -109,11 +108,11 @@ export default async function ComptePage() {
               {fullAccess ? "Votre accès" : "Ce que le compte gratuit garde"}
             </p>
             <h2 className="font-normal text-[20px] leading-[1.2] text-label mb-5 tracking-[-0.2px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              {fullAccess ? "Six dimensions, toutes ouvertes." : "Votre première lecture, retrouvable."}
+              {fullAccess ? "Trois échelles, toutes ouvertes." : "Votre première lecture, retrouvable."}
             </h2>
             <div className="grid grid-cols-3 rounded-lg overflow-hidden border border-white/[0.08] mb-5">
               {(fullAccess
-                ? [{ val: "6", label: "modules ouverts" }, { val: "∞", label: "questions Futur•e" }, { val: "∞", label: "mises à jour" }]
+                ? [{ val: "3", label: "modules ouverts" }, { val: "∞", label: "questions Futur•e" }, { val: "∞", label: "mises à jour" }]
                 : [{ val: "1", label: "ville de référence" }, { val: "1", label: "lecture personnalisée" }, { val: "∞", label: "retrouvable" }]
               ).map((m, i) => (
                 <div key={m.label} className={`px-3 py-3.5 text-center ${i < 2 ? "border-r border-white/[0.08]" : ""}`}>
@@ -138,9 +137,9 @@ export default async function ComptePage() {
             <>
               <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
                 <div>
-                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Vos six modules</p>
+                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Vos trois modules</p>
                   <h2 className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                    Chaque dimension de votre vie ici.
+                    De la commune jusqu&apos;à vos murs.
                   </h2>
                 </div>
                 <p className="text-[15px] text-muted leading-[1.65]">
@@ -148,10 +147,13 @@ export default async function ComptePage() {
                 </p>
               </div>
               <div className="grid grid-cols-3 gap-3">
+                {/* Les trois s'ouvrent. Plus aucune carte ne s'annonce pour finir sur un tiret :
+                    une grille où deux cartes sur six menaient quelque part était une promesse
+                    d'inventaire, pas un sommaire. */}
                 {PRODUCT_MODULES.map((module, i) => (
                   <Link
                     key={module.id}
-                    href={module.id === "quartier" || module.id === "logement" ? `/rapport/${module.id}` : "/rapport"}
+                    href={MODULE_HREF[module.id]}
                     className="glass rounded-xl p-5 no-underline block"
                   >
                     <div className="w-[30px] h-[30px] rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[15px] mb-3">
@@ -161,7 +163,7 @@ export default async function ComptePage() {
                     <h3 className="font-normal text-[18px] text-label mb-2" style={{ fontFamily: "'Instrument Serif', serif" }}>{module.name}</h3>
                     <p className="text-[12px] text-muted leading-[1.6] mb-3">{MODULE_BENEFIT[module.id] ?? module.summary}</p>
                     <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase text-accent bg-accent/[0.06] border border-accent/[0.2] rounded-full px-2 py-1">
-                      {module.id === "quartier" || module.id === "logement" ? "Ouvrir" : "—"}
+                      Ouvrir
                     </span>
                   </Link>
                 ))}
@@ -196,7 +198,7 @@ export default async function ComptePage() {
               <div className="pt-14">
                 <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
                   <div>
-                    <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Six dimensions fermées</p>
+                    <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Trois échelles fermées</p>
                     <h2 className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
                       Ce que le rapport interactif lit pour vous.
                     </h2>
@@ -226,10 +228,10 @@ export default async function ComptePage() {
                   <div className="absolute top-[-60px] right-[-60px] w-[200px] h-[200px] rounded-full bg-accent/[0.08] pointer-events-none" />
                   <div>
                     <h2 className="font-normal text-[clamp(20px,2.2vw,26px)] leading-[1.2] tracking-[-0.4px] text-label mb-2.5" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                      {commune ? `Six lectures de votre vie à ${commune}. Sourcées. Personnalisées.` : "Six lectures de votre vie. Sourcées. Personnalisées."}
+                      {commune ? `Trois échelles de lecture à ${commune}. Sourcées. Personnalisées.` : "Trois échelles de lecture. Sourcées. Personnalisées."}
                     </h2>
                     <p className="text-[15px] text-muted leading-[1.7]">
-                      Le rapport interactif ne produit pas un score. Il garde les dimensions distinctes pour que vos arbitrages restent les vôtres.
+                      Le rapport interactif ne produit pas un score. Il garde les échelles distinctes, parce qu&apos;une bonne commune ne fait pas un bon quartier, ni un bon quartier un bon logement.
                     </p>
                   </div>
                   <div className="text-center">

@@ -16,11 +16,15 @@ test("buildFactHash change si le DPE change", () => {
   assert.notEqual(a, b);
 });
 
-test("buildFactHash change quand l'« autour » arrive (course figée -> détectée)", () => {
-  // Board critique 2a : une synthèse générée sans la section « autour » ne doit plus rester figée.
+test("buildFactHash NE change PAS avec l'« autour » (frontière de module)", () => {
+  // CE TEST A ÉTÉ RETOURNÉ le 29/07/2026. Il vérifiait l'inverse : que l'arrivée tardive de
+  // l'« autour » invalidait bien la synthèse figée (board critique 2a). Cette course a disparu
+  // avec l'entourage lui-même, parti dans le module Autour de l'adresse. La propriété à tenir est
+  // désormais la frontière : ce que le module Logement n'affiche pas n'entre pas dans son texte,
+  // exactement comme irep/friches ci-dessous.
   const sansAutour = buildFactHash(fullData({ autour: null }));
   const avecAutour = buildFactHash(fullData());
-  assert.notEqual(sansAutour, avecAutour);
+  assert.equal(sansAutour, avecAutour);
 });
 
 test("buildFactHash NE change PAS avec la posture (jamais un fait)", () => {
@@ -59,9 +63,11 @@ function fullData(over = {}) {
   };
 }
 
-test("buildSynthesisPayload inclut l'autour et exclut irep/friches/posture", () => {
+test("buildSynthesisPayload exclut autour/irep/friches/posture", () => {
   const p = buildSynthesisPayload(fullData());
-  assert.ok(p.autour, "autour présent");
+  // L'entourage se lit dans son propre module : le texte Logement ne doit pas pouvoir le
+  // commenter, puisque aucun bloc de cette page ne l'affiche sous lui.
+  assert.equal("autour" in p, false);
   assert.equal("irep" in p, false);
   assert.equal("friches" in p, false);
   assert.equal("posture" in p, false);

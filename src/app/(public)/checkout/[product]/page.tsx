@@ -41,9 +41,9 @@ const COPY: Record<CheckoutProductSlug, {
   "rapport-complet": {
     kicker: "Rapport interactif · 14 € une fois",
     hero: { line1: "Votre futur,", line2: "posé sur la table." },
-    promise: "Un rapport interactif intégral, six modules personnalisés à partir de votre commune et de votre profil. Téléchargeable, à conserver.",
+    promise: "Un rapport interactif intégral, lu à trois échelles à partir de votre commune, de votre adresse et de votre profil. Téléchargeable, à conserver.",
     whatYouGet: [
-      { n: "01", title: "Rapport interactif personnalisé", body: "Six modules interactifs : territoire, logement, métier, santé, mobilité, projets. Écrits pour vous, sourcés sur les données publiques (DRIAS, INSEE, Géorisques, IREP). Export PDF inclus." },
+      { n: "01", title: "Rapport interactif personnalisé", body: "Trois modules interactifs : la commune (Territoire), le secteur autour de votre adresse, et le logement lui-même. Écrits pour vous, sourcés sur les données publiques (DRIAS, INSEE, Géorisques, BPE). Export PDF inclus." },
       { n: "02", title: "Dashboard simplifié", body: "Vos indicateurs clés en lecture seule, accessibles à tout moment depuis votre espace futur•e." },
       { n: "03", title: "Régénération annuelle", body: "Une mise à jour du rapport interactif par an, incluse, pour suivre l'évolution de votre territoire." },
     ],
@@ -53,7 +53,7 @@ const COPY: Record<CheckoutProductSlug, {
       { n: "03", title: "Accès permanent", body: "Téléchargeable depuis votre espace, exportable en PDF, partageable en lien temporaire." },
     ],
     faqs: [
-      { q: "Le rapport interactif est-il vraiment personnalisé ?", a: "Oui. Chaque module est construit à partir de votre commune, votre profil de risque et vos réponses au wizard. Deux foyers d'une même ville obtiennent deux rapports différents." },
+      { q: "Le rapport interactif est-il vraiment personnalisé ?", a: "Oui. Chaque module est construit à partir de votre commune, votre profil de risque et vos réponses au wizard, et les deux modules les plus fins descendent à l'adresse que vous analysez. Deux foyers d'une même ville obtiennent deux rapports différents." },
       { q: "Combien de temps avant de le recevoir ?", a: "Sous 24 heures ouvrées. La plupart des rapports sont produits en quelques minutes ; nous gardons 24 h pour les périodes de forte demande." },
       { q: "Mes données sont-elles vendues ?", a: "Jamais. Les données issues du wizard restent dans votre espace. Voir notre politique RGPD." },
     ],

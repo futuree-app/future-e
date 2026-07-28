@@ -90,7 +90,7 @@ export default async function DashboardPage() {
                   <span className="account-flow-step">One-shot</span>
                   <h3 className="account-flow-title">Dashboard simple</h3>
                   <p className="account-copy">
-                    Les 6 modules apparaissent en lecture seule, sans scenarios,
+                    Les 3 modules apparaissent en lecture seule, sans scenarios,
                     sans detail des facteurs et sans pistes d&apos;action.
                   </p>
                 </article>

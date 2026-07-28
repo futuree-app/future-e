@@ -83,20 +83,14 @@ function formatValue(value: number | null | undefined, digits = 0) {
   }).format(value);
 }
 
+// Ne rend plus qu'un BADGE. Il portait aussi `mobility`, `projects` et `work` : trois verdicts
+// de vie (« Sous pression », « Exposé ») dérivés du seul nombre de jours chauds, pour alimenter
+// trois cartes retirées le 29/07/2026. Un compte de jours ne dit pas si un métier est exposé.
 function getHeatStatus(hotDays: number | null | undefined) {
-  if (hotDays === null || hotDays === undefined) {
-    return { badge: "À compléter", mobility: "À préciser", projects: "2", work: "Variable" };
-  }
-
-  if (hotDays < 15) {
-    return { badge: "Faible", mobility: "Tenable", projects: "2", work: "Sous contrôle" };
-  }
-
-  if (hotDays < 35) {
-    return { badge: "Modéré", mobility: "Fragile", projects: "3", work: "Sous tension" };
-  }
-
-  return { badge: "Élevé", mobility: "Sous pression", projects: "5", work: "Exposé" };
+  if (hotDays === null || hotDays === undefined) return { badge: "À compléter" };
+  if (hotDays < 15) return { badge: "Faible" };
+  if (hotDays < 35) return { badge: "Modéré" };
+  return { badge: "Élevé" };
 }
 
 export function DashboardExperience({
@@ -209,17 +203,21 @@ export function DashboardExperience({
       ],
     },
     {
-      id: "sante",
-      title: "Ta santé",
-      subtitle: "Stress thermique",
-      badge: heatStatus.badge,
-      color: "var(--red)",
-      main: `${formatValue(hotDays, 0)}j`,
-      label: "chaleur forte / an",
+      id: "autour",
+      title: "Autour de ton adresse",
+      subtitle: "Voisinage · demande une adresse",
+      badge: "À ouvrir",
+      color: "var(--green)",
+      // AUCUN CHIFFRE ICI, ET C'EST LE SUJET DE LA CARTE. Ce dashboard ne connaît que la commune ;
+      // ce qui entoure une adresse se mesure au point géocodé. Afficher une moyenne communale sous
+      // ce titre reviendrait à faire passer une donnée de commune pour une donnée de quartier.
+      // La carte dit donc ce qu'elle ne sait pas encore, et à quelle condition elle le saura.
+      main: "—",
+      label: "à lire dans le module",
       points: [
-        `${formatValue(tropicalNights, 0)} nuits chaudes persistantes`,
-        `Lecture ${currentScenario.temp} à horizon ${currentScenario.year}`,
-        "Base climat réelle, lecture santé encore éditoriale",
+        "Commerces, école, gare, espace vert les plus proches",
+        "Îlot de chaleur du quartier, équipement automobile du secteur",
+        "Se calcule à l'adresse, pas à la commune",
       ],
     },
     {
@@ -236,49 +234,11 @@ export function DashboardExperience({
         "Isolation et inertie à regarder en priorité",
       ],
     },
-    {
-      id: "metier",
-      title: "Ton métier",
-      subtitle: "Exposition chaleur",
-      badge: heatStatus.badge,
-      color: "var(--violet)",
-      main: heatStatus.work,
-      label: "pression climatique",
-      points: [
-        "Les métiers extérieurs prennent plus de risque",
-        "Les métiers de bureau dépendent surtout du bâti",
-        "La lecture sectorielle détaillée reste à brancher",
-      ],
-    },
-    {
-      id: "mobilite",
-      title: "Ta mobilité",
-      subtitle: "Tenue du quotidien",
-      badge: heatStatus.badge,
-      color: "var(--green)",
-      main: heatStatus.mobility,
-      label: "tenue en été",
-      points: [
-        `${formatValue(hotDays, 0)} jours très chauds perturbent déjà les trajets`,
-        "Voiture, vélo, TER ne réagissent pas pareil aux fortes chaleurs",
-        "Le détail réseau local reste à brancher",
-      ],
-    },
-    {
-      id: "projets",
-      title: "Tes projets",
-      subtitle: "Arbitrages à prévoir",
-      badge: heatStatus.badge,
-      color: "var(--yellow)",
-      main: heatStatus.projects,
-      label: "points d'attention",
-      points: [
-        "Achat, travaux et confort d'été deviennent liés",
-        "Les scénarios changent le niveau de prudence à adopter",
-        "Le rapport interactif détaillera les arbitrages concrets",
-      ],
-    },
   ];
+  // TROIS CARTES, TROIS ÉCHELLES (bascule du 29/07/2026). Les trois retirées — métier, santé,
+  // mobilité — partageaient toutes le MÊME badge dérivé de la chaleur et disaient d'elles-mêmes
+  // que leur donnée « restait à brancher ». Six titres pour une seule mesure : le dashboard
+  // paraissait riche et ne l'était pas.
 
   const synthesis = loading
     ? "Chargement des projections climatiques compactes..."

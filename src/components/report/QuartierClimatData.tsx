@@ -798,7 +798,7 @@ function buildFactors(
       col: "var(--green)",
       src: "INSEE / ADEME · à plus de 20 min d'un service",
       missing: false,
-      tip: `${elo} % des habitants vivent à plus de 20 min des services essentiels. Cette carte décrit le bassin de vie de la commune, pas vos trajets : ceux-ci relèvent du module Mobilité.`,
+      tip: `${elo} % des habitants vivent à plus de 20 min des services essentiels. Cette carte décrit le bassin de vie de la commune entière, pas votre voisinage : ce qui se trouve à proximité de votre adresse se lit dans le module Autour de l'adresse.`,
     });
   }
 

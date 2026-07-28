@@ -23,7 +23,10 @@ export function LogementSynthesis({
   const abortRef = useRef<AbortController | null>(null);
 
   // Hash de CONTENU : dérivé des faits eux-mêmes (même contrat que le serveur). Le gate en session
-  // ne relance donc que si un fait change (l'« autour » arrivé, un DPE confirmé), jamais la posture.
+  // ne relance donc que si un fait change (un DPE confirmé, une exposition re-fetchée), jamais la
+  // posture. Il porte aussi la version du prompt : une synthèse figée sous une version antérieure
+  // ne peut pas être resservie, elle est régénérée — c'est ce qui a retiré tout seul l'entourage
+  // des textes écrits avant le 29/07/2026.
   const factHash = buildFactHash(data);
 
   const run = useCallback(async (force = false) => {

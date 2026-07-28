@@ -35,7 +35,7 @@ export default async function InscriptionPage({
         <div className="auth-story-card">
           <p className="auth-story-card-label">Ce que vous construisez</p>
           <ul className="auth-story-list">
-            <li>Six lectures depuis votre vie, logement, santé, mobilité, projets</li>
+            <li>Trois échelles de lecture : la commune, le secteur autour de votre adresse, le logement</li>
             <li>Les projections de votre commune à travers trois scénarios</li>
             <li>Un rapport interactif qui s&apos;affine à mesure que vous le complétez</li>
           </ul>

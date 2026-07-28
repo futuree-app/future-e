@@ -115,6 +115,33 @@ export async function upsertLogement(
     .upsert({ ...row, updated_at: new Date().toISOString() }, { onConflict: "user_id,logement_id" });
 }
 
+// Crée (ou rafraîchit) la ligne d'artefact à partir de la SEULE IDENTITÉ DE L'ADRESSE.
+//
+// POURQUOI ELLE EXISTE. Jusqu'au 29/07/2026, la ligne naissait d'un effet de bord : le module
+// Logement demandait l'« autour » de l'adresse, et c'est cette route-là qui insérait. Le jour où
+// l'entourage est parti dans son propre module, plus rien ne créait la ligne — et comme l'endpoint
+// DPE et la synthèse font des UPDATE ciblés, no-op quand la ligne manque, le choix de diagnostic
+// et le texte se seraient perdus SANS ERREUR, chaque analyse repartant de zéro.
+//
+// Elle n'écrit QUE l'identité (adresse, point, parcelle). Ni `snapshot` ni `posture` : un upsert
+// qui les porterait écraserait, à chaque analyse de bâti, l'entourage déjà calculé et la posture
+// déjà déclarée. Les colonnes absentes gardent leur valeur sur conflit, et prennent leur défaut
+// SQL à l'insertion (`posture` = 'residence', `snapshot` = null).
+export async function upsertLogementAddress(
+  sb: SupabaseClient,
+  row: Pick<LogementRow,
+    "user_id" | "logement_id" | "insee" | "address_label" | "city" | "postcode" |
+    "latitude" | "longitude" | "parcel_code">,
+): Promise<void> {
+  // Une parcelle introuvable (API Carto muette, adresse sans parcellaire) ne DÉGRADE pas ce qu'on
+  // savait déjà : on omet la colonne plutôt que d'écrire null par-dessus une parcelle connue.
+  const { parcel_code, ...identity } = row;
+  await sb.from("logement").upsert(
+    { ...identity, ...(parcel_code ? { parcel_code } : {}), updated_at: new Date().toISOString() },
+    { onConflict: "user_id,logement_id" },
+  );
+}
+
 // Écrit uniquement les colonnes de synthèse sur la ligne (user, logement_id) existante. UPDATE
 // ciblé (pas upsert) : si la ligne n'existe pas encore (course avec la création par « autour »),
 // c'est un no-op silencieux, toléré (le client affiche quand même la synthèse ce tour-là).

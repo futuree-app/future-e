@@ -3,9 +3,11 @@ import type { Face3Snapshot, GreenKind } from "@/lib/logement-autour-types";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { ecartAuCommune, partSansVoiture, type CarOwnership } from "@/lib/iris-logement";
 
-// Face 3 — « Autour de cette adresse » (buffer local au point géocodé). Hiérarchie :
-// vie quotidienne (BPE, socle) > verts (repère). Infra de transport (bruit) déplacée vers le
-// futur module Santé. Distances brutes à vol d'oiseau, aucun adjectif de proximité, aucune note.
+// « Autour de cette adresse » (buffer local au point géocodé) — le corps du module 02 depuis le
+// 29/07/2026, où il n'était jusque-là que la « Face 3 » du module Logement. Hiérarchie : vie
+// quotidienne (BPE, socle) > verts (repère). L'infrastructure de transport (bruit) n'est toujours
+// pas rendue : elle demande un grain adresse qu'on n'a pas encore.
+// Distances brutes à vol d'oiseau, aucun adjectif de proximité, aucune note.
 const FACE3_CAT_LABEL: Record<string, string> = {
   sante: "Santé",
   alimentation: "Alimentation quotidienne",
@@ -162,8 +164,8 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
           {/* Brique 2 bis — équipement automobile du secteur (INSEE). */}
           {car ? <CarOwnershipBlock car={car} /> : null}
 
-          {/* Brique 2 — espace vert (repère). Infra de transport (bruit/nuisance) déplacée
-              vers le futur module Santé, au grain adresse. */}
+          {/* Brique 2 — espace vert (repère). L'infrastructure de transport (bruit/nuisance)
+              reste hors rendu tant qu'on ne sait pas la dire au grain de l'adresse. */}
           <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 8 }}>
             <div style={FACE3_SUBHEAD}>Espace vert</div>
             {s.sourceStatus.osmGreenSpaces === "pending" ? (
@@ -179,9 +181,10 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
             )}
           </div>
 
-          {/* L'îlot de chaleur a été DÉPLACÉ dans la famille « ce à quoi l'adresse est exposée »
-              (l'Autour est plutôt positif : services, verdure ; l'ÎCU est une exposition).
-              Composant IcuExposure, rendu depuis LogementModule à partir de `autour.icu`. */}
+          {/* L'îlot de chaleur est rendu par AutourModule, juste sous ce bloc (composant
+              IcuExposure, alimenté par `snapshot.icu`). Il est SORTI de cette carte pour ne pas
+              mêler ce qui rend un lieu agréable et ce qui l'expose ; il est resté hors du module
+              Logement parce qu'il décrit un quartier, pas des murs. */}
 
           <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.85 }}>
             Sources : INSEE, BPE 2024 · © les contributeurs OpenStreetMap (ODbL) · distances approximatives à vol d’oiseau

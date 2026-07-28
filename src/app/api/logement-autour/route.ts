@@ -110,7 +110,11 @@ export async function POST(req: Request) {
     postcode: body.postcode ?? null,
     latitude: body.latitude,
     longitude: body.longitude,
-    parcel_code: body.parcel_code ?? null,
+    // NE JAMAIS DÉGRADER LA PARCELLE. Deux modules écrivent cette ligne : Logement, qui géocode
+    // un bâti et connaît sa parcelle, et Autour de l'adresse, qui n'en a pas besoin et n'en envoie
+    // pas. Écrire `null` sans regarder ferait perdre la parcelle déjà connue à la première lecture
+    // de l'entourage sur une adresse déjà analysée.
+    parcel_code: body.parcel_code ?? existing?.parcel_code ?? null,
     posture,
     snapshot,
   });

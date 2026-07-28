@@ -159,19 +159,19 @@ const STATIC_ANSWERS = {
     verdict: 'Plusieurs signaux méritent votre attention.',
     detail:
       "La santé des enfants face au climat se joue sur quelques fronts : la qualité de l'air, l'allongement de la saison pollinique, le nombre de jours de forte chaleur qui augmente, et selon les territoires la qualité des sols. Rien d'irrémédiable, mais autant connaître la situation de votre commune tôt pour agir au bon moment.",
-    cta: 'Voir le module Santé de votre rapport interactif',
+    cta: 'Voir le module Territoire de votre rapport interactif',
   },
   mobilite_fragile: {
     verdict: "Ici, la place de la voiture mérite d'être posée.",
     detail:
       "Dans beaucoup de communes rurales et périurbaines, la voiture n'est pas un choix : l'offre de transport collectif reste limitée et les trajets du quotidien sont longs. Cette dépendance expose directement le budget des foyers à la volatilité du prix des carburants. Les alternatives, vélo, covoiturage, recharge électrique, dépendent fortement du territoire.",
-    cta: 'Voir le module Mobilité de votre rapport interactif',
+    cta: "Voir le module Autour de l'adresse de votre rapport interactif",
   },
   metier_general: {
     verdict: "Ça dépend du secteur. Certains gagnent, d'autres perdent.",
     detail:
       "Le secteur associatif et de l'ESS sera relativement peu exposé aux risques physiques directs, mais fortement affecté par l'évolution des financements et des priorités. Les métiers liés à l'adaptation climatique (bilan carbone, transition énergétique) sont en forte croissance. Les secteurs à exposition extérieure (BTP, agriculture) sont les plus vulnérables à la chaleur croissante (INRS).",
-    cta: 'Voir le module Métier de votre rapport interactif',
+    cta: 'Voir le module Territoire de votre rapport interactif',
   },
   valeur_immo: {
     verdict: "Moins risqué que ce qu'on raconte, mais pas sans condition.",
@@ -844,18 +844,18 @@ function getEmptyStateCopy(categories) {
     categories && categories.length > 0 ? categories : ['all'];
 
   if (safeCategories.includes('littoral')) {
-    return 'Le module affichera des questions liées au littoral, à la chaleur, au logement et aux projets de vie.';
+    return 'Les questions porteront ici sur le littoral, la chaleur, le logement et les projets de vie.';
   }
 
   if (safeCategories.includes('montagne')) {
-    return "Le module affichera des questions liées à la montagne, à l'enneigement, au tourisme et à l'habitabilité.";
+    return "Les questions porteront ici sur la montagne, l'enneigement, le tourisme et l'habitabilité.";
   }
 
   if (
     safeCategories.includes('periurbain_dependance_auto') ||
     safeCategories.includes('rural_peri_urbain')
   ) {
-    return "Le module affichera des questions liées à la mobilité, à l'eau, au logement et à l'adaptation du territoire.";
+    return "Les questions porteront ici sur les déplacements, l'eau, le logement et l'adaptation du territoire.";
   }
 
   return 'Quatre questions sélectionnées pour votre territoire apparaîtront ici.';
@@ -2203,10 +2203,29 @@ export default function FutureELanding() {
       gridTemplateColumns: 'repeat(3,1fr)',
       gap: 16,
     },
+    // Trois cartes tiennent sur UNE ligne (elles étaient six sur deux) : chacune reçoit plus de
+    // place, donc plus d'air. Le padding vertical monte pour que la ligne ne paraisse pas écrasée
+    // sous le titre de section.
     moduleCard: (col) => ({
-      ...glass({ borderRadius: 12, padding: '28px 26px' }),
+      ...glass({ borderRadius: 12, padding: '32px 28px 30px' }),
       borderTop: `2px solid ${col}`,
       cursor: 'default',
+      display: 'flex',
+      flexDirection: 'column',
+    }),
+    // Bandeau d'échelle : le numéro d'ordre puis le grain de lecture, en mono, dans la couleur du
+    // module. C'est le seul endroit de la page où l'emboîtement commune > secteur > bâti se lit
+    // d'un coup d'œil.
+    moduleScale: (col) => ({
+      display: 'flex',
+      alignItems: 'center',
+      gap: 7,
+      fontFamily: "'JetBrains Mono', monospace",
+      fontSize: 10.5,
+      letterSpacing: '0.12em',
+      textTransform: 'uppercase',
+      color: col,
+      marginBottom: 18,
     }),
     moduleIcon: (col) => ({
       width: 36,
@@ -2233,7 +2252,10 @@ export default function FutureELanding() {
       lineHeight: 1.6,
       marginBottom: 16,
     },
-    moduleItems: { display: 'flex', flexDirection: 'column', gap: 6 },
+    // `marginTop: auto` colle les listes au bas des cartes : les descriptions n'ont pas la même
+    // longueur, et sans ça les quatre lignes de sujets partaient à des hauteurs différentes d'une
+    // carte à l'autre.
+    moduleItems: { display: 'flex', flexDirection: 'column', gap: 7, marginTop: 'auto' },
     moduleItem: (col) => ({
       fontSize: 12,
       color: C.dim,
@@ -2367,77 +2389,48 @@ export default function FutureELanding() {
     },
   };
 
+  // TROIS MODULES = TROIS ÉCHELLES EMBOÎTÉES (bascule du 29/07/2026). Chaque carte porte son
+  // échelle (`scale`) : c'est elle qui fait comprendre la structure au premier coup d'œil, bien
+  // avant la liste des sujets. Les anciens modules par domaine de vie (Métier, Santé, Mobilité,
+  // Projets) n'ont pas disparu comme sujets, ils sont traités à l'échelle qui les concerne.
   const MODULES = [
     {
       name: 'Territoire',
+      scale: 'La commune',
       icon: '🏘',
       color: C.blue,
-      desc: 'Votre cadre de vie local : nuisances, nature proche, ambiance, et ce que le territoire devient.',
+      desc: "Ce que devient la commune : ce qui s'y réchauffe, ce qui s'y assèche, ce qui l'expose, et vers où elle va.",
       items: [
-        'Nature et espaces de respiration',
-        'Calme et nuisances sonores',
-        'Vitalité et services de proximité',
-        'Aléas climatiques du lieu',
+        'Chaleur et sécheresse projetées',
+        'Inondation, submersion, feux',
+        "Qualité de l'air et de l'eau",
+        'Trajectoire de population',
+      ],
+    },
+    {
+      name: "Autour de l'adresse",
+      scale: 'Le voisinage',
+      icon: '🚶',
+      color: C.green,
+      desc: "Ce qui se trouve à proximité, ce qui manque, et ce qui distingue ce secteur du reste de la commune.",
+      items: [
+        'Commerces, école, santé, gare',
+        'Espace vert le plus proche',
+        'Îlot de chaleur du quartier',
+        'Ce que la voiture pèse ici',
       ],
     },
     {
       name: 'Logement',
+      scale: 'Le bâtiment',
       icon: '🏠',
       color: C.orange,
-      desc: 'Votre habitat dans la durée : confort, sécurité, valeur et exposition aux risques.',
+      desc: 'Ce que ce logement précis absorbe, perd ou protège, à son adresse et pas à celle du voisin.',
       items: [
-        'DPE et réglementation future',
-        'Risques physiques par adresse',
-        "Coût d'assurance projeté",
-        'Valeur immobilière à 20 ans',
-      ],
-    },
-    {
-      name: 'Métier',
-      icon: '💼',
-      color: C.violet,
-      desc: 'Votre secteur et sa trajectoire : emploi local, transformations, chaleur au travail, débouchés.',
-      items: [
-        'Solidité du secteur',
-        'Exposition à la chaleur',
-        'Transformations structurelles',
-        'Opportunités émergentes',
-      ],
-    },
-    {
-      name: 'Santé',
-      icon: '🫁',
-      color: C.red,
-      desc: 'Votre environnement quotidien : air, chaleur, sols, eau, bruit et facteurs de fragilité.',
-      items: [
-        "Qualité de l'air respiré",
-        'Chaleur et vulnérabilité',
-        'Cadmium et métaux lourds',
-        'Bruit et eau potable',
-      ],
-    },
-    {
-      name: 'Mobilité',
-      icon: '🚗',
-      color: C.green,
-      desc: 'Votre dépendance à la voiture et vos alternatives réelles.',
-      items: [
-        'Part voiture sur le territoire',
-        'Alternatives de transport',
-        'Coût carburant et fragilité',
-        'Transition électrique : si pertinente',
-      ],
-    },
-    {
-      name: 'Projets',
-      icon: '🗓',
-      color: C.blue,
-      desc: 'Vos décisions de vie à moyen terme : famille, retraite, achat, installation ou départ.',
-      items: [
-        'Achat immobilier',
-        'Déménagement, vers où',
-        'Projet familial',
-        'Retraite et territoire',
+        'Diagnostic et confort d’été',
+        'Sol de la parcelle, sismicité',
+        'Zone réglementée, patrimoine',
+        'Sinistres déjà indemnisés',
       ],
     },
   ];
@@ -2947,13 +2940,14 @@ export default function FutureELanding() {
                           type="button"
                           style={{ ...styles.answerCta, border: 'none', cursor: 'pointer' }}
                           onClick={() => {
+                            // Le sujet de la question oriente vers l'ÉCHELLE qui le traite :
+                            // le corps et le climat se lisent à la commune, les trajets et les
+                            // services au secteur, le bâti au logement. (Le wizard reçoit ce
+                            // contexte sans encore s'en servir, cf. WizardTeaser.)
                             const cta = answer.cta || '';
                             const ctx =
-                              cta.includes('Santé') ? 'sante' :
-                              cta.includes('Mobilité') ? 'mobilite' :
-                              cta.includes('Métier') ? 'metier' :
-                              cta.includes('Logement') ? 'logement' :
-                              cta.includes('Projets') ? 'projets' : 'quartier';
+                              cta.includes('Autour') ? 'autour' :
+                              cta.includes('Logement') ? 'logement' : 'quartier';
                             openWizard(ctx);
                           }}
                         >
@@ -3023,26 +3017,35 @@ export default function FutureELanding() {
               display: 'flex',
             }}
           >
-            6 modules
+            3 modules
           </div>
           <h2 style={{ ...styles.sectionTitle, textAlign: 'center' }}>
-            Six dimensions de votre vie
+            Trois échelles, de la commune à vos murs
           </h2>
           <p
             style={{
               ...styles.sectionSub,
               textAlign: 'center',
               margin: '0 auto',
-              maxWidth: 560,
+              maxWidth: 620,
             }}
           >
-            Chaque dimension lue à travers les données publiques : cadre de vie,
-            services, mobilité, santé, risques, climat et trajectoires locales.
+            Une bonne commune ne fait pas un bon quartier, et un bon quartier ne fait
+            pas un bon logement. Les trois se lisent séparément, sur les données
+            publiques, et chacune peut contredire la précédente.
           </p>
         </div>
         <div style={styles.modulesGrid} className="modules-grid">
-          {MODULES.map((module) => (
+          {MODULES.map((module, i) => (
             <div key={module.name} style={styles.moduleCard(module.color)}>
+              {/* L'en-tête porte l'échelle : le numéro dit l'ordre de lecture (on part du large),
+                  le libellé dit à quoi on zoome. C'est la grille elle-même qui doit enseigner la
+                  structure du produit, pas un paragraphe au-dessus. */}
+              <div style={styles.moduleScale(module.color)}>
+                <span>0{i + 1}</span>
+                <span style={{ opacity: 0.45 }}>·</span>
+                <span>{module.scale}</span>
+              </div>
               <div style={styles.moduleIcon(module.color)}>{module.icon}</div>
               <div style={styles.moduleName}>{module.name}</div>
               <div style={styles.moduleDesc}>{module.desc}</div>

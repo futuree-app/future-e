@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import type { Face3Snapshot, Posture } from "@/lib/logement-autour-types";
 import type { SynthesisData } from "@/lib/logement-synthesis-cache";
 import type { LogementReport as ApiResponse } from "@/lib/logement-report-types";
 import type { LogementRow, DpeSelectionStatus } from "@/lib/logement-store";
@@ -18,15 +17,11 @@ import type { BanAddressResult } from "@/lib/ban";
 // Faces extraites (board étape 4 : une face = un fichier ; gabarit ThermalComfortSection).
 import { Block, FamilyHeading } from "@/components/report/logement/kit";
 import { IconSeismic, IconStrata, IconCavity, IconLandslide } from "@/components/report/logement/icons";
-import { IcuExposure } from "@/components/report/logement/IcuExposure";
-import { POSTURE_FOR_PROJET } from "@/components/report/logement/posture";
 import { PropertyPassport } from "@/components/report/logement/PropertyPassport";
 import { ProjectProbe } from "@/components/report/logement/ProjectProbe";
 import { EnergieSection } from "@/components/report/logement/EnergieSection";
 import { SinistraliteBlock } from "@/components/report/logement/SinistraliteSection";
 import { RegulatoryStatusBlock } from "@/components/report/logement/RegulatorySection";
-import { Face3Block } from "@/components/report/logement/AutourSection";
-import type { CarOwnership } from "@/lib/iris-logement";
 import { DecisionChecklist } from "@/components/report/logement/DecisionChecklist";
 import { PreciseLogementStep } from "@/components/report/logement/PreciseLogementStep";
 import { energyState, type ChecklistFacts } from "@/lib/logement-checklist";
@@ -62,16 +57,19 @@ function seismicValue(label: string, code: string | null | undefined): string {
   return lvl ? lvl.charAt(0).toUpperCase() + lvl.slice(1) : label;
 }
 
+// CE MODULE S'ARRÊTE AUX MURS (bascule 6 -> 3 modules, 29/07/2026). L'entourage de l'adresse — les
+// équipements du quotidien, l'espace vert le plus proche, l'équipement automobile du secteur,
+// l'îlot de chaleur du quartier — était le « beat 4 » de cette page et son snapshot conditionnait
+// même la synthèse. Il vit désormais dans son propre module (/rapport/autour), à l'échelle qui est
+// la sienne : le secteur. Ce qui a disparu d'ici : l'état `autour`, le gate `autourPhase` qui
+// retardait la synthèse, l'appel à /api/logement-autour, et le bloc îlot de chaleur.
 export default function LogementModule({
   defaultCommune,
   initialRow = null,
-  initialCarOwnership = null,
   rehydrateSource = "auto",
 }: {
   defaultCommune?: string | null;
   initialRow?: LogementRow | null;
-  // Calculé par la page (Server Component) : le snapshot ne le porte pas, par choix.
-  initialCarOwnership?: CarOwnership | null;
   rehydrateSource?: "auto" | "deeplink";
 }) {
   const [loading, setLoading] = useState(false);
@@ -83,14 +81,6 @@ export default function LogementModule({
   const [addressResetKey, setAddressResetKey] = useState(0);
   const [result, setResult] = useState<ApiResponse | null>(null);
   const [projet, setProjet] = useState<string | null>(null);
-  const [autour, setAutour] = useState<Face3Snapshot | null>(null);
-  // Équipement automobile du secteur (INSEE RP). Hors snapshot : recalculé à chaque rendu, jamais figé.
-  const [carOwnership, setCarOwnership] = useState<CarOwnership | null>(null);
-  // Complétude de l'« autour » pour le gate de synthèse (board critique 2a). "terminal" = un
-  // snapshot non-pending est arrivé, OU le retry OSM est épuisé, OU la requête a échoué : dans
-  // les trois cas on ne l'attend plus. La synthèse ne se génère jamais avant ce point (sinon elle
-  // se fige sans la section « autour »).
-  const [autourPhase, setAutourPhase] = useState<"pending" | "terminal">("pending");
   // Attribution du DPE au logement (cf. spec §2). Aucun DPE affiché comme « le vôtre » tant
   // qu'il n'est pas confirmé (auto ou par l'utilisateur).
   const [dpeStatus, setDpeStatus] = useState<
@@ -98,7 +88,6 @@ export default function LogementModule({
   >("loading");
   const [selectedDpe, setSelectedDpe] = useState<DpeRecord | null>(null);
   const [dpeCandidates, setDpeCandidates] = useState<DpeRecord[]>([]);
-  const autourRetriedRef = useRef(false);
   // Instrumentation « artefact adresse » : adresses DISTINCTES analysées par commune dans la
   // session. Un même utilisateur comparant plusieurs biens d'une même ville est le cas d'usage
   // payant que la clé actuelle (user, insee) ne sait pas encore porter : ce compteur est le
@@ -108,65 +97,29 @@ export default function LogementModule({
   const rehydratedRef = useRef(false);
   const posthog = usePostHog();
 
-  // Face 3 : génère (ou relit, figé) le snapshot « autour de l'adresse ». La donnée
-  // OSM vient du cache de tuile côté serveur ; l'affichage ne touche jamais Overpass.
-  async function requestAutour(payload: ApiResponse, posture: Posture) {
+  // Enregistre l'identité de l'adresse analysée (voir /api/logement-artefact). Échec silencieux à
+  // l'UI : la lecture à l'écran reste complète, seule la sauvegarde manque, et la prochaine
+  // analyse de la même adresse la repose.
+  async function persistArtefact(payload: ApiResponse) {
     const a = payload.address;
-    // Adresse sans coordonnées : rien à récupérer, l'« autour » est terminal (la synthèse n'attend pas).
-    if (!a?.id || !a.citycode || a.latitude == null || a.longitude == null) { setAutourPhase("terminal"); return; }
+    if (!a?.id || !a.citycode || a.latitude == null || a.longitude == null) return;
     try {
-      const res = await fetch("/api/logement-autour", {
+      await fetch("/api/logement-artefact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           logement_id: a.id,
           insee: a.citycode,
-          latitude: a.latitude,
-          longitude: a.longitude,
           address_label: a.label,
           city: a.city ?? null,
           postcode: a.postcode ?? null,
+          latitude: a.latitude,
+          longitude: a.longitude,
           parcel_code: payload.parcel?.parcelCode ?? null,
-          posture,
         }),
       });
-      if (!res.ok) { setAutourPhase("terminal"); return; }
-      const { snapshot, carOwnership: car } = (await res.json()) as {
-        snapshot: Face3Snapshot; carOwnership?: CarOwnership;
-      };
-      setAutour(snapshot);
-      setCarOwnership(car ?? null);
-      // Terminal sauf si l'OSM est revenu `pending` ET qu'on n'a pas encore fait le retry unique
-      // (le retry est gaté sur osmInfrastructure, comme l'effet ci-dessous : on aligne dessus).
-      const willRetry = snapshot.sourceStatus.osmInfrastructure === "pending" && !autourRetriedRef.current;
-      setAutourPhase(willRetry ? "pending" : "terminal");
-      // Observabilité de complétude, SANS donnée localisante fine (pas de tile_key/coords).
-      posthog?.capture("logement_autour", {
-        insee: a.citycode,
-        posture,
-        status_bpe: snapshot?.sourceStatus?.bpe,
-        status_osm_infra: snapshot?.sourceStatus?.osmInfrastructure,
-        status_osm_green: snapshot?.sourceStatus?.osmGreenSpaces,
-      });
-    } catch {
-      /* échec silencieux à l'UI ; l'observabilité vit dans le snapshot/serveur */
-      setAutourPhase("terminal");
-    }
+    } catch { /* échec silencieux */ }
   }
-
-  // Remplissage asynchrone minimal : si l'OSM est revenu `pending` (tuile froide,
-  // Overpass lent), on re-demande UNE fois après un court délai (la tuile est alors
-  // chaude grâce au after() serveur). Au-delà = incrément futur.
-  useEffect(() => {
-    if (!result || !autour || autourRetriedRef.current) return;
-    if (autour.sourceStatus.osmInfrastructure !== "pending") return;
-    autourRetriedRef.current = true;
-    const t = setTimeout(() => {
-      void requestAutour(result, POSTURE_FOR_PROJET[projet ?? "reside"] ?? "residence");
-    }, 4500);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autour, result]);
 
   // Déclenchée par la sélection d'une suggestion BAN (le texte libre n'analyse jamais). On
   // envoie l'adresse ATOMIQUE au serveur ; on dérive ensuite l'état d'attribution du DPE.
@@ -178,9 +131,6 @@ export default function LogementModule({
     setLoading(true);
     setError(null);
     setLockedCommune(null);
-    setAutour(null);
-    setAutourPhase("pending");
-    autourRetriedRef.current = false;
     setDpeStatus("loading");
     setSelectedDpe(null);
     setDpeCandidates([]);
@@ -204,6 +154,11 @@ export default function LogementModule({
       if (!res.ok) throw new Error(payload.error ?? `Erreur ${res.status}`);
       setResult(payload);
       setProjet(null);
+      // POSE L'ARTEFACT AVANT TOUTE ÉCRITURE QUI LE SUPPOSE, et c'est un `await`, pas un `void` :
+      // la persistance du DPE juste en dessous est un UPDATE ciblé, sans effet ni erreur si la
+      // ligne n'existe pas encore. Les lancer en concurrence rendrait la sauvegarde du diagnostic
+      // dépendante de l'ordre d'arrivée de deux requêtes.
+      await persistArtefact(payload);
       const candidates = payload.dpeCandidates ?? [];
       setDpeCandidates(candidates);
       const attribution = dpeAttributionStatus(candidates, payload.banFeatureType ?? null);
@@ -241,7 +196,6 @@ export default function LogementModule({
         insee,
         address_token: token,
       });
-      void requestAutour(payload, "residence");
     } catch (err) {
       setResult(null);
       setError(err instanceof Error ? err.message : "Erreur de chargement.");
@@ -251,17 +205,17 @@ export default function LogementModule({
   }
 
   // Rehydratation d'un logement sauvegardé (spec 2026-07-07). On re-fetch UNIQUEMENT l'exposition
-  // Géorisques (le risque doit rester frais) ; le DPE figé, l'autour (snapshot) et la posture sont
-  // RESTAURÉS depuis la ligne, jamais recalculés. La cohérence de la synthèse est gérée par le
-  // cache serveur par hash de faits : si les faits re-fetchés n'ont pas bougé, la synthèse figée
-  // est renvoyée telle quelle ; s'ils ont dérivé, elle est régénérée. Aucune génération mélangée.
+  // Géorisques (le risque doit rester frais) ; le DPE figé est RESTAURÉ depuis la ligne, jamais
+  // recalculé. La cohérence de la synthèse est gérée par le cache serveur par hash de faits : si
+  // les faits re-fetchés n'ont pas bougé, la synthèse figée est renvoyée telle quelle ; s'ils ont
+  // dérivé, elle est régénérée. Aucune génération mélangée.
   async function rehydrateFromRow(row: LogementRow) {
     // Sans city/postcode, l'adresse ne passe pas le validateur du re-fetch : retour à la saisie.
-    if (!row.city || !row.postcode || !row.snapshot) return;
+    // LE SNAPSHOT N'EST PLUS EXIGÉ (29/07/2026) : il n'appartient plus à ce module, et une adresse
+    // analysée ici n'en a pas. L'exiger rendrait tout bien analysé depuis Logement non rouvrable.
+    if (!row.city || !row.postcode) return;
     setLoading(true);
     setError(null);
-    setAutourPhase("terminal");      // autour restauré du snapshot : on ne l'attend pas
-    autourRetriedRef.current = true; // et on n'enclenche aucun retry OSM
     try {
       const res = await fetch("/api/georisques-logement", {
         method: "POST",
@@ -284,10 +238,6 @@ export default function LogementModule({
       // Restaure le choix DPE figé + son statut (jamais de re-dérivation d'attribution).
       setSelectedDpe(row.selected_dpe_snapshot);
       setDpeStatus(RUNTIME_DPE_STATUS[row.dpe_selection_status] ?? "not_found");
-      // Restaure l'autour depuis le snapshot (figé par design, jamais re-fetché).
-      setAutour(row.snapshot);
-      // L'équipement automobile, LUI, n'est pas figé : la page l'a recalculé pour cette adresse.
-      setCarOwnership(initialCarOwnership);
       // La posture est stockée, pas le projet fin : la sonde réapparaît non répondue (ton défaut).
       setProjet(null);
       posthog?.capture("logement_restored", {
@@ -339,9 +289,6 @@ export default function LogementModule({
     setResult(null);
     setError(null);
     setLockedCommune(null);
-    setAutour(null);
-    setAutourPhase("pending");
-    autourRetriedRef.current = false;
     setProjet(null);
     setAddressResetKey((k) => k + 1);
   }
@@ -355,9 +302,10 @@ export default function LogementModule({
   // Synthèse artefact : prête quand l'analyse est là ET le DPE dans un état terminal
   // (auto_confirmed / confirmed / not_found). On attend tant que l'utilisateur choisit.
   const dpeTerminal = dpeStatus === "auto_confirmed" || dpeStatus === "confirmed" || dpeStatus === "not_found";
-  // La synthèse artefact attend AUSSI que l'« autour » soit terminal (board critique 2a) : sinon
-  // elle se génère sans la section « autour » et se fige incomplète.
-  const synthesisReady = Boolean(result) && dpeTerminal && autourPhase === "terminal";
+  // Le gate « attendre que l'autour soit terminal » (board critique 2a) A DISPARU avec l'autour :
+  // il existait parce qu'une synthèse générée trop tôt se figeait sans la section entourage. Ce
+  // fait n'entrant plus dans le payload, la synthèse ne dépend plus que de l'analyse et du DPE.
+  const synthesisReady = Boolean(result) && dpeTerminal;
   const synthesisData: SynthesisData = {
     address: result?.address,
     altitude: result?.altitude,
@@ -365,10 +313,6 @@ export default function LogementModule({
     selectedDpe: dpe,
     georisques: result?.georisques,
     sinistralite: result?.sinistralite,
-    // Le snapshot Face 3 (bpe.categories) est ramené à la forme attendue par buildSynthesisPayload
-    // (bpe = tableau de proximités). Sans ce mapping, `.filter` sur `bpe.categories` casse dès que
-    // l'« autour » est présent (jusqu'ici masqué par la course désormais fermée par le gate 3a).
-    autour: autour ? { bpe: autour.bpe.categories, osm: autour.osm } : null,
     communeData: result?.communeData,
   };
   const georisques = result?.georisques?.parcel ?? result?.georisques?.address;
@@ -556,9 +500,11 @@ export default function LogementModule({
             <FamilyHeading color="var(--blue)">Ce à quoi cette adresse est exposée</FamilyHeading>
 
             {/* Risques du bâti — registre sobre (dé-dramatisé). Sismicité/RGA en gradé (couleur de
-                famille bleue), + cavités/mouvements de terrain au grain point, + résidu communal,
-                + îlot de chaleur (déplacé de l'Autour). */}
-            {(georisques?.seismic?.label || georisques?.rga?.label || pointHazards?.cavites || pointHazards?.mvt || (pointHazards?.communalResidual?.length ?? 0) > 0 || autour?.icu) && (
+                famille bleue), + cavités/mouvements de terrain au grain point, + résidu communal.
+                L'îlot de chaleur a QUITTÉ ce bloc le 29/07/2026 : il y avait atterri faute de
+                place ailleurs, mais il décrit le quartier, pas le bâti. Il se lit maintenant dans
+                le module Autour de l'adresse, à son échelle. */}
+            {(georisques?.seismic?.label || georisques?.rga?.label || pointHazards?.cavites || pointHazards?.mvt || (pointHazards?.communalResidual?.length ?? 0) > 0) && (
               <ReportSection eyebrow="Risques du bâti">
                 <GlassCard>
                   <div style={{ display: "grid", gap: 16 }}>
@@ -583,11 +529,6 @@ export default function LogementModule({
                         Cavités et mouvements de terrain recensés par le BRGM via Géorisques.
                       </p>
                     )}
-                    {autour?.icu && (
-                      <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)" }}>
-                        <IcuExposure icu={autour.icu} />
-                      </div>
-                    )}
                   </div>
                 </GlassCard>
               </ReportSection>
@@ -602,17 +543,34 @@ export default function LogementModule({
             {result.sinistralite && <SinistraliteBlock sinistralite={result.sinistralite} commune={result.address?.city ?? null} />}
           </div>
 
-          {/* Beat 4 — Autour : qu'y a-t-il autour ? */}
-          {autour && <Face3Block s={autour} car={carOwnership} />}
+          {/* Beat 4 — Le relais vers l'échelle du dessus. L'entourage de l'adresse était rendu ici
+              (Face3Block) ; il a son module depuis le 29/07/2026. On ne le résume pas et on n'en
+              donne aucun avant-goût : un aperçu ferait de ce renvoi un teaser, alors que c'est une
+              frontière de lecture. */}
+          <ReportSection eyebrow="Changer d'échelle" tone="green">
+            <GlassCard>
+              <div style={{ display: "grid", gap: 14 }}>
+                <p style={{ fontSize: 14.5, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>
+                  Cette lecture s&apos;arrête aux murs. Ce qu&apos;il y a autour de cette adresse,
+                  les commerces et services les plus proches, l&apos;espace vert le plus proche et la
+                  chaleur du quartier se lisent dans le module Autour de l&apos;adresse.
+                </p>
+                <Link href="/rapport/autour" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg no-underline text-[13.5px] w-fit" style={{ color: "var(--green)", border: "1px solid color-mix(in srgb, var(--green) 25%, transparent)", background: "color-mix(in srgb, var(--green) 8%, transparent)" }}>
+                  Ouvrir Autour de l&apos;adresse →
+                </Link>
+              </div>
+            </GlassCard>
+          </ReportSection>
 
           {/* Beat 5 — À vérifier avant de décider : et moi, je fais quoi ? */}
           <div style={{ display: "grid", gap: 16 }}>
+            {/* La sonde ne déclenche plus de recalcul d'entourage (il a son module) : elle ne sert
+                plus qu'à ce à quoi elle sert vraiment ici, orienter la checklist par posture. */}
             <ProjectProbe
               answered={projet}
               onAnswer={(v) => {
                 setProjet(v);
                 posthog?.capture("logement_projet_declare", { projet: v, insee: result.address?.citycode ?? null });
-                void requestAutour(result, POSTURE_FOR_PROJET[v] ?? "residence");
               }}
             />
             <DecisionChecklist facts={checklistFacts} projet={projet} />
