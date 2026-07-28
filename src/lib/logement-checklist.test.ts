@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { GESTES } from "./decision/logement-gestes.ts";
 import {
   energyState, projetBucket, buildDecisionChecklist, checklistIntro, type ChecklistFacts,
 } from "./logement-checklist.ts";
@@ -98,4 +99,56 @@ test("texte cavité : achat parle de fondations, location de bailleur", () => {
   const loc = buildDecisionChecklist({ ...NONE, caviteProche: true }, "location")[0].text;
   assert.match(achat, /fondation|sol/i);
   assert.match(loc, /bailleur/i);
+});
+
+// ── SOURCE UNIQUE DES GESTES (29/07/2026) ────────────────────────────────────
+
+test("UN SEUL TEXTE PAR GESTE : la checklist dit exactement ce que dit le dossier", () => {
+  // Le défaut fermé ce jour-là : les deux chemins portaient leur propre copie des mêmes gestes, et
+  // elles avaient divergé. La checklist disait encore « Vérifier le diagnostic énergétique complet
+  // et sa date » là où le dossier disait « Regardez le détail du diagnostic et sa date ».
+  const f: ChecklistFacts = {
+    dpe: "passoire", confortEteInsuffisant: false, expositionBati: false,
+    zoneReglementee: false, sinistraliteActive: false, caviteProche: false, perimetrePatrimonial: false,
+  };
+  for (const [projet, bucket] of [["achat", "achat"], ["location", "location"], [null, "neutre"]] as const) {
+    const texte = buildDecisionChecklist(f, projet)[0]!.text;
+    assert.ok(texte.startsWith(GESTES.energie[bucket].label), `posture ${bucket} : le label doit ouvrir la phrase`);
+    assert.ok(texte.includes(GESTES.energie[bucket].detail), `posture ${bucket} : le détail doit suivre`);
+  }
+});
+
+test("LE VERBE « VÉRIFIER » N'OUVRE PLUS AUCUN GESTE", () => {
+  // Cinq libellés sur sept commençaient par là : empilés, ils se lisaient comme un formulaire.
+  const tous: ChecklistFacts = {
+    dpe: "passoire", confortEteInsuffisant: true, expositionBati: true,
+    zoneReglementee: true, sinistraliteActive: true, caviteProche: true, perimetrePatrimonial: true,
+  };
+  for (const projet of ["achat", "location", "reside", null]) {
+    for (const it of buildDecisionChecklist(tous, projet)) {
+      assert.doesNotMatch(it.text, /^Vérifi/, `« ${it.text.slice(0, 40)}… » ouvre par « Vérifi »`);
+    }
+  }
+});
+
+test("LE CONFORT D'ÉTÉ est un geste à part entière, dans les quatre postures", () => {
+  const f: ChecklistFacts = {
+    dpe: "correct", confortEteInsuffisant: true, expositionBati: false,
+    zoneReglementee: false, sinistraliteActive: false, caviteProche: false, perimetrePatrimonial: false,
+  };
+  for (const projet of ["achat", "location", "reside", null]) {
+    const items = buildDecisionChecklist(f, projet);
+    assert.equal(items.length, 1);
+    assert.equal(items[0]!.id, "confort");
+    assert.ok(items[0]!.text.length > 40);
+  }
+});
+
+test("PATRIMOINE : la posture location ne produit pas de ligne vide", () => {
+  const f: ChecklistFacts = {
+    dpe: "correct", confortEteInsuffisant: false, expositionBati: false,
+    zoneReglementee: false, sinistraliteActive: false, caviteProche: false, perimetrePatrimonial: true,
+  };
+  assert.equal(buildDecisionChecklist(f, "location").length, 0);
+  assert.equal(buildDecisionChecklist(f, "achat").length, 1);
 });

@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { runRules } from "./materiality-rules.ts";
+import { GESTES } from "./logement-gestes.ts";
 import type { ModuleFacts, LogementFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import type { EvaluationContext } from "../hard-constraints.ts";
@@ -143,4 +144,52 @@ test("argiles : la sévérité vit dans l'état scannable, pas recopiée en pare
   assert.equal((f as { status?: string }).status, "Aléa moyen ou fort");
   assert.match(f.statement, /retrait-gonflement des argiles/);
   assert.doesNotMatch(f.statement, /aléa/i); // plus de « (aléa moyen ou fort) » : le StatusTag le porte
+});
+
+// ── CONFORT D'ÉTÉ (29/07/2026) ───────────────────────────────────────────────
+
+test("CONFORT D'ÉTÉ : le geste entre enfin dans le moteur, en `secondary`", () => {
+  // Il existait dans la checklist depuis toujours sans jamais peser sur le dossier : la donnée
+  // (bloc confort du DPE) était là, la décision ne la lisait pas.
+  const r = runRules(facts(lf({ confortEteInsuffisant: true })), project(), HARD);
+  const f = r.facts.find((x) => x.ruleId === "logement.confort-ete")!;
+  assert.ok(f, "aucun fait de confort d'été");
+  assert.equal(f.materialityTier, "secondary");
+  assert.equal(f.role, "verification");
+  assert.match(f.statement, /insuffisant/);
+});
+
+test("CONFORT D'ÉTÉ : rien quand l'indicateur n'est pas insuffisant", () => {
+  const r = runRules(facts(lf({ confortEteInsuffisant: false })), project(), HARD);
+  assert.equal(r.facts.find((x) => x.ruleId === "logement.confort-ete"), undefined);
+});
+
+test("CONFORT D'ÉTÉ : la limitation dit que l'indicateur décrit le BÂTI, pas le vécu", () => {
+  const r = runRules(facts(lf({ confortEteInsuffisant: true })), project(), HARD);
+  const f = r.facts.find((x) => x.ruleId === "logement.confort-ete")!;
+  assert.match(f.limitation!, /étage|orientation|usages/);
+});
+
+test("CONFORT D'ÉTÉ : le geste vient de la table PARTAGÉE, pas d'une copie locale", () => {
+  const r = runRules(facts(lf({ confortEteInsuffisant: true })), project(), HARD);
+  const f = r.facts.find((x) => x.ruleId === "logement.confort-ete")!;
+  assert.equal(f.action!.label, GESTES.confort.neutre.label);
+});
+
+test("LE GESTE SUIT LA POSTURE, depuis la même table que la checklist", () => {
+  for (const [intent, bucket] of [["achat", "achat"], ["location", "location"]] as const) {
+    const r = runRules(facts(lf({ confortEteInsuffisant: true })), project({ intent }), HARD);
+    const f = r.facts.find((x) => x.ruleId === "logement.confort-ete")!;
+    assert.equal(f.action!.label, GESTES.confort[bucket].label);
+  }
+});
+
+test("AUCUN LIBELLÉ DU MODULE N'OUVRE PAR « VÉRIFI »", () => {
+  // Miroir du test de la checklist : les deux chemins lisent la même table, donc la même règle
+  // éditoriale doit tenir des deux côtés.
+  for (const geste of Object.values(GESTES)) {
+    for (const copy of Object.values(geste)) {
+      assert.doesNotMatch(copy.label, /^Vérifi/, `« ${copy.label} » ouvre par « Vérifi »`);
+    }
+  }
 });

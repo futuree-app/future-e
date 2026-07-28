@@ -1,9 +1,19 @@
 // « À vérifier avant de décider » (beat 5, spec 5a). Lib PURE : à partir des faits déjà montrés
 // (état normalisé) et du PROJET, produit des points de vérification déterministes. La synthèse
-// décrit le logement ; cette checklist décrit la RELATION (personne × projet). Extensible :
-// ajouter un axe de personnalisation = ajouter une règle, jamais toucher au prompt IA.
+// décrit le logement ; cette checklist décrit la RELATION (personne × projet).
+//
+// LES TEXTES NE VIVENT PLUS ICI (29/07/2026). Ils viennent de `decision/logement-gestes.ts`, que le
+// MOTEUR lit aussi. Cette liste portait sa propre copie des mêmes gestes, restée à la première
+// génération : elle disait encore « Vérifier le diagnostic énergétique complet et sa date » là où le
+// dossier dit « Regardez le détail du diagnostic et sa date ». Deux formulations du même geste selon
+// l'endroit de l'écran où le lecteur regardait.
+//
+// Ce fichier ne garde donc que ce qui lui est PROPRE : quels gestes s'activent, et pour quelles
+// postures. Ajouter un geste = une entrée dans la table partagée, plus une ligne ici.
 
-export type Bucket = "neutre" | "achat" | "reside" | "location";
+import { gesteEnPhrase, type Bucket, type GesteKey } from "./decision/logement-gestes.ts";
+
+export type { Bucket };
 
 export type ChecklistFacts = {
   dpe: "passoire" | "energivore" | "correct" | "absent";
@@ -32,93 +42,30 @@ export function projetBucket(projet: string | null): Bucket {
     : "neutre";
 }
 
-// Une règle par face. `active` gate sur le fait ; `text` porte la formulation par bucket.
+// Une règle par geste. `active` gate sur le fait ; le TEXTE vient de la table partagée.
 // L'ordre du tableau = l'ordre des preuves (énergie -> chaleur -> bâti -> réglementaire -> sinistralité).
 const RULES: {
-  id: string;
+  id: GesteKey;
   active: (f: ChecklistFacts) => boolean;
-  buckets?: Bucket[]; // par défaut : tous. Restreint l'item aux projets où le geste a un sens.
-  text: Record<Bucket, string>;
+  buckets?: Bucket[]; // par défaut : tous. Restreint le geste aux projets où il a un sens.
 }[] = [
-  {
-    id: "energie",
-    active: (f) => f.dpe === "passoire" || f.dpe === "energivore",
-    text: {
-      neutre: "Vérifier le diagnostic énergétique complet et sa date.",
-      achat: "Demandez le diagnostic énergétique complet et faites chiffrer les travaux d'amélioration avant de vous engager.",
-      reside: "Conservez le diagnostic énergétique et documentez tout travail d'amélioration engagé.",
-      location: "Demandez le diagnostic énergétique complet au bailleur et vérifiez sa date avant signature.",
-    },
-  },
-  {
-    id: "confort",
-    active: (f) => f.confortEteInsuffisant,
-    text: {
-      neutre: "Se renseigner sur le confort du logement en période de forte chaleur.",
-      achat: "Demandez comment le logement se comporte l'été et faites vérifier l'isolation et la ventilation.",
-      reside: "Suivez le confort du logement lors des épisodes de chaleur et notez les pièces les plus exposées.",
-      location: "Observez comment le logement se comporte l'été et demandez au bailleur les protections existantes.",
-    },
-  },
-  {
-    id: "bati",
-    active: (f) => f.expositionBati,
-    text: {
-      neutre: "Regarder les signes visibles sur le bâti, l'exposition au retrait-gonflement des argiles étant relevée à cette adresse.",
-      achat: "Demandez l'historique des fissures et des sinistres, et faites vérifier les fondations avant de vous engager.",
-      reside: "Surveillez et photographiez d'éventuelles fissures dans le temps, et conservez les justificatifs de travaux.",
-      location: "Observez l'état des murs et signalez au bailleur toute fissure apparente.",
-    },
-  },
-  {
-    id: "reglementaire",
-    active: (f) => f.zoneReglementee,
-    text: {
-      neutre: "Lire le règlement de la zone, cette adresse relevant d'un plan de prévention.",
-      achat: "Consultez le règlement de la zone en mairie avant tout projet de travaux ou d'extension : lui seul dit ce qui est autorisé à cette adresse.",
-      reside: "Vérifiez le règlement de la zone avant d'engager une extension ou une rénovation lourde.",
-      location: "Demandez au bailleur si le logement est concerné par des prescriptions particulières.",
-    },
-  },
-  {
-    id: "sinistralite",
-    active: (f) => f.sinistraliteActive,
-    text: {
-      neutre: "Garder en tête que les sinistres indemnisés sont lus à l'échelle de la commune, pas du logement.",
-      achat: "Demandez au vendeur l'état des risques et l'historique des sinistres du bien : la commune en a connu, sans que cela concerne forcément ce logement.",
-      reside: "Conservez les déclarations de sinistres et d'indemnisation : elles documentent l'exposition réelle du bien, au-delà de la statistique communale.",
-      location: "Demandez au bailleur l'état des risques et signalez tout sinistre survenu pendant la location.",
-    },
-  },
-  {
-    id: "cavite",
-    active: (f) => f.caviteProche,
-    text: {
-      neutre: "Se renseigner sur les cavités souterraines recensées à proximité et leur éventuel suivi.",
-      achat: "Faites vérifier la présence de cavités souterraines et l'état des fondations et du sol avant de vous engager.",
-      reside: "Surveillez tout signe d'affaissement ou de fissure : une cavité souterraine est recensée à proximité.",
-      location: "Signalez au bailleur tout affaissement ou fissure : une cavité souterraine est recensée à proximité.",
-    },
-  },
-  {
-    id: "patrimoine",
-    active: (f) => f.perimetrePatrimonial,
-    // Un locataire ne fait pas ces travaux.
-    buckets: ["neutre", "achat", "reside"],
-    text: {
-      neutre: "Se renseigner en mairie sur ce que le périmètre patrimonial autorise, avant tout projet de travaux extérieurs.",
-      achat: "Si vous envisagez des travaux extérieurs, isolation, menuiseries ou toiture, faites vérifier en mairie ce que le périmètre patrimonial autorise, avant tout devis.",
-      reside: "Avant d'engager des travaux extérieurs, faites vérifier en mairie ce que le périmètre patrimonial autorise : l'avis de l'Architecte des Bâtiments de France peut être requis.",
-      location: "",
-    },
-  },
+  { id: "energie", active: (f) => f.dpe === "passoire" || f.dpe === "energivore" },
+  { id: "confort", active: (f) => f.confortEteInsuffisant },
+  { id: "bati", active: (f) => f.expositionBati },
+  { id: "reglementaire", active: (f) => f.zoneReglementee },
+  { id: "sinistralite", active: (f) => f.sinistraliteActive },
+  { id: "cavite", active: (f) => f.caviteProche },
+  // Un locataire ne fait pas ces travaux.
+  { id: "patrimoine", active: (f) => f.perimetrePatrimonial, buckets: ["neutre", "achat", "reside"] },
 ];
 
 export function buildDecisionChecklist(facts: ChecklistFacts, projet: string | null): ChecklistItem[] {
   const b = projetBucket(projet);
   return RULES.filter((r) => r.active(facts))
     .filter((r) => r.buckets === undefined || r.buckets.includes(b))
-    .map((r) => ({ id: r.id, text: r.text[b] }));
+    .map((r) => ({ id: r.id, text: gesteEnPhrase(r.id, b) }))
+    // Un geste sans texte pour cette posture ne s'affiche pas (cf. `patrimoine` / location).
+    .filter((it) => it.text.length > 0);
 }
 
 export function checklistIntro(projet: string | null): string {

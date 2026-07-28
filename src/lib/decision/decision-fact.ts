@@ -258,6 +258,11 @@ export type LogementFacts = {
   cavites: SourceCoverage; caviteProche: boolean;
   patrimoine: SourceCoverage; perimetrePatrimonial: boolean;
   sinistralite: SourceCoverage; sinistraliteActive: boolean;
+  // CONFORT D'ÉTÉ (29/07/2026). Dérivé du DPE persisté, donc sans coverage : soit le diagnostic le
+  // porte, soit il ne le porte pas. `true` UNIQUEMENT quand l'indicateur réglementaire vaut
+  // « insuffisant » ET que le DPE décrit bien CE logement — un DPE généré à l'immeuble ne dit rien
+  // du confort d'un appartement en particulier, et `deriveThermalEvidence` rend alors `null`.
+  confortEteInsuffisant: boolean;
   addressLabel: string;
 };
 
