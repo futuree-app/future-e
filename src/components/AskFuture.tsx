@@ -222,6 +222,24 @@ export function AskFuture({
     [messageFeedback, sessionId, communeInsee],
   );
 
+  // Le quota atteint n'est pas un emplacement d'upsell : c'est le signal
+  // « limite commerciale rencontrée ». On le MESURE avant de décider quoi en
+  // faire — la suite se construit sur ce que les acheteurs butent réellement,
+  // pas sur ce qu'on imagine.
+  const quotaReached = questionsMax !== null && usedCount >= questionsMax;
+  const quotaTrackedRef = useRef(false);
+
+  useEffect(() => {
+    if (!quotaReached || quotaTrackedRef.current) return;
+    quotaTrackedRef.current = true;
+    posthog.capture("ask_quota_reached", {
+      questions_max: questionsMax,
+      report_id: communeInsee,
+      commune: communeName,
+      module_id: moduleIdFromPath(),
+    });
+  }, [quotaReached, questionsMax, communeInsee, communeName]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     void sendMessage(input);
@@ -398,7 +416,7 @@ export function AskFuture({
             <div ref={messagesEndRef} />
           </div>
 
-          {questionsMax !== null && usedCount >= questionsMax ? (
+          {quotaReached ? (
             <div className="ask-quota-reached">
               <p className="ask-quota-text">
                 Vous avez utilisé vos {questionsMax} questions incluses avec le Rapport interactif.
