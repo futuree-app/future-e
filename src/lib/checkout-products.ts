@@ -1,4 +1,4 @@
-export type CheckoutProductSlug = "rapport-complet" | "le-fil";
+export type CheckoutProductSlug = "rapport-complet";
 
 export type CheckoutProduct = {
   slug: CheckoutProductSlug;
@@ -6,7 +6,7 @@ export type CheckoutProduct = {
   subtitle: string;
   amount: number;
   priceLabel: string;
-  productType: "one-shot" | "suivi-solo";
+  productType: "one-shot";
   ctaLabel: string;
   features: string[];
 };
@@ -28,26 +28,10 @@ export const CHECKOUT_PRODUCTS: Record<CheckoutProductSlug, CheckoutProduct> = {
       "À conserver, et qui s'enrichit au fil des prochains modules",
     ],
   },
-  "le-fil": {
-    slug: "le-fil",
-    title: "Le Fil",
-    subtitle:
-      "Le rapport interactif devient vivant : dashboard évolutif, profil modifiable, alertes et mises à jour ciblées.",
-    amount: 9,
-    priceLabel: "Prochainement",
-    productType: "suivi-solo",
-    ctaLabel: "Activer Le Fil",
-    features: [
-      "Dashboard complet et interactif",
-      "Profil modifiable à tout moment",
-      "Newsletter mensuelle personnalisée",
-      "Notifications ciblées sur les événements",
-    ],
-  },
 };
 
 export function getCheckoutProduct(slug: string) {
-  if (slug === "rapport-complet" || slug === "le-fil") {
+  if (slug === "rapport-complet") {
     return CHECKOUT_PRODUCTS[slug];
   }
 

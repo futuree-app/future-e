@@ -66,9 +66,12 @@ const nextConfig: NextConfig = {
       { source: '/territoires/submersion/:code', destination: '/inondation/:code', permanent: true },
       { source: '/savoir/submersion', destination: '/inondation', permanent: true },
       { source: '/savoir/submersion/:code', destination: '/inondation/:code', permanent: true },
-      // Renommage offre « Suivi » → « Le Fil » (texte + routes publiques)
-      { source: '/suivi-bientot', destination: '/le-fil', permanent: true },
-      { source: '/checkout/suivi', destination: '/checkout/le-fil', permanent: true },
+      // Offre d'abonnement retirée du produit (28/07/2026) : les anciennes URLs
+      // publiques ne doivent pas tomber en 404.
+      { source: '/suivi-bientot', destination: '/', permanent: true },
+      { source: '/le-fil', destination: '/', permanent: true },
+      { source: '/checkout/suivi', destination: '/checkout/rapport-complet', permanent: true },
+      { source: '/checkout/le-fil', destination: '/checkout/rapport-complet', permanent: true },
     ];
   },
 };

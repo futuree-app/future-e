@@ -2186,8 +2186,8 @@ export default function FutureELanding() {
     amnesieVisualInner: {
       position: 'relative',
       width: '100%',
-      aspectRatio: '16 / 9',
-      minHeight: 260,
+      aspectRatio: '21 / 9',
+      minHeight: 200,
       borderRadius: 12,
       overflow: 'hidden',
     },
@@ -3471,6 +3471,10 @@ export default function FutureELanding() {
       </section>
 
 
+      {/* Résumé de la page /pourquoi, en clôture de landing. Toutes les formules
+          viennent de /pourquoi : ne pas en inventer ici, sinon les deux pages
+          divergent. Reprend la charpente de l'ancienne section (orbe, visuel,
+          visuel) — cf. styles.amnesie*. */}
       <section style={styles.amnesieSection}>
         <div style={styles.amnesieInner} className="amnesie-inner">
           <div
@@ -3485,35 +3489,26 @@ export default function FutureELanding() {
               pointerEvents: 'none',
             }}
           />
-          <div style={styles.amnesieEyebrow}>Pourquoi s&apos;abonner</div>
+          <div style={styles.amnesieEyebrow}>Pourquoi futur•e</div>
           <h2 style={styles.amnesieTitle}>
-            Votre territoire continue d&apos;évoluer, même lorsque vous n&apos;y pensez plus.
+            Votre futur lieu de vie ne tient pas dans une annonce.
           </h2>
           <p style={styles.amnesieBody}>
-            Une semaine, on parle du cadmium. La suivante, d&apos;une canicule.
-            Puis des incendies, d&apos;une pollution de l&apos;air ou d&apos;un
-            nouveau projet d&apos;aménagement.
+            Choisir où vivre est l’une des décisions les plus engageantes qui
+            soient : des années de vie, une grande partie d’un patrimoine,
+            parfois la santé d’une famille.
           </p>
           <p style={styles.amnesieBody}>
-            Vous lisez. Vous vous inquiétez parfois. Puis l&apos;actualité passe
-            à autre chose.
+            Pourtant, celui qui vend, loue ou aménage connaît le lieu et son
+            environnement mieux que la personne qui arrive. Certaines données
+            sont publiques mais illisibles. D’autres n’ont jamais été produites.
+            D’autres encore ne sont pas transmises alors qu’elles sont connues.
           </p>
           <p style={styles.amnesieBody}>
-            Ce n&apos;est pas un manque de volonté. La capacité d&apos;attention
-            est limitée, c&apos;est documenté. Quand elle se concentre sur un
-            sujet, elle en laisse d&apos;autres à l&apos;arrière-plan.
-          </p>
-          <p style={styles.amnesieBody}>
-            Pendant ce temps, les territoires continuent d&apos;évoluer. Les
-            risques changent. Les services se transforment. Les infrastructures
-            se développent ou se dégradent. Les tensions sur l&apos;eau
-            progressent. Les normes évoluent. Les décisions publiques produisent
-            leurs effets.
-          </p>
-          <p style={styles.amnesieBody}>
-            Ces changements concernent votre commune, votre logement, votre
-            santé, vos déplacements et les choix que vous n&apos;avez pas encore
-            pris.
+            futur•e rassemble ce qui est connu, rend visibles les angles morts et
+            vous aide à savoir ce qu’il reste à vérifier avant de vous engager.
+            Les faits sont les mêmes pour tout le monde : ce qui change avec
+            votre projet, c’est le poids de chaque fait pour votre décision.
           </p>
           <div style={styles.amnesieVisualWrap}>
             <div style={styles.amnesieVisualInner}>
@@ -3538,45 +3533,43 @@ export default function FutureELanding() {
               />
             </div>
           </div>
-          <div style={styles.amnesieHighlight}>
-            Le Fil existe pour maintenir ce lien dans la durée. Pas une alerte
-            de plus : une présence calme, continue, qui traduit les données
-            publiques en lecture personnalisée pour votre vie. Comme vous suivez
-            votre santé ou vos finances : sans obsession, sans oubli.
-          </div>
-
-          {/* Pré-lancement du Fil : liste d'attente, aucun prix tant que le
-              produit n'existe pas. Le texte ci-dessus prépare déjà l'abonnement. */}
           <div style={{
             marginTop: 32,
             paddingTop: 28,
             borderTop: `1px solid ${C.border}`,
           }}>
-            <div style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 10, letterSpacing: '0.14em',
-              textTransform: 'uppercase', color: C.orange, marginBottom: 14,
-            }}>
-              Le Fil · à venir
-            </div>
             <p style={{
-              fontSize: 15, color: C.muted, lineHeight: 1.7,
-              margin: '0 0 22px', maxWidth: 620,
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: 'clamp(19px, 2.2vw, 23px)',
+              lineHeight: 1.5,
+              margin: '0 0 22px',
             }}>
-              Mises à jour personnalisées de votre territoire, évolutions des
-              risques, qualité de l&apos;air, eau, santé environnementale,
-              mobilité et décisions locales qui comptent.
+              <span style={{ color: C.text }}>Ce que nous savons.</span>{' '}
+              <span style={{ color: C.muted }}>Ce que cela change pour vous.</span>{' '}
+              <span style={{ color: C.orange, fontStyle: 'italic' }}>Ce qu’il reste à vérifier.</span>
             </p>
-            <Link href="/le-fil" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '13px 24px', borderRadius: 10,
-              background: 'transparent', border: `1px solid ${C.orange}`,
-              color: C.orange, fontWeight: 600, fontSize: 14,
-              textDecoration: 'none',
-              fontFamily: "'Instrument Sans', sans-serif",
-            }}>
-              Être prévenu·e à l&apos;ouverture →
-            </Link>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+              <Link href="/ou-vivre" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '13px 24px', borderRadius: 10,
+                background: C.orange, border: '1px solid transparent',
+                color: C.bg, fontWeight: 600, fontSize: 14,
+                textDecoration: 'none',
+                fontFamily: "'Instrument Sans', sans-serif",
+              }}>
+                Décrire mon projet →
+              </Link>
+              <Link href="/pourquoi" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '13px 24px', borderRadius: 10,
+                background: 'transparent', border: `1px solid ${C.borderHi}`,
+                color: C.muted, fontWeight: 500, fontSize: 14,
+                textDecoration: 'none',
+                fontFamily: "'Instrument Sans', sans-serif",
+              }}>
+                Découvrir notre méthode
+              </Link>
+            </div>
           </div>
         </div>
       </section>

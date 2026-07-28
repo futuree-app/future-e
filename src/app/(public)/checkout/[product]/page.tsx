@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { CheckoutPaymentPanel } from "@/components/CheckoutPaymentPanel";
-import { FilWaitlistForm } from "@/components/FilWaitlistForm";
 import { getCheckoutProduct, type CheckoutProductSlug } from "@/lib/checkout-products";
 import { createClient } from "@/lib/supabase/server";
 import { CheckoutViewedTracker } from "./CheckoutViewedTracker";
@@ -27,15 +26,6 @@ const THEMES: Record<CheckoutProductSlug, Theme> = {
     accentGlow: "rgba(74,222,128,0.16)",
     orb: "rgba(74,222,128,0.32)",
     status: "Disponible maintenant",
-  },
-  "le-fil": {
-    accent: "var(--orange)",
-    accentSoft: "var(--orange-soft)",
-    accentTint: "var(--orange-tint)",
-    accentRing: "var(--orange-ring)",
-    accentGlow: "rgba(251,146,60,0.18)",
-    orb: "var(--orb-orange)",
-    status: "Bientôt disponible",
   },
 };
 
@@ -68,28 +58,6 @@ const COPY: Record<CheckoutProductSlug, {
       { q: "Mes données sont-elles vendues ?", a: "Jamais. Les données issues du wizard restent dans votre espace. Voir notre politique RGPD." },
     ],
   },
-  "le-fil": {
-    kicker: "Le Fil · prochainement",
-    hero: { line1: "Le Fil.", line2: "Bientôt." },
-    promise: "Le rapport interactif futur•e ne s'arrête pas à un PDF. Avec Le Fil, il devient vivant : un dashboard interactif, des alertes ciblées, une lecture mensuelle écrite pour vous. Inscrivez-vous pour être prévenu·e en avant-première.",
-    whatYouGet: [
-      { n: "01", title: "Dashboard interactif", body: "Vos risques, vos indicateurs, vos seuils, mis à jour à chaque nouvelle donnée publique." },
-      { n: "02", title: "Alertes locales", body: "Canicule, sécheresse, nouvelles études DRIAS sur votre département : prévenu·e sans être inondé·e." },
-      { n: "03", title: "Profil vivant", body: "Vous déménagez, achetez, changez de mode de vie : votre profil suit, vos projections aussi." },
-      { n: "04", title: "Lettre mensuelle", body: "Écrite à la main, personnalisée, vos territoires, vos risques, vos décisions du moment." },
-    ],
-    timeline: [
-      { n: "01", title: "Vous laissez votre email", body: "Et, si vous voulez, votre commune et votre motivation principale." },
-      { n: "02", title: "Un seul email à l'ouverture", body: "Aucun spam d'ici là. Vous serez prévenu·e en premier, avec 30 jours offerts." },
-      { n: "03", title: "Activation en un clic", body: "Lien direct vers votre dashboard Le Fil, sans engagement, résiliable à tout moment." },
-    ],
-    faqs: [
-      { q: "Quand Le Fil ouvre-t-il vraiment ?", a: "Nous visons une ouverture progressive dans les prochains mois. Les inscrits à la liste d'attente passent en premier." },
-      { q: "Pourquoi pas tout de suite ?", a: "Nous voulons que la première version tienne ses promesses : alertes utiles, dashboard fiable, newsletter écrite, pas un produit générique." },
-      { q: "L'inscription m'engage-t-elle ?", a: "Aucun engagement. Aucune carte demandée. Juste votre email pour être prévenu·e." },
-      { q: "Et si j'ai déjà acheté le rapport interactif ?", a: "Les 14 € seront entièrement déduits de votre premier mois du Fil à son ouverture." },
-    ],
-  },
 };
 
 export async function generateMetadata({
@@ -100,11 +68,9 @@ export async function generateMetadata({
   const { product: slug } = await params;
   const product = getCheckoutProduct(slug);
   if (!product) return { title: "futur•e" };
-  const isFil = product.slug === "le-fil";
   return {
-    title: isFil ? "Le Fil · Bientôt · futur•e" : `${product.title} · futur•e`,
+    title: `${product.title} · futur•e`,
     description: product.subtitle,
-    robots: isFil ? { index: false, follow: false } : undefined,
   };
 }
 
@@ -114,9 +80,6 @@ export default async function CheckoutPage({
   params: Promise<{ product: string }>;
 }) {
   const { product: productSlug } = await params;
-  // Le Fil n'est pas achetable : pas de faux checkout, on renvoie vers la liste
-  // d'attente honnête (passe « pas d'upsell pour un produit inexistant »).
-  if (productSlug === "le-fil") redirect("/le-fil");
   const product = getCheckoutProduct(productSlug);
 
   if (!product) notFound();
@@ -128,7 +91,6 @@ export default async function CheckoutPage({
   const checkoutPath = `/checkout/${product.slug}`;
   const theme = THEMES[product.slug];
   const copy = COPY[product.slug];
-  const isFil = product.slug === "le-fil";
 
   return (
     <div
@@ -358,9 +320,7 @@ export default async function CheckoutPage({
                     color: "var(--fg-hi)",
                   }}
                 >
-                  {isFil
-                    ? "Un climat qui bouge, un outil qui suit."
-                    : "Tout ce qu'il vous faut pour décider."}
+                  Tout ce qu&apos;il vous faut pour décider.
                 </h2>
 
                 <div
@@ -629,7 +589,7 @@ export default async function CheckoutPage({
                     margin: "0 0 14px",
                   }}
                 >
-                  {isFil ? "Liste d'attente" : "Votre commande"}
+                  Votre commande
                 </p>
                 <div
                   style={{
@@ -657,14 +617,8 @@ export default async function CheckoutPage({
                       letterSpacing: "var(--tracking-display)",
                     }}
                   >
-                    {isFil ? (
-                      <span style={{ fontSize: 16, color: "var(--fg-3)" }}>Prochainement</span>
-                    ) : (
-                      <>
-                        {product.amount}
-                        <span style={{ fontSize: 16, color: "var(--fg-3)", marginLeft: 4 }}>€</span>
-                      </>
-                    )}
+                    {product.amount}
+                    <span style={{ fontSize: 16, color: "var(--fg-3)", marginLeft: 4 }}>€</span>
                   </div>
                 </div>
                 <p
@@ -676,16 +630,12 @@ export default async function CheckoutPage({
                     color: "var(--fg-4)",
                   }}
                 >
-                  {isFil
-                    ? "Sans engagement · 30 jours offerts à l'ouverture"
-                    : "Paiement unique · TVA non applicable, art. 293 B du CGI"}
+                  Paiement unique · TVA non applicable, art. 293 B du CGI
                 </p>
               </div>
 
               {/* Action */}
-              {isFil ? (
-                <FilWaitlistForm />
-              ) : user ? (
+              {user ? (
                 <CheckoutPaymentPanel product={product} userEmail={user.email} />
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -782,9 +732,9 @@ export default async function CheckoutPage({
                   color: "var(--fg-4)",
                 }}
               >
-                <span>{isFil ? "RGPD" : "Stripe · sécurisé"}</span>
-                <span>{isFil ? "0 spam" : "TVA non applicable"}</span>
-                <span>{isFil ? "0 engagement" : "Support FR"}</span>
+                <span>Stripe · sécurisé</span>
+                <span>TVA non applicable</span>
+                <span>Support FR</span>
               </div>
             </aside>
           </div>
@@ -816,9 +766,8 @@ export default async function CheckoutPage({
                 marginInline: "auto",
               }}
             >
-              {isFil
-                ? "« Ce n'est plus une projection qu'on consulte. C'est une relation qu'on tient avec son territoire. »"
-                : "« Pas une étude de plus. Un rapport interactif pour décider, calmement, et à temps. »"}
+              « Pas une étude de plus. Un rapport interactif pour décider,
+              calmement, et à temps. »
             </p>
             <p
               style={{

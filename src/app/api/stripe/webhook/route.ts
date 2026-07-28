@@ -15,18 +15,6 @@ const supabaseAdmin = createClient(
 );
 
 function getEntitlements(productType: string) {
-  if (productType === "suivi-solo") {
-    return {
-      plan: "suivi",
-      status: "active",
-      report_access: "complete",
-      dashboard_access: "interactive",
-      newsletter_enabled: true,
-      notifications_enabled: true,
-      household_mode_enabled: false,
-    };
-  }
-
   if (productType === "suivi-foyer") {
     return {
       plan: "foyer",
@@ -164,32 +152,6 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
       html: `
         <p>Merci pour votre confiance.</p>
         <p>Votre rapport interactif est en préparation. Vous le recevrez dans les prochaines minutes.</p>
-        <p>— futur•e</p>
-      `,
-    });
-  }
-
-  if (productType === "one-shot" && userEmail) {
-    const sendAt = new Date();
-    sendAt.setDate(sendAt.getDate() + 7);
-
-    await resend.emails.send({
-      from: "futur•e <hello@futur-e.fr>",
-      to: userEmail,
-      subject: "Le Fil arrive : soyez prévenu·e en avant-première",
-      scheduledAt: sendAt.toISOString(),
-      html: `
-        <p>Votre rapport interactif futur•e est là depuis une semaine.</p>
-        <p>
-          La suite, c'est Le Fil : votre rapport qui reste vivant, avec des mises
-          à jour et des alertes au fil de l'évolution de votre territoire. Il n'est
-          pas encore ouvert.
-        </p>
-        <p>
-          <a href="https://futur-e.fr/le-fil">
-            Rejoindre la liste d'attente →
-          </a>
-        </p>
         <p>— futur•e</p>
       `,
     });

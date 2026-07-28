@@ -128,7 +128,7 @@ export async function resolveReadableTerritory(
 // resolveReadableTerritory, mais pour un INSEE arbitraire (celui de l'adresse tapée) :
 //   - résidence déclarée (home_insee_code), OU
 //   - commune achetée (rapport ou Pack) : un report_grant sur (user, insee).
-// Aucun élargissement implicite (voisines, département, Le Fil, foyer, B2B) : ce seront des
+// Aucun élargissement implicite (voisines, département, abonnement, foyer, B2B) : ce seront des
 // droits EXPLICITES plus tard. La sécurité réelle est ici, côté serveur (le client peut doubler
 // pour l'UX, jamais pour la garantie).
 export async function canAnalyzeCommune(

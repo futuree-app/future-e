@@ -8,7 +8,6 @@ export const runtime = "nodejs";
 // Server-side price map — client-provided amounts are never trusted
 const PRODUCT_PRICES: Record<string, { amountEur: number; stripePriceId: string }> = {
   "one-shot":      { amountEur: 14, stripePriceId: process.env.STRIPE_RAPPORT_PRICE_ID ?? "" },
-  "suivi-solo":    { amountEur: 9,  stripePriceId: process.env.STRIPE_SUIVI_PRICE_ID   ?? "" },
   "pack-decision": { amountEur: 39, stripePriceId: process.env.STRIPE_PACK_PRICE_ID    ?? "" },
 };
 

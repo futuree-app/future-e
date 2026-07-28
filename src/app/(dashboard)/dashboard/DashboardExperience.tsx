@@ -649,7 +649,7 @@ export function DashboardExperience({
         {!interactive ? (
           <div className="proto-note">
             Le plan one-shot reste sur la lecture `gwl20` 2050. La comparaison des
-            scénarios `gwl15`, `gwl20` et `gwl30` arrivera avec Le Fil.
+            scénarios `gwl15`, `gwl20` et `gwl30` n&apos;est pas incluse.
           </div>
         ) : null}
       </div>
