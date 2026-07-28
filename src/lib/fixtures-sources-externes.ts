@@ -109,5 +109,7 @@ export const CARTOFRICHES_SOL_POLLUTION = [
   "pollution probable",     //      2
 ] as const;
 
-// Les seules formes qui ÉTABLISSENT une pollution (avérée ou traitée : le sol a été pollué).
-export const CARTOFRICHES_POLLUTION_ETABLIE = ["pollution avérée", "pollution traitée"] as const;
+// La seule forme qui ÉTABLIT une pollution non traitée. « pollution traitée » a son propre état :
+// un site dépollué n'appelle pas le même geste qu'un site pollué, et les confondre refaisait en plus
+// petit l'erreur du booléen.
+export const CARTOFRICHES_POLLUTION_ETABLIE = ["pollution avérée"] as const;

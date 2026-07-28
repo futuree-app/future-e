@@ -1,6 +1,6 @@
 import "server-only";
 
-import { readSolPollution, type SolPollution } from "./cartofriches-pollution";
+import { readSolPollution, type SolPollutionLu } from "./cartofriches-pollution";
 
 const BASE = "https://data.ademe.fr/data-fair/api/v1/datasets/59gkmzgmbjypm6yjqzunjmto";
 
@@ -16,11 +16,12 @@ export type Friche = {
   latitude: number | null;
   longitude: number | null;
   distanceM: number | null;
-  // L'ÉTAT DE CONNAISSANCE, pas un booléen. `sol_pollue: boolean` a valu `false` pour les 28 373
-  // friches de France, parce qu'il testait des valeurs que le champ ne porte jamais — et parce qu'un
-  // booléen ne peut pas distinguer « inconnu » (86,6 %) de « pollution inexistante » (1,9 %).
+  // L'ÉTAT DE CONNAISSANCE + LE LIBELLÉ BRUT, pas un booléen. `sol_pollue: boolean` a valu `false`
+  // pour les 28 373 friches de France, parce qu'il testait des valeurs que le champ ne porte jamais
+  // — et parce qu'un booléen ne peut pas distinguer « inconnu » (86,6 %) de « pollution
+  // inexistante » (1,9 %). Le brut permet de voir arriver une modalité nouvelle.
   // Cf. `cartofriches-pollution.ts`.
-  solPollution: SolPollution;
+  solPollution: SolPollutionLu;
   sol_pollution_origine: string | null;
   bati_pollution: string | null;
   activite: string | null;

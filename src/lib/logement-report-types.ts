@@ -9,7 +9,7 @@ import type { RegulatoryPlan } from "./pprn-zonage.ts";
 import type { HeritageStatus } from "./gpu-servitudes.ts";
 import type { OnrnSinistralite } from "./onrn-sinistralite.ts";
 import type { PointHazards } from "./point-hazards.ts";
-import type { SolPollution } from "./cartofriches-pollution.ts";
+import type { SolPollutionLu } from "./cartofriches-pollution.ts";
 import type { IrisScope } from "./iris-scope.ts";
 
 export type LogementReport = {
@@ -25,7 +25,7 @@ export type LogementReport = {
   } | null;
   zfe?: { inZfe: boolean; zones: Array<{ id: string; nom: string; vp_critair: string | null; deux_rm_critair: string | null; date_debut: string | null; date_fin: string | null; }>; } | null;
   irep?: { count: number; installations: Array<{ id: number; nom: string; distanceM: number; nombre_polluants: number; milieu_emission: string | null; }>; } | null;
-  cartofriches?: { count: number; friches: Array<{ id: string; nom: string; type: string | null; statut: string | null; solPollution: SolPollution; activite: string | null; distanceM: number | null; }>; } | null;
+  cartofriches?: { count: number; friches: Array<{ id: string; nom: string; type: string | null; statut: string | null; solPollution: SolPollutionLu; activite: string | null; distanceM: number | null; }>; } | null;
   communeData?: {
     commune: {
       inseeCode: string; nom: string; population: number | null; vieillissement_pct: number | null;
