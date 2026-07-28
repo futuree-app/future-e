@@ -86,3 +86,28 @@ export const ONDE_ECOULEMENTS = [
 
 // Les deux seules formes qui signalent un cours d'eau effectivement à sec.
 export const ONDE_FORMES_SECHES = ["Assec", "Ecoulement non visible"] as const;
+
+// ── CARTOFRICHES (ADEME) — l'état de pollution du sol d'une friche ──────────────
+// Relevé le 29/07/2026 sur /values/sol_pollution_existe (28 373 friches). SEPT valeurs, pas un
+// booléen : le champ décrit un ÉTAT DE CONNAISSANCE, exactement comme la doctrine des quatre états.
+//
+// LA FORME QUI A CAUSÉ LE BUG : toutes. `toFriche` testait `=== true || === "true" || === "1"`, donc
+// `sol_pollue` valait `false` pour LES 28 373 FRICHES DE FRANCE, y compris les 485 en pollution
+// avérée. Même signature que « feux de foret » au pluriel et `libelle_observation` : une valeur d'API
+// jamais confrontée à la source.
+//
+// ET LE PIÈGE PROPRE À CE CHAMP : « inconnu » (86,6 % des friches) n'est PAS « pollution
+// inexistante » (1,9 %). Les réduire tous deux à `false` détruit précisément la distinction qui fait
+// la valeur du produit — « ne pas figurer dans une base ≠ sol sain ».
+export const CARTOFRICHES_SOL_POLLUTION = [
+  "inconnu",                // 24 576 friches — 86,6 %
+  "pollution supposée",     //  1 641 — 5,8 %
+  "pollution peu probable", //    843 — 3,0 %
+  "pollution inexistante",  //    528 — 1,9 %
+  "pollution avérée",       //    485 — 1,7 %
+  "pollution traitée",      //      8
+  "pollution probable",     //      2
+] as const;
+
+// Les seules formes qui ÉTABLISSENT une pollution (avérée ou traitée : le sol a été pollué).
+export const CARTOFRICHES_POLLUTION_ETABLIE = ["pollution avérée", "pollution traitée"] as const;

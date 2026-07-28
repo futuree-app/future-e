@@ -1,5 +1,7 @@
 import "server-only";
 
+import { readSolPollution, type SolPollution } from "./cartofriches-pollution";
+
 const BASE = "https://data.ademe.fr/data-fair/api/v1/datasets/59gkmzgmbjypm6yjqzunjmto";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -14,7 +16,11 @@ export type Friche = {
   latitude: number | null;
   longitude: number | null;
   distanceM: number | null;
-  sol_pollue: boolean;
+  // L'ÉTAT DE CONNAISSANCE, pas un booléen. `sol_pollue: boolean` a valu `false` pour les 28 373
+  // friches de France, parce qu'il testait des valeurs que le champ ne porte jamais — et parce qu'un
+  // booléen ne peut pas distinguer « inconnu » (86,6 %) de « pollution inexistante » (1,9 %).
+  // Cf. `cartofriches-pollution.ts`.
+  solPollution: SolPollution;
   sol_pollution_origine: string | null;
   bati_pollution: string | null;
   activite: string | null;
@@ -96,7 +102,7 @@ function toFriche(r: ApiRecord, refLat?: number, refLon?: number): Friche {
     distanceM:             lat != null && lon != null && refLat != null && refLon != null
                              ? Math.round(haversineM(refLat, refLon, lat, lon))
                              : null,
-    sol_pollue:            r.sol_pollution_existe === true || r.sol_pollution_existe === "true" || r.sol_pollution_existe === "1",
+    solPollution:          readSolPollution(r.sol_pollution_existe),
     sol_pollution_origine: r.sol_pollution_origine ?? null,
     bati_pollution:        r.bati_pollution ?? null,
     activite:              r.activite_libelle ?? null,
