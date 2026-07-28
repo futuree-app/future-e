@@ -24,7 +24,8 @@ export type LogementReport = {
     scenarios: Array<{ categorie: string | null; etape: string | null; travaux: string | null; conso_ep: number | null; emission_ges: number | null; }>;
   } | null;
   zfe?: { inZfe: boolean; zones: Array<{ id: string; nom: string; vp_critair: string | null; deux_rm_critair: string | null; date_debut: string | null; date_fin: string | null; }>; } | null;
-  irep?: { count: number; installations: Array<{ id: number; nom: string; distanceM: number; nombre_polluants: number; milieu_emission: string | null; }>; } | null;
+  // `irep` retiré du contrat le 29/07/2026 : il n'était lu par aucun composant ni aucune règle.
+  // La source vit toujours (`src/lib/irep.ts`, `/api/proxy/irep`, page /agir/pollutions-invisibles).
   // Friches recensées AUTOUR DE L'ADRESSE (rayon `CARTOFRICHES_RAYON_RECHERCHE_M`), triées de la plus
   // proche. `distanceM` est la distance au POINT DE RÉFÉRENCE du site, jamais à sa limite : une
   // friche étendue peut commencer bien avant. `tronque` dit que le tri n'a peut-être pas vu tous les

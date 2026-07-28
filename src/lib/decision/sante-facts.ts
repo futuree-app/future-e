@@ -1,8 +1,25 @@
 // LA DOCTRINE DE SANTÉ ENVIRONNEMENTALE DU DOSSIER. Lib PURE : aucune I/O, aucun réseau.
 //
 // Elle n'est PAS un module (cf. ADR-0010) : la santé environnementale est une LECTURE, pas un gisement de
-// données. Ces faits sont ceux qui sont vrais au grain COMMUNE. Le radon, les argiles et le bruit de façade
-// sont vrais au grain ADRESSE, et vivent dans Logement. La même promesse, deux mailles.
+// données. Ces faits sont ceux qui sont vrais au grain COMMUNE.
+//
+// ⚠ CORRIGÉ LE 29/07/2026. Cette en-tête affirmait : « le radon, les argiles et le bruit de façade sont
+// vrais au grain ADRESSE, et vivent dans Logement ». C'était faux pour deux des trois, et cette phrase
+// a coûté cher — elle expliquait pourquoi personne ne cherchait le radon ici.
+//
+//   • LE RADON est CLASSÉ PAR COMMUNE. Vérifié le 29/07/2026 : l'API Géorisques exige `code_insee` et
+//     REFUSE `latlon` (400). Le rapport au point porte bien un `libelleStatutAdresse`, mais il recopie
+//     le statut communal — égal sur les neuf points testés. Il n'existe donc aucune finesse d'adresse
+//     à aller chercher : le classement décrit le sous-sol de la commune, et la concentration réelle
+//     dans un logement dépend du bâti et de la ventilation, que personne ne publie.
+//   • LE BRUIT DE FAÇADE serait vrai au grain adresse, mais la donnée qui le dirait (cartes de bruit
+//     stratégiques, en décibels) est diffusée par ~100 DDT et les agglomérations, sans agrégat
+//     national : elle n'est pas intégrable à un coût raisonnable aujourd'hui. Ce qui existe ici est
+//     une distance depuis le CENTROÏDE communal, et la règle le dit au lecteur.
+//   • SEULES LES ARGILES sont réellement lues au grain parcelle, et elles vivent bien dans Logement.
+//
+// CONSÉQUENCE : le radon a sa place ICI, au grain commune. Il n'y est pas encore — la mesure est faite
+// (19,5 % des communes en classe 3, potentiel significatif), la décision produit ne l'est pas.
 //
 // LA DOCTRINE DU SEUIL, héritée du climat : la GRANDEUR est officielle, la FRÉQUENCE (ou le déclencheur)
 // peut être une convention, mais alors elle est NOMMÉE, VERSIONNÉE, et DITE dans le texte.

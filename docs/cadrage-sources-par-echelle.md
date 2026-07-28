@@ -424,3 +424,33 @@ Sept indicateurs (passoires, précarité, propriété, location, HLM, suroccupat
 servis au grain secteur depuis le 28/07 alors qu'ils sont **estimés** (ENL 2022 par sondage,
 GEODIP 2017). Seul l'équipement automobile a été basculé vers une source mesurée. Les autres
 mériteraient le même examen — en particulier les passoires, qui portent une décision produit.
+
+---
+
+## 9. Registre des sources dormantes (29/07/2026)
+
+**Rien n'est supprimé ici.** Une intégration est du capital : la lib garde le parsing, les pièges
+relevés et les contrats de source. Ce qui est retiré, ce sont les APPELS qui ne nourrissent rien —
+un appel réseau par dossier, une dépendance qui peut tomber, et surtout l'impression qu'une
+dimension est couverte alors qu'elle ne s'affiche nulle part.
+
+La règle : **une source fetchée mais jamais interprétée n'est pas une capacité du produit.**
+
+| Source | État | Ce qui vit encore | Pour la réveiller |
+|---|---|---|---|
+| **IREP** (rejets industriels déclarés) | appel retiré de la route Logement le 29/07 | `src/lib/irep.ts`, `/api/proxy/irep`, affichage sur `/agir/pollutions-invisibles` | rétablir `getIrepNearPoint(lat, lon)` dans le `Promise.all` de `georisques-logement` + le champ au contrat |
+| **Pollen** | aucun appelant | `src/lib/pollen.ts`, avec son repli départemental documenté | demande une priorité explicite (allergies) : saisonnier, très dépendant des sensibilités, souvent départemental |
+| **Gissol / RMQS** (métaux lourds) | aperçu de la landing seulement | `src/lib/gissol.ts`, `/api/gissol` | maille large, pas de valeur décisionnelle à l'adresse en l'état |
+| **Baignade** | contexte du prompt AskFuture | `src/lib/baignade.ts`, branchée à `commune-enrichment` | communes littorales/lacustres, saisonnier |
+| **SIS / BASIAS** | page `/agir/pollutions-invisibles` | `/api/proxy/sis`, `PollutionLookup` | ⚠️ **ne pas ouvrir sans intégration parcellaire** : cf. la doctrine « ne pas crier au loup » — en urbain, tout est à proximité de quelque chose |
+| **Coûts de rénovation ADEME** | dormante | `src/lib/renovation.ts`, `/api/renovation/[departement]` | par département, enquête 2017-2018 : ordres de grandeur, jamais un devis |
+| **RGE** (artisans qualifiés) | dormante | `src/lib/rge.ts`, `/api/rge` | utile au geste « faire chiffrer », pas au constat |
+
+### Le seul vrai trou côté santé
+
+Le **radon** n'est pas dormant : il n'a jamais été intégré. Mesuré discriminant (19,5 % des communes
+en classe 3), source publique sans jeton, grain communal confirmé. Sa table de vérité est écrite —
+voir `docs/cadrage-radon.md` — et l'intégration attend une décision produit, pas du code.
+
+Air, bruit et industrie forment déjà un socle cohérent au grain commune. Le radon est la pièce qui
+est tombée entre les anciens modules, chacun la croyant chez le voisin.

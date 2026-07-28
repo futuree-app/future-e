@@ -16,7 +16,6 @@ import { fetchHeritageProtections } from "@/lib/gpu";
 import { getDpeCandidatesByBanId, getDpeByCoordinates } from "@/lib/dpe";
 import { validateSelectedBanAddress } from "@/lib/selected-ban-address";
 import { getZfeForPoint } from "@/lib/zfe";
-import { getIrepNearPoint } from "@/lib/irep";
 import { getAuditByBanId, getAuditByCoordinates } from "@/lib/audit";
 import { getCartofrichesNearPoint, CARTOFRICHES_RAYON_RECHERCHE_M } from "@/lib/cartofriches";
 import { getCommuneFullData } from "@/lib/commune-data";
@@ -46,11 +45,10 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         : getAuditByCoordinates(address.latitude, address.longitude).catch(() => null),
     ]);
 
-    const [georisquesCommune, altitude, zfe, irep, cartofriches, communeData, sinistralite, cavites, mvt, heritage] = await Promise.all([
+    const [georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage] = await Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
       getAltitude(address.latitude, address.longitude).catch(() => null),
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
-      getIrepNearPoint(address.latitude, address.longitude).catch(() => null),
       // AUTOUR DE L'ADRESSE, PLUS AUTOUR DE LA COMMUNE (29/07/2026). L'appel communal rendait
       // cinquante friches situées n'importe où dans la commune, SANS distance : « une friche
       // polluée quelque part à Nantes » n'est pas une information sur un logement nantais.
@@ -106,7 +104,15 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       banFeatureType,
       audit,
       zfe,
-      irep,
+      // IREP DÉBRANCHÉ LE 29/07/2026 — l'appel, pas la source. Les rejets industriels déclarés
+      // étaient fetchés à chaque dossier, transportés dans le payload, et lus par AUCUN composant ni
+      // aucune règle. Un appel réseau par dossier, une dépendance qui peut tomber, et surtout
+      // l'impression que la dimension est couverte alors qu'elle ne s'affiche nulle part.
+      //
+      // RIEN N'EST PERDU : `src/lib/irep.ts` est intact et vivant — `/api/proxy/irep` s'en sert, et
+      // `PollutionLookup` l'affiche sur /agir/pollutions-invisibles. Pour le rebrancher ici le jour
+      // où un fait le lit, il suffit de rétablir `getIrepNearPoint(lat, lon)` dans le Promise.all
+      // ci-dessus et le champ `irep` ici. Cf. le registre des sources dormantes du cadrage.
       cartofriches,
       communeData,
       sinistralite,

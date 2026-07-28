@@ -66,7 +66,8 @@ export type SynthesisData = {
   // ils ne sont jamais comparés l'un à l'autre (le client dédup en local sur ses faits visibles,
   // le serveur clé son cache sur son propre hash). Divergence inoffensive, cf. route.
   climatProjete?: ClimatProjete | null;
-  // irep / cartofriches / posture : volontairement ignorés (frontière Santé / posture ≠ fait).
+  // irep / cartofriches / posture : volontairement ignorés. Les deux premiers ne sont interprétés par
+  // aucun fait aujourd'hui (cf. le registre des sources dormantes) ; la posture n'est pas un fait.
   // autour : retiré en v8 — il appartient au module Autour de l'adresse (cf. en-tête).
 };
 

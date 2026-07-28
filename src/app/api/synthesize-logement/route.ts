@@ -44,8 +44,7 @@ le lecteur n'aurait pas rapprochés ; RENONCER à tout le reste.
 CE QUI FAIT LA VALEUR : LE DÉTAIL PRÉCIS, DIT SIMPLEMENT
 Le lecteur doit sentir que quelqu'un a vraiment regardé SON logement, pas un logement type. Cela
 se joue dans le détail concret et vérifiable de ce bien : la façon dont l'air y circule, ce que
-ses murs font de la chaleur, le sol de sa parcelle, ce qui pousse à quelques dizaines de mètres,
-son année, sa surface. N'effacez pas ces détails, ce sont eux qui prouvent. Mais le vocabulaire
+ses murs font de la chaleur, le sol de sa parcelle, son année, sa surface. N'effacez pas ces détails, ce sont eux qui prouvent. Mais le vocabulaire
 d'EXPERT n'apparaît JAMAIS, même suivi d'une explication : vous le REMPLACEZ par son sens en
 langage courant. On ne lit pas « retrait-gonflement des argiles » mais « le sol argileux, qui
 gonfle quand il pleut et se rétracte quand il fait sec » ; pas « inertie légère » mais « des murs
@@ -228,8 +227,9 @@ jamais le couronner ni prendre sa place en clôture.
 
 RÈGLES DE FOND
 - N'introduisez AUCUN fait qui ne soit pas dans le payload. Aucune donnée nouvelle, aucun chiffre
-  inventé, aucune inférence sur la valeur ou la mobilité. La pollution, les sols pollués,
-  l'industrie et le radon relèvent d'une autre lecture, jamais celle-ci : n'en parlez pas.
+  inventé, aucune inférence sur la valeur ou la mobilité. Ne déduisez AUCUNE exposition aux sols
+  pollués, aux activités industrielles ou au radon à partir des données de ce logement : ces
+  dimensions ne se concluent que sur un fait structuré et suffisamment localisé, qui n'est pas ici.
 - Le nom de la commune est une donnée de localisation, jamais une source de connaissance. Vous ne
   mobilisez rien de ce que vous croyez savoir de cette ville (son climat, son histoire, sa
   géographie, son tissu urbain, la fréquence de ses étés chauds). « Une commune où les étés sont

@@ -39,7 +39,8 @@ const MVT_FAMILY = /mouvement de terrain|glissement|[ée]boulement|chute[s]? de 
 //    serait un doublon pour le lecteur. Raison toujours valable.
 const DEJA_MONTRE_AILLEURS = /s[ée]ism|argile|tassement|inondation/i;
 
-// 2. RENVOYÉ AU MODULE SANTÉ — qui n'existe plus (passage à trois modules : Commune, Autour, Logement).
+// 2. HORS DU PÉRIMÈTRE D'UNE LECTURE D'ADRESSE (ces aléas renvoyaient à un module Santé, supprimé le
+//    29/07/2026 avec le passage à trois modules : Commune, Autour de l'adresse, Logement).
 //    Ces aléas restent écartés ICI parce qu'ils sont vrais au grain COMMUNE et que ce résidu est celui
 //    d'un module d'ADRESSE : les y afficher vendrait de la commune pour de l'adresse.
 //
@@ -76,7 +77,8 @@ export function isMvtFlagged(labels: string[] | null | undefined): boolean {
 
 /**
  * Aléas GASPAR communaux SANS source fine, pour la phrase de résidu. Reprend le filtre historique
- * (frontière Santé, sous-détails « Par … », séisme/argile, relabel submersion marine), exclut la
+ * (aléas hors périmètre d'adresse, sous-détails « Par … », séisme/argile, relabel submersion
+ * marine), exclut la
  * famille mouvement de terrain et les cavités (portées au grain point), et l'inondation (doublon :
  * déjà portée par le PPRN et la sinistralité ONRN). Le mouvement de terrain est RÉINJECTÉ par
  * `buildPointHazards` quand la commune est signalée sans événement au point.
