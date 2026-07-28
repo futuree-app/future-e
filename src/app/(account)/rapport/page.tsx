@@ -38,7 +38,7 @@ const MODULE_ICONS: Record<string, string> = {
 
 const MODULE_BENEFIT: Record<string, string> = {
   autour: "Commerces, école, gare, espace vert, chaleur du quartier, place de la voiture. Ce qui se mesure autour du point, et pas à l'échelle de la commune.",
-  logement: "Diagnostic, confort d'été, sol de la parcelle, sinistres indemnisés. Ce que ce logement précis absorbe ou laisse passer.",
+  logement: "Diagnostic, confort d'été, sol de la parcelle, sinistres indemnisés. Et, pour finir, ce qu'il reste à demander avant de décider.",
 };
 
 export default async function RapportPage() {

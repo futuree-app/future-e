@@ -49,12 +49,17 @@ const COPY: Record<CheckoutProductSlug, {
     ],
     timeline: [
       { n: "01", title: "Paiement sécurisé", body: "Stripe, moins de 2 minutes, carte bancaire ou Apple/Google Pay." },
-      { n: "02", title: "Génération du rapport interactif", body: "Votre rapport interactif est produit puis envoyé par email sous 24 heures ouvrées." },
-      { n: "03", title: "Accès permanent", body: "Téléchargeable depuis votre espace, exportable en PDF, partageable en lien temporaire." },
+      // « Envoyé par email sous 24 heures ouvrées » : retiré le 29/07/2026. La phrase datait d'un
+      // produit livré à la main, en PDF. Le webhook Stripe pose les droits en base dès le paiement
+      // confirmé et les trois modules se lisent en ligne : rien n'est produit en différé, rien
+      // n'est envoyé. La promesse faisait donc attendre un acheteur qui pouvait déjà lire, et
+      // lui laissait croire qu'il achetait un document plutôt qu'un rapport interactif.
+      { n: "02", title: "Accès immédiat", body: "Vos trois modules s'ouvrent dès le paiement confirmé. Rien à attendre, rien à recevoir par email." },
+      { n: "03", title: "Accès permanent", body: "Consultable à tout moment depuis votre espace, exportable en PDF, partageable en lien temporaire." },
     ],
     faqs: [
       { q: "Le rapport interactif est-il vraiment personnalisé ?", a: "Oui. Chaque module est construit à partir de votre commune, votre profil de risque et vos réponses au wizard, et les deux modules les plus fins descendent à l'adresse que vous analysez. Deux foyers d'une même ville obtiennent deux rapports différents." },
-      { q: "Combien de temps avant de le recevoir ?", a: "Sous 24 heures ouvrées. La plupart des rapports sont produits en quelques minutes ; nous gardons 24 h pour les périodes de forte demande." },
+      { q: "Combien de temps avant d'y accéder ?", a: "Le temps que le paiement se confirme, quelques secondes. Vos trois modules s'ouvrent dans votre espace : il n'y a rien à générer, rien à attendre par email." },
       { q: "Mes données sont-elles vendues ?", a: "Jamais. Les données issues du wizard restent dans votre espace. Voir notre politique RGPD." },
     ],
   },

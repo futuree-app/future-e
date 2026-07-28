@@ -21,9 +21,9 @@ const MODULE_ICONS: Record<string, string> = {
 
 // Le bénéfice dit ce que le module TRANCHE, pas ce qu'il contient.
 const MODULE_BENEFIT: Record<string, string> = {
-  quartier: "Ce que devient cette commune : chaleur, eau, feux, trajectoire de population. La lecture d'ensemble avant tout le reste.",
+  quartier: "Ce qui structure la vie dans cette commune et ce qui la transforme : services, population, espaces naturels, trajectoire du climat. La lecture d'ensemble avant tout le reste.",
   autour: "Ce qui se trouve à proximité et ce qui varie d'un secteur à l'autre : commerces, école, gare, espace vert, chaleur du quartier, place de la voiture.",
-  logement: "Ce que ce logement précis absorbe ou laisse passer : diagnostic, confort d'été, sol de la parcelle, sinistres indemnisés.",
+  logement: "Ce que son diagnostic établit, ce à quoi son adresse l'expose, et ce qu'il reste à demander avant de signer : la lecture se termine par ce qu'il faut vérifier.",
 };
 
 export default async function ComptePage() {

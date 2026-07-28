@@ -27,11 +27,16 @@
 // (`terrain_observations.module`), dans les URLs (/rapport/quartier) et dans l'analytics déjà
 // collectée : le renommer casserait des données réelles pour un gain purement cosmétique.
 export const PRODUCT_MODULES = [
+  // NE PAS RÉDUIRE TERRITOIRE AU CLIMAT. La promesse a dérivé une première fois vers « ce qui se
+  // réchauffe, ce qui s'assèche » alors que le module rend aussi l'accès aux services, la
+  // trajectoire de population, les résidences secondaires, les logements inoccupés, les espaces
+  // naturels et le boisement. Une promesse plus étroite que le contenu fait passer un rapport de
+  // territoire pour un bulletin de risques.
   {
     id: "quartier",
     name: "Territoire",
-    summary: "Ce que la commune devient autour de vous.",
-    signals: ["Canicule", "Eau", "Feux", "Trajectoire"],
+    summary: "Ce qui structure la vie dans cette commune, et ce qui la transforme.",
+    signals: ["Services", "Population", "Nature", "Climat et risques"],
   },
   {
     id: "autour",
@@ -39,11 +44,15 @@ export const PRODUCT_MODULES = [
     summary: "Ce qui se trouve et se mesure à proximité.",
     signals: ["Services", "Nature", "Îlot de chaleur", "Ménages et voiture"],
   },
+  // LOGEMENT SE VEND PAR SA SORTIE, PAS PAR SON CONTENU. Le module se termine sur « à vérifier
+  // avant de décider » — des gestes, jamais des cases — et c'est l'élément le plus actionnable du
+  // produit. Le résumer à ce que le bâti « absorbe ou protège » demandait au lecteur un effort
+  // d'interprétation et taisait la seule chose qui change sa journée.
   {
     id: "logement",
     name: "Logement",
-    summary: "Ce que ce logement absorbe, perd ou protège.",
-    signals: ["DPE", "Confort d'été", "Risques du bâti", "Sinistralité"],
+    summary: "Ce que ce logement établit, ce qui l'expose, et ce qu'il reste à demander.",
+    signals: ["Diagnostic", "Confort d'été", "Risques du bâti", "À vérifier"],
   },
 ] as const;
 
