@@ -38,6 +38,22 @@ spec fait foi.
 
 **Vérif de référence :** `npx tsc --noEmit` · `node --test src/lib/<fichier>.test.ts`
 
+## Ordre d'exécution réel (décidé le 29/07, à l'ouverture des travaux)
+
+**Il n'existe qu'une seule base Supabase, et c'est la production.** La Task 1 ne peut donc pas
+appliquer la migration : elle renommerait `logement` sous les pieds du code déployé, qui
+l'interroge encore. L'ordre est :
+
+1. **Task 1** : écrire le fichier de migration, **sans l'exécuter**. Commit.
+2. **Tasks 2 à 7** : tout le code, vérifié par `tsc`, `npm run build` et les tests purs, qui ne
+   touchent pas la base.
+3. **Task 9** : relever le compte de lignes, appliquer la migration, fusionner, pousser.
+4. **Task 8** : la vérification RLS, qui exige la table nouvelle, donc **après** la migration. Les
+   dossiers qu'elle crée sont administratifs et supprimés en fin de script.
+
+La fenêtre d'incompatibilité (migration appliquée, ancien code encore servi) dure le temps d'un
+déploiement Vercel. Elle est voulue et courte. Aucun compte n'a payé.
+
 **AUCUN PUSH AVANT LA TASK 9.** Le projet déploie en production sur push `main`, sans PR
 (`docs/handoff/CURRENT.md`, « Pièges »). Or plusieurs tasks se terminent volontairement sur un
 `tsc --noEmit` en erreur, réparé par la suivante. Committer localement est prévu ; **pousser
@@ -181,12 +197,14 @@ revoke insert, update, delete on public.address_dossiers from authenticated;
 commit;
 ```
 
-- [ ] **Step 2: Appliquer sur la base de développement**
+- [ ] **Step 2: NE PAS l'appliquer**
 
-Coller le contenu dans l'éditeur SQL Supabase du projet de développement, exécuter.
-Attendu : `Success. No rows returned`.
+Il n'existe qu'une seule base, et c'est la production. L'appliquer maintenant renommerait la table
+sous les pieds du code déployé. L'application se fait à la Task 9, juste avant le merge.
 
-- [ ] **Step 3: Vérifier la forme obtenue**
+Les requêtes de vérification ci-dessous s'exécutent donc **à ce moment-là**, pas maintenant.
+
+- [ ] **Step 3: Vérifier la forme obtenue (à la Task 9)**
 
 ```sql
 select column_name, data_type, is_nullable
