@@ -54,6 +54,7 @@ jamais du diagnostic.
 | `posture`, `snapshot`, `dpe_selection_status`, `selected_dpe_*`, `synthesis_*`, `updated_at` | L'artefact, inchangé. |
 | `stripe_payment_intent_id text unique` | **Provenance**, écrite par le service role. Un index unique Postgres accepte plusieurs `NULL`, donc les dossiers administratifs coexistent. |
 | `amount_paid_cents int`, `purchased_at timestamptz` | Provenance, service role. |
+| `access_revoked_at timestamptz` | **Retire l'accès sans détruire l'artefact.** Service role. Voir « Le droit est la ligne ». |
 
 **Aucune unicité sur `(user_id, ban_id)`** : deux appartements du même immeuble sont deux dossiers
 légitimes. Le doublon involontaire se traite en interface (voir « Le panneau de choix »), jamais par
@@ -65,7 +66,10 @@ une impossibilité inscrite dans la clé.
 - `status` à états multiples : dupliquerait `dpe_selection_status` et la présence de
   `synthesis_text`. Deux vérités qui divergent est exactement la classe de défaut traquée le 29/07.
 - `entitlement_status` : voir « Le droit est la ligne ». Une colonne de droit dans une table que le
-  client peut écrire est un self-service de droits.
+  client peut écrire est un self-service de droits. `access_revoked_at` n'est pas son retour déguisé :
+  un horodatage binaire écrit par le seul service role répond à un événement réel, là où un statut à
+  plusieurs valeurs rejouerait le cycle de vie que `dpe_selection_status` et `synthesis_text` portent
+  déjà.
 - `territory_credit_payment_id` : la remise n'est pas un crédit consommable, c'est un état calculé.
   Voir « Tarif ».
 - `access_source` : `stripe_payment_intent_id IS NULL` suffit tant que les dossiers administratifs
@@ -81,10 +85,16 @@ la **provenance** du droit, elles ne le définissent pas : sinon un dossier cré
 n'ouvrirait rien sans fabriquer un faux paiement.
 
 ```
-Ligne existante + user_id propriétaire   → accès au dossier
-stripe_payment_intent_id renseigné       → dossier acheté
-stripe_payment_intent_id NULL            → dossier administratif (tests, démonstration)
+Ligne existante + user_id propriétaire + access_revoked_at IS NULL → accès au dossier
+stripe_payment_intent_id renseigné                                → dossier acheté
+stripe_payment_intent_id NULL                                     → dossier administratif
 ```
+
+**`access_revoked_at timestamptz null`** est la seule condition qui s'ajoute à l'existence de la
+ligne. Sans elle, la seule façon de retirer un accès serait de **détruire le dossier**, donc son
+snapshot, son DPE, sa synthèse et la trace de la transaction. Ce n'est pas un `status` polymorphe :
+c'est un booléen daté qui répond à des cas réels (impayé après contestation, dossier créé par erreur,
+révocation administrative). Elle n'est jamais écrite par l'utilisateur.
 
 `report_grants` reste **strictement territorial** et n'est pas modifié. Aucun `dossier_id` nullable
 n'y est ajouté : ce serait une table polymorphe dont le nom ne décrirait plus le contenu, avec des
@@ -103,15 +113,29 @@ Autour / Logement            = le dossier précis
 - `canAnalyzeCommune()` **disparaît** avec le droit communal qu'elle relayait.
 - `canAccessTerritory(userId, insee)` la remplace : un grant, ou un dossier dans cette commune.
 - La **résidence n'ouvre plus rien par elle-même**. Elle garde son rôle de commune affichée par
-  défaut. Un compte gratuit voit le rapport partiel de sa commune, comme partout ailleurs.
+  défaut.
+
+**Ce n'est pas une régression, et il faut le dire précisément parce que la phrase se lit mal.** Il
+n'existe aujourd'hui aucun accès gratuit au Territoire **complet** de la résidence : `/rapport`
+s'affiche pour un compte gratuit en version **partielle**, pilotée par `fullReport =
+canAccessCompleteReport(account)` (`rapport/page.tsx:46`, une dizaine de branches, titre « Rapport
+interactif partiel », `HorizonBar locked`, dossier de décision absent). Le rapport partiel n'est pas
+un droit, c'est le mode par défaut : il reste rendu quand `canAccessTerritory` répond faux. Un compte
+gratuit voit donc exactement ce qu'il voit aujourd'hui.
+
+Ce que `canAnalyzeCommune()` accordait réellement à la résidence était plus étroit : un compte **qui
+avait déjà payé** pouvait analyser des adresses de sa commune sans avoir acheté de grant pour elle.
+Une dispense de second achat, jamais un accès gratuit.
 
 Un dossier acheté ne crée **pas** de `report_grant` dérivé. Le droit territorial se déduit de
-l'existence du dossier, ce qui le fait disparaître proprement si le dossier est révoqué, sans laisser
-un grant orphelin derrière lui.
+l'existence du dossier, donc `access_revoked_at` le retire sans laisser un grant orphelin derrière
+lui et sans toucher à l'artefact.
 
-**Piège PLM** : la comparaison de communes passe par `communeParent()` des deux côtés
+**Piège PLM** : la **comparaison** de communes passe par `communeParent()` des deux côtés
 (`src/lib/plm.ts`). Une adresse lyonnaise est géocodée sur l'arrondissement (`691xx`), la commune est
-stockée sur `69123`.
+stockée sur `69123`. `communeParent()` sert au calcul des droits et du prix ; la colonne `insee` de la
+ligne **garde le code local de l'arrondissement**, dont dépendent les données fines. Ne jamais
+normaliser la colonne elle-même.
 
 ### Qui écrit, et comment
 
@@ -129,10 +153,15 @@ demanderait la même vigilance à chaque colonne ajoutée. On passe donc par le 
 unique :
 
 ```ts
-requireOwnedAddressDossier(dossierId)
-// authentifie, vérifie la propriété, retourne le client service role
-// toute écriture cible id = dossierId AND user_id = currentUser.id
+updateOwnedAddressDossier(dossierId, patch: AddressDossierPatch): Promise<void>
+// authentifie, vérifie la propriété et access_revoked_at, puis écrit en service role
+// la clause .eq("id", dossierId).eq("user_id", user.id) vit DANS le helper
 ```
+
+**Le helper ne rend jamais le client service role à l'appelant.** Une fonction qui vérifie la
+propriété du dossier A puis remet un client tout-puissant laisse une route future écrire le dossier B
+par erreur. `AddressDossierPatch` est un type fermé sur les seules colonnes d'artefact : ni `id`, ni
+`user_id`, ni `ban_id`, ni `insee`, ni aucune colonne de paiement ou de révocation.
 
 Les trois routes passent par lui, et par lui seul. `selected_dpe_id` n'est jamais accepté
 aveuglément : la route vérifie que le diagnostic figure parmi les candidats retrouvés pour l'adresse.
@@ -142,8 +171,10 @@ aveuglément : la route vérifie que le diagnostic figure parmi les candidats re
 Deux créateurs, et deux seulement :
 
 1. **Le webhook Stripe**, en service role, après paiement (spec suivante).
-2. **`POST /api/admin/dossier`**, réservée aux adresses listées dans `FUTUREE_ADMIN_EMAILS`,
-   vérifiées contre l'e-mail de la session. Elle crée la ligne en service role avec
+2. **`POST /api/admin/dossier`**, protégée par **deux verrous indépendants** :
+   `ENABLE_ADMIN_DOSSIER_CREATION` doit valoir `true`, **et** l'e-mail de la session doit figurer
+   dans `FUTUREE_ADMIN_EMAILS`. Le premier est absent en production par défaut, donc la route y
+   répond 404 quelle que soit la liste. Elle crée la ligne en service role avec
    `stripe_payment_intent_id` à `NULL`, exactement comme le webhook la créera. `DELETE` sur la même
    route pour nettoyer. Un bouton visible pour ce seul compte, sur l'écran de saisie d'adresse.
 
@@ -214,7 +245,14 @@ fonctions de lecture :
   la lecture, ne stocke rien, ne se consomme pas. Tous les biens d'une commune déjà payée bénéficient
   du tarif d'approfondissement, pas seulement le premier.
 - Elle est vraie pour : un paiement direct de 14 € sur cette commune, un `report_grant` de source
-  `pack_decision`, un dossier antérieur dans cette commune.
+  `pack_decision`, un **dossier antérieur payé** dans cette commune
+  (`stripe_payment_intent_id is not null and access_revoked_at is null`).
+- **Un dossier administratif n'est jamais une acquisition.** Il ouvre Territoire pour les tests, il
+  ne donne aucun tarif d'approfondissement. Sans cette condition, créer un dossier de test à Nantes
+  offrirait la remise sur tous les biens nantais alors que rien n'a été encaissé.
+- Le cas `pack_decision` est un **arbitrage du porteur du 29/07** : un compte qui a payé 39 € pour
+  comparer trois communes possède le territoire des trois. Motif retenu, le même qui a fait tomber le
+  plein tarif du deuxième dossier. À réaffirmer dans la spec de tarification, jamais à re-déduire.
 - Elle est **fausse pour la seule résidence** : un accès offert n'est pas une acquisition. Sinon
   `home_insee_code`, qui est déclaratif, deviendrait un bon de réduction.
 - Elle ne se calcule **jamais** sur la simple existence d'un `report_grant` sans regarder ce qui a été
@@ -253,15 +291,35 @@ qu'au premier achat.
 
 ## Migration `supabase/25_address_dossiers.sql`
 
-1. **Purge des lignes de test** de `logement`. Aucune ne correspond à un achat. Les garder rendrait
-   `stripe_payment_intent_id IS NULL` ambigu entre « dossier administratif » et « résidu ».
-2. `alter table logement rename to address_dossiers`.
-3. `logement_id` renommé `ban_id` ; la clé primaire tombe ; `id uuid primary key default
+1. `alter table logement rename to address_dossiers`.
+2. `logement_id` renommé `ban_id` ; la clé primaire tombe ; `id uuid primary key default
    gen_random_uuid()` la remplace ; index sur `(user_id, ban_id)`, **sans unicité**.
-4. Colonnes de provenance : `stripe_payment_intent_id text unique`, `amount_paid_cents int`,
-   `purchased_at timestamptz`.
-5. Policies : `insert_own` et `update_own` supprimées, `select_own` conservée,
-   `revoke insert, update on address_dossiers from authenticated`.
+3. Colonnes de provenance et de révocation : `stripe_payment_intent_id text unique`,
+   `amount_paid_cents int`, `purchased_at timestamptz`, `access_revoked_at timestamptz`.
+4. **Purge, après l'ajout des colonnes et jamais avant** :
+   `delete from address_dossiers where stripe_payment_intent_id is null`.
+
+   L'ordre n'est pas cosmétique. Une purge inconditionnelle écrite aujourd'hui pour des lignes de
+   test effacerait des dossiers payés le jour où quelqu'un rejoue la migration sur une base devenue
+   réelle. Conditionnée à l'absence de paiement, elle **ne peut pas** détruire un achat, quel que
+   soit le moment où elle s'exécute. Motif de la purge : garder les résidus rendrait
+   `stripe_payment_intent_id IS NULL` ambigu entre « dossier administratif » et « donnée de test ».
+5. Contrainte de cohérence des colonnes de provenance, qui formalise les deux seuls états admis :
+
+   ```sql
+   check (
+     (stripe_payment_intent_id is null and amount_paid_cents is null and purchased_at is null)
+     or
+     (stripe_payment_intent_id is not null and amount_paid_cents is not null
+      and purchased_at is not null and amount_paid_cents >= 0)
+   )
+   ```
+
+   Le jour où un cadeau ou une gratuité promotionnelle apparaît, le modèle s'étend sciemment.
+6. Policies : `insert_own` et `update_own` supprimées, `select_own` conservée,
+   `revoke insert, update, delete on address_dossiers from authenticated`. **`delete` est révoqué
+   explicitement** bien qu'aucune policy `delete_own` n'existe : une interdiction implicite ne se
+   relit pas. La suppression appartient au service role et à l'outil administratif.
 
 Ordre du code, par dépendance : `logement-store.ts` → `address-dossier-store.ts` ;
 `requireOwnedAddressDossier` ; les trois routes d'écriture ; `access.ts` et `active-territory.ts` ;
@@ -279,12 +337,18 @@ visent des faits :
 - **Un client authentifié ne peut ni insérer une ligne, ni mettre à jour une colonne**, éprouvé
   **contre la base réelle avec un JWT utilisateur**. Un mock de notre propre logique ne dirait rien
   d'une policy.
-- `hasPaidTerritory` répond **faux** pour la seule résidence, **vrai** pour un `pack_decision`, et
-  **vrai** pour un dossier antérieur dans la commune.
-- Deux insertions portant le même `stripe_payment_intent_id` n'en produisent qu'une. C'est le filet
-  que la disparition de `unique (user_id, insee)` retire : le webhook n'a **aucune idempotence
-  propre**, toute sa protection contre un événement rejoué vient des contraintes de table
-  (`webhook/route.ts:59-134`).
+- `hasPaidTerritory` répond **faux** pour la seule résidence, **faux** pour un dossier administratif
+  dans la commune, **vrai** pour un `pack_decision`, **vrai** pour un dossier antérieur payé.
+- Un dossier dont `access_revoked_at` est renseigné n'ouvre rien et ne compte pas comme acquisition.
+- **La base refuse** une seconde ligne portant le même `stripe_payment_intent_id`. C'est un invariant
+  de schéma, et c'est le filet que la disparition de `unique (user_id, insee)` retire : le webhook n'a
+  **aucune idempotence propre**, toute sa protection contre un événement rejoué vient des contraintes
+  de table (`webhook/route.ts:59-134`).
+
+  Cette contrainte garantit qu'un doublon **échoue**, elle ne rend pas le traitement idempotent. Que
+  le webhook rejoué **retrouve le dossier existant et réponde en succès** relève du `ON CONFLICT`, et
+  appartient à la spec du webhook. Confondre les deux ferait croire le replay traité alors qu'il
+  lèverait une erreur à chaque fois.
 - Le repli par défaut n'ouvre rien quand deux dossiers existent.
 
 **Piège** : `tsconfig.json` exclut `**/*.test.ts` du typecheck et eslint les ignore. Un lint vert ne
