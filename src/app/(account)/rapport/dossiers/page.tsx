@@ -4,6 +4,8 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { requireCurrentUser } from "@/lib/user-account";
 import { listDossiers } from "@/lib/address-dossier-store";
+import { isAdminDossierCreator } from "@/lib/server/admin-dossier";
+import { AdminDossierCreator } from "@/components/report/AdminDossierCreator";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Choisir parmi les dossiers qu'on possède.
@@ -23,6 +25,7 @@ const DATE_FMT = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long
 export default async function RapportDossiersPage() {
   const { supabase, user } = await requireCurrentUser();
   const dossiers = await listDossiers(supabase, user.id);
+  const canCreate = isAdminDossierCreator(user.email);
 
   return (
     <div
@@ -39,6 +42,8 @@ export default async function RapportDossiersPage() {
         >
           {dossiers.length > 1 ? "Quel bien voulez-vous ouvrir ?" : "Le bien que vous avez analysé."}
         </h1>
+
+        {canCreate && <AdminDossierCreator />}
 
         {dossiers.length === 0 ? (
           <div className="glass rounded-xl p-8">
