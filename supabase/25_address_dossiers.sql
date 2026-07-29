@@ -76,14 +76,14 @@ create unique index if not exists address_dossiers_payment_intent_key
 --
 -- Le garde-fou ci-dessous protège du vrai risque : exécuter ce fichier sur la
 -- mauvaise base, ou sur un état devenu différent de celui qu'on a inspecté.
--- Remplacer <NOMBRE_ATTENDU> par le compte relevé juste avant, avec :
---   select count(*) from public.logement;
+-- Compte relevé en production le 29/07/2026, juste avant application : 24 lignes,
+-- UN SEUL compte (celui du porteur), du 03/07 au 26/07. Aucun achat n'existe.
 do $$
 declare n integer;
 begin
   select count(*) into n from public.address_dossiers;
-  if n <> <NOMBRE_ATTENDU> then
-    raise exception 'Migration annulée : % lignes trouvées, % attendues. Mauvaise base ?', n, <NOMBRE_ATTENDU>;
+  if n <> 24 then
+    raise exception 'Migration annulée : % lignes trouvées, % attendues. Mauvaise base ?', n, 24;
   end if;
 end $$;
 
