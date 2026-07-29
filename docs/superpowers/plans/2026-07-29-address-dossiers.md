@@ -38,9 +38,18 @@ spec fait foi.
 
 **Vérif de référence :** `npx tsc --noEmit` · `node --test src/lib/<fichier>.test.ts`
 
+**AUCUN PUSH AVANT LA TASK 9.** Le projet déploie en production sur push `main`, sans PR
+(`docs/handoff/CURRENT.md`, « Pièges »). Or plusieurs tasks se terminent volontairement sur un
+`tsc --noEmit` en erreur, réparé par la suivante. Committer localement est prévu ; **pousser
+mettrait un build cassé en production**. Travailler sur une branche ou un worktree, et ne
+fusionner qu'une fois les Tasks 1 à 8 vertes.
+
 **Interruption de service assumée :** à partir de la Task 4, personne n'ouvre Autour ni Logement par
 l'application tant que la Task 7 n'est pas livrée (aucun dossier n'existe et le flag global ne
 déverrouille plus rien). Sans conséquence, aucun compte n'a payé.
+
+**La migration est une coupure franche :** l'ancien code interroge `logement`, le nouveau
+`address_dossiers`. Aucun ordre de déploiement n'évite une courte incompatibilité, d'où la Task 9.
 
 ---
 
@@ -96,12 +105,17 @@ create index if not exists address_dossiers_user_insee_idx
 alter index if exists public.logement_user_id_idx
   rename to address_dossiers_user_id_idx;
 
--- ── 3. Provenance et révocation (service role uniquement) ──────────────────
+-- ── 3. Provenance, révocation, date de naissance ───────────────────────────
+-- created_at n'existait pas (17/19/20/21/22 ne portent qu'updated_at). Le panneau de
+-- choix doit dire « créé le … » pour distinguer deux dossiers d'un même immeuble :
+-- updated_at bouge à chaque écriture technique, purchased_at est nul pour un dossier
+-- administratif. Un écrivain, un lecteur, un sens.
 alter table public.address_dossiers
   add column if not exists stripe_payment_intent_id text,
   add column if not exists amount_paid_cents        int,
   add column if not exists purchased_at             timestamptz,
-  add column if not exists access_revoked_at        timestamptz;
+  add column if not exists access_revoked_at        timestamptz,
+  add column if not exists created_at               timestamptz not null default now();
 
 -- Remplace le filet que la disparition de unique (user_id, insee) retire :
 -- le webhook n'a AUCUNE idempotence propre, toute sa protection contre un
@@ -109,11 +123,25 @@ alter table public.address_dossiers
 create unique index if not exists address_dossiers_payment_intent_key
   on public.address_dossiers (stripe_payment_intent_id);
 
--- ── 4. Purge, APRÈS l'ajout des colonnes et jamais avant ───────────────────
--- L'ordre n'est pas cosmétique. Une purge inconditionnelle écrite aujourd'hui
--- pour des lignes de test effacerait des dossiers payés le jour où quelqu'un
--- rejoue cette migration sur une base devenue réelle. Conditionnée à l'absence
--- de paiement, elle ne PEUT PAS détruire un achat.
+-- ── 4. Purge des lignes de test ────────────────────────────────────────────
+-- HONNÊTETÉ SUR CE QUI PROTÈGE QUOI. La condition `stripe_payment_intent_id is null`
+-- ne démontre rien ici : la colonne vient d'être créée, donc TOUTES les lignes
+-- antérieures la portent à null, quelle qu'ait été leur histoire. Ces lignes sont
+-- supprimées parce qu'elles ont été VÉRIFIÉES comme données de test avant la
+-- migration, pas parce que le SQL le prouverait.
+--
+-- Le garde-fou ci-dessous protège du vrai risque : exécuter ce fichier sur la
+-- mauvaise base. Remplacer <NOMBRE_ATTENDU> par le compte relevé juste avant, avec
+--   select count(*) from public.address_dossiers;
+do $$
+declare n integer;
+begin
+  select count(*) into n from public.address_dossiers;
+  if n <> <NOMBRE_ATTENDU> then
+    raise exception 'Migration annulée : % lignes trouvées, % attendues. Mauvaise base ?', n, <NOMBRE_ATTENDU>;
+  end if;
+end $$;
+
 delete from public.address_dossiers where stripe_payment_intent_id is null;
 
 -- ── 5. Cohérence : deux états admis, administratif ou acheté ───────────────
@@ -139,8 +167,12 @@ drop policy if exists logement_insert_own on public.address_dossiers;
 drop policy if exists logement_update_own on public.address_dossiers;
 drop policy if exists logement_select_own on public.address_dossiers;
 
+-- access_revoked_at est dans la POLICY, pas seulement dans les requêtes applicatives.
+-- Sans cette clause, un dossier révoqué resterait lisible par son propriétaire via
+-- PostgREST avec son JWT : ce serait une révocation d'interface, jamais de droit.
 create policy address_dossiers_select_own
-  on public.address_dossiers for select using (auth.uid() = user_id);
+  on public.address_dossiers for select
+  using (auth.uid() = user_id and access_revoked_at is null);
 
 -- delete est révoqué explicitement bien qu'aucune policy delete_own n'existe :
 -- une interdiction implicite ne se relit pas.
@@ -191,10 +223,10 @@ git commit -m "Le dossier devient un objet : uuid en identité, ban_id sans unic
 
 **Interfaces:**
 - Produces:
-  - `type AddressDossierRow` (ex-`LogementRow`, avec `id`, `ban_id`, colonnes de provenance)
+  - `type AddressDossierRow` (ex-`LogementRow`, avec `id`, `ban_id`, `created_at`, colonnes de provenance)
   - `pickSoleDossier(rows: AddressDossierRow[]): AddressDossierRow | null`
   - `getDossier(sb, userId, dossierId): Promise<AddressDossierRow | null>`
-  - `listDossiersForBan(sb, userId, banId): Promise<AddressDossierRow[]>`
+  - `listDossiers(sb, userId): Promise<AddressDossierRow[]>`
   - `getSoleDossier(sb, userId): Promise<AddressDossierRow | null>`
   - `SOURCES_VERSION`, `needsRecompute`, `buildDpeSelectionFields` (inchangés)
 
@@ -213,7 +245,7 @@ function row(id: string, updatedAt: string): AddressDossierRow {
     city: "Nantes", postcode: "44000", latitude: 47.2, longitude: -1.5,
     parcel_code: null, posture: "residence", snapshot: null,
     dpe_selection_status: "pending", selected_dpe_id: null, selected_dpe_snapshot: null,
-    selected_dpe_at: null, updated_at: updatedAt,
+    selected_dpe_at: null, created_at: "2026-07-18T08:00:00Z", updated_at: updatedAt,
     synthesis_text: null, synthesis_fact_hash: null, synthesis_generated_at: null,
     stripe_payment_intent_id: null, amount_paid_cents: null, purchased_at: null,
     access_revoked_at: null,
@@ -273,6 +305,10 @@ export type AddressDossierRow = {
   selected_dpe_id: string | null;
   selected_dpe_snapshot: DpeRecord | null;
   selected_dpe_at: string | null;
+  // Date de NAISSANCE du dossier, ce que le sélecteur affiche pour distinguer deux biens d'un
+  // même immeuble. updated_at bouge à chaque écriture technique, purchased_at est nul pour un
+  // dossier administratif : ni l'un ni l'autre ne répond à « lequel ai-je ouvert en premier ? ».
+  created_at: string;
   updated_at: string;
   synthesis_text: string | null;
   synthesis_fact_hash: string | null;
@@ -296,46 +332,55 @@ export function pickSoleDossier(rows: AddressDossierRow[]): AddressDossierRow | 
   return rows.length === 1 ? rows[0] : null;
 }
 
+// UNE PANNE N'EST PAS UN REFUS DE DROIT. Le code actuel écrit partout `const { data } = await …`
+// puis `data ?? null` : une erreur réseau, une colonne renommée ou une requête invalide y
+// deviennent silencieusement « ce dossier ne vous appartient pas ». Sur un produit payant, ça
+// répond 403 à un acheteur légitime pendant une panne. Toutes les fonctions de ce module lèvent.
+function unwrap<T>(res: { data: T | null; error: { message: string } | null }, what: string): T | null {
+  if (res.error) throw new Error(`address_dossiers ${what} a échoué : ${res.error.message}`);
+  return res.data;
+}
+
 export async function getDossier(
   sb: SupabaseClient, userId: string, dossierId: string,
 ): Promise<AddressDossierRow | null> {
-  const { data } = await sb
+  const res = await sb
     .from("address_dossiers")
     .select("*")
     .eq("user_id", userId)
     .eq("id", dossierId)
     .is("access_revoked_at", null)
     .maybeSingle();
-  return (data as AddressDossierRow) ?? null;
+  return unwrap(res, "getDossier") as AddressDossierRow | null;
 }
 
 // Les dossiers d'une même adresse : ce que le panneau de choix affiche quand un lecteur soumet
 // une adresse où il possède déjà quelque chose.
-export async function listDossiersForBan(
-  sb: SupabaseClient, userId: string, banId: string,
+// Les dossiers actifs du compte, les plus récemment créés d'abord. Alimente /rapport/dossiers.
+export async function listDossiers(
+  sb: SupabaseClient, userId: string,
 ): Promise<AddressDossierRow[]> {
-  const { data } = await sb
+  const res = await sb
     .from("address_dossiers")
     .select("*")
     .eq("user_id", userId)
-    .eq("ban_id", banId)
     .is("access_revoked_at", null)
-    .order("updated_at", { ascending: false });
-  return (data as AddressDossierRow[]) ?? [];
+    .order("created_at", { ascending: false });
+  return (unwrap(res, "listDossiers") as AddressDossierRow[] | null) ?? [];
 }
 
 export async function getSoleDossier(
   sb: SupabaseClient, userId: string,
 ): Promise<AddressDossierRow | null> {
   // limit(2) suffit à répondre « y en a-t-il plus d'un ? » sans tout charger.
-  const { data } = await sb
+  const res = await sb
     .from("address_dossiers")
     .select("*")
     .eq("user_id", userId)
     .is("access_revoked_at", null)
-    .order("updated_at", { ascending: false })
+    .order("created_at", { ascending: false })
     .limit(2);
-  return pickSoleDossier((data as AddressDossierRow[]) ?? []);
+  return pickSoleDossier((unwrap(res, "getSoleDossier") as AddressDossierRow[] | null) ?? []);
 }
 ```
 
@@ -373,6 +418,17 @@ git commit -m "Le store passe au dossier : uuid, ban_id, et un repli qui refuse 
 naît du webhook Stripe** (migration 12 : aucune policy d'écriture, service role uniquement), donc
 tout grant est par construction un achat. Discriminer `direct` de `pack_decision` dans le code
 graverait un débat tarifaire là où il n'y en a pas.
+
+**Cet invariant est une hypothèse sur le monde, et il faut le dire là où il se romprait.** Le jour
+où un grant promotionnel, offert ou importé apparaît, `decidePaidTerritory` deviendra faux sans
+qu'aucun type ne change. Porter donc ce commentaire au point d'écriture, dans
+`src/app/api/stripe/webhook/route.ts`, à côté de l'upsert de `report_grants` :
+
+```ts
+// Ce webhook est le SEUL écrivain de report_grants (aucune policy d'écriture côté client).
+// decidePaidTerritory() en dépend : tout grant y vaut acquisition payante. Créer un grant
+// offert ou promotionnel par un autre chemin rendrait cette règle fausse en silence.
+```
 
 Les lignes révoquées sont filtrées **à la lecture** (Task 2), elles n'atteignent jamais ces
 fonctions.
@@ -574,7 +630,7 @@ export async function loadTerritoryClaims(
   supabase: SupabaseClient,
   userId: string,
 ): Promise<TerritoryClaim[]> {
-  const [{ data: grants }, { data: dossiers }] = await Promise.all([
+  const [grantsRes, dossiersRes] = await Promise.all([
     supabase.from("report_grants").select("insee").eq("user_id", userId),
     supabase
       .from("address_dossiers")
@@ -582,6 +638,13 @@ export async function loadTerritoryClaims(
       .eq("user_id", userId)
       .is("access_revoked_at", null),
   ]);
+
+  // Les DEUX erreurs sont inspectées. Une liste vide obtenue par panne se lirait « aucun droit »,
+  // donc fermerait le Territoire d'un acheteur légitime pendant l'incident.
+  if (grantsRes.error) throw new Error(`report_grants a échoué : ${grantsRes.error.message}`);
+  if (dossiersRes.error) throw new Error(`address_dossiers a échoué : ${dossiersRes.error.message}`);
+  const { data: grants } = grantsRes;
+  const { data: dossiers } = dossiersRes;
 
   return [
     ...((grants ?? []) as { insee: string }[]).map(
@@ -744,30 +807,32 @@ git commit -m "Les routes écrivent par le dossier possédé, et le créateur im
 - Modify: `src/app/(account)/rapport/logement/page.tsx`
 - Modify: `src/app/(account)/rapport/autour/page.tsx`
 - Modify: `src/app/(account)/rapport/page.tsx:77`
-- Create: `src/components/report/DossierChoicePanel.tsx`
+- Create: `src/app/(account)/rapport/dossiers/page.tsx`
 
 **Interfaces:**
-- Consumes: `getDossier`, `getSoleDossier`, `listDossiersForBan` (Task 2), `canAccessTerritory` (Task 4)
+- Consumes: `getDossier`, `getSoleDossier`, `listDossiers` (Task 2), `canAccessTerritory` (Task 4)
 
-- [ ] **Step 1: Le panneau de choix**
+**Ce qui a été retiré de cette tâche, et pourquoi :** le panneau « vous avez déjà un dossier à
+cette adresse » **appartient à la spec de qualification**. Il suppose une adresse soumise, donc un
+`ban_id` connu, un prix calculé et un checkout, qui n'existent pas encore. L'écrire ici produirait
+un composant que rien n'appelle, avec un bouton payant qui ne mène nulle part. Ici, on livre la
+seule chose dont les modules ont besoin tout de suite : **choisir parmi les dossiers qu'on
+possède déjà**.
 
-Créer `src/components/report/DossierChoicePanel.tsx`. Il reçoit
-`dossiers: AddressDossierRow[]`, `addressLabel: string`, et `newDossierPriceLabel: string`.
+- [ ] **Step 1: La page de sélection**
 
-```tsx
-// Quand un lecteur soumet une adresse où il possède déjà un ou plusieurs dossiers, on ne décide
-// pas à sa place. Quelqu'un qui saisit volontairement la même adresse pour un AUTRE appartement
-// atterrirait sinon dans l'ancien dossier, et ne s'en apercevrait qu'après avoir changé son DPE
-// ou régénéré sa synthèse.
-//
-// Le prix du nouveau dossier est TOUJOURS calculé et passé en props, jamais écrit en dur : un
-// lecteur qui possède déjà un dossier ici possède le territoire de cette commune, donc il voit le
-// tarif d'approfondissement.
-```
+Créer `src/app/(account)/rapport/dossiers/page.tsx` : la liste des dossiers actifs du compte, via
+`listDossiers`. C'est la destination des modules quand aucun dossier n'est visé et qu'il en existe
+plusieurs.
 
-Chaque dossier est affiché avec de quoi le reconnaître : date de création, classe du DPE
-sélectionné quand il existe, sinon « logement à préciser ». « Rouvrir » est gratuit et
-visuellement dominant ; la création est explicitement payante.
+Chaque ligne porte de quoi reconnaître le bien : `address_label`, date de `created_at`, classe du
+DPE sélectionné quand il existe, sinon « logement à préciser ». Deux liens par ligne, vers
+`/rapport/logement?dossierId=…` et `/rapport/autour?dossierId=…`.
+
+**Aucun bouton payant sur cette page.** Elle ne fait que rouvrir ce qui est déjà possédé.
+
+Si la liste est vide, la page dit qu'aucun dossier n'existe encore et renvoie vers `/rapport`,
+sans jamais rediriger en silence.
 
 - [ ] **Step 2: Basculer les deux pages**
 
@@ -778,13 +843,25 @@ Le verrou `canAccessCompleteReport(account)` en tête disparaît. À la place :
 
 ```tsx
 const { dossierId } = await searchParams;
-const dossier = dossierId
-  ? await getDossier(supabase, user.id, dossierId)
-  : await getSoleDossier(supabase, user.id);
 
-// Le droit EST la ligne. Pas de dossier accessible, pas de module.
-if (!dossier) redirect("/rapport");
+if (dossierId) {
+  const dossier = await getDossier(supabase, user.id, dossierId);
+  // Le droit EST la ligne. Pas de dossier accessible, pas de module.
+  if (!dossier) redirect("/rapport");
+  // … rendu du module sur ce dossier
+}
+
+// Aucun dossier visé : le repli ne s'applique QU'À un dossier unique.
+const sole = await getSoleDossier(supabase, user.id);
+if (sole) redirect(`/rapport/logement?dossierId=${encodeURIComponent(sole.id)}`);
+
+// Zéro dossier, ou plusieurs. Dans les deux cas on ne devine pas : la page de sélection
+// répond « lequel ? » quand il y en a plusieurs, et « aucun encore » quand il n'y en a pas.
+redirect("/rapport/dossiers");
 ```
+
+Rediriger vers `?dossierId=` plutôt que rendre le dossier unique en place garde une seule forme
+d'URL : celle qu'on peut recharger, mettre en favori et relire dans les journaux.
 
 Le repli reste soumis aux mêmes conditions de rehydratation qu'aujourd'hui (`city` + `postcode`
 pour le re-fetch Géorisques ; en plus, sur `/rapport/logement`, un `dpe_selection_status` terminal).
@@ -800,7 +877,7 @@ Run: `npm run build` → attendu : succès.
 - [ ] **Step 4: Commit**
 
 ```bash
-git add -u "src/app/(account)/rapport" && git add src/components/report/DossierChoicePanel.tsx
+git add -u "src/app/(account)/rapport" && git add "src/app/(account)/rapport/dossiers/page.tsx"
 git commit -m "Deux dossiers au même immeuble posent une question au lieu d'en ouvrir un au hasard"
 ```
 
@@ -842,6 +919,16 @@ Si le verrou refuse : `new Response(null, { status: 404 })`, jamais un 403 (un 4
 l'existence de la route). Sinon, insertion en service role avec les colonnes de provenance
 **laissées nulles**, ce que la contrainte `address_dossiers_provenance_ck` impose de toute façon.
 La réponse porte le `dossierId` créé.
+
+Le `DELETE` filtre sur **deux** conditions, jamais sur le seul `id` :
+
+```ts
+// Le service role ignore la RLS : sans ces deux filtres, l'outil de nettoyage pourrait détruire
+// un dossier PAYÉ (le tien, le jour où tu en auras un) ou celui de quelqu'un d'autre.
+.eq("id", dossierId)
+.eq("user_id", user.id)
+.is("stripe_payment_intent_id", null)
+```
 
 - [ ] **Step 2: Le bouton**
 
@@ -885,24 +972,40 @@ tests. Une policy ne se vérifie que contre la base, avec un vrai JWT utilisateu
 
 - [ ] **Step 1: Écrire le script**
 
-Il prend en argument l'e-mail et le mot de passe d'un compte de test, se connecte avec la clé
-**anon** (jamais la service role), et tente quatre écritures qui doivent **toutes** échouer :
+Il lit ses identifiants dans l'**environnement**, jamais dans `argv` (un mot de passe en argument
+se retrouve dans l'historique du shell et dans la liste des processus). Il se connecte avec la clé
+**anon**, jamais la service role.
+
+**Phase de préparation, en service role** : le script crée d'abord un dossier appartenant à un
+**second** compte. Sans cette ligne étrangère, le test d'isolation réussirait sur une table qui
+n'en contient simplement aucune, c'est-à-dire pour la mauvaise raison.
 
 ```js
-// 1. INSERT d'un dossier pour soi        → doit échouer (privilège révoqué)
-// 2. UPDATE de snapshot sur son dossier  → doit échouer
-// 3. UPDATE de stripe_payment_intent_id  → doit échouer
-// 4. DELETE de son propre dossier        → doit échouer
-// 5. SELECT de ses dossiers              → doit RÉUSSIR
-// 6. SELECT des dossiers d'un autre user → doit retourner 0 ligne
+// Préparation (service role) : un dossier au compte A, un dossier au compte B.
+// Puis, connecté en anon comme compte A :
+// 1. INSERT d'un dossier pour soi          → doit échouer (privilège révoqué)
+// 2. UPDATE de snapshot sur son dossier    → doit échouer
+// 3. UPDATE de stripe_payment_intent_id    → doit échouer
+// 4. DELETE de son propre dossier          → doit échouer
+// 5. SELECT de ses dossiers                → doit RÉUSSIR, et voir le sien
+// 6. SELECT du dossier du compte B (par id)→ doit retourner 0 ligne
+// 7. RÉVOCATION : le service role pose access_revoked_at sur le dossier de A,
+//    puis A relit sa propre ligne         → doit retourner 0 ligne
 ```
 
-Le script sort en code 1 si une seule écriture réussit, avec le détail de laquelle.
+Le point 7 est celui qui distingue une révocation de droit d'une révocation d'interface. Il échoue
+si la clause `access_revoked_at is null` manque dans la policy.
+
+Le script sort en code 1 si une seule de ces attentes est démentie, en nommant laquelle.
 
 - [ ] **Step 2: Lancer contre la base de développement**
 
-Run: `node scripts/verify-address-dossiers-rls.mjs <email> <password>`
-Attendu : `RLS vérifiée : 4 écritures refusées, lecture propre OK, isolation OK.`
+```bash
+TEST_USER_EMAIL=… TEST_USER_PASSWORD=… TEST_OTHER_USER_ID=… \
+  node scripts/verify-address-dossiers-rls.mjs
+```
+
+Attendu : `RLS vérifiée : 4 écritures refusées, lecture propre OK, isolation OK, révocation OK.`
 
 - [ ] **Step 3: Vérifier la coexistence de deux dossiers au même immeuble**
 
@@ -936,6 +1039,66 @@ Attendu : la seconde échoue sur `address_dossiers_payment_intent_key`. Que le w
 git add scripts/verify-address-dossiers-rls.mjs
 git commit -m "Une policy ne se vérifie que contre la base, avec un vrai JWT"
 ```
+
+---
+
+## Task 9: Release coordonnée
+
+**Files:** aucun. Cette tâche est une séquence d'exécution, et elle est la seule qui touche la
+production.
+
+**Pourquoi elle existe :** l'ancien code interroge `logement`, le nouveau `address_dossiers`. Entre
+l'application de la migration et l'arrivée du nouveau code en production, l'ancien code tourne
+contre une table qui n'existe plus. La fenêtre doit être courte et voulue, jamais découverte.
+
+- [ ] **Step 1: Vérifier que tout est vert sur la branche**
+
+Run: `npx tsc --noEmit` → aucune erreur.
+Run: `npm run build` → succès.
+Run: `node --test src/lib/address-dossier-store.test.ts src/lib/territory-claims.test.ts` → PASS.
+
+- [ ] **Step 2: Relever le compte de lignes de la base de PRODUCTION**
+
+```sql
+select count(*) from public.logement;
+```
+
+Reporter ce nombre dans `<NOMBRE_ATTENDU>` de la migration. S'il diffère de ce qui était attendu,
+**arrêter** et comprendre pourquoi avant d'aller plus loin.
+
+- [ ] **Step 3: Appliquer la migration en production**
+
+Coller `supabase/25_address_dossiers.sql` dans l'éditeur SQL du projet de production. Le garde-fou
+lève une exception si le compte ne correspond pas, et la transaction entière est annulée.
+
+- [ ] **Step 4: Fusionner et pousser immédiatement**
+
+```bash
+git checkout main && git merge <branche> && git push
+```
+
+Suivre le déploiement Vercel jusqu'à ce qu'il soit actif. C'est ici que la fenêtre
+d'incompatibilité se referme.
+
+- [ ] **Step 5: Smoke tests en production, dans cet ordre**
+
+1. Compte gratuit : `/rapport` affiche le **rapport partiel** de la commune de résidence. C'est la
+   vérification que le nouveau contrôle n'a pas fermé ce qui était ouvert.
+2. Compte avec un `report_grant` : `/rapport` sur cette commune est **complet**.
+3. Sans dossier : `/rapport/logement` redirige vers `/rapport/dossiers`, qui dit qu'aucun dossier
+   n'existe.
+4. Route d'administration : créer un dossier, vérifier que Logement et Autour s'ouvrent dessus.
+5. Créer un **second** dossier au même `ban_id`, choisir un DPE différent sur chacun, rouvrir le
+   premier et vérifier qu'il a gardé le sien. **C'est le défaut §5, vérifié en production.**
+6. `/rapport/logement` sans paramètre, avec deux dossiers : redirige vers `/rapport/dossiers`.
+7. Vérifier que `ENABLE_ADMIN_DOSSIER_CREATION` est **absent** de l'environnement de production et
+   que la route y répond 404.
+
+- [ ] **Step 6: Consigner**
+
+Ajouter à `docs/handoff/CURRENT.md` la date d'application de la migration et le résultat des sept
+smoke tests. Une migration appliquée dont personne ne sait quand est une migration qu'on
+réappliquera.
 
 ---
 
