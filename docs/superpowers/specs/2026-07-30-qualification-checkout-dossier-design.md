@@ -484,13 +484,18 @@ est le moment d'achat).
 |---|---|---|
 | `address_qualification_viewed` | `decision_journey_id`, `insee` | volume d'intention à l'échelle adresse |
 | `address_qualification_result` | `status`, `warnings[]`, `ban_feature_type`, `insee`, `address_token`, classe de densité | le taux de refus réel, **par segment** |
-| `address_qualification_exit` | `choice: territory_14 \| notified \| left` | ce que devient un refus |
+| `address_qualification_exit` | `choice: territory_14 \| left` | ce que devient un refus |
 | `address_checkout_viewed` | `amount_due_cents`, `deducted`, `address_token` | dénominateur de conversion |
 | `address_dossier_purchased` | `amount_paid_cents`, `deducted`, `rank_in_dossiers`, `address_token` | questions 1 et 4 du rapport business |
 | `address_dossier_reopened` | `days_since_purchase` | valeur dans la durée, préalable au pass |
 
 La sortie après un refus est un **événement distinct** du résultat : un événement ne peut pas porter
 une décision postérieure à son émission. Les mélanger rendrait le comptage impossible.
+
+**Aucune valeur `notified` au lancement.** Recueillir un e-mail après un refus demande une table et
+une politique de conservation, alors que le refus s'est avéré rare une fois les numéros ruraux
+découverts par le reverse. Cette valeur arrive avec le geste de placement manuel, dont elle mesurera
+la demande.
 
 ### Les événements sont la vérité, les agrégats sont des analyses
 
