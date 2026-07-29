@@ -81,6 +81,21 @@ export function needsRecompute(
   const s = row?.snapshot;
   if (!s) return true;
   if (s.sourcesVersion !== sourcesVersion) return true;
+
+  // UN SNAPSHOT INCOMPLET N'EST PAS UN SNAPSHOT VALIDE. Overpass est interrogé sous un timeout de
+  // 3,5 s ; au-delà, le snapshot est écrit avec OSM en `pending` et le remplissage du cache de
+  // tuile se poursuit en tâche de fond. Sans cette ligne, l'état d'attente devenait définitif : la
+  // route renvoyait le snapshot figé à chaque appel, y compris quand la tuile était devenue chaude
+  // une seconde plus tard, et l'écran répétait « environnement en cours de récupération » alors que
+  // la donnée attendue était disponible juste à côté. Constaté en production le 29/07/2026.
+  //
+  // `failed` ne relance PAS, et la distinction est volontaire : `pending` dit « pas encore », donc
+  // on redemande ; `failed` dit « Overpass a répondu une erreur », et le relancer à chaque ouverture
+  // martèlerait une source en panne alors que l'écran sait déjà dire que la donnée est indisponible.
+  if (s.sourceStatus.osmInfrastructure === "pending" || s.sourceStatus.osmGreenSpaces === "pending") {
+    return true;
+  }
+
   // même position à ~10 m près (le géocodage a pu bouger)
   return haversineM(center, s.center) > 10;
 }

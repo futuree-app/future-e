@@ -83,6 +83,40 @@ test("même position + même version -> pas de recompute", () => {
   assert.equal(needsRecompute({ snapshot: okSnap }, center, SOURCES_VERSION), false);
 });
 
+// ── Le snapshot INCOMPLET, constaté en production le 29/07/2026 ─────────────
+// Overpass n'avait pas répondu sous le timeout de 3,5 s, donc le snapshot a été écrit avec
+// osmInfrastructure et osmGreenSpaces à `pending`. La tuile est arrivée en cache UNE SECONDE plus
+// tard, complète. Mais `needsRecompute` ne regardait que la version et la position : le snapshot
+// incomplet passait pour valide, la route le renvoyait figé, et l'écran répétait « environnement en
+// cours de récupération » indéfiniment, alors que la donnée attendue était disponible à côté.
+const pendingSnap = {
+  ...okSnap,
+  sourceStatus: { bpe: "complete", osmInfrastructure: "pending", osmGreenSpaces: "pending" },
+} satisfies Face3Snapshot;
+
+test("un snapshot dont OSM est PENDING doit être recalculé, même version et même position", () => {
+  assert.equal(needsRecompute({ snapshot: pendingSnap }, center, SOURCES_VERSION), true);
+});
+
+test("un seul des deux volets OSM en attente suffit à recalculer", () => {
+  const half = {
+    ...okSnap,
+    sourceStatus: { bpe: "complete", osmInfrastructure: "complete", osmGreenSpaces: "pending" },
+  } satisfies Face3Snapshot;
+  assert.equal(needsRecompute({ snapshot: half }, center, SOURCES_VERSION), true);
+});
+
+test("un OSM en ÉCHEC ne relance pas : `failed` est un résultat, `pending` est une absence", () => {
+  // Distinction volontaire. `pending` dit « pas encore », donc on redemande. `failed` dit
+  // « Overpass a répondu une erreur » : le relancer à chaque ouverture martèlerait une source en
+  // panne, alors que l'écran sait déjà dire honnêtement que la donnée est indisponible.
+  const failed = {
+    ...okSnap,
+    sourceStatus: { bpe: "complete", osmInfrastructure: "failed", osmGreenSpaces: "failed" },
+  } satisfies Face3Snapshot;
+  assert.equal(needsRecompute({ snapshot: failed }, center, SOURCES_VERSION), false);
+});
+
 const dpe = { id_dpe: "d1", etiquette_dpe: "D" } as unknown as DpeRecord;
 
 test("buildDpeSelectionFields: user_confirmed fige id + snapshot + date", () => {
