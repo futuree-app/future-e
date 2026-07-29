@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { PollutionLookup } from '@/components/PollutionLookup';
+import Navbar from '@/components/Navbar';
 
 export const dynamic = 'force-dynamic';
 
@@ -165,18 +166,7 @@ export default function AgirPollutionsInvisiblesPage() {
       <div className="orb orb-2" />
       <div className="orb orb-3" />
 
-      <nav className="nav">
-        <div className="nav-inner">
-          <Link href="/" className="brand">
-            futur<span className="brand-dot">•</span>e
-          </Link>
-          <div className="nav-crumb">
-            <Link href="/agir">Guides Agir</Link>
-            <span className="sep">/</span>
-            Pollutions invisibles
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <article className="article">
 

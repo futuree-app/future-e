@@ -1,6 +1,5 @@
-import Link from 'next/link';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import type { Metadata } from 'next';
+import Navbar from '@/components/Navbar';
 
 export const metadata: Metadata = {
   title: 'Pourquoi certains territoires rendent la voiture presque obligatoire · futur•e',
@@ -275,21 +274,7 @@ export default function DependanceAutoPage() {
       <div className="orb orb-2" />
       <div className="orb orb-3" />
 
-      <nav className="nav">
-        <div className="nav-inner">
-          <Link className="brand" href="/">
-            futur<span className="brand-dot">•</span>e
-          </Link>
-          <div className="nav-crumb">
-            <span className="step-home">Savoir</span>
-            <span className="sep">/</span>
-            <span>Mobilité</span>
-            <span className="sep">/</span>
-            Dépendance automobile
-          </div>
-          <ThemeToggle />
-        </div>
-      </nav>
+      <Navbar />
 
       <article
         className="article"

@@ -1,7 +1,6 @@
-import Link from 'next/link';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import type { Metadata } from 'next';
 import { PaywallGate } from '@/components/PaywallGate';
+import Navbar from '@/components/Navbar';
 
 export const dynamic = 'force-dynamic';
 
@@ -162,13 +161,6 @@ const previewHtml = `
     </div>
   </div>
 
-  <a href="/savoir/feux" class="context-link">
-    <div>
-      <div class="context-link-label">Page thématique associée</div>
-      <div class="context-link-title">Feux de forêts en France : tendances, territoires exposés et facteurs de risque</div>
-    </div>
-    <span class="context-link-arrow">→</span>
-  </a>
 
   <p class="lede">
     En 2022, environ 72 000 hectares ont brûlé en France métropolitaine selon les données Copernicus (EFFIS) : le volume le plus élevé depuis que des données fiables existent. Si la zone méditerranéenne concentre historiquement 90 % des surfaces brûlées (base Prométhée, 1973-2022), l'été 2022 a vu des incendies majeurs dans la Gironde, les Landes et la Bretagne. Ce mouvement est cohérent avec les projections climatiques. Cette page décrit ce que vous pouvez faire si vous vivez dans ou à proximité d'un massif forestier, à partir des obligations légales et des recommandations des services de défense des forêts contre l'incendie.
@@ -347,7 +339,6 @@ const fullHtml = `
     </ul>
   </section>
 
-  <a href="/savoir/feux" class="back-link">← Feux de forêts en France : tendances et territoires exposés</a>
 `;
 
 export default async function AgirFeuxForetsPage() {
@@ -358,21 +349,7 @@ export default async function AgirFeuxForetsPage() {
       <div className="orb orb-1" />
       <div className="orb orb-2" />
 
-      <nav className="nav">
-        <div className="nav-inner">
-          <Link className="brand" href="/">
-            futur<span className="brand-dot">•</span>e
-          </Link>
-          <div className="nav-crumb">
-            <Link href="/savoir/feux">Savoir</Link>
-            <span className="sep">/</span>
-            Risques
-            <span className="sep">/</span>
-            Agir
-          </div>
-          <ThemeToggle />
-        </div>
-      </nav>
+      <Navbar />
 
       <article className="article">
         <PaywallGate

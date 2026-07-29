@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import Navbar from '@/components/Navbar';
 
 export const metadata: Metadata = {
   title: 'Pollutions invisibles : ce que votre sol et votre air contiennent · futur•e',
@@ -129,18 +130,7 @@ export default function PollutionsInvisiblesPage() {
       <div className="orb orb-2" />
       <div className="orb orb-3" />
 
-      <nav className="nav">
-        <div className="nav-inner">
-          <Link href="/" className="brand">
-            futur<span className="brand-dot">•</span>e
-          </Link>
-          <div className="nav-crumb">
-            <Link href="/savoir">Pages Savoir</Link>
-            <span className="sep">/</span>
-            Pollutions invisibles
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <article className="article">
 

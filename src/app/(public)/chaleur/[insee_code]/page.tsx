@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { getClimatDataCommune } from '@/lib/drias-json';
 import { getGeorisquesSummary, getGasparCatnatSummary } from '@/lib/georisques';
 import { getAtmoForCommune } from '@/lib/atmo';
@@ -14,6 +13,7 @@ export const revalidate = 86400;
 // Régénérer avec : scripts/update-top-communes.sh
 // Le reste des communes est généré à la demande via ISR (revalidate 24h)
 import top1000 from '@/data/top1000-communes.json';
+import Navbar from '@/components/Navbar';
 
 export function generateStaticParams() {
   return (top1000 as string[]).map((code) => ({ insee_code: code }));
@@ -231,19 +231,7 @@ export default async function ChaleurCommune({
       <div className="orb" style={{ width: 360, height: 360, background: 'radial-gradient(circle,#fb923c 0%,transparent 70%)', bottom: -80, right: -60, animationDelay: '-7s', opacity: 0.14 }} />
 
       {/* Nav */}
-      <nav className="nav">
-        <div className="nav-inner">
-          <Link className="brand" href="/">
-            futur<span style={{ color: ACCENT, fontStyle: 'normal' }}>•</span>e
-          </Link>
-          <div className="crumb">
-            <Link href="/chaleur">Chaleur et canicule</Link>
-            <span className="crumb-sep">/</span>
-            {communeName}
-          </div>
-          <ThemeToggle />
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="page">
         <Link className="back-link" href="/chaleur">← Chaleur et canicule</Link>
@@ -450,7 +438,7 @@ export default async function ChaleurCommune({
               </div>
               <div className="article-cta">Lire →</div>
             </Link>
-            <Link href="/savoir/canicule" className="article-card">
+            <Link href="/chaleur" className="article-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/chaleur-rue.jpg" alt="Canicule en ville" className="article-img" />
               <span className="article-cat" style={{ background: 'rgba(248,113,113,0.12)', color: ACCENT }}>Projections</span>

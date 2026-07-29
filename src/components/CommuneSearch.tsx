@@ -12,17 +12,18 @@ interface CommuneResult {
 }
 
 interface CommuneSearchProps {
-  slug?: string;
   accent?: string;
   placeholder?: string;
-  basePath?: string; // ex: '/chaleur' — override du chemin de destination
+  // Chemin de destination, ex : '/chaleur' → /chaleur/17300. Obligatoire dès qu'`onSelect` n'est pas
+  // fourni. Le repli historique vers `/territoires/[slug]/[code]` a disparu avec ce gabarit
+  // (30/07/2026) : il n'existe plus de destination générique par défaut.
+  basePath?: string;
   // Si fourni, on appelle ce callback au choix d'une commune AU LIEU de naviguer
   // (utilisé par l'amorce « partez d'une commune » de /ou-vivre, Phase B).
   onSelect?: (commune: { code: string; nom: string }) => void;
 }
 
 export function CommuneSearch({
-  slug,
   accent = '#60a5fa',
   placeholder = 'Saisissez votre commune…',
   basePath,
@@ -75,7 +76,7 @@ export function CommuneSearch({
       return;
     }
     startTransition(() => {
-      router.push(basePath ? `${basePath}/${commune.code}` : `/territoires/${slug}/${commune.code}`);
+      router.push(`${basePath}/${commune.code}`);
     });
   }
 

@@ -1,7 +1,6 @@
-import Link from 'next/link';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import type { Metadata } from 'next';
 import { PaywallGate } from '@/components/PaywallGate';
+import Navbar from '@/components/Navbar';
 
 export const dynamic = 'force-dynamic';
 
@@ -162,7 +161,7 @@ const previewHtml = `
     </div>
   </div>
 
-  <a href="/savoir/submersion" class="context-link">
+  <a href="/inondation" class="context-link">
     <div>
       <div class="context-link-label">Page thématique associée</div>
       <div class="context-link-title">Submersion, crues et risques côtiers en France</div>
@@ -351,7 +350,7 @@ const fullHtml = `
     </ul>
   </section>
 
-  <a href="/savoir/submersion" class="back-link">← Submersion, crues et risques côtiers en France</a>
+  <a href="/inondation" class="back-link">← Submersion, crues et risques côtiers en France</a>
 `;
 
 export default async function AgirInondationPage() {
@@ -362,21 +361,7 @@ export default async function AgirInondationPage() {
       <div className="orb orb-1" />
       <div className="orb orb-2" />
 
-      <nav className="nav">
-        <div className="nav-inner">
-          <Link className="brand" href="/">
-            futur<span className="brand-dot">•</span>e
-          </Link>
-          <div className="nav-crumb">
-            <Link href="/savoir/submersion">Savoir</Link>
-            <span className="sep">/</span>
-            Logement
-            <span className="sep">/</span>
-            Agir
-          </div>
-          <ThemeToggle />
-        </div>
-      </nav>
+      <Navbar />
 
       <article className="article">
         <PaywallGate

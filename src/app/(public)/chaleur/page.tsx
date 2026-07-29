@@ -117,7 +117,6 @@ export default function ChaleurPage() {
           Chercher ma commune
         </div>
         <CommuneSearch
-          slug="canicule"
           accent={ACCENT}
           placeholder="Ex : La Rochelle, Lyon, Vannes…"
           basePath="/chaleur"
@@ -240,9 +239,15 @@ export default function ChaleurPage() {
 
         {/* ── BLOC 4 — SIGNAL ────────────────────────────────────────────── */}
         <section className="section">
-          <div className="section-eyebrow">Signal en cours</div>
-          <h2 className="section-title">Ce que les données disent aujourd'hui</h2>
-          <p className="section-sub">Bulletin de veille · Mai 2026.</p>
+          {/* Ce bloc s'appelait « Signal en cours » et affichait « Bulletin de veille · Mai 2026 »,
+              date écrite à la main et fausse de deux mois. Un bloc de veille dont le contenu est
+              figé dans le JSX ne peut pas se dire « en cours » : il se présente désormais pour ce
+              qu'il est, un état des connaissances, avec la date de publication de chaque source
+              portée par la carte elle-même. Le rendre réellement vivant est un chantier distinct,
+              instruit dans docs/audits/2026-07-30-famille-editoriale.md. */}
+          <div className="section-eyebrow">Ce que l'on sait</div>
+          <h2 className="section-title">L'état des connaissances</h2>
+          <p className="section-sub">Quatre constats publiés, chacun daté par sa source.</p>
 
           <div className="signal-grid">
             <div className="signal-card">

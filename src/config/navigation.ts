@@ -29,31 +29,35 @@ export const NAV_ITEMS: NavItem[] = [
   // ─── Où vivre — porte d'entrée principale du produit ────────────────────────
   { label: 'Où vivre', href: '/ou-vivre' },
 
-  // ─── Explorer — thèmes + profils ────────────────────────────────────────────
+  // ─── Explorer — une ligne par enjeu, et rien d'autre ────────────────────────
+  //
+  // Refonte du 30/07/2026. Trois choses ont disparu, et le motif de chacune compte :
+  //
+  // 1. LES QUATRE BADGES « BIENTÔT » (qualité de l'air, eau potable, famille, retraite). Une
+  //    navigation qui annonce quatre destinations inexistantes est le signal d'inachèvement le plus
+  //    visible d'un site. Elles reviendront quand elles existeront, pas avant.
+  // 2. LA COLONNE « PAR PROFIL ». Elle mettait sur un même plan une tâche produit (« je cherche à
+  //    déménager », doublon pur de /ou-vivre, déjà en tête de ce menu), une situation (la voiture,
+  //    qui est en réalité l'enjeu Mobilité et remonte ci-dessous), une composition de foyer et un
+  //    moment de vie. La doctrine produit tranche : l'archétype se prend au MOMENT, jamais à la
+  //    démographie ; « j'ai des enfants » n'est donc pas une entrée de menu, c'est une contrainte
+  //    du projet, saisie dans /ou-vivre.
+  // 3. LES DESTINATIONS `territoires/[slug]`, retirées du produit le même jour (gabarit au score
+  //    composite sur 100). Feux pointe vers son guide, seule page réelle sur le sujet ; pollutions
+  //    des sols vers l'article rédigé, qui vaut mieux que le hub générique qu'il remplace.
   {
     label: 'Explorer',
     groups: [
       {
-        groupLabel: 'Par thème',
+        groupLabel: 'Par enjeu',
         color: '#f87171',
         links: [
-          { label: 'Chaleur et canicule',      href: '/chaleur',                    description: 'Jours > 30 °C, nuits tropicales' },
-          { label: 'Inondation et submersion',  href: '/inondation',                 description: 'Risque côtier et cours d\'eau' },
-          { label: 'Feux de forêt',             href: '/territoires/feux',           description: 'Zones à risque incendie' },
-          { label: 'Pollutions des sols',       href: '/territoires/cadmium',        description: 'Cadmium, sites pollués' },
-          { label: 'Qualité de l\'air',         href: '/territoires/air',            description: 'PM2.5, NO₂, O₃',            badge: 'Bientôt' },
-          { label: 'Eau potable',               href: '/territoires/eau',            description: 'Stress hydrique, nappes',    badge: 'Bientôt' },
-          { label: 'Maladies émergentes',       href: '/savoir/maladies-emergentes', description: 'Moustiques, tiques, hantavirus' },
-        ],
-      },
-      {
-        groupLabel: 'Par profil',
-        color: '#fb923c',
-        links: [
-          { label: 'Je cherche à déménager',        href: '/ou-vivre',                     description: 'Trouver où vivre selon votre projet de vie' },
-          { label: 'J\'utilise beaucoup ma voiture', href: '/j-utilise-beaucoup-ma-voiture', description: 'Vulnérabilité mobilité' },
-          { label: 'J\'ai des enfants',              href: '/agir/famille',                  description: 'Santé, pollutions, qualité de vie',  badge: 'Bientôt' },
-          { label: 'Je prépare ma retraite',         href: '/agir/retraite',                 description: 'Chaleur, dépendance, budget',         badge: 'Bientôt' },
+          { label: 'Chaleur et canicule',      href: '/chaleur',                       description: 'Jours > 30 °C, nuits tropicales' },
+          { label: 'Inondation et submersion', href: '/inondation',                    description: 'Risque côtier et cours d\'eau' },
+          { label: 'Feux de forêt',            href: '/agir/feux-forets',              description: 'Exposition, débroussaillement, prévention' },
+          { label: 'Pollutions des sols',      href: '/savoir/cadmium',                description: 'Cadmium, métaux lourds, sites pollués' },
+          { label: 'Maladies émergentes',      href: '/savoir/maladies-emergentes',    description: 'Moustiques, tiques, hantavirus' },
+          { label: 'Mobilité',                 href: '/j-utilise-beaucoup-ma-voiture', description: 'Voiture, transports, dépendance' },
         ],
       },
     ],
@@ -103,7 +107,7 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
       "Des villes comme Marseille atteindront 63 jours > 30 °C par an. Découvrez les communes françaises les plus exposées.",
     category: 'Environnement',
     accent: '#f87171',
-    href: '/savoir/canicule',
+    href: '/chaleur',
     image: '/hub-canicule.jpg',
   },
   {
@@ -113,7 +117,7 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
       "Un million de logements français sont en zone inondable. Sur le littoral atlantique, le risque progresse. Certaines communes ne seront plus assurables.",
     category: 'Environnement',
     accent: '#60a5fa',
-    href: '/savoir/submersion',
+    href: '/inondation',
     image: '/hub-submersion.jpg',
   },
   {

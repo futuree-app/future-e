@@ -381,3 +381,70 @@ Explorer n'a aujourd'hui aucune destination propre, seulement un dropdown. Le be
 réserve : si cette page devient un catalogue, elle crée une **sixième famille d'URL** au lieu d'en
 supprimer quatre. Sa valeur est de rendre visible la règle de canonicité, un enjeu par bloc avec ses
 quatre surfaces et rien d'autre.
+
+---
+
+## Exécution du lot minimal · 30/07/2026
+
+Les six gestes ont été appliqués le jour même, à la demande du porteur, **sauf toute ouverture à
+l'indexation** : `public/robots.txt` reste en `Disallow: /` et `layout.tsx` garde
+`index: false`. Rien n'a été ouvert aux moteurs.
+
+### Ce que l'exécution a corrigé dans le diagnostic
+
+**Les redirections canicule et submersion existaient déjà** dans `next.config.ts`, pour `/savoir/*`
+comme pour `/territoires/*`. La fracture n° 6 surestimait donc la collision : `/savoir/canicule` ne
+concurrençait pas `/chaleur`, il y redirigeait en 308. Ce qui restait réellement servi par le
+gabarit legacy : `feux`, `pollens`, `cadmium` et `secheresse`.
+
+**Le gabarit servait bien la page interdite**, vérifié sur une commune réelle :
+`/savoir/feux/01001` affichait « Risque Feux de forêt à L'Abergement-Clémenciat », **14 mentions de
+« /100 »**, la « capacité d'adaptation » et « Mis à jour quotidiennement ».
+
+**`/territoires/[slug]` était un annuaire de masse** : la page rendait **356 Ko** de liens vers
+`/savoir/[slug]/[insee]`, commune par commune. C'était la couche de génération programmatique, et
+elle pointait entièrement vers le gabarit interdit.
+
+### Les gestes
+
+| Geste | État |
+| --- | --- |
+| Gabarit générique retiré (4 routes supprimées, 7 redirections ajoutées) | fait |
+| Sitemap corrigé | fait |
+| Quatre badges « Bientôt » retirés du header | fait |
+| Colonne « Par profil » retirée, Mobilité remontée en enjeu | fait |
+| `Navbar` montée sur les pages à nav locale | fait, 14 pages |
+| Bulletin « Signal en cours · Mai 2026 » redressé | fait |
+
+**Destinations retenues** : `feux` (Savoir et Territoires, hub et commune) vers `/agir/feux-forets`,
+seule page réelle sur le sujet ; `cadmium` vers l'article rédigé `/savoir/cadmium`, qui vaut mieux
+que le hub générique qu'il remplace. **`pollens` et `secheresse` tombent volontairement en 404** :
+aucun contenu vers quoi renvoyer, et la doctrine Data Curator dit que leur donnée n'est pas
+communale. Un 404 est plus honnête qu'une redirection hors sujet, et rien n'étant indexé, rien ne
+casse.
+
+**Un piège rencontré et corrigé** : la redirection `/savoir/cadmium/:code` capturait
+`/savoir/cadmium/actionnable`, une page réelle. Les paramètres de redirection sont désormais
+contraints au format d'un code INSEE (`\d{5}` ou `2[AB]\d{3}`, la Corse), sur les sept nouvelles
+règles **et sur les quatre préexistantes**, qui portaient le même risque.
+
+### Mesures après le lot
+
+| Mesure | Avant | Après |
+| --- | --- | --- |
+| Pages portant leur propre feuille de style | 27 | **22** |
+| Lignes de CSS injecté | 2 266 | **2 118** |
+| Pages sans la `Navbar` du site | 15 | **1** (`/professionnels`, page B2B hors périmètre) |
+| Routes servant le score composite sur 100 | 4 | **0** |
+| URL soumises au sitemap qui sont des redirections | 2 | **0** |
+
+Vérifications : `tsc --noEmit` propre, ESLint sans avertissement sur le périmètre, les 17 pages
+publiques touchées rendues en 200 avec la `Navbar` présente, les 11 redirections et les deux 404
+volontaires contrôlés un par un en local.
+
+### Ce que le lot ne fait pas
+
+La génération de pages commune en masse **n'a plus de gabarit**. C'était l'objet de la suppression :
+`/territoires/[slug]` réalisait cette génération sur le patron interdit. Le futur système se
+refera sur le patron `/chaleur/[insee]`, qui est le bon, quand la canonicité sera tranchée. Git
+conserve l'ancien code.

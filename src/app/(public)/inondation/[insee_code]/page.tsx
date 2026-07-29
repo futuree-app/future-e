@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { getClimatDataCommune } from '@/lib/drias-json';
 import { getGeorisquesSummary, getGasparCatnatSummary } from '@/lib/georisques';
 import { createClient } from '@supabase/supabase-js';
@@ -8,6 +7,7 @@ import { createClient } from '@supabase/supabase-js';
 export const revalidate = 86400;
 
 import top1000 from '@/data/top1000-communes.json';
+import Navbar from '@/components/Navbar';
 
 export function generateStaticParams() {
   return (top1000 as string[]).map((code) => ({ insee_code: code }));
@@ -240,19 +240,7 @@ export default async function InondationCommune({
       <div className="orb" style={{ width: 360, height: 360, background: 'radial-gradient(circle,#818cf8 0%,transparent 70%)', bottom: -80, right: -60, animationDelay: '-7s', opacity: 0.14 }} />
 
       {/* Nav */}
-      <nav className="nav">
-        <div className="nav-inner">
-          <Link className="brand" href="/">
-            futur<span style={{ color: ACCENT, fontStyle: 'normal' }}>•</span>e
-          </Link>
-          <div className="crumb">
-            <Link href="/inondation">Inondation et submersion</Link>
-            <span className="crumb-sep">/</span>
-            {communeName}
-          </div>
-          <ThemeToggle />
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="page">
         <Link className="back-link" href="/inondation">← Inondation et submersion</Link>
@@ -406,7 +394,7 @@ export default async function InondationCommune({
           <h2 className="section-title">Aller plus loin sur l&apos;inondation</h2>
           <p className="section-sub">Trois lectures de fond pour contextualiser ces données.</p>
           <div className="articles-grid">
-            <Link href="/savoir/submersion" className="article-card">
+            <Link href="/inondation" className="article-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/hub-submersion.jpg" alt="Inondation et submersion" className="article-img" />
               <span className="article-cat" style={{ background: 'rgba(96,165,250,0.12)', color: ACCENT }}>Projections</span>

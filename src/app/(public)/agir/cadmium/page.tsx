@@ -1,7 +1,6 @@
-import Link from 'next/link';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import type { Metadata } from 'next';
 import { PaywallGate } from '@/components/PaywallGate';
+import Navbar from '@/components/Navbar';
 
 export const dynamic = 'force-dynamic';
 
@@ -338,19 +337,7 @@ export default async function AgirCadmiumPage() {
       <div className="orb orb-1" />
       <div className="orb orb-2" />
 
-      <nav className="nav">
-        <div className="nav-inner">
-          <Link className="brand" href="/">
-            futur<span className="brand-dot">•</span>e
-          </Link>
-          <div className="nav-crumb">
-            <Link href="/agir/cadmium">Agir</Link>
-            <span className="sep">/</span>
-            Cadmium
-          </div>
-          <ThemeToggle />
-        </div>
-      </nav>
+      <Navbar />
 
       <article className="article">
         <PaywallGate

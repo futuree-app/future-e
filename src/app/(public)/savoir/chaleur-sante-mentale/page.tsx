@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import type { Metadata } from 'next';
+import Navbar from '@/components/Navbar';
 
 export const metadata: Metadata = {
   title: 'La chaleur et la santé mentale · futur•e',
@@ -121,21 +121,7 @@ export default function ChaleurSanteMentalePage() {
       <div className="orb orb-2" />
       <div className="orb orb-3" />
 
-      <nav className="nav">
-        <div className="nav-inner">
-          <Link href="/" className="brand">
-            futur<span className="brand-dot">•</span>e
-          </Link>
-          <div className="nav-crumb">
-            <Link href="/savoir/canicule" className="step-home">Savoir</Link>
-            <span className="sep">/</span>
-            <Link href="/savoir/chaleur-sante-mentale">Santé</Link>
-            <span className="sep">/</span>
-            Chaleur
-          </div>
-          <ThemeToggle />
-        </div>
-      </nav>
+      <Navbar />
 
       <article className="article">
 
@@ -252,7 +238,7 @@ export default function ChaleurSanteMentalePage() {
               </Link>
             </li>
                 <li>
-              <Link href="/territoires/canicule">
+              <Link href="/chaleur">
                 Comprendre l&apos;exposition canicule de votre commune <span className="arrow">→</span>
               </Link>
             </li>
@@ -300,7 +286,7 @@ export default function ChaleurSanteMentalePage() {
         <div>
           <Link href="/pourquoi">Pourquoi futur•e</Link>
           {' · '}
-          <Link href="/territoires/canicule">Territoires / Canicule</Link>
+          <Link href="/chaleur">Territoires / Canicule</Link>
         </div>
       </footer>
     </>

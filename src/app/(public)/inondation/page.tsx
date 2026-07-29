@@ -117,7 +117,6 @@ export default function InondationPage() {
           Chercher ma commune
         </div>
         <CommuneSearch
-          slug="submersion"
           accent={ACCENT}
           placeholder="Ex : Rouen, Nantes, Bordeaux…"
           basePath="/inondation"
