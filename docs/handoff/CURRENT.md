@@ -1,446 +1,185 @@
-# Passation — journée du 29/07 : six thèmes deviennent trois échelles, et l'entourage prend son module
+# Passation — 29/07/2026, soirée
 
-**Horodatage** : 2026-07-29 16:46, **complété à 17:40 par la seconde session** (§6), **puis en
-soirée par une TROISIÈME session : voir §0, qui remplace le §4** · **Branche** : `main` = `2ad7f81`
-(poussé, migration appliquée en production).
-**Tree propre**, un seul non suivi à NE JAMAIS committer : `Futur.e Design System.zip`.
+**Horodatage** : 2026-07-29, ~20h15 · **Branche** : `main` = `cb3fc79`, **tout est poussé**.
+**Migration appliquée en production ce soir.** Rien n'est en attente de commit.
 
-**983 tests · tsc 0 · lint global à 20 problèmes (8 erreurs)** — toutes antérieures à cette session
-(`useTheme.ts`, `ConclusionRedigee.tsx`, `DossierAvecLogement.tsx`, un `any` dans la landing).
-
-> **Deux sessions ont travaillé en parallèle dans le MÊME working tree aujourd'hui.** Celle-ci a fait
-> la bascule des modules ; l'autre a fait Cartofriches, le secteur dans le moteur de décision et le
-> radon. Les commits sont entrelacés (`d14e5b4`, `2c79618`, `0115f22` d'un côté ; `f98a002`, `ef17ffc`,
-> `b01b8f2`, `473d2fa` de l'autre). Aucun conflit : chaque session n'a stagé que ses propres fichiers,
-> nommément. **C'est la seule discipline qui a rendu ça possible — ne pas faire `git add -A` ici.**
+> Le handoff des deux sessions précédentes (la bascule six thèmes → trois échelles, l'entourage qui
+> prend son module, les neuf faux silencieux) est archivé dans
+> **`docs/handoff/2026-07-29-journee-trois-echelles.md`**. Il reste utile : ses §1, §2, §3 et §6
+> décrivent du code encore vivant. Son **§4 est PÉRIMÉ** (le brainstorming interrompu qu'il décrivait
+> a été mené et livré), et son **§5 est RÉSOLU** (c'est l'objet de cette session).
 
 ---
 
-## 0. TROISIÈME SESSION (soirée du 29/07) : le droit descend à l'échelle du bien — **EN PRODUCTION**
+## Objectif en cours
 
-`main` = `2ad7f81`, poussé. **Migration `25_address_dossiers.sql` APPLIQUÉE en production le
-29/07/2026**, plus une seconde (`address_dossiers_revoke_truncate`). Ce §0 remplace le §4 du présent
-handoff, qui décrivait le brainstorming interrompu : il a été mené, spécifié, planifié et livré.
+Faire descendre le droit à l'échelle du **bien** : `public.logement` est devenue
+`public.address_dossiers`, identifiée par un **uuid**, et l'existence d'une ligne EST le droit
+d'ouvrir le dossier. Cette tranche est **livrée et vérifiée en production**. La suite est la spec de
+**qualification et de checkout**, qui est désormais bloquante : sans elle, aucune surface ne crée de
+dossier hors de la route de test.
 
-**Lire d'abord** : `docs/superpowers/specs/2026-07-29-address-dossiers-design.md` (la doctrine),
-`docs/superpowers/plans/2026-07-29-address-dossiers.md` (le plan, ses 9 tâches), et
-`docs/rapports-agents/business-strategist/2026-07-29-dossier-adresse-39e.md` (l'analyse business).
+---
 
-### Ce qui a changé, en une phrase
-`public.logement` est devenue `public.address_dossiers`, identifiée par un **uuid** : l'existence
-d'une ligne EST le droit d'ouvrir le dossier. Le flag de plan global et le droit communal ne
-gouvernent plus ni Autour ni Logement.
+## Fait dans cette session
 
-### Les deux défauts réparés
-- **Deux appartements du même immeuble s'écrasaient** (ancien §5) : la clé était `(user_id, ban_id)`
-  alors que `PreciseLogementStep` existe précisément parce qu'une adresse BAN porte plusieurs
-  logements. `ban_id` est désormais une colonne indexée **sans aucune unicité**.
-- **Un achat quelconque ouvrait le Territoire complet de la commune de résidence, jamais achetée** :
-  `resolveReadableTerritory` ne contrôlait aucun grant sur la résidence, et `canAccessCompleteReport`
-  était global. La complétude se demande maintenant à la commune (`canAccessTerritory`).
+**Trois documents, à lire dans cet ordre à la reprise :**
+- `docs/rapports-agents/business-strategist/2026-07-29-dossier-adresse-39e.md` (610 l.) : l'analyse
+  business. Goulot = zéro euro encaissé. Le 14 € survit resserré sur Territoire, la qualification
+  pré-paiement devient le capteur du goulot, le 2ᵉ dossier reste à l'unité.
+- `docs/superpowers/specs/2026-07-29-address-dossiers-design.md` : la doctrine de l'objet dossier.
+- `docs/superpowers/plans/2026-07-29-address-dossiers.md` : le plan en 9 tâches, toutes exécutées.
 
-### Ce qui est parti
-`canAnalyzeCommune`, `upsertLogementAddress`, `saveSynthesis`, la route `/api/logement-artefact`,
-`logement-artefact-lifecycle.test.ts`, et **la saisie libre d'adresse dans les deux modules**. Ce
-dernier point n'était pas un choix d'ergonomie : `georisques-logement` exige désormais que l'adresse
-soumise soit celle du dossier, donc une saisie libre ne pouvait plus qu'échouer.
+**Le code, 12 commits de `79e1b64` à `cb3fc79` :**
+- `supabase/25_address_dossiers.sql` : renommage, `id uuid` en clé, `ban_id` **sans unicité**,
+  colonnes `stripe_payment_intent_id` (unique) / `amount_paid_cents` / `purchased_at` /
+  `access_revoked_at` / `created_at`, purge des 24 lignes de test, contrainte de cohérence de
+  provenance, policy SELECT portant `access_revoked_at is null`, `revoke insert, update, delete`.
+  Une seconde migration a retiré `TRUNCATE`.
+- `src/lib/address-dossier-store.ts` (ex-`logement-store.ts`) : lectures seules, toutes **lèvent**
+  au lieu de transformer une panne en absence de droit. `pickSoleDossier` refuse de deviner.
+- `src/lib/territory-claims.ts` (+ test) : `decideTerritoryAccess` / `decidePaidTerritory`, purs,
+  sans `server-only` pour rester testables sous `node --test`.
+- `src/lib/server/address-dossier-write.ts` : `updateOwnedAddressDossier`, **seul** chemin
+  d'écriture. Il ne rend jamais le client service role.
+- `src/lib/active-territory.ts` : `canAnalyzeCommune` supprimée, `canAccessTerritory` et
+  `hasPaidTerritory` la remplacent.
+- Routes : `/api/logement-artefact` **supprimée** ; `logement-dpe`, `logement-autour`,
+  `synthesize-logement`, `georisques-logement` passent par le dossier.
+- Pages : `?logementId=` → `?dossierId=`, nouvelle page `/rapport/dossiers`, saisie d'adresse
+  retirée des deux modules.
+- `/api/admin/dossier` + `AdminDossierCreator` : créateur de dossiers pour les tests.
+- `scripts/verify-address-dossiers-rls.mjs` : vérification des privilèges contre la base réelle.
+- `cb3fc79` : correctif du gel « environnement en cours de récupération » (voir Pièges).
 
-`logement_same_commune_multi` est retiré aussi : il comptait par session (`useRef`) et par commune
-(`Map` clé INSEE), donc ratait le multi-session et le multi-commune, c'est-à-dire les deux façons
-dont un projet compare réellement des adresses.
+**Vérifié en production, au navigateur** : deux dossiers sur le même `ban_id`
+(`44109_2300_00002`, 2 rue Crébillon à Nantes) coexistent avec des choix DPE divergents
+(`user_confirmed`/D et `not_in_list`), le premier se rouvre avec le sien. **C'est le défaut §5,
+mort.** Le rapport se rend en entier (passeport, parcelle, confort d'été, périmètre ABF, sinistres).
 
-### CONSÉQUENCE BLOQUANTE, à connaître avant tout
-**Aucune surface ne permet plus de créer un dossier**, sauf la route de test. Le checkout et la
-qualification n'existent pas. Tant que la spec suivante n'est pas livrée, Autour et Logement ne
-s'ouvrent que sur un dossier créé par `POST /api/admin/dossier`.
+---
 
-Deux variables d'environnement, **absentes du repo** (`.env.example` est gitignoré) :
+## Décisions prises, pas encore dans le vault
+
+Toutes **tranchées par le porteur** ce soir, sauf mention contraire :
+
+1. **Un dossier est l'analyse d'un BIEN situé à une adresse.** Jamais « un dossier = une adresse » :
+   cette formule contredit l'existence de `PreciseLogementStep`.
+2. **Identité = uuid**, `ban_id` sans aucune unicité.
+3. **Le droit EST la ligne.** Pas de seconde table de droits ; `report_grants` reste territorial.
+4. **Le tarif d'approfondissement est un ÉTAT calculé, jamais un crédit consommable.** Tous les
+   biens d'une commune déjà payée en bénéficient, pas seulement le premier.
+5. **Le business-strategist recommandait le 2ᵉ dossier à PLEIN TARIF** pour ne pas brouiller la
+   mesure. **Sciemment écarté** : revendre le tiers d'un ensemble que le compte possède déjà est un
+   fait que futur•e connaîtrait en l'encaissant. Une session qui relira le rapport y trouvera
+   l'inverse ; ne pas « corriger ».
+6. **Le Pack Décision ouvre le tarif d'approfondissement** sur ses trois communes (arbitrage porteur).
+7. **Un dossier administratif n'est jamais une acquisition** (`stripe_payment_intent_id is null`).
+8. **La résidence n'ouvre plus rien par elle-même**, et ce n'est pas une régression : il n'a jamais
+   existé d'accès gratuit au Territoire COMPLET de la résidence, seulement le rapport partiel, qui
+   reste rendu quand `canAccessTerritory` répond faux.
+9. **Écarté** (proposé, refusé) : `dwelling_discriminator`, un `status` à états multiples,
+   `entitlement_status`, `territory_credit_payment_id`, `last_opened_at`, `access_source`.
+
+**À porter au vault à la reprise** : `docs/vault/vision/modele-economique.md` (architecture d'offre,
+et **l'ancre de prix à corriger**, voir Pièges), plus un arbitrage
+`arbitrages/dossier-adresse-unite-pas-pack.md`.
+
+---
+
+## État git
+
+- **Branche** : `main`, à jour avec `origin/main`. **Aucun commit non poussé.**
+- **Non commité** : uniquement `Futur.e Design System.zip` (non suivi, **à ne jamais committer**).
+- **Branches locales à nettoyer** : `feat/address-dossiers` est fusionnée dans `main`, elle peut
+  être supprimée. Restent aussi `feat/composition-faits-lies`, `feat/lot-a-depate-en-une-minute`,
+  `feat/verdict-heros`, antérieures et hors sujet.
+- **Aucune PR** : le projet pousse directement sur `main`, et **un push déploie en production**.
+- **Base** : une seule base Supabase (`xkewgsccadjmondzmjxj`), **c'est la production**. Il n'y a pas
+  d'environnement de développement séparé.
+
+---
+
+## Prochaine étape immédiate
+
+**Vérifier que le correctif `cb3fc79` a résolu le gel du module Autour.** Ouvrir
+`https://futur-e.fr/rapport/autour?dossierId=cfe1ed8e-5fc0-4b8c-81ad-989c1d0c3db6` connecté, et
+regarder le bloc « Espace vert ».
+
+- Si l'espace vert s'affiche : le sujet est clos, passer à la spec de qualification.
+- S'il répète « environnement en cours de récupération » : la racine serveur est corrigée, donc le
+  problème restant est **côté client**. `AutourModule` ne retente qu'**une seule fois par montage**
+  (`autourRetriedRef`, ~l. 120). Un second échec exige un rechargement manuel. C'est la limite
+  connue, à traiter là.
+
+Contrôle SQL rapide de l'état réel :
+```sql
+select id, snapshot->'sourceStatus' from public.address_dossiers;
 ```
-ENABLE_ADMIN_DOSSIER_CREATION=true      # ABSENT en prod = route 404. Présent en prod aujourd'hui.
+`osmInfrastructure` et `osmGreenSpaces` doivent passer à `complete`.
+
+**Puis** : lancer la vérification RLS, jamais exécutée (elle demande le mot de passe du porteur) :
+```bash
+TEST_USER_EMAIL=bonjourfuturee@gmail.com TEST_USER_PASSWORD='…' \
+TEST_OTHER_USER_ID=b779cc8f-40c9-4ba5-a3d8-5a5726897c84 \
+  node scripts/verify-address-dossiers-rls.mjs
+```
+
+---
+
+## À lire d'abord à la reprise
+
+1. `MEMORY.md` (chargé au démarrage) puis les fiches `project_module_logement`,
+   `project_paywall_territoire`, `business_modele_economique`.
+2. `docs/superpowers/specs/2026-07-29-address-dossiers-design.md` — **la doctrine fait foi** en cas
+   de divergence avec le code.
+3. `docs/rapports-agents/business-strategist/2026-07-29-dossier-adresse-39e.md` — §6 (protocole de
+   test sans historique payant) et §7 (les six événements) alimentent directement la spec suivante.
+4. `docs/handoff/2026-07-29-journee-trois-echelles.md` — §1, §2, §3, §6 et la section « Pièges »
+   restent valables. Son §4 est périmé, son §5 est résolu.
+5. `docs/handoff/AUTO-SNAPSHOT.md` — **daté du 08/07, très en retard.** Ne pas s'y fier.
+6. `docs/vault/arbitrages/recurrence-b2c-episodique-pas-mensuelle.md` avant toute idée de pass.
+
+---
+
+## Pièges et fils ouverts
+
+**Le produit ne peut plus créer de dossier sans la porte de test.** Deux variables, absentes du
+repo (`.env.example` est gitignoré), **actuellement actives en production** :
+```
+ENABLE_ADMIN_DOSSIER_CREATION=true      # absent = route 404, quelle que soit la liste
 FUTUREE_ADMIN_EMAILS=bonjourfuturee@gmail.com
 ```
-La comparaison d'e-mail est stricte : Gmail confond `bonjour.futuree@` et `bonjourfuturee@`, pas nous.
+La comparaison d'e-mail est stricte : Gmail confond `bonjour.futuree@` et `bonjourfuturee@`, pas
+nous. **À RETIRER de la production le jour où le checkout dossier existera** : ce genre de porte
+reste ouverte des années.
 
-### Ce que ce chantier laisse derrière lui
-1. **Retirer `ENABLE_ADMIN_DOSSIER_CREATION` de la production** le jour où le checkout dossier
-   existera. Ce genre de porte reste ouverte des années.
-2. **`TRUNCATE` est accordé à `authenticated` sur TOUTES les autres tables** (`payments`,
-   `report_grants`, `user_profiles`…), défaut Supabase : la protection repose entièrement sur la
-   RLS, que TRUNCATE ignore. Retiré sur `address_dossiers` seulement. PostgREST ne l'expose pas,
-   donc c'est théorique, mais ça se resserre.
-3. **Le script `scripts/verify-address-dossiers-rls.mjs`** vérifie les privilèges contre la base
-   réelle avec un vrai JWT (un test simulé éprouverait notre logique contre nos propres chaînes).
-   Il exige `TEST_USER_EMAIL`, `TEST_USER_PASSWORD`, `TEST_OTHER_USER_ID` en environnement.
+**L'ancre de prix du vault est FAUSSE et doit être corrigée avant toute page de vente.**
+`modele-economique.md` compare 39 € aux « 600 à 800 € de diagnostics ». Or le dossier de diagnostics
+est à la charge du **vendeur** (art. L271-4 CCH), du bailleur en location : l'acquéreur ne débourse
+pas cette somme. L'ancre resterait juste pour un vendeur ou un propriétaire, segment non instruit.
 
-### Décisions à NE PAS re-litiger
-- **Un dossier est l'analyse d'un BIEN situé à une adresse.** Jamais « un dossier = une adresse » :
-  cette formule contredit l'existence de `PreciseLogementStep`.
-- **Le tarif d'approfondissement est un ÉTAT calculé, jamais un crédit consommable.** Tous les biens
-  d'une commune déjà payée en bénéficient, pas seulement le premier.
-- **Le business-strategist recommandait le 2ᵉ dossier à PLEIN TARIF** pour ne pas brouiller la
-  mesure. **Cette recommandation est sciemment écartée** : revendre le tiers d'un ensemble que le
-  compte possède déjà est un fait que futur•e connaîtrait en l'encaissant. Une session qui relira le
-  rapport y trouvera l'inverse.
-- **Un dossier administratif n'est jamais une acquisition** (`stripe_payment_intent_id is null`) :
-  il ouvre Territoire pour les tests, il ne donne aucun tarif.
-- La **résidence n'ouvre plus rien par elle-même**, et ce n'est pas une régression : il n'a jamais
-  existé d'accès gratuit au Territoire COMPLET de la résidence, seulement le rapport partiel, qui
-  reste rendu.
+**`TRUNCATE` reste accordé à `authenticated` sur toutes les autres tables** (`payments`,
+`report_grants`, `user_profiles`…), défaut Supabase : la protection repose entièrement sur la RLS,
+que TRUNCATE ignore. Retiré sur `address_dossiers` seulement. PostgREST ne l'expose pas, donc c'est
+théorique. Chantier distinct.
 
-### La suite immédiate
-La **spec de qualification et de checkout** : route publique de qualification (légère, cachée par
-adresse, rate-limitée, JAMAIS `georisques-logement`), calcul du prix, création du dossier par le
-webhook avec son `ON CONFLICT`, page de succès qui attend le webhook, et l'instrumentation
-(`decision_journey_id`, six événements). `hasPaidTerritory` est déjà livré, son usage tarifaire non.
+**Le compteur d'adresses est mort, pas remplacé.** `logement_same_commune_multi` comptait par
+session (`useRef`) et par commune (`Map` clé INSEE) : il ratait le multi-session et le
+multi-commune, les deux façons dont un projet compare réellement des adresses. Sa mesure appartient
+à la qualification, à l'échelle du **parcours de décision** (`decision_journey_id` anonyme), jamais
+du `project_id` : `user_project` est une colonne de `user_profiles`, donc un visiteur froid n'en a
+pas, et le visiteur froid est précisément le moment d'achat identifié.
 
----
+**Deux dossiers de test vivent en base** (2 rue Crébillon, Nantes), `stripe_payment_intent_id` nul,
+donc exclus de tout comptage et d'aucun tarif. Supprimables par `DELETE /api/admin/dossier`.
 
-## 1. LA BASCULE : six modules thématiques → trois échelles (`d14e5b4`)
+**Le webhook Stripe n'a AUCUNE idempotence propre** : toute sa protection contre un événement
+rejoué vient des contraintes de table. `address_dossiers` porte un index unique sur
+`stripe_payment_intent_id`, mais la gestion `ON CONFLICT` (retrouver le dossier et répondre en
+succès) appartient à la spec du webhook, et n'existe pas encore.
 
-Le produit annonçait six modules (Territoire, Logement, Métier, Santé, Mobilité, Projets) **dont
-quatre ne s'ouvraient pas** : la grille du hub affichait un tiret en guise de lien. C'était un
-inventaire de ce qu'on n'avait pas.
-
-Il en tient trois, et ce sont trois **échelles emboîtées** :
-
-| Module | Id technique | Échelle | Ce qu'il tranche |
-|---|---|---|---|
-| Territoire | `quartier` | la commune | ce qui structure la vie ici et ce qui la transforme |
-| Autour de l'adresse | `autour` | le voisinage | ce qui se trouve et se mesure à proximité du point |
-| Logement | `logement` | le bâtiment | ce que le diagnostic établit, ce qui expose, ce qu'il reste à demander |
-
-**Les thèmes retirés n'ont pas disparu, ils TRAVERSENT désormais les échelles.** La chaleur, par
-exemple : trajectoire projetée dans Territoire, îlot de chaleur du quartier dans Autour, inertie et
-protections solaires dans Logement. C'est ce que les six modules empêchaient.
-
-**PIÈGE D'IDENTIFIANT, à lire avant de toucher aux ids** : `quartier` est l'id historique du module
-**Territoire** et désigne l'échelle **communale**, jamais le voisinage. Il est antérieur à l'existence
-d'un module « Autour ». Conservé parce qu'il est écrit en base (`terrain_observations.module`), dans
-les URLs et dans l'analytics. L'analytics émet désormais `module_semantic_key`
-(`territory` / `surroundings` / `housing`) à côté, pour que les analyses futures n'aient pas à
-connaître cette histoire. `module_index` a bougé (logement 2 → 3) : c'est une **position d'écran**,
-pas une identité — toute comparaison à cheval sur le 29/07 compare deux mises en page.
-
----
-
-## 2. L'ENTOURAGE PREND SON MODULE — et révèle deux couplages cachés
-
-L'« autour de l'adresse » était le **beat 4 du module Logement** : on ne pouvait le lire qu'après
-avoir fait analyser un bâti. Ce n'est ni la même question, ni la même échelle, ni le même moment.
-
-Nouveau : `/rapport/autour` + `AutourModule.tsx`. Il réutilise `AutourSection` (donc le
-`CarOwnershipBlock` de l'autre session part avec lui, à sa place naturelle) et passe par
-`buildAutourResponse` — **aucun chemin ne renvoie le snapshot directement**, la règle tient toujours.
-L'**îlot de chaleur revient avec lui** : il avait atterri dans « les risques du bâti » faute de place,
-mais il décrit un quartier, pas des murs.
-
-### Les deux régressions silencieuses, et pourquoi elles étaient invisibles
-
-1. **La ligne d'artefact naissait d'un EFFET DE BORD de l'appel « autour ».** L'extraction faite,
-   plus rien ne la créait — et comme `/api/logement-dpe` et `saveSynthesis` font des **UPDATE ciblés**,
-   ils seraient devenus des no-op **sans lever d'erreur** : l'API répond 200, rien n'est sauvegardé,
-   chaque analyse repart de zéro. D'où `/api/logement-artefact` + `upsertLogementAddress`, **awaité**
-   avant la persistance DPE (les lancer en concurrence rendait la sauvegarde dépendante de l'ordre
-   d'arrivée de deux requêtes).
-2. **La rehydratation Logement exigeait un snapshot d'entourage.** Ce module n'en produit plus :
-   l'exiger aurait rendu **tout bien nouvellement analysé impossible à rouvrir**.
-
-Six tests figent maintenant le contrat d'écriture (`logement-artefact-lifecycle.test.ts`) : un upsert
-d'identité ne touche ni au snapshot, ni à la posture, ni au DPE, ni à la synthèse ; une parcelle
-inconnue est **OMISE** plutôt qu'écrite en `null` ; le conflit se résout sur `(user_id, logement_id)`.
-
-### La synthèse Logement en v8
-
-L'autour a quitté le payload. La règle du fichier : **le payload ne contient QUE des faits affichés
-sous le texte** — c'est ce qui autorise le prompt à dire « les blocs portent déjà chaque donnée ».
-Le hash de contenu porte la version du prompt, donc les textes écrits avant se régénèrent **seuls** :
-aucune migration à faire. Le gate `autourPhase` qui retardait la synthèse a disparu avec sa cause.
-
----
-
-## 3. LA REVUE EXTERNE A TROUVÉ CE QUE LE GREP AVAIT MANQUÉ (`2c79618`, `0115f22`)
-
-La bascule avait été cherchée par grep sur « six modules », « 6 modules », « Six dimensions »,
-« module Santé ». **Deux lignes disaient exactement la même chose sans jamais employer le mot
-« module »** :
-
-- la **grille tarifaire** — la surface la plus commerciale du site — annonçait « 6 analyses
-  personnalisées : logement, territoire, santé, mobilité, métier, projets » sous un prix de 14 € ;
-- le bloc « votre rapport interactif en 2 minutes » promettait les mêmes six.
-
-> **Leçon de méthode : chercher le NOM d'un concept ne trouve pas ses paraphrases. Une énumération est
-> une définition qui ne se nomme pas.** Quand un concept est retiré, greffer la recherche sur ce qu'il
-> ÉNUMÉRAIT, pas seulement sur son nom.
-
-Trois corrections de promesse ont suivi, toutes dans le même sens — **la vitrine était plus étroite,
-ou plus fausse, que ce que les modules font déjà** :
-
-- **Le délai était faux.** Le checkout promettait « envoyé par email sous 24 heures ouvrées ». Le
-  webhook Stripe pose les droits **dès le paiement confirmé** et les modules se lisent en ligne : rien
-  n'est produit en différé, rien n'est envoyé. On faisait attendre un acheteur qui pouvait déjà lire,
-  sur la page où il sort sa carte.
-- **Territoire était réduit au climat.** Il rend aussi l'accès aux services, la trajectoire de
-  population, les résidences secondaires, les logements inoccupés, les espaces naturels, le boisement.
-  Une promesse plus étroite que le contenu fait passer un rapport de territoire pour un bulletin de
-  risques, et n'intéresse que les gens déjà inquiets du climat.
-- **Logement se vendait par son contenu, pas par sa SORTIE.** Le module se termine sur « à vérifier
-  avant de décider » (des gestes, jamais des cases) — l'élément le plus actionnable du produit, absent
-  de toute surface de vente.
-
-**Aucune promesse de périmètre sur Autour.** « À portée de pas » serait faux pour la moitié de ses
-faits : BPE à **3 km à vol d'oiseau**, îlot de chaleur au **grand-IRIS**, équipement automobile au
-secteur **avec repli sur la commune entière**. Le grain se dit fait par fait, là où il s'affiche —
-jamais dans le titre du module. C'est gravé en tête de `product.ts`.
-
----
-
-## 4. BRAINSTORMING EN COURS, INTERROMPU : le « dossier adresse » à 39 €
-
-**Rien n'est construit. Rien n'est écrit en spec.** La session s'est arrêtée juste avant de lancer le
-`business-strategist`. Voici l'état exact du raisonnement, pour ne pas le refaire.
-
-### Le constat qui a lancé le sujet
-**Aujourd'hui, les 14 € donnent déjà le dossier adresse.** `canAccessCompleteReport` est un flag de
-plan **global**, `report_grants` déverrouille une **commune** : dès qu'un acheteur a payé, Autour et
-Logement s'ouvrent pour n'importe quelle adresse de cette commune. **Il n'existe aucune notion de
-droit par adresse.** Un dossier à 39 € n'est donc pas une entrée de plus : c'est un **re-découpage**
-de ce que les 14 € contiennent.
-
-### Tranché
-- **14 € = Territoire (commune seule) · 39 € = commune + adresse (Autour + Logement).** On vend
-  l'échelle, pas le module.
-- **Un dossier acheté = UNE adresse**, pas la commune. L'argument est la **réversibilité asymétrique** :
-  devenir plus généreux ensuite est facile, retirer un droit accordé ne l'est pas. Ni PostHog ni aucune
-  donnée ne pouvait trancher ça — il n'y a **aucune donnée** (rien lancé, aucun achat à ce jour).
-- **Objet `address_dossiers`, UNE seule table.** Deux tables (`addresses` + dossiers) seraient une
-  normalisation prématurée : la BAN EST déjà le référentiel. L'argument décisif n'est pas la
-  spéculation sur l'évolution des ids BAN, c'est un défaut **déjà présent** : voir §5.
-- **Aucun choix de DPE avant paiement.** Le `DpeSelector` est un travail d'attribution ; le placer
-  avant l'encaissement met la friction au pire endroit.
-- **Grandfathering : SANS OBJET.** Personne n'a acheté. Resserrer le 14 € sur Territoire ne coûte rien
-  et ne lèse personne.
-
-### Non tranché
-- **Le 14 € survit-il ?** Puisqu'il n'a aucun acheteur, sa suppression est gratuite.
-- **La qualification avant paiement** (montrer la COUVERTURE sans les valeurs, puis refuser la vente si
-  le socle est insuffisant) : la discussion y a convergé, le porteur avait d'abord répondu
-  « remboursement sur seuil ». **À re-valider explicitement.**
-- **La mission du `business-strategist`** : moments du parcours immobilier où plusieurs adresses sont
-  comparées, modèles après le premier dossier (2ᵉ à l'unité / pack de 3 / pass / accès communal),
-  cannibalisation, protocole de test **sans historique payant**, événements à instrumenter dès le
-  lancement.
-
-### Faits vérifiés à réutiliser
-- **Le dossier n'est jamais vide.** Couverture nationale : BPE (« aucun dans les 3 km » EST une
-  information en rural), équipement automobile (4 états, jamais « pas de donnée »), sismicité, RGA,
-  sinistres indemnisés, statut réglementaire, parcelle. Ce qui varie : le **DPE** (seul trou fréquent)
-  et l'**ICU** (1955 grand-IRIS sur 596 communes).
-- **Mais matière ≠ valeur.** « Parcelle identifiée, sismicité faible, aucun risque réglementaire,
-  pharmacie à 1,8 km » est honnête et décevant à 39 €.
-- **La qualification est une route PUBLIQUE qui tape des API externes.** `/api/georisques-logement` est
-  explicitement réservée au rapport complet (« fan-out ~10 API dont Géorisques token »). Une
-  qualification pré-paiement doit être une **autre** route, légère, cachée par adresse, avec limite de
-  débit — sinon on offre un scraper gratuit de la base DPE avec notre token.
-- **Ne lister que les manques propres à CETTE adresse** (« aucun diagnostic retrouvé »), jamais
-  l'inventaire des sources que le produit n'a pas : le pré-check deviendrait un catalogue anxiogène.
-
----
-
-## 5. LE DÉFAUT LATENT À CONNAÎTRE : deux appartements du même immeuble s'écrasent
-
-`logement` a pour clé primaire `(user_id, logement_id)` avec `logement_id = ban_id`. Or
-**`PreciseLogementStep` existe précisément parce que plusieurs logements partagent une même adresse
-BAN** (« quand plusieurs diagnostics existent à l'adresse, on demande LEQUEL est le bon »).
-
-Conséquence : **un utilisateur qui analyse l'appartement du 2ᵉ étage puis celui du 4ᵉ, au même
-immeuble, écrase le premier.** Même ligne, même snapshot, choix de DPE remplacé.
-
-C'est gratuit aujourd'hui. **Ça devient une réclamation le jour où chaque dossier coûte 39 €.** C'est
-l'argument décisif pour que le droit porte sur un `address_dossier` et non sur `ban_id`.
-
----
-
-## 6. L'AUTRE SESSION : neuf faux silencieux, et le grain qui devient une propriété du fait
-
-Ajouté par la seconde session (fils `f98a002`, `ef17ffc`, `b01b8f2`, `473d2fa`, et les commits
-antérieurs de la journée). Elle a passé la journée sur **une seule classe de défaut** : *une réponse
-plausible, aucune erreur levée, aucun test capable de la voir* — parce que les tests éprouvaient
-notre logique contre nos propres chaînes, jamais contre les valeurs des sources.
-
-### Les neuf, dans l'ordre où ils sont tombés
-
-1. **Les IRIS étaient cherchés PAR NOM.** La France compte quatre Saint-Denis : la requête ramenait
-   103 IRIS, dont 62 à La Réunion, et en faisait la moyenne. **Motorisation de Saint-Denis (93)
-   affichée 39,9 % au lieu de 21,0 %.** Le dataset ne porte aucun code commune — il n'existe que dans
-   le préfixe du code IRIS — d'où requête par préfixe **puis filtre d'appartenance côté application**
-   (`iris-scope.ts`) : l'invariant ne se délègue pas à l'API. Débloque au passage Paris, Lyon et
-   Marseille, qui n'avaient **aucune** donnée IRIS (940 pour Paris contre `size=200` en dur).
-2. **La règle « bruit » rendait `satisfied` SANS aucun fait.** Donc aucune carte, donc aucune
-   limitation — alors que `criteria-registry` en tirait « favorable » et faisait monter la couverture.
-   Le lecteur recevait une bonne nouvelle sur SON adresse, tirée du centroïde communal. `uncertain`
-   dès qu'une adresse existe. **Les 900 tests passaient avant ; l'un d'eux verrouillait le
-   comportement fautif.**
-3. **`sol_pollue` valait `false` pour les 28 373 friches de France**, dont 485 en pollution avérée :
-   le champ porte sept libellés français, le code testait `=== true || === "true" || === "1"`.
-4. **Puis j'ai refait l'erreur en plus petit** : sept libellés écrasés en quatre états, « traitée »
-   rangée avec « avérée » et « peu probable » avec « inexistante ». Six états désormais, plus le
-   **libellé brut conservé** — c'est lui qui distingue une modalité nouvelle d'un vrai « inconnu ».
-5. **La fenêtre de recherche était plus étroite que le rayon**, d'est en ouest : `rayon / 111 000`
-   appliqué aux deux axes, alors qu'un degré de longitude vaut `111 km × cos(lat)`. Perte de 27 à
-   37 % aux latitudes françaises.
-6. **Le plafond mordait avant le tri** : `size: 20` pris dans l'ordre de l'API, tri par distance
-   ensuite. **Friche « la plus proche » annoncée à 314 m alors qu'il y en avait une à 78 m.**
-7. **Une friche sans coordonnées triait en premier** (`?? 0`), donc se présentait comme la plus proche.
-8. **Cartofriches était interrogé au grain COMMUNE** par la route Logement : cinquante friches situées
-   n'importe où, sans distance.
-9. **`sante-facts.ts` affirmait que le radon est vrai au grain ADRESSE et vit dans Logement.** Faux —
-   et c'est cette phrase qui expliquait pourquoi personne ne le cherchait au bon endroit.
-
-### Ce que le modèle a gagné
-
-**`EvidenceRef.relation` (`attribut` | `proximite`) ferme la limite qu'`echelles.ts` annonçait.**
-L'échelle se dérive du couple *ancre × relation* : une proximité ancrée sur l'adresse décrit le
-QUARTIER, un attribut du bien reste au LOGEMENT. Aucune exception par règle — une règle déclare ce
-qu'elle **mesure**, jamais où elle s'affiche.
-
-⚠ **Garde-fou gravé** : `relation` ne veut pas dire « la preuve est un rayon ». Une cavité à 300 m est
-mesurée en rayon mais atteint le **bien** : elle reste au logement. Le test : le constat parle-t-il de
-ce qu'on **vivra autour**, ou de ce qui **atteint le bien** ?
-
-**L'échelle « quartier » n'est plus vide.** `secteur-rules.ts` émet le premier `grain: "secteur"` :
-l'équipement automobile du secteur, comparé à sa commune. Le test qui figeait « aucune règle n'émet
-le grain SECTEUR » disait lui-même qu'il tomberait ce jour-là ; il vérifie maintenant l'inverse —
-que **seules** les règles de secteur émettent ce grain.
-
-**Un seul texte par geste.** `decision/logement-gestes.ts` est la source unique, lue par le moteur ET
-par la checklist. Les deux portaient leur copie et avaient divergé : la checklist disait encore
-« Vérifier le diagnostic… » là où le dossier dit « Regardez le détail… ». Le **confort d'été** entre
-au passage dans le moteur (zéro source nouvelle : `deriveThermalEvidence` est pure).
-
-**Le radon existe enfin.** Classe 3 seulement (19,5 % des communes, mesuré sur 200) — et **à Lyon,
-c'est l'arrondissement qui parle** : `/radon?code_insee=69123` rend zéro, `69389` répond, et le 9ᵉ est
-en classe 3 quand les huit autres sont en 1. D'où `arrondissementsDe` et
-`codePourSourceParArrondissement` dans `plm.ts`, qui ne portait que le sens inverse. **Sans adresse,
-ces trois communes n'ont pas de valeur** : la règle se tait.
-
-### Deux documents à lire avant de reprendre
-
-- **`docs/cadrage-sources-par-echelle.md`** — les 35 sources rangées par grain réel, le tri « existe-t-il
-  plus fin ? » en trois piles, et **§9 le registre des sources dormantes** (sept sources intégrées et
-  non branchées, avec ce qu'il faut pour les réveiller). Rien n'est supprimé, rien ne prétend être
-  couvert.
-- **`docs/cadrage-radon.md`** — la table de vérité, écrite avant le code.
-
-### L'analyse d'« Autour », en cours au moment de la coupure
-
-**Ce qu'il contient aujourd'hui : quatre choses.** BPE (le plus proche par catégorie), espace vert
-OSM, équipement automobile du secteur, îlot de chaleur (596 communes). Deux des quatre datent d'hier.
-
-**Le gisement immédiat : `potentiallyNoisyInfrastructure` est calculé et rendu NULLE PART.** Autoroute,
-voie rapide et voie ferrée, avec la distance réelle **depuis l'adresse**, dans le snapshot depuis
-toujours. Un commentaire dit pourquoi : « déplacée vers le futur module Santé » — module qui n'a
-jamais existé. C'est la meilleure donnée de santé environnementale du produit, et elle dort.
-⚠ **À afficher comme inventaire de sources potentielles, jamais comme verdict acoustique** : ce qu'on
-entend dépend du trafic, des horaires, du relief, de l'étage, des fenêtres.
-
-**Métier et Mobilité n'ont rien perdu.** Les modules étaient des ÉCRANS ; leurs critères vivent dans
-le moteur et décident déjà (`acces_transports`, `mobilite_quotidienne`, `viabilite_emploi`,
-`faible_dependance_auto`). La question n'est pas « où les remettre » mais « à quelle échelle chaque
-critère se lit » — et `faible_dependance_auto` montre le patron : lecture communale (position
-nationale) nuancée par lecture sectorielle.
-
-**Sitadel : je m'étais trompé hier en l'écartant.** Vérifié le 29/07 : le jeu SDES des autorisations
-d'urbanisme est **national, mensuel, mis à jour le jour même**, 1 905 937 autorisations de logements
-depuis 2013, et l'API DiDo filtre par commune :
-`…/datafiles/8b35affb-55fc-4c1f-915b-7750f974446a/csv?COMM=eq:17300&columns=…`. Il n'a **pas** de
-lat/lon mais porte les **parcelles cadastrales** (`SEC_CADASTRE1`/`NUM_CADASTRE1`) — et le produit
-résout déjà la parcelle d'une adresse. C'est le seul contenu qui répond à une question qu'aucune
-visite ne peut trancher : ce qui va être construit à côté.
-
-**Ordre proposé pour « Autour »** : 1. afficher les infrastructures bruyantes (déjà calculées, une
-session) · 2. compter dans un rayon plutôt que le plus proche (même donnée BPE : « une boulangerie »
-n'est pas « un quartier commerçant ») · 3. les permis Sitadel autour de l'adresse · 4. le zonage PLU
-des parcelles voisines (même appel GPU que la servitude ABF déjà en place).
-**Écarté pour coût** : les fréquences GTFS (parsing multi-opérateurs, pas « une source de plus ») et
-les cartes de bruit stratégiques (~100 DDT + agglomérations, aucun agrégat national).
-
----
-
-## Doctrine (à ne pas re-litiger)
-- **Une absence de couverture n'est jamais une absence de phénomène.** L'ICU non couvert ne dit PAS
-  « pas d'îlot ici » : il dit que cette source ne mesure pas cette adresse. Erreur commise dans cette
-  session, corrigée. **Tension à trancher plus tard** : `IcuExposure` fait `if (!icu) return null` et
-  le type assume « jamais de *non renseigné* » — un silence qui peut se lire comme un examen rassurant.
-- **Le payload d'une synthèse ne contient que des faits AFFICHÉS sous elle.** C'est ce qui interdit au
-  modèle de commenter ce que le lecteur ne peut pas vérifier d'un coup d'œil.
-- **Un module ne promet jamais un périmètre unique** quand il agrège des méthodes spatiales
-  différentes. Le grain se dit au niveau du fait.
-- **Ne jamais dégrader ce qu'un autre module a écrit** : un upsert d'identité OMET les colonnes qu'il
-  ne connaît pas (parcelle), il ne les écrit pas en `null`.
-- **Un UPDATE ciblé sur une ligne absente est un no-op SILENCIEUX.** Toute écriture qui suppose une
-  ligne doit être précédée — et `await` — de sa création.
-- **Chercher le nom d'un concept ne trouve pas ses paraphrases.**
-- **Vendre l'échelle, pas le module** : les thèmes traversent les trois échelles.
-- **Une valeur d'API jamais confrontée à la source est un mensonge en attente.** Trois fois le même
-  défaut (« feux de foret » au pluriel, `libelle_observation`, `sol_pollue`). La parade est écrite
-  dans `fixtures-sources-externes.ts` : **la valeur qui a causé le bug entre dans le corpus AVANT le
-  correctif**, relevée telle quelle, avec sa date.
-- **Un booléen ne peut pas porter un état de connaissance.** « inconnu » et « pollution inexistante »
-  rendus tous deux `false`, c'est « sol sain » là où personne n'a regardé. Quand une source distingue
-  des états, changer le TYPE, pas la comparaison — et conserver la valeur brute.
-- **Ne jamais prétendre au plus proche quand la liste des candidats a pu être coupée.** Un plafond qui
-  mord avant le tri transforme « le plus proche » en « le plus proche d'un échantillon arbitraire ».
-- **Une règle déclare ce qu'elle MESURE, jamais où elle s'affiche.** L'échelle se dérive du couple
-  ancre × relation. Une exception « telle règle va dans Quartier » rétablirait l'appartenance que la
-  projection existe pour supprimer.
-- **Une valeur volontairement non persistée doit être produite par CHAQUE chemin de sortie**, sinon
-  elle clignote (constaté : le clic « J'y vis » faisait disparaître l'équipement automobile). D'où
-  `server/autour-response.ts` : aucun chemin ne renvoie le snapshot directement.
-- **Une source fetchée mais jamais interprétée n'est pas une capacité du produit.** Retirer l'APPEL
-  ne retire pas la source : la lib, ses pièges et ses contrats restent (cf. §9 du cadrage).
-
-## La suite
-1. **Reprendre le brainstorming §4** — re-valider la qualification avant paiement, puis lancer le
-   `business-strategist` (rapport à déposer dans `docs/rapports-agents/business-strategist/`), puis
-   spec dans `docs/superpowers/specs/`. **Ne pas coder avant la spec.**
-2. **`address_dossiers`** — nécessaire dans tous les scénarios de §4, et corrige §5. Peut démarrer
-   avant l'agent.
-3. **Le test manuel de la bascule, jamais fait** : un dossier existant, un nouveau, une adresse sans
-   DPE, l'aller-retour Territoire → Autour → Logement. Demande un compte payant avec commune
-   débloquée.
-4. **La porte « j'ai une adresse » sur la home** — arbitrage porteur. Les deux CTA sont aujourd'hui
-   `Trouver où vivre` et `Analyser ma commune` : aucune entrée par l'adresse, alors que deux des trois
-   modules l'exigent.
-5. **`checkout-products.ts`** — le champ `features` décrit encore « la lecture du territoire… qui
-   s'enrichit au fil des prochains modules ». **Il n'est affiché nulle part** (vérifié), mais c'est une
-   source de vérité dormante et divergente. À nettoyer quand l'offre sera tranchée.
-6. **« Autour » : quatre chantiers, dans l'ordre** — afficher les infrastructures bruyantes déjà
-   calculées (une session, aucune donnée nouvelle) · compter dans un rayon plutôt que le plus proche ·
-   les permis Sitadel autour de l'adresse (API vérifiée, jointure par parcelle) · le zonage PLU des
-   parcelles voisines. Détail et réserves en §6.
-7. **Le radon attend une décision produit, pas du code** : libellé exact de la carte, et si le geste
-   « faire mesurer » mérite un annuaire — auquel cas la doctrine diagnostiqueurs s'applique (annuaire
-   qualifié SANS commission, le moteur ne connaît jamais les rémunérations).
-8. **La conclusion déterministe d'« Autour »** — le module rend des faits sans synthèse. Ne PAS créer
-   un troisième prompt : assembler des énoncés déterministes à partir de `secteur-facts.ts`
-   (`equipementAutoStatement` fait déjà ce geste). Mémoire : `project_futuree_autour_conclusion`.
-
-## Pièges
-- **Deux sessions dans le même tree** : stager par chemin, jamais `git add -A`. Vérifier `git diff`
-  avant d'ajouter un fichier partagé (`synthesize-logement/route.ts` a porté les deux ce matin).
-- `tsconfig.json` exclut `**/*.test.ts` du typecheck ; **eslint les ignore aussi** — un lint vert ne
-  dit rien d'eux.
-- Un commentaire JSX `{/* … */}` DANS un ternaire y met deux enfants et casse le build.
-- Le hook pre-commit lance `index:verify` (OK). Push direct sur `main`, pas de PR.
-- Sonde `probe-conclusion.ts` : **NE PAS lancer** (45 appels LLM facturés).
-- **`data/iris-logement.json` n'est régénéré par AUCUN automatisme.** `scripts/build-iris-logement.mjs`
-  existe, rien ne le lance, et l'URL INSEE contient l'identifiant de publication (`8647012`) qui change
-  à chaque millésime : le script devra être **édité**, pas seulement relancé.
-- **Le contrat client porte `irisScope` et `part_deplacements_motorises` que rien n'affiche.** Un champ
-  transporté que personne ne consomme finit supprimé « parce qu'il ne sert à rien », ou branché plus
-  tard par quelqu'un qui n'a pas lu ce qu'`irisScope` protège.
-- **`LAB_IRIS` est transporté sans sémantique** : la documentation INSEE ne publie pas ses modalités.
-  Ne pas la déduire par corrélation — ce serait reconstruire officieusement une doctrine du producteur.
-- **Les sept autres indicateurs IRIS de l'ADEME sont ESTIMÉS** (ENL 2022 par sondage, GEODIP 2017).
-  Seul l'équipement automobile a été basculé vers une source mesurée (INSEE RP 2022). Les autres —
-  en particulier les passoires, qui portent une décision produit — méritent le même examen.
+**Rappels mécaniques** : `tsconfig.json` exclut `**/*.test.ts` du typecheck et eslint les ignore, un
+lint vert ne dit rien d'eux. Un module important `server-only` casse sous `node --test`. Un
+commentaire JSX dans un ternaire casse le build. Le hook pre-commit lance `index:verify`.
+**Ne pas lancer `scripts/probe-conclusion.ts`** (45 appels LLM facturés).
