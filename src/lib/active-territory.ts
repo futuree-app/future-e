@@ -1,5 +1,9 @@
 import "server-only";
-import { communeParent } from "./plm";
+import {
+  decideTerritoryAccess,
+  decidePaidTerritory,
+  type TerritoryClaim,
+} from "./territory-claims";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -97,16 +101,12 @@ export async function resolveReadableTerritory(
     return { ...territory, deniedInsee: null, deniedCommune: null };
   }
 
-  // Territoire actif distinct : exige un grant pour ce couple (user, insee).
-  // La policy RLS report_grants_select_own garantit qu'on ne lit que ses grants.
-  const { data: grant } = await supabase
-    .from("report_grants")
-    .select("insee")
-    .eq("user_id", userId)
-    .eq("insee", territory.inseeCode)
-    .maybeSingle();
+  // Territoire actif distinct : exige une revendication sur cette commune. Depuis la migration 25,
+  // un DOSSIER dans la commune vaut aussi droit de lecture, pas seulement un grant : quelqu'un qui
+  // a payé le dossier d'une adresse marseillaise doit pouvoir lire Marseille.
+  const claims = await loadTerritoryClaims(supabase, userId);
 
-  if (grant) {
+  if (decideTerritoryAccess(claims, territory.inseeCode)) {
     return { ...territory, deniedInsee: null, deniedCommune: null };
   }
 
@@ -122,33 +122,77 @@ export async function resolveReadableTerritory(
   };
 }
 
-// Frontière de MONÉTISATION du module Logement (board étape 4.5). Analyser une adresse suppose
-// que l'utilisateur a le droit de LIRE la commune de cette adresse : sinon un seul achat
-// déverrouillerait l'analyse Logement de la France entière. Commune lisible = même règle que
-// resolveReadableTerritory, mais pour un INSEE arbitraire (celui de l'adresse tapée) :
-//   - résidence déclarée (home_insee_code), OU
-//   - commune achetée (rapport ou Pack) : un report_grant sur (user, insee).
-// Aucun élargissement implicite (voisines, département, abonnement, foyer, B2B) : ce seront des
-// droits EXPLICITES plus tard. La sécurité réelle est ici, côté serveur (le client peut doubler
-// pour l'UX, jamais pour la garantie).
-export async function canAnalyzeCommune(
+// ════════════════════════════════════════════════════════════════════════════
+// Le droit territorial, depuis la migration 25.
+//
+// `canAnalyzeCommune` vivait ici. Elle accordait la commune de RÉSIDENCE sans paiement, ce qui
+// n'était pas un accès gratuit : elle n'était atteinte qu'après le verrou de plan global des pages
+// Logement et Autour, donc elle dispensait un compte DÉJÀ payant d'un second achat. Le droit
+// descendant à l'échelle du bien, elle disparaît avec le droit communal qu'elle relayait.
+// ════════════════════════════════════════════════════════════════════════════
+
+// Charge en DEUX requêtes ce qui fonde un droit territorial. Les dossiers révoqués sont exclus
+// ici : ils n'atteignent jamais la décision.
+export async function loadTerritoryClaims(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<TerritoryClaim[]> {
+  const [grantsRes, dossiersRes] = await Promise.all([
+    supabase.from("report_grants").select("insee").eq("user_id", userId),
+    supabase
+      .from("address_dossiers")
+      .select("insee, stripe_payment_intent_id")
+      .eq("user_id", userId)
+      .is("access_revoked_at", null),
+  ]);
+
+  // Les DEUX erreurs sont inspectées. Une liste vide obtenue par panne se lirait « aucun droit »,
+  // donc fermerait le Territoire d'un acheteur légitime pendant l'incident.
+  if (grantsRes.error) throw new Error(`report_grants a échoué : ${grantsRes.error.message}`);
+  if (dossiersRes.error) {
+    throw new Error(`address_dossiers a échoué : ${dossiersRes.error.message}`);
+  }
+
+  const grants = (grantsRes.data ?? []) as { insee: string }[];
+  const dossiers = (dossiersRes.data ?? []) as {
+    insee: string;
+    stripe_payment_intent_id: string | null;
+  }[];
+
+  return [
+    ...grants.map((g): TerritoryClaim => ({ kind: "grant", insee: g.insee })),
+    ...dossiers.map(
+      (d): TerritoryClaim => ({
+        kind: "dossier",
+        insee: d.insee,
+        paid: d.stripe_payment_intent_id !== null,
+      }),
+    ),
+  ];
+}
+
+// Territoire COMPLET sur cette commune : un grant, ou un dossier accessible dans cette commune.
+//
+// La RÉSIDENCE n'ouvre plus rien par elle-même, et ce n'est pas une régression : un compte gratuit
+// voyait déjà le rapport PARTIEL de sa commune, qui reste rendu quand cette fonction dit faux.
+// Le défaut réparé est l'inverse : `resolveReadableTerritory` ne contrôlait aucun grant sur la
+// résidence, donc un achat quelconque ouvrait le Territoire complet d'une commune jamais achetée.
+export async function canAccessTerritory(
   supabase: SupabaseClient,
   userId: string,
   insee: string | null | undefined,
 ): Promise<boolean> {
   if (!insee) return false;
-  // PLM : l'adresse est géocodée sur l'arrondissement (751xx), la commune stockée sur son code
-  // commune (75056). On compare au grain COMMUNE des deux côtés (cf. src/lib/plm.ts).
-  const target = communeParent(insee);
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("home_insee_code")
-    .eq("user_id", userId)
-    .maybeSingle();
-  if (profile?.home_insee_code && communeParent(profile.home_insee_code) === target) return true;
-  const { data: grants } = await supabase
-    .from("report_grants")
-    .select("insee")
-    .eq("user_id", userId);
-  return (grants ?? []).some((g) => communeParent(g.insee as string) === target);
+  return decideTerritoryAccess(await loadTerritoryClaims(supabase, userId), insee);
+}
+
+// Gouverne le TARIF d'approfondissement (spec de tarification). Un dossier administratif
+// (stripe_payment_intent_id nul) ouvre le territoire sans jamais valoir acquisition.
+export async function hasPaidTerritory(
+  supabase: SupabaseClient,
+  userId: string,
+  insee: string | null | undefined,
+): Promise<boolean> {
+  if (!insee) return false;
+  return decidePaidTerritory(await loadTerritoryClaims(supabase, userId), insee);
 }

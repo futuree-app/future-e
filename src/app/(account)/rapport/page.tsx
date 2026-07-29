@@ -2,10 +2,9 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { canAccessCompleteReport } from "@/lib/access";
 import { PRODUCT_MODULES, MODULE_HREF } from "@/lib/product";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
-import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
+import { resolveReadableTerritory, TERRITORY_SELECT, canAccessTerritory } from "@/lib/active-territory";
 import { TrackedModuleLink, TrackedUpgradeLink } from "./RapportTrackedLinks";
 import HorizonBar from "@/components/report/HorizonBar";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
@@ -18,7 +17,8 @@ import { Suspense } from "react";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
 import { DossierAvecLogement } from "@/components/report/DossierAvecLogement";
-import { getLatestLogement } from "@/lib/logement-store";
+import { listDossiers } from "@/lib/address-dossier-store";
+import { communeParent } from "@/lib/plm";
 import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 
@@ -43,7 +43,6 @@ const MODULE_BENEFIT: Record<string, string> = {
 
 export default async function RapportPage() {
   const account = await getCurrentUserAccount();
-  const fullReport = canAccessCompleteReport(account);
 
   const { supabase, user } = await requireCurrentUser();
   const { data: profile } = await supabase
@@ -57,6 +56,16 @@ export default async function RapportPage() {
   const inseeCode = territory.inseeCode;
   const displayName = communeName ?? "votre commune";
 
+  // La complétude se demande À LA COMMUNE, plus à un flag de plan.
+  //
+  // `canAccessCompleteReport(account)` était global : il ne disait pas QUELLE commune était payée.
+  // Combiné à `resolveReadableTerritory`, qui ne contrôlait rien sur la résidence, un achat
+  // quelconque ouvrait le Territoire complet de la commune de résidence, jamais achetée.
+  //
+  // Faux ne ferme rien : le rapport PARTIEL reste rendu, exactement comme aujourd'hui pour un
+  // compte gratuit. C'est la dizaine de branches ci-dessous qui s'en chargent.
+  const fullReport = await canAccessTerritory(supabase, user.id, inseeCode);
+
   const allModules = PRODUCT_MODULES;
   // Première lecture du compte gratuit : réponses du wizard persistées (point 2).
   const serverWizardAnswers = (profile?.wizard_answers ?? null) as WizardAnswers | null;
@@ -64,20 +73,24 @@ export default async function RapportPage() {
 
   // Dossier de décision (« En une minute ») : payant, commune connue, projet présent. Ouvert à tous
   // les payants (pas de flag) ; le cas creux reste digne (conclusion honnête + contraintes non couvertes).
-  // Une analyse logement déjà sauvegardée pour CETTE commune = adresse renseignée : on coupe la règle
-  // « confort sans adresse » et le CTA renvoie vers l'analyse, plutôt que d'inviter à saisir une adresse.
-  const latestLogement = fullReport && inseeCode ? await getLatestLogement(supabase, user.id) : null;
-  const logementForCommune = latestLogement && latestLogement.insee === inseeCode ? latestLogement : null;
+  // Un dossier de CETTE commune vaut « adresse renseignée » : on coupe la règle « confort sans
+  // adresse » et le CTA renvoie vers l'analyse, plutôt que d'inviter à saisir une adresse. On compare au grain commune
+  // (communeParent) : un dossier sur le 3e arrondissement de Lyon concerne bien Lyon.
+  const dossiers = fullReport && inseeCode ? await listDossiers(supabase, user.id) : [];
+  const logementForCommune =
+    inseeCode
+      ? (dossiers.find((d) => communeParent(d.insee) === communeParent(inseeCode)) ?? null)
+      : null;
   const communeResult =
     fullReport && inseeCode && userProject
       ? await buildCommuneDossier(inseeCode, userProject, { hasAddress: Boolean(logementForCommune) })
       : null;
   const dossier = communeResult?.dossier ?? null;
   const dossierLogementLink = logementForCommune
-    ? { href: `/rapport/logement?logementId=${encodeURIComponent(logementForCommune.logement_id)}`, label: logementForCommune.address_label }
+    ? { href: `/rapport/logement?dossierId=${encodeURIComponent(logementForCommune.id)}`, label: logementForCommune.address_label }
     : null;
   const dossierAddress: ResolvedAddress | null = logementForCommune
-    ? { id: logementForCommune.logement_id, label: logementForCommune.address_label, city: logementForCommune.city, citycode: logementForCommune.insee, postcode: logementForCommune.postcode, latitude: logementForCommune.latitude, longitude: logementForCommune.longitude }
+    ? { id: logementForCommune.ban_id, label: logementForCommune.address_label, city: logementForCommune.city, citycode: logementForCommune.insee, postcode: logementForCommune.postcode, latitude: logementForCommune.latitude, longitude: logementForCommune.longitude }
     : null;
 
   return (
@@ -264,7 +277,7 @@ export default async function RapportPage() {
                 communeDossier={dossier}
                 logementLink={dossierLogementLink}
                 insee={inseeCode}
-                scopeKey={`logement:${logementForCommune.logement_id}`}
+                scopeKey={`logement:${logementForCommune.id}`}
                 // Les contraintes dures, hydratées UNE fois : la section n'en change que le point
                 // d'évaluation (l'adresse), elle ne re-résout aucune référence.
                 hard={communeResult.hard}
