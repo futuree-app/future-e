@@ -100,9 +100,85 @@ et **l'ancre de prix à corriger**, voir Pièges), plus un arbitrage
 
 ---
 
+## URGENT : le droit est incohérent entre les écrans (constaté après le déploiement)
+
+**Symptôme observé par le porteur, connecté** : `/rapport` sert le **rapport partiel** de La Rochelle,
+pendant que `/compte` annonce « Trois échelles, toutes ouvertes ». Les deux écrans ne posent plus la
+même question.
+
+**Cause, et c'est une faute de ce lot.** Le point de décision a été changé sur `/rapport`, Logement
+et Autour, mais **cinq points de citation sont restés en arrière** :
+
+| Endroit | Question posée aujourd'hui |
+|---|---|
+| `src/app/(account)/rapport/page.tsx:66` | `canAccessTerritory(commune)` ← changé ce soir |
+| `src/app/(account)/compte/page.tsx:33` | `canAccessCompleteReport(account)` ← flag de plan |
+| `src/app/(account)/rapport/quartier/page.tsx:35,40` | `canAccessCompleteReport(account)` ← flag de plan |
+| `src/app/api/synthesize-quartier/route.ts:222` | `canAccessCompleteReport(account)` ← flag de plan |
+| `src/app/(dashboard)/dashboard/page.tsx:16` | `canAccessCompleteReport(account)` ← flag de plan |
+
+Plus deux commentaires périmés qui citent l'ancienne règle : `src/lib/decision-packs.ts:125` et
+`src/lib/active-territory.ts:21`.
+
+C'est **exactement le piège écrit dans `AGENTS.md`** (« un seuil qui devient conditionnel rend
+conditionnel tout ce qui le cite… le point de décision, le texte rendu, la convention affichée »).
+La règle était dans le projet, elle n'a pas été appliquée.
+
+**Pourquoi le compte du porteur est touché** : `plan = suivi`, `report_access = complete`, mais
+**zéro `report_grant`**, résidence La Rochelle (`17300`), et ses deux dossiers sont à Nantes
+(`44109`). Donc `canAccessTerritory(17300)` répond faux.
+
+**Un vrai acheteur n'aurait pas ce problème** : le webhook Stripe crée le grant au paiement
+(`webhook/route.ts:125`). Le trou ne concerne que les comptes dont le plan a été posé à la main,
+c'est-à-dire les cinq comptes de test. La spec déclarait le grandfathering « sans objet parce que
+personne n'a payé » : exact sur les paiements, **faux sur les états de compte**.
+
+### Arbitrage à trancher par le porteur, AVANT de coder
+
+1. **Créer un `report_grant` sur la résidence** pour les comptes dont le plan est payant
+   (régularisation de données, le code reste juste). Effet de bord à assumer : ce grant vaudra
+   « territoire payé », donc ouvrira le tarif d'approfondissement plus tard. Recommandation de la
+   session précédente.
+2. **Rouvrir la résidence au flag de plan** (`report_access === "complete"`). Aucune écriture en
+   base, mais ça rouvre le trou que ce lot vient de fermer.
+3. **Ne rien faire** : vivre avec le partiel jusqu'à ce que le checkout existe, et ne corriger que
+   les textes.
+
+Puis, dans tous les cas : **aligner les cinq points de citation sur la même question**. Attention à
+l'ordre, aligner avant de régulariser fermerait aussi le module Territoire.
+
+SQL de régularisation, si l'option 1 est retenue :
+```sql
+insert into public.report_grants (user_id, insee, commune, source)
+select p.user_id, p.home_insee_code, p.home_commune, 'direct'
+from public.user_profiles p
+join public.user_accounts a on a.user_id = p.user_id
+where a.report_access = 'complete' and p.home_insee_code is not null
+on conflict (user_id, insee) do nothing;
+```
+
+---
+
+## Défaut préexistant découvert au passage : le teaser nomme la mauvaise commune
+
+`src/components/wizard/WizardTeaser.tsx:292` fait `const ville = answers.quartier || "votre
+commune"` pour le titre « Aperçu personnalisé · {ville} », **mais charge les signaux sur
+`inseeCode`**, la commune du rapport. Chez le porteur : quatre points d'attention calculés sur **La
+Rochelle**, affichés sous le nom de **Carpentras** (sa réponse au wizard).
+
+Faux silencieux au sens du §6 de l'archive : plausible, aucune erreur levée, aucun test capable de
+le voir. Antérieur à ce lot. Le titre doit nommer la commune réellement analysée, ou le teaser doit
+charger la commune qu'il nomme, mais pas les deux à la fois.
+
+---
+
 ## Prochaine étape immédiate
 
-**Vérifier que le correctif `cb3fc79` a résolu le gel du module Autour.** Ouvrir
+**D'abord trancher l'arbitrage de la section URGENT ci-dessus** : le porteur n'a plus accès au
+rapport complet de sa propre commune, et deux écrans se contredisent. C'est ce qui bloque son
+usage, avant tout autre chantier.
+
+**Ensuite seulement : vérifier que le correctif `cb3fc79` a résolu le gel du module Autour.** Ouvrir
 `https://futur-e.fr/rapport/autour?dossierId=cfe1ed8e-5fc0-4b8c-81ad-989c1d0c3db6` connecté, et
 regarder le bloc « Espace vert ».
 
