@@ -156,7 +156,7 @@ export function DossierDecisionSection({
             const partages = new Set(grains.filter(Boolean));
             const grainCommun = partages.size === 1 ? [...partages][0]! : null;
             return (
-              <div key={s.key} className="glass rounded-xl p-6">
+              <div key={s.key} className="glass rounded-xl p-5 sm:p-6">
                 <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mb-2" style={{ color: col }}>
                   <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
                   {s.title}
@@ -191,7 +191,7 @@ export function DossierDecisionSection({
                quatre traits vifs sous un bloc de réponse qui, lui, porte souvent un ton neutre (gris).
                L'œil allait aux pièces à examiner plutôt qu'à la réponse. La couleur de section
                survit là où elle suffit : la pastille en tête de titre, qui la porte déjà. */
-            <div key={s.key} className="glass rounded-xl p-6">
+            <div key={s.key} className="glass rounded-xl p-5 sm:p-6">
               <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mb-2" style={{ color: col }}>
                 <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
                 {s.title}
@@ -291,7 +291,7 @@ export function DossierDecisionSection({
         logement ? (
           <Link
             href={logement.href}
-            className="mt-5 group flex items-center justify-between gap-4 px-6 py-4 rounded-xl no-underline border border-white/[0.1] bg-white/[0.02] hover:border-accent/40 hover:bg-white/[0.04] transition-colors"
+            className="mt-5 group flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-4 rounded-xl no-underline border border-white/[0.1] bg-white/[0.02] hover:border-accent/40 hover:bg-white/[0.04] transition-colors"
           >
             <span className="flex flex-col gap-1">
               <span className="text-[14px] font-semibold text-label">Voir l&apos;analyse du logement</span>
@@ -302,7 +302,7 @@ export function DossierDecisionSection({
         ) : (
           <Link
             href="/rapport/logement"
-            className="mt-5 group flex items-center justify-between gap-4 px-6 py-4 rounded-xl no-underline border border-white/[0.1] bg-white/[0.02] hover:border-accent/40 hover:bg-white/[0.04] transition-colors"
+            className="mt-5 group flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-4 rounded-xl no-underline border border-white/[0.1] bg-white/[0.02] hover:border-accent/40 hover:bg-white/[0.04] transition-colors"
           >
             <span className="flex flex-col gap-1">
               <span className="text-[14px] font-semibold text-label">Affiner avec une adresse</span>

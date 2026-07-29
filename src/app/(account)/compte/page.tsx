@@ -64,7 +64,7 @@ export default async function ComptePage() {
 
       <Navbar ctas={{ secondary: { href: "/rapport/dossiers", label: "Mes biens" }, primary: fullAccess ? { href: "/rapport", label: "Mon rapport" } : { href: "/#pricing", label: "Passer au complet" } }} />
 
-      <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
+      <div className="relative z-[2] max-w-[1100px] mx-auto px-5 sm:px-7 pb-24">
 
         {/* Persiste les réponses du wizard (sessionStorage → profil) si elles
             ne sont pas déjà en base : rend la première lecture retrouvable. */}
@@ -293,7 +293,7 @@ export default async function ComptePage() {
 
       {/* Footer */}
       <footer className="relative z-[2] border-t border-white/[0.08]">
-        <div className="max-w-[1100px] mx-auto px-7 py-8 flex items-center justify-between gap-6 flex-wrap">
+        <div className="max-w-[1100px] mx-auto px-5 sm:px-7 py-8 flex items-center justify-between gap-6 flex-wrap">
           <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
             futur<span className="text-accent not-italic">•</span>e
           </div>

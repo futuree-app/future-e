@@ -1106,7 +1106,10 @@ export function QuartierAside({ communeName, scenarios, georisques, territoire, 
                   {THEME[g.t].label}
                 </span>
               </div>
-              <div className="grid grid-cols-4 gap-2.5">
+              {/* Quatre colonnes seulement à partir de `lg`. Figée à 4, cette grille donnait
+                  ~72 px par carte sur téléphone, pour un libellé, une valeur, un sous-titre et une
+                  source : la carte devenait illisible là où la donnée est justement le produit. */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
                 {g.items.map((f) => {
                   const clickable = !!f.detail;
                   return (

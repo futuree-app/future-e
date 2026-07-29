@@ -165,7 +165,52 @@ révélés plus larges que ce qui est écrit ci-dessous, et le second reste ouve
   encore « ce qui entoure votre adresse et ce qui pèse sur votre logement ». Recouvre le chantier
   déjà traité en partie le 29/07 (cf. `CURRENT.md`, lot `da6f079`).
 
-### Étape 3 · Le responsive du Rapport Territoire, avant toute refonte
+### Étape 3 · Le responsive du Rapport Territoire, avant toute refonte · **FAITE**
+
+**État au 30/07, après exécution.** Neuf fichiers touchés, `tsc --noEmit` propre, rendus vérifiés en
+local sur `/`, `/dev/dossier` et `/dev/conclusion`. Rien de la grammaire visuelle n'a bougé : mêmes
+composants, mêmes teintes, mêmes gabarits de carte. Seuls les seuils changent.
+
+**Le constat de départ était trop noir**, et c'est utile pour la suite : le responsive n'est pas
+absent, il est *incomplet*. Quatre composants avaient déjà des variantes (`FactCompositionCard`
+`md:grid-cols-2`, `TerritoryIdentityCard` et `PropertyPassport` `sm:grid-cols-2`,
+`QuartierSynthesis`), `MetricDrawer` est **entièrement** responsive (`clamp(320px, 92vw, 440px)` plus
+une media query 640 px qui le bascule en feuille basse), la `Navbar` a son menu mobile, et les
+grilles des modules Autour et Logement sont déjà fluides (`repeat(auto-fill, minmax(…))`). Le
+périmètre réel se réduisait à **trois grilles figées**, aux paddings et au hero.
+
+Ce qui a été fait :
+
+- **Les trois grilles figées.** Hero de `/rapport` : `grid-cols-[1fr_400px]` → empilé sous `lg`
+  (la colonne de 400 px écrasait la lecture à ~200 px). Cartes de modules : `grid-cols-3` →
+  `1 / sm:2 / lg:3`. Cartes climat (`QuartierClimatData`) : `grid-cols-4` →
+  `2 / md:3 / lg:4`, le point le plus dur, ~72 px par carte sur téléphone avant correction.
+- **Le padding de page**, sur les sept conteneurs `max-w-[1100px]` du rapport, des modules et de
+  `/compte` : `px-7` → `px-5 sm:px-7`. Seize pixels rendus à la colonne de lecture sur téléphone.
+- **Les blocs de décision** : `card-verdict` passe `p-8` → `p-6 sm:p-8`, les cartes de section
+  `p-6` → `p-5 sm:p-6`, et les deux liens de bas de section gagnent `flex-wrap`.
+- **Le bandeau « horizons verrouillés »** de `HorizonBar` gagne `flex-wrap` : texte et CTA se
+  chevauchaient sous 500 px.
+- **La preuve produit du hero d'accueil ne disparaît plus.** `.hero-right { display: none }` est
+  remplacé par une version compacte : le bloc passe sous le titre et se réduit à ses deux premières
+  cartes (l'accroche climat, puis la carte de profondeur), via la classe `hero-preview-extra` posée
+  sur les cartes d'index 2 et 3. `HorizonSwitch` reste affiché, il tient en 236 px.
+
+**Ouvert par le porteur pendant l'exécution, à instruire en étape 5** : le **filet coloré en haut de
+carte** (`border-t-2` sur `rounded-xl`, et son équivalent inline `borderTop: 2px solid ${col}` sur les
+cartes climat). Il est aujourd'hui dans la pile « conserver » de l'audit, comme vocabulaire
+chromatique du thème. Le porteur le soupçonne d'être **un signe reconnaissable d'interface générée
+par IA**, ce qui le ferait basculer dans la pile inverse. Non tranché, rien n'a été modifié. Le hook
+`impeccable` le signale de son côté (`border-accent-on-rounded`), aucune exception n'a été posée en
+attendant l'arbitrage.
+
+**Non traité, et volontairement** : la largeur de lecture. Le handoff la renvoie lui-même à l'étape
+A / `DESIGN.md` (« se règle à l'échelle de la PAGE »). Rien n'a été décidé ici pour ne pas graver un
+choix qui appartient à la direction visuelle.
+
+---
+
+Constat d'origine, conservé pour mémoire :
 
 **Traiter comme un défaut de livraison, sans toucher à la grammaire visuelle.** Constat mesuré :
 `grep` sur `sm:` `md:` `lg:` `@media` dans les 22 composants de `src/components/report/` et dans

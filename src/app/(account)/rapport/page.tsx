@@ -118,7 +118,7 @@ export default async function RapportPage() {
 
       <Navbar ctas={{ secondary: { href: "/compte", label: "Mon compte" }, primary: { href: "/rapport/dossiers", label: "Mes biens" } }} />
 
-      <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
+      <div className="relative z-[2] max-w-[1100px] mx-auto px-5 sm:px-7 pb-24">
 
         {/* Persiste les réponses du wizard (sessionStorage → profil) à la 1re
             page authentifiée, si elles ne sont pas déjà en base. */}
@@ -217,7 +217,9 @@ export default async function RapportPage() {
         )}
 
         {/* ── Hero ── */}
-        <section className={fullReport ? "grid grid-cols-[1fr_400px] gap-16 items-start py-20" : "py-20"}>
+        {/* La colonne de 400 px n'existe qu'à partir de `lg`. En dessous, le hub des modules passe
+            sous le titre au lieu d'écraser la colonne de lecture à ~200 px. */}
+        <section className={fullReport ? "grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-10 lg:gap-16 items-start py-14 lg:py-20" : "py-14 lg:py-20"}>
           <div>
             <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-accent mb-5">
               <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
@@ -375,7 +377,7 @@ export default async function RapportPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
               {allModules.map((module, i) => {
                 const col = MODULE_COLORS[module.id] ?? "var(--violet)";
                 const benefit = module.id === "quartier"
@@ -432,7 +434,7 @@ export default async function RapportPage() {
 
       {/* Footer */}
       <footer className="relative z-[2] border-t border-white/[0.08]">
-        <div className="max-w-[1100px] mx-auto px-7 py-9 flex items-center justify-between gap-6 flex-wrap">
+        <div className="max-w-[1100px] mx-auto px-5 sm:px-7 py-9 flex items-center justify-between gap-6 flex-wrap">
           <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
             futur<span className="text-accent not-italic">•</span>e
           </div>

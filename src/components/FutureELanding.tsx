@@ -2525,7 +2525,11 @@ export default function FutureELanding() {
         }
         @media (max-width:768px) {
           .hero-grid { grid-template-columns: 1fr !important; }
-          .hero-right { display: none !important; }
+          /* La preuve produit du hero ne disparaît plus sur téléphone : elle passe sous le titre,
+             réduite à ses deux premières cartes. C'est la seule donnée réelle de la commune que
+             voit un visiteur mobile avant de scroller. */
+          .hero-right { margin-top: 32px; }
+          .hero-preview-extra { display: none !important; }
           .modules-grid { grid-template-columns: 1fr !important; }
           .pricing-grid { grid-template-columns: 1fr !important; }
           .lifecompare-grid { grid-template-columns: 1fr !important; gap: 32px !important; padding: 32px 22px !important; }
@@ -2651,10 +2655,13 @@ export default function FutureELanding() {
                 <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '40%', background: 'linear-gradient(90deg, transparent, #fb923c, transparent)', animation: 'hero-loading-sweep 1.4s ease-in-out infinite' }} />
               </div>
             )}
+            {/* `hero-preview-extra` porte les cartes 3 et 4 : sur téléphone, la preuve produit se
+                réduit aux deux premières (l'accroche climat, puis la carte de profondeur) plutôt
+                que de disparaître entièrement comme avant. Voir la media query 768 px. */}
             {previewCards.map((item, index) => (
               <div
                 key={`${slotAnimKey}-${index}`}
-                className={commune || slotSettled ? 'slot-card-settle' : 'slot-card-spin'}
+                className={`${commune || slotSettled ? 'slot-card-settle' : 'slot-card-spin'}${index >= 2 ? ' hero-preview-extra' : ''}`}
                 style={{
                   ...styles.previewCard,
                   opacity: 1 - index * 0.08,

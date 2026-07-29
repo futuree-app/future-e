@@ -85,7 +85,7 @@ export function ConclusionBlock({
     // il porte le verre surélevé du système (cf. .card-verdict), et son halo suit le ton du verdict.
     // La mesure de 168 px, calibrée à l'écran, ne bouge pas.
     <div
-      className="card-verdict rounded-2xl p-8 mb-5"
+      className="card-verdict rounded-2xl p-6 sm:p-8 mb-5"
       style={{ "--tone": color, minHeight: "168px" } as React.CSSProperties}
     >
       <div className="flex items-baseline justify-between gap-4 mb-3">

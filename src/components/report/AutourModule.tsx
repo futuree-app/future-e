@@ -155,7 +155,7 @@ export default function AutourModule({
 
       <Navbar ctas={{ secondary: { href: "/rapport", label: "Mon rapport" }, primary: { href: "/rapport/dossiers", label: "Mes biens" } }} />
 
-      <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
+      <div className="relative z-[2] max-w-[1100px] mx-auto px-5 sm:px-7 pb-24">
         <section className="py-20">
           <div className="max-w-[720px]">
             <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase mb-5" style={{ color: "var(--green)" }}>

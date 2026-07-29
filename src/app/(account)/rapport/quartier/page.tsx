@@ -121,7 +121,7 @@ export default async function RapportQuartierPage() {
       <Navbar ctas={{ secondary: { href: "/rapport", label: "Mon rapport" }, primary: { href: "/rapport/dossiers", label: "Mes biens" } }} />
 
       <ModuleTracker moduleId="quartier" commune={communeName} inseeCode={inseeCode} source="page" />
-      <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
+      <div className="relative z-[2] max-w-[1100px] mx-auto px-5 sm:px-7 pb-24">
         {!communeName && (
           <div className="pt-10">
             <CommuneSetupBanner />

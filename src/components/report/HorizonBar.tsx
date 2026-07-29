@@ -175,7 +175,7 @@ export default function HorizonBar({ communeName, locked = false, inseeCode, mod
 
       {locked && (
         <div
-          className="glass rounded-xl px-5 py-3.5 mb-8 flex items-center justify-between gap-6"
+          className="glass rounded-xl px-5 py-3.5 mb-8 flex flex-wrap items-center justify-between gap-4"
           style={{ borderLeft: "2px solid var(--accent, #c8b89a)" }}
         >
           <p className="text-[14px] text-muted leading-[1.6]">
