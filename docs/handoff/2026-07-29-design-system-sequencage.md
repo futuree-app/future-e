@@ -248,6 +248,38 @@ Les cinq constats qui commandent `DESIGN.md` :
    fois de signe sémantique (le thème) et de décor (l'orbe de fond). **Même question que le sable :
    à trancher ensemble en étape 5.**
 
+Trois constats ajoutés le 30/07, après le retour du porteur sur l'histoire du chantier et un retour
+externe sur la navigation (tout ce qui suit a été vérifié dans le code) :
+
+6. **Une même intention est servie par six familles d'URL.** Pour la seule chaleur : neuf surfaces,
+   dont six qui répondent à « la chaleur à telle commune ». Un cas est **cassé** : `/savoir/cadmium`
+   est un article rédigé qui masque la route dynamique (la clé `cadmium` de `SAVOIR_HUBS` est du code
+   mort), mais `/savoir/cadmium/[insee]` reste servi par le gabarit legacy. Le parent et l'enfant
+   appartiennent à deux générations du produit. Et le sitemap soumet le hub générique
+   `/savoir/canicule` **en concurrence** avec `/chaleur`, tandis que `/inondation` n'y figure pas du
+   tout.
+7. **Deux régimes économiques pour la même intention.** Question du porteur tranchée : Savoir et Agir
+   générique sont **déjà gratuits** (les pages Agir montent `PaywallGate` en `variant="open"`, qui ne
+   cache rien), et la mort du Fil n'a laissé aucune dette. Le seul contenu gaté de la famille est
+   `/savoir/[slug]/[insee]`, le croisement thème × commune, donc le bon endroit. Mais
+   `/chaleur/[insee]` et `/inondation/[insee]` sont **entièrement ouvertes** sur la même intention :
+   le lecteur venu d'un moteur est récompensé ou puni selon l'URL retenue. Et le seul contenu payant
+   d'Explorer vit sur le gabarit legacy au score sur 100.
+8. **Le CTA de fin des pages Agir est centralisé** dans `PaywallGate.tsx:123` : un seul point de
+   correction pour les sept guides, pas sept.
+
+**Un lot minimal « propre au lancement » est écrit dans l'audit** (position du porteur : Explorer
+n'est pas le chantier principal, mais doit être propre sans être parfait). Il ne construit rien, il
+retire : faire mourir le gabarit générique par redirections, corriger le sitemap, sortir les quatre
+badges « Bientôt » et la colonne « Par profil » du header, monter la vraie `Navbar` sur les 19 pages
+à nav locale, dater ou supprimer le bulletin de veille. **Contexte SEO vérifié en production** : le
+site est entièrement fermé au crawl (`robots.txt` en `Disallow: /`, plus `index: false` dans
+`layout.tsx`), donc aucune collision d'URL n'a encore coûté quoi que ce soit. La canonicité doit être
+tranchée **avant de lever le `Disallow`**, ce qui est exactement la pile d'action arrêtée le 29/06 et
+restée immobile depuis (fiche `project_frontiere_savoir_agir`).
+
+**Une proposition de navigation est en annexe de l'audit, NON TRANCHÉE**, à la demande du porteur.
+
 Ce que la famille fait déjà bien, et que `DESIGN.md` doit protéger plutôt que refaire :
 `/savoir/pollutions-invisibles` porte **le meilleur traitement des sources du produit** (source
 inline sur l'affirmation + bibliographie descriptive) ; `/agir/canicule` a une section « ce que vous
