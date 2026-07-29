@@ -1,6 +1,7 @@
 # Passation — journée du 29/07 : six thèmes deviennent trois échelles, et l'entourage prend son module
 
-**Horodatage** : 2026-07-29 16:46 (fin de session) · **Branche** : `main` = `473d2fa` (poussé).
+**Horodatage** : 2026-07-29 16:46, **complété à 17:40 par la seconde session** (§6, et les ajouts
+signés dans Doctrine / La suite / Pièges) · **Branche** : `main` = `473d2fa` (poussé).
 **Tree propre**, un seul non suivi à NE JAMAIS committer : `Futur.e Design System.zip`.
 
 **983 tests · tsc 0 · lint global à 20 problèmes (8 erreurs)** — toutes antérieures à cette session
@@ -179,6 +180,112 @@ l'argument décisif pour que le droit porte sur un `address_dossier` et non sur 
 
 ---
 
+## 6. L'AUTRE SESSION : neuf faux silencieux, et le grain qui devient une propriété du fait
+
+Ajouté par la seconde session (fils `f98a002`, `ef17ffc`, `b01b8f2`, `473d2fa`, et les commits
+antérieurs de la journée). Elle a passé la journée sur **une seule classe de défaut** : *une réponse
+plausible, aucune erreur levée, aucun test capable de la voir* — parce que les tests éprouvaient
+notre logique contre nos propres chaînes, jamais contre les valeurs des sources.
+
+### Les neuf, dans l'ordre où ils sont tombés
+
+1. **Les IRIS étaient cherchés PAR NOM.** La France compte quatre Saint-Denis : la requête ramenait
+   103 IRIS, dont 62 à La Réunion, et en faisait la moyenne. **Motorisation de Saint-Denis (93)
+   affichée 39,9 % au lieu de 21,0 %.** Le dataset ne porte aucun code commune — il n'existe que dans
+   le préfixe du code IRIS — d'où requête par préfixe **puis filtre d'appartenance côté application**
+   (`iris-scope.ts`) : l'invariant ne se délègue pas à l'API. Débloque au passage Paris, Lyon et
+   Marseille, qui n'avaient **aucune** donnée IRIS (940 pour Paris contre `size=200` en dur).
+2. **La règle « bruit » rendait `satisfied` SANS aucun fait.** Donc aucune carte, donc aucune
+   limitation — alors que `criteria-registry` en tirait « favorable » et faisait monter la couverture.
+   Le lecteur recevait une bonne nouvelle sur SON adresse, tirée du centroïde communal. `uncertain`
+   dès qu'une adresse existe. **Les 900 tests passaient avant ; l'un d'eux verrouillait le
+   comportement fautif.**
+3. **`sol_pollue` valait `false` pour les 28 373 friches de France**, dont 485 en pollution avérée :
+   le champ porte sept libellés français, le code testait `=== true || === "true" || === "1"`.
+4. **Puis j'ai refait l'erreur en plus petit** : sept libellés écrasés en quatre états, « traitée »
+   rangée avec « avérée » et « peu probable » avec « inexistante ». Six états désormais, plus le
+   **libellé brut conservé** — c'est lui qui distingue une modalité nouvelle d'un vrai « inconnu ».
+5. **La fenêtre de recherche était plus étroite que le rayon**, d'est en ouest : `rayon / 111 000`
+   appliqué aux deux axes, alors qu'un degré de longitude vaut `111 km × cos(lat)`. Perte de 27 à
+   37 % aux latitudes françaises.
+6. **Le plafond mordait avant le tri** : `size: 20` pris dans l'ordre de l'API, tri par distance
+   ensuite. **Friche « la plus proche » annoncée à 314 m alors qu'il y en avait une à 78 m.**
+7. **Une friche sans coordonnées triait en premier** (`?? 0`), donc se présentait comme la plus proche.
+8. **Cartofriches était interrogé au grain COMMUNE** par la route Logement : cinquante friches situées
+   n'importe où, sans distance.
+9. **`sante-facts.ts` affirmait que le radon est vrai au grain ADRESSE et vit dans Logement.** Faux —
+   et c'est cette phrase qui expliquait pourquoi personne ne le cherchait au bon endroit.
+
+### Ce que le modèle a gagné
+
+**`EvidenceRef.relation` (`attribut` | `proximite`) ferme la limite qu'`echelles.ts` annonçait.**
+L'échelle se dérive du couple *ancre × relation* : une proximité ancrée sur l'adresse décrit le
+QUARTIER, un attribut du bien reste au LOGEMENT. Aucune exception par règle — une règle déclare ce
+qu'elle **mesure**, jamais où elle s'affiche.
+
+⚠ **Garde-fou gravé** : `relation` ne veut pas dire « la preuve est un rayon ». Une cavité à 300 m est
+mesurée en rayon mais atteint le **bien** : elle reste au logement. Le test : le constat parle-t-il de
+ce qu'on **vivra autour**, ou de ce qui **atteint le bien** ?
+
+**L'échelle « quartier » n'est plus vide.** `secteur-rules.ts` émet le premier `grain: "secteur"` :
+l'équipement automobile du secteur, comparé à sa commune. Le test qui figeait « aucune règle n'émet
+le grain SECTEUR » disait lui-même qu'il tomberait ce jour-là ; il vérifie maintenant l'inverse —
+que **seules** les règles de secteur émettent ce grain.
+
+**Un seul texte par geste.** `decision/logement-gestes.ts` est la source unique, lue par le moteur ET
+par la checklist. Les deux portaient leur copie et avaient divergé : la checklist disait encore
+« Vérifier le diagnostic… » là où le dossier dit « Regardez le détail… ». Le **confort d'été** entre
+au passage dans le moteur (zéro source nouvelle : `deriveThermalEvidence` est pure).
+
+**Le radon existe enfin.** Classe 3 seulement (19,5 % des communes, mesuré sur 200) — et **à Lyon,
+c'est l'arrondissement qui parle** : `/radon?code_insee=69123` rend zéro, `69389` répond, et le 9ᵉ est
+en classe 3 quand les huit autres sont en 1. D'où `arrondissementsDe` et
+`codePourSourceParArrondissement` dans `plm.ts`, qui ne portait que le sens inverse. **Sans adresse,
+ces trois communes n'ont pas de valeur** : la règle se tait.
+
+### Deux documents à lire avant de reprendre
+
+- **`docs/cadrage-sources-par-echelle.md`** — les 35 sources rangées par grain réel, le tri « existe-t-il
+  plus fin ? » en trois piles, et **§9 le registre des sources dormantes** (sept sources intégrées et
+  non branchées, avec ce qu'il faut pour les réveiller). Rien n'est supprimé, rien ne prétend être
+  couvert.
+- **`docs/cadrage-radon.md`** — la table de vérité, écrite avant le code.
+
+### L'analyse d'« Autour », en cours au moment de la coupure
+
+**Ce qu'il contient aujourd'hui : quatre choses.** BPE (le plus proche par catégorie), espace vert
+OSM, équipement automobile du secteur, îlot de chaleur (596 communes). Deux des quatre datent d'hier.
+
+**Le gisement immédiat : `potentiallyNoisyInfrastructure` est calculé et rendu NULLE PART.** Autoroute,
+voie rapide et voie ferrée, avec la distance réelle **depuis l'adresse**, dans le snapshot depuis
+toujours. Un commentaire dit pourquoi : « déplacée vers le futur module Santé » — module qui n'a
+jamais existé. C'est la meilleure donnée de santé environnementale du produit, et elle dort.
+⚠ **À afficher comme inventaire de sources potentielles, jamais comme verdict acoustique** : ce qu'on
+entend dépend du trafic, des horaires, du relief, de l'étage, des fenêtres.
+
+**Métier et Mobilité n'ont rien perdu.** Les modules étaient des ÉCRANS ; leurs critères vivent dans
+le moteur et décident déjà (`acces_transports`, `mobilite_quotidienne`, `viabilite_emploi`,
+`faible_dependance_auto`). La question n'est pas « où les remettre » mais « à quelle échelle chaque
+critère se lit » — et `faible_dependance_auto` montre le patron : lecture communale (position
+nationale) nuancée par lecture sectorielle.
+
+**Sitadel : je m'étais trompé hier en l'écartant.** Vérifié le 29/07 : le jeu SDES des autorisations
+d'urbanisme est **national, mensuel, mis à jour le jour même**, 1 905 937 autorisations de logements
+depuis 2013, et l'API DiDo filtre par commune :
+`…/datafiles/8b35affb-55fc-4c1f-915b-7750f974446a/csv?COMM=eq:17300&columns=…`. Il n'a **pas** de
+lat/lon mais porte les **parcelles cadastrales** (`SEC_CADASTRE1`/`NUM_CADASTRE1`) — et le produit
+résout déjà la parcelle d'une adresse. C'est le seul contenu qui répond à une question qu'aucune
+visite ne peut trancher : ce qui va être construit à côté.
+
+**Ordre proposé pour « Autour »** : 1. afficher les infrastructures bruyantes (déjà calculées, une
+session) · 2. compter dans un rayon plutôt que le plus proche (même donnée BPE : « une boulangerie »
+n'est pas « un quartier commerçant ») · 3. les permis Sitadel autour de l'adresse · 4. le zonage PLU
+des parcelles voisines (même appel GPU que la servitude ABF déjà en place).
+**Écarté pour coût** : les fréquences GTFS (parsing multi-opérateurs, pas « une source de plus ») et
+les cartes de bruit stratégiques (~100 DDT + agglomérations, aucun agrégat national).
+
+---
+
 ## Doctrine (à ne pas re-litiger)
 - **Une absence de couverture n'est jamais une absence de phénomène.** L'ICU non couvert ne dit PAS
   « pas d'îlot ici » : il dit que cette source ne mesure pas cette adresse. Erreur commise dans cette
@@ -194,6 +301,23 @@ l'argument décisif pour que le droit porte sur un `address_dossier` et non sur 
   ligne doit être précédée — et `await` — de sa création.
 - **Chercher le nom d'un concept ne trouve pas ses paraphrases.**
 - **Vendre l'échelle, pas le module** : les thèmes traversent les trois échelles.
+- **Une valeur d'API jamais confrontée à la source est un mensonge en attente.** Trois fois le même
+  défaut (« feux de foret » au pluriel, `libelle_observation`, `sol_pollue`). La parade est écrite
+  dans `fixtures-sources-externes.ts` : **la valeur qui a causé le bug entre dans le corpus AVANT le
+  correctif**, relevée telle quelle, avec sa date.
+- **Un booléen ne peut pas porter un état de connaissance.** « inconnu » et « pollution inexistante »
+  rendus tous deux `false`, c'est « sol sain » là où personne n'a regardé. Quand une source distingue
+  des états, changer le TYPE, pas la comparaison — et conserver la valeur brute.
+- **Ne jamais prétendre au plus proche quand la liste des candidats a pu être coupée.** Un plafond qui
+  mord avant le tri transforme « le plus proche » en « le plus proche d'un échantillon arbitraire ».
+- **Une règle déclare ce qu'elle MESURE, jamais où elle s'affiche.** L'échelle se dérive du couple
+  ancre × relation. Une exception « telle règle va dans Quartier » rétablirait l'appartenance que la
+  projection existe pour supprimer.
+- **Une valeur volontairement non persistée doit être produite par CHAQUE chemin de sortie**, sinon
+  elle clignote (constaté : le clic « J'y vis » faisait disparaître l'équipement automobile). D'où
+  `server/autour-response.ts` : aucun chemin ne renvoie le snapshot directement.
+- **Une source fetchée mais jamais interprétée n'est pas une capacité du produit.** Retirer l'APPEL
+  ne retire pas la source : la lib, ses pièges et ses contrats restent (cf. §9 du cadrage).
 
 ## La suite
 1. **Reprendre le brainstorming §4** — re-valider la qualification avant paiement, puis lancer le
@@ -210,7 +334,14 @@ l'argument décisif pour que le droit porte sur un `address_dossier` et non sur 
 5. **`checkout-products.ts`** — le champ `features` décrit encore « la lecture du territoire… qui
    s'enrichit au fil des prochains modules ». **Il n'est affiché nulle part** (vérifié), mais c'est une
    source de vérité dormante et divergente. À nettoyer quand l'offre sera tranchée.
-6. **La conclusion déterministe d'« Autour »** — le module rend des faits sans synthèse. Ne PAS créer
+6. **« Autour » : quatre chantiers, dans l'ordre** — afficher les infrastructures bruyantes déjà
+   calculées (une session, aucune donnée nouvelle) · compter dans un rayon plutôt que le plus proche ·
+   les permis Sitadel autour de l'adresse (API vérifiée, jointure par parcelle) · le zonage PLU des
+   parcelles voisines. Détail et réserves en §6.
+7. **Le radon attend une décision produit, pas du code** : libellé exact de la carte, et si le geste
+   « faire mesurer » mérite un annuaire — auquel cas la doctrine diagnostiqueurs s'applique (annuaire
+   qualifié SANS commission, le moteur ne connaît jamais les rémunérations).
+8. **La conclusion déterministe d'« Autour »** — le module rend des faits sans synthèse. Ne PAS créer
    un troisième prompt : assembler des énoncés déterministes à partir de `secteur-facts.ts`
    (`equipementAutoStatement` fait déjà ce geste). Mémoire : `project_futuree_autour_conclusion`.
 
@@ -222,3 +353,14 @@ l'argument décisif pour que le droit porte sur un `address_dossier` et non sur 
 - Un commentaire JSX `{/* … */}` DANS un ternaire y met deux enfants et casse le build.
 - Le hook pre-commit lance `index:verify` (OK). Push direct sur `main`, pas de PR.
 - Sonde `probe-conclusion.ts` : **NE PAS lancer** (45 appels LLM facturés).
+- **`data/iris-logement.json` n'est régénéré par AUCUN automatisme.** `scripts/build-iris-logement.mjs`
+  existe, rien ne le lance, et l'URL INSEE contient l'identifiant de publication (`8647012`) qui change
+  à chaque millésime : le script devra être **édité**, pas seulement relancé.
+- **Le contrat client porte `irisScope` et `part_deplacements_motorises` que rien n'affiche.** Un champ
+  transporté que personne ne consomme finit supprimé « parce qu'il ne sert à rien », ou branché plus
+  tard par quelqu'un qui n'a pas lu ce qu'`irisScope` protège.
+- **`LAB_IRIS` est transporté sans sémantique** : la documentation INSEE ne publie pas ses modalités.
+  Ne pas la déduire par corrélation — ce serait reconstruire officieusement une doctrine du producteur.
+- **Les sept autres indicateurs IRIS de l'ADEME sont ESTIMÉS** (ENL 2022 par sondage, GEODIP 2017).
+  Seul l'équipement automobile a été basculé vers une source mesurée (INSEE RP 2022). Les autres —
+  en particulier les passoires, qui portent une décision produit — méritent le même examen.
