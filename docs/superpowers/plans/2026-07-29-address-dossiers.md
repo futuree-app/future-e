@@ -1,4 +1,4 @@
-# `address_dossiers` : le dossier devient un objet — Implementation Plan
+# `address_dossiers` : le dossier devient un objet (plan d'implémentation)
 
 > **For agentic workers:** REQUIRED SUB-SKILL: superpowers:subagent-driven-development (recommandé) ou superpowers:executing-plans. Steps en `- [ ]`.
 
