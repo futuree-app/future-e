@@ -6,10 +6,9 @@
 import { NextRequest, after } from "next/server";
 import { streamText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
-import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
-import { canAccessCompleteReport } from "@/lib/access";
-import { canAnalyzeCommune } from "@/lib/active-territory";
-import { getLogement, saveSynthesis } from "@/lib/logement-store";
+import { requireCurrentUser } from "@/lib/user-account";
+import { getDossier } from "@/lib/address-dossier-store";
+import { updateOwnedAddressDossier } from "@/lib/server/address-dossier-write";
 import { buildFactHash, buildSynthesisPayload, type SynthesisData } from "@/lib/logement-synthesis-cache";
 import { deriveClimatProjete } from "@/lib/drias-json";
 
@@ -287,22 +286,16 @@ L'utilisateur vous transmet un payload JSON. Servez-vous-en sans le réciter.`;
 
 type Body = {
   data?: SynthesisData;
-  logementId?: string;
-  // INSEE de l'adresse, pour la frontière de monétisation (étape 4.5). Défense en profondeur :
-  // le vrai gate autoritatif est sur georisques-logement (citycode validé serveur) ; ici on
-  // barre une génération LLM cross-commune même sur appel direct.
-  insee?: string;
+  dossierId?: string;
+  // L'INSEE n'est PLUS transmis par le client. Il est lu sur le dossier, donc sur une ligne que
+  // seul le serveur écrit : un client qui pouvait l'envoyer pouvait faire générer une synthèse
+  // sur le climat d'une autre commune que celle de l'adresse payée.
   // Force la régénération malgré un cache chaud (bouton « Régénérer »). Sans lui, re-POST -> hash
   // identique -> cache hit -> même texte : le bouton mentirait.
   force?: boolean;
 };
 
 export async function POST(req: NextRequest) {
-  const account = await getCurrentUserAccount();
-  if (!canAccessCompleteReport(account)) {
-    return new Response("forbidden", { status: 403 });
-  }
-
   let body: Body;
   try {
     body = (await req.json()) as Body;
@@ -310,31 +303,32 @@ export async function POST(req: NextRequest) {
     return new Response("Invalid JSON body.", { status: 400 });
   }
   // Validation minimale du body (geste 1, version minimale) : les faits sont posés par le client
-  // en attendant que la ligne logement devienne la source serveur des faits. `data` doit être un
-  // objet, `logementId` une chaîne non vide. Le hash étant désormais un hash de CONTENU, la
+  // en attendant que la ligne du dossier devienne la source serveur des faits. `data` doit être un
+  // objet, `dossierId` une chaîne non vide. Le hash étant désormais un hash de CONTENU, la
   // position n'est plus transmise (elle est déjà dans `data.address`).
-  if (!body?.data || typeof body.data !== "object" || Array.isArray(body.data) || typeof body.logementId !== "string" || !body.logementId) {
-    return new Response("data (objet) et logementId (chaîne) requis", { status: 400 });
+  if (!body?.data || typeof body.data !== "object" || Array.isArray(body.data) || typeof body.dossierId !== "string" || !body.dossierId) {
+    return new Response("data (objet) et dossierId (chaîne) requis", { status: 400 });
   }
 
   const { supabase, user } = await requireCurrentUser();
-  // Frontière de monétisation (étape 4.5) : commune de l'adresse lisible par l'utilisateur.
-  if (!(await canAnalyzeCommune(supabase, user.id, body.insee))) {
-    return new Response(JSON.stringify({ error: "COMMUNE_NOT_UNLOCKED", code: "COMMUNE_NOT_UNLOCKED", insee: body.insee ?? null }), {
+
+  // Le droit EST le dossier. Il porte aussi l'INSEE autoritatif du climat injecté plus bas.
+  const existing = await getDossier(supabase, user.id, body.dossierId);
+  if (!existing) {
+    return new Response(JSON.stringify({ error: "DOSSIER_NOT_ACCESSIBLE" }), {
       status: 403,
       headers: { "Content-Type": "application/json" },
     });
   }
   // Croisement Territoire (v6) : injection SERVEUR-ONLY du signal climat curé (le client ne peut
-  // pas lire le JSON DRIAS). Sur `body.insee` autoritatif (déjà validé par le gate 4.5). Local,
+  // pas lire le JSON DRIAS). Sur l'INSEE du DOSSIER, écrit par le seul serveur. Local,
   // caché en mémoire, zéro réseau. Entre dans le payload ET le hash (fait déterministe de la
   // commune, aucune posture). Le hash serveur diverge donc du hash client (qui n'a pas le climat) :
   // inoffensif, ils ne sont jamais comparés (cf. commentaire sur SynthesisData.climatProjete).
-  body.data.climatProjete = await deriveClimatProjete(body.insee ?? "");
+  body.data.climatProjete = await deriveClimatProjete(existing.insee);
   const factHash = buildFactHash(body.data);
 
   // Cache touché : texte figé, zéro LLM (sauf régénération forcée).
-  const existing = await getLogement(supabase, user.id, body.logementId);
   if (!body.force && existing?.synthesis_fact_hash === factHash && existing.synthesis_text) {
     return new Response(existing.synthesis_text, {
       headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
@@ -397,11 +391,11 @@ ${JSON.stringify(payload, null, 2)}`;
   // Persistance post-réponse : seulement si le stream s'est clos proprement (texte complet).
   after(async () => {
     if (!completed || !full.trim()) return;
-    await saveSynthesis(supabase, user.id, body.logementId!, {
+    await updateOwnedAddressDossier(user.id, body.dossierId!, {
       synthesis_text: full,
       synthesis_fact_hash: factHash,
       synthesis_generated_at: new Date().toISOString(),
-    }).catch((e) => console.error("[synthesize-logement] persist failed:", e));
+    }).catch((e: unknown) => console.error("[synthesize-logement] persist failed:", e));
   });
 
   return new Response(stream, {

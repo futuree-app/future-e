@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
-import { canAccessCompleteReport } from "@/lib/access";
-import { canAnalyzeCommune } from "@/lib/active-territory";
+import { requireCurrentUser } from "@/lib/user-account";
+import { getDossier } from "@/lib/address-dossier-store";
 import { findCadastreParcelByPoint } from "@/lib/cadastre";
 import {
   getGeorisquesAddressSummary,
@@ -148,24 +147,32 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
 // (L'ancien GET `?q=` de repli géocodage libre a été retiré : non utilisé par le client, et il
 // exposait le fan-out ~10 API externes sans authentification.)
 export async function POST(request: Request) {
-  // Route coûteuse (fan-out ~10 API externes dont Géorisques token) : réservée au rapport complet.
-  const account = await getCurrentUserAccount();
-  if (!canAccessCompleteReport(account)) {
-    return NextResponse.json({ error: "forbidden" }, { status: 403 });
-  }
   let body: unknown;
   try { body = await request.json(); } catch { body = null; }
   const sel = validateSelectedBanAddress((body as { address?: unknown })?.address);
   if (!sel) {
     return NextResponse.json({ error: "Invalid selected address." }, { status: 400 });
   }
-  // Frontière de monétisation (étape 4.5) : l'adresse doit être dans une commune que
-  // l'utilisateur a le droit de lire (résidence ou commune achetée). Chemin autoritatif :
-  // le citycode vient de l'objet BAN validé serveur, pas d'un champ client libre.
+
+  // ROUTE LA PLUS COÛTEUSE DU PRODUIT (fan-out ~10 API externes dont le token Géorisques). Elle
+  // était réservée au « rapport complet », un flag de plan global. Ce flag disparaissant, il faut
+  // un droit d'un grain au moins aussi fin, sinon la route s'ouvre à tout compte connecté.
+  //
+  // Le droit exigé est le DOSSIER, et l'adresse analysée doit être CELLE du dossier : sans cette
+  // seconde condition, un seul dossier payé servirait de laissez-passer pour analyser toutes les
+  // adresses de France.
+  const dossierId = (body as { dossierId?: unknown })?.dossierId;
+  if (typeof dossierId !== "string" || !dossierId) {
+    return NextResponse.json({ error: "dossierId requis" }, { status: 400 });
+  }
   const { supabase, user } = await requireCurrentUser();
-  if (!(await canAnalyzeCommune(supabase, user.id, sel.citycode))) {
+  const dossier = await getDossier(supabase, user.id, dossierId);
+  if (!dossier) {
+    return NextResponse.json({ error: "DOSSIER_NOT_ACCESSIBLE" }, { status: 403 });
+  }
+  if (dossier.ban_id !== sel.banId) {
     return NextResponse.json(
-      { error: "COMMUNE_NOT_UNLOCKED", code: "COMMUNE_NOT_UNLOCKED", commune: sel.city, insee: sel.citycode },
+      { error: "ADDRESS_NOT_IN_DOSSIER", code: "ADDRESS_NOT_IN_DOSSIER" },
       { status: 403 },
     );
   }

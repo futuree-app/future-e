@@ -6,7 +6,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import type { SynthesisData } from "@/lib/logement-synthesis-cache";
 import type { LogementReport as ApiResponse } from "@/lib/logement-report-types";
-import type { LogementRow, DpeSelectionStatus } from "@/lib/logement-store";
+import type { AddressDossierRow, DpeSelectionStatus } from "@/lib/address-dossier-store";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { AddressAutocomplete } from "@/components/report/AddressAutocomplete";
 import { ThermalComfortSection } from "@/components/report/ThermalComfortSection";
@@ -97,30 +97,6 @@ export default function LogementModule({
   const rehydratedRef = useRef(false);
   const posthog = usePostHog();
 
-  // Enregistre l'identité de l'adresse analysée (voir /api/logement-artefact). Échec silencieux à
-  // l'UI : la lecture à l'écran reste complète, seule la sauvegarde manque, et la prochaine
-  // analyse de la même adresse la repose.
-  async function persistArtefact(payload: ApiResponse) {
-    const a = payload.address;
-    if (!a?.id || !a.citycode || a.latitude == null || a.longitude == null) return;
-    try {
-      await fetch("/api/logement-artefact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          logement_id: a.id,
-          insee: a.citycode,
-          address_label: a.label,
-          city: a.city ?? null,
-          postcode: a.postcode ?? null,
-          latitude: a.latitude,
-          longitude: a.longitude,
-          parcel_code: payload.parcel?.parcelCode ?? null,
-        }),
-      });
-    } catch { /* échec silencieux */ }
-  }
-
   // Déclenchée par la sélection d'une suggestion BAN (le texte libre n'analyse jamais). On
   // envoie l'adresse ATOMIQUE au serveur ; on dérive ensuite l'état d'attribution du DPE.
   async function analyzeSelected(a: BanAddressResult) {
@@ -158,7 +134,10 @@ export default function LogementModule({
       // la persistance du DPE juste en dessous est un UPDATE ciblé, sans effet ni erreur si la
       // ligne n'existe pas encore. Les lancer en concurrence rendrait la sauvegarde du diagnostic
       // dépendante de l'ordre d'arrivée de deux requêtes.
-      await persistArtefact(payload);
+      // La ligne de dossier N'EST PLUS créée par le client. Elle naît du webhook Stripe (dossier
+      // acheté) ou de la route d'administration. Un créateur implicite côté client ferait revenir
+      // par la fenêtre exactement ce que la migration 25 a fermé : une écriture que l'utilisateur
+      // déclenche sur la table qui porte son droit.
       const candidates = payload.dpeCandidates ?? [];
       setDpeCandidates(candidates);
       const attribution = dpeAttributionStatus(candidates, payload.banFeatureType ?? null);

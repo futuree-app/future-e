@@ -22,7 +22,7 @@ import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import type { Face3Snapshot } from "@/lib/logement-autour-types";
-import type { LogementRow } from "@/lib/logement-store";
+import type { AddressDossierRow } from "@/lib/address-dossier-store";
 import type { BanAddressResult } from "@/lib/ban";
 import type { CarOwnership } from "@/lib/iris-logement";
 import { ReportSection, GlassCard } from "@/components/report/kit";

@@ -1,6 +1,6 @@
 import type { LngLat } from "./geo-distance.ts";
 import type { BpeNearest, OsmProximity, Face3Snapshot, IcuSnapshot } from "./logement-autour-types.ts";
-import { SOURCES_VERSION } from "./logement-store.ts";
+import { SOURCES_VERSION } from "./address-dossier-store.ts";
 import { OSM_QUERY_VERSION, OSM_BBOX_RADIUS_M } from "./logement-osm.ts";
 
 export type { Face3Snapshot }; // ré-export pratique pour les consommateurs
