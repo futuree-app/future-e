@@ -106,8 +106,8 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
         <div className="hero-note">
           <div className="hero-note-label">Ce qui est public ici</div>
           <div className="hero-note-text">
-            Vous pouvez lire les analyses et les guides pratiques. <strong>Le diagnostic par commune et par profil détaillé</strong> reste réservé au rapport interactif : il va plus loin en descendant à trois échelles
-            {' '}<strong>la commune, le secteur autour de votre adresse, le logement</strong>.
+            Vous pouvez lire les analyses et les guides pratiques. <strong>Le diagnostic par commune et par profil détaillé</strong> reste réservé au rapport interactif : il lit la commune en entier,
+            {' '}<strong>son climat, ses risques, son cadre de vie et ce qui la transforme</strong>.
           </div>
         </div>
 

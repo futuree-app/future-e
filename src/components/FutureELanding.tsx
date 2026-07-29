@@ -2685,7 +2685,7 @@ export default function FutureELanding() {
                   lineHeight: 1.5,
                   margin: 0,
                 }}>
-                  Ces projections ne sont qu&apos;un aperçu de ce qui pourrait changer à {commune}. futur•e croise plus de 50 indicateurs (cadre de vie, santé, mobilité, climat) avec votre profil.
+                  Ces projections ne sont qu&apos;un aperçu de ce qui pourrait changer à {commune}. futur•e croise près de 30 critères (cadre de vie, santé, mobilité, climat) avec votre profil.
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
                   <button
@@ -3096,7 +3096,7 @@ export default function FutureELanding() {
               Votre rapport interactif en 2 minutes.
             </h2>
             <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.65, margin: 0 }}>
-              Répondez à 6 questions. Obtenez un aperçu personnalisé de ce que devient votre commune, de ce qui entoure votre adresse et de ce qui pèse sur votre logement.
+              Répondez à 6 questions. Obtenez un aperçu personnalisé de ce que devient votre commune face au climat : ce à quoi elle est exposée, ce qui la transforme.
             </p>
           </div>
           <div style={{ flexShrink: 0, textAlign: 'center' }}>
@@ -3125,8 +3125,11 @@ export default function FutureELanding() {
         </div>
       </div>
 
-      {/* Hub Savoir */}
+      {/* Hub Savoir. L'ancre `#savoir` est la cible du lien « Pages Savoir » des deux pieds de page
+          (celui-ci et celui de /rapport) : il n'existe pas de route d'index /savoir, seulement des
+          slugs. Renommer ou déplacer cette section demande de suivre les deux liens. */}
       <section
+        id="savoir"
         style={{
           position: 'relative',
           zIndex: 2,
@@ -3582,8 +3585,17 @@ export default function FutureELanding() {
             futur<span style={{ color: C.orange }}>•</span>e
           </div>
           <div style={styles.footerLinks}>
-            {['Manifeste', 'Méthodologie', 'Pages Savoir', 'Contact', 'Mentions légales'].map((label) => (
-              <a key={label} style={styles.footerLink} href="#">
+            {/* Ces cinq liens pointaient tous vers `#`, ici et à l'identique dans le pied de page de
+                /rapport. Chacun mène désormais à une destination qui existe. Une disparition
+                assumée : « Méthodologie » doublonnait /pourquoi, qui porte déjà la section « La
+                méthode ». */}
+            {[
+              { label: 'Pourquoi futur•e', href: '/pourquoi' },
+              { label: 'Pages Savoir', href: '/#savoir' },
+              { label: 'Contact', href: 'mailto:hello@futur-e.fr' },
+              { label: 'Mentions légales', href: '/mentions-legales' },
+            ].map(({ label, href }) => (
+              <a key={label} style={styles.footerLink} href={href}>
                 {label}
               </a>
             ))}

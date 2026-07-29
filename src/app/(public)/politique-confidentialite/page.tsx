@@ -111,11 +111,19 @@ export default function PolitiqueConfidentialitePage() {
             </p>
             <InfoBlock>
               <InfoRow label="Nom" value="Quentin Brache" />
-              <InfoRow label="Structure" value="Micro-entreprise futur•e" />
+              <InfoRow label="Structure" value="Entrepreneur individuel, nom commercial futur•e" />
               <InfoRow label="SIREN" value="105 109 557" />
-              <InfoRow label="Adresse" value="1 rue Saint Dominique, 17000 La Rochelle" />
+              <InfoRow label="SIRET" value="10510955700014" />
+              <InfoRow label="Adresse" value="1 rue Saint-Dominique, Apt B04, 17000 La Rochelle" />
               <InfoRow label="Contact" value="hello@futur-e.fr" />
             </InfoBlock>
+            <p style={{ marginTop: 16, fontSize: 14 }}>
+              Les informations complètes de l&apos;éditeur et de l&apos;hébergeur figurent dans les{" "}
+              <Link href="/mentions-legales" style={{ color: "var(--orange)" }}>
+                mentions légales
+              </Link>
+              .
+            </p>
           </Section>
 
           {/* Données collectées */}

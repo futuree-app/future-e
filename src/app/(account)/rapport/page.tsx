@@ -412,10 +412,15 @@ export default async function RapportPage() {
         )}
 
         {/* Footer nav */}
+        {/* Le CTA d'achat est gardé par `!fullReport`, comme celui du hero (l. 236-244) qui l'est
+            depuis toujours. Ici il ne l'était pas : un lecteur ayant payé ce territoire lisait son
+            rapport complet, puis se voyait proposer en pied de page de l'acheter. */}
         <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-white/[0.08]">
-          <TrackedUpgradeLink href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-            Ouvrir le rapport interactif
-          </TrackedUpgradeLink>
+          {!fullReport && (
+            <TrackedUpgradeLink href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+              Ouvrir le rapport interactif
+            </TrackedUpgradeLink>
+          )}
           <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
             Mon compte
           </Link>
@@ -431,10 +436,18 @@ export default async function RapportPage() {
           <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
             futur<span className="text-accent not-italic">•</span>e
           </div>
+          {/* Même pied de page que la landing, mêmes destinations : voir le commentaire dans
+              FutureELanding.tsx. Les deux listes doivent rester alignées. */}
           <div className="flex gap-6 flex-wrap">
-            {["Manifeste", "Méthodologie", "Pages Savoir", "Contact", "Mentions légales"].map((l) => (
-              <a key={l} href="#" className="font-mono text-[11px] text-ghost no-underline tracking-[0.06em] uppercase">
-                {l}
+            {[
+              { label: "Pourquoi futur•e", href: "/pourquoi" },
+              { label: "Pages Savoir", href: "/#savoir" },
+              { label: "Contact", href: "mailto:hello@futur-e.fr" },
+              { label: "Confidentialité", href: "/politique-confidentialite" },
+              { label: "Mentions légales", href: "/mentions-legales" },
+            ].map(({ label, href }) => (
+              <a key={label} href={href} className="font-mono text-[11px] text-ghost no-underline tracking-[0.06em] uppercase">
+                {label}
               </a>
             ))}
           </div>

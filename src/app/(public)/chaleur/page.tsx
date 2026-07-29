@@ -206,7 +206,7 @@ export default function ChaleurPage() {
               <em style={{ fontStyle: 'italic', color: ACCENT }}>vos décisions éclairées</em>
             </p>
             <p className="rapport-cta-desc">
-              Trois échelles croisées pour votre situation spécifique : <strong style={{ color: 'var(--fg-1)' }}>la commune, le secteur autour de votre adresse, le logement.</strong>{' '}
+              <strong style={{ color: 'var(--fg-1)' }}>La commune en entier : climat, risques, cadre de vie, ce qui la transforme.</strong>{' '}
               Pas un article générique : un diagnostic construit à partir de données publiques réelles, mis à jour régulièrement.
             </p>
             <span className="rapport-cta-btn">
