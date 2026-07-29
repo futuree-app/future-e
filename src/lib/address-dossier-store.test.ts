@@ -1,8 +1,63 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { needsRecompute, SOURCES_VERSION, buildDpeSelectionFields } from "./logement-store.ts";
+import {
+  pickSoleDossier,
+  needsRecompute,
+  SOURCES_VERSION,
+  buildDpeSelectionFields,
+  type AddressDossierRow,
+} from "./address-dossier-store.ts";
 import type { Face3Snapshot } from "./logement-autour-types.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
+
+function row(id: string, updatedAt: string): AddressDossierRow {
+  return {
+    id,
+    user_id: "u1",
+    ban_id: "b1",
+    insee: "44109",
+    address_label: "1 rue X",
+    city: "Nantes",
+    postcode: "44000",
+    latitude: 47.2,
+    longitude: -1.5,
+    parcel_code: null,
+    posture: "residence",
+    snapshot: null,
+    dpe_selection_status: "pending",
+    selected_dpe_id: null,
+    selected_dpe_snapshot: null,
+    selected_dpe_at: null,
+    created_at: "2026-07-18T08:00:00Z",
+    updated_at: updatedAt,
+    synthesis_text: null,
+    synthesis_fact_hash: null,
+    synthesis_generated_at: null,
+    stripe_payment_intent_id: null,
+    amount_paid_cents: null,
+    purchased_at: null,
+    access_revoked_at: null,
+  };
+}
+
+test("aucun dossier : pas de repli", () => {
+  assert.equal(pickSoleDossier([]), null);
+});
+
+test("un seul dossier : il est le repli", () => {
+  const only = row("d1", "2026-07-29T10:00:00Z");
+  assert.equal(pickSoleDossier([only])?.id, "d1");
+});
+
+test("PLUSIEURS dossiers : AUCUN repli, la question est posée au lecteur", () => {
+  // updated_at bouge à chaque écriture technique (synthèse, posture, rehydratation) : le dossier
+  // le plus récemment MODIFIÉ n'est pas celui qu'on voulait rouvrir. Ouvrir le 2e étage quand le
+  // lecteur visait le 4e est exactement le défaut que l'identité en uuid corrige.
+  const rows = [row("d1", "2026-07-29T12:00:00Z"), row("d2", "2026-07-29T09:00:00Z")];
+  assert.equal(pickSoleDossier(rows), null);
+});
+
+// ── Repris de logement-store.test.ts (le fichier a été renommé, pas ces règles) ──
 
 const center = { lat: 48.85, lon: 2.35 };
 const okSnap = {
