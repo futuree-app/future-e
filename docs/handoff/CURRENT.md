@@ -1,7 +1,8 @@
 # Passation — journée du 29/07 : six thèmes deviennent trois échelles, et l'entourage prend son module
 
-**Horodatage** : 2026-07-29 16:46, **complété à 17:40 par la seconde session** (§6, et les ajouts
-signés dans Doctrine / La suite / Pièges) · **Branche** : `main` = `473d2fa` (poussé).
+**Horodatage** : 2026-07-29 16:46, **complété à 17:40 par la seconde session** (§6), **puis en
+soirée par une TROISIÈME session : voir §0, qui remplace le §4** · **Branche** : `main` = `2ad7f81`
+(poussé, migration appliquée en production).
 **Tree propre**, un seul non suivi à NE JAMAIS committer : `Futur.e Design System.zip`.
 
 **983 tests · tsc 0 · lint global à 20 problèmes (8 erreurs)** — toutes antérieures à cette session
@@ -12,6 +13,85 @@ signés dans Doctrine / La suite / Pièges) · **Branche** : `main` = `473d2fa` 
 > radon. Les commits sont entrelacés (`d14e5b4`, `2c79618`, `0115f22` d'un côté ; `f98a002`, `ef17ffc`,
 > `b01b8f2`, `473d2fa` de l'autre). Aucun conflit : chaque session n'a stagé que ses propres fichiers,
 > nommément. **C'est la seule discipline qui a rendu ça possible — ne pas faire `git add -A` ici.**
+
+---
+
+## 0. TROISIÈME SESSION (soirée du 29/07) : le droit descend à l'échelle du bien — **EN PRODUCTION**
+
+`main` = `2ad7f81`, poussé. **Migration `25_address_dossiers.sql` APPLIQUÉE en production le
+29/07/2026**, plus une seconde (`address_dossiers_revoke_truncate`). Ce §0 remplace le §4 du présent
+handoff, qui décrivait le brainstorming interrompu : il a été mené, spécifié, planifié et livré.
+
+**Lire d'abord** : `docs/superpowers/specs/2026-07-29-address-dossiers-design.md` (la doctrine),
+`docs/superpowers/plans/2026-07-29-address-dossiers.md` (le plan, ses 9 tâches), et
+`docs/rapports-agents/business-strategist/2026-07-29-dossier-adresse-39e.md` (l'analyse business).
+
+### Ce qui a changé, en une phrase
+`public.logement` est devenue `public.address_dossiers`, identifiée par un **uuid** : l'existence
+d'une ligne EST le droit d'ouvrir le dossier. Le flag de plan global et le droit communal ne
+gouvernent plus ni Autour ni Logement.
+
+### Les deux défauts réparés
+- **Deux appartements du même immeuble s'écrasaient** (ancien §5) : la clé était `(user_id, ban_id)`
+  alors que `PreciseLogementStep` existe précisément parce qu'une adresse BAN porte plusieurs
+  logements. `ban_id` est désormais une colonne indexée **sans aucune unicité**.
+- **Un achat quelconque ouvrait le Territoire complet de la commune de résidence, jamais achetée** :
+  `resolveReadableTerritory` ne contrôlait aucun grant sur la résidence, et `canAccessCompleteReport`
+  était global. La complétude se demande maintenant à la commune (`canAccessTerritory`).
+
+### Ce qui est parti
+`canAnalyzeCommune`, `upsertLogementAddress`, `saveSynthesis`, la route `/api/logement-artefact`,
+`logement-artefact-lifecycle.test.ts`, et **la saisie libre d'adresse dans les deux modules**. Ce
+dernier point n'était pas un choix d'ergonomie : `georisques-logement` exige désormais que l'adresse
+soumise soit celle du dossier, donc une saisie libre ne pouvait plus qu'échouer.
+
+`logement_same_commune_multi` est retiré aussi : il comptait par session (`useRef`) et par commune
+(`Map` clé INSEE), donc ratait le multi-session et le multi-commune, c'est-à-dire les deux façons
+dont un projet compare réellement des adresses.
+
+### CONSÉQUENCE BLOQUANTE, à connaître avant tout
+**Aucune surface ne permet plus de créer un dossier**, sauf la route de test. Le checkout et la
+qualification n'existent pas. Tant que la spec suivante n'est pas livrée, Autour et Logement ne
+s'ouvrent que sur un dossier créé par `POST /api/admin/dossier`.
+
+Deux variables d'environnement, **absentes du repo** (`.env.example` est gitignoré) :
+```
+ENABLE_ADMIN_DOSSIER_CREATION=true      # ABSENT en prod = route 404. Présent en prod aujourd'hui.
+FUTUREE_ADMIN_EMAILS=bonjourfuturee@gmail.com
+```
+La comparaison d'e-mail est stricte : Gmail confond `bonjour.futuree@` et `bonjourfuturee@`, pas nous.
+
+### Ce que ce chantier laisse derrière lui
+1. **Retirer `ENABLE_ADMIN_DOSSIER_CREATION` de la production** le jour où le checkout dossier
+   existera. Ce genre de porte reste ouverte des années.
+2. **`TRUNCATE` est accordé à `authenticated` sur TOUTES les autres tables** (`payments`,
+   `report_grants`, `user_profiles`…), défaut Supabase : la protection repose entièrement sur la
+   RLS, que TRUNCATE ignore. Retiré sur `address_dossiers` seulement. PostgREST ne l'expose pas,
+   donc c'est théorique, mais ça se resserre.
+3. **Le script `scripts/verify-address-dossiers-rls.mjs`** vérifie les privilèges contre la base
+   réelle avec un vrai JWT (un test simulé éprouverait notre logique contre nos propres chaînes).
+   Il exige `TEST_USER_EMAIL`, `TEST_USER_PASSWORD`, `TEST_OTHER_USER_ID` en environnement.
+
+### Décisions à NE PAS re-litiger
+- **Un dossier est l'analyse d'un BIEN situé à une adresse.** Jamais « un dossier = une adresse » :
+  cette formule contredit l'existence de `PreciseLogementStep`.
+- **Le tarif d'approfondissement est un ÉTAT calculé, jamais un crédit consommable.** Tous les biens
+  d'une commune déjà payée en bénéficient, pas seulement le premier.
+- **Le business-strategist recommandait le 2ᵉ dossier à PLEIN TARIF** pour ne pas brouiller la
+  mesure. **Cette recommandation est sciemment écartée** : revendre le tiers d'un ensemble que le
+  compte possède déjà est un fait que futur•e connaîtrait en l'encaissant. Une session qui relira le
+  rapport y trouvera l'inverse.
+- **Un dossier administratif n'est jamais une acquisition** (`stripe_payment_intent_id is null`) :
+  il ouvre Territoire pour les tests, il ne donne aucun tarif.
+- La **résidence n'ouvre plus rien par elle-même**, et ce n'est pas une régression : il n'a jamais
+  existé d'accès gratuit au Territoire COMPLET de la résidence, seulement le rapport partiel, qui
+  reste rendu.
+
+### La suite immédiate
+La **spec de qualification et de checkout** : route publique de qualification (légère, cachée par
+adresse, rate-limitée, JAMAIS `georisques-logement`), calcul du prix, création du dossier par le
+webhook avec son `ON CONFLICT`, page de succès qui attend le webhook, et l'instrumentation
+(`decision_journey_id`, six événements). `hasPaidTerritory` est déjà livré, son usage tarifaire non.
 
 ---
 
