@@ -5,6 +5,7 @@ import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { UserProject } from "../user-project.ts";
 import type { ClimatFacts } from "./climat-facts.ts";
 import type { SanteFacts } from "./sante-facts.ts";
+import type { RadonFacts } from "./radon-facts.ts";
 import type { RankBand } from "./mismatch-facts.ts";
 import type { NamedAbsenceBasis, LocalNetworkAttestation, HigherEdAttestation } from "./absence-facts.ts";
 import type { FactComposition } from "./fact-composition.ts";
@@ -308,6 +309,10 @@ export type ModuleFacts = CommuneAttributes & {
   // Elle n'est pas un module (ADR-0010) : c'est une lecture, et ses autres faits (radon, argiles, bruit de
   // façade) sont vrais au grain ADRESSE, dans Logement.
   sante: SanteFacts | null;
+  // LE POTENTIEL RADON DU SOL. Chargé par l'APPELANT (I/O), comme le climat. `null` = source muette,
+  // classe illisible, ou commune PLM sans arrondissement connu — dans tous ces cas la règle se tait,
+  // elle ne dit JAMAIS « pas de radon ».
+  radon?: RadonFacts | null;
   scores: Partial<Record<PreferenceKey, number | null>>;
   hasAddress: boolean;
   logement?: LogementFacts; // slice 1.5 : présent seulement quand une analyse adresse est là

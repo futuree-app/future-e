@@ -2,17 +2,13 @@
 // none -> rien. Les fabriques ne produisent QUE verification/unknown (jamais incompatibility).
 // Posture-aware. Chaque fait porte le constat établi (statement) + l'action propre.
 import type { DecisionRule, VerificationFact, UnknownFact, EvidenceRef, RuleEvaluation, MaterialityTier, LogementFacts, SourceCoverage, VerificationActionType } from "./decision-fact.ts";
-import type { UserProject } from "../user-project.ts";
 import type { EvidenceTargetKey } from "./evidence-targets.ts";
 
-import { GESTES, type Bucket, type ActionCopy } from "./logement-gestes.ts";
+import { GESTES, bucketDuProjet, type Bucket, type ActionCopy } from "./logement-gestes.ts";
 
-function bucket(p: UserProject): Bucket {
-  if (p.intent === "achat") return "achat";
-  if (p.intent === "location") return "location";
-  if (p.posture === "habitant") return "reside";
-  return "neutre";
-}
+// La dérivation vit dans `logement-gestes.ts` : une règle de territoire peut proposer un geste à
+// faire dans le logement (le radon), donc elle en a besoin aussi.
+const bucket = bucketDuProjet;
 
 function ev(l: LogementFacts, factId: string, mode: "persisted_snapshot" | "live_fetch", grain: "adresse" | "commune" = "adresse", observedValue?: string, targetKey?: EvidenceTargetKey): EvidenceRef {
   return { factId, module: "logement", label: l.addressLabel, observedValue, grain, href: "/rapport/logement", sourceMode: mode, ...(targetKey ? { targetKey } : {}) };

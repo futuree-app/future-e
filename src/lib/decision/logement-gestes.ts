@@ -26,11 +26,24 @@
 /** La posture du projet. `neutre` = avant toute déclaration : on ne suppose rien. */
 export type Bucket = "neutre" | "achat" | "reside" | "location";
 
+/**
+ * LA POSTURE DÉRIVÉE DU PROJET. Vivait dans `logement-rules.ts` ; remontée ici le 29/07/2026 parce
+ * qu'une règle de TERRITOIRE peut proposer un geste à faire DANS le logement — le radon en est le
+ * premier cas. L'échelle du constat et celle de l'action ne coïncident pas toujours.
+ */
+export function bucketDuProjet(p: { intent?: string | null; posture?: string | null }): Bucket {
+  if (p.intent === "achat") return "achat";
+  if (p.intent === "location") return "location";
+  if (p.posture === "habitant") return "reside";
+  return "neutre";
+}
+
 export type ActionCopy = { label: string; detail: string };
 
 /** Les gestes que le module Logement sait proposer. Un par famille de constat. */
 export type GesteKey =
-  | "energie" | "confort" | "bati" | "reglementaire" | "cavite" | "patrimoine" | "sinistralite";
+  | "energie" | "confort" | "bati" | "reglementaire" | "cavite" | "patrimoine" | "sinistralite"
+  | "radon";
 
 export const GESTES: Record<GesteKey, Record<Bucket, ActionCopy>> = {
   energie: {
@@ -76,6 +89,15 @@ export const GESTES: Record<GesteKey, Record<Bucket, ActionCopy>> = {
     // table même qui énonce la règle. Repéré le 29/07/2026 par le test qui interdit ce verbe.
     reside: { label: "Consultez la mairie avant des travaux extérieurs", detail: "Le périmètre encadre ce qui se voit depuis l'espace public." },
     neutre: { label: "Renseignez-vous sur ce que le périmètre autorise", detail: "Il encadre les travaux visibles depuis l'espace public : façade, menuiseries, toiture." },
+  },
+  // RADON : le seul geste dont le CONSTAT est communal et l'ACTION dans le logement. Aucun libellé ne
+  // promet de résultat ni ne donne de délai : une mesure se fait sur plusieurs semaines, en période
+  // de chauffe, et c'est une pratique, pas un droit.
+  radon: {
+    achat: { label: "Demandez si une mesure du radon a été faite dans le logement", detail: "À défaut, une mesure peut être posée avant de s'engager : elle se fait sur plusieurs semaines, en période de chauffe." },
+    location: { label: "Demandez au bailleur si une mesure du radon a été faite", detail: "Le résultat, s'il existe, porte sur ce logement — pas le classement de la commune." },
+    reside: { label: "Faites mesurer le radon pendant la saison de chauffe", detail: "Un dosimètre posé plusieurs semaines dans les pièces de vie donne la concentration réelle." },
+    neutre: { label: "Renseignez-vous sur la mesure du radon dans ce logement", detail: "C'est la seule façon de savoir : le classement du sol ne dit rien d'un bâtiment en particulier." },
   },
   sinistralite: {
     achat: { label: "Demandez l'état des risques et les sinistres indemnisés", detail: "Le vendeur indique les sinistres indemnisés au titre d'une catastrophe naturelle pendant qu'il occupait le bien." },

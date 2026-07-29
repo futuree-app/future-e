@@ -19,6 +19,7 @@ import { aCommune } from "../typography.ts";
 import { declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } from "./project-view.ts";
 import { LOGEMENT_RULES } from "./logement-rules.ts";
 import { SECTEUR_RULES } from "./secteur-rules.ts";
+import { RADON_RULES } from "./radon-rules.ts";
 import { HARD_CONSTRAINT_RULES } from "./hard-constraint-rules.ts";
 import { MISMATCH_RULES } from "./mismatch-rules.ts";
 import { ALIGNMENT_RULES } from "./alignment-rules.ts";
@@ -801,6 +802,7 @@ export const REGISTRY: DecisionRule[] = [
   ruleInondation,
   ...LOGEMENT_RULES,
   ...SECTEUR_RULES,
+  ...RADON_RULES,
 ];
 
 // L'ÉTAT SCANNABLE est une ÉTIQUETTE, pas une phrase : court (le lecteur le lit d'un coup d'œil, avant

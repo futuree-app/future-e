@@ -5,6 +5,7 @@ import type { IndexCommune, PreferenceKey } from "../comparateur-vie.ts";
 import type { CommuneAttributes } from "../hard-constraints.ts";
 import type { ModuleFacts } from "./decision-fact.ts";
 import type { ClimatFacts } from "./climat-facts.ts";
+import type { RadonFacts } from "./radon-facts.ts";
 import { buildSanteFacts } from "./sante-facts.ts";
 import type { RankBand } from "./mismatch-facts.ts";
 
@@ -16,7 +17,7 @@ export function mapCommuneToModuleFacts(
   // de fermer (le comparateur jugeait la taille sur l'agglomération, le dossier sur la commune).
   // `climat` est chargé PAR L'APPELANT (les scénarios DRIAS vivent dans un fichier, et ce mapping doit
   // rester pur donc testable), exactement comme `tailleVille`.
-  opts: { hasAddress: boolean; tailleVille: number | null; tailleVilleSource: "urban_unit" | "commune" | null; climat?: ClimatFacts | null; risquesDeclares?: { wildfire: boolean } | null },
+  opts: { hasAddress: boolean; tailleVille: number | null; tailleVilleSource: "urban_unit" | "commune" | null; climat?: ClimatFacts | null; risquesDeclares?: { wildfire: boolean } | null; radon?: RadonFacts | null },
 ): ModuleFacts {
   return {
     insee: entry.insee,
@@ -44,6 +45,9 @@ export function mapCommuneToModuleFacts(
     // La santé se construit ICI, sans I/O : air, bruit et exposition industrielle sont déjà dans l'index.
     // (Le climat, lui, exige les scénarios DRIAS complets, qui vivent dans un fichier à part.)
     sante: buildSanteFacts(entry),
+    // Le radon est un APPEL (Géorisques), donc chargé par l'appelant comme le climat : ce mapping
+    // reste pur. Absent = la règle se tait.
+    radon: opts.radon ?? null,
     // Le rang est DANS l'index (forme COMPACTE : points de base 0..10000, l'index fait déjà 67 Mo). On le
     // reconstitue en fractions, sans le recalculer : la distribution nationale a été figée à l'enrichissement.
     rankBands: (() => {

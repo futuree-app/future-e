@@ -113,3 +113,19 @@ export const CARTOFRICHES_SOL_POLLUTION = [
 // un site dépollué n'appelle pas le même geste qu'un site pollué, et les confondre refaisait en plus
 // petit l'erreur du booléen.
 export const CARTOFRICHES_POLLUTION_ETABLIE = ["pollution avérée"] as const;
+
+// ── GÉORISQUES / RADON — le potentiel du sol, par commune ───────────────────────
+// Relevé le 29/07/2026 sur /api/v1/radon?code_insee= (endpoint public, sans jeton).
+//
+// LA SOURCE NE DONNE QU'UN CHIFFRE. La réponse est `{ classe_potentiel, code_insee, libelle_commune }`,
+// où `classe_potentiel` est la CHAÎNE "1", "2" ou "3" — jamais un nombre, jamais un libellé. Il
+// n'existe donc AUCUNE formulation officielle à reprendre : le texte affiché est le nôtre, et à ce
+// titre il doit être nommé et versionné comme toute convention de produit.
+//
+// (L'autre endpoint, `resultats_rapport_risque?latlon=`, dit « Risque Existant - important » : le mot
+// « risque » y remplace « potentiel », ce que la source elle-même ne fait pas. On ne le reprend pas.)
+export const RADON_CLASSES = ["1", "2", "3"] as const;
+
+// `libelle_commune` vaut `null` sur les codes d'ARRONDISSEMENT (75104, 69389…) alors qu'il porte le
+// nom sur les communes ordinaires. Ne jamais s'en servir pour nommer un lieu.
+export const RADON_LIBELLE_COMMUNE_NULLABLE = true;

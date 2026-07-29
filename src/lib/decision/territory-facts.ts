@@ -18,16 +18,18 @@ import { mapCommuneToModuleFacts } from "./module-facts-map.ts";
 import { buildClimatFacts, type ClimatFacts } from "./climat-facts.ts";
 import { getClimatDataCommune } from "../drias-json.ts";
 import { getGeorisquesSummary } from "../georisques.ts";
+import { getRadonPotentiel } from "../radon.ts";
 import { runRules } from "./materiality-rules.ts";
 import { assembleDossier } from "./decision-assembler.ts";
 import { composeFacts } from "./fact-compositions.ts";
 import type { ModuleFacts, Dossier } from "./decision-fact.ts";
+import type { RadonFacts } from "./radon-facts.ts";
 import type { UserProject } from "../user-project.ts";
 import { deCommune } from "../typography.ts";
 
 export function buildModuleFacts(
   entry: IndexCommune,
-  opts: { hasAddress: boolean; climat?: ClimatFacts | null; risquesDeclares?: { wildfire: boolean } | null },
+  opts: { hasAddress: boolean; climat?: ClimatFacts | null; risquesDeclares?: { wildfire: boolean } | null; radon?: RadonFacts | null },
 ): ModuleFacts {
   const scores: ModuleFacts["scores"] = {};
   for (const key of PREFERENCE_KEYS) scores[key] = subScore(key, entry);
@@ -41,7 +43,21 @@ export function buildModuleFacts(
     tailleVilleSource: resolvedSize.source,
     climat: opts.climat ?? null,
     risquesDeclares: opts.risquesDeclares ?? null,
+    radon: opts.radon ?? null,
   });
+}
+
+/**
+ * LE POTENTIEL RADON, chargé comme le climat : par l'appelant, jamais dans le mapping pur.
+ *
+ * `citycode` est le code que le géocodeur a donné à l'adresse. Il compte : à Paris, Lyon et
+ * Marseille, la source ne connaît QUE les arrondissements, et la valeur y varie (le 9e de Lyon est
+ * en classe 3, les huit autres en 1). Sans adresse dans ces trois villes, il n'y a pas de valeur —
+ * `null`, jamais un arrondissement tiré au hasard.
+ */
+export async function loadRadonFacts(insee: string, citycode?: string | null): Promise<RadonFacts | null> {
+  const p = await getRadonPotentiel(insee, citycode);
+  return p ? { classe: p.classe, codeInterroge: p.codeInterroge, parArrondissement: p.parArrondissement } : null;
 }
 
 // LE CLIMAT VIENT DES SCÉNARIOS DRIAS COMPLETS, pas de l'index du comparateur : l'index ne porte que la
@@ -58,7 +74,10 @@ export async function loadClimatFacts(insee: string): Promise<ClimatFacts | null
   }
 }
 
-export async function loadModuleFacts(insee: string, opts: { hasAddress: boolean }): Promise<ModuleFacts | null> {
+export async function loadModuleFacts(
+  insee: string,
+  opts: { hasAddress: boolean; citycode?: string | null },
+): Promise<ModuleFacts | null> {
   // LES RISQUES DÉCLARÉS entrent dans le socle du dossier. Ils étaient chargés par le module Territoire
   // (l'écran) mais restaient invisibles au MOTEUR : le dossier concluait sur le risque d'incendie à partir
   // du seul indice météo projeté, pendant que Géorisques déclarait « Feu de forêt » sur la même commune.
@@ -66,13 +85,17 @@ export async function loadModuleFacts(insee: string, opts: { hasAddress: boolean
   //
   // La source est déjà mise en cache par commune (getGeorisquesSummary) : aucun appel supplémentaire pour
   // un lecteur qui ouvre aussi le module Territoire. Une panne rend `null` — jamais `false`.
-  const [entry, climat, georisques] = await Promise.all([
+  const [entry, climat, georisques, radon] = await Promise.all([
     getCommuneEntry(insee),
     loadClimatFacts(insee),
     getGeorisquesSummary(insee).catch(() => null),
+    // `citycode` sert aux trois communes à arrondissements : sans lui, Paris, Lyon et Marseille
+    // n'ont pas de valeur radon — et c'est la vérité, puisqu'elle y varie d'un arrondissement à
+    // l'autre. Cache 30 j : une classification géologique ne bouge pas.
+    loadRadonFacts(insee, opts.citycode),
   ]);
   const risquesDeclares = georisques ? { wildfire: georisques.flags.wildfire } : null;
-  return entry ? buildModuleFacts(entry, { hasAddress: opts.hasAddress, climat, risquesDeclares }) : null;
+  return entry ? buildModuleFacts(entry, { hasAddress: opts.hasAddress, climat, risquesDeclares, radon }) : null;
 }
 
 // LE CONTEXTE DES CONTRAINTES DURES, hydraté AU-DESSUS des deux moteurs : le MÊME annuaire et la MÊME
@@ -163,9 +186,12 @@ export async function withEvaluationPoint(
 export async function buildCommuneDossier(
   insee: string,
   project: UserProject,
-  opts?: { hasAddress?: boolean },
+  // `citycode` : le code que le géocodeur a donné à l'adresse analysée, quand il y en a une. Il n'est
+  // PAS redondant avec `insee` pour Paris, Lyon et Marseille, où il porte l'arrondissement — seule
+  // maille à laquelle certaines sources (le radon) répondent, et à laquelle leur valeur varie.
+  opts?: { hasAddress?: boolean; citycode?: string | null },
 ): Promise<{ moduleFacts: ModuleFacts; dossier: Dossier; hard: EvaluationContext } | null> {
-  const facts = await loadModuleFacts(insee, { hasAddress: opts?.hasAddress ?? false });
+  const facts = await loadModuleFacts(insee, { hasAddress: opts?.hasAddress ?? false, citycode: opts?.citycode });
   if (!facts) return null;
   const hard = await buildHardContext(project, facts);
   // moduleFacts retournés pour que l'augmentation Logement reparte du MÊME socle (pas de reload).
