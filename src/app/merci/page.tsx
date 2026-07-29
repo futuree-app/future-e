@@ -11,10 +11,10 @@ export default function MerciPage() {
           Vous recevrez votre rapport interactif par email dans les prochaines minutes.
         </p>
         <Link
-          href="/dashboard"
+          href="/rapport"
           className="font-mono text-sm tracking-wider text-[var(--accent)] uppercase"
         >
-          Accéder à mon espace →
+          Accéder à mon rapport →
         </Link>
       </div>
     </div>

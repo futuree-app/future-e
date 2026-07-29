@@ -41,10 +41,15 @@ const COPY: Record<CheckoutProductSlug, {
   "rapport-complet": {
     kicker: "Rapport interactif · 14 € une fois",
     hero: { line1: "Votre futur,", line2: "posé sur la table." },
-    promise: "Un rapport interactif intégral, lu à trois échelles à partir de votre commune, de votre adresse et de votre profil. Téléchargeable, à conserver.",
+    // CE QUE LE PAIEMENT DÉLIVRE RÉELLEMENT, et rien de plus (aligné le 30/07/2026). Ce bloc
+    // annonçait « trois modules interactifs », quand le webhook 14 € pose un report_grant sur une
+    // commune et rien d'autre : les échelles Autour et Logement demandent un dossier d'adresse,
+    // qu'aucun paiement à 14 € ne crée. checkout-products.ts, lui, décrivait déjà le territoire
+    // seul. La vitrine promettait donc davantage que la caisse.
+    promise: "Une lecture interactive de votre commune : ce qu'elle devient face au climat, ce à quoi elle est exposée, ce qui la transforme. Téléchargeable, à conserver.",
     whatYouGet: [
-      { n: "01", title: "Rapport interactif personnalisé", body: "Trois modules interactifs : la commune (Territoire), le secteur autour de votre adresse, et le logement lui-même. Écrits pour vous, sourcés sur les données publiques (DRIAS, INSEE, Géorisques, BPE). Export PDF inclus." },
-      { n: "02", title: "Dashboard simplifié", body: "Vos indicateurs clés en lecture seule, accessibles à tout moment depuis votre espace futur•e." },
+      { n: "01", title: "Le Territoire, en entier", body: "La commune lue à travers son climat, ses risques, son cadre de vie et sa population. Écrit pour vous à partir de votre profil, sourcé sur les données publiques (DRIAS, INSEE, Géorisques, BPE). Export PDF inclus." },
+      { n: "02", title: "AskFuture, 3 questions", body: "De quoi revenir sur ce que le rapport laisse ouvert, avec vos mots, sur votre commune." },
       { n: "03", title: "Régénération annuelle", body: "Une mise à jour du rapport interactif par an, incluse, pour suivre l'évolution de votre territoire." },
     ],
     timeline: [
@@ -54,12 +59,12 @@ const COPY: Record<CheckoutProductSlug, {
       // confirmé et les trois modules se lisent en ligne : rien n'est produit en différé, rien
       // n'est envoyé. La promesse faisait donc attendre un acheteur qui pouvait déjà lire, et
       // lui laissait croire qu'il achetait un document plutôt qu'un rapport interactif.
-      { n: "02", title: "Accès immédiat", body: "Vos trois modules s'ouvrent dès le paiement confirmé. Rien à attendre, rien à recevoir par email." },
+      { n: "02", title: "Accès immédiat", body: "Votre rapport s'ouvre dès le paiement confirmé. Rien à attendre, rien à recevoir par email." },
       { n: "03", title: "Accès permanent", body: "Consultable à tout moment depuis votre espace, exportable en PDF, partageable en lien temporaire." },
     ],
     faqs: [
-      { q: "Le rapport interactif est-il vraiment personnalisé ?", a: "Oui. Chaque module est construit à partir de votre commune, votre profil de risque et vos réponses au wizard, et les deux modules les plus fins descendent à l'adresse que vous analysez. Deux foyers d'une même ville obtiennent deux rapports différents." },
-      { q: "Combien de temps avant d'y accéder ?", a: "Le temps que le paiement se confirme, quelques secondes. Vos trois modules s'ouvrent dans votre espace : il n'y a rien à générer, rien à attendre par email." },
+      { q: "Le rapport interactif est-il vraiment personnalisé ?", a: "Oui. Il est construit à partir de votre commune, votre profil de risque et vos réponses au wizard. Deux foyers d'une même ville obtiennent deux rapports différents." },
+      { q: "Combien de temps avant d'y accéder ?", a: "Le temps que le paiement se confirme, quelques secondes. Votre rapport s'ouvre dans votre espace : il n'y a rien à générer, rien à attendre par email." },
       { q: "Mes données sont-elles vendues ?", a: "Jamais. Les données issues du wizard restent dans votre espace. Voir notre politique RGPD." },
     ],
   },

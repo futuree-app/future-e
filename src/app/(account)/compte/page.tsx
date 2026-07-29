@@ -5,8 +5,6 @@ import Navbar from "@/components/Navbar";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
 import {
   canAccessCompleteReport,
-  canAccessDashboard,
-  canAccessInteractiveDashboard,
   getPlanLabel,
 } from "@/lib/access";
 import { PRODUCT_MODULES, MODULE_HREF } from "@/lib/product";
@@ -29,8 +27,6 @@ const MODULE_BENEFIT: Record<string, string> = {
 
 export default async function ComptePage() {
   const account = await getCurrentUserAccount();
-  const hasDashboard = canAccessDashboard(account);
-  const isInteractive = canAccessInteractiveDashboard(account);
   const fullAccess = canAccessCompleteReport(account);
   // Doctrine 2026-06-11 : le gratuit n'ouvre plus aucun module (Territoire compris).
   // Les trois modules sont premium ; le gratuit garde la mini-analyse post-wizard.
@@ -66,7 +62,7 @@ export default async function ComptePage() {
       <div className="fixed top-[-160px] left-[-130px] w-[520px] h-[520px] rounded-full bg-accent/[0.12] blur-[100px] opacity-40 pointer-events-none z-0" />
       <div className="fixed bottom-[-100px] right-[-80px] w-[400px] h-[400px] rounded-full bg-amethyst/[0.10] blur-[88px] opacity-30 pointer-events-none z-0" />
 
-      <Navbar ctas={{ secondary: { href: "/rapport", label: "Mon rapport" }, primary: fullAccess ? { href: "/dashboard", label: "Dashboard" } : { href: "/#pricing", label: "Passer au complet" } }} />
+      <Navbar ctas={{ secondary: { href: "/rapport/dossiers", label: "Mes biens" }, primary: fullAccess ? { href: "/rapport", label: "Mon rapport" } : { href: "/#pricing", label: "Passer au complet" } }} />
 
       <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
 
@@ -276,9 +272,9 @@ export default async function ComptePage() {
           <Link href="/rapport" prefetch={false} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
             Lire mon rapport interactif
           </Link>
-          {hasDashboard && (
-            <Link href="/dashboard" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
-              {isInteractive ? "Dashboard interactif" : "Dashboard"}
+          {fullAccess && (
+            <Link href="/rapport/dossiers" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
+              Mes biens analysés
             </Link>
           )}
           <Link href="/compte/memoire" className="font-mono text-[11px] tracking-[0.06em] uppercase text-ghost no-underline py-2">

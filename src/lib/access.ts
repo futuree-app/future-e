@@ -1,14 +1,24 @@
+// ════════════════════════════════════════════════════════════════════════════
+// Les capacités du COMPTE. Ce fichier ne répond JAMAIS « peut-il lire telle
+// commune ? » : cette question est territoriale et vit dans active-territory.ts
+// (`canAccessTerritory`), qui interroge grants et dossiers.
+//
+// `dashboardAccess` a été retiré le 30/07/2026 avec la page /dashboard. Il
+// portait trois valeurs (none / read_only / interactive) et deux fonctions,
+// pour un écran qui doublait /rapport sans rien trancher de plus. La colonne
+// `dashboard_access` reste en base : aucune migration destructive, plus aucune
+// lecture.
+// ════════════════════════════════════════════════════════════════════════════
+
 export type UserPlan = "free" | "one_shot" | "suivi" | "foyer";
 export type UserStatus = "active" | "inactive" | "canceled";
 export type ReportAccess = "partial" | "complete";
-export type DashboardAccess = "none" | "read_only" | "interactive";
 
 export type UserAccount = {
   email: string | null;
   plan: UserPlan;
   status: UserStatus;
   reportAccess: ReportAccess;
-  dashboardAccess: DashboardAccess;
   newsletterEnabled: boolean;
   notificationsEnabled: boolean;
   householdModeEnabled: boolean;
@@ -17,7 +27,6 @@ export type UserAccount = {
 type CapabilityMatrix = {
   label: string;
   reportAccess: ReportAccess;
-  dashboardAccess: DashboardAccess;
   newsletterEnabled: boolean;
   notificationsEnabled: boolean;
   householdModeEnabled: boolean;
@@ -27,7 +36,6 @@ export const PLAN_MATRIX: Record<UserPlan, CapabilityMatrix> = {
   free: {
     label: "Compte gratuit",
     reportAccess: "partial",
-    dashboardAccess: "none",
     newsletterEnabled: false,
     notificationsEnabled: true,
     householdModeEnabled: false,
@@ -35,7 +43,6 @@ export const PLAN_MATRIX: Record<UserPlan, CapabilityMatrix> = {
   one_shot: {
     label: "Rapport interactif",
     reportAccess: "complete",
-    dashboardAccess: "read_only",
     newsletterEnabled: false,
     notificationsEnabled: false,
     householdModeEnabled: false,
@@ -43,7 +50,6 @@ export const PLAN_MATRIX: Record<UserPlan, CapabilityMatrix> = {
   suivi: {
     label: "Abonnement suivi",
     reportAccess: "complete",
-    dashboardAccess: "interactive",
     newsletterEnabled: true,
     notificationsEnabled: true,
     householdModeEnabled: false,
@@ -51,7 +57,6 @@ export const PLAN_MATRIX: Record<UserPlan, CapabilityMatrix> = {
   foyer: {
     label: "Abonnement Foyer",
     reportAccess: "complete",
-    dashboardAccess: "interactive",
     newsletterEnabled: true,
     notificationsEnabled: true,
     householdModeEnabled: true,
@@ -82,8 +87,6 @@ export function normalizeAccount(
     status: (account?.status as UserStatus) || "active",
     reportAccess:
       (account?.reportAccess as ReportAccess) || defaults.reportAccess,
-    dashboardAccess:
-      (account?.dashboardAccess as DashboardAccess) || defaults.dashboardAccess,
     newsletterEnabled:
       account?.newsletterEnabled ?? defaults.newsletterEnabled,
     notificationsEnabled:
@@ -99,14 +102,6 @@ export function canAccessSavedReport(account: UserAccount) {
 
 export function canAccessCompleteReport(account: UserAccount) {
   return account.reportAccess === "complete";
-}
-
-export function canAccessDashboard(account: UserAccount) {
-  return account.dashboardAccess !== "none";
-}
-
-export function canAccessInteractiveDashboard(account: UserAccount) {
-  return account.dashboardAccess === "interactive";
 }
 
 export function canAccessHouseholdFeatures(account: UserAccount) {

@@ -116,7 +116,7 @@ export default async function RapportPage() {
       <div className="fixed bottom-[-100px] right-[-100px] w-[420px] h-[420px] rounded-full bg-amethyst/[0.12] blur-[90px] opacity-28 pointer-events-none z-0" />
       <div className="fixed top-[42%] left-[58%] w-[280px] h-[280px] rounded-full bg-info/[0.08] blur-[70px] opacity-16 pointer-events-none z-0" />
 
-      <Navbar ctas={{ secondary: { href: "/compte", label: "Mon compte" }, primary: { href: "/dashboard", label: "Dashboard" } }} />
+      <Navbar ctas={{ secondary: { href: "/compte", label: "Mon compte" }, primary: { href: "/rapport/dossiers", label: "Mes biens" } }} />
 
       <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
 
@@ -228,8 +228,8 @@ export default async function RapportPage() {
               </p>
               <div className="flex gap-3 flex-wrap">
                 {fullReport ? (
-                  <Link href="/dashboard" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-                    Voir le dashboard
+                  <Link href="#modules" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+                    Voir mes trois échelles
                   </Link>
                 ) : (
                   <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
@@ -357,7 +357,7 @@ export default async function RapportPage() {
 
         {/* ── Vue payant ── */}
         {fullReport && (
-          <section className="pt-14">
+          <section className="pt-14" id="modules">
             <div className="mb-8">
               <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
                 Trois échelles, de la commune à vos murs.

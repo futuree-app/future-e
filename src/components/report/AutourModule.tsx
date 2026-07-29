@@ -153,7 +153,7 @@ export default function AutourModule({
       <div className="fixed top-[-160px] left-[-130px] w-[520px] h-[520px] rounded-full bg-green/[0.10] blur-[100px] opacity-32 pointer-events-none z-0" />
       <div className="fixed bottom-[-100px] right-[-80px] w-[400px] h-[400px] rounded-full bg-accent/[0.08] blur-[88px] opacity-24 pointer-events-none z-0" />
 
-      <Navbar ctas={{ secondary: { href: "/rapport", label: "Mon rapport" }, primary: { href: "/dashboard", label: "Dashboard" } }} />
+      <Navbar ctas={{ secondary: { href: "/rapport", label: "Mon rapport" }, primary: { href: "/rapport/dossiers", label: "Mes biens" } }} />
 
       <div className="relative z-[2] max-w-[1100px] mx-auto px-7 pb-24">
         <section className="py-20">

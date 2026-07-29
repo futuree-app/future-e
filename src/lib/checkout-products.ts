@@ -25,7 +25,12 @@ export const CHECKOUT_PRODUCTS: Record<CheckoutProductSlug, CheckoutProduct> = {
       "La lecture du territoire : ce qu'il devient face au climat (canicule, inondation, sécheresse)",
       "Les sources publiques croisées et rendues lisibles pour cette commune",
       "AskFuture : 3 questions pour approfondir le territoire",
-      "À conserver, et qui s'enrichit au fil des prochains modules",
+      // « qui s'enrichit au fil des prochains modules » a été retiré le 30/07/2026. La ligne
+      // promettait que les modules à venir tomberaient dans cet achat, ce que le découpage tranché
+      // contredit : les échelles Autour et Logement demandent un dossier d'adresse, qui se paie.
+      // Une promesse d'enrichissement gratuit dans le produit le moins cher rendrait tout achat
+      // ultérieur illégitime aux yeux de qui l'a lue.
+      "À conserver, et régénérable une fois par an",
     ],
   },
 };

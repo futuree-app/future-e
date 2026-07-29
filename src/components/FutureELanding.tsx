@@ -3396,9 +3396,8 @@ export default function FutureELanding() {
             </div>
             <div style={styles.planFeatures}>
               {[
-                'Trois échelles : la commune, le secteur autour de votre adresse, le logement',
+                'La commune en entier : climat, risques, cadre de vie, ce qui la transforme',
                 'AskFuture : 3 questions incluses',
-                'Dashboard simplifié en lecture seule',
                 'Export PDF, à conserver',
                 'Régénération 1 fois par an',
               ].map((feature) => (
