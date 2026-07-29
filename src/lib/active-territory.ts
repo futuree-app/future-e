@@ -17,9 +17,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 //   - active_insee_code défini → on consulte ce territoire (bandeau « revenir »).
 //
 // Ce resolver centralise la règle pour les quelques sites de lecture (page
-// rapport, modules, AskFuture). Le gating « rapport complet » reste au niveau
-// compte (canAccessCompleteReport) en V1 ; report_grants trace les territoires
-// achetés pour le futur modèle multi-territoires.
+// rapport, modules, AskFuture). Le gating « rapport complet » ne vit PLUS au
+// niveau compte : depuis l'alignement du 30/07, tout écran qui ouvre un
+// territoire le demande à `canAccessTerritory`, qui répond commune par commune.
+// `canAccessCompleteReport` ne subsiste que là où la question porte sur le PLAN
+// sans ouvrir d'accès (l'inventaire du dashboard).
 // ════════════════════════════════════════════════════════════════════════════
 
 export type ProfileTerritoryFields = {
@@ -71,18 +73,19 @@ export function resolveActiveTerritory(
   };
 }
 
-// Territoire de lecture autorisé : applique le contrôle d'accès territoire-aware.
+// Territoire de lecture autorisé : QUELLE commune l'écran va lire.
 //
-// Gating V1 :
-//   - résidence            → accès historique au niveau compte (report_access) ;
-//   - territoire actif ≠ résidence → accès UNIQUEMENT s'il existe un report_grant
-//     pour (user_id, insee). Sinon on n'affiche jamais ce territoire : repli
-//     propre sur la résidence et signalement du territoire refusé (deniedInsee /
-//     deniedCommune) pour l'UI.
+//   - pas de territoire actif → la résidence, SANS contrôle ici ;
+//   - territoire actif ≠ résidence → seulement s'il existe une revendication sur
+//     cette commune (grant ou dossier). Sinon repli propre sur la résidence, avec
+//     signalement du territoire refusé (deniedInsee / deniedCommune) pour l'UI.
 //
-// La résidence reste juge par report_access ; report_grants devient juge du
-// rapport par territoire. report_access seul ne suffit plus à lire un territoire
-// acheté par un autre compte / jamais acheté.
+// LA RÉSIDENCE N'EST PAS CONTRÔLÉE ICI, ET C'EST DÉLIBÉRÉ : cette fonction répond
+// « quelle commune », pas « en a-t-il le droit ». Le droit est une seconde
+// question, posée par l'écran à `canAccessTerritory`, qui vaut aussi pour la
+// résidence. Les confondre a coûté cher : quand les pages demandaient encore
+// l'accès au plan, un compte ayant payé Nantes lisait le Territoire COMPLET de sa
+// résidence, jamais payée.
 export type ReadableTerritory = ActiveTerritory & {
   // Territoire actif demandé puis refusé faute de grant. null si aucun refus.
   deniedInsee: string | null;

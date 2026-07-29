@@ -36,10 +36,13 @@ export default async function RapportAutourPage({
 
   if (targetId && !dossier) redirect("/rapport");
 
+  // Repli par `ouvrir`, comme sur /rapport/logement : ce chemin pose aussi le territoire de lecture.
   if (!dossier) {
     const sole = await getSoleDossier(supabase, user.id);
     redirect(
-      sole ? `/rapport/autour?dossierId=${encodeURIComponent(sole.id)}` : "/rapport/dossiers",
+      sole
+        ? `/rapport/dossiers/ouvrir?id=${encodeURIComponent(sole.id)}&vers=autour`
+        : "/rapport/dossiers",
     );
   }
 

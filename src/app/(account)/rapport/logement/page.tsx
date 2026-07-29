@@ -31,10 +31,15 @@ export default async function RapportLogementPage({
 
   // Aucun dossier visé : le repli ne s'applique QU'À un dossier unique. Au-delà, on ne devine pas
   // lequel (deux appartements d'un même immeuble sont deux dossiers légitimes), on demande.
+  // Le repli passe par `ouvrir` plutôt que par l'URL directe : c'est le seul chemin qui pose aussi
+  // le territoire de lecture sur la commune du dossier. Sans ça, entrer par `/rapport/logement` nu
+  // ouvrait le bien à Nantes en laissant la commune sur la résidence.
   if (!dossier) {
     const sole = await getSoleDossier(supabase, user.id);
     redirect(
-      sole ? `/rapport/logement?dossierId=${encodeURIComponent(sole.id)}` : "/rapport/dossiers",
+      sole
+        ? `/rapport/dossiers/ouvrir?id=${encodeURIComponent(sole.id)}&vers=logement`
+        : "/rapport/dossiers",
     );
   }
 

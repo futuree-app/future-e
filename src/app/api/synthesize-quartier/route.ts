@@ -16,8 +16,8 @@
 import { NextRequest } from "next/server";
 import { streamText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
-import { getCurrentUserAccount } from "@/lib/user-account";
-import { canAccessCompleteReport } from "@/lib/access";
+import { getCurrentSessionUser } from "@/lib/user-account";
+import { canAccessTerritory } from "@/lib/active-territory";
 import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
 import { getTerritoryContext, getCommuneDistinctive, RECIT_DEMOGRAPHIE } from "@/lib/comparateur-vie";
 import { deriveTerritoryMood } from "@/lib/territory-mood";
@@ -216,11 +216,14 @@ function shapeWorkbook(wb: WorkbookInput | undefined) {
 }
 
 export async function POST(req: NextRequest) {
-  // Route coûteuse (fan-out enrichissement commune + Sonnet 4.6) : réservée au rapport complet,
-  // seule surface qui la consomme (/rapport/quartier, déjà gatée côté page).
-  const account = await getCurrentUserAccount();
-  if (!canAccessCompleteReport(account)) {
-    return new Response("forbidden", { status: 403 });
+  // Route coûteuse (fan-out enrichissement commune + Sonnet 4.6). Le contrôle est plus bas, APRÈS
+  // la lecture du corps : `inseeCode` vient du client, donc la seule garde qui protège vraiment est
+  // celle qui porte sur la commune DEMANDÉE. `canAccessCompleteReport` était global et ne la
+  // regardait pas : un compte ayant payé Nantes pouvait faire synthétiser n'importe quelle commune
+  // de France, à nos frais.
+  const { supabase, user } = await getCurrentSessionUser();
+  if (!user) {
+    return new Response("unauthorized", { status: 401 });
   }
 
   let body: RequestBody;
@@ -241,6 +244,11 @@ export async function POST(req: NextRequest) {
       : null;
   if (!inseeCode || !horizon || !HORIZON_META[horizon]) {
     return new Response("Missing or invalid inseeCode / horizon.", { status: 400 });
+  }
+
+  // Le droit se demande à la commune, comme sur /rapport et /rapport/quartier.
+  if (!(await canAccessTerritory(supabase, user.id, inseeCode))) {
+    return new Response("forbidden", { status: 403 });
   }
 
   const meta = HORIZON_META[horizon];

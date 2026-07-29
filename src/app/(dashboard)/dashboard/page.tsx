@@ -13,6 +13,10 @@ export default async function DashboardPage() {
   const account = await getCurrentUserAccount();
   const hasDashboard = canAccessDashboard(account);
   const isInteractive = canAccessInteractiveDashboard(account);
+  // Le flag de PLAN est la bonne question ici, et c'est le seul écran où il l'est restée après
+  // l'alignement du 30/07. Cette valeur décrit ce que le plan comprend (« rapport interactif :
+  // oui »), elle n'ouvre aucun accès et ne nomme aucune commune. Le droit de LIRE un territoire se
+  // demande à `canAccessTerritory`, jamais ici.
   const hasFullReport = canAccessCompleteReport(account);
   const hasHousehold = canAccessHouseholdFeatures(account);
 

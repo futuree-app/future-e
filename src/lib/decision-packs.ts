@@ -121,10 +121,11 @@ export async function grantDecisionPackFromSnapshot(
     { onConflict: "user_id,insee" },
   );
 
-  // Entitlements one_shot au niveau compte : sans report_access = complete,
-  // l'acheteur ne pourrait NI lire les rapports (canAccessCompleteReport) NI
-  // utiliser AskFuture (api/ask bloque le plan free). Mêmes droits qu'un achat
-  // rapport one-shot. email requis seulement à l'INSERT (la ligne existe déjà).
+  // Entitlements one_shot au niveau compte. Ce qui ouvre les rapports du Pack, ce sont les trois
+  // `report_grants` écrits juste au-dessus : depuis l'alignement du 30/07, la lecture d'un
+  // territoire se demande à `canAccessTerritory`, jamais au plan. Le plan reste nécessaire pour ce
+  // qui n'est pas territorial, AskFuture en tête (api/ask bloque le plan free).
+  // email requis seulement à l'INSERT (la ligne existe déjà).
   if (email) {
     await admin.from("user_accounts").upsert(
       {

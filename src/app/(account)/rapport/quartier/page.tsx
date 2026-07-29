@@ -4,7 +4,6 @@ export const dynamic = "force-dynamic";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { canAccessCompleteReport } from "@/lib/access";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
@@ -15,7 +14,7 @@ import QuartierSynthesis, {
 } from "@/components/report/QuartierSynthesis";
 import { ModuleTracker } from "@/components/ModuleTracker";
 import { deriveQuartierSources, buildFallbackSummary } from "@/lib/quartier-signals";
-import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
+import { resolveReadableTerritory, TERRITORY_SELECT, canAccessTerritory } from "@/lib/active-territory";
 import { AskFutureInlineMount } from "@/components/AskFutureInlineMount";
 import { TerritoryYearsBand } from "@/components/report/TerritoryYearsBand";
 import { deriveTerritoryMood } from "@/lib/territory-mood";
@@ -30,14 +29,7 @@ import { ReportRelationBanner } from "@/components/report/ReportRelationBanner";
 export default async function RapportQuartierPage() {
   const account = await getCurrentUserAccount();
 
-  // Doctrine 2026-06-11 : Quartier est premium. Le gratuit n'ouvre aucun module
-  // et est renvoyé vers le hub /rapport (qui lui montre la première lecture).
-  if (!canAccessCompleteReport(account)) {
-    redirect("/rapport");
-  }
-
   const { supabase, user } = await requireCurrentUser();
-  const fullReport = canAccessCompleteReport(account);
 
   const { data: profile } = await supabase
     .from("user_profiles")
@@ -48,6 +40,20 @@ export default async function RapportQuartierPage() {
   const territory = await resolveReadableTerritory(supabase, user.id, profile);
   const communeName = territory.communeName;
   const inseeCode = territory.inseeCode;
+
+  // LA GARDE SE POSE À LA COMMUNE, plus au plan (migration 25, alignement 30/07).
+  //
+  // `canAccessCompleteReport(account)` était global : il ouvrait Territoire sur N'IMPORTE quelle
+  // commune lue dès que le compte avait payé quelque part. `resolveReadableTerritory` ne contrôle
+  // rien sur la résidence, délibérément, le contrôle vivant sur les pages : quelqu'un qui achetait
+  // le territoire de Nantes obtenait donc le Territoire COMPLET de sa résidence, jamais payée.
+  // C'est le trou que /rapport a fermé le 29/07 et que cette page gardait ouvert.
+  //
+  // Le gratuit tombe toujours ici, sans claim d'aucune sorte, et retrouve le hub comme avant.
+  const fullReport = await canAccessTerritory(supabase, user.id, inseeCode);
+  if (!fullReport) {
+    redirect("/rapport");
+  }
   const initialWorkbook = normalizeWorkbook(profile?.workbook_quartier);
 
   // Contexte de lecture : relation effective (corrigée par l'utilisateur si posée,
@@ -135,14 +141,12 @@ export default async function RapportQuartierPage() {
             Ce que {displayName} devient.<br />
             <span className="italic text-info">Territoire, climat, risques.</span>
           </h1>
-          <p className={`text-[17px] leading-[1.72] text-muted ${fullReport ? "mb-0" : "mb-9"}`}>
+          {/* La branche « pas d'accès » qui vivait ici était morte : la garde du haut redirige
+              avant d'atteindre le rendu. Un compte sans droit sur cette commune ne voit pas cette
+              page du tout, il voit le hub, qui porte l'offre. */}
+          <p className="text-[17px] leading-[1.72] text-muted mb-0">
             Une lecture d&apos;ensemble de la commune : ce qu&apos;elle est, ce qui la transforme et les grands phénomènes auxquels elle est exposée.
           </p>
-          {!fullReport && (
-            <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline">
-              Ouvrir le rapport interactif
-            </Link>
-          )}
         </section>
 
         {/* Passeport territorial : la carte d'identité ouvre le rapport. */}

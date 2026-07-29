@@ -10,6 +10,7 @@ import {
   getPlanLabel,
 } from "@/lib/access";
 import { PRODUCT_MODULES, MODULE_HREF } from "@/lib/product";
+import { resolveActiveTerritory, TERRITORY_SELECT, canAccessTerritory } from "@/lib/active-territory";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
@@ -38,11 +39,22 @@ export default async function ComptePage() {
   const { supabase, user } = await requireCurrentUser();
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("home_commune, home_insee_code, wizard_answers")
+    .select(`${TERRITORY_SELECT}, wizard_answers`)
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const commune = profile?.home_commune ?? null;
+  // DEUX QUESTIONS, ET LES CONFONDRE FAISAIT MENTIR CET ÉCRAN. `fullAccess` dit l'état du PLAN :
+  // ce compte a-t-il payé quelque chose. `scalesOpen` dit si les trois échelles sont réellement
+  // ouvertes ICI, sur le territoire que le rapport va lire. Depuis que le droit est communal, un
+  // compte payant peut n'avoir aucune commune ouverte : /compte annonçait « Trois échelles, toutes
+  // ouvertes » pendant que /rapport servait le partiel. Les deux écrans posent désormais la même
+  // question au même endroit.
+  const territory = resolveActiveTerritory(profile);
+  const scalesOpen = fullAccess && (await canAccessTerritory(supabase, user.id, territory.inseeCode));
+
+  // La commune NOMMÉE ici est celle que le rapport va lire, pas la résidence : les deux écrans
+  // doivent parler du même lieu. Sans territoire actif, les deux coïncident.
+  const commune = territory.communeName ?? null;
   const serverWizardAnswers = (profile?.wizard_answers ?? null) as WizardAnswers | null;
 
   return (
@@ -79,9 +91,11 @@ export default async function ComptePage() {
               <span className="italic text-accent">{fullAccess ? "de la commune aux murs." : "ne disparaît plus."}</span>
             </h1>
             <p className="text-[17px] leading-[1.72] text-muted mb-8 max-w-[480px]">
-              {fullAccess
+              {scalesOpen
                 ? "Le rapport interactif est ici. Trois échelles, toutes ouvertes : la commune, le secteur, le logement."
-                : "Votre première lecture personnalisée est sauvegardée ici, sans limite de temps. Le rapport interactif, lui, ouvre les trois échelles."}
+                : fullAccess
+                  ? "Votre accès est actif. Ouvrez le bien ou la commune que vous voulez lire : les trois échelles suivent le lieu que vous désignez."
+                  : "Votre première lecture personnalisée est sauvegardée ici, sans limite de temps. Le rapport interactif, lui, ouvre les trois échelles."}
             </p>
             <div className="flex gap-2 flex-wrap mb-7">
               <span className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] font-mono text-[11px] text-ghost">
@@ -108,12 +122,18 @@ export default async function ComptePage() {
               {fullAccess ? "Votre accès" : "Ce que le compte gratuit garde"}
             </p>
             <h2 className="font-normal text-[20px] leading-[1.2] text-label mb-5 tracking-[-0.2px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              {fullAccess ? "Trois échelles, toutes ouvertes." : "Votre première lecture, retrouvable."}
+              {scalesOpen
+                ? "Trois échelles, toutes ouvertes."
+                : fullAccess
+                  ? "Trois échelles, sur le lieu que vous ouvrez."
+                  : "Votre première lecture, retrouvable."}
             </h2>
             <div className="grid grid-cols-3 rounded-lg overflow-hidden border border-white/[0.08] mb-5">
-              {(fullAccess
+              {(scalesOpen
                 ? [{ val: "3", label: "modules ouverts" }, { val: "∞", label: "questions Futur•e" }, { val: "∞", label: "mises à jour" }]
-                : [{ val: "1", label: "ville de référence" }, { val: "1", label: "lecture personnalisée" }, { val: "∞", label: "retrouvable" }]
+                : fullAccess
+                  ? [{ val: "3", label: "échelles par lieu" }, { val: "∞", label: "questions Futur•e" }, { val: "∞", label: "mises à jour" }]
+                  : [{ val: "1", label: "ville de référence" }, { val: "1", label: "lecture personnalisée" }, { val: "∞", label: "retrouvable" }]
               ).map((m, i) => (
                 <div key={m.label} className={`px-3 py-3.5 text-center ${i < 2 ? "border-r border-white/[0.08]" : ""}`}>
                   <span className="block text-[26px] text-accent leading-none mb-1" style={{ fontFamily: "'Instrument Serif', serif" }}>{m.val}</span>
@@ -122,9 +142,11 @@ export default async function ComptePage() {
               ))}
             </div>
             <p className="text-[14px] leading-[1.7] text-muted">
-              {fullAccess
+              {scalesOpen
                 ? "Tous les modules sont accessibles depuis le hub rapport interactif. Futur•e répond à vos questions en tenant compte de votre commune et de votre profil."
-                : "Le compte garde votre première lecture et votre commune de référence, pour y revenir sans repasser par le questionnaire."}
+                : fullAccess
+                  ? "Les modules s'ouvrent sur le lieu que vous désignez : un bien que vous avez analysé, ou une commune que vous avez débloquée. Vos dossiers restent dans votre compte."
+                  : "Le compte garde votre première lecture et votre commune de référence, pour y revenir sans repasser par le questionnaire."}
             </p>
           </aside>
         </section>

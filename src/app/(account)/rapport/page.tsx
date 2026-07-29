@@ -76,11 +76,24 @@ export default async function RapportPage() {
   // Un dossier de CETTE commune vaut « adresse renseignée » : on coupe la règle « confort sans
   // adresse » et le CTA renvoie vers l'analyse, plutôt que d'inviter à saisir une adresse. On compare au grain commune
   // (communeParent) : un dossier sur le 3e arrondissement de Lyon concerne bien Lyon.
-  const dossiers = fullReport && inseeCode ? await listDossiers(supabase, user.id) : [];
+  //
+  // La liste est chargée SANS condition, alors qu'elle ne l'était que pour un rapport complet.
+  // C'est ce qui rendait les dossiers introuvables : un compte qui possède deux biens à Nantes et
+  // réside à La Rochelle lisait le partiel de La Rochelle, et rien à l'écran ne disait que Nantes
+  // était ouvert. Le hub doit nommer ce que le compte possède, même quand le territoire lu, lui,
+  // n'est pas ouvert.
+  const dossiers = await listDossiers(supabase, user.id);
   const logementForCommune =
-    inseeCode
+    fullReport && inseeCode
       ? (dossiers.find((d) => communeParent(d.insee) === communeParent(inseeCode)) ?? null)
       : null;
+  // Les biens qui ouvrent une AUTRE commune que celle lue : c'est exactement ce que le lecteur
+  // cherche quand l'écran lui sert un rapport partiel. Une entrée par commune, pas par bien : deux
+  // appartements du même immeuble mènent au même territoire.
+  const dossiersAilleurs = inseeCode
+    ? dossiers.filter((d) => communeParent(d.insee) !== communeParent(inseeCode))
+    : dossiers;
+  const communesAilleurs = [...new Map(dossiersAilleurs.map((d) => [communeParent(d.insee), d])).values()];
   const communeResult =
     fullReport && inseeCode && userProject
       ? await buildCommuneDossier(inseeCode, userProject, { hasAddress: Boolean(logementForCommune) })
@@ -161,6 +174,39 @@ export default async function RapportPage() {
                 ? `Revenir à ${territory.residenceCommune}`
                 : "Revenir à ma résidence"}
             </Link>
+          </div>
+        )}
+
+        {/* ── Bandeau : des biens analysés ouvrent une autre commune ──
+            La porte qui manquait. Posséder un dossier ouvre les trois échelles de SA commune, mais
+            rien ne le disait ni ne permettait d'y aller : le territoire lu restait la résidence,
+            l'écran servait le partiel, et le lecteur n'avait aucun moyen de savoir que Nantes lui
+            était ouverte. `prefetch={false}` : la cible écrit le territoire actif. */}
+        {communesAilleurs.length > 0 && (
+          <div className="mt-6 rounded-xl border border-white/[0.10] bg-white/[0.03] px-5 py-4">
+            <p className="text-[14px] text-label leading-snug mb-3">
+              {communesAilleurs.length === 1
+                ? "Vous avez analysé un bien dans une autre commune, et elle vous est ouverte en entier."
+                : "Vous avez analysé des biens dans d'autres communes, et elles vous sont ouvertes en entier."}
+            </p>
+            <div className="flex flex-wrap gap-2.5">
+              {communesAilleurs.map((d) => (
+                <Link
+                  key={d.id}
+                  href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=territoire`}
+                  prefetch={false}
+                  className="font-mono text-[11px] tracking-[0.08em] uppercase text-accent hover:text-label no-underline border border-accent/[0.3] rounded-lg px-3.5 py-2"
+                >
+                  Ouvrir {d.city ?? d.address_label}
+                </Link>
+              ))}
+              <Link
+                href="/rapport/dossiers"
+                className="font-mono text-[11px] tracking-[0.08em] uppercase text-muted hover:text-label no-underline border border-white/[0.12] rounded-lg px-3.5 py-2"
+              >
+                Tous mes biens
+              </Link>
+            </div>
           </div>
         )}
 
