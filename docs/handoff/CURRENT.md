@@ -1,190 +1,224 @@
-# Passation — journée du 25/07 : faux positifs fermés, la MINUTE devient une sélection, six sources sous contrat
+# Passation — journée du 29/07 : six thèmes deviennent trois échelles, et l'entourage prend son module
 
-**Horodatage** : 2026-07-25 (fin de session) · **Branche** : `main` = `a1d2d50` (poussé, 27 commits depuis
-la dernière passation). **Tree propre** côté code : deux non suivis à NE JAMAIS committer —
-`Futur.e Design System.zip` et `src/app/dev/` (les harnais, voir plus bas).
+**Horodatage** : 2026-07-29 16:46 (fin de session) · **Branche** : `main` = `473d2fa` (poussé).
+**Tree propre**, un seul non suivi à NE JAMAIS committer : `Futur.e Design System.zip`.
 
-**864 tests · tsc 0 · lint global à 40 problèmes** (contre 75 887 ce matin — voir §6).
+**983 tests · tsc 0 · lint global à 20 problèmes (8 erreurs)** — toutes antérieures à cette session
+(`useTheme.ts`, `ConclusionRedigee.tsx`, `DossierAvecLogement.tsx`, un `any` dans la landing).
 
----
-
-## 1. CE QUI DÉCLENCHE TOUT : un dossier ouvert au bon moment
-
-Le porteur ouvre Lège-Cap-Ferret **pendant que la commune brûle**, sur un projet qui demande d'être
-« à l'abri des risques d'incendie ». Le dossier affiche **« Bonne correspondance »**. Douze correctifs
-en sont sortis, tous de la même famille :
-
-> **Le moteur était exact localement, et le dossier devenait faux par COMPOSITION.**
-
-Aucun fait n'était mal calculé. C'est leur assemblage qui mentait — une preuve attachée au mauvais
-constat, une intro de section qui requalifiait, un verdict qui niait la carte du dessous, une sortie
-précoce qui rendait une branche inatteignable. **Aucun des ~800 tests ne pouvait le voir.**
-
-### Les bugs de données (les plus graves, silencieux depuis des mois)
-- `flags.wildfire` cherchait « feux de foret » AU PLURIEL ; GASPAR écrit « Feu de forêt » au SINGULIER.
-  Le drapeau valait `false` **pour toutes les communes de France** (`5674613`).
-- `eaufrance` lisait `libelle_observation` ; le champ Hub'Eau s'appelle `libelle_ecoulement`. `isDry`
-  valait toujours faux : **un cours d'eau à sec n'a jamais pu être signalé** (`d40cb1f`).
-
-Même signature : une valeur d'API jamais confrontée à la source, et une logique enfermée dans un module
-`server-only` donc intestable. Même correction : extraire la fonction pure, figer le corpus réel, tester.
-
-### Le feu, de bout en bout
-`risquesDeclares` entre dans le socle (`498a66b`) ; le risque recensé devient un **mismatch** avec un
-fondement propre `declared_hazard` (`ee13539`) ; il reste **visible à poids 1** en `secondary`, sans
-réécrire le verdict (`8b15f5e`) ; le **boisement** (≥ 70 % = 9,4 % des communes) interdit de conclure
-« satisfait » là où l'État n'a rien recensé, sans jamais affirmer un risque (`47d40a8`).
+> **Deux sessions ont travaillé en parallèle dans le MÊME working tree aujourd'hui.** Celle-ci a fait
+> la bascule des modules ; l'autre a fait Cartofriches, le secteur dans le moteur de décision et le
+> radon. Les commits sont entrelacés (`d14e5b4`, `2c79618`, `0115f22` d'un côté ; `f98a002`, `ef17ffc`,
+> `b01b8f2`, `473d2fa` de l'autre). Aucun conflit : chaque session n'a stagé que ses propres fichiers,
+> nommément. **C'est la seule discipline qui a rendu ça possible — ne pas faire `git add -A` ici.**
 
 ---
 
-## 2. « EN UNE MINUTE » EST DEVENU UNE SÉLECTION (`4bbbac0`, `b9138cb`)
+## 1. LA BASCULE : six modules thématiques → trois échelles (`d14e5b4`)
 
-C'était un dossier RACCOURCI : six plafonds par section (2+3+3+3+3+4), chaque rubrique optimisant son
-volume sans regarder le total. Le bloc grossissait donc avec le nombre de priorités déclarées —
-**mesuré : 3 minutes pour un projet à 15 critères contre 81 s pour un projet à 2**. Celui qui avait le
-plus réfléchi à ce qu'il cherchait était le plus mal servi.
+Le produit annonçait six modules (Territoire, Logement, Métier, Santé, Mobilité, Projets) **dont
+quatre ne s'ouvraient pas** : la grille du hub affichait un tiret en guise de lien. C'était un
+inventaire de ce qu'on n'avait pas.
 
-Désormais : **plafond GLOBAL de 4 cartes**, tri LEXICOGRAPHIQUE (jamais un score — chaque inclusion se
-raconte en une phrase), une **place réservée au contrepoids** quand le dossier arbitre.
+Il en tient trois, et ce sont trois **échelles emboîtées** :
 
-**Mesuré à l'écran, projet à 15 priorités : 87-95 s** (contre 116-181 avant).
+| Module | Id technique | Échelle | Ce qu'il tranche |
+|---|---|---|---|
+| Territoire | `quartier` | la commune | ce qui structure la vie ici et ce qui la transforme |
+| Autour de l'adresse | `autour` | le voisinage | ce qui se trouve et se mesure à proximité du point |
+| Logement | `logement` | le bâtiment | ce que le diagnostic établit, ce qui expose, ce qu'il reste à demander |
 
-- **Ce qui ne trie PAS** : la matérialité et le lien à une priorité sont d'excellents critères
-  d'ÉLIGIBILITÉ mais de mauvais critères de SÉLECTION — sur un projet riche, tous les faits sont
-  `structuring` ET rattachés à une priorité. Ils s'aplatissent là où on en aurait besoin.
-- **Le rôle se lit PAR RAPPORT À L'ORIENTATION** : dans un dossier favorable les correspondances
-  FONDENT le verdict (3 places) ; ailleurs, une seule.
-- **La sélection vit dans le PLAN**, pas dans la vue : le verdict en dépend (il annonce le nombre de
-  contrôles visibles). Circularité levée par **deux passes** — un premier verdict dont seul le héros est
-  retenu, la sélection, puis le verdict définitif avec son périmètre.
-- Le détail dit les **deux périmètres** : « Un constat reste par ailleurs à contrôler. Un autre constat
-  figure dans le dossier complet. »
+**Les thèmes retirés n'ont pas disparu, ils TRAVERSENT désormais les échelles.** La chaleur, par
+exemple : trajectoire projetée dans Territoire, îlot de chaleur du quartier dans Autour, inertie et
+protections solaires dans Logement. C'est ce que les six modules empêchaient.
 
-**« En une minute » reste le nom** — décision du porteur : c'est un titre éditorial, pas un chronomètre,
-et 1 min 45 est la borne. Ne pas rouvrir.
-
----
-
-## 3. LES CONTRATS DE DONNÉES EXTERNES (`d40cb1f`, `d6a5335`)
-
-`src/lib/fixtures-sources-externes.ts` fige des valeurs **OBSERVÉES**, recopiées telles que les sources
-les renvoient. **Toute valeur ajoutée doit avoir été relevée**, avec sa date : une valeur écrite de
-mémoire réintroduit le défaut (le commentaire d'ONDE en était la démonstration — il listait des accents
-que la source n'écrit pas).
-
-| Source | Nature du risque | Comment on le teste |
-|---|---|---|
-| GASPAR risques | libellé littéral | 10 libellés réels, aucun faux positif croisé |
-| GASPAR catnat | repli en jargon | aucun libellé réel ne tombe dans le repli |
-| ADEME / BAN | décision d'attribution DPE | 3 types, 7 classes, 4 précisions, défaut sûr |
-| ONDE | nom de champ | 6 écoulements réels, « Observation impossible » ni sec ni humide |
-| DRIAS | DÉCALAGE de colonnes | **invariants physiques** (35 006 communes, 0 violation) |
-| BPE | deux tables en deux langages | shards réels : tout code a un libellé, aucun orphelin |
+**PIÈGE D'IDENTIFIANT, à lire avant de toucher aux ids** : `quartier` est l'id historique du module
+**Territoire** et désigne l'échelle **communale**, jamais le voisinage. Il est antérieur à l'existence
+d'un module « Autour ». Conservé parce qu'il est écrit en base (`terrain_observations.module`), dans
+les URLs et dans l'analytics. L'analytics émet désormais `module_semantic_key`
+(`territory` / `surroundings` / `housing`) à côté, pour que les analyses futures n'aient pas à
+connaître cette histoire. `module_index` a bougé (logement 2 → 3) : c'est une **position d'écran**,
+pas une identité — toute comparaison à cheval sur le 29/07 compare deux mises en page.
 
 ---
 
-## 4. LES ÉCHELLES TERRITOIRE / QUARTIER / LOGEMENT (`c0f9a9d`, `12087e1`)
+## 2. L'ENTOURAGE PREND SON MODULE — et révèle deux couplages cachés
 
-Premier pas du reclassement, **métadonnées seulement, aucune présentation touchée**.
+L'« autour de l'adresse » était le **beat 4 du module Logement** : on ne pouvait le lire qu'après
+avoir fait analyser un bâti. Ce n'est ni la même question, ni la même échelle, ni le même moment.
 
-`echelles.ts` dérive l'échelle du GRAIN de la preuve. **Un fait n'appartient pas à un module** : le champ
-`module` dit d'où VIENT la donnée, pas ce qu'elle DÉCRIT, et il est binaire.
+Nouveau : `/rapport/autour` + `AutourModule.tsx`. Il réutilise `AutourSection` (donc le
+`CarOwnershipBlock` de l'autre session part avec lui, à sa place naturelle) et passe par
+`buildAutourResponse` — **aucun chemin ne renvoie le snapshot directement**, la règle tient toujours.
+L'**îlot de chaleur revient avec lui** : il avait atterri dans « les risques du bâti » faute de place,
+mais il décrit un quartier, pas des murs.
 
-**Ce que la mesure a montré, et c'est le contenu du chantier** : sur un projet à 12 priorités, les six
-faits émis sont TOUS à l'échelle du territoire. **Zéro quartier, zéro logement.** Le grain `secteur`
-n'est émis par AUCUNE règle — un test le documente et tombera quand ce sera faux.
+### Les deux régressions silencieuses, et pourquoi elles étaient invisibles
 
-⚠ **LIMITE INSCRITE DANS LE CONTRAT** : `grain` dit l'ANCRE du calcul, pas le SUPPORT du constat. Ils
-coïncident pour une surface (grand-IRIS) et un attribut du bâtiment (DPE) ; ils DIVERGENT pour une
-distance (« la gare est à 8 min » se mesure depuis l'adresse mais décrit l'environnement). À résoudre
-AVANT de faire entrer l'Autour dans le moteur, et **surtout pas** par une exception « telle règle va
-dans Quartier ».
+1. **La ligne d'artefact naissait d'un EFFET DE BORD de l'appel « autour ».** L'extraction faite,
+   plus rien ne la créait — et comme `/api/logement-dpe` et `saveSynthesis` font des **UPDATE ciblés**,
+   ils seraient devenus des no-op **sans lever d'erreur** : l'API répond 200, rien n'est sauvegardé,
+   chaque analyse repart de zéro. D'où `/api/logement-artefact` + `upsertLogementAddress`, **awaité**
+   avant la persistance DPE (les lancer en concurrence rendait la sauvegarde dépendante de l'ordre
+   d'arrivée de deux requêtes).
+2. **La rehydratation Logement exigeait un snapshot d'entourage.** Ce module n'en produit plus :
+   l'exiger aurait rendu **tout bien nouvellement analysé impossible à rouvrir**.
+
+Six tests figent maintenant le contrat d'écriture (`logement-artefact-lifecycle.test.ts`) : un upsert
+d'identité ne touche ni au snapshot, ni à la posture, ni au DPE, ni à la synthèse ; une parcelle
+inconnue est **OMISE** plutôt qu'écrite en `null` ; le conflit se résout sur `(user_id, logement_id)`.
+
+### La synthèse Logement en v8
+
+L'autour a quitté le payload. La règle du fichier : **le payload ne contient QUE des faits affichés
+sous le texte** — c'est ce qui autorise le prompt à dire « les blocs portent déjà chaque donnée ».
+Le hash de contenu porte la version du prompt, donc les textes écrits avant se régénèrent **seuls** :
+aucune migration à faire. Le gate `autourPhase` qui retardait la synthèse a disparu avec sa cause.
 
 ---
 
-## 5. LES HARNAIS (locaux, NON commités — décision du porteur)
+## 3. LA REVUE EXTERNE A TROUVÉ CE QUE LE GREP AVAIT MANQUÉ (`2c79618`, `0115f22`)
 
-**`/dev/dossier` — LA BOUCLE DE VÉRIFICATION, à utiliser en premier.** Un code INSEE + des priorités
-(`cle:poids`) et le VRAI dossier apparaît : mêmes données, mêmes règles, même composant. Aucun LLM.
-**Sa table « Ce que chaque règle a conclu » est le cœur de l'outil** — c'est là qu'on aurait lu
-`satisfied` en deux secondes. Une campagne sur 11 dossiers a trouvé 2 défauts en quelques minutes.
+La bascule avait été cherchée par grep sur « six modules », « 6 modules », « Six dimensions »,
+« module Santé ». **Deux lignes disaient exactement la même chose sans jamais employer le mot
+« module »** :
 
-**`/dev/conclusion`** — six variantes du bloc de verdict côte à côte, pour le rendu.
+- la **grille tarifaire** — la surface la plus commerciale du site — annonçait « 6 analyses
+  personnalisées : logement, territoire, santé, mobilité, métier, projets » sous un prix de 14 € ;
+- le bloc « votre rapport interactif en 2 minutes » promettait les mêmes six.
+
+> **Leçon de méthode : chercher le NOM d'un concept ne trouve pas ses paraphrases. Une énumération est
+> une définition qui ne se nomme pas.** Quand un concept est retiré, greffer la recherche sur ce qu'il
+> ÉNUMÉRAIT, pas seulement sur son nom.
+
+Trois corrections de promesse ont suivi, toutes dans le même sens — **la vitrine était plus étroite,
+ou plus fausse, que ce que les modules font déjà** :
+
+- **Le délai était faux.** Le checkout promettait « envoyé par email sous 24 heures ouvrées ». Le
+  webhook Stripe pose les droits **dès le paiement confirmé** et les modules se lisent en ligne : rien
+  n'est produit en différé, rien n'est envoyé. On faisait attendre un acheteur qui pouvait déjà lire,
+  sur la page où il sort sa carte.
+- **Territoire était réduit au climat.** Il rend aussi l'accès aux services, la trajectoire de
+  population, les résidences secondaires, les logements inoccupés, les espaces naturels, le boisement.
+  Une promesse plus étroite que le contenu fait passer un rapport de territoire pour un bulletin de
+  risques, et n'intéresse que les gens déjà inquiets du climat.
+- **Logement se vendait par son contenu, pas par sa SORTIE.** Le module se termine sur « à vérifier
+  avant de décider » (des gestes, jamais des cases) — l'élément le plus actionnable du produit, absent
+  de toute surface de vente.
+
+**Aucune promesse de périmètre sur Autour.** « À portée de pas » serait faux pour la moitié de ses
+faits : BPE à **3 km à vol d'oiseau**, îlot de chaleur au **grand-IRIS**, équipement automobile au
+secteur **avec repli sur la commune entière**. Le grain se dit fait par fait, là où il s'affiche —
+jamais dans le titre du module. C'est gravé en tête de `product.ts`.
 
 ---
 
-## 6. LE LINT N'ÉTAIT PAS ROUGE, IL ÉTAIT POLLUÉ (`50d3319`, `a1d2d50`)
+## 4. BRAINSTORMING EN COURS, INTERROMPU : le « dossier adresse » à 39 €
 
-`npx eslint` rendait **5 421 erreurs et 70 466 warnings** : plus personne ne pouvait s'en servir, et un
-vrai défaut y avait exactement la même visibilité qu'une extension Chrome minifiée.
+**Rien n'est construit. Rien n'est écrit en spec.** La session s'est arrêtée juste avant de lancer le
+`business-strategist`. Voici l'état exact du raisonnement, pour ne pas le refaire.
 
-**99,8 % du bruit venait de trois dossiers qui n'ont jamais été écrits ici** : `.tmp-audit-screenshots`
-(profils Chrome jetables laissés par les captures, 58 533 problèmes), `.claude` (outillage, 17 219) et
-l'archive du design system. Le code du produit en comptait **104**. Ils sont désormais ignorés.
+### Le constat qui a lancé le sujet
+**Aujourd'hui, les 14 € donnent déjà le dossier adresse.** `canAccessCompleteReport` est un flag de
+plan **global**, `report_grants` déverrouille une **commune** : dès qu'un acheteur a payé, Autour et
+Logement s'ouvrent pour n'importe quelle adresse de cette commune. **Il n'existe aucune notion de
+droit par adresse.** Un dossier à 39 € n'est donc pas une entrée de plus : c'est un **re-découpage**
+de ce que les 14 € contiennent.
 
-**75 887 → 125 → 40.** Ce que le signal restauré a permis de corriger :
-- `HorizonBar` naviguait avec un `<a>` : rechargement complet au lieu du routing client ;
-- `useModuleTracking` appelait `Date.now()` PENDANT LE RENDU — impur, et redondant puisque l'effet
-  posait déjà le vrai départ ;
-- `QuartierSynthesis` écrivait une ref en plein rendu.
+### Tranché
+- **14 € = Territoire (commune seule) · 39 € = commune + adresse (Autour + Logement).** On vend
+  l'échelle, pas le module.
+- **Un dossier acheté = UNE adresse**, pas la commune. L'argument est la **réversibilité asymétrique** :
+  devenir plus généreux ensuite est facile, retirer un droit accordé ne l'est pas. Ni PostHog ni aucune
+  donnée ne pouvait trancher ça — il n'y a **aucune donnée** (rien lancé, aucun achat à ce jour).
+- **Objet `address_dossiers`, UNE seule table.** Deux tables (`addresses` + dossiers) seraient une
+  normalisation prématurée : la BAN EST déjà le référentiel. L'argument décisif n'est pas la
+  spéculation sur l'évolution des ids BAN, c'est un défaut **déjà présent** : voir §5.
+- **Aucun choix de DPE avant paiement.** Le `DpeSelector` est un travail d'attribution ; le placer
+  avant l'encaissement met la friction au pire endroit.
+- **Grandfathering : SANS OBJET.** Personne n'a acheté. Resserrer le 14 € sur Territoire ne coûte rien
+  et ne lèse personne.
 
-**L'apostrophe n'est plus échappée** (82 occurrences) : `react/no-unescaped-entities` garde `>`, `"` et
-`}`, qui sont réellement ambigus, et autorise `'` — « L&apos;exposition n&apos;est pas établie » coûte
-cher à un produit dont les textes français sont la matière première. Fin de l'incohérence entre fichiers.
+### Non tranché
+- **Le 14 € survit-il ?** Puisqu'il n'a aucun acheteur, sa suppression est gratuite.
+- **La qualification avant paiement** (montrer la COUVERTURE sans les valeurs, puis refuser la vente si
+  le socle est insuffisant) : la discussion y a convergé, le porteur avait d'abord répondu
+  « remboursement sur seuil ». **À re-valider explicitement.**
+- **La mission du `business-strategist`** : moments du parcours immobilier où plusieurs adresses sont
+  comparées, modèles après le premier dossier (2ᵉ à l'unité / pack de 3 / pass / accès communal),
+  cannibalisation, protocole de test **sans historique payant**, événements à instrumenter dès le
+  lancement.
 
-Et une trouvaille du signal enfin lisible : les 14 alertes restantes n'étaient pas des échappements
-manquants mais des **guillemets droits dans du texte français**, quand le produit écrit « … » partout
-ailleurs. Le lint révélait une incohérence typographique.
+### Faits vérifiés à réutiliser
+- **Le dossier n'est jamais vide.** Couverture nationale : BPE (« aucun dans les 3 km » EST une
+  information en rural), équipement automobile (4 états, jamais « pas de donnée »), sismicité, RGA,
+  sinistres indemnisés, statut réglementaire, parcelle. Ce qui varie : le **DPE** (seul trou fréquent)
+  et l'**ICU** (1955 grand-IRIS sur 596 communes).
+- **Mais matière ≠ valeur.** « Parcelle identifiée, sismicité faible, aucun risque réglementaire,
+  pharmacie à 1,8 km » est honnête et décevant à 39 €.
+- **La qualification est une route PUBLIQUE qui tape des API externes.** `/api/georisques-logement` est
+  explicitement réservée au rapport complet (« fan-out ~10 API dont Géorisques token »). Une
+  qualification pré-paiement doit être une **autre** route, légère, cachée par adresse, avec limite de
+  débit — sinon on offre un scraper gratuit de la base DPE avec notre token.
+- **Ne lister que les manques propres à CETTE adresse** (« aucun diagnostic retrouvé »), jamais
+  l'inventaire des sources que le produit n'a pas : le pré-check deviendrait un catalogue anxiogène.
 
-**Les 40 restants**, à reprendre comme des sujets de comportement React et non comme un nettoyage :
-18 `any`, 12 variables inutilisées, **4 setState dans des effets** (hydratation, préférences navigateur,
-consentement — les corriger mécaniquement introduirait des divergences serveur-client) et **2 try/catch
-autour de JSX** (`ConclusionRedigee`, `DossierAvecLogement`). Ce dernier point est le plus important :
-le catch ne rattrape PAS les erreurs de rendu, donc sa présence donne l'impression qu'un fallback
-existe alors qu'il n'y en a pas — un mensonge de code, de la famille de ceux fermés aujourd'hui.
+---
+
+## 5. LE DÉFAUT LATENT À CONNAÎTRE : deux appartements du même immeuble s'écrasent
+
+`logement` a pour clé primaire `(user_id, logement_id)` avec `logement_id = ban_id`. Or
+**`PreciseLogementStep` existe précisément parce que plusieurs logements partagent une même adresse
+BAN** (« quand plusieurs diagnostics existent à l'adresse, on demande LEQUEL est le bon »).
+
+Conséquence : **un utilisateur qui analyse l'appartement du 2ᵉ étage puis celui du 4ᵉ, au même
+immeuble, écrase le premier.** Même ligne, même snapshot, choix de DPE remplacé.
+
+C'est gratuit aujourd'hui. **Ça devient une réclamation le jour où chaque dossier coûte 39 €.** C'est
+l'argument décisif pour que le droit porte sur un `address_dossier` et non sur `ban_id`.
 
 ---
 
 ## Doctrine (à ne pas re-litiger)
-- **LE SILENCE EST UN MENSONGE quand il porte sur une priorité.** Un `satisfied` muet sur un risque
-  nommé produit une affirmation invérifiable. Vaut aussi à poids 1 pour un risque RECENSÉ (binaire),
-  pas pour un écart gradué.
-- **Le poids décide si un écart TRANCHE, pas s'il a le droit d'EXISTER à l'écran.**
-- **Le rôle d'un fait suit sa NATURE pour le lecteur, jamais la forme de sa preuve.**
-- **AVANT D'AJOUTER UN SIGNAL, MESURER SA FRÉQUENCE.** Feu recensé 6/14 (discriminant) ; inondation
-  **12/14**, mouvement de terrain **11/12** (universels — les croiser produirait du bruit) ; boisement
-  ≥ 70 % = 9,4 %. **NE PAS étendre le croisement GASPAR à l'inondation** : notre score est gradué là où
-  le drapeau est binaire, le croisement DÉGRADERAIT le signal.
-- **Un croisement avec une source externe ne vaut que si elle SAIT ce que notre indicateur ne peut pas
-  voir.** Vrai pour le feu (indice météo aveugle au massif). Faux ailleurs.
-- **Un budget de lecture se mesure SUR L'ÉCRAN**, jamais sur le texte des faits : une simulation sur les
-  `statement` annonçait 67-94 s là où le rendu réel en faisait 101-123.
-- **Une bascule verification → mismatch FAIT PERDRE l'action** : sans composition pour la restaurer,
-  c'est une régression pour le lecteur.
-- **Une action = une seule source de vérité** ; **ce bloc n'est PAS généré par le LLM** ; **la gate ne
-  compte que les registres GÉNÉRABLES** ; **pas de bump manuel du hash** pour un champ du plan.
-- **Un repère posé hors de React se pose en `data-`, jamais en classe.**
-- **Un instrument de contrôle illisible ne protège de rien.** Le lint rendait 75 887 lignes dont 99,8 %
-  de bruit ; restauré, il a livré trois défauts réels et une incohérence typographique en dix minutes.
-- Sonde `probe-conclusion.ts` : **NE PAS lancer** (45 appels LLM facturés).
+- **Une absence de couverture n'est jamais une absence de phénomène.** L'ICU non couvert ne dit PAS
+  « pas d'îlot ici » : il dit que cette source ne mesure pas cette adresse. Erreur commise dans cette
+  session, corrigée. **Tension à trancher plus tard** : `IcuExposure` fait `if (!icu) return null` et
+  le type assume « jamais de *non renseigné* » — un silence qui peut se lire comme un examen rassurant.
+- **Le payload d'une synthèse ne contient que des faits AFFICHÉS sous elle.** C'est ce qui interdit au
+  modèle de commenter ce que le lecteur ne peut pas vérifier d'un coup d'œil.
+- **Un module ne promet jamais un périmètre unique** quand il agrège des méthodes spatiales
+  différentes. Le grain se dit au niveau du fait.
+- **Ne jamais dégrader ce qu'un autre module a écrit** : un upsert d'identité OMET les colonnes qu'il
+  ne connaît pas (parcelle), il ne les écrit pas en `null`.
+- **Un UPDATE ciblé sur une ligne absente est un no-op SILENCIEUX.** Toute écriture qui suppose une
+  ligne doit être précédée — et `await` — de sa création.
+- **Chercher le nom d'un concept ne trouve pas ses paraphrases.**
+- **Vendre l'échelle, pas le module** : les thèmes traversent les trois échelles.
 
 ## La suite
-1. **Le DOSSIER COMPLET** (les 3 modules) — chantier de plusieurs semaines, prévu AVANT le lancement.
-   Deux dettes l'attendent : le verdict promet déjà « le dossier complet » qui n'existe pas, et les
-   plafonds de l'assembleur (2/3/3/3/3/4) le borneraient à 18 cartes.
-2. **Le grain QUARTIER dans le moteur** — l'îlot de chaleur (CSTB, grand-IRIS) est le premier candidat :
-   donnée déjà intégrée, maille réellement intermédiaire, priorité existante (`faible_chaleur`). Il sera
-   le patron des preuves SURFACIQUES ; celui des distances demande d'abord de trancher ancre/support.
-3. **La sécheresse** : seuil trouvable (150 j/an = 10,4 % des communes) mais axe PEU discriminant
-   (médiane 115) et « 150 jours de sol sec » ne parle pas. Décision produit en attente.
-4. **La submersion marine** : discriminante (2/12, littoral), recensée mais AUCUN critère déclarable.
-5. **Les 40 alertes de lint restantes**, en particulier les deux try/catch autour de JSX et les quatre
-   setState dans des effets — un par un, avec le comportement React en tête.
+1. **Reprendre le brainstorming §4** — re-valider la qualification avant paiement, puis lancer le
+   `business-strategist` (rapport à déposer dans `docs/rapports-agents/business-strategist/`), puis
+   spec dans `docs/superpowers/specs/`. **Ne pas coder avant la spec.**
+2. **`address_dossiers`** — nécessaire dans tous les scénarios de §4, et corrige §5. Peut démarrer
+   avant l'agent.
+3. **Le test manuel de la bascule, jamais fait** : un dossier existant, un nouveau, une adresse sans
+   DPE, l'aller-retour Territoire → Autour → Logement. Demande un compte payant avec commune
+   débloquée.
+4. **La porte « j'ai une adresse » sur la home** — arbitrage porteur. Les deux CTA sont aujourd'hui
+   `Trouver où vivre` et `Analyser ma commune` : aucune entrée par l'adresse, alors que deux des trois
+   modules l'exigent.
+5. **`checkout-products.ts`** — le champ `features` décrit encore « la lecture du territoire… qui
+   s'enrichit au fil des prochains modules ». **Il n'est affiché nulle part** (vérifié), mais c'est une
+   source de vérité dormante et divergente. À nettoyer quand l'offre sera tranchée.
+6. **La conclusion déterministe d'« Autour »** — le module rend des faits sans synthèse. Ne PAS créer
+   un troisième prompt : assembler des énoncés déterministes à partir de `secteur-facts.ts`
+   (`equipementAutoStatement` fait déjà ce geste). Mémoire : `project_futuree_autour_conclusion`.
 
 ## Pièges
-- `tsconfig.json` exclut `**/*.test.ts` du typecheck ; **eslint les ignore aussi** — un lint vert ne dit
-  rien d'eux.
+- **Deux sessions dans le même tree** : stager par chemin, jamais `git add -A`. Vérifier `git diff`
+  avant d'ajouter un fichier partagé (`synthesize-logement/route.ts` a porté les deux ce matin).
+- `tsconfig.json` exclut `**/*.test.ts` du typecheck ; **eslint les ignore aussi** — un lint vert ne
+  dit rien d'eux.
 - Un commentaire JSX `{/* … */}` DANS un ternaire y met deux enfants et casse le build.
-- Chrome **headless** : mesurer un halo de 2 s après `networkidle` le rate. Attendre l'ÉTAT
-  (`waitForFunction`), pas une durée.
 - Le hook pre-commit lance `index:verify` (OK). Push direct sur `main`, pas de PR.
+- Sonde `probe-conclusion.ts` : **NE PAS lancer** (45 appels LLM facturés).
