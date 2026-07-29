@@ -78,30 +78,34 @@ export default async function RapportDossiersPage() {
                   {/* Les trois échelles du bien, et elles passent TOUTES par `ouvrir` : le clic
                       pose le territoire de lecture sur la commune du dossier, sans quoi le lecteur
                       obtenait Logement et Autour sur Nantes pendant que la commune restait sa
-                      résidence. `prefetch={false}` parce que la cible écrit : sans lui, Next
-                      basculerait le territoire au seul passage du lien dans le viewport. */}
+                      résidence.
+
+                      <a> ET PAS <Link>, PARCE QUE LA CIBLE EST UNE ROUTE HANDLER. Avec <Link>, le
+                      router demande un payload RSC, la Route Handler répond une redirection vers
+                      une page HTML, et le router abandonne sans rien faire : le clic restait sans
+                      effet. Constaté en production le 30/07/2026, la MÊME URL collée dans la barre
+                      d'adresse fonctionnant parfaitement, ce qui a désigné le routing client et
+                      disculpé le serveur. Un <a> natif fait une vraie navigation et suit le 307.
+                      `prefetch` n'a plus d'objet : un <a> n'est jamais préfetché. */}
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-                    <Link
+                    <a
                       href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=logement`}
-                      prefetch={false}
                       className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent/[0.12] text-accent text-[13.5px] no-underline border border-accent/[0.25]"
                     >
                       Le logement
-                    </Link>
-                    <Link
+                    </a>
+                    <a
                       href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=autour`}
-                      prefetch={false}
                       className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/[0.05] text-muted text-[13.5px] no-underline border border-white/[0.08]"
                     >
                       Autour de l&apos;adresse
-                    </Link>
-                    <Link
+                    </a>
+                    <a
                       href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=territoire`}
-                      prefetch={false}
                       className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/[0.05] text-muted text-[13.5px] no-underline border border-white/[0.08]"
                     >
                       {d.city ? `La commune : ${d.city}` : "La commune"}
-                    </Link>
+                    </a>
                   </div>
                 </div>
               );

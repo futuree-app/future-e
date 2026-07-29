@@ -166,14 +166,18 @@ export default async function RapportPage() {
                 </span>
               ) : null}
             </p>
-            <Link
+            {/* <a> : /rapport/residence est une Route Handler, et un <Link> vers une Route Handler
+                ne navigue pas (le router attend du RSC, reçoit une redirection vers du HTML, et
+                abandonne). Ce bouton était donc inerte AVANT cette session, le même défaut que
+                « Ouvrir {commune} » plus bas a rendu visible le 30/07/2026. */}
+            <a
               href="/rapport/residence"
               className="shrink-0 font-mono text-[11px] tracking-[0.08em] uppercase text-muted hover:text-label no-underline border border-white/[0.12] rounded-lg px-3.5 py-2"
             >
               {territory.residenceCommune
                 ? `Revenir à ${territory.residenceCommune}`
                 : "Revenir à ma résidence"}
-            </Link>
+            </a>
           </div>
         )}
 
@@ -181,7 +185,10 @@ export default async function RapportPage() {
             La porte qui manquait. Posséder un dossier ouvre les trois échelles de SA commune, mais
             rien ne le disait ni ne permettait d'y aller : le territoire lu restait la résidence,
             l'écran servait le partiel, et le lecteur n'avait aucun moyen de savoir que Nantes lui
-            était ouverte. `prefetch={false}` : la cible écrit le territoire actif. */}
+            était ouverte.
+
+            <a> et pas <Link> : la cible est une Route Handler, et un <Link> vers une Route Handler
+            ne navigue pas. Voir le commentaire du bandeau au-dessus. */}
         {communesAilleurs.length > 0 && (
           <div className="mt-6 rounded-xl border border-white/[0.10] bg-white/[0.03] px-5 py-4">
             <p className="text-[14px] text-label leading-snug mb-3">
@@ -191,14 +198,13 @@ export default async function RapportPage() {
             </p>
             <div className="flex flex-wrap gap-2.5">
               {communesAilleurs.map((d) => (
-                <Link
+                <a
                   key={d.id}
                   href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=territoire`}
-                  prefetch={false}
                   className="font-mono text-[11px] tracking-[0.08em] uppercase text-accent hover:text-label no-underline border border-accent/[0.3] rounded-lg px-3.5 py-2"
                 >
                   Ouvrir {d.city ?? d.address_label}
-                </Link>
+                </a>
               ))}
               <Link
                 href="/rapport/dossiers"
