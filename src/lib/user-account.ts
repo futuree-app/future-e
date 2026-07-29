@@ -26,7 +26,7 @@ export async function getCurrentUserAccount(): Promise<UserAccount & { userId: s
   const { data: account } = await supabase
     .from("user_accounts")
     .select(
-      "email, plan, status, report_access, newsletter_enabled, notifications_enabled, household_mode_enabled",
+      "email, plan, status, report_access, newsletter_enabled, notifications_enabled",
     )
     .eq("user_id", user.id)
     .maybeSingle();
@@ -40,7 +40,6 @@ export async function getCurrentUserAccount(): Promise<UserAccount & { userId: s
           reportAccess: account.report_access,
           newsletterEnabled: account.newsletter_enabled,
           notificationsEnabled: account.notifications_enabled,
-          householdModeEnabled: account.household_mode_enabled,
         }
       : {
           email: user.email || null,

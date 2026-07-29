@@ -3,14 +3,26 @@
 // commune ? » : cette question est territoriale et vit dans active-territory.ts
 // (`canAccessTerritory`), qui interroge grants et dossiers.
 //
-// `dashboardAccess` a été retiré le 30/07/2026 avec la page /dashboard. Il
-// portait trois valeurs (none / read_only / interactive) et deux fonctions,
-// pour un écran qui doublait /rapport sans rien trancher de plus. La colonne
-// `dashboard_access` reste en base : aucune migration destructive, plus aucune
-// lecture.
+// TROIS NOTIONS RETIRÉES LE 30/07/2026, toutes pour la même raison : elles
+// décrivaient une offre qui n'a jamais existé, et personne ne pouvait plus dire
+// ce qu'elles ouvraient.
+//
+//   - `dashboardAccess` (none / read_only / interactive), parti avec la page
+//     /dashboard, qui doublait /rapport sans rien trancher de plus ;
+//   - `householdModeEnabled` et `canAccessHouseholdFeatures` : le mode foyer
+//     n'a jamais été construit. La fonction n'avait qu'un appelant, la page
+//     dashboard, et n'ouvrait rien. Aucun parcours ne le vendait ;
+//   - les plans `suivi` et `foyer` : jamais vendus non plus. Aucune page de
+//     prix ne les proposait, `checkout-products.ts` n'expose qu'un produit, et
+//     le `productType: "suivi-foyer"` du webhook n'était atteignable par aucun
+//     parcours. Arbitrage porteur : un éventuel abonnement sera B2B, donc un
+//     autre modèle, pas la reprise de ces valeurs.
+//
+// Les colonnes correspondantes restent en base : aucune migration destructive,
+// plus aucune lecture.
 // ════════════════════════════════════════════════════════════════════════════
 
-export type UserPlan = "free" | "one_shot" | "suivi" | "foyer";
+export type UserPlan = "free" | "one_shot";
 export type UserStatus = "active" | "inactive" | "canceled";
 export type ReportAccess = "partial" | "complete";
 
@@ -21,7 +33,6 @@ export type UserAccount = {
   reportAccess: ReportAccess;
   newsletterEnabled: boolean;
   notificationsEnabled: boolean;
-  householdModeEnabled: boolean;
 };
 
 type CapabilityMatrix = {
@@ -29,7 +40,6 @@ type CapabilityMatrix = {
   reportAccess: ReportAccess;
   newsletterEnabled: boolean;
   notificationsEnabled: boolean;
-  householdModeEnabled: boolean;
 };
 
 export const PLAN_MATRIX: Record<UserPlan, CapabilityMatrix> = {
@@ -38,37 +48,35 @@ export const PLAN_MATRIX: Record<UserPlan, CapabilityMatrix> = {
     reportAccess: "partial",
     newsletterEnabled: false,
     notificationsEnabled: true,
-    householdModeEnabled: false,
   },
   one_shot: {
     label: "Rapport interactif",
     reportAccess: "complete",
     newsletterEnabled: false,
     notificationsEnabled: false,
-    householdModeEnabled: false,
-  },
-  suivi: {
-    label: "Abonnement suivi",
-    reportAccess: "complete",
-    newsletterEnabled: true,
-    notificationsEnabled: true,
-    householdModeEnabled: false,
-  },
-  foyer: {
-    label: "Abonnement Foyer",
-    reportAccess: "complete",
-    newsletterEnabled: true,
-    notificationsEnabled: true,
-    householdModeEnabled: true,
   },
 };
 
-export function getPlanLabel(plan: string) {
-  if (plan in PLAN_MATRIX) {
-    return PLAN_MATRIX[plan as UserPlan].label;
-  }
+// LES COMPTES POSÉS AVANT LE RETRAIT PORTENT ENCORE CES VALEURS EN BASE, et sans
+// cette table ils se dégraderaient silencieusement en « free » : un plan inconnu
+// retombe sur `free`, dont le label est « Compte gratuit ». Les cinq comptes de
+// test, dont celui du porteur (plan = suivi), afficheraient donc « gratuit » en
+// portant un accès payant. Leur droit de LIRE ne bougerait pas, il vient de
+// report_access et des grants, mais l'écran mentirait. Table de compatibilité,
+// pas une offre : rien ne peut plus écrire ces valeurs.
+const LEGACY_PLANS: Record<string, UserPlan> = {
+  suivi: "one_shot",
+  foyer: "one_shot",
+};
 
-  return plan;
+function resolvePlan(raw: unknown): UserPlan {
+  if (typeof raw !== "string") return "free";
+  if (raw in PLAN_MATRIX) return raw as UserPlan;
+  return LEGACY_PLANS[raw] ?? "free";
+}
+
+export function getPlanLabel(plan: string) {
+  return PLAN_MATRIX[resolvePlan(plan)].label;
 }
 
 export function normalizeAccount(
@@ -77,8 +85,7 @@ export function normalizeAccount(
     | null
     | undefined,
 ): UserAccount {
-  const rawPlan = account?.plan;
-  const plan = rawPlan && rawPlan in PLAN_MATRIX ? (rawPlan as UserPlan) : "free";
+  const plan = resolvePlan(account?.plan);
   const defaults = PLAN_MATRIX[plan];
 
   return {
@@ -91,8 +98,6 @@ export function normalizeAccount(
       account?.newsletterEnabled ?? defaults.newsletterEnabled,
     notificationsEnabled:
       account?.notificationsEnabled ?? defaults.notificationsEnabled,
-    householdModeEnabled:
-      account?.householdModeEnabled ?? defaults.householdModeEnabled,
   };
 }
 
@@ -102,8 +107,4 @@ export function canAccessSavedReport(account: UserAccount) {
 
 export function canAccessCompleteReport(account: UserAccount) {
   return account.reportAccess === "complete";
-}
-
-export function canAccessHouseholdFeatures(account: UserAccount) {
-  return account.householdModeEnabled;
 }

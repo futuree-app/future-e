@@ -8,7 +8,6 @@ type Profile = Record<string, unknown>;
 
 interface MemoireFormProps {
   profile: Profile;
-  canEditCommune?: boolean;
 }
 
 const CHAUFFAGE_OPTIONS = [
@@ -48,7 +47,7 @@ function asArray(v: unknown): string[] {
   return v.filter((x): x is string => typeof x === "string");
 }
 
-export function MemoireForm({ profile, canEditCommune = false }: MemoireFormProps) {
+export function MemoireForm({ profile }: MemoireFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [savingField, setSavingField] = useState<string | null>(null);
@@ -117,7 +116,6 @@ export function MemoireForm({ profile, canEditCommune = false }: MemoireFormProp
       <CommuneBlock
         inseeCode={profile.home_insee_code as string | null}
         communeName={profile.home_commune as string | null}
-        canEdit={canEditCommune}
         onSave={saveField}
         saving={savingField === "commune"}
         disabled={isBusy}
@@ -309,17 +307,20 @@ type SaveFn = (field: string, value: ProfileValue | Record<string, string>) => v
 
 type CommuneResult = { code: string; nom: string; codeDepartement: string };
 
+// LA COMMUNE S'ÉDITE, POUR TOUT LE MONDE (30/07/2026). Le verrou `canEdit` était posé par les
+// plans `suivi` et `foyer`, retirés, et il ne verrouillait rien : /api/profile écrit `field=commune`
+// sans consulter le plan. Son texte de repli invitait d'ailleurs à « passer au Fil », un produit
+// écarté. Et le geste n'a plus d'enjeu d'accès : la résidence n'ouvre aucun rapport par elle-même,
+// le droit vient des grants et des dossiers.
 function CommuneBlock({
   inseeCode,
   communeName,
-  canEdit,
   onSave,
   saving,
   disabled,
 }: {
   inseeCode: string | null;
   communeName: string | null;
-  canEdit: boolean;
   onSave: SaveFn;
   saving: boolean;
   disabled: boolean;
@@ -411,7 +412,7 @@ function CommuneBlock({
         </div>
         <div className="flex items-center gap-3">
           {saving && <span className="text-[11px] text-ghost">Enregistrement…</span>}
-          {canEdit && !editing && !saving && (
+          {!editing && !saving && (
             <button
               type="button"
               onClick={() => setEditing(true)}
@@ -421,17 +422,11 @@ function CommuneBlock({
               Modifier
             </button>
           )}
-          {!canEdit && (
-            <span className="font-mono text-[10px] tracking-[0.08em] uppercase text-ghost bg-white/[0.04] border border-white/[0.08] rounded-full px-3 py-1">
-              Champ structurant
-            </span>
-          )}
         </div>
       </div>
       <p className="text-[13px] text-muted leading-[1.6]">
-        {canEdit
-          ? "Modifiez votre commune si vous avez déménagé. Cela recalibrera votre accès aux données territoriales."
-          : "La commune conditionne le fonctionnement de votre rapport interactif. Pour la modifier, passez au Fil."}
+        Modifiez votre commune si vous avez déménagé. C&apos;est celle que votre rapport lit par
+        défaut. Les communes et les biens que vous avez débloqués restent les vôtres.
       </p>
     </div>
   );

@@ -8,40 +8,31 @@ export const dynamic = "force-dynamic";
 export default async function MemoirePage() {
   const { supabase, user } = await requireCurrentUser();
 
-  const [{ data: profile }, { data: account }] = await Promise.all([
-    supabase
-      .from("user_profiles")
-      .select(
-        [
-          "home_insee_code",
-          "home_commune",
-          "age_band",
-          "housing_status",
-          "housing_type",
-          "job_category",
-          "mobility_profile",
-          "logement_chauffage",
-          "logement_isolation",
-          "presence_enfants",
-          "age_enfants",
-          "travail_exterieur",
-          "vehicule_type",
-          "health_flags",
-          "life_projects",
-        ].join(", "),
-      )
-      .eq("user_id", user.id)
-      .maybeSingle(),
-    supabase
-      .from("user_accounts")
-      .select("plan")
-      .eq("user_id", user.id)
-      .maybeSingle(),
-  ]);
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select(
+      [
+        "home_insee_code",
+        "home_commune",
+        "age_band",
+        "housing_status",
+        "housing_type",
+        "job_category",
+        "mobility_profile",
+        "logement_chauffage",
+        "logement_isolation",
+        "presence_enfants",
+        "age_enfants",
+        "travail_exterieur",
+        "vehicule_type",
+        "health_flags",
+        "life_projects",
+      ].join(", "),
+    )
+    .eq("user_id", user.id)
+    .maybeSingle();
 
   const safeProfile = (profile ?? {}) as Record<string, unknown>;
-  const plan = account?.plan ?? "free";
-  const canEditCommune = plan === "suivi" || plan === "foyer";
 
   return (
     <div
@@ -72,10 +63,12 @@ export default async function MemoirePage() {
           </p>
         </section>
 
-        <MemoireForm
-          profile={safeProfile}
-          canEditCommune={canEditCommune}
-        />
+        {/* CHANGER SA COMMUNE N'EST PLUS RÉSERVÉ. Ce geste était gardé par les plans `suivi` et
+            `foyer`, retirés le 30/07/2026, et cette garde ne protégeait rien : /api/profile écrit
+            `field=commune` sans regarder le plan, donc un appel direct passait déjà. Elle n'a plus
+            d'objet non plus : depuis que le droit est territorial, la résidence n'ouvre aucun
+            rapport par elle-même, changer de commune ne déplace donc aucun accès. */}
+        <MemoireForm profile={safeProfile} />
 
         <div className="mt-10 pt-7 border-t border-white/[0.08] flex items-center gap-4 flex-wrap">
           <Link

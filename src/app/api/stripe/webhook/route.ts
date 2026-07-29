@@ -14,27 +14,20 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
-function getEntitlements(productType: string) {
-  if (productType === "suivi-foyer") {
-    return {
-      plan: "foyer",
-      status: "active",
-      report_access: "complete",
-      dashboard_access: "interactive",
-      newsletter_enabled: true,
-      notifications_enabled: true,
-      household_mode_enabled: true,
-    };
-  }
-
+// UN SEUL JEU DE DROITS DE COMPTE, parce qu'il n'existe qu'un seul produit qui en pose (30/07/2026).
+// La branche `suivi-foyer` posait plan `foyer` + mode foyer + dashboard interactif : trois notions
+// qu'aucun parcours ne vendait et qu'aucun écran ne lisait. Le paramètre `productType` a disparu
+// avec elle ; le jour où un second produit pose des droits de compte, c'est ici qu'il se distingue.
+//
+// CE QUI OUVRE UNE COMMUNE N'EST PAS ICI : c'est le report_grant écrit plus bas, et le dossier
+// d'adresse. `report_access` dit seulement que le compte a payé quelque chose.
+function getEntitlements() {
   return {
     plan: "one_shot",
     status: "active",
     report_access: "complete",
-    dashboard_access: "read_only",
     newsletter_enabled: false,
     notifications_enabled: false,
-    household_mode_enabled: false,
   };
 }
 
@@ -103,7 +96,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
   );
 
   if (userId && userId !== "anonymous") {
-    const entitlements = getEntitlements(productType);
+    const entitlements = getEntitlements();
 
     await supabaseAdmin.from("user_accounts").upsert(
       {
@@ -117,9 +110,11 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     // Profil : on n'écrase JAMAIS la résidence. Si un territoire a été ciblé
     // (comparateur), on le trace comme grant et on le pose en territoire actif
     // de lecture. Sinon, comportement historique (rapport sur la résidence).
-    const profileUpdate: Record<string, unknown> = {
-      household_mode_enabled: entitlements.household_mode_enabled,
-    };
+    //
+    // `household_mode_enabled` a quitté cet objet avec le mode foyer (30/07/2026), ce qui le laisse
+    // VIDE quand aucun territoire n'est ciblé. D'où la garde plus bas : un `.update({})` ne veut
+    // rien dire, et écrirait au mieux une ligne inchangée.
+    const profileUpdate: Record<string, unknown> = {};
 
     if (insee) {
       await supabaseAdmin.from("report_grants").upsert(
@@ -138,10 +133,12 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
       profileUpdate.active_commune = commune || null;
     }
 
-    await supabaseAdmin
-      .from("user_profiles")
-      .update(profileUpdate)
-      .eq("user_id", userId);
+    if (Object.keys(profileUpdate).length > 0) {
+      await supabaseAdmin
+        .from("user_profiles")
+        .update(profileUpdate)
+        .eq("user_id", userId);
+    }
   }
 
   if (userEmail) {

@@ -134,7 +134,6 @@ export async function grantDecisionPackFromSnapshot(
         plan: "one_shot",
         status: "active",
         report_access: "complete",
-        dashboard_access: "read_only",
       },
       { onConflict: "user_id" },
     );
