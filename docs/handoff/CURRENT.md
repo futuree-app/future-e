@@ -1,4 +1,4 @@
-# Passation — 29/07/2026, soirée
+# Passation : 29/07/2026, soirée
 
 **Horodatage** : 2026-07-29, ~20h15 · **Branche** : `main` = `cb3fc79`, **tout est poussé**.
 **Migration appliquée en production ce soir.** Rien n'est en attente de commit.
@@ -106,7 +106,9 @@ et **l'ancre de prix à corriger**, voir Pièges), plus un arbitrage
 `https://futur-e.fr/rapport/autour?dossierId=cfe1ed8e-5fc0-4b8c-81ad-989c1d0c3db6` connecté, et
 regarder le bloc « Espace vert ».
 
-- Si l'espace vert s'affiche : le sujet est clos, passer à la spec de qualification.
+- Si l'espace vert s'affiche : le sujet est clos, passer à la spec de qualification (et lire la
+  section « Chantiers hérités » plus bas : six chantiers antérieurs restent ouverts, dont un qui
+  s'est aggravé ce soir).
 - S'il répète « environnement en cours de récupération » : la racine serveur est corrigée, donc le
   problème restant est **côté client**. `AutourModule` ne retente qu'**une seule fois par montage**
   (`autourRetriedRef`, ~l. 120). Un second échec exige un rechargement manuel. C'est la limite
@@ -124,6 +126,52 @@ TEST_USER_EMAIL=bonjourfuturee@gmail.com TEST_USER_PASSWORD='…' \
 TEST_OTHER_USER_ID=b779cc8f-40c9-4ba5-a3d8-5a5726897c84 \
   node scripts/verify-address-dossiers-rls.mjs
 ```
+
+---
+
+## Chantiers hérités du handoff précédent, toujours ouverts
+
+Sa section « La suite » portait huit points. Deux sont faits (le brainstorming §4 et
+`address_dossiers`, c'est cette session). Voici les six autres, avec ce que la livraison de ce soir
+a changé pour eux.
+
+**A. La porte « j'ai une adresse » sur la home. STATUT AGGRAVÉ, c'est le plus urgent.**
+Les deux CTA sont `Trouver où vivre` et `Analyser ma commune`. Il n'y avait aucune entrée par
+l'adresse, alors que deux des trois modules l'exigent. **Ce soir, la saisie libre d'adresse a été
+retirée des modules eux-mêmes** (la route `georisques-logement` exige que l'adresse soit celle du
+dossier, donc une saisie libre ne pouvait plus qu'échouer). Il n'existe donc **plus aucune entrée
+par l'adresse dans tout le produit**, hors la porte de test. Ce n'était qu'un arbitrage de confort ;
+c'est devenu la condition d'existence du parcours payant. À traiter avec la spec de qualification,
+qui est l'endroit naturel de cette saisie.
+
+**B. Le test manuel de la bascule. PARTIELLEMENT FAIT.**
+Vérifié ce soir en production : un dossier neuf, un second au même immeuble, la divergence des
+choix DPE, la réouverture, le repli qui refuse de deviner. **Pas encore vérifié** : une adresse
+**sans DPE** (le trou fréquent, et le cas où le Passeport doit rester digne), et l'aller-retour
+Territoire → Autour → Logement.
+
+**C. `checkout-products.ts`. MÛR maintenant.**
+Le champ `features` décrit encore « la lecture du territoire… qui s'enrichit au fil des prochains
+modules ». Il n'est affiché nulle part (vérifié), mais c'est une source de vérité dormante et
+divergente. Le handoff disait « à nettoyer quand l'offre sera tranchée » : **elle l'est** (14 € =
+Territoire seul, 39 € = commune + un bien). Cette promesse d'enrichissement gratuit contredit
+désormais le découpage.
+
+**D. « Autour » : quatre chantiers, dans l'ordre.** Afficher les infrastructures bruyantes déjà
+calculées (une session, aucune donnée nouvelle) · compter dans un rayon plutôt que le plus proche ·
+les permis Sitadel autour de l'adresse (API vérifiée, jointure par parcelle) · le zonage PLU des
+parcelles voisines. Détail et réserves dans le §6 de l'archive.
+
+**E. Le radon attend une décision produit, pas du code** : libellé exact de la carte, et si le geste
+« faire mesurer » mérite un annuaire. Si oui, la doctrine diagnostiqueurs s'applique : annuaire
+qualifié SANS commission, le moteur ne connaît jamais les rémunérations.
+
+**F. La conclusion déterministe d'« Autour »** : le module rend des faits sans synthèse. **Ne PAS
+créer un troisième prompt** : assembler des énoncés déterministes à partir de `secteur-facts.ts`
+(`equipementAutoStatement` fait déjà ce geste). Mémoire : `project_futuree_autour_conclusion`.
+
+**Ordre suggéré** : A avec la spec de qualification (ils se répondent), puis C (court, et l'offre
+est tranchée), puis B, puis D/F, puis E qui demande un arbitrage porteur.
 
 ---
 
