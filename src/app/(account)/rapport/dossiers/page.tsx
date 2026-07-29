@@ -40,7 +40,11 @@ export default async function RapportDossiersPage() {
           className="font-normal text-[clamp(26px,3vw,40px)] leading-[1.15] tracking-[-0.5px] text-label mb-8"
           style={{ fontFamily: "'Instrument Serif', serif" }}
         >
-          {dossiers.length > 1 ? "Quel bien voulez-vous ouvrir ?" : "Le bien que vous avez analysé."}
+          {dossiers.length === 0
+            ? "Aucun bien analysé pour l'instant."
+            : dossiers.length === 1
+              ? "Le bien que vous avez analysé."
+              : "Quel bien voulez-vous ouvrir ?"}
         </h1>
 
         {canCreate && <AdminDossierCreator />}
