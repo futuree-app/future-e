@@ -20,10 +20,11 @@ abonnement Foyer 15 €/mois. Le produit réel a évolué.
   Voir `arbitrages/le-fil-veille-evenementielle-ecartee.md`.
   Le récurrent, s'il existe, viendra du **cycle de vie** (le lecteur change, pas le territoire), du
   **débit d'inconnus**, ou du **produit qui grandit**, jamais d'une veille.
-- **Écart prod à recaler (urgent)** : la page de pré-lancement `/le-fil` (liste d'attente,
-  `noindex`) est en production et **affiche encore « 9 €/mois · 30 jours offerts »**, plus une
-  promesse de newsletter mensuelle et de tableau de bord. Elle vend désormais un produit que
-  futur•e ne construira pas. À recadrer ou retirer : action sans regret.
+- **Écart prod : RÉSOLU le 28/07/2026.** La page de pré-lancement `/le-fil`, qui affichait
+  « 9 €/mois · 30 jours offerts » et promettait une newsletter mensuelle, a été supprimée avec la
+  route `/api/suivi-waitlist` et `FilWaitlistForm` (commit `f0b6c3c`) ; la table `suivi_waitlist`
+  a été droppée en production (migration `004_drop_suivi_waitlist.sql`, table vide). Plus aucune
+  surface ne vend d'abonnement. **Ne pas rouvrir ce point comme s'il était en cours.**
 
 ## « Le Fil » (abonnement) ≠ « Mode Foyer » (upsell) : deux axes distincts
 

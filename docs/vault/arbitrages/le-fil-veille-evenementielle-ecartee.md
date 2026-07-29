@@ -18,8 +18,9 @@ mensuel, par intuition. Les mesures du 9 juillet ont tranché la question de fon
 **futur•e ne construit pas de veille événementielle territoriale.** Ni comme produit, ni comme
 newsletter, ni comme abonnement, ni comme fil d'actualité.
 
-La page de pré-lancement `/le-fil`, qui vend une newsletter mensuelle et un tableau de bord, promet
-ce que la matière ne permet pas. Elle doit être recadrée ou retirée.
+La page de pré-lancement `/le-fil` vendait une newsletter mensuelle et un tableau de bord, donc
+promettait ce que la matière ne permet pas. **Elle a été retirée le 28/07/2026** (commit `f0b6c3c`),
+avec la route `/api/suivi-waitlist`, `FilWaitlistForm` et la table `suivi_waitlist`.
 
 ## Pourquoi : les quatre flux, tous qualifiés
 
@@ -79,7 +80,7 @@ raconter, a désigné ce qu'il restait à mesurer.
 
 ## Conséquences
 
-- **Recadrer ou retirer `/le-fil`** (action sans regret, déjà recommandée par le Product en juillet).
+- **`/le-fil` retiré** le 28/07/2026 (commit `f0b6c3c`). Point clos.
 - **L'ICPE alimente un critère, pas un fil.** Les créations et extensions rafraîchissent
   `faible_exposition_industrielle`.
 - **Ne jamais écrire « rien n'a changé ».** Nommer les sources surveillées, dater la dernière

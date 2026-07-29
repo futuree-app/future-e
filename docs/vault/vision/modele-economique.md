@@ -73,9 +73,11 @@ acquises.
   (2 ou 3 ; cf. `adr/ADR-0007` et son addendum). Ancre primaire = **valeur** (« 39 € contre le
   coût d'une commune mal choisie ») ; la remise « trois rapports valent 42 € » devient secondaire
   et ne s'invoque pas à 2 communes (où elle s'inverse : 2 rapports = 28 € < 39 €).
-- **Abonnement (« Le Fil »)** : PAS encore achetable. Page de pré-lancement (`/le-fil`, liste
-  d'attente, `noindex`) affichant encore « 9 €/mois », mais direction = **tarif annuel**
-  (~49,99 €/an) ; à recaler (cf. `arbitrages/pricing-abonnements-reportes.md`).
+- **Abonnement (« Le Fil »)** : RETIRÉ DU PRODUIT le 28/07/2026. La page de pré-lancement, la route
+  `/api/suivi-waitlist` et `FilWaitlistForm` ont été supprimés (commit `f0b6c3c`), la table
+  `suivi_waitlist` droppée en production (migration `004_drop_suivi_waitlist.sql`). Plus aucune
+  surface ne vend d'abonnement. Le récurrent, s'il revient, sera un pass de recherche
+  (cf. `arbitrages/recurrence-b2c-episodique-pas-mensuelle.md`).
 - **Mode Foyer** : upsell multi-personnes sur le rapport one-shot, distinct de l'abonnement
   (cf. `arbitrages/mode-foyer-recadre.md`).
 
