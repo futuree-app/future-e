@@ -124,4 +124,12 @@ create policy address_dossiers_select_own
 -- une interdiction implicite ne se relit pas.
 revoke insert, update, delete on public.address_dossiers from authenticated;
 
+-- TRUNCATE aussi, et il vaut d'être nommé. Le défaut Supabase (`grant all on all tables to
+-- authenticated`) l'accorde sur TOUTES les tables du projet, la protection reposant entièrement
+-- sur la RLS. Or TRUNCATE l'ignore par construction : c'est le seul privilège capable de vider
+-- d'un coup la table qui porte les droits payants. PostgREST ne l'expose pas, donc il n'est pas
+-- atteignable par l'API REST, mais le laisser sur cette table-ci n'a aucun bénéfice.
+-- Les autres tables du projet gardent le défaut : les resserrer est un chantier distinct.
+revoke truncate on public.address_dossiers from authenticated;
+
 commit;
