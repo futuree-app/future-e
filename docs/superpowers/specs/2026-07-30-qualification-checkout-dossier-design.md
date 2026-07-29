@@ -5,9 +5,10 @@
 - **Origine** : `docs/handoff/CURRENT.md` (chantier A, « la porte j'ai une adresse »),
   frontière laissée ouverte par `docs/superpowers/specs/2026-07-29-address-dossiers-design.md`,
   rapport `docs/rapports-agents/business-strategist/2026-07-29-dossier-adresse-39e.md` §6 et §7.
-- **Aucune migration.** `address_dossiers` porte déjà `stripe_payment_intent_id`,
-  `amount_paid_cents`, `purchased_at`, `access_revoked_at`. Cette spec n'ajoute aucune colonne et
-  aucune table.
+- **Une seule migration**, `supabase/26_dossier_intents.sql`, sur le patron déjà en place de
+  `pack_snapshots` : elle évite de faire transiter l'adresse du bien par Stripe (voir « L'adresse ne
+  transite pas par Stripe »). `address_dossiers` n'est pas touchée : elle porte déjà
+  `stripe_payment_intent_id`, `amount_paid_cents`, `purchased_at`, `access_revoked_at`.
 - **Ne couvre pas** : l'intake déclaratif et la confirmation du diagnostic (spec B « résolution,
   actualisation et vécu »), le rattachement bâtimentaire par le RNB
   (`docs/audits/2026-07-30-rnb-dpe-rattachement-batiment.md`), le placement manuel d'un bien non
@@ -101,7 +102,7 @@ type QualificationOutcome =
       reason: "no_reliable_local_anchor" };
 
 type QualificationWarning =
-  | { code: "no_dpe_found" }
+  | { code: "no_exact_dpe_found" }
   | { code: "no_parcel_reading" }
   | { code: "source_unavailable"; source: "ademe" | "cadastre" };
 
@@ -119,6 +120,24 @@ appel a échoué ».
 **`source_unavailable` nomme sa source.** Sans elle, une panne de l'ADEME et une panne du cadastre
 produisent la même phrase, alors que l'une parle du diagnostic et l'autre de la parcelle.
 
+### Pourquoi `no_exact_dpe_found` et jamais `no_dpe_found`
+
+La qualification interroge les diagnostics **par `ban_id`**, ce qui couvre ~20 % des adresses. Le
+taux de 35 à 53 % de l'audit porte sur une recherche incluant déjà le repli géographique à 50 m.
+Dire « aucun diagnostic » sur la base du seul `ban_id` serait donc faux pour environ quatre adresses
+sur cinq, et surtout **démenti par le dossier lui-même** quelques minutes après l'achat, quand le
+repli par coordonnées trouve un voisin.
+
+La formule dit ce qui est vérifié : le diagnostic **exact de ce logement** n'a pas été retrouvé. Elle
+reste vraie que le dossier trouve ensuite un candidat par proximité ou rien du tout.
+
+**Un état `nearby_dpe_only` est refusé, et le motif n'est pas l'économie d'appel.** Il demanderait de
+rejouer le résolveur complet, et il transformerait un diagnostic non attribué en argument avant
+paiement. Un DPE trouvé à 50 m est un candidat à confirmer : c'est la doctrine
+`B2_NEARBY_UNCONFIRMED` du socle thermique, qui réserve toute attribution par proximité à une
+confirmation humaine (spec B). L'annoncer avant l'encaissement promettrait une matière que le produit
+refuse d'affirmer après.
+
 ### Distinguer `needs_precision` de `unsupported_at_launch`
 
 Le fait observable est un **reverse-géocodage filtré sur les numéros**, au point de la feature
@@ -128,18 +147,52 @@ grossière :
 GET /reverse/?lon=…&lat=…&type=housenumber&limit=5
 ```
 
-Des numéros à proximité donnent `needs_precision`, **et l'écran les propose** plutôt que de demander
-au lecteur de deviner. Aucun numéro donne `unsupported_at_launch`, appuyé sur un fait vérifié.
+Des candidats **admissibles** donnent `needs_precision`, et l'écran les propose plutôt que de
+demander au lecteur de deviner. Aucun candidat admissible donne `unsupported_at_launch`. La
+distinction porte sur l'admissibilité, jamais sur le fait que le reverse ait rendu quelque chose de
+brut.
 
-Éprouvé le 30/07/2026 : sur « le Cros » à Méounes-lès-Montrieux (83136), une feature `street`, le
-reverse rend « 1986 le Cros » à 9 m et « 850 le Vallon » à 44 m. **Le rural est adressé**, par
-numérotation métrique des routes, donc le refus y est plus rare que supposé et se règle souvent par
-un clic.
+### Admissibilité d'un candidat, et l'identifiant qui la rend exacte
+
+**L'identifiant BAN d'un numéro est `citycode_idvoie_numero`.** Éprouvé le 30/07/2026 sur « le Cros »
+à Méounes-lès-Montrieux (83136), une feature `street` d'identifiant `83077_i1no3t` :
+
+```
+83077_i1no3t_01986   1986 le Cros      9 m    même voie
+83077_rbzfxz_00850    850 le Vallon    44 m   autre voie
+83077_rbzfxz_00771    771 le Vallon    44 m   autre voie
+83077_i1no3t_00451    451 le Cros      58 m   même voie
+```
+
+Donc pour une feature `street`, la compatibilité de voie est un **test de préfixe d'identifiant**,
+exact et sans heuristique sur les chaînes de caractères :
+
+```ts
+candidate.banId.startsWith(`${selected.banId}_`)
+```
+
+« le Vallon » est éliminé mécaniquement, sans comparer des libellés ni normaliser des accents.
+
+**Aucun seuil de distance n'est inventé, et le quatrième candidat dit pourquoi** : « 451 le Cros » est
+à 58 m sur la bonne voie. Un `MAX_DISTANCE` à 50 m aurait écarté un numéro légitime, et toute valeur
+choisie ici serait un seuil arbitraire dont personne ne pourrait défendre le chiffre. **La distance
+sert au tri et à l'affichage** (« à 9 m »), le préfixe de voie sert au filtre.
+
+**Le rural est donc adressé**, par numérotation métrique des routes, et le refus y est plus rare que
+supposé.
+
+**Cas `locality`, où aucune voie n'existe pour porter le préfixe.** Le filtre se réduit alors au même
+`citycode`, les candidats sont triés par distance, plafonnés à cinq, et **chacun est affiché avec sa
+distance**. Le lecteur tranche, parce qu'il est le seul à savoir où est son bien. Aucun candidat dans
+la commune donne `unsupported_at_launch`.
 
 **Piège écarté, et il a coûté un contrôle** : `GET /search/?q=rue+Crebillon&citycode=44109&type=housenumber`
 rend **zéro** résultat, sur une rue pleine de numéros. Le score plein texte de la BAN ne fait pas
 remonter les numéros quand la requête n'en porte pas. L'absence de résultat sur `/search` ne prouve
 donc jamais l'absence de numéro : seul le `/reverse` filtré répond à cette question.
+
+**Sélectionner un candidat relance une qualification complète** sur son `banId`, seul chemin qui
+repasse par l'ancrage. Un candidat proposé n'est jamais un ancrage acquis.
 
 ### Le cache, et ce qu'il ne met jamais en cache
 
@@ -291,10 +344,37 @@ nouvelle.
 Aucune table : le devis se recalcule à chaque requête, donc rien ne dépend de la confiance accordée
 à ce jeton, qui n'est qu'une clé.
 
-**Les métadonnées du PaymentIntent portent l'adresse canonique entière**, pour que le webhook crée le
-dossier sans état intermédiaire : `productType: "address-dossier"`, `banId`, `insee`, `label`,
-`city`, `postcode`, `latitude`, `longitude`, `amountDueCents`, `deducted`, `phDistinctId`,
-`decisionJourneyId`. Stripe plafonne à 500 caractères par valeur, ce qui suffit.
+### L'adresse ne transite pas par Stripe
+
+Première intention de cette spec : mettre l'adresse canonique entière dans les métadonnées du
+PaymentIntent, pour que le webhook crée le dossier sans état intermédiaire. **Écarté**, pour deux
+raisons dont une seule est technique.
+
+L'adresse du bien analysé n'est pas l'adresse de facturation, et ce n'est pas nécessairement le
+domicile de la personne : c'est **le lieu qu'elle envisage**. La transmettre à un tiers de paiement
+avec ses coordonnées communique une intention de vie qui n'a aucun rôle dans la transaction.
+Techniquement, elle vivrait en clair dans un système dont la finalité est ailleurs, et le plafond de
+500 caractères par valeur imposerait de la découper.
+
+**Le projet a déjà le patron.** Le Pack Décision met son trio dans `pack_snapshots`, clé
+`stripe_payment_intent_id`, écrit avant le paiement en service role, relu par le webhook via
+`grantDecisionPackFromSnapshot`. Le dossier suit la même route : une table
+`dossier_intents` minimale, migration `supabase/26_dossier_intents.sql`, portant l'adresse
+**canonique vérifiée par le serveur**, le montant dû, l'état de déduction, `user_id`, et le
+`decision_journey_id`.
+
+Les métadonnées Stripe se réduisent alors à ce qui sert la transaction et l'instrumentation :
+`productType: "address-dossier"`, `userId`, `userEmail`, `insee` (déjà transmis aujourd'hui pour le
+14 €), `phDistinctId`. Aucun libellé d'adresse, aucune coordonnée.
+
+**`amount_paid_cents` s'écrit depuis `paymentIntent.amount`, jamais depuis le montant préparé.** La
+seule vérité de ce qui a été encaissé est ce que Stripe déclare avoir encaissé. Recopier une valeur
+d'intention ferait dire à la base un prix que la caisse n'a pas confirmé.
+
+Nettoyage : les lignes `dossier_intents` sans paiement associé sont sans effet et n'ouvrent aucun
+droit (le droit reste l'existence de la ligne `address_dossiers`). Aucune tâche de purge au
+lancement ; le jour où le volume le justifie, une suppression des intentions non payées de plus de
+sept jours suffit.
 
 Contrôles rejoués avant le paiement, dans cet ordre : utilisateur authentifié, adresse revalidée par
 la BAN, ancrage toujours vendable, droit territorial relu, prix recalculé serveur.
@@ -303,17 +383,29 @@ la BAN, ancrage toujours vendable, droit territorial relu, prix recalculé serve
 
 ## Le webhook
 
-Une branche `productType === "address-dossier"`, en service role, qui crée la ligne :
+Une branche `productType === "address-dossier"`, en service role. Elle **relit l'intention** par
+`stripe_payment_intent_id` (jamais les métadonnées Stripe, qui ne portent plus l'adresse), puis crée
+la ligne :
 
 ```sql
+-- 1. l'adresse canonique, telle que le serveur l'a vérifiée avant le paiement
+select * from dossier_intents where stripe_payment_intent_id = $1;
+
+-- 2. le dossier, avec le montant que STRIPE déclare avoir encaissé
 insert into address_dossiers (user_id, ban_id, insee, address_label, city, postcode,
                               latitude, longitude,
                               stripe_payment_intent_id, amount_paid_cents, purchased_at)
 values (…)
 on conflict (stripe_payment_intent_id) do nothing;
 
+-- 3. la relecture, qui fait réussir le rejeu
 select id from address_dossiers where stripe_payment_intent_id = $1;
 ```
+
+**Une intention absente est une erreur, pas un cas dégradé** : le webhook journalise et s'arrête sans
+créer de dossier, parce qu'inventer une adresse depuis un paiement serait produire un dossier sur un
+bien inconnu. C'est le seul chemin où un encaissement peut rester sans livraison, et il se répare à
+la main plutôt que par une supposition.
 
 **L'index unique fait échouer un doublon ; le `do nothing` suivi de la relecture fait réussir le
 rejeu.** Le webhook n'a aucune idempotence propre : toute sa protection vient des contraintes de
@@ -338,7 +430,16 @@ Elle **ne peut pas supposer le dossier créé** : Stripe confirme côté client 
 n'arrive.
 
 Elle interroge une petite route de statut par `payment_intent_id`, qui répond « en attente » ou rend
-l'identifiant du dossier. Intervalle court, et une issue explicite au bout d'une trentaine de
+l'identifiant du dossier.
+
+**La route exige l'utilisateur et filtre sur lui.** La recherche porte sur
+`stripe_payment_intent_id` **et** `user_id`, et la réponse ne contient que `pending` ou l'identifiant
+d'un dossier appartenant au demandeur. Sans le filtre sur le propriétaire, quiconque détient un
+identifiant de PaymentIntent pourrait sonder l'existence d'un dossier et récupérer son uuid, qui est
+la clé d'ouverture de toutes les pages du bien. L'exigence est gratuite ici : l'authentification est
+déjà acquise, puisqu'aucun paiement ne peut avoir lieu sans elle.
+
+Intervalle court, et une issue explicite au bout d'une trentaine de
 secondes : « votre paiement est enregistré, votre dossier s'ouvre dans un instant, vous le
 retrouverez dans vos dossiers ». Jamais une page qui tourne indéfiniment, jamais une page qui
 affirme un dossier qui n'existe pas encore.
@@ -382,17 +483,36 @@ est le moment d'achat).
 | Événement | Propriétés | Ce qu'il tranche |
 |---|---|---|
 | `address_qualification_viewed` | `decision_journey_id`, `insee` | volume d'intention à l'échelle adresse |
-| `address_qualification_result` | `status`, `warnings[]`, `has_dpe`, `ban_feature_type`, `insee`, classe de densité | le taux de refus réel, **par segment** |
-| `address_qualification_repeat` | `distinct_addresses`, `distinct_communes`, `days_since_first` | **la variable dominante** (pack, pass ou unité) |
+| `address_qualification_result` | `status`, `warnings[]`, `ban_feature_type`, `insee`, `address_token`, classe de densité | le taux de refus réel, **par segment** |
 | `address_qualification_exit` | `choice: territory_14 \| notified \| left` | ce que devient un refus |
-| `address_checkout_viewed` | `amount_due_cents`, `deducted` | dénominateur de conversion |
-| `address_dossier_purchased` | `amount_paid_cents`, `deducted`, `rank_in_project`, `days_since_first_qualification` | questions 1 et 4 du rapport business |
+| `address_checkout_viewed` | `amount_due_cents`, `deducted`, `address_token` | dénominateur de conversion |
+| `address_dossier_purchased` | `amount_paid_cents`, `deducted`, `rank_in_dossiers`, `address_token` | questions 1 et 4 du rapport business |
 | `address_dossier_reopened` | `days_since_purchase` | valeur dans la durée, préalable au pass |
 
 La sortie après un refus est un **événement distinct** du résultat : un événement ne peut pas porter
 une décision postérieure à son émission. Les mélanger rendrait le comptage impossible.
 
-Propriété persistante sur la personne : `addresses_qualified_total`.
+### Les événements sont la vérité, les agrégats sont des analyses
+
+Une première version portait `address_qualification_repeat` avec `distinct_addresses`,
+`distinct_communes`, `days_since_first`, plus une propriété de personne
+`addresses_qualified_total`. **Supprimés** : aucune de ces valeurs n'a de source, puisque cette spec
+refuse la table de parcours et la table de qualifications. Un événement qui prétend connaître son
+propre historique invente son contenu.
+
+La variable dominante se calcule **dans PostHog**, à partir de ce que les événements atomiques
+portent déjà : `decision_journey_id` groupe le parcours, `address_token` compte les adresses
+distinctes, `insee` compte les communes, l'horodatage donne les délais. C'est exactement le niveau
+d'outillage que le rapport business autorise (un tableur suffit pendant un trimestre) et il évite de
+construire un état persistant pour répondre à une question d'analyse.
+
+**`address_token` est un hachage salé du `ban_id`, calculé côté serveur.** Il permet de dénombrer des
+adresses distinctes sans déposer dans l'outil de mesure la liste des lieux où quelqu'un envisage de
+vivre. Le rapport business le prévoyait déjà sous ce nom (§7, « un `address_token` anonymisé »).
+
+**`rank_in_dossiers` est la seule valeur d'historique conservée, parce qu'elle a une source réelle** :
+au moment de l'achat, `count(*)` des dossiers payés du compte. La base la connaît, personne ne
+l'invente. Le nom dit son échelle : le compte, jamais un « projet » qui n'existe pas comme objet.
 
 ### Le seuil de réouverture, segmenté
 
@@ -434,7 +554,7 @@ Ils visent des faits, pas nos propres chaînes de caractères.
   (`src/lib/address-dossier-store.test.ts`), à étendre au calcul du montant : 2500 contre 3900.
 - La décision de vente est une fonction pure de `(banFeatureType, nearbyHouseNumbers)`, testable sans
   réseau, y compris le cas `street` avec numéros et le cas `locality` sans numéro.
-- Une panne de source produit un avertissement portant sa source, jamais `no_dpe_found`. C'est le
+- Une panne de source produit un avertissement portant sa source, jamais `no_exact_dpe_found`. C'est le
   test qui empêche une panne de mentir sur l'adresse.
 - Le cache ne retient pas `source_unavailable`.
 - Le webhook rejoué sur le même `payment_intent_id` rend le dossier existant **et répond en succès**,
@@ -444,13 +564,22 @@ Ils visent des faits, pas nos propres chaînes de caractères.
 - Une adresse dont le type est falsifié par le client est refusée au checkout.
 - Deux tentatives avec le même `checkoutAttemptId` rendent un seul PaymentIntent ; deux tentatives
   distinctes sur le même `ban_id` en rendent deux.
+- **La route de statut ne rend rien** quand le `payment_intent_id` appartient à un autre compte,
+  éprouvé avec deux utilisateurs réels. Un test qui vérifie seulement qu'elle rend le dossier de son
+  propriétaire ne dit rien de ce qu'elle rend aux autres.
+- Le filtre de candidats n'admet que la même voie : sur « le Cros » (`83077_i1no3t`), « 850 le Vallon »
+  (`83077_rbzfxz_00850`) est écarté, « 451 le Cros » à 58 m est retenu. C'est le test qui interdit à
+  un seuil de distance de revenir par la fenêtre.
+- Un webhook dont l'intention est introuvable ne crée aucun dossier et le journalise.
 
 ---
 
 ## Ce qu'on ne construit pas
 
 Carte, sélecteur de parcelle, placement manuel d'un bien non adressé. Table de parcours, table de
-qualifications, rattachement post-paiement par e-mail. Pack, pass de recherche, remise dégressive,
+qualifications, rattachement post-paiement par e-mail. `dossier_intents` n'est ni l'une ni l'autre :
+elle porte une intention de **paiement**, elle vit le temps d'une transaction, et aucune qualification
+anonyme n'y laisse de trace. Pack, pass de recherche, remise dégressive,
 grille tarifaire, test A/B de prix, tableau de bord. Téléversement de documents. Rattachement
 bâtimentaire RNB. Intake déclaratif et confirmation de diagnostic, qui appartiennent à la spec B et
 vivent **après** le paiement, parce qu'aucune déclaration ne peut fournir ce qui manque à un ancrage
