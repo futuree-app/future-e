@@ -1,11 +1,10 @@
 export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
-import { canAccessCompleteReport } from "@/lib/access";
 import AutourModule from "@/components/report/AutourModule";
-import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
-import { resolveReadableTerritory, TERRITORY_SELECT, canAnalyzeCommune } from "@/lib/active-territory";
-import { getLogement, getLatestLogement, type LogementRow } from "@/lib/logement-store";
+import { requireCurrentUser } from "@/lib/user-account";
+import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
+import { getDossier, getSoleDossier } from "@/lib/address-dossier-store";
 import { ModuleTracker } from "@/components/ModuleTracker";
 import { buildAutourResponse } from "@/lib/server/autour-response";
 
@@ -18,14 +17,8 @@ import { buildAutourResponse } from "@/lib/server/autour-response";
 export default async function RapportAutourPage({
   searchParams,
 }: {
-  searchParams: Promise<{ logementId?: string }>;
+  searchParams: Promise<{ dossierId?: string }>;
 }) {
-  const account = await getCurrentUserAccount();
-
-  if (!canAccessCompleteReport(account)) {
-    redirect("/rapport");
-  }
-
   const { supabase, user } = await requireCurrentUser();
   const { data: profile } = await supabase
     .from("user_profiles")
@@ -35,33 +28,33 @@ export default async function RapportAutourPage({
 
   const territory = await resolveReadableTerritory(supabase, user.id, profile);
 
-  // Rehydratation : rouvrir une adresse déjà analysée sans la retaper. `?logementId=<banId>` vise
-  // une adresse précise ; sinon la dernière touchée. On ne restaure que si la commune est ENCORE
-  // lisible (même règle de droit que l'analyse elle-même, étape 4.5) : un accès retiré ne doit
-  // pas continuer d'afficher les données via un artefact en cache.
-  const { logementId } = await searchParams;
-  const targetId = typeof logementId === "string" && logementId ? logementId : null;
-  const candidate: LogementRow | null = targetId
-    ? await getLogement(supabase, user.id, targetId)
-    : await getLatestLogement(supabase, user.id);
+  // LE DROIT EST LA LIGNE, comme sur /rapport/logement : les deux modules lisent le MÊME dossier.
+  // Une adresse ouverte ici se rouvre là-bas, et réciproquement.
+  const { dossierId } = await searchParams;
+  const targetId = typeof dossierId === "string" && dossierId ? dossierId : null;
+  const dossier = targetId ? await getDossier(supabase, user.id, targetId) : null;
 
-  const initialRow =
-    candidate?.snapshot && (await canAnalyzeCommune(supabase, user.id, candidate.insee))
-      ? candidate
-      : null;
+  if (targetId && !dossier) redirect("/rapport");
+
+  if (!dossier) {
+    const sole = await getSoleDossier(supabase, user.id);
+    redirect(
+      sole ? `/rapport/autour?dossierId=${encodeURIComponent(sole.id)}` : "/rapport/dossiers",
+    );
+  }
 
   // L'ÉQUIPEMENT AUTOMOBILE N'EST PAS DANS LE SNAPSHOT, et c'est voulu : il vient d'un artefact
   // versionné (INSEE RP) régénéré à chaque millésime, que figer ferait cohabiter des dossiers
   // annonçant des millésimes différents sans le dire. La rehydratation doit donc le RELIRE, sinon
   // toute adresse déjà analysée rouvre sans lui.
   const initialCarOwnership =
-    initialRow?.snapshot
+    dossier.snapshot
       ? (
           await buildAutourResponse({
-            snapshot: initialRow.snapshot,
-            lat: initialRow.latitude,
-            lon: initialRow.longitude,
-            insee: initialRow.insee,
+            snapshot: dossier.snapshot,
+            lat: dossier.latitude,
+            lon: dossier.longitude,
+            insee: dossier.insee,
           })
         ).carOwnership
       : null;
@@ -71,7 +64,7 @@ export default async function RapportAutourPage({
       <ModuleTracker moduleId="autour" commune={territory.communeName} inseeCode={territory.inseeCode} source="page" />
       <AutourModule
         defaultCommune={territory.communeName}
-        initialRow={initialRow}
+        dossier={dossier}
         initialCarOwnership={initialCarOwnership}
       />
     </>

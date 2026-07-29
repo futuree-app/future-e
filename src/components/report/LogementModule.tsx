@@ -8,12 +8,10 @@ import type { SynthesisData } from "@/lib/logement-synthesis-cache";
 import type { LogementReport as ApiResponse } from "@/lib/logement-report-types";
 import type { AddressDossierRow, DpeSelectionStatus } from "@/lib/address-dossier-store";
 import { ReportSection, GlassCard } from "@/components/report/kit";
-import { AddressAutocomplete } from "@/components/report/AddressAutocomplete";
 import { ThermalComfortSection } from "@/components/report/ThermalComfortSection";
 import { LogementSynthesis } from "@/components/report/LogementSynthesis";
 import { deriveThermalEvidence } from "@/lib/thermal-evidence";
 import { dpeAttributionStatus, type DpeRecord } from "@/lib/dpe-attribution";
-import type { BanAddressResult } from "@/lib/ban";
 // Faces extraites (board étape 4 : une face = un fichier ; gabarit ThermalComfortSection).
 import { Block, FamilyHeading } from "@/components/report/logement/kit";
 import { IconSeismic, IconStrata, IconCavity, IconLandslide } from "@/components/report/logement/icons";
@@ -63,22 +61,21 @@ function seismicValue(label: string, code: string | null | undefined): string {
 // même la synthèse. Il vit désormais dans son propre module (/rapport/autour), à l'échelle qui est
 // la sienne : le secteur. Ce qui a disparu d'ici : l'état `autour`, le gate `autourPhase` qui
 // retardait la synthèse, l'appel à /api/logement-autour, et le bloc îlot de chaleur.
+// L'adresse ne se SAISIT plus ici : elle est fixée à la création du dossier, sur une ligne que
+// seul le serveur écrit. `georisques-logement` refuse d'ailleurs toute adresse qui n'est pas celle
+// du dossier, donc une saisie libre ne mènerait qu'à un refus. Analyser un autre bien, y compris
+// dans le même immeuble, passe par un autre dossier.
 export default function LogementModule({
   defaultCommune,
-  initialRow = null,
+  dossier,
   rehydrateSource = "auto",
 }: {
   defaultCommune?: string | null;
-  initialRow?: LogementRow | null;
+  dossier: AddressDossierRow | null;
   rehydrateSource?: "auto" | "deeplink";
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Commune de l'adresse tapée non débloquée par le rapport de l'utilisateur (étape 4.5) : on
-  // affiche un upsell honnête, jamais les données Logement.
-  const [lockedCommune, setLockedCommune] = useState<{ commune: string | null; insee: string | null } | null>(null);
-  // Remonte AddressAutocomplete pour repartir d'un champ vide (« Modifier l'adresse »).
-  const [addressResetKey, setAddressResetKey] = useState(0);
   const [result, setResult] = useState<ApiResponse | null>(null);
   const [projet, setProjet] = useState<string | null>(null);
   // Attribution du DPE au logement (cf. spec §2). Aucun DPE affiché comme « le vôtre » tant
@@ -88,92 +85,79 @@ export default function LogementModule({
   >("loading");
   const [selectedDpe, setSelectedDpe] = useState<DpeRecord | null>(null);
   const [dpeCandidates, setDpeCandidates] = useState<DpeRecord[]>([]);
-  // Instrumentation « artefact adresse » : adresses DISTINCTES analysées par commune dans la
-  // session. Un même utilisateur comparant plusieurs biens d'une même ville est le cas d'usage
-  // payant que la clé actuelle (user, insee) ne sait pas encore porter : ce compteur est le
-  // signal de re-key (cf. board 2026-07-07). Reset au remontage (≈ par session).
-  const analyzedByInseeRef = useRef<Map<string, Set<string>>>(new Map());
+  // `logement_same_commune_multi` VIVAIT ICI, et il a été retiré. Il comptait les adresses
+  // distinctes via un useRef (donc par SESSION) et une Map par INSEE (donc par COMMUNE) : il
+  // ratait exactement les deux façons dont un projet réel compare des adresses, le multi-session
+  // et le multi-commune. Sa mesure sera reprise à l'échelle du PARCOURS DE DÉCISION, avec la
+  // qualification, qui est la seule surface capable de la produire avant tout paiement.
   // Rehydratation au montage : ne s'exécute qu'une fois (sinon boucle sur re-render).
   const rehydratedRef = useRef(false);
   const posthog = usePostHog();
 
-  // Déclenchée par la sélection d'une suggestion BAN (le texte libre n'analyse jamais). On
-  // envoie l'adresse ATOMIQUE au serveur ; on dérive ensuite l'état d'attribution du DPE.
-  async function analyzeSelected(a: BanAddressResult) {
-    if (!a.id) { setError("Adresse sans identifiant BAN."); return; }
-    // Événement d'ENTRÉE (une sélection BAN, jamais le texte libre) : mesure le débit d'adresses.
-    const token = addressToken(a.id);
-    posthog?.capture("logement_address_selected", { insee: a.citycode ?? null, address_token: token });
+  // CHEMIN UNIQUE : on charge le bien du dossier. Le re-fetch Géorisques est systématique (le
+  // risque doit rester frais, jamais figé) ; le DPE déjà attribué est RESTAURÉ depuis la ligne,
+  // jamais re-dérivé. La cohérence de la synthèse est tenue par le cache serveur à hash de faits.
+  //
+  // Il y avait deux chemins ici, `analyzeSelected` (saisie libre) et `rehydrateFromRow`. Le premier
+  // n'a plus d'objet : l'adresse est celle du dossier, et le serveur refuse toute autre.
+  async function loadDossier(row: AddressDossierRow) {
+    // Sans city/postcode, l'adresse ne passe pas `validateSelectedBanAddress` : rien à charger.
+    if (!row.city || !row.postcode) return;
     setLoading(true);
     setError(null);
-    setLockedCommune(null);
-    setDpeStatus("loading");
-    setSelectedDpe(null);
-    setDpeCandidates([]);
     try {
       const res = await fetch("/api/georisques-logement", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address: {
-          banId: a.id, label: a.label, postcode: a.postcode ?? "", city: a.city ?? "",
-          citycode: a.citycode ?? "", latitude: a.latitude, longitude: a.longitude, type: a.type,
-        } }),
+        body: JSON.stringify({
+          dossierId: row.id,
+          address: {
+            banId: row.ban_id, label: row.address_label, postcode: row.postcode, city: row.city,
+            citycode: row.insee, latitude: row.latitude, longitude: row.longitude, type: null,
+          },
+        }),
       });
-      const payload = (await res.json()) as ApiResponse & { code?: string; commune?: string | null; insee?: string | null };
-      // Frontière de monétisation (étape 4.5) : commune non débloquée -> upsell, pas une erreur.
-      if (res.status === 403 && payload.code === "COMMUNE_NOT_UNLOCKED") {
-        setResult(null);
-        setLockedCommune({ commune: payload.commune ?? a.city ?? null, insee: payload.insee ?? a.citycode ?? null });
-        posthog?.capture("logement_commune_locked", { insee: payload.insee ?? a.citycode ?? null });
-        return;
-      }
+      const payload = (await res.json()) as ApiResponse & { code?: string };
       if (!res.ok) throw new Error(payload.error ?? `Erreur ${res.status}`);
+
       setResult(payload);
       setProjet(null);
-      // POSE L'ARTEFACT AVANT TOUTE ÉCRITURE QUI LE SUPPOSE, et c'est un `await`, pas un `void` :
-      // la persistance du DPE juste en dessous est un UPDATE ciblé, sans effet ni erreur si la
-      // ligne n'existe pas encore. Les lancer en concurrence rendrait la sauvegarde du diagnostic
-      // dépendante de l'ordre d'arrivée de deux requêtes.
-      // La ligne de dossier N'EST PLUS créée par le client. Elle naît du webhook Stripe (dossier
-      // acheté) ou de la route d'administration. Un créateur implicite côté client ferait revenir
-      // par la fenêtre exactement ce que la migration 25 a fermé : une écriture que l'utilisateur
-      // déclenche sur la table qui porte son droit.
       const candidates = payload.dpeCandidates ?? [];
       setDpeCandidates(candidates);
-      const attribution = dpeAttributionStatus(candidates, payload.banFeatureType ?? null);
-      if (attribution.status === "not_found") {
-        setDpeStatus("not_found");
-      } else if (attribution.status === "auto_confirmed") {
-        setSelectedDpe(attribution.dpe);
-        setDpeStatus("auto_confirmed");
-        void persistDpe("auto_confirmed", attribution.dpe, payload);
+
+      // Un dossier dont le diagnostic est déjà attribué le RESTAURE. Un dossier neuf (statut
+      // `pending`) dérive l'attribution pour la première fois, ce qui est le seul moment où elle
+      // se calcule.
+      if (row.dpe_selection_status !== "pending") {
+        setSelectedDpe(row.selected_dpe_snapshot);
+        setDpeStatus(RUNTIME_DPE_STATUS[row.dpe_selection_status] ?? "not_found");
       } else {
-        setDpeStatus("selection_required");
+        const attribution = dpeAttributionStatus(candidates, payload.banFeatureType ?? null);
+        if (attribution.status === "not_found") {
+          setDpeStatus("not_found");
+        } else if (attribution.status === "auto_confirmed") {
+          setSelectedDpe(attribution.dpe);
+          setDpeStatus("auto_confirmed");
+          void persistDpe("auto_confirmed", attribution.dpe);
+        } else {
+          setDpeStatus("selection_required");
+        }
       }
-      // Signal implicite acheteur/résident : l'adresse analysée est-elle la commune déclarée ?
+
+      // Signal implicite acheteur/résident : l'adresse du dossier est-elle la commune déclarée ?
       const relation =
         defaultCommune && payload.address?.city
           ? payload.address.city.toLowerCase() === defaultCommune.toLowerCase()
             ? "residence"
             : "prospection"
           : "inconnue";
-      const insee = payload.address?.citycode ?? null;
-      // Adresses distinctes analysées dans CETTE commune cette session : au 2e bien distinct, on
-      // émet le signal de re-key (comparaison de biens dans une même ville = moment payant).
-      if (insee) {
-        const set = analyzedByInseeRef.current.get(insee) ?? new Set<string>();
-        set.add(token);
-        analyzedByInseeRef.current.set(insee, set);
-        if (set.size >= 2) {
-          posthog?.capture("logement_same_commune_multi", { insee, distinct_addresses_in_commune: set.size });
-        }
-      }
-      posthog?.capture("logement_analyzed", {
+      posthog?.capture("logement_opened", {
         relation_inferee: relation,
         in_declared_commune: relation === "residence",
-        dpe_attribution: attribution.status,
-        insee,
-        address_token: token,
+        dpe_selection_status: row.dpe_selection_status,
+        insee: row.insee,
+        source: rehydrateSource,
+        address_token: addressToken(row.ban_id),
       });
     } catch (err) {
       setResult(null);
@@ -183,93 +167,29 @@ export default function LogementModule({
     }
   }
 
-  // Rehydratation d'un logement sauvegardé (spec 2026-07-07). On re-fetch UNIQUEMENT l'exposition
-  // Géorisques (le risque doit rester frais) ; le DPE figé est RESTAURÉ depuis la ligne, jamais
-  // recalculé. La cohérence de la synthèse est gérée par le cache serveur par hash de faits : si
-  // les faits re-fetchés n'ont pas bougé, la synthèse figée est renvoyée telle quelle ; s'ils ont
-  // dérivé, elle est régénérée. Aucune génération mélangée.
-  async function rehydrateFromRow(row: LogementRow) {
-    // Sans city/postcode, l'adresse ne passe pas le validateur du re-fetch : retour à la saisie.
-    // LE SNAPSHOT N'EST PLUS EXIGÉ (29/07/2026) : il n'appartient plus à ce module, et une adresse
-    // analysée ici n'en a pas. L'exiger rendrait tout bien analysé depuis Logement non rouvrable.
-    if (!row.city || !row.postcode) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/georisques-logement", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address: {
-          banId: row.logement_id, label: row.address_label, postcode: row.postcode, city: row.city,
-          citycode: row.insee, latitude: row.latitude, longitude: row.longitude, type: null,
-        } }),
-      });
-      const payload = (await res.json()) as ApiResponse & { code?: string; commune?: string | null; insee?: string | null };
-      // Commune redevenue inaccessible depuis l'analyse : upsell honnête, jamais les données.
-      if (res.status === 403 && payload.code === "COMMUNE_NOT_UNLOCKED") {
-        setResult(null);
-        setLockedCommune({ commune: payload.commune ?? row.city, insee: payload.insee ?? row.insee });
-        return;
-      }
-      if (!res.ok) throw new Error(payload.error ?? `Erreur ${res.status}`);
-      setResult(payload);
-      setDpeCandidates(payload.dpeCandidates ?? []);
-      // Restaure le choix DPE figé + son statut (jamais de re-dérivation d'attribution).
-      setSelectedDpe(row.selected_dpe_snapshot);
-      setDpeStatus(RUNTIME_DPE_STATUS[row.dpe_selection_status] ?? "not_found");
-      // La posture est stockée, pas le projet fin : la sonde réapparaît non répondue (ton défaut).
-      setProjet(null);
-      posthog?.capture("logement_restored", {
-        insee: row.insee,
-        source: rehydrateSource,
-        address_token: addressToken(row.logement_id),
-      });
-    } catch {
-      // Rehydratation ratée -> retour silencieux à la saisie (aucune régression).
-      setResult(null);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // Au montage : si la page serveur a résolu un logement rehydratable, on le restaure une fois.
-  // Déféré en microtask : la rehydratation est un chargement de données (elle setState après un
-  // fetch), on évite un setState synchrone dans le corps de l'effet (cascading renders).
+  // Au montage : le dossier ouvert. Une seule fois (sinon boucle sur re-render).
   useEffect(() => {
-    if (rehydratedRef.current || !initialRow) return;
+    if (rehydratedRef.current || !dossier) return;
     rehydratedRef.current = true;
-    const row = initialRow;
-    void Promise.resolve().then(() => rehydrateFromRow(row));
+    const row = dossier;
+    void Promise.resolve().then(() => loadDossier(row));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Persiste le choix DPE dans l'artefact logement (échec silencieux à l'UI ; cohérence rétablie
-  // au prochain chargement). `payload` fournit l'adresse quand `result` n'est pas encore posé.
+  // Persiste le choix DPE dans le dossier (échec silencieux à l'UI ; cohérence rétablie au
+  // prochain chargement). Le serveur vérifie que le diagnostic appartient bien à cette adresse.
   async function persistDpe(
     status: "auto_confirmed" | "user_confirmed" | "not_in_list",
     dpe: DpeRecord | null,
-    payload?: ApiResponse,
   ) {
-    const a = (payload ?? result)?.address;
-    if (!a?.id) return;
+    if (!dossier) return;
     try {
       await fetch("/api/logement-dpe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ logement_id: a.id, status, dpe }),
+        body: JSON.stringify({ dossierId: dossier.id, status, dpe }),
       });
     } catch { /* échec silencieux */ }
-  }
-
-  // Retour à l'état de recherche vierge (« Modifier l'adresse ») : on efface le rapport précédent
-  // AVANT de rééditer, sinon l'ancien Passeport reste affiché sous le champ et le menu de
-  // suggestions se superpose dessus. Remonte aussi AddressAutocomplete (champ vide).
-  function resetToSearch() {
-    setResult(null);
-    setError(null);
-    setLockedCommune(null);
-    setProjet(null);
-    setAddressResetKey((k) => k + 1);
   }
 
   // Le DPE « du logement » = uniquement le choix attribué (jamais un candidat non confirmé).
@@ -350,22 +270,15 @@ export default function LogementModule({
 
         <section className="pt-14">
           <div className="mb-8">
-            <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Lecture par défaut</p>
+            <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Le bien de ce dossier</p>
             <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              Analyser un logement précis.
+              {dossier?.address_label ?? "Aucun dossier ouvert."}
             </h2>
           </div>
 
-          <div className="glass rounded-xl p-8 border-t-2 border-t-accent" style={{ maxWidth: 760 }}>
-            <AddressAutocomplete
-              key={addressResetKey}
-              placeholder={`Ex. : 12 rue des Minimes${defaultCommune ? `, ${defaultCommune}` : ""}`}
-              onSelect={(a) => void analyzeSelected(a)}
-              showModify={!lockedCommune}
-              onModify={resetToSearch}
-            />
+          <div className="glass rounded-xl p-8 border-t-2 border-t-accent">
             {loading && (
-              <div style={{ marginTop: 14, fontSize: 12.5, color: "var(--fg-4)", fontFamily: "var(--font-mono)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+              <div style={{ fontSize: 12.5, color: "var(--fg-4)", fontFamily: "var(--font-mono)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                 Analyse en cours…
               </div>
             )}
@@ -376,32 +289,13 @@ export default function LogementModule({
               </div>
             )}
 
-            {lockedCommune && (
-              <div style={{ marginTop: 16, padding: "16px 18px", background: "var(--bg-elev)", border: "1px solid var(--border-2)", borderRadius: 12, display: "grid", gap: 12 }}>
-                <p style={{ margin: 0, fontSize: 14.5, color: "var(--fg-1)", lineHeight: 1.6 }}>
-                  Cette adresse est située à <strong style={{ color: "var(--fg-hi)" }}>{lockedCommune.commune ?? "une autre commune"}</strong>.
-                </p>
-                <p style={{ margin: 0, fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6 }}>
-                  Votre rapport actuel ne donne pas accès à l&apos;analyse Logement de cette commune. Débloquez {lockedCommune.commune ?? "cette commune"} pour analyser ce bien.
-                </p>
-                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 14 }}>
-                  {lockedCommune.insee && (
-                    <Link
-                      href={`/territoire/${lockedCommune.insee}/debloquer?${new URLSearchParams({ ...(lockedCommune.commune ? { nom: lockedCommune.commune } : {}), source: "logement" }).toString()}`}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent/[0.12] text-accent text-[13.5px] no-underline border border-accent/[0.25] w-fit"
-                    >
-                      Débloquer cette commune
-                    </Link>
-                  )}
-                  <button
-                    type="button"
-                    onClick={resetToSearch}
-                    style={{ fontSize: 12.5, color: "var(--fg-4)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0 }}
-                  >
-                    Modifier l&apos;adresse
-                  </button>
-                </div>
-              </div>
+            {!loading && !error && (
+              <Link
+                href="/rapport/dossiers"
+                className="inline-flex items-center gap-2 text-[13.5px] text-muted no-underline"
+              >
+                Analyser un autre bien
+              </Link>
             )}
           </div>
         </section>
@@ -449,7 +343,7 @@ export default function LogementModule({
           <LogementSynthesis
             ready={synthesisReady}
             data={synthesisData}
-            logementId={result.address?.id ?? ""}
+            dossierId={dossier?.id ?? ""}
             insee={result.address?.citycode ?? ""}
           />
 

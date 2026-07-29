@@ -23,10 +23,8 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import type { Face3Snapshot } from "@/lib/logement-autour-types";
 import type { AddressDossierRow } from "@/lib/address-dossier-store";
-import type { BanAddressResult } from "@/lib/ban";
 import type { CarOwnership } from "@/lib/iris-logement";
 import { ReportSection, GlassCard } from "@/components/report/kit";
-import { AddressAutocomplete } from "@/components/report/AddressAutocomplete";
 import { Face3Block } from "@/components/report/logement/AutourSection";
 import { IcuExposure } from "@/components/report/logement/IcuExposure";
 
@@ -45,13 +43,17 @@ type AnalyzedAddress = {
   postcode: string | null; latitude: number; longitude: number;
 };
 
+// Le module ne fait plus SAISIR une adresse : il en analyse UNE, celle du dossier ouvert.
+// L'adresse est fixée à la création du dossier et vit sur une ligne que seul le serveur écrit.
+// Une saisie libre serait de toute façon refusée : `georisques-logement` et `logement-autour`
+// exigent que l'adresse soit celle du dossier.
 export default function AutourModule({
   defaultCommune,
-  initialRow = null,
+  dossier,
   initialCarOwnership = null,
 }: {
   defaultCommune?: string | null;
-  initialRow?: LogementRow | null;
+  dossier: AddressDossierRow;
   initialCarOwnership?: CarOwnership | null;
 }) {
   const [loading, setLoading] = useState(false);
@@ -61,11 +63,6 @@ export default function AutourModule({
   const [analyzed, setAnalyzed] = useState<AnalyzedAddress | null>(null);
   const [autour, setAutour] = useState<Face3Snapshot | null>(null);
   const [carOwnership, setCarOwnership] = useState<CarOwnership | null>(null);
-  // Commune de l'adresse tapée non débloquée par le rapport de l'utilisateur (frontière de
-  // monétisation, étape 4.5) : upsell honnête, jamais les données.
-  const [lockedCommune, setLockedCommune] = useState<{ commune: string | null; insee: string | null } | null>(null);
-  // Remonte AddressAutocomplete pour repartir d'un champ vide (« Modifier l'adresse »).
-  const [addressResetKey, setAddressResetKey] = useState(0);
   const autourRetriedRef = useRef(false);
   const rehydratedRef = useRef(false);
   const posthog = usePostHog();
@@ -79,29 +76,14 @@ export default function AutourModule({
       const res = await fetch("/api/logement-autour", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          logement_id: a.id,
-          insee: a.citycode,
-          latitude: a.latitude,
-          longitude: a.longitude,
-          address_label: a.label,
-          city: a.city,
-          postcode: a.postcode,
-          // Aucune parcelle ici : ce module ne géocode pas de bâti. La route préserve le
-          // `parcel_code` déjà en base plutôt que de l'écraser (cf. route logement-autour).
-          posture: "residence",
-        }),
+        // Le corps ne porte plus l'identité de l'adresse : la route la lit sur le dossier. Un
+        // client qui pouvait l'envoyer pouvait déplacer un dossier payé sur une autre adresse.
+        body: JSON.stringify({ dossierId: dossier.id, posture: "residence" }),
       });
       const payload = (await res.json()) as {
         snapshot?: Face3Snapshot; carOwnership?: CarOwnership;
         error?: string; code?: string; insee?: string | null;
       };
-      if (res.status === 403 && payload.code === "COMMUNE_NOT_UNLOCKED") {
-        setAutour(null);
-        setLockedCommune({ commune: a.city, insee: payload.insee ?? a.citycode });
-        posthog?.capture("autour_commune_locked", { insee: a.citycode });
-        return;
-      }
       if (!res.ok || !payload.snapshot) throw new Error(payload.error ?? `Erreur ${res.status}`);
       setAutour(payload.snapshot);
       setCarOwnership(payload.carOwnership ?? null);
@@ -121,21 +103,6 @@ export default function AutourModule({
     }
   }
 
-  function analyzeSelected(a: BanAddressResult) {
-    if (!a.id || !a.citycode || a.latitude == null || a.longitude == null) {
-      setError("Adresse sans coordonnées exploitables.");
-      return;
-    }
-    setLockedCommune(null);
-    setAutour(null);
-    autourRetriedRef.current = false;
-    posthog?.capture("autour_address_selected", { insee: a.citycode, address_token: addressToken(a.id) });
-    void requestAutour({
-      id: a.id, label: a.label, citycode: a.citycode, city: a.city ?? null,
-      postcode: a.postcode ?? null, latitude: a.latitude, longitude: a.longitude,
-    });
-  }
-
   // Remplissage asynchrone minimal : si l'OSM est revenu `pending` (tuile froide, Overpass lent),
   // on re-demande UNE fois après un court délai (la tuile est alors chaude grâce au after()
   // serveur). Au-delà = incrément futur. Même règle que dans LogementModule.
@@ -152,31 +119,34 @@ export default function AutourModule({
   // Au montage : si la page serveur a résolu une adresse déjà analysée, on l'affiche telle
   // quelle. Le snapshot est FIGÉ (historique) ; l'équipement automobile, lui, a été relu au
   // rendu par la page (artefact versionné, jamais figé — cf. autour-response.ts).
+  // Au montage : l'adresse du dossier. Si l'entourage est déjà calculé, on l'affiche figé
+  // (historique) ; sinon on le demande. L'équipement automobile, lui, est relu au rendu par la
+  // page (artefact versionné, jamais figé, cf. autour-response.ts).
   useEffect(() => {
-    if (rehydratedRef.current || !initialRow?.snapshot) return;
+    if (rehydratedRef.current) return;
     rehydratedRef.current = true;
-    setAutour(initialRow.snapshot);
-    setCarOwnership(initialCarOwnership);
-    setAnalyzed({
-      id: initialRow.logement_id, label: initialRow.address_label, citycode: initialRow.insee,
-      city: initialRow.city, postcode: initialRow.postcode,
-      latitude: initialRow.latitude, longitude: initialRow.longitude,
-    });
-    posthog?.capture("autour_restored", {
-      insee: initialRow.insee,
-      address_token: addressToken(initialRow.logement_id),
+    const address: AnalyzedAddress = {
+      id: dossier.ban_id, label: dossier.address_label, citycode: dossier.insee,
+      city: dossier.city, postcode: dossier.postcode,
+      latitude: dossier.latitude, longitude: dossier.longitude,
+    };
+    // Déféré en microtask : un setState synchrone dans le corps d'un effet déclenche des rendus
+    // en cascade (même patron que le chargement, qui setState après un fetch).
+    void Promise.resolve().then(() => {
+      if (dossier.snapshot) {
+        setAutour(dossier.snapshot);
+        setCarOwnership(initialCarOwnership);
+        setAnalyzed(address);
+        posthog?.capture("autour_restored", {
+          insee: dossier.insee,
+          address_token: addressToken(dossier.ban_id),
+        });
+        return;
+      }
+      return requestAutour(address);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  function resetToSearch() {
-    setAutour(null);
-    setError(null);
-    setLockedCommune(null);
-    setAnalyzed(null);
-    autourRetriedRef.current = false;
-    setAddressResetKey((k) => k + 1);
-  }
 
   return (
     <div className="min-h-screen bg-canvas text-label relative overflow-hidden" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
@@ -216,22 +186,18 @@ export default function AutourModule({
 
         <section className="pt-14">
           <div className="mb-8">
-            <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Lecture par défaut</p>
+            <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">L&apos;adresse de ce dossier</p>
             <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              Analyser les environs d&apos;une adresse.
+              {dossier.address_label}
             </h2>
           </div>
 
-          <div className="glass rounded-xl p-8" style={{ maxWidth: 760, borderTop: "2px solid var(--green)" }}>
-            <AddressAutocomplete
-              key={addressResetKey}
-              placeholder={`Ex. : 12 rue des Minimes${defaultCommune ? `, ${defaultCommune}` : ""}`}
-              onSelect={(a) => analyzeSelected(a)}
-              showModify={!lockedCommune}
-              onModify={resetToSearch}
-            />
+          {/* L'adresse ne se saisit plus ici : elle est fixée à la création du dossier. Analyser
+              un autre bien passe par un autre dossier, ce qui est exactement la règle que
+              l'identité en uuid rend possible (deux appartements d'un même immeuble coexistent). */}
+          <div className="glass rounded-xl p-8" style={{ borderTop: "2px solid var(--green)" }}>
             {loading && (
-              <div style={{ marginTop: 14, fontSize: 12.5, color: "var(--fg-4)", fontFamily: "var(--font-mono)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+              <div style={{ fontSize: 12.5, color: "var(--fg-4)", fontFamily: "var(--font-mono)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                 Analyse en cours…
               </div>
             )}
@@ -242,32 +208,13 @@ export default function AutourModule({
               </div>
             )}
 
-            {lockedCommune && (
-              <div style={{ marginTop: 16, padding: "16px 18px", background: "var(--bg-elev)", border: "1px solid var(--border-2)", borderRadius: 12, display: "grid", gap: 12 }}>
-                <p style={{ margin: 0, fontSize: 14.5, color: "var(--fg-1)", lineHeight: 1.6 }}>
-                  Cette adresse est située à <strong style={{ color: "var(--fg-hi)" }}>{lockedCommune.commune ?? "une autre commune"}</strong>.
-                </p>
-                <p style={{ margin: 0, fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6 }}>
-                  Votre rapport actuel ne donne pas accès à cette commune. Débloquez {lockedCommune.commune ?? "cette commune"} pour lire ce qui entoure cette adresse.
-                </p>
-                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 14 }}>
-                  {lockedCommune.insee && (
-                    <Link
-                      href={`/territoire/${lockedCommune.insee}/debloquer?${new URLSearchParams({ ...(lockedCommune.commune ? { nom: lockedCommune.commune } : {}), source: "autour" }).toString()}`}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent/[0.12] text-accent text-[13.5px] no-underline border border-accent/[0.25] w-fit"
-                    >
-                      Débloquer cette commune
-                    </Link>
-                  )}
-                  <button
-                    type="button"
-                    onClick={resetToSearch}
-                    style={{ fontSize: 12.5, color: "var(--fg-4)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0 }}
-                  >
-                    Modifier l&apos;adresse
-                  </button>
-                </div>
-              </div>
+            {!loading && !error && (
+              <Link
+                href="/rapport/dossiers"
+                className="inline-flex items-center gap-2 text-[13.5px] text-muted no-underline"
+              >
+                Analyser un autre bien
+              </Link>
             )}
           </div>
         </section>
