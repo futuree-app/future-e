@@ -225,7 +225,39 @@ décision · preuves, sources et drawers · largeur de lecture · navigation ent
 **Et sur l'accueil** : la preuve produit du hero ne doit pas simplement disparaître sur mobile
 (`hero-right { display: none }`, `FutureELanding.tsx:2528`). Proposer une **version compacte**.
 
-### Étape 4 · Mini-audit de la famille éditoriale, en lecture seule
+### Étape 4 · Mini-audit de la famille éditoriale, en lecture seule · **FAITE**
+
+**Rendu** : `docs/audits/2026-07-30-famille-editoriale.md`. Lecture seule, aucun fichier de la
+famille modifié. À lire **avant** d'ouvrir l'étape 5 : il change le cadrage.
+
+Les cinq constats qui commandent `DESIGN.md` :
+
+1. **Il y a trois langages, pas deux.** L'audit du 29/07 opposait l'objet `styles` JS de l'accueil
+   aux tokens du rapport. Le troisième est le plus étendu : **27 pages** portent chacune leur propre
+   feuille de style injectée, **2 266 lignes de CSS cumulées**, largement du copier-coller.
+2. **La navigation se coupe en deux au milieu de la famille** : 7 pages (les hubs Explorer) ont la
+   vraie `Navbar`, 19 (Savoir, Agir, et toutes les pages `[insee_code]`) ont une nav locale sticky
+   réécrite à la main. Passer d'un hub à une page Savoir fait **perdre les menus du site**.
+3. **La donnée vivante n'est jamais datée pour le lecteur**, alors que les pages Explorer se
+   revalident toutes les 24 h. Et la seule date affichée sur `/chaleur` est écrite à la main et
+   fausse de deux mois (« Bulletin de veille · Mai 2026 »).
+4. **Cinq largeurs de lecture** coexistent dans le produit : 960 (hubs), 760 (Savoir/Agir), 680
+   (blocs internes), 1 100 (rapport), 920 (comparateur). Aucune règle écrite.
+5. **Six accents thématiques en dur**, hors tokens (`#f87171` chaleur, `#60a5fa` inondation,
+   `#38bdf8` submersion, `#fb923c` voiture, `#a78bfa` pollutions, `#c8b89a` pro). Chacun sert à la
+   fois de signe sémantique (le thème) et de décor (l'orbe de fond). **Même question que le sable :
+   à trancher ensemble en étape 5.**
+
+Ce que la famille fait déjà bien, et que `DESIGN.md` doit protéger plutôt que refaire :
+`/savoir/pollutions-invisibles` porte **le meilleur traitement des sources du produit** (source
+inline sur l'affirmation + bibliographie descriptive) ; `/agir/canicule` a une section « ce que vous
+n'avez pas à faire » qui vaut autant que ses gestes ; `/chaleur/[insee_code]` est **la meilleure
+articulation du produit** (commune, Savoir, Agir, comparateur, et le paywall argumenté plutôt que
+`/#pricing`).
+
+---
+
+Consigne d'origine, conservée :
 
 Trois surfaces, sans refaire un audit complet :
 
