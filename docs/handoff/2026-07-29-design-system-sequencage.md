@@ -301,7 +301,45 @@ Question à instruire : **ce que `DESIGN.md` doit prévoir pour Explorer, Savoir
 longue, traitement des sources, fraîcheur de la donnée, gestes actionnables, articulation avec la
 commune et avec le rapport. À rendre au porteur **avant** de rédiger `DESIGN.md`.
 
-### Étape 5 · Rédiger `DESIGN.md`, prescriptif
+### Étape 5 · Rédiger `DESIGN.md`, prescriptif · **FAITE (v1)**
+
+`DESIGN.md` est à la racine, onze sections. Il se place comme couche d'**application** sous la
+doctrine du vault, qui garde l'autorité : ADR-0005 grave la décision, `doctrine/design.md` porte le
+pourquoi verrouillé, `DESIGN.md` dit le comment écran par écran.
+
+**Trois arbitrages pris par le porteur le 30/07, tous consignés dans le document :**
+
+1. **Les orbes flous sortent de la direction artistique.** Il y avait une contradiction frontale que
+   la rédaction a révélée : `doctrine/design.md` inscrivait « mesh gradients animés » dans une DA
+   **verrouillée**, quand l'audit du 29/07 les rangeait dans « à ne jamais documenter ». La doctrine
+   exige qu'une proposition contraire soit explicitement justifiée : elle l'est, et
+   `doctrine/design.md` **a été amendée** en conséquence. Motif retenu : le problème n'est pas le
+   glassmorphism, c'est son automatisme (trois orbes identiques sur vingt-cinq pages, rapport payant
+   compris).
+2. **Le filet coloré de carte devient conditionnel.** Il n'apparaît que lorsque sa couleur informe.
+   Règle testable gravée : dans une grille où toutes les cartes porteraient le même filet, aucune ne
+   le porte. Ce qui faisait « slop » était la répétition, pas la forme.
+3. **La palette est close à sept teintes.** Mesure faite pendant la rédaction : quatre des six
+   accents thématiques étaient **exactement** la palette de la doctrine, simplement écrits en dur.
+   Le problème était le mécanisme, pas la palette. Trois orphelines supprimées (`#38bdf8` → bleu,
+   `#c8b89a` et `#d4a574` → orange).
+
+**Découverte de rédaction, laissée ouverte** : `--orange` sert à la fois d'accent de marque **et** de
+registre sémantique « compromis » dans le dossier de décision. Sur un écran qui porte les deux, la
+marque et le sens se confondent. Deux issues proposées (§ 5.4), non tranchées.
+
+**Reste ouvert dans le document** : la collision de l'orange, la navigation de niveau 1 (annexe de
+l'audit du 30/07), et le système de composants éditoriaux partagés (reporté après lancement).
+
+**Non fait, et c'est le prolongement naturel** : `DESIGN.md` est prescriptif, le code ne s'y conforme
+pas encore. La mise en conformité (retrait des orbes, des emoji d'icône, des couleurs en dur, du
+filet automatique) est un chantier distinct, à séquencer.
+
+---
+
+Consigne d'origine, conservée :
+
+### Étape 5 (consigne) · Rédiger `DESIGN.md`, prescriptif
 
 Doit graver :
 

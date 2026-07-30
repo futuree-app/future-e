@@ -21,10 +21,24 @@ preuve).
 ## Direction artistique
 
 **Glassmorphism sombre.** Palette : noir `#060812`, orange `#fb923c`, rouge `#f87171`,
-violet `#a78bfa`, vert `#4ade80`, bleu `#60a5fa`. Typographies : **Instrument Sans** (sans),
-Instrument Serif italic, JetBrains Mono (mono), définies en `--font-sans/serif/mono` dans
-`src/app/design-tokens.css`. Mesh gradients animés, noise overlay. La DA est validée, elle ne
-se remet pas en question à chaque itération.
+violet `#a78bfa`, vert `#4ade80`, bleu `#60a5fa`, jaune `#fbbf24`. Typographies : **Instrument
+Sans** (sans), Instrument Serif italic, JetBrains Mono (mono), définies en `--font-sans/serif/mono`
+dans `src/app/design-tokens.css`. Fond profond, verre translucide, noise overlay. La DA est validée,
+elle ne se remet pas en question à chaque itération.
+
+> **Amendement du 2026-07-30 (arbitrage du porteur).** Cette page mentionnait « mesh gradients
+> animés » ; les **orbes flous en `position: fixed` sont retirés de la direction artistique**.
+> Justification explicite, comme cette doctrine l'exige de toute proposition contraire : ce qui pose
+> problème n'est pas le glassmorphism, c'est son **automatisme**. Trois orbes dupliqués à l'identique
+> sur vingt-cinq pages, y compris dans le rapport payant, cessent d'être une signature et deviennent
+> un fond d'usine, aujourd'hui reconnaissable comme marqueur d'interface générée. Le fond profond, le
+> verre et le grain tiennent la promesse esthétique sans ce motif. Le reste de la DA est inchangé.
+>
+> **La palette devient close** au même moment : les sept teintes ci-dessus, et aucune autre. Trois
+> orphelines sont supprimées (`#38bdf8` rejoint le bleu ; `#c8b89a` et `#d4a574`, deux sables
+> voisins jamais distingués, rejoignent l'orange). Toute couleur s'écrit `var(--token)`.
+>
+> Règles d'application dans `DESIGN.md` (racine), § 5.
 
 > Note : l'ADR-0005 (intention d'origine, avril 2026) cite « Inter Tight » comme sans. La
 > sans implémentée est **Instrument Sans** (vérifié dans le code 2026-06-25). Cette page porte
@@ -68,5 +82,5 @@ IRIS) vit dans `doctrine/data.md`.
 
 ## Liens
 
-`adr/ADR-0005-direction-artistique.md`, `doctrine/interface.md`, `doctrine/editoriale.md`,
-`doctrine/data.md`, `principes/invariants.md`.
+`DESIGN.md` (racine, l'application écran par écran), `adr/ADR-0005-direction-artistique.md`,
+`doctrine/interface.md`, `doctrine/editoriale.md`, `doctrine/data.md`, `principes/invariants.md`.
