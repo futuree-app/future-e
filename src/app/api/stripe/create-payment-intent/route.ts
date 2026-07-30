@@ -3,6 +3,13 @@ import { getStripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { sanitizeDistinctId } from "@/lib/posthog-identity";
+import { validateSelectedBanAddress } from "@/lib/selected-ban-address";
+import { fetchBanFeaturesByLabel } from "@/lib/ban";
+import { pickFeatureById } from "@/lib/ban-verify";
+import { isSellableAnchor } from "@/lib/dossier-qualification";
+import { quoteForDossier } from "@/lib/dossier-pricing";
+import { hasPaidTerritory } from "@/lib/active-territory";
+import { communeParent } from "@/lib/plm";
 
 export const runtime = "nodejs";
 
@@ -10,13 +17,16 @@ export const runtime = "nodejs";
 const PRODUCT_PRICES: Record<string, { amountEur: number; stripePriceId: string }> = {
   "one-shot":      { amountEur: 14, stripePriceId: process.env.STRIPE_RAPPORT_PRICE_ID ?? "" },
   "pack-decision": { amountEur: 39, stripePriceId: process.env.STRIPE_PACK_PRICE_ID    ?? "" },
+  // Le montant réel est calculé par `quoteForDossier` (39 € ou 25 € selon le territoire déjà
+  // payé) : cette entrée sert à RECONNAÎTRE le produit, son `amountEur` n'est jamais facturé.
+  "address-dossier": { amountEur: 39, stripePriceId: process.env.STRIPE_DOSSIER_PRICE_ID ?? "" },
 };
 
 export async function POST(request: Request) {
   try {
     const {
       productType, targetInsee, targetCommune, source, rank, pack,
-      phDistinctId: phDistinctIdRaw,
+      phDistinctId: phDistinctIdRaw, address, checkoutAttemptId,
     } = await request.json();
 
     if (typeof productType !== "string" || productType.trim().length === 0) {
@@ -72,6 +82,67 @@ export async function POST(request: Request) {
 
     const stripe = getStripe();
 
+    // ════════════════════════════════════════════════════════════════════════════
+    // Dossier d'adresse : revalidation de l'adresse contre la BAN, puis prix serveur.
+    // ════════════════════════════════════════════════════════════════════════════
+    const isDossier = productType.trim() === "address-dossier";
+    let dossierAmountCents = 0;
+    let dossierIntent: {
+      banId: string; insee: string; label: string; city: string | null;
+      postcode: string | null; latitude: number; longitude: number; deductionCents: number;
+    } | null = null;
+
+    if (isDossier) {
+      const sel = validateSelectedBanAddress(address);
+      if (!sel) {
+        return NextResponse.json({ error: "Adresse invalide." }, { status: 400 });
+      }
+
+      // LA BAN A LE DERNIER MOT sur le type ET sur les coordonnées. Le checkout est rare et c'est
+      // là que l'argent bouge : la qualification, à haut volume et sans conséquence financière,
+      // fait confiance au client, celle-ci jamais.
+      const features = await fetchBanFeaturesByLabel(sel.label, sel.citycode);
+      if (features === null) {
+        return NextResponse.json(
+          { error: "Vérification indisponible.", code: "BAN_VERIFICATION_FAILED" },
+          { status: 503 },
+        );
+      }
+      const canonical = pickFeatureById(
+        features.flatMap((f) => (f.id ? [{ ...f, id: f.id }] : [])),
+        sel.banId,
+      );
+      // Le `citycode` est exigé parce qu'il gouverne le droit et le prix : une feature sans code
+      // commune ne peut ni être comparée à un grant, ni porter un dossier.
+      if (!canonical || !isSellableAnchor(canonical.type) || !canonical.citycode) {
+        return NextResponse.json(
+          { error: "Ce bien n'est pas identifié assez précisément.", code: "ANCHOR_REFUSED" },
+          { status: 422 },
+        );
+      }
+
+      // TOUTES les valeurs viennent de la feature canonique. Sécuriser le type en gardant les
+      // coordonnées du client analyserait un point choisi par le client.
+      const paid = await hasPaidTerritory(supabase, user.id, communeParent(canonical.citycode));
+      const quote = quoteForDossier(paid);
+      dossierAmountCents = quote.amountDueCents;
+      dossierIntent = {
+        banId: canonical.id, insee: canonical.citycode, label: canonical.label,
+        city: canonical.city, postcode: canonical.postcode,
+        latitude: canonical.latitude, longitude: canonical.longitude,
+        deductionCents: quote.territoryDeductionCents,
+      };
+    }
+
+    // Clé d'idempotence de la TENTATIVE, générée par la page de checkout. Rien ne dépend de la
+    // confiance qu'on lui accorde : le prix est recalculé à chaque requête, donc ce jeton n'est
+    // qu'une clé. Un identifiant absent ou biscornu produit une tentative neuve plutôt qu'un
+    // refus, parce qu'une clé illisible ne doit jamais empêcher un achat légitime.
+    const attemptId =
+      typeof checkoutAttemptId === "string" && /^[A-Za-z0-9_-]{8,100}$/.test(checkoutAttemptId)
+        ? checkoutAttemptId
+        : crypto.randomUUID();
+
     // Pack Décision : 2-3 INSEE valides. Mode 'replay' (trio /ou-vivre, snapshot du
     // projet requis) ou 'choix' (communes nommées sur /comparateur, sans projet,
     // reconstruites via seedComparaison). Le snapshot replay est persisté en base
@@ -107,7 +178,7 @@ export async function POST(request: Request) {
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(priceConfig.amountEur * 100),
+      amount: isDossier ? dossierAmountCents : Math.round(priceConfig.amountEur * 100),
       currency: "eur",
       payment_method_types: ["card"],
       metadata: {
@@ -129,8 +200,51 @@ export async function POST(request: Request) {
         packProjetLabel,
         // Voyage jusqu'au webhook, seul point du parcours sans navigateur.
         phDistinctId,
+        checkoutAttemptId: isDossier ? attemptId : "",
       },
-    });
+    },
+      // IDEMPOTENCE TECHNIQUE SEULE, et bornée par l'utilisateur. Elle ne dérive PAS du `ban_id` :
+      // le produit autorise délibérément plusieurs dossiers à la même adresse (deux appartements
+      // d'un immeuble), et une clé fondée sur l'adresse rendrait à l'acheteur du second bien le
+      // PaymentIntent du premier. Un double clic réutilise la tentative ; « créer un autre
+      // dossier » repasse par la page de checkout, donc par une clé neuve.
+      isDossier ? { idempotencyKey: `dossier_${user.id}_${attemptId}` } : undefined,
+    );
+
+    if (isDossier && dossierIntent) {
+      const { createClient: createAdminClient } = await import("@supabase/supabase-js");
+      const admin = createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      );
+      const { error: intentError } = await admin.from("dossier_intents").upsert(
+        {
+          stripe_payment_intent_id: paymentIntent.id,
+          user_id: user.id,
+          ban_id: dossierIntent.banId,
+          insee: dossierIntent.insee,
+          address_label: dossierIntent.label,
+          city: dossierIntent.city,
+          postcode: dossierIntent.postcode,
+          latitude: dossierIntent.latitude,
+          longitude: dossierIntent.longitude,
+          amount_due_cents: dossierAmountCents,
+          territory_deduction_cents: dossierIntent.deductionCents,
+        },
+        { onConflict: "stripe_payment_intent_id" },
+      );
+
+      // SANS INTENTION, LE WEBHOOK NE POURRA PAS CRÉER LE DOSSIER. Rendre le `clientSecret` ici
+      // reviendrait à ouvrir un paiement dont la livraison est déjà impossible. On échoue avant
+      // que la carte ne soit débitée.
+      if (intentError) {
+        console.error("[create-payment-intent] dossier_intents", intentError.message);
+        return NextResponse.json(
+          { error: "Préparation du dossier impossible." },
+          { status: 500 },
+        );
+      }
+    }
 
     if (isPack) {
       const { createClient: createAdminClient } = await import("@supabase/supabase-js");
@@ -165,7 +279,7 @@ export async function POST(request: Request) {
       event: "payment_intent_created",
       properties: {
         product_type: productType.trim(),
-        amount: priceConfig.amountEur,
+        amount: isDossier ? dossierAmountCents / 100 : priceConfig.amountEur,
         currency: "eur",
         user_id: user.id,
       },

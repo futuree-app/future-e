@@ -7,6 +7,7 @@ import { getStripe } from "@/lib/stripe";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { sanitizeDistinctId } from "@/lib/posthog-identity";
 import { grantDecisionPackFromSnapshot } from "@/lib/decision-packs";
+import { communeParent } from "@/lib/plm";
 
 export const runtime = "nodejs";
 
@@ -49,6 +50,142 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
   const source = grantSource || "direct";
   const rank = grantRank ? Number.parseInt(grantRank, 10) : null;
   const resend = getResend();
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // Dossier d'adresse : l'adresse vient de l'INTENTION, jamais des métadonnées Stripe, qui ne la
+  // portent pas. Le droit d'ouvrir ce dossier EST l'existence de la ligne créée ici.
+  // ════════════════════════════════════════════════════════════════════════════
+  if (productType === "address-dossier") {
+    const { data: intent } = await supabaseAdmin
+      .from("dossier_intents")
+      .select("*")
+      .eq("stripe_payment_intent_id", paymentIntent.id)
+      .maybeSingle();
+
+    if (!intent) {
+      // Une intention absente est une ERREUR, pas un cas dégradé : inventer une adresse depuis un
+      // paiement produirait un dossier sur un bien inconnu.
+      //
+      // ON LÈVE, ON NE RETOURNE PAS. `POST` répond `{ received: true }` juste après cet appel :
+      // un `return` ferait croire à Stripe que l'événement est traité, donc il ne le rejouerait
+      // JAMAIS, et le paiement resterait encaissé sans dossier, définitivement. En levant, la
+      // route répond 500 et Stripe réessaie pendant trois jours, ce qui laisse le temps de
+      // réparer.
+      throw new Error(`dossier_intents introuvable pour ${paymentIntent.id}`);
+    }
+
+    // Le rang du dossier dans le compte, AVANT l'insertion. C'est la seule valeur d'historique de
+    // l'instrumentation, et elle a une source réelle : la base la connaît, personne ne l'invente.
+    const { count: paidBefore } = await supabaseAdmin
+      .from("address_dossiers")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", intent.user_id)
+      .not("stripe_payment_intent_id", "is", null);
+
+    // `upsert` avec `ignoreDuplicates`, JAMAIS `insert`. Un `insert` sur une clé déjà prise lève
+    // une erreur, donc un webhook rejoué échouerait à chaque fois.
+    //
+    // LES DEUX OPTIONS SONT OBLIGATOIRES. Sans `onConflict`, Postgres arbitre sur la clé primaire
+    // (`id`, un uuid neuf), donc le conflit réel n'est jamais vu. Sans `ignoreDuplicates`,
+    // l'upsert ÉCRASE la ligne existante, ce qui réécrirait le montant et la date d'achat d'un
+    // dossier déjà payé à chaque rejeu.
+    const { data: inserted, error: insertError } = await supabaseAdmin
+      .from("address_dossiers")
+      .upsert(
+        {
+          user_id: intent.user_id,
+          ban_id: intent.ban_id,
+          insee: intent.insee,
+          address_label: intent.address_label,
+          city: intent.city,
+          postcode: intent.postcode,
+          latitude: intent.latitude,
+          longitude: intent.longitude,
+          stripe_payment_intent_id: paymentIntent.id,
+          // La seule vérité de ce qui a été encaissé est ce que STRIPE déclare avoir encaissé.
+          // Recopier le montant préparé ferait dire à la base un prix que la caisse n'a pas
+          // confirmé.
+          amount_paid_cents: paymentIntent.amount,
+          purchased_at: new Date().toISOString(),
+        },
+        { onConflict: "stripe_payment_intent_id", ignoreDuplicates: true },
+      )
+      .select("id");
+
+    if (insertError) throw insertError;
+
+    // `ignoreDuplicates` rend une liste VIDE quand la ligne existait déjà : c'est ainsi qu'on
+    // distingue une création d'un rejeu, et cette distinction gouverne les effets de bord.
+    const created = (inserted?.length ?? 0) > 0;
+
+    const { data: dossier } = await supabaseAdmin
+      .from("address_dossiers")
+      .select("id")
+      .eq("stripe_payment_intent_id", paymentIntent.id)
+      .maybeSingle();
+
+    // Un dossier introuvable APRÈS l'insertion signale une base incohérente : même traitement que
+    // l'intention absente, on laisse Stripe rejouer plutôt que d'accuser réception dans le vide.
+    if (!dossier) throw new Error(`dossier introuvable après insertion ${paymentIntent.id}`);
+
+    await supabaseAdmin.from("payments").upsert(
+      {
+        user_id: intent.user_id,
+        stripe_payment_intent_id: paymentIntent.id,
+        amount: paymentIntent.amount / 100,
+        product_type: productType,
+        status: "succeeded",
+        email: userEmail || null,
+        target_insee: intent.insee,
+      },
+      { onConflict: "stripe_payment_intent_id" },
+    );
+
+    // AUCUN report_grant dérivé : le droit territorial se déduit de l'existence du dossier, donc
+    // `access_revoked_at` le retire sans laisser un grant orphelin. On pose seulement le
+    // territoire ACTIF de lecture, au grain commune (PLM ferait lire « Paris 1er »).
+    await supabaseAdmin
+      .from("user_profiles")
+      .update({
+        active_insee_code: communeParent(intent.insee),
+        active_commune: intent.city,
+      })
+      .eq("user_id", intent.user_id);
+
+    if (userEmail) {
+      await resend.emails.send({
+        from: "futur•e <hello@futur-e.fr>",
+        to: userEmail,
+        subject: "Votre dossier futur•e est ouvert",
+        html: `
+          <p>Merci pour votre confiance.</p>
+          <p>Le dossier de ${intent.address_label} est ouvert : vous le retrouverez dans votre espace, avec la commune, ce qui entoure l'adresse et ce que dit le logement.</p>
+          <p>futur•e</p>
+        `,
+      });
+    }
+
+    // ÉMIS À LA CRÉATION SEULEMENT. Un rejeu compterait un second achat, et son
+    // `rank_in_dossiers` serait faux puisque le dossier existe déjà au moment du décompte.
+    // `$insert_id` ajoute une déduplication côté PostHog si deux instances traitaient l'événement.
+    if (created) {
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId,
+        event: "address_dossier_purchased",
+        properties: {
+          $insert_id: `address_dossier_purchased_${paymentIntent.id}`,
+          amount_paid_cents: paymentIntent.amount,
+          deducted: (intent.territory_deduction_cents ?? 0) > 0,
+          insee: intent.insee,
+          dossier_id: dossier.id,
+          rank_in_dossiers: (paidBefore ?? 0) + 1,
+        },
+      });
+      await posthog.shutdown();
+    }
+    return;
+  }
 
   // Pack Décision : crée le pack + 3 grants + entitlements one_shot (report_access
   // complete) depuis le snapshot en staging, via la fonction partagée (l'email pose
