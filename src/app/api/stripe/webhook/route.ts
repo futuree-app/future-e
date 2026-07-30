@@ -5,6 +5,7 @@ import type Stripe from "stripe";
 import { getResend } from "@/lib/resend";
 import { getStripe } from "@/lib/stripe";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { sanitizeDistinctId } from "@/lib/posthog-identity";
 import { grantDecisionPackFromSnapshot } from "@/lib/decision-packs";
 
 export const runtime = "nodejs";
@@ -32,8 +33,15 @@ function getEntitlements() {
 }
 
 async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
-  const { userId, userEmail, productType, targetInsee, targetCommune, grantSource, grantRank } =
-    paymentIntent.metadata;
+  const {
+    userId, userEmail, productType, targetInsee, targetCommune, grantSource, grantRank,
+    phDistinctId,
+  } = paymentIntent.metadata;
+
+  // LE SEUL POINT DU PARCOURS SANS NAVIGATEUR : l'identité de mesure voyage par les métadonnées
+  // Stripe. Sans elle, `payment_completed` créait une personne distincte de celle qui a cliqué,
+  // parce que le navigateur identifie sur l'UUID Supabase et qu'on émettait sur l'e-mail.
+  const distinctId = sanitizeDistinctId(phDistinctId, userId || paymentIntent.id);
 
   // Territoire ciblé (parcours comparateur). Vide = achat sur la résidence.
   const insee = typeof targetInsee === "string" ? targetInsee.trim() : "";
@@ -74,7 +82,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     }
     const posthog = getPostHogClient();
     posthog.capture({
-      distinctId: userEmail || userId || paymentIntent.id,
+      distinctId,
       event: "payment_completed",
       properties: { product_type: productType, amount: paymentIntent.amount / 100 },
     });
@@ -154,7 +162,6 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     });
   }
 
-  const distinctId = userEmail || userId || paymentIntent.id;
   const posthog = getPostHogClient();
   posthog.capture({
     distinctId,

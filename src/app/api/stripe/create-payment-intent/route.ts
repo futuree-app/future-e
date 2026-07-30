@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { sanitizeDistinctId } from "@/lib/posthog-identity";
 
 export const runtime = "nodejs";
 
@@ -13,8 +14,10 @@ const PRODUCT_PRICES: Record<string, { amountEur: number; stripePriceId: string 
 
 export async function POST(request: Request) {
   try {
-    const { productType, targetInsee, targetCommune, source, rank, pack } =
-      await request.json();
+    const {
+      productType, targetInsee, targetCommune, source, rank, pack,
+      phDistinctId: phDistinctIdRaw,
+    } = await request.json();
 
     if (typeof productType !== "string" || productType.trim().length === 0) {
       return NextResponse.json(
@@ -61,6 +64,11 @@ export async function POST(request: Request) {
         { status: 401 },
       );
     }
+
+    // L'IDENTITÉ DE MESURE, transmise par le navigateur. Le repli est l'UUID Supabase, celui-là
+    // même que `PostHogProvider` passe à `identify()`, donc un client qui n'envoie rien reste
+    // rattaché à la bonne personne.
+    const phDistinctId = sanitizeDistinctId(phDistinctIdRaw, user.id);
 
     const stripe = getStripe();
 
@@ -119,6 +127,8 @@ export async function POST(request: Request) {
         packCommune2: isPack ? packTrio[1].commune : "",
         packCommune3: isPack ? (packTrio[2]?.commune ?? "") : "",
         packProjetLabel,
+        // Voyage jusqu'au webhook, seul point du parcours sans navigateur.
+        phDistinctId,
       },
     });
 
@@ -151,7 +161,7 @@ export async function POST(request: Request) {
 
     const posthog = getPostHogClient();
     posthog.capture({
-      distinctId: user.email ?? user.id,
+      distinctId: phDistinctId,
       event: "payment_intent_created",
       properties: {
         product_type: productType.trim(),

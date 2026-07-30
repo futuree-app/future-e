@@ -1,9 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import posthog from "posthog-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { stripePromise } from "@/lib/stripe-client";
 import { PaymentForm } from "@/components/PaymentForm";
+
+// L'identité de mesure du navigateur, transmise au serveur pour qu'il émette SOUS LA MÊME
+// PERSONNE. Sans elle, les événements de paiement appartiennent à quelqu'un d'autre que le
+// parcours qui les a produits. Même patron que `ou-vivre` et `comparateur-vie/ask`.
+function clientDistinctId(): string | undefined {
+  try {
+    return posthog.get_distinct_id?.() ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 // Territoire ciblé optionnel (parcours comparateur). Sans lui, l'achat porte
 // sur la commune de résidence (comportement historique du checkout).
@@ -28,6 +40,10 @@ type PaymentWrapperProps = {
   };
   returnUrl?: string;
   onSubmit?: () => void; // intention de paiement (clic), pour l'instrumentation. cf. PaymentForm.
+  // Dossier d'adresse : l'adresse sélectionnée (revalidée côté serveur de toute façon) et la clé
+  // d'idempotence de la tentative, générée par la page de checkout.
+  address?: unknown;
+  checkoutAttemptId?: string;
 };
 
 export function PaymentWrapper({
@@ -39,7 +55,12 @@ export function PaymentWrapper({
   pack,
   returnUrl,
   onSubmit,
+  address,
+  checkoutAttemptId,
 }: PaymentWrapperProps) {
+  // `requestBody` sert aussi de `requestKey` au useEffect : toutes les valeurs ci-dessous sont
+  // stables pour un rendu de page (le distinct_id l'est pour une session), donc le PaymentIntent
+  // n'est demandé qu'une fois.
   const requestBody = JSON.stringify({
     amount,
     productType,
@@ -48,6 +69,9 @@ export function PaymentWrapper({
     source: grant?.source,
     rank: grant?.rank,
     pack,
+    address,
+    checkoutAttemptId,
+    phDistinctId: clientDistinctId(),
   });
   const requestKey = requestBody;
   const [clientSecret, setClientSecret] = useState<string | null>(null);
