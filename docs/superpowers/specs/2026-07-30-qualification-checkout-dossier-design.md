@@ -106,10 +106,13 @@ type QualificationWarning =
   | { code: "no_parcel_reading" }
   | { code: "source_unavailable"; source: "ademe" | "cadastre" };
 
-// Ce que le reverse rend, réduit à ce qu'il faut pour proposer un clic. Aucune
-// coordonnée n'est conservée ici : sélectionner un candidat relance une
-// qualification complète sur son `banId`, seul chemin qui repasse par l'ancrage.
-type NearbyHouseNumber = { banId: string; label: string; distanceM: number };
+// Un candidat porte SON point. Sélectionner « 1986 le Cros » en gardant les
+// coordonnées de la voie sonderait le cadastre au centroïde tout en affichant
+// l'adresse d'un numéro précis : le faux ancrage que cette doctrine empêche.
+type NearbyHouseNumber = {
+  banId: string; label: string; city: string | null; postcode: string | null;
+  latitude: number; longitude: number; distanceM: number;
+};
 ```
 
 **Trois issues, et l'indisponibilité technique n'en est pas une.** Un échec de vérification répond
@@ -181,10 +184,26 @@ sert au tri et à l'affichage** (« à 9 m »), le préfixe de voie sert au filt
 **Le rural est donc adressé**, par numérotation métrique des routes, et le refus y est plus rare que
 supposé.
 
-**Cas `locality`, où aucune voie n'existe pour porter le préfixe.** Le filtre se réduit alors au même
-`citycode`, les candidats sont triés par distance, plafonnés à cinq, et **chacun est affiché avec sa
-distance**. Le lecteur tranche, parce qu'il est le seul à savoir où est son bien. Aucun candidat dans
-la commune donne `unsupported_at_launch`.
+**Cas `locality`, où aucune voie n'existe pour porter le préfixe.** Le filtre se réduit au même
+`citycode` **dans un périmètre borné** (`LOCALITY_RADIUS_M = 150`), les candidats sont triés par
+distance, plafonnés à cinq, et chacun est affiché avec sa distance. Le lecteur tranche, parce qu'il
+est le seul à savoir où est son bien.
+
+Cette borne est une convention nommée, sur le patron de `CARTOFRICHES_RAYON_RECHERCHE_M` : un
+périmètre de proposition, jamais un seuil de qualité. Motif : sans elle, le reverse rendrait le
+numéro le plus proche même à des kilomètres, et l'écran proposerait une adresse sans rapport avec le
+lieu-dit saisi. Le préfixe protège la branche `street` ; le lieu-dit n'a pas de voie pour le faire.
+Mesuré le 30/07/2026 sur six hameaux (Aubrac, Doubs, Queyras, Lozère, Var) : le premier numéro est
+entre 3 et 59 m, donc 150 m est généreux. À réviser si les refus abondent.
+
+**Cas d'une commune saisie seule** (feature `municipality`, par exemple « Kerlaz Locronan », dont le
+reverse voisin est « 13 Rue Moal » à 0 m au centre du bourg) : `needs_precision` **sans aucun
+candidat**. Proposer cinq numéros du centre à qui n'a saisi qu'un nom de commune serait arbitraire ;
+le geste attendu est de saisir une adresse.
+
+**Découverte de la mesure** : les six hameaux testés rendent des features `street`, aucune
+`locality`. Le cas du lieu-dit sans voie est donc plus rare encore que la conception ne le
+supposait.
 
 **Piège écarté, et il a coûté un contrôle** : `GET /search/?q=rue+Crebillon&citycode=44109&type=housenumber`
 rend **zéro** résultat, sur une rue pleine de numéros. Le score plein texte de la BAN ne fait pas
@@ -468,10 +487,16 @@ serveur émet avec **ce** `distinct_id`. Le webhook, seul point sans client, le 
 métadonnées Stripe (`phDistinctId`). Ainsi `identify(user.id)` au `SIGNED_IN` fusionne le parcours
 anonyme avec le compte.
 
-**`decision_journey_id` est une propriété métier de parcours, jamais une identité PostHog.** Il
-distingue deux recherches du même navigateur à six mois d'écart, là où PostHog agrège tout sur la
-même personne. Il vit dans un cookie signé `HttpOnly`, il survit au retour d'authentification, et
-**il ne transporte jamais une décision de prix ou d'éligibilité**.
+**`decision_journey_id` distinguerait deux recherches du même navigateur à six mois d'écart**, là où
+PostHog agrège tout sur la même personne. Il vivrait dans un cookie signé `HttpOnly`, survivrait au
+retour d'authentification, et ne transporterait **jamais** une décision de prix ou d'éligibilité.
+
+**Il n'est pas construit au lancement.** Le cookie signé demande une rotation, une lecture serveur
+et une discipline pour qu'il ne devienne jamais une donnée d'autorité, pour une question à laquelle
+personne ne peut répondre avant d'avoir des acheteurs. Le regroupement se fait par le `distinct_id`
+PostHog, qui persiste déjà dans le navigateur, et la distinction entre deux recherches éloignées se
+lit à l'horodatage des événements. Le jour où la question se pose vraiment, le cookie s'ajoute sans
+rien casser : aucune colonne ne l'attend, aucun code ne le lit.
 
 Aucune table de parcours, aucune réclamation atomique, aucun refus de journey appartenant à un autre
 utilisateur : sans table, ce cas ne peut pas se produire. La clé d'analyse est le parcours, jamais
@@ -482,7 +507,7 @@ est le moment d'achat).
 
 | Événement | Propriétés | Ce qu'il tranche |
 |---|---|---|
-| `address_qualification_viewed` | `decision_journey_id`, `insee` | volume d'intention à l'échelle adresse |
+| `address_qualification_viewed` | `insee` | volume d'intention à l'échelle adresse |
 | `address_qualification_result` | `status`, `warnings[]`, `ban_feature_type`, `insee`, `address_token`, classe de densité | le taux de refus réel, **par segment** |
 | `address_qualification_exit` | `choice: territory_14 \| left` | ce que devient un refus |
 | `address_checkout_viewed` | `amount_due_cents`, `deducted`, `address_token` | dénominateur de conversion |
@@ -506,8 +531,9 @@ refuse la table de parcours et la table de qualifications. Un événement qui pr
 propre historique invente son contenu.
 
 La variable dominante se calcule **dans PostHog**, à partir de ce que les événements atomiques
-portent déjà : `decision_journey_id` groupe le parcours, `address_token` compte les adresses
-distinctes, `insee` compte les communes, l'horodatage donne les délais. C'est exactement le niveau
+portent déjà : le `distinct_id` PostHog groupe la personne, `address_token` compte les adresses
+distinctes, `insee` compte les communes, l'horodatage donne les délais et sépare deux recherches
+éloignées. C'est exactement le niveau
 d'outillage que le rapport business autorise (un tableur suffit pendant un trimestre) et il évite de
 construire un état persistant pour répondre à une question d'analyse.
 

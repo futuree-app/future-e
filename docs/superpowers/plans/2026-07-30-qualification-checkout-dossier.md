@@ -80,6 +80,8 @@ Carto cadastre, API ADEME. Tests en `node:test` sur des libs pures.
 |---|---|
 | `src/app/(public)/dossier/page.tsx` | La porte, publique |
 | `src/app/(public)/dossier/DossierQualificationClient.tsx` | Saisie, issues, candidats, CTA |
+| `src/app/(public)/checkout/dossier/page.tsx` | Identité exigée, adresse revalidée, devis final |
+| `src/app/(public)/checkout/dossier/DossierCheckoutPanel.tsx` | Le formulaire de paiement du dossier |
 | `src/app/(account)/dossier/merci/page.tsx` | Attente du webhook, puis ouverture |
 
 **Migration** : `supabase/26_dossier_intents.sql`.
@@ -168,8 +170,10 @@ curl -s -X POST http://localhost:3000/api/stripe/create-payment-intent \
   -H "Content-Type: application/json" -d '{"productType":"inexistant"}'
 ```
 
-Attendu : `{"error":"Produit inconnu."}`. La validation du produit reste en amont de la garde, donc
-un scanner n'apprend rien de nos produits par le code de statut.
+Attendu : `{"error":"Produit inconnu."}`. La validation du produit reste en amont de la garde, ce
+qui permet à un visiteur de découvrir qu'un slug existe (400 contre 401) : les noms de produits sont
+publics, ils figurent dans les URL du site, donc l'ordre est choisi pour la clarté du message
+d'erreur plutôt que pour une confidentialité qui n'a pas d'objet.
 
 - [ ] **Step 4: Vérifier que le tunnel 14 € connecté fonctionne encore**
 
@@ -315,12 +319,19 @@ valeur est `undefined` et disparaît du JSON, ce qui reste stable.
 
 - [ ] **Step 6: Lire et propager côté route de paiement**
 
-Dans `create-payment-intent/route.ts`, ajouter `phDistinctId` à la destructuration du corps, puis :
+Dans `create-payment-intent/route.ts`, la destructuration du corps devient (le renommage est
+nécessaire : la valeur brute et la valeur assainie ne peuvent pas porter le même nom) :
 
 ```ts
 import { sanitizeDistinctId } from "@/lib/posthog-identity";
 
 // …
+    const {
+      productType, targetInsee, targetCommune, source, rank, pack,
+      phDistinctId: phDistinctIdRaw,
+    } = await request.json();
+
+    // … après la garde d'authentification, `user` est garanti :
     const phDistinctId = sanitizeDistinctId(phDistinctIdRaw, user.id);
 ```
 
@@ -399,11 +410,18 @@ test("seul un numéro d'adresse est un ancrage vendable", () => {
 
 // L'identifiant BAN d'un numéro est `citycode_idvoie_numero`. Vérifié le 30/07/2026 :
 // la voie « le Cros » est 83077_i1no3t, « 1986 le Cros » est 83077_i1no3t_01986.
+const hit = (banId: string, label: string, distanceM: number, over: Partial<ReverseHit> = {}): ReverseHit => ({
+  banId, label, distanceM,
+  citycode: "83077", city: "Méounes-lès-Montrieux", postcode: "83136",
+  latitude: 43.2819, longitude: 5.9780,
+  ...over,
+});
+
 const hits: ReverseHit[] = [
-  { banId: "83077_i1no3t_01986", label: "1986 le Cros",  citycode: "83077", distanceM: 9 },
-  { banId: "83077_rbzfxz_00850", label: "850 le Vallon", citycode: "83077", distanceM: 44 },
-  { banId: "83077_rbzfxz_00771", label: "771 le Vallon", citycode: "83077", distanceM: 44 },
-  { banId: "83077_i1no3t_00451", label: "451 le Cros",   citycode: "83077", distanceM: 58 },
+  hit("83077_i1no3t_01986", "1986 le Cros", 9),
+  hit("83077_rbzfxz_00850", "850 le Vallon", 44),
+  hit("83077_rbzfxz_00771", "771 le Vallon", 44),
+  hit("83077_i1no3t_00451", "451 le Cros", 58),
 ];
 
 test("sur une voie, seuls les numéros de CETTE voie sont admissibles", () => {
@@ -424,7 +442,7 @@ test("aucun seuil de distance : un numéro de la bonne voie à 58 m reste admiss
   assert.ok(out.some((c) => c.distanceM === 58));
 });
 
-test("sur un lieu-dit, le filtre se réduit à la commune et le tri à la distance", () => {
+test("sur un lieu-dit, le filtre se réduit à la commune, dans un périmètre borné", () => {
   const out = admissibleCandidates(
     { banId: "83077_xyz", citycode: "83077", type: "locality" },
     hits,
@@ -433,21 +451,40 @@ test("sur un lieu-dit, le filtre se réduit à la commune et le tri à la distan
   assert.deepEqual(out.map((c) => c.distanceM), [9, 44, 44, 58]);
 });
 
+test("sur un lieu-dit, un numéro hors du périmètre n'est jamais proposé", () => {
+  // Sans borne, le reverse rendrait le numéro le plus proche même à des kilomètres, et
+  // l'écran proposerait une adresse sans rapport avec le bien cherché. Le préfixe de voie
+  // protège la branche `street` ; le lieu-dit n'a pas de voie pour le faire.
+  const out = admissibleCandidates(
+    { banId: "83077_xyz", citycode: "83077", type: "locality" },
+    [hit("83077_zzz_00001", "1 Très Loin", 900)],
+  );
+  assert.deepEqual(out, []);
+});
+
+test("une commune saisie seule ne propose AUCUN candidat", () => {
+  // « Kerlaz Locronan » rend une feature `municipality` dont le reverse voisin est
+  // « 13 Rue Moal » à 0 m, au centre du bourg. Proposer cinq numéros du centre à qui n'a
+  // saisi qu'un nom de commune n'aurait aucun sens : le geste attendu est de saisir une
+  // adresse, pas de choisir dans une liste arbitraire.
+  const out = admissibleCandidates(
+    { banId: "29136", citycode: "29136", type: "municipality" },
+    [hit("29136_aaa_00013", "13 Rue Moal", 0, { citycode: "29136" })],
+  );
+  assert.deepEqual(out, []);
+});
+
 test("un candidat d'une autre commune n'est jamais proposé", () => {
   const out = admissibleCandidates(
     { banId: "83077_xyz", citycode: "83077", type: "locality" },
-    [...hits, { banId: "83999_aaa_00001", label: "1 rue Ailleurs", citycode: "83999", distanceM: 2 }],
+    [...hits, hit("83999_aaa_00001", "1 rue Ailleurs", 2, { citycode: "83999" })],
   );
   assert.ok(!out.some((c) => c.banId.startsWith("83999")));
 });
 
 test("cinq candidats au plus, les plus proches", () => {
-  const many: ReverseHit[] = Array.from({ length: 9 }, (_, i) => ({
-    banId: `83077_i1no3t_0000${i}`,
-    label: `${i} le Cros`,
-    citycode: "83077",
-    distanceM: 100 - i,
-  }));
+  const many: ReverseHit[] = Array.from({ length: 9 }, (_, i) =>
+    hit(`83077_i1no3t_0000${i}`, `${i} le Cros`, 100 - i));
   const out = admissibleCandidates(
     { banId: "83077_i1no3t", citycode: "83077", type: "street" },
     many,
@@ -501,14 +538,37 @@ Créer `src/lib/dossier-qualification.ts` :
 
 export const MAX_CANDIDATES = 5;
 
+// Périmètre de PROPOSITION pour un lieu-dit, jamais un seuil de qualité. Convention nommée et
+// versionnée, sur le patron de CARTOFRICHES_RAYON_RECHERCHE_M. Mesuré le 30/07/2026 sur six
+// hameaux (Aubrac, Doubs, Queyras, Lozère, Var) : le premier numéro est entre 3 et 59 m. Au-delà
+// de ce périmètre, un numéro n'a plus de rapport crédible avec le lieu-dit saisi, et un refus
+// honnête vaut mieux qu'un candidat lointain. À réviser si les refus abondent.
+export const LOCALITY_RADIUS_M = 150;
+
+// Un candidat porte SES coordonnées. Sans elles, sélectionner « 1986 le Cros » relancerait la
+// qualification avec l'identifiant du numéro et le POINT DE LA VOIE : le cadastre serait sondé au
+// centroïde, et l'écran annoncerait une parcelle (ou son absence) sur le mauvais endroit. C'est
+// très exactement le faux ancrage que la doctrine du refus existe pour empêcher.
 export type ReverseHit = {
   banId: string;
   label: string;
   citycode: string | null;
+  city: string | null;
+  postcode: string | null;
+  latitude: number;
+  longitude: number;
   distanceM: number;
 };
 
-export type NearbyHouseNumber = { banId: string; label: string; distanceM: number };
+export type NearbyHouseNumber = {
+  banId: string;
+  label: string;
+  city: string | null;
+  postcode: string | null;
+  latitude: number;
+  longitude: number;
+  distanceM: number;
+};
 
 export function isSellableAnchor(type: string | null): boolean {
   return type === "housenumber";
@@ -526,15 +586,23 @@ export function admissibleCandidates(
   selected: { banId: string; citycode: string; type: string | null },
   hits: ReverseHit[],
 ): NearbyHouseNumber[] {
+  // Une commune saisie seule ne se précise pas par une liste : le geste attendu est de saisir une
+  // adresse. Proposer les numéros du centre-bourg serait arbitraire.
+  if (selected.type !== "street" && selected.type !== "locality") return [];
+
   const sameStreet = selected.type === "street";
   const prefix = `${selected.banId}_`;
 
   return hits
     .filter((h) => h.citycode === selected.citycode)
-    .filter((h) => (sameStreet ? h.banId.startsWith(prefix) : true))
+    .filter((h) =>
+      sameStreet ? h.banId.startsWith(prefix) : h.distanceM <= LOCALITY_RADIUS_M,
+    )
     .sort((a, b) => a.distanceM - b.distanceM)
     .slice(0, MAX_CANDIDATES)
-    .map(({ banId, label, distanceM }) => ({ banId, label, distanceM }));
+    .map(({ banId, label, city, postcode, latitude, longitude, distanceM }) => ({
+      banId, label, city, postcode, latitude, longitude, distanceM,
+    }));
 }
 ```
 
@@ -594,7 +662,12 @@ export async function probeDpeByBanId(
     url.searchParams.set("size", "5");
     url.searchParams.set("select", "numero_dpe");
     try {
-      const res = await fetch(url.toString(), { next: { revalidate: 86400 } });
+      // Timeout explicite : sans lui, une ADEME lente bloque une route publique jusqu'au timeout
+      // de la plateforme, et le lecteur regarde un écran vide au lieu de lire un avertissement.
+      const res = await fetch(url.toString(), {
+        next: { revalidate: 86400 },
+        signal: AbortSignal.timeout(6000),
+      });
       if (!res.ok) {
         sawFailure = true;
         continue;
@@ -625,11 +698,20 @@ export async function probeCadastreAtPoint(
   latitude: number,
 ): Promise<{ status: "found" | "none" | "unavailable" }> {
   try {
-    const parcel = await findCadastreParcelByPoint(longitude, latitude);
-    return { status: parcel ? "found" : "none" };
+    // UN SEUL APPEL, AU POINT. `findCadastreParcelByPoint` retombe sur des carrés de 3, 8 puis
+    // 15 m quand le point ne tombe dans aucune parcelle : quatre requêtes, acceptables pour un
+    // dossier payé, trop pour une route publique à haut volume.
+    //
+    // Divergence assumée, et elle va dans le bon sens : la qualification peut annoncer
+    // « lecture parcellaire indisponible » là où le dossier la trouvera par repli. On promet
+    // moins que ce qu'on livre, jamais l'inverse.
+    const features = await fetchCadastreFeatures(
+      { type: "Point", coordinates: [longitude, latitude] },
+      1,
+    );
+    return { status: toCadastreParcel(features[0]) ? "found" : "none" };
   } catch {
-    // `findCadastreParcelByPoint` laisse remonter une panne réseau. On ne la traduit jamais en
-    // « aucune parcelle ».
+    // Une panne réseau ne se traduit JAMAIS en « aucune parcelle ».
     return { status: "unavailable" };
   }
 }
@@ -672,7 +754,7 @@ export async function reverseHouseNumbers(
     if (!res.ok) return null;
 
     const json = (await res.json()) as {
-      features?: { properties?: Record<string, unknown> }[];
+      features?: { properties?: Record<string, unknown>; geometry?: unknown }[];
     };
     return (json.features ?? []).flatMap((f) => {
       const p = f.properties ?? {};
@@ -680,10 +762,18 @@ export async function reverseHouseNumbers(
       const label = typeof p.label === "string" ? p.label : null;
       const distance = typeof p.distance === "number" ? p.distance : null;
       if (!banId || !label || distance === null) return [];
+      // La GÉOMÉTRIE, pas seulement les propriétés : c'est le point du numéro, et c'est lui qui
+      // doit servir à qualifier si le lecteur choisit ce candidat.
+      const coords = (f.geometry as { coordinates?: [number, number] } | undefined)?.coordinates;
+      if (!coords || coords.length !== 2) return [];
       return [{
         banId,
         label,
         citycode: typeof p.citycode === "string" ? p.citycode : null,
+        city: typeof p.city === "string" ? p.city : null,
+        postcode: typeof p.postcode === "string" ? p.postcode : null,
+        longitude: coords[0],
+        latitude: coords[1],
         distanceM: distance,
       }];
     });
@@ -962,7 +1052,14 @@ export async function POST(request: Request) {
     status: "qualified",
     anchorSource: "ban_housenumber",
     warnings,
-    quote: { status: "final", ...quoteForDossier(paid) },
+    quote: {
+      status: "final",
+      ...quoteForDossier(paid),
+      // La clé d'idempotence NE NAÎT PAS ICI : elle naît dans la page de checkout (tâche 7A), qui
+      // est le vrai « devis final » (elle revalide l'adresse et recalcule le prix pour un
+      // utilisateur connecté). La produire ici obligerait à la traverser jusqu'au formulaire à
+      // travers une éventuelle connexion, sans rien garantir de plus.
+    },
   });
 }
 ```
@@ -1076,7 +1173,10 @@ import posthog from "posthog-js";
 import { AddressAutocomplete } from "@/components/report/AddressAutocomplete";
 import type { BanAddressResult } from "@/lib/ban";
 
-type Candidate = { banId: string; label: string; distanceM: number };
+type Candidate = {
+  banId: string; label: string; city: string | null; postcode: string | null;
+  latitude: number; longitude: number; distanceM: number;
+};
 type Warning =
   | { code: "no_exact_dpe_found" }
   | { code: "no_parcel_reading" }
@@ -1195,7 +1295,11 @@ export function DossierQualificationClient() {
               : <span />
           )}
           <a
-            href={`/checkout/dossier?banId=${encodeURIComponent(address.id!)}`}
+            // Trois paramètres, et pas un de plus : ils SUFFISENT au serveur pour retrouver la
+            // feature canonique (`fetchBanFeaturesByLabel` + `pickFeatureById`) et en tirer les
+            // coordonnées lui-même. Passer les coordonnées dans l'URL les rendrait modifiables
+            // pour rien, puisqu'elles seraient de toute façon écrasées par la revalidation.
+            href={`/checkout/dossier?banId=${encodeURIComponent(address.id!)}&label=${encodeURIComponent(address.label)}&insee=${encodeURIComponent(address.citycode!)}`}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent/[0.12] text-accent text-[14px] no-underline border border-accent/[0.25]"
             onClick={() => posthog.capture("address_checkout_viewed", {
               insee: address.citycode,
@@ -1213,18 +1317,25 @@ export function DossierQualificationClient() {
             Nous n&apos;avons pas encore identifié le bien avec assez de précision.
           </p>
           <p className="text-[14px] text-muted leading-relaxed mb-5">
-            Cette adresse désigne une voie. Voici les adresses numérotées les plus proches.
+            {outcome.candidates.length > 0
+              ? "Cette adresse désigne une voie. Voici les adresses numérotées les plus proches."
+              : "Saisissez une adresse précise dans cette commune, avec son numéro."}
           </p>
           <div style={{ display: "grid", gap: 10 }}>
             {outcome.candidates.map((c) => (
               <button
                 key={c.banId}
                 type="button"
+                // LES COORDONNÉES DU CANDIDAT, jamais celles de la feature grossière. Reprendre
+                // le point de la voie sonderait le cadastre au centroïde tout en affichant
+                // l'adresse d'un numéro précis.
                 onClick={() => qualify({
-                  id: c.banId, label: c.label, city: address?.city ?? null,
-                  citycode: address?.citycode ?? null, postcode: address?.postcode ?? null,
+                  id: c.banId, label: c.label,
+                  city: c.city ?? address?.city ?? null,
+                  citycode: address?.citycode ?? null,
+                  postcode: c.postcode ?? address?.postcode ?? null,
                   type: "housenumber",
-                  latitude: address!.latitude, longitude: address!.longitude,
+                  latitude: c.latitude, longitude: c.longitude,
                 })}
                 className="text-left px-5 py-3 rounded-lg bg-white/[0.05] text-label text-[14px] border border-white/[0.08]"
               >
@@ -1302,9 +1413,230 @@ git commit -m "La porte par l'adresse : trois issues, et le refus propose les nu
 
 ---
 
-### Task 7: Le checkout, l'intention, le webhook, la page d'attente
+### Task 7A: Le checkout du dossier
 
-Les quatre vont ensemble : aucun ne se vérifie seul, puisque le seul test valable est un paiement
+Sans cette tâche, le backend existe et **personne ne l'atteint** : `/checkout/[product]` appelle
+`notFound()` pour tout slug hors `rapport-complet` (`getCheckoutProduct` ne connaît que lui), et
+`CheckoutPaymentPanel` envoie systématiquement vers `/merci` après succès.
+
+**Files:**
+- Create: `src/app/(public)/checkout/dossier/page.tsx`
+- Create: `src/app/(public)/checkout/dossier/DossierCheckoutPanel.tsx`
+- Modify: `src/components/PaymentWrapper.tsx` (deux props transmises au corps de requête)
+
+**Interfaces:**
+- Consumes: `fetchBanFeaturesByLabel` (tâche 7, étape 5), `pickFeatureById`, `isSellableAnchor`,
+  `quoteForDossier`, `hasPaidTerritory`, `communeParent`.
+- Produces: l'URL `/checkout/dossier?banId=…&label=…&insee=…`, et le `checkoutAttemptId` que la
+  tâche 7 consomme comme clé d'idempotence.
+
+**Un segment statique prime sur un segment dynamique** dans le routage : `/checkout/dossier` gagne
+sur `/checkout/[product]`, donc le registre catalogue reste intact et n'a ni thème ni copie à
+recevoir pour un produit qui se rend dynamiquement.
+
+- [ ] **Step 1: Étendre le formulaire de paiement**
+
+Dans `src/components/PaymentWrapper.tsx`, ajouter deux props au type et au corps de requête :
+
+```ts
+type PaymentWrapperProps = {
+  // … props existantes
+  address?: unknown;            // SelectedBanAddress, revalidée côté serveur de toute façon
+  checkoutAttemptId?: string;   // clé d'idempotence de la tentative
+};
+```
+
+```ts
+  const requestBody = JSON.stringify({
+    amount,
+    productType,
+    targetInsee: grant?.targetInsee,
+    targetCommune: grant?.targetCommune,
+    source: grant?.source,
+    rank: grant?.rank,
+    pack,
+    address,
+    checkoutAttemptId,
+    phDistinctId: clientDistinctId(),
+  });
+```
+
+`requestBody` sert de `requestKey` au `useEffect` : `checkoutAttemptId` étant stable pour un rendu de
+page, la clé ne bouge pas et le PaymentIntent n'est demandé qu'une fois.
+
+- [ ] **Step 2: Écrire la page serveur, qui exige l'identité au dernier moment utile**
+
+Créer `src/app/(public)/checkout/dossier/page.tsx` :
+
+```tsx
+export const dynamic = "force-dynamic";
+
+import { redirect } from "next/navigation";
+import Navbar from "@/components/Navbar";
+import { createClient } from "@/lib/supabase/server";
+import { fetchBanFeaturesByLabel } from "@/lib/ban";
+import { pickFeatureById } from "@/lib/ban-verify";
+import { isSellableAnchor } from "@/lib/dossier-qualification";
+import { quoteForDossier } from "@/lib/dossier-pricing";
+import { hasPaidTerritory } from "@/lib/active-territory";
+import { communeParent } from "@/lib/plm";
+import { DossierCheckoutPanel } from "./DossierCheckoutPanel";
+
+export default async function DossierCheckoutPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ banId?: string; label?: string; insee?: string }>;
+}) {
+  const { banId, label, insee } = await searchParams;
+  if (!banId || !label || !insee) redirect("/dossier");
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // L'IDENTITÉ AU DERNIER MOMENT UTILE. Le lecteur a déjà vu que son bien est analysable, ce que
+  // le dossier contiendra et ce qui manquera : l'authentification n'interrompt pas la découverte,
+  // elle sécurise l'acquisition. `getSafeNextPath` (src/app/auth/actions.ts) accepte tout chemin
+  // relatif, query comprise, donc l'adresse survit à la connexion.
+  if (!user) {
+    const next = `/checkout/dossier?banId=${encodeURIComponent(banId)}&label=${encodeURIComponent(label)}&insee=${encodeURIComponent(insee)}`;
+    redirect(`/connexion?next=${encodeURIComponent(next)}`);
+  }
+
+  // LE SERVEUR DÉCIDE DE L'ADRESSE. Le navigateur n'a transmis qu'un libellé et une commune.
+  const features = await fetchBanFeaturesByLabel(label, insee);
+  if (features === null) redirect("/dossier?erreur=verification");
+  const canonical = pickFeatureById(
+    features.flatMap((f) => (f.id ? [{ ...f, id: f.id }] : [])),
+    banId,
+  );
+  if (!canonical || !isSellableAnchor(canonical.type) || !canonical.citycode) {
+    redirect("/dossier?erreur=ancrage");
+  }
+
+  const paid = await hasPaidTerritory(supabase, user.id, communeParent(canonical.citycode));
+  const quote = quoteForDossier(paid);
+
+  return (
+    <div
+      className="min-h-screen bg-canvas text-label relative overflow-hidden"
+      style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+    >
+      <Navbar />
+      <div className="relative z-[2] max-w-[920px] mx-auto px-7 pb-24 pt-14">
+        <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">
+          Le dossier de ce bien
+        </p>
+        <h1
+          className="font-normal text-[clamp(26px,3vw,40px)] leading-[1.15] tracking-[-0.5px] text-label mb-6"
+          style={{ fontFamily: "'Instrument Serif', serif" }}
+        >
+          {canonical.label}
+        </h1>
+        <DossierCheckoutPanel
+          address={{
+            banId: canonical.id, label: canonical.label,
+            postcode: canonical.postcode ?? "", city: canonical.city ?? "",
+            citycode: canonical.citycode,
+            latitude: canonical.latitude, longitude: canonical.longitude,
+            type: canonical.type,
+          }}
+          quote={quote}
+          userEmail={user.email}
+          {/* Généré à CHAQUE rendu de la page : un double clic sur « Payer » réutilise la même
+              valeur, puisqu'elle vit dans les props du formulaire, tandis qu'un retour explicite
+              sur cette page ouvre une tentative neuve. C'est exactement la frontière voulue entre
+              doublon technique et second achat légitime. */}
+          checkoutAttemptId={crypto.randomUUID()}
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+**Attention** : un commentaire JSX dans un ternaire casse le build. Celui ci-dessus est un enfant
+direct de l'élément, donc il est légal ; ne pas l'y déplacer.
+
+- [ ] **Step 3: Écrire le panneau client**
+
+Créer `src/app/(public)/checkout/dossier/DossierCheckoutPanel.tsx` :
+
+```tsx
+"use client";
+
+import { useRouter } from "next/navigation";
+import { PaymentWrapper } from "@/components/PaymentWrapper";
+
+type Address = {
+  banId: string; label: string; postcode: string; city: string; citycode: string;
+  latitude: number; longitude: number; type: string | null;
+};
+
+export function DossierCheckoutPanel({
+  address, quote, userEmail, checkoutAttemptId,
+}: {
+  address: Address;
+  quote: { basePriceCents: number; territoryDeductionCents: number; amountDueCents: number };
+  userEmail: string | null | undefined;
+  checkoutAttemptId: string;
+}) {
+  const router = useRouter();
+  const eur = (c: number) => `${(c / 100).toFixed(0)} €`;
+
+  return (
+    <div className="glass rounded-xl p-6">
+      <p className="text-[15px] text-label mb-1">{eur(quote.amountDueCents)}</p>
+      {quote.territoryDeductionCents > 0 && (
+        <p className="font-mono text-[12px] text-ghost mb-5">
+          Vous avez déjà la lecture de {address.city} : {eur(quote.territoryDeductionCents)} déduits
+          des {eur(quote.basePriceCents)}.
+        </p>
+      )}
+      <p className="text-[14px] text-muted leading-relaxed mb-6">
+        Paiement rattaché à <span className="text-label">{userEmail}</span>. TVA non applicable,
+        art. 293 B du CGI.
+      </p>
+      <PaymentWrapper
+        // `amount` n'est qu'un AFFICHAGE : le montant facturé est recalculé côté serveur par
+        // `quoteForDossier`, et un client qui modifierait cette valeur ne changerait rien.
+        amount={quote.amountDueCents / 100}
+        productType="address-dossier"
+        address={address}
+        checkoutAttemptId={checkoutAttemptId}
+        returnUrl="/dossier/merci"
+        onSuccess={() => router.push("/dossier/merci")}
+      />
+    </div>
+  );
+}
+```
+
+**« TVA non applicable, art. 293 B du CGI »**, jamais « TVA incluse ».
+
+- [ ] **Step 4: Vérifier le parcours jusqu'au formulaire, déconnecté puis connecté**
+
+Déconnecté, ouvrir `/dossier`, qualifier « 2 rue Crébillon Nantes », cliquer « Créer mon dossier » :
+la connexion doit s'afficher, et **après connexion le checkout doit revenir sur la même adresse**.
+Vérifier que le montant affiché vaut 39 € (ou 25 € si la commune est déjà payée) et que l'adresse
+affichée est celle rendue par la BAN.
+
+Falsifier l'URL (`&banId=44109_2300_00099`) doit renvoyer vers `/dossier?erreur=ancrage`, sans jamais
+afficher de formulaire de paiement.
+
+- [ ] **Step 5: Committer**
+
+```bash
+git add "src/app/(public)/checkout/dossier" src/components/PaymentWrapper.tsx
+git commit -m "Le checkout du dossier : l'identité au dernier moment, l'adresse décidée par le serveur"
+```
+
+---
+
+### Task 7: L'intention, le webhook, la page d'attente
+
+Les trois vont ensemble : aucun ne se vérifie seul, puisque le seul test valable est un paiement
 qui produit un dossier.
 
 **Files:**
@@ -1355,9 +1687,24 @@ create table if not exists public.dossier_intents (
   longitude     double precision not null,
   amount_due_cents int not null check (amount_due_cents >= 0),
   territory_deduction_cents int not null default 0 check (territory_deduction_cents >= 0),
-  decision_journey_id text,
   created_at    timestamptz not null default now()
 );
+
+-- AUCUNE COLONNE `decision_journey_id`. La spec envisageait un cookie signé de parcours ; il n'est
+-- pas construit au lancement (voir « Ce que ce plan ne construit pas »), et une colonne sans
+-- écrivain est exactement le piège que la spec du 29/07 a refusé pour `dwelling_discriminator`.
+-- Le regroupement des événements se fait par le distinct_id PostHog, qui persiste déjà.
+
+-- RÉTENTION. Cette table existe pour éviter d'envoyer à Stripe les lieux que des gens envisagent
+-- d'habiter : elle ne doit pas devenir l'archive permanente de ces mêmes intentions. L'index sert
+-- la purge, qui se lance à la main tant que le volume est faible :
+--   delete from public.dossier_intents
+--    where created_at < now() - interval '30 days'
+--      and stripe_payment_intent_id not in (
+--        select stripe_payment_intent_id from public.address_dossiers
+--         where stripe_payment_intent_id is not null);
+create index if not exists dossier_intents_created_at_idx
+  on public.dossier_intents (created_at);
 
 alter table public.dossier_intents enable row level security;
 
@@ -1477,6 +1824,7 @@ export async function fetchBanFeaturesByLabel(
     const res = await fetch(url.toString(), {
       headers: { accept: "application/json" },
       next: { revalidate: 86400 },
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
     if (!res.ok) return null;
     const json = (await res.json()) as BanResponse;
@@ -1574,7 +1922,9 @@ Modifier la création du PaymentIntent pour prendre le montant du dossier et la 
       // une clé fondée sur l'adresse rendrait à l'acheteur du second bien le PaymentIntent du
       // premier. Un double clic réutilise la tentative ; « créer un autre dossier » en ouvre une
       // nouvelle.
-      isDossier && attemptId ? { idempotencyKey: `dossier_${attemptId}` } : undefined,
+      // Bornée par l'utilisateur : deux comptes ne peuvent pas se partager une clé, même si
+      // l'un devinait celle de l'autre.
+      isDossier ? { idempotencyKey: `dossier_${user.id}_${attemptId}` } : undefined,
     );
 ```
 
@@ -1587,7 +1937,7 @@ Puis, après la création, écrire l'intention en service role :
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!,
       );
-      await admin.from("dossier_intents").upsert(
+      const { error: intentError } = await admin.from("dossier_intents").upsert(
         {
           stripe_payment_intent_id: paymentIntent.id,
           user_id: user.id,
@@ -1600,10 +1950,20 @@ Puis, après la création, écrire l'intention en service role :
           longitude: dossierIntent.longitude,
           amount_due_cents: dossierAmountCents,
           territory_deduction_cents: dossierIntent.deductionCents,
-          decision_journey_id: typeof decisionJourneyId === "string" ? decisionJourneyId : null,
         },
         { onConflict: "stripe_payment_intent_id" },
       );
+
+      // SANS INTENTION, LE WEBHOOK NE POURRA PAS CRÉER LE DOSSIER. Rendre le `clientSecret` ici
+      // reviendrait à ouvrir un paiement dont la livraison est déjà impossible. On échoue avant que
+      // la carte ne soit débitée.
+      if (intentError) {
+        console.error("[create-payment-intent] dossier_intents", intentError.message);
+        return NextResponse.json(
+          { error: "Préparation du dossier impossible." },
+          { status: 500 },
+        );
+      }
     }
 ```
 
@@ -1639,10 +1999,14 @@ Dans `webhook/route.ts`, `handleSucceededPayment`, avant la branche `pack-decisi
 
     if (!intent) {
       // Une intention absente est une ERREUR, pas un cas dégradé : inventer une adresse depuis un
-      // paiement produirait un dossier sur un bien inconnu. On journalise et on s'arrête ; la
-      // réparation est manuelle.
-      console.error("[stripe/webhook] dossier_intents introuvable", paymentIntent.id);
-      return;
+      // paiement produirait un dossier sur un bien inconnu.
+      //
+      // ON LÈVE, ON NE RETOURNE PAS. `POST` répond `{ received: true }` juste après cet appel :
+      // un `return` ferait croire à Stripe que l'événement est traité, donc il ne le rejouerait
+      // JAMAIS, et le paiement resterait encaissé sans dossier, définitivement. En levant, la
+      // route répond 500 et Stripe réessaie pendant trois jours, ce qui laisse le temps de
+      // réparer.
+      throw new Error(`dossier_intents introuvable pour ${paymentIntent.id}`);
     }
 
     // Le rang du dossier dans le compte, AVANT l'insertion. C'est la seule valeur d'historique de
@@ -1658,7 +2022,9 @@ Dans `webhook/route.ts`, `handleSucceededPayment`, avant la branche `pack-decisi
     // `ON CONFLICT … DO NOTHING` que la spec exige, et la relecture qui suit fait RÉUSSIR le rejeu
     // en retrouvant le dossier existant. L'index unique garantit qu'un doublon n'est pas créé ;
     // cette séquence garantit que le rejeu répond en succès. Ce sont deux affirmations distinctes.
-    await supabaseAdmin.from("address_dossiers").upsert({
+    const { data: inserted, error: insertError } = await supabaseAdmin
+      .from("address_dossiers")
+      .upsert({
       user_id: intent.user_id,
       ban_id: intent.ban_id,
       insee: intent.insee,
@@ -1671,15 +2037,29 @@ Dans `webhook/route.ts`, `handleSucceededPayment`, avant la branche `pack-decisi
       // La seule vérité de ce qui a été encaissé est ce que STRIPE déclare avoir encaissé.
       amount_paid_cents: paymentIntent.amount,
       purchased_at: new Date().toISOString(),
-    }).select("id");
-    // Un conflit sur `stripe_payment_intent_id` (rejeu) laisse la ligne existante intacte :
-    // l'erreur est attendue et ignorée, la relecture ci-dessous donne l'identifiant.
+      },
+      // LES DEUX OPTIONS SONT OBLIGATOIRES. Sans `onConflict`, Postgres arbitre sur la clé
+      // primaire (`id`, un uuid neuf), donc le conflit réel n'est jamais vu. Sans
+      // `ignoreDuplicates`, l'upsert ÉCRASE la ligne existante, ce qui réécrirait le montant et la
+      // date d'achat d'un dossier déjà payé à chaque rejeu.
+      { onConflict: "stripe_payment_intent_id", ignoreDuplicates: true })
+      .select("id");
+
+    if (insertError) throw insertError;
+
+    // `ignoreDuplicates` rend une liste VIDE quand la ligne existait déjà : c'est ainsi qu'on
+    // distingue une création d'un rejeu, et cette distinction gouverne les effets de bord plus bas.
+    const created = (inserted?.length ?? 0) > 0;
 
     const { data: dossier } = await supabaseAdmin
       .from("address_dossiers")
       .select("id")
       .eq("stripe_payment_intent_id", paymentIntent.id)
       .maybeSingle();
+
+    // Un dossier introuvable APRÈS l'insertion signale une base incohérente : même traitement que
+    // l'intention absente, on laisse Stripe rejouer plutôt que d'accuser réception dans le vide.
+    if (!dossier) throw new Error(`dossier introuvable après insertion ${paymentIntent.id}`);
 
     await supabaseAdmin.from("payments").upsert(
       {
@@ -1702,19 +2082,25 @@ Dans `webhook/route.ts`, `handleSucceededPayment`, avant la branche `pack-decisi
       .update({ active_insee_code: communeParent(intent.insee), active_commune: intent.city })
       .eq("user_id", intent.user_id);
 
-    const posthog = getPostHogClient();
-    posthog.capture({
-      distinctId: sanitizeDistinctId(phDistinctId, intent.user_id),
-      event: "address_dossier_purchased",
-      properties: {
-        amount_paid_cents: paymentIntent.amount,
-        deducted: (intent.territory_deduction_cents ?? 0) > 0,
-        insee: intent.insee,
-        dossier_id: dossier?.id ?? null,
-        decision_journey_id: intent.decision_journey_id,
-      },
-    });
-    await posthog.shutdown();
+    // ÉMIS À LA CRÉATION SEULEMENT. Un rejeu compterait un second achat, et son `rank_in_dossiers`
+    // serait faux puisque le dossier existe déjà au moment du décompte. `$insert_id` ajoute une
+    // déduplication côté PostHog, au cas où deux instances traiteraient le même événement.
+    if (created) {
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId: sanitizeDistinctId(phDistinctId, intent.user_id),
+        event: "address_dossier_purchased",
+        properties: {
+          $insert_id: `address_dossier_purchased_${paymentIntent.id}`,
+          amount_paid_cents: paymentIntent.amount,
+          deducted: (intent.territory_deduction_cents ?? 0) > 0,
+          insee: intent.insee,
+          dossier_id: dossier.id,
+          rank_in_dossiers: (paidBefore ?? 0) + 1,
+        },
+      });
+      await posthog.shutdown();
+    }
     return;
   }
 ```
@@ -1964,10 +2350,23 @@ Task 1 (garde auth) ──┬── Task 2 (identité PostHog)
                       │
 Task 3 (lib pure) ────┴── Task 4 (sondes) ── Task 5 (route) ── Task 6 (porte)
                                                                      │
-                                              Task 7 (checkout + webhook + attente)
+                                    Task 7A (checkout) ── Task 7 (intention + webhook + attente)
                                                                      │
-                                              Task 8 (retrait de la porte admin)
+                                                      Task 8 (retrait de la porte admin)
 ```
 
-Les tâches 1 et 3 sont indépendantes et peuvent démarrer en parallèle. La tâche 8 attend un achat
-réel en production.
+Les tâches 1 et 3 sont indépendantes et peuvent démarrer en parallèle. **7A dépend de deux fonctions
+écrites dans la tâche 7** (`fetchBanFeaturesByLabel` et `pickFeatureById`, étapes 3 à 6) : écrire ces
+deux-là d'abord, puis 7A, puis le reste de la tâche 7. La tâche 8 attend un achat réel en
+production.
+
+## Ce que l'exécution ne peut pas vérifier seule
+
+Trois choses demandent un œil humain et ne se déduisent d'aucun test :
+
+- **Le refus doit se lire comme une preuve de sérieux**, pas comme une panne. Si l'écran
+  `unsupported_at_launch` donne l'impression que le produit est cassé, la copie a échoué même si le
+  code est juste.
+- **Le renvoi vers la commune à 14 € ne doit pas dominer l'écran de refus.** Un refus qui débouche
+  sur une vente mise en avant devient une technique commerciale.
+- **La bascule de prix de 39 € à 25 € doit se comprendre**, jamais surprendre.
