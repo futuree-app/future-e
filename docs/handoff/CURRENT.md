@@ -1,4 +1,4 @@
-# Passation : 30/07/2026, le parcours d'achat par l'adresse encaisse, en mode test
+# Passation : 30/07/2026, le parcours d'achat par l'adresse est éprouvé de bout en bout
 
 **Horodatage** : 2026-07-30 · **Branche** : `main`, **seize commits en attente, RIEN N'EST POUSSÉ**,
 donc rien de tout ceci n'est en production. Un push déploie. Les trois preuves demandées avant push
@@ -18,9 +18,8 @@ sont acquises en mode test (voir ci-dessous) ; le push reste une décision du po
 
 ## L'état réel, en une phrase
 
-**Le chemin serveur encaisse et livre : deux paiements de test ont produit deux dossiers, à 39 € puis
-25 €, et le rejeu du webhook n'a rien dupliqué. Le chemin NAVIGATEUR n'a jamais été parcouru par un
-humain, et le mode production n'a jamais encaissé.**
+**Le parcours complet a été parcouru au navigateur par le porteur, formulaire de paiement compris,
+et il a produit un dossier. Le mode production, lui, n'a jamais encaissé.**
 
 ---
 
@@ -50,19 +49,45 @@ Trois vérifications supplémentaires, non prévues au plan :
 **Nettoyage vérifié** : base revenue à son état initial (6 dossiers administratifs, 0 payé, 0
 intention, 0 compte de test, 0 ligne `payments` de dossier).
 
-### CE QUE CES PREUVES NE COUVRENT PAS
+### Le passage au navigateur, fait ensuite
 
-Le test a parcouru le chemin **serveur** de bout en bout, sans navigateur. Restent non éprouvés :
+Parcours complet en mode test sur un serveur dédié : qualification, connexion, checkout, formulaire
+Stripe, paiement, retour, ouverture du dossier. **Un dossier a été créé** (`pi_3Tyrb9…`, 3900,
+compte du porteur). Le porteur a validé l'écran et le tunnel.
 
-- **Le formulaire de paiement Stripe Elements** : jamais affiché, donc jamais vu avec une clé
-  publique de test. C'est le seul écran du parcours qu'aucun test n'a rendu.
-- **La page d'attente `/dossier/merci`** et son interrogation du statut, jamais exécutées dans un
-  navigateur.
+**Il a fallu corriger deux défauts que seul le navigateur pouvait révéler**, tous deux commités :
+
+- **`return_url` doit être ABSOLUE.** Passer `/dossier/merci` faisait échouer la confirmation avec
+  « Not a valid URL », affichée à la place du formulaire : rien ne pouvait se payer. Le repli
+  historique (`window.location.origin + "/merci"`) était absolu, ce qui a caché le piège jusqu'au
+  premier appelant qui passe un chemin. La normalisation vit désormais dans `PaymentForm`.
+- **L'écran ne montrait que les manques.** Il promettait de dire ce qu'on trouverait à l'adresse et
+  n'affichait rien quand tout était disponible. La route rend maintenant la **matière**
+  (`found` / `none` / `unavailable` par élément), et l'écran nomme les trois échelles avec l'état
+  de chaque vérification porté par l'interface, comme la doctrine de marque l'exige.
+
+### CE QUI RESTE NON COUVERT
+
 - **Le mode production** : clés live, webhook déployé sur Vercel, `STRIPE_DOSSIER_PRICE_ID` absent.
 - **Le tunnel 14 €** après la garde d'authentification, jamais rouvert connecté.
+- **Le rejeu et le second achat à 25 €** ont été éprouvés côté serveur, pas au navigateur. C'est le
+  bon niveau : ils ne dépendent d'aucun écran.
 
 **Conséquence pour la porte administrative** : le plan conditionnait son retrait à un achat réel
 **en production**, ouvert et lu. Cette condition n'est pas remplie. **Elle reste ouverte.**
+
+### Une donnée de test vit sur le compte du porteur
+
+Le dossier `ceaa8e6a-57bf-4f74-a902-934a75d04382` (2 Rue Crébillon, 39 €) provient d'un **paiement
+de test**. Il compte comme payé : il fausse le chiffre d'affaires et **ouvre le tarif
+d'approfondissement à 25 € sur Nantes** pour ce compte. Le garder sert à explorer les écrans du
+dossier ; le supprimer restaure la mesure.
+
+```sql
+delete from public.payments where stripe_payment_intent_id = 'pi_3Tyrb9RZMIJhaPi50gMK1f78';
+delete from public.dossier_intents where stripe_payment_intent_id = 'pi_3Tyrb9RZMIJhaPi50gMK1f78';
+delete from public.address_dossiers where id = 'ceaa8e6a-57bf-4f74-a902-934a75d04382';
+```
 
 ---
 
