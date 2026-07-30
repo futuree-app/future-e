@@ -1,4 +1,16 @@
-# Passation : 30/07/2026, le parcours d'achat par l'adresse, éprouvé, vérifié, non poussé
+# Passation : 30/07/2026, le parcours d'achat par l'adresse est EN PRODUCTION
+
+> **MISE À JOUR ~14h40 : LE PUSH EST FAIT.** `af81db1..1de7811`, 19 commits, déploiement Vercel
+> `future-e77duetx0` en état `Ready`. Rien n'est en attente côté git. Test de fumée public passé sur
+> `futur-e.fr` **sans confirmer aucun paiement** : `/dossier` répond 200, `/checkout/dossier` sans
+> intention redirige vers `/dossier`, et les quatre branches de `POST /api/dossier/qualification`
+> sont conformes en production (adresse ancrée anonyme → `qualified` avec devis provisoire 3900 ;
+> rue seule → `needs_precision` avec cinq numéros voisins ordonnés par distance ; commune seule →
+> `needs_precision` sans candidat et sans refus ; corps invalide → 400). **Non vérifié en
+> production** : tout ce qui suit la connexion (checkout affiché, paiement, webhook, dossier
+> ouvert), qui demande le porteur. Le tarif 25 € est désormais gravé dans
+> `docs/vault/vision/modele-economique.md`. Ce qui suit décrit la session qui a produit le code, et
+> reste exact **sauf sur l'état du push**.
 
 **Horodatage** : 2026-07-30, ~13h00 · **Branche** : `main` = `171ae9a`, plus une modification non
 commitée. **17 commits en attente, RIEN N'EST POUSSÉ.** Aucune PR ouverte : le projet pousse
@@ -176,6 +188,11 @@ répond à cette question.
 
 **Deux sessions dans le même arbre de travail** : stager par chemin, jamais `git add -A`. L'autre
 session a déjà emporté un fichier de celle-ci dans un de ses commits (`c40a956`).
+
+**`vercel ls` n'imprime QUE les URL hors TTY**, sans colonne de statut. Une boucle
+`until vercel ls | grep '● Ready'` a donc tourné treize minutes et conclu « toujours en build »
+alors que le déploiement était prêt : le motif cherché n'existait pas dans la sortie. Surveiller un
+déploiement depuis un script par `npx vercel inspect <url> | grep -i status`, qui rend bien l'état.
 
 **Rappels mécaniques** : `tsconfig.json` exclut `**/*.test.ts` du typecheck et eslint les ignore. Un
 module qui importe `server-only` casse sous `node --test`. Un commentaire JSX dans un ternaire casse

@@ -73,6 +73,17 @@ acquises.
   (2 ou 3 ; cf. `adr/ADR-0007` et son addendum). Ancre primaire = **valeur** (« 39 € contre le
   coût d'une commune mal choisie ») ; la remise « trois rapports valent 42 € » devient secondaire
   et ne s'invoque pas à 2 communes (où elle s'inverse : 2 rapports = 28 € < 39 €).
+- **39 € / 25 €** : dossier d'adresse, au grain de l'ADRESSE et non de la commune (porte `/dossier`,
+  déployé le 30/07/2026). Un seul produit à deux montants, décidés côté serveur par
+  `quoteForDossier` (`src/lib/dossier-pricing.ts`) : **39 €** quand le compte n'a jamais payé ce
+  territoire, **25 €** dès que `decidePaidTerritory` est vrai, quelle que soit la provenance du
+  droit (un 14 € direct, un grant `pack_decision`, ou un dossier antérieur payé sur la même
+  commune). Les 14 € retirés sont une **déduction recalculée à chaque devis**, jamais un crédit
+  consommable : elle vaut pour tous les biens d'une commune déjà payée, pas seulement le premier.
+  Elle ne s'ouvre pas sur la seule résidence déclarée (`home_insee_code` deviendrait un bon de
+  réduction) ni sur un dossier administratif, puisque rien n'a été encaissé. Conséquence
+  technique : **aucun Price Stripe** pour ce produit, un Price portant un montant fixe alors que
+  celui-ci en a deux.
 - **Abonnement (« Le Fil »)** : RETIRÉ DU PRODUIT le 28/07/2026. La page de pré-lancement, la route
   `/api/suivi-waitlist` et `FilWaitlistForm` ont été supprimés (commit `f0b6c3c`), la table
   `suivi_waitlist` droppée en production (migration `004_drop_suivi_waitlist.sql`). Plus aucune
