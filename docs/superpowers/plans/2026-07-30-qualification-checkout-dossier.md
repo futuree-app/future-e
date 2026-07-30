@@ -985,6 +985,19 @@ export async function POST(request: Request) {
 
   // ── Adresse non ancrée : préciser, ou refuser sur un fait vérifié ────────────────────
   if (!isSellableAnchor(sel.type)) {
+    // UNE COMMUNE SAISIE SEULE N'EST PAS UN REFUS. Le lecteur n'a pas encore donné d'adresse :
+    // lui répondre « nous ne pouvons pas identifier ce bien » lui ferait croire que sa commune
+    // n'est pas couverte, ce qui est faux et décourageant. Aucun reverse n'est lancé, il n'aurait
+    // rendu que les numéros du centre-bourg. Constaté à l'exécution sur « Kerlaz Locronan »,
+    // feature `municipality`, qui répondait un refus définitif.
+    if (sel.type !== "street" && sel.type !== "locality") {
+      return NextResponse.json({
+        status: "needs_precision",
+        reason: "missing_house_number",
+        candidates: [],
+      });
+    }
+
     const hits = await reverseHouseNumbers(sel.longitude, sel.latitude);
     if (hits === null) {
       // Une panne du reverse ne devient jamais « aucun numéro n'existe » : ce serait refuser une
@@ -2359,6 +2372,25 @@ Les tâches 1 et 3 sont indépendantes et peuvent démarrer en parallèle. **7A 
 écrites dans la tâche 7** (`fetchBanFeaturesByLabel` et `pickFeatureById`, étapes 3 à 6) : écrire ces
 deux-là d'abord, puis 7A, puis le reste de la tâche 7. La tâche 8 attend un achat réel en
 production.
+
+## Journal d'exécution (30/07/2026)
+
+Tâches 1 à 7A **livrées et commitées**, `3f08387` à `73cbcc5`. 24 tests verts, typecheck et lint
+propres, `npm run build` en code 0, migration `26_dossier_intents` appliquée et vérifiée (RLS
+active, aucune policy, aucun droit `authenticated`, `permission denied` confirmé par l'API REST).
+
+Deux écarts trouvés **par l'exécution**, tous deux corrigés :
+
+- **`municipality` répondait un refus définitif.** Le test réel sur « Kerlaz Locronan » a montré
+  qu'une commune saisie seule tombait dans `unsupported_at_launch`, donc « nous ne pouvons pas
+  identifier ce bien », à quelqu'un qui n'avait pas encore donné d'adresse. Corrigé ci-dessus.
+- **Rien ne pointait vers la porte.** Le plan la décrivait « appelée depuis les pages commune, la
+  landing et /rapport » sans qu'aucune tâche ne pose le lien. L'écran vide de `/rapport/dossiers`
+  mène désormais à `/dossier` (commit `73cbcc5`). Les liens depuis la landing et les pages commune
+  restent à poser, en coordination avec le chantier de langage visuel.
+
+**Reste** : l'étape 11 de la tâche 7 (achat de bout en bout en mode test Stripe), et la tâche 8,
+qui en dépend.
 
 ## Ce que l'exécution ne peut pas vérifier seule
 
