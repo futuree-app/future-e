@@ -19,6 +19,12 @@ const PRODUCT_PRICES: Record<string, { amountEur: number; stripePriceId: string 
   "pack-decision": { amountEur: 39, stripePriceId: process.env.STRIPE_PACK_PRICE_ID    ?? "" },
   // Le montant réel est calculé par `quoteForDossier` (39 € ou 25 € selon le territoire déjà
   // payé) : cette entrée sert à RECONNAÎTRE le produit, son `amountEur` n'est jamais facturé.
+  //
+  // `STRIPE_DOSSIER_PRICE_ID` N'EXISTE PAS ET N'A PAS À EXISTER, ce n'est pas un oubli de
+  // configuration. Un Price Stripe porte un montant fixe, or ce produit en a deux, décidés côté
+  // serveur : un Price unique mentirait, deux Prices dupliqueraient `quoteForDossier`. Le champ
+  // n'est d'ailleurs lu par personne, il est seulement recopié dans les métadonnées ;
+  // `STRIPE_PACK_PRICE_ID` est absente pour la même raison et le Pack fonctionne.
   "address-dossier": { amountEur: 39, stripePriceId: process.env.STRIPE_DOSSIER_PRICE_ID ?? "" },
 };
 
