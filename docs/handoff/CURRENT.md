@@ -1,8 +1,8 @@
-# Passation : 30/07/2026, le parcours d'achat par l'adresse existe, il n'a jamais encaissé
+# Passation : 30/07/2026, le parcours d'achat par l'adresse encaisse, en mode test
 
-**Horodatage** : 2026-07-30 · **Branche** : `main`, **quatorze commits en attente, RIEN N'EST
-POUSSÉ**, donc rien de tout ceci n'est en production. Un push déploie : ne pas pousser avant la
-preuve décrite ci-dessous.
+**Horodatage** : 2026-07-30 · **Branche** : `main`, **seize commits en attente, RIEN N'EST POUSSÉ**,
+donc rien de tout ceci n'est en production. Un push déploie. Les trois preuves demandées avant push
+sont acquises en mode test (voir ci-dessous) ; le push reste une décision du porteur.
 
 > Le handoff précédent (droit territorial cohérent, dashboard supprimé, écrans d'attente) est
 > archivé dans **`docs/handoff/2026-07-30-nuit-droit-territorial.md`**. Son **chantier A, « la porte
@@ -18,28 +18,51 @@ preuve décrite ci-dessous.
 
 ## L'état réel, en une phrase
 
-**Un inconnu peut qualifier une adresse gratuitement, se voir refuser, ou aller jusqu'au formulaire
-de paiement ; le webhook sait créer le dossier. Aucun euro n'a été encaissé par ce chemin, et tant
-que ce n'est pas fait, le checkout n'est pas terminé.**
+**Le chemin serveur encaisse et livre : deux paiements de test ont produit deux dossiers, à 39 € puis
+25 €, et le rejeu du webhook n'a rien dupliqué. Le chemin NAVIGATEUR n'a jamais été parcouru par un
+humain, et le mode production n'a jamais encaissé.**
 
 ---
 
-## LE CHECKOUT N'EST PAS CONSIDÉRÉ TERMINÉ
+## LES TROIS PREUVES, ACQUISES LE 30/07/2026
 
-Sept tâches sur neuf sont livrées, testées unitairement et vérifiées contre les API réelles. **Cela
-ne vaut pas preuve.** Trois faits, et trois seulement, feront du checkout un chantier fini :
+Elles ont été obtenues en mode test Stripe, contre la base réelle, puis **entièrement nettoyées** :
 
-1. **Un premier achat réel** en mode test Stripe : de `/dossier` au dossier ouvert, avec une ligne
-   `address_dossiers` portant `stripe_payment_intent_id`, `amount_paid_cents` égal au montant Stripe
-   et `purchased_at` renseigné.
-2. **Le rejeu du webhook** depuis le tableau de bord Stripe : **aucun second dossier**, et une
-   réponse en succès. La contrainte unique garantit qu'un doublon échoue ; ce test garantit que le
-   rejeu réussit, ce qui est une autre affirmation.
-3. **Un second achat à la même adresse**, qui doit créer un second dossier légitime **à 25 €**,
-   puisque la commune est alors payée.
+1. **Premier achat** : `pi_3TypSz…`, dossier `f0116088…` créé, `amount_paid_cents` = 3900 égal au
+   montant déclaré par Stripe, `purchased_at` renseigné, territoire actif posé sur 44109, **zéro
+   `report_grant` dérivé**.
+2. **Rejeu du webhook** (`stripe events resend`) : réponse 200, **un seul dossier**, et
+   `purchased_at` **inchangé**. Sans `ignoreDuplicates`, l'upsert aurait réécrit la date d'achat
+   d'un dossier déjà payé : le défaut anticipé dans le commentaire est confirmé par l'expérience.
+3. **Second achat à la même adresse** : `pi_3TypVQ…`, second dossier légitime, **2500 centimes**.
+   Le défaut d'écrasement du 29/07 (`logement_id = ban_id`) est mort : deux uuid distincts sur un
+   même `ban_id`.
 
-Tant que ces trois preuves manquent : **ne pas pousser**, **ne pas retirer la porte administrative**,
-et considérer que le parcours payant n'existe que sur le papier.
+Trois vérifications supplémentaires, non prévues au plan :
+
+- **La revalidation écrase bien le client.** L'intention a stocké `47.214294 / -1.559066`, les
+  coordonnées rendues par la BAN, là où la requête portait `47.214331 / -1.559088`.
+- **La route de statut ne fuit pas.** Un autre compte **connecté** obtient `pending`, jamais l'uuid
+  du dossier. Sans session : 307 vers `/connexion`, corps vide.
+- **L'idempotence tient des deux côtés.** Même `checkoutAttemptId` rendu deux fois : le même
+  PaymentIntent. Tentative neuve : un PaymentIntent distinct.
+
+**Nettoyage vérifié** : base revenue à son état initial (6 dossiers administratifs, 0 payé, 0
+intention, 0 compte de test, 0 ligne `payments` de dossier).
+
+### CE QUE CES PREUVES NE COUVRENT PAS
+
+Le test a parcouru le chemin **serveur** de bout en bout, sans navigateur. Restent non éprouvés :
+
+- **Le formulaire de paiement Stripe Elements** : jamais affiché, donc jamais vu avec une clé
+  publique de test. C'est le seul écran du parcours qu'aucun test n'a rendu.
+- **La page d'attente `/dossier/merci`** et son interrogation du statut, jamais exécutées dans un
+  navigateur.
+- **Le mode production** : clés live, webhook déployé sur Vercel, `STRIPE_DOSSIER_PRICE_ID` absent.
+- **Le tunnel 14 €** après la garde d'authentification, jamais rouvert connecté.
+
+**Conséquence pour la porte administrative** : le plan conditionnait son retrait à un achat réel
+**en production**, ouvert et lu. Cette condition n'est pas remplie. **Elle reste ouverte.**
 
 ---
 
@@ -145,21 +168,34 @@ art. L271-4 CCH, donc fausse pour un acquéreur).
 
 ## Prochaine étape immédiate
 
-**Le test d'achat de bout en bout.** Rien d'autre ne compte tant qu'il n'est pas fait.
+**Le parcours au navigateur, avec des clés de test.** C'est le seul morceau que le test serveur n'a
+pas pu couvrir, et il porte l'écran le plus visible du tunnel.
+
+Les clés de test sont disponibles sans manipulation : la CLI Stripe est authentifiée et son fichier
+de configuration porte `test_mode_api_key` et `test_mode_pub_key`, valides jusqu'au 05/09/2026.
+**Next 16 refuse un second `next dev` dans le même répertoire** : servir le build par
+`npx next start -p 3001` contourne le verrou sans toucher au serveur de l'autre session.
 
 ```bash
-stripe listen --forward-to localhost:3000/api/stripe/webhook
+stripe listen --forward-to localhost:3001/api/stripe/webhook
+# puis, avec les trois valeurs (sk_test, pk_test, whsec de la session) :
+npx next start -p 3001
 ```
 
-Puis, connecté, sur `/dossier` : qualifier « 2 rue Crébillon Nantes », cliquer « Créer mon dossier »,
-payer avec `4242 4242 4242 4242`.
+Vérifier : le formulaire de paiement s'affiche, la page d'attente bascule seule vers le dossier,
+et le dossier s'ouvre. Puis **nettoyer** (voir la requête plus bas).
 
-Les six vérifications sont détaillées dans le plan, tâche 7, étape 11. **Une variable manque
-probablement** : `STRIPE_DOSSIER_PRICE_ID`. Elle n'est lue que pour être recopiée dans les
-métadonnées, donc son absence ne bloque pas, mais autant la poser avant.
+Ensuite : le push (seize commits), et seulement après un achat éprouvé **en production**, la
+tâche 8. **`STRIPE_DOSSIER_PRICE_ID` est absente** ; elle n'est lue que pour être recopiée dans les
+métadonnées, donc elle ne bloque rien, mais autant la poser.
 
-Ensuite seulement : le push (quatorze commits), puis la tâche 8 (retrait de la porte
-administrative), qui attend ce même achat réel.
+### Nettoyer après un test
+
+Le mode test écrit dans la **même base que la production**. Les dossiers créés comptent comme payés,
+donc ils fausseraient le chiffre d'affaires et offriraient le tarif d'approfondissement. Le plus sûr
+est de créer un compte de test dédié et de le supprimer : `address_dossiers`, `dossier_intents`,
+`user_profiles` et `user_accounts` **cascadent**, mais `payments` passe seulement `user_id` à NULL,
+donc ces lignes se suppriment à part, avant le compte.
 
 ---
 
