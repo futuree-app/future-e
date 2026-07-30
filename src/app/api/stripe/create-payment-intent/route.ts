@@ -49,6 +49,19 @@ export async function POST(request: Request) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+
+    // AUCUN PAIEMENT ANONYME, POUR AUCUN DES TROIS PRODUITS. Chacun livre un droit rattaché à un
+    // compte : le 14 € pose un report_grant sur un user_id, le Pack en pose trois, le dossier crée
+    // une ligne address_dossiers dont la colonne user_id est `not null`. Sans utilisateur, le
+    // webhook encaissait et ne livrait rien (il garde `if (userId && userId !== "anonymous")`),
+    // donc l'acheteur recevait un e-mail de confirmation et zéro accès.
+    if (!user) {
+      return NextResponse.json(
+        { error: "Connexion requise pour finaliser un achat.", code: "AUTH_REQUIRED" },
+        { status: 401 },
+      );
+    }
+
     const stripe = getStripe();
 
     // Pack Décision : 2-3 INSEE valides. Mode 'replay' (trio /ou-vivre, snapshot du
@@ -90,8 +103,8 @@ export async function POST(request: Request) {
       currency: "eur",
       payment_method_types: ["card"],
       metadata: {
-        userId: user?.id ?? "anonymous",
-        userEmail: user?.email ?? "",
+        userId: user.id,
+        userEmail: user.email ?? "",
         productType: productType.trim(),
         stripePriceId: priceConfig.stripePriceId,
         targetInsee: cleanInsee,
@@ -119,7 +132,7 @@ export async function POST(request: Request) {
       await admin.from("pack_snapshots").upsert(
         {
           stripe_payment_intent_id: paymentIntent.id,
-          user_id: user?.id ?? null,
+          user_id: user.id,
           mode: packMode,
           trio_key: trioKey(packTrio.map((t) => t.insee)),
           insee_1: packTrio[0].insee,
@@ -138,13 +151,13 @@ export async function POST(request: Request) {
 
     const posthog = getPostHogClient();
     posthog.capture({
-      distinctId: user?.email ?? "anonymous",
+      distinctId: user.email ?? user.id,
       event: "payment_intent_created",
       properties: {
         product_type: productType.trim(),
         amount: priceConfig.amountEur,
         currency: "eur",
-        user_id: user?.id ?? null,
+        user_id: user.id,
       },
     });
     await posthog.shutdown();
