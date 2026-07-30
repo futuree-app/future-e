@@ -1,6 +1,11 @@
 # DESIGN.md · Le langage visuel de futur•e
 
-**Version 1 · 30 juillet 2026 · prescriptif.**
+**Version 1.1 · 30 juillet 2026 · prescriptif.**
+
+> **v1.1** : quatre amendements après relecture critique. La couleur cesse d'identifier les trois
+> échelles (§ 7, la seule contradiction structurelle de la v1) ; la largeur devient une grille à deux
+> pistes (§ 2.1) ; la surface dominante se compte par viewport (§ 2.2) ; l'état absent passe par un
+> token de contraste testé au lieu d'une opacité globale (§ 3.1).
 
 Ce document dit ce qu'il faut faire. Il ne décrit pas l'interface existante : une partie de
 l'existant est précisément ce qu'il vient corriger.
@@ -55,37 +60,53 @@ une marque tenue, un dossier illisible.
 
 ## 2. A · La charpente
 
-### 2.1 La largeur de lecture, par nature de contenu
+### 2.1 Une grille de page, deux pistes
 
-La largeur se règle à l'échelle de la **page**, jamais du paragraphe. Trois mesures, et aucune
-autre :
+Une page a **un seul conteneur et une seule gouttière**. À l'intérieur, deux pistes possibles.
 
-| Nature | Largeur | Où |
+| Piste | Largeur maximale | Contenu |
 | --- | --- | --- |
-| **Prose longue** | `720px` | pages Savoir, guides Agir, texte suivi |
+| **Prose** | `720px` | texte suivi, aligné sur la gouttière gauche |
+| **Donnée** | toute la largeur du conteneur | grilles, tableaux, cartes |
+
+Trois largeurs maximales de conteneur, et aucune autre. Ce sont des maxima : sous ces seuils, le
+conteneur fait `width: 100%` avec les paddings prescrits.
+
+| Nature de page | Conteneur | Où |
+| --- | --- | --- |
+| **Éditoriale** | `720px` | pages Savoir, guides Agir |
 | **Dossier** | `920px` | comparateur, pages de décision, formulaires |
-| **Grille de données** | `1100px` | rapport, hubs thématiques, tableaux |
+| **Mixte** | `1100px` | rapport, hubs thématiques |
 
-Quand prose et données cohabitent sur une page, **la page prend la largeur la plus grande des deux**
-et la prose s'aligne à gauche sur la même gouttière. Elle ne se recentre pas, elle ne se
-recompose pas en colonne étroite au milieu d'un bloc large.
+Sur une page mixte de 1100 px, la prose occupe sa piste de 720 px **alignée à gauche**, et les
+données peuvent prendre toute la largeur. La prose ne se recentre pas au milieu du bloc, ce qui
+créerait deux axes de lecture concurrents.
 
-Interdit, et c'est la faute la plus fréquente : un `max-w-[NNNpx]` sur un paragraphe **plus étroit
-que le bloc bordé qui l'entoure**. La phrase wrappe à mi-bloc et laisse un vide à droite. Un
-`max-w` sur du texte n'est légitime que pour le conteneur de page, un sous-titre de hero mesuré en
-espace ouvert sous un grand H1, ou un texte en `flex-row` qui partage sa ligne. Règle complète et
-historique du diagnostic dans `doctrine/interface.md § 1`.
+**La nuance qui décide, et c'est là que se joue la faute la plus fréquente** : la piste de prose
+vaut en **espace ouvert**. Dans un **bloc bordé** (carte, section à fond, `.glass`), le texte
+remplit son bloc et ne porte aucun `max-w` propre. Un paragraphe plafonné plus étroit que la carte
+qui l'entoure wrappe à mi-bloc et laisse un vide à droite, très visible.
+
+Un `max-w` sur du texte n'est donc légitime que pour le conteneur de page, la piste de prose en
+espace ouvert, un sous-titre de hero sous un grand H1, ou un texte en `flex-row` qui partage sa
+ligne. Règle complète et historique du diagnostic dans `doctrine/interface.md § 1`.
 
 Le padding horizontal du conteneur est `px-5` sous 640 px et `px-7` au-delà.
 
-### 2.2 Une seule surface élevée par écran
+### 2.2 Une seule surface dominante à la fois
 
-Une surface élevée est un bloc qui sort du plan : verre, ombre portée, fond distinct. **Un écran
-n'en porte qu'une**, et elle désigne ce qui compte le plus : le verdict dans le rapport, le
-formulaire dans un parcours, la carte d'identité dans un module.
+Une surface élevée est un bloc qui sort du plan : verre, ombre portée, fond distinct.
+
+**Une seule surface dominante par viewport, ou par mouvement majeur de la page.** Deux surfaces
+élevées de même poids ne se font jamais concurrence dans le même champ visuel. Une page longue,
+un guide Agir, un rapport de plusieurs milliers de pixels ont le droit d'en porter plusieurs, à
+condition qu'elles ne coexistent pas à l'écran.
+
+La surface dominante désigne ce qui compte le plus dans son mouvement : le verdict dans le rapport,
+le formulaire dans un parcours, la carte d'identité en tête de module.
 
 Tout le reste se sépare par un **filet** (1 px, `--border-1`) et par de la **marge**. Une page où
-chaque bloc est une carte de verre n'a plus de hiérarchie : elle a une texture.
+chaque bloc est une carte de verre n'a plus de hiérarchie, elle a une texture.
 
 ### 2.3 Ce qui sépare
 
@@ -109,11 +130,31 @@ Toute valeur affichée est dans l'un de ces quatre états, et son traitement vis
 | --- | --- |
 | **Mesurée** | valeur pleine, mono tabulaire, source sous la valeur |
 | **Projetée** | valeur pleine + horizon nommé (« en 2050 ») + scénario France (« +2,7 °C ») |
-| **Absente** | tiret `—`, `opacity: 0.45`, filet gris, mention explicite de l'absence |
+| **Absente** | tiret `—`, couleur `--fg-absent`, filet gris, mention explicite de l'absence |
 | **Non applicable** | la carte n'est pas rendue du tout |
 
 **L'absence est une information, elle s'affiche.** Une donnée manquante ne se remplace jamais par
 un zéro, une moyenne nationale ou un silence. Le lecteur doit voir qu'on n'a pas su, et pourquoi.
+
+**L'effacement passe par une couleur testée, jamais par une opacité globale.** L'implémentation
+actuelle applique `opacity: 0.45` au conteneur, donc au texte. Mesuré sur le fond `--bg` :
+
+| Élément | Contraste plein | À `opacity: 0.45` |
+| --- | --- | --- |
+| Libellé (`--fg-1`) | 16,9:1 | **3,96:1** |
+| Texte secondaire (`--fg-3`) | 7,9:1 | **2,39:1** |
+| Source (`--ghost`) | **4,22:1** | **1,72:1** |
+
+AA exige 4,5:1 pour du texte courant. Les trois échouent une fois estompés, ce qui contredit
+frontalement le plancher WCAG 2.2 AA que ce document se donne au § 10.
+
+Règle : un token `--fg-absent` porte la couleur de l'état absent, avec un contraste vérifié sur
+tous les fonds autorisés, y compris le futur thème clair. L'effacement **visuel** se produit par la
+teinte, le filet gris et le tiret, jamais par l'opacité du bloc.
+
+**Défaut connexe à corriger** : `--ghost` (`#6b7388`) est déjà à 4,22:1 en pleine opacité, donc sous
+AA avant tout estompage. Il porte aujourd'hui les sources et les surtitres. À reprendre avec
+`--fg-absent`.
 
 ### 3.2 L'alignement au chiffre
 
@@ -292,19 +333,64 @@ jamais horizontalement.
 Territoire, Autour, Logement se lisent dans cet ordre, **du large au précis**, et chacune peut
 contredire la précédente.
 
-| Échelle | Teinte | Grain |
+| Échelle | Grain |
+| --- | --- |
+| Territoire | la commune |
+| Autour | le secteur autour du point |
+| Logement | le bâtiment |
+
+**Une échelle se reconnaît d'abord à son nom, sa position dans l'ordre et son grain. Une teinte
+éventuelle ne fait que confirmer cette identité, et elle ne touche jamais une donnée ni un verdict.**
+
+### 7.1 Pourquoi la couleur ne peut pas identifier une échelle
+
+Le produit portait deux systèmes chromatiques incompatibles, et ils se croisaient sur le même
+écran :
+
+| Teinte | Sens décisionnel (§ 5.4) | Sens structurel (ancien) |
 | --- | --- | --- |
-| Territoire | `--info` | la commune |
-| Autour | `--green` | le secteur autour du point |
-| Logement | `--orange` | le bâtiment |
+| Bleu | contrôle à mener | Territoire |
+| Vert | alignement | Autour |
+| Orange | compromis | Logement |
 
-Ces teintes ne bougent pas d'un écran à l'autre. Une échelle se reconnaît à sa couleur avant son
-titre.
+Ce n'est pas une hypothèse. `src/app/(account)/rapport/page.tsx` rend `DossierDecisionSection`
+(les cinq registres) **et** la grille des modules colorée par `MODULE_COLORS` (les trois échelles),
+sur la même page, à quelques centaines de pixels d'écart. Le vert y dit « ce lieu tient bien ce
+point » en haut et « ceci appartient à Autour » plus bas.
 
-**Ce que l'interface doit dire, et qu'elle ne dit pas encore** : posséder le Territoire d'une commune
-n'ouvre ni Autour ni Logement, qui demandent un dossier d'adresse. Un écran qui annonce « trois
-échelles » avec trois cartes marquées accessibles alors que deux exigent une adresse ment par
-composition. Le décompte affiché doit suivre ce que le compte possède réellement.
+Le § 5.3 pose qu'une teinte est une affirmation vérifiable. Une couleur ne peut pas affirmer en
+même temps **où se trouve la donnée** et **ce qu'elle signifie pour la décision**. Les cinq
+registres gardent la couleur ; les échelles la perdent.
+
+Le § 3.6 le disait déjà autrement : le signal passe par la position et la longueur avant la
+couleur.
+
+### 7.2 Ce que cela change concrètement
+
+- `MODULE_COLORS` disparaît comme identité d'échelle. Les cartes de modules se distinguent par leur
+  nom, leur rang et leur bénéfice écrit.
+- Le filet vert des cartes du module Autour (`AutourModule`, `borderTop: 2px solid var(--green)`)
+  tombe **déjà** sous l'interdit du § 6.2 : toutes les cartes du module portent la même teinte,
+  donc elle ne distingue rien.
+- Une teinte d'échelle reste tolérée dans la **chrome de navigation** d'un module (surtitre,
+  bandeau de tête), jamais sur une carte de donnée, jamais dans un écran qui affiche des registres
+  de décision.
+
+**Dépendance à régler d'abord** : faire porter l'identité par le rang suppose que le décompte soit
+juste. Aujourd'hui le rapport annonce « six angles » dans son hero, « trois échelles » dans la
+section suivante, et numérote « Module 01 ». Ces trois décomptes doivent s'accorder avant que le
+rang devienne un repère.
+
+**Note de coût** : identifier une échelle par une icône demanderait un jeu d'icônes dessiné. Les
+emoji sont interdits (`doctrine/editoriale.md`), et ceux qui servent aujourd'hui d'icônes de module
+sont à retirer.
+
+### 7.3 Ce que l'interface doit dire, et qu'elle ne dit pas encore
+
+Posséder le Territoire d'une commune n'ouvre ni Autour ni Logement, qui demandent un dossier
+d'adresse. Un écran qui annonce « trois échelles » avec trois cartes marquées accessibles alors que
+deux exigent une adresse ment par composition. Le décompte affiché doit suivre ce que le compte
+possède réellement.
 
 ---
 
@@ -323,8 +409,16 @@ généralise. Largeur prose.
 
 ### 8.1 La navigation
 
-**La `Navbar` du site est la navigation de toute page publique, sans exception.** Un fil d'Ariane
-thématique s'ajoute, il ne remplace jamais. Une nav locale réécrite dans une page est interdite.
+**La `Navbar` du site est la navigation de toute page publique.** Un fil d'Ariane thématique
+s'ajoute, il ne remplace jamais. Une nav locale réécrite dans une page est interdite.
+
+**Y compris dans les tunnels transactionnels**, et c'est une décision, pas un oubli. Un en-tête
+réduit sur une page de paiement est une pratique courante, censée réduire les fuites. futur•e
+n'encaisse aucun abonnement et vend un achat unique réfléchi : cacher les issues à ce moment
+précis reviendrait à retenir un lecteur qui doute, ce que la doctrine interdit
+(`doctrine/editoriale.md`, « ne tranche jamais à la place du lecteur »). `/checkout/[product]` et
+`/territoire/[insee]/debloquer` montent déjà la `Navbar` complète : cette règle décrit l'existant,
+elle ne le change pas.
 
 ### 8.2 La fraîcheur
 
@@ -390,10 +484,28 @@ survivent à un changement de technologie, celles-ci non.
 
 ## 11. Ce qui reste ouvert
 
-Trois points sont volontairement non tranchés dans cette version :
+Quatre points sont volontairement non tranchés dans cette version :
 
-1. **La collision de l'orange** (accent de marque et registre « compromis »), § 5.4.
-2. **La navigation de niveau 1** : proposition en annexe de
+1. **La collision de l'orange** (accent de marque et registre « compromis »), § 5.4. C'est le
+   dernier reste du problème réglé au § 7 : la couleur ne dit plus le grain, elle dit encore deux
+   choses à la fois sur cette seule teinte.
+2. **Le décompte des échelles** : « six angles », « trois échelles » et « Module 01 » cohabitent
+   dans le rapport. Le § 7.2 en dépend, puisqu'il fait porter l'identité par le rang.
+3. **La navigation de niveau 1** : proposition en annexe de
    `docs/audits/2026-07-30-famille-editoriale.md`, non tranchée par le porteur.
-3. **Le système de composants éditoriaux partagés** qui remplacera les feuilles de style par page,
+4. **Le système de composants éditoriaux partagés** qui remplacera les feuilles de style par page,
    reporté après le lancement.
+
+## 12. Journal des amendements
+
+**v1.1, 30/07/2026** (relecture critique, quatre amendements retenus) :
+
+| Amendement | Motif |
+| --- | --- |
+| § 7 · la couleur n'identifie plus les échelles | Deux systèmes chromatiques se croisaient sur `/rapport`. Le § 5.3 exige qu'une teinte soit une affirmation vérifiable ; elle ne peut pas dire à la fois le grain et le sens |
+| § 2.1 · grille à deux pistes | La v1 pouvait se lire comme « la prose s'étale à 1100 px ». La piste de prose à 720 px lève l'ambiguïté sans rouvrir le `max-w` de paragraphe |
+| § 2.2 · surface dominante par viewport | « Un écran » était ambigu (route, section, viewport). Une page longue a le droit de porter plusieurs surfaces, jamais concurrentes |
+| § 3.1 · token `--fg-absent` | `opacity: 0.45` faisait tomber les trois niveaux de texte sous AA (3,96 / 2,39 / 1,72:1), en contradiction avec le § 10 |
+
+Deux précisions du même passage : les largeurs sont des **maxima**, et la `Navbar` vaut aussi dans
+les tunnels transactionnels, par décision motivée.
