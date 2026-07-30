@@ -1,332 +1,242 @@
-# Passation : 30/07/2026, nuit
+# Passation : 30/07/2026, le parcours d'achat par l'adresse existe, il n'a jamais encaissé
 
-**Horodatage** : 2026-07-30, ~02h00 · **Branche** : `main` = `a91e613`, **tout est poussé**, donc
-**tout est en production**. Aucun commit en attente. Cinq lots de code cette session : `d228417`,
-`da6f079`, `273f910`, `a1a629c`, `a91e613`.
+**Horodatage** : 2026-07-30 · **Branche** : `main`, **quatorze commits en attente, RIEN N'EST
+POUSSÉ**, donc rien de tout ceci n'est en production. Un push déploie : ne pas pousser avant la
+preuve décrite ci-dessous.
 
-> Le handoff précédent (livraison d'`address_dossiers`, le droit descendu à l'échelle du bien) est
-> archivé dans **`docs/handoff/2026-07-29-address-dossiers.md`**. Sa section URGENT est **RÉSOLUE**,
-> son chantier hérité **C est FAIT**, son chantier **A reste ouvert et prioritaire**.
+> Le handoff précédent (droit territorial cohérent, dashboard supprimé, écrans d'attente) est
+> archivé dans **`docs/handoff/2026-07-30-nuit-droit-territorial.md`**. Son **chantier A, « la porte
+> j'ai une adresse », est l'objet de cette session** ; ses chantiers B à I restent ouverts.
 
-> **CHANTIER PARALLÈLE, distinct de celui-ci** : la refonte du langage visuel (`PRODUCT.md`, audit
-> accueil + Rapport Territoire, séquence vers `DESIGN.md`) vit dans
-> **`docs/handoff/2026-07-29-design-system-sequencage.md`**. Il porte deux corrections qui touchent
-> des fichiers cités ici (`FutureELanding.tsx`, `rapport/page.tsx`) : les promesses 14 € et le CTA
-> d'achat affiché aux payants. Le lire avant d'y toucher. **Son étape 2 a été partiellement exécutée
-> cette nuit** (voir « Fait », lot 2) ; deux de ses points restent ouverts, listés en fin de section.
+> **CHANTIER PARALLÈLE, mené dans un autre terminal** : la refonte du langage visuel vit dans
+> **`docs/handoff/2026-07-29-design-system-sequencage.md`** et a produit quatre commits ce jour
+> (`219bc8f`, `b44f1f0`, `1da154f`, `c40a956`). Cette session n'a touché **aucun** de ses fichiers.
+> Les deux arbitrages laissés de côté ici (liens vers la nouvelle porte depuis la landing et les
+> pages commune) lui appartiennent.
 
 ---
 
-## Objectif en cours
+## L'état réel, en une phrase
 
-Le droit territorial est cohérent d'un écran à l'autre, la bascule de territoire fonctionne
-réellement au clic, et le produit ne vend plus que ce qu'il délivre. Reste le vrai blocage, inchangé
-depuis deux sessions : **aucune surface ne crée de dossier hors de la route de test**. La spec de
-qualification et de checkout est ce qui manque, et rien de payant ne peut exister avant elle.
+**Un inconnu peut qualifier une adresse gratuitement, se voir refuser, ou aller jusqu'au formulaire
+de paiement ; le webhook sait créer le dossier. Aucun euro n'a été encaissé par ce chemin, et tant
+que ce n'est pas fait, le checkout n'est pas terminé.**
+
+---
+
+## LE CHECKOUT N'EST PAS CONSIDÉRÉ TERMINÉ
+
+Sept tâches sur neuf sont livrées, testées unitairement et vérifiées contre les API réelles. **Cela
+ne vaut pas preuve.** Trois faits, et trois seulement, feront du checkout un chantier fini :
+
+1. **Un premier achat réel** en mode test Stripe : de `/dossier` au dossier ouvert, avec une ligne
+   `address_dossiers` portant `stripe_payment_intent_id`, `amount_paid_cents` égal au montant Stripe
+   et `purchased_at` renseigné.
+2. **Le rejeu du webhook** depuis le tableau de bord Stripe : **aucun second dossier**, et une
+   réponse en succès. La contrainte unique garantit qu'un doublon échoue ; ce test garantit que le
+   rejeu réussit, ce qui est une autre affirmation.
+3. **Un second achat à la même adresse**, qui doit créer un second dossier légitime **à 25 €**,
+   puisque la commune est alors payée.
+
+Tant que ces trois preuves manquent : **ne pas pousser**, **ne pas retirer la porte administrative**,
+et considérer que le parcours payant n'existe que sur le papier.
 
 ---
 
 ## Fait dans cette session
 
-### 1. `d228417` — Le territoire lu ne suivait pas le bien
+### La conception, d'abord
 
-**Le défaut.** `territory-claims.ts` acceptait déjà un dossier comme fondement territorial
-(`kind: "dossier"`), mais rien ne déplaçait le territoire **lu**. `active_insee_code` restait nul,
-donc `/rapport` retombait sur la résidence. Un compte qui possède deux biens à Nantes et réside à
-La Rochelle **possédait Nantes en entier et recevait le partiel de La Rochelle**. Le webhook Stripe
-pose bien le territoire actif, mais une seule fois, au paiement, et seulement si le paiement portait
-un INSEE. Ensuite la seule route existante était `/rapport/residence`, qui **désactive**.
+- **`docs/superpowers/specs/2026-07-30-qualification-checkout-dossier-design.md`** : la spec qui
+  ferme la frontière laissée ouverte le 29/07 (qualification, prix, webhook, page de succès,
+  instrumentation).
+- **`docs/superpowers/plans/2026-07-30-qualification-checkout-dossier.md`** : neuf tâches, avec un
+  journal d'exécution en fin de document.
+- **`docs/audits/2026-07-30-rnb-dpe-rattachement-batiment.md`** : sonde du Référentiel National des
+  Bâtiments comme couche de rattachement du DPE. **Chantier de données, hors de ce lot.**
+- Deux arbitrages gravés : `docs/vault/arbitrages/refus-de-vente-sur-ancrage.md` et
+  `docs/vault/arbitrages/adresse-analysee-hors-stripe.md`.
 
-**Le geste.** Nouvelle route `/rapport/dossiers/ouvrir?id=…&vers=logement|autour|territoire` : ouvrir
-un dossier pose son territoire, au grain commune (`communeParent`, sinon PLM ferait lire « Paris
-1er »). Choix porteur contre un repli automatique dans `/rapport` : le clic sur un bien EST la
-désignation, et deviner est ce que `pickSoleDossier` refuse une ligne plus loin. `/rapport` liste
-désormais les communes ouvertes par un bien, porte qui n'existait nulle part : `/rapport/dossiers`
-n'était atteignable que depuis les modules eux-mêmes.
+### Le code, dix commits (`3f08387` → `a076c6a`)
 
-**L'alignement des cinq points de citation, et le trou jouait dans les DEUX sens.**
-`resolveReadableTerritory` ne contrôle rien sur la résidence, délibérément (le contrôle vit sur les
-pages). Donc tant que les pages demandaient l'accès au plan, un compte ayant payé Nantes obtenait le
-Territoire **complet de sa résidence, jamais payée**, sur `/rapport/quartier`, et pouvait faire
-synthétiser **n'importe quelle commune de France** par `synthesize-quartier`, dont l'`inseeCode`
-vient du client. La garde y est descendue **après lecture du corps**, seul endroit où elle porte sur
-la commune demandée.
+**`3f08387` : Aucun paiement anonyme.** `create-payment-intent` acceptait `user?.id ?? "anonymous"`
+et le webhook ne pose les droits que sous `if (userId && userId !== "anonymous")` : **un visiteur
+non connecté pouvait payer 14 € et ne recevoir qu'un e-mail**. Défaut qui existait en production,
+sans victime puisque personne n'a payé. Vérifié : 401 sans session, 400 sur un produit inconnu.
 
-`/compte` séparait mal l'état du **plan** et l'ouverture des **échelles** : il annonçait « Trois
-échelles, toutes ouvertes » pendant que `/rapport` servait le partiel. Troisième état ajouté (payant
-sans commune ouverte).
+**`162caad` : Une seule identité PostHog.** Le navigateur identifiait sur l'UUID Supabase, les
+routes serveur sur l'e-mail : deux personnes distinctes, donc `payment_completed` n'appartenait pas
+au parcours qui l'avait produit. Le `distinct_id` du client voyage désormais jusqu'au webhook par
+les métadonnées Stripe.
 
-### 2. `da6f079` — Le dashboard supprimé, et la vitrine cesse de sur-promettre
+**`41e4058` : La lib pure de décision.** `isSellableAnchor`, `admissibleCandidates`, 11 tests.
+L'identifiant BAN portant la voie (`citycode_idvoie_numero`), l'admissibilité d'un numéro voisin est
+un test de préfixe, sans seuil de distance inventé.
 
-785 lignes d'écran, un axe de droits à trois valeurs et le CTA primaire de cinq Navbar, pour une page
-qui répétait ce que `/rapport` dit mieux. **Arbitrage porteur** : l'équivalent réel est `/rapport` et
-« En une minute ». Huit liens re-routés, dont `/merci`, ce que voit un acheteur trente secondes après
-avoir payé.
+**`7d92ac8` : Trois sondes qui distinguent une absence d'une panne.** Sans elles, « aucun
+diagnostic à cette adresse » se serait affiché pendant un incident ADEME.
 
-**Deux promesses fausses trouvées en cartographiant, sans rapport avec le dashboard.** La landing
-vendait « Trois échelles : la commune, le secteur autour de votre adresse, le logement » et
-`/checkout/rapport-complet` « trois modules interactifs », quand **le webhook 14 € pose un
-`report_grant` sur une commune et rien d'autre** : Autour et Logement exigent un dossier d'adresse,
-qu'aucun paiement à 14 € ne crée. `checkout-products.ts`, lui, décrivait déjà le territoire seul.
-Trois surfaces, trois discours. Elles disent maintenant ce que la caisse livre. Chantier hérité **C
-fait** au passage : « qui s'enrichit au fil des prochains modules » retiré.
+**`b90c5d8` : La route de qualification.** Trois issues, deux appels externes, **aucun Géorisques**
+(cette route est publique et porterait notre token).
 
-`globals.css` perd 495 lignes (71 classes `account-*` / `dashboard-*` / `gating-*` mortes), retirées
-par équilibrage d'accolades puis vérifiées : 155/155, aucun sélecteur hors périmètre perdu.
+**`dee2088` : La porte publique `/dossier`.** Saisie, trois issues, candidats proposés au clic,
+trois événements.
 
-### 3. `273f910` — Mode foyer et plans d'abonnement
+**`5932dd1` : Le checkout du dossier.** `/checkout/dossier`, identité exigée au dernier moment
+utile, adresse reconstruite depuis la BAN par le serveur, clé d'idempotence de la tentative.
 
-Le mode foyer n'avait jamais été construit : `canAccessHouseholdFeatures` avait un seul appelant, la
-page dashboard supprimée juste avant, et n'ouvrait rien. Les plans `suivi` et `foyer` n'étaient
-vendus nulle part. `subscription.ts` existait pour les distinguer, sans un seul appelant. Doctrine
-gravée dans `docs/vault/arbitrages/mode-foyer-recadre.md` (réécriture : la version de juin gardait le
-Foyer comme feature future à base de comptes multi-personnes).
+**`472a5a7` : L'intention, le webhook, l'attente.** Table `dossier_intents`, création idempotente,
+route de statut filtrée sur le propriétaire, page d'attente qui n'affirme jamais un dossier
+inexistant.
 
-**Piège traité** : les comptes existants portent encore ces plans en base, dont celui du porteur
-(`plan = suivi`). Sans table de compatibilité, un plan inconnu retombe sur `free` et l'écran
-afficherait « Compte gratuit » à un compte payant. `LEGACY_PLANS` mappe `suivi` et `foyer` vers
-`one_shot`, **à la lecture seulement**. Aucune migration, aucune écriture en production.
+**`73cbcc5` : L'écran vide des dossiers menait nulle part.** Il ne proposait que « revenir au
+rapport » : aucun chemin vers la qualification depuis l'application.
 
-### 4. `a1a629c` — Un `<Link>` vers une Route Handler ne navigue pas
+**`a076c6a` : Journal d'exécution** dans le plan.
 
-**Défaut constaté en production juste après le lot 1** : cliquer « Ouvrir Nantes » ne faisait rien.
-Le serveur était hors de cause, et le test l'a prouvé sans ambiguïté : la MÊME URL collée dans la
-barre d'adresse basculait le territoire correctement. Avec `<Link>`, Next demande un payload RSC ; la
-Route Handler répond une redirection vers du HTML, que le router ne sait pas consommer, et il
-abandonne sans rien faire ni rien dire. `prefetch={false}` ne protégeait que du préchargement.
+### La migration, appliquée en production
 
-Les cinq liens visant une Route Handler passent en `<a>` natif. **« Revenir à {commune} » est corrigé
-au passage, et il était cassé AVANT cette session** : `/rapport/residence` est une Route Handler
-atteinte par un `<Link>` depuis toujours, donc le territoire actif ne pouvait pas se désactiver
-depuis l'interface. **Vérifié au navigateur par le porteur, dans les deux sens.**
-
-**Règle à retenir** : dans ce projet, tout lien vers un `route.ts` doit être un `<a>`, jamais un
-`<Link>`.
-
-### 5. `a91e613` — Les écrans d'attente
-
-« Chargement… » remplacé par **six jeux contextuels**, un par segment (`src/lib/loading-messages.ts`
-+ un `loading.tsx` par segment). Discipline : la matière d'abord (ce qui est réellement chargé), puis
-ce que cette lecture permet de comprendre, puis la transparence sur le délai.
-
-**Six jeux CONTEXTUELS, pas six échelles** (correction porteur) : le produit a trois échelles,
-Territoire, Autour, Logement ; `compte`, `rapport` et `dossiers` sont des surfaces.
-
-Tout est en CSS, aucun JS : un `Math.random()` ou un `setInterval` rendrait le fallback dynamique,
-donc plus lent à s'afficher, ce qui lui retire sa seule qualité. La variété entre écrans vient du
-segment, celle dans le temps de l'attente réelle.
-
-**Règle d'honnêteté, écrite dans le fichier pour ne pas être cassée par symétrie** : `territoire`
-peut nommer DRIAS, Géorisques et VigiEau, car `/rapport/quartier` les interroge pendant le rendu
-serveur ; `autour` et `logement` nomment leur matière, leurs sources arrivant après le rendu par des
-routes API. Trois fausses précisions retirées après revue porteur (« sinistres », « à trois cents
-mètres près », « deux logements d'un même immeuble ne vieillissent pas pareil »).
-
-`/dev/loading` rejoue les six jeux, 404 en production.
+`supabase/26_dossier_intents.sql`, **déjà appliquée** (base `xkewgsccadjmondzmjxj`). Vérifié :
+12 colonnes, RLS active, **aucune policy, aucun droit `authenticated`/`anon`**, `permission denied`
+confirmé par l'API REST avec la clé publique.
 
 ---
 
-## Décisions prises, pas encore dans le vault
+## Ce qui a été vérifié, et comment
 
-1. **Porteur** : le dashboard n'a pas de valeur propre, son équivalent est `/rapport` + « En une
-   minute ». Supprimé.
-2. **Porteur** : `foyer` et `suivi` sortent du modèle. Un éventuel suivi sera **B2B**, donc un autre
-   modèle, pas la reprise de ces valeurs. (Doctrine foyer déjà gravée, arbitrage abonnement non.)
-3. **Porteur** : la bascule de territoire se fait par un geste explicite du lecteur, jamais par un
-   repli automatique.
-4. **Proposé et retenu** : la garde territoriale de `synthesize-quartier` descend après lecture du
-   corps, seul endroit où elle porte sur la commune demandée.
-5. **Proposé et retenu** : `/dashboard` gardait légitimement `canAccessCompleteReport` (question de
-   plan, sans ouvrir d'accès). L'analyse du handoff précédent, qui le comptait parmi les cinq points
-   à aligner, était donc inexacte sur ce point. Devenu sans objet avec la suppression.
-6. **Porteur** : discipline des écrans d'attente en trois temps (matière, sens, délai), pas de statut
-   générique répété, aucune phrase qui promette une granularité absente.
+- 401 et 400 sur `create-payment-intent`, sans session.
+- Les trois issues de qualification **contre les API réelles** : « 2 rue Crébillon » qualifiée sans
+  avertissement ; « le Cros » à préciser, avec ses deux candidats de la bonne voie et **sans**
+  « le Vallon » ; « 1986 le Cros » qualifiée avec `no_exact_dpe_found`.
+- **Les candidats portent des points distincts** (43.281987 et 43.282393), ce qui prouve la
+  correction du défaut le plus grave de la conception (voir plus bas).
+- `/checkout/dossier` : 307 vers `/connexion` avec l'adresse conservée dans `next` ; 307 vers
+  `/dossier` sans paramètres. La 307 prouve aussi que le segment statique prime sur `[product]`.
+- 24 tests unitaires, `npx tsc --noEmit`, `npx eslint`, `npm run build` en code 0.
 
-**À porter au vault** : un arbitrage sur la suppression du dashboard, un sur le retrait des
-abonnements. Et **la correction déjà signalée deux fois** : `vision/modele-economique.md` compare
-39 € aux « 600 à 800 € de diagnostics », or ce dossier est à la charge du **vendeur**
-(art. L271-4 CCH). L'ancre resterait juste pour un vendeur ou un propriétaire, segment non instruit.
+**Jamais vérifié** : le tunnel 14 € au navigateur après la garde d'authentification (il n'a pas de
+raison d'avoir bougé, la garde étant en amont, mais personne ne l'a ouvert connecté). Et tout le
+parcours payant, évidemment.
 
 ---
 
-## État git
+## Décisions prises, gravées ou à graver
 
-- **Branche** : `main` = `a91e613`, à jour avec `origin/main`. **Aucun commit non poussé.**
-- **Aucune PR ouverte.** Le projet pousse directement sur `main`, et **un push déploie en
-  production**.
-- **Non commités, et ce sont les livrables du CHANTIER PARALLÈLE** (560 lignes de documentation, pas
-  une ligne de code) :
-  - `PRODUCT.md` (152 l.)
-  - `docs/audits/2026-07-29-accueil-rapport-territoire.md` (179 l.)
-  - `docs/handoff/2026-07-29-design-system-sequencage.md` (229 l.)
-  - `.impeccable/` (12 K, configuration de la skill design)
-  - **Ils existent sur disque, donc ils survivent à une coupure de session, mais un `git checkout` ou
-    un `git clean` les perdrait. À committer tôt.**
-- **Non commité, à ne jamais committer** : `Futur.e Design System.zip` (non suivi).
-- **Branches locales à nettoyer** : `feat/address-dossiers` est fusionnée. Restent
-  `feat/composition-faits-lies`, `feat/lot-a-depate-en-une-minute`, `feat/verdict-heros`, antérieures
-  et hors sujet.
-- **Base** : une seule base Supabase (`xkewgsccadjmondzmjxj`), **c'est la production**. Pas
-  d'environnement de développement séparé.
+1. **Porteur** : le refus de vente porte sur l'identification du bien, jamais sur la matière.
+   *Gravé* (`arbitrages/refus-de-vente-sur-ancrage.md`).
+2. **Porteur** : tarif d'approfondissement à **25 €** forfaitaires dès que `decidePaidTerritory` est
+   vrai, quelle que soit la provenance du droit. *Dans la spec, pas encore dans
+   `vision/modele-economique.md`.*
+3. **Porteur** : le compte devient obligatoire **après le clic d'achat et avant la création du
+   PaymentIntent**. *Dans la spec.*
+4. **Proposé et retenu** : l'adresse analysée ne transite pas par Stripe. *Gravé
+   (`arbitrages/adresse-analysee-hors-stripe.md`).*
+5. **Proposé et retenu** : le cookie signé de parcours (`decision_journey_id`) est **abandonné au
+   lancement** plutôt que promis. Le `distinct_id` PostHog persiste déjà, et une colonne sans
+   écrivain est le piège refusé pour `dwelling_discriminator`.
+6. **Porteur** : les liens vers la nouvelle porte depuis la landing et les pages commune
+   **appartiennent au chantier visuel**, pas à celui-ci.
+
+**À porter au vault** : le tarif 25 € dans `vision/modele-economique.md`, avec la correction déjà
+signalée trois fois (l'ancre « 600 à 800 € de diagnostics » est à la charge du **vendeur**,
+art. L271-4 CCH, donc fausse pour un acquéreur).
 
 ---
 
 ## Prochaine étape immédiate
 
-**Committer les cinq fichiers du chantier parallèle** (`PRODUCT.md`, l'audit, son handoff,
-`.impeccable/`). C'est un geste de trente secondes qui protège 560 lignes de travail, et aucun de ces
-fichiers ne touche le code de production.
+**Le test d'achat de bout en bout.** Rien d'autre ne compte tant qu'il n'est pas fait.
 
-**Ensuite, la spec de qualification et de checkout**, qui est le seul vrai blocage : il n'existe
-aucune entrée par l'adresse dans le produit hors la porte de test, et deux des trois échelles
-l'exigent. Matière prête pour l'écrire :
-`docs/rapports-agents/business-strategist/2026-07-29-dossier-adresse-39e.md`, §6 (protocole de test
-sans historique payant) et §7 (les six événements).
-
----
-
-## À vérifier au navigateur, jamais fait
-
-Les lots 1 à 3 n'ont été vérifiés que partiellement (le lot 4 l'a été dans les deux sens). Restent :
-
-1. **`/compte`** doit cesser d'annoncer « Trois échelles, toutes ouvertes » quand elles ne le sont
-   pas, et afficher « Rapport interactif » comme plan malgré `plan = suivi` en base (`LEGACY_PLANS`).
-2. **`/rapport/quartier` sur une commune sans droit** doit rediriger vers `/rapport`. Attention :
-   c'est le seul changement de la session qui peut **fermer** quelque chose qui était ouvert.
-3. **`/compte/memoire`** : le bouton « Modifier » de la commune doit être présent (le verrou de plan
-   est tombé avec les abonnements).
-4. **Le gel du module Autour** (`cb3fc79`), toujours pas vérifié depuis le 29/07 :
-   `https://futur-e.fr/rapport/autour?dossierId=cfe1ed8e-5fc0-4b8c-81ad-989c1d0c3db6`, bloc « Espace
-   vert ». S'il répète « environnement en cours de récupération », la racine serveur est corrigée et
-   le reste est côté client (`AutourModule`, `autourRetriedRef` ne retente qu'une fois par montage).
-
-```sql
-select id, snapshot->'sourceStatus' from public.address_dossiers;
-```
-`osmInfrastructure` et `osmGreenSpaces` doivent être `complete`.
-
-**Vérification RLS jamais exécutée** (elle demande le mot de passe du porteur) :
 ```bash
-TEST_USER_EMAIL=bonjourfuturee@gmail.com TEST_USER_PASSWORD='…' \
-TEST_OTHER_USER_ID=b779cc8f-40c9-4ba5-a3d8-5a5726897c84 \
-  node scripts/verify-address-dossiers-rls.mjs
+stripe listen --forward-to localhost:3000/api/stripe/webhook
 ```
+
+Puis, connecté, sur `/dossier` : qualifier « 2 rue Crébillon Nantes », cliquer « Créer mon dossier »,
+payer avec `4242 4242 4242 4242`.
+
+Les six vérifications sont détaillées dans le plan, tâche 7, étape 11. **Une variable manque
+probablement** : `STRIPE_DOSSIER_PRICE_ID`. Elle n'est lue que pour être recopiée dans les
+métadonnées, donc son absence ne bloque pas, mais autant la poser avant.
+
+Ensuite seulement : le push (quatorze commits), puis la tâche 8 (retrait de la porte
+administrative), qui attend ce même achat réel.
 
 ---
 
 ## Chantiers ouverts, par priorité
 
-**A. La porte « j'ai une adresse ». TOUJOURS LE PLUS URGENT.** Aucune entrée par l'adresse dans le
-produit, hors la porte de test : la saisie libre a été retirée des modules le 29/07, et
-`georisques-logement` exige que l'adresse soit celle du dossier. Condition d'existence du parcours
-payant. À traiter avec la spec de qualification, son endroit naturel.
+**A. Les trois preuves du checkout.** Voir la section en tête.
 
-**B. Deux points de l'étape 2 du chantier parallèle, non traités et vérifiés encore présents :**
-- `FutureELanding.tsx:3099` promet encore « ce qui entoure votre adresse et ce qui pèse sur votre
-  logement » dans le CTA wizard. Même famille de sur-promesse que celle corrigée au lot 2.
-- `FutureELanding.tsx:2688` dit « plus de 50 indicateurs » ; la formule prouvée est « près de 30
-  critères », et elle existe déjà ligne 2803 de la même page.
-- Le reste de l'étape 2 (liens `href="#"` du pied de page du rapport, CTA d'achat affiché aux
-  payants, token sable `#c8b89a`) est décrit dans son handoff.
+**B. Le retrait de la porte administrative**, une fois A fait : retirer
+`ENABLE_ADMIN_DOSSIER_CREATION` de l'environnement Vercel (ce geste seul suffit à fermer la porte),
+supprimer les dossiers de test (`delete ... where stripe_payment_intent_id is null`), puis les trois
+fichiers. **Décision porteur : elle reste ouverte jusque-là.**
 
-**C. Le test manuel de la bascule `address_dossiers`, partiellement fait.** Restent : une adresse
-**sans DPE** (le trou fréquent, où le Passeport doit rester digne), et l'aller-retour
-Territoire → Autour → Logement.
+**C. Les liens vers la porte** depuis la landing et les pages commune. Appartient au chantier
+visuel.
 
-**D. La composition du foyer n'atteint le moteur que par le texte libre.** `user_profiles` porte
-`presence_enfants`, `age_enfants`, `travail_exterieur`, `vehicule_type`, `health_flags`,
-`life_projects`, mais `WizardAnswers` ne demande pas qui vivra là, `UserProject` porte posture /
-intention / texte libre, et `HardConstraints` est purement géographique. **Pas une régression** :
-rien n'a été perdu par le retrait du mode foyer.
+**D. Le rattachement bâtimentaire RNB.** `docs/audits/2026-07-30-rnb-dpe-rattachement-batiment.md`.
+Le RNB rend l'empreinte au sol d'un bâtiment depuis une clé BAN, gratuitement : de quoi remplacer le
+cercle de 50 m par un test point-en-polygone. **Les 34 % de DPE « à moins de 50 m » ne sont pas tous
+attribuables au bon bâtiment**, donc la couverture honnête est peut-être inférieure à 55 %.
 
-**E. « Autour » : quatre chantiers, dans l'ordre.** Afficher les infrastructures bruyantes déjà
-calculées (une session, aucune donnée nouvelle) · compter dans un rayon plutôt que le plus proche ·
-les permis Sitadel autour de l'adresse (API vérifiée, jointure par parcelle) · le zonage PLU des
-parcelles voisines.
+**E. La spec B (« résolution, actualisation et vécu »).** L'intake déclaratif, la confirmation
+d'actualité et d'identité du diagnostic, le numéro de DPE fourni par le lecteur. **Après le
+paiement, jamais avant** : aucune déclaration ne peut fournir ce qui manque à un ancrage absent.
 
-**F. La conclusion déterministe d'« Autour »** : le module rend des faits sans synthèse. **Ne PAS
-créer un troisième prompt** : assembler des énoncés déterministes depuis `secteur-facts.ts`
-(`equipementAutoStatement` fait déjà ce geste).
-
-**G. Le radon attend une décision produit**, pas du code : libellé exact de la carte, et si le geste
-« faire mesurer » mérite un annuaire. Si oui, annuaire qualifié SANS commission.
-
-**H. Le teaser nomme la mauvaise commune.** `WizardTeaser.tsx:292` titre avec `answers.quartier` mais
-charge les signaux sur `inseeCode`. Chez le porteur : quatre points d'attention calculés sur La
-Rochelle, affichés sous le nom de Carpentras. Faux silencieux, antérieur.
-
-**I. Dette conceptuelle `/rapport/quartier`.** L'URL dit encore « quartier » alors qu'Autour porte
-désormais la lecture locale. Constat porteur. Non traité parce que l'URL est indexée et sert le
-levier de découvrabilité : c'est un chantier de redirections, pas une ligne. Consigné dans
-`src/app/dev/loading/page.tsx` (table `SEGMENTS`), là où il se voit.
-
----
-
-## À lire d'abord à la reprise
-
-1. `MEMORY.md` (chargé au démarrage), puis les fiches `project_droit_territorial_ecrans`,
-   `project_foyer_pas_une_echelle`, `project_module_logement`, `project_paywall_territoire`,
-   `business_modele_economique`.
-2. `docs/superpowers/specs/2026-07-29-address-dossiers-design.md` — **la doctrine fait foi** en cas
-   de divergence avec le code.
-3. `docs/vault/arbitrages/mode-foyer-recadre.md` — réécrit cette session.
-4. `docs/handoff/2026-07-29-design-system-sequencage.md` — le chantier parallèle, à lire avant de
-   toucher `FutureELanding.tsx` ou `rapport/page.tsx`.
-5. `docs/rapports-agents/business-strategist/2026-07-29-dossier-adresse-39e.md` — §6 et §7 alimentent
-   la spec de qualification.
-6. `docs/handoff/2026-07-29-address-dossiers.md` — l'archive de la veille.
-7. `docs/handoff/AUTO-SNAPSHOT.md` — **daté du 08/07, très en retard.** Ne pas s'y fier.
+**F à N** : les chantiers B à I du handoff précédent restent ouverts sans changement (composition du
+foyer, module Autour, conclusion déterministe, radon, teaser qui nomme la mauvaise commune, dette
+`/rapport/quartier`).
 
 ---
 
 ## Pièges et fils ouverts
 
-**Un `<Link>` vers une Route Handler ne navigue pas.** Tout lien vers un `route.ts` doit être un
-`<a>`. Ce défaut a rendu inertes trois boutons neufs et un ancien, silencieusement, sans erreur
-console ni signal serveur. Concerne aujourd'hui `/rapport/dossiers/ouvrir` et `/rapport/residence`.
+**Un `<Link>` vers une Route Handler ne navigue pas.** La page d'attente redirige par
+`window.location` vers `/rapport/dossiers/ouvrir`, qui est un `route.ts`.
 
-**Le produit ne peut toujours pas créer de dossier sans la porte de test.** Deux variables absentes
-du repo (`.env.example` est gitignoré), **actives en production** :
-```
-ENABLE_ADMIN_DOSSIER_CREATION=true      # absent = route 404, quelle que soit la liste
-FUTUREE_ADMIN_EMAILS=bonjourfuturee@gmail.com
-```
-Comparaison d'e-mail stricte : Gmail confond `bonjour.futuree@` et `bonjourfuturee@`, pas nous.
-**À RETIRER le jour où le checkout dossier existera** : ce genre de porte reste ouverte des années.
+**Le webhook lève au lieu de retourner** quand l'intention manque. C'est délibéré : `POST` répond
+`{ received: true }` juste après, donc un `return` ferait croire à Stripe que l'événement est traité
+et il ne le rejouerait jamais. Conséquence à connaître : une erreur permanente produira des rejeux
+pendant trois jours, et c'est préférable à un encaissement muet.
 
-**Colonnes devenues muettes en base**, aucune migration destructive : `dashboard_access`,
-`household_mode_enabled`, et les valeurs `suivi` / `foyer` de `plan` (encore portées par cinq comptes,
-lues via `LEGACY_PLANS`). La contrainte `check` de `04_init_accounts.sql` les autorise toujours, sans
-effet puisque plus rien ne les écrit.
+**L'upsert du dossier exige ses deux options.** Sans `onConflict`, Postgres arbitre sur la clé
+primaire (un uuid neuf) et le conflit réel n'est jamais vu ; sans `ignoreDuplicates`, un rejeu
+**écrase** le montant et la date d'achat d'un dossier déjà payé. La liste vide qu'il rend distingue
+une création d'un rejeu, et c'est elle qui gouverne l'e-mail et l'événement d'achat.
 
-**Le webhook Stripe n'a AUCUNE idempotence propre** : toute sa protection contre un événement rejoué
-vient des contraintes de table. `address_dossiers` porte un index unique sur
-`stripe_payment_intent_id`, mais la gestion `ON CONFLICT` appartient à la spec du webhook, qui
-n'existe pas.
+**Deux défauts de conception ont été attrapés avant d'être écrits, et il faut savoir pourquoi.**
+Le premier : les candidats de précision étaient qualifiés avec **les coordonnées de la voie**, donc
+le cadastre aurait été sondé au centroïde pendant que l'écran affichait un numéro précis. Le
+second : le lien menait à `/checkout/dossier`, une page qui n'existait pas, `/checkout/[product]`
+appelant `notFound()` hors `rapport-complet`. Aucune relecture ne les avait vus ; c'est la
+confrontation au code réel et aux API réelles qui les a révélés.
 
-**Pas de bouton de réessai sur les écrans d'attente, et c'est délibéré.** Dans un fallback de
-Suspense sans JS, il ne pourrait être qu'un lien vers la même URL, qui relancerait une navigation
-par-dessus celle en cours au lieu de la reprendre. Le construire demanderait un composant client sur
-le chemin critique, exactement ce qui rend cet écran lent à s'afficher. À traiter avec une vraie
-frontière d'erreur si la reprise devient nécessaire.
+**`GET /search/?…&type=housenumber` ne prouve pas l'absence de numéro** : il rend zéro résultat sur
+une rue pleine de numéros, le score plein texte ne les faisant pas remonter sans numéro dans la
+requête. Seul `/reverse/?…&type=housenumber` répond à cette question.
 
-**`TRUNCATE` reste accordé à `authenticated` sur toutes les tables sauf `address_dossiers`** (défaut
-Supabase). PostgREST ne l'expose pas, donc c'est théorique. Chantier distinct.
+**Deux sessions dans le même arbre de travail.** Stager par chemin, jamais `git add -A` : l'autre
+session a déjà emporté un fichier de celle-ci dans un de ses commits (`c40a956`).
 
-**Deux dossiers de test vivent en base** (2 rue Crébillon, Nantes), `stripe_payment_intent_id` nul,
-donc exclus de tout comptage et d'aucun tarif. Supprimables par `DELETE /api/admin/dossier`.
+**Rappels mécaniques** : `tsconfig.json` exclut `**/*.test.ts` du typecheck et eslint les ignore. Un
+module qui importe `server-only` casse sous `node --test`. Un commentaire JSX dans un ternaire casse
+le build. Un backtick dans un commentaire CSS ferme le template literal d'un bloc `<style>`. **Écrire
+une classe de caractères de contrôle en littéral dans un fichier y dépose de vrais octets NUL** :
+utiliser des echappements Unicode dans la classe. Le hook de pre-commit lance `index:verify`. **Ne pas lancer
+`scripts/probe-conclusion.ts`** (45 appels LLM facturés).
 
-**Rappels mécaniques** : `tsconfig.json` exclut `**/*.test.ts` du typecheck et eslint les ignore, un
-lint vert ne dit rien d'eux. Un module important `server-only` casse sous `node --test`. Un
-commentaire JSX dans un ternaire casse le build. **Un backtick dans un commentaire CSS ferme le
-template literal** d'un bloc `<style>{\`…\`}</style>` (rencontré cette session). Le hook pre-commit
-lance `index:verify`. **Ne pas lancer `scripts/probe-conclusion.ts`** (45 appels LLM facturés).
+---
 
-**Le build affiche des `Failed to build /chaleur/[insee]` en timeout réseau**, jusqu'à 71 sur un run
-quand un serveur de dev tourne en parallèle. Ils repassent au retry : vérifier le compte final et le
-code de sortie, jamais une ligne isolée.
+## À lire d'abord à la reprise
 
-**Le hook design signale `Instrument Serif` comme « fonte surexploitée »** à chaque édition de
-`RouteLoadingBar.tsx`. Faux positif contextuel : c'est la fonte de titre de tout le site. Aucune
-exception n'a été posée, le porteur reprenant la typographie au global, et une exception figée
-deviendrait fausse au changement de fonte.
+1. `MEMORY.md`, puis `project_droit_territorial_ecrans`, `project_module_logement`,
+   `business_modele_economique`.
+2. `docs/superpowers/specs/2026-07-30-qualification-checkout-dossier-design.md` : **la doctrine fait
+   foi** en cas de divergence avec le code.
+3. `docs/superpowers/plans/2026-07-30-qualification-checkout-dossier.md`, dont le journal
+   d'exécution et la tâche 7 étape 11 (le test à faire).
+4. Les deux arbitrages du jour dans `docs/vault/arbitrages/`.
+5. `docs/superpowers/specs/2026-07-29-address-dossiers-design.md` : le socle du dossier.
+6. `docs/handoff/2026-07-30-nuit-droit-territorial.md` : l'archive de la veille.
+7. `docs/handoff/AUTO-SNAPSHOT.md` : **daté du 08/07, très en retard.** Ne pas s'y fier.
