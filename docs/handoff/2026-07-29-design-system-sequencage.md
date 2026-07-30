@@ -89,10 +89,28 @@ secondaire**. Elle doit entrer dans l'audit avant que `DESIGN.md` soit rédigé.
 
 ## Séquence de travail, dans cet ordre
 
-### Étape 1 · Corriger la vérité produit dans `PRODUCT.md`
+### Étape 1 · Corriger la vérité produit dans `PRODUCT.md` · **FAITE (en dernier)**
 
-Appliquer la table à quatre états ci-dessus, et la formulation Pack (élargir) / Dossier Adresse
-(approfondir).
+Faite le 30/07 après les étapes 2 à 5, le porteur ayant démarré la séquence à l'étape 2.
+
+**La table à quatre états du handoff avait vieilli d'un jour** et a été corrigée sur les faits
+plutôt que recopiée. Le Pack Décision **est** achetable (`PackPaymentPanel`, `amount=39`, plus
+l'entrée `pack-decision` dans la table de prix serveur), et le **Dossier Adresse aussi** depuis son
+déploiement du 30/07. La ligne « présenté dans l'interface, pas livré de bout en bout » ne
+correspondait à rien de réel.
+
+État inscrit : Rapport Territoire et Pack Décision **achetables et livrés** ; Dossier Adresse
+**achetable, pas encore éprouvé** (aucun achat réel, module Logement incomplet).
+
+**La question des deux offres à 39 € se répond mieux que prévu**, et le code le disait déjà : le
+Dossier vaut **39 € plein, 25 € quand le territoire de la commune est déjà payé** (`DOSSIER_PRICE`,
+déduction de 14 €). Le Dossier **absorbe** le Territoire au lieu de le revendre. La formulation
+retenue reste celle du porteur : le Pack **élargit** entre plusieurs territoires, le Dossier
+**approfondit** un lieu.
+
+**Piège consigné dans `PRODUCT.md`** : `checkout-products.ts` ne décrit que le Rapport Territoire,
+alors que les trois produits sont câblés dans `api/stripe/create-payment-intent`. Lire le premier
+fichier seul donne une image fausse de l'offre, et c'est ce qui avait produit la table périmée.
 
 ### Étape 2 · Les corrections indépendantes de toute direction visuelle · **FAITE, deux restes**
 
