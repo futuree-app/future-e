@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import { useHorizon, HORIZON_META, type HorizonKey } from "@/hooks/useHorizon";
 import type { QuartierSourceKey } from "@/lib/quartier-signals";
-import { AUTO_SYNTHESIS } from "@/lib/auto-synthesis";
 import { QuartierWorkbook } from "@/app/(account)/compte/QuartierWorkbook";
 
 const HORIZON_PILLS: { key: HorizonKey; year: string; recommended?: boolean }[] = [
@@ -240,8 +239,9 @@ export default function QuartierSynthesis({
 
   useEffect(() => {
     if (!inseeCode || !communeName) return;
-    // Auto seulement si AUTO_SYNTHESIS ; sinon l'utilisateur la déclenche via le bouton.
-    if (!AUTO_SYNTHESIS) return;
+    // INCONDITIONNEL DEPUIS LE 30/07/2026 : cette synthèse était derrière un flag
+    // `AUTO_SYNTHESIS` absent de la production, donc derrière un bouton « Générer la synthèse »
+    // dans un module payant.
     const cleanup = fetchSynthesis(workbook, false);
     return cleanup;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -317,18 +317,6 @@ export default function QuartierSynthesis({
         )}
 
         {synthState === "error" && <FallbackPanel text={fallbackSummary} />}
-
-        {!AUTO_SYNTHESIS && synthState === "idle" && (
-          <div className="mt-2">
-            <button
-              type="button"
-              onClick={() => fetchSynthesis(workbook, false)}
-              className="quartier-regen-btn"
-            >
-              Générer la synthèse
-            </button>
-          </div>
-        )}
 
         {synthState !== "error" &&
           parsed.blocks.map((b, i) => {

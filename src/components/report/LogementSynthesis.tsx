@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import { ReportSection } from "@/components/report/kit";
-import { AUTO_SYNTHESIS } from "@/lib/auto-synthesis";
 import { buildFactHash, type SynthesisData } from "@/lib/logement-synthesis-cache";
 
 type State = "idle" | "streaming" | "done" | "error";
@@ -65,9 +64,15 @@ export function LogementSynthesis({
     }
   }, [data, dossierId, insee, factHash, posthog]);
 
-  // Auto-déclenchement : données prêtes, flag actif, et le hash de faits a changé (gating).
+  // Auto-déclenchement : données prêtes et le hash de faits a changé (gating). Un hash inchangé
+  // sert le texte figé sans appeler le modèle, donc l'auto ne dépense que sur un fait nouveau.
+  //
+  // INCONDITIONNEL DEPUIS LE 30/07/2026. Cette lecture était derrière un flag `AUTO_SYNTHESIS`,
+  // absent des variables de production : l'acheteur d'un dossier à 39 € voyait un bouton
+  // « Générer la lecture » à la place du bloc qu'il avait payé, et personne n'appuie sur un
+  // bouton dont il ignore qu'il contient le produit.
   useEffect(() => {
-    if (!ready || !AUTO_SYNTHESIS) return;
+    if (!ready) return;
     if (lastHashRef.current === factHash) return;
     run();
   }, [ready, factHash, run]);
@@ -77,14 +82,6 @@ export function LogementSynthesis({
   return (
     <ReportSection eyebrow="Lecture de ce logement" tone="accent">
       <div style={{ padding: "4px 0" }}>
-        {state === "idle" && !AUTO_SYNTHESIS && (
-          <button
-            onClick={() => run()}
-            style={{ fontSize: 14, padding: "10px 18px", borderRadius: 10, border: "1px solid var(--border-1)", background: "var(--bg-elev)", color: "var(--fg-hi)", cursor: "pointer" }}
-          >
-            Générer la lecture
-          </button>
-        )}
         {text && (
           // Paragraphes explicites (split sur les sauts doubles) avec inter-paragraphe serré :
           // le pre-wrap + lineHeight 1.75 laissaient des blancs trop grands entre blocs (retour porteur).

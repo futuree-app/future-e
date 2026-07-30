@@ -25,8 +25,14 @@ import { readNarrative, saveNarrative, pruneNarratives } from "@/lib/server/deci
 import { requireCurrentUser } from "@/lib/user-account";
 import { ConclusionBlock, planToBlocks, type ConditionEvidence } from "@/components/report/ConclusionBlock";
 
-// Défaut sûr : « ne dépense pas » (doctrine AUTO_SYNTHESIS). On livre, on observe les artefacts, on
-// allume ensuite. Tant que le flag est absent, le déterministe EST le produit.
+// Défaut sûr à la livraison : « ne dépense pas ». Tant que le flag est absent, le déterministe EST
+// le produit, et ce repli-là est digne (ConclusionBlock rend le plan complet, sans texte généré).
+//
+// LE FLAG EST POSÉ À `true` EN PRODUCTION depuis le 13/07/2026. Attention à la classe de piège :
+// son frère `AUTO_SYNTHESIS` gouvernait les synthèses des modules payants, n'a jamais été posé, et
+// a laissé l'interprétation derrière un bouton pendant toute la phase de lancement. Il a été
+// supprimé le 30/07/2026. Si ce flag-ci disparaît des variables Vercel, la conclusion rédigée
+// disparaît sans bruit : le repli déterministe la rend indiscernable d'une panne.
 const NARRATIVE_ENABLED = process.env.DOSSIER_NARRATIVE === "true";
 
 // Schéma de TRANSPORT, permissif jusqu'à l'élément : un schéma strict ferait échouer l'objet ENTIER
