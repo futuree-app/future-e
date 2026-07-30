@@ -153,3 +153,30 @@ export async function findCadastreParcelByPoint(
 
   return null;
 }
+
+// Sonde de QUALIFICATION : la lecture parcellaire sera-t-elle disponible pour ce point ? L'absence
+// de parcelle ne refuse RIEN (le rapport garde Géorisques au point, les cavités, le GPU,
+// Cartofriches, l'IRIS) : elle est seulement annoncée avant le paiement.
+//
+// UN SEUL APPEL, AU POINT. `findCadastreParcelByPoint` retombe sur des carrés de 3, 8 puis 15 m
+// quand le point ne tombe dans aucune parcelle : quatre requêtes, acceptables pour un dossier
+// payé, trop pour une route publique à haut volume.
+//
+// Divergence assumée, et elle va dans le bon sens : la qualification peut annoncer « lecture
+// parcellaire indisponible » là où le dossier la trouvera par repli. On promet moins que ce qu'on
+// livre, jamais l'inverse.
+export async function probeCadastreAtPoint(
+  longitude: number,
+  latitude: number,
+): Promise<{ status: "found" | "none" | "unavailable" }> {
+  try {
+    const features = await fetchCadastreFeatures(
+      { type: "Point", coordinates: [longitude, latitude] },
+      1,
+    );
+    return { status: toCadastreParcel(features[0]) ? "found" : "none" };
+  } catch {
+    // Une panne réseau ne se traduit JAMAIS en « aucune parcelle ».
+    return { status: "unavailable" };
+  }
+}

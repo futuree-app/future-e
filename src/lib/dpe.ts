@@ -225,6 +225,48 @@ export async function getDpeCandidatesByBanId(banId: string): Promise<DpeRecord[
     .sort((a, b) => (b.date_dpe ?? "").localeCompare(a.date_dpe ?? ""));
 }
 
+// Sonde de QUALIFICATION : dit si un diagnostic EXACT existe à cet identifiant BAN, et distingue
+// l'absence de la panne. `fetchLines` rend `[]` dans les deux cas, ce qui ferait annoncer « aucun
+// diagnostic » pendant un incident ADEME, alors que l'invariant central de la qualification est
+// qu'une source en panne ne se présente jamais comme une absence de donnée.
+//
+// Elle ne cherche PAS par coordonnées : un DPE à 50 m est un candidat à confirmer (doctrine
+// B2_NEARBY_UNCONFIRMED du socle thermique), et l'annoncer avant paiement promettrait une matière
+// que le produit refuse d'affirmer après l'achat.
+export async function probeDpeByBanId(
+  banId: string,
+): Promise<{ status: "found" | "none" | "unavailable"; count: number }> {
+  let sawFailure = false;
+  let count = 0;
+
+  for (const dataset of [DS.existant, DS.neuf]) {
+    const url = new URL(`${dataset}/lines`);
+    url.searchParams.set("qs", `identifiant_ban:"${banId}"`);
+    url.searchParams.set("size", "5");
+    url.searchParams.set("select", "numero_dpe");
+    try {
+      // Timeout explicite : sans lui, une ADEME lente bloque une route PUBLIQUE jusqu'au timeout
+      // de la plateforme, et le lecteur regarde un écran vide au lieu de lire un avertissement.
+      const res = await fetch(url.toString(), {
+        next: { revalidate: 86400 },
+        signal: AbortSignal.timeout(6000),
+      });
+      if (!res.ok) {
+        sawFailure = true;
+        continue;
+      }
+      const json = (await res.json()) as { results?: unknown[] };
+      count += json.results?.length ?? 0;
+    } catch {
+      sawFailure = true;
+    }
+  }
+
+  if (count > 0) return { status: "found", count };
+  // Une absence n'est affirmée que si les DEUX jeux ont RÉPONDU. Sinon on ne sait pas.
+  return sawFailure ? { status: "unavailable", count: 0 } : { status: "none", count: 0 };
+}
+
 export async function getDpeByBanId(banId: string): Promise<DpeRecord | null> {
   for (const dataset of [DS.existant, DS.neuf]) {
     const results = await fetchLines(dataset, {
