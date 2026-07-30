@@ -305,8 +305,8 @@ export default async function RapportPage() {
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <span className="text-[14px] text-label font-medium">{m.name}</span>
-                    <span className="ml-auto font-mono text-[10px] tracking-[0.06em] uppercase text-ghost group-hover:text-label transition-colors shrink-0">
-                      Ouvrir →
+                    <span className="ml-auto text-[13px] text-ghost group-hover:text-label transition-colors shrink-0">
+                      Ouvrir <span aria-hidden>→</span>
                     </span>
                   </TrackedModuleLink>
                 ))}
@@ -434,14 +434,16 @@ export default async function RapportPage() {
                     <span className="font-mono text-[13px] text-ghost tabular-nums">
                       {String(i + 1).padStart(2, "0")}
                     </span>
+                    {/* UN SEUL EMPLOI DU MONO PAR LIGNE, le rang. Le grain était en mono capitales
+                        espacées et le bouton aussi : trois voix machine par ligne pour un sommaire de
+                        trois liens, ce qui donnait un écran plus froid que dense. Le mono dit une
+                        valeur ou un repère de comptage, jamais une phrase. */}
                     <div>
                       <h3 className="font-normal text-[20px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
                         {module.name}
+                        <span className="text-muted text-[15px]"> · {MODULE_GRAIN[module.id] ?? module.summary}</span>
                       </h3>
-                      <p className="font-mono text-[11px] tracking-[0.06em] uppercase text-ghost mt-1">
-                        {MODULE_GRAIN[module.id] ?? module.summary}
-                      </p>
-                      <p className="text-[13px] text-muted leading-[1.65] mt-3">{benefit}</p>
+                      <p className="text-[13px] text-muted leading-[1.65] mt-2.5">{benefit}</p>
                     </div>
                     <div className="col-start-2 sm:col-start-3 sm:row-start-1">
                       <TrackedModuleLink
@@ -449,9 +451,9 @@ export default async function RapportPage() {
                         moduleId={module.id}
                         commune={displayName}
                         inseeCode={inseeCode}
-                        className="inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.08em] uppercase text-muted hover:text-label no-underline border border-white/[0.12] rounded-lg px-4 py-2 whitespace-nowrap transition-colors"
+                        className="inline-flex items-center gap-2 text-[14px] text-muted hover:text-label no-underline whitespace-nowrap transition-colors"
                       >
-                        Ouvrir →
+                        Ouvrir <span aria-hidden>→</span>
                       </TrackedModuleLink>
                     </div>
                   </article>

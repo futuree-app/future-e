@@ -25,6 +25,11 @@ import { getResidencesSecondairesPct } from "@/lib/saisonnalite";
 import { getEra5Trend } from "@/lib/era5-trend";
 import { getReportContext, resolveRelation, synthesisRelation, parseDiscoveryWorkbook } from "@/lib/report-context";
 import { ReportRelationBanner } from "@/components/report/ReportRelationBanner";
+import { buildCommuneDossier } from "@/lib/decision/territory-facts";
+import { normalizeUserProject } from "@/lib/user-project";
+import { listDossiers } from "@/lib/address-dossier-store";
+import { communeParent } from "@/lib/plm";
+import { registersByTarget } from "@/lib/decision/evidence-registers";
 
 export default async function RapportQuartierPage() {
   const account = await getCurrentUserAccount();
@@ -33,7 +38,7 @@ export default async function RapportQuartierPage() {
 
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select(`${TERRITORY_SELECT}, workbook_quartier`)
+    .select(`${TERRITORY_SELECT}, workbook_quartier, user_project`)
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -95,6 +100,27 @@ export default async function RapportQuartierPage() {
       })
     : null;
   const territoryCards = territoryContext ? buildTerritoryCards(territoryContext.entry) : null;
+
+  // LA RELATION DE CHAQUE CARTE AU PROJET DU LECTEUR, pour le filet coloré de la grille.
+  //
+  // Le dossier de décision est assemblé sur /rapport, pas ici : cette page ne le connaissait pas. Le
+  // reconstruire est un coût assumé (buildCommuneDossier lit climat, risques, radon et contraintes
+  // dures), et c'est le seul moyen de savoir quelles cartes participent réellement à la décision.
+  // Les sources ont leur propre cache, donc la seconde lecture est moins chère que la première.
+  //
+  // Sans projet, `dossier` reste nul et la table est vide : aucune carte n'a de filet, ce qui est le
+  // comportement voulu (la couleur exprime une relation au projet).
+  const userProject = normalizeUserProject(
+    (profile as { user_project?: unknown } | null)?.user_project ?? null,
+  );
+  const dossiersDuCompte = inseeCode ? await listDossiers(supabase, user.id) : [];
+  const aUneAdresseIci = inseeCode
+    ? dossiersDuCompte.some((d) => communeParent(d.insee) === communeParent(inseeCode))
+    : false;
+  const communeDossier = inseeCode && userProject
+    ? await buildCommuneDossier(inseeCode, userProject, { hasAddress: aUneAdresseIci }).catch(() => null)
+    : null;
+  const registres = registersByTarget(communeDossier?.dossier ?? null);
 
   // Sources mobilisées par horizon : pré-calculées côté serveur, le composant
   // client choisit via useHorizon. Ligne discrète sous la synthèse (pas de bloc
@@ -210,7 +236,7 @@ export default async function RapportQuartierPage() {
           >
             Les grands signaux du territoire
           </h2>
-          <QuartierAside communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={eloignementServicesPct} era5={era5} climatType={territoryMood.type} />
+          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={eloignementServicesPct} era5={era5} climatType={territoryMood.type} />
         </section>
 
         {/* Une question ? — AskFuture inline (uniquement pour comptes payants) :

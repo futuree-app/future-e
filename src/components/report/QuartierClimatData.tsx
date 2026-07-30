@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { evidenceAnchorId, type EvidenceTargetKey } from "@/lib/decision/evidence-targets";
+import { registerForCard, type RegisterKey } from "@/lib/decision/evidence-registers";
 import { useHorizon, HORIZON_META, type HorizonKey } from "@/hooks/useHorizon";
 import { MetricDrawer, type CardDetail } from "@/components/MetricDrawer";
 import { MetricTooltip } from "@/components/MetricTooltip";
@@ -1079,7 +1080,18 @@ function formatFrDate(iso: string): string {
 
 // ─── FactorGrid (grille horizontale de cartes) ────────────────────────────────
 
-export function QuartierAside({ communeName, scenarios, georisques, territoire, vigieau, drought, catnat, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, climatType }: SharedProps) {
+// LA TEINTE D'UN REGISTRE, seule table de correspondance de ce fichier. Identique à celle du dossier
+// (DossierDecisionSection) : la même chose dite au même endroit doit se peindre pareil.
+const REGISTER_TONE: Record<RegisterKey, string> = {
+  incompatibilities: "var(--red)",
+  alignments: "var(--green)",
+  mismatches: "var(--yellow)",
+  compromises: "var(--orange)",
+  unknowns: "var(--amethyst)",
+  verifications: "var(--info)",
+};
+
+export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, catnat, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, climatType }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
   const [horizon] = useHorizon();
   const [openDetail, setOpenDetail] = useState<CardDetail | null>(null);
   const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, climatType ?? null);
@@ -1112,6 +1124,15 @@ export function QuartierAside({ communeName, scenarios, georisques, territoire, 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
                 {g.items.map((f) => {
                   const clickable = !!f.detail;
+                  // LE FILET DIT LA RELATION AU PROJET, plus le thème du groupe.
+                  //
+                  // Il portait la couleur du thème, donc la même sur toutes les cartes d'un groupe,
+                  // sous un surtitre qui la disait déjà : il ne distinguait rien et devenait un motif
+                  // (DESIGN.md § 6.2). Il dit maintenant à quel registre du dossier cette donnée
+                  // participe, et il est RARE par construction : la plupart des cartes n'en ont pas.
+                  // Les règles de sélection vivent dans `evidence-registers.ts`, avec leurs tests.
+                  const registre = registres ? registerForCard(f.targets, registres) : null;
+                  const tone = registre ? REGISTER_TONE[registre] : null;
                   return (
                     <div
                       key={f.label}
@@ -1129,7 +1150,7 @@ export function QuartierAside({ communeName, scenarios, georisques, territoire, 
                       // c'est une information, pas un déchet visuel.
                       style={{
                         position: "relative",
-                        borderTop: `2px solid ${f.missing ? "var(--fg-absent)" : col}`,
+                        borderTop: tone ? `2px solid ${tone}` : undefined,
                         cursor: clickable ? "pointer" : undefined,
                       }}
                       role={clickable ? "button" : undefined}

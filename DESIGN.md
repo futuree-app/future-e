@@ -1,7 +1,10 @@
 # DESIGN.md · Le langage visuel de futur•e
 
-**Version 1.3 · 30 juillet 2026 · prescriptif.**
+**Version 1.4 · 30 juillet 2026 · prescriptif.**
 
+> **v1.4** : le filet de carte dit désormais la **relation de la donnée au projet du lecteur**, avec
+> ses quatre règles de sélection (§ 6.2), et le registre « écart » reçoit le jaune (§ 5.4).
+>
 > **v1.3** : correction factuelle. Le dossier porte **six** registres, pas cinq : `mismatches`
 > existe et n'a aucune teinte, il tombe silencieusement sur celle de « non su » (§ 5.4).
 >
@@ -136,7 +139,7 @@ Toute valeur affichée est dans l'un de ces quatre états, et son traitement vis
 | --- | --- |
 | **Mesurée** | valeur pleine, mono tabulaire, source sous la valeur |
 | **Projetée** | valeur pleine + horizon nommé (« en 2050 ») + scénario France (« +2,7 °C ») |
-| **Absente** | tiret `—`, couleur `--fg-absent`, filet gris, mention explicite de l'absence |
+| **Absente** | tiret `—`, couleur `--fg-absent`, mention explicite de l'absence |
 | **Non applicable** | la carte n'est pas rendue du tout |
 
 **L'absence est une information, elle s'affiche.** Une donnée manquante ne se remplace jamais par
@@ -155,8 +158,12 @@ AA exige 4,5:1 pour du texte courant. Les trois échouent une fois estompés, ce
 frontalement le plancher WCAG 2.2 AA que ce document se donne au § 10.
 
 Règle : un token `--fg-absent` porte la couleur de l'état absent, avec un contraste vérifié sur
-tous les fonds autorisés, y compris le futur thème clair. L'effacement **visuel** se produit par la
-teinte, le filet gris et le tiret, jamais par l'opacité du bloc.
+tous les fonds autorisés, y compris le thème clair. L'effacement **visuel** se produit par la teinte
+et le tiret, jamais par l'opacité du bloc.
+
+L'absence **n'a pas de filet propre**. Le filet de carte ne dit qu'une chose, la relation au projet
+(§ 6.2) : lui faire dire aussi « donnée manquante » rouvrirait la confusion que le § 7 vient de
+fermer sur les échelles.
 
 **Défaut connexe à corriger** : `--ghost` (`#6b7388`) est déjà à 4,22:1 en pleine opacité, donc sous
 AA avant tout estompage. Il porte aujourd'hui les sources et les surtitres. À reprendre avec
@@ -247,7 +254,7 @@ Six teintes, et aucune autre :
 | `--blue` / `--info` | `#60a5fa` | contrôle à mener, eau, inondation |
 | `--green` | `#4ade80` | alignement |
 | `--amethyst` / `--violet` | `#a78bfa` | ce qui n'est pas su, pollutions |
-| `--yellow` | `#fbbf24` | vigilance |
+| `--yellow` | `#fbbf24` | écart à la demande |
 
 **Toute couleur s'écrit `var(--token)`.** Une valeur hexadécimale en dur dans un composant est un
 défaut, même quand elle est exacte : elle échappe au thème clair et au changement futur.
@@ -276,15 +283,22 @@ Le dossier de décision porte six registres, et cette correspondance est gravée
 | Incompatibilité | `--red` | une condition non négociable n'est pas tenue |
 | Alignement | `--green` | ce que le lieu tient bien |
 | Compromis | `--orange` | ce qui départage |
-| Écart (`mismatches`) | **aucune** | ce qui correspond moins bien que demandé |
+| Écart (`mismatches`) | `--yellow` | ce qui correspond moins bien que demandé |
 | Non su | `--amethyst` | ce qu'on n'a pas pu lire |
 | Contrôle à mener | `--info` | ce qui reste à vérifier sur place |
 
-**Défaut à corriger** : `mismatches` n'a pas d'entrée dans `SECTION_ACCENT` et tombe sur le repli
-`--amethyst`, donc sur la teinte de « non su ». Un écart à la demande et une donnée illisible sont
-deux choses opposées, peintes à l'identique. La teinte de ce registre reste **à trancher** : le jaune
-est la seule libre, mais un écart n'est pas davantage une vigilance qu'un compromis n'est une alerte.
-Tant que le choix n'est pas fait, le repli silencieux est un mensonge de couleur.
+**Pourquoi le jaune pour l'écart** (tranché le 30/07/2026). Un mismatch n'est pas une
+incompatibilité moins grave, c'est une nature différente : l'assembleur le décrit comme « établi, non
+éliminatoire, à arbitrer », et précise qu'« un mismatch n'est pas un compromis, pas de contrepartie ».
+Il dit la distance entre ce que le lecteur a demandé et ce que le lieu est, sans que ce soit un
+défaut du lieu. Une gradation rouge vers orange aurait suggéré une échelle de gravité, donc un score,
+que l'ADR-0001 interdit. Le rôle du jaune dans la palette devient donc « écart à la demande ».
+
+**Défaut transversal découvert au même moment, non corrigé** : les six teintes de registre sont
+calibrées pour le fond sombre et **s'effondrent en thème clair**. Sur `#faf8f3` : jaune 1,57:1,
+orange 2,13:1, rouge 2,61:1, quand AA exige 4,5:1 pour un texte. Or `col` peint le surtitre de chaque
+section, donc du texte. Le thème clair a besoin de ses propres valeurs de registre, plus sombres et
+plus saturées. Chantier distinct, à ouvrir.
 
 **Tranché le 30/07/2026** : dans le rapport, **l'orange signifie « compromis »**. L'accent de marque
 ne colore plus les éléments de navigation ordinaires du rapport : les CTA y sont neutres, en texte
@@ -316,14 +330,29 @@ fait, un module. Un paragraphe dans une carte est un paragraphe avec une bordure
 
 ### 6.2 Le filet coloré en haut de carte
 
-**Le filet n'apparaît que lorsque sa couleur informe** : le thème d'un groupe de cartes, le registre
-d'un verdict. Il est interdit en décor. *(Arbitrage du porteur, 30/07/2026.)*
+**Le filet dit la relation de cette donnée au projet du lecteur, et rien d'autre.** Il porte la
+teinte du registre du dossier auquel cette donnée participe (§ 5.4). Il est interdit en décor, et
+interdit pour dire un thème, une échelle ou un état technique. *(Arbitrages du porteur, 30/07/2026.)*
 
 Règle testable : dans une grille où toutes les cartes visibles porteraient le même filet, **aucune
-ne le porte**. La couleur du groupe est déjà dite par le surtitre et sa puce.
+ne le porte**. Une couleur qui ne distingue rien ne signifie rien.
 
 Motif : le filet automatique sur chaque carte est l'un des signes les plus reconnaissables d'une
-interface générée. Ce qui le rend tel est sa répétition, non sa forme.
+interface générée. Ce qui le rend tel est sa répétition, non sa forme. En le liant au dossier, il
+devient rare par construction : une carte doit réellement participer à la décision pour en porter un.
+
+**Les quatre règles de sélection** (implémentées et testées dans
+`src/lib/decision/evidence-registers.ts`) :
+
+1. Sans projet, donc sans dossier, aucune carte n'a de filet.
+2. Une carte dont aucun phénomène n'est cité par le dossier n'en a pas.
+3. Une carte dont les phénomènes cités convergent vers un seul registre porte sa teinte.
+4. Une carte citée par plusieurs registres différents n'en a pas, **sauf** si l'un d'eux est
+   l'incompatibilité, qui l'emporte toujours parce qu'elle bloque le dossier.
+
+La règle 4 n'invente pas de priorité : le code donne déjà à l'incompatibilité un statut à part
+(`dossier-view.ts` lui fait absorber les autres sections). Effacer un blocage parce qu'un alignement
+coexiste sur la même carte perdrait l'information la plus grave de l'écran.
 
 ### 6.3 Le badge et la pastille
 
@@ -549,6 +578,14 @@ Quatre points sont volontairement non tranchés dans cette version :
    reporté après le lancement.
 
 ## 12. Journal des amendements
+
+**v1.4, 30/07/2026** :
+
+| Amendement | Motif |
+| --- | --- |
+| § 6.2 · le filet dit la relation au projet | Il portait le thème du groupe, donc la même teinte sur toutes les cartes sous un surtitre qui la disait déjà. Lié au dossier, il devient rare par construction et redevient une affirmation vérifiable |
+| § 5.4 · le jaune pour l'écart | Le sixième registre n'avait pas de teinte. Un écart n'est ni une incompatibilité atténuée ni un compromis : une gradation aurait suggéré un score |
+| § 3.1 · l'absence perd son filet | Le filet ne dit qu'une chose. Lui faire dire aussi « donnée manquante » rouvrirait la confusion fermée au § 7 |
 
 **v1.3, 30/07/2026** :
 

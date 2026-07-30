@@ -17,6 +17,18 @@ const SECTION_ACCENT: Record<string, string> = {
   // ALIGNMENT (lot C) : le côté favorable, en VERT — un accent distinct des sections de problème
   // (rouge/orange/améthyste/bleu). Même ton que le côté favorable d'un tradeoff : la couleur porte le sens.
   alignments: "var(--green)",
+  // MISMATCH : la sixième section n'avait AUCUNE entrée ici et tombait sur le repli améthyste, donc
+  // sur la teinte de « ce que nous ne savons pas ». Un écart mesuré à la demande et une donnée
+  // illisible sont deux choses opposées, et l'écran les peignait à l'identique (corrigé le
+  // 30/07/2026).
+  //
+  // Le jaune, et pas un rouge atténué : un mismatch n'est pas une incompatibilité moins grave, c'est
+  // une NATURE différente. Il dit la distance entre ce que le lecteur a demandé et ce que le lieu
+  // est, sans que ce soit un défaut du lieu ni quelque chose qui se compense (l'assembleur le note :
+  // « établi, non éliminatoire, à ARBITRER », et « un mismatch n'est pas un compromis, pas de
+  // contrepartie »). Une gradation rouge → orange aurait suggéré une échelle de gravité, donc un
+  // score, que l'ADR-0001 interdit.
+  mismatches: "var(--yellow)",
   compromises: "var(--orange)",
   unknowns: "var(--amethyst)",
   verifications: "var(--info)",
