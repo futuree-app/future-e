@@ -119,11 +119,54 @@ Bandeaux d'état corrects (territoire refusé, territoire actif, biens dans une 
 
 ---
 
-## À vérifier au navigateur, dans cet ordre
+## Parcours réel au navigateur, 30/07/2026
 
-1. Une adresse **sans DPE**. Lire le module Logement en entier et juger les deux premières sections.
-2. La même adresse **avec DPE**, pour mesurer l'écart entre les deux dossiers.
-3. Cliquer « Générer la lecture » sur Logement et sur Territoire, et juger le texte obtenu. C'est
-   lui qui décide si le flag doit être allumé.
-4. L'aller-retour Territoire → Autour → Logement, jamais parcouru en entier.
-5. Le module Autour seul : est-ce qu'il vaut son titre sans conclusion ?
+**Méthode** : compte de test jeté, deux dossiers posés en base sans passer par Stripe, parcours
+Playwright sur la production, puis suppression complète (compte, profil, dossiers ; aucune ligne
+`payments` n'a été créée). Deux adresses choisies pour opposer les cas :
+**1 Place du Capitole, Toulouse** (DPE et parcelle présents, immeuble collectif) et
+**2 Le Cros, Anglards-de-Saint-Flour** (parcelle présente, aucun DPE, rural).
+
+### Ce qui marche
+
+- La **synthèse automatique fonctionne** depuis le déploiement du 30/07 : trois blocs rédigés sur
+  Territoire (« ce qui domine », « ce qui tient, ce qui se tend », « ce qu'on sous-estime ici »),
+  spécifiques à la commune, et une lecture rédigée sur Logement. Plus aucun bouton à deviner.
+- Le **module Territoire est le plus solide des trois** : passeport, synthèse rédigée, mémoire des
+  catastrophes depuis 1982, treize cartes de signaux réparties en territoire, climat et risques.
+- Le **module Autour rend bien son contenu** (pharmacie 68 m, école maternelle 287 m, gare 1,2 km,
+  banque 28 m, 39,7 % de ménages avec voiture, parc 65 m, îlot de chaleur +7,3 °C). Il reste mince
+  et s'arrête sans conclusion.
+- Les bandeaux du hub sont justes une fois le territoire posé.
+
+### Les deux problèmes que seul le navigateur montre
+
+**1. En ville, le module Logement s'ouvre sur un devoir à faire.** À 1 Place du Capitole, la base
+DPE contient **24 diagnostics**. `PreciseLogementStep` bloque tout le rapport et demande à
+l'acheteur de désigner le sien dans une liste d'appartements anonymes : « appartement · 10,2 m² ·
+Etage 4 ; Porte 37 · 2026 », « appartement · 23,3 m² · R+2 · 2024 »… Quelqu'un qui **envisage**
+d'acheter ne connaît ni l'étage ni le numéro de porte. S'il répond « mon logement n'est pas dans
+cette liste », l'état passe à `rejected` et la section Énergie se réduit à une phrase. C'est le cas
+majoritaire d'un acheteur urbain.
+
+**2. En rural sans DPE, le dossier conclut qu'il n'y a rien à dire.** Le module rend tout son
+contenu, honnêtement, et la synthèse générée se termine par :
+
+> « L'adresse ne porte pas d'enjeu structurant identifié. »
+
+Précédée de « Aucun diagnostic énergétique n'est rattaché à ce logement », « Les données publiques
+retrouvées ne permettent pas de qualifier le confort d'été », « Aucune règle de construction
+particulière à cette adresse », « Aucun sinistre de sécheresse remboursé dans cette commune ». Tout
+est vrai. Le problème n'est pas l'honnêteté, c'est que **le dossier vaut cher là où il y a un
+problème et ne vaut rien là où il n'y en a pas**, et que l'acheteur ne peut pas le savoir avant de
+payer. La qualification annonce la MATIÈRE disponible, jamais l'ENJEU.
+
+### Corrections de la lecture de code
+
+- **« 35 à 53 % des adresses sans DPE » ne correspond pas à ce qu'on mesure.** Sur onze adresses
+  sondées en production, neuf ont un DPE, et toutes les urbaines en ont un. Le trou est **rural**,
+  pas général.
+- La bande « mémoire du lieu » paraissait vide en capture : c'est un artefact. Elle est à
+  `opacity: 0` jusqu'à ce qu'un `IntersectionObserver` la révèle au défilement, ce qu'une capture
+  pleine page en headless ne déclenche pas.
+- Le module Autour ne rendait pas « que son en-tête » : la longueur du texte m'avait trompé.
