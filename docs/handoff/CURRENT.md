@@ -173,17 +173,42 @@ pas pu couvrir, et il porte l'écran le plus visible du tunnel.
 
 Les clés de test sont disponibles sans manipulation : la CLI Stripe est authentifiée et son fichier
 de configuration porte `test_mode_api_key` et `test_mode_pub_key`, valides jusqu'au 05/09/2026.
-**Next 16 refuse un second `next dev` dans le même répertoire** : servir le build par
-`npx next start -p 3001` contourne le verrou sans toucher au serveur de l'autre session.
+
+### DANGER : `next start` sert un formulaire de paiement EN MODE LIVE
+
+**`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` est inlinée dans le bundle au moment du BUILD**, pas lue à
+l'exécution. Le build présent sur disque le 30/07/2026 contient **une occurrence de `pk_live` et
+zéro `pk_test`**. Passer `pk_test` en variable d'environnement à `npx next start` ne change donc
+**rien** à ce que le navigateur charge : Stripe Elements s'ouvrirait sur la caisse réelle, et une
+vraie carte serait débitée.
+
+`next start` convient au test **serveur** (aucune clé publique en jeu, c'est ainsi que les trois
+preuves ont été obtenues). Il ne convient **pas** au test navigateur.
+
+Pour le test navigateur, deux voies, et une seule est sûre sans rebuild :
 
 ```bash
-stripe listen --forward-to localhost:3001/api/stripe/webhook
-# puis, avec les trois valeurs (sk_test, pk_test, whsec de la session) :
-npx next start -p 3001
+# 1. arrêter le serveur dev en cours (celui de l'autre session), puis :
+STRIPE_SECRET_KEY=sk_test_… \
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_… \
+STRIPE_WEBHOOK_SECRET=whsec_… \
+  npm run dev
 ```
 
-Vérifier : le formulaire de paiement s'affiche, la page d'attente bascule seule vers le dossier,
-et le dossier s'ouvre. Puis **nettoyer** (voir la requête plus bas).
+`next dev` compile à la volée et lit les variables du processus, qui priment sur `.env.local`.
+
+**Garde-fou à exécuter AVANT de saisir une carte**, quelle que soit la voie choisie :
+
+```bash
+curl -s http://localhost:3000/checkout/dossier?banId=…\&label=…\&insee=… \
+  | grep -c "pk_live" ; # doit répondre 0
+```
+
+Et dans l'onglet réseau du navigateur, vérifier que la requête vers `api.stripe.com` porte une clé
+`pk_test_`. **Ne jamais saisir de carte tant qu'un `pk_live` est visible.**
+
+À terme : séparer les secrets locaux des secrets de production. Un navigateur local ne devrait pas
+pouvoir afficher un formulaire de paiement réel.
 
 Ensuite : le push (seize commits), et seulement après un achat éprouvé **en production**, la
 tâche 8. **`STRIPE_DOSSIER_PRICE_ID` est absente** ; elle n'est lue que pour être recopiée dans les
