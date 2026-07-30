@@ -1234,7 +1234,10 @@ export function QuartierDataBody({ communeName, scenarios, georisques, drought, 
   const paragraphs = communeName ? buildParagraphs(communeName, gwlData, horizon, georisques, drought, vigieau) : [];
 
   return (
-    <div className="glass rounded-xl p-8 border-t-2 border-t-info">
+    /* Le filet bleu de tête a été retiré le 30/07/2026 : il portait la couleur d'échelle Territoire,
+       que le § 7 de DESIGN.md ne reconnaît plus, et il était seul de son espèce sur cet écran, donc
+       il ne distinguait rien (§ 6.2). Le bloc reste la surface élevée de son mouvement. */
+    <div className="glass rounded-xl p-6 sm:p-8">
       <h3 className="font-normal text-[26px] text-label mb-3 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
         {communeName}, à l&apos;horizon {meta.year}, scénario France {meta.france}.
       </h3>
