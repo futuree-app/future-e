@@ -37,10 +37,17 @@ export function PaymentForm({ onSuccess, submitLabel, returnUrl, onSubmit }: Pay
       return;
     }
 
+    // STRIPE EXIGE UNE URL ABSOLUE. Un chemin relatif fait échouer la confirmation avec
+    // « Not a valid URL », et l'erreur s'affiche à la place du formulaire, donc rien ne se paie.
+    // Le repli historique était déjà absolu, ce qui a caché le piège jusqu'au premier appelant qui
+    // a passé un chemin (le dossier d'adresse, 30/07/2026). La normalisation vit ICI, au seul
+    // endroit qui parle à Stripe, pour qu'aucun appelant futur n'ait à y penser.
+    const absoluteReturnUrl = new URL(returnUrl ?? "/merci", window.location.origin).toString();
+
     const { error: confirmError } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: returnUrl ?? `${window.location.origin}/merci`,
+        return_url: absoluteReturnUrl,
       },
     });
 

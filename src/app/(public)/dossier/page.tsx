@@ -31,8 +31,8 @@ export default function DossierPage() {
           Quel bien voulez-vous faire examiner&nbsp;?
         </h1>
         <p className="text-[15.5px] text-muted leading-relaxed mb-9">
-          Avant de vous proposer quoi que ce soit, nous vérifions que nous savons de quel bien il
-          s&apos;agit, et nous vous disons ce que nous trouverons à cette adresse.
+          Une adresse porte trois échelles : la commune où elle se trouve, ce qui l&apos;entoure, et
+          le bâtiment lui-même. Saisissez-la, nous vous dirons ce que nous pouvons en lire.
         </p>
 
         <DossierQualificationClient />

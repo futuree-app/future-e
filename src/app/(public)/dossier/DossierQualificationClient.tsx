@@ -15,15 +15,12 @@ type Candidate = {
   distanceM: number;
 };
 
-type Warning =
-  | { code: "no_exact_dpe_found" }
-  | { code: "no_parcel_reading" }
-  | { code: "source_unavailable"; source: "ademe" | "cadastre" };
+type MatterState = "found" | "none" | "unavailable";
 
 type Outcome =
   | {
       status: "qualified";
-      warnings: Warning[];
+      matter: { dpe: MatterState; parcel: MatterState };
       quote: {
         status: "final" | "provisional";
         basePriceCents: number;
@@ -34,26 +31,79 @@ type Outcome =
   | { status: "needs_precision"; candidates: Candidate[] }
   | { status: "unsupported_at_launch" };
 
-// Ce que la qualification DIT, et ce qu'elle ne dit jamais. Elle nomme la MATIÈRE et les manques
-// propres à cette adresse. Aucune valeur, aucun état, aucun verdict : sinon elle devient le
-// produit gratuit qui rend le payant inutile.
+// ════════════════════════════════════════════════════════════════════════════
+// CE QUE CET ÉCRAN DIT, ET CE QU'IL NE DIT JAMAIS.
 //
-// « le diagnostic EXACT n'a pas été retrouvé » plutôt que « aucun diagnostic » : la sonde cherche
-// par identifiant BAN, qui couvre une adresse sur cinq, tandis que le dossier retrouvera peut-être
-// un candidat par proximité. La formule reste vraie dans les deux cas, donc elle ne sera jamais
-// démentie quelques minutes après l'achat.
-const WARNING_COPY: Record<string, string> = {
-  no_exact_dpe_found:
-    "Le diagnostic exact de ce logement n'a pas été retrouvé. Le dossier le dira, et lira le bâtiment autrement.",
-  no_parcel_reading:
-    "La lecture parcellaire n'est pas disponible ici. Les risques au point et les alentours le restent.",
-  source_unavailable_ademe:
-    "Nous n'avons pas pu interroger les diagnostics à l'instant. Ce n'est pas une absence de diagnostic.",
-  source_unavailable_cadastre:
-    "Nous n'avons pas pu vérifier la parcelle à l'instant.",
-};
+// Il nomme la MATIÈRE : ce qui sera examiné à cette adresse, et ce qui manque à cette adresse-là.
+// Aucune valeur, aucun état, aucun verdict : la classe d'un diagnostic et le numéro d'une parcelle
+// appartiennent au dossier payé. Sinon la qualification deviendrait le produit gratuit qui rend le
+// payant inutile.
+//
+// LE STATUT SE PORTE PAR L'INTERFACE, jamais par une phrase qui énumère des absences (doctrine de
+// marque). D'où une ligne par élément, avec sa pastille et son état en deux mots, plutôt que des
+// paragraphes de regret.
+// ════════════════════════════════════════════════════════════════════════════
 
 const EUR = (cents: number) => `${Math.round(cents / 100)} €`;
+
+// Les trois échelles du dossier. Elles décrivent ce que le lecteur obtient, dans son ordre de
+// lecture : le territoire d'abord, puis ce qui l'entoure, puis le bâtiment.
+const SCALES = [
+  {
+    key: "commune",
+    title: "La commune",
+    body: "Ce qu'elle devient face au climat, ce à quoi elle est exposée, ce qui la transforme.",
+  },
+  {
+    key: "autour",
+    title: "Autour de l'adresse",
+    body: "Ce qui l'entoure à quelques centaines de mètres, et ce que ce voisinage change au quotidien.",
+  },
+  {
+    key: "logement",
+    title: "Le logement",
+    body: "Ce que le bâtiment et sa parcelle révèlent de leur exposition.",
+  },
+] as const;
+
+const MATTER_LABEL: Record<MatterState, { text: string; tone: "found" | "absent" | "unknown" }> = {
+  found: { text: "disponible", tone: "found" },
+  none: { text: "aucun à cette adresse", tone: "absent" },
+  unavailable: { text: "non vérifiable à l'instant", tone: "unknown" },
+};
+
+const TONE_COLOR: Record<"found" | "absent" | "unknown", string> = {
+  found: "var(--color-success)",
+  absent: "var(--color-ghost)",
+  unknown: "var(--color-accent)",
+};
+
+function MatterLine({ label, state }: { label: string; state: MatterState }) {
+  const { text, tone } = MATTER_LABEL[state];
+  return (
+    <li className="flex items-baseline gap-2.5 flex-wrap">
+      <span
+        aria-hidden
+        style={{
+          width: 5,
+          height: 5,
+          borderRadius: 999,
+          background: TONE_COLOR[tone],
+          opacity: tone === "found" ? 0.9 : 0.55,
+          transform: "translateY(-2px)",
+          flex: "0 0 auto",
+        }}
+      />
+      <span className="text-[13.5px] text-muted">{label}</span>
+      <span
+        className="font-mono text-[11px] tracking-[0.08em] uppercase"
+        style={{ color: TONE_COLOR[tone], opacity: tone === "found" ? 0.85 : 0.7 }}
+      >
+        {text}
+      </span>
+    </li>
+  );
+}
 
 export function DossierQualificationClient() {
   const [address, setAddress] = useState<BanAddressResult | null>(null);
@@ -104,7 +154,7 @@ export function DossierQualificationClient() {
         status: payload.status,
         insee: a.citycode,
         ban_feature_type: a.type,
-        warnings: payload.status === "qualified" ? payload.warnings.map((w) => w.code) : [],
+        matter: payload.status === "qualified" ? payload.matter : null,
       });
     } catch {
       setError("Qualification impossible pour l'instant.");
@@ -125,64 +175,106 @@ export function DossierQualificationClient() {
       />
 
       {busy && (
-        <p className="text-[14px] text-muted mt-6">
+        <p className="text-[14px] text-muted mt-7" aria-live="polite">
           Nous vérifions ce que nous savons de cette adresse.
         </p>
       )}
 
-      {error && <p className="text-[14px] text-muted mt-6">{error}</p>}
+      {error && (
+        <p className="text-[14px] text-muted mt-7" aria-live="polite">
+          {error}
+        </p>
+      )}
 
       {outcome?.status === "qualified" && address && (
-        <div className="glass rounded-xl p-6 mt-8">
-          <p className="text-[16.5px] text-label leading-snug mb-4">{address.label}</p>
+        <div className="card-answer rounded-2xl p-7 md:p-9 mt-8">
+          <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-6">
+            Ce que nous examinerons ici
+          </p>
 
-          {outcome.warnings.length > 0 && (
-            <ul className="mb-6 list-none p-0" style={{ display: "grid", gap: 10 }}>
-              {outcome.warnings.map((w) => (
-                <li
-                  key={w.code + ("source" in w ? w.source : "")}
-                  className="text-[14px] text-muted leading-relaxed"
-                >
-                  {WARNING_COPY["source" in w ? `${w.code}_${w.source}` : w.code]}
-                </li>
-              ))}
-            </ul>
-          )}
+          <div style={{ display: "grid", gap: 26 }}>
+            {SCALES.map((scale) => (
+              <div key={scale.key}>
+                <p className="text-[16px] text-label leading-snug mb-1.5">
+                  {scale.key === "commune" && address.city ? `${scale.title} : ${address.city}` : scale.title}
+                </p>
+                <p className="text-[14px] text-muted leading-relaxed">{scale.body}</p>
 
-          <p className="text-[15px] text-label mb-1">{EUR(outcome.quote.amountDueCents)}</p>
+                {scale.key === "logement" && (
+                  <ul
+                    className="list-none p-0 mt-3.5"
+                    style={{ display: "grid", gap: 9 }}
+                  >
+                    <MatterLine label="Diagnostic énergétique" state={outcome.matter.dpe} />
+                    <MatterLine label="Parcelle cadastrale" state={outcome.matter.parcel} />
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
 
-          {outcome.quote.status === "provisional" && (
-            <p className="font-mono text-[12px] text-ghost mb-5">
-              14 € sont déduits si vous avez déjà la lecture de cette commune.
-            </p>
-          )}
-          {outcome.quote.status === "final" && (outcome.quote.territoryDeductionCents ?? 0) > 0 && (
-            <p className="font-mono text-[12px] text-ghost mb-5">
-              Vous avez déjà la lecture de cette commune : 14 € déduits.
-            </p>
-          )}
-
-          <a
-            href={`/checkout/dossier?banId=${encodeURIComponent(address.id!)}&label=${encodeURIComponent(address.label)}&insee=${encodeURIComponent(address.citycode!)}`}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent/[0.12] text-accent text-[14px] no-underline border border-accent/[0.25]"
-            onClick={() =>
-              posthog.capture("address_checkout_viewed", {
-                insee: address.citycode,
-                amount_due_cents: outcome.quote.amountDueCents,
-              })
-            }
+          <div
+            className="mt-8 pt-7"
+            style={{ borderTop: "1px solid var(--border-1)" }}
           >
-            Créer mon dossier
-          </a>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 18,
+              }}
+            >
+              <div>
+                <p
+                  className="text-[26px] text-label leading-none mb-2"
+                  style={{ fontFamily: "'Instrument Serif', serif" }}
+                >
+                  {EUR(outcome.quote.amountDueCents)}
+                </p>
+                {outcome.quote.status === "provisional" && (
+                  <p className="text-[13px] text-ghost">
+                    14 € de moins si vous avez déjà la lecture de cette commune.
+                  </p>
+                )}
+                {outcome.quote.status === "final" &&
+                  (outcome.quote.territoryDeductionCents ?? 0) > 0 && (
+                    <p className="text-[13px] text-ghost">
+                      Vous avez déjà la lecture de {address.city}, 14 € sont déduits.
+                    </p>
+                  )}
+                {outcome.quote.status === "final" &&
+                  (outcome.quote.territoryDeductionCents ?? 0) === 0 && (
+                    <p className="text-[13px] text-ghost">
+                      Une fois, pour ce bien. TVA non applicable, art. 293 B du CGI.
+                    </p>
+                  )}
+              </div>
+
+              <a
+                href={`/checkout/dossier?banId=${encodeURIComponent(address.id!)}&label=${encodeURIComponent(address.label)}&insee=${encodeURIComponent(address.citycode!)}`}
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-lg bg-accent/[0.14] text-accent text-[14.5px] no-underline border border-accent/[0.28]"
+                onClick={() =>
+                  posthog.capture("address_checkout_viewed", {
+                    insee: address.citycode,
+                    amount_due_cents: outcome.quote.amountDueCents,
+                  })
+                }
+              >
+                Créer mon dossier
+              </a>
+            </div>
+          </div>
         </div>
       )}
 
       {outcome?.status === "needs_precision" && (
-        <div className="glass rounded-xl p-6 mt-8">
-          <p className="text-[16.5px] text-label leading-snug mb-2">
+        <div className="card-answer rounded-2xl p-7 md:p-9 mt-8">
+          <p className="text-[17px] text-label leading-snug mb-2">
             Nous n&apos;avons pas encore identifié le bien avec assez de précision.
           </p>
-          <p className="text-[14px] text-muted leading-relaxed mb-5">
+          <p className="text-[14px] text-muted leading-relaxed mb-6">
             {outcome.candidates.length > 0
               ? "Cette adresse désigne une voie. Voici les adresses numérotées les plus proches."
               : "Saisissez une adresse précise dans cette commune, avec son numéro."}
@@ -194,7 +286,7 @@ export function DossierQualificationClient() {
                 <button
                   key={c.banId}
                   type="button"
-                  className="text-left px-5 py-3 rounded-lg bg-white/[0.05] text-label text-[14px] border border-white/[0.08] cursor-pointer"
+                  className="text-left px-5 py-3.5 rounded-lg bg-white/[0.05] text-label text-[14px] border border-white/[0.08] cursor-pointer"
                   onClick={() =>
                     qualify({
                       id: c.banId,
@@ -212,7 +304,7 @@ export function DossierQualificationClient() {
                   }
                 >
                   {c.label}
-                  <span className="font-mono text-[12px] text-ghost">
+                  <span className="font-mono text-[11px] tracking-[0.06em] text-ghost">
                     {" "}
                     · à {Math.round(c.distanceM)} m
                   </span>
@@ -224,11 +316,11 @@ export function DossierQualificationClient() {
       )}
 
       {outcome?.status === "unsupported_at_launch" && address && (
-        <div className="glass rounded-xl p-6 mt-8">
-          <p className="text-[16.5px] text-label leading-snug mb-3">
+        <div className="card-answer rounded-2xl p-7 md:p-9 mt-8">
+          <p className="text-[17px] text-label leading-snug mb-3">
             Nous ne pouvons pas encore identifier ce bien assez précisément.
           </p>
-          <p className="text-[14px] text-muted leading-relaxed mb-5">
+          <p className="text-[14px] text-muted leading-relaxed mb-6">
             Cette adresse ne porte pas de point de bâtiment fiable. Pour éviter d&apos;analyser la
             mauvaise parcelle ou de mesurer les alentours depuis un point approximatif, nous
             préférons ne pas vous vendre ce dossier.

@@ -29,10 +29,14 @@ export const dynamic = "force-dynamic";
 // cache, puisque les sondes rendent alors un statut distinct plutôt qu'une absence.
 // ════════════════════════════════════════════════════════════════════════════
 
-type Warning =
-  | { code: "no_exact_dpe_found" }
-  | { code: "no_parcel_reading" }
-  | { code: "source_unavailable"; source: "ademe" | "cadastre" };
+// LA MATIÈRE, ET NON SEULEMENT LES MANQUES. La qualification annonce ce qui sera examiné à cette
+// adresse ; l'écran porte l'état de chaque élément par son interface plutôt que par une phrase qui
+// énumère des absences (doctrine de marque). Trois états, jamais deux : `found` dit qu'un élément
+// existe, `none` qu'il n'existe pas, `unavailable` que la source n'a pas répondu.
+//
+// AUCUNE VALEUR N'EST TRANSMISE : la classe d'un diagnostic ou le numéro d'une parcelle
+// appartiennent au dossier payé. On dit qu'il y a de la matière, jamais ce qu'elle vaut.
+type MatterState = "found" | "none" | "unavailable";
 
 // Limite de débit en mémoire, par instance. Elle arrête l'abus trivial, pas un attaquant
 // distribué : le vrai garde-fou est l'absence de Géorisques ci-dessus. Fluid Compute réutilise les
@@ -111,15 +115,10 @@ export async function POST(request: Request) {
     probeCadastreAtPoint(sel.longitude, sel.latitude),
   ]);
 
-  const warnings: Warning[] = [];
-  if (dpe.status === "none") warnings.push({ code: "no_exact_dpe_found" });
-  if (dpe.status === "unavailable") {
-    warnings.push({ code: "source_unavailable", source: "ademe" });
-  }
-  if (cadastre.status === "none") warnings.push({ code: "no_parcel_reading" });
-  if (cadastre.status === "unavailable") {
-    warnings.push({ code: "source_unavailable", source: "cadastre" });
-  }
+  const matter: { dpe: MatterState; parcel: MatterState } = {
+    dpe: dpe.status,
+    parcel: cadastre.status,
+  };
 
   const supabase = await createClient();
   const {
@@ -132,7 +131,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       status: "qualified",
       anchorSource: "ban_housenumber",
-      warnings,
+      matter,
       quote: {
         status: "provisional",
         basePriceCents: DOSSIER_PRICE.fullCents,
@@ -149,7 +148,7 @@ export async function POST(request: Request) {
   return NextResponse.json({
     status: "qualified",
     anchorSource: "ban_housenumber",
-    warnings,
+    matter,
     quote: { status: "final", ...quoteForDossier(paid) },
   });
 }
