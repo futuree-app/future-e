@@ -22,18 +22,25 @@ import { communeParent } from "@/lib/plm";
 import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 
-// Une couleur par échelle, et elle ne bouge plus d'un écran à l'autre : bleu pour la commune
-// (l'ADN Territoire), vert pour le secteur, taupe accent pour le bâti (l'ADN Logement).
-const MODULE_COLORS: Record<string, string> = {
-  quartier: "var(--blue)",
-  autour: "var(--green)",
-  logement: "var(--accent)",
-};
-
-const MODULE_ICONS: Record<string, string> = {
-  quartier: "🏘",
-  autour: "🚶",
-  logement: "🏠",
+// L'IDENTITÉ D'UNE ÉCHELLE EST SON RANG, SON NOM ET SON GRAIN. Ni couleur, ni icône.
+//
+// `MODULE_COLORS` (bleu Territoire, vert Autour, orange Logement) a été retiré le 30/07/2026. Le
+// produit portait DEUX systèmes chromatiques incompatibles qui se croisaient sur cette page même :
+// les cinq registres du dossier de décision rendus plus bas (rouge incompatibilité, vert alignement,
+// orange compromis, améthyste non su, bleu contrôle) et ces trois échelles. Le vert disait « ce lieu
+// tient bien ce point » dans le dossier et « ceci appartient à Autour » dans la grille, à quelques
+// centaines de pixels. Une teinte est une affirmation vérifiable (DESIGN.md § 5.3) : elle ne peut
+// pas dire à la fois OÙ est la donnée et CE QU'ELLE SIGNIFIE pour la décision. Les registres gardent
+// la couleur, les échelles la perdent.
+//
+// `MODULE_ICONS` (🏘 🚶 🏠) a été retiré au même moment, sans substitution : les emoji sont interdits
+// (doctrine/editoriale.md) et un jeu d'icônes dessiné serait un vocabulaire de plus à faire
+// comprendre, alors que « Territoire », « Autour de l'adresse » et « Logement » sont déjà plus
+// précis que n'importe quelle maison ou silhouette.
+const MODULE_GRAIN: Record<string, string> = {
+  quartier: "La commune",
+  autour: "Le secteur autour de l'adresse",
+  logement: "Le bâtiment",
 };
 
 const MODULE_BENEFIT: Record<string, string> = {
@@ -105,6 +112,20 @@ export default async function RapportPage() {
   const dossierAddress: ResolvedAddress | null = logementForCommune
     ? { id: logementForCommune.ban_id, label: logementForCommune.address_label, city: logementForCommune.city, citycode: logementForCommune.insee, postcode: logementForCommune.postcode, latitude: logementForCommune.latitude, longitude: logementForCommune.longitude }
     : null;
+
+  // COMBIEN D'ÉCHELLES SONT RÉELLEMENT OUVERTES, SUR LA COMMUNE LUE.
+  //
+  // Le hub annonçait « trois échelles » à tout compte payant, avec trois cartes marquées
+  // « Accessible ». C'était faux : `/rapport/autour` et `/rapport/logement` exigent un dossier
+  // d'adresse et redirigent vers `/rapport/dossiers` sans lui. Un lecteur qui a payé 14 € voyait
+  // donc son produit décrit comme deux tiers manquant.
+  //
+  // Le calcul se fait sur `logementForCommune`, donc sur LA COMMUNE LUE, jamais sur le compte :
+  // posséder un bien à Nantes n'ouvre pas Autour et Logement à La Rochelle. C'est la même règle que
+  // le bandeau `communesAilleurs` plus bas.
+  const openModules = fullReport
+    ? allModules.filter((m) => m.id === "quartier" || Boolean(logementForCommune))
+    : [];
 
   return (
     <div
@@ -231,13 +252,20 @@ export default async function RapportPage() {
                 {displayName} en 2030, 2050, 2100.<br />
                 <span className="italic text-accent">Ce que ça change pour vous.</span>
               </h1>
+              {/* « Six angles » a été retiré le 30/07/2026. Le hero annonçait six angles, la section
+                  suivante trois échelles, et les cartes « Module 01 » : trois décomptes pour un
+                  seul produit. Le rang porte désormais l'identité des échelles, donc il doit être
+                  juste. La phrase parle du lieu et de l'horizon, sans compter quoi que ce soit. */}
               <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[500px]">
-                Six angles sur ce que le changement climatique fait concrètement à votre quotidien ici. Choisissez un horizon. Les données s&apos;adaptent quand c&apos;est possible.
+                Ce que le changement climatique fait concrètement à votre quotidien ici. Choisissez un horizon. Les données s&apos;adaptent quand c&apos;est possible.
               </p>
               <div className="flex gap-3 flex-wrap">
                 {fullReport ? (
-                  <Link href="#modules" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
-                    Voir mes trois échelles
+                  /* CTA neutre, et c'est une règle : dans le rapport, l'orange est le registre
+                     « compromis » du dossier de décision. Un bouton de navigation qui le porte ferait
+                     dire deux choses à la même teinte sur le même écran (DESIGN.md § 5.4). */
+                  <Link href="#modules" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.08] text-label font-semibold text-[14px] no-underline border border-white/[0.14] hover:bg-white/[0.12] transition-colors" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+                    {openModules.length === 1 ? "Lire le territoire" : "Voir mes trois échelles"}
                   </Link>
                 ) : (
                   <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
@@ -256,34 +284,42 @@ export default async function RapportPage() {
           {fullReport && (
             <aside className="glass rounded-2xl p-7 relative overflow-hidden">
               <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">
-                Hub des modules
+                {openModules.length === 1 ? "1 échelle ouverte" : `${openModules.length} échelles ouvertes`}
               </p>
               <h2 className="font-normal text-[22px] leading-[1.2] text-label mb-5 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
                 Rapport interactif · {displayName}
               </h2>
-              {/* Le panneau est devenu un SOMMAIRE CLIQUABLE. Il listait six lignes dont quatre
-                  affichaient un tiret : un inventaire de ce qu'on n'a pas. Les trois échelles
-                  s'ouvrent, donc chaque ligne mène quelque part. */}
-              <div className="flex flex-col gap-2.5">
-                {allModules.map((m) => {
-                  const col = MODULE_COLORS[m.id] ?? "var(--violet)";
-                  return (
-                    <TrackedModuleLink
-                      key={m.id}
-                      href={MODULE_HREF[m.id]}
-                      moduleId={m.id}
-                      commune={displayName}
-                      inseeCode={inseeCode}
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg no-underline"
-                      style={{ background: `${col}0a`, border: `1px solid ${col}1a` }}
-                    >
-                      <span className="text-[16px]">{MODULE_ICONS[m.id]}</span>
-                      <span className="text-[14px] text-label font-medium">{m.name}</span>
-                      <span className="ml-auto font-mono text-[10px] tracking-[0.06em] uppercase" style={{ color: col }}>Ouvrir</span>
-                    </TrackedModuleLink>
-                  );
-                })}
+              {/* SOMMAIRE NUMÉROTÉ, NEUTRE. Chaque ligne mène quelque part, et le rang porte
+                  l'identité de l'échelle à la place de la couleur et de l'emoji retirés. */}
+              <div className="flex flex-col">
+                {openModules.map((m, i) => (
+                  <TrackedModuleLink
+                    key={m.id}
+                    href={MODULE_HREF[m.id]}
+                    moduleId={m.id}
+                    commune={displayName}
+                    inseeCode={inseeCode}
+                    className="flex items-baseline gap-3.5 py-3 no-underline border-t border-white/[0.07] first:border-t-0 group"
+                  >
+                    <span className="font-mono text-[11px] text-ghost tabular-nums shrink-0">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="text-[14px] text-label font-medium">{m.name}</span>
+                    <span className="ml-auto font-mono text-[10px] tracking-[0.06em] uppercase text-ghost group-hover:text-label transition-colors shrink-0">
+                      Ouvrir →
+                    </span>
+                  </TrackedModuleLink>
+                ))}
               </div>
+              {/* Une seule phrase quand les deux échelles fines ne sont pas ouvertes, à la place de
+                  deux fausses lignes verrouillées qui feraient passer un produit payé pour un
+                  produit incomplet. */}
+              {openModules.length === 1 && (
+                <p className="text-[13px] leading-[1.6] text-muted mt-4 pt-4 border-t border-white/[0.07]">
+                  Le secteur autour d&apos;une adresse et le logement lui-même demandent l&apos;analyse
+                  d&apos;une adresse précise.
+                </p>
+              )}
             </aside>
           )}
         </section>
@@ -368,18 +404,24 @@ export default async function RapportPage() {
           <section className="pt-14" id="modules">
             <div className="mb-8">
               <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                Trois échelles, de la commune à vos murs.
+                {openModules.length === 1
+                  ? `Ce que ${displayName} devient.`
+                  : "Trois échelles, de la commune à vos murs."}
               </h2>
               <p className="text-[15px] text-muted leading-[1.7] mt-3">
-                Elles se lisent dans cet ordre, et chacune peut contredire la précédente : une
-                commune qui tient bien peut abriter un secteur mal desservi, et un secteur agréable
-                un logement qui souffrira de l&apos;été.
+                {openModules.length === 1
+                  ? "La commune en entier : son climat, ses risques, son cadre de vie et ce qui la transforme."
+                  : "Elles se lisent dans cet ordre, et chacune peut contredire la précédente : une commune qui tient bien peut abriter un secteur mal desservi, et un secteur agréable un logement qui souffrira de l'été."}
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {allModules.map((module, i) => {
-                const col = MODULE_COLORS[module.id] ?? "var(--violet)";
+            {/* LIGNES, PAS CARTES. Trois cartes de verre colorées pour trois liens donnaient au
+                sommaire plus de poids visuel qu'au verdict. Le rang porte l'identité, un filet
+                sépare, et le badge « Accessible » a disparu : il était identique sur les trois, donc
+                il ne distinguait rien (DESIGN.md § 6.3). Ce qui varie réellement, c'est le NOMBRE de
+                lignes, et il suit maintenant les droits sur la commune lue. */}
+            <div className="flex flex-col">
+              {openModules.map((module, i) => {
                 const benefit = module.id === "quartier"
                   ? `Chaleur, inondations, érosion côtière. Ce que ${displayName} devient selon l'horizon choisi, données climatiques publiques à l'appui.`
                   : MODULE_BENEFIT[module.id] ?? module.summary;
@@ -387,29 +429,42 @@ export default async function RapportPage() {
                 return (
                   <article
                     key={module.id}
-                    className="glass rounded-xl p-6 relative"
-                    style={{ borderTop: `2px solid ${col}` }}
+                    className="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto] gap-x-5 gap-y-2 items-baseline py-6 border-t border-white/[0.08] first:border-t-0"
                   >
-                    <div className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[17px] mb-3.5 border"
-                      style={{ background: `${col}16`, borderColor: `${col}22` }}>
-                      {MODULE_ICONS[module.id]}
-                    </div>
-                    <p className="font-mono text-[10px] tracking-[0.1em] text-ghost mb-1 uppercase">Module 0{i + 1}</p>
-                    <h3 className="font-normal text-[20px] text-label mb-2.5" style={{ fontFamily: "'Instrument Serif', serif" }}>{module.name}</h3>
-                    <p className="text-[13px] text-muted leading-[1.65] mb-3.5">{benefit}</p>
-                    <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase" style={{ color: col }}>
-                      <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
-                      Accessible
+                    <span className="font-mono text-[13px] text-ghost tabular-nums">
+                      {String(i + 1).padStart(2, "0")}
                     </span>
-                    <div className="mt-4">
-                      <TrackedModuleLink href={href} moduleId={module.id} commune={displayName} inseeCode={inseeCode} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg no-underline font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: col, border: `1px solid ${col}33`, background: `${col}0d` }}>
-                        Ouvrir le module
+                    <div>
+                      <h3 className="font-normal text-[20px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                        {module.name}
+                      </h3>
+                      <p className="font-mono text-[11px] tracking-[0.06em] uppercase text-ghost mt-1">
+                        {MODULE_GRAIN[module.id] ?? module.summary}
+                      </p>
+                      <p className="text-[13px] text-muted leading-[1.65] mt-3">{benefit}</p>
+                    </div>
+                    <div className="col-start-2 sm:col-start-3 sm:row-start-1">
+                      <TrackedModuleLink
+                        href={href}
+                        moduleId={module.id}
+                        commune={displayName}
+                        inseeCode={inseeCode}
+                        className="inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.08em] uppercase text-muted hover:text-label no-underline border border-white/[0.12] rounded-lg px-4 py-2 whitespace-nowrap transition-colors"
+                      >
+                        Ouvrir →
                       </TrackedModuleLink>
                     </div>
                   </article>
                 );
               })}
             </div>
+
+            {openModules.length === 1 && (
+              <p className="text-[14px] leading-[1.7] text-muted mt-8 pt-6 border-t border-white/[0.08]">
+                Le secteur autour d&apos;une adresse et le logement lui-même se lisent au grain de
+                l&apos;adresse. Ils demandent l&apos;analyse d&apos;un bien précis.
+              </p>
+            )}
           </section>
         )}
 

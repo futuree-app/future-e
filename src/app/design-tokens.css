@@ -41,7 +41,20 @@
      NULLE PART hors des pages savoir (qui scopent leur propre --accent, et gardent la priorité).
      Sans ces alias, eyebrows et pastilles héritaient silencieusement de la couleur du parent. */
   --accent:         #fb923c;   /* = --color-accent */
-  --ghost:          #6b7388;   /* = --color-ghost */
+  /* LE TEXTE ESTOMPÉ ÉTAIT SOUS LE PLANCHER D'ACCESSIBILITÉ (corrigé le 30/07/2026). `--ghost` et
+     `--fg-4` valaient #6b7388, soit 4,22:1 sur `--bg` alors que WCAG AA exige 4,5:1 pour du texte
+     courant — et ils portent les surtitres, les sources et les métadonnées dans tout le rapport.
+     Sur les fonds plus clairs autorisés (`--bg-deep`, le verre à 6 %) ils tombaient plus bas encore.
+     #788095 tient 5,06 sur `--bg`, 4,69 sur `--bg-deep`, 4,53 sur le verre. La teinte est conservée,
+     seule la clarté monte.
+     En thème clair, `--ghost` héritait de la valeur sombre (3,72:1 sur le fond crème) et `--fg-4`
+     valait #8a93a4, soit 2,91:1 : les deux sont redéfinis à #646c7f dans les blocs clairs.
+     Toute nouvelle valeur de texte estompé se vérifie sur `--bg`, `--bg-deep` ET le verre. */
+  --ghost:          #788095;   /* = --color-ghost */
+  /* L'ÉTAT « DONNÉE ABSENTE ». Même valeur que `--ghost` à dessein : c'est le texte le plus estompé
+     qui reste au-dessus du plancher AA. L'effacement se lit au tiret « — », au filet gris et à la
+     mention explicite de l'absence, jamais en descendant encore le contraste. */
+  --fg-absent:      #788095;
   --info:           #60a5fa;   /* = --color-info */
   --amethyst:       #a78bfa;   /* = --color-amethyst */
 }
@@ -63,7 +76,7 @@
   --fg-1:           #e9ecf2;
   --fg-2:           #c6cfdb;
   --fg-3:           #9ba3b4;
-  --fg-4:           #6b7388;
+  --fg-4:           #788095;
 
   --border-1:       rgba(255, 255, 255, 0.08);
   --border-2:       rgba(255, 255, 255, 0.12);
@@ -100,7 +113,9 @@
   --fg-1:           #2b3040;
   --fg-2:           #3d4456;
   --fg-3:           #5b6373;
-  --fg-4:           #8a93a4;
+  --fg-4:           #646c7f;
+  --ghost:          #646c7f;
+  --fg-absent:      #646c7f;
 
   --border-1:       rgba(26, 29, 40, 0.08);
   --border-2:       rgba(26, 29, 40, 0.12);
@@ -135,7 +150,9 @@
     --fg-1:           #2b3040;
     --fg-2:           #3d4456;
     --fg-3:           #5b6373;
-    --fg-4:           #8a93a4;
+    --fg-4:           #646c7f;
+    --ghost:          #646c7f;
+    --fg-absent:      #646c7f;
     --border-1:       rgba(26, 29, 40, 0.08);
     --border-2:       rgba(26, 29, 40, 0.12);
     --border-hi:      rgba(26, 29, 40, 0.18);

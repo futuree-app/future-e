@@ -13,10 +13,9 @@ import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 
-// Une icône par ÉCHELLE, du plus large au plus resserré : la commune, le voisinage, le bâtiment.
-const MODULE_ICONS: Record<string, string> = {
-  quartier: "🏘", autour: "🚶", logement: "🏠",
-};
+// Les emoji d'icône ont été retirés le 30/07/2026, sans substitution : ils sont interdits
+// (doctrine/editoriale.md) et l'identité d'une échelle est son rang, son nom et son grain
+// (DESIGN.md § 7). Le rang, en mono tabulaire, prend leur place.
 
 // Le bénéfice dit ce que le module TRANCHE, pas ce qu'il contient.
 const MODULE_BENEFIT: Record<string, string> = {
@@ -174,10 +173,7 @@ export default async function ComptePage() {
                     href={MODULE_HREF[module.id]}
                     className="glass rounded-xl p-5 no-underline block"
                   >
-                    <div className="w-[30px] h-[30px] rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[15px] mb-3">
-                      {MODULE_ICONS[module.id]}
-                    </div>
-                    <p className="font-mono text-[10px] tracking-[0.1em] text-ghost mb-0.5 uppercase">Module 0{i + 1}</p>
+                    <p className="font-mono text-[13px] text-ghost tabular-nums mb-2">{String(i + 1).padStart(2, "0")}</p>
                     <h3 className="font-normal text-[18px] text-label mb-2" style={{ fontFamily: "'Instrument Serif', serif" }}>{module.name}</h3>
                     <p className="text-[12px] text-muted leading-[1.6] mb-3">{MODULE_BENEFIT[module.id] ?? module.summary}</p>
                     <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase text-accent bg-accent/[0.06] border border-accent/[0.2] rounded-full px-2 py-1">
@@ -228,10 +224,7 @@ export default async function ComptePage() {
                 <div className="grid grid-cols-3 gap-3">
                   {LOCKED_MODULES.map((module, i) => (
                     <article key={module.id} className="glass rounded-xl p-5 opacity-50">
-                      <div className="w-[30px] h-[30px] rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[15px] mb-3 grayscale">
-                        {MODULE_ICONS[module.id]}
-                      </div>
-                      <p className="font-mono text-[10px] tracking-[0.1em] text-ghost mb-0.5 uppercase">Module 0{i + 1}</p>
+                      <p className="font-mono text-[13px] text-ghost tabular-nums mb-2">{String(i + 1).padStart(2, "0")}</p>
                       <h3 className="font-normal text-[18px] text-muted mb-2" style={{ fontFamily: "'Instrument Serif', serif" }}>{module.name}</h3>
                       <p className="text-[12px] text-ghost leading-[1.6] mb-3">{MODULE_BENEFIT[module.id] ?? module.summary}</p>
                       <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase text-ghost bg-white/[0.03] border border-white/[0.08] rounded-full px-2 py-1">

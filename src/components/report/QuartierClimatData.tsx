@@ -1121,10 +1121,15 @@ export function QuartierAside({ communeName, scenarios, georisques, territoire, 
                       // a qu'un), les suivants sont posés en ancres vides juste avant, ci-dessous.
                       id={f.targets?.[0] ? evidenceAnchorId(f.targets[0]) : undefined}
                       className={`glass rounded-xl px-4 py-3.5 scroll-mt-24${clickable ? " metric-card-clickable" : ""}`}
+                      // L'ABSENCE SE LIT SANS PASSER SOUS LE PLANCHER D'ACCESSIBILITÉ. `opacity: 0.45`
+                      // sur la carte estompait le TEXTE avec elle : le libellé tombait à 3,96:1 et
+                      // la source à 1,72:1, quand WCAG AA exige 4,5:1. L'effacement passe désormais
+                      // par `--fg-absent` (contraste vérifié sur --bg, --bg-deep et le verre), le
+                      // filet gris et le tiret « — ». Une donnée qu'on n'a pas doit rester lisible :
+                      // c'est une information, pas un déchet visuel.
                       style={{
                         position: "relative",
-                        borderTop: `2px solid ${f.missing ? "var(--ghost)" : col}`,
-                        opacity: f.missing ? 0.45 : 1,
+                        borderTop: `2px solid ${f.missing ? "var(--fg-absent)" : col}`,
                         cursor: clickable ? "pointer" : undefined,
                       }}
                       role={clickable ? "button" : undefined}
@@ -1149,9 +1154,9 @@ export function QuartierAside({ communeName, scenarios, georisques, territoire, 
                       {f.targets?.slice(1).map((t) => (
                         <span key={t} id={evidenceAnchorId(t)} aria-hidden className="block h-0 scroll-mt-24" />
                       ))}
-                      <div className="text-[13px] font-medium text-label mb-2 leading-[1.3]">{f.label}</div>
-                      <div className="font-mono text-[12px] tracking-[0.02em] mb-0.5" style={{ color: f.missing ? "var(--ghost)" : col }}>{f.val}</div>
-                      {f.sub && <div className="text-[12px] text-label tracking-[0.01em] leading-[1.4] mb-0.5">{f.sub}</div>}
+                      <div className={`text-[13px] font-medium mb-2 leading-[1.3]${f.missing ? "" : " text-label"}`} style={f.missing ? { color: "var(--fg-absent)" } : undefined}>{f.label}</div>
+                      <div className="font-mono text-[12px] tracking-[0.02em] mb-0.5" style={{ color: f.missing ? "var(--fg-absent)" : col }}>{f.val}</div>
+                      {f.sub && <div className={`text-[12px] tracking-[0.01em] leading-[1.4] mb-0.5${f.missing ? "" : " text-label"}`} style={f.missing ? { color: "var(--fg-absent)" } : undefined}>{f.sub}</div>}
                       <div className="font-mono text-[11px] text-ghost tracking-[0.02em] leading-[1.4]">{f.src}</div>
                       {clickable && (
                         <div className="font-mono text-[11px] tracking-[0.06em] mt-2" style={{ color: col }}>

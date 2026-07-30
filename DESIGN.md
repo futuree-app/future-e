@@ -1,7 +1,10 @@
 # DESIGN.md · Le langage visuel de futur•e
 
-**Version 1.1 · 30 juillet 2026 · prescriptif.**
+**Version 1.2 · 30 juillet 2026 · prescriptif.**
 
+> **v1.2** : l'orange est réservé au registre « compromis » **dans le rapport** (§ 5.4), et une
+> section sur l'image répond au reproche « il manque des visuels » (§ 6.5).
+>
 > **v1.1** : quatre amendements après relecture critique. La couleur cesse d'identifier les trois
 > échelles (§ 7, la seule contradiction structurelle de la v1) ; la largeur devient une grille à deux
 > pistes (§ 2.1) ; la surface dominante se compte par viewport (§ 2.2) ; l'état absent passe par un
@@ -274,10 +277,19 @@ gravée :
 | Non su | `--amethyst` | ce qu'on n'a pas pu lire |
 | Contrôle à mener | `--info` | ce qui reste à vérifier sur place |
 
-**Collision connue, à instruire** : `--orange` sert à la fois d'accent de marque et de registre
-« compromis ». Sur un écran qui porte les deux, la marque et le sens se confondent. Deux issues
-possibles, non tranchées : déplacer le compromis vers `--yellow`, ou réserver l'orange au seul
-registre sémantique dans le rapport. À décider avant la prochaine passe sur le dossier.
+**Tranché le 30/07/2026** : dans le rapport, **l'orange signifie « compromis »**. L'accent de marque
+ne colore plus les éléments de navigation ordinaires du rapport : les CTA y sont neutres, en texte
+clair sur fond sourd ou en bordure claire. L'orange reste libre comme couleur de marque partout
+ailleurs, sur l'accueil, les tunnels et les pages d'achat.
+
+Le compromis n'a pas été déplacé vers `--yellow`, et pas pour la raison qu'on croit : le jaune est
+presque libre dans le code (deux occurrences, sur des codes réglementaires du module Logement). La
+vraie raison est sémantique. **Un compromis n'est pas une alerte.** Le jaune dirait « danger léger »
+là où le sens est « ceci s'arbitre ». L'orange, entre le rouge et le vert, dit exactement cet
+entre-deux.
+
+Règle générale qui en découle : **là où le sens et la marque se disputent une teinte, le sens
+gagne.**
 
 ### 5.5 Le verdict ne porte jamais l'accent de marque
 
@@ -320,7 +332,38 @@ ne remplace jamais la voix éditoriale. Une donnée unique se dit en toutes lett
 **Aucune donnée ne s'anime.** Un chiffre qui défile avant de se poser suggère que le résultat est un
 tirage. C'est l'inverse exact de ce que futur•e promet.
 
-### 6.5 Les tableaux et grilles denses
+### 6.5 L'image
+
+Le reproche le plus fréquent fait à futur•e de l'extérieur est qu'elle manque de visuels. Le
+diagnostic est mal posé, et la réponse « c'est volontaire, on est factuel » l'est aussi. Les deux
+ratent le vrai manque.
+
+**Le produit a déjà dix-sept photographies**, toutes sur les surfaces éditoriales et de marque
+(hubs, articles, accueil). Ce n'est pas là que ça manque.
+
+**Le rapport, lui, ne dessine presque rien.** Un seul composant y transforme une donnée en forme :
+`TerritoryYearsBand`, la bande des années d'arrêtés CatNat. Tout le reste est du texte dans des
+cartes. L'œil n'a rien à saisir, et c'est ce que le lecteur ressent comme de la froideur.
+
+Trois règles :
+
+1. **La photographie d'illustration générique est interdite.** Un sol craquelé, une ville dans la
+   brume de chaleur, une inondation de banque d'images : elle dramatise sans rien prouver, et elle
+   ment quand la commune lue n'est pas concernée. C'est l'inverse exact de « on ne raconte que ce
+   qu'on mesure exactement ».
+2. **Une image est légitime quand elle est elle-même une donnée** : une bande d'années, une
+   silhouette de trajectoire, une échelle qui situe la commune, une distribution où le lecteur se
+   place. Elle obéit alors au § 3 en entier, absence comprise.
+3. **Une photographie de lieu réel est légitime** si le lieu est nommé, la prise de vue datée et
+   créditée. Elle identifie un territoire ; elle n'illustre pas une menace.
+
+**Le levier n'est donc pas d'ajouter des images, c'est de dessiner la donnée.** Une trajectoire de
+jours de chaleur, un écart entre deux horizons, la place d'une commune dans une distribution
+remplissent l'œil autant qu'une photographie, et eux disent vrai. `TerritoryYearsBand` est le
+modèle : une forme, une donnée réelle, et un vide qui signifie « commune épargnée » plutôt que
+« panne ».
+
+### 6.6 Les tableaux et grilles denses
 
 Toute grille descend à une ou deux colonnes sous 768 px. Une grille figée à trois ou quatre colonnes
 est un défaut de livraison. Une table large scrolle dans son propre conteneur ; la page ne scrolle
@@ -497,6 +540,13 @@ Quatre points sont volontairement non tranchés dans cette version :
    reporté après le lancement.
 
 ## 12. Journal des amendements
+
+**v1.2, 30/07/2026** :
+
+| Amendement | Motif |
+| --- | --- |
+| § 5.4 · l'orange est le compromis dans le rapport | Le sens gagne sur la marque là où les deux se disputent une teinte. Le jaune a été écarté parce qu'un compromis n'est pas une alerte |
+| § 6.5 · l'image | Le reproche « il manque des visuels » vise mal. Le produit a dix-sept photographies ; c'est le rapport qui ne dessine presque rien |
 
 **v1.1, 30/07/2026** (relecture critique, quatre amendements retenus) :
 

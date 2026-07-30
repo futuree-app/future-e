@@ -5,7 +5,7 @@
   --color-canvas:    #060812;
   --color-label:     #e9ecf2;
   --color-muted:     #9ba3b4;
-  --color-ghost:     #6b7388;
+  --color-ghost:     #788095;
   --color-accent:    #fb923c;  /* safe name — no Tailwind built-in scale conflict */
   --color-danger:    #f87171;
   --color-amethyst:  #a78bfa;  /* safe name — no Tailwind built-in scale conflict */
