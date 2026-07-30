@@ -55,12 +55,23 @@ export default async function RapportDossiersPage() {
               Aucun bien analysé pour l&apos;instant. Un dossier porte une adresse précise : ce
               qu&apos;elle a autour d&apos;elle, et ce que dit le bâtiment lui-même.
             </p>
-            <Link
-              href="/rapport"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent/[0.12] text-accent text-[14px] no-underline border border-accent/[0.25]"
-            >
-              Retour au rapport
-            </Link>
+            {/* La porte par l'adresse, en premier : c'est le geste que cet écran vide appelle.
+                Avant le 30/07/2026, il ne proposait que de revenir au rapport, donc un compte
+                sans dossier n'avait aucun chemin vers la qualification. */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+              <Link
+                href="/dossier"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent/[0.12] text-accent text-[14px] no-underline border border-accent/[0.25]"
+              >
+                Analyser une adresse
+              </Link>
+              <Link
+                href="/rapport"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]"
+              >
+                Retour au rapport
+              </Link>
+            </div>
           </div>
         ) : (
           <div style={{ display: "grid", gap: 16 }}>
