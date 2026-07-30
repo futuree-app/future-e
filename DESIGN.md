@@ -1,7 +1,10 @@
 # DESIGN.md · Le langage visuel de futur•e
 
-**Version 1.2 · 30 juillet 2026 · prescriptif.**
+**Version 1.3 · 30 juillet 2026 · prescriptif.**
 
+> **v1.3** : correction factuelle. Le dossier porte **six** registres, pas cinq : `mismatches`
+> existe et n'a aucune teinte, il tombe silencieusement sur celle de « non su » (§ 5.4).
+>
 > **v1.2** : l'orange est réservé au registre « compromis » **dans le rapport** (§ 5.4), et une
 > section sur l'image répond au reproche « il manque des visuels » (§ 6.5).
 >
@@ -264,18 +267,24 @@ ornement, et l'ornement coloré est interdit.
 Test à appliquer avant de poser une couleur : **si toutes les occurrences visibles portent la même
 teinte, aucune ne doit la porter.** Une couleur qui ne distingue rien ne signifie rien.
 
-### 5.4 Les cinq registres du dossier
+### 5.4 Les six registres du dossier
 
-Le dossier de décision porte cinq registres, chacun avec sa teinte, et cette correspondance est
-gravée :
+Le dossier de décision porte six registres, et cette correspondance est gravée :
 
 | Registre | Teinte | Ce qu'il dit |
 | --- | --- | --- |
 | Incompatibilité | `--red` | une condition non négociable n'est pas tenue |
 | Alignement | `--green` | ce que le lieu tient bien |
 | Compromis | `--orange` | ce qui départage |
+| Écart (`mismatches`) | **aucune** | ce qui correspond moins bien que demandé |
 | Non su | `--amethyst` | ce qu'on n'a pas pu lire |
 | Contrôle à mener | `--info` | ce qui reste à vérifier sur place |
+
+**Défaut à corriger** : `mismatches` n'a pas d'entrée dans `SECTION_ACCENT` et tombe sur le repli
+`--amethyst`, donc sur la teinte de « non su ». Un écart à la demande et une donnée illisible sont
+deux choses opposées, peintes à l'identique. La teinte de ce registre reste **à trancher** : le jaune
+est la seule libre, mais un écart n'est pas davantage une vigilance qu'un compromis n'est une alerte.
+Tant que le choix n'est pas fait, le repli silencieux est un mensonge de couleur.
 
 **Tranché le 30/07/2026** : dans le rapport, **l'orange signifie « compromis »**. L'accent de marque
 ne colore plus les éléments de navigation ordinaires du rapport : les CTA y sont neutres, en texte
@@ -540,6 +549,12 @@ Quatre points sont volontairement non tranchés dans cette version :
    reporté après le lancement.
 
 ## 12. Journal des amendements
+
+**v1.3, 30/07/2026** :
+
+| Amendement | Motif |
+| --- | --- |
+| § 5.4 · six registres | `mismatches` avait été oublié. Il tombe sur le repli `--amethyst`, donc sur la teinte de « non su » : un écart à la demande et une donnée illisible sont peints à l'identique |
 
 **v1.2, 30/07/2026** :
 
