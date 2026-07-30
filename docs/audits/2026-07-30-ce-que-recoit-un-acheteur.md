@@ -146,8 +146,10 @@ DPE contient **24 diagnostics**. `PreciseLogementStep` bloque tout le rapport et
 l'acheteur de désigner le sien dans une liste d'appartements anonymes : « appartement · 10,2 m² ·
 Etage 4 ; Porte 37 · 2026 », « appartement · 23,3 m² · R+2 · 2024 »… Quelqu'un qui **envisage**
 d'acheter ne connaît ni l'étage ni le numéro de porte. S'il répond « mon logement n'est pas dans
-cette liste », l'état passe à `rejected` et la section Énergie se réduit à une phrase. C'est le cas
-majoritaire d'un acheteur urbain.
+cette liste », l'état passe à `rejected` et la section Énergie se réduit à une phrase. Fréquent en
+ville, sûrement ; « majoritaire » reste une hypothèse non mesurée. Un seul acheteur bloqué devant
+vingt-quatre diagnostics anonymes suffit à établir que le choix du DPE ne peut pas être la porte
+obligatoire du module.
 
 **2. En rural sans DPE, le dossier conclut qu'il n'y a rien à dire.** Le module rend tout son
 contenu, honnêtement, et la synthèse générée se termine par :
@@ -163,9 +165,14 @@ payer. La qualification annonce la MATIÈRE disponible, jamais l'ENJEU.
 
 ### Corrections de la lecture de code
 
-- **« 35 à 53 % des adresses sans DPE » ne correspond pas à ce qu'on mesure.** Sur onze adresses
-  sondées en production, neuf ont un DPE, et toutes les urbaines en ont un. Le trou est **rural**,
-  pas général.
+- **Le « 35 à 53 % » tient, mon objection ne tenait pas.** J'avais écrit que onze adresses le
+  contredisaient. Vérification faite : ce taux vient de 124 adresses, communes pondérées par la
+  population (`docs/audits/2026-07-03-dpe-confort-ete-couverture.md`), sur le MÊME chemin de
+  recherche que ma sonde, repli géographique à 50 m compris. Deux absences sur onze donnent un
+  intervalle à 95 % d'environ 5 % à 48 %, qui recouvre largement les 44 % mesurés. Onze tirages ne
+  réfutent rien. Ce qu'ils suggèrent, sans le prouver, c'est que **l'absence n'est pas répartie
+  uniformément** : elle se concentre en rural et en faible densité. Une mesure stratifiée (urbain
+  dense, périurbain, petites villes, rural adressé) trancherait ; elle n'existe pas.
 - La bande « mémoire du lieu » paraissait vide en capture : c'est un artefact. Elle est à
   `opacity: 0` jusqu'à ce qu'un `IntersectionObserver` la révèle au défilement, ce qu'une capture
   pleine page en headless ne déclenche pas.
