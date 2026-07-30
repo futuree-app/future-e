@@ -40,8 +40,8 @@ Un modèle ne se résume pas à une grille de prix. Quatre questions :
   satisfait revient surtout en **prescrivant** (au conjoint, au notaire, à la famille). À ce
   stade c'est une hypothèse, pas une preuve (voir hiérarchie de preuve).
 
-Le flux de valeur : `acquisition (SEO, intention) → rapport 14 € → Pack 39 € → Mode Foyer →
-Le Fil (récurrent) → B2B`. Mais un étage ne sert pas qu'à vendre le suivant : il augmente
+Le flux de valeur : `acquisition (SEO, intention) → rapport 14 € → Pack 39 € → dossier d'adresse
+39 € puis 25 € → B2B`. Mais un étage ne sert pas qu'à vendre le suivant : il augmente
 aussi la confiance, la relation et la compréhension du lecteur. C'est ce qui distingue un
 **système** d'un simple tunnel.
 
@@ -89,8 +89,13 @@ acquises.
   `suivi_waitlist` droppée en production (migration `004_drop_suivi_waitlist.sql`). Plus aucune
   surface ne vend d'abonnement. Le récurrent, s'il revient, sera un pass de recherche
   (cf. `arbitrages/recurrence-b2c-episodique-pas-mensuelle.md`).
-- **Mode Foyer** : upsell multi-personnes sur le rapport one-shot, distinct de l'abonnement
-  (cf. `arbitrages/mode-foyer-recadre.md`).
+- **Mode Foyer** : RETIRÉ DU PRODUIT le 30/07/2026, il n'est plus un étage de l'offre. Le foyer
+  n'est ni une échelle ni une posture : sa composition alimente le projet et personnalise les
+  conclusions, gratuitement, et l'unité métier reste le projet puis le dossier. Facturer le nombre
+  de personnes vendrait un attribut là où le produit facture un objet examinable, et pousserait à
+  sous-déclarer précisément la donnée dont la justesse dépend. Le vrai besoin qui subsiste, décider
+  à plusieurs, se servira par un dossier partageable (`address_dossier_members`), pas par un compte
+  foyer (cf. `arbitrages/mode-foyer-recadre.md`).
 
 futur•e occupe l'étage intermédiaire vacant, entre le gratuit générique et le service humain
 coûteux (chasseur immobilier 2-3 %, coaching relocation 300 €+).

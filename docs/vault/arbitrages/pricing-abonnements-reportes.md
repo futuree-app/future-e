@@ -40,12 +40,18 @@ d'un même abonnement. Recadrage porteur : ce sont **deux choses sans rapport**.
   après le rapport, **pas un palier d'abonnement**. Son prix reste à fixer. Voir
   `arbitrages/mode-foyer-recadre.md` pour sa redéfinition (multi-personnes, découplé du
   comparateur public).
+  > **CADUC depuis le 30/07/2026.** Le second recadrage a supprimé le Mode Foyer du produit :
+  > il n'est plus un upsell, plus un palier, plus rien. Ce qui reste ci-dessus vaut comme
+  > archive du raisonnement de juin, pas comme offre. Le texte qui fait foi est
+  > `arbitrages/mode-foyer-recadre.md`. Ce qui subsiste de cette section, c'est la seule
+  > distinction encore utile : un abonnement de veille et un upsell one-shot ne sont pas deux
+  > paliers d'une même échelle, ils répondent à deux moments d'achat.
 
 ## Pourquoi cette page
 
 Le journal des décisions Notion est **périmé** sur le pricing. On trace ici l'écart pour ne
 pas relire l'ancien tarif comme la vérité, tout en gardant que le récurrent n'est pas mort,
-seulement différé, et que Foyer n'est pas un abonnement.
+seulement différé. Le Foyer, lui, n'est plus rien depuis le 30/07/2026.
 
 ## Liens
 

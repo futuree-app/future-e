@@ -18,8 +18,8 @@ Frontière avec adr/ : une décision structurante et engageante va dans adr/.
 - **app-native-reportee** — PWA suffit l'année 1.
 - **pricing-abonnements-reportes** — 14 € + Pack 39 € livrés ; abos mensuels reportés ; « Le
   Fil » sorti du pricing.
-- **mode-foyer-recadre** — Foyer = multi-personnes + données du foyer ; comparateur de villes
-  découplé (public).
+- **mode-foyer-recadre** — Le foyer n'est ni une échelle ni une posture : sa composition alimente
+  le projet, l'unité métier reste projet puis dossier, jamais un compte foyer.
 - **carte-exploration-probleme-ouvert** — carte-dashboard écartée (1er board) ; l'interaction
   spatiale reste un problème ouvert. Voir `adr/ADR-0009`.
 - **comparateur-un-moteur-trois-portes** — un seul moteur de comparaison (legacy `communes_tension`
