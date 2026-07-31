@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import posthog from "posthog-js";
 import { AddressAutocomplete } from "@/components/report/AddressAutocomplete";
 import type { BanAddressResult } from "@/lib/ban";
+import { expectedCoverage } from "@/lib/dossier-couverture-attendue";
 
 type Candidate = {
   banId: string;
@@ -212,6 +213,27 @@ export function DossierQualificationClient() {
               </div>
             ))}
           </div>
+
+          {/* CE QUE CETTE ADRESSE PERMETTRA DE LIRE. Les lignes ci-dessus nomment la MATIÈRE ; ce
+              bloc en dit la CONSÉQUENCE, et ce n'est pas la même chose. « Diagnostic énergétique :
+              aucun à cette adresse » est un fait technique ; « ce dossier ne pourra pas qualifier
+              la performance énergétique de ce logement » est une décision d'achat. Le manque se
+              lit AVANT ce qui reste : l'ordre inverse minimiserait le manque. 75 à 86 % des
+              adresses sont dans ce cas (mesure du 31/07/2026). */}
+          {(() => {
+            const cov = expectedCoverage(outcome.matter);
+            return (
+              <div className="mt-7 rounded-xl border border-white/[0.10] bg-white/[0.03] px-5 py-4">
+                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2.5">
+                  Ce que cette adresse permettra de lire
+                </p>
+                {cov.manque && (
+                  <p className="text-[14.5px] text-label leading-relaxed mb-2.5">{cov.manque}</p>
+                )}
+                <p className="text-[14px] text-muted leading-relaxed">{cov.reste}</p>
+              </div>
+            );
+          })()}
 
           <div
             className="mt-8 pt-7"
