@@ -59,6 +59,7 @@ export default async function InscriptionPage({
           pendingLabel="Création…"
           passwordAutoComplete="new-password"
           nextDestination={next}
+          askFullName
         />
         <p className="text-center font-mono text-[11px] tracking-[0.06em] text-ghost">
           Vous avez déjà un compte ?{" "}

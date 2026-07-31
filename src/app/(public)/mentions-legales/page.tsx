@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { LEGAL_ENTITY, legalEntityRows } from "@/lib/legal-entity";
 
 export const metadata: Metadata = {
   title: "Mentions légales · futur•e",
@@ -8,24 +9,14 @@ export const metadata: Metadata = {
 
 const LAST_UPDATED = "30 juillet 2026";
 
-/* Toutes les valeurs ci-dessous viennent de l'attestation d'immatriculation au Registre national
-   des entreprises (RNE), mise à jour le 18/05/2026. Ne rien y écrire qui ne figure pas sur un
-   document officiel : cette page engage l'éditeur. La date de naissance figure au RNE mais n'est
-   pas exigée par la LCEN, elle n'est donc pas publiée ici. */
-const EDITEUR = [
-  { label: "Éditeur", value: "Quentin Brache" },
-  { label: "Nom commercial", value: "futur•e" },
-  { label: "Forme", value: "Entrepreneur individuel" },
-  { label: "SIREN", value: "105 109 557" },
-  { label: "SIRET", value: "10510955700014" },
-  { label: "Code APE", value: "5829C — Édition de logiciels applicatifs" },
-  { label: "RNE", value: "Immatriculé le 18 mai 2026" },
-  { label: "Adresse", value: "1 rue Saint-Dominique, Apt B04, 17000 La Rochelle, France" },
-  { label: "Contact", value: "hello@futur-e.fr" },
-  { label: "TVA", value: "TVA non applicable, article 293 B du CGI" },
-];
+/* L'identité de l'éditeur vit dans `src/lib/legal-entity.ts`, où les FACTURES la lisent aussi.
+   Elle était écrite en dur ici : deux copies d'une identité légale divergent tôt ou tard, et
+   l'écart se découvre quand un tiers compare une facture à cette page. Toutes ses valeurs viennent
+   de l'attestation d'immatriculation au RNE du 18/05/2026. La date de naissance y figure mais
+   n'est pas exigée par la LCEN, elle n'est donc pas publiée. */
+const EDITEUR = legalEntityRows();
 
-const DIRECTEUR = "Quentin Brache, en sa qualité d'éditeur.";
+const DIRECTEUR = `${LEGAL_ENTITY.legalName}, en sa qualité d'éditeur.`;
 
 /* Deux prestataires, deux rôles distincts. L'application elle-même est déployée sur Vercel ; le nom
    de domaine et la messagerie sont gérés par OVH. La LCEN demande d'identifier qui héberge, donc

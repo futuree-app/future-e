@@ -58,6 +58,7 @@ export function PasswordForm({
   passwordAutoComplete,
   forgotPasswordHref,
   nextDestination,
+  askFullName = false,
 }: {
   action: ActionFn;
   title: string;
@@ -67,6 +68,12 @@ export function PasswordForm({
   passwordAutoComplete: string;
   forgotPasswordHref?: string;
   nextDestination?: string;
+  /**
+   * Demande le nom (inscription seulement). Il sert à ÉTABLIR LA FACTURE : une note de prestation
+   * à un particulier doit nommer son client, et le demander ici évite de l'exiger au pire moment,
+   * juste avant le paiement. La connexion, elle, ne le demande pas : le compte le porte déjà.
+   */
+  askFullName?: boolean;
 }) {
   const [state, formAction] = useActionState(action, EMPTY_STATE);
 
@@ -84,6 +91,25 @@ export function PasswordForm({
 
       <form action={formAction} className="flex flex-col gap-5">
         {nextDestination ? <input type="hidden" name="next" value={nextDestination} /> : null}
+        {askFullName && (
+          <div>
+            <label className={labelCls} htmlFor="auth-full-name">Nom et prénom</label>
+            <input
+              className={inputCls}
+              id="auth-full-name"
+              name="fullName"
+              type="text"
+              autoComplete="name"
+              placeholder="Camille Rivière"
+              maxLength={120}
+              required
+            />
+            <p className="mt-2 text-[12.5px] text-ghost leading-relaxed">
+              Il figurera sur vos factures. Rien d&apos;autre n&apos;en dépend.
+            </p>
+          </div>
+        )}
+
         <div>
           <label className={labelCls} htmlFor="auth-email">Email</label>
           <input

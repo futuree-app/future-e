@@ -10,6 +10,9 @@ import {
 import { PRODUCT_MODULES, MODULE_HREF } from "@/lib/product";
 import { resolveActiveTerritory, TERRITORY_SELECT, canAccessTerritory } from "@/lib/active-territory";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
+import { listInvoices } from "@/lib/server/invoice-store";
+import { formatEuro, formatDateFr } from "@/lib/invoice";
+import { LEGAL_ENTITY } from "@/lib/legal-entity";
 import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 
@@ -32,6 +35,10 @@ export default async function ComptePage() {
   const LOCKED_MODULES = PRODUCT_MODULES;
 
   const { supabase, user } = await requireCurrentUser();
+  // Les factures du compte. La lecture passe par le magasin, qui possède son client admin :
+  // `authenticated` n'a aucun droit sur la table, un client d'utilisateur rendrait une liste vide
+  // sans erreur, donc « aucune facture » à quelqu'un qui en a.
+  const invoices = await listInvoices(user.id);
   const { data: profile } = await supabase
     .from("user_profiles")
     .select(`${TERRITORY_SELECT}, wizard_answers`)
@@ -259,6 +266,42 @@ export default async function ComptePage() {
             </>
           )}
         </section>
+
+        {/* ── Factures ──────────────────────────────────────────────────────────────────
+            N'APPARAÎT QUE S'IL Y EN A. Une section vide « vous n'avez aucune facture »
+            annoncerait au lecteur qu'il n'a rien acheté, ce qu'il sait déjà, sur un écran qui le
+            lui dit ailleurs. */}
+        {invoices.length > 0 && (
+          <section className="pt-14">
+            <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-3">
+              Vos factures
+            </p>
+            <div className="rounded-xl border border-white/[0.08] overflow-hidden">
+              {invoices.map((f, i) => (
+                <a
+                  key={f.number}
+                  href={`/api/account/factures/${f.number}`}
+                  target="_blank"
+                  rel="noopener"
+                  className={`flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-5 py-4 no-underline hover:bg-white/[0.03] transition-colors ${i > 0 ? "border-t border-white/[0.06]" : ""}`}
+                >
+                  <span className="text-[14.5px] text-label">{f.designation}</span>
+                  <span className="flex items-baseline gap-5 shrink-0">
+                    <span className="font-mono text-[11px] tracking-[0.06em] uppercase text-ghost">
+                      {f.number} &middot; {formatDateFr(f.issuedAt)}
+                    </span>
+                    <span className="text-[14.5px] text-label tabular-nums">
+                      {formatEuro(f.amountCents)}
+                    </span>
+                  </span>
+                </a>
+              ))}
+            </div>
+            <p className="mt-3 text-[12.5px] text-ghost">
+              {LEGAL_ENTITY.vatMention}
+            </p>
+          </section>
+        )}
 
         {/* Footer nav */}
         <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-white/[0.08]">

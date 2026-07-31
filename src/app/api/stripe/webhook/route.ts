@@ -8,6 +8,9 @@ import { getPostHogClient } from "@/lib/posthog-server";
 import { sanitizeDistinctId } from "@/lib/posthog-identity";
 import { grantDecisionPackFromSnapshot } from "@/lib/decision-packs";
 import { communeParent } from "@/lib/plm";
+import { issueInvoice } from "@/lib/server/invoice-store";
+import { renderInvoicePdf } from "@/lib/server/invoice-pdf";
+import { invoiceFileName, type InvoiceProductType } from "@/lib/invoice";
 
 export const runtime = "nodejs";
 
@@ -31,6 +34,48 @@ function getEntitlements() {
     newsletter_enabled: false,
     notifications_enabled: false,
   };
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// LA FACTURE, ÉMISE À L'ENCAISSEMENT ET JOINTE À L'E-MAIL DE CONFIRMATION.
+//
+// NE LÈVE JAMAIS. Un échec d'émission ne doit pas empêcher la livraison ni provoquer un rejeu
+// Stripe : le client a payé, il garde son accès. Une facture manquante se rattrape à la main,
+// un accès refusé après encaissement ne se rattrape pas. L'échec est journalisé, et il se voit
+// dans la base par une facture absente pour un paiement présent.
+//
+// LE NOM VIENT DES MÉTADONNÉES, jamais d'une relecture du compte : il a été figé au moment de
+// l'achat, et un client qui change son nom ensuite ne doit pas changer la facture émise.
+async function buildInvoiceAttachment(
+  paymentIntent: Stripe.PaymentIntent,
+  productType: InvoiceProductType,
+  subject: string | null,
+): Promise<{ filename: string; content: Buffer }[]> {
+  try {
+    const { userId, userEmail, buyerName } = paymentIntent.metadata;
+    if (!userEmail) return [];
+
+    const result = await issueInvoice({
+      userId: userId && userId !== "anonymous" ? userId : null,
+      buyerNameRaw: buyerName,
+      buyerEmail: userEmail,
+      productType,
+      subject,
+      // Ce que STRIPE déclare avoir encaissé, jamais un tarif catalogue.
+      amountCents: paymentIntent.amount,
+      paymentIntentId: paymentIntent.id,
+    });
+
+    if (result.status !== "issued") {
+      console.error("[facture] non émise", { pi: paymentIntent.id, result });
+      return [];
+    }
+    const pdf = await renderInvoicePdf(result.invoice);
+    return [{ filename: invoiceFileName(result.invoice.number), content: pdf }];
+  } catch (error) {
+    console.error("[facture] échec d'émission", { pi: paymentIntent.id, error });
+    return [];
+  }
 }
 
 async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
@@ -152,7 +197,13 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
       })
       .eq("user_id", intent.user_id);
 
-    if (userEmail) {
+    // `created` GOUVERNE L'E-MAIL, comme il gouverne déjà l'événement d'achat plus bas. Il ne le
+    // gouvernait pas jusqu'au 31/07/2026 : un rejeu du webhook renvoyait le message à l'acheteur,
+    // et le code provoque délibérément des rejeux quand l'intention manque.
+    if (userEmail && created) {
+      const attachments = await buildInvoiceAttachment(
+        paymentIntent, "address-dossier", intent.address_label,
+      );
       await resend.emails.send({
         from: "futur•e <hello@futur-e.fr>",
         to: userEmail,
@@ -160,8 +211,10 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
         html: `
           <p>Merci pour votre confiance.</p>
           <p>Le dossier de ${intent.address_label} est ouvert : vous le retrouverez dans votre espace, avec la commune, ce qui entoure l'adresse et ce que dit le logement.</p>
+          ${attachments.length ? "<p>Votre facture est jointe à ce message. Vous la retrouverez aussi dans votre compte.</p>" : ""}
           <p>futur•e</p>
         `,
+        attachments,
       });
     }
 
@@ -206,6 +259,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
       { onConflict: "stripe_payment_intent_id" },
     );
     if (userEmail) {
+      const attachments = await buildInvoiceAttachment(paymentIntent, "pack-decision", null);
       await resend.emails.send({
         from: "futur•e <hello@futur-e.fr>",
         to: userEmail,
@@ -213,8 +267,10 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
         html: `
           <p>Merci pour votre confiance.</p>
           <p>Votre comparaison complète et vos trois rapports sont accessibles depuis votre espace.</p>
+          ${attachments.length ? "<p>Votre facture est jointe à ce message. Vous la retrouverez aussi dans votre compte.</p>" : ""}
           <p>futur•e</p>
         `,
+        attachments,
       });
     }
     const posthog = getPostHogClient();
@@ -287,15 +343,25 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
   }
 
   if (userEmail) {
+    // LA PROMESSE ÉTAIT FAUSSE. Ce message annonçait « votre rapport interactif est en
+    // préparation, vous le recevrez dans les prochaines minutes » : rien n'a jamais été envoyé,
+    // le rapport se lit sur le site et il est ouvert dès cet instant. Un acheteur qui attend un
+    // document et ne reçoit rien demande un remboursement, et il a raison.
+    const attachments = await buildInvoiceAttachment(
+      paymentIntent, "one-shot", commune || null,
+    );
+    const lieu = commune ? ` de ${commune}` : "";
     await resend.emails.send({
       from: "futur•e <hello@futur-e.fr>",
       to: userEmail,
-      subject: "Votre rapport interactif futur•e est en préparation",
+      subject: "Votre rapport futur•e est ouvert",
       html: `
         <p>Merci pour votre confiance.</p>
-        <p>Votre rapport interactif est en préparation. Vous le recevrez dans les prochaines minutes.</p>
-        <p>— futur•e</p>
+        <p>Votre rapport${lieu} est ouvert dès maintenant : il se lit dans votre espace, sur futur-e.fr.</p>
+        ${attachments.length ? "<p>Votre facture est jointe à ce message. Vous la retrouverez aussi dans votre compte.</p>" : ""}
+        <p>futur•e</p>
       `,
+      attachments,
     });
   }
 

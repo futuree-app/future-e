@@ -78,6 +78,14 @@ export function PaymentWrapper({
   const [clientSecretKey, setClientSecretKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [errorKey, setErrorKey] = useState<string | null>(null);
+  // LE NOM MANQUE SUR LE COMPTE. Le serveur refuse de créer le paiement tant qu'il ne peut pas
+  // établir une facture nommée. On le demande ici, puis on rejoue : `retry` change, l'effet
+  // repart. Un simple message d'erreur laisserait l'acheteur devant une impasse.
+  const [needsName, setNeedsName] = useState(false);
+  const [nameDraft, setNameDraft] = useState("");
+  const [savingName, setSavingName] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -90,6 +98,17 @@ export function PaymentWrapper({
       .then(async (response) => {
         const payload = await response.json();
 
+        if (payload?.code === "BILLING_NAME_REQUIRED") {
+          if (active) {
+            setNeedsName(true);
+            setClientSecret(null);
+            setClientSecretKey(null);
+            setError(null);
+            setErrorKey(null);
+          }
+          return;
+        }
+
         if (!response.ok || !payload.clientSecret) {
           throw new Error(payload.error ?? "Impossible d'initialiser le paiement.");
         }
@@ -99,6 +118,7 @@ export function PaymentWrapper({
           setClientSecretKey(requestKey);
           setError(null);
           setErrorKey(null);
+          setNeedsName(false);
         }
       })
       .catch((requestError: unknown) => {
@@ -120,7 +140,67 @@ export function PaymentWrapper({
     return () => {
       active = false;
     };
-  }, [requestBody, requestKey]);
+  }, [requestBody, requestKey, retry]);
+
+  if (needsName) {
+    return (
+      <form
+        className="rounded-2xl border border-white/[0.10] bg-white/[0.03] p-6"
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setSavingName(true);
+          setNameError(null);
+          try {
+            const res = await fetch("/api/account/billing-name", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ fullName: nameDraft }),
+            });
+            const payload = await res.json();
+            if (!res.ok) throw new Error(payload.error ?? "Enregistrement impossible.");
+            setNeedsName(false);
+            setRetry((n) => n + 1);
+          } catch (err) {
+            setNameError(err instanceof Error ? err.message : "Enregistrement impossible.");
+          } finally {
+            setSavingName(false);
+          }
+        }}
+      >
+        <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">
+          Dernière chose
+        </p>
+        <label htmlFor="billing-name" className="block text-[15.5px] text-label mb-1.5">
+          À quel nom établir votre facture&nbsp;?
+        </label>
+        <p className="text-[13.5px] text-muted leading-relaxed mb-4">
+          Votre compte n&apos;en porte pas encore. Il figurera sur votre facture, rien
+          d&apos;autre n&apos;en dépend.
+        </p>
+        <input
+          id="billing-name"
+          type="text"
+          autoComplete="name"
+          maxLength={120}
+          required
+          value={nameDraft}
+          onChange={(e) => setNameDraft(e.target.value)}
+          placeholder="Camille Rivière"
+          className="w-full rounded-lg border border-white/[0.12] bg-[var(--bg-deep,#0f1424)] px-4 py-3 text-[15px] text-label outline-none focus:border-accent/60"
+        />
+        {nameError && (
+          <p className="mt-3 text-[13.5px] text-red-300">{nameError}</p>
+        )}
+        <button
+          type="submit"
+          disabled={savingName}
+          className="mt-4 rounded-lg bg-accent px-5 py-2.5 text-[14px] font-medium text-[#12172a] disabled:opacity-60"
+        >
+          {savingName ? "Enregistrement…" : "Continuer"}
+        </button>
+      </form>
+    );
+  }
 
   if (error && errorKey === requestKey) {
     return (

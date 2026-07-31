@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { AuthActionState } from "@/app/auth/shared";
 import { createClient } from "@/lib/supabase/server";
+import { normalizeBuyerName } from "@/lib/invoice";
 import { getPostHogClient } from "@/lib/posthog-server";
 
 function getStringField(formData: FormData, key: string) {
@@ -118,10 +119,22 @@ export async function signUpWithPasswordAction(
   const email = getStringField(formData, "email").toLowerCase();
   const password = getStringField(formData, "password");
   const next = getSafeNextPath(getStringField(formData, "next"));
+  // LE NOM SERT À ÉTABLIR LA FACTURE. Demandé ici plutôt qu'au moment de payer : une note de
+  // prestation à un particulier doit nommer son client, et l'exiger juste avant le paiement
+  // ajouterait une friction au pire endroit du parcours. `normalizeBuyerName` refuse ce qui ne
+  // nomme personne (une ponctuation, des chiffres), donc la même règle qu'à l'émission.
+  const fullName = normalizeBuyerName(getStringField(formData, "fullName"));
 
   if (!email || !password) {
     return {
       error: "Email et mot de passe requis.",
+      message: null,
+    };
+  }
+
+  if (!fullName) {
+    return {
+      error: "Indiquez votre nom : il figurera sur vos factures.",
       message: null,
     };
   }
@@ -143,6 +156,9 @@ export async function signUpWithPasswordAction(
     password,
     options: {
       emailRedirectTo: redirectTo.toString(),
+      // `full_name` est la clé que renseigne aussi la connexion Google : une seule clé, deux
+      // provenances, et `create-payment-intent` n'a qu'un endroit où la lire.
+      data: { full_name: fullName },
     },
   });
 

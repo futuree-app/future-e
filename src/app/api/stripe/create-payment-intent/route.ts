@@ -8,6 +8,7 @@ import { fetchBanFeaturesByLabel } from "@/lib/ban";
 import { pickFeatureById } from "@/lib/ban-verify";
 import { isSellableAnchor } from "@/lib/dossier-qualification";
 import { quoteForDossier } from "@/lib/dossier-pricing";
+import { normalizeBuyerName } from "@/lib/invoice";
 import { hasPaidTerritory } from "@/lib/active-territory";
 import { communeParent } from "@/lib/plm";
 
@@ -78,6 +79,32 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Connexion requise pour finaliser un achat.", code: "AUTH_REQUIRED" },
         { status: 401 },
+      );
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // LE NOM DE FACTURATION EST EXIGÉ AVANT LE PAIEMENT, pas après.
+    //
+    // Une note de prestation à un particulier doit nommer son client. Émettre la facture après
+    // l'encaissement avec un nom manquant produirait une pièce non conforme, donc inutile là où
+    // une facture sert ; et redemander le nom après coup suppose que l'acheteur revienne.
+    // Le nom est DÉCLARÉ par le client (métadonnées de son compte) : c'est la règle normale, le
+    // vendeur ne certifie pas l'identité de l'acheteur.
+    //
+    // Le refus porte un code distinct : l'écran de paiement demande le nom, l'enregistre sur le
+    // compte, puis rejoue. Concerne les comptes créés avant que l'inscription ne demande le nom,
+    // et les comptes Google dont le profil n'en porte pas.
+    // ════════════════════════════════════════════════════════════════════════════
+    const buyerName = normalizeBuyerName(
+      (user.user_metadata as Record<string, unknown> | null)?.full_name,
+    );
+    if (!buyerName) {
+      return NextResponse.json(
+        {
+          error: "Nous avons besoin de votre nom pour établir votre facture.",
+          code: "BILLING_NAME_REQUIRED",
+        },
+        { status: 422 },
       );
     }
 
@@ -206,6 +233,10 @@ export async function POST(request: Request) {
         packProjetLabel,
         // Voyage jusqu'au webhook, seul point du parcours sans navigateur.
         phDistinctId,
+        // Le nom de facturation, FIGÉ AU MOMENT DE L'ACHAT. Le webhook ne relit pas le compte :
+        // un client qui change son nom entre le paiement et le rejeu du webhook ne doit pas
+        // changer le nom porté par la facture de cet encaissement-là.
+        buyerName,
         checkoutAttemptId: isDossier ? attemptId : "",
       },
     },
