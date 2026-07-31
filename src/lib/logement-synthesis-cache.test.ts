@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildFactHash, buildSynthesisPayload, SYNTHESIS_PROMPT_VERSION } from "./logement-synthesis-cache.ts";
+import { buildCoverage, buildFactHash, buildSynthesisPayload, SYNTHESIS_PROMPT_VERSION } from "./logement-synthesis-cache.ts";
 
 test("buildFactHash déterministe : mêmes faits -> même hash", () => {
   assert.equal(buildFactHash(fullData()), buildFactHash(fullData()));
@@ -78,4 +78,110 @@ test("buildSynthesisPayload : confortEte sous verrou DPE confirmé", () => {
   assert.ok(confirmed.confortEte, "confortEte présent si confirmé");
   const pending = buildSynthesisPayload(fullData({ dpeSelectionStatus: "selection_required" }));
   assert.equal(pending.confortEte, null);
+});
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// COUVERTURE DES DIMENSIONS (30/07/2026)
+//
+// Ce qui a rendu le défaut possible : le payload rendait `dpe: null` et `confortEte: null` aussi
+// bien pour un logement sans diagnostic que pour un champ tu volontairement. Le prompt demandait,
+// quand rien de marquant ne ressort, de « dire que l'adresse est calme ». Sur une adresse rurale
+// sans diagnostic, la synthèse a donc conclu que l'adresse « ne portait pas d'enjeu structurant
+// identifié », après quatre sections disant qu'on ne savait pas.
+//
+// Ces tests fixent ce que le modèle REÇOIT, jamais ce qu'il écrit. La formulation reste une
+// consigne de prompt, non vérifiable ici. Ce qui est vérifiable, c'est que l'information sans
+// laquelle aucune consigne ne peut tenir arrive bien jusqu'à lui.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+
+test("couverture : toutes les sources répondent -> rien de non lu, clôture globale autorisée", () => {
+  const c = buildCoverage(fullData());
+  assert.equal(c.energie, "examined");
+  assert.equal(c.confort_ete, "examined");
+  assert.equal(c.exposition_adresse, "examined");
+  assert.equal(c.sinistralite_communale, "examined");
+  assert.deepEqual(c.non_lues, []);
+});
+
+test("couverture : aucun diagnostic -> énergie ET confort d'été non lus, ensemble", () => {
+  // Les deux tombent d'un coup parce que le confort d'été DÉRIVE du diagnostic. C'est le cas du
+  // Cros, à Anglards-de-Saint-Flour : deux sections muettes d'affilée, puis une clôture qui
+  // affirmait le calme de l'adresse entière.
+  const c = buildCoverage(fullData({ dpeSelectionStatus: "not_found", selectedDpe: null }));
+  assert.equal(c.energie, "unexamined");
+  assert.equal(c.confort_ete, "unexamined");
+  assert.equal(c.non_lues.length, 2);
+  assert.equal(c.non_lues[0], "la performance énergétique de ce logement");
+});
+
+test("couverture : diagnostic REFUSÉ par le lecteur -> non lu, comme s'il n'existait pas", () => {
+  // `rejected` veut dire qu'aucun des diagnostics trouvés n'est celui de ce logement. Le tenir
+  // pour examiné ferait conclure au calme sur une dimension que personne n'a lue.
+  const c = buildCoverage(fullData({ dpeSelectionStatus: "rejected", selectedDpe: null }));
+  assert.equal(c.energie, "unexamined");
+});
+
+test("couverture : un diagnostic NON CONFIRMÉ ne compte pas pour lu", () => {
+  // Un candidat en attente de sélection n'est le diagnostic de personne. Même règle que le
+  // payload, qui ne rend le DPE que sur `auto_confirmed` ou `user_confirmed`.
+  const c = buildCoverage(fullData({ dpeSelectionStatus: "selection_required" }));
+  assert.equal(c.energie, "unexamined");
+  assert.equal(c.confort_ete, "unexamined");
+});
+
+test("couverture : un zonage VIDE est un résultat, pas une absence de lecture", () => {
+  // La distinction qui manquait. Géorisques a répondu « aucune règle ici » : c'est examiné, et la
+  // clôture a le droit de s'en servir. Une adresse sans contrainte n'est pas une adresse non lue.
+  const c = buildCoverage(fullData({
+    georisques: { parcel: { risks: { labels: [] }, pprn: { labels: [] }, seismic: { label: "faible" }, rga: { label: "exposition faible" } } },
+  }));
+  assert.equal(c.exposition_adresse, "examined");
+  assert.equal(c.non_lues.includes("ce à quoi son adresse est exposée"), false);
+});
+
+test("couverture : aucune réponse de Géorisques -> exposition non lue", () => {
+  const c = buildCoverage(fullData({ georisques: null }));
+  assert.equal(c.exposition_adresse, "unexamined");
+  assert.equal(c.non_lues.includes("ce à quoi son adresse est exposée"), true);
+});
+
+test("couverture : sinistralité absente -> non lue", () => {
+  const c = buildCoverage(fullData({ sinistralite: null }));
+  assert.equal(c.sinistralite_communale, "unexamined");
+});
+
+test("couverture : un signal défavorable n'efface pas une dimension non lue", () => {
+  // Le cas mixte, celui qu'on rate le plus facilement : l'exposition est forte ET le diagnostic
+  // manque. Les deux doivent survivre jusqu'au modèle, sinon la clôture nomme l'enjeu et tait
+  // l'inconnue.
+  const c = buildCoverage(fullData({
+    dpeSelectionStatus: "not_found", selectedDpe: null,
+    georisques: { parcel: { risks: { labels: ["inondation"] }, pprn: { labels: ["PPRI"] }, seismic: { label: "modérée" }, rga: { label: "exposition forte" } } },
+  }));
+  assert.equal(c.exposition_adresse, "examined");
+  assert.equal(c.energie, "unexamined");
+  assert.equal(c.non_lues.length, 2);
+});
+
+test("couverture : toutes les sources muettes -> les quatre dimensions non lues", () => {
+  const c = buildCoverage(fullData({
+    dpeSelectionStatus: "not_found", selectedDpe: null, georisques: null, sinistralite: null,
+  }));
+  assert.equal(c.non_lues.length, 4);
+});
+
+test("la couverture VOYAGE : elle entre dans le payload envoyé au modèle", () => {
+  // Le piège gravé dans AGENTS.md : un paramètre branché au point de décision dont le TEXTE ne se
+  // sert jamais. Les tests du dessus disent que la couverture est juste, celui-ci dit qu'elle
+  // arrive.
+  const p = buildSynthesisPayload(fullData({ dpeSelectionStatus: "not_found", selectedDpe: null }));
+  assert.equal("couverture" in p, true);
+  const c = p.couverture as { non_lues: string[] };
+  assert.equal(c.non_lues.length, 2);
+});
+
+test("la couverture entre dans le HASH : un diagnostic qui arrive régénère la synthèse", () => {
+  const sans = buildFactHash(fullData({ dpeSelectionStatus: "not_found", selectedDpe: null }));
+  const avec = buildFactHash(fullData());
+  assert.notEqual(sans, avec);
 });

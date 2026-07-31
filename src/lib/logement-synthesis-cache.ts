@@ -17,7 +17,7 @@ import { deriveThermalEvidence, thermalEvidenceSummary } from "./thermal-evidenc
 import { stableStringify } from "./stable-stringify.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 
-export const SYNTHESIS_PROMPT_VERSION = "v8"; // v8 : sortie de l'« autour » — la lecture Logement s'arrête aux murs et à ce à quoi l'adresse est exposée ; l'entourage (équipements, espace vert, îlot de chaleur) est passé au module Autour de l'adresse, donc il quitte le payload ET le prompt. Bump = régénération de toutes les synthèses existantes, voulue : les anciennes commentent un entourage que la page n'affiche plus. // v7 : passe langage non-expert renforcée — le vocabulaire d'expert n'apparaît JAMAIS même glosé (« retrait-gonflement des argiles », « inertie », « conditions conventionnelles », « représentativité » interdits), test de la mère. // v6 : croisement Logement × Territoire — le climat projeté (gwl20/2050) éclaire une caractéristique du bâti sans jamais en être le sujet ni changer le diagnostic (il change le POIDS) ; poids narratif (le climat ne prend jamais l'enjeu principal, la sinistralité communale n'est jamais couronnée). MARQUEE-ONLY en v1 (notable rendu silencieux : répétition de charnière observée 8/8 à fréquence notable). Axe chaleur seul (sécheresse différée). Passe Editorial v2.
+export const SYNTHESIS_PROMPT_VERSION = "v9"; // v9 : couverture des dimensions dans le payload, et clôture BORNÉE — le calme ne peut plus être affirmé sur « l'adresse » quand une dimension n'a pas pu être lue. Bump = régénération voulue : toutes les synthèses écrites sous v8 sur une adresse sans diagnostic concluent au calme en confondant « rien trouvé » et « rien cherchable ». // v8 : sortie de l'« autour » — la lecture Logement s'arrête aux murs et à ce à quoi l'adresse est exposée ; l'entourage (équipements, espace vert, îlot de chaleur) est passé au module Autour de l'adresse, donc il quitte le payload ET le prompt. Bump = régénération de toutes les synthèses existantes, voulue : les anciennes commentent un entourage que la page n'affiche plus. // v7 : passe langage non-expert renforcée — le vocabulaire d'expert n'apparaît JAMAIS même glosé (« retrait-gonflement des argiles », « inertie », « conditions conventionnelles », « représentativité » interdits), test de la mère. // v6 : croisement Logement × Territoire — le climat projeté (gwl20/2050) éclaire une caractéristique du bâti sans jamais en être le sujet ni changer le diagnostic (il change le POIDS) ; poids narratif (le climat ne prend jamais l'enjeu principal, la sinistralité communale n'est jamais couronnée). MARQUEE-ONLY en v1 (notable rendu silencieux : répétition de charnière observée 8/8 à fréquence notable). Axe chaleur seul (sécheresse différée). Passe Editorial v2.
 
 // Empreinte de CACHE déterministe (FNV-1a 32 bits), PAS un mécanisme de sécurité. Le risque de
 // collision est négligeable à cette échelle ; l'intégrité des faits sera assurée par la
@@ -74,6 +74,76 @@ export type SynthesisData = {
 const DPE_CONFIRMED = (s: string | null | undefined) =>
   s === "auto_confirmed" || s === "user_confirmed";
 
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LA COUVERTURE EST UN FAIT DU PAYLOAD, PAS UNE DÉDUCTION LAISSÉE AU MODÈLE.
+//
+// Le 30/07/2026, la synthèse d'une adresse rurale sans diagnostic s'est terminée par « L'adresse
+// ne porte pas d'enjeu structurant identifié », après quatre sections disant qu'on ne savait pas.
+// Le modèle n'avait pas dérivé : le prompt lui demandait, quand rien de marquant ne ressort, de
+// « dire que l'adresse est calme et de s'arrêter là ». Cette consigne avait été écrite pour le cas
+// où les données existent et ne montrent rien, et elle ne distinguait pas « on a regardé » de
+// « on n'a pas pu regarder ».
+//
+// Le payload rendait les deux cas IDENTIQUES : `dpe: null` et `confortEte: null` valent aussi bien
+// pour un logement sans diagnostic que pour un champ qu'on aurait choisi de taire. Aucune consigne
+// ne pouvait rattraper ça, puisque l'information manquait de l'autre côté.
+//
+// VOCABULAIRE VOLONTAIREMENT REPRIS de `decision/criteria-registry.ts` (`CriterionCoverage`,
+// "examined" | "unexamined") SANS l'importer : les deux sous-systèmes n'ont aucune raison de se
+// coupler, et inventer un troisième mot pour la même idée serait la dette qu'on cherche à éviter.
+// Un même concept, un même mot, deux domaines qui restent indépendants.
+//
+// PAS DE TROISIÈME ÉTAT ICI. Les sondes distinguent bien `none` d'`unavailable` une couche plus
+// bas, mais une panne de source empêche le rapport entier de se rendre : elle n'atteint jamais
+// cette fonction. Le jour où une source pourra manquer sur un rapport rendu, l'état s'ajoutera ici
+// et la clôture devra le nommer autrement (« momentanément indisponible », jamais « absent »).
+// ════════════════════════════════════════════════════════════════════════════════════════════
+export type DimensionCoverage = "examined" | "unexamined";
+
+export type SynthesisCoverage = {
+  energie: DimensionCoverage;
+  confort_ete: DimensionCoverage;
+  exposition_adresse: DimensionCoverage;
+  sinistralite_communale: DimensionCoverage;
+  /** Libellés lisibles des dimensions NON lues, dans l'ordre où la clôture doit les nommer. */
+  non_lues: string[];
+};
+
+// Libellés destinés au TEXTE, donc écrits pour un lecteur : ils entrent tels quels dans la
+// clôture. Le vocabulaire d'expert reste interdit (règle v7 du prompt), d'où « diagnostic
+// énergétique » et non « DPE ».
+const LIBELLES: Record<Exclude<keyof SynthesisCoverage, "non_lues">, string> = {
+  energie: "la performance énergétique de ce logement",
+  confort_ete: "son comportement en été",
+  exposition_adresse: "ce à quoi son adresse est exposée",
+  sinistralite_communale: "les sinistres indemnisés dans la commune",
+};
+
+export function buildCoverage(data: SynthesisData): SynthesisCoverage {
+  const dpe = Boolean(DPE_CONFIRMED(data.dpeSelectionStatus) && data.selectedDpe);
+  const parcel = data.georisques?.parcel;
+  // Une exposition EXAMINÉE veut dire que Géorisques a répondu pour cette adresse, même si sa
+  // réponse est « rien ici ». C'est précisément la distinction qui manquait : un zonage vide est
+  // un résultat, une absence de réponse n'en est pas un.
+  const expositionLue = Boolean(
+    parcel && (parcel.seismic?.label || parcel.rga?.label || parcel.risks || parcel.pprn),
+  );
+
+  const c: SynthesisCoverage = {
+    // Le confort d'été DÉRIVE du même diagnostic : sans lui, les deux tombent ensemble, et c'est
+    // ce qui rend le trou visible dans le texte (deux dimensions muettes d'affilée).
+    energie: dpe ? "examined" : "unexamined",
+    confort_ete: dpe ? "examined" : "unexamined",
+    exposition_adresse: expositionLue ? "examined" : "unexamined",
+    sinistralite_communale: data.sinistralite != null ? "examined" : "unexamined",
+    non_lues: [],
+  };
+  c.non_lues = (Object.keys(LIBELLES) as (keyof typeof LIBELLES)[])
+    .filter((k) => c[k] === "unexamined")
+    .map((k) => LIBELLES[k]);
+  return c;
+}
+
 export function buildSynthesisPayload(data: SynthesisData): Record<string, unknown> {
   const dpe = DPE_CONFIRMED(data.dpeSelectionStatus) && data.selectedDpe;
   const parcel = data.georisques?.parcel;
@@ -109,5 +179,8 @@ export function buildSynthesisPayload(data: SynthesisData): Record<string, unkno
       : null,
     // Signal climat curé (codes, aucun chiffre). null si commune hors DRIAS ou sous plancher.
     climat_projete: data.climatProjete ?? null,
+    // CE QUI A PU ÊTRE LU, ET CE QUI NE L'A PAS ÉTÉ. Entre dans le payload donc dans le hash :
+    // une adresse dont le diagnostic apparaît plus tard régénère sa synthèse, ce qui est voulu.
+    couverture: buildCoverage(data),
   };
 }

@@ -282,6 +282,34 @@ caractéristique du logement ; le climat peut dire qu'elle pèsera davantage, il
 l'enjeu à lui seul, et la commune encore moins. Si le logement ne porte pas d'enjeu marquant, la
 trajectoire du climat n'en fabrique pas un : dites que l'adresse est calme, et arrêtez-vous là.
 
+CE QUE VOUS N'AVEZ PAS PU LIRE BORNE CE QUE VOUS POUVEZ CONCLURE
+Le payload porte un objet \`couverture\`. Chaque dimension y vaut « examined » (une source a
+répondu pour cette adresse, même si sa réponse est qu'il n'y a rien) ou « unexamined » (rien n'a
+pu être lu). \`couverture.non_lues\` liste, déjà rédigées, les dimensions non lues.
+
+Tant que \`non_lues\` est vide, la clôture peut conclure sur l'adresse entière, calme comprise.
+
+Dès que \`non_lues\` contient au moins une entrée, DEUX RÈGLES S'APPLIQUENT, sans exception.
+1. Aucune phrase ne conclut sur « l'adresse », « ce logement » ou « l'ensemble » pris globalement.
+   Le calme se borne explicitement à ce qui a pu être lu. « L'adresse ne porte pas d'enjeu
+   structurant », « rien de notable ici », « ce logement est sans particularité » sont INTERDITS :
+   ils transforment une absence de mesure en absence de problème, ce qui est faux et ce qui se
+   retournera contre le lecteur le jour où il découvrira ce qu'on n'avait pas regardé.
+2. La clôture nomme ensuite les dimensions non lues, en reprenant les libellés de \`non_lues\`, en
+   une phrase, sans les dramatiser et sans prescrire quoi que ce soit (« demandez », « faites
+   vérifier », « avant de vous engager » restent interdits, un autre bloc s'en charge).
+
+L'ordre est toujours le même : ce qui a été lu d'abord, borné ; ce qui n'a pas pu l'être ensuite.
+Le logement reste le sujet grammatical des deux phrases. Forme attendue :
+
+« Rien de structurant ne ressort de ce qui a pu être lu à cette adresse. La performance
+énergétique de ce logement et son comportement en été restent non qualifiés, faute de diagnostic
+attribuable. »
+
+Et quand un enjeu EST présent malgré une dimension non lue, l'enjeu garde la clôture : vous le
+nommez d'abord, puis la dimension non lue en fin de phrase. Une inconnue n'efface jamais un
+signal, et un signal n'autorise jamais à taire une inconnue.
+
 L'utilisateur vous transmet un payload JSON. Servez-vous-en sans le réciter.`;
 
 type Body = {
