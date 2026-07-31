@@ -61,7 +61,7 @@ Voir le constat central. **Vide par défaut en production.**
 | **Aucun DPE** (`not_found`) | **Une phrase.** « Aucun DPE retrouvé dans la base ouverte pour cette adresse. » |
 | DPE rejeté par le lecteur | **Une phrase.** « Aucun des diagnostics retrouvés n'a été attribué à ce logement. » |
 
-L'absence de DPE concerne **35 à 53 % des adresses** (mesure de la session de qualification).
+L'absence de DPE concerne **73 à 92 % des adresses selon la densité** (`2026-07-31-couverture-dpe-stratifiee.md`). Le « 35 à 53 % » écrit ici le 30/07 mesurait une recherche incluant un repli à 50 m que le produit ne fait pas.
 
 ### Beat 3b — Confort d'été
 Dérivé du **même** DPE (`deriveThermalEvidence(dpe)` rend `C_NO_DATA` dès que `dpe == null`). Sans

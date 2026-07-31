@@ -26,12 +26,20 @@ emplacement, et la parcelle trouvée sous ce point peut appartenir à un tiers. 
 dossier incomplet, on vendrait **un dossier précis sur le mauvais objet**. C'est la seule
 défaillance que le lecteur ne peut ni voir ni corriger.
 
-**L'absence de diagnostic est un cas ordinaire, mesuré.** Sur le chemin BAN réel, communes pondérées
-par la population (`docs/audits/2026-07-03-dpe-confort-ete-couverture.md`) : environ 20 % des
-adresses ont un DPE à l'identifiant exact, 34 % de plus sous 50 m, **et 44 % n'ont rien**.
-L'échantillon donne un intervalle de 35 à 53 %, et le biais du tirage pousse vers le haut. Refuser
-là-dessus reviendrait à fermer la porte à une adresse sur deux, alors que le module Logement est
-déjà conçu autour de cette dégradation, en trois états également nobles.
+**L'absence de diagnostic est le cas MAJORITAIRE, mesuré par strate le 31/07/2026**
+(`docs/audits/2026-07-31-couverture-dpe-stratifiee.md`, 160 adresses tirées au hasard). Sur le
+chemin que le produit emprunte vraiment, l'identifiant BAN exact, **73 % des adresses urbaines
+denses n'ont aucun diagnostic, 85 % en péri-urbain, 86 % en petite ville, 92 % en rural**.
+
+> Le chiffre de « 35 à 53 % » qui figurait ici, tiré de l'audit du 03/07/2026, mesurait une
+> recherche INCLUANT le repli géographique à 50 m. Le produit ne fait pas ce repli, et il a raison :
+> vérification faite sur 65 adresses, le diagnostic trouvé à moins de 50 m appartient à une adresse
+> VOISINE dans 57 cas et à la même sous un autre identifiant dans **zéro** cas. La jointure est
+> juste ; le repli n'améliorerait pas la couverture, il attribuerait le diagnostic du voisin.
+
+Refuser là-dessus reviendrait donc à fermer la porte non pas à une adresse sur deux, mais à trois
+sur quatre. Le module Logement est déjà conçu autour de cette dégradation, en trois états également
+nobles.
 
 **L'absence de parcelle ne retire presque rien.** Sans elle, le rapport garde Géorisques au point,
 les cavités et mouvements de terrain, le GPU patrimonial, Cartofriches, les indicateurs IRIS

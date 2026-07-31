@@ -4,13 +4,14 @@
 // tant que le produit n'est pas en vente (cf. mémoire synthesis_model_routing).
 
 import { NextRequest, after } from "next/server";
-import { streamText } from "ai";
+import { streamText, generateText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { requireCurrentUser } from "@/lib/user-account";
 import { getDossier } from "@/lib/address-dossier-store";
 import { updateOwnedAddressDossier } from "@/lib/server/address-dossier-write";
 import { buildFactHash, buildSynthesisPayload, type SynthesisData } from "@/lib/logement-synthesis-cache";
 import { deriveClimatProjete } from "@/lib/drias-json";
+import { validateCoverageClosure, correctionPourClosure } from "@/lib/coverage-closure";
 
 export const dynamic = "force-dynamic";
 // Aligné sur synthesize-quartier : un stream lent ne doit pas être tronqué par la durée par
@@ -389,9 +390,73 @@ export async function POST(req: NextRequest) {
 DONNÉES :
 ${JSON.stringify(payload, null, 2)}`;
 
+  const MODEL = anthropic("claude-sonnet-4-6");
+  const OPTIONS = { anthropic: { effort: "medium", thinking: { type: "disabled" } } } as const;
+
+  // ════════════════════════════════════════════════════════════════════════════════════════════
+  // LE VERROU DE COUVERTURE, POSÉ SEULEMENT LÀ OÙ IL Y A QUELQUE CHOSE À VERROUILLER.
+  //
+  // Quand toutes les dimensions ont pu être lues, le texte n'a aucune règle particulière à tenir :
+  // on streame, et le lecteur voit la prose s'écrire. Quand une dimension MANQUE, la règle existe
+  // (le calme se borne à ce qui a été lu, l'inconnue se nomme) et une consigne de prompt ne la
+  // garantit pas : cette route produit de la prose libre, sans plan ni schéma, contrairement à la
+  // conclusion du dossier qui passe par `validateGeneratedBlocks`.
+  //
+  // Dans ce cas-là seulement, on BUFFERISE : on génère en entier, on vérifie, et on reprend une
+  // fois si le texte enfreint la règle. Le coût est quelques secondes sans affichage progressif,
+  // sur une minorité de dossiers, et il achète la seule chose qui compte ici, ne pas faire lire
+  // « rien à signaler » à quelqu'un dont on n'a pas pu mesurer la moitié du logement.
+  //
+  // Un second échec LAISSE PASSER le texte et journalise. Refuser tout net rendrait un dossier
+  // payé muet, ce qui est pire que le défaut qu'on corrige ; l'incident se voit dans les logs et
+  // dans un texte qu'on peut relire.
+  // ════════════════════════════════════════════════════════════════════════════════════════════
+  const nonLues = ((payload.couverture as { non_lues?: string[] } | undefined)?.non_lues) ?? [];
+
+  if (nonLues.length > 0) {
+    let texte = "";
+    let verdict = null as ReturnType<typeof validateCoverageClosure> | null;
+
+    for (let essai = 0; essai < 2; essai++) {
+      const gen = await generateText({
+        model: MODEL,
+        providerOptions: OPTIONS,
+        system: SYSTEM_PROMPT,
+        prompt: essai === 0
+          ? userMessage
+          : `${userMessage}\n\n${correctionPourClosure(verdict as Extract<ReturnType<typeof validateCoverageClosure>, { ok: false }>, nonLues)}`,
+      }).catch((err: unknown) => {
+        console.error("[synthesize-logement] generateText failed:", err);
+        return null;
+      });
+      if (!gen?.text?.trim()) break;
+
+      texte = gen.text;
+      verdict = validateCoverageClosure(texte, nonLues);
+      if (verdict.ok) break;
+      console.error("[synthesize-logement] clôture refusée", {
+        essai, raison: verdict.raison, detail: verdict.detail,
+      });
+    }
+
+    if (!texte.trim()) return new Response("AI provider unavailable.", { status: 502 });
+
+    after(async () => {
+      await updateOwnedAddressDossier(user.id, body.dossierId!, {
+        synthesis_text: texte,
+        synthesis_fact_hash: factHash,
+        synthesis_generated_at: new Date().toISOString(),
+      }).catch((e: unknown) => console.error("[synthesize-logement] persist failed:", e));
+    });
+
+    return new Response(texte, {
+      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+    });
+  }
+
   const result = streamText({
-    model: anthropic("claude-sonnet-4-6"),
-    providerOptions: { anthropic: { effort: "medium", thinking: { type: "disabled" } } },
+    model: MODEL,
+    providerOptions: OPTIONS,
     system: SYSTEM_PROMPT,
     prompt: userMessage,
     onError: ({ error }) => console.error("[synthesize-logement] streamText error:", error),
