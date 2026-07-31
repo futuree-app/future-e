@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { expectedCoverage } from "./dossier-couverture-attendue.ts";
+import {
+  expectedCoverage, mentionOrdinaire, ABSENCE_DPE_MESUREE, TAUX_ABSENCE_MINIMAL,
+} from "./dossier-couverture-attendue.ts";
 
 // ── Le cas majoritaire, celui qui a motivé ce module ───────────────────────────────────────
 
@@ -17,6 +19,33 @@ test("aucun diagnostic : le manque dit que c'est ORDINAIRE", () => {
   // Sans ça, le lecteur croit que SON adresse est mal servie, alors que c'est le cas courant.
   const c = expectedCoverage({ dpe: "none", parcel: "found" });
   assert.ok(c.manque?.includes("la plupart des adresses"), c.manque ?? "");
+});
+
+// ── « La plupart » est une affirmation EMPIRIQUE, pas une constante de langue ───────────────
+// Vérifier seulement sa présence la fossiliserait : dans trois ans, si la couverture ADEME
+// s'améliore ou si le rattachement au RNB comble les jointures, le produit affirmerait une
+// banalité devenue fausse sans que rien ne le signale. La phrase est donc CONDITIONNÉE à la
+// mesure, et ces tests vérifient la condition, pas la formule.
+
+test("la mention « ordinaire » DISPARAÎT si la mesure cesse de la soutenir", () => {
+  assert.equal(mentionOrdinaire(30), null);
+  assert.equal(mentionOrdinaire(50), null, "la moitié n'est pas « la plupart »");
+  assert.ok(mentionOrdinaire(75)?.includes("la plupart des adresses"));
+});
+
+test("la mesure en vigueur soutient bien la phrase, dans TOUTES les strates", () => {
+  // Le minimum gouverne, pas la moyenne : une moyenne à 80 % avec une strate urbaine à 40 %
+  // ferait mentir l'écran à l'acheteur urbain, qui est le plus nombreux.
+  assert.ok(TAUX_ABSENCE_MINIMAL > 50, `taux minimal mesuré : ${TAUX_ABSENCE_MINIMAL} %`);
+  for (const [strate, taux] of Object.entries(ABSENCE_DPE_MESUREE.tauxParStrate)) {
+    assert.ok(taux > 50, `${strate} : ${taux} %`);
+  }
+});
+
+test("la mesure porte sa DATE et sa source, pour qu'on puisse la contester", () => {
+  assert.match(ABSENCE_DPE_MESUREE.date, /^\d{4}-\d{2}-\d{2}$/);
+  assert.ok(ABSENCE_DPE_MESUREE.audit.endsWith(".md"));
+  assert.ok(ABSENCE_DPE_MESUREE.echantillon >= 400, "un échantillon trop petit ne fonde rien");
 });
 
 test("ce qui RESTE est dit dans tous les cas : c'est ce qu'on achète", () => {

@@ -28,6 +28,53 @@
 /** L'état d'un élément de matière, tel que la route de qualification le rend. */
 export type MatterState = "found" | "none" | "unavailable";
 
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LA MESURE QUI AUTORISE LA PHRASE « c'est le cas de la plupart des adresses ».
+//
+// Cette phrase est une affirmation EMPIRIQUE, pas une constante de langue. Elle est vraie
+// aujourd'hui ; elle cessera de l'être si la couverture ADEME s'améliore ou si le rattachement des
+// diagnostics au Référentiel National des Bâtiments réduit les jointures manquantes. Un test qui
+// vérifierait seulement sa présence la fossiliserait : dans trois ans le produit affirmerait une
+// banalité devenue fausse, sans que rien ne le signale.
+//
+// Elle est donc CONDITIONNÉE à la mesure, qui est écrite ici avec sa date et sa source. Si un
+// nouveau relevé descend le taux le plus bas sous 50 %, la phrase disparaît d'elle-même.
+//
+// POUR REMESURER : `node scripts/mesure-dpe-stratifiee.mjs`, puis mettre à jour ce bloc et l'audit.
+// La liste exacte des adresses du relevé précédent est dans
+// `docs/audits/mesure-dpe-2026-07-31-adresses.json` et se rejoue par `--rejouer`, ce qui compare
+// deux dates sur le même échantillon.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+export const ABSENCE_DPE_MESUREE = {
+  date: "2026-07-31",
+  audit: "docs/audits/2026-07-31-couverture-dpe-stratifiee.md",
+  echantillon: 800,
+  /** Taux d'ABSENCE de diagnostic, en %, sur le chemin du produit (identifiant BAN exact). */
+  tauxParStrate: {
+    urbain_dense: 75.0,
+    peri_urbain: 79.5,
+    petite_ville: 81.5,
+    rural: 85.5,
+  },
+} as const;
+
+/**
+ * Le taux le PLUS BAS observé. C'est lui qui gouverne : « la plupart des adresses » doit être vrai
+ * dans toutes les strates, pas seulement en moyenne, sinon la phrase mentirait à l'acheteur urbain.
+ */
+export const TAUX_ABSENCE_MINIMAL = Math.min(...Object.values(ABSENCE_DPE_MESUREE.tauxParStrate));
+
+/**
+ * La mention « c'est ordinaire », rendue seulement si la mesure la soutient.
+ *
+ * Sans elle, l'écran produit une impression d'anomalie individuelle : le lecteur croit que SON
+ * adresse est mal servie, alors qu'il est dans le cas courant. Avec elle, une lacune structurelle
+ * de la donnée ouverte devient un contexte, jamais une excuse.
+ */
+export function mentionOrdinaire(tauxMinimal: number): string | null {
+  return tauxMinimal > 50 ? " C'est le cas de la plupart des adresses." : null;
+}
+
 export type ExpectedCoverage = {
   /**
    * Le genre de lecture que cette adresse permet. Décrit la COUVERTURE, jamais l'enjeu.
@@ -64,7 +111,8 @@ export function expectedCoverage(matter: {
       manque:
         "Aucun diagnostic de performance énergétique n'est rattaché à cette adresse dans la base " +
         "ouverte. Ce dossier ne pourra donc qualifier ni la performance énergétique de ce " +
-        "logement, ni son comportement en été. C'est le cas de la plupart des adresses.",
+        "logement, ni son comportement en été." +
+        (mentionOrdinaire(TAUX_ABSENCE_MINIMAL) ?? ""),
       reste: RESTE_TOUJOURS,
     };
   }
