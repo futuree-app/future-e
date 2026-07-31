@@ -532,7 +532,7 @@ Créer `src/lib/dossier-qualification.ts` :
 // d'un tiers. Le défaut ne serait pas un dossier incomplet, ce serait un dossier PRÉCIS SUR LE
 // MAUVAIS OBJET.
 //
-// L'absence de diagnostic ne refuse rien (73 à 92 % des adresses), l'absence de parcelle non plus
+// L'absence de diagnostic ne refuse rien (75 à 86 % des adresses), l'absence de parcelle non plus
 // (le rapport garde neuf sources au point sans elle).
 // ════════════════════════════════════════════════════════════════════════════
 

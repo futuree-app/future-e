@@ -47,9 +47,10 @@ les indicateurs IRIS calculés avec le point, l'altitude, la ZFE et les DPE par 
 grossier, à l'inverse, elle rend une parcelle réelle qui n'est pas celle du bien.
 
 **L'absence de diagnostic ne refuse jamais rien, et elle est MAJORITAIRE.** Mesuré par strate le
-31/07/2026 (`docs/audits/2026-07-31-couverture-dpe-stratifiee.md`, 160 adresses tirées au hasard),
-sur le chemin que le produit emprunte vraiment, l'`identifiant_ban` exact : **73 % d'absence en
-urbain dense, 85 % en péri-urbain, 86 % en petite ville, 92 % en rural**.
+31/07/2026 (`docs/audits/2026-07-31-couverture-dpe-stratifiee.md`, 800 adresses tirées uniformément
+parmi les adresses réelles de la BAN), sur le chemin que le produit emprunte vraiment,
+l'`identifiant_ban` exact : **75 % d'absence en urbain dense, 79 % en péri-urbain, 82 % en petite
+ville, 86 % en rural**, à ±5 ou 6 points près.
 
 > Le taux de « 35 à 53 % » cité ici auparavant venait de l'audit du 03/07/2026 et mesurait une
 > recherche INCLUANT le repli à 50 m, que le produit ne fait pas. Vérification faite, ce repli
@@ -57,7 +58,7 @@ urbain dense, 85 % en péri-urbain, 86 % en petite ville, 92 % en rural**.
 > de la même adresse sous un autre identifiant : la jointure du produit est juste, et le repli
 > n'améliorerait pas la couverture, il attribuerait le diagnostic du voisin.
 
-Refuser sur ce fait refuserait donc les trois quarts des adresses analysables. Le module Logement est déjà conçu autour de cette dégradation, en
+Refuser sur ce fait refuserait donc quatre adresses analysables sur cinq. Le module Logement est déjà conçu autour de cette dégradation, en
 trois états également nobles.
 
 ### L'invariant
@@ -131,7 +132,7 @@ produisent la même phrase, alors que l'une parle du diagnostic et l'autre de la
 ### Pourquoi `no_exact_dpe_found` et jamais `no_dpe_found`
 
 La qualification interroge les diagnostics **par `ban_id`**, ce qui couvre ~20 % des adresses. Le
-taux de 35 à 53 % de l'audit porte sur une recherche incluant déjà le repli géographique à 50 m, que le produit NE FAIT PAS : sur son propre chemin, l'absence va de 73 à 92 % (mesure du 31/07).
+taux de 35 à 53 % de l'audit porte sur une recherche incluant déjà le repli géographique à 50 m, que le produit NE FAIT PAS : sur son propre chemin, l'absence va de 75 à 86 % (mesure du 31/07).
 Dire « aucun diagnostic » sur la base du seul `ban_id` serait donc faux pour environ quatre adresses
 sur cinq, et surtout **démenti par le dossier lui-même** quelques minutes après l'achat, quand le
 repli par coordonnées trouve un voisin.
@@ -565,7 +566,7 @@ masse urbaine rendrait alors l'échec rural statistiquement invisible.
 | Cas | Issue | Ce que le lecteur voit |
 |---|---|---|
 | `housenumber`, parcelle et DPE trouvés | vendable | prix, et rien de plus à dire |
-| `housenumber`, aucun DPE (73 à 92 % des adresses) | vendable | le manque nommé avant paiement |
+| `housenumber`, aucun DPE (75 à 86 % des adresses) | vendable | le manque nommé avant paiement |
 | `housenumber`, aucune parcelle | vendable | la lecture parcellaire annoncée absente |
 | `housenumber`, ADEME en panne | vendable | « nous n'avons pas pu vérifier le diagnostic maintenant » |
 | `street`, numéros trouvés à proximité | à préciser | les numéros proposés au clic |

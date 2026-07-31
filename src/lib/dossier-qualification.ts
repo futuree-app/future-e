@@ -8,10 +8,11 @@
 // emplacement, et la parcelle trouvée pourrait être celle d'un tiers. Le défaut ne serait pas un
 // dossier incomplet, ce serait un dossier PRÉCIS SUR LE MAUVAIS OBJET.
 //
-// L'absence de diagnostic ne refuse rien, et c'est le cas MAJORITAIRE : 73 % d'absence en urbain
-// dense et jusqu'à 92 % en rural sur le chemin que ce produit emprunte, l'identifiant BAN exact
-// (mesure stratifiée du 31/07/2026 ; le « 35 à 53 % » d'avant incluait un repli à 50 m qui
-// ramènerait le diagnostic du VOISIN, vérifié 57 fois sur 57).
+// L'absence de diagnostic ne refuse rien, et c'est le cas MAJORITAIRE : 75 % d'absence en urbain
+// dense, 86 % en rural, sur le chemin que ce produit emprunte, l'identifiant BAN exact (800
+// adresses tirées uniformément dans la BAN, 31/07/2026). Le « 35 à 53 % » cité avant incluait un
+// repli à 50 m qui ramènerait le diagnostic du VOISIN, vérifié 57 fois sur 57 ; ce repli tombe
+// d'ailleurs à 3,5 % d'absence en ville, où il mesure la présence de voisins, pas la couverture.
 // l'absence de parcelle non plus : le rapport garde neuf sources au point sans elle.
 // ════════════════════════════════════════════════════════════════════════════
 

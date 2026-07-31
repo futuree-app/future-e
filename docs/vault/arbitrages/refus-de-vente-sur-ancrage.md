@@ -27,9 +27,10 @@ dossier incomplet, on vendrait **un dossier précis sur le mauvais objet**. C'es
 défaillance que le lecteur ne peut ni voir ni corriger.
 
 **L'absence de diagnostic est le cas MAJORITAIRE, mesuré par strate le 31/07/2026**
-(`docs/audits/2026-07-31-couverture-dpe-stratifiee.md`, 160 adresses tirées au hasard). Sur le
-chemin que le produit emprunte vraiment, l'identifiant BAN exact, **73 % des adresses urbaines
-denses n'ont aucun diagnostic, 85 % en péri-urbain, 86 % en petite ville, 92 % en rural**.
+(`docs/audits/2026-07-31-couverture-dpe-stratifiee.md`, 800 adresses tirées uniformément parmi les
+adresses réelles de la BAN). Sur le chemin que le produit emprunte vraiment, l'identifiant BAN
+exact : **75 % des adresses urbaines denses n'ont aucun diagnostic, 79 % en péri-urbain, 82 % en
+petite ville, 86 % en rural** (marges à 95 % d'environ ±5 à 6 points).
 
 > Le chiffre de « 35 à 53 % » qui figurait ici, tiré de l'audit du 03/07/2026, mesurait une
 > recherche INCLUANT le repli géographique à 50 m. Le produit ne fait pas ce repli, et il a raison :
@@ -37,8 +38,8 @@ denses n'ont aucun diagnostic, 85 % en péri-urbain, 86 % en petite ville, 92 % 
 > VOISINE dans 57 cas et à la même sous un autre identifiant dans **zéro** cas. La jointure est
 > juste ; le repli n'améliorerait pas la couverture, il attribuerait le diagnostic du voisin.
 
-Refuser là-dessus reviendrait donc à fermer la porte non pas à une adresse sur deux, mais à trois
-sur quatre. Le module Logement est déjà conçu autour de cette dégradation, en trois états également
+Refuser là-dessus reviendrait donc à fermer la porte non pas à une adresse sur deux, mais à quatre
+sur cinq. Le module Logement est déjà conçu autour de cette dégradation, en trois états également
 nobles.
 
 **L'absence de parcelle ne retire presque rien.** Sans elle, le rapport garde Géorisques au point,

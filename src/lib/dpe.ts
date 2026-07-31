@@ -281,6 +281,23 @@ export async function getDpeByBanId(banId: string): Promise<DpeRecord | null> {
   // Note: dpe-france (pre-2021) n'a généralement pas d'identifiant_ban fiable
 }
 
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// ATTENTION : CETTE FONCTION ATTRIBUE PAR COORDONNÉES, ET ELLE LIT UN JEU EXPIRÉ.
+//
+// Deux raisons de ne PAS l'appeler sur le chemin payant, vérifiées le 31/07/2026.
+//
+// 1. Un diagnostic à 50 m est celui d'un VOISIN. Mesuré sur 65 adresses : 57 fois une adresse
+//    voisine, ZÉRO fois la même sous un autre identifiant. Le rayon ne répare pas une jointure, il
+//    emprunte le diagnostic d'à côté — ce que la doctrine du produit interdit.
+// 2. `DS.legacy` (« DPE Logements avant juillet 2021 », 10,7 millions de lignes) ne contient QUE
+//    des diagnostics EXPIRÉS : ceux de 2013-2017 le sont depuis le 31/12/2022, ceux de 2018 à
+//    juin 2021 depuis le 31/12/2024. Depuis le 1er janvier 2025, aucun DPE antérieur à juillet
+//    2021 n'est valide. Ce jeu ne peut donc jamais servir à dire « le diagnostic de ce logement ».
+//
+// Elle n'est atteignable que SANS identifiant BAN (`georisques-logement`, branche `address.id`
+// absente). Un dossier en porte toujours un, la colonne `ban_id` étant `not null` : la branche est
+// morte sur le chemin payant, et elle doit le rester.
+// ════════════════════════════════════════════════════════════════════════════════════════════
 export async function getDpeByCoordinates(
   latitude: number,
   longitude: number,
