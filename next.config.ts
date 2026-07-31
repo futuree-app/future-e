@@ -41,14 +41,10 @@ const nextConfig: NextConfig = {
       "./data/bpe-points/**",
       "./data/icu.json",
     ],
-    // FACTURES : pdfkit lit ses métriques de police (.afm) au runtime, par `fs`, pour les
-    // quatorze polices PDF de base. Le traceur ne les voit pas, puisque le chemin est construit
-    // à l'exécution. Sans cette ligne : PDF parfait en local, et
-    // `ENOENT ... pdfkit/js/data/Helvetica.afm` en production, donc 500 au téléchargement et
-    // facture manquante en pièce jointe. Constaté le 31/07/2026, exactement le piège décrit en
-    // tête de ce bloc pour l'index du comparateur.
-    "/api/account/factures/[number]": ["./node_modules/pdfkit/js/data/**"],
-    "/api/stripe/webhook": ["./node_modules/pdfkit/js/data/**"],
+    // (Il exista ici deux entrées pour les métriques de police de pdfkit. Elles n'ont RIEN changé :
+    // la production répondait toujours `ENOENT ... pdfkit/js/data/Helvetica.afm`. Le rendu passe
+    // désormais par `pdfkit.standalone.js`, qui embarque ces métriques et ne lit aucun fichier ;
+    // voir l'en-tête de `src/lib/server/invoice-pdf.ts`.)
   },
   async rewrites() {
     return [

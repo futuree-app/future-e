@@ -1,5 +1,5 @@
 import "server-only";
-import PDFDocument from "pdfkit";
+import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
 import { formatEuro, formatDateFr, type Invoice } from "@/lib/invoice";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
@@ -9,8 +9,17 @@ import { formatEuro, formatDateFr, type Invoice } from "@/lib/invoice";
 // marque, aucun élément décoratif. Le seul style qui compte ici est la lisibilité d'un document
 // imprimé en noir et blanc et relu dans dix ans.
 //
-// POLICES STANDARD, AUCUN FICHIER EMBARQUÉ. pdfkit sait dessiner les quatorze polices PDF de base
-// sans embarquer de fichier ; leur jeu de caractères est WinAnsi (cp1252), qui couvre les accents
+// LA VARIANTE `pdfkit.standalone.js`, PAS LE POINT D'ENTRÉE PAR DÉFAUT. Celui-ci lit les
+// métriques des polices (.afm) sur le disque au moment de dessiner, par un chemin construit à
+// l'exécution : le traceur de Next ne le voit pas, et la production répond
+// `ENOENT ... pdfkit/js/data/Helvetica.afm` là où le rendu local est parfait. Constaté le
+// 31/07/2026, en production, après un build vert. `outputFileTracingIncludes` a été essayé sur
+// les deux routes concernées et n'a rien changé. La variante autonome embarque ces métriques dans
+// un système de fichiers virtuel et ne touche jamais au disque, ce qui supprime la classe
+// entière de problème plutôt que de la configurer.
+//
+// POLICES STANDARD, AUCUN FICHIER DE POLICE À NOUS. pdfkit dessine les quatorze polices PDF de
+// base ; leur jeu de caractères est WinAnsi (cp1252), qui couvre les accents
 // français et le symbole euro. En contrepartie il NE couvre PAS l'espace fine insécable U+202F,
 // que `formatEuro` utilise comme séparateur de milliers parce que c'est la typographie juste à
 // l'écran. `toWinAnsi` la ramène donc à l'espace insécable ordinaire U+00A0, qui appartient bien
