@@ -21,6 +21,29 @@ test("désignation : sans sujet, la prestation seule, jamais un tiret orphelin",
   assert.equal(designationFor("one-shot", "   "), "Rapport d'analyse territoriale d'une commune");
 });
 
+test("désignation : le tarif appliqué s'écrit, quand il n'est pas le tarif public", () => {
+  // Sans lui, une facture à 19 € pour un produit affiché 39 € oblige à retrouver pourquoi, et
+  // c'est la première question qu'un comptable ou un tiers pose.
+  assert.equal(
+    designationFor("address-dossier", "2 Le Cros 15100 Anglards-de-Saint-Flour", "Tarif de lancement"),
+    "Dossier d'analyse d'une adresse — 2 Le Cros 15100 Anglards-de-Saint-Flour (Tarif de lancement)",
+  );
+});
+
+test("désignation : sans tarif particulier, aucune parenthèse vide", () => {
+  const attendu = "Dossier d'analyse d'une adresse — 12 rue X";
+  assert.equal(designationFor("address-dossier", "12 rue X"), attendu);
+  assert.equal(designationFor("address-dossier", "12 rue X", null), attendu);
+  assert.equal(designationFor("address-dossier", "12 rue X", "   "), attendu);
+});
+
+test("désignation : un tarif sans sujet reste lisible", () => {
+  assert.equal(
+    designationFor("address-dossier", null, "Tarif de lancement"),
+    "Dossier d'analyse d'une adresse (Tarif de lancement)",
+  );
+});
+
 test("désignation : les trois produits sont couverts", () => {
   for (const p of ["one-shot", "pack-decision", "address-dossier"] as const) {
     assert.ok(designationFor(p, null).length > 10, `${p} a une désignation`);

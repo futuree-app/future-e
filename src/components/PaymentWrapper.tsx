@@ -44,6 +44,8 @@ type PaymentWrapperProps = {
   // d'idempotence de la tentative, générée par la page de checkout.
   address?: unknown;
   checkoutAttemptId?: string;
+  /** Intention de code de lancement. Le serveur le résout : le client ne fixe aucun montant. */
+  promoCode?: string | null;
 };
 
 export function PaymentWrapper({
@@ -57,6 +59,7 @@ export function PaymentWrapper({
   onSubmit,
   address,
   checkoutAttemptId,
+  promoCode,
 }: PaymentWrapperProps) {
   // `requestBody` sert aussi de `requestKey` au useEffect : toutes les valeurs ci-dessous sont
   // stables pour un rendu de page (le distinct_id l'est pour une session), donc le PaymentIntent
@@ -71,6 +74,7 @@ export function PaymentWrapper({
     pack,
     address,
     checkoutAttemptId,
+    promoCode,
     phDistinctId: clientDistinctId(),
   });
   const requestKey = requestBody;

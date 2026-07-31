@@ -27,6 +27,13 @@ export type InvoiceProductType = "one-shot" | "pack-decision" | "address-dossier
 export function designationFor(
   productType: InvoiceProductType,
   subject: string | null,
+  /**
+   * Le tarif appliqué, quand il n'est pas le tarif public (« Tarif de lancement »). Il ENTRE dans
+   * la désignation plutôt que de rester implicite : sans lui, une facture à 19 € pour un produit
+   * affiché 39 € oblige à retrouver pourquoi, et c'est exactement la question qu'un comptable ou
+   * un tiers pose en premier.
+   */
+  tariffLabel?: string | null,
 ): string {
   const base: Record<InvoiceProductType, string> = {
     "one-shot": "Rapport d'analyse territoriale d'une commune",
@@ -34,7 +41,9 @@ export function designationFor(
     "address-dossier": "Dossier d'analyse d'une adresse",
   };
   const s = subject?.trim();
-  return s ? `${base[productType]} — ${s}` : base[productType];
+  const t = tariffLabel?.trim();
+  const core = s ? `${base[productType]} — ${s}` : base[productType];
+  return t ? `${core} (${t})` : core;
 }
 
 // Les deux espaces de la typographie monétaire française, en ÉCHAPPEMENTS EXPLICITES. Les taper

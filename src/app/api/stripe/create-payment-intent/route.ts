@@ -8,6 +8,7 @@ import { fetchBanFeaturesByLabel } from "@/lib/ban";
 import { pickFeatureById } from "@/lib/ban-verify";
 import { isSellableAnchor } from "@/lib/dossier-qualification";
 import { quoteForDossier } from "@/lib/dossier-pricing";
+import { resolvePromo } from "@/lib/promo-code";
 import { normalizeBuyerName } from "@/lib/invoice";
 import { hasPaidTerritory } from "@/lib/active-territory";
 import { communeParent } from "@/lib/plm";
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
   try {
     const {
       productType, targetInsee, targetCommune, source, rank, pack,
-      phDistinctId: phDistinctIdRaw, address, checkoutAttemptId,
+      phDistinctId: phDistinctIdRaw, address, checkoutAttemptId, promoCode,
     } = await request.json();
 
     if (typeof productType !== "string" || productType.trim().length === 0) {
@@ -120,6 +121,9 @@ export async function POST(request: Request) {
     // ════════════════════════════════════════════════════════════════════════════
     const isDossier = productType.trim() === "address-dossier";
     let dossierAmountCents = 0;
+    // Écrit sur la facture à côté de la prestation : c'est ce qui explique, à un comptable comme
+    // à l'acheteur, pourquoi le montant diffère du prix affiché publiquement.
+    let dossierPromoLabel: string | null = null;
     let dossierIntent: {
       banId: string; insee: string; label: string; city: string | null;
       postcode: string | null; latitude: number; longitude: number; deductionCents: number;
@@ -157,8 +161,16 @@ export async function POST(request: Request) {
       // TOUTES les valeurs viennent de la feature canonique. Sécuriser le type en gardant les
       // coordonnées du client analyserait un point choisi par le client.
       const paid = await hasPaidTerritory(supabase, user.id, communeParent(canonical.citycode));
-      const quote = quoteForDossier(paid);
+
+      // LE CODE EST RÉSOLU ICI, C'EST LE SEUL ENDROIT QUI COMPTE. La page de checkout le résout
+      // aussi, mais pour AFFICHER : un code fabriqué dans l'URL, ou un montant modifié dans le
+      // corps de la requête, ne changent rien à ce qui est encaissé. Un code expiré entre le
+      // moment où l'écran s'est rendu et celui du paiement fait donc payer le plein tarif, ce qui
+      // est le bon sens de l'erreur.
+      const promo = resolvePromo(promoCode, "address-dossier", new Date());
+      const quote = quoteForDossier(paid, promo);
       dossierAmountCents = quote.amountDueCents;
+      dossierPromoLabel = quote.promoLabel;
       dossierIntent = {
         banId: canonical.id, insee: canonical.citycode, label: canonical.label,
         city: canonical.city, postcode: canonical.postcode,
@@ -233,6 +245,8 @@ export async function POST(request: Request) {
         packProjetLabel,
         // Voyage jusqu'au webhook, seul point du parcours sans navigateur.
         phDistinctId,
+        // Le tarif appliqué, figé lui aussi : la facture le porte, et il ne se recalcule pas.
+        promoLabel: dossierPromoLabel ?? "",
         // Le nom de facturation, FIGÉ AU MOMENT DE L'ACHAT. Le webhook ne relit pas le compte :
         // un client qui change son nom entre le paiement et le rejeu du webhook ne doit pas
         // changer le nom porté par la facture de cet encaissement-là.

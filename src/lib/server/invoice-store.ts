@@ -60,6 +60,8 @@ export async function issueInvoice(
     subject: string | null;
     /** Ce que Stripe déclare avoir encaissé. Jamais un tarif catalogue. */
     amountCents: number;
+    /** Le tarif appliqué s'il n'est pas le tarif public. Entre dans la désignation. */
+    tariffLabel?: string | null;
     paymentIntentId: string;
   },
 ): Promise<IssueResult> {
@@ -70,7 +72,7 @@ export async function issueInvoice(
   }
 
   const seller = sellerSnapshot();
-  const designation = designationFor(input.productType, input.subject);
+  const designation = designationFor(input.productType, input.subject, input.tariffLabel);
 
   const { data, error } = await admin().rpc("allocate_invoice", {
     p_user_id: input.userId,

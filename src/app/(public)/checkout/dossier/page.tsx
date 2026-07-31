@@ -7,6 +7,7 @@ import { fetchBanFeaturesByLabel } from "@/lib/ban";
 import { pickFeatureById } from "@/lib/ban-verify";
 import { isSellableAnchor } from "@/lib/dossier-qualification";
 import { quoteForDossier } from "@/lib/dossier-pricing";
+import { resolvePromo, promoExists } from "@/lib/promo-code";
 import { hasPaidTerritory } from "@/lib/active-territory";
 import { communeParent } from "@/lib/plm";
 import { DossierCheckoutPanel } from "./DossierCheckoutPanel";
@@ -27,9 +28,9 @@ import { DossierCheckoutPanel } from "./DossierCheckoutPanel";
 export default async function DossierCheckoutPage({
   searchParams,
 }: {
-  searchParams: Promise<{ banId?: string; label?: string; insee?: string }>;
+  searchParams: Promise<{ banId?: string; label?: string; insee?: string; code?: string }>;
 }) {
-  const { banId, label, insee } = await searchParams;
+  const { banId, label, insee, code } = await searchParams;
   if (!banId || !label || !insee) redirect("/dossier");
 
   const supabase = await createClient();
@@ -61,7 +62,17 @@ export default async function DossierCheckoutPage({
   }
 
   const paid = await hasPaidTerritory(supabase, user.id, communeParent(canonical.citycode));
-  const quote = quoteForDossier(paid);
+
+  // LE CODE EST RÉSOLU CÔTÉ SERVEUR, ici comme au moment de créer le paiement. Cette page ne fait
+  // qu'AFFICHER : la route de paiement le résout à nouveau, sur la même table, donc un code
+  // fabriqué dans l'URL ne changerait rien à ce qui est encaissé.
+  //
+  // On distingue « inconnu » d'« expiré » : un code expiré affiché comme invalide laisserait
+  // croire à une faute de frappe, et la personne réessaierait indéfiniment.
+  const promo = resolvePromo(code, "address-dossier", new Date());
+  const promoRejected = Boolean(code?.trim()) && !promo;
+  const promoExpired = promoRejected && promoExists(code);
+  const quote = quoteForDossier(paid, promo);
 
   return (
     <div
@@ -93,6 +104,9 @@ export default async function DossierCheckoutPage({
             type: canonical.type,
           }}
           quote={quote}
+          promoCode={promo?.code ?? null}
+          promoRejected={promoRejected}
+          promoExpired={promoExpired}
           userEmail={user.email}
           checkoutAttemptId={crypto.randomUUID()}
         />

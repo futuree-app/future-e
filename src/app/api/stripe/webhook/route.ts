@@ -52,7 +52,7 @@ async function buildInvoiceAttachment(
   subject: string | null,
 ): Promise<{ filename: string; content: Buffer }[]> {
   try {
-    const { userId, userEmail, buyerName } = paymentIntent.metadata;
+    const { userId, userEmail, buyerName, promoLabel } = paymentIntent.metadata;
     if (!userEmail) return [];
 
     const result = await issueInvoice({
@@ -63,6 +63,8 @@ async function buildInvoiceAttachment(
       subject,
       // Ce que STRIPE déclare avoir encaissé, jamais un tarif catalogue.
       amountCents: paymentIntent.amount,
+      // Figé dans les métadonnées à l'achat : la facture dit à quel tarif la vente s'est faite.
+      tariffLabel: promoLabel || null,
       paymentIntentId: paymentIntent.id,
     });
 

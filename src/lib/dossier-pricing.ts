@@ -16,11 +16,38 @@ export const DOSSIER_PRICE = {
   territoryDeductionCents: 1400,
 } as const;
 
-export function quoteForDossier(hasPaidTerritory: boolean): {
+export type DossierQuote = {
   basePriceCents: number;
   territoryDeductionCents: number;
   amountDueCents: number;
-} {
+  /** Le libellé du tarif de lancement appliqué, s'il y en a un. Écrit sur la facture. */
+  promoLabel: string | null;
+};
+
+/**
+ * Le devis du dossier.
+ *
+ * `promo` est un PLANCHER, jamais une remise qui s'ajoute à la déduction. Cumuler les deux ferait
+ * tomber à 0 € un compte ayant déjà payé le territoire : Stripe refuse en dessous de 50 centimes,
+ * et un encaissement nul ne prouverait rien. Quand un code s'applique, la déduction territoriale
+ * est donc ANNULÉE, pas soustraite : le lecteur paie le tarif de lancement, point.
+ *
+ * Conséquence assumée, et elle va dans le bon sens : quelqu'un qui a déjà payé le territoire paie
+ * 19 € au lieu de 25 €, donc le code lui profite aussi. L'inverse (facturer 25 € malgré le code)
+ * serait incompréhensible pour la personne à qui on a annoncé un prix.
+ */
+export function quoteForDossier(
+  hasPaidTerritory: boolean,
+  promo?: { amountCents: number; label: string } | null,
+): DossierQuote {
+  if (promo) {
+    return {
+      basePriceCents: DOSSIER_PRICE.fullCents,
+      territoryDeductionCents: 0,
+      amountDueCents: promo.amountCents,
+      promoLabel: promo.label,
+    };
+  }
   const territoryDeductionCents = hasPaidTerritory
     ? DOSSIER_PRICE.territoryDeductionCents
     : 0;
@@ -28,5 +55,6 @@ export function quoteForDossier(hasPaidTerritory: boolean): {
     basePriceCents: DOSSIER_PRICE.fullCents,
     territoryDeductionCents,
     amountDueCents: DOSSIER_PRICE.fullCents - territoryDeductionCents,
+    promoLabel: null,
   };
 }

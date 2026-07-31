@@ -7,6 +7,7 @@ test("plein tarif quand le territoire n'a pas été payé", () => {
     basePriceCents: 3900,
     territoryDeductionCents: 0,
     amountDueCents: 3900,
+    promoLabel: null,
   });
 });
 
@@ -15,6 +16,7 @@ test("tarif d'approfondissement quand le territoire a été payé", () => {
     basePriceCents: 3900,
     territoryDeductionCents: 1400,
     amountDueCents: 2500,
+    promoLabel: null,
   });
 });
 
