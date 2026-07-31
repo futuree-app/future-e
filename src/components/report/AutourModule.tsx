@@ -27,6 +27,7 @@ import type { CarOwnership } from "@/lib/iris-logement";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { Face3Block } from "@/components/report/logement/AutourSection";
 import { IcuExposure } from "@/components/report/logement/IcuExposure";
+import { buildAutourConclusion } from "@/lib/decision/autour-conclusion";
 
 // Jeton d'adresse non réversible pour l'analytics : distingue deux adresses sans stocker
 // l'adresse (djb2 -> base36). Même fonction que dans LogementModule, volontairement dupliquée :
@@ -253,6 +254,34 @@ export default function AutourModule({
                 </GlassCard>
               </ReportSection>
             )}
+
+            {/* CE QU'IL FAUT EN RETENIR, assemblé des faits, jamais généré. Le module rendait des
+                nombres et s'arrêtait ; il rend maintenant la configuration que ces nombres
+                décrivent. Placé APRÈS les faits et AVANT le renvoi : une conclusion se lit quand
+                on a vu ce qu'elle résume. */}
+            {(() => {
+              const c = buildAutourConclusion(autour);
+              if (!c) return null;
+              return (
+                <ReportSection eyebrow="Ce que ce secteur met à portée" tone="green">
+                  <GlassCard>
+                    <div style={{ display: "grid", gap: 14 }}>
+                      <p style={{ fontSize: 15.5, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 }}>
+                        {c.lead}
+                      </p>
+                      {c.absences.map((a) => (
+                        <p key={a} style={{ fontSize: 14.5, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+                          {a}
+                        </p>
+                      ))}
+                      <p style={{ fontSize: 13, color: "var(--fg-4)", lineHeight: 1.55, margin: 0, paddingTop: 4, borderTop: "1px solid var(--border-1)" }}>
+                        {c.limite}
+                      </p>
+                    </div>
+                  </GlassCard>
+                </ReportSection>
+              );
+            })()}
 
             <ReportSection eyebrow="Poursuivre" tone="neutral">
               <GlassCard>
