@@ -28,6 +28,7 @@ import { ReportSection, GlassCard } from "@/components/report/kit";
 import { Face3Block } from "@/components/report/logement/AutourSection";
 import { IcuExposure } from "@/components/report/logement/IcuExposure";
 import { buildAutourConclusion } from "@/lib/decision/autour-conclusion";
+import { buildInfraLecture } from "@/lib/decision/autour-infrastructures";
 
 // Jeton d'adresse non réversible pour l'analytics : distingue deux adresses sans stocker
 // l'adresse (djb2 -> base36). Même fonction que dans LogementModule, volontairement dupliquée :
@@ -254,6 +255,41 @@ export default function AutourModule({
                 </GlassCard>
               </ReportSection>
             )}
+
+            {/* LES ABORDS. Cette donnée était calculée dans chaque snapshot depuis toujours et
+                jamais affichée, avec ce motif : « reste hors rendu tant qu'on ne sait pas la dire
+                au grain de l'adresse ». La difficulté était réelle, une distance n'est pas un
+                niveau de bruit. Elle se lève de la même façon que pour l'équipement automobile du
+                secteur : on donne le fait, et on dit dans la foulée ce qu'il n'établit pas. */}
+            {(() => {
+              const infra = buildInfraLecture(autour);
+              if (!infra) return null;
+              return (
+                <ReportSection eyebrow="Les abords de l'adresse" tone="neutral">
+                  <GlassCard>
+                    {infra.indisponible ? (
+                      <p style={{ fontSize: 14, color: "var(--fg-4)", lineHeight: 1.6, margin: 0 }}>
+                        {infra.indisponible}
+                      </p>
+                    ) : (
+                      <div style={{ display: "grid", gap: 10 }}>
+                        {infra.lignes.map((l) => (
+                          <div key={l.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
+                            <span style={{ fontSize: 15, color: "var(--fg-1)", fontWeight: 500 }}>{l.label}</span>
+                            <span style={{ fontSize: 15, color: "var(--fg-hi)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                              à {l.distance}
+                            </span>
+                          </div>
+                        ))}
+                        <p style={{ fontSize: 13, color: "var(--fg-4)", lineHeight: 1.55, margin: 0, paddingTop: 10, borderTop: "1px solid var(--border-1)" }}>
+                          {infra.limite}
+                        </p>
+                      </div>
+                    )}
+                  </GlassCard>
+                </ReportSection>
+              );
+            })()}
 
             {/* CE QU'IL FAUT EN RETENIR, assemblé des faits, jamais généré. Le module rendait des
                 nombres et s'arrêtait ; il rend maintenant la configuration que ces nombres

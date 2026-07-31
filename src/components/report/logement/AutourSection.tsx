@@ -5,8 +5,10 @@ import { ecartAuCommune, partSansVoiture, type CarOwnership } from "@/lib/iris-l
 
 // « Autour de cette adresse » (buffer local au point géocodé) — le corps du module 02 depuis le
 // 29/07/2026, où il n'était jusque-là que la « Face 3 » du module Logement. Hiérarchie : vie
-// quotidienne (BPE, socle) > verts (repère). L'infrastructure de transport (bruit) n'est toujours
-// pas rendue : elle demande un grain adresse qu'on n'a pas encore.
+// quotidienne (BPE, socle) > verts (repère). L'infrastructure de transport, elle, se lit depuis le
+// 01/08/2026 dans son propre bloc du module (« Les abords de l'adresse ») : ce qui manquait n'était
+// pas le grain, c'était la limite qui rend la distance dicible sans la faire passer pour un niveau
+// sonore. Voir `decision/autour-infrastructures.ts`.
 // Distances brutes à vol d'oiseau, aucun adjectif de proximité, aucune note.
 const FACE3_CAT_LABEL: Record<string, string> = {
   sante: "Santé",
@@ -164,8 +166,8 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
           {/* Brique 2 bis — équipement automobile du secteur (INSEE). */}
           {car ? <CarOwnershipBlock car={car} /> : null}
 
-          {/* Brique 2 — espace vert (repère). L'infrastructure de transport (bruit/nuisance)
-              reste hors rendu tant qu'on ne sait pas la dire au grain de l'adresse. */}
+          {/* Brique 2 — espace vert (repère). L'infrastructure de transport a quitté ce silence le
+              01/08/2026 : elle se lit dans son propre bloc du module Autour. */}
           <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 8 }}>
             <div style={FACE3_SUBHEAD}>Espace vert</div>
             {s.sourceStatus.osmGreenSpaces === "pending" ? (
