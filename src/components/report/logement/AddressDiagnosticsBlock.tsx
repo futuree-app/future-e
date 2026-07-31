@@ -22,6 +22,13 @@ import { DpeSelector } from "@/components/report/DpeSelector";
 // réponse, une répartition se lit comme de la dispersion.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
+// Virgule décimale. Les surfaces ADEME arrivent en flottant (« 10.2 »), et un point décimal dans
+// un texte français se lit comme une coquille. Pas d'`Intl` : une seule règle, pas de dépendance à
+// la version d'ICU du runtime.
+function m2(v: number): string {
+  return (Math.round(v * 10) / 10).toString().replace(".", ",");
+}
+
 function Ligne({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
@@ -83,8 +90,8 @@ export function AddressDiagnosticsBlock({
         {ctx.surfaces && (
           <Ligne label="Surfaces diagnostiquées">
             {ctx.surfaces.min === ctx.surfaces.max
-              ? `${ctx.surfaces.min} m²`
-              : `de ${ctx.surfaces.min} à ${ctx.surfaces.max} m²`}
+              ? `${m2(ctx.surfaces.min)} m²`
+              : `de ${m2(ctx.surfaces.min)} à ${m2(ctx.surfaces.max)} m²`}
           </Ligne>
         )}
 
