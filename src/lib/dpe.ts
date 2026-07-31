@@ -61,8 +61,8 @@ function toRecordLegacy(r: LegacyApiRecord): DpeRecord {
 
 // La logique pure d'attribution + les types de base vivent dans dpe-attribution.ts (sans
 // server-only, car le client s'en sert). On les ré-exporte ici pour les consommateurs serveur.
-export type { DpeLabel, DpeRecord, DpeAttribution, AddressDpeContext } from "./dpe-attribution.ts";
-export { dedupeAndCollapseDpe, dpeAttributionStatus, deriveAddressDpeContext } from "./dpe-attribution.ts";
+export type { DpeLabel, DpeRecord, DpeAttribution } from "./dpe-attribution.ts";
+export { dedupeAndCollapseDpe, dpeAttributionStatus } from "./dpe-attribution.ts";
 
 import { LABEL_ORDER, dedupeAndCollapseDpe } from "./dpe-attribution.ts";
 import type { DpeLabel, DpeRecord } from "./dpe-attribution.ts";

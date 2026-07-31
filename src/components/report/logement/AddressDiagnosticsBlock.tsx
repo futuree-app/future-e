@@ -119,7 +119,7 @@ export function AddressDiagnosticsBlock({
       <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)" }}>
         <p style={{ fontSize: 13.5, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
           Le numéro à treize caractères du diagnostic, que porte le document remis avec le dossier
-          de diagnostic technique, lève cette incertitude.
+          de diagnostic technique, lève cette incertitude. Vous pouvez le coller ci-dessous.
         </p>
       </div>
 
@@ -136,7 +136,7 @@ export function AddressDiagnosticsBlock({
           Reconnaître le diagnostic de ce logement
         </summary>
         <div style={{ paddingBottom: 6 }}>
-          <DpeSelector candidates={candidates} context={null} onPick={onPick} onNotInList={onNotInList} />
+          <DpeSelector candidates={candidates} onPick={onPick} onNotInList={onNotInList} />
         </div>
       </details>
     </div>

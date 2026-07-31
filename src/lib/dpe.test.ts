@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 import {
   dedupeAndCollapseDpe,
   dpeAttributionStatus,
-  deriveAddressDpeContext,
   type DpeRecord,
 } from "./dpe-attribution.ts";
 
@@ -77,30 +76,7 @@ test("2 candidats -> selection_required", () => {
   assert.equal(out.status, "selection_required");
 });
 
-// ── Task 3 : contexte DPE de l'adresse ───────────────────────────────────────
-
-test("≥3 diagnostics résidentiels -> fourchette de classes", () => {
-  const out = deriveAddressDpeContext([
-    rec({ id_dpe: "a", etiquette_dpe: "D", type_batiment: "appartement" }),
-    rec({ id_dpe: "b", etiquette_dpe: "F", type_batiment: "appartement" }),
-    rec({ id_dpe: "c", etiquette_dpe: "E", type_batiment: "appartement" }),
-  ]);
-  assert.deepEqual(out, { count: 3, minLabel: "D", maxLabel: "F" });
-});
-
-test("<3 diagnostics -> null (repère non affiché)", () => {
-  const out = deriveAddressDpeContext([
-    rec({ id_dpe: "a", etiquette_dpe: "D" }),
-    rec({ id_dpe: "b", etiquette_dpe: "F" }),
-  ]);
-  assert.equal(out, null);
-});
-
-test("classes manquantes exclues ; si <3 valides -> null", () => {
-  const out = deriveAddressDpeContext([
-    rec({ id_dpe: "a", etiquette_dpe: "D" }),
-    rec({ id_dpe: "b", etiquette_dpe: null }),
-    rec({ id_dpe: "c", etiquette_dpe: null }),
-  ]);
-  assert.equal(out, null);
-});
+// (Les trois tests du contexte DPE d'adresse ont été retirés le 31/07/2026 avec la fonction
+//  qu'ils couvraient. Leurs propriétés sont reprises, et étendues, dans
+//  `dpe-address-context.test.ts` : le seuil de trois diagnostics classés y est vérifié dans les
+//  deux sens, et les classes manquantes y sont exclues de la même façon.)

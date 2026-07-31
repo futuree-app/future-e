@@ -85,21 +85,7 @@ export function dpeAttributionStatus(
     : { status: "selection_required", candidates };
 }
 
-export type AddressDpeContext = { count: number; minLabel: DpeLabel; maxLabel: DpeLabel };
-
-// « Diagnostics retrouvés à cette adresse » : n'affiche une fourchette QUE si au moins 3
-// diagnostics résidentiels portent une classe. Sinon null (trop peu ou trop hétérogène pour
-// constituer un repère honnête). Ne qualifie jamais le logement.
-export function deriveAddressDpeContext(candidates: DpeRecord[]): AddressDpeContext | null {
-  const labels = candidates
-    .filter((c) => (c.type_batiment ?? "").toLowerCase() !== "tertiaire")
-    .map((c) => c.etiquette_dpe)
-    .filter((l): l is DpeLabel => l != null);
-  if (labels.length < 3) return null;
-  const idx = labels.map((l) => LABEL_ORDER.indexOf(l)).filter((i) => i >= 0);
-  return {
-    count: labels.length,
-    minLabel: LABEL_ORDER[Math.min(...idx)],
-    maxLabel: LABEL_ORDER[Math.max(...idx)],
-  };
-}
+// (Il exista ici `AddressDpeContext` et `deriveAddressDpeContext`, qui rendaient un compte et
+//  deux bornes de classes. Plus rien ne les lisait depuis le 31/07/2026 : le contexte d'adresse
+//  vit dans `dpe-address-context.ts`, plus riche et écrit pour être affiché. Deux notions du même
+//  concept auraient divergé.)
