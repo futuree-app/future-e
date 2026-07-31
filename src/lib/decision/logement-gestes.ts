@@ -43,9 +43,23 @@ export type ActionCopy = { label: string; detail: string };
 /** Les gestes que le module Logement sait proposer. Un par famille de constat. */
 export type GesteKey =
   | "energie" | "confort" | "bati" | "reglementaire" | "cavite" | "patrimoine" | "sinistralite"
-  | "radon";
+  | "radon" | "diagnostic_adresse";
 
 export const GESTES: Record<GesteKey, Record<Bucket, ActionCopy>> = {
+  // DIAGNOSTIC NON ATTRIBUÉ (31/07/2026). Se déclenche quand l'adresse porte des diagnostics mais
+  // qu'aucun n'a pu être rattaché au logement examiné — le cas ordinaire d'un immeuble, où la base
+  // en contient parfois plus de vingt. Sans ce geste, AUCUN geste énergie ne se proposait dans ce
+  // cas, puisque la règle `energie` exige une étiquette : le lecteur repartait avec une incertitude
+  // et rien à en faire.
+  //
+  // Le numéro à treize caractères est la seule question qui la lève, et c'est une question que le
+  // vendeur ou le bailleur peut répondre sans effort : il figure sur le document qu'il détient.
+  diagnostic_adresse: {
+    achat: { label: "Demandez le numéro du diagnostic de ce logement", detail: "Treize caractères, sur le document remis avec le dossier de diagnostic technique. Il désigne un logement précis, là où l'adresse seule en désigne plusieurs." },
+    location: { label: "Demandez au bailleur le diagnostic de ce logement", detail: "Son numéro à treize caractères distingue ce logement des autres diagnostics de l'immeuble." },
+    reside: { label: "Retrouvez le numéro du diagnostic de votre logement", detail: "Il figure sur le document remis à l'achat ou à l'entrée dans les lieux, et il vaut pour ce logement seul." },
+    neutre: { label: "Demandez le numéro du diagnostic de ce logement", detail: "Treize caractères qui désignent un logement précis, là où l'adresse seule en désigne plusieurs." },
+  },
   energie: {
     achat: { label: "Faites chiffrer les travaux d'amélioration", detail: "Demandez des devis avant de vous engager : isolation, chauffage, ventilation." },
     location: { label: "Demandez la date du diagnostic et les factures réelles", detail: "L'étiquette date d'un diagnostic ; les factures des derniers hivers disent ce que ça coûte vraiment." },

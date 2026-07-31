@@ -185,3 +185,64 @@ test("la couverture entre dans le HASH : un diagnostic qui arrive régénère la
   const avec = buildFactHash(fullData());
   assert.notEqual(sans, avec);
 });
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LES DIAGNOSTICS DE L'ADRESSE (31/07/2026)
+//
+// Ils entrent dans le payload uniquement quand AUCUN n'est attribué. C'est ce qui permet au texte
+// de dire qu'un document existe et se demande, au lieu de s'arrêter à « non qualifiée ». Ce qu'ils
+// ne doivent JAMAIS permettre, c'est d'emprunter une valeur au logement voisin : d'où l'absence
+// totale de valeurs individuelles dans ce qui traverse.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+
+const voisins = [
+  { ...fullData().selectedDpe, id_dpe: "V1", etiquette_dpe: "B", surface_m2: 22 },
+  { ...fullData().selectedDpe, id_dpe: "V2", etiquette_dpe: "F", surface_m2: 88 },
+  { ...fullData().selectedDpe, id_dpe: "V3", etiquette_dpe: "D", surface_m2: 45 },
+];
+
+test("diagnostics de l'adresse : ABSENTS dès qu'un diagnostic est attribué", () => {
+  // Le logement a le sien : les voisins n'ont plus rien à dire, et les laisser passer offrirait au
+  // modèle une comparaison qu'il n'a pas à faire.
+  const p = buildSynthesisPayload(fullData({ dpeCandidates: voisins }));
+  assert.equal(p.diagnostics_adresse, null);
+});
+
+test("diagnostics de l'adresse : PRÉSENTS quand rien n'est attribué", () => {
+  const p = buildSynthesisPayload(fullData({
+    dpeSelectionStatus: "selection_required", selectedDpe: null, dpeCandidates: voisins,
+  }));
+  assert.deepEqual(p.diagnostics_adresse, {
+    total: 3, ecart_classes: "B à F", immeuble_entier: false,
+  });
+});
+
+test("diagnostics de l'adresse : AUCUNE valeur individuelle ne traverse", () => {
+  // La garde qui compte. Le modèle ne doit pas pouvoir citer l'étiquette d'un voisin, ni sa
+  // surface, ni son identifiant : rien de ce qui décrirait un autre logement que celui-ci.
+  const p = buildSynthesisPayload(fullData({
+    dpeSelectionStatus: "rejected", selectedDpe: null, dpeCandidates: voisins,
+  }));
+  const brut = JSON.stringify(p.diagnostics_adresse);
+  for (const interdit of ["V1", "V2", "V3", "22", "88", "45"]) {
+    assert.equal(brut.includes(interdit), false, `« ${interdit} » ne doit pas traverser`);
+  }
+});
+
+test("diagnostics de l'adresse : rien à dire quand l'adresse n'en porte aucun", () => {
+  // Distinct du cas précédent : ici il n'y a aucun document à réclamer, et le prompt s'appuie sur
+  // cette absence pour ne pas en inventer un.
+  const p = buildSynthesisPayload(fullData({
+    dpeSelectionStatus: "not_found", selectedDpe: null, dpeCandidates: [],
+  }));
+  assert.equal(p.diagnostics_adresse, null);
+});
+
+test("diagnostics de l'adresse : un diagnostic d'IMMEUBLE est signalé comme tel", () => {
+  const p = buildSynthesisPayload(fullData({
+    dpeSelectionStatus: "selection_required", selectedDpe: null,
+    dpeCandidates: [...voisins, { ...voisins[0], id_dpe: "V4", methode_dpe: "dpe immeuble collectif" }],
+  })) as { diagnostics_adresse: { immeuble_entier: boolean; total: number } };
+  assert.equal(p.diagnostics_adresse.immeuble_entier, true);
+  assert.equal(p.diagnostics_adresse.total, 4);
+});

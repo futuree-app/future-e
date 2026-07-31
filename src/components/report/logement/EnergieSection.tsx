@@ -1,6 +1,7 @@
 import type { LogementReport } from "@/lib/logement-report-types";
 import type { DpeRecord } from "@/lib/dpe-attribution";
 import { ReportSection, GlassCard } from "@/components/report/kit";
+import { AddressDiagnosticsBlock } from "./AddressDiagnosticsBlock";
 import { DpeBadge, Block, DPE_LABELS } from "./kit";
 
 // Face 1 — Énergie & rénovation : attribution du DPE au logement (sélecteur / absence / rejet /
@@ -10,39 +11,50 @@ export type DpeUiStatus =
   | "loading" | "not_found" | "selection_required" | "auto_confirmed" | "confirmed" | "rejected" | "error";
 
 export function EnergieSection({
-  dpeStatus, dpe, audit, onReselect,
+  dpeStatus, dpe, audit, candidates, onPick, onNotInList, onReselect,
 }: {
   dpeStatus: DpeUiStatus;
   dpe: DpeRecord | null;
   audit: LogementReport["audit"];
+  /** Tous les diagnostics rattachés à l'adresse, attribués ou non. */
+  candidates: DpeRecord[];
+  onPick: (d: DpeRecord) => void;
+  onNotInList: () => void;
   onReselect: () => void;
 }) {
-  // Note : la sélection multi-DPE (« selection_required ») se fait AVANT le rapport, dans
-  // PreciseLogementStep (le rapport ne se rend jamais dans cet état). Ici on ne traite que les
-  // états terminaux : diagnostic attribué, aucun DPE, ou aucun attribué.
-  if (dpeStatus === "not_found") {
+  // LA SÉLECTION NE BLOQUE PLUS LE RAPPORT (31/07/2026). Elle se faisait avant lui, dans un écran
+  // `PreciseLogementStep` qui masquait tout le module tant que le lecteur n'avait pas désigné son
+  // diagnostic parmi ceux de l'adresse. À vingt-quatre candidats, décrits par une surface, un
+  // étage et un numéro de porte, quelqu'un qui ENVISAGE d'acheter ne peut pas répondre : il ne
+  // voyait donc pas le dossier qu'il venait de payer. Et répondre « mon logement n'est pas dans
+  // cette liste » réduisait cette section à une phrase.
+  //
+  // Deux états quand rien n'est attribué. Soit l'adresse porte des diagnostics, et ils se lisent
+  // comme un CONTEXTE D'ADRESSE, jamais comme une caractéristique de ce logement-ci. Soit elle
+  // n'en porte aucun, et on le dit sans prétendre qu'il n'en existe pas.
+  const nonAttribue = dpeStatus === "selection_required" || dpeStatus === "rejected" || !dpe;
+
+  if (nonAttribue) {
     return (
-      <ReportSection eyebrow="Énergie & rénovation" tone="orange">
+      <ReportSection eyebrow="Diagnostics à cette adresse" tone="orange">
         <GlassCard>
-          <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
-            Aucun DPE retrouvé dans la base ouverte pour cette adresse. Cela ne signifie pas nécessairement qu&apos;aucun diagnostic n&apos;existe.
-          </p>
+          {candidates.length > 0 ? (
+            <AddressDiagnosticsBlock
+              candidates={candidates}
+              onPick={onPick}
+              onNotInList={onNotInList}
+            />
+          ) : (
+            <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+              Aucun diagnostic de performance énergétique n&apos;est rattaché à cette adresse dans
+              la base ouverte. Cela ne veut pas dire qu&apos;aucun n&apos;existe : il peut ne pas y
+              avoir été versé.
+            </p>
+          )}
         </GlassCard>
       </ReportSection>
     );
   }
-  if (dpeStatus === "rejected") {
-    return (
-      <ReportSection eyebrow="Énergie & rénovation" tone="orange">
-        <GlassCard>
-          <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
-            Aucun des diagnostics retrouvés n&apos;a été attribué à ce logement.
-          </p>
-        </GlassCard>
-      </ReportSection>
-    );
-  }
-  if (!dpe) return null;
   return (
     <ReportSection eyebrow="Énergie & rénovation" tone="orange">
       <GlassCard>

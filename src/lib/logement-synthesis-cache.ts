@@ -14,10 +14,11 @@
 // Pas de `server-only` : buildFactHash est aussi utilisé côté client pour le gating en session.
 
 import { deriveThermalEvidence, thermalEvidenceSummary } from "./thermal-evidence.ts";
+import { buildAddressDpeContext } from "./dpe-address-context.ts";
 import { stableStringify } from "./stable-stringify.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 
-export const SYNTHESIS_PROMPT_VERSION = "v9"; // v9 : couverture des dimensions dans le payload, et clôture BORNÉE — le calme ne peut plus être affirmé sur « l'adresse » quand une dimension n'a pas pu être lue. Bump = régénération voulue : toutes les synthèses écrites sous v8 sur une adresse sans diagnostic concluent au calme en confondant « rien trouvé » et « rien cherchable ». // v8 : sortie de l'« autour » — la lecture Logement s'arrête aux murs et à ce à quoi l'adresse est exposée ; l'entourage (équipements, espace vert, îlot de chaleur) est passé au module Autour de l'adresse, donc il quitte le payload ET le prompt. Bump = régénération de toutes les synthèses existantes, voulue : les anciennes commentent un entourage que la page n'affiche plus. // v7 : passe langage non-expert renforcée — le vocabulaire d'expert n'apparaît JAMAIS même glosé (« retrait-gonflement des argiles », « inertie », « conditions conventionnelles », « représentativité » interdits), test de la mère. // v6 : croisement Logement × Territoire — le climat projeté (gwl20/2050) éclaire une caractéristique du bâti sans jamais en être le sujet ni changer le diagnostic (il change le POIDS) ; poids narratif (le climat ne prend jamais l'enjeu principal, la sinistralité communale n'est jamais couronnée). MARQUEE-ONLY en v1 (notable rendu silencieux : répétition de charnière observée 8/8 à fréquence notable). Axe chaleur seul (sécheresse différée). Passe Editorial v2.
+export const SYNTHESIS_PROMPT_VERSION = "v10"; // v10 : les diagnostics de l'adresse entrent dans le payload quand AUCUN n'est attribué, et la lecture doit alors nommer le document à réclamer plutôt que de s'arrêter à « non qualifiée ». Bump = régénération voulue. // v9 : couverture des dimensions dans le payload, et clôture BORNÉE — le calme ne peut plus être affirmé sur « l'adresse » quand une dimension n'a pas pu être lue. Bump = régénération voulue : toutes les synthèses écrites sous v8 sur une adresse sans diagnostic concluent au calme en confondant « rien trouvé » et « rien cherchable ». // v8 : sortie de l'« autour » — la lecture Logement s'arrête aux murs et à ce à quoi l'adresse est exposée ; l'entourage (équipements, espace vert, îlot de chaleur) est passé au module Autour de l'adresse, donc il quitte le payload ET le prompt. Bump = régénération de toutes les synthèses existantes, voulue : les anciennes commentent un entourage que la page n'affiche plus. // v7 : passe langage non-expert renforcée — le vocabulaire d'expert n'apparaît JAMAIS même glosé (« retrait-gonflement des argiles », « inertie », « conditions conventionnelles », « représentativité » interdits), test de la mère. // v6 : croisement Logement × Territoire — le climat projeté (gwl20/2050) éclaire une caractéristique du bâti sans jamais en être le sujet ni changer le diagnostic (il change le POIDS) ; poids narratif (le climat ne prend jamais l'enjeu principal, la sinistralité communale n'est jamais couronnée). MARQUEE-ONLY en v1 (notable rendu silencieux : répétition de charnière observée 8/8 à fréquence notable). Axe chaleur seul (sécheresse différée). Passe Editorial v2.
 
 // Empreinte de CACHE déterministe (FNV-1a 32 bits), PAS un mécanisme de sécurité. Le risque de
 // collision est négligeable à cette échelle ; l'intégrité des faits sera assurée par la
@@ -66,6 +67,15 @@ export type SynthesisData = {
   // ils ne sont jamais comparés l'un à l'autre (le client dédup en local sur ses faits visibles,
   // le serveur clé son cache sur son propre hash). Divergence inoffensive, cf. route.
   climatProjete?: ClimatProjete | null;
+  /**
+   * TOUS les diagnostics rattachés à l'adresse, attribués ou non. Entrés dans le payload le
+   * 31/07/2026 avec le déblocage de la sélection : la page les affiche désormais, donc le texte a
+   * le droit d'en parler (règle du fichier : le payload ne porte QUE des faits affichés dessous).
+   *
+   * Ils ne servent qu'à une chose : dire qu'il y a un document à réclamer. Le prompt interdit d'en
+   * tirer la moindre caractéristique de ce logement-ci.
+   */
+  dpeCandidates?: DpeRecord[] | null;
   // irep / cartofriches / posture : volontairement ignorés. Les deux premiers ne sont interprétés par
   // aucun fait aujourd'hui (cf. le registre des sources dormantes) ; la posture n'est pas un fait.
   // autour : retiré en v8 — il appartient au module Autour de l'adresse (cf. en-tête).
@@ -179,6 +189,20 @@ export function buildSynthesisPayload(data: SynthesisData): Record<string, unkno
       : null,
     // Signal climat curé (codes, aucun chiffre). null si commune hors DRIAS ou sous plancher.
     climat_projete: data.climatProjete ?? null,
+    // CONTEXTE D'ADRESSE, jamais une caractéristique du logement. Présent SEULEMENT quand rien
+    // n'est attribué : dès qu'un diagnostic est confirmé, il devient le sujet et les autres n'ont
+    // plus rien à dire. Réduit au strict nécessaire (un nombre, un écart), sans aucune valeur
+    // individuelle : le modèle ne doit pas pouvoir citer l'étiquette d'un voisin.
+    diagnostics_adresse: (() => {
+      if (dpe) return null;
+      const ctx = buildAddressDpeContext(data.dpeCandidates ?? []);
+      if (!ctx) return null;
+      return {
+        total: ctx.total,
+        ecart_classes: ctx.spread ? `${ctx.spread.min} à ${ctx.spread.max}` : null,
+        immeuble_entier: ctx.hasCollective,
+      };
+    })(),
     // CE QUI A PU ÊTRE LU, ET CE QUI NE L'A PAS ÉTÉ. Entre dans le payload donc dans le hash :
     // une adresse dont le diagnostic apparaît plus tard régénère sa synthèse, ce qui est voulu.
     couverture: buildCoverage(data),

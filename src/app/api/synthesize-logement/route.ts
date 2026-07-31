@@ -282,6 +282,25 @@ caractéristique du logement ; le climat peut dire qu'elle pèsera davantage, il
 l'enjeu à lui seul, et la commune encore moins. Si le logement ne porte pas d'enjeu marquant, la
 trajectoire du climat n'en fabrique pas un : dites que l'adresse est calme, et arrêtez-vous là.
 
+LES DIAGNOSTICS DE L'ADRESSE NE DÉCRIVENT JAMAIS CE LOGEMENT
+Quand aucun diagnostic n'a pu être rattaché au logement, le payload porte \`diagnostics_adresse\` :
+combien de diagnostics existent à l'adresse, l'écart des classes observées, et si l'un d'eux porte
+sur l'immeuble entier. Ces diagnostics sont ceux des VOISINS.
+
+Vous ne leur empruntez RIEN. Pas une étiquette, pas une consommation, pas une tendance, pas un
+« plutôt bien classé dans l'ensemble ». Un logement voisin ne dit rien de celui-ci, et le laisser
+entendre serait la faute la plus grave que ce texte puisse commettre.
+
+Ce que vous avez le droit d'en faire, et c'est utile : dire qu'un document existe et qu'il se
+demande. « Plusieurs diagnostics portent cette adresse sans qu'aucun puisse être rattaché à ce
+logement ; celui de ce logement précis existe, et le vendeur le détient. » Nommer le nombre est
+permis, il est affiché juste dessous. L'écart des classes ne se cite QUE pour montrer que les
+logements de l'immeuble ne se ressemblent pas, donc qu'aucun ne peut servir de substitut, jamais
+pour situer celui-ci dans la fourchette.
+
+Quand \`diagnostics_adresse\` est absent, l'adresse n'en porte aucun : vous ne dites pas qu'il y en
+a ailleurs, et vous n'inventez pas de document à réclamer.
+
 CE QUE VOUS N'AVEZ PAS PU LIRE BORNE CE QUE VOUS POUVEZ CONCLURE
 Le payload porte un objet \`couverture\`. Chaque dimension y vaut « examined » (une source a
 répondu pour cette adresse, même si sa réponse est qu'il n'y a rien) ou « unexamined » (rien n'a

@@ -17,6 +17,15 @@ export type { Bucket };
 
 export type ChecklistFacts = {
   dpe: "passoire" | "energivore" | "correct" | "absent";
+  /**
+   * L'adresse porte des diagnostics, mais AUCUN n'a pu être rattaché à ce logement.
+   *
+   * Distinct de `dpe: "absent"`, qui couvre aussi le cas où l'adresse n'en porte aucun : dans ce
+   * dernier cas il n'y a rien à réclamer, alors qu'ici le document existe et que le vendeur
+   * l'a. Sans ce fait, la checklist restait muette sur l'énergie dès qu'on n'attribuait pas,
+   * puisque la règle `energie` exige une étiquette.
+   */
+  diagnosticNonAttribue: boolean;
   confortEteInsuffisant: boolean;
   expositionBati: boolean; // RGA/argile à exposition notable
   zoneReglementee: boolean; // au moins un zonage PPRN au point
@@ -49,6 +58,8 @@ const RULES: {
   active: (f: ChecklistFacts) => boolean;
   buckets?: Bucket[]; // par défaut : tous. Restreint le geste aux projets où il a un sens.
 }[] = [
+  // Avant l'énergie : sans diagnostic attribué, c'est le premier geste qui a du sens.
+  { id: "diagnostic_adresse", active: (f) => f.diagnosticNonAttribue },
   { id: "energie", active: (f) => f.dpe === "passoire" || f.dpe === "energivore" },
   { id: "confort", active: (f) => f.confortEteInsuffisant },
   { id: "bati", active: (f) => f.expositionBati },

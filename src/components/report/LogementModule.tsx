@@ -21,7 +21,6 @@ import { EnergieSection } from "@/components/report/logement/EnergieSection";
 import { SinistraliteBlock } from "@/components/report/logement/SinistraliteSection";
 import { RegulatoryStatusBlock } from "@/components/report/logement/RegulatorySection";
 import { DecisionChecklist } from "@/components/report/logement/DecisionChecklist";
-import { PreciseLogementStep } from "@/components/report/logement/PreciseLogementStep";
 import { energyState, type ChecklistFacts } from "@/lib/logement-checklist";
 import { evidenceAnchorId } from "@/lib/decision/evidence-targets";
 
@@ -198,9 +197,17 @@ export default function LogementModule({
   const thermalEvidence = deriveThermalEvidence(dpe);
   const communeName = result?.address?.city ?? defaultCommune ?? "cette commune";
   const dpeYear = dpe?.date_dpe ? dpe.date_dpe.slice(0, 4) : null;
-  // Synthèse artefact : prête quand l'analyse est là ET le DPE dans un état terminal
-  // (auto_confirmed / confirmed / not_found). On attend tant que l'utilisateur choisit.
-  const dpeTerminal = dpeStatus === "auto_confirmed" || dpeStatus === "confirmed" || dpeStatus === "not_found";
+  // Synthèse artefact : prête dès que l'analyse est là et que l'attribution a un RÉSULTAT, quel
+  // qu'il soit.
+  //
+  // ÉLARGI LE 31/07/2026. La liste excluait `selection_required` et `rejected`, parce que le
+  // rapport ne se rendait pas dans ces états : on attendait le choix du lecteur. Depuis que le
+  // rapport s'affiche sans attribution, cette exclusion aurait privé de lecture rédigée exactement
+  // le cas le plus fréquent en ville, celui où l'adresse porte plusieurs diagnostics et où
+  // personne ne peut désigner le sien. « Non attribué » est un résultat, pas une attente.
+  //
+  // Seuls `loading` et `error` restent non terminaux : là, on ne sait pas encore.
+  const dpeTerminal = dpeStatus !== "loading" && dpeStatus !== "error";
   // Le gate « attendre que l'autour soit terminal » (board critique 2a) A DISPARU avec l'autour :
   // il existait parce qu'une synthèse générée trop tôt se figeait sans la section entourage. Ce
   // fait n'entrant plus dans le payload, la synthèse ne dépend plus que de l'analyse et du DPE.
@@ -213,6 +220,9 @@ export default function LogementModule({
     georisques: result?.georisques,
     sinistralite: result?.sinistralite,
     communeData: result?.communeData,
+    // Le payload ne les retient QUE si rien n'est attribué (cf. `buildSynthesisPayload`) : dès
+    // qu'un diagnostic est confirmé, il devient le sujet et les autres n'ont plus rien à dire.
+    dpeCandidates,
   };
   const georisques = result?.georisques?.parcel ?? result?.georisques?.address;
   // Les risques du bâti au grain point (cavités, mouvements de terrain) et le résidu communal sont
@@ -224,6 +234,9 @@ export default function LogementModule({
   const sini = result?.sinistralite ?? null;
   const checklistFacts: ChecklistFacts = {
     dpe: energyState(dpe?.etiquette_dpe ?? null),
+    // L'adresse porte des diagnostics et aucun n'est attribué : il y a un document à réclamer.
+    // Distinct de « aucun diagnostic à cette adresse », où il n'y a rien à demander.
+    diagnosticNonAttribue: !dpe && dpeCandidates.length > 0,
     confortEteInsuffisant: thermalEvidence.indicator === "insuffisant",
     expositionBati: Boolean(georisques?.rga?.label && /moyen|fort|élev/i.test(georisques.rga.label)),
     zoneReglementee: (georisques?.regulatoryPlans?.length ?? 0) > 0,
@@ -300,19 +313,14 @@ export default function LogementModule({
           </div>
         </section>
 
-      {/* Précisez votre logement : quand plusieurs diagnostics existent, on choisit AVANT le
-          rapport pour que le Passeport s'affiche rempli (retour porteur, 5a). */}
-      {result && dpeStatus === "selection_required" && (
-        <PreciseLogementStep
-          addressLabel={result.address?.label ?? null}
-          candidates={dpeCandidates}
-          onPick={(d) => { setSelectedDpe(d); setDpeStatus("confirmed"); void persistDpe("user_confirmed", d); }}
-          onNotInList={() => { setSelectedDpe(null); setDpeStatus("rejected"); void persistDpe("not_in_list", null); }}
-        />
-      )}
-
-      {/* ── RÉSULTATS : lecture en 5 beats (spec 5a) ── */}
-      {result && dpeStatus !== "selection_required" && (
+      {/* ── RÉSULTATS : lecture en 5 beats (spec 5a) ──
+          LE RAPPORT NE SE MASQUE PLUS DERRIÈRE LA SÉLECTION DU DIAGNOSTIC (31/07/2026). Un écran
+          « Précisez votre logement » s'interposait ici quand plusieurs diagnostics existaient à
+          l'adresse, pour que le Passeport s'affiche rempli (décision porteur, 5a). Renversé :
+          l'usage réel montre que l'exigence empêche l'acheteur d'atteindre la valeur, puisqu'il
+          ignore l'étage et le numéro de porte du bien qu'il visite. La reconnaissance vit
+          désormais DANS la section Énergie, repliée, à côté de ce que la base dit de l'adresse. */}
+      {result && (
         <section style={{ padding: "24px 0 96px", display: "grid", gap: 40 }}>
 
           {/* Beat 1 — Identité : quel logement ? (passeport compacté, tilt conservé) */}
@@ -360,6 +368,9 @@ export default function LogementModule({
               dpeStatus={dpeStatus}
               dpe={dpe}
               audit={result.audit}
+              candidates={dpeCandidates}
+              onPick={(d) => { setSelectedDpe(d); setDpeStatus("confirmed"); void persistDpe("user_confirmed", d); }}
+              onNotInList={() => { setSelectedDpe(null); setDpeStatus("rejected"); void persistDpe("not_in_list", null); }}
               onReselect={() => setDpeStatus("selection_required")}
             />
             </div>
