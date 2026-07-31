@@ -5,10 +5,29 @@ import type { LngLat } from "./geo-distance.ts";
 export type Face3Cat = "sante" | "alimentation" | "education" | "transports" | "services";
 export type Posture = "residence" | "prospection";
 export type BpePoint = { c: Face3Cat; t: string; lat: number; lon: number };
+/**
+ * LE RAYON « À PORTÉE DE PAS » : 500 m à vol d'oiseau, six à sept minutes de marche.
+ *
+ * Défini ICI, dans le contrat partagé, parce que deux endroits s'en servent : le comptage des
+ * équipements (`nearestByCategory`) et la conclusion du module (`decision/autour-conclusion.ts`).
+ * Deux constantes pour un même seuil finiraient par diverger, et l'écran dirait alors « 3 à moins
+ * de 500 m » sous une phrase qui parle d'un autre périmètre.
+ */
+export const BPE_WALK_RADIUS_M = 500;
+
 export type BpeNearest = {
   category: Face3Cat;
   nearest: { distanceMeters: number; typeLabel: string | null } | null;
   searchCapMeters: number;
+  /**
+   * Combien d'équipements de cette catégorie dans `BPE_WALK_RADIUS_M`.
+   *
+   * OPTIONNEL, ET IL DOIT LE RESTER. Les snapshots sont figés à leur création : ceux d'avant le
+   * 01/08/2026 ne portent pas ce champ, et un dossier ancien ne doit pas afficher « 0 à moins de
+   * 500 m » là où le comptage n'a simplement jamais eu lieu. Absent veut dire « non compté »,
+   * jamais « aucun ».
+   */
+  withinWalkCount?: number;
 };
 
 // Libellé FR précis par code TYPEQU (BPE24). Nature de chaque code confirmée sur les

@@ -24,3 +24,45 @@ test("toutes les catégories sont présentes dans la sortie", () => {
   assert.equal(res.length, 5);
   assert.ok(res.every((r) => r.nearest === null && r.searchCapMeters === 3000));
 });
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LE COMPTAGE À PORTÉE DE PAS (01/08/2026)
+//
+// « La plus proche » efface la différence entre un secteur où une boulangerie est à 400 m et un
+// secteur où il y en a quatre. C'est pourtant la différence entre avoir un commerce et avoir le
+// choix, et elle ne se voit sur aucune carte au premier coup d'œil.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+
+test("le comptage à portée de pas ne retient QUE ce qui est dans le rayon", () => {
+  const centre = { lat: 45, lon: 5 };
+  // 0,001° de latitude vaut environ 111 m : de quoi placer des points à des distances connues.
+  const pts = [
+    { c: "alimentation" as const, t: "B207", lat: 45.001, lon: 5 }, // ~111 m
+    { c: "alimentation" as const, t: "B207", lat: 45.002, lon: 5 }, // ~222 m
+    { c: "alimentation" as const, t: "B207", lat: 45.008, lon: 5 }, // ~889 m, hors rayon
+  ];
+  const r = nearestByCategory(centre, pts).find((x) => x.category === "alimentation")!;
+  assert.equal(r.withinWalkCount, 2, "le troisième est au-delà de 500 m");
+  assert.ok(r.nearest && r.nearest.distanceMeters < 130, "le plus proche reste le plus proche");
+});
+
+test("le comptage rend 0 quand la catégorie existe au loin mais pas à portée de pas", () => {
+  // Zéro EST une réponse ici : la recherche a bien eu lieu. C'est `undefined` qui veut dire
+  // « non compté », et il ne peut venir que d'un snapshot figé avant ce comptage.
+  const r = nearestByCategory({ lat: 45, lon: 5 }, [
+    { c: "sante" as const, t: "D307", lat: 45.02, lon: 5 },
+  ]).find((x) => x.category === "sante")!;
+  assert.equal(r.withinWalkCount, 0);
+  assert.ok(r.nearest, "elle existe, elle est juste loin");
+});
+
+test("chaque catégorie compte la sienne, sans contamination", () => {
+  const r = nearestByCategory({ lat: 45, lon: 5 }, [
+    { c: "sante" as const, t: "D307", lat: 45.001, lon: 5 },
+    { c: "alimentation" as const, t: "B207", lat: 45.001, lon: 5 },
+    { c: "alimentation" as const, t: "B105", lat: 45.0015, lon: 5 },
+  ]);
+  assert.equal(r.find((x) => x.category === "sante")!.withinWalkCount, 1);
+  assert.equal(r.find((x) => x.category === "alimentation")!.withinWalkCount, 2);
+  assert.equal(r.find((x) => x.category === "education")!.withinWalkCount, 0);
+});

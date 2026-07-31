@@ -1,5 +1,5 @@
 import React from "react";
-import type { Face3Snapshot, GreenKind } from "@/lib/logement-autour-types";
+import { BPE_WALK_RADIUS_M, type Face3Snapshot, type GreenKind } from "@/lib/logement-autour-types";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { ecartAuCommune, partSansVoiture, type CarOwnership } from "@/lib/iris-logement";
 
@@ -158,6 +158,18 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
                       {c.nearest ? `env. ${fmtDist(c.nearest.distanceMeters)}` : `dans les ${c.searchCapMeters / 1000} km analysés`}
                     </span>
                   </div>
+                  {/* LE COMPTE, SEULEMENT QUAND IL APPREND QUELQUE CHOSE. « 1 à moins de 500 m »
+                      ne dit rien de plus que la ligne au-dessus, qui donne déjà la distance du
+                      plus proche. À partir de deux, il dit autre chose : la différence entre
+                      avoir un commerce et avoir le choix.
+                      `undefined` veut dire NON COMPTÉ, jamais « aucun » : les snapshots figés
+                      avant le 01/08/2026 ne portent pas ce champ, et un dossier ancien ne doit
+                      pas afficher un zéro qui serait faux. */}
+                  {typeof c.withinWalkCount === "number" && c.withinWalkCount > 1 && (
+                    <span style={{ fontSize: 12.5, color: "var(--fg-4)" }}>
+                      {c.withinWalkCount} à moins de {BPE_WALK_RADIUS_M} m
+                    </span>
+                  )}
                 </div>
               ))}
             </div>

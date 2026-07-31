@@ -21,7 +21,7 @@
 // Pur, testé sous `node --test`.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
-import type { Face3Cat, Face3Snapshot } from "../logement-autour-types.ts";
+import { BPE_WALK_RADIUS_M, type Face3Cat, type Face3Snapshot } from "../logement-autour-types.ts";
 
 /**
  * LE SEUIL « À PORTÉE DE PAS » : 500 mètres, à vol d'oiseau.
@@ -33,8 +33,12 @@ import type { Face3Cat, Face3Snapshot } from "../logement-autour-types.ts";
  * Convention de produit, donc NOMMÉE ET DITE dans la phrase, au même titre que le seuil de
  * `ECART_SECTEUR_NOTABLE` : un seuil qui gouverne une phrase sans être affiché est un jugement
  * caché.
+ *
+ * LA VALEUR VIT DANS LE CONTRAT PARTAGÉ (`BPE_WALK_RADIUS_M`), parce que le comptage des
+ * équipements s'en sert aussi. Deux constantes pour un même seuil finiraient par diverger, et
+ * l'écran dirait « 3 à moins de 500 m » sous une phrase parlant d'un autre périmètre.
  */
-export const SEUIL_A_PIED_M = 500;
+export const SEUIL_A_PIED_M = BPE_WALK_RADIUS_M;
 
 /**
  * Le libellé de famille, quand aucun type précis n'est renseigné.
