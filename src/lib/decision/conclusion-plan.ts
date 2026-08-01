@@ -124,15 +124,21 @@ export type ConclusionNarrativePlan = {
   posture: ProjectPosture;
   blocks: NarrativeBlock[];
   reservesCount: number; // faits AFFICHÉS (post-caps), jamais faits émis
+  /**
+   * LA RÉPARTITION DES CONTRÔLES entre la minute et la liste complète, celle-là même que le verdict
+   * prononce. Exposée pour être VÉRIFIABLE : l'invariant « le lecteur doit pouvoir compter les
+   * cartes et retomber sur le chiffre » se teste sur `visibles + enPlus`, pas sur une phrase.
+   */
+  controles: PerimetreControles;
   lead: LeadSelection;
   // La prochaine démarche concrète, déterministe. Distincte de `lead` (qui choisit QUEL sujet vient
   // ensuite) : elle dit QUOI FAIRE à son propos, depuis l'action déjà écrite sur le fait. `null` quand
   // le fait de tête ne porte aucune action (rien à orienter).
   priorityControl: PriorityControl | null;
   // LES CARTES DE LA SYNTHÈSE (« En une minute »). Le plan la porte parce que le VERDICT en dépend :
-  // il annonce le nombre de contrôles visibles et le nombre restant dans le dossier complet. La laisser
-  // à la vue rendait le verdict incapable de parler juste de ce que le lecteur a sous les yeux.
-  // `dossier.sections` reste la restitution complète.
+  // il annonce le nombre de contrôles visibles et le nombre restant, qui se lit PLUS BAS depuis le
+  // 01/08/2026 (`ControlesDuDossier`). La laisser à la vue rendait le verdict incapable de parler
+  // juste de ce que le lecteur a sous les yeux. `dossier.sections` reste la restitution complète.
   minute: string[];
   verdict: VerdictPresentation;
   verdictLabel: string;   // le statut qui coiffe la carte, dérivé de la MÊME table que la phrase
@@ -593,11 +599,17 @@ function favorableNomme(input: ConclusionPlanInput): string | null {
 // n'annoncer que le total contredit l'écran.
 export type PerimetreControles = { visibles: number; enPlus: number };
 
-// « Deux points sont par ailleurs à contrôler. Trois autres figurent dans le dossier complet. »
+// « Deux points sont par ailleurs à contrôler. Trois autres figurent plus bas. »
 //
 // Les deux clauses sont indépendantes : une synthèse peut ne montrer aucun contrôle et le dossier en
 // contenir cinq — c'est même le cas le plus fréquent depuis que la sélection privilégie ce qui fonde le
 // verdict. On ne dit alors QUE la seconde, et on ne prétend pas que rien ne reste à faire.
+//
+// « PLUS BAS », ET PLUS « DANS LE DOSSIER COMPLET » (01/08/2026). La seconde formule désignait un
+// endroit qui n'existait pas : `dossier.sections` n'était rendu par aucun composant, et le lecteur
+// à qui on annonçait trois autres constats n'avait nulle part où les lire. La liste complète est
+// désormais sous la minute, sur la même page. Aucun lien n'est injecté dans cette prose : elle est
+// fortement contrainte, jamais générée, et la surface est immédiatement en dessous.
 function suiteControles(p: PerimetreControles): string {
   const ici = p.visibles > 0
     ? ` ${p.visibles > 1 ? `${capitalize(enLettres(p.visibles))} constats restent` : "Un constat reste"} par ailleurs à contrôler.`
@@ -605,7 +617,7 @@ function suiteControles(p: PerimetreControles): string {
   const ailleurs = p.enPlus > 0
     ? ` ${p.enPlus > 1
         ? `${p.visibles > 0 ? capitalize(enLettres(p.enPlus)) + " autres constats" : capitalize(enLettres(p.enPlus)) + " constats"} figurent`
-        : `${p.visibles > 0 ? "Un autre constat" : "Un constat"} figure`} dans le dossier complet.`
+        : `${p.visibles > 0 ? "Un autre constat" : "Un constat"} figure`} plus bas.`
     : "";
   return `${ici}${ailleurs}`;
 }
@@ -982,7 +994,8 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
   });
   // LE PÉRIMÈTRE DES CONTRÔLES. `reservesShown` reste le TOTAL — il est calculé par l'assembleur, qui
   // seul connaît les compositions porteuses de réserves. Ce qui est nouveau, c'est de savoir combien de
-  // ces contrôles la SYNTHÈSE retient : le reste vit dans le dossier complet, et le verdict le dit.
+  // ces contrôles la SYNTHÈSE retient : le reste se lit dans la liste complète, sous elle, et le
+  // verdict y renvoie.
   //
   // Sans les faits sous la main (appelant partiel, test unitaire du verdict seul), les deux périmètres
   // ne sont pas distinguables : on décrit alors le total, comme avant. Mieux vaut l'ancienne phrase,
@@ -1020,7 +1033,7 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
   if (input.conclusionState === "project_not_structured") {
     return {
       scope: input.scope, communeNom: input.communeNom, conclusionState: input.conclusionState,
-      posture: input.posture, blocks, reservesCount: 0, lead: { kind: "none" }, priorityControl: null,
+      posture: input.posture, blocks, reservesCount: 0, controles: { visibles: 0, enPlus: 0 }, lead: { kind: "none" }, priorityControl: null,
       minute: [], verdict: v,
       verdictLabel: v.label, verdictTone: v.tone,
     };
@@ -1107,6 +1120,7 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
     posture: input.posture,
     blocks,
     reservesCount: rs.length,
+    controles,
     lead,
     priorityControl,
     minute: [...minute],

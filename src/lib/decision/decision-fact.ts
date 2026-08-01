@@ -439,6 +439,14 @@ export type Dossier = {
   criteria: CriteriaSummary;
   conclusionBasis: { ruleIds: string[]; factIds: string[]; evidence: EvidenceRef[] };
   sections: DossierSection[];
+  /**
+   * LE TITRE DE LA LISTE COMPLÈTE DES CONTRÔLES, rendue sous la minute.
+   *
+   * Il suit la posture, et il vient de la même fonction que le titre de la section de la minute :
+   * les deux disent le même geste (« contrôler » pour qui s'engage, « surveiller » pour qui
+   * habite), et deux tables les auraient laissés diverger sur le verbe.
+   */
+  controlesTitle: string;
   // Les compositions AFFICHÉES (post-cap) et les faits qu'elles ont absorbés : ceux-ci quittent les
   // sections mais restent lisibles au dépliable d'audit de leur composition (invariant 4).
   compositions: FactComposition[];

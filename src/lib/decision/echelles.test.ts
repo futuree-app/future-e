@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { echelleDuFait, echelleDeLaComposition, echelleDeLaPreuve, ECHELLE_PAR_GRAIN, type Echelle } from "./echelles.ts";
+import { echelleDuFait, echelleDeLaComposition, echelleDeLaPreuve, ECHELLE_PAR_GRAIN, NOM_ECHELLE, ORDRE_ECHELLES, type Echelle } from "./echelles.ts";
 import type { DecisionFact, EvidenceRef } from "./decision-fact.ts";
 import type { FactComposition } from "./fact-composition.ts";
 import { readFileSync } from "node:fs";
@@ -160,4 +160,22 @@ test("ÉCHELLE : le secteur reste le quartier, quelle que soit la relation", () 
       "quartier",
     );
   }
+});
+
+// ── LE NOM DE L'ÉCHELLE POUR LE LECTEUR ────────────────────────────────────────────────────
+
+test("PIÈGE DE VOCABULAIRE : `quartier` s'écrit « Autour de l'adresse », jamais « Quartier »", () => {
+  // Dans `PRODUCT_MODULES`, le module d'`id: "quartier"` s'appelle « Territoire », et le secteur
+  // s'appelle « Autour de l'adresse ». Le même mot désigne deux choses opposées selon le
+  // vocabulaire : un titre « Quartier » enverrait un fait de secteur à l'échelle de la commune,
+  // pour le lecteur.
+  assert.equal(NOM_ECHELLE.quartier, "Autour de l'adresse");
+  assert.equal(NOM_ECHELLE.territoire, "Territoire");
+  assert.equal(NOM_ECHELLE.logement, "Logement");
+});
+
+test("l'ordre de lecture va du plus large au plus précis", () => {
+  assert.deepEqual(ORDRE_ECHELLES, ["territoire", "quartier", "logement"]);
+  // Toute échelle nommée a une place dans l'ordre : sinon un groupe existerait sans jamais s'afficher.
+  for (const e of Object.keys(NOM_ECHELLE)) assert.ok(ORDRE_ECHELLES.includes(e as never), e);
 });

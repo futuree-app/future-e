@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { assembleDossier } from "./decision-assembler.ts";
+import { sectionsDeLaMinute, controlesParEchelle } from "./dossier-view.ts";
 import type { DecisionFact, RunResult, RuleEvaluation, IncompatibilityFact, AlignmentFact, MismatchFact } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 
@@ -138,13 +139,71 @@ test("un titre de section porte UNE idée, et dit ce que le lecteur en fait", ()
   }
 });
 
-test("les réserves annoncées sont les faits AFFICHÉS, jamais les faits émis (caps)", () => {
-  // 5 vérifications émises, section plafonnée à 4 : le dossier compte 4, pas 5. Le lecteur doit
-  // pouvoir compter les cartes et retomber sur le chiffre, y compris dans le verdict.
-  const facts = Array.from({ length: 5 }, (_, i) => verif(`v${i}`));
+test("les contrôles ne sont plus plafonnés, et le verdict compte le total réel", () => {
+  // Le plafond de 4 supprimait des contrôles ÉTABLIS avant même qu'on les compte : le verdict, qui
+  // compte sur l'affiché, annonçait un total déjà tronqué, et le lecteur ne pouvait pas savoir
+  // qu'il en existait d'autres. La liste complète les rend désormais tous, sous la minute.
+  const facts = Array.from({ length: 11 }, (_, i) => verif(`v${i}`));
   const d = assembleDossier(run(facts, ["nearSea"]), project(WITH_HC), "commune", "Toulouse");
-  assert.equal(d.sections.find((s) => s.key === "verifications")!.cards.length, 4);
-  assert.equal(d.narrativePlan.reservesCount, 4);
+  assert.equal(d.sections.find((s) => s.key === "verifications")!.cards.length, 11);
+  assert.equal(d.narrativePlan.reservesCount, 11);
+});
+
+test("le lecteur peut compter : visibles + enPlus retombe sur le total annoncé", () => {
+  for (const n of [0, 1, 4, 11]) {
+    const facts = Array.from({ length: n }, (_, i) => verif(`v${i}`));
+    const d = assembleDossier(run(facts, ["nearSea"]), project(WITH_HC), "commune", "Toulouse");
+    const p = d.narrativePlan.controles;
+    assert.equal(p.visibles + p.enPlus, d.narrativePlan.reservesCount, `${n} contrôles`);
+    assert.equal(d.narrativePlan.reservesCount, n, `${n} contrôles émis`);
+  }
+});
+
+test("la minute reste bornée, quel que soit le nombre de contrôles du dossier", () => {
+  // Les deux surfaces ne se règlent pas au même endroit : la section n'est plus plafonnée, la
+  // MINUTE l'est par son plan (mesuré au chronomètre). Lever l'un ne devait pas lever l'autre.
+  const facts = Array.from({ length: 11 }, (_, i) => verif(`v${i}`));
+  const d = assembleDossier(run(facts, ["nearSea"]), project(WITH_HC), "commune", "Toulouse");
+  const dansLaMinute = sectionsDeLaMinute(d).flatMap((s) => s.cards);
+  assert.ok(dansLaMinute.length <= 4, `${dansLaMinute.length} cartes dans la minute`);
+});
+
+test("les cinq autres sections gardent leur plafond", () => {
+  const mismatchs = Array.from({ length: 6 }, (_, i) => mism(`m${i}`));
+  const d = assembleDossier(run(mismatchs, ["nearSea"]), project(WITH_HC), "commune", "Toulouse");
+  assert.equal(d.sections.find((s) => s.key === "mismatches")!.cards.length, 3);
+});
+
+test("les contrôles se rangent par échelle, du plus large au plus précis", () => {
+  const auPoint = verif("adresse");
+  (auPoint as { evidence: { grain: string }[] }).evidence[0].grain = "adresse";
+  const d = assembleDossier(run([verif("commune"), auPoint], ["nearSea"]), project(WITH_HC), "commune", "Toulouse");
+  const groupes = controlesParEchelle(d);
+  assert.deepEqual(groupes.map((g) => g.titre), ["Territoire", "Logement"]);
+  assert.deepEqual(groupes.flatMap((g) => g.cards.map((c) => (c.kind === "fact" ? c.fact.id : c.composition.id))), ["commune", "adresse"]);
+});
+
+test("un contrôle dont aucune preuve ne porte l'échelle n'est pas rangé d'office", () => {
+  const sansPreuve = verif("orphelin");
+  (sansPreuve as { evidence: unknown[] }).evidence = [];
+  const groupes = controlesParEchelle(
+    assembleDossier(run([verif("commune"), sansPreuve], ["nearSea"]), project(WITH_HC), "commune", "Toulouse"),
+  );
+  assert.deepEqual(groupes.map((g) => g.titre), ["Territoire", null]);
+  assert.equal(groupes[1]!.cards.length, 1);
+});
+
+test("aucun contrôle : aucun groupe, donc aucune surface", () => {
+  assert.deepEqual(controlesParEchelle(assembleDossier(run([], ["nearSea"]), project(WITH_HC), "commune", "Toulouse")), []);
+});
+
+test("le titre de la liste complète suit la posture, comme celui de la section", () => {
+  const engage = assembleDossier(run([verif()], ["nearSea"]), project(WITH_HC), "commune", "Toulouse");
+  const habitant = assembleDossier(run([verif()], ["nearSea"]), project(WITH_HC, { posture: "habitant" }), "commune", "Toulouse");
+  assert.match(engage.controlesTitle, /contrôles/);
+  assert.match(habitant.controlesTitle, /surveiller/);
+  // Le verbe du titre de la liste et celui de la section de la minute ne peuvent pas diverger.
+  assert.match(habitant.sections.find((s) => s.key === "verifications")!.title, /surveiller/);
 });
 
 test("le dossier porte le plan narratif, et sa conclusion en est la concaténation", () => {

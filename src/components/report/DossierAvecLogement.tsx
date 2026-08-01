@@ -10,6 +10,7 @@ import { assembleDossier } from "@/lib/decision/decision-assembler";
 import { composeFacts } from "@/lib/decision/fact-compositions";
 import { withEvaluationPoint } from "@/lib/decision/territory-facts";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
+import { ControlesDuDossier } from "@/components/report/ControlesDuDossier";
 import type { Dossier, ModuleFacts } from "@/lib/decision/decision-fact";
 import type { EvaluationContext } from "@/lib/hard-constraints";
 import type { DpeRecord } from "@/lib/dpe";
@@ -31,6 +32,9 @@ export async function DossierAvecLogement({
   // au-dessus des deux moteurs). On n'en change que le POINT.
   hard: EvaluationContext;
 }) {
+  // Ce que la page rendra : le dossier augmenté de l'adresse, ou le dossier communal si la lecture
+  // du logement n'a pas abouti.
+  let vue: { dossier: Dossier; status: "done" | "unavailable"; scope: string };
   try {
     const data = await fetchLogementDecisionDataWithTimeout(address);
     const logement = buildLogementFacts(data, savedDpe, address.label);
@@ -53,23 +57,33 @@ export async function DossierAvecLogement({
       grain: "address", source: "address_geocoder", label: address.label,
     });
     const run = runRules(facts, project, hardAtAddress);
-    const dossier = assembleDossier(run, project, "commune+adresse", facts.nom, composeFacts(run, facts, project));
-    return (
-      <DossierDecisionSection
-        dossier={dossier} logement={logementLink} logementStatus="done"
-        insee={insee} scopeKey={scopeKey}
-      />
-    );
+    vue = {
+      dossier: assembleDossier(run, project, "commune+adresse", facts.nom, composeFacts(run, facts, project)),
+      status: "done",
+      scope: scopeKey,
+    };
   } catch (error) {
-    if (error instanceof LogementDataUnavailableError) {
-      // Le dossier COMMUNE devient le dossier final : sa conclusion peut être rédigée, au scope commune.
-      return (
-        <DossierDecisionSection
-          dossier={communeDossier} logement={logementLink} logementStatus="unavailable"
-          insee={insee} scopeKey="commune"
-        />
-      );
+    if (!(error instanceof LogementDataUnavailableError)) {
+      throw error; // bug de code : reste visible (frontière d'erreur / observabilité)
     }
-    throw error; // bug de code : reste visible (frontière d'erreur / observabilité)
+    // Le dossier COMMUNE devient le dossier final : sa conclusion peut être rédigée, au scope commune.
+    vue = { dossier: communeDossier, status: "unavailable", scope: "commune" };
   }
+
+  // LE RENDU EST HORS DU `try`, et ce n'est pas une préférence de style : React ne rend pas un
+  // composant au moment où son JSX est construit, donc une erreur de rendu ne serait PAS attrapée
+  // par ce catch, qui promettrait pourtant de la traiter. Le try ne couvre que ce qu'il peut
+  // vraiment couvrir : le chargement et l'assemblage.
+  return (
+    <>
+      <DossierDecisionSection
+        dossier={vue.dossier} logement={logementLink} logementStatus={vue.status}
+        insee={insee} scopeKey={vue.scope}
+      />
+      {/* La liste complète des contrôles est rendue par le MÊME dossier que la minute : une liste
+          construite ailleurs, sur le dossier communal, contredirait le compte que le verdict vient
+          d'annoncer. */}
+      <ControlesDuDossier dossier={vue.dossier} />
+    </>
+  );
 }

@@ -81,6 +81,24 @@ export function echelleDuFait(fact: DecisionFact): Echelle | null {
   return e ? echelleDeLaPreuve(e) : null;
 }
 
+// LE NOM DE L'ÉCHELLE POUR LE LECTEUR, et un piège de vocabulaire à ne jamais rejouer.
+//
+// `Echelle` vaut `territoire | quartier | logement`, où `quartier` désigne LE SECTEUR. Dans
+// `PRODUCT_MODULES`, le module d'`id: "quartier"` s'appelle « Territoire », et le secteur s'appelle
+// « Autour de l'adresse » (`id: "autour"`). Le même mot désigne donc deux choses opposées selon le
+// vocabulaire qu'on lit : ranger un fait de secteur sous un titre « Quartier » l'enverrait, pour le
+// lecteur, à l'échelle de la commune.
+//
+// La correspondance vit ICI, en une seule fonction, testée. Nulle part ailleurs.
+export const NOM_ECHELLE: Record<Echelle, string> = {
+  territoire: "Territoire",
+  quartier: "Autour de l'adresse",
+  logement: "Logement",
+};
+
+/** Du plus large au plus précis : l'ordre de lecture d'un dossier. */
+export const ORDRE_ECHELLES: Echelle[] = ["territoire", "quartier", "logement"];
+
 // L'ÉCHELLE D'UNE COMPOSITION. Elle vient de ses faits ABSORBÉS, qui partagent le même grain par
 // construction du patron ; à défaut (aucun absorbé rendu), de la preuve que la composition porte
 // elle-même. Une composition est une carte : elle a une échelle, comme tout ce qu'elle regroupe.

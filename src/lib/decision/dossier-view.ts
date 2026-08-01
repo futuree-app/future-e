@@ -7,6 +7,7 @@
 import type { Dossier, DossierSection, DossierCard, DecisionFact, IncompatibilityFact } from "./decision-fact.ts";
 import { estDansLaMinute } from "./minute-selection.ts";
 import type { FactComposition } from "./fact-composition.ts";
+import { echelleDuFait, echelleDeLaComposition, NOM_ECHELLE, ORDRE_ECHELLES, type Echelle } from "./echelles.ts";
 
 // LA CONDITION QUE LE BLOC DE TÊTE PORTE DÉJÀ ENTIÈREMENT.
 //
@@ -195,4 +196,49 @@ export function factsNonNarresParLaFace(
           : composition.consequences.map((c) => c.factId),
   );
   return absorbedFacts.filter((f) => !narres.has(f.id));
+}
+
+// ── LES CONTRÔLES DU DOSSIER, RANGÉS PAR ÉCHELLE ─────────────────────────────────────────────
+//
+// La section « à contrôler » de la minute est plafonnée par le PLAN (quatre cartes tous registres
+// confondus, mesurées au chronomètre) ; le dossier, lui, ne l'est plus. Cette vue rend la liste
+// entière, celle que le verdict annonce quand il dit « trois autres constats figurent plus bas ».
+//
+// LE GROUPEMENT VIENT DU DOMAINE, pas de l'écran : `echelleDuFait` dérive l'échelle du GRAIN de la
+// preuve et de ce qu'elle mesure. C'est sa première consommation hors de son test — jusqu'ici, le
+// modèle savait nommer l'échelle d'un fait et personne ne le lui demandait.
+
+/**
+ * Un groupe de contrôles. `echelle` vaut `null` pour les faits dont AUCUNE preuve ne porte
+ * l'échelle : ils forment un groupe final sans titre plutôt que d'être rangés d'office dans
+ * « Territoire ». Deviner fabriquerait une appartenance que rien ne fonde, ce que la projection des
+ * échelles existe précisément pour éviter.
+ */
+export type GroupeDeControles = { echelle: Echelle | null; titre: string | null; cards: DossierCard[] };
+
+export function controlesParEchelle(dossier: Dossier): GroupeDeControles[] {
+  const cards = dossier.sections.find((s) => s.key === "verifications")?.cards ?? [];
+  if (cards.length === 0) return [];
+
+  // Une composition tire son échelle de ses faits ABSORBÉS, qui partagent le même grain par
+  // construction du patron. Ils vivent hors des sections (invariant 4), d'où cette résolution.
+  const echelleDeLaCarte = (c: DossierCard): Echelle | null =>
+    c.kind === "fact"
+      ? echelleDuFait(c.fact)
+      : echelleDeLaComposition(
+          c.composition,
+          dossier.absorbedFacts.filter((f) => c.composition.absorbedFactIds.includes(f.id)),
+        );
+
+  const groupes: GroupeDeControles[] = ORDRE_ECHELLES.map((echelle) => ({
+    echelle,
+    titre: NOM_ECHELLE[echelle],
+    cards: cards.filter((c) => echelleDeLaCarte(c) === echelle),
+  }));
+  const sansEchelle = cards.filter((c) => echelleDeLaCarte(c) == null);
+  if (sansEchelle.length > 0) groupes.push({ echelle: null, titre: null, cards: sansEchelle });
+
+  // Un groupe vide tombe : l'ordre des échelles est une convention de lecture, pas une grille à
+  // remplir. Un dossier de commune seule n'affiche que « Territoire ».
+  return groupes.filter((g) => g.cards.length > 0);
 }

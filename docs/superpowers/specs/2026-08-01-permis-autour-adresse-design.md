@@ -1,7 +1,11 @@
 # Les permis de construire autour de l'adresse
 
-**Date** : 2026-08-01 · **Statut** : COMPLET. Socle vérifié, doctrine tranchée, périmètre mesuré,
-appel, gel dans le snapshot et écran livrés. · **Chantier 3 de la liste « Autour »** (1 et 2 livrés le 01/08).
+**Date** : 2026-08-01 · **Statut** : **EN COURS**, pas complet. Socle vérifié, doctrine tranchée,
+périmètre mesuré, appel, gel dans le snapshot et écran livrés — mais le chantier reste ouvert.
+⚠ Ce document s'est déclaré COMPLET le 01/08 ; **le porteur a démenti le même jour**. Reste connu :
+le module Autour produit sa prose **hors du `REGISTRY`** (ni `DecisionFact`, ni règle, ni grain
+déclaré), et la pagination DiDo pour les très grandes communes n'est pas tranchée (voir §2).
+· **Chantier 3 de la liste « Autour »** (1 et 2 livrés le 01/08).
 
 ## Ce que ça répond
 

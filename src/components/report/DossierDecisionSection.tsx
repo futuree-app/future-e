@@ -103,7 +103,10 @@ export function DossierDecisionSection({
     : null;
   // LA MINUTE EST UNE SÉLECTION, pas un dossier raccourci : un plafond GLOBAL de cinq cartes, trié par
   // ce qui explique le verdict, avec une place réservée au contrepoids quand le dossier arbitre. Le
-  // dossier complet (toutes les cartes) reste dans `dossier.sections`.
+  // dossier complet (toutes les cartes) reste dans `dossier.sections`, et ses CONTRÔLES se lisent
+  // juste en dessous, dans `ControlesDuDossier` : le verdict annonce leur nombre, il fallait donc
+  // qu'ils aient une surface. Les cinq autres registres n'en ont pas encore, et gardent leur
+  // plafond de section.
   const sections = sectionsDeLaMinute(dossier);
   // Les cartes que CETTE section rend : la ligne « À contrôler en priorité » n'active un renvoi que
   // vers l'une d'elles. Le plan ne peut pas le savoir — il ignore les masquages d'affichage.

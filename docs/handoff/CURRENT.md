@@ -1,202 +1,249 @@
-# Passation : 30/07/2026, le parcours d'achat par l'adresse est EN PRODUCTION
+# Passation — 2026-08-01, branche `main`
 
-> **MISE À JOUR ~14h40 : LE PUSH EST FAIT.** `af81db1..1de7811`, 19 commits, déploiement Vercel
-> `future-e77duetx0` en état `Ready`. Rien n'est en attente côté git. Test de fumée public passé sur
-> `futur-e.fr` **sans confirmer aucun paiement** : `/dossier` répond 200, `/checkout/dossier` sans
-> intention redirige vers `/dossier`, et les quatre branches de `POST /api/dossier/qualification`
-> sont conformes en production (adresse ancrée anonyme → `qualified` avec devis provisoire 3900 ;
-> rue seule → `needs_precision` avec cinq numéros voisins ordonnés par distance ; commune seule →
-> `needs_precision` sans candidat et sans refus ; corps invalide → 400). **Non vérifié en
-> production** : tout ce qui suit la connexion (checkout affiché, paiement, webhook, dossier
-> ouvert), qui demande le porteur. Le tarif 25 € est désormais gravé dans
-> `docs/vault/vision/modele-economique.md`. Ce qui suit décrit la session qui a produit le code, et
-> reste exact **sauf sur l'état du push**.
+**Horodatage** : 2026-08-01, 10 h 55 · **Branche** : `main` = `efedfd4`, plus le lot D1/D2 non
+commité. Le handoff précédent est archivé sous
+`docs/handoff/2026-07-30-parcours-achat-production.md`.
 
-**Horodatage** : 2026-07-30, ~13h00 · **Branche** : `main` = `171ae9a`, plus une modification non
-commitée. **17 commits en attente, RIEN N'EST POUSSÉ.** Aucune PR ouverte : le projet pousse
-directement sur `main` et **un push déploie en production**.
-
-> Handoff précédent archivé dans **`docs/handoff/2026-07-30-nuit-droit-territorial.md`** (droit
-> territorial cohérent, dashboard supprimé, écrans d'attente). Son chantier A, « la porte j'ai une
-> adresse », est l'objet de cette session.
-
-> **CHANTIER PARALLÈLE, autre terminal** : la refonte du langage visuel vit dans
-> **`docs/handoff/2026-07-29-design-system-sequencage.md`** (commits `219bc8f`, `b44f1f0`,
-> `1da154f`, `c40a956`). Cette session n'a touché aucun de ses fichiers.
-
----
+> ⚠ **Ce fichier a été réécrit deux fois ce matin, par deux sessions.** La version de 10 h 51 était
+> exacte au moment de son écriture ; celle-ci la met à jour après la vérification et quatre
+> modifications supplémentaires. Si une troisième session écrit sur le même arbre de travail, relire
+> `git status` avant tout `git add` : deux terminaux travaillent sur `main`.
 
 ## Objectif en cours
 
-Le porteur a demandé **de pousser les 17 commits**, ce qui déploiera le parcours d'achat par
-l'adresse en production. La vérification préalable est **terminée et verte** : 36 tests,
-`npm run build` en code 0, aucune ligne d'erreur. Le push n'a pas été exécuté, la session ayant été
-réorientée vers l'écriture de cette passation.
+Réparer une promesse cassée du dossier de décision : le verdict annonçait « N autres constats
+figurent dans le dossier complet » alors que `dossier.sections` n'était rendu par **aucun**
+composant. Le lot livre la surface manquante (`ControlesDuDossier`), lève le plafond de la section
+`verifications` pour que les nombres du verdict deviennent exacts, et fusionne les deux moteurs qui
+décidaient séparément quels gestes proposer.
+
+**Le travail est fait et VÉRIFIÉ** : `1 201` tests passent, `tsc --noEmit` est muet, `eslint` est
+propre sur les fichiers touchés, `npm run build` sort en code 0 sur le lot non commité. Il reste à
+**committer**.
 
 ---
 
 ## Fait dans cette session
 
-**Conception** : la spec `docs/superpowers/specs/2026-07-30-qualification-checkout-dossier-design.md`,
-le plan `docs/superpowers/plans/2026-07-30-qualification-checkout-dossier.md` (9 tâches, avec un
-journal d'exécution), l'audit `docs/audits/2026-07-30-rnb-dpe-rattachement-batiment.md` (sonde du
-RNB, chantier de données hors périmètre), et deux arbitrages gravés dans `docs/vault/arbitrages/` :
-`refus-de-vente-sur-ancrage.md`, `adresse-analysee-hors-stripe.md`.
+### Audits et spec écrits (non suivis par git)
 
-**Code, 12 commits de `3f08387` à `171ae9a`** :
+- `docs/audits/2026-07-30-tableau-des-capacites.md` — la chaîne
+  fetchée → affichée → règle → oriente → geste, famille par famille, sur les trois grains. Met à
+  jour le §4.4 et le §6 de `docs/cadrage-sources-par-echelle.md`, périmés sur trois points (confort
+  d'été et radon branchés depuis, IREP débranché). Y figure aussi le constat que `zfe` et
+  `cartofriches` sont fetchés, transportés dans `LogementReport` et lus par **rien**.
+- `docs/superpowers/specs/2026-08-01-controles-du-dossier-design.md` — la spec du lot.
+  ⚠ **Son §6 est faux**, voir « Décisions » ci-dessous.
 
-| Commit | Livrable |
+### Code non commité : 9 fichiers modifiés, 1 nouveau
+
+| Fichier | Changement |
 |---|---|
-| `3f08387` | Aucun paiement anonyme, sur les trois produits. Fermait un trou réel : un visiteur non connecté pouvait payer 14 € et ne recevoir qu'un e-mail. |
-| `162caad` | Une seule identité PostHog du navigateur au webhook (le navigateur identifiait sur l'UUID Supabase, le serveur sur l'e-mail : deux personnes distinctes). |
-| `41e4058` | `src/lib/dossier-qualification.ts`, lib pure de décision, 11 tests. |
-| `7d92ac8` | Trois sondes qui distinguent une absence d'une panne : `probeDpeByBanId`, `probeCadastreAtPoint`, `reverseHouseNumbers`. |
-| `b90c5d8` | `POST /api/dossier/qualification` et `src/lib/dossier-pricing.ts`. |
-| `dee2088` | La porte publique `/dossier`. |
-| `5932dd1` | `/checkout/dossier` et `src/lib/ban-verify.ts`. |
-| `472a5a7` | `dossier_intents`, branche webhook idempotente, `/api/dossier/statut`, `/dossier/merci`. |
-| `73cbcc5` | L'écran vide des dossiers ne menait nulle part. |
-| `6a457d8` | `return_url` absolue (bug bloquant) et l'écran qui montre la matière. |
-| `5dbe64c`, `4de2d35`, `772bddb`, `171ae9a` | Passation, arbitrages, pièges. |
+| `decision-assembler.ts` | Plafond de la section `verifications` passé à `Number.POSITIVE_INFINITY` ; `labels()` gagne `controlesTitle` |
+| `decision-fact.ts` | `Dossier.controlesTitle` et `Dossier.absorbedFacts` |
+| `dossier-view.ts` | `controlesParEchelle(dossier)`, le groupement des contrôles par échelle |
+| `echelles.ts` | `NOM_ECHELLE`, `ORDRE_ECHELLES`, et le piège de vocabulaire gravé en commentaire |
+| `conclusion-plan.ts` | « figurent dans le dossier complet » devient « figurent plus bas » |
+| `ControlesDuDossier.tsx` | **nouveau fichier**, la surface, `id="controles"` |
+| `rapport/page.tsx`, `DossierAvecLogement.tsx` | Rendu de la liste, y compris dans le repli Suspense et dans la branche commune seule |
+| `decision-assembler.test.ts`, `conclusion-plan.test.ts` | Tests du groupement, du titre par posture, du cas vide, du fait sans échelle |
 
-**Migration appliquée en production** : `supabase/26_dossier_intents.sql` sur la base
-`xkewgsccadjmondzmjxj`. Vérifié : 12 colonnes, RLS active, aucune policy, aucun droit
-`authenticated`/`anon`, `permission denied` confirmé par l'API REST avec la clé publique.
+### Ajouté après la version de 10 h 51 de ce fichier
 
-**Preuves obtenues** (mode test Stripe, base réelle, puis nettoyées) : premier achat à 3900 avec
-`amount_paid_cents` conforme au montant déclaré par Stripe et zéro `report_grant` dérivé ; rejeu du
-webhook sans doublon **et sans réécriture de `purchased_at`** ; second achat au même `ban_id` à
-2500. Plus : la revalidation écrase les coordonnées reçues du client, la route de statut rend
-`pending` à un autre compte connecté, le double clic rend le même PaymentIntent. **Puis le parcours
-complet au navigateur**, formulaire Stripe compris, validé par le porteur.
+| Fichier | Changement |
+|---|---|
+| `conclusion-plan.ts` | `ConclusionNarrativePlan.controles` **exposé** : l'invariant « le lecteur compte les cartes et retombe sur le chiffre » se teste sur `visibles + enPlus`, pas sur une phrase. Les deux commentaires périmés (fil ouvert n° 4) sont corrigés. |
+| `decision-assembler.test.ts` | 11 contrôles rendent 11 cartes ; `visibles + enPlus === reservesCount` sur 0/1/4/11 ; la minute reste ≤ 4 ; les cinq autres sections gardent leur plafond ; groupement par échelle ; fait sans échelle ; titre par posture |
+| `echelles.test.ts` | Le piège de vocabulaire épinglé : `NOM_ECHELLE.quartier === "Autour de l'adresse"`, et toute échelle nommée a une place dans `ORDRE_ECHELLES` |
+| `DossierAvecLogement.tsx` | Le JSX **sort du `try/catch`** : React ne rend pas au moment où le JSX est construit, donc le `catch` ne pouvait pas attraper ce qu'il promettait. Erreur `react-hooks/error-boundaries` **préexistante**, corrigée au passage. |
+| `DossierDecisionSection.tsx` | Le commentaire « le dossier complet reste dans `dossier.sections` » dit maintenant où ses contrôles se lisent. |
+
+### Commits faits, non poussés
+
+- `efedfd4` — **D3 résolu**. `logement-coverage.ts` (pur, 10 tests) et `logement-verifications.ts`
+  (pur, 16 tests) remplacent trois dérivations parallèles. `logement-checklist.ts` perd ses 86 lignes
+  de table d'activation. 1 192 tests, build vert au moment du commit.
+- `d9ebaff` — **le chantier SITADEL n'est PAS clos.** ⚠ Une version antérieure de ce fichier
+  l'annonçait clos, sur la foi du statut COMPLET de la spec ; **le porteur a démenti le 01/08**. Ce
+  qui est livré : l'appel (cadastre + registre), le gel dans le snapshot, le bloc d'écran. Ce qui
+  reste connu à ce jour : (a) le module Autour, permis compris, produit de la prose **hors du
+  `REGISTRY`** — ni `DecisionFact`, ni règle, ni grain déclaré, voir le fil ouvert n° 6 ;
+  (b) la pagination DiDo pour les très grandes communes (`pageSize` répond 400) n'a jamais été
+  tranchée, seulement contournée par `columns=` + `AN_DEPOT=gte:`. Trois
+  points vérifiés en réel (La Rochelle centre : 1 permis ; Paris 12e : 0 ; village de la Creuse : 0).
+  Deux paramètres DiDo trouvés ce jour-là font tomber le coût : `columns=` et `AN_DEPOT=gte:`
+  ramènent La Rochelle de 538 Ko à 9 Ko, Paris entier à 20 Ko, donc aucun cache n'est nécessaire.
+  Deux pièges gravés : Sitadel ne connaît que les communes-mères (`75101` répond 400, il faut
+  `75056`), et un `400 « Le fichier est vide »` est zéro ligne, pas une panne.
 
 ---
 
-## Décisions prises, pas encore dans le vault
+## Décisions prises
 
-1. **Porteur** : tarif d'approfondissement à **25 €** forfaitaires dès que `decidePaidTerritory` est
-   vrai, quelle que soit la provenance du droit. *À porter dans `vision/modele-economique.md`.*
-2. **Porteur** : le compte devient obligatoire après le clic d'achat, avant la création du
-   PaymentIntent.
-3. **Porteur** : les liens vers la porte depuis la landing et les pages commune appartiennent au
-   chantier visuel. `/dossier` n'est donc atteignable aujourd'hui que par URL directe ou depuis
-   l'écran vide de `/rapport/dossiers`.
-4. **Porteur** : le dossier de test créé au navigateur **reste sur son compte** (voir Pièges).
-5. **Porteur** : la porte administrative reste ouverte jusqu'à un achat réel en production.
-6. **Proposé et retenu** : l'adresse analysée ne transite pas par Stripe (gravé au vault).
-7. **Proposé et retenu** : le cookie signé de parcours (`decision_journey_id`) est abandonné au
-   lancement plutôt que promis ; le `distinct_id` PostHog suffit, et une colonne sans écrivain est
-   le piège refusé pour `dwelling_discriminator`.
-8. **Proposé et retenu** : **ne pas créer `STRIPE_DOSSIER_PRICE_ID`** dans Vercel. Un Price Stripe
-   porte un montant fixe, or ce produit en a deux, décidés serveur ; le champ n'est lu par personne,
-   et `STRIPE_PACK_PRICE_ID` est déjà absente sans conséquence. Motif écrit dans le code.
+### Par le porteur, dans cette session
+
+1. **Le verdict compte le total réel** des contrôles, plus les quatre rescapés du plafond. Livré
+   avec la surface, jamais sans : les nombres prononcés changent sur tous les dossiers existants, et
+   ce n'est honnête qu'une fois la liste lisible.
+2. **La liste vit sur `/rapport`**, sous la minute. Motif : `/rapport/logement` redirige vers
+   `/rapport/dossiers` sans dossier d'adresse, or les contrôles de territoire (chaleur future, feu
+   futur, radon) existent sans adresse. La placer là aurait laissé la promesse sans référent pour
+   les dossiers les plus pauvres.
+3. **Périmètre limité au registre `verification`.** Les cinq autres registres gardent leur
+   écrêtage ; `mismatchTotal` contre `mismatchShown` porte un écart de même famille, non traité.
+4. **`MINUTE_MAX_CARTES = 4` ne bouge pas.** C'est le seul chiffre du projet mesuré sur l'écran
+   (87 à 95 s à quatre cartes, 101 à 123 à cinq).
+
+### Correction du design établie à l'implémentation (`efedfd4`)
+
+> Le §6 de la spec renvoyait D3 à un chantier distinct, au motif que `LogementModule` est un
+> composant client sans `Dossier`. **C'est vrai de l'ASSEMBLEUR, faux des RÈGLES** : elles sont
+> pures, et il ne leur manquait que des faits. La route `/api/georisques-logement` tenait déjà, dans
+> son `Promise.all`, exactement les sources que l'adaptateur du moteur re-fetchait.
+
+Conséquence : le « verrou d'équivalence » que réclamait la spec n'a plus d'objet, il n'y a plus deux
+tables à comparer. `gesteEnPhrase` prend désormais l'action d'un fait plutôt qu'une clé de geste,
+sans quoi une règle portant une action inconnue de la table (le radon) n'aurait pas pu être rendue.
+
+### Mesure qui corrige une affirmation antérieure de la session
+
+Le confort d'été avait été annoncé comme se déclenchant sur ~26 % des dossiers. **Mauvais
+dénominateur.** `docs/audits/2026-07-31-couverture-dpe-stratifiee.md` (800 adresses) établit que
+**75 à 86 % des adresses n'ont aucun DPE** sur le chemin de recherche que le produit emprunte. Les
+deux gestes issus du DPE se déclenchent donc sur **3,6 à 6,7 %** des dossiers.
+
+La mesure ADEME reste juste, elle porte sur le jeu de données et non sur les adresses : sur
+15 292 277 diagnostics de `dpe03existant`, 25,7 % portent une étiquette E, F ou G, et 26,6 % un
+confort d'été insuffisant.
 
 ---
 
 ## État git
 
-- **Branche** : `main` = `171ae9a`. **17 commits non poussés.** Aucune PR ouverte.
-- **Modifié non commité** : `src/app/api/stripe/create-payment-intent/route.ts`, un commentaire
-  seul (le motif du point 8). Diff relu : rien d'autre.
-- **Non suivis, appartenant au chantier visuel** : `.impeccable/`, `PRODUCT.md`. Ne pas les
-  committer depuis cette session. `Futur.e Design System.zip` ne doit jamais être committé.
-- **Worktrees** : celui de cette session est supprimé. Reste
-  `.claude/worktrees/agent-a34fa3e0af58bf46f` sur `feat/lot-a-depate-en-une-minute`, antérieur.
+- Branche **`main`**, aucune PR ouverte.
+- **Deux commits non poussés** : `efedfd4`, `d9ebaff`.
+- **Modifié non commité** : les 9 fichiers du tableau ci-dessus.
+- **Non suivi** : `src/components/report/ControlesDuDossier.tsx` (le composant central du lot, à ne
+  pas oublier au `git add`), `docs/audits/2026-07-30-tableau-des-capacites.md`,
+  `docs/superpowers/specs/2026-08-01-controles-du-dossier-design.md`,
+  `docs/handoff/2026-07-30-parcours-achat-production.md`, `.impeccable/`,
+  `Futur.e Design System.zip`.
+
+⚠ **Deux sessions travaillent sur le même arbre `main`.** Le chantier SITADEL (`autour-*`,
+`Face3Snapshot`) est désormais commité (`d9ebaff`), donc le recouvrement de fichiers est nul, mais
+ce fichier de passation lui-même a été écrit par les deux ce matin. Vérifier `git status` avant tout
+`git add`, et ne jamais `git add -A` à l'aveugle.
 
 ---
 
 ## Prochaine étape immédiate
 
-**Committer le commentaire, puis pousser.** La vérification est déjà faite et verte, il n'y a pas à
-la rejouer.
+**Committer le lot D1/D2.** La vérification est faite et complète : `node --test src/lib/**/*.test.ts`
+rend 1 201 passés, `npx tsc -p tsconfig.json --noEmit` est muet, `eslint` est propre sur les fichiers
+touchés, `npm run build` sort en code 0.
+
+Ne pas oublier le fichier non suivi, qui est le composant central du lot :
 
 ```bash
-git add src/app/api/stripe/create-payment-intent/route.ts
-git commit -m "STRIPE_DOSSIER_PRICE_ID n'a pas à exister : le produit a deux montants"
-git push origin main     # DÉPLOIE EN PRODUCTION
+git add src/components/report/ControlesDuDossier.tsx \
+        src/lib/decision src/app "src/components/report/DossierAvecLogement.tsx" \
+        docs/audits docs/superpowers/specs docs/handoff
 ```
 
-Puis surveiller le déploiement Vercel, et faire un test de fumée en production **sans confirmer de
-paiement** : `/dossier`, qualification d'une adresse, connexion, affichage du checkout.
-
-**Si un typecheck est relancé** : `npx tsc --noEmit` exécuté **pendant** un build affiche une erreur
-trompeuse, `.next/types/validator.ts … Cannot find module './routes.js'`. Elle vient des types
-régénérés par le build, jamais du code. Relancer après la fin du build.
+Puis traiter le fil ouvert n°1, qui est le seul défaut de correction connu du lot.
 
 ---
 
 ## À lire d'abord à la reprise
 
-1. `MEMORY.md`, puis les fiches `project_qualification_checkout_dossier.md` (l'état de ce chantier),
-   `project_droit_territorial_ecrans.md`, `business_modele_economique.md`.
-2. `docs/superpowers/specs/2026-07-30-qualification-checkout-dossier-design.md` : **la doctrine fait
-   foi** en cas de divergence avec le code.
-3. `docs/superpowers/plans/2026-07-30-qualification-checkout-dossier.md` : son journal d'exécution,
-   et la tâche 8 (retrait de la porte administrative), encore bloquée.
-4. `docs/vault/arbitrages/refus-de-vente-sur-ancrage.md` et
-   `docs/vault/arbitrages/adresse-analysee-hors-stripe.md`.
-5. `docs/superpowers/specs/2026-07-29-address-dossiers-design.md` : le socle du dossier d'adresse.
-6. `docs/handoff/AUTO-SNAPSHOT.md` : **daté du 08/07, très en retard.** Ne pas s'y fier.
+1. `MEMORY.md` (chargé au démarrage), en particulier `project_dossier_decision.md` (registre de
+   matérialité, régime `/rapport`) et `project_module_logement.md`.
+2. `docs/superpowers/specs/2026-08-01-controles-du-dossier-design.md`, **avec la correction de son
+   §6** rappelée plus haut.
+3. `docs/vault/adr/ADR-0001-pas-de-score-synthetique.md` — contraint la forme de la liste : aucun
+   compteur, aucune coche.
+4. `docs/audits/2026-07-30-ce-que-recoit-un-acheteur.md` — ce que le dossier livre réellement, et le
+   défaut plus large qui attend derrière ce lot.
+5. `docs/cadrage-sources-par-echelle.md`, corrigé par
+   `docs/audits/2026-07-30-tableau-des-capacites.md`.
+6. `docs/handoff/AUTO-SNAPSHOT.md` — vérifier la fraîcheur mécanique.
 
 ---
 
 ## Pièges et fils ouverts
 
-**Le push a été demandé et n'est pas fait.** C'est le premier geste attendu.
+### 1. `echelleDeLaComposition` fait une hypothèse non gardée — seul vrai défaut restant
 
-**Un dossier de TEST vit sur le compte du porteur, et il le garde délibérément** :
-`ceaa8e6a-57bf-4f74-a902-934a75d04382`, 2 Rue Crébillon, 3900,
-`pi_3Tyrb9RZMIJhaPi50gMK1f78`. Il provient d'un paiement en mode test. À savoir avant toute lecture
-de chiffres : il compte comme payé, donc il **fausse le chiffre d'affaires** et **ouvre le tarif à
-25 € sur Nantes** pour ce compte. Requête de suppression, si elle devient souhaitable :
+Elle élit l'échelle du **premier** fait absorbé non nul :
 
-```sql
-delete from public.payments where stripe_payment_intent_id = 'pi_3Tyrb9RZMIJhaPi50gMK1f78';
-delete from public.dossier_intents where stripe_payment_intent_id = 'pi_3Tyrb9RZMIJhaPi50gMK1f78';
-delete from public.address_dossiers where id = 'ceaa8e6a-57bf-4f74-a902-934a75d04382';
+```ts
+const parAbsorbe = absorbes.map(echelleDuFait).find((x): x is Echelle => x != null);
 ```
 
-**`.env.local` porte des clés Stripe LIVE.** Tout test local qui rend le formulaire de paiement doit
-surcharger `sk_test_`, `pk_test_` et le `whsec_` de `stripe listen`, sinon une vraie carte est
-débitée.
+Le commentaire justifie par « ils partagent le même grain par construction du patron ». Vrai
+aujourd'hui : le seul patron `grouped_verification` est `clay_regulation_grouped` (argiles + PPR,
+tous deux au grain adresse). Rien ne le garantit pour un patron futur croisant les échelles, et le
+classement serait alors silencieusement faux.
 
-**`NEXT_PUBLIC_*` est inlinée au BUILD, pas lue à l'exécution.** Passer `pk_test` à
-`npx next start` ne change rien : le bundle servi garde la clé du build. Pour un test navigateur, il
-faut `next dev`, qui lit le processus, ou un rebuild. **Next 16 refuse un second `next dev` dans le
-même répertoire** : la voie utilisée ici était un worktree git avec `node_modules` copié par liens
-physiques (`cp -al`), un symlink étant refusé par Turbopack.
+**Correction attendue** : rendre `null` quand les échelles des faits absorbés divergent, plutôt que
+d'en élire une. Le groupe sans titre existe déjà et absorbera le cas. Deux tests : composition dont
+tous les faits sont `logement` → groupe Logement ; composition territoire + logement → groupe sans
+échelle.
 
-**Le webhook lève au lieu de retourner** quand l'intention manque : `POST` répond
-`{ received: true }` juste après, donc un `return` ferait croire à Stripe que l'événement est traité
-et il ne le rejouerait jamais. Conséquence assumée : une erreur permanente produit des rejeux
-pendant trois jours, ce qui reste préférable à un encaissement muet.
+### 2. La liste répète les cartes de la minute, dans le même rendu
 
-**L'upsert du dossier exige `onConflict` ET `ignoreDuplicates`.** Sans le premier, Postgres arbitre
-sur la clé primaire et le vrai conflit n'est jamais vu ; sans le second, un rejeu écrase le montant
-et la date d'achat d'un dossier déjà payé. La liste vide qu'il rend distingue une création d'un
-rejeu, et c'est elle qui gouverne l'e-mail et l'événement d'achat.
+`ControlesDuDossier` réutilise `FactBody`, `EvidenceRow`, `MethodDetails` et `FactCompositionCard`,
+c'est-à-dire le rendu exact de la minute. Un contrôle retenu par la minute s'affiche donc **deux
+fois à l'identique sur la même page**. Le code en a conscience (commentaire « un même fait peut
+s'afficher aux deux endroits », d'où l'absence d'ancre dupliquée), mais la redondance visuelle n'est
+pas traitée. La répétition est un choix assumé (feuille de contrôle autonome) ; sa FORME ne l'est
+pas.
 
-**`return_url` doit être absolue pour Stripe.** Un chemin relatif affiche « Not a valid URL » à la
-place du formulaire, donc rien ne se paie. Normalisé dans `PaymentForm`, ne pas défaire.
+Piste : minute en cartes de décision, liste en lignes de contrôle plus denses, mêmes objets de
+domaine, deux hiérarchies visuelles.
 
-**Un `<Link>` vers une Route Handler ne navigue pas.** Concerne `/rapport/dossiers/ouvrir` et
-`/rapport/residence`.
+**Deux formes interdites, à ne pas réintroduire par inadvertance** :
+- **aucune case à cocher** : ADR-0001 et le commentaire de `DecisionChecklist` (« aucun compteur,
+  aucune coche verte / croix rouge, pas de score de complétude ») ;
+- **aucun libellé commençant par « Vérifiez »** : rejeté le 29/07 dans `logement-gestes.ts`, où cinq
+  libellés sur sept commençaient ainsi et se lisaient comme un formulaire. Le verbe nomme le geste
+  réel : Regardez, Demandez, Consultez, Signalez, Suivez, Faites chiffrer.
 
-**`GET /search?…&type=housenumber` ne prouve jamais l'absence de numéro** : zéro résultat sur une
-rue pleine de numéros, le score plein texte ne les faisant pas remonter. Seul `/reverse` filtré
-répond à cette question.
+### 3. `reservesShown` porte encore le nom de l'ancienne architecture
 
-**Deux sessions dans le même arbre de travail** : stager par chemin, jamais `git add -A`. L'autre
-session a déjà emporté un fichier de celle-ci dans un de ses commits (`c40a956`).
+Le champ désignait un nombre **après** écrêtage ; il désigne maintenant le total. Le nom reste
+littéralement vrai, puisque tout est désormais montré, mais il peut se relire dans six mois comme
+« ce qui est visible dans la minute » et faire réintroduire le défaut. Renommage suggéré :
+`verificationTotal`. Non bloquant.
 
-**`vercel ls` n'imprime QUE les URL hors TTY**, sans colonne de statut. Une boucle
-`until vercel ls | grep '● Ready'` a donc tourné treize minutes et conclu « toujours en build »
-alors que le déploiement était prêt : le motif cherché n'existait pas dans la sortie. Surveiller un
-déploiement depuis un script par `npx vercel inspect <url> | grep -i status`, qui rend bien l'état.
+### 4. Dérive documentaire — CORRIGÉ
 
-**Rappels mécaniques** : `tsconfig.json` exclut `**/*.test.ts` du typecheck et eslint les ignore. Un
-module qui importe `server-only` casse sous `node --test`. Un commentaire JSX dans un ternaire casse
-le build. Un backtick dans un commentaire CSS ferme le template literal d'un bloc `<style>`. Écrire
-une classe de caractères de contrôle en littéral dépose de vrais octets NUL dans le fichier : passer
-par des échappements Unicode. Le hook de pre-commit lance `index:verify`. **Ne pas lancer
-`scripts/probe-conclusion.ts`** (45 appels LLM facturés).
+Les deux commentaires de `conclusion-plan.ts` qui parlaient encore du « dossier complet » disent
+désormais « plus bas » et nomment `ControlesDuDossier`. Vérifié : plus aucune occurrence de la
+formule dans ce fichier.
+
+### 5. Ce que ce lot ne répare pas
+
+L'audit du 30/07 nomme un défaut plus large : **le dossier vaut cher là où il y a un problème et ne
+vaut rien là où il n'y en a pas**, et l'acheteur ne peut pas le savoir avant de payer. Ce lot rend
+visible une valeur déjà calculée ; il ne crée pas de matière sur un dossier rural. Une sollicitation
+directe est prévue **avant le 20/08**.
+
+### 6. Dette nommée : le module Autour n'entre pas dans le moteur
+
+`autour-conclusion.ts`, `autour-permis.ts` et `autour-infrastructures.ts` produisent de la prose
+depuis `Face3Snapshot`, **hors du `REGISTRY`** : aucun `DecisionFact`, aucune règle, aucun grain
+déclaré. Conséquence directe et visible : le groupe « Autour de l'adresse » de la nouvelle liste ne
+porte qu'un seul item, l'équipement automobile du secteur, alors que le module dit désormais
+beaucoup plus.
+
+Leur entrée devra passer par une règle, une preuve avec son grain et une activation. **Jamais** par
+réutilisation opportuniste de leur prose.
+
+### 7. Deux familles fetchées et lues par personne
+
+`zfe` et `cartofriches` sont appelés par `/api/georisques-logement`, transportés dans
+`LogementReport`, et consommés par aucun composant ni aucune règle. C'est le défaut exact pour lequel
+l'IREP a été débranché le 29/07, et le commentaire qui l'explique est écrit dix lignes au-dessus de
+`cartofriches` dans le même fichier. Deux issues symétriques : les débrancher comme l'IREP, ou leur
+donner une règle. Le statu quo est le seul mauvais choix.

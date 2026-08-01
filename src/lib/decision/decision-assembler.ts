@@ -23,11 +23,28 @@ import { buildConclusionPlan } from "./conclusion-plan.ts";
 // « Contrôler » reste le verbe des constats établis ; « vérifier » demeure réservé au non-examiné
 // (les conditions que la conclusion n'a pas pu tester). Un habitant ne s'engage pas : il connaît son
 // logement et le surveille.
-function labels(project: UserProject): { engage: string; verifTitle: string } {
+//
+// LE TROISIÈME TITRE est celui de la liste complète, rendue sous la minute. Il vient d'ICI, avec
+// celui de la section, pour que les deux ne puissent pas se contredire sur le verbe : le jour où
+// « contrôler » devient un autre mot, il le devient aux deux endroits.
+//
+// Il dit « établis par nos sources », et pas « tous les points à vérifier » : la vue est exhaustive
+// de ce que le MOTEUR a établi, pas du produit. Les permis autour de l'adresse, les abords et la
+// conclusion Autour produisent des constats hors moteur, et un titre qui promettrait l'exhaustivité
+// se tromperait sur ce qu'il montre.
+function labels(project: UserProject): { engage: string; verifTitle: string; controlesTitle: string } {
   if (project.posture === "habitant") {
-    return { engage: "comprendre et surveiller", verifTitle: "À connaître et à surveiller" };
+    return {
+      engage: "comprendre et surveiller",
+      verifTitle: "À connaître et à surveiller",
+      controlesTitle: "Tous les points à connaître et à surveiller",
+    };
   }
-  return { engage: "vous engager", verifTitle: "À contrôler avant de vous engager" };
+  return {
+    engage: "vous engager",
+    verifTitle: "À contrôler avant de vous engager",
+    controlesTitle: "Tous les contrôles établis pour ce dossier",
+  };
 }
 
 const TIER_RANK: Record<MaterialityTier, number> = { decision_critical: 0, structuring: 1, secondary: 2 };
@@ -120,7 +137,15 @@ export function assembleDossier(
     { key: "mismatches", title: "Ce qui correspond moins bien", cards: sectionCards(facts, compositions, "mismatch", "mismatches", 3) },
     { key: "compromises", title: "Ce qui départage vraiment", cards: sectionCards(facts, compositions, "compromise", "compromises", 3) },
     { key: "unknowns", title: "Ce que nous ne savons pas encore", cards: sectionCards(facts, compositions, "unknown", "unknowns", 3) },
-    { key: "verifications", title: l.verifTitle, cards: sectionCards(facts, compositions, "verification", "verifications", 4) },
+    // LES CONTRÔLES NE SONT PLUS PLAFONNÉS (01/08/2026). Les cinq autres sections gardent le leur :
+    // elles bornent le dossier interne, qui n'a pas de surface complète.
+    //
+    // Le plafond de 4 supprimait des contrôles ÉTABLIS avant même qu'on les compte, et le verdict
+    // comptant sur l'affiché (voir plus bas), il annonçait un total déjà tronqué : le lecteur ne
+    // pouvait pas savoir qu'il en existait d'autres. La minute, elle, reste plafonnée par son
+    // propre plan (`MINUTE_MAX_CARTES`, mesuré au chronomètre) : ce que cette levée change, c'est
+    // ce que le DOSSIER contient, pas ce que la minute montre.
+    { key: "verifications", title: l.verifTitle, cards: sectionCards(facts, compositions, "verification", "verifications", Number.POSITIVE_INFINITY) },
   ];
   const sections = candidates.filter((s) => s.cards.length > 0);
   const allCards = sections.flatMap((s) => s.cards);
@@ -202,6 +227,7 @@ export function assembleDossier(
       ],
     },
     sections,
+    controlesTitle: l.controlesTitle,
     compositions: shownComps,
     absorbedFacts: run.facts.filter((f) => absorbed.has(f.id)),
     presentation: { elementaryFactShown: shown.length, compositionShown: shownComps.length, absorbedFactTotal: absorbed.size },

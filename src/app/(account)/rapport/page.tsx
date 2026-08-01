@@ -16,6 +16,7 @@ import { normalizeUserProject } from "@/lib/user-project";
 import { Suspense } from "react";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
+import { ControlesDuDossier } from "@/components/report/ControlesDuDossier";
 import { DossierAvecLogement } from "@/components/report/DossierAvecLogement";
 import { listDossiers } from "@/lib/address-dossier-store";
 import { communeParent } from "@/lib/plm";
@@ -350,13 +351,19 @@ export default async function RapportPage() {
           dossierAddress && logementForCommune ? (
             <Suspense
               fallback={
-                <DossierDecisionSection
-                  dossier={dossier}
-                  logement={dossierLogementLink}
-                  logementStatus="pending"
-                  insee={inseeCode}
-                  scopeKey="commune"
-                />
+                // Le repli porte la liste lui aussi : son verdict annonce déjà des constats
+                // « plus bas », et une promesse tenue seulement après l'augmentation serait fausse
+                // pendant tout le temps d'attente.
+                <>
+                  <DossierDecisionSection
+                    dossier={dossier}
+                    logement={dossierLogementLink}
+                    logementStatus="pending"
+                    insee={inseeCode}
+                    scopeKey="commune"
+                  />
+                  <ControlesDuDossier dossier={dossier} />
+                </>
               }
             >
               <DossierAvecLogement
@@ -374,13 +381,19 @@ export default async function RapportPage() {
               />
             </Suspense>
           ) : (
-            <DossierDecisionSection
-              dossier={dossier}
-              logement={dossierLogementLink}
-              logementStatus="none"
-              insee={inseeCode}
-              scopeKey="commune"
-            />
+            // Dossier de commune seule : la liste complète des contrôles se rend ici aussi, avec
+            // son seul groupe « Territoire ». Le verdict y annonce déjà des constats « plus bas »,
+            // et cette promesse ne dépend pas de la présence d'une adresse.
+            <>
+              <DossierDecisionSection
+                dossier={dossier}
+                logement={dossierLogementLink}
+                logementStatus="none"
+                insee={inseeCode}
+                scopeKey="commune"
+              />
+              <ControlesDuDossier dossier={dossier} />
+            </>
           )
         ) : null}
 
