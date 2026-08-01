@@ -245,12 +245,14 @@ beaucoup plus.
 Leur entrée devra passer par une règle, une preuve avec son grain et une activation. **Jamais** par
 réutilisation opportuniste de leur prose.
 
-Deuxième conséquence, trouvée le 01/08 en vérifiant le statut de SITADEL : **`autour-conclusion.ts`
-ne contient aucune occurrence de « permis »**. La conclusion déterministe du module s'assemble sur
-quatre nombres (portée de pas, équipement auto, espace vert, ÎCU) écrits avant le chantier 3. À
-l'écran, le lecteur lit un chantier ouvert à 40 m, puis une conclusion qui n'en tient pas compte.
-C'est le défaut que cette conclusion avait justement été écrite pour corriger, revenu sur le bloc
-suivant.
+Deuxième conséquence, trouvée le 01/08 en vérifiant le statut de SITADEL, et **CORRIGÉE le même
+jour** : `autour-conclusion.ts` ne contenait aucune occurrence de « permis ». La conclusion porte
+maintenant une charnière temporelle, `AutourConclusion.mouvement`, sur les seuls permis non achevés.
+Spec et plan dédiés (`2026-08-01-permis-dans-la-conclusion-autour-*`), quatre commits, 15 tests.
+
+La dette de fond reste entière : la charnière est de la **prose**, assemblée hors du `REGISTRY`.
+Elle ne rend pas les permis examinables par le moteur, elle rend seulement la conclusion du module
+cohérente avec le bloc qui la précède à l'écran.
 
 ### 7. Deux familles fetchées et lues par personne
 

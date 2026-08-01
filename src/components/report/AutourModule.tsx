@@ -353,7 +353,15 @@ export default function AutourModule({
             {/* CE QU'IL FAUT EN RETENIR, assemblé des faits, jamais généré. Le module rendait des
                 nombres et s'arrêtait ; il rend maintenant la configuration que ces nombres
                 décrivent. Placé APRÈS les faits et AVANT le renvoi : une conclusion se lit quand
-                on a vu ce qu'elle résume. */}
+                on a vu ce qu'elle résume.
+
+                L'INVARIANT DE RENDU : `mouvement` peut porter l'année de DÉPÔT du dossier, jamais
+                la date de CONSULTATION du registre, qui est celle qui borne l'état observé. Il
+                s'appuie pour cela sur le « Registre national des autorisations d'urbanisme,
+                consulté le … » du bloc des permis, rendu juste au-dessus. Cette phrase ne doit
+                jamais être affichée sur une surface qui ne porte pas cette date quelque part :
+                reprise seule dans un PDF, un partage ou une synthèse, elle ferait lire au présent
+                une possibilité constatée des années plus tôt. */}
             {(() => {
               const c = buildAutourConclusion(autour);
               if (!c) return null;
@@ -364,6 +372,11 @@ export default function AutourModule({
                       <p style={{ fontSize: 15.5, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 }}>
                         {c.lead}
                       </p>
+                      {c.mouvement && (
+                        <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 }}>
+                          {c.mouvement}
+                        </p>
+                      )}
                       {c.absences.map((a) => (
                         <p key={a} style={{ fontSize: 14.5, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
                           {a}

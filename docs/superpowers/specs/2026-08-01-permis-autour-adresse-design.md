@@ -20,11 +20,12 @@ sources » plutôt que « tous les points à vérifier ». Un chantier ouvert à
 décisive du dossier et la seule que le moteur ignore. Leur entrée devra passer par une règle, une
 preuve avec son grain et une activation, **jamais** par réutilisation opportuniste de la prose.
 
-**2. `autour-conclusion.ts` ne connaît pas les permis.** Zéro occurrence de « permis » dans le
-fichier : la conclusion déterministe du module a été écrite avant ce chantier, sur quatre nombres
-(portée de pas, équipement auto, espace vert, ÎCU). Le lecteur lit un chantier ouvert, puis une
-conclusion de module qui n'en tient aucun compte. Son propre en-tête dit « le lecteur repartait avec
-des nombres et sans lecture » : le défaut qu'elle a corrigé est réapparu sur le bloc suivant.
+**2. `autour-conclusion.ts` ne connaissait pas les permis. CORRIGÉ le 01/08/2026.** La conclusion
+porte désormais une charnière temporelle (`AutourConclusion.mouvement`) quand au moins un permis non
+achevé est retenu. Spec dédiée :
+`docs/superpowers/specs/2026-08-01-permis-dans-la-conclusion-autour-design.md`, plan :
+`docs/superpowers/plans/2026-08-01-permis-dans-la-conclusion-autour.md`, livré en quatre commits
+(`fd0c3d1`, `9263d42`, `d062f66`, et le rendu).
 
 **3. La pagination DiDo n'est pas tranchée** (cf. « La source », où `pageSize` est noté refusé et la
 pagination « à vérifier pour les très grandes communes »). `columns=` + `AN_DEPOT=gte:` fait tenir Paris en 20 Ko, ce qui **masque** le problème
