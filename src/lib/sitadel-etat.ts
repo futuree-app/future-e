@@ -81,6 +81,9 @@ export const LIBELLE_ETAT: Record<Exclude<EtatAutorisation, "sans_date">, string
  * voisinage qui vient de changer. C'est l'ANCIENNETÉ qui décide de sa pertinence, pas son état, et
  * ce filtre-là appartient à l'appelant.
  */
-export function etatMontrable(e: EtatAutorisation): boolean {
+// GARDE DE TYPE, pas un simple booléen : elle retire `sans_date` du type pour l'appelant, donc
+// `LIBELLE_ETAT[etat]` compile sans assertion. Un `boolean` obligerait à forcer le type là où
+// la vérification vient d'avoir lieu, et c'est exactement là que les erreurs s'installent.
+export function etatMontrable(e: EtatAutorisation): e is Exclude<EtatAutorisation, "sans_date"> {
   return e !== "sans_date";
 }
