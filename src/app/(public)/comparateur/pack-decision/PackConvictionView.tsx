@@ -77,7 +77,7 @@ export function PackConvictionView({ insees, userEmail, returnUrl, returnPath }:
 
       <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent mb-3">Pack Décision · 39 €</p>
       <h1
-        className="font-normal text-[clamp(28px,4vw,44px)] leading-[1.1] tracking-[-0.8px] text-label mb-5"
+        className="font-normal text-[length:var(--text-display)] leading-[1.1] tracking-[-0.8px] text-label mb-5"
         style={{ fontFamily: "var(--font-serif)" }}
       >
         {trioNoms.length === 3
@@ -115,7 +115,7 @@ export function PackConvictionView({ insees, userEmail, returnUrl, returnPath }:
             {BUNDLE.map((b) => (
               <div key={b.t} className="glass rounded-xl p-4">
                 <p className="text-[14px] text-label" style={{ fontFamily: "var(--font-serif)" }}>{b.t}</p>
-                <p className="mt-1 text-[12.5px] leading-[1.5] text-muted">{b.d}</p>
+                <p className="mt-1 text-[length:var(--text-caption)] leading-[1.5] text-muted">{b.d}</p>
               </div>
             ))}
           </div>

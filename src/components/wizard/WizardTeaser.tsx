@@ -324,7 +324,7 @@ export function WizardTeaser({
         {loading ? (
           <>
             <h2
-              className="font-semibold text-[clamp(2rem,4.2vw,3.8rem)] leading-[1.04] tracking-[-0.03em] text-label text-balance"
+              className="font-semibold text-[length:var(--text-display)] leading-[1.04] tracking-[-0.03em] text-label text-balance"
               style={{ fontFamily: "var(--font-serif)" }}
             >
               Analyse de{" "}
@@ -343,7 +343,7 @@ export function WizardTeaser({
           </>
         ) : (
           <h2
-            className="font-semibold text-[clamp(2rem,4.2vw,3.8rem)] leading-[1.04] tracking-[-0.03em] text-label text-balance"
+            className="font-semibold text-[length:var(--text-display)] leading-[1.04] tracking-[-0.03em] text-label text-balance"
             style={{ fontFamily: "var(--font-serif)" }}
           >
             Votre situation fait déjà ressortir{" "}
@@ -402,7 +402,7 @@ export function WizardTeaser({
               Rapport interactif
             </p>
             <p
-              className="max-w-[42rem] text-[clamp(1.85rem,3.4vw,2.45rem)] font-normal text-label leading-[1.08] tracking-[-0.025em] text-balance"
+              className="max-w-[42rem] text-[length:var(--text-title)] font-normal text-label leading-[1.08] tracking-[-0.025em] text-balance"
               style={{ fontFamily: "var(--font-serif)" }}
             >
               Découvrez ce que ces points d&apos;attention signifient vraiment pour votre logement, votre santé, votre mobilité et vos projets.

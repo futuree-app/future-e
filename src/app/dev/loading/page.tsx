@@ -60,7 +60,7 @@ export default async function DevLoadingPage({
           Dev · écrans d&apos;attente
         </p>
         <h1
-          className="font-normal text-[clamp(26px,3vw,40px)] leading-[1.15] tracking-[-0.5px] mb-4"
+          className="font-normal text-[length:var(--text-title)] leading-[1.15] tracking-[-0.5px] mb-4"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           Six jeux contextuels, dont trois échelles.
@@ -94,7 +94,7 @@ export default async function DevLoadingPage({
                         {instantDeLEtat(i).toFixed(1).replace(".", ",")} s
                       </span>
                       {i === 0 ? (
-                        <span className="font-mono text-[11.5px] tracking-[0.1em] uppercase text-muted">
+                        <span className="font-mono text-[length:var(--text-kicker)] tracking-[0.1em] uppercase text-muted">
                           {texte}
                         </span>
                       ) : (
@@ -111,7 +111,7 @@ export default async function DevLoadingPage({
 
                 <Link
                   href={`/dev/loading?scope=${s}`}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent/[0.12] text-accent text-[13.5px] no-underline border border-accent/[0.25]"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent/[0.12] text-accent text-[length:var(--text-dense)] no-underline border border-accent/[0.25]"
                 >
                   Voir l&apos;écran
                 </Link>
@@ -120,7 +120,7 @@ export default async function DevLoadingPage({
           })}
         </div>
 
-        <p className="text-[13.5px] text-ghost leading-relaxed mt-10">
+        <p className="text-[length:var(--text-dense)] text-ghost leading-relaxed mt-10">
           Variante à libellé fixe, sans séquence :{" "}
           <Link href="/dev/loading?label=Analyse en cours" className="text-accent">
             /dev/loading?label=Analyse en cours

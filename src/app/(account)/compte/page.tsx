@@ -86,7 +86,7 @@ export default async function ComptePage() {
               {fullAccess ? getPlanLabel(account.plan) : "Compte gratuit"}
             </div>
             <h1
-              className="font-normal text-[clamp(34px,3.8vw,52px)] leading-[1.1] tracking-[-1.2px] mb-5 text-label"
+              className="font-normal text-[length:var(--text-display)] leading-[1.1] tracking-[-1.2px] mb-5 text-label"
               style={{ fontFamily: "var(--font-serif)" }}
             >
               {commune ? `Votre lecture ${deCommune(commune)}` : "Votre espace personnel"}<br />
@@ -162,7 +162,7 @@ export default async function ComptePage() {
               <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
                 <div>
                   <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Vos trois modules</p>
-                  <h2 className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+                  <h2 className="font-normal text-[length:var(--text-section)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                     De la commune jusqu&apos;à vos murs.
                   </h2>
                 </div>
@@ -195,7 +195,7 @@ export default async function ComptePage() {
               <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
                 <div>
                   <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Dans votre accès gratuit</p>
-                  <h2 className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+                  <h2 className="font-normal text-[length:var(--text-section)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                     Ce que ce compte garde pour vous.
                   </h2>
                 </div>
@@ -220,7 +220,7 @@ export default async function ComptePage() {
                 <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
                   <div>
                     <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Trois échelles fermées</p>
-                    <h2 className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+                    <h2 className="font-normal text-[length:var(--text-section)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                       Ce que le rapport interactif lit pour vous.
                     </h2>
                   </div>
@@ -245,7 +245,7 @@ export default async function ComptePage() {
                 <div className="glass rounded-2xl p-10 border-accent/[0.12] grid grid-cols-[1fr_180px] gap-12 items-center mt-10 relative overflow-hidden">
                   <div className="absolute top-[-60px] right-[-60px] w-[200px] h-[200px] rounded-full bg-accent/[0.08] pointer-events-none" />
                   <div>
-                    <h2 className="font-normal text-[clamp(20px,2.2vw,26px)] leading-[1.2] tracking-[-0.4px] text-label mb-2.5" style={{ fontFamily: "var(--font-serif)" }}>
+                    <h2 className="font-normal text-[length:var(--text-section)] leading-[1.2] tracking-[-0.4px] text-label mb-2.5" style={{ fontFamily: "var(--font-serif)" }}>
                       {commune ? `Trois échelles de lecture à ${commune}. Sourcées. Personnalisées.` : "Trois échelles de lecture. Sourcées. Personnalisées."}
                     </h2>
                     <p className="text-[15px] text-muted leading-[1.7]">
@@ -285,19 +285,19 @@ export default async function ComptePage() {
                   rel="noopener"
                   className={`flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-5 py-4 no-underline hover:bg-[var(--bg-elev)] transition-colors ${i > 0 ? "border-t border-[var(--border-1)]" : ""}`}
                 >
-                  <span className="text-[14.5px] text-label">{f.designation}</span>
+                  <span className="text-[length:var(--text-dense)] text-label">{f.designation}</span>
                   <span className="flex items-baseline gap-5 shrink-0">
                     <span className="font-mono text-[11px] tracking-[0.06em] uppercase text-ghost">
                       {f.number} &middot; {formatDateFr(f.issuedAt)}
                     </span>
-                    <span className="text-[14.5px] text-label tabular-nums">
+                    <span className="text-[length:var(--text-dense)] text-label tabular-nums">
                       {formatEuro(f.amountCents)}
                     </span>
                   </span>
                 </a>
               ))}
             </div>
-            <p className="mt-3 text-[12.5px] text-ghost">
+            <p className="mt-3 text-[length:var(--text-caption)] text-ghost">
               {LEGAL_ENTITY.vatMention}
             </p>
           </section>

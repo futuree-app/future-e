@@ -272,7 +272,7 @@ export default function LogementModule({
               <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
               Module 02 · Logement
             </div>
-            <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
+            <h1 className="font-normal text-[length:var(--text-display)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
               Ce logement, lu à son adresse.<br />
               <span className="italic text-accent">Énergie, risques, entourage.</span>
             </h1>
@@ -295,7 +295,7 @@ export default function LogementModule({
         <section className="pt-14">
           <div className="mb-8">
             <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Le bien de ce dossier</p>
-            <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+            <h2 className="font-normal text-[length:var(--text-title)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
               {dossier?.address_label ?? "Aucun dossier ouvert."}
             </h2>
           </div>
@@ -316,7 +316,7 @@ export default function LogementModule({
             {!loading && !error && (
               <Link
                 href="/rapport/dossiers"
-                className="inline-flex items-center gap-2 text-[13.5px] text-muted no-underline"
+                className="inline-flex items-center gap-2 text-[length:var(--text-dense)] text-muted no-underline"
               >
                 Analyser un autre bien
               </Link>
@@ -450,7 +450,7 @@ export default function LogementModule({
                   les commerces et services les plus proches, l&apos;espace vert le plus proche et la
                   chaleur du quartier se lisent dans le module Autour de l&apos;adresse.
                 </p>
-                <Link href="/rapport/autour" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg no-underline text-[13.5px] w-fit" style={{ color: "var(--green)", border: "1px solid color-mix(in srgb, var(--green) 25%, transparent)", background: "color-mix(in srgb, var(--green) 8%, transparent)" }}>
+                <Link href="/rapport/autour" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg no-underline text-[length:var(--text-dense)] w-fit" style={{ color: "var(--green)", border: "1px solid color-mix(in srgb, var(--green) 25%, transparent)", background: "color-mix(in srgb, var(--green) 8%, transparent)" }}>
                   Ouvrir Autour de l&apos;adresse →
                 </Link>
               </div>

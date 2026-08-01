@@ -64,7 +64,7 @@ function Hero({ compact = false }: { compact?: boolean }) {
     <div className="mb-8">
       <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-3">Comparateur de communes</p>
       <h1
-        className="font-normal text-[clamp(28px,4vw,44px)] leading-[1.1] tracking-[-0.8px] text-label max-w-[820px]"
+        className="font-normal text-[length:var(--text-display)] leading-[1.1] tracking-[-0.8px] text-label max-w-[820px]"
         style={{ fontFamily: "var(--font-serif)", textWrap: "balance" }}
       >
         Vous hésitez entre plusieurs communes ?{" "}
@@ -153,7 +153,7 @@ export default async function ComparateurPage({
       <ModeChoixSearch initial={initial} />
 
       {ignores.length > 0 && (
-        <p className="mt-4 text-[14.5px] leading-[1.55] text-muted">
+        <p className="mt-4 text-[length:var(--text-dense)] leading-[1.55] text-muted">
           {ignores.length === 1 ? "Une commune n'a pas pu être située" : `${ignores.length} communes n'ont pas pu être situées`} et
           n&apos;apparaît{ignores.length === 1 ? "" : "ssent"} pas ci-dessous (pour Paris, Lyon ou Marseille, choisissez un arrondissement).
         </p>
@@ -177,9 +177,9 @@ export default async function ComparateurPage({
                   {r.nom}
                 </span>
               </div>
-              <p className="text-[15.5px] leading-[1.55] text-accent italic">{r.identite}</p>
+              <p className="text-[length:var(--text-body)] leading-[1.55] text-accent italic">{r.identite}</p>
               {r.compromis && (
-                <p className="mt-3 pt-3 border-t border-[var(--border-1)] text-[14.5px] leading-[1.55] text-muted">
+                <p className="mt-3 pt-3 border-t border-[var(--border-1)] text-[length:var(--text-dense)] leading-[1.55] text-muted">
                   {r.compromis}
                 </p>
               )}
@@ -210,7 +210,7 @@ export default async function ComparateurPage({
           Bordure neutre (plus d'accent) : l'accent est réservé à la réponse (le
           face-à-face), l'upsell reste repérable par son bouton. cf. dé-emphase /ou-vivre. */}
       <div className="mt-10 glass rounded-2xl p-6 md:p-7 border border-[var(--border-2)]">
-        <p className="text-[16.5px] leading-[1.6] text-label" style={{ textWrap: "pretty" }}>
+        <p className="text-[length:var(--text-lede)] leading-[1.6] text-label" style={{ textWrap: "pretty" }}>
           {bindOrphans(upsellLede)}
         </p>
         <p className="mt-3 text-[15px] leading-[1.6] text-muted" style={{ textWrap: "pretty" }}>
@@ -221,7 +221,7 @@ export default async function ComparateurPage({
         </p>
         <Link
           href={ctaHref}
-          className="inline-flex items-center justify-center mt-5 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[15.5px]"
+          className="inline-flex items-center justify-center mt-5 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[length:var(--text-body)]"
         >
           Voir la comparaison complète · 39 €
         </Link>

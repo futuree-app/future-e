@@ -271,7 +271,7 @@ export default function QuartierSynthesis({
     <div>
       <div className="glass rounded-xl p-8 md:p-10 border-t-2 border-t-info">
         <h2
-          className="font-normal text-[clamp(28px,3vw,40px)] leading-[1.15] tracking-[-0.5px] mb-4"
+          className="font-normal text-[length:var(--text-title)] leading-[1.15] tracking-[-0.5px] mb-4"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           {parsed.title ? (

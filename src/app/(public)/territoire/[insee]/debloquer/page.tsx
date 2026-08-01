@@ -97,7 +97,7 @@ export default async function TerritoryUnlockPage({
             Rapport de territoire · {displayName} · 14 € une fois
           </p>
           <h1
-            className="mt-4 text-[clamp(2rem,4.4vw,3.1rem)] leading-[1.06] tracking-[-0.02em] text-label"
+            className="mt-4 text-[length:var(--text-display)] leading-[1.06] tracking-[-0.02em] text-label"
             style={{ fontFamily: "var(--font-serif)" }}
           >
             Avant de choisir <span className="italic text-accent">{displayName}</span>, regardez ce
@@ -132,7 +132,7 @@ export default async function TerritoryUnlockPage({
             <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent mb-2">
               Aperçu réel du rapport
             </p>
-            <h2 className="text-[clamp(22px,2.6vw,28px)] leading-[1.15] text-label mb-1" style={{ fontFamily: "var(--font-serif)" }}>
+            <h2 className="text-[length:var(--text-section)] leading-[1.15] text-label mb-1" style={{ fontFamily: "var(--font-serif)" }}>
               Ce que futur•e a déjà analysé sur {displayName}
             </h2>
             <p className="text-[13px] text-muted mb-5">
@@ -190,7 +190,7 @@ export default async function TerritoryUnlockPage({
 
         {/* 7. CTA paiement : le point le plus lumineux de la page (anneau + glow) */}
         <section className="mt-20" style={reveal(6)}>
-          <h2 className="text-[clamp(22px,2.6vw,28px)] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+          <h2 className="text-[length:var(--text-section)] text-label" style={{ fontFamily: "var(--font-serif)" }}>
             Explorer le rapport de {displayName}
           </h2>
           <p className="mt-2 font-mono text-[11px] tracking-[0.08em] text-muted">

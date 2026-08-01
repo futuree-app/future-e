@@ -1,7 +1,11 @@
 # DESIGN.md · Le langage visuel de futur•e
 
-**Version 1.4 · 30 juillet 2026 · prescriptif.**
+**Version 1.5 · 1er août 2026 · prescriptif.**
 
+> **v1.5** : une **échelle de rôles** typographiques remplace 53 valeurs arbitraires (§ 9.1), et la
+> piste de prose descend de 720 à 640 px, la mesure de la v1.1 donnant environ 90 caractères par
+> ligne (§ 2.1).
+>
 > **v1.4** : le filet de carte dit désormais la **relation de la donnée au projet du lecteur**, avec
 > ses quatre règles de sélection (§ 6.2), et le registre « écart » reçoit le jaune (§ 5.4).
 >
@@ -75,15 +79,21 @@ Une page a **un seul conteneur et une seule gouttière**. À l'intérieur, deux 
 
 | Piste | Largeur maximale | Contenu |
 | --- | --- | --- |
-| **Prose** | `720px` | texte suivi, aligné sur la gouttière gauche |
+| **Prose** | `640px` | texte suivi, aligné sur la gouttière gauche |
 | **Donnée** | toute la largeur du conteneur | grilles, tableaux, cartes |
+
+**Pourquoi 640 et non 720** (corrigé le 01/08/2026). La mesure de confort d'une ligne est de 45 à
+75 caractères. À `--text-body` (16 px), une piste de 720 px en donne environ **90**, et l'œil perd
+le début de la ligne suivante. 640 px en donne environ 80, ce qui reste haut mais tenable ; à
+`--text-lede` (17 px), la même piste tombe à 75. La v1.1 avait posé 720 px en corrigeant le piège du
+`max-w` de paragraphe, sans vérifier la mesure elle-même.
 
 Trois largeurs maximales de conteneur, et aucune autre. Ce sont des maxima : sous ces seuils, le
 conteneur fait `width: 100%` avec les paddings prescrits.
 
 | Nature de page | Conteneur | Où |
 | --- | --- | --- |
-| **Éditoriale** | `720px` | pages Savoir, guides Agir |
+| **Éditoriale** | `680px` | pages Savoir, guides Agir |
 | **Dossier** | `920px` | comparateur, pages de décision, formulaires |
 | **Mixte** | `1100px` | rapport, hubs thématiques |
 
@@ -540,10 +550,36 @@ texte plus petit imbriqué dans ce titre (un grain, une précision, une unité) 
 espaces entre les mots se referment, d'autant plus fort que le titrage est serré. Constaté sur le
 banc typographique à -1,6 px : le grain de 15 px devenait un bloc de lettres collées.
 
-**Le trio typographique** : `--font-serif` (Instrument Serif) pour les titres et la voix éditoriale ;
-`--font-sans` (Instrument Sans) pour le texte courant ; `--font-mono` (JetBrains Mono) pour les
-valeurs, surtitres, sources et métadonnées. Toujours par le token, jamais par un `fontFamily` en
-dur, qui perd les piles de repli.
+**Le trio typographique** : `--font-serif` pour les titres et la voix éditoriale ; `--font-sans`
+pour le texte courant ; `--font-mono` pour les valeurs, surtitres, sources et métadonnées. Toujours
+par le token, jamais par un `fontFamily` en dur, qui perd les piles de repli et rend tout changement
+de famille impraticable.
+
+**L'échelle de rôles.** Dix rôles, et aucune autre taille. Un nom dit un **usage**, jamais un niveau
+de titre HTML ni une valeur. S'écrit `text-[length:var(--text-role)]`.
+
+| Rôle | Valeur | Ce que le texte fait |
+| --- | --- | --- |
+| `--text-display` | `clamp(34px, 4vw, 54px)` | titre de page, **un seul par écran** |
+| `--text-title` | `clamp(26px, 3vw, 38px)` | titre de section |
+| `--text-section` | `clamp(20px, 2.4vw, 26px)` | titre de bloc, de carte, de groupe |
+| `--text-lede` | `17px` | chapô sous un titre de page |
+| `--text-body` | `16px` | corps de lecture, prose suivie |
+| `--text-dense` | `14px` | corps d'une carte, d'une liste, d'un tableau |
+| `--text-caption` | `13px` | précision, légende, phrase de rang |
+| `--text-meta` | `12px` | source, mention, unité |
+| `--text-kicker` | `11px` | surtitre mono capitales, désigne une section |
+| `--text-micro` | `10px` | étiquette d'axe, note de bas de carte |
+
+**Choisir un rôle, c'est se demander ce que le texte fait**, jamais la place qu'on veut lui donner.
+`dense` et `meta` existent séparément parce qu'un corps de carte et une source ne font pas le même
+travail, pas parce qu'un pixel les sépare.
+
+Cette échelle en remplace une antérieure qui nommait neuf niveaux de titre (`--fs-h1` à `--fs-h6`,
+trois `display`) et n'était appelée que **dix-neuf fois** dans tout le produit, pendant que
+**53 valeurs arbitraires** faisaient le travail, dont 24 façons différentes d'écrire « un grand
+titre » et 9 demi-pixels. Une échelle qu'on n'appelle pas n'est pas une échelle, c'est une
+intention.
 
 ### 9.2 Dépréciés, à ne plus produire
 
@@ -594,6 +630,13 @@ Quatre points sont volontairement non tranchés dans cette version :
    reporté après le lancement.
 
 ## 12. Journal des amendements
+
+**v1.5, 01/08/2026** :
+
+| Amendement | Motif |
+| --- | --- |
+| § 9.1 · échelle de rôles | L'échelle antérieure nommait neuf niveaux de titre et n'était appelée que 19 fois, pendant que 53 valeurs arbitraires faisaient le travail, dont 24 clamps distincts pour trois rôles |
+| § 2.1 · piste de prose à 640 px | 720 px donnait ~90 caractères par ligne quand la mesure de confort est 45 à 75. Erreur de la v1.1 |
 
 **v1.4, 30/07/2026** :
 

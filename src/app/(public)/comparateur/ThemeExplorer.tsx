@@ -66,7 +66,7 @@ export function ThemeExplorer({ themes, trio, defaultThemeId }: Props) {
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-[16.5px] leading-[1.15] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+                    <p className="text-[length:var(--text-lede)] leading-[1.15] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                       {th.titre}
                     </p>
                     {/* Cadenas : au survol d'une carte ouvrable, l'anse se soulève et l'icône vire accent. */}
@@ -94,7 +94,7 @@ export function ThemeExplorer({ themes, trio, defaultThemeId }: Props) {
                   <p className="mt-2 font-mono text-[10px] tracking-[0.12em] uppercase text-ghost/80">
                     {th.lignes.some((l) => l.avantage.type === "avantage") ? "Les communes s'écartent ici" : "Profils proches ici"}
                   </p>
-                  <p className="mt-1 text-[12.5px] leading-[1.5] text-ghost">{th.lignes.map((l) => l.label).join(" · ")}</p>
+                  <p className="mt-1 text-[length:var(--text-caption)] leading-[1.5] text-ghost">{th.lignes.map((l) => l.label).join(" · ")}</p>
                 </button>
               );
             })}

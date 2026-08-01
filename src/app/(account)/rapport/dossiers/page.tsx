@@ -37,7 +37,7 @@ export default async function RapportDossiersPage() {
       <div className="relative z-[2] max-w-[920px] mx-auto px-7 pb-24 pt-14">
         <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Vos dossiers</p>
         <h1
-          className="font-normal text-[clamp(26px,3vw,40px)] leading-[1.15] tracking-[-0.5px] text-label mb-8"
+          className="font-normal text-[length:var(--text-title)] leading-[1.15] tracking-[-0.5px] text-label mb-8"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           {dossiers.length === 0
@@ -81,7 +81,7 @@ export default async function RapportDossiersPage() {
               const dpe = d.selected_dpe_snapshot?.etiquette_dpe ?? null;
               return (
                 <div key={d.id} className="glass rounded-xl p-6">
-                  <p className="text-[16.5px] text-label leading-snug mb-1.5">{d.address_label}</p>
+                  <p className="text-[length:var(--text-lede)] text-label leading-snug mb-1.5">{d.address_label}</p>
                   <p className="font-mono text-[12px] text-ghost mb-5">
                     {dpe ? `DPE ${dpe}` : "logement à préciser"} · créé le{" "}
                     {DATE_FMT.format(new Date(d.created_at))}
@@ -101,19 +101,19 @@ export default async function RapportDossiersPage() {
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
                     <a
                       href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=logement`}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent/[0.12] text-accent text-[13.5px] no-underline border border-accent/[0.25]"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent/[0.12] text-accent text-[length:var(--text-dense)] no-underline border border-accent/[0.25]"
                     >
                       Le logement
                     </a>
                     <a
                       href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=autour`}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[13.5px] no-underline border border-[var(--border-1)]"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[length:var(--text-dense)] no-underline border border-[var(--border-1)]"
                     >
                       Autour de l&apos;adresse
                     </a>
                     <a
                       href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=territoire`}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[13.5px] no-underline border border-[var(--border-1)]"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[length:var(--text-dense)] no-underline border border-[var(--border-1)]"
                     >
                       {d.city ? `La commune : ${d.city}` : "La commune"}
                     </a>

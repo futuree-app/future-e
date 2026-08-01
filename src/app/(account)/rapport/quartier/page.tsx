@@ -161,7 +161,7 @@ export default async function RapportQuartierPage() {
             Module 01 · Territoire
           </div>
           <h1
-            className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-4 text-label"
+            className="font-normal text-[length:var(--text-display)] leading-[1.08] tracking-[-1.2px] mb-4 text-label"
             style={{ fontFamily: "var(--font-serif)" }}
           >
             Ce que {displayName} devient.<br />
@@ -231,7 +231,7 @@ export default async function RapportQuartierPage() {
               le saut est natif (fragment), ce composant n'ajoute que le repère et le focus. */}
           <EvidenceArrival />
           <h2
-            className="font-normal italic text-[clamp(22px,2vw,28px)] leading-[1.25] tracking-[-0.3px] text-label mb-6"
+            className="font-normal italic text-[length:var(--text-section)] leading-[1.25] tracking-[-0.3px] text-label mb-6"
             style={{ fontFamily: "var(--font-serif)" }}
           >
             Les grands signaux du territoire

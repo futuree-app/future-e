@@ -101,7 +101,7 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
       <div style={reveal(0)}>
         <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-3">Comparaison complète</p>
         <h2
-          className="font-normal text-[clamp(26px,3.6vw,38px)] leading-[1.12] tracking-[-0.6px] text-label max-w-[760px]"
+          className="font-normal text-[length:var(--text-title)] leading-[1.12] tracking-[-0.6px] text-label max-w-[760px]"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           Vous les avez retenus tous les {trio.length >= 3 ? "trois" : "deux"}.{" "}
@@ -117,7 +117,7 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
             {data.resume.map((s, n) => (
               <p
                 key={n}
-                className={n === 0 ? "text-[16px] leading-[1.55] text-label" : "text-[14.5px] leading-[1.55] text-muted"}
+                className={n === 0 ? "text-[16px] leading-[1.55] text-label" : "text-[length:var(--text-dense)] leading-[1.55] text-muted"}
               >
                 {s}
               </p>
@@ -140,7 +140,7 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
               </h3>
             </div>
             <p className="text-[12px] text-ghost mb-2">{th.lignes.map((l) => l.label).join(" · ")}</p>
-            <p className="text-[14.5px] leading-[1.55] text-muted italic mb-4 max-w-[680px]">{th.synthese}</p>
+            <p className="text-[length:var(--text-dense)] leading-[1.55] text-muted italic mb-4 max-w-[680px]">{th.synthese}</p>
             <ThemeMatrix theme={th} trio={trio} />
           </section>
         ))}

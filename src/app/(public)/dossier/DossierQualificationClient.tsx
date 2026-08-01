@@ -95,7 +95,7 @@ function MatterLine({ label, state }: { label: string; state: MatterState }) {
           flex: "0 0 auto",
         }}
       />
-      <span className="text-[13.5px] text-muted">{label}</span>
+      <span className="text-[length:var(--text-dense)] text-muted">{label}</span>
       <span
         className="font-mono text-[11px] tracking-[0.08em] uppercase"
         style={{ color: TONE_COLOR[tone], opacity: tone === "found" ? 0.85 : 0.7 }}
@@ -228,7 +228,7 @@ export function DossierQualificationClient() {
                   Ce que cette adresse permettra de lire
                 </p>
                 {cov.manque && (
-                  <p className="text-[14.5px] text-label leading-relaxed mb-2.5">{cov.manque}</p>
+                  <p className="text-[length:var(--text-dense)] text-label leading-relaxed mb-2.5">{cov.manque}</p>
                 )}
                 <p className="text-[14px] text-muted leading-relaxed">{cov.reste}</p>
               </div>
@@ -276,7 +276,7 @@ export function DossierQualificationClient() {
 
               <a
                 href={`/checkout/dossier?banId=${encodeURIComponent(address.id!)}&label=${encodeURIComponent(address.label)}&insee=${encodeURIComponent(address.citycode!)}`}
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-lg bg-accent/[0.14] text-accent text-[14.5px] no-underline border border-accent/[0.28]"
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-lg bg-accent/[0.14] text-accent text-[length:var(--text-dense)] no-underline border border-accent/[0.28]"
                 onClick={() =>
                   posthog.capture("address_checkout_viewed", {
                     insee: address.citycode,

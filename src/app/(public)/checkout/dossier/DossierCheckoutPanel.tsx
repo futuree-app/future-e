@@ -102,7 +102,7 @@ export function DossierCheckoutPanel({
             <button
               type="button"
               onClick={() => appliquer(saisie)}
-              className="rounded-lg border border-[var(--border-2)] bg-[var(--bg-elev-2)] px-4 py-2.5 text-[13.5px] text-muted"
+              className="rounded-lg border border-[var(--border-2)] bg-[var(--bg-elev-2)] px-4 py-2.5 text-[length:var(--text-dense)] text-muted"
             >
               Appliquer
             </button>

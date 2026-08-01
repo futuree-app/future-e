@@ -208,7 +208,7 @@ export function WizardStep({
           Module {config.step} · {config.module}
         </p>
         <h2
-          className="font-semibold text-[clamp(1.55rem,3vw,2.5rem)] leading-[1.08] tracking-[-0.025em] text-label text-balance"
+          className="font-semibold text-[length:var(--text-title)] leading-[1.08] tracking-[-0.025em] text-label text-balance"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           {config.question}
@@ -294,7 +294,7 @@ export function WizardStep({
           <div className="flex flex-col gap-10">
             <div className="flex flex-col gap-6">
               <h3
-                className="font-semibold text-[clamp(1.55rem,3vw,2.5rem)] leading-[1.08] tracking-[-0.025em] text-label"
+                className="font-semibold text-[length:var(--text-title)] leading-[1.08] tracking-[-0.025em] text-label"
                 style={{ fontFamily: "var(--font-serif)" }}
               >
                 Quel est l&apos;âge de votre logement ?

@@ -132,7 +132,7 @@ export function TerritoryYearsBand({
     <section ref={rootRef}>
       {/* En-tête : la bande n'a ni cadre ni nom, elle doit être annoncée. */}
       <h2
-        className="font-normal italic text-[clamp(22px,2vw,28px)] leading-[1.25] tracking-[-0.3px] text-label mb-2"
+        className="font-normal italic text-[length:var(--text-section)] leading-[1.25] tracking-[-0.3px] text-label mb-2"
         style={{ fontFamily: "var(--font-serif)" }}
       >
         La mémoire du lieu
@@ -213,7 +213,7 @@ export function TerritoryYearsBand({
         </svg>
       </div>
       <figcaption>
-        <p className="text-[13.5px] text-muted mt-2 mb-1.5 ml-0.5">
+        <p className="text-[length:var(--text-dense)] text-muted mt-2 mb-1.5 ml-0.5">
           {buildCaption(markedYears, endYear)}
         </p>
         {familiesPresent.length > 0 && (

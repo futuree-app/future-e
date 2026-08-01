@@ -25,12 +25,12 @@ export default function DossierPage() {
           Une adresse précise
         </p>
         <h1
-          className="font-normal text-[clamp(26px,3vw,40px)] leading-[1.15] tracking-[-0.5px] text-label mb-5"
+          className="font-normal text-[length:var(--text-title)] leading-[1.15] tracking-[-0.5px] text-label mb-5"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           Quel bien voulez-vous faire examiner&nbsp;?
         </h1>
-        <p className="text-[15.5px] text-muted leading-relaxed mb-9">
+        <p className="text-[length:var(--text-body)] text-muted leading-relaxed mb-9">
           Une adresse porte trois échelles : la commune où elle se trouve, ce qui l&apos;entoure, et
           le bâtiment lui-même. Saisissez-la, nous vous dirons ce que nous pouvons en lire.
         </p>

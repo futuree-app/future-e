@@ -369,7 +369,7 @@ function InterpretationPanel({
                     {reliefLabel}
                   </span>
                   <span
-                    className="flex items-baseline gap-1 pl-1 text-[12.5px] leading-snug text-label/55 italic"
+                    className="flex items-baseline gap-1 pl-1 text-[length:var(--text-caption)] leading-snug text-label/55 italic"
                     style={{ fontFamily: "var(--font-serif)" }}
                   >
                     <span className="not-italic text-accent/50">→</span>
@@ -991,7 +991,7 @@ export function OuVivreClient() {
           Un projet de vie ?
         </p>
         <h1
-          className="font-normal text-[clamp(34px,5vw,56px)] leading-[1.06] tracking-[-1.2px] text-label"
+          className="font-normal text-[length:var(--text-display)] leading-[1.06] tracking-[-1.2px] text-label"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           Découvrez où vivre,{" "}
@@ -1217,7 +1217,7 @@ export function OuVivreClient() {
                       Pression éco / logement / littoral restent hors carte (doctrine 2026-06-02)
                       et vivent dans la synthèse, AskFuture et le rapport. */}
                   {r.compromis && (
-                    <p className="mt-4 pt-3 border-t border-[var(--border-1)] text-[12.5px] leading-[1.55] text-muted">
+                    <p className="mt-4 pt-3 border-t border-[var(--border-1)] text-[length:var(--text-caption)] leading-[1.55] text-muted">
                       Compromis : {r.compromis}
                     </p>
                   )}
@@ -1227,7 +1227,7 @@ export function OuVivreClient() {
                     onClick={() => onExplore(r, i + 1)}
                     className="mt-6 flex items-center justify-center gap-2 rounded-xl px-4 py-3 no-underline text-muted border border-[var(--border-2)] transition-colors hover:border-[var(--border-hi)] hover:text-label"
                   >
-                    <span className="font-mono text-[10.5px] tracking-[0.08em] uppercase">
+                    <span className="font-mono text-[length:var(--text-micro)] tracking-[0.08em] uppercase">
                       Explorer le rapport · 14 €
                     </span>
                     <span aria-hidden>→</span>
@@ -1388,7 +1388,7 @@ export function OuVivreClient() {
                     key={q}
                     onClick={() => sendAsk(q)}
                     disabled={askLoading}
-                    className="shrink-0 whitespace-nowrap text-left text-[12.5px] leading-snug text-muted hover:text-label border border-[var(--border-2)] hover:border-accent/[0.4] rounded-full px-3.5 py-1.5 transition-colors disabled:opacity-40"
+                    className="shrink-0 whitespace-nowrap text-left text-[length:var(--text-caption)] leading-snug text-muted hover:text-label border border-[var(--border-2)] hover:border-accent/[0.4] rounded-full px-3.5 py-1.5 transition-colors disabled:opacity-40"
                   >
                     {q}
                   </button>

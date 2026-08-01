@@ -188,7 +188,7 @@ export default async function CheckoutPage({
             href="/#pricing"
             style={{
               fontFamily: "var(--font-mono)",
-              fontSize: "var(--fs-kicker)",
+              fontSize: "var(--text-kicker)",
               letterSpacing: "var(--tracking-kicker)",
               color: "var(--fg-4)",
               textTransform: "uppercase",
@@ -233,7 +233,7 @@ export default async function CheckoutPage({
               <span
                 style={{
                   fontFamily: "var(--font-mono)",
-                  fontSize: "var(--fs-kicker)",
+                  fontSize: "var(--text-kicker)",
                   letterSpacing: "var(--tracking-kicker)",
                   textTransform: "uppercase",
                   color: theme.accent,
@@ -251,7 +251,7 @@ export default async function CheckoutPage({
               <span
                 style={{
                   fontFamily: "var(--font-mono)",
-                  fontSize: "var(--fs-kicker)",
+                  fontSize: "var(--text-kicker)",
                   letterSpacing: "var(--tracking-kicker)",
                   textTransform: "uppercase",
                   color: "var(--fg-3)",
@@ -264,7 +264,7 @@ export default async function CheckoutPage({
             <h1
               style={{
                 fontFamily: "var(--font-serif)",
-                fontSize: "var(--fs-display-lg)",
+                fontSize: "var(--text-display)",
                 lineHeight: "var(--lh-display)",
                 letterSpacing: "var(--tracking-tight)",
                 margin: "0 0 22px",
@@ -281,7 +281,7 @@ export default async function CheckoutPage({
 
             <p
               style={{
-                fontSize: "var(--fs-body-lg)",
+                fontSize: "var(--text-lede)",
                 lineHeight: "var(--lh-body)",
                 color: "var(--fg-2)",
                 maxWidth: 680,
@@ -311,7 +311,7 @@ export default async function CheckoutPage({
                 <p
                   style={{
                     fontFamily: "var(--font-mono)",
-                    fontSize: "var(--fs-kicker)",
+                    fontSize: "var(--text-kicker)",
                     letterSpacing: "var(--tracking-kicker)",
                     textTransform: "uppercase",
                     color: theme.accent,
@@ -323,7 +323,7 @@ export default async function CheckoutPage({
                 <h2
                   style={{
                     fontFamily: "var(--font-serif)",
-                    fontSize: "var(--fs-h3)",
+                    fontSize: "var(--text-title)",
                     lineHeight: "var(--lh-title)",
                     letterSpacing: "var(--tracking-display)",
                     margin: "0 0 28px",
@@ -358,7 +358,7 @@ export default async function CheckoutPage({
                       <div
                         style={{
                           fontFamily: "var(--font-mono)",
-                          fontSize: "var(--fs-kicker)",
+                          fontSize: "var(--text-kicker)",
                           letterSpacing: "var(--tracking-kicker)",
                           color: theme.accent,
                           marginBottom: 12,
@@ -380,7 +380,7 @@ export default async function CheckoutPage({
                       </h3>
                       <p
                         style={{
-                          fontSize: "var(--fs-body-sm)",
+                          fontSize: "var(--text-dense)",
                           lineHeight: "var(--lh-body)",
                           color: "var(--fg-3)",
                           margin: 0,
@@ -401,7 +401,7 @@ export default async function CheckoutPage({
                 <p
                   style={{
                     fontFamily: "var(--font-mono)",
-                    fontSize: "var(--fs-kicker)",
+                    fontSize: "var(--text-kicker)",
                     letterSpacing: "var(--tracking-kicker)",
                     textTransform: "uppercase",
                     color: "var(--fg-4)",
@@ -413,7 +413,7 @@ export default async function CheckoutPage({
                 <h2
                   style={{
                     fontFamily: "var(--font-serif)",
-                    fontSize: "var(--fs-h4)",
+                    fontSize: "var(--text-section)",
                     lineHeight: "var(--lh-title)",
                     letterSpacing: "var(--tracking-display)",
                     margin: "0 0 28px",
@@ -488,7 +488,7 @@ export default async function CheckoutPage({
                 <p
                   style={{
                     fontFamily: "var(--font-mono)",
-                    fontSize: "var(--fs-kicker)",
+                    fontSize: "var(--text-kicker)",
                     letterSpacing: "var(--tracking-kicker)",
                     textTransform: "uppercase",
                     color: "var(--fg-4)",
@@ -500,7 +500,7 @@ export default async function CheckoutPage({
                 <h2
                   style={{
                     fontFamily: "var(--font-serif)",
-                    fontSize: "var(--fs-h4)",
+                    fontSize: "var(--text-section)",
                     lineHeight: "var(--lh-title)",
                     letterSpacing: "var(--tracking-display)",
                     margin: "0 0 24px",
@@ -592,7 +592,7 @@ export default async function CheckoutPage({
                 <p
                   style={{
                     fontFamily: "var(--font-mono)",
-                    fontSize: "var(--fs-kicker)",
+                    fontSize: "var(--text-kicker)",
                     letterSpacing: "var(--tracking-kicker)",
                     textTransform: "uppercase",
                     color: "var(--fg-4)",
@@ -652,7 +652,7 @@ export default async function CheckoutPage({
                   <p
                     style={{
                       fontFamily: "var(--font-mono)",
-                      fontSize: "var(--fs-kicker)",
+                      fontSize: "var(--text-kicker)",
                       letterSpacing: "var(--tracking-kicker)",
                       textTransform: "uppercase",
                       color: "var(--fg-4)",
@@ -693,7 +693,7 @@ export default async function CheckoutPage({
                       background: theme.accent,
                       color: "#0b0e1a",
                       fontFamily: "var(--font-mono)",
-                      fontSize: "var(--fs-label)",
+                      fontSize: "var(--text-meta)",
                       letterSpacing: "var(--tracking-kicker)",
                       textTransform: "uppercase",
                       fontWeight: 600,
@@ -767,7 +767,7 @@ export default async function CheckoutPage({
               style={{
                 fontFamily: "var(--font-serif)",
                 fontStyle: "italic",
-                fontSize: "var(--fs-h4)",
+                fontSize: "var(--text-section)",
                 lineHeight: 1.3,
                 letterSpacing: "var(--tracking-display)",
                 margin: 0,
@@ -782,7 +782,7 @@ export default async function CheckoutPage({
             <p
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: "var(--fs-kicker)",
+                fontSize: "var(--text-kicker)",
                 letterSpacing: "var(--tracking-kicker)",
                 textTransform: "uppercase",
                 color: "var(--fg-4)",

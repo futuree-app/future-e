@@ -174,10 +174,10 @@ export function PaymentWrapper({
         <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">
           Dernière chose
         </p>
-        <label htmlFor="billing-name" className="block text-[15.5px] text-label mb-1.5">
+        <label htmlFor="billing-name" className="block text-[length:var(--text-body)] text-label mb-1.5">
           À quel nom établir votre facture&nbsp;?
         </label>
-        <p className="text-[13.5px] text-muted leading-relaxed mb-4">
+        <p className="text-[length:var(--text-dense)] text-muted leading-relaxed mb-4">
           Votre compte n&apos;en porte pas encore. Il figurera sur votre facture, rien
           d&apos;autre n&apos;en dépend.
         </p>
@@ -193,7 +193,7 @@ export function PaymentWrapper({
           className="w-full rounded-lg border border-[var(--border-2)] bg-[var(--bg-deep,#0f1424)] px-4 py-3 text-[15px] text-label outline-none focus:border-accent/60"
         />
         {nameError && (
-          <p className="mt-3 text-[13.5px] text-red-300">{nameError}</p>
+          <p className="mt-3 text-[length:var(--text-dense)] text-red-300">{nameError}</p>
         )}
         <button
           type="submit"

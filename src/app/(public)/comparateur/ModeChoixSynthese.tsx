@@ -29,7 +29,7 @@ export function ModeChoixSynthese({ arbitrage, spatialContext }: Props) {
       )}
       {/* Contexte spatial : une ligne sobre, sous l'arbitrage (la relation, pas la localisation). */}
       {spatialContext && (
-        <p className="mt-3 text-[14.5px] leading-[1.55] text-muted" style={{ textWrap: "pretty", maxWidth: 680 }}>
+        <p className="mt-3 text-[length:var(--text-dense)] leading-[1.55] text-muted" style={{ textWrap: "pretty", maxWidth: 680 }}>
           {bindOrphans(spatialContext)}
         </p>
       )}

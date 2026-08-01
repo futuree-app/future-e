@@ -217,21 +217,31 @@
   --font-sans:      "Instrument Sans", "Avenir Next", Avenir, "Segoe UI", system-ui, sans-serif;
   --font-mono:      "JetBrains Mono", "SF Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
 
-  --fs-display-xl:  clamp(48px, 6vw, 82px);
-  --fs-display-lg:  clamp(44px, 6vw, 68px);
-  --fs-display:     clamp(42px, 5vw, 68px);
-  --fs-h1:          clamp(34px, 5vw, 46px);
-  --fs-h2:          clamp(30px, 3vw, 44px);
-  --fs-h3:          clamp(28px, 3.5vw, 40px);
-  --fs-h4:          26px;
-  --fs-h5:          24px;
-  --fs-h6:          20px;
-  --fs-body-lg:     18px;
-  --fs-body:        16px;
-  --fs-body-sm:     14px;
-  --fs-meta:        13px;
-  --fs-label:       12px;
-  --fs-kicker:      11px;
+  /* L'ÉCHELLE DE RÔLES. Un nom dit un USAGE, jamais un niveau de titre HTML ni une valeur.
+     ================================================================================
+     Elle remplace une échelle antérieure (`--fs-display-xl` … `--fs-h6`, `--fs-body-lg` …) qui
+     nommait neuf niveaux de titre et n'était appelée que dix-neuf fois dans tout le produit,
+     pendant que 53 valeurs arbitraires en `text-[Npx]` faisaient le travail. Une échelle qu'on
+     n'appelle pas n'est pas une échelle, c'est une intention.
+     ================================================================================
+     Les valeurs sont calées sur l'usage RÉEL mesuré le 01/08/2026, pour que la migration ne
+     déplace pas les tailles majoritaires. Ce qui change, ce sont les 24 clamps distincts (ramenés à
+     trois rôles) et les 9 demi-pixels (arrondis), deux poches de bruit sans intention.
+     ================================================================================
+     Choisir un rôle : se demander CE QUE LE TEXTE FAIT, jamais la place qu'on veut lui donner.
+     Deux rôles voisins (`dense` et `meta`) existent parce qu'un corps de carte et une source ne
+     font pas le même travail, pas parce qu'un pixel les sépare. */
+
+  --text-display:   clamp(34px, 4vw, 54px);   /* titre de page, un seul par écran */
+  --text-title:     clamp(26px, 3vw, 38px);   /* titre de section */
+  --text-section:   clamp(20px, 2.4vw, 26px); /* titre de bloc, de carte, de groupe */
+  --text-lede:      17px;                     /* chapô sous un titre de page */
+  --text-body:      16px;                     /* corps de lecture, prose suivie */
+  --text-dense:     14px;                     /* corps d'une carte, d'une liste, d'un tableau */
+  --text-caption:   13px;                     /* précision, légende, phrase de rang */
+  --text-meta:      12px;                     /* source, mention, unité */
+  --text-kicker:    11px;                     /* surtitre mono capitales, désigne une section */
+  --text-micro:     10px;                     /* étiquette d'axe, note de bas de carte */
 
   --lh-display:     0.96;
   --lh-tight:       1.06;

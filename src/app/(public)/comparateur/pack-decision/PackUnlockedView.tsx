@@ -82,7 +82,7 @@ export function PackUnlockedView({ data, trio, pistes, projetLabel }: Props) {
             Trois nouvelles pistes
           </p>
           <h3
-            className="font-normal text-[clamp(20px,3vw,28px)] leading-[1.15] text-label mb-2"
+            className="font-normal text-[length:var(--text-section)] leading-[1.15] text-label mb-2"
             style={{ fontFamily: "var(--font-serif)" }}
           >
             Si aucune des trois ne vous convainc totalement.
@@ -99,7 +99,7 @@ export function PackUnlockedView({ data, trio, pistes, projetLabel }: Props) {
                 <p className="mt-2 text-[14px] leading-[1.6] text-accent italic">{r.identite}</p>
                 <ul className="mt-4 space-y-2">
                   {forces(r).map((f) => (
-                    <li key={f} className="text-[13.5px] leading-[1.55] text-label flex gap-2">
+                    <li key={f} className="text-[length:var(--text-dense)] leading-[1.55] text-label flex gap-2">
                       <span className="text-emerald-400 shrink-0" aria-hidden>+</span>
                       <span>{cap(f)}</span>
                     </li>

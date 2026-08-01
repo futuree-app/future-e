@@ -153,7 +153,7 @@ export function TerritoryIdentityCard({
 
       {/* Identifiant : le nom de la commune, en grand, comme sur une pièce d'identité */}
       <h3
-        className="passport-layer-name font-normal uppercase text-[clamp(28px,4.2vw,42px)] leading-[1.0] tracking-[0.01em] text-label"
+        className="passport-layer-name font-normal uppercase text-[length:var(--text-title)] leading-[1.0] tracking-[0.01em] text-label"
         style={{ fontFamily: "var(--font-serif)" }}
       >
         {communeName}

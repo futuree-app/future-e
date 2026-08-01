@@ -46,7 +46,7 @@ export function ControlesDuDossier({ dossier }: { dossier: Dossier }) {
           <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: COULEUR, boxShadow: `0 0 6px ${COULEUR}` }} />
           {dossier.controlesTitle}
         </div>
-        <p className="text-[13.5px] leading-[1.6] text-ghost">
+        <p className="text-[length:var(--text-dense)] leading-[1.6] text-ghost">
           Ce que nos sources ont établi pour ce dossier, du plus large au plus précis. La synthèse
           ci-dessus en retient ce qui fonde son verdict.
         </p>

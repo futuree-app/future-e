@@ -81,7 +81,7 @@ function Cellule({ cell, nom, leader }: { cell: ComparaisonCellule; nom: string;
     >
       <span className="md:hidden w-[104px] shrink-0 text-[13px] text-muted pt-0.5">{nom}</span>
       <span className="min-w-0">
-        <span className={`text-[15.5px] leading-[1.45] ${paletteTone(cell, leader)}`}>{cell.palier}</span>
+        <span className={`text-[length:var(--text-body)] leading-[1.45] ${paletteTone(cell, leader)}`}>{cell.palier}</span>
         {cell.qualifier && (
           <span className="block text-[13px] leading-[1.4] text-muted mt-0.5">{cell.qualifier}</span>
         )}
@@ -112,7 +112,7 @@ function LigneRow({ ligne, trio }: { ligne: ComparaisonLigne; trio: MatchResult[
         <LabelTip label={ligne.label} text={ligne.aide} />
         {!neutre && (
           <span
-            className={`block mt-1 font-mono text-[9.5px] tracking-[0.12em] uppercase ${
+            className={`block mt-1 font-mono text-[length:var(--text-micro)] tracking-[0.12em] uppercase ${
               egalite ? "text-ghost" : "text-accent"
             }`}
           >
@@ -123,11 +123,11 @@ function LigneRow({ ligne, trio }: { ligne: ComparaisonLigne; trio: MatchResult[
 
       {merged ? (
         <div className={`${MERGED_SPAN_BY_N[n] ?? MERGED_SPAN_BY_N[3]} md:px-3.5 md:py-2.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5`}>
-          <span className="text-[15.5px] leading-[1.45] text-label">
+          <span className="text-[length:var(--text-body)] leading-[1.45] text-label">
             {dispo[0].palier}
             {dispo[0].qualifier ? `, ${dispo[0].qualifier}` : ""}
           </span>
-          <span className="text-[14.5px] text-muted">· les {n >= 3 ? "trois" : "deux"} territoires se valent</span>
+          <span className="text-[length:var(--text-dense)] text-muted">· les {n >= 3 ? "trois" : "deux"} territoires se valent</span>
         </div>
       ) : (
         trio.map((r) => {
@@ -144,11 +144,11 @@ function LigneRow({ ligne, trio }: { ligne: ComparaisonLigne; trio: MatchResult[
 export function MatrixHeader({ trio }: { trio: MatchResult[] }) {
   return (
     <div className={`${gridFor(trio.length)} hidden md:grid pb-2 border-b border-[var(--border-1)]`}>
-      <div className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-ghost self-end pb-1">Critère</div>
+      <div className="font-mono text-[length:var(--text-micro)] tracking-[0.14em] uppercase text-ghost self-end pb-1">Critère</div>
       {trio.map((r, n) => (
         <div key={r.insee} className="px-3.5 flex items-baseline gap-2">
           <span className="font-mono text-[10px] text-accent">{String(n + 1).padStart(2, "0")}</span>
-          <span className="text-[18.5px] leading-[1.1] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+          <span className="text-[length:var(--text-lede)] leading-[1.1] text-label" style={{ fontFamily: "var(--font-serif)" }}>
             {r.nom}
           </span>
         </div>

@@ -180,7 +180,7 @@ export default function AutourModule({
               <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--green)" }} />
               Module 02 · Autour de l&apos;adresse
             </div>
-            <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
+            <h1 className="font-normal text-[length:var(--text-display)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
               Ce qu&apos;il y a autour.<br />
               <span className="italic" style={{ color: "var(--green)" }}>Services, nature, chaleur.</span>
             </h1>
@@ -205,7 +205,7 @@ export default function AutourModule({
         <section className="pt-14">
           <div className="mb-8">
             <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">L&apos;adresse de ce dossier</p>
-            <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+            <h2 className="font-normal text-[length:var(--text-title)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
               {dossier.address_label}
             </h2>
           </div>
@@ -229,7 +229,7 @@ export default function AutourModule({
             {!loading && !error && (
               <Link
                 href="/rapport/dossiers"
-                className="inline-flex items-center gap-2 text-[13.5px] text-muted no-underline"
+                className="inline-flex items-center gap-2 text-[length:var(--text-dense)] text-muted no-underline"
               >
                 Analyser un autre bien
               </Link>
@@ -399,7 +399,7 @@ export default function AutourModule({
                     ou laisse passer, son diagnostic énergétique et ce à quoi son adresse est
                     exposée se lisent dans le module Logement.
                   </p>
-                  <Link href="/rapport/logement" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[13.5px] no-underline border border-[var(--border-1)] w-fit">
+                  <Link href="/rapport/logement" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[length:var(--text-dense)] no-underline border border-[var(--border-1)] w-fit">
                     Ouvrir le module Logement →
                   </Link>
                 </div>

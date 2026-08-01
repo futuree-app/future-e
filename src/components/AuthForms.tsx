@@ -81,7 +81,7 @@ export function PasswordForm({
     <section className="flex flex-col gap-7">
       <div>
         <h1
-          className="text-[clamp(26px,3vw,32px)] font-semibold text-label leading-tight tracking-[-0.03em] mb-2"
+          className="text-[length:var(--text-section)] font-semibold text-label leading-tight tracking-[-0.03em] mb-2"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           {title}
@@ -104,7 +104,7 @@ export function PasswordForm({
               maxLength={120}
               required
             />
-            <p className="mt-2 text-[12.5px] text-ghost leading-relaxed">
+            <p className="mt-2 text-[length:var(--text-caption)] text-ghost leading-relaxed">
               Il figurera sur vos factures. Rien d&apos;autre n&apos;en dépend.
             </p>
           </div>
@@ -176,7 +176,7 @@ export function MagicLinkForm({
     <section className="flex flex-col gap-7">
       <div>
         <h1
-          className="text-[clamp(26px,3vw,32px)] font-semibold text-label leading-tight tracking-[-0.03em] mb-2"
+          className="text-[length:var(--text-section)] font-semibold text-label leading-tight tracking-[-0.03em] mb-2"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           {title}
