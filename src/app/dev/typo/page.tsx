@@ -42,6 +42,8 @@ type Proposition = {
   body: string;
   /** Famille des rangs et valeurs. Le mono du produit, sauf si la proposition le remplace. */
   meta: string;
+  /** Axe de largeur, pour les familles variables. 100 = largeur normale. */
+  titleStretch?: number;
 };
 
 const SANS = "'Instrument Sans', system-ui, sans-serif";
@@ -130,6 +132,41 @@ const PROPOSITIONS: Proposition[] = [
     meta: MONO,
   },
   {
+    id: "archivo-partout",
+    label: "Archivo partout",
+    registre: "Une seule famille · titre et texte",
+    origine: "Omnibus-Type · SIL OFL · variable",
+    argument:
+      "La même grotesque du titre au paragraphe. Le produit descend à deux familles au lieu de trois, la hiérarchie ne tient plus qu'à la graisse et à la taille, et les deux Instrument disparaissent, or le linter les condamne toutes les deux. Archivo est une police de presse : elle sait aussi porter du texte long.",
+    reserve:
+      "Sans le contraste d'une seconde famille, tout repose sur la discipline des graisses. Une page mal réglée devient plate.",
+    title: "'Archivo', system-ui, sans-serif",
+    titleWeight: 600,
+    titleTracking: "-1.6px",
+    accentStyle: "normal",
+    accentWeight: 600,
+    body: "'Archivo', system-ui, sans-serif",
+    meta: MONO,
+  },
+  {
+    id: "archivo-serre",
+    label: "Archivo partout, titres resserrés",
+    registre: "Une seule famille · la largeur devient la signature",
+    origine: "Omnibus-Type · SIL OFL · variable, axe de largeur",
+    argument:
+      "Même parti pris, en exploitant l'axe de largeur de la police variable : les titres se resserrent à 82 %, le texte reste à largeur normale. C'est ce qui empêche Archivo de rester neutre. Une grotesque condensée en titre est un geste qu'aucune interface générée ne produit, parce qu'il demande de régler un axe à la main.",
+    reserve:
+      "Le resserrement doit être tenu partout, sinon deux écrans ne se ressembleront plus. C'est une règle à graver, pas un effet.",
+    title: "'Archivo', system-ui, sans-serif",
+    titleWeight: 600,
+    titleTracking: "-1.2px",
+    titleStretch: 82,
+    accentStyle: "normal",
+    accentWeight: 600,
+    body: "'Archivo', system-ui, sans-serif",
+    meta: MONO,
+  },
+  {
     id: "martian",
     label: "Martian Mono",
     registre: "Mono en titre · l'instrument assumé",
@@ -168,7 +205,7 @@ function Banc() {
       {/* Les familles non embarquées dans le produit sont chargées ICI seulement. Toutes libres. */}
       <link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&family=Public+Sans:ital,wght@0,300..700;1,300..700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Archivo:ital,wght@0,300..700;1,300..700&family=Martian+Mono:wght@300..600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&family=Public+Sans:ital,wght@0,300..700;1,300..700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Archivo:ital,wdth,wght@0,62..125,300..700;1,62..125,300..700&family=Martian+Mono:wght@300..600&display=swap"
       />
 
       <div className="max-w-[1100px] mx-auto px-5 sm:px-7 py-10">
@@ -238,7 +275,12 @@ function Banc() {
 }
 
 function Echantillon({ p }: { p: Proposition }) {
-  const titre = { fontFamily: p.title, fontWeight: p.titleWeight, letterSpacing: p.titleTracking };
+  const titre = {
+    fontFamily: p.title,
+    fontWeight: p.titleWeight,
+    letterSpacing: p.titleTracking,
+    ...(p.titleStretch ? { fontStretch: `${p.titleStretch}%` } : {}),
+  };
   return (
     <section>
       <div className="pb-4 mb-8 border-b" style={{ borderColor: "var(--border-1)" }}>
@@ -284,7 +326,7 @@ function Echantillon({ p }: { p: Proposition }) {
                 {e.rang}
               </span>
               <div>
-                <h4 className="text-[20px] text-label" style={{ fontFamily: p.title, fontWeight: p.titleWeight }}>
+                <h4 className="text-[20px] text-label" style={titre}>
                   {e.nom}
                   <span className="text-muted text-[15px]" style={{ fontFamily: p.body, fontWeight: 400 }}>
                     {" "}· {e.grain}
