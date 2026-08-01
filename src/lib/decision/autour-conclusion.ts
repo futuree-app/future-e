@@ -21,7 +21,12 @@
 // Pur, testé sous `node --test`.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
-import { BPE_WALK_RADIUS_M, type Face3Cat, type Face3Snapshot } from "../logement-autour-types.ts";
+import {
+  BPE_WALK_RADIUS_M,
+  type Face3Cat,
+  type Face3Snapshot,
+  type PermisSnapshot,
+} from "../logement-autour-types.ts";
 
 /**
  * LE SEUIL « À PORTÉE DE PAS » : 500 mètres, à vol d'oiseau.
@@ -87,11 +92,52 @@ function et(parts: string[]): string {
 export type AutourConclusion = {
   /** La configuration du secteur, en une ou deux phrases. */
   lead: string;
+  /**
+   * LA CHARNIÈRE TEMPORELLE. `null` quand aucun permis non achevé n'est retenu.
+   *
+   * Le bloc des permis, rendu juste au-dessus, porte déjà toute la charge factuelle : présence ou
+   * absence, périmètre, objet du registre, année, état, date de consultation. Ce que ces faits ne
+   * disent pas, et que la conclusion pose : la configuration décrite est celle observée lors de
+   * l'analyse, et elle n'était peut-être pas stabilisée.
+   *
+   * ── CE CHAMP NE SE SUFFIT PAS À LUI-MÊME ─────────────────────────────────────────────────
+   * La phrase peut porter l'année de DÉPÔT du dossier, jamais la date de CONSULTATION du registre,
+   * qui est celle qui borne l'état observé. « Peut encore changer » n'est au présent que parce que
+   * le lecteur voit, sur la même surface, à quelle date le registre a été consulté.
+   *
+   * Toute réutilisation de `AutourConclusion` hors de `AutourModule` (un PDF, un partage, une
+   * synthèse qui en cite le texte) doit donc afficher cette date quelque part, sans quoi un lecteur
+   * de 2028 lira au présent une possibilité constatée en 2026.
+   */
+  mouvement: string | null;
   /** Ce qui est absent du périmètre cherché. Vide si tout a été trouvé. */
   absences: string[];
   /** Ce que ces nombres ne disent pas. Toujours présent. */
   limite: string;
 };
+
+/**
+ * LA CHARNIÈRE TEMPORELLE DES PERMIS.
+ *
+ * Elle ne dit qu'une chose : ce qui est décrit au-dessus n'est peut-être pas stabilisé. Jamais la
+ * nature du changement, jamais son ampleur, jamais sa date.
+ *
+ * NON ACHEVÉ SEULEMENT. Un achevé ne signale plus une transformation à venir au moment de
+ * l'analyse. L'absence, elle, est déjà dite par le bloc au-dessus, où elle est bornée par le
+ * périmètre et l'objet du registre ; la répéter ici coûterait une phrase sur trois dossiers sur
+ * quatre pour ne rien ajouter.
+ *
+ * LE MODAL EST OBLIGATOIRE. Une autorisation EST une permission de changer, elle ne prouve pas que
+ * le changement aura lieu. « Peut encore changer » est donc plus faible que la donnée elle-même, ce
+ * qui est exactement le but. Le verbe est « changer » et non « évoluer », qui penche vers
+ * l'amélioration en français, sur une phrase dont tout l'enjeu est de ne rien qualifier.
+ */
+function buildMouvement(p: PermisSnapshot | undefined): string | null {
+  if (!p) return null;
+  const retenus = p.permis.filter((x) => x.etat !== "acheve");
+  if (retenus.length === 0) return null;
+  return "Cette configuration peut encore changer.";
+}
 
 /**
  * Assemble la conclusion. Rend `null` quand il n'y a rien à conclure : source BPE en échec, ou
@@ -157,6 +203,7 @@ export function buildAutourConclusion(s: Face3Snapshot): AutourConclusion | null
 
   return {
     lead,
+    mouvement: buildMouvement(s.permis),
     absences,
     limite:
       "Ces distances mesurent la présence, jamais la qualité, les horaires ni la capacité d'accueil " +

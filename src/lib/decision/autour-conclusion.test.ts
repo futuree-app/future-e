@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildAutourConclusion, distanceFr, SEUIL_A_PIED_M } from "./autour-conclusion.ts";
-import type { Face3Cat, Face3Snapshot } from "../logement-autour-types.ts";
+import type { Face3Cat, Face3Snapshot, PermisSnapshot } from "../logement-autour-types.ts";
 
 function cat(c: Face3Cat, m: number | null, typeLabel: string | null = null, cap = 3000) {
   return { category: c, nearest: m == null ? null : { distanceMeters: m, typeLabel }, searchCapMeters: cap };
@@ -19,6 +19,24 @@ function snap(categories: ReturnType<typeof cat>[], bpe: "complete" | "failed" =
   } as Face3Snapshot;
 }
 
+/**
+ * Un snapshot de permis GELÉ. Le rayon est un paramètre, jamais la constante : c'est exactement ce
+ * que les tests doivent pouvoir faire varier pour prouver qu'un dossier ancien décrit le périmètre
+ * qui l'a réellement sélectionné.
+ */
+function permis(
+  liste: { annee: number; etat: "acheve" | "chantier_ouvert" | "autorise_non_commence" }[],
+  rayonMeters = 50,
+): PermisSnapshot {
+  return {
+    permis: liste,
+    rayonMeters,
+    ancienneteMaxAns: 3,
+    anneeReference: 2026,
+    consulteLe: "2026-08-01T00:00:00.000Z",
+  };
+}
+
 // Le cas réel relevé au Capitole le 31/07/2026.
 const CAPITOLE = [
   cat("sante", 68, "Pharmacie"),
@@ -27,6 +45,11 @@ const CAPITOLE = [
   cat("transports", 1200, "Gare"),
   cat("services", 28, "Banque"),
 ];
+
+/** Le Capitole, avec un registre des permis consulté. `undefined` veut dire NON consulté. */
+function snapAvecPermis(p: PermisSnapshot | undefined, bpe: "complete" | "failed" = "complete"): Face3Snapshot {
+  return { ...snap(CAPITOLE, bpe), ...(p ? { permis: p } : {}) };
+}
 
 // ── Ne rien conclure quand on n'a pas pu regarder ───────────────────────────────────────────
 
@@ -144,4 +167,40 @@ test("un type inconnu de la nomenclature ne casse pas la phrase", () => {
 test("sans type précis, la famille prend le relais", () => {
   const c = buildAutourConclusion(snap([cat("education", 200, null)]))!;
   assert.ok(c.lead.includes("une école"), c.lead);
+});
+
+// ── La charnière temporelle des permis : le silence d'abord ─────────────────────────────────
+
+test("registre NON CONSULTÉ : aucune charnière", () => {
+  // Un dossier antérieur au 01/08/2026, ou une API muette. Le bloc des permis disparaît pour cette
+  // raison, et la conclusion doit se taire pour la même : un registre non consulté ne se lit jamais
+  // comme un voisinage stable.
+  const c = buildAutourConclusion(snapAvecPermis(undefined));
+  assert.equal(c?.mouvement, null);
+});
+
+test("consulté, RIEN trouvé : aucune charnière", () => {
+  // L'absence est déjà dite par le bloc au-dessus, bornée par le périmètre et l'objet du registre.
+  // La répéter coûterait une phrase sur trois dossiers sur quatre pour ne rien ajouter.
+  const c = buildAutourConclusion(snapAvecPermis(permis([])));
+  assert.equal(c?.mouvement, null);
+});
+
+test("QUE DES ACHEVÉS : aucune charnière", () => {
+  // Un achevé ne signale plus une transformation à venir au moment de l'analyse. Il reste dans le
+  // bloc factuel, il n'entre pas dans la charnière temporelle. Ce que le registre établit de lui
+  // s'arrête là : une autorisation sélectionnée est passée à l'état achevé, et rien n'assure que
+  // son effet soit visible à la visite.
+  const c = buildAutourConclusion(snapAvecPermis(permis([
+    { annee: 2024, etat: "acheve" },
+    { annee: 2023, etat: "acheve" },
+  ])));
+  assert.equal(c?.mouvement, null);
+});
+
+test("BPE en échec : pas de conclusion du tout, même avec un chantier ouvert", () => {
+  // « Cette configuration peut encore changer » n'a pas de référent quand aucune configuration n'a
+  // été décrite. L'information n'est pas perdue : le bloc des permis reste affiché au-dessus.
+  const s = snapAvecPermis(permis([{ annee: 2025, etat: "chantier_ouvert" }]), "failed");
+  assert.equal(buildAutourConclusion(s), null);
 });
