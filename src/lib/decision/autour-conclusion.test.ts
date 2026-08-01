@@ -204,3 +204,100 @@ test("BPE en échec : pas de conclusion du tout, même avec un chantier ouvert",
   const s = snapAvecPermis(permis([{ annee: 2025, etat: "chantier_ouvert" }]), "failed");
   assert.equal(buildAutourConclusion(s), null);
 });
+
+// ── Les cinq formes ─────────────────────────────────────────────────────────────────────────
+
+test("un chantier ouvert seul : l'année est dite, rattachée au DÉPÔT", () => {
+  // Le point-virgule porte un fait : 2025 est l'année de dépôt, jamais celle de l'ouverture du
+  // chantier. Un complément collé au verbe laisserait les deux dates se contaminer.
+  const c = buildAutourConclusion(snapAvecPermis(permis([{ annee: 2025, etat: "chantier_ouvert" }])));
+  assert.equal(
+    c?.mouvement,
+    "Cette configuration peut encore changer : un chantier de logements est déclaré ouvert " +
+      "à moins de 50 m ; le dossier a été déposé en 2025.",
+  );
+});
+
+test("une autorisation non commencée seule : l'ouverture manquante est dite, puis l'année", () => {
+  const c = buildAutourConclusion(snapAvecPermis(permis([{ annee: 2024, etat: "autorise_non_commence" }])));
+  assert.equal(
+    c?.mouvement,
+    "Cette configuration peut encore changer : une autorisation créant des logements est " +
+      "recensée à moins de 50 m, sans ouverture de chantier déclarée ; le dossier a été déposé " +
+      "en 2024.",
+  );
+});
+
+test("plusieurs, tous ouverts : pluriel, AUCUNE année", () => {
+  const c = buildAutourConclusion(snapAvecPermis(permis([
+    { annee: 2025, etat: "chantier_ouvert" },
+    { annee: 2024, etat: "chantier_ouvert" },
+  ])));
+  assert.equal(
+    c?.mouvement,
+    "Cette configuration peut encore changer : deux chantiers de logements sont déclarés " +
+      "ouverts à moins de 50 m.",
+  );
+});
+
+test("plusieurs, aucun ouvert : pluriel, AUCUNE année", () => {
+  const c = buildAutourConclusion(snapAvecPermis(permis([
+    { annee: 2025, etat: "autorise_non_commence" },
+    { annee: 2024, etat: "autorise_non_commence" },
+    { annee: 2024, etat: "autorise_non_commence" },
+  ])));
+  assert.equal(
+    c?.mouvement,
+    "Cette configuration peut encore changer : trois autorisations créant des logements sont " +
+      "recensées à moins de 50 m, sans ouverture de chantier déclarée.",
+  );
+});
+
+test("états mixtes : le total, puis les ouverts, sans compter les autres", () => {
+  // Le total permet de déduire les non commencées. Les compter séparément produirait une phrase de
+  // registre administratif là où on attend une lecture.
+  const c = buildAutourConclusion(snapAvecPermis(permis([
+    { annee: 2025, etat: "chantier_ouvert" },
+    { annee: 2025, etat: "chantier_ouvert" },
+    { annee: 2024, etat: "autorise_non_commence" },
+    { annee: 2023, etat: "acheve" },
+  ])));
+  assert.equal(
+    c?.mouvement,
+    "Cette configuration peut encore changer : trois autorisations créant des logements sont " +
+      "recensées à moins de 50 m, dont deux chantiers déclarés ouverts.",
+  );
+});
+
+test("mixte avec UN SEUL chantier ouvert : l'accord suit", () => {
+  const c = buildAutourConclusion(snapAvecPermis(permis([
+    { annee: 2025, etat: "chantier_ouvert" },
+    { annee: 2024, etat: "autorise_non_commence" },
+  ])));
+  assert.equal(
+    c?.mouvement,
+    "Cette configuration peut encore changer : deux autorisations créant des logements sont " +
+      "recensées à moins de 50 m, dont un chantier déclaré ouvert.",
+  );
+});
+
+test("même millésime au pluriel : l'année reste TUE", () => {
+  // Règle éditoriale assumée, pas un raccourci : l'année n'apparaît que lorsque la conclusion
+  // mentionne une seule autorisation. L'ajouter au pluriel rapprocherait la charnière de
+  // l'inventaire que le bloc précédent rend déjà.
+  const c = buildAutourConclusion(snapAvecPermis(permis([
+    { annee: 2025, etat: "chantier_ouvert" },
+    { annee: 2025, etat: "chantier_ouvert" },
+  ])));
+  assert.ok(!c?.mouvement?.includes("2025"));
+});
+
+test("au-delà de neuf, le nombre passe en chiffres", () => {
+  const dix = Array.from({ length: 10 }, () => ({ annee: 2025, etat: "chantier_ouvert" as const }));
+  const c = buildAutourConclusion(snapAvecPermis(permis(dix)));
+  assert.equal(
+    c?.mouvement,
+    "Cette configuration peut encore changer : 10 chantiers de logements sont déclarés ouverts " +
+      "à moins de 50 m.",
+  );
+});
