@@ -37,7 +37,7 @@ export default async function MemoirePage() {
   return (
     <div
       className="min-h-screen bg-canvas text-label relative overflow-hidden"
-      style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+      style={{ fontFamily: "var(--font-sans)" }}
     >
       <div className="fixed top-[-160px] left-[-130px] w-[520px] h-[520px] rounded-full bg-accent/[0.10] blur-[100px] opacity-40 pointer-events-none z-0" />
       <div className="fixed bottom-[-100px] right-[-80px] w-[400px] h-[400px] rounded-full bg-amethyst/[0.08] blur-[88px] opacity-30 pointer-events-none z-0" />
@@ -52,7 +52,7 @@ export default async function MemoirePage() {
           </div>
           <h1
             className="font-normal text-[clamp(30px,3.4vw,46px)] leading-[1.1] tracking-[-1px] mb-5 text-label"
-            style={{ fontFamily: "'Instrument Serif', serif" }}
+            style={{ fontFamily: "var(--font-serif)" }}
           >
             Ce que futur<span className="text-accent not-italic">•</span>e sait de vous.
           </h1>

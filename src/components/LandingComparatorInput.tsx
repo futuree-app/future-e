@@ -101,7 +101,7 @@ export function LandingComparatorInput() {
           {loading && (
             <span style={{
               position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--fg-4)',
+              fontFamily: "var(--font-mono)", fontSize: 11, color: 'var(--fg-4)',
             }}>…</span>
           )}
           {open && suggestions.length > 0 && (

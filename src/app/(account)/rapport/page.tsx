@@ -131,7 +131,7 @@ export default async function RapportPage() {
   return (
     <div
       className="min-h-screen bg-canvas text-label relative overflow-hidden"
-      style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+      style={{ fontFamily: "var(--font-sans)" }}
     >
       {/* Orbs */}
       <div className="fixed top-[-160px] left-[-130px] w-[540px] h-[540px] rounded-full bg-accent/[0.14] blur-[100px] opacity-40 pointer-events-none z-0" />
@@ -249,7 +249,7 @@ export default async function RapportPage() {
             </div>
 
             <>
-              <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+              <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
                 {displayName} en 2030, 2050, 2100.<br />
                 <span className="italic text-accent">Ce que ça change pour vous.</span>
               </h1>
@@ -265,11 +265,11 @@ export default async function RapportPage() {
                   /* CTA neutre, et c'est une règle : dans le rapport, l'orange est le registre
                      « compromis » du dossier de décision. Un bouton de navigation qui le porte ferait
                      dire deux choses à la même teinte sur le même écran (DESIGN.md § 5.4). */
-                  <Link href="#modules" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-3)] text-label font-semibold text-[14px] no-underline border border-[var(--border-2)] hover:bg-[var(--bg-elev-3)] transition-colors" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+                  <Link href="#modules" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-3)] text-label font-semibold text-[14px] no-underline border border-[var(--border-2)] hover:bg-[var(--bg-elev-3)] transition-colors" style={{ fontFamily: "var(--font-sans)" }}>
                     {openModules.length === 1 ? "Lire le territoire" : "Voir mes trois échelles"}
                   </Link>
                 ) : (
-                  <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+                  <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "var(--font-sans)" }}>
                     Ouvrir le rapport interactif
                   </Link>
                 )}
@@ -287,7 +287,7 @@ export default async function RapportPage() {
               <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">
                 {openModules.length === 1 ? "1 échelle ouverte" : `${openModules.length} échelles ouvertes`}
               </p>
-              <h2 className="font-normal text-[22px] leading-[1.2] text-label mb-5 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
+              <h2 className="font-normal text-[22px] leading-[1.2] text-label mb-5 tracking-[-0.3px]" style={{ fontFamily: "var(--font-serif)" }}>
                 Rapport interactif · {displayName}
               </h2>
               {/* SOMMAIRE NUMÉROTÉ, NEUTRE. Chaque ligne mène quelque part, et le rang porte
@@ -404,7 +404,7 @@ export default async function RapportPage() {
           <section className="pt-14" id="quartier">
             <div className="mb-8 max-w-[640px]">
               <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Votre première lecture</p>
-              <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+              <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                 Ce que vos réponses font déjà ressortir à {displayName}.
               </h2>
             </div>
@@ -416,7 +416,7 @@ export default async function RapportPage() {
         {fullReport && (
           <section className="pt-14" id="modules">
             <div className="mb-8">
-              <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+              <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                 {openModules.length === 1
                   ? `Ce que ${displayName} devient.`
                   : "Trois échelles, de la commune à vos murs."}
@@ -452,7 +452,7 @@ export default async function RapportPage() {
                         trois liens, ce qui donnait un écran plus froid que dense. Le mono dit une
                         valeur ou un repère de comptage, jamais une phrase. */}
                     <div>
-                      <h3 className="font-normal text-[20px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                      <h3 className="font-normal text-[20px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                         {module.name}
                         <span className="text-muted text-[15px]"> · {MODULE_GRAIN[module.id] ?? module.summary}</span>
                       </h3>
@@ -489,7 +489,7 @@ export default async function RapportPage() {
             rapport complet, puis se voyait proposer en pied de page de l'acheter. */}
         <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-[var(--border-1)]">
           {!fullReport && (
-            <TrackedUpgradeLink href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+            <TrackedUpgradeLink href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "var(--font-sans)" }}>
               Ouvrir le rapport interactif
             </TrackedUpgradeLink>
           )}
@@ -505,7 +505,7 @@ export default async function RapportPage() {
       {/* Footer */}
       <footer className="relative z-[2] border-t border-[var(--border-1)]">
         <div className="max-w-[1100px] mx-auto px-5 sm:px-7 py-9 flex items-center justify-between gap-6 flex-wrap">
-          <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
+          <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "var(--font-serif)" }}>
             futur<span className="text-accent not-italic">•</span>e
           </div>
           {/* Même pied de page que la landing, mêmes destinations : voir le commentaire dans

@@ -259,7 +259,7 @@ export function MemoireForm({ profile }: MemoireFormProps) {
         </p>
         <h3
           className="text-[20px] text-label mb-2"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
+          style={{ fontFamily: "var(--font-serif)" }}
         >
           Tout supprimer (sauf commune)
         </h3>
@@ -371,7 +371,7 @@ function CommuneBlock({
             Commune de résidence
           </p>
           {!editing ? (
-            <p className="text-[20px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+            <p className="text-[20px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
               {communeName ?? "Non renseignée"}
               {inseeCode && (
                 <span className="text-ghost text-[14px] ml-2 font-mono">{inseeCode}</span>

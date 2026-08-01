@@ -70,7 +70,7 @@ export function CommuneSetupBanner() {
         </div>
         <h2
           className="font-normal text-[18px] leading-[1.25] tracking-[-0.2px] text-label mb-1"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
+          style={{ fontFamily: "var(--font-serif)" }}
         >
           Quelle est votre commune de résidence ?
         </h2>

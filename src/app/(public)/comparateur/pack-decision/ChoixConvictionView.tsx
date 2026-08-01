@@ -49,7 +49,7 @@ export function ChoixConvictionView({ trio, apercu, userEmail, returnUrl, return
       <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent mb-3">Pack Décision · 39 €</p>
       <h1
         className="font-normal text-[clamp(28px,4vw,44px)] leading-[1.1] tracking-[-0.8px] text-label mb-5"
-        style={{ fontFamily: "'Instrument Serif', serif" }}
+        style={{ fontFamily: "var(--font-serif)" }}
       >
         {noms.length >= 2 ? `Vous hésitez entre ${heroNoms(noms)} ?` : "Vous hésitez entre ces territoires ?"}
         <br />
@@ -78,7 +78,7 @@ export function ChoixConvictionView({ trio, apercu, userEmail, returnUrl, return
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {bundle.map((b) => (
               <div key={b.t} className="glass rounded-xl p-4">
-                <p className="text-[14px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>{b.t}</p>
+                <p className="text-[14px] text-label" style={{ fontFamily: "var(--font-serif)" }}>{b.t}</p>
                 <p className="mt-1 text-[12.5px] leading-[1.5] text-muted">{b.d}</p>
               </div>
             ))}
@@ -92,8 +92,8 @@ export function ChoixConvictionView({ trio, apercu, userEmail, returnUrl, return
 
         <aside className="glass rounded-2xl p-6 md:sticky md:top-6">
           <div className="flex items-baseline justify-between mb-4 pb-4 border-b border-[var(--border-1)]">
-            <span className="text-[15px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>Pack Décision</span>
-            <span className="text-[28px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+            <span className="text-[15px] text-label" style={{ fontFamily: "var(--font-serif)" }}>Pack Décision</span>
+            <span className="text-[28px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
               39<span className="text-[15px] text-muted ml-1">€</span>
             </span>
           </div>

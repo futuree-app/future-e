@@ -192,7 +192,7 @@ export function MetricDrawer({
           box-shadow: -20px 0 60px rgba(0,0,0,0.5);
           padding: 30px 28px 36px;
           animation: metric-slide-right 0.26s cubic-bezier(0.22,1,0.36,1);
-          font-family: 'Instrument Sans', sans-serif;
+          font-family:var(--font-sans);
         }
         .metric-drawer-close {
           position: absolute; top: 18px; right: 18px; width: 30px; height: 30px;
@@ -201,16 +201,16 @@ export function MetricDrawer({
         }
         .metric-drawer-close:hover { background: var(--bg-elev-3); color: #e9ecf2; }
         .metric-drawer-eyebrow {
-          font-family: 'JetBrains Mono', monospace; font-size: 10px;
+          font-family:var(--font-mono); font-size: 10px;
           letter-spacing: 0.16em; text-transform: uppercase; margin: 0 0 8px;
         }
         .metric-drawer-title {
-          font-family: 'Instrument Serif', serif; font-weight: 400; font-style: italic;
+          font-family:var(--font-serif); font-weight: 400; font-style: italic;
           font-size: 24px; color: #e9ecf2; margin: 0 0 14px; line-height: 1.2;
         }
         .metric-drawer-head { margin-bottom: 26px; }
         .metric-drawer-headline {
-          font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600;
+          font-family:var(--font-mono); font-size: 20px; font-weight: 600;
           margin: 0 0 6px; letter-spacing: 0.01em;
           white-space: pre-line; line-height: 1.35;
         }
@@ -219,7 +219,7 @@ export function MetricDrawer({
         }
         .metric-drawer-section { margin-bottom: 24px; }
         .metric-drawer-label {
-          font-family: 'JetBrains Mono', monospace; font-size: 10px;
+          font-family:var(--font-mono); font-size: 10px;
           letter-spacing: 0.16em; text-transform: uppercase; color: #6b7388; margin: 0 0 10px;
         }
         .metric-drawer-rows { list-style: none; margin: 0; padding: 0; }
@@ -240,7 +240,7 @@ export function MetricDrawer({
           display: block; height: 100%; border-radius: 3px;
           transition: width 0.4s cubic-bezier(0.22,1,0.36,1);
         }
-        .metric-drawer-val { font-family: 'JetBrains Mono', monospace; color: #e9ecf2; }
+        .metric-drawer-val { font-family:var(--font-mono); color: #e9ecf2; }
         .metric-drawer-frise {
           display: flex; align-items: flex-end; gap: 6px; height: 88px;
           padding-top: 4px;
@@ -250,7 +250,7 @@ export function MetricDrawer({
           height: 100%; justify-content: flex-end;
         }
         .metric-drawer-frise-count {
-          font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #9ba3b4;
+          font-family:var(--font-mono); font-size: 10px; color: #9ba3b4;
         }
         .metric-drawer-frise-track {
           width: 100%; flex: 1; display: flex; align-items: flex-end;
@@ -262,7 +262,7 @@ export function MetricDrawer({
           transition: height 0.4s cubic-bezier(0.22,1,0.36,1);
         }
         .metric-drawer-frise-tick {
-          font-family: 'JetBrains Mono', monospace; font-size: 9px;
+          font-family:var(--font-mono); font-size: 9px;
           letter-spacing: 0.02em; color: #6b7388;
         }
         .metric-drawer-facts { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
@@ -279,7 +279,7 @@ export function MetricDrawer({
           background: var(--bg-elev); border: 1px solid var(--border-1);
         }
         .metric-drawer-note-label {
-          font-family: 'JetBrains Mono', monospace; font-size: 10px;
+          font-family:var(--font-mono); font-size: 10px;
           letter-spacing: 0.14em; text-transform: uppercase; color: #6b7388; margin: 0 0 7px;
         }
         .metric-drawer-note-text { font-size: 13px; line-height: 1.6; color: #9ba3b4; margin: 0; }
@@ -298,7 +298,7 @@ export function MetricDrawer({
         }
         .metric-drawer-sources > summary {
           list-style: none; cursor: pointer;
-          font-family: 'JetBrains Mono', monospace; font-size: 10px;
+          font-family:var(--font-mono); font-size: 10px;
           letter-spacing: 0.12em; text-transform: uppercase; color: #5c6478;
           display: inline-flex; align-items: center; gap: 7px;
           transition: color 0.15s;
@@ -309,7 +309,7 @@ export function MetricDrawer({
         .metric-drawer-sources > summary:hover { color: #9ba3b4; }
         .metric-drawer-sources > p {
           margin: 11px 0 0;
-          font-family: 'JetBrains Mono', monospace; font-size: 10px;
+          font-family:var(--font-mono); font-size: 10px;
           letter-spacing: 0.04em; line-height: 1.6; color: #5c6478;
         }
         @keyframes metric-fade { from { opacity: 0; } to { opacity: 1; } }

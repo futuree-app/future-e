@@ -24,7 +24,7 @@ function SubmitButton({ label, pendingLabel }: { label: string; pendingLabel: st
       type="submit"
       disabled={pending}
       className="w-full px-7 py-4 rounded-xl bg-accent text-canvas font-semibold text-[15px] transition-all duration-300 hover:bg-accent/90 hover:shadow-lg hover:shadow-accent/20 active:scale-[0.98] disabled:opacity-40 disabled:cursor-wait"
-      style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+      style={{ fontFamily: "var(--font-sans)" }}
     >
       {pending ? pendingLabel : label}
     </button>
@@ -82,7 +82,7 @@ export function PasswordForm({
       <div>
         <h1
           className="text-[clamp(26px,3vw,32px)] font-semibold text-label leading-tight tracking-[-0.03em] mb-2"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
+          style={{ fontFamily: "var(--font-serif)" }}
         >
           {title}
         </h1>
@@ -177,7 +177,7 @@ export function MagicLinkForm({
       <div>
         <h1
           className="text-[clamp(26px,3vw,32px)] font-semibold text-label leading-tight tracking-[-0.03em] mb-2"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
+          style={{ fontFamily: "var(--font-serif)" }}
         >
           {title}
         </h1>

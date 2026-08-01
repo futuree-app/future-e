@@ -209,7 +209,7 @@ export function WizardStep({
         </p>
         <h2
           className="font-semibold text-[clamp(1.55rem,3vw,2.5rem)] leading-[1.08] tracking-[-0.025em] text-label text-balance"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
+          style={{ fontFamily: "var(--font-serif)" }}
         >
           {config.question}
         </h2>
@@ -295,7 +295,7 @@ export function WizardStep({
             <div className="flex flex-col gap-6">
               <h3
                 className="font-semibold text-[clamp(1.55rem,3vw,2.5rem)] leading-[1.08] tracking-[-0.025em] text-label"
-                style={{ fontFamily: "'Instrument Serif', serif" }}
+                style={{ fontFamily: "var(--font-serif)" }}
               >
                 Quel est l&apos;âge de votre logement ?
               </h3>

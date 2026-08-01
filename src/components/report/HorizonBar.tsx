@@ -81,7 +81,7 @@ export default function HorizonBar({ communeName, locked = false, inseeCode, mod
           <h2
             className="font-normal leading-[1.18] tracking-[-0.5px] text-label mb-3"
             style={{
-              fontFamily: "'Instrument Serif', serif",
+              fontFamily: "var(--font-serif)",
               fontSize: "clamp(20px, 2.4vw, 28px)",
               transition: "opacity 0.2s ease",
             }}
@@ -116,7 +116,7 @@ export default function HorizonBar({ communeName, locked = false, inseeCode, mod
                     top: -16,
                     left: "50%",
                     transform: "translateX(-50%)",
-                    fontFamily: "var(--font-mono, monospace)",
+                    fontFamily: "var(--font-mono)",
                     fontSize: 7,
                     letterSpacing: "0.10em",
                     textTransform: "uppercase",
@@ -147,7 +147,7 @@ export default function HorizonBar({ communeName, locked = false, inseeCode, mod
                   }}
                 >
                   <span style={{
-                    fontFamily: "'Instrument Serif', serif",
+                    fontFamily: "var(--font-serif)",
                     fontSize: 22,
                     fontWeight: 400,
                     letterSpacing: "-0.5px",
@@ -158,7 +158,7 @@ export default function HorizonBar({ communeName, locked = false, inseeCode, mod
                     {h.year}
                   </span>
                   <span style={{
-                    fontFamily: "var(--font-mono, monospace)",
+                    fontFamily: "var(--font-mono)",
                     fontSize: 9,
                     letterSpacing: "0.08em",
                     color: isActive ? "var(--accent, #c8b89a)" : "var(--ghost, #555)",
@@ -184,7 +184,7 @@ export default function HorizonBar({ communeName, locked = false, inseeCode, mod
           <Link
             href="/#pricing"
             className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-canvas font-semibold text-[13px] no-underline"
-            style={{ fontFamily: "'Instrument Sans', sans-serif", color: "var(--canvas, #1a1814)" }}
+            style={{ fontFamily: "var(--font-sans)", color: "var(--canvas, #1a1814)" }}
           >
             Ouvrir le rapport
           </Link>

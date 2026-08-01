@@ -23,7 +23,7 @@ export function ModeChoixSynthese({ arbitrage, spatialContext }: Props) {
       {/* Apex typographique de la page résultat : la lecture du choix domine le titre d'explorateur
           (23px). Mesure de lecture ~680px en style inline (prose en espace ouvert, pas une carte). */}
       {arbitrage && (
-        <p className="text-[26px] leading-[1.35] text-label" style={{ fontFamily: "'Instrument Serif', serif", textWrap: "pretty", maxWidth: 680 }}>
+        <p className="text-[26px] leading-[1.35] text-label" style={{ fontFamily: "var(--font-serif)", textWrap: "pretty", maxWidth: 680 }}>
           {bindOrphans(arbitrage)}
         </p>
       )}

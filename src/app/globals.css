@@ -893,7 +893,7 @@ body:has(dialog.wizard-dialog[open]) {
 }
 
 .horizon-switch-label {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-family:var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -934,7 +934,7 @@ body:has(dialog.wizard-dialog[open]) {
 }
 
 .horizon-btn-label {
-  font-family: 'Instrument Sans', system-ui, sans-serif;
+  font-family:var(--font-sans);
   font-size: 14px;
   font-weight: 500;
   color: #9ba3b4;
@@ -946,7 +946,7 @@ body:has(dialog.wizard-dialog[open]) {
 }
 
 .horizon-btn-sublabel {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-family:var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.06em;
   color: #6b7388;
@@ -958,7 +958,7 @@ body:has(dialog.wizard-dialog[open]) {
 }
 
 .horizon-switch-source {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-family:var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -966,7 +966,7 @@ body:has(dialog.wizard-dialog[open]) {
 }
 
 .card-no-projection {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-family:var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.06em;
   text-transform: uppercase;

@@ -47,7 +47,7 @@ const btn = (active: boolean): CSSProperties => ({
   border: active ? '1px solid rgba(200,184,154,0.28)' : '1px solid transparent',
   cursor: 'pointer',
   transition: 'background 0.18s ease, border-color 0.18s ease',
-  fontFamily: "'Instrument Sans', system-ui, sans-serif",
+  fontFamily: "var(--font-sans)",
   fontSize: 13,
   fontWeight: active ? 600 : 400,
   color: active ? '#c8b89a' : '#9ba3b4',
@@ -58,7 +58,7 @@ const btn = (active: boolean): CSSProperties => ({
 });
 
 const scenarioLine: CSSProperties = {
-  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+  fontFamily: "var(--font-mono)",
   fontSize: 9,
   letterSpacing: '0.07em',
   textTransform: 'uppercase' as const,

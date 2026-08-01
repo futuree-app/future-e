@@ -41,7 +41,7 @@ function glass(extra = {}) {
 
 const kicker = (color: string = C.dim) => ({
   display: 'block' as const,
-  fontFamily: "'JetBrains Mono', monospace",
+  fontFamily: "var(--font-mono)",
   fontSize: 12,
   color,
   letterSpacing: '0.1em',
@@ -50,7 +50,7 @@ const kicker = (color: string = C.dim) => ({
 });
 
 const h2 = {
-  fontFamily: "'Instrument Serif', serif",
+  fontFamily: "var(--font-serif)",
   fontSize: '1.9rem',
   fontWeight: 400,
   lineHeight: 1.3,
@@ -172,7 +172,7 @@ export default function PourquoiPage() {
         color: C.text,
         position: 'relative',
         overflowX: 'hidden',
-        fontFamily: "'Instrument Sans', system-ui, sans-serif",
+        fontFamily: "var(--font-sans)",
       }}
     >
       <style>{`
@@ -240,7 +240,7 @@ export default function PourquoiPage() {
               </p>
               <h1
                 style={{
-                  fontFamily: "'Instrument Serif', serif",
+                  fontFamily: "var(--font-serif)",
                   fontSize: 'clamp(2.4rem, 5.5vw, 3.7rem)',
                   fontWeight: 400,
                   lineHeight: 1.18,
@@ -269,7 +269,7 @@ export default function PourquoiPage() {
                   flexDirection: 'column',
                 }}
               >
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: C.dim }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: C.dim }}>
                   L&apos;annonce
                 </span>
                 <div
@@ -281,13 +281,13 @@ export default function PourquoiPage() {
                     border: `1px solid ${C.border}`,
                   }}
                 />
-                <strong style={{ fontFamily: "'Instrument Serif', serif", fontSize: 19, fontWeight: 400, lineHeight: 1.3 }}>
+                <strong style={{ fontFamily: "var(--font-serif)", fontSize: 19, fontWeight: 400, lineHeight: 1.3 }}>
                   Maison 4 pièces, jardin, proche&nbsp;mer
                 </strong>
                 <span style={{ fontSize: 14, color: C.muted, marginTop: 6, lineHeight: 1.5 }}>
                   Lumineuse, au calme. Écoles et commerces à proximité. Coup de cœur assuré.
                 </span>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: C.text, marginTop: 14 }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: C.text, marginTop: 14 }}>
                   289 000 €
                 </span>
               </div>
@@ -308,7 +308,7 @@ export default function PourquoiPage() {
                         background: 'var(--bg)',
                         border: `1px solid ${t.border}`,
                         color: t.color,
-                        fontFamily: "'JetBrains Mono', monospace",
+                        fontFamily: "var(--font-mono)",
                         fontSize: 12,
                         lineHeight: 1.45,
                         letterSpacing: '0.02em',
@@ -326,7 +326,7 @@ export default function PourquoiPage() {
               <p
                 style={{
                   textAlign: 'center',
-                  fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 14, color: C.dim,
+                  fontFamily: "var(--font-serif)", fontStyle: 'italic', fontSize: 14, color: C.dim,
                   margin: '16px 0 0',
                 }}
               >
@@ -359,7 +359,7 @@ export default function PourquoiPage() {
             la moins bien informée.
           </p>
           <div style={{ borderLeft: `2px solid rgba(248, 113, 113, 0.25)`, padding: '6px 0 6px 24px', margin: '28px 0 0' }}>
-            <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.3rem', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontFamily: "var(--font-serif)", fontSize: '1.3rem', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
               futur•e construit le dossier que chacun devrait pouvoir consulter avant de choisir
               un endroit où engager sa&nbsp;vie, son&nbsp;argent et&nbsp;parfois
               la&nbsp;santé de&nbsp;sa&nbsp;famille.
@@ -383,7 +383,7 @@ export default function PourquoiPage() {
                 <span
                   style={{
                     alignSelf: 'flex-start',
-                    fontFamily: "'JetBrains Mono', monospace",
+                    fontFamily: "var(--font-mono)",
                     fontSize: 11,
                     letterSpacing: '0.04em',
                     color: d.tone,
@@ -400,10 +400,10 @@ export default function PourquoiPage() {
               </div>
             ))}
           </div>
-          <p style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: '1.2rem', color: C.text, margin: '24px 0 0' }}>
+          <p style={{ fontFamily: "var(--font-serif)", fontStyle: 'italic', fontSize: '1.2rem', color: C.text, margin: '24px 0 0' }}>
             Les faits ne changent pas. Leur importance pour la&nbsp;décision,&nbsp;oui.
           </p>
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: '0.06em', color: C.dim, margin: '14px 0 0' }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: '0.06em', color: C.dim, margin: '14px 0 0' }}>
             Exemple illustratif : les verdicts réels dépendent du projet complet et des données au
             jour de la consultation.
           </p>
@@ -428,7 +428,7 @@ export default function PourquoiPage() {
                       width: 30, height: 30, borderRadius: '50%',
                       border: `1px solid ${i === CHAINE.length - 1 ? 'rgba(248, 113, 113, 0.6)' : C.borderHi}`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontFamily: "'JetBrains Mono', monospace", fontSize: 12,
+                      fontFamily: "var(--font-mono)", fontSize: 12,
                       color: i === CHAINE.length - 1 ? C.accent : C.muted,
                       background: i === CHAINE.length - 1 ? 'rgba(248,113,113,0.07)' : 'transparent',
                     }}
@@ -473,7 +473,7 @@ export default function PourquoiPage() {
                 <div
                   className="why-asym-num"
                   style={{
-                    fontFamily: "'Instrument Serif', serif",
+                    fontFamily: "var(--font-serif)",
                     fontSize: '3.4rem',
                     lineHeight: 0.9,
                     color: a.fort ? C.accent : 'transparent',
@@ -487,7 +487,7 @@ export default function PourquoiPage() {
                   <strong style={{ display: 'block', fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 5 }}>
                     {a.nom}
                     {a.fort && (
-                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.08em', color: C.accent, marginLeft: 8, textTransform: 'uppercase' }}>
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: '0.08em', color: C.accent, marginLeft: 8, textTransform: 'uppercase' }}>
                         · le cœur de futur•e
                       </span>
                     )}
@@ -495,7 +495,7 @@ export default function PourquoiPage() {
                   <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.65, margin: 0 }}>{a.constat}</p>
                 </div>
                 <div className="why-asym-response" style={{ paddingLeft: 16, borderLeft: `1px solid ${C.border}` }}>
-                  <span style={{ display: 'block', fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: C.accent, marginBottom: 5 }}>
+                  <span style={{ display: 'block', fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: C.accent, marginBottom: 5 }}>
                     → La réponse futur•e
                   </span>
                   <p style={{ fontSize: 15, color: C.text, lineHeight: 1.65, margin: 0 }}>{a.reponse}</p>
@@ -519,7 +519,7 @@ export default function PourquoiPage() {
           <div className="why-etats-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, margin: '28px 0' }}>
             {ETATS.map(([nom, desc], i) => (
               <div key={nom} style={{ ...glass({ padding: '15px 17px', borderRadius: 10 }), display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: i === 5 ? C.accent : C.dim, paddingTop: 2 }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: i === 5 ? C.accent : C.dim, paddingTop: 2 }}>
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <div>
@@ -530,7 +530,7 @@ export default function PourquoiPage() {
             ))}
           </div>
           <div style={{ borderLeft: `2px solid rgba(248, 113, 113, 0.25)`, padding: '6px 0 6px 24px', margin: '0 0 24px' }}>
-            <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: '1.3rem', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontFamily: "var(--font-serif)", fontSize: '1.3rem', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
               « Aucun risque confirmé dans les données consultées » n&apos;est pas
               la&nbsp;même chose qu&apos;«&nbsp;aucun&nbsp;risque&nbsp;». Nous refusons
               de&nbsp;confondre les&nbsp;deux.
@@ -551,7 +551,7 @@ export default function PourquoiPage() {
             borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`,
           }}
         >
-          <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: 'clamp(1.2rem, 2.6vw, 1.5rem)', lineHeight: 1.55, margin: 0, width: '100%' }}>
+          <p style={{ fontFamily: "var(--font-serif)", fontSize: 'clamp(1.2rem, 2.6vw, 1.5rem)', lineHeight: 1.55, margin: 0, width: '100%' }}>
             <span style={{ color: C.text }}>Ce que nous savons.</span>{' '}
             <span style={{ color: C.muted }}>Ce que cela change pour&nbsp;vous.</span>{' '}
             <span style={{ color: C.accent, fontStyle: 'italic' }}>Ce qu&apos;il reste à&nbsp;vérifier.</span>
@@ -628,7 +628,7 @@ export default function PourquoiPage() {
         <section style={{ marginTop: 72, paddingTop: 48, borderTop: `1px solid ${C.border}` }}>
           <p
             style={{
-              fontFamily: "'Instrument Serif', serif",
+              fontFamily: "var(--font-serif)",
               fontSize: 'clamp(1.5rem, 3.2vw, 1.95rem)',
               fontStyle: 'italic',
               lineHeight: 1.5,

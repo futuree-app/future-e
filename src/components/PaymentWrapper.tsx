@@ -236,7 +236,7 @@ export function PaymentWrapper({
             colorBackground: "#12172a",
             colorText: "#e9ecf2",
             colorDanger: "#f87171",
-            fontFamily: "Instrument Sans, system-ui, sans-serif",
+            fontFamily: "var(--font-sans)",
             borderRadius: "8px",
           },
         },

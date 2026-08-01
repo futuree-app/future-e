@@ -292,7 +292,7 @@ function InterpretationPanel({
       {/* La reformulation reste TOUJOURS visible (le « il m'a compris ») */}
       <p
         className="mt-3 text-[19px] leading-[1.6] text-label"
-        style={{ fontFamily: "'Instrument Serif', serif" }}
+        style={{ fontFamily: "var(--font-serif)" }}
       >
         {reformulation}
       </p>
@@ -370,7 +370,7 @@ function InterpretationPanel({
                   </span>
                   <span
                     className="flex items-baseline gap-1 pl-1 text-[12.5px] leading-snug text-label/55 italic"
-                    style={{ fontFamily: "'Instrument Serif', serif" }}
+                    style={{ fontFamily: "var(--font-serif)" }}
                   >
                     <span className="not-italic text-accent/50">→</span>
                     reliefs montagneux à proximité
@@ -992,7 +992,7 @@ export function OuVivreClient() {
         </p>
         <h1
           className="font-normal text-[clamp(34px,5vw,56px)] leading-[1.06] tracking-[-1.2px] text-label"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
+          style={{ fontFamily: "var(--font-serif)" }}
         >
           Découvrez où vivre,{" "}
           <span className="italic text-accent">selon ce qui compte pour vous.</span>
@@ -1023,7 +1023,7 @@ export function OuVivreClient() {
           maxLength={2000}
           placeholder={rotatingPlaceholder ? `${typedPlaceholder}${caretOn ? "▌" : " "}` : ""}
           className="w-full resize-none bg-transparent text-[16px] leading-[1.7] text-label placeholder:text-ghost outline-none"
-          style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+          style={{ fontFamily: "var(--font-sans)" }}
         />
         <div className="mt-3 flex items-center justify-between gap-4">
           <span className="font-mono text-[10px] tracking-[0.06em] text-ghost">
@@ -1033,7 +1033,7 @@ export function OuVivreClient() {
             onClick={() => runParse(text)}
             disabled={busy || text.trim().length < 3}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+            style={{ fontFamily: "var(--font-sans)" }}
           >
             {phase === "results" || phase === "empty" ? "Relancer une recherche" : "Explorer mes possibilités"}
             <span aria-hidden>→</span>
@@ -1145,7 +1145,7 @@ export function OuVivreClient() {
             </p>
             <h2
               className="font-normal text-[26px] leading-[1.15] tracking-[-0.4px] text-label mb-2"
-              style={{ fontFamily: "'Instrument Serif', serif" }}
+              style={{ fontFamily: "var(--font-serif)" }}
             >
               Les territoires à regarder.
             </h2>
@@ -1167,7 +1167,7 @@ export function OuVivreClient() {
                   <p className="text-[13px] leading-[1.5] text-accent italic">{r.identite}</p>
                   <h3
                     className="mt-2 font-normal text-[22px] text-label leading-[1.15]"
-                    style={{ fontFamily: "'Instrument Serif', serif" }}
+                    style={{ fontFamily: "var(--font-serif)" }}
                   >
                     {r.nom}
                   </h3>
@@ -1328,7 +1328,7 @@ export function OuVivreClient() {
                 </p>
                 <h3
                   className="font-normal text-[21px] leading-[1.2] text-label"
-                  style={{ fontFamily: "'Instrument Serif', serif" }}
+                  style={{ fontFamily: "var(--font-serif)" }}
                 >
                   Comparer les trois en profondeur.
                 </h3>
@@ -1342,7 +1342,7 @@ export function OuVivreClient() {
               <button
                 onClick={onPackDecision}
                 className="group relative overflow-hidden shrink-0 inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-accent text-canvas font-semibold text-[14px] transition-shadow duration-300 hover:shadow-[0_8px_30px_-6px_var(--orange)]"
-                style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+                style={{ fontFamily: "var(--font-sans)" }}
               >
                 {/* Reflet premium qui balaie au survol */}
                 <span
@@ -1364,7 +1364,7 @@ export function OuVivreClient() {
             </p>
             <h2
               className="font-normal text-[22px] text-label mb-1.5"
-              style={{ fontFamily: "'Instrument Serif', serif" }}
+              style={{ fontFamily: "var(--font-serif)" }}
             >
               Pourquoi ces territoires ressortent ?
             </h2>
@@ -1445,7 +1445,7 @@ export function OuVivreClient() {
                   rows={1}
                   placeholder={askRotating ? `${askTyped}▌` : "Posez votre question sur ces territoires…"}
                   className="flex-1 resize-none bg-[var(--bg-elev)] border border-[var(--border-2)] rounded-lg px-4 py-3 text-[14px] text-label placeholder:text-ghost outline-none focus:border-accent/[0.4]"
-                  style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+                  style={{ fontFamily: "var(--font-sans)" }}
                 />
                 <button
                   onClick={() => sendAsk()}

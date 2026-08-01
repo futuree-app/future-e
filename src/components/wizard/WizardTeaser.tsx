@@ -325,7 +325,7 @@ export function WizardTeaser({
           <>
             <h2
               className="font-semibold text-[clamp(2rem,4.2vw,3.8rem)] leading-[1.04] tracking-[-0.03em] text-label text-balance"
-              style={{ fontFamily: "'Instrument Serif', serif" }}
+              style={{ fontFamily: "var(--font-serif)" }}
             >
               Analyse de{" "}
               <span className="italic text-accent">votre exposition</span>{" "}
@@ -344,7 +344,7 @@ export function WizardTeaser({
         ) : (
           <h2
             className="font-semibold text-[clamp(2rem,4.2vw,3.8rem)] leading-[1.04] tracking-[-0.03em] text-label text-balance"
-            style={{ fontFamily: "'Instrument Serif', serif" }}
+            style={{ fontFamily: "var(--font-serif)" }}
           >
             Votre situation fait déjà ressortir{" "}
             <span className="italic text-accent">
@@ -403,7 +403,7 @@ export function WizardTeaser({
             </p>
             <p
               className="max-w-[42rem] text-[clamp(1.85rem,3.4vw,2.45rem)] font-normal text-label leading-[1.08] tracking-[-0.025em] text-balance"
-              style={{ fontFamily: "'Instrument Serif', serif" }}
+              style={{ fontFamily: "var(--font-serif)" }}
             >
               Découvrez ce que ces points d&apos;attention signifient vraiment pour votre logement, votre santé, votre mobilité et vos projets.
             </p>

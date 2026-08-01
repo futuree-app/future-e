@@ -65,7 +65,7 @@ function Hero({ compact = false }: { compact?: boolean }) {
       <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-3">Comparateur de communes</p>
       <h1
         className="font-normal text-[clamp(28px,4vw,44px)] leading-[1.1] tracking-[-0.8px] text-label max-w-[820px]"
-        style={{ fontFamily: "'Instrument Serif', serif", textWrap: "balance" }}
+        style={{ fontFamily: "var(--font-serif)", textWrap: "balance" }}
       >
         Vous hésitez entre plusieurs communes ?{" "}
         <span className="italic text-accent">Comparez-les,&nbsp;tranchez&nbsp;sans&nbsp;deviner.</span>
@@ -173,7 +173,7 @@ export default async function ComparateurPage({
             <div key={r.insee} className="card-answer rounded-2xl p-5 flex flex-col">
               <div className="flex items-baseline gap-2 mb-3">
                 <span className="font-mono text-[10px] text-accent">{String(i + 1).padStart(2, "0")}</span>
-                <span className="text-[22px] leading-[1.1] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                <span className="text-[22px] leading-[1.1] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                   {r.nom}
                 </span>
               </div>

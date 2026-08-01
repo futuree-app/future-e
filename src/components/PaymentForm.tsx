@@ -92,7 +92,7 @@ export function PaymentForm({ onSuccess, submitLabel, returnUrl, onSubmit }: Pay
             borderRadius: 8,
             background: loading ? "rgba(251,146,60,0.5)" : "#fb923c",
             color: "#060812",
-            fontFamily: "Instrument Sans, system-ui, sans-serif",
+            fontFamily: "var(--font-sans)",
             fontSize: 15,
             fontWeight: 600,
             border: "none",

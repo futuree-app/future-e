@@ -77,7 +77,7 @@ export default async function DossierCheckoutPage({
   return (
     <div
       className="min-h-screen bg-canvas text-label relative overflow-hidden"
-      style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+      style={{ fontFamily: "var(--font-sans)" }}
     >
       <Navbar />
 
@@ -87,7 +87,7 @@ export default async function DossierCheckoutPage({
         </p>
         <h1
           className="font-normal text-[clamp(26px,3vw,40px)] leading-[1.15] tracking-[-0.5px] text-label mb-8"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
+          style={{ fontFamily: "var(--font-serif)" }}
         >
           {canonical.label}
         </h1>

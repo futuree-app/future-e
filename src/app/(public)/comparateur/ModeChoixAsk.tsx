@@ -129,7 +129,7 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
   return (
     <section className="mt-12">
       <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent mb-2">Une question sur ces communes ?</p>
-      <h2 className="font-normal text-[24px] text-label mb-1.5" style={{ fontFamily: "'Instrument Serif', serif" }}>
+      <h2 className="font-normal text-[24px] text-label mb-1.5" style={{ fontFamily: "var(--font-serif)" }}>
         Demandez à futur•e
       </h2>
       <p className={`text-[15.5px] text-muted leading-[1.65] ${remaining > 0 ? "mb-1.5" : "mb-5"}`}>
@@ -201,7 +201,7 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
             rows={1}
             placeholder="Posez votre question sur ces communes…"
             className="flex-1 resize-none bg-[var(--bg-elev)] border border-[var(--border-2)] rounded-lg px-4 py-3 text-[15.5px] text-label placeholder:text-ghost outline-none focus:border-accent/[0.4]"
-            style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+            style={{ fontFamily: "var(--font-sans)" }}
           />
           <button
             onClick={() => sendAsk()}

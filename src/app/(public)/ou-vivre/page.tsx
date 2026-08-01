@@ -20,7 +20,7 @@ export default function OuVivrePage() {
   return (
     <div
       className="min-h-screen bg-canvas text-label relative overflow-hidden"
-      style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+      style={{ fontFamily: "var(--font-sans)" }}
     >
       {/* Retour arrière du navigateur : une navigation "back_forward" vers cette
           page (atteinte via window.location.href côté paywall) re-rend l'UI mais

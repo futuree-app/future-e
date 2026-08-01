@@ -30,7 +30,7 @@ export default async function RapportDossiersPage() {
   return (
     <div
       className="min-h-screen bg-canvas text-label relative overflow-hidden"
-      style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+      style={{ fontFamily: "var(--font-sans)" }}
     >
       <Navbar ctas={{ secondary: { href: "/compte", label: "Mon compte" }, primary: { href: "/rapport", label: "Mon rapport" } }} />
 
@@ -38,7 +38,7 @@ export default async function RapportDossiersPage() {
         <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Vos dossiers</p>
         <h1
           className="font-normal text-[clamp(26px,3vw,40px)] leading-[1.15] tracking-[-0.5px] text-label mb-8"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
+          style={{ fontFamily: "var(--font-serif)" }}
         >
           {dossiers.length === 0
             ? "Aucun bien analysé pour l'instant."

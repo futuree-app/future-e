@@ -51,7 +51,7 @@ export function RouteLoadingBar({
   return (
     <div
       className="min-h-screen bg-canvas"
-      style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+      style={{ fontFamily: "var(--font-sans)" }}
     >
       {/* Barre indéterminée fixée en haut de page */}
       <div
@@ -147,7 +147,7 @@ export function RouteLoadingBar({
         }
 
         .future-loading-matiere {
-          font-family: 'JetBrains Mono', monospace;
+          font-family:var(--font-mono);
           font-size: 12px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -157,7 +157,7 @@ export function RouteLoadingBar({
         }
 
         .future-loading-phrase {
-          font-family: 'Instrument Serif', serif;
+          font-family:var(--font-serif);
           font-size: clamp(19px, 2.4vw, 25px);
           line-height: 1.28;
           letter-spacing: -0.4px;

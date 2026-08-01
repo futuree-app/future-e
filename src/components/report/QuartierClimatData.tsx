@@ -1239,7 +1239,7 @@ export function QuartierSectionTitle({ communeName, scenarios, georisques }: Pic
   return (
     <div>
       <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Synthèse territoriale</p>
-      <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+      <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
         {title}
       </h2>
     </div>
@@ -1259,7 +1259,7 @@ export function QuartierDataBody({ communeName, scenarios, georisques, drought, 
        que le § 7 de DESIGN.md ne reconnaît plus, et il était seul de son espèce sur cet écran, donc
        il ne distinguait rien (§ 6.2). Le bloc reste la surface élevée de son mouvement. */
     <div className="glass rounded-xl p-6 sm:p-8">
-      <h3 className="font-normal text-[26px] text-label mb-3 tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
+      <h3 className="font-normal text-[26px] text-label mb-3 tracking-[-0.3px]" style={{ fontFamily: "var(--font-serif)" }}>
         {communeName}, à l&apos;horizon {meta.year}, scénario France {meta.france}.
       </h3>
       {paragraphs.length > 0 ? (

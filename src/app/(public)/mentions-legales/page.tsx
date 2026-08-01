@@ -52,7 +52,7 @@ export default function MentionsLegalesPage() {
         minHeight: "100vh",
         background: "var(--bg)",
         color: "var(--fg-1)",
-        fontFamily: "'Instrument Sans', system-ui, sans-serif",
+        fontFamily: "var(--font-sans)",
       }}
     >
       {/* Nav minimale, identique à celle de /politique-confidentialite : les deux pages légales
@@ -71,7 +71,7 @@ export default function MentionsLegalesPage() {
         <Link
           href="/"
           style={{
-            fontFamily: "'Instrument Serif', Georgia, serif",
+            fontFamily: "var(--font-serif)",
             fontSize: 22,
             fontStyle: "italic",
             color: "var(--fg-1)",
@@ -83,7 +83,7 @@ export default function MentionsLegalesPage() {
         <Link
           href="/"
           style={{
-            fontFamily: "var(--font-mono, monospace)",
+            fontFamily: "var(--font-mono)",
             fontSize: 11,
             letterSpacing: "0.08em",
             textTransform: "uppercase",
@@ -100,7 +100,7 @@ export default function MentionsLegalesPage() {
         <div style={{ marginBottom: 56 }}>
           <p
             style={{
-              fontFamily: "var(--font-mono, monospace)",
+              fontFamily: "var(--font-mono)",
               fontSize: 11,
               letterSpacing: "0.12em",
               textTransform: "uppercase",
@@ -112,7 +112,7 @@ export default function MentionsLegalesPage() {
           </p>
           <h1
             style={{
-              fontFamily: "'Instrument Serif', Georgia, serif",
+              fontFamily: "var(--font-serif)",
               fontSize: "clamp(32px, 5vw, 48px)",
               fontWeight: 400,
               lineHeight: 1.1,
@@ -225,7 +225,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     <section>
       <h2
         style={{
-          fontFamily: "'Instrument Serif', Georgia, serif",
+          fontFamily: "var(--font-serif)",
           fontSize: 22,
           fontWeight: 400,
           letterSpacing: "-0.2px",
@@ -270,7 +270,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
         fontSize: 14,
       }}
     >
-      <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fg-3)", paddingTop: 2 }}>{label}</span>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fg-3)", paddingTop: 2 }}>{label}</span>
       <span style={{ color: "var(--fg-1)" }}>{value}</span>
     </div>
   );

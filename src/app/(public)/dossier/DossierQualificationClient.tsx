@@ -251,7 +251,7 @@ export function DossierQualificationClient() {
               <div>
                 <p
                   className="text-[26px] text-label leading-none mb-2"
-                  style={{ fontFamily: "'Instrument Serif', serif" }}
+                  style={{ fontFamily: "var(--font-serif)" }}
                 >
                   {EUR(outcome.quote.amountDueCents)}
                 </p>

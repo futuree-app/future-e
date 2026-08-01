@@ -107,7 +107,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
           <Link
             href="/"
             style={{
-              fontFamily: "'Instrument Serif', serif",
+              fontFamily: "var(--font-serif)",
               fontSize: 22,
               fontStyle: 'italic',
               color: C.text,
@@ -148,7 +148,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                       }}
                       className="nb-link"
                       style={{
-                        fontFamily: "'JetBrains Mono', monospace",
+                        fontFamily: "var(--font-mono)",
                         fontSize: 11,
                         letterSpacing: '0.08em',
                         textTransform: 'uppercase',
@@ -217,7 +217,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                             {/* Group header */}
                             <div
                               style={{
-                                fontFamily: "'JetBrains Mono', monospace",
+                                fontFamily: "var(--font-mono)",
                                 fontSize: 9,
                                 letterSpacing: '0.14em',
                                 textTransform: 'uppercase',
@@ -258,7 +258,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                                     style={{
                                       fontSize: 13,
                                       color: C.text,
-                                      fontFamily: "'Instrument Sans', sans-serif",
+                                      fontFamily: "var(--font-sans)",
                                       fontWeight: 500,
                                     }}
                                   >
@@ -267,7 +267,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                                   {link.badge && (
                                     <span
                                       style={{
-                                        fontFamily: "'JetBrains Mono', monospace",
+                                        fontFamily: "var(--font-mono)",
                                         fontSize: 9,
                                         letterSpacing: '0.1em',
                                         textTransform: 'uppercase',
@@ -286,7 +286,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                                     style={{
                                       fontSize: 11,
                                       color: C.dim,
-                                      fontFamily: "'JetBrains Mono', monospace",
+                                      fontFamily: "var(--font-mono)",
                                       lineHeight: 1.5,
                                     }}
                                   >
@@ -310,7 +310,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                   href={item.href}
                   className="nb-link"
                   style={{
-                    fontFamily: "'JetBrains Mono', monospace",
+                    fontFamily: "var(--font-mono)",
                     fontSize: 11,
                     letterSpacing: '0.08em',
                     textTransform: 'uppercase',
@@ -340,7 +340,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                   border: `1px solid ${C.border}`,
                   color: C.text,
                   textDecoration: 'none',
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: "var(--font-mono)",
                   fontSize: 11,
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase',
@@ -356,7 +356,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                   borderRadius: 6,
                   background: C.orange,
                   color: C.bg,
-                  fontFamily: "'Instrument Sans', sans-serif",
+                  fontFamily: "var(--font-sans)",
                   fontWeight: 600,
                   fontSize: 13,
                   textDecoration: 'none',
@@ -429,7 +429,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                           border: 'none',
                           cursor: 'pointer',
                           color: C.text,
-                          fontFamily: "'JetBrains Mono', monospace",
+                          fontFamily: "var(--font-mono)",
                           fontSize: 12,
                           letterSpacing: '0.1em',
                           textTransform: 'uppercase',
@@ -456,7 +456,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                             <div key={group.groupLabel} style={{ marginBottom: 16 }}>
                               <div
                                 style={{
-                                  fontFamily: "'JetBrains Mono', monospace",
+                                  fontFamily: "var(--font-mono)",
                                   fontSize: 9,
                                   letterSpacing: '0.14em',
                                   textTransform: 'uppercase',
@@ -478,7 +478,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                                     padding: '9px 4px',
                                     color: link.badge ? C.dim : C.muted,
                                     textDecoration: 'none',
-                                    fontFamily: "'Instrument Sans', sans-serif",
+                                    fontFamily: "var(--font-sans)",
                                     fontSize: 14,
                                     pointerEvents: link.badge ? 'none' : 'auto',
                                     alignItems: 'center',
@@ -490,7 +490,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                                   {link.badge && (
                                     <span
                                       style={{
-                                        fontFamily: "'JetBrains Mono', monospace",
+                                        fontFamily: "var(--font-mono)",
                                         fontSize: 9,
                                         letterSpacing: '0.1em',
                                         textTransform: 'uppercase',
@@ -525,7 +525,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                       borderBottom: `1px solid ${C.border}`,
                       color: C.muted,
                       textDecoration: 'none',
-                      fontFamily: "'JetBrains Mono', monospace",
+                      fontFamily: "var(--font-mono)",
                       fontSize: 12,
                       letterSpacing: '0.1em',
                       textTransform: 'uppercase',
@@ -550,7 +550,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                     borderRadius: 8,
                     color: C.text,
                     textDecoration: 'none',
-                    fontFamily: "'JetBrains Mono', monospace",
+                    fontFamily: "var(--font-mono)",
                     fontSize: 11,
                     letterSpacing: '0.08em',
                     textTransform: 'uppercase',
@@ -569,7 +569,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                     borderRadius: 8,
                     color: C.bg,
                     textDecoration: 'none',
-                    fontFamily: "'Instrument Sans', sans-serif",
+                    fontFamily: "var(--font-sans)",
                     fontWeight: 600,
                     fontSize: 14,
                   }}

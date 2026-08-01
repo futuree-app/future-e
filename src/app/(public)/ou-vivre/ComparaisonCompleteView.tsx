@@ -102,7 +102,7 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
         <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-3">Comparaison complète</p>
         <h2
           className="font-normal text-[clamp(26px,3.6vw,38px)] leading-[1.12] tracking-[-0.6px] text-label max-w-[760px]"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
+          style={{ fontFamily: "var(--font-serif)" }}
         >
           Vous les avez retenus tous les {trio.length >= 3 ? "trois" : "deux"}.{" "}
           <span className="italic text-accent">Voici, critère par critère, ce qui penche et ce qui se vaut.</span>
@@ -134,7 +134,7 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
               <ThemeIcon id={th.id} />
               <h3
                 className="font-normal text-[23px] leading-[1.1] text-label"
-                style={{ fontFamily: "'Instrument Serif', serif" }}
+                style={{ fontFamily: "var(--font-serif)" }}
               >
                 {th.titre}
               </h3>

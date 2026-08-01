@@ -101,7 +101,7 @@ export async function LocalTensionContext({
       <div style={{ marginBottom: '28px' }}>
         <div
           style={{
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: "var(--font-mono)",
             fontSize: '11px',
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
@@ -113,7 +113,7 @@ export async function LocalTensionContext({
         </div>
         <h2
           style={{
-            fontFamily: "'Instrument Serif', serif",
+            fontFamily: "var(--font-serif)",
             fontSize: 'clamp(22px, 2.5vw, 30px)',
             fontWeight: 400,
             color: 'var(--fg-1)',
@@ -129,7 +129,7 @@ export async function LocalTensionContext({
             margin: 0,
             fontSize: '14px',
             color: '#6b7388',
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: "var(--font-mono)",
           }}
         >
           Score de tension calculé sur 4 indicateurs · mise à jour quotidienne
@@ -150,7 +150,7 @@ export async function LocalTensionContext({
         <span />
         <span
           style={{
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: "var(--font-mono)",
             fontSize: '10px',
             letterSpacing: '0.1em',
             textTransform: 'uppercase',
@@ -163,7 +163,7 @@ export async function LocalTensionContext({
           <span
             key={ind.key}
             style={{
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "var(--font-mono)",
               fontSize: '10px',
               letterSpacing: '0.06em',
               textTransform: 'uppercase',
@@ -202,7 +202,7 @@ export async function LocalTensionContext({
               {/* Rank */}
               <span
                 style={{
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: "var(--font-mono)",
                   fontSize: '12px',
                   color: isPodium ? accent : '#4a5468',
                   fontWeight: isPodium ? 600 : 400,
@@ -228,7 +228,7 @@ export async function LocalTensionContext({
                   style={{
                     color: '#6b7388',
                     fontSize: '11px',
-                    fontFamily: "'JetBrains Mono', monospace",
+                    fontFamily: "var(--font-mono)",
                     marginTop: '2px',
                   }}
                 >
@@ -271,7 +271,7 @@ export async function LocalTensionContext({
                         </div>
                         <span
                           style={{
-                            fontFamily: "'JetBrains Mono', monospace",
+                            fontFamily: "var(--font-mono)",
                             fontSize: '11px',
                             color: '#9ba3b4',
                           }}
@@ -305,7 +305,7 @@ export async function LocalTensionContext({
       >
         <span
           style={{
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: "var(--font-mono)",
             fontSize: '11px',
             color: '#4a5468',
             letterSpacing: '0.06em',
@@ -315,7 +315,7 @@ export async function LocalTensionContext({
         </span>
         <span
           style={{
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: "var(--font-mono)",
             fontSize: '11px',
             color: '#4a5468',
           }}

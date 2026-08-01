@@ -12,7 +12,7 @@ const ACCENT = '#c8b89a';
 
 const css = `
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:#060812;color:var(--fg-1);font-family:'Instrument Sans',system-ui,sans-serif;font-size:16px;line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+  html,body{margin:0;padding:0;background:#060812;color:var(--fg-1);font-family:var(--font-sans);font-size:16px;line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
   .orb{position:fixed;border-radius:50%;filter:blur(120px);opacity:0.25;pointer-events:none;z-index:0;animation:breathe 16s ease-in-out infinite;will-change:opacity;}
   /* « breathe » via opacité uniquement : sur une couche floue (blur 120px),
      animer transform forçait une re-rastérisation du flou à chaque frame (la
@@ -23,18 +23,18 @@ const css = `
 
   .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(6,8,18,0.72);border-bottom:1px solid rgba(255,255,255,0.08);}
   .nav-inner{max-width:1100px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px;}
-  .nav-link{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#9ba3b4;text-decoration:none;transition:color 0.2s;}
+  .nav-link{font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#9ba3b4;text-decoration:none;transition:color 0.2s;}
   .nav-link:hover{color:${ACCENT};}
-  .nav-cta{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-1);padding:8px 16px;border:1px solid var(--border-2);border-radius:6px;text-decoration:none;transition:all 0.2s;}
+  .nav-cta{font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-1);padding:8px 16px;border:1px solid var(--border-2);border-radius:6px;text-decoration:none;transition:all 0.2s;}
   .nav-cta:hover{border-color:${ACCENT};color:${ACCENT};}
 
   .hero{padding:120px 28px 80px;text-align:center;max-width:900px;margin:0 auto;}
-  .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(200,184,154,0.12);border:1px solid rgba(200,184,154,0.28);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:${ACCENT};margin-bottom:32px;}
+  .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(200,184,154,0.12);border:1px solid rgba(200,184,154,0.28);font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:${ACCENT};margin-bottom:32px;}
   .hero-badge-dot{width:6px;height:6px;border-radius:50%;background:${ACCENT};box-shadow:0 0 10px ${ACCENT};animation:pulse 2.5s ease-in-out infinite;}
   @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
 
   .section-wrap{max-width:1100px;margin:0 auto;padding:0 28px;}
-  .section-kicker{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:${ACCENT};margin-bottom:16px;}
+  .section-kicker{font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:${ACCENT};margin-bottom:16px;}
 
   .profession-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:48px;}
   .profession-card{padding:36px 32px;background:var(--bg-elev);border:1px solid var(--border-1);border-radius:8px;cursor:pointer;transition:all 0.3s ease;position:relative;overflow:hidden;}
@@ -139,7 +139,7 @@ export default function ProfessionnelsPage() {
 
       <nav className="nav">
         <div className="nav-inner">
-          <Link href="/" style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, fontStyle: 'italic', color: 'var(--fg-1)', textDecoration: 'none', letterSpacing: '-0.01em' }}>
+          <Link href="/" style={{ fontFamily: "var(--font-serif)", fontSize: 22, fontStyle: 'italic', color: 'var(--fg-1)', textDecoration: 'none', letterSpacing: '-0.01em' }}>
             futur<span style={{ color: ACCENT, fontStyle: 'normal' }}>•</span>e
           </Link>
           <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
@@ -158,7 +158,7 @@ export default function ProfessionnelsPage() {
             <span className="hero-badge-dot" />
             Avant-première · Lancement automne 2026
           </div>
-          <h1 style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontSize: 'clamp(40px,6vw,72px)', lineHeight: 1.05, letterSpacing: '-0.025em', margin: '0 0 28px', color: 'var(--fg-1)' }}>
+          <h1 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 'clamp(40px,6vw,72px)', lineHeight: 1.05, letterSpacing: '-0.025em', margin: '0 0 28px', color: 'var(--fg-1)' }}>
             L'outil de lecture<br />territoriale<br />
             <em style={{ fontStyle: 'italic', color: ACCENT }}>pour vos rendez-vous client.</em>
           </h1>
@@ -172,10 +172,10 @@ export default function ProfessionnelsPage() {
 
         {/* ── TENSION ──────────────────────────────────────────────────── */}
         <div style={{ padding: '80px 28px', maxWidth: 760, margin: '0 auto' }}>
-          <blockquote style={{ fontFamily: "'Instrument Serif', serif", fontSize: 'clamp(22px,2.6vw,30px)', lineHeight: 1.45, color: 'var(--fg-1)', fontStyle: 'italic', margin: '0 0 24px', paddingLeft: 24, borderLeft: `2px solid ${ACCENT}` }}>
+          <blockquote style={{ fontFamily: "var(--font-serif)", fontSize: 'clamp(22px,2.6vw,30px)', lineHeight: 1.45, color: 'var(--fg-1)', fontStyle: 'italic', margin: '0 0 24px', paddingLeft: 24, borderLeft: `2px solid ${ACCENT}` }}>
             « Nos clients nous posent des questions sur le risque climatique de leurs actifs immobiliers. Mais nous n'avons pas les outils pour leur répondre rapidement et sérieusement. »
           </blockquote>
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#6b7388', marginLeft: 24, marginBottom: 48 }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#6b7388', marginLeft: 24, marginBottom: 48 }}>
             Un constat partagé par de nombreux professionnels
           </p>
           <div style={{ fontSize: 17, lineHeight: 1.75, color: '#9ba3b4' }}>
@@ -195,7 +195,7 @@ export default function ProfessionnelsPage() {
         <div style={{ padding: '80px 28px' }}>
           <div className="section-wrap">
             <div className="section-kicker">Quatre professions, quatre angles</div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontSize: 'clamp(30px,4vw,46px)', lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--fg-1)', margin: '0 0 24px' }}>
+            <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 'clamp(30px,4vw,46px)', lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--fg-1)', margin: '0 0 24px' }}>
               Pas le même besoin,<br />
               <em style={{ fontStyle: 'italic', color: ACCENT }}>pas le même livrable.</em>
             </h2>
@@ -208,10 +208,10 @@ export default function ProfessionnelsPage() {
                   <div style={{ width: 42, height: 42, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, fontSize: 20, background: p.iconBg }}>
                     {p.icon}
                   </div>
-                  <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#6b7388', marginBottom: 14 }}>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#6b7388', marginBottom: 14 }}>
                     {p.tag}
                   </div>
-                  <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 24, fontWeight: 400, color: 'var(--fg-1)', margin: '0 0 10px', letterSpacing: '-0.01em' }}>
+                  <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 24, fontWeight: 400, color: 'var(--fg-1)', margin: '0 0 10px', letterSpacing: '-0.01em' }}>
                     {p.title}
                   </h3>
                   <p style={{ fontSize: 15, lineHeight: 1.7, color: '#c5cad6', margin: '0 0 20px' }}>
@@ -225,7 +225,7 @@ export default function ProfessionnelsPage() {
                       </li>
                     ))}
                   </ul>
-                  <a href="#inscription" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: ACCENT, textDecoration: 'none' }}>
+                  <a href="#inscription" style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: ACCENT, textDecoration: 'none' }}>
                     Voir le détail →
                   </a>
                 </div>
@@ -238,7 +238,7 @@ export default function ProfessionnelsPage() {
         <div style={{ padding: '96px 28px' }}>
           <div className="section-wrap">
             <div className="section-kicker">Pourquoi maintenant</div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontSize: 'clamp(30px,4vw,46px)', lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--fg-1)', margin: '0 0 24px' }}>
+            <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 'clamp(30px,4vw,46px)', lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--fg-1)', margin: '0 0 24px' }}>
               Le sujet entre<br />
               <em style={{ fontStyle: 'italic', color: ACCENT }}>dans vos rendez-vous.</em>
             </h2>
@@ -252,10 +252,10 @@ export default function ProfessionnelsPage() {
                 { num: '10 s', title: 'Pour une lecture complète', desc: "De la saisie du nom de commune à l'affichage des sept thèmes sourcés, prêts à être montrés à votre client ou exportés en PDF.", src: 'Mesuré en conditions réelles' },
               ].map((w) => (
                 <div key={w.num} className="why-card">
-                  <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 46, lineHeight: 1, color: ACCENT, marginBottom: 14, fontWeight: 400, letterSpacing: '-0.02em' }}>{w.num}</div>
+                  <div style={{ fontFamily: "var(--font-serif)", fontSize: 46, lineHeight: 1, color: ACCENT, marginBottom: 14, fontWeight: 400, letterSpacing: '-0.02em' }}>{w.num}</div>
                   <div style={{ fontWeight: 500, fontSize: 15, color: 'var(--fg-1)', marginBottom: 10 }}>{w.title}</div>
                   <p style={{ fontSize: 13, color: '#9ba3b4', lineHeight: 1.6, margin: 0 }}>{w.desc}</p>
-                  <span style={{ display: 'block', marginTop: 10, fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: '#6b7388', letterSpacing: '0.06em' }}>Source : {w.src}</span>
+                  <span style={{ display: 'block', marginTop: 10, fontFamily: "var(--font-mono)", fontSize: 10, color: '#6b7388', letterSpacing: '0.06em' }}>Source : {w.src}</span>
                 </div>
               ))}
             </div>
@@ -266,12 +266,12 @@ export default function ProfessionnelsPage() {
         <div style={{ padding: '96px 28px', maxWidth: 980, margin: '0 auto' }}>
           <div className="scene-inner">
             <div className="section-kicker">Un rendez-vous client</div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 'clamp(26px,3.4vw,38px)', lineHeight: 1.2, fontWeight: 400, letterSpacing: '-0.015em', margin: '0 0 32px', color: 'var(--fg-1)' }}>
+            <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 'clamp(26px,3.4vw,38px)', lineHeight: 1.2, fontWeight: 400, letterSpacing: '-0.015em', margin: '0 0 32px', color: 'var(--fg-1)' }}>
               Avant futur•e, et <em style={{ fontStyle: 'italic', color: ACCENT }}>après.</em>
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 36, position: 'relative', zIndex: 1 }}>
               <div>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#6b7388', marginBottom: 14 }}>Avant, sans futur•e</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#6b7388', marginBottom: 14 }}>Avant, sans futur•e</div>
                 {[
                   { time: 'Min 02', text: <><strong style={{ color: 'var(--fg-1)', fontWeight: 500 }}>Le client demande</strong> si le bien qu'il envisage à Saint-Jean-de-Luz sera encore assurable dans 20 ans.</> },
                   { time: 'Min 03', text: <>Vous évoquez la submersion, le retrait du trait de côte, « ça dépend des zones »… Sans chiffre précis.</> },
@@ -279,13 +279,13 @@ export default function ProfessionnelsPage() {
                   { time: 'J + 7', text: <>Le client revient avec des informations contradictoires lues en ligne. Vous passez 30 minutes à les démêler.</> },
                 ].map((s) => (
                   <div key={s.time} className="scene-step">
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: ACCENT, letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>{s.time}</span>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: ACCENT, letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>{s.time}</span>
                     {s.text}
                   </div>
                 ))}
               </div>
               <div>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#6b7388', marginBottom: 14 }}>Avec futur•e</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#6b7388', marginBottom: 14 }}>Avec futur•e</div>
                 {[
                   { time: 'Min 02', text: <><strong style={{ color: 'var(--fg-1)', fontWeight: 500 }}>Le client pose la même question.</strong></> },
                   { time: 'Min 02 + 10s', text: <>Vous tapez « Saint-Jean-de-Luz » dans futur•e. La fiche s'affiche : submersion, qualité air, vulnérabilité économique, projection 2050. Sources citées.</> },
@@ -293,7 +293,7 @@ export default function ProfessionnelsPage() {
                   { time: 'Min 10', text: <>Vous exportez le PDF. <strong style={{ color: 'var(--fg-1)', fontWeight: 500 }}>Vous avez une trace.</strong> Le client a une référence.</> },
                 ].map((s) => (
                   <div key={s.time} className="scene-step">
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: ACCENT, letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>{s.time}</span>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: ACCENT, letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>{s.time}</span>
                     {s.text}
                   </div>
                 ))}
@@ -305,7 +305,7 @@ export default function ProfessionnelsPage() {
         {/* ── PRINCIPES ────────────────────────────────────────────────── */}
         <div style={{ padding: '96px 28px', maxWidth: 760, margin: '0 auto' }}>
           <div className="section-kicker">Trois principes éditoriaux</div>
-          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontSize: 'clamp(30px,4vw,46px)', lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--fg-1)', margin: '0 0 48px' }}>
+          <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 'clamp(30px,4vw,46px)', lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--fg-1)', margin: '0 0 48px' }}>
             Ce qui rend cet outil<br />
             <em style={{ fontStyle: 'italic', color: ACCENT }}>professionnellement utilisable.</em>
           </h2>
@@ -327,9 +327,9 @@ export default function ProfessionnelsPage() {
             },
           ].map((p) => (
             <div key={p.num} className="principle">
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 60, lineHeight: 1, color: ACCENT, fontWeight: 400, letterSpacing: '-0.04em' }}>{p.num}</div>
+              <div style={{ fontFamily: "var(--font-serif)", fontSize: 60, lineHeight: 1, color: ACCENT, fontWeight: 400, letterSpacing: '-0.04em' }}>{p.num}</div>
               <div>
-                <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, fontWeight: 400, color: 'var(--fg-1)', margin: '6px 0 12px', letterSpacing: '-0.01em', fontStyle: 'italic' }}>{p.title}</h3>
+                <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 22, fontWeight: 400, color: 'var(--fg-1)', margin: '6px 0 12px', letterSpacing: '-0.01em', fontStyle: 'italic' }}>{p.title}</h3>
                 {p.body}
               </div>
             </div>
@@ -340,7 +340,7 @@ export default function ProfessionnelsPage() {
         <div id="inscription" style={{ padding: '96px 28px 120px', maxWidth: 680, margin: '0 auto' }}>
           <div className="form-card">
             <div className="section-kicker">Avant-première professionnelle</div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 'clamp(28px,3.6vw,40px)', lineHeight: 1.15, fontWeight: 400, letterSpacing: '-0.015em', margin: '0 0 16px', color: 'var(--fg-1)' }}>
+            <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 'clamp(28px,3.6vw,40px)', lineHeight: 1.15, fontWeight: 400, letterSpacing: '-0.015em', margin: '0 0 16px', color: 'var(--fg-1)' }}>
               Recevez l'accès<br />
               <em style={{ fontStyle: 'italic', color: ACCENT }}>en avant-première.</em>
             </h2>
@@ -355,10 +355,10 @@ export default function ProfessionnelsPage() {
 
       <footer style={{ borderTop: '1px solid var(--border-1)', padding: '36px 28px', position: 'relative', zIndex: 2 }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
-          <Link href="/" style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, fontStyle: 'italic', color: 'var(--fg-1)', textDecoration: 'none' }}>
+          <Link href="/" style={{ fontFamily: "var(--font-serif)", fontSize: 22, fontStyle: 'italic', color: 'var(--fg-1)', textDecoration: 'none' }}>
             futur<span style={{ color: ACCENT, fontStyle: 'normal' }}>•</span>e
           </Link>
-          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#6b7388', letterSpacing: '0.06em', textTransform: 'uppercase', lineHeight: 1.7 }}>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: '#6b7388', letterSpacing: '0.06em', textTransform: 'uppercase', lineHeight: 1.7 }}>
             Données publiques françaises · Aucune publicité<br />
             futur•e Pro · Avant-première professionnelle
           </div>

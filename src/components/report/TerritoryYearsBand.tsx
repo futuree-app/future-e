@@ -133,7 +133,7 @@ export function TerritoryYearsBand({
       {/* En-tête : la bande n'a ni cadre ni nom, elle doit être annoncée. */}
       <h2
         className="font-normal italic text-[clamp(22px,2vw,28px)] leading-[1.25] tracking-[-0.3px] text-label mb-2"
-        style={{ fontFamily: "'Instrument Serif', serif" }}
+        style={{ fontFamily: "var(--font-serif)" }}
       >
         La mémoire du lieu
       </h2>
@@ -165,7 +165,7 @@ export function TerritoryYearsBand({
                   <text
                     x={x}
                     y={H * 0.5}
-                    fontFamily="'JetBrains Mono', monospace"
+                    fontFamily="var(--font-mono)"
                     fontSize={15}
                     fontWeight={500}
                     fill={FAMILIES[family].color}
@@ -192,7 +192,7 @@ export function TerritoryYearsBand({
           <text
             x={PADX}
             y={H * 0.88}
-            fontFamily="'JetBrains Mono', monospace"
+            fontFamily="var(--font-mono)"
             fontSize={9}
             letterSpacing="1.5"
             fill="#6b7388"
@@ -202,7 +202,7 @@ export function TerritoryYearsBand({
           <text
             x={W - PADX - 10}
             y={H * 0.88}
-            fontFamily="'JetBrains Mono', monospace"
+            fontFamily="var(--font-mono)"
             fontSize={9}
             letterSpacing="1.5"
             fill="#6b7388"

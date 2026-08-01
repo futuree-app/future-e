@@ -41,7 +41,7 @@ export function ProForm() {
     background: 'var(--bg-elev-2)',
     border: '1px solid var(--border-2)',
     color: 'var(--fg-1)',
-    fontFamily: "'Instrument Sans', system-ui, sans-serif",
+    fontFamily: "var(--font-sans)",
     fontSize: 15,
     outline: 'none',
     borderRadius: 6,
@@ -50,7 +50,7 @@ export function ProForm() {
 
   const labelStyle: React.CSSProperties = {
     display: 'block',
-    fontFamily: "'JetBrains Mono', monospace",
+    fontFamily: "var(--font-mono)",
     fontSize: 10,
     letterSpacing: '0.1em',
     textTransform: 'uppercase',
@@ -61,10 +61,10 @@ export function ProForm() {
   if (status === 'done') {
     return (
       <div style={{ padding: '40px 0', textAlign: 'center' }}>
-        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: GREEN, marginBottom: 16 }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: GREEN, marginBottom: 16 }}>
           Inscription enregistrée
         </div>
-        <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--fg-1)', fontStyle: 'italic', margin: '0 0 12px' }}>
+        <p style={{ fontFamily: "var(--font-serif)", fontSize: 22, color: 'var(--fg-1)', fontStyle: 'italic', margin: '0 0 12px' }}>
           Vous serez contacté en avant-première.
         </p>
         <p style={{ fontSize: 14, color: '#9ba3b4', margin: 0 }}>
@@ -129,7 +129,7 @@ export function ProForm() {
       </div>
 
       {status === 'error' && (
-        <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: '#f87171', marginBottom: 12 }}>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: '#f87171', marginBottom: 12 }}>
           Une erreur est survenue. Réessayez ou écrivez-nous directement.
         </p>
       )}
@@ -143,7 +143,7 @@ export function ProForm() {
           background: status === 'loading' ? 'rgba(200,184,154,0.5)' : ACCENT,
           border: 'none',
           color: '#060812',
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: "var(--font-mono)",
           fontSize: 12,
           letterSpacing: '0.12em',
           textTransform: 'uppercase',
@@ -159,7 +159,7 @@ export function ProForm() {
         {status === 'loading' ? 'Envoi…' : "Recevoir l'accès en avant-première"}
       </button>
 
-      <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.06em', color: '#6b7388', marginTop: 16, textAlign: 'center', lineHeight: 1.6 }}>
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: '0.06em', color: '#6b7388', marginTop: 16, textAlign: 'center', lineHeight: 1.6 }}>
         Inscription sans engagement · Aucun spam · Vous serez contacté à l'ouverture de votre segment<br />
         Données traitées selon le RGPD · futur•e ne revend jamais ses listes
       </p>

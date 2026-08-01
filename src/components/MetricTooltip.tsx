@@ -75,7 +75,7 @@ export function MetricTooltip({ text, accent }: { text: string; accent?: string 
           background: var(--bg-elev-2);
           border: 1px solid var(--border-hi);
           color: #9ba3b4; padding: 0;
-          font-family: 'JetBrains Mono', monospace;
+          font-family:var(--font-mono);
           transition: background 0.15s, color 0.15s, border-color 0.15s;
         }
         .metric-tip-btn:hover { background: var(--bg-elev-3); color: #e9ecf2; }
@@ -86,7 +86,7 @@ export function MetricTooltip({ text, accent }: { text: string; accent?: string 
           background: #0b101c; color: #c6cfdb;
           border: 1px solid var(--border-2);
           border-radius: 10px; padding: 10px 12px;
-          font-family: 'Instrument Sans', sans-serif;
+          font-family:var(--font-sans);
           font-size: 12.5px; line-height: 1.5; font-weight: 400;
           letter-spacing: normal; text-transform: none;
           box-shadow: 0 12px 32px rgba(0,0,0,0.5);

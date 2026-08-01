@@ -48,7 +48,7 @@ function CtaCard({
     >
       <div
         style={{
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: "var(--font-mono)",
           fontSize: '11px',
           letterSpacing: '0.12em',
           textTransform: 'uppercase',
@@ -60,7 +60,7 @@ function CtaCard({
       </div>
       <p
         style={{
-          fontFamily: "'Instrument Serif', serif",
+          fontFamily: "var(--font-serif)",
           fontSize: '22px',
           lineHeight: 1.4,
           color: 'var(--fg-1)',
@@ -86,7 +86,7 @@ function CtaCard({
             padding: '14px 28px',
             background: accent,
             color: '#060812',
-            fontFamily: "'Instrument Sans', system-ui, sans-serif",
+            fontFamily: "var(--font-sans)",
             fontSize: '15px',
             fontWeight: 600,
             textDecoration: 'none',

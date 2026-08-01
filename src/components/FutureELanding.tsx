@@ -1591,7 +1591,7 @@ export default function FutureELanding() {
 
   const styles = {
     root: {
-      fontFamily: "'Instrument Sans', system-ui, sans-serif",
+      fontFamily: "var(--font-sans)",
       background: C.bg,
       color: C.text,
       minHeight: '100vh',
@@ -1658,7 +1658,7 @@ export default function FutureELanding() {
       gap: 24,
     },
     brand: {
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: "var(--font-serif)",
       fontSize: 22,
       fontStyle: 'italic',
       color: C.text,
@@ -1671,7 +1671,7 @@ export default function FutureELanding() {
     brandDot: { color: C.orange, fontStyle: 'normal' },
     navLinks: { display: 'flex', alignItems: 'center', gap: 32 },
     navLink: {
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       fontSize: 11,
       letterSpacing: '0.08em',
       textTransform: 'uppercase',
@@ -1690,7 +1690,7 @@ export default function FutureELanding() {
       border: `1px solid ${C.border}`,
       color: C.text,
       textDecoration: 'none',
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       fontSize: 11,
       letterSpacing: '0.08em',
       textTransform: 'uppercase',
@@ -1701,7 +1701,7 @@ export default function FutureELanding() {
       borderRadius: 6,
       background: C.orange,
       color: C.bg,
-      fontFamily: "'Instrument Sans', sans-serif",
+      fontFamily: "var(--font-sans)",
       fontWeight: 600,
       fontSize: 13,
       border: 'none',
@@ -1721,7 +1721,7 @@ export default function FutureELanding() {
     },
     heroLeft: {},
     eyebrow: {
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       fontSize: 11,
       letterSpacing: '0.12em',
       textTransform: 'uppercase',
@@ -1740,7 +1740,7 @@ export default function FutureELanding() {
       display: 'inline-block',
     },
     h1: {
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: "var(--font-serif)",
       fontWeight: 400,
       fontSize: 'clamp(42px,5vw,68px)',
       lineHeight: 1.06,
@@ -1770,7 +1770,7 @@ export default function FutureELanding() {
       borderRadius: 10,
       background: C.orange,
       color: C.bg,
-      fontFamily: "'Instrument Sans', sans-serif",
+      fontFamily: "var(--font-sans)",
       fontWeight: 600,
       fontSize: 15,
       textDecoration: 'none',
@@ -1784,7 +1784,7 @@ export default function FutureELanding() {
       background: 'var(--bg-elev)',
       border: `1px solid ${C.border}`,
       color: C.text,
-      fontFamily: "'Instrument Sans', sans-serif",
+      fontFamily: "var(--font-sans)",
       fontWeight: 600,
       fontSize: 15,
       cursor: 'pointer',
@@ -1798,7 +1798,7 @@ export default function FutureELanding() {
       border: `1px solid ${C.border}`,
       color: C.text,
       fontSize: 16,
-      fontFamily: "'Instrument Sans', sans-serif",
+      fontFamily: "var(--font-sans)",
       outline: 'none',
       boxSizing: 'border-box',
       transition: 'border-color 0.2s, background 0.2s',
@@ -1816,7 +1816,7 @@ export default function FutureELanding() {
       marginTop: 12,
       fontSize: 13,
       color: C.dim,
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       letterSpacing: '0.04em',
     },
     suggestionsPanel: {
@@ -1847,7 +1847,7 @@ export default function FutureELanding() {
     suggestionMeta: {
       fontSize: 12,
       color: C.dim,
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       letterSpacing: '0.04em',
     },
     helperText: {
@@ -1886,7 +1886,7 @@ export default function FutureELanding() {
       border: `1px solid ${col}30`,
       fontSize: 11,
       color: col,
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       marginTop: 6,
     }),
     sourcesBar: {
@@ -1905,7 +1905,7 @@ export default function FutureELanding() {
       animation: 'scroll-x 25s linear infinite',
     },
     sourceItem: {
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       fontSize: 11,
       color: C.dim,
       letterSpacing: '0.06em',
@@ -1920,7 +1920,7 @@ export default function FutureELanding() {
       padding: '80px 28px',
     },
     sectionLabel: {
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       fontSize: 11,
       letterSpacing: '0.12em',
       textTransform: 'uppercase',
@@ -1928,7 +1928,7 @@ export default function FutureELanding() {
       marginBottom: 8,
     },
     sectionTitle: {
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: "var(--font-serif)",
       fontWeight: 400,
       fontSize: 'clamp(28px,3.5vw,40px)',
       lineHeight: 1.15,
@@ -1950,7 +1950,7 @@ export default function FutureELanding() {
       borderRadius: 100,
       background: 'var(--orange-tint)',
       border: '1px solid var(--orange-ring)',
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       fontSize: 12,
       color: C.orange,
       marginBottom: 12,
@@ -1987,7 +1987,7 @@ export default function FutureELanding() {
       pointerEvents: disabled ? 'none' : 'auto',
     }),
     tensionLabel: {
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: "var(--font-serif)",
       fontStyle: 'italic',
       fontSize: 17,
       color: C.text,
@@ -1995,7 +1995,7 @@ export default function FutureELanding() {
       marginBottom: 6,
     },
     tensionSub: {
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       fontSize: 11,
       color: C.dim,
       letterSpacing: '0.04em',
@@ -2016,7 +2016,7 @@ export default function FutureELanding() {
       border: `1px solid ${C.border}`,
       color: C.text,
       fontSize: 15,
-      fontFamily: "'Instrument Sans', sans-serif",
+      fontFamily: "var(--font-sans)",
       outline: 'none',
     },
     freeBtn: (disabled = false) => ({
@@ -2029,7 +2029,7 @@ export default function FutureELanding() {
       border: 'none',
       cursor: disabled ? 'not-allowed' : 'pointer',
       whiteSpace: 'nowrap',
-      fontFamily: "'Instrument Sans', sans-serif",
+      fontFamily: "var(--font-sans)",
       opacity: disabled ? 0.45 : 1,
     }),
     answerBox: {
@@ -2055,7 +2055,7 @@ export default function FutureELanding() {
       animation: 'spin 0.8s linear infinite',
     },
     verdict: {
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: "var(--font-serif)",
       fontStyle: 'italic',
       fontSize: 22,
       lineHeight: 1.3,
@@ -2083,7 +2083,7 @@ export default function FutureELanding() {
       textDecoration: 'none',
       cursor: 'pointer',
       border: 'none',
-      fontFamily: "'Instrument Sans', sans-serif",
+      fontFamily: "var(--font-sans)",
     },
     questionLimitNote: {
       marginBottom: 20,
@@ -2130,7 +2130,7 @@ export default function FutureELanding() {
       overflow: 'hidden',
     },
     amnesieEyebrow: {
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       fontSize: 11,
       letterSpacing: '0.12em',
       textTransform: 'uppercase',
@@ -2138,7 +2138,7 @@ export default function FutureELanding() {
       marginBottom: 20,
     },
     amnesieTitle: {
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: "var(--font-serif)",
       fontWeight: 400,
       fontSize: 'clamp(26px,3vw,38px)',
       lineHeight: 1.2,
@@ -2163,7 +2163,7 @@ export default function FutureELanding() {
       background: 'var(--bg-card)',
       backdropFilter: 'none',
       WebkitBackdropFilter: 'none',
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: "var(--font-serif)",
       fontStyle: 'italic',
       fontSize: 18,
       lineHeight: 1.6,
@@ -2220,7 +2220,7 @@ export default function FutureELanding() {
       display: 'flex',
       alignItems: 'center',
       gap: 7,
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       fontSize: 10.5,
       letterSpacing: '0.12em',
       textTransform: 'uppercase',
@@ -2240,7 +2240,7 @@ export default function FutureELanding() {
       border: `1px solid ${col}25`,
     }),
     moduleName: {
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: "var(--font-serif)",
       fontWeight: 400,
       fontSize: 20,
       color: C.text,
@@ -2262,7 +2262,7 @@ export default function FutureELanding() {
       paddingLeft: 12,
       borderLeft: `1px solid ${col}30`,
       lineHeight: 1.5,
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       letterSpacing: '0.02em',
     }),
     pricingSection: {
@@ -2292,28 +2292,28 @@ export default function FutureELanding() {
       borderRadius: 100,
       background: C.orange,
       color: C.bg,
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       fontSize: 11,
       fontWeight: 600,
       letterSpacing: '0.06em',
       whiteSpace: 'nowrap',
     },
     planPrice: {
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: "var(--font-serif)",
       fontSize: 40,
       fontWeight: 400,
       color: C.text,
       letterSpacing: -1,
     },
     planPriceSub: {
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       fontSize: 11,
       color: C.dim,
       marginLeft: 4,
       letterSpacing: '0.04em',
     },
     planName: {
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: "var(--font-serif)",
       fontStyle: 'italic',
       fontSize: 20,
       color: C.text,
@@ -2355,7 +2355,7 @@ export default function FutureELanding() {
       fontSize: 14,
       border: accent ? 'none' : `1px solid ${C.border}`,
       cursor: 'pointer',
-      fontFamily: "'Instrument Sans', sans-serif",
+      fontFamily: "var(--font-sans)",
       transition: 'opacity 0.2s',
     }),
     footer: {
@@ -2372,14 +2372,14 @@ export default function FutureELanding() {
       gap: 20,
     },
     footerBrand: {
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: "var(--font-serif)",
       fontStyle: 'italic',
       fontSize: 18,
       color: C.text,
     },
     footerLinks: { display: 'flex', gap: 28 },
     footerLink: {
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "var(--font-mono)",
       fontSize: 11,
       color: C.dim,
       letterSpacing: '0.06em',
@@ -2686,7 +2686,7 @@ export default function FutureELanding() {
                 gap: 10,
               }}>
                 <p style={{
-                  fontFamily: "'Instrument Sans', system-ui, sans-serif",
+                  fontFamily: "var(--font-sans)",
                   fontSize: 12,
                   color: C.muted,
                   lineHeight: 1.5,
@@ -2706,7 +2706,7 @@ export default function FutureELanding() {
                       borderRadius: 8,
                       background: 'rgba(200,184,154,0.10)',
                       border: '1px solid rgba(200,184,154,0.22)',
-                      fontFamily: "'Instrument Sans', system-ui, sans-serif",
+                      fontFamily: "var(--font-sans)",
                       fontSize: 12,
                       fontWeight: 600,
                       color: '#c8b89a',
@@ -2725,7 +2725,7 @@ export default function FutureELanding() {
                       borderRadius: 8,
                       background: 'transparent',
                       border: '1px solid var(--border-1)',
-                      fontFamily: "'Instrument Sans', system-ui, sans-serif",
+                      fontFamily: "var(--font-sans)",
                       fontSize: 12,
                       fontWeight: 400,
                       color: C.muted,
@@ -2781,14 +2781,14 @@ export default function FutureELanding() {
           {/* Colonne gauche : texte */}
           <div>
             <div style={{
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "var(--font-mono)",
               fontSize: 10, letterSpacing: '0.14em',
               textTransform: 'uppercase', color: C.orange, marginBottom: 16,
             }}>
               Trouver où vivre · sans inscription
             </div>
             <h2 style={{
-              fontFamily: "'Instrument Serif', serif",
+              fontFamily: "var(--font-serif)",
               fontWeight: 400,
               fontSize: 'clamp(26px, 2.6vw, 38px)',
               lineHeight: 1.12, letterSpacing: '-0.5px',
@@ -2813,7 +2813,7 @@ export default function FutureELanding() {
               ].map((label) => (
                 <div key={label} style={{
                   display: 'flex', alignItems: 'center', gap: 10,
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: "var(--font-mono)",
                   fontSize: 11, color: C.dim, letterSpacing: '0.03em',
                 }}>
                   <span style={{
@@ -2833,7 +2833,7 @@ export default function FutureELanding() {
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10,
               padding: '15px 28px', borderRadius: 10,
               background: C.orange, color: C.bg,
-              fontFamily: "'Instrument Sans', sans-serif", fontWeight: 600, fontSize: 15,
+              fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 15,
               textDecoration: 'none',
             }}>
               Trouver où vivre →
@@ -2968,7 +2968,7 @@ export default function FutureELanding() {
                             background: 'transparent', border: `1px solid ${C.orange}`,
                             color: C.orange, fontWeight: 600, fontSize: 14,
                             textDecoration: 'none', cursor: 'pointer',
-                            fontFamily: "'Instrument Sans', sans-serif",
+                            fontFamily: "var(--font-sans)",
                           }}
                         >
                           Trouver des territoires qui me correspondent →
@@ -2992,7 +2992,7 @@ export default function FutureELanding() {
             <div style={{ fontSize: 32, marginBottom: 16 }}>⌖</div>
             <div
               style={{
-                fontFamily: "'Instrument Serif', serif",
+                fontFamily: "var(--font-serif)",
               fontStyle: 'italic',
               fontSize: 20,
               color: C.muted,
@@ -3087,14 +3087,14 @@ export default function FutureELanding() {
           }} />
           <div style={{ maxWidth: 540 }}>
             <div style={{
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "var(--font-mono)",
               fontSize: 10, letterSpacing: '0.14em',
               textTransform: 'uppercase', color: C.orange, marginBottom: 10,
             }}>
               Rapport interactif personnalisé
             </div>
             <h2 style={{
-              fontFamily: "'Instrument Serif', serif",
+              fontFamily: "var(--font-serif)",
               fontWeight: 400,
               fontSize: 'clamp(22px, 2.4vw, 30px)',
               lineHeight: 1.2, letterSpacing: '-0.4px',
@@ -3114,7 +3114,7 @@ export default function FutureELanding() {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 gap: 8, padding: '14px 28px', borderRadius: 12,
                 background: C.orange, color: C.bg,
-                fontFamily: "'Instrument Sans', sans-serif",
+                fontFamily: "var(--font-sans)",
                 fontWeight: 600, fontSize: 15,
                 border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
               }}
@@ -3122,7 +3122,7 @@ export default function FutureELanding() {
               Obtenir mon rapport interactif personnalisé
             </button>
             <p style={{
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "var(--font-mono)",
               fontSize: 10, color: C.dim,
               letterSpacing: '0.04em', marginTop: 10,
             }}>
@@ -3148,7 +3148,7 @@ export default function FutureELanding() {
         <div style={{ marginBottom: 48 }}>
           <div
             style={{
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "var(--font-mono)",
               fontSize: 11,
               letterSpacing: '0.12em',
               textTransform: 'uppercase',
@@ -3172,7 +3172,7 @@ export default function FutureELanding() {
           </div>
           <h2
             style={{
-              fontFamily: "'Instrument Serif', serif",
+              fontFamily: "var(--font-serif)",
               fontSize: 'clamp(26px, 3vw, 38px)',
               fontWeight: 400,
               color: C.text,
@@ -3184,7 +3184,7 @@ export default function FutureELanding() {
           </h2>
           <p
             style={{
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "var(--font-mono)",
               fontSize: 13,
               color: C.dim,
               margin: 0,
@@ -3244,7 +3244,7 @@ export default function FutureELanding() {
                 <div style={{ padding: '18px 20px 20px', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
                   <div
                     style={{
-                      fontFamily: "'JetBrains Mono', monospace",
+                      fontFamily: "var(--font-mono)",
                       fontSize: 9,
                       letterSpacing: '0.14em',
                       textTransform: 'uppercase',
@@ -3269,7 +3269,7 @@ export default function FutureELanding() {
 
                   <div
                     style={{
-                      fontFamily: "'Instrument Serif', serif",
+                      fontFamily: "var(--font-serif)",
                       fontSize: 17,
                       fontWeight: 400,
                       color: 'var(--fg-1)',
@@ -3282,7 +3282,7 @@ export default function FutureELanding() {
 
                   <p
                     style={{
-                      fontFamily: "'JetBrains Mono', monospace",
+                      fontFamily: "var(--font-mono)",
                       fontSize: 11,
                       color: 'var(--fg-4)',
                       margin: 0,
@@ -3294,7 +3294,7 @@ export default function FutureELanding() {
 
                   <div
                     style={{
-                      fontFamily: "'JetBrains Mono', monospace",
+                      fontFamily: "var(--font-mono)",
                       fontSize: 11,
                       letterSpacing: '0.08em',
                       textTransform: 'uppercase',
@@ -3551,7 +3551,7 @@ export default function FutureELanding() {
             borderTop: `1px solid ${C.border}`,
           }}>
             <p style={{
-              fontFamily: "'Instrument Serif', serif",
+              fontFamily: "var(--font-serif)",
               fontSize: 'clamp(19px, 2.2vw, 23px)',
               lineHeight: 1.5,
               margin: '0 0 22px',
@@ -3567,7 +3567,7 @@ export default function FutureELanding() {
                 background: C.orange, border: '1px solid transparent',
                 color: C.bg, fontWeight: 600, fontSize: 14,
                 textDecoration: 'none',
-                fontFamily: "'Instrument Sans', sans-serif",
+                fontFamily: "var(--font-sans)",
               }}>
                 Décrire mon projet →
               </Link>
@@ -3577,7 +3577,7 @@ export default function FutureELanding() {
                 background: 'transparent', border: `1px solid ${C.borderHi}`,
                 color: C.muted, fontWeight: 500, fontSize: 14,
                 textDecoration: 'none',
-                fontFamily: "'Instrument Sans', sans-serif",
+                fontFamily: "var(--font-sans)",
               }}>
                 Découvrir notre méthode
               </Link>
@@ -3616,7 +3616,7 @@ export default function FutureELanding() {
           </div>
           <div
             style={{
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "var(--font-mono)",
               fontSize: 11,
               color: C.dim,
               letterSpacing: '0.04em',

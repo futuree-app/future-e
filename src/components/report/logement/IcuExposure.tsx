@@ -26,7 +26,7 @@ export function IcuExposure({ icu }: { icu: Face3Snapshot["icu"] }) {
       </span>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
         <span style={{ ...CAPTION, alignSelf: "center" }}>Jusqu&apos;à</span>
-        <span style={{ fontFamily: "'Instrument Serif', serif", fontSize: 38, lineHeight: 1, color: "var(--orange)", fontVariantNumeric: "tabular-nums" }}>
+        <span style={{ fontFamily: "var(--font-serif)", fontSize: 38, lineHeight: 1, color: "var(--orange)", fontVariantNumeric: "tabular-nums" }}>
           +{icu.iuhi.toFixed(1).replace(".", ",")} °C
         </span>
         <span style={{ fontSize: 14.5, color: "var(--fg-1)", lineHeight: 1.45 }}>

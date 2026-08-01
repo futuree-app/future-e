@@ -102,7 +102,7 @@ export function ConclusionBlock({
           JAMAIS aux paragraphes. */}
       <h2
         className="font-normal text-[clamp(24px,2.6vw,32px)] leading-[1.2] tracking-[-0.4px] text-label max-w-[540px]"
-        style={{ fontFamily: "'Instrument Serif', serif" }}
+        style={{ fontFamily: "var(--font-serif)" }}
       >
         {bindOrphans(plan.verdict.headline.text)}
       </h2>

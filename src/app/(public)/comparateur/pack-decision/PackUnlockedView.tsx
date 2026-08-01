@@ -64,7 +64,7 @@ export function PackUnlockedView({ data, trio, pistes, projetLabel }: Props) {
             disabled={opening !== null}
             className="glass rounded-xl p-4 flex items-center justify-between hover:border-[var(--border-hi)] border border-[var(--border-2)] transition-colors text-left disabled:opacity-60"
           >
-            <span className="text-[14px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+            <span className="text-[14px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
               {opening === r.insee ? "Ouverture…" : `Rapport · ${r.nom}`}
             </span>
             <span aria-hidden className="text-accent">→</span>
@@ -83,7 +83,7 @@ export function PackUnlockedView({ data, trio, pistes, projetLabel }: Props) {
           </p>
           <h3
             className="font-normal text-[clamp(20px,3vw,28px)] leading-[1.15] text-label mb-2"
-            style={{ fontFamily: "'Instrument Serif', serif" }}
+            style={{ fontFamily: "var(--font-serif)" }}
           >
             Si aucune des trois ne vous convainc totalement.
           </h3>
@@ -93,7 +93,7 @@ export function PackUnlockedView({ data, trio, pistes, projetLabel }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {pistes.map((r) => (
               <div key={r.insee} className="glass rounded-2xl p-6 flex flex-col">
-                <h4 className="font-normal text-[20px] leading-[1.2] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                <h4 className="font-normal text-[20px] leading-[1.2] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                   {r.nom}
                 </h4>
                 <p className="mt-2 text-[14px] leading-[1.6] text-accent italic">{r.identite}</p>

@@ -135,7 +135,7 @@ export function CommuneSearch({
               border: '1px solid var(--border-2)',
               borderRadius: 8,
               color: 'var(--fg-1)',
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "var(--font-mono)",
               fontSize: 13,
               transition: 'border-color 0.2s, background 0.2s',
             }}
@@ -145,7 +145,7 @@ export function CommuneSearch({
               style={{
                 position: 'absolute',
                 right: 14,
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: "var(--font-mono)",
                 fontSize: 10,
                 color: '#6b7388',
                 letterSpacing: '0.06em',
@@ -196,7 +196,7 @@ export function CommuneSearch({
                 <span
                   style={{
                     color: 'var(--fg-1)',
-                    fontFamily: "'Instrument Sans', sans-serif",
+                    fontFamily: "var(--font-sans)",
                     fontSize: 14,
                   }}
                 >
@@ -204,7 +204,7 @@ export function CommuneSearch({
                 </span>
                 <span
                   style={{
-                    fontFamily: "'JetBrains Mono', monospace",
+                    fontFamily: "var(--font-mono)",
                     fontSize: 10,
                     color: '#6b7388',
                     letterSpacing: '0.06em',

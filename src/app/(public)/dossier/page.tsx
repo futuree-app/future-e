@@ -16,7 +16,7 @@ export default function DossierPage() {
   return (
     <div
       className="min-h-screen bg-canvas text-label relative overflow-hidden"
-      style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+      style={{ fontFamily: "var(--font-sans)" }}
     >
       <Navbar />
 
@@ -26,7 +26,7 @@ export default function DossierPage() {
         </p>
         <h1
           className="font-normal text-[clamp(26px,3vw,40px)] leading-[1.15] tracking-[-0.5px] text-label mb-5"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
+          style={{ fontFamily: "var(--font-serif)" }}
         >
           Quel bien voulez-vous faire examiner&nbsp;?
         </h1>

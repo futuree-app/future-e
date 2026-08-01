@@ -22,7 +22,7 @@ export function AccountNav({
         <Link
           href="/"
           className="no-underline tracking-[-0.3px]"
-          style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, fontStyle: "italic", color: "var(--fg-1)" }}
+          style={{ fontFamily: "var(--font-serif)", fontSize: 22, fontStyle: "italic", color: "var(--fg-1)" }}
         >
           futur<span className="text-accent not-italic">•</span>e
         </Link>
@@ -53,7 +53,7 @@ export function AccountNav({
           <Link
             href={primaryCta.href}
             className="px-5 py-2 rounded-md bg-accent text-canvas font-semibold text-[13px] no-underline"
-            style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+            style={{ fontFamily: "var(--font-sans)" }}
           >
             {primaryCta.label}
           </Link>

@@ -6,14 +6,14 @@
 @import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
 @font-face {
-  font-family: 'Instrument Serif';
+  font-family:var(--font-serif);
   font-style: normal;
   font-weight: 400;
   font-display: swap;
   src: url('/fonts/InstrumentSerif-Regular.ttf') format('truetype');
 }
 @font-face {
-  font-family: 'Instrument Serif';
+  font-family:var(--font-serif);
   font-style: italic;
   font-weight: 400;
   font-display: swap;

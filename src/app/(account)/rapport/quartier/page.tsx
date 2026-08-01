@@ -139,7 +139,7 @@ export default async function RapportQuartierPage() {
   return (
     <div
       className="min-h-screen bg-canvas text-label relative overflow-hidden"
-      style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+      style={{ fontFamily: "var(--font-sans)" }}
     >
       <div className="fixed top-[-160px] left-[-130px] w-[520px] h-[520px] rounded-full bg-info/[0.10] blur-[100px] opacity-32 pointer-events-none z-0" />
       <div className="fixed bottom-[-100px] right-[-80px] w-[400px] h-[400px] rounded-full bg-accent/[0.08] blur-[88px] opacity-24 pointer-events-none z-0" />
@@ -162,7 +162,7 @@ export default async function RapportQuartierPage() {
           </div>
           <h1
             className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-4 text-label"
-            style={{ fontFamily: "'Instrument Serif', serif" }}
+            style={{ fontFamily: "var(--font-serif)" }}
           >
             Ce que {displayName} devient.<br />
             <span className="italic text-info">Territoire, climat, risques.</span>
@@ -232,7 +232,7 @@ export default async function RapportQuartierPage() {
           <EvidenceArrival />
           <h2
             className="font-normal italic text-[clamp(22px,2vw,28px)] leading-[1.25] tracking-[-0.3px] text-label mb-6"
-            style={{ fontFamily: "'Instrument Serif', serif" }}
+            style={{ fontFamily: "var(--font-serif)" }}
           >
             Les grands signaux du territoire
           </h2>
@@ -257,7 +257,7 @@ export default async function RapportQuartierPage() {
           <Link
             href="/rapport/logement"
             className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg no-underline font-semibold text-[14px]"
-            style={{ background: "var(--orange)", color: "var(--canvas)", fontFamily: "'Instrument Sans', sans-serif" }}
+            style={{ background: "var(--orange)", color: "var(--canvas)", fontFamily: "var(--font-sans)" }}
           >
             Module Logement
             <span className="text-[16px] leading-none">→</span>

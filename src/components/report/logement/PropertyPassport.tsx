@@ -55,7 +55,7 @@ export function PropertyPassport({
 
       <h3
         className="passport-layer-name font-normal text-[clamp(22px,3vw,32px)] leading-[1.1] tracking-[-0.01em] text-label"
-        style={{ fontFamily: "'Instrument Serif', serif" }}
+        style={{ fontFamily: "var(--font-serif)" }}
       >
         {address?.label ?? "Logement"}
       </h3>

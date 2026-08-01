@@ -148,7 +148,7 @@ export function MatrixHeader({ trio }: { trio: MatchResult[] }) {
       {trio.map((r, n) => (
         <div key={r.insee} className="px-3.5 flex items-baseline gap-2">
           <span className="font-mono text-[10px] text-accent">{String(n + 1).padStart(2, "0")}</span>
-          <span className="text-[18.5px] leading-[1.1] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+          <span className="text-[18.5px] leading-[1.1] text-label" style={{ fontFamily: "var(--font-serif)" }}>
             {r.nom}
           </span>
         </div>

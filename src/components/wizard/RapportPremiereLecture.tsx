@@ -40,7 +40,7 @@ export function RapportPremiereLecture({
         <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">Votre première lecture</p>
         <h2
           className="font-normal text-[clamp(22px,2.4vw,30px)] leading-[1.2] tracking-[-0.5px] text-label mb-3.5"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
+          style={{ fontFamily: "var(--font-serif)" }}
         >
           Quelques questions, et votre lecture personnalisée apparaît.
         </h2>
@@ -50,7 +50,7 @@ export function RapportPremiereLecture({
         <Link
           href="/"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline"
-          style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+          style={{ fontFamily: "var(--font-sans)" }}
         >
           Faire le questionnaire
         </Link>

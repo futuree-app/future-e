@@ -84,7 +84,7 @@ export function AnchorAmorce({
         <button
           onClick={() => setExpanded(true)}
           className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/5 px-5 py-2.5 text-[13px] font-medium text-accent transition-colors hover:border-accent hover:bg-accent/10"
-          style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+          style={{ fontFamily: "var(--font-sans)" }}
         >
           <span aria-hidden>⌖</span>
           Pas d&apos;idée ? Partez d&apos;une commune que vous aimez
@@ -124,7 +124,7 @@ export function AnchorAmorce({
                       ? "border-[var(--border-1)] text-ghost line-through"
                       : "border-[var(--border-hi)] text-label hover:border-[var(--border-hi)]"
                   }`}
-                  style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+                  style={{ fontFamily: "var(--font-sans)" }}
                 >
                   {c.text} <span aria-hidden>{off ? "↺" : "✕"}</span>
                 </button>
@@ -136,7 +136,7 @@ export function AnchorAmorce({
               onClick={launch}
               disabled={!canLaunch}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+              style={{ fontFamily: "var(--font-sans)" }}
             >
               {launching ? "Analyse en cours…" : "Explorer dans cet esprit"} <span aria-hidden>→</span>
             </button>

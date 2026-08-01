@@ -36,7 +36,7 @@ export function ThemeExplorer({ themes, trio, defaultThemeId }: Props) {
       <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-2">Là où ça se joue</p>
 
       {/* Thème ouvert : la vraie grammaire (paliers + avantages), les 2-3 communes. */}
-      <h3 className="font-normal text-[25px] leading-[1.1] text-label mb-1" style={{ fontFamily: "'Instrument Serif', serif" }}>
+      <h3 className="font-normal text-[25px] leading-[1.1] text-label mb-1" style={{ fontFamily: "var(--font-serif)" }}>
         {open.titre}
       </h3>
       <p className="text-[16px] leading-[1.55] text-muted italic mb-4" style={{ textWrap: "pretty" }}>
@@ -66,7 +66,7 @@ export function ThemeExplorer({ themes, trio, defaultThemeId }: Props) {
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-[16.5px] leading-[1.15] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                    <p className="text-[16.5px] leading-[1.15] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                       {th.titre}
                     </p>
                     {/* Cadenas : au survol d'une carte ouvrable, l'anse se soulève et l'icône vire accent. */}

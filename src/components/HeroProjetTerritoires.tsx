@@ -202,7 +202,7 @@ export default function HeroProjetTerritoires({ className }: { className?: strin
       <div
         style={{
           position: 'absolute', top: '6%', left: '6%', width: '88%', textAlign: 'center',
-          fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
+          fontFamily: "var(--font-serif)", fontStyle: 'italic',
           fontSize: 'clamp(14px, 4.2cqw, 20px)', lineHeight: 1.32, color: 'var(--fg-1)',
           opacity: phraseDim ? 0.5 : 1, transition: 'opacity 1s var(--e)',
         }}
@@ -230,7 +230,7 @@ export default function HeroProjetTerritoires({ className }: { className?: strin
         aria-hidden="true"
         style={{
           position: 'absolute', bottom: '4%', left: 0, width: '100%', textAlign: 'center',
-          fontFamily: "'JetBrains Mono', monospace", fontSize: 'clamp(7px, 1.9cqw, 9px)',
+          fontFamily: "var(--font-mono)", fontSize: 'clamp(7px, 1.9cqw, 9px)',
           letterSpacing: '0.04em', color: 'var(--fg-4)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
           opacity: showLegend ? 1 : 0, transition: 'opacity 0.7s var(--e)',
@@ -328,7 +328,7 @@ function CityRow({
         >
           <div
             style={{
-              fontFamily: "'Instrument Serif', serif",
+              fontFamily: "var(--font-serif)",
               fontSize: 'clamp(13px, 3.7cqw, 18px)', lineHeight: 1.1, color: 'var(--fg-1)',
               marginBottom: '8%',
             }}
@@ -343,7 +343,7 @@ function CityRow({
                   key={label}
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: 5,
-                    fontFamily: "'JetBrains Mono', monospace",
+                    fontFamily: "var(--font-mono)",
                     fontSize: 'clamp(8px, 2.2cqw, 11px)', letterSpacing: '0.02em',
                     color: met ? 'var(--fg-1)' : 'var(--fg-4)',
                     whiteSpace: 'nowrap',
@@ -379,7 +379,7 @@ function Token({
         padding: '3px 9px', borderRadius: 999,
         border: '1px solid var(--orange-ring)',
         background: 'color-mix(in srgb, var(--orange) 10%, var(--bg))',
-        fontFamily: "'JetBrains Mono', monospace",
+        fontFamily: "var(--font-mono)",
         fontSize: 'clamp(9px, 2.5cqw, 12px)', letterSpacing: '0.02em', color: 'var(--fg-1)',
         whiteSpace: 'nowrap',
         opacity: visible ? 1 : 0,

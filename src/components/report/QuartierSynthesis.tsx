@@ -272,7 +272,7 @@ export default function QuartierSynthesis({
       <div className="glass rounded-xl p-8 md:p-10 border-t-2 border-t-info">
         <h2
           className="font-normal text-[clamp(28px,3vw,40px)] leading-[1.15] tracking-[-0.5px] mb-4"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
+          style={{ fontFamily: "var(--font-serif)" }}
         >
           {parsed.title ? (
             <span className="italic text-label">{parsed.title}</span>
@@ -506,7 +506,7 @@ export default function QuartierSynthesis({
           flex-wrap: wrap;
         }
         .quartier-horizon-label {
-          font-family: 'JetBrains Mono', monospace;
+          font-family:var(--font-mono);
           font-size: 10px;
           letter-spacing: 0.16em;
           text-transform: uppercase;
@@ -527,7 +527,7 @@ export default function QuartierSynthesis({
           border: none;
           border-radius: 100px;
           color: #9ba3b4;
-          font-family: 'JetBrains Mono', monospace;
+          font-family:var(--font-mono);
           font-size: 12px;
           letter-spacing: 0.04em;
           cursor: pointer;

@@ -62,7 +62,7 @@ export default async function ComptePage() {
   return (
     <div
       className="min-h-screen bg-canvas text-label relative overflow-hidden"
-      style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+      style={{ fontFamily: "var(--font-sans)" }}
     >
       {/* Orbs */}
       <div className="fixed top-[-160px] left-[-130px] w-[520px] h-[520px] rounded-full bg-accent/[0.12] blur-[100px] opacity-40 pointer-events-none z-0" />
@@ -87,7 +87,7 @@ export default async function ComptePage() {
             </div>
             <h1
               className="font-normal text-[clamp(34px,3.8vw,52px)] leading-[1.1] tracking-[-1.2px] mb-5 text-label"
-              style={{ fontFamily: "'Instrument Serif', serif" }}
+              style={{ fontFamily: "var(--font-serif)" }}
             >
               {commune ? `Votre lecture ${deCommune(commune)}` : "Votre espace personnel"}<br />
               <span className="italic text-accent">{fullAccess ? "de la commune aux murs." : "ne disparaît plus."}</span>
@@ -108,7 +108,7 @@ export default async function ComptePage() {
               </span>
             </div>
             <div className="flex gap-3 flex-wrap">
-              <Link href="/rapport" prefetch={false} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+              <Link href="/rapport" prefetch={false} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "var(--font-sans)" }}>
                 {fullAccess ? "Voir mes modules" : "Reprendre ma première lecture"}
               </Link>
               {!fullAccess && (
@@ -123,7 +123,7 @@ export default async function ComptePage() {
             <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">
               {fullAccess ? "Votre accès" : "Ce que le compte gratuit garde"}
             </p>
-            <h2 className="font-normal text-[20px] leading-[1.2] text-label mb-5 tracking-[-0.2px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
+            <h2 className="font-normal text-[20px] leading-[1.2] text-label mb-5 tracking-[-0.2px]" style={{ fontFamily: "var(--font-serif)" }}>
               {scalesOpen
                 ? "Trois échelles, toutes ouvertes."
                 : fullAccess
@@ -138,7 +138,7 @@ export default async function ComptePage() {
                   : [{ val: "1", label: "ville de référence" }, { val: "1", label: "lecture personnalisée" }, { val: "∞", label: "retrouvable" }]
               ).map((m, i) => (
                 <div key={m.label} className={`px-3 py-3.5 text-center ${i < 2 ? "border-r border-[var(--border-1)]" : ""}`}>
-                  <span className="block text-[26px] text-accent leading-none mb-1" style={{ fontFamily: "'Instrument Serif', serif" }}>{m.val}</span>
+                  <span className="block text-[26px] text-accent leading-none mb-1" style={{ fontFamily: "var(--font-serif)" }}>{m.val}</span>
                   <span className="block font-mono text-[9px] tracking-[0.08em] text-ghost uppercase leading-[1.4]">{m.label}</span>
                 </div>
               ))}
@@ -162,7 +162,7 @@ export default async function ComptePage() {
               <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
                 <div>
                   <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Vos trois modules</p>
-                  <h2 className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                  <h2 className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                     De la commune jusqu&apos;à vos murs.
                   </h2>
                 </div>
@@ -181,7 +181,7 @@ export default async function ComptePage() {
                     className="glass rounded-xl p-5 no-underline block"
                   >
                     <p className="font-mono text-[13px] text-ghost tabular-nums mb-2">{String(i + 1).padStart(2, "0")}</p>
-                    <h3 className="font-normal text-[18px] text-label mb-2" style={{ fontFamily: "'Instrument Serif', serif" }}>{module.name}</h3>
+                    <h3 className="font-normal text-[18px] text-label mb-2" style={{ fontFamily: "var(--font-serif)" }}>{module.name}</h3>
                     <p className="text-[12px] text-muted leading-[1.6] mb-3">{MODULE_BENEFIT[module.id] ?? module.summary}</p>
                     <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase text-accent bg-accent/[0.06] border border-accent/[0.2] rounded-full px-2 py-1">
                       Ouvrir
@@ -195,7 +195,7 @@ export default async function ComptePage() {
               <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
                 <div>
                   <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Dans votre accès gratuit</p>
-                  <h2 className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                  <h2 className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                     Ce que ce compte garde pour vous.
                   </h2>
                 </div>
@@ -209,7 +209,7 @@ export default async function ComptePage() {
                   { accent: "border-t-info", title: "Votre questionnaire conservé", copy: "Vos réponses restent prêtes à nourrir le rapport interactif quand vous déciderez d'aller plus loin." },
                 ].map((k) => (
                   <article key={k.title} className={`glass rounded-xl p-5 border-t-2 ${k.accent}`}>
-                    <h3 className="font-normal text-[17px] text-label mb-2.5 leading-[1.3]" style={{ fontFamily: "'Instrument Serif', serif" }}>{k.title}</h3>
+                    <h3 className="font-normal text-[17px] text-label mb-2.5 leading-[1.3]" style={{ fontFamily: "var(--font-serif)" }}>{k.title}</h3>
                     <p className="text-[14px] text-muted leading-[1.65]">{k.copy}</p>
                   </article>
                 ))}
@@ -220,7 +220,7 @@ export default async function ComptePage() {
                 <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
                   <div>
                     <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Trois échelles fermées</p>
-                    <h2 className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                    <h2 className="font-normal text-[clamp(22px,2.6vw,32px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                       Ce que le rapport interactif lit pour vous.
                     </h2>
                   </div>
@@ -232,7 +232,7 @@ export default async function ComptePage() {
                   {LOCKED_MODULES.map((module, i) => (
                     <article key={module.id} className="glass rounded-xl p-5 opacity-50">
                       <p className="font-mono text-[13px] text-ghost tabular-nums mb-2">{String(i + 1).padStart(2, "0")}</p>
-                      <h3 className="font-normal text-[18px] text-muted mb-2" style={{ fontFamily: "'Instrument Serif', serif" }}>{module.name}</h3>
+                      <h3 className="font-normal text-[18px] text-muted mb-2" style={{ fontFamily: "var(--font-serif)" }}>{module.name}</h3>
                       <p className="text-[12px] text-ghost leading-[1.6] mb-3">{MODULE_BENEFIT[module.id] ?? module.summary}</p>
                       <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase text-ghost bg-[var(--bg-elev)] border border-[var(--border-1)] rounded-full px-2 py-1">
                         Fermé
@@ -245,7 +245,7 @@ export default async function ComptePage() {
                 <div className="glass rounded-2xl p-10 border-accent/[0.12] grid grid-cols-[1fr_180px] gap-12 items-center mt-10 relative overflow-hidden">
                   <div className="absolute top-[-60px] right-[-60px] w-[200px] h-[200px] rounded-full bg-accent/[0.08] pointer-events-none" />
                   <div>
-                    <h2 className="font-normal text-[clamp(20px,2.2vw,26px)] leading-[1.2] tracking-[-0.4px] text-label mb-2.5" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                    <h2 className="font-normal text-[clamp(20px,2.2vw,26px)] leading-[1.2] tracking-[-0.4px] text-label mb-2.5" style={{ fontFamily: "var(--font-serif)" }}>
                       {commune ? `Trois échelles de lecture à ${commune}. Sourcées. Personnalisées.` : "Trois échelles de lecture. Sourcées. Personnalisées."}
                     </h2>
                     <p className="text-[15px] text-muted leading-[1.7]">
@@ -253,11 +253,11 @@ export default async function ComptePage() {
                     </p>
                   </div>
                   <div className="text-center">
-                    <span className="block text-[44px] text-label leading-none tracking-[-1.5px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                    <span className="block text-[44px] text-label leading-none tracking-[-1.5px]" style={{ fontFamily: "var(--font-serif)" }}>
                       14<span className="text-[20px] text-ghost ml-0.5">€</span>
                     </span>
                     <span className="block font-mono text-[10px] text-ghost tracking-[0.04em] mt-1 mb-4">une fois</span>
-                    <Link href="/#pricing" className="flex items-center justify-center px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[13px] no-underline w-full" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+                    <Link href="/#pricing" className="flex items-center justify-center px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[13px] no-underline w-full" style={{ fontFamily: "var(--font-sans)" }}>
                       Voir les formules
                     </Link>
                   </div>
@@ -305,7 +305,7 @@ export default async function ComptePage() {
 
         {/* Footer nav */}
         <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-[var(--border-1)]">
-          <Link href="/rapport" prefetch={false} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+          <Link href="/rapport" prefetch={false} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "var(--font-sans)" }}>
             Lire mon rapport interactif
           </Link>
           {fullAccess && (
@@ -330,7 +330,7 @@ export default async function ComptePage() {
       {/* Footer */}
       <footer className="relative z-[2] border-t border-[var(--border-1)]">
         <div className="max-w-[1100px] mx-auto px-5 sm:px-7 py-8 flex items-center justify-between gap-6 flex-wrap">
-          <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
+          <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "var(--font-serif)" }}>
             futur<span className="text-accent not-italic">•</span>e
           </div>
           <div className="flex gap-5 flex-wrap">

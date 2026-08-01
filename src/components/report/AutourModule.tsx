@@ -167,7 +167,7 @@ export default function AutourModule({
   }, []);
 
   return (
-    <div className="min-h-screen bg-canvas text-label relative overflow-hidden" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+    <div className="min-h-screen bg-canvas text-label relative overflow-hidden" style={{ fontFamily: "var(--font-sans)" }}>
       <div className="fixed top-[-160px] left-[-130px] w-[520px] h-[520px] rounded-full bg-green/[0.10] blur-[100px] opacity-32 pointer-events-none z-0" />
       <div className="fixed bottom-[-100px] right-[-80px] w-[400px] h-[400px] rounded-full bg-accent/[0.08] blur-[88px] opacity-24 pointer-events-none z-0" />
 
@@ -180,7 +180,7 @@ export default function AutourModule({
               <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--green)" }} />
               Module 02 · Autour de l&apos;adresse
             </div>
-            <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+            <h1 className="font-normal text-[clamp(36px,4vw,54px)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
               Ce qu&apos;il y a autour.<br />
               <span className="italic" style={{ color: "var(--green)" }}>Services, nature, chaleur.</span>
             </h1>
@@ -205,7 +205,7 @@ export default function AutourModule({
         <section className="pt-14">
           <div className="mb-8">
             <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">L&apos;adresse de ce dossier</p>
-            <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
+            <h2 className="font-normal text-[clamp(24px,2.8vw,36px)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
               {dossier.address_label}
             </h2>
           </div>

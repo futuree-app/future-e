@@ -53,7 +53,7 @@ export default async function DevLoadingPage({
   return (
     <div
       className="min-h-screen bg-canvas text-label"
-      style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+      style={{ fontFamily: "var(--font-sans)" }}
     >
       <div className="max-w-[920px] mx-auto px-7 py-16">
         <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">
@@ -61,7 +61,7 @@ export default async function DevLoadingPage({
         </p>
         <h1
           className="font-normal text-[clamp(26px,3vw,40px)] leading-[1.15] tracking-[-0.5px] mb-4"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
+          style={{ fontFamily: "var(--font-serif)" }}
         >
           Six jeux contextuels, dont trois échelles.
         </h1>
@@ -100,7 +100,7 @@ export default async function DevLoadingPage({
                       ) : (
                         <span
                           className="text-[18px] leading-[1.3] text-label"
-                          style={{ fontFamily: "'Instrument Serif', serif", letterSpacing: "-0.3px" }}
+                          style={{ fontFamily: "var(--font-serif)", letterSpacing: "-0.3px" }}
                         >
                           {texte}
                         </span>
