@@ -36,6 +36,24 @@
   --violet:         #a78bfa;   --violet-tint: rgba(167, 139, 250, 0.18);
   --yellow:         #fbbf24;   --yellow-tint: rgba(251, 191, 36, 0.14);
 
+  /* LA TEINTE POSÉE SUR DU TEXTE, distincte de celle posée en fond (ajoutée le 01/08/2026).
+     Sur le fond sombre les deux coïncident : ces couleurs vives y tiennent 7 à 12 contre 1. Sur le
+     fond crème du thème clair, TOUTES échouaient — de 1,43 (jaune) à 2,61 (rouge) — alors qu'elles
+     peignent les surtitres de registre du dossier, donc du texte porteur de sens. Les valeurs
+     claires plus bas sont calculées pour tenir 4,5:1 sur `--bg` ET sur `--bg-deep`, teinte conservée.
+     Règle d'emploi : `--x-ink` sur du TEXTE et des icônes, `--x` sur des fonds, filets et pastilles
+     (WCAG demande 3:1 pour un élément graphique, 4,5:1 pour du texte). Ne jamais poser `--x` sur du
+     texte sans vérifier le thème clair. */
+  --orange-ink:     #fb923c;
+  --red-ink:        #f87171;
+  --blue-ink:       #60a5fa;
+  --green-ink:      #4ade80;
+  --violet-ink:     #a78bfa;
+  --yellow-ink:     #fbbf24;
+  --info-ink:       #60a5fa;
+  --amethyst-ink:   #a78bfa;
+  --accent-ink:     #fb923c;
+
   /* ALIAS GLOBAUX des noms du @theme Tailwind (globals.css). Le @theme n'émet que --color-* : les
      composants du rapport consomment var(--accent)/--ghost/--info/--amethyst, qui ne se résolvaient
      NULLE PART hors des pages savoir (qui scopent leur propre --accent, et gardent la priorité).
@@ -117,6 +135,18 @@
   --ghost:          #646c7f;
   --fg-absent:      #646c7f;
 
+  /* Les teintes de TEXTE, assombries pour le fond crème (voir le bloc `--*-ink` du :root). Chacune
+     tient 4,5:1 sur `--bg` (#faf8f3) et sur `--bg-deep` (#f2ede4), avec sa teinte d'origine. */
+  --orange-ink:     #b04f00;
+  --red-ink:        #da0000;
+  --blue-ink:       #0065e2;
+  --green-ink:      #0a7d34;
+  --violet-ink:     #7344fd;
+  --yellow-ink:     #8c6500;
+  --info-ink:       #0065e2;
+  --amethyst-ink:   #7344fd;
+  --accent-ink:     #b04f00;
+
   --border-1:       rgba(26, 29, 40, 0.08);
   --border-2:       rgba(26, 29, 40, 0.12);
   --border-hi:      rgba(26, 29, 40, 0.18);
@@ -153,6 +183,15 @@
     --fg-4:           #646c7f;
     --ghost:          #646c7f;
     --fg-absent:      #646c7f;
+    --orange-ink:     #b04f00;
+    --red-ink:        #da0000;
+    --blue-ink:       #0065e2;
+    --green-ink:      #0a7d34;
+    --violet-ink:     #7344fd;
+    --yellow-ink:     #8c6500;
+    --info-ink:       #0065e2;
+    --amethyst-ink:   #7344fd;
+    --accent-ink:     #b04f00;
     --border-1:       rgba(26, 29, 40, 0.08);
     --border-2:       rgba(26, 29, 40, 0.12);
     --border-hi:      rgba(26, 29, 40, 0.18);

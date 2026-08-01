@@ -34,6 +34,18 @@ const SECTION_ACCENT: Record<string, string> = {
   verifications: "var(--info)",
 };
 
+// LA MÊME COULEUR, POUR DU TEXTE. Sur le fond crème du thème clair, les teintes vives tombaient
+// entre 1,43 et 2,61 contre 1 alors qu'elles peignent ce surtitre. `--x-ink` porte la version
+// lisible ; la pastille, elle, reste vive (un élément graphique demande 3:1, pas 4,5:1).
+const SECTION_INK: Record<string, string> = {
+  incompatibilities: "var(--red-ink)",
+  alignments: "var(--green-ink)",
+  mismatches: "var(--yellow-ink)",
+  compromises: "var(--orange-ink)",
+  unknowns: "var(--amethyst-ink)",
+  verifications: "var(--info-ink)",
+};
+
 const cap = (s: string): string => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
 // D'OÙ VIENT CE QU'ON MONTRE. Trois sections répondent aux critères du lecteur : ses conditions non
@@ -160,6 +172,7 @@ export function DossierDecisionSection({
       <div className="grid gap-3.5">
         {sections.map((s) => {
           const col = SECTION_ACCENT[s.key] ?? "var(--amethyst)";
+          const ink = SECTION_INK[s.key] ?? "var(--amethyst-ink)";
 
           // CE QUI CORRESPOND (alignments) : une carte GROUPÉE, courte. Un point fort n'appelle aucune
           // action, donc pas la structure complète d'une carte de problème — deux lignes suffisent :
@@ -172,7 +185,7 @@ export function DossierDecisionSection({
             const grainCommun = partages.size === 1 ? [...partages][0]! : null;
             return (
               <div key={s.key} className="glass rounded-xl p-5 sm:p-6">
-                <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mb-2" style={{ color: col }}>
+                <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mb-2" style={{ color: ink }}>
                   <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
                   {s.title}
                 </div>
@@ -207,7 +220,7 @@ export function DossierDecisionSection({
                L'œil allait aux pièces à examiner plutôt qu'à la réponse. La couleur de section
                survit là où elle suffit : la pastille en tête de titre, qui la porte déjà. */
             <div key={s.key} className="glass rounded-xl p-5 sm:p-6">
-              <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mb-2" style={{ color: col }}>
+              <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mb-2" style={{ color: ink }}>
                 <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
                 {s.title}
               </div>

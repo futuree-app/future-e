@@ -294,11 +294,21 @@ Il dit la distance entre ce que le lecteur a demandé et ce que le lieu est, san
 défaut du lieu. Une gradation rouge vers orange aurait suggéré une échelle de gravité, donc un score,
 que l'ADR-0001 interdit. Le rôle du jaune dans la palette devient donc « écart à la demande ».
 
-**Défaut transversal découvert au même moment, non corrigé** : les six teintes de registre sont
-calibrées pour le fond sombre et **s'effondrent en thème clair**. Sur `#faf8f3` : jaune 1,57:1,
-orange 2,13:1, rouge 2,61:1, quand AA exige 4,5:1 pour un texte. Or `col` peint le surtitre de chaque
-section, donc du texte. Le thème clair a besoin de ses propres valeurs de registre, plus sombres et
-plus saturées. Chantier distinct, à ouvrir.
+### 5.6 Deux familles de teintes : l'encre et la surface
+
+Une couleur sémantique existe en deux versions, et le choix entre elles est une règle, pas un goût :
+
+| Famille | Token | Usage | Exigence WCAG |
+| --- | --- | --- | --- |
+| **Encre** | `--x-ink` | texte, icône | 4,5:1 |
+| **Surface** | `--x` | fond, filet, pastille, bordure | 3:1 |
+
+Sur le fond sombre les deux coïncident : les teintes vives y tiennent 7 à 12 contre 1. Sur le fond
+crème du thème clair, **elles échouaient toutes**, de 1,43 (jaune) à 2,61 (rouge), alors qu'elles
+peignent les surtitres de registre du dossier. Les versions claires sont calculées pour tenir 4,5:1
+sur `--bg` et sur `--bg-deep`, teinte conservée.
+
+**Ne jamais poser `--x` sur du texte sans vérifier le thème clair.**
 
 **Tranché le 30/07/2026** : dans le rapport, **l'orange signifie « compromis »**. L'accent de marque
 ne colore plus les éléments de navigation ordinaires du rapport : les CTA y sont neutres, en texte
