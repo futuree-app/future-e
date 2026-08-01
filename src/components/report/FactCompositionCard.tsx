@@ -161,7 +161,7 @@ export function FactCompositionCard({
           </div>
           <ul className="flex flex-col gap-4">
             {composition.consequences.map((c) => (
-              <li key={c.factId} className="pl-3 border-l border-white/[0.12]">
+              <li key={c.factId} className="pl-3 border-l border-[var(--border-2)]">
                 {/* L'étiquette nommait le materialityTier (« Priorité structurante », « Point
                     secondaire »), deux fois dans la même carte : une décision interne de matérialité,
                     que le lecteur ne peut ni expliquer ni opposer, affichée comme une information.
@@ -185,7 +185,7 @@ export function FactCompositionCard({
           <summary className="cursor-pointer font-mono text-[11px] tracking-[0.06em] uppercase text-muted hover:text-label transition-colors">
             Voir {nonNarres.length > 1 ? `les ${nonNarres.length} constats détaillés` : "le constat détaillé"}
           </summary>
-          <ul className="mt-3 flex flex-col gap-4 pl-3 border-l border-white/[0.08]">
+          <ul className="mt-3 flex flex-col gap-4 pl-3 border-l border-[var(--border-1)]">
             {nonNarres.map((f) => (
               <li key={f.id}>
                 <FactBody fact={f} />

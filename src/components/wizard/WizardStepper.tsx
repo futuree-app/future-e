@@ -15,7 +15,7 @@ export function WizardStepper({
               ? "w-6 bg-accent/60"
               : i === currentStep
                 ? "w-10 bg-accent"
-                : "w-4 bg-white/[0.10]"
+                : "w-4 bg-[var(--bg-elev-3)]"
           }`}
         />
       ))}

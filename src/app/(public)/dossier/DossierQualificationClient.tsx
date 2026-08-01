@@ -223,7 +223,7 @@ export function DossierQualificationClient() {
           {(() => {
             const cov = expectedCoverage(outcome.matter);
             return (
-              <div className="mt-7 rounded-xl border border-white/[0.10] bg-white/[0.03] px-5 py-4">
+              <div className="mt-7 rounded-xl border border-[var(--border-2)] bg-[var(--bg-elev)] px-5 py-4">
                 <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2.5">
                   Ce que cette adresse permettra de lire
                 </p>
@@ -308,7 +308,7 @@ export function DossierQualificationClient() {
                 <button
                   key={c.banId}
                   type="button"
-                  className="text-left px-5 py-3.5 rounded-lg bg-white/[0.05] text-label text-[14px] border border-white/[0.08] cursor-pointer"
+                  className="text-left px-5 py-3.5 rounded-lg bg-[var(--bg-elev-2)] text-label text-[14px] border border-[var(--border-1)] cursor-pointer"
                   onClick={() =>
                     qualify({
                       id: c.banId,

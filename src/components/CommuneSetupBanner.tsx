@@ -87,7 +87,7 @@ export function CommuneSetupBanner() {
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           placeholder="Tapez votre commune…"
           disabled={saving}
-          className="w-full bg-white/[0.04] border border-white/[0.12] rounded-lg px-4 py-3 text-[15px] text-label placeholder:text-ghost outline-none focus:border-accent/40 disabled:opacity-50"
+          className="w-full bg-[var(--bg-elev-2)] border border-[var(--border-2)] rounded-lg px-4 py-3 text-[15px] text-label placeholder:text-ghost outline-none focus:border-accent/40 disabled:opacity-50"
         />
         {fetching && (
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-ghost">…</span>
@@ -96,13 +96,13 @@ export function CommuneSetupBanner() {
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-ghost">Enregistrement…</span>
         )}
         {open && results.length > 0 && (
-          <ul className="absolute left-0 top-full mt-1 z-10 w-full glass border border-white/[0.1] rounded-xl overflow-hidden shadow-xl">
+          <ul className="absolute left-0 top-full mt-1 z-10 w-full glass border border-[var(--border-2)] rounded-xl overflow-hidden shadow-xl">
             {results.map((c) => (
               <li key={c.code}>
                 <button
                   type="button"
                   onMouseDown={() => handleSelect(c)}
-                  className="w-full text-left px-4 py-2.5 text-[13px] text-label hover:bg-white/[0.05] flex justify-between gap-2"
+                  className="w-full text-left px-4 py-2.5 text-[13px] text-label hover:bg-[var(--bg-elev-2)] flex justify-between gap-2"
                 >
                   <span>{c.nom}</span>
                   <span className="text-ghost font-mono text-[11px]">{c.code}</span>

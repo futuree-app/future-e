@@ -237,7 +237,7 @@ export function DossierDecisionSection({
                   et l'air le disent, sans ajouter ni bordure ni fond (ce serait des cartes dans des
                   cartes). Il ne s'applique pas au premier élément ni aux intertitres de grain, qui
                   ouvrent un groupe au lieu de clore le précédent. */}
-              <ul className="flex flex-col gap-6 [&>li:not(:first-child):not(.grain-header)]:border-t [&>li:not(:first-child):not(.grain-header)]:border-white/[0.07] [&>li:not(:first-child):not(.grain-header)]:pt-6">
+              <ul className="flex flex-col gap-6 [&>li:not(:first-child):not(.grain-header)]:border-t [&>li:not(:first-child):not(.grain-header)]:border-[var(--border-1)] [&>li:not(:first-child):not(.grain-header)]:pt-6">
                 {(() => {
                   // Le grain (« À cette adresse » / « À l'échelle de la commune ») ne se répète plus sur
                   // chaque carte : il ne s'affiche QUE si la section MÉLANGE des grains, et alors comme un
@@ -319,7 +319,7 @@ export function DossierDecisionSection({
         logement ? (
           <Link
             href={logement.href}
-            className="mt-5 group flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-4 rounded-xl no-underline border border-white/[0.1] bg-white/[0.02] hover:border-accent/40 hover:bg-white/[0.04] transition-colors"
+            className="mt-5 group flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-4 rounded-xl no-underline border border-[var(--border-2)] bg-[var(--bg-elev)] hover:border-accent/40 hover:bg-[var(--bg-elev-2)] transition-colors"
           >
             <span className="flex flex-col gap-1">
               <span className="text-[14px] font-semibold text-label">Voir l&apos;analyse du logement</span>
@@ -330,7 +330,7 @@ export function DossierDecisionSection({
         ) : (
           <Link
             href="/rapport/logement"
-            className="mt-5 group flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-4 rounded-xl no-underline border border-white/[0.1] bg-white/[0.02] hover:border-accent/40 hover:bg-white/[0.04] transition-colors"
+            className="mt-5 group flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-4 rounded-xl no-underline border border-[var(--border-2)] bg-[var(--bg-elev)] hover:border-accent/40 hover:bg-[var(--bg-elev-2)] transition-colors"
           >
             <span className="flex flex-col gap-1">
               <span className="text-[14px] font-semibold text-label">Affiner avec une adresse</span>

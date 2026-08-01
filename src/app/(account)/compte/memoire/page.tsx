@@ -70,10 +70,10 @@ export default async function MemoirePage() {
             rapport par elle-même, changer de commune ne déplace donc aucun accès. */}
         <MemoireForm profile={safeProfile} />
 
-        <div className="mt-10 pt-7 border-t border-white/[0.08] flex items-center gap-4 flex-wrap">
+        <div className="mt-10 pt-7 border-t border-[var(--border-1)] flex items-center gap-4 flex-wrap">
           <Link
             href="/compte"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/[0.05] text-muted text-[13px] no-underline border border-white/[0.08]"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[13px] no-underline border border-[var(--border-1)]"
           >
             Retour au compte
           </Link>

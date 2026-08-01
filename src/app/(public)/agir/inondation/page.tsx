@@ -102,7 +102,7 @@ const css = `
   .question-to{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-4);margin-bottom:8px;font-style:normal;}
 
   .not-todo{display:flex;flex-direction:column;gap:12px;margin:24px 0;}
-  .not-todo-item{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;padding:18px 22px;background:rgba(255,255,255,0.02);border:1px solid var(--border-1);border-radius:6px;}
+  .not-todo-item{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;padding:18px 22px;background:var(--bg-elev);border:1px solid var(--border-1);border-radius:6px;}
   .not-todo-cross{font-family:var(--font-mono);font-size:14px;color:var(--fg-4);padding-top:1px;}
   .not-todo-title{font-size:15px;font-weight:500;color:var(--fg-3);margin-bottom:4px;}
   .not-todo-reason{font-size:14px;color:var(--fg-4);line-height:1.55;margin:0;}

@@ -102,7 +102,7 @@ export function MetricDrawer({
                   </div>
                   {r.bar != null && (
                     <span className="metric-drawer-bar" aria-hidden>
-                      <span style={{ width: `${Math.max(4, Math.round(r.bar * 100))}%`, background: r.muted ? "rgba(255,255,255,0.18)" : accent }} />
+                      <span style={{ width: `${Math.max(4, Math.round(r.bar * 100))}%`, background: r.muted ? "var(--bg-elev-3)" : accent }} />
                     </span>
                   )}
                 </li>
@@ -188,7 +188,7 @@ export function MetricDrawer({
         .metric-drawer-panel {
           position: relative; width: clamp(320px, 92vw, 440px); height: 100%;
           overflow-y: auto; background: #0b101c;
-          border-left: 1px solid rgba(255,255,255,0.1);
+          border-left: 1px solid var(--border-2);
           box-shadow: -20px 0 60px rgba(0,0,0,0.5);
           padding: 30px 28px 36px;
           animation: metric-slide-right 0.26s cubic-bezier(0.22,1,0.36,1);
@@ -196,10 +196,10 @@ export function MetricDrawer({
         }
         .metric-drawer-close {
           position: absolute; top: 18px; right: 18px; width: 30px; height: 30px;
-          border-radius: 8px; background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.1); color: #9ba3b4; cursor: pointer; font-size: 13px;
+          border-radius: 8px; background: var(--bg-elev-2);
+          border: 1px solid var(--border-2); color: #9ba3b4; cursor: pointer; font-size: 13px;
         }
-        .metric-drawer-close:hover { background: rgba(255,255,255,0.08); color: #e9ecf2; }
+        .metric-drawer-close:hover { background: var(--bg-elev-3); color: #e9ecf2; }
         .metric-drawer-eyebrow {
           font-family: 'JetBrains Mono', monospace; font-size: 10px;
           letter-spacing: 0.16em; text-transform: uppercase; margin: 0 0 8px;
@@ -224,7 +224,7 @@ export function MetricDrawer({
         }
         .metric-drawer-rows { list-style: none; margin: 0; padding: 0; }
         .metric-drawer-rows li {
-          padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+          padding: 9px 0; border-bottom: 1px solid var(--border-1);
           font-size: 14px; color: #c6cfdb;
         }
         .metric-drawer-row-head {
@@ -234,7 +234,7 @@ export function MetricDrawer({
         .metric-drawer-row-head .metric-drawer-val { text-align: right; }
         .metric-drawer-bar {
           display: block; margin-top: 7px; height: 5px; border-radius: 3px;
-          background: rgba(255,255,255,0.07); overflow: hidden;
+          background: var(--bg-elev-3); overflow: hidden;
         }
         .metric-drawer-bar > span {
           display: block; height: 100%; border-radius: 3px;
@@ -254,7 +254,7 @@ export function MetricDrawer({
         }
         .metric-drawer-frise-track {
           width: 100%; flex: 1; display: flex; align-items: flex-end;
-          background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;
+          background: var(--bg-elev-2); border-radius: 4px; overflow: hidden;
           min-height: 30px;
         }
         .metric-drawer-frise-track > span {
@@ -268,7 +268,7 @@ export function MetricDrawer({
         .metric-drawer-facts { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
         .metric-drawer-fact {
           flex: 1; min-width: 130px;
-          background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+          background: var(--bg-elev); border: 1px solid var(--border-1);
           border-radius: 10px; padding: 12px 14px;
           display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #9ba3b4;
         }
@@ -276,7 +276,7 @@ export function MetricDrawer({
         .metric-drawer-why { font-size: 15px; line-height: 1.7; color: #9ba3b4; margin: 0; }
         .metric-drawer-note {
           margin: 0 0 22px; padding: 14px 16px; border-radius: 10px;
-          background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+          background: var(--bg-elev); border: 1px solid var(--border-1);
         }
         .metric-drawer-note-label {
           font-family: 'JetBrains Mono', monospace; font-size: 10px;
@@ -294,7 +294,7 @@ export function MetricDrawer({
         .metric-drawer-ask:hover { background: rgba(200,184,154,0.2); border-color: rgba(200,184,154,0.6); }
         .metric-drawer-sources {
           margin: 4px 0 22px; padding-top: 14px;
-          border-top: 1px solid rgba(255,255,255,0.06);
+          border-top: 1px solid var(--border-1);
         }
         .metric-drawer-sources > summary {
           list-style: none; cursor: pointer;
@@ -318,7 +318,7 @@ export function MetricDrawer({
           .metric-drawer-root { justify-content: center; align-items: flex-end; }
           .metric-drawer-panel {
             width: 100%; height: auto; max-height: 86vh;
-            border-left: none; border-top: 1px solid rgba(255,255,255,0.1);
+            border-left: none; border-top: 1px solid var(--border-2);
             border-radius: 18px 18px 0 0;
             animation: metric-slide-up 0.26s cubic-bezier(0.22,1,0.36,1);
           }

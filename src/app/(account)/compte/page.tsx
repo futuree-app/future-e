@@ -100,10 +100,10 @@ export default async function ComptePage() {
                   : "Votre première lecture personnalisée est sauvegardée ici, sans limite de temps. Le rapport interactif, lui, ouvre les trois échelles."}
             </p>
             <div className="flex gap-2 flex-wrap mb-7">
-              <span className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] font-mono text-[11px] text-ghost">
+              <span className="px-3 py-1 rounded-full bg-[var(--bg-elev-2)] border border-[var(--border-1)] font-mono text-[11px] text-ghost">
                 {getPlanLabel(account.plan)}
               </span>
-              <span className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] font-mono text-[11px] text-ghost">
+              <span className="px-3 py-1 rounded-full bg-[var(--bg-elev-2)] border border-[var(--border-1)] font-mono text-[11px] text-ghost">
                 {account.email}
               </span>
             </div>
@@ -112,7 +112,7 @@ export default async function ComptePage() {
                 {fullAccess ? "Voir mes modules" : "Reprendre ma première lecture"}
               </Link>
               {!fullAccess && (
-                <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
+                <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">
                   Passer au complet
                 </Link>
               )}
@@ -130,14 +130,14 @@ export default async function ComptePage() {
                   ? "Trois échelles, sur le lieu que vous ouvrez."
                   : "Votre première lecture, retrouvable."}
             </h2>
-            <div className="grid grid-cols-3 rounded-lg overflow-hidden border border-white/[0.08] mb-5">
+            <div className="grid grid-cols-3 rounded-lg overflow-hidden border border-[var(--border-1)] mb-5">
               {(scalesOpen
                 ? [{ val: "3", label: "modules ouverts" }, { val: "∞", label: "questions Futur•e" }, { val: "∞", label: "mises à jour" }]
                 : fullAccess
                   ? [{ val: "3", label: "échelles par lieu" }, { val: "∞", label: "questions Futur•e" }, { val: "∞", label: "mises à jour" }]
                   : [{ val: "1", label: "ville de référence" }, { val: "1", label: "lecture personnalisée" }, { val: "∞", label: "retrouvable" }]
               ).map((m, i) => (
-                <div key={m.label} className={`px-3 py-3.5 text-center ${i < 2 ? "border-r border-white/[0.08]" : ""}`}>
+                <div key={m.label} className={`px-3 py-3.5 text-center ${i < 2 ? "border-r border-[var(--border-1)]" : ""}`}>
                   <span className="block text-[26px] text-accent leading-none mb-1" style={{ fontFamily: "'Instrument Serif', serif" }}>{m.val}</span>
                   <span className="block font-mono text-[9px] tracking-[0.08em] text-ghost uppercase leading-[1.4]">{m.label}</span>
                 </div>
@@ -153,7 +153,7 @@ export default async function ComptePage() {
           </aside>
         </section>
 
-        <div className="border-t border-white/[0.08]" />
+        <div className="border-t border-[var(--border-1)]" />
 
         {/* ── Ce que le compte garde (free) / Modules ouverts (paid) ── */}
         <section className="pt-14">
@@ -234,7 +234,7 @@ export default async function ComptePage() {
                       <p className="font-mono text-[13px] text-ghost tabular-nums mb-2">{String(i + 1).padStart(2, "0")}</p>
                       <h3 className="font-normal text-[18px] text-muted mb-2" style={{ fontFamily: "'Instrument Serif', serif" }}>{module.name}</h3>
                       <p className="text-[12px] text-ghost leading-[1.6] mb-3">{MODULE_BENEFIT[module.id] ?? module.summary}</p>
-                      <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase text-ghost bg-white/[0.03] border border-white/[0.08] rounded-full px-2 py-1">
+                      <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase text-ghost bg-[var(--bg-elev)] border border-[var(--border-1)] rounded-full px-2 py-1">
                         Fermé
                       </span>
                     </article>
@@ -276,14 +276,14 @@ export default async function ComptePage() {
             <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-3">
               Vos factures
             </p>
-            <div className="rounded-xl border border-white/[0.08] overflow-hidden">
+            <div className="rounded-xl border border-[var(--border-1)] overflow-hidden">
               {invoices.map((f, i) => (
                 <a
                   key={f.number}
                   href={`/api/account/factures/${f.number}`}
                   target="_blank"
                   rel="noopener"
-                  className={`flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-5 py-4 no-underline hover:bg-white/[0.03] transition-colors ${i > 0 ? "border-t border-white/[0.06]" : ""}`}
+                  className={`flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-5 py-4 no-underline hover:bg-[var(--bg-elev)] transition-colors ${i > 0 ? "border-t border-[var(--border-1)]" : ""}`}
                 >
                   <span className="text-[14.5px] text-label">{f.designation}</span>
                   <span className="flex items-baseline gap-5 shrink-0">
@@ -304,12 +304,12 @@ export default async function ComptePage() {
         )}
 
         {/* Footer nav */}
-        <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-white/[0.08]">
+        <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-[var(--border-1)]">
           <Link href="/rapport" prefetch={false} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
             Lire mon rapport interactif
           </Link>
           {fullAccess && (
-            <Link href="/rapport/dossiers" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
+            <Link href="/rapport/dossiers" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">
               Mes biens analysés
             </Link>
           )}
@@ -328,7 +328,7 @@ export default async function ComptePage() {
       </div>
 
       {/* Footer */}
-      <footer className="relative z-[2] border-t border-white/[0.08]">
+      <footer className="relative z-[2] border-t border-[var(--border-1)]">
         <div className="max-w-[1100px] mx-auto px-5 sm:px-7 py-8 flex items-center justify-between gap-6 flex-wrap">
           <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
             futur<span className="text-accent not-italic">•</span>e

@@ -149,7 +149,7 @@ export function PaymentWrapper({
   if (needsName) {
     return (
       <form
-        className="rounded-2xl border border-white/[0.10] bg-white/[0.03] p-6"
+        className="rounded-2xl border border-[var(--border-2)] bg-[var(--bg-elev)] p-6"
         onSubmit={async (e) => {
           e.preventDefault();
           setSavingName(true);
@@ -190,7 +190,7 @@ export function PaymentWrapper({
           value={nameDraft}
           onChange={(e) => setNameDraft(e.target.value)}
           placeholder="Camille Rivière"
-          className="w-full rounded-lg border border-white/[0.12] bg-[var(--bg-deep,#0f1424)] px-4 py-3 text-[15px] text-label outline-none focus:border-accent/60"
+          className="w-full rounded-lg border border-[var(--border-2)] bg-[var(--bg-deep,#0f1424)] px-4 py-3 text-[15px] text-label outline-none focus:border-accent/60"
         />
         {nameError && (
           <p className="mt-3 text-[13.5px] text-red-300">{nameError}</p>

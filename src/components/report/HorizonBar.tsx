@@ -133,8 +133,8 @@ export default function HorizonBar({ communeName, locked = false, inseeCode, mod
                   onClick={() => handleHorizonClick(h.key)}
                   disabled={locked}
                   style={{
-                    background: isActive ? "rgba(200,184,154,0.10)" : "rgba(255,255,255,0.03)",
-                    border: `1px solid ${isActive ? "rgba(200,184,154,0.35)" : "rgba(255,255,255,0.08)"}`,
+                    background: isActive ? "rgba(200,184,154,0.10)" : "var(--bg-elev)",
+                    border: `1px solid ${isActive ? "rgba(200,184,154,0.35)" : "var(--border-1)"}`,
                     borderRadius: 12,
                     padding: "10px 16px",
                     cursor: locked ? "default" : "pointer",

@@ -59,7 +59,7 @@ export default function MentionsLegalesPage() {
           forment une paire et doivent se ressembler. */}
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          borderBottom: "1px solid var(--border-1)",
           padding: "20px 24px",
           display: "flex",
           alignItems: "center",
@@ -232,7 +232,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
           color: "var(--fg-hi, #fff)",
           margin: "0 0 16px",
           paddingBottom: 12,
-          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          borderBottom: "1px solid var(--border-1)",
         }}
       >
         {title}
@@ -250,7 +250,7 @@ function InfoBlock({ children }: { children: React.ReactNode }) {
       style={{
         marginTop: 16,
         borderRadius: 12,
-        border: "1px solid rgba(255,255,255,0.07)",
+        border: "1px solid var(--border-1)",
         overflow: "hidden",
       }}
     >
@@ -266,7 +266,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
         display: "grid",
         gridTemplateColumns: "120px 1fr",
         padding: "10px 16px",
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
+        borderBottom: "1px solid var(--border-1)",
         fontSize: 14,
       }}
     >

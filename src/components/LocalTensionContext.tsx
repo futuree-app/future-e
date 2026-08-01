@@ -116,7 +116,7 @@ export async function LocalTensionContext({
             fontFamily: "'Instrument Serif', serif",
             fontSize: 'clamp(22px, 2.5vw, 30px)',
             fontWeight: 400,
-            color: '#e9ecf2',
+            color: 'var(--fg-1)',
             margin: '0 0 8px',
             lineHeight: 1.2,
           }}
@@ -143,7 +143,7 @@ export async function LocalTensionContext({
           gridTemplateColumns: '2.5rem 1fr repeat(4, 56px)',
           gap: '8px',
           padding: '0 12px 10px',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          borderBottom: '1px solid var(--border-1)',
           marginBottom: '6px',
         }}
       >
@@ -216,7 +216,7 @@ export async function LocalTensionContext({
               <div>
                 <div
                   style={{
-                    color: '#e9ecf2',
+                    color: 'var(--fg-1)',
                     fontSize: '14px',
                     fontWeight: 500,
                     lineHeight: 1.3,
@@ -255,7 +255,7 @@ export async function LocalTensionContext({
                           style={{
                             width: '36px',
                             height: '3px',
-                            background: 'rgba(255,255,255,0.08)',
+                            background: 'var(--bg-elev-3)',
                             borderRadius: '2px',
                             overflow: 'hidden',
                           }}
@@ -295,7 +295,7 @@ export async function LocalTensionContext({
         style={{
           marginTop: '20px',
           paddingTop: '16px',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
+          borderTop: '1px solid var(--border-1)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',

@@ -57,7 +57,7 @@ export function ConsentBanner() {
         left: 0,
         right: 0,
         zIndex: 9999,
-        borderTop: "1px solid rgba(255,255,255,0.07)",
+        borderTop: "1px solid var(--border-1)",
         background: "rgba(6,8,18,0.96)",
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
@@ -93,7 +93,7 @@ export function ConsentBanner() {
           style={{
             padding: "6px 14px",
             borderRadius: 8,
-            border: "1px solid rgba(255,255,255,0.10)",
+            border: "1px solid var(--border-2)",
             background: "transparent",
             fontFamily: "var(--font-mono, monospace)",
             fontSize: 11,
@@ -110,8 +110,8 @@ export function ConsentBanner() {
           style={{
             padding: "6px 14px",
             borderRadius: 8,
-            border: "1px solid rgba(255,255,255,0.15)",
-            background: "rgba(255,255,255,0.06)",
+            border: "1px solid var(--border-hi)",
+            background: "var(--bg-elev-3)",
             fontFamily: "var(--font-mono, monospace)",
             fontSize: 11,
             letterSpacing: "0.08em",

@@ -97,12 +97,12 @@ export function DossierCheckoutPanel({
               onKeyDown={(e) => { if (e.key === "Enter") appliquer(saisie); }}
               placeholder="Votre code"
               aria-label="Code de lancement"
-              className="flex-1 min-w-[160px] rounded-lg border border-white/[0.12] bg-[var(--bg-deep,#0f1424)] px-3.5 py-2.5 text-[14px] text-label outline-none focus:border-accent/60"
+              className="flex-1 min-w-[160px] rounded-lg border border-[var(--border-2)] bg-[var(--bg-deep,#0f1424)] px-3.5 py-2.5 text-[14px] text-label outline-none focus:border-accent/60"
             />
             <button
               type="button"
               onClick={() => appliquer(saisie)}
-              className="rounded-lg border border-white/[0.12] bg-white/[0.05] px-4 py-2.5 text-[13.5px] text-muted"
+              className="rounded-lg border border-[var(--border-2)] bg-[var(--bg-elev-2)] px-4 py-2.5 text-[13.5px] text-muted"
             >
               Appliquer
             </button>

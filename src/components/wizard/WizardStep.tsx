@@ -127,7 +127,7 @@ const optionBase =
 const optionSelected =
   "bg-accent/[0.08] border-accent/50 text-accent shadow-[0_0_0_1px_rgba(251,146,60,0.15)]";
 const optionIdle =
-  "bg-white/[0.02] border-white/[0.08] text-muted hover:border-white/[0.20] hover:bg-white/[0.04] hover:text-label";
+  "bg-[var(--bg-elev)] border-[var(--border-1)] text-muted hover:border-[var(--border-hi)] hover:bg-[var(--bg-elev-2)] hover:text-label";
 
 export function WizardStep({
   step,
@@ -234,13 +234,13 @@ export function WizardStep({
               }
               setBanOpen(false);
             }}
-            className="wizard-input w-full rounded-[1.65rem] bg-white/[0.04] border border-white/[0.08] text-label text-[18px] placeholder:text-ghost focus:outline-none focus:border-accent/50 focus:bg-white/[0.06] transition-all duration-200"
+            className="wizard-input w-full rounded-[1.65rem] bg-[var(--bg-elev-2)] border border-[var(--border-1)] text-label text-[18px] placeholder:text-ghost focus:outline-none focus:border-accent/50 focus:bg-[var(--bg-elev-3)] transition-all duration-200"
             autoFocus
             autoComplete="off"
           />
 
           {banOpen && banSuggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-3 rounded-[1.65rem] overflow-hidden border border-white/[0.08] z-10 shadow-2xl" style={{ background: "#0d1120" }}>
+            <div className="absolute top-full left-0 right-0 mt-3 rounded-[1.65rem] overflow-hidden border border-[var(--border-1)] z-10 shadow-2xl" style={{ background: "#0d1120" }}>
               {banSuggestions.map((s) => (
                 <button
                   key={s.id}
@@ -252,7 +252,7 @@ export function WizardStep({
                     setBanOpen(false);
                     setBanSuggestions([]);
                   }}
-                  className="wizard-suggestion w-full text-left hover:bg-white/[0.06] transition-colors duration-150 border-b border-white/[0.05] last:border-0"
+                  className="wizard-suggestion w-full text-left hover:bg-[var(--bg-elev-3)] transition-colors duration-150 border-b border-[var(--border-1)] last:border-0"
                 >
                   <span className="block text-[18px] leading-tight text-label">{s.name}</span>
                   <span className="block font-mono text-[12px] tracking-[0.06em] text-ghost mt-2">
@@ -383,7 +383,7 @@ export function WizardStep({
           <button
             type="button"
             onClick={() => onSkip(config.key)}
-            className="inline-flex items-center justify-center shrink-0 min-h-[3.75rem] rounded-full border border-white/[0.12] bg-white/[0.04] text-[15px] font-medium text-muted hover:bg-white/[0.07] hover:text-label transition-all duration-200 whitespace-nowrap"
+            className="inline-flex items-center justify-center shrink-0 min-h-[3.75rem] rounded-full border border-[var(--border-2)] bg-[var(--bg-elev-2)] text-[15px] font-medium text-muted hover:bg-[var(--bg-elev-3)] hover:text-label transition-all duration-200 whitespace-nowrap"
             style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem" }}
           >
             Je ne sais pas répondre
@@ -395,7 +395,7 @@ export function WizardStep({
       )}
 
       {/* ── Navigation ── */}
-      <div className="flex items-center justify-between pt-8 border-t border-white/[0.06]">
+      <div className="flex items-center justify-between pt-8 border-t border-[var(--border-1)]">
         {step > 0 ? (
           <button
             type="button"

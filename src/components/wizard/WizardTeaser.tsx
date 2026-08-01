@@ -126,7 +126,7 @@ const SCORE_MODERE = 40;
 /* ── Signal card — 4 lignes : headline / stat / precision / source ── */
 function Signal({ icon, headline, stat, precision, source }: SignalContent) {
   return (
-    <div className="rounded-[1.7rem] bg-white/[0.03] border border-white/[0.07]" style={{ padding: "1.75rem 2rem" }}>
+    <div className="rounded-[1.7rem] bg-[var(--bg-elev)] border border-[var(--border-1)]" style={{ padding: "1.75rem 2rem" }}>
       <div className="flex items-start gap-4">
         <span
           className="shrink-0 text-[20px] leading-none"
@@ -331,7 +331,7 @@ export function WizardTeaser({
               <span className="italic text-accent">votre exposition</span>{" "}
               en cours…
             </h2>
-            <div className="relative h-[3px] max-w-[24rem] rounded-full bg-white/[0.06] overflow-hidden mt-2">
+            <div className="relative h-[3px] max-w-[24rem] rounded-full bg-[var(--bg-elev-3)] overflow-hidden mt-2">
               <div
                 className="absolute top-0 h-full bg-accent rounded-full"
                 style={{ animation: "wizard-loading-bar 1.5s ease-in-out infinite" }}
@@ -381,7 +381,7 @@ export function WizardTeaser({
                 ))}
               </div>
               <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(6,8,18,0.45)" }}>
-                <span className="font-mono text-[11px] tracking-[0.12em] uppercase text-muted border border-white/[0.12] rounded-full bg-canvas/85" style={{ padding: "0.75rem 1.5rem" }}>
+                <span className="font-mono text-[11px] tracking-[0.12em] uppercase text-muted border border-[var(--border-2)] rounded-full bg-canvas/85" style={{ padding: "0.75rem 1.5rem" }}>
                   {lockedSignals.length} point{lockedSignals.length > 1 ? "s" : ""} d&apos;attention verrouillé{lockedSignals.length > 1 ? "s" : ""}
                 </span>
               </div>

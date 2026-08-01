@@ -98,14 +98,14 @@ const css = `
 
   /* Data grids */
   .data-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:24px 0;}
-  .data-card{padding:22px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);}
+  .data-card{padding:22px;border-radius:10px;background:var(--bg-elev-2);border:1px solid var(--border-1);}
   .data-card-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-4);margin-bottom:10px;}
   .data-card-value{font-family:var(--font-serif);font-size:32px;line-height:1;font-weight:400;color:${ACCENT};}
   .data-card-unit{font-size:0.45em;color:var(--fg-4);}
   .data-card-note{font-size:12px;color:var(--fg-3);margin-top:8px;line-height:1.5;}
 
   /* Pill tags */
-  .pill{display:inline-flex;align-items:center;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);font-family:var(--font-mono);font-size:11px;color:var(--fg-3);}
+  .pill{display:inline-flex;align-items:center;padding:6px 12px;border-radius:999px;background:var(--bg-elev-2);border:1px solid var(--border-1);font-family:var(--font-mono);font-size:11px;color:var(--fg-3);}
 
   /* Section headers */
   .section{margin:64px 0 0;}
@@ -115,15 +115,15 @@ const css = `
 
   /* Article cards */
   .articles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px;}
-  .article-card{padding:22px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);text-decoration:none;display:flex;flex-direction:column;gap:10px;transition:border-color 0.2s,background 0.2s;}
-  .article-card:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);}
+  .article-card{padding:22px;border-radius:10px;background:var(--bg-elev);border:1px solid var(--border-1);text-decoration:none;display:flex;flex-direction:column;gap:10px;transition:border-color 0.2s,background 0.2s;}
+  .article-card:hover{background:var(--bg-elev-2);border-color:var(--border-hi);}
   .article-img{width:100%;height:140px;object-fit:cover;border-radius:6px;margin-bottom:2px;}
   .article-cat{font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
   .article-title{font-size:14px;font-weight:500;color:var(--fg-1);line-height:1.35;}
   .article-cta{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:${ACCENT};margin-top:auto;}
 
   /* CTA block */
-  .cta-block{margin-top:48px;padding:36px 40px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-left:3px solid ${ACCENT};border-radius:12px;}
+  .cta-block{margin-top:48px;padding:36px 40px;background:var(--bg-elev);border:1px solid var(--border-1);border-left:3px solid ${ACCENT};border-radius:12px;}
   .cta-eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:${ACCENT};margin-bottom:14px;}
   .cta-title{font-family:var(--font-serif);font-size:22px;line-height:1.4;color:var(--fg-1);margin:0 0 8px;font-weight:400;}
   .cta-sub{font-family:var(--font-mono);font-size:12px;color:var(--fg-4);margin:0 0 24px;line-height:1.7;}
@@ -131,10 +131,10 @@ const css = `
   .cta-sec{display:inline-flex;align-items:center;gap:6px;padding:13px 22px;border:1px solid ${ACCENT}40;color:${ACCENT};font-family:var(--font-mono);font-size:12px;letter-spacing:0.06em;text-decoration:none;border-radius:6px;}
 
   /* Divider */
-  .divider{height:1px;background:rgba(255,255,255,0.06);margin:0;}
+  .divider{height:1px;background:var(--bg-elev-3);margin:0;}
 
   /* Footer */
-  .page-footer{position:relative;z-index:2;max-width:960px;margin:0 auto;padding:28px 28px 56px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.06em;border-top:1px solid rgba(255,255,255,0.06);}
+  .page-footer{position:relative;z-index:2;max-width:960px;margin:0 auto;padding:28px 28px 56px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.06em;border-top:1px solid var(--border-1);}
   .page-footer a{color:var(--fg-3);text-decoration:none;}
 
   @media(max-width:768px){
@@ -469,13 +469,13 @@ export default async function ChaleurCommune({
           <h2 className="section-title">Ce que vous pouvez faire</h2>
           <p className="section-sub">Deux guides ciblés selon votre situation.</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14, marginTop: 24 }}>
-            <Link href="/agir/canicule" style={{ padding: '24px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: 10, transition: 'border-color 0.2s' }}>
+            <Link href="/agir/canicule" style={{ padding: '24px', borderRadius: 10, background: 'var(--bg-elev)', border: '1px solid var(--border-1)', textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: 10, transition: 'border-color 0.2s' }}>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--fg-4)' }}>Guide pratique</div>
               <div style={{ fontSize: 16, fontWeight: 500, color: 'var(--fg-1)', lineHeight: 1.35 }}>Se préparer à la canicule</div>
               <div style={{ fontSize: 13, color: 'var(--fg-3)', lineHeight: 1.6 }}>Ventilation, hydratation, personnes vulnérables : les gestes qui font une vraie différence.</div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: ACCENT, marginTop: 'auto' }}>Voir le guide →</div>
             </Link>
-            <Link href="/comparateur" style={{ padding: '24px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: 10, transition: 'border-color 0.2s' }}>
+            <Link href="/comparateur" style={{ padding: '24px', borderRadius: 10, background: 'var(--bg-elev)', border: '1px solid var(--border-1)', textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: 10, transition: 'border-color 0.2s' }}>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--fg-4)' }}>Outil de comparaison</div>
               <div style={{ fontSize: 16, fontWeight: 500, color: 'var(--fg-1)', lineHeight: 1.35 }}>Comparer avec une autre commune</div>
               <div style={{ fontSize: 13, color: 'var(--fg-3)', lineHeight: 1.6 }}>Chaleur, air, eau, revenus, accès aux soins : les deux territoires côte à côte en moins de 10 secondes.</div>

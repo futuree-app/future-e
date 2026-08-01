@@ -64,7 +64,7 @@ export function ChoixConvictionView({ trio, apercu, userEmail, returnUrl, return
               <p key={i} className="text-[14px] leading-[1.6] text-label mb-3">{line}</p>
             ))}
             {apercu.themes.map((th) => (
-              <div key={th.id} className="mt-4 pt-4 border-t border-white/[0.08]">
+              <div key={th.id} className="mt-4 pt-4 border-t border-[var(--border-1)]">
                 <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-accent mb-1">{th.titre}</p>
                 <p className="text-[13px] leading-[1.55] text-muted">{th.synthese}</p>
               </div>
@@ -91,7 +91,7 @@ export function ChoixConvictionView({ trio, apercu, userEmail, returnUrl, return
         </div>
 
         <aside className="glass rounded-2xl p-6 md:sticky md:top-6">
-          <div className="flex items-baseline justify-between mb-4 pb-4 border-b border-white/[0.08]">
+          <div className="flex items-baseline justify-between mb-4 pb-4 border-b border-[var(--border-1)]">
             <span className="text-[15px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>Pack Décision</span>
             <span className="text-[28px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
               39<span className="text-[15px] text-muted ml-1">€</span>
@@ -116,7 +116,7 @@ export function ChoixConvictionView({ trio, apercu, userEmail, returnUrl, return
               </Link>
               <Link
                 href={`/connexion?next=${encodeURIComponent(returnPath)}`}
-                className="flex items-center justify-center px-5 py-2.5 rounded-lg border border-white/[0.14] text-[13px] text-label"
+                className="flex items-center justify-center px-5 py-2.5 rounded-lg border border-[var(--border-2)] text-[13px] text-label"
               >
                 J&apos;ai déjà un compte
               </Link>

@@ -62,21 +62,21 @@ export function ChipTooltip({ label, text, color }: { label: string; text: strin
         .chip-tip-btn {
           font-size: 12px; line-height: 1.2; cursor: help;
           color: rgba(233,236,242,0.9);
-          border: 1px solid rgba(255,255,255,0.12);
+          border: 1px solid var(--border-2);
           border-radius: 9999px; padding: 4px 12px;
           background: transparent;
-          text-decoration: underline dotted rgba(255,255,255,0.3);
+          text-decoration: underline dotted var(--bg-elev-3);
           text-underline-offset: 3px;
           transition: border-color 0.15s, color 0.15s;
           font-family: inherit;
         }
-        .chip-tip-btn:hover { border-color: rgba(255,255,255,0.22); color: #e9ecf2; }
+        .chip-tip-btn:hover { border-color: var(--border-hi); color: #e9ecf2; }
         .chip-tip-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
         .chip-tip-bubble {
           position: absolute; bottom: calc(100% + 8px); left: 0; z-index: 50;
           width: max-content; max-width: 240px;
           background: #0b101c; color: #c6cfdb;
-          border: 1px solid rgba(255,255,255,0.12);
+          border: 1px solid var(--border-2);
           border-radius: 10px; padding: 10px 12px;
           font-family: 'Instrument Sans', sans-serif;
           font-size: 12.5px; line-height: 1.5; font-weight: 400;

@@ -1781,7 +1781,7 @@ export default function FutureELanding() {
       justifyContent: 'center',
       padding: '14px 24px',
       borderRadius: 10,
-      background: 'rgba(255,255,255,0.02)',
+      background: 'var(--bg-elev)',
       border: `1px solid ${C.border}`,
       color: C.text,
       fontFamily: "'Instrument Sans', sans-serif",
@@ -2651,7 +2651,7 @@ export default function FutureELanding() {
               <HorizonSwitch value={horizon} onChange={setHorizon} />
             )}
             {communeDataLoading && (
-              <div style={{ position: 'relative', height: 2, borderRadius: 1, background: 'rgba(255,255,255,0.06)', overflow: 'hidden', marginBottom: 6 }}>
+              <div style={{ position: 'relative', height: 2, borderRadius: 1, background: 'var(--bg-elev-3)', overflow: 'hidden', marginBottom: 6 }}>
                 <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '40%', background: 'linear-gradient(90deg, transparent, #fb923c, transparent)', animation: 'hero-loading-sweep 1.4s ease-in-out infinite' }} />
               </div>
             )}
@@ -2680,7 +2680,7 @@ export default function FutureELanding() {
               <div style={{
                 marginTop: 4,
                 paddingTop: 16,
-                borderTop: '1px solid rgba(255,255,255,0.06)',
+                borderTop: '1px solid var(--border-1)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 10,
@@ -2724,7 +2724,7 @@ export default function FutureELanding() {
                       padding: '8px 12px',
                       borderRadius: 8,
                       background: 'transparent',
-                      border: '1px solid rgba(255,255,255,0.07)',
+                      border: '1px solid var(--border-1)',
                       fontFamily: "'Instrument Sans', system-ui, sans-serif",
                       fontSize: 12,
                       fontWeight: 400,

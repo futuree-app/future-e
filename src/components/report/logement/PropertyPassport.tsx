@@ -65,7 +65,7 @@ export function PropertyPassport({
 
       <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-0 mt-5 pt-2 border-t" style={{ borderColor: `${tint}26` }}>
         {fields.map((f) => (
-          <div key={f.label} className="flex items-start gap-3 py-3 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+          <div key={f.label} className="flex items-start gap-3 py-3 border-b" style={{ borderColor: "var(--border-1)" }}>
             <div className="min-w-0">
               <dt className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">{f.label}</dt>
               <dd className="text-[15px] text-label leading-snug">{f.value}</dd>

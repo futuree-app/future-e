@@ -118,7 +118,7 @@ export default async function TerritoryUnlockPage({
             { n: "02", t: "Identifier les points de vigilance", d: `Ce qui joue en faveur ${deCommune(displayName)}, ce qui demande attention, et ce qui dépend vraiment de votre projet.` },
             { n: "03", t: "Poser vos questions", d: "3 questions à AskFuture pour approfondir cette option avec votre situation." },
           ].map((c) => (
-            <div key={c.t} className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
+            <div key={c.t} className="rounded-2xl border border-[var(--border-1)] bg-[var(--bg-elev)] p-5">
               <p className="font-mono text-[10px] tracking-[0.14em] text-ghost mb-3">{c.n}</p>
               <p className="text-[16px] leading-[1.2] text-label" style={{ fontFamily: "var(--font-serif)" }}>{c.t}</p>
               <p className="mt-2 text-[13px] leading-[1.6] text-muted">{c.d}</p>
@@ -197,7 +197,7 @@ export default async function TerritoryUnlockPage({
             14 € · paiement unique · accès immédiat · TVA non applicable, art. 293 B du CGI
           </p>
           <div
-            className="mt-5 rounded-2xl bg-white/[0.03] p-7"
+            className="mt-5 rounded-2xl bg-[var(--bg-elev)] p-7"
             style={{ border: "1px solid var(--orange-ring)", boxShadow: "0 24px 70px -28px var(--orange)" }}
           >
             {user ? (
@@ -224,7 +224,7 @@ export default async function TerritoryUnlockPage({
                 </Link>
                 <Link
                   href={`/connexion?next=${encodeURIComponent(backHref)}`}
-                  className="flex items-center justify-center rounded-lg border border-white/[0.12] px-6 py-3.5 text-[14px] text-muted no-underline"
+                  className="flex items-center justify-center rounded-lg border border-[var(--border-2)] px-6 py-3.5 text-[14px] text-muted no-underline"
                 >
                   J&apos;ai déjà un compte
                 </Link>

@@ -46,9 +46,9 @@ export default async function InscriptionPage({
         <div className="flex flex-col gap-4">
           <GoogleSignInButton next={next} />
           <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-white/[0.08]" />
+            <div className="h-px flex-1 bg-[var(--bg-elev-3)]" />
             <span className="text-[11px] font-mono text-ghost tracking-[0.08em] uppercase">ou</span>
-            <div className="h-px flex-1 bg-white/[0.08]" />
+            <div className="h-px flex-1 bg-[var(--bg-elev-3)]" />
           </div>
         </div>
         <PasswordForm

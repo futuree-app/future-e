@@ -1202,7 +1202,7 @@ export function QuartierAside({ registres, communeName, scenarios, georisques, t
 
       <style>{`
         .metric-card-clickable { transition: transform 0.15s ease, background 0.15s ease; }
-        .metric-card-clickable:hover { transform: translateY(-2px); background: rgba(255,255,255,0.05); }
+        .metric-card-clickable:hover { transform: translateY(-2px); background: var(--bg-elev-2); }
         .metric-card-clickable:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
       `}</style>
     </div>

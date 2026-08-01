@@ -66,9 +66,9 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
     <>
       <style>{`
         .nb-link:hover { color: #e9ecf2 !important; }
-        .nb-dropdown-link:hover { background: rgba(255,255,255,0.05) !important; }
+        .nb-dropdown-link:hover { background: var(--bg-elev-2) !important; }
         .nb-mobile-link:hover { color: #fb923c !important; }
-        .nb-burger:hover { background: rgba(255,255,255,0.06) !important; }
+        .nb-burger:hover { background: var(--bg-elev-3) !important; }
         @keyframes nb-fadein {
           from { opacity: 0; transform: translateY(-6px); }
           to   { opacity: 1; transform: translateY(0); }
@@ -344,7 +344,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                   fontSize: 11,
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase',
-                  background: 'rgba(255,255,255,0.02)',
+                  background: 'var(--bg-elev)',
                 }}
               >
                 {ctas?.secondary?.label ?? 'Se connecter'}

@@ -62,7 +62,7 @@ export function PackUnlockedView({ data, trio, pistes, projetLabel }: Props) {
             key={r.insee}
             onClick={() => openReport(r.insee, r.nom)}
             disabled={opening !== null}
-            className="glass rounded-xl p-4 flex items-center justify-between hover:border-white/[0.28] border border-white/[0.14] transition-colors text-left disabled:opacity-60"
+            className="glass rounded-xl p-4 flex items-center justify-between hover:border-[var(--border-hi)] border border-[var(--border-2)] transition-colors text-left disabled:opacity-60"
           >
             <span className="text-[14px] text-label" style={{ fontFamily: "'Instrument Serif', serif" }}>
               {opening === r.insee ? "Ouverture…" : `Rapport · ${r.nom}`}
@@ -105,7 +105,7 @@ export function PackUnlockedView({ data, trio, pistes, projetLabel }: Props) {
                     </li>
                   ))}
                 </ul>
-                <p className="mt-4 pt-3 border-t border-white/[0.08] text-[13px] leading-[1.55] text-muted">
+                <p className="mt-4 pt-3 border-t border-[var(--border-1)] text-[13px] leading-[1.55] text-muted">
                   {r.compromis}
                 </p>
               </div>

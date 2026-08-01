@@ -107,7 +107,7 @@ function LigneRow({ ligne, trio }: { ligne: ComparaisonLigne; trio: MatchResult[
     new Set(dispo.map((c) => `${c.palier}|${c.qualifier ?? ""}`)).size === 1;
 
   return (
-    <div className={`${gridFor(n)} gap-y-2 md:gap-y-0 md:items-center py-3.5 border-t border-white/[0.06]`}>
+    <div className={`${gridFor(n)} gap-y-2 md:gap-y-0 md:items-center py-3.5 border-t border-[var(--border-1)]`}>
       <div className="md:pr-2">
         <LabelTip label={ligne.label} text={ligne.aide} />
         {!neutre && (
@@ -143,7 +143,7 @@ function LigneRow({ ligne, trio }: { ligne: ComparaisonLigne; trio: MatchResult[
 // En-tête de colonnes (communes nommées en Serif) rappelé pour le thème.
 export function MatrixHeader({ trio }: { trio: MatchResult[] }) {
   return (
-    <div className={`${gridFor(trio.length)} hidden md:grid pb-2 border-b border-white/[0.06]`}>
+    <div className={`${gridFor(trio.length)} hidden md:grid pb-2 border-b border-[var(--border-1)]`}>
       <div className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-ghost self-end pb-1">Critère</div>
       {trio.map((r, n) => (
         <div key={r.insee} className="px-3.5 flex items-baseline gap-2">

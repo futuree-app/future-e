@@ -259,8 +259,8 @@ export function ComparatorSearch({
   return (
     <>
       <style>{`
-        .cmp-input:focus { border-color: rgba(248,113,113,0.35) !important; background: rgba(255,255,255,0.05) !important; outline: none; }
-        .cmp-row:hover { background: rgba(255,255,255,0.05) !important; }
+        .cmp-input:focus { border-color: rgba(248,113,113,0.35) !important; background: var(--bg-elev-2) !important; outline: none; }
+        .cmp-row:hover { background: var(--bg-elev-2) !important; }
         @keyframes cmp-progress {
           0%   { width: 0%;   opacity: 1; }
           60%  { width: 75%;  opacity: 1; }

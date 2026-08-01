@@ -337,7 +337,7 @@ export default function QuartierSynthesis({
           })}
 
         {workbookChangedSinceLastFetch && synthState !== "streaming" && (
-          <div className="mt-7 pt-5 border-t border-white/[0.06] flex items-center justify-between gap-4 flex-wrap">
+          <div className="mt-7 pt-5 border-t border-[var(--border-1)] flex items-center justify-between gap-4 flex-wrap">
             <p className="text-[13px] leading-[1.55] text-muted max-w-[620px]">
               Vos repères ont changé.
             </p>
@@ -358,7 +358,7 @@ export default function QuartierSynthesis({
             reste du parcours), mais le déclencheur est traité en CTA bleu bien
             visible dans QuartierWorkbook, pas une pastille grise qui se perd. */}
         {isResidence && synthState !== "streaming" && (
-          <div className="mt-7 pt-5 border-t border-white/[0.06]">
+          <div className="mt-7 pt-5 border-t border-[var(--border-1)]">
             <QuartierWorkbook
               userKey={userKey}
               commune={communeName}
@@ -375,7 +375,7 @@ export default function QuartierSynthesis({
             Fermé par défaut, même geste que le bloc résidence : tout le
             header est cliquable, le déclencheur est un CTA bleu visible. */}
         {relation === "considering_living" && synthState !== "streaming" && (
-          <div className="mt-7 pt-5 border-t border-white/[0.06]">
+          <div className="mt-7 pt-5 border-t border-[var(--border-1)]">
             <button
               type="button"
               onClick={() => setDiscoveryOpen((v) => !v)}
@@ -394,7 +394,7 @@ export default function QuartierSynthesis({
               <span
                 className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] whitespace-nowrap shrink-0 ${
                   discoveryOpen
-                    ? "border border-white/[0.12] bg-white/[0.04] text-muted font-normal"
+                    ? "border border-[var(--border-2)] bg-[var(--bg-elev-2)] text-muted font-normal"
                     : "border border-info/40 bg-info/[0.14] text-info font-semibold"
                 }`}
               >
@@ -417,7 +417,7 @@ export default function QuartierSynthesis({
                   maxLength={300}
                   rows={2}
                   placeholder="Le calme, les écoles, le budget, l'exposition aux risques : ce qui pèse le plus pour vous."
-                  className="w-full bg-white/[0.03] border border-white/[0.1] rounded-md p-2.5 text-[14px] text-label placeholder:text-ghost mb-3 resize-y"
+                  className="w-full bg-[var(--bg-elev)] border border-[var(--border-2)] rounded-md p-2.5 text-[14px] text-label placeholder:text-ghost mb-3 resize-y"
                 />
                 <label className="block text-[13px] text-label mb-1.5">
                   Qu&apos;est-ce qui pourrait vous faire hésiter&nbsp;?
@@ -428,7 +428,7 @@ export default function QuartierSynthesis({
                   maxLength={300}
                   rows={2}
                   placeholder="Une inquiétude ou un point que vous souhaitez examiner avec attention."
-                  className="w-full bg-white/[0.03] border border-white/[0.1] rounded-md p-2.5 text-[14px] text-label placeholder:text-ghost mb-3 resize-y"
+                  className="w-full bg-[var(--bg-elev)] border border-[var(--border-2)] rounded-md p-2.5 text-[14px] text-label placeholder:text-ghost mb-3 resize-y"
                 />
                 <div className="flex items-center gap-3 flex-wrap">
                   <button
@@ -516,8 +516,8 @@ export default function QuartierSynthesis({
           display: inline-flex;
           gap: 4px;
           padding: 3px;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.06);
+          background: var(--bg-elev);
+          border: 1px solid var(--border-1);
           border-radius: 100px;
         }
         .quartier-horizon-pill {
@@ -535,7 +535,7 @@ export default function QuartierSynthesis({
         }
         .quartier-horizon-pill:hover:not(:disabled):not([data-active="true"]) {
           color: #e9ecf2;
-          background: rgba(255, 255, 255, 0.04);
+          background: var(--bg-elev-2);
         }
         .quartier-horizon-pill[data-active="true"] {
           background: rgba(96, 165, 250, 0.18);

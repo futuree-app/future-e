@@ -272,7 +272,7 @@ export function MemoireForm({ profile }: MemoireFormProps) {
             type="button"
             onClick={() => setConfirmClearAll(true)}
             disabled={isBusy}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/[0.04] border border-red-400/30 text-red-200 text-[13px] disabled:opacity-40"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] border border-red-400/30 text-red-200 text-[13px] disabled:opacity-40"
           >
             Tout effacer
           </button>
@@ -290,7 +290,7 @@ export function MemoireForm({ profile }: MemoireFormProps) {
               type="button"
               onClick={() => setConfirmClearAll(false)}
               disabled={isBusy}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-muted text-[13px] disabled:opacity-40"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] border border-[var(--border-1)] text-muted text-[13px] disabled:opacity-40"
             >
               Annuler
             </button>
@@ -364,7 +364,7 @@ function CommuneBlock({
   }
 
   return (
-    <div className="glass rounded-2xl p-7 mb-3 border border-white/[0.08]">
+    <div className="glass rounded-2xl p-7 mb-3 border border-[var(--border-1)]">
       <div className="flex items-baseline justify-between gap-4 mb-3 flex-wrap">
         <div>
           <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-ghost mb-1">
@@ -385,20 +385,20 @@ function CommuneBlock({
                 value={query}
                 onChange={handleChange}
                 placeholder="Rechercher une commune…"
-                className="bg-transparent border border-white/[0.18] rounded-lg px-3 py-2 text-[15px] text-label placeholder:text-ghost outline-none w-64"
+                className="bg-transparent border border-[var(--border-hi)] rounded-lg px-3 py-2 text-[15px] text-label placeholder:text-ghost outline-none w-64"
                 onBlur={() => setTimeout(() => { setOpen(false); setEditing(false); setQuery(""); }, 150)}
               />
               {fetching && (
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-ghost">…</span>
               )}
               {open && results.length > 0 && (
-                <ul className="absolute left-0 top-full mt-1 z-10 w-72 glass border border-white/[0.1] rounded-xl overflow-hidden shadow-xl">
+                <ul className="absolute left-0 top-full mt-1 z-10 w-72 glass border border-[var(--border-2)] rounded-xl overflow-hidden shadow-xl">
                   {results.map((c) => (
                     <li key={c.code}>
                       <button
                         type="button"
                         onMouseDown={() => handleSelect(c)}
-                        className="w-full text-left px-4 py-2.5 text-[13px] text-label hover:bg-white/[0.05] flex justify-between gap-2"
+                        className="w-full text-left px-4 py-2.5 text-[13px] text-label hover:bg-[var(--bg-elev-2)] flex justify-between gap-2"
                       >
                         <span>{c.nom}</span>
                         <span className="text-ghost font-mono text-[11px]">{c.code}</span>
@@ -417,7 +417,7 @@ function CommuneBlock({
               type="button"
               onClick={() => setEditing(true)}
               disabled={disabled}
-              className="font-mono text-[10px] tracking-[0.08em] uppercase text-ghost hover:text-muted border border-white/[0.08] rounded-full px-3 py-1 disabled:opacity-40"
+              className="font-mono text-[10px] tracking-[0.08em] uppercase text-ghost hover:text-muted border border-[var(--border-1)] rounded-full px-3 py-1 disabled:opacity-40"
             >
               Modifier
             </button>
@@ -448,7 +448,7 @@ function FieldShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="glass rounded-xl p-5 border border-white/[0.06]">
+    <div className="glass rounded-xl p-5 border border-[var(--border-1)]">
       <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
         <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-ghost">
           {label}
@@ -559,7 +559,7 @@ function SelectField({
               className={`px-4 py-2 rounded-full text-[13px] border transition-colors ${
                 selected
                   ? "bg-accent/[0.18] border-accent/50 text-label"
-                  : "bg-white/[0.03] border-white/[0.08] text-muted hover:text-label"
+                  : "bg-[var(--bg-elev)] border-[var(--border-1)] text-muted hover:text-label"
               } disabled:opacity-40`}
             >
               {opt.label}
@@ -616,7 +616,7 @@ function BooleanField({
               className={`px-4 py-2 rounded-full text-[13px] border ${
                 selected
                   ? "bg-accent/[0.18] border-accent/50 text-label"
-                  : "bg-white/[0.03] border-white/[0.08] text-muted"
+                  : "bg-[var(--bg-elev)] border-[var(--border-1)] text-muted"
               } disabled:opacity-40`}
             >
               {opt.label}
@@ -710,13 +710,13 @@ function ArrayField({
           }}
           placeholder={hint}
           disabled={disabled}
-          className="flex-1 bg-transparent border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] text-label placeholder:text-ghost outline-none focus:border-white/[0.18]"
+          className="flex-1 bg-transparent border border-[var(--border-1)] rounded-lg px-3 py-2 text-[13px] text-label placeholder:text-ghost outline-none focus:border-[var(--border-hi)]"
         />
         <button
           type="button"
           onClick={addItem}
           disabled={disabled || draft.trim().length === 0}
-          className="px-4 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[12px] text-muted disabled:opacity-40"
+          className="px-4 py-2 rounded-lg bg-[var(--bg-elev-2)] border border-[var(--border-1)] text-[12px] text-muted disabled:opacity-40"
         >
           Ajouter
         </button>

@@ -150,7 +150,7 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
               key={q}
               onClick={() => sendAsk(q)}
               disabled={loading}
-              className="shrink-0 whitespace-nowrap text-left text-[14px] leading-snug text-muted hover:text-label border border-white/[0.12] hover:border-accent/[0.4] rounded-full px-3.5 py-1.5 transition-colors disabled:opacity-40"
+              className="shrink-0 whitespace-nowrap text-left text-[14px] leading-snug text-muted hover:text-label border border-[var(--border-2)] hover:border-accent/[0.4] rounded-full px-3.5 py-1.5 transition-colors disabled:opacity-40"
             >
               {q}
             </button>
@@ -166,7 +166,7 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
               className={
                 m.role === "user"
                   ? "self-end max-w-[85%] rounded-xl bg-accent/[0.1] border border-accent/[0.18] px-4 py-2.5 text-[15.5px] text-label"
-                  : "self-start max-w-[92%] rounded-xl bg-white/[0.03] border border-white/[0.08] px-4 py-3 text-[15.5px] leading-[1.7] text-label"
+                  : "self-start max-w-[92%] rounded-xl bg-[var(--bg-elev)] border border-[var(--border-1)] px-4 py-3 text-[15.5px] leading-[1.7] text-label"
               }
             >
               {m.content}
@@ -200,7 +200,7 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
             }}
             rows={1}
             placeholder="Posez votre question sur ces communes…"
-            className="flex-1 resize-none bg-white/[0.03] border border-white/[0.1] rounded-lg px-4 py-3 text-[15.5px] text-label placeholder:text-ghost outline-none focus:border-accent/[0.4]"
+            className="flex-1 resize-none bg-[var(--bg-elev)] border border-[var(--border-2)] rounded-lg px-4 py-3 text-[15.5px] text-label placeholder:text-ghost outline-none focus:border-accent/[0.4]"
             style={{ fontFamily: "'Instrument Sans', sans-serif" }}
           />
           <button

@@ -83,8 +83,8 @@ export function CommuneSearch({
   return (
     <>
       <style>{`
-        .cs-input:focus { border-color: ${accent}80 !important; background: rgba(255,255,255,0.07) !important; outline: none; }
-        .cs-row:hover { background: rgba(255,255,255,0.05) !important; }
+        .cs-input:focus { border-color: ${accent}80 !important; background: var(--bg-elev-3) !important; outline: none; }
+        .cs-row:hover { background: var(--bg-elev-2) !important; }
         @keyframes cs-progress {
           0%   { width: 0%;   opacity: 1; }
           60%  { width: 75%;  opacity: 1; }
@@ -131,10 +131,10 @@ export function CommuneSearch({
             style={{
               width: '100%',
               padding: '14px 16px 14px 44px',
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'var(--bg-elev-2)',
+              border: '1px solid var(--border-2)',
               borderRadius: 8,
-              color: '#e9ecf2',
+              color: 'var(--fg-1)',
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 13,
               transition: 'border-color 0.2s, background 0.2s',
@@ -166,7 +166,7 @@ export function CommuneSearch({
               background: 'rgba(10,13,28,0.98)',
               backdropFilter: 'blur(16px)',
               WebkitBackdropFilter: 'blur(16px)',
-              border: '1px solid rgba(255,255,255,0.12)',
+              border: '1px solid var(--border-2)',
               borderRadius: 8,
               overflow: 'hidden',
               zIndex: 20,
@@ -186,7 +186,7 @@ export function CommuneSearch({
                   padding: '11px 16px',
                   background: 'transparent',
                   border: 'none',
-                  borderBottom: '1px solid rgba(255,255,255,0.05)',
+                  borderBottom: '1px solid var(--border-1)',
                   cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'background 0.12s',
@@ -195,7 +195,7 @@ export function CommuneSearch({
               >
                 <span
                   style={{
-                    color: '#e9ecf2',
+                    color: 'var(--fg-1)',
                     fontFamily: "'Instrument Sans', sans-serif",
                     fontSize: 14,
                   }}

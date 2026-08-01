@@ -80,7 +80,7 @@ export function PaymentForm({ onSuccess, submitLabel, returnUrl, onSubmit }: Pay
         style={{
           marginTop: 8,
           paddingTop: 16,
-          borderTop: "1px solid rgba(255,255,255,0.08)",
+          borderTop: "1px solid var(--border-1)",
         }}
       >
         <button

@@ -12,7 +12,7 @@ type ActionFn = (
 
 /* ── Shared field styles — identical to wizard inputs ── */
 const inputCls =
-  "w-full px-5 py-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] text-label text-[15px] placeholder:text-ghost focus:outline-none focus:border-accent/50 focus:bg-white/[0.06] transition-all duration-200";
+  "w-full px-5 py-4 rounded-2xl bg-[var(--bg-elev-2)] border border-[var(--border-1)] text-label text-[15px] placeholder:text-ghost focus:outline-none focus:border-accent/50 focus:bg-[var(--bg-elev-3)] transition-all duration-200";
 
 const labelCls =
   "block font-mono text-[10px] tracking-[0.12em] uppercase text-ghost mb-2.5";

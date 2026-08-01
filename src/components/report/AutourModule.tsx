@@ -190,17 +190,17 @@ export default function AutourModule({
               chaleur de l&apos;été.
             </p>
             <div className="flex gap-3 flex-wrap">
-              <Link href="/rapport" prefetch={false} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
+              <Link href="/rapport" prefetch={false} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">
                 Retour au hub
               </Link>
-              <Link href="/rapport/quartier" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
+              <Link href="/rapport/quartier" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">
                 Voir le module Territoire
               </Link>
             </div>
           </div>
         </section>
 
-        <div className="border-t border-white/[0.08]" />
+        <div className="border-t border-[var(--border-1)]" />
 
         <section className="pt-14">
           <div className="mb-8">
@@ -386,7 +386,7 @@ export default function AutourModule({
                     ou laisse passer, son diagnostic énergétique et ce à quoi son adresse est
                     exposée se lisent dans le module Logement.
                   </p>
-                  <Link href="/rapport/logement" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/[0.05] text-muted text-[13.5px] no-underline border border-white/[0.08] w-fit">
+                  <Link href="/rapport/logement" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[13.5px] no-underline border border-[var(--border-1)] w-fit">
                     Ouvrir le module Logement →
                   </Link>
                 </div>

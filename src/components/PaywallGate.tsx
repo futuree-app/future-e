@@ -39,8 +39,8 @@ function CtaCard({
       style={{
         marginTop: '40px',
         padding: '40px 36px',
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        background: 'var(--bg-elev)',
+        border: '1px solid var(--border-1)',
         borderLeft: `2px solid ${accent}`,
         borderRadius: '8px',
         textAlign: 'center',
@@ -63,7 +63,7 @@ function CtaCard({
           fontFamily: "'Instrument Serif', serif",
           fontSize: '22px',
           lineHeight: 1.4,
-          color: '#e9ecf2',
+          color: 'var(--fg-1)',
           margin: '0 0 28px',
           fontWeight: 400,
         }}

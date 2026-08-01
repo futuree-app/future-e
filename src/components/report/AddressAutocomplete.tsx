@@ -118,7 +118,7 @@ export function AddressAutocomplete({
             <li key={a.id ?? i} role="option" aria-selected={i === active}
               onMouseDown={(e) => { e.preventDefault(); choose(a); }}
               onMouseEnter={() => setActive(i)}
-              style={{ padding: "10px 12px", borderRadius: 8, cursor: "pointer", fontSize: 14, color: "var(--fg-1)", background: i === active ? "var(--bg-card, rgba(255,255,255,0.05))" : "transparent" }}>
+              style={{ padding: "10px 12px", borderRadius: 8, cursor: "pointer", fontSize: 14, color: "var(--fg-1)", background: i === active ? "var(--bg-card, var(--bg-elev-2))" : "transparent" }}>
               {a.label}
             </li>
           ))}

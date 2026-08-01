@@ -194,7 +194,7 @@ export default async function RapportPage() {
                 « Ouvrir {commune} » plus bas a rendu visible le 30/07/2026. */}
             <a
               href="/rapport/residence"
-              className="shrink-0 font-mono text-[11px] tracking-[0.08em] uppercase text-muted hover:text-label no-underline border border-white/[0.12] rounded-lg px-3.5 py-2"
+              className="shrink-0 font-mono text-[11px] tracking-[0.08em] uppercase text-muted hover:text-label no-underline border border-[var(--border-2)] rounded-lg px-3.5 py-2"
             >
               {territory.residenceCommune
                 ? `Revenir à ${territory.residenceCommune}`
@@ -212,7 +212,7 @@ export default async function RapportPage() {
             <a> et pas <Link> : la cible est une Route Handler, et un <Link> vers une Route Handler
             ne navigue pas. Voir le commentaire du bandeau au-dessus. */}
         {communesAilleurs.length > 0 && (
-          <div className="mt-6 rounded-xl border border-white/[0.10] bg-white/[0.03] px-5 py-4">
+          <div className="mt-6 rounded-xl border border-[var(--border-2)] bg-[var(--bg-elev)] px-5 py-4">
             <p className="text-[14px] text-label leading-snug mb-3">
               {communesAilleurs.length === 1
                 ? "Vous avez analysé un bien dans une autre commune, et elle vous est ouverte en entier."
@@ -230,7 +230,7 @@ export default async function RapportPage() {
               ))}
               <Link
                 href="/rapport/dossiers"
-                className="font-mono text-[11px] tracking-[0.08em] uppercase text-muted hover:text-label no-underline border border-white/[0.12] rounded-lg px-3.5 py-2"
+                className="font-mono text-[11px] tracking-[0.08em] uppercase text-muted hover:text-label no-underline border border-[var(--border-2)] rounded-lg px-3.5 py-2"
               >
                 Tous mes biens
               </Link>
@@ -265,7 +265,7 @@ export default async function RapportPage() {
                   /* CTA neutre, et c'est une règle : dans le rapport, l'orange est le registre
                      « compromis » du dossier de décision. Un bouton de navigation qui le porte ferait
                      dire deux choses à la même teinte sur le même écran (DESIGN.md § 5.4). */
-                  <Link href="#modules" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.08] text-label font-semibold text-[14px] no-underline border border-white/[0.14] hover:bg-white/[0.12] transition-colors" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
+                  <Link href="#modules" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-3)] text-label font-semibold text-[14px] no-underline border border-[var(--border-2)] hover:bg-[var(--bg-elev-3)] transition-colors" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
                     {openModules.length === 1 ? "Lire le territoire" : "Voir mes trois échelles"}
                   </Link>
                 ) : (
@@ -273,7 +273,7 @@ export default async function RapportPage() {
                     Ouvrir le rapport interactif
                   </Link>
                 )}
-                <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
+                <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">
                   Mon compte
                 </Link>
               </div>
@@ -300,7 +300,7 @@ export default async function RapportPage() {
                     moduleId={m.id}
                     commune={displayName}
                     inseeCode={inseeCode}
-                    className="flex items-baseline gap-3.5 py-3 no-underline border-t border-white/[0.07] first:border-t-0 group"
+                    className="flex items-baseline gap-3.5 py-3 no-underline border-t border-[var(--border-1)] first:border-t-0 group"
                   >
                     <span className="font-mono text-[11px] text-ghost tabular-nums shrink-0">
                       {String(i + 1).padStart(2, "0")}
@@ -316,7 +316,7 @@ export default async function RapportPage() {
                   deux fausses lignes verrouillées qui feraient passer un produit payé pour un
                   produit incomplet. */}
               {openModules.length === 1 && (
-                <p className="text-[13px] leading-[1.6] text-muted mt-4 pt-4 border-t border-white/[0.07]">
+                <p className="text-[13px] leading-[1.6] text-muted mt-4 pt-4 border-t border-[var(--border-1)]">
                   Le secteur autour d&apos;une adresse et le logement lui-même demandent l&apos;analyse
                   d&apos;une adresse précise.
                 </p>
@@ -325,7 +325,7 @@ export default async function RapportPage() {
           )}
         </section>
 
-        <div className="border-t border-white/[0.08]" />
+        <div className="border-t border-[var(--border-1)]" />
 
         {!communeName && (
           <div className="pt-10">
@@ -397,7 +397,7 @@ export default async function RapportPage() {
           )
         ) : null}
 
-        <div className="border-t border-white/[0.08] mt-14" />
+        <div className="border-t border-[var(--border-1)] mt-14" />
 
         {/* ── Vue gratuite : la première lecture post-wizard ── */}
         {!fullReport && (
@@ -442,7 +442,7 @@ export default async function RapportPage() {
                 return (
                   <article
                     key={module.id}
-                    className="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto] gap-x-5 gap-y-2 items-baseline py-6 border-t border-white/[0.08] first:border-t-0"
+                    className="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto] gap-x-5 gap-y-2 items-baseline py-6 border-t border-[var(--border-1)] first:border-t-0"
                   >
                     <span className="font-mono text-[13px] text-ghost tabular-nums">
                       {String(i + 1).padStart(2, "0")}
@@ -475,7 +475,7 @@ export default async function RapportPage() {
             </div>
 
             {openModules.length === 1 && (
-              <p className="text-[14px] leading-[1.7] text-muted mt-8 pt-6 border-t border-white/[0.08]">
+              <p className="text-[14px] leading-[1.7] text-muted mt-8 pt-6 border-t border-[var(--border-1)]">
                 Le secteur autour d&apos;une adresse et le logement lui-même se lisent au grain de
                 l&apos;adresse. Ils demandent l&apos;analyse d&apos;un bien précis.
               </p>
@@ -487,13 +487,13 @@ export default async function RapportPage() {
         {/* Le CTA d'achat est gardé par `!fullReport`, comme celui du hero (l. 236-244) qui l'est
             depuis toujours. Ici il ne l'était pas : un lecteur ayant payé ce territoire lisait son
             rapport complet, puis se voyait proposer en pied de page de l'acheter. */}
-        <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-white/[0.08]">
+        <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-[var(--border-1)]">
           {!fullReport && (
             <TrackedUpgradeLink href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
               Ouvrir le rapport interactif
             </TrackedUpgradeLink>
           )}
-          <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]">
+          <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">
             Mon compte
           </Link>
           <Link href="/" className="font-mono text-[11px] tracking-[0.06em] uppercase text-ghost no-underline py-2 ml-auto">
@@ -503,7 +503,7 @@ export default async function RapportPage() {
       </div>
 
       {/* Footer */}
-      <footer className="relative z-[2] border-t border-white/[0.08]">
+      <footer className="relative z-[2] border-t border-[var(--border-1)]">
         <div className="max-w-[1100px] mx-auto px-5 sm:px-7 py-9 flex items-center justify-between gap-6 flex-wrap">
           <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
             futur<span className="text-accent not-italic">•</span>e

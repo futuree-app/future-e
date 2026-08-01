@@ -87,11 +87,11 @@ function Seal({ type }: { type: TerritoryType }) {
       </g>
       {/* liseré pressé dans la cire (discret) */}
       <circle cx="26" cy="26" r="16.5" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="1" />
-      <circle cx="26" cy="25.4" r="16.5" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="0.6" />
+      <circle cx="26" cy="25.4" r="16.5" fill="none" stroke="var(--border-2)" strokeWidth="0.6" />
       {/* glyphe gravé : ombre dessous, lumière atténuée dessus */}
       <g transform="translate(10,10)" fill="none" strokeLinecap="round" strokeLinejoin="round">
         <g transform="translate(0,0.7)" stroke="rgba(0,0,0,0.45)" strokeWidth="1.4">{SEAL_GLYPH[type]}</g>
-        <g transform="translate(0,-0.4)" stroke="rgba(255,255,255,0.3)" strokeWidth="1">{SEAL_GLYPH[type]}</g>
+        <g transform="translate(0,-0.4)" stroke="var(--border-hi)" strokeWidth="1">{SEAL_GLYPH[type]}</g>
       </g>
     </svg>
   );
@@ -166,7 +166,7 @@ export function TerritoryIdentityCard({
         style={{ borderColor: `${tint}26` }}
       >
         {fields.map((f) => (
-          <div key={f.label} className="flex items-start gap-3 py-3 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+          <div key={f.label} className="flex items-start gap-3 py-3 border-b" style={{ borderColor: "var(--border-1)" }}>
             <span className="mt-0.5">
               <Picto kind={f.kind} color={accent} />
             </span>

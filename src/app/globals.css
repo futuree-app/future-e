@@ -539,7 +539,7 @@ a {
    accent + liseré clair en haut → elle se détache des blocs d'appui (synthèse,
    Pack) qui restent en .glass. Source unique, partagée entre les portes. */
 .card-answer {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-elev-2);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-2);
@@ -564,7 +564,7 @@ a {
      Le filet de ton DIFFUSE donc dans la surface, comme une encre qui prend dans le papier : le bloc
      est teinté par ce qu'il annonce, et sa couleur cesse d'être un décor pour devenir l'information.
      Le lavis se dissout avant la moitié de la hauteur — le texte se lit toujours sur du neutre. */
-  background: rgba(255, 255, 255, 0.045);
+  background: var(--bg-elev-2);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border-2);
@@ -903,8 +903,8 @@ body:has(dialog.wizard-dialog[open]) {
 .horizon-switch {
   display: inline-flex;
   gap: 2px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-elev);
+  border: 1px solid var(--border-1);
   border-radius: 10px;
   padding: 3px;
 }
@@ -924,7 +924,7 @@ body:has(dialog.wizard-dialog[open]) {
 }
 
 .horizon-btn:hover:not(.horizon-btn--active) {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg-elev-2);
 }
 
 .horizon-btn--active {
@@ -973,7 +973,7 @@ body:has(dialog.wizard-dialog[open]) {
   color: #6b7388;
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--border-1);
 }
 
 @media (max-width: 640px) {

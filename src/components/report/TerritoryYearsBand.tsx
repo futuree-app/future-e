@@ -182,7 +182,7 @@ export function TerritoryYearsBand({
                     y1={H * 0.36}
                     x2={x}
                     y2={H * 0.64}
-                    stroke="rgba(255,255,255,0.10)"
+                    stroke="var(--border-2)"
                     strokeWidth={1}
                   />
                 )}

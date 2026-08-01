@@ -15,13 +15,13 @@ export function TerritoryUnlockPreview({
         {preview.cards.map((card) => (
           <div
             key={card.titre}
-            className="flex flex-col rounded-2xl border border-white/[0.08] bg-white/[0.025] p-5"
+            className="flex flex-col rounded-2xl border border-[var(--border-1)] bg-[var(--bg-elev)] p-5"
           >
             <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-accent mb-2.5">
               {card.titre}
             </p>
             <p className="text-[15px] leading-[1.6] text-label/85">{card.constat}</p>
-            <div className="mt-4 pt-3 flex items-center gap-2 border-t border-white/[0.06] text-ghost">
+            <div className="mt-4 pt-3 flex items-center gap-2 border-t border-[var(--border-1)] text-ghost">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <rect x="5" y="11" width="14" height="10" rx="2" />
                 <path d="M8 11V7a4 4 0 0 1 8 0v4" />

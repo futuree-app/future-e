@@ -7,7 +7,7 @@ import { usePostHog } from "posthog-js/react";
 const C = {
   bg: "#060812",
   bgElev: "rgba(255,255,255,0.03)",
-  border: "rgba(255,255,255,0.08)",
+  border: "var(--border-1)",
   text: "#e9ecf2",
   muted: "#9ba3b4",
   dim: "#6b7388",
@@ -123,7 +123,7 @@ const S = {
     borderRadius: 100,
     background: pct === 1
       ? "rgba(74,222,128,0.12)"
-      : "rgba(255,255,255,0.04)",
+      : "var(--bg-elev-2)",
     border: `1px solid ${pct === 1 ? "rgba(74,222,128,0.3)" : C.border}`,
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: 11,
@@ -134,7 +134,7 @@ const S = {
   progressBar: {
     height: 2,
     borderRadius: 2,
-    background: "rgba(255,255,255,0.06)",
+    background: "var(--bg-elev-3)",
     overflow: "hidden",
   },
   progressFill: (pct: number): React.CSSProperties => ({
@@ -175,7 +175,7 @@ const S = {
     textAlign: "left" as const,
     padding: "12px 16px",
     borderRadius: 8,
-    background: active ? "rgba(96,165,250,0.1)" : "rgba(255,255,255,0.03)",
+    background: active ? "rgba(96,165,250,0.1)" : "var(--bg-elev)",
     border: `1px solid ${active ? "rgba(96,165,250,0.5)" : C.border}`,
     color: active ? C.text : C.muted,
     fontSize: 14,
@@ -227,7 +227,7 @@ const S = {
     width: "100%",
     padding: "14px 16px",
     borderRadius: 8,
-    background: "rgba(255,255,255,0.03)",
+    background: "var(--bg-elev)",
     border: `1px solid ${focused ? "rgba(96,165,250,0.5)" : C.border}`,
     color: C.text,
     fontSize: 14,
@@ -451,7 +451,7 @@ export function QuartierWorkbook({ userKey, commune, inseeCode, reportId }: Quar
                 padding: "7px 14px",
                 borderRadius: 100,
                 border: `1px solid ${open ? C.border : "rgba(96,165,250,0.4)"}`,
-                background: open ? "rgba(255,255,255,0.04)" : "rgba(96,165,250,0.14)",
+                background: open ? "var(--bg-elev-2)" : "rgba(96,165,250,0.14)",
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 12,
                 fontWeight: open ? 400 : 600,

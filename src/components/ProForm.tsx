@@ -38,9 +38,9 @@ export function ProForm() {
   const inputStyle: React.CSSProperties = {
     width: '100%',
     padding: '14px 16px',
-    background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.14)',
-    color: '#e9ecf2',
+    background: 'var(--bg-elev-2)',
+    border: '1px solid var(--border-2)',
+    color: 'var(--fg-1)',
     fontFamily: "'Instrument Sans', system-ui, sans-serif",
     fontSize: 15,
     outline: 'none',
@@ -64,7 +64,7 @@ export function ProForm() {
         <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: GREEN, marginBottom: 16 }}>
           Inscription enregistrée
         </div>
-        <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: '#e9ecf2', fontStyle: 'italic', margin: '0 0 12px' }}>
+        <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--fg-1)', fontStyle: 'italic', margin: '0 0 12px' }}>
           Vous serez contacté en avant-première.
         </p>
         <p style={{ fontSize: 14, color: '#9ba3b4', margin: 0 }}>

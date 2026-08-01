@@ -273,7 +273,7 @@ function InterpretationPanel({
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={onRefine}
-            className="font-mono text-[10px] tracking-[0.08em] uppercase text-muted hover:text-label border border-white/[0.12] rounded-lg px-3 py-1.5"
+            className="font-mono text-[10px] tracking-[0.08em] uppercase text-muted hover:text-label border border-[var(--border-2)] rounded-lg px-3 py-1.5"
           >
             Affiner
           </button>
@@ -281,7 +281,7 @@ function InterpretationPanel({
             <button
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
-              className="font-mono text-[10px] tracking-[0.08em] uppercase text-muted hover:text-label border border-white/[0.12] rounded-lg px-3 py-1.5"
+              className="font-mono text-[10px] tracking-[0.08em] uppercase text-muted hover:text-label border border-[var(--border-2)] rounded-lg px-3 py-1.5"
             >
               {open ? "Réduire" : "Voir le détail"}
             </button>
@@ -308,7 +308,7 @@ function InterpretationPanel({
             ) : (
               <span
                 key={c.label}
-                className="text-[12px] text-label/90 border border-white/[0.12] rounded-full px-3 py-1"
+                className="text-[12px] text-label/90 border border-[var(--border-2)] rounded-full px-3 py-1"
               >
                 {c.label}
               </span>
@@ -347,7 +347,7 @@ function InterpretationPanel({
                 {inspZoneLabels.map((z) => (
                   <span
                     key={z}
-                    className="text-[12px] text-muted border border-white/[0.1] rounded-full px-3 py-1"
+                    className="text-[12px] text-muted border border-[var(--border-2)] rounded-full px-3 py-1"
                   >
                     ouvert à : {z}
                   </span>
@@ -355,7 +355,7 @@ function InterpretationPanel({
                 {exclLabels.map((z) => (
                   <span
                     key={z}
-                    className="text-[12px] text-muted border border-white/[0.12] rounded-full px-3 py-1"
+                    className="text-[12px] text-muted border border-[var(--border-2)] rounded-full px-3 py-1"
                   >
                     hors {z}
                   </span>
@@ -1060,7 +1060,7 @@ export function OuVivreClient() {
                 capture("life_example_clicked", { example_index: i });
                 runParse(ex);
               }}
-              className="text-left text-[13px] leading-snug text-muted hover:text-label no-underline border border-white/[0.1] hover:border-white/[0.2] rounded-full px-4 py-2 transition-colors"
+              className="text-left text-[13px] leading-snug text-muted hover:text-label no-underline border border-[var(--border-2)] hover:border-[var(--border-hi)] rounded-full px-4 py-2 transition-colors"
             >
               {ex}
             </button>
@@ -1109,7 +1109,7 @@ export function OuVivreClient() {
             ambiguities={parsed.ambiguities}
             onRefine={refine}
           />
-          <div className="mt-7 rounded-xl border border-white/[0.1] bg-white/[0.03] px-6 py-7">
+          <div className="mt-7 rounded-xl border border-[var(--border-2)] bg-[var(--bg-elev)] px-6 py-7">
             <p className="text-[16px] leading-[1.7] text-label">
               {outcome?.message ?? "Aucun territoire ne respecte l'ensemble de vos contraintes. Essayez d'élargir un critère."}
             </p>
@@ -1217,7 +1217,7 @@ export function OuVivreClient() {
                       Pression éco / logement / littoral restent hors carte (doctrine 2026-06-02)
                       et vivent dans la synthèse, AskFuture et le rapport. */}
                   {r.compromis && (
-                    <p className="mt-4 pt-3 border-t border-white/[0.08] text-[12.5px] leading-[1.55] text-muted">
+                    <p className="mt-4 pt-3 border-t border-[var(--border-1)] text-[12.5px] leading-[1.55] text-muted">
                       Compromis : {r.compromis}
                     </p>
                   )}
@@ -1225,7 +1225,7 @@ export function OuVivreClient() {
                   <a
                     href={`/territoire/${r.insee}/debloquer?nom=${encodeURIComponent(r.nom)}&rank=${i + 1}&source=comparateur_vie`}
                     onClick={() => onExplore(r, i + 1)}
-                    className="mt-6 flex items-center justify-center gap-2 rounded-xl px-4 py-3 no-underline text-muted border border-white/[0.14] transition-colors hover:border-white/[0.28] hover:text-label"
+                    className="mt-6 flex items-center justify-center gap-2 rounded-xl px-4 py-3 no-underline text-muted border border-[var(--border-2)] transition-colors hover:border-[var(--border-hi)] hover:text-label"
                   >
                     <span className="font-mono text-[10.5px] tracking-[0.08em] uppercase">
                       Explorer le rapport · 14 €
@@ -1388,7 +1388,7 @@ export function OuVivreClient() {
                     key={q}
                     onClick={() => sendAsk(q)}
                     disabled={askLoading}
-                    className="shrink-0 whitespace-nowrap text-left text-[12.5px] leading-snug text-muted hover:text-label border border-white/[0.12] hover:border-accent/[0.4] rounded-full px-3.5 py-1.5 transition-colors disabled:opacity-40"
+                    className="shrink-0 whitespace-nowrap text-left text-[12.5px] leading-snug text-muted hover:text-label border border-[var(--border-2)] hover:border-accent/[0.4] rounded-full px-3.5 py-1.5 transition-colors disabled:opacity-40"
                   >
                     {q}
                   </button>
@@ -1404,7 +1404,7 @@ export function OuVivreClient() {
                     className={
                       m.role === "user"
                         ? "self-end max-w-[85%] rounded-xl bg-accent/[0.1] border border-accent/[0.18] px-4 py-2.5 text-[14px] text-label"
-                        : "self-start max-w-[92%] rounded-xl bg-white/[0.03] border border-white/[0.08] px-4 py-3 text-[14px] leading-[1.7] text-label"
+                        : "self-start max-w-[92%] rounded-xl bg-[var(--bg-elev)] border border-[var(--border-1)] px-4 py-3 text-[14px] leading-[1.7] text-label"
                     }
                   >
                     {m.content}
@@ -1444,7 +1444,7 @@ export function OuVivreClient() {
                   }}
                   rows={1}
                   placeholder={askRotating ? `${askTyped}▌` : "Posez votre question sur ces territoires…"}
-                  className="flex-1 resize-none bg-white/[0.03] border border-white/[0.1] rounded-lg px-4 py-3 text-[14px] text-label placeholder:text-ghost outline-none focus:border-accent/[0.4]"
+                  className="flex-1 resize-none bg-[var(--bg-elev)] border border-[var(--border-2)] rounded-lg px-4 py-3 text-[14px] text-label placeholder:text-ghost outline-none focus:border-accent/[0.4]"
                   style={{ fontFamily: "'Instrument Sans', sans-serif" }}
                 />
                 <button

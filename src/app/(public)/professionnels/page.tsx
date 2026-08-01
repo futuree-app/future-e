@@ -12,7 +12,7 @@ const ACCENT = '#c8b89a';
 
 const css = `
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:#060812;color:#e9ecf2;font-family:'Instrument Sans',system-ui,sans-serif;font-size:16px;line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+  html,body{margin:0;padding:0;background:#060812;color:var(--fg-1);font-family:'Instrument Sans',system-ui,sans-serif;font-size:16px;line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
   .orb{position:fixed;border-radius:50%;filter:blur(120px);opacity:0.25;pointer-events:none;z-index:0;animation:breathe 16s ease-in-out infinite;will-change:opacity;}
   /* « breathe » via opacité uniquement : sur une couche floue (blur 120px),
      animer transform forçait une re-rastérisation du flou à chaque frame (la
@@ -25,7 +25,7 @@ const css = `
   .nav-inner{max-width:1100px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px;}
   .nav-link{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#9ba3b4;text-decoration:none;transition:color 0.2s;}
   .nav-link:hover{color:${ACCENT};}
-  .nav-cta{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#e9ecf2;padding:8px 16px;border:1px solid rgba(255,255,255,0.14);border-radius:6px;text-decoration:none;transition:all 0.2s;}
+  .nav-cta{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-1);padding:8px 16px;border:1px solid var(--border-2);border-radius:6px;text-decoration:none;transition:all 0.2s;}
   .nav-cta:hover{border-color:${ACCENT};color:${ACCENT};}
 
   .hero{padding:120px 28px 80px;text-align:center;max-width:900px;margin:0 auto;}
@@ -37,21 +37,21 @@ const css = `
   .section-kicker{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:${ACCENT};margin-bottom:16px;}
 
   .profession-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:48px;}
-  .profession-card{padding:36px 32px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;cursor:pointer;transition:all 0.3s ease;position:relative;overflow:hidden;}
+  .profession-card{padding:36px 32px;background:var(--bg-elev);border:1px solid var(--border-1);border-radius:8px;cursor:pointer;transition:all 0.3s ease;position:relative;overflow:hidden;}
   .profession-card::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(200,184,154,0.28),transparent);opacity:0;transition:opacity 0.3s;}
-  .profession-card:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.14);transform:translateY(-2px);}
+  .profession-card:hover{background:var(--bg-elev-2);border-color:var(--border-2);transform:translateY(-2px);}
   .profession-card:hover::before{opacity:1;}
 
-  .scene-inner{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:56px 60px;position:relative;overflow:hidden;}
+  .scene-inner{background:var(--bg-elev);border:1px solid var(--border-1);border-radius:14px;padding:56px 60px;position:relative;overflow:hidden;}
   .scene-inner::after{content:"";position:absolute;top:-100px;right:-100px;width:300px;height:300px;background:radial-gradient(circle,rgba(200,184,154,0.12) 0%,transparent 70%);pointer-events:none;}
-  .scene-step{padding:18px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:15px;color:#9ba3b4;line-height:1.6;}
+  .scene-step{padding:18px 0;border-bottom:1px solid var(--border-1);font-size:15px;color:#9ba3b4;line-height:1.6;}
   .scene-step:last-child{border-bottom:none;padding-bottom:0;}
 
-  .why-card{padding:32px 28px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;}
-  .principle{padding:32px 0;border-bottom:1px solid rgba(255,255,255,0.08);display:grid;grid-template-columns:140px 1fr;gap:32px;align-items:start;}
+  .why-card{padding:32px 28px;background:var(--bg-elev);border:1px solid var(--border-1);border-radius:8px;}
+  .principle{padding:32px 0;border-bottom:1px solid var(--border-1);display:grid;grid-template-columns:140px 1fr;gap:32px;align-items:start;}
   .principle:last-child{border-bottom:none;}
 
-  .form-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:48px 44px;}
+  .form-card{background:var(--bg-elev);border:1px solid var(--border-1);border-radius:14px;padding:48px 44px;}
 
   @media(max-width:880px){
     .profession-grid{grid-template-columns:1fr;}
@@ -139,7 +139,7 @@ export default function ProfessionnelsPage() {
 
       <nav className="nav">
         <div className="nav-inner">
-          <Link href="/" style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, fontStyle: 'italic', color: '#e9ecf2', textDecoration: 'none', letterSpacing: '-0.01em' }}>
+          <Link href="/" style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, fontStyle: 'italic', color: 'var(--fg-1)', textDecoration: 'none', letterSpacing: '-0.01em' }}>
             futur<span style={{ color: ACCENT, fontStyle: 'normal' }}>•</span>e
           </Link>
           <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
@@ -158,7 +158,7 @@ export default function ProfessionnelsPage() {
             <span className="hero-badge-dot" />
             Avant-première · Lancement automne 2026
           </div>
-          <h1 style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontSize: 'clamp(40px,6vw,72px)', lineHeight: 1.05, letterSpacing: '-0.025em', margin: '0 0 28px', color: '#e9ecf2' }}>
+          <h1 style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontSize: 'clamp(40px,6vw,72px)', lineHeight: 1.05, letterSpacing: '-0.025em', margin: '0 0 28px', color: 'var(--fg-1)' }}>
             L'outil de lecture<br />territoriale<br />
             <em style={{ fontStyle: 'italic', color: ACCENT }}>pour vos rendez-vous client.</em>
           </h1>
@@ -172,7 +172,7 @@ export default function ProfessionnelsPage() {
 
         {/* ── TENSION ──────────────────────────────────────────────────── */}
         <div style={{ padding: '80px 28px', maxWidth: 760, margin: '0 auto' }}>
-          <blockquote style={{ fontFamily: "'Instrument Serif', serif", fontSize: 'clamp(22px,2.6vw,30px)', lineHeight: 1.45, color: '#e9ecf2', fontStyle: 'italic', margin: '0 0 24px', paddingLeft: 24, borderLeft: `2px solid ${ACCENT}` }}>
+          <blockquote style={{ fontFamily: "'Instrument Serif', serif", fontSize: 'clamp(22px,2.6vw,30px)', lineHeight: 1.45, color: 'var(--fg-1)', fontStyle: 'italic', margin: '0 0 24px', paddingLeft: 24, borderLeft: `2px solid ${ACCENT}` }}>
             « Nos clients nous posent des questions sur le risque climatique de leurs actifs immobiliers. Mais nous n'avons pas les outils pour leur répondre rapidement et sérieusement. »
           </blockquote>
           <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#6b7388', marginLeft: 24, marginBottom: 48 }}>
@@ -183,7 +183,7 @@ export default function ProfessionnelsPage() {
               Les données existent. Elles sont publiques. Elles sont produites par DRIAS, par Géorisques, par l'ANSES, par l'INSEE. Mais elles sont dispersées dans des dizaines de portails différents, dans des formats hétérogènes, avec des échelles géographiques qui ne se recoupent pas.
             </p>
             <p style={{ margin: '0 0 18px' }}>
-              <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>Pour qu'elles soient utilisables en rendez-vous client, il faut les agréger, les contextualiser, les traduire en langage accessible.</strong> C'est un travail d'éditorialisation que les bases publiques ne font pas, et que vous n'avez pas le temps de faire vous-même pour chaque dossier.
+              <strong style={{ color: 'var(--fg-1)', fontWeight: 500 }}>Pour qu'elles soient utilisables en rendez-vous client, il faut les agréger, les contextualiser, les traduire en langage accessible.</strong> C'est un travail d'éditorialisation que les bases publiques ne font pas, et que vous n'avez pas le temps de faire vous-même pour chaque dossier.
             </p>
             <p style={{ margin: 0 }}>
               futur•e fait ce travail. Vous tapez une commune. En dix secondes, vous avez une lecture sur sept thèmes territoriaux avec les sources citées et la mention « données publiques officielles ». Pas de score opaque. Pas d'alarme. Une contextualisation factuelle.
@@ -195,7 +195,7 @@ export default function ProfessionnelsPage() {
         <div style={{ padding: '80px 28px' }}>
           <div className="section-wrap">
             <div className="section-kicker">Quatre professions, quatre angles</div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontSize: 'clamp(30px,4vw,46px)', lineHeight: 1.15, letterSpacing: '-0.02em', color: '#e9ecf2', margin: '0 0 24px' }}>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontSize: 'clamp(30px,4vw,46px)', lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--fg-1)', margin: '0 0 24px' }}>
               Pas le même besoin,<br />
               <em style={{ fontStyle: 'italic', color: ACCENT }}>pas le même livrable.</em>
             </h2>
@@ -211,7 +211,7 @@ export default function ProfessionnelsPage() {
                   <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#6b7388', marginBottom: 14 }}>
                     {p.tag}
                   </div>
-                  <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 24, fontWeight: 400, color: '#e9ecf2', margin: '0 0 10px', letterSpacing: '-0.01em' }}>
+                  <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 24, fontWeight: 400, color: 'var(--fg-1)', margin: '0 0 10px', letterSpacing: '-0.01em' }}>
                     {p.title}
                   </h3>
                   <p style={{ fontSize: 15, lineHeight: 1.7, color: '#c5cad6', margin: '0 0 20px' }}>
@@ -238,7 +238,7 @@ export default function ProfessionnelsPage() {
         <div style={{ padding: '96px 28px' }}>
           <div className="section-wrap">
             <div className="section-kicker">Pourquoi maintenant</div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontSize: 'clamp(30px,4vw,46px)', lineHeight: 1.15, letterSpacing: '-0.02em', color: '#e9ecf2', margin: '0 0 24px' }}>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontSize: 'clamp(30px,4vw,46px)', lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--fg-1)', margin: '0 0 24px' }}>
               Le sujet entre<br />
               <em style={{ fontStyle: 'italic', color: ACCENT }}>dans vos rendez-vous.</em>
             </h2>
@@ -253,7 +253,7 @@ export default function ProfessionnelsPage() {
               ].map((w) => (
                 <div key={w.num} className="why-card">
                   <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 46, lineHeight: 1, color: ACCENT, marginBottom: 14, fontWeight: 400, letterSpacing: '-0.02em' }}>{w.num}</div>
-                  <div style={{ fontWeight: 500, fontSize: 15, color: '#e9ecf2', marginBottom: 10 }}>{w.title}</div>
+                  <div style={{ fontWeight: 500, fontSize: 15, color: 'var(--fg-1)', marginBottom: 10 }}>{w.title}</div>
                   <p style={{ fontSize: 13, color: '#9ba3b4', lineHeight: 1.6, margin: 0 }}>{w.desc}</p>
                   <span style={{ display: 'block', marginTop: 10, fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: '#6b7388', letterSpacing: '0.06em' }}>Source : {w.src}</span>
                 </div>
@@ -266,16 +266,16 @@ export default function ProfessionnelsPage() {
         <div style={{ padding: '96px 28px', maxWidth: 980, margin: '0 auto' }}>
           <div className="scene-inner">
             <div className="section-kicker">Un rendez-vous client</div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 'clamp(26px,3.4vw,38px)', lineHeight: 1.2, fontWeight: 400, letterSpacing: '-0.015em', margin: '0 0 32px', color: '#e9ecf2' }}>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 'clamp(26px,3.4vw,38px)', lineHeight: 1.2, fontWeight: 400, letterSpacing: '-0.015em', margin: '0 0 32px', color: 'var(--fg-1)' }}>
               Avant futur•e, et <em style={{ fontStyle: 'italic', color: ACCENT }}>après.</em>
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 36, position: 'relative', zIndex: 1 }}>
               <div>
                 <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#6b7388', marginBottom: 14 }}>Avant, sans futur•e</div>
                 {[
-                  { time: 'Min 02', text: <><strong style={{ color: '#e9ecf2', fontWeight: 500 }}>Le client demande</strong> si le bien qu'il envisage à Saint-Jean-de-Luz sera encore assurable dans 20 ans.</> },
+                  { time: 'Min 02', text: <><strong style={{ color: 'var(--fg-1)', fontWeight: 500 }}>Le client demande</strong> si le bien qu'il envisage à Saint-Jean-de-Luz sera encore assurable dans 20 ans.</> },
                   { time: 'Min 03', text: <>Vous évoquez la submersion, le retrait du trait de côte, « ça dépend des zones »… Sans chiffre précis.</> },
-                  { time: 'Min 12', text: <>Le client repart <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>avec plus de questions que de réponses</strong>. Il consultera Google. Vous perdez la main.</> },
+                  { time: 'Min 12', text: <>Le client repart <strong style={{ color: 'var(--fg-1)', fontWeight: 500 }}>avec plus de questions que de réponses</strong>. Il consultera Google. Vous perdez la main.</> },
                   { time: 'J + 7', text: <>Le client revient avec des informations contradictoires lues en ligne. Vous passez 30 minutes à les démêler.</> },
                 ].map((s) => (
                   <div key={s.time} className="scene-step">
@@ -287,10 +287,10 @@ export default function ProfessionnelsPage() {
               <div>
                 <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#6b7388', marginBottom: 14 }}>Avec futur•e</div>
                 {[
-                  { time: 'Min 02', text: <><strong style={{ color: '#e9ecf2', fontWeight: 500 }}>Le client pose la même question.</strong></> },
+                  { time: 'Min 02', text: <><strong style={{ color: 'var(--fg-1)', fontWeight: 500 }}>Le client pose la même question.</strong></> },
                   { time: 'Min 02 + 10s', text: <>Vous tapez « Saint-Jean-de-Luz » dans futur•e. La fiche s'affiche : submersion, qualité air, vulnérabilité économique, projection 2050. Sources citées.</> },
-                  { time: 'Min 04', text: <>Vous montrez l'écran. <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>Vous expliquez les données ensemble.</strong> Le client comprend. La décision se prend en connaissance.</> },
-                  { time: 'Min 10', text: <>Vous exportez le PDF. <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>Vous avez une trace.</strong> Le client a une référence.</> },
+                  { time: 'Min 04', text: <>Vous montrez l'écran. <strong style={{ color: 'var(--fg-1)', fontWeight: 500 }}>Vous expliquez les données ensemble.</strong> Le client comprend. La décision se prend en connaissance.</> },
+                  { time: 'Min 10', text: <>Vous exportez le PDF. <strong style={{ color: 'var(--fg-1)', fontWeight: 500 }}>Vous avez une trace.</strong> Le client a une référence.</> },
                 ].map((s) => (
                   <div key={s.time} className="scene-step">
                     <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: ACCENT, letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>{s.time}</span>
@@ -305,7 +305,7 @@ export default function ProfessionnelsPage() {
         {/* ── PRINCIPES ────────────────────────────────────────────────── */}
         <div style={{ padding: '96px 28px', maxWidth: 760, margin: '0 auto' }}>
           <div className="section-kicker">Trois principes éditoriaux</div>
-          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontSize: 'clamp(30px,4vw,46px)', lineHeight: 1.15, letterSpacing: '-0.02em', color: '#e9ecf2', margin: '0 0 48px' }}>
+          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontSize: 'clamp(30px,4vw,46px)', lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--fg-1)', margin: '0 0 48px' }}>
             Ce qui rend cet outil<br />
             <em style={{ fontStyle: 'italic', color: ACCENT }}>professionnellement utilisable.</em>
           </h2>
@@ -313,23 +313,23 @@ export default function ProfessionnelsPage() {
             {
               num: '01',
               title: 'Sources citées, toujours',
-              body: <p style={{ fontSize: 15, color: '#9ba3b4', lineHeight: 1.7, margin: 0 }}>Chaque chiffre, chaque projection, chaque alerte est explicitement attribué à sa source primaire. <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>DRIAS pour le climat, Géorisques pour les risques naturels, ANSES pour la qualité sanitaire, INSEE pour le socio-économique.</strong> Vous ne transmettez pas une opinion : vous transmettez une donnée publique vérifiable.</p>,
+              body: <p style={{ fontSize: 15, color: '#9ba3b4', lineHeight: 1.7, margin: 0 }}>Chaque chiffre, chaque projection, chaque alerte est explicitement attribué à sa source primaire. <strong style={{ color: 'var(--fg-1)', fontWeight: 500 }}>DRIAS pour le climat, Géorisques pour les risques naturels, ANSES pour la qualité sanitaire, INSEE pour le socio-économique.</strong> Vous ne transmettez pas une opinion : vous transmettez une donnée publique vérifiable.</p>,
             },
             {
               num: '02',
               title: 'Aucun score synthétique opaque',
-              body: <p style={{ fontSize: 15, color: '#9ba3b4', lineHeight: 1.7, margin: 0 }}>futur•e refuse les notes de A à E ou les scores climatiques composites. Ce sont des artefacts éditoriaux qui simplifient à outrance. <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>À la place : près de trente critères distincts, lisibles séparément.</strong> Une commune peut être bien classée sur la canicule et mal sur la submersion. C'est plus utile pour vous qu'un score moyen.</p>,
+              body: <p style={{ fontSize: 15, color: '#9ba3b4', lineHeight: 1.7, margin: 0 }}>futur•e refuse les notes de A à E ou les scores climatiques composites. Ce sont des artefacts éditoriaux qui simplifient à outrance. <strong style={{ color: 'var(--fg-1)', fontWeight: 500 }}>À la place : près de trente critères distincts, lisibles séparément.</strong> Une commune peut être bien classée sur la canicule et mal sur la submersion. C'est plus utile pour vous qu'un score moyen.</p>,
             },
             {
               num: '03',
               title: 'Ni alarmisme, ni minimisation',
-              body: <p style={{ fontSize: 15, color: '#9ba3b4', lineHeight: 1.7, margin: 0 }}>La voix éditoriale est sobre, calme, lucide. Pas de « danger imminent », pas de « tout va bien ». <strong style={{ color: '#e9ecf2', fontWeight: 500 }}>L'incertitude est nommée comme telle. Les positifs sont signalés quand ils existent.</strong> C'est la seule voix qu'un professionnel peut transmettre à son client sans s'exposer à la contradiction.</p>,
+              body: <p style={{ fontSize: 15, color: '#9ba3b4', lineHeight: 1.7, margin: 0 }}>La voix éditoriale est sobre, calme, lucide. Pas de « danger imminent », pas de « tout va bien ». <strong style={{ color: 'var(--fg-1)', fontWeight: 500 }}>L'incertitude est nommée comme telle. Les positifs sont signalés quand ils existent.</strong> C'est la seule voix qu'un professionnel peut transmettre à son client sans s'exposer à la contradiction.</p>,
             },
           ].map((p) => (
             <div key={p.num} className="principle">
               <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 60, lineHeight: 1, color: ACCENT, fontWeight: 400, letterSpacing: '-0.04em' }}>{p.num}</div>
               <div>
-                <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, fontWeight: 400, color: '#e9ecf2', margin: '6px 0 12px', letterSpacing: '-0.01em', fontStyle: 'italic' }}>{p.title}</h3>
+                <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, fontWeight: 400, color: 'var(--fg-1)', margin: '6px 0 12px', letterSpacing: '-0.01em', fontStyle: 'italic' }}>{p.title}</h3>
                 {p.body}
               </div>
             </div>
@@ -340,7 +340,7 @@ export default function ProfessionnelsPage() {
         <div id="inscription" style={{ padding: '96px 28px 120px', maxWidth: 680, margin: '0 auto' }}>
           <div className="form-card">
             <div className="section-kicker">Avant-première professionnelle</div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 'clamp(28px,3.6vw,40px)', lineHeight: 1.15, fontWeight: 400, letterSpacing: '-0.015em', margin: '0 0 16px', color: '#e9ecf2' }}>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 'clamp(28px,3.6vw,40px)', lineHeight: 1.15, fontWeight: 400, letterSpacing: '-0.015em', margin: '0 0 16px', color: 'var(--fg-1)' }}>
               Recevez l'accès<br />
               <em style={{ fontStyle: 'italic', color: ACCENT }}>en avant-première.</em>
             </h2>
@@ -353,9 +353,9 @@ export default function ProfessionnelsPage() {
 
       </main>
 
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.08)', padding: '36px 28px', position: 'relative', zIndex: 2 }}>
+      <footer style={{ borderTop: '1px solid var(--border-1)', padding: '36px 28px', position: 'relative', zIndex: 2 }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
-          <Link href="/" style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, fontStyle: 'italic', color: '#e9ecf2', textDecoration: 'none' }}>
+          <Link href="/" style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, fontStyle: 'italic', color: 'var(--fg-1)', textDecoration: 'none' }}>
             futur<span style={{ color: ACCENT, fontStyle: 'normal' }}>•</span>e
           </Link>
           <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#6b7388', letterSpacing: '0.06em', textTransform: 'uppercase', lineHeight: 1.7 }}>

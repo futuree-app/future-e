@@ -33,8 +33,8 @@ const wrapper: CSSProperties = {
 const track: CSSProperties = {
   display: 'flex',
   gap: 3,
-  background: 'rgba(255,255,255,0.03)',
-  border: '1px solid rgba(255,255,255,0.08)',
+  background: 'var(--bg-elev)',
+  border: '1px solid var(--border-1)',
   borderRadius: 10,
   padding: 4,
 };

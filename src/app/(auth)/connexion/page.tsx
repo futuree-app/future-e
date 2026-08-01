@@ -42,7 +42,7 @@ export default async function ConnexionPage({
               gridTemplateColumns: "repeat(3, 1fr)",
               borderRadius: 12,
               overflow: "hidden",
-              border: "1px solid rgba(255,255,255,0.08)",
+              border: "1px solid var(--border-1)",
             }}
           >
             {METRICS.map((m, i) => (
@@ -51,7 +51,7 @@ export default async function ConnexionPage({
                 style={{
                   padding: "14px 12px",
                   textAlign: "center",
-                  borderRight: i < 2 ? "1px solid rgba(255,255,255,0.08)" : undefined,
+                  borderRight: i < 2 ? "1px solid var(--border-1)" : undefined,
                 }}
               >
                 <span
@@ -88,9 +88,9 @@ export default async function ConnexionPage({
       <div className="flex flex-col gap-4">
         <GoogleSignInButton next={next} />
         <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-white/[0.08]" />
+          <div className="h-px flex-1 bg-[var(--bg-elev-3)]" />
           <span className="text-[11px] font-mono text-ghost tracking-[0.08em] uppercase">ou</span>
-          <div className="h-px flex-1 bg-white/[0.08]" />
+          <div className="h-px flex-1 bg-[var(--bg-elev-3)]" />
         </div>
       </div>
       <PasswordForm

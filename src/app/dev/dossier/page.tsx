@@ -91,17 +91,17 @@ export default async function DevDossierPage({
       <form className="glass rounded-xl p-4 mb-8 flex flex-wrap items-end gap-4">
         <label className="flex flex-col gap-1">
           <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-ghost">code INSEE</span>
-          <input name="insee" defaultValue={insee} className="bg-white/[0.04] rounded-md px-3 py-2 text-[14px] text-label w-[120px]" />
+          <input name="insee" defaultValue={insee} className="bg-[var(--bg-elev-2)] rounded-md px-3 py-2 text-[14px] text-label w-[120px]" />
         </label>
         <label className="flex flex-col gap-1 grow">
           <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-ghost">priorités — cle:poids, séparées par des virgules</span>
-          <input name="prefs" defaultValue={prefsRaw} className="bg-white/[0.04] rounded-md px-3 py-2 text-[14px] text-label w-full" />
+          <input name="prefs" defaultValue={prefsRaw} className="bg-[var(--bg-elev-2)] rounded-md px-3 py-2 text-[14px] text-label w-full" />
         </label>
         <label className="flex items-center gap-2 pb-2">
           <input type="checkbox" name="adresse" value="1" defaultChecked={hasAddress} />
           <span className="text-[13px] text-muted">adresse renseignée</span>
         </label>
-        <button type="submit" className="rounded-md px-4 py-2 text-[14px] font-semibold bg-white/[0.08] text-label">
+        <button type="submit" className="rounded-md px-4 py-2 text-[14px] font-semibold bg-[var(--bg-elev-3)] text-label">
           Voir le dossier
         </button>
       </form>
@@ -138,7 +138,7 @@ export default async function DevDossierPage({
                 </thead>
                 <tbody className="text-muted">
                   {[...result.dossier.criteria.registry].map((c) => (
-                    <tr key={c.criterionKey} className="border-t border-white/[0.06]">
+                    <tr key={c.criterionKey} className="border-t border-[var(--border-1)]">
                       <td className="py-1 pr-4 text-label">{c.criterionKey}</td>
                       <td className="py-1 pr-4" style={{ color: OUTCOME_COLOR[c.outcome] ?? "var(--ghost)" }}>{c.outcome}</td>
                       <td className="py-1 pr-4">{c.coverage}</td>

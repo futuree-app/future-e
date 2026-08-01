@@ -11,7 +11,7 @@ export function AccountNav({
 }) {
   return (
     <nav
-      className="sticky top-0 z-50 border-b border-white/[0.08]"
+      className="sticky top-0 z-50 border-b border-[var(--border-1)]"
       style={{
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
@@ -22,7 +22,7 @@ export function AccountNav({
         <Link
           href="/"
           className="no-underline tracking-[-0.3px]"
-          style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, fontStyle: "italic", color: "#e9ecf2" }}
+          style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, fontStyle: "italic", color: "var(--fg-1)" }}
         >
           futur<span className="text-accent not-italic">•</span>e
         </Link>
@@ -46,7 +46,7 @@ export function AccountNav({
         <div className="flex items-center gap-2.5">
           <Link
             href={secondaryCta.href}
-            className="px-3.5 py-2 rounded-full border border-white/[0.08] text-label no-underline font-mono text-[11px] tracking-[0.08em] uppercase bg-white/[0.02]"
+            className="px-3.5 py-2 rounded-full border border-[var(--border-1)] text-label no-underline font-mono text-[11px] tracking-[0.08em] uppercase bg-[var(--bg-elev)]"
           >
             {secondaryCta.label}
           </Link>

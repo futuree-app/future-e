@@ -32,7 +32,7 @@ export default function PolitiqueConfidentialitePage() {
       {/* Nav minimale */}
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          borderBottom: "1px solid var(--border-1)",
           padding: "20px 24px",
           display: "flex",
           alignItems: "center",
@@ -129,7 +129,7 @@ export default function PolitiqueConfidentialitePage() {
           {/* Données collectées */}
           <Section title="Données collectées">
             <p>futur•e collecte uniquement ce dont le service a besoin pour fonctionner :</p>
-            <p style={{ marginTop: 16, padding: "12px 16px", borderRadius: 10, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", fontSize: 14 }}>
+            <p style={{ marginTop: 16, padding: "12px 16px", borderRadius: 10, background: "var(--bg-elev)", border: "1px solid var(--border-1)", fontSize: 14 }}>
               {NO_SELL_NOTICE}
             </p>
             <ul style={{ paddingLeft: 20, lineHeight: 2, color: "var(--fg-2)", margin: "16px 0 0" }}>
@@ -167,7 +167,7 @@ export default function PolitiqueConfidentialitePage() {
           {/* Sous-traitants */}
           <Section title="Sous-traitants et transferts">
             <p>futur•e fait appel aux services suivants. Tous disposent de garanties contractuelles conformes au RGPD (clauses contractuelles types ou décision d'adéquation) :</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 1, marginTop: 16, borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 1, marginTop: 16, borderRadius: 12, overflow: "hidden", border: "1px solid var(--border-1)" }}>
               {PROCESSORS.map((p, i) => (
                 <div
                   key={p.name}
@@ -176,7 +176,7 @@ export default function PolitiqueConfidentialitePage() {
                     gridTemplateColumns: "1fr 1fr 1fr",
                     gap: 12,
                     padding: "12px 16px",
-                    background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
+                    background: i % 2 === 0 ? "var(--bg-elev)" : "transparent",
                     fontSize: 13,
                     alignItems: "center",
                   }}
@@ -195,7 +195,7 @@ export default function PolitiqueConfidentialitePage() {
               Par défaut, aucun cookie de mesure ou de publicité n'est déposé sur votre navigateur. La bannière affichée à votre première visite vous permet d'accepter ou de refuser ces traceurs.
             </p>
             <p>
-              Un cookie technique (<code style={{ fontFamily: "monospace", fontSize: 13, background: "rgba(255,255,255,0.06)", padding: "2px 6px", borderRadius: 4 }}>futuree-consent</code>) est utilisé pour mémoriser votre choix. Il ne contient aucune donnée personnelle.
+              Un cookie technique (<code style={{ fontFamily: "monospace", fontSize: 13, background: "var(--bg-elev-3)", padding: "2px 6px", borderRadius: 4 }}>futuree-consent</code>) est utilisé pour mémoriser votre choix. Il ne contient aucune donnée personnelle.
             </p>
             <p>
               Vous pouvez modifier votre choix à tout moment depuis le lien{" "}
@@ -256,7 +256,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
           color: "var(--fg-hi, #fff)",
           margin: "0 0 16px",
           paddingBottom: 12,
-          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          borderBottom: "1px solid var(--border-1)",
         }}
       >
         {title}
@@ -274,7 +274,7 @@ function InfoBlock({ children }: { children: React.ReactNode }) {
       style={{
         marginTop: 16,
         borderRadius: 12,
-        border: "1px solid rgba(255,255,255,0.07)",
+        border: "1px solid var(--border-1)",
         overflow: "hidden",
       }}
     >
@@ -290,7 +290,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
         display: "grid",
         gridTemplateColumns: "120px 1fr",
         padding: "10px 16px",
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
+        borderBottom: "1px solid var(--border-1)",
         fontSize: 14,
       }}
     >
@@ -302,8 +302,8 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 function Table({ rows }: { rows: [string, string, string][] }) {
   return (
-    <div style={{ marginTop: 16, borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.07)" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 2fr 1fr", padding: "8px 16px", background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+    <div style={{ marginTop: 16, borderRadius: 12, overflow: "hidden", border: "1px solid var(--border-1)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 2fr 1fr", padding: "8px 16px", background: "var(--bg-elev-2)", borderBottom: "1px solid var(--border-1)" }}>
         {["Finalité", "Données concernées", "Base légale"].map((h) => (
           <span key={h} style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-3)" }}>{h}</span>
         ))}
@@ -315,10 +315,10 @@ function Table({ rows }: { rows: [string, string, string][] }) {
             display: "grid",
             gridTemplateColumns: "2fr 2fr 1fr",
             padding: "11px 16px",
-            background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
+            background: i % 2 === 0 ? "var(--bg-elev)" : "transparent",
             fontSize: 13,
             gap: 12,
-            borderBottom: i < rows.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
+            borderBottom: i < rows.length - 1 ? "1px solid var(--border-1)" : "none",
           }}
         >
           <span style={{ color: "var(--fg-1)" }}>{finalite}</span>

@@ -175,12 +175,12 @@ export const ReportWizard = forwardRef<
       onClose={() => dispatch({ type: "RESET" })}
     >
       {/* Header — shrinks to content */}
-      <div className="flex items-center justify-between px-10 pt-8 pb-5 border-b border-white/[0.06] shrink-0">
+      <div className="flex items-center justify-between px-10 pt-8 pb-5 border-b border-[var(--border-1)] shrink-0">
         <WizardStepper currentStep={state.step} totalSteps={6} />
         <button
           type="button"
           onClick={handleClose}
-          className="p-1.5 rounded-lg font-mono text-[10px] tracking-[0.1em] uppercase text-ghost hover:text-label hover:bg-white/[0.06] transition-all duration-200"
+          className="p-1.5 rounded-lg font-mono text-[10px] tracking-[0.1em] uppercase text-ghost hover:text-label hover:bg-[var(--bg-elev-3)] transition-all duration-200"
         >
           esc ×
         </button>

@@ -7,7 +7,7 @@ import { evidenceHref, type EvidenceTargetKey } from "@/lib/decision/evidence-ta
 
 export function Chip({ label, value, href, color }: { label: string; value?: string; href?: string; color: string }) {
   const inner = (
-    <span className="inline-flex items-center gap-1.5 font-mono text-[11px] tracking-[0.06em] uppercase rounded-md border border-white/[0.1] px-2 py-1 text-ghost">
+    <span className="inline-flex items-center gap-1.5 font-mono text-[11px] tracking-[0.06em] uppercase rounded-md border border-[var(--border-2)] px-2 py-1 text-ghost">
       {label}
       {value ? <span style={{ color }}>· {value}</span> : null}
     </span>
@@ -170,7 +170,7 @@ export function MethodDetails({ conventions, checks = [] }: { conventions: strin
       <summary className="cursor-pointer font-mono text-[11px] tracking-[0.06em] uppercase text-muted hover:text-label transition-colors">
         Données et limites
       </summary>
-      <div className="mt-2 flex flex-col gap-3 pl-3 border-l border-white/[0.08]">
+      <div className="mt-2 flex flex-col gap-3 pl-3 border-l border-[var(--border-1)]">
         <MethodZone titre="À vérifier" lignes={aVerifier} />
         <MethodZone titre="Méthode du signal" lignes={methode} />
       </div>
@@ -195,7 +195,7 @@ export function FactBody({ fact, color }: { fact: DecisionFact; color?: string }
         <p className="text-label text-[15px] leading-[1.6]">{fact.statement}</p>
         <ul className="mt-2 flex flex-col gap-1.5">
           {fact.sides.map((s, i) => (
-            <li key={i} className="text-muted text-[15px] leading-[1.55] pl-3 border-l border-white/[0.12]">{s.statement}</li>
+            <li key={i} className="text-muted text-[15px] leading-[1.55] pl-3 border-l border-[var(--border-2)]">{s.statement}</li>
           ))}
         </ul>
       </>

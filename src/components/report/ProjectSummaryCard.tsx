@@ -144,7 +144,7 @@ export function ProjectSummaryCard({ initial }: { initial: UserProject | null })
               className={
                 active
                   ? "rounded-lg px-3.5 py-2 text-[13px] font-medium bg-accent text-canvas border border-transparent transition-colors"
-                  : "rounded-lg px-3.5 py-2 text-[13px] text-muted bg-white/[0.04] border border-white/[0.12] hover:text-label hover:border-white/25 transition-colors"
+                  : "rounded-lg px-3.5 py-2 text-[13px] text-muted bg-[var(--bg-elev-2)] border border-[var(--border-2)] hover:text-label hover:border-white/25 transition-colors"
               }
             >
               {o.label}
@@ -158,7 +158,7 @@ export function ProjectSummaryCard({ initial }: { initial: UserProject | null })
         onChange={(e) => setText(e.target.value)}
         rows={3}
         placeholder="Par exemple : nous cherchons une maison au calme, proche de la mer, avec une école à pied."
-        className="w-full rounded-xl bg-white/[0.03] border border-white/[0.12] px-4 py-3 text-[14px] text-label placeholder:text-ghost leading-[1.6] resize-y focus:outline-none focus:border-accent/60 transition-colors"
+        className="w-full rounded-xl bg-[var(--bg-elev)] border border-[var(--border-2)] px-4 py-3 text-[14px] text-label placeholder:text-ghost leading-[1.6] resize-y focus:outline-none focus:border-accent/60 transition-colors"
         style={{ fontFamily: "inherit" }}
       />
 

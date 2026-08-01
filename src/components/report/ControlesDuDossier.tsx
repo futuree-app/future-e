@@ -64,7 +64,7 @@ export function ControlesDuDossier({ dossier }: { dossier: Dossier }) {
                 {g.titre}
               </div>
             )}
-            <ul className="flex flex-col gap-6 [&>li:not(:first-child)]:border-t [&>li:not(:first-child)]:border-white/[0.07] [&>li:not(:first-child)]:pt-6">
+            <ul className="flex flex-col gap-6 [&>li:not(:first-child)]:border-t [&>li:not(:first-child)]:border-[var(--border-1)] [&>li:not(:first-child)]:pt-6">
               {g.cards.map((card) => {
                 if (card.kind === "composition") {
                   return (

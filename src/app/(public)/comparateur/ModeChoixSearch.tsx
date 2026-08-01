@@ -182,7 +182,7 @@ export function ModeChoixSearch({ initial = [] }: { initial?: Selected[] }) {
                   className={`w-full rounded-lg px-4 py-3 text-[15px] text-label placeholder:text-ghost outline-none transition-colors ${
                     s.selected
                       ? "border border-accent/60 bg-accent/[0.07] pr-11"
-                      : "border border-white/[0.12] bg-white/[0.04] focus:border-accent/60"
+                      : "border border-[var(--border-2)] bg-[var(--bg-elev-2)] focus:border-accent/60"
                   }`}
                   aria-label={`Commune ${i + 1}`}
                   autoComplete="off"
@@ -201,7 +201,7 @@ export function ModeChoixSearch({ initial = [] }: { initial?: Selected[] }) {
                 )}
                 {s.open && s.results.length > 0 && (
                   <ul
-                    className="absolute left-0 right-0 mt-1 rounded-lg border border-white/[0.12] overflow-hidden"
+                    className="absolute left-0 right-0 mt-1 rounded-lg border border-[var(--border-2)] overflow-hidden"
                     style={{ zIndex: 60, background: "#0b101c", boxShadow: "0 16px 40px rgba(0,0,0,0.5)" }}
                   >
                     {s.results.map((hit) => (
@@ -212,7 +212,7 @@ export function ModeChoixSearch({ initial = [] }: { initial?: Selected[] }) {
                             e.preventDefault();
                             handleSelect(i, hit);
                           }}
-                          className="w-full text-left px-4 py-2.5 hover:bg-white/[0.06] transition-colors"
+                          className="w-full text-left px-4 py-2.5 hover:bg-[var(--bg-elev-3)] transition-colors"
                         >
                           <span className="text-[14px] text-label">{hit.nom}</span>
                           {hit.codePostal && <span className="text-[12px] text-muted ml-2">{hit.codePostal}</span>}

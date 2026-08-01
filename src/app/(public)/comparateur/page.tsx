@@ -179,7 +179,7 @@ export default async function ComparateurPage({
               </div>
               <p className="text-[15.5px] leading-[1.55] text-accent italic">{r.identite}</p>
               {r.compromis && (
-                <p className="mt-3 pt-3 border-t border-white/[0.08] text-[14.5px] leading-[1.55] text-muted">
+                <p className="mt-3 pt-3 border-t border-[var(--border-1)] text-[14.5px] leading-[1.55] text-muted">
                   {r.compromis}
                 </p>
               )}
@@ -209,7 +209,7 @@ export default async function ComparateurPage({
       {/* 5. CTA Pack : l'amorce prend le relais de la tension, ancrée sur la VALEUR.
           Bordure neutre (plus d'accent) : l'accent est réservé à la réponse (le
           face-à-face), l'upsell reste repérable par son bouton. cf. dé-emphase /ou-vivre. */}
-      <div className="mt-10 glass rounded-2xl p-6 md:p-7 border border-white/[0.1]">
+      <div className="mt-10 glass rounded-2xl p-6 md:p-7 border border-[var(--border-2)]">
         <p className="text-[16.5px] leading-[1.6] text-label" style={{ textWrap: "pretty" }}>
           {bindOrphans(upsellLede)}
         </p>

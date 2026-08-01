@@ -121,8 +121,8 @@ export function AnchorAmorce({
                   aria-pressed={!off}
                   className={`text-[12px] rounded-full px-3 py-1.5 border transition-colors ${
                     off
-                      ? "border-white/[0.08] text-ghost line-through"
-                      : "border-white/[0.18] text-label hover:border-white/[0.3]"
+                      ? "border-[var(--border-1)] text-ghost line-through"
+                      : "border-[var(--border-hi)] text-label hover:border-[var(--border-hi)]"
                   }`}
                   style={{ fontFamily: "'Instrument Sans', sans-serif" }}
                 >

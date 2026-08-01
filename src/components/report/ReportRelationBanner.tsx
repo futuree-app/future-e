@@ -101,7 +101,7 @@ export function ReportRelationBanner({
               className={`px-2.5 py-1 rounded-md border text-[12px] transition-colors disabled:opacity-50 ${
                 c.value === relation
                   ? "border-info/50 text-label"
-                  : "border-white/[0.12] text-muted hover:text-label hover:border-white/25"
+                  : "border-[var(--border-2)] text-muted hover:text-label hover:border-white/25"
               }`}
             >
               {c.label}

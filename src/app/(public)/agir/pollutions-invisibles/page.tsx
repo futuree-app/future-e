@@ -74,14 +74,14 @@ const css = `
 
   /* ── LOOKUP BLOCKS ── */
   .lookup-block{margin:28px 0;border:1px solid var(--border-1);background:var(--bg-elev);overflow:hidden;}
-  .lookup-header{padding:16px 20px;border-bottom:1px solid var(--border-1);background:rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .lookup-header{padding:16px 20px;border-bottom:1px solid var(--border-1);background:var(--bg-elev);display:flex;align-items:center;justify-content:space-between;gap:12px;}
   .lookup-title{font-size:14px;font-weight:500;color:var(--fg-1);}
   .lookup-sub{font-family:var(--font-mono);font-size:10px;letter-spacing:0.07em;text-transform:uppercase;color:var(--fg-4);margin-top:3px;}
   .lookup-body{padding:20px;}
   .lookup-desc{font-size:14px;color:var(--fg-3);line-height:1.6;margin:0 0 16px;}
 
   .lookup-form{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:16px;}
-  .lookup-input{background:rgba(255,255,255,0.04);border:1px solid var(--border-hi);color:var(--fg-1);padding:10px 14px;font-family:var(--font-sans);font-size:14px;outline:none;border-radius:0;transition:border-color 0.2s;}
+  .lookup-input{background:var(--bg-elev-2);border:1px solid var(--border-hi);color:var(--fg-1);padding:10px 14px;font-family:var(--font-sans);font-size:14px;outline:none;border-radius:0;transition:border-color 0.2s;}
   .lookup-input::placeholder{color:var(--fg-4);}
   .lookup-input:focus{border-color:var(--accent-border);}
   .lookup-btn{padding:10px 18px;background:var(--accent);border:none;color:#060812;font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.15s;white-space:nowrap;}
@@ -98,7 +98,7 @@ const css = `
   .badge-alert{background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.25);color:#fca5a5;}
   .badge-ok{background:rgba(52,211,153,0.10);border:1px solid rgba(52,211,153,0.22);color:#6ee7b7;}
   .badge-warn{background:rgba(251,191,36,0.10);border:1px solid rgba(251,191,36,0.2);color:#fde68a;}
-  .badge-neutral{background:rgba(255,255,255,0.04);border:1px solid var(--border-1);color:var(--fg-4);}
+  .badge-neutral{background:var(--bg-elev-2);border:1px solid var(--border-1);color:var(--fg-4);}
 
   .lookup-empty{padding:20px;font-size:13px;color:var(--fg-4);text-align:center;font-style:italic;font-family:var(--font-serif);}
   .lookup-loading{padding:20px;font-size:12px;color:var(--fg-4);text-align:center;font-family:var(--font-mono);letter-spacing:0.08em;text-transform:uppercase;}

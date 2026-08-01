@@ -125,9 +125,9 @@ const css = `
   h1{font-family:var(--font-serif);font-weight:400;font-size:clamp(32px,5vw,54px);line-height:1.08;letter-spacing:-0.02em;margin:0 0 20px;color:var(--fg-1);}
   h1 em{font-style:italic;color:${ACCENT};}
   .lede{font-size:17px;color:var(--fg-3);margin:0 0 16px;line-height:1.75;max-width:680px;}
-  .method-note{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);line-height:1.7;margin:0 0 64px;max-width:680px;padding:14px 18px;border-left:2px solid rgba(255,255,255,0.08);}
+  .method-note{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);line-height:1.7;margin:0 0 64px;max-width:680px;padding:14px 18px;border-left:2px solid var(--border-1);}
 
-  .city-item{padding:36px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+  .city-item{padding:36px 0;border-bottom:1px solid var(--border-1);}
   .city-item:last-child{border-bottom:none;}
   .city-header{display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap;}
   .city-rank{font-family:var(--font-serif);font-size:clamp(38px,5vw,58px);font-weight:400;color:${ACCENT};opacity:0.22;line-height:1;letter-spacing:-0.04em;flex-shrink:0;min-width:52px;}
@@ -139,7 +139,7 @@ const css = `
   .city-score-label{font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-4);margin-top:2px;}
 
   .city-stats{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
-  .city-stat{padding:12px 16px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;gap:3px;}
+  .city-stat{padding:12px 16px;border-radius:8px;background:var(--bg-elev);border:1px solid var(--border-1);display:flex;flex-direction:column;gap:3px;}
   .city-stat-label{font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-4);}
   .city-stat-value{font-family:var(--font-serif);font-size:20px;color:${ACCENT};line-height:1;}
   .city-stat-unit{font-size:0.55em;color:var(--fg-4);}
@@ -158,8 +158,8 @@ const css = `
   .cta-sec{display:inline-flex;align-items:center;padding:11px 20px;border:1px solid rgba(248,113,113,0.28);color:${ACCENT};font-family:var(--font-mono);font-size:11px;letter-spacing:0.06em;text-decoration:none;border-radius:6px;transition:border-color 0.2s;}
   .cta-sec:hover{border-color:rgba(248,113,113,0.5);}
 
-  .divider{height:1px;background:rgba(255,255,255,0.06);margin:64px 0;}
-  .page-footer{position:relative;z-index:2;max-width:860px;margin:0 auto;padding:28px 28px 56px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;font-family:var(--font-mono);font-size:11px;color:var(--fg-4);border-top:1px solid rgba(255,255,255,0.06);}
+  .divider{height:1px;background:var(--bg-elev-3);margin:64px 0;}
+  .page-footer{position:relative;z-index:2;max-width:860px;margin:0 auto;padding:28px 28px 56px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;font-family:var(--font-mono);font-size:11px;color:var(--fg-4);border-top:1px solid var(--border-1);}
   .page-footer a{color:var(--fg-3);text-decoration:none;}
 
   @media(max-width:680px){

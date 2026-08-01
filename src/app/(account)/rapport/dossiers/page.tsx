@@ -67,7 +67,7 @@ export default async function RapportDossiersPage() {
               </Link>
               <Link
                 href="/rapport"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/[0.05] text-muted text-[14px] no-underline border border-white/[0.08]"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]"
               >
                 Retour au rapport
               </Link>
@@ -107,13 +107,13 @@ export default async function RapportDossiersPage() {
                     </a>
                     <a
                       href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=autour`}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/[0.05] text-muted text-[13.5px] no-underline border border-white/[0.08]"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[13.5px] no-underline border border-[var(--border-1)]"
                     >
                       Autour de l&apos;adresse
                     </a>
                     <a
                       href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=territoire`}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/[0.05] text-muted text-[13.5px] no-underline border border-white/[0.08]"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[13.5px] no-underline border border-[var(--border-1)]"
                     >
                       {d.city ? `La commune : ${d.city}` : "La commune"}
                     </a>
