@@ -92,7 +92,9 @@ test("consulté, RIEN trouvé : aucune charnière", () => {
 
 test("QUE DES ACHEVÉS : aucune charnière", () => {
   // Un achevé ne signale plus une transformation à venir au moment de l'analyse. Il reste dans le
-  // bloc, où il explique une vue ou une ombre ; il n'entre pas dans une conclusion.
+  // bloc factuel, il n'entre pas dans la charnière temporelle. Ce que le registre établit de lui
+  // s'arrête là : une autorisation sélectionnée est passée à l'état achevé, et rien n'assure que
+  // son effet soit visible à la visite.
   const c = buildAutourConclusion(snapAvecPermis(permis([
     { annee: 2024, etat: "acheve" },
     { annee: 2023, etat: "acheve" },
@@ -140,6 +142,15 @@ export type AutourConclusion = {
    * absence, périmètre, objet du registre, année, état, date de consultation. Ce que ces faits ne
    * disent pas, et que la conclusion pose : la configuration décrite est celle observée lors de
    * l'analyse, et elle n'était peut-être pas stabilisée.
+   *
+   * ── CE CHAMP NE SE SUFFIT PAS À LUI-MÊME ─────────────────────────────────────────────────
+   * La phrase peut porter l'année de DÉPÔT du dossier, jamais la date de CONSULTATION du
+   * registre, qui est celle qui borne l'état observé. « Peut encore changer » n'est au présent
+   * que parce que le lecteur voit, sur la même surface, à quelle date le registre a été consulté.
+   *
+   * Toute réutilisation de `AutourConclusion` hors de `AutourModule` (un PDF, un partage, une
+   * synthèse qui en cite le texte) doit donc afficher cette date quelque part, sans quoi un
+   * lecteur de 2028 lira au présent une possibilité constatée en 2026.
    */
   mouvement: string | null;
   /** Ce qui est absent du périmètre cherché. Vide si tout a été trouvé. */
@@ -355,6 +366,9 @@ Puis, dans `buildMouvement`, après `if (retenus.length === 0) return null;` :
     //
     // Le POINT-VIRGULE rattache l'année au DÉPÔT et à lui seul : « déclaré ouvert en 2025 » serait
     // faux, 2025 étant l'année de dépôt du dossier et non celle de l'ouverture du chantier.
+    // `retenus[0]` sans garde : `total === 1` vient d'être établi, et `noUncheckedIndexedAccess`
+    // n'est pas activé (le tsconfig n'a que `strict`), donc l'index compile. Le fichier utilise
+    // déjà ce motif ligne 123. Un garde ici serait du code mort qu'aucun test ne peut atteindre.
     const annee = retenus[0].annee;
     corps = ouverts === 1
       ? `un chantier de logements est déclaré ouvert ${perimetre} ; le dossier a été déposé en ${annee}.`
@@ -411,7 +425,9 @@ Ces tests ne vérifient pas un comportement, ils empêchent une dérive. « La c
 ```ts
 // ── Les verrous de doctrine ─────────────────────────────────────────────────────────────────
 
-test("AUCUN FUTUR : une autorisation n'est pas un bâtiment", () => {
+test("AUCUNE TRANSFORMATION TENUE POUR ACQUISE : une autorisation n'est pas un bâtiment", () => {
+  // Le nom compte : la charnière parle bel et bien d'un possible futur (« peut encore changer »).
+  // Ce que ce verrou interdit, c'est d'affirmer une conséquence, de la dater ou de la qualifier.
   // LES LIMITES DE MOT NE SONT PAS OPTIONNELLES. Cherché en sous-chaîne, « va » frappe « travaux »
   // et « évaluation », deux mots parfaitement légitimes ici : le test échouerait sur une phrase
   // juste, et finirait désarmé plutôt que corrigé.
@@ -491,12 +507,13 @@ Aucun encadré, aucune couleur d'alerte, aucun style nouveau : la charnière est
 Ajouter au-dessus du bloc, dans le commentaire existant qui commence par « CE QU'IL FAUT EN RETENIR » :
 
 ```tsx
-                L'INVARIANT DE RENDU : `mouvement` ne porte aucune date. Il s'appuie entièrement
-                sur le « Registre national des autorisations d'urbanisme, consulté le … » du bloc
-                des permis, rendu juste au-dessus. Cette phrase ne doit jamais être affichée sur
-                une surface qui ne porte pas cette date quelque part : reprise seule dans un PDF,
-                un partage ou une synthèse, elle ferait lire au présent une possibilité constatée
-                des années plus tôt.
+                L'INVARIANT DE RENDU : `mouvement` peut porter l'année de DÉPÔT du dossier, jamais
+                la date de CONSULTATION du registre, qui est celle qui borne l'état observé. Il
+                s'appuie pour cela sur le « Registre national des autorisations d'urbanisme,
+                consulté le … » du bloc des permis, rendu juste au-dessus. Cette phrase ne doit
+                jamais être affichée sur une surface qui ne porte pas cette date quelque part :
+                reprise seule dans un PDF, un partage ou une synthèse, elle ferait lire au présent
+                une possibilité constatée des années plus tôt.
 ```
 
 - [ ] **Step 2 : vérifier les types et le lint**
@@ -510,7 +527,15 @@ Expected: aucune sortie.
 - [ ] **Step 3 : lancer la suite complète**
 
 Run: `node --test src/lib/**/*.test.ts 2>&1 | tail -8`
-Expected: `fail 0`, et un total supérieur de 15 aux 1 201 d'avant le lot.
+Expected: `fail 0`, et **quinze tests de plus que le commit de base du lot**, mesurés et non
+supposés. Le total absolu n'est pas un invariant : deux sessions travaillent sur le même arbre
+`main`, et un test ajouté à côté rendrait un nombre figé faux sans que rien soit cassé.
+
+Pour mesurer sans se fier à sa mémoire :
+
+```bash
+git stash && node --test src/lib/**/*.test.ts 2>&1 | grep "^ℹ pass" && git stash pop
+```
 
 - [ ] **Step 4 : build**
 
@@ -528,12 +553,30 @@ git commit -m "La charnière se lit sous la configuration qu'elle date"
 
 ## Vérification finale, avant de déclarer le lot fini
 
-- [ ] `node --test src/lib/**/*.test.ts` : `fail 0`, total attendu 1 216.
+- [ ] `node --test src/lib/**/*.test.ts` : `fail 0`, et quinze tests de plus que le commit de base
+      du lot (mesuré, jamais un total figé : deux sessions travaillent sur le même arbre).
 - [ ] `npx tsc -p tsconfig.json --noEmit` : muet.
 - [ ] `npx eslint` sur les deux fichiers touchés : propre.
 - [ ] `npm run build` : code 0.
 - [ ] `grep -n "—" src/lib/decision/autour-conclusion.ts src/components/report/AutourModule.tsx` : aucune occurrence ajoutée.
 - [ ] Marquer le point 2 comme CORRIGÉ dans `docs/superpowers/specs/2026-08-01-permis-autour-adresse-design.md` et dans le fil ouvert n° 6 de `docs/handoff/CURRENT.md`, en nommant le commit.
+
+### La vérification à l'écran, qu'aucun test pur ne remplace
+
+Les quinze tests prouvent la fonction, jamais son insertion. Sur `/rapport/logement`, en local puis
+en production, **deux adresses** :
+
+- [ ] **Une adresse avec un chantier ouvert** (La Rochelle centre en portait un au 01/08/2026, cf.
+      les trois points vérifiés en réel de la spec des permis). Attendu : la charnière apparaît
+      **après** le `lead` et **avant** les absences, dans le même bloc, et la date de consultation
+      est lisible dans le bloc des permis juste au-dessus. C'est l'invariant de rendu, et il ne se
+      vérifie qu'à l'œil.
+- [ ] **Une adresse sans permis non achevé** (Paris 12e, un village de la Creuse). Attendu : aucun
+      paragraphe vide, aucun espacement résiduel dans la grille, le bloc de conclusion strictement
+      identique à ce qu'il était avant le lot.
+
+Aucun Playwright pour ce lot : le projet n'en a pas l'usage, et deux ouvertures d'écran coûtent
+moins qu'une dépendance de test à maintenir.
 
 ## Ce que ce plan ne fait pas
 
