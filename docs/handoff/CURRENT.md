@@ -64,13 +64,18 @@ propre sur les fichiers touchés, `npm run build` sort en code 0 sur le lot non 
   (pur, 16 tests) remplacent trois dérivations parallèles. `logement-checklist.ts` perd ses 86 lignes
   de table d'activation. 1 192 tests, build vert au moment du commit.
 - `d9ebaff` — **le chantier SITADEL n'est PAS clos.** ⚠ Une version antérieure de ce fichier
-  l'annonçait clos, sur la foi du statut COMPLET de la spec ; **le porteur a démenti le 01/08**. Ce
-  qui est livré : l'appel (cadastre + registre), le gel dans le snapshot, le bloc d'écran. Ce qui
-  reste connu à ce jour : (a) le module Autour, permis compris, produit de la prose **hors du
-  `REGISTRY`** — ni `DecisionFact`, ni règle, ni grain déclaré, voir le fil ouvert n° 6 ;
-  (b) la pagination DiDo pour les très grandes communes (`pageSize` répond 400) n'a jamais été
-  tranchée, seulement contournée par `columns=` + `AN_DEPOT=gte:`. Trois
-  points vérifiés en réel (La Rochelle centre : 1 permis ; Paris 12e : 0 ; village de la Creuse : 0).
+  l'annonçait clos, sur la foi du statut COMPLET de la spec ; **le porteur a démenti le 01/08, et la
+  vérification lui a donné raison**. Ce qui est livré l'est réellement : l'appel (cadastre +
+  registre), le gel dans le snapshot, le bloc d'écran, les 13 fichiers, le branchement à la création
+  et au rattrapage. Trois points vérifiés en réel (La Rochelle centre : 1 permis ; Paris 12e : 0 ;
+  village de la Creuse : 0). **La spec s'était déclarée complète sur sa propre liste de tâches, pas
+  sur l'intégration du module** : quatre points restent ouverts, listés en tête de
+  `docs/superpowers/specs/2026-08-01-permis-autour-adresse-design.md`. Les deux qui comptent :
+  (a) les permis ne produisent **aucun `DecisionFact`** (`decision-assembler.ts:32` le dit
+  lui-même), donc ils sont absents du verdict, de la minute et de `ControlesDuDossier` — un chantier
+  ouvert à 40 m est la chose la plus décisive du dossier et la seule que le moteur ignore ;
+  (b) `autour-conclusion.ts` ne contient **aucune occurrence de « permis »** : la conclusion du
+  module a été écrite avant ce chantier et conclut sans le bloc qui le précède à l'écran.
   Deux paramètres DiDo trouvés ce jour-là font tomber le coût : `columns=` et `AN_DEPOT=gte:`
   ramènent La Rochelle de 538 Ko à 9 Ko, Paris entier à 20 Ko, donc aucun cache n'est nécessaire.
   Deux pièges gravés : Sitadel ne connaît que les communes-mères (`75101` répond 400, il faut
@@ -239,6 +244,13 @@ beaucoup plus.
 
 Leur entrée devra passer par une règle, une preuve avec son grain et une activation. **Jamais** par
 réutilisation opportuniste de leur prose.
+
+Deuxième conséquence, trouvée le 01/08 en vérifiant le statut de SITADEL : **`autour-conclusion.ts`
+ne contient aucune occurrence de « permis »**. La conclusion déterministe du module s'assemble sur
+quatre nombres (portée de pas, équipement auto, espace vert, ÎCU) écrits avant le chantier 3. À
+l'écran, le lecteur lit un chantier ouvert à 40 m, puis une conclusion qui n'en tient pas compte.
+C'est le défaut que cette conclusion avait justement été écrite pour corriger, revenu sur le bloc
+suivant.
 
 ### 7. Deux familles fetchées et lues par personne
 

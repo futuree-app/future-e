@@ -1,11 +1,40 @@
 # Les permis de construire autour de l'adresse
 
-**Date** : 2026-08-01 · **Statut** : **EN COURS**, pas complet. Socle vérifié, doctrine tranchée,
-périmètre mesuré, appel, gel dans le snapshot et écran livrés — mais le chantier reste ouvert.
-⚠ Ce document s'est déclaré COMPLET le 01/08 ; **le porteur a démenti le même jour**. Reste connu :
-le module Autour produit sa prose **hors du `REGISTRY`** (ni `DecisionFact`, ni règle, ni grain
-déclaré), et la pagination DiDo pour les très grandes communes n'est pas tranchée (voir §2).
-· **Chantier 3 de la liste « Autour »** (1 et 2 livrés le 01/08).
+**Date** : 2026-08-01 · **Statut** : **EN COURS**, pas complet. · **Chantier 3 de la liste
+« Autour »** (1 et 2 livrés le 01/08).
+
+> ⚠ **Ce document s'est déclaré COMPLET le 01/08 ; le porteur a démenti le même jour, et la
+> vérification lui a donné raison.** Tout ce qui figure ci-dessous comme livré l'est réellement (les
+> 13 fichiers existent, `buildPermisLecture` est appelé par `AutourModule.tsx`, `fetchPermisAutour`
+> est branché à la création et au rattrapage). Le statut était faux parce que la spec s'était
+> déclarée complète **sur sa propre liste de tâches, pas sur l'intégration du module**. Les quatre
+> points ouverts sont juste en dessous, avant tout le reste, parce qu'ils décident du statut.
+
+## Ce qui reste ouvert, vérifié dans le code le 01/08/2026
+
+**1. Les permis ne produisent aucun `DecisionFact`.** `src/lib/decision/decision-assembler.ts:32`
+le dit lui-même : « les permis autour de l'adresse, les abords et la conclusion Autour produisent
+des constats **hors moteur** ». Ils n'entrent donc ni dans le verdict, ni dans la minute, ni dans
+`ControlesDuDossier`, et c'est la raison pour laquelle le titre de cette liste dit « établis par nos
+sources » plutôt que « tous les points à vérifier ». Un chantier ouvert à 40 m est la chose la plus
+décisive du dossier et la seule que le moteur ignore. Leur entrée devra passer par une règle, une
+preuve avec son grain et une activation, **jamais** par réutilisation opportuniste de la prose.
+
+**2. `autour-conclusion.ts` ne connaît pas les permis.** Zéro occurrence de « permis » dans le
+fichier : la conclusion déterministe du module a été écrite avant ce chantier, sur quatre nombres
+(portée de pas, équipement auto, espace vert, ÎCU). Le lecteur lit un chantier ouvert, puis une
+conclusion de module qui n'en tient aucun compte. Son propre en-tête dit « le lecteur repartait avec
+des nombres et sans lecture » : le défaut qu'elle a corrigé est réapparu sur le bloc suivant.
+
+**3. La pagination DiDo n'est pas tranchée** (cf. « La source », où `pageSize` est noté refusé et la
+pagination « à vérifier pour les très grandes communes »). `columns=` + `AN_DEPOT=gte:` fait tenir Paris en 20 Ko, ce qui **masque** le problème
+sans le résoudre : on ignore ce que l'API fait quand une commune dépasse la page, et le code n'a
+aucun garde-fou pour ce cas — contrairement aux parcelles, où `features.length >= LIMITE_PARCELLES`
+refuse explicitement de conclure.
+
+**4. La réserve de méthode du périmètre reste ouverte** : 4 listes de parcelles sur 160 tronquées à 1 000
+entrées. Sans effet sur le rayon retenu, mais les chiffres à 200 m du tableau sont des **minorants**,
+ce qu'il faudra se rappeler le jour où le choix du rayon sera rouvert avec cette table.
 
 ## Ce que ça répond
 
