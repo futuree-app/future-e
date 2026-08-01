@@ -25,7 +25,11 @@ date de consultation. Une conclusion qui redirait ces faits recopierait le table
 donner la lecture.
 
 Ce que les faits ne disent pas, et que la conclusion doit poser : **la configuration décrite
-au-dessus est celle d'aujourd'hui, et elle n'est peut-être pas stabilisée.**
+au-dessus est celle observée lors de l'analyse, et elle n'était peut-être pas stabilisée.**
+
+Le temps de cette phrase n'est pas un détail de style. Le snapshot est gelé : écrire « celle
+d'aujourd'hui » referait, dans la doctrine, le piège de « à ce jour » qu'on a retiré de la phrase
+rendue.
 
 ### La règle, en une phrase
 
@@ -34,10 +38,15 @@ au-dessus est celle d'aujourd'hui, et elle n'est peut-être pas stabilisée.**
 
 ### Pourquoi « non achevé » seulement
 
-Un permis achevé appartient déjà au lieu tel qu'il existe. Il explique une vue, une ombre, un
-voisinage qui vient de changer, et c'est bien pour ça que la doctrine du chantier a décidé de
-**conserver** les achevés dans le bloc. Mais il ne change rien à ce que la conclusion annonce : ce
-qu'il a produit est dans le paysage que le lecteur a visité.
+Un permis achevé ne signale plus une transformation à venir au moment de l'analyse. Il explique une
+vue, une ombre, un voisinage qui vient de changer, et c'est bien pour ça que la doctrine du chantier
+a décidé de **conserver** les achevés dans le bloc. Mais il ne change rien à ce que la conclusion
+annonce.
+
+Cette formulation est plus étroite que « il appartient déjà au lieu tel qu'il existe », et
+volontairement : rien n'établit que l'effet d'un achevé soit visible à la visite, ni qu'il soit
+capté par les autres sources du dossier. Ce qu'on sait de lui, c'est seulement qu'il n'annonce plus
+rien.
 
 L'absence, elle, n'entre pas non plus dans la conclusion. Elle est déjà dite par le bloc au-dessus,
 bornée et vérifiable, et elle concerne trois adresses sur quatre. La répéter coûterait une phrase
@@ -66,14 +75,20 @@ Toutes précédées de la charnière « Cette configuration peut encore changer 
 
 | Composition | Phrase |
 |---|---|
-| 1 chantier ouvert | un chantier de logements est déclaré ouvert à moins de 50 m, sur un dossier déposé en 2025. |
-| 1 autorisation non commencée | une autorisation créant des logements est recensée à moins de 50 m, sans ouverture de chantier déclarée, sur un dossier déposé en 2024. |
+| 1 chantier ouvert | un chantier de logements est déclaré ouvert à moins de 50 m ; le dossier a été déposé en 2025. |
+| 1 autorisation non commencée | une autorisation créant des logements est recensée à moins de 50 m, sans ouverture de chantier déclarée ; le dossier a été déposé en 2024. |
 | Plusieurs, tous ouverts | deux chantiers de logements sont déclarés ouverts à moins de 50 m. |
 | Plusieurs, aucun ouvert | trois autorisations créant des logements sont recensées à moins de 50 m, sans ouverture de chantier déclarée. |
 | États mixtes | trois autorisations créant des logements sont recensées à moins de 50 m, dont deux chantiers déclarés ouverts. |
 
 Le « 50 m » de ces cinq exemples est illustratif : la phrase écrit le rayon **gelé dans le
 snapshot**, jamais la constante du jour. Voir « Le périmètre vient du snapshot ».
+
+**Le point-virgule des deux formes au singulier est porteur.** L'année est celle du DÉPÔT, jamais
+celle de l'ouverture du chantier : « déclaré ouvert en 2025 » serait factuellement faux. Un
+complément collé au verbe (« ouvert à moins de 50 m sur un dossier déposé en 2025 ») laisse les deux
+dates se contaminer, et « dans le cadre d'un dossier déposé en 2025 » remplace la raideur par la
+locution des circulaires. Le point-virgule rattache l'année au dépôt, et à lui seul.
 
 ### Ce que la composition dit, et pourquoi
 
@@ -87,18 +102,16 @@ attend une lecture.
 
 ### L'année
 
-**Elle apparaît si et seulement si un seul dossier est retenu.**
+**L'année apparaît uniquement lorsque la conclusion mentionne une seule autorisation.** Au pluriel,
+elle est toujours omise, **même lorsque tous les dossiers portent le même millésime** : l'ajouter
+alourdirait la charnière et la rapprocherait de l'inventaire que le bloc précédent rend déjà.
 
-La justification est sémantique : l'année ne se dit que si elle peut être attribuée à tout ce que
-la phrase désigne. Au pluriel, prendre la plus récente ferait paraître l'ensemble aussi récent
+C'est une règle éditoriale, pas un raccourci d'implémentation : `retenus.length === 1` est la
+traduction exacte de la décision, et non son approximation.
+
+Ce qu'elle écarte, au passage : prendre la plus récente ferait paraître l'ensemble aussi récent
 qu'elle, prendre la plus ancienne produirait le biais inverse, et donner une plage transformerait
-la charnière en inventaire, rôle que le bloc précédent tient déjà.
-
-**La règle CODÉE est le comptage** (`retenus.length === 1`), pas la sémantique. Elles divergent sur
-un cas : deux chantiers ouverts déposés tous deux en 2025, où l'année pourrait légitimement être
-attribuée. Arbitré au plus simple : deux permis dans 50 m du même millésime est rare, et la fidélité
-complète coûterait une branche, un accord pluriel et un test pour une phrase que presque personne
-ne lira. Le jour où ce cas compte, la règle sémantique est écrite ici et il suffira de l'appliquer.
+la charnière en inventaire.
 
 ## Ce qui a été écarté, faute de données
 
@@ -171,9 +184,23 @@ mentirait sur tous les dossiers antérieurs au prochain changement de rayon.
 distinct sous le `lead`, avant les `absences`. Aucun style nouveau, aucun encadré, aucune couleur
 d'alerte. La charnière est une phrase de la conclusion, pas un avertissement.
 
+### L'invariant de rendu : la charnière n'a pas d'ancrage temporel à elle
+
+« Cette configuration peut encore changer » ne porte aucune date. Sur `/rapport/logement`, elle
+n'en a pas besoin : le bloc des permis est rendu juste au-dessus et porte « Registre national des
+autorisations d'urbanisme, consulté le 1er août 2026 ».
+
+**Cette dépendance est un invariant, pas une coïncidence de mise en page.** Le jour où la conclusion
+du module est reprise ailleurs (un PDF, un partage, une synthèse qui en cite le texte), la phrase
+flotte : un lecteur de 2028 lira au présent une possibilité constatée en 2026.
+
+La règle : `mouvement` ne s'affiche jamais sur une surface qui ne porte pas, quelque part, la date
+de consultation du registre. Charger la phrase elle-même a été écarté, la charnière devant rester
+courte et le bloc portant déjà la date au bon endroit.
+
 ## Les tests
 
-Dix, sous `node --test`, dans `autour-conclusion.test.ts`.
+Onze, sous `node --test`, dans `autour-conclusion.test.ts`.
 
 | Cas | Attendu |
 |---|---|
@@ -185,12 +212,23 @@ Dix, sous `node --test`, dans `autour-conclusion.test.ts`.
 | Que des achevés | `mouvement === null` |
 | `permis` absent | `mouvement === null` |
 | BPE en échec, avec un chantier ouvert | conclusion `null` en entier |
-| Aucun futur, aucune ampleur | `mouvement` ne contient ni « va », ni « futur », ni « d'ici », ni « dense », ni un nombre de logements |
+| Aucun futur | `mouvement` ne contient ni « va », ni « futur », ni « d'ici », ni « dense », **en limites de mot** |
+| Aucun volume | `mouvement` ne contient aucune construction « N logements », le N étant en chiffres ou en lettres |
 | Rayon du snapshot | un snapshot gelé à 80 m écrit « 80 m », jamais 50 |
 
-Les deux derniers verrouillent une doctrine, pas un comportement. Ils sont la raison d'être de ce
+Les trois derniers verrouillent une doctrine, pas un comportement. Ils sont la raison d'être de ce
 tableau : « la conclusion mentionne le permis » et « la conclusion dit vrai du permis » sont deux
 assertions distinctes, et la seconde ne se déduit jamais de la première.
+
+**Deux pièges dans l'écriture de ces tests, à ne pas payer deux fois :**
+
+- **Les limites de mot ne sont pas optionnelles.** Cherché en sous-chaîne, « va » frappe *travaux*
+  et *évaluation*, deux mots parfaitement légitimes ici. Le test doit viser `\bva\b`, sans quoi il
+  échouera sur une phrase juste et sera désarmé plutôt que corrigé.
+- **Le volume interdit s'écrit aussi en lettres.** La charnière écrit ses nombres en toutes lettres
+  (« trois autorisations »), donc un test sur `\d+\s+logements` laisserait passer « deux
+  logements ». L'interdiction porte sur le VOLUME de logements, jamais sur le nombre
+  d'autorisations, qui est légitime et attendu.
 
 ## Ce que ce lot ne fait pas
 
