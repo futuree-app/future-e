@@ -19,6 +19,7 @@ import { getAuditByBanId, getAuditByCoordinates } from "@/lib/audit";
 import { getCartofrichesNearPoint, CARTOFRICHES_RAYON_RECHERCHE_M } from "@/lib/cartofriches";
 import { getCommuneFullData } from "@/lib/commune-data";
 import { getOnrnSinistralite } from "@/lib/onrn-sinistralite";
+import { deriveLogementCoverage } from "@/lib/decision/logement-coverage";
 import type { LogementReport } from "@/lib/logement-report-types";
 
 // Cœur commun : construit le rapport à partir d'une adresse déjà résolue (géocodée en GET,
@@ -122,6 +123,16 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       },
       heritage,
       pointHazards,
+      // LA COUVERTURE PAR FAMILLE, dérivée par la MÊME fonction que le moteur de décision. Le
+      // module en tire les gestes « à vérifier » en évaluant les règles du dossier, au lieu d'en
+      // tenir une copie qui divergeait (cf. `decision/logement-coverage.ts`).
+      decision: deriveLogementCoverage({
+        georisquesAddress,
+        georisquesParcel,
+        cavites,
+        heritage,
+        sinistralite,
+      }),
       granularity: {
         geocoding: "address",
         cadastre: parcel ? "parcel" : null,

@@ -11,6 +11,7 @@ import type { OnrnSinistralite } from "./onrn-sinistralite.ts";
 import type { PointHazards } from "./point-hazards.ts";
 import type { SolPollutionLu } from "./cartofriches-pollution.ts";
 import type { IrisScope } from "./iris-scope.ts";
+import type { LogementCoverage } from "./decision/logement-coverage.ts";
 
 export type LogementReport = {
   error?: string;
@@ -62,6 +63,18 @@ export type LogementReport = {
   // Risques du bâti au grain point (cavités, mouvements de terrain) + résidu communal. Comme le
   // reste de Géorisques : re-fetché à chaque rendu, jamais snapshoté. `null` = non interrogé.
   pointHazards?: PointHazards | null;
+  /**
+   * LA COUVERTURE PAR FAMILLE, DÉRIVÉE UNE SEULE FOIS, CÔTÉ SERVEUR (01/08/2026).
+   *
+   * Le module refaisait ces booléens dans son composant client, à partir des mêmes champs, avec
+   * ses propres tests d'égalité : le même fait était établi deux fois, par deux codes différents.
+   * Le serveur la dérive désormais avec `deriveLogementCoverage`, la MÊME fonction que le moteur
+   * de décision, et l'envoie ici. C'est ce qui permet au module d'évaluer les règles du dossier
+   * au lieu d'en tenir une copie.
+   *
+   * Optionnel : une réponse d'erreur de la route ne le porte pas.
+   */
+  decision?: LogementCoverage;
   // Métadonnées serveur portées sur le fil, non lues par le client (diagnostic / futur usage).
   granularity?: {
     geocoding: string; cadastre: string | null; georisques_address: string | null;

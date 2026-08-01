@@ -1,14 +1,17 @@
 // LES GESTES DU MODULE LOGEMENT — SOURCE UNIQUE. Lib PURE (aucune I/O, aucun `node:`) : elle est lue
-// par le moteur de décision (`logement-rules.ts`, serveur) ET par la checklist (`logement-checklist.ts`,
-// client).
+// par les règles du moteur de décision (`logement-rules.ts`), qui alimentent aussi bien le dossier
+// que la liste « à vérifier » du module (`logement-verifications.ts`).
 //
-// POURQUOI ELLE EXISTE. Les deux chemins portaient chacun leur table de textes pour LES MÊMES faits :
-// six gestes sur sept étaient écrits deux fois. Ce n'était pas seulement redondant — les deux copies
-// avaient DIVERGÉ. Celle de la checklist est restée à la première génération et commence par
+// POURQUOI ELLE EXISTE. Le module portait sa propre table de textes pour LES MÊMES faits : six
+// gestes sur sept étaient écrits deux fois. Ce n'était pas seulement redondant — les deux copies
+// avaient DIVERGÉ. Celle de la checklist est restée à la première génération et commençait par
 // « Vérifier », que le moteur a explicitement rejeté depuis : « cinq libellés sur sept commençaient
 // par Vérifiez ; empilés sur une colonne de cartes, ils se lisaient comme un formulaire, et ils
 // contredisaient le lexique que le dossier applique dix lignes plus haut ». Le lecteur recevait donc
 // deux formulations du même geste selon l'endroit où il regardait.
+//
+// LES TEXTES ONT ÉTÉ UNIFIÉS ICI LE 29/07/2026 ; L'ACTIVATION L'A ÉTÉ LE 01/08. Entre les deux, il
+// restait deux moteurs pour décider QUELS gestes apparaissent, sur les mêmes faits.
 //
 // LE VERBE NOMME LE GESTE RÉEL : Regardez / Demandez / Consultez / Signalez / Suivez / Faites
 // chiffrer. Chacun dit ce que la personne va effectivement faire.
@@ -122,13 +125,15 @@ export const GESTES: Record<GesteKey, Record<Bucket, ActionCopy>> = {
 };
 
 /**
- * LE GESTE EN UNE PHRASE, pour la checklist — qui rend une ligne, là où la carte du dossier dispose
- * d'une face et d'un dépliable. Le label reprend son point final, le détail suit.
+ * LE GESTE EN UNE PHRASE, pour la liste du module — qui rend une ligne, là où la carte du dossier
+ * dispose d'une face et d'un dépliable. Le label reprend son point final, le détail suit.
  *
  * C'est la SEULE différence de forme autorisée entre les deux chemins : le texte, lui, est le même.
+ * Elle prend l'ACTION D'UN FAIT plutôt qu'une clé de geste : depuis l'unification du 01/08/2026, la
+ * liste vient des règles, et une règle peut porter une action que cette table ne connaît pas (le
+ * radon, dont le constat est communal, en est le premier cas).
  */
-export function gesteEnPhrase(geste: GesteKey, bucket: Bucket): string {
-  const { label, detail } = GESTES[geste][bucket];
-  if (!label) return "";
-  return detail ? `${label}. ${detail}` : `${label}.`;
+export function gesteEnPhrase(action: { label: string; detail?: string }): string {
+  if (!action.label) return "";
+  return action.detail ? `${action.label}. ${action.detail}` : `${action.label}.`;
 }

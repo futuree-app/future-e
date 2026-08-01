@@ -1,6 +1,11 @@
 // Données de décision Logement (lean) : appelle les fetchers BAS NIVEAU directement, ce qui donne le
 // STATUT par famille (present / none / unavailable) — la donnée le porte déjà (heritage.sourceStatus,
 // 4 kinds sinistralité, null/[] cavités).
+//
+// LA DÉRIVATION DU STATUT N'EST PLUS ICI (01/08/2026). Elle vit dans `decision/logement-coverage.ts`,
+// pure et testée, parce que la route du module Logement en a besoin AUSSI : elle refaisait les mêmes
+// booléens dans un composant client, et deux dérivations d'un même fait finissent par diverger. Ce
+// module ne fait donc plus que le RÉSEAU, comme `sitadel-permis.ts` pour les autorisations.
 // Fraîcheur (honnête) : on re-fetch depuis la source vivante, JAMAIS on ne persiste/fige en base
 // (doctrine « jamais snapshoté »). Deux caches EXISTENT en amont, délibérés et PARTAGÉS avec le
 // module, qu'on conserve pour ne pas diverger : un cache mémoire de process (getGeorisquesAddressSummary)
@@ -10,19 +15,15 @@ import { findCadastreParcelByPoint } from "@/lib/cadastre";
 import { getGeorisquesAddressSummary, getGeorisquesParcelSummary, fetchCavitesNearPoint } from "@/lib/georisques";
 import { fetchHeritageProtections } from "@/lib/gpu";
 import { getOnrnSinistralite } from "@/lib/onrn-sinistralite";
+import { deriveLogementCoverage, type LogementCoverage, type SourceCoverage } from "@/lib/decision/logement-coverage";
 
 export type ResolvedAddress = {
   id: string | null; label: string; city: string | null; citycode: string | null;
   postcode: string | null; latitude: number; longitude: number;
 };
-export type SourceCoverage = "present" | "none" | "unavailable"; // none = source a répondu, rien trouvé
+export type { SourceCoverage };
 
-export type LogementDecisionData = {
-  rga: { coverage: SourceCoverage; label: string | null };
-  pprn: { coverage: SourceCoverage; count: number; label: string | null };
-  cavites: { coverage: SourceCoverage; count: number };
-  patrimoine: { coverage: SourceCoverage; count: number };
-  sinistralite: { coverage: SourceCoverage; active: boolean };
+export type LogementDecisionData = LogementCoverage & {
   fetchedAt: string;
 };
 
@@ -45,20 +46,14 @@ export async function fetchLogementDecisionData(address: ResolvedAddress): Promi
     address.citycode ? getOnrnSinistralite(address.citycode).catch(() => null) : Promise.resolve(null),
   ]);
 
-  const rgaLabel = gParcel?.rga?.label ?? gAddr?.rga?.label ?? null; // champ par champ : parcelle puis adresse
-  const plans = gParcel?.regulatoryPlans ?? gAddr?.regulatoryPlans ?? [];
-  const topPlan = plans.length ? plans.reduce((a, b) => (a.topRegimeRank <= b.topRegimeRank ? a : b)) : null; // le plus contraignant
-  const georisquesDown = gAddr == null && gParcel == null; // résumé indisponible (token absent ou panne)
-
-  const siniActive = sini != null && [sini.secheresse.kind, sini.inondation.kind].some((k) => k === "lecture" || k === "faible_repr");
-  const siniDown = sini == null || (sini.secheresse.kind === "indispo" && sini.inondation.kind === "indispo");
-
   return {
-    rga: { coverage: georisquesDown ? "unavailable" : rgaLabel ? "present" : "none", label: rgaLabel },
-    pprn: { coverage: georisquesDown ? "unavailable" : plans.length > 0 ? "present" : "none", count: plans.length, label: topPlan?.plan ?? null },
-    cavites: { coverage: cavites == null ? "unavailable" : cavites.length > 0 ? "present" : "none", count: cavites?.length ?? 0 },
-    patrimoine: { coverage: heritage.sourceStatus === "unavailable" ? "unavailable" : heritage.items.length > 0 ? "present" : "none", count: heritage.items.length },
-    sinistralite: { coverage: siniDown ? "unavailable" : siniActive ? "present" : "none", active: siniActive },
+    ...deriveLogementCoverage({
+      georisquesAddress: gAddr,
+      georisquesParcel: gParcel,
+      cavites,
+      heritage,
+      sinistralite: sini,
+    }),
     fetchedAt: new Date().toISOString(),
   };
 }

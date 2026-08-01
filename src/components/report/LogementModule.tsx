@@ -21,7 +21,8 @@ import { EnergieSection } from "@/components/report/logement/EnergieSection";
 import { SinistraliteBlock } from "@/components/report/logement/SinistraliteSection";
 import { RegulatoryStatusBlock } from "@/components/report/logement/RegulatorySection";
 import { DecisionChecklist } from "@/components/report/logement/DecisionChecklist";
-import { energyState, type ChecklistFacts } from "@/lib/logement-checklist";
+import { energyState, expositionArgileNotable } from "@/lib/decision/logement-coverage";
+import type { LogementFacts } from "@/lib/decision/decision-fact";
 import { evidenceAnchorId } from "@/lib/decision/evidence-targets";
 
 // Le contrat de réponse (ApiResponse) vit dans @/lib/logement-report-types (LogementReport),
@@ -229,23 +230,33 @@ export default function LogementModule({
   // désormais structurés côté serveur (`pointHazards`), plus l'ancienne ligne « autres risques »
   // aplatie ici. Les libellés PPRN sont portés par « Statut réglementaire à cette adresse ».
   const pointHazards = result?.pointHazards ?? null;
-  // Faits normalisés pour la checklist « À vérifier » (beat 5). expositionBati gate sur une
-  // exposition RGA notable (moyen/fort) pour ne pas se déclencher partout.
-  const sini = result?.sinistralite ?? null;
-  const checklistFacts: ChecklistFacts = {
-    dpe: energyState(dpe?.etiquette_dpe ?? null),
-    // L'adresse porte des diagnostics et aucun n'est attribué : il y a un document à réclamer.
-    // Distinct de « aucun diagnostic à cette adresse », où il n'y a rien à demander.
-    diagnosticNonAttribue: !dpe && dpeCandidates.length > 0,
-    confortEteInsuffisant: thermalEvidence.indicator === "insuffisant",
-    expositionBati: Boolean(georisques?.rga?.label && /moyen|fort|élev/i.test(georisques.rga.label)),
-    zoneReglementee: (georisques?.regulatoryPlans?.length ?? 0) > 0,
-    sinistraliteActive:
-      sini != null &&
-      [sini.secheresse.kind, sini.inondation.kind].some((k) => k === "lecture" || k === "faible_repr"),
-    caviteProche: (pointHazards?.cavites?.count ?? 0) > 0,
-    perimetrePatrimonial: (result?.heritage?.items?.length ?? 0) > 0,
-  };
+  // LES FAITS DE DÉCISION DU LOGEMENT, tels que le dossier les lit.
+  //
+  // Ce bloc dérivait ses propres booléens des mêmes sources (`/moyen|fort|élev/i` recopié ici, un
+  // `.length > 0` là), en parallèle de l'adaptateur du moteur : deux établissements du même fait,
+  // dont rien n'aurait dit lequel avait raison. La couverture par famille est désormais dérivée
+  // UNE fois, côté serveur, par la fonction que le moteur emploie (`result.decision`), et le
+  // module ne fait plus que la lire.
+  //
+  // Ce qui reste calculé ici est ce que le serveur ne peut pas savoir : le DPE ATTRIBUÉ (le choix
+  // du lecteur, persisté sur le dossier) et ce qui s'en déduit.
+  const coverage = result?.decision ?? null;
+  const logementFacts: LogementFacts | null = coverage
+    ? {
+        dpe: energyState(dpe?.etiquette_dpe ?? null),
+        dpeLabel: dpe?.etiquette_dpe ?? null,
+        confortEteInsuffisant: thermalEvidence.indicator === "insuffisant",
+        // L'adresse porte des diagnostics et aucun n'est attribué : il y a un document à réclamer.
+        // Distinct de « aucun diagnostic à cette adresse », où il n'y a rien à demander.
+        diagnosticNonAttribue: !dpe && dpeCandidates.length > 0,
+        rga: coverage.rga.coverage, expositionBati: expositionArgileNotable(coverage.rga.label),
+        pprn: coverage.pprn.coverage, zoneReglementee: coverage.pprn.count > 0, pprnLabel: coverage.pprn.label,
+        cavites: coverage.cavites.coverage, caviteProche: coverage.cavites.count > 0,
+        patrimoine: coverage.patrimoine.coverage, perimetrePatrimonial: coverage.patrimoine.count > 0,
+        sinistralite: coverage.sinistralite.coverage, sinistraliteActive: coverage.sinistralite.active,
+        addressLabel: result?.address?.label ?? "cette adresse",
+      }
+    : null;
 
   return (
     <div className="min-h-screen bg-canvas text-label relative overflow-hidden" style={{ fontFamily: "'Instrument Sans', sans-serif" }}>
@@ -457,7 +468,10 @@ export default function LogementModule({
                 posthog?.capture("logement_projet_declare", { projet: v, insee: result.address?.citycode ?? null });
               }}
             />
-            <DecisionChecklist facts={checklistFacts} projet={projet} />
+            {/* Sans la couverture par famille (réponse d'erreur de la route), il n'y a pas de
+                faits à évaluer : le bloc disparaît, plutôt que d'annoncer « aucun point à
+                vérifier » sur la foi d'une absence de données. */}
+            {logementFacts && <DecisionChecklist facts={logementFacts} projet={projet} />}
           </div>
 
           {/* La sortie d'engagement du module = le beat 5 « À vérifier avant de décider »

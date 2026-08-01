@@ -1,7 +1,7 @@
 // Adaptateur PUR : données de décision (statut par famille) + DPE sauvegardé -> LogementFacts. Sans
 // project (faits intrinsèques ; la doctrine projet-relative vit dans les règles). Value-import
-// energyState (logement-checklist.ts, pur) ; type-only le reste -> node-testable.
-import { energyState } from "../logement-checklist.ts";
+// energyState (decision/logement-coverage.ts, pur) ; type-only le reste -> node-testable.
+import { energyState } from "./logement-coverage.ts";
 import { deriveThermalEvidence } from "../thermal-evidence.ts";
 import type { LogementDecisionData } from "../server/logement-decision-data.ts";
 import type { DpeRecord } from "../dpe.ts";

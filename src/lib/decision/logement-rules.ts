@@ -110,8 +110,37 @@ const ruleConfortEte: DecisionRule = {
   },
 };
 
+// DIAGNOSTIC NON ATTRIBUÉ. Le geste existait dans la checklist du module et n'était porté par AUCUNE
+// règle : le dossier de décision, lui, ne le proposait donc jamais. Il entre dans le moteur le
+// 01/08/2026, avec l'unification des deux chemins « à vérifier ».
+//
+// Il n'émet que sur `true`. `undefined` veut dire que la liste des diagnostics de l'adresse n'a pas
+// été établie (le chemin du dossier ne la demande pas) : sans elle, on ne sait pas s'il y a un
+// document à réclamer, et une règle qui se tairait « parce que le champ est absent » dirait la même
+// chose qu'une règle qui se tait « parce qu'il n'y a rien ». Ici les deux se taisent, mais aucune
+// n'AFFIRME : c'est l'absence de fait, jamais un fait d'absence.
+const ruleDiagnosticNonAttribue: DecisionRule = {
+  id: "logement.diagnostic-non-attribue", module: "logement",
+  evaluate: (f, p): RuleEvaluation => {
+    const l = f.logement;
+    if (!l?.diagnosticNonAttribue) return na("diagnostic-non-attribue");
+    return out("diagnostic-non-attribue", logementVerification(
+      "diagnostic-non-attribue",
+      ev(l, "logement.diagnostic-non-attribue", "live_fetch"),
+      "secondary",
+      "le diagnostic énergétique de ce logement",
+      "À cette adresse, des diagnostics énergétiques existent, mais aucun n'a pu être rattaché à ce logement.",
+      "obtenir_document",
+      GESTES.diagnostic_adresse[bucket(p)],
+      "Diagnostic non attribué",
+      "Un diagnostic généré à l'immeuble ne décrit pas un logement en particulier.",
+    ));
+  },
+};
+
 export const LOGEMENT_RULES: DecisionRule[] = [
   ruleConfortEte,
+  ruleDiagnosticNonAttribue,
   ruleDpe,
   coverageRule({ id: "exposition-bati", tier: "structuring", targetKey: "housing.clay_shrink_swell", topic: () => "le retrait-gonflement des argiles", status: "Aléa moyen ou fort", coverage: (l) => l.rga, flag: (l) => l.expositionBati,
     // La sévérité (« aléa moyen ou fort ») est portée par le StatusTag rendu au-dessus du constat : la

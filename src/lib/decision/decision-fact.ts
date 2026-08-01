@@ -264,6 +264,19 @@ export type LogementFacts = {
   // « insuffisant » ET que le DPE décrit bien CE logement — un DPE généré à l'immeuble ne dit rien
   // du confort d'un appartement en particulier, et `deriveThermalEvidence` rend alors `null`.
   confortEteInsuffisant: boolean;
+  /**
+   * L'ADRESSE PORTE DES DIAGNOSTICS, ET AUCUN NE DÉCRIT CE LOGEMENT.
+   *
+   * Le cas ordinaire d'un immeuble, où la base en contient parfois plus de vingt. Distinct de
+   * `dpe: "absent"`, qui couvre aussi l'adresse qui n'en porte aucun : là il n'y a rien à
+   * réclamer, ici le document existe et le vendeur ou le bailleur le détient.
+   *
+   * OPTIONNEL, ET C'EST UN TROISIÈME ÉTAT. `undefined` veut dire que la liste des diagnostics de
+   * l'adresse n'a pas été établie : le chemin du dossier de décision ne la demande pas, et
+   * répondre `false` y affirmerait qu'il n'y a rien à réclamer, ce qui n'a pas été vérifié. La
+   * règle n'émet que sur `true`.
+   */
+  diagnosticNonAttribue?: boolean;
   addressLabel: string;
 };
 
