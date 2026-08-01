@@ -534,6 +534,12 @@ quand le verdict la porte déjà) · `FactBody`, `EvidenceRow`, `MethodDetails`,
 `HorizonSwitch` · `MetricDrawer` (référence de composant responsive) · le tiret `—` comme marqueur
 d'absence · le trio typographique et ses trois rôles.
 
+**Un tracking négatif ne s'hérite jamais.** Il est calibré pour la taille du titre qui le porte. Un
+texte plus petit imbriqué dans ce titre (un grain, une précision, une unité) doit remettre
+`letter-spacing: normal`, et `font-stretch: normal` si le titre est resserré. Sans cette remise, les
+espaces entre les mots se referment, d'autant plus fort que le titrage est serré. Constaté sur le
+banc typographique à -1,6 px : le grain de 15 px devenait un bloc de lettres collées.
+
 **Le trio typographique** : `--font-serif` (Instrument Serif) pour les titres et la voix éditoriale ;
 `--font-sans` (Instrument Sans) pour le texte courant ; `--font-mono` (JetBrains Mono) pour les
 valeurs, surtitres, sources et métadonnées. Toujours par le token, jamais par un `fontFamily` en

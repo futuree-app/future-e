@@ -328,7 +328,14 @@ function Echantillon({ p }: { p: Proposition }) {
               <div>
                 <h4 className="text-[20px] text-label" style={titre}>
                   {e.nom}
-                  <span className="text-muted text-[15px]" style={{ fontFamily: p.body, fontWeight: 400 }}>
+                  {/* UN TRACKING NÉGATIF NE S'HÉRITE PAS. Il est calibré pour la taille du titre :
+                      hérité par ce grain de 15 px, il refermait les espaces entre les mots, d'autant
+                      plus fort que la proposition resserre (jusqu'à -1,6 px). La remise à `normal`
+                      est nécessaire, pas cosmétique. */}
+                  <span
+                    className="text-muted text-[15px]"
+                    style={{ fontFamily: p.body, fontWeight: 400, letterSpacing: "normal", fontStretch: "normal" }}
+                  >
                     {" "}· {e.grain}
                   </span>
                 </h4>
