@@ -1,0 +1,22 @@
+{
+  "adresses": 160,
+  "echecs": 0,
+  "rayons": {
+    "50": {
+      "avecPermis": 88,
+      "avecEnCours": 69,
+      "avecRecent": 39
+    },
+    "100": {
+      "avecPermis": 129,
+      "avecEnCours": 114,
+      "avecRecent": 75
+    },
+    "200": {
+      "avecPermis": 153,
+      "avecEnCours": 147,
+      "avecRecent": 108
+    }
+  },
+  "source": "docs/audits/mesure-dpe-2026-07-31-adresses.json"
+}

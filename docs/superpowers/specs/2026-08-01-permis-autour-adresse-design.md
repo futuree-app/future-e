@@ -1,7 +1,7 @@
 # Les permis de construire autour de l'adresse
 
-**Date** : 2026-08-01 · **Statut** : socle vérifié et première brique livrée ; le reste est spécifié
-et non construit. · **Chantier 3 de la liste « Autour »** (1 et 2 livrés le 01/08).
+**Date** : 2026-08-01 · **Statut** : socle vérifié, doctrine tranchée, périmètre MESURÉ, première
+brique livrée. Reste à construire : l'appel, le gel dans le snapshot et l'écran. · **Chantier 3 de la liste « Autour »** (1 et 2 livrés le 01/08).
 
 ## Ce que ça répond
 
@@ -57,34 +57,50 @@ l'afficher ferait passer un enregistrement administratif pour un projet.
 
 ## Ce qui reste à construire
 
-### 1. Le périmètre : quelles parcelles sont « à côté » ?
+### 1. Le périmètre : TRANCHÉ par la mesure du 01/08/2026
 
-Le produit résout déjà la parcelle de l'adresse (`findCadastreParcelByPoint`, avec repli par carrés
-de 3, 8 puis 15 m). Il faut les parcelles **voisines**. `apicarto/cadastre/parcelle` accepte une
-géométrie : un carré autour du point, comme `buildSquareAroundPoint` le fait déjà, à un rayon plus
-grand.
+`scripts/mesure-permis-autour.mjs`, sur 160 adresses tirées uniformément dans la BAN (les mêmes
+que la mesure DPE, donc sans nouveau biais). Résultats dans
+`docs/audits/mesure-permis-2026-08-01.json`.
 
-**Question ouverte, à mesurer avant de coder** : à quel rayon ? À 100 m en ville, on couvre
-l'îlot ; à 200 m on couvre la rue. Le rayon doit être **nommé et affiché**, comme les 500 m du
-comptage et les 15 points de l'écart de secteur.
+| Rayon | Au moins un permis | dont non achevé | dont déposé depuis 3 ans |
+|---|---|---|---|
+| 50 m | 55,0 % | 43,1 % | **24,4 %** |
+| 100 m | 80,6 % | 71,3 % | 46,9 % |
+| 200 m | 95,6 % | 91,9 % | 67,5 % |
+
+**Le problème n'était pas la rareté, c'était le bruit.** À 200 m, 95,6 % des adresses ont un permis
+à côté : une information que presque tout le monde reçoit ne distingue plus rien, et elle
+occuperait un bloc du dossier pour dire « comme partout ». À 100 m, plus des deux tiers en ont un
+non achevé : encore trop banal.
+
+**Retenu : 50 m, filtré aux dépôts des trois dernières années.** Le signal concerne alors une
+adresse sur quatre. Assez rare pour vouloir dire quelque chose quand il apparaît, assez fréquent
+pour valoir la peine d'être construit. Le rayon sera NOMMÉ dans le texte, comme les 500 m du
+comptage.
+
+**Réserve de méthode** : 4 listes de parcelles sur 160 ont été tronquées à 1 000 entrées au rayon
+de 200 m. Sans effet sur le rayon retenu (50 m n'approche jamais la limite), mais les chiffres à
+200 m sont des minorants.
 
 ### 2. Le coût, et le cache
 
-Un appel par dossier, filtré par commune, sur un CSV de quelques centaines de kilo-octets. Le
-snapshot Autour est **figé** : les permis devraient y entrer comme les autres faits, donc être
-gelés à la création du dossier. À trancher : un dossier de six mois affichera-t-il des permis de
-six mois ? Le champ doit être optionnel, comme `withinWalkCount`, pour que les dossiers antérieurs
-n'affichent pas une absence.
+Un appel par dossier, filtré par commune, sur un CSV de quelques centaines de kilo-octets, plus un
+appel cadastre pour les parcelles à 50 m. Le snapshot Autour est **figé** : les permis devraient y
+entrer comme les autres faits, donc être gelés à la création du dossier. À trancher : un dossier de
+six mois affichera-t-il des permis de six mois ? Le champ doit être optionnel, comme
+`withinWalkCount`, pour que les dossiers antérieurs n'affichent pas une absence.
 
-### 3. La mesure qui décide si ça vaut le coup
+### 3. Deux pièges de jointure, déjà payés
 
-**Combien d'adresses verraient quelque chose ?** 1 091 permis sur treize ans pour une commune de
-75 000 habitants, c'est rare à l'échelle d'une parcelle. Si 95 % des dossiers affichent un bloc
-vide, la fonctionnalité coûte un appel pour rien.
+Ils ont produit **zéro permis sur huit adresses** au premier essai, ce qui aurait fermé le chantier
+sur un faux verdict.
 
-À mesurer sur les 800 adresses de `docs/audits/mesure-dpe-2026-07-31-adresses.json`, qui sont déjà
-tirées uniformément : part des adresses avec au moins un permis non achevé à moins de N mètres,
-par strate. **Cette mesure conditionne tout le reste.**
+- **Le numéro de parcelle est complété à quatre chiffres par le cadastre** (« 0300 ») et rendu brut
+  par Sitadel (« 300 »). Sans normalisation, la clé ne correspond jamais.
+- **`_limit=200` sur `apicarto/cadastre/parcelle` était atteint PILE** à 200 m en ville. Les
+  parcelles disparaissaient en silence, et la mesure aurait sous-compté précisément les secteurs
+  denses, ceux où il y a des permis. Limite portée à 1 000, troncature comptée et affichée.
 
 ### 4. La forme
 
