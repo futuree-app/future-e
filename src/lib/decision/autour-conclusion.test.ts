@@ -301,3 +301,47 @@ test("au-delà de neuf, le nombre passe en chiffres", () => {
       "à moins de 50 m.",
   );
 });
+
+// ── Les verrous de doctrine ─────────────────────────────────────────────────────────────────
+
+test("AUCUNE TRANSFORMATION TENUE POUR ACQUISE : une autorisation n'est pas un bâtiment", () => {
+  // Le nom compte : la charnière parle bel et bien d'un possible futur (« peut encore changer »).
+  // Ce que ce verrou interdit, c'est d'affirmer une conséquence, de la dater ou de la qualifier.
+  //
+  // LES LIMITES DE MOT NE SONT PAS OPTIONNELLES. Cherché en sous-chaîne, « va » frappe « travaux »
+  // et « évaluation », deux mots parfaitement légitimes ici : le test échouerait sur une phrase
+  // juste, et finirait désarmé plutôt que corrigé.
+  const INTERDITS = [/\bva\b/i, /\bvont\b/i, /\bsera\b/i, /\bfutur/i, /\bd'ici\b/i, /\bdens/i, /\bprévu/i];
+  for (const liste of [
+    [{ annee: 2025, etat: "chantier_ouvert" as const }],
+    [{ annee: 2024, etat: "autorise_non_commence" as const }],
+    [{ annee: 2025, etat: "chantier_ouvert" as const }, { annee: 2024, etat: "autorise_non_commence" as const }],
+  ]) {
+    const m = buildAutourConclusion(snapAvecPermis(permis(liste)))?.mouvement ?? "";
+    for (const interdit of INTERDITS) {
+      assert.ok(!interdit.test(m), `« ${interdit} » trouvé dans : ${m}`);
+    }
+  }
+});
+
+test("AUCUN VOLUME de logements, en chiffres comme en lettres", () => {
+  // La charnière écrit ses nombres en toutes lettres, donc un test sur /\d+\s+logements/ seul
+  // laisserait passer « deux logements ». L'interdit porte sur le VOLUME de logements, jamais sur
+  // le nombre d'autorisations, qui est légitime et attendu.
+  const VOLUME = /(\d+|un|une|deux|trois|quatre|cinq|six|sept|huit|neuf)\s+logements/i;
+  const m = buildAutourConclusion(snapAvecPermis(permis([
+    { annee: 2025, etat: "chantier_ouvert" },
+    { annee: 2024, etat: "autorise_non_commence" },
+  ])))?.mouvement ?? "";
+  assert.ok(!VOLUME.test(m), `un volume de logements a été écrit : ${m}`);
+  assert.ok(m.includes("deux autorisations"), "le nombre d'autorisations, lui, doit être dit");
+});
+
+test("LE RAYON VIENT DU SNAPSHOT, jamais de la constante du jour", () => {
+  // Un dossier créé sous un ancien rayon doit continuer de décrire le périmètre qui l'a réellement
+  // sélectionné. Une phrase bâtie sur RAYON_PERMIS_M mentirait sur tous les dossiers antérieurs au
+  // prochain changement de rayon.
+  const c = buildAutourConclusion(snapAvecPermis(permis([{ annee: 2025, etat: "chantier_ouvert" }], 80)));
+  assert.ok(c?.mouvement?.includes("à moins de 80 m"));
+  assert.ok(!c?.mouvement?.includes("50 m"));
+});
