@@ -5,6 +5,7 @@ import { loadBpePointsAround, nearestByCategory } from "@/lib/logement-bpe";
 import { getTileGeoms, computeOsmProximity, OSM_BBOX_RADIUS_M } from "@/lib/logement-osm";
 import { assembleSnapshot } from "@/lib/logement-autour";
 import { getIcuSignal } from "@/lib/icu";
+import { fetchPermisAutour } from "@/lib/server/sitadel-permis";
 import { buildAutourResponse } from "@/lib/server/autour-response";
 import { getDossier, needsRecompute, SOURCES_VERSION } from "@/lib/address-dossier-store";
 import { updateOwnedAddressDossier } from "@/lib/server/address-dossier-write";
@@ -52,6 +53,44 @@ export async function POST(req: Request) {
     if (existing.posture !== posture) {
       await updateOwnedAddressDossier(user.id, existing.id, { posture });
     }
+
+    // LE RATTRAPAGE DES PERMIS, UNE SEULE FOIS PAR DOSSIER.
+    //
+    // Le registre des autorisations est arrivé le 01/08/2026 : tous les snapshots antérieurs
+    // n'ont pas le champ, et une panne de l'API pendant l'analyse le laisse absent aussi. Sans ce
+    // rattrapage, ces dossiers n'auraient JAMAIS le bloc, puisque rien ne les recalcule tant que
+    // `SOURCES_VERSION` ne bouge pas — et la bumper invaliderait tous les snapshots pour un
+    // champ optionnel, ce qui coûterait un recalcul complet à chaque dossier existant.
+    //
+    // Une fois rempli, il est GELÉ comme les autres faits : la date de consultation est écrite
+    // avec, et affichée. Le rattrapage ne rafraîchit donc jamais un champ déjà là.
+    const snapshotFige = existing.snapshot;
+    if (snapshotFige.permis === undefined) {
+      const enCours = fetchPermisAutour(center.lat, center.lon, existing.insee);
+      const persiste = async (permis: Awaited<typeof enCours>) => {
+        if (!permis) return;
+        await updateOwnedAddressDossier(user.id, existing.id, {
+          snapshot: { ...snapshotFige, permis },
+        }).catch(() => {});
+      };
+      // Le même budget que la tuile OSM : au-delà, on rend la page sans attendre, et le
+      // remplissage se termine en tâche de fond pour la prochaine ouverture.
+      const permis = await Promise.race([
+        enCours,
+        new Promise<null>((res) => setTimeout(() => res(null), 3500)),
+      ]);
+      if (permis) {
+        await persiste(permis);
+        return Response.json(
+          await buildAutourResponse({
+            snapshot: { ...snapshotFige, permis },
+            lat: center.lat, lon: center.lon, insee: existing.insee,
+          }),
+        );
+      }
+      after(async () => { await persiste(await enCours.catch(() => null)); });
+    }
+
     // AUCUN chemin ne renvoie le snapshot directement : tous passent par l'assembleur (cf.
     // `autour-response.ts`). C'est ce qui empêche un enrichissement de dépendre de la branche.
     return Response.json(
@@ -62,6 +101,10 @@ export async function POST(req: Request) {
   // ICU (îlot de chaleur du quartier) : appel WFS IGN, lancé en concurrence avec OSM (silencieux
   // si non couvert / panne -> pas de bloc). Awaité au moment d'assembler.
   const icuPromise = getIcuSignal(center.lat, center.lon);
+
+  // Les permis : deux appels réseau (cadastre + registre), lancés ici pour qu'ils courent pendant
+  // la BPE et la tuile OSM. Ne lèvent jamais ; `null` laisse le champ absent, donc pas de bloc.
+  const permisPromise = fetchPermisAutour(center.lat, center.lon, existing.insee);
 
   // BPE : local, immédiat.
   const bpe = nearestByCategory(center, await loadBpePointsAround(center));
@@ -91,7 +134,7 @@ export async function POST(req: Request) {
     osmStatus = "failed";
   }
 
-  const snapshot = assembleSnapshot(center, bpe, osm, osmStatus, await icuPromise);
+  const snapshot = assembleSnapshot(center, bpe, osm, osmStatus, await icuPromise, await permisPromise);
 
   // Le patch ne porte QUE ce que ce module produit. L'identité de l'adresse et la parcelle ne
   // sont plus dans la portée d'écriture : la question « ne jamais dégrader la parcelle », qui

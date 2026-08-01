@@ -27,7 +27,7 @@
 // Pur, testé sous `node --test`.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
-import { etatAutorisation, etatMontrable, LIBELLE_ETAT, type SitadelDates } from "./sitadel-etat.ts";
+import { etatAutorisation, etatMontrable, type EtatAutorisation, type SitadelDates } from "./sitadel-etat.ts";
 
 /** Le rayon retenu, en mètres. NOMMÉ dans le texte, comme les 500 m du comptage. */
 export const RAYON_PERMIS_M = 50;
@@ -53,7 +53,16 @@ export function cleParcelle(section: string | null | undefined, numero: string |
   return `${s}|${n}`;
 }
 
-export type PermisRetenu = { annee: number; libelle: string };
+/**
+ * UN PERMIS RETENU PORTE SON ÉTAT, PAS SA PHRASE.
+ *
+ * Ces objets sont GELÉS dans le snapshot du dossier. Y écrire le libellé figerait la formulation
+ * du jour de l'analyse : réécrire « chantier déclaré ouvert » plus tard laisserait les dossiers
+ * déjà créés parler l'ancienne langue, et deux dossiers voisins diraient deux choses de la même
+ * situation. L'état est le FAIT, le libellé est de la présentation : il se calcule au rendu par
+ * `LIBELLE_ETAT`.
+ */
+export type PermisRetenu = { annee: number; etat: Exclude<EtatAutorisation, "sans_date"> };
 
 /**
  * Les permis à montrer pour une adresse.
@@ -76,21 +85,35 @@ export function permisAMontrer(
     .flatMap((a) => {
       const etat = etatAutorisation(a);
       if (!etatMontrable(etat)) return [];
-      return [{ annee: a.annee, libelle: LIBELLE_ETAT[etat] }];
+      return [{ annee: a.annee, etat }];
     })
     .sort((x, y) => y.annee - x.annee);
 }
 
 /**
- * LA LIMITE, toujours dite quand des permis s'affichent.
+ * LA LIMITE, toujours dite quand le bloc s'affiche, présence ou absence de permis.
  *
  * Trois réserves, et chacune a coûté une vérification : un permis autorisé peut n'être jamais
  * construit ; le jeu est mensuel, donc un dossier déposé le mois dernier n'y figure pas encore ;
  * et le périmètre est nommé, sans quoi l'absence se lirait « rien ne se construit », alors qu'elle
  * dit seulement « rien dans ces cinquante mètres ».
+ *
+ * ── POURQUOI UNE FONCTION, ET PAS UNE CONSTANTE ───────────────────────────────────────────────
+ * Le rayon et la fenêtre sont GELÉS dans le snapshot avec les permis qu'ils ont sélectionnés. Une
+ * constante bâtie sur `RAYON_PERMIS_M` décrirait tous les dossiers avec le rayon D'AUJOURD'HUI :
+ * le jour où il change, les dossiers anciens continueraient d'afficher leurs permis à 50 m sous
+ * une phrase annonçant le nouveau rayon. La phrase doit donc se construire à partir des valeurs
+ * QUI ONT SERVI, que l'appelant lit dans le snapshot.
  */
-export const LIMITE_PERMIS =
-  `Ces autorisations portent sur les parcelles situées à moins de ${RAYON_PERMIS_M} m de l'adresse, ` +
-  `déposées depuis moins de ${ANCIENNETE_MAX_ANS} ans. Une autorisation n'est pas un bâtiment : elle ` +
-  `peut n'être jamais construite. Le registre national est mis à jour chaque mois, donc un dossier ` +
-  `déposé récemment peut ne pas encore y figurer.`;
+export function limitePermis(
+  rayonMeters: number = RAYON_PERMIS_M,
+  ancienneteMaxAns: number = ANCIENNETE_MAX_ANS,
+): string {
+  return (
+    `Le registre a été interrogé sur les parcelles situées à moins de ${rayonMeters} m de ` +
+    `l'adresse, pour les dossiers déposés depuis moins de ${ancienneteMaxAns} ans. Une ` +
+    `autorisation n'est pas un bâtiment : elle peut n'être jamais construite. Le registre ` +
+    `national est mis à jour chaque mois, donc un dossier déposé récemment peut ne pas encore ` +
+    `y figurer.`
+  );
+}

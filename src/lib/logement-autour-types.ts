@@ -1,4 +1,5 @@
 import type { LngLat } from "./geo-distance.ts";
+import type { PermisRetenu } from "./sitadel-selection.ts";
 
 // Foyer canonique de TOUS les types partagés Face 3 (évite les imports en avant entre libs).
 
@@ -73,11 +74,42 @@ export type OsmProximity = {
 // « Chaleur autour du logement » n'apparaît pas (jamais de « non renseigné »). iuhi = °C.
 export type IcuSnapshot = { iuhi: number; level: "marque" | "present" } | null;
 
+/**
+ * LES AUTORISATIONS D'URBANISME AUTOUR DE L'ADRESSE, GELÉES AVEC LEUR PÉRIMÈTRE.
+ *
+ * Le rayon, la fenêtre d'ancienneté et l'année de référence sont écrits ICI, à côté des permis
+ * qu'ils ont sélectionnés, et jamais relus depuis les constantes du jour. Le jour où le rayon
+ * change, un dossier ancien doit continuer de décrire ce qui a réellement servi à le construire :
+ * une phrase bâtie sur la constante courante raconterait un périmètre que ces permis n'ont pas
+ * connu.
+ *
+ * `consulteLe` est affiché. Le registre national est mensuel et un dossier se relit des mois
+ * après sa création : sans la date de consultation, le lecteur ne peut pas savoir de quand date
+ * ce qu'il lit.
+ */
+export type PermisSnapshot = {
+  /** Du plus récent au plus ancien. Vide veut dire CONSULTÉ ET RIEN TROUVÉ, jamais « non su ». */
+  permis: PermisRetenu[];
+  rayonMeters: number;
+  ancienneteMaxAns: number;
+  /** L'année qui a servi de référence à la fenêtre d'ancienneté. */
+  anneeReference: number;
+  /** ISO 8601. */
+  consulteLe: string;
+};
+
 export type Face3Snapshot = {
   center: LngLat;
   bpe: { categories: BpeNearest[] };
   osm: OsmProximity;
   icu?: IcuSnapshot;
+  /**
+   * OPTIONNEL, ET IL DOIT LE RESTER. Absent veut dire « le registre n'a pas été consulté » : les
+   * snapshots figés avant le 01/08/2026 ne portent pas ce champ, et une panne de l'API en cours
+   * d'analyse le laisse absent. Dans les deux cas le bloc DISPARAÎT, au lieu d'annoncer une
+   * absence de permis qui n'a jamais été établie.
+   */
+  permis?: PermisSnapshot;
   sourceStatus: {
     bpe: "complete" | "failed";
     osmInfrastructure: "complete" | "pending" | "failed";

@@ -1,8 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  cleParcelle, permisAMontrer, LIMITE_PERMIS, RAYON_PERMIS_M, ANCIENNETE_MAX_ANS,
+  cleParcelle, permisAMontrer, limitePermis, RAYON_PERMIS_M, ANCIENNETE_MAX_ANS,
 } from "./sitadel-selection.ts";
+
+import { LIBELLE_ETAT } from "./sitadel-etat.ts";
 
 const P = new Set(["BP|300"]);
 
@@ -50,11 +52,14 @@ test("du plus récent au plus ancien", () => {
   assert.deepEqual(r.map((x) => x.annee), [2026, 2025, 2024]);
 });
 
-test("le libellé suit l'état déduit des DATES", () => {
+test("l'état retenu est déduit des DATES, et c'est l'état qui est gelé, pas sa phrase", () => {
   const r = permisAMontrer([
     autorisation({ achevement: "2025-11-22", ouvertureChantier: "2025-05-07" }),
   ], P, 2026);
-  assert.equal(r[0].libelle, "travaux déclarés achevés");
+  assert.equal(r[0].etat, "acheve");
+  // Le libellé se calcule au rendu : le réécrire un jour ne doit pas laisser les dossiers déjà
+  // gelés parler l'ancienne langue.
+  assert.equal(LIBELLE_ETAT[r[0].etat], "travaux déclarés achevés");
 });
 
 test("un dossier à trois parcelles est retenu si UNE seule touche le périmètre", () => {
@@ -65,12 +70,22 @@ test("un dossier à trois parcelles est retenu si UNE seule touche le périmètr
 // ── La limite ──────────────────────────────────────────────────────────────────────────────
 
 test("la limite nomme le rayon, la fenêtre, et les deux réserves qui comptent", () => {
-  assert.ok(LIMITE_PERMIS.includes(`${RAYON_PERMIS_M} m`), "le périmètre est nommé");
-  assert.ok(LIMITE_PERMIS.includes(`${ANCIENNETE_MAX_ANS} ans`));
-  assert.ok(LIMITE_PERMIS.includes("n'est pas un bâtiment"));
-  assert.ok(LIMITE_PERMIS.includes("chaque mois"), "la fraîcheur du registre est dite");
+  const l = limitePermis();
+  assert.ok(l.includes(`${RAYON_PERMIS_M} m`), "le périmètre est nommé");
+  assert.ok(l.includes(`${ANCIENNETE_MAX_ANS} ans`));
+  assert.ok(l.includes("n'est pas un bâtiment"));
+  assert.ok(l.includes("chaque mois"), "la fraîcheur du registre est dite");
+});
+
+test("la limite décrit le rayon QUI A SERVI, pas celui d'aujourd'hui", () => {
+  // Un dossier gelé à 50 m ne doit pas se relire sous une phrase annonçant 80 m le jour où la
+  // constante bouge : c'est le snapshot qui dicte la phrase.
+  const l = limitePermis(80, 5);
+  assert.ok(l.includes("80 m"));
+  assert.ok(l.includes("5 ans"));
+  assert.equal(l.includes(`${RAYON_PERMIS_M} m`), false);
 });
 
 test("la limite ne promet AUCUNE construction future", () => {
-  assert.equal(/sera |va être|livraison|d'ici \d{4}/i.test(LIMITE_PERMIS), false);
+  assert.equal(/sera |va être|livraison|d'ici \d{4}/i.test(limitePermis()), false);
 });

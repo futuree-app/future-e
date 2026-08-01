@@ -1,5 +1,7 @@
 import type { LngLat } from "./geo-distance.ts";
-import type { BpeNearest, OsmProximity, Face3Snapshot, IcuSnapshot } from "./logement-autour-types.ts";
+import type {
+  BpeNearest, OsmProximity, Face3Snapshot, IcuSnapshot, PermisSnapshot,
+} from "./logement-autour-types.ts";
 import { SOURCES_VERSION } from "./address-dossier-store.ts";
 import { OSM_QUERY_VERSION, OSM_BBOX_RADIUS_M } from "./logement-osm.ts";
 
@@ -11,11 +13,15 @@ export function assembleSnapshot(
   osm: OsmProximity | null,
   osmStatus: "complete" | "pending" | "failed",
   icu: IcuSnapshot = null,
+  // Le registre des autorisations d'urbanisme, quand il a répondu. `null` laisse le champ ABSENT
+  // du snapshot : le bloc disparaît, au lieu d'annoncer une absence de permis jamais établie.
+  permis: PermisSnapshot | null = null,
 ): Face3Snapshot {
   const now = new Date().toISOString();
   return {
     center,
     bpe: { categories: bpe },
+    ...(permis ? { permis } : {}),
     osm: osm ?? {
       potentiallyNoisyInfrastructure: [],
       nearestMappedGreenSpace: null,

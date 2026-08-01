@@ -1,7 +1,7 @@
 # Les permis de construire autour de l'adresse
 
-**Date** : 2026-08-01 · **Statut** : socle vérifié, doctrine tranchée, périmètre MESURÉ, première
-brique livrée. Reste à construire : l'appel, le gel dans le snapshot et l'écran. · **Chantier 3 de la liste « Autour »** (1 et 2 livrés le 01/08).
+**Date** : 2026-08-01 · **Statut** : COMPLET. Socle vérifié, doctrine tranchée, périmètre mesuré,
+appel, gel dans le snapshot et écran livrés. · **Chantier 3 de la liste « Autour »** (1 et 2 livrés le 01/08).
 
 ## Ce que ça répond
 
@@ -83,13 +83,46 @@ comptage.
 de 200 m. Sans effet sur le rayon retenu (50 m n'approche jamais la limite), mais les chiffres à
 200 m sont des minorants.
 
-### 2. Le coût, et le cache
+### 2. Le coût, et le gel : TRANCHÉ ET LIVRÉ
 
-Un appel par dossier, filtré par commune, sur un CSV de quelques centaines de kilo-octets, plus un
-appel cadastre pour les parcelles à 50 m. Le snapshot Autour est **figé** : les permis devraient y
-entrer comme les autres faits, donc être gelés à la création du dossier. À trancher : un dossier de
-six mois affichera-t-il des permis de six mois ? Le champ doit être optionnel, comme
-`withinWalkCount`, pour que les dossiers antérieurs n'affichent pas une absence.
+**Le coût s'est effondré à la mesure du 01/08.** Deux paramètres DiDo non documentés dans la
+première exploration, tous deux vérifiés :
+
+| Requête | Poids |
+|---|---|
+| CSV brut, 94 colonnes, La Rochelle depuis 2013 | 538 Ko |
+| `columns=` (10 colonnes) | 31 Ko |
+| `columns=` + `AN_DEPOT=gte:2023` | **9 Ko** |
+| idem, Paris entier | 20 Ko |
+
+Le filtre d'ancienneté est donc appliqué **par la source**, avec la règle exacte de
+`permisAMontrer`, qui la ré-applique ensuite : la sélection reste vraie si le filtre distant change
+de sens. Aucun cache n'est nécessaire.
+
+**Deux pièges d'API en plus, mesurés le 01/08 :**
+
+- **Sitadel ne connaît que les communes-mères.** `COMM=eq:75101` répond 400 ; il faut `75056`. Une
+  adresse parisienne étant géocodée sur son arrondissement, sans `communeParent` le bloc serait
+  vide pour tout Paris, Lyon et Marseille, et vide se lirait « rien ne se construit » dans les
+  trois villes où c'est le plus faux.
+- **Un `400 « Le fichier est vide »` n'est pas une panne** : c'est zéro ligne pour le filtre.
+  Vérifié sur `17300` avec `AN_DEPOT=gte:2050`, qui répond comme un code inexistant. Le traiter en
+  échec ferait disparaître le bloc partout où l'absence est justement l'information.
+
+**Le gel : les permis entrent dans le snapshot, avec leur périmètre et leur date de consultation.**
+Le champ est optionnel comme `withinWalkCount`. Absent veut dire « registre non consulté » (dossier
+antérieur, ou API muette), et le bloc **disparaît** ; présent et vide veut dire « consulté, rien
+trouvé », et le bloc **dit l'absence**.
+
+La question « un dossier de six mois affichera-t-il des permis de six mois ? » est tranchée par
+l'affichage : oui, et **la date de consultation est écrite sous le bloc**. Le rayon et la fenêtre
+sont gelés **avec** les permis qu'ils ont sélectionnés, et toutes les phrases se construisent à
+partir de ces valeurs-là, jamais des constantes du jour : le jour où le rayon change, un dossier
+ancien continue de décrire le périmètre qui a réellement servi.
+
+Les dossiers antérieurs au 01/08/2026 sont **rattrapés une fois**, à leur prochaine ouverture,
+sans recalculer le reste du snapshot : bumper `SOURCES_VERSION` pour un champ optionnel aurait
+coûté un recalcul complet à chaque dossier existant.
 
 ### 3. Deux pièges de jointure, déjà payés
 
@@ -102,11 +135,45 @@ sur un faux verdict.
   parcelles disparaissaient en silence, et la mesure aurait sous-compté précisément les secteurs
   denses, ceux où il y a des permis. Limite portée à 1 000, troncature comptée et affichée.
 
-### 4. La forme
+### 4. La forme : LIVRÉE
 
-Un bloc du module Autour, sur le patron des « abords de l'adresse » : les faits, puis la limite. La
-limite ici : un permis autorisé peut ne jamais être construit, et le jeu est mensuel, donc un
-dossier déposé le mois dernier n'y est pas encore.
+Un bloc du module Autour, « Ce qui est autorisé autour », sur le patron des « abords de
+l'adresse » : la phrase d'ouverture, les faits, la limite, la date de consultation.
+
+**L'absence est affichée**, contrairement aux abords (où le silence est plus honnête qu'un
+satisfecit). La différence tient à ce qui est nommé : les abords cherchent trois types d'objets
+dans un rayon, et « rien trouvé » y ressemblerait à une promesse de calme. Ici le périmètre et
+l'objet du registre sont dits dans la phrase même, donc l'absence est bornée et vérifiable. Elle
+concerne trois adresses sur quatre : la taire reviendrait à ne rien répondre à la majorité des
+lecteurs.
+
+**Le registre ne recense que les autorisations CRÉANT DES LOGEMENTS.** Un entrepôt, un commerce,
+une extension sans logement nouveau n'y figurent pas. La phrase le porte toujours, présence comme
+absence, et un test le verrouille : « aucune autorisation » tout court promettrait un quartier
+immobile que la source ne permet pas d'affirmer.
+
+Les lignes sont regroupées par (année, état), avec leur nombre. À 50 m sur trois ans il y a au plus
+trois années et trois états, donc **neuf lignes au maximum** : aucune troncature, donc aucune
+troncature silencieuse. Dans une année, l'ordre va de ce qui reste à venir à ce qui est révolu.
+
+### 5. Le code livré
+
+| Fichier | Rôle |
+|---|---|
+| `src/lib/sitadel-etat.ts` | l'état déduit des trois dates (+ 8 tests) |
+| `src/lib/sitadel-selection.ts` | périmètre, ancienneté, clé de jointure, limite (+ 11 tests) |
+| `src/lib/sitadel-csv.ts` | lecture du CSV DiDo, `null` si le format a changé (+ 7 tests) |
+| `src/lib/decision/autour-permis.ts` | la lecture affichée, depuis le snapshot gelé (+ 11 tests) |
+| `src/lib/server/sitadel-permis.ts` | les deux appels réseau, et rien d'autre |
+| `src/app/api/logement-autour/route.ts` | gel à l'analyse, rattrapage une fois pour les anciens |
+| `src/components/report/AutourModule.tsx` | le bloc |
+
+Un permis retenu porte son **état**, jamais sa phrase : le libellé se calcule au rendu. Écrire la
+phrase dans le snapshot figerait la formulation du jour de l'analyse, et deux dossiers voisins
+diraient deux choses de la même situation le jour où le texte est réécrit.
+
+Vérifié en réel le 01/08/2026 sur trois points : La Rochelle centre (1 permis, chantier ouvert
+2025), Paris 12e (0), un village de la Creuse (0), avec 62 / 18 / 7 parcelles jointes.
 
 ## Ce qui a été écarté
 

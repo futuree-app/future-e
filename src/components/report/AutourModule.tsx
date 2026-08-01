@@ -29,6 +29,7 @@ import { Face3Block } from "@/components/report/logement/AutourSection";
 import { IcuExposure } from "@/components/report/logement/IcuExposure";
 import { buildAutourConclusion } from "@/lib/decision/autour-conclusion";
 import { buildInfraLecture } from "@/lib/decision/autour-infrastructures";
+import { buildPermisLecture } from "@/lib/decision/autour-permis";
 
 // Jeton d'adresse non réversible pour l'analytics : distingue deux adresses sans stocker
 // l'adresse (djb2 -> base36). Même fonction que dans LogementModule, volontairement dupliquée :
@@ -71,9 +72,15 @@ export default function AutourModule({
 
   // Demande (ou relit, figé) le snapshot « autour de l'adresse ». La donnée OSM vient du cache de
   // tuile côté serveur ; l'affichage ne touche jamais Overpass.
-  async function requestAutour(a: AnalyzedAddress) {
-    setLoading(true);
-    setError(null);
+  // `silencieux` : la demande complète un dossier DÉJÀ affiché (rattrapage des permis sur un
+  // snapshot antérieur au 01/08/2026). Montrer « Analyse en cours… » au-dessus d'un rapport
+  // complet ferait croire à un recalcul, et un échec afficherait une erreur alors que rien de ce
+  // qui est à l'écran n'est en défaut.
+  async function requestAutour(a: AnalyzedAddress, silencieux = false) {
+    if (!silencieux) {
+      setLoading(true);
+      setError(null);
+    }
     try {
       const res = await fetch("/api/logement-autour", {
         method: "POST",
@@ -98,10 +105,13 @@ export default function AutourModule({
         status_osm_green: payload.snapshot.sourceStatus.osmGreenSpaces,
       });
     } catch (err) {
+      // Un rattrapage qui échoue laisse l'écran EXACTEMENT tel qu'il est : le dossier affiché est
+      // valide, il lui manque seulement un bloc, et l'effacer pour une erreur serait une perte.
+      if (silencieux) return;
       setAutour(null);
       setError(err instanceof Error ? err.message : "Erreur de chargement.");
     } finally {
-      setLoading(false);
+      if (!silencieux) setLoading(false);
     }
   }
 
@@ -143,6 +153,12 @@ export default function AutourModule({
           insee: dossier.insee,
           address_token: addressToken(dossier.ban_id),
         });
+        // LE RATTRAPAGE DES PERMIS. Un snapshot figé avant le 01/08/2026 ne porte pas le champ, et
+        // rien ne le recalculera : cette branche-ci n'appelait la route dans AUCUN cas, donc le
+        // rattrapage écrit côté serveur n'aurait jamais été atteint. On redemande une fois, en
+        // silence, par-dessus un écran déjà complet. Le champ une fois écrit est gelé, donc cet
+        // appel n'a lieu qu'une seule fois par dossier.
+        if (dossier.snapshot.permis === undefined) void requestAutour(address, true);
         return;
       }
       return requestAutour(address);
@@ -286,6 +302,49 @@ export default function AutourModule({
                         </p>
                       </div>
                     )}
+                  </GlassCard>
+                </ReportSection>
+              );
+            })()}
+
+            {/* CE QUI EST AUTORISÉ AUTOUR. La seule question qu'aucune visite ne tranche : on
+                visite un dimanche matin, on ne voit pas le terrain voisin autorisé depuis six
+                mois. Le bloc DISPARAÎT quand le registre n'a pas été consulté (snapshot antérieur
+                au 01/08/2026, API muette) : « aucune autorisation » ne se dit que quand on a
+                cherché. Il s'affiche en revanche quand la recherche n'a rien trouvé, ce qui est le
+                cas de trois adresses sur quatre, parce que l'absence EST une réponse dès lors que
+                le périmètre et l'objet du registre sont nommés. */}
+            {(() => {
+              const p = buildPermisLecture(autour);
+              if (!p) return null;
+              return (
+                <ReportSection eyebrow="Ce qui est autorisé autour" tone="neutral">
+                  <GlassCard>
+                    <div style={{ display: "grid", gap: 14 }}>
+                      <p style={{ fontSize: 15.5, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 }}>
+                        {p.lead}
+                      </p>
+                      {p.lignes.length > 0 && (
+                        <div style={{ display: "grid", gap: 10 }}>
+                          {p.lignes.map((l) => (
+                            <div key={`${l.annee}-${l.label}`} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
+                              <span style={{ fontSize: 15, color: "var(--fg-1)", fontWeight: 500 }}>{l.label}</span>
+                              <span style={{ fontSize: 15, color: "var(--fg-hi)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                                déposé en {l.annee}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <p style={{ fontSize: 13, color: "var(--fg-4)", lineHeight: 1.55, margin: 0, paddingTop: 10, borderTop: "1px solid var(--border-1)" }}>
+                        {p.limite}
+                      </p>
+                      {p.consultation && (
+                        <p style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.85, margin: 0 }}>
+                          {p.consultation}
+                        </p>
+                      )}
+                    </div>
                   </GlassCard>
                 </ReportSection>
               );
