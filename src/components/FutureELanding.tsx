@@ -1668,7 +1668,7 @@ export default function FutureELanding() {
       alignItems: 'center',
       gap: 0,
     },
-    brandDot: { color: C.orange, fontStyle: 'normal' },
+    brandDot: { color: 'var(--accent-ink)', fontStyle: 'normal' },
     navLinks: { display: 'flex', alignItems: 'center', gap: 32 },
     navLink: {
       fontFamily: "var(--font-mono)",

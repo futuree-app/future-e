@@ -128,9 +128,9 @@
   --fg-3:           #9ba3b4;
   --fg-4:           #788095;
 
-  --border-1:       var(--border-1);
-  --border-2:       var(--border-2);
-  --border-hi:      var(--border-hi);
+  --border-1:       rgba(255, 255, 255, 0.08);
+  --border-2:       rgba(255, 255, 255, 0.12);
+  --border-hi:      rgba(255, 255, 255, 0.15);
 
   --shadow-card:        0 8px 24px rgba(0, 0, 0, 0.24);
   --shadow-card-hover:  0 8px 24px rgba(251, 146, 60, 0.10);

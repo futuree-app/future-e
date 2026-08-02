@@ -24,7 +24,7 @@ export function AccountNav({
           className="no-underline tracking-[-0.3px]"
           style={{ fontFamily: "var(--font-brand)", fontSize: 22, fontStyle: "italic", color: "var(--fg-1)" }}
         >
-          futur<span className="text-accent not-italic">•</span>e
+          futur<span className="not-italic" style={{ color: "var(--accent-ink)" }}>•</span>e
         </Link>
 
         <div className="flex items-center gap-8">

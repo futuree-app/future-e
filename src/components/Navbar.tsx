@@ -116,7 +116,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
               flexShrink: 0,
             }}
           >
-            futur<span style={{ color: C.orange, fontStyle: 'normal' }}>•</span>e
+            futur<span style={{ color: 'var(--accent-ink)', fontStyle: 'normal' }}>•</span>e
           </Link>
 
           {/* Desktop links */}

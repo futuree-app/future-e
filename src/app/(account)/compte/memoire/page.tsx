@@ -54,11 +54,11 @@ export default async function MemoirePage() {
             className="font-[var(--weight-display)] text-[length:var(--text-display)] leading-[1.1] tracking-[-1px] mb-5 text-label"
             style={{ fontFamily: "var(--font-serif)" }}
           >
-            Ce que futur<span className="text-accent not-italic">•</span>e sait de vous.
+            Ce que futur<span className="not-italic" style={{ color: "var(--accent-ink)" }}>•</span>e sait de vous.
           </h1>
           <p className="text-[16px] leading-[1.72] text-muted">
             Ces informations servent uniquement à personnaliser les réponses de
-            futur<span className="text-accent not-italic">•</span>e. Vous pouvez les modifier ou les
+            futur<span className="not-italic" style={{ color: "var(--accent-ink)" }}>•</span>e. Vous pouvez les modifier ou les
             supprimer à tout moment. Elles ne sont jamais partagées avec des tiers.
           </p>
         </section>

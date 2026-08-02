@@ -51,7 +51,7 @@ export default function PolitiqueConfidentialitePage() {
             textDecoration: "none",
           }}
         >
-          futur<span style={{ color: "var(--orange)", fontStyle: "normal" }}>•</span>e
+          futur<span style={{ color: "var(--accent-ink)", fontStyle: "normal" }}>•</span>e
         </Link>
         <Link
           href="/"

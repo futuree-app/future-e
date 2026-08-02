@@ -331,7 +331,7 @@ export default async function ComptePage() {
       <footer className="relative z-[2] border-t border-[var(--border-1)]">
         <div className="max-w-[1100px] mx-auto px-5 sm:px-7 py-8 flex items-center justify-between gap-6 flex-wrap">
           <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "var(--font-brand)" }}>
-            futur<span className="text-accent not-italic">•</span>e
+            futur<span className="not-italic" style={{ color: "var(--accent-ink)" }}>•</span>e
           </div>
           <div className="flex gap-5 flex-wrap">
             {[
