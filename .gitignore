@@ -47,12 +47,15 @@ next-env.d.ts
 .env.local
 
 # non-source assets (docs Notion exportées, logo, rapports de setup)
-Documentation Notion/
-logo/
-posthog-setup-report.md
+# UN SLASH INITIAL, sinon le motif vaut à TOUTE profondeur. `logo/` ignorait aussi `public/logo/`
+# et `src/app/dev/logo/`, donc des fichiers qui n'atteignaient jamais la production sans que rien
+# ne le dise. Corrigé le 02/08/2026 : ces trois motifs ne visent que la racine.
+/Documentation Notion/
+/logo/
+/posthog-setup-report.md
 
 # Bannières sources (les WebP optimisées vivent dans public/covers)
-Photos/
+/Photos/
 # Exports design system locaux
 *Design System.html
 *Design System.pdf
