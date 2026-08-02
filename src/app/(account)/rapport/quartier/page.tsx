@@ -161,7 +161,7 @@ export default async function RapportQuartierPage() {
             Module 01 · Territoire
           </div>
           <h1
-            className="font-normal text-[length:var(--text-display)] leading-[1.08] tracking-[-1.2px] mb-4 text-label"
+            className="font-[var(--weight-display)] text-[length:var(--text-display)] leading-[1.08] tracking-[-1.2px] mb-4 text-label"
             style={{ fontFamily: "var(--font-serif)" }}
           >
             Ce que {displayName} devient.<br />

@@ -64,7 +64,7 @@ function Hero({ compact = false }: { compact?: boolean }) {
     <div className="mb-8">
       <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-3">Comparateur de communes</p>
       <h1
-        className="font-normal text-[length:var(--text-display)] leading-[1.1] tracking-[-0.8px] text-label max-w-[820px]"
+        className="font-[var(--weight-display)] text-[length:var(--text-display)] leading-[1.1] tracking-[-0.8px] text-label max-w-[820px]"
         style={{ fontFamily: "var(--font-serif)", textWrap: "balance" }}
       >
         Vous hésitez entre plusieurs communes ?{" "}

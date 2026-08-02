@@ -101,7 +101,7 @@ export function ConclusionBlock({
           ouvert) : une phrase de héros qui traverse toute la carte perd son impact. Il ne s'applique
           JAMAIS aux paragraphes. */}
       <h2
-        className="font-normal text-[length:var(--text-section)] leading-[1.2] tracking-[-0.4px] text-label max-w-[540px]"
+        className="font-[var(--weight-section)] text-[length:var(--text-section)] leading-[1.2] tracking-[-0.4px] text-label max-w-[540px]"
         style={{ fontFamily: "var(--font-serif)" }}
       >
         {bindOrphans(plan.verdict.headline.text)}

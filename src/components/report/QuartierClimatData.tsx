@@ -1239,7 +1239,7 @@ export function QuartierSectionTitle({ communeName, scenarios, georisques }: Pic
   return (
     <div>
       <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Synthèse territoriale</p>
-      <h2 className="font-normal text-[length:var(--text-title)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+      <h2 className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
         {title}
       </h2>
     </div>

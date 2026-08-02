@@ -1,7 +1,11 @@
 # DESIGN.md · Le langage visuel de futur•e
 
-**Version 1.5 · 1er août 2026 · prescriptif.**
+**Version 2.0 · 2 août 2026 · prescriptif.**
 
+> **v2.0** : l'interface passe à **Archivo**, une grotesque unique, et la hiérarchie repose sur une
+> **échelle de graisses** (§ 9.1). Le logo garde Instrument Serif sur `--font-brand`. Les fontes sont
+> auto-hébergées en WOFF2 variable.
+>
 > **v1.5** : une **échelle de rôles** typographiques remplace 53 valeurs arbitraires (§ 9.1), et la
 > piste de prose descend de 720 à 640 px, la mesure de la v1.1 donnant environ 90 caractères par
 > ligne (§ 2.1).
@@ -550,10 +554,35 @@ texte plus petit imbriqué dans ce titre (un grain, une précision, une unité) 
 espaces entre les mots se referment, d'autant plus fort que le titrage est serré. Constaté sur le
 banc typographique à -1,6 px : le grain de 15 px devenait un bloc de lettres collées.
 
-**Le trio typographique** : `--font-serif` pour les titres et la voix éditoriale ; `--font-sans`
-pour le texte courant ; `--font-mono` pour les valeurs, surtitres, sources et métadonnées. Toujours
-par le token, jamais par un `fontFamily` en dur, qui perd les piles de repli et rend tout changement
-de famille impraticable.
+**Deux familles pour l'interface, une pour la marque.** `--font-sans` et `--font-serif` désignent
+tous deux **Archivo** (les deux noms survivent le temps que les appelants migrent) ; `--font-mono`
+désigne JetBrains Mono, pour les valeurs, rangs, sources et métadonnées ; `--font-brand` désigne
+Instrument Serif italique, **pour le logo et rien d'autre**. Toujours par le token, jamais par un
+`fontFamily` en dur.
+
+**L'échelle de graisses, et c'est elle qui porte la hiérarchie maintenant.** Une serif et une sans
+se distinguaient par leur dessin. Archivo tenant les deux rôles, un titre et un paragraphe ne se
+séparent plus que par la taille, la graisse et la couleur.
+
+| Token | Valeur | Rôle |
+| --- | --- | --- |
+| `--weight-display` / `--weight-title` / `--weight-section` | `600` | les trois rôles de titre |
+| `--weight-body` / `--weight-lede` | `400` | corps et chapô |
+| `--weight-strong` | `500` | mise en avant **dans** un texte, jamais un titre |
+| `--weight-meta` | `500` | petit texte : sous 13 px, 400 s'efface sur fond sombre |
+| `--weight-kicker` | `600` | surtitre mono capitales |
+
+**Deux crans séparent toujours un titre de son texte**, 600 contre 400. Un seul cran ne se voit pas
+sur une grotesque, il se lit comme une erreur de rendu.
+
+**Ce qui rend Archivo distinctive est le réglage, pas le dessin.** Elle descend des grotesques
+américaines : posée en 400 avec un tracking normal, elle redevient invisible. La discipline des
+graisses et des gris n'est donc pas un confort, c'est ce qui tient l'identité.
+
+**La couleur reprend du service comme troisième axe.** Avec une famille unique, les cinq niveaux de
+gris (`--fg-hi` à `--fg-4`) et les teintes de registre portent une part de la hiérarchie que le
+dessin ne porte plus. Un titre en `--fg-hi`, un corps en `--fg-2`, une source en `--ghost` créent
+trois plans lisibles avant même que la graisse intervienne.
 
 **L'échelle de rôles.** Dix rôles, et aucune autre taille. Un nom dit un **usage**, jamais un niveau
 de titre HTML ni une valeur. S'écrit `text-[length:var(--text-role)]`.
@@ -630,6 +659,14 @@ Quatre points sont volontairement non tranchés dans cette version :
    reporté après le lancement.
 
 ## 12. Journal des amendements
+
+**v2.0, 02/08/2026** :
+
+| Amendement | Motif |
+| --- | --- |
+| § 9.1 · Archivo, famille unique | Les deux Instrument étaient signalées comme surexposées, et le registre serif littéraire était faux pour un instrument de mesure. Amende `ADR-0005` et `doctrine/design.md` |
+| § 9.1 · échelle de graisses | Avec une famille unique, la graisse et la couleur portent la hiérarchie que le dessin ne porte plus |
+| § 9.1 · `--font-brand` | Le logo est du texte, pas une image. Changer l'interface ne change pas la marque |
 
 **v1.5, 01/08/2026** :
 

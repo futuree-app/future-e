@@ -82,7 +82,7 @@ export function PackUnlockedView({ data, trio, pistes, projetLabel }: Props) {
             Trois nouvelles pistes
           </p>
           <h3
-            className="font-normal text-[length:var(--text-section)] leading-[1.15] text-label mb-2"
+            className="font-[var(--weight-section)] text-[length:var(--text-section)] leading-[1.15] text-label mb-2"
             style={{ fontFamily: "var(--font-serif)" }}
           >
             Si aucune des trois ne vous convainc totalement.

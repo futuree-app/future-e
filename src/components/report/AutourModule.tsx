@@ -180,7 +180,7 @@ export default function AutourModule({
               <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--green)" }} />
               Module 02 · Autour de l&apos;adresse
             </div>
-            <h1 className="font-normal text-[length:var(--text-display)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
+            <h1 className="font-[var(--weight-display)] text-[length:var(--text-display)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
               Ce qu&apos;il y a autour.<br />
               <span className="italic" style={{ color: "var(--green)" }}>Services, nature, chaleur.</span>
             </h1>
@@ -205,7 +205,7 @@ export default function AutourModule({
         <section className="pt-14">
           <div className="mb-8">
             <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">L&apos;adresse de ce dossier</p>
-            <h2 className="font-normal text-[length:var(--text-title)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+            <h2 className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
               {dossier.address_label}
             </h2>
           </div>

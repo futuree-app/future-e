@@ -21,10 +21,32 @@ preuve).
 ## Direction artistique
 
 **Glassmorphism sombre.** Palette : noir `#060812`, orange `#fb923c`, rouge `#f87171`,
-violet `#a78bfa`, vert `#4ade80`, bleu `#60a5fa`, jaune `#fbbf24`. Typographies : **Instrument
-Sans** (sans), Instrument Serif italic, JetBrains Mono (mono), définies en `--font-sans/serif/mono`
-dans `src/app/design-tokens.css`. Fond profond, verre translucide, noise overlay. La DA est validée,
+violet `#a78bfa`, vert `#4ade80`, bleu `#60a5fa`, jaune `#fbbf24`. Typographies : **Archivo**
+(interface entière, variable 100-900), JetBrains Mono (valeurs et métadonnées), Instrument Serif
+italique (le logo, et lui seul), définies en `--font-sans/serif/mono/brand` dans
+`src/app/design-tokens.css`. Fond profond, verre translucide, noise overlay. La DA est validée,
 elle ne se remet pas en question à chaque itération.
+
+> **Amendement du 2026-08-01 (arbitrage du porteur).** L'interface passe d'un **titrage serif
+> littéraire à une grotesque unique**, Archivo. Justification, comme cette doctrine l'exige :
+> Instrument Serif et Instrument Sans étaient toutes deux signalées comme surexposées, et
+> l'italique serif surdimensionnée du hero est l'un des marqueurs les plus reconnaissables d'une
+> page d'accueil générée. Au-delà de la mode, le registre était faux : futur•e est un instrument de
+> mesure doublé d'un dossier d'expertise, et un rapport d'ingénierie n'emploie pas de serif élégante.
+>
+> Quatre serifs avaient été comparées sans emporter la décision, ce qui était le résultat utile :
+> elles partageaient toutes le même parti pris.
+>
+> **La marque garde son dessin.** Le logo « futur•e » reste en Instrument Serif italique, isolé sur
+> `--font-brand`. Changer la police de l'interface ne change pas la marque.
+>
+> **Ce qui rend Archivo distinctive est le réglage, pas le dessin.** Elle descend des grotesques
+> américaines : posée en 400 avec un tracking normal, elle redevient invisible. La hiérarchie repose
+> désormais entièrement sur une **échelle de graisses**, gravée dans les tokens, qui sépare toujours
+> un titre de son texte par deux crans (600 contre 400). Un seul cran ne se voit pas sur une
+> grotesque, il se lit comme une erreur de rendu.
+>
+> Règles d'application dans `DESIGN.md` (racine), § 9.1.
 
 > **Amendement du 2026-07-30 (arbitrage du porteur).** Cette page mentionnait « mesh gradients
 > animés » ; les **orbes flous en `position: fixed` sont retirés de la direction artistique**.

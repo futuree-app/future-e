@@ -71,7 +71,7 @@ export default function MentionsLegalesPage() {
         <Link
           href="/"
           style={{
-            fontFamily: "var(--font-serif)",
+            fontFamily: "var(--font-brand)",
             fontSize: 22,
             fontStyle: "italic",
             color: "var(--fg-1)",

@@ -37,7 +37,7 @@ export default async function RapportDossiersPage() {
       <div className="relative z-[2] max-w-[920px] mx-auto px-7 pb-24 pt-14">
         <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Vos dossiers</p>
         <h1
-          className="font-normal text-[length:var(--text-title)] leading-[1.15] tracking-[-0.5px] text-label mb-8"
+          className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.15] tracking-[-0.5px] text-label mb-8"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           {dossiers.length === 0

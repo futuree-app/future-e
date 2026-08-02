@@ -60,7 +60,7 @@ export default async function DevLoadingPage({
           Dev · écrans d&apos;attente
         </p>
         <h1
-          className="font-normal text-[length:var(--text-title)] leading-[1.15] tracking-[-0.5px] mb-4"
+          className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.15] tracking-[-0.5px] mb-4"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           Six jeux contextuels, dont trois échelles.

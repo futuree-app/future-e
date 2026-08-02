@@ -22,7 +22,7 @@ export function AccountNav({
         <Link
           href="/"
           className="no-underline tracking-[-0.3px]"
-          style={{ fontFamily: "var(--font-serif)", fontSize: 22, fontStyle: "italic", color: "var(--fg-1)" }}
+          style={{ fontFamily: "var(--font-brand)", fontSize: 22, fontStyle: "italic", color: "var(--fg-1)" }}
         >
           futur<span className="text-accent not-italic">•</span>e
         </Link>

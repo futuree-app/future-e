@@ -101,7 +101,7 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
       <div style={reveal(0)}>
         <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-3">Comparaison complète</p>
         <h2
-          className="font-normal text-[length:var(--text-title)] leading-[1.12] tracking-[-0.6px] text-label max-w-[760px]"
+          className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.12] tracking-[-0.6px] text-label max-w-[760px]"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           Vous les avez retenus tous les {trio.length >= 3 ? "trois" : "deux"}.{" "}

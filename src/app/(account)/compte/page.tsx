@@ -86,7 +86,7 @@ export default async function ComptePage() {
               {fullAccess ? getPlanLabel(account.plan) : "Compte gratuit"}
             </div>
             <h1
-              className="font-normal text-[length:var(--text-display)] leading-[1.1] tracking-[-1.2px] mb-5 text-label"
+              className="font-[var(--weight-display)] text-[length:var(--text-display)] leading-[1.1] tracking-[-1.2px] mb-5 text-label"
               style={{ fontFamily: "var(--font-serif)" }}
             >
               {commune ? `Votre lecture ${deCommune(commune)}` : "Votre espace personnel"}<br />
@@ -162,7 +162,7 @@ export default async function ComptePage() {
               <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
                 <div>
                   <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Vos trois modules</p>
-                  <h2 className="font-normal text-[length:var(--text-section)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+                  <h2 className="font-[var(--weight-section)] text-[length:var(--text-section)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                     De la commune jusqu&apos;à vos murs.
                   </h2>
                 </div>
@@ -195,7 +195,7 @@ export default async function ComptePage() {
               <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
                 <div>
                   <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Dans votre accès gratuit</p>
-                  <h2 className="font-normal text-[length:var(--text-section)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+                  <h2 className="font-[var(--weight-section)] text-[length:var(--text-section)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                     Ce que ce compte garde pour vous.
                   </h2>
                 </div>
@@ -220,7 +220,7 @@ export default async function ComptePage() {
                 <div className="grid grid-cols-[1fr_300px] gap-10 items-end mb-8">
                   <div>
                     <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Trois échelles fermées</p>
-                    <h2 className="font-normal text-[length:var(--text-section)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+                    <h2 className="font-[var(--weight-section)] text-[length:var(--text-section)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                       Ce que le rapport interactif lit pour vous.
                     </h2>
                   </div>
@@ -245,7 +245,7 @@ export default async function ComptePage() {
                 <div className="glass rounded-2xl p-10 border-accent/[0.12] grid grid-cols-[1fr_180px] gap-12 items-center mt-10 relative overflow-hidden">
                   <div className="absolute top-[-60px] right-[-60px] w-[200px] h-[200px] rounded-full bg-accent/[0.08] pointer-events-none" />
                   <div>
-                    <h2 className="font-normal text-[length:var(--text-section)] leading-[1.2] tracking-[-0.4px] text-label mb-2.5" style={{ fontFamily: "var(--font-serif)" }}>
+                    <h2 className="font-[var(--weight-section)] text-[length:var(--text-section)] leading-[1.2] tracking-[-0.4px] text-label mb-2.5" style={{ fontFamily: "var(--font-serif)" }}>
                       {commune ? `Trois échelles de lecture à ${commune}. Sourcées. Personnalisées.` : "Trois échelles de lecture. Sourcées. Personnalisées."}
                     </h2>
                     <p className="text-[15px] text-muted leading-[1.7]">
@@ -330,7 +330,7 @@ export default async function ComptePage() {
       {/* Footer */}
       <footer className="relative z-[2] border-t border-[var(--border-1)]">
         <div className="max-w-[1100px] mx-auto px-5 sm:px-7 py-8 flex items-center justify-between gap-6 flex-wrap">
-          <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "var(--font-serif)" }}>
+          <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "var(--font-brand)" }}>
             futur<span className="text-accent not-italic">•</span>e
           </div>
           <div className="flex gap-5 flex-wrap">

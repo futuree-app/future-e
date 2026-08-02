@@ -272,7 +272,7 @@ export default function LogementModule({
               <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
               Module 02 · Logement
             </div>
-            <h1 className="font-normal text-[length:var(--text-display)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
+            <h1 className="font-[var(--weight-display)] text-[length:var(--text-display)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
               Ce logement, lu à son adresse.<br />
               <span className="italic text-accent">Énergie, risques, entourage.</span>
             </h1>
@@ -295,7 +295,7 @@ export default function LogementModule({
         <section className="pt-14">
           <div className="mb-8">
             <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Le bien de ce dossier</p>
-            <h2 className="font-normal text-[length:var(--text-title)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+            <h2 className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
               {dossier?.address_label ?? "Aucun dossier ouvert."}
             </h2>
           </div>

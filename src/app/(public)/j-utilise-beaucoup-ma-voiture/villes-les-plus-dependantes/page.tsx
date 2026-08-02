@@ -351,7 +351,7 @@ const css = `
   .page{position:relative;z-index:2;max-width:860px;margin:0 auto;padding:72px 28px 120px;}
   .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:${ACCENT};margin-bottom:18px;display:flex;align-items:center;gap:10px;}
   .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:${ACCENT};box-shadow:0 0 10px ${ACCENT};flex-shrink:0;}
-  h1{font-family:var(--font-serif);font-weight:400;font-size:clamp(32px,5vw,54px);line-height:1.08;letter-spacing:-0.02em;margin:0 0 20px;color:var(--fg-1);}
+  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(32px,5vw,54px);line-height:1.08;letter-spacing:-0.02em;margin:0 0 20px;color:var(--fg-1);}
   h1 em{font-style:italic;color:${ACCENT};}
   .lede{font-size:17px;color:var(--fg-3);margin:0 0 16px;line-height:1.75;max-width:700px;}
   .method-note{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);line-height:1.7;margin:0 0 64px;max-width:720px;padding:14px 18px;border-left:2px solid var(--border-1);}
@@ -364,12 +364,12 @@ const css = `
   .city-item{padding:36px 0;border-bottom:1px solid var(--border-1);}
   .city-item:last-child{border-bottom:none;}
   .city-header{display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap;}
-  .city-rank{font-family:var(--font-serif);font-size:clamp(38px,5vw,58px);font-weight:400;color:${ACCENT};opacity:0.22;line-height:1;letter-spacing:-0.04em;flex-shrink:0;min-width:52px;}
+  .city-rank{font-family:var(--font-serif);font-size:clamp(38px,5vw,58px);font-weight:var(--weight-title);color:${ACCENT};opacity:0.22;line-height:1;letter-spacing:-0.04em;flex-shrink:0;min-width:52px;}
   .city-info{flex:1;}
-  .city-name{font-family:var(--font-serif);font-size:clamp(22px,3vw,30px);font-weight:400;color:var(--fg-1);line-height:1.1;}
+  .city-name{font-family:var(--font-serif);font-size:clamp(22px,3vw,30px);font-weight:var(--weight-title);color:var(--fg-1);line-height:1.1;}
   .city-dept{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);margin-top:3px;}
   .city-score-block{text-align:right;flex-shrink:0;}
-  .city-score-num{font-family:var(--font-serif);font-size:clamp(32px,4vw,48px);font-weight:400;color:${ACCENT};line-height:1;letter-spacing:-0.02em;}
+  .city-score-num{font-family:var(--font-serif);font-size:clamp(32px,4vw,48px);font-weight:var(--weight-title);color:${ACCENT};line-height:1;letter-spacing:-0.02em;}
   .city-score-label{font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-4);margin-top:2px;}
 
   .city-stats{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
@@ -381,7 +381,7 @@ const css = `
 
   .cta-block{margin-top:72px;display:flex;flex-direction:column;gap:14px;}
   .cta-rapport{padding:32px 36px;border-radius:12px;background:rgba(251,146,60,0.06);border:1px solid rgba(251,146,60,0.2);display:flex;flex-direction:column;gap:10px;}
-  .cta-rapport-title{font-family:var(--font-serif);font-size:22px;font-weight:400;color:var(--fg-1);line-height:1.3;}
+  .cta-rapport-title{font-family:var(--font-serif);font-size:22px;font-weight:var(--weight-title);color:var(--fg-1);line-height:1.3;}
   .cta-rapport-desc{font-size:14px;color:var(--fg-3);line-height:1.65;max-width:560px;}
   .cta-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;}
   .cta-btn{display:inline-flex;align-items:center;padding:11px 22px;background:${ACCENT};color:#060812;font-family:var(--font-sans);font-size:13px;font-weight:600;text-decoration:none;border-radius:6px;}

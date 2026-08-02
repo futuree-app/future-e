@@ -107,7 +107,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
           <Link
             href="/"
             style={{
-              fontFamily: "var(--font-serif)",
+              fontFamily: "var(--font-brand)",
               fontSize: 22,
               fontStyle: 'italic',
               color: C.text,

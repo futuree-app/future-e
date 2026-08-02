@@ -86,7 +86,7 @@ export default async function DossierCheckoutPage({
           Le dossier de ce bien
         </p>
         <h1
-          className="font-normal text-[length:var(--text-title)] leading-[1.15] tracking-[-0.5px] text-label mb-8"
+          className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.15] tracking-[-0.5px] text-label mb-8"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           {canonical.label}

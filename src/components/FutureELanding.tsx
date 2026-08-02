@@ -1658,7 +1658,7 @@ export default function FutureELanding() {
       gap: 24,
     },
     brand: {
-      fontFamily: "var(--font-serif)",
+      fontFamily: "var(--font-brand)",
       fontSize: 22,
       fontStyle: 'italic',
       color: C.text,

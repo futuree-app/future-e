@@ -27,7 +27,7 @@ export default async function DossierMerciPage({
           Paiement enregistré
         </p>
         <h1
-          className="font-normal text-[length:var(--text-title)] leading-[1.15] tracking-[-0.5px] text-label mb-6"
+          className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.15] tracking-[-0.5px] text-label mb-6"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           Merci.

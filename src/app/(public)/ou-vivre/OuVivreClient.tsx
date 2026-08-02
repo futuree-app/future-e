@@ -991,7 +991,7 @@ export function OuVivreClient() {
           Un projet de vie ?
         </p>
         <h1
-          className="font-normal text-[length:var(--text-display)] leading-[1.06] tracking-[-1.2px] text-label"
+          className="font-[var(--weight-display)] text-[length:var(--text-display)] leading-[1.06] tracking-[-1.2px] text-label"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           Découvrez où vivre,{" "}

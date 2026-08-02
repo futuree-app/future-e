@@ -51,7 +51,7 @@ export default async function MemoirePage() {
             Mémoire
           </div>
           <h1
-            className="font-normal text-[length:var(--text-display)] leading-[1.1] tracking-[-1px] mb-5 text-label"
+            className="font-[var(--weight-display)] text-[length:var(--text-display)] leading-[1.1] tracking-[-1px] mb-5 text-label"
             style={{ fontFamily: "var(--font-serif)" }}
           >
             Ce que futur<span className="text-accent not-italic">•</span>e sait de vous.

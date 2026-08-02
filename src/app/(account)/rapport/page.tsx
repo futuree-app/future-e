@@ -249,7 +249,7 @@ export default async function RapportPage() {
             </div>
 
             <>
-              <h1 className="font-normal text-[length:var(--text-display)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
+              <h1 className="font-[var(--weight-display)] text-[length:var(--text-display)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
                 {displayName} en 2030, 2050, 2100.<br />
                 <span className="italic text-accent">Ce que ça change pour vous.</span>
               </h1>
@@ -404,7 +404,7 @@ export default async function RapportPage() {
           <section className="pt-14" id="quartier">
             <div className="mb-8 max-w-[640px]">
               <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Votre première lecture</p>
-              <h2 className="font-normal text-[length:var(--text-title)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+              <h2 className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                 Ce que vos réponses font déjà ressortir à {displayName}.
               </h2>
             </div>
@@ -416,7 +416,7 @@ export default async function RapportPage() {
         {fullReport && (
           <section className="pt-14" id="modules">
             <div className="mb-8">
-              <h2 className="font-normal text-[length:var(--text-title)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
+              <h2 className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
                 {openModules.length === 1
                   ? `Ce que ${displayName} devient.`
                   : "Trois échelles, de la commune à vos murs."}
@@ -505,7 +505,7 @@ export default async function RapportPage() {
       {/* Footer */}
       <footer className="relative z-[2] border-t border-[var(--border-1)]">
         <div className="max-w-[1100px] mx-auto px-5 sm:px-7 py-9 flex items-center justify-between gap-6 flex-wrap">
-          <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "var(--font-serif)" }}>
+          <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "var(--font-brand)" }}>
             futur<span className="text-accent not-italic">•</span>e
           </div>
           {/* Même pied de page que la landing, mêmes destinations : voir le commentaire dans

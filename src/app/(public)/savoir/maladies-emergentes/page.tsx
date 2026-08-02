@@ -36,7 +36,7 @@ const css = String.raw`
 
   .nav { position:sticky; top:0; z-index:50; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); background:var(--bg-card); border-bottom:1px solid var(--border-1); }
   .nav-inner { max-width:800px; margin:0 auto; padding:16px 28px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
-  .brand { font-family:var(--font-serif); font-size:22px; font-style:italic; color:var(--fg-1); text-decoration:none; letter-spacing:-0.01em; }
+  .brand { font-family:var(--font-brand); font-size:22px; font-style:italic; color:var(--fg-1); text-decoration:none; letter-spacing:-0.01em; }
   .brand-dot { color:var(--accent); font-style:normal; }
   .nav-crumb { font-family:var(--font-mono); font-size:11px; color:var(--fg-4); letter-spacing:0.08em; text-transform:uppercase; }
   .nav-crumb a { color:var(--fg-3); text-decoration:none; }

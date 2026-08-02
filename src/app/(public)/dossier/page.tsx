@@ -25,7 +25,7 @@ export default function DossierPage() {
           Une adresse précise
         </p>
         <h1
-          className="font-normal text-[length:var(--text-title)] leading-[1.15] tracking-[-0.5px] text-label mb-5"
+          className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.15] tracking-[-0.5px] text-label mb-5"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           Quel bien voulez-vous faire examiner&nbsp;?

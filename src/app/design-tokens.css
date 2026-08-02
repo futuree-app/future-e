@@ -3,17 +3,49 @@
    Palette + typography + spacing + radius + shadows
    ============================================================ */
 
-@import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+/* ============ FONTES, AUTO-HÉBERGÉES ============
+   Plus aucun `@import` vers Google Fonts. Un import CSS depuis un CSS crée une chaîne de requêtes
+   bloquante : le navigateur doit charger cette feuille avant de découvrir qu'il lui faut encore
+   celle de Google, puis les fichiers. Servies depuis /fonts, les polices partent en même temps que
+   le reste.
+
+   UN NOM LITTÉRAL, JAMAIS UNE VARIABLE. Une passe de migration avait remplacé le nom de famille de
+   ces règles par `var(--font-serif)` le 01/08/2026 : un `@font-face` n'accepte pas de variable, la
+   règle devenait invalide, et Instrument Serif n'était plus chargée du tout. Le produit tournait sur
+   sa pile de repli sans que rien ne le signale. C'est le risque propre aux substitutions massives,
+   et il se paie en silence.
+
+   Deux fichiers variables au lieu de quatre statiques : 74 Ko pour Archivo (roman et italique)
+   contre 140 Ko de TTF, et toutes les graisses de 100 à 900 au lieu de la seule 400. */
 
 @font-face {
-  font-family:var(--font-serif);
+  font-family: 'Archivo';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 100 900;
   font-display: swap;
-  src: url('/fonts/InstrumentSerif-Regular.ttf') format('truetype');
+  src: url('/fonts/Archivo-Variable.woff2') format('woff2-variations');
 }
 @font-face {
-  font-family:var(--font-serif);
+  font-family: 'Archivo';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/Archivo-Variable-Italic.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('/fonts/JetBrainsMono-Variable.woff2') format('woff2-variations');
+}
+/* LA MARQUE GARDE SON DESSIN. Le logo « futur•e » est du texte, pas une image, et il est écrit en
+   Instrument Serif italique depuis l'origine (les fichiers vivent aussi dans `logo/fonts/`).
+   Changer la police de l'interface ne change pas la marque : `--font-brand` isole ce seul usage.
+   Le jour où le logo passe à un SVG (ils existent dans `logo/svg/`), ces deux règles disparaissent
+   et Instrument Serif quitte le produit. */
+@font-face {
+  font-family: 'Instrument Serif';
   font-style: italic;
   font-weight: 400;
   font-display: swap;
@@ -213,9 +245,24 @@
 :root {
   /* ============ TYPOGRAPHY ============ */
 
-  --font-serif:     "Instrument Serif", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-  --font-sans:      "Instrument Sans", "Avenir Next", Avenir, "Segoe UI", system-ui, sans-serif;
+  /* UNE SEULE FAMILLE POUR L'INTERFACE (01/08/2026). `--font-serif` et `--font-sans` pointent tous
+     deux vers Archivo : le produit passe d'un titrage serif littéraire à une grotesque de presse.
+     Les deux noms survivent le temps que les appelants migrent, ils désignent la même chose.
+
+     Pourquoi : futur•e est un instrument de mesure doublé d'un dossier d'expertise, registre où un
+     rapport d'ingénierie n'emploie pas de serif élégante. Instrument Serif et Instrument Sans étaient
+     par ailleurs signalées toutes deux comme surexposées, et l'italique serif surdimensionnée du
+     hero est l'un des marqueurs les plus reconnaissables d'une page d'accueil générée.
+
+     CE QUI REND ARCHIVO DISTINCTIVE EST LE RÉGLAGE, PAS LE DESSIN. Elle descend des grotesques
+     américaines, même généalogie que Roboto : posée en 400 avec un tracking normal, elle redevient
+     invisible. L'échelle de graisses plus bas n'est donc pas un confort, c'est ce qui porte la
+     hiérarchie maintenant qu'une seule famille la tient. */
+  --font-serif:     "Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-sans:      "Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
   --font-mono:      "JetBrains Mono", "SF Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+  /* Le logo, et lui seul. */
+  --font-brand:     "Instrument Serif", "Iowan Old Style", Georgia, serif;
 
   /* L'ÉCHELLE DE RÔLES. Un nom dit un USAGE, jamais un niveau de titre HTML ni une valeur.
      ================================================================================
@@ -242,6 +289,23 @@
   --text-meta:      12px;                     /* source, mention, unité */
   --text-kicker:    11px;                     /* surtitre mono capitales, désigne une section */
   --text-micro:     10px;                     /* étiquette d'axe, note de bas de carte */
+
+  /* L'ÉCHELLE DE GRAISSES. Avec une seule famille, c'est elle qui porte la hiérarchie.
+     ================================================================================
+     Une serif et une sans se distinguaient par leur dessin. Archivo tenant les deux rôles, un titre
+     et un paragraphe ne se séparent plus que par la taille, la graisse et la couleur. Deux crans
+     séparent toujours un titre de son texte : 600 contre 400. Un seul cran (500 contre 400) ne se
+     voit pas sur une grotesque, il se lit comme une erreur de rendu.
+     ================================================================================
+     Archivo est variable de 100 à 900 : ces valeurs sont réelles, aucune n'est synthétisée. */
+  --weight-display: 600;   /* titre de page */
+  --weight-title:   600;   /* titre de section */
+  --weight-section: 600;   /* titre de bloc */
+  --weight-lede:    400;   /* chapô */
+  --weight-body:    400;   /* corps */
+  --weight-strong:  500;   /* mise en avant DANS un texte, jamais un titre */
+  --weight-meta:    500;   /* petit texte : sous 13 px, 400 s'efface sur fond sombre */
+  --weight-kicker:  600;   /* surtitre mono capitales */
 
   --lh-display:     0.96;
   --lh-tight:       1.06;

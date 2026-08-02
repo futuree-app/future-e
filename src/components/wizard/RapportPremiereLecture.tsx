@@ -39,7 +39,7 @@ export function RapportPremiereLecture({
         />
         <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2.5">Votre première lecture</p>
         <h2
-          className="font-normal text-[length:var(--text-section)] leading-[1.2] tracking-[-0.5px] text-label mb-3.5"
+          className="font-[var(--weight-section)] text-[length:var(--text-section)] leading-[1.2] tracking-[-0.5px] text-label mb-3.5"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           Quelques questions, et votre lecture personnalisée apparaît.
