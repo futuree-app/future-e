@@ -1,6 +1,7 @@
 import React from "react";
 import { BPE_WALK_RADIUS_M, type Face3Snapshot, type GreenKind } from "@/lib/logement-autour-types";
 import { ReportSection, GlassCard } from "@/components/report/kit";
+import { lireChaleurEtVegetal } from "@/lib/logement-autour-chaleur";
 import { ecartAuCommune, partSansVoiture, type CarOwnership } from "@/lib/iris-logement";
 
 // « Autour de cette adresse » (buffer local au point géocodé) — le corps du module 02 depuis le
@@ -180,19 +181,41 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
 
           {/* Brique 2 — espace vert (repère). L'infrastructure de transport a quitté ce silence le
               01/08/2026 : elle se lit dans son propre bloc du module Autour. */}
+          {/* CHALEUR DU SECTEUR ET ACCÈS AU VÉGÉTAL, LUS ENSEMBLE (03/08/2026).
+              Les deux faits étaient là, dans deux blocs qui ne se parlaient pas, et le lecteur
+              devait faire le rapprochement lui-même. La lecture composée REMPLACE la ligne d'espace
+              vert quand l'îlot de chaleur est mesuré : l'ajouter en plus donnerait deux fois le même
+              fait et ferait peser la chaleur par simple répétition. Sans îlot mesuré, la ligne
+              d'origine reste, elle se lit très bien seule. Rédaction et limites : lib/logement-autour-chaleur.ts. */}
           <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 8 }}>
-            <div style={FACE3_SUBHEAD}>Espace vert</div>
-            {s.sourceStatus.osmGreenSpaces === "pending" ? (
-              <em style={{ color: "var(--fg-4)", fontSize: 14 }}>Environnement en cours de récupération…</em>
-            ) : s.sourceStatus.osmGreenSpaces === "failed" ? (
-              <span style={{ color: "var(--fg-4)", fontSize: 14 }}>Espaces verts : donnée momentanément indisponible.</span>
-            ) : s.osm.nearestMappedGreenSpace ? (
-              <Face3Line label={greenSpaceLabel(s.osm.nearestMappedGreenSpace.kind)} meters={s.osm.nearestMappedGreenSpace.distanceMeters} />
-            ) : (
-              <span style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
-                Aucun espace vert correspondant aux catégories recherchées dans l’emprise cartographiée.
-              </span>
-            )}
+            {(() => {
+              const lecture = s.sourceStatus.osmGreenSpaces === "complete" ? lireChaleurEtVegetal(s.icu ?? null, s.osm) : null;
+              if (lecture) {
+                return (
+                  <>
+                    <div style={FACE3_SUBHEAD}>Chaleur du secteur et accès au végétal</div>
+                    <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 }}>{lecture.texte}</p>
+                    <p style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>{lecture.limite}</p>
+                  </>
+                );
+              }
+              return (
+                <>
+                  <div style={FACE3_SUBHEAD}>Espace vert</div>
+                  {s.sourceStatus.osmGreenSpaces === "pending" ? (
+                    <em style={{ color: "var(--fg-4)", fontSize: 14 }}>Environnement en cours de récupération…</em>
+                  ) : s.sourceStatus.osmGreenSpaces === "failed" ? (
+                    <span style={{ color: "var(--fg-4)", fontSize: 14 }}>Espaces verts : donnée momentanément indisponible.</span>
+                  ) : s.osm.nearestMappedGreenSpace ? (
+                    <Face3Line label={greenSpaceLabel(s.osm.nearestMappedGreenSpace.kind)} meters={s.osm.nearestMappedGreenSpace.distanceMeters} />
+                  ) : (
+                    <span style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
+                      Aucun espace vert correspondant aux catégories recherchées dans l’emprise cartographiée.
+                    </span>
+                  )}
+                </>
+              );
+            })()}
           </div>
 
           {/* L'îlot de chaleur est rendu par AutourModule, juste sous ce bloc (composant

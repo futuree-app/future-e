@@ -128,3 +128,19 @@ presque partout.
 **Ce que ça n'interdit pas.** Le troisième niveau reste la bonne cible produit, et la question qu'il
 adresse est bien résidentielle (« aurai-je un endroit où me réfugier »), pas météorologique. Il se
 remplira par les collectivités et les études avant de se remplir par la contribution.
+
+### Tension ouverte : deux faits résidentiels vivent hors du moteur
+
+Relevé par le porteur le 03/08/2026, en instruisant la lecture ci-dessus. **L'îlot de chaleur du
+secteur et l'espace vert le plus proche ne sont pas des `DecisionFact`** : ils vivent dans
+`Face3Snapshot`, donc dans l'affichage du module Autour, sans poids, sans matérialité et sans effet
+sur le verdict.
+
+C'est étrange pour deux faits qui pèsent sur une décision résidentielle, et ça mérite d'être
+instruit. Deux lectures possibles, non tranchées : ou bien ils manquent au registre de matérialité
+et devraient y entrer, ou bien ils relèvent du décor d'un lieu plutôt que d'une condition du projet,
+et leur place est bien celle qu'ils occupent.
+
+Conséquence pratique connue : tant qu'ils restent hors du moteur, aucune de leurs compositions ne
+peut créer de double comptage. Le jour où ils y entreraient, la règle du § composition s'applique,
+une lecture liée remplace ses composants au lieu de s'y ajouter.
