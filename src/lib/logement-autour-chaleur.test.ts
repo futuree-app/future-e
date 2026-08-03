@@ -15,7 +15,40 @@ test("un bois : la nature est nommée, la densité d'arbres reste ouverte", () =
   const r = lireChaleurEtVegetal({ iuhi: 4.2, level: "marque" }, vert("wood", 340))!;
   assert.match(r.texte, /îlot de chaleur urbain marqué/);
   assert.match(r.texte, /un bois, à 340 mètres de l'adresse/);
-  assert.match(r.limite, /densité d'arbres/);
+  assert.match(r.limite, /densité réelle de son couvert arboré/);
+});
+
+test("un espace de loisirs n'est jamais présenté comme végétalisé", () => {
+  // `recreation_ground` peut être largement minéral : la catégorie OSM ne garantit pas la végétation.
+  const r = lireChaleurEtVegetal({ iuhi: 4, level: "marque" }, vert("recreation_ground", 150))!;
+  assert.doesNotMatch(r.texte, /végétalisé/);
+  assert.match(r.texte, /un espace de loisirs/);
+  assert.match(r.limite, /part de végétation/);
+});
+
+test("L'ACCESSIBILITÉ N'EST JAMAIS AFFIRMÉE, et son inconnue est dite", () => {
+  // Une distance ne prouve pas l'accès : le polygone peut être privé, clôturé, ou séparé par une
+  // voie rapide. Et elle est mesurée jusqu'à la LIMITE, pas jusqu'à une entrée praticable.
+  for (const k of ["wood", "park", "grass", "recreation_ground"] as const) {
+    const r = lireChaleurEtVegetal({ iuhi: 4, level: "marque" }, vert(k, 200))!;
+    assert.doesNotMatch(r.texte, /accès|accessible/i);
+    assert.match(r.limite, /accessibilité/);
+    assert.match(r.limite, /pas jusqu'à une entrée/);
+  }
+});
+
+test("STRUCTURE DE LA PREUVE : changer l'espace proche ne change jamais le fait climatique", () => {
+  // Le garde-fou lexical ne suffit pas : une compensation peut s'écrire sans mot interdit. Ce test
+  // vérifie que la moitié « chaleur » de la phrase est rigoureusement invariante.
+  const icu = { iuhi: 4.2, level: "marque" as const };
+  const debuts = [
+    lireChaleurEtVegetal(icu, vert("wood", 50)),
+    lireChaleurEtVegetal(icu, vert("grass", 900)),
+    lireChaleurEtVegetal(icu, vert("recreation_ground", 300)),
+    lireChaleurEtVegetal(icu, { nearestMappedGreenSpace: null }),
+  ].map((r) => r!.texte.split(".")[0]);
+  assert.equal(new Set(debuts).size, 1, "le fait climatique doit être identique dans tous les cas");
+  assert.match(debuts[0], /Votre secteur présente un îlot de chaleur urbain marqué/);
 });
 
 test("une pelouse : aucun ombrage n'est supposé", () => {
@@ -32,13 +65,13 @@ test("un parc n'est pas présumé arboré", () => {
 
 test("aucun espace vert : l'absence porte sur le périmètre cartographié, pas sur le réel", () => {
   const r = lireChaleurEtVegetal({ iuhi: 4.5, level: "marque" }, { nearestMappedGreenSpace: null })!;
-  assert.match(r.texte, /aucun espace végétalisé n'est cartographié/);
-  assert.match(r.limite, /pas sur l'ensemble des espaces existants/);
+  assert.match(r.texte, /Aucun espace correspondant aux catégories recherchées/);
+  assert.match(r.limite, /couverture d'OpenStreetMap et les catégories interrogées/);
 });
 
 test("un espace sans tag de nature reste générique", () => {
   const r = lireChaleurEtVegetal({ iuhi: 3.4, level: "present" }, vert(undefined, 90))!;
-  assert.match(r.texte, /un espace végétalisé, à 90 mètres/);
+  assert.match(r.texte, /un espace, à 90 mètres/);
 });
 
 test("LES DEUX ÉCHELLES SONT NOMMÉES dans toutes les branches", () => {

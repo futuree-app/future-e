@@ -35,12 +35,15 @@ export type ChaleurVegetal = {
  * `wood` et `forest` portent des arbres par définition du tag ; `grass` et `recreation_ground` non.
  * La distinction sert à formuler la limite, jamais à qualifier un confort.
  */
-const NATURE: Record<GreenKind, { nom: string; arbore: boolean }> = {
-  wood: { nom: "un bois", arbore: true },
-  forest: { nom: "une forêt", arbore: true },
-  park: { nom: "un parc", arbore: false },
-  grass: { nom: "une surface enherbée", arbore: false },
-  recreation_ground: { nom: "un terrain de plein air", arbore: false },
+// `vegetal` dit si la CATÉGORIE OSM garantit de la végétation. `recreation_ground` désigne un espace
+// de loisirs qui peut être largement minéral : l'appeler « espace végétalisé » transformerait une
+// catégorie en caractéristique physique non établie.
+const NATURE: Record<GreenKind, { nom: string; arbore: boolean; vegetal: boolean }> = {
+  wood: { nom: "un bois", arbore: true, vegetal: true },
+  forest: { nom: "une forêt", arbore: true, vegetal: true },
+  park: { nom: "un parc", arbore: false, vegetal: true },
+  grass: { nom: "une surface enherbée", arbore: false, vegetal: true },
+  recreation_ground: { nom: "un espace de loisirs", arbore: false, vegetal: false },
 };
 
 export function lireChaleurEtVegetal(
@@ -53,26 +56,36 @@ export function lireChaleurEtVegetal(
 
   const vert = osm?.nearestMappedGreenSpace ?? null;
   const intensite = icu.level === "marque" ? "marqué" : "présent";
-  const secteur = `Votre secteur connaît un îlot de chaleur urbain ${intensite}`;
+  const secteur = `Votre secteur présente un îlot de chaleur urbain ${intensite}`;
 
   if (!vert) {
     return {
-      texte: `${secteur}, et aucun espace végétalisé n'est cartographié dans le périmètre observé autour de l'adresse.`,
+      texte: `${secteur}. Aucun espace correspondant aux catégories recherchées n'est cartographié dans le périmètre analysé autour de l'adresse.`,
       limite:
-        "L'absence porte sur ce qu'OpenStreetMap a cartographié dans ce périmètre, pas sur l'ensemble des espaces existants.",
+        "Ce résultat reflète la couverture d'OpenStreetMap et les catégories interrogées : il ne permet pas de conclure à l'absence de tout espace végétalisé.",
     };
   }
 
   const nature = vert.kind ? NATURE[vert.kind] : null;
-  const nom = nature?.nom ?? "un espace végétalisé";
+  const nom = nature?.nom ?? "un espace";
   const metres = Math.round(vert.distanceMeters);
 
+  const texte = nature?.vegetal === false
+    ? `${secteur}. L'espace cartographié le plus proche est ${nom}, à ${metres} mètres de l'adresse.`
+    : `${secteur}. Le premier espace végétalisé cartographié est ${nom}, à ${metres} mètres de l'adresse.`;
+
+  // L'ACCESSIBILITÉ EST INCONNUE, ET IL FAUT LE DIRE. La distance est mesurée du point au BORD du
+  // polygone, à vol d'oiseau (`distancePointToPolygonM`) : un bois privé, clôturé ou séparé par une
+  // voie rapide donne le même chiffre qu'un parc public dont on pousse la grille. Écrire « accès »
+  // affirmerait ce que la donnée n'établit pas.
+  const inconnues = nature?.arbore
+    ? "Son accessibilité, la densité réelle de son couvert arboré et l'ombre disponible aux heures les plus chaudes ne sont pas documentées."
+    : nature?.vegetal === false
+      ? "Sa part de végétation, son accessibilité et son confort lors des fortes chaleurs ne sont pas documentés."
+      : "Son accessibilité, son ombrage et son confort lors des fortes chaleurs ne sont pas documentés.";
+
   return {
-    texte: `${secteur}. Le premier espace végétalisé cartographié est ${nom}, à ${metres} mètres de l'adresse.`,
-    limite: nature?.arbore
-      // Le tag dit qu'il y a des arbres. Il ne dit pas leur densité, ni l'ombre qu'ils portent selon
-      // l'heure : la nuance sépare ce que la donnée établit de ce que le lecteur en attend.
-      ? "Sa densité d'arbres et l'ombre qu'il porte aux heures les plus chaudes ne sont pas documentées."
-      : "Son ombrage et son confort lors des fortes chaleurs ne sont pas documentés.",
+    texte,
+    limite: `${inconnues} La distance est mesurée à vol d'oiseau jusqu'à la limite de l'espace, pas jusqu'à une entrée.`,
   };
 }
