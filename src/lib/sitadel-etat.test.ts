@@ -44,8 +44,14 @@ test("les libellés décrivent un ACTE CONSTATÉ, jamais un projet", () => {
   }
 });
 
-test("le libellé « autorisé » porte sa réserve temporelle", () => {
-  // Sans « à cette date », le lecteur comprend « toujours pas commencé aujourd'hui », ce que le
-  // millésime mensuel du jeu ne garantit pas.
-  assert.ok(LIBELLE_ETAT.autorise_non_commence.includes("à cette date"));
+test("le libellé « autorisé » porte sa réserve temporelle, et NOMME la date", () => {
+  // Sans réserve, le lecteur comprend « toujours pas commencé aujourd'hui », ce que le millésime
+  // mensuel du jeu ne garantit pas. La réserve est donc obligatoire.
+  //
+  // Elle doit en plus DÉSIGNER sa date. « À cette date » obligeait à deviner laquelle des deux
+  // dates affichées était visée, celle du dépôt ou celle de la consultation ; le test accepte donc
+  // la formule qui la nomme, et refuse un démonstratif seul.
+  const texte = LIBELLE_ETAT.autorise_non_commence;
+  assert.ok(/à la date du registre/.test(texte), texte);
+  assert.equal(/à cette date/.test(texte), false, "le démonstratif seul n'est plus accepté");
 });

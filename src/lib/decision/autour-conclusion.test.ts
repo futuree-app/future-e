@@ -205,100 +205,58 @@ test("BPE en échec : pas de conclusion du tout, même avec un chantier ouvert",
   assert.equal(buildAutourConclusion(s), null);
 });
 
-// ── Les cinq formes ─────────────────────────────────────────────────────────────────────────
+// ── Les deux formes ────────────────────────────────────────────────────────────────────────
+//
+// Deux, et non cinq. Les cinq premières disaient le nombre, le rayon, l'objet du registre et
+// l'année ; lues À L'ÉCRAN sous la carte des permis, elles en étaient une seconde version. Ne
+// reste ici que ce que la carte ne fait pas : dire lequel des deux degrés de certitude s'applique.
 
-test("un chantier ouvert seul : l'année est dite, rattachée au DÉPÔT", () => {
-  // Le point-virgule porte un fait : 2025 est l'année de dépôt, jamais celle de l'ouverture du
-  // chantier. Un complément collé au verbe laisserait les deux dates se contaminer.
+test("un chantier déclaré ouvert : le changement est ENGAGÉ", () => {
   const c = buildAutourConclusion(snapAvecPermis(permis([{ annee: 2025, etat: "chantier_ouvert" }])));
   assert.equal(
     c?.mouvement,
-    "Cette configuration peut encore changer : un chantier de logements est déclaré ouvert " +
-      "à moins de 50 m ; le dossier a été déposé en 2025.",
+    "Cette configuration peut encore changer : un chantier est déjà déclaré ouvert.",
   );
 });
 
-test("une autorisation non commencée seule : l'ouverture manquante est dite, puis l'année", () => {
+test("aucun chantier ouvert : le changement n'est qu'AUTORISÉ", () => {
+  // Une autorisation sans chantier peut ne jamais commencer : « encore » le porte sans le promettre.
   const c = buildAutourConclusion(snapAvecPermis(permis([{ annee: 2024, etat: "autorise_non_commence" }])));
   assert.equal(
     c?.mouvement,
-    "Cette configuration peut encore changer : une autorisation créant des logements est " +
-      "recensée à moins de 50 m, sans ouverture de chantier déclarée ; le dossier a été déposé " +
-      "en 2024.",
+    "Cette configuration peut encore changer : aucun chantier n'est encore déclaré ouvert.",
   );
 });
 
-test("plusieurs, tous ouverts : pluriel, AUCUNE année", () => {
-  const c = buildAutourConclusion(snapAvecPermis(permis([
-    { annee: 2025, etat: "chantier_ouvert" },
-    { annee: 2024, etat: "chantier_ouvert" },
-  ])));
-  assert.equal(
-    c?.mouvement,
-    "Cette configuration peut encore changer : deux chantiers de logements sont déclarés " +
-      "ouverts à moins de 50 m.",
-  );
+test("le NOMBRE ne change pas la phrase : un ou dix disent la même chose", () => {
+  // Le dénombrement est dans la carte du dessus. Le répéter ici serait de l'inventaire.
+  const un = buildAutourConclusion(snapAvecPermis(permis([{ annee: 2025, etat: "chantier_ouvert" }])));
+  const dix = buildAutourConclusion(snapAvecPermis(permis(
+    Array.from({ length: 10 }, () => ({ annee: 2025, etat: "chantier_ouvert" as const })),
+  )));
+  assert.equal(un?.mouvement, dix?.mouvement);
 });
 
-test("plusieurs, aucun ouvert : pluriel, AUCUNE année", () => {
+test("états MIXTES : un seul chantier ouvert suffit à engager", () => {
   const c = buildAutourConclusion(snapAvecPermis(permis([
-    { annee: 2025, etat: "autorise_non_commence" },
-    { annee: 2024, etat: "autorise_non_commence" },
-    { annee: 2024, etat: "autorise_non_commence" },
-  ])));
-  assert.equal(
-    c?.mouvement,
-    "Cette configuration peut encore changer : trois autorisations créant des logements sont " +
-      "recensées à moins de 50 m, sans ouverture de chantier déclarée.",
-  );
-});
-
-test("états mixtes : le total, puis les ouverts, sans compter les autres", () => {
-  // Le total permet de déduire les non commencées. Les compter séparément produirait une phrase de
-  // registre administratif là où on attend une lecture.
-  const c = buildAutourConclusion(snapAvecPermis(permis([
-    { annee: 2025, etat: "chantier_ouvert" },
     { annee: 2025, etat: "chantier_ouvert" },
     { annee: 2024, etat: "autorise_non_commence" },
     { annee: 2023, etat: "acheve" },
   ])));
   assert.equal(
     c?.mouvement,
-    "Cette configuration peut encore changer : trois autorisations créant des logements sont " +
-      "recensées à moins de 50 m, dont deux chantiers déclarés ouverts.",
+    "Cette configuration peut encore changer : un chantier est déjà déclaré ouvert.",
   );
 });
 
-test("mixte avec UN SEUL chantier ouvert : l'accord suit", () => {
+test("un ACHEVÉ ne compte pas comme un chantier ouvert", () => {
   const c = buildAutourConclusion(snapAvecPermis(permis([
-    { annee: 2025, etat: "chantier_ouvert" },
+    { annee: 2025, etat: "acheve" },
     { annee: 2024, etat: "autorise_non_commence" },
   ])));
   assert.equal(
     c?.mouvement,
-    "Cette configuration peut encore changer : deux autorisations créant des logements sont " +
-      "recensées à moins de 50 m, dont un chantier déclaré ouvert.",
-  );
-});
-
-test("même millésime au pluriel : l'année reste TUE", () => {
-  // Règle éditoriale assumée, pas un raccourci : l'année n'apparaît que lorsque la conclusion
-  // mentionne une seule autorisation. L'ajouter au pluriel rapprocherait la charnière de
-  // l'inventaire que le bloc précédent rend déjà.
-  const c = buildAutourConclusion(snapAvecPermis(permis([
-    { annee: 2025, etat: "chantier_ouvert" },
-    { annee: 2025, etat: "chantier_ouvert" },
-  ])));
-  assert.ok(!c?.mouvement?.includes("2025"));
-});
-
-test("au-delà de neuf, le nombre passe en chiffres", () => {
-  const dix = Array.from({ length: 10 }, () => ({ annee: 2025, etat: "chantier_ouvert" as const }));
-  const c = buildAutourConclusion(snapAvecPermis(permis(dix)));
-  assert.equal(
-    c?.mouvement,
-    "Cette configuration peut encore changer : 10 chantiers de logements sont déclarés ouverts " +
-      "à moins de 50 m.",
+    "Cette configuration peut encore changer : aucun chantier n'est encore déclaré ouvert.",
   );
 });
 
@@ -324,24 +282,32 @@ test("AUCUNE TRANSFORMATION TENUE POUR ACQUISE : une autorisation n'est pas un b
   }
 });
 
-test("AUCUN VOLUME de logements, en chiffres comme en lettres", () => {
-  // La charnière écrit ses nombres en toutes lettres, donc un test sur /\d+\s+logements/ seul
-  // laisserait passer « deux logements ». L'interdit porte sur le VOLUME de logements, jamais sur
-  // le nombre d'autorisations, qui est légitime et attendu.
-  const VOLUME = /(\d+|un|une|deux|trois|quatre|cinq|six|sept|huit|neuf)\s+logements/i;
-  const m = buildAutourConclusion(snapAvecPermis(permis([
-    { annee: 2025, etat: "chantier_ouvert" },
-    { annee: 2024, etat: "autorise_non_commence" },
-  ])))?.mouvement ?? "";
-  assert.ok(!VOLUME.test(m), `un volume de logements a été écrit : ${m}`);
-  assert.ok(m.includes("deux autorisations"), "le nombre d'autorisations, lui, doit être dit");
+test("AUCUN CHIFFRE : la charnière ne recopie rien de la carte du dessus", () => {
+  // LE VERROU QUI ENCODE LA DÉCISION DU 01/08/2026. Le rayon, l'année de dépôt et le nombre de
+  // dossiers sont dans la carte rendue juste au-dessus ; les redire ici a été essayé, vu à l'écran,
+  // et rejeté. Un chiffre qui réapparaît dans cette phrase est le signe que la redite revient.
+  //
+  // Il couvre du même geste l'interdit du VOLUME de logements : la source n'en porte aucun, et une
+  // conclusion qui écrirait « douze logements » inventerait une ampleur que rien n'établit.
+  for (const liste of [
+    [{ annee: 2025, etat: "chantier_ouvert" as const }],
+    [{ annee: 2024, etat: "autorise_non_commence" as const }],
+    [{ annee: 2025, etat: "chantier_ouvert" as const }, { annee: 2024, etat: "autorise_non_commence" as const }],
+  ]) {
+    for (const rayon of [50, 80]) {
+      const m = buildAutourConclusion(snapAvecPermis(permis(liste, rayon)))?.mouvement ?? "";
+      assert.ok(!/\d/.test(m), `un chiffre a reparu dans : ${m}`);
+      assert.ok(!/logements/i.test(m), `un volume de logements a été écrit : ${m}`);
+      assert.ok(!/\bm\b|mètres/i.test(m), `un périmètre a été écrit : ${m}`);
+    }
+  }
 });
 
-test("LE RAYON VIENT DU SNAPSHOT, jamais de la constante du jour", () => {
-  // Un dossier créé sous un ancien rayon doit continuer de décrire le périmètre qui l'a réellement
-  // sélectionné. Une phrase bâtie sur RAYON_PERMIS_M mentirait sur tous les dossiers antérieurs au
-  // prochain changement de rayon.
-  const c = buildAutourConclusion(snapAvecPermis(permis([{ annee: 2025, etat: "chantier_ouvert" }], 80)));
-  assert.ok(c?.mouvement?.includes("à moins de 80 m"));
-  assert.ok(!c?.mouvement?.includes("50 m"));
+test("LE RAYON GELÉ NE CONCERNE PLUS CETTE PHRASE, et c'est vérifié", () => {
+  // La charnière ne cite aucun périmètre, donc deux snapshots de rayons différents doivent rendre
+  // EXACTEMENT la même phrase. L'invariant du rayon gelé reste vrai là où il s'applique : dans
+  // `autour-permis.ts`, qui écrit le périmètre et le teste chez lui.
+  const a = buildAutourConclusion(snapAvecPermis(permis([{ annee: 2025, etat: "chantier_ouvert" }], 50)));
+  const b = buildAutourConclusion(snapAvecPermis(permis([{ annee: 2025, etat: "chantier_ouvert" }], 80)));
+  assert.equal(a?.mouvement, b?.mouvement);
 });

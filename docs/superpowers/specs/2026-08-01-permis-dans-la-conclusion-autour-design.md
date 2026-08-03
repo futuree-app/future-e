@@ -1,12 +1,16 @@
 # Les permis dans la conclusion du module Autour
 
-**Date** : 2026-08-01 · **Statut** : SPÉCIFIÉ, pas implémenté. · **Point 2 des quatre restes de**
-`2026-08-01-permis-autour-adresse-design.md`.
+**Date** : 2026-08-01, révisée le 02/08 après vérification à l'écran · **Statut** : LIVRÉ. ·
+**Point 2 des quatre restes de** `2026-08-01-permis-autour-adresse-design.md`.
+
+> La rédaction de la charnière a été REFAITE après l'avoir vue sous la carte des permis : cinq
+> formes détaillées sont devenues deux formes sans aucun chiffre. Le motif est écrit au chapitre
+> « Les deux formes ». Tout le reste de la spec a tenu.
 
 ## Ce que ça répare
 
-`autour-conclusion.ts` ne contient **aucune occurrence de « permis »**. La conclusion déterministe
-du module s'assemble sur quatre nombres (portée de pas, équipement automobile, espace vert, ÎCU)
+`autour-conclusion.ts` ne contenait **aucune occurrence de « permis »**. La conclusion déterministe
+du module s'assemblait sur quatre nombres (portée de pas, équipement automobile, espace vert, ÎCU)
 écrits avant le chantier des autorisations d'urbanisme.
 
 À l'écran, l'ordre de rendu est : les repères du quotidien, les infrastructures, **le bloc des
@@ -69,49 +73,55 @@ permission de changer, elle ne prouve pas que le changement aura lieu. Supprimer
 transformerait une autorisation en effet déjà établi, ce que la doctrine du chantier interdit
 depuis le premier jour (« autorisé » n'est jamais « prévu »).
 
-## Les cinq formes, gravées
+## Les deux formes, gravées
 
-Toutes précédées de la charnière « Cette configuration peut encore changer : ».
+> Cette configuration peut encore changer : **un chantier est déjà déclaré ouvert.**
 
-| Composition | Phrase |
-|---|---|
-| 1 chantier ouvert | un chantier de logements est déclaré ouvert à moins de 50 m ; le dossier a été déposé en 2025. |
-| 1 autorisation non commencée | une autorisation créant des logements est recensée à moins de 50 m, sans ouverture de chantier déclarée ; le dossier a été déposé en 2024. |
-| Plusieurs, tous ouverts | deux chantiers de logements sont déclarés ouverts à moins de 50 m. |
-| Plusieurs, aucun ouvert | trois autorisations créant des logements sont recensées à moins de 50 m, sans ouverture de chantier déclarée. |
-| États mixtes | trois autorisations créant des logements sont recensées à moins de 50 m, dont deux chantiers déclarés ouverts. |
+> Cette configuration peut encore changer : **aucun chantier n'est encore déclaré ouvert.**
 
-Le « 50 m » de ces cinq exemples est illustratif : la phrase écrit le rayon **gelé dans le
-snapshot**, jamais la constante du jour. Voir « Le périmètre vient du snapshot ».
+C'est tout. Pas de nombre, pas de rayon, pas d'année, pas d'accord à gérer.
 
-**Le point-virgule des deux formes au singulier est porteur.** L'année est celle du DÉPÔT, jamais
-celle de l'ouverture du chantier : « déclaré ouvert en 2025 » serait factuellement faux. Un
-complément collé au verbe (« ouvert à moins de 50 m sur un dossier déposé en 2025 ») laisse les deux
-dates se contaminer, et « dans le cadre d'un dossier déposé en 2025 » remplace la raideur par la
-locution des circulaires. Le point-virgule rattache l'année au dépôt, et à lui seul.
+### Pourquoi deux, alors que la première version en comptait cinq
 
-### Ce que la composition dit, et pourquoi
+**La vérification à l'écran du 01/08/2026 a invalidé les cinq formes.** Elles disaient le nombre, le
+rayon, l'objet du registre et l'année. Rendues sous la carte des permis, qui porte déjà tout cela
+mot pour mot et à trois centimètres au-dessus, elles s'en lisaient comme une seconde version. La
+phrase alors rendue était :
 
-**Le nombre total, puis l'état le plus avancé.** Le nombre établit que ce n'est pas un dossier
-isolé, et c'est la seule mesure d'ampleur que la source autorise. L'état nommé est le plus certain
-des deux : un chantier ouvert est constaté, une autorisation non commencée peut ne jamais l'être.
+> Cette configuration peut encore changer : une autorisation créant des logements est recensée à
+> moins de 50 m, sans ouverture de chantier déclarée ; le dossier a été déposé en 2025.
 
-Dans le cas mixte, les autorisations non commencées **ne sont pas comptées séparément** : le total
-permet de les déduire, et les compter produirait une phrase de registre administratif là où on
-attend une lecture.
+Quatre éléments sur cinq y sont repris de la carte, dont deux à l'identique. Une conclusion qui
+recopie n'est plus une conclusion.
 
-### L'année
+La spec avait pourtant posé la bonne règle (« le bloc porte les faits, la conclusion leur lecture »),
+puis l'avait contredite en rédigeant la phrase **isolément**, sans jamais la poser sous la carte.
+C'est l'écran qui a tranché, et c'est exactement ce pour quoi la vérification visuelle figurait au
+plan.
 
-**L'année apparaît uniquement lorsque la conclusion mentionne une seule autorisation.** Au pluriel,
-elle est toujours omise, **même lorsque tous les dossiers portent le même millésime** : l'ajouter
-alourdirait la charnière et la rapprocherait de l'inventaire que le bloc précédent rend déjà.
+### Ce que les deux formes gardent, et pourquoi
 
-C'est une règle éditoriale, pas un raccourci d'implémentation : `retenus.length === 1` est la
-traduction exacte de la décision, et non son approximation.
+**Le degré de certitude, seule chose que la conclusion transforme au lieu de la répéter.** Un
+chantier déclaré ouvert est engagé ; une autorisation sans chantier peut ne jamais commencer. La
+carte donne l'acte administratif, la conclusion dit ce qu'il implique pour la stabilité de ce qui
+vient d'être décrit.
 
-Ce qu'elle écarte, au passage : prendre la plus récente ferait paraître l'ensemble aussi récent
-qu'elle, prendre la plus ancienne produirait le biais inverse, et donner une plage transformerait
-la charnière en inventaire.
+**« Déjà » et « encore » portent la lecture temporelle**, et rien d'autre : ni date, ni délai, ni
+promesse. Ils opposent ce qui est engagé à ce qui ne l'est pas, sans affirmer que l'un aboutira ni
+que l'autre commencera.
+
+**Un achevé n'engage rien** : il est écarté avant ce calcul, comme tout le reste de la charnière.
+
+### Ce qui a été écarté avec les cinq formes
+
+- **La phrase nue** (« Cette configuration peut encore changer. »), proposée à la relecture. Elle ne
+  recopie rien, mais elle perd le degré de certitude, et une phrase qui ne dépend plus d'aucune
+  donnée n'est plus un fait assemblé : c'est un booléen déguisé en texte, dont la place serait dans
+  le composant.
+- **Le dénombrement.** Un dossier ou dix produisent la même phrase, et un test le vérifie. Le
+  nombre est dans la carte.
+- **La règle de l'année**, et avec elle le point-virgule qui la rattachait au dépôt. Sans année, le
+  piège qu'il désamorçait n'existe plus.
 
 ## Ce qui a été écarté, faute de données
 
@@ -200,23 +210,26 @@ courte et le bloc portant déjà la date au bon endroit.
 
 ## Les tests
 
-Onze, sous `node --test`, dans `autour-conclusion.test.ts`.
+Douze, sous `node --test`, dans `autour-conclusion.test.ts`.
 
 | Cas | Attendu |
 |---|---|
-| 1 chantier ouvert | l'année est dite |
-| 1 autorisation non commencée | « sans ouverture de chantier déclarée », l'année est dite |
-| 2 chantiers ouverts | pluriel, aucune année |
-| 3 dossiers dont 2 ouverts | « dont deux chantiers déclarés ouverts », aucune année |
-| 3 dossiers, aucun ouvert | « sans ouverture de chantier déclarée », aucune année |
+| 1 chantier ouvert | « un chantier est déjà déclaré ouvert » |
+| 1 autorisation non commencée | « aucun chantier n'est encore déclaré ouvert » |
+| 1 dossier contre 10 | **la même phrase**, le nombre n'entre pas |
+| États mixtes | un seul chantier ouvert suffit à engager |
+| Un achevé plus une non commencée | l'achevé ne compte pas comme un chantier ouvert |
 | Que des achevés | `mouvement === null` |
 | `permis` absent | `mouvement === null` |
+| Registre consulté, rien trouvé | `mouvement === null` |
 | BPE en échec, avec un chantier ouvert | conclusion `null` en entier |
-| Aucun futur | `mouvement` ne contient ni « va », ni « futur », ni « d'ici », ni « dense », **en limites de mot** |
-| Aucun volume | `mouvement` ne contient aucune construction « N logements », le N étant en chiffres ou en lettres |
-| Rayon du snapshot | un snapshot gelé à 80 m écrit « 80 m », jamais 50 |
+| Aucune transformation tenue pour acquise | ni « va », ni « futur », ni « d'ici », ni « dense », **en limites de mot** |
+| **Aucun chiffre** | la phrase ne contient aucun chiffre, aucun « logements », aucun périmètre |
+| Le rayon ne concerne plus la phrase | deux snapshots de rayons différents rendent la MÊME phrase |
 
-Les trois derniers verrouillent une doctrine, pas un comportement. Ils sont la raison d'être de ce
+Les trois derniers verrouillent une doctrine, pas un comportement. « Aucun chiffre » est celui qui
+encode la décision du 02/08 : un chiffre qui réapparaît dans cette phrase est le signe que la redite
+revient. Ils sont la raison d'être de ce
 tableau : « la conclusion mentionne le permis » et « la conclusion dit vrai du permis » sont deux
 assertions distinctes, et la seconde ne se déduit jamais de la première.
 

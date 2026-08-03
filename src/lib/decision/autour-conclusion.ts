@@ -101,9 +101,10 @@ export type AutourConclusion = {
    * l'analyse, et elle n'était peut-être pas stabilisée.
    *
    * ── CE CHAMP NE SE SUFFIT PAS À LUI-MÊME ─────────────────────────────────────────────────
-   * La phrase peut porter l'année de DÉPÔT du dossier, jamais la date de CONSULTATION du registre,
-   * qui est celle qui borne l'état observé. « Peut encore changer » n'est au présent que parce que
-   * le lecteur voit, sur la même surface, à quelle date le registre a été consulté.
+   * La phrase ne porte AUCUNE date, et aucun chiffre : ni le rayon, ni l'année de dépôt, ni le
+   * nombre de dossiers, tous présents dans la carte rendue juste au-dessus. « Peut encore changer »
+   * et « déjà / encore déclaré ouvert » ne sont au présent que parce que le lecteur voit, sur la
+   * même surface, à quelle date le registre a été consulté.
    *
    * Toute réutilisation de `AutourConclusion` hors de `AutourModule` (un PDF, un partage, une
    * synthèse qui en cite le texte) doit donc afficher cette date quelque part, sans quoi un lecteur
@@ -115,20 +116,6 @@ export type AutourConclusion = {
   /** Ce que ces nombres ne disent pas. Toujours présent. */
   limite: string;
 };
-
-/**
- * Les nombres de la charnière, EN TOUTES LETTRES et en minuscules.
- *
- * Table locale plutôt que partagée avec `autour-permis.ts` : là-bas les nombres ouvrent une phrase
- * et portent donc une majuscule, ici ils sont au milieu d'une proposition. Deux besoins différents,
- * deux tables, aucune ne dépend de l'autre.
- *
- * Au-delà de neuf, le chiffre. À 50 m sur trois ans, dix dossiers est déjà une grosse opération
- * découpée, et « quatorze » en toutes lettres au milieu d'une phrase se lit moins bien que 14.
- */
-const NOMBRE = ["", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf"];
-
-const enToutesLettres = (n: number): string => (n < NOMBRE.length ? NOMBRE[n] : String(n));
 
 /**
  * LA CHARNIÈRE TEMPORELLE DES PERMIS.
@@ -151,48 +138,26 @@ function buildMouvement(p: PermisSnapshot | undefined): string | null {
   const retenus = p.permis.filter((x) => x.etat !== "acheve");
   if (retenus.length === 0) return null;
 
-  const total = retenus.length;
-  const ouverts = retenus.filter((x) => x.etat === "chantier_ouvert").length;
-  const perimetre = `à moins de ${p.rayonMeters} m`;
+  // DEUX FORMES, ET AUCUN CHIFFRE. La première version en comptait cinq : elle disait le nombre,
+  // le rayon, l'objet du registre et l'année. Lues À L'ÉCRAN sous le bloc des permis, le 01/08/2026,
+  // ces phrases se sont révélées être une seconde version de la carte du dessus, qui porte déjà
+  // tout cela mot pour mot. Une conclusion qui recopie n'est plus une conclusion.
+  //
+  // Ce que la carte ne fait pas, et qui reste ici : transformer « autorisation non achevée » en
+  // « configuration non stabilisée », et dire lequel des deux degrés de certitude s'applique. Un
+  // chantier déclaré ouvert est engagé ; une autorisation sans chantier peut ne jamais commencer.
+  //
+  // « DÉJÀ » ET « ENCORE » PORTENT LA LECTURE TEMPORELLE, et c'est tout ce qu'ils font : ni date,
+  // ni délai, ni promesse. Ils opposent ce qui est engagé à ce qui ne l'est pas, sans affirmer que
+  // l'un aboutira ni que l'autre commencera.
+  //
+  // Le nombre, le rayon et l'année sont volontairement absents : ils sont dans la carte, à trois
+  // centimètres au-dessus, et un test verrouille qu'aucun chiffre ne revienne ici.
+  const engage = retenus.some((x) => x.etat === "chantier_ouvert");
 
-  let corps: string;
-
-  if (total === 1) {
-    // L'ANNÉE N'APPARAÎT QU'ICI. Elle ne se dit que si elle peut être attribuée à tout ce que la
-    // phrase désigne, donc au singulier seulement, y compris quand plusieurs dossiers partagent le
-    // même millésime. Au pluriel, prendre la plus récente ferait paraître l'ensemble aussi récent
-    // qu'elle, et la plus ancienne produirait le biais inverse.
-    //
-    // Le POINT-VIRGULE rattache l'année au DÉPÔT et à lui seul : « déclaré ouvert en 2025 » serait
-    // faux, 2025 étant l'année de dépôt du dossier et non celle de l'ouverture du chantier.
-    //
-    // `retenus[0]` sans garde : `total === 1` vient d'être établi, et `noUncheckedIndexedAccess`
-    // n'est pas activé, donc l'index compile. Un garde ici serait du code mort qu'aucun test ne
-    // peut atteindre.
-    const annee = retenus[0].annee;
-    corps = ouverts === 1
-      ? `un chantier de logements est déclaré ouvert ${perimetre} ; le dossier a été déposé en ${annee}.`
-      : `une autorisation créant des logements est recensée ${perimetre}, sans ouverture de ` +
-        `chantier déclarée ; le dossier a été déposé en ${annee}.`;
-  } else if (ouverts === total) {
-    corps = `${enToutesLettres(total)} chantiers de logements sont déclarés ouverts ${perimetre}.`;
-  } else if (ouverts === 0) {
-    corps =
-      `${enToutesLettres(total)} autorisations créant des logements sont recensées ${perimetre}, ` +
-      `sans ouverture de chantier déclarée.`;
-  } else {
-    // LE TOTAL, PUIS LES OUVERTS. Le nombre établit que ce n'est pas un dossier isolé, et c'est la
-    // seule mesure d'ampleur que la source autorise : ni volume de logements, ni nature de
-    // l'opération ne sont gelés. L'état nommé est le plus certain des deux, un chantier ouvert
-    // étant constaté là où une autorisation non commencée peut ne jamais l'être. Les non commencées
-    // ne sont pas comptées séparément : le total permet de les déduire.
-    corps =
-      `${enToutesLettres(total)} autorisations créant des logements sont recensées ${perimetre}, ` +
-      `dont ${enToutesLettres(ouverts)} chantier${ouverts > 1 ? "s" : ""} ` +
-      `déclaré${ouverts > 1 ? "s" : ""} ouvert${ouverts > 1 ? "s" : ""}.`;
-  }
-
-  return `Cette configuration peut encore changer : ${corps}`;
+  return engage
+    ? "Cette configuration peut encore changer : un chantier est déjà déclaré ouvert."
+    : "Cette configuration peut encore changer : aucun chantier n'est encore déclaré ouvert.";
 }
 
 /**

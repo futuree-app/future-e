@@ -67,7 +67,12 @@ export function etatAutorisation(d: SitadelDates): EtatAutorisation {
 export const LIBELLE_ETAT: Record<Exclude<EtatAutorisation, "sans_date">, string> = {
   acheve: "travaux déclarés achevés",
   chantier_ouvert: "chantier déclaré ouvert",
-  autorise_non_commence: "autorisé, travaux non commencés à cette date",
+  // « À LA DATE DU REGISTRE », et non « à cette date » : la réserve est la même, le démonstratif en
+  // moins. Elle est indispensable, le jeu SDES ayant un millésime MENSUEL : sans elle, le lecteur
+  // comprend « toujours pas commencé aujourd'hui », ce que la source ne garantit pas. Mais « cette
+  // date » obligeait à chercher laquelle des deux dates affichées était désignée, celle du dépôt ou
+  // celle de la consultation. La formule nomme la bonne.
+  autorise_non_commence: "autorisé, travaux non commencés à la date du registre",
 };
 
 /**
