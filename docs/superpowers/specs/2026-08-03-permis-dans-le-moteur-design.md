@@ -207,7 +207,7 @@ verrouillée par un test dans le module ; elle accompagne le fait pour la même 
   factId: "autour.permis",
   module: "logement",
   label: "Autorisations d'urbanisme · parcelles à moins de 50 m",
-  observedValue: "1 autorisation, chantier déclaré ouvert, déposée en 2025",
+  observedValue: "1 dossier non achevé, dont 1 chantier déclaré ouvert",
   grain: "adresse",
   relation: "proximite",
   href: "/rapport/autour#permis",
@@ -216,7 +216,7 @@ verrouillée par un test dans le module ; elle accompagne le fait pour la même 
 }
 ```
 
-**Les « 50 m » de `label` et le « 2025 » d'`observedValue` sont illustratifs** : comme dans le
+**Le « 50 m » du `label` est illustratif** : comme dans le
 `statement` et la `signalConvention`, tout nombre écrit ici vient du snapshot gelé (`rayonMeters`,
 `ancienneteMaxAns`, `annee`), jamais des constantes du jour. Un dossier créé sous un ancien rayon doit
 continuer de décrire le périmètre qui l'a réellement sélectionné.
@@ -272,7 +272,8 @@ est déjà l'invariant de la liste des contrôles.
 
 ## Les tests
 
-Onze, sous `node --test`, dans `permis-rules.test.ts`.
+Dix-neuf, sous `node --test`, dans `permis-rules.test.ts`. Le tableau ci-dessous en donne
+les onze qui portent une décision ; le plan d'implémentation les décline en dix-neuf cas.
 
 | Cas | Attendu |
 |---|---|
