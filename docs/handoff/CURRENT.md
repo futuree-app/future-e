@@ -85,6 +85,111 @@ dense et trop proche), le **bruit** l'était. Deuxième récidive de cette conve
    sur une cellule de 0,005° mais d'une marge réelle sur `GRID_CELL_DEG` (0,18°).
 6. **Porteur** : hiérarchie de la suite arrêtée, cf. « Prochaine étape ».
 
+## Observation produit, hors chantier — session d'usage réel du moteur (03/08)
+
+Le moteur a été utilisé **hors produit** sur un cas de mobilité résidentielle réel : index comparateur
++ `public/data_climat.json` + Flores A38 + Géorisques en direct, sur une dizaine de communes, en cinq
+messages. **Le résultat territorial n'a aucun intérêt et n'est consigné nulle part.** Ce qui suit est
+ce que la session a révélé du produit. Fiche complète : **`project_futuree_point_de_reference`**.
+
+1. **Le point de référence.** La session a basculé quand la personne a dit « notre ville actuelle ».
+   Avant : « ce marché, c'est 13 082 » — ne décide rien. Après : « **+4 % par rapport à chez vous** » —
+   décide immédiatement. **futur·e ne demande jamais d'où vient la personne**, alors que l'écart depuis
+   sa commune actuelle est le seul opérateur qui rend les autres chiffres lisibles. C'est le
+   positionnement « la même adresse n'a pas le même sens », non implémenté. **C'est un champ**, et ça
+   marche **dans le Rapport, en mono-commune, sans toucher au firewall**. Meilleur rapport
+   valeur/effort identifié à ce jour.
+2. **Les critères n'existaient pas au départ** : un critère décisif est apparu au 5ᵉ message et a
+   réordonné tout le classement. Le comparateur les prend une fois, en entrée. Segment « recherche
+   mouvante » du Pass Projet, observé en direct sur son ICP.
+3. **Deux personnes, deux verdicts sur la même ville**, selon le métier pondéré. Le format presse le
+   sait déjà (« même ville, trois profils, trois verdicts ») ; le produit ne le sait pas.
+
+**Ce que ça ne justifie pas, et c'est le point important.** L'intuition spontanée était « c'est le rôle
+d'Ask futur·e ». **Non.** L'architecture est scellée en quatre cases (en-tête de
+`src/app/api/comparateur-vie/ask/route.ts`) et la session a occupé la case interdite : multi-commune
+**et** chiffrée **et** transversale. Ask comparateur n'importe aucune donnée profonde (firewall
+d'import), Ask rapport refuse de sortir de son `communeInsee`. Rouvrir ça viderait le Rapport à 14 € de
+sa raison d'être. **Le Fil ne rouvre pas davantage** : en cinq messages la donnée n'a pas bougé d'un
+chiffre, c'est l'utilisateur qui a bougé — soit exactement le test gravé le 28/07. La session
+**confirme** la décision, elle ne la rouvre pas.
+
+**Seule construction que la règle autorise** : l'**entité `projet`** dans le schéma (exception déjà
+actée au « ne rien construire » du Pass Projet). La session aurait produit une ligne de signal —
+communes ajoutées/retirées, critères modifiés trois fois, projet relancé cinq fois — et rien ne
+l'enregistre. Ordre proposé, **non tranché par le porteur** : adresse de référence dans le Rapport,
+puis entité projet.
+
+**Deux réserves à ne pas perdre** : le « non concluant » a été lu comme de la valeur, mais **par
+l'auteur du produit** — non généralisable, et la tension « plus le prix monte, plus la pression à
+sur-conclure menace le moat » reste entière. Et **une erreur a été corrigée en cours de session** (un
+écart annoncé à 40 % valait 25 %) : personne ne corrige un produit automatisé, ce qui est un argument
+de plus pour garder le firewall où il est.
+
+## Observation de données, non demandée — le critère « accès aux services » (03/08)
+
+Point de départ : le piège `inondation.tri` ci-dessous nomme le pire des quatre états d'une
+information, présentée comme mesurée alors qu'elle ne l'est pas. Recherche systématique de la même
+famille sur les 140 champs de `data/comparateur-index.json` (34 788 communes), par cardinalité et
+part de la valeur dominante. **Un seul cas sérieux en est sorti, et il n'est pas un champ en dur.**
+
+**Ce qui a été écarté d'abord, pour ne pas le re-soupçonner** : `reseauLocalMeasured` vaut `true` sur
+100 % des communes et `etudesSup.measured` aussi, ce qui ressemblait à un drapeau de provenance
+menteur. Vérification faite, c'est **honnête** : les 34 788 communes sont géolocalisées, la mesure a
+donc bien été tentée partout, et `reseauLocal: null` (82,8 %) est une **absence attestée**, pas une
+donnée manquante. Seule réserve, latente : deux producteurs écrivent ce champ avec deux sémantiques
+(`scripts/populate-reseau-local.py:345` pose `ins in geoloc`, donc potentiellement `false` ;
+`scripts/lib/absence-attestations.mjs:32` pose `true` inconditionnellement, et c'est lui qui a
+tourné). Aujourd'hui l'écart ne mord pas, faute de commune non géolocalisée. À savoir si une source
+future en introduit.
+
+**Le cas sérieux : `acces_services` est un critère binaire présenté comme une mesure de proximité.**
+
+1. **La donnée est dégénérée.** Le score vaut `100 - vivpct.eloignement`
+   (`comparateur-vie.ts:1242`). Il ne prend que **19 valeurs distinctes** sur 34 788 communes, et
+   **80,1 % des communes obtiennent exactement 100/100**. Un critère sain, en comparaison : `nature`
+   a 101 valeurs, la plus fréquente couvrant 1,1 % des communes.
+2. **Le palier intermédiaire est vide.** Avec `bandIndex` (≥66 / <34), la répartition réelle est
+   **80,1 % « Services proches », 0,0 % « Accès intermédiaire », 19,7 % « Services éloignés »**.
+   Zéro commune sur 34 788 au palier du milieu. Les trois paliers annoncés en décrivent deux.
+3. **La sémantique est retournée, et c'est le vrai défaut.** La source est
+   `part_de_la_population_eloignee_de_plus_de_20_minutes_d_au_moins_un_des_services`
+   (`scripts/fetch-communes-vivabilite.mjs:62`). C'est un indicateur de **queue de distribution** :
+   `0` signifie « aucun habitant n'est à plus de 20 minutes d'au moins un service », pas « les
+   services sont proches ». La chaîne `100 - x` puis palier « Services proches » transforme une
+   **absence d'éloignement extrême en affirmation de proximité**. Une commune où chaque habitant est
+   à 18 minutes du premier service marque 100/100 et s'affiche « Services proches ». Le tooltip
+   promet d'ailleurs ce que l'indicateur ne mesure pas : « La proximité des commerces et services du
+   quotidien » (`comparateur-vie.ts:1381`). C'est le motif déjà corrigé une fois en `47dfadc`,
+   « j'avais écrit *accès* là où je n'avais qu'une distance », sur un autre champ.
+4. **Le code connaît le défaut à deux endroits, et pas aux autres.** `comparateur-scores.ts:22` le
+   dit (« plafond dégénéré neutralisé par la bande à deux bornes ») et le mismatch est donc protégé ;
+   `comparateur-vie.ts:1063` l'écarte de la Découverte (« trop génériques, presque partout hauts »).
+   Mais il reste plein exercice **dans la matrice payante des 27 dimensions** et **dans le
+   comparateur gratuit**. C'est exactement le patron gravé dans `AGENTS.md` : le point de décision a
+   été corrigé, les points de citation ne l'ont pas été.
+5. **Deux amplificateurs.** Dans la matrice payante, deux communes tirées au hasard partagent le
+   palier haut dans **64 % des cas** (51 % pour trois) : la ligne affiche alors « À égalité /
+   Services proches / Services proches », avec la même surface et la même autorité qu'une ligne qui
+   discrimine. La matrice n'invente pas de gagnant, le code est correct sur ce point
+   (`comparateur-vie.ts:1527`), mais le lecteur paie pour un arbitrage et lit une ligne qui n'en rend
+   aucun. Et le parsing d'intention **injecte `acces_services` au poids 2** dès que le lecteur dit
+   « famille », « enfant », « élever un enfant », « grandir » (`api/comparateur-vie/parse/route.ts:267`) :
+   sur une somme pondérée, une dimension quasi constante à poids 2 ne classe rien et **dilue** le
+   poids relatif des critères qui, eux, discriminent.
+
+**Ce que je propose, sans l'avoir tranché** : ne pas supprimer le critère, mais cesser de lui faire
+dire une proximité. Trois options, par ordre de coût croissant : (a) renommer paliers et tooltip
+pour ce que la donnée dit réellement (« Aucun habitant très éloigné » / « Une partie de la population
+à plus de 20 minutes »), ce qui rend le binaire assumé et honnête ; (b) le retirer de l'injection
+automatique « famille », où son poids 2 dilue sans classer ; (c) le remplacer à terme par une vraie
+mesure de proximité, la matière existe déjà en BPE au point (module Logement, Face 3), ce qui pose la
+question de frontière commune/adresse.
+
+**Ce que je n'ai PAS vérifié** : le rendu à l'écran (session payante requise pour la matrice), et la
+composition exacte du panier de services ADEME derrière les « 20 minutes ». Les chiffres ci-dessus
+viennent tous de l'index et du code, pas d'une observation d'écran.
+
 ## État git
 
 - Branche `main`, `ce71f36`, **rien à pousser**, aucun commit local en avance sur `origin/main`.
@@ -159,6 +264,15 @@ pour l'instant sur les tests et la mesure, pas sur une observation en production
 - Les pièges design du handoff archivé restent d'actualité, en particulier `--orange` sur du texte en
   thème clair (2,13:1) et la palette de `DESIGN.md` non appliquée (le sable `#c8b89a` subsiste dans
   `professionnels/page.tsx`, `ProForm.tsx`, `globals.css`).
+- **`inondation.tri` est codé en dur à `False`** (`scripts/populate-inondation.py:93`) et alimente
+  l'index comparateur. Le champ est donc **présenté comme une donnée alors qu'il n'en est pas une** —
+  c'est le pire des quatre états de l'information (absent, mais affiché comme mesuré). Vérifié le
+  03/08 sur une commune réellement couverte par un TRI : le champ dit `false`. Soit le renseigner,
+  soit le retirer du rendu.
+- **`distance_cote_km` est faux sur des communes littorales.** L'approximation (haversine vers une
+  liste de villes côtières, « V1 » assumée dans `data/comparateur-index.json`) classe **Lannion à
+  58 km** et **Morlaix à 54 km** de la mer. Sur un produit qui vend de la lecture littorale, c'est
+  visible. À remplacer par le trait de côte IGN, comme le prévoit déjà la note de méthode.
 - **Aucune CGV n'existe** (rétractation 14 jours, médiateur de la consommation) ; arbitrage du
   porteur, à traiter en fin de séquence.
 - **Le site est fermé au crawl** (`robots.txt` en `Disallow: /`) ; la canonicité des URL doit être
