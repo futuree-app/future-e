@@ -215,7 +215,7 @@ test("un chantier déclaré ouvert : le changement est ENGAGÉ", () => {
   const c = buildAutourConclusion(snapAvecPermis(permis([{ annee: 2025, etat: "chantier_ouvert" }])));
   assert.equal(
     c?.mouvement,
-    "Cette configuration peut encore changer : un chantier est déjà déclaré ouvert.",
+    "Cette configuration peut encore changer : au moins un chantier est déclaré ouvert.",
   );
 });
 
@@ -224,7 +224,7 @@ test("aucun chantier ouvert : le changement n'est qu'AUTORISÉ", () => {
   const c = buildAutourConclusion(snapAvecPermis(permis([{ annee: 2024, etat: "autorise_non_commence" }])));
   assert.equal(
     c?.mouvement,
-    "Cette configuration peut encore changer : aucun chantier n'est encore déclaré ouvert.",
+    "Cette configuration peut encore changer : aucune ouverture de chantier n'est déclarée.",
   );
 });
 
@@ -245,7 +245,7 @@ test("états MIXTES : un seul chantier ouvert suffit à engager", () => {
   ])));
   assert.equal(
     c?.mouvement,
-    "Cette configuration peut encore changer : un chantier est déjà déclaré ouvert.",
+    "Cette configuration peut encore changer : au moins un chantier est déclaré ouvert.",
   );
 });
 
@@ -256,9 +256,15 @@ test("un ACHEVÉ ne compte pas comme un chantier ouvert", () => {
   ])));
   assert.equal(
     c?.mouvement,
-    "Cette configuration peut encore changer : aucun chantier n'est encore déclaré ouvert.",
+    "Cette configuration peut encore changer : aucune ouverture de chantier n'est déclarée.",
   );
 });
+
+const JEUX = [
+  [{ annee: 2025, etat: "chantier_ouvert" as const }],
+  [{ annee: 2024, etat: "autorise_non_commence" as const }],
+  [{ annee: 2025, etat: "chantier_ouvert" as const }, { annee: 2024, etat: "autorise_non_commence" as const }],
+];
 
 // ── Les verrous de doctrine ─────────────────────────────────────────────────────────────────
 
@@ -282,32 +288,59 @@ test("AUCUNE TRANSFORMATION TENUE POUR ACQUISE : une autorisation n'est pas un b
   }
 });
 
-test("AUCUN CHIFFRE : la charnière ne recopie rien de la carte du dessus", () => {
-  // LE VERROU QUI ENCODE LA DÉCISION DU 01/08/2026. Le rayon, l'année de dépôt et le nombre de
-  // dossiers sont dans la carte rendue juste au-dessus ; les redire ici a été essayé, vu à l'écran,
-  // et rejeté. Un chiffre qui réapparaît dans cette phrase est le signe que la redite revient.
+test("AUCUN CHIFFRE, ET AUCUNE TOURNURE DE LA CARTE", () => {
+  // Premier garde-fou : ce que la phrase ne doit pas CONTENIR. Le rayon, l'année et le nombre sont
+  // dans la carte rendue juste au-dessus ; les redire ici a été essayé, vu à l'écran le 01/08/2026,
+  // et rejeté.
   //
-  // Il couvre du même geste l'interdit du VOLUME de logements : la source n'en porte aucun, et une
-  // conclusion qui écrirait « douze logements » inventerait une ampleur que rien n'établit.
-  for (const liste of [
-    [{ annee: 2025, etat: "chantier_ouvert" as const }],
-    [{ annee: 2024, etat: "autorise_non_commence" as const }],
-    [{ annee: 2025, etat: "chantier_ouvert" as const }, { annee: 2024, etat: "autorise_non_commence" as const }],
-  ]) {
+  // Un test sur les seuls chiffres serait un proxy : une redite peut revenir en toutes lettres. On
+  // interdit donc AUSSI les tournures propres à la carte, celles par lesquelles la répétition
+  // reviendrait sans qu'aucun chiffre n'apparaisse.
+  const TOURNURES = [/à moins de/i, /déposé/i, /logements/i, /recens/i, /parcelle/i, /\bm\b|mètres/i];
+  for (const liste of JEUX) {
     for (const rayon of [50, 80]) {
       const m = buildAutourConclusion(snapAvecPermis(permis(liste, rayon)))?.mouvement ?? "";
       assert.ok(!/\d/.test(m), `un chiffre a reparu dans : ${m}`);
-      assert.ok(!/logements/i.test(m), `un volume de logements a été écrit : ${m}`);
-      assert.ok(!/\bm\b|mètres/i.test(m), `un périmètre a été écrit : ${m}`);
+      for (const t of TOURNURES) {
+        assert.ok(!t.test(m), `une tournure de la carte a reparu (${t}) dans : ${m}`);
+      }
     }
   }
 });
 
-test("LE RAYON GELÉ NE CONCERNE PLUS CETTE PHRASE, et c'est vérifié", () => {
-  // La charnière ne cite aucun périmètre, donc deux snapshots de rayons différents doivent rendre
-  // EXACTEMENT la même phrase. L'invariant du rayon gelé reste vrai là où il s'applique : dans
-  // `autour-permis.ts`, qui écrit le périmètre et le teste chez lui.
-  const a = buildAutourConclusion(snapAvecPermis(permis([{ annee: 2025, etat: "chantier_ouvert" }], 50)));
-  const b = buildAutourConclusion(snapAvecPermis(permis([{ annee: 2025, etat: "chantier_ouvert" }], 80)));
-  assert.equal(a?.mouvement, b?.mouvement);
+test("LA PHRASE NE DÉPEND QUE DE L'ENGAGEMENT, de rien d'autre", () => {
+  // Second garde-fou, et le plus fort : au lieu de lister ce que la phrase ne doit pas contenir, on
+  // vérifie CE DONT ELLE DÉPEND. Rayon, année et nombre de dossiers peuvent varier autant qu'ils
+  // veulent, la phrase ne bouge pas ; seule la présence d'au moins un chantier ouvert la change.
+  const phrase = (liste, rayon = 50) =>
+    buildAutourConclusion(snapAvecPermis(permis(liste, rayon)))?.mouvement;
+
+  const ouvert = { annee: 2025, etat: "chantier_ouvert" as const };
+  const dormant = { annee: 2024, etat: "autorise_non_commence" as const };
+
+  // Invariance : rayon, année, nombre, et présence d'achevés.
+  assert.equal(phrase([ouvert], 50), phrase([ouvert], 80), "le rayon ne doit rien changer");
+  assert.equal(
+    phrase([{ annee: 2023, etat: "chantier_ouvert" }]),
+    phrase([{ annee: 2026, etat: "chantier_ouvert" }]),
+    "l'année ne doit rien changer",
+  );
+  assert.equal(phrase([ouvert]), phrase([ouvert, ouvert, ouvert]), "le nombre ne doit rien changer");
+  assert.equal(
+    phrase([dormant]),
+    phrase([dormant, { annee: 2023, etat: "acheve" }]),
+    "un achevé ne doit rien changer",
+  );
+
+  // Dépendance : l'engagement, et lui seul, fait varier la phrase.
+  assert.notEqual(phrase([ouvert]), phrase([dormant]), "l'engagement DOIT changer la phrase");
+  assert.equal(phrase([ouvert, dormant]), phrase([ouvert]), "un seul ouvert suffit à engager");
+});
+
+test("AUCUNE ATTENTE IMPLICITE : une autorisation peut n'être jamais suivie de travaux", () => {
+  // « Pas encore » annonce ce qui va venir. La phrase du cas non engagé le disait, et contredisait
+  // ainsi la doctrine qu'elle sert : rien ne garantit qu'un chantier s'ouvrira un jour.
+  const m = buildAutourConclusion(snapAvecPermis(permis([{ annee: 2024, etat: "autorise_non_commence" }])))?.mouvement ?? "";
+  assert.equal(/\bencore\b(?!\s+changer)/.test(m), false, `une attente est suggérée dans : ${m}`);
+  assert.equal(/\bpour l'instant\b|\bà ce stade\b|\bpas encore\b/i.test(m), false, m);
 });

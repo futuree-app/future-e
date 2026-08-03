@@ -147,17 +147,23 @@ function buildMouvement(p: PermisSnapshot | undefined): string | null {
   // « configuration non stabilisée », et dire lequel des deux degrés de certitude s'applique. Un
   // chantier déclaré ouvert est engagé ; une autorisation sans chantier peut ne jamais commencer.
   //
-  // « DÉJÀ » ET « ENCORE » PORTENT LA LECTURE TEMPORELLE, et c'est tout ce qu'ils font : ni date,
-  // ni délai, ni promesse. Ils opposent ce qui est engagé à ce qui ne l'est pas, sans affirmer que
-  // l'un aboutira ni que l'autre commencera.
+  // NI « DÉJÀ », NI « ENCORE ». Une première version opposait « un chantier est DÉJÀ déclaré
+  // ouvert » à « aucun chantier n'est ENCORE déclaré ouvert ». En français, « pas encore » annonce
+  // ce qui va venir : la phrase promettait donc une ouverture future, alors que toute la doctrine
+  // du chantier tient dans l'inverse, une autorisation pouvant n'être jamais suivie de travaux.
+  // L'adverbe contredisait la règle qu'il était censé servir.
+  //
+  // « AU MOINS UN » plutôt qu'un décompte : il dit que le cas est établi sans dire combien, ce qui
+  // est exactement la frontière entre cette phrase et la carte du dessus.
   //
   // Le nombre, le rayon et l'année sont volontairement absents : ils sont dans la carte, à trois
-  // centimètres au-dessus, et un test verrouille qu'aucun chiffre ne revienne ici.
+  // centimètres au-dessus, et deux tests verrouillent qu'ils ne reviennent pas ici, ni en chiffres,
+  // ni par les tournures de la carte.
   const engage = retenus.some((x) => x.etat === "chantier_ouvert");
 
   return engage
-    ? "Cette configuration peut encore changer : un chantier est déjà déclaré ouvert."
-    : "Cette configuration peut encore changer : aucun chantier n'est encore déclaré ouvert.";
+    ? "Cette configuration peut encore changer : au moins un chantier est déclaré ouvert."
+    : "Cette configuration peut encore changer : aucune ouverture de chantier n'est déclarée.";
 }
 
 /**

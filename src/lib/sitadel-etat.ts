@@ -67,12 +67,21 @@ export function etatAutorisation(d: SitadelDates): EtatAutorisation {
 export const LIBELLE_ETAT: Record<Exclude<EtatAutorisation, "sans_date">, string> = {
   acheve: "travaux déclarés achevés",
   chantier_ouvert: "chantier déclaré ouvert",
-  // « À LA DATE DU REGISTRE », et non « à cette date » : la réserve est la même, le démonstratif en
-  // moins. Elle est indispensable, le jeu SDES ayant un millésime MENSUEL : sans elle, le lecteur
-  // comprend « toujours pas commencé aujourd'hui », ce que la source ne garantit pas. Mais « cette
-  // date » obligeait à chercher laquelle des deux dates affichées était désignée, celle du dépôt ou
-  // celle de la consultation. La formule nomme la bonne.
-  autorise_non_commence: "autorisé, travaux non commencés à la date du registre",
+  // CE QUE LA SOURCE ÉTABLIT EST UNE ABSENCE DE DÉCLARATION, PAS UNE ABSENCE DE TRAVAUX.
+  //
+  // L'état se déduit de trois DATES DÉCLARÉES (autorisation, ouverture de chantier, achèvement).
+  // « Travaux non commencés » transformait donc l'absence d'une déclaration en constat matériel :
+  // un chantier peut avoir commencé sans que la déclaration d'ouverture soit parvenue au registre.
+  // La formule dit exactement ce qui est dans la source, et rien de plus.
+  //
+  // LA RÉSERVE TEMPORELLE RESTE, sous une autre forme. Elle est indispensable, le jeu SDES ayant un
+  // millésime MENSUEL : sans elle, le lecteur comprend « toujours rien aujourd'hui », ce que la
+  // source ne garantit pas. Deux formules ont précédé celle-ci. « À cette date » obligeait à
+  // chercher laquelle des deux dates affichées était désignée, celle du dépôt ou celle de la
+  // consultation. « À la date du registre » nommait la bonne, mais gardait « travaux non
+  // commencés ». « Dans le registre consulté » borne l'information à sa source, et la ligne
+  // « consulté le … » du même bloc dit quand.
+  autorise_non_commence: "autorisé, sans ouverture de chantier déclarée dans le registre consulté",
 };
 
 /**

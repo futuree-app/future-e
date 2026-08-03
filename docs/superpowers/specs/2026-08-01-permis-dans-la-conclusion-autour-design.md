@@ -75,9 +75,9 @@ depuis le premier jour (« autorisé » n'est jamais « prévu »).
 
 ## Les deux formes, gravées
 
-> Cette configuration peut encore changer : **un chantier est déjà déclaré ouvert.**
+> Cette configuration peut encore changer : **au moins un chantier est déclaré ouvert.**
 
-> Cette configuration peut encore changer : **aucun chantier n'est encore déclaré ouvert.**
+> Cette configuration peut encore changer : **aucune ouverture de chantier n'est déclarée.**
 
 C'est tout. Pas de nombre, pas de rayon, pas d'année, pas d'accord à gérer.
 
@@ -106,9 +106,14 @@ chantier déclaré ouvert est engagé ; une autorisation sans chantier peut ne j
 carte donne l'acte administratif, la conclusion dit ce qu'il implique pour la stabilité de ce qui
 vient d'être décrit.
 
-**« Déjà » et « encore » portent la lecture temporelle**, et rien d'autre : ni date, ni délai, ni
-promesse. Ils opposent ce qui est engagé à ce qui ne l'est pas, sans affirmer que l'un aboutira ni
-que l'autre commencera.
+**Ni « déjà », ni « encore ».** Une version intermédiaire opposait « un chantier est DÉJÀ déclaré
+ouvert » à « aucun chantier n'est ENCORE déclaré ouvert ». En français, « pas encore » annonce ce qui
+va venir : la phrase promettait donc une ouverture future, alors que toute la doctrine du chantier
+tient dans l'inverse, une autorisation pouvant n'être jamais suivie de travaux. L'adverbe
+contredisait la règle qu'il servait, et un test l'interdit désormais.
+
+**« Au moins un » plutôt qu'un décompte** : il établit le cas sans dire combien, ce qui est
+exactement la frontière entre cette phrase et la carte du dessus.
 
 **Un achevé n'engage rien** : il est écarté avant ce calcul, comme tout le reste de la charnière.
 
@@ -210,12 +215,12 @@ courte et le bloc portant déjà la date au bon endroit.
 
 ## Les tests
 
-Douze, sous `node --test`, dans `autour-conclusion.test.ts`.
+Treize, sous `node --test`, dans `autour-conclusion.test.ts`.
 
 | Cas | Attendu |
 |---|---|
-| 1 chantier ouvert | « un chantier est déjà déclaré ouvert » |
-| 1 autorisation non commencée | « aucun chantier n'est encore déclaré ouvert » |
+| 1 chantier ouvert | « au moins un chantier est déclaré ouvert » |
+| 1 autorisation non commencée | « aucune ouverture de chantier n'est déclarée » |
 | 1 dossier contre 10 | **la même phrase**, le nombre n'entre pas |
 | États mixtes | un seul chantier ouvert suffit à engager |
 | Un achevé plus une non commencée | l'achevé ne compte pas comme un chantier ouvert |
@@ -224,12 +229,17 @@ Douze, sous `node --test`, dans `autour-conclusion.test.ts`.
 | Registre consulté, rien trouvé | `mouvement === null` |
 | BPE en échec, avec un chantier ouvert | conclusion `null` en entier |
 | Aucune transformation tenue pour acquise | ni « va », ni « futur », ni « d'ici », ni « dense », **en limites de mot** |
-| **Aucun chiffre** | la phrase ne contient aucun chiffre, aucun « logements », aucun périmètre |
-| Le rayon ne concerne plus la phrase | deux snapshots de rayons différents rendent la MÊME phrase |
+| Aucun chiffre, aucune tournure de la carte | ni chiffre, ni « à moins de », « déposé », « logements », « recensé », « parcelle » |
+| **La phrase ne dépend que de l'engagement** | rayon, année, nombre et achevés n'y changent rien ; seul un chantier ouvert la change |
+| Aucune attente implicite | pas de « pas encore », « pour l'instant », « à ce stade » |
 
-Les trois derniers verrouillent une doctrine, pas un comportement. « Aucun chiffre » est celui qui
-encode la décision du 02/08 : un chiffre qui réapparaît dans cette phrase est le signe que la redite
-revient. Ils sont la raison d'être de ce
+Les quatre derniers verrouillent une doctrine, pas un comportement.
+
+**Le plus fort est celui de la DÉPENDANCE.** Interdire des caractères est un proxy : une redite peut
+revenir en toutes lettres, et une phrase sans aucun chiffre peut être mauvaise. Vérifier ce dont la
+phrase dépend est plus solide : rayon, année, nombre de dossiers et présence d'achevés peuvent varier
+autant qu'ils veulent sans la faire bouger, et seule la présence d'au moins un chantier ouvert la
+change. Les interdits de forme restent, en second rideau. Ils sont la raison d'être de ce
 tableau : « la conclusion mentionne le permis » et « la conclusion dit vrai du permis » sont deux
 assertions distinctes, et la seconde ne se déduit jamais de la première.
 

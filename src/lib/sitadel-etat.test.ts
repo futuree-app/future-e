@@ -44,14 +44,19 @@ test("les libellés décrivent un ACTE CONSTATÉ, jamais un projet", () => {
   }
 });
 
-test("le libellé « autorisé » porte sa réserve temporelle, et NOMME la date", () => {
-  // Sans réserve, le lecteur comprend « toujours pas commencé aujourd'hui », ce que le millésime
-  // mensuel du jeu ne garantit pas. La réserve est donc obligatoire.
+test("le libellé « autorisé » borne ce qu'il affirme À LA SOURCE, et ne parle pas de travaux", () => {
+  // DEUX EXIGENCES, ET ELLES SONT DISTINCTES.
   //
-  // Elle doit en plus DÉSIGNER sa date. « À cette date » obligeait à deviner laquelle des deux
-  // dates affichées était visée, celle du dépôt ou celle de la consultation ; le test accepte donc
-  // la formule qui la nomme, et refuse un démonstratif seul.
+  // 1. La réserve temporelle est obligatoire : sans elle, le lecteur comprend « toujours rien
+  //    aujourd'hui », ce que le millésime MENSUEL du jeu ne garantit pas. « À cette date »
+  //    l'assurait déjà, mais obligeait à deviner laquelle des deux dates affichées était visée.
+  //
+  // 2. Ce que la source établit est une ABSENCE DE DÉCLARATION, jamais une absence de travaux :
+  //    l'état se déduit de trois dates déclarées, et un chantier peut avoir commencé sans que sa
+  //    déclaration d'ouverture soit parvenue au registre. « Travaux non commencés » faisait de
+  //    l'absence d'une déclaration un constat matériel.
   const texte = LIBELLE_ETAT.autorise_non_commence;
-  assert.ok(/à la date du registre/.test(texte), texte);
+  assert.ok(/registre consulté/.test(texte), `la réserve doit borner à la source : ${texte}`);
+  assert.equal(/travaux non commencés/.test(texte), false, `constat matériel non établi : ${texte}`);
   assert.equal(/à cette date/.test(texte), false, "le démonstratif seul n'est plus accepté");
 });

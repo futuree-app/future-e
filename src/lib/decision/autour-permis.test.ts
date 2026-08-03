@@ -102,7 +102,7 @@ test("l'année récente d'abord, et dans l'année, ce qui reste à venir avant c
     ],
   }))!;
   assert.deepEqual(r.lignes.map((l) => `${l.annee} ${l.label}`), [
-    "2025 Autorisé, travaux non commencés à la date du registre",
+    "2025 Autorisé, sans ouverture de chantier déclarée dans le registre consulté",
     "2025 Chantier déclaré ouvert",
     "2025 Travaux déclarés achevés",
     "2024 Chantier déclaré ouvert",
