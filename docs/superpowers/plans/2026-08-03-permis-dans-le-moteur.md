@@ -93,7 +93,6 @@ import { PERMIS_RULES } from "./permis-rules.ts";
 import type { ModuleFacts, VerificationFact } from "./decision-fact.ts";
 import type { PermisSnapshot } from "../logement-autour-types.ts";
 import type { UserProject } from "../user-project.ts";
-import type { EvaluationContext } from "../hard-constraints.ts";
 
 const rule = PERMIS_RULES[0]!;
 
@@ -139,18 +138,25 @@ test("REGISTRE NON CONSULTÉ : uncertain, jamais not_applicable", () => {
   assert.match(r.reason, /non consult/i);
 });
 
-test("CONSULTÉ, AUCUN DOSSIER : not_applicable, aucun fait", () => {
+test("CONSULTÉ, AUCUN DOSSIER : not_applicable, et la RAISON le dit", () => {
   const r = evalWith(permis([]));
   assert.equal(r.outcome, "not_applicable");
   assert.equal(r.facts.length, 0);
+  assert.equal(r.reason, "registre consulté, aucune autorisation recensée");
 });
 
-test("QUE DES ACHEVÉS : not_applicable, aucun fait", () => {
+test("QUE DES ACHEVÉS : not_applicable, et la RAISON N'EST PAS LA MÊME", () => {
   // Un achevé ne signale plus une transformation à venir au moment de l'analyse. Il reste dans le
   // bloc du module, il n'entre pas au moteur.
+  //
+  // MÊME OUTCOME, RAISON DIFFÉRENTE, et c'est tout l'enjeu de ce test : « rien autour » et
+  // « uniquement des opérations achevées » sont deux situations distinctes, et un audit qui ne peut
+  // pas les distinguer ne sert à rien. Le contrat n'offre qu'un `outcome` pour les deux, donc c'est
+  // la `reason` qui porte la différence.
   const r = evalWith(permis([{ annee: 2024, etat: "acheve" }, { annee: 2023, etat: "acheve" }]));
   assert.equal(r.outcome, "not_applicable");
   assert.equal(r.facts.length, 0);
+  assert.equal(r.reason, "autorisations recensées, toutes achevées");
 });
 
 test("AUCUNE PRÉFÉRENCE N'ACTIVE CETTE RÈGLE", () => {
@@ -175,7 +181,7 @@ Créer `src/lib/decision/permis-rules.ts` :
 // LES RÈGLES DES AUTORISATIONS D'URBANISME. PURES.
 //
 // POURQUOI ELLES EXISTENT. Le registre SDES est appelé, gelé dans le snapshot, rendu à l'écran et
-// doté d'une doctrine complète depuis le 01/08/2026 — et il n'existait pas pour le moteur. Ni
+// doté d'une doctrine complète depuis le 01/08/2026, et il n'existait pas pour le moteur. Ni
 // `DecisionFact`, ni règle, ni grain déclaré, donc absent du verdict, de la minute et de la liste
 // des contrôles, dont le groupe « Autour de l'adresse » ne portait qu'un seul item.
 //
@@ -220,8 +226,16 @@ const permisRule: DecisionRule = {
     // que la règle s'applique et que la donnée manque, sans même un fait à montrer.
     if (!p) return ret("uncertain", [], "registre des autorisations non consulté");
 
+    // DEUX SILENCES DISTINCTS SOUS LE MÊME OUTCOME. Le contrat n'offre que `not_applicable` pour
+    // les deux, donc la RAISON porte la différence : un audit qui lirait « aucune autorisation non
+    // achevée » ne saurait pas si le quartier est calme ou si tout y est déjà construit.
+    if (p.permis.length === 0) {
+      return ret("not_applicable", [], "registre consulté, aucune autorisation recensée");
+    }
     const retenus = p.permis.filter((x) => x.etat !== "acheve");
-    if (retenus.length === 0) return ret("not_applicable", [], "aucune autorisation non achevée");
+    if (retenus.length === 0) {
+      return ret("not_applicable", [], "autorisations recensées, toutes achevées");
+    }
 
     return ret("verification", [], "au moins une autorisation non achevée");
   },
@@ -286,7 +300,7 @@ test("UN SEUL FAIT, quel que soit le nombre de dossiers", () => {
 
 test("un seul, chantier ouvert", () => {
   const fact = factOf(permis([{ annee: 2025, etat: "chantier_ouvert" }]));
-  assert.equal(fact.status, "Chantier ouvert");
+  assert.equal(fact.status, "Chantier déclaré ouvert");
   assert.equal(
     fact.statement,
     "Une autorisation créant des logements est recensée à moins de 50 m, et son chantier est " +
@@ -297,7 +311,7 @@ test("un seul, chantier ouvert", () => {
 
 test("un seul, non commencé", () => {
   const fact = factOf(permis([{ annee: 2024, etat: "autorise_non_commence" }]));
-  assert.equal(fact.status, "Autorisation non commencée");
+  assert.equal(fact.status, "Sans ouverture déclarée");
   assert.equal(
     fact.statement,
     "Une autorisation créant des logements est recensée à moins de 50 m, sans ouverture de " +
@@ -310,7 +324,7 @@ test("plusieurs, tous ouverts : le pluriel gagne le libellé d'action", () => {
     { annee: 2025, etat: "chantier_ouvert" },
     { annee: 2024, etat: "chantier_ouvert" },
   ]));
-  assert.equal(fact.status, "Chantiers ouverts");
+  assert.equal(fact.status, "Chantiers déclarés ouverts");
   assert.equal(
     fact.statement,
     "Deux autorisations créant des logements sont recensées à moins de 50 m, et leurs chantiers " +
@@ -325,7 +339,7 @@ test("plusieurs, aucun ouvert", () => {
     { annee: 2024, etat: "autorise_non_commence" },
     { annee: 2024, etat: "autorise_non_commence" },
   ]));
-  assert.equal(fact.status, "Autorisations non commencées");
+  assert.equal(fact.status, "Sans ouverture déclarée");
   assert.equal(
     fact.statement,
     "Trois autorisations créant des logements sont recensées à moins de 50 m, sans ouverture de " +
@@ -333,7 +347,19 @@ test("plusieurs, aucun ouvert", () => {
   );
 });
 
-test("ÉTATS MIXTES : le status ne peut pas dire « Chantier ouvert »", () => {
+test("AUCUN STATUS N'AFFIRME PLUS QUE LA SOURCE", () => {
+  // La source établit une absence de DÉCLARATION, jamais une absence de travaux.
+  for (const c of [
+    [{ annee: 2025, etat: "autorise_non_commence" as const }],
+    [{ annee: 2025, etat: "autorise_non_commence" as const }, { annee: 2024, etat: "autorise_non_commence" as const }],
+  ]) {
+    const st = factOf(permis(c)).status ?? "";
+    assert.equal(/non commencée?s?/i.test(st), false, st);
+    assert.match(st, /déclarée?/i);
+  }
+});
+
+test("ÉTATS MIXTES : le status ne peut pas dire « Chantier déclaré ouvert »", () => {
   // Un fait agrégeant trois dossiers mixtes qui afficherait « Chantier ouvert » serait vrai d'une
   // partie des données et faux comme résumé de la carte.
   const fact = factOf(permis([
@@ -381,9 +407,13 @@ test("LE GESTE COMBLE LE MANQUE DE LA DONNÉE, et ne promet aucun droit", () => 
   assert.equal(/^Vérifiez/.test(fact.action.label), false);
 });
 
-test("la LIMITATION dit ce que le registre ne recense pas", () => {
+test("la LIMITATION dit D'ABORD le manque qui explique le rang du fait", () => {
   const fact = factOf(permis([{ annee: 2025, etat: "chantier_ouvert" }]));
-  assert.match(fact.limitation ?? "", /que les autorisations créant des logements/);
+  const lim = fact.limitation ?? "";
+  assert.match(lim, /ni l'ampleur ni les effets/);
+  assert.match(lim, /que les autorisations créant des logements/);
+  // L'ordre porte le sens : le manque décisif avant la couverture du jeu.
+  assert.ok(lim.indexOf("ampleur") < lim.indexOf("créant des logements"), lim);
 });
 ```
 
@@ -416,13 +446,19 @@ const dedans = (n: number): string => (n < NOMBRE_MIN.length ? NOMBRE_MIN[n] : S
 /**
  * L'ÉTAT ÉTABLI, EN DEUX À QUATRE MOTS, et il doit résumer TOUT ce que le fait agrège.
  *
- * Cinq formes, pas deux : un fait portant trois dossiers mixtes qui afficherait « Chantier ouvert »
+ * Quatre formes, pas deux : un fait portant trois dossiers mixtes qui afficherait « Chantier ouvert »
  * serait vrai d'une partie des données et faux comme résumé de la carte.
+ *
+ * ET AUCUNE N'AFFIRME PLUS QUE LA SOURCE. « Autorisation non commencée » a été écarté le 03/08 :
+ * l'état se déduit de l'ABSENCE d'une déclaration d'ouverture de chantier, et un chantier peut avoir
+ * commencé sans que sa déclaration soit parvenue au registre. C'est exactement la correction faite la
+ * veille sur `LIBELLE_ETAT`, où « travaux non commencés » est devenu « sans ouverture de chantier
+ * déclarée » : la réintroduire ici aurait défait dans le moteur ce qu'on venait de corriger dans le
+ * module.
  */
 function statusPermis(total: number, ouverts: number): string {
-  if (total === 1) return ouverts === 1 ? "Chantier ouvert" : "Autorisation non commencée";
-  if (ouverts === total) return "Chantiers ouverts";
-  if (ouverts === 0) return "Autorisations non commencées";
+  if (ouverts === 0) return "Sans ouverture déclarée";
+  if (ouverts === total) return total === 1 ? "Chantier déclaré ouvert" : "Chantiers déclarés ouverts";
   return "Autorisations non achevées";
 }
 
@@ -465,9 +501,14 @@ Puis remplacer la ligne `return ret("verification", [], "au moins une autorisati
       topic: "les autorisations d'urbanisme récentes",
       statement: statementPermis(total, ouverts, p.rayonMeters),
       status: statusPermis(total, ouverts),
+      // LA LIMITATION DIT D'ABORD LE MANQUE DÉCISIF, celui qui explique pourquoi ce fait reste
+      // `secondary` et pourquoi l'action existe : le registre ne qualifie ni l'ampleur ni les
+      // effets. La couverture du jeu vient ensuite. Dans l'autre ordre, l'action semblait posée à
+      // côté du constat au lieu de répondre à sa limite.
       limitation:
-        "Le registre ne recense que les autorisations créant des logements : un commerce, un " +
-        "entrepôt ou une extension sans logement nouveau n'y figurent pas.",
+        "Le registre ne précise ni l'ampleur ni les effets de l'opération. Il ne couvre ici que " +
+        "les autorisations créant des logements : un commerce, un entrepôt ou une extension sans " +
+        "logement nouveau n'y figurent pas.",
       evidence: [],
       action: {
         type: "obtenir_document",
@@ -594,27 +635,39 @@ Expected: FAIL sur les cinq nouveaux, `fact.evidence[0]` valant `undefined` et `
 
 - [ ] **Step 3 : écrire la preuve et la convention**
 
-Dans `permis-rules.ts`, ajouter la fonction sous `statementPermis` :
+Dans `permis-rules.ts`, ajouter la fonction sous `statementPermis`, avec l'import de `dateFr`, déjà écrit et testé pour le module (`import { dateFr } from "./autour-permis.ts";`) :
 
 ```ts
 /**
- * POURQUOI futur•e SIGNALE ce fait. Distincte du constat, et la séparation est stricte.
+ * POURQUOI futur•e SIGNALE ce fait, ET DEPUIS QUAND IL LE SAIT.
  *
+ * ── LA SÉPARATION AVEC LE CONSTAT EST STRICTE ────────────────────────────────────────────────
  * Le `statement` porte ce qui a été TROUVÉ (nombre, états, rayon) ; la convention porte ce qui a
  * été CHOISI (la fenêtre, et le fait de ne retenir que les non achevées). Mettre le rayon et la
  * fenêtre dans les deux recréerait, à l'intérieur d'une seule carte, la redondance que la
  * vérification à l'écran du 01/08/2026 a révélée entre le bloc des permis et la conclusion.
  *
- * La fenêtre vient du SNAPSHOT, comme le rayon.
+ * ── LA FENÊTRE SE DÉRIVE DES DEUX CHAMPS GELÉS, JAMAIS D'UN SEUL ─────────────────────────────
+ * `permisAMontrer` retient `annee >= anneeCourante - ANCIENNETE_MAX_ANS`, et `anneeCourante` est
+ * l'`anneeReference` figée dans le snapshot. Écrire « dans les trois années précédant l'analyse »
+ * à partir du seul `ancienneteMaxAns` décrirait une période flottante : rouvert en 2029, un dossier
+ * de 2026 laisserait croire qu'on a regardé jusqu'en 2026. L'année calculée est datée, elle.
+ * Elle règle du même coup le « dans les une années » qu'un compte en toutes lettres produisait à
+ * `ancienneteMaxAns === 1`.
+ *
+ * ── LA DATE DE CONSULTATION EST ICI, PARCE QUE C'EST ICI QU'ELLE SE VOIT ──────────────────────
+ * `observedAt` la porte dans le DOMAINE, mais aucun composant ne le lit aujourd'hui : `EvidenceRow`
+ * ne rend que label, valeur et lien, et `factSources` écarte même les preuves qui portent une
+ * valeur observée. La convention, elle, est rendue dans « Données et limites »
+ * (`ControlesDuDossier.tsx:82`, `DossierDecisionSection.tsx:285`). Sans cette phrase, la carte
+ * dirait au présent, en 2029, ce qui a été constaté en 2026.
  */
-const ANS = ["", "une", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf"];
-
-function conventionPermis(ancienneteMaxAns: number): string {
-  const n = ancienneteMaxAns < ANS.length ? ANS[ancienneteMaxAns] : String(ancienneteMaxAns);
-  return `futur•e signale les autorisations non achevées déposées dans les ${n} années précédant ` +
-    `l'analyse.`;
+function conventionPermis(p: PermisSnapshot): string {
+  const depuis = p.anneeReference - p.ancienneteMaxAns;
+  const jour = dateFr(p.consulteLe);
+  const base = `futur•e signale les autorisations non achevées déposées depuis ${depuis}.`;
+  return jour ? `${base} Registre consulté le ${jour}.` : base;
 }
-```
 
 Puis, dans le fait, remplacer `evidence: []` par la preuve et ajouter la convention juste après `limitation` :
 
@@ -631,7 +684,12 @@ Puis, dans le fait, remplacer `evidence: []` par la preuve et ajouter la convent
         // fichier tranche dans ce sens : ce que le lecteur vivra autour, pas ce qui atteint son bien.
         grain: "adresse",
         relation: "proximite",
-        href: "/rapport/autour#permis",
+        // AUCUN `href` DANS CE LOT, ET C'EST DÉLIBÉRÉ. `/rapport/autour` sans `dossierId` ne
+        // retombe sur le bon bien que par `getSoleDossier`, donc uniquement quand le compte n'en a
+        // qu'un ; au-delà, il renvoie vers la liste des biens. La preuve ne connaît pas
+        // l'identifiant du dossier, et l'ajouter à `ModuleFacts` y ferait entrer une clé Supabase
+        // dans un contrat de faits. Une preuve non cliquable vaut mieux qu'un lien qui ouvre le
+        // mauvais bien.
         // LA DATE DE CONSULTATION EST UNE PROPRIÉTÉ DE LA PREUVE, pas un invariant de mise en page.
         // Le fait la porte partout où il est projeté : carte, liste, conclusion, export futur.
         sourceMode: "persisted_snapshot",
@@ -642,7 +700,7 @@ Puis, dans le fait, remplacer `evidence: []` par la preuve et ajouter la convent
 - [ ] **Step 4 : lancer les tests, vérifier qu'ils passent**
 
 Run: `node --test src/lib/decision/permis-rules.test.ts`
-Expected: PASS sur les 19 tests.
+Expected: PASS sur les 19 tests du fichier.
 
 - [ ] **Step 5 : commit**
 
@@ -661,8 +719,7 @@ Tant que cette tâche n'est pas faite, la règle existe et personne ne l'appelle
 - Modify: `src/lib/decision/materiality-rules.ts:20-21` (import) et `:803-804` (`REGISTRY`)
 - Modify: `src/components/report/DossierAvecLogement.tsx:45`
 - Modify: `src/app/(account)/rapport/page.tsx:369`
-- Modify: `src/components/report/kit.tsx:28`
-- Modify: `src/components/report/AutourModule.tsx` (le bloc « Ce qui est autorisé autour »)
+- Test: `src/lib/decision/permis-rules.test.ts` (le branchement lui-même)
 
 **Interfaces:**
 - Consumes: `PERMIS_RULES` (Task 1), `ModuleFacts.permis` (Task 1).
@@ -727,43 +784,66 @@ Puis, à l'assemblage des `ModuleFacts` (ligne 45), ajouter le champ à la suite
     };
 ```
 
-- [ ] **Step 4 : ouvrir une ancre sur le bloc des permis**
+- [ ] **Step 4 : écrire le test du BRANCHEMENT, celui qu'aucun test de règle ne remplace**
 
-Dans `src/components/report/kit.tsx`, la signature de `ReportSection` (ligne 28) devient :
+Les dix-neuf tests précédents appellent `PERMIS_RULES[0].evaluate(...)` en direct : ils passeraient
+tous si cette tâche oubliait d'ajouter la règle au `REGISTRY`. Le seul test qui prouve le
+branchement passe par le chemin réel.
 
-```tsx
-export function ReportSection(
-  { eyebrow, tone = "neutral", id, children }:
-  { eyebrow: string; tone?: ReportTone; id?: string; children: ReactNode },
-) {
-  return (
-    <section id={id}>
+À ajouter à la fin de `permis-rules.test.ts` :
+
+```ts
+// ── Le branchement, que les tests de règle ne prouvent jamais ────────────────────────────────
+
+test("LA RÈGLE EST DANS LE REGISTRY, et son fait sort de runRules", () => {
+  // Sans ce test, oublier `...PERMIS_RULES` dans le REGISTRY laisserait les dix-neuf autres au vert
+  // pendant que le dossier resterait exactement comme avant.
+  const run = runRules(
+    facts({ permis: permis([{ annee: 2025, etat: "chantier_ouvert" }]) }),
+    PROJECT,
+    undefined as never,
+  );
+  assert.ok(
+    run.evaluations.some((e) => e.ruleId === "autour.permis"),
+    "la règle n'a pas été évaluée : elle n'est pas dans le REGISTRY",
+  );
+  assert.ok(
+    run.facts.some((f) => f.ruleId === "autour.permis"),
+    "la règle est évaluée mais son fait n'arrive pas dans le run",
+  );
+});
 ```
 
-Dans `src/components/report/AutourModule.tsx`, sur le bloc des permis :
+Ajouter l'import en tête du fichier de test :
 
-```tsx
-                <ReportSection eyebrow="Ce qui est autorisé autour" tone="neutral" id="permis">
+```ts
+import { runRules } from "./materiality-rules.ts";
 ```
-
-Sans cette ancre, le `href` de la preuve ne mènerait qu'en haut du module, ce qui est exactement le défaut que les cibles de preuve existent pour corriger.
 
 - [ ] **Step 5 : vérifier les types et le lint**
 
 Run: `npx tsc -p tsconfig.json --noEmit`
 Expected: aucune sortie.
 
-Run: `npx eslint src/lib/decision/permis-rules.ts src/components/report/DossierAvecLogement.tsx src/components/report/kit.tsx src/components/report/AutourModule.tsx "src/app/(account)/rapport/page.tsx"`
+Run: `npx eslint src/lib/decision/permis-rules.ts src/lib/decision/materiality-rules.ts src/components/report/DossierAvecLogement.tsx "src/app/(account)/rapport/page.tsx"`
 Expected: aucune erreur.
 
 - [ ] **Step 6 : lancer la suite complète**
 
 Run: `node --test src/lib/**/*.test.ts 2>&1 | grep -E "^ℹ (tests|pass|fail)"`
-Expected: `fail 0`, et **dix-neuf tests de plus** que le commit de base du lot. Mesurer plutôt que supposer, deux sessions travaillant sur le dépôt :
+Expected: `fail 0`, et **vingt tests de plus** que le commit de base du lot.
+
+**Ne PAS mesurer la base avec `git stash`.** La pile de stash est partagée entre le dépôt principal
+et tous les worktrees, et une autre session y travaille : un `pop` pourrait restaurer le travail de
+quelqu'un d'autre, ou perdre le sien. Le compte de base se lit sans toucher à l'arbre :
 
 ```bash
-git stash && node --test src/lib/**/*.test.ts 2>&1 | grep "^ℹ pass" && git stash pop
+git show <SHA-de-base>:package.json > /dev/null   # le worktree est propre, la base est un SHA
+git log --oneline -1                              # noter le SHA avant de commencer la Task 1
 ```
+
+En pratique : relever le total AVANT la Task 1 (`node --test src/lib/**/*.test.ts | grep "^ℹ pass"`),
+le noter, et comparer à la fin. Aucune commande destructive n'est nécessaire.
 
 - [ ] **Step 7 : build**
 
@@ -773,7 +853,7 @@ Expected: code de sortie 0. Des avertissements « took more than 60 seconds » s
 - [ ] **Step 8 : commit**
 
 ```bash
-git add src/lib/decision/materiality-rules.ts src/components/report/DossierAvecLogement.tsx src/components/report/kit.tsx src/components/report/AutourModule.tsx "src/app/(account)/rapport/page.tsx"
+git add src/lib/decision/materiality-rules.ts src/lib/decision/permis-rules.test.ts src/components/report/DossierAvecLogement.tsx "src/app/(account)/rapport/page.tsx"
 git commit -m "Le groupe « Autour de l'adresse » ne portait qu'un seul item"
 ```
 
@@ -781,9 +861,9 @@ git commit -m "Le groupe « Autour de l'adresse » ne portait qu'un seul item"
 
 ## Vérification finale, avant de déclarer le lot fini
 
-- [ ] `node --test src/lib/**/*.test.ts` : `fail 0`, dix-neuf tests de plus que le commit de base (mesuré).
+- [ ] `node --test src/lib/**/*.test.ts` : `fail 0`, vingt tests de plus que le total relevé AVANT la Task 1 (jamais par `git stash`, dont la pile est partagée entre les worktrees).
 - [ ] `npx tsc -p tsconfig.json --noEmit` : muet.
-- [ ] `npx eslint` sur les cinq fichiers touchés : propre.
+- [ ] `npx eslint` sur les quatre fichiers touchés : propre.
 - [ ] `npm run build` : code 0.
 - [ ] `grep -n "—" src/lib/decision/permis-rules.ts` : aucune occurrence.
 - [ ] Marquer le point 1 comme CORRIGÉ dans `docs/superpowers/specs/2026-08-01-permis-autour-adresse-design.md` et dans le fil ouvert n° 6 de `docs/handoff/CURRENT.md`, en nommant les commits.
@@ -798,9 +878,27 @@ PORT=3001 npm run dev
 
 Sur `/rapport`, avec un dossier d'adresse ouvert, **trois adresses** :
 
-- [ ] **Une adresse avec un permis non achevé** (Paris 7e et les deux La Rochelle en portaient un au 03/08/2026). Attendu : une carte dans la liste des contrôles, **sous le groupe « Autour de l'adresse »**, à côté de l'équipement automobile, avec son état en tête, son geste, et la date de consultation dans la preuve dépliée. Le lien de la preuve doit descendre au bloc des permis du module Autour, pas en haut de la page.
+- [ ] **Une adresse avec un permis non achevé** (Paris 7e et les deux La Rochelle en portaient un au 03/08/2026). Attendu : une carte dans la liste des contrôles, **sous le groupe « Autour de l'adresse »**, à côté de l'équipement automobile, avec son état en tête et son geste. **Déplier « Données et limites »** : la fenêtre gelée et la date de consultation doivent y figurer, portées par la convention de signalement. La preuve n'est pas cliquable dans ce lot, et c'est voulu.
 - [ ] **Une adresse sans permis non achevé.** Attendu : aucune carte, et le groupe « Autour de l'adresse » inchangé.
 - [ ] **Le compte du verdict.** Attendu : le nombre annoncé par la conclusion inclut la nouvelle carte. C'est l'invariant du lot précédent (« le lecteur compte les cartes et retombe sur le chiffre »), et ce lot ajoute un contrôle : s'il ne comptait pas, la promesse casserait.
+
+## Deux risques nommés, qui ne sont pas corrigés ici
+
+**Le fait disparaît si le chargement Logement échoue.** Dans `DossierAvecLogement`, tout l'assemblage
+au grain adresse vit dans un `try` : sur `LogementDataUnavailableError`, le composant retombe au
+dossier communal. Le permis, pourtant gelé et indépendant de cet appel, s'en irait avec les autres
+faits d'adresse. Ce lot ne change pas cette structure, mais elle est à connaître : le fait n'existe
+que lorsque l'augmentation adresse aboutit.
+
+**Une réponse vide erronée se gèle définitivement.** `fetchPermisAutour` traite un `400 « Le fichier
+est vide »` comme zéro ligne, ce qui est juste dans le cas normal. Si l'API répondait ainsi à tort, le
+snapshot figerait une absence, et le rattrapage ne repasserait pas (il ne se déclenche que sur
+`permis === undefined`). Avec le fait entré au moteur, cette absence gelée devient un contrôle
+manquant plutôt qu'un bloc muet.
+
+À ne pas confondre avec le non-déterminisme soupçonné le 01/08 : il a été vérifié et écarté, trois
+lectures du même `dossierId` rendant exactement le même bloc et la même date. La divergence observée
+venait d'un pilote de test qui comparait deux dossiers différents.
 
 ## Ce que ce plan ne fait pas
 

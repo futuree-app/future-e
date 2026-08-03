@@ -1,6 +1,6 @@
 # Les permis d'urbanisme entrent dans le moteur de décision
 
-**Date** : 2026-08-03 · **Statut** : SPÉCIFIÉ, pas implémenté. · **Point 1 des quatre restes de**
+**Date** : 2026-08-03, révisée le même jour après relecture du plan · **Statut** : SPÉCIFIÉ, pas implémenté. · **Point 1 des quatre restes de**
 `2026-08-01-permis-autour-adresse-design.md`.
 
 ## Ce que ça répare
@@ -129,11 +129,17 @@ table des évaluations de `/dev/dossier`, et nulle part ailleurs.
 
 | Composition | `status` |
 |---|---|
-| Un seul, chantier ouvert | Chantier ouvert |
-| Un seul, non commencé | Autorisation non commencée |
-| Plusieurs, tous ouverts | Chantiers ouverts |
-| Plusieurs, aucun ouvert | Autorisations non commencées |
+| Un seul, chantier ouvert | Chantier déclaré ouvert |
+| Un seul, sans ouverture | Sans ouverture déclarée |
+| Plusieurs, tous ouverts | Chantiers déclarés ouverts |
+| Plusieurs, sans ouverture | Sans ouverture déclarée |
 | États mixtes | Autorisations non achevées |
+
+**Aucun statut n'affirme plus que la source.** « Autorisation non commencée » a été écarté : l'état se
+déduit de l'ABSENCE d'une déclaration d'ouverture de chantier, et un chantier peut avoir commencé sans
+que sa déclaration soit parvenue au registre. C'est la correction faite la veille sur `LIBELLE_ETAT`,
+où « travaux non commencés » est devenu « sans ouverture de chantier déclarée » : la réintroduire ici
+aurait défait dans le moteur ce qu'on venait de corriger dans le module.
 
 Deux formes ne suffiraient pas : un fait agrégeant trois dossiers mixtes afficherait « Chantier
 ouvert », vrai d'une partie des données et faux comme résumé de la carte.
@@ -150,10 +156,21 @@ une carte autonome, lue dans une liste, pas une phrase posée sous une autre qui
 
 ### `signalConvention` : pourquoi futur•e le fait remonter
 
-> futur•e signale les autorisations non achevées déposées dans les trois années précédant l'analyse.
+> futur•e signale les autorisations non achevées déposées depuis 2023. Registre consulté le 1er août 2026.
 
-Il porte la fenêtre gelée, le choix de ne retenir que les non achevées, et le caractère conventionnel
-du signalement.
+Il porte la fenêtre gelée, le choix de ne retenir que les non achevées, le caractère conventionnel du
+signalement, **et la date de consultation**.
+
+**La fenêtre se dérive des DEUX champs gelés.** `permisAMontrer` retient
+`annee >= anneeReference - ancienneteMaxAns` : écrire « dans les trois années précédant l'analyse » à
+partir du seul `ancienneteMaxAns` décrirait une période flottante, et un dossier rouvert en 2029
+laisserait croire qu'on a regardé jusque-là. L'année calculée est datée.
+
+**La date de consultation est ici parce que c'est ici qu'elle se voit.** `observedAt` la porte dans le
+domaine, mais aucun composant ne le lit : `EvidenceRow` ne rend que label, valeur et lien, et
+`factSources` écarte même les preuves qui portent une valeur observée. La convention, elle, est rendue
+dans « Données et limites » (`ControlesDuDossier.tsx:82`). Sans cette phrase, la carte dirait au
+présent, en 2029, ce qui a été constaté en 2026.
 
 **La séparation est stricte.** Mettre le rayon ET la fenêtre dans les deux champs recréerait à
 l'intérieur d'une seule carte la redondance que la vérification à l'écran du 01/08 a révélée entre le
@@ -210,7 +227,6 @@ verrouillée par un test dans le module ; elle accompagne le fait pour la même 
   observedValue: "1 dossier non achevé, dont 1 chantier déclaré ouvert",
   grain: "adresse",
   relation: "proximite",
-  href: "/rapport/autour#permis",
   sourceMode: "persisted_snapshot",
   observedAt: <consulteLe du snapshot>,
 }
@@ -245,16 +261,19 @@ live_fetch ». Le champ devient la date à laquelle la source a été observée,
 ou conservée dans un snapshot persistant. Sans cette correction le code serait juste et sa
 documentation dirait qu'il ne l'est pas.
 
-### L'ancre `#permis` demande trois lignes de kit
+### Aucun lien dans ce lot, et c'est délibéré
 
-`ReportSection` (`kit.tsx:28`) n'accepte aujourd'hui que `eyebrow`, `tone` et `children` : il n'y a
-aucune ancre à cibler. Le lot ajoute une prop `id?: string` posée sur le `<section>`, et
-`AutourModule` la renseigne sur le bloc des permis. Sans elle, `href` ne mènerait qu'en haut du
-module, ce qui est exactement le défaut que `targetKey` existe pour corriger.
+`/rapport/autour` sans `dossierId` ne retombe sur le bon bien que par `getSoleDossier`, donc
+uniquement quand le compte n'en possède qu'un ; au-delà, la page renvoie vers la liste des biens. La
+preuve ne connaît pas l'identifiant du dossier, et l'ajouter à `ModuleFacts` ferait entrer une clé
+Supabase dans un contrat de faits.
 
-**Aucun `targetKey` n'est inventé** : le vocabulaire partagé (`evidence-targets.ts`) n'en contient pas
-pour les permis, et un lien qui promettrait une démonstration inexistante vaut moins qu'un lien
-absent.
+Une preuve non cliquable vaut mieux qu'un lien qui ouvre le mauvais bien. Le jour où l'identité du
+dossier remontera jusqu'à la projection, le lien et l'ancre `#permis` s'ajouteront ensemble.
+
+**Aucun `targetKey` n'est inventé** non plus : le vocabulaire partagé (`evidence-targets.ts`) n'en
+contient pas pour les permis, et un lien qui promettrait une démonstration inexistante vaut moins
+qu'un lien absent.
 
 ## Le chemin de la donnée
 
