@@ -97,3 +97,34 @@ incertain.
 `doctrine/editoriale.md` (formulations honnêtes), `principes/invariants.md` (n°3 et n°6),
 `recherches/inventaire-sources.md` (terrain de l'agent Data Curator),
 `/memory/home_insee_code_pitfall.md`.
+
+## Un équipement n'est pas un refuge
+
+> Règle ajoutée le 2026-08-03, après l'examen de la cartographie « Refuges climatiques »
+> (TRIBU, labos toulousains, Toulouse Métropole, financement ADEME, données sous ODbL).
+
+**Un équipement susceptible d'accueillir pendant une forte chaleur n'est pas, à lui seul, un
+refuge.** futur•e distingue trois niveaux de preuve, et ne les mélange jamais dans une même
+affirmation :
+
+| Niveau | Ce qu'on sait | D'où ça vient |
+| --- | --- | --- |
+| **Lieu potentiel** | l'équipement existe et il est à telle distance | BPE, OSM : sources canoniques déjà lues par le module Autour |
+| **Conditions favorables observables** | couvert arboré, plan d'eau, taille du parc, distance à pied | mesuré, mais ce sont des indices, jamais une garantie de fraîcheur |
+| **Refuge documenté** | la fraîcheur, l'ombrage, l'accès ou les horaires ont été caractérisés | collectivité, étude, ou contribution locale attribuée |
+
+**Pourquoi la règle existe.** BPE et OSM disent qu'une médiathèque est à dix minutes. Ils ne disent
+pas qu'elle est climatisée, ouverte pendant la canicule, gratuite, ni qu'on peut y rester sans
+consommer. Reprendre l'étiquette « refuge » sur un équipement reviendrait à afficher une promesse
+thermique que rien ne mesure, ce qu'interdit le principe « on n'affirme jamais au-delà de la preuve ».
+
+**Corollaire chiffré, mesuré sur l'API le 03/08/2026** : sur 42 547 lieux publiés, les trois quarts
+sont des imports de bases publiques (IGN bibliothèques, parcs, musées, piscines, cinémas ; Institut
+Paris Région), que futur•e possède déjà. Les lieux portant une **qualification réelle** sont
+**environ 160** : 159 « espace très ombragé », 157 « espace très frais ». Soit **0,4 %**. La couche
+qui aurait de la valeur existe, elle est minuscule, et le niveau « refuge documenté » serait vide
+presque partout.
+
+**Ce que ça n'interdit pas.** Le troisième niveau reste la bonne cible produit, et la question qu'il
+adresse est bien résidentielle (« aurai-je un endroit où me réfugier »), pas météorologique. Il se
+remplira par les collectivités et les études avant de se remplir par la contribution.
