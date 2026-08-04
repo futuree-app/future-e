@@ -12,15 +12,15 @@ export const metadata: Metadata = {
 
 const css = `
   :root {
-  --accent: #fb923c;
-    --accent-soft: rgba(251,146,60,0.12);
-    --accent-border: rgba(251,146,60,0.28);
+  --accent: #E8823A;
+    --accent-soft: rgba(232, 130, 58,0.12);
+    --accent-border: rgba(232, 130, 58,0.28);
 }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--fg-1);font-family:var(--font-sans);font-size:16px;line-height:1.65;overflow-x:hidden;max-width:100vw;-webkit-font-smoothing:antialiased;}
 
   .orb{position:fixed;border-radius:50%;filter:blur(120px);opacity:0.3;pointer-events:none;z-index:0;animation:breathe 14s ease-in-out infinite;}
-  .orb-1{width:480px;height:480px;background:radial-gradient(circle,#fb923c 0%,transparent 70%);top:-120px;left:-100px;}
+  .orb-1{width:480px;height:480px;background:radial-gradient(circle,#E8823A 0%,transparent 70%);top:-120px;left:-100px;}
   .orb-2{width:400px;height:400px;background:radial-gradient(circle,#a78bfa 0%,transparent 70%);bottom:-100px;right:-80px;animation-delay:-6s;}
   @keyframes breathe{0%,100%{transform:scale(1);}50%{transform:scale(1.12) translate(15px,-22px);}}
 
@@ -76,7 +76,7 @@ const css = `
   .lever-desc{font-size:15px;color:var(--fg-3);line-height:1.6;margin:0;}
   .lever-src{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);margin-top:8px;letter-spacing:0.04em;}
 
-  .formula-box{margin:24px 0;padding:20px 24px;background:rgba(251,146,60,0.06);border:1px solid rgba(251,146,60,0.18);border-radius:6px;}
+  .formula-box{margin:24px 0;padding:20px 24px;background:rgba(232, 130, 58,0.06);border:1px solid rgba(232, 130, 58,0.18);border-radius:6px;}
   .formula-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--fg-4);margin-bottom:12px;}
   .formula{font-family:var(--font-mono);font-size:14px;color:var(--fg-1);line-height:1.7;}
   .formula-eq{color:var(--accent);font-weight:500;}
@@ -383,7 +383,7 @@ export default async function AgirDependanceAutoPage() {
           variant="open"
           previewHtml={previewHtml}
           fullHtml={fullHtml}
-          accent="#fb923c"
+          accent="#E8823A"
         />
       </article>
 

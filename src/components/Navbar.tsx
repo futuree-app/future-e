@@ -68,7 +68,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
       <style>{`
         .nb-link:hover { color: #e9ecf2 !important; }
         .nb-dropdown-link:hover { background: var(--bg-elev-2) !important; }
-        .nb-mobile-link:hover { color: #fb923c !important; }
+        .nb-mobile-link:hover { color: #E8823A !important; }
         .nb-burger:hover { background: var(--bg-elev-3) !important; }
         @keyframes nb-fadein {
           from { opacity: 0; transform: translateY(-6px); }

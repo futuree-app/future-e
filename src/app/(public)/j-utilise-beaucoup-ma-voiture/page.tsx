@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   },
 };
 
-const ACCENT = '#fb923c';
+const ACCENT = '#E8823A';
 
 const css = `
   *{box-sizing:border-box;}
@@ -30,7 +30,7 @@ const css = `
   h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-display);line-height:1.08;letter-spacing:-0.02em;margin:0 0 22px;color:var(--fg-1);}
   h1 em{font-style:italic;color:${ACCENT};}
   .lede{font-size:18px;color:var(--fg-3);margin:0 0 30px;line-height:1.7;max-width:680px;}
-  .hero-note{padding:24px 26px;border-radius:12px;background:rgba(251,146,60,0.06);border:1px solid rgba(251,146,60,0.18);margin:0 0 20px;display:flex;flex-direction:column;gap:10px;}
+  .hero-note{padding:24px 26px;border-radius:12px;background:rgba(232, 130, 58,0.06);border:1px solid rgba(232, 130, 58,0.18);margin:0 0 20px;display:flex;flex-direction:column;gap:10px;}
   .hero-note-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:${ACCENT};}
   .hero-note-text{font-size:15px;color:var(--fg-3);line-height:1.7;max-width:720px;}
   .hero-note-text strong{color:var(--fg-1);font-weight:500;}
@@ -51,9 +51,9 @@ const css = `
   .article-desc{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);line-height:1.6;flex:1;}
   .article-cta{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:${ACCENT};}
 
-  .rapport-cta{display:flex;flex-direction:column;gap:16px;padding:36px 40px;border-radius:14px;background:rgba(251,146,60,0.06);border:1px solid rgba(251,146,60,0.22);text-decoration:none;margin-top:28px;transition:background 0.2s,border-color 0.2s;position:relative;overflow:hidden;}
+  .rapport-cta{display:flex;flex-direction:column;gap:16px;padding:36px 40px;border-radius:14px;background:rgba(232, 130, 58,0.06);border:1px solid rgba(232, 130, 58,0.22);text-decoration:none;margin-top:28px;transition:background 0.2s,border-color 0.2s;position:relative;overflow:hidden;}
   .rapport-cta::after{content:"";position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,${ACCENT}14 0%,transparent 70%);pointer-events:none;}
-  .rapport-cta:hover{background:rgba(251,146,60,0.09);border-color:rgba(251,146,60,0.35);}
+  .rapport-cta:hover{background:rgba(232, 130, 58,0.09);border-color:rgba(232, 130, 58,0.35);}
   .rapport-cta-eyebrow{font-family:var(--font-mono);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:${ACCENT};}
   .rapport-cta-title{font-family:var(--font-serif);font-size:var(--text-section);font-weight:var(--weight-title);color:var(--fg-1);line-height:1.2;margin:0;}
   .rapport-cta-desc{font-size:15px;color:var(--fg-3);line-height:1.65;max-width:620px;}
@@ -67,7 +67,7 @@ const css = `
   .guide-cta{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:${ACCENT};margin-top:auto;}
 
   .signal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:28px;}
-  .signal-card{padding:22px;border-radius:10px;background:rgba(251,146,60,0.04);border:1px solid rgba(251,146,60,0.13);display:flex;flex-direction:column;gap:8px;}
+  .signal-card{padding:22px;border-radius:10px;background:rgba(232, 130, 58,0.04);border:1px solid rgba(232, 130, 58,0.13);display:flex;flex-direction:column;gap:8px;}
   .signal-source{font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:${ACCENT};opacity:0.65;}
   .signal-head{font-size:14px;font-weight:500;color:var(--fg-1);line-height:1.4;}
   .signal-body{font-size:13px;color:var(--fg-3);line-height:1.6;}
@@ -122,7 +122,7 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/hub-dependance.jpg" alt="Dépendance automobile" className="article-img" />
               <div className="article-body">
-                <span className="article-cat" style={{ background: 'rgba(251,146,60,0.12)', color: ACCENT }}>Savoir</span>
+                <span className="article-cat" style={{ background: 'rgba(232, 130, 58,0.12)', color: ACCENT }}>Savoir</span>
                 <div className="article-title">Pourquoi certains territoires rendent la voiture presque obligatoire</div>
                 <div className="article-desc">
                   84 % des actifs ruraux vont travailler en voiture. Ce que ce chiffre dit de l&apos;organisation du territoire, et pourquoi cette dépendance est d&apos;abord une affaire de territoire.
@@ -135,7 +135,7 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/top10-villes-dependantes-voiture.jpg" alt="Top 10 des villes les plus dépendantes à la voiture" className="article-img" />
               <div className="article-body">
-                <span className="article-cat" style={{ background: 'rgba(251,146,60,0.12)', color: ACCENT }}>Classement</span>
+                <span className="article-cat" style={{ background: 'rgba(232, 130, 58,0.12)', color: ACCENT }}>Classement</span>
                 <div className="article-title">Top 10 des villes les plus dépendantes à la voiture</div>
                 <div className="article-desc">
                   Un classement gratuit à partir des scores mobilité déjà présents dans futur•e, pour voir où la voiture reste la plus difficile à remplacer dans les grandes communes.

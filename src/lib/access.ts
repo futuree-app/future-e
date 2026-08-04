@@ -50,7 +50,11 @@ export const PLAN_MATRIX: Record<UserPlan, CapabilityMatrix> = {
     notificationsEnabled: true,
   },
   one_shot: {
-    label: "Rapport interactif",
+    // LIBELLÉ VOLONTAIREMENT NEUTRE (04/08/2026). Le webhook pose `plan: "one_shot"` pour les TROIS
+    // produits : dossier de territoire à 14 €, dossier d'adresse à 39 €, dossier comparatif à 39 €.
+    // Nommer l'un d'eux ici ferait mentir l'écran /compte pour les deux autres. Ce que le compte
+    // possède réellement se lit dans les grants et les dossiers, pas dans le plan.
+    label: "Achat unique",
     reportAccess: "complete",
     newsletterEnabled: false,
     notificationsEnabled: false,

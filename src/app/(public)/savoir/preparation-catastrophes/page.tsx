@@ -12,15 +12,15 @@ export const metadata: Metadata = {
 
 const css = `
   :root {
-    --accent: #fb923c;
-    --accent-soft: rgba(251,146,60,0.12);
-    --accent-border: rgba(251,146,60,0.28);
+    --accent: #E8823A;
+    --accent-soft: rgba(232, 130, 58,0.12);
+    --accent-border: rgba(232, 130, 58,0.28);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--fg-1);font-family:var(--font-sans);font-size:16px;line-height:1.65;overflow-x:hidden;max-width:100vw;-webkit-font-smoothing:antialiased;}
 
   .orb{position:fixed;border-radius:50%;filter:blur(120px);opacity:0.28;pointer-events:none;z-index:0;animation:breathe 14s ease-in-out infinite;}
-  .orb-1{width:520px;height:520px;background:radial-gradient(circle,#fb923c 0%,transparent 70%);top:-140px;left:-120px;}
+  .orb-1{width:520px;height:520px;background:radial-gradient(circle,#E8823A 0%,transparent 70%);top:-140px;left:-120px;}
   .orb-2{width:460px;height:460px;background:radial-gradient(circle,#f87171 0%,transparent 70%);bottom:-120px;right:-100px;animation-delay:-5s;}
   .orb-3{width:340px;height:340px;background:radial-gradient(circle,#a78bfa 0%,transparent 70%);top:45%;left:65%;opacity:0.14;animation-delay:-9s;}
   @keyframes breathe{0%,100%{transform:scale(1) translate(0,0);}50%{transform:scale(1.15) translate(20px,-30px);}}
@@ -85,7 +85,7 @@ const css = `
   .levier-desc{font-size:15px;color:var(--fg-3);line-height:1.65;margin:0 0 6px;}
   .levier-src{font-family:var(--font-mono);font-size:10px;color:var(--fg-4);letter-spacing:0.06em;}
 
-  .callout{margin:40px 0;padding:24px 28px;background:rgba(251,146,60,0.06);border:1px solid var(--accent-border);border-radius:6px;}
+  .callout{margin:40px 0;padding:24px 28px;background:rgba(232, 130, 58,0.06);border:1px solid var(--accent-border);border-radius:6px;}
   .callout-head{font-family:var(--font-mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
   .callout p{margin:0;font-size:15px;color:var(--fg-3);line-height:1.65;}
 

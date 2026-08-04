@@ -119,7 +119,7 @@ export function SinistraliteBlock({ sinistralite, commune }: { sinistralite: Onr
                 {commune ? `À ${commune}, ` : "Dans la commune, "}les sinistres indemnisés liés {freqCompare.more} ont été plus fréquents que ceux liés {freqCompare.less}.
               </p>
             )}
-            <PerilLine peril="Sécheresse (retrait-gonflement des argiles)" word="de sécheresse" color="var(--orange, #fb923c)" state={secheresse} tip="Le sol argileux gonfle avec l’humidité puis se rétracte en période sèche. Ces mouvements peuvent fissurer les murs et les fondations d’un logement." />
+            <PerilLine peril="Sécheresse (retrait-gonflement des argiles)" word="de sécheresse" color="var(--orange, #E8823A)" state={secheresse} tip="Le sol argileux gonfle avec l’humidité puis se rétracte en période sèche. Ces mouvements peuvent fissurer les murs et les fondations d’un logement." />
             <PerilLine peril="Inondation (tous types)" word="d’inondation" color="var(--blue, #60a5fa)" state={inondation} tip="Regroupe tous les types : débordement de cours d’eau, ruissellement de pluie, remontée de nappe et submersion marine." />
             {/* Rappel court sur l'assurance ; le détail va dans le repli */}
             <p style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>

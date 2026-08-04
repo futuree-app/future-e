@@ -20,12 +20,12 @@ preuve).
 
 ## Direction artistique
 
-**Glassmorphism sombre.** Palette : noir `#060812`, orange `#fb923c`, rouge `#f87171`,
+**Glassmorphism sombre.** Palette : noir `#060812`, orange `#E8823A`, rouge `#f87171`,
 violet `#a78bfa`, vert `#4ade80`, bleu `#60a5fa`, jaune `#fbbf24`. Typographies : **Archivo**
-(interface entière, variable 100-900), JetBrains Mono (valeurs et métadonnées), Instrument Serif
-italique (le logo, et lui seul), définies en `--font-sans/serif/mono/brand` dans
-`src/app/design-tokens.css`. Fond profond, verre translucide, noise overlay. La DA est validée,
-elle ne se remet pas en question à chaque itération.
+(interface entière, variable 100-900) et JetBrains Mono (valeurs et métadonnées), définies en
+`--font-sans/serif/mono` dans `src/app/design-tokens.css`. **Aucune police ne porte la marque** :
+le logo est un dessin vectoriel (voir l'amendement du 2026-08-04). Fond profond, verre translucide,
+noise overlay. La DA est validée, elle ne se remet pas en question à chaque itération.
 
 > **Amendement du 2026-08-01 (arbitrage du porteur).** L'interface passe d'un **titrage serif
 > littéraire à une grotesque unique**, Archivo. Justification, comme cette doctrine l'exige :
@@ -40,6 +40,10 @@ elle ne se remet pas en question à chaque itération.
 > **La marque garde son dessin.** Le logo « futur•e » reste en Instrument Serif italique, isolé sur
 > `--font-brand`. Changer la police de l'interface ne change pas la marque.
 >
+> *(Cette phrase a été dépassée trois jours plus tard : voir l'amendement du 2026-08-04. Elle reste
+> ici parce qu'elle dit ce qui était décidé le 01/08, et que le raisonnement qui l'a remplacée ne se
+> comprend qu'en la lisant.)*
+>
 > **Ce qui rend Archivo distinctive est le réglage, pas le dessin.** Elle descend des grotesques
 > américaines : posée en 400 avec un tracking normal, elle redevient invisible. La hiérarchie repose
 > désormais entièrement sur une **échelle de graisses**, gravée dans les tokens, qui sépare toujours
@@ -47,6 +51,27 @@ elle ne se remet pas en question à chaque itération.
 > grotesque, il se lit comme une erreur de rendu.
 >
 > Règles d'application dans `DESIGN.md` (racine), § 9.1.
+
+> **Amendement du 2026-08-04 (charte de marque v1.7, arbitrage du porteur).**
+>
+> **Le logo n'est plus une police, c'est un dessin.** Instrument Serif et le token `--font-brand`
+> quittent le dépôt. La charte livre un mot-symbole vectoriel dont la coupe du `r`, les sept fûts à
+> 35 unités et la position du point sont des valeurs décidées : aucune police ne les produit, et
+> vectoriser une police revenait à graver le dessin qu'on venait d'écarter. Il vit dans
+> `src/components/Logo.tsx`, un composant unique plutôt que les huit SVG du pack, qui ne diffèrent
+> que par leurs deux `fill` : les importer tels quels figerait la couleur hors du thème. Le
+> mot-symbole ne descend pas sous 22 px de haut. Le nom **dans une phrase** reste du texte.
+>
+> **L'orange de marque devient `#E8823A`**, hors du preset Tailwind `orange-400`, vers une teinte
+> plus terreuse.
+>
+> **Les six registres de décision ont leurs propres tokens** (`--reg-*`), aux valeurs de la charte.
+> Deux changent de teinte : l'écart passe du jaune au violet, et le non su quitte l'améthyste pour
+> un gris neutre, parce qu'**un statut inconnu ne reçoit aucune valence**. C'est le seul des deux
+> qui soit un vrai renversement : peindre « nous n'avons pas pu lire cette donnée » d'une couleur
+> qui a du sens, c'était affirmer quelque chose au-delà de la preuve, l'invariant n°5.
+>
+> Règles d'application dans `DESIGN.md` (racine), § 5.2, § 5.4 et § 9.1.
 
 > **Amendement du 2026-07-30 (arbitrage du porteur).** Cette page mentionnait « mesh gradients
 > animés » ; les **orbes flous en `position: fixed` sont retirés de la direction artistique**.

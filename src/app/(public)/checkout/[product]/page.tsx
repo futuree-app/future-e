@@ -39,7 +39,7 @@ const COPY: Record<CheckoutProductSlug, {
   notIncluded?: string[];
 }> = {
   "rapport-complet": {
-    kicker: "Rapport interactif · 14 € une fois",
+    kicker: "Dossier de territoire · 14 € une fois",
     hero: { line1: "Votre futur,", line2: "posé sur la table." },
     // CE QUE LE PAIEMENT DÉLIVRE RÉELLEMENT, et rien de plus (aligné le 30/07/2026). Ce bloc
     // annonçait « trois modules interactifs », quand le webhook 14 € pose un report_grant sur une
@@ -49,8 +49,14 @@ const COPY: Record<CheckoutProductSlug, {
     promise: "Une lecture interactive de votre commune : ce qu'elle devient face au climat, ce à quoi elle est exposée, ce qui la transforme. Téléchargeable, à conserver.",
     whatYouGet: [
       { n: "01", title: "Le Territoire, en entier", body: "La commune lue à travers son climat, ses risques, son cadre de vie et sa population. Écrit pour vous à partir de votre profil, sourcé sur les données publiques (DRIAS, INSEE, Géorisques, BPE). Export PDF inclus." },
-      { n: "02", title: "AskFuture, 3 questions", body: "De quoi revenir sur ce que le rapport laisse ouvert, avec vos mots, sur votre commune." },
-      { n: "03", title: "Régénération annuelle", body: "Une mise à jour du rapport interactif par an, incluse, pour suivre l'évolution de votre territoire." },
+      { n: "02", title: "AskFuture, 3 questions", body: "De quoi revenir sur ce que le dossier laisse ouvert, avec vos mots, sur votre commune. Les réponses ne s'appuient que sur les faits examinés ici." },
+      { n: "03", title: "Régénération annuelle", body: "Une mise à jour du dossier par an, incluse, pour suivre l'évolution de votre territoire." },
+      // QUATRIÈME CARTE AJOUTÉE LE 04/08/2026. La déduction de 14 € existait dans
+      // `dossier-pricing.ts` depuis le 29/07 sans qu'aucun écran ne la dise : quelqu'un qui voulait
+      // les trois échelles pouvait croire qu'entrer par le territoire lui coûterait 14 + 39 = 53 €,
+      // et sauter la marche d'entrée pour cette raison. La carte remplit aussi la grille 2×2, que
+      // trois éléments laissaient bancale.
+      { n: "04", title: "La marche suivante, déduite", body: "Les échelles Autour et Logement demandent un dossier d'adresse, à 39 €. Ces 14 € en sont déduits : si vous le prenez ensuite sur cette commune, il vous reste 25 € à payer. Entrer par le territoire ne coûte donc rien de plus." },
     ],
     timeline: [
       { n: "01", title: "Paiement sécurisé", body: "Stripe, moins de 2 minutes, carte bancaire ou Apple/Google Pay." },
@@ -58,13 +64,14 @@ const COPY: Record<CheckoutProductSlug, {
       // produit livré à la main, en PDF. Le webhook Stripe pose les droits en base dès le paiement
       // confirmé et les trois modules se lisent en ligne : rien n'est produit en différé, rien
       // n'est envoyé. La promesse faisait donc attendre un acheteur qui pouvait déjà lire, et
-      // lui laissait croire qu'il achetait un document plutôt qu'un rapport interactif.
-      { n: "02", title: "Accès immédiat", body: "Votre rapport s'ouvre dès le paiement confirmé. Rien à attendre, rien à recevoir par email." },
+      // lui laissait croire qu'il achetait un document plutôt qu'un dossier qui s'ouvre.
+      { n: "02", title: "Accès immédiat", body: "Votre dossier s'ouvre dès le paiement confirmé. Rien à attendre, rien à recevoir par email." },
       { n: "03", title: "Accès permanent", body: "Consultable à tout moment depuis votre espace, exportable en PDF, partageable en lien temporaire." },
     ],
     faqs: [
-      { q: "Le rapport interactif est-il vraiment personnalisé ?", a: "Oui. Il est construit à partir de votre commune, votre profil de risque et vos réponses au wizard. Deux foyers d'une même ville obtiennent deux rapports différents." },
-      { q: "Combien de temps avant d'y accéder ?", a: "Le temps que le paiement se confirme, quelques secondes. Votre rapport s'ouvre dans votre espace : il n'y a rien à générer, rien à attendre par email." },
+      { q: "Ce dossier couvre-t-il aussi mon quartier et mon logement ?", a: "Non. Celui-ci couvre la commune. Le secteur autour de votre adresse et le logement demandent un dossier d'adresse, à 39 €, dont ces 14 € sont déduits : 25 € si vous l'ouvrez ensuite sur cette même commune." },
+      { q: "Le dossier est-il vraiment personnalisé ?", a: "Oui. Il est construit à partir de votre commune, votre profil de risque et vos réponses au wizard. Deux foyers d'une même ville obtiennent deux dossiers différents." },
+      { q: "Combien de temps avant d'y accéder ?", a: "Le temps que le paiement se confirme, quelques secondes. Votre dossier s'ouvre dans votre espace : il n'y a rien à générer, rien à attendre par email." },
       { q: "Mes données sont-elles vendues ?", a: "Jamais. Les données issues du wizard restent dans votre espace. Voir notre politique RGPD." },
     ],
   },
@@ -681,7 +688,7 @@ export default async function CheckoutPage({
                       margin: 0,
                     }}
                   >
-                    Le paiement doit être rattaché à un compte pour débloquer votre rapport interactif.
+                    Le paiement doit être rattaché à un compte pour ouvrir votre dossier de territoire.
                   </p>
                   <Link
                     href={`/inscription?next=${encodeURIComponent(checkoutPath)}`}
@@ -776,7 +783,7 @@ export default async function CheckoutPage({
                 marginInline: "auto",
               }}
             >
-              « Pas une étude de plus. Un rapport interactif pour décider,
+              « Pas une étude de plus. Un dossier pour décider,
               calmement, et à temps. »
             </p>
             <p

@@ -94,7 +94,7 @@ export default async function TerritoryUnlockPage({
         {/* 1. Hero de continuité */}
         <div style={reveal(0)}>
           <p className="mt-10 font-mono text-[11px] tracking-[0.16em] uppercase text-accent">
-            Rapport de territoire · {displayName} · 14 € une fois
+            Dossier de territoire · {displayName} · 14 € une fois
           </p>
           <h1
             className="mt-4 text-[length:var(--text-display)] leading-[1.06] tracking-[-0.02em] text-label"
@@ -104,7 +104,7 @@ export default async function TerritoryUnlockPage({
             que les données racontent vraiment.
           </h1>
           <p className="mt-5 max-w-[58ch] text-[16px] leading-[1.7] text-muted">
-            Vous avez vu pourquoi {displayName} ressort dans votre recherche. Le rapport complet va
+            Vous avez vu pourquoi {displayName} ressort dans votre recherche. Le dossier va
             plus loin : il met à plat ce que ce territoire implique concrètement pour votre projet, à
             partir des données disponibles sur le climat, les risques, la santé environnementale, la
             mobilité, le logement et le cadre de vie.
@@ -130,13 +130,13 @@ export default async function TerritoryUnlockPage({
         {preview && (
           <section className="mt-20" style={reveal(2)}>
             <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent mb-2">
-              Aperçu réel du rapport
+              Aperçu réel du dossier
             </p>
             <h2 className="text-[length:var(--text-section)] leading-[1.15] text-label mb-1" style={{ fontFamily: "var(--font-serif)" }}>
               Ce que futur•e a déjà analysé sur {displayName}
             </h2>
             <p className="text-[13px] text-muted mb-5">
-              Le constat est visible, l&apos;analyse complète se débloque avec le rapport.
+              Le constat est visible, l&apos;analyse complète s&apos;ouvre avec le dossier.
             </p>
             <PersonalTouch commune={displayName} />
             <TerritoryUnlockPreview preview={preview} commune={displayName} />

@@ -228,7 +228,7 @@ export default async function ChaleurCommune({
       <style dangerouslySetInnerHTML={{ __html: css }} />
 
       <div className="orb" style={{ width: 500, height: 500, background: `radial-gradient(circle,${ACCENT} 0%,transparent 70%)`, top: -140, left: -120 }} />
-      <div className="orb" style={{ width: 360, height: 360, background: 'radial-gradient(circle,#fb923c 0%,transparent 70%)', bottom: -80, right: -60, animationDelay: '-7s', opacity: 0.14 }} />
+      <div className="orb" style={{ width: 360, height: 360, background: 'radial-gradient(circle,#E8823A 0%,transparent 70%)', bottom: -80, right: -60, animationDelay: '-7s', opacity: 0.14 }} />
 
       {/* Nav */}
       <Navbar />
@@ -451,7 +451,7 @@ export default async function ChaleurCommune({
             <Link href="/savoir/pollutions-invisibles" className="article-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/chaleur-feuille.jpg" alt="Pollutions invisibles" className="article-img" />
-              <span className="article-cat" style={{ background: 'rgba(251,146,60,0.12)', color: '#fb923c' }}>Air & sols</span>
+              <span className="article-cat" style={{ background: 'rgba(232, 130, 58,0.12)', color: '#E8823A' }}>Air & sols</span>
               <div className="article-title">Pollutions invisibles</div>
               <div style={{ fontSize: 12, color: 'var(--fg-4)', lineHeight: 1.55 }}>
                 La chaleur amplifie l&apos;ozone. Comment lire les données et agir à la bonne échelle.

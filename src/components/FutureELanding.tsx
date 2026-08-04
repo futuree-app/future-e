@@ -2655,7 +2655,7 @@ export default function FutureELanding() {
             )}
             {communeDataLoading && (
               <div style={{ position: 'relative', height: 2, borderRadius: 1, background: 'var(--bg-elev-3)', overflow: 'hidden', marginBottom: 6 }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '40%', background: 'linear-gradient(90deg, transparent, #fb923c, transparent)', animation: 'hero-loading-sweep 1.4s ease-in-out infinite' }} />
+                <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '40%', background: 'linear-gradient(90deg, transparent, #E8823A, transparent)', animation: 'hero-loading-sweep 1.4s ease-in-out infinite' }} />
               </div>
             )}
             {/* `hero-preview-extra` porte les cartes 3 et 4 : sur téléphone, la preuve produit se

@@ -81,8 +81,8 @@ const PROFILS_DEMO = [
     profil: 'Famille sans voiture, enfant asthmatique',
     verdict: 'Réserves importantes',
     tone: C.warm,
-    toneBg: 'rgba(251, 146, 60, 0.1)',
-    toneBorder: 'rgba(251, 146, 60, 0.4)',
+    toneBg: 'rgba(232, 130, 58, 0.1)',
+    toneBorder: 'rgba(232, 130, 58, 0.4)',
     detail: 'Le quotidien sans voiture se joue à quelques rues près ; l’exposition aux pollens et à la chaleur pèse plus lourd pour ce foyer que pour un autre.',
   },
   {
@@ -158,7 +158,7 @@ const ETATS = [
 
 const chipTone: Record<string, { border: string; color: string }> = {
   accent: { border: 'rgba(248, 113, 113, 0.5)', color: 'var(--red)' },
-  warm: { border: 'rgba(251, 146, 60, 0.5)', color: 'var(--orange)' },
+  warm: { border: 'rgba(232, 130, 58, 0.5)', color: 'var(--orange)' },
   blue: { border: 'rgba(96, 165, 250, 0.5)', color: 'var(--blue)' },
   violet: { border: 'rgba(167, 139, 250, 0.5)', color: 'var(--violet)' },
 };

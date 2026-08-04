@@ -393,7 +393,7 @@ export function WizardTeaser({
       {/* Paywall */}
       <div
         className="wizard-panel-lg rounded-3xl border border-accent/[0.16] relative overflow-hidden"
-        style={{ background: "rgba(251,146,60,0.03)" }}
+        style={{ background: "rgba(232, 130, 58,0.03)" }}
       >
         <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-accent/[0.07] blur-3xl pointer-events-none" />
         <div className="flex flex-col gap-7 md:gap-8">

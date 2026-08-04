@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
 };
 
-const ACCENT = '#fb923c';
+const ACCENT = '#E8823A';
 const TOP200_CODES = (top1000 as string[]).slice(0, 200);
 const TOP200_SET = new Set(TOP200_CODES);
 
@@ -380,13 +380,13 @@ const css = `
   .city-editorial{font-size:15px;color:var(--fg-3);line-height:1.8;margin:0;}
 
   .cta-block{margin-top:72px;display:flex;flex-direction:column;gap:14px;}
-  .cta-rapport{padding:32px 36px;border-radius:12px;background:rgba(251,146,60,0.06);border:1px solid rgba(251,146,60,0.2);display:flex;flex-direction:column;gap:10px;}
+  .cta-rapport{padding:32px 36px;border-radius:12px;background:rgba(232, 130, 58,0.06);border:1px solid rgba(232, 130, 58,0.2);display:flex;flex-direction:column;gap:10px;}
   .cta-rapport-title{font-family:var(--font-serif);font-size:22px;font-weight:var(--weight-title);color:var(--fg-1);line-height:1.3;}
   .cta-rapport-desc{font-size:14px;color:var(--fg-3);line-height:1.65;max-width:560px;}
   .cta-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;}
   .cta-btn{display:inline-flex;align-items:center;padding:11px 22px;background:${ACCENT};color:#060812;font-family:var(--font-sans);font-size:13px;font-weight:600;text-decoration:none;border-radius:6px;}
-  .cta-sec{display:inline-flex;align-items:center;padding:11px 20px;border:1px solid rgba(251,146,60,0.28);color:${ACCENT};font-family:var(--font-mono);font-size:11px;letter-spacing:0.06em;text-decoration:none;border-radius:6px;transition:border-color 0.2s;}
-  .cta-sec:hover{border-color:rgba(251,146,60,0.5);}
+  .cta-sec{display:inline-flex;align-items:center;padding:11px 20px;border:1px solid rgba(232, 130, 58,0.28);color:${ACCENT};font-family:var(--font-mono);font-size:11px;letter-spacing:0.06em;text-decoration:none;border-radius:6px;transition:border-color 0.2s;}
+  .cta-sec:hover{border-color:rgba(232, 130, 58,0.5);}
 
   .divider{height:1px;background:var(--bg-elev-3);margin:64px 0;}
   .page-footer{position:relative;z-index:2;max-width:860px;margin:0 auto;padding:28px 28px 56px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;font-family:var(--font-mono);font-size:11px;color:var(--fg-4);border-top:1px solid var(--border-1);}

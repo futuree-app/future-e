@@ -78,7 +78,7 @@ const css = `
   .substance-table tr:last-child td{border-bottom:none;}
   .badge{display:inline-block;font-family:var(--font-mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;white-space:nowrap;}
   .badge-red{background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.25);color:#fca5a5;}
-  .badge-orange{background:rgba(251,146,60,0.12);border:1px solid rgba(251,146,60,0.25);color:#fdba74;}
+  .badge-orange{background:rgba(232, 130, 58,0.12);border:1px solid rgba(232, 130, 58,0.25);color:#EEA36E;}
   .badge-violet{background:var(--accent-soft);border:1px solid var(--accent-border);color:#c4b5fd;}
   .badge-blue{background:rgba(96,165,250,0.12);border:1px solid rgba(96,165,250,0.25);color:#93c5fd;}
 

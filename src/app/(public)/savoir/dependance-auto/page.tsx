@@ -9,15 +9,15 @@ export const metadata: Metadata = {
 
 const css = `
   :root {
-  --accent: #fb923c;
-    --accent-soft: rgba(251,146,60,0.12);
-    --accent-border: rgba(251,146,60,0.28);
+  --accent: #E8823A;
+    --accent-soft: rgba(232, 130, 58,0.12);
+    --accent-border: rgba(232, 130, 58,0.28);
 }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--fg-1);font-family:var(--font-sans);font-size:16px;line-height:1.65;overflow-x:hidden;max-width:100vw;-webkit-font-smoothing:antialiased;}
 
   .orb{position:fixed;border-radius:50%;filter:blur(120px);opacity:0.32;pointer-events:none;z-index:0;animation:breathe 14s ease-in-out infinite;}
-  .orb-1{width:500px;height:500px;background:radial-gradient(circle,#fb923c 0%,transparent 70%);top:-130px;left:-100px;}
+  .orb-1{width:500px;height:500px;background:radial-gradient(circle,#E8823A 0%,transparent 70%);top:-130px;left:-100px;}
   .orb-2{width:440px;height:440px;background:radial-gradient(circle,#a78bfa 0%,transparent 70%);bottom:-110px;right:-90px;animation-delay:-5s;}
   .orb-3{width:360px;height:360px;background:radial-gradient(circle,#f87171 0%,transparent 70%);top:55%;left:62%;opacity:0.14;animation-delay:-9s;}
   @keyframes breathe{0%,100%{transform:scale(1) translate(0,0);}50%{transform:scale(1.15) translate(18px,-28px);}}
@@ -74,7 +74,7 @@ const css = `
   .stat-card-src{margin-top:10px;font-family:var(--font-mono);font-size:10px;color:var(--fg-4);}
 
   .map-figure{margin:44px -20px;padding:32px 28px 28px;background:var(--bg-elev);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--border-1);border-radius:8px;position:relative;overflow:hidden;}
-  .map-figure::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 65% 35%,rgba(251,146,60,0.06) 0%,transparent 55%);pointer-events:none;}
+  .map-figure::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 65% 35%,rgba(232, 130, 58,0.06) 0%,transparent 55%);pointer-events:none;}
   .france-map{display:block;width:100%;max-width:480px;height:auto;margin:0 auto 20px;position:relative;z-index:1;}
   .map-figure figcaption{font-size:13px;color:var(--fg-3);line-height:1.55;text-align:center;padding:18px 0 0;border-top:1px solid var(--border-1);position:relative;z-index:1;}
   .map-figure figcaption a{color:var(--fg-1);text-decoration:none;border-bottom:1px solid var(--border-hi);transition:color 0.2s,border-color 0.2s;}

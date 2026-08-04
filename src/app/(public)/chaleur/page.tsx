@@ -95,7 +95,7 @@ export default function ChaleurPage() {
       <style dangerouslySetInnerHTML={{ __html: css }} />
 
       <div className="orb" style={{ width: 600, height: 600, background: `radial-gradient(circle,${ACCENT} 0%,transparent 70%)`, top: -180, left: -150 }} />
-      <div className="orb" style={{ width: 380, height: 380, background: 'radial-gradient(circle,#fb923c 0%,transparent 70%)', bottom: -80, right: -80, animationDelay: '-6s', opacity: 0.13 }} />
+      <div className="orb" style={{ width: 380, height: 380, background: 'radial-gradient(circle,#E8823A 0%,transparent 70%)', bottom: -80, right: -80, animationDelay: '-6s', opacity: 0.13 }} />
 
       <Navbar />
 
@@ -164,7 +164,7 @@ export default function ChaleurPage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/chaleur-feuille.jpg" alt="Pollution et air" className="article-img" />
               <div className="article-body">
-                <span className="article-cat" style={{ background: 'rgba(251,146,60,0.12)', color: '#fb923c' }}>Air & sols</span>
+                <span className="article-cat" style={{ background: 'rgba(232, 130, 58,0.12)', color: '#E8823A' }}>Air & sols</span>
                 <div className="article-title">Pollutions invisibles</div>
                 <div className="article-desc">
                   La chaleur amplifie les pics d'ozone et de pollution fine. Comment lire les données de qualité de l'air et réduire son exposition.
@@ -177,7 +177,7 @@ export default function ChaleurPage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/hub-preparation.jpg" alt="Préparation aux catastrophes climatiques" className="article-img" />
               <div className="article-body">
-                <span className="article-cat" style={{ background: 'rgba(251,146,60,0.12)', color: '#fb923c' }}>Résilience</span>
+                <span className="article-cat" style={{ background: 'rgba(232, 130, 58,0.12)', color: '#E8823A' }}>Résilience</span>
                 <div className="article-title">Sommes-nous prêts à la prochaine catastrophe ?</div>
                 <div className="article-desc">
                   84 % des Français savent que leur territoire devra s'adapter. Seulement 26 % se sentent préparés. Le paradoxe de la résilience française, et comment le réduire.

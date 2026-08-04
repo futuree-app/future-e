@@ -44,7 +44,7 @@ const INDEX: Record<number, { label: string; color: string }> = {
   1: { label: "Très faible", color: "#4ade80" },
   2: { label: "Faible", color: "#86efac" },
   3: { label: "Modéré", color: "#facc15" },
-  4: { label: "Élevé", color: "#fb923c" },
+  4: { label: "Élevé", color: "#E8823A" },
   5: { label: "Très élevé", color: "#f87171" },
   6: { label: "Extrêmement élevé", color: "#991b1b" },
 };

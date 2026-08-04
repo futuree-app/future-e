@@ -1083,12 +1083,12 @@ function formatFrDate(iso: string): string {
 // LA TEINTE D'UN REGISTRE, seule table de correspondance de ce fichier. Identique à celle du dossier
 // (DossierDecisionSection) : la même chose dite au même endroit doit se peindre pareil.
 const REGISTER_TONE: Record<RegisterKey, string> = {
-  incompatibilities: "var(--red)",
-  alignments: "var(--green)",
-  mismatches: "var(--yellow)",
-  compromises: "var(--orange)",
-  unknowns: "var(--amethyst)",
-  verifications: "var(--info)",
+  incompatibilities: "var(--reg-incompatibilite)",
+  alignments: "var(--reg-alignement)",
+  mismatches: "var(--reg-ecart)",
+  compromises: "var(--reg-compromis)",
+  unknowns: "var(--reg-non-su)",
+  verifications: "var(--reg-controle)",
 };
 
 export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, catnat, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, climatType }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {

@@ -12,39 +12,35 @@ import { FactBody, EvidenceRow, MethodDetails, factSources, factChecks } from "@
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
 import { dossierAnchorId } from "@/lib/decision/dossier-anchors";
 
+// LES SIX REGISTRES DE DÉCISION DE LA CHARTE v1.7 (branchés le 04/08/2026). Chaque section du
+// dossier est l'un des six registres nommés par la charte, et porte sa teinte.
+//
+// Deux d'entre eux ne disaient pas ce que la charte dit, et le changement porte du sens :
+//
+// — L'ÉCART (`mismatches`) passe du jaune au VIOLET. Le raisonnement qui l'avait mis en jaune le
+//   30/07 tient toujours : un mismatch n'est pas une incompatibilité moins grave, c'est une NATURE
+//   différente (« établi, non éliminatoire, à ARBITRER », sans contrepartie), et une gradation
+//   rouge → orange aurait suggéré une échelle de gravité, donc un score, que l'ADR-0001 interdit.
+//   Le violet n'est pas davantage un rouge atténué : il satisfait la même exigence, et il est la
+//   teinte que la charte donne à ce registre.
+//
+// — LE NON SU (`unknowns`) quitte l'améthyste pour un GRIS NEUTRE. C'est l'arbitrage explicite de la
+//   charte : un statut inconnu ne reçoit AUCUNE valence. L'améthyste en portait une, et peignait
+//   « nous n'avons pas pu lire cette donnée ici » dans la même famille qu'un constat établi.
+//
+// Une seule table au lieu de deux : les teintes de la charte tiennent de 5,5:1 à 11,1:1 sur les
+// deux fonds de chaque thème, donc la même valeur porte le texte et la pastille. C'est le couple
+// vif/texte des couleurs génériques qui existait parce qu'elles échouaient sur le fond crème.
 const SECTION_ACCENT: Record<string, string> = {
-  incompatibilities: "var(--red)",
-  // ALIGNMENT (lot C) : le côté favorable, en VERT — un accent distinct des sections de problème
-  // (rouge/orange/améthyste/bleu). Même ton que le côté favorable d'un tradeoff : la couleur porte le sens.
-  alignments: "var(--green)",
-  // MISMATCH : la sixième section n'avait AUCUNE entrée ici et tombait sur le repli améthyste, donc
-  // sur la teinte de « ce que nous ne savons pas ». Un écart mesuré à la demande et une donnée
-  // illisible sont deux choses opposées, et l'écran les peignait à l'identique (corrigé le
-  // 30/07/2026).
-  //
-  // Le jaune, et pas un rouge atténué : un mismatch n'est pas une incompatibilité moins grave, c'est
-  // une NATURE différente. Il dit la distance entre ce que le lecteur a demandé et ce que le lieu
-  // est, sans que ce soit un défaut du lieu ni quelque chose qui se compense (l'assembleur le note :
-  // « établi, non éliminatoire, à ARBITRER », et « un mismatch n'est pas un compromis, pas de
-  // contrepartie »). Une gradation rouge → orange aurait suggéré une échelle de gravité, donc un
-  // score, que l'ADR-0001 interdit.
-  mismatches: "var(--yellow)",
-  compromises: "var(--orange)",
-  unknowns: "var(--amethyst)",
-  verifications: "var(--info)",
+  incompatibilities: "var(--reg-incompatibilite)",
+  alignments: "var(--reg-alignement)",
+  mismatches: "var(--reg-ecart)",
+  compromises: "var(--reg-compromis)",
+  unknowns: "var(--reg-non-su)",
+  verifications: "var(--reg-controle)",
 };
 
-// LA MÊME COULEUR, POUR DU TEXTE. Sur le fond crème du thème clair, les teintes vives tombaient
-// entre 1,43 et 2,61 contre 1 alors qu'elles peignent ce surtitre. `--x-ink` porte la version
-// lisible ; la pastille, elle, reste vive (un élément graphique demande 3:1, pas 4,5:1).
-const SECTION_INK: Record<string, string> = {
-  incompatibilities: "var(--red-ink)",
-  alignments: "var(--green-ink)",
-  mismatches: "var(--yellow-ink)",
-  compromises: "var(--orange-ink)",
-  unknowns: "var(--amethyst-ink)",
-  verifications: "var(--info-ink)",
-};
+const SECTION_INK: Record<string, string> = SECTION_ACCENT;
 
 const cap = (s: string): string => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
@@ -171,8 +167,11 @@ export function DossierDecisionSection({
           la pastille du titre, plus dans un filet qui rivalisait avec la réponse. */}
       <div className="grid gap-3.5">
         {sections.map((s) => {
-          const col = SECTION_ACCENT[s.key] ?? "var(--amethyst)";
-          const ink = SECTION_INK[s.key] ?? "var(--amethyst-ink)";
+          // Le repli est le registre du NON SU, jamais une teinte de constat : une section dont la
+          // clé n'est pas connue de cette table est, par définition, quelque chose qu'on ne sait pas
+          // qualifier. C'est exactement ce que le gris neutre dit.
+          const col = SECTION_ACCENT[s.key] ?? "var(--reg-non-su)";
+          const ink = SECTION_INK[s.key] ?? "var(--reg-non-su)";
 
           // CE QUI CORRESPOND (alignments) : une carte GROUPÉE, courte. Un point fort n'appelle aucune
           // action, donc pas la structure complète d'une carte de problème — deux lignes suffisent :

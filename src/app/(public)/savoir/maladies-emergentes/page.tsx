@@ -11,9 +11,9 @@ export const metadata: Metadata = {
 
 const css = String.raw`
   :root {
-    --accent: #fb923c;
-    --accent-soft: rgba(251,146,60,0.10);
-    --accent-border: rgba(251,146,60,0.28);
+    --accent: #E8823A;
+    --accent-soft: rgba(232, 130, 58,0.10);
+    --accent-border: rgba(232, 130, 58,0.28);
     --red: #f87171;
     --red-soft: rgba(248,113,113,0.09);
     --blue: #60a5fa;
@@ -28,7 +28,7 @@ const css = String.raw`
   html, body { margin:0; padding:0; background:var(--bg); color:var(--fg-1); font-family:var(--font-sans); font-size:16px; line-height:1.65; overflow-x:hidden; -webkit-font-smoothing:antialiased; }
 
   .orb { position:fixed; border-radius:50%; filter:blur(120px); opacity:0.26; pointer-events:none; z-index:0; animation:breathe 14s ease-in-out infinite; }
-  .orb-1 { width:520px; height:520px; background:radial-gradient(circle,#fb923c 0%,transparent 70%); top:-160px; left:-100px; }
+  .orb-1 { width:520px; height:520px; background:radial-gradient(circle,#E8823A 0%,transparent 70%); top:-160px; left:-100px; }
   .orb-2 { width:440px; height:440px; background:radial-gradient(circle,#a78bfa 0%,transparent 70%); bottom:-100px; right:-80px; animation-delay:-6s; }
   .orb-3 { width:380px; height:380px; background:radial-gradient(circle,#60a5fa 0%,transparent 70%); top:40%; left:55%; opacity:0.14; animation-delay:-11s; }
   @keyframes breathe { 0%,100%{transform:scale(1) translate(0,0);} 50%{transform:scale(1.14) translate(18px,-28px);} }
@@ -85,7 +85,7 @@ const css = String.raw`
   .disease-desc { font-size:13px; color:var(--fg-3); line-height:1.6; }
   .disease-badge { font-family:var(--font-mono); font-size:9px; letter-spacing:0.08em; text-transform:uppercase; padding:2px 8px; border-radius:3px; white-space:nowrap; }
   .badge-etabli { background:rgba(248,113,113,0.12); border:1px solid rgba(248,113,113,0.25); color:#fca5a5; }
-  .badge-expansion { background:rgba(251,146,60,0.12); border:1px solid rgba(251,146,60,0.25); color:#fdba74; }
+  .badge-expansion { background:rgba(232, 130, 58,0.12); border:1px solid rgba(232, 130, 58,0.25); color:#EEA36E; }
   .badge-emergent { background:rgba(251,191,36,0.10); border:1px solid rgba(251,191,36,0.2); color:#fde68a; }
   .badge-surveille { background:rgba(167,139,250,0.10); border:1px solid rgba(167,139,250,0.22); color:#c4b5fd; }
 
@@ -234,7 +234,7 @@ const articleHtml = String.raw`
     </div>
 
     <div class="disease-card">
-      <div class="disease-icon" style="background:rgba(251,146,60,0.12);">🐦</div>
+      <div class="disease-icon" style="background:rgba(232, 130, 58,0.12);">🐦</div>
       <div class="disease-body">
         <div class="disease-name">Virus West Nile <span class="disease-badge badge-etabli">Établi</span></div>
         <p class="disease-desc">30 cas humains en PACA en 2025, un record. Transmis par des moustiques du genre Culex à partir d'oiseaux réservoirs. 37 % des cas développent des formes neurologiques sévères. En 2025, pour la première fois, une circulation virale a été clairement établie dans le Vaucluse. En 2022, le virus West Nile a émergé de façon inattendue sur la côte atlantique, en Nouvelle-Aquitaine. <span class="src">Source : Santé publique France · CNR Arbovirus</span></p>

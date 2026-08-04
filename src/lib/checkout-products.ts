@@ -11,16 +11,22 @@ export type CheckoutProduct = {
   features: string[];
 };
 
+// LE SLUG NE SUIT PAS LE NOM COMMERCIAL, et c'est délibéré. « rapport-complet » est écrit dans les
+// metadata des PaymentIntent Stripe déjà émis et relu par le webhook (`api/stripe/webhook`) pour
+// décider quel droit poser. Le renommer casserait la relecture des paiements passés et l'URL
+// /checkout/rapport-complet déjà indexée. Le slug est un identifiant technique, le `title` est ce
+// que le lecteur voit : les deux ont cessé de coïncider le 04/08/2026, quand le produit d'entrée a
+// arrêté de s'appeler « complet » alors qu'il est la première des trois échelles.
 export const CHECKOUT_PRODUCTS: Record<CheckoutProductSlug, CheckoutProduct> = {
   "rapport-complet": {
     slug: "rapport-complet",
-    title: "Rapport interactif",
+    title: "Dossier de territoire",
     subtitle:
-      "Une lecture interactive de ce que le territoire devient, à conserver et à enrichir.",
+      "Ce que devient une commune, lu depuis votre projet. La première des trois échelles.",
     amount: 14,
     priceLabel: "14 € une fois",
     productType: "one-shot",
-    ctaLabel: "Débloquer le rapport",
+    ctaLabel: "Ouvrir le dossier de territoire",
     features: [
       "La lecture du territoire : ce qu'il devient face au climat (canicule, inondation, sécheresse)",
       "Les sources publiques croisées et rendues lisibles pour cette commune",
@@ -31,6 +37,10 @@ export const CHECKOUT_PRODUCTS: Record<CheckoutProductSlug, CheckoutProduct> = {
       // Une promesse d'enrichissement gratuit dans le produit le moins cher rendrait tout achat
       // ultérieur illégitime aux yeux de qui l'a lue.
       "À conserver, et régénérable une fois par an",
+      // Ajoutée le 04/08/2026 : l'escalier était CODÉ dans `dossier-pricing.ts` (les 14 € sont
+      // déduits des 39 € du dossier d'adresse) et affiché nulle part. Le lecteur pouvait croire
+      // qu'acheter le territoire d'abord lui coûterait 53 € au total.
+      "Déduit des 39 € si vous ouvrez ensuite le dossier d'adresse de cette commune",
     ],
   },
 };

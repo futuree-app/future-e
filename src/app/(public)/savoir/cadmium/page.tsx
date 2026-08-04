@@ -35,7 +35,7 @@ const css = `
   }
   .orb-1 { width:520px;height:520px;background:radial-gradient(circle,#f87171 0%,transparent 70%);top:-140px;left:-120px; }
   .orb-2 { width:460px;height:460px;background:radial-gradient(circle,#a78bfa 0%,transparent 70%);bottom:-120px;right:-100px;animation-delay:-5s; }
-  .orb-3 { width:380px;height:380px;background:radial-gradient(circle,#fb923c 0%,transparent 70%);top:50%;left:60%;opacity:0.18;animation-delay:-9s; }
+  .orb-3 { width:380px;height:380px;background:radial-gradient(circle,#E8823A 0%,transparent 70%);top:50%;left:60%;opacity:0.18;animation-delay:-9s; }
   @keyframes breathe {
     0%,100% { transform: scale(1) translate(0,0); }
     50% { transform: scale(1.15) translate(20px,-30px); }

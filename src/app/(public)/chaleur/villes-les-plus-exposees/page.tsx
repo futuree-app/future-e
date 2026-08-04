@@ -187,7 +187,7 @@ export default async function ChaleurTop10() {
     <>
       <style dangerouslySetInnerHTML={{ __html: css }} />
       <div className="orb" style={{ width: 560, height: 560, background: `radial-gradient(circle,${ACCENT} 0%,transparent 70%)`, top: -200, left: -180 }} />
-      <div className="orb" style={{ width: 300, height: 300, background: 'radial-gradient(circle,#fb923c 0%,transparent 70%)', bottom: -60, right: -80, animationDelay: '-8s', opacity: 0.11 }} />
+      <div className="orb" style={{ width: 300, height: 300, background: 'radial-gradient(circle,#E8823A 0%,transparent 70%)', bottom: -60, right: -80, animationDelay: '-8s', opacity: 0.11 }} />
 
       <Navbar />
 

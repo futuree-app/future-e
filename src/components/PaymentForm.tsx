@@ -90,7 +90,7 @@ export function PaymentForm({ onSuccess, submitLabel, returnUrl, onSubmit }: Pay
             width: "100%",
             padding: "16px",
             borderRadius: 8,
-            background: loading ? "rgba(251,146,60,0.5)" : "#fb923c",
+            background: loading ? "rgba(232, 130, 58,0.5)" : "#E8823A",
             color: "#060812",
             fontFamily: "var(--font-sans)",
             fontSize: 15,
