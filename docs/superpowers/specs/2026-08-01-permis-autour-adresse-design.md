@@ -12,7 +12,22 @@
 
 ## Ce qui reste ouvert, vérifié dans le code le 01/08/2026
 
-**1. Les permis ne produisent aucun `DecisionFact`.** `src/lib/decision/decision-assembler.ts:32`
+**1. Les permis ne produisent aucun `DecisionFact`. CORRIGÉ le 04/08/2026.** La règle
+`autour.permis` vit dans `src/lib/decision/permis-rules.ts` et est branchée au `REGISTRY`. Elle rend
+`uncertain` quand le registre n'a pas été consulté, deux `not_applicable` de raisons distinctes
+quand il l'a été sans rien retenir, et un fait unique `secondary` au grain quartier dès qu'une
+autorisation non achevée existe. Spec : `2026-08-03-permis-dans-le-moteur-design.md`, plan :
+`2026-08-03-permis-dans-le-moteur.md`, livré en quatre commits (`c6df036`, `229a8b5`, `9bd0699`,
+`c622282`), 23 tests de plus, tous verts.
+
+**Ce qui reste à faire sur ce point** : la vérification à l'écran sur trois adresses réelles, décrite
+en fin de plan. Elle demande une session authentifiée et un dossier d'adresse ouvert, donc elle
+n'est pas automatisable. Le compte du verdict en dépend : ce lot ajoute un contrôle à la liste, et
+la promesse gravée le 01/08 (« le lecteur compte les cartes et retombe sur le chiffre ») casse si le
+nouveau fait n'est pas compté.
+
+*Le texte d'origine du point, conservé parce qu'il dit pourquoi le chantier existait :*
+`src/lib/decision/decision-assembler.ts:32`
 le dit lui-même : « les permis autour de l'adresse, les abords et la conclusion Autour produisent
 des constats **hors moteur** ». Ils n'entrent donc ni dans le verdict, ni dans la minute, ni dans
 `ControlesDuDossier`, et c'est la raison pour laquelle le titre de cette liste dit « établis par nos
