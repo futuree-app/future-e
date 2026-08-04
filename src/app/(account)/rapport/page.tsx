@@ -22,6 +22,7 @@ import { listDossiers } from "@/lib/address-dossier-store";
 import { communeParent } from "@/lib/plm";
 import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
+import { Logo } from "@/components/Logo";
 
 // L'IDENTITÉ D'UNE ÉCHELLE EST SON RANG, SON NOM ET SON GRAIN. Ni couleur, ni icône.
 //
@@ -505,8 +506,8 @@ export default async function RapportPage() {
       {/* Footer */}
       <footer className="relative z-[2] border-t border-[var(--border-1)]">
         <div className="max-w-[1100px] mx-auto px-5 sm:px-7 py-9 flex items-center justify-between gap-6 flex-wrap">
-          <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "var(--font-brand)" }}>
-            futur<span className="not-italic" style={{ color: "var(--accent-ink)" }}>•</span>e
+          <div className="text-label">
+            <Logo height={24} />
           </div>
           {/* Même pied de page que la landing, mêmes destinations : voir le commentaire dans
               FutureELanding.tsx. Les deux listes doivent rester alignées. */}

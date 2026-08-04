@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ProForm } from '@/components/ProForm';
+import { Logo } from "@/components/Logo";
 
 export const metadata: Metadata = {
   title: 'futur•e Pro · Outil de lecture territoriale pour les professionnels',
@@ -139,8 +140,8 @@ export default function ProfessionnelsPage() {
 
       <nav className="nav">
         <div className="nav-inner">
-          <Link href="/" style={{ fontFamily: "var(--font-brand)", fontSize: 22, fontStyle: 'italic', color: 'var(--fg-1)', textDecoration: 'none', letterSpacing: '-0.01em' }}>
-            futur<span style={{ color: ACCENT, fontStyle: 'normal' }}>•</span>e
+          <Link href="/" aria-label="futur•e, accueil" style={{ display: 'flex', alignItems: 'center', color: 'var(--fg-1)', textDecoration: 'none' }}>
+            <Logo height={26} title={null} />
           </Link>
           <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
             <Link href="/chaleur" className="nav-link nav-link-hide">Explorer</Link>
@@ -355,8 +356,8 @@ export default function ProfessionnelsPage() {
 
       <footer style={{ borderTop: '1px solid var(--border-1)', padding: '36px 28px', position: 'relative', zIndex: 2 }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
-          <Link href="/" style={{ fontFamily: "var(--font-brand)", fontSize: 22, fontStyle: 'italic', color: 'var(--fg-1)', textDecoration: 'none' }}>
-            futur<span style={{ color: ACCENT, fontStyle: 'normal' }}>•</span>e
+          <Link href="/" aria-label="futur•e, accueil" style={{ display: 'flex', alignItems: 'center', color: 'var(--fg-1)', textDecoration: 'none' }}>
+            <Logo height={26} title={null} />
           </Link>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: '#6b7388', letterSpacing: '0.06em', textTransform: 'uppercase', lineHeight: 1.7 }}>
             Données publiques françaises · Aucune publicité<br />

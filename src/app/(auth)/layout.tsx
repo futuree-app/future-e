@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,8 +10,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
       <div className="auth-shell-stage">
         <div className="auth-shell-brand">
-          <Link className="auth-brandmark" href="/">
-            futur<span>•</span>e
+          <Link className="auth-brandmark" href="/" aria-label="futur•e, accueil">
+            <Logo height={30} title={null} />
           </Link>
           <p className="auth-brand-kicker">Projection climatique personnelle</p>
         </div>

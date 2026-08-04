@@ -85,7 +85,7 @@ const css = `
 
   .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:var(--bg-card);border-bottom:1px solid var(--border-1);}
   .nav-inner{max-width:960px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
-  .brand{font-family:var(--font-brand);font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
+  .brand{font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
   .crumb{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.06em;display:flex;align-items:center;gap:0;}
   .crumb a{color:var(--fg-3);text-decoration:none;transition:color 0.2s;}
   .crumb a:hover{color:var(--fg-1);}

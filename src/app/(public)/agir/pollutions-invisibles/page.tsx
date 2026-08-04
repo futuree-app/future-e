@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { PollutionLookup } from '@/components/PollutionLookup';
 import Navbar from '@/components/Navbar';
+import { Logo } from "@/components/Logo";
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +34,7 @@ const css = `
 
   .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:var(--bg-card);border-bottom:1px solid var(--border-1);}
   .nav-inner{max-width:1100px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
-  .brand{font-family:var(--font-brand);font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
+  .brand{font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
   .brand-dot{color:var(--accent-ink);font-style:normal;}
   .nav-crumb{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.08em;text-transform:uppercase;}
   .nav-crumb a{color:var(--fg-3);text-decoration:none;}
@@ -395,8 +396,8 @@ export default function AgirPollutionsInvisiblesPage() {
       </article>
 
       <footer className="page-footer">
-        <Link href="/" className="brand" style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: '18px', color: 'var(--fg-3)', textDecoration: 'none' }}>
-          futur<span style={{ color: 'var(--accent)', fontStyle: 'normal' }}>•</span>e
+        <Link href="/" className="brand" aria-label="futur•e, accueil" style={{ display: 'flex', alignItems: 'center', color: 'var(--fg-3)', textDecoration: 'none' }}>
+          <Logo height={22} title={null} />
         </Link>
         <div className="footer-note">
           Données publiques françaises · Aucune publicité<br />

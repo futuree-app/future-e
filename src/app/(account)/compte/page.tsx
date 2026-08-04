@@ -15,6 +15,7 @@ import { formatEuro, formatDateFr } from "@/lib/invoice";
 import { LEGAL_ENTITY } from "@/lib/legal-entity";
 import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
+import { Logo } from "@/components/Logo";
 
 // Les emoji d'icône ont été retirés le 30/07/2026, sans substitution : ils sont interdits
 // (doctrine/editoriale.md) et l'identité d'une échelle est son rang, son nom et son grain
@@ -330,8 +331,8 @@ export default async function ComptePage() {
       {/* Footer */}
       <footer className="relative z-[2] border-t border-[var(--border-1)]">
         <div className="max-w-[1100px] mx-auto px-5 sm:px-7 py-8 flex items-center justify-between gap-6 flex-wrap">
-          <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "var(--font-brand)" }}>
-            futur<span className="not-italic" style={{ color: "var(--accent-ink)" }}>•</span>e
+          <div className="text-label">
+            <Logo height={24} />
           </div>
           <div className="flex gap-5 flex-wrap">
             {[

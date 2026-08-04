@@ -15,6 +15,7 @@ import { deCommune } from '@/lib/typography';
 import posthog from 'posthog-js';
 import { HorizonSwitch, type Horizon } from '@/components/HorizonSwitch';
 import HeroProjetTerritoires from '@/components/HeroProjetTerritoires';
+import { Logo } from "@/components/Logo";
 
 const C = {
   bg: 'var(--bg)',
@@ -1658,7 +1659,6 @@ export default function FutureELanding() {
       gap: 24,
     },
     brand: {
-      fontFamily: "var(--font-brand)",
       fontSize: 22,
       fontStyle: 'italic',
       color: C.text,
@@ -3588,8 +3588,8 @@ export default function FutureELanding() {
 
       <footer style={{ borderTop: `1px solid ${C.border}`, position: 'relative', zIndex: 2 }}>
         <div style={styles.footer}>
-          <div style={styles.footerBrand}>
-            futur<span style={{ color: C.orange }}>•</span>e
+          <div style={{ ...styles.footerBrand, display: 'flex', alignItems: 'center' }}>
+            <Logo height={24} />
           </div>
           <div style={styles.footerLinks}>
             {/* Ces cinq liens pointaient tous vers `#`, ici et à l'identique dans le pied de page de

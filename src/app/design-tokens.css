@@ -39,18 +39,13 @@
   font-display: swap;
   src: url('/fonts/JetBrainsMono-Variable.woff2') format('woff2-variations');
 }
-/* LA MARQUE GARDE SON DESSIN. Le logo « futur•e » est du texte, pas une image, et il est écrit en
-   Instrument Serif italique depuis l'origine (les fichiers vivent aussi dans `logo/fonts/`).
-   Changer la police de l'interface ne change pas la marque : `--font-brand` isole ce seul usage.
-   Le jour où le logo passe à un SVG (ils existent dans `logo/svg/`), ces deux règles disparaissent
-   et Instrument Serif quitte le produit. */
-@font-face {
-  font-family: 'Instrument Serif';
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts/InstrumentSerif-Italic.ttf') format('truetype');
-}
+/* LA MARQUE EST UN DESSIN, PLUS UNE POLICE (04/08/2026). Le logo était composé en Instrument Serif
+   italique et réécrit à la main dans 18 fichiers. La charte v1.7 livre un mot-symbole vectoriel dont
+   la coupe du `r`, les fûts de 35 unités et la position du point sont des valeurs décidées : aucune
+   police ne le produit. Il vit désormais dans `components/Logo.tsx`, et le `@font-face` d'Instrument
+   Serif comme le token `--font-brand` ont disparu avec lui — c'est la bascule que ce bloc annonçait.
+
+   `--font-serif` n'est PAS concernée : malgré son nom, elle vaut Archivo (270 usages). */
 
 :root {
   /* ============ MODE-AGNOSTIC TOKENS ============ */
@@ -261,8 +256,6 @@
   --font-serif:     "Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
   --font-sans:      "Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
   --font-mono:      "JetBrains Mono", "SF Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
-  /* Le logo, et lui seul. */
-  --font-brand:     "Instrument Serif", "Iowan Old Style", Georgia, serif;
 
   /* L'ÉCHELLE DE RÔLES. Un nom dit un USAGE, jamais un niveau de titre HTML ni une valeur.
      ================================================================================

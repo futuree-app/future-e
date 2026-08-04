@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { Logo } from "@/components/Logo";
 
 export const metadata: Metadata = {
   title: 'Maladies émergentes : ce que le changement climatique déplace vers la France · futur•e',
@@ -36,7 +37,7 @@ const css = String.raw`
 
   .nav { position:sticky; top:0; z-index:50; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); background:var(--bg-card); border-bottom:1px solid var(--border-1); }
   .nav-inner { max-width:800px; margin:0 auto; padding:16px 28px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
-  .brand { font-family:var(--font-brand); font-size:22px; font-style:italic; color:var(--fg-1); text-decoration:none; letter-spacing:-0.01em; }
+  .brand { font-size:22px; font-style:italic; color:var(--fg-1); text-decoration:none; letter-spacing:-0.01em; }
   .brand-dot { color:var(--accent-ink); font-style:normal; }
   .nav-crumb { font-family:var(--font-mono); font-size:11px; color:var(--fg-4); letter-spacing:0.08em; text-transform:uppercase; }
   .nav-crumb a { color:var(--fg-3); text-decoration:none; }
@@ -427,8 +428,8 @@ export default function MaladiesEmergentesPage() {
 
       <nav className="nav">
         <div className="nav-inner">
-          <Link href="/" className="brand">
-            futur<span className="brand-dot">•</span>e
+          <Link href="/" className="brand" aria-label="futur•e, accueil">
+            <Logo height={26} title={null} />
           </Link>
           <div className="nav-crumb">
             <Link href="/">Pages Savoir</Link>
@@ -442,8 +443,8 @@ export default function MaladiesEmergentesPage() {
       <article className="article" dangerouslySetInnerHTML={{ __html: articleHtml }} />
 
       <footer className="page-footer">
-        <Link href="/" className="brand" style={{ fontSize: 18, color: 'var(--fg-3)' }}>
-          futur<span className="brand-dot">•</span>e
+        <Link href="/" className="brand" aria-label="futur•e, accueil" style={{ color: 'var(--fg-3)' }}>
+          <Logo height={22} title={null} />
         </Link>
         <div className="footer-note">Données publiques françaises · Aucune publicité<br />Page Savoir · Maladies émergentes · Mai 2026</div>
       </footer>
