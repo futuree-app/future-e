@@ -1742,9 +1742,12 @@ export default function FutureELanding() {
     h1: {
       fontFamily: "var(--font-serif)",
       fontWeight: 400,
-      fontSize: 'clamp(42px,5vw,68px)',
+      fontSize: 'var(--text-display)',
       lineHeight: 1.06,
-      letterSpacing: -1.5,
+      // En em, pas en px : -1,5 px avait été réglé à l'œil sur un titre de 68 px (-0,022 em). Le
+      // même -1,5 px sur les 46 px du plafond actuel vaut -0,033 em, un serrage que personne n'a
+      // choisi et qui colle les lettres. En em, le réglage suit la taille au lieu de la subir.
+      letterSpacing: '-0.022em',
       margin: '0 0 24px',
       color: C.text,
     },
@@ -1930,7 +1933,7 @@ export default function FutureELanding() {
     sectionTitle: {
       fontFamily: "var(--font-serif)",
       fontWeight: 400,
-      fontSize: 'clamp(28px,3.5vw,40px)',
+      fontSize: 'var(--text-title)',
       lineHeight: 1.15,
       letterSpacing: -0.5,
       margin: '0 0 8px',
@@ -2140,7 +2143,7 @@ export default function FutureELanding() {
     amnesieTitle: {
       fontFamily: "var(--font-serif)",
       fontWeight: 400,
-      fontSize: 'clamp(26px,3vw,38px)',
+      fontSize: 'var(--text-title)',
       lineHeight: 1.2,
       letterSpacing: -0.5,
       margin: '0 0 24px',
@@ -2790,7 +2793,7 @@ export default function FutureELanding() {
             <h2 style={{
               fontFamily: "var(--font-serif)",
               fontWeight: 400,
-              fontSize: 'clamp(26px, 2.6vw, 38px)',
+              fontSize: 'var(--text-title)',
               lineHeight: 1.12, letterSpacing: '-0.5px',
               color: C.text, margin: '0 0 20px',
             }}>
@@ -3096,7 +3099,7 @@ export default function FutureELanding() {
             <h2 style={{
               fontFamily: "var(--font-serif)",
               fontWeight: 400,
-              fontSize: 'clamp(22px, 2.4vw, 30px)',
+              fontSize: 'var(--text-section)',
               lineHeight: 1.2, letterSpacing: '-0.4px',
               color: C.text, margin: '0 0 10px',
             }}>
@@ -3173,7 +3176,7 @@ export default function FutureELanding() {
           <h2
             style={{
               fontFamily: "var(--font-serif)",
-              fontSize: 'clamp(26px, 3vw, 38px)',
+              fontSize: 'var(--text-title)',
               fontWeight: 400,
               color: C.text,
               margin: '0 0 12px',

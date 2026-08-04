@@ -118,7 +118,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
           >
             {/* Le lettrage suit `color` du lien ; `title={null}` parce que le `aria-label` du lien
                 porte déjà le nom, sinon un lecteur d'écran l'annonce deux fois. */}
-            <Logo height={26} title={null} />
+            <Logo height={22} title={null} />
           </Link>
 
           {/* Desktop links */}

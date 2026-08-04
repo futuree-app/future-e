@@ -101,7 +101,7 @@ const css = `
   /* Section headers */
   .section{margin:64px 0 0;}
   .section-eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:${ACCENT};margin-bottom:10px;}
-  .section-title{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(22px,2.8vw,32px);line-height:1.15;letter-spacing:-0.015em;margin:0 0 6px;color:var(--fg-1);}
+  .section-title{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-title);line-height:1.15;letter-spacing:-0.015em;margin:0 0 6px;color:var(--fg-1);}
   .section-sub{font-size:14px;color:var(--fg-4);margin:0 0 28px;font-family:var(--font-mono);}
 
   /* Article cards */
@@ -250,7 +250,7 @@ export default async function InondationCommune({
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: ACCENT, marginBottom: 12 }}>
             Inondation et submersion · Projections 2050
           </div>
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(26px, 4vw, 42px)', fontWeight: 400, color: 'var(--fg-1)', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 18px' }}>
+          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'var(--text-display)', fontWeight: 400, color: 'var(--fg-1)', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 18px' }}>
             À {communeName}, quel est le risque d&apos;inondation réel ?
           </h1>
           <p style={{ fontSize: 15, color: 'var(--fg-3)', lineHeight: 1.75, maxWidth: 640, margin: '0 0 12px' }}>

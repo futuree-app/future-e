@@ -264,17 +264,26 @@
      pendant que 53 valeurs arbitraires en `text-[Npx]` faisaient le travail. Une échelle qu'on
      n'appelle pas n'est pas une échelle, c'est une intention.
      ================================================================================
-     Les valeurs sont calées sur l'usage RÉEL mesuré le 01/08/2026, pour que la migration ne
-     déplace pas les tailles majoritaires. Ce qui change, ce sont les 24 clamps distincts (ramenés à
-     trois rôles) et les 9 demi-pixels (arrondis), deux poches de bruit sans intention.
+     Les valeurs ont d'abord été calées sur l'usage RÉEL mesuré le 01/08/2026, pour que la migration
+     ne déplace pas les tailles majoritaires. Ce qui changeait, c'étaient les 24 clamps distincts
+     (ramenés à trois rôles) et les 9 demi-pixels (arrondis), deux poches de bruit sans intention.
+     ================================================================================
+     LES TROIS PLAFONDS ONT BAISSÉ LE 04/08/2026, et cette fois c'est une décision, pas un relevé.
+     Trois titres se lisent l'un après l'autre en descendant une page ; le premier n'a pas besoin de
+     crier pour être premier, c'est l'ÉCART entre les trois qui porte la hiérarchie. La borne basse
+     bouge moins que le plafond : sur un téléphone, la place manque déjà, le problème n'y était pas.
+     Le rapport display/body passe de 3,4 à 2,9, et l'écart display→title reste de 1,5.
+     Ce que la baisse a rendu possible : le h1 de la landing débordait de 27 px de sa colonne de
+     490 px à son ancien plafond de 68 px. À 46, il mesure 349,6 px et cesse de renvoyer son `?`
+     à la ligne, sans qu'aucun `max-w` ne vienne couper la phrase (cf. AGENTS.md).
      ================================================================================
      Choisir un rôle : se demander CE QUE LE TEXTE FAIT, jamais la place qu'on veut lui donner.
      Deux rôles voisins (`dense` et `meta`) existent parce qu'un corps de carte et une source ne
      font pas le même travail, pas parce qu'un pixel les sépare. */
 
-  --text-display:   clamp(34px, 4vw, 54px);   /* titre de page, un seul par écran */
-  --text-title:     clamp(26px, 3vw, 38px);   /* titre de section */
-  --text-section:   clamp(20px, 2.4vw, 26px); /* titre de bloc, de carte, de groupe */
+  --text-display:   clamp(30px, 3.6vw, 46px); /* titre de page, un seul par écran */
+  --text-title:     clamp(23px, 2.6vw, 31px); /* titre de section */
+  --text-section:   clamp(19px, 2.1vw, 23px); /* titre de bloc, de carte, de groupe */
   --text-lede:      17px;                     /* chapô sous un titre de page */
   --text-body:      16px;                     /* corps de lecture, prose suivie */
   --text-dense:     14px;                     /* corps d'une carte, d'une liste, d'un tableau */

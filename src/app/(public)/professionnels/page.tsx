@@ -159,7 +159,7 @@ export default function ProfessionnelsPage() {
             <span className="hero-badge-dot" />
             Avant-première · Lancement automne 2026
           </div>
-          <h1 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 'clamp(40px,6vw,72px)', lineHeight: 1.05, letterSpacing: '-0.025em', margin: '0 0 28px', color: 'var(--fg-1)' }}>
+          <h1 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 'var(--text-display)', lineHeight: 1.05, letterSpacing: '-0.025em', margin: '0 0 28px', color: 'var(--fg-1)' }}>
             L'outil de lecture<br />territoriale<br />
             <em style={{ fontStyle: 'italic', color: ACCENT }}>pour vos rendez-vous client.</em>
           </h1>
@@ -196,7 +196,7 @@ export default function ProfessionnelsPage() {
         <div style={{ padding: '80px 28px' }}>
           <div className="section-wrap">
             <div className="section-kicker">Quatre professions, quatre angles</div>
-            <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 'clamp(30px,4vw,46px)', lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--fg-1)', margin: '0 0 24px' }}>
+            <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 'var(--text-title)', lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--fg-1)', margin: '0 0 24px' }}>
               Pas le même besoin,<br />
               <em style={{ fontStyle: 'italic', color: ACCENT }}>pas le même livrable.</em>
             </h2>
@@ -239,7 +239,7 @@ export default function ProfessionnelsPage() {
         <div style={{ padding: '96px 28px' }}>
           <div className="section-wrap">
             <div className="section-kicker">Pourquoi maintenant</div>
-            <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 'clamp(30px,4vw,46px)', lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--fg-1)', margin: '0 0 24px' }}>
+            <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 'var(--text-title)', lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--fg-1)', margin: '0 0 24px' }}>
               Le sujet entre<br />
               <em style={{ fontStyle: 'italic', color: ACCENT }}>dans vos rendez-vous.</em>
             </h2>
@@ -267,7 +267,7 @@ export default function ProfessionnelsPage() {
         <div style={{ padding: '96px 28px', maxWidth: 980, margin: '0 auto' }}>
           <div className="scene-inner">
             <div className="section-kicker">Un rendez-vous client</div>
-            <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 'clamp(26px,3.4vw,38px)', lineHeight: 1.2, fontWeight: 400, letterSpacing: '-0.015em', margin: '0 0 32px', color: 'var(--fg-1)' }}>
+            <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 'var(--text-title)', lineHeight: 1.2, fontWeight: 400, letterSpacing: '-0.015em', margin: '0 0 32px', color: 'var(--fg-1)' }}>
               Avant futur•e, et <em style={{ fontStyle: 'italic', color: ACCENT }}>après.</em>
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 36, position: 'relative', zIndex: 1 }}>
@@ -306,7 +306,7 @@ export default function ProfessionnelsPage() {
         {/* ── PRINCIPES ────────────────────────────────────────────────── */}
         <div style={{ padding: '96px 28px', maxWidth: 760, margin: '0 auto' }}>
           <div className="section-kicker">Trois principes éditoriaux</div>
-          <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 'clamp(30px,4vw,46px)', lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--fg-1)', margin: '0 0 48px' }}>
+          <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: 'var(--text-title)', lineHeight: 1.15, letterSpacing: '-0.02em', color: 'var(--fg-1)', margin: '0 0 48px' }}>
             Ce qui rend cet outil<br />
             <em style={{ fontStyle: 'italic', color: ACCENT }}>professionnellement utilisable.</em>
           </h2>
@@ -341,7 +341,7 @@ export default function ProfessionnelsPage() {
         <div id="inscription" style={{ padding: '96px 28px 120px', maxWidth: 680, margin: '0 auto' }}>
           <div className="form-card">
             <div className="section-kicker">Avant-première professionnelle</div>
-            <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 'clamp(28px,3.6vw,40px)', lineHeight: 1.15, fontWeight: 400, letterSpacing: '-0.015em', margin: '0 0 16px', color: 'var(--fg-1)' }}>
+            <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 'var(--text-title)', lineHeight: 1.15, fontWeight: 400, letterSpacing: '-0.015em', margin: '0 0 16px', color: 'var(--fg-1)' }}>
               Recevez l'accès<br />
               <em style={{ fontStyle: 'italic', color: ACCENT }}>en avant-première.</em>
             </h2>

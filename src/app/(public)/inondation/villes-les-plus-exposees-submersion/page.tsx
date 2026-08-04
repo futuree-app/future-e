@@ -352,7 +352,7 @@ const css = `
   .page{position:relative;z-index:2;max-width:860px;margin:0 auto;padding:72px 28px 120px;}
   .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:${ACCENT};margin-bottom:18px;display:flex;align-items:center;gap:10px;}
   .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:${ACCENT};box-shadow:0 0 10px ${ACCENT};flex-shrink:0;}
-  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(32px,5vw,54px);line-height:1.08;letter-spacing:-0.02em;margin:0 0 20px;color:var(--fg-1);}
+  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-display);line-height:1.08;letter-spacing:-0.02em;margin:0 0 20px;color:var(--fg-1);}
   h1 em{font-style:italic;color:${ACCENT};}
   .lede{font-size:17px;color:var(--fg-3);margin:0 0 16px;line-height:1.75;max-width:680px;}
   .hero-image{width:100%;height:auto;display:block;border-radius:12px;margin:0 0 28px;border:1px solid var(--border-1);}
@@ -363,7 +363,7 @@ const css = `
   .city-header{display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap;}
   .city-rank{font-family:var(--font-serif);font-size:clamp(38px,5vw,58px);font-weight:var(--weight-title);color:${ACCENT};opacity:0.22;line-height:1;letter-spacing:-0.04em;flex-shrink:0;min-width:52px;}
   .city-info{flex:1;}
-  .city-name{font-family:var(--font-serif);font-size:clamp(22px,3vw,30px);font-weight:var(--weight-title);color:var(--fg-1);line-height:1.1;}
+  .city-name{font-family:var(--font-serif);font-size:var(--text-section);font-weight:var(--weight-title);color:var(--fg-1);line-height:1.1;}
   .city-dept{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);margin-top:3px;}
   .city-score-block{text-align:right;flex-shrink:0;}
   .city-score-num{font-family:var(--font-serif);font-size:clamp(32px,4vw,48px);font-weight:var(--weight-title);color:${ACCENT};line-height:1;letter-spacing:-0.02em;}
