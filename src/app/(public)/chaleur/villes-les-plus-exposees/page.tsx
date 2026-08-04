@@ -171,10 +171,14 @@ const css = `
 
 type DriasV = Record<string, number | undefined>;
 
+// L'HORIZON LU EST CELUI QUE LA PAGE ANNONCE (04/08/2026). Cette page titre « Classement 2050 »
+// et lisait `gwl30`, c'est-à-dire le palier +3 °C mondial (+4 °C en France) atteint vers 2100. Le
+// classement lui-même ne bouge pas : il vient du score de tension Supabase, pas de ces valeurs, qui
+// ne font qu'illustrer chaque ville. Seuls les chiffres affichés changent, pour dire enfin 2050.
 async function getCityData(insee: string): Promise<DriasV | null> {
   try {
     const data = await getClimatDataCommune(insee);
-    return (data?.commune?.s?.gwl30?.v as DriasV) ?? null;
+    return (data?.commune?.s?.gwl20?.v as DriasV) ?? null;
   } catch {
     return null;
   }
@@ -201,7 +205,7 @@ export default async function ChaleurTop10() {
           Cette page ne classe pas seulement les villes les plus chaudes. Elle classe les grandes communes où la chaleur pèsera le plus sur la vie quotidienne en 2050, en croisant jours très chauds, nuits tropicales et vulnérabilités locales. Le Sud méditerranéen domine nettement, mais pas toujours pour les mêmes raisons d&apos;une ville à l&apos;autre.
         </p>
         <div className="method-note">
-          Classement fondé sur le score de tension canicule futur•e. Il combine projections climatiques DRIAS, nuits chaudes, intensité de la chaleur et vulnérabilités locales. La lecture correspond à un horizon 2050 dans une trajectoire de réchauffement conduisant vers environ +4°C en fin de siècle.
+          Classement fondé sur le score de tension canicule futur•e. Il combine projections climatiques DRIAS, nuits chaudes, intensité de la chaleur et vulnérabilités locales. Les chiffres affichés sont ceux de l&apos;horizon 2050, où le monde atteint +2 °C et la France +2,7 °C (DRIAS-TRACC). L&apos;horizon 2100, où la France atteint +4 °C, se lit sur la page de chaque commune.
         </div>
 
         {CITIES.map((city, i) => {
