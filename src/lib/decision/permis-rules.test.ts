@@ -5,6 +5,7 @@ import type { ModuleFacts, VerificationFact } from "./decision-fact.ts";
 import type { PermisSnapshot } from "../logement-autour-types.ts";
 import type { UserProject } from "../user-project.ts";
 import type { EvaluationContext } from "../hard-constraints.ts";
+import { echelleDeLaPreuve } from "./echelles.ts";
 
 const rule = PERMIS_RULES[0]!;
 
@@ -213,4 +214,83 @@ test("la LIMITATION dit D'ABORD le manque qui explique le rang du fait", () => {
   assert.match(lim, /que les autorisations créant des logements/);
   // L'ordre porte le sens : le manque décisif avant la couverture du jeu.
   assert.ok(lim.indexOf("ampleur") < lim.indexOf("créant des logements"), lim);
+});
+
+// ── La preuve, et les verrous de doctrine ───────────────────────────────────────────────────
+
+test("LA PREUVE PORTE SA DATE, et c'est ce qui répare l'invariant de mise en page", () => {
+  // La charnière de la conclusion Autour ne porte aucune date : elle dépend du « consulté le … »
+  // rendu dans le bloc au-dessus. Ici la date est une propriété de la preuve, donc elle suit le
+  // fait partout où il est projeté.
+  const fact = factOf(permis([{ annee: 2025, etat: "chantier_ouvert" }]));
+  const ev = fact.evidence[0]!;
+  assert.equal(ev.sourceMode, "persisted_snapshot");
+  assert.equal(ev.observedAt, "2026-08-01T00:00:00.000Z");
+});
+
+test("GRAIN ADRESSE + RELATION PROXIMITÉ : l'échelle est le QUARTIER", () => {
+  // Le test doctrinal d'`echelles.ts` : le constat parle de ce que le lecteur VIVRA AUTOUR, pas de
+  // ce qui ATTEINT SON BIEN. Une cavité à 300 m resterait un attribut du logement ; un chantier
+  // voisin, non.
+  const fact = factOf(permis([{ annee: 2025, etat: "chantier_ouvert" }]));
+  const ev = fact.evidence[0]!;
+  assert.equal(ev.grain, "adresse");
+  assert.equal(ev.relation, "proximite");
+  assert.equal(echelleDeLaPreuve(ev), "quartier");
+});
+
+test("JAMAIS structuring, sur aucune composition", () => {
+  const compositions: { annee: number; etat: "chantier_ouvert" | "autorise_non_commence" }[][] = [
+    [{ annee: 2025, etat: "chantier_ouvert" }],
+    [{ annee: 2024, etat: "autorise_non_commence" }],
+    [{ annee: 2025, etat: "chantier_ouvert" }, { annee: 2024, etat: "chantier_ouvert" }],
+    [{ annee: 2025, etat: "autorise_non_commence" }, { annee: 2024, etat: "autorise_non_commence" }],
+    [{ annee: 2025, etat: "chantier_ouvert" }, { annee: 2024, etat: "autorise_non_commence" }],
+  ];
+  for (const c of compositions) {
+    assert.equal(factOf(permis(c)).materialityTier, "secondary");
+  }
+});
+
+test("LE PÉRIMÈTRE ET LA FENÊTRE VIENNENT DU SNAPSHOT, jamais des constantes du jour", () => {
+  const fact = factOf(permis([{ annee: 2025, etat: "chantier_ouvert" }], 80, 5));
+  assert.match(fact.statement, /à moins de 80 m/);
+  assert.equal(/50 m/.test(fact.statement), false);
+  // La fenêtre s'écrit en ANNÉE CALCULÉE (2026 - 5), jamais en durée relative : « depuis cinq
+  // années » décrirait une période flottante, et un dossier rouvert en 2029 laisserait croire
+  // qu'on a regardé jusque-là.
+  assert.match(fact.signalConvention ?? "", /depuis 2021/);
+  assert.equal(/cinq années|trois années/.test(fact.signalConvention ?? ""), false);
+  assert.equal(fact.evidence[0]!.label.includes("80 m"), true);
+});
+
+test("la fenêtre est datée par les DEUX champs gelés, pas par le seul ancienneteMaxAns", () => {
+  // Même durée, année de référence différente : la convention doit changer. Sans
+  // `anneeReference`, les deux rendraient la même phrase, et l'une des deux mentirait.
+  const recent = factOf(permis([{ annee: 2025, etat: "chantier_ouvert" }], 50, 3));
+  const ancien = { ...permis([{ annee: 2022, etat: "chantier_ouvert" }], 50, 3), anneeReference: 2023 };
+  assert.match(recent.signalConvention ?? "", /depuis 2023/);
+  assert.match(factOf(ancien).signalConvention ?? "", /depuis 2020/);
+});
+
+test("la convention porte la DATE DE CONSULTATION, parce que c'est là qu'elle se voit", () => {
+  // `observedAt` la porte dans le domaine, mais aucun composant ne le rend : `EvidenceRow` ne
+  // montre que label, valeur et lien. La convention, elle, est rendue dans « Données et limites ».
+  const fact = factOf(permis([{ annee: 2025, etat: "chantier_ouvert" }]));
+  assert.match(fact.signalConvention ?? "", /consult/i);
+  assert.match(fact.signalConvention ?? "", /2026/);
+});
+
+test("les bornes d'assertFactValid sont respectées", () => {
+  // 70 caractères et aucun point final, sur le topic comme sur le libellé d'action.
+  for (const c of [
+    [{ annee: 2025, etat: "chantier_ouvert" as const }],
+    [{ annee: 2025, etat: "chantier_ouvert" as const }, { annee: 2024, etat: "chantier_ouvert" as const }],
+  ]) {
+    const fact = factOf(permis(c));
+    assert.ok(fact.topic.length <= 70, fact.topic);
+    assert.ok(fact.action.label.length <= 70, fact.action.label);
+    assert.equal(/[.!?]$/.test(fact.action.label), false, fact.action.label);
+    assert.equal(/[.!?]/.test(fact.topic), false, fact.topic);
+  }
 });

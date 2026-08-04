@@ -24,9 +24,10 @@
 // Pure, testée sous `node --test`.
 
 import type {
-  DecisionRule, RuleEvaluation, VerificationFact,
+  DecisionRule, RuleEvaluation, VerificationFact, EvidenceRef,
 } from "./decision-fact.ts";
 import type { PermisSnapshot } from "../logement-autour-types.ts";
+import { dateFr } from "./autour-permis.ts";
 
 const RULE_PERMIS = "autour.permis";
 
@@ -86,6 +87,37 @@ function statementPermis(total: number, ouverts: number, rayonMeters: number): s
     `déclaré${ouverts > 1 ? "s" : ""} ouvert${ouverts > 1 ? "s" : ""}.`;
 }
 
+/**
+ * POURQUOI futur•e SIGNALE ce fait, ET DEPUIS QUAND IL LE SAIT.
+ *
+ * ── LA SÉPARATION AVEC LE CONSTAT EST STRICTE ────────────────────────────────────────────────
+ * Le `statement` porte ce qui a été TROUVÉ (nombre, états, rayon) ; la convention porte ce qui a
+ * été CHOISI (la fenêtre, et le fait de ne retenir que les non achevées). Mettre le rayon et la
+ * fenêtre dans les deux recréerait, à l'intérieur d'une seule carte, la redondance que la
+ * vérification à l'écran du 01/08/2026 a révélée entre le bloc des permis et la conclusion.
+ *
+ * ── LA FENÊTRE SE DÉRIVE DES DEUX CHAMPS GELÉS, JAMAIS D'UN SEUL ─────────────────────────────
+ * `permisAMontrer` retient `annee >= anneeCourante - ANCIENNETE_MAX_ANS`, et `anneeCourante` est
+ * l'`anneeReference` figée dans le snapshot. Écrire « dans les trois années précédant l'analyse »
+ * à partir du seul `ancienneteMaxAns` décrirait une période flottante : rouvert en 2029, un dossier
+ * de 2026 laisserait croire qu'on a regardé jusqu'en 2026. L'année calculée est datée, elle.
+ * Elle règle du même coup le « dans les une années » qu'un compte en toutes lettres produisait à
+ * `ancienneteMaxAns === 1`.
+ *
+ * ── LA DATE DE CONSULTATION EST ICI, PARCE QUE C'EST ICI QU'ELLE SE VOIT ──────────────────────
+ * `observedAt` la porte dans le DOMAINE, mais aucun composant ne le lit aujourd'hui : `EvidenceRow`
+ * ne rend que label, valeur et lien, et `factSources` écarte même les preuves qui portent une
+ * valeur observée. La convention, elle, est rendue dans « Données et limites »
+ * (`ControlesDuDossier.tsx:82`, `DossierDecisionSection.tsx:285`). Sans cette phrase, la carte
+ * dirait au présent, en 2029, ce qui a été constaté en 2026.
+ */
+function conventionPermis(p: PermisSnapshot): string {
+  const depuis = p.anneeReference - p.ancienneteMaxAns;
+  const jour = dateFr(p.consulteLe);
+  const base = `futur•e signale les autorisations non achevées déposées depuis ${depuis}.`;
+  return jour ? `${base} Registre consulté le ${jour}.` : base;
+}
+
 const permisRule: DecisionRule = {
   id: RULE_PERMIS,
   // Le module dit d'où VIENT la donnée ; l'échelle se dérive de la preuve (cf. `echelles.ts`).
@@ -135,7 +167,29 @@ const permisRule: DecisionRule = {
         "Le registre ne précise ni l'ampleur ni les effets de l'opération. Il ne couvre ici que " +
         "les autorisations créant des logements : un commerce, un entrepôt ou une extension sans " +
         "logement nouveau n'y figurent pas.",
-      evidence: [],
+      signalConvention: conventionPermis(p),
+      evidence: [{
+        factId: "autour.permis",
+        module: "logement",
+        label: `Autorisations d'urbanisme · parcelles à moins de ${p.rayonMeters} m`,
+        observedValue: `${total} dossier${total > 1 ? "s" : ""} non achevé${total > 1 ? "s" : ""}` +
+          (ouverts > 0 ? `, dont ${ouverts} chantier${ouverts > 1 ? "s" : ""} déclaré${ouverts > 1 ? "s" : ""} ouvert${ouverts > 1 ? "s" : ""}` : ""),
+        // ANCRE `adresse`, RELATION `proximite` : la mesure part de l'adresse et décrit son
+        // ENVIRONNEMENT, donc l'échelle dérivée est le QUARTIER (cf. `echelles.ts`). Le test du
+        // fichier tranche dans ce sens : ce que le lecteur vivra autour, pas ce qui atteint son bien.
+        grain: "adresse",
+        relation: "proximite",
+        // AUCUN `href` DANS CE LOT, ET C'EST DÉLIBÉRÉ. `/rapport/autour` sans `dossierId` ne
+        // retombe sur le bon bien que par `getSoleDossier`, donc uniquement quand le compte n'en a
+        // qu'un ; au-delà, il renvoie vers la liste des biens. La preuve ne connaît pas
+        // l'identifiant du dossier, et l'ajouter à `ModuleFacts` y ferait entrer une clé Supabase
+        // dans un contrat de faits. Une preuve non cliquable vaut mieux qu'un lien qui ouvre le
+        // mauvais bien.
+        // LA DATE DE CONSULTATION EST UNE PROPRIÉTÉ DE LA PREUVE, pas un invariant de mise en page.
+        // Le fait la porte partout où il est projeté : carte, liste, conclusion, export futur.
+        sourceMode: "persisted_snapshot",
+        observedAt: p.consulteLe,
+      } satisfies EvidenceRef],
       action: {
         type: "obtenir_document",
         // LE GESTE COMBLE LE MANQUE DE LA DONNÉE. Le dossier déposé porte la nature de l'opération,
