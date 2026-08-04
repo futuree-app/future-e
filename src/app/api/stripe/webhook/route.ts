@@ -36,6 +36,30 @@ function getEntitlements() {
   };
 }
 
+/**
+ * LA CONFIRMATION DU RENONCEMENT, DANS LE CORPS DE L'E-MAIL (04/08/2026).
+ *
+ * L'article L221-28 13° du code de la consommation dispense de rétractation un contenu numérique
+ * fourni immédiatement, à trois conditions cumulatives : accord exprès pour l'exécution immédiate,
+ * renoncement exprès, et CONFIRMATION de cet accord sur support durable. Les deux premières sont
+ * recueillies avant le paiement (`PaymentForm.tsx`), la facture PDF porte la troisième.
+ *
+ * ── POURQUOI AUSSI DANS L'E-MAIL, ET PAS SEULEMENT SUR LA FACTURE ────────────────────────────
+ * `buildInvoiceAttachment` rend un tableau VIDE quand la facture ne peut pas être émise : nom de
+ * facturation absent (comptes anciens, certains comptes Google), ou n'importe quelle erreur, qu'il
+ * avale volontairement pour ne jamais faire échouer un webhook. L'e-mail part quand même. Dans ce
+ * cas, la case avait été cochée et AUCUNE confirmation ne parvenait au client : la troisième
+ * condition manquait, donc l'exception ne jouait pas, alors même que l'écran l'avait annoncée.
+ *
+ * L'e-mail, lui, part dans tous les cas, et il qualifie comme support durable : le client peut le
+ * stocker, s'y reporter et le reproduire à l'identique. La mention vit donc aux deux endroits.
+ */
+const MENTION_RENONCEMENT =
+  "<p style=\"color:#555;font-size:13px\">Vous avez demandé l'ouverture immédiate de votre dossier " +
+  "et renoncé à votre droit de rétractation de quatorze jours, comme le prévoit l'article L221-28 " +
+  "du code de la consommation. Si le dossier ne contient pas ce qui était annoncé, écrivez-nous : " +
+  "le remboursement est accordé.</p>";
+
 // ════════════════════════════════════════════════════════════════════════════
 // LA FACTURE, ÉMISE À L'ENCAISSEMENT ET JOINTE À L'E-MAIL DE CONFIRMATION.
 //
@@ -46,6 +70,8 @@ function getEntitlements() {
 //
 // LE NOM VIENT DES MÉTADONNÉES, jamais d'une relecture du compte : il a été figé au moment de
 // l'achat, et un client qui change son nom ensuite ne doit pas changer la facture émise.
+
+
 async function buildInvoiceAttachment(
   paymentIntent: Stripe.PaymentIntent,
   productType: InvoiceProductType,
@@ -214,6 +240,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
           <p>Merci pour votre confiance.</p>
           <p>Le dossier de ${intent.address_label} est ouvert : vous le retrouverez dans votre espace, avec la commune, ce qui entoure l'adresse et ce que dit le logement.</p>
           ${attachments.length ? "<p>Votre facture est jointe à ce message. Vous la retrouverez aussi dans votre compte.</p>" : ""}
+          ${MENTION_RENONCEMENT}
           <p>futur•e</p>
         `,
         attachments,
@@ -270,6 +297,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
           <p>Merci pour votre confiance.</p>
           <p>Votre comparaison complète et vos trois rapports sont accessibles depuis votre espace.</p>
           ${attachments.length ? "<p>Votre facture est jointe à ce message. Vous la retrouverez aussi dans votre compte.</p>" : ""}
+          ${MENTION_RENONCEMENT}
           <p>futur•e</p>
         `,
         attachments,
@@ -361,7 +389,8 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
         <p>Merci pour votre confiance.</p>
         <p>Votre rapport${lieu} est ouvert dès maintenant : il se lit dans votre espace, sur futur-e.fr.</p>
         ${attachments.length ? "<p>Votre facture est jointe à ce message. Vous la retrouverez aussi dans votre compte.</p>" : ""}
-        <p>futur•e</p>
+        ${MENTION_RENONCEMENT}
+          <p>futur•e</p>
       `,
       attachments,
     });

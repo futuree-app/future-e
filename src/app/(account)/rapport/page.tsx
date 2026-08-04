@@ -518,6 +518,7 @@ export default async function RapportPage() {
               { label: "Contact", href: "mailto:hello@futur-e.fr" },
               { label: "Confidentialité", href: "/politique-confidentialite" },
               { label: "Mentions légales", href: "/mentions-legales" },
+              { label: "CGV", href: "/conditions-generales-de-vente" },
             ].map(({ label, href }) => (
               <a key={label} href={href} className="font-mono text-[11px] text-ghost no-underline tracking-[0.06em] uppercase">
                 {label}

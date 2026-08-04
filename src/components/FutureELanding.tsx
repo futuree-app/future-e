@@ -3734,6 +3734,7 @@ export default function FutureELanding() {
               { label: 'Pages Savoir', href: '/#savoir' },
               { label: 'Contact', href: 'mailto:hello@futur-e.fr' },
               { label: 'Mentions légales', href: '/mentions-legales' },
+              { label: 'CGV', href: '/conditions-generales-de-vente' },
             ].map(({ label, href }) => (
               <a key={label} style={styles.footerLink} href={href}>
                 {label}
