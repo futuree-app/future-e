@@ -4,8 +4,8 @@ import { buildAbsenceAttestations, radiusFor, tailleVilleFrom } from "./absence-
 
 function fixture() {
   const communes = [
-    { insee: "1", nom: "A", uu: "u1", population: 600000 }, // agglo -> rayon 5
-    { insee: "2", nom: "B", population: 800 },              // rural -> rayon 25
+    { insee: "1", nom: "A", uu: "u1", population: 600000, lat: 48.85, lon: 2.35 }, // agglo -> rayon 5
+    { insee: "2", nom: "B", population: 800, lat: 46.16, lon: -1.15 },              // rural -> rayon 25
   ];
   const networkRecords = { "1": { acces: 80, tram: true, metro: false, arret_km: 0.3 }, "2": null };
   const bpeRecords = { "1": { etudes_acces: { score: 90, count: 12 } }, "2": { etudes_acces: { score: 40, count: 0 } } };
@@ -47,4 +47,33 @@ test("tailleVilleFrom : uuPop si uu connu, sinon population (réplique Python)",
   assert.equal(tailleVilleFrom("uX", 5000, uuPop), 5000); // uu inconnu -> pop
   assert.equal(tailleVilleFrom(null, 5000, uuPop), 5000);
   assert.equal(tailleVilleFrom(null, null, uuPop), null);
+});
+
+// ── L'ATTESTATION SUPPOSE QU'ON AIT PU TENTER LA MESURE ─────────────────────────────────────
+test("REFUSE d'attester une commune SANS COORDONNÉES", () => {
+  // `measured: true` affirme qu'on a cherché et qu'on n'a rien trouvé. Sans coordonnées, la
+  // recherche n'a pas pu partir : l'attestation dirait une absence qui n'a jamais été établie.
+  // Le producteur jette déjà quand une commune manque d'un record ; il lui manquait ce cas.
+  for (const champManquant of ["lat", "lon"]) {
+    const { communes, networkRecords, bpeRecords } = fixture();
+    delete communes[1][champManquant];
+    assert.throws(
+      () => buildAbsenceAttestations({ communes, networkRecords, bpeRecords }),
+      /coordonn/i,
+      `un ${champManquant} absent doit être refusé`,
+    );
+  }
+});
+
+test("REFUSE une coordonnée présente mais NON FINIE", () => {
+  // Le cas le plus traître : `lat: null` passe un test d'existence naïf et ne permet aucune mesure.
+  for (const valeur of [null, NaN, "46.16"]) {
+    const { communes, networkRecords, bpeRecords } = fixture();
+    communes[0].lat = valeur;
+    assert.throws(
+      () => buildAbsenceAttestations({ communes, networkRecords, bpeRecords }),
+      /coordonn/i,
+      `lat = ${String(valeur)} doit être refusé`,
+    );
+  }
 });
