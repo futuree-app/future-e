@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { PERMIS_RULES } from "./permis-rules.ts";
-import type { ModuleFacts } from "./decision-fact.ts";
+import type { ModuleFacts, VerificationFact } from "./decision-fact.ts";
 import type { PermisSnapshot } from "../logement-autour-types.ts";
 import type { UserProject } from "../user-project.ts";
 import type { EvaluationContext } from "../hard-constraints.ts";
@@ -77,4 +77,140 @@ test("AUCUNE PRÉFÉRENCE N'ACTIVE CETTE RÈGLE", () => {
   for (const p of [undefined, permis([]), permis([{ annee: 2025, etat: "chantier_ouvert" }])]) {
     assert.deepEqual(evalWith(p).projectKeys, []);
   }
+});
+
+// ── Les cinq compositions ───────────────────────────────────────────────────────────────────
+
+const factOf = (p: PermisSnapshot) => {
+  const r = evalWith(p);
+  assert.equal(r.outcome, "verification");
+  return r.facts[0] as VerificationFact;
+};
+
+test("UN SEUL FAIT, quel que soit le nombre de dossiers", () => {
+  // Un fait par permis produirait plusieurs cartes portant le même geste.
+  const r = evalWith(permis([
+    { annee: 2025, etat: "chantier_ouvert" },
+    { annee: 2024, etat: "autorise_non_commence" },
+    { annee: 2024, etat: "chantier_ouvert" },
+  ]));
+  assert.equal(r.facts.length, 1);
+});
+
+test("un seul, chantier ouvert", () => {
+  const fact = factOf(permis([{ annee: 2025, etat: "chantier_ouvert" }]));
+  assert.equal(fact.status, "Chantier déclaré ouvert");
+  assert.equal(
+    fact.statement,
+    "Une autorisation créant des logements est recensée à moins de 50 m, et son chantier est " +
+      "déclaré ouvert.",
+  );
+  assert.equal(fact.action.label, "Demandez en mairie à consulter le dossier de l'autorisation");
+});
+
+test("un seul, non commencé", () => {
+  const fact = factOf(permis([{ annee: 2024, etat: "autorise_non_commence" }]));
+  assert.equal(fact.status, "Sans ouverture déclarée");
+  assert.equal(
+    fact.statement,
+    "Une autorisation créant des logements est recensée à moins de 50 m, sans ouverture de " +
+      "chantier déclarée.",
+  );
+});
+
+test("plusieurs, tous ouverts : le pluriel gagne le libellé d'action", () => {
+  const fact = factOf(permis([
+    { annee: 2025, etat: "chantier_ouvert" },
+    { annee: 2024, etat: "chantier_ouvert" },
+  ]));
+  assert.equal(fact.status, "Chantiers déclarés ouverts");
+  assert.equal(
+    fact.statement,
+    "Deux autorisations créant des logements sont recensées à moins de 50 m, et leurs chantiers " +
+      "sont déclarés ouverts.",
+  );
+  assert.equal(fact.action.label, "Demandez en mairie à consulter les dossiers des autorisations");
+});
+
+test("plusieurs, aucun ouvert", () => {
+  const fact = factOf(permis([
+    { annee: 2025, etat: "autorise_non_commence" },
+    { annee: 2024, etat: "autorise_non_commence" },
+    { annee: 2024, etat: "autorise_non_commence" },
+  ]));
+  assert.equal(fact.status, "Sans ouverture déclarée");
+  assert.equal(
+    fact.statement,
+    "Trois autorisations créant des logements sont recensées à moins de 50 m, sans ouverture de " +
+      "chantier déclarée.",
+  );
+});
+
+test("AUCUN STATUS N'AFFIRME PLUS QUE LA SOURCE", () => {
+  // La source établit une absence de DÉCLARATION, jamais une absence de travaux.
+  for (const c of [
+    [{ annee: 2025, etat: "autorise_non_commence" as const }],
+    [{ annee: 2025, etat: "autorise_non_commence" as const }, { annee: 2024, etat: "autorise_non_commence" as const }],
+  ]) {
+    const st = factOf(permis(c)).status ?? "";
+    assert.equal(/non commencée?s?/i.test(st), false, st);
+    assert.match(st, /déclarée?/i);
+  }
+});
+
+test("ÉTATS MIXTES : le status ne peut pas dire « Chantier déclaré ouvert »", () => {
+  // Un fait agrégeant trois dossiers mixtes qui afficherait « Chantier ouvert » serait vrai d'une
+  // partie des données et faux comme résumé de la carte.
+  const fact = factOf(permis([
+    { annee: 2025, etat: "chantier_ouvert" },
+    { annee: 2025, etat: "chantier_ouvert" },
+    { annee: 2024, etat: "autorise_non_commence" },
+    { annee: 2023, etat: "acheve" },
+  ]));
+  assert.equal(fact.status, "Autorisations non achevées");
+  assert.equal(
+    fact.statement,
+    "Trois autorisations créant des logements sont recensées à moins de 50 m, dont deux chantiers " +
+      "déclarés ouverts.",
+  );
+});
+
+test("mixte avec UN SEUL chantier ouvert : l'accord suit", () => {
+  const fact = factOf(permis([
+    { annee: 2025, etat: "chantier_ouvert" },
+    { annee: 2024, etat: "autorise_non_commence" },
+  ]));
+  assert.equal(
+    fact.statement,
+    "Deux autorisations créant des logements sont recensées à moins de 50 m, dont un chantier " +
+      "déclaré ouvert.",
+  );
+});
+
+test("au-delà de neuf, le nombre passe en chiffres", () => {
+  const dix = Array.from({ length: 10 }, () => ({ annee: 2025, etat: "chantier_ouvert" as const }));
+  const fact = factOf(permis(dix));
+  assert.ok(fact.statement.startsWith("10 autorisations"), fact.statement);
+});
+
+test("LE GESTE COMBLE LE MANQUE DE LA DONNÉE, et ne promet aucun droit", () => {
+  const fact = factOf(permis([{ annee: 2025, etat: "chantier_ouvert" }]));
+  assert.equal(fact.action.type, "obtenir_document");
+  // Le dossier déposé porte les trois informations que le registre ne publie pas.
+  assert.match(fact.action.detail ?? "", /nature de l'opération/);
+  assert.match(fact.action.detail ?? "", /hauteur/);
+  assert.match(fact.action.detail ?? "", /surface de plancher/);
+  // `detail` décrit une pratique, jamais un droit ni un délai (invariants 3 et 5).
+  assert.equal(/droit|accès garanti|sous \d+ jours/i.test(fact.action.detail ?? ""), false);
+  // Aucun « Vérifiez » générique : le verbe nomme le geste réel.
+  assert.equal(/^Vérifiez/.test(fact.action.label), false);
+});
+
+test("la LIMITATION dit D'ABORD le manque qui explique le rang du fait", () => {
+  const fact = factOf(permis([{ annee: 2025, etat: "chantier_ouvert" }]));
+  const lim = fact.limitation ?? "";
+  assert.match(lim, /ni l'ampleur ni les effets/);
+  assert.match(lim, /que les autorisations créant des logements/);
+  // L'ordre porte le sens : le manque décisif avant la couverture du jeu.
+  assert.ok(lim.indexOf("ampleur") < lim.indexOf("créant des logements"), lim);
 });
