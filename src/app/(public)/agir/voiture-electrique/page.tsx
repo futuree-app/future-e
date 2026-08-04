@@ -330,7 +330,7 @@ const fullHtml = `
   <div class="profiles">
     <div class="profile-card favorable">
       <div class="profile-label">Fort rouleur en maison individuelle, cas le plus favorable</div>
-      <p class="profile-body">Plus de 18 000 km/an, recharge à domicile possible, trajets majoritairement sur des axes couverts en bornes rapides : c'est le profil pour lequel le passage à l'électrique présente le meilleur rapport interactif économique et pratique. Le retour sur investissement par rapport à un thermique équivalent est généralement atteint entre la troisième et la quatrième année.</p>
+      <p class="profile-body">Plus de 18 000 km/an, recharge à domicile possible, trajets majoritairement sur des axes couverts en bornes rapides : c'est le profil pour lequel le passage à l'électrique présente le meilleur rapport économique et pratique. Le retour sur investissement par rapport à un thermique équivalent est généralement atteint entre la troisième et la quatrième année.</p>
     </div>
     <div class="profile-card favorable">
       <div class="profile-label">Foyer avec deux voitures dont une peu utilisée</div>
@@ -363,7 +363,7 @@ const fullHtml = `
     </div>
     <div class="question-item">
       <span class="question-to">Au vendeur d'un véhicule d'occasion</span>
-      "Quel est l'état de santé de la batterie exprimé en pourcentage, et pouvez-vous me fournir un rapport interactif de diagnostic ou me laisser procéder à une vérification avant achat ?"
+      "Quel est l'état de santé de la batterie exprimé en pourcentage, et pouvez-vous me fournir un rapport de diagnostic ou me laisser procéder à une vérification avant achat ?"
     </div>
     <div class="question-item">
       <span class="question-to">À votre employeur ou service RH</span>

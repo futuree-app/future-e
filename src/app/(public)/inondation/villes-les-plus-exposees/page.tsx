@@ -271,10 +271,10 @@ export default async function InondationTop10() {
           <div className="cta-rapport">
             <div className="cta-rapport-title">Votre commune est-elle exposée ?</div>
             <p className="cta-rapport-desc">
-              Ces dix villes concentrent les risques les plus élevés, mais le risque d'inondation existe dans des milliers de communes françaises. Cherchez la vôtre pour voir son niveau d'exposition, puis construisez votre rapport interactif personnalisé.
+              Ces dix villes concentrent les risques les plus élevés, mais le risque d'inondation existe dans des milliers de communes françaises. Cherchez la vôtre pour voir son niveau d'exposition, puis construisez votre dossier personnalisé.
             </p>
             <div className="cta-links">
-              <Link href="/rapport" prefetch={false} className="cta-btn">Créer mon rapport interactif →</Link>
+              <Link href="/rapport" prefetch={false} className="cta-btn">Créer mon dossier →</Link>
               <Link href="/inondation" className="cta-sec">Explorer par commune</Link>
               <Link href="/comparateur" className="cta-sec">Comparer deux villes</Link>
             </div>

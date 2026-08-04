@@ -54,7 +54,7 @@ const css = `
   .article-desc{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);line-height:1.6;flex:1;}
   .article-cta{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:${ACCENT};}
 
-  /* Rapport interactif CTA */
+  /* Dossier CTA */
   .rapport-cta{display:flex;flex-direction:column;gap:16px;padding:36px 40px;border-radius:14px;background:rgba(96,165,250,0.06);border:1px solid rgba(96,165,250,0.22);text-decoration:none;margin-top:28px;transition:background 0.2s,border-color 0.2s;position:relative;overflow:hidden;}
   .rapport-cta::after{content:"";position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,${ACCENT}14 0%,transparent 70%);pointer-events:none;}
   .rapport-cta:hover{background:rgba(96,165,250,0.09);border-color:rgba(96,165,250,0.35);}
@@ -197,7 +197,7 @@ export default function InondationPage() {
           <p className="section-sub">Un diagnostic complet, et deux guides ciblés.</p>
 
           <Link href="/rapport" prefetch={false} className="rapport-cta">
-            <div className="rapport-cta-eyebrow">Rapport interactif personnalisé · futur•e</div>
+            <div className="rapport-cta-eyebrow">Dossier personnalisé · futur•e</div>
             <p className="rapport-cta-title">
               Votre commune, votre profil,<br />
               <em style={{ fontStyle: 'italic', color: ACCENT }}>vos décisions éclairées</em>
@@ -207,7 +207,7 @@ export default function InondationPage() {
               Pas un article générique : un diagnostic construit à partir de données publiques réelles, mis à jour régulièrement.
             </p>
             <span className="rapport-cta-btn">
-              Voir mon rapport interactif →
+              Voir mon dossier →
             </span>
           </Link>
 

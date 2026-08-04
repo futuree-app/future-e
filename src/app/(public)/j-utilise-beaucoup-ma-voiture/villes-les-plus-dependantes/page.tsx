@@ -507,12 +507,12 @@ export default async function TopDependanceAutoPage() {
 
         <div className="cta-block">
           <div className="cta-rapport">
-            <div className="cta-rapport-title">Le top 10 montre le risque. Le rapport interactif dit comment il vous touche.</div>
+            <div className="cta-rapport-title">Le top 10 montre le risque. Le dossier dit comment il vous touche.</div>
             <p className="cta-rapport-desc">
-              Une ville peut ressortir très haut au classement sans que cela dise tout de votre situation. Le rapport interactif ajoute votre commune, votre profil et une lecture du secteur autour de votre adresse pour comprendre où un choc énergétique pèserait vraiment sur votre quotidien.
+              Une ville peut ressortir très haut au classement sans que cela dise tout de votre situation. Le dossier ajoute votre commune, votre profil et une lecture du secteur autour de votre adresse pour comprendre où un choc énergétique pèserait vraiment sur votre quotidien.
             </p>
             <div className="cta-links">
-              <Link href="/rapport" prefetch={false} className="cta-btn">Voir le rapport interactif →</Link>
+              <Link href="/rapport" prefetch={false} className="cta-btn">Voir le dossier →</Link>
               <Link href="/j-utilise-beaucoup-ma-voiture" className="cta-sec">Retour au hub</Link>
             </div>
           </div>

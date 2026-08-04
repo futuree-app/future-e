@@ -262,11 +262,11 @@ export default async function ChaleurTop10() {
           <div className="cta-rapport">
             <div className="cta-rapport-title">Votre commune est-elle exposée ?</div>
             <p className="cta-rapport-desc">
-              Cherchez votre ville pour voir ses projections spécifiques, puis construisez votre rapport interactif personnalisé.
+              Cherchez votre ville pour voir ses projections spécifiques, puis construisez votre dossier personnalisé.
               La commune en entier : climat, risques, cadre de vie, ce qui la transforme.
             </p>
             <div className="cta-links">
-              <Link href="/rapport" prefetch={false} className="cta-btn">Créer mon rapport interactif →</Link>
+              <Link href="/rapport" prefetch={false} className="cta-btn">Créer mon dossier →</Link>
               <Link href="/chaleur" className="cta-sec">Explorer par commune</Link>
               <Link href="/comparateur" className="cta-sec">Comparer deux villes</Link>
             </div>

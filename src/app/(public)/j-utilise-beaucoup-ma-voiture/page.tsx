@@ -7,11 +7,11 @@ export const revalidate = 86400;
 export const metadata: Metadata = {
   title: "J'utilise beaucoup ma voiture · futur•e",
   description:
-    "Dépendance automobile, budget transport, alternatives réelles : les bons articles pour comprendre votre situation, puis aller plus loin avec le rapport interactif futur•e.",
+    "Dépendance automobile, budget transport, alternatives réelles : les bons articles pour comprendre votre situation, puis aller plus loin avec le dossier futur•e.",
   openGraph: {
     title: "J'utilise beaucoup ma voiture · futur•e",
     description:
-      "Un hub de lecture et d'action sur la dépendance automobile, sans recherche communale libre, avec un accès plus profond via le rapport interactif.",
+      "Un hub de lecture et d'action sur la dépendance automobile, sans recherche communale libre, avec un accès plus profond via le dossier.",
   },
 };
 
@@ -105,7 +105,7 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
         <div className="hero-note">
           <div className="hero-note-label">Ce qui est public ici</div>
           <div className="hero-note-text">
-            Vous pouvez lire les analyses et les guides pratiques. <strong>Le diagnostic par commune et par profil détaillé</strong> reste réservé au rapport interactif : il lit la commune en entier,
+            Vous pouvez lire les analyses et les guides pratiques. <strong>Le diagnostic par commune et par profil détaillé</strong> reste réservé au dossier : il lit la commune en entier,
             {' '}<strong>son climat, ses risques, son cadre de vie et ce qui la transforme</strong>.
           </div>
         </div>
@@ -190,21 +190,21 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
         <div className="divider" style={{ marginTop: 72 }} />
 
         <section className="section">
-          <div className="section-eyebrow">Rapport interactif</div>
-          <h2 className="section-title">Ce que le rapport interactif ajoute</h2>
+          <div className="section-eyebrow">Dossier</div>
+          <h2 className="section-title">Ce que le dossier ajoute</h2>
           <p className="section-sub">Le niveau communal et les arbitrages personnels ne sont pas ouverts ici en libre-service.</p>
 
           <Link href="/rapport" prefetch={false} className="rapport-cta">
-            <div className="rapport-cta-eyebrow">Rapport interactif personnalisé · futur•e</div>
+            <div className="rapport-cta-eyebrow">Dossier personnalisé · futur•e</div>
             <p className="rapport-cta-title">
               Votre territoire, votre budget,<br />
               <em style={{ fontStyle: 'italic', color: ACCENT }}>vos marges de manœuvre réelles</em>
             </p>
             <p className="rapport-cta-desc">
-              Le rapport interactif descend sous la commune : <strong style={{ color: 'var(--fg-1)' }}>ce qui se trouve à proximité de votre adresse, et la place qu\u2019y tient encore la voiture.</strong>{' '}
+              Le dossier descend sous la commune : <strong style={{ color: 'var(--fg-1)' }}>ce qui se trouve à proximité de votre adresse, et la place qu\u2019y tient encore la voiture.</strong>{' '}
               Il ne vous donne pas seulement une idée générale. Il relie votre lieu de vie, vos contraintes quotidiennes et les décisions qui ont du sens pour vous.
             </p>
-            <span className="rapport-cta-btn">Découvrir le rapport interactif →</span>
+            <span className="rapport-cta-btn">Découvrir le dossier →</span>
           </Link>
         </section>
 

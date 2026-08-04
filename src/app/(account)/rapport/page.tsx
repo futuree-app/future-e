@@ -246,7 +246,7 @@ export default async function RapportPage() {
           <div>
             <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-accent mb-5">
               <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
-              {fullReport ? "Rapport interactif" : "Rapport interactif partiel"}
+              {fullReport ? "Dossier" : "Dossier partiel"}
             </div>
 
             <>
@@ -271,7 +271,7 @@ export default async function RapportPage() {
                   </Link>
                 ) : (
                   <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "var(--font-sans)" }}>
-                    Ouvrir le rapport interactif
+                    Ouvrir le dossier
                   </Link>
                 )}
                 <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">
@@ -289,7 +289,7 @@ export default async function RapportPage() {
                 {openModules.length === 1 ? "1 échelle ouverte" : `${openModules.length} échelles ouvertes`}
               </p>
               <h2 className="font-normal text-[22px] leading-[1.2] text-label mb-5 tracking-[-0.3px]" style={{ fontFamily: "var(--font-serif)" }}>
-                Rapport interactif · {displayName}
+                Dossier · {displayName}
               </h2>
               {/* SOMMAIRE NUMÉROTÉ, NEUTRE. Chaque ligne mène quelque part, et le rang porte
                   l'identité de l'échelle à la place de la couleur et de l'emoji retirés. */}
@@ -491,7 +491,7 @@ export default async function RapportPage() {
         <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-[var(--border-1)]">
           {!fullReport && (
             <TrackedUpgradeLink href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "var(--font-sans)" }}>
-              Ouvrir le rapport interactif
+              Ouvrir le dossier
             </TrackedUpgradeLink>
           )}
           <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">

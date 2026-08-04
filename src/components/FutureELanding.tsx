@@ -154,37 +154,37 @@ const STATIC_ANSWERS = {
     verdict: 'À acheter avec les yeux ouverts.',
     detail:
       "Sur le littoral, le risque de submersion et d'érosion progresse, et le coût de l'assurance habitation grimpe dans les zones exposées. L'achat reste viable, à condition de regarder le risque à l'adresse, la qualité énergétique du logement (diagnostic de performance énergétique) et son assurabilité dans la durée. Le choix du quartier change tout.",
-    cta: 'Voir le rapport interactif sur votre commune',
+    cta: 'Voir le dossier sur votre commune',
   },
   enfants_sante: {
     verdict: 'Plusieurs signaux méritent votre attention.',
     detail:
       "La santé des enfants face au climat se joue sur quelques fronts : la qualité de l'air, l'allongement de la saison pollinique, le nombre de jours de forte chaleur qui augmente, et selon les territoires la qualité des sols. Rien d'irrémédiable, mais autant connaître la situation de votre commune tôt pour agir au bon moment.",
-    cta: 'Voir le module Territoire de votre rapport interactif',
+    cta: 'Voir l’échelle Territoire de votre dossier',
   },
   mobilite_fragile: {
     verdict: "Ici, la place de la voiture mérite d'être posée.",
     detail:
       "Dans beaucoup de communes rurales et périurbaines, la voiture n'est pas un choix : l'offre de transport collectif reste limitée et les trajets du quotidien sont longs. Cette dépendance expose directement le budget des foyers à la volatilité du prix des carburants. Les alternatives, vélo, covoiturage, recharge électrique, dépendent fortement du territoire.",
-    cta: "Voir le module Autour de l'adresse de votre rapport interactif",
+    cta: "Voir l’échelle Autour de l’adresse de votre dossier",
   },
   metier_general: {
     verdict: "Ça dépend du secteur. Certains gagnent, d'autres perdent.",
     detail:
       "Le secteur associatif et de l'ESS sera relativement peu exposé aux risques physiques directs, mais fortement affecté par l'évolution des financements et des priorités. Les métiers liés à l'adaptation climatique (bilan carbone, transition énergétique) sont en forte croissance. Les secteurs à exposition extérieure (BTP, agriculture) sont les plus vulnérables à la chaleur croissante (INRS).",
-    cta: 'Voir le module Territoire de votre rapport interactif',
+    cta: 'Voir l’échelle Territoire de votre dossier',
   },
   valeur_immo: {
     verdict: "Moins risqué que ce qu'on raconte, mais pas sans condition.",
     detail:
       'Les zones exposées aux risques documentés (PPRi, RGA, submersion) voient déjà leurs prix stagner ou baisser par rapport à des zones similaires sans risque (DVF 2024). Le DPE devient un facteur de valeur majeur : un logement F ou G se négocie en moyenne 6 à 15 % moins cher que son équivalent C (ADEME). À l\'horizon 2030, les obligations de rénovation énergétique rendront certains biens quasi invendables sans travaux.',
-    cta: 'Voir le module Logement de votre rapport interactif',
+    cta: 'Voir l’échelle Logement de votre dossier',
   },
   default: {
     verdict: 'Les données pour cette commune pointent plusieurs signaux.',
     detail:
-      "Un rapport interactif croise les données climatiques, sanitaires, immobilières et professionnelles pour votre commune et votre profil spécifique. Ce que futur•e fait, c'est transformer ces données publiques en lecture lisible et personnalisée, pour que vous puissiez décider, pas seulement vous inquiéter.",
-    cta: 'Générer votre rapport interactif',
+      "Les données climatiques, sanitaires, immobilières et professionnelles existent, dispersées et illisibles. Ce qui manque, c'est leur position les unes par rapport aux autres, sur votre commune, mesurée de la même façon que sur les 34 000 autres. C'est là que se décide ce qui vous concerne vraiment.",
+    cta: 'Ouvrir le dossier de votre commune',
   },
 };
 
@@ -2275,15 +2275,28 @@ export default function FutureELanding() {
       margin: '0 auto',
       padding: '80px 28px',
     },
+    // TROIS CARTES, UN SEUL AXE (04/08/2026). La grille montre la même commune de plus en plus
+    // près : gratuit, territoire, puis adresse et logement. Le dossier d'adresse à 39 € y est
+    // entré à cette date, parce qu'il est le seul produit à livrer les trois échelles annoncées en
+    // haut de cette même page et qu'il ne figurait dans aucune carte. Il a pris la place du
+    // comparatif, descendu en bande sous la grille : lui compare des communes entre elles, ce qui
+    // est une autre question et se lisait mal aligné sur une profondeur.
     pricingGrid: {
       display: 'grid',
       gridTemplateColumns: 'repeat(3,1fr)',
       gap: 16,
       marginTop: 40,
     },
+    // COLONNE FLEX (04/08/2026) pour que les trois CTA tombent sur la même ligne. Les cartes
+    // avaient déjà la même hauteur (`stretch` de la grille), mais leurs boutons suivaient la fin de
+    // leur propre liste de features : trois listes de longueurs différentes donnaient trois
+    // boutons à trois hauteurs, et de grands vides sous les cartes courtes. Le `marginTop: auto`
+    // du bouton (cf. planBtn) pousse l'espace restant AU-DESSUS de lui, il ne l'étire pas.
     planCard: (accent) => ({
       ...glass({ borderRadius: 14, padding: '32px 28px' }),
       position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
       borderColor: accent ? `${C.orange}40` : C.border,
     }),
     planBadge: {
@@ -2360,7 +2373,20 @@ export default function FutureELanding() {
       cursor: 'pointer',
       fontFamily: "var(--font-sans)",
       transition: 'opacity 0.2s',
+      // Colle le bouton au bas de sa carte (cf. planCard). La bande comparatif, qui réutilise ce
+      // style hors grille, remet `marginTop: 0` de son côté.
+      marginTop: 'auto',
     }),
+    // La note sous le prix : là où l'escalier doit se lire, AVANT les listes. Reléguée en dernière
+    // puce, la déduction de 14 € arrivait après la décision.
+    planPriceNote: {
+      fontFamily: "var(--font-mono)",
+      fontSize: 11,
+      lineHeight: 1.5,
+      color: C.dim,
+      letterSpacing: '0.02em',
+      marginTop: 6,
+    },
     footer: {
       position: 'relative',
       zIndex: 2,
@@ -2535,6 +2561,10 @@ export default function FutureELanding() {
           .hero-preview-extra { display: none !important; }
           .modules-grid { grid-template-columns: 1fr !important; }
           .pricing-grid { grid-template-columns: 1fr !important; }
+          /* La bande comparatif s'empile sous 768px : son bouton reprend la pleine largeur des
+             CTA de cartes, sinon il flotte seul à droite d'un bloc de texte étroit. */
+          .pricing-compare { flex-direction: column !important; align-items: flex-start !important; }
+          .pricing-compare .plan-btn { width: 100% !important; }
           .lifecompare-grid { grid-template-columns: 1fr !important; gap: 32px !important; padding: 32px 22px !important; }
           .tensions-grid { grid-template-columns: 1fr !important; }
           .amnesie-inner { padding: 28px 24px !important; }
@@ -2717,7 +2747,7 @@ export default function FutureELanding() {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    Créer mon rapport interactif →
+                    Créer mon dossier →
                   </button>
                   <Link
                     href="/ou-vivre"
@@ -2961,7 +2991,7 @@ export default function FutureELanding() {
                             openWizard(ctx);
                           }}
                         >
-                          Générer mon rapport interactif personnalisé →
+                          Ouvrir mon dossier personnalisé →
                         </button>
                         <Link
                           href="/ou-vivre"
@@ -3071,7 +3101,7 @@ export default function FutureELanding() {
         </div>
       </section>
 
- {/* ── CTA Rapport interactif personnalisé ── */}
+ {/* ── CTA Dossier personnalisé ── */}
       <div style={{ position: 'relative', zIndex: 2, maxWidth: 1100, margin: '0 auto', padding: '0 28px 80px' }}>
         <div style={{
           ...glass({ borderRadius: 20, padding: '48px 52px' }),
@@ -3094,7 +3124,7 @@ export default function FutureELanding() {
               fontSize: 10, letterSpacing: '0.14em',
               textTransform: 'uppercase', color: C.orange, marginBottom: 10,
             }}>
-              Rapport interactif personnalisé
+              Dossier personnalisé
             </div>
             <h2 style={{
               fontFamily: "var(--font-serif)",
@@ -3103,7 +3133,7 @@ export default function FutureELanding() {
               lineHeight: 1.2, letterSpacing: '-0.4px',
               color: C.text, margin: '0 0 10px',
             }}>
-              Votre rapport interactif en 2 minutes.
+              Votre dossier en 2 minutes.
             </h2>
             <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.65, margin: 0 }}>
               Répondez à 6 questions. Obtenez un aperçu personnalisé de ce que devient votre commune face au climat : ce à quoi elle est exposée, ce qui la transforme.
@@ -3122,7 +3152,7 @@ export default function FutureELanding() {
                 border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
               }}
             >
-              Obtenir mon rapport interactif personnalisé
+              Obtenir mon dossier personnalisé
             </button>
             <p style={{
               fontFamily: "var(--font-mono)",
@@ -3349,14 +3379,22 @@ export default function FutureELanding() {
               maxWidth: 500,
             }}
           >
-            Une lecture personnalisée à partir de vos réponses et des données publiques,
-            à l&apos;échelle d&apos;une commune ou de plusieurs.
+            Une lecture personnalisée à partir de vos réponses et des données publiques.
+            À l&apos;échelle d&apos;une commune, d&apos;une adresse précise, ou de plusieurs
+            territoires mis en regard.
           </p>
         </div>
         <div style={styles.pricingGrid} className="pricing-grid">
           <div style={styles.planCard(false)}>
             <div style={styles.planPrice}>
               0<span style={styles.planPriceSub}>€</span>
+            </div>
+            {/* Les deux autres cartes portent une note sous leur prix (l'escalier). Sans une ligne
+                ici, les trois titres de plan se décalaient verticalement. Celle-ci dit quelque
+                chose de vrai plutôt que de tenir une place : l'inscription se fait par email ou
+                Google, aucun moyen de paiement n'est demandé. */}
+            <div style={styles.planPriceNote}>
+              Aucune carte bancaire demandée
             </div>
             <div style={styles.planName}>Découverte</div>
             <div style={styles.planDesc}>
@@ -3398,21 +3436,30 @@ export default function FutureELanding() {
                 color: C.bg,
               }}
             >
-              Disponible maintenant
+              {/* « Disponible maintenant » retiré le 04/08/2026 : depuis que le dossier d'adresse
+                  figure lui aussi dans la grille, un badge de disponibilité sur la seule carte à
+                  14 € laissait entendre que l'autre ne l'était pas encore. Le badge dit désormais
+                  la place dans l'escalier, pas un état de livraison. */}
+              Pour commencer
             </div>
             <div style={styles.planPrice}>
               14<span style={styles.planPriceSub}>€ une fois</span>
             </div>
-            <div style={styles.planName}>Rapport interactif</div>
+            <div style={styles.planPriceNote}>
+              Intégralement déduits si vous poursuivez ensuite sur une adresse
+            </div>
+            <div style={styles.planName}>Dossier de territoire</div>
             <div style={styles.planDesc}>
-              Le rapport interactif intégral, téléchargeable, à conserver.
+              Une commune examinée depuis votre projet. La première des trois échelles.
             </div>
             <div style={styles.planFeatures}>
               {[
                 'La commune en entier : climat, risques, cadre de vie, ce qui la transforme',
+                'Sa position parmi les 34 000 communes françaises, critère par critère',
                 'AskFuture : 3 questions incluses',
-                'Export PDF, à conserver',
-                'Régénération 1 fois par an',
+                // La déduction est remontée sous le prix (cf. planPriceNote) : elle ne se répète
+                // pas ici, où elle arrivait après que la décision soit prise.
+                'Export PDF, à conserver, régénérable 1 fois par an',
               ].map((feature) => (
                 <div key={feature} style={styles.planFeature}>
                   <span style={styles.planCheck}>✓</span>
@@ -3429,40 +3476,52 @@ export default function FutureELanding() {
               className="plan-btn"
               href="/checkout/rapport-complet"
             >
-              Acheter le rapport interactif · 14 €
+              Ouvrir un dossier de territoire · 14 €
             </Link>
           </div>
 
+          {/* LE DOSSIER D'ADRESSE, ABSENT DE CETTE GRILLE JUSQU'AU 04/08/2026. Le produit est en
+              production depuis le 30/07 (parcours /dossier, webhook `address-dossier`) et n'était
+              vendu nulle part sur l'accueil : la page promettait trois échelles en haut et n'en
+              proposait qu'une à l'achat. */}
           <div
             style={{
               ...styles.planCard(false),
-              borderColor: `${C.violet}40`,
-              boxShadow: '0 0 0 1px rgba(167,139,250,0.18), 0 16px 48px rgba(167,139,250,0.10)',
+              borderColor: `${C.blue}40`,
+              boxShadow: '0 0 0 1px rgba(96,165,250,0.18), 0 16px 48px rgba(96,165,250,0.10)',
             }}
           >
             <div
               style={{
                 ...styles.planBadge,
-                background: C.violet,
+                background: C.blue,
                 color: C.bg,
               }}
             >
-              Au bout du parcours
+              Territoire · Autour · Logement
             </div>
             <div style={styles.planPrice}>
-              39<span style={styles.planPriceSub}>€ une fois</span>
+              39<span style={styles.planPriceSub}>€ au total</span>
             </div>
-            <div style={styles.planName}>Pack Décision</div>
+            <div style={styles.planPriceNote}>
+              ou +25 € après un dossier de territoire
+            </div>
+            <div style={styles.planName}>Dossier d’adresse</div>
+            {/* La phrase « une bonne commune ne fait pas un bon quartier » vit déjà plus haut sur
+                cette page, dans le bloc des trois échelles, et dans /compte. La reprendre ici la
+                faisait lire deux fois sur le même écran. Cette carte dit ce qu'elle vend. */}
             <div style={styles.planDesc}>
-              Quand une commune ne suffit plus : trois territoires comparés thème
-              par thème, pour décider avec plus de recul.
+              Une commune, ses alentours et un logement ne répondent pas aux mêmes questions. Les
+              trois échelles sont examinées à partir d’une adresse précise.
             </div>
             <div style={styles.planFeatures}>
               {[
-                'La comparaison complète des trois communes sur 27 dimensions.',
-                'Les trois rapports interactifs complets, par commune',
-                'Trois nouvelles pistes si aucune ne tranche',
-                'AskFuture : 9 questions incluses',
+                'Tout le dossier de territoire de cette commune',
+                // « mesuré au mètre » promettait une précision que la mesure n'a pas : l'accès se
+                // calcule par distances et temps de parcours depuis le point, pas au mètre près.
+                'Autour de l’adresse : ce qui est accessible, selon les distances calculées',
+                'Le logement : confort d’été, risques du bâti, ce qui reste à vérifier en visite',
+                'À conserver, rouvrir et compléter au fil de votre recherche',
               ].map((feature) => (
                 <div key={feature} style={styles.planFeature}>
                   <span style={styles.planCheck}>✓</span>
@@ -3473,15 +3532,86 @@ export default function FutureELanding() {
             <Link
               style={{
                 ...styles.planBtn(true),
-                background: C.violet,
+                background: C.blue,
                 color: C.bg,
               }}
               className="plan-btn"
-              href="/ou-vivre"
+              href="/dossier"
             >
-              Comparer trois territoires
+              Ouvrir un dossier d’adresse · 39 €
             </Link>
           </div>
+
+        </div>
+
+        {/* LE DOSSIER COMPARATIF EST SORTI DE LA GRILLE LE 04/08/2026, et ce n'est pas une
+            rétrogradation. Les trois cartes décrivent UN SEUL AXE : la même commune regardée de
+            plus en plus près (gratuit, puis le territoire, puis l'adresse et le logement). Le
+            comparatif change d'axe, il élargit à plusieurs communes au même grain. Aligné en
+            quatrième carte, il obligeait le lecteur à comparer une profondeur et une largeur sur
+            la même ligne, ce qui est exactement la confusion qui avait laissé deux produits
+            différents au même prix de 39 €. La bande pose la seconde question à part.
+            Elle reste pleine largeur : une note de bas de page se raterait. */}
+        <div
+          className="pricing-compare"
+          style={{
+            marginTop: 16,
+            padding: '26px 30px',
+            borderRadius: 14,
+            border: `1px solid ${C.violet}40`,
+            background: 'var(--bg-elev)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 28,
+            flexWrap: 'wrap',
+          }}
+        >
+          <div style={{ flex: '1 1 460px', minWidth: 0 }}>
+            <div
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 10,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                color: C.violet,
+                marginBottom: 10,
+              }}
+            >
+              Une autre question · Dossier comparatif · 39 €
+            </div>
+            <div
+              style={{
+                fontFamily: 'var(--font-serif)',
+                fontSize: 21,
+                lineHeight: 1.25,
+                color: 'var(--fg-hi)',
+                marginBottom: 8,
+              }}
+            >
+              Vous hésitez entre plusieurs communes, pas sur une seule.
+            </div>
+            <div style={{ fontSize: 14, lineHeight: 1.65, color: C.muted }}>
+              Trois territoires comparés thème par thème sur 27 dimensions, les trois dossiers de
+              territoire complets, et trois nouvelles pistes si aucune commune ne se détache.
+              AskFuture&nbsp;: 9 questions incluses.
+            </div>
+          </div>
+          <Link
+            href="/ou-vivre"
+            className="plan-btn"
+            style={{
+              ...styles.planBtn(true),
+              background: C.violet,
+              color: C.bg,
+              flex: '0 0 auto',
+              width: 'auto',
+              padding: '14px 26px',
+              marginTop: 0,
+            }}
+          >
+            Comparer trois territoires
+          </Link>
         </div>
       </section>
 

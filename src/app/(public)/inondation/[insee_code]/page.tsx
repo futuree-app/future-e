@@ -372,7 +372,7 @@ export default async function InondationCommune({
 
         {/* CTA conversion */}
         <div className="cta-block">
-          <div className="cta-eyebrow">Rapport interactif personnalisé</div>
+          <div className="cta-eyebrow">Dossier personnalisé</div>
           <p className="cta-title">
             Approfondissez ce diagnostic{' '}
             <em style={{ fontStyle: 'italic', color: ACCENT }}>pour {communeName}</em>
@@ -381,7 +381,7 @@ export default async function InondationCommune({
             Logement · Mobilité · Santé · Économie locale, croisés pour votre profil spécifique.
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Link href={`/territoire/${insee_code}/debloquer?nom=${encodeURIComponent(communeName)}&source=inondation`} className="cta-btn">Ouvrir le rapport interactif</Link>
+            <Link href={`/territoire/${insee_code}/debloquer?nom=${encodeURIComponent(communeName)}&source=inondation`} className="cta-btn">Ouvrir le dossier</Link>
             <Link href="/rapport/logement" className="cta-sec">Ouvrir le module Logement →</Link>
           </div>
         </div>
