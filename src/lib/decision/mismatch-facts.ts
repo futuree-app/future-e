@@ -100,7 +100,7 @@ export const MISMATCH_LABELS: Record<string, MismatchLabel> = {
   vie_locale: { topic: "la vie locale", projectPhrase: "une vie locale animée", indicator: "l'intensité de la vie locale", subject: "une vie locale animée" },
   cadre_calme: { topic: "le cadre calme", projectPhrase: "un cadre calme", indicator: "le calme du cadre de vie", subject: "le calme" },
   viabilite_emploi: { topic: "le bassin d'emploi", projectPhrase: "un bassin d'emploi dynamique", indicator: "le dynamisme du bassin d'emploi", subject: "le dynamisme du bassin d'emploi" },
-  acces_services: { topic: "l'accès aux services du quotidien", projectPhrase: "un bon accès aux services du quotidien", indicator: "l'accès aux services et commerces du quotidien", subject: "l'accès aux services du quotidien" },
+  acces_services: { topic: "le niveau de services de la commune", projectPhrase: "une commune qui concentre commerces et services", indicator: "le niveau de services de la commune", subject: "le niveau de services" },
   ensoleillement_recherche: {
     topic: "l'ensoleillement",
     projectPhrase: "un territoire ensoleillé",
@@ -140,7 +140,7 @@ export const ALIGNMENT_LABELS: Record<string, AlignmentLabel> = {
   acces_soins: { headlineSubject: "l'accès aux soins", favorableStatusTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
   acces_ecoles: { headlineSubject: "l'accès aux collèges et lycées", favorableStatusTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
   acces_culture: { headlineSubject: "l'accès à la culture", favorableStatusTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
-  acces_services: { headlineSubject: "l'accès aux services du quotidien", favorableStatusTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
+  acces_services: { headlineSubject: "le niveau de services de la commune", favorableStatusTemplate: "Parmi les {rank} de communes qui concentrent le plus de commerces et services en France" },
   acces_transports: { headlineSubject: "l'accès au train", favorableStatusTemplate: "Parmi les {rank} de communes les mieux desservies par le train en France" },
   nature: { headlineSubject: "l'accès aux espaces naturels", favorableStatusTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
   vie_locale: { headlineSubject: "la vie locale", favorableStatusTemplate: "Parmi les {rank} de communes les plus animées de France" },

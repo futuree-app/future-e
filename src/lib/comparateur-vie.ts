@@ -37,6 +37,7 @@ import {
   DEPT_MEDITERRANEE,
   DEPT_LITTORAL_ATLANTIQUE,
 } from "@/lib/commune-categories";
+import { centraliteRang } from "@/lib/centralite-services";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — moteur de compatibilité déterministe (V1).
@@ -72,7 +73,7 @@ export const PREFERENCE_KEYS = [
   // Santé environnementale + vivabilité (V1.5/V1.6)
   "air_sain",                 // air de fond plus pur (PM2.5 ≫ NO2)
   "acces_soins",              // accès aux médecins généralistes (APL)
-  "acces_services",           // services/commerces accessibles
+  "acces_services",           // niveau de centralité en commerces et services (ANCT)
   "faible_pression_agricole", // éloigné des cultures à traitements fréquents (pression, pas exposition)
   // Caractère naturel à proximité (OSO 2023, couvert naturel élargi dans 15 km).
   // « perçu comme naturel », pas biodiversité ni wilderness. cf. NATURE_TERRITORIAL.md.
@@ -1240,7 +1241,11 @@ export function subScore(key: PreferenceKey, c: IndexCommune): number | null {
     case "acces_soins":
       return c.vivpct?.apl == null ? null : c.vivpct.apl; // APL haut = bon accès
     case "acces_services":
-      return c.vivpct?.eloignement == null ? null : 100 - c.vivpct.eloignement; // éloignement bas = mieux
+      // LE NIVEAU DE CENTRALITÉ de la commune (INRAE-CESAER / ANCT 2021), et plus le champ des
+      // 20 minutes, dont l'identité n'a jamais pu être établie et dont le palier intermédiaire
+      // était vide sur 34 788 communes. Voir `centralite-services.ts` pour ce que ce rang mesure,
+      // et surtout ce qu'il ne mesure pas. `mismatchRawScore` en tient la copie fidèle.
+      return centraliteRang(c.agri?.equip, c.insee);
     case "faible_pression_agricole":
       return c.pression_agricole == null ? null : 100 - c.pression_agricole;
     case "viabilite_emploi":
@@ -1378,7 +1383,11 @@ const DIMENSIONS: ComparaisonDim[] = [
   { id: "train", label: "Train / gares", themeId: "mobilite", key: "acces_transports", paliers: ["Bien relié par le train", "Gare accessible, desserte limitée", "Peu relié par le train"], gp: "le train", forte: "sa desserte ferroviaire", aide: "La desserte par le train et les gares proches.", risque: false, directionnel: true },
   { id: "tc_quotidien", label: "Transports du quotidien", themeId: "mobilite", key: "mobilite_quotidienne", paliers: ["Réseau de transports présent", "Desserte partielle", "Peu de transports en commun"], gp: "les transports du quotidien", forte: "ses transports du quotidien", aide: "Un réseau de bus, tram ou métro pour se déplacer sans voiture au quotidien.", risque: false, directionnel: true },
   { id: "soins", label: "Soins", themeId: "services", key: "acces_soins", paliers: ["Bon accès aux soins", "Accès intermédiaire", "Accès aux soins limité"], gp: "l'accès aux soins", forte: "son accès aux soins", aide: "La facilité d'accès aux médecins.", risque: false, directionnel: true },
-  { id: "services", label: "Services", themeId: "services", key: "acces_services", paliers: ["Services proches", "Accès intermédiaire", "Services éloignés"], gp: "les services", forte: "ses services accessibles", aide: "La proximité des commerces et services du quotidien.", risque: false, directionnel: true },
+  // NIVEAU DE SERVICES, plus « Services ». Le libellé générique portait la plus grande autorité
+  // apparente du thème à côté de quatre lignes qui, elles, mesurent, et il promettait une proximité
+  // que la donnée ne dit pas : la classification ANCT dit ce que la commune CONCENTRE pour son
+  // bassin, jamais la distance qu'un habitant parcourt (cf. `centralite-services.ts`).
+  { id: "services", label: "Niveau de services", themeId: "services", key: "acces_services", paliers: ["Pôle de services", "Centre de proximité", "Hors pôle de services"], gp: "le niveau de services", forte: "son niveau de services", aide: "Ce que la commune concentre en commerces et services pour son bassin de vie (classification INRAE-CESAER / ANCT).", risque: false, directionnel: true },
   { id: "ecoles", label: "Collèges / lycées", themeId: "services", key: "acces_ecoles", paliers: ["Collèges et lycées accessibles", "Accès intermédiaire", "Accès limité"], gp: "l'accès aux collèges et lycées", forte: "son accès aux collèges et lycées", aide: "L'accès aux collèges et lycées alentour.", risque: false, directionnel: true },
   { id: "culture", label: "Culture", themeId: "services", key: "acces_culture", paliers: ["Offre culturelle présente", "Offre intermédiaire", "Offre limitée"], gp: "l'offre culturelle", forte: "son offre culturelle", aide: "La présence d'équipements culturels à proximité.", risque: false, directionnel: true },
   { id: "isolement", label: "Isolement", themeId: "services", key: "eviter_isolement", paliers: ["Bassin de vie étendu", "Bassin de proximité", "Bassin de vie restreint"], gp: "le bassin de vie", forte: "son bassin de vie étendu", aide: "La taille du bassin de vie qui dessert le territoire.", risque: false, directionnel: true },
@@ -1818,7 +1827,7 @@ const COMPROMIS_NEG: Partial<Record<PreferenceKey, string>> = {
   faible_risque_inondation: "le risque d'inondation est plus présent",
   air_sain: "l'air de fond est un peu moins pur",
   acces_soins: "l'offre de soins est plus limitée",
-  acces_services: "les services sont moins accessibles",
+  acces_services: "la commune concentre moins de services",
   calme_sonore: "l'environnement est plus bruyant",
   faible_exposition_industrielle: "les sites industriels sont plus présents",
   vie_locale: "la vie locale est plus discrète",
@@ -2038,7 +2047,7 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   },
   air_sain: "air de fond plus pur",
   acces_soins: "bon accès aux médecins",
-  acces_services: "services et commerces à proximité",
+  acces_services: "commune qui concentre commerces et services",
   faible_pression_agricole: "loin des cultures à traitements fréquents",
   // « à proximité » assumé : on mesure le couvert naturel autour, pas dans la commune.
   // Jamais « commune naturelle / préservée / sauvage / biodiversité » (cf. doctrine).
@@ -2082,7 +2091,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   eviter_isolement: "bassin de vie réduit, plus isolé",
   air_sain: "air plus chargé en particules",
   acces_soins: "zone sous-dotée en médecins",
-  acces_services: "services parfois éloignés",
+  acces_services: "commune hors pôle de services",
   faible_pression_agricole: "environnement agricole à traitements fréquents à proximité",
   viabilite_emploi: "bassin d'emploi étroit ou peu diversifié",
   nature: "peu d'espaces naturels à proximité",

@@ -790,18 +790,21 @@ function buildFactors(
       tip: "Part du parc sans occupant au recensement.",
     });
   }
-  if (eloignementServicesPct != null) {
-    const elo = Math.round(eloignementServicesPct);
-    const eloLabel = elo < 5 ? "Services proches" : elo <= 20 ? "Éloignement modéré" : "Éloignement marqué";
-    factors.push({
-      label: "Accès aux services",
-      val: eloLabel,
-      col: "var(--green)",
-      src: "INSEE / ADEME · à plus de 20 min d'un service",
-      missing: false,
-      tip: `${elo} % des habitants vivent à plus de 20 min des services essentiels. Cette carte décrit le bassin de vie de la commune entière, pas votre voisinage : ce qui se trouve à proximité de votre adresse se lit dans le module Autour de l'adresse.`,
-    });
-  }
+  // LA CARTE « ACCÈS AUX SERVICES » A ÉTÉ RETIRÉE LE 04/08/2026, et le champ avec elle.
+  //
+  // Elle affirmait « X % des habitants vivent à plus de 20 min des SERVICES ESSENTIELS ». La
+  // recherche de source du 04/08 a établi que l'ADEME ne documente pas ce champ, et que le seul
+  // indicateur homonyme du catalogue de l'ANCT porte sur les services DE SANTÉ de proximité. Le
+  // faisceau est fort (les ordres de grandeur concordent), la preuve manque, et l'écran, lui,
+  // affirmait sans réserve. Dire « services essentiels » d'une donnée qui compte peut-être des
+  // médecins, c'est affirmer au-delà de la preuve.
+  //
+  // Le critère du comparateur qui reposait sur ce même champ a été remplacé par le niveau de
+  // centralité de l'ANCT (`centralite-services.ts`), qui est identifié, daté et complet. Cette
+  // carte reviendra quand ce niveau sera câblé jusqu'ici : il vit dans l'index du comparateur, pas
+  // dans le jeu ADEME que cette page lit. En attendant, une carte absente vaut mieux qu'une carte
+  // qui nomme mal ce qu'elle mesure.
+  void eloignementServicesPct;
 
   // Carte CatNat (GASPAR) — ajoutée seulement quand l'appelant fournit la donnée
   // (QuartierAside). Histoire vécue : nombre de reconnaissances depuis l'origine.

@@ -21,7 +21,7 @@ export const PREFERENCE_LABELS: Record<string, string> = {
   eviter_isolement: "ne pas être isolé",
   air_sain: "un air plus pur",
   acces_soins: "un bon accès aux soins",
-  acces_services: "des services du quotidien accessibles",
+  acces_services: "une commune qui concentre commerces et services",
   faible_pression_agricole: "un environnement peu marqué par l'agriculture intensive",
   viabilite_emploi: "un bassin d'emploi dynamique",
   nature: "des espaces naturels à proximité",
