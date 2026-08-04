@@ -19,6 +19,7 @@ import { aCommune } from "../typography.ts";
 import { declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } from "./project-view.ts";
 import { LOGEMENT_RULES } from "./logement-rules.ts";
 import { SECTEUR_RULES } from "./secteur-rules.ts";
+import { PERMIS_RULES } from "./permis-rules.ts";
 import { RADON_RULES } from "./radon-rules.ts";
 import { HARD_CONSTRAINT_RULES } from "./hard-constraint-rules.ts";
 import { MISMATCH_RULES } from "./mismatch-rules.ts";
@@ -802,6 +803,7 @@ export const REGISTRY: DecisionRule[] = [
   ruleInondation,
   ...LOGEMENT_RULES,
   ...SECTEUR_RULES,
+  ...PERMIS_RULES,
   ...RADON_RULES,
 ];
 

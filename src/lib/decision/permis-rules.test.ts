@@ -6,6 +6,7 @@ import type { PermisSnapshot } from "../logement-autour-types.ts";
 import type { UserProject } from "../user-project.ts";
 import type { EvaluationContext } from "../hard-constraints.ts";
 import { echelleDeLaPreuve } from "./echelles.ts";
+import { runRules } from "./materiality-rules.ts";
 
 const rule = PERMIS_RULES[0]!;
 
@@ -293,4 +294,35 @@ test("les bornes d'assertFactValid sont respectées", () => {
     assert.equal(/[.!?]$/.test(fact.action.label), false, fact.action.label);
     assert.equal(/[.!?]/.test(fact.topic), false, fact.topic);
   }
+});
+
+// ── Le branchement, que les tests de règle ne prouvent jamais ────────────────────────────────
+
+test("LA RÈGLE EST DANS LE REGISTRY, et son fait sort de runRules", () => {
+  // Sans ce test, oublier `...PERMIS_RULES` dans le REGISTRY laisserait les vingt-deux autres au
+  // vert pendant que le dossier resterait exactement comme avant.
+  // Un contexte RÉEL, même vide de contraintes : `runRules` lit `context.constraints`, et le
+  // `undefined as never` que portait le plan faisait tomber le test avant d'atteindre la règle.
+  const HARD: EvaluationContext = {
+    constraints: {
+      departements: null, zones: null, excludeZones: null, montagne: false, reliefProche: false,
+      nearSea: null, excludeSea: false, communeSize: null, nearPlace: null, excludePlace: [],
+      sizeRelativeTo: null,
+    },
+    point: { lat: 46.16, lon: -1.15, grain: "commune_reference", source: "commune_centroid", label: "La Rochelle" },
+    conventionsVersion: "hc-conv-1",
+  };
+  const run = runRules(
+    facts({ permis: permis([{ annee: 2025, etat: "chantier_ouvert" }]) }),
+    PROJECT,
+    HARD,
+  );
+  assert.ok(
+    run.evaluations.some((e) => e.ruleId === "autour.permis"),
+    "la règle n'a pas été évaluée : elle n'est pas dans le REGISTRY",
+  );
+  assert.ok(
+    run.facts.some((f) => f.ruleId === "autour.permis"),
+    "la règle est évaluée mais son fait n'arrive pas dans le run",
+  );
 });

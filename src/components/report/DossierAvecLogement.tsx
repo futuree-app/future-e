@@ -15,13 +15,20 @@ import type { Dossier, ModuleFacts } from "@/lib/decision/decision-fact";
 import type { EvaluationContext } from "@/lib/hard-constraints";
 import type { DpeRecord } from "@/lib/dpe";
 import type { UserProject } from "@/lib/user-project";
+import type { PermisSnapshot } from "@/lib/logement-autour-types";
 
 export async function DossierAvecLogement({
-  project, address, savedDpe, communeFacts, communeDossier, logementLink, insee, scopeKey, hard,
+  project, address, savedDpe, permis, communeFacts, communeDossier, logementLink, insee, scopeKey, hard,
 }: {
   project: UserProject;
   address: ResolvedAddress;
   savedDpe: DpeRecord | null;
+  /**
+   * LE REGISTRE DES AUTORISATIONS, gelé à l'analyse. `null` veut dire NON CONSULTÉ (dossier
+   * antérieur au 01/08/2026, ou API muette), et la règle rend alors `uncertain` : jamais une
+   * absence d'autorisation qui n'a pas été établie.
+   */
+  permis: PermisSnapshot | null;
   communeFacts: ModuleFacts;
   communeDossier: Dossier;
   logementLink: { href: string; label: string } | null;
@@ -44,6 +51,10 @@ export async function DossierAvecLogement({
       .catch(() => null);
     const facts: ModuleFacts = {
       ...communeFacts, hasAddress: true, logement, secteur: buildSecteurFacts(car),
+      // LE REGISTRE ENTRE DANS LE MOTEUR. Aucune I/O : la donnée est déjà gelée dans le snapshot du
+      // dossier. `undefined` quand elle est absente, pour que la règle distingue « non consulté »
+      // de « rien trouvé ».
+      ...(permis ? { permis } : {}),
     };
     // LE GRAIN CHANGE. Une commune peut passer sur son point de référence et échouer pour une adresse
     // située à son extrémité : ce n'est pas une divergence de moteur, c'est une lecture plus fine, et la

@@ -370,6 +370,7 @@ export default async function RapportPage() {
                 project={userProject!}
                 address={dossierAddress}
                 savedDpe={logementForCommune.selected_dpe_snapshot}
+                permis={logementForCommune.snapshot?.permis ?? null}
                 communeFacts={communeResult.moduleFacts}
                 communeDossier={dossier}
                 logementLink={dossierLogementLink}
