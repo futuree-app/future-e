@@ -22,7 +22,7 @@ import { bindOrphans } from "@/lib/typography";
 export type ConditionEvidence = { evidence: EvidenceRef[]; limitation?: string };
 
 // LES QUATRE TONS DOIVENT ÊTRE QUATRE COULEURS. `caution` et `positive` rendaient EXACTEMENT la même
-// (--orange et --accent valent tous deux #fb923c) : deux états opposés du verdict, « à nuancer » et
+// (--orange et --accent valent tous deux #E8823A) : deux états opposés du verdict, « à nuancer » et
 // « bonne correspondance », portaient le même signal. `positive` prend le vert de la palette, qui n'a
 // pas d'autre emploi et que personne ne lit comme une mise en garde.
 const TONE_COLOR: Record<VerdictTone, string> = {

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
 };
 
-const ACCENT = '#fb923c';
+const ACCENT = '#E8823A';
 const TOP200_CODES = (top1000 as string[]).slice(0, 200);
 const TOP200_SET = new Set(TOP200_CODES);
 
@@ -351,7 +351,7 @@ const css = `
   .page{position:relative;z-index:2;max-width:860px;margin:0 auto;padding:72px 28px 120px;}
   .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:${ACCENT};margin-bottom:18px;display:flex;align-items:center;gap:10px;}
   .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:${ACCENT};box-shadow:0 0 10px ${ACCENT};flex-shrink:0;}
-  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(32px,5vw,54px);line-height:1.08;letter-spacing:-0.02em;margin:0 0 20px;color:var(--fg-1);}
+  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-display);line-height:1.08;letter-spacing:-0.02em;margin:0 0 20px;color:var(--fg-1);}
   h1 em{font-style:italic;color:${ACCENT};}
   .lede{font-size:17px;color:var(--fg-3);margin:0 0 16px;line-height:1.75;max-width:700px;}
   .method-note{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);line-height:1.7;margin:0 0 64px;max-width:720px;padding:14px 18px;border-left:2px solid var(--border-1);}
@@ -366,7 +366,7 @@ const css = `
   .city-header{display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap;}
   .city-rank{font-family:var(--font-serif);font-size:clamp(38px,5vw,58px);font-weight:var(--weight-title);color:${ACCENT};opacity:0.22;line-height:1;letter-spacing:-0.04em;flex-shrink:0;min-width:52px;}
   .city-info{flex:1;}
-  .city-name{font-family:var(--font-serif);font-size:clamp(22px,3vw,30px);font-weight:var(--weight-title);color:var(--fg-1);line-height:1.1;}
+  .city-name{font-family:var(--font-serif);font-size:var(--text-section);font-weight:var(--weight-title);color:var(--fg-1);line-height:1.1;}
   .city-dept{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);margin-top:3px;}
   .city-score-block{text-align:right;flex-shrink:0;}
   .city-score-num{font-family:var(--font-serif);font-size:clamp(32px,4vw,48px);font-weight:var(--weight-title);color:${ACCENT};line-height:1;letter-spacing:-0.02em;}
@@ -380,13 +380,13 @@ const css = `
   .city-editorial{font-size:15px;color:var(--fg-3);line-height:1.8;margin:0;}
 
   .cta-block{margin-top:72px;display:flex;flex-direction:column;gap:14px;}
-  .cta-rapport{padding:32px 36px;border-radius:12px;background:rgba(251,146,60,0.06);border:1px solid rgba(251,146,60,0.2);display:flex;flex-direction:column;gap:10px;}
+  .cta-rapport{padding:32px 36px;border-radius:12px;background:rgba(232, 130, 58,0.06);border:1px solid rgba(232, 130, 58,0.2);display:flex;flex-direction:column;gap:10px;}
   .cta-rapport-title{font-family:var(--font-serif);font-size:22px;font-weight:var(--weight-title);color:var(--fg-1);line-height:1.3;}
   .cta-rapport-desc{font-size:14px;color:var(--fg-3);line-height:1.65;max-width:560px;}
   .cta-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;}
   .cta-btn{display:inline-flex;align-items:center;padding:11px 22px;background:${ACCENT};color:#060812;font-family:var(--font-sans);font-size:13px;font-weight:600;text-decoration:none;border-radius:6px;}
-  .cta-sec{display:inline-flex;align-items:center;padding:11px 20px;border:1px solid rgba(251,146,60,0.28);color:${ACCENT};font-family:var(--font-mono);font-size:11px;letter-spacing:0.06em;text-decoration:none;border-radius:6px;transition:border-color 0.2s;}
-  .cta-sec:hover{border-color:rgba(251,146,60,0.5);}
+  .cta-sec{display:inline-flex;align-items:center;padding:11px 20px;border:1px solid rgba(232, 130, 58,0.28);color:${ACCENT};font-family:var(--font-mono);font-size:11px;letter-spacing:0.06em;text-decoration:none;border-radius:6px;transition:border-color 0.2s;}
+  .cta-sec:hover{border-color:rgba(232, 130, 58,0.5);}
 
   .divider{height:1px;background:var(--bg-elev-3);margin:64px 0;}
   .page-footer{position:relative;z-index:2;max-width:860px;margin:0 auto;padding:28px 28px 56px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;font-family:var(--font-mono);font-size:11px;color:var(--fg-4);border-top:1px solid var(--border-1);}
@@ -507,12 +507,12 @@ export default async function TopDependanceAutoPage() {
 
         <div className="cta-block">
           <div className="cta-rapport">
-            <div className="cta-rapport-title">Le top 10 montre le risque. Le rapport interactif dit comment il vous touche.</div>
+            <div className="cta-rapport-title">Le top 10 montre le risque. Le dossier dit comment il vous touche.</div>
             <p className="cta-rapport-desc">
-              Une ville peut ressortir très haut au classement sans que cela dise tout de votre situation. Le rapport interactif ajoute votre commune, votre profil et une lecture du secteur autour de votre adresse pour comprendre où un choc énergétique pèserait vraiment sur votre quotidien.
+              Une ville peut ressortir très haut au classement sans que cela dise tout de votre situation. Le dossier ajoute votre commune, votre profil et une lecture du secteur autour de votre adresse pour comprendre où un choc énergétique pèserait vraiment sur votre quotidien.
             </p>
             <div className="cta-links">
-              <Link href="/rapport" prefetch={false} className="cta-btn">Voir le rapport interactif →</Link>
+              <Link href="/rapport" prefetch={false} className="cta-btn">Voir le dossier →</Link>
               <Link href="/j-utilise-beaucoup-ma-voiture" className="cta-sec">Retour au hub</Link>
             </div>
           </div>

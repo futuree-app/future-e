@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { DRIAS_CITY_FALLBACK } from "@/lib/communes";
 import type { ClimatProjete } from "@/lib/logement-synthesis-cache";
+import { construireEchelle, rangDe, type Rang } from "@/lib/rang-national";
 
 // Mapping des colonnes techniques vers nos indicateurs métier.
 //
@@ -55,32 +56,136 @@ type ScenarioId = "gwl15" | "gwl20" | "gwl30";
 // Cache pour stocker les données en mémoire après le premier chargement
 let indexCache: Map<string, Map<ScenarioId, RawRow>> | null = null;
 
+// ON MÉMOÏSE LA PROMESSE, PAS SEULEMENT SA VALEUR. Le cache de valeur ne se remplit qu'APRÈS la
+// lecture et le parse des 60 Mo de `data_climat.json` : deux appels concurrents arrivés avant cet
+// instant trouvaient tous deux `indexCache` à null et relisaient le fichier chacun de leur côté.
+// La faute était latente tant qu'une page n'appelait qu'une fois `getIndex()` ; l'arrivée du rang
+// national (quatre indicateurs demandés en parallèle) l'a rendue coûteuse, et le nombre de pages
+// dépassant le timeout de 60 s au build est passé de 16 à 80. Mesuré, pas supposé.
+let indexPromise: Promise<Map<string, Map<ScenarioId, RawRow>>> | null = null;
+
 /**
  * Charge et indexe le fichier JSON par insee_code et par scenario.
  * Utilise padStart(5, '0') pour garantir la cohérence des clés INSEE.
  */
 async function getIndex(): Promise<Map<string, Map<ScenarioId, RawRow>>> {
   if (indexCache) return indexCache;
+  if (indexPromise) return indexPromise;
 
+  indexPromise = chargerIndex();
+  try {
+    indexCache = await indexPromise;
+    return indexCache;
+  } finally {
+    // Libère la promesse : en cas d'échec, le prochain appel doit pouvoir retenter.
+    indexPromise = null;
+  }
+}
+
+async function chargerIndex(): Promise<Map<string, Map<ScenarioId, RawRow>>> {
   const filePath = path.join(process.cwd(), "public", "data_climat.json");
   const raw = await fs.readFile(filePath, "utf8");
   const rows: RawRow[] = JSON.parse(raw);
 
-  indexCache = new Map();
+  // La carte se construit EN LOCAL puis est retournée : `indexCache` n'est affecté qu'une fois
+  // l'index complet. Écrire dans le cache au fil de la boucle exposerait un index à moitié rempli
+  // à tout appelant concurrent, et une commune absente y serait indiscernable d'une commune pas
+  // encore chargée.
+  const index = new Map<string, Map<ScenarioId, RawRow>>();
   for (const row of rows) {
     // Nettoyage et formatage uniforme sur 5 caractères (ex: 1355 -> 01355)
-    const rawInsee = String(row.insee_code);
-    const insee = rawInsee.padStart(5, '0');
-    
+    const insee = String(row.insee_code).padStart(5, '0');
     const scenario = String(row.scenario) as ScenarioId;
-    
-    if (!indexCache.has(insee)) {
-      indexCache.set(insee, new Map());
+
+    let parScenario = index.get(insee);
+    if (!parScenario) {
+      parScenario = new Map();
+      index.set(insee, parScenario);
     }
-    indexCache.get(insee)!.set(scenario, row);
+    parScenario.set(scenario, row);
   }
 
-  return indexCache;
+  return index;
+}
+
+// ─── Rang national d'une commune, par indicateur et par scénario ──────────────
+//
+// L'index DRIAS est déjà chargé en entier et gardé en mémoire (`indexCache`) : toute page de
+// commune le paie déjà. Construire l'échelle nationale d'un indicateur ne coûte donc qu'un tri de
+// ~35 000 nombres, mémoïsé lui aussi. Aucun fichier supplémentaire, aucune étape de build.
+//
+// L'ÉCHELLE EST INDEXÉE PAR (SCÉNARIO, INDICATEUR), et jamais par indicateur seul. Comparer une
+// valeur de 2050 à l'échelle de 2100 produirait un rang vrai sous une convention fausse : la
+// commune serait dite « peu exposée » simplement parce qu'on la mesure contre un futur plus
+// lointain. C'est la même faute que celle qui a motivé `horizons.ts`, à un autre endroit.
+//
+// Même mémoïsation par PROMESSE que pour l'index, et pour la même raison : les quatre indicateurs
+// d'une page sont demandés en parallèle, et un cache de valeur les laisserait tous construire leur
+// échelle avant que le premier ait fini d'écrire la sienne.
+const echelleCache = new Map<string, Promise<Float64Array>>();
+
+function getEchelle(scenario: ScenarioId, indicateur: string): Promise<Float64Array> {
+  const cle = `${scenario}|${indicateur}`;
+  const dejaLa = echelleCache.get(cle);
+  if (dejaLa) return dejaLa;
+
+  const promesse = construireEchelleNationale(scenario, indicateur);
+  echelleCache.set(cle, promesse);
+  promesse.catch(() => echelleCache.delete(cle));
+  return promesse;
+}
+
+async function construireEchelleNationale(
+  scenario: ScenarioId,
+  indicateur: string,
+): Promise<Float64Array> {
+  const col = COLUMN_MAP[indicateur];
+  const index = await getIndex();
+  const valeurs: number[] = [];
+
+  if (col) {
+    for (const scenarioMap of index.values()) {
+      const row = scenarioMap.get(scenario);
+      if (!row) continue;
+      const brut = row[col];
+      if (brut === null || brut === undefined) continue;
+      const n = Number(brut);
+      if (!Number.isNaN(n)) valeurs.push(n);
+    }
+  }
+
+  return construireEchelle(valeurs);
+}
+
+/**
+ * Où se situe une commune, pour un indicateur donné, parmi toutes les communes que DRIAS couvre.
+ *
+ * Retourne `null` quand la commune est absente de l'index, quand l'indicateur ne lui est pas
+ * fourni, ou quand l'indicateur est inconnu. Une absence de rang se dit, elle ne se remplace pas
+ * par une position moyenne : le périmètre DRIAS exclut les DROM, et une commune d'outre-mer doit
+ * lire « non comparée » plutôt qu'un rang qui n'existe pas.
+ */
+export async function getRangNational(
+  inseeCode: string,
+  scenario: ScenarioId,
+  indicateur: string,
+): Promise<Rang | null> {
+  const index = await getIndex();
+  const safeInsee = String(inseeCode).padStart(5, "0");
+  const lookupInsee = DRIAS_CITY_FALLBACK[safeInsee] ?? safeInsee;
+
+  const row = index.get(lookupInsee)?.get(scenario);
+  if (!row) return null;
+
+  const col = COLUMN_MAP[indicateur];
+  if (!col) return null;
+
+  const brut = row[col];
+  if (brut === null || brut === undefined) return null;
+  const valeur = Number(brut);
+  if (Number.isNaN(valeur)) return null;
+
+  return rangDe(await getEchelle(scenario, indicateur), valeur);
 }
 
 function rowToIndicators(row: RawRow): Record<string, number> {

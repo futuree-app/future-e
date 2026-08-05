@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getClimatDataCommune } from '@/lib/drias-json';
+import { getClimatDataCommune, getRangNational } from '@/lib/drias-json';
+import { phraseDePosition, type Rang } from '@/lib/rang-national';
+import { HORIZON } from '@/lib/horizons';
 import { getGeorisquesSummary, getGasparCatnatSummary } from '@/lib/georisques';
 import { createClient } from '@supabase/supabase-js';
 
@@ -79,7 +81,7 @@ const css = `
 
   .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:var(--bg-card);border-bottom:1px solid var(--border-1);}
   .nav-inner{max-width:960px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
-  .brand{font-family:var(--font-brand);font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
+  .brand{font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
   .crumb{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.06em;display:flex;align-items:center;gap:0;}
   .crumb a{color:var(--fg-3);text-decoration:none;transition:color 0.2s;}
   .crumb a:hover{color:var(--fg-1);}
@@ -97,11 +99,20 @@ const css = `
   .data-card-value{font-family:var(--font-serif);font-size:32px;line-height:1;font-weight:var(--weight-title);color:${ACCENT};}
   .data-card-unit{font-size:0.45em;color:var(--fg-4);}
   .data-card-note{font-size:12px;color:var(--fg-3);margin-top:8px;line-height:1.5;}
+  /* Les deux horizons côte à côte, et la position nationale. Mêmes classes que la page chaleur
+     jumelle : les deux écrans doivent se lire de la même façon. */
+  .horizons{display:flex;align-items:flex-end;gap:22px;flex-wrap:wrap;}
+  .horizon-annee{font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;color:var(--fg-4);margin-bottom:4px;}
+  .horizon-eq{font-family:var(--font-mono);font-size:10px;color:var(--fg-4);margin-top:4px;}
+  .horizon-late .data-card-value{font-size:22px;color:var(--fg-3);}
+  .rang{margin-top:12px;padding-top:10px;border-top:1px solid var(--border-1);font-size:12px;line-height:1.5;color:var(--fg-2);}
+  .rang strong{color:${ACCENT};font-weight:600;}
+  .rang-meta{font-family:var(--font-mono);font-size:10px;color:var(--fg-4);margin-top:3px;}
 
   /* Section headers */
   .section{margin:64px 0 0;}
   .section-eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:${ACCENT};margin-bottom:10px;}
-  .section-title{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(22px,2.8vw,32px);line-height:1.15;letter-spacing:-0.015em;margin:0 0 6px;color:var(--fg-1);}
+  .section-title{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-title);line-height:1.15;letter-spacing:-0.015em;margin:0 0 6px;color:var(--fg-1);}
   .section-sub{font-size:14px;color:var(--fg-4);margin:0 0 28px;font-family:var(--font-mono);}
 
   /* Article cards */
@@ -155,7 +166,22 @@ export default async function InondationCommune({
 
   const communeName = commune?.nom_commune ?? driasData?.commune?.n ?? insee_code;
   const dept = commune?.departement ?? insee_code.slice(0, 2);
-  const driasV = driasData?.commune?.s?.gwl30?.v;
+  // LES DEUX HORIZONS, CHACUN SOUS SA VRAIE DATE (04/08/2026). Même correction que sur la page
+  // chaleur jumelle : la page titrait « Projections 2050 » en lisant `gwl30`, le palier +3 °C
+  // mondial (+4 °C en France) atteint vers 2100.
+  const drias2050 = driasData?.commune?.s?.gwl20?.v;
+  const drias2100 = driasData?.commune?.s?.gwl30?.v;
+
+  // La position nationale, établie sur l'horizon AFFICHÉ en premier.
+  const RANG_INDICATEURS = ['NORRx1d_yr', 'NORRRq99_yr', 'NORRR_yr', 'NORRR_seas_DJF'] as const;
+  const rangs = Object.fromEntries(
+    await Promise.all(
+      RANG_INDICATEURS.map(async (ind) => [
+        ind,
+        await getRangNational(insee_code, 'gwl20', ind).catch(() => null),
+      ] as const),
+    ),
+  ) as Record<(typeof RANG_INDICATEURS)[number], Rang | null>;
 
   // Mémoire CatNat liée à l'eau : arrêtés inondation + submersion marine. Fait brut,
   // sans interprétation personnalisée — le croisement passé × futur reste au rapport
@@ -185,28 +211,43 @@ export default async function InondationCommune({
     : coastalScore >= 55 ? 'Ville très basse'
     : 'Ville basse';
 
-  const DRIAS_ITEMS: { label: string; val: number | undefined; unit: string; note: string }[] = [
+  const DRIAS_ITEMS: {
+    label: string;
+    val: number | undefined;
+    val2100?: number | undefined;
+    rang?: Rang | null;
+    unit: string;
+    note: string;
+  }[] = [
     {
       label: 'Précipitations extrêmes (max 1 jour)',
-      val: driasV?.NORRx1d_yr,
+      val: drias2050?.NORRx1d_yr,
+      val2100: drias2100?.NORRx1d_yr,
+      rang: rangs.NORRx1d_yr,
       unit: 'mm',
-      note: "Quantité maximale de pluie tombée en 24 heures dans le scénario +4°C. Au-delà de 100 mm/j, les systèmes d'assainissement urbains sont saturés et les crues se déclenchent rapidement.",
+      note: "Quantité maximale de pluie tombée en 24 heures. Au-delà de 100 mm/j, les systèmes d'assainissement urbains sont saturés et les crues se déclenchent rapidement.",
     },
     {
       label: 'Précipitations remarquables (p99)',
-      val: driasV?.NORRRq99_yr,
+      val: drias2050?.NORRRq99_yr,
+      val2100: drias2100?.NORRRq99_yr,
+      rang: rangs.NORRRq99_yr,
       unit: 'mm',
       note: "Seuil dépassé 1 % du temps, soit environ 3 à 4 fois par an. C'est l'indicateur de référence pour évaluer la fréquence des épisodes à fort ruissellement.",
     },
     {
       label: 'Précipitations annuelles totales',
-      val: driasV?.NORRR_yr,
+      val: drias2050?.NORRR_yr,
+      val2100: drias2100?.NORRR_yr,
+      rang: rangs.NORRR_yr,
       unit: 'mm',
-      note: "Volume total de précipitations sur l'année en 2050. Un volume élevé combiné à une forte saisonnalité augmente le risque d'inondation sur des sols déjà saturés.",
+      note: "Volume total de précipitations sur l'année. Un volume élevé combiné à une forte saisonnalité augmente le risque d'inondation sur des sols déjà saturés.",
     },
     {
       label: 'Précipitations hivernales',
-      val: driasV?.NORRR_seas_DJF,
+      val: drias2050?.NORRR_seas_DJF,
+      val2100: drias2100?.NORRR_seas_DJF,
+      rang: rangs.NORRR_seas_DJF,
       unit: 'mm',
       note: "Les crues de plaine surviennent principalement en hiver (décembre–février) quand les sols sont saturés. C'est la saison à risque pour la majorité des cours d'eau de plaine.",
     },
@@ -250,11 +291,11 @@ export default async function InondationCommune({
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: ACCENT, marginBottom: 12 }}>
             Inondation et submersion · Projections 2050
           </div>
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(26px, 4vw, 42px)', fontWeight: 400, color: 'var(--fg-1)', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 18px' }}>
+          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'var(--text-display)', fontWeight: 400, color: 'var(--fg-1)', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 18px' }}>
             À {communeName}, quel est le risque d&apos;inondation réel ?
           </h1>
           <p style={{ fontSize: 15, color: 'var(--fg-3)', lineHeight: 1.75, maxWidth: 640, margin: '0 0 12px' }}>
-            Cette page rassemble les données officielles sur l&apos;exposition de {communeName} aux inondations, aux submersions marines et aux précipitations extrêmes, issues de Géorisques, de Météo-France et du CNRS, dans un scénario de réchauffement à +4°C d&apos;ici 2050.
+            Cette page rassemble les données officielles sur l&apos;exposition de {communeName} aux inondations, aux submersions marines et aux précipitations extrêmes, issues de Géorisques, de Météo-France et du CNRS, à deux horizons : 2050, où la France atteint +2,7 °C, et 2100, où elle atteint +4 °C. Chaque mesure est située parmi l&apos;ensemble des communes françaises.
           </p>
           <p style={{ fontSize: 14, color: 'var(--fg-4)', lineHeight: 1.65, maxWidth: 640, margin: 0, fontFamily: 'var(--font-mono)' }}>
             Que vous habitiez ici, envisagiez d&apos;y acheter un bien ou prépariez votre avenir, ces données ont une valeur concrète pour vos décisions.
@@ -291,21 +332,52 @@ export default async function InondationCommune({
         {/* DRIAS projections */}
         <div style={{ marginBottom: 10 }}>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACCENT, marginBottom: 4 }}>
-            Ce que les modèles prévoient pour 2050
+            Ce que les modèles prévoient
           </div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg-4)' }}>
-            Scénario +4°C · Météo-France / CNRS · Valeur médiane sur l&apos;ensemble des modèles climatiques
+            {HORIZON.gwl20.annee} ({HORIZON.gwl20.mondial} dans le monde, {HORIZON.gwl20.france} en
+            France) et {HORIZON.gwl30.annee} ({HORIZON.gwl30.mondial} dans le monde,{' '}
+            {HORIZON.gwl30.france} en France) · DRIAS-TRACC, Météo-France / CNRS · valeur médiane
+            sur l&apos;ensemble des modèles climatiques
           </div>
         </div>
         <div className="data-grid">
           {DRIAS_ITEMS.filter((item) => item.val != null).map((item) => (
             <div key={item.label} className="data-card">
               <div className="data-card-label">{item.label}</div>
-              <div className="data-card-value">
-                {typeof item.val === 'number' ? item.val.toFixed(0) : item.val}
-                <span className="data-card-unit"> {item.unit}</span>
+              <div className="horizons">
+                <div>
+                  <div className="horizon-annee">{HORIZON.gwl20.annee}</div>
+                  <div className="data-card-value">
+                    {typeof item.val === 'number' ? item.val.toFixed(0) : item.val}
+                    <span className="data-card-unit"> {item.unit}</span>
+                  </div>
+                  <div className="horizon-eq">{HORIZON.gwl20.france} en France</div>
+                </div>
+                {typeof item.val2100 === 'number' && (
+                  <div className="horizon-late">
+                    <div className="horizon-annee">{HORIZON.gwl30.annee}</div>
+                    <div className="data-card-value">
+                      {item.val2100.toFixed(0)}
+                      <span className="data-card-unit"> {item.unit}</span>
+                    </div>
+                    <div className="horizon-eq">{HORIZON.gwl30.france} en France</div>
+                  </div>
+                )}
               </div>
               <div className="data-card-note">{item.note}</div>
+              {/* Position nationale, silencieuse au milieu de la distribution (cf.
+                  `phraseDePosition`). */}
+              {phraseDePosition(item.rang ?? null) && (
+                <div className="rang">
+                  <strong>{phraseDePosition(item.rang ?? null)}</strong>, à l&apos;horizon{' '}
+                  {HORIZON.gwl20.annee}.
+                  <div className="rang-meta">
+                    {item.rang!.total.toLocaleString('fr-FR')} communes comparées · DRIAS-TRACC ·
+                    Météo-France · maille communale
+                  </div>
+                </div>
+              )}
             </div>
           ))}
           {DRIAS_ITEMS.filter((item) => item.val != null).length === 0 && (
@@ -372,7 +444,7 @@ export default async function InondationCommune({
 
         {/* CTA conversion */}
         <div className="cta-block">
-          <div className="cta-eyebrow">Rapport interactif personnalisé</div>
+          <div className="cta-eyebrow">Dossier personnalisé</div>
           <p className="cta-title">
             Approfondissez ce diagnostic{' '}
             <em style={{ fontStyle: 'italic', color: ACCENT }}>pour {communeName}</em>
@@ -381,7 +453,7 @@ export default async function InondationCommune({
             Logement · Mobilité · Santé · Économie locale, croisés pour votre profil spécifique.
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Link href={`/territoire/${insee_code}/debloquer?nom=${encodeURIComponent(communeName)}&source=inondation`} className="cta-btn">Ouvrir le rapport interactif</Link>
+            <Link href={`/territoire/${insee_code}/debloquer?nom=${encodeURIComponent(communeName)}&source=inondation`} className="cta-btn">Ouvrir le dossier</Link>
             <Link href="/rapport/logement" className="cta-sec">Ouvrir le module Logement →</Link>
           </div>
         </div>

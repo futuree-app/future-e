@@ -12,7 +12,7 @@ type Props = {
   submitLabel?: string;
 };
 
-// Panneau de paiement d'un rapport ciblé sur un territoire exploré.
+// Panneau de paiement d'un dossier de territoire ciblé sur une commune explorée.
 // À la réussite : bascule immédiate du territoire actif de lecture, puis rapport.
 export function TerritoryUnlockPanel({ insee, commune, rank, amount, submitLabel }: Props) {
   const router = useRouter();
@@ -41,7 +41,7 @@ export function TerritoryUnlockPanel({ insee, commune, rank, amount, submitLabel
       />
       {activating && (
         <p className="mt-4 text-[13px] text-[var(--fg-3)]">
-          Ouverture de votre rapport…
+          Ouverture de votre dossier…
         </p>
       )}
     </>

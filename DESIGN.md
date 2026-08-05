@@ -1,10 +1,15 @@
 # DESIGN.md · Le langage visuel de futur•e
 
-**Version 2.0 · 2 août 2026 · prescriptif.**
+**Version 2.1 · 4 août 2026 · prescriptif.**
 
+> **v2.1** : la charte de marque v1.7 entre dans le produit. **Le logo n'est plus une police** :
+> c'est un dessin vectoriel, dans `components/Logo.tsx`, et Instrument Serif comme `--font-brand`
+> ont quitté le dépôt (§ 9.1). L'orange de marque devient `#E8823A` (§ 5). Les **six registres de
+> décision** prennent les valeurs de la charte, dont deux changent de teinte (§ 5.4).
+> Les trois plafonds de l'échelle de rôles baissent (§ 9.1).
+>
 > **v2.0** : l'interface passe à **Archivo**, une grotesque unique, et la hiérarchie repose sur une
-> **échelle de graisses** (§ 9.1). Le logo garde Instrument Serif sur `--font-brand`. Les fontes sont
-> auto-hébergées en WOFF2 variable.
+> **échelle de graisses** (§ 9.1). Les fontes sont auto-hébergées en WOFF2 variable.
 >
 > **v1.5** : une **échelle de rôles** typographiques remplace 53 valeurs arbitraires (§ 9.1), et la
 > piste de prose descend de 720 à 640 px, la mesure de la v1.1 donnant environ 90 caractères par
@@ -263,7 +268,7 @@ Six teintes, et aucune autre :
 
 | Token | Valeur | Rôle |
 | --- | --- | --- |
-| `--orange` | `#fb923c` | accent de marque **et** registre « compromis » (voir 5.4) |
+| `--orange` | `#E8823A` | accent de marque **et** registre « compromis » (voir 5.4) |
 | `--red` | `#f87171` | incompatibilité, chaleur |
 | `--blue` / `--info` | `#60a5fa` | contrôle à mener, eau, inondation |
 | `--green` | `#4ade80` | alignement |
@@ -290,23 +295,40 @@ teinte, aucune ne doit la porter.** Une couleur qui ne distingue rien ne signifi
 
 ### 5.4 Les six registres du dossier
 
-Le dossier de décision porte six registres, et cette correspondance est gravée :
+Le dossier de décision porte six registres, et cette correspondance est gravée. **Depuis le
+04/08/2026, ils ont leurs propres tokens**, aux valeurs de la charte v1.7 : les couleurs génériques
+de la palette ne les portent plus.
 
-| Registre | Teinte | Ce qu'il dit |
-| --- | --- | --- |
-| Incompatibilité | `--red` | une condition non négociable n'est pas tenue |
-| Alignement | `--green` | ce que le lieu tient bien |
-| Compromis | `--orange` | ce qui départage |
-| Écart (`mismatches`) | `--yellow` | ce qui correspond moins bien que demandé |
-| Non su | `--amethyst` | ce qu'on n'a pas pu lire |
-| Contrôle à mener | `--info` | ce qui reste à vérifier sur place |
+| Registre | Token | Clair | Sombre | Ce qu'il dit |
+| --- | --- | --- | --- | --- |
+| Incompatibilité | `--reg-incompatibilite` | `#8F2E3A` | `#FF9AA4` | une condition non négociable n'est pas tenue |
+| Alignement | `--reg-alignement` | `#236844` | `#7BD3A5` | ce que le lieu tient bien |
+| Compromis | `--reg-compromis` | `#994000` | `#E8823A` | ce qui départage |
+| Écart (`mismatches`) | `--reg-ecart` | `#64428E` | `#C2A5EB` | ce qui correspond moins bien que demandé |
+| Non su | `--reg-non-su` | `#505662` | `#B8BFCC` | ce qu'on n'a pas pu lire |
+| Contrôle à mener | `--reg-controle` | `#285B91` | `#82B4E8` | ce qui reste à vérifier sur place |
 
-**Pourquoi le jaune pour l'écart** (tranché le 30/07/2026). Un mismatch n'est pas une
-incompatibilité moins grave, c'est une nature différente : l'assembleur le décrit comme « établi, non
-éliminatoire, à arbitrer », et précise qu'« un mismatch n'est pas un compromis, pas de contrepartie ».
-Il dit la distance entre ce que le lecteur a demandé et ce que le lieu est, sans que ce soit un
-défaut du lieu. Une gradation rouge vers orange aurait suggéré une échelle de gravité, donc un score,
-que l'ADR-0001 interdit. Le rôle du jaune dans la palette devient donc « écart à la demande ».
+**Une seule teinte par registre et par thème**, contrairement au couple encre/surface du § 5.6. Les
+valeurs de la charte tiennent de 5,5:1 à 11,1:1 sur les deux fonds de chaque thème et sur leur
+propre surface sémantique : la même valeur porte donc le texte, le filet et la pastille. Le couple
+existait parce que les couleurs génériques échouaient sur le fond crème, et ce n'est plus le cas ici.
+Chaque registre a en plus une `--reg-*-surface`, pour un fond sémantique. **Un fond sémantique ne
+porte jamais le sens seul** : garder le libellé et un filet de la teinte.
+
+**Deux registres ont changé de teinte le 04/08/2026, et le changement porte du sens.**
+
+**L'écart passe du jaune au violet.** Le raisonnement du 30/07 tient toujours : un mismatch n'est
+pas une incompatibilité moins grave, c'est une nature différente. L'assembleur le décrit comme
+« établi, non éliminatoire, à arbitrer », et précise qu'« un mismatch n'est pas un compromis, pas de
+contrepartie ». Il dit la distance entre ce que le lecteur a demandé et ce que le lieu est, sans que
+ce soit un défaut du lieu. Une gradation rouge vers orange aurait suggéré une échelle de gravité,
+donc un score, que l'ADR-0001 interdit. Le violet n'est pas davantage un rouge atténué : il satisfait
+la même exigence, et c'est la teinte que la charte donne à ce registre.
+
+**Le non su quitte l'améthyste pour un gris neutre.** C'est l'arbitrage explicite de la charte :
+**un statut inconnu ne reçoit aucune valence.** L'améthyste en portait une, et peignait « nous
+n'avons pas pu lire cette donnée ici » dans la même famille qu'un constat établi sur le lieu. Le
+repli d'une section dont la clé est inconnue est ce même gris, et pour la même raison.
 
 ### 5.6 Deux familles de teintes : l'encre et la surface
 
@@ -554,11 +576,24 @@ texte plus petit imbriqué dans ce titre (un grain, une précision, une unité) 
 espaces entre les mots se referment, d'autant plus fort que le titrage est serré. Constaté sur le
 banc typographique à -1,6 px : le grain de 15 px devenait un bloc de lettres collées.
 
-**Deux familles pour l'interface, une pour la marque.** `--font-sans` et `--font-serif` désignent
-tous deux **Archivo** (les deux noms survivent le temps que les appelants migrent) ; `--font-mono`
-désigne JetBrains Mono, pour les valeurs, rangs, sources et métadonnées ; `--font-brand` désigne
-Instrument Serif italique, **pour le logo et rien d'autre**. Toujours par le token, jamais par un
-`fontFamily` en dur.
+**Deux familles pour l'interface, et AUCUNE pour la marque.** `--font-sans` et `--font-serif`
+désignent tous deux **Archivo** (les deux noms survivent le temps que les appelants migrent) ;
+`--font-mono` désigne JetBrains Mono, pour les valeurs, rangs, sources et métadonnées. Toujours par
+le token, jamais par un `fontFamily` en dur.
+
+**Le logo n'est plus composé, il est dessiné (04/08/2026).** Il n'existe plus de `--font-brand`, et
+Instrument Serif a quitté le dépôt : `@font-face`, token, et le fichier de 70 Ko. Le mot-symbole est
+un tracé vectoriel dont la coupe du `r`, les sept fûts à 35 unités et la position du point sont des
+valeurs décidées ; aucune police ne les produit. Il vit dans **`src/components/Logo.tsx`**, qui
+inline le mot-symbole et le signe compact : le lettrage prend `currentColor`, le point prend
+`var(--accent)`. Ne jamais recomposer le nom en texte pour faire un logo, ne jamais importer les
+huit SVG du pack tels quels (ils ne diffèrent que par leurs deux `fill`, et les importer figerait la
+couleur hors du thème). Le nom **dans une phrase** reste du texte : seul le logo est un dessin.
+
+**Le mot-symbole ne descend pas sous 22 px de haut** à l'écran (minimum de la charte, révisé le
+04/08/2026 : voir `CHARTE/futur-e-charte-v1/07-validation/ARBITRAGES-V1-7.md`). Le signe compact
+`r•` est réservé aux favicon, avatar et icône d'application ; il ne remplace pas le nom dans une
+première prise de contact.
 
 **L'échelle de graisses, et c'est elle qui porte la hiérarchie maintenant.** Une serif et une sans
 se distinguaient par leur dessin. Archivo tenant les deux rôles, un titre et un paragraphe ne se
@@ -659,6 +694,18 @@ Quatre points sont volontairement non tranchés dans cette version :
    reporté après le lancement.
 
 ## 12. Journal des amendements
+
+**v2.1, 04/08/2026** (intégration de la charte de marque v1.7) :
+
+| Amendement | Motif |
+| --- | --- |
+| § 9.1 · le logo est un dessin, `--font-brand` supprimé | La v2.0 affirmait le contraire (« le logo est du texte »). La charte livre un mot-symbole vectoriel dont la coupe du `r`, les fûts et la position du point sont des valeurs décidées : aucune police ne les produit. Instrument Serif a quitté le dépôt |
+| § 9.1 · minimum du mot-symbole à 22 px | Les 28 px de la charte avaient été relevés sur des épreuves imprimées, jamais mesurés dans une navbar : à 26 px le logo y faisait 105 px de large contre 75 px au logo texte qu'il remplace |
+| § 9.1 · les trois plafonds de l'échelle baissent | 110 `clamp()` ad hoc ignoraient l'échelle, dont des `h1` à 72 px quand le rôle plafonnait à 54. Le titre de la landing débordait de 27 px de sa colonne |
+| § 5.2 · l'orange devient `#E8823A` | Sortie du preset Tailwind `orange-400` vers une teinte plus terreuse, décidée par la charte |
+| § 5.4 · les six registres ont leurs propres tokens | Ils empruntaient les couleurs génériques de la palette, aux valeurs de la charte près |
+| § 5.4 · l'écart passe du jaune au violet | La teinte que la charte donne à ce registre. Le raisonnement du 30/07 est intact : ce qu'il écartait, c'était une gradation du rouge, donc une échelle de gravité |
+| § 5.4 · le non su devient un gris neutre | Arbitrage explicite de la charte : un statut inconnu ne reçoit aucune valence. L'améthyste en portait une |
 
 **v2.0, 02/08/2026** :
 

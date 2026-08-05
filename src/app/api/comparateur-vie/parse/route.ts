@@ -246,7 +246,7 @@ PRÉFÉRENCES DISPONIBLES (liste fermée)
 - eviter_isolement : commune suffisamment vivante, pas isolée
 - air_sain : air de fond plus pur (moins de particules fines)
 - acces_soins : bon accès aux médecins
-- acces_services : services et commerces accessibles
+- acces_services : niveau de services de la commune, ce qu'elle concentre en commerces et services pour son bassin (classification nationale à cinq niveaux). Ne dit RIEN de la distance qu'un habitant parcourt : une commune peut être hors pôle et voisine d'un centre
 - faible_pression_agricole : éloigné des cultures à traitements fréquents (environnement peu marqué par l'agriculture intensive)
 - viabilite_emploi : vitalité du bassin d'emploi (taille + diversité sectorielle), à activer (poids 2) si l'emploi est un enjeu du projet
 - nature : couvert naturel à proximité (forêts, prairies, landes, milieux naturels autour). Pour « proche de la nature », « du vert », « des forêts », « la campagne », « entouré de nature »
@@ -264,7 +264,8 @@ PRÉFÉRENCES DISPONIBLES (liste fermée)
 - faible_exposition_industrielle : éloignement des installations industrielles classées à risque EN ACTIVITÉ (sites Seveso, IED, industrie lourde, usines/dépôts chimiques, raffineries, traitement de déchets dangereux). DISTINCT de air_sain (qualité de l'air) et calme_sonore (bruit). Ne couvre PAS les anciens sites pollués / friches. Pour « loin des usines », « éviter les zones industrielles », « pas de site Seveso à côté », « loin de l'industrie lourde », « pas de raffinerie / usine chimique »
 
 TRADUCTION AUTOMATIQUE (activez le critère interne, sans exposer le terme technique)
-- "famille", "enfant", "élever un enfant", "grandir" → ajoutez eviter_isolement (poids 2), acces_services (poids 2), faible_pression_agricole (poids 2).
+- "famille", "enfant", "élever un enfant", "grandir" → ajoutez eviter_isolement (poids 2), faible_pression_agricole (poids 2).
+- INTERDIT : la seule mention d'une famille, d'enfants ou du fait de grandir n'active JAMAIS acces_services. Elle ne démontre aucune demande explicite sur le niveau de services de la commune.
 - "environnement sain", "qualité environnementale", "sain pour grandir" → air_sain (poids 3) + faible_pression_agricole (poids 2).
 - "pesticides", "agriculture intensive", "loin des cultures traitées" → faible_pression_agricole (poids 3).
 - "qualité de l'air", "respirer", "pollution de l'air" → air_sain (poids 3).

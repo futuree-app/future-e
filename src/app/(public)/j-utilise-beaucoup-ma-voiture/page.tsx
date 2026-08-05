@@ -7,15 +7,15 @@ export const revalidate = 86400;
 export const metadata: Metadata = {
   title: "J'utilise beaucoup ma voiture · futur•e",
   description:
-    "Dépendance automobile, budget transport, alternatives réelles : les bons articles pour comprendre votre situation, puis aller plus loin avec le rapport interactif futur•e.",
+    "Dépendance automobile, budget transport, alternatives réelles : les bons articles pour comprendre votre situation, puis aller plus loin avec le dossier futur•e.",
   openGraph: {
     title: "J'utilise beaucoup ma voiture · futur•e",
     description:
-      "Un hub de lecture et d'action sur la dépendance automobile, sans recherche communale libre, avec un accès plus profond via le rapport interactif.",
+      "Un hub de lecture et d'action sur la dépendance automobile, sans recherche communale libre, avec un accès plus profond via le dossier.",
   },
 };
 
-const ACCENT = '#fb923c';
+const ACCENT = '#E8823A';
 
 const css = `
   *{box-sizing:border-box;}
@@ -27,17 +27,17 @@ const css = `
   .page{position:relative;z-index:2;max-width:960px;margin:0 auto;padding:72px 28px 120px;}
   .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:${ACCENT};margin-bottom:18px;display:flex;align-items:center;gap:10px;}
   .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:${ACCENT};box-shadow:0 0 10px ${ACCENT};flex-shrink:0;}
-  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(36px,5vw,60px);line-height:1.08;letter-spacing:-0.02em;margin:0 0 22px;color:var(--fg-1);}
+  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-display);line-height:1.08;letter-spacing:-0.02em;margin:0 0 22px;color:var(--fg-1);}
   h1 em{font-style:italic;color:${ACCENT};}
   .lede{font-size:18px;color:var(--fg-3);margin:0 0 30px;line-height:1.7;max-width:680px;}
-  .hero-note{padding:24px 26px;border-radius:12px;background:rgba(251,146,60,0.06);border:1px solid rgba(251,146,60,0.18);margin:0 0 20px;display:flex;flex-direction:column;gap:10px;}
+  .hero-note{padding:24px 26px;border-radius:12px;background:rgba(232, 130, 58,0.06);border:1px solid rgba(232, 130, 58,0.18);margin:0 0 20px;display:flex;flex-direction:column;gap:10px;}
   .hero-note-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:${ACCENT};}
   .hero-note-text{font-size:15px;color:var(--fg-3);line-height:1.7;max-width:720px;}
   .hero-note-text strong{color:var(--fg-1);font-weight:500;}
 
   .section{margin:72px 0 0;}
   .section-eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:${ACCENT};margin-bottom:10px;}
-  .section-title{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(24px,3vw,34px);line-height:1.15;letter-spacing:-0.015em;margin:0 0 6px;color:var(--fg-1);}
+  .section-title{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-title);line-height:1.15;letter-spacing:-0.015em;margin:0 0 6px;color:var(--fg-1);}
   .section-sub{font-size:14px;color:var(--fg-4);margin:0 0 28px;font-family:var(--font-mono);}
   .divider{height:1px;background:var(--bg-elev-3);margin:0;}
 
@@ -51,11 +51,11 @@ const css = `
   .article-desc{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);line-height:1.6;flex:1;}
   .article-cta{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:${ACCENT};}
 
-  .rapport-cta{display:flex;flex-direction:column;gap:16px;padding:36px 40px;border-radius:14px;background:rgba(251,146,60,0.06);border:1px solid rgba(251,146,60,0.22);text-decoration:none;margin-top:28px;transition:background 0.2s,border-color 0.2s;position:relative;overflow:hidden;}
+  .rapport-cta{display:flex;flex-direction:column;gap:16px;padding:36px 40px;border-radius:14px;background:rgba(232, 130, 58,0.06);border:1px solid rgba(232, 130, 58,0.22);text-decoration:none;margin-top:28px;transition:background 0.2s,border-color 0.2s;position:relative;overflow:hidden;}
   .rapport-cta::after{content:"";position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,${ACCENT}14 0%,transparent 70%);pointer-events:none;}
-  .rapport-cta:hover{background:rgba(251,146,60,0.09);border-color:rgba(251,146,60,0.35);}
+  .rapport-cta:hover{background:rgba(232, 130, 58,0.09);border-color:rgba(232, 130, 58,0.35);}
   .rapport-cta-eyebrow{font-family:var(--font-mono);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:${ACCENT};}
-  .rapport-cta-title{font-family:var(--font-serif);font-size:clamp(22px,2.5vw,30px);font-weight:var(--weight-title);color:var(--fg-1);line-height:1.2;margin:0;}
+  .rapport-cta-title{font-family:var(--font-serif);font-size:var(--text-section);font-weight:var(--weight-title);color:var(--fg-1);line-height:1.2;margin:0;}
   .rapport-cta-desc{font-size:15px;color:var(--fg-3);line-height:1.65;max-width:620px;}
   .rapport-cta-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:${ACCENT};color:#060812;font-family:var(--font-sans);font-size:14px;font-weight:600;border-radius:6px;align-self:flex-start;}
 
@@ -67,7 +67,7 @@ const css = `
   .guide-cta{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:${ACCENT};margin-top:auto;}
 
   .signal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:28px;}
-  .signal-card{padding:22px;border-radius:10px;background:rgba(251,146,60,0.04);border:1px solid rgba(251,146,60,0.13);display:flex;flex-direction:column;gap:8px;}
+  .signal-card{padding:22px;border-radius:10px;background:rgba(232, 130, 58,0.04);border:1px solid rgba(232, 130, 58,0.13);display:flex;flex-direction:column;gap:8px;}
   .signal-source{font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:${ACCENT};opacity:0.65;}
   .signal-head{font-size:14px;font-weight:500;color:var(--fg-1);line-height:1.4;}
   .signal-body{font-size:13px;color:var(--fg-3);line-height:1.6;}
@@ -77,7 +77,6 @@ const css = `
 
   @media(max-width:768px){
     .page{padding:48px 20px 80px;}
-    h1{font-size:34px;}
     .articles-grid,.guides-grid,.signal-grid{grid-template-columns:1fr;}
     .rapport-cta{padding:24px 22px;}
   }
@@ -106,7 +105,7 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
         <div className="hero-note">
           <div className="hero-note-label">Ce qui est public ici</div>
           <div className="hero-note-text">
-            Vous pouvez lire les analyses et les guides pratiques. <strong>Le diagnostic par commune et par profil détaillé</strong> reste réservé au rapport interactif : il lit la commune en entier,
+            Vous pouvez lire les analyses et les guides pratiques. <strong>Le diagnostic par commune et par profil détaillé</strong> reste réservé au dossier : il lit la commune en entier,
             {' '}<strong>son climat, ses risques, son cadre de vie et ce qui la transforme</strong>.
           </div>
         </div>
@@ -123,7 +122,7 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/hub-dependance.jpg" alt="Dépendance automobile" className="article-img" />
               <div className="article-body">
-                <span className="article-cat" style={{ background: 'rgba(251,146,60,0.12)', color: ACCENT }}>Savoir</span>
+                <span className="article-cat" style={{ background: 'rgba(232, 130, 58,0.12)', color: ACCENT }}>Savoir</span>
                 <div className="article-title">Pourquoi certains territoires rendent la voiture presque obligatoire</div>
                 <div className="article-desc">
                   84 % des actifs ruraux vont travailler en voiture. Ce que ce chiffre dit de l&apos;organisation du territoire, et pourquoi cette dépendance est d&apos;abord une affaire de territoire.
@@ -136,7 +135,7 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/top10-villes-dependantes-voiture.jpg" alt="Top 10 des villes les plus dépendantes à la voiture" className="article-img" />
               <div className="article-body">
-                <span className="article-cat" style={{ background: 'rgba(251,146,60,0.12)', color: ACCENT }}>Classement</span>
+                <span className="article-cat" style={{ background: 'rgba(232, 130, 58,0.12)', color: ACCENT }}>Classement</span>
                 <div className="article-title">Top 10 des villes les plus dépendantes à la voiture</div>
                 <div className="article-desc">
                   Un classement gratuit à partir des scores mobilité déjà présents dans futur•e, pour voir où la voiture reste la plus difficile à remplacer dans les grandes communes.
@@ -191,21 +190,21 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
         <div className="divider" style={{ marginTop: 72 }} />
 
         <section className="section">
-          <div className="section-eyebrow">Rapport interactif</div>
-          <h2 className="section-title">Ce que le rapport interactif ajoute</h2>
+          <div className="section-eyebrow">Dossier</div>
+          <h2 className="section-title">Ce que le dossier ajoute</h2>
           <p className="section-sub">Le niveau communal et les arbitrages personnels ne sont pas ouverts ici en libre-service.</p>
 
           <Link href="/rapport" prefetch={false} className="rapport-cta">
-            <div className="rapport-cta-eyebrow">Rapport interactif personnalisé · futur•e</div>
+            <div className="rapport-cta-eyebrow">Dossier personnalisé · futur•e</div>
             <p className="rapport-cta-title">
               Votre territoire, votre budget,<br />
               <em style={{ fontStyle: 'italic', color: ACCENT }}>vos marges de manœuvre réelles</em>
             </p>
             <p className="rapport-cta-desc">
-              Le rapport interactif descend sous la commune : <strong style={{ color: 'var(--fg-1)' }}>ce qui se trouve à proximité de votre adresse, et la place qu\u2019y tient encore la voiture.</strong>{' '}
+              Le dossier descend sous la commune : <strong style={{ color: 'var(--fg-1)' }}>ce qui se trouve à proximité de votre adresse, et la place qu\u2019y tient encore la voiture.</strong>{' '}
               Il ne vous donne pas seulement une idée générale. Il relie votre lieu de vie, vos contraintes quotidiennes et les décisions qui ont du sens pour vous.
             </p>
-            <span className="rapport-cta-btn">Découvrir le rapport interactif →</span>
+            <span className="rapport-cta-btn">Découvrir le dossier →</span>
           </Link>
         </section>
 

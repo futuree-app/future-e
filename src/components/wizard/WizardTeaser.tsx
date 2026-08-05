@@ -393,13 +393,13 @@ export function WizardTeaser({
       {/* Paywall */}
       <div
         className="wizard-panel-lg rounded-3xl border border-accent/[0.16] relative overflow-hidden"
-        style={{ background: "rgba(251,146,60,0.03)" }}
+        style={{ background: "rgba(232, 130, 58,0.03)" }}
       >
         <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-accent/[0.07] blur-3xl pointer-events-none" />
         <div className="flex flex-col gap-7 md:gap-8">
           <div className="flex flex-col gap-4 md:gap-5">
             <p className="font-mono text-[11px] tracking-[0.16em] uppercase text-accent">
-              Rapport interactif
+              Dossier
             </p>
             <p
               className="max-w-[42rem] text-[length:var(--text-title)] font-normal text-label leading-[1.08] tracking-[-0.025em] text-balance"
@@ -417,7 +417,7 @@ export function WizardTeaser({
               href="/checkout/rapport-complet"
               className="wizard-cta flex w-full gap-2 rounded-xl bg-accent text-canvas text-[15px] no-underline transition-all duration-300 hover:bg-accent/90 hover:shadow-lg hover:shadow-accent/20 active:scale-[0.98]"
             >
-              Débloquer mon rapport interactif · 14 €
+              Débloquer mon dossier · 14 €
             </Link>
           </div>
         </div>

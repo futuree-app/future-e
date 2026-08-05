@@ -125,7 +125,7 @@ function mapBanFeature(f: { properties: Record<string, string> }): BanSuggestion
 const optionBase =
   "wizard-option w-full rounded-2xl border text-[15px] transition-all duration-200";
 const optionSelected =
-  "bg-accent/[0.08] border-accent/50 text-accent shadow-[0_0_0_1px_rgba(251,146,60,0.15)]";
+  "bg-accent/[0.08] border-accent/50 text-accent shadow-[0_0_0_1px_rgba(232, 130, 58,0.15)]";
 const optionIdle =
   "bg-[var(--bg-elev)] border-[var(--border-1)] text-muted hover:border-[var(--border-hi)] hover:bg-[var(--bg-elev-2)] hover:text-label";
 
@@ -215,7 +215,7 @@ export function WizardStep({
         </h2>
         {config.type === "text" && (
           <p className="max-w-[36rem] text-[15px] leading-[1.7] text-muted">
-            Commencez par votre commune. Le rapport interactif s&apos;adaptera ensuite à votre territoire et à vos priorités.
+            Commencez par votre commune. Le dossier s&apos;adaptera ensuite à votre territoire et à vos priorités.
           </p>
         )}
       </div>

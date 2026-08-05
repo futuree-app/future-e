@@ -38,6 +38,23 @@ export type VigieauSummary = {
   maxLevel: DroughtLevel | null;
   topZone: VigieauZone | null;
   zones: VigieauZone[];
+  /**
+   * L'ÉTAT DE LA CONSULTATION, ajouté le 05/08/2026, et il manquait cruellement.
+   *
+   * ── CE QUE LE CODE FAISAIT ───────────────────────────────────────────────────────────────
+   * En cas de panne de l'API, le `catch` rendait `{ maxLevel: null, topZone: null, zones: [] }`,
+   * c'est-à-dire un objet STRICTEMENT INDISTINGUABLE d'une consultation réussie sans restriction.
+   * L'écran affichait donc « Aucune restriction en cours » alors que personne n'avait pu demander.
+   *
+   * C'est le patron que ce dépôt combat partout ailleurs : un registre non consulté n'est pas un
+   * registre vide, une absence non mesurée n'est pas une absence attestée. Il manquait ici, sur la
+   * donnée la plus sensible du produit, celle qui dit ce qui est INTERDIT en ce moment.
+   *
+   * `unavailable` ne veut pas dire « pas de restriction » : il veut dire qu'on ne sait pas.
+   */
+  status: "ok" | "unavailable";
+  /** ISO 8601. Quand cette réponse a été obtenue, pour que l'écran puisse la dater. */
+  consultedAt: string;
 };
 
 // Ordre croissant de gravité. Sert au calcul du niveau maximum sur la commune.
@@ -117,7 +134,7 @@ async function fetchVigieau(inseeCode: string): Promise<VigieauSummary> {
     const maxLevel: DroughtLevel | null =
       topZone && topZone.level !== "pas_de_restrictions" ? topZone.level : null;
 
-    return { inseeCode, maxLevel, topZone, zones };
+    return { inseeCode, maxLevel, topZone, zones, status: "ok", consultedAt: new Date().toISOString() };
   } finally {
     clearTimeout(timeout);
   }
@@ -128,8 +145,13 @@ export function getVigieauSummary(inseeCode: string): Promise<VigieauSummary> {
   if (!cache.has(key)) {
     cache.set(
       key,
+      // LA PANNE SE DIT, elle ne se déguise pas en absence de restriction. Voir `status` sur le
+      // type : c'est la correction du 05/08/2026.
       fetchVigieau(key).catch(
-        (): VigieauSummary => ({ inseeCode: key, maxLevel: null, topZone: null, zones: [] }),
+        (): VigieauSummary => ({
+          inseeCode: key, maxLevel: null, topZone: null, zones: [],
+          status: "unavailable", consultedAt: new Date().toISOString(),
+        }),
       ),
     );
   }

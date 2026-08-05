@@ -267,7 +267,7 @@ export default async function RapportQuartierPage() {
         {/* Sortie propre */}
         <div className="mt-14">
           <a href="/rapport" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[13px] no-underline border border-[var(--border-1)]">
-            ← Retour au rapport interactif
+            ← Retour au dossier
           </a>
         </div>
       </div>

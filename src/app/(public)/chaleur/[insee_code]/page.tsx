@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getClimatDataCommune } from '@/lib/drias-json';
+import { getClimatDataCommune, getRangNational } from '@/lib/drias-json';
+import { phraseDePosition, type Rang } from '@/lib/rang-national';
+import { HORIZON } from '@/lib/horizons';
 import { getGeorisquesSummary, getGasparCatnatSummary } from '@/lib/georisques';
 import { getAtmoForCommune } from '@/lib/atmo';
 import { getEra5Trend } from '@/lib/era5-trend';
@@ -85,7 +87,7 @@ const css = `
 
   .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:var(--bg-card);border-bottom:1px solid var(--border-1);}
   .nav-inner{max-width:960px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
-  .brand{font-family:var(--font-brand);font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
+  .brand{font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
   .crumb{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.06em;display:flex;align-items:center;gap:0;}
   .crumb a{color:var(--fg-3);text-decoration:none;transition:color 0.2s;}
   .crumb a:hover{color:var(--fg-1);}
@@ -103,6 +105,16 @@ const css = `
   .data-card-value{font-family:var(--font-serif);font-size:32px;line-height:1;font-weight:var(--weight-title);color:${ACCENT};}
   .data-card-unit{font-size:0.45em;color:var(--fg-4);}
   .data-card-note{font-size:12px;color:var(--fg-3);margin-top:8px;line-height:1.5;}
+  /* Les deux horizons côte à côte. 2050 porte la valeur pleine (c'est l'horizon utile pour
+     décider) ; 2100 se lit en second, plus discret, à la date qui est la sienne. */
+  .horizons{display:flex;align-items:flex-end;gap:22px;flex-wrap:wrap;}
+  .horizon-annee{font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;color:var(--fg-4);margin-bottom:4px;}
+  .horizon-eq{font-family:var(--font-mono);font-size:10px;color:var(--fg-4);margin-top:4px;}
+  .horizon-late .data-card-value{font-size:22px;color:var(--fg-3);}
+  /* La position nationale : la seule ligne de la page qu'un résumé ne peut pas produire. */
+  .rang{margin-top:12px;padding-top:10px;border-top:1px solid var(--border-1);font-size:12px;line-height:1.5;color:var(--fg-2);}
+  .rang strong{color:${ACCENT};font-weight:600;}
+  .rang-meta{font-family:var(--font-mono);font-size:10px;color:var(--fg-4);margin-top:3px;}
 
   /* Pill tags */
   .pill{display:inline-flex;align-items:center;padding:6px 12px;border-radius:999px;background:var(--bg-elev-2);border:1px solid var(--border-1);font-family:var(--font-mono);font-size:11px;color:var(--fg-3);}
@@ -110,7 +122,7 @@ const css = `
   /* Section headers */
   .section{margin:64px 0 0;}
   .section-eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:${ACCENT};margin-bottom:10px;}
-  .section-title{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(22px,2.8vw,32px);line-height:1.15;letter-spacing:-0.015em;margin:0 0 6px;color:var(--fg-1);}
+  .section-title{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-title);line-height:1.15;letter-spacing:-0.015em;margin:0 0 6px;color:var(--fg-1);}
   .section-sub{font-size:14px;color:var(--fg-4);margin:0 0 28px;font-family:var(--font-mono);}
 
   /* Article cards */
@@ -167,7 +179,32 @@ export default async function ChaleurCommune({
   ]);
 
   const communeName = commune?.nom_commune ?? driasData?.commune?.n ?? insee_code;
-  const driasV = driasData?.commune?.s?.gwl30?.v;
+
+  // LES DEUX HORIZONS, CHACUN SOUS SA VRAIE DATE (04/08/2026). Cette page ne lisait que `gwl30` en
+  // titrant « projections 2050 » partout, jusque dans son H1 et sa meta description : gwl30 est le
+  // palier +3 °C mondial, soit +4 °C en France, atteint vers 2100. Le lecteur voyait donc les
+  // chiffres de 2100 sous la date de 2050, sur la surface la plus indexée du site, pendant que le
+  // produit payant appliquait la bonne convention (HorizonBar). Le « +4 °C » de l'ancienne page
+  // n'était pas faux en soi, il était l'équivalence France de gwl30 : c'est son ACCOLEMENT à 2050
+  // qui mélangeait deux scénarios.
+  //
+  // 2050 devient l'horizon principal, celui qui sert à décider aujourd'hui. 2100 reste affiché,
+  // plus discret, à sa date.
+  const drias2050 = driasData?.commune?.s?.gwl20?.v;
+  const drias2100 = driasData?.commune?.s?.gwl30?.v;
+
+  // LA POSITION NATIONALE, calculée sur l'horizon AFFICHÉ (2050), jamais sur un autre : un rang
+  // établi contre l'échelle de 2100 dirait une commune « peu exposée » au seul motif qu'on la
+  // compare à un futur plus lointain.
+  const RANG_INDICATEURS = ['NORTX30D_yr', 'NORTX35D_yr', 'NORTR_yr', 'NORTMm_seas_JJA'] as const;
+  const rangs = Object.fromEntries(
+    await Promise.all(
+      RANG_INDICATEURS.map(async (ind) => [
+        ind,
+        await getRangNational(insee_code, 'gwl20', ind).catch(() => null),
+      ] as const),
+    ),
+  ) as Record<(typeof RANG_INDICATEURS)[number], Rang | null>;
 
   // Mémoire CatNat liée à la chaleur : les arrêtés « sécheresse des sols »
   // (retrait-gonflement des argiles), aléa directement aggravé par des étés plus
@@ -177,29 +214,50 @@ export default async function ChaleurCommune({
     .filter((rk) => rk.label === 'Sécheresse des sols')
     .reduce((s, rk) => s + rk.count, 0);
 
-  const DRIAS_ITEMS: { label: string; val: number | undefined; unit: string; note: string }[] = [
+  // LA PRÉCISION D'AFFICHAGE EST PROPRE À CHAQUE INDICATEUR. Un comptage de jours n'a pas de
+  // décimale, une température si : à zéro décimale, l'été lyonnais passait de « 24 » à « 25 » entre
+  // 2050 et 2100, soit un écart réel de 1,8 °C affiché comme 1 °C, et 23,53 arrondi à 24 gonflait
+  // la valeur la plus regardée de la page.
+  const DRIAS_ITEMS: {
+    label: string;
+    val: number | undefined;
+    val2100?: number | undefined;
+    rang?: Rang | null;
+    unit: string;
+    decimales?: number;
+    note: string;
+  }[] = [
     {
       label: 'Jours de forte chaleur par an',
-      val: driasV?.NORTX30D_yr,
+      val: drias2050?.NORTX30D_yr,
+      val2100: drias2100?.NORTX30D_yr,
+      rang: rangs.NORTX30D_yr,
       unit: 'j',
       note: "Jours où il fera plus de 30°C. Au-delà de 30 jours par an, rester dehors en plein soleil devient dangereux pour les personnes fragiles.",
     },
     {
       label: 'Jours de canicule intense par an',
-      val: driasV?.NORTX35D_yr,
+      val: drias2050?.NORTX35D_yr,
+      val2100: drias2100?.NORTX35D_yr,
+      rang: rangs.NORTX35D_yr,
       unit: 'j',
       note: "Jours à plus de 35°C, seuil où les mécanismes de refroidissement du corps sont débordés, même chez les adultes en bonne santé.",
     },
     {
       label: 'Nuits chaudes par an',
-      val: driasV?.NORTR_yr,
+      val: drias2050?.NORTR_yr,
+      val2100: drias2100?.NORTR_yr,
+      rang: rangs.NORTR_yr,
       unit: 'n',
       note: "Nuits où la température ne descend pas sous 20°C. Sans fraîcheur nocturne, le corps ne récupère pas et les risques d'accident cardiaque augmentent.",
     },
     {
       label: "Température moyenne de l'été",
-      val: driasV?.NORTMm_seas_JJA,
+      val: drias2050?.NORTMm_seas_JJA,
+      val2100: drias2100?.NORTMm_seas_JJA,
+      rang: rangs.NORTMm_seas_JJA,
       unit: '°C',
+      decimales: 1,
       note: "Moyenne sur juin–juillet–août. Au-dessus de 25°C, dormir fenêtre ouverte ne suffit plus. C'est la référence pour calibrer les besoins en climatisation.",
     },
   ];
@@ -228,7 +286,7 @@ export default async function ChaleurCommune({
       <style dangerouslySetInnerHTML={{ __html: css }} />
 
       <div className="orb" style={{ width: 500, height: 500, background: `radial-gradient(circle,${ACCENT} 0%,transparent 70%)`, top: -140, left: -120 }} />
-      <div className="orb" style={{ width: 360, height: 360, background: 'radial-gradient(circle,#fb923c 0%,transparent 70%)', bottom: -80, right: -60, animationDelay: '-7s', opacity: 0.14 }} />
+      <div className="orb" style={{ width: 360, height: 360, background: 'radial-gradient(circle,#E8823A 0%,transparent 70%)', bottom: -80, right: -60, animationDelay: '-7s', opacity: 0.14 }} />
 
       {/* Nav */}
       <Navbar />
@@ -241,11 +299,11 @@ export default async function ChaleurCommune({
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: ACCENT, marginBottom: 12 }}>
             Chaleur et canicule · Projections 2050
           </div>
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(26px, 4vw, 42px)', fontWeight: 400, color: 'var(--fg-1)', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 18px' }}>
+          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'var(--text-display)', fontWeight: 400, color: 'var(--fg-1)', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 18px' }}>
             À {communeName}, à quoi ressemblera un été en 2050 ?
           </h1>
           <p style={{ fontSize: 15, color: 'var(--fg-3)', lineHeight: 1.75, maxWidth: 640, margin: '0 0 12px' }}>
-            Cette page rassemble les projections climatiques officelles pour {communeName}, nombre de jours de canicule, nuits sans fraîcheur, risques associés, dans un scénario de réchauffement à +4°C d&apos;ici 2050. Les données viennent de Météo-France, du CNRS, et des bases de risques officielles de l&apos;État.
+            Cette page rassemble les projections climatiques officielles pour {communeName}, nombre de jours de canicule, nuits sans fraîcheur, risques associés, à deux horizons : 2050, où la France atteint +2,7 °C, et 2100, où elle atteint +4 °C. Chaque mesure est située parmi l&apos;ensemble des communes françaises. Les données viennent de Météo-France, du CNRS, et des bases de risques officielles de l&apos;État.
           </p>
           <p style={{ fontSize: 14, color: 'var(--fg-4)', lineHeight: 1.65, maxWidth: 640, margin: 0, fontFamily: 'var(--font-mono)' }}>
             Que vous habitiez ici, envisagiez d&apos;y déménager ou prépariez votre avenir, ces chiffres vous concernent directement.
@@ -278,7 +336,7 @@ export default async function ChaleurCommune({
                   {era5.delta_c >= 0 ? '+' : ''}{era5.delta_c.toFixed(1)}°C depuis la fin du XXᵉ siècle
                 </p>
                 <p style={{ fontSize: 14, color: 'var(--fg-3)', lineHeight: 1.6, margin: '0 0 10px', maxWidth: 640 }}>
-                  Mesuré sur la moyenne des 10 dernières années, comparée à la période de référence 1961-1990. Les chiffres ci-dessous montrent ce que ce réchauffement deviendra à l&apos;horizon 2050 si la trajectoire continue.
+                  Mesuré sur la moyenne des 10 dernières années, comparée à la période de référence 1961-1990. Les chiffres ci-dessous montrent ce que ce réchauffement deviendra en 2050, puis en 2100, si la trajectoire continue.
                 </p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-4)', letterSpacing: '0.04em', margin: 0 }}>
                   Réanalyse ERA5-Land · Copernicus Climate Data Store · données jusqu&apos;à {era5.data_through_year}
@@ -291,21 +349,59 @@ export default async function ChaleurCommune({
         {/* DRIAS projections */}
         <div style={{ marginBottom: 10 }}>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACCENT, marginBottom: 4 }}>
-            Ce que les modèles prévoient pour 2050
+            Ce que les modèles prévoient
           </div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg-4)' }}>
-            Scénario +4°C · Météo-France / CNRS · Valeur médiane sur l&apos;ensemble des modèles climatiques
+            {/* L'ancienne ligne disait « Scénario +4 °C » sous un titre « pour 2050 ». Les deux
+                paliers sont désormais nommés avec leur date et leur équivalence France. */}
+            {HORIZON.gwl20.annee} ({HORIZON.gwl20.mondial} dans le monde, {HORIZON.gwl20.france} en
+            France) et {HORIZON.gwl30.annee} ({HORIZON.gwl30.mondial} dans le monde,{' '}
+            {HORIZON.gwl30.france} en France) · DRIAS-TRACC, Météo-France / CNRS · valeur médiane
+            sur l&apos;ensemble des modèles climatiques
           </div>
         </div>
         <div className="data-grid">
           {DRIAS_ITEMS.filter((item) => item.val != null).map((item) => (
             <div key={item.label} className="data-card">
               <div className="data-card-label">{item.label}</div>
-              <div className="data-card-value">
-                {typeof item.val === 'number' ? item.val.toFixed(0) : item.val}
-                <span className="data-card-unit"> {item.unit}</span>
+              <div className="horizons">
+                <div>
+                  <div className="horizon-annee">{HORIZON.gwl20.annee}</div>
+                  <div className="data-card-value">
+                    {typeof item.val === 'number'
+                      ? item.val.toFixed(item.decimales ?? 0).replace('.', ',')
+                      : item.val}
+                    <span className="data-card-unit"> {item.unit}</span>
+                  </div>
+                  <div className="horizon-eq">{HORIZON.gwl20.france} en France</div>
+                </div>
+                {typeof item.val2100 === 'number' && (
+                  <div className="horizon-late">
+                    <div className="horizon-annee">{HORIZON.gwl30.annee}</div>
+                    <div className="data-card-value">
+                      {item.val2100.toFixed(item.decimales ?? 0).replace('.', ',')}
+                      <span className="data-card-unit"> {item.unit}</span>
+                    </div>
+                    <div className="horizon-eq">{HORIZON.gwl30.france} en France</div>
+                  </div>
+                )}
               </div>
               <div className="data-card-note">{item.note}</div>
+              {/* LA POSITION NATIONALE. Elle ne s'affiche qu'aux deux extrémités de la
+                  distribution : une commune médiane n'apprend rien au lecteur en lisant qu'elle
+                  est médiane, et l'écrire diluerait les mentions qui comptent (cf.
+                  `phraseDePosition`). Le total affiché est le nombre de communes RÉELLEMENT
+                  comparées pour cet indicateur, jamais un chiffre rond de communication. */}
+              {phraseDePosition(item.rang ?? null) && (
+                <div className="rang">
+                  <strong>{phraseDePosition(item.rang ?? null)}</strong>, à l&apos;horizon{' '}
+                  {HORIZON.gwl20.annee}.
+                  <div className="rang-meta">
+                    {item.rang!.total.toLocaleString('fr-FR')} communes comparées · DRIAS-TRACC ·
+                    Météo-France · maille communale
+                  </div>
+                </div>
+              )}
             </div>
           ))}
           {DRIAS_ITEMS.filter((item) => item.val != null).length === 0 && (
@@ -406,7 +502,7 @@ export default async function ChaleurCommune({
 
         {/* CTA conversion */}
         <div className="cta-block">
-          <div className="cta-eyebrow">Rapport interactif personnalisé</div>
+          <div className="cta-eyebrow">Dossier personnalisé</div>
           <p className="cta-title">
             Approfondissez ce diagnostic{' '}
             <em style={{ fontStyle: 'italic', color: ACCENT }}>pour {communeName}</em>
@@ -415,7 +511,7 @@ export default async function ChaleurCommune({
             Logement · Mobilité · Santé · Économie locale, croisés pour votre profil spécifique.
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Link href={`/territoire/${insee_code}/debloquer?nom=${encodeURIComponent(communeName)}&source=chaleur`} className="cta-btn">Ouvrir le rapport interactif</Link>
+            <Link href={`/territoire/${insee_code}/debloquer?nom=${encodeURIComponent(communeName)}&source=chaleur`} className="cta-btn">Ouvrir le dossier</Link>
             <Link href="/comparateur" className="cta-sec">Comparer avec une autre commune →</Link>
           </div>
         </div>
@@ -451,7 +547,7 @@ export default async function ChaleurCommune({
             <Link href="/savoir/pollutions-invisibles" className="article-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/chaleur-feuille.jpg" alt="Pollutions invisibles" className="article-img" />
-              <span className="article-cat" style={{ background: 'rgba(251,146,60,0.12)', color: '#fb923c' }}>Air & sols</span>
+              <span className="article-cat" style={{ background: 'rgba(232, 130, 58,0.12)', color: '#E8823A' }}>Air & sols</span>
               <div className="article-title">Pollutions invisibles</div>
               <div style={{ fontSize: 12, color: 'var(--fg-4)', lineHeight: 1.55 }}>
                 La chaleur amplifie l&apos;ozone. Comment lire les données et agir à la bonne échelle.

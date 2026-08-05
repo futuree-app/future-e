@@ -31,7 +31,9 @@ const MISMATCH_TARGET: Partial<Record<PreferenceKey, EvidenceTargetKey>> = {
 export const MISMATCH_KEYS: PreferenceKey[] = [
   "nature", "acces_ecoles", "acces_soins", "acces_culture", "acces_transports",
   "faible_dependance_auto", "croissance_demographique", "vie_locale", "cadre_calme", "viabilite_emploi",
-  "acces_services", // lot 2b : plafond dégénéré (services complets = table-stakes -> neutral), queue basse propre
+  // 04/08/2026 : plus de plafond dégénéré. Le niveau de centralité ANCT distribue sur cinq classes
+  // (69 / 20 / 8 / 2 / 0,4 %), contre 80,1 % au plafond et un palier intermédiaire VIDE auparavant.
+  "acces_services",
   "ensoleillement_recherche", // lot 4a : relative_position + limitation ERA5-Land (card-only)
   "douceur_climat", // lot 4b : douceur hivernale (relative_position + limitation 1976-2005)
 ];

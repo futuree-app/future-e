@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { NAV_ITEMS, type NavDropdownItem, type NavItem } from '@/config/navigation';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { Logo } from '@/components/Logo';
 
 const C = {
   bg: 'var(--bg)',
@@ -67,7 +68,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
       <style>{`
         .nb-link:hover { color: #e9ecf2 !important; }
         .nb-dropdown-link:hover { background: var(--bg-elev-2) !important; }
-        .nb-mobile-link:hover { color: #fb923c !important; }
+        .nb-mobile-link:hover { color: #E8823A !important; }
         .nb-burger:hover { background: var(--bg-elev-3) !important; }
         @keyframes nb-fadein {
           from { opacity: 0; transform: translateY(-6px); }
@@ -106,17 +107,18 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
           {/* Brand */}
           <Link
             href="/"
+            aria-label="futur•e, accueil"
             style={{
-              fontFamily: "var(--font-brand)",
-              fontSize: 22,
-              fontStyle: 'italic',
+              display: 'flex',
+              alignItems: 'center',
               color: C.text,
-              letterSpacing: -0.3,
               textDecoration: 'none',
               flexShrink: 0,
             }}
           >
-            futur<span style={{ color: 'var(--accent-ink)', fontStyle: 'normal' }}>•</span>e
+            {/* Le lettrage suit `color` du lien ; `title={null}` parce que le `aria-label` du lien
+                porte déjà le nom, sinon un lecteur d'écran l'annonce deux fois. */}
+            <Logo height={22} title={null} />
           </Link>
 
           {/* Desktop links */}

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1024 369 180 180" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
+  <title id="title">Signe compact futur•e</title>
+  <desc id="desc">Lettrage redessiné sur grille; fûts de 35 unités, coupe basse du r conservée.</desc>
+  <path id="lettre-r" d="M 1119 380
+        C 1125 380 1130 381 1133 382
+        L 1133 414
+        C 1113 414 1099 417 1090 427
+        C 1081 437 1076 445 1076 453
+        L 1076 517 L 1045 538
+        C 1044 539 1042 539 1041 539
+        L 1041 384 L 1076 384 L 1076 404
+        C 1086 391 1101 380 1119 380 Z" fill="#060812"/>
+  <circle id="point" cx="1162.54" cy="461.5" r="25.0" fill="#E8823A"/>
+</svg>

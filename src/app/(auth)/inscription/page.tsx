@@ -30,14 +30,18 @@ export default async function InscriptionPage({
           Les données climatiques de votre commune sont publiques. Ce qui
           n&apos;existe pas encore, c&apos;est la lecture depuis votre
           situation. futur•e la construit : vos réponses croisées avec le
-          territoire, module par module.
+          territoire, échelle par échelle.
         </p>
         <div className="auth-story-card">
           <p className="auth-story-card-label">Ce que vous construisez</p>
           <ul className="auth-story-list">
+            {/* Les deux dernières lignes ont été réécrites le 04/08/2026. « Trois scénarios » ne
+                disait pas de quoi, et le référentiel TRACC veut que l'équivalence France soit
+                portée partout où le réchauffement est cité. « Un rapport qui s'affine » décrivait
+                un texte ; ce que le compte garde est un dossier qu'on rouvre. */}
             <li>Trois échelles de lecture : la commune, le secteur autour de votre adresse, le logement</li>
-            <li>Les projections de votre commune à travers trois scénarios</li>
-            <li>Un rapport interactif qui s&apos;affine à mesure que vous le complétez</li>
+            <li>Les projections de votre commune à trois horizons de réchauffement : +2, +2,7 et +4 °C en France</li>
+            <li>Un dossier que vous conservez, rouvrez et complétez au fil de votre recherche</li>
           </ul>
         </div>
       </section>

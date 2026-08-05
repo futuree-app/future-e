@@ -11,9 +11,13 @@ function getSafeNext(value?: string) {
   return value;
 }
 
+// VOCABULAIRE CANONIQUE (04/08/2026). Ces trois tuiles annonçaient « 6 modules » et « 3 scénarios »
+// pendant que le reste du site parlait de trois échelles et de près de trente critères : un
+// visiteur qui passait de l'accueil à la connexion lisait deux architectures différentes. Les
+// « modules » restent un mot interne, ils ne décrivent plus rien de vendu.
 const METRICS = [
-  { val: "6", label: "modules" },
-  { val: "3", label: "scénarios" },
+  { val: "3", label: "échelles" },
+  { val: "34 000", label: "communes" },
   { val: "∞", label: "accès" },
 ];
 
@@ -29,7 +33,7 @@ export default async function ConnexionPage({
     <>
       <section className="auth-story">
         <p className="auth-story-label">Bon retour</p>
-        <h2 className="auth-story-title">Votre rapport interactif vous attend.</h2>
+        <h2 className="auth-story-title">Votre dossier vous attend.</h2>
         <p className="auth-story-copy">
           Vos projections, vos réponses et votre commune sont exactement là où
           vous les avez laissés.

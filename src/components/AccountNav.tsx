@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 
 type Cta = { href: string; label: string };
 
@@ -21,10 +22,11 @@ export function AccountNav({
       <div className="max-w-[1100px] mx-auto px-7 h-16 flex items-center justify-between gap-6">
         <Link
           href="/"
-          className="no-underline tracking-[-0.3px]"
-          style={{ fontFamily: "var(--font-brand)", fontSize: 22, fontStyle: "italic", color: "var(--fg-1)" }}
+          aria-label="futur•e, accueil"
+          className="no-underline flex items-center"
+          style={{ color: "var(--fg-1)" }}
         >
-          futur<span className="not-italic" style={{ color: "var(--accent-ink)" }}>•</span>e
+          <Logo height={26} title={null} />
         </Link>
 
         <div className="flex items-center gap-8">

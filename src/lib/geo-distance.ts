@@ -64,23 +64,56 @@ export function distancePointToPolygonM(p: LngLat, ring: LngLat[]): number {
 }
 
 /**
- * LA FENÊTRE QUI CONTIENT UN DISQUE, pour interroger une API qui ne sait filtrer que par rectangle.
+ * LA SEULE CONVERSION MÈTRES -> DEGRÉS DU MODULE. Toute fenêtre géographique passe par ici.
  *
- * ELLE EXISTE PARCE QU'UN APPELANT S'EST TROMPÉ. `cartofriches` appliquait `rayon / 111 000` aux DEUX
- * axes. Un degré de LATITUDE vaut bien ~111 km partout ; un degré de LONGITUDE vaut
- * `111 km × cos(lat)`, donc moins dès qu'on quitte l'équateur. La fenêtre ne couvrait ainsi que 63 à
- * 74 % du rayon demandé vers l'est et l'ouest aux latitudes françaises (Lille : −37 %), et les
- * objets situés au-delà étaient silencieusement absents — jamais une erreur, juste un résultat
- * incomplet qui a l'air complet.
+ * ELLE EST ISOLÉE PARCE QUE LA RECOPIER EST LE PIÈGE. Un degré de LATITUDE vaut ~111 km partout ;
+ * un degré de LONGITUDE vaut `111 km × cos(lat)`, donc moins dès qu'on quitte l'équateur. Appliquer
+ * `rayon / 111 000` aux DEUX axes rétrécit la fenêtre de 27 à 37 % en est-ouest aux latitudes
+ * françaises (Lille : −37 %). L'erreur a été commise deux fois, à deux ans d'écart, par deux
+ * appelants qui ne se connaissaient pas : `cartofriches`, puis `getTileGeoms` dans `logement-osm.ts`.
+ * Les deux fois elle n'a levé aucune erreur ni cassé aucun test : juste des objets silencieusement
+ * absents d'un résultat qui a l'air complet.
  *
- * La fenêtre rendue est un MAJORANT : elle contient le disque, avec des coins en trop. L'appelant
- * doit donc toujours filtrer les résultats par distance réelle — le rectangle sélectionne, il ne
- * conclut pas.
+ * `latRef` est la latitude à laquelle la conversion est faite. Pour une fenêtre autour d'un point,
+ * c'est celle du point ; pour l'élargissement d'une emprise, c'est son bord le plus éloigné de
+ * l'équateur (cf. `expandBBoxM`).
  */
-export function bboxAround(p: LngLat, radiusM: number): { minLon: number; minLat: number; maxLon: number; maxLat: number } {
-  const degLat = radiusM / 111_000;
+export function metersToDegrees(latRef: number, radiusM: number): { dLat: number; dLon: number } {
   // cos(lat) borné : près des pôles la division exploserait au lieu de rendre une fenêtre utilisable.
   // Les latitudes françaises (42° à 51°) sont très loin de cette borne.
-  const degLon = radiusM / (111_000 * Math.max(0.1, Math.cos(toRad(p.lat))));
-  return { minLon: p.lon - degLon, minLat: p.lat - degLat, maxLon: p.lon + degLon, maxLat: p.lat + degLat };
+  return {
+    dLat: radiusM / 111_000,
+    dLon: radiusM / (111_000 * Math.max(0.1, Math.cos(toRad(latRef)))),
+  };
+}
+
+/**
+ * LA FENÊTRE QUI CONTIENT UN DISQUE, pour interroger une API qui ne sait filtrer que par rectangle.
+ *
+ * Elle rend un MAJORANT : elle contient le disque, avec des coins en trop. L'appelant doit donc
+ * toujours filtrer les résultats par distance réelle. Le rectangle sélectionne, il ne conclut pas.
+ */
+export function bboxAround(p: LngLat, radiusM: number): { minLon: number; minLat: number; maxLon: number; maxLat: number } {
+  const { dLat, dLon } = metersToDegrees(p.lat, radiusM);
+  return { minLon: p.lon - dLon, minLat: p.lat - dLat, maxLon: p.lon + dLon, maxLat: p.lat + dLat };
+}
+
+/**
+ * ÉLARGIT UNE EMPRISE EXISTANTE d'au moins `radiusM` dans toutes les directions.
+ *
+ * `bboxAround` construit une fenêtre autour d'un POINT ; celle-ci élargit une CELLULE, dont tous les
+ * points doivent rester couverts. La conversion se fait donc à la latitude du bord le plus éloigné
+ * de l'équateur, là où un degré de longitude est le plus court : le majorant vaut alors pour la
+ * cellule entière. Prendre la latitude médiane sous-couvrirait le bord polaire, d'un cheveu sur une
+ * cellule de 0,005° mais d'une marge réelle sur une cellule de 0,18°.
+ *
+ * Comme `bboxAround`, elle rend un MAJORANT : l'appelant filtre toujours par distance réelle.
+ */
+export function expandBBoxM(
+  b: { s: number; w: number; n: number; e: number },
+  radiusM: number,
+): { s: number; w: number; n: number; e: number } {
+  const latLaPlusEloignee = Math.abs(b.n) >= Math.abs(b.s) ? b.n : b.s;
+  const { dLat, dLon } = metersToDegrees(latLaPlusEloignee, radiusM);
+  return { s: b.s - dLat, w: b.w - dLon, n: b.n + dLat, e: b.e + dLon };
 }

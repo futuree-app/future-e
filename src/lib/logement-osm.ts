@@ -1,10 +1,12 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { haversineM, distancePointToPolylineM, distancePointToPolygonM, type LngLat } from "./geo-distance.ts";
+import { haversineM, distancePointToPolylineM, distancePointToPolygonM, expandBBoxM, type LngLat } from "./geo-distance.ts";
 import { cellKey, cellBBox } from "./geo-grid.ts";
 import type { OsmProximity, GreenKind } from "./logement-autour-types.ts";
 
+// v3 : l'emprise de collecte était tronquée en longitude (cf. tileFetchBBox) ; les cellules mises en
+// cache sous v2 sont incomplètes à l'est et à l'ouest, ce bump les fait re-collecter à la demande.
 // v2 : on conserve le type d'espace vert (greenKind) ; bump = re-fetch des cellules à la demande.
-export const OSM_QUERY_VERSION = "osm-v2-2026-07-03";
+export const OSM_QUERY_VERSION = "osm-v3-2026-08-03";
 export const OSM_BBOX_RADIUS_M = 1500;
 export const OSM_CELL_DEG = 0.005; // ~500 m ; à valider (Paris/Lyon, ville moyenne, rural boisé)
 
@@ -120,6 +122,22 @@ export async function fetchOverpass(bbox: { s: number; w: number; n: number; e: 
   throw new Error("Overpass indisponible");
 }
 
+/**
+ * L'EMPRISE COLLECTÉE POUR UNE CELLULE : la cellule, élargie d'au moins `OSM_BBOX_RADIUS_M` dans
+ * toutes les directions, pour que tout point de la cellule ait son disque complet.
+ *
+ * Exportée pour être testable : le défaut qu'elle répare ne se voyait nulle part. La marge était
+ * calculée en `OSM_BBOX_RADIUS_M / 111_000` sur les DEUX axes, ce qui ne fait que 987 m à l'est et à
+ * l'ouest à Paris, 951 m à Lille, pour 1 500 m au nord et au sud. `computeOsmProximity` filtrait
+ * ensuite à 1 500 m : entre ces deux bornes, le produit croyait chercher sans avoir demandé.
+ * Mesuré le 03/08/2026 (`docs/audits/2026-08-03-osm-semantique-distance.md`) : jusqu'à 15 % des
+ * adresses de Lille perdaient ainsi une voie ferrée ou un axe rapide RÉELLEMENT à moins de 1 500 m,
+ * sans que le rapport signale la moindre incomplétude.
+ */
+export function tileFetchBBox(key: string): { s: number; w: number; n: number; e: number } {
+  return expandBBoxM(cellBBox(key, OSM_CELL_DEG), OSM_BBOX_RADIUS_M);
+}
+
 // Cache de cellule : emprise = cellule + marge (>= OSM_BBOX_RADIUS_M autour de tout point).
 export async function getTileGeoms(
   sb: SupabaseClient,
@@ -134,9 +152,7 @@ export async function getTileGeoms(
   if (data && data.query_version === OSM_QUERY_VERSION && data.status === "complete") {
     return { geoms: data.geometries as OsmGeom[], status: "complete" };
   }
-  const cell = cellBBox(key, OSM_CELL_DEG);
-  const marginDeg = OSM_BBOX_RADIUS_M / 111_000;
-  const bbox = { s: cell.s - marginDeg, w: cell.w - marginDeg, n: cell.n + marginDeg, e: cell.e + marginDeg };
+  const bbox = tileFetchBBox(key);
   try {
     const geoms = parseOverpass(await fetchOverpass(bbox));
     await sb.from("osm_tile_cache").upsert({

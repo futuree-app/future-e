@@ -126,7 +126,7 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     description:
       "Moustique tigre, West Nile, hantavirus : ce que le changement climatique déplace déjà vers la France.",
     category: 'Santé',
-    accent: '#fb923c',
+    accent: '#E8823A',
     href: '/savoir/maladies-emergentes',
     image: '/maladies-emergentes.png',
   },
@@ -136,7 +136,7 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     description:
       "84 % des Français savent que leur territoire devra s'adapter. Pourtant seulement 26 % se sentent préparés à une canicule. Le paradoxe français de l'adaptation.",
     category: 'Adaptation',
-    accent: '#fb923c',
+    accent: '#E8823A',
     href: '/savoir/preparation-catastrophes',
     image: '/hub-preparation.jpg',
   },

@@ -272,10 +272,11 @@ function formatAdemeBlock(data: CommuneFullData | null): string {
     pct(commune.economie.inferiorite_nationale_pct),
   );
   push("APL médecins généralistes", fnum(commune.sante.acces_medecins, 2));
-  push(
-    "Population à plus de 20 min d'un service (%)",
-    pct(commune.sante.eloignement_services_pct),
-  );
+  // La ligne « Population à plus de 20 min d'un service » a été retirée le 04/08/2026 : l'ADEME ne
+  // documente pas ce champ, et le seul indicateur homonyme de l'ANCT porte sur les services de
+  // SANTÉ. Donnée au modèle sous ce libellé, elle lui faisait produire des phrases sur l'accès aux
+  // commerces à partir d'un chiffre qui compte peut-être des médecins. Un contexte qu'on ne sait
+  // pas nommer ne se donne pas à un modèle : il ne se tait pas, il extrapole.
   push("Taux boisement (%)", pct(commune.territoire.taux_boisement));
   push("Incendies récents (nombre)", num(commune.territoire.incendies));
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { CookieSettingsLink } from "@/components/CookieSettingsLink";
+import { Logo } from "@/components/Logo";
 
 export const metadata: Metadata = {
   title: "Politique de confidentialité · futur•e",
@@ -43,15 +44,15 @@ export default function PolitiqueConfidentialitePage() {
       >
         <Link
           href="/"
+          aria-label="futur•e, accueil"
           style={{
-            fontFamily: "var(--font-brand)",
-            fontSize: 22,
-            fontStyle: "italic",
+            display: "flex",
+            alignItems: "center",
             color: "var(--fg-1)",
             textDecoration: "none",
           }}
         >
-          futur<span style={{ color: "var(--accent-ink)", fontStyle: "normal" }}>•</span>e
+          <Logo height={26} title={null} />
         </Link>
         <Link
           href="/"

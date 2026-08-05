@@ -6,7 +6,7 @@
   --color-label:     #e9ecf2;
   --color-muted:     #9ba3b4;
   --color-ghost:     #788095;
-  --color-accent:    #fb923c;  /* safe name — no Tailwind built-in scale conflict */
+  --color-accent:    #E8823A;  /* safe name — no Tailwind built-in scale conflict */
   --color-danger:    #f87171;
   --color-amethyst:  #a78bfa;  /* safe name — no Tailwind built-in scale conflict */
   --color-success:   #4ade80;
@@ -49,7 +49,7 @@ a {
   overflow-x: clip;
   padding: 32px 20px;
   background:
-    radial-gradient(circle at top, rgba(251, 146, 60, 0.14), transparent 24%),
+    radial-gradient(circle at top, rgba(232, 130, 58, 0.14), transparent 24%),
     linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
 }
 

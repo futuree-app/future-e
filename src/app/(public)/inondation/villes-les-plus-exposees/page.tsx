@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     'Nîmes, Nice, Perpignan, Grenoble : classement des 10 villes françaises les plus exposées aux inondations fluviales et pluviales, avec les données DRIAS Météo-France et Géorisques.',
   openGraph: {
     title: 'Top 10 des villes françaises les plus exposées aux inondations',
-    description: 'Crues fluviales, épisodes cévenols, rivières torrentielles : les 10 villes françaises les plus exposées selon les projections DRIAS à +4°C.',
+    description: 'Crues fluviales, épisodes cévenols, rivières torrentielles : les 10 villes françaises les plus exposées selon les projections DRIAS-TRACC à l\'horizon 2050.',
   },
 };
 
@@ -108,7 +108,7 @@ const css = `
   .page{position:relative;z-index:2;max-width:860px;margin:0 auto;padding:72px 28px 120px;}
   .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:${ACCENT};margin-bottom:18px;display:flex;align-items:center;gap:10px;}
   .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:${ACCENT};box-shadow:0 0 10px ${ACCENT};flex-shrink:0;}
-  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(32px,5vw,54px);line-height:1.08;letter-spacing:-0.02em;margin:0 0 20px;color:var(--fg-1);}
+  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-display);line-height:1.08;letter-spacing:-0.02em;margin:0 0 20px;color:var(--fg-1);}
   h1 em{font-style:italic;color:${ACCENT};}
   .lede{font-size:17px;color:var(--fg-3);margin:0 0 16px;line-height:1.75;max-width:680px;}
   .method-note{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);line-height:1.7;margin:0 0 64px;max-width:680px;padding:14px 18px;border-left:2px solid var(--border-1);}
@@ -118,7 +118,7 @@ const css = `
   .city-header{display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap;}
   .city-rank{font-family:var(--font-serif);font-size:clamp(38px,5vw,58px);font-weight:var(--weight-title);color:${ACCENT};opacity:0.22;line-height:1;letter-spacing:-0.04em;flex-shrink:0;min-width:52px;}
   .city-info{flex:1;}
-  .city-name{font-family:var(--font-serif);font-size:clamp(22px,3vw,30px);font-weight:var(--weight-title);color:var(--fg-1);line-height:1.1;}
+  .city-name{font-family:var(--font-serif);font-size:var(--text-section);font-weight:var(--weight-title);color:var(--fg-1);line-height:1.1;}
   .city-dept{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);margin-top:3px;}
   .city-score-block{text-align:right;flex-shrink:0;}
   .city-score-num{font-family:var(--font-serif);font-size:clamp(32px,4vw,48px);font-weight:var(--weight-title);color:${ACCENT};line-height:1;letter-spacing:-0.02em;}
@@ -174,7 +174,9 @@ export default async function InondationTop10() {
     CANDIDATE_CITIES.map(async (c) => {
       try {
         const data = await getClimatDataCommune(c.insee);
-        return (data?.commune?.s?.gwl30?.v as DriasV) ?? null;
+        // Même correction que sur le classement chaleur : la page annonce 2050, elle lisait le
+        // palier de 2100. Le classement vient du score, pas de ces valeurs.
+        return (data?.commune?.s?.gwl20?.v as DriasV) ?? null;
       } catch {
         return null;
       }
@@ -205,10 +207,10 @@ export default async function InondationTop10() {
           les plus exposées aux <em>inondations</em>
         </h1>
         <p className="lede">
-          Crues de rivières, épisodes de pluies extrêmes, ruissellement dans les rues : les dix villes françaises les plus exposées aux inondations, selon les projections Météo-France à l'horizon 2050 dans un scénario de réchauffement de +4°C.
+          Crues de rivières, épisodes de pluies extrêmes, ruissellement dans les rues : les dix villes françaises les plus exposées aux inondations, selon les projections Météo-France à l'horizon 2050, où le monde atteint +2 °C et la France +2,7 °C.
         </p>
         <div className="method-note">
-          Comment lire ce classement. Le score combine quatre indicateurs climatiques : l'intensité des pluies les plus fortes de l'année (pondération principale, car c'est elle qui cause les catastrophes documentées), les précipitations en hiver qui font déborder les rivières, le volume de pluie annuel qui sature les sols, et l'évolution des pluies extrêmes par rapport à aujourd'hui. Les données viennent de DRIAS Météo-France, scénario à +4°C. La submersion marine est un risque différent : elle fait l'objet d'un classement séparé.
+          Comment lire ce classement. Le score combine quatre indicateurs climatiques : l'intensité des pluies les plus fortes de l'année (pondération principale, car c'est elle qui cause les catastrophes documentées), les précipitations en hiver qui font déborder les rivières, le volume de pluie annuel qui sature les sols, et l'évolution des pluies extrêmes par rapport à aujourd'hui. Les données viennent de DRIAS-TRACC (Météo-France), à l'horizon 2050. La submersion marine est un risque différent : elle fait l'objet d'un classement séparé.
         </div>
 
         {cities.map((city) => {
@@ -271,10 +273,10 @@ export default async function InondationTop10() {
           <div className="cta-rapport">
             <div className="cta-rapport-title">Votre commune est-elle exposée ?</div>
             <p className="cta-rapport-desc">
-              Ces dix villes concentrent les risques les plus élevés, mais le risque d'inondation existe dans des milliers de communes françaises. Cherchez la vôtre pour voir son niveau d'exposition, puis construisez votre rapport interactif personnalisé.
+              Ces dix villes concentrent les risques les plus élevés, mais le risque d'inondation existe dans des milliers de communes françaises. Cherchez la vôtre pour voir son niveau d'exposition, puis construisez votre dossier personnalisé.
             </p>
             <div className="cta-links">
-              <Link href="/rapport" prefetch={false} className="cta-btn">Créer mon rapport interactif →</Link>
+              <Link href="/rapport" prefetch={false} className="cta-btn">Créer mon dossier →</Link>
               <Link href="/inondation" className="cta-sec">Explorer par commune</Link>
               <Link href="/comparateur" className="cta-sec">Comparer deux villes</Link>
             </div>

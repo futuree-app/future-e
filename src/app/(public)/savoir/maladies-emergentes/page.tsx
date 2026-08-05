@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { Logo } from "@/components/Logo";
 
 export const metadata: Metadata = {
   title: 'Maladies émergentes : ce que le changement climatique déplace vers la France · futur•e',
@@ -10,9 +11,9 @@ export const metadata: Metadata = {
 
 const css = String.raw`
   :root {
-    --accent: #fb923c;
-    --accent-soft: rgba(251,146,60,0.10);
-    --accent-border: rgba(251,146,60,0.28);
+    --accent: #E8823A;
+    --accent-soft: rgba(232, 130, 58,0.10);
+    --accent-border: rgba(232, 130, 58,0.28);
     --red: #f87171;
     --red-soft: rgba(248,113,113,0.09);
     --blue: #60a5fa;
@@ -27,7 +28,7 @@ const css = String.raw`
   html, body { margin:0; padding:0; background:var(--bg); color:var(--fg-1); font-family:var(--font-sans); font-size:16px; line-height:1.65; overflow-x:hidden; -webkit-font-smoothing:antialiased; }
 
   .orb { position:fixed; border-radius:50%; filter:blur(120px); opacity:0.26; pointer-events:none; z-index:0; animation:breathe 14s ease-in-out infinite; }
-  .orb-1 { width:520px; height:520px; background:radial-gradient(circle,#fb923c 0%,transparent 70%); top:-160px; left:-100px; }
+  .orb-1 { width:520px; height:520px; background:radial-gradient(circle,#E8823A 0%,transparent 70%); top:-160px; left:-100px; }
   .orb-2 { width:440px; height:440px; background:radial-gradient(circle,#a78bfa 0%,transparent 70%); bottom:-100px; right:-80px; animation-delay:-6s; }
   .orb-3 { width:380px; height:380px; background:radial-gradient(circle,#60a5fa 0%,transparent 70%); top:40%; left:55%; opacity:0.14; animation-delay:-11s; }
   @keyframes breathe { 0%,100%{transform:scale(1) translate(0,0);} 50%{transform:scale(1.14) translate(18px,-28px);} }
@@ -36,7 +37,7 @@ const css = String.raw`
 
   .nav { position:sticky; top:0; z-index:50; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); background:var(--bg-card); border-bottom:1px solid var(--border-1); }
   .nav-inner { max-width:800px; margin:0 auto; padding:16px 28px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
-  .brand { font-family:var(--font-brand); font-size:22px; font-style:italic; color:var(--fg-1); text-decoration:none; letter-spacing:-0.01em; }
+  .brand { font-size:22px; font-style:italic; color:var(--fg-1); text-decoration:none; letter-spacing:-0.01em; }
   .brand-dot { color:var(--accent-ink); font-style:normal; }
   .nav-crumb { font-family:var(--font-mono); font-size:11px; color:var(--fg-4); letter-spacing:0.08em; text-transform:uppercase; }
   .nav-crumb a { color:var(--fg-3); text-decoration:none; }
@@ -46,13 +47,13 @@ const css = String.raw`
   .article-tag { display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:999px; background:var(--accent-soft); border:1px solid var(--accent-border); font-family:var(--font-mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); margin-bottom:28px; }
   .article-tag::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent); }
 
-  h1 { font-family:var(--font-serif); font-weight:400; font-size:clamp(34px,5vw,52px); line-height:1.08; letter-spacing:-0.02em; margin:0 0 24px; color:var(--fg-1); }
+  h1 { font-family:var(--font-serif); font-weight:400; font-size:var(--text-display); line-height:1.08; letter-spacing:-0.02em; margin:0 0 24px; color:var(--fg-1); }
   h1 em { font-style:italic; color:var(--accent); }
   .article-intro { font-family:var(--font-serif); font-size:clamp(17px,2vw,21px); line-height:1.62; color:var(--fg-3); margin:0 0 40px; border-bottom:1px solid var(--border-1); padding-bottom:36px; }
   .article-meta { display:flex; gap:24px; flex-wrap:wrap; margin-bottom:44px; font-family:var(--font-mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--fg-4); }
   .hero-image { width:min(100%, 560px); height:auto; display:block; border-radius:12px; margin:0 auto 36px; border:1px solid var(--border-1); }
 
-  h2 { font-family:var(--font-serif); font-weight:400; font-size:clamp(24px,3vw,32px); line-height:1.2; letter-spacing:-0.01em; margin:64px 0 20px; color:var(--fg-1); position:relative; }
+  h2 { font-family:var(--font-serif); font-weight:400; font-size:var(--text-title); line-height:1.2; letter-spacing:-0.01em; margin:64px 0 20px; color:var(--fg-1); position:relative; }
   h2::before { content:""; position:absolute; left:-28px; top:18px; width:14px; height:1px; background:var(--accent); }
   p { margin:0 0 18px; font-size:17px; line-height:1.72; color:var(--fg-1); }
   p strong { font-weight:500; color:#fff; }
@@ -84,7 +85,7 @@ const css = String.raw`
   .disease-desc { font-size:13px; color:var(--fg-3); line-height:1.6; }
   .disease-badge { font-family:var(--font-mono); font-size:9px; letter-spacing:0.08em; text-transform:uppercase; padding:2px 8px; border-radius:3px; white-space:nowrap; }
   .badge-etabli { background:rgba(248,113,113,0.12); border:1px solid rgba(248,113,113,0.25); color:#fca5a5; }
-  .badge-expansion { background:rgba(251,146,60,0.12); border:1px solid rgba(251,146,60,0.25); color:#fdba74; }
+  .badge-expansion { background:rgba(232, 130, 58,0.12); border:1px solid rgba(232, 130, 58,0.25); color:#EEA36E; }
   .badge-emergent { background:rgba(251,191,36,0.10); border:1px solid rgba(251,191,36,0.2); color:#fde68a; }
   .badge-surveille { background:rgba(167,139,250,0.10); border:1px solid rgba(167,139,250,0.22); color:#c4b5fd; }
 
@@ -233,7 +234,7 @@ const articleHtml = String.raw`
     </div>
 
     <div class="disease-card">
-      <div class="disease-icon" style="background:rgba(251,146,60,0.12);">🐦</div>
+      <div class="disease-icon" style="background:rgba(232, 130, 58,0.12);">🐦</div>
       <div class="disease-body">
         <div class="disease-name">Virus West Nile <span class="disease-badge badge-etabli">Établi</span></div>
         <p class="disease-desc">30 cas humains en PACA en 2025, un record. Transmis par des moustiques du genre Culex à partir d'oiseaux réservoirs. 37 % des cas développent des formes neurologiques sévères. En 2025, pour la première fois, une circulation virale a été clairement établie dans le Vaucluse. En 2022, le virus West Nile a émergé de façon inattendue sur la côte atlantique, en Nouvelle-Aquitaine. <span class="src">Source : Santé publique France · CNR Arbovirus</span></p>
@@ -427,8 +428,8 @@ export default function MaladiesEmergentesPage() {
 
       <nav className="nav">
         <div className="nav-inner">
-          <Link href="/" className="brand">
-            futur<span className="brand-dot">•</span>e
+          <Link href="/" className="brand" aria-label="futur•e, accueil">
+            <Logo height={26} title={null} />
           </Link>
           <div className="nav-crumb">
             <Link href="/">Pages Savoir</Link>
@@ -442,8 +443,8 @@ export default function MaladiesEmergentesPage() {
       <article className="article" dangerouslySetInnerHTML={{ __html: articleHtml }} />
 
       <footer className="page-footer">
-        <Link href="/" className="brand" style={{ fontSize: 18, color: 'var(--fg-3)' }}>
-          futur<span className="brand-dot">•</span>e
+        <Link href="/" className="brand" aria-label="futur•e, accueil" style={{ color: 'var(--fg-3)' }}>
+          <Logo height={22} title={null} />
         </Link>
         <div className="footer-note">Données publiques françaises · Aucune publicité<br />Page Savoir · Maladies émergentes · Mai 2026</div>
       </footer>

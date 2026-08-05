@@ -217,7 +217,7 @@ export default async function ComparateurPage({
           {bindOrphans("Vous avez vu ce que ces communes sont aujourd'hui. Reste ce qu'elles deviennent : leur trajectoire, ce qui pèse le plus sur une décision qui vous engage des années.")}
         </p>
         <p className="mt-3 text-[15px] leading-[1.6] text-muted" style={{ textWrap: "pretty" }}>
-          {bindOrphans("39 €. Accès immédiat, rapport interactif que vous gardez.")}
+          {bindOrphans("39 €. Accès immédiat, dossier que vous gardez.")}
         </p>
         <Link
           href={ctaHref}

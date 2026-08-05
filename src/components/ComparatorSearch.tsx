@@ -269,7 +269,7 @@ export function ComparatorSearch({
         }
         .cmp-progress-bar {
           position: absolute; top: 0; left: 0; height: 2px;
-          background: linear-gradient(90deg, #f87171, #fb923c);
+          background: linear-gradient(90deg, #f87171, #E8823A);
           border-radius: 0 2px 2px 0;
           animation: cmp-progress 8s cubic-bezier(0.1, 0.4, 0.2, 1) forwards;
         }

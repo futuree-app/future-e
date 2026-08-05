@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
+import { Logo } from "@/components/Logo";
 
 export const metadata: Metadata = {
   title: 'Pollutions invisibles : ce que votre sol et votre air contiennent · futur•e',
@@ -29,7 +30,7 @@ const css = `
 
   .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:var(--bg-card);border-bottom:1px solid var(--border-1);}
   .nav-inner{max-width:1100px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
-  .brand{font-family:var(--font-brand);font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
+  .brand{font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
   .brand-dot{color:var(--accent-ink);font-style:normal;}
   .nav-crumb{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.08em;text-transform:uppercase;}
   .nav-crumb a{color:var(--fg-3);text-decoration:none;}
@@ -40,14 +41,14 @@ const css = `
   .article-tag{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:var(--accent-soft);border:1px solid var(--accent-border);font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:28px;}
   .article-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);}
 
-  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(36px,5vw,54px);line-height:1.08;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fg-1);}
+  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-display);line-height:1.08;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fg-1);}
   h1 em{font-style:italic;color:var(--accent);}
 
   .article-intro{font-family:var(--font-serif);font-size:clamp(18px,2vw,22px);line-height:1.6;color:var(--fg-3);margin:0 0 48px;border-bottom:1px solid var(--border-1);padding-bottom:40px;}
 
   .article-meta{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:48px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-4);}
 
-  h2{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(24px,3vw,32px);line-height:1.2;letter-spacing:-0.01em;margin:64px 0 20px;color:var(--fg-1);position:relative;}
+  h2{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-title);line-height:1.2;letter-spacing:-0.01em;margin:64px 0 20px;color:var(--fg-1);position:relative;}
   h2::before{content:"";position:absolute;left:-28px;top:18px;width:14px;height:1px;background:var(--accent);}
 
   h3{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:20px;line-height:1.3;margin:36px 0 12px;color:var(--fg-1);font-style:italic;}
@@ -77,7 +78,7 @@ const css = `
   .substance-table tr:last-child td{border-bottom:none;}
   .badge{display:inline-block;font-family:var(--font-mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;white-space:nowrap;}
   .badge-red{background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.25);color:#fca5a5;}
-  .badge-orange{background:rgba(251,146,60,0.12);border:1px solid rgba(251,146,60,0.25);color:#fdba74;}
+  .badge-orange{background:rgba(232, 130, 58,0.12);border:1px solid rgba(232, 130, 58,0.25);color:#EEA36E;}
   .badge-violet{background:var(--accent-soft);border:1px solid var(--accent-border);color:#c4b5fd;}
   .badge-blue{background:rgba(96,165,250,0.12);border:1px solid rgba(96,165,250,0.25);color:#93c5fd;}
 
@@ -439,8 +440,8 @@ export default function PollutionsInvisiblesPage() {
       </article>
 
       <footer className="page-footer">
-        <Link href="/" className="brand" style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: '18px', color: 'var(--fg-3)', textDecoration: 'none' }}>
-          futur<span style={{ color: 'var(--accent)', fontStyle: 'normal' }}>•</span>e
+        <Link href="/" className="brand" aria-label="futur•e, accueil" style={{ display: 'flex', alignItems: 'center', color: 'var(--fg-3)', textDecoration: 'none' }}>
+          <Logo height={22} title={null} />
         </Link>
         <div className="footer-note">
           Données publiques françaises · Aucune publicité<br />

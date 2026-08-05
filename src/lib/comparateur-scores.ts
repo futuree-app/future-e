@@ -14,12 +14,15 @@
 // 3 000 lignes) : on fige la parité, on ne fusionne pas.
 import type { IndexCommune, PreferenceKey } from "./comparateur-vie.ts";
 import { winterMildnessScore } from "./climate/winter-mildness.ts";
+import { centraliteRang } from "./centralite-services.ts";
 
 // Les 10 critères de position à distribution saine, vérifiés sur 34 788 communes.
 export const MISMATCH_RANK_KEYS: PreferenceKey[] = [
   "nature", "acces_ecoles", "acces_soins", "acces_culture", "acces_transports",
   "faible_dependance_auto", "croissance_demographique", "vie_locale", "cadre_calme", "viabilite_emploi",
-  "acces_services", // lot 2b : mécanique v1, plafond dégénéré neutralisé par la bande à deux bornes
+  // 04/08/2026 : la mécanique v1 (champ des 20 minutes, plafond dégénéré à 80,1 %) est remplacée par
+  // le niveau de centralité ANCT. La bande à deux bornes reste, la donnée qu'elle borne a changé.
+  "acces_services",
   "ensoleillement_recherche", // lot 4a : percentile ERA5-Land uniforme, relative_position symétrique
   "douceur_climat", // lot 4b : douceur hivernale monotone (position DJF), fin du double comptage été
 ];
@@ -71,9 +74,10 @@ export function mismatchRawScore(key: PreferenceKey, c: IndexCommune): number | 
     case "viabilite_emploi":
       return c.emploi == null ? null : 0.6 * c.emploi.taille + 0.4 * c.emploi.diversite;
     case "acces_services":
-      // COPIE FIDÈLE de subScore("acces_services") : éloignement bas = mieux. Le test de parité garantit
-      // qu'elles restent identiques (sinon le rang du dossier ordonnerait autrement que le comparateur).
-      return c.vivpct?.eloignement == null ? null : 100 - c.vivpct.eloignement;
+      // COPIE FIDÈLE de subScore("acces_services") : le niveau de centralité ANCT. Le test de parité
+      // garantit qu'elles restent identiques (sinon le rang du dossier ordonnerait autrement que le
+      // comparateur). Les deux appellent la MÊME fonction pure : la copie ne peut plus diverger.
+      return centraliteRang(c.agri?.equip, c.insee);
     case "ensoleillement_recherche":
       // COPIE FIDÈLE de subScore("ensoleillement_recherche") : rayonnement solaire ERA5-Land, percentile
       // national. Plus de soleil = rang plus haut. Le test de parité garantit l'identité avec le comparateur.

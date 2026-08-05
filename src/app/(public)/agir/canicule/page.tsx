@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
+import { Logo } from "@/components/Logo";
 
 export const dynamic = 'force-dynamic';
 
@@ -23,14 +24,14 @@ const css = `
   .orb{position:fixed;border-radius:50%;filter:blur(120px);opacity:0.32;pointer-events:none;z-index:0;animation:breathe 14s ease-in-out infinite;}
   .orb-1{width:520px;height:520px;background:radial-gradient(circle,#f87171 0%,transparent 70%);top:-140px;left:-120px;}
   .orb-2{width:460px;height:460px;background:radial-gradient(circle,#a78bfa 0%,transparent 70%);bottom:-120px;right:-100px;animation-delay:-5s;}
-  .orb-3{width:380px;height:380px;background:radial-gradient(circle,#fb923c 0%,transparent 70%);top:50%;left:60%;opacity:0.16;animation-delay:-9s;}
+  .orb-3{width:380px;height:380px;background:radial-gradient(circle,#E8823A 0%,transparent 70%);top:50%;left:60%;opacity:0.16;animation-delay:-9s;}
   @keyframes breathe{0%,100%{transform:scale(1) translate(0,0);}50%{transform:scale(1.15) translate(20px,-30px);}}
 
   body::before{content:"";position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none;z-index:1;mix-blend-mode:overlay;}
 
   .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:var(--bg-card);border-bottom:1px solid var(--border-1);}
   .nav-inner{max-width:1100px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
-  .brand{font-family:var(--font-brand);font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
+  .brand{font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
   .brand-dot{color:var(--accent-ink);font-style:normal;}
   .nav-crumb{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.08em;text-transform:uppercase;}
   .nav-crumb a{color:var(--fg-3);text-decoration:none;transition:color 0.2s;}
@@ -44,7 +45,7 @@ const css = `
   .tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);}
   .read-info{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.08em;text-transform:uppercase;}
 
-  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(40px,6vw,60px);line-height:1.08;letter-spacing:-0.02em;margin:0 0 32px;color:var(--fg-1);}
+  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-display);line-height:1.08;letter-spacing:-0.02em;margin:0 0 32px;color:var(--fg-1);}
   h1 em{font-style:italic;color:var(--accent);}
 
   .lede{font-family:var(--font-serif);font-size:clamp(19px,2.2vw,23px);line-height:1.55;color:var(--fg-1);font-weight:var(--weight-title);margin:0 0 48px;padding:0 0 48px;border-bottom:1px solid var(--border-1);}
@@ -53,7 +54,7 @@ const css = `
   .assoc-link:hover{border-color:var(--accent-border);color:var(--accent);}
   .assoc-link-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-4);margin-right:4px;}
 
-  h2{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(24px,3vw,32px);line-height:1.22;letter-spacing:-0.01em;margin:56px 0 20px;color:var(--fg-1);position:relative;}
+  h2{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-title);line-height:1.22;letter-spacing:-0.01em;margin:56px 0 20px;color:var(--fg-1);position:relative;}
   h2::before{content:"";position:absolute;left:-28px;top:18px;width:14px;height:1px;background:var(--accent);}
 
   p{margin:0 0 20px;color:var(--fg-1);font-size:17px;line-height:1.72;}
@@ -118,8 +119,7 @@ const css = `
   @media(max-width:768px){
     .article{padding:40px 22px 80px;}
     .nav-inner{padding:14px 22px;}
-    h1{font-size:36px;}
-    h2{font-size:24px;margin:44px 0 16px;}
+    h2{margin:44px 0 16px;}
     h2::before{display:none;}
     .lede{font-size:18px;}
     p,.step-desc,.levier-desc,.no-desc,.profile-desc{font-size:15px;}
@@ -349,8 +349,8 @@ export default function CaniculePage() {
 
       <footer className="nav nav-footer">
         <div className="nav-inner">
-          <Link href="/" className="brand">
-            futur<span className="brand-dot">•</span>e
+          <Link href="/" className="brand" aria-label="futur•e, accueil">
+            <Logo height={26} title={null} />
           </Link>
           <div className="nav-crumb">
             <Link href="/chaleur" className="step-home">Savoir</Link>

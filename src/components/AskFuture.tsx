@@ -419,7 +419,7 @@ export function AskFuture({
           {quotaReached ? (
             <div className="ask-quota-reached">
               <p className="ask-quota-text">
-                Vous avez utilisé vos {questionsMax} questions incluses avec le Rapport interactif.
+                Vous avez utilisé vos {questionsMax} questions incluses avec le Dossier.
               </p>
             </div>
           ) : (

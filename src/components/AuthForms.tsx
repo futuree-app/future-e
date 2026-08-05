@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { EMPTY_STATE, type AuthActionState } from "@/app/auth/shared";
+import { Logo } from "@/components/Logo";
 
 type ActionFn = (
   state: AuthActionState,
@@ -226,7 +227,7 @@ export function AuthShell({
       <div className="auth-shell-orb auth-shell-orb-tertiary" />
       <div className="auth-shell-stage">
         <div className="auth-shell-brand">
-          <Link className="auth-brandmark" href="/">futur<span>•</span>e</Link>
+          <Link className="auth-brandmark" href="/" aria-label="futur•e, accueil"><Logo height={30} title={null} /></Link>
           <p className="auth-brand-kicker">Projection climatique personnelle</p>
         </div>
         <div className="auth-grid">

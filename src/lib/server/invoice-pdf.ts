@@ -1,6 +1,7 @@
 import "server-only";
 import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
 import { formatEuro, formatDateFr, type Invoice } from "@/lib/invoice";
+import { MOT, POINT, HAUTEUR_MOT_IMPRIME_PT } from "@/lib/brand-mark";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // LE RENDU PDF DE LA FACTURE.
@@ -51,6 +52,31 @@ const GREY = "#555555";
 const INK = "#111111";
 const RULE = "#cccccc";
 
+
+/**
+ * Dessine le mot-symbole à (x, y), à la hauteur voulue, dans une seule couleur.
+ *
+ * pdfkit travaille en points avec l'origine en haut à gauche, comme un viewBox SVG : il suffit
+ * donc de mettre à l'échelle puis de translater du coin du viewBox, sans miroir ni rotation.
+ * `save`/`restore` encadrent la transformation pour que le reste du document ne la subisse pas.
+ *
+ * Le `e` se remplit en `even-odd` : sa contre-forme est un second sous-chemin, et la règle par
+ * défaut (`non-zero`) la remplirait, ce qui transformerait la lettre en pâté.
+ */
+function dessineMotSymbole(
+  doc: PDFKit.PDFDocument, x: number, y: number, hauteur: number, couleur: string,
+): void {
+  const echelle = hauteur / MOT.box.height;
+  doc.save();
+  doc.translate(x, y).scale(echelle).translate(-MOT.box.x, -MOT.box.y);
+  doc.fillColor(couleur);
+  for (const d of MOT.paths) doc.path(d).fill();
+  doc.path(MOT.pathEvenOdd).fill("even-odd");
+  // Le point prend la même encre que le lettrage : c'est la variante monochrome de la charte.
+  doc.circle(POINT.cx, POINT.cy, POINT.r).fill();
+  doc.restore();
+}
+
 export function renderInvoicePdf(invoice: Invoice): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
@@ -72,9 +98,20 @@ export function renderInvoicePdf(invoice: Invoice): Promise<Buffer> {
     const t = (s: string) => toWinAnsi(s);
 
     // ── En-tête : qui vend, et quel document ──────────────────────────────────────────────
-    doc.fillColor(INK).font("Helvetica-Bold").fontSize(18).text(t(invoice.seller.tradeName), MARGIN, MARGIN);
+    //
+    // LE LOGO EST DESSINÉ, PLUS COMPOSÉ (04/08/2026). L'en-tête écrivait « futur•e » en
+    // Helvetica-Bold 18, c'est-à-dire dans une police système qui n'est ni le mot-symbole de la
+    // charte ni même Archivo. La facture est la seule pièce que l'acheteur conserve, et elle
+    // portait la marque sous une forme qui n'existe nulle part ailleurs dans le produit.
+    //
+    // EN ENCRE, PAS EN ORANGE, et c'est la doctrine de ce fichier : « aucune couleur de marque,
+    // aucun élément décoratif », parce qu'une facture se relit imprimée en noir et blanc, où
+    // l'orange du point deviendrait un gris sale à côté d'un lettrage noir. La charte prévoit
+    // exactement cet emploi avec ses variantes monochromes.
+    dessineMotSymbole(doc, MARGIN, MARGIN, HAUTEUR_MOT_IMPRIME_PT, INK);
+
     doc.font("Helvetica").fontSize(9).fillColor(GREY);
-    doc.text(t(invoice.seller.nameWithForm));
+    doc.text(t(invoice.seller.nameWithForm), MARGIN, MARGIN + HAUTEUR_MOT_IMPRIME_PT + 10);
     doc.text(t(invoice.seller.address));
     doc.text(`SIRET ${t(invoice.seller.siret)} - APE ${t(invoice.seller.apeCode)}`);
     doc.text(t(invoice.seller.email));
@@ -126,25 +163,54 @@ export function renderInvoicePdf(invoice: Invoice): Promise<Buffer> {
       .text(t(invoice.vatMention), MARGIN, y, { width: W, align: "right" });
 
     // ── Pied : les mentions qui font la conformité ────────────────────────────────────────
-    const footY = doc.page.height - MARGIN - 54;
-    doc.moveTo(MARGIN, footY - 14).lineTo(MARGIN + W, footY - 14).strokeColor(RULE).stroke();
+    //
+    // LA HAUTEUR DU PIED EST MESURÉE, PLUS DEVINÉE (04/08/2026). Elle valait 54 points pour deux
+    // blocs posés à des décalages fixes. L'ajout de la mention de renoncement à la rétractation a
+    // montré la fragilité du procédé : un bloc qui gagne une ligne passe sous le suivant, sans que
+    // rien n'échoue, et la facture part quand même. Les trois blocs sont désormais empilés à partir
+    // de leur hauteur réelle.
     doc.font("Helvetica").fontSize(8).fillColor(GREY);
-    // La DATE D'EXÉCUTION doit figurer sur une note de prestation de service (arrêté du 3 octobre
-    // 1983). Elle se confond ici avec la date de paiement : l'accès au rapport est ouvert par le
-    // webhook, dans la seconde qui suit l'encaissement. Le jour où une prestation s'étalerait dans
-    // le temps, cette ligne devrait porter deux dates distinctes.
-    doc.text(
+    const piedBlocs = [
+      // La DATE D'EXÉCUTION doit figurer sur une note de prestation de service (arrêté du 3 octobre
+      // 1983). Elle se confond ici avec la date de paiement : l'accès au rapport est ouvert par le
+      // webhook, dans la seconde qui suit l'encaissement. Le jour où une prestation s'étalerait
+      // dans le temps, cette ligne devrait porter deux dates distinctes.
       t(
         `Facture acquittée. Paiement reçu le ${formatDateFr(invoice.issuedAt)} par carte bancaire. ` +
         `Prestation exécutée le ${formatDateFr(invoice.issuedAt)}, accès ouvert au client à cette date. ` +
         `${invoice.vatMention}.`,
       ),
-      MARGIN, footY, { width: W },
-    );
-    doc.text(
+      // LA TROISIÈME CONDITION DE L'ARTICLE L221-28 13°.
+      // ════════════════════════════════════════════════════════════════════════════════════════
+      // L'exception au droit de rétractation pour un contenu numérique fourni immédiatement demande
+      // TROIS choses : l'accord exprès à l'exécution immédiate, le renoncement exprès à la
+      // rétractation, et la CONFIRMATION de cet accord sur un support durable. Les deux premières
+      // sont recueillies avant le paiement (`PaymentForm.tsx`) ; sans cette ligne, la troisième
+      // manquait, et l'exception ne jouait donc pas, quoi qu'ait coché l'acheteur.
+      //
+      // La facture est le support durable : produite à l'encaissement, remise au client, conservée.
+      // Le libellé reprend les deux accords tels qu'ils lui ont été présentés, sans les reformuler :
+      // une confirmation qui dirait autre chose que la case ne confirmerait rien.
+      t(
+        "Le client a demandé l'exécution immédiate de la prestation et a reconnu perdre son " +
+        "droit de rétractation dès la mise à disposition du contenu, conformément à l'article " +
+        "L221-28 13° du code de la consommation. " +
+        "La présente facture vaut confirmation de cet accord sur support durable.",
+      ),
       t(`${invoice.seller.nameWithForm} - SIRET ${invoice.seller.siret} - ${invoice.seller.address}`),
-      MARGIN, footY + 22, { width: W },
+    ];
+    const ESPACE_ENTRE_BLOCS = 6;
+    const hauteurPied = piedBlocs.reduce(
+      (h, bloc) => h + doc.heightOfString(bloc, { width: W }) + ESPACE_ENTRE_BLOCS,
+      0,
     );
+    const footY = doc.page.height - MARGIN - hauteurPied;
+    doc.moveTo(MARGIN, footY - 14).lineTo(MARGIN + W, footY - 14).strokeColor(RULE).stroke();
+    let piedY = footY;
+    for (const bloc of piedBlocs) {
+      doc.text(bloc, MARGIN, piedY, { width: W });
+      piedY += doc.heightOfString(bloc, { width: W }) + ESPACE_ENTRE_BLOCS;
+    }
 
     doc.end();
   });

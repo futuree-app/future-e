@@ -19,9 +19,14 @@ import { DossierDecisionSection } from "@/components/report/DossierDecisionSecti
 import { ControlesDuDossier } from "@/components/report/ControlesDuDossier";
 import { DossierAvecLogement } from "@/components/report/DossierAvecLogement";
 import { listDossiers } from "@/lib/address-dossier-store";
+import { readLatestArtifact } from "@/lib/server/decision-artifact-store";
+import { artifactScopeKey, dossierAServir } from "@/lib/decision/decision-artifact";
+import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
+import { after } from "next/server";
 import { communeParent } from "@/lib/plm";
 import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
+import { Logo } from "@/components/Logo";
 
 // L'IDENTITÉ D'UNE ÉCHELLE EST SON RANG, SON NOM ET SON GRAIN. Ni couleur, ni icône.
 //
@@ -106,7 +111,37 @@ export default async function RapportPage() {
     fullReport && inseeCode && userProject
       ? await buildCommuneDossier(inseeCode, userProject, { hasAddress: Boolean(logementForCommune) })
       : null;
-  const dossier = communeResult?.dossier ?? null;
+  // L'ARTEFACT PASSE AVANT L'ASSEMBLAGE (05/08/2026).
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  // Ce qui a été vendu est la lecture du jour de l'achat. `buildCommuneDossier` reste appelé plus
+  // haut parce que ses `moduleFacts` et son contexte de contraintes servent l'augmentation Adresse,
+  // mais le DOSSIER affiché vient de l'artefact dès qu'il existe.
+  //
+  // Un artefact absent n'est pas une panne : les dossiers achetés avant ce lot n'en ont pas, et un
+  // dossier ouvert sans projet renseigné non plus. On retombe alors sur l'assemblage vivant,
+  // exactement comme avant. Un artefact illisible fait de même, le parseur ayant refusé plutôt que
+  // de réparer.
+  const artefactCommune =
+    fullReport && inseeCode
+      ? await readLatestArtifact(supabase, user.id, inseeCode, artifactScopeKey(null)).catch(() => null)
+      : null;
+  // LE RATTRAPAGE DES DOSSIERS DÉJÀ ACHETÉS. Sans lui, un territoire payé avant ce lot n'aurait
+  // jamais d'artefact et continuerait de se réécrire à chaque ouverture : le lot aurait été complet
+  // pour les ventes futures et sans effet sur les ventes faites. La génération part dans `after()`,
+  // donc après la réponse : cette page ne l'attend pas, et affiche l'assemblage du jour comme avant.
+  // Au rechargement suivant, la version figée prend le relais.
+  if (fullReport && inseeCode && userProject && !artefactCommune) {
+    after(async () => {
+      const r = await generateDecisionArtifact(supabase, user.id, userProject, {
+        kind: "commune", insee: inseeCode,
+      });
+      if (r.status === "failed") console.error("[artefact] rattrapage échoué", { inseeCode, r });
+    });
+  }
+
+  const servi = dossierAServir(artefactCommune, communeResult?.dossier ?? null);
+  const dossier = servi.dossier;
+  const dossierGenereLe = servi.generatedAt;
   const dossierLogementLink = logementForCommune
     ? { href: `/rapport/logement?dossierId=${encodeURIComponent(logementForCommune.id)}`, label: logementForCommune.address_label }
     : null;
@@ -245,7 +280,7 @@ export default async function RapportPage() {
           <div>
             <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-accent mb-5">
               <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
-              {fullReport ? "Rapport interactif" : "Rapport interactif partiel"}
+              {fullReport ? "Dossier" : "Dossier partiel"}
             </div>
 
             <>
@@ -270,7 +305,7 @@ export default async function RapportPage() {
                   </Link>
                 ) : (
                   <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "var(--font-sans)" }}>
-                    Ouvrir le rapport interactif
+                    Ouvrir le dossier
                   </Link>
                 )}
                 <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">
@@ -288,7 +323,7 @@ export default async function RapportPage() {
                 {openModules.length === 1 ? "1 échelle ouverte" : `${openModules.length} échelles ouvertes`}
               </p>
               <h2 className="font-normal text-[22px] leading-[1.2] text-label mb-5 tracking-[-0.3px]" style={{ fontFamily: "var(--font-serif)" }}>
-                Rapport interactif · {displayName}
+                Dossier · {displayName}
               </h2>
               {/* SOMMAIRE NUMÉROTÉ, NEUTRE. Chaque ligne mène quelque part, et le rang porte
                   l'identité de l'échelle à la place de la couleur et de l'emoji retirés. */}
@@ -361,6 +396,7 @@ export default async function RapportPage() {
                     logementStatus="pending"
                     insee={inseeCode}
                     scopeKey="commune"
+                    generatedAt={dossierGenereLe}
                   />
                   <ControlesDuDossier dossier={dossier} />
                 </>
@@ -379,6 +415,7 @@ export default async function RapportPage() {
                 // Les contraintes dures, hydratées UNE fois : la section n'en change que le point
                 // d'évaluation (l'adresse), elle ne re-résout aucune référence.
                 hard={communeResult.hard}
+                userId={user.id}
               />
             </Suspense>
           ) : (
@@ -392,6 +429,7 @@ export default async function RapportPage() {
                 logementStatus="none"
                 insee={inseeCode}
                 scopeKey="commune"
+                generatedAt={dossierGenereLe}
               />
               <ControlesDuDossier dossier={dossier} />
             </>
@@ -491,7 +529,7 @@ export default async function RapportPage() {
         <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-[var(--border-1)]">
           {!fullReport && (
             <TrackedUpgradeLink href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "var(--font-sans)" }}>
-              Ouvrir le rapport interactif
+              Ouvrir le dossier
             </TrackedUpgradeLink>
           )}
           <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">
@@ -506,8 +544,8 @@ export default async function RapportPage() {
       {/* Footer */}
       <footer className="relative z-[2] border-t border-[var(--border-1)]">
         <div className="max-w-[1100px] mx-auto px-5 sm:px-7 py-9 flex items-center justify-between gap-6 flex-wrap">
-          <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "var(--font-brand)" }}>
-            futur<span className="not-italic" style={{ color: "var(--accent-ink)" }}>•</span>e
+          <div className="text-label">
+            <Logo height={24} />
           </div>
           {/* Même pied de page que la landing, mêmes destinations : voir le commentaire dans
               FutureELanding.tsx. Les deux listes doivent rester alignées. */}
@@ -518,6 +556,7 @@ export default async function RapportPage() {
               { label: "Contact", href: "mailto:hello@futur-e.fr" },
               { label: "Confidentialité", href: "/politique-confidentialite" },
               { label: "Mentions légales", href: "/mentions-legales" },
+              { label: "CGV", href: "/conditions-generales-de-vente" },
             ].map(({ label, href }) => (
               <a key={label} href={href} className="font-mono text-[11px] text-ghost no-underline tracking-[0.06em] uppercase">
                 {label}

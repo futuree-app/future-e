@@ -29,7 +29,7 @@ const css = `
   /* Hero */
   .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:${ACCENT};margin-bottom:18px;display:flex;align-items:center;gap:10px;}
   .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:${ACCENT};box-shadow:0 0 10px ${ACCENT};flex-shrink:0;}
-  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(36px,5vw,60px);line-height:1.08;letter-spacing:-0.02em;margin:0 0 22px;color:var(--fg-1);}
+  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-display);line-height:1.08;letter-spacing:-0.02em;margin:0 0 22px;color:var(--fg-1);}
   h1 em{font-style:italic;color:${ACCENT};}
   .lede{font-size:18px;color:var(--fg-3);margin:0 0 48px;line-height:1.7;max-width:620px;}
 
@@ -39,7 +39,7 @@ const css = `
   /* Section */
   .section{margin:72px 0 0;}
   .section-eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:${ACCENT};margin-bottom:10px;}
-  .section-title{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(24px,3vw,34px);line-height:1.15;letter-spacing:-0.015em;margin:0 0 6px;color:var(--fg-1);}
+  .section-title{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-title);line-height:1.15;letter-spacing:-0.015em;margin:0 0 6px;color:var(--fg-1);}
   .section-sub{font-size:14px;color:var(--fg-4);margin:0 0 28px;font-family:var(--font-mono);}
   .divider{height:1px;background:var(--bg-elev-3);margin:0;}
 
@@ -54,12 +54,12 @@ const css = `
   .article-desc{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);line-height:1.6;flex:1;}
   .article-cta{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:${ACCENT};}
 
-  /* Rapport interactif CTA */
+  /* Dossier CTA */
   .rapport-cta{display:flex;flex-direction:column;gap:16px;padding:36px 40px;border-radius:14px;background:rgba(96,165,250,0.06);border:1px solid rgba(96,165,250,0.22);text-decoration:none;margin-top:28px;transition:background 0.2s,border-color 0.2s;position:relative;overflow:hidden;}
   .rapport-cta::after{content:"";position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,${ACCENT}14 0%,transparent 70%);pointer-events:none;}
   .rapport-cta:hover{background:rgba(96,165,250,0.09);border-color:rgba(96,165,250,0.35);}
   .rapport-cta-eyebrow{font-family:var(--font-mono);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:${ACCENT};}
-  .rapport-cta-title{font-family:var(--font-serif);font-size:clamp(22px,2.5vw,30px);font-weight:var(--weight-title);color:var(--fg-1);line-height:1.2;margin:0;}
+  .rapport-cta-title{font-family:var(--font-serif);font-size:var(--text-section);font-weight:var(--weight-title);color:var(--fg-1);line-height:1.2;margin:0;}
   .rapport-cta-desc{font-size:15px;color:var(--fg-3);line-height:1.65;max-width:560px;}
   .rapport-cta-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:${ACCENT};color:#060812;font-family:var(--font-sans);font-size:14px;font-weight:600;border-radius:6px;align-self:flex-start;}
 
@@ -84,7 +84,6 @@ const css = `
 
   @media(max-width:768px){
     .page{padding:48px 20px 80px;}
-    h1{font-size:34px;}
     .articles-grid,.guides-grid,.signal-grid{grid-template-columns:1fr;}
     .rapport-cta{padding:24px 22px;}
   }
@@ -198,7 +197,7 @@ export default function InondationPage() {
           <p className="section-sub">Un diagnostic complet, et deux guides ciblés.</p>
 
           <Link href="/rapport" prefetch={false} className="rapport-cta">
-            <div className="rapport-cta-eyebrow">Rapport interactif personnalisé · futur•e</div>
+            <div className="rapport-cta-eyebrow">Dossier personnalisé · futur•e</div>
             <p className="rapport-cta-title">
               Votre commune, votre profil,<br />
               <em style={{ fontStyle: 'italic', color: ACCENT }}>vos décisions éclairées</em>
@@ -208,7 +207,7 @@ export default function InondationPage() {
               Pas un article générique : un diagnostic construit à partir de données publiques réelles, mis à jour régulièrement.
             </p>
             <span className="rapport-cta-btn">
-              Voir mon rapport interactif →
+              Voir mon dossier →
             </span>
           </Link>
 

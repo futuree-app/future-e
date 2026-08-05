@@ -12,16 +12,16 @@ export const metadata: Metadata = {
 
 const css = `
   :root {
-  --accent: #fb923c;
-    --accent-soft: rgba(251,146,60,0.12);
-    --accent-border: rgba(251,146,60,0.28);
+  --accent: #E8823A;
+    --accent-soft: rgba(232, 130, 58,0.12);
+    --accent-border: rgba(232, 130, 58,0.28);
     --green-border: rgba(74,222,128,0.22);
 }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--fg-1);font-family:var(--font-sans);font-size:16px;line-height:1.65;overflow-x:hidden;max-width:100vw;-webkit-font-smoothing:antialiased;}
 
   .orb{position:fixed;border-radius:50%;filter:blur(120px);opacity:0.3;pointer-events:none;z-index:0;animation:breathe 14s ease-in-out infinite;}
-  .orb-1{width:480px;height:480px;background:radial-gradient(circle,#fb923c 0%,transparent 70%);top:-120px;left:-100px;}
+  .orb-1{width:480px;height:480px;background:radial-gradient(circle,#E8823A 0%,transparent 70%);top:-120px;left:-100px;}
   .orb-2{width:400px;height:400px;background:radial-gradient(circle,#4ade80 0%,transparent 70%);bottom:-100px;right:-80px;opacity:0.18;animation-delay:-6s;}
   @keyframes breathe{0%,100%{transform:scale(1);}50%{transform:scale(1.12) translate(15px,-22px);}}
 
@@ -29,7 +29,7 @@ const css = `
 
   .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:var(--bg-card);border-bottom:1px solid var(--border-1);}
   .nav-inner{max-width:1100px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
-  .brand{font-family:var(--font-brand);font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
+  .brand{font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
   .brand-dot{color:var(--accent-ink);font-style:normal;}
   .nav-crumb{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.08em;text-transform:uppercase;}
   .nav-crumb a{color:var(--fg-3);text-decoration:none;transition:color 0.2s;}
@@ -45,7 +45,7 @@ const css = `
   .tag-actionnable::before{background:var(--green);box-shadow:0 0 10px var(--green);}
   .read-info{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.08em;text-transform:uppercase;}
 
-  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(36px,5vw,56px);line-height:1.1;letter-spacing:-0.02em;margin:0 0 28px;color:var(--fg-1);}
+  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-display);line-height:1.1;letter-spacing:-0.02em;margin:0 0 28px;color:var(--fg-1);}
   h1 em{font-style:italic;color:var(--accent);}
 
   .dates{display:flex;align-items:center;gap:20px;margin:0 0 40px;padding:16px 20px;background:var(--bg-elev);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--border-1);border-radius:6px;width:fit-content;max-width:100%;}
@@ -63,7 +63,7 @@ const css = `
 
   .lede{font-family:var(--font-serif);font-size:clamp(19px,2vw,23px);line-height:1.55;color:var(--fg-1);font-weight:var(--weight-title);margin:0 0 48px;padding:0 0 48px;border-bottom:1px solid var(--border-1);}
 
-  h2{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(24px,2.8vw,32px);line-height:1.2;letter-spacing:-0.01em;margin:52px 0 18px;color:var(--fg-1);position:relative;}
+  h2{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-title);line-height:1.2;letter-spacing:-0.01em;margin:52px 0 18px;color:var(--fg-1);position:relative;}
   h2::before{content:"";position:absolute;left:-28px;top:17px;width:14px;height:1px;background:var(--accent);}
 
   p{margin:0 0 20px;color:var(--fg-1);font-size:17px;line-height:1.72;}
@@ -144,8 +144,7 @@ const css = `
   @media(max-width:768px){
     .article{padding:40px 22px 80px;}
     .nav-inner{padding:14px 22px;}
-    h1{font-size:34px;}
-    h2{font-size:24px;margin:40px 0 14px;}
+    h2{margin:40px 0 14px;}
     h2::before{display:none;}
     .lede{font-size:18px;padding-bottom:32px;margin-bottom:32px;}
     p{font-size:16px;}
@@ -331,7 +330,7 @@ const fullHtml = `
   <div class="profiles">
     <div class="profile-card favorable">
       <div class="profile-label">Fort rouleur en maison individuelle, cas le plus favorable</div>
-      <p class="profile-body">Plus de 18 000 km/an, recharge à domicile possible, trajets majoritairement sur des axes couverts en bornes rapides : c'est le profil pour lequel le passage à l'électrique présente le meilleur rapport interactif économique et pratique. Le retour sur investissement par rapport à un thermique équivalent est généralement atteint entre la troisième et la quatrième année.</p>
+      <p class="profile-body">Plus de 18 000 km/an, recharge à domicile possible, trajets majoritairement sur des axes couverts en bornes rapides : c'est le profil pour lequel le passage à l'électrique présente le meilleur rapport économique et pratique. Le retour sur investissement par rapport à un thermique équivalent est généralement atteint entre la troisième et la quatrième année.</p>
     </div>
     <div class="profile-card favorable">
       <div class="profile-label">Foyer avec deux voitures dont une peu utilisée</div>
@@ -364,7 +363,7 @@ const fullHtml = `
     </div>
     <div class="question-item">
       <span class="question-to">Au vendeur d'un véhicule d'occasion</span>
-      "Quel est l'état de santé de la batterie exprimé en pourcentage, et pouvez-vous me fournir un rapport interactif de diagnostic ou me laisser procéder à une vérification avant achat ?"
+      "Quel est l'état de santé de la batterie exprimé en pourcentage, et pouvez-vous me fournir un rapport de diagnostic ou me laisser procéder à une vérification avant achat ?"
     </div>
     <div class="question-item">
       <span class="question-to">À votre employeur ou service RH</span>
@@ -454,7 +453,7 @@ export default async function AgirVoitureElectriquePage() {
           variant="open"
           previewHtml={previewHtml}
           fullHtml={fullHtml}
-          accent="#fb923c"
+          accent="#E8823A"
         />
       </article>
 

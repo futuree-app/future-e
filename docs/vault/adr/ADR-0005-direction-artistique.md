@@ -18,6 +18,21 @@ Direction artistique **glassmorphism sombre** : fond profond (`#060812`), accent
 design non négociables qui en découlent : **la narration prime sur les graphiques**, et
 **les sources sont visibles à chaque affirmation significative**.
 
+## Ce qui a bougé depuis
+
+Cette décision est datée et ne se réécrit pas ; elle a été amendée deux fois, et **aucun des trois
+éléments cités ci-dessus n'est encore exact**. La règle vivante est dans `doctrine/design.md`.
+
+| Cité ici | Aujourd'hui | Quand |
+| --- | --- | --- |
+| Inter Tight | **Archivo**, famille unique pour toute l'interface | 01/08/2026 |
+| Instrument Serif (le logo) | **aucune police** : le logo est un dessin vectoriel, `components/Logo.tsx` | 04/08/2026 |
+| `#fb923c` | **`#E8823A`** | 04/08/2026 |
+
+Ce qui n'a pas bougé, et qui était le vrai contenu de la décision : le glassmorphism sombre, le fond
+`#060812`, la narration qui prime sur les graphiques, et les sources visibles à chaque affirmation
+significative.
+
 ## Pourquoi ADR ET doctrine
 
 C'est à la fois une décision figée et datée (cette page) et une **règle vivante appliquée à

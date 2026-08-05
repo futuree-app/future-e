@@ -15,17 +15,32 @@ type Theme = {
   accentGlow: string;
   orb: string;
   status: string;
+  /** La teinte de l'ÉTAT, distincte de l'accent d'action. Le vert dit « disponible ». */
+  statusTone: string;
 };
 
+/* L'ACCENT DE CET ÉCRAN EST REVENU À L'ORANGE (05/08/2026).
+   ══════════════════════════════════════════════════════════════════════════════════════════════
+   Toute la page était peinte en vert : titres, filets, pastilles, bouton d'achat. Le résultat était
+   deux accents principaux sur le même écran, la navbar posant son bouton orange à quelques
+   centimètres du CTA vert, une semaine après que la charte v1.7 a unifié la couleur de marque.
+
+   LA HIÉRARCHIE, désormais : l'orange dit l'action et la marque ; le vert dit un ÉTAT positif ; les
+   teintes de registre restent réservées au dossier de décision. Une teinte est une affirmation
+   vérifiable (DESIGN.md § 5.3) : un bouton d'achat vert n'affirmait rien, il décorait.
+
+   `statusTone` existe pour cette raison, et il est le seul vert restant : « Disponible maintenant »
+   est bien un état, et c'est la seule chose sur cette page qui en soit un. */
 const THEMES: Record<CheckoutProductSlug, Theme> = {
   "rapport-complet": {
-    accent: "var(--green)",
-    accentSoft: "var(--green-soft)",
-    accentTint: "var(--green-tint)",
-    accentRing: "rgba(74,222,128,0.36)",
-    accentGlow: "rgba(74,222,128,0.16)",
-    orb: "rgba(74,222,128,0.32)",
+    accent: "var(--orange)",
+    accentSoft: "var(--orange-soft)",
+    accentTint: "var(--orange-tint)",
+    accentRing: "var(--orange-ring)",
+    accentGlow: "rgba(232,130,58,0.16)",
+    orb: "var(--orb-orange)",
     status: "Disponible maintenant",
+    statusTone: "var(--reg-alignement)",
   },
 };
 
@@ -39,18 +54,37 @@ const COPY: Record<CheckoutProductSlug, {
   notIncluded?: string[];
 }> = {
   "rapport-complet": {
-    kicker: "Rapport interactif · 14 € une fois",
+    kicker: "Dossier de territoire · 14 € une fois",
     hero: { line1: "Votre futur,", line2: "posé sur la table." },
     // CE QUE LE PAIEMENT DÉLIVRE RÉELLEMENT, et rien de plus (aligné le 30/07/2026). Ce bloc
     // annonçait « trois modules interactifs », quand le webhook 14 € pose un report_grant sur une
     // commune et rien d'autre : les échelles Autour et Logement demandent un dossier d'adresse,
     // qu'aucun paiement à 14 € ne crée. checkout-products.ts, lui, décrivait déjà le territoire
     // seul. La vitrine promettait donc davantage que la caisse.
-    promise: "Une lecture interactive de votre commune : ce qu'elle devient face au climat, ce à quoi elle est exposée, ce qui la transforme. Téléchargeable, à conserver.",
+    // CINQ PROMESSES RETIRÉES LE 05/08/2026, PARCE QU'AUCUNE N'EXISTAIT.
+    // ══════════════════════════════════════════════════════════════════════════════════════════
+    // « Téléchargeable, à conserver », « Export PDF inclus », « Régénération annuelle », « Accès
+    // permanent », « exportable en PDF, partageable en lien temporaire ». Vérifié dans tout le
+    // dépôt : aucun export PDF du rapport (seule la facture en est un), aucun mécanisme de partage,
+    // aucune régénération planifiée. Le dossier est simplement réassemblé à chaque consultation.
+    //
+    // Ces déclarations publiques entrent dans les attentes de conformité : un contenu numérique
+    // doit correspondre à sa description et aux déclarations publiques qui ont décidé l'achat. Les
+    // laisser en place, c'était vendre un produit et en livrer un autre.
+    //
+    // Elles sont remplacées par des capacités RÉELLES, pas par du vide : ce qui rend ce dossier
+    // différent est qu'il date ses sources et nomme ce qu'il ignore.
+    promise: "Une lecture interactive de votre commune : ce qu'elle devient face au climat, ce à quoi elle est exposée, ce qui la transforme.",
     whatYouGet: [
-      { n: "01", title: "Le Territoire, en entier", body: "La commune lue à travers son climat, ses risques, son cadre de vie et sa population. Écrit pour vous à partir de votre profil, sourcé sur les données publiques (DRIAS, INSEE, Géorisques, BPE). Export PDF inclus." },
-      { n: "02", title: "AskFuture, 3 questions", body: "De quoi revenir sur ce que le rapport laisse ouvert, avec vos mots, sur votre commune." },
-      { n: "03", title: "Régénération annuelle", body: "Une mise à jour du rapport interactif par an, incluse, pour suivre l'évolution de votre territoire." },
+      { n: "01", title: "Le Territoire, en entier", body: "La commune lue à travers son climat, ses risques, son cadre de vie et sa population. Écrit pour vous à partir de votre profil, sourcé sur les données publiques (DRIAS, INSEE, Géorisques, BPE)." },
+      { n: "02", title: "AskFuture, 3 questions", body: "De quoi revenir sur ce que le dossier laisse ouvert, avec vos mots, sur votre commune. Les réponses ne s'appuient que sur les faits examinés ici." },
+      { n: "03", title: "Daté, sourcé, et honnête sur ses limites", body: "Chaque constat porte sa source et la date à laquelle elle a été lue. Ce que les données ne permettent pas d'établir est nommé plutôt que comblé." },
+      // QUATRIÈME CARTE AJOUTÉE LE 04/08/2026. La déduction de 14 € existait dans
+      // `dossier-pricing.ts` depuis le 29/07 sans qu'aucun écran ne la dise : quelqu'un qui voulait
+      // les trois échelles pouvait croire qu'entrer par le territoire lui coûterait 14 + 39 = 53 €,
+      // et sauter la marche d'entrée pour cette raison. La carte remplit aussi la grille 2×2, que
+      // trois éléments laissaient bancale.
+      { n: "04", title: "La marche suivante, déduite", body: "Les échelles Autour et Logement demandent un dossier d'adresse, à 39 €. Ces 14 € en sont déduits : si vous le prenez ensuite sur cette commune, il vous reste 25 € à payer. Entrer par le territoire ne coûte donc rien de plus." },
     ],
     timeline: [
       { n: "01", title: "Paiement sécurisé", body: "Stripe, moins de 2 minutes, carte bancaire ou Apple/Google Pay." },
@@ -58,13 +92,18 @@ const COPY: Record<CheckoutProductSlug, {
       // produit livré à la main, en PDF. Le webhook Stripe pose les droits en base dès le paiement
       // confirmé et les trois modules se lisent en ligne : rien n'est produit en différé, rien
       // n'est envoyé. La promesse faisait donc attendre un acheteur qui pouvait déjà lire, et
-      // lui laissait croire qu'il achetait un document plutôt qu'un rapport interactif.
-      { n: "02", title: "Accès immédiat", body: "Votre rapport s'ouvre dès le paiement confirmé. Rien à attendre, rien à recevoir par email." },
-      { n: "03", title: "Accès permanent", body: "Consultable à tout moment depuis votre espace, exportable en PDF, partageable en lien temporaire." },
+      // lui laissait croire qu'il achetait un document plutôt qu'un dossier qui s'ouvre.
+      { n: "02", title: "Accès immédiat", body: "Votre dossier s'ouvre dès le paiement confirmé. Rien à attendre, rien à recevoir par email." },
+      // « ACCÈS PERMANENT » ENGAGEAIT SANS RIEN DÉFINIR : ce qui arrive si futur•e ferme, change
+      // d'infrastructure ou supprime les comptes n'était dit nulle part, et la formule contredisait
+      // les CGV. La durée annoncée ici et celle des CGV doivent être la même, sinon l'acheteur lit
+      // deux contrats.
+      { n: "03", title: "Consultable depuis votre compte", body: "Votre dossier se rouvre à tout moment depuis votre espace, pendant au moins trois ans. Paiement unique, sans abonnement." },
     ],
     faqs: [
-      { q: "Le rapport interactif est-il vraiment personnalisé ?", a: "Oui. Il est construit à partir de votre commune, votre profil de risque et vos réponses au wizard. Deux foyers d'une même ville obtiennent deux rapports différents." },
-      { q: "Combien de temps avant d'y accéder ?", a: "Le temps que le paiement se confirme, quelques secondes. Votre rapport s'ouvre dans votre espace : il n'y a rien à générer, rien à attendre par email." },
+      { q: "Ce dossier couvre-t-il aussi mon quartier et mon logement ?", a: "Non. Celui-ci couvre la commune. Le secteur autour de votre adresse et le logement demandent un dossier d'adresse, à 39 €, dont ces 14 € sont déduits : 25 € si vous l'ouvrez ensuite sur cette même commune." },
+      { q: "Le dossier est-il vraiment personnalisé ?", a: "Oui. Il est construit à partir de votre commune, votre profil de risque et vos réponses au wizard. Deux foyers d'une même ville obtiennent deux dossiers différents." },
+      { q: "Combien de temps avant d'y accéder ?", a: "Le temps que le paiement se confirme, quelques secondes. Votre dossier s'ouvre dans votre espace : il n'y a rien à générer, rien à attendre par email." },
       { q: "Mes données sont-elles vendues ?", a: "Jamais. Les données issues du wizard restent dans votre espace. Voir notre politique RGPD." },
     ],
   },
@@ -221,13 +260,14 @@ export default async function CheckoutPage({
                 marginBottom: 24,
               }}
             >
+              {/* LE SEUL VERT DE LA PAGE, et il dit un état, pas une action. */}
               <span
                 className="checkout-dot"
                 style={{
                   width: 8,
                   height: 8,
                   borderRadius: "50%",
-                  background: theme.accent,
+                  background: theme.statusTone,
                 }}
               />
               <span
@@ -236,7 +276,7 @@ export default async function CheckoutPage({
                   fontSize: "var(--text-kicker)",
                   letterSpacing: "var(--tracking-kicker)",
                   textTransform: "uppercase",
-                  color: theme.accent,
+                  color: theme.statusTone,
                 }}
               >
                 {theme.status}
@@ -681,7 +721,7 @@ export default async function CheckoutPage({
                       margin: 0,
                     }}
                   >
-                    Le paiement doit être rattaché à un compte pour débloquer votre rapport interactif.
+                    Le paiement doit être rattaché à un compte pour ouvrir votre dossier de territoire.
                   </p>
                   <Link
                     href={`/inscription?next=${encodeURIComponent(checkoutPath)}`}
@@ -776,7 +816,7 @@ export default async function CheckoutPage({
                 marginInline: "auto",
               }}
             >
-              « Pas une étude de plus. Un rapport interactif pour décider,
+              « Pas une étude de plus. Un dossier pour décider,
               calmement, et à temps. »
             </p>
             <p

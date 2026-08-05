@@ -75,7 +75,7 @@ export function CommuneSetupBanner() {
           Quelle est votre commune de résidence ?
         </h2>
         <p className="text-[13px] text-muted leading-[1.6]">
-          Elle conditionne toutes les données de votre rapport interactif.
+          Elle conditionne toutes les données de votre dossier.
         </p>
       </div>
 

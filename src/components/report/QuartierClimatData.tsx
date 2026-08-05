@@ -9,6 +9,7 @@ import { MetricTooltip } from "@/components/MetricTooltip";
 import type { GeorisquesSummary, GasparCatnatSummary } from "@/lib/georisques";
 import type { EaufranceSummary } from "@/lib/eaufrance";
 import type { VigieauSummary, DroughtLevel } from "@/lib/vigieau";
+import { libelleRestrictions } from "@/lib/restrictions-eau";
 import type { LittoralSummary, LittoralFacade } from "@/lib/littoral";
 import type { DemographieCardData, CouvertCardData } from "@/lib/territory-identity";
 import type { Era5Trend } from "@/lib/era5-trend";
@@ -418,13 +419,22 @@ function buildFactors(
   // sensibilisation, pas une restriction d'usage. La nommer « restriction »
   // contredit le reste de la carte. On ne parle de restriction qu'à partir
   // d'« alerte ».
-  const todayValue = vigieau?.maxLevel
-    ? vigieau.maxLevel === "vigilance"
-      ? "Vigilance sécheresse, sans restriction"
-      : `Restriction « ${levelLabel(vigieau.maxLevel).toLowerCase()} » en cours`
-    : "Aucune restriction en cours";
+  // LA RÈGLE VIT DANS `lib/restrictions-eau.ts`, pure et testée : elle distingue trois états là
+  // où ce composant n'en connaissait que deux, et une panne y annonçait « aucune restriction ».
+  const restrictions = libelleRestrictions(vigieau);
+  const todayValue = restrictions.texte;
+
   const droughtRows: { label: string; value: string }[] = [
-    { label: "Aujourd'hui", value: todayValue },
+    // « AUJOURD'HUI » AFFIRMAIT UN PRÉSENT SANS DIRE QUAND IL AVAIT ÉTÉ LU (05/08/2026). La valeur
+    // vient d'un cache d'une heure, ce qui est parfaitement acceptable pour un arrêté préfectoral,
+    // et qui ne se dit pas « en direct ». Le libellé porte donc la date de consultation : c'est le
+    // registre des données VIVANTES, distinct de la date de génération du dossier affichée en tête.
+    {
+      label: vigieau?.consultedAt
+        ? `État consulté le ${formatFrDate(vigieau.consultedAt)}`
+        : "Aujourd'hui",
+      value: todayValue,
+    },
     // Terrain : uniquement si on a une vraie observation ONDE. Sans donnée, on
     // n'invente pas une réassurance (« pas de tension ») qui contredirait une
     // restriction en cours.
@@ -449,10 +459,10 @@ function buildFactors(
         headline:
           drySoilDays != null
             ? `Environ ${drySoilDays} jours secs par an d'ici ${meta.year}`
-            : vigieau?.maxLevel
-              ? vigieau.maxLevel === "vigilance"
-                ? "Vigilance sécheresse en cours"
-                : `Restriction « ${levelLabel(vigieau.maxLevel).toLowerCase()} » en cours`
+            : restrictions.etat === "en_vigueur"
+              // MÊME PHRASE QUE LA LIGNE DU FIL, et c'est le but : deux formulations d'un même
+              // état obligeaient le lecteur à vérifier qu'elles disaient bien la même chose.
+              ? restrictions.texte
               : "Cours d'eau à sec observé",
         subhead: "Le manque durable d'eau dans les sols, même en dehors des périodes de restriction.",
         accent: "var(--orange)",
@@ -790,18 +800,21 @@ function buildFactors(
       tip: "Part du parc sans occupant au recensement.",
     });
   }
-  if (eloignementServicesPct != null) {
-    const elo = Math.round(eloignementServicesPct);
-    const eloLabel = elo < 5 ? "Services proches" : elo <= 20 ? "Éloignement modéré" : "Éloignement marqué";
-    factors.push({
-      label: "Accès aux services",
-      val: eloLabel,
-      col: "var(--green)",
-      src: "INSEE / ADEME · à plus de 20 min d'un service",
-      missing: false,
-      tip: `${elo} % des habitants vivent à plus de 20 min des services essentiels. Cette carte décrit le bassin de vie de la commune entière, pas votre voisinage : ce qui se trouve à proximité de votre adresse se lit dans le module Autour de l'adresse.`,
-    });
-  }
+  // LA CARTE « ACCÈS AUX SERVICES » A ÉTÉ RETIRÉE LE 04/08/2026, et le champ avec elle.
+  //
+  // Elle affirmait « X % des habitants vivent à plus de 20 min des SERVICES ESSENTIELS ». La
+  // recherche de source du 04/08 a établi que l'ADEME ne documente pas ce champ, et que le seul
+  // indicateur homonyme du catalogue de l'ANCT porte sur les services DE SANTÉ de proximité. Le
+  // faisceau est fort (les ordres de grandeur concordent), la preuve manque, et l'écran, lui,
+  // affirmait sans réserve. Dire « services essentiels » d'une donnée qui compte peut-être des
+  // médecins, c'est affirmer au-delà de la preuve.
+  //
+  // Le critère du comparateur qui reposait sur ce même champ a été remplacé par le niveau de
+  // centralité de l'ANCT (`centralite-services.ts`), qui est identifié, daté et complet. Cette
+  // carte reviendra quand ce niveau sera câblé jusqu'ici : il vit dans l'index du comparateur, pas
+  // dans le jeu ADEME que cette page lit. En attendant, une carte absente vaut mieux qu'une carte
+  // qui nomme mal ce qu'elle mesure.
+  void eloignementServicesPct;
 
   // Carte CatNat (GASPAR) — ajoutée seulement quand l'appelant fournit la donnée
   // (QuartierAside). Histoire vécue : nombre de reconnaissances depuis l'origine.
@@ -1083,12 +1096,12 @@ function formatFrDate(iso: string): string {
 // LA TEINTE D'UN REGISTRE, seule table de correspondance de ce fichier. Identique à celle du dossier
 // (DossierDecisionSection) : la même chose dite au même endroit doit se peindre pareil.
 const REGISTER_TONE: Record<RegisterKey, string> = {
-  incompatibilities: "var(--red)",
-  alignments: "var(--green)",
-  mismatches: "var(--yellow)",
-  compromises: "var(--orange)",
-  unknowns: "var(--amethyst)",
-  verifications: "var(--info)",
+  incompatibilities: "var(--reg-incompatibilite)",
+  alignments: "var(--reg-alignement)",
+  mismatches: "var(--reg-ecart)",
+  compromises: "var(--reg-compromis)",
+  unknowns: "var(--reg-non-su)",
+  verifications: "var(--reg-controle)",
 };
 
 export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, catnat, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, climatType }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {

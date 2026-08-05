@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { PollutionLookup } from '@/components/PollutionLookup';
 import Navbar from '@/components/Navbar';
+import { Logo } from "@/components/Logo";
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +34,7 @@ const css = `
 
   .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:var(--bg-card);border-bottom:1px solid var(--border-1);}
   .nav-inner{max-width:1100px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
-  .brand{font-family:var(--font-brand);font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
+  .brand{font-size:22px;font-style:italic;letter-spacing:-0.01em;color:var(--fg-1);text-decoration:none;}
   .brand-dot{color:var(--accent-ink);font-style:normal;}
   .nav-crumb{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.08em;text-transform:uppercase;}
   .nav-crumb a{color:var(--fg-3);text-decoration:none;}
@@ -44,7 +45,7 @@ const css = `
   .article-tag{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:var(--accent-soft);border:1px solid var(--accent-border);font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:28px;}
   .article-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);}
 
-  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(34px,5vw,52px);line-height:1.08;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fg-1);}
+  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-display);line-height:1.08;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fg-1);}
   h1 em{font-style:italic;color:var(--accent);}
 
   .article-intro{font-family:var(--font-serif);font-size:clamp(17px,2vw,21px);line-height:1.62;color:var(--fg-3);margin:0 0 40px;border-bottom:1px solid var(--border-1);padding-bottom:36px;}
@@ -55,7 +56,7 @@ const css = `
   .tone-block{padding:28px 32px;margin:0 0 48px;background:var(--bg-elev);border:1px solid var(--border-1);border-left:2px solid var(--accent);font-family:var(--font-serif);font-size:19px;line-height:1.65;color:var(--fg-3);font-style:italic;}
   .tone-block strong{color:var(--fg-1);font-style:normal;font-weight:500;}
 
-  h2{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(24px,3vw,32px);line-height:1.2;letter-spacing:-0.01em;margin:64px 0 20px;color:var(--fg-1);position:relative;}
+  h2{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-title);line-height:1.2;letter-spacing:-0.01em;margin:64px 0 20px;color:var(--fg-1);position:relative;}
   h2::before{content:"";position:absolute;left:-28px;top:18px;width:14px;height:1px;background:var(--accent);}
 
   h3{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:19px;line-height:1.35;margin:36px 0 12px;color:var(--fg-1);font-style:italic;}
@@ -66,7 +67,7 @@ const css = `
 
   .level-header{display:flex;align-items:center;gap:14px;margin:56px 0 20px;padding-bottom:16px;border-bottom:1px solid var(--border-1);}
   .level-num{font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-4);flex-shrink:0;}
-  .level-title{font-family:var(--font-serif);font-size:clamp(22px,2.5vw,28px);font-weight:var(--weight-title);color:var(--fg-1);margin:0;letter-spacing:-0.01em;}
+  .level-title{font-family:var(--font-serif);font-size:var(--text-section);font-weight:var(--weight-title);color:var(--fg-1);margin:0;letter-spacing:-0.01em;}
   .level-scope{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;margin-left:auto;flex-shrink:0;}
   .scope-self{background:rgba(52,211,153,0.10);border:1px solid rgba(52,211,153,0.22);color:#6ee7b7;}
   .scope-collective{background:rgba(96,165,250,0.10);border:1px solid rgba(96,165,250,0.22);color:#93c5fd;}
@@ -395,8 +396,8 @@ export default function AgirPollutionsInvisiblesPage() {
       </article>
 
       <footer className="page-footer">
-        <Link href="/" className="brand" style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: '18px', color: 'var(--fg-3)', textDecoration: 'none' }}>
-          futur<span style={{ color: 'var(--accent)', fontStyle: 'normal' }}>•</span>e
+        <Link href="/" className="brand" aria-label="futur•e, accueil" style={{ display: 'flex', alignItems: 'center', color: 'var(--fg-3)', textDecoration: 'none' }}>
+          <Logo height={22} title={null} />
         </Link>
         <div className="footer-note">
           Données publiques françaises · Aucune publicité<br />

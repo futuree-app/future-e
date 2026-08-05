@@ -33,7 +33,7 @@ export function ChoixConvictionView({ trio, apercu, userEmail, returnUrl, return
 
   const bundle = [
     { t: "La comparaison complète", d: `Vos ${motN} communes, thème par thème, ce qui les départage vraiment.` },
-    { t: `Les ${motN} rapports complets`, d: "Un rapport par commune, à conserver, accessible depuis votre espace." },
+    { t: `Les ${motN} rapports complets`, d: "Un rapport par commune, accessible depuis votre espace." },
     { t: "AskFuture : 9 questions incluses", d: "Pour creuser ce qui compte, sur chacun des territoires." },
   ];
 

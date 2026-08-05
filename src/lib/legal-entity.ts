@@ -44,6 +44,19 @@ export const LEGAL_ENTITY = {
   },
   contactEmail: "hello@futur-e.fr",
   /**
+   * LE TÉLÉPHONE FAIT PARTIE DE L'INFORMATION PRÉCONTRACTUELLE (ajouté le 05/08/2026).
+   *
+   * L'article L111-1 du code de la consommation, auquel renvoie L221-5 pour la vente à distance,
+   * demande les coordonnées permettant d'entrer effectivement en contact avec le professionnel, ce
+   * qui inclut un numéro de téléphone. Le site n'en publiait aucun : le `1007` des mentions légales
+   * est celui d'OVH, l'hébergeur du domaine, et il ne joint personne chez futur•e.
+   *
+   * Deux écritures parce qu'elles servent deux usages : `phone` s'affiche, `phoneHref` compose. Un
+   * `tel:` avec des espaces ne se compose pas sur tous les téléphones.
+   */
+  phone: "06 69 41 08 44",
+  phoneHref: "tel:+33669410844",
+  /**
    * FRANCHISE EN BASE. La mention exacte est imposée par l'article 293 B du CGI ; écrire
    * « TVA incluse » ou « TTC » sur ces factures serait faux et laisserait croire à une taxe
    * collectée. Voir la doctrine de projet sur ce point.
@@ -77,6 +90,7 @@ export function legalEntityRows(): { label: string; value: string }[] {
     { label: "RNE", value: `Immatriculé le ${LEGAL_ENTITY.registeredOn}` },
     { label: "Adresse", value: legalAddressLine() },
     { label: "Contact", value: LEGAL_ENTITY.contactEmail },
+    { label: "Téléphone", value: LEGAL_ENTITY.phone },
     { label: "TVA", value: LEGAL_ENTITY.vatMention },
   ];
 }

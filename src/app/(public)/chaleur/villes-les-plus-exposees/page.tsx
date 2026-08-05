@@ -122,7 +122,7 @@ const css = `
   .page{position:relative;z-index:2;max-width:860px;margin:0 auto;padding:72px 28px 120px;}
   .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:${ACCENT};margin-bottom:18px;display:flex;align-items:center;gap:10px;}
   .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:${ACCENT};box-shadow:0 0 10px ${ACCENT};flex-shrink:0;}
-  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:clamp(32px,5vw,54px);line-height:1.08;letter-spacing:-0.02em;margin:0 0 20px;color:var(--fg-1);}
+  h1{font-family:var(--font-serif);font-weight:var(--weight-title);font-size:var(--text-display);line-height:1.08;letter-spacing:-0.02em;margin:0 0 20px;color:var(--fg-1);}
   h1 em{font-style:italic;color:${ACCENT};}
   .lede{font-size:17px;color:var(--fg-3);margin:0 0 16px;line-height:1.75;max-width:680px;}
   .method-note{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);line-height:1.7;margin:0 0 64px;max-width:680px;padding:14px 18px;border-left:2px solid var(--border-1);}
@@ -132,7 +132,7 @@ const css = `
   .city-header{display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap;}
   .city-rank{font-family:var(--font-serif);font-size:clamp(38px,5vw,58px);font-weight:var(--weight-title);color:${ACCENT};opacity:0.22;line-height:1;letter-spacing:-0.04em;flex-shrink:0;min-width:52px;}
   .city-info{flex:1;}
-  .city-name{font-family:var(--font-serif);font-size:clamp(22px,3vw,30px);font-weight:var(--weight-title);color:var(--fg-1);line-height:1.1;}
+  .city-name{font-family:var(--font-serif);font-size:var(--text-section);font-weight:var(--weight-title);color:var(--fg-1);line-height:1.1;}
   .city-dept{font-family:var(--font-mono);font-size:11px;color:var(--fg-4);margin-top:3px;}
   .city-score-block{text-align:right;flex-shrink:0;}
   .city-score-num{font-family:var(--font-serif);font-size:clamp(32px,4vw,48px);font-weight:var(--weight-title);color:${ACCENT};line-height:1;letter-spacing:-0.02em;}
@@ -171,10 +171,14 @@ const css = `
 
 type DriasV = Record<string, number | undefined>;
 
+// L'HORIZON LU EST CELUI QUE LA PAGE ANNONCE (04/08/2026). Cette page titre « Classement 2050 »
+// et lisait `gwl30`, c'est-à-dire le palier +3 °C mondial (+4 °C en France) atteint vers 2100. Le
+// classement lui-même ne bouge pas : il vient du score de tension Supabase, pas de ces valeurs, qui
+// ne font qu'illustrer chaque ville. Seuls les chiffres affichés changent, pour dire enfin 2050.
 async function getCityData(insee: string): Promise<DriasV | null> {
   try {
     const data = await getClimatDataCommune(insee);
-    return (data?.commune?.s?.gwl30?.v as DriasV) ?? null;
+    return (data?.commune?.s?.gwl20?.v as DriasV) ?? null;
   } catch {
     return null;
   }
@@ -187,7 +191,7 @@ export default async function ChaleurTop10() {
     <>
       <style dangerouslySetInnerHTML={{ __html: css }} />
       <div className="orb" style={{ width: 560, height: 560, background: `radial-gradient(circle,${ACCENT} 0%,transparent 70%)`, top: -200, left: -180 }} />
-      <div className="orb" style={{ width: 300, height: 300, background: 'radial-gradient(circle,#fb923c 0%,transparent 70%)', bottom: -60, right: -80, animationDelay: '-8s', opacity: 0.11 }} />
+      <div className="orb" style={{ width: 300, height: 300, background: 'radial-gradient(circle,#E8823A 0%,transparent 70%)', bottom: -60, right: -80, animationDelay: '-8s', opacity: 0.11 }} />
 
       <Navbar />
 
@@ -201,7 +205,7 @@ export default async function ChaleurTop10() {
           Cette page ne classe pas seulement les villes les plus chaudes. Elle classe les grandes communes où la chaleur pèsera le plus sur la vie quotidienne en 2050, en croisant jours très chauds, nuits tropicales et vulnérabilités locales. Le Sud méditerranéen domine nettement, mais pas toujours pour les mêmes raisons d&apos;une ville à l&apos;autre.
         </p>
         <div className="method-note">
-          Classement fondé sur le score de tension canicule futur•e. Il combine projections climatiques DRIAS, nuits chaudes, intensité de la chaleur et vulnérabilités locales. La lecture correspond à un horizon 2050 dans une trajectoire de réchauffement conduisant vers environ +4°C en fin de siècle.
+          Classement fondé sur le score de tension canicule futur•e. Il combine projections climatiques DRIAS, nuits chaudes, intensité de la chaleur et vulnérabilités locales. Les chiffres affichés sont ceux de l&apos;horizon 2050, où le monde atteint +2 °C et la France +2,7 °C (DRIAS-TRACC). L&apos;horizon 2100, où la France atteint +4 °C, se lit sur la page de chaque commune.
         </div>
 
         {CITIES.map((city, i) => {
@@ -262,11 +266,11 @@ export default async function ChaleurTop10() {
           <div className="cta-rapport">
             <div className="cta-rapport-title">Votre commune est-elle exposée ?</div>
             <p className="cta-rapport-desc">
-              Cherchez votre ville pour voir ses projections spécifiques, puis construisez votre rapport interactif personnalisé.
+              Cherchez votre ville pour voir ses projections spécifiques, puis construisez votre dossier personnalisé.
               La commune en entier : climat, risques, cadre de vie, ce qui la transforme.
             </p>
             <div className="cta-links">
-              <Link href="/rapport" prefetch={false} className="cta-btn">Créer mon rapport interactif →</Link>
+              <Link href="/rapport" prefetch={false} className="cta-btn">Créer mon dossier →</Link>
               <Link href="/chaleur" className="cta-sec">Explorer par commune</Link>
               <Link href="/comparateur" className="cta-sec">Comparer deux villes</Link>
             </div>

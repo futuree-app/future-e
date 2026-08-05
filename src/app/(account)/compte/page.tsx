@@ -15,6 +15,7 @@ import { formatEuro, formatDateFr } from "@/lib/invoice";
 import { LEGAL_ENTITY } from "@/lib/legal-entity";
 import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
+import { Logo } from "@/components/Logo";
 
 // Les emoji d'icône ont été retirés le 30/07/2026, sans substitution : ils sont interdits
 // (doctrine/editoriale.md) et l'identité d'une échelle est son rang, son nom et son grain
@@ -94,10 +95,10 @@ export default async function ComptePage() {
             </h1>
             <p className="text-[17px] leading-[1.72] text-muted mb-8 max-w-[480px]">
               {scalesOpen
-                ? "Le rapport interactif est ici. Trois échelles, toutes ouvertes : la commune, le secteur, le logement."
+                ? "Le dossier est ici. Trois échelles, toutes ouvertes : la commune, le secteur, le logement."
                 : fullAccess
                   ? "Votre accès est actif. Ouvrez le bien ou la commune que vous voulez lire : les trois échelles suivent le lieu que vous désignez."
-                  : "Votre première lecture personnalisée est sauvegardée ici, sans limite de temps. Le rapport interactif, lui, ouvre les trois échelles."}
+                  : "Votre première lecture personnalisée est sauvegardée ici, sans limite de temps. Le dossier, lui, ouvre les trois échelles."}
             </p>
             <div className="flex gap-2 flex-wrap mb-7">
               <span className="px-3 py-1 rounded-full bg-[var(--bg-elev-2)] border border-[var(--border-1)] font-mono text-[11px] text-ghost">
@@ -145,9 +146,9 @@ export default async function ComptePage() {
             </div>
             <p className="text-[14px] leading-[1.7] text-muted">
               {scalesOpen
-                ? "Tous les modules sont accessibles depuis le hub rapport interactif. Futur•e répond à vos questions en tenant compte de votre commune et de votre profil."
+                ? "Les trois échelles sont ouvertes depuis votre dossier. Futur•e répond à vos questions en tenant compte de votre commune et de votre profil."
                 : fullAccess
-                  ? "Les modules s'ouvrent sur le lieu que vous désignez : un bien que vous avez analysé, ou une commune que vous avez débloquée. Vos dossiers restent dans votre compte."
+                  ? "Les échelles s'ouvrent sur le lieu que vous désignez : un bien que vous avez analysé, ou une commune que vous avez ouverte. Vos dossiers restent dans votre compte."
                   : "Le compte garde votre première lecture et votre commune de référence, pour y revenir sans repasser par le questionnaire."}
             </p>
           </aside>
@@ -206,7 +207,7 @@ export default async function ComptePage() {
               <div className="grid grid-cols-2 gap-3.5">
                 {[
                   { accent: "border-t-accent", title: "Votre première lecture sauvegardée", copy: `Vous retrouvez votre lecture personnalisée${commune ? ` sur ${commune}` : ""} sans repasser par le questionnaire.` },
-                  { accent: "border-t-info", title: "Votre questionnaire conservé", copy: "Vos réponses restent prêtes à nourrir le rapport interactif quand vous déciderez d'aller plus loin." },
+                  { accent: "border-t-info", title: "Votre questionnaire conservé", copy: "Vos réponses restent prêtes à nourrir le dossier quand vous déciderez d'aller plus loin." },
                 ].map((k) => (
                   <article key={k.title} className={`glass rounded-xl p-5 border-t-2 ${k.accent}`}>
                     <h3 className="font-normal text-[17px] text-label mb-2.5 leading-[1.3]" style={{ fontFamily: "var(--font-serif)" }}>{k.title}</h3>
@@ -221,7 +222,7 @@ export default async function ComptePage() {
                   <div>
                     <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">Trois échelles fermées</p>
                     <h2 className="font-[var(--weight-section)] text-[length:var(--text-section)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
-                      Ce que le rapport interactif lit pour vous.
+                      Ce que le dossier lit pour vous.
                     </h2>
                   </div>
                   <p className="text-[15px] text-muted leading-[1.65]">
@@ -249,7 +250,7 @@ export default async function ComptePage() {
                       {commune ? `Trois échelles de lecture à ${commune}. Sourcées. Personnalisées.` : "Trois échelles de lecture. Sourcées. Personnalisées."}
                     </h2>
                     <p className="text-[15px] text-muted leading-[1.7]">
-                      Le rapport interactif ne produit pas un score. Il garde les échelles distinctes, parce qu&apos;une bonne commune ne fait pas un bon quartier, ni un bon quartier un bon logement.
+                      Le dossier ne produit pas un score. Il garde les échelles distinctes, parce qu&apos;une bonne commune ne fait pas un bon quartier, ni un bon quartier un bon logement.
                     </p>
                   </div>
                   <div className="text-center">
@@ -306,7 +307,7 @@ export default async function ComptePage() {
         {/* Footer nav */}
         <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-[var(--border-1)]">
           <Link href="/rapport" prefetch={false} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "var(--font-sans)" }}>
-            Lire mon rapport interactif
+            Lire mon dossier
           </Link>
           {fullAccess && (
             <Link href="/rapport/dossiers" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">
@@ -330,8 +331,8 @@ export default async function ComptePage() {
       {/* Footer */}
       <footer className="relative z-[2] border-t border-[var(--border-1)]">
         <div className="max-w-[1100px] mx-auto px-5 sm:px-7 py-8 flex items-center justify-between gap-6 flex-wrap">
-          <div className="text-[20px] italic text-label tracking-[-0.3px]" style={{ fontFamily: "var(--font-brand)" }}>
-            futur<span className="not-italic" style={{ color: "var(--accent-ink)" }}>•</span>e
+          <div className="text-label">
+            <Logo height={24} />
           </div>
           <div className="flex gap-5 flex-wrap">
             {[

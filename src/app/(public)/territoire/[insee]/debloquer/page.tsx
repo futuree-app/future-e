@@ -10,7 +10,7 @@ import { TerritoryUnlockPanel } from "./TerritoryUnlockPanel";
 import { TerritoryUnlockPreview } from "./TerritoryUnlockPreview";
 import { PersonalTouch } from "./PersonalTouch";
 
-// Paywall de territoire : débloque le rapport d'une commune explorée depuis le
+// Paywall de territoire : ouvre le dossier d'une commune explorée depuis le
 // comparateur (parcours « territoires découverts »). Distinct du checkout
 // produit générique : il est orienté territoire, pas profil personnel, et ne
 // passe jamais par le wizard (doctrine de parcours 5.12).
@@ -30,7 +30,7 @@ export async function generateMetadata({
   const { nom } = await searchParams;
   const commune = typeof nom === "string" && nom.trim() ? nom.trim() : "ce territoire";
   return {
-    title: `Débloquer le rapport ${deCommune(commune)} · futur•e`,
+    title: `Ouvrir le dossier ${deCommune(commune)} · futur•e`,
     robots: { index: false, follow: false },
   };
 }
@@ -94,7 +94,7 @@ export default async function TerritoryUnlockPage({
         {/* 1. Hero de continuité */}
         <div style={reveal(0)}>
           <p className="mt-10 font-mono text-[11px] tracking-[0.16em] uppercase text-accent">
-            Rapport de territoire · {displayName} · 14 € une fois
+            Dossier de territoire · {displayName} · 14 € une fois
           </p>
           <h1
             className="mt-4 text-[length:var(--text-display)] leading-[1.06] tracking-[-0.02em] text-label"
@@ -104,14 +104,14 @@ export default async function TerritoryUnlockPage({
             que les données racontent vraiment.
           </h1>
           <p className="mt-5 max-w-[58ch] text-[16px] leading-[1.7] text-muted">
-            Vous avez vu pourquoi {displayName} ressort dans votre recherche. Le rapport complet va
+            Vous avez vu pourquoi {displayName} ressort dans votre recherche. Le dossier va
             plus loin : il met à plat ce que ce territoire implique concrètement pour votre projet, à
             partir des données disponibles sur le climat, les risques, la santé environnementale, la
             mobilité, le logement et le cadre de vie.
           </p>
         </div>
 
-        {/* 2. Ce que le rapport permet de vérifier (honnête, sans liste de modules) */}
+        {/* 2. Ce que le dossier permet de vérifier (honnête, sans liste de modules) */}
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4" style={reveal(1)}>
           {[
             { n: "01", t: "Comprendre le territoire", d: `Ce que les données permettent de dire sur ${displayName} aujourd'hui, et ce qui peut évoluer dans les prochaines décennies.` },
@@ -130,13 +130,13 @@ export default async function TerritoryUnlockPage({
         {preview && (
           <section className="mt-20" style={reveal(2)}>
             <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent mb-2">
-              Aperçu réel du rapport
+              Aperçu réel du dossier
             </p>
             <h2 className="text-[length:var(--text-section)] leading-[1.15] text-label mb-1" style={{ fontFamily: "var(--font-serif)" }}>
               Ce que futur•e a déjà analysé sur {displayName}
             </h2>
             <p className="text-[13px] text-muted mb-5">
-              Le constat est visible, l&apos;analyse complète se débloque avec le rapport.
+              Le constat est visible, l&apos;analyse complète s&apos;ouvre avec le dossier.
             </p>
             <PersonalTouch commune={displayName} />
             <TerritoryUnlockPreview preview={preview} commune={displayName} />
@@ -166,32 +166,58 @@ export default async function TerritoryUnlockPage({
 
         {/* 5. Pourquoi payant : prose éditoriale (filet accent), pas une boîte */}
         <section className="mt-20 border-l-2 pl-5" style={{ ...reveal(4), borderColor: "var(--orange)" }}>
+          {/* RÉÉCRIT LE 04/08/2026. La version précédente disait « futur•e croise des données
+              publiques dispersées, les rend lisibles et les applique à votre projet » : une
+              promesse qu'un moteur de recherche à résumés revendique désormais mot pour mot, donc
+              une justification qui ne justifiait plus rien. Ce qu'aucune réponse conversationnelle
+              ne produit, c'est la POSITION RELATIVE : elle demande d'avoir mesuré les 34 000 autres
+              communes avec la même méthode, avant qu'on pose la question. */}
           <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-2">
-            Pourquoi ce rapport est payant ?
+            Pourquoi ce dossier est payant ?
           </p>
           <p className="max-w-[60ch] text-[15px] leading-[1.75] text-muted">
-            futur•e croise des données publiques dispersées, les rend lisibles commune par
-            commune et les applique à votre projet. Vous ne payez pas l&apos;accès aux données
-            publiques, vous payez leur croisement, leur mise en perspective et leur lecture.
+            Dire que {displayName} sera exposée à la chaleur ne vous apprend rien : c&apos;est vrai
+            presque partout. Ce qui décide, c&apos;est de savoir où elle se situe parmi les 34 000
+            communes françaises, et sur quels critères précisément. Cette position se calcule avant
+            qu&apos;on vous la demande, sur toutes les communes à la fois, avec la même méthode.
+            C&apos;est ce travail que vous payez, pas l&apos;accès à des données publiques et
+            gratuites.
+          </p>
+        </section>
+
+        {/* L'ESCALIER, RENDU VISIBLE LE 04/08/2026. La déduction vit dans `dossier-pricing.ts`
+            depuis le 29/07 et n'était affichée sur aucun écran : quelqu'un qui voulait les trois
+            échelles pouvait calculer 14 + 39 = 53 € et sauter la marche d'entrée pour cette
+            raison. Placée après la justification du prix et avant le CTA, là où la question
+            « et si j'en veux plus ? » se pose. */}
+        <section className="mt-10 rounded-2xl border border-[var(--border-1)] bg-[var(--bg-elev)] p-6" style={reveal(5)}>
+          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-3">
+            Et si vous allez plus loin
+          </p>
+          <p className="max-w-[62ch] text-[14px] leading-[1.7] text-muted">
+            Ce dossier couvre la commune. Le secteur autour d&apos;une adresse précise et le
+            logement lui-même se lisent dans un dossier d&apos;adresse, à 39 €. Si vous l&apos;ouvrez
+            ensuite sur {displayName}, ces 14 € en sont déduits : il vous reste 25 € à payer.
+            Commencer par le territoire ne coûte rien de plus que de tout prendre d&apos;un coup.
           </p>
         </section>
 
         {/* 6. Aucun engagement : une ligne discrète, pas une boîte de plus */}
-        <p className="mt-8 flex items-start gap-2.5 text-[13px] leading-[1.6] text-ghost" style={reveal(5)}>
+        <p className="mt-8 flex items-start gap-2.5 text-[13px] leading-[1.6] text-ghost" style={reveal(6)}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-[2px] shrink-0" aria-hidden>
             <path d="M20 6 9 17l-5-5" />
           </svg>
           <span>
-            <span className="text-muted">Aucun engagement.</span> Débloquer ce rapport ne modifie
+            <span className="text-muted">Aucun engagement.</span> Ouvrir ce dossier ne modifie
             pas votre commune de résidence : vous ouvrez simplement {displayName} comme option à
             lire, comparer et conserver.
           </span>
         </p>
 
         {/* 7. CTA paiement : le point le plus lumineux de la page (anneau + glow) */}
-        <section className="mt-20" style={reveal(6)}>
+        <section className="mt-20" style={reveal(7)}>
           <h2 className="text-[length:var(--text-section)] text-label" style={{ fontFamily: "var(--font-serif)" }}>
-            Explorer le rapport de {displayName}
+            Ouvrir le dossier de {displayName}
           </h2>
           <p className="mt-2 font-mono text-[11px] tracking-[0.08em] text-muted">
             14 € · paiement unique · accès immédiat · TVA non applicable, art. 293 B du CGI
@@ -206,7 +232,7 @@ export default async function TerritoryUnlockPage({
                 commune={commune}
                 rank={rank}
                 amount={product.amount}
-                submitLabel={`Débloquer le rapport ${deCommune(displayName)}`}
+                submitLabel={`Ouvrir le dossier ${deCommune(displayName)}`}
               />
             ) : (
               <div className="flex flex-col gap-4">
@@ -214,7 +240,7 @@ export default async function TerritoryUnlockPage({
                   Ouvrez d&apos;abord votre espace.
                 </h3>
                 <p className="text-[14px] leading-[1.6] text-muted">
-                  Le rapport est rattaché à votre compte pour que vous le retrouviez à tout moment.
+                  Le dossier est rattaché à votre compte pour que vous le retrouviez à tout moment.
                 </p>
                 <Link
                   href={`/inscription?next=${encodeURIComponent(backHref)}`}

@@ -39,28 +39,23 @@
   font-display: swap;
   src: url('/fonts/JetBrainsMono-Variable.woff2') format('woff2-variations');
 }
-/* LA MARQUE GARDE SON DESSIN. Le logo « futur•e » est du texte, pas une image, et il est écrit en
-   Instrument Serif italique depuis l'origine (les fichiers vivent aussi dans `logo/fonts/`).
-   Changer la police de l'interface ne change pas la marque : `--font-brand` isole ce seul usage.
-   Le jour où le logo passe à un SVG (ils existent dans `logo/svg/`), ces deux règles disparaissent
-   et Instrument Serif quitte le produit. */
-@font-face {
-  font-family: 'Instrument Serif';
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts/InstrumentSerif-Italic.ttf') format('truetype');
-}
+/* LA MARQUE EST UN DESSIN, PLUS UNE POLICE (04/08/2026). Le logo était composé en Instrument Serif
+   italique et réécrit à la main dans 18 fichiers. La charte v1.7 livre un mot-symbole vectoriel dont
+   la coupe du `r`, les fûts de 35 unités et la position du point sont des valeurs décidées : aucune
+   police ne le produit. Il vit désormais dans `components/Logo.tsx`, et le `@font-face` d'Instrument
+   Serif comme le token `--font-brand` ont disparu avec lui — c'est la bascule que ce bloc annonçait.
+
+   `--font-serif` n'est PAS concernée : malgré son nom, elle vaut Archivo (270 usages). */
 
 :root {
   /* ============ MODE-AGNOSTIC TOKENS ============ */
 
-  --orange:         #fb923c;
-  --orange-soft:    #fdba74;
-  --orange-hover:   #ffd0a8;
-  --orange-tint:    rgba(251, 146, 60, 0.12);
-  --orange-tint-2:  rgba(251, 146, 60, 0.18);
-  --orange-ring:    rgba(251, 146, 60, 0.36);
+  --orange:         #E8823A;
+  --orange-soft:    #EEA36E;
+  --orange-hover:   #F4C29E;
+  --orange-tint:    rgba(232, 130, 58, 0.12);
+  --orange-tint-2:  rgba(232, 130, 58, 0.18);
+  --orange-ring:    rgba(232, 130, 58, 0.36);
 
   --red:            #f87171;   --red-soft: #fecaca;   --red-tint: rgba(248, 113, 113, 0.12);
   --blue:           #60a5fa;   --blue-soft: #c8ddff;  --blue-tint: rgba(96, 165, 250, 0.12);
@@ -76,7 +71,7 @@
      Règle d'emploi : `--x-ink` sur du TEXTE et des icônes, `--x` sur des fonds, filets et pastilles
      (WCAG demande 3:1 pour un élément graphique, 4,5:1 pour du texte). Ne jamais poser `--x` sur du
      texte sans vérifier le thème clair. */
-  --orange-ink:     #fb923c;
+  --orange-ink:     #E8823A;
   --red-ink:        #f87171;
   --blue-ink:       #60a5fa;
   --green-ink:      #4ade80;
@@ -84,13 +79,13 @@
   --yellow-ink:     #fbbf24;
   --info-ink:       #60a5fa;
   --amethyst-ink:   #a78bfa;
-  --accent-ink:     #fb923c;
+  --accent-ink:     #E8823A;
 
   /* ALIAS GLOBAUX des noms du @theme Tailwind (globals.css). Le @theme n'émet que --color-* : les
      composants du rapport consomment var(--accent)/--ghost/--info/--amethyst, qui ne se résolvaient
      NULLE PART hors des pages savoir (qui scopent leur propre --accent, et gardent la priorité).
      Sans ces alias, eyebrows et pastilles héritaient silencieusement de la couleur du parent. */
-  --accent:         #fb923c;   /* = --color-accent */
+  --accent:         #E8823A;   /* = --color-accent */
   /* LE TEXTE ESTOMPÉ ÉTAIT SOUS LE PLANCHER D'ACCESSIBILITÉ (corrigé le 30/07/2026). `--ghost` et
      `--fg-4` valaient #6b7388, soit 4,22:1 sur `--bg` alors que WCAG AA exige 4,5:1 pour du texte
      courant — et ils portent les surtitres, les sources et les métadonnées dans tout le rapport.
@@ -133,18 +128,33 @@
   --border-hi:      rgba(255, 255, 255, 0.15);
 
   --shadow-card:        0 8px 24px rgba(0, 0, 0, 0.24);
-  --shadow-card-hover:  0 8px 24px rgba(251, 146, 60, 0.10);
+  --shadow-card-hover:  0 8px 24px rgba(232, 130, 58, 0.10);
   --shadow-hero:        0 30px 90px rgba(2, 6, 23, 0.42);
   --shadow-band:        0 32px 90px rgba(2, 6, 23, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   --shadow-inset-hi:    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   --shadow-inset-lo:    inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  --shadow-focus:       0 0 0 2px rgba(251, 146, 60, 0.18);
+  --shadow-focus:       0 0 0 2px rgba(232, 130, 58, 0.18);
   --glow-orange:        0 0 12px var(--orange);
 
-  --orb-orange:    rgba(251, 146, 60, 0.45);
+  --orb-orange:    rgba(232, 130, 58, 0.45);
   --orb-violet:    rgba(167, 139, 250, 0.35);
   --orb-blue:      rgba(96, 165, 250, 0.25);
   --orb-opacity:   1;
+
+  /* LES SIX REGISTRES DE DÉCISION, sur fond sombre (valeurs `dark` de la charte v1.7).
+     Voir le bloc du thème clair pour la doctrine complète. */
+  --reg-incompatibilite:          #FF9AA4;
+  --reg-incompatibilite-surface:  rgba(255, 154, 164, 0.10);
+  --reg-alignement:               #7BD3A5;
+  --reg-alignement-surface:       rgba(123, 211, 165, 0.10);
+  --reg-compromis:                #E8823A;
+  --reg-compromis-surface:        rgba(232, 130, 58, 0.10);
+  --reg-ecart:                    #C2A5EB;
+  --reg-ecart-surface:            rgba(194, 165, 235, 0.10);
+  --reg-non-su:                   #B8BFCC;
+  --reg-non-su-surface:           rgba(184, 191, 204, 0.10);
+  --reg-controle:                 #82B4E8;
+  --reg-controle-surface:         rgba(130, 180, 232, 0.10);
 }
 
 /* ============ LIGHT MODE ============ */
@@ -169,7 +179,7 @@
 
   /* Les teintes de TEXTE, assombries pour le fond crème (voir le bloc `--*-ink` du :root). Chacune
      tient 4,5:1 sur `--bg` (#faf8f3) et sur `--bg-deep` (#f2ede4), avec sa teinte d'origine. */
-  --orange-ink:     #b04f00;
+  --orange-ink:     #994000;
   --red-ink:        #da0000;
   --blue-ink:       #0065e2;
   --green-ink:      #0a7d34;
@@ -177,25 +187,54 @@
   --yellow-ink:     #8c6500;
   --info-ink:       #0065e2;
   --amethyst-ink:   #7344fd;
-  --accent-ink:     #b04f00;
+  --accent-ink:     #994000;
 
   --border-1:       rgba(26, 29, 40, 0.08);
   --border-2:       rgba(26, 29, 40, 0.12);
   --border-hi:      rgba(26, 29, 40, 0.18);
 
   --shadow-card:        0 6px 20px rgba(26, 29, 40, 0.06);
-  --shadow-card-hover:  0 10px 28px rgba(251, 146, 60, 0.14);
+  --shadow-card-hover:  0 10px 28px rgba(232, 130, 58, 0.14);
   --shadow-hero:        0 24px 72px rgba(26, 29, 40, 0.08);
   --shadow-band:        0 24px 72px rgba(26, 29, 40, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
   --shadow-inset-hi:    inset 0 1px 0 rgba(255, 255, 255, 0.6);
   --shadow-inset-lo:    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  --shadow-focus:       0 0 0 2px rgba(251, 146, 60, 0.22);
-  --glow-orange:        0 0 10px rgba(251, 146, 60, 0.6);
+  --shadow-focus:       0 0 0 2px rgba(232, 130, 58, 0.22);
+  --glow-orange:        0 0 10px rgba(232, 130, 58, 0.6);
 
-  --orb-orange:    rgba(251, 146, 60, 0.18);
+  --orb-orange:    rgba(232, 130, 58, 0.18);
   --orb-violet:    rgba(167, 139, 250, 0.14);
   --orb-blue:      rgba(96, 165, 250, 0.12);
   --orb-opacity:   0.8;
+
+  /* LES SIX REGISTRES DE DÉCISION (charte v1.7, intégrés le 04/08/2026).
+     ================================================================================
+     Six registres, pas cinq : le rapport en peignait déjà six, mais deux ne disaient pas ce que la
+     charte dit. L'ÉCART était jaune et le NON SU améthyste ; la charte donne le violet à l'écart et
+     un GRIS NEUTRE au non su. C'est le point qui compte : un statut inconnu ne reçoit aucune
+     valence. L'améthyste en portait une, et peignait « nous n'avons pas pu lire cette donnée » de la
+     même famille qu'un constat. Le violet, lui, revient à l'écart, à qui il appartenait.
+     ================================================================================
+     Le passage de l'écart au violet ne contredit pas le raisonnement qui l'avait mis en jaune le
+     30/07 : ce raisonnement écartait une GRADATION du rouge, qui aurait suggéré une échelle de
+     gravité, donc un score. Le violet n'est pas un rouge atténué non plus.
+     ================================================================================
+     Une seule teinte par registre et par thème, au lieu du couple vif/texte des couleurs génériques :
+     les valeurs de la charte tiennent 5,5:1 à 11,1:1 partout, sur les deux fonds de chaque thème ET
+     sur leur propre surface. Elles peuvent donc porter le texte, le filet et la pastille.
+     Un fond sémantique ne porte jamais le sens seul : garder le libellé et un filet de la teinte. */
+  --reg-incompatibilite:          #8F2E3A;
+  --reg-incompatibilite-surface:  #F7E4E6;
+  --reg-alignement:               #236844;
+  --reg-alignement-surface:       #E2F1E9;
+  --reg-compromis:                #994000;
+  --reg-compromis-surface:        #F8E5D4;
+  --reg-ecart:                    #64428E;
+  --reg-ecart-surface:            #EEE6F7;
+  --reg-non-su:                   #505662;
+  --reg-non-su-surface:           #E8EAED;
+  --reg-controle:                 #285B91;
+  --reg-controle-surface:         #E3EDF8;
 }
 
 @media (prefers-color-scheme: light) {
@@ -215,7 +254,7 @@
     --fg-4:           #646c7f;
     --ghost:          #646c7f;
     --fg-absent:      #646c7f;
-    --orange-ink:     #b04f00;
+    --orange-ink:     #994000;
     --red-ink:        #da0000;
     --blue-ink:       #0065e2;
     --green-ink:      #0a7d34;
@@ -223,22 +262,38 @@
     --yellow-ink:     #8c6500;
     --info-ink:       #0065e2;
     --amethyst-ink:   #7344fd;
-    --accent-ink:     #b04f00;
+    --accent-ink:     #994000;
     --border-1:       rgba(26, 29, 40, 0.08);
     --border-2:       rgba(26, 29, 40, 0.12);
     --border-hi:      rgba(26, 29, 40, 0.18);
     --shadow-card:        0 6px 20px rgba(26, 29, 40, 0.06);
-    --shadow-card-hover:  0 10px 28px rgba(251, 146, 60, 0.14);
+    --shadow-card-hover:  0 10px 28px rgba(232, 130, 58, 0.14);
     --shadow-hero:        0 24px 72px rgba(26, 29, 40, 0.08);
     --shadow-band:        0 24px 72px rgba(26, 29, 40, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
     --shadow-inset-hi:    inset 0 1px 0 rgba(255, 255, 255, 0.6);
     --shadow-inset-lo:    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    --shadow-focus:       0 0 0 2px rgba(251, 146, 60, 0.22);
-    --glow-orange:        0 0 10px rgba(251, 146, 60, 0.6);
-    --orb-orange:    rgba(251, 146, 60, 0.18);
+    --shadow-focus:       0 0 0 2px rgba(232, 130, 58, 0.22);
+    --glow-orange:        0 0 10px rgba(232, 130, 58, 0.6);
+    --orb-orange:    rgba(232, 130, 58, 0.18);
     --orb-violet:    rgba(167, 139, 250, 0.14);
     --orb-blue:      rgba(96, 165, 250, 0.12);
     --orb-opacity:   0.8;
+
+    /* Les six registres, en clair. Mêmes valeurs que `[data-theme="light"]` : sans cette reprise,
+       un visiteur en préférence système claire mais sans thème choisi hériterait des teintes du
+       fond sombre, illisibles sur le crème. */
+    --reg-incompatibilite:          #8F2E3A;
+    --reg-incompatibilite-surface:  #F7E4E6;
+    --reg-alignement:               #236844;
+    --reg-alignement-surface:       #E2F1E9;
+    --reg-compromis:                #994000;
+    --reg-compromis-surface:        #F8E5D4;
+    --reg-ecart:                    #64428E;
+    --reg-ecart-surface:            #EEE6F7;
+    --reg-non-su:                   #505662;
+    --reg-non-su-surface:           #E8EAED;
+    --reg-controle:                 #285B91;
+    --reg-controle-surface:         #E3EDF8;
   }
 }
 
@@ -261,8 +316,6 @@
   --font-serif:     "Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
   --font-sans:      "Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
   --font-mono:      "JetBrains Mono", "SF Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
-  /* Le logo, et lui seul. */
-  --font-brand:     "Instrument Serif", "Iowan Old Style", Georgia, serif;
 
   /* L'ÉCHELLE DE RÔLES. Un nom dit un USAGE, jamais un niveau de titre HTML ni une valeur.
      ================================================================================
@@ -271,17 +324,26 @@
      pendant que 53 valeurs arbitraires en `text-[Npx]` faisaient le travail. Une échelle qu'on
      n'appelle pas n'est pas une échelle, c'est une intention.
      ================================================================================
-     Les valeurs sont calées sur l'usage RÉEL mesuré le 01/08/2026, pour que la migration ne
-     déplace pas les tailles majoritaires. Ce qui change, ce sont les 24 clamps distincts (ramenés à
-     trois rôles) et les 9 demi-pixels (arrondis), deux poches de bruit sans intention.
+     Les valeurs ont d'abord été calées sur l'usage RÉEL mesuré le 01/08/2026, pour que la migration
+     ne déplace pas les tailles majoritaires. Ce qui changeait, c'étaient les 24 clamps distincts
+     (ramenés à trois rôles) et les 9 demi-pixels (arrondis), deux poches de bruit sans intention.
+     ================================================================================
+     LES TROIS PLAFONDS ONT BAISSÉ LE 04/08/2026, et cette fois c'est une décision, pas un relevé.
+     Trois titres se lisent l'un après l'autre en descendant une page ; le premier n'a pas besoin de
+     crier pour être premier, c'est l'ÉCART entre les trois qui porte la hiérarchie. La borne basse
+     bouge moins que le plafond : sur un téléphone, la place manque déjà, le problème n'y était pas.
+     Le rapport display/body passe de 3,4 à 2,9, et l'écart display→title reste de 1,5.
+     Ce que la baisse a rendu possible : le h1 de la landing débordait de 27 px de sa colonne de
+     490 px à son ancien plafond de 68 px. À 46, il mesure 349,6 px et cesse de renvoyer son `?`
+     à la ligne, sans qu'aucun `max-w` ne vienne couper la phrase (cf. AGENTS.md).
      ================================================================================
      Choisir un rôle : se demander CE QUE LE TEXTE FAIT, jamais la place qu'on veut lui donner.
      Deux rôles voisins (`dense` et `meta`) existent parce qu'un corps de carte et une source ne
      font pas le même travail, pas parce qu'un pixel les sépare. */
 
-  --text-display:   clamp(34px, 4vw, 54px);   /* titre de page, un seul par écran */
-  --text-title:     clamp(26px, 3vw, 38px);   /* titre de section */
-  --text-section:   clamp(20px, 2.4vw, 26px); /* titre de bloc, de carte, de groupe */
+  --text-display:   clamp(30px, 3.6vw, 46px); /* titre de page, un seul par écran */
+  --text-title:     clamp(23px, 2.6vw, 31px); /* titre de section */
+  --text-section:   clamp(19px, 2.1vw, 23px); /* titre de bloc, de carte, de groupe */
   --text-lede:      17px;                     /* chapô sous un titre de page */
   --text-body:      16px;                     /* corps de lecture, prose suivie */
   --text-dense:     14px;                     /* corps d'une carte, d'une liste, d'un tableau */

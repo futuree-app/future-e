@@ -232,7 +232,7 @@ export function PaymentWrapper({
         appearance: {
           theme: "night",
           variables: {
-            colorPrimary: "#fb923c",
+            colorPrimary: "#E8823A",
             colorBackground: "#12172a",
             colorText: "#e9ecf2",
             colorDanger: "#f87171",
