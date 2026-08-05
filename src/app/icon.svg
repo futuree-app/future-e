@@ -1,11 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="1024 369 180 180" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
-  <title id="title">Signe compact futur•e</title>
-  <desc id="desc">Lettrage redessiné sur grille; fûts de 35 unités, coupe basse du r conservée.</desc>
-  <!-- Le fond nuit est porté ici, alors que le SVG du pack est livré en lettrage nuit sur
-       transparent : posé tel quel dans un onglet en thème sombre, le `r` deviendrait invisible.
-       Ce fond aligne aussi le rendu sur favicon.ico et apple-icon.png, qui l'ont cuit dedans. -->
-  <rect x="1024" y="369" width="180" height="180" fill="#060812"/>
-  <path id="lettre-r" d="M 1119 380
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
+  <title id="title">futur•e</title>
+  <desc id="desc">Signe compact futur•e : lettre r ivoire et point orange sur tuile nuit.</desc>
+  <!-- Composition, et non recadrage. Le SVG du pack (CHARTE/…/futur-e-signe-compact-principal.svg)
+       a un viewBox collé à la boîte du tracé : posé tel quel dans un onglet, le signe touche les
+       quatre bords et se lit comme un bloc. La charte, elle, compose à 50 % de la tuile (mesuré sur
+       futur-e-icon-512-transparent.png : 234 × 254 dans 512, centré exactement), un cadrage prévu
+       pour les masques iOS/Android. Un onglet ne masque rien et n'affiche que 16 px, où 50 % fait
+       tomber le point orange sous 3 px. D'où 69 %, l'entre-deux vérifié au rendu.
+       Le fond nuit est porté ici alors que le pack livre le lettrage sur transparent : sans lui, le
+       `r` disparaît dans un onglet en thème sombre. Les coins arrondis reproduisent le masque que le
+       système applique de lui-même aux icônes d'application, et que le navigateur n'applique pas.
+       apple-icon.png garde volontairement ses coins vifs et son cadrage à 50 % : iOS pose son propre
+       masque, et une icône déjà arrondie y gagnerait un liseré sombre.
+       favicon.ico (16/32/48) est régénéré depuis ce fichier : les deux doivent rester d'accord. -->
+  <rect width="64" height="64" rx="14" fill="#060812"/>
+  <g transform="translate(-276.3515 -95.1573) scale(0.2767296)">
+    <path id="lettre-r" d="M 1119 380
         C 1125 380 1130 381 1133 382
         L 1133 414
         C 1113 414 1099 417 1090 427
@@ -14,5 +24,6 @@
         C 1044 539 1042 539 1041 539
         L 1041 384 L 1076 384 L 1076 404
         C 1086 391 1101 380 1119 380 Z" fill="#F6F4EF"/>
-  <circle id="point" cx="1162.54" cy="461.5" r="25.0" fill="#E8823A"/>
+    <circle id="point" cx="1162.54" cy="461.5" r="25.0" fill="#E8823A"/>
+  </g>
 </svg>
