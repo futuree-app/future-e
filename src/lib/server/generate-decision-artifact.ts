@@ -39,6 +39,27 @@ export type GenerationOutcome =
   | { status: "skipped"; reason: string }
   | { status: "failed"; reason: string };
 
+/**
+ * LE RATTRAPAGE DES DOSSIERS ANTÉRIEURS AU LOT (05/08/2026).
+ *
+ * Un dossier acheté avant ce lot n'a pas d'artefact, et n'en aurait JAMAIS eu : la génération se
+ * fait au webhook, et son paiement est passé. Il aurait donc continué de se réécrire indéfiniment,
+ * exactement comme avant, sans que rien ne le distingue d'un dossier figé. Le lot aurait été
+ * complet pour les ventes futures et sans effet sur les ventes faites.
+ *
+ * ── LA DATE EST CELLE D'AUJOURD'HUI, ET C'EST LE SEUL CHOIX HONNÊTE ──────────────────────────
+ * On ne peut pas reconstituer ce que le moteur disait le jour de l'achat : ce moteur n'existe plus.
+ * Antidater l'artefact ferait passer une lecture d'aujourd'hui pour une lecture d'alors, ce qui est
+ * précisément le mensonge que ce lot supprime. Le dossier est donc figé À PARTIR DE MAINTENANT, et
+ * il le dit.
+ *
+ * ── IL NE PEUT PAS DOUBLER LE WEBHOOK ────────────────────────────────────────────────────────
+ * Sur un achat récent, le webhook a déjà réservé la place ; `claimArtifactSlot` rend alors `false`
+ * et ce rattrapage s'arrête sans rien produire. L'idempotence de la table couvre les deux chemins.
+ *
+ * Sans effet de bord visible : appelé depuis `after()`, il ne retarde aucun rendu, et son échec
+ * laisse le dossier s'afficher comme avant.
+ */
 export async function generateDecisionArtifact(
   sb: SupabaseClient, userId: string, project: UserProject, cible: Cible,
 ): Promise<GenerationOutcome> {

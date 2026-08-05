@@ -8,6 +8,8 @@
 import { assembleAddressDossier } from "@/lib/server/assemble-address-dossier";
 import { readLatestArtifact } from "@/lib/server/decision-artifact-store";
 import { dossierAServir } from "@/lib/decision/decision-artifact";
+import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
+import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
@@ -55,6 +57,19 @@ export async function DossierAvecLogement({
     : await assembleAddressDossier({
         project, address, savedDpe, communeFacts, communeDossier, hard, scopeKey,
       });
+  // LE RATTRAPAGE, comme pour le territoire : un dossier d'adresse acheté avant ce lot n'aurait
+  // jamais d'artefact. Il n'est tenté que si l'assemblage a ABOUTI : figer un repli communal comme
+  // la version vendue d'un dossier d'adresse priverait l'acheteur de ce qu'il a payé, sous une page
+  // d'apparence normale. C'est la même règle qu'au webhook, et elle vaut ici pour la même raison.
+  if (!stocke && assemble?.status === "done") {
+    after(async () => {
+      const r = await generateDecisionArtifact(sb, userId, project, {
+        kind: "adresse", insee, dossierId: scopeKey.replace(/^logement:/, ""), address, savedDpe,
+      });
+      if (r.status === "failed") console.error("[artefact] rattrapage adresse échoué", { insee, r });
+    });
+  }
+
   const servi = dossierAServir(stocke, assemble?.dossier ?? communeDossier);
   const vue = {
     dossier: servi.dossier,

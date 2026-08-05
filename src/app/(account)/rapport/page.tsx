@@ -21,6 +21,8 @@ import { DossierAvecLogement } from "@/components/report/DossierAvecLogement";
 import { listDossiers } from "@/lib/address-dossier-store";
 import { readLatestArtifact } from "@/lib/server/decision-artifact-store";
 import { artifactScopeKey, dossierAServir } from "@/lib/decision/decision-artifact";
+import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
+import { after } from "next/server";
 import { communeParent } from "@/lib/plm";
 import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
@@ -123,6 +125,20 @@ export default async function RapportPage() {
     fullReport && inseeCode
       ? await readLatestArtifact(supabase, user.id, inseeCode, artifactScopeKey(null)).catch(() => null)
       : null;
+  // LE RATTRAPAGE DES DOSSIERS DÉJÀ ACHETÉS. Sans lui, un territoire payé avant ce lot n'aurait
+  // jamais d'artefact et continuerait de se réécrire à chaque ouverture : le lot aurait été complet
+  // pour les ventes futures et sans effet sur les ventes faites. La génération part dans `after()`,
+  // donc après la réponse : cette page ne l'attend pas, et affiche l'assemblage du jour comme avant.
+  // Au rechargement suivant, la version figée prend le relais.
+  if (fullReport && inseeCode && userProject && !artefactCommune) {
+    after(async () => {
+      const r = await generateDecisionArtifact(supabase, user.id, userProject, {
+        kind: "commune", insee: inseeCode,
+      });
+      if (r.status === "failed") console.error("[artefact] rattrapage échoué", { inseeCode, r });
+    });
+  }
+
   const servi = dossierAServir(artefactCommune, communeResult?.dossier ?? null);
   const dossier = servi.dossier;
   const dossierGenereLe = servi.generatedAt;
