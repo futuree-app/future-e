@@ -116,3 +116,40 @@ export function buildDecisionArtifact(
 export function artifactScopeKey(dossierId: string | null): string {
   return dossierId ? `logement:${dossierId}` : "commune";
 }
+
+export type ArtifactStatus = "generating" | "ready" | "failed";
+
+/** Ce que la base rend, une fois le payload validé. Le type vit ICI, dans la lib pure, pour que la
+ *  décision ci-dessous soit testable sans `server-only` (patron de `comparateur-scores.ts`). */
+export type StoredArtifact = {
+  version: number;
+  status: ArtifactStatus;
+  generatedAt: string | null;
+  /** Nul quand le statut n'est pas `ready`, ou quand le contenu ne s'est pas relu. */
+  artifact: DecisionArtifactV1 | null;
+};
+
+/**
+ * QUEL DOSSIER LE LECTEUR VOIT, et c'est LA décision de tout ce lot.
+ *
+ * ── L'ARTEFACT GAGNE TOUJOURS ────────────────────────────────────────────────────────────────
+ * Dès qu'une version figée existe et se relit, c'est elle qui s'affiche, MÊME SI le moteur du jour
+ * conclurait autrement. C'est tout l'objet du lot : la décision du 5 août reste la décision du
+ * 5 août. Un moteur amélioré produira une version 2, il ne réécrit pas la première.
+ *
+ * ── L'ABSENCE N'EST PAS UNE PANNE ────────────────────────────────────────────────────────────
+ * Les dossiers achetés avant ce lot n'ont pas d'artefact, une génération peut avoir échoué, et un
+ * dossier ouvert sans projet renseigné n'en produit pas. Dans ces cas on sert l'assemblage vivant,
+ * exactement comme avant, et SANS DATE : une lecture recalculée à l'instant n'a pas d'âge, et la
+ * dater ferait croire à un figement qui n'a pas eu lieu.
+ *
+ * Cette fonction est pure et sans I/O pour être testable : aucun module `server/` de ce dépôt ne
+ * l'est, `server-only` empêchant `node --test` de les charger.
+ */
+export function dossierAServir<D>(
+  stocke: StoredArtifact | null, assemble: D,
+): { dossier: D | Dossier; generatedAt: string | null; source: "artefact" | "assemblage" } {
+  const fige = stocke?.artifact ?? null;
+  if (fige) return { dossier: fige.dossier, generatedAt: fige.generatedAt, source: "artefact" };
+  return { dossier: assemble, generatedAt: null, source: "assemblage" };
+}

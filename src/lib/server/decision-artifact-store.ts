@@ -1,7 +1,8 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
-  parseDecisionArtifact, type DecisionArtifactV1,
+  parseDecisionArtifact,
+  type DecisionArtifactV1, type ArtifactStatus, type StoredArtifact,
 } from "@/lib/decision/decision-artifact";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
@@ -12,15 +13,10 @@ import {
 // et un artefact écrit sous un contrat antérieur est IGNORÉ plutôt que de faire tomber le rendu.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
-export type ArtifactStatus = "generating" | "ready" | "failed";
-
-export type StoredArtifact = {
-  version: number;
-  status: ArtifactStatus;
-  generatedAt: string | null;
-  /** Nul quand le statut n'est pas `ready`, ou quand le contenu ne se relit pas. */
-  artifact: DecisionArtifactV1 | null;
-};
+// `ArtifactStatus` et `StoredArtifact` vivent dans `decision/decision-artifact.ts`, avec la
+// décision qui les consomme : la garder ici l'aurait rendue intestable, `server-only` empêchant
+// `node --test` de charger ce module.
+export type { ArtifactStatus, StoredArtifact };
 
 /**
  * LA DERNIÈRE VERSION D'UN SCOPE, quel que soit son statut.

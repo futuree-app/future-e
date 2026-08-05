@@ -11,8 +11,56 @@ import { communeParent } from "@/lib/plm";
 import { issueInvoice } from "@/lib/server/invoice-store";
 import { renderInvoicePdf } from "@/lib/server/invoice-pdf";
 import { invoiceFileName, type InvoiceProductType } from "@/lib/invoice";
+import { after } from "next/server";
+import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
+import { normalizeUserProject } from "@/lib/user-project";
 
 export const runtime = "nodejs";
+
+/**
+ * LA GÉNÉRATION DE L'ARTEFACT DE DÉCISION, APRÈS LA RÉPONSE À STRIPE.
+ *
+ * ── POURQUOI `after` ─────────────────────────────────────────────────────────────────────────
+ * Assembler un dossier demande huit lectures externes et le moteur complet. Le faire pendant le
+ * webhook retarderait l'accusé de réception, et Stripe rejouerait l'événement en croyant à une
+ * panne. `after` répond d'abord, puis travaille (`waitUntil` sur Vercel, dans la limite du
+ * `maxDuration` de la route).
+ *
+ * ── POURQUOI ELLE NE PEUT PAS FAIRE ÉCHOUER LE WEBHOOK ───────────────────────────────────────
+ * Le client a payé, son droit est déjà posé, et il peut lire son dossier même sans artefact : la
+ * page retombe alors sur l'assemblage vivant, exactement comme avant ce lot. Une génération ratée
+ * est donc un défaut à rattraper, jamais une raison de refuser une livraison encaissée.
+ *
+ * ── LE PROJET VIENT DE LA BASE, PAS DES MÉTADONNÉES STRIPE ───────────────────────────────────
+ * C'est le projet TEL QU'IL EST À LA DÉLIVRANCE qui a produit la lecture achetée. Le recopier dans
+ * les métadonnées à la création du PaymentIntent le figerait une minute trop tôt, avant un dernier
+ * ajustement du wizard.
+ */
+function planifierArtefact(
+  userId: string,
+  cible: Parameters<typeof generateDecisionArtifact>[3],
+): void {
+  after(async () => {
+    try {
+      const { data: profile } = await supabaseAdmin
+        .from("user_profiles")
+        .select("user_project")
+        .eq("user_id", userId)
+        .maybeSingle();
+      const project = normalizeUserProject(
+        (profile as { user_project?: unknown } | null)?.user_project ?? null,
+      );
+      // SANS PROJET, PAS D'ARTEFACT. Le dossier de décision se construit à partir du projet : le
+      // figer sans lui produirait une version vide, qui vaudrait moins que l'assemblage vivant du
+      // jour où le lecteur aura enfin renseigné son projet.
+      if (!project) return;
+      const r = await generateDecisionArtifact(supabaseAdmin, userId, project, cible);
+      if (r.status === "failed") console.error("[artefact] génération échouée", { userId, cible, r });
+    } catch (error) {
+      console.error("[artefact] planification échouée", { userId, error });
+    }
+  });
+}
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -202,6 +250,30 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     // l'intention absente, on laisse Stripe rejouer plutôt que d'accuser réception dans le vide.
     if (!dossier) throw new Error(`dossier introuvable après insertion ${paymentIntent.id}`);
 
+    // À LA CRÉATION SEULEMENT. Sur un rejeu, la place de l'artefact est déjà réservée et la
+    // génération s'arrêterait d'elle-même sur la contrainte unique ; ne pas la lancer évite un
+    // aller-retour inutile en base à chaque rejeu Stripe.
+    if (created) {
+      planifierArtefact(intent.user_id, {
+        kind: "adresse",
+        insee: intent.insee,
+        dossierId: dossier.id as string,
+        address: {
+          id: intent.ban_id,
+          label: intent.address_label,
+          city: intent.city,
+          citycode: intent.insee,
+          postcode: intent.postcode,
+          latitude: intent.latitude,
+          longitude: intent.longitude,
+        },
+        // LE DPE N'EST PAS ENCORE CHOISI À CET INSTANT : le parcours le propose après l'achat. Le
+        // dossier figé porte donc l'état du bien SANS diagnostic sélectionné, ce qui est exact au
+        // moment de la vente. Le jour où le choix du DPE précédera le paiement, il entrera ici.
+        savedDpe: null,
+      });
+    }
+
     await supabaseAdmin.from("payments").upsert(
       {
         user_id: intent.user_id,
@@ -363,6 +435,12 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
 
       profileUpdate.active_insee_code = insee;
       profileUpdate.active_commune = commune || null;
+
+      // LE DOSSIER DE TERRITOIRE EST FIGÉ LUI AUSSI. Il est vendu 14 €, il porte une conclusion et
+      // des contrôles, et il se réécrivait exactement comme celui d'adresse. Le `pack-decision`
+      // passe aussi par ici, une commune à la fois, ce qui est juste : ce qui est figé est la
+      // lecture d'un territoire, pas l'emballage commercial qui l'a vendue.
+      planifierArtefact(userId, { kind: "commune", insee });
     }
 
     if (Object.keys(profileUpdate).length > 0) {

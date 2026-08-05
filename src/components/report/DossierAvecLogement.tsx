@@ -1,14 +1,15 @@
 // Augmentation Logement streamée (Server Component async). Suspense gère le "pending" (fallback) ;
 // ce catch TYPÉ gère le "unavailable" (un bug d'adaptateur/règle/assembleur remonte). Faits communs
 // reçus en prop (mêmes que le fallback, pas de reload).
-import { fetchLogementDecisionDataWithTimeout, LogementDataUnavailableError, type ResolvedAddress } from "@/lib/server/logement-decision-data";
-import { buildLogementFacts } from "@/lib/decision/logement-facts";
-import { buildSecteurFacts } from "@/lib/decision/secteur-facts";
-import { getCarOwnershipAtPoint } from "@/lib/server/iris-logement-store";
-import { runRules } from "@/lib/decision/materiality-rules";
-import { assembleDossier } from "@/lib/decision/decision-assembler";
-import { composeFacts } from "@/lib/decision/fact-compositions";
-import { withEvaluationPoint } from "@/lib/decision/territory-facts";
+//
+// L'ASSEMBLAGE A QUITTÉ CE FICHIER le 05/08/2026, pour `server/assemble-address-dossier.ts` : le
+// webhook Stripe doit produire le même dossier hors de toute page, et un pipeline qui n'existe que
+// dans le corps d'un composant ne se rejoue pas. Ce composant ne fait plus que demander et rendre.
+import { assembleAddressDossier } from "@/lib/server/assemble-address-dossier";
+import { readLatestArtifact } from "@/lib/server/decision-artifact-store";
+import { dossierAServir } from "@/lib/decision/decision-artifact";
+import { createClient } from "@/lib/supabase/server";
+import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
 import { ControlesDuDossier } from "@/components/report/ControlesDuDossier";
 import type { Dossier, ModuleFacts } from "@/lib/decision/decision-fact";
@@ -18,6 +19,7 @@ import type { UserProject } from "@/lib/user-project";
 
 export async function DossierAvecLogement({
   project, address, savedDpe, communeFacts, communeDossier, logementLink, insee, scopeKey, hard,
+  userId,
 }: {
   project: UserProject;
   address: ResolvedAddress;
@@ -31,54 +33,45 @@ export async function DossierAvecLogement({
   // Les contraintes dures déjà hydratées au grain de la commune (références résolues une seule fois,
   // au-dessus des deux moteurs). On n'en change que le POINT.
   hard: EvaluationContext;
+  /** Le compte qui lit, pour retrouver son artefact. */
+  userId: string;
 }) {
-  // Ce que la page rendra : le dossier augmenté de l'adresse, ou le dossier communal si la lecture
-  // du logement n'a pas abouti.
-  let vue: { dossier: Dossier; status: "done" | "unavailable"; scope: string };
-  try {
-    const data = await fetchLogementDecisionDataWithTimeout(address);
-    const logement = buildLogementFacts(data, savedDpe, address.label);
-    // LE SECTEUR ENTRE DANS LE MOTEUR. Lecture locale (artefact INSEE + résolution IRIS au point) :
-    // en panne, elle rend `unknown` et la règle se tait — jamais d'erreur qui coûterait le dossier.
-    const car = await getCarOwnershipAtPoint(address.latitude, address.longitude, address.citycode)
-      .catch(() => null);
-    const facts: ModuleFacts = {
-      ...communeFacts, hasAddress: true, logement, secteur: buildSecteurFacts(car),
-    };
-    // LE GRAIN CHANGE. Une commune peut passer sur son point de référence et échouer pour une adresse
-    // située à son extrémité : ce n'est pas une divergence de moteur, c'est une lecture plus fine, et la
-    // phrase le dit (« Cette adresse est à 42 km de… », au lieu de « Le point de référence de X… »).
-    //
-    // ET LA DEMANDE CHANGE AVEC LUI : le temps de trajet est RECALCULÉ depuis l'adresse. Traîner celui de
-    // la commune trancherait le sort de l'adresse avec la durée d'un autre lieu (le noyau le refuserait,
-    // mais on ne s'en remet pas à ce filet : on mesure ce qu'on évalue).
-    const hardAtAddress: EvaluationContext = await withEvaluationPoint(hard, {
-      lat: address.latitude, lon: address.longitude,
-      grain: "address", source: "address_geocoder", label: address.label,
-    });
-    const run = runRules(facts, project, hardAtAddress);
-    vue = {
-      dossier: assembleDossier(run, project, "commune+adresse", facts.nom, composeFacts(run, facts, project)),
-      status: "done",
-      scope: scopeKey,
-    };
-  } catch (error) {
-    if (!(error instanceof LogementDataUnavailableError)) {
-      throw error; // bug de code : reste visible (frontière d'erreur / observabilité)
-    }
-    // Le dossier COMMUNE devient le dossier final : sa conclusion peut être rédigée, au scope commune.
-    vue = { dossier: communeDossier, status: "unavailable", scope: "commune" };
-  }
+  // L'ARTEFACT PASSE AVANT L'ASSEMBLAGE (05/08/2026).
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  // Ce qui a été vendu est la lecture du jour de l'achat, pas celle du moteur d'aujourd'hui. Quand
+  // l'artefact existe, on ne rejoue RIEN : ni les huit lectures externes, ni les règles. C'est ce
+  // qui rend la relecture reproductible, et accessoirement instantanée.
+  //
+  // Son absence n'est pas une panne : les dossiers achetés avant ce lot n'en ont pas, et une
+  // génération peut avoir échoué. On assemble alors comme avant, et la date ne s'affiche pas,
+  // puisqu'une lecture recalculée à l'instant n'a pas d'âge.
+  const sb = await createClient();
+  const stocke = await readLatestArtifact(sb, userId, insee, scopeKey).catch(() => null);
 
-  // LE RENDU EST HORS DU `try`, et ce n'est pas une préférence de style : React ne rend pas un
+  // L'ASSEMBLAGE N'EST DEMANDÉ QUE S'IL SERVIRA. Un artefact prêt évite les huit lectures externes
+  // et le moteur entier : c'est ce qui rend la relecture reproductible, et accessoirement immédiate.
+  const assemble = stocke?.artifact
+    ? null
+    : await assembleAddressDossier({
+        project, address, savedDpe, communeFacts, communeDossier, hard, scopeKey,
+      });
+  const servi = dossierAServir(stocke, assemble?.dossier ?? communeDossier);
+  const vue = {
+    dossier: servi.dossier,
+    status: servi.source === "artefact" ? ("done" as const) : (assemble?.status ?? "unavailable"),
+    scope: servi.source === "artefact" ? scopeKey : (assemble?.scope ?? "commune"),
+  };
+
+  // LE RENDU EST HORS DE TOUT `try`, et ce n'est pas une préférence de style : React ne rend pas un
   // composant au moment où son JSX est construit, donc une erreur de rendu ne serait PAS attrapée
-  // par ce catch, qui promettrait pourtant de la traiter. Le try ne couvre que ce qu'il peut
-  // vraiment couvrir : le chargement et l'assemblage.
+  // par un catch posé ici, qui promettrait pourtant de la traiter. Le rattrapage vit dans
+  // `assembleAddressDossier` et ne couvre que ce qu'il peut vraiment couvrir : le chargement et
+  // l'assemblage.
   return (
     <>
       <DossierDecisionSection
         dossier={vue.dossier} logement={logementLink} logementStatus={vue.status}
-        insee={insee} scopeKey={vue.scope}
+        insee={insee} scopeKey={vue.scope} generatedAt={servi.generatedAt}
       />
       {/* La liste complète des contrôles est rendue par le MÊME dossier que la minute : une liste
           construite ailleurs, sur le dossier communal, contredirait le compte que le verdict vient

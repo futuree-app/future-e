@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     "Ce que futur•e vend, à quel prix, ce que l'achat donne, et ce qu'il advient du droit de rétractation.",
 };
 
-const LAST_UPDATED = "4 août 2026";
+const LAST_UPDATED = "5 août 2026";
 
 /* LES PRIX SONT ÉCRITS ICI EN TOUTES LETTRES, ET C'EST UN CHOIX.
    Ils vivent aussi dans `create-payment-intent/route.ts` (la carte serveur, seule autorité sur ce
@@ -297,35 +297,35 @@ export default function ConditionsGeneralesDeVentePage() {
           <strong>au moins trois ans à compter de l&apos;achat</strong>. Le paiement est unique, il
           n&apos;y a pas d&apos;abonnement.
         </p>
-        {/* CE PARAGRAPHE DIT CE QUE LE CODE FAIT, ET C'EST INCONFORTABLE (05/08/2026).
+        {/* CE PARAGRAPHE A ÉTÉ RÉÉCRIT LE JOUR OÙ IL EST DEVENU FAUX (05/08/2026).
             ══════════════════════════════════════════════════════════════════════════════════════
-            La version précédente promettait une « régénération une fois tous les douze mois ». Rien
-            dans le dépôt ne régénère quoi que ce soit : `/rapport` et `/rapport/quartier` sont en
-            `force-dynamic` et `buildCommuneDossier` réassemble le dossier À CHAQUE CONSULTATION,
-            avec le moteur du jour. La phrase décrivait un modèle d'artefact figé que futur•e n'a
-            jamais eu, et je l'avais reprise des textes de vente sans la vérifier.
+            Il disait, quelques heures plus tôt, que le dossier était recalculé à chaque ouverture
+            et qu'aucune copie figée n'était conservée. C'était exact, et c'était le défaut : le
+            lecteur qui revenait ne retrouvait pas la décision qu'il avait achetée. Le dossier est
+            désormais figé à la délivrance, sous une version datée.
 
-            CE QU'IL FAUT DIRE, ET QUI EST PLUS DÉLICAT : le lecteur qui revient ne retrouve pas
-            exactement le dossier qu'il a acheté. Les sources d'adresse restent celles du jour de
-            l'analyse (elles sont gelées dans le snapshot), pendant que les règles, les seuils et
-            les formulations, eux, sont ceux du moteur courant. Le taire serait une omission sur la
-            chose même que futur•e vend, la vérifiabilité.
-
-            CE N'EST PAS UN ÉTAT SOUHAITABLE, et le dire ici ne le rend pas souhaitable. Le chantier
-            qui le referme est le dossier DATÉ ET VERSIONNÉ : une amélioration du moteur créerait
-            une nouvelle version, sans réécrire la précédente. Tant qu'il n'est pas fait, la page
-            décrit la réalité plutôt qu'une intention. */}
+            CE QUI RESTE VIVANT EST DIT AUSSI, et ce n'est pas une réserve de style : les arrêtés en
+            vigueur doivent le rester. Figer un arrêté sécheresse afficherait en 2027 une alerte de
+            l'été 2026, ce qui serait un mensonge d'une autre nature. La page distingue donc les
+            deux, comme l'écran. */}
         <p style={{ marginTop: 16 }}>
-          <strong>Votre dossier se consulte en ligne et il est recalculé à chaque ouverture</strong>,
-          avec les méthodes et les données disponibles à ce moment-là. Les analyses peuvent donc
-          évoluer entre deux consultations, à mesure que futur•e améliore ses sources et ses
-          méthodes. Les données propres à une adresse, elles, restent celles relevées au moment de
-          l&apos;analyse, et chaque constat porte la date à laquelle sa source a été lue.
+          <strong>Votre dossier est daté.</strong> Il est produit au moment de l&apos;achat, à partir
+          de votre projet, des données disponibles et de la version du moteur d&apos;analyse en
+          vigueur ce jour-là. Cette version est conservée dans votre compte et{" "}
+          <strong>n&apos;est pas modifiée rétroactivement</strong> : les améliorations que futur•e
+          apporte ensuite à ses sources et à ses méthodes ne réécrivent pas l&apos;analyse que vous
+          avez achetée. La date de génération est affichée sur le dossier.
         </p>
         <p style={{ marginTop: 16 }}>
-          Il en découle une limite que nous préférons écrire : futur•e ne conserve pas aujourd&apos;hui
-          une copie figée du dossier tel qu&apos;il se présentait le jour de votre achat. Si une
-          analyse a compté dans une décision, gardez-en une trace de votre côté.
+          Certaines informations restent volontairement vivantes, parce que leur sens est d&apos;être
+          à jour : les arrêtés en vigueur, les restrictions en cours, les données publiques dont un
+          millésime plus récent paraît. Elles se relisent à chaque consultation et portent leur
+          propre date, distincte de celle du dossier.
+        </p>
+        <p style={{ marginTop: 16 }}>
+          Une actualisation ultérieure, si futur•e en propose une, donnera lieu à une{" "}
+          <strong>nouvelle version datée</strong>, distincte de la précédente, et non à la
+          réécriture de celle-ci.
         </p>
         <p style={{ marginTop: 16 }}>
           futur•e s&apos;efforce de maintenir le service accessible en permanence, sans le garantir :

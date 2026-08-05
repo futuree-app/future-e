@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   parseDecisionArtifact, buildDecisionArtifact, artifactScopeKey, ENGINE_VERSION,
+  dossierAServir,
 } from "./decision-artifact.ts";
 import type { Dossier } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
@@ -118,4 +119,44 @@ test("LA FIXTURE V1, telle qu'un artefact réel se présente en base", () => {
   assert.ok(relu, "un artefact d'août 2026 n'est plus relisible par le code courant");
   assert.equal(relu!.dossier.sections.length, 2);
   assert.match(relu!.dossier.conclusion, /La Rochelle/);
+});
+
+// ── LE TEST D'ACCEPTATION DU LOT ────────────────────────────────────────────────────────────
+//
+// « Générer un dossier, modifier un seuil du moteur, rouvrir : la décision reste identique. »
+// Le changement de seuil se simule par ce qu'il PRODUIT, un assemblage différent, ce qui est
+// exactement ce que la fonction reçoit.
+
+test("L'ARTEFACT GAGNE SUR L'ASSEMBLAGE DU JOUR", () => {
+  const vendu = buildDecisionArtifact(
+    dossier({ conclusion: "Ce que futur•e disait le 5 août." }),
+    PROJECT, "2026-08-05T09:30:00.000Z", "hc-conv-2",
+  );
+  const stocke = { version: 1, status: "ready" as const, generatedAt: vendu.generatedAt, artifact: vendu };
+  // Ce que le moteur de février 2027 conclurait, seuils révisés.
+  const aujourdhui = dossier({ conclusion: "Ce que le moteur dirait aujourd'hui." });
+
+  const servi = dossierAServir(stocke, aujourdhui);
+  assert.equal(servi.source, "artefact");
+  assert.equal((servi.dossier as typeof aujourdhui).conclusion, "Ce que futur•e disait le 5 août.");
+  assert.equal(servi.generatedAt, "2026-08-05T09:30:00.000Z");
+});
+
+test("SANS ARTEFACT, on sert l'assemblage ET AUCUNE DATE", () => {
+  // La date est ce qui rend le figement visible. L'afficher sur un dossier recalculé à l'instant
+  // annoncerait un figement qui n'a pas eu lieu, ce qui est le mensonge exactement inverse de
+  // celui que ce lot corrige.
+  const vivant = dossier({ conclusion: "Assemblé à l'instant." });
+  for (const stocke of [
+    null,
+    { version: 1, status: "generating" as const, generatedAt: null, artifact: null },
+    { version: 1, status: "failed" as const, generatedAt: null, artifact: null },
+    // `ready` mais payload illisible : le parseur a refusé, l'appelant ne doit pas s'en apercevoir.
+    { version: 1, status: "ready" as const, generatedAt: "2026-08-05T09:30:00.000Z", artifact: null },
+  ]) {
+    const servi = dossierAServir(stocke, vivant);
+    assert.equal(servi.source, "assemblage", JSON.stringify(stocke));
+    assert.equal(servi.generatedAt, null, "une date est apparue sur un dossier non figé");
+    assert.equal((servi.dossier as typeof vivant).conclusion, "Assemblé à l'instant.");
+  }
 });

@@ -11,6 +11,7 @@ import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 import { FactBody, EvidenceRow, MethodDetails, factSources, factChecks } from "@/components/report/DecisionFactRenderParts";
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
 import { dossierAnchorId } from "@/lib/decision/dossier-anchors";
+import { dateFr } from "@/lib/decision/autour-permis";
 
 // LES SIX REGISTRES DE DÉCISION DE LA CHARTE v1.7 (branchés le 04/08/2026). Chaque section du
 // dossier est l'un des six registres nommés par la charte, et porte sa teinte.
@@ -87,8 +88,17 @@ export function DossierDecisionSection({
   logementStatus = "none",
   insee,
   scopeKey,
+  generatedAt,
 }: {
   dossier: Dossier;
+  /**
+   * La date de génération de l'artefact, quand le dossier affiché en vient un.
+   *
+   * ABSENTE POUR UN DOSSIER RÉASSEMBLÉ, et il ne faut surtout pas la remplacer par « aujourd'hui » :
+   * une lecture recalculée à l'instant n'a pas d'âge, et la dater ferait croire à un figement qui
+   * n'a pas eu lieu. C'est précisément la confusion que ce lot supprime.
+   */
+  generatedAt?: string | null;
   // Analyse logement déjà sauvegardée pour cette commune (adresse renseignée), ou null.
   logement?: { href: string; label: string } | null;
   // Slice 1.5 : état de l'augmentation adresse en couche de rendu (pas un état de l'assembleur).
@@ -135,6 +145,19 @@ export function DossierDecisionSection({
           <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
           En une minute
         </div>
+        {/* LA DATE DE LA DÉCISION, ET C'EST TOUT L'ENJEU DU LOT (05/08/2026).
+            Le dossier se réécrivait à chaque ouverture sans que rien ne le dise. Il est maintenant
+            figé au jour de l'achat, et cette ligne est la seule chose qui rende ce figement VISIBLE.
+            Sans elle, le lecteur ne saurait toujours pas ce qu'il lit, et le lot n'aurait corrigé
+            qu'une moitié du défaut.
+
+            Elle ne s'affiche que quand un artefact existe : l'inventer pour un dossier réassemblé à
+            l'instant daterait d'aujourd'hui une lecture qui n'a pas d'âge. */}
+        {generatedAt && dateFr(generatedAt) ? (
+          <p className="mt-2 font-mono text-[11px] text-ghost">
+            Analyse générée le {dateFr(generatedAt)}
+          </p>
+        ) : null}
       </div>
 
       {logementStatus === "pending" ? (

@@ -19,6 +19,8 @@ import { DossierDecisionSection } from "@/components/report/DossierDecisionSecti
 import { ControlesDuDossier } from "@/components/report/ControlesDuDossier";
 import { DossierAvecLogement } from "@/components/report/DossierAvecLogement";
 import { listDossiers } from "@/lib/address-dossier-store";
+import { readLatestArtifact } from "@/lib/server/decision-artifact-store";
+import { artifactScopeKey, dossierAServir } from "@/lib/decision/decision-artifact";
 import { communeParent } from "@/lib/plm";
 import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
@@ -107,7 +109,23 @@ export default async function RapportPage() {
     fullReport && inseeCode && userProject
       ? await buildCommuneDossier(inseeCode, userProject, { hasAddress: Boolean(logementForCommune) })
       : null;
-  const dossier = communeResult?.dossier ?? null;
+  // L'ARTEFACT PASSE AVANT L'ASSEMBLAGE (05/08/2026).
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  // Ce qui a été vendu est la lecture du jour de l'achat. `buildCommuneDossier` reste appelé plus
+  // haut parce que ses `moduleFacts` et son contexte de contraintes servent l'augmentation Adresse,
+  // mais le DOSSIER affiché vient de l'artefact dès qu'il existe.
+  //
+  // Un artefact absent n'est pas une panne : les dossiers achetés avant ce lot n'en ont pas, et un
+  // dossier ouvert sans projet renseigné non plus. On retombe alors sur l'assemblage vivant,
+  // exactement comme avant. Un artefact illisible fait de même, le parseur ayant refusé plutôt que
+  // de réparer.
+  const artefactCommune =
+    fullReport && inseeCode
+      ? await readLatestArtifact(supabase, user.id, inseeCode, artifactScopeKey(null)).catch(() => null)
+      : null;
+  const servi = dossierAServir(artefactCommune, communeResult?.dossier ?? null);
+  const dossier = servi.dossier;
+  const dossierGenereLe = servi.generatedAt;
   const dossierLogementLink = logementForCommune
     ? { href: `/rapport/logement?dossierId=${encodeURIComponent(logementForCommune.id)}`, label: logementForCommune.address_label }
     : null;
@@ -362,6 +380,7 @@ export default async function RapportPage() {
                     logementStatus="pending"
                     insee={inseeCode}
                     scopeKey="commune"
+                    generatedAt={dossierGenereLe}
                   />
                   <ControlesDuDossier dossier={dossier} />
                 </>
@@ -379,6 +398,7 @@ export default async function RapportPage() {
                 // Les contraintes dures, hydratées UNE fois : la section n'en change que le point
                 // d'évaluation (l'adresse), elle ne re-résout aucune référence.
                 hard={communeResult.hard}
+                userId={user.id}
               />
             </Suspense>
           ) : (
@@ -392,6 +412,7 @@ export default async function RapportPage() {
                 logementStatus="none"
                 insee={inseeCode}
                 scopeKey="commune"
+                generatedAt={dossierGenereLe}
               />
               <ControlesDuDossier dossier={dossier} />
             </>
