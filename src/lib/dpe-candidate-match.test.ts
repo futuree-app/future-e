@@ -38,6 +38,22 @@ test("un étage réel passe", () => {
   assert.equal(meaningfulFloor(" 4 "), "4");
 });
 
+// L'API ADEME rend `numero_etage_appartement` en NOMBRE, alors que le type le déclarait en texte,
+// et des snapshots de DPE figés en base portent déjà cette valeur numérique. Le sélecteur tombait
+// dessus en `(raw ?? "").trim is not a function`, et le module Logement entier devenait illisible
+// pour l'adresse concernée. Le zéro numérique se rejette comme le zéro textuel : c'est le même
+// défaut de saisie, il ne devient pas un rez-de-chaussée en changeant de type.
+test("L'ÉTAGE PEUT ARRIVER EN NOMBRE, et ne fait pas tomber la page", () => {
+  assert.equal(meaningfulFloor(4), "4");
+  assert.equal(meaningfulFloor(0), null);
+});
+
+test("un complément d'adresse numérique ne fait pas tomber la page non plus", () => {
+  // Même API, même champ de texte libre, aucune garantie de type : « 12 » saisi seul revient en
+  // nombre. Non observé, mais du même défaut que l'étage, et le sélecteur le lit pareil.
+  assert.equal(candidateIdentifier(dpe({ complement: 12 as unknown as string })), "12");
+});
+
 // ── L'identifiant de logement ──────────────────────────────────────────────────────────────
 
 test("l'identifiant est le complément d'adresse, espaces normalisés", () => {

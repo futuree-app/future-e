@@ -16,8 +16,12 @@ export type DpeRecord = {
   surface_m2: number | null;
   annee_construction: number | null;
   type_batiment: string | null;
-  etage: string | null;
-  complement: string | null;
+  // TEXTE OU NOMBRE, ET LE TYPE LE DIT. L'ADEME rend `numero_etage_appartement` en nombre, et le
+  // complément d'adresse est du texte libre sans garantie de type. Des snapshots figés en base
+  // portent déjà des valeurs numériques : les déclarer `string` faisait tomber le sélecteur de
+  // DPE en `.trim is not a function`. Toute lecture passe par `asText` (dpe-candidate-match).
+  etage: string | number | null;
+  complement: string | number | null;
   // Bloc confort d'été + enveloppe + méthode (lecture thermique, Face 1). Normalisés à la
   // lecture (toRecord) : booléens pour les champs 0/1, chaînes brutes ADEME sinon.
   confort_ete: "bon" | "moyen" | "insuffisant" | null;

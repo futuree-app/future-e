@@ -125,8 +125,8 @@ type ApiRecord = {
   annee_construction?: number | null;
   surface_habitable_logement?: number | null;
   type_batiment?: string | null;
-  numero_etage_appartement?: string | null;
-  complement_adresse_logement?: string | null;
+  numero_etage_appartement?: string | number | null;
+  complement_adresse_logement?: string | number | null;
   date_etablissement_dpe?: string | null;
   conso_5_usages_par_m2_ep?: number | null;
   emission_ges_5_usages_par_m2?: number | null;

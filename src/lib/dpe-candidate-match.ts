@@ -26,20 +26,34 @@
 import type { DpeRecord } from "./dpe-attribution.ts";
 
 /**
+ * LE TEXTE D'UN CHAMP QUI PEUT ARRIVER EN NOMBRE.
+ *
+ * L'API ADEME rend `numero_etage_appartement` en NOMBRE, alors que le type le déclarait en texte,
+ * et des snapshots de DPE figés en base portent déjà cette valeur numérique : ils ne repasseront
+ * jamais par la frontière de l'API, donc normaliser à l'entrée n'aurait rien réparé pour eux. Le
+ * sélecteur tombait ici même, en `(raw ?? "").trim is not a function`, et le module Logement
+ * entier devenait illisible pour l'adresse concernée.
+ */
+function asText(raw: string | number | null | undefined): string {
+  return raw == null ? "" : String(raw).trim();
+}
+
+/**
  * L'étage, quand il veut dire quelque chose.
  *
  * « 0 » est rejeté : c'est le défaut du formulaire de saisie, et l'afficher ferait passer une
- * absence de renseignement pour un rez-de-chaussée.
+ * absence de renseignement pour un rez-de-chaussée. Le zéro NUMÉRIQUE est le même défaut de
+ * saisie ; il ne devient pas un rez-de-chaussée en changeant de type.
  */
-export function meaningfulFloor(raw: string | null | undefined): string | null {
-  const s = (raw ?? "").trim();
+export function meaningfulFloor(raw: string | number | null | undefined): string | null {
+  const s = asText(raw);
   if (!s || s === "0") return null;
   return s;
 }
 
 /** L'identifiant de logement saisi par le diagnostiqueur, nettoyé de ses espaces multiples. */
 export function candidateIdentifier(c: DpeRecord): string | null {
-  const s = (c.complement ?? "").trim().replace(/\s+/g, " ");
+  const s = asText(c.complement).replace(/\s+/g, " ");
   return s.length > 0 ? s : null;
 }
 
