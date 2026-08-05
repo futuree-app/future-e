@@ -164,7 +164,12 @@ export default function ProfessionnelsPage() {
             <em style={{ fontStyle: 'italic', color: ACCENT }}>pour vos rendez-vous client.</em>
           </h1>
           <p style={{ fontSize: 'clamp(17px,2vw,21px)', lineHeight: 1.65, color: '#c5cad6', margin: '0 auto 16px', maxWidth: 680 }}>
-            DRIAS, Géorisques, INSEE, ANSES, ATMO. Toutes les données publiques officielles, agrégées en une lecture lisible que vous pouvez montrer, exporter, intégrer à vos livrables.
+            {/* LE PRÉSENT PROMETTAIT CE QUI N'EXISTE PAS (05/08/2026). « que vous pouvez montrer,
+                exporter, intégrer » décrivait au présent un export qui n'est pas codé. Le reste de
+                la page annonce des capacités de l'offre professionnelle, sous le bandeau
+                « Lancement automne 2026 » : ce cadre-là est explicite, cette phrase ne l'était pas.
+                Rien n'est vendu sur cette page, elle recueille des inscriptions. */}
+            DRIAS, Géorisques, INSEE, ANSES, ATMO. Toutes les données publiques officielles, agrégées en une lecture lisible, à montrer en rendez-vous et à intégrer à vos livrables.
           </p>
           <p style={{ fontSize: 16, lineHeight: 1.7, color: '#9ba3b4', margin: '0 auto', maxWidth: 580 }}>
             Pour les conseillers en gestion de patrimoine, les notaires, les agents d'assurance et les diagnostiqueurs immobiliers qui répondent aux questions que leurs clients commencent tout juste à poser.
@@ -218,6 +223,15 @@ export default function ProfessionnelsPage() {
                   <p style={{ fontSize: 15, lineHeight: 1.7, color: '#c5cad6', margin: '0 0 20px' }}>
                     {p.pitch}
                   </p>
+                  {/* CES LISTES DÉCRIVENT L'OFFRE À VENIR, ET IL FAUT QUE ÇA SE VOIE (05/08/2026).
+                      Plusieurs de ces capacités ne sont pas construites : l'export PDF, l'archivage
+                      par numéro de dossier, les alertes de zonage. Le bandeau « Lancement automne
+                      2026 » cadre la page entière, mais une liste à puces se lit comme un inventaire
+                      de ce qui existe. Un surtitre par carte lève l'ambiguïté là où elle naît.
+                      Rien n'est vendu ici : la page recueille des inscriptions. */}
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#6b7388', marginBottom: 8 }}>
+                    Prévu au lancement
+                  </div>
                   <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 22px' }}>
                     {p.bullets.map((b) => (
                       <li key={b} style={{ fontSize: 13, color: '#9ba3b4', lineHeight: 1.55, padding: '6px 0 6px 18px', position: 'relative' }}>

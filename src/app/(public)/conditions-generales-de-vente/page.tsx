@@ -25,8 +25,7 @@ const PRODUITS = [
     prix: "14 €",
     objet:
       "L'analyse d'une commune : sa trajectoire climatique, ses risques déclarés et ce que les " +
-      "sources publiques en disent, lues depuis votre projet. Trois questions à AskFuture. " +
-      "Régénérable une fois par an.",
+      "sources publiques en disent, lues depuis votre projet. Trois questions à AskFuture.",
   },
   {
     nom: "Dossier d'adresse",
@@ -291,18 +290,42 @@ export default function ConditionsGeneralesDeVentePage() {
       <Section title="7. Durée d'accès et disponibilité">
         {/* UNE DURÉE CHIFFRÉE, PARCE QUE C'EST UN ENGAGEMENT (05/08/2026).
             « Tant que le service existe » se comprend humainement et ne s'exécute pas : la durée
-            dépendait alors d'un événement que futur•e décide seule. « Régénérable une fois par an »
-            ne disait ni à partir de quand, ni pendant combien de temps, ni si la nouvelle version
-            remplace l'ancienne. Trois ans et douze mois glissants sont des engagements tenables,
-            au-dessus de la durée d'usage réelle d'un dossier de décision. Arbitrage du porteur. */}
+            dépendait alors d'un événement que futur•e décide seule. Trois ans est un engagement
+            tenable, au-dessus de la durée d'usage réelle d'un dossier de décision. */}
         <p>
           Un dossier acheté reste accessible depuis votre compte pendant{" "}
-          <strong>au moins trois ans à compter de l&apos;achat</strong>.
+          <strong>au moins trois ans à compter de l&apos;achat</strong>. Le paiement est unique, il
+          n&apos;y a pas d&apos;abonnement.
+        </p>
+        {/* CE PARAGRAPHE DIT CE QUE LE CODE FAIT, ET C'EST INCONFORTABLE (05/08/2026).
+            ══════════════════════════════════════════════════════════════════════════════════════
+            La version précédente promettait une « régénération une fois tous les douze mois ». Rien
+            dans le dépôt ne régénère quoi que ce soit : `/rapport` et `/rapport/quartier` sont en
+            `force-dynamic` et `buildCommuneDossier` réassemble le dossier À CHAQUE CONSULTATION,
+            avec le moteur du jour. La phrase décrivait un modèle d'artefact figé que futur•e n'a
+            jamais eu, et je l'avais reprise des textes de vente sans la vérifier.
+
+            CE QU'IL FAUT DIRE, ET QUI EST PLUS DÉLICAT : le lecteur qui revient ne retrouve pas
+            exactement le dossier qu'il a acheté. Les sources d'adresse restent celles du jour de
+            l'analyse (elles sont gelées dans le snapshot), pendant que les règles, les seuils et
+            les formulations, eux, sont ceux du moteur courant. Le taire serait une omission sur la
+            chose même que futur•e vend, la vérifiabilité.
+
+            CE N'EST PAS UN ÉTAT SOUHAITABLE, et le dire ici ne le rend pas souhaitable. Le chantier
+            qui le referme est le dossier DATÉ ET VERSIONNÉ : une amélioration du moteur créerait
+            une nouvelle version, sans réécrire la précédente. Tant qu'il n'est pas fait, la page
+            décrit la réalité plutôt qu'une intention. */}
+        <p style={{ marginTop: 16 }}>
+          <strong>Votre dossier se consulte en ligne et il est recalculé à chaque ouverture</strong>,
+          avec les méthodes et les données disponibles à ce moment-là. Les analyses peuvent donc
+          évoluer entre deux consultations, à mesure que futur•e améliore ses sources et ses
+          méthodes. Les données propres à une adresse, elles, restent celles relevées au moment de
+          l&apos;analyse, et chaque constat porte la date à laquelle sa source a été lue.
         </p>
         <p style={{ marginTop: 16 }}>
-          Le dossier de territoire peut être <strong>régénéré une fois tous les douze mois</strong>{" "}
-          pendant cette période, pour tenir compte des mises à jour des sources publiques. La
-          régénération remplace la version précédente.
+          Il en découle une limite que nous préférons écrire : futur•e ne conserve pas aujourd&apos;hui
+          une copie figée du dossier tel qu&apos;il se présentait le jour de votre achat. Si une
+          analyse a compté dans une décision, gardez-en une trace de votre côté.
         </p>
         <p style={{ marginTop: 16 }}>
           futur•e s&apos;efforce de maintenir le service accessible en permanence, sans le garantir :

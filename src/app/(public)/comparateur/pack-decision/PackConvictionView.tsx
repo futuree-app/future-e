@@ -16,7 +16,7 @@ type Apercu = { apercu: ComparaisonComplete; trio: { insee: string; nom: string 
 
 const BUNDLE = [
   { t: "La comparaison complète", d: "Les trois territoires, thème par thème, ce qui les départage vraiment." },
-  { t: "Les trois rapports complets", d: "Un rapport par commune, à conserver, accessible depuis votre espace." },
+  { t: "Les trois rapports complets", d: "Un rapport par commune, accessible depuis votre espace." },
   { t: "Trois nouvelles pistes", d: "Les communes suivantes sur le même projet, si aucune des trois ne tranche." },
   { t: "AskFuture : 9 questions incluses", d: "Pour creuser ce qui compte, sur chacun des territoires." },
 ];

@@ -36,7 +36,10 @@ export const CHECKOUT_PRODUCTS: Record<CheckoutProductSlug, CheckoutProduct> = {
       // contredit : les échelles Autour et Logement demandent un dossier d'adresse, qui se paie.
       // Une promesse d'enrichissement gratuit dans le produit le moins cher rendrait tout achat
       // ultérieur illégitime aux yeux de qui l'a lue.
-      "À conserver, et régénérable une fois par an",
+      // « À conserver, et régénérable une fois par an » retiré le 05/08/2026 : rien dans le code ne
+      // régénère quoi que ce soit, et « à conserver » promettait un document remis alors que le
+      // dossier se lit en ligne. Vérifié par un grep du dépôt entier, pas de mémoire.
+      "Consultable depuis votre compte pendant au moins trois ans, sans abonnement",
       // Ajoutée le 04/08/2026 : l'escalier était CODÉ dans `dossier-pricing.ts` (les 14 € sont
       // déduits des 39 € du dossier d'adresse) et affiché nulle part. Le lecteur pouvait croire
       // qu'acheter le territoire d'abord lui coûterait 53 € au total.

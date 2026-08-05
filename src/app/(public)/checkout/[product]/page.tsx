@@ -46,11 +46,24 @@ const COPY: Record<CheckoutProductSlug, {
     // commune et rien d'autre : les échelles Autour et Logement demandent un dossier d'adresse,
     // qu'aucun paiement à 14 € ne crée. checkout-products.ts, lui, décrivait déjà le territoire
     // seul. La vitrine promettait donc davantage que la caisse.
-    promise: "Une lecture interactive de votre commune : ce qu'elle devient face au climat, ce à quoi elle est exposée, ce qui la transforme. Téléchargeable, à conserver.",
+    // CINQ PROMESSES RETIRÉES LE 05/08/2026, PARCE QU'AUCUNE N'EXISTAIT.
+    // ══════════════════════════════════════════════════════════════════════════════════════════
+    // « Téléchargeable, à conserver », « Export PDF inclus », « Régénération annuelle », « Accès
+    // permanent », « exportable en PDF, partageable en lien temporaire ». Vérifié dans tout le
+    // dépôt : aucun export PDF du rapport (seule la facture en est un), aucun mécanisme de partage,
+    // aucune régénération planifiée. Le dossier est simplement réassemblé à chaque consultation.
+    //
+    // Ces déclarations publiques entrent dans les attentes de conformité : un contenu numérique
+    // doit correspondre à sa description et aux déclarations publiques qui ont décidé l'achat. Les
+    // laisser en place, c'était vendre un produit et en livrer un autre.
+    //
+    // Elles sont remplacées par des capacités RÉELLES, pas par du vide : ce qui rend ce dossier
+    // différent est qu'il date ses sources et nomme ce qu'il ignore.
+    promise: "Une lecture interactive de votre commune : ce qu'elle devient face au climat, ce à quoi elle est exposée, ce qui la transforme.",
     whatYouGet: [
-      { n: "01", title: "Le Territoire, en entier", body: "La commune lue à travers son climat, ses risques, son cadre de vie et sa population. Écrit pour vous à partir de votre profil, sourcé sur les données publiques (DRIAS, INSEE, Géorisques, BPE). Export PDF inclus." },
+      { n: "01", title: "Le Territoire, en entier", body: "La commune lue à travers son climat, ses risques, son cadre de vie et sa population. Écrit pour vous à partir de votre profil, sourcé sur les données publiques (DRIAS, INSEE, Géorisques, BPE)." },
       { n: "02", title: "AskFuture, 3 questions", body: "De quoi revenir sur ce que le dossier laisse ouvert, avec vos mots, sur votre commune. Les réponses ne s'appuient que sur les faits examinés ici." },
-      { n: "03", title: "Régénération annuelle", body: "Une mise à jour du dossier par an, incluse, pour suivre l'évolution de votre territoire." },
+      { n: "03", title: "Daté, sourcé, et honnête sur ses limites", body: "Chaque constat porte sa source et la date à laquelle elle a été lue. Ce que les données ne permettent pas d'établir est nommé plutôt que comblé." },
       // QUATRIÈME CARTE AJOUTÉE LE 04/08/2026. La déduction de 14 € existait dans
       // `dossier-pricing.ts` depuis le 29/07 sans qu'aucun écran ne la dise : quelqu'un qui voulait
       // les trois échelles pouvait croire qu'entrer par le territoire lui coûterait 14 + 39 = 53 €,
@@ -66,7 +79,11 @@ const COPY: Record<CheckoutProductSlug, {
       // n'est envoyé. La promesse faisait donc attendre un acheteur qui pouvait déjà lire, et
       // lui laissait croire qu'il achetait un document plutôt qu'un dossier qui s'ouvre.
       { n: "02", title: "Accès immédiat", body: "Votre dossier s'ouvre dès le paiement confirmé. Rien à attendre, rien à recevoir par email." },
-      { n: "03", title: "Accès permanent", body: "Consultable à tout moment depuis votre espace, exportable en PDF, partageable en lien temporaire." },
+      // « ACCÈS PERMANENT » ENGAGEAIT SANS RIEN DÉFINIR : ce qui arrive si futur•e ferme, change
+      // d'infrastructure ou supprime les comptes n'était dit nulle part, et la formule contredisait
+      // les CGV. La durée annoncée ici et celle des CGV doivent être la même, sinon l'acheteur lit
+      // deux contrats.
+      { n: "03", title: "Consultable depuis votre compte", body: "Votre dossier se rouvre à tout moment depuis votre espace, pendant au moins trois ans. Paiement unique, sans abonnement." },
     ],
     faqs: [
       { q: "Ce dossier couvre-t-il aussi mon quartier et mon logement ?", a: "Non. Celui-ci couvre la commune. Le secteur autour de votre adresse et le logement demandent un dossier d'adresse, à 39 €, dont ces 14 € sont déduits : 25 € si vous l'ouvrez ensuite sur cette même commune." },

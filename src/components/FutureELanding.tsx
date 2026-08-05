@@ -3459,7 +3459,10 @@ export default function FutureELanding() {
                 'AskFuture : 3 questions incluses',
                 // La déduction est remontée sous le prix (cf. planPriceNote) : elle ne se répète
                 // pas ici, où elle arrivait après que la décision soit prise.
-                'Export PDF, à conserver, régénérable 1 fois par an',
+                // « Export PDF, à conserver, régénérable 1 fois par an » retiré le 05/08/2026 :
+                // trois promesses, zéro implémentation. Remplacé par ce qui distingue vraiment ce
+                // dossier des lectures concurrentes.
+                'Chaque constat daté et sourcé, ce qui manque est nommé',
               ].map((feature) => (
                 <div key={feature} style={styles.planFeature}>
                   <span style={styles.planCheck}>✓</span>
@@ -3521,7 +3524,9 @@ export default function FutureELanding() {
                 // calcule par distances et temps de parcours depuis le point, pas au mètre près.
                 'Autour de l’adresse : ce qui est accessible, selon les distances calculées',
                 'Le logement : confort d’été, risques du bâti, ce qui reste à vérifier en visite',
-                'À conserver, rouvrir et compléter au fil de votre recherche',
+                // « À conserver » suggérait un document remis. Le reste de la phrase décrit bien ce
+                // qui existe : un dossier qu'on rouvre en ligne au fil d'une recherche.
+                'À rouvrir et compléter au fil de votre recherche, depuis votre compte',
               ].map((feature) => (
                 <div key={feature} style={styles.planFeature}>
                   <span style={styles.planCheck}>✓</span>
