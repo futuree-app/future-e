@@ -134,10 +134,17 @@ export function PaymentForm({ onSuccess, submitLabel, returnUrl, onSubmit }: Pay
           }}
           style={{ marginTop: 3, width: 16, height: 16, accentColor: "var(--orange)", flexShrink: 0 }}
         />
+        {/* LE LIBELLÉ DIT LA MISE À DISPOSITION, PAS LA LECTURE (05/08/2026).
+            « en l'obtenant tout de suite je renonce » laissait entendre que le droit se perdait en
+            consultant le dossier. Il se perd au COMMENCEMENT DE LA FOURNITURE : un dossier ouvert
+            dans le compte et jamais consulté n'est déjà plus rétractable. La case et la section 6
+            des CGV doivent dire exactement la même chose, sinon l'acheteur a consenti à autre chose
+            que ce qu'il a lu. */}
         <span style={{ fontSize: 13, lineHeight: 1.6, color: "var(--fg-2)" }}>
-          Je demande que mon dossier soit ouvert <strong>immédiatement</strong> après le paiement,
-          et je reconnais qu&apos;en l&apos;obtenant tout de suite je renonce à mon droit de
-          rétractation de quatorze jours. J&apos;accepte les{" "}
+          Je demande que mon dossier soit mis à disposition{" "}
+          <strong>immédiatement</strong> après le paiement, et je reconnais que je perds mon droit
+          de rétractation de quatorze jours dès cette mise à disposition, que je consulte le dossier
+          ou non. J&apos;accepte les{" "}
           <Link
             href="/conditions-generales-de-vente"
             target="_blank"

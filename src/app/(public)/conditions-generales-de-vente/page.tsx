@@ -38,11 +38,17 @@ const PRODUITS = [
       "calcul et devient le prix payé.",
   },
   {
-    nom: "Comparaison complète",
+    // LE NOM EST CELUI QUE LE LECTEUR VOIT AU MOMENT DE PAYER. Trois noms coexistaient au
+    // 05/08/2026 : « Pack Décision » dans toute l'interface d'achat, « Comparaison complète de
+    // plusieurs communes » sur la facture, et « Comparaison complète » ici. Des conditions de vente
+    // qui nomment autrement que l'écran de paiement obligent l'acheteur à deviner qu'il s'agit du
+    // même produit. C'est le nom de l'interface qui gagne, et la facture reste plus descriptive
+    // parce qu'elle s'adresse aussi à un tiers qui ne connaît pas le produit.
+    nom: "Pack Décision",
     prix: "39 €",
     objet:
       "La mise en regard de plusieurs communes sur l'ensemble des thèmes, pour arbitrer entre " +
-      "elles.",
+      "elles. La facture le désigne comme « comparaison complète de plusieurs communes ».",
   },
 ];
 
@@ -61,7 +67,73 @@ const PRODUITS = [
    Dès l'adhésion : renseigner les trois champs, la section se réécrit seule. */
 const MEDIATEUR: { nom: string; site: string; adresse: string } | null = null;
 
+/* L'ENCADRÉ DE LA GARANTIE LÉGALE, REPRODUIT MOT POUR MOT.
+   ════════════════════════════════════════════════════════════════════════════════════════════
+   L'article D211-3 du code de la consommation impose que les conditions générales portant sur un
+   contenu numérique comportent un encadré informant le consommateur des modalités de mise en œuvre
+   des garanties légales, « conformément au modèle annexé au présent code ». Le modèle est
+   l'annexe à l'article D. 211-3, et son texte est IMPOSÉ.
+
+   NE PAS LE RÉÉCRIRE, NE PAS L'ABRÉGER, NE PAS LE « METTRE DANS LA VOIX DE futur•e ». Un résumé,
+   même fidèle et mieux écrit, ne satisfait pas l'obligation : c'est la seule partie de cette page
+   dont la rédaction n'appartient pas à futur•e. La version précédente en donnait trois phrases de
+   synthèse, ce qui était le plus gros manque de la page.
+
+   Découpé en paragraphes plutôt qu'en un bloc unique, uniquement pour le rendu : le texte est
+   identique, dans le même ordre, et l'énumération de 1° à 5° garde sa numérotation.
+
+   Source : Légifrance, annexe à l'article D. 211-3 du code de la consommation. */
+const ENCADRE_GARANTIE: string[] = [
+  "Le consommateur dispose d'un délai de deux ans à compter de la fourniture du contenu numérique ou du service numérique pour obtenir la mise en œuvre de la garantie légale de conformité en cas d'apparition d'un défaut de conformité. Durant un délai d'un an à compter de la date de fourniture, le consommateur n'est tenu d'établir que l'existence du défaut de conformité et non la date d'apparition de celui-ci.",
+  "La garantie légale de conformité emporte obligation de fournir toutes les mises à jour nécessaires au maintien de la conformité du contenu numérique ou du service numérique.",
+  "La garantie légale de conformité donne au consommateur droit à la mise en conformité du contenu numérique ou du service numérique sans retard injustifié suivant sa demande, sans frais et sans inconvénient majeur pour lui.",
+  "Le consommateur peut obtenir une réduction du prix en conservant le contenu numérique ou le service numérique ou il peut mettre fin au contrat en se faisant rembourser intégralement contre renoncement au contenu numérique ou au service numérique, si :",
+  "1° Le professionnel refuse de mettre le contenu numérique ou le service numérique en conformité ;",
+  "2° La mise en conformité du contenu numérique ou du service numérique est retardée de manière injustifiée ;",
+  "3° La mise en conformité du contenu numérique ou du service numérique ne peut intervenir sans frais imposés au consommateur ;",
+  "4° La mise en conformité du contenu numérique ou du service numérique occasionne un inconvénient majeur pour le consommateur ;",
+  "5° La non-conformité du contenu numérique ou du service numérique persiste en dépit de la tentative de mise en conformité du professionnel restée infructueuse.",
+  "Le consommateur a également droit à une réduction du prix ou à la résolution du contrat lorsque le défaut de conformité est si grave qu'il justifie que la réduction du prix ou la résolution du contrat soit immédiate. Le consommateur n'est alors pas tenu de demander la mise en conformité du contenu numérique ou du service numérique au préalable.",
+  "Dans les cas où le défaut de conformité est mineur, le consommateur n'a droit à l'annulation du contrat que si le contrat ne prévoit pas le paiement d'un prix.",
+  "Toute période d'indisponibilité du contenu numérique ou du service numérique en vue de sa remise en conformité suspend la garantie qui restait à courir jusqu'à la fourniture du contenu numérique ou du service numérique de nouveau conforme.",
+  "Les droits mentionnés ci-dessus résultent de l'application des articles L. 224-25-1 à L. 224-25-31 du code de la consommation.",
+  "Le professionnel qui fait obstacle de mauvaise foi à la mise en œuvre de la garantie légale de conformité encourt une amende civile d'un montant maximal de 300 000 euros, qui peut être porté jusqu'à 10 % du chiffre d'affaires moyen annuel (article L. 242-18-1 du code de la consommation).",
+  "Le consommateur bénéficie, en outre, de la garantie légale des vices cachés en application des articles 1641 à 1649 du code civil, pendant une durée de deux ans à compter de la découverte du défaut. Cette garantie donne droit à une réduction de prix si le contenu numérique ou le service numérique est conservé ou à un remboursement intégral contre renonciation au contenu numérique ou au service numérique.",
+];
+
 const lien = { color: "var(--orange-ink)", textDecoration: "underline" } as const;
+
+/** Un vrai encadré, parce que la réglementation en demande un et pas un paragraphe de plus. */
+function Encadre({ titre, children }: { titre: string; children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        marginTop: 20,
+        padding: "20px 22px",
+        borderRadius: 12,
+        border: "1px solid var(--border-2)",
+        background: "var(--bg-elev)",
+        fontSize: 13.5,
+        lineHeight: 1.7,
+        color: "var(--fg-2)",
+      }}
+    >
+      <p
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: 11,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          color: "var(--fg-3)",
+          margin: "0 0 14px",
+        }}
+      >
+        {titre}
+      </p>
+      {children}
+    </div>
+  );
+}
 
 export default function ConditionsGeneralesDeVentePage() {
   return (
@@ -85,11 +157,19 @@ export default function ConditionsGeneralesDeVentePage() {
           <InfoRow label="SIRET" value={LEGAL_ENTITY.siret} />
           <InfoRow label="Adresse" value={legalAddressLine()} />
           <InfoRow label="Contact" value={LEGAL_ENTITY.contactEmail} />
+          <InfoRow label="Téléphone" value={LEGAL_ENTITY.phone} />
         </InfoBlock>
+        {/* LE PUBLIC EST DÉFINI, ET IL EST ÉTROIT (05/08/2026).
+            « Toute personne qui achète » couvrait aussi un acheteur professionnel, qui ne relève
+            pas du même régime : les garanties et le droit de rétractation décrits plus bas sont
+            ceux du consommateur. Le jour où futur•e vend à des professionnels, ce sera par des
+            conditions distinctes, pas par extension de celles-ci. */}
         <p style={{ marginTop: 16 }}>
-          Ces conditions s&apos;appliquent à toute personne qui achète un dossier sur futur•e. Elles
-          sont acceptées au moment du paiement, et la version qui vous engage est celle affichée ce
-          jour-là. Les informations complètes sur l&apos;éditeur figurent dans les{" "}
+          Ces conditions s&apos;appliquent aux <strong>consommateurs</strong>, c&apos;est-à-dire aux
+          personnes physiques qui achètent à des fins n&apos;entrant pas dans le cadre de leur
+          activité professionnelle. Elles sont acceptées au moment du paiement, et la version qui
+          vous engage est celle affichée ce jour-là. Les informations complètes sur l&apos;éditeur
+          figurent dans les{" "}
           <Link href="/mentions-legales" style={lien}>mentions légales</Link>.
         </p>
       </Section>
@@ -137,11 +217,18 @@ export default function ConditionsGeneralesDeVentePage() {
           Le montant encaissé est décidé par le serveur de futur•e à partir du produit choisi, et
           jamais à partir d&apos;une valeur transmise par votre navigateur.
         </p>
+        {/* CE QUI EST PROMIS ICI DOIT ÊTRE VRAI DANS TOUS LES CAS (05/08/2026).
+            La rédaction précédente promettait une facture « émise automatiquement ». Le webhook
+            n'en émet pas quand le nom de facturation manque au compte, et il avale volontairement
+            l'échec pour ne jamais bloquer la livraison. Promettre sans condition ce que le code
+            fait sous condition, dans un document contractuel, crée l'écart le plus banal et le plus
+            coûteux : celui entre ce qui est écrit et ce qui se passe.
+            La condition est donc dite, et le recours avec. */}
         <p style={{ marginTop: 16 }}>
-          Une <strong>facture</strong>{" "}
-          est émise automatiquement dès l&apos;encaissement confirmé.
-          Elle porte le détail de la prestation, son montant et l&apos;identité du vendeur, et
-          reste disponible depuis votre compte.
+          Un <strong>e-mail de confirmation</strong> vous est envoyé dès l&apos;encaissement. Une{" "}
+          <strong>facture</strong> y est jointe dès lors que votre compte porte un nom de
+          facturation, et vous la retrouvez alors dans votre espace. Si elle manque, écrivez-nous :
+          elle est émise sans délai.
         </p>
       </Section>
 
@@ -172,17 +259,25 @@ export default function ConditionsGeneralesDeVentePage() {
         </p>
         <ul style={{ paddingLeft: 20, lineHeight: 1.9, color: "var(--fg-2)", margin: "16px 0 0" }}>
           <li>que vous demandiez expressément l&apos;exécution immédiate du contrat ;</li>
+          {/* « DÈS QUE LA FOURNITURE COMMENCE », ET NON « DÈS QUE LE DOSSIER EST LU » (05/08/2026).
+              La perte du droit ne dépend pas de ce que le client a effectivement consulté : elle
+              tient au COMMENCEMENT DE LA FOURNITURE, c'est-à-dire à la mise à disposition. Un
+              dossier ouvert et jamais ouvert par son acheteur n'est déjà plus rétractable. Écrire
+              l'inverse promettait un droit qui n'existe pas, et la formule « un dossier lu ne se
+              rend pas », meilleure à l'oreille, disait précisément la chose fausse. */}
           <li>
             que vous reconnaissiez qu&apos;en le faisant, vous{" "}
-            <strong>renoncez à votre droit de rétractation</strong> dès que le dossier vous est
-            ouvert.
+            <strong>perdez votre droit de rétractation</strong>{" "}
+            dès que la fourniture commence, c&apos;est-à-dire dès la mise à disposition du dossier
+            dans votre compte, que vous le consultiez ou non.
           </li>
         </ul>
         <p style={{ marginTop: 16 }}>
-          Sans ces deux accords, l&apos;achat ne peut pas être finalisé. Ils vous sont confirmés par
-          écrit avec votre facture. C&apos;est ce que prévoit l&apos;article L221-28 du code de la
-          consommation, et c&apos;est la contrepartie honnête d&apos;un accès immédiat : un dossier
-          lu ne se rend pas.
+          Sans ces deux accords, l&apos;achat ne peut pas être finalisé. Ils vous sont confirmés{" "}
+          <strong>dans l&apos;e-mail de confirmation de commande</strong> et, lorsqu&apos;une
+          facture est émise, sur celle-ci. C&apos;est ce que prévoit l&apos;article L221-28 du code
+          de la consommation, et c&apos;est la contrepartie d&apos;un accès immédiat : un contenu
+          numérique dont la fourniture a commencé ne se rétracte plus.
         </p>
         <p style={{ marginTop: 16 }}>
           <strong>Ce que futur•e fait quand même.</strong>{" "}
@@ -194,10 +289,20 @@ export default function ConditionsGeneralesDeVentePage() {
       </Section>
 
       <Section title="7. Durée d'accès et disponibilité">
+        {/* UNE DURÉE CHIFFRÉE, PARCE QUE C'EST UN ENGAGEMENT (05/08/2026).
+            « Tant que le service existe » se comprend humainement et ne s'exécute pas : la durée
+            dépendait alors d'un événement que futur•e décide seule. « Régénérable une fois par an »
+            ne disait ni à partir de quand, ni pendant combien de temps, ni si la nouvelle version
+            remplace l'ancienne. Trois ans et douze mois glissants sont des engagements tenables,
+            au-dessus de la durée d'usage réelle d'un dossier de décision. Arbitrage du porteur. */}
         <p>
-          Un dossier acheté reste accessible depuis votre compte tant que le service existe. Le
-          dossier de territoire est régénérable une fois par an, pour tenir compte des mises à jour
-          des sources publiques.
+          Un dossier acheté reste accessible depuis votre compte pendant{" "}
+          <strong>au moins trois ans à compter de l&apos;achat</strong>.
+        </p>
+        <p style={{ marginTop: 16 }}>
+          Le dossier de territoire peut être <strong>régénéré une fois tous les douze mois</strong>{" "}
+          pendant cette période, pour tenir compte des mises à jour des sources publiques. La
+          régénération remplace la version précédente.
         </p>
         <p style={{ marginTop: 16 }}>
           futur•e s&apos;efforce de maintenir le service accessible en permanence, sans le garantir :
@@ -218,18 +323,36 @@ export default function ConditionsGeneralesDeVentePage() {
         <p style={{ marginTop: 16 }}>
           Les sources publiques utilisées peuvent comporter des erreurs, des retards de mise à jour
           ou des lacunes. Chaque dossier nomme ce qu&apos;il sait, ce qu&apos;il ne sait pas et à
-          quelle date il l&apos;a lu. La responsabilité de futur•e ne peut être engagée pour une
-          décision prise sur la seule foi d&apos;un dossier, ni au-delà du montant payé pour lui.
+          quelle date il l&apos;a lu. Un dossier se croise avec les documents réglementaires et les
+          vérifications adaptées à votre projet : une décision prise sur sa seule foi ignorerait ce
+          qu&apos;il dit lui-même de ses limites.
+        </p>
+        {/* CE PARAGRAPHE A REMPLACÉ UN PLAFOND DE RESPONSABILITÉ (05/08/2026).
+            La version précédente finissait par « ni au-delà du montant payé pour lui ». L'article
+            R212-1 du code de la consommation répute irréfragablement abusive, dans un contrat entre
+            un professionnel et un consommateur, la clause qui supprime ou réduit le droit à
+            réparation du consommateur en cas de manquement du professionnel à l'une quelconque de
+            ses obligations. Un plafond égal au prix payé tombe exactement là.
+            Décrire la PORTÉE du service reste légitime, et c'est ce que fait le paragraphe
+            ci-dessus. Limiter la réparation ne l'est pas. */}
+        <p style={{ marginTop: 16 }}>
+          Ces limites décrivent la portée du service. Elles ne réduisent ni les garanties légales
+          dont vous bénéficiez, ni la responsabilité de futur•e en cas de manquement à ses
+          obligations.
         </p>
       </Section>
 
       <Section title="9. Garantie légale de conformité">
         <p>
-          Vous bénéficiez de la garantie légale de conformité des contenus numériques, prévue aux
-          articles L224-25-12 et suivants du code de la consommation. Elle s&apos;applique
-          indépendamment des présentes conditions et sans frais. Un contenu qui ne correspond pas à
-          ce qui était décrit doit être mis en conformité, ou le prix réduit, ou le contrat résolu.
+          Vous bénéficiez de la garantie légale de conformité des contenus numériques. Elle
+          s&apos;applique indépendamment des présentes conditions, sans frais, et rien ici ne peut
+          la réduire. Le texte ci-dessous est celui que la réglementation impose de reproduire.
         </p>
+        <Encadre titre="Garantie légale de conformité des contenus numériques et services numériques">
+          {ENCADRE_GARANTIE.map((paragraphe, i) => (
+            <p key={i} style={{ margin: i === 0 ? 0 : "12px 0 0" }}>{paragraphe}</p>
+          ))}
+        </Encadre>
       </Section>
 
       <Section title="10. Données personnelles">
@@ -272,9 +395,18 @@ export default function ConditionsGeneralesDeVentePage() {
 
       <Section title="12. Droit applicable">
         <p>
-          Ces conditions sont soumises au droit français. En cas de litige, les tribunaux français
-          sont compétents, et un consommateur peut toujours saisir la juridiction du lieu où il
-          demeurait au moment de l&apos;achat.
+          Ces conditions sont soumises au droit français, sous réserve des dispositions impératives
+          qui protègent le consommateur.
+        </p>
+        {/* LES DEUX MOMENTS, ET PAS UN SEUL (05/08/2026). La rédaction précédente ne retenait que
+            le lieu où le consommateur demeurait « au moment de l'achat ». L'article R631-3 du code
+            de la consommation lui ouvre aussi la juridiction du lieu où il demeurait au moment de
+            la SURVENANCE DU FAIT DOMMAGEABLE, ce qui compte précisément pour quelqu'un qui a
+            déménagé entre les deux, c'est-à-dire pour le lecteur type de futur•e. */}
+        <p style={{ marginTop: 16 }}>
+          En cas de litige, vous pouvez saisir soit une juridiction compétente selon les règles
+          ordinaires, soit la juridiction du lieu où vous demeuriez au moment de la conclusion du
+          contrat, soit celle du lieu où vous demeuriez lors de la survenance du fait dommageable.
         </p>
       </Section>
     </LegalShell>

@@ -55,10 +55,11 @@ function getEntitlements() {
  * stocker, s'y reporter et le reproduire à l'identique. La mention vit donc aux deux endroits.
  */
 const MENTION_RENONCEMENT =
-  "<p style=\"color:#555;font-size:13px\">Vous avez demandé l'ouverture immédiate de votre dossier " +
-  "et renoncé à votre droit de rétractation de quatorze jours, comme le prévoit l'article L221-28 " +
-  "du code de la consommation. Si le dossier ne contient pas ce qui était annoncé, écrivez-nous : " +
-  "le remboursement est accordé.</p>";
+  "<p style=\"color:#555;font-size:13px\">Vous avez demandé la mise à disposition immédiate de " +
+  "votre dossier et reconnu perdre votre droit de rétractation de quatorze jours dès cette mise à " +
+  "disposition, comme le prévoit l'article L221-28 du code de la consommation. Ce message vaut " +
+  "confirmation de cet accord sur support durable. Si le dossier ne contient pas ce qui était " +
+  "annoncé, écrivez-nous : le remboursement est accordé.</p>";
 
 // ════════════════════════════════════════════════════════════════════════════
 // LA FACTURE, ÉMISE À L'ENCAISSEMENT ET JOINTE À L'E-MAIL DE CONFIRMATION.

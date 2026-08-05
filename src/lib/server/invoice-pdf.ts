@@ -192,8 +192,9 @@ export function renderInvoicePdf(invoice: Invoice): Promise<Buffer> {
       // Le libellé reprend les deux accords tels qu'ils lui ont été présentés, sans les reformuler :
       // une confirmation qui dirait autre chose que la case ne confirmerait rien.
       t(
-        "Le client a demandé l'exécution immédiate de la prestation et a expressément renoncé à " +
-        "son droit de rétractation, conformément à l'article L221-28 13° du code de la consommation. " +
+        "Le client a demandé l'exécution immédiate de la prestation et a reconnu perdre son " +
+        "droit de rétractation dès la mise à disposition du contenu, conformément à l'article " +
+        "L221-28 13° du code de la consommation. " +
         "La présente facture vaut confirmation de cet accord sur support durable.",
       ),
       t(`${invoice.seller.nameWithForm} - SIRET ${invoice.seller.siret} - ${invoice.seller.address}`),
