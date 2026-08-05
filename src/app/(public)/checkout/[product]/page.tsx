@@ -15,17 +15,32 @@ type Theme = {
   accentGlow: string;
   orb: string;
   status: string;
+  /** La teinte de l'ÉTAT, distincte de l'accent d'action. Le vert dit « disponible ». */
+  statusTone: string;
 };
 
+/* L'ACCENT DE CET ÉCRAN EST REVENU À L'ORANGE (05/08/2026).
+   ══════════════════════════════════════════════════════════════════════════════════════════════
+   Toute la page était peinte en vert : titres, filets, pastilles, bouton d'achat. Le résultat était
+   deux accents principaux sur le même écran, la navbar posant son bouton orange à quelques
+   centimètres du CTA vert, une semaine après que la charte v1.7 a unifié la couleur de marque.
+
+   LA HIÉRARCHIE, désormais : l'orange dit l'action et la marque ; le vert dit un ÉTAT positif ; les
+   teintes de registre restent réservées au dossier de décision. Une teinte est une affirmation
+   vérifiable (DESIGN.md § 5.3) : un bouton d'achat vert n'affirmait rien, il décorait.
+
+   `statusTone` existe pour cette raison, et il est le seul vert restant : « Disponible maintenant »
+   est bien un état, et c'est la seule chose sur cette page qui en soit un. */
 const THEMES: Record<CheckoutProductSlug, Theme> = {
   "rapport-complet": {
-    accent: "var(--green)",
-    accentSoft: "var(--green-soft)",
-    accentTint: "var(--green-tint)",
-    accentRing: "rgba(74,222,128,0.36)",
-    accentGlow: "rgba(74,222,128,0.16)",
-    orb: "rgba(74,222,128,0.32)",
+    accent: "var(--orange)",
+    accentSoft: "var(--orange-soft)",
+    accentTint: "var(--orange-tint)",
+    accentRing: "var(--orange-ring)",
+    accentGlow: "rgba(232,130,58,0.16)",
+    orb: "var(--orb-orange)",
     status: "Disponible maintenant",
+    statusTone: "var(--reg-alignement)",
   },
 };
 
@@ -245,13 +260,14 @@ export default async function CheckoutPage({
                 marginBottom: 24,
               }}
             >
+              {/* LE SEUL VERT DE LA PAGE, et il dit un état, pas une action. */}
               <span
                 className="checkout-dot"
                 style={{
                   width: 8,
                   height: 8,
                   borderRadius: "50%",
-                  background: theme.accent,
+                  background: theme.statusTone,
                 }}
               />
               <span
@@ -260,7 +276,7 @@ export default async function CheckoutPage({
                   fontSize: "var(--text-kicker)",
                   letterSpacing: "var(--tracking-kicker)",
                   textTransform: "uppercase",
-                  color: theme.accent,
+                  color: theme.statusTone,
                 }}
               >
                 {theme.status}
