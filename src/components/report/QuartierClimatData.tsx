@@ -9,6 +9,7 @@ import { MetricTooltip } from "@/components/MetricTooltip";
 import type { GeorisquesSummary, GasparCatnatSummary } from "@/lib/georisques";
 import type { EaufranceSummary } from "@/lib/eaufrance";
 import type { VigieauSummary, DroughtLevel } from "@/lib/vigieau";
+import { libelleRestrictions } from "@/lib/restrictions-eau";
 import type { LittoralSummary, LittoralFacade } from "@/lib/littoral";
 import type { DemographieCardData, CouvertCardData } from "@/lib/territory-identity";
 import type { Era5Trend } from "@/lib/era5-trend";
@@ -418,13 +419,22 @@ function buildFactors(
   // sensibilisation, pas une restriction d'usage. La nommer « restriction »
   // contredit le reste de la carte. On ne parle de restriction qu'à partir
   // d'« alerte ».
-  const todayValue = vigieau?.maxLevel
-    ? vigieau.maxLevel === "vigilance"
-      ? "Vigilance sécheresse, sans restriction"
-      : `Restriction « ${levelLabel(vigieau.maxLevel).toLowerCase()} » en cours`
-    : "Aucune restriction en cours";
+  // LA RÈGLE VIT DANS `lib/restrictions-eau.ts`, pure et testée : elle distingue trois états là
+  // où ce composant n'en connaissait que deux, et une panne y annonçait « aucune restriction ».
+  const restrictions = libelleRestrictions(vigieau);
+  const todayValue = restrictions.texte;
+
   const droughtRows: { label: string; value: string }[] = [
-    { label: "Aujourd'hui", value: todayValue },
+    // « AUJOURD'HUI » AFFIRMAIT UN PRÉSENT SANS DIRE QUAND IL AVAIT ÉTÉ LU (05/08/2026). La valeur
+    // vient d'un cache d'une heure, ce qui est parfaitement acceptable pour un arrêté préfectoral,
+    // et qui ne se dit pas « en direct ». Le libellé porte donc la date de consultation : c'est le
+    // registre des données VIVANTES, distinct de la date de génération du dossier affichée en tête.
+    {
+      label: vigieau?.consultedAt
+        ? `État consulté le ${formatFrDate(vigieau.consultedAt)}`
+        : "Aujourd'hui",
+      value: todayValue,
+    },
     // Terrain : uniquement si on a une vraie observation ONDE. Sans donnée, on
     // n'invente pas une réassurance (« pas de tension ») qui contredirait une
     // restriction en cours.
@@ -449,10 +459,10 @@ function buildFactors(
         headline:
           drySoilDays != null
             ? `Environ ${drySoilDays} jours secs par an d'ici ${meta.year}`
-            : vigieau?.maxLevel
-              ? vigieau.maxLevel === "vigilance"
-                ? "Vigilance sécheresse en cours"
-                : `Restriction « ${levelLabel(vigieau.maxLevel).toLowerCase()} » en cours`
+            : restrictions.etat === "en_vigueur"
+              // MÊME PHRASE QUE LA LIGNE DU FIL, et c'est le but : deux formulations d'un même
+              // état obligeaient le lecteur à vérifier qu'elles disaient bien la même chose.
+              ? restrictions.texte
               : "Cours d'eau à sec observé",
         subhead: "Le manque durable d'eau dans les sols, même en dehors des périodes de restriction.",
         accent: "var(--orange)",

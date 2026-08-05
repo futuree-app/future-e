@@ -1,6 +1,21 @@
 # Le dossier daté et versionné
 
-**Date** : 2026-08-05 · **Statut** : **SPEC, non implémentée.** · **Avant la première vente réelle.**
+**Date** : 2026-08-05 · **Statut** : **LIVRÉ**, migration `28_decision_artifact.sql` appliquée en
+production le 05/08/2026. · **Avant la première vente réelle.**
+
+> **Ce qui a été livré**, en trois commits : le contrat et son parseur (`81fab64`), le figement et sa
+> relecture (`20f14a6`), la distinction des temporalités à l'écran. La table existe, RLS active,
+> vide : le premier artefact naîtra du premier achat.
+>
+> **Un défaut trouvé en chemin, et il ne venait pas de ce lot.** `getVigieauSummary` rendait, en cas
+> de panne de l'API, un objet strictement indistinguable d'une consultation réussie sans
+> restriction. L'écran annonçait « Aucune restriction en cours » alors que personne n'avait pu
+> demander, sur la donnée qui dit ce qui est INTERDIT en ce moment. C'est le patron que ce dépôt
+> combat partout ailleurs, absent là où il comptait le plus.
+>
+> **Ce qui reste ouvert** : les enrichissements millésimés affichent leur millésime là où ils
+> s'affichent (doctrine `autour-response.ts`, inchangée), mais aucun contrôle automatique ne le
+> vérifie. Le jour où un enrichissement arrivera muet sur sa date, rien ne le signalera.
 
 **Le problème en une phrase** : futur•e vend une décision, et cette décision se réécrit toute seule.
 
