@@ -13,6 +13,7 @@ import type { AgglomerationCategory } from "./agglomeration-facts.ts";
 import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
 import type { CriteriaSummary } from "./criteria-registry.ts";
 import type { EvidenceTargetKey } from "./evidence-targets.ts";
+import type { PermisSnapshot } from "../logement-autour-types.ts";
 import type {
   CommuneAttributes, EvaluationContext, HardConstraintAssessment, HardConstraintKey,
 } from "../hard-constraints.ts";
@@ -53,7 +54,16 @@ export type EvidenceRef = {
   // lien absent vaut mieux qu'un lien qui promet une démonstration inexistante (cf. evidence-targets.ts).
   targetKey?: EvidenceTargetKey;
   sourceMode?: "persisted_snapshot" | "live_fetch"; // Logement : DPE persisté vs réglementaire frais
-  observedAt?: string; // pour live_fetch
+  /**
+   * LA DATE À LAQUELLE LA SOURCE A ÉTÉ OBSERVÉE, qu'elle ait été lue en direct ou conservée dans un
+   * snapshot persistant.
+   *
+   * Le commentaire disait « pour live_fetch » : c'était vrai tant que seul le Logement s'en
+   * servait. Les permis sont gelés avec leur date de consultation, et c'est précisément ce qui
+   * permet à leur fait de porter sa borne temporelle PARTOUT où il est projeté, au lieu de
+   * dépendre d'un bloc voisin resté à l'écran.
+   */
+  observedAt?: string;
 };
 
 type BaseFact = {
@@ -333,6 +343,15 @@ export type ModuleFacts = CommuneAttributes & {
   // contient l'adresse, comparé à sa commune. Absent = pas d'adresse, IRIS non résolu, secteur non
   // résidentiel, ou artefact indisponible : dans tous ces cas la règle ne dit rien.
   secteur?: SecteurFacts;
+  /**
+   * LE REGISTRE DES AUTORISATIONS D'URBANISME, tel qu'il a été gelé à l'analyse.
+   *
+   * OPTIONNEL POUR LA MÊME RAISON QUE `secteur` : absent veut dire que le registre n'a pas été
+   * consulté (dossier antérieur au 01/08/2026, ou API muette au moment de l'analyse), jamais qu'il
+   * n'y a rien autour. La règle rend alors `uncertain`, et surtout pas `not_applicable`, qui
+   * dirait que la question ne se pose pas pour cette adresse.
+   */
+  permis?: PermisSnapshot;
 };
 
 /**

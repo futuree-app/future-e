@@ -18,14 +18,21 @@ import type { Dossier, ModuleFacts } from "@/lib/decision/decision-fact";
 import type { EvaluationContext } from "@/lib/hard-constraints";
 import type { DpeRecord } from "@/lib/dpe";
 import type { UserProject } from "@/lib/user-project";
+import type { PermisSnapshot } from "@/lib/logement-autour-types";
 
 export async function DossierAvecLogement({
-  project, address, savedDpe, communeFacts, communeDossier, logementLink, insee, scopeKey, hard,
+  project, address, savedDpe, permis, communeFacts, communeDossier, logementLink, insee, scopeKey, hard,
   userId,
 }: {
   project: UserProject;
   address: ResolvedAddress;
   savedDpe: DpeRecord | null;
+  /**
+   * LE REGISTRE DES AUTORISATIONS, gelé à l'analyse. `null` veut dire NON CONSULTÉ (dossier
+   * antérieur au 01/08/2026, ou API muette), et la règle rend alors `uncertain` : jamais une
+   * absence d'autorisation qui n'a pas été établie.
+   */
+  permis: PermisSnapshot | null;
   communeFacts: ModuleFacts;
   communeDossier: Dossier;
   logementLink: { href: string; label: string } | null;
@@ -55,7 +62,7 @@ export async function DossierAvecLogement({
   const assemble = stocke?.artifact
     ? null
     : await assembleAddressDossier({
-        project, address, savedDpe, communeFacts, communeDossier, hard, scopeKey,
+        project, address, savedDpe, communeFacts, communeDossier, hard, scopeKey, permis,
       });
   // LE RATTRAPAGE, comme pour le territoire : un dossier d'adresse acheté avant ce lot n'aurait
   // jamais d'artefact. Il n'est tenté que si l'assemblage a ABOUTI : figer un repli communal comme

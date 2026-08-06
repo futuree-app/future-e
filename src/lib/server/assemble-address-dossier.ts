@@ -13,6 +13,7 @@ import type { Dossier, ModuleFacts } from "@/lib/decision/decision-fact";
 import type { EvaluationContext } from "@/lib/hard-constraints";
 import type { DpeRecord } from "@/lib/dpe";
 import type { UserProject } from "@/lib/user-project";
+import type { PermisSnapshot } from "@/lib/logement-autour-types";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // L'ASSEMBLAGE DU DOSSIER AU GRAIN ADRESSE.
@@ -43,8 +44,14 @@ export async function assembleAddressDossier(input: {
   communeDossier: Dossier;
   hard: EvaluationContext;
   scopeKey: string;
+  /**
+   * LE REGISTRE DES AUTORISATIONS, gelé à l'analyse du dossier. `null` (ou absent) veut dire NON
+   * CONSULTÉ, et la règle rend alors `uncertain` : jamais une absence d'autorisation qui n'a pas
+   * été établie. Aucune I/O ici, la donnée arrive déjà figée dans le snapshot du dossier.
+   */
+  permis?: PermisSnapshot | null;
 }): Promise<AddressDossierResult> {
-  const { project, address, savedDpe, communeFacts, communeDossier, hard, scopeKey } = input;
+  const { project, address, savedDpe, communeFacts, communeDossier, hard, scopeKey, permis } = input;
   try {
     const data = await fetchLogementDecisionDataWithTimeout(address);
     const logement = buildLogementFacts(data, savedDpe, address.label);
@@ -54,6 +61,10 @@ export async function assembleAddressDossier(input: {
       .catch(() => null);
     const facts: ModuleFacts = {
       ...communeFacts, hasAddress: true, logement, secteur: buildSecteurFacts(car),
+      // LE REGISTRE ENTRE DANS LE MOTEUR. Aucune I/O : la donnée est déjà gelée dans le snapshot du
+      // dossier. `undefined` quand elle est absente, pour que la règle distingue « non consulté »
+      // de « rien trouvé ».
+      ...(permis ? { permis } : {}),
     };
     // LE GRAIN CHANGE. Une commune peut passer sur son point de référence et échouer pour une adresse
     // située à son extrémité : ce n'est pas une divergence de moteur, c'est une lecture plus fine, et la

@@ -10,6 +10,7 @@ import { PRODUCT_CONVENTIONS_VERSION } from "@/lib/hard-constraints";
 import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import type { DpeRecord } from "@/lib/dpe";
 import type { UserProject } from "@/lib/user-project";
+import type { Face3Snapshot, PermisSnapshot } from "@/lib/logement-autour-types";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // LA GÉNÉRATION DE L'ARTEFACT DE DÉCISION, À LA DÉLIVRANCE.
@@ -60,6 +61,21 @@ export type GenerationOutcome =
  * Sans effet de bord visible : appelé depuis `after()`, il ne retarde aucun rendu, et son échec
  * laisse le dossier s'afficher comme avant.
  */
+/**
+ * Le registre tel qu'il a été gelé dans le snapshot du dossier, ou `null` s'il n'y en a pas encore
+ * (dossier tout juste acheté, page « Autour » jamais ouverte) ou si la lecture échoue.
+ */
+async function lirePermisGele(
+  sb: SupabaseClient, dossierId: string,
+): Promise<PermisSnapshot | null> {
+  const { data } = await sb
+    .from("address_dossiers")
+    .select("snapshot")
+    .eq("id", dossierId)
+    .maybeSingle();
+  return (data?.snapshot as Face3Snapshot | null)?.permis ?? null;
+}
+
 export async function generateDecisionArtifact(
   sb: SupabaseClient, userId: string, project: UserProject, cible: Cible,
 ): Promise<GenerationOutcome> {
@@ -88,6 +104,18 @@ export async function generateDecisionArtifact(
       return { status: "ready" };
     }
 
+    // LE REGISTRE DES AUTORISATIONS SE LIT ICI, ET NON DEPUIS L'APPELANT.
+    // ══════════════════════════════════════════════════════════════════════════════════════════
+    // Il est gelé dans le snapshot du dossier, écrit par la page « Autour ». S'il ne remontait pas
+    // jusqu'ici, l'écran et l'artefact ne diraient pas la même chose : la page assemblée montre le
+    // contrôle des permis, l'artefact figé dans la foulée l'aurait perdu, et le rechargement
+    // suivant, servi par l'artefact, ferait disparaître une carte que le lecteur venait de voir.
+    //
+    // Le lire en base plutôt que le recevoir en paramètre évite qu'un appelant futur l'oublie. Une
+    // lecture qui échoue vaut « non consulté » : la règle rend `uncertain`, jamais une absence
+    // d'autorisation qu'on n'a pas établie.
+    const permis = await lirePermisGele(sb, cible.dossierId);
+
     const vue = await assembleAddressDossier({
       project,
       address: cible.address,
@@ -96,6 +124,7 @@ export async function generateDecisionArtifact(
       communeDossier: commune.dossier,
       hard: commune.hard,
       scopeKey,
+      permis,
     });
 
     // ON N'ENREGISTRE JAMAIS UN REPLI COMME LA VERSION VENDUE.
