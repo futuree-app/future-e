@@ -264,7 +264,7 @@ export default function ProfessionnelsPage() {
               {[
                 { num: '+ 124 %', title: 'Sinistres climatiques', desc: "Hausse des sinistres habitation liés aux risques naturels en France entre 2000 et 2024. Les assureurs durcissent. Les primes augmentent. Vos clients posent des questions.", src: 'France Assureurs · 2024' },
                 { num: '~ 35 000', title: 'Communes françaises', desc: "Chacune avec un profil distinct sur sept thèmes territoriaux. futur•e couvre l'intégralité du territoire métropolitain et ultra-marin.", src: 'INSEE · DRIAS · Géorisques' },
-                { num: '10 s', title: 'Pour une lecture complète', desc: "De la saisie du nom de commune à l'affichage des sept thèmes sourcés, prêts à être montrés à votre client ou exportés en PDF.", src: 'Mesuré en conditions réelles' },
+                { num: '10 s', title: 'Pour une lecture complète', desc: "De la saisie du nom de commune à l'affichage des sept thèmes sourcés, prêts à être montrés à votre client.", src: 'Mesuré en conditions réelles' },
               ].map((w) => (
                 <div key={w.num} className="why-card">
                   <div style={{ fontFamily: "var(--font-serif)", fontSize: 46, lineHeight: 1, color: ACCENT, marginBottom: 14, fontWeight: 400, letterSpacing: '-0.02em' }}>{w.num}</div>
@@ -305,7 +305,13 @@ export default function ProfessionnelsPage() {
                   { time: 'Min 02', text: <><strong style={{ color: 'var(--fg-1)', fontWeight: 500 }}>Le client pose la même question.</strong></> },
                   { time: 'Min 02 + 10s', text: <>Vous tapez « Saint-Jean-de-Luz » dans futur•e. La fiche s'affiche : submersion, qualité air, vulnérabilité économique, projection 2050. Sources citées.</> },
                   { time: 'Min 04', text: <>Vous montrez l'écran. <strong style={{ color: 'var(--fg-1)', fontWeight: 500 }}>Vous expliquez les données ensemble.</strong> Le client comprend. La décision se prend en connaissance.</> },
-                  { time: 'Min 10', text: <>Vous exportez le PDF. <strong style={{ color: 'var(--fg-1)', fontWeight: 500 }}>Vous avez une trace.</strong> Le client a une référence.</> },
+                  // L'EXPORT PDF N'EXISTE PAS, et cette scène le racontait au présent (10/08/2026).
+                  // Le bandeau « Lancement automne 2026 » et le surtitre « Prévu au lancement »
+                  // cadrent les listes de capacités ; une scène minutée, elle, se lit comme un
+                  // compte rendu de ce qui se passe aujourd'hui. Ce pas dit maintenant ce que la
+                  // fiche fait vraiment : chaque chiffre porte son producteur et sa date, et le
+                  // client peut rouvrir la source lui-même.
+                  { time: 'Min 10', text: <>Vous montrez les sources. <strong style={{ color: 'var(--fg-1)', fontWeight: 500 }}>Chaque chiffre porte son producteur et sa date.</strong> Le client peut les rouvrir lui-même.</> },
                 ].map((s) => (
                   <div key={s.time} className="scene-step">
                     <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: ACCENT, letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>{s.time}</span>
