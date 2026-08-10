@@ -41,8 +41,8 @@ registre, pas à imiter son texte final.**
 
 1. **L'objet central est le dossier, pas le rapport.** Territoire, Autour et Logement deviennent
    les lieux de la preuve ; la page du dossier devient le lieu de l'arbitrage.
-2. **Le projet est la source de vérité de toute l'expérience.** Une modification du projet doit
-   changer, de façon explicable, ce que les quatre vues disent.
+2. **Quatre niveaux reliés, jamais fusionnés** (voir la section dédiée plus bas). Une modification
+   au bon niveau doit changer, de façon explicable, ce que les vues disent.
 3. **Le triptyque du gratuit** : une correspondance, une contradiction, une inconnue, chacune
    réelle, datée et sourcée. C'est la démonstration de la nature du moteur, pas un aperçu tronqué
    du payant.
@@ -57,6 +57,60 @@ registre, pas à imiter son texte final.**
 8. **Le rôle de l'IA est borné** : parser le projet et les documents, reformuler des faits déjà
    sélectionnés, expliquer une contradiction, proposer des questions à partir d'inconnues
    déterminées. Jamais décider de la couverture, d'un seuil, du verdict ou de la provenance.
+
+## Quatre niveaux, reliés et distincts
+
+« Une source de vérité » ne veut pas dire « une seule table qui contient tout ». Fusionner ces
+niveaux produirait un objet monstrueux et, surtout, poserait chaque donnée au mauvais endroit.
+La cohérence vient de leur **relation**, et les cardinalités sont la partie qui décide de
+l'architecture.
+
+| Niveau | Ce qu'il porte | Cardinalité |
+|---|---|---|
+| **Profil** | Ce qui survit aux recherches : santé, mobilité, composition du foyer, préférences durables | Une personne |
+| **Projet** | Cette recherche-ci : partir en Bretagne, louer ou acheter, échéance, priorités, contraintes | Plusieurs par personne |
+| **Candidat** | Ce bien ou ce territoire : la posture vis-à-vis de CE logement, le diagnostic retenu, les visites, les points à vérifier | Plusieurs par projet |
+| **Version d'analyse** | Les faits, sources, règles et la conclusion, calculés à un instant donné | Plusieurs par candidat |
+
+C'est cette structure, et non un objet unique, qui réalise
+`projet → candidats → preuves → arbitrages → décision`.
+
+Elle explique aussi un symptôme relevé sur le compte réel : le module Logement redemande après
+l'analyse si le lecteur achète, loue ou habite. Cette donnée appartient au **candidat**, jamais à la
+personne, et elle était cherchée au mauvais niveau.
+
+Conséquence sur le gel : un changement matériel au niveau du **projet** ou du **candidat** (posture,
+diagnostic) ne réécrit jamais l'analyse vendue, il produit une **version nouvelle**, datée, la
+précédente restant lisible. C'est la même règle que pour le diagnostic, tenue depuis le 10/08/2026.
+
+## Un prompt n'est pas une frontière de sûreté
+
+Formulation retenue de la contre-lecture du 10/08/2026, et elle vaut pour tout le produit.
+« Ne déduis jamais X » est une préférence exprimée à un modèle, pas une garantie d'exécution.
+
+La preuve est dans notre propre code, en creux : le verdict décisionnel est fiable parce qu'il
+**n'est jamais généré** (`generable: false` sur le bloc du plan de conclusion), et non parce qu'une
+instruction le lui interdirait. Les synthèses de module, elles, ne reposent que sur l'instruction,
+et c'est exactement là que des inférences interdites ont été observées.
+
+Règle qui en découle : une propriété qui doit être vraie **doit être structurellement impossible à
+enfreindre** (elle n'est pas générée), ou **vérifiée après coup par un validateur qui refuse**
+(patron de `FORMULATIONS_INTERDITES` dans `src/lib/coverage-closure.ts`). Un texte qui échoue à la
+validation ne s'affiche pas ; l'afficher en journalisant revient à n'avoir aucun garde-fou.
+
+## Intégrité contre conversion : deux natures de défaut
+
+Distinction plus utile qu'une liste de priorités numérotées. Un défaut d'**intégrité** peut livrer
+au lecteur une analyse fausse, invérifiable ou rattachée au mauvais bien. Un défaut de
+**conversion** rend le produit moins compréhensible ou moins désirable, sans corrompre le dossier.
+
+Intégrité : les synthèses libres, l'identité du bien tout au long du parcours, le recalcul explicite
+après un changement matériel, la chaîne de preuve visible.
+Conversion : la conclusion qui arrive après plusieurs écrans, la longueur du rapport, la barre
+AskFuture sur mobile.
+
+Une précision qui évite un mois de travail mal orienté : **aucune donnée fausse n'a été observée**.
+Ce qui est cassé, c'est la couche qui MONTRE la preuve, jamais la preuve.
 
 ## Ce que futur•e doit posséder
 
