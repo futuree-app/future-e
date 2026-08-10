@@ -1494,3 +1494,38 @@ test("posture recherche : « votre projet » reste, c'est le mot juste", () => {
   const p = buildConclusionPlan(baseInput({ coverage: "high", orientation: "favorable", hasFavorable: true, favorableCount: 3 }));
   assert.equal(p.verdict.headline.text, "Toulouse semble bien correspondre à votre projet.");
 });
+
+// ── Le compte du héros et les cartes que le lecteur a sous les yeux ─────────────
+
+test("le héros compte les contrôles MONTRÉS, et dit ceux qui restent plus bas", () => {
+  // Vu à l'écran le 10/08/2026 sur un dossier réel (La Rochelle) : le héros annonçait « Trois points
+  // restent à contrôler », la minute en montrait deux, et la liste complète en portait six. Trois
+  // périmètres, un seul chiffre. Le héros comptait `majorReserveCount`, c'est-à-dire les réserves dont
+  // la matérialité n'est pas `secondary` : un compte exact selon sa propre définition, et invérifiable
+  // pour le lecteur, qui ne voit pas les tiers.
+  //
+  // Six réserves affichées, trois structurantes (inondation, argiles, cavités) et trois secondaires
+  // (indemnisations, permis, périmètre patrimonial), comme sur le dossier réel.
+  const plan = buildConclusionPlan(baseInput({
+    communeNom: "La Rochelle",
+    coverage: "high", orientation: "major_reserves", hasFavorable: false, favorableCount: 0,
+    majorReserveCount: 3, reservesShown: 6,
+    shownFacts: [
+      verification("f1", "structuring"), verification("f2", "structuring"),
+      verification("f3", "structuring"), verification("f4", "secondary"),
+      verification("f5", "secondary"), verification("f6", "secondary"),
+    ],
+  }));
+  assert.equal(plan.verdict.label, "Correspondance à nuancer");
+  // Le chiffre du héros EST le nombre de cartes de contrôle retenues par la minute.
+  const montres = plan.controles.visibles;
+  assert.ok(montres > 0 && montres < 6, `périmètre attendu strictement entre 0 et 6, reçu ${montres}`);
+  assert.match(
+    plan.verdict.headline.text,
+    new RegExp(`^${["Un", "Deux", "Trois", "Quatre", "Cinq"][montres - 1]} points? reste`),
+    `héros : « ${plan.verdict.headline.text} » pour ${montres} carte(s) montrée(s)`,
+  );
+  // Et le reste du dossier est annoncé, jamais tu : 6 = ce qui est montré + ce qui figure plus bas.
+  assert.equal(plan.controles.enPlus, 6 - montres);
+  assert.match(plan.verdict.detail, /constats? figurent? plus bas\.$|constat figure plus bas\.$/);
+});

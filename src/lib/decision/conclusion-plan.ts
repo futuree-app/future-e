@@ -610,16 +610,23 @@ export type PerimetreControles = { visibles: number; enPlus: number };
 // à qui on annonçait trois autres constats n'avait nulle part où les lire. La liste complète est
 // désormais sous la minute, sur la même page. Aucun lien n'est injecté dans cette prose : elle est
 // fortement contrainte, jamais générée, et la surface est immédiatement en dessous.
+// LA SECONDE CLAUSE SEULE, quand le héros porte DÉJÀ le compte des contrôles montrés. Elle ne peut
+// pas être reconstruite à la main sur chaque branche : « autres » dépend de ce que la synthèse
+// montre, et l'oublier ferait dire « Quatre constats figurent plus bas » sous un héros qui vient
+// d'en annoncer deux, comme si les deux comptes portaient sur le même pool.
+function controlesPlusBas(p: PerimetreControles): string {
+  if (p.enPlus <= 0) return "";
+  const autres = p.visibles > 0;
+  return p.enPlus > 1
+    ? ` ${capitalize(enLettres(p.enPlus))}${autres ? " autres constats" : " constats"} figurent plus bas.`
+    : ` ${autres ? "Un autre constat" : "Un constat"} figure plus bas.`;
+}
+
 function suiteControles(p: PerimetreControles): string {
   const ici = p.visibles > 0
     ? ` ${p.visibles > 1 ? `${capitalize(enLettres(p.visibles))} constats restent` : "Un constat reste"} par ailleurs à contrôler.`
     : "";
-  const ailleurs = p.enPlus > 0
-    ? ` ${p.enPlus > 1
-        ? `${p.visibles > 0 ? capitalize(enLettres(p.enPlus)) + " autres constats" : capitalize(enLettres(p.enPlus)) + " constats"} figurent`
-        : `${p.visibles > 0 ? "Un autre constat" : "Un constat"} figure`} plus bas.`
-    : "";
-  return `${ici}${ailleurs}`;
+  return `${ici}${controlesPlusBas(p)}`;
 }
 
 function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreControles): VerdictBuild {
@@ -918,14 +925,30 @@ function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreCon
     // qui met l'incapacité du côté de futur•e alors que la couverture est ÉLEVÉE : les données sont
     // là, c'est la situation qui est mitigée. L'effacement n'est légitime que quand l'objet de la
     // phrase EST notre incapacité.
+    // LE HÉROS COMPTE CE QUE LE LECTEUR A SOUS LES YEUX (10/08/2026, décision porteur). Il comptait
+    // `majorReserveCount`, les réserves affichées dont la matérialité n'est pas `secondary`. Vu à
+    // l'écran sur un dossier réel : « Trois points restent à contrôler », deux cartes dans la minute,
+    // six dans la liste complète. Trois périmètres sous un seul chiffre, et le seul qu'on annonçait
+    // était le seul que le lecteur ne peut pas vérifier, faute de voir les tiers.
+    //
+    // Le compte porte donc sur `controles.visibles`, les cartes de contrôle que la minute retient,
+    // et `controlesPlusBas` dit le reste. Le lecteur compte ce qu'il voit, additionne, et retombe sur
+    // le dossier. La hiérarchie ne disparaît pas pour autant : c'est la SÉLECTION qui la porte, en
+    // remontant les structurantes, là où elle est agissante plutôt qu'affichée.
+    //
+    // `visibles === 0` reste possible (la minute peut n'avoir retenu que des écarts) : la phrase perd
+    // alors son compte plutôt que d'annoncer zéro, et la clause « plus bas » porte tout le dossier.
+    const montres = controles.visibles;
     return {
       label: "Correspondance à nuancer", tone: "caution",
       // « conclure à Toulouse » se lit comme « tirer une conclusion sur place » : la conclusion porte
       // SUR la commune, elle ne s'y tient pas.
       headline: namedReserve ?? POSTURE(
-        n > 1
-          ? `${capitalize(enLettres(n))} points restent à contrôler avant de conclure sur ${nom}.`
-          : `Un point reste à contrôler avant de conclure sur ${nom}.`,
+        montres > 1
+          ? `${capitalize(enLettres(montres))} points restent à contrôler avant de conclure sur ${nom}.`
+          : montres === 1
+            ? `Un point reste à contrôler avant de conclure sur ${nom}.`
+            : `Des points restent à contrôler avant de conclure sur ${nom}.`,
       ),
       // « Ces contrôles portent sur des points qui pèsent » reste le moteur qui décrit son propre
       // travail. La phrase dit maintenant ce que le lecteur en fait : ils pèsent dans SA décision.
@@ -945,9 +968,13 @@ function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreCon
       // aucun candidat concurrent entre les deux. Le favorable passe en second, introduit par « Par
       // ailleurs », qui dit explicitement le changement de registre. C'est aussi l'ordre juste pour un
       // dossier en réserves majeures : il ne s'ouvre pas sur le positif.
-      detail: !input.hasFavorable
-        ? `Tant que ${n > 1 ? "ces points ne sont pas levés" : "ce point n'est pas levé"}, rien ne permet de dire que ${voc.repond(nom)}.`
-        : `${n > 1 ? "Ces points pèsent" : "Ce point pèse"} dans votre décision. Par ailleurs, ${favorableNomme(input) ?? (plusieurs ? `${nom} répond bien à plusieurs de vos priorités` : voc.elementFavorable(nom))}.`,
+      //
+      // Le démonstratif s'accorde sur le compte du HÉROS, jamais sur `majorReserveCount` : « ce point »
+      // sous un héros qui vient d'en annoncer quatre relèverait du même défaut, un cran plus bas.
+      detail: (!input.hasFavorable
+        ? `Tant que ${montres === 1 ? "ce point n'est pas levé" : "ces points ne sont pas levés"}, rien ne permet de dire que ${voc.repond(nom)}.`
+        : `${montres === 1 ? "Ce point pèse" : "Ces points pèsent"} dans votre décision. Par ailleurs, ${favorableNomme(input) ?? (plusieurs ? `${nom} répond bien à plusieurs de vos priorités` : voc.elementFavorable(nom))}.`)
+        + controlesPlusBas(controles),
     };
   }
 
@@ -1002,7 +1029,11 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
   // vraie à l'échelle du dossier, qu'une répartition inventée.
   const controles: PerimetreControles = (() => {
     if (input.shownFacts.length === 0 && input.shownCompositions.length === 0) {
-      return { visibles: input.reservesShown, enPlus: 0 };
+      // `max` et non `reservesShown` seul : depuis que le héros compte sur ce périmètre, un appelant
+      // partiel qui ne renseigne que `majorReserveCount` (fixtures, tests du verdict seul) verrait son
+      // compte tomber à zéro et la phrase perdre son nombre. Sur un dossier réel les deux coïncident,
+      // `reservesShown` étant le total dont `majorReserveCount` est un sous-ensemble.
+      return { visibles: Math.max(input.reservesShown, input.majorReserveCount), enPlus: 0 };
     }
     const estControle = (id: string): boolean =>
       input.shownFacts.some((f) => f.id === id && f.role === "verification")
