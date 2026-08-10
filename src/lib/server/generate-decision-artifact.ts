@@ -76,15 +76,21 @@ async function lirePermisGele(
   return (data?.snapshot as Face3Snapshot | null)?.permis ?? null;
 }
 
+/**
+ * `version` : la place à réserver. Elle vaut 1 pour un premier figement (webhook, rattrapage d'un
+ * dossier antérieur). Elle vaut la suivante quand une version PRÊTE existe et qu'une pièce apportée
+ * par le lecteur l'a périmée : la précédente reste en base, et `readLatestArtifact` sert la plus
+ * haute. Une version prête ne se réécrit jamais, c'est la promesse de la migration 28.
+ */
 export async function generateDecisionArtifact(
-  sb: SupabaseClient, userId: string, project: UserProject, cible: Cible,
+  sb: SupabaseClient, userId: string, project: UserProject, cible: Cible, version = 1,
 ): Promise<GenerationOutcome> {
   const scopeKey = artifactScopeKey(cible.kind === "adresse" ? cible.dossierId : null);
   try {
     // LA PLACE SE RÉSERVE AVANT DE TRAVAILLER. Deux webhooks concurrents, ou un rejeu Stripe,
     // constateraient sinon tous deux qu'aucun artefact n'existe et généreraient deux fois. Le perdant
     // s'arrête ici, sur la contrainte unique de la table.
-    const reserve = await claimArtifactSlot(sb, userId, cible.insee, scopeKey);
+    const reserve = await claimArtifactSlot(sb, userId, cible.insee, scopeKey, version);
     if (!reserve) return { status: "skipped", reason: "artefact déjà réservé pour cette version" };
 
     const commune = await buildCommuneDossier(cible.insee, project, {
@@ -92,7 +98,7 @@ export async function generateDecisionArtifact(
       citycode: cible.kind === "adresse" ? cible.address.citycode : null,
     });
     if (!commune) {
-      await failArtifact(sb, userId, cible.insee, scopeKey);
+      await failArtifact(sb, userId, cible.insee, scopeKey, version);
       return { status: "failed", reason: `commune ${cible.insee} introuvable` };
     }
 
@@ -100,7 +106,7 @@ export async function generateDecisionArtifact(
       const artefact = buildDecisionArtifact(
         commune.dossier, project, new Date().toISOString(), PRODUCT_CONVENTIONS_VERSION,
       );
-      await completeArtifact(sb, userId, cible.insee, scopeKey, artefact);
+      await completeArtifact(sb, userId, cible.insee, scopeKey, artefact, version);
       return { status: "ready" };
     }
 
@@ -137,19 +143,19 @@ export async function generateDecisionArtifact(
     //
     // L'échec est donc marqué, la place reste prise, et la génération se rejoue.
     if (vue.status !== "done") {
-      await failArtifact(sb, userId, cible.insee, scopeKey);
+      await failArtifact(sb, userId, cible.insee, scopeKey, version);
       return { status: "failed", reason: "lecture Logement indisponible, repli communal non figé" };
     }
 
     const artefact = buildDecisionArtifact(
       vue.dossier, project, new Date().toISOString(), PRODUCT_CONVENTIONS_VERSION,
     );
-    await completeArtifact(sb, userId, cible.insee, scopeKey, artefact);
+    await completeArtifact(sb, userId, cible.insee, scopeKey, artefact, version);
     return { status: "ready" };
   } catch (error) {
     // Le marquage lui-même peut échouer (base injoignable) : on ne laisse pas cette seconde panne
     // remonter, sinon elle masquerait la première et ferait tomber le webhook.
-    await failArtifact(sb, userId, cible.insee, scopeKey).catch(() => {});
+    await failArtifact(sb, userId, cible.insee, scopeKey, version).catch(() => {});
     return { status: "failed", reason: error instanceof Error ? error.message : String(error) };
   }
 }

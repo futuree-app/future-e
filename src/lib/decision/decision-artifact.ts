@@ -153,3 +153,42 @@ export function dossierAServir<D>(
   if (fige) return { dossier: fige.dossier, generatedAt: fige.generatedAt, source: "artefact" };
   return { dossier: assemble, generatedAt: null, source: "assemblage" };
 }
+
+/**
+ * LE DIAGNOSTIC ARRIVE APRÈS LA VENTE, ET LE GEL NE PEUT PAS L'IGNORER.
+ *
+ * L'artefact est figé au webhook, à un instant où le client n'a PAS PU choisir son diagnostic :
+ * `savedDpe` y vaut `null` par construction, le dossier venant d'être créé. Le choix se fait
+ * ensuite, sur la page Logement. Sans cette règle, il n'entrait jamais dans la décision : le module
+ * Logement affichait l'étiquette, la conclusion figée continuait de l'ignorer, et la carte
+ * `logement.dpe-faible` (une réserve STRUCTURANTE) n'apparaissait dans aucun dossier vendu. Deux
+ * moitiés du même écran disaient deux choses du même logement.
+ *
+ * ── CE N'EST PAS UNE ENTORSE AU GEL, C'EST SA RAISON D'ÊTRE ──────────────────────────────────
+ * Le gel protège le lecteur d'une réécriture qu'il n'a pas demandée. Ici, c'est LUI qui apporte la
+ * pièce. La version figée n'est pas modifiée : elle reste en base, et une version 2 est produite,
+ * comme la migration 28 l'annonçait dès le premier jour.
+ *
+ * ── POURQUOI COMPARER DES DATES PLUTÔT QUE DES DPE ───────────────────────────────────────────
+ * L'artefact ne porte pas trace du diagnostic qui l'a nourri, et le lui ajouter demanderait un
+ * schéma de payload nouveau, donc une seconde forme à maintenir pour tous les artefacts déjà
+ * vendus. « Le choix est postérieur au figement » répond exactement à la question posée : un
+ * artefact ne peut pas avoir vu une pièce déposée après lui. La règle couvre du même coup la
+ * CORRECTION d'un diagnostic, qui repose une date plus récente.
+ *
+ * Les statuts sans diagnostic (`not_in_list`, `not_found`) ne posent pas de date : ils ne changent
+ * pas la matière (`savedDpe` reste nul) et ne périment donc rien.
+ *
+ * ── UNE DATE ILLISIBLE NE PÉRIME JAMAIS ──────────────────────────────────────────────────────
+ * L'inverse ferait régénérer à chaque ouverture, sans fin et sans trace, un dossier dont une date
+ * est corrompue.
+ */
+export function artefactPerimeParLeDpe(
+  stocke: StoredArtifact | null, dpeChoisiLe: string | null,
+): boolean {
+  if (!stocke?.artifact || !dpeChoisiLe) return false;
+  const fige = Date.parse(stocke.artifact.generatedAt);
+  const choisi = Date.parse(dpeChoisiLe);
+  if (Number.isNaN(fige) || Number.isNaN(choisi)) return false;
+  return choisi > fige;
+}

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   parseDecisionArtifact, buildDecisionArtifact, artifactScopeKey, ENGINE_VERSION,
-  dossierAServir,
+  dossierAServir, artefactPerimeParLeDpe,
 } from "./decision-artifact.ts";
 import type { Dossier } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
@@ -159,4 +159,55 @@ test("SANS ARTEFACT, on sert l'assemblage ET AUCUNE DATE", () => {
     assert.equal(servi.generatedAt, null, "une date est apparue sur un dossier non figé");
     assert.equal((servi.dossier as typeof vivant).conclusion, "Assemblé à l'instant.");
   }
+});
+
+// ── La péremption par le diagnostic ────────────────────────────────────────────
+
+test("le DPE choisi APRÈS le figement périme l'artefact", () => {
+  // Le cas réel, et il est structurel : l'artefact est figé au webhook, où le client n'a par
+  // construction pas encore choisi son diagnostic (`savedDpe: null`). S'il le choisit ensuite, le
+  // dossier le porte, l'écran Logement l'affiche, et la conclusion figée continue de l'ignorer.
+  const fige = {
+    version: 1, status: "ready" as const,
+    generatedAt: "2026-08-05T09:30:00.000Z",
+    artifact: { generatedAt: "2026-08-05T09:30:00.000Z" },
+  };
+  assert.equal(artefactPerimeParLeDpe(fige, "2026-08-06T11:00:00.000Z"), true);
+});
+
+test("le DPE choisi AVANT le figement n'y change rien", () => {
+  const fige = {
+    version: 1, status: "ready" as const,
+    generatedAt: "2026-08-05T09:30:00.000Z",
+    artifact: { generatedAt: "2026-08-05T09:30:00.000Z" },
+  };
+  // L'artefact l'a vu : le périmer relancerait une génération à chaque ouverture.
+  assert.equal(artefactPerimeParLeDpe(fige, "2026-08-05T09:00:00.000Z"), false);
+  assert.equal(artefactPerimeParLeDpe(fige, null), false);
+});
+
+test("rien à périmer quand il n'y a rien de figé, ni sur une date illisible", () => {
+  const apres = "2026-08-06T11:00:00.000Z";
+  // Aucun artefact, ou un artefact que le parseur a refusé : le chemin normal génère déjà.
+  assert.equal(artefactPerimeParLeDpe(null, apres), false);
+  assert.equal(
+    artefactPerimeParLeDpe({ version: 1, status: "generating", generatedAt: null, artifact: null }, apres),
+    false,
+  );
+  // UNE DATE ILLISIBLE NE PÉRIME JAMAIS. L'inverse ferait régénérer sans fin un dossier dont une
+  // date est corrompue, à chaque ouverture, sans que rien ne le dise.
+  assert.equal(
+    artefactPerimeParLeDpe(
+      { version: 1, status: "ready", generatedAt: "pas une date", artifact: { generatedAt: "pas une date" } },
+      apres,
+    ),
+    false,
+  );
+  assert.equal(
+    artefactPerimeParLeDpe(
+      { version: 1, status: "ready", generatedAt: "2026-08-05T09:30:00.000Z", artifact: { generatedAt: "2026-08-05T09:30:00.000Z" } },
+      "hier matin",
+    ),
+    false,
+  );
 });

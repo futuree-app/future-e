@@ -7,7 +7,7 @@
 // dans le corps d'un composant ne se rejoue pas. Ce composant ne fait plus que demander et rendre.
 import { assembleAddressDossier } from "@/lib/server/assemble-address-dossier";
 import { readLatestArtifact } from "@/lib/server/decision-artifact-store";
-import { dossierAServir } from "@/lib/decision/decision-artifact";
+import { dossierAServir, artefactPerimeParLeDpe } from "@/lib/decision/decision-artifact";
 import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
 import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
@@ -21,12 +21,18 @@ import type { UserProject } from "@/lib/user-project";
 import type { PermisSnapshot } from "@/lib/logement-autour-types";
 
 export async function DossierAvecLogement({
-  project, address, savedDpe, permis, communeFacts, communeDossier, logementLink, insee, scopeKey, hard,
-  userId,
+  project, address, savedDpe, dpeChoisiLe, permis, communeFacts, communeDossier, logementLink, insee,
+  scopeKey, hard, userId,
 }: {
   project: UserProject;
   address: ResolvedAddress;
   savedDpe: DpeRecord | null;
+  /**
+   * QUAND le diagnostic a été choisi (`selected_dpe_at`), ou `null` si aucun ne l'a été. C'est ce
+   * qui permet de savoir si l'artefact figé a pu le voir : il est figé au webhook, où le choix
+   * n'existe pas encore. Voir `artefactPerimeParLeDpe`.
+   */
+  dpeChoisiLe: string | null;
   /**
    * LE REGISTRE DES AUTORISATIONS, gelé à l'analyse. `null` veut dire NON CONSULTÉ (dossier
    * antérieur au 01/08/2026, ou API muette), et la règle rend alors `uncertain` : jamais une
@@ -57,9 +63,14 @@ export async function DossierAvecLogement({
   const sb = await createClient();
   const stocke = await readLatestArtifact(sb, userId, insee, scopeKey).catch(() => null);
 
+  // LA SEULE PIÈCE QUI PÉRIME UNE VERSION VENDUE : le diagnostic, parce qu'il arrive APRÈS elle.
+  // L'artefact est figé au webhook, quand le client n'a pas encore pu le choisir. Sans cette
+  // vérification, la carte de l'étiquette énergétique n'entrait dans AUCUN dossier vendu.
+  const perime = artefactPerimeParLeDpe(stocke, dpeChoisiLe);
+
   // L'ASSEMBLAGE N'EST DEMANDÉ QUE S'IL SERVIRA. Un artefact prêt évite les huit lectures externes
   // et le moteur entier : c'est ce qui rend la relecture reproductible, et accessoirement immédiate.
-  const assemble = stocke?.artifact
+  const assemble = stocke?.artifact && !perime
     ? null
     : await assembleAddressDossier({
         project, address, savedDpe, communeFacts, communeDossier, hard, scopeKey, permis,
@@ -68,16 +79,24 @@ export async function DossierAvecLogement({
   // jamais d'artefact. Il n'est tenté que si l'assemblage a ABOUTI : figer un repli communal comme
   // la version vendue d'un dossier d'adresse priverait l'acheteur de ce qu'il a payé, sous une page
   // d'apparence normale. C'est la même règle qu'au webhook, et elle vaut ici pour la même raison.
-  if (!stocke && assemble?.status === "done") {
+  //
+  // UN ARTEFACT PÉRIMÉ N'EST PAS RÉÉCRIT, IL EST SUCCÉDÉ : on réserve la version SUIVANTE, et celle
+  // sur laquelle le lecteur a pu décider reste en base, lisible. C'est la promesse écrite dans la
+  // migration 28 le premier jour, tenue ici pour la première fois.
+  if ((!stocke || perime) && assemble?.status === "done") {
+    const version = perime ? (stocke?.version ?? 0) + 1 : 1;
     after(async () => {
       const r = await generateDecisionArtifact(sb, userId, project, {
         kind: "adresse", insee, dossierId: scopeKey.replace(/^logement:/, ""), address, savedDpe,
-      });
-      if (r.status === "failed") console.error("[artefact] rattrapage adresse échoué", { insee, r });
+      }, version);
+      if (r.status === "failed") console.error("[artefact] rattrapage adresse échoué", { insee, version, r });
     });
   }
 
-  const servi = dossierAServir(stocke, assemble?.dossier ?? communeDossier);
+  // Un artefact périmé ne s'affiche pas en attendant son successeur : il dirait le logement SANS son
+  // diagnostic, alors que le module Logement, juste à côté, l'affiche. On sert l'assemblage vivant
+  // le temps que la version suivante s'écrive, comme pour un dossier qui n'en a pas encore.
+  const servi = dossierAServir(perime ? null : stocke, assemble?.dossier ?? communeDossier);
   const vue = {
     dossier: servi.dossier,
     status: servi.source === "artefact" ? ("done" as const) : (assemble?.status ?? "unavailable"),
