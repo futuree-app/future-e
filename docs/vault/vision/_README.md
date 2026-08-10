@@ -12,3 +12,7 @@ problème il répond, ce qu'il refuse d'être. Pages stables, peu nombreuses, fo
   surtout ce qu'il paie vraiment (temps épargné, confiance, continuité).
 - **`positionnement.md`** — positionnement de marque et posture éditoriale : le ton, le
   rapport à la preuve et à l'incertitude, ce que futur•e refuse d'écrire et d'être.
+- **`objet-central-dossier-de-decision.md`** — quel objet futur•e vend et fait vivre, face à
+  une IA généraliste qui sait déjà produire un rapport sourcé : un dossier de décision
+  rattaché à un projet, versionné et cumulatif. Ce qui est adopté des audits du 10/08/2026,
+  ce qui en est corrigé, la kill list, et l'écart mesuré entre la thèse et le produit du jour.

@@ -222,6 +222,51 @@ représentativité, pédagogie CatNat non prédictive). Le pari passe de « gel�
 - **Ce qu'on a appris** : —
 - **Dernière revue** : 2026-07-02.
 
+## Pari #10 — Le dossier vit dans une décision réelle (il est rouvert)
+
+Le pari qui décide si futur•e vend un **dossier** ou un **rapport**, et donc si la thèse de
+`vision/objet-central-dossier-de-decision.md` tient. Un dossier qu'on lit une fois est un rapport
+avec une base de données derrière : le coût de changement est nul, la continuité ne se paie pas, et
+l'avance technique reste invisible. Issu des deux audits du 10/08/2026.
+
+- **Statut** : non testé, et pas encore instrumenté.
+- **Confiance** : faible. Elle repose sur la doctrine (une décision immobilière ou de mobilité
+  s'étale sur des semaines) et sur une observation de structure (les inconnues du dossier sont des
+  questions de visite), jamais sur un lecteur observé revenant après une visite.
+- **Signal attendu** : des acheteurs qui rouvrent leur dossier après une visite, ajoutent une pièce
+  (diagnostic, observation) ou changent une question restée ouverte.
+- **Source de preuve** : les premiers acheteurs, en conversation directe ; puis les réouvertures et
+  les versions d'artefact générées après le figement initial, que le lot du 10/08 rend enfin
+  observables (une v2 n'existe que si une pièce est arrivée après la vente).
+- **Critère de mort** : sur les premières ventes, aucun dossier n'est rouvert après sa lecture
+  initiale, et aucune pièce n'est ajoutée. Alors le versionnement, la collaboration et l'import de
+  documents sont du travail investi au mauvais endroit, et la valeur est entièrement dans la
+  première lecture, donc dans Autour et l'adresse.
+- **Ce qu'on a appris** : —
+- **Dernière revue** : 2026-08-10.
+
+## Pari #11 — La différence avec une IA généraliste est compréhensible sans être expliquée
+
+futur•e peut être objectivement plus rigoureuse et rester perçue comme « un rapport que ChatGPT
+ferait aussi ». Ce pari porte sur la **perception**, pas sur la qualité du moteur : il décide si la
+rigueur doit devenir visible dans l'écran gratuit (le triptyque correspondance / contradiction /
+inconnue) ou rester une garantie de fond.
+
+- **Statut** : non testé.
+- **Confiance** : faible. Le second audit note que les synthèses et l'interface conversationnelle
+  rapprochent mentalement le produit d'un assistant spécialisé, ce qui est l'inverse de l'effet
+  recherché.
+- **Signal attendu** : quelqu'un qui, après trente secondes sur une page gratuite, reformule
+  spontanément futur•e comme un contrôle structuré (« ça vérifie des critères et ça dit ce qu'il
+  manque ») plutôt que comme une rédaction automatique.
+- **Source de preuve** : les premiers lecteurs, en conversation ; un test à deux versions de page
+  si le volume le permet un jour.
+- **Critère de mort** : les lecteurs continuent de décrire futur•e comme une IA qui rédige, y
+  compris devant une preuve déterministe montrée avant paiement. Alors la différenciation ne se
+  joue pas sur la méthode, et il faut la chercher dans la donnée d'adresse et l'action.
+- **Ce qu'on a appris** : —
+- **Dernière revue** : 2026-08-10.
+
 ---
 
 ## L'agent viendra après la page (pas l'inverse)
