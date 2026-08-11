@@ -15,8 +15,8 @@ import { getDossier } from "@/lib/address-dossier-store";
 import { updateOwnedAddressDossier } from "@/lib/server/address-dossier-write";
 import { buildFactHash, buildSynthesisPayload, type SynthesisData } from "@/lib/logement-synthesis-cache";
 import { deriveClimatProjete } from "@/lib/drias-json";
-import { validateCoverageClosure, correctionPourClosure } from "@/lib/coverage-closure";
-import { validateAssertions, correctionPourAssertions } from "@/lib/synthesis-guardrails";
+import { validateAssertions } from "@/lib/synthesis-guardrails";
+import { runValidatedSynthesis } from "@/lib/synthesis-run";
 
 export const dynamic = "force-dynamic";
 // Aligné sur synthesize-quartier : un stream lent ne doit pas être tronqué par la durée par
@@ -382,9 +382,25 @@ export async function POST(req: NextRequest) {
   const factHash = buildFactHash(body.data);
 
   // Cache touché : texte figé, zéro LLM (sauf régénération forcée).
+  //
+  // LE CACHE PASSE PAR LE MÊME CONTRÔLE QUE LA GÉNÉRATION (revue du 11/08/2026). Il le contournait
+  // entièrement : un texte écrit avant que le garde-fou existe, ou sous une version antérieure de
+  // ses règles, était resservi tel quel indéfiniment. Le retrait de l'altitude du payload change le
+  // hash et invalide les textes du jour, mais par effet collatéral : la prochaine règle ajoutée
+  // n'aurait, elle, invalidé personne.
+  //
+  // Un cache refusé n'est pas une erreur pour le lecteur : on le jette et on régénère, ce que la
+  // suite de la fonction fait déjà. Le texte fautif reste en base jusqu'à ce qu'une génération
+  // conforme l'écrase, et il n'est plus jamais servi.
   if (!body.force && existing?.synthesis_fact_hash === factHash && existing.synthesis_text) {
-    return new Response(existing.synthesis_text, {
-      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+    const verdictCache = validateAssertions(existing.synthesis_text);
+    if (verdictCache.ok) {
+      return new Response(existing.synthesis_text, {
+        headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+      });
+    }
+    console.error("[synthesize-logement] cache refusé, régénération", {
+      raison: `assertion_${verdictCache.famille}`, detail: verdictCache.extrait,
     });
   }
 
@@ -398,103 +414,62 @@ ${JSON.stringify(payload, null, 2)}`;
   const MODEL = anthropic("claude-sonnet-4-6");
   const OPTIONS = { anthropic: { effort: "medium", thinking: { type: "disabled" } } } as const;
 
-  // ════════════════════════════════════════════════════════════════════════════════════════════
-  // LE VERROU DE COUVERTURE, POSÉ SEULEMENT LÀ OÙ IL Y A QUELQUE CHOSE À VERROUILLER.
-  //
-  // Quand toutes les dimensions ont pu être lues, le texte n'a aucune règle particulière à tenir :
-  // on streame, et le lecteur voit la prose s'écrire. Quand une dimension MANQUE, la règle existe
-  // (le calme se borne à ce qui a été lu, l'inconnue se nomme) et une consigne de prompt ne la
-  // garantit pas : cette route produit de la prose libre, sans plan ni schéma, contrairement à la
-  // conclusion du dossier qui passe par `validateGeneratedBlocks`.
-  //
-  // Dans ce cas-là seulement, on BUFFERISE : on génère en entier, on vérifie, et on reprend une
-  // fois si le texte enfreint la règle. Le coût est quelques secondes sans affichage progressif,
-  // sur une minorité de dossiers, et il achète la seule chose qui compte ici, ne pas faire lire
-  // « rien à signaler » à quelqu'un dont on n'a pas pu mesurer la moitié du logement.
-  //
-  // Un second échec LAISSE PASSER le texte et journalise. Refuser tout net rendrait un dossier
-  // payé muet, ce qui est pire que le défaut qu'on corrige ; l'incident se voit dans les logs et
-  // dans un texte qu'on peut relire.
-  // ════════════════════════════════════════════════════════════════════════════════════════════
   const nonLues = ((payload.couverture as { non_lues?: string[] } | undefined)?.non_lues) ?? [];
 
   // ══════════════════════════════════════════════════════════════════════════════════════════
   // LE TEXTE EST TOUJOURS VÉRIFIÉ AVANT D'ÊTRE VU (11/08/2026), ET UN REFUS RESTE UN REFUS.
   //
-  // Deux changements, tous deux payés par la perte du streaming, et tous deux nécessaires.
+  // L'orchestration elle-même vit dans `lib/synthesis-run.ts`, où ses garanties sont testées :
+  // relance unique avec correction citée, refus au second échec, panne distinguée d'un refus, et
+  // surtout aucun texte refusé rendu à l'appelant, donc aucun texte refusé persistable.
+  //
+  // Ce qui a changé ici, et pourquoi :
   //
   // 1. LA VÉRIFICATION NE DÉPEND PLUS DE LA COUVERTURE. Le verrou ne se posait que lorsqu'une
   //    dimension manquait ; un dossier entièrement lu partait en streaming, sans aucun contrôle.
   //    Or les trois synthèses trouvées en base le 11/08 portaient des inférences interdites par
   //    le prompt, indépendamment de toute lacune de couverture
-  //    (docs/audits/2026-08-11-syntheses-logement-fautives.md). Une prose ne peut pas se vérifier
-  //    après avoir été affichée : on la génère en entier, on la contrôle, puis on la rend.
+  //    (docs/audits/2026-08-11-syntheses-logement-fautives.md). Une prose ne se vérifie pas après
+  //    avoir été affichée : le streaming a donc été retiré.
   //
-  // 2. UN SECOND ÉCHEC NE LAISSE PLUS PASSER. L'ancien commentaire disait qu'un dossier payé muet
-  //    serait pire que le défaut corrigé. C'est faux, et l'inverse est vrai : le module n'est
-  //    jamais muet, ses cartes déterministes portent tous les faits, leurs preuves et leurs
-  //    limites. Ce qui disparaît en cas de refus est la PROSE. Laisser passer, c'est afficher à
-  //    un acheteur une causalité que le moteur n'établit pas, sous une marque qui promet
-  //    l'inverse. Le refus se dit au client (422), il ne se déguise pas en panne.
+  // 2. UN SECOND ÉCHEC NE LAISSE PLUS PASSER. L'ancien commentaire jugeait qu'un dossier payé muet
+  //    serait pire que le défaut corrigé. C'est l'inverse : le module n'est jamais muet, ses cartes
+  //    déterministes portent chaque fait, sa preuve et sa limite. Ce qui disparaît en cas de refus
+  //    est la PROSE. Le refus se dit au client (422), il ne se déguise pas en panne.
   // ══════════════════════════════════════════════════════════════════════════════════════════
-  {
-    let texte = "";
-    let correction = "";
-    let refus: { raison: string; detail: string } | null = null;
-
-    for (let essai = 0; essai < 2; essai++) {
-      const gen = await generateText({
-        model: MODEL,
-        providerOptions: OPTIONS,
-        system: SYSTEM_PROMPT,
-        prompt: essai === 0 ? userMessage : `${userMessage}\n\n${correction}`,
-      }).catch((err: unknown) => {
-        console.error("[synthesize-logement] generateText failed:", err);
-        return null;
-      });
-      if (!gen?.text?.trim()) break;
-
-      texte = gen.text;
-      refus = null;
-
-      // Les assertions d'abord : elles portent sur ce que le texte AFFIRME, quand la clôture ne
-      // regarde que ce qu'il conclut des dimensions non lues. Une phrase peut être irréprochable
-      // du point de vue de la couverture et inventer un mécanisme.
-      const assertions = validateAssertions(texte);
-      if (!assertions.ok) {
-        refus = { raison: `assertion_${assertions.famille}`, detail: assertions.extrait };
-        correction = correctionPourAssertions(assertions);
-      } else if (nonLues.length > 0) {
-        const closure = validateCoverageClosure(texte, nonLues);
-        if (!closure.ok) {
-          refus = { raison: closure.raison, detail: closure.detail };
-          correction = correctionPourClosure(closure, nonLues);
-        }
-      }
-
-      if (!refus) break;
-      console.error("[synthesize-logement] texte refusé", { essai, ...refus });
-    }
-
-    if (!texte.trim()) return new Response("AI provider unavailable.", { status: 502 });
-
-    if (refus) {
-      // RIEN N'EST PERSISTÉ. Un texte refusé qui entrerait en base serait resservi tel quel au
-      // prochain chargement par le cache de `factHash`, et le contrôle n'aurait servi qu'une fois.
-      console.error("[synthesize-logement] refus définitif après relance", refus);
-      return new Response("La lecture rédigée n'a pas passé les contrôles.", { status: 422 });
-    }
-
-    after(async () => {
-      await updateOwnedAddressDossier(user.id, body.dossierId!, {
-        synthesis_text: texte,
-        synthesis_fact_hash: factHash,
-        synthesis_generated_at: new Date().toISOString(),
-      }).catch((e: unknown) => console.error("[synthesize-logement] persist failed:", e));
+  const issue = await runValidatedSynthesis(async (correction) => {
+    const gen = await generateText({
+      model: MODEL,
+      providerOptions: OPTIONS,
+      system: SYSTEM_PROMPT,
+      prompt: correction ? `${userMessage}\n\n${correction}` : userMessage,
+    }).catch((err: unknown) => {
+      console.error("[synthesize-logement] generateText failed:", err);
+      return null;
     });
+    return gen?.text ?? null;
+  }, nonLues);
 
-    return new Response(texte, {
-      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
-    });
+  if (issue.status === "unavailable") {
+    return new Response("AI provider unavailable.", { status: 502 });
   }
+
+  if (issue.status === "refused") {
+    // MESURABLE SANS JOURNALISER LA PROSE : la raison et le nombre d'essais suffisent à suivre le
+    // taux de refus par famille. Le détail est la phrase en cause, jamais le texte entier.
+    console.error("[synthesize-logement] refus définitif", { ...issue.refus, essais: issue.essais });
+    return new Response("La lecture rédigée n'a pas passé les contrôles.", { status: 422 });
+  }
+
+  after(async () => {
+    await updateOwnedAddressDossier(user.id, body.dossierId!, {
+      synthesis_text: issue.texte,
+      synthesis_fact_hash: factHash,
+      synthesis_generated_at: new Date().toISOString(),
+    }).catch((e: unknown) => console.error("[synthesize-logement] persist failed:", e));
+  });
+
+  return new Response(issue.texte, {
+    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+  });
 }

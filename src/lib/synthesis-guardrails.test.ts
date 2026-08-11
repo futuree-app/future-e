@@ -39,12 +39,17 @@ test("la sortie du 2 Crébillon est refusée (absence d'exposition conclue)", ()
 
 // ── Ce qui doit PASSER : le coût d'un faux positif est la prose entière ────────────────────────
 
-test("une lecture honnête du même dossier passe", () => {
-  // Les deux premiers paragraphes réels de Crébillon, qui ne portent aucune faute : ils décrivent
-  // le diagnostic fourni et nomment ce qu'il ne renseigne pas.
-  const bon = `Le diagnostic de ce petit appartement de 20,5 m² renseigne une ventilation mécanique qui régule l'humidité en continu : c'est le trait le plus concret que le diagnostic donne sur son fonctionnement quotidien, et il explique en partie la classe D malgré une surface aussi réduite.
+test("une lecture strictement descriptive passe", () => {
+  // TEXTE DESCRIPTIF, PAS « HONNÊTE » (revue du 11/08/2026). La version précédente de ce test
+  // utilisait le paragraphe réel de Crébillon, qui contient « il explique en partie la classe D » :
+  // une causalité que le payload n'établit pas. Le filet ne la détecte pas, et c'est assumé, mais
+  // un test ne doit pas la CONSACRER comme exemple de ce qui est correct.
+  //
+  // Ce texte-ci ne fait que rapporter ce que le diagnostic renseigne, et nommer ce qu'il ne
+  // renseigne pas.
+  const bon = `Le diagnostic de cet appartement de 20,5 m² renseigne une ventilation mécanique, qui renouvelle l'air en continu.
 
-Pour les beaux jours, le diagnostic indique que l'air peut traverser l'appartement d'une façade à l'autre, et que ses murs offrent une résistance thermique intermédiaire à la chaleur. Les protections solaires aux fenêtres ne sont pas renseignées dans le diagnostic : c'est le point qui reste ouvert sur ce chapitre.`;
+Il indique que l'air peut traverser le logement d'une façade à l'autre, et décrit des murs de résistance thermique intermédiaire. Les protections solaires aux fenêtres ne sont pas renseignées.`;
   assert.equal(validateAssertions(bon).ok, true);
 });
 
@@ -94,4 +99,45 @@ test("accents et apostrophes typographiques ne contournent pas le filet", () => 
   // d'un développeur.
   assert.equal(validateAssertions("Il n'y a pas de plan de prévention sur cette parcelle.").ok, false);
   assert.equal(validateAssertions("Le bien est à l’abri des crues.").ok, false);
+});
+
+// ── Ce que la revue du 11/08/2026 a trouvé, et qui doit rester mort ────────────────────────────
+
+test("une phrase honnête ne couvre pas une phrase fautive qui la suit", () => {
+  // Le désamorçage travaillait sur une fenêtre de caractères après la PREMIÈRE occurrence : la
+  // phrase honnête absorbait la fautive, et l'affirmation passait.
+  const v = validateAssertions(
+    "Aucune exposition n'a pu être établie faute de données. Pourtant, l'adresse ne porte aucune exposition aux inondations.",
+  );
+  assert.equal(v.ok, false);
+  assert.equal(v.ok === false && v.famille, "absence_conclue");
+  // Le refus cite la phrase FAUTIVE, pas la première du texte.
+  assert.match(v.ok === false ? v.extrait : "", /Pourtant/);
+});
+
+test("une incertitude sur un AUTRE sujet ne désamorce rien", () => {
+  // « Son confort d'été n'a pas pu être établi » parle du confort, pas de l'exposition : hors de la
+  // phrase, un marqueur d'incertitude ne qualifie pas l'affirmation qui précède.
+  const v = validateAssertions(
+    "L'adresse ne porte aucune exposition aux inondations. Son confort d'été n'a pas pu être établi.",
+  );
+  assert.equal(v.ok, false);
+  assert.equal(v.ok === false && v.famille, "absence_conclue");
+});
+
+test("un nom de rue n'est pas une protection", () => {
+  // « 2 rue de la Digue » était refusé : un odonyme n'affirme rien, et un faux positif coûte toute
+  // la prose du module.
+  assert.equal(validateAssertions("Le logement est situé 2 rue de la Digue, dans un immeuble de 1930.").ok, true);
+  // L'ouvrage compte quand il PROTÈGE.
+  assert.equal(validateAssertions("Une digue protège ce quartier des crues du fleuve.").ok, false);
+});
+
+test("plusieurs phrases honnêtes d'affilée passent, quel que soit leur ordre", () => {
+  assert.equal(
+    validateAssertions(
+      "Le confort d'été n'a pas pu être établi, faute de diagnostic attribuable. Aucune exposition n'a pu être établie à la parcelle.",
+    ).ok,
+    true,
+  );
 });

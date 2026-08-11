@@ -65,46 +65,81 @@ const REGLES: Regle[] = [
   },
   {
     // Un mécanisme ou une protection dont la donnée n'existe pas.
+    //
+    // « DIGUE » SEUL A ÉTÉ RETIRÉ (revue du 11/08/2026) : « le logement est situé 2 rue de la
+    // Digue » était refusé comme protection supposée. Un odonyme n'affirme rien, et un faux positif
+    // coûte la prose entière. L'ouvrage ne compte que lorsqu'il PROTÈGE quelque chose, ce que les
+    // formes verbales ci-dessous attrapent.
     famille: "protection_supposee",
-    motifs: ["a l'abri", "protege des crues", "protegee des crues", "mise hors d'eau", "digue"],
+    motifs: [
+      "a l'abri", "protege des crues", "protegee des crues", "mise hors d'eau",
+      "digue protege", "digue qui protege", "protege par une digue", "protegee par une digue",
+    ],
     desamorcable: true,
   },
 ];
 
-// Ce qui transforme une conclusion en constat de lacune. Cherché dans la FENÊTRE qui suit le motif :
-// « aucune exposition n'a pu être établie » est honnête, « ne porte aucune exposition » ne l'est pas.
+// Ce qui transforme une conclusion en constat de lacune. « Aucune exposition n'a pu être établie »
+// décrit ce qu'on ne sait pas ; « ne porte aucune exposition » affirme qu'il n'y a rien.
 const INCERTITUDE = [
   "n'a pas pu", "n'a pu", "n'est pas etabli", "n'est pas etablie", "faute de", "non renseigne",
   "non renseignee", "pas ete mesure", "pas ete mesuree", "reste inconnu", "reste inconnue",
-  "n'a pas ete", "impossible",
+  "n'a pas ete", "impossible", "n'ont pas pu", "n'ont pu",
 ];
-const FENETRE = 70;
+
+// LE DÉSAMORÇAGE EST BORNÉ À LA PHRASE, ET CHAQUE PHRASE EST EXAMINÉE (revue du 11/08/2026).
+//
+// Une fenêtre de caractères après le premier motif laissait passer deux textes réels :
+//
+//   « Aucune exposition n'a pu être établie faute de données. Pourtant, l'adresse ne porte
+//     aucune exposition aux inondations. »   → la phrase honnête couvrait la fautive
+//   « L'adresse ne porte aucune exposition aux inondations. Son confort d'été n'a pas pu être
+//     établi. »                              → une incertitude SANS RAPPORT désamorçait l'affirmation
+//
+// Une seule occurrence était cherchée, et le marqueur pouvait appartenir à une autre proposition.
+// On découpe donc sur la ponctuation forte, et un marqueur ne vaut que dans SA phrase.
+function phrases(t: string): string[] {
+  return t.split(/[.!?;\n]+/).map((p) => p.trim()).filter(Boolean);
+}
 
 /**
  * Le texte porte-t-il une affirmation que le moteur n'établit pas ?
  *
- * Rend le PREMIER motif rencontré : il suffit à refuser, et la relance cite ce motif au modèle.
+ * Rend le PREMIER motif retenu, dans l'ordre de lecture : il suffit à refuser, et la relance le
+ * cite au modèle avec sa phrase.
  */
 export function validateAssertions(text: string): AssertionVerdict {
-  const t = fold(text);
-  for (const regle of REGLES) {
-    for (const motif of regle.motifs) {
-      const i = t.indexOf(motif);
-      if (i === -1) continue;
-      if (regle.desamorcable) {
-        const suite = t.slice(i, i + motif.length + FENETRE);
-        if (INCERTITUDE.some((marqueur) => suite.includes(marqueur))) continue;
+  for (const phrase of phrases(fold(text))) {
+    for (const regle of REGLES) {
+      for (const motif of regle.motifs) {
+        if (!phrase.includes(motif)) continue;
+        // Le marqueur d'incertitude doit qualifier CETTE proposition, pas se trouver dans le
+        // voisinage : hors de la phrase, il parle d'autre chose.
+        if (regle.desamorcable && INCERTITUDE.some((m) => phrase.includes(m))) continue;
+        return {
+          ok: false,
+          motif,
+          famille: regle.famille,
+          // La phrase entière, pas une fenêtre de caractères : c'est elle qu'on cite au modèle
+          // pour qu'il sache quoi réécrire, et elle qui rend un log de refus lisible.
+          extrait: retrouvePhrase(text, phrase),
+        };
       }
-      return {
-        ok: false,
-        motif,
-        famille: regle.famille,
-        // De quoi comprendre le refus dans un log sans rouvrir la base.
-        extrait: text.slice(Math.max(0, i - 40), i + motif.length + 60).replace(/\s+/g, " ").trim(),
-      };
     }
   }
   return { ok: true };
+}
+
+/**
+ * La phrase telle que le lecteur la lirait (accents, majuscules), à partir de sa forme normalisée.
+ * Le repli sur la forme normalisée est acceptable : elle reste compréhensible dans un log.
+ */
+function retrouvePhrase(original: string, phraseNormalisee: string): string {
+  const cible = phraseNormalisee.slice(0, 40);
+  for (const p of phrases(original)) {
+    if (fold(p).slice(0, 40) === cible) return p.replace(/\s+/g, " ").trim();
+  }
+  return phraseNormalisee;
 }
 
 /** La correction envoyée au modèle pour sa seconde tentative. */

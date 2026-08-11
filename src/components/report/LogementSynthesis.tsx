@@ -9,7 +9,11 @@ import { buildFactHash, type SynthesisData } from "@/lib/logement-synthesis-cach
 // texte parce qu'il affirmait plus que ce que le moteur établit (voir `synthesis-guardrails`). Le
 // distinguer d'une panne est une question d'honnêteté : « réessayez dans un instant » serait faux,
 // puisque rien ne dit qu'une relance produirait un texte conforme.
-type State = "idle" | "streaming" | "done" | "error" | "refused";
+//
+// « loading » et non plus « streaming » : la réponse arrive d'un bloc depuis le 11/08/2026, une
+// prose ne se vérifiant pas après avoir été affichée. Un état qui garde le nom de l'ancien
+// comportement finit par le faire revenir.
+type State = "idle" | "loading" | "done" | "error" | "refused";
 
 export function LogementSynthesis({
   ready, data, dossierId, insee,
@@ -38,7 +42,7 @@ export function LogementSynthesis({
     abortRef.current = controller;
     lastHashRef.current = factHash;
     setText("");
-    setState("streaming");
+    setState("loading");
     posthog?.capture("logement_ai_summary_started", { insee });
     try {
       const res = await fetch("/api/synthesize-logement", {
@@ -100,7 +104,7 @@ export function LogementSynthesis({
             ))}
           </div>
         )}
-        {state === "streaming" && !text && (
+        {state === "loading" && !text && (
           <p style={{ fontSize: 14, color: "var(--fg-4)" }}>Lecture en cours…</p>
         )}
         {state === "error" && (
