@@ -73,6 +73,31 @@ test("buildSynthesisPayload exclut autour/irep/friches/posture", () => {
   assert.equal("posture" in p, false);
 });
 
+test("buildSynthesisPayload exclut l'altitude : une donnée dont aucun usage n'est autorisé", () => {
+  // TROIS SYNTHÈSES STOCKÉES, TROIS INFÉRENCES INTERDITES (capture du 11/08/2026, textes exacts
+  // dans docs/audits/2026-08-11-syntheses-logement-fautives.md) :
+  //
+  //   « le bâti est bas : à 7,5 mètres d'altitude, les fondations sont proches d'un sol qui,
+  //     selon les saisons, travaille »
+  //   « l'altitude de 8 mètres environ n'éloigne pas le bien des contraintes de sol »
+  //
+  // Le prompt interdisait déjà cette déduction en toutes lettres (« L'altitude seule n'est pas un
+  // phénomène, ne la transformez pas en signal »), et le payload transmettait la valeur quand
+  // même. Une donnée fournie sans usage autorisé finit mobilisée : on donne rarement une
+  // information inutile à quelqu'un, et le modèle le sait.
+  //
+  // L'altitude ne nourrit AUCUN fait, aucune règle, aucune preuve de ce module. La frontière
+  // n'est donc pas une consigne mieux écrite, c'est l'absence de la donnée.
+  const p = buildSynthesisPayload(fullData());
+  assert.equal("altitude" in p, false);
+});
+
+test("buildFactHash change quand l'altitude sort du payload (les synthèses en cache se rejouent)", () => {
+  // L'identité de cache dérive du payload : retirer un champ invalide les synthèses stockées, donc
+  // les trois textes fautifs. C'est l'effet recherché, il est noté pour qu'il ne surprenne personne.
+  assert.equal(buildFactHash(fullData({ altitude: 7.5 })), buildFactHash(fullData({ altitude: 812 })));
+});
+
 test("buildSynthesisPayload : confortEte sous verrou DPE confirmé", () => {
   const confirmed = buildSynthesisPayload(fullData());
   assert.ok(confirmed.confortEte, "confortEte présent si confirmé");

@@ -159,7 +159,16 @@ export function buildSynthesisPayload(data: SynthesisData): Record<string, unkno
   const parcel = data.georisques?.parcel;
   return {
     address: data.address?.label ?? null,
-    altitude: data.altitude ?? null,
+    // L'ALTITUDE NE SORT PAS D'ICI (11/08/2026). Elle était transmise au modèle alors que le prompt
+    // lui interdit, en toutes lettres, d'en tirer un signal. Trois synthèses stockées sur trois
+    // portaient la déduction interdite (« le bâti est bas : à 7,5 mètres d'altitude, les fondations
+    // sont proches d'un sol qui travaille »). Textes exacts et analyse :
+    // docs/audits/2026-08-11-syntheses-logement-fautives.md
+    //
+    // Une donnée fournie sans usage autorisé finit par être mobilisée. L'altitude ne nourrit aucun
+    // fait, aucune règle et aucune preuve de ce module : la frontière est de ne pas la donner, pas
+    // de mieux formuler l'interdit. Le champ reste sur `SynthesisData` (d'autres surfaces le
+    // lisent) ; il ne franchit plus la frontière du modèle.
     // `?? null` sur chaque champ : le type promet `| null`, mais ces objets viennent d'un JSON de base
     // où une colonne absente donne `undefined`, que le type ne voit pas. Or stableStringify JETTE sur
     // undefined (il refuse de donner la même identité à `absent` et à `null`), et ce hash tourne AUSSI
