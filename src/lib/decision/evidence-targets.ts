@@ -24,6 +24,7 @@ export type EvidenceTargetKey =
   | "climate.heavy_rain"
   // risques
   | "risk.flooding"
+  | "risk.catnat"
   | "risk.wildfire"
   // Le catalogue ne contient QUE des phénomènes reliés des deux côtés : une preuve qui les vise, et une
   // carte qui les démontre. Submersion marine, feu de forêt, sécheresse des sols et taux de boisement ont
@@ -47,6 +48,9 @@ export const EVIDENCE_TARGET_MODULE: Record<EvidenceTargetKey, "territoire" | "l
   "climate.mean_temperature": "territoire",
   "climate.heavy_rain": "territoire",
   "risk.flooding": "territoire",
+  // Les arrêtés de catastrophe naturelle ont leur propre carte (« Mémoire des catastrophes ») :
+  // la preuve qui les compte doit y mener, et non à la carte du zonage inondation, qui n'en dit rien.
+  "risk.catnat": "territoire",
   "risk.wildfire": "territoire",
   "nature.green_spaces": "territoire",
   "nature.forest_cover": "territoire",

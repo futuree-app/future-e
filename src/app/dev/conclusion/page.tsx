@@ -49,7 +49,11 @@ const INONDATION = verification(
   "inondation", "decision_critical", "l'exposition à l'inondation",
   "L'exposition de la commune à l'inondation ressort élevée. 19 arrêtés de catastrophe naturelle depuis 1982.",
   "Vérifiez le zonage inondation à cette adresse",
-  { observedValue: "exposition élevée · 19 arrêtés CatNat depuis 1982", href: "/rapport/quartier", targetKey: "risk.flooding" },
+  // Une pastille = UNE affirmation, et son lien la démontre (11/08/2026). L'exemple portait
+  // « exposition élevée · 19 arrêtés CatNat depuis 1982 » sous une clé `risk.flooding`, dont la
+  // carte ne mentionne aucun arrêté : c'est le défaut corrigé dans la règle inondation, et cette
+  // page de référence le reproduisait à l'identique.
+  { observedValue: "19 arrêtés CatNat depuis 1982", href: "/rapport/quartier", targetKey: "risk.catnat" },
 );
 
 const PATRIMOINE = verification(

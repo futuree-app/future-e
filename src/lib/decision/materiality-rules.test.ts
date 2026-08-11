@@ -77,18 +77,43 @@ test("règle inondation : vérification si exposition notable, texte acheteur", 
   assert.match(f.statement, /1982/);
 });
 
-test("règle inondation : la preuve est OPPOSABLE, jamais un score interne (100/100 illisible)", () => {
-  // « 100/100 » pouvait se lire comme une probabilité ou une certitude. La preuve affiche la matière
-  // que le lecteur peut vérifier (arrêtés CatNat) ; le score reste interne au moteur.
+test("règle inondation : la preuve est OPPOSABLE, et son lien DÉMONTRE ce qu'elle affiche", () => {
+  // Deux défauts d'une même chaîne, corrigés ensemble le 11/08/2026.
+  //
+  // 1. « 100/100 » pouvait se lire comme une probabilité. La preuve affiche la matière que le
+  //    lecteur peut vérifier, les arrêtés CatNat ; le score reste interne au moteur. (Acquis.)
+  //
+  // 2. UNE SEULE PASTILLE PORTAIT DEUX AFFIRMATIONS, et son lien n'en démontrait aucune : vu à
+  //    l'écran sur un dossier payé, « exposition élevée · 7 arrêtés CatNat depuis 1982 » menait à
+  //    la carte « Inondation fluviale », qui dit « Une partie du territoire est concernée » et ne
+  //    mentionne aucun arrêté. Le compte d'arrêtés a sa propre carte dans le module Territoire
+  //    (« Mémoire des catastrophes ») : c'est elle que le lien vise désormais.
+  //
+  // L'exposition, elle, ne porte plus de valeur : « élevée » vient du seuil interne, et aucune
+  // carte ne le démontre. La phrase du constat la dit déjà, en toutes lettres.
   const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
   const avec = run(facts({ inondationRisque: 80, catnatInondation: 6 }), p)
     .facts.find((x) => x.ruleId === "territoire.inondation-exposition");
   assert.ok(avec && avec.role === "verification");
-  assert.equal(avec.evidence[0]?.observedValue, "exposition élevée · 6 arrêtés CatNat depuis 1982");
+
+  const chiffree = avec.evidence.filter((e) => e.observedValue);
+  assert.equal(chiffree.length, 1, "une seule preuve chiffrée : celle qui est opposable");
+  assert.equal(chiffree[0]!.observedValue, "6 arrêtés CatNat depuis 1982");
+  assert.equal(chiffree[0]!.targetKey, "risk.catnat", "le lien doit viser la carte qui montre les arrêtés");
+  // Aucune pastille ne peut plus mélanger le seuil interne et la matière vérifiable.
+  assert.equal(
+    avec.evidence.some((e) => e.observedValue?.includes("exposition élevée")),
+    false,
+  );
+
+  // Sans arrêté connu, il n'y a rien d'opposable à montrer : aucune preuve chiffrée, et la carte
+  // vit de son constat. Une pastille « exposition élevée » renverrait le lecteur vers une carte
+  // qui ne dit pas « élevée ».
   const sans = run(facts({ inondationRisque: 80, catnatInondation: null }), p)
     .facts.find((x) => x.ruleId === "territoire.inondation-exposition");
   assert.ok(sans && sans.role === "verification");
-  assert.equal(sans.evidence[0]?.observedValue, "exposition élevée");
+  assert.equal(sans.evidence.filter((e) => e.observedValue).length, 0);
+  assert.ok(sans.evidence.length >= 1, "la source reste citée, même sans valeur opposable");
 });
 
 test("règle inondation : posture habitant -> comprendre/surveiller, pas s'engager", () => {

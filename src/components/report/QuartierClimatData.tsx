@@ -862,6 +862,9 @@ function buildFactors(
           : `Surtout ${sortedRisks[0].label.toLowerCase()}`;
     factors.push({
       label: "Mémoire des catastrophes",
+      // La preuve du dossier qui compte les arrêtés CatNat vise CETTE carte, et non celle du
+      // zonage inondation, qui ne dit rien des arrêtés (cf. materiality-rules, règle inondation).
+      targets: ["risk.catnat"],
       val: headline,
       sub: dominantSub,
       col: "var(--blue)",

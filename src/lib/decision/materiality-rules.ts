@@ -101,10 +101,33 @@ const ruleInondation: DecisionRule = {
     const catnatCtx = f.catnatInondation != null ? ` La commune a connu ${f.catnatInondation} arrêtés de catastrophe naturelle inondation depuis 1982 (comptage administratif, pas une probabilité).` : "";
     // LA PREUVE EST OPPOSABLE, jamais un score interne : « 100/100 » se lisait comme une probabilité ou
     // une certitude. On affiche la matière vérifiable (arrêtés CatNat) ; le score reste au moteur.
-    const observed = f.catnatInondation != null
-      ? `exposition élevée · ${f.catnatInondation} arrêtés CatNat depuis 1982`
-      : "exposition élevée";
-    const ev: EvidenceRef = { factId: "inondation.risque", module: "territoire", label: `Territoire · ${f.nom}`, observedValue: observed, grain: "commune", href: territoireHref, targetKey: "risk.flooding" };
+    //
+    // ── DEUX AFFIRMATIONS NE TIENNENT PAS DANS UNE PASTILLE (11/08/2026) ──────────────────────
+    // Elles y tenaient : « exposition élevée · 7 arrêtés CatNat depuis 1982 », sous un lien unique
+    // qui menait à la carte « Inondation fluviale » du module Territoire. Cette carte dit « Une
+    // partie du territoire est concernée » et ne mentionne aucun arrêté : le lecteur qui cliquait
+    // pour vérifier le chiffre atterrissait devant une autre phrase, sur une autre donnée. Le
+    // premier invariant du dossier tombait, celui qui veut qu'un lien « Preuve » démontre
+    // exactement ce qu'il accompagne.
+    //
+    // Les arrêtés ont leur propre carte dans le module Territoire (« Mémoire des catastrophes »,
+    // GASPAR) : la preuve chiffrée la vise, par la clé `risk.catnat`.
+    //
+    // L'EXPOSITION NE PORTE PLUS DE VALEUR. « Élevée » vient du seuil interne (>= 66), qu'aucune
+    // carte n'affiche et que la doctrine refuse de montrer. Elle reste une SOURCE citée, sans
+    // pastille : le constat, lui, dit déjà l'exposition en toutes lettres, et son lien ramène au
+    // module qui la présente.
+    const evidence: EvidenceRef[] = [
+      { factId: "inondation.risque", module: "territoire", label: `Territoire · ${f.nom}`, grain: "commune", href: territoireHref, targetKey: "risk.flooding" },
+      ...(f.catnatInondation != null
+        ? [{
+            factId: "inondation.catnat", module: "territoire" as const,
+            label: `Territoire · ${f.nom}`,
+            observedValue: `${f.catnatInondation} arrêtés CatNat depuis 1982`,
+            grain: "commune" as const, href: territoireHref, targetKey: "risk.catnat" as const,
+          }]
+        : []),
+    ];
     const fact: VerificationFact = {
       id: `${f.insee}:inondation-exposition`, ruleId: RULE_INOND, sourceFactIds: ["inondation.risque", "inondation.catnat"], module: "territoire",
       role: "verification", materialityTier: "structuring", topic: "l'exposition à l'inondation",
@@ -112,7 +135,7 @@ const ruleInondation: DecisionRule = {
         ? "L'exposition de la commune à l'inondation ressort élevée, à comprendre et surveiller au fil des épisodes."
         : "L'exposition de la commune à l'inondation ressort élevée. Consultez l'état des risques avant de vous engager.") + catnatCtx,
       limitation: "Cette exposition est lue à l'échelle de la commune, pas de l'adresse.",
-      evidence: [ev],
+      evidence,
       action: habitant
         ? { type: "demander_confirmation", label: "Consultez l'état des risques applicable à votre adresse" }
         : { type: "obtenir_document", label: "Consultez l'état des risques (Géorisques)" },
