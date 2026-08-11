@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { composeFacts } from "./fact-compositions.ts";
 import { runRules, assertFactValid } from "./materiality-rules.ts";
-import { catnatInondationDepuisIndex, libelleCatnatInondation } from "./catnat-evidence.ts";
+import { catnatInondationDepuisIndex, catnatInondationDepuisCompte, libelleCatnatInondation } from "./catnat-evidence.ts";
 import type { ModuleFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import { PRODUCT_CONVENTIONS_VERSION, type EvaluationContext } from "../hard-constraints.ts";
@@ -1028,7 +1028,7 @@ test("un indice interne ne peut PAS devenir une valeur affichée, quelle que soi
   );
 });
 
-test("la pastille du dossier porte EXACTEMENT la phrase que la carte affichera", () => {
+test("la phrase de la pastille est INCLUSE mot pour mot dans la ligne de la carte", () => {
   // L'invariant du chantier, tenu de bout en bout : la règle et la carte « Mémoire des
   // catastrophes » construisent leur texte depuis le MÊME objet (`catnat-evidence`), alimenté par
   // la MÊME source (l'index). Ce test relie les deux mondes, que rien d'autre ne fait se rencontrer :
@@ -1042,6 +1042,32 @@ test("la pastille du dossier porte EXACTEMENT la phrase que la carte affichera",
   assert.ok(fait && fait.role === "verification");
   const pastille = fait.evidence.find((e) => e.observedValue)?.observedValue;
 
-  const cotéCarte = libelleCatnatInondation(catnatInondationDepuisIndex({ inondation: { catnat: 6 } })!);
-  assert.equal(pastille, cotéCarte);
+  // INCLUSION, ET PLUS IDENTITÉ (revue du 11/08/2026). Imposer que toute la ligne de la carte soit
+  // la pastille interdisait d'expliquer la relation entre le total tous risques et son
+  // sous-ensemble. La carte écrit « Dont 7 arrêtés inondation depuis 1982 » sous « Tous risques ·
+  // 23 arrêtés depuis 1987 » : le lecteur retrouve son texte exact, dans une ligne qui dit en plus
+  // ce dont il s'agit.
+  const phrasePartagee = libelleCatnatInondation(catnatInondationDepuisIndex({ inondation: { catnat: 6 } })!);
+  assert.equal(pastille, phrasePartagee, "la pastille EST la phrase partagée");
+  const ligneCarte = `Dont ${phrasePartagee}`;
+  assert.ok(ligneCarte.includes(pastille!), "la carte doit contenir la phrase, mot pour mot");
+});
+
+test("CE QUI RESTE OUVERT : un artefact figé et l'index courant peuvent diverger", () => {
+  // Le partage porte sur la FORME, pas sur la donnée figée vendue au lecteur. /rapport sert
+  // l'artefact du jour de l'achat ; /rapport/quartier relit l'index du déploiement courant. Après
+  // une régénération de l'index, la pastille peut annoncer 6 et la carte 7, chacune fidèle à sa
+  // source, sans qu'aucun test ne le voie : celui du dessus injecte volontairement le même compte
+  // des deux côtés.
+  //
+  // Ce test ne corrige rien. Il rend le défaut LISIBLE là où quelqu'un le cherchera. Le correctif
+  // est de conserver l'objet dans l'artefact et de le faire porter par le lien, ce qui suppose
+  // aussi que l'index sache dire sa date, ce qu'il ne fait pas aujourd'hui.
+  const figeALAchat = catnatInondationDepuisCompte(6, "17300")!;
+  const indexDuJour = catnatInondationDepuisIndex({ insee: "17300", inondation: { catnat: 7 } })!;
+  assert.notEqual(
+    libelleCatnatInondation(figeALAchat),
+    libelleCatnatInondation(indexDuJour),
+    "deux états de la donnée produisent deux phrases : c'est le défaut restant, pas un bug de forme",
+  );
 });

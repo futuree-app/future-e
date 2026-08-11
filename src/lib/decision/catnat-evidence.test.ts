@@ -109,3 +109,36 @@ test("la phrase du compte n'est écrite QUE dans catnat-evidence", async () => {
     `la phrase du compte doit venir de catnat-evidence.ts, elle est réécrite dans : ${fautifs.join(", ")}`,
   );
 });
+
+// ── Ce que la revue du 11/08/2026 a corrigé ───────────────────────────────────────────────────
+
+test("un compte d'arrêtés est un entier positif ou nul, jamais autre chose", () => {
+  // Les fabriques ne vérifiaient que `Number.isFinite` : -1 et 1,5 passaient, et « 1,5 arrêté
+  // inondation depuis 1982 » se serait affiché sans que rien ne l'arrête. C'est le genre de valeur
+  // qu'une donnée mal parsée produit, et qu'un objet de preuve doit refuser plutôt que mettre en page.
+  assert.equal(catnatInondationDepuisCompte(-1), null);
+  assert.equal(catnatInondationDepuisCompte(1.5), null);
+  assert.equal(catnatInondationDepuisCompte(Number.NaN), null);
+  assert.equal(catnatInondationDepuisIndex({ inondation: { catnat: -3 } }), null);
+  assert.equal(catnatInondationDepuisIndex({ inondation: { catnat: 2.5 } }), null);
+  assert.equal(catnatInondationDepuisCompte(0)?.count, 0);
+});
+
+test("l'objet porte la commune : deux INSEE différents ne se comparent pas, même à compte égal", () => {
+  const a = catnatInondationDepuisIndex({ insee: "17300", inondation: { catnat: 7 } });
+  const b = catnatInondationDepuisCompte(7, "44109");
+  assert.equal(a?.insee, "17300");
+  assert.equal(b?.insee, "44109");
+  assert.notDeepEqual(a, b);
+});
+
+test("LA LIMITE ASSUMÉE : la version dit la convention, jamais l'état des données", () => {
+  // Deux index contenant des comptes différents produisent tous deux `catnat-1`. Un dossier figé
+  // peut donc dire sous quelle règle il a été écrit, jamais sur quel état de la donnée. La racine
+  // est ailleurs : `data/comparateur-index.json` ne porte aucune date de génération dans son `meta`
+  // (vérifié le 11/08/2026). Ce test existe pour que la limite soit LUE, pas découverte.
+  const avant = catnatInondationDepuisCompte(6, "17300")!;
+  const apres = catnatInondationDepuisCompte(7, "17300")!;
+  assert.equal(avant.version, apres.version);
+  assert.notEqual(libelleCatnatInondation(avant), libelleCatnatInondation(apres));
+});

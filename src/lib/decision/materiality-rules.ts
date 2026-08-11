@@ -129,7 +129,7 @@ const ruleInondation: DecisionRule = {
     // de couverture, et n'aurait jamais vu un seul point positif. Cf. spec 2.1 §3.1.
     if (f.inondationRisque < 66) return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "satisfied", facts: [], reason: "exposition non notable" };
     const habitant = p.posture === "habitant";
-    const catnat = catnatInondationDepuisCompte(f.catnatInondation);
+    const catnat = catnatInondationDepuisCompte(f.catnatInondation, f.insee);
     const catnatCtx = catnat ? ` La commune a connu ${phraseConstatCatnatInondation(catnat)} (comptage administratif, pas une probabilité).` : "";
     // LA PREUVE EST OPPOSABLE, jamais un score interne : « 100/100 » se lisait comme une probabilité ou
     // une certitude. On affiche la matière vérifiable (arrêtés CatNat) ; le score reste au moteur.

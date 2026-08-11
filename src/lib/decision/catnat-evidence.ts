@@ -30,9 +30,16 @@
 export const CATNAT_DEPUIS = 1982;
 
 /**
- * Version de cet objet de preuve. À relever quand la MATIÈRE change (périmètre du comptage,
- * source, borne temporelle), jamais pour une reformulation. Elle voyage dans le libellé de source
- * afin qu'un dossier figé puisse dire sous quelle convention il a été écrit.
+ * Version de la CONVENTION, et d'elle seule : périmètre du comptage, source, borne temporelle. À
+ * relever quand la matière change, jamais pour une reformulation.
+ *
+ * ── CE QU'ELLE NE FAIT PAS, ET C'EST IMPORTANT (revue du 11/08/2026) ─────────────────────────
+ * Elle n'identifie pas les DONNÉES. Deux index contenant des comptes différents produisent tous
+ * deux `catnat-1` : un dossier figé peut donc dire sous quelle règle il a été écrit, jamais sur
+ * quel état de la donnée. L'horodatage manque à la racine, `data/comparateur-index.json` n'ayant
+ * aucune date de génération dans son `meta` (vérifié le 11/08/2026). Tant qu'il n'en porte pas, la
+ * promesse s'arrête à la convention, et ce commentaire est la seule chose qui empêche de croire
+ * l'inverse.
  */
 export const CATNAT_EVIDENCE_VERSION = "catnat-1";
 
@@ -43,11 +50,22 @@ export type CatnatInondation = {
   depuis: number;
   /** D'où vient ce compte. Une seule valeur aujourd'hui, et c'est le point : il n'y a qu'un chemin. */
   origine: "index_local";
+  /** La commune comptée. Deux objets d'INSEE différents ne se comparent pas, même à compte égal. */
+  insee: string | null;
   version: string;
 };
 
+/**
+ * Un compte d'arrêtés est un ENTIER POSITIF OU NUL. Un objet de preuve qui accepterait -1 ou 1,5
+ * afficherait « 1,5 arrêté inondation depuis 1982 » sans que rien ne l'arrête : c'est le genre de
+ * valeur qu'une donnée mal parsée produit, et qu'une preuve doit refuser plutôt que mettre en page.
+ */
+function compteValide(n: unknown): n is number {
+  return typeof n === "number" && Number.isInteger(n) && n >= 0;
+}
+
 /** L'entrée d'index, réduite à ce dont ce module a besoin. */
-type EntreeIndex = { inondation?: { catnat: number } | null } | null | undefined;
+type EntreeIndex = { insee?: string; inondation?: { catnat: number } | null } | null | undefined;
 
 /**
  * L'objet, depuis l'index. `null` quand la commune n'a pas de comptage : une absence de donnée
@@ -55,14 +73,19 @@ type EntreeIndex = { inondation?: { catnat: number } | null } | null | undefined
  */
 export function catnatInondationDepuisIndex(entry: EntreeIndex): CatnatInondation | null {
   const count = entry?.inondation?.catnat;
-  if (typeof count !== "number" || !Number.isFinite(count)) return null;
-  return { count, depuis: CATNAT_DEPUIS, origine: "index_local", version: CATNAT_EVIDENCE_VERSION };
+  if (!compteValide(count)) return null;
+  return {
+    count, depuis: CATNAT_DEPUIS, origine: "index_local",
+    insee: entry?.insee ?? null, version: CATNAT_EVIDENCE_VERSION,
+  };
 }
 
 /** Le même objet, depuis le moteur, qui n'a que le nombre sous la main (`ModuleFacts`). */
-export function catnatInondationDepuisCompte(count: number | null | undefined): CatnatInondation | null {
-  if (typeof count !== "number" || !Number.isFinite(count)) return null;
-  return { count, depuis: CATNAT_DEPUIS, origine: "index_local", version: CATNAT_EVIDENCE_VERSION };
+export function catnatInondationDepuisCompte(
+  count: number | null | undefined, insee: string | null = null,
+): CatnatInondation | null {
+  if (!compteValide(count)) return null;
+  return { count, depuis: CATNAT_DEPUIS, origine: "index_local", insee, version: CATNAT_EVIDENCE_VERSION };
 }
 
 /**

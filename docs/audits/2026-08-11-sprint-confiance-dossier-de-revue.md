@@ -110,9 +110,22 @@ carte qui n'en démontrait aucune.
 - **Garantit** : trois verrous. Un test relie les deux mondes que rien ne fait se rencontrer ; un
   second interdit d'écrire la phrase ailleurs dans `src/` en lisant les sources ; le troisième laisse
   ce droit aux tests, parce que recopier une sortie éditoriale est ce qui la fige.
-- **Ne garantit pas** : le volet ne s'ouvre pas automatiquement sur la ligne visée, et le total tous
-  risques reste le titre de la carte. En cas de panne GASPAR, la carte affiche « — » pendant que la
-  pastille garde son chiffre : **ce cas n'est pas traité**.
+- **Corrigé après revue** : la carte distingue ses deux observations (« Tous risques · 23 arrêtés
+  depuis 1987 », puis « Dont 7 arrêtés inondation depuis 1982 »), la phrase partagée restant INCLUSE
+  mot pour mot ; imposer l'identité de toute la ligne interdisait d'expliquer la relation entre un
+  total et son sous-ensemble. En panne du relevé direct, la carte n'est plus marquée absente sous une
+  valeur lisible : le compte local devient sa face, sans « Dont » qui n'aurait plus de référent. Les
+  fabriques refusent enfin les comptes non entiers ou négatifs, et l'objet porte l'INSEE.
+- **NE GARANTIT PAS, et c'est le point n°1 du chantier** : le partage porte sur la FORME, pas sur la
+  donnée figée vendue. `/rapport` sert l'artefact du jour de l'achat, `/rapport/quartier` relit
+  l'index du déploiement courant : après une régénération de l'index, la pastille peut annoncer 6 et
+  la carte 7, chacune fidèle à sa source. Un test le rend LISIBLE (« CE QUI RESTE OUVERT ») sans le
+  corriger. Le correctif est de conserver l'objet dans l'artefact et de le faire porter par le lien.
+- **Racine à traiter d'abord** : `data/comparateur-index.json` n'a **aucune date de génération** dans
+  son `meta` (vérifié le 11/08/2026). Tant qu'il n'en porte pas, aucun objet de preuve ne peut
+  identifier l'état de la donnée qu'il a utilisé, et `catnat-1` ne versionne que la convention.
+- **Volet** : l'ouverture automatique n'est plus nécessaire à l'intégrité depuis que le chiffre est
+  sur la face. Le lien doit atterrir sur la bonne carte et la mettre en évidence, ce qu'il fait.
 
 ### `a246b71` — un indice interne n'est plus une preuve
 
@@ -137,8 +150,8 @@ huit invariants vérifiables, l'ordre du prochain chantier, et deux paris nouvea
 
 ## Ce que je soumets en priorité au relecteur
 
-1. **Le cas de la panne GASPAR** : pastille chiffrée pointant vers une carte en « — ». Identifié, non
-   traité.
+1. **L'artefact figé contre l'index courant** (priorité absolue). Deux sources de vérité pour un même
+   chiffre, dont l'une est vendue et l'autre change à chaque déploiement.
 2. **La source invisible quand la preuve porte une valeur** : le défaut le plus large de la chaîne,
    reporté pour une raison de séquence.
 3. **`synthesize-quartier` et Territoire sans aucun garde-fou d'assertions**, alors que la même faute

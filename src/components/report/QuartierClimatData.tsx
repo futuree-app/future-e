@@ -869,12 +869,30 @@ function buildFactors(
         : sortedRisks.length >= 2 && sortedRisks[1].count >= sortedRisks[0].count * 0.5
           ? `Surtout ${sortedRisks[0].label.toLowerCase()} et ${sortedRisks[1].label.toLowerCase()}`
           : `Surtout ${sortedRisks[0].label.toLowerCase()}`;
+    // ── DEUX OBSERVATIONS, DEUX LIGNES QUI SE DISENT (revue du 11/08/2026) ────────────────────
+    // Le total tous risques vient du relevé DIRECT sur GASPAR, depuis la première reconnaissance
+    // réelle de la commune. Le compte d'arrêtés inondation vient de l'INDEX, depuis l'origine du
+    // régime, et c'est lui que la preuve du dossier annonce. Les afficher sans les distinguer
+    // laissait croire à un seul chiffre qui aurait changé de valeur entre deux lignes.
+    //
+    // « Dont » dit la relation, et la phrase de l'objet partagé reste INCLUSE mot pour mot : le
+    // lecteur arrivé par la pastille retrouve exactement son texte, dans une ligne qui explique en
+    // plus ce dont il s'agit.
+    const totalTousRisques = hasCatnat ? `Tous risques · ${headline}` : headline;
+    const ligneInondation = catnatInondation ? `Dont ${libelleCatnatInondation(catnatInondation)}` : null;
     factors.push({
       label: "Mémoire des catastrophes",
       // La preuve du dossier qui compte les arrêtés vise CETTE carte, et non celle du zonage
       // inondation, qui ne dit rien des arrêtés (cf. materiality-rules, règle inondation).
       targets: ["risk.catnat"],
-      val: headline,
+      // LA CARTE N'EST « MISSING » QUE SI ELLE NE SAIT RIEN. Elle l'était dès que le relevé direct
+      // manquait, alors que le compte local pouvait s'afficher juste dessous : un statut mixte, la
+      // face grisée sous une valeur lisible.
+      // EN PANNE DU RELEVÉ DIRECT, la phrase se tient SEULE : « Dont » n'aurait plus de référent,
+      // le total ne s'affichant pas. Le compte local reste vrai, il devient la face de la carte.
+      val: hasCatnat
+        ? totalTousRisques
+        : (catnatInondation ? libelleCatnatInondation(catnatInondation) : headline),
       // ── LE LECTEUR ARRIVE AVEC UN CHIFFRE EN TÊTE, IL DOIT LE RETROUVER ICI ─────────────────
       // La pastille du dossier annonce « 7 arrêtés inondation depuis 1982 » ; cette carte ouvrait
       // sur son total TOUS RISQUES relevé en direct (« 23 arrêtés depuis 1987 »), et le compte
@@ -883,10 +901,12 @@ function buildFactors(
       //
       // La répartition dominante descend dans le volet quand ce compte existe : elle reste utile,
       // elle n'est pas ce que le lecteur vient chercher.
-      sub: catnatInondation ? libelleCatnatInondation(catnatInondation) : dominantSub,
+      sub: hasCatnat
+        ? (ligneInondation ?? dominantSub)
+        : (catnatInondation ? "Le relevé de tous les risques n'a pas répondu" : dominantSub),
       col: "var(--blue)",
       src: "Géorisques · GASPAR · arrêtés CatNat",
-      missing: !hasCatnat,
+      missing: !hasCatnat && !catnatInondation,
       detail,
     });
   }
