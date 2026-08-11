@@ -193,3 +193,70 @@ test("AUCUN LIBELLÉ DU MODULE N'OUVRE PAR « VÉRIFI »", () => {
     }
   }
 });
+
+// ── La preuve nomme sa SOURCE, jamais l'objet analysé ──────────────────────────────────────────
+
+test("aucune preuve du logement ne présente l'adresse comme sa source", () => {
+  // Vu à l'écran sur un dossier payé le 10/08/2026, dans cinq volets « Données et limites » :
+  //
+  //     Source : 29 Rue de l'Evescot 17000 La Rochelle
+  //
+  // L'adresse est ce qu'on analyse. La présenter comme la provenance de la donnée vide de son sens
+  // le seul mot qui engage futur•e, sur le produit dont la traçabilité est l'argument.
+  //
+  // Le module Territoire n'a jamais eu ce défaut (« Géorisques · Toulouse »).
+  const adresse = "7 Rue du Taur";
+  const l = lf({
+    addressLabel: adresse,
+    rga: "present", expositionBati: true,
+    pprn: "present", zoneReglementee: true,
+    cavites: "present", caviteProche: true,
+    patrimoine: "present", perimetrePatrimonial: true,
+    sinistralite: "present", sinistraliteActive: true,
+    dpe: "passoire", dpeLabel: "G",
+    diagnosticNonAttribue: true,
+  });
+  const facts_ = runRules(facts(l), project({ intent: "achat" }), HARD).facts
+    .filter((f) => f.ruleId.startsWith("logement."));
+  assert.ok(facts_.length >= 6, `attendu au moins 6 faits logement, reçu ${facts_.length}`);
+
+  for (const f of facts_) {
+    const refs = f.role === "compromise" ? f.sides.flatMap((s) => s.evidence) : f.evidence;
+    for (const e of refs) {
+      assert.notEqual(e.label, adresse, `${f.ruleId} présente l'adresse comme source`);
+      assert.ok(e.label.trim().length > 0, `${f.ruleId} : source vide`);
+      // Un producteur, pas une paraphrase de l'objet : le libellé doit nommer qui publie la donnée.
+      assert.match(
+        e.label,
+        /Géorisques|ONRN|ADEME|Géoportail de l'urbanisme/,
+        `${f.ruleId} : « ${e.label} » ne nomme aucun producteur connu`,
+      );
+    }
+  }
+});
+
+test("chaque famille du logement nomme le producteur qui publie SA donnée", () => {
+  // Une source unique pour tout le module serait plus simple et fausse : les argiles et les cavités
+  // viennent du BRGM par Géorisques, le périmètre patrimonial du Géoportail de l'urbanisme, la
+  // sinistralité de l'ONRN. Un lecteur qui veut vérifier doit savoir où aller.
+  const attendu: Record<string, RegExp> = {
+    "logement.exposition-bati": /Géorisques/,
+    "logement.zone-reglementee": /Géorisques/,
+    "logement.cavite": /Géorisques/,
+    "logement.patrimoine": /Géoportail de l'urbanisme/,
+    "logement.sinistralite": /ONRN/,
+    "logement.dpe-faible": /ADEME/,
+  };
+  const l = lf({
+    rga: "present", expositionBati: true, pprn: "present", zoneReglementee: true,
+    cavites: "present", caviteProche: true, patrimoine: "present", perimetrePatrimonial: true,
+    sinistralite: "present", sinistraliteActive: true, dpe: "passoire", dpeLabel: "G",
+  });
+  const produits = runRules(facts(l), project({ intent: "achat" }), HARD).facts;
+  for (const [ruleId, motif] of Object.entries(attendu)) {
+    const f = produits.find((x) => x.ruleId === ruleId);
+    assert.ok(f, `règle ${ruleId} absente du run`);
+    const refs = f.role === "compromise" ? f.sides.flatMap((s) => s.evidence) : f.evidence;
+    assert.match(refs[0]!.label, motif, `${ruleId} : source « ${refs[0]!.label} »`);
+  }
+});
