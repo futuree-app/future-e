@@ -49,11 +49,23 @@ export async function GET(request: NextRequest) {
   const dossier = await getDossier(supabase, user.id, dossierId);
   if (!dossier) return retour;
 
-  // Grain COMMUNE. `dossier.insee` est le code LOCAL de l'adresse, donc l'arrondissement pour PLM :
-  // poser 75101 en territoire actif ferait lire « Paris 1er » à tous les écrans de commune.
+  // DEUX ÉCHELLES, DEUX COLONNES (11/08/2026).
+  //
+  // Le territoire actif est au grain COMMUNE : `dossier.insee` est le code LOCAL de l'adresse, donc
+  // l'arrondissement pour PLM, et poser 75101 ferait lire « Paris 1er » à tous les écrans de commune.
+  //
+  // Le BIEN actif s'ajoute, et il manquait. Sans lui, le hub servait le dossier le plus récemment
+  // créé de la commune : ouvrir le 1 rue Saint-Dominique puis revenir réaffichait le 29 rue de
+  // l'Evescot, sans un mot. Ce n'est ni un droit ni une autorisation, seulement le souvenir de ce
+  // que le lecteur lisait ; `canAccessTerritory` continue de gouverner l'accès, et
+  // `choisirDossierActif` ignore cette valeur dès qu'elle désigne une autre commune.
   const { error } = await supabase
     .from("user_profiles")
-    .update({ active_insee_code: communeParent(dossier.insee), active_commune: dossier.city })
+    .update({
+      active_insee_code: communeParent(dossier.insee),
+      active_commune: dossier.city,
+      active_dossier_id: dossier.id,
+    })
     .eq("user_id", user.id);
 
   // L'échec de la bascule ne doit pas retenir le lecteur : Logement et Autour ne dépendent que du

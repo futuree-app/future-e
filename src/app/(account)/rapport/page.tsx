@@ -24,6 +24,7 @@ import { artifactScopeKey, dossierAServir } from "@/lib/decision/decision-artifa
 import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
 import { after } from "next/server";
 import { communeParent } from "@/lib/plm";
+import { choisirDossierActif } from "@/lib/dossier-actif";
 import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 import { Logo } from "@/components/Logo";
@@ -60,7 +61,7 @@ export default async function RapportPage() {
   const { supabase, user } = await requireCurrentUser();
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select(`${TERRITORY_SELECT}, wizard_answers, user_project`)
+    .select(`${TERRITORY_SELECT}, wizard_answers, user_project, active_dossier_id`)
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -96,10 +97,14 @@ export default async function RapportPage() {
   // était ouvert. Le hub doit nommer ce que le compte possède, même quand le territoire lu, lui,
   // n'est pas ouvert.
   const dossiers = await listDossiers(supabase, user.id);
-  const logementForCommune =
-    fullReport && inseeCode
-      ? (dossiers.find((d) => communeParent(d.insee) === communeParent(inseeCode)) ?? null)
-      : null;
+  // LE BIEN LU EST CELUI QUE LE LECTEUR A OUVERT EN DERNIER (11/08/2026). Il était choisi par
+  // `dossiers.find(...)`, c'est-à-dire le plus récemment CRÉÉ de la commune : ouvrir un bien puis
+  // revenir ici en réaffichait un autre, sans un mot. La règle et ses cas limites vivent dans
+  // `lib/dossier-actif.ts`, testés ; l'écran, lui, doit NOMMER le bien retenu (plus bas).
+  const choixDossier = fullReport
+    ? choisirDossierActif(dossiers, inseeCode, (profile as { active_dossier_id?: string | null } | null)?.active_dossier_id ?? null)
+    : { dossier: null, raison: "aucun" as const, autres: [] };
+  const logementForCommune = choixDossier.dossier;
   // Les biens qui ouvrent une AUTRE commune que celle lue : c'est exactement ce que le lecteur
   // cherche quand l'écran lui sert un rapport partiel. Une entrée par commune, pas par bien : deux
   // appartements du même immeuble mènent au même territoire.
@@ -383,6 +388,27 @@ export default async function RapportPage() {
         <div className="mt-12">
           <ProjectSummaryCard initial={userProject} />
         </div>
+
+        {/* ── LE BIEN LU EST NOMMÉ, ET IL SE CHANGE ──────────────────────────────────────
+            Un choix implicite juste reste un choix implicite : le hub servait le dossier le plus
+            récemment créé de la commune sans le dire, et un compte à plusieurs biens ne pouvait pas
+            savoir lequel il lisait. La ligne n'apparaît que s'il y a une alternative : sur un compte
+            à un seul bien, elle n'apprendrait rien et ajouterait du bruit. */}
+        {logementForCommune && choixDossier.autres.length > 0 && (
+          <div className="mt-8 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[13.5px]">
+            <span className="text-muted">
+              Bien lu : <span className="text-label">{logementForCommune.address_label}</span>
+            </span>
+            <Link
+              href="/rapport/dossiers"
+              className="text-accent underline underline-offset-2 decoration-[var(--border-2)] hover:decoration-current"
+            >
+              {choixDossier.autres.length === 1
+                ? "Lire l'autre bien de cette commune"
+                : `Lire un autre bien de cette commune (${choixDossier.autres.length})`}
+            </Link>
+          </div>
+        )}
 
         {/* ── En une minute : le dossier de décision (payant, grain commune) ── */}
         {dossier && communeResult && inseeCode ? (
