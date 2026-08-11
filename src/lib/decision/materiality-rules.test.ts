@@ -98,7 +98,12 @@ test("règle inondation : la preuve est OPPOSABLE, et son lien DÉMONTRE ce qu'e
 
   const chiffree = avec.evidence.filter((e) => e.observedValue);
   assert.equal(chiffree.length, 1, "une seule preuve chiffrée : celle qui est opposable");
-  assert.equal(chiffree[0]!.observedValue, "6 arrêtés CatNat depuis 1982");
+  assert.equal(chiffree[0]!.observedValue, "6 arrêtés inondation depuis 1982");
+  // « CatNat » est du jargon, et surtout le mot masquait un écart : la carte cible affiche le total
+  // TOUS RISQUES depuis la première reconnaissance réelle, quand cette preuve compte les seuls
+  // arrêtés inondation depuis 1982. Le libellé dit donc ce qu'il compte, pour que le lecteur sache
+  // quelle ligne chercher dans la ventilation par risque.
+  assert.equal(chiffree[0]!.observedValue?.includes("CatNat"), false);
   assert.equal(chiffree[0]!.targetKey, "risk.catnat", "le lien doit viser la carte qui montre les arrêtés");
   // Aucune pastille ne peut plus mélanger le seuil interne et la matière vérifiable.
   assert.equal(

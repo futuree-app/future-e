@@ -113,6 +113,18 @@ const ruleInondation: DecisionRule = {
     // Les arrêtés ont leur propre carte dans le module Territoire (« Mémoire des catastrophes »,
     // GASPAR) : la preuve chiffrée la vise, par la clé `risk.catnat`.
     //
+    // ── DEUX COMPTES QUI NE SE SUPERPOSENT PAS, ET LE LIBELLÉ DOIT LE DIRE ────────────────────
+    // La preuve compte les arrêtés INONDATION, lus dans l'index local (`module-facts-map`), depuis
+    // l'origine du régime (1982). La carte cible affiche le total TOUS RISQUES relevé en direct sur
+    // GASPAR, depuis la première reconnaissance réelle de la commune. Le lecteur qui clique sur
+    // « 7 » peut donc lire « 23 arrêtés depuis 1987 » en arrivant : le chiffre inondation vit dans
+    // la ventilation par risque de cette même carte, jamais dans son titre.
+    //
+    // D'où « arrêtés inondation », et non « arrêtés CatNat » : le libellé dit ce qu'il compte, et
+    // le lecteur sait quelle ligne chercher. Faire porter à la preuve le total tous risques serait
+    // faux (le fait parle d'inondation) ; poser une ancre par ligne de ventilation est le vrai
+    // correctif, et il appartient au chantier qui structurera la preuve.
+    //
     // L'EXPOSITION NE PORTE PLUS DE VALEUR. « Élevée » vient du seuil interne (>= 66), qu'aucune
     // carte n'affiche et que la doctrine refuse de montrer. Elle reste une SOURCE citée, sans
     // pastille : le constat, lui, dit déjà l'exposition en toutes lettres, et son lien ramène au
@@ -123,7 +135,7 @@ const ruleInondation: DecisionRule = {
         ? [{
             factId: "inondation.catnat", module: "territoire" as const,
             label: `Territoire · ${f.nom}`,
-            observedValue: `${f.catnatInondation} arrêtés CatNat depuis 1982`,
+            observedValue: `${f.catnatInondation} arrêtés inondation depuis 1982`,
             grain: "commune" as const, href: territoireHref, targetKey: "risk.catnat" as const,
           }]
         : []),
