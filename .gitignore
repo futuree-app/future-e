@@ -106,3 +106,9 @@ data/rp-mobpro-2022.parquet
 
 # Sorties de spikes de recherche (regenerables par scripts/research/)
 /tmp/
+
+# ── SAUVEGARDES LOCALES DE DONNÉES RÉELLES ────────────────────────────────────────────────────
+# Photographies d'un état de la base de production (artefacts avant régénération, exports de
+# vérification). Elles portent des données personnelles et ne doivent jamais entrer au dépôt, mais
+# elles valent mieux que /tmp : ce sont les seules fixtures d'une migration future.
+.prive/
