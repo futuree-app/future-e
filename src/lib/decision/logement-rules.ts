@@ -31,9 +31,11 @@ const bucket = bucketDuProjet;
 //   - servitudes patrimoniales : publiées au Géoportail de l'urbanisme, interrogées via API Carto,
 //     que l'IGN OPÈRE sans les produire ;
 //   - indemnisations : données assurantielles collectées et traitées par la CCR, publiées comme
-//     indicateurs ONRN, millésime 2025 sur la période 1995-2021. Elles ne sont pas interrogées en
-//     direct : ce sont des JSON embarqués dans le dépôt (`lib/onrn-sinistralite.ts`), et le
-//     libellé ne prétend donc à aucune fraîcheur ;
+//     indicateurs ONRN. DEUX DATES, ET ELLES NE DISENT PAS LA MÊME CHOSE : la mise à jour du jeu
+//     (2025) et la période que les données couvrent (1995-2021). N'afficher que la seconde en
+//     l'appelant « millésime », comme le faisait la première version de ce libellé, laisse croire
+//     que la donnée s'arrête en 2021 par vétusté. Elles ne sont pas interrogées en direct : ce sont
+//     des JSON embarqués dans le dépôt (`lib/onrn-sinistralite.ts`) ;
 //   - diagnostic : base DPE de l'ADEME.
 //
 // ── CE QUE CETTE FORME NE FAIT PAS ───────────────────────────────────────────────────────────
@@ -47,7 +49,7 @@ export const SOURCES = {
   georisquesBrgm: "BRGM, via Géorisques",
   georisquesGaspar: "Base GASPAR, via Géorisques",
   gpu: "Géoportail de l'urbanisme, via API Carto (IGN)",
-  onrn: "CCR, indicateurs ONRN 1995-2021 (Géorisques)",
+  onrn: "CCR · indicateurs ONRN, mise à jour 2025 · données 1995-2021 · via Géorisques",
   ademe: "Base DPE (ADEME)",
 } as const;
 
@@ -68,6 +70,16 @@ function coverageRule(cfg: {
   id: string; tier: MaterialityTier; buckets?: Bucket[]; grain?: "adresse" | "commune";
   /** La provenance de la donnée de CETTE famille, telle que SOURCES la nomme (en tête de fichier). */
   source: string;
+  /**
+   * Comment la donnée arrive. `live_fetch` par défaut, ce qui est vrai des quatre familles
+   * réglementaires, interrogées à chaque assemblage.
+   *
+   * La sinistralité fait exception : elle est lue dans des JSON embarqués au dépôt, jamais
+   * appelée. La déclarer fraîche contredisait à la fois le code et le libellé de sa source.
+   * `persisted_snapshot` est le moins faux des deux modes existants ; un `embedded_dataset`
+   * serait plus juste, et il appartient au chantier qui structurera `EvidenceRef`.
+   */
+  sourceMode?: "live_fetch" | "persisted_snapshot";
   coverage: (l: LogementFacts) => SourceCoverage; flag: (l: LogementFacts) => boolean;
   // Le SUJET du fait, 3-6 mots : ce que la conclusion NOMME quand elle cite ce point, sans recopier le
   // constat que la carte affiche. Il vaut aussi pour l'inconnue (la source n'a pas répondu SUR ce sujet).
@@ -96,9 +108,9 @@ function coverageRule(cfg: {
       const b = bucket(p);
       if (cfg.buckets && !cfg.buckets.includes(b)) return na(cfg.id);
       const cov = cfg.coverage(l);
-      if (cov === "unavailable") return out(cfg.id, logementScopedUnknown(cfg.id, ev(`logement.${cfg.id}`, cfg.source, "live_fetch", grain, undefined, cfg.targetKey), cfg.topic(f.nom), cfg.unavailableStatement));
+      if (cov === "unavailable") return out(cfg.id, logementScopedUnknown(cfg.id, ev(`logement.${cfg.id}`, cfg.source, cfg.sourceMode ?? "live_fetch", grain, undefined, cfg.targetKey), cfg.topic(f.nom), cfg.unavailableStatement));
       if (cov === "present" && cfg.flag(l)) {
-        return out(cfg.id, logementVerification(cfg.id, ev(`logement.${cfg.id}`, cfg.source, "live_fetch", grain, cfg.observedValue?.(l), cfg.targetKey), cfg.tier, cfg.topic(f.nom), cfg.statement(l), cfg.actionType, cfg.action[b], cfg.status, cfg.limitation));
+        return out(cfg.id, logementVerification(cfg.id, ev(`logement.${cfg.id}`, cfg.source, cfg.sourceMode ?? "live_fetch", grain, cfg.observedValue?.(l), cfg.targetKey), cfg.tier, cfg.topic(f.nom), cfg.statement(l), cfg.actionType, cfg.action[b], cfg.status, cfg.limitation));
       }
       return na(cfg.id);
     },
@@ -202,7 +214,7 @@ export const LOGEMENT_RULES: DecisionRule[] = [
   coverageRule({ id: "patrimoine", tier: "secondary", source: SOURCES.gpu, buckets: ["neutre", "achat", "reside"], topic: () => "le périmètre patrimonial protégé", status: "Périmètre protégé", coverage: (l) => l.patrimoine, flag: (l) => l.perimetrePatrimonial,
     statement: () => "À cette adresse, le bien est dans un périmètre patrimonial protégé.", actionType: "obtenir_document", action: GESTES.patrimoine,
     unavailableStatement: "Les protections patrimoniales n'ont pas pu être vérifiées à cette adresse." }),
-  coverageRule({ id: "sinistralite", tier: "secondary", source: SOURCES.onrn, grain: "commune", topic: () => "les indemnisations recensées", status: "Indemnisations recensées", coverage: (l) => l.sinistralite, flag: (l) => l.sinistraliteActive,
+  coverageRule({ id: "sinistralite", tier: "secondary", source: SOURCES.onrn, sourceMode: "persisted_snapshot", grain: "commune", topic: () => "les indemnisations recensées", status: "Indemnisations recensées", coverage: (l) => l.sinistralite, flag: (l) => l.sinistraliteActive,
     statement: () => "À l'échelle de la commune, des indemnisations liées à la sécheresse ou aux inondations sont recensées.",
     limitation: "Ces données ne permettent pas d'établir l'historique de ce logement.", actionType: "obtenir_document", action: GESTES.sinistralite,
     unavailableStatement: "La sinistralité de la commune n'a pas pu être établie." }),

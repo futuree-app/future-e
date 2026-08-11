@@ -238,19 +238,20 @@ test("aucune preuve du logement ne présente l'adresse comme sa source", () => {
 });
 
 test("chaque règle du module porte le libellé de source EXACT de sa famille", () => {
-  // REGEX BANNIE ICI (revue du 11/08/2026). Une expression comme /Géorisques/ passait aussi bien
-  // sur « Géorisques (BRGM) » que sur « BRGM, via Géorisques » : elle protégeait une forme, pas une
-  // attribution. On compare au libellé exact, et les huit règles sont couvertes, y compris le
-  // confort d'été et le diagnostic non attribué, qu'une version antérieure de ce test oubliait.
+  // LES LIBELLÉS SONT RECOPIÉS À LA MAIN, PAS IMPORTÉS (revue du 11/08/2026). Comparer la règle à
+  // la constante que la règle utilise elle-même ne prouve rien : si `SOURCES` redevenait faux, la
+  // production et le test changeraient ensemble et le test passerait. Ce sont des sorties
+  // éditoriales auditées, avec une chaîne d'accès vérifiée source par source : c'est le test qui
+  // les fige, et toute modification doit être délibérée jusque dans ce fichier.
   const attendu: Record<string, string> = {
-    "logement.exposition-bati": SOURCES.georisquesBrgm,
-    "logement.zone-reglementee": SOURCES.georisquesGaspar,
-    "logement.cavite": SOURCES.georisquesBrgm,
-    "logement.patrimoine": SOURCES.gpu,
-    "logement.sinistralite": SOURCES.onrn,
-    "logement.dpe-faible": SOURCES.ademe,
-    "logement.confort-ete": SOURCES.ademe,
-    "logement.diagnostic-non-attribue": SOURCES.ademe,
+    "logement.exposition-bati": "BRGM, via Géorisques",
+    "logement.zone-reglementee": "Base GASPAR, via Géorisques",
+    "logement.cavite": "BRGM, via Géorisques",
+    "logement.patrimoine": "Géoportail de l'urbanisme, via API Carto (IGN)",
+    "logement.sinistralite": "CCR · indicateurs ONRN, mise à jour 2025 · données 1995-2021 · via Géorisques",
+    "logement.dpe-faible": "Base DPE (ADEME)",
+    "logement.confort-ete": "Base DPE (ADEME)",
+    "logement.diagnostic-non-attribue": "Base DPE (ADEME)",
   };
   const l = lf({
     rga: "present", expositionBati: true, pprn: "present", zoneReglementee: true,
@@ -267,15 +268,37 @@ test("chaque règle du module porte le libellé de source EXACT de sa famille", 
   }
 });
 
-test("les libellés de source disent la chaîne d'accès, pas un producteur unique", () => {
-  // Ce que la revue a corrigé : la CCR produit les données assurantielles que l'ONRN publie et que
-  // Géorisques diffuse ; l'IGN OPÈRE API Carto sans produire les servitudes. Un libellé qui
-  // nommerait un « producteur » unique serait une promesse de rigueur là où l'on tient une
-  // commodité d'affichage.
-  assert.match(SOURCES.onrn, /CCR/, "la CCR produit la donnée d'indemnisation");
-  assert.match(SOURCES.onrn, /1995-2021/, "le millésime connu doit être dit tant qu'aucun champ ne le porte");
-  assert.match(SOURCES.gpu, /via API Carto/, "l'IGN opère le service, il ne produit pas la servitude");
+test("deux dates distinctes pour l'ONRN : la mise à jour n'est pas la période couverte", () => {
+  // « 1995-2021 » avait été appelé « le millésime ». C'est la période que les données couvrent ; le
+  // jeu, lui, a été mis à jour en 2025 (cf. l'en-tête de `lib/onrn-sinistralite.ts`). Ne dire que la
+  // première laisse croire à une donnée arrêtée en 2021 par vétusté.
+  assert.match(SOURCES.onrn, /mise à jour 2025/);
+  assert.match(SOURCES.onrn, /données 1995-2021/);
+  assert.match(SOURCES.onrn, /CCR/, "la CCR collecte et traite la donnée d'indemnisation");
+});
+
+test("la sinistralité ne se déclare pas fraîche : elle est lue dans un jeu embarqué", () => {
+  // `coverageRule` posait `live_fetch` pour toutes ses familles. Les quatre familles réglementaires
+  // sont bien interrogées à chaque assemblage ; la sinistralité est lue dans des JSON du dépôt.
+  const l = lf({ sinistralite: "present", sinistraliteActive: true });
+  const f = runRules(facts(l), project({ intent: "achat" }), HARD).facts
+    .find((x) => x.ruleId === "logement.sinistralite");
+  assert.ok(f);
+  const refs = f.role === "compromise" ? f.sides.flatMap((s) => s.evidence) : f.evidence;
+  assert.equal(refs[0]!.sourceMode, "persisted_snapshot");
+
+  const reglementaire = runRules(
+    facts(lf({ rga: "present", expositionBati: true })), project({ intent: "achat" }), HARD,
+  ).facts.find((x) => x.ruleId === "logement.exposition-bati");
+  assert.ok(reglementaire);
+  const refsRegl = reglementaire.role === "compromise" ? reglementaire.sides.flatMap((s) => s.evidence) : reglementaire.evidence;
+  assert.equal(refsRegl[0]!.sourceMode, "live_fetch");
+});
+
+test("aucun libellé de source ne se dit « producteur »", () => {
+  // Une chaîne d'accès compte jusqu'à quatre acteurs : le mot promettrait plus que ce que ce champ
+  // unique peut tenir. La structuration de `EvidenceRef` est le vrai correctif, et elle viendra.
   for (const source of Object.values(SOURCES)) {
-    assert.equal(source.includes("producteur"), false, "le mot promet plus que ce que la forme tient");
+    assert.equal(source.includes("producteur"), false);
   }
 });
