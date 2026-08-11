@@ -116,14 +116,23 @@ carte qui n'en démontrait aucune.
   total et son sous-ensemble. En panne du relevé direct, la carte n'est plus marquée absente sous une
   valeur lisible : le compte local devient sa face, sans « Dont » qui n'aurait plus de référent. Les
   fabriques refusent enfin les comptes non entiers ou négatifs, et l'objet porte l'INSEE.
-- **NE GARANTIT PAS, et c'est le point n°1 du chantier** : le partage porte sur la FORME, pas sur la
-  donnée figée vendue. `/rapport` sert l'artefact du jour de l'achat, `/rapport/quartier` relit
-  l'index du déploiement courant : après une régénération de l'index, la pastille peut annoncer 6 et
-  la carte 7, chacune fidèle à sa source. Un test le rend LISIBLE (« CE QUI RESTE OUVERT ») sans le
-  corriger. Le correctif est de conserver l'objet dans l'artefact et de le faire porter par le lien.
-- **Racine à traiter d'abord** : `data/comparateur-index.json` n'a **aucune date de génération** dans
-  son `meta` (vérifié le 11/08/2026). Tant qu'il n'en porte pas, aucun objet de preuve ne peut
-  identifier l'état de la donnée qu'il a utilisé, et `catnat-1` ne versionne que la convention.
+### `ac446a1` — le chiffre figé, et non plus seulement sa phrase
+
+Le point n°1, fermé. `DecisionArtifactV1` porte un `dataSnapshot` à côté du snapshot de projet ;
+`/rapport/quartier` le lit (`readLatestDataSnapshot`, tous scopes de la commune) et le préfère à
+l'index. Le texte figé n'est lisible que par un humain : sans objet structuré, une autre surface
+n'avait que deux choix, relire l'index d'aujourd'hui ou parser une phrase.
+
+- **Garantit** : la carte affiche le compte TEL QU'IL A ÉTÉ VENDU. Quand l'index a changé depuis, la
+  mise à jour est annoncée (« Depuis votre analyse : 7 arrêtés inondation depuis 1982 ») au lieu
+  d'être choisie en silence : taire un chiffre qui a bougé serait le défaut symétrique.
+- **Le parseur refuse l'artefact entier** sur un snapshot aberrant, plutôt que de servir un dossier
+  à demi figé. Un artefact sans snapshot reste valide, et aucun objet vide n'est écrit.
+- **Ne garantit pas** : les artefacts déjà vendus n'ont pas de snapshot et ne seront pas régénérés
+  pour cela. Leur carte retombe sur l'index courant, exactement comme avant ce lot.
+- **Limite connue** : `data/comparateur-index.json` n'a **aucune date de génération** dans son `meta`
+  (vérifié le 11/08/2026). `catnat-1` versionne donc la convention, jamais l'état de la donnée. Le
+  snapshot rend le problème inoffensif pour l'affichage, il ne le résout pas pour l'audit.
 - **Volet** : l'ouverture automatique n'est plus nécessaire à l'intégrité depuis que le chiffre est
   sur la face. Le lien doit atterrir sur la bonne carte et la mettre en évidence, ce qu'il fait.
 
