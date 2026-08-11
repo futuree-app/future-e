@@ -19,6 +19,7 @@ import { AskFutureInlineMount } from "@/components/AskFutureInlineMount";
 import { TerritoryYearsBand } from "@/components/report/TerritoryYearsBand";
 import { deriveTerritoryMood } from "@/lib/territory-mood";
 import { catnatInondationDepuisIndex } from "@/lib/decision/catnat-evidence";
+import { readLatestDataSnapshot } from "@/lib/server/decision-artifact-store";
 import { getTerritoryContext } from "@/lib/comparateur-vie";
 import { buildTerritoryIdentity, buildTerritoryCards } from "@/lib/territory-identity";
 import { TerritoryIdentityCard } from "@/components/report/TerritoryIdentityCard";
@@ -90,12 +91,29 @@ export default async function RapportQuartierPage() {
   // trait distinctif. Absent (commune hors index, PLM) => on n'affiche pas la carte.
   const territoryContext = inseeCode ? await getTerritoryContext(inseeCode) : null;
 
-  // LE COMPTE QUE LA PREUVE DU DOSSIER ANNONCE, pris à la MÊME source qu'elle : l'index. Le moteur
-  // de décision est déterministe et sans réseau, il ne connaît que ce comptage ; la carte, elle,
-  // dispose du relevé direct tous risques. Faire descendre l'index jusqu'ici est le seul sens
-  // possible, et c'est ce qui permet au lecteur arrivé par la pastille de retrouver SON chiffre.
-  // Fabrique et libellés : `lib/decision/catnat-evidence.ts`.
-  const catnatInondation = catnatInondationDepuisIndex(territoryContext?.entry);
+  // LE COMPTE QUE LA PREUVE DU DOSSIER ANNONCE, et il vient de l'ARTEFACT quand il existe.
+  //
+  // ── POURQUOI PAS L'INDEX COURANT ─────────────────────────────────────────────────────────────
+  // Le dossier est figé le jour de l'achat ; cette page, elle, est recalculée à chaque ouverture.
+  // Lire l'index d'aujourd'hui faisait diverger les deux dès la première régénération : la pastille
+  // vendue annonçait 6, la carte affichait 7, chacune fidèle à sa source et personne pour le dire.
+  // Le snapshot de données de l'artefact porte l'objet TEL QU'IL A ÉTÉ VENDU.
+  //
+  // L'index reste le repli, pour les dossiers d'avant ce lot et pour un lecteur qui n'a pas encore
+  // d'artefact sur cette commune. Il sert aussi à détecter une MISE À JOUR : quand les deux
+  // existent et diffèrent, la carte le dit plutôt que de choisir en silence.
+  const snapshotFige = inseeCode
+    ? await readLatestDataSnapshot(supabase, user.id, inseeCode).catch(() => null)
+    : null;
+  const catnatIndexCourant = catnatInondationDepuisIndex(territoryContext?.entry);
+  const catnatInondation = snapshotFige?.catnatInondation ?? catnatIndexCourant;
+  // Une mise à jour ne s'affiche que si elle CHANGE le compte : un index régénéré à l'identique
+  // n'a rien à raconter au lecteur.
+  const catnatMisAJour =
+    snapshotFige?.catnatInondation && catnatIndexCourant
+      && catnatIndexCourant.count !== snapshotFige.catnatInondation.count
+      ? catnatIndexCourant
+      : null;
   const saisonnalitePct = inseeCode ? await getResidencesSecondairesPct(inseeCode) : null;
   // Tendance observée ERA5-Land (Copernicus) : preuve « le passé valide la
   // projection » dans le drawer Températures. La face avant reste sur le futur DRIAS.
@@ -244,7 +262,7 @@ export default async function RapportQuartierPage() {
           >
             Les grands signaux du territoire
           </h2>
-          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} catnatInondation={catnatInondation} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={eloignementServicesPct} era5={era5} climatType={territoryMood.type} />
+          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} catnatInondation={catnatInondation} catnatMisAJour={catnatMisAJour} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={eloignementServicesPct} era5={era5} climatType={territoryMood.type} />
         </section>
 
         {/* Une question ? — AskFuture inline (uniquement pour comptes payants) :

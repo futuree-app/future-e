@@ -2,7 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   parseDecisionArtifact,
-  type DecisionArtifactV1, type ArtifactStatus, type StoredArtifact,
+  type DecisionArtifactV1, type ArtifactStatus, type StoredArtifact, type DataSnapshot,
 } from "@/lib/decision/decision-artifact";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
@@ -47,6 +47,38 @@ export async function readLatestArtifact(
     // qu'une page en échec.
     artifact: data.status === "ready" ? parseDecisionArtifact(data.payload) : null,
   };
+}
+
+/**
+ * LE SNAPSHOT DE DONNÉES LE PLUS RÉCENT DE CETTE COMMUNE, tous scopes confondus.
+ *
+ * ── POURQUOI TOUS SCOPES ─────────────────────────────────────────────────────────────────────
+ * Le module Territoire ne sait pas DEPUIS QUEL dossier le lecteur a cliqué : il connaît la commune
+ * lue, pas le dossier d'adresse d'où venait le lien. Or le fait qui porte le compte d'arrêtés est
+ * le même dans l'artefact communal et dans celui d'un dossier d'adresse : c'est la même règle, sur
+ * la même commune. Prendre le plus récent des deux donne donc le bon chiffre dans tous les cas
+ * sauf un, deux artefacts de la même commune figés à des dates différentes ET sur des index
+ * différents. Ce cas rare est meilleur que le comportement d'avant, où la carte ignorait purement
+ * et simplement ce qui avait été vendu.
+ *
+ * Rend `null` sans artefact prêt, ou quand aucun ne porte de snapshot (tous ceux d'avant le
+ * 11/08/2026) : l'appelant retombe alors sur l'index courant.
+ */
+export async function readLatestDataSnapshot(
+  sb: SupabaseClient, userId: string, insee: string,
+): Promise<DataSnapshot | null> {
+  const { data, error } = await sb
+    .from("decision_artifact")
+    .select("payload, generated_at")
+    .eq("user_id", userId).eq("insee_code", insee).eq("status", "ready")
+    .order("generated_at", { ascending: false })
+    .limit(5);
+  if (error) throw error;
+  for (const ligne of data ?? []) {
+    const artefact = parseDecisionArtifact(ligne.payload);
+    if (artefact?.dataSnapshot) return artefact.dataSnapshot;
+  }
+  return null;
 }
 
 /**

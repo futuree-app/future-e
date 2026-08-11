@@ -1053,16 +1053,19 @@ test("la phrase de la pastille est INCLUSE mot pour mot dans la ligne de la cart
   assert.ok(ligneCarte.includes(pastille!), "la carte doit contenir la phrase, mot pour mot");
 });
 
-test("CE QUI RESTE OUVERT : un artefact figé et l'index courant peuvent diverger", () => {
+test("FERMÉ le 11/08/2026 : l'artefact figé prime sur l'index courant", () => {
   // Le partage porte sur la FORME, pas sur la donnée figée vendue au lecteur. /rapport sert
   // l'artefact du jour de l'achat ; /rapport/quartier relit l'index du déploiement courant. Après
   // une régénération de l'index, la pastille peut annoncer 6 et la carte 7, chacune fidèle à sa
   // source, sans qu'aucun test ne le voie : celui du dessus injecte volontairement le même compte
   // des deux côtés.
   //
-  // Ce test ne corrige rien. Il rend le défaut LISIBLE là où quelqu'un le cherchera. Le correctif
-  // est de conserver l'objet dans l'artefact et de le faire porter par le lien, ce qui suppose
-  // aussi que l'index sache dire sa date, ce qu'il ne fait pas aujourd'hui.
+  // CORRIGÉ DEPUIS : l'artefact porte un `dataSnapshot` qui conserve l'objet TEL QU'IL A ÉTÉ VENDU,
+  // et /rapport/quartier le préfère à l'index (`readLatestDataSnapshot`). Quand les deux diffèrent,
+  // la carte annonce la mise à jour au lieu de choisir en silence.
+  //
+  // Ce test garde sa valeur : il montre que les deux états produisent bien deux phrases, donc que la
+  // divergence est réelle et que seul le choix de la source la règle.
   const figeALAchat = catnatInondationDepuisCompte(6, "17300")!;
   const indexDuJour = catnatInondationDepuisIndex({ insee: "17300", inondation: { catnat: 7 } })!;
   assert.notEqual(

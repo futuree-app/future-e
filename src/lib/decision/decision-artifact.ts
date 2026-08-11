@@ -17,6 +17,7 @@
 // ════════════════════════════════════════════════════════════════════════════════════════════
 import { z } from "zod";
 import type { Dossier } from "./decision-fact.ts";
+import type { CatnatInondation } from "./catnat-evidence.ts";
 import type { UserProject } from "../user-project.ts";
 
 /**
@@ -41,6 +42,30 @@ export type DecisionArtifactV1 = {
   conventionsVersion: string;
   projectSnapshot: UserProject;
   dossier: Dossier;
+  /**
+   * LES DONNÉES CHIFFRÉES QUE LE DOSSIER ANNONCE, sous leur forme structurée (11/08/2026).
+   *
+   * ── POURQUOI, ALORS QUE `dossier` PORTE DÉJÀ LE TEXTE ────────────────────────────────────
+   * Le texte est figé, mais il n'est lisible que par un humain. Quand une AUTRE surface doit
+   * afficher le même chiffre (la carte du module Territoire, visée par le lien « Preuve »), elle
+   * n'a que deux choix : relire l'index du déploiement courant, et diverger de ce qui a été vendu,
+   * ou parser une phrase, ce qui casse au premier changement de formulation. Le défaut était réel :
+   * la pastille d'un dossier acheté annonçait 6 pendant que la carte, relisant l'index régénéré,
+   * affichait 7.
+   *
+   * Ce champ est donc le SNAPSHOT DE DONNÉES de l'artefact, à côté du snapshot de projet. Il ne
+   * contient que ce qu'une autre surface doit pouvoir réafficher à l'identique.
+   *
+   * OPTIONNEL, et il le restera : les artefacts vendus avant ce lot n'en ont pas, et leur lecteur
+   * doit continuer de voir son dossier. L'absence se traite comme un repli sur l'index courant,
+   * jamais comme une erreur.
+   */
+  dataSnapshot?: DataSnapshot;
+};
+
+/** Ce que l'artefact fige EN PLUS de sa prose. Une entrée par donnée réaffichée ailleurs. */
+export type DataSnapshot = {
+  catnatInondation?: CatnatInondation;
 };
 
 /**
@@ -84,6 +109,18 @@ const artifactSchema = z.object({
   conventionsVersion: z.string().min(1),
   projectSnapshot: z.object({}).passthrough(),
   dossier: dossierShape,
+  // Le snapshot de données est OPTIONNEL et vérifié champ par champ : un artefact antérieur au lot
+  // n'en a pas, et un artefact dont ce bloc serait illisible doit rester servable (le repli sur
+  // l'index courant est dégradé, pas cassé).
+  dataSnapshot: z.object({
+    catnatInondation: z.object({
+      count: z.number().int().nonnegative(),
+      depuis: z.number().int(),
+      origine: z.literal("index_local"),
+      insee: z.string().nullable(),
+      version: z.string().min(1),
+    }).optional(),
+  }).optional(),
 });
 
 export function parseDecisionArtifact(value: unknown): DecisionArtifactV1 | null {
@@ -97,6 +134,7 @@ export function parseDecisionArtifact(value: unknown): DecisionArtifactV1 | null
 /** L'emballage, au moment de la génération. Aucune I/O : l'appelant écrit. */
 export function buildDecisionArtifact(
   dossier: Dossier, projectSnapshot: UserProject, generatedAt: string, conventionsVersion: string,
+  dataSnapshot?: DataSnapshot,
 ): DecisionArtifactV1 {
   return {
     schemaVersion: 1,
@@ -105,6 +143,9 @@ export function buildDecisionArtifact(
     conventionsVersion,
     projectSnapshot,
     dossier,
+    // `undefined` plutôt qu'un objet vide : `stableStringify` refuse `undefined`, et un
+    // `dataSnapshot: {}` ferait croire, à la relecture, qu'on a figé quelque chose.
+    ...(dataSnapshot && Object.keys(dataSnapshot).length > 0 ? { dataSnapshot } : {}),
   };
 }
 

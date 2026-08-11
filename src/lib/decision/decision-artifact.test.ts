@@ -211,3 +211,43 @@ test("rien à périmer quand il n'y a rien de figé, ni sur une date illisible",
     false,
   );
 });
+
+// ── Le snapshot de données : ce que d'autres surfaces doivent réafficher à l'identique ─────────
+
+test("le snapshot de données survit à l'aller-retour JSON", () => {
+  const artefact = buildDecisionArtifact(
+    { scope: "commune", conclusion: "x", conclusionState: "y", sections: [], controlesTitle: "t", compositions: [], absorbedFacts: [] } as never,
+    {} as never, "2026-08-11T10:00:00.000Z", "hc-conv-1",
+    { catnatInondation: { count: 6, depuis: 1982, origine: "index_local", insee: "17300", version: "catnat-1" } },
+  );
+  const relu = parseDecisionArtifact(JSON.parse(JSON.stringify(artefact)));
+  assert.equal(relu?.dataSnapshot?.catnatInondation?.count, 6);
+  assert.equal(relu?.dataSnapshot?.catnatInondation?.insee, "17300");
+});
+
+test("un artefact SANS snapshot reste parfaitement valide", () => {
+  // Tous ceux vendus avant le 11/08/2026. Leur lecteur doit continuer de voir son dossier ; la
+  // carte du module retombe alors sur l'index courant, ce qui est dégradé, jamais cassé.
+  const artefact = buildDecisionArtifact(
+    { scope: "commune", conclusion: "x", conclusionState: "y", sections: [], controlesTitle: "t", compositions: [], absorbedFacts: [] } as never,
+    {} as never, "2026-08-05T10:00:00.000Z", "hc-conv-1",
+  );
+  assert.equal("dataSnapshot" in artefact, false, "aucun objet vide : il ferait croire qu'on a figé quelque chose");
+  assert.ok(parseDecisionArtifact(JSON.parse(JSON.stringify(artefact))));
+});
+
+test("un snapshot au compte aberrant fait REFUSER l'artefact entier", () => {
+  // Le parseur refuse, il ne répare pas : un artefact à demi lisible produirait un dossier moitié
+  // figé moitié recalculé, l'hybride que tout ce lot supprime. L'appelant retombe sur l'assemblage
+  // vivant, comme pour n'importe quel payload illisible.
+  const base = buildDecisionArtifact(
+    { scope: "commune", conclusion: "x", conclusionState: "y", sections: [], controlesTitle: "t", compositions: [], absorbedFacts: [] } as never,
+    {} as never, "2026-08-11T10:00:00.000Z", "hc-conv-1",
+    { catnatInondation: { count: 6, depuis: 1982, origine: "index_local", insee: "17300", version: "catnat-1" } },
+  );
+  const corrompu = JSON.parse(JSON.stringify(base));
+  corrompu.dataSnapshot.catnatInondation.count = -2;
+  assert.equal(parseDecisionArtifact(corrompu), null);
+  corrompu.dataSnapshot.catnatInondation.count = 1.5;
+  assert.equal(parseDecisionArtifact(corrompu), null);
+});

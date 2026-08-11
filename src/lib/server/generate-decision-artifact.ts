@@ -2,7 +2,8 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { assembleAddressDossier } from "@/lib/server/assemble-address-dossier";
-import { buildDecisionArtifact, artifactScopeKey } from "@/lib/decision/decision-artifact";
+import { buildDecisionArtifact, artifactScopeKey, type DataSnapshot } from "@/lib/decision/decision-artifact";
+import { catnatInondationDepuisCompte } from "@/lib/decision/catnat-evidence";
 import {
   claimArtifactSlot, completeArtifact, failArtifact,
 } from "@/lib/server/decision-artifact-store";
@@ -102,9 +103,16 @@ export async function generateDecisionArtifact(
       return { status: "failed", reason: `commune ${cible.insee} introuvable` };
     }
 
+    // LE SNAPSHOT DE DONNÉES, figé avec la décision. Il tient ce que d'AUTRES surfaces devront
+    // réafficher à l'identique : sans lui, la carte du module Territoire relit l'index du
+    // déploiement courant et peut afficher 7 sous une pastille vendue à 6.
+    const dataSnapshot: DataSnapshot = {};
+    const catnat = catnatInondationDepuisCompte(commune.moduleFacts.catnatInondation, cible.insee);
+    if (catnat) dataSnapshot.catnatInondation = catnat;
+
     if (cible.kind === "commune") {
       const artefact = buildDecisionArtifact(
-        commune.dossier, project, new Date().toISOString(), PRODUCT_CONVENTIONS_VERSION,
+        commune.dossier, project, new Date().toISOString(), PRODUCT_CONVENTIONS_VERSION, dataSnapshot,
       );
       await completeArtifact(sb, userId, cible.insee, scopeKey, artefact, version);
       return { status: "ready" };
@@ -148,7 +156,7 @@ export async function generateDecisionArtifact(
     }
 
     const artefact = buildDecisionArtifact(
-      vue.dossier, project, new Date().toISOString(), PRODUCT_CONVENTIONS_VERSION,
+      vue.dossier, project, new Date().toISOString(), PRODUCT_CONVENTIONS_VERSION, dataSnapshot,
     );
     await completeArtifact(sb, userId, cible.insee, scopeKey, artefact, version);
     return { status: "ready" };
