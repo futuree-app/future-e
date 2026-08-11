@@ -1,10 +1,14 @@
-// Route de synthèse Logement — prose streamée (patron synthesize-quartier), traitée en ARTEFACT.
-// Cache par hash de faits dans la table `logement` : hit -> texte figé, zéro LLM ; miss -> stream
-// + persistance via after(). Modèle Sonnet 4.6 medium, thinking off. Routing : Anthropic direct
-// tant que le produit n'est pas en vente (cf. mémoire synthesis_model_routing).
+// Route de synthèse Logement, traitée en ARTEFACT. Cache par hash de faits : hit -> texte figé,
+// zéro LLM ; miss -> génération BUFFERISÉE, vérifiée, puis persistée via after().
+//
+// LE STREAMING A ÉTÉ RETIRÉ le 11/08/2026 : une prose ne se vérifie pas après avoir été affichée,
+// et ce module a servi des inférences que son propre prompt interdit.
+//
+// Modèle Sonnet 4.6 medium, thinking off. Routing : Anthropic direct tant que le produit n'est pas
+// en vente (cf. mémoire synthesis_model_routing).
 
 import { NextRequest, after } from "next/server";
-import { streamText, generateText } from "ai";
+import { generateText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { requireCurrentUser } from "@/lib/user-account";
 import { getDossier } from "@/lib/address-dossier-store";
@@ -12,6 +16,7 @@ import { updateOwnedAddressDossier } from "@/lib/server/address-dossier-write";
 import { buildFactHash, buildSynthesisPayload, type SynthesisData } from "@/lib/logement-synthesis-cache";
 import { deriveClimatProjete } from "@/lib/drias-json";
 import { validateCoverageClosure, correctionPourClosure } from "@/lib/coverage-closure";
+import { validateAssertions, correctionPourAssertions } from "@/lib/synthesis-guardrails";
 
 export const dynamic = "force-dynamic";
 // Aligné sur synthesize-quartier : un stream lent ne doit pas être tronqué par la durée par
@@ -413,18 +418,36 @@ ${JSON.stringify(payload, null, 2)}`;
   // ════════════════════════════════════════════════════════════════════════════════════════════
   const nonLues = ((payload.couverture as { non_lues?: string[] } | undefined)?.non_lues) ?? [];
 
-  if (nonLues.length > 0) {
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  // LE TEXTE EST TOUJOURS VÉRIFIÉ AVANT D'ÊTRE VU (11/08/2026), ET UN REFUS RESTE UN REFUS.
+  //
+  // Deux changements, tous deux payés par la perte du streaming, et tous deux nécessaires.
+  //
+  // 1. LA VÉRIFICATION NE DÉPEND PLUS DE LA COUVERTURE. Le verrou ne se posait que lorsqu'une
+  //    dimension manquait ; un dossier entièrement lu partait en streaming, sans aucun contrôle.
+  //    Or les trois synthèses trouvées en base le 11/08 portaient des inférences interdites par
+  //    le prompt, indépendamment de toute lacune de couverture
+  //    (docs/audits/2026-08-11-syntheses-logement-fautives.md). Une prose ne peut pas se vérifier
+  //    après avoir été affichée : on la génère en entier, on la contrôle, puis on la rend.
+  //
+  // 2. UN SECOND ÉCHEC NE LAISSE PLUS PASSER. L'ancien commentaire disait qu'un dossier payé muet
+  //    serait pire que le défaut corrigé. C'est faux, et l'inverse est vrai : le module n'est
+  //    jamais muet, ses cartes déterministes portent tous les faits, leurs preuves et leurs
+  //    limites. Ce qui disparaît en cas de refus est la PROSE. Laisser passer, c'est afficher à
+  //    un acheteur une causalité que le moteur n'établit pas, sous une marque qui promet
+  //    l'inverse. Le refus se dit au client (422), il ne se déguise pas en panne.
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  {
     let texte = "";
-    let verdict = null as ReturnType<typeof validateCoverageClosure> | null;
+    let correction = "";
+    let refus: { raison: string; detail: string } | null = null;
 
     for (let essai = 0; essai < 2; essai++) {
       const gen = await generateText({
         model: MODEL,
         providerOptions: OPTIONS,
         system: SYSTEM_PROMPT,
-        prompt: essai === 0
-          ? userMessage
-          : `${userMessage}\n\n${correctionPourClosure(verdict as Extract<ReturnType<typeof validateCoverageClosure>, { ok: false }>, nonLues)}`,
+        prompt: essai === 0 ? userMessage : `${userMessage}\n\n${correction}`,
       }).catch((err: unknown) => {
         console.error("[synthesize-logement] generateText failed:", err);
         return null;
@@ -432,14 +455,35 @@ ${JSON.stringify(payload, null, 2)}`;
       if (!gen?.text?.trim()) break;
 
       texte = gen.text;
-      verdict = validateCoverageClosure(texte, nonLues);
-      if (verdict.ok) break;
-      console.error("[synthesize-logement] clôture refusée", {
-        essai, raison: verdict.raison, detail: verdict.detail,
-      });
+      refus = null;
+
+      // Les assertions d'abord : elles portent sur ce que le texte AFFIRME, quand la clôture ne
+      // regarde que ce qu'il conclut des dimensions non lues. Une phrase peut être irréprochable
+      // du point de vue de la couverture et inventer un mécanisme.
+      const assertions = validateAssertions(texte);
+      if (!assertions.ok) {
+        refus = { raison: `assertion_${assertions.famille}`, detail: assertions.extrait };
+        correction = correctionPourAssertions(assertions);
+      } else if (nonLues.length > 0) {
+        const closure = validateCoverageClosure(texte, nonLues);
+        if (!closure.ok) {
+          refus = { raison: closure.raison, detail: closure.detail };
+          correction = correctionPourClosure(closure, nonLues);
+        }
+      }
+
+      if (!refus) break;
+      console.error("[synthesize-logement] texte refusé", { essai, ...refus });
     }
 
     if (!texte.trim()) return new Response("AI provider unavailable.", { status: 502 });
+
+    if (refus) {
+      // RIEN N'EST PERSISTÉ. Un texte refusé qui entrerait en base serait resservi tel quel au
+      // prochain chargement par le cache de `factHash`, et le contrôle n'aurait servi qu'une fois.
+      console.error("[synthesize-logement] refus définitif après relance", refus);
+      return new Response("La lecture rédigée n'a pas passé les contrôles.", { status: 422 });
+    }
 
     after(async () => {
       await updateOwnedAddressDossier(user.id, body.dossierId!, {
@@ -453,64 +497,4 @@ ${JSON.stringify(payload, null, 2)}`;
       headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
     });
   }
-
-  const result = streamText({
-    model: MODEL,
-    providerOptions: OPTIONS,
-    system: SYSTEM_PROMPT,
-    prompt: userMessage,
-    onError: ({ error }) => console.error("[synthesize-logement] streamText error:", error),
-  });
-
-  // Probe le premier chunk : IA down -> 502 franc (le client bascule sur son état d'erreur).
-  const iter = result.textStream[Symbol.asyncIterator]();
-  let firstChunk: IteratorResult<string>;
-  try {
-    firstChunk = await iter.next();
-  } catch (err) {
-    console.error("[synthesize-logement] first chunk failed:", err);
-    return new Response("AI provider unavailable.", { status: 502 });
-  }
-  if (firstChunk.done) {
-    return new Response("Empty stream from AI provider.", { status: 502 });
-  }
-
-  const encoder = new TextEncoder();
-  let full = firstChunk.value;
-  // Gate de complétude (board critique 2c) : after() s'exécute MÊME si la réponse a échoué (doc
-  // Next). Sur un abort client en cours de stream, `full` est tronqué : sans ce flag, on
-  // persisterait un texte partiel comme artefact définitif. On ne persiste que si la boucle est
-  // sortie proprement (stream clos).
-  let completed = false;
-  const stream = new ReadableStream({
-    async start(controller) {
-      controller.enqueue(encoder.encode(firstChunk.value));
-      try {
-        while (true) {
-          const next = await iter.next();
-          if (next.done) break;
-          full += next.value;
-          controller.enqueue(encoder.encode(next.value));
-        }
-        completed = true;
-        controller.close();
-      } catch (err) {
-        try { controller.error(err); } catch { /* client déjà parti */ }
-      }
-    },
-  });
-
-  // Persistance post-réponse : seulement si le stream s'est clos proprement (texte complet).
-  after(async () => {
-    if (!completed || !full.trim()) return;
-    await updateOwnedAddressDossier(user.id, body.dossierId!, {
-      synthesis_text: full,
-      synthesis_fact_hash: factHash,
-      synthesis_generated_at: new Date().toISOString(),
-    }).catch((e: unknown) => console.error("[synthesize-logement] persist failed:", e));
-  });
-
-  return new Response(stream, {
-    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
-  });
 }

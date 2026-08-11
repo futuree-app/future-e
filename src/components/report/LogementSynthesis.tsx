@@ -5,7 +5,11 @@ import { usePostHog } from "posthog-js/react";
 import { ReportSection } from "@/components/report/kit";
 import { buildFactHash, type SynthesisData } from "@/lib/logement-synthesis-cache";
 
-type State = "idle" | "streaming" | "done" | "error";
+// « refused » n'est PAS une erreur : la génération a abouti, et le contrôle a refusé de montrer le
+// texte parce qu'il affirmait plus que ce que le moteur établit (voir `synthesis-guardrails`). Le
+// distinguer d'une panne est une question d'honnêteté : « réessayez dans un instant » serait faux,
+// puisque rien ne dit qu'une relance produirait un texte conforme.
+type State = "idle" | "streaming" | "done" | "error" | "refused";
 
 export function LogementSynthesis({
   ready, data, dossierId, insee,
@@ -45,6 +49,11 @@ export function LogementSynthesis({
         body: JSON.stringify({ data, dossierId, force }),
         signal: controller.signal,
       });
+      if (res.status === 422) {
+        setState("refused");
+        posthog?.capture("logement_ai_summary_refused", { insee });
+        return;
+      }
       if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -96,6 +105,14 @@ export function LogementSynthesis({
         )}
         {state === "error" && (
           <p style={{ fontSize: 14, color: "var(--fg-3)" }}>La lecture n&apos;a pas pu être générée. Réessayez dans un instant.</p>
+        )}
+        {state === "refused" && (
+          // Ce que le lecteur doit comprendre : il ne manque RIEN au dossier, seule la mise en
+          // prose est absente. Les blocs sous ce texte portent chaque donnée, sa source et sa
+          // limite. Dire « réessayez » ici serait une fausse promesse.
+          <p style={{ fontSize: 14, color: "var(--fg-3)" }}>
+            La lecture rédigée n&apos;a pas passé nos contrôles et n&apos;est pas affichée. Les constats ci-dessous restent complets.
+          </p>
         )}
         {(state === "done" || state === "error") && (
           <button
