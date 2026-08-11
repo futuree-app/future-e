@@ -92,6 +92,18 @@ export function LogementSynthesis({
 
   if (!ready) return <></>;
 
+  // LE BLOC DISPARAÎT QUAND LA LECTURE EST REFUSÉE (décision porteur, 11/08/2026).
+  //
+  // Une première version affichait « la lecture rédigée n'a pas passé nos contrôles ». C'est de la
+  // plomberie : le lecteur n'a pas à connaître l'existence d'un validateur, et la phrase attire
+  // l'attention sur une absence qu'il n'aurait jamais remarquée. Le module ne perd rien de ce qu'il
+  // a vendu, ses cartes portent chaque donnée, sa source et sa limite ; il perd une mise en prose.
+  //
+  // L'ERREUR TECHNIQUE, ELLE, RESTE DITE : « réessayez dans un instant » est une promesse tenable
+  // quand le fournisseur n'a pas répondu, et le lecteur peut agir. Un refus n'est pas retentable,
+  // et le silence est la seule réponse honnête.
+  if (state === "refused") return <></>;
+
   return (
     <ReportSection eyebrow="Lecture de ce logement" tone="accent">
       <div style={{ padding: "4px 0" }}>
@@ -109,14 +121,6 @@ export function LogementSynthesis({
         )}
         {state === "error" && (
           <p style={{ fontSize: 14, color: "var(--fg-3)" }}>La lecture n&apos;a pas pu être générée. Réessayez dans un instant.</p>
-        )}
-        {state === "refused" && (
-          // Ce que le lecteur doit comprendre : il ne manque RIEN au dossier, seule la mise en
-          // prose est absente. Les blocs sous ce texte portent chaque donnée, sa source et sa
-          // limite. Dire « réessayez » ici serait une fausse promesse.
-          <p style={{ fontSize: 14, color: "var(--fg-3)" }}>
-            La lecture rédigée n&apos;a pas passé nos contrôles et n&apos;est pas affichée. Les constats ci-dessous restent complets.
-          </p>
         )}
         {(state === "done" || state === "error") && (
           <button
