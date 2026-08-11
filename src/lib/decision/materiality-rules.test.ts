@@ -57,7 +57,14 @@ test("règle compromis : deux côtés, chacun sa preuve", () => {
   assert.ok(f && f.role === "compromise");
   assert.equal(f.sides.length, 2);
   assert.ok(f.sides[0].evidence.length >= 1 && f.sides[1].evidence.length >= 1);
-  assert.equal(f.sides[0].evidence[0].observedValue, "80/100");
+  // LE SCORE INTERNE NE S'AFFICHE PLUS (11/08/2026). Il valait « 80/100 » en pastille « Preuve » :
+  // une note de qualité apparente, une précision artificielle entre deux constructions non
+  // comparables, et les faits de l'arbitrage masqués derrière un chiffre. Chaque côté garde une
+  // référence, sans valeur, qui nomme la dimension mesurée : `assertFactValid` exige une preuve par
+  // côté, et le lecteur garde une provenance.
+  assert.equal(f.sides[0].evidence[0].observedValue, undefined);
+  assert.match(f.sides[0].evidence[0].label, /accès aux transports/);
+  assert.match(f.sides[1].evidence[0].label, /exposition à la chaleur/);
   assert.doesNotMatch(f.sides[0].statement + f.sides[1].statement, /meilleure|train/i);
 });
 
@@ -128,7 +135,9 @@ test("règle inondation : une seule preuve chiffrée, opposable, et qui VISE la 
   // Rochelle », un libellé de contexte affiché sous le mot « Source ». Elle nomme désormais la
   // donnée d'entrée ET la transformation, seule forme honnête pour un fait calculé.
   assert.equal(sans.evidence.length, 1, "assertFactValid refuse un fait sans preuve : elle reste");
-  assert.equal(sans.evidence[0]!.label, "Arrêtés inondation (GASPAR), rang national");
+  // Le périmètre de l'index est la France métropolitaine, DROM exclus : « rang national » annonçait
+  // un territoire que le calcul ne parcourt pas.
+  assert.equal(sans.evidence[0]!.label, "Arrêtés inondation (GASPAR), position en France métropolitaine");
   assert.equal(sans.evidence[0]!.observedValue, undefined, "le rang est interne, il ne s'affiche pas");
 });
 
@@ -1001,4 +1010,19 @@ test("FEU AMBIANT : priorité déclarée, la règle ambiante se tait — recense
   );
   assert.equal(r.facts.some((x) => x.ruleId === "territoire.verification-feu-futur"), false);
   assert.ok(r.facts.some((x) => x.ruleId === "territoire.climat-feu"), "ruleFeu porte le signal");
+});
+
+test("un indice interne ne peut PAS devenir une valeur affichée, quelle que soit la règle", () => {
+  // La garde vaut pour toutes les règles à la fois : le « 100/100 » de l'inondation avait été retiré
+  // deux mois avant le « 80/100 » du compromis, sans que rien n'empêche le geste de revenir ailleurs.
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "acces_transports", weight: 3 }] });
+  assert.throws(
+    () => assertFactValid({
+      id: "x", ruleId: "territoire.test", sourceFactIds: [], module: "territoire",
+      role: "verification", materialityTier: "secondary", topic: "un sujet",
+      statement: "Un constat.", action: { type: "verifier_sur_place", label: "Vérifier" },
+      evidence: [{ factId: "scores.acces_transports", module: "territoire", label: "Indice", observedValue: "80/100", grain: "commune" }],
+    } as never, p),
+    /indice interne ne peut pas être une valeur affichée/,
+  );
 });

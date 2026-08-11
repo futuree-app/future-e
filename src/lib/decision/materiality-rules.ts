@@ -53,9 +53,36 @@ import {
 
 const territoireHref = "/rapport/quartier";
 
-function scoreEvidence(nom: string, key: string, score: number): EvidenceRef {
-  return { factId: `scores.${key}`, module: "territoire", label: `Territoire · ${nom}`, observedValue: `${Math.round(score)}/100`, grain: "commune", href: territoireHref };
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// UN SCORE INTERNE NE DEVIENT JAMAIS UNE PREUVE VISIBLE (11/08/2026).
+//
+// Cette fabrique affichait « 80/100 » en pastille « Preuve ». Trois défauts en un :
+//
+//   - la note se lit comme un jugement de qualité, ce que le produit refuse d'émettre ;
+//   - elle donne une précision artificielle à deux constructions qui ne sont pas comparables entre
+//     elles (l'accès aux transports et l'exposition à la chaleur n'ont ni la même échelle ni la
+//     même méthode) ;
+//   - elle masque les faits qui fondent réellement l'arbitrage.
+//
+// C'est le même geste que celui retiré à la règle inondation le même jour, et la doctrine y était
+// déjà écrite : « la preuve est opposable, jamais un score interne ». Le score continue de
+// DÉCLENCHER la règle ; il ne s'affiche plus.
+//
+// La référence demeure, sans valeur : `assertFactValid` exige une preuve par côté, et le lecteur
+// garde une provenance dans « Données et limites ». On ne fabrique pas de mesure de remplacement :
+// pour la chaleur, les mesures DRIAS existent mais ne sont pas portées ici ; pour les transports,
+// `ModuleFacts` ne conserve que le score, et une distance à la gare ne démontrerait pas la
+// desserte. Inventer une valeur pour combler la pastille serait le défaut d'à côté.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+function scoreEvidence(nom: string, key: string): EvidenceRef {
+  return { factId: `scores.${key}`, module: "territoire", label: `Indice futur•e · ${LIBELLE_INDICE[key] ?? key}`, grain: "commune", href: territoireHref };
 }
+
+// Ce que l'indice mesure, dit au lecteur. Le libellé nomme la DIMENSION, jamais sa valeur.
+const LIBELLE_INDICE: Record<string, string> = {
+  acces_transports: "accès aux transports",
+  faible_chaleur: "exposition à la chaleur",
+};
 
 // Règle 4 : compromis transport × chaleur. Deux priorités déclarées qui tirent en sens opposés sur
 // cette commune. Texte honnête (pas de « meilleure », pas de « train »), preuve de chaque côté.
@@ -75,8 +102,8 @@ const ruleCompromis: DecisionRule = {
       role: "compromise", materialityTier: "structuring", topic: "la tension entre transports et chaleur",
       statement: "Deux de vos priorités tirent en sens opposés sur cette commune.",
       sides: [
-        { projectKey: "acces_transports", statement: "L'accès aux transports ressort favorablement à l'échelle de la commune.", evidence: [scoreEvidence(f.nom, "acces_transports", t)] },
-        { projectKey: "faible_chaleur", statement: "Votre priorité de faible exposition à la chaleur est moins bien satisfaite ici.", evidence: [scoreEvidence(f.nom, "faible_chaleur", c)] },
+        { projectKey: "acces_transports", statement: "L'accès aux transports ressort favorablement à l'échelle de la commune.", evidence: [scoreEvidence(f.nom, "acces_transports")] },
+        { projectKey: "faible_chaleur", statement: "Votre priorité de faible exposition à la chaleur est moins bien satisfaite ici.", evidence: [scoreEvidence(f.nom, "faible_chaleur")] },
       ],
     };
     return { ruleId: RULE_COMPROMIS, projectKeys: ["acces_transports", "faible_chaleur"], outcome: "compromise", facts: [fact], reason: "tension transport/chaleur" };
@@ -137,12 +164,14 @@ const ruleInondation: DecisionRule = {
     //
     // Ici, les deux preuves viennent de la MÊME matière, les arrêtés CatNat inondation de GASPAR
     // (`scripts/populate-inondation.py`, submersion marine exclue). L'une la donne brute, l'autre
-    // la donne mise en rang parmi les communes françaises. La supprimer n'était pas une option :
+    // la donne mise en rang parmi les communes de l'index, dont le périmètre V1 est la France
+    // MÉTROPOLITAINE, Corse comprise et DROM exclus (`scripts/build-comparateur-index.mjs`).
+    // « Rang national » couvrait un territoire que ce calcul n'a jamais parcouru. La supprimer n'était pas une option :
     // `assertFactValid` refuse un fait sans preuve, et c'est une bonne règle.
     //
     // Elle reste SANS valeur affichée : le rang est un calcul interne que la doctrine ne montre pas.
     const evidence: EvidenceRef[] = [
-      { factId: "inondation.risque", module: "territoire", label: "Arrêtés inondation (GASPAR), rang national", grain: "commune", href: territoireHref, targetKey: "risk.flooding" },
+      { factId: "inondation.risque", module: "territoire", label: "Arrêtés inondation (GASPAR), position en France métropolitaine", grain: "commune", href: territoireHref, targetKey: "risk.flooding" },
       ...(f.catnatInondation != null
         ? [{
             factId: "inondation.catnat", module: "territoire" as const,
@@ -869,6 +898,11 @@ function assertStatus(fact: { ruleId: string; status?: string }): void {
 // avec une limitation est un abus de portée.
 const ALIGNMENT_LIMITATION_KEYS = new Set<string>(["ensoleillement_recherche", "douceur_climat", "proximite_mer"]);
 
+/** Les références d'un fait, quel que soit son rôle : un compromis les range par côté. */
+function toutesLesPreuves(fact: DecisionFact): EvidenceRef[] {
+  return fact.role === "compromise" ? fact.sides.flatMap((s) => s.evidence) : fact.evidence;
+}
+
 export function assertFactValid(fact: DecisionFact, project: UserProject): void {
   // Arbitrage slice 1.5 : une règle Logement ne peut pas émettre incompatibility.
   if (fact.ruleId.startsWith("logement.") && fact.role === "incompatibility") {
@@ -884,6 +918,21 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
   if (fact.topic.length > 70 || /[.!?]/.test(fact.topic)) {
     throw new Error(`[decision] ${fact.ruleId}: topic trop long ou phrasé (« ${fact.topic} ») — on NOMME, on ne raconte pas`);
   }
+  // ── UN SCORE INTERNE NE S'AFFICHE JAMAIS COMME PREUVE (11/08/2026) ────────────────────────────
+  // Les indices de futur•e déclenchent des règles ; ils ne se montrent pas. Rendus en pastille, ils
+  // se lisent comme une note de qualité, donnent une précision artificielle à des constructions non
+  // comparables, et masquent les faits qui fondent l'arbitrage. La règle du compromis affichait
+  // « 80/100 » ; celle de l'inondation avait déjà perdu son « 100/100 » deux mois plus tôt, sans que
+  // rien n'empêche le geste de revenir ailleurs. Cette garde le ferme pour toutes les règles à la
+  // fois : le `factId` d'une référence dérivée d'un indice commence par `scores.`.
+  for (const ref of toutesLesPreuves(fact)) {
+    if (ref.factId.startsWith("scores.") && ref.observedValue !== undefined) {
+      throw new Error(
+        `[decision] ${fact.ruleId}: un indice interne ne peut pas être une valeur affichée (« ${ref.observedValue} »)`,
+      );
+    }
+  }
+
   switch (fact.role) {
     case "incompatibility":
       if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);

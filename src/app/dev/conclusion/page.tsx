@@ -53,7 +53,7 @@ const INONDATION = verification(
   // « exposition élevée · 19 arrêtés CatNat depuis 1982 » sous une clé `risk.flooding`, dont la
   // carte ne mentionne aucun arrêté : c'est le défaut corrigé dans la règle inondation, et cette
   // page de référence le reproduisait à l'identique.
-  { observedValue: "19 arrêtés CatNat depuis 1982", href: "/rapport/quartier", targetKey: "risk.catnat" },
+  { observedValue: "19 arrêtés inondation depuis 1982", href: "/rapport/quartier", targetKey: "risk.catnat" },
 );
 
 const PATRIMOINE = verification(
@@ -205,7 +205,14 @@ export default function DevConclusionPage() {
         </p>
         <div id={evidenceAnchorId("risk.catnat")} className="glass rounded-xl p-4 scroll-mt-24">
           <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ghost mb-1">carte du module</p>
-          <p className="text-[15px] text-label">Inondation fluviale</p>
+          {/* LA CARTE DOIT ÊTRE CELLE QUE LA PREUVE VISE. Le harnais nommait « Inondation fluviale »
+              sous une ancre `risk.catnat` : le focus fonctionnait, et le parcours SÉMANTIQUE restait
+              faux, ce qu'un harnais existe précisément pour attraper. */}
+          <p className="text-[15px] text-label">Mémoire des catastrophes</p>
+          <p className="text-[13px] text-muted mt-1">
+            En production, cette carte affiche le total tous risques ; le compte d'arrêtés inondation
+            que porte la pastille vit dans sa ventilation par risque.
+          </p>
         </div>
       </section>
 
