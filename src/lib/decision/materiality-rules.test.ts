@@ -77,7 +77,13 @@ test("règle inondation : vérification si exposition notable, texte acheteur", 
   assert.match(f.statement, /1982/);
 });
 
-test("règle inondation : la preuve est OPPOSABLE, et son lien DÉMONTRE ce qu'elle affiche", () => {
+test("règle inondation : une seule preuve chiffrée, opposable, et qui VISE la carte des arrêtés", () => {
+  // NOM REVU (revue du 11/08/2026) : il promettait que « le lien démontre ce qu'il affiche ». Ce
+  // test ne vérifie que la valeur produite et la clé visée. Que la carte cible affiche ce même
+  // chiffre reste FAUX à ce jour (elle donne le total tous risques, en direct de GASPAR, quand la
+  // preuve compte les arrêtés inondation de l'index local), et aucun test ici ne pourrait le dire :
+  // il faudrait rendre le module. Un nom qui promet une garantie que les assertions ne tiennent pas
+  // est plus dangereux que l'absence de test, parce qu'il ferme la question.
   // Deux défauts d'une même chaîne, corrigés ensemble le 11/08/2026.
   //
   // 1. « 100/100 » pouvait se lire comme une probabilité. La preuve affiche la matière que le
@@ -118,7 +124,12 @@ test("règle inondation : la preuve est OPPOSABLE, et son lien DÉMONTRE ce qu'e
     .facts.find((x) => x.ruleId === "territoire.inondation-exposition");
   assert.ok(sans && sans.role === "verification");
   assert.equal(sans.evidence.filter((e) => e.observedValue).length, 0);
-  assert.ok(sans.evidence.length >= 1, "la source reste citée, même sans valeur opposable");
+  // ET AUCUNE SOURCE INVENTÉE. La référence de l'exposition rendait « Source : Territoire · La
+  // Rochelle », un libellé de contexte affiché sous le mot « Source ». Elle nomme désormais la
+  // donnée d'entrée ET la transformation, seule forme honnête pour un fait calculé.
+  assert.equal(sans.evidence.length, 1, "assertFactValid refuse un fait sans preuve : elle reste");
+  assert.equal(sans.evidence[0]!.label, "Arrêtés inondation (GASPAR), rang national");
+  assert.equal(sans.evidence[0]!.observedValue, undefined, "le rang est interne, il ne s'affiche pas");
 });
 
 test("règle inondation : posture habitant -> comprendre/surveiller, pas s'engager", () => {

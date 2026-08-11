@@ -126,11 +126,23 @@ const ruleInondation: DecisionRule = {
     // correctif, et il appartient au chantier qui structurera la preuve.
     //
     // L'EXPOSITION NE PORTE PLUS DE VALEUR. « Élevée » vient du seuil interne (>= 66), qu'aucune
-    // carte n'affiche et que la doctrine refuse de montrer. Elle reste une SOURCE citée, sans
-    // pastille : le constat, lui, dit déjà l'exposition en toutes lettres, et son lien ramène au
-    // module qui la présente.
+    // carte n'affiche et que la doctrine refuse de montrer. Le constat, lui, dit déjà l'exposition
+    // en toutes lettres.
+    //
+    // ── L'EXPOSITION DIT SA SOURCE ET SA TRANSFORMATION (revue du 11/08/2026) ─────────────────
+    // Elle portait « Territoire · La Rochelle », que `factSources` rend en « Source : Territoire ·
+    // La Rochelle » en abandonnant le href au passage : un libellé de contexte affiché sous le mot
+    // « Source ». Un fait produit par un calcul doit nommer la donnée d'entrée ET ce qu'on lui a
+    // fait ; sans quoi le lecteur ne peut ni vérifier ni contester.
+    //
+    // Ici, les deux preuves viennent de la MÊME matière, les arrêtés CatNat inondation de GASPAR
+    // (`scripts/populate-inondation.py`, submersion marine exclue). L'une la donne brute, l'autre
+    // la donne mise en rang parmi les communes françaises. La supprimer n'était pas une option :
+    // `assertFactValid` refuse un fait sans preuve, et c'est une bonne règle.
+    //
+    // Elle reste SANS valeur affichée : le rang est un calcul interne que la doctrine ne montre pas.
     const evidence: EvidenceRef[] = [
-      { factId: "inondation.risque", module: "territoire", label: `Territoire · ${f.nom}`, grain: "commune", href: territoireHref, targetKey: "risk.flooding" },
+      { factId: "inondation.risque", module: "territoire", label: "Arrêtés inondation (GASPAR), rang national", grain: "commune", href: territoireHref, targetKey: "risk.flooding" },
       ...(f.catnatInondation != null
         ? [{
             factId: "inondation.catnat", module: "territoire" as const,

@@ -198,10 +198,12 @@ export default function DevConclusionPage() {
       <section className="mb-12">
         <h2 className="text-[15px] font-semibold text-label mb-1">0 · Arrivée depuis une preuve</h2>
         <p className="text-[13px] text-muted mb-3">
-          Ouvrir <code>/dev/conclusion#evidence-risk-flooding</code> : la carte ci-dessous doit prendre le
-          focus et un liseré bleu bref.
+          Ouvrir <code>/dev/conclusion#evidence-risk-catnat</code> : la carte ci-dessous doit prendre le
+          focus et un liseré bleu bref. C'est la cible que vise la preuve chiffrée de l'exemple
+          « inondation » ; le harnais ancrait <code>risk.flooding</code>, que plus aucune preuve ne
+          porte, donc il ne reproduisait plus le parcours qu'il prétendait éprouver.
         </p>
-        <div id={evidenceAnchorId("risk.flooding")} className="glass rounded-xl p-4 scroll-mt-24">
+        <div id={evidenceAnchorId("risk.catnat")} className="glass rounded-xl p-4 scroll-mt-24">
           <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ghost mb-1">carte du module</p>
           <p className="text-[15px] text-label">Inondation fluviale</p>
         </div>
