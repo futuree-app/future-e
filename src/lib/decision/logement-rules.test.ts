@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { runRules } from "./materiality-rules.ts";
+import { SOURCES } from "./logement-rules.ts";
 import { GESTES } from "./logement-gestes.ts";
 import type { ModuleFacts, LogementFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
@@ -214,11 +215,12 @@ test("aucune preuve du logement ne présente l'adresse comme sa source", () => {
     patrimoine: "present", perimetrePatrimonial: true,
     sinistralite: "present", sinistraliteActive: true,
     dpe: "passoire", dpeLabel: "G",
+    confortEteInsuffisant: true,
     diagnosticNonAttribue: true,
   });
   const facts_ = runRules(facts(l), project({ intent: "achat" }), HARD).facts
     .filter((f) => f.ruleId.startsWith("logement."));
-  assert.ok(facts_.length >= 6, `attendu au moins 6 faits logement, reçu ${facts_.length}`);
+  assert.equal(facts_.length, 8, `les huit règles du module doivent émettre, reçu ${facts_.length}`);
 
   for (const f of facts_) {
     const refs = f.role === "compromise" ? f.sides.flatMap((s) => s.evidence) : f.evidence;
@@ -235,28 +237,45 @@ test("aucune preuve du logement ne présente l'adresse comme sa source", () => {
   }
 });
 
-test("chaque famille du logement nomme le producteur qui publie SA donnée", () => {
-  // Une source unique pour tout le module serait plus simple et fausse : les argiles et les cavités
-  // viennent du BRGM par Géorisques, le périmètre patrimonial du Géoportail de l'urbanisme, la
-  // sinistralité de l'ONRN. Un lecteur qui veut vérifier doit savoir où aller.
-  const attendu: Record<string, RegExp> = {
-    "logement.exposition-bati": /Géorisques/,
-    "logement.zone-reglementee": /Géorisques/,
-    "logement.cavite": /Géorisques/,
-    "logement.patrimoine": /Géoportail de l'urbanisme/,
-    "logement.sinistralite": /ONRN/,
-    "logement.dpe-faible": /ADEME/,
+test("chaque règle du module porte le libellé de source EXACT de sa famille", () => {
+  // REGEX BANNIE ICI (revue du 11/08/2026). Une expression comme /Géorisques/ passait aussi bien
+  // sur « Géorisques (BRGM) » que sur « BRGM, via Géorisques » : elle protégeait une forme, pas une
+  // attribution. On compare au libellé exact, et les huit règles sont couvertes, y compris le
+  // confort d'été et le diagnostic non attribué, qu'une version antérieure de ce test oubliait.
+  const attendu: Record<string, string> = {
+    "logement.exposition-bati": SOURCES.georisquesBrgm,
+    "logement.zone-reglementee": SOURCES.georisquesGaspar,
+    "logement.cavite": SOURCES.georisquesBrgm,
+    "logement.patrimoine": SOURCES.gpu,
+    "logement.sinistralite": SOURCES.onrn,
+    "logement.dpe-faible": SOURCES.ademe,
+    "logement.confort-ete": SOURCES.ademe,
+    "logement.diagnostic-non-attribue": SOURCES.ademe,
   };
   const l = lf({
     rga: "present", expositionBati: true, pprn: "present", zoneReglementee: true,
     cavites: "present", caviteProche: true, patrimoine: "present", perimetrePatrimonial: true,
     sinistralite: "present", sinistraliteActive: true, dpe: "passoire", dpeLabel: "G",
+    confortEteInsuffisant: true, diagnosticNonAttribue: true,
   });
   const produits = runRules(facts(l), project({ intent: "achat" }), HARD).facts;
-  for (const [ruleId, motif] of Object.entries(attendu)) {
+  for (const [ruleId, source] of Object.entries(attendu)) {
     const f = produits.find((x) => x.ruleId === ruleId);
     assert.ok(f, `règle ${ruleId} absente du run`);
     const refs = f.role === "compromise" ? f.sides.flatMap((s) => s.evidence) : f.evidence;
-    assert.match(refs[0]!.label, motif, `${ruleId} : source « ${refs[0]!.label} »`);
+    assert.equal(refs[0]!.label, source, `${ruleId} : source « ${refs[0]!.label} »`);
+  }
+});
+
+test("les libellés de source disent la chaîne d'accès, pas un producteur unique", () => {
+  // Ce que la revue a corrigé : la CCR produit les données assurantielles que l'ONRN publie et que
+  // Géorisques diffuse ; l'IGN OPÈRE API Carto sans produire les servitudes. Un libellé qui
+  // nommerait un « producteur » unique serait une promesse de rigueur là où l'on tient une
+  // commodité d'affichage.
+  assert.match(SOURCES.onrn, /CCR/, "la CCR produit la donnée d'indemnisation");
+  assert.match(SOURCES.onrn, /1995-2021/, "le millésime connu doit être dit tant qu'aucun champ ne le porte");
+  assert.match(SOURCES.gpu, /via API Carto/, "l'IGN opère le service, il ne produit pas la servitude");
+  for (const source of Object.values(SOURCES)) {
+    assert.equal(source.includes("producteur"), false, "le mot promet plus que ce que la forme tient");
   }
 });

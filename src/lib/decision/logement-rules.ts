@@ -11,28 +11,44 @@ import { GESTES, bucketDuProjet, type Bucket, type ActionCopy } from "./logement
 const bucket = bucketDuProjet;
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
-// LE LABEL D'UNE PREUVE NOMME SA SOURCE, JAMAIS L'OBJET ANALYSÉ.
+// LE LABEL D'UNE PREUVE DIT D'OÙ VIENT LA DONNÉE, JAMAIS CE QU'ON EXAMINE.
 //
 // Il portait `l.addressLabel`, et « Données et limites » affichait donc, cinq fois sur le même
 // écran d'un dossier payé : « Source : 29 Rue de l'Evescot 17000 La Rochelle ». L'adresse est ce
 // qu'on examine ; la donner pour provenance vide de son sens le seul mot qui engage futur•e, sur
-// le produit dont la traçabilité est l'argument. Le module Territoire n'a jamais eu ce défaut
-// (« Géorisques · Toulouse »).
+// le produit dont la traçabilité est l'argument.
 //
-// UNE SOURCE PAR FAMILLE, jamais une seule pour tout le module : les argiles et les cavités
-// viennent du BRGM via Géorisques, le périmètre patrimonial du Géoportail de l'urbanisme
-// (`lib/gpu.ts`, API Carto IGN), la sinistralité de l'ONRN (`lib/onrn-sinistralite.ts`), le
-// diagnostic de l'ADEME. Un lecteur qui veut vérifier doit savoir OÙ aller.
+// ── « PRODUCTEUR » SERAIT FAUX, ET LE MOT A ÉTÉ RETIRÉ (revue du 11/08/2026) ─────────────────
+// Une chaîne d'accès réelle compte jusqu'à quatre acteurs : qui produit la donnée, qui la
+// consolide, qui la diffuse, et quel service on interroge. Les confondre sous « producteur »
+// serait une promesse de rigueur là où l'on tient une commodité d'affichage. Chaque libellé
+// ci-dessous nomme donc la chaîne telle qu'elle est, du plus proche de la mesure au plus proche
+// de nous :
 //
-// Ces libellés ne s'inventent pas : chacun est le service réellement interrogé par le fetcher
-// correspondant dans `lib/server/logement-decision-data.ts`.
+//   - argiles et cavités : aléas publiés par le BRGM, interrogés sur Géorisques ;
+//   - plans de prévention : base GASPAR de l'État, interrogée sur Géorisques
+//     (`/api/v2/gaspar/pprn`) ;
+//   - servitudes patrimoniales : publiées au Géoportail de l'urbanisme, interrogées via API Carto,
+//     que l'IGN OPÈRE sans les produire ;
+//   - indemnisations : données assurantielles collectées et traitées par la CCR, publiées comme
+//     indicateurs ONRN, millésime 2025 sur la période 1995-2021. Elles ne sont pas interrogées en
+//     direct : ce sont des JSON embarqués dans le dépôt (`lib/onrn-sinistralite.ts`), et le
+//     libellé ne prétend donc à aucune fraîcheur ;
+//   - diagnostic : base DPE de l'ADEME.
+//
+// ── CE QUE CETTE FORME NE FAIT PAS ───────────────────────────────────────────────────────────
+// `EvidenceRef` porte un seul champ de texte pour tout cela. Séparer producteur, jeu de données,
+// diffuseur, millésime et date de consultation est la bonne structure, et c'est un chantier à
+// part : `observedAt` existe déjà et n'est renseigné nulle part ici, `fetchedAt` est connu de
+// `logement-decision-data.ts` et n'est pas transmis. Tant que ce n'est pas fait, le millésime
+// vit dans le libellé quand il est connu, et nulle part quand il ne l'est pas.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 export const SOURCES = {
-  georisquesBrgm: "Géorisques (BRGM)",
-  georisquesGaspar: "Géorisques (GASPAR)",
-  gpu: "Géoportail de l'urbanisme (IGN)",
-  onrn: "ONRN, via Géorisques",
-  ademe: "ADEME",
+  georisquesBrgm: "BRGM, via Géorisques",
+  georisquesGaspar: "Base GASPAR, via Géorisques",
+  gpu: "Géoportail de l'urbanisme, via API Carto (IGN)",
+  onrn: "CCR, indicateurs ONRN 1995-2021 (Géorisques)",
+  ademe: "Base DPE (ADEME)",
 } as const;
 
 function ev(factId: string, source: string, mode: "persisted_snapshot" | "live_fetch", grain: "adresse" | "commune" = "adresse", observedValue?: string, targetKey?: EvidenceTargetKey): EvidenceRef {
@@ -50,7 +66,7 @@ const na = (id: string): RuleEvaluation => ({ ruleId: `logement.${id}`, projectK
 // Règle statut-aware générique pour les cinq familles réglementaires.
 function coverageRule(cfg: {
   id: string; tier: MaterialityTier; buckets?: Bucket[]; grain?: "adresse" | "commune";
-  /** Le producteur réellement interrogé pour CETTE famille (cf. SOURCES, en tête de fichier). */
+  /** La provenance de la donnée de CETTE famille, telle que SOURCES la nomme (en tête de fichier). */
   source: string;
   coverage: (l: LogementFacts) => SourceCoverage; flag: (l: LogementFacts) => boolean;
   // Le SUJET du fait, 3-6 mots : ce que la conclusion NOMME quand elle cite ce point, sans recopier le
