@@ -33,7 +33,13 @@ import { listDossiers } from "@/lib/address-dossier-store";
 import { communeParent } from "@/lib/plm";
 import { registersByTarget } from "@/lib/decision/evidence-registers";
 
-export default async function RapportQuartierPage() {
+export default async function RapportQuartierPage(
+  { searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> },
+) {
+  // L'ARTEFACT D'OÙ VIENT LE LIEN. Posé par `evidenceHref` sur les liens « Preuve » d'un dossier
+  // FIGÉ, et absent partout ailleurs : la commune seule n'est pas une identité de preuve.
+  const preuveDe = (await searchParams).preuve;
+  const scopeDemande = typeof preuveDe === "string" ? preuveDe : null;
   const account = await getCurrentUserAccount();
 
   const { supabase, user } = await requireCurrentUser();
@@ -103,12 +109,13 @@ export default async function RapportQuartierPage() {
   // d'artefact sur cette commune. Il sert aussi à détecter une MISE À JOUR : quand les deux
   // existent et diffèrent, la carte le dit plutôt que de choisir en silence.
   const snapshotFige = inseeCode
-    ? await readLatestDataSnapshot(supabase, user.id, inseeCode).catch(() => null)
+    ? await readLatestDataSnapshot(supabase, user.id, inseeCode, scopeDemande).catch(() => null)
     : null;
   const catnatIndexCourant = catnatInondationDepuisIndex(territoryContext?.entry);
   const catnatInondation = snapshotFige?.catnatInondation ?? catnatIndexCourant;
-  // Une mise à jour ne s'affiche que si elle CHANGE le compte : un index régénéré à l'identique
-  // n'a rien à raconter au lecteur.
+  // L'écart ne s'affiche que s'il CHANGE le compte : un index régénéré à l'identique n'a rien à
+  // raconter au lecteur. On ne prétend pas dire QUAND il a changé : l'index ne porte aucune date de
+  // génération, et l'affirmer serait inventer une chronologie.
   const catnatMisAJour =
     snapshotFige?.catnatInondation && catnatIndexCourant
       && catnatIndexCourant.count !== snapshotFige.catnatInondation.count

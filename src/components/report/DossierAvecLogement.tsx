@@ -113,11 +113,18 @@ export async function DossierAvecLogement({
       <DossierDecisionSection
         dossier={vue.dossier} logement={logementLink} logementStatus={vue.status}
         insee={insee} scopeKey={vue.scope} generatedAt={servi.generatedAt}
+        // LA PROVENANCE N'EXISTE QUE S'IL Y A UNE VERSION FIGÉE. Sur un dossier assemblé à
+        // l'instant, un lien qui désignerait un artefact enverrait la surface d'arrivée chercher
+        // une preuve qui n'a jamais été vendue.
+        provenance={servi.source === "artefact" ? scopeKey : undefined}
       />
       {/* La liste complète des contrôles est rendue par le MÊME dossier que la minute : une liste
           construite ailleurs, sur le dossier communal, contredirait le compte que le verdict vient
           d'annoncer. */}
-      <ControlesDuDossier dossier={vue.dossier} />
+      <ControlesDuDossier
+        dossier={vue.dossier}
+        provenance={servi.source === "artefact" ? scopeKey : undefined}
+      />
     </>
   );
 }

@@ -236,18 +236,31 @@ test("un artefact SANS snapshot reste parfaitement valide", () => {
   assert.ok(parseDecisionArtifact(JSON.parse(JSON.stringify(artefact))));
 });
 
-test("un snapshot au compte aberrant fait REFUSER l'artefact entier", () => {
-  // Le parseur refuse, il ne répare pas : un artefact à demi lisible produirait un dossier moitié
-  // figé moitié recalculé, l'hybride que tout ce lot supprime. L'appelant retombe sur l'assemblage
-  // vivant, comme pour n'importe quel payload illisible.
+test("un snapshot aberrant TOMBE SEUL : la décision vendue survit", () => {
+  // CE TEST FIGEAIT LE COMPORTEMENT DANGEREUX (revue du 11/08/2026). Le snapshot vivait dans le
+  // schéma principal : un bloc corrompu faisait refuser l'artefact ENTIER, `dossierAServir`
+  // retombait en silence sur l'assemblage vivant, et la corruption d'un enrichissement annexe
+  // réécrivait toute la décision vendue.
+  //
+  // Le dossier figé est la vente ; le snapshot n'est qu'un confort de réaffichage pour une autre
+  // surface. Leurs échecs ne peuvent pas coûter la même chose.
   const base = buildDecisionArtifact(
     { scope: "commune", conclusion: "x", conclusionState: "y", sections: [], controlesTitle: "t", compositions: [], absorbedFacts: [] } as never,
     {} as never, "2026-08-11T10:00:00.000Z", "hc-conv-1",
     { catnatInondation: { count: 6, depuis: 1982, origine: "index_local", insee: "17300", version: "catnat-1" } },
   );
-  const corrompu = JSON.parse(JSON.stringify(base));
-  corrompu.dataSnapshot.catnatInondation.count = -2;
-  assert.equal(parseDecisionArtifact(corrompu), null);
-  corrompu.dataSnapshot.catnatInondation.count = 1.5;
-  assert.equal(parseDecisionArtifact(corrompu), null);
+  for (const aberrant of [-2, 1.5, "sept", null]) {
+    const corrompu = JSON.parse(JSON.stringify(base));
+    corrompu.dataSnapshot.catnatInondation.count = aberrant;
+    const relu = parseDecisionArtifact(corrompu);
+    assert.ok(relu, `l'artefact entier a été refusé pour un snapshot à ${aberrant}`);
+    assert.equal(relu!.dataSnapshot, undefined, "le snapshot illisible doit disparaître");
+    assert.equal(relu!.dossier.conclusion, "x", "la décision vendue doit survivre intacte");
+  }
+
+  // Un `dataSnapshot` qui n'est même pas un objet tombe pareil.
+  const pasUnObjet = JSON.parse(JSON.stringify(base));
+  pasUnObjet.dataSnapshot = "n'importe quoi";
+  assert.ok(parseDecisionArtifact(pasUnObjet));
+  assert.equal(parseDecisionArtifact(pasUnObjet)!.dataSnapshot, undefined);
 });

@@ -65,18 +65,38 @@ export async function readLatestArtifact(
  * 11/08/2026) : l'appelant retombe alors sur l'index courant.
  */
 export async function readLatestDataSnapshot(
-  sb: SupabaseClient, userId: string, insee: string,
+  sb: SupabaseClient, userId: string, insee: string, scopeKey?: string | null,
 ): Promise<DataSnapshot | null> {
-  const { data, error } = await sb
+  // `scopeKey` DÉSIGNE L'ARTEFACT D'OÙ LE LIEN A ÉTÉ ÉMIS (revue du 11/08/2026). Sans lui, un
+  // lecteur possédant plusieurs artefacts sur la même commune pouvait voir, en cliquant depuis le
+  // bien A, la preuve figée du bien B. Il reste facultatif : les liens des dossiers antérieurs à ce
+  // lot n'en portent pas, et le repli « le plus récent de la commune » vaut mieux que l'index seul.
+  //
+  // La sécurité ne repose pas sur lui : la requête est filtrée par `user_id`, donc un identifiant
+  // fabriqué ne peut désigner que les artefacts du lecteur lui-même.
+  let requete = sb
     .from("decision_artifact")
     .select("payload, generated_at")
-    .eq("user_id", userId).eq("insee_code", insee).eq("status", "ready")
+    .eq("user_id", userId).eq("insee_code", insee).eq("status", "ready");
+  if (scopeKey) requete = requete.eq("scope_key", scopeKey);
+  const { data, error } = await requete
     .order("generated_at", { ascending: false })
     .limit(5);
   if (error) throw error;
   for (const ligne of data ?? []) {
     const artefact = parseDecisionArtifact(ligne.payload);
-    if (artefact?.dataSnapshot) return artefact.dataSnapshot;
+    const snapshot = artefact?.dataSnapshot;
+    if (!snapshot) continue;
+    // L'INSEE DU PAYLOAD EST VÉRIFIÉ CONTRE CELUI DEMANDÉ (revue du 11/08/2026). Le filtre SQL
+    // protège la LIGNE, pas son contenu : un payload écrit avec un autre code, par un bug de
+    // génération ou une reprise de données, afficherait le compte d'une autre commune sous le nom
+    // de celle-ci. Un objet de preuve qui ne sait pas de quoi il parle ne prouve rien.
+    const inseeSnapshot = snapshot.catnatInondation?.insee;
+    if (inseeSnapshot != null && inseeSnapshot !== insee) {
+      console.warn("[artefact] dataSnapshot d'une autre commune, ignoré", { attendu: insee, trouve: inseeSnapshot });
+      continue;
+    }
+    return snapshot;
   }
   return null;
 }

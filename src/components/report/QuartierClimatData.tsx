@@ -889,11 +889,16 @@ function buildFactors(
     const ligneInondation = catnatInondation
       ? `Dont ${libelleCatnatInondation(catnatInondation)}`
       : null;
-    // LA MISE À JOUR SE DIT, elle ne remplace pas. Le chiffre de la face est celui du dossier figé,
-    // parce que c'est lui que la preuve annonce ; si l'index en compte un autre depuis, le lecteur
-    // doit l'apprendre plutôt que de découvrir un jour que son dossier était en retard.
+    // L'ÉCART SE DIT, il ne remplace pas. Le chiffre de la face est celui du dossier figé, parce que
+    // c'est lui que la preuve annonce ; si l'index en compte un autre, le lecteur doit l'apprendre
+    // plutôt que de découvrir un jour que son dossier était en retard.
+    //
+    // « L'INDEX ACTUELLEMENT CHARGÉ », ET NON « DEPUIS VOTRE ANALYSE » (revue du 11/08/2026). La
+    // seconde formule affirmait une CHRONOLOGIE que rien ne démontre : on ne compare que deux
+    // comptes, et l'index ne porte ni date de génération ni identité de jeu. Une restauration de
+    // sauvegarde ou un changement de convention se serait présenté comme une actualité.
     const ligneMisAJour = catnatMisAJour
-      ? `Depuis votre analyse : ${libelleCatnatInondation(catnatMisAJour)}`
+      ? `L'index actuellement chargé indique ${libelleCatnatInondation(catnatMisAJour)}`
       : null;
     factors.push({
       label: "Mémoire des catastrophes",
@@ -929,7 +934,7 @@ function buildFactors(
         ? {
             ...detail,
             facts: [
-              ...(ligneMisAJour ? [{ label: "Mise à jour", value: ligneMisAJour }] : []),
+              ...(ligneMisAJour ? [{ label: "Écart avec l'index courant", value: ligneMisAJour }] : []),
               ...(detail.facts ?? []),
             ],
           }

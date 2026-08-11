@@ -88,6 +88,7 @@ export function DossierDecisionSection({
   logementStatus = "none",
   insee,
   scopeKey,
+  provenance,
   generatedAt,
 }: {
   dossier: Dossier;
@@ -106,6 +107,13 @@ export function DossierDecisionSection({
   // Slice 2 : identité de l'artefact narratif. scopeKey = "commune" | "logement:<id>".
   insee: string;
   scopeKey: string;
+  /**
+   * L'IDENTITÉ DE L'ARTEFACT SERVI, quand le dossier en vient un. Distincte de `scopeKey`, qui
+   * désigne la vue et vaut aussi pour un dossier assemblé à l'instant : un lien de preuve ne doit
+   * désigner une version figée que s'il en existe une. Portée par les liens « Preuve »
+   * (cf. `evidenceHref`), pour que la surface d'arrivée réaffiche LA donnée vendue.
+   */
+  provenance?: string;
 }) {
   const structured = dossier.conclusionState !== "project_not_structured";
 
@@ -293,6 +301,7 @@ export function DossierDecisionSection({
                         <Fragment key={card.composition.id}>
                           {grainLi}
                           <FactCompositionCard
+                            provenance={provenance}
                             composition={card.composition}
                             color={col}
                             absorbedFacts={absorbedOf(card)}
@@ -319,7 +328,7 @@ export function DossierDecisionSection({
                             </p>
                           ) : null}
                           <FactBody fact={f} color={col} />
-                          <EvidenceRow fact={f} color={col} />
+                          <EvidenceRow fact={f} color={col} provenance={provenance} />
                           <MethodDetails conventions={conventions} checks={factChecks(f)} />
                         </li>
                       </Fragment>

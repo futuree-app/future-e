@@ -77,7 +77,20 @@ export function evidenceAnchorId(key: EvidenceTargetKey): string {
 // LE LIEN vers la démonstration. Sans clé, on retombe sur le module seul : c'est le FALLBACK assumé —
 // le lecteur arrive en haut d'un module qui parle bien du sujet, plutôt que nulle part. Le libellé de
 // la chip ne promet donc jamais une mesure précise, seulement « le détail dans ce module ».
-export function evidenceHref(key: EvidenceTargetKey | undefined, fallback: string): string {
+export function evidenceHref(
+  key: EvidenceTargetKey | undefined, fallback: string, provenance?: string,
+): string {
   if (!key) return fallback;
-  return `${MODULE_PATH[EVIDENCE_TARGET_MODULE[key]]}#${evidenceAnchorId(key)}`;
+  // ── LE LIEN DIT DE QUEL DOSSIER IL VIENT (revue du 11/08/2026) ────────────────────────────────
+  // La commune ne suffit pas à identifier une preuve. Un lecteur qui possède plusieurs artefacts sur
+  // la même commune (le dossier communal et un ou plusieurs biens) cliquait depuis le bien A et
+  // pouvait voir la preuve figée du bien B, ou celle d'un artefact communal plus récent : le module
+  // d'arrivée prenait simplement le dernier snapshot de la commune.
+  //
+  // `preuve` porte donc le `scopeKey` de l'artefact d'où le lien est émis, la même identité que
+  // `artifactScopeKey`. Il est indicatif au sens de la sécurité : la lecture reste filtrée par
+  // `user_id`, un identifiant fabriqué ne désigne rien d'autre que les artefacts du lecteur.
+  const cible = `${MODULE_PATH[EVIDENCE_TARGET_MODULE[key]]}#${evidenceAnchorId(key)}`;
+  if (!provenance) return cible;
+  return `${MODULE_PATH[EVIDENCE_TARGET_MODULE[key]]}?preuve=${encodeURIComponent(provenance)}#${evidenceAnchorId(key)}`;
 }

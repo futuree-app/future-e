@@ -142,6 +142,9 @@ export default async function RapportPage() {
   const servi = dossierAServir(artefactCommune, communeResult?.dossier ?? null);
   const dossier = servi.dossier;
   const dossierGenereLe = servi.generatedAt;
+  // L'identité de l'artefact servi, portée par les liens « Preuve » du dossier communal. Absente
+  // quand le dossier est assemblé à l'instant : il n'y a alors aucune version figée à désigner.
+  const provenanceCommune = servi.source === "artefact" ? "commune" : undefined;
   const dossierLogementLink = logementForCommune
     ? { href: `/rapport/logement?dossierId=${encodeURIComponent(logementForCommune.id)}`, label: logementForCommune.address_label }
     : null;
@@ -397,8 +400,9 @@ export default async function RapportPage() {
                     insee={inseeCode}
                     scopeKey="commune"
                     generatedAt={dossierGenereLe}
+                    provenance={provenanceCommune}
                   />
-                  <ControlesDuDossier dossier={dossier} />
+                  <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
                 </>
               }
             >
@@ -431,8 +435,9 @@ export default async function RapportPage() {
                 insee={inseeCode}
                 scopeKey="commune"
                 generatedAt={dossierGenereLe}
+                provenance={provenanceCommune}
               />
-              <ControlesDuDossier dossier={dossier} />
+              <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
             </>
           )
         ) : null}

@@ -109,17 +109,25 @@ const artifactSchema = z.object({
   conventionsVersion: z.string().min(1),
   projectSnapshot: z.object({}).passthrough(),
   dossier: dossierShape,
-  // Le snapshot de données est OPTIONNEL et vérifié champ par champ : un artefact antérieur au lot
-  // n'en a pas, et un artefact dont ce bloc serait illisible doit rester servable (le repli sur
-  // l'index courant est dégradé, pas cassé).
-  dataSnapshot: z.object({
-    catnatInondation: z.object({
-      count: z.number().int().nonnegative(),
-      depuis: z.number().int(),
-      origine: z.literal("index_local"),
-      insee: z.string().nullable(),
-      version: z.string().min(1),
-    }).optional(),
+});
+
+// ── LE SNAPSHOT SE VALIDE À PART, ET SON ÉCHEC NE COÛTE QUE LUI (revue du 11/08/2026) ─────────
+//
+// Il était dans le schéma principal. Un bloc corrompu faisait donc refuser l'artefact ENTIER, et
+// `dossierAServir` retombait en silence sur l'assemblage vivant : la corruption d'un enrichissement
+// annexe réécrivait toute la décision vendue, ce que ce lot existe précisément pour empêcher. Le
+// commentaire promettait déjà l'inverse de ce que le code faisait.
+//
+// Deux passes, donc : le dossier figé d'abord, qui est la vente ; le snapshot ensuite, qui est un
+// confort de réaffichage. Un snapshot illisible disparaît, l'appelant retombe sur l'index courant,
+// et le lecteur garde SA décision.
+const dataSnapshotSchema = z.object({
+  catnatInondation: z.object({
+    count: z.number().int().nonnegative(),
+    depuis: z.number().int(),
+    origine: z.literal("index_local"),
+    insee: z.string().nullable(),
+    version: z.string().min(1),
   }).optional(),
 });
 
@@ -128,7 +136,17 @@ export function parseDecisionArtifact(value: unknown): DecisionArtifactV1 | null
   if (!parsed.success) return null;
   // Le cast est SÛR ici et seulement ici : la forme structurelle est vérifiée juste au-dessus, et
   // les champs non validés sont ceux que le rendu traite déjà comme optionnels.
-  return parsed.data as unknown as DecisionArtifactV1;
+  const artefact = parsed.data as unknown as DecisionArtifactV1;
+
+  // Le snapshot, en seconde passe. Illisible, il TOMBE ; il n'emporte pas la décision avec lui.
+  const brut = (value as { dataSnapshot?: unknown })?.dataSnapshot;
+  if (brut === undefined) return artefact;
+  const snapshot = dataSnapshotSchema.safeParse(brut);
+  if (!snapshot.success) {
+    console.warn("[artefact] dataSnapshot illisible, ignoré", { generatedAt: artefact.generatedAt });
+    return { ...artefact, dataSnapshot: undefined };
+  }
+  return { ...artefact, dataSnapshot: snapshot.data };
 }
 
 /** L'emballage, au moment de la génération. Aucune I/O : l'appelant écrit. */

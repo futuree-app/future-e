@@ -28,7 +28,15 @@ import { FactCompositionCard } from "@/components/report/FactCompositionCard";
 // peint pareil d'un bout à l'autre de la page.
 const COULEUR = "var(--info)";
 
-export function ControlesDuDossier({ dossier }: { dossier: Dossier }) {
+export function ControlesDuDossier(
+  {
+    dossier,
+    /** L'identité de l'artefact d'où ces cartes viennent, portée par les liens « Preuve » qu'elles
+     *  émettent (cf. `evidenceHref`). Absente sur un dossier assemblé à l'instant : il n'y a alors
+     *  aucune version figée à désigner. */
+    provenance,
+  }: { dossier: Dossier; provenance?: string },
+) {
   const groupes = controlesParEchelle(dossier);
   // Aucun contrôle établi : rien ne s'affiche, et le verdict n'en parle pas non plus. Un bloc vide
   // annonçant « aucun point à contrôler » promettrait une vérification exhaustive du lieu.
@@ -69,7 +77,7 @@ export function ControlesDuDossier({ dossier }: { dossier: Dossier }) {
                 if (card.kind === "composition") {
                   return (
                     <Fragment key={card.composition.id}>
-                      <FactCompositionCard
+                      <FactCompositionCard provenance={provenance}
                         composition={card.composition}
                         color={COULEUR}
                         absorbedFacts={absorbedOf(card)}
@@ -88,7 +96,7 @@ export function ControlesDuDossier({ dossier }: { dossier: Dossier }) {
                   // enverraient les renvois « à contrôler en priorité » au hasard.
                   <li key={f.id}>
                     <FactBody fact={f} color={COULEUR} />
-                    <EvidenceRow fact={f} color={COULEUR} />
+                    <EvidenceRow fact={f} color={COULEUR} provenance={provenance} />
                     <MethodDetails conventions={conventions} checks={factChecks(f)} />
                   </li>
                 );

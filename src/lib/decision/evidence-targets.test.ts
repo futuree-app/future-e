@@ -95,3 +95,34 @@ test("toute clé du catalogue est ÉMISE par au moins une règle (pas de vocabul
     + "elles doivent sortir du catalogue.",
   );
 });
+
+// ── La provenance : le lien dit de quel dossier il vient ───────────────────────────────────────
+
+test("le lien porte l'artefact d'où il est émis, quand il y en a un", () => {
+  // La commune n'est pas une identité de preuve : un lecteur qui possède le dossier communal et deux
+  // biens sur la même commune cliquait depuis le bien A et pouvait voir la preuve figée du bien B,
+  // la surface d'arrivée prenant le snapshot le plus récent.
+  assert.equal(
+    evidenceHref("risk.catnat", "/x", "logement:abc-123"),
+    "/rapport/quartier?preuve=logement%3Aabc-123#evidence-risk-catnat",
+  );
+  assert.equal(
+    evidenceHref("risk.catnat", "/x", "commune"),
+    "/rapport/quartier?preuve=commune#evidence-risk-catnat",
+  );
+});
+
+test("sans provenance, le lien reste ce qu'il était", () => {
+  // Un dossier assemblé à l'instant n'a aucune version figée à désigner, et les liens des dossiers
+  // antérieurs à ce lot n'en portent pas : le repli doit rester exactement l'ancien comportement.
+  assert.equal(evidenceHref("risk.catnat", "/x"), "/rapport/quartier#evidence-risk-catnat");
+  assert.equal(evidenceHref(undefined, "/rapport/quartier", "commune"), "/rapport/quartier");
+});
+
+test("le scopeKey est encodé : il contient un caractère réservé", () => {
+  // « logement:<uuid> » porte un deux-points. Non encodé, il produit une URL que certains agents
+  // relisent de travers, et le paramètre cesse de désigner l'artefact.
+  const href = evidenceHref("risk.flooding", "/x", "logement:a:b");
+  assert.ok(href.includes("preuve=logement%3Aa%3Ab"));
+  assert.equal(new URL(href, "https://futur-e.fr").searchParams.get("preuve"), "logement:a:b");
+});

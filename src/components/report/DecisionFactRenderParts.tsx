@@ -67,7 +67,7 @@ export function ActionCue({ label, color, type }: { label: string; color: string
 // /rapport/quartier, au lecteur de retrouver la carte qui parlait de son sujet. Quand la preuve porte
 // une clé de phénomène, le lien pointe la carte qui le démontre ; sinon il retombe sur le module — le
 // fallback assumé (cf. evidence-targets.ts), jamais une promesse de mesure précise.
-function toChips(refs: { label: string; observedValue?: string; href?: string; targetKey?: EvidenceTargetKey }[]) {
+function toChips(refs: { label: string; observedValue?: string; href?: string; targetKey?: EvidenceTargetKey }[], provenance?: string) {
   const seen = new Set<string>();
   const out: { label: string; value?: string; href?: string }[] = [];
   for (const e of refs) {
@@ -77,7 +77,7 @@ function toChips(refs: { label: string; observedValue?: string; href?: string; t
     // un intertitre qui disait déjà « À cette adresse ».
     if (!e.observedValue) continue;
     const label = e.href ? "Preuve" : e.label;
-    const href = e.href ? evidenceHref(e.targetKey, e.href) : undefined;
+    const href = e.href ? evidenceHref(e.targetKey, e.href, provenance) : undefined;
     // La dédup porte sur le rendu FINAL : deux preuves de même valeur qui visent deux phénomènes
     // distincts mènent à deux cartes, ce sont deux chips.
     const cle = `${label}|${e.observedValue}|${href ?? ""}`;
@@ -118,9 +118,11 @@ export function StatusTag({ label, color }: { label: string; color: string }) {
   );
 }
 
-export function EvidenceRow({ fact, color }: { fact: DecisionFact; color: string }) {
+export function EvidenceRow(
+  { fact, color, provenance }: { fact: DecisionFact; color: string; provenance?: string },
+) {
   const refs = fact.role === "compromise" ? fact.sides.flatMap((s) => s.evidence) : fact.evidence;
-  const chips = toChips(refs);
+  const chips = toChips(refs, provenance);
   const action = fact.role === "verification" || fact.role === "unknown" ? fact.action : undefined;
   return (
     <div className="mt-2.5 flex flex-col gap-2">

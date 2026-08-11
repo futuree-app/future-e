@@ -108,11 +108,13 @@ function TradeoffFaceoff({ composition }: { composition: TradeoffComposition }) 
 }
 
 export function FactCompositionCard({
-  composition, color, absorbedFacts,
+  composition, color, absorbedFacts, provenance,
 }: {
   composition: FactComposition;
   color: string;
   absorbedFacts: DecisionFact[]; // les faits absorbés de CETTE composition, pour le dépliable
+  /** L'artefact d'où vient cette carte, porté par ses liens « Preuve » (cf. `evidenceHref`). */
+  provenance?: string;
 }) {
   // Le dépliable ne garde que ce que la face ne dit pas déjà. La règle et son « pourquoi » vivent
   // dans dossier-view.ts, où elles sont testables.
@@ -189,7 +191,7 @@ export function FactCompositionCard({
             {nonNarres.map((f) => (
               <li key={f.id}>
                 <FactBody fact={f} />
-                <EvidenceRow fact={f} color={color} />
+                <EvidenceRow fact={f} color={color} provenance={provenance} />
               </li>
             ))}
           </ul>
