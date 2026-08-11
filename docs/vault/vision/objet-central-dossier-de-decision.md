@@ -75,6 +75,37 @@ l'architecture.
 C'est cette structure, et non un objet unique, qui réalise
 `projet → candidats → preuves → arbitrages → décision`.
 
+Arbre cible, arrêté le 10/08/2026 :
+
+```text
+Profil
+  └── Projet
+        ├── Candidat territoire
+        └── Candidat logement
+              ├── Documents et observations
+              └── Versions d'analyse
+                    ├── instantané du projet
+                    ├── faits et preuves
+                    ├── conventions du moteur
+                    └── conclusion
+```
+
+Une version est **immuable**. Modifier le projet, la posture ou le diagnostic n'écrase jamais
+l'analyse achetée : la version courante devient obsolète, et une version nouvelle se produit en
+disant ce qui a changé.
+
+Deux précisions issues de l'implémentation du 10/08, à ne pas perdre :
+
+- **La péremption est CALCULÉE, pas stockée.** `artefactPerimeParLeDpe` compare la date du choix à
+  celle du figement. Aucun statut « obsolète » n'existe en base, et c'est délibéré : un état stocké
+  se désynchronise, une comparaison ne peut pas mentir. La contrainte de la migration 28 n'accepte
+  d'ailleurs que `generating`, `ready`, `failed`.
+- **Le recalcul est automatique pour une pièce, explicite pour un projet.** Quand le lecteur dépose
+  un diagnostic, il a fourni la matière et attend qu'elle compte : le recalcul se fait seul.
+  Quand il change son PROJET, l'analyse achetée répondait à une autre question, et le
+  lui refaire sans le dire effacerait la décision sur laquelle il a peut-être déjà agi. Là, la
+  nouvelle version se demande.
+
 Elle explique aussi un symptôme relevé sur le compte réel : le module Logement redemande après
 l'analyse si le lecteur achète, loue ou habite. Cette donnée appartient au **candidat**, jamais à la
 personne, et elle était cherchée au mauvais niveau.
@@ -170,18 +201,75 @@ vérifiés dans le code. Ils sont détaillés, avec leurs numéros de ligne, dan
 Tant que ces trois points tiennent, futur•e revendique une traçabilité que son écran ne sert pas.
 C'est le vrai coût du retard, davantage qu'une fonctionnalité manquante.
 
+## Les invariants à écrire avant de coder
+
+Contrats vérifiables, arrêtés le 10/08/2026. Ils ne sont pas des invariants de projet au sens de
+`principes/invariants.md` (qui doit rester courte et parle du produit, pas de son implémentation) :
+ce sont les propriétés que le prochain chantier doit rendre **testables**.
+
+1. Aucune affirmation décisionnelle sans `factId` et preuve correspondante.
+2. Un lien « Preuve » présente exactement le même fait et la même valeur que l'affirmation qu'il
+   accompagne.
+3. Aucune page d'adresse sans `dossierId` explicite.
+4. Une modification matérielle ne laisse jamais une analyse se présenter comme à jour.
+5. Une version ancienne n'est jamais réécrite.
+6. L'IA ne verbalise que des propositions **déjà autorisées**. Recevoir l'instruction de ne rien
+   inventer ne suffit pas (voir « un prompt n'est pas une frontière de sûreté »).
+7. Une absence ne se conclut que si la couverture de la source est établie. C'est la doctrine des
+   attestations d'absence, déjà tenue côté données ; elle doit l'être aussi côté prose.
+8. **Tout compte affiché au lecteur est recomptable à l'écran.** Ajouté depuis le défaut du
+   10/08/2026 : le verdict annonçait trois points en s'appuyant sur une notion de matérialité que
+   rien à l'écran ne permettait de dénombrer. Même famille que l'invariant 2 : ce qu'on montre doit
+   démontrer ce qu'on dit.
+
+## L'ordre du prochain chantier
+
+Arrêté le 10/08/2026, après contre-lecture. La réparation de la preuve passe **avant**
+l'architecture canonique : elle est circonscrite, l'architecture multi-projets ne l'est pas, et
+laisser un défaut visible attendre un grand chantier revient à le laisser indéfiniment.
+
+1. Désactiver ou rendre déterministes les narrations libres.
+2. Réparer la chaîne de preuve visible : source, valeur, date, destination.
+3. Persister le `dossierId` dans tout le parcours.
+4. Définir puis implémenter le minimum de Profil → Projet → Candidat → Version.
+5. Recomposer le premier écran autour de la décision.
+
+Le point 5 n'est pas un défaut d'intégrité. Pour une bêta fermée, il vient après les quatre
+garanties. Pour une bêta payante publique, il redevient bloquant, pour une raison commerciale :
+le lecteur ne voit pas assez vite ce qu'il vient d'acheter.
+
+Restent après : la collaboration, l'import documentaire étendu, l'historique riche, la carte
+d'Autour, les fonctions B2B, l'enrichissement d'AskFuture.
+
+## Autour n'est pas le moat, c'est la preuve que son substrat existe
+
+Le module Autour est aujourd'hui la meilleure démonstration de valeur du produit payé. Il répond à
+des questions qu'une personne examinerait difficilement de façon méthodique : ce qu'il y a
+réellement autour de cette adresse, à quelle distance, selon quel périmètre, et s'il s'agit d'une
+proximité, d'une exposition ou d'un attribut du bien.
+
+Des distances, des dénombrements et des permis ne constituent pourtant pas un moat : un agent
+équipé de cartes les reproduira. Ce qui se défend est l'ensemble : **faits préparés, relation
+géographique correcte, convention stable, traçabilité, confrontation au projet, conservation dans
+le dossier.**
+
+D'où la formulation de la cible : faire d'Autour, de Territoire et du Logement **trois fournisseurs
+de faits d'un même dossier de décision**, plutôt que trois rapports reliés par une navigation.
+
 ## Ce qui est différé, et pourquoi
 
 Le porteur a arbitré le 10/08/2026 : **la priorité est la vente avant le 20 août**
-(`/memory/project_csp_activite_conservee.md`). Les chantiers structurants de cette page sont donc
-des chantiers de septembre, dans cet ordre de valeur :
+(`/memory/project_csp_activite_conservee.md`). Les cinq chantiers listés plus haut, dans « L'ordre
+du prochain chantier », sont donc des chantiers de septembre.
 
-1. Borner les synthèses génératives, ou les rendre déterministes.
-2. Réparer la chaîne de preuve visible.
-3. Porter le `dossierId` de bout en bout, et faire du dossier le contexte persistant.
-4. Placer la conclusion avant le climat et les modules (mesuré : 1 316 px avant le verdict sur
-   desktop, 1 844 px sur mobile).
-5. Unifier projet, mémoire, intention et version d'artefact.
+Ce que cet arbitrage suppose, et qu'il faut assumer les yeux ouverts : sur une vente à quelques
+proches, un dossier par personne, trois des quatre défauts d'intégrité ne se déclenchent pas. Le
+bien actif ne se perd qu'à partir de deux dossiers dans une commune, et un projet ne change guère
+en deux semaines. Le seul qui morde dès la première vente est celui des synthèses libres.
+
+Mesure du défaut de conversion, pour ne pas la reprendre plus tard : 1 316 px avant le verdict sur
+desktop en 1 000 px de large, 1 844 px sur mobile en 844 px de haut. Longueur totale du rapport :
+4 624 px desktop, 6 286 px mobile.
 
 La collaboration, l'import de documents et la carte d'Autour viennent après. Ajouter des
 fonctionnalités à un dossier dont la preuve et l'identité du bien ne sont pas fiables amplifierait
