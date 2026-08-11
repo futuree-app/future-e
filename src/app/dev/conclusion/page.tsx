@@ -9,6 +9,7 @@
 // DEV UNIQUEMENT : 404 en production.
 import { notFound } from "next/navigation";
 import { buildConclusionPlan, type ConclusionPlanInput } from "@/lib/decision/conclusion-plan";
+import { catnatInondationDepuisCompte, libelleCatnatInondation } from "@/lib/decision/catnat-evidence";
 import type { DecisionFact, MaterialityTier } from "@/lib/decision/decision-fact";
 import type { FactComposition } from "@/lib/decision/fact-composition";
 import { ConclusionBlock, planToBlocks } from "@/components/report/ConclusionBlock";
@@ -53,7 +54,9 @@ const INONDATION = verification(
   // « exposition élevée · 19 arrêtés CatNat depuis 1982 » sous une clé `risk.flooding`, dont la
   // carte ne mentionne aucun arrêté : c'est le défaut corrigé dans la règle inondation, et cette
   // page de référence le reproduisait à l'identique.
-  { observedValue: "19 arrêtés inondation depuis 1982", href: "/rapport/quartier", targetKey: "risk.catnat" },
+  // LA PHRASE VIENT DU MODULE PARTAGÉ, comme en production : un harnais qui écrit la sienne cesse
+  // d'éprouver ce qu'il prétend montrer, et c'est arrivé ici deux fois en une soirée.
+  { observedValue: libelleCatnatInondation(catnatInondationDepuisCompte(19)!), href: "/rapport/quartier", targetKey: "risk.catnat" },
 );
 
 const PATRIMOINE = verification(

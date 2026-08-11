@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { evidenceAnchorId, type EvidenceTargetKey } from "@/lib/decision/evidence-targets";
+import { libelleCatnatInondation, type CatnatInondation } from "@/lib/decision/catnat-evidence";
 import { registerForCard, type RegisterKey } from "@/lib/decision/evidence-registers";
 import { useHorizon, HORIZON_META, type HorizonKey } from "@/hooks/useHorizon";
 import { MetricDrawer, type CardDetail } from "@/components/MetricDrawer";
@@ -78,6 +79,13 @@ type SharedProps = {
   territoire: Territoire | null;
   vigieau: VigieauSummary | null;
   catnat?: GasparCatnatSummary | null;
+  /**
+   * LE COMPTE QUE LA PREUVE DU DOSSIER ANNONCE, dans son objet partagé (`catnat-evidence`). Distinct
+   * de `catnat` ci-dessus, qui est le relevé DIRECT tous risques : ce sont deux périmètres et deux
+   * chemins. La carte « Mémoire des catastrophes » affiche les deux, en disant lequel est lequel,
+   * pour que le lecteur arrivé par la pastille retrouve SON chiffre sans ouvrir de volet.
+   */
+  catnatInondation?: CatnatInondation | null;
   littoral?: LittoralSummary | null;
   // Bloc 4 : trajectoire de population + couvert naturel + saisonnalité (données riches).
   demographie?: DemographieCardData | null;
@@ -308,6 +316,7 @@ function buildFactors(
   drought: Drought | null,
   communeName: string,
   catnat?: GasparCatnatSummary | null,
+  catnatInondation?: CatnatInondation | null,
   littoral?: LittoralSummary | null,
   demographie?: DemographieCardData | null,
   couvertNaturel?: CouvertCardData | null,
@@ -862,11 +871,19 @@ function buildFactors(
           : `Surtout ${sortedRisks[0].label.toLowerCase()}`;
     factors.push({
       label: "Mémoire des catastrophes",
-      // La preuve du dossier qui compte les arrêtés CatNat vise CETTE carte, et non celle du
-      // zonage inondation, qui ne dit rien des arrêtés (cf. materiality-rules, règle inondation).
+      // La preuve du dossier qui compte les arrêtés vise CETTE carte, et non celle du zonage
+      // inondation, qui ne dit rien des arrêtés (cf. materiality-rules, règle inondation).
       targets: ["risk.catnat"],
       val: headline,
-      sub: dominantSub,
+      // ── LE LECTEUR ARRIVE AVEC UN CHIFFRE EN TÊTE, IL DOIT LE RETROUVER ICI ─────────────────
+      // La pastille du dossier annonce « 7 arrêtés inondation depuis 1982 » ; cette carte ouvrait
+      // sur son total TOUS RISQUES relevé en direct (« 23 arrêtés depuis 1987 »), et le compte
+      // inondation dormait dans la ventilation d'un volet fermé. Le sous-titre porte donc la phrase
+      // de l'objet partagé, mot pour mot : elle est écrite dans `catnat-evidence`, jamais ici.
+      //
+      // La répartition dominante descend dans le volet quand ce compte existe : elle reste utile,
+      // elle n'est pas ce que le lecteur vient chercher.
+      sub: catnatInondation ? libelleCatnatInondation(catnatInondation) : dominantSub,
       col: "var(--blue)",
       src: "Géorisques · GASPAR · arrêtés CatNat",
       missing: !hasCatnat,
@@ -1107,10 +1124,10 @@ const REGISTER_TONE: Record<RegisterKey, string> = {
   verifications: "var(--reg-controle)",
 };
 
-export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, catnat, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, climatType }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
+export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, catnat, catnatInondation, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, climatType }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
   const [horizon] = useHorizon();
   const [openDetail, setOpenDetail] = useState<CardDetail | null>(null);
-  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, climatType ?? null);
+  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, catnatInondation ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, climatType ?? null);
 
   // Regroupement par thème : le décor (territoire) d'abord, puis le climat, puis
   // les risques. Le code couleur suit le thème, pas la carte individuelle.

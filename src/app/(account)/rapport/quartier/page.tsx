@@ -18,6 +18,7 @@ import { resolveReadableTerritory, TERRITORY_SELECT, canAccessTerritory } from "
 import { AskFutureInlineMount } from "@/components/AskFutureInlineMount";
 import { TerritoryYearsBand } from "@/components/report/TerritoryYearsBand";
 import { deriveTerritoryMood } from "@/lib/territory-mood";
+import { catnatInondationDepuisIndex } from "@/lib/decision/catnat-evidence";
 import { getTerritoryContext } from "@/lib/comparateur-vie";
 import { buildTerritoryIdentity, buildTerritoryCards } from "@/lib/territory-identity";
 import { TerritoryIdentityCard } from "@/components/report/TerritoryIdentityCard";
@@ -88,6 +89,13 @@ export default async function RapportQuartierPage() {
   // Contexte territorial (index comparateur, lecture seule) : carte d'identité +
   // trait distinctif. Absent (commune hors index, PLM) => on n'affiche pas la carte.
   const territoryContext = inseeCode ? await getTerritoryContext(inseeCode) : null;
+
+  // LE COMPTE QUE LA PREUVE DU DOSSIER ANNONCE, pris à la MÊME source qu'elle : l'index. Le moteur
+  // de décision est déterministe et sans réseau, il ne connaît que ce comptage ; la carte, elle,
+  // dispose du relevé direct tous risques. Faire descendre l'index jusqu'ici est le seul sens
+  // possible, et c'est ce qui permet au lecteur arrivé par la pastille de retrouver SON chiffre.
+  // Fabrique et libellés : `lib/decision/catnat-evidence.ts`.
+  const catnatInondation = catnatInondationDepuisIndex(territoryContext?.entry);
   const saisonnalitePct = inseeCode ? await getResidencesSecondairesPct(inseeCode) : null;
   // Tendance observée ERA5-Land (Copernicus) : preuve « le passé valide la
   // projection » dans le drawer Températures. La face avant reste sur le futur DRIAS.
@@ -236,7 +244,7 @@ export default async function RapportQuartierPage() {
           >
             Les grands signaux du territoire
           </h2>
-          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={eloignementServicesPct} era5={era5} climatType={territoryMood.type} />
+          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} catnatInondation={catnatInondation} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={eloignementServicesPct} era5={era5} climatType={territoryMood.type} />
         </section>
 
         {/* Une question ? — AskFuture inline (uniquement pour comptes payants) :

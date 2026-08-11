@@ -20,6 +20,10 @@ import { declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } 
 import { LOGEMENT_RULES } from "./logement-rules.ts";
 import { SECTEUR_RULES } from "./secteur-rules.ts";
 import { PERMIS_RULES } from "./permis-rules.ts";
+import {
+  catnatInondationDepuisCompte, libelleCatnatInondation, sourceCatnatInondation,
+  phraseConstatCatnatInondation,
+} from "./catnat-evidence.ts";
 import { RADON_RULES } from "./radon-rules.ts";
 import { HARD_CONSTRAINT_RULES } from "./hard-constraint-rules.ts";
 import { MISMATCH_RULES } from "./mismatch-rules.ts";
@@ -125,7 +129,8 @@ const ruleInondation: DecisionRule = {
     // de couverture, et n'aurait jamais vu un seul point positif. Cf. spec 2.1 §3.1.
     if (f.inondationRisque < 66) return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "satisfied", facts: [], reason: "exposition non notable" };
     const habitant = p.posture === "habitant";
-    const catnatCtx = f.catnatInondation != null ? ` La commune a connu ${f.catnatInondation} arrêtés de catastrophe naturelle inondation depuis 1982 (comptage administratif, pas une probabilité).` : "";
+    const catnat = catnatInondationDepuisCompte(f.catnatInondation);
+    const catnatCtx = catnat ? ` La commune a connu ${phraseConstatCatnatInondation(catnat)} (comptage administratif, pas une probabilité).` : "";
     // LA PREUVE EST OPPOSABLE, jamais un score interne : « 100/100 » se lisait comme une probabilité ou
     // une certitude. On affiche la matière vérifiable (arrêtés CatNat) ; le score reste au moteur.
     //
@@ -140,17 +145,15 @@ const ruleInondation: DecisionRule = {
     // Les arrêtés ont leur propre carte dans le module Territoire (« Mémoire des catastrophes »,
     // GASPAR) : la preuve chiffrée la vise, par la clé `risk.catnat`.
     //
-    // ── DEUX COMPTES QUI NE SE SUPERPOSENT PAS, ET LE LIBELLÉ DOIT LE DIRE ────────────────────
-    // La preuve compte les arrêtés INONDATION, lus dans l'index local (`module-facts-map`), depuis
-    // l'origine du régime (1982). La carte cible affiche le total TOUS RISQUES relevé en direct sur
-    // GASPAR, depuis la première reconnaissance réelle de la commune. Le lecteur qui clique sur
-    // « 7 » peut donc lire « 23 arrêtés depuis 1987 » en arrivant : le chiffre inondation vit dans
-    // la ventilation par risque de cette même carte, jamais dans son titre.
+    // ── LA PHRASE VIENT DE L'OBJET PARTAGÉ, ELLE NE S'ÉCRIT PAS ICI ───────────────────────────
+    // `catnat-evidence.ts` la produit, et la carte « Mémoire des catastrophes » du module Territoire
+    // affiche EXACTEMENT la même, construite depuis le même objet. Avant cela, chaque côté écrivait
+    // la sienne : la pastille annonçait « 7 arrêtés inondation depuis 1982 » et la carte ouvrait sur
+    // « 23 arrêtés depuis 1987 », son total tous risques relevé en direct. Le lecteur cliquait sur 7
+    // et lisait 23.
     //
-    // D'où « arrêtés inondation », et non « arrêtés CatNat » : le libellé dit ce qu'il compte, et
-    // le lecteur sait quelle ligne chercher. Faire porter à la preuve le total tous risques serait
-    // faux (le fait parle d'inondation) ; poser une ancre par ligne de ventilation est le vrai
-    // correctif, et il appartient au chantier qui structurera la preuve.
+    // Le total tous risques reste sur la carte, à sa place : un contexte, jamais la démonstration de
+    // cette preuve-ci.
     //
     // L'EXPOSITION NE PORTE PLUS DE VALEUR. « Élevée » vient du seuil interne (>= 66), qu'aucune
     // carte n'affiche et que la doctrine refuse de montrer. Le constat, lui, dit déjà l'exposition
@@ -172,11 +175,11 @@ const ruleInondation: DecisionRule = {
     // Elle reste SANS valeur affichée : le rang est un calcul interne que la doctrine ne montre pas.
     const evidence: EvidenceRef[] = [
       { factId: "inondation.risque", module: "territoire", label: "Arrêtés inondation (GASPAR), position en France métropolitaine", grain: "commune", href: territoireHref, targetKey: "risk.flooding" },
-      ...(f.catnatInondation != null
+      ...(catnat
         ? [{
             factId: "inondation.catnat", module: "territoire" as const,
-            label: `Territoire · ${f.nom}`,
-            observedValue: `${f.catnatInondation} arrêtés inondation depuis 1982`,
+            label: sourceCatnatInondation(catnat),
+            observedValue: libelleCatnatInondation(catnat),
             grain: "commune" as const, href: territoireHref, targetKey: "risk.catnat" as const,
           }]
         : []),

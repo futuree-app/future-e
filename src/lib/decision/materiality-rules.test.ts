@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { composeFacts } from "./fact-compositions.ts";
 import { runRules, assertFactValid } from "./materiality-rules.ts";
+import { catnatInondationDepuisIndex, libelleCatnatInondation } from "./catnat-evidence.ts";
 import type { ModuleFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import { PRODUCT_CONVENTIONS_VERSION, type EvaluationContext } from "../hard-constraints.ts";
@@ -1025,4 +1026,22 @@ test("un indice interne ne peut PAS devenir une valeur affichée, quelle que soi
     } as never, p),
     /indice interne ne peut pas être une valeur affichée/,
   );
+});
+
+test("la pastille du dossier porte EXACTEMENT la phrase que la carte affichera", () => {
+  // L'invariant du chantier, tenu de bout en bout : la règle et la carte « Mémoire des
+  // catastrophes » construisent leur texte depuis le MÊME objet (`catnat-evidence`), alimenté par
+  // la MÊME source (l'index). Ce test relie les deux mondes, que rien d'autre ne fait se rencontrer :
+  // le moteur ne rend pas de composant, et le composant n'appelle pas le moteur.
+  //
+  // Le chemin de la carte est reproduit ici tel quel : `catnatInondationDepuisIndex` sur l'entrée
+  // d'index, exactement ce que fait /rapport/quartier.
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
+  const fait = run(facts({ inondationRisque: 80, catnatInondation: 6 }), p)
+    .facts.find((x) => x.ruleId === "territoire.inondation-exposition");
+  assert.ok(fait && fait.role === "verification");
+  const pastille = fait.evidence.find((e) => e.observedValue)?.observedValue;
+
+  const cotéCarte = libelleCatnatInondation(catnatInondationDepuisIndex({ inondation: { catnat: 6 } })!);
+  assert.equal(pastille, cotéCarte);
 });
