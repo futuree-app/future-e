@@ -213,14 +213,39 @@ donc une requête Supabase de plus sur `/rapport`, et appliquer `resolveRelation
 valeur EFFECTIVE (celle que la synthèse utilisera) plutôt qu'une valeur déclarée qui n'existe peut
 être pas.
 
-### 4.2 Ce que les pages de résultat perdent
+### 4.2 Changer l'intention ne doit pas détruire les priorités
+
+`ProjectSummaryCard.save()` reparse SYSTÉMATIQUEMENT le texte et initialise `parsed` à `null`
+(lignes 40 à 54) : si l'appel au parseur échoue, le projet est enregistré avec `parsed: null`. C'est
+tolérable aujourd'hui, où l'on ne sauvegarde qu'après avoir édité le texte. Cela ne l'est plus quand
+l'écran offre de changer la seule intention : un aller-retour « achat → location » un jour où le
+parseur est indisponible ferait perdre les priorités et les contraintes du lecteur, et son dossier
+retomberait en « projet non structuré » sans qu'il ait touché à son texte.
+
+Règle imposée :
+
+- **Texte inchangé** : aucun reparsage. `project.parsed` est conservé tel quel, et seul le champ
+  modifié part en écriture.
+- **Texte modifié** : reparsage explicite, et son échec est VISIBLE. On n'enregistre pas un projet
+  amputé de sa structure en annonçant un succès.
+
+C'est la même doctrine que la sauvegarde honnête déjà en place : ne jamais annoncer comme enregistré
+ce qui ne l'est pas, et ne jamais faire perdre en silence ce que le lecteur avait déclaré.
+
+### 4.3 Ce que les pages de résultat perdent
 
 | Composant | Aujourd'hui | Devient |
 |---|---|---|
 | `ProjectProbe` (Logement) | Demande « Que comptez-vous faire de ce logement ? » à **chaque visite** : `useState<string \| null>(null)`, jamais persistée. N'oriente que `DecisionChecklist`. | **Supprimée.** La posture se dérive du projet du compte. |
-| `ReportRelationBanner` (Territoire) | Une phrase plus un sélecteur qui écrit `report_context.relation`. | **Une ligne non interactive** qui dit le cadrage, suivie d'un lien « Modifier le projet » vers `/rapport`. |
+| `ReportRelationBanner` (Territoire) | Une phrase plus un sélecteur qui écrit `report_context.relation`. | **Une ligne non interactive** qui dit le cadrage, suivie d'un lien « Modifier le projet » vers `/rapport#projet`. |
 
-### 4.3 Le Logement lit le projet, il ne le re-dérive pas
+**Une destination, une seule.** L'éditeur porte `id="projet"`, et TOUT geste qui renvoie au cadrage
+pointe vers `/rapport#projet` : le lien de Territoire, le « modifier » du hero, et le bouton des deux
+états de hero sans verdict. Un lien qui dépose le lecteur en haut d'une page longue en le laissant
+chercher ce qu'il vient modifier ne tient pas la promesse « une seule surface d'édition ». L'ancre
+porte `scroll-mt` comme les ancres de cartes du dossier, pour ne pas passer sous la navbar.
+
+### 4.4 Le Logement lit le projet, il ne le re-dérive pas
 
 La règle de dérivation existe déjà et elle est canonique : `bucketDuProjet`
 (`lib/decision/logement-gestes.ts:37`), qui teste **l'intention avant la posture** et rend `neutre`
@@ -245,7 +270,7 @@ Sans projet, `bucketDuProjet` rend `neutre`, et `DecisionChecklist` sert déjà 
 rien et on n'invente aucune posture par défaut : une posture devinée orienterait une checklist
 d'achat vers un résident, ou l'inverse.
 
-### 4.4 Le cas « j'y habite déjà » et « j'achète »
+### 4.5 Le cas « j'y habite déjà » et « j'achète »
 
 `bucketDuProjet` teste l'intention d'abord : la combinaison `posture: habitant` avec `intent: achat`
 rend donc `achat`. Ce n'est pas un bug (un locataire qui achète le logement où il vit est un cas
@@ -268,8 +293,9 @@ tranche lui-même ; la combinaison incohérente devient impossible à produire s
 | Fichier | Changement |
 |---|---|
 | `src/app/(account)/rapport/page.tsx` | Nouvel ordre. Hero d'identité rendu au-dessus du `Suspense`. Retrait de `HorizonBar` et de `id="horizon"`. Descente de `ProjectSummaryCard`, du panneau des échelles et du cadrage climat. |
-| `src/components/report/DossierDecisionSection.tsx` | Ne rend plus son en-tête (eyebrow « En une minute », date, bandeau projet changé) : la page les porte. Le verdict reste chez elle, en tête de ce qu'elle rend, et son headline passe de `<h2>` à `<h1>`. |
-| `src/components/report/ConclusionBlock.tsx` | Le headline passe de `<h2>` (ligne 103) à `<h1>`, la page n'en portant plus d'autre. |
+| `src/components/report/DossierDecisionSection.tsx` | Perd le seul eyebrow « En une minute ». **Conserve** la date de l'analyse servie, le grain, le bandeau d'obsolescence et les états d'augmentation : ce sont les métadonnées de la version qu'elle lit, elles ne peuvent pas remonter (cf. 3.1). Le verdict reste chez elle, en tête de ce qu'elle rend. |
+| `src/components/report/ConclusionBlock.tsx` | Le headline (ligne 103) prend un niveau de titre et une taille reçus en prop (cf. 5.1). |
+| `src/components/report/ConclusionRedigee.tsx` | Propage la prop de niveau de titre à ses quatre appels de `ConclusionBlock`. |
 | `src/components/report/ProjectSummaryCard.tsx` | Ajout du choix d'intention. Ajout du sous-contrôle « Pour {commune} », avec sa propre sauvegarde. Le résumé d'une ligne du hero se lit depuis le même projet. |
 | `src/components/report/ReportRelationBanner.tsx` | Perd son sélecteur, garde sa phrase, gagne un lien. |
 | `src/components/report/LogementModule.tsx` | Retire `ProjectProbe`, reçoit le projet et le transmet sans le convertir. |
@@ -277,8 +303,30 @@ tranche lui-même ; la combinaison incohérente devient impossible à produire s
 | `src/lib/decision/logement-verifications.ts` | `pointsAVerifier` accepte `UserProject \| null` ; `projetDepuisLaSonde` supprimé. |
 | `src/components/report/logement/ProjectProbe.tsx` | Supprimé. |
 
-Aucune donnée nouvelle, aucun appel externe supplémentaire, aucune migration SQL. Une requête
-Supabase de plus sur `/rapport` : la lecture de `report_context` pour la commune lue.
+Aucune donnée nouvelle, **aucun appel supplémentaire aux sources publiques**, aucune migration SQL.
+Une requête Supabase est bien ajoutée sur `/rapport` : la lecture de `report_context` pour la commune
+lue.
+
+### 5.1 La promotion du titre n'est pas qu'une balise
+
+Passer le headline de `<h2>` à `<h1>` change l'arbre du document et ne change rien à l'écran : il
+resterait en `--text-section` (19 à 23 px), donc **plus petit que les titres de section situés plus
+bas** dans la page (`--text-title`, 23 à 31 px). L'invariant 1 serait faux à la lettre.
+
+Le headline prend donc `--text-display` et `--weight-display`, le couple que les tokens réservent au
+« titre de page, un seul par écran », et il garde son `max-width` de 540 px, qui est l'usage prévu de
+l'exception de la doctrine de largeur (un titre de hero mesuré en espace ouvert).
+
+**Mesure qui tranche, à faire en implémentation** : rendre le headline déterministe le plus long du
+corpus à 360 px de large. `--text-display` y vaut 30 px. Si la phrase dépasse cinq lignes, on retombe
+sur `--text-title` pour le mobile seul, et la mesure est notée dans le commit. Aucune de ces deux
+issues n'est un échec ; ce qui serait un échec est de choisir sans mesurer.
+
+**La prop, et pourquoi.** `ConclusionBlock` est aussi rendu par `/dev/conclusion` (la galerie de cas)
+et par les quatre chemins de `ConclusionRedigee`. Le niveau de titre et la taille sont donc des
+**props**, avec le comportement actuel par défaut (`h2`, `--text-section`), propagées depuis la page
+qui sait, elle, si ce bloc est le titre de son écran. Le figer dans le composant ferait apparaître
+plusieurs `<h1>` dans la galerie.
 
 ---
 
@@ -319,6 +367,8 @@ Ce que l'implémentation doit rendre testable, dans l'esprit des huit invariants
    grain et l'obsolescence appartiennent à la version servie, donc au composant qui la lit.
 8. **Aucune sauvegarde n'est annoncée sans confirmation serveur**, et deux écritures dans deux tables
    ont deux confirmations.
+9. **Modifier un champ n'en détruit aucun autre.** Changer l'intention ne touche pas aux priorités
+   déjà parsées, quel que soit l'état du parseur.
 
 ---
 
@@ -345,4 +395,10 @@ Ce que l'implémentation doit rendre testable, dans l'esprit des huit invariants
   commune plus adresse.
 - Le cas multi-communes du tableau 6, joué en entier : lire Lorient, lire La Rochelle, vérifier que
   la relation de l'une n'a pas écrasé l'autre et que le projet n'a pas bougé.
-- Captures desktop et mobile du premier écran dans ses trois contenus.
+- Captures desktop et mobile du premier écran dans ses **quatre** contenus (payant structuré, payant
+  non structuré, payant sans projet, non payant).
+- Mesure du headline déterministe le plus long à 360 px, qui tranche la taille du titre (cf. 5.1).
+- Recette d'un changement d'intention seul, texte inchangé : les priorités et contraintes doivent
+  survivre, y compris parseur indisponible.
+- Vérification que `/rapport#projet` dépose bien le lecteur sur l'éditeur, depuis Territoire et
+  depuis les gestes du hero.
