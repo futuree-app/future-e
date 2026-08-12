@@ -5,7 +5,7 @@
 import Link from "next/link";
 import { Fragment, Suspense } from "react";
 import type { Dossier, DecisionFact, DossierCard } from "@/lib/decision/decision-fact";
-import { ConclusionBlock, planToBlocks } from "@/components/report/ConclusionBlock";
+import { ConclusionBlock, planToBlocks, type NiveauTitre } from "@/components/report/ConclusionBlock";
 import { conditionPorteeParLeBloc, sectionsDeLaMinute, ancresRendues, sectionHorsPriorites, sectionMixte, carteHorsPriorites } from "@/lib/decision/dossier-view";
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 import { FactBody, EvidenceRow, MethodDetails, factSources, factChecks } from "@/components/report/DecisionFactRenderParts";
@@ -93,6 +93,7 @@ export function DossierDecisionSection({
   projetAChange,
   generatedAt,
   espacement = "mt-14",
+  titre,
 }: {
   dossier: Dossier;
   /**
@@ -129,6 +130,13 @@ export function DossierDecisionSection({
    * doit y voir un seul bloc de tête, identité puis réponse.
    */
   espacement?: string;
+  /**
+   * Le niveau et la taille du titre du verdict. Sur `/rapport`, ce verdict EST le titre de l'écran :
+   * la prop traverse les deux branches (repli `pending` et `Suspense`), sans quoi le repli communal
+   * s'afficherait en grand puis le verdict d'adresse, celui qui a été payé, reviendrait en petit au
+   * moment où le streaming se résout.
+   */
+  titre?: NiveauTitre;
 }) {
   const structured = dossier.conclusionState !== "project_not_structured";
 
@@ -202,14 +210,14 @@ export function DossierDecisionSection({
       {/* Le verdict. En « pending », le dossier n'est PAS final (l'augmentation adresse arrive) :
           générer ici coûterait un second appel Sonnet, jeté quelques secondes plus tard. */}
       {logementStatus === "pending" ? (
-        <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} renderedIds={renderedIds} />
+        <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} />
       ) : (
         <Suspense
           fallback={
-            <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} renderedIds={renderedIds} />
+            <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} />
           }
         >
-          <ConclusionRedigee plan={dossier.narrativePlan} insee={insee} scopeKey={scopeKey} condition={conditionEvidence} renderedIds={renderedIds} />
+          <ConclusionRedigee plan={dossier.narrativePlan} insee={insee} scopeKey={scopeKey} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} />
         </Suspense>
       )}
 

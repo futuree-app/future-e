@@ -16,6 +16,7 @@ import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
+import type { NiveauTitre } from "@/components/report/ConclusionBlock";
 import { ControlesDuDossier } from "@/components/report/ControlesDuDossier";
 import type { Dossier, ModuleFacts } from "@/lib/decision/decision-fact";
 import type { EvaluationContext } from "@/lib/hard-constraints";
@@ -25,7 +26,7 @@ import type { PermisSnapshot } from "@/lib/logement-autour-types";
 
 export async function DossierAvecLogement({
   project, address, savedDpe, dpeChoisiLe, permis, communeFacts, communeDossier, logementLink, insee,
-  scopeKey, hard, userId, espacement,
+  scopeKey, hard, userId, espacement, titre,
 }: {
   project: UserProject;
   address: ResolvedAddress;
@@ -59,6 +60,12 @@ export async function DossierAvecLogement({
    * instants plus tard, sauterait de 56 px au moment où le streaming se résout.
    */
   espacement?: string;
+  /**
+   * Le niveau du titre du verdict, transmis tel quel. LE CHEMIN ADRESSE DOIT LE RECEVOIR AUSSI :
+   * sans lui, le repli communal s'afficherait en grand titre de page, puis le verdict d'adresse,
+   * celui qui a été payé, reviendrait en petit au moment où le streaming se résout.
+   */
+  titre?: NiveauTitre;
 }) {
   // L'ARTEFACT PASSE AVANT L'ASSEMBLAGE (05/08/2026).
   // ══════════════════════════════════════════════════════════════════════════════════════════
@@ -136,7 +143,7 @@ export async function DossierAvecLogement({
     <>
       <DossierDecisionSection
         dossier={vue.dossier} logement={logementLink} logementStatus={vue.status}
-        insee={insee} scopeKey={vue.scope} generatedAt={servi.generatedAt} espacement={espacement}
+        insee={insee} scopeKey={vue.scope} generatedAt={servi.generatedAt} espacement={espacement} titre={titre}
         projetAChange={projetAChangeMateriellement(stocke?.artifact?.projectSnapshot ?? null, project)}
         // LA PROVENANCE N'EXISTE QUE S'IL Y A UNE VERSION FIGÉE. Sur un dossier assemblé à
         // l'instant, un lien qui désignerait un artefact enverrait la surface d'arrivée chercher

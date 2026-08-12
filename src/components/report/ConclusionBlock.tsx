@@ -52,12 +52,29 @@ function Eyebrow({ children, color }: { children: React.ReactNode; color: string
   );
 }
 
+/** LE NIVEAU DE TITRE EST UNE PROP, ET NON UNE CONSTANTE (12/08/2026).
+ *  Ce bloc est rendu par la page `/rapport` (où il est LE titre de l'écran), par les quatre
+ *  chemins de `ConclusionRedigee`, et par la galerie `/dev/conclusion`, qui en affiche plusieurs.
+ *  Le figer en `h1` ferait apparaître plusieurs titres de page dans la galerie. Le défaut reste
+ *  donc le comportement actuel, et seule la page qui SAIT qu'il est son titre le promeut.
+ *
+ *  Promouvoir la seule BALISE ne suffisait pas : en `--text-section` (19 à 23 px), la réponse
+ *  restait plus petite que les titres de section situés plus bas (`--text-title`, 23 à 31 px). La
+ *  taille voyage donc avec le niveau. */
+export type NiveauTitre = { niveau: "h1" | "h2"; classe: string };
+
+const TITRE_DEFAUT: NiveauTitre = {
+  niveau: "h2",
+  classe: "text-[length:var(--text-section)] font-[var(--weight-section)] tracking-[-0.4px]",
+};
+
 export function ConclusionBlock({
-  plan, blocks, condition: conditionEvidence = null, renderedIds = [],
+  plan, blocks, condition: conditionEvidence = null, renderedIds = [], titre = TITRE_DEFAUT,
 }: {
   plan: ConclusionNarrativePlan;
   blocks: RenderedBlock[];
   condition?: ConditionEvidence | null;
+  titre?: NiveauTitre;
   // Les cartes rendues sous ce bloc, pour n'activer un renvoi que vers ce qui existe (cf.
   // PriorityControlActions). Vide par défaut : sans elles, les démarches restent du texte.
   renderedIds?: string[];
@@ -100,12 +117,17 @@ export function ConclusionBlock({
           l'usage prévu de l'exception de la doctrine de largeur (un titre de hero mesuré en espace
           ouvert) : une phrase de héros qui traverse toute la carte perd son impact. Il ne s'applique
           JAMAIS aux paragraphes. */}
-      <h2
-        className="font-[var(--weight-section)] text-[length:var(--text-section)] leading-[1.2] tracking-[-0.4px] text-label max-w-[540px]"
-        style={{ fontFamily: "var(--font-serif)" }}
-      >
-        {bindOrphans(plan.verdict.headline.text)}
-      </h2>
+      {(() => {
+        const T = titre.niveau;
+        return (
+          <T
+            className={`${titre.classe} leading-[1.2] text-label max-w-[540px]`}
+            style={{ fontFamily: "var(--font-serif)" }}
+          >
+            {bindOrphans(plan.verdict.headline.text)}
+          </T>
+        );
+      })()}
 
       {/* Le détail : construit AVEC le headline, jamais une troncature de lui. */}
       {detail ? (

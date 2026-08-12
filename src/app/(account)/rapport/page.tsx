@@ -54,6 +54,15 @@ const MODULE_GRAIN: Record<string, string> = {
   logement: "Le bâtiment",
 };
 
+// LE VERDICT EST LE TITRE DE CET ÉCRAN (12/08/2026), aux TROIS points de montage : le repli
+// communal du Suspense, le chemin adresse et le chemin commune seule. En oublier un ferait changer
+// la taille du titre au moment où le streaming se résout. La taille voyage avec la balise :
+// promouvoir le seul <h1> aurait laissé la réponse plus petite que les titres de section sous elle.
+const TITRE_VERDICT = {
+  niveau: "h1" as const,
+  classe: "text-[length:var(--text-display)] font-[var(--weight-display)] tracking-[-0.8px]",
+};
+
 const MODULE_BENEFIT: Record<string, string> = {
   autour: "Commerces, école, gare, espace vert, chaleur du quartier, place de la voiture. Ce qui se mesure autour du point, et pas à l'échelle de la commune.",
   logement: "Diagnostic, confort d'été, sol de la parcelle, sinistres indemnisés. Et, pour finir, ce qu'il reste à demander avant de décider.",
@@ -390,6 +399,7 @@ export default async function RapportPage() {
                     provenance={provenanceCommune}
                     projetAChange={projetCommuneAChange}
                     espacement="mt-6"
+                    titre={TITRE_VERDICT}
                   />
                   <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
                 </>
@@ -411,6 +421,7 @@ export default async function RapportPage() {
                 hard={communeResult.hard}
                 userId={user.id}
                 espacement="mt-6"
+                titre={TITRE_VERDICT}
               />
             </Suspense>
           ) : (
@@ -428,6 +439,7 @@ export default async function RapportPage() {
                 provenance={provenanceCommune}
                 projetAChange={projetCommuneAChange}
                 espacement="mt-6"
+                titre={TITRE_VERDICT}
               />
               <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
             </>
