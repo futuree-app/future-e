@@ -229,7 +229,6 @@ export default async function RapportQuartierPage(
           {inseeCode && (
             <div className="mb-4">
               <ReportRelationBanner
-                insee={inseeCode}
                 relation={effectiveRelation}
                 communeName={displayName}
               />
