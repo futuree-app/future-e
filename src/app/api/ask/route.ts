@@ -10,8 +10,8 @@
 // ════════════════════════════════════════════════════════════════════════════
 
 import Anthropic from "@anthropic-ai/sdk";
-import { canAccessTerritory } from "@/lib/active-territory";
-import { communeParent } from "@/lib/plm";
+import { canAccessTerritory, loadTerritoryClaims } from "@/lib/active-territory";
+import { quotaQuestions } from "@/lib/territory-claims";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { deriveCategories } from "@/lib/commune-categories";
@@ -571,25 +571,12 @@ export async function POST(request: NextRequest) {
     }
 
     if (plan === "one_shot") {
-      // Pool unique proportionnel aux droits : 3 questions par territoire débloqué, comptées
-      // globalement. Un rapport seul = 3, un Pack Décision (3 grants) = 9, en un seul compteur.
-      // Plancher de 3 (résidence sans grant).
-      //
-      // LES DOSSIERS COMPTENT AUSSI (revue du 11/08/2026). Le calcul ne regardait que les grants,
-      // et l'achat d'un dossier d'adresse n'en crée aucun : deux dossiers à 39 € donnaient trois
-      // questions au total, quand le commentaire en promet trois par territoire. Le plancher
-      // masquait le défaut pour le premier achat, jamais pour le second.
-      //
-      // On compte les COMMUNES distinctes, pas les lignes : deux appartements du même immeuble sont
-      // deux dossiers légitimes et un seul territoire, et le quota parle de territoires.
-      const [{ count: grantCount }, { data: dossiersOuverts }] = await Promise.all([
-        supabase.from("report_grants").select("insee", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("address_dossiers").select("insee").eq("user_id", user.id).is("access_revoked_at", null),
-      ]);
-      const communesDeDossiers = new Set(
-        (dossiersOuverts ?? []).map((d) => communeParent(String((d as { insee: string }).insee))),
-      );
-      const quota = 3 * Math.max(1, (grantCount ?? 0) + communesDeDossiers.size);
+      // Pool unique proportionnel aux droits : trois questions par TERRITOIRE débloqué, comptées
+      // globalement. Le calcul vit dans `territory-claims`, avec ses tests, et il est partagé par
+      // cette route ET par les deux points de montage d'AskFuture : un quota calculé à deux
+      // endroits est un quota qui diverge, ce qui venait justement d'arriver (l'API en autorisait
+      // six pendant que l'écran masquait le formulaire au bout de trois).
+      const quota = quotaQuestions(await loadTerritoryClaims(supabase, user.id));
       const { count: askedCount } = await supabase
         .from("ask_conversations")
         .select("id", { count: "exact", head: true })

@@ -38,3 +38,42 @@ export function decideTerritoryAccess(claims: TerritoryClaim[], insee: string): 
 export function decidePaidTerritory(claims: TerritoryClaim[], insee: string): boolean {
   return claims.some((c) => sameCommune(c.insee, insee) && (c.kind === "grant" || c.paid));
 }
+
+// ════════════════════════════════════════════════════════════════════════════
+// LE QUOTA DE QUESTIONS D'ASKFUTURE, calculé UNE fois pour tout le produit.
+//
+// ── DEUX DÉFAUTS QUE CE CALCUL FERME (revue du 11/08/2026) ─────────────────
+// Le compte se faisait sur les seuls `report_grants`, dans la route. Or l'achat
+// d'un dossier d'adresse n'en crée aucun : deux dossiers à 39 € donnaient trois
+// questions au total, quand la règle en promet trois par territoire. Le plancher
+// masquait le défaut sur le premier achat, jamais sur le second.
+//
+// Puis, en ajoutant les dossiers, `grants + dossiers` comptait DEUX FOIS une
+// commune possédée des deux façons : c'est le parcours normal, Territoire à 14 €
+// puis extension d'adresse à 25 €, qui doublait son quota.
+//
+// La bonne unité est le TERRITOIRE, pas la revendication. On déduplique donc au
+// grain commune, ce que `sameCommune` fait déjà pour l'accès : deux appartements
+// d'un même immeuble sont deux dossiers légitimes et un seul territoire, et un
+// arrondissement parisien n'est pas un territoire de plus.
+//
+// ── POURQUOI ICI, ET PAS DANS LA ROUTE ────────────────────────────────────
+// L'API décidait seule, et les deux points de montage d'AskFuture envoyaient un
+// plafond de 3 en dur au composant : l'interface masquait donc le formulaire
+// alors que l'API aurait répondu. Un quota calculé à deux endroits est un quota
+// qui diverge ; celui-ci est pur, testable, et partagé par les trois appelants.
+// ════════════════════════════════════════════════════════════════════════════
+
+/** Questions offertes par territoire débloqué, plan `one_shot`. */
+export const QUESTIONS_PAR_TERRITOIRE = 3;
+
+/**
+ * Le nombre de questions d'un compte `one_shot`.
+ *
+ * Plancher à un territoire : la résidence ouvre le gratuit sans qu'on ait rien
+ * acheté, et un compte sans revendication garde donc ses trois questions.
+ */
+export function quotaQuestions(claims: TerritoryClaim[]): number {
+  const territoires = new Set(claims.map((c) => communeParent(c.insee)));
+  return QUESTIONS_PAR_TERRITOIRE * Math.max(1, territoires.size);
+}

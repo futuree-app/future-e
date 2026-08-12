@@ -1,15 +1,16 @@
 // Server Component : charge la commune et le plan utilisateur, puis monte
 // AskFuture uniquement pour les comptes payants.
 // — free          : pas de widget
-// — one_shot      : 3 questions au total (comptées dans ask_conversations)
+// — one_shot      : 3 questions par TERRITOIRE débloqué (cf. quotaQuestions), comptées dans
+//                   ask_conversations
 // — suivi / foyer : illimité
 
 import { createClient } from "@/lib/supabase/server";
-import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
+import { resolveReadableTerritory, TERRITORY_SELECT, loadTerritoryClaims } from "@/lib/active-territory";
+import { quotaQuestions } from "@/lib/territory-claims";
 import { contexteDeLecture } from "@/lib/server/contexte-de-lecture";
 import { AskFuture } from "./AskFuture";
 
-const ONE_SHOT_QUOTA = 3;
 
 export async function AskFutureMount() {
   const supabase = await createClient();
@@ -55,7 +56,12 @@ export async function AskFutureMount() {
   let questionsMax: number | null = null;
 
   if (plan === "one_shot") {
-    questionsMax = ONE_SHOT_QUOTA;
+    // LE MÊME QUOTA QUE L'API, calculé par la même fonction (revue du 11/08/2026). Ce plafond était
+    // écrit en dur à 3 : l'API en autorisait six ou neuf selon les territoires possédés, et l'écran
+    // masquait quand même le formulaire au bout de trois questions. Un quota calculé à deux
+    // endroits est un quota qui diverge, et c'est l'écran qui gagne, puisque c'est lui que le
+    // lecteur croit.
+    questionsMax = quotaQuestions(await loadTerritoryClaims(supabase, user.id));
     const { count } = await supabase
       .from("ask_conversations")
       .select("id", { count: "exact", head: true })
