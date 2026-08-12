@@ -1,8 +1,8 @@
 # Passation : 2026-08-12, branche `main`
 
-**Horodatage** : 2026-08-12, soirée · **Branche** : `main` = `88c7cbc`, **5 commits non poussés**
-(tous de la documentation : spec et plan du chantier 6). Production déployée depuis `2756ccd`
-(build `future-3u6rfjuix`, Ready).
+**Horodatage** : 2026-08-12, fin de session · **Branche** : `main`, **tout est poussé, rien en
+attente**. Production déployée depuis `2756ccd` (build `future-3u6rfjuix`, Ready) ; les commits
+postérieurs sont documentaires et ne changent rien à ce qui tourne.
 
 > **Le chantier 5 est CLOS, poussé et déployé.** Le chantier 6 (premier écran) est **spécifié et
 > planifié, pas commencé** : aucune ligne de code applicatif n'a été écrite pour lui. La reprise
@@ -85,8 +85,10 @@ sur le plan), tous traités.
 
 ## État git
 
-- `main` = `88c7cbc`, **5 commits en avance sur `origin/main`** : `00a0ebf`, `83223aa`, `89882e0`,
-  `f32725e`, `88c7cbc`. Tous documentaires (spec, plan, ce brief mis à jour).
+- `main` = `origin/main`. **Rien en attente, rien à pousser** : la session s'est arrêtée ici
+  volontairement, après la planification et avant la première ligne de code du chantier 6.
+- Les sept derniers commits sont documentaires (spec, plan, ce brief). Le dernier commit de CODE est
+  `2756ccd`, le durcissement du chantier 5, déjà en production.
 - Aucun fichier applicatif modifié. `git status` propre hors non-suivis.
 - Non suivis, volontairement hors dépôt : `CHARTE/`, `.impeccable/`, `Futur.e Design System.zip`.
 - Aucune PR ouverte. Un push sur `main` déploie, **sans étape Preview**.
@@ -99,6 +101,10 @@ sur le plan), tous traités.
 
 **Exécuter le plan `docs/superpowers/plans/2026-08-12-premier-ecran-decision.md`, tâche par tâche,
 en commençant par la Task 1.**
+
+Rien à récupérer, rien à rebaser, aucun travail en cours à retrouver : la session précédente s'est
+arrêtée nette après la planification, tout est poussé, l'arbre de travail est propre. Le premier
+geste est d'écrire le test de la Task 1.
 
 Le plan est autoportant : chaque tâche liste ses fichiers, son code, ses commandes de vérification et
 son message de commit. Deux modes possibles, au choix du porteur : un sous-agent neuf par tâche avec
