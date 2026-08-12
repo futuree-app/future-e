@@ -6,7 +6,6 @@ import { PRODUCT_MODULES, MODULE_HREF } from "@/lib/product";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
 import { resolveReadableTerritory, TERRITORY_SELECT, canAccessTerritory } from "@/lib/active-territory";
 import { TrackedModuleLink, TrackedUpgradeLink } from "./RapportTrackedLinks";
-import HorizonBar from "@/components/report/HorizonBar";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
 import { RapportPremiereLecture } from "@/components/wizard/RapportPremiereLecture";
 import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
@@ -447,92 +446,43 @@ export default async function RapportPage() {
           </Link>
         ) : null}
 
-        {/* ── Hero ── */}
-        {/* La colonne de 400 px n'existe qu'à partir de `lg`. En dessous, le hub des modules passe
-            sous le titre au lieu d'écraser la colonne de lecture à ~200 px. */}
-        <section className={fullReport ? "grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-10 lg:gap-16 items-start py-14 lg:py-20" : "py-14 lg:py-20"}>
-          <div>
+        {/* ── CADRAGE CLIMAT, EN TÊTE UNIQUEMENT QUAND RIEN NE LE PRÉCÈDE ─────────────────
+            En NON payant, cette promesse EST le haut de page : elle garde son <h1> et son CTA
+            d'achat, et rien ne la double, puisqu'il n'y a ni en-tête de dossier ni section de
+            modules ouverte. En payant, elle descend au niveau des modules dont elle est le sujet
+            (plus bas), sous la réponse achetée.
+
+            LA BARRE D'HORIZON A QUITTÉ LE HUB (12/08/2026). `useHorizon` n'est consommé que par
+            `QuartierSynthesis` et `QuartierClimatData`, donc par le module Territoire. Le clic
+            n'était pas sans effet (il persiste la préférence, que Territoire relit), mais RIEN ne
+            bougeait sous les yeux du lecteur, et le réglage occupait la place de ce qu'il avait
+            acheté. Territoire porte son propre sélecteur inline : le choix n'est pas perdu. Le
+            paragraphe ci-dessous ne dit donc plus « Choisissez un horizon », consigne devenue
+            impossible à suivre sur cette page. */}
+        {heroContenu.kind === "commercial" ? (
+          <section className="py-14 lg:py-20">
             <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-accent mb-5">
               <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
-              {fullReport ? "Dossier" : "Dossier partiel"}
+              Dossier partiel
             </div>
-
-            <>
-              <h1 className="font-[var(--weight-display)] text-[length:var(--text-display)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
-                {displayName} en 2030, 2050, 2100.<br />
-                <span className="italic text-accent">Ce que ça change pour vous.</span>
-              </h1>
-              {/* « Six angles » a été retiré le 30/07/2026. Le hero annonçait six angles, la section
-                  suivante trois échelles, et les cartes « Module 01 » : trois décomptes pour un
-                  seul produit. Le rang porte désormais l'identité des échelles, donc il doit être
-                  juste. La phrase parle du lieu et de l'horizon, sans compter quoi que ce soit. */}
-              <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[500px]">
-                Ce que le changement climatique fait concrètement à votre quotidien ici. Choisissez un horizon. Les données s&apos;adaptent quand c&apos;est possible.
-              </p>
-              <div className="flex gap-3 flex-wrap">
-                {fullReport ? (
-                  /* CTA neutre, et c'est une règle : dans le rapport, l'orange est le registre
-                     « compromis » du dossier de décision. Un bouton de navigation qui le porte ferait
-                     dire deux choses à la même teinte sur le même écran (DESIGN.md § 5.4). */
-                  <Link href="#modules" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-3)] text-label font-semibold text-[14px] no-underline border border-[var(--border-2)] hover:bg-[var(--bg-elev-3)] transition-colors" style={{ fontFamily: "var(--font-sans)" }}>
-                    {openModules.length === 1 ? "Lire le territoire" : "Voir mes trois échelles"}
-                  </Link>
-                ) : (
-                  <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "var(--font-sans)" }}>
-                    Ouvrir le dossier
-                  </Link>
-                )}
-                <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">
-                  Mon compte
-                </Link>
-              </div>
-            </>
-          </div>
-
-          {/* Panel hub des modules — payant uniquement. En gratuit, les signaux
-              réels sont portés par la première lecture plus bas (pas de doublon). */}
-          {fullReport && (
-            <aside className="glass rounded-2xl p-7 relative overflow-hidden">
-              <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">
-                {openModules.length === 1 ? "1 échelle ouverte" : `${openModules.length} échelles ouvertes`}
-              </p>
-              <h2 className="font-normal text-[22px] leading-[1.2] text-label mb-5 tracking-[-0.3px]" style={{ fontFamily: "var(--font-serif)" }}>
-                Dossier · {displayName}
-              </h2>
-              {/* SOMMAIRE NUMÉROTÉ, NEUTRE. Chaque ligne mène quelque part, et le rang porte
-                  l'identité de l'échelle à la place de la couleur et de l'emoji retirés. */}
-              <div className="flex flex-col">
-                {openModules.map((m, i) => (
-                  <TrackedModuleLink
-                    key={m.id}
-                    href={hrefModule(m.id)}
-                    moduleId={m.id}
-                    commune={displayName}
-                    inseeCode={inseeCode}
-                    className="flex items-baseline gap-3.5 py-3 no-underline border-t border-[var(--border-1)] first:border-t-0 group"
-                  >
-                    <span className="font-mono text-[11px] text-ghost tabular-nums shrink-0">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span className="text-[14px] text-label font-medium">{m.name}</span>
-                    <span className="ml-auto text-[13px] text-ghost group-hover:text-label transition-colors shrink-0">
-                      Ouvrir <span aria-hidden>→</span>
-                    </span>
-                  </TrackedModuleLink>
-                ))}
-              </div>
-              {/* Une seule phrase quand les deux échelles fines ne sont pas ouvertes, à la place de
-                  deux fausses lignes verrouillées qui feraient passer un produit payé pour un
-                  produit incomplet. */}
-              {openModules.length === 1 && (
-                <p className="text-[13px] leading-[1.6] text-muted mt-4 pt-4 border-t border-[var(--border-1)]">
-                  Le secteur autour d&apos;une adresse et le logement lui-même demandent l&apos;analyse
-                  d&apos;une adresse précise.
-                </p>
-              )}
-            </aside>
-          )}
-        </section>
+            <h1 className="font-[var(--weight-display)] text-[length:var(--text-display)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
+              {displayName} en 2030, 2050, 2100.<br />
+              <span className="italic text-accent">Ce que ça change pour vous.</span>
+            </h1>
+            <p className="text-[17px] leading-[1.72] text-muted mb-9">
+              Ce que le changement climatique fait concrètement à votre quotidien ici, à trois
+              horizons. Les données s&apos;adaptent quand c&apos;est possible.
+            </p>
+            <div className="flex gap-3 flex-wrap">
+              <Link href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "var(--font-sans)" }}>
+                Ouvrir le dossier
+              </Link>
+              <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">
+                Mon compte
+              </Link>
+            </div>
+          </section>
+        ) : null}
 
         <div className="border-t border-[var(--border-1)]" />
 
@@ -542,20 +492,40 @@ export default async function RapportPage() {
           </div>
         )}
 
-        <div id="horizon">
-          <HorizonBar
-            communeName={displayName}
-            locked={!fullReport}
-            inseeCode={inseeCode}
-          />
-        </div>
-
-        {/* ── Votre projet : Section 1 « ce que nous avons compris », éditable ── */}
-        <div className="mt-12">
+        {/* ── Votre projet : la SEULE surface d'édition du cadrage ──────────────────────────
+            L'ÉDITEUR EST UNE DESTINATION. Tout geste qui renvoie au cadrage pointe vers
+            `/rapport#projet` : le « modifier » de l'en-tête, le bouton des états sans verdict, et le
+            lien du module Territoire. `scroll-mt-24` évite que l'ancre passe sous la navbar, comme
+            pour les ancres de cartes du dossier. */}
+        <div id={ANCRE_PROJET} className="scroll-mt-24 mt-12">
           <ProjectSummaryCard initial={userProject} />
         </div>
 
-        <div className="border-t border-[var(--border-1)] mt-14" />
+        {/* ── CADRAGE CLIMAT, DESCENDU AU NIVEAU DES MODULES DONT IL EST LE SUJET ────────────
+            Il était le plus grand texte de l'écran, au-dessus de la réponse achetée : un cadrage
+            sans réponse en tête d'un dossier payé. En <h2>, il ouvre la section des échelles, qu'il
+            introduit réellement.
+
+            LE PANNEAU COMPACT DES ÉCHELLES A DISPARU : il répétait le mot « Dossier » que l'en-tête
+            porte désormais, et listait les modules quelques centimètres au-dessus de la section
+            `#modules`, qui les liste avec plus de contexte. */}
+        {heroContenu.kind !== "commercial" ? (
+          <section className="mt-14 pt-14 border-t border-[var(--border-1)]">
+            <h2 className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.18] tracking-[-0.5px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
+              {displayName} en 2030, 2050, 2100.<br />
+              <span className="italic text-accent">Ce que ça change pour vous.</span>
+            </h2>
+            {/* Le CTA « Voir mes trois échelles » est tombé avec le déplacement : il pointait vers
+                `#modules`, qui commence maintenant quelques lignes plus bas. Un bouton d'ancre vers
+                le bloc immédiatement suivant ne fait rien avancer. */}
+            <p className="text-[17px] leading-[1.72] text-muted">
+              Ce que le changement climatique fait concrètement à votre quotidien ici, à trois
+              horizons. Les données s&apos;adaptent quand c&apos;est possible.
+            </p>
+          </section>
+        ) : (
+          <div className="border-t border-[var(--border-1)] mt-14" />
+        )}
 
         {/* ── Vue gratuite : la première lecture post-wizard ── */}
         {!fullReport && (
