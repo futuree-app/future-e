@@ -92,6 +92,7 @@ export function DossierDecisionSection({
   provenance,
   projetAChange,
   generatedAt,
+  espacement = "mt-14",
 }: {
   dossier: Dossier;
   /**
@@ -122,6 +123,12 @@ export function DossierDecisionSection({
    * jamais seul, l'analyse achetée répondant à une autre question.
    */
   projetAChange?: boolean;
+  /**
+   * L'air AU-DESSUS de la section. `mt-14` quand elle suit d'autres blocs (comportement
+   * historique), resserré quand elle est la suite immédiate de l'en-tête du dossier : le lecteur
+   * doit y voir un seul bloc de tête, identité puis réponse.
+   */
+  espacement?: string;
 }) {
   const structured = dossier.conclusionState !== "project_not_structured";
 
@@ -147,7 +154,7 @@ export function DossierDecisionSection({
   const renderedIds = ancresRendues(dossier);
 
   return (
-    <section className="mt-14" id="dossier-decision">
+    <section className={espacement} id="dossier-decision">
       {/* LARGEUR DE LECTURE : QUESTION OUVERTE. Une colonne de 860 px a été essayée puis retirée :
           la page entière fait 1044 px utiles, et rien d'autre ne partageait cette largeur, si bien que
           le bloc se lisait comme un élément mal aligné plutôt que comme une colonne éditoriale. La
@@ -156,25 +163,22 @@ export function DossierDecisionSection({
       {/* Le titre « {Commune}, au regard de votre projet. » a disparu : le plus grand texte de l'écran
           était un cadrage sans réponse, posé au-dessus d'un verdict deux fois plus petit. Le nom de la
           commune est tissé dans le headline, qui porte désormais le <h2> de la section. */}
-      <div className="mb-7">
-        <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-accent">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
-          En une minute
-        </div>
-        {/* LA DATE DE LA DÉCISION, ET C'EST TOUT L'ENJEU DU LOT (05/08/2026).
-            Le dossier se réécrivait à chaque ouverture sans que rien ne le dise. Il est maintenant
-            figé au jour de l'achat, et cette ligne est la seule chose qui rende ce figement VISIBLE.
-            Sans elle, le lecteur ne saurait toujours pas ce qu'il lit, et le lot n'aurait corrigé
-            qu'une moitié du défaut.
+      {/* L'EYEBROW « EN UNE MINUTE » A DISPARU (12/08/2026) : il nommait une section au milieu d'une
+          page, or cette section est devenue la page. Le cadre (« Dossier », le bien lu, le projet
+          actuel) est porté par `EnTeteDossier`, au-dessus du `Suspense`.
 
-            Elle ne s'affiche que quand un artefact existe : l'inventer pour un dossier réassemblé à
-            l'instant daterait d'aujourd'hui une lecture qui n'a pas d'âge. */}
-        {generatedAt && dateFr(generatedAt) ? (
-          <p className="mt-2 font-mono text-[11px] text-ghost">
-            Analyse générée le {dateFr(generatedAt)}
-          </p>
-        ) : null}
-      </div>
+          LA DATE, ELLE, RESTE ICI, ET C'EST STRUCTUREL. Elle qualifie la version SERVIE, qui n'est
+          connue qu'après la lecture de l'artefact de CE scope. La page ne connaît que l'artefact
+          communal : remonter cette date daterait un verdict d'adresse avec la date d'un autre
+          artefact. Même raison pour le bandeau d'obsolescence juste dessous.
+
+          Elle ne s'affiche que quand un artefact existe : l'inventer pour un dossier réassemblé à
+          l'instant daterait d'aujourd'hui une lecture qui n'a pas d'âge. */}
+      {generatedAt && dateFr(generatedAt) ? (
+        <p className="mb-5 font-mono text-[11px] text-ghost">
+          Analyse générée le {dateFr(generatedAt)}
+        </p>
+      ) : null}
 
       {/* L'ANALYSE RÉPOND À UN PROJET QUI N'EST PLUS CELUI DU LECTEUR. Dire avant de montrer : la
           suite de l'écran s'interprète autrement selon qu'on lit une réponse actuelle ou une
