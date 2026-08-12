@@ -54,7 +54,20 @@ export async function AskFutureInlineMount({ suggestions, placeholder }: Props) 
     // masquait quand même le formulaire au bout de trois questions. Un quota calculé à deux
     // endroits est un quota qui diverge, et c'est l'écran qui gagne, puisque c'est lui que le
     // lecteur croit.
-    questionsMax = quotaQuestions(await loadTerritoryClaims(supabase, user.id));
+    // ── UNE PANNE DE QUOTA NE FAIT PAS TOMBER LE RAPPORT (revue du 11/08/2026) ───────────────
+    // `loadTerritoryClaims` LÈVE quand une des deux tables ne répond pas, et c'est la bonne
+    // décision là où elle gouverne un droit : une liste vide obtenue par panne fermerait le
+    // Territoire d'un acheteur légitime. Ici, elle ne gouverne qu'un compteur de questions, sur un
+    // widget secondaire. La laisser remonter ferait disparaître le rapport entier, payé, pour un
+    // incident sur son accessoire.
+    //
+    // Le widget se masque, l'incident se journalise. Personne ne perd ce qu'il a acheté.
+    try {
+      questionsMax = quotaQuestions(await loadTerritoryClaims(supabase, user.id));
+    } catch (error) {
+      console.error("[askfuture] quota indisponible, widget masqué", { userId: user.id, error });
+      return null;
+    }
     const { count } = await supabase
       .from("ask_conversations")
       .select("id", { count: "exact", head: true })

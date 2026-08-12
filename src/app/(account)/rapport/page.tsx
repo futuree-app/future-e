@@ -25,6 +25,7 @@ import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifac
 import { after } from "next/server";
 import { communeParent } from "@/lib/plm";
 import { choisirDossierActif } from "@/lib/dossier-actif";
+import { projetAChangeMateriellement } from "@/lib/decision/projet-materiel";
 import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 import { Logo } from "@/components/Logo";
@@ -182,6 +183,11 @@ export default async function RapportPage() {
   // L'identité de l'artefact servi, portée par les liens « Preuve » du dossier communal. Absente
   // quand le dossier est assemblé à l'instant : il n'y a alors aucune version figée à désigner.
   const provenanceCommune = servi.source === "artefact" ? "commune" : undefined;
+  // L'ANALYSE RÉPOND-ELLE ENCORE AU PROJET DU LECTEUR ? Comparaison SÉMANTIQUE avec le projet figé
+  // dans l'artefact : les dates ne disent rien ici, `updatedAt` bougeant sur une faute de frappe.
+  const projetCommuneAChange = projetAChangeMateriellement(
+    artefactCommune?.artifact?.projectSnapshot ?? null, userProject,
+  );
   // LES LIENS DES MODULES D'ADRESSE PORTENT LE BIEN LU (11/08/2026).
   //
   // Ils étaient génériques (`/rapport/autour`, `/rapport/logement`). Tant qu'un compte n'avait qu'un
@@ -479,6 +485,7 @@ export default async function RapportPage() {
                     scopeKey="commune"
                     generatedAt={dossierGenereLe}
                     provenance={provenanceCommune}
+                    projetAChange={projetCommuneAChange}
                   />
                   <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
                 </>
@@ -514,6 +521,7 @@ export default async function RapportPage() {
                 scopeKey="commune"
                 generatedAt={dossierGenereLe}
                 provenance={provenanceCommune}
+                projetAChange={projetCommuneAChange}
               />
               <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
             </>

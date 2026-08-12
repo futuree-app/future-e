@@ -8,6 +8,7 @@
 import { assembleAddressDossier } from "@/lib/server/assemble-address-dossier";
 import { readLatestArtifact } from "@/lib/server/decision-artifact-store";
 import { dossierAServir, artefactPerimeParLeDpe } from "@/lib/decision/decision-artifact";
+import { projetAChangeMateriellement } from "@/lib/decision/projet-materiel";
 import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
 import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
@@ -113,6 +114,7 @@ export async function DossierAvecLogement({
       <DossierDecisionSection
         dossier={vue.dossier} logement={logementLink} logementStatus={vue.status}
         insee={insee} scopeKey={vue.scope} generatedAt={servi.generatedAt}
+        projetAChange={projetAChangeMateriellement(stocke?.artifact?.projectSnapshot ?? null, project)}
         // LA PROVENANCE N'EXISTE QUE S'IL Y A UNE VERSION FIGÉE. Sur un dossier assemblé à
         // l'instant, un lien qui désignerait un artefact enverrait la surface d'arrivée chercher
         // une preuve qui n'a jamais été vendue.

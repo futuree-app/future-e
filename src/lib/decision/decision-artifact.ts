@@ -186,6 +186,14 @@ export type StoredArtifact = {
   generatedAt: string | null;
   /** Nul quand le statut n'est pas `ready`, ou quand le contenu ne s'est pas relu. */
   artifact: DecisionArtifactV1 | null;
+  /**
+   * Le numéro d'une version plus récente qui n'est PAS servable (en cours de génération, ou en
+   * échec), quand la version servie n'est pas la dernière. `null` le reste du temps.
+   *
+   * Sert à deux choses : ne pas relancer une génération déjà en cours, et ne pas laisser croire que
+   * ce qu'on affiche est la dernière lecture produite.
+   */
+  versionPlusRecente?: number | null;
 };
 
 /**

@@ -28,24 +28,41 @@ export type { ArtifactStatus, StoredArtifact };
 export async function readLatestArtifact(
   sb: SupabaseClient, userId: string, insee: string, scopeKey: string,
 ): Promise<StoredArtifact | null> {
+  // ── ON SERT LA DERNIÈRE VERSION *SERVABLE*, PAS LA DERNIÈRE VERSION (11/08/2026) ────────────
+  // Cette lecture prenait la version MAX, quel que soit son statut. Depuis qu'une v2 peut naître
+  // (diagnostic déposé, projet modifié), une génération en cours ou échouée devenait la version
+  // lue : `artifact` valait `null`, l'appelant retombait sur l'assemblage vivant, et le lecteur
+  // PERDAIT la version qu'il avait achetée le temps de l'incident. Une version prête ne se réécrit
+  // jamais ; elle ne doit pas non plus se laisser masquer.
   const { data, error } = await sb
     .from("decision_artifact")
     .select("version, status, generated_at, payload")
     .eq("user_id", userId).eq("insee_code", insee).eq("scope_key", scopeKey)
     .order("version", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(5);
   if (error) throw error;
-  if (!data) return null;
+  const lignes = data ?? [];
+  if (lignes.length === 0) return null;
+
+  const servable = lignes.find(
+    (l) => l.status === "ready" && parseDecisionArtifact(l.payload) !== null,
+  );
+  // Aucune version servable : on rend la plus récente telle quelle, pour que l'appelant sache qu'il
+  // y a eu une tentative (et la distingue d'un dossier qui n'a jamais eu d'artefact).
+  const retenue = servable ?? lignes[0]!;
+  const maxVersion = lignes[0]!.version as number;
 
   return {
-    version: data.version as number,
-    status: data.status as ArtifactStatus,
-    generatedAt: (data.generated_at as string | null) ?? null,
+    version: retenue.version as number,
+    status: retenue.status as ArtifactStatus,
+    generatedAt: (retenue.generated_at as string | null) ?? null,
     // UN PAYLOAD ILLISIBLE N'EST PAS UNE ERREUR, c'est un artefact d'un autre contrat. Il rend
     // `null`, l'appelant retombe sur l'assemblage vivant, et le lecteur voit un dossier plutôt
     // qu'une page en échec.
-    artifact: data.status === "ready" ? parseDecisionArtifact(data.payload) : null,
+    artifact: retenue.status === "ready" ? parseDecisionArtifact(retenue.payload) : null,
+    // Une version plus récente existe sans être servable : elle se génère, ou elle a échoué. Sert à
+    // ne pas relancer une génération déjà en cours, et à ne pas prétendre que la lecture est à jour.
+    versionPlusRecente: maxVersion > (retenue.version as number) ? maxVersion : null,
   };
 }
 

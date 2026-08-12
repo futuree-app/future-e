@@ -10,6 +10,7 @@ import { conditionPorteeParLeBloc, sectionsDeLaMinute, ancresRendues, sectionHor
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 import { FactBody, EvidenceRow, MethodDetails, factSources, factChecks } from "@/components/report/DecisionFactRenderParts";
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
+import { AnalyseAncienProjet } from "@/components/report/AnalyseAncienProjet";
 import { dossierAnchorId } from "@/lib/decision/dossier-anchors";
 import { dateFr } from "@/lib/decision/autour-permis";
 
@@ -89,6 +90,7 @@ export function DossierDecisionSection({
   insee,
   scopeKey,
   provenance,
+  projetAChange,
   generatedAt,
 }: {
   dossier: Dossier;
@@ -114,6 +116,12 @@ export function DossierDecisionSection({
    * (cf. `evidenceHref`), pour que la surface d'arrivée réaffiche LA donnée vendue.
    */
   provenance?: string;
+  /**
+   * Le projet du lecteur diffère, POUR LA DÉCISION, de celui figé dans cette analyse
+   * (`projetAChangeMateriellement`). L'écran le dit et propose une mise à jour ; il ne recalcule
+   * jamais seul, l'analyse achetée répondant à une autre question.
+   */
+  projetAChange?: boolean;
 }) {
   const structured = dossier.conclusionState !== "project_not_structured";
 
@@ -167,6 +175,13 @@ export function DossierDecisionSection({
           </p>
         ) : null}
       </div>
+
+      {/* L'ANALYSE RÉPOND À UN PROJET QUI N'EST PLUS CELUI DU LECTEUR. Dire avant de montrer : la
+          suite de l'écran s'interprète autrement selon qu'on lit une réponse actuelle ou une
+          réponse d'alors. */}
+      {projetAChange && insee ? (
+        <AnalyseAncienProjet insee={insee} scopeKey={scopeKey} />
+      ) : null}
 
       {logementStatus === "pending" ? (
         <div className="glass rounded-xl p-4 mb-3.5 flex items-center gap-3" style={{ borderLeft: "2px solid var(--info)" }}>
