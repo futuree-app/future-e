@@ -27,7 +27,7 @@
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
 import { LOGEMENT_RULES } from "./logement-rules.ts";
-import { gesteEnPhrase } from "./logement-gestes.ts";
+import { gesteEnPhrase, bucketDuProjet } from "./logement-gestes.ts";
 import type { HardEvaluation, LogementFacts, ModuleFacts, VerificationFact } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 
@@ -52,20 +52,6 @@ export type PointAVerifier = { id: string; text: string };
 const SANS_CONTRAINTES_DURES = {} as HardEvaluation;
 
 /**
- * LA POSTURE, depuis la réponse de la sonde du module.
- *
- * La sonde rend une chaîne (`achat` / `location` / `reside`), le moteur lit un projet
- * (`intent` + `posture`). La conversion vit ici, en un seul endroit, et `bucketDuProjet` fait le
- * reste : le module n'a plus sa propre table de postures.
- */
-function projetDepuisLaSonde(projet: string | null): UserProject {
-  return {
-    intent: projet === "achat" || projet === "location" ? projet : null,
-    posture: projet === "reside" ? "habitant" : null,
-  } as UserProject;
-}
-
-/**
  * Les faits minimaux que les règles Logement lisent : `logement` et `nom`. Les autres champs de
  * `ModuleFacts` décrivent la commune et ne sont touchés par AUCUNE de ces règles — vérifié en les
  * lisant, et verrouillé par un test qui évalue la table complète sur cet objet-ci.
@@ -80,20 +66,35 @@ function faitsMinimaux(logement: LogementFacts): ModuleFacts {
 /**
  * Les points à vérifier pour ce logement, dans cette posture.
  *
+ * LE PROJET VIENT DU COMPTE, PLUS D'UNE SONDE LOCALE (12/08/2026). `projetDepuisLaSonde`
+ * reconstruisait un `UserProject` depuis la réponse d'une sonde qui ne persistait rien et se
+ * reposait à chaque visite. Le compte porte déjà l'objectif et l'intention : on les lit. La
+ * dérivation de posture reste celle de `bucketDuProjet`, appelée par les règles, et ce module n'en
+ * écrit aucune seconde.
+ *
  * Un geste vide (le patrimoine pour un locataire, qui ne fait pas ces travaux) ne produit pas de
  * ligne : la règle l'écarte déjà, et ce filtre garde la garantie même si une table de gestes
  * laisse un libellé vide.
  */
-export function pointsAVerifier(logement: LogementFacts, projet: string | null): PointAVerifier[] {
+export function pointsAVerifier(
+  logement: LogementFacts, project: UserProject | null,
+): PointAVerifier[] {
   const facts = faitsMinimaux(logement);
-  const project = projetDepuisLaSonde(projet);
+  // Sans projet, rien n'est deviné : `bucketDuProjet` rend `neutre` et les règles servent leur
+  // version neutre. Une posture par défaut orienterait une checklist d'achat vers un résident.
+  // `posture: null` n'est pas une valeur du type persisté (`UserProject` exige une posture) : c'est
+  // exactement le sens de « rien n'a été déclaré », que le cast rend explicite. `bucketDuProjet`
+  // rend alors `neutre`, ce que les règles savent servir.
+  const projet = project ?? ({
+    posture: null, intent: null, rawText: null, parsed: null, updatedAt: null,
+  } as unknown as UserProject);
 
   const lignes = LOGEMENT_RULES.flatMap((regle, index) => {
     // Le troisième paramètre porte les CONTRAINTES DURES, qu'aucune règle Logement ne lit : la
     // signature les déclare pour tout le registre, et ces règles-ci les ignorent (elles n'émettent
     // jamais d'incompatibilité, par arbitrage de la slice 1.5). L'objet vide n'est donc jamais
     // déréférencé, et le test qui évalue la table entière le vérifie.
-    const evaluation = regle.evaluate(facts, project, SANS_CONTRAINTES_DURES);
+    const evaluation = regle.evaluate(facts, projet, SANS_CONTRAINTES_DURES);
     if (evaluation.outcome !== "verification") return [];
     return evaluation.facts
       .filter((f): f is VerificationFact => f.role === "verification")
@@ -114,8 +115,9 @@ export function pointsAVerifier(logement: LogementFacts, projet: string | null):
 }
 
 /** L'intro de la liste. Elle change avec la posture, jamais avec le nombre de points. */
-export function introPointsAVerifier(projet: string | null): string {
-  return projet === "achat" || projet === "location" || projet === "reside"
+export function introPointsAVerifier(project: UserProject | null): string {
+  // `neutre` est le seul cas où l'on ne sait rien : on le dit, sans deviner une posture.
+  return bucketDuProjet(project ?? {}) !== "neutre"
     ? "Voici les points que la lecture de ce logement fait remonter, à documenter selon votre projet."
     : "Ces points viennent de la lecture du logement. Votre projet permettra de les rendre plus précis.";
 }

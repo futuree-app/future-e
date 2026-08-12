@@ -16,11 +16,11 @@ import { dpeAttributionStatus, type DpeRecord } from "@/lib/dpe-attribution";
 import { Block, FamilyHeading } from "@/components/report/logement/kit";
 import { IconSeismic, IconStrata, IconCavity, IconLandslide } from "@/components/report/logement/icons";
 import { PropertyPassport } from "@/components/report/logement/PropertyPassport";
-import { ProjectProbe } from "@/components/report/logement/ProjectProbe";
 import { EnergieSection } from "@/components/report/logement/EnergieSection";
 import { SinistraliteBlock } from "@/components/report/logement/SinistraliteSection";
 import { RegulatoryStatusBlock } from "@/components/report/logement/RegulatorySection";
 import { DecisionChecklist } from "@/components/report/logement/DecisionChecklist";
+import type { UserProject } from "@/lib/user-project";
 import { energyState, expositionArgileNotable } from "@/lib/decision/logement-coverage";
 import type { LogementFacts } from "@/lib/decision/decision-fact";
 import { evidenceAnchorId } from "@/lib/decision/evidence-targets";
@@ -69,15 +69,22 @@ export default function LogementModule({
   defaultCommune,
   dossier,
   rehydrateSource = "auto",
+  project,
 }: {
   defaultCommune?: string | null;
   dossier: AddressDossierRow | null;
   rehydrateSource?: "auto" | "deeplink";
+  /**
+   * LE PROJET DU COMPTE, transmis sans conversion (12/08/2026). Le module posait sa propre sonde
+   * (« Que comptez-vous faire de ce logement ? ») à chaque visite, sans jamais persister la réponse,
+   * alors que le compte la connaissait. Une seule fonction dérive la posture, `bucketDuProjet`, et
+   * elle est appelée par les règles : ce composant ne convertit rien.
+   */
+  project: UserProject | null;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ApiResponse | null>(null);
-  const [projet, setProjet] = useState<string | null>(null);
   // Attribution du DPE au logement (cf. spec §2). Aucun DPE affiché comme « le vôtre » tant
   // qu'il n'est pas confirmé (auto ou par l'utilisateur).
   const [dpeStatus, setDpeStatus] = useState<
@@ -121,7 +128,6 @@ export default function LogementModule({
       if (!res.ok) throw new Error(payload.error ?? `Erreur ${res.status}`);
 
       setResult(payload);
-      setProjet(null);
       const candidates = payload.dpeCandidates ?? [];
       setDpeCandidates(candidates);
 
@@ -462,19 +468,14 @@ export default function LogementModule({
 
           {/* Beat 5 — À vérifier avant de décider : et moi, je fais quoi ? */}
           <div style={{ display: "grid", gap: 16 }}>
-            {/* La sonde ne déclenche plus de recalcul d'entourage (il a son module) : elle ne sert
-                plus qu'à ce à quoi elle sert vraiment ici, orienter la checklist par posture. */}
-            <ProjectProbe
-              answered={projet}
-              onAnswer={(v) => {
-                setProjet(v);
-                posthog?.capture("logement_projet_declare", { projet: v, insee: result.address?.citycode ?? null });
-              }}
-            />
+            {/* LA SONDE A DISPARU (12/08/2026) : elle redemandait à chaque visite une réponse que le
+                compte porte déjà, et ne la persistait jamais. L'objectif et l'intention se déclarent
+                au seul endroit qui édite le cadrage, `/rapport#projet`. L'événement PostHog
+                `logement_projet_declare` disparaît avec elle. */}
             {/* Sans la couverture par famille (réponse d'erreur de la route), il n'y a pas de
                 faits à évaluer : le bloc disparaît, plutôt que d'annoncer « aucun point à
                 vérifier » sur la foi d'une absence de données. */}
-            {logementFacts && <DecisionChecklist facts={logementFacts} projet={projet} />}
+            {logementFacts && <DecisionChecklist facts={logementFacts} project={project} />}
           </div>
 
           {/* La sortie d'engagement du module = le beat 5 « À vérifier avant de décider »

@@ -9,6 +9,7 @@ import { choisirDossierActif } from "@/lib/dossier-actif";
 import { MarquerBienActif } from "@/components/report/MarquerBienActif";
 import { communeParent } from "@/lib/plm";
 import { ModuleTracker } from "@/components/ModuleTracker";
+import { normalizeUserProject } from "@/lib/user-project";
 
 export default async function RapportLogementPage({
   searchParams,
@@ -16,11 +17,16 @@ export default async function RapportLogementPage({
   searchParams: Promise<{ dossierId?: string }>;
 }) {
   const { supabase, user } = await requireCurrentUser();
+  // LE PROJET DU COMPTE ENTRE DANS LE MODULE (12/08/2026), à la place de la sonde locale. Il se lit
+  // dans la même requête que le territoire : une colonne de plus, aucun aller-retour de plus.
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select(TERRITORY_SELECT)
+    .select(`${TERRITORY_SELECT}, user_project`)
     .eq("user_id", user.id)
     .maybeSingle();
+  const userProject = normalizeUserProject(
+    (profile as { user_project?: unknown } | null)?.user_project ?? null,
+  );
 
   const territory = await resolveReadableTerritory(supabase, user.id, profile);
 
@@ -93,6 +99,7 @@ export default async function RapportLogementPage({
         defaultCommune={contexte.communeName}
         dossier={loadable ? dossier : null}
         rehydrateSource={targetId ? "deeplink" : "auto"}
+        project={userProject}
       />
     </>
   );
