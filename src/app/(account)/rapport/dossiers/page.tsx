@@ -137,6 +137,29 @@ export default async function RapportDossiersPage() {
                 </div>
               );
             })}
+
+            {/* AJOUTER UN BIEN N'AVAIT AUCUNE PORTE DÈS QU'ON EN POSSÉDAIT UN (13/08/2026).
+                « Analyser une adresse » n'existait que dans l'état VIDE : un compte qui avait déjà
+                un dossier, donc exactement celui qui peut en vouloir un second, ne trouvait ici
+                aucun chemin pour le demander. La liste montrait ce qu'il possède et taisait comment
+                l'agrandir.
+
+                LE PRIX N'EST PAS ANNONCÉ ICI, et c'est la règle de cette page : il vaut 39 € ou
+                25 € selon que le territoire du bien est déjà payé, et `quoteForDossier` ne peut le
+                trancher qu'une fois l'adresse connue. L'écrire ici serait faux une fois sur deux.
+                Le parcours de qualification, lui, connaît l'adresse et affiche le montant exact. */}
+            <div className="rounded-xl p-6" style={{ border: "1px dashed var(--border-2)" }}>
+              <p className="text-[14px] text-muted leading-relaxed mb-4">
+                Un autre bien à examiner ? Chaque dossier porte une adresse précise, et ouvre les
+                trois échelles de sa commune.
+              </p>
+              <Link
+                href="/dossier"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent/[0.12] text-accent text-[length:var(--text-dense)] no-underline border border-accent/[0.25]"
+              >
+                Analyser une autre adresse
+              </Link>
+            </div>
           </div>
         )}
       </div>
