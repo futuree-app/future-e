@@ -339,6 +339,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
+      // CE QUE LE COMPTE SAIT DÉJÀ, RENVOYÉ POUR NE PAS LE REDEMANDER (13/08/2026). L'acheteur
+      // venait de créer son compte avec son nom et son e-mail, et l'écran de paiement les
+      // redemandait à l'identique : Stripe ne connaît pas notre session, et personne ne les lui
+      // avait passés. Ils préremplissent les champs de facturation ; le serveur reste seul maître
+      // de ce qui part sur la facture (`buyerName` ci-dessus), le navigateur ne fixe rien.
+      billing: { name: buyerName, email: user.email ?? null },
     });
   } catch (error) {
     console.error("[stripe/create-payment-intent]", error);

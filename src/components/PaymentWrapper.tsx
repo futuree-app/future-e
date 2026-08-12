@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import posthog from "posthog-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { stripePromise } from "@/lib/stripe-client";
@@ -78,6 +78,9 @@ export function PaymentWrapper({
     phDistinctId: clientDistinctId(),
   });
   const requestKey = requestBody;
+  // Ce que le compte porte déjà (nom, e-mail), renvoyé par le serveur avec le clientSecret : le
+  // formulaire Stripe les préremplit au lieu de les redemander.
+  const [billing, setBilling] = useState<{ name: string | null; email: string | null } | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [clientSecretKey, setClientSecretKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -90,6 +93,49 @@ export function PaymentWrapper({
   const [savingName, setSavingName] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
+
+  // ════════════════════════════════════════════════════════════════════════════════════════════
+  // L'ENCART DE PAIEMENT SUIT LE THÈME DU SITE (13/08/2026).
+  //
+  // Il était figé : `theme: "night"` et trois couleurs écrites en dur, dont un fond `#12172a` qui
+  // n'existe dans aucun token. En thème CLAIR, le site est crème et le formulaire restait un carré
+  // sombre au milieu de la page. La `fontFamily` valait `var(--font-sans)`, ce qui ne peut pas
+  // fonctionner : l'iframe de Stripe est un autre document, elle n'a aucun accès aux variables CSS
+  // de la page. Elle retombait donc en silence sur la police par défaut.
+  //
+  // Les valeurs sont lues sur `:root` au montage, donc dans le thème réellement affiché. La police
+  // est passée en PILE LITTÉRALE : Archivo est auto-hébergée et l'iframe ne peut pas la charger
+  // sans une feuille dédiée servie avec les bons en-têtes, ce qui se vérifie de jour, à l'écran ;
+  // en attendant, le repli déclaré vaut mieux qu'une variable que Stripe ne résout pas.
+  const appearance = useMemo(() => {
+    const lire = (nom: string, defaut: string) => {
+      if (typeof window === "undefined") return defaut;
+      const v = getComputedStyle(document.documentElement).getPropertyValue(nom).trim();
+      return v || defaut;
+    };
+    const racine = typeof document !== "undefined" ? document.documentElement : null;
+    const clair = racine?.getAttribute("data-theme") === "light"
+      || (racine?.getAttribute("data-theme") == null
+          && typeof window !== "undefined"
+          && window.matchMedia?.("(prefers-color-scheme: light)").matches);
+    return {
+      // Deux thèmes de base distincts : « night » éclaircit ses propres surfaces, « stripe » les
+      // assombrit. Partir du mauvais donnerait des bordures et des ombres à contresens.
+      theme: (clair ? "stripe" : "night") as "stripe" | "night",
+      variables: {
+        colorPrimary: lire("--accent", "#E8823A"),
+        // Un fond OPAQUE : les `--bg-elev` du produit sont des rgba, que Stripe compose sur du
+        // blanc et qui délaveraient les champs.
+        colorBackground: lire("--bg-deep", clair ? "#f2ede4" : "#0d1322"),
+        colorText: lire("--fg-1", clair ? "#1a1d28" : "#e9ecf2"),
+        colorTextSecondary: lire("--fg-3", "#9ba3b4"),
+        colorTextPlaceholder: lire("--fg-4", "#788095"),
+        colorDanger: lire("--red-ink", "#f87171"),
+        fontFamily: "Archivo, 'Helvetica Neue', Arial, system-ui, sans-serif",
+        borderRadius: "10px",
+      },
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -119,6 +165,7 @@ export function PaymentWrapper({
 
         if (active) {
           setClientSecret(payload.clientSecret);
+          setBilling(payload.billing ?? null);
           setClientSecretKey(requestKey);
           setError(null);
           setErrorKey(null);
@@ -227,22 +274,15 @@ export function PaymentWrapper({
   return (
     <Elements
       stripe={stripePromise}
-      options={{
-        clientSecret,
-        appearance: {
-          theme: "night",
-          variables: {
-            colorPrimary: "#E8823A",
-            colorBackground: "#12172a",
-            colorText: "#e9ecf2",
-            colorDanger: "#f87171",
-            fontFamily: "var(--font-sans)",
-            borderRadius: "8px",
-          },
-        },
-      }}
+      options={{ clientSecret, appearance }}
     >
-      <PaymentForm onSuccess={onSuccess} submitLabel={submitLabel} returnUrl={returnUrl} onSubmit={onSubmit} />
+      <PaymentForm
+        onSuccess={onSuccess}
+        submitLabel={submitLabel}
+        returnUrl={returnUrl}
+        onSubmit={onSubmit}
+        billing={billing}
+      />
     </Elements>
   );
 }

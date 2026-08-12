@@ -11,9 +11,16 @@ type PaymentFormProps = {
   // Optionnel : intention de paiement (clic sur le bouton payer), AVANT confirmation Stripe.
   // Sert l'instrumentation du funnel ; no-op si non fourni (rétrocompatible).
   onSubmit?: () => void;
+  /**
+   * Ce que le COMPTE porte déjà. L'acheteur venait de créer son compte avec son nom et son e-mail,
+   * et cet écran les redemandait à l'identique : Stripe ne connaît pas notre session, et personne
+   * ne les lui passait. Ils PRÉREMPLISSENT les champs, ils ne les remplacent pas : l'acheteur reste
+   * libre de facturer à un autre nom, et le serveur garde la main sur ce qui part sur la facture.
+   */
+  billing?: { name: string | null; email: string | null } | null;
 };
 
-export function PaymentForm({ onSuccess, submitLabel, returnUrl, onSubmit }: PaymentFormProps) {
+export function PaymentForm({ onSuccess, submitLabel, returnUrl, onSubmit, billing }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -81,6 +88,15 @@ export function PaymentForm({ onSuccess, submitLabel, returnUrl, onSubmit }: Pay
             type: "accordion",
             defaultCollapsed: false,
             spacedAccordionItems: false,
+          },
+          // Les champs que Stripe demande sont préremplis avec ce que le compte sait déjà. Les
+          // valeurs vides sont OMISES : passer une chaîne vide écraserait ce que Stripe aurait pu
+          // retrouver autrement (un moyen de paiement enregistré, par exemple).
+          defaultValues: {
+            billingDetails: {
+              ...(billing?.name ? { name: billing.name } : {}),
+              ...(billing?.email ? { email: billing.email } : {}),
+            },
           },
         }}
       />
