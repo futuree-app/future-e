@@ -29,7 +29,7 @@ export type ContexteDeLecture = { id: string; insee: string; city: string | null
 
 export async function marquerDossierActif(
   sb: SupabaseClient, userId: string, dossier: ContexteDeLecture,
-): Promise<void> {
+): Promise<boolean> {
   const { error } = await sb
     .from("user_profiles")
     .update({
@@ -39,8 +39,11 @@ export async function marquerDossierActif(
     })
     .eq("user_id", userId);
   if (error) {
-    // Journalisé, jamais tu : le symptôme visible serait un hub qui rouvre un autre bien, ou un
-    // territoire qui contredit la page lue. Sans cette ligne, ce serait indétectable.
+    // Journalisé ET RENDU (revue du 11/08/2026). L'échec ne se voyait nulle part : la route
+    // répondait `{ ok: true }` sur une écriture qui n'avait pas eu lieu, et le symptôme, un hub qui
+    // rouvre un autre bien, arrivait plus tard, ailleurs, sans lien apparent avec cette panne.
     console.error("[dossier-actif] écriture échouée", { userId, dossierId: dossier.id, error });
+    return false;
   }
+  return true;
 }

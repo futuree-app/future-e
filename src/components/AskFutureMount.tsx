@@ -6,6 +6,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
+import { contexteDeLecture } from "@/lib/server/contexte-de-lecture";
 import { AskFuture } from "./AskFuture";
 
 const ONE_SHOT_QUOTA = 3;
@@ -31,7 +32,20 @@ export async function AskFutureMount() {
       .maybeSingle(),
   ]);
 
-  const territory = await resolveReadableTerritory(supabase, user.id, profile);
+  // LE CONTEXTE DE LA PAGE PASSE AVANT CELUI DU PROFIL (revue du 11/08/2026).
+  //
+  // Ce composant vit dans le layout du compte : il lisait donc le dernier bien PERSISTÉ, pas celui
+  // qu'on est en train de lire. Sur une ouverture directe, la page nantaise s'affichait sous « Une
+  // question sur La Rochelle ? », et la question partait vers le mauvais territoire, `communeInsee`
+  // étant envoyé tel quel à l'API.
+  //
+  // Le profil reste le repère PARTOUT AILLEURS : sur le hub, sur le Territoire, sur le compte, il
+  // n'y a pas de bien en cours de lecture et le dernier connu est la bonne réponse.
+  const lecture = await contexteDeLecture(supabase, user.id);
+  const profilTerritory = await resolveReadableTerritory(supabase, user.id, profile);
+  const territory = lecture
+    ? { inseeCode: lecture.inseeCode, communeName: lecture.communeName }
+    : profilTerritory;
   if (!territory.inseeCode) return null;
 
   const plan = account?.plan ?? "free";

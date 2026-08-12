@@ -6,6 +6,7 @@ import { requireCurrentUser } from "@/lib/user-account";
 import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
 import { getDossier, getSoleDossier } from "@/lib/address-dossier-store";
 import { MarquerBienActif } from "@/components/report/MarquerBienActif";
+import { communeParent } from "@/lib/plm";
 import { ModuleTracker } from "@/components/ModuleTracker";
 import { buildAutourResponse } from "@/lib/server/autour-response";
 
@@ -37,12 +38,23 @@ export default async function RapportAutourPage({
 
   if (targetId && !dossier) redirect("/rapport");
 
-  // Repli par `ouvrir`, comme sur /rapport/logement : ce chemin pose aussi le territoire de lecture.
+  // AUCUN DOSSIER VISÉ : ON REPREND CELUI QUE LE LECTEUR LISAIT (revue du 11/08/2026). Redemander
+  // « lequel ? » à quelqu'un qui vient d'en lire un est une question dont on a la réponse ; le
+  // sélecteur reste la fin du chemin, pas son début. Repli par `ouvrir`, comme sur
+  // /rapport/logement : ce chemin pose aussi le territoire de lecture.
   if (!dossier) {
-    const sole = await getSoleDossier(supabase, user.id);
+    const { data: profilActif } = await supabase
+      .from("user_profiles")
+      .select("active_dossier_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    // La propriété est revérifiée : la colonne peut désigner un dossier supprimé ou révoqué.
+    const actifId = (profilActif as { active_dossier_id?: string | null } | null)?.active_dossier_id ?? null;
+    const actif = actifId ? await getDossier(supabase, user.id, actifId).catch(() => null) : null;
+    const repli = actif ?? (await getSoleDossier(supabase, user.id));
     redirect(
-      sole
-        ? `/rapport/dossiers/ouvrir?id=${encodeURIComponent(sole.id)}&vers=autour`
+      repli
+        ? `/rapport/dossiers/ouvrir?id=${encodeURIComponent(repli.id)}&vers=autour`
         : "/rapport/dossiers",
     );
   }
@@ -63,16 +75,25 @@ export default async function RapportAutourPage({
         ).carOwnership
       : null;
 
+  // LE CONTEXTE AFFICHÉ VIENT DU DOSSIER, PAS DU PROFIL (revue du 11/08/2026). Le profil porte le
+  // dernier bien PERSISTÉ : sur une ouverture directe, les traceurs enregistraient l'ancienne
+  // commune et l'écran annonçait un autre territoire que celui de la page. Le dossier est la source
+  // de ce qu'on montre ; le profil ne sert qu'à retenir, pour les navigations futures.
+  const contexte = {
+    inseeCode: communeParent(dossier.insee),
+    communeName: dossier.city ?? territory.communeName,
+  };
+
   return (
     <>
-      <ModuleTracker moduleId="autour" commune={territory.communeName} inseeCode={territory.inseeCode} source="page" />
+      <ModuleTracker moduleId="autour" commune={contexte.communeName} inseeCode={contexte.inseeCode} source="page" />
       {/* LE CONTEXTE DE LECTURE SUIT CE QUI EST VRAIMENT OUVERT. Monté, ce composant prouve que la
           page est à l'écran : il pose alors le bien ET son territoire, d'un seul geste. L'écriture
           vivait dans `after()`, qui s'exécute aussi sur un préchargement ou une navigation
           abandonnée. */}
       <MarquerBienActif dossierId={dossier.id} />
       <AutourModule
-        defaultCommune={territory.communeName}
+        defaultCommune={contexte.communeName}
         dossier={dossier}
         initialCarOwnership={initialCarOwnership}
       />

@@ -34,6 +34,10 @@ export async function POST(request: Request) {
   // lequel des trois. Le contexte de lecture ne se pose pas, et rien n'est révélé.
   if (!dossier) return Response.json({ error: "DOSSIER_NOT_ACCESSIBLE" }, { status: 403 });
 
-  await marquerDossierActif(supabase, user.id, dossier);
+  // UN 200 SUR UNE ÉCRITURE QUI N'A PAS EU LIEU EST UN MENSONGE AU CLIENT. Il ne changerait rien à
+  // ce que voit le lecteur maintenant, et il rendrait la panne indétectable au moment où elle se
+  // produit : son symptôme n'apparaîtra qu'à la navigation suivante.
+  const ecrit = await marquerDossierActif(supabase, user.id, dossier);
+  if (!ecrit) return Response.json({ error: "PERSISTENCE_FAILED" }, { status: 500 });
   return Response.json({ ok: true });
 }
