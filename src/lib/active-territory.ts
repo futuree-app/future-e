@@ -1,4 +1,5 @@
 import "server-only";
+import { communeParent } from "./plm";
 import {
   decideTerritoryAccess,
   decidePaidTerritory,
@@ -198,4 +199,47 @@ export async function hasPaidTerritory(
 ): Promise<boolean> {
   if (!insee) return false;
   return decidePaidTerritory(await loadTerritoryClaims(supabase, userId), insee);
+}
+
+/**
+ * LES TERRITOIRES ACHETÉS SEULS, ceux qu'aucun bien ne porte (13/08/2026).
+ *
+ * Un achat de territoire (14 €) crée un `report_grant` et rien d'autre. « Mes biens » liste des
+ * BIENS, le compte des communes ouvertes du hub comptait des DOSSIERS : une commune payée sans
+ * adresse n'apparaissait donc nulle part, passé le jour de l'achat où le webhook pose le territoire
+ * actif une fois. Le lecteur ne pouvait plus revenir sur ce qu'il avait payé.
+ *
+ * Les grants dont la commune porte DÉJÀ un dossier sont écartés : ils s'y liraient deux fois, et
+ * c'est le bien qui est la porte la plus riche (il ouvre les trois échelles).
+ *
+ * Le nom vient de la colonne `commune` du grant, écrite au webhook : jamais résolu depuis l'index,
+ * qui n'a pas de ligne pour les codes agrégés de Paris, Lyon et Marseille.
+ */
+export async function listTerritoiresSansBien(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<{ insee: string; commune: string | null; createdAt: string }[]> {
+  const [grantsRes, dossiersRes] = await Promise.all([
+    supabase
+      .from("report_grants")
+      .select("insee, commune, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("address_dossiers")
+      .select("insee")
+      .eq("user_id", userId)
+      .is("access_revoked_at", null),
+  ]);
+  // Une panne ne doit pas se lire « vous ne possédez rien » : on remonte l'erreur, comme
+  // `loadTerritoryClaims`, plutôt que de servir une liste vide qui ferait disparaître un achat.
+  if (grantsRes.error) throw new Error(`report_grants a échoué : ${grantsRes.error.message}`);
+  if (dossiersRes.error) throw new Error(`address_dossiers a échoué : ${dossiersRes.error.message}`);
+
+  const avecBien = new Set(
+    ((dossiersRes.data ?? []) as { insee: string }[]).map((d) => communeParent(d.insee)),
+  );
+  return ((grantsRes.data ?? []) as { insee: string; commune: string | null; created_at: string }[])
+    .filter((g) => !avecBien.has(communeParent(g.insee)))
+    .map((g) => ({ insee: g.insee, commune: g.commune, createdAt: g.created_at }));
 }

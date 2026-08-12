@@ -4,6 +4,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { requireCurrentUser } from "@/lib/user-account";
 import { listDossiers } from "@/lib/address-dossier-store";
+import { listTerritoiresSansBien } from "@/lib/active-territory";
 import { isAdminDossierCreator } from "@/lib/server/admin-dossier";
 import { AdminDossierCreator } from "@/components/report/AdminDossierCreator";
 
@@ -25,6 +26,10 @@ const DATE_FMT = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long
 export default async function RapportDossiersPage() {
   const { supabase, user } = await requireCurrentUser();
   const dossiers = await listDossiers(supabase, user.id);
+  // LES TERRITOIRES ACHETÉS SEULS ONT LEUR PLACE ICI (13/08/2026). Cette page listait des BIENS, et
+  // un territoire payé sans adresse n'y figurait donc pas : passé le jour de l'achat, son acheteur
+  // n'avait plus aucun écran qui le nomme.
+  const territoires = await listTerritoiresSansBien(supabase, user.id);
   const canCreate = isAdminDossierCreator(user.email);
 
   return (
@@ -40,7 +45,9 @@ export default async function RapportDossiersPage() {
           className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.15] tracking-[-0.5px] text-label mb-8"
           style={{ fontFamily: "var(--font-serif)" }}
         >
-          {dossiers.length === 0
+          {dossiers.length === 0 && territoires.length > 0
+            ? "Ce que vous avez ouvert."
+            : dossiers.length === 0
             ? "Aucun bien analysé pour l'instant."
             : dossiers.length === 1
               ? "Le bien que vous avez analysé."
@@ -159,6 +166,44 @@ export default async function RapportDossiersPage() {
               >
                 Analyser une autre adresse
               </Link>
+            </div>
+          </div>
+        )}
+        {/* ── VOS TERRITOIRES ─────────────────────────────────────────────────────────────
+            Un territoire acheté seul (14 €) crée un droit et aucun bien : il n'apparaissait ni ici,
+            ni dans le compte des communes ouvertes du hub, qui ne comptait que des dossiers. Seuls
+            sont listés ceux qu'AUCUN bien ne porte déjà : ailleurs, c'est le bien qui est la porte,
+            et il ouvre les trois échelles au lieu d'une. */}
+        {territoires.length > 0 && (
+          <div className="mt-10">
+            <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-3">
+              {territoires.length === 1 ? "Votre territoire" : "Vos territoires"}
+            </p>
+            <div style={{ display: "grid", gap: 12 }}>
+              {territoires.map((t) => (
+                <div
+                  key={t.insee}
+                  className="glass rounded-xl px-6 py-5 flex flex-wrap items-center justify-between gap-4"
+                >
+                  <span>
+                    <span className="text-[length:var(--text-lede)] text-label">
+                      {t.commune ?? `Commune ${t.insee}`}
+                    </span>
+                    <span className="font-mono text-[12px] text-ghost block mt-1">
+                      ouvert le {DATE_FMT.format(new Date(t.createdAt))}
+                    </span>
+                  </span>
+                  {/* <a> natif : la cible est une Route Handler (voir le commentaire plus haut). */}
+                  <a
+                    href={`/rapport/territoire?insee=${encodeURIComponent(t.insee)}${
+                      t.commune ? `&nom=${encodeURIComponent(t.commune)}` : ""
+                    }`}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent/[0.12] text-accent text-[length:var(--text-dense)] no-underline border border-accent/[0.25]"
+                  >
+                    Ouvrir le dossier
+                  </a>
+                </div>
+              ))}
             </div>
           </div>
         )}

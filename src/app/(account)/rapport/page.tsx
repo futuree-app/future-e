@@ -16,6 +16,7 @@ import { EnTeteDossier } from "@/components/report/EnTeteDossier";
 import { contenuDuHero, ANCRE_PROJET } from "@/lib/decision/premier-ecran";
 import { normalizeUserProject } from "@/lib/user-project";
 import { getReportContext, resolveRelation } from "@/lib/report-context";
+import { listTerritoiresSansBien } from "@/lib/active-territory";
 import { Suspense } from "react";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
@@ -173,7 +174,17 @@ export default async function RapportPage() {
   const dossiersAilleurs = inseeCode
     ? dossiers.filter((d) => communeParent(d.insee) !== communeParent(inseeCode))
     : dossiers;
-  const communesAilleurs = [...new Map(dossiersAilleurs.map((d) => [communeParent(d.insee), d])).values()];
+  // LE COMPTE NE PORTAIT QUE LES BIENS (corrigé le 13/08/2026) : un territoire acheté seul (14 €)
+  // n'a pas de dossier, il n'était donc compté nulle part et son acheteur n'avait plus d'écran qui
+  // le nomme. Une commune, une entrée, quelle que soit la porte qui l'a ouverte.
+  const territoiresSansBien = await listTerritoiresSansBien(supabase, user.id);
+  const communesOuvertes = new Set([
+    ...dossiersAilleurs.map((d) => communeParent(d.insee)),
+    ...territoiresSansBien
+      .map((t) => communeParent(t.insee))
+      .filter((c) => !inseeCode || c !== communeParent(inseeCode)),
+  ]);
+  const communesAilleurs = [...communesOuvertes];
   // LE CODE DE LECTURE, quand la commune se lit par arrondissement. `null` partout ailleurs, donc
   // aucun changement sur une commune ordinaire. Voir `codeDeLectureLocal`.
   const codeLecture = inseeCode
