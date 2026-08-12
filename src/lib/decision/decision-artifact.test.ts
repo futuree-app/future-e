@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   parseDecisionArtifact, buildDecisionArtifact, artifactScopeKey, ENGINE_VERSION,
   dossierAServir, artefactPerimeParLeDpe,
+  etatArtefact, prochaineVersionAReserver, prochaineVersionAutomatique,
 } from "./decision-artifact.ts";
 import type { Dossier } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
@@ -132,7 +133,10 @@ test("L'ARTEFACT GAGNE SUR L'ASSEMBLAGE DU JOUR", () => {
     dossier({ conclusion: "Ce que futur•e disait le 5 août." }),
     PROJECT, "2026-08-05T09:30:00.000Z", "hc-conv-2",
   );
-  const stocke = { version: 1, status: "ready" as const, generatedAt: vendu.generatedAt, artifact: vendu };
+  const stocke = {
+    servedVersion: 1, artifact: vendu, generatedAt: vendu.generatedAt,
+    headVersion: 1, headStatus: "ready" as const, headCreatedAt: null,
+  };
   // Ce que le moteur de février 2027 conclurait, seuils révisés.
   const aujourdhui = dossier({ conclusion: "Ce que le moteur dirait aujourd'hui." });
 
@@ -149,10 +153,10 @@ test("SANS ARTEFACT, on sert l'assemblage ET AUCUNE DATE", () => {
   const vivant = dossier({ conclusion: "Assemblé à l'instant." });
   for (const stocke of [
     null,
-    { version: 1, status: "generating" as const, generatedAt: null, artifact: null },
-    { version: 1, status: "failed" as const, generatedAt: null, artifact: null },
+    { servedVersion: null, artifact: null, generatedAt: null, headVersion: 1, headStatus: "generating" as const, headCreatedAt: null },
+    { servedVersion: null, artifact: null, generatedAt: null, headVersion: 1, headStatus: "failed" as const, headCreatedAt: null },
     // `ready` mais payload illisible : le parseur a refusé, l'appelant ne doit pas s'en apercevoir.
-    { version: 1, status: "ready" as const, generatedAt: "2026-08-05T09:30:00.000Z", artifact: null },
+    { servedVersion: null, artifact: null, generatedAt: null, headVersion: 1, headStatus: "ready" as const, headCreatedAt: null },
   ]) {
     const servi = dossierAServir(stocke, vivant);
     assert.equal(servi.source, "assemblage", JSON.stringify(stocke));
@@ -168,7 +172,7 @@ test("le DPE choisi APRÈS le figement périme l'artefact", () => {
   // construction pas encore choisi son diagnostic (`savedDpe: null`). S'il le choisit ensuite, le
   // dossier le porte, l'écran Logement l'affiche, et la conclusion figée continue de l'ignorer.
   const fige = {
-    version: 1, status: "ready" as const,
+    servedVersion: 1, headVersion: 1, headStatus: "ready" as const, headCreatedAt: null,
     generatedAt: "2026-08-05T09:30:00.000Z",
     artifact: { generatedAt: "2026-08-05T09:30:00.000Z" },
   };
@@ -177,7 +181,7 @@ test("le DPE choisi APRÈS le figement périme l'artefact", () => {
 
 test("le DPE choisi AVANT le figement n'y change rien", () => {
   const fige = {
-    version: 1, status: "ready" as const,
+    servedVersion: 1, headVersion: 1, headStatus: "ready" as const, headCreatedAt: null,
     generatedAt: "2026-08-05T09:30:00.000Z",
     artifact: { generatedAt: "2026-08-05T09:30:00.000Z" },
   };
@@ -191,25 +195,161 @@ test("rien à périmer quand il n'y a rien de figé, ni sur une date illisible",
   // Aucun artefact, ou un artefact que le parseur a refusé : le chemin normal génère déjà.
   assert.equal(artefactPerimeParLeDpe(null, apres), false);
   assert.equal(
-    artefactPerimeParLeDpe({ version: 1, status: "generating", generatedAt: null, artifact: null }, apres),
+    artefactPerimeParLeDpe(
+      { servedVersion: null, artifact: null, generatedAt: null, headVersion: 1, headStatus: "generating", headCreatedAt: null },
+      apres,
+    ),
     false,
   );
   // UNE DATE ILLISIBLE NE PÉRIME JAMAIS. L'inverse ferait régénérer sans fin un dossier dont une
   // date est corrompue, à chaque ouverture, sans que rien ne le dise.
   assert.equal(
     artefactPerimeParLeDpe(
-      { version: 1, status: "ready", generatedAt: "pas une date", artifact: { generatedAt: "pas une date" } },
+      {
+        servedVersion: 1, headVersion: 1, headStatus: "ready", headCreatedAt: null,
+        generatedAt: "pas une date", artifact: { generatedAt: "pas une date" },
+      },
       apres,
     ),
     false,
   );
   assert.equal(
     artefactPerimeParLeDpe(
-      { version: 1, status: "ready", generatedAt: "2026-08-05T09:30:00.000Z", artifact: { generatedAt: "2026-08-05T09:30:00.000Z" } },
+      {
+        servedVersion: 1, headVersion: 1, headStatus: "ready", headCreatedAt: null,
+        generatedAt: "2026-08-05T09:30:00.000Z", artifact: { generatedAt: "2026-08-05T09:30:00.000Z" },
+      },
       "hier matin",
     ),
     false,
   );
+});
+
+// ── L'ÉTAT D'UN SCOPE : ce qu'on sert, et où en est la dernière tentative ─────────────────────
+//
+// CES TRANSITIONS N'ÉTAIENT COUVERTES PAR AUCUN TEST (revue du 12/08/2026), alors que la lecture
+// vivait dans un module `server-only` qu'aucun test ne peut charger. Vingt tests passaient à côté
+// d'un blocage complet : après une v2 en échec, plus aucune version ne naissait.
+
+const MAINTENANT = new Date("2026-08-12T12:00:00.000Z");
+const ligne = (
+  version: number, status: "ready" | "generating" | "failed",
+  payload: unknown = null, createdAt: string | null = "2026-08-12T11:59:00.000Z",
+) => ({ version, status, generatedAt: null, createdAt, payload });
+
+const payloadValide = (quand: string) =>
+  JSON.parse(JSON.stringify(buildDecisionArtifact(dossier(), PROJECT, quand, "hc-conv-2")));
+
+const v1Prete = () => ligne(1, "ready", payloadValide("2026-08-05T09:30:00.000Z"));
+
+test("une v2 EN COURS ne masque pas la v1 vendue, et n'autorise pas de v3", () => {
+  const etat = etatArtefact([ligne(2, "generating"), v1Prete()]);
+  assert.equal(etat?.servedVersion, 1, "la version vendue doit rester servie pendant la génération");
+  assert.equal(etat?.artifact?.generatedAt, "2026-08-05T09:30:00.000Z");
+  assert.equal(etat?.headVersion, 2);
+  assert.equal(etat?.headStatus, "generating");
+  // Attendre, sans annoncer un succès : doubler la génération ne produirait rien, la contrainte
+  // unique refusant la place.
+  assert.equal(prochaineVersionAReserver(etat, MAINTENANT), null);
+});
+
+test("une GÉNÉRATION ABANDONNÉE ne verrouille pas le dossier pour toujours", () => {
+  // `generating` est écrit AVANT le travail. Une fonction tuée entre les deux laisse une ligne qui
+  // ne changera plus jamais de statut : sans échéance, chaque clic répondait « déjà en cours » et le
+  // dossier ne produisait plus aucune version.
+  const abandonnee = etatArtefact([ligne(2, "generating", null, "2026-08-12T11:00:00.000Z"), v1Prete()]);
+  assert.equal(prochaineVersionAReserver(abandonnee, MAINTENANT), 3, "une heure d'attente doit libérer le numéro suivant");
+  // Une génération qui vient de partir, elle, doit être attendue : le bail est très au-dessus des
+  // 60 s de `maxDuration`.
+  const recente = etatArtefact([ligne(2, "generating", null, "2026-08-12T11:58:00.000Z"), v1Prete()]);
+  assert.equal(prochaineVersionAReserver(recente, MAINTENANT), null);
+  // SANS DATE LISIBLE, ON N'AFFIRME PAS L'ABANDON : le doute laisse la génération vivre.
+  for (const date of [null, "hier"]) {
+    const sansDate = etatArtefact([ligne(2, "generating", null, date), v1Prete()]);
+    assert.equal(prochaineVersionAReserver(sansDate, MAINTENANT), null, `abandon affirmé sur ${date}`);
+  }
+  // La v1 vendue reste servie dans tous les cas.
+  assert.equal(abandonnee?.servedVersion, 1);
+});
+
+test("une v2 EN ÉCHEC laisse naître une v3 : c'est tout l'objet de la correction", () => {
+  const etat = etatArtefact([ligne(2, "failed"), v1Prete()]);
+  assert.equal(etat?.servedVersion, 1, "l'échec ne doit pas coûter au lecteur la version qu'il a payée");
+  assert.equal(etat?.headStatus, "failed");
+  assert.equal(prochaineVersionAReserver(etat, MAINTENANT), 3, "après un échec, chaque clic répondait ok sans rien créer");
+});
+
+test("PLUSIEURS ÉCHECS D'AFFILÉE : la v1 reste servie, et le rattrapage automatique s'arrête", () => {
+  // La garantie s'arrêtait à cinq lignes : au sixième échec, la v1 PRÊTE sortait de la fenêtre de
+  // lecture et disparaissait de l'écran d'un client qui l'avait payée.
+  const etat = etatArtefact([ligne(9, "failed"), v1Prete()]);
+  assert.equal(etat?.servedVersion, 1);
+  assert.equal(etat?.headVersion, 9);
+  // La demande EXPLICITE reste possible : elle est bornée par les clics du lecteur.
+  assert.equal(prochaineVersionAReserver(etat, MAINTENANT), 10);
+  // Le rattrapage lancé au RENDU, lui, s'arrête : sinon une panne durable créerait une version
+  // morte par rechargement de page.
+  assert.equal(prochaineVersionAutomatique(etat, MAINTENANT), null);
+  assert.equal(
+    prochaineVersionAutomatique(etatArtefact([ligne(2, "failed"), v1Prete()]), MAINTENANT),
+    3,
+    "un premier échec doit encore se rattraper tout seul",
+  );
+});
+
+test("LE PREMIER ÉCHEC D'UN DOSSIER SANS AUCUNE VERSION SERVIE se retente", () => {
+  // Le cas du dossier d'ADRESSE dont la toute première génération rate : la ligne existe, donc
+  // « aucune ligne » est faux, et il n'y a rien à périmer. Sans reprise, ce dossier vendu se
+  // réassemblerait à chaque ouverture, sans jamais être figé ni daté.
+  const etat = etatArtefact([ligne(1, "failed")]);
+  assert.equal(etat?.servedVersion, null);
+  assert.equal(etat?.artifact, null, "c'est cette absence, et non celle de la ligne, qui déclenche la reprise");
+  assert.equal(prochaineVersionAutomatique(etat, MAINTENANT), 2);
+});
+
+test("un PAYLOAD INVALIDE n'est pas une version servie", () => {
+  // Un artefact écrit sous un contrat antérieur : `ready` en base, illisible ici. On passe à la
+  // version prête suivante, et à défaut on ne sert rien : l'appelant retombe sur l'assemblage.
+  const etat = etatArtefact([ligne(2, "ready", { schemaVersion: 7 }), v1Prete()]);
+  assert.equal(etat?.servedVersion, 1, "la version lisible d'en dessous doit prendre le relais");
+  assert.equal(etat?.headVersion, 2);
+  assert.equal(etat?.headStatus, "ready");
+
+  // Plusieurs versions prêtes ILLISIBLES d'affilée ne masquent pas la version valide du dessous :
+  // l'invariant est absolu, la lecture pagine jusqu'à elle.
+  const empilees = etatArtefact([
+    ligne(5, "ready", { schemaVersion: 7 }), ligne(4, "ready", { schemaVersion: 7 }),
+    ligne(3, "ready", { schemaVersion: 7 }), ligne(2, "ready", { schemaVersion: 7 }),
+    v1Prete(),
+  ]);
+  assert.equal(empilees?.servedVersion, 1);
+  assert.equal(empilees?.headVersion, 5);
+
+  const aucune = etatArtefact([ligne(1, "ready", { schemaVersion: 7 })]);
+  assert.equal(aucune?.servedVersion, null);
+  assert.equal(aucune?.artifact, null);
+  assert.equal(prochaineVersionAReserver(aucune, MAINTENANT), 2);
+});
+
+test("LA TÊTE ET SON STATUT VIENNENT DE LA MÊME LIGNE", () => {
+  // Les deux lectures du store partent l'une après l'autre : une version qui se termine entre les
+  // deux apparaît dans l'une sans l'autre. Composer `headVersion` d'une ligne et `headStatus` d'une
+  // autre annoncerait un état qui n'a jamais existé, et ferait réserver une v3 inutile.
+  const etat = etatArtefact([
+    ligne(2, "generating"),                                     // la tête, lue avant la fin
+    ligne(2, "ready", payloadValide("2026-08-12T10:00:00.000Z")), // la même, lue après
+    v1Prete(),
+  ]);
+  assert.equal(etat?.headVersion, 2);
+  assert.equal(etat?.headStatus, "ready", "un statut ne recule jamais : la forme la plus avancée gagne");
+  assert.equal(etat?.servedVersion, 2, "la v2 terminée doit être servie, pas la v1");
+  assert.equal(prochaineVersionAReserver(etat, MAINTENANT), 3);
+});
+
+test("aucune ligne : ce scope n'a JAMAIS eu d'artefact, ce qui n'est pas un échec", () => {
+  assert.equal(etatArtefact([]), null);
+  assert.equal(prochaineVersionAReserver(null, MAINTENANT), 1, "le premier figement réserve la v1");
+  assert.equal(prochaineVersionAutomatique(null, MAINTENANT), 1);
 });
 
 // ── Le snapshot de données : ce que d'autres surfaces doivent réafficher à l'identique ─────────

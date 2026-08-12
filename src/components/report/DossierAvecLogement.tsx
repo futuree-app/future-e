@@ -7,7 +7,9 @@
 // dans le corps d'un composant ne se rejoue pas. Ce composant ne fait plus que demander et rendre.
 import { assembleAddressDossier } from "@/lib/server/assemble-address-dossier";
 import { readLatestArtifact } from "@/lib/server/decision-artifact-store";
-import { dossierAServir, artefactPerimeParLeDpe } from "@/lib/decision/decision-artifact";
+import {
+  dossierAServir, artefactPerimeParLeDpe, prochaineVersionAutomatique,
+} from "@/lib/decision/decision-artifact";
 import { projetAChangeMateriellement } from "@/lib/decision/projet-materiel";
 import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
 import { after } from "next/server";
@@ -84,8 +86,23 @@ export async function DossierAvecLogement({
   // UN ARTEFACT PÉRIMÉ N'EST PAS RÉÉCRIT, IL EST SUCCÉDÉ : on réserve la version SUIVANTE, et celle
   // sur laquelle le lecteur a pu décider reste en base, lisible. C'est la promesse écrite dans la
   // migration 28 le premier jour, tenue ici pour la première fois.
-  if ((!stocke || perime) && assemble?.status === "done") {
-    const version = perime ? (stocke?.version ?? 0) + 1 : 1;
+  //
+  // LE NUMÉRO RÉSERVÉ EST CELUI D'APRÈS LA DERNIÈRE TENTATIVE, pas celui d'après la version SERVIE
+  // (revue du 12/08/2026). Le calcul partait de la version servie : avec une v2 déjà en base (ratée,
+  // ou écrite par un autre onglet), il redemandait indéfiniment la place v2, que la contrainte
+  // unique refusait, et le diagnostic déposé par le lecteur n'entrait JAMAIS dans la décision.
+  // `prochaineVersionAutomatique` rend `null` quand une génération est en cours, et quand trop de
+  // tentatives se sont déjà empilées : ce rattrapage part à CHAQUE ouverture de page, et une panne
+  // durable créerait sinon une version morte par rechargement.
+  //
+  // LA CONDITION PORTE SUR L'ABSENCE DE VERSION *SERVIE*, pas sur l'absence de LIGNE (revue du
+  // 12/08/2026). Écrite `!stocke`, elle laissait un dossier d'adresse dont la toute première
+  // génération avait échoué sans aucun rattrapage : la ligne existait, donc `stocke` n'était pas
+  // nul, et `perime` ne pouvait pas l'être non plus faute d'artefact à périmer. Le dossier vendu se
+  // réassemblait alors à chaque ouverture, sans jamais être figé. Le chemin Territoire, lui, testait
+  // déjà l'artefact.
+  const version = prochaineVersionAutomatique(stocke, new Date());
+  if ((!stocke?.artifact || perime) && version !== null && assemble?.status === "done") {
     after(async () => {
       const r = await generateDecisionArtifact(sb, userId, project, {
         kind: "adresse", insee, dossierId: scopeKey.replace(/^logement:/, ""), address, savedDpe,

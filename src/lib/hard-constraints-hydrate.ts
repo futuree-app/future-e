@@ -12,7 +12,7 @@ import {
 import type {
   NormalizedHardConstraints, PlaceMode, PlaceThreshold, SearchExplorationHint,
 } from "./hard-constraints.ts";
-import type { HardConstraints } from "./hard-constraint-schema.ts";
+import type { HardConstraints, ZoneAnchor } from "./hard-constraint-schema.ts";
 // TYPE SEULEMENT : hard-constraints-external.ts fait du réseau. L'importer en VALEUR rendrait
 // l'hydratation non testable sous node --test, et ferait entrer un fetch dans une lib pure.
 import type { ExternalResolutions } from "./hard-constraints-external.ts";
@@ -41,10 +41,30 @@ export function explorationHints(hc: HardConstraints | undefined | null): Search
 // Un seuil PRÉSENT dans le projet vient toujours du parse, donc du texte du lecteur : les défauts
 // (?? 50, ?? 30) étaient appliqués au RUNTIME et n'ont jamais été écrits dans hardConstraints. Il n'y a
 // donc aucun « faux user » à démêler dans les projets historiques.
-function thresholdFrom(maxKm: number | null | undefined): PlaceThreshold | null {
+export function thresholdFrom(maxKm: number | null | undefined): PlaceThreshold | null {
   return typeof maxKm === "number" && Number.isFinite(maxKm) && maxKm > 0
     ? { metric: "distance", maxKm, source: "user" }
     : null;
+}
+
+/**
+ * LES ANCRES QUI FILTRENT, et elles seules. Une ancre `preferred` ou `inspiration` ne restreint
+ * aucun territoire : elle vaut bonus de score dans le comparateur, et le noyau des contraintes
+ * dures ne la voit jamais.
+ *
+ * Exportée pour que `signatureDecisionnelle` compare EXACTEMENT ce que l'hydratation retient
+ * (revue du 12/08/2026) : ajouter une ancre souple à côté d'une ancre dure ne change aucune
+ * contrainte, et périmait pourtant le dossier vendu.
+ */
+export function hardZoneAnchorsDe(zones: HardConstraints["zones"]): ZoneAnchor[] {
+  return (zones ?? []).filter((z) => z?.strength === "hard");
+}
+
+/** Les exclusions de lieu RETENUES : une entrée sans label ne désigne rien, et se jette. */
+export function excludePlaceDeclares(
+  excludePlace: HardConstraints["excludePlace"],
+): NonNullable<HardConstraints["excludePlace"]> {
+  return (excludePlace ?? []).filter((e) => e?.label);
 }
 
 const MODES: PlaceMode[] = ["car", "walk", "bike"];
@@ -56,7 +76,7 @@ const MODES: PlaceMode[] = ["car", "walk", "bike"];
 // ET LE MODE NE SE DEVINE PAS. Le parse est un LLM : il peut écrire « voiture » ou « transports ». Un mode
 // que le noyau ne connaît pas est un mode ABSENT, qui rendra missing_parameter, et que le lecteur se verra
 // demander. On ne se replie jamais sur la voiture « parce que c'est le plus fréquent ».
-function nearPlaceThreshold(np: NonNullable<HardConstraints["nearPlace"]>): PlaceThreshold | null {
+export function nearPlaceThreshold(np: NonNullable<HardConstraints["nearPlace"]>): PlaceThreshold | null {
   const minutes = np.maxMinutes;
   if (typeof minutes === "number" && Number.isFinite(minutes) && minutes > 0) {
     const mode = MODES.includes(np.mode as PlaceMode) ? (np.mode as PlaceMode) : null;
@@ -83,7 +103,7 @@ export function hydrateHardConstraints(
   // jeton : une ancre souple inconnue ne doit pas rendre la contrainte dure non examinée (elle ne filtre
   // pas). On les recalcule donc ici, en ne gardant que les dures. Sans ce champ, un jeton non reconnu
   // DISPARAÎT, et la contrainte devient « non déclarée » ou « satisfaite » sans avoir été testée.
-  const hardZoneAnchors = (c.zones ?? []).filter((z) => z?.strength === "hard");
+  const hardZoneAnchors = hardZoneAnchorsDe(c.zones);
   const unresolvedHardZones = hardZoneAnchors.filter((z) => !ZONE_TABLE[z.zone]).map((z) => z.zone);
 
   return {
@@ -117,8 +137,7 @@ export function hydrateHardConstraints(
           }
         : null,
     excludePlace: dir
-      ? (c.excludePlace ?? [])
-          .filter((e) => e?.label)
+      ? excludePlaceDeclares(c.excludePlace)
           .map((e) => ({ label: e.label, reference: resolveUrbanArea(e.label, dir, input) }))
       : [],
     // sizeRelativeTo ne MUTE PLUS communeSize (matchProjects réécrivait hc.communeSize en douce) : les

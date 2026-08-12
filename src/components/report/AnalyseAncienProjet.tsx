@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
 export function AnalyseAncienProjet({ insee, scopeKey }: { insee: string; scopeKey: string }) {
-  const [etat, setEtat] = useState<"repos" | "encours" | "echec">("repos");
+  const [etat, setEtat] = useState<"repos" | "encours" | "ailleurs" | "echec">("repos");
   const router = useRouter();
 
   const mettreAJour = async () => {
@@ -33,6 +33,14 @@ export function AnalyseAncienProjet({ insee, scopeKey }: { insee: string; scopeK
         body: JSON.stringify({ insee, scopeKey }),
       });
       if (!res.ok) throw new Error(String(res.status));
+      // UNE GÉNÉRATION DÉJÀ EN COURS N'EST PAS UNE GÉNÉRATION ABOUTIE (revue du 12/08/2026). La
+      // route répondait `ok` dans les deux cas, et le rechargement réaffichait le même bandeau sans
+      // rien expliquer : le lecteur cliquait, la page revenait identique.
+      const corps = (await res.json().catch(() => null)) as { statut?: string } | null;
+      if (corps?.statut === "en_cours") {
+        setEtat("ailleurs");
+        return;
+      }
       // La génération a abouti : on relit la page, qui servira la version nouvelle.
       router.refresh();
       setEtat("repos");
@@ -59,6 +67,11 @@ export function AnalyseAncienProjet({ insee, scopeKey }: { insee: string; scopeK
       >
         {etat === "encours" ? "Mise à jour…" : "Mettre à jour l'analyse"}
       </button>
+      {etat === "ailleurs" && (
+        <p className="text-[12.5px] text-muted w-full">
+          Une mise à jour est déjà en cours. Rechargez la page dans un instant.
+        </p>
+      )}
       {etat === "echec" && (
         <p className="text-[12.5px] text-muted w-full">
           La mise à jour n&apos;a pas abouti. L&apos;analyse ci-dessous reste celle de votre achat.

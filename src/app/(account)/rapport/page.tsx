@@ -20,7 +20,9 @@ import { ControlesDuDossier } from "@/components/report/ControlesDuDossier";
 import { DossierAvecLogement } from "@/components/report/DossierAvecLogement";
 import { listDossiers } from "@/lib/address-dossier-store";
 import { readLatestArtifact } from "@/lib/server/decision-artifact-store";
-import { artifactScopeKey, dossierAServir } from "@/lib/decision/decision-artifact";
+import {
+  artifactScopeKey, dossierAServir, prochaineVersionAutomatique,
+} from "@/lib/decision/decision-artifact";
 import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
 import { after } from "next/server";
 import { communeParent } from "@/lib/plm";
@@ -168,12 +170,23 @@ export default async function RapportPage() {
   // pour les ventes futures et sans effet sur les ventes faites. La génération part dans `after()`,
   // donc après la réponse : cette page ne l'attend pas, et affiche l'assemblage du jour comme avant.
   // Au rechargement suivant, la version figée prend le relais.
-  if (fullReport && inseeCode && userProject && !artefactCommune) {
+  //
+  // UNE TENTATIVE RATÉE NE CONDAMNAIT PAS LE DOSSIER À N'ÊTRE JAMAIS FIGÉ (revue du 12/08/2026) :
+  // la condition était « aucune ligne », donc une v1 en échec fermait le rattrapage pour toujours et
+  // ce territoire payé se serait réassemblé à chaque ouverture, sans date, sans que rien ne le dise.
+  // On repart du numéro qui suit la dernière TENTATIVE, et `prochaineVersionAutomatique` borne la
+  // reprise : jamais pendant une génération en cours, jamais au-delà de quelques échecs.
+  //
+  // Le rattrapage ne concerne QUE l'absence de version servie : quand une version est servie, la
+  // suivante se DEMANDE (bouton), elle ne se déclenche pas au rendu. C'est la doctrine du vault.
+  const versionCommune = prochaineVersionAutomatique(artefactCommune, new Date());
+  if (fullReport && inseeCode && userProject && versionCommune !== null
+      && !artefactCommune?.artifact) {
     after(async () => {
       const r = await generateDecisionArtifact(supabase, user.id, userProject, {
         kind: "commune", insee: inseeCode,
-      });
-      if (r.status === "failed") console.error("[artefact] rattrapage échoué", { inseeCode, r });
+      }, versionCommune);
+      if (r.status === "failed") console.error("[artefact] rattrapage échoué", { inseeCode, versionCommune, r });
     });
   }
 

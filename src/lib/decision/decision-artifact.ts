@@ -178,23 +178,165 @@ export function artifactScopeKey(dossierId: string | null): string {
 
 export type ArtifactStatus = "generating" | "ready" | "failed";
 
-/** Ce que la base rend, une fois le payload validé. Le type vit ICI, dans la lib pure, pour que la
- *  décision ci-dessous soit testable sans `server-only` (patron de `comparateur-scores.ts`). */
+/**
+ * L'ÉTAT D'UN SCOPE : ce qu'on SERT, et où en est la dernière TENTATIVE. Les deux, séparément.
+ *
+ * ── POURQUOI DEUX AXES ET NON UN (revue du 12/08/2026) ───────────────────────────────────────
+ * Ce type portait une `version` + un `status` (ceux de la ligne retenue) et un `versionPlusRecente`
+ * qui valait dès qu'une version plus haute n'était pas servable, SANS dire pourquoi. Les appelants
+ * ne pouvaient donc pas distinguer « une génération est en cours » de « la dernière a échoué », et
+ * traitaient les deux comme « déjà en cours » : après une v2 en échec, chaque clic sur « mettre à
+ * jour » répondait `ok` et aucune v3 ne naissait jamais. Le même repli faisait retenter au recalcul
+ * DPE le numéro DÉJÀ RÉSERVÉ, que la contrainte unique refusait aussitôt.
+ *
+ * Le contrat est donc explicite :
+ *   - `servedVersion` / `artifact` / `generatedAt` : la dernière version PRÊTE et relue. C'est ce
+ *     que le lecteur voit, et ce qu'une v2 ratée ne doit jamais masquer.
+ *   - `headVersion` / `headStatus` : la dernière TENTATIVE, quel que soit son sort. C'est elle qui
+ *     dit s'il faut attendre (`generating`) ou si le numéro suivant est libre (`failed`, `ready`).
+ *
+ * Le type vit ICI, dans la lib pure, pour que les décisions ci-dessous soient testables sans
+ * `server-only` (patron de `comparateur-scores.ts`).
+ */
 export type StoredArtifact = {
+  /** Le numéro de la version servie, ou `null` : aucune version prête et relisible. */
+  servedVersion: number | null;
+  /** Nul quand aucune version n'est prête, ou quand son contenu ne s'est pas relu. */
+  artifact: DecisionArtifactV1 | null;
+  /** La date de la version SERVIE. Nulle quand il n'y en a pas. */
+  generatedAt: string | null;
+  /**
+   * La dernière tentative, prête ou non. Toujours >= `servedVersion`, et son statut vient de LA
+   * MÊME LIGNE que son numéro (revue du 12/08/2026) : deux lectures parallèles pouvaient sinon
+   * composer un couple qui n'a jamais existé, `headVersion` d'une ligne et `headStatus` d'une autre.
+   */
+  headVersion: number;
+  headStatus: ArtifactStatus;
+  /** Quand la tentative de tête a été RÉSERVÉE. Sert à détecter une génération abandonnée. */
+  headCreatedAt: string | null;
+};
+
+/** Une ligne de `decision_artifact`, telle que la base la rend. */
+export type ArtifactRow = {
   version: number;
   status: ArtifactStatus;
   generatedAt: string | null;
-  /** Nul quand le statut n'est pas `ready`, ou quand le contenu ne s'est pas relu. */
-  artifact: DecisionArtifactV1 | null;
-  /**
-   * Le numéro d'une version plus récente qui n'est PAS servable (en cours de génération, ou en
-   * échec), quand la version servie n'est pas la dernière. `null` le reste du temps.
-   *
-   * Sert à deux choses : ne pas relancer une génération déjà en cours, et ne pas laisser croire que
-   * ce qu'on affiche est la dernière lecture produite.
-   */
-  versionPlusRecente?: number | null;
+  createdAt: string | null;
+  payload: unknown;
 };
+
+/**
+ * L'ÉTAT, DÉDUIT DES LIGNES. Pure et sans I/O, pour être testable sur les transitions qui comptent :
+ * `ready` + `generating`, `ready` + `failed`, payload invalide, plusieurs échecs d'affilée,
+ * génération abandonnée.
+ *
+ * ── UNE SEULE LISTE, ET LA TÊTE EN FAIT PARTIE ───────────────────────────────────────────────
+ * La fonction prenait la tête à part. Les deux requêtes du store partant en parallèle, une version
+ * qui se terminait entre les deux apparaissait dans l'une sans l'autre, et l'état composé annonçait
+ * « v2 prête » tout en servant la v1 : une demande concurrente réservait alors une v3 inutile. Ici,
+ * toutes les lignes entrent dans la même liste, la tête EST la ligne de version maximale, et son
+ * statut vient d'elle.
+ *
+ * Une même version peut arriver deux fois, lue par les deux requêtes à un instant différent. On
+ * garde alors la forme la plus avancée : les statuts ne reculent jamais (`generating` → `ready` |
+ * `failed`, tous deux terminaux), donc une ligne non `generating` est toujours la plus récente.
+ *
+ * Rend `null` quand il n'y a aucune ligne, ce qui veut dire « ce scope n'a jamais eu d'artefact »
+ * et ne se confond avec aucun échec.
+ */
+export function etatArtefact(lignes: ArtifactRow[]): StoredArtifact | null {
+  const parVersion = new Map<number, ArtifactRow>();
+  for (const ligne of lignes) {
+    const connue = parVersion.get(ligne.version);
+    if (!connue || connue.status === "generating") parVersion.set(ligne.version, ligne);
+  }
+  const triees = [...parVersion.values()].sort((a, b) => b.version - a.version);
+  const head = triees[0];
+  if (!head) return null;
+
+  for (const ligne of triees) {
+    if (ligne.status !== "ready") continue;
+    const artefact = parseDecisionArtifact(ligne.payload);
+    if (!artefact) continue;
+    return {
+      servedVersion: ligne.version, artifact: artefact, generatedAt: artefact.generatedAt,
+      headVersion: head.version, headStatus: head.status, headCreatedAt: head.createdAt,
+    };
+  }
+  return {
+    servedVersion: null, artifact: null, generatedAt: null,
+    headVersion: head.version, headStatus: head.status, headCreatedAt: head.createdAt,
+  };
+}
+
+/**
+ * LE BAIL D'UNE GÉNÉRATION : au-delà, on considère qu'elle ne finira jamais.
+ *
+ * ── POURQUOI UNE ÉCHÉANCE (revue du 12/08/2026) ──────────────────────────────────────────────
+ * `generating` est écrit AVANT le travail, et le travail tourne dans un `after()` ou une route
+ * plafonnée à 60 s. Une fonction tuée entre la réservation et la fin laisse donc une ligne qui ne
+ * changera plus jamais de statut. Sans échéance, cette ligne devenait la tête pour toujours : chaque
+ * clic sur « mettre à jour » répondait « déjà en cours », et le dossier ne pouvait plus JAMAIS
+ * produire de version. Le blocage qu'on vient de corriger pour l'échec existait à l'identique pour
+ * l'abandon, en plus silencieux, puisque rien ne le marque en base.
+ *
+ * Quinze minutes : très au-dessus des 60 s de `maxDuration`, donc jamais atteint par une génération
+ * qui vit encore ; assez court pour qu'un lecteur bloqué ne le reste pas une journée. Une reprise
+ * après expiration ne détruit rien : elle réserve le numéro SUIVANT, et la ligne abandonnée reste en
+ * base, telle qu'elle était.
+ */
+export const BAIL_GENERATION_MS = 15 * 60 * 1000;
+
+/** Une génération de tête est-elle abandonnée ? Sans date lisible, on ne l'affirme JAMAIS. */
+function generationAbandonnee(etat: StoredArtifact, maintenant: Date): boolean {
+  if (etat.headStatus !== "generating") return false;
+  if (!etat.headCreatedAt) return false;
+  const depuis = Date.parse(etat.headCreatedAt);
+  if (Number.isNaN(depuis)) return false;
+  return maintenant.getTime() - depuis > BAIL_GENERATION_MS;
+}
+
+/**
+ * LE NUMÉRO À RÉSERVER pour une nouvelle tentative, ou `null` quand il ne faut PAS en lancer.
+ *
+ * `null` ne signifie qu'une chose : une génération est en cours ET son bail court encore. La doubler
+ * ne produirait rien, la contrainte unique de la table refusant la place. L'appelant doit alors dire
+ * « en cours », jamais « abouti ».
+ *
+ * Une tentative ÉCHOUÉE ne bloque pas : le numéro suivant est libre, et c'est tout l'objet de la
+ * correction. Une version prête non plus : c'est le cas normal d'une mise à jour demandée. Une
+ * génération ABANDONNÉE non plus, passé son bail.
+ *
+ * `maintenant` est injecté : sans lui, l'échéance ne serait pas testable, et une règle de temps
+ * qu'on ne peut pas tester est une règle qu'on ne connaît pas.
+ */
+export function prochaineVersionAReserver(etat: StoredArtifact | null, maintenant: Date): number | null {
+  if (!etat) return 1;
+  if (etat.headStatus === "generating" && !generationAbandonnee(etat, maintenant)) return null;
+  return etat.headVersion + 1;
+}
+
+/**
+ * COMBIEN DE TENTATIVES AUTOMATIQUES on accepte d'empiler au-dessus de la version servie.
+ *
+ * Un rattrapage lancé depuis un RENDU (le figement d'un dossier antérieur au lot, le recalcul après
+ * dépôt d'un diagnostic) se déclenche à chaque ouverture de page. Autoriser sans limite le numéro
+ * suivant ferait, sur une panne durable, une version morte par rechargement : la table grossirait
+ * indéfiniment sans qu'aucune ne se termine. Au-delà de ce plafond, la page continue de servir ce
+ * qu'elle a et attend une demande EXPLICITE du lecteur, qui n'est bornée que par ses clics.
+ */
+export const TENTATIVES_AUTOMATIQUES_MAX = 3;
+
+/**
+ * Le numéro à réserver pour une tentative AUTOMATIQUE, ou `null` : génération en cours, ou plafond
+ * de tentatives atteint. La demande explicite du lecteur passe par `prochaineVersionAReserver`.
+ */
+export function prochaineVersionAutomatique(etat: StoredArtifact | null, maintenant: Date): number | null {
+  const version = prochaineVersionAReserver(etat, maintenant);
+  if (version === null || !etat) return version;
+  const tentativesMortes = etat.headVersion - (etat.servedVersion ?? 0);
+  return tentativesMortes >= TENTATIVES_AUTOMATIQUES_MAX ? null : version;
+}
 
 /**
  * QUEL DOSSIER LE LECTEUR VOIT, et c'est LA décision de tout ce lot.

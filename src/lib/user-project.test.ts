@@ -69,3 +69,37 @@ test("read : updatedAt absent -> null (jamais 1970)", () => {
   const out = normalizeUserProject({ posture: "recherche", rawText: "x", parsed: null });
   assert.equal(out?.updatedAt, null);
 });
+
+// ── L'UNICITÉ DES CLÉS DE PRÉFÉRENCE (revue du 12/08/2026) ────────────────────────────────────
+//
+// Le moteur lit un poids par `find` (`preferenceWeight`) : sur deux entrées de même clé, il applique
+// la PREMIÈRE et ignore la seconde. Rien n'imposait pourtant l'unicité, si bien qu'un projet
+// enregistré pouvait porter un poids que le moteur n'appliquerait jamais, et que deux projets de
+// décisions différentes signaient pareil (`signatureDecisionnelle` trie les couples clé:poids).
+
+test("une clé de préférence en double est ramenée à la PREMIÈRE occurrence", () => {
+  const avecDoublon = {
+    posture: "recherche", intent: null, rawText: "x",
+    parsed: {
+      reformulation: "Vous cherchez la fraîcheur.",
+      preferences: [{ key: "faible_chaleur", weight: 1 }, { key: "faible_chaleur", weight: 3 }],
+    },
+  };
+  const out = normalizeUserProjectInput(avecDoublon);
+  assert.deepEqual(out?.parsed?.preferences, [{ key: "faible_chaleur", weight: 1 }],
+    "la persistance doit enregistrer ce que le moteur applique, pas davantage");
+
+  // L'ORDRE INVERSE DONNE UN AUTRE PROJET, et c'est le point : le moteur passe de 1 à 3.
+  const inverse = normalizeUserProjectInput({
+    ...avecDoublon,
+    parsed: {
+      reformulation: "Vous cherchez la fraîcheur.",
+      preferences: [{ key: "faible_chaleur", weight: 3 }, { key: "faible_chaleur", weight: 1 }],
+    },
+  });
+  assert.deepEqual(inverse?.parsed?.preferences, [{ key: "faible_chaleur", weight: 3 }]);
+
+  // La lecture d'un projet DÉJÀ en base, écrit avant cette règle, est canonisée pareil.
+  const relu = normalizeUserProject({ ...avecDoublon, updatedAt: "2026-08-01T00:00:00.000Z" });
+  assert.deepEqual(relu?.parsed?.preferences, [{ key: "faible_chaleur", weight: 1 }]);
+});

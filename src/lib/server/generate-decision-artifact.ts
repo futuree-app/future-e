@@ -4,6 +4,7 @@ import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { assembleAddressDossier } from "@/lib/server/assemble-address-dossier";
 import { buildDecisionArtifact, artifactScopeKey, type DataSnapshot } from "@/lib/decision/decision-artifact";
 import { catnatInondationDepuisCompte } from "@/lib/decision/catnat-evidence";
+import { communeParent } from "@/lib/plm";
 import {
   claimArtifactSlot, completeArtifact, failArtifact,
 } from "@/lib/server/decision-artifact-store";
@@ -87,34 +88,47 @@ export async function generateDecisionArtifact(
   sb: SupabaseClient, userId: string, project: UserProject, cible: Cible, version = 1,
 ): Promise<GenerationOutcome> {
   const scopeKey = artifactScopeKey(cible.kind === "adresse" ? cible.dossierId : null);
+  // L'IDENTITÉ D'UN ARTEFACT EST LA COMMUNE, JAMAIS L'ARRONDISSEMENT (revue du 12/08/2026).
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  // Le webhook passe ici l'`insee` de l'intention de paiement, qui est le `citycode` du géocodeur,
+  // donc `75101` pour une adresse du 1er arrondissement de Paris. Toutes les LECTURES, elles,
+  // passent par le territoire actif, qui est remonté à la commune (`75056`). Sur Paris, Lyon et
+  // Marseille, l'artefact vendu à l'achat n'était donc jamais retrouvé : la page rattrapait, et
+  // écrivait une SECONDE v1 sous le code parent, datée du jour de la première ouverture. La
+  // décision affichée n'était pas celle du jour de la vente, ce que ce lot existe pour empêcher.
+  //
+  // La remontée se fait ICI, au seul endroit qui décide de l'identité d'une ligne. L'arrondissement
+  // n'est pas perdu pour autant : il continue de voyager dans `address.citycode`, que
+  // `buildCommuneDossier` passe aux sources qui ne connaissent QUE les arrondissements (le radon).
+  const insee = communeParent(cible.insee);
   try {
     // LA PLACE SE RÉSERVE AVANT DE TRAVAILLER. Deux webhooks concurrents, ou un rejeu Stripe,
     // constateraient sinon tous deux qu'aucun artefact n'existe et généreraient deux fois. Le perdant
     // s'arrête ici, sur la contrainte unique de la table.
-    const reserve = await claimArtifactSlot(sb, userId, cible.insee, scopeKey, version);
+    const reserve = await claimArtifactSlot(sb, userId, insee, scopeKey, version);
     if (!reserve) return { status: "skipped", reason: "artefact déjà réservé pour cette version" };
 
-    const commune = await buildCommuneDossier(cible.insee, project, {
+    const commune = await buildCommuneDossier(insee, project, {
       hasAddress: cible.kind === "adresse",
       citycode: cible.kind === "adresse" ? cible.address.citycode : null,
     });
     if (!commune) {
-      await failArtifact(sb, userId, cible.insee, scopeKey, version);
-      return { status: "failed", reason: `commune ${cible.insee} introuvable` };
+      await failArtifact(sb, userId, insee, scopeKey, version);
+      return { status: "failed", reason: `commune ${insee} introuvable` };
     }
 
     // LE SNAPSHOT DE DONNÉES, figé avec la décision. Il tient ce que d'AUTRES surfaces devront
     // réafficher à l'identique : sans lui, la carte du module Territoire relit l'index du
     // déploiement courant et peut afficher 7 sous une pastille vendue à 6.
     const dataSnapshot: DataSnapshot = {};
-    const catnat = catnatInondationDepuisCompte(commune.moduleFacts.catnatInondation, cible.insee);
+    const catnat = catnatInondationDepuisCompte(commune.moduleFacts.catnatInondation, insee);
     if (catnat) dataSnapshot.catnatInondation = catnat;
 
     if (cible.kind === "commune") {
       const artefact = buildDecisionArtifact(
         commune.dossier, project, new Date().toISOString(), PRODUCT_CONVENTIONS_VERSION, dataSnapshot,
       );
-      await completeArtifact(sb, userId, cible.insee, scopeKey, artefact, version);
+      await completeArtifact(sb, userId, insee, scopeKey, artefact, version);
       return { status: "ready" };
     }
 
@@ -151,19 +165,19 @@ export async function generateDecisionArtifact(
     //
     // L'échec est donc marqué, la place reste prise, et la génération se rejoue.
     if (vue.status !== "done") {
-      await failArtifact(sb, userId, cible.insee, scopeKey, version);
+      await failArtifact(sb, userId, insee, scopeKey, version);
       return { status: "failed", reason: "lecture Logement indisponible, repli communal non figé" };
     }
 
     const artefact = buildDecisionArtifact(
       vue.dossier, project, new Date().toISOString(), PRODUCT_CONVENTIONS_VERSION, dataSnapshot,
     );
-    await completeArtifact(sb, userId, cible.insee, scopeKey, artefact, version);
+    await completeArtifact(sb, userId, insee, scopeKey, artefact, version);
     return { status: "ready" };
   } catch (error) {
     // Le marquage lui-même peut échouer (base injoignable) : on ne laisse pas cette seconde panne
     // remonter, sinon elle masquerait la première et ferait tomber le webhook.
-    await failArtifact(sb, userId, cible.insee, scopeKey, version).catch(() => {});
+    await failArtifact(sb, userId, insee, scopeKey, version).catch(() => {});
     return { status: "failed", reason: error instanceof Error ? error.message : String(error) };
   }
 }
