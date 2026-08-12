@@ -59,9 +59,15 @@ const MODULE_GRAIN: Record<string, string> = {
 // communal du Suspense, le chemin adresse et le chemin commune seule. En oublier un ferait changer
 // la taille du titre au moment où le streaming se résout. La taille voyage avec la balise :
 // promouvoir le seul <h1> aurait laissé la réponse plus petite que les titres de section sous elle.
+// LA MESURE TRANCHE LA TAILLE, ET ELLE A TRANCHÉ (12/08/2026). Le headline déterministe est borné à
+// 130 caractères (`HEADLINE_MAX_CHARS`). Rendu à 360 px de large, la carte du verdict laisse 270 px
+// au titre : à `--text-display` (30 px à cette largeur), les phrases les plus longues du corpus
+// prennent SEPT à HUIT lignes, ce qui n'est plus un titre. À `--text-title` (23 px), les mêmes
+// phrases tiennent en cinq. Le repli ne vaut donc QUE pour le mobile ; au-delà de `sm`, la réponse
+// garde la taille du titre de page, sans quoi elle resterait plus petite que les titres sous elle.
 const TITRE_VERDICT = {
   niveau: "h1" as const,
-  classe: "text-[length:var(--text-display)] font-[var(--weight-display)] tracking-[-0.8px]",
+  classe: "text-[length:var(--text-display)] max-sm:text-[length:var(--text-title)] font-[var(--weight-display)] tracking-[-0.8px]",
 };
 
 const MODULE_BENEFIT: Record<string, string> = {
