@@ -121,6 +121,43 @@ const MENTION_RENONCEMENT =
 // l'achat, et un client qui change son nom ensuite ne doit pas changer la facture émise.
 
 
+/**
+ * ENVOYER, ET REGARDER SI C'EST PARTI (13/08/2026).
+ *
+ * Le SDK Resend NE LÈVE JAMAIS : il rend `{ data, error }`, y compris quand le domaine n'est pas
+ * vérifié, quand la clé est invalide, quand le destinataire est refusé ou quand la requête n'aboutit
+ * pas. Les trois envois de ce webhook faisaient `await resend.emails.send(...)` sans jamais lire ce
+ * retour : un échec passait donc inaperçu, le webhook répondait 200 à Stripe, et rien nulle part ne
+ * gardait trace de l'e-mail perdu.
+ *
+ * Constaté sur la PREMIÈRE VENTE RÉELLE (12/08/2026, dossier de Magné) : paiement encaissé, dossier
+ * créé, facture FE-2026-0001 émise, et aucun message reçu. Faute de journal, on ne peut même pas
+ * dire, après coup, si l'envoi a échoué ou si le message a été filtré à l'arrivée.
+ *
+ * ON NE LÈVE PAS POUR AUTANT. Lever ferait répondre 500 à Stripe, qui rejouerait l'événement ; or
+ * `created` vaut alors faux et le rejeu n'enverrait rien de plus, tout en laissant l'achat marqué
+ * en échec côté Stripe. Ce qui manquait n'est pas une exception, c'est une TRACE : elle est ici, et
+ * elle porte de quoi renvoyer la facture à la main (le PaymentIntent et l'adresse).
+ */
+async function envoyerEmail(
+  resend: ReturnType<typeof getResend>,
+  message: Parameters<ReturnType<typeof getResend>["emails"]["send"]>[0],
+  contexte: { pi: string; quoi: string },
+): Promise<void> {
+  const destinataire = Array.isArray(message.to) ? message.to.join(", ") : message.to;
+  try {
+    const { data, error } = await resend.emails.send(message);
+    if (error) {
+      console.error("[email] ENVOI REFUSÉ", { ...contexte, destinataire, error });
+      return;
+    }
+    console.log("[email] envoyé", { ...contexte, destinataire, id: data?.id ?? null });
+  } catch (error) {
+    // Le SDK ne lève pas, mais le rendu d'une pièce jointe ou une panne inattendue le peuvent.
+    console.error("[email] ENVOI EN ÉCHEC", { ...contexte, destinataire, error });
+  }
+}
+
 async function buildInvoiceAttachment(
   paymentIntent: Stripe.PaymentIntent,
   productType: InvoiceProductType,
@@ -327,7 +364,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
       const attachments = await buildInvoiceAttachment(
         paymentIntent, "address-dossier", intent.address_label,
       );
-      await resend.emails.send({
+      await envoyerEmail(resend, {
         from: "futur•e <hello@futur-e.fr>",
         to: userEmail,
         subject: "Votre dossier futur•e est ouvert",
@@ -339,7 +376,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
           <p>futur•e</p>
         `,
         attachments,
-      });
+      }, { pi: paymentIntent.id, quoi: "dossier d'adresse" });
     }
 
     // ÉMIS À LA CRÉATION SEULEMENT. Un rejeu compterait un second achat, et son
@@ -384,7 +421,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     );
     if (userEmail) {
       const attachments = await buildInvoiceAttachment(paymentIntent, "pack-decision", null);
-      await resend.emails.send({
+      await envoyerEmail(resend, {
         from: "futur•e <hello@futur-e.fr>",
         to: userEmail,
         subject: "Votre Pack Décision futur•e est débloqué",
@@ -396,7 +433,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
           <p>futur•e</p>
         `,
         attachments,
-      });
+      }, { pi: paymentIntent.id, quoi: "pack décision" });
     }
     const posthog = getPostHogClient();
     posthog.capture({
@@ -482,7 +519,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
       paymentIntent, "one-shot", commune || null,
     );
     const lieu = commune ? ` de ${commune}` : "";
-    await resend.emails.send({
+    await envoyerEmail(resend, {
       from: "futur•e <hello@futur-e.fr>",
       to: userEmail,
       subject: "Votre rapport futur•e est ouvert",
@@ -494,7 +531,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
           <p>futur•e</p>
       `,
       attachments,
-    });
+    }, { pi: paymentIntent.id, quoi: `territoire ${commune || insee || "?"}` });
   }
 
   const posthog = getPostHogClient();
