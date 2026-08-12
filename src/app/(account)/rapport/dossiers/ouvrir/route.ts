@@ -26,10 +26,23 @@ import { communeParent } from "@/lib/plm";
 export const runtime = "nodejs";
 
 // La destination vient de l'URL : liste blanche, jamais une redirection construite depuis le
-// paramètre. `territoire` mène au rapport de commune, qui est justement ce que la bascule ouvre.
+// paramètre.
+//
+// `territoire` MENAIT AU HUB, ET SON NOM DISAIT LE MODULE (corrigé le 13/08/2026). Le bouton
+// « La commune : Nantes » de la page des biens ouvrait donc `/rapport`, la page qui porte le verdict,
+// et le module Territoire (`/rapport/quartier`) n'était atteignable depuis aucun de ces boutons. Deux
+// clés distinctes, nommées d'après ce qu'elles ouvrent vraiment :
+//
+//   dossier  -> `/rapport`, le hub : le verdict, les cartes, les contrôles ;
+//   commune  -> `/rapport/quartier`, le module Territoire.
+//
+// `territoire` reste accepté, et garde SA cible historique (le hub) : un lien déjà en circulation ne
+// doit pas se mettre à ouvrir un autre écran. Il n'est plus construit nulle part.
 const DESTINATIONS: Record<string, (dossierId: string) => string> = {
+  dossier: () => "/rapport",
   logement: (id) => `/rapport/logement?dossierId=${encodeURIComponent(id)}`,
   autour: (id) => `/rapport/autour?dossierId=${encodeURIComponent(id)}`,
+  commune: () => "/rapport/quartier",
   territoire: () => "/rapport",
 };
 

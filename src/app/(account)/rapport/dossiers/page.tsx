@@ -86,10 +86,12 @@ export default async function RapportDossiersPage() {
                     {dpe ? `DPE ${dpe}` : "logement à préciser"} · créé le{" "}
                     {DATE_FMT.format(new Date(d.created_at))}
                   </p>
-                  {/* Les trois échelles du bien, et elles passent TOUTES par `ouvrir` : le clic
-                      pose le territoire de lecture sur la commune du dossier, sans quoi le lecteur
-                      obtenait Logement et Autour sur Nantes pendant que la commune restait sa
-                      résidence.
+                  {/* CE QUI S'OUVRE D'ABORD EST LA RÉPONSE, PAS UNE ÉCHELLE (13/08/2026).
+                      Cette page ne menait qu'aux modules. Le bouton « La commune » ouvrait bien
+                      `/rapport`, donc le dossier de décision, mais sous un libellé qui annonçait le
+                      module Territoire : le hub n'était nommé nulle part, et le module Territoire,
+                      lui, n'était atteignable depuis aucun de ces boutons. Le verdict passe en tête,
+                      les trois échelles suivent, chacune sous son nom.
 
                       <a> ET PAS <Link>, PARCE QUE LA CIBLE EST UNE ROUTE HANDLER. Avec <Link>, le
                       router demande un payload RSC, la Route Handler répond une redirection vers
@@ -97,13 +99,27 @@ export default async function RapportDossiersPage() {
                       effet. Constaté en production le 30/07/2026, la MÊME URL collée dans la barre
                       d'adresse fonctionnant parfaitement, ce qui a désigné le routing client et
                       disculpé le serveur. Un <a> natif fait une vraie navigation et suit le 307.
-                      `prefetch` n'a plus d'objet : un <a> n'est jamais préfetché. */}
+                      `prefetch` n'a plus d'objet : un <a> n'est jamais préfetché.
+
+                      Toutes ces destinations passent par `ouvrir` : le clic pose le territoire de
+                      lecture sur la commune du dossier, sans quoi le lecteur obtenait Logement et
+                      Autour sur Nantes pendant que la commune restait sa résidence. */}
+                  <a
+                    href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=dossier`}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[length:var(--text-dense)] no-underline"
+                  >
+                    Ouvrir le dossier
+                  </a>
+
+                  <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-ghost mt-6 mb-2.5">
+                    Ou une échelle en particulier
+                  </p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
                     <a
-                      href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=logement`}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent/[0.12] text-accent text-[length:var(--text-dense)] no-underline border border-accent/[0.25]"
+                      href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=commune`}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[length:var(--text-dense)] no-underline border border-[var(--border-1)]"
                     >
-                      Le logement
+                      {d.city ? `La commune : ${d.city}` : "La commune"}
                     </a>
                     <a
                       href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=autour`}
@@ -112,10 +128,10 @@ export default async function RapportDossiersPage() {
                       Autour de l&apos;adresse
                     </a>
                     <a
-                      href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=territoire`}
+                      href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=logement`}
                       className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[length:var(--text-dense)] no-underline border border-[var(--border-1)]"
                     >
-                      {d.city ? `La commune : ${d.city}` : "La commune"}
+                      Le logement
                     </a>
                   </div>
                 </div>
