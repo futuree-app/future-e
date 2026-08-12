@@ -20,7 +20,9 @@ export default async function DossierMerciPage({
       className="min-h-screen bg-canvas text-label relative overflow-hidden"
       style={{ fontFamily: "var(--font-sans)" }}
     >
-      <Navbar ctas={{ primary: { href: "/rapport/dossiers", label: "Mes dossiers" } }} />
+      {/* « Mes biens » partout : la même destination portait deux noms, et le lecteur qui vient
+          d'acheter est le moins bien placé pour deviner qu'ils désignent la même page. */}
+      <Navbar ctas={{ primary: { href: "/rapport/dossiers", label: "Mes biens" } }} />
 
       <div className="relative z-[2] max-w-[920px] mx-auto px-7 pb-24 pt-14">
         <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">

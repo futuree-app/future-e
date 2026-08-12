@@ -64,6 +64,15 @@ export const NAV_ITEMS: NavItem[] = [
   },
 
   { label: 'Mon rapport', href: '/rapport' },
+  // MES BIENS ENTRE DANS LA NAVIGATION GLOBALE (13/08/2026). La page qui liste les dossiers d'un
+  // compte n'était atteignable que par le CTA `primary` de la navbar, posé page par page : depuis
+  // `/rapport`, Territoire, Logement, Autour et `/compte`. Depuis la landing, `/ou-vivre`, `/dossier`
+  // ou une page Savoir, donc partout où un acheteur revient par le site, il n'y avait aucun chemin.
+  // « Mon rapport » y mène en deux clics, mais rien ne l'annonce.
+  //
+  // Sans session, la page redirige vers la connexion : c'est déjà le sort de « Mon rapport », posé
+  // ici sans condition, et la navbar est un composant client qui ne connaît pas la session.
+  { label: 'Mes biens', href: '/rapport/dossiers' },
   { label: 'Comparateur', href: '/comparateur' },
   { label: 'Pourquoi futur•e', href: '/pourquoi' },
 ];
