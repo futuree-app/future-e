@@ -1,189 +1,180 @@
-# Passation — 2026-08-12, branche `main`
+# Passation : 2026-08-12, branche `main`
 
-**Horodatage** : 2026-08-12, soirée · **Branche** : `main` = `2756ccd`, **rien en attente**.
-Production déployée depuis `2756ccd` (build `future-3u6rfjuix`, parti au push).
+**Horodatage** : 2026-08-12, soirée · **Branche** : `main` = `88c7cbc`, **5 commits non poussés**
+(tous de la documentation : spec et plan du chantier 6). Production déployée depuis `2756ccd`
+(build `future-3u6rfjuix`, Ready).
 
-> **Le chantier 5 est CLOS et poussé.** Le durcissement en quatre points demandé par la revue
-> externe a été fait, puis étendu à six défauts trouvés en le faisant (détail dans
-> « Fait dans cette session »). Le prochain chantier est le **6 (premier écran)**.
-
-> Le brief précédent (04/08, chantiers charte / données / permis) est **entièrement périmé** : ses
-> trois chantiers sont fusionnés et déployés. Il est archivé sous
-> `docs/handoff/2026-08-11-avant-sprint-confiance.md` si besoin de sa trace.
+> **Le chantier 5 est CLOS, poussé et déployé.** Le chantier 6 (premier écran) est **spécifié et
+> planifié, pas commencé** : aucune ligne de code applicatif n'a été écrite pour lui. La reprise
+> consiste à EXÉCUTER un plan déjà validé, tâche par tâche.
 
 ---
 
 ## Objectif en cours
 
-**Sprint de confiance pré-bêta**, pour qu'un testeur payant ne rencontre aucune affirmation ni
-aucune preuve trompeuse. Contrainte qui gouverne tout : quelques ventes RÉELLES encaissées avant le
-**20/08/2026** (activité conservée au CSP, cf. `/memory/project_csp_activite_conservee.md`).
+**Chantier 6 : recomposer `/rapport` autour de la décision.** Le lecteur qui vient de payer voit
+aujourd'hui une promesse commerciale en très grand, un panneau de navigation, un sélecteur d'horizon
+qui ne change rien sur cette page, une carte projet, puis seulement la conclusion qu'il a achetée.
+Le chantier remonte la conclusion en tête et fait de cet écran la seule surface où l'on modifie le
+cadrage de l'analyse (objectif, intention, priorités, relation au lieu lu).
 
-Le sprint compte sept chantiers. **Six sont faits**, le septième (premier écran) est le prochain.
-Un durcissement de quatre points est en cours sur le dernier livré, demandé par la revue externe
-et **non commencé** (détail plus bas).
+Contrainte qui gouverne tout le reste : quelques ventes RÉELLES encaissées avant le **20/08/2026**
+(activité conservée au CSP, cf. `/memory/project_csp_activite_conservee.md`).
 
 ---
 
 ## Fait dans cette session
 
-Trente-deux commits, du `08d6d44` au `d74ff26`. Le détail par étape, avec ce que chacune garantit
-et ce qu'elle ne garantit pas, est dans **`docs/audits/2026-08-11-sprint-confiance-dossier-de-revue.md`**
-(à lire avant de juger un commit isolé).
+**Chantier 5, durcissement, MERGÉ ET DÉPLOYÉ** (`2756ccd`, treize fichiers, 1400 tests verts). Six
+défauts fermés, tous vérifiés dans le code avant correction :
 
-**En production** (poussé) :
+1. `versionPlusRecente` confondait `generating` et `failed` : après une v2 en échec, chaque clic sur
+   « mettre à jour » répondait `ok` et aucune v3 ne naissait. Remplacé par `servedVersion` /
+   `headVersion` + `headStatus`, pris sur LA MÊME ligne.
+2. Un `generating` abandonné (fonction tuée après la réservation) verrouillait le dossier à vie.
+   Bail de 15 min sur `created_at`, `maintenant` injecté pour être testable.
+3. La lecture s'arrêtait à `.limit(5)` : au sixième échec, la v1 payée disparaissait de l'écran. La
+   tête se lit seule, les versions prêtes se paginent jusqu'à une lisible.
+4. `/api/dossier/actualiser` acceptait un `scopeKey` hors grammaire et ne vérifiait pas que le
+   dossier appartenait à la commune. Grammaire validée, `communeParent` imposé des deux côtés.
+5. L'identité d'artefact était l'arrondissement au webhook (`75101`) et la commune en lecture
+   (`75056`) : sur Paris, Lyon, Marseille, l'artefact vendu n'était jamais retrouvé. Remonté à la
+   commune aux deux bouts. **Vérifié en production : aucune ligne à migrer** (5 lignes en tout dans
+   `decision_artifact`, sur `17300` et `44109`).
+6. `signatureDecisionnelle` ratait de vrais changements (projet libre vers structuré, clé de
+   préférence en double) et en inventait (contrainte inactive, ancre souple, `maxKm` sous un
+   `maxMinutes`). Les règles d'activité sont désormais EMPRUNTÉES à `hard-constraints-hydrate.ts` et
+   `project-view.ts`, jamais recopiées.
 
-- Le verdict comptait des points invérifiables à l'écran ; il compte les contrôles montrés.
-- Le diagnostic choisi APRÈS l'achat n'entrait dans aucune décision (`artefactPerimeParLeDpe`).
-- `RESEND_API_KEY` et `FUTUREE_ADMIN_EMAILS` posées en prod : sans elles, tout paiement réel était
-  encaissé sans rien livrer (le webhook levait avant d'écrire le dossier).
-- Garde-fous des synthèses : altitude retirée du payload, `validateAssertions` qui REFUSE, cache
-  validé, orchestration testable (`lib/synthesis-run.ts`), bloc qui disparaît sans message.
-- Chaîne de preuve : sources réelles du module Logement, lien qui démontre (`risk.catnat`), objet
-  partagé `lib/decision/catnat-evidence.ts`, snapshot de données dans l'artefact, indice interne
-  interdit d'affichage (garde dans `assertFactValid`).
-- Bien actif : colonne `active_dossier_id` (migration 29 **appliquée en prod**), contexte de lecture
-  dès le premier rendu (`lib/server/contexte-de-lecture.ts` + en-tête posé par `src/proxy.ts`),
-  CTA qui portent le bien, droits d'AskFuture alignés sur `canAccessTerritory`, quota unifié
-  (`quotaQuestions` dans `lib/territory-claims.ts`).
+**Chantier 6, documentation, NON POUSSÉE** :
 
-- **Chantier 5** (`d74ff26`) : l'analyse répond-elle encore au projet du lecteur. Comparaison
-  SÉMANTIQUE (`lib/decision/projet-materiel.ts`), bandeau + bouton
-  (`components/report/AnalyseAncienProjet.tsx`), route `/api/dossier/actualiser` qui produit une
-  version n+1, lecture de la dernière version SERVABLE, et durcissement AskFuture (une panne de
-  quota masque le widget au lieu de faire tomber le rapport).
-- **Durcissement du chantier 5** (`2756ccd`, six défauts) : `versionPlusRecente` remplacé par
-  `servedVersion` / `headVersion` + `headStatus` pris sur LA MÊME ligne (une v2 en échec bloquait
-  toute v3) ; bail de 15 min sur `created_at` pour qu'un `generating` abandonné ne verrouille pas le
-  dossier à vie ; recherche paginée de la dernière version servable (le `.limit(5)` faisait
-  disparaître une v1 payée après cinq échecs) ; grammaire du `scopeKey` + `communeParent` imposé des
-  deux côtés dans la route ; identité d'artefact remontée à la COMMUNE (le webhook écrivait sous
-  `75101` ce que toute lecture cherchait sous `75056`) ; signature décisionnelle qui ne rate plus un
-  vrai changement (libre → structuré, clé de préférence en double) et n'en invente plus (contrainte
-  inactive, ancre souple, `maxKm` sous un `maxMinutes`). Les règles d'activité sont EMPRUNTÉES à
-  `hard-constraints-hydrate.ts`, jamais recopiées.
+- `docs/superpowers/specs/2026-08-12-premier-ecran-decision-design.md` (`00a0ebf`, corrigé par
+  `83223aa` et `89882e0`) : neuf sections, dix cas limites, neuf invariants vérifiables.
+- `docs/superpowers/plans/2026-08-12-premier-ecran-decision.md` (`f32725e`, corrigé par `88c7cbc`) :
+  **dix tâches**, avec le code à écrire, les tests, les commandes de vérification et les messages de
+  commit.
+
+Spec et plan ont chacun subi deux tours de revue externe (six puis quatre constats sur la spec, huit
+sur le plan), tous traités.
 
 ---
 
 ## Décisions prises, pas encore dans le vault
 
-1. **Porteur** : un texte de synthèse refusé par les contrôles fait disparaître **tout le bloc**,
-   sans message. Une panne technique, elle, garde son message et son bouton.
-2. **Porteur** : le contrat du bien actif est « **dernier bien effectivement ouvert** », pas
-   « dernier sélectionné dans une liste ». Toute page qui ouvre un bien le pose.
-3. **Proposé, appliqué** : la mise à jour d'une analyse après changement de PROJET se **demande**
-   (bouton), quand une pièce déposée par le lecteur (diagnostic) recalcule **seule**. Doctrine :
-   `docs/vault/vision/objet-central-dossier-de-decision.md`.
-4. **Proposé, appliqué** : `address_dossiers.posture` reste **non matérielle** (elle n'entre pas
-   dans `assemble-address-dossier`). La faire périmer produirait des versions identiques. À
-   rebrancher le jour où elle entre dans la décision.
-5. **Proposé, appliqué** : aucune tolérance de schéma en repli. Une colonne manquante fait échouer
-   l'écran explicitement plutôt que de servir un compte vidé.
+1. **Porteur** : le H1 de `/rapport` devient la CONCLUSION. Le bloc verdict existant est promu ; le
+   cadrage climat descend au niveau des modules, dont il est le sujet.
+2. **Porteur** : le sélecteur d'horizon quitte le hub (il n'y change rien de visible) et reste sur
+   Territoire, qui porte déjà son propre sélecteur inline.
+3. **Porteur** : une seule surface d'ÉDITION, **sans fusionner les stockages**. `user_project` reste
+   global au compte, `report_context.relation` reste attaché au lieu. Quelqu'un peut habiter Lorient
+   et envisager La Rochelle : une posture, deux relations. La synthèse Territoire reçoit exactement
+   la même valeur qu'aujourd'hui, aucun prompt n'est touché.
+4. **Porteur** : les pages de résultat cessent de poser des questions. La sonde du Logement est
+   supprimée, le bandeau de Territoire devient une ligne qui DIT le cadrage avec un lien vers
+   `/rapport#projet`.
+5. **Proposé, retenu** : `posture: habitant` avec `intent: achat` reste possible (le locataire qui
+   achète son logement est un cas réel). L'intention est toujours demandée, son libellé suit
+   l'objectif, et « ni l'un ni l'autre » écrit `null`. Effacer silencieusement une valeur déclarée
+   est refusé.
+6. **Proposé, retenu** : le panneau compact des échelles est SUPPRIMÉ en mode payant (il double la
+   section `#modules`), conservé tel quel en gratuit où rien ne le double.
+7. **Proposé, retenu** : les versions d'artefact nées de la recette du 12/08 restent en base. Une
+   version ne se supprime pas, c'est la promesse de la migration 28.
 
 ---
 
 ## État git
 
-- `main` = `2756ccd` = `origin/main`. Rien en attente.
+- `main` = `88c7cbc`, **5 commits en avance sur `origin/main`** : `00a0ebf`, `83223aa`, `89882e0`,
+  `f32725e`, `88c7cbc`. Tous documentaires (spec, plan, ce brief mis à jour).
+- Aucun fichier applicatif modifié. `git status` propre hors non-suivis.
 - Non suivis, volontairement hors dépôt : `CHARTE/`, `.impeccable/`, `Futur.e Design System.zip`.
-- `.prive/` (ignoré) contient `artefacts-avant-regeneration-2026-08-11.json` : la seule photographie
-  des anciens artefacts, fixture d'une migration future. Ne jamais commiter.
 - Aucune PR ouverte. Un push sur `main` déploie, **sans étape Preview**.
 - **Piège vu deux fois** : le webhook Vercel n'a pas déclenché de build sur un push. Un commit vide
-  poussé le réveille. Ne PAS faire `vercel deploy` depuis le CLI, il téléverserait les 92 Mo de
-  `CHARTE/`, non suivi et absent du `.gitignore`.
+  le réveille. Ne PAS faire `vercel deploy` en CLI, il téléverserait les 92 Mo de `CHARTE/`.
 
 ---
 
 ## Prochaine étape immédiate
 
-**Chantier 6 : le premier écran.** Hiérarchie seule, aucune donnée nouvelle : le bien et le projet,
-la conclusion, les contradictions et les inconnues, les actions, les preuves ensuite. Validation par
-captures desktop ET mobile.
+**Exécuter le plan `docs/superpowers/plans/2026-08-12-premier-ecran-decision.md`, tâche par tâche,
+en commençant par la Task 1.**
 
-<details>
-<summary>Pour mémoire : le durcissement en quatre points, FAIT dans le commit <code>2756ccd</code></summary>
+Le plan est autoportant : chaque tâche liste ses fichiers, son code, ses commandes de vérification et
+son message de commit. Deux modes possibles, au choix du porteur : un sous-agent neuf par tâche avec
+revue entre chaque (recommandé, c'est aussi ce qui protège le contexte), ou une exécution en ligne
+par lots avec points d'arrêt.
 
+L'ordre des tâches n'est pas indifférent, deux dépendances sont réelles :
 
-1. **Bloquant** : `versionPlusRecente` (`lib/server/decision-artifact-store.ts`) confond `generating`
-   et `failed`, et `/api/dossier/actualiser` traite les deux comme « déjà en cours ». Après une v2
-   en échec, chaque clic répond `ok` et **aucune v3 ne naît**. Même verrou dans
-   `DossierAvecLogement` (recalcul DPE), qui retente le numéro déjà réservé.
-   Contrat cible : `servedVersion` (dernière prête et valide), `headVersion` + `headStatus`
-   (dernière tentative) ; `generating` = attendre sans annoncer un succès ; `failed` = autoriser
-   `maxVersion + 1` ; `skipped` du générateur = réponse « en cours », pas « abouti ».
-2. **Bloquant** : `/api/dossier/actualiser` vérifie le droit sur `insee` et la propriété du dossier
-   SANS vérifier que le dossier appartient à cette commune, et accepte un `scopeKey` hors grammaire.
-   Valider `commune` | `logement:<uuid>` et imposer
-   `communeParent(dossier.insee) === communeParent(insee)`.
-3. **Important** : `signatureDecisionnelle` (`lib/decision/projet-materiel.ts`) ne trie que les clés
-   de PREMIER niveau. Deux faux changements reproduits par la revue : mêmes `nearPlace` avec clés
-   imbriquées dans un autre ordre, mêmes départements dans un autre ordre de tableau. Il faut une
-   sérialisation récursive stable et normaliser les listes qui sont des ENSEMBLES (`departements`,
-   `excludePlace`…). Le test « ordre des préférences et des contraintes » ne change en réalité que
-   l'ordre des préférences : il ment sur sa couverture.
-4. **Important** : la garantie « la v1 reste lisible » s'arrête à `.limit(5)`. Extraire le sélecteur
-   d'état en fonction PURE et le tester sur `ready + generating`, `ready + failed`, payload
-   invalide, et plusieurs échecs d'affilée.
+- la **Task 2** retire l'eyebrow « En une minute » AVANT que la **Task 3** n'en pose un dans
+  l'en-tête, sinon l'écran en montre deux ;
+- la **Task 9** réécrit le test du module Logement AVANT de changer la signature, pour le voir
+  échouer.
 
-Recette navigateur faite sur bundle de production local, compte payé : changement matériel détecté
-sur les deux scopes, actualisation Territoire et Adresse jusqu'à `ready`, bandeau disparu au
-rechargement, rendu vérifié desktop et mobile.
+Trois tâches contiennent une décision ou une mesure à ne pas escamoter :
 
-</details>
+- **Task 5** : la taille du titre se MESURE (headline déterministe le plus long, rendu à 360 px), et
+  le résultat va dans le message de commit. Cinq lignes ou moins : `--text-display` partout. Plus :
+  repli `--text-title` en mobile seul.
+- **Task 6** : l'avertissement de parse ne s'affiche qu'APRÈS confirmation serveur, et il survit à la
+  fermeture de l'éditeur. Il ne passe jamais par `error`.
+- **Task 10** : deux des quatre captures demandent un projet dégradé. Compte jetable en premier
+  choix ; à défaut, la procédure SQL de sauvegarde et de restauration vérifiée est écrite dans le
+  plan. L'état non payant se lit avec un compte sans droit, jamais en retirant un droit payé.
 
-> **Les lignes de recette restent en base, et c'est voulu.** Les deux scopes du compte de test
-> portent des v2 et des v3 nées de la recette du 12/08. Elles sont immuables, cohérentes, et ne sont
-> pas servies. Elles ne se nettoient pas : supprimer une version d'artefact contredirait la promesse
-> de la migration 28. À savoir seulement le jour où le nombre de versions d'un dossier deviendra une
-> donnée d'analyse : sur ce compte, il raconte une recette, pas un usage.
+Après les dix tâches : test navigateur, puis push (qui déploie).
 
 ---
 
 ## À lire d'abord à la reprise
 
-1. `MEMORY.md`, puis `project_objet_central_dossier.md`, `audit_compte_reel_p0.md`,
-   `project_csp_activite_conservee.md`, `piege_env_prod_vs_local.md`.
-2. **`docs/audits/2026-08-11-sprint-confiance-dossier-de-revue.md`** : les 17 premières étapes, ce
-   qu'elles garantissent, et où elles restent faibles.
-3. `docs/vault/vision/objet-central-dossier-de-decision.md` : la thèse, les quatre niveaux
-   (Profil → Projet → Candidat → Version), « un prompt n'est pas une frontière de sûreté », les huit
-   invariants, l'ordre du prochain chantier.
-4. `docs/audits/2026-08-11-syntheses-logement-fautives.md` : les trois textes fautifs, mot pour mot.
-5. Le code du sujet courant : `lib/decision/projet-materiel.ts`,
-   `lib/server/decision-artifact-store.ts`, `app/api/dossier/actualiser/route.ts`,
-   `lib/decision/decision-artifact.ts`.
-6. `docs/handoff/AUTO-SNAPSHOT.md` pour vérifier la fraîcheur (il date du 08/07, il est périmé).
+1. `MEMORY.md`, puis `project_objet_central_dossier.md`, `project_csp_activite_conservee.md`,
+   `audit_compte_reel_p0.md`, `feedback_text_maxwidth.md`, `feedback_no_em_dash.md`,
+   `feedback_no_antithese.md`.
+2. **`docs/superpowers/specs/2026-08-12-premier-ecran-decision-design.md`** : le POURQUOI de chaque
+   décision du plan. À lire avant le plan, sans quoi certaines contraintes paraîtront arbitraires.
+3. **`docs/superpowers/plans/2026-08-12-premier-ecran-decision.md`** : ce qu'il y a à faire.
+4. `docs/vault/vision/objet-central-dossier-de-decision.md` : la thèse, les quatre niveaux
+   (Profil → Projet → Candidat → Version), les huit invariants. Le chantier 6 est le point 5 de « L'ordre
+   du prochain chantier », et le dernier.
+5. `docs/audits/2026-08-11-sprint-confiance-dossier-de-revue.md` : les 17 premières étapes du sprint,
+   ce qu'elles garantissent, où elles restent faibles.
+6. Le code du sujet : `src/app/(account)/rapport/page.tsx`,
+   `src/components/report/DossierDecisionSection.tsx`, `src/components/report/ConclusionBlock.tsx`,
+   `src/components/report/ProjectSummaryCard.tsx`.
+7. `docs/handoff/AUTO-SNAPSHOT.md` pour vérifier la fraîcheur (il date du 08/07, il est périmé).
 
 ---
 
 ## Pièges et fils ouverts
 
-- **Stripe n'est PAS vérifié en mode Live.** C'est le seul verrou restant pour la vente, et il
-  appartient au porteur : clé `sk_live_`, et surtout un endpoint webhook **Live** vers
-  `https://futur-e.fr/api/stripe/webhook` dont le `whsec_` est celui posé sur Vercel. Aucun achat
-  RÉEL n'a encore eu lieu.
-- **Recette finale prévue, non faite** : achat réel d'un second bien dans la MÊME commune (vérifie
-  la bascule du bien actif), puis `stripe events resend <id>` sur un ancien événement : le bien
-  actif ne doit PAS changer (le garde `created` du webhook protège ce cas).
-- **Les artefacts vendus avant le 11/08 n'ont pas de `dataSnapshot`** : leur carte du module
-  Territoire retombe sur l'index courant. Décision porteur en attente : hors garantie, backfill, ou
-  adaptateur de rendu.
-- **`comparateur-index.json` ne porte AUCUNE date de génération** dans son `meta`. Tant qu'il n'en a
-  pas, aucun objet de preuve ne peut identifier l'état de donnée qu'il a utilisé, et `catnat-1` ne
-  versionne que la convention.
-- **La source d'une preuve portant une valeur reste invisible** : `factSources` exclut les
-  références à `observedValue`, donc la carte DPE n'affiche aucune provenance. Corriger en une ligne
-  exposerait les libellés vagues du Territoire (« Territoire · Toulouse ») : la séquence juste est
-  d'ajouter un champ de provenance distinct de `label`, puis de migrer les deux modules.
-- **`synthesize-quartier` et la synthèse Territoire n'ont AUCUN garde-fou d'assertions.** La même
-  faute qu'au Logement y est possible. Leur registre d'interdits leur est propre : ne pas réutiliser
-  mécaniquement la liste du Logement (l'altitude peut y être légitime).
-- **Le taux de refus des synthèses est inconnu.** Les logs portent la famille et le nombre d'essais,
-  jamais le texte : mesurable dans les journaux Vercel dès les premiers dossiers.
+- **Ne JAMAIS remonter la date de l'analyse, son grain ou son obsolescence au-dessus du `Suspense`.**
+  La page ne connaît que l'artefact COMMUNAL ; pour un dossier d'adresse, ces valeurs ne sont connues
+  qu'après la lecture de l'artefact du scope `logement:<id>`, dans le composant streamé. Les remonter
+  daterait le verdict d'adresse avec la date d'un autre artefact, et rouvrirait par une décision de
+  mise en page le défaut que le chantier 5 vient de fermer. C'est la contrainte n°1 du plan.
+- **Une seule fonction dérive la posture** : `bucketDuProjet` (`lib/decision/logement-gestes.ts:37`),
+  qui teste l'intention AVANT la posture. Ne pas en écrire une seconde. Une première version du plan
+  en proposait une, avec la priorité inverse.
+- **Stripe n'est PAS vérifié en mode Live.** Seul verrou restant pour la vente, et il appartient au
+  porteur : clé `sk_live_`, et un endpoint webhook **Live** vers `https://futur-e.fr/api/stripe/webhook`
+  dont le `whsec_` est celui posé sur Vercel. Aucun achat RÉEL n'a encore eu lieu.
+- **Les versions de recette restent en base.** Les deux scopes du compte de test portent des v2 et v3
+  nées de la recette du 12/08. Elles ne sont pas servies, elles ne se nettoient pas. À savoir le jour
+  où le nombre de versions d'un dossier deviendra une donnée d'analyse : sur ce compte, il raconte une
+  recette.
+- **Les artefacts vendus avant le 11/08 n'ont pas de `dataSnapshot`** : leur carte du module Territoire
+  retombe sur l'index courant. Décision porteur en attente : hors garantie, backfill, ou adaptateur.
+- **`comparateur-index.json` ne porte AUCUNE date de génération** dans son `meta`. Sans elle, aucun
+  objet de preuve ne peut identifier l'état de donnée utilisé.
+- **La source d'une preuve portant une valeur reste invisible** : `factSources` exclut les références
+  à `observedValue`. Corriger en une ligne exposerait les libellés vagues du Territoire ; la séquence
+  juste est d'ajouter un champ de provenance distinct de `label`, puis de migrer les deux modules.
+- **`synthesize-quartier` et la synthèse Territoire n'ont AUCUN garde-fou d'assertions.** La même faute
+  qu'au Logement y est possible. Leur registre d'interdits leur est propre : ne pas réutiliser
+  mécaniquement la liste du Logement.
 - **Page `/compte/memoire`** : elle promet « ce que futur•e sait de vous » en lisant des colonnes
-  historiques SANS `user_project`, qui est pourtant ce qui pilote l'analyse. Aucune faille de
-  sécurité (vérifié : l'accès vient des seuls `claims`), mais le titre est faux. Candidat naturel du
-  niveau **Profil** de l'architecture cible.
+  historiques SANS `user_project`, qui pilote pourtant l'analyse. Aucune faille, mais le titre est faux.
 - **Le site reste fermé au crawl** (`robots.txt` en `Disallow: /`) et **aucun médiateur de la
   consommation n'est désigné** (art. L612-1). Les deux survivent aux handoffs.
