@@ -12,6 +12,8 @@ import { RapportPremiereLecture } from "@/components/wizard/RapportPremiereLectu
 import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
 import { OuVivreProjectSync } from "@/components/OuVivreProjectSync";
 import { ProjectSummaryCard } from "@/components/report/ProjectSummaryCard";
+import { EnTeteDossier } from "@/components/report/EnTeteDossier";
+import { contenuDuHero, ANCRE_PROJET } from "@/lib/decision/premier-ecran";
 import { normalizeUserProject } from "@/lib/user-project";
 import { Suspense } from "react";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
@@ -236,6 +238,12 @@ export default async function RapportPage() {
     ? allModules.filter((m) => m.id === "quartier" || Boolean(logementForCommune))
     : [];
 
+  // LE CONTENU DU HAUT DE PAGE, décidé par une fonction pure et testée (quatre états). La page ne
+  // rejoue pas la règle : elle la consomme.
+  const heroContenu = contenuDuHero({
+    fullReport, project: userProject, commune: communeName,
+  });
+
   return (
     <div
       className="min-h-screen bg-canvas text-label relative overflow-hidden"
@@ -346,6 +354,99 @@ export default async function RapportPage() {
           </div>
         )}
 
+        {/* ── EN TÊTE : L'IDENTITÉ DE CE QUI EST LU, PUIS LA RÉPONSE ACHETÉE ─────────────
+            Le lecteur qui venait de payer voyait, dans cet ordre : une promesse commerciale en très
+            grand, un sommaire, un réglage sans effet, une carte projet, et SEULEMENT ENSUITE la
+            conclusion qu'il avait achetée. L'en-tête porte ce qui ne dépend d'aucun artefact (lieu,
+            bien, projet du jour), le bloc du dossier porte la réponse et les métadonnées de la
+            version qu'il sert. */}
+        {fullReport ? (
+          <EnTeteDossier
+            lieu={displayName}
+            bienLabel={logementForCommune?.address_label ?? null}
+            bienAlternatif={choixDossier.autres.length > 0}
+            choixParDefaut={choixDossier.raison === "repli_plus_recent"}
+            intent={userProject?.intent ?? null}
+            reformulation={userProject?.parsed?.reformulation ?? userProject?.rawText ?? null}
+            contenu={heroContenu}
+          />
+        ) : null}
+
+        {/* ── Le dossier de décision (payant, grain commune) ── */}
+        {dossier && communeResult && inseeCode ? (
+          dossierAddress && logementForCommune ? (
+            <Suspense
+              fallback={
+                // Le repli porte la liste lui aussi : son verdict annonce déjà des constats
+                // « plus bas », et une promesse tenue seulement après l'augmentation serait fausse
+                // pendant tout le temps d'attente.
+                <>
+                  <DossierDecisionSection
+                    dossier={dossier}
+                    logement={dossierLogementLink}
+                    logementStatus="pending"
+                    insee={inseeCode}
+                    scopeKey="commune"
+                    generatedAt={dossierGenereLe}
+                    provenance={provenanceCommune}
+                    projetAChange={projetCommuneAChange}
+                    espacement="mt-6"
+                  />
+                  <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
+                </>
+              }
+            >
+              <DossierAvecLogement
+                project={userProject!}
+                address={dossierAddress}
+                savedDpe={logementForCommune.selected_dpe_snapshot}
+                dpeChoisiLe={logementForCommune.selected_dpe_at}
+                permis={logementForCommune.snapshot?.permis ?? null}
+                communeFacts={communeResult.moduleFacts}
+                communeDossier={dossier}
+                logementLink={dossierLogementLink}
+                insee={inseeCode}
+                scopeKey={`logement:${logementForCommune.id}`}
+                // Les contraintes dures, hydratées UNE fois : la section n'en change que le point
+                // d'évaluation (l'adresse), elle ne re-résout aucune référence.
+                hard={communeResult.hard}
+                userId={user.id}
+                espacement="mt-6"
+              />
+            </Suspense>
+          ) : (
+            // Dossier de commune seule : la liste complète des contrôles se rend ici aussi, avec
+            // son seul groupe « Territoire ». Le verdict y annonce déjà des constats « plus bas »,
+            // et cette promesse ne dépend pas de la présence d'une adresse.
+            <>
+              <DossierDecisionSection
+                dossier={dossier}
+                logement={dossierLogementLink}
+                logementStatus="none"
+                insee={inseeCode}
+                scopeKey="commune"
+                generatedAt={dossierGenereLe}
+                provenance={provenanceCommune}
+                projetAChange={projetCommuneAChange}
+                espacement="mt-6"
+              />
+              <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
+            </>
+          )
+        ) : null}
+
+        {/* LE GESTE DE L'ÉTAT « PROJET NON STRUCTURÉ » SUIT LE TITRE QU'IL ACCOMPAGNE : ce titre est
+            porté par le bloc verdict, rendu par le composant streamé juste au-dessus. Le placer dans
+            l'en-tête l'aurait fait précéder la phrase à laquelle il répond. */}
+        {heroContenu.kind === "verdict" && heroContenu.geste ? (
+          <Link
+            href={heroContenu.geste.href}
+            className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline"
+          >
+            {heroContenu.geste.label}
+          </Link>
+        ) : null}
+
         {/* ── Hero ── */}
         {/* La colonne de 400 px n'existe qu'à partir de `lg`. En dessous, le hub des modules passe
             sous le titre au lieu d'écraser la colonne de lecture à ~200 px. */}
@@ -453,93 +554,6 @@ export default async function RapportPage() {
         <div className="mt-12">
           <ProjectSummaryCard initial={userProject} />
         </div>
-
-        {/* ── LE BIEN LU EST NOMMÉ, ET IL SE CHANGE ──────────────────────────────────────
-            Un choix implicite juste reste un choix implicite : le hub servait le dossier le plus
-            récemment créé de la commune sans le dire, et un compte à plusieurs biens ne pouvait pas
-            savoir lequel il lisait. La ligne n'apparaît que s'il y a une alternative : sur un compte
-            à un seul bien, elle n'apprendrait rien et ajouterait du bruit. */}
-        {logementForCommune && choixDossier.autres.length > 0 && (
-          <div className="mt-8 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[13.5px]">
-            <span className="text-muted">
-              {/* LA RAISON DU CHOIX EST DITE, ET PAS SEULEMENT CALCULÉE (revue du 11/08/2026).
-                  Elle ne servait à rien : l'écran nommait le bien sans distinguer « celui que vous
-                  avez ouvert » de « celui que nous avons choisi pour vous ». Or c'est exactement la
-                  différence qui décide si le lecteur doit aller vérifier. */}
-              {choixDossier.raison === "actif" ? "Bien lu" : "À défaut de choix, bien le plus récent"} :{" "}
-              <span className="text-label">{logementForCommune.address_label}</span>
-            </span>
-            <Link
-              href="/rapport/dossiers"
-              className="text-accent underline underline-offset-2 decoration-[var(--border-2)] hover:decoration-current"
-            >
-              {/* « DE CETTE COMMUNE » ÉTAIT FAUX : la destination liste TOUS les biens du compte,
-                  toutes communes confondues. Vérifié au navigateur. Renommer coûte une seconde,
-                  filtrer la liste est un autre chantier ; on ne promet donc que ce qu'on livre. */}
-              Changer de bien
-            </Link>
-          </div>
-        )}
-
-        {/* ── En une minute : le dossier de décision (payant, grain commune) ── */}
-        {dossier && communeResult && inseeCode ? (
-          dossierAddress && logementForCommune ? (
-            <Suspense
-              fallback={
-                // Le repli porte la liste lui aussi : son verdict annonce déjà des constats
-                // « plus bas », et une promesse tenue seulement après l'augmentation serait fausse
-                // pendant tout le temps d'attente.
-                <>
-                  <DossierDecisionSection
-                    dossier={dossier}
-                    logement={dossierLogementLink}
-                    logementStatus="pending"
-                    insee={inseeCode}
-                    scopeKey="commune"
-                    generatedAt={dossierGenereLe}
-                    provenance={provenanceCommune}
-                    projetAChange={projetCommuneAChange}
-                  />
-                  <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
-                </>
-              }
-            >
-              <DossierAvecLogement
-                project={userProject!}
-                address={dossierAddress}
-                savedDpe={logementForCommune.selected_dpe_snapshot}
-                dpeChoisiLe={logementForCommune.selected_dpe_at}
-                permis={logementForCommune.snapshot?.permis ?? null}
-                communeFacts={communeResult.moduleFacts}
-                communeDossier={dossier}
-                logementLink={dossierLogementLink}
-                insee={inseeCode}
-                scopeKey={`logement:${logementForCommune.id}`}
-                // Les contraintes dures, hydratées UNE fois : la section n'en change que le point
-                // d'évaluation (l'adresse), elle ne re-résout aucune référence.
-                hard={communeResult.hard}
-                userId={user.id}
-              />
-            </Suspense>
-          ) : (
-            // Dossier de commune seule : la liste complète des contrôles se rend ici aussi, avec
-            // son seul groupe « Territoire ». Le verdict y annonce déjà des constats « plus bas »,
-            // et cette promesse ne dépend pas de la présence d'une adresse.
-            <>
-              <DossierDecisionSection
-                dossier={dossier}
-                logement={dossierLogementLink}
-                logementStatus="none"
-                insee={inseeCode}
-                scopeKey="commune"
-                generatedAt={dossierGenereLe}
-                provenance={provenanceCommune}
-                projetAChange={projetCommuneAChange}
-              />
-              <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
-            </>
-          )
-        ) : null}
 
         <div className="border-t border-[var(--border-1)] mt-14" />
 

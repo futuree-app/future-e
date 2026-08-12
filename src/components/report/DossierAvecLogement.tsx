@@ -25,7 +25,7 @@ import type { PermisSnapshot } from "@/lib/logement-autour-types";
 
 export async function DossierAvecLogement({
   project, address, savedDpe, dpeChoisiLe, permis, communeFacts, communeDossier, logementLink, insee,
-  scopeKey, hard, userId,
+  scopeKey, hard, userId, espacement,
 }: {
   project: UserProject;
   address: ResolvedAddress;
@@ -53,6 +53,12 @@ export async function DossierAvecLogement({
   hard: EvaluationContext;
   /** Le compte qui lit, pour retrouver son artefact. */
   userId: string;
+  /**
+   * L'air au-dessus de la section, transmis tel quel. LE CHEMIN ADRESSE DOIT LE RECEVOIR AUSSI :
+   * sans lui, le repli communal se poserait contre l'en-tête et le dossier d'adresse, servi quelques
+   * instants plus tard, sauterait de 56 px au moment où le streaming se résout.
+   */
+  espacement?: string;
 }) {
   // L'ARTEFACT PASSE AVANT L'ASSEMBLAGE (05/08/2026).
   // ══════════════════════════════════════════════════════════════════════════════════════════
@@ -130,7 +136,7 @@ export async function DossierAvecLogement({
     <>
       <DossierDecisionSection
         dossier={vue.dossier} logement={logementLink} logementStatus={vue.status}
-        insee={insee} scopeKey={vue.scope} generatedAt={servi.generatedAt}
+        insee={insee} scopeKey={vue.scope} generatedAt={servi.generatedAt} espacement={espacement}
         projetAChange={projetAChangeMateriellement(stocke?.artifact?.projectSnapshot ?? null, project)}
         // LA PROVENANCE N'EXISTE QUE S'IL Y A UNE VERSION FIGÉE. Sur un dossier assemblé à
         // l'instant, un lien qui désignerait un artefact enverrait la surface d'arrivée chercher
