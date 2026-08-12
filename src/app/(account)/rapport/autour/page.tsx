@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import AutourModule from "@/components/report/AutourModule";
 import { requireCurrentUser } from "@/lib/user-account";
 import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
-import { getDossier, getSoleDossier } from "@/lib/address-dossier-store";
+import { getDossier, getSoleDossier, listDossiers } from "@/lib/address-dossier-store";
+import { choisirDossierActif } from "@/lib/dossier-actif";
 import { MarquerBienActif } from "@/components/report/MarquerBienActif";
 import { communeParent } from "@/lib/plm";
 import { ModuleTracker } from "@/components/ModuleTracker";
@@ -43,15 +44,24 @@ export default async function RapportAutourPage({
   // sélecteur reste la fin du chemin, pas son début. Repli par `ouvrir`, comme sur
   // /rapport/logement : ce chemin pose aussi le territoire de lecture.
   if (!dossier) {
+    // LE REPLI RESPECTE LA COMMUNE LUE (revue du 11/08/2026). Une première version reprenait le bien
+    // actif sans la vérifier : après « Revenir à ma résidence » sur La Rochelle, le lien générique
+    // rouvrait le dernier bien nantais, et l'écran retombait dans la contradiction qu'on venait de
+    // fermer. `choisirDossierActif` fait déjà cet arbitrage, c'est celui du hub : on le réutilise
+    // plutôt que d'en écrire un second, qui divergerait.
     const { data: profilActif } = await supabase
       .from("user_profiles")
       .select("active_dossier_id")
       .eq("user_id", user.id)
       .maybeSingle();
-    // La propriété est revérifiée : la colonne peut désigner un dossier supprimé ou révoqué.
     const actifId = (profilActif as { active_dossier_id?: string | null } | null)?.active_dossier_id ?? null;
-    const actif = actifId ? await getDossier(supabase, user.id, actifId).catch(() => null) : null;
-    const repli = actif ?? (await getSoleDossier(supabase, user.id));
+    const choix = choisirDossierActif(
+      await listDossiers(supabase, user.id), territory.inseeCode, actifId,
+    );
+    // Aucun bien dans la commune lue : le dossier UNIQUE du compte reste un repli légitime, parce
+    // qu'il n'y a rien à deviner. Le passage par `ouvrir` bascule alors tout l'écran sur SA commune,
+    // donc sans contradiction possible. Au-delà, on demande.
+    const repli = choix.dossier ?? (await getSoleDossier(supabase, user.id));
     redirect(
       repli
         ? `/rapport/dossiers/ouvrir?id=${encodeURIComponent(repli.id)}&vers=autour`

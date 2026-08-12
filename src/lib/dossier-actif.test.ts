@@ -86,3 +86,25 @@ test("à dates égales, l'identifiant départage : le hub ne change pas d'avis a
   assert.equal(choisirDossierActif([a, b], "17300", null).dossier?.id, "aaa");
   assert.equal(choisirDossierActif([b, a], "17300", null).dossier?.id, "aaa");
 });
+
+test("le cas « actif à Nantes, territoire lu La Rochelle » : le repli reste local", () => {
+  // LA RÉGRESSION DU 11/08/2026, corrigée puis testée. Après « Revenir à ma résidence », le lien
+  // générique du Territoire rouvrait le dernier bien nantais : l'écran affichait un logement de
+  // Nantes sous un contexte La Rochelle, exactement la contradiction qu'on venait de fermer.
+  //
+  // Cette règle est celle du hub ; les pages Logement et Autour l'appellent désormais pour leur
+  // repli, plutôt que de lire `active_dossier_id` seul. Un second arbitrage aurait divergé.
+  const c = choisirDossierActif([EVESCOT, SAINT_DOMINIQUE, CREBILLON], "17300", "crebillon");
+  assert.equal(c.dossier?.insee, "17300", "le repli ne quitte jamais la commune lue");
+  assert.equal(c.dossier?.id, "evescot");
+});
+
+test("aucun bien dans la commune lue : la règle ne propose RIEN", () => {
+  // Elle ne va pas chercher ailleurs : c'est à l'appelant de décider ce qu'il fait de ce vide (le
+  // hub n'affiche pas de bien, les pages d'adresse retombent sur le dossier unique du compte, qui
+  // bascule alors tout l'écran sur SA commune).
+  const c = choisirDossierActif([CREBILLON], "17300", "crebillon");
+  assert.equal(c.dossier, null);
+  assert.equal(c.raison, "aucun");
+  assert.deepEqual(c.autres, []);
+});
