@@ -35,6 +35,8 @@
 | `src/components/report/DossierDecisionSection.tsx` | Perd son eyebrow, garde date, grain, obsolescence, états d'augmentation. |
 | `src/components/report/ConclusionBlock.tsx` | Niveau et taille de titre reçus en props. |
 | `src/components/report/ConclusionRedigee.tsx` | Propage ces props à ses quatre appels. |
+| `src/lib/decision/projet-edition.ts` (créé) | Décide, sans I/O, quand reparser et ce que la sauvegarde porte dans `parsed`. |
+| `src/lib/decision/projet-edition.test.ts` (créé) | Le changement d'intention seul, et le parseur indisponible. |
 | `src/components/report/ProjectSummaryCard.tsx` | Intention, relation communale, sauvegarde non destructive. |
 | `src/components/report/ReportRelationBanner.tsx` | Devient une ligne qui dit, sans contrôle. |
 | `src/app/(account)/rapport/logement/page.tsx` | Charge et normalise `user_project`. |
@@ -202,7 +204,23 @@ git commit -m "Un écran sans projet du tout n'a aucun plan où lire son titre"
 - Consumes: rien de nouveau.
 - Produces: `DossierDecisionSection` sans l'eyebrow « En une minute ». Elle CONSERVE `generatedAt`, `projetAChange`, `logementStatus` et le grain : ce sont les métadonnées de la version qu'elle lit.
 
-- [ ] **Step 1: Retirer l'eyebrow, garder la date**
+- [ ] **Step 1: Rapprocher la section de l'en-tête**
+
+`DossierDecisionSection` ouvre sur `className="mt-14"` (ligne 150), soit 56 px. Cet écart était juste
+quand la section arrivait après une carte projet ; il couperait en deux le bloc de tête que ce
+chantier prétend former. L'espacement devient une prop, avec le comportement actuel par défaut :
+
+```tsx
+  /** L'air AU-DESSUS de la section. `mt-14` quand elle suit d'autres blocs (comportement
+   *  historique), resserré quand elle est la suite immédiate de l'en-tête du dossier : le lecteur
+   *  doit y voir un seul bloc de tête, identité puis réponse. */
+  espacement = "mt-14",
+```
+
+et `/rapport` passe `espacement="mt-6"` aux trois points de montage. Mesure à l'écran : l'identité et
+le verdict doivent se lire comme un groupe, sans que le verdict paraisse collé à la ligne du projet.
+
+- [ ] **Step 2: Retirer l'eyebrow, garder la date**
 
 Dans `DossierDecisionSection.tsx`, remplacer le bloc `<div className="mb-7">` (lignes 159 à 177) par :
 
@@ -222,7 +240,7 @@ Dans `DossierDecisionSection.tsx`, remplacer le bloc `<div className="mb-7">` (l
       ) : null}
 ```
 
-- [ ] **Step 2: Vérifier que rien d'autre ne dépendait de ce bloc**
+- [ ] **Step 3: Vérifier que rien d'autre ne dépendait de ce bloc**
 
 Run: `grep -n "En une minute" -r src`
 Expected: aucune occurrence dans le rendu (seuls des commentaires peuvent subsister).
@@ -230,7 +248,7 @@ Expected: aucune occurrence dans le rendu (seuls des commentaires peuvent subsis
 Run: `npx tsc --noEmit`
 Expected: aucune sortie.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
 git add src/components/report/DossierDecisionSection.tsx
@@ -280,13 +298,19 @@ import { ANCRE_PROJET } from "@/lib/decision/premier-ecran";
 const INTENT_LABEL: Record<string, string> = { achat: "Achat", location: "Location" };
 
 export function EnTeteDossier({
-  lieu, bienLabel, bienAlternatif, intent, reformulation, contenu,
+  lieu, bienLabel, bienAlternatif, choixParDefaut, intent, reformulation, contenu,
 }: {
   lieu: string;
   /** L'adresse du bien lu, ou `null` quand la lecture est communale. */
   bienLabel: string | null;
   /** Vrai s'il existe un autre bien à ouvrir : sans alternative, le lien n'apprend rien. */
   bienAlternatif: boolean;
+  /**
+   * Le bien affiché a été DEVINÉ (`choixDossier.raison === "repli_plus_recent"`), non ouvert par le
+   * lecteur. La distinction décide s'il doit aller vérifier, et elle n'existe nulle part ailleurs
+   * dans le produit : `/rapport/dossiers` ne la montre pas.
+   */
+  choixParDefaut: boolean;
   intent: string | null;
   /** La reformulation du projet, ou son texte brut. `null` quand aucun projet n'est renseigné. */
   reformulation: string | null;
@@ -301,6 +325,9 @@ export function EnTeteDossier({
 
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[15px] mb-1.5">
         <span className="text-label">{bienLabel ? `${bienLabel}, ${lieu}` : lieu}</span>
+        {choixParDefaut && bienAlternatif ? (
+          <span className="text-[13px] text-ghost">À défaut de choix, le bien le plus récent</span>
+        ) : null}
         {bienAlternatif ? (
           <Link
             href="/rapport/dossiers"
@@ -402,7 +429,26 @@ import { contenuDuHero, ANCRE_PROJET } from "@/lib/decision/premier-ecran";
         ) : null}
 ```
 
-5. Supprimer l'ancienne ligne « Bien lu / À défaut de choix » (lignes 462 à 481) : l'en-tête la porte désormais, et sans condition sur l'existence d'une alternative. La NUANCE de la raison du choix (« bien lu » contre « à défaut de choix, bien le plus récent ») se perd volontairement ici : elle sera rendue par le sélecteur de biens, dont c'est le sujet. Noter ce retrait dans le message de commit.
+5. Supprimer l'ancienne ligne « Bien lu / À défaut de choix » (lignes 462 à 481) : l'en-tête la porte
+   désormais, et sans condition sur l'existence d'une alternative.
+
+   **LA RAISON DU CHOIX NE SE PERD PAS.** `choixDossier.raison` (`repli_plus_recent`) existe
+   précisément pour distinguer « le bien que vous avez ouvert » de « celui que nous avons choisi pour
+   vous », et c'est cette différence qui décide si le lecteur doit aller vérifier. `/rapport/dossiers`
+   ne la montre pas : la laisser tomber ici la ferait disparaître du produit, et le hub servirait à
+   nouveau un bien sans dire qu'il l'a deviné. Elle est donc passée à `EnTeteDossier` :
+
+```tsx
+            choixParDefaut={choixDossier.raison === "repli_plus_recent"}
+```
+
+   et rendue quand il existe une alternative (sans alternative, il n'y a rien à départager) :
+
+```tsx
+        {choixParDefaut && bienAlternatif ? (
+          <span className="text-[13px] text-ghost">À défaut de choix, le bien le plus récent</span>
+        ) : null}
+```
 
 - [ ] **Step 3: Vérifier**
 
@@ -462,7 +508,31 @@ Déplacer la `<section>` du hero climat (lignes 352 à 434) APRÈS le bloc du do
               </h2>
 ```
 
-En mode NON payant, cette section reste EN TÊTE et garde son `<h1>` : c'est le hero commercial, et `contenuDuHero` rend alors `{ kind: "commercial" }`. Le rendu se branche sur ce discriminant :
+**LE TEXTE NE SURVIT PAS AU DÉPLACEMENT TEL QUEL.** Le paragraphe dit « Choisissez un horizon »
+(ligne 368), alors que la tâche vient de retirer le sélecteur : la phrase donnerait une consigne
+impossible à suivre. Le réécrire, sans rien promettre de plus que ce que la section ouvre :
+
+```tsx
+              <p className="text-[17px] leading-[1.72] text-muted mb-9">
+                Ce que le changement climatique fait concrètement à votre quotidien ici, à trois
+                horizons. Les données s&apos;adaptent quand c&apos;est possible.
+              </p>
+```
+
+(le `max-w-[500px]` tombe : dans sa nouvelle position, ce paragraphe n'a plus de voisin de ligne, et
+la doctrine de largeur interdit de plafonner un texte plus étroit que le bloc qui l'entoure.)
+
+**LE PANNEAU COMPACT DES ÉCHELLES EST SUPPRIMÉ.** L'`<aside>` (lignes 393 à 433) répète le mot
+« Dossier » que l'en-tête porte désormais, et liste les modules trois centimètres au-dessus de la
+section `#modules`, qui les liste déjà avec plus de contexte. Déplacé, il deviendrait un doublon
+visible ; il disparaît donc, et la section `<section>` perd sa grille à deux colonnes
+(`grid-cols-[1fr_400px]`) pour redevenir une colonne pleine. Le lien « Voir mes trois échelles »
+pointe toujours vers `#modules` et suffit à la navigation.
+
+En mode NON payant, cette section reste EN TÊTE, garde son `<h1>`, son paragraphe actuel ET son
+panneau : rien n'y est redondant, puisqu'il n'y a ni en-tête de dossier ni section de modules
+ouverte. `contenuDuHero` rend alors `{ kind: "commercial" }`, et le rendu se branche sur ce
+discriminant :
 
 ```tsx
         {heroContenu.kind === "commercial" ? (
@@ -507,6 +577,8 @@ git commit -m "Un réglage qui ne règle rien sur la page où il s'affiche"
 - Modify: `src/components/report/ConclusionBlock.tsx:100-108`
 - Modify: `src/components/report/ConclusionRedigee.tsx:57,86,149,152`
 - Modify: `src/components/report/DossierDecisionSection.tsx` (les deux appels au verdict)
+- Modify: `src/components/report/DossierAvecLogement.tsx:131` (le chemin ADRESSE)
+- Modify: `src/app/(account)/rapport/page.tsx` (les trois points de montage : `fallback`, chemin adresse, chemin commune seule)
 
 **Interfaces:**
 - Produces: `ConclusionBlock` accepte `titre?: { niveau: "h1" | "h2"; classe: string }`, par défaut `{ niveau: "h2", classe: "text-[length:var(--text-section)] font-[var(--weight-section)]" }`.
@@ -540,7 +612,16 @@ Dans le corps, remplacer le `<h2>` de la ligne 103 par :
 
 - [ ] **Step 2: Propager depuis `ConclusionRedigee` et la section**
 
-`ConclusionRedigee` reçoit la même prop `titre` et la passe à ses QUATRE appels de `ConclusionBlock` (lignes 57, 86, 149, 152). `DossierDecisionSection` la reçoit également et la transmet aux deux branches (`pending` et `Suspense`). `/rapport` passe :
+`ConclusionRedigee` reçoit la même prop `titre` et la passe à ses QUATRE appels de `ConclusionBlock` (lignes 57, 86, 149, 152). `DossierDecisionSection` la reçoit également et la transmet aux deux branches (`pending` et `Suspense`).
+
+**LA CHAÎNE DOIT ALLER JUSQU'AU BOUT DU CHEMIN ADRESSE.** `DossierAvecLogement` rend lui aussi une
+`DossierDecisionSection` (ligne 131). L'oublier produirait le pire résultat possible : le repli
+communal s'afficherait en grand `<h1>`, puis le verdict d'adresse, celui qui a été payé, reviendrait
+en petit `<h2>` au moment où le streaming se résout. La prop traverse donc les TROIS points de
+montage de `/rapport` (le `fallback`, le chemin adresse, le chemin commune seule) et
+`DossierAvecLogement`.
+
+`/rapport` passe :
 
 ```tsx
 titre={{ niveau: "h1", classe: "text-[length:var(--text-display)] font-[var(--weight-display)] tracking-[-0.8px]" }}
@@ -559,7 +640,10 @@ Décision inscrite dans le commit :
 Run: `npx tsc --noEmit && npm run build && node --test "src/**/*.test.ts"`
 Expected: aucune erreur, 1400+ tests au vert.
 
-Vérifier dans le navigateur qu'il y a exactement un `<h1>` : `document.querySelectorAll("h1").length === 1`.
+Vérifier dans le navigateur qu'il y a exactement un `<h1>`, **DEUX FOIS sur un dossier d'adresse** :
+pendant le repli communal (couper le réseau après le premier octet, ou recharger en 3G lente), puis
+une fois le streaming résolu. `document.querySelectorAll("h1").length === 1` dans les deux instants,
+et la taille du titre ne doit pas changer entre les deux.
 
 - [ ] **Step 5: Commit**
 
@@ -573,10 +657,12 @@ git commit -m "Promouvoir la balise laissait la réponse plus petite que les tit
 ### Task 6 : Changer l'intention sans détruire les priorités
 
 **Files:**
+- Create: `src/lib/decision/projet-edition.ts`
+- Test: `src/lib/decision/projet-edition.test.ts`
 - Modify: `src/components/report/ProjectSummaryCard.tsx:7-11,36-84,131-187`
 
 **Interfaces:**
-- Produces: `ProjectSummaryCard` expose le choix d'intention et n'appelle le parseur que si le texte a changé.
+- Produces: `doitReparser(texteSaisi: string, projet: UserProject | null): boolean`, `parsedASauvegarder(input: { reparse: boolean; parsedRecu: UserProject["parsed"] | null; projet: UserProject | null }): { parsed: UserProject["parsed"] | null; avertir: boolean }`, et un `ProjectSummaryCard` qui expose le choix d'intention.
 
 - [ ] **Step 1: Ajouter les options d'intention**
 
@@ -597,6 +683,13 @@ const INTENT_OPTIONS: { value: ProjectIntent | null; label: string }[] = [
 ];
 ```
 
+Renommer au passage l'option de posture `adresse`, dont le libellé annonce une question désormais
+posée juste en dessous :
+
+```tsx
+  { value: "adresse", label: "J'étudie ce lieu" },   // était : « J'étudie ce lieu pour acheter ou louer »
+```
+
 Ajouter l'état `const [intent, setIntent] = useState<ProjectIntent | null>(initial?.intent ?? null);` et, dans le formulaire d'édition, le même groupe de boutons que les postures, sous le libellé qui suit l'objectif :
 
 ```tsx
@@ -605,26 +698,123 @@ Ajouter l'état `const [intent, setIntent] = useState<ProjectIntent | null>(init
       </p>
 ```
 
-- [ ] **Step 2: Rendre la sauvegarde non destructive**
+- [ ] **Step 2: Extraire la règle en fonction PURE et la tester**
 
-Remplacer le corps de `save()` (lignes 36 à 54) par :
+La décision « faut-il reparser, et que sauvegarde-t-on » ne peut pas vivre uniquement dans un
+composant client : elle ne serait vérifiable que par un blocage réseau à la main, donc jamais en
+intégration continue. Créer `src/lib/decision/projet-edition.ts` :
+
+```ts
+import type { UserProject } from "../user-project.ts";
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// CE QU'ON SAUVEGARDE QUAND LE LECTEUR MODIFIE SON PROJET.
+//
+// Le défaut corrigé : `save()` reparse SYSTÉMATIQUEMENT et repart de `parsed = null`. Tant qu'on ne
+// sauvegardait qu'après avoir édité le texte, c'était tolérable. Depuis que l'écran permet de
+// changer la SEULE intention, un aller-retour « achat / location » un jour où le parseur est
+// indisponible enregistrerait le projet sans ses priorités, et le dossier retomberait en « projet
+// non structuré » alors que le lecteur n'a pas touché à son texte.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+
+/** Le texte a-t-il changé ? Comparaison sur le texte TAILLÉ : une espace en fin de zone de saisie
+ *  n'est pas une modification de projet. */
+export function doitReparser(texteSaisi: string, projet: UserProject | null): boolean {
+  return texteSaisi.trim() !== (projet?.rawText ?? "").trim();
+}
+
+/**
+ * Ce que la sauvegarde doit porter dans `parsed`, et s'il faut avertir le lecteur.
+ *
+ * `parsedRecu` vaut `null` quand le parseur a échoué OU refusé. Dans ce cas on n'écrit PAS l'ancien
+ * `parsed` : il décrit l'ancien texte, et l'attacher au nouveau ferait répondre l'analyse à des
+ * priorités que le lecteur vient de retirer. On écrit `null` et on le DIT.
+ */
+export function parsedASauvegarder(input: {
+  reparse: boolean;
+  parsedRecu: UserProject["parsed"] | null;
+  projet: UserProject | null;
+}): { parsed: UserProject["parsed"] | null; avertir: boolean } {
+  if (!input.reparse) return { parsed: input.projet?.parsed ?? null, avertir: false };
+  return { parsed: input.parsedRecu, avertir: input.parsedRecu == null };
+}
+```
+
+Et son test, `src/lib/decision/projet-edition.test.ts` :
+
+```ts
+import test from "node:test";
+import assert from "node:assert/strict";
+import { doitReparser, parsedASauvegarder } from "./projet-edition.ts";
+import type { UserProject } from "../user-project.ts";
+
+const PARSED = { reformulation: "Un lieu calme.", hardConstraints: {}, preferences: [{ key: "cadre_calme", weight: 3 }] };
+const projet = {
+  posture: "recherche", intent: "achat", rawText: "au calme, près de la mer",
+  parsed: PARSED, updatedAt: "2026-08-05T09:00:00.000Z",
+} as unknown as UserProject;
+
+test("changer la SEULE intention ne reparse rien et ne perd rien", () => {
+  // Le cas qui motive tout : sans cette règle, un aller-retour achat / location un jour de panne du
+  // parseur effacerait les priorités du lecteur, sans qu'il ait touché à son texte.
+  assert.equal(doitReparser("au calme, près de la mer", projet), false);
+  assert.deepEqual(
+    parsedASauvegarder({ reparse: false, parsedRecu: null, projet }),
+    { parsed: PARSED, avertir: false },
+  );
+});
+
+test("une espace de plus n'est pas une modification", () => {
+  assert.equal(doitReparser("  au calme, près de la mer  ", projet), false);
+});
+
+test("texte modifié et parseur disponible : le nouveau parsed gagne", () => {
+  const neuf = { reformulation: "Autre chose.", hardConstraints: {}, preferences: [] } as unknown as UserProject["parsed"];
+  assert.equal(doitReparser("je veux la montagne", projet), true);
+  assert.deepEqual(
+    parsedASauvegarder({ reparse: true, parsedRecu: neuf, projet }),
+    { parsed: neuf, avertir: false },
+  );
+});
+
+test("texte modifié et parseur indisponible : on n'attache PAS les anciennes priorités au nouveau texte", () => {
+  // Les garder ferait répondre l'analyse à des priorités que le lecteur vient de retirer. On écrit
+  // null, et l'écran le dit.
+  assert.deepEqual(
+    parsedASauvegarder({ reparse: true, parsedRecu: null, projet }),
+    { parsed: null, avertir: true },
+  );
+});
+
+test("premier projet, aucun texte antérieur : on reparse", () => {
+  assert.equal(doitReparser("au calme", null), true);
+});
+```
+
+Run: `node --test src/lib/decision/projet-edition.test.ts`
+Expected: FAIL puis PASS après création du module.
+
+- [ ] **Step 3: Rendre la sauvegarde non destructive dans la carte**
+
+La carte CONSOMME les deux fonctions ci-dessus, elle ne réécrit pas la règle. Remplacer le corps de
+`save()` (lignes 36 à 54) par :
 
 ```tsx
     const raw = text.trim();
     if (!raw || !posture) return;
     setBusy(true);
     setError(null);
-    // LE REPARSAGE NE SE DÉCLENCHE QUE SI LE TEXTE A CHANGÉ (12/08/2026).
+    setAvertissement(null);
+
+    // DEUX ÉTATS DISTINCTS, ET LA DISTINCTION EST TOUT (revue du 12/08/2026).
     // ══════════════════════════════════════════════════════════════════════════════════════════
-    // `parsed` était réinitialisé à `null` puis rempli seulement en cas de succès du parseur. Tant
-    // qu'on ne sauvegardait qu'après avoir édité le texte, c'était tolérable. Depuis que cette carte
-    // permet de changer la SEULE intention, un aller-retour « achat / location » un jour où le
-    // parseur est indisponible enregistrerait le projet SANS ses priorités : le dossier retomberait
-    // en « projet non structuré » alors que le lecteur n'a pas touché à son texte.
-    const texteInchange = raw === (project?.rawText ?? "").trim();
-    let parsed: UserProject["parsed"] = project?.parsed ?? null;
-    if (!texteInchange) {
-      let echecParse = false;
+    // `error` dit « ce n'est PAS enregistré » et garde l'éditeur ouvert. `avertissement` dit « c'est
+    // enregistré, mais vos priorités n'ont pas pu être comprises ». Les confondre produisait le pire
+    // des deux : un message posé AVANT l'appel de sauvegarde, donc prématuré, puis effacé par la
+    // fermeture de l'éditeur en cas de succès, donc invisible.
+    const reparse = doitReparser(raw, project);
+    let parsedRecu: UserProject["parsed"] | null = null;
+    if (reparse) {
       try {
         const r = await fetch("/api/comparateur-vie/parse", {
           method: "POST",
@@ -632,39 +822,48 @@ Remplacer le corps de `save()` (lignes 36 à 54) par :
           body: JSON.stringify({ text: raw }),
         });
         const data = r.ok ? ((await r.json()) as { parsed?: unknown }) : null;
-        parsed = data?.parsed && typeof data.parsed === "object"
+        parsedRecu = data?.parsed && typeof data.parsed === "object"
           ? (data.parsed as UserProject["parsed"])
           : null;
-        echecParse = parsed == null;
       } catch {
-        parsed = null;
-        echecParse = true;
-      }
-      // UN ÉCHEC DE PARSE SE VOIT. Le texte est conservé (il est ce que le lecteur a écrit), mais on
-      // ne laisse pas croire que ses priorités ont été comprises.
-      if (echecParse) {
-        setError("Votre texte est enregistré, mais nous n'avons pas pu en extraire vos priorités. Réessayez dans un instant pour une analyse complète.");
+        parsedRecu = null;
       }
     }
+    const { parsed, avertir } = parsedASauvegarder({ reparse, parsedRecu, projet: project });
 ```
 
-puis, dans l'appel à `/api/profile`, remplacer `intent: project?.intent ?? null` par `intent`.
+puis, dans l'appel à `/api/profile`, remplacer `intent: project?.intent ?? null` par `intent`, et
+poser l'avertissement APRÈS la confirmation serveur, jamais avant :
 
-- [ ] **Step 3: Vérifier à la main le cas qui motive la tâche**
+```tsx
+      setProject(data.project); // uniquement le projet confirmé par le serveur
+      setEditing(false);
+      // L'AVERTISSEMENT SURVIT À LA FERMETURE DE L'ÉDITEUR : il concerne ce qui vient d'être
+      // enregistré, et il se lit sur la carte fermée. Le poser avant l'appel l'aurait rendu
+      // prématuré ; le poser dans `error` l'aurait fait disparaître avec l'éditeur.
+      if (avertir) {
+        setAvertissement("Votre texte est enregistré. Nous n'avons pas pu en extraire vos priorités : rouvrez l'éditeur et enregistrez à nouveau pour une analyse complète.");
+      }
+      router.refresh();
+```
+
+L'état `avertissement` est déclaré à côté de `error` (`const [avertissement, setAvertissement] = useState<string | null>(null);`) et rendu dans la vue « projet présent », sous la reformulation, dans la teinte du non-su (`var(--reg-non-su)`), jamais dans celle d'une erreur.
+
+- [ ] **Step 4: Vérifier à la main le cas qui motive la tâche**
 
 Run: `npm run dev`. Sur `/rapport`, ouvrir l'éditeur, changer UNIQUEMENT l'intention, enregistrer. Puis, dans les DevTools, bloquer `/api/comparateur-vie/parse` (onglet Réseau, « Block request URL ») et refaire la même opération.
 
 Expected : dans les deux cas, la reformulation reste affichée après rechargement, et le dossier ne bascule pas en « À préciser ».
 
-- [ ] **Step 4: Vérifier le reste**
+- [ ] **Step 5: Vérifier le reste**
 
 Run: `npx tsc --noEmit && npm run build`
 Expected: aucune erreur.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add src/components/report/ProjectSummaryCard.tsx
+git add src/lib/decision/projet-edition.ts src/lib/decision/projet-edition.test.ts src/components/report/ProjectSummaryCard.tsx
 git commit -m "Changer d'intention un jour de panne du parseur effaçait les priorités"
 ```
 
@@ -678,7 +877,7 @@ git commit -m "Changer d'intention un jour de panne du parseur effaçait les pri
 
 **Interfaces:**
 - Consumes: `getReportContext`, `resolveRelation` (`src/lib/report-context.ts`), `PATCH /api/report-context`.
-- Produces: `ProjectSummaryCard` accepte `relation?: { insee: string; commune: string; valeur: Relation } | null`.
+- Produces: `ProjectSummaryCard` accepte `relation?: { insee: string; commune: string; valeur: Relation; source: RelationSource } | null`.
 
 - [ ] **Step 1: Charger le contexte dans la page**
 
@@ -699,7 +898,14 @@ et passer à la carte :
           <ProjectSummaryCard
             initial={userProject}
             relation={contexteLecture && inseeCode
-              ? { insee: inseeCode, commune: displayName, valeur: contexteLecture.relation }
+              ? {
+                  insee: inseeCode, commune: displayName,
+                  valeur: contexteLecture.relation,
+                  // L'ORIGINE VOYAGE AVEC LA VALEUR (revue du 12/08/2026). Sans elle, l'écran ne
+                  // peut pas distinguer une réponse DÉCLARÉE d'une relation DÉDUITE du domicile, et
+                  // afficherait une déduction comme un choix du lecteur.
+                  source: contexteLecture.source,
+                }
               : null}
           />
 ```
@@ -728,7 +934,21 @@ avec un état `relationBusy` / `relationError` distinct de `busy` / `error`, et 
     router.refresh();
 ```
 
-Les deux choix affichés sont ceux qui existent déjà côté route : `current_residence` (« J'y vis ») et `considering_living` (« J'envisage d'y vivre »).
+Les deux choix affichés sont ceux qui existent déjà côté route : `current_residence` (« J'y vis ») et
+`considering_living` (« J'envisage d'y vivre »).
+
+**L'ORIGINE SE DIT, ET LES DEUX AUTRES VALEURS NE SE PERDENT PAS.** `Relation` compte quatre valeurs :
+`information_only` et `unknown` existent en base, ne sont proposées par aucun écran, et
+`synthesisRelation` les traite comme `considering_living`. Deux règles de rendu :
+
+- `source === "inferred"` : la valeur est présentée comme une DÉDUCTION, jamais comme une réponse.
+  Sous les deux boutons, une ligne : « Déduit de votre commune de résidence. Corrigez si besoin. »
+  `source === "confirmed_by_user"` n'affiche rien de tel : le lecteur a répondu, le lui rappeler
+  serait du bruit.
+- `valeur` hors des deux choix proposés (`information_only`, `unknown`) : aucun bouton n'est marqué
+  actif, et la ligne dit ce qui s'appliquera : « Aucune relation déclarée pour cette commune :
+  l'analyse s'adresse à quelqu'un qui envisage de s'y installer. » Marquer « J'envisage d'y vivre »
+  comme actif serait afficher comme déclaré ce qui n'est qu'un repli de la synthèse.
 
 - [ ] **Step 3: Vérifier le cas multi-communes**
 
@@ -822,23 +1042,31 @@ import type { UserProject } from "../user-project.ts";
 // LE MODULE LIT LE PROJET DU COMPTE, PLUS UNE RÉPONSE DE SONDE (12/08/2026). La sonde locale
 // demandait « Que comptez-vous faire de ce logement ? » à chaque visite sans rien persister, alors
 // que le compte connaît déjà la réponse. La dérivation reste celle de `bucketDuProjet`, seule.
-const ACHAT = { intent: "achat", posture: null } as unknown as UserProject;
-const LOCATION = { intent: "location", posture: null } as unknown as UserProject;
-const RESIDE = { intent: null, posture: "habitant" } as unknown as UserProject;
+// Des projets VALIDES, pas des objets maquillés : `UserProject` exige une `posture`. Les fixtures
+// décrivent donc trois lecteurs réels, et le cast ne sert qu'à omettre les champs d'affichage.
+const projet = (over: Partial<UserProject>): UserProject => ({
+  posture: "adresse", intent: null, rawText: null, parsed: null, updatedAt: null, ...over,
+} as UserProject);
+const ACHAT = projet({ intent: "achat" });
+const LOCATION = projet({ intent: "location" });
+const RESIDE = projet({ posture: "habitant" });
 ```
 
-puis remplacer les littéraux :
+puis remplacer les littéraux. Le motif porte sur le DERNIER argument, qui est toujours la chaîne :
+un motif `([^,]+)` s'arrêterait sur les virgules internes des objets étalés comme
+`pointsAVerifier({ ...RIEN, dpe: "passoire" }, "achat")`, et laisserait plusieurs appels inchangés.
 
 ```bash
-perl -pi -e 's/pointsAVerifier\(([^,]+), "achat"\)/pointsAVerifier($1, ACHAT)/g;
-             s/pointsAVerifier\(([^,]+), "location"\)/pointsAVerifier($1, LOCATION)/g;
-             s/pointsAVerifier\(([^,]+), "reside"\)/pointsAVerifier($1, RESIDE)/g;
-             s/introPointsAVerifier\("achat"\)/introPointsAVerifier(ACHAT)/g;
-             s/introPointsAVerifier\("location"\)/introPointsAVerifier(LOCATION)/g;
-             s/introPointsAVerifier\("reside"\)/introPointsAVerifier(RESIDE)/g' src/lib/decision/logement-verifications.test.ts
+perl -pi -e 's/, "achat"\)/, ACHAT)/g; s/, "location"\)/, LOCATION)/g; s/, "reside"\)/, RESIDE)/g;
+             s/\("achat"\)/(ACHAT)/g; s/\("location"\)/(LOCATION)/g; s/\("reside"\)/(RESIDE)/g' \
+  src/lib/decision/logement-verifications.test.ts
+grep -n '"achat"\|"location"\|"reside"' src/lib/decision/logement-verifications.test.ts
 ```
 
-Ajouter un test qui fixe le nouveau contrat :
+Le `grep` final doit être VIDE : s'il reste une occurrence, la corriger à la main plutôt que d'élargir
+le motif.
+
+Ajouter deux tests qui fixent le nouveau contrat :
 
 ```ts
 test("un projet d'achat déclaré au COMPTE oriente la liste, sans sonde locale", () => {
@@ -847,6 +1075,15 @@ test("un projet d'achat déclaré au COMPTE oriente la liste, sans sonde locale"
   assert.notDeepEqual(pointsAVerifier(TOUT, ACHAT), pointsAVerifier(TOUT, RESIDE));
   // Sans projet, aucune posture n'est devinée : `bucketDuProjet` rend `neutre` et l'intro le dit.
   assert.match(introPointsAVerifier(null), /Votre projet permettra/);
+});
+
+test("HABITANT QUI ACHÈTE : l'intention gagne, et c'est la règle de bucketDuProjet", () => {
+  // Le locataire qui achète le logement où il vit est un cas réel. L'écran permet de poser les deux,
+  // et une seule fonction arbitre : `bucketDuProjet` teste l'intention avant la posture. Ce test
+  // existe pour que personne ne « corrige » cet ordre en croyant réparer une incohérence.
+  const habitantQuiAchete = projet({ posture: "habitant", intent: "achat" });
+  assert.deepEqual(pointsAVerifier(TOUT, habitantQuiAchete), pointsAVerifier(TOUT, ACHAT));
+  assert.notDeepEqual(pointsAVerifier(TOUT, habitantQuiAchete), pointsAVerifier(TOUT, RESIDE));
 });
 ```
 
@@ -960,14 +1197,59 @@ Sur `npm run dev`, produire une capture desktop ET mobile (360 px) de chacun :
 3. payant, aucun projet (invite écrite par la page) ;
 4. non payant (hero commercial).
 
-Pour l'état 2, mettre temporairement `parsed` à `null` dans la base pour le compte de test, et le restaurer ensuite. Pour l'état 3, effacer `user_project`, puis le restaurer.
+**Ne pas mutiler un compte réel à la légère.** Deux des quatre états demandent un projet dégradé, et
+le compte de recette porte des achats réels.
+
+Ordre de préférence :
+
+1. **Un compte jetable** : créer un compte, lui poser un droit sur une commune à la main
+   (`insert into report_grants …` selon le patron existant), et le supprimer après. Aucun état à
+   restaurer, donc rien à oublier de restaurer.
+2. À défaut, sur le compte de recette, avec sauvegarde EXACTE et vérification finale :
+
+```sql
+-- 1. Sauvegarder le JSON exact, dans une table temporaire de session
+create temp table sauvegarde_projet as
+  select user_id, user_project from user_profiles where user_id = '<id>';
+select user_project from sauvegarde_projet;  -- copier aussi le résultat hors de la base
+
+-- 2. État « projet présent, parsed nul »
+update user_profiles set user_project = user_project - 'parsed' where user_id = '<id>';
+-- … capture …
+
+-- 3. État « aucun projet »
+update user_profiles set user_project = null where user_id = '<id>';
+-- … capture …
+
+-- 4. Restaurer, puis PROUVER que la restauration est exacte
+update user_profiles p set user_project = s.user_project
+  from sauvegarde_projet s where p.user_id = s.user_id;
+select (p.user_project = s.user_project) as identique
+  from user_profiles p join sauvegarde_projet s on s.user_id = p.user_id;
+-- doit rendre `t`. Si `f` ou aucune ligne : restaurer depuis la copie prise à l'étape 1.
+```
+
+L'état NON payant ne se produit pas en dégradant le compte de recette : il se lit avec un compte sans
+droit sur la commune (un second compte, ou une session privée sur un compte neuf). Retirer un droit
+payé pour faire une capture serait la seule manipulation vraiment irréversible de cette liste.
 
 - [ ] **Step 2: Les invariants qui se vérifient à l'œil**
 
-- Un seul `<h1>` : `document.querySelectorAll("h1").length === 1` sur les quatre états.
+- Un seul `<h1>` : `document.querySelectorAll("h1").length === 1` sur les quatre états, et **deux
+  fois sur un dossier d'adresse** : pendant le repli communal, puis après résolution du stream. La
+  taille du titre doit être la même aux deux instants.
+- Les deux grains sont couverts explicitement : une commune SEULE (aucun bien d'adresse) et une
+  commune AVEC adresse. Ce sont deux chemins de rendu distincts, pas deux variantes d'un même.
 - Aucun débordement horizontal à 360 px : `document.documentElement.scrollWidth <= window.innerWidth`.
 - La date de l'analyse n'apparaît QUE dans le bloc du dossier, jamais au-dessus.
-- Sur un dossier d'adresse dont le projet a matériellement changé, le bandeau d'obsolescence et la ligne « Votre projet aujourd'hui » restent deux blocs distincts.
+- Sur un dossier d'adresse dont le projet a matériellement changé, le bandeau d'obsolescence et la
+  ligne « Votre projet aujourd'hui » restent deux blocs distincts.
+- Le module Logement n'affiche PLUS la sonde « Que comptez-vous faire de ce logement ? », et la
+  checklist est bien orientée par le projet du compte (changer l'intention sur `/rapport` doit
+  changer la liste).
+- Depuis Territoire, le lien « Modifier le projet » dépose sur l'éditeur, sous la navbar.
+- `npm run lint` ne signale aucune erreur nouvelle (l'avertissement `account` de `rapport/page.tsx`
+  est préexistant).
 
 - [ ] **Step 3: Le cas multi-communes, en entier**
 
