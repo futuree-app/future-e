@@ -1,6 +1,7 @@
 # Recette du premier écran (chantier 6)
 
-**Date** : 2026-08-12 · **Branche** : `main`, commits `a111335` à `0ca1e28`, **non poussés**.
+**Date** : 2026-08-12, **complétée le 13/08** · **Branche** : `main`, commits `a111335` à `02b2536`,
+**non poussés**.
 **Plan** : `docs/superpowers/plans/2026-08-12-premier-ecran-decision.md` ·
 **Spec** : `docs/superpowers/specs/2026-08-12-premier-ecran-decision-design.md`.
 
@@ -66,7 +67,50 @@ Cette estimation n'est pas une mesure : elle attend la capture du § 2.
 
 ---
 
-## 2. Ce qui reste à vérifier, et ne peut pas l'être sans compte payé
+## 2. La recette au navigateur, faite le 13/08
+
+Menée sur compte réel, cookies affichés, comptes et captures temporaires supprimés après coup.
+**Ce paragraphe remplace la liste d'attente qui suit**, qui n'est conservée que pour ce qui reste.
+
+### 2.0 La position du verdict, mesurée
+
+| État | Desktop | Mobile | Cible |
+|---|---|---|---|
+| Territoire, projet structuré | 204 px | 242 px | conforme |
+| Projet non structuré | 204 px | 242 px | conforme |
+| Adresse Nantes | 246 px | 309 px | conforme |
+| Analyse obsolète | 330 px | 402 px | conforme |
+| Dossier réel existant | 284 px | 362 px | conforme |
+
+Cibles tenues : moins de 350 px en desktop, moins de 500 px en mobile.
+
+Également prouvé : un seul `<h1>` pendant tout le streaming d'adresse (repli vers 400 ms,
+remplacement vers 1,5 s, jamais de coexistence) ; aucun débordement horizontal à 390 px ; date et
+obsolescence restent attachées à l'analyse et distinctes du projet actuel ; relations La Rochelle et
+Nantes persistées séparément, projet global inchangé ; « Y revenir » remet bien le territoire actif
+sur la résidence ; un changement achat vers location est enregistré sans perdre la structure, et le
+parseur n'est pas appelé quand seul ce choix change ; la sonde du Logement a disparu et la checklist
+passe réellement du vocabulaire acheteur au vocabulaire bailleur ; « Module 03 » et « Énergie,
+risques, bâti » sont en place ; AskFuture ouvert mesure 358 px dans un viewport de 390 px.
+
+### 2.0.1 Ce que la recette a trouvé, et qui est corrigé
+
+| Constat | Correction |
+|---|---|
+| **P0 : aucun verdict sur Paris, Lyon, Marseille.** L'index est bâti par arrondissement, les codes agrégés n'y existent pas : sur un dossier PAYÉ, aucun fait, donc aucun dossier, aucun verdict, aucun `<h1>`, en silence | `codeDeLectureLocal` rend le code local que le lecteur possède (l'arrondissement de son bien, ou celui de son droit), jamais un arrondissement par défaut. L'identité d'artefact reste la commune. Ce qui reste est DIT à l'écran, porte le `<h1>`, et se journalise (`2b62546`) |
+| **P1 : les territoires achetés seuls étaient introuvables.** Un grant sans adresse n'apparaissait ni dans « Mes biens » ni dans le compte des communes ouvertes | Section « Vos territoires », route de bascule par INSEE avec vérification du droit, et compte qui additionne les deux portes (`02b2536`) |
+| **P1 : « Mes biens » en double dans la barre** | La destination reste dans la navigation globale, les CTA portent l'action de l'écran. L'écran de remerciement garde le sien : après un achat, répéter le chemin n'est pas du bruit (`2b62546`) |
+
+### 2.0.2 Mis de côté, non bloquant
+
+- Dans l'état sans projet, deux boutons « Décrire mon projet » se suivent : celui du hero et celui de
+  la carte projet.
+- Le panneau d'AskFuture ouvert passe sous le bandeau cookies (`z-index` 100 contre 9999). La
+  pastille fermée, elle, ne recouvre plus rien.
+
+---
+
+## 3. Ce qui reste à vérifier, et ne peut pas l'être sans compte payé
 
 ### 2.1 Les quatre contenus du hero, desktop ET mobile (360 px)
 
@@ -157,7 +201,7 @@ Attendu : une ligne par commune, aucune écrasée par l'autre.
 
 ---
 
-## 3. Écarts assumés par rapport au plan, et leur raison
+## 4. Écarts assumés par rapport au plan, et leur raison
 
 1. **Le panneau compact des échelles disparaît complètement**, pas seulement en payant. Le plan le
    disait conservé en gratuit ; il n'y existait pas, sa condition de rendu étant `fullReport`. Rien
@@ -180,8 +224,8 @@ Attendu : une ligne par commune, aucune écrasée par l'autre.
 
 ---
 
-## 4. État git
+## 5. État git
 
-Dix commits sur `main`, **rien poussé**, arbre de travail propre hors les non-suivis habituels
+Vingt-et-un commits sur `main`, **rien poussé**, arbre de travail propre hors les non-suivis habituels
 (`CHARTE/`, `.impeccable/`, l'archive du design system). Un push déploie en production, sans étape
 Preview : il n'aura lieu qu'après la recette du § 2.
