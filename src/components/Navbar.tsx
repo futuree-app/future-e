@@ -368,10 +368,18 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                   borderRadius: 6,
                   background: C.orange,
                   color: C.bg,
-                  fontFamily: "var(--font-sans)",
+                  // LA MÊME VOIX QUE LE RESTE DE LA BARRE (13/08/2026). Tous les autres éléments
+                  // sont en mono 11 px, capitales, interlettrage 0,08em : ce seul bouton était en
+                  // police de texte, 13 px, casse normale, ce qui le désignait comme un élément
+                  // étranger là où sa couleur suffit à le distinguer. Seul le poids reste appuyé,
+                  // parce qu'il porte l'action principale.
+                  fontFamily: "var(--font-mono)",
                   fontWeight: 600,
-                  fontSize: 13,
+                  fontSize: 11,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
                   textDecoration: 'none',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {ctas?.primary?.label ?? 'Commencer'}
@@ -581,9 +589,12 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                     borderRadius: 8,
                     color: C.bg,
                     textDecoration: 'none',
-                    fontFamily: "var(--font-sans)",
+                    // Même voix que le bouton secondaire juste au-dessus, dans le menu déroulé.
+                    fontFamily: "var(--font-mono)",
                     fontWeight: 600,
-                    fontSize: 14,
+                    fontSize: 11,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
                   }}
                 >
                   {ctas?.primary?.label ?? 'Commencer'}
