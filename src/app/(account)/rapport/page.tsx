@@ -57,17 +57,22 @@ const MODULE_GRAIN: Record<string, string> = {
 
 // LE VERDICT EST LE TITRE DE CET ÉCRAN (12/08/2026), aux TROIS points de montage : le repli
 // communal du Suspense, le chemin adresse et le chemin commune seule. En oublier un ferait changer
-// la taille du titre au moment où le streaming se résout. La taille voyage avec la balise :
-// promouvoir le seul <h1> aurait laissé la réponse plus petite que les titres de section sous elle.
-// LA MESURE TRANCHE LA TAILLE, ET ELLE A TRANCHÉ (12/08/2026). Le headline déterministe est borné à
-// 130 caractères (`HEADLINE_MAX_CHARS`). Rendu à 360 px de large, la carte du verdict laisse 270 px
-// au titre : à `--text-display` (30 px à cette largeur), les phrases les plus longues du corpus
-// prennent SEPT à HUIT lignes, ce qui n'est plus un titre. À `--text-title` (23 px), les mêmes
-// phrases tiennent en cinq. Le repli ne vaut donc QUE pour le mobile ; au-delà de `sm`, la réponse
-// garde la taille du titre de page, sans quoi elle resterait plus petite que les titres sous elle.
+// la taille du titre au moment où le streaming se résout.
+//
+// LA MESURE TRANCHE LA TAILLE, ET ELLE L'A TRANCHÉE DEUX FOIS.
+// ══════════════════════════════════════════════════════════════════════════════════════════
+// Le headline déterministe est borné à 130 caractères (`HEADLINE_MAX_CHARS`), ce qui est long pour
+// un titre. À 360 px de viewport, la carte laisse 270 px : `--text-display` (30 px) y donnait SEPT
+// à HUIT lignes, 23 px en donne CINQ.
+//
+// Sur desktop, `--text-display` monte à 46 px, une taille de couverture éditoriale : trois lignes de
+// titre, et la réponse commençait à 629 px, sous le pli. La sémantique du <h1> n'impose aucune
+// taille ; ce qu'elle impose est d'être le plus grand texte de l'écran, ce que 36 px tient largement
+// (les titres de section plafonnent à 31 px). L'échelle propre au verdict est donc bornée ici :
+// 23 px en mobile, 36 px au plus en desktop.
 const TITRE_VERDICT = {
   niveau: "h1" as const,
-  classe: "text-[length:var(--text-display)] max-sm:text-[length:var(--text-title)] font-[var(--weight-display)] tracking-[-0.8px]",
+  classe: "text-[length:clamp(23px,2.9vw,36px)] font-[var(--weight-display)] tracking-[-0.8px]",
 };
 
 const MODULE_BENEFIT: Record<string, string> = {
@@ -316,67 +321,51 @@ export default async function RapportPage() {
           </div>
         )}
 
-        {/* ── Bandeau territoire actif (≠ résidence) ── */}
-        {!territory.isResidence && (
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/[0.18] bg-accent/[0.05] px-5 py-3.5">
-            <p className="text-[14px] text-label leading-snug">
-              Vous consultez{" "}
-              <span className="font-semibold text-accent">{displayName}</span>
-              {territory.residenceCommune ? (
-                <span className="text-muted">
-                  {" "}· votre résidence reste {territory.residenceCommune}
-                </span>
-              ) : null}
-            </p>
-            {/* <a> : /rapport/residence est une Route Handler, et un <Link> vers une Route Handler
-                ne navigue pas (le router attend du RSC, reçoit une redirection vers du HTML, et
-                abandonne). Ce bouton était donc inerte AVANT cette session, le même défaut que
-                « Ouvrir {commune} » plus bas a rendu visible le 30/07/2026. */}
-            <a
-              href="/rapport/residence"
-              className="shrink-0 font-mono text-[11px] tracking-[0.08em] uppercase text-muted hover:text-label no-underline border border-[var(--border-2)] rounded-lg px-3.5 py-2"
-            >
-              {territory.residenceCommune
-                ? `Revenir à ${territory.residenceCommune}`
-                : "Revenir à ma résidence"}
-            </a>
-          </div>
-        )}
+        {/* ── OÙ JE SUIS, ET COMMENT J'EN CHANGE : UNE LIGNE, PLUS DEUX CARTES ──────────────
+            Deux bandeaux se succédaient ici : le territoire consulté, puis la liste des communes
+            ouvertes par un bien. Ensemble ils occupaient 320 px, si bien que la réponse achetée
+            commençait à 629 px sur desktop et sous le premier écran sur mobile : le chantier
+            remontait le verdict, la navigation le repoussait aussitôt.
 
-        {/* ── Bandeau : des biens analysés ouvrent une autre commune ──
-            La porte qui manquait. Posséder un dossier ouvre les trois échelles de SA commune, mais
-            rien ne le disait ni ne permettait d'y aller : le territoire lu restait la résidence,
-            l'écran servait le partiel, et le lecteur n'avait aucun moyen de savoir que Nantes lui
-            était ouverte.
+            Ce qu'ils disaient survit, à sa vraie échelle : une ligne. Les autres communes ne sont
+            plus listées ici, elles sont derrière le lien qui les compte, et cette page-là (« Mes
+            biens ») les ouvre déjà toutes, chacune vers ses trois échelles.
 
-            <a> et pas <Link> : la cible est une Route Handler, et un <Link> vers une Route Handler
-            ne navigue pas. Voir le commentaire du bandeau au-dessus. */}
-        {communesAilleurs.length > 0 && (
-          <div className="mt-6 rounded-xl border border-[var(--border-2)] bg-[var(--bg-elev)] px-5 py-4">
-            <p className="text-[14px] text-label leading-snug mb-3">
-              {communesAilleurs.length === 1
-                ? "Vous avez analysé un bien dans une autre commune, et elle vous est ouverte en entier."
-                : "Vous avez analysé des biens dans d'autres communes, et elles vous sont ouvertes en entier."}
-            </p>
-            <div className="flex flex-wrap gap-2.5">
-              {communesAilleurs.map((d) => (
+            <a> et non <Link> pour `/rapport/residence` : la cible est une Route Handler, et un
+            <Link> vers une Route Handler ne navigue pas (le router attend du RSC, reçoit une
+            redirection vers du HTML, et abandonne). */}
+        {!territory.isResidence || communesAilleurs.length > 0 ? (
+          <p className="mt-5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13px] text-muted">
+            <span>
+              Vous consultez <span className="text-label font-medium">{displayName}</span>
+            </span>
+            {!territory.isResidence && territory.residenceCommune ? (
+              <>
+                <span aria-hidden className="text-ghost">·</span>
+                <span>votre résidence est {territory.residenceCommune}</span>
                 <a
-                  key={d.id}
-                  href={`/rapport/dossiers/ouvrir?id=${encodeURIComponent(d.id)}&vers=territoire`}
-                  className="font-mono text-[11px] tracking-[0.08em] uppercase text-accent hover:text-label no-underline border border-accent/[0.3] rounded-lg px-3.5 py-2"
+                  href="/rapport/residence"
+                  className="underline underline-offset-2 decoration-[var(--border-2)] text-accent hover:decoration-current"
                 >
-                  Ouvrir {d.city ?? d.address_label}
+                  Y revenir
                 </a>
-              ))}
-              <Link
-                href="/rapport/dossiers"
-                className="font-mono text-[11px] tracking-[0.08em] uppercase text-muted hover:text-label no-underline border border-[var(--border-2)] rounded-lg px-3.5 py-2"
-              >
-                Tous mes biens
-              </Link>
-            </div>
-          </div>
-        )}
+              </>
+            ) : null}
+            {communesAilleurs.length > 0 ? (
+              <>
+                <span aria-hidden className="text-ghost">·</span>
+                <Link
+                  href="/rapport/dossiers"
+                  className="underline underline-offset-2 decoration-[var(--border-2)] text-accent hover:decoration-current"
+                >
+                  {communesAilleurs.length === 1
+                    ? "1 autre commune vous est ouverte"
+                    : `${communesAilleurs.length} autres communes vous sont ouvertes`}
+                </Link>
+              </>
+            ) : null}
+          </p>
+        ) : null}
 
         {/* ── EN TÊTE : L'IDENTITÉ DE CE QUI EST LU, PUIS LA RÉPONSE ACHETÉE ─────────────
             Le lecteur qui venait de payer voyait, dans cet ordre : une promesse commerciale en très
@@ -391,7 +380,8 @@ export default async function RapportPage() {
             bienAlternatif={choixDossier.autres.length > 0}
             choixParDefaut={choixDossier.raison === "repli_plus_recent"}
             intent={userProject?.intent ?? null}
-            reformulation={userProject?.parsed?.reformulation ?? userProject?.rawText ?? null}
+            nbPriorites={userProject?.parsed?.preferences?.length ?? null}
+            projetRenseigne={Boolean(userProject?.parsed?.reformulation ?? userProject?.rawText)}
             contenu={heroContenu}
           />
         ) : null}
@@ -536,6 +526,7 @@ export default async function RapportPage() {
                   // réponse DÉCLARÉE d'une relation DÉDUITE du domicile, et afficherait une
                   // déduction comme un choix du lecteur.
                   source: contexteLecture.source,
+                  residence: territory.residenceCommune ?? null,
                 }
               : null}
           />

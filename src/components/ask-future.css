@@ -446,6 +446,13 @@ body[data-drawer-open] .ask-future-container:not(.ask-future-container--inline) 
   .ask-future-container {
     bottom: 16px;
     right: 16px;
+    /* PLUS DE `left` EN ÉTAT FERMÉ (12/08/2026) : la barre traversait l'écran et recouvrait
+       l'entrée du verdict, en concurrence avec le bandeau cookies. Fermé, AskFuture redevient une
+       pastille posée dans le coin ; ouvert, le panneau reprend toute la largeur (règle ci-dessous),
+       parce qu'une conversation a besoin de place. */
+    left: auto;
+  }
+  .ask-future-container[data-open="true"] {
     left: 16px;
   }
   .ask-panel {
@@ -453,9 +460,16 @@ body[data-drawer-open] .ask-future-container:not(.ask-future-container--inline) 
     max-width: 100%;
     max-height: 75vh;
   }
+  /* Le libellé (« Une question sur Nantes ? ») et le raccourci clavier disparaissent : le premier
+     dictait la largeur de la barre, le second nomme une touche qui n'existe pas sur un téléphone.
+     L'intitulé complet reste porté par `aria-label`, donc rien n'est perdu pour un lecteur d'écran. */
   .ask-trigger {
-    width: 100%;
+    width: 48px;
+    height: 48px;
+    padding: 0;
     justify-content: center;
+    border-radius: 100px;
   }
+  .ask-trigger span { display: none; }
   .ask-trigger kbd { display: none; }
 }

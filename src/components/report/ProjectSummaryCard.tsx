@@ -14,6 +14,12 @@ export type RelationCommune = {
   commune: string;
   valeur: Relation;
   source: RelationSource;
+  /**
+   * La commune de RÉSIDENCE du compte, quand elle est connue. Elle nomme la déduction : « déduit de
+   * votre commune de résidence » laissait le lecteur chercher laquelle, alors que c'est précisément
+   * l'information qui lui permet de dire si la déduction est juste.
+   */
+  residence: string | null;
 };
 
 // Les deux seules valeurs qu'un écran propose. `information_only` et `unknown` existent en base et
@@ -224,7 +230,9 @@ export function ProjectSummaryCard({
           </p>
         ) : relationSource === "inferred" ? (
           <p className="text-[12.5px] leading-[1.5] text-ghost mt-2.5">
-            Déduit de votre commune de résidence. Corrigez si besoin.
+            {relation.residence
+              ? `Déduit du fait que votre résidence est ${relation.residence}. Corrigez si besoin.`
+              : "Déduit de votre commune de résidence. Corrigez si besoin."}
           </p>
         ) : null}
         {relationError ? <p className="text-danger text-[13px] mt-2.5">{relationError}</p> : null}

@@ -276,14 +276,23 @@ export default function LogementModule({
           <div className="max-w-[720px]">
             <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-accent mb-5">
               <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
-              Module 02 · Logement
+              {/* RANG 03, ET NON 02 (12/08/2026) : « Autour de l'adresse » porte le 02, et les deux
+                  modules affichaient le même numéro. L'ordre canonique est celui de `PRODUCT_MODULES`
+                  (Territoire, Autour, Logement), et le rang porte l'identité de l'échelle depuis que
+                  la couleur et l'icône ont été retirées : deux 02 rendaient cette identité fausse. */}
+              Module 03 · Logement
             </div>
             <h1 className="font-[var(--weight-display)] text-[length:var(--text-display)] leading-[1.08] tracking-[-1.2px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
               Ce logement, lu à son adresse.<br />
-              <span className="italic text-accent">Énergie, risques, entourage.</span>
+              {/* « ENTOURAGE » A QUITTÉ LA PROMESSE (12/08/2026) : ce module s'arrête aux murs
+                  depuis la bascule 6 -> 3 modules, et l'entourage vit dans `/rapport/autour`. Le
+                  hero promettait donc ce que la page déclare ensuite ne pas faire. */}
+              <span className="italic text-accent">Énergie, risques, bâti.</span>
             </h1>
             <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[560px]">
-              Une adresse suffit. Vous lisez ce qui pèse vraiment sur ce logement : sa performance énergétique, ce à quoi son adresse est exposée, et ce qui l&apos;entoure.
+              Une adresse suffit. Vous lisez ce qui pèse vraiment sur ce logement : sa performance
+              énergétique, ce à quoi son adresse l&apos;expose, et ce qu&apos;il reste à demander
+              avant de décider. Le secteur autour de l&apos;adresse a son propre module.
             </p>
             <div className="flex gap-3 flex-wrap">
               <Link href="/rapport" prefetch={false} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">
