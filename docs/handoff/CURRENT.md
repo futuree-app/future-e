@@ -1,8 +1,11 @@
 # Passation — 2026-08-12, branche `main`
 
-**Horodatage** : 2026-08-12, fin d'après-midi · **Branche** : `main` = `d74ff26`, **1 commit non
-poussé**. Production à jour au commit `911b5be` (déploiement `future-gbx9od5us`, Ready, aliasé sur
-`futur-e.fr` et `www.futur-e.fr`).
+**Horodatage** : 2026-08-12, soirée · **Branche** : `main` = `2756ccd`, **rien en attente**.
+Production déployée depuis `2756ccd` (build `future-3u6rfjuix`, parti au push).
+
+> **Le chantier 5 est CLOS et poussé.** Le durcissement en quatre points demandé par la revue
+> externe a été fait, puis étendu à six défauts trouvés en le faisant (détail dans
+> « Fait dans cette session »). Le prochain chantier est le **6 (premier écran)**.
 
 > Le brief précédent (04/08, chantiers charte / données / permis) est **entièrement périmé** : ses
 > trois chantiers sont fusionnés et déployés. Il est archivé sous
@@ -44,11 +47,21 @@ et ce qu'elle ne garantit pas, est dans **`docs/audits/2026-08-11-sprint-confian
   CTA qui portent le bien, droits d'AskFuture alignés sur `canAccessTerritory`, quota unifié
   (`quotaQuestions` dans `lib/territory-claims.ts`).
 
-**Non poussé** (`d74ff26`, chantier 5) : l'analyse répond-elle encore au projet du lecteur.
-Comparaison SÉMANTIQUE (`lib/decision/projet-materiel.ts`), bandeau + bouton
-(`components/report/AnalyseAncienProjet.tsx`), route `/api/dossier/actualiser` qui produit une
-version n+1, lecture de la dernière version SERVABLE, et durcissement AskFuture (une panne de quota
-masque le widget au lieu de faire tomber le rapport).
+- **Chantier 5** (`d74ff26`) : l'analyse répond-elle encore au projet du lecteur. Comparaison
+  SÉMANTIQUE (`lib/decision/projet-materiel.ts`), bandeau + bouton
+  (`components/report/AnalyseAncienProjet.tsx`), route `/api/dossier/actualiser` qui produit une
+  version n+1, lecture de la dernière version SERVABLE, et durcissement AskFuture (une panne de
+  quota masque le widget au lieu de faire tomber le rapport).
+- **Durcissement du chantier 5** (`2756ccd`, six défauts) : `versionPlusRecente` remplacé par
+  `servedVersion` / `headVersion` + `headStatus` pris sur LA MÊME ligne (une v2 en échec bloquait
+  toute v3) ; bail de 15 min sur `created_at` pour qu'un `generating` abandonné ne verrouille pas le
+  dossier à vie ; recherche paginée de la dernière version servable (le `.limit(5)` faisait
+  disparaître une v1 payée après cinq échecs) ; grammaire du `scopeKey` + `communeParent` imposé des
+  deux côtés dans la route ; identité d'artefact remontée à la COMMUNE (le webhook écrivait sous
+  `75101` ce que toute lecture cherchait sous `75056`) ; signature décisionnelle qui ne rate plus un
+  vrai changement (libre → structuré, clé de préférence en double) et n'en invente plus (contrainte
+  inactive, ancre souple, `maxKm` sous un `maxMinutes`). Les règles d'activité sont EMPRUNTÉES à
+  `hard-constraints-hydrate.ts`, jamais recopiées.
 
 ---
 
@@ -71,7 +84,7 @@ masque le widget au lieu de faire tomber le rapport).
 
 ## État git
 
-- `main` = `d74ff26`, **1 commit en avance sur `origin/main`** (`d74ff26` seul).
+- `main` = `2756ccd` = `origin/main`. Rien en attente.
 - Non suivis, volontairement hors dépôt : `CHARTE/`, `.impeccable/`, `Futur.e Design System.zip`.
 - `.prive/` (ignoré) contient `artefacts-avant-regeneration-2026-08-11.json` : la seule photographie
   des anciens artefacts, fixture d'une migration future. Ne jamais commiter.
@@ -84,8 +97,13 @@ masque le widget au lieu de faire tomber le rapport).
 
 ## Prochaine étape immédiate
 
-**Le durcissement en quatre points de `d74ff26`, demandé par la revue externe, avant tout push.**
-Il était commencé (lecture de `HardConstraints` en cours) et rien n'a été modifié.
+**Chantier 6 : le premier écran.** Hiérarchie seule, aucune donnée nouvelle : le bien et le projet,
+la conclusion, les contradictions et les inconnues, les actions, les preuves ensuite. Validation par
+captures desktop ET mobile.
+
+<details>
+<summary>Pour mémoire : le durcissement en quatre points, FAIT dans le commit <code>2756ccd</code></summary>
+
 
 1. **Bloquant** : `versionPlusRecente` (`lib/server/decision-artifact-store.ts`) confond `generating`
    et `failed`, et `/api/dossier/actualiser` traite les deux comme « déjà en cours ». Après une v2
@@ -108,9 +126,17 @@ Il était commencé (lecture de `HardConstraints` en cours) et rien n'a été mo
    d'état en fonction PURE et le tester sur `ready + generating`, `ready + failed`, payload
    invalide, et plusieurs échecs d'affilée.
 
-Ensuite seulement : test navigateur Territoire + Adresse, push, puis **chantier 6** (premier écran,
-hiérarchie seule : bien et projet, conclusion, contradictions et inconnues, actions, preuves
-ensuite ; validation par captures desktop ET mobile).
+Recette navigateur faite sur bundle de production local, compte payé : changement matériel détecté
+sur les deux scopes, actualisation Territoire et Adresse jusqu'à `ready`, bandeau disparu au
+rechargement, rendu vérifié desktop et mobile.
+
+</details>
+
+> **Les lignes de recette restent en base, et c'est voulu.** Les deux scopes du compte de test
+> portent des v2 et des v3 nées de la recette du 12/08. Elles sont immuables, cohérentes, et ne sont
+> pas servies. Elles ne se nettoient pas : supprimer une version d'artefact contredirait la promesse
+> de la migration 28. À savoir seulement le jour où le nombre de versions d'un dossier deviendra une
+> donnée d'analyse : sur ce compte, il raconte une recette, pas un usage.
 
 ---
 
