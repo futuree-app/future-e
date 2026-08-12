@@ -14,6 +14,7 @@ import { ProjectSummaryCard } from "@/components/report/ProjectSummaryCard";
 import { EnTeteDossier } from "@/components/report/EnTeteDossier";
 import { contenuDuHero, ANCRE_PROJET } from "@/lib/decision/premier-ecran";
 import { normalizeUserProject } from "@/lib/user-project";
+import { getReportContext, resolveRelation } from "@/lib/report-context";
 import { Suspense } from "react";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
@@ -245,6 +246,15 @@ export default async function RapportPage() {
   const openModules = fullReport
     ? allModules.filter((m) => m.id === "quartier" || Boolean(logementForCommune))
     : [];
+
+  // LA RELATION AU LIEU SE LIT ICI DEPUIS LE 12/08/2026, parce que c'est ici qu'on la modifie
+  // désormais. Elle reste attachée à la COMMUNE (table `report_context`), et non au projet :
+  // quelqu'un peut habiter Lorient et envisager La Rochelle. On affiche la valeur EFFECTIVE
+  // (`resolveRelation`), celle que la synthèse utilisera, plutôt qu'une valeur déclarée qui n'existe
+  // peut-être pas encore.
+  const contexteLecture = fullReport && inseeCode
+    ? resolveRelation(territory.isResidence, await getReportContext(supabase, user.id, inseeCode))
+    : null;
 
   // LE CONTENU DU HAUT DE PAGE, décidé par une fonction pure et testée (quatre états). La page ne
   // rejoue pas la règle : elle la consomme.
@@ -510,7 +520,19 @@ export default async function RapportPage() {
             lien du module Territoire. `scroll-mt-24` évite que l'ancre passe sous la navbar, comme
             pour les ancres de cartes du dossier. */}
         <div id={ANCRE_PROJET} className="scroll-mt-24 mt-12">
-          <ProjectSummaryCard initial={userProject} />
+          <ProjectSummaryCard
+            initial={userProject}
+            relation={contexteLecture && inseeCode
+              ? {
+                  insee: inseeCode, commune: displayName,
+                  valeur: contexteLecture.relation,
+                  // L'ORIGINE VOYAGE AVEC LA VALEUR. Sans elle, l'écran ne peut pas distinguer une
+                  // réponse DÉCLARÉE d'une relation DÉDUITE du domicile, et afficherait une
+                  // déduction comme un choix du lecteur.
+                  source: contexteLecture.source,
+                }
+              : null}
+          />
         </div>
 
         {/* ── CADRAGE CLIMAT, DESCENDU AU NIVEAU DES MODULES DONT IL EST LE SUJET ────────────

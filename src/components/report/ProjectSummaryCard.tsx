@@ -4,6 +4,24 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { UserProject, ProjectPosture, ProjectIntent } from "@/lib/user-project";
 import { doitReparser, parsedASauvegarder } from "@/lib/decision/projet-edition";
+// `import type` et rien d'autre : `lib/report-context.ts` est `server-only`, et une importation de
+// valeur depuis ce composant client casserait le build. Les types, eux, sont effacés à la compilation.
+import type { Relation, RelationSource } from "@/lib/report-context";
+
+/** Le lieu LU et la relation qu'on lui déclare. `null` quand la page n'a pas de commune ouverte. */
+export type RelationCommune = {
+  insee: string;
+  commune: string;
+  valeur: Relation;
+  source: RelationSource;
+};
+
+// Les deux seules valeurs qu'un écran propose. `information_only` et `unknown` existent en base et
+// ne sont proposées nulle part : `synthesisRelation` les traite comme `considering_living`.
+const RELATION_OPTIONS: { value: Relation; label: string }[] = [
+  { value: "current_residence", label: "J'y vis" },
+  { value: "considering_living", label: "J'envisage d'y vivre" },
+];
 
 const POSTURE_OPTIONS: { value: ProjectPosture; label: string }[] = [
   { value: "recherche", label: "Je cherche où vivre" },
@@ -41,7 +59,12 @@ function ProjectEyebrow({ label }: { label: string }) {
   );
 }
 
-export function ProjectSummaryCard({ initial }: { initial: UserProject | null }) {
+export function ProjectSummaryCard({
+  initial, relation = null,
+}: {
+  initial: UserProject | null;
+  relation?: RelationCommune | null;
+}) {
   const [project, setProject] = useState<UserProject | null>(initial);
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(initial?.rawText ?? "");
@@ -54,7 +77,43 @@ export function ProjectSummaryCard({ initial }: { initial: UserProject | null })
   // être comprises », et il survit à la fermeture de l'éditeur, puisqu'il concerne ce qui vient
   // d'être écrit.
   const [avertissement, setAvertissement] = useState<string | null>(null);
+  // DEUX SOUS-CONTRÔLES, DEUX SAUVEGARDES, ET C'EST DÉLIBÉRÉ (12/08/2026).
+  // Le projet vit dans `user_profiles.user_project`, la relation dans `report_context` : deux
+  // tables, deux routes, aucune transaction. Un bouton « Enregistrer » unique pourrait donc réussir
+  // à moitié et laisser l'écran incapable de dire lequel des deux il montre. Le lecteur modifie tout
+  // au même endroit ; on refuse seulement de prétendre à une atomicité que le stockage ne donne pas.
+  const [relationValeur, setRelationValeur] = useState<Relation | null>(relation?.valeur ?? null);
+  const [relationSource, setRelationSource] = useState<RelationSource | null>(relation?.source ?? null);
+  const [relationBusy, setRelationBusy] = useState(false);
+  const [relationError, setRelationError] = useState<string | null>(null);
   const router = useRouter();
+
+  async function enregistrerRelation(next: Relation) {
+    if (!relation) return;
+    setRelationBusy(true);
+    setRelationError(null);
+    try {
+      const res = await fetch("/api/report-context", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ insee: relation.insee, relation: next }),
+      });
+      if (!res.ok) {
+        setRelationError("Enregistrement impossible pour le moment. Réessayez.");
+        setRelationBusy(false);
+        return;
+      }
+    } catch {
+      setRelationError("Enregistrement impossible pour le moment. Réessayez.");
+      setRelationBusy(false);
+      return;
+    }
+    // Confirmé par le serveur, et seulement là : la valeur affichée devient une réponse DÉCLARÉE.
+    setRelationValeur(next);
+    setRelationSource("confirmed_by_user");
+    setRelationBusy(false);
+    router.refresh();
+  }
 
   async function save() {
     const raw = text.trim();
@@ -122,6 +181,57 @@ export function ProjectSummaryCard({ initial }: { initial: UserProject | null })
     setBusy(false);
   }
 
+
+  // Rendu par une FONCTION appelée dans le JSX, jamais par un composant déclaré pendant le rendu :
+  // un composant recréé à chaque passe remonterait ses enfants et perdrait leur état.
+  function blocRelation() {
+    if (!relation) return null;
+    const horsChoix = relationValeur == null
+      || !RELATION_OPTIONS.some((o) => o.value === relationValeur);
+    return (
+      <div className="mt-6 pt-5 border-t border-[var(--border-1)]">
+        <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-ghost mb-2.5">
+          Pour {relation.commune}
+        </p>
+        <div className="flex gap-2 flex-wrap">
+          {RELATION_OPTIONS.map((o) => {
+            const active = !horsChoix && relationValeur === o.value;
+            return (
+              <button
+                key={o.value}
+                type="button"
+                disabled={relationBusy}
+                onClick={() => enregistrerRelation(o.value)}
+                className={
+                  active
+                    ? "rounded-lg px-3.5 py-2 text-[13px] font-medium bg-accent text-canvas border border-transparent transition-colors disabled:opacity-40"
+                    : "rounded-lg px-3.5 py-2 text-[13px] text-muted bg-[var(--bg-elev-2)] border border-[var(--border-2)] hover:text-label hover:border-white/25 transition-colors disabled:opacity-40"
+                }
+              >
+                {o.label}
+              </button>
+            );
+          })}
+        </div>
+        {/* L'ORIGINE SE DIT. Une relation DÉDUITE du domicile n'est pas une réponse du lecteur :
+            l'afficher comme un choix ferait passer notre inférence pour sa déclaration. Une valeur
+            hors des deux choix (`information_only`, `unknown`, jamais proposées par un écran) ne
+            marque aucun bouton actif : la ligne dit alors ce que la synthèse appliquera. */}
+        {horsChoix ? (
+          <p className="text-[12.5px] leading-[1.5] text-ghost mt-2.5">
+            Aucune relation déclarée pour cette commune : l&apos;analyse s&apos;adresse à quelqu&apos;un
+            qui envisage de s&apos;y installer.
+          </p>
+        ) : relationSource === "inferred" ? (
+          <p className="text-[12.5px] leading-[1.5] text-ghost mt-2.5">
+            Déduit de votre commune de résidence. Corrigez si besoin.
+          </p>
+        ) : null}
+        {relationError ? <p className="text-danger text-[13px] mt-2.5">{relationError}</p> : null}
+      </div>
+    );
+  }
+
   // « VOTRE PROJET » N'EST PAS LE MOT D'UN HABITANT. Quelqu'un qui a coché « j'y habite déjà » n'a pas
   // de projet : il a un lieu de vie et des questions dessus. Le titre suit donc la posture choisie,
   // comme le fait déjà le verdict et le titre des vérifications. Déclaré hors du rendu : une
@@ -149,6 +259,7 @@ export function ProjectSummaryCard({ initial }: { initial: UserProject | null })
           Affiner
           <span aria-hidden className="text-[13px] leading-none">→</span>
         </button>
+        {blocRelation()}
       </div>
     );
   }
@@ -168,6 +279,7 @@ export function ProjectSummaryCard({ initial }: { initial: UserProject | null })
         >
           Décrire mon projet
         </button>
+        {blocRelation()}
       </div>
     );
   }
@@ -256,6 +368,7 @@ export function ProjectSummaryCard({ initial }: { initial: UserProject | null })
           </button>
         )}
       </div>
+      {blocRelation()}
     </div>
   );
 }
