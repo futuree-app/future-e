@@ -122,9 +122,17 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
           </Link>
 
           {/* Desktop links */}
+          {/* UNE SEULE LIGNE, TOUJOURS (13/08/2026).
+              Les liens sont des flex items compressibles : sans `nowrap`, TOUT libellé en deux mots
+              cassait sur son espace, quelle que soit la place disponible. « Où vivre » et « Pourquoi
+              futur•e » faisaient déjà 36 px de haut au lieu de 18 avant l'ajout de « Mes biens » ;
+              à six entrées, la barre entière se lisait sur deux lignes.
+              Trois verrous, dans cet ordre : aucun retour à la ligne dans un libellé (`nowrap` sur
+              chaque item), aucune compression (`flexShrink: 0`), et le passage au menu burger AVANT
+              que la place ne manque (voir la media query en pied de fichier). */}
           <div
             className="nb-desktop-links"
-            style={{ display: 'flex', alignItems: 'center', gap: 32 }}
+            style={{ display: 'flex', alignItems: 'center', gap: 26, flexWrap: 'nowrap', flexShrink: 0 }}
           >
             {NAV_ITEMS.map((item) => {
               if (isDropdown(item)) {
@@ -162,6 +170,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                         display: 'flex',
                         alignItems: 'center',
                         gap: 5,
+                        whiteSpace: 'nowrap',
                         transition: 'color 0.15s',
                       }}
                     >
@@ -318,6 +327,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                     textTransform: 'uppercase',
                     color: C.muted,
                     textDecoration: 'none',
+                    whiteSpace: 'nowrap',
                     transition: 'color 0.15s',
                   }}
                 >
@@ -328,7 +338,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
           </div>
 
           {/* Right actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
             <ThemeToggle />
             <div
               className="nb-actions-desktop"
@@ -585,12 +595,16 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
       </nav>
 
       <style>{`
-        @media (max-width: 768px) {
+        /* LE BURGER ARRIVE À 1024 px, ET PLUS À 768 (13/08/2026). Six entrées plus deux boutons
+           d'action ne tiennent pas sur une ligne en dessous : les garder affichées les ferait
+           déborder ou compresser, ce que les verrous ci-dessus interdisent désormais. Le menu
+           mobile porte exactement les mêmes destinations, rien n'est perdu entre 769 et 1023 px. */
+        @media (max-width: 1023px) {
           .nb-desktop-links { display: none !important; }
           .nb-actions-desktop { display: none !important; }
           .nb-mobile-only { display: flex !important; }
         }
-        @media (min-width: 769px) {
+        @media (min-width: 1024px) {
           .nb-mobile-only { display: none !important; }
         }
       `}</style>
