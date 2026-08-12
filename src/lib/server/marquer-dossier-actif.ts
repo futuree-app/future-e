@@ -1,40 +1,46 @@
 import "server-only";
-import { after } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { communeParent } from "@/lib/plm";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
-// LE BIEN ACTIF SUIT CE QUE LE LECTEUR OUVRE VRAIMENT.
+// LE CONTEXTE DE LECTURE, POSÉ D'UN SEUL GESTE.
 //
 // ── LE CONTRAT, TRANCHÉ LE 11/08/2026 ────────────────────────────────────────────────────────
-// « Dernier bien effectivement ouvert », et non « dernier sélectionné dans la liste ». C'est ce que
-// le nom `active_dossier_id` promet, c'est ce qu'un lecteur attend, et c'est le seul contrat qui
-// survive aux liens directs : ouvrir `/rapport/logement?dossierId=…` en revenant d'un e-mail, d'un
-// signet ou d'un lien du hub laissait sinon le hub sur un autre bien.
+// « Dernier bien effectivement ouvert », et non « dernier sélectionné dans une liste ». C'est ce
+// que `active_dossier_id` promet, et le seul contrat qui survive aux liens directs : ouvrir
+// `/rapport/logement?dossierId=…` depuis un e-mail ou un signet laissait sinon le hub sur un autre
+// bien.
 //
-// Vérifié en revue navigateur : ouverture directe de l'Evescot, retour au hub, Saint-Dominique
-// restait actif. Le produit affichait une identité qu'il ne transportait pas.
+// ── UN TRIPLET, JAMAIS UN CHAMP SEUL (revue du 11/08/2026) ───────────────────────────────────
+// Une première version n'écrivait que le dossier. Vérifié au navigateur : contexte sur La Rochelle,
+// ouverture directe du logement nantais, la page montrait bien Nantes et AskFuture proposait
+// « Une question sur La Rochelle ? ». Le bien actif et le territoire actif se contredisaient.
 //
-// ── POURQUOI `after()` ───────────────────────────────────────────────────────────────────────
-// C'est une écriture sur une lecture. Elle ne doit ni retarder le rendu, ni le faire échouer : le
-// lecteur a le droit de voir son bien même si la préférence ne s'enregistre pas. L'échec se
-// journalise, il ne remonte pas.
+// Les trois colonnes disent UNE seule chose, « ce que le lecteur consulte », et se posent ensemble.
+// Le territoire reste au grain COMMUNE : `dossier.insee` est le code local, donc l'arrondissement
+// pour PLM, et poser 75101 ferait lire « Paris 1er » à tous les écrans de commune.
 //
-// ── CE QUE CETTE VALEUR N'EST PAS ────────────────────────────────────────────────────────────
-// Ni un droit, ni une autorisation. L'appelant a DÉJÀ vérifié que le dossier appartient au lecteur
-// (`getDossier` filtre par `user_id` et par la RLS) : cette fonction ne fait que retenir, elle
-// n'autorise rien. `choisirDossierActif` l'ignore d'ailleurs dès qu'elle désigne une autre commune.
+// ── CE QUE CE MODULE N'EST PAS ───────────────────────────────────────────────────────────────
+// Ni un droit, ni une autorisation. L'appelant a déjà vérifié la propriété du dossier ; on ne fait
+// que retenir. `choisirDossierActif` ignore d'ailleurs le bien dès qu'il désigne une autre commune.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
-export function marquerDossierActif(sb: SupabaseClient, userId: string, dossierId: string): void {
-  after(async () => {
-    const { error } = await sb
-      .from("user_profiles")
-      .update({ active_dossier_id: dossierId })
-      .eq("user_id", userId);
-    if (error) {
-      // Journalisé, jamais tu : le symptôme visible serait un hub qui rouvre un autre bien, soit
-      // exactement le défaut que cette colonne corrige. Sans cette ligne, il serait indétectable.
-      console.error("[dossier-actif] écriture échouée", { userId, dossierId, error });
-    }
-  });
+export type ContexteDeLecture = { id: string; insee: string; city: string | null };
+
+export async function marquerDossierActif(
+  sb: SupabaseClient, userId: string, dossier: ContexteDeLecture,
+): Promise<void> {
+  const { error } = await sb
+    .from("user_profiles")
+    .update({
+      active_dossier_id: dossier.id,
+      active_insee_code: communeParent(dossier.insee),
+      active_commune: dossier.city,
+    })
+    .eq("user_id", userId);
+  if (error) {
+    // Journalisé, jamais tu : le symptôme visible serait un hub qui rouvre un autre bien, ou un
+    // territoire qui contredit la page lue. Sans cette ligne, ce serait indétectable.
+    console.error("[dossier-actif] écriture échouée", { userId, dossierId: dossier.id, error });
+  }
 }

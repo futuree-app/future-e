@@ -295,14 +295,30 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     // lot précédent : le hub sert désormais `active_dossier_id` en priorité, donc un client qui
     // achète un SECOND bien dans une commune où il en possède déjà un se verrait rouvrir l'ancien,
     // juste après avoir payé le nouveau.
-    await supabaseAdmin
-      .from("user_profiles")
-      .update({
-        active_insee_code: communeParent(intent.insee),
-        active_commune: intent.city,
-        active_dossier_id: dossier.id as string,
-      })
-      .eq("user_id", intent.user_id);
+    //
+    // `created` GOUVERNE CETTE BASCULE, comme il gouverne l'e-mail et l'événement d'achat (revue du
+    // 11/08/2026). Sans lui, un `payment_intent.succeeded` rejoué par Stripe des jours plus tard
+    // remettrait un ancien dossier au premier plan, alors que le lecteur en a ouvert un autre
+    // depuis : le contrat « dernier bien effectivement ouvert » tomberait sur un événement que
+    // personne n'a provoqué. Le retour de paiement passe de toute façon par
+    // `/rapport/dossiers/ouvrir`, qui repose le contexte exact.
+    if (created) {
+      const { error: bascule } = await supabaseAdmin
+        .from("user_profiles")
+        .update({
+          active_insee_code: communeParent(intent.insee),
+          active_commune: intent.city,
+          active_dossier_id: dossier.id as string,
+        })
+        .eq("user_id", intent.user_id);
+      // Journalisé, jamais tu : son symptôme serait un acheteur qui retrouve un autre bien que
+      // celui qu'il vient de payer, sans que rien ne l'explique.
+      if (bascule) {
+        console.error("[webhook] bascule vers le bien acheté échouée", {
+          userId: intent.user_id, dossierId: dossier.id, error: bascule,
+        });
+      }
+    }
 
     // `created` GOUVERNE L'E-MAIL, comme il gouverne déjà l'événement d'achat plus bas. Il ne le
     // gouvernait pas jusqu'au 31/07/2026 : un rejeu du webhook renvoyait le message à l'acheteur,

@@ -399,7 +399,9 @@ export default function AutourModule({
                     ou laisse passer, son diagnostic énergétique et ce à quoi son adresse est
                     exposée se lisent dans le module Logement.
                   </p>
-                  <Link href="/rapport/logement" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[length:var(--text-dense)] no-underline border border-[var(--border-1)] w-fit">
+                  {/* Le lien porte le bien lu : sans lui, un compte à plusieurs biens repasse par le
+                      sélecteur alors qu'il vient de lire CE logement (revue du 11/08/2026). */}
+                  <Link href={dossier?.id ? `/rapport/logement?dossierId=${encodeURIComponent(dossier.id)}` : "/rapport/logement"} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[length:var(--text-dense)] no-underline border border-[var(--border-1)] w-fit">
                     Ouvrir le module Logement →
                   </Link>
                 </div>

@@ -5,7 +5,7 @@ import LogementModule from "@/components/report/LogementModule";
 import { requireCurrentUser } from "@/lib/user-account";
 import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
 import { getDossier, getSoleDossier } from "@/lib/address-dossier-store";
-import { marquerDossierActif } from "@/lib/server/marquer-dossier-actif";
+import { MarquerBienActif } from "@/components/report/MarquerBienActif";
 import { ModuleTracker } from "@/components/ModuleTracker";
 
 export default async function RapportLogementPage({
@@ -44,11 +44,6 @@ export default async function RapportLogementPage({
     );
   }
 
-  // LE BIEN OUVERT DEVIENT LE BIEN ACTIF. Le dossier est établi et appartient au lecteur (getDossier
-  // filtre par user_id et par la RLS) : on ne fait que retenir ce qu'il lit, pour que le hub le lui
-  // resserve. Sans cette ligne, un lien direct laissait le hub sur un autre bien.
-  marquerDossierActif(supabase, user.id, dossier.id);
-
   // Rehydratation : city + postcode sont exigés par `validateSelectedBanAddress` pour le re-fetch
   // Géorisques. Sans eux, le module n'a rien à charger. Le choix DPE, lui, peut rester `pending` :
   // un dossier fraîchement créé n'a pas encore de diagnostic attribué, et il doit pouvoir s'ouvrir.
@@ -57,6 +52,11 @@ export default async function RapportLogementPage({
   return (
     <>
       <ModuleTracker moduleId="logement" commune={territory.communeName} inseeCode={territory.inseeCode} source="page" />
+      {/* LE CONTEXTE DE LECTURE SUIT CE QUI EST VRAIMENT OUVERT. Monté, ce composant prouve que la
+          page est à l'écran : il pose alors le bien ET son territoire, d'un seul geste. L'écriture
+          vivait dans `after()`, qui s'exécute aussi sur un préchargement ou une navigation
+          abandonnée. */}
+      <MarquerBienActif dossierId={dossier.id} />
       <LogementModule
         defaultCommune={territory.communeName}
         dossier={loadable ? dossier : null}

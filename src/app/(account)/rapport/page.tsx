@@ -65,18 +65,36 @@ export default async function RapportPage() {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  // UNE ERREUR DE LECTURE N'EST PAS UN PROFIL ABSENT (revue du 11/08/2026).
+  // UNE ERREUR DE LECTURE N'EST PAS UN PROFIL ABSENT, ET ELLE ARRÊTE L'ÉCRAN.
   //
-  // Elle était ignorée : une colonne manquante (migration oubliée sur un environnement) faisait
-  // rejeter la requête entière par PostgREST, `profile` valait `null`, et l'écran servait un compte
-  // sans territoire, sans projet et sans bien, comme s'il venait d'être créé. Le lecteur y aurait vu
-  // la disparition de ce qu'il a payé, et les journaux, rien du tout.
+  // Elle était d'abord ignorée, puis seulement journalisée : dans les deux cas le rendu continuait
+  // avec `profile === null`, et l'écran servait un compte sans territoire, sans projet et sans bien,
+  // comme s'il venait d'être créé. Un lecteur qui a payé y voit la disparition de ce qu'il possède,
+  // et les journaux n'aident que nous.
   //
   // On ne tolère PAS l'ancienne forme du schéma en repli : la colonne est un contrat, la migration
   // est additive, et une lecture indulgente masquerait l'oubli tout en laissant la route d'écriture
-  // incompatible. On journalise et on laisse le rendu se poursuivre, dégradé mais explicable.
+  // incompatible. On s'arrête donc, en disant ce qui se passe et ce que ça ne veut PAS dire.
   if (profileError) {
     console.error("[rapport] lecture du profil échouée", { userId: user.id, error: profileError });
+    return (
+      <div className="min-h-screen bg-canvas text-label" style={{ fontFamily: "var(--font-sans)" }}>
+        <Navbar />
+        <main className="max-w-[720px] mx-auto px-7 py-24">
+          <h1
+            className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.15] text-label mb-5"
+            style={{ fontFamily: "var(--font-serif)" }}
+          >
+            Votre espace n&apos;a pas pu être chargé.
+          </h1>
+          <p className="text-[16px] leading-[1.7] text-muted">
+            L&apos;incident est de notre côté et il est enregistré. Rien n&apos;est perdu : vos
+            dossiers, vos analyses et vos droits d&apos;accès sont intacts. Réessayez dans quelques
+            minutes.
+          </p>
+        </main>
+      </div>
+    );
   }
 
   const territory = await resolveReadableTerritory(supabase, user.id, profile);

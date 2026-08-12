@@ -5,7 +5,7 @@ import AutourModule from "@/components/report/AutourModule";
 import { requireCurrentUser } from "@/lib/user-account";
 import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
 import { getDossier, getSoleDossier } from "@/lib/address-dossier-store";
-import { marquerDossierActif } from "@/lib/server/marquer-dossier-actif";
+import { MarquerBienActif } from "@/components/report/MarquerBienActif";
 import { ModuleTracker } from "@/components/ModuleTracker";
 import { buildAutourResponse } from "@/lib/server/autour-response";
 
@@ -47,11 +47,6 @@ export default async function RapportAutourPage({
     );
   }
 
-  // LE BIEN OUVERT DEVIENT LE BIEN ACTIF. Le dossier est établi et appartient au lecteur (getDossier
-  // filtre par user_id et par la RLS) : on ne fait que retenir ce qu'il lit, pour que le hub le lui
-  // resserve. Sans cette ligne, un lien direct laissait le hub sur un autre bien.
-  marquerDossierActif(supabase, user.id, dossier.id);
-
   // L'ÉQUIPEMENT AUTOMOBILE N'EST PAS DANS LE SNAPSHOT, et c'est voulu : il vient d'un artefact
   // versionné (INSEE RP) régénéré à chaque millésime, que figer ferait cohabiter des dossiers
   // annonçant des millésimes différents sans le dire. La rehydratation doit donc le RELIRE, sinon
@@ -71,6 +66,11 @@ export default async function RapportAutourPage({
   return (
     <>
       <ModuleTracker moduleId="autour" commune={territory.communeName} inseeCode={territory.inseeCode} source="page" />
+      {/* LE CONTEXTE DE LECTURE SUIT CE QUI EST VRAIMENT OUVERT. Monté, ce composant prouve que la
+          page est à l'écran : il pose alors le bien ET son territoire, d'un seul geste. L'écriture
+          vivait dans `after()`, qui s'exécute aussi sur un préchargement ou une navigation
+          abandonnée. */}
+      <MarquerBienActif dossierId={dossier.id} />
       <AutourModule
         defaultCommune={territory.communeName}
         dossier={dossier}

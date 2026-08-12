@@ -450,7 +450,10 @@ export default function LogementModule({
                   les commerces et services les plus proches, l&apos;espace vert le plus proche et la
                   chaleur du quartier se lisent dans le module Autour de l&apos;adresse.
                 </p>
-                <Link href="/rapport/autour" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg no-underline text-[length:var(--text-dense)] w-fit" style={{ color: "var(--green)", border: "1px solid color-mix(in srgb, var(--green) 25%, transparent)", background: "color-mix(in srgb, var(--green) 8%, transparent)" }}>
+                {/* LE LIEN PORTE LE BIEN LU (revue du 11/08/2026). Sans lui, un compte à plusieurs biens
+                    atterrissait sur le sélecteur : le lecteur venait de lire CE logement, et on lui
+                    redemandait lequel il voulait. */}
+                <Link href={dossier?.id ? `/rapport/autour?dossierId=${encodeURIComponent(dossier.id)}` : "/rapport/autour"} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg no-underline text-[length:var(--text-dense)] w-fit" style={{ color: "var(--green)", border: "1px solid color-mix(in srgb, var(--green) 25%, transparent)", background: "color-mix(in srgb, var(--green) 8%, transparent)" }}>
                   Ouvrir Autour de l&apos;adresse →
                 </Link>
               </div>
