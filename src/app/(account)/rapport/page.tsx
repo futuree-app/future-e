@@ -4,7 +4,8 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { PRODUCT_MODULES, MODULE_HREF } from "@/lib/product";
 import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
-import { resolveReadableTerritory, TERRITORY_SELECT, canAccessTerritory } from "@/lib/active-territory";
+import { resolveReadableTerritory, TERRITORY_SELECT, loadTerritoryClaims } from "@/lib/active-territory";
+import { decideTerritoryAccess, codeDeLectureLocal } from "@/lib/territory-claims";
 import { TrackedModuleLink, TrackedUpgradeLink } from "./RapportTrackedLinks";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
 import { RapportPremiereLecture } from "@/components/wizard/RapportPremiereLecture";
@@ -135,7 +136,11 @@ export default async function RapportPage() {
   //
   // Faux ne ferme rien : le rapport PARTIEL reste rendu, exactement comme aujourd'hui pour un
   // compte gratuit. C'est la dizaine de branches ci-dessous qui s'en chargent.
-  const fullReport = await canAccessTerritory(supabase, user.id, inseeCode);
+  // LES DROITS SONT CHARGÉS UNE FOIS, et servent deux fois : décider l'accès, et retrouver le code
+  // LOCAL auquel la commune se lit quand elle a des arrondissements (Paris, Lyon, Marseille).
+  // `canAccessTerritory` refaisait sa propre requête pour la seule première question.
+  const claims = inseeCode ? await loadTerritoryClaims(supabase, user.id) : [];
+  const fullReport = Boolean(inseeCode) && decideTerritoryAccess(claims, inseeCode!);
 
   const allModules = PRODUCT_MODULES;
   // Première lecture du compte gratuit : réponses du wizard persistées (point 2).
@@ -169,9 +174,17 @@ export default async function RapportPage() {
     ? dossiers.filter((d) => communeParent(d.insee) !== communeParent(inseeCode))
     : dossiers;
   const communesAilleurs = [...new Map(dossiersAilleurs.map((d) => [communeParent(d.insee), d])).values()];
+  // LE CODE DE LECTURE, quand la commune se lit par arrondissement. `null` partout ailleurs, donc
+  // aucun changement sur une commune ordinaire. Voir `codeDeLectureLocal`.
+  const codeLecture = inseeCode
+    ? codeDeLectureLocal(claims, inseeCode, logementForCommune?.insee ?? null)
+    : null;
   const communeResult =
     fullReport && inseeCode && userProject
-      ? await buildCommuneDossier(inseeCode, userProject, { hasAddress: Boolean(logementForCommune) })
+      ? await buildCommuneDossier(inseeCode, userProject, {
+          hasAddress: Boolean(logementForCommune),
+          citycode: codeLecture,
+        })
       : null;
   // L'ARTEFACT PASSE AVANT L'ASSEMBLAGE (05/08/2026).
   // ══════════════════════════════════════════════════════════════════════════════════════════
@@ -209,6 +222,15 @@ export default async function RapportPage() {
         kind: "commune", insee: inseeCode,
       }, versionCommune);
       if (r.status === "failed") console.error("[artefact] rattrapage échoué", { inseeCode, versionCommune, r });
+    });
+  }
+
+  // UN DOSSIER PAYÉ SANS FAITS NE RESTE PAS SILENCIEUX, NI POUR LE LECTEUR NI POUR NOUS. L'écran le
+  // dit (bloc plus bas), et le journal porte de quoi le reconnaître : c'est ainsi que le trou de
+  // Paris, Lyon et Marseille a pu vivre sans être vu.
+  if (fullReport && userProject && !communeResult) {
+    console.error("[rapport] aucun fait de territoire pour une commune ouverte", {
+      userId: user.id, inseeCode, codeLecture, bien: logementForCommune?.insee ?? null,
     });
   }
 
@@ -283,7 +305,11 @@ export default async function RapportPage() {
       <div className="fixed bottom-[-100px] right-[-100px] w-[420px] h-[420px] rounded-full bg-amethyst/[0.12] blur-[90px] opacity-28 pointer-events-none z-0" />
       <div className="fixed top-[42%] left-[58%] w-[280px] h-[280px] rounded-full bg-info/[0.08] blur-[70px] opacity-16 pointer-events-none z-0" />
 
-      <Navbar ctas={{ secondary: { href: "/compte", label: "Mon compte" }, primary: { href: "/rapport/dossiers", label: "Mes biens" } }} />
+      {/* « MES BIENS » NE S'AFFICHE PLUS DEUX FOIS (13/08/2026) : il est entré dans la navigation
+          globale, et il restait le bouton d'action de cet écran, à quelques centimètres. Le CTA
+          rend la place à la seule action que cette page n'offre pas ailleurs, ouvrir un nouveau
+          dossier ; la liste des biens garde son lien, dans la barre. */}
+      <Navbar ctas={{ secondary: { href: "/compte", label: "Mon compte" }, primary: { href: "/dossier", label: "Analyser une adresse" } }} />
 
       <div className="relative z-[2] max-w-[1100px] mx-auto px-5 sm:px-7 pb-24">
 
@@ -450,6 +476,35 @@ export default async function RapportPage() {
               <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
             </>
           )
+        ) : null}
+
+        {/* LA LECTURE MANQUE, ET L'ÉCRAN LE DIT (13/08/2026).
+            Sur Paris, Lyon et Marseille, l'index n'a pas de ligne pour le code agrégé : le dossier
+            valait `null`, et l'écran d'un produit PAYÉ passait de l'adresse au cadrage climat, sans
+            verdict, sans titre, sans un mot. `codeDeLectureLocal` ferme le cas ordinaire ; ce bloc
+            ferme ce qui reste (aucun droit portant un arrondissement, panne de chargement), en
+            disant ce qui manque et ce qui l'ouvre. Il porte le <h1> : la page n'en a jamais zéro. */}
+        {fullReport && userProject && !dossier ? (
+          <section className="mt-6">
+            <h1
+              className="font-[var(--weight-display)] text-[length:clamp(23px,2.9vw,36px)] leading-[1.12] tracking-[-0.8px] text-label max-w-[540px]"
+              style={{ fontFamily: "var(--font-serif)" }}
+            >
+              La lecture de {displayName} n&apos;a pas pu être établie.
+            </h1>
+            <p className="text-[16px] leading-[1.7] text-muted mt-4 mb-6">
+              Nos données de territoire manquent pour cette commune, ou n&apos;ont pas pu être lues à
+              l&apos;instant. Votre accès reste ouvert, et l&apos;incident est enregistré de notre
+              côté. Sur Paris, Lyon et Marseille, la lecture se fait au grain de
+              l&apos;arrondissement : analyser une adresse précise l&apos;ouvre immédiatement.
+            </p>
+            <Link
+              href="/dossier"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline"
+            >
+              Analyser une adresse
+            </Link>
+          </section>
         ) : null}
 
         {/* LE GESTE DE L'ÉTAT « PROJET NON STRUCTURÉ » SUIT LE TITRE QU'IL ACCOMPAGNE : ce titre est

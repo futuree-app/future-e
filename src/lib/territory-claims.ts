@@ -39,6 +39,41 @@ export function decidePaidTerritory(claims: TerritoryClaim[], insee: string): bo
   return claims.some((c) => sameCommune(c.insee, insee) && (c.kind === "grant" || c.paid));
 }
 
+/**
+ * LE CODE AUQUEL LA COMMUNE SE LIT VRAIMENT (13/08/2026).
+ *
+ * L'index de territoire est bâti par ARRONDISSEMENT pour Paris, Lyon et Marseille : les codes
+ * agrégés (75056, 69123, 13055) n'y existent pas, et `getCommuneEntry` rend `null` pour eux. Le
+ * hub, lui, travaille au grain commune (`communeParent`) depuis le durcissement du chantier 5, qui
+ * a remonté l'identité de l'artefact à la commune aux deux bouts. Conséquence, restée silencieuse :
+ * sur un dossier parisien PAYÉ, aucun fait n'était chargé, donc aucun dossier, donc aucun verdict
+ * et aucun `<h1>`. L'écran passait de l'adresse au cadrage climat, sans rien dire.
+ *
+ * Ce que le lecteur possède porte pourtant un code LOCAL exploitable : l'arrondissement de son bien,
+ * ou celui sur lequel son droit a été acheté (`report_grants.insee` garde le code d'origine). C'est
+ * ce code qu'on rend ici, et lui seul : jamais un arrondissement choisi au hasard, qui ferait lire
+ * le 1er à quelqu'un qui a acheté le 18e.
+ *
+ * L'identité de l'artefact NE CHANGE PAS : elle reste la commune. Ce code ne sert qu'à LIRE les
+ * faits, comme `citycode` le fait déjà pour le radon, qui varie lui aussi par arrondissement.
+ *
+ * Rend `null` quand le code demandé n'est pas un code agrégé (le cas ordinaire : on lit la commune
+ * elle-même) ou quand aucun droit ne désigne d'arrondissement.
+ */
+export function codeDeLectureLocal(
+  claims: TerritoryClaim[],
+  insee: string,
+  /** Le code local du bien lu, quand il y en a un : il prime sur les droits, il est plus précis. */
+  codeDuBienLu?: string | null,
+): string | null {
+  // `communeParent(insee) === insee` ET un code local différent chez les ayants droit : c'est la
+  // signature d'une commune à arrondissements. Sur une commune ordinaire, tous les codes coïncident
+  // et cette fonction rend `null`, donc rien ne change.
+  if (codeDuBienLu && codeDuBienLu !== insee && sameCommune(codeDuBienLu, insee)) return codeDuBienLu;
+  const local = claims.find((c) => sameCommune(c.insee, insee) && c.insee !== insee);
+  return local ? local.insee : null;
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 // LE QUOTA DE QUESTIONS D'ASKFUTURE, calculé UNE fois pour tout le produit.
 //

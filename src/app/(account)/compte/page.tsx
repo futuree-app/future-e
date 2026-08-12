@@ -69,7 +69,8 @@ export default async function ComptePage() {
       <div className="fixed top-[-160px] left-[-130px] w-[520px] h-[520px] rounded-full bg-accent/[0.12] blur-[100px] opacity-40 pointer-events-none z-0" />
       <div className="fixed bottom-[-100px] right-[-80px] w-[400px] h-[400px] rounded-full bg-amethyst/[0.10] blur-[88px] opacity-30 pointer-events-none z-0" />
 
-      <Navbar ctas={{ secondary: { href: "/rapport/dossiers", label: "Mes biens" }, primary: fullAccess ? { href: "/rapport", label: "Mon rapport" } : { href: "/#pricing", label: "Passer au complet" } }} />
+      {/* Même raison qu'ailleurs : « Mes biens » est dans la barre, le CTA porte l'action. */}
+      <Navbar ctas={{ secondary: { href: "/dossier", label: "Analyser une adresse" }, primary: fullAccess ? { href: "/rapport", label: "Mon rapport" } : { href: "/#pricing", label: "Passer au complet" } }} />
 
       <div className="relative z-[2] max-w-[1100px] mx-auto px-5 sm:px-7 pb-24">
 

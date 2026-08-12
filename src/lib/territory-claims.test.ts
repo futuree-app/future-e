@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { decideTerritoryAccess, decidePaidTerritory, type TerritoryClaim } from "./territory-claims.ts";
+import { decideTerritoryAccess, decidePaidTerritory, codeDeLectureLocal, type TerritoryClaim } from "./territory-claims.ts";
 
 const NANTES = "44109";
 
@@ -54,4 +54,29 @@ test("un dossier administratif ne masque pas un dossier payé dans la même comm
     { kind: "dossier", insee: NANTES, paid: true },
   ];
   assert.equal(decidePaidTerritory(claims, NANTES), true);
+});
+
+// ── Paris, Lyon, Marseille : le code auquel la commune se lit ───────────────────────────────
+
+test("PLM : le bien lu donne le code de lecture, jamais un arrondissement au hasard", () => {
+  // Le défaut fermé : sur un dossier parisien payé, `getCommuneEntry("75056")` rend null (l'index
+  // est par arrondissement), donc aucun fait, donc aucun verdict, en silence.
+  const claims: TerritoryClaim[] = [{ kind: "dossier", insee: "75118", paid: true }];
+  assert.equal(codeDeLectureLocal(claims, "75056", "75118"), "75118");
+});
+
+test("PLM sans bien : le droit acheté porte l'arrondissement, et c'est lui qu'on lit", () => {
+  // `report_grants.insee` garde le code d'origine de l'achat : quelqu'un qui a acheté le 18e lit le
+  // 18e, jamais le 1er.
+  assert.equal(codeDeLectureLocal([{ kind: "grant", insee: "75118" }], "75056"), "75118");
+});
+
+test("commune ordinaire : aucun code local, donc rien ne change", () => {
+  const claims: TerritoryClaim[] = [{ kind: "grant", insee: "17300" }];
+  assert.equal(codeDeLectureLocal(claims, "17300", null), null);
+  assert.equal(codeDeLectureLocal(claims, "17300", "17300"), null);
+});
+
+test("un droit sur une AUTRE commune ne fournit jamais le code de lecture", () => {
+  assert.equal(codeDeLectureLocal([{ kind: "grant", insee: "69381" }], "75056"), null);
 });

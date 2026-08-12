@@ -85,7 +85,7 @@ export async function loadModuleFacts(
   //
   // La source est déjà mise en cache par commune (getGeorisquesSummary) : aucun appel supplémentaire pour
   // un lecteur qui ouvre aussi le module Territoire. Une panne rend `null` — jamais `false`.
-  const [entry, climat, georisques, radon] = await Promise.all([
+  const [entryCommune, climat, georisques, radon] = await Promise.all([
     getCommuneEntry(insee),
     loadClimatFacts(insee),
     getGeorisquesSummary(insee).catch(() => null),
@@ -94,6 +94,18 @@ export async function loadModuleFacts(
     // l'autre. Cache 30 j : une classification géologique ne bouge pas.
     loadRadonFacts(insee, opts.citycode),
   ]);
+  // PARIS, LYON, MARSEILLE : L'INDEX N'A PAS DE LIGNE POUR LE CODE AGRÉGÉ (13/08/2026).
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  // Il est bâti par arrondissement, et 75056 / 69123 / 13055 n'y existent pas. Le hub, lui, travaille
+  // au grain commune depuis que l'identité de l'artefact y a été remontée : `entry` valait donc
+  // `null`, `loadModuleFacts` rendait `null`, et l'écran d'un dossier parisien PAYÉ n'affichait ni
+  // verdict ni titre, sans rien dire.
+  //
+  // `citycode` porte déjà le code LOCAL (il servait au radon, qui varie par arrondissement) : il sert
+  // maintenant de repli de lecture. Jamais un arrondissement choisi par défaut, toujours celui que le
+  // lecteur possède, décidé en amont par `codeDeLectureLocal`.
+  const entry = entryCommune
+    ?? (opts.citycode && opts.citycode !== insee ? await getCommuneEntry(opts.citycode) : null);
   const risquesDeclares = georisques ? { wildfire: georisques.flags.wildfire } : null;
   return entry ? buildModuleFacts(entry, { hasAddress: opts.hasAddress, climat, risquesDeclares, radon }) : null;
 }

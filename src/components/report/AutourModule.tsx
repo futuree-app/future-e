@@ -171,7 +171,10 @@ export default function AutourModule({
       <div className="fixed top-[-160px] left-[-130px] w-[520px] h-[520px] rounded-full bg-green/[0.10] blur-[100px] opacity-32 pointer-events-none z-0" />
       <div className="fixed bottom-[-100px] right-[-80px] w-[400px] h-[400px] rounded-full bg-accent/[0.08] blur-[88px] opacity-24 pointer-events-none z-0" />
 
-      <Navbar ctas={{ secondary: { href: "/rapport", label: "Mon rapport" }, primary: { href: "/rapport/dossiers", label: "Mes biens" } }} />
+      {/* « Mes biens » vit dans la navigation globale depuis le 13/08/2026 : le répéter en bouton
+          d'action, à quelques centimètres, était un doublon visible. Le CTA porte l'action que cet
+          écran n'offre pas ailleurs. */}
+      <Navbar ctas={{ secondary: { href: "/rapport", label: "Mon rapport" }, primary: { href: "/dossier", label: "Analyser une adresse" } }} />
 
       <div className="relative z-[2] max-w-[1100px] mx-auto px-5 sm:px-7 pb-24">
         <section className="py-20">
