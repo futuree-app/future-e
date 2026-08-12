@@ -1,6 +1,6 @@
 # Recette du premier écran (chantier 6)
 
-**Date** : 2026-08-12 · **Branche** : `main`, commits `a111335` à `194c329`, **non poussés**.
+**Date** : 2026-08-12 · **Branche** : `main`, commits `a111335` à `0ca1e28`, **non poussés**.
 **Plan** : `docs/superpowers/plans/2026-08-12-premier-ecran-decision.md` ·
 **Spec** : `docs/superpowers/specs/2026-08-12-premier-ecran-decision-design.md`.
 
@@ -34,12 +34,35 @@ Rendu réel dans Chromium (Playwright), viewport 360 px, police du site.
   **7 à 8 lignes**.
 - À `--text-title` (**23 px**), les mêmes phrases tiennent en **5 lignes**.
 
-**Décision appliquée** : `max-sm:text-[length:var(--text-title)]` sur la classe passée par `/rapport`.
-Le repli ne vaut que pour le mobile ; au-delà de `sm`, la réponse garde la taille du titre de page,
-sans quoi elle resterait plus petite que les titres de section situés sous elle.
-
 Le titre d'invite du hero (état « aucun projet ») a été mesuré dans les mêmes conditions : **3 à 4
-lignes** à 30 px, hors carte, sur 318 px. Il reste en `--text-display`, sans repli.
+lignes** à 30 px, hors carte, sur 318 px.
+
+**Décision appliquée**, après la recette visuelle du soir (voir plus bas) : une échelle propre au
+verdict, `clamp(23px, 2.9vw, 36px)`, pour les deux titres de page de cet écran. Elle règle les deux
+bouts d'un coup : 23 px en mobile, où 30 px donnait sept lignes, et 36 px au plus en desktop, où 46 px
+donnait une couverture de magazine et repoussait la réponse sous le pli.
+
+### La recette visuelle du 12/08 au soir, et ce qu'elle a corrigé
+
+La recette fonctionnelle passait, la recette VISUELLE non : le verdict commençait à **629 px** en
+1440 × 1000 et à **824 px** en 390 × 844. Le chantier remontait la réponse, la navigation la
+repoussait aussitôt. Huit corrections, commit `0ca1e28` :
+
+| Constat | Correction |
+|---|---|
+| Deux bandeaux de navigation avant le dossier (~320 px) | Une seule ligne : commune consultée, résidence, et un lien qui COMPTE les autres communes ouvertes vers « Mes biens », qui les ouvre déjà toutes |
+| 56 px (mobile) et 80 px (desktop) d'air avant « Dossier » | 28 px |
+| Verdict en 46 px sur desktop, trois lignes | `clamp(23px, 2.9vw, 36px)` : la sémantique du `<h1>` impose d'être le plus grand texte de l'écran (les titres de section plafonnent à 31 px), pas une taille de couverture. Le titre d'invite suit la même échelle |
+| Reformulation entière recopiée au-dessus du verdict | « Votre projet aujourd'hui · location · 3 priorités », avec « Voir et modifier » vers le texte complet |
+| « 2 Rue Crébillon 44000 Nantes, **Nantes** » | Le lieu ne se recolle plus quand l'étiquette BAN le porte déjà (comparaison sans accents ni casse) |
+| AskFuture en barre pleine largeur recouvrant l'entrée du verdict sur mobile | Pastille de 48 px en état fermé ; le panneau reprend toute la largeur une fois ouvert |
+| Autour et Logement tous deux « Module 02 » | Logement porte le rang 03, celui de `PRODUCT_MODULES` |
+| Le hero Logement promettait « entourage » | « Énergie, risques, bâti », et le texte renvoie Autour à son module |
+| « Déduit de votre commune de résidence » | « Déduit du fait que votre résidence est La Rochelle » |
+
+**Position estimée du verdict après correction**, par addition des hauteurs (à confirmer par une
+capture) : environ **320 px** en desktop et **400 px** en mobile, pour des cibles de 350 et 500 px.
+Cette estimation n'est pas une mesure : elle attend la capture du § 2.
 
 ---
 
@@ -83,7 +106,18 @@ L'état non payant **ne se produit pas en dégradant le compte de recette** : il
 sans droit sur la commune. Retirer un droit payé serait la seule manipulation vraiment irréversible
 de cette liste.
 
-### 2.2 Les invariants qui se vérifient à l'œil
+### 2.2 La position du verdict, qui est l'objet même du chantier
+
+Le début du bloc verdict doit apparaître **avant 350 px en desktop (1440 × 1000)** et **avant 500 px
+en mobile (390 × 844)**. À vérifier sur les deux grains (commune seule, commune plus adresse), et
+avec le bandeau cookies affiché : c'est l'état qu'un lecteur voit à sa première visite.
+
+```js
+const c = document.querySelector(".card-verdict").getBoundingClientRect();
+c.top + window.scrollY;   // doit être < 350 (desktop) / < 500 (mobile)
+```
+
+### 2.3 Les invariants qui se vérifient à l'œil
 
 - Un seul `<h1>` : `document.querySelectorAll("h1").length === 1` sur les quatre états, et **deux
   fois sur un dossier d'adresse** : pendant le repli communal, puis après résolution du stream. La
@@ -98,7 +132,7 @@ de cette liste.
   l'intention sur `/rapport` doit changer la liste.
 - Depuis Territoire, « Modifier le projet » dépose sur l'éditeur, sous la navbar.
 
-### 2.3 Le changement d'intention seul, parseur indisponible
+### 2.4 Le changement d'intention seul, parseur indisponible
 
 Sur `/rapport`, ouvrir l'éditeur, changer UNIQUEMENT l'intention, enregistrer. Puis bloquer
 `/api/comparateur-vie/parse` (DevTools, « Block request URL ») et refaire la même opération. Dans les
@@ -106,7 +140,7 @@ deux cas, la reformulation doit rester affichée après rechargement, et le doss
 basculer en « À préciser ». La règle est testée hors navigateur (`projet-edition.test.ts`) ; ce
 passage vérifie le câblage.
 
-### 2.4 Le cas multi-communes, en entier
+### 2.5 Le cas multi-communes, en entier
 
 Compte résidant en commune A, dossier en commune B :
 
