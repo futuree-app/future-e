@@ -5,6 +5,7 @@ import AutourModule from "@/components/report/AutourModule";
 import { requireCurrentUser } from "@/lib/user-account";
 import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
 import { getDossier, getSoleDossier } from "@/lib/address-dossier-store";
+import { marquerDossierActif } from "@/lib/server/marquer-dossier-actif";
 import { ModuleTracker } from "@/components/ModuleTracker";
 import { buildAutourResponse } from "@/lib/server/autour-response";
 
@@ -45,6 +46,11 @@ export default async function RapportAutourPage({
         : "/rapport/dossiers",
     );
   }
+
+  // LE BIEN OUVERT DEVIENT LE BIEN ACTIF. Le dossier est établi et appartient au lecteur (getDossier
+  // filtre par user_id et par la RLS) : on ne fait que retenir ce qu'il lit, pour que le hub le lui
+  // resserve. Sans cette ligne, un lien direct laissait le hub sur un autre bien.
+  marquerDossierActif(supabase, user.id, dossier.id);
 
   // L'ÉQUIPEMENT AUTOMOBILE N'EST PAS DANS LE SNAPSHOT, et c'est voulu : il vient d'un artefact
   // versionné (INSEE RP) régénéré à chaque millésime, que figer ferait cohabiter des dossiers

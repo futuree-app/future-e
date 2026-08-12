@@ -22,8 +22,15 @@ import { communeParent } from "./plm.ts";
 // lecture dans le hub.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
-/** Le strict nécessaire pour choisir. Le hub passe des `AddressDossierRow` entiers. */
-export type DossierChoisissable = { id: string; insee: string };
+/**
+ * Le strict nécessaire pour choisir. Le hub passe des `AddressDossierRow` entiers.
+ *
+ * `created_at` EST EXIGÉ, et ce n'est pas du confort (revue du 11/08/2026). Une version antérieure
+ * prenait le premier élément reçu, en supposant que `listDossiers` trie par création décroissante :
+ * un invariant vrai, documenté nulle part dans cette signature, et qu'un simple changement d'`order`
+ * dans le store aurait renversé en silence. La règle trie elle-même ce dont elle dépend.
+ */
+export type DossierChoisissable = { id: string; insee: string; created_at: string };
 
 export type ChoixDossier<T extends DossierChoisissable> = {
   /** Le bien à lire, ou `null` si la commune lue n'en porte aucun. */
@@ -44,9 +51,10 @@ export type ChoixDossier<T extends DossierChoisissable> = {
  * Il ne gagne QUE s'il appartient à la commune lue : un lecteur qui bascule de Nantes à La Rochelle
  * ne doit pas se voir servir son appartement nantais.
  *
- * L'ordre d'entrée fait foi pour le repli : `listDossiers` trie par date de création décroissante,
- * donc le premier de la liste est le plus récent. Ce module ne retrie pas, il ne connaît pas les
- * dates.
+ * Le repli prend le plus récemment créé, en triant ICI. À dates égales (deux dossiers ouverts dans
+ * la même seconde, ou deux `created_at` identiques après une reprise de données), l'identifiant
+ * départage : le résultat doit être le même à chaque ouverture, faute de quoi le hub afficherait un
+ * bien différent d'un rechargement à l'autre sans que rien n'ait changé.
  */
 export function choisirDossierActif<T extends DossierChoisissable>(
   dossiers: readonly T[], inseeLu: string | null | undefined, actifId: string | null | undefined,
@@ -56,9 +64,13 @@ export function choisirDossierActif<T extends DossierChoisissable>(
   const candidats = dossiers.filter((d) => communeParent(d.insee) === commune);
   if (candidats.length === 0) return { dossier: null, raison: "aucun", autres: [] };
 
+  const parRecence = [...candidats].sort((a, b) => {
+    const cmp = (b.created_at ?? "").localeCompare(a.created_at ?? "");
+    return cmp !== 0 ? cmp : a.id.localeCompare(b.id);
+  });
   const actif = actifId ? candidats.find((d) => d.id === actifId) ?? null : null;
-  const retenu = actif ?? candidats[0]!;
-  const autres = candidats.filter((d) => d.id !== retenu.id);
+  const retenu = actif ?? parRecence[0]!;
+  const autres = parRecence.filter((d) => d.id !== retenu.id);
 
   const raison: ChoixDossier<T>["raison"] =
     actif ? "actif" : candidats.length === 1 ? "unique" : "repli_plus_recent";

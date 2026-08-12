@@ -5,6 +5,7 @@ import LogementModule from "@/components/report/LogementModule";
 import { requireCurrentUser } from "@/lib/user-account";
 import { resolveReadableTerritory, TERRITORY_SELECT } from "@/lib/active-territory";
 import { getDossier, getSoleDossier } from "@/lib/address-dossier-store";
+import { marquerDossierActif } from "@/lib/server/marquer-dossier-actif";
 import { ModuleTracker } from "@/components/ModuleTracker";
 
 export default async function RapportLogementPage({
@@ -42,6 +43,11 @@ export default async function RapportLogementPage({
         : "/rapport/dossiers",
     );
   }
+
+  // LE BIEN OUVERT DEVIENT LE BIEN ACTIF. Le dossier est établi et appartient au lecteur (getDossier
+  // filtre par user_id et par la RLS) : on ne fait que retenir ce qu'il lit, pour que le hub le lui
+  // resserve. Sans cette ligne, un lien direct laissait le hub sur un autre bien.
+  marquerDossierActif(supabase, user.id, dossier.id);
 
   // Rehydratation : city + postcode sont exigés par `validateSelectedBanAddress` pour le re-fetch
   // Géorisques. Sans eux, le module n'a rien à charger. Le choix DPE, lui, peut rester `pending` :

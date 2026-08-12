@@ -59,11 +59,25 @@ export default async function RapportPage() {
   const account = await getCurrentUserAccount();
 
   const { supabase, user } = await requireCurrentUser();
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("user_profiles")
     .select(`${TERRITORY_SELECT}, wizard_answers, user_project, active_dossier_id`)
     .eq("user_id", user.id)
     .maybeSingle();
+
+  // UNE ERREUR DE LECTURE N'EST PAS UN PROFIL ABSENT (revue du 11/08/2026).
+  //
+  // Elle était ignorée : une colonne manquante (migration oubliée sur un environnement) faisait
+  // rejeter la requête entière par PostgREST, `profile` valait `null`, et l'écran servait un compte
+  // sans territoire, sans projet et sans bien, comme s'il venait d'être créé. Le lecteur y aurait vu
+  // la disparition de ce qu'il a payé, et les journaux, rien du tout.
+  //
+  // On ne tolère PAS l'ancienne forme du schéma en repli : la colonne est un contrat, la migration
+  // est additive, et une lecture indulgente masquerait l'oubli tout en laissant la route d'écriture
+  // incompatible. On journalise et on laisse le rendu se poursuivre, dégradé mais explicable.
+  if (profileError) {
+    console.error("[rapport] lecture du profil échouée", { userId: user.id, error: profileError });
+  }
 
   const territory = await resolveReadableTerritory(supabase, user.id, profile);
   const communeName = territory.communeName;
@@ -150,6 +164,20 @@ export default async function RapportPage() {
   // L'identité de l'artefact servi, portée par les liens « Preuve » du dossier communal. Absente
   // quand le dossier est assemblé à l'instant : il n'y a alors aucune version figée à désigner.
   const provenanceCommune = servi.source === "artefact" ? "commune" : undefined;
+  // LES LIENS DES MODULES D'ADRESSE PORTENT LE BIEN LU (11/08/2026).
+  //
+  // Ils étaient génériques (`/rapport/autour`, `/rapport/logement`). Tant qu'un compte n'avait qu'un
+  // bien par commune, ces pages le retrouvaient seules ; à partir de deux, elles renvoyaient vers le
+  // sélecteur. Le hub nommait donc un bien que ses propres boutons n'ouvraient pas, ce qui est pire
+  // qu'un hub muet : il annonce une identité qu'il ne transporte pas.
+  //
+  // Le Territoire reste au grain COMMUNE : lui passer un dossier n'aurait aucun sens.
+  const hrefModule = (id: string): string => {
+    const base = MODULE_HREF[id as keyof typeof MODULE_HREF];
+    if (!logementForCommune || id === "quartier") return base;
+    return `${base}?dossierId=${encodeURIComponent(logementForCommune.id)}`;
+  };
+
   const dossierLogementLink = logementForCommune
     ? { href: `/rapport/logement?dossierId=${encodeURIComponent(logementForCommune.id)}`, label: logementForCommune.address_label }
     : null;
@@ -339,7 +367,7 @@ export default async function RapportPage() {
                 {openModules.map((m, i) => (
                   <TrackedModuleLink
                     key={m.id}
-                    href={MODULE_HREF[m.id]}
+                    href={hrefModule(m.id)}
                     moduleId={m.id}
                     commune={displayName}
                     inseeCode={inseeCode}
@@ -397,15 +425,21 @@ export default async function RapportPage() {
         {logementForCommune && choixDossier.autres.length > 0 && (
           <div className="mt-8 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[13.5px]">
             <span className="text-muted">
-              Bien lu : <span className="text-label">{logementForCommune.address_label}</span>
+              {/* LA RAISON DU CHOIX EST DITE, ET PAS SEULEMENT CALCULÉE (revue du 11/08/2026).
+                  Elle ne servait à rien : l'écran nommait le bien sans distinguer « celui que vous
+                  avez ouvert » de « celui que nous avons choisi pour vous ». Or c'est exactement la
+                  différence qui décide si le lecteur doit aller vérifier. */}
+              {choixDossier.raison === "actif" ? "Bien lu" : "À défaut de choix, bien le plus récent"} :{" "}
+              <span className="text-label">{logementForCommune.address_label}</span>
             </span>
             <Link
               href="/rapport/dossiers"
               className="text-accent underline underline-offset-2 decoration-[var(--border-2)] hover:decoration-current"
             >
-              {choixDossier.autres.length === 1
-                ? "Lire l'autre bien de cette commune"
-                : `Lire un autre bien de cette commune (${choixDossier.autres.length})`}
+              {/* « DE CETTE COMMUNE » ÉTAIT FAUX : la destination liste TOUS les biens du compte,
+                  toutes communes confondues. Vérifié au navigateur. Renommer coûte une seconde,
+                  filtrer la liste est un autre chantier ; on ne promet donc que ce qu'on livre. */}
+              Changer de bien
             </Link>
           </div>
         )}
@@ -509,7 +543,7 @@ export default async function RapportPage() {
                 const benefit = module.id === "quartier"
                   ? `Chaleur, inondations, érosion côtière. Ce que ${displayName} devient selon l'horizon choisi, données climatiques publiques à l'appui.`
                   : MODULE_BENEFIT[module.id] ?? module.summary;
-                const href = MODULE_HREF[module.id];
+                const href = hrefModule(module.id);
                 return (
                   <article
                     key={module.id}

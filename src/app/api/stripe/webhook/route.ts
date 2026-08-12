@@ -288,13 +288,19 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     );
 
     // AUCUN report_grant dérivé : le droit territorial se déduit de l'existence du dossier, donc
-    // `access_revoked_at` le retire sans laisser un grant orphelin. On pose seulement le
-    // territoire ACTIF de lecture, au grain commune (PLM ferait lire « Paris 1er »).
+    // `access_revoked_at` le retire sans laisser un grant orphelin. On pose le territoire ACTIF de
+    // lecture, au grain commune (PLM ferait lire « Paris 1er »), ET le bien qu'on vient d'acheter.
+    //
+    // LE BIEN ACTIF EST ÉCRIT ICI DEPUIS LE 11/08/2026, et l'oublier serait une régression née du
+    // lot précédent : le hub sert désormais `active_dossier_id` en priorité, donc un client qui
+    // achète un SECOND bien dans une commune où il en possède déjà un se verrait rouvrir l'ancien,
+    // juste après avoir payé le nouveau.
     await supabaseAdmin
       .from("user_profiles")
       .update({
         active_insee_code: communeParent(intent.insee),
         active_commune: intent.city,
+        active_dossier_id: dossier.id as string,
       })
       .eq("user_id", intent.user_id);
 

@@ -70,7 +70,15 @@ export async function GET(request: NextRequest) {
 
   // L'échec de la bascule ne doit pas retenir le lecteur : Logement et Autour ne dépendent que du
   // dossier, ils s'ouvriront. Seul le territoire restera sur la résidence, et le bandeau le dira.
-  if (error) console.error("[dossiers/ouvrir]", error);
+  //
+  // LE BIEN ACTIF, LUI, N'A PAS DE BANDEAU QUI LE RATTRAPE : son échec est invisible, et son
+  // symptôme est un hub qui rouvre un autre bien, soit exactement le défaut que cette écriture
+  // corrige. Le journal porte donc de quoi le reconnaître sans le deviner (revue du 11/08/2026).
+  if (error) {
+    console.error("[dossiers/ouvrir] bascule échouée", {
+      userId: user.id, dossierId: dossier.id, insee: communeParent(dossier.insee), error,
+    });
+  }
 
   return NextResponse.redirect(new URL(buildHref(dossier.id), request.url));
 }
