@@ -8,7 +8,7 @@ import type { FactComposition } from "./fact-composition.ts";
 import { assertCompositionsValid } from "./fact-compositions.ts";
 import type { UserProject } from "../user-project.ts";
 import { hasAnyHardConstraint, isStructured, hardConstraintLabel } from "./project-view.ts";
-import { buildCriteriaRegistry, uncoveredConstraints, uncoveredPreferences } from "./criteria-registry.ts";
+import { buildCriteriaRegistry, uncoveredConstraints, uncoveredPreferences, inconclusivePreferences } from "./criteria-registry.ts";
 import { buildConclusionPlan } from "./conclusion-plan.ts";
 
 // UN TITRE, UNE IDÉE. « Ce qui est établi, à contrôler avant de vous engager » en portait deux,
@@ -183,6 +183,10 @@ export function assembleDossier(
     shownCompositions: shownComps,
     uncovered,
     uncoveredPriorities: uncoveredPreferences(criteria),
+    // Les priorités qu'une règle a évaluées sans conclure ICI. Elles se disaient dans la même phrase
+    // que celles qu'aucune règle ne sait examiner, et les deux limites n'appellent pas la même
+    // attente du lecteur (cf. `UnexaminedReason`).
+    inconclusivePriorities: inconclusivePreferences(criteria),
     // Le libellé est résolu ICI, depuis le projet : le `topic` du fait nomme la commune (« la distance
     // de Toulouse au littoral »), et le héros la nomme déjà. `hardConstraintLabel` rend la condition
     // telle que le lecteur l'a posée, exactement comme pour les contraintes non examinées.

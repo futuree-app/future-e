@@ -162,7 +162,16 @@ export type ConclusionPlanInput = {
   // rattache une carte à une priorité, y compris pour les rôles sans `projectKey` (une verification).
   reglesDeclarees?: string[];
   uncovered: UncoveredConstraint[];
+  /** Les priorités qu'AUCUNE règle ne sait examiner : une limite du produit, la même partout. */
   uncoveredPriorities: { key: string; label: string }[];
+  /**
+   * Les priorités qu'une règle a bien évaluées SANS pouvoir conclure ici : la donnée manque sur cette
+   * commune, ou elle a été lue à une échelle qui ne conclut pas au grain demandé. Deux limites
+   * différentes se disaient de la même phrase, et le lecteur ne pouvait pas savoir s'il attendait une
+   * évolution du produit ou s'il venait de rencontrer une limite de la donnée sur SA commune.
+   * Optionnel : un dossier assemblé par un appelant qui l'ignore garde le comportement d'avant.
+   */
+  inconclusivePriorities?: { key: string; label: string }[];
   // LA CONDITION TELLE QUE LE LECTEUR L'A POSÉE, jamais le `topic` du fait. Les topics de contraintes
   // dures portent déjà le nom de la commune (hard-constraints.ts, tous en `deCommune(c.nom)`), et le
   // héros le nomme lui aussi : « … n'est pas satisfaite à Toulouse : la distance de Toulouse au
@@ -1131,15 +1140,52 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
   // nommée par le HEADLINE du verdict, en tête du bloc. Un registre construit, généré, validé et
   // stocké, mais rendu nulle part, coûtait un appel au modèle pour un texte que personne ne lisait.
 
-  if (input.uncoveredPriorities.length > 0) {
-    const top = input.uncoveredPriorities.slice(0, 3);
+  // DEUX LIMITES, DEUX PHRASES, UN SEUL BLOC (13/08/2026).
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  // « Vos priorités concernant X ne sont pas encore couvertes » se disait aussi bien d'un critère
+  // qu'aucune règle ne sait examiner (l'agriculture intensive, faute de seuil défendable au grain
+  // commune) que d'un critère qu'une règle a bien évalué sans conclure ici (le calme sonore à
+  // Nantes). Le lecteur ne pouvait pas distinguer « le produit ne sait pas encore faire » de « nous
+  // avons regardé, et cette commune ne se conclut pas ». La première limite s'applique partout, la
+  // seconde est propre à son lieu, et elles n'appellent pas la même attente.
+  //
+  // UN SEUL BLOC, et non deux : sa clé est lue par la validation de la synthèse rédigée et par le
+  // prompt. Deux phrases dans un même bloc distinguent ce qu'il faut distinguer sans toucher au
+  // contrat de génération.
+  const inconclusives = input.inconclusivePriorities ?? [];
+  if (input.uncoveredPriorities.length > 0 || inconclusives.length > 0) {
+    const topAbsentes = input.uncoveredPriorities.slice(0, 3);
+    const topNonConclues = inconclusives.slice(0, 3);
+    const phrases: string[] = [];
+    if (topAbsentes.length > 0) {
+      phrases.push(`Vos priorités concernant ${topAbsentes.map((p) => p.label).join(", ")} ne sont pas encore couvertes dans cette synthèse.`);
+    }
+    if (topNonConclues.length > 0) {
+      // « À ce grain » et non « à cette adresse » : la même phrase sert un dossier communal, où la
+      // limite est la donnée manquante, et un dossier d'adresse, où elle est l'échelle de mesure.
+      phrases.push(
+        topNonConclues.length === 1
+          ? `Votre priorité concernant ${topNonConclues[0]!.label} a bien été examinée, sans pouvoir être conclue à ce grain.`
+          : `Vos priorités concernant ${topNonConclues.map((p) => p.label).join(", ")} ont bien été examinées, sans pouvoir être conclues à ce grain.`,
+      );
+    }
     blocks.push({
       key: "uncovered_priorities",
-      fallbackText: `Vos priorités concernant ${top.map((p) => p.label).join(", ")} ne sont pas encore couvertes dans cette synthèse.`,
-      sourceIds: top.map((p) => p.key),
-      requiredPhrases: top.map((p) => coreLabel(p.label)),
-      allowedNumbers: numberForms(top.length),
-      maxChars: 260,
+      fallbackText: phrases.join(" "),
+      sourceIds: [...topAbsentes, ...topNonConclues].map((p) => p.key),
+      // LE NOYAU QUI PORTE LA DISTINCTION EST EXIGÉ, sans quoi le modèle pourrait fondre les deux
+      // phrases en « ne sont pas encore couvertes » et effacer la nuance sans violer aucune règle.
+      // « conclu » couvre conclue, conclues, conclure et conclusion : le modèle garde sa tournure,
+      // il ne peut pas perdre l'idée. À défaut, la validation retombe sur le repli déterministe,
+      // qui la porte. Dans les deux cas, la distinction survit.
+      requiredPhrases: [
+        ...[...topAbsentes, ...topNonConclues].map((p) => coreLabel(p.label)),
+        ...(topNonConclues.length > 0 ? ["conclu"] : []),
+      ],
+      allowedNumbers: numberForms(topAbsentes.length + topNonConclues.length),
+      // Deux phrases au lieu d'une : la borne suit, sinon la seconde limite serait tronquée par une
+      // règle écrite pour la première.
+      maxChars: 420,
       generable: true,
     });
   }

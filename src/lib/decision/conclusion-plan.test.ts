@@ -230,6 +230,47 @@ test("requiredPhrases : le noyau des priorités non couvertes doit survivre", ()
   );
 });
 
+test("« regardé sans conclure » ne se dit pas comme « pas encore couvert »", () => {
+  // Deux limites que la même phrase confondait : l'agriculture intensive, qu'AUCUNE règle ne sait
+  // examiner (limite du produit, la même partout), et le calme sonore à Nantes, qu'une règle a bien
+  // évalué sans pouvoir conclure (limite de CE lieu). Le lecteur ne pouvait pas savoir s'il attendait
+  // une évolution du produit ou s'il venait de buter sur la donnée de sa commune.
+  const plan = buildConclusionPlan(baseInput({
+    uncoveredPriorities: [{ key: "agriculture", label: "l'agriculture intensive" }],
+    inconclusivePriorities: [{ key: "calme_sonore", label: "le calme sonore" }],
+  }));
+  const bloc = plan.blocks.find((b) => b.key === "uncovered_priorities")!;
+  assert.match(bloc.fallbackText, /l'agriculture intensive ne sont pas encore couvertes/);
+  assert.match(bloc.fallbackText, /le calme sonore a bien été examinée, sans pouvoir être conclue/);
+  // UN SEUL BLOC : sa clé est lue par la validation de la synthèse rédigée et par le prompt.
+  assert.equal(plan.blocks.filter((b) => b.key === "uncovered_priorities").length, 1);
+  // Les deux groupes doivent survivre à une réécriture par le modèle, et le compte les couvre tous.
+  // « conclu » couvre conclue / conclues / conclure : le modèle garde sa tournure, il ne peut pas
+  // fondre les deux limites en une seule sans que la validation retombe sur le repli.
+  assert.deepEqual(bloc.requiredPhrases, ["agriculture intensive", "calme sonore", "conclu"]);
+  assert.deepEqual(bloc.allowedNumbers, ["2", "deux"]);
+});
+
+test("une priorité seulement NON CONCLUE n'annonce jamais une lacune du produit", () => {
+  const plan = buildConclusionPlan(baseInput({
+    uncoveredPriorities: [],
+    inconclusivePriorities: [{ key: "calme_sonore", label: "le calme sonore" }],
+  }));
+  const bloc = plan.blocks.find((b) => b.key === "uncovered_priorities")!;
+  assert.doesNotMatch(bloc.fallbackText, /pas encore couvert/);
+  assert.match(bloc.fallbackText, /^Votre priorité concernant le calme sonore a bien été examinée/);
+});
+
+test("un appelant qui ignore les priorités non conclues garde le texte d'avant", () => {
+  // Le champ est optionnel : un dossier assemblé ailleurs (harnais, artefact ancien rejoué) ne doit
+  // pas changer de phrase parce qu'un champ lui manque.
+  const plan = buildConclusionPlan(baseInput({ uncoveredPriorities: [AIR] }));
+  assert.equal(
+    plan.blocks.find((b) => b.key === "uncovered_priorities")!.fallbackText,
+    "Vos priorités concernant la qualité de l'air ne sont pas encore couvertes dans cette synthèse.",
+  );
+});
+
 test("lead single : la démarche prioritaire reprend l'ACTION du fait de tête, mot pour mot", () => {
   // Le résiduel nommait un sujet (« L'étiquette énergétique du logement. ») : sous un verdict
   // d'arbitrage il se lisait comme un second point défavorable, et il ne disait AUCUNE démarche. Il

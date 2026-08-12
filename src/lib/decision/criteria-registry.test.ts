@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildCriteriaRegistry, uncoveredPreferences, uncoveredConstraints } from "./criteria-registry.ts";
+import { buildCriteriaRegistry, uncoveredPreferences, uncoveredConstraints, inconclusivePreferences } from "./criteria-registry.ts";
 import type { RunResult, RuleEvaluation, DecisionFact, MaterialityTier } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 
@@ -218,4 +218,48 @@ test("un mismatch d'absence de POIDS 1 monte la couverture mais ne déclenche PA
   );
   assert.equal(s.registry.find((c) => c.criterionKey === "mobilite_quotidienne")!.coverage, "examined");
   assert.notEqual(s.orientation, "arbitration");
+});
+
+// ── Deux façons de n'être pas examiné, et elles ne se disent pas pareil ─────────────────────
+
+test("une règle qui S'EST APPLIQUÉE sans conclure n'est pas une priorité que le produit ignore", () => {
+  // Le cas réel : le calme sonore à Nantes. La règle tourne, ne trouve aucune infrastructure
+  // nommable près du point de référence, et refuse de conclure dès qu'une adresse est en jeu. Dire
+  // « pas encore couverte dans cette synthèse », comme pour un critère qu'AUCUNE règle ne sait
+  // examiner, laissait le lecteur incapable de savoir s'il attend une évolution du produit ou s'il
+  // vient de rencontrer une limite de la donnée sur SA commune.
+  const s = buildCriteriaRegistry(
+    project({}, [{ key: "calme_sonore", weight: 3 }, { key: "faible_pression_agricole", weight: 3 }]),
+    run([ev("territoire.sante-bruit", ["calme_sonore"], "uncertain")]),
+  );
+  const bruit = s.registry.find((c) => c.criterionKey === "calme_sonore")!;
+  const agri = s.registry.find((c) => c.criterionKey === "faible_pression_agricole")!;
+
+  assert.equal(bruit.coverage, "unexamined");
+  assert.equal(bruit.unexaminedReason, "inconclusive");
+  // Aucune règle ne cite ce critère : le produit ne sait pas l'examiner, ici comme ailleurs.
+  assert.equal(agri.unexaminedReason, "no_rule");
+
+  assert.deepEqual(uncoveredPreferences(s).map((p) => p.key), ["faible_pression_agricole"]);
+  assert.deepEqual(inconclusivePreferences(s).map((p) => p.key), ["calme_sonore"]);
+});
+
+test("un critère EXAMINÉ ne porte aucune raison de non-examen", () => {
+  const s = buildCriteriaRegistry(
+    project({}, [{ key: "faible_chaleur", weight: 3 }]),
+    run([ev("r1", ["faible_chaleur"], "satisfied")]),
+  );
+  assert.equal(s.registry[0]!.unexaminedReason, null);
+  assert.deepEqual(uncoveredPreferences(s), []);
+  assert.deepEqual(inconclusivePreferences(s), []);
+});
+
+test("not_applicable ne vaut pas tentative : le critère reste une lacune du produit", () => {
+  // `not_applicable` dit HORS SUJET (la règle ne s'applique pas ici), jamais « regardé sans
+  // conclure ». Le confondre avec `uncertain` ferait passer une règle muette pour un examen.
+  const s = buildCriteriaRegistry(
+    project({}, [{ key: "calme_sonore", weight: 3 }]),
+    run([ev("r1", ["calme_sonore"], "not_applicable")]),
+  );
+  assert.equal(s.registry[0]!.unexaminedReason, "no_rule");
 });

@@ -15,6 +15,33 @@ import { declaredHardConstraintKeys, declaredPreferenceKeys, hardConstraintLabel
 import { PREFERENCE_LABELS } from "../comparateur-labels.ts";
 
 export type CriterionCoverage = "examined" | "unexamined";
+
+/**
+ * POURQUOI UN CRITÈRE N'A PAS ÉTÉ EXAMINÉ, ET LA DISTINCTION N'EST PAS COSMÉTIQUE (13/08/2026).
+ *
+ * Deux situations très différentes se disaient d'une seule phrase (« pas encore couvertes dans cette
+ * synthèse ») :
+ *
+ * — `no_rule` : AUCUNE règle ne sait examiner ce critère. C'est un état du PRODUIT, valable partout
+ *   et pour tout le monde. `faible_pression_agricole` en est le cas type : aucun seuil défendable au
+ *   grain commune, décision documentée dans `sante-facts.ts`.
+ *
+ * — `inconclusive` : une règle s'est bien appliquée, et n'a pas pu conclure ICI (`unknown` ou
+ *   `uncertain`) : la donnée manque sur cette commune, ou elle a été lue à une échelle qui ne
+ *   conclut pas au grain demandé. C'est un état de CE LIEU, ou de ce dossier.
+ *
+ * Le lecteur qui lit la même phrase dans les deux cas ne peut pas savoir s'il attend une évolution
+ * du produit ou s'il vient de rencontrer une limite de la donnée sur sa commune. Le cas qui a rendu
+ * la confusion visible : le calme sonore à Nantes, où la règle tourne, ne trouve aucune
+ * infrastructure nommable près du point de référence, et refuse de conclure dès qu'une adresse est
+ * en jeu.
+ *
+ * CE QUE CETTE DISTINCTION NE DIT PAS ENCORE : au sein de `inconclusive`, « la donnée manque » et
+ * « la donnée a été lue mais ne conclut pas à ce grain » restent confondues. `unknown` et
+ * `uncertain` les sépareraient, mais les règles ne les emploient pas encore de façon cohérente
+ * (`ruleBruit` rend `uncertain` dans les deux cas). À reprendre le jour où les règles trancheront.
+ */
+export type UnexaminedReason = "no_rule" | "inconclusive";
 export type CriterionOutcome = "favorable" | "reserve" | "mismatch" | "incompatible" | "indeterminate";
 
 export type ProjectCriterionAssessment = {
@@ -22,6 +49,8 @@ export type ProjectCriterionAssessment = {
   kind: "hard_constraint" | "preference";
   label: string;
   coverage: CriterionCoverage;
+  /** `null` quand le critère est examiné. Voir `UnexaminedReason`. */
+  unexaminedReason: UnexaminedReason | null;
   outcome: CriterionOutcome;
   maxReserveTier: MaterialityTier | null; // matérialité maximale des RÉSERVES de ce critère
   ruleIds: string[];
@@ -97,9 +126,16 @@ function assess(
     // critère EXPLOITABLE, donc examiné (la couverture monte).
   }
 
+  // `unknown` / `uncertain` disent qu'une règle S'EST APPLIQUÉE sans conclure ; `not_applicable` dit
+  // qu'elle est hors sujet (cf. la table des outcomes, `decision-fact.ts`). C'est là toute la
+  // distinction, et elle est déjà structurée : rien à ajouter aux règles.
+  const tentee = mine.some((e) => e.outcome === "unknown" || e.outcome === "uncertain");
+  const examine = exploitable.length > 0;
+
   return {
     criterionKey, kind, label,
-    coverage: exploitable.length > 0 ? "examined" : "unexamined",
+    coverage: examine ? "examined" : "unexamined",
+    unexaminedReason: examine ? null : tentee ? "inconclusive" : "no_rule",
     outcome,
     maxReserveTier,
     ruleIds: mine.map((e) => e.ruleId),
@@ -155,12 +191,23 @@ export function buildCriteriaRegistry(project: UserProject, run: RunResult): Cri
   };
 }
 
+/** Les priorités qu'AUCUNE règle ne sait examiner : une limite du produit, la même partout. */
 export function uncoveredPreferences(summary: CriteriaSummary): { key: string; label: string }[] {
   return summary.registry
-    .filter((c) => c.kind === "preference" && c.coverage === "unexamined")
+    .filter((c) => c.kind === "preference" && c.unexaminedReason === "no_rule")
     .map((c) => ({ key: c.criterionKey, label: c.label }));
 }
 
+/** Les priorités qu'une règle a bien évaluées, sans pouvoir conclure ICI : une limite de ce lieu. */
+export function inconclusivePreferences(summary: CriteriaSummary): { key: string; label: string }[] {
+  return summary.registry
+    .filter((c) => c.kind === "preference" && c.unexaminedReason === "inconclusive")
+    .map((c) => ({ key: c.criterionKey, label: c.label }));
+}
+
+// LES CONTRAINTES DURES NE SE SÉPARENT PAS, et c'est délibéré : une condition non négociable jamais
+// testée réduit la portée du verdict, que la règle soit absente ou muette. Le lecteur doit la
+// vérifier lui-même dans les deux cas, donc la phrase est la même.
 export function uncoveredConstraints(summary: CriteriaSummary): { key: HardConstraintKey; label: string }[] {
   return summary.registry
     .filter((c) => c.kind === "hard_constraint" && c.coverage === "unexamined")
