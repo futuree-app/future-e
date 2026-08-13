@@ -142,7 +142,7 @@ export default function ConditionsGeneralesDeVentePage() {
       intro={
         <>
           Ce que futur•e vend, à quel prix, ce que l&apos;achat vous donne, et ce qu&apos;il advient
-          de votre droit de rétractation quand vous demandez à lire votre dossier tout de suite.
+          de votre droit de rétractation.
         </>
       }
     >
@@ -246,44 +246,39 @@ export default function ConditionsGeneralesDeVentePage() {
         </p>
       </Section>
 
-      <Section title="6. Droit de rétractation, et ce que vous en faites">
+      <Section title="6. Droit de rétractation">
+        {/* LE RENONCEMENT A ÉTÉ RETIRÉ DU PARCOURS D'ACHAT (13/08/2026, décision porteur).
+            Cette section décrivait l'exception de l'article L221-28 13° : un contenu numérique
+            fourni immédiatement échappe à la rétractation, à condition que l'acheteur ait demandé
+            l'exécution immédiate ET renoncé expressément à son droit, les deux avant le paiement.
+            La case du paiement ne recueille plus ces deux accords ; l'exception ne joue donc pas,
+            et le droit s'applique en entier. Écrire l'inverse ferait tenir au vendeur, dans ses
+            propres conditions, un discours que rien dans son parcours ne soutient. */}
         <p>
-          Un achat à distance ouvre normalement un droit de rétractation de{" "}
-          <strong>quatorze jours</strong>, sans motif à donner.
+          Un achat à distance ouvre un droit de rétractation de{" "}
+          <strong>quatorze jours</strong>, sans motif à donner. Ce droit vous est acquis, et
+          futur•e ne vous demande pas d&apos;y renoncer pour vous donner accès à votre dossier tout
+          de suite.
         </p>
         <p style={{ marginTop: 16 }}>
-          Ce droit connaît une exception pour les contenus numériques fournis immédiatement. Pour
-          que vous puissiez lire votre dossier tout de suite plutôt que dans quatorze jours,
-          futur•e vous demande, <strong>avant le paiement</strong>, deux choses distinctes :
-        </p>
-        <ul style={{ paddingLeft: 20, lineHeight: 1.9, color: "var(--fg-2)", margin: "16px 0 0" }}>
-          <li>que vous demandiez expressément l&apos;exécution immédiate du contrat ;</li>
-          {/* « DÈS QUE LA FOURNITURE COMMENCE », ET NON « DÈS QUE LE DOSSIER EST LU » (05/08/2026).
-              La perte du droit ne dépend pas de ce que le client a effectivement consulté : elle
-              tient au COMMENCEMENT DE LA FOURNITURE, c'est-à-dire à la mise à disposition. Un
-              dossier ouvert et jamais ouvert par son acheteur n'est déjà plus rétractable. Écrire
-              l'inverse promettait un droit qui n'existe pas, et la formule « un dossier lu ne se
-              rend pas », meilleure à l'oreille, disait précisément la chose fausse. */}
-          <li>
-            que vous reconnaissiez qu&apos;en le faisant, vous{" "}
-            <strong>perdez votre droit de rétractation</strong>{" "}
-            dès que la fourniture commence, c&apos;est-à-dire dès la mise à disposition du dossier
-            dans votre compte, que vous le consultiez ou non.
-          </li>
-        </ul>
-        <p style={{ marginTop: 16 }}>
-          Sans ces deux accords, l&apos;achat ne peut pas être finalisé. Ils vous sont confirmés{" "}
-          <strong>dans l&apos;e-mail de confirmation de commande</strong> et, lorsqu&apos;une
-          facture est émise, sur celle-ci. C&apos;est ce que prévoit l&apos;article L221-28 du code
-          de la consommation, et c&apos;est la contrepartie d&apos;un accès immédiat : un contenu
-          numérique dont la fourniture a commencé ne se rétracte plus.
+          Le délai court à partir du jour de la conclusion du contrat, c&apos;est-à-dire du
+          paiement. Pour l&apos;exercer, écrivez à{" "}
+          <a href="mailto:hello@futur-e.fr" style={{ color: "var(--orange-ink)" }}>
+            hello@futur-e.fr
+          </a>{" "}
+          depuis l&apos;adresse de votre compte, en indiquant votre commande. Aucune justification
+          n&apos;est demandée, et aucune forme particulière n&apos;est exigée.
         </p>
         <p style={{ marginTop: 16 }}>
-          <strong>Ce que futur•e fait quand même.</strong>{" "}
-          Si le dossier acheté ne contient pas ce
-          qui était annoncé, ou si un problème technique vous empêche de le lire, écrivez. Le
-          remboursement est accordé sans discuter. Le droit auquel vous renoncez est celui de
-          changer d&apos;avis, jamais celui d&apos;obtenir ce pour quoi vous avez payé.
+          Le remboursement intervient dans les quatorze jours suivant votre demande, par le même
+          moyen de paiement que celui de l&apos;achat. L&apos;accès au dossier concerné est alors
+          fermé.
+        </p>
+        <p style={{ marginTop: 16 }}>
+          <strong>Au-delà de ce délai.</strong>{" "}
+          Si le dossier acheté ne contient pas ce qui était annoncé, ou si un problème technique
+          vous empêche de le lire, écrivez. Le remboursement est accordé sans discuter, quelle que
+          soit la date : obtenir ce pour quoi vous avez payé n&apos;a pas de date limite.
         </p>
       </Section>
 

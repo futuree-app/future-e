@@ -40,9 +40,7 @@ export function PaymentForm({ onSuccess, submitLabel, returnUrl, onSubmit, billi
     // clavier, et l'accord doit être vrai au moment où l'on parle à Stripe, pas seulement à
     // l'instant où le bouton a été peint.
     if (!consent) {
-      setError(
-        "Cochez la case au-dessus pour demander l'ouverture immédiate de votre dossier.",
-      );
+      setError("Cochez la case au-dessus pour accepter les conditions générales de vente.");
       return;
     }
 
@@ -105,27 +103,24 @@ export function PaymentForm({ onSuccess, submitLabel, returnUrl, onSubmit, billi
         <p className="font-mono text-sm text-red-400">{error}</p>
       ) : null}
 
-      {/* L'ACCORD PRÉALABLE, ET IL EST OBLIGATOIRE (04/08/2026).
+      {/* L'ACCEPTATION DES CONDITIONS DE VENTE.
           ══════════════════════════════════════════════════════════════════════════════════════
-          Un achat à distance ouvre quatorze jours de rétractation. L'article L221-28 13° du code
-          de la consommation en dispense les contenus numériques fournis immédiatement, mais à
-          trois conditions cumulatives : accord exprès pour l'exécution immédiate, renoncement
-          exprès au droit de rétractation, et confirmation écrite sur support durable.
+          CE QUE CETTE CASE NE RECUEILLE PLUS, ET CE QUE ÇA CHANGE (13/08/2026, décision porteur).
+          Elle portait deux accords : la demande d'exécution immédiate, et le renoncement exprès au
+          droit de rétractation. Ensemble, ils font jouer l'exception de l'article L221-28 13° du
+          code de la consommation pour un contenu numérique fourni tout de suite.
 
-          SANS CETTE CASE, L'EXCEPTION NE JOUE PAS, et un acheteur peut lire son dossier puis se
-          faire rembourser pendant quatorze jours. Les CGV décriraient un mécanisme qui n'existe
-          pas, ce qui est pire que de ne rien écrire.
+          Le porteur a choisi de n'y laisser que l'acceptation des CGV. Conséquence assumée, et
+          écrite ici pour que personne ne la redécouvre par un litige : l'exception ne joue pas, et
+          l'acheteur CONSERVE ses quatorze jours de rétractation, dossier consulté ou non.
 
-          UNE SEULE CASE POUR LES DEUX ACCORDS, parce que le texte les lie : demander l'exécution
-          immédiate EST ce qui fait perdre la rétractation. Deux cases feraient croire à deux
-          décisions séparées, dont l'une serait refusable sans conséquence.
+          LES TROIS AUTRES TEXTES ONT SUIVI LE MÊME JOUR, sans quoi le produit se contredirait :
+          la section 6 des CGV, qui décrivait le renoncement ; le message de confirmation d'achat,
+          qui affirmait que l'acheteur y avait consenti ; et le renvoi de facture. Un document qui
+          affirme une renonciation que rien ne recueille se retourne contre celui qui l'écrit.
 
           ELLE VIT ICI, au seul composant qui parle à Stripe, et non dans les quatre panneaux
-          d'achat : un cinquième parcours arriverait sans elle.
-
-          RESTE À FAIRE, et ce n'est pas optionnel : la confirmation sur support durable. La
-          facture émise au webhook doit porter la mention de cet accord. Tant que ce n'est pas le
-          cas, la troisième condition n'est pas remplie. */}
+          d'achat : un cinquième parcours arriverait sans elle. */}
       <label
         htmlFor={consentId}
         style={{
@@ -150,17 +145,8 @@ export function PaymentForm({ onSuccess, submitLabel, returnUrl, onSubmit, billi
           }}
           style={{ marginTop: 3, width: 16, height: 16, accentColor: "var(--orange)", flexShrink: 0 }}
         />
-        {/* LE LIBELLÉ DIT LA MISE À DISPOSITION, PAS LA LECTURE (05/08/2026).
-            « en l'obtenant tout de suite je renonce » laissait entendre que le droit se perdait en
-            consultant le dossier. Il se perd au COMMENCEMENT DE LA FOURNITURE : un dossier ouvert
-            dans le compte et jamais consulté n'est déjà plus rétractable. La case et la section 6
-            des CGV doivent dire exactement la même chose, sinon l'acheteur a consenti à autre chose
-            que ce qu'il a lu. */}
         <span style={{ fontSize: 13, lineHeight: 1.6, color: "var(--fg-2)" }}>
-          Je demande que mon dossier soit mis à disposition{" "}
-          <strong>immédiatement</strong> après le paiement, et je reconnais que je perds mon droit
-          de rétractation de quatorze jours dès cette mise à disposition, que je consulte le dossier
-          ou non. J&apos;accepte les{" "}
+          J&apos;accepte les{" "}
           <Link
             href="/conditions-generales-de-vente"
             target="_blank"

@@ -180,22 +180,19 @@ export function renderInvoicePdf(invoice: Invoice): Promise<Buffer> {
         `Prestation exécutée le ${formatDateFr(invoice.issuedAt)}, accès ouvert au client à cette date. ` +
         `${invoice.vatMention}.`,
       ),
-      // LA TROISIÈME CONDITION DE L'ARTICLE L221-28 13°.
+      // LA FACTURE NE CONFIRME PLUS UN RENONCEMENT (13/08/2026, décision porteur).
       // ════════════════════════════════════════════════════════════════════════════════════════
-      // L'exception au droit de rétractation pour un contenu numérique fourni immédiatement demande
-      // TROIS choses : l'accord exprès à l'exécution immédiate, le renoncement exprès à la
-      // rétractation, et la CONFIRMATION de cet accord sur un support durable. Les deux premières
-      // sont recueillies avant le paiement (`PaymentForm.tsx`) ; sans cette ligne, la troisième
-      // manquait, et l'exception ne jouait donc pas, quoi qu'ait coché l'acheteur.
+      // Elle portait la troisième condition de l'article L221-28 13° : la confirmation, sur support
+      // durable, de l'accord à l'exécution immédiate et du renoncement à la rétractation. La case du
+      // paiement ne recueille plus ces deux accords, l'exception ne joue donc pas.
       //
-      // La facture est le support durable : produite à l'encaissement, remise au client, conservée.
-      // Le libellé reprend les deux accords tels qu'ils lui ont été présentés, sans les reformuler :
-      // une confirmation qui dirait autre chose que la case ne confirmerait rien.
+      // Une facture qui confirmerait un accord jamais donné serait pire qu'un silence : elle
+      // opposerait au client, sur une pièce comptable qu'il conserve, une renonciation dont rien ne
+      // porte la trace. La ligne dit maintenant le droit tel qu'il s'applique.
       t(
-        "Le client a demandé l'exécution immédiate de la prestation et a reconnu perdre son " +
-        "droit de rétractation dès la mise à disposition du contenu, conformément à l'article " +
-        "L221-28 13° du code de la consommation. " +
-        "La présente facture vaut confirmation de cet accord sur support durable.",
+        "Le client dispose d'un droit de rétractation de quatorze jours à compter de la conclusion " +
+        "du contrat, conformément aux articles L221-18 et suivants du code de la consommation. " +
+        "Demande à adresser à hello@futur-e.fr.",
       ),
       t(`${invoice.seller.nameWithForm} - SIRET ${invoice.seller.siret} - ${invoice.seller.address}`),
     ];
