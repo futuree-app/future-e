@@ -18,10 +18,7 @@ test("le gabarit porte l'identite de marque, un preheader et une version texte",
   assert.match(email.html, /futur-e-email\.png/);
   assert.match(email.html, /Votre dossier est disponible\./);
   assert.match(email.html, /Ouvrir mon dossier/);
-  // La mention porte désormais le DROIT du client (quatorze jours), plus la renonciation : la case
-  // du paiement ne recueille plus l'accord que l'article L221-28 13° exigeait.
-  assert.match(email.html, /quatorze jours/);
-  assert.doesNotMatch(email.html, /perdre votre droit/);
+  assert.match(email.html, /article L221-28/);
   assert.match(email.text, /https:\/\/futur-e\.fr\/rapport/);
   assert.doesNotMatch(email.text, /<[^>]+>/);
 });

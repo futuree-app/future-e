@@ -97,11 +97,8 @@ function getEntitlements() {
  *
  * L'article L221-28 13° du code de la consommation dispense de rétractation un contenu numérique
  * fourni immédiatement, à trois conditions cumulatives : accord exprès pour l'exécution immédiate,
- * renoncement exprès, et confirmation de cet accord sur support durable.
- *
- * AUCUNE DES TROIS N'EST PLUS RÉUNIE DEPUIS LE 13/08/2026 (décision porteur) : la case du paiement
- * ne recueille que l'acceptation des CGV. Les quatorze jours courent donc, et tout ce que le
- * produit écrit le dit ainsi : cette mention, la facture, et la section 6 des CGV.
+ * renoncement exprès, et CONFIRMATION de cet accord sur support durable. Les deux premières sont
+ * recueillies avant le paiement (`PaymentForm.tsx`), la facture PDF porte la troisième.
  *
  * ── POURQUOI AUSSI DANS L'E-MAIL, ET PAS SEULEMENT SUR LA FACTURE ────────────────────────────
  * `buildInvoiceAttachment` rend un tableau VIDE quand la facture ne peut pas être émise : nom de

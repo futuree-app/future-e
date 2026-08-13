@@ -4,23 +4,12 @@
 export const TRANSACTIONAL_EMAIL_FROM = "futur•e <hello@futur-e.fr>";
 export const TRANSACTIONAL_EMAIL_REPLY_TO = "hello@futur-e.fr";
 
-/**
- * LA MENTION DE RÉTRACTATION, ET CE QU'ELLE DIT DEPUIS LE 13/08/2026.
- *
- * Elle affirmait que l'acheteur avait demandé la mise à disposition immédiate et reconnu perdre son
- * droit de rétractation, ce qui valait confirmation sur support durable, troisième condition de
- * l'article L221-28 13°. La case du paiement ne recueille plus ces deux accords (décision porteur) :
- * l'exception ne joue donc pas, et l'affirmer dans un message serait une déclaration du vendeur sur
- * un droit du client que rien n'a recueilli.
- *
- * Elle dit maintenant l'inverse, et c'est la vérité : les quatorze jours courent. Le nom de la
- * constante reste juste (une mention de rétractation), seul son contenu a changé de sens.
- */
 export const DIGITAL_CONTENT_WITHDRAWAL_NOTICE =
-  "Vous disposez de quatorze jours à compter de votre achat pour vous rétracter, sans avoir à " +
-  "vous justifier : écrivez à hello@futur-e.fr depuis l'adresse de votre compte, en indiquant " +
-  "votre commande. Et si le dossier ne contient pas ce qui était annoncé, le remboursement est " +
-  "accordé sans discuter, quelle que soit la date.";
+  "Vous avez demandé la mise à disposition immédiate de votre dossier et reconnu perdre votre " +
+  "droit de rétractation de quatorze jours dès cette mise à disposition, comme le prévoit " +
+  "l'article L221-28 du code de la consommation. Ce message vaut confirmation de cet accord sur " +
+  "support durable. Si le dossier ne contient pas ce qui était annoncé, écrivez-nous : le " +
+  "remboursement est accordé.";
 
 type TransactionalEmailInput = {
   preheader: string;
