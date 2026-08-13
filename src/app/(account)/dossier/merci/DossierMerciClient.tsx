@@ -27,10 +27,22 @@ export function DossierMerciClient({ paymentIntentId }: { paymentIntentId: strin
           | null;
         if (payload?.status === "ready" && payload.dossierId) {
           setState("ready");
+          // ON OUVRE LE DOSSIER, PLUS LE MODULE LOGEMENT (13/08/2026).
+          //
+          // L'acheteur arrivait directement sur `/rapport/logement`, l'échelle la plus fine, sans
+          // avoir vu la réponse qu'il venait d'acheter. Depuis le chantier 6, le hub porte le
+          // VERDICT en tête, et sur un dossier d'adresse c'est la conclusion augmentée de l'adresse
+          // qui s'y affiche, avec ses contrôles et ses trois échelles en dessous. Le geste suivant
+          // (« voir l'analyse du logement ») y est proposé, nommé, à un clic.
+          //
+          // L'attente ne se voit pas davantage : quand l'artefact d'adresse n'est pas encore prêt,
+          // le hub sert le repli communal sous un bandeau qui le dit, puis le remplace. Le module
+          // Logement, lui, n'aurait rien eu à montrer de la décision.
+          //
           // `/rapport/dossiers/ouvrir` est une ROUTE HANDLER : navigation native obligatoire.
           // Avec le router de Next, le payload RSC demandé ne correspond pas à la redirection
           // rendue, et le clic reste sans effet.
-          window.location.href = `/rapport/dossiers/ouvrir?id=${encodeURIComponent(payload.dossierId)}&vers=logement`;
+          window.location.href = `/rapport/dossiers/ouvrir?id=${encodeURIComponent(payload.dossierId)}&vers=dossier`;
           return;
         }
       } catch {
@@ -62,7 +74,7 @@ export function DossierMerciClient({ paymentIntentId }: { paymentIntentId: strin
     <p className="text-[15px] text-muted leading-relaxed">
       {state === "ready"
         ? "Nous ouvrons votre dossier."
-        : "Nous préparons votre dossier : l'adresse, ce qui l'entoure, et ce que dit le bâtiment."}
+        : "Nous préparons votre dossier : ce que ce lieu devient, ce qui entoure l'adresse, et ce que dit le bâtiment."}
     </p>
   );
 }

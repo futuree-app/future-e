@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { AddressAutocomplete } from "@/components/report/AddressAutocomplete";
 
 // Créer un dossier sans passer par Stripe, pour éprouver les écrans.
@@ -13,7 +12,6 @@ import { AddressAutocomplete } from "@/components/report/AddressAutocomplete";
 export function AdminDossierCreator() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   return (
     <div
@@ -50,7 +48,12 @@ export function AdminDossierCreator() {
             if (!res.ok || !payload?.dossierId) {
               throw new Error(payload?.error ?? `Erreur ${res.status}`);
             }
-            router.push(`/rapport/logement?dossierId=${encodeURIComponent(payload.dossierId)}`);
+            // LE MÊME CHEMIN QU'UN ACHETEUR, et c'est la raison d'être de cet outil : il produit
+            // une vraie ligne pour que le porteur rencontre les mêmes écrans, les mêmes états
+            // dégradés et les mêmes refus. Depuis le 13/08/2026, un achat mène au hub, où se lit la
+            // décision ; y arriver par le module Logement ferait tester un parcours que personne
+            // d'autre n'emprunte.
+            window.location.href = `/rapport/dossiers/ouvrir?id=${encodeURIComponent(payload.dossierId)}&vers=dossier`;
           } catch (err) {
             setError(err instanceof Error ? err.message : "Création impossible.");
           } finally {
