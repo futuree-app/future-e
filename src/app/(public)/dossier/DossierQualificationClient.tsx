@@ -107,6 +107,18 @@ function MatterLine({ label, state }: { label: string; state: MatterState }) {
 }
 
 export function DossierQualificationClient() {
+  // Le code de lancement porté par le lien d'invitation (`/dossier?code=BETA`). Il n'est ici qu'un
+  // PASSAGER : rien ne l'interprète côté navigateur, `resolvePromo` tranche côté serveur, et un
+  // code inventé ne change donc aucun montant.
+  //
+  // LU AU MONTAGE PLUTÔT QUE PAR `useSearchParams`, et c'est une contrainte de cette page-ci :
+  // `/dossier` est publique et prérendue (elle porte le SEO de la porte par l'adresse). Le hook
+  // aurait exigé une frontière `Suspense` et fait basculer la page en rendu dynamique, ce qui
+  // coûterait son prérendu pour un paramètre qui ne sert qu'au clic, bien après la première peinture.
+  const [codeDeLancement, setCodeDeLancement] = useState("");
+  useEffect(() => {
+    setCodeDeLancement(new URLSearchParams(window.location.search).get("code")?.trim() ?? "");
+  }, []);
   const [address, setAddress] = useState<BanAddressResult | null>(null);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [busy, setBusy] = useState(false);
@@ -275,7 +287,12 @@ export function DossierQualificationClient() {
               </div>
 
               <a
-                href={`/checkout/dossier?banId=${encodeURIComponent(address.id!)}&label=${encodeURIComponent(address.label)}&insee=${encodeURIComponent(address.citycode!)}`}
+                // LE CODE DE LANCEMENT TRAVERSE LA QUALIFICATION (13/08/2026). Il n'était lu qu'à
+                // la page de paiement, sous « J'ai un code » : un lien partagé avec `?code=BETA` le
+                // perdait dès la première étape, et il fallait le retaper de mémoire au moment de
+                // payer. Sur des gens qu'on invite personnellement, chaque saisie de plus est une
+                // vente de moins. Le serveur reste seul juge de sa validité et du montant.
+                href={`/checkout/dossier?banId=${encodeURIComponent(address.id!)}&label=${encodeURIComponent(address.label)}&insee=${encodeURIComponent(address.citycode!)}${codeDeLancement ? `&code=${encodeURIComponent(codeDeLancement)}` : ""}`}
                 className="inline-flex items-center gap-2 px-7 py-3.5 rounded-lg bg-accent/[0.14] text-accent text-[length:var(--text-dense)] no-underline border border-accent/[0.28]"
                 onClick={() =>
                   posthog.capture("address_checkout_viewed", {

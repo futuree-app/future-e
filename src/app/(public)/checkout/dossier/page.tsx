@@ -41,7 +41,11 @@ export default async function DossierCheckoutPage({
   // `getSafeNextPath` (src/app/auth/actions.ts) accepte tout chemin relatif, query comprise, donc
   // l'adresse survit à la connexion et le lecteur revient exactement ici.
   if (!user) {
-    const next = `/checkout/dossier?banId=${encodeURIComponent(banId)}&label=${encodeURIComponent(label)}&insee=${encodeURIComponent(insee)}`;
+    // LE CODE SURVIT À LA CRÉATION DE COMPTE, et c'est le maillon qui manquait le plus : un
+    // visiteur invité par un lien avec code n'a PAS de compte par définition, il passe donc tous
+    // par ici. Sans le code dans `next`, il revenait au paiement au tarif plein après s'être
+    // inscrit, sans que rien n'explique la différence.
+    const next = `/checkout/dossier?banId=${encodeURIComponent(banId)}&label=${encodeURIComponent(label)}&insee=${encodeURIComponent(insee)}${code ? `&code=${encodeURIComponent(code)}` : ""}`;
     redirect(`/connexion?next=${encodeURIComponent(next)}`);
   }
 
