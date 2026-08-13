@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   DIGITAL_CONTENT_WITHDRAWAL_NOTICE,
+  mentionSiFactureAbsente,
   renderTransactionalEmail,
 } from "./transactional-email.ts";
 
@@ -34,4 +35,22 @@ test("les valeurs metier ne peuvent pas injecter du HTML", () => {
   assert.doesNotMatch(email.html, /<script>/);
   assert.match(email.html, /&lt;script&gt;/);
   assert.match(email.html, /Facture &lt;FE-1&gt;/);
+});
+
+test("la mention de renoncement n'entre dans l'e-mail QUE si la facture manque", () => {
+  // La facture est le support durable normal, et le message ne répète pas ce qu'elle porte. Mais
+  // `buildInvoiceAttachment` rend un tableau vide quand la facture n'a pas pu être émise : l'e-mail
+  // devient alors le seul support durable, et sans la mention, la troisième condition de l'article
+  // L221-28 13° manquerait, alors même que l'acheteur a coché la case.
+  assert.equal(mentionSiFactureAbsente([{ filename: "futur-e-facture-FE-2026-0001.pdf" }]), undefined);
+  assert.equal(mentionSiFactureAbsente([]), DIGITAL_CONTENT_WITHDRAWAL_NOTICE);
+});
+
+test("sans mention, le gabarit ne laisse aucune trace du bloc", () => {
+  const email = renderTransactionalEmail({
+    preheader: "p", eyebrow: "e", title: "t", paragraphs: ["corps"],
+    notice: mentionSiFactureAbsente([{ filename: "f.pdf" }]),
+  });
+  assert.doesNotMatch(email.html, /rétractation/);
+  assert.doesNotMatch(email.text, /rétractation/);
 });

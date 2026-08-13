@@ -133,3 +133,22 @@ export function renderTransactionalEmail(input: TransactionalEmailInput): {
 
   return { html, text };
 }
+
+/**
+ * LA MENTION DE RENONCEMENT N'ENTRE DANS L'E-MAIL QUE SI LA FACTURE MANQUE (13/08/2026).
+ *
+ * La troisième condition de l'article L221-28 13° est la CONFIRMATION de l'accord sur un support
+ * durable. La facture la porte, et c'est sa place : un document conservé, classé, opposable. La
+ * répéter dans le corps du message n'apprenait rien à qui reçoit les deux, et alourdissait de
+ * quatre lignes juridiques un message de bienvenue.
+ *
+ * MAIS ELLE NE PEUT PAS DISPARAÎTRE TOUT À FAIT. `buildInvoiceAttachment` rend un tableau VIDE
+ * quand la facture ne peut pas être émise (nom de facturation absent sur un compte ancien, ou
+ * n'importe quelle erreur, qu'il avale volontairement pour ne jamais faire échouer un webhook).
+ * L'e-mail part quand même. Dans ce cas précis, il devient le seul support durable disponible :
+ * sans la mention, la troisième condition manquerait, et l'exception ne jouerait pas alors même que
+ * l'acheteur a coché la case.
+ */
+export function mentionSiFactureAbsente(attachments: { filename: string }[]): string | undefined {
+  return attachments.length ? undefined : DIGITAL_CONTENT_WITHDRAWAL_NOTICE;
+}

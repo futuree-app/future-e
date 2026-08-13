@@ -150,26 +150,40 @@ export function PaymentForm({ onSuccess, submitLabel, returnUrl, onSubmit, billi
           }}
           style={{ marginTop: 3, width: 16, height: 16, accentColor: "var(--orange)", flexShrink: 0 }}
         />
-        {/* LE LIBELLÉ DIT LA MISE À DISPOSITION, PAS LA LECTURE (05/08/2026).
-            « en l'obtenant tout de suite je renonce » laissait entendre que le droit se perdait en
-            consultant le dossier. Il se perd au COMMENCEMENT DE LA FOURNITURE : un dossier ouvert
-            dans le compte et jamais consulté n'est déjà plus rétractable. La case et la section 6
-            des CGV doivent dire exactement la même chose, sinon l'acheteur a consenti à autre chose
-            que ce qu'il a lu. */}
-        <span style={{ fontSize: 13, lineHeight: 1.6, color: "var(--fg-2)" }}>
-          Je demande que mon dossier soit mis à disposition{" "}
-          <strong>immédiatement</strong> après le paiement, et je reconnais que je perds mon droit
-          de rétractation de quatorze jours dès cette mise à disposition, que je consulte le dossier
-          ou non. J&apos;accepte les{" "}
-          <Link
-            href="/conditions-generales-de-vente"
-            target="_blank"
-            style={{ color: "var(--orange-ink)", textDecoration: "underline" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            conditions générales de vente
-          </Link>
-          .
+        {/* DEUX NIVEAUX DE LECTURE, UN SEUL CONSENTEMENT (13/08/2026).
+            ══════════════════════════════════════════════════════════════════════════════════════
+            Le bloc disait tout d'un trait, en un pavé de quatre lignes que personne ne lit avant de
+            payer. L'œil reçoit maintenant l'engagement courant (les CGV) en corps de texte, et la
+            conséquence juridique juste dessous, en plus petit.
+
+            LES DEUX RESTENT DANS LE MÊME <label>, ET C'EST TOUT L'ENJEU : un seul clic les coche
+            ensemble, donc le renoncement demeure EXPRÈS au sens de l'article L221-28 13°. Sortir la
+            seconde ligne du label en ferait une simple information affichée, que rien ne recueille,
+            et l'exception cesserait de jouer sans que l'écran change d'apparence.
+
+            LE LIBELLÉ DIT LA MISE À DISPOSITION, PAS LA LECTURE (05/08/2026). « en l'obtenant tout
+            de suite je renonce » laissait entendre que le droit se perdait en consultant le dossier.
+            Il se perd au COMMENCEMENT DE LA FOURNITURE : un dossier ouvert dans le compte et jamais
+            consulté n'est déjà plus rétractable. La case et la section 6 des CGV doivent dire
+            exactement la même chose, sinon l'acheteur a consenti à autre chose que ce qu'il a lu. */}
+        <span style={{ display: "block" }}>
+          <span style={{ fontSize: 13, lineHeight: 1.6, color: "var(--fg-2)" }}>
+            J&apos;accepte les{" "}
+            <Link
+              href="/conditions-generales-de-vente"
+              target="_blank"
+              style={{ color: "var(--orange-ink)", textDecoration: "underline" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              conditions générales de vente
+            </Link>
+            .
+          </span>
+          <span style={{ display: "block", marginTop: 5, fontSize: 11, lineHeight: 1.55, color: "var(--fg-4)" }}>
+            Je demande que mon dossier soit mis à disposition immédiatement après le paiement, et je
+            reconnais que je perds mon droit de rétractation de quatorze jours dès cette mise à
+            disposition, que je consulte le dossier ou non.
+          </span>
         </span>
       </label>
 

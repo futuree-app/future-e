@@ -17,7 +17,7 @@ import { after } from "next/server";
 import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
 import { normalizeUserProject } from "@/lib/user-project";
 import {
-  DIGITAL_CONTENT_WITHDRAWAL_NOTICE,
+  mentionSiFactureAbsente,
   renderTransactionalEmail,
   TRANSACTIONAL_EMAIL_FROM,
   TRANSACTIONAL_EMAIL_REPLY_TO,
@@ -392,7 +392,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
             : []),
         ],
         cta: { label: "Ouvrir mon dossier", href: "https://futur-e.fr/rapport" },
-        notice: DIGITAL_CONTENT_WITHDRAWAL_NOTICE,
+        notice: mentionSiFactureAbsente(attachments),
       });
       await envoyerEmail(resend, {
         from: TRANSACTIONAL_EMAIL_FROM,
@@ -458,7 +458,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
             : []),
         ],
         cta: { label: "Ouvrir ma comparaison", href: "https://futur-e.fr/rapport" },
-        notice: DIGITAL_CONTENT_WITHDRAWAL_NOTICE,
+        notice: mentionSiFactureAbsente(attachments),
       });
       await envoyerEmail(resend, {
         from: TRANSACTIONAL_EMAIL_FROM,
@@ -565,7 +565,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
           : []),
       ],
       cta: { label: "Ouvrir mon rapport", href: "https://futur-e.fr/rapport" },
-      notice: DIGITAL_CONTENT_WITHDRAWAL_NOTICE,
+      notice: mentionSiFactureAbsente(attachments),
     });
     await envoyerEmail(resend, {
       from: TRANSACTIONAL_EMAIL_FROM,
