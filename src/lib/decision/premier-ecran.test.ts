@@ -38,18 +38,19 @@ test("payant SANS AUCUN PROJET : la page porte le titre, sans jamais lire un pla
   assert.equal(c.kind, "invite");
   assert.equal(
     c.kind === "invite" ? c.titre : "",
-    "Dites ce que vous cherchez, et La Rochelle se lira à cette aune.",
+    "La Rochelle ne se lit pas pareil selon ce que vous cherchez.",
   );
   assert.deepEqual(c.kind === "invite" ? c.geste : null, {
     label: "Décrire mon projet", href: `/rapport#${ANCRE_PROJET}`,
   });
 });
 
-test("payant sans projet et sans commune connue : la phrase reste juste", () => {
+test("payant sans projet et sans commune connue : la phrase reste juste, capitale comprise", () => {
+  // Le lieu ouvre la phrase : le repli doit porter la majuscule qu'un nom de commune apporte seul.
   const c = contenuDuHero({ fullReport: true, project: null, commune: null });
   assert.equal(
     c.kind === "invite" ? c.titre : "",
-    "Dites ce que vous cherchez, et ce territoire se lira à cette aune.",
+    "Ce territoire ne se lit pas pareil selon ce que vous cherchez.",
   );
 });
 

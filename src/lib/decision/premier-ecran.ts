@@ -35,10 +35,16 @@ export function contenuDuHero(input: {
 }): ContenuHero {
   if (!input.fullReport) return { kind: "commercial" };
   if (!input.project) {
-    // Le lieu se nomme s'il est connu. « ce territoire » vaut mieux qu'un nom inventé ou qu'un
-    // trou dans la phrase.
-    const lieu = input.commune ?? "ce territoire";
-    return { kind: "invite", titre: `Dites ce que vous cherchez, et ${lieu} se lira à cette aune.`, geste: DECRIRE };
+    // Le lieu se nomme s'il est connu. « Ce territoire » vaut mieux qu'un nom inventé ou qu'un
+    // trou dans la phrase. La capitale est portée par le repli : le lieu OUVRE la phrase, et un nom
+    // de commune la porte déjà.
+    const lieu = input.commune ?? "Ce territoire";
+    // LA PHRASE POSE UNE CONSÉQUENCE, ELLE NE DEMANDE PAS UN SERVICE (13/08/2026). La première
+    // version disait « Dites ce que vous cherchez, et {commune} se lira à cette aune » : « à cette
+    // aune » appartient à un registre que personne n'emploie en parlant, et « se lira » mettait le
+    // produit en sujet là où le lecteur doit l'être. Ce qui donne envie de répondre est de savoir
+    // ce que la réponse change ; le bouton, juste dessous, dit quoi faire.
+    return { kind: "invite", titre: `${lieu} ne se lit pas pareil selon ce que vous cherchez.`, geste: DECRIRE };
   }
   // `parsed` nul est exactement ce que lit `isStructured`, donc ce qui produit
   // `project_not_structured` dans le plan. On ne recalcule pas l'état, on lit la même chose.
