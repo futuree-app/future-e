@@ -226,6 +226,20 @@ export async function POST(request: Request) {
       amount: isDossier ? dossierAmountCents : Math.round(priceConfig.amountEur * 100),
       currency: "eur",
       payment_method_types: ["card"],
+      // LE REÇU STRIPE, FILET DE DERNIER RECOURS (13/08/2026).
+      //
+      // Il manquait, et son absence s'est vue à la première vente réelle : notre message de
+      // confirmation n'est jamais arrivé, et l'acheteuse n'a RIEN reçu du tout, pas même une
+      // preuve de paiement. Avec ce champ, Stripe envoie son propre reçu, par une infrastructure
+      // qui n'est pas la nôtre et qui tombe donc pour d'autres raisons que la nôtre.
+      //
+      // C'EST L'ADRESSE DU COMPTE, jamais celle de la carte : le dossier est rattaché au compte,
+      // et c'est là que le lecteur ira le lire. Payer avec la carte d'un proche est un cas
+      // ordinaire, et le reçu doit suivre l'acheteur, pas le porteur de la carte.
+      //
+      // Ce reçu ne remplace PAS la facture : il ne porte ni la mention de l'article 293 B, ni le
+      // numéro de la séquence légale. Il prouve seulement qu'un paiement a eu lieu.
+      ...(user.email ? { receipt_email: user.email } : {}),
       metadata: {
         userId: user.id,
         userEmail: user.email ?? "",

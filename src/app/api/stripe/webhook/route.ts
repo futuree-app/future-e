@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import type Stripe from "stripe";
 import { getResend } from "@/lib/resend";
+import { ouvrirEnvoi, fermerEnvoi, type EmailKind } from "@/lib/server/email-log";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { getStripe } from "@/lib/stripe";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { sanitizeDistinctId } from "@/lib/posthog-identity";
@@ -136,25 +138,39 @@ const MENTION_RENONCEMENT =
  *
  * ON NE LÈVE PAS POUR AUTANT. Lever ferait répondre 500 à Stripe, qui rejouerait l'événement ; or
  * `created` vaut alors faux et le rejeu n'enverrait rien de plus, tout en laissant l'achat marqué
- * en échec côté Stripe. Ce qui manquait n'est pas une exception, c'est une TRACE : elle est ici, et
- * elle porte de quoi renvoyer la facture à la main (le PaymentIntent et l'adresse).
+ * en échec côté Stripe. Ce qui manquait n'est pas une exception, c'est une TRACE.
+ *
+ * ELLE EST EN BASE, ET PLUS SEULEMENT DANS LES JOURNAUX (13/08/2026, second temps). Un journal ne
+ * se requête pas, expire, et ne permet aucune relance : `email_deliveries` porte l'état de chaque
+ * message, l'identifiant rendu par Resend et l'erreur du fournisseur. C'est ce qui rend possible de
+ * retrouver les envois manqués et de les rejouer. La trace ne fait jamais échouer l'envoi qu'elle
+ * observe : ses propres pannes sont avalées dans `email-log.ts`.
  */
 async function envoyerEmail(
   resend: ReturnType<typeof getResend>,
   message: Parameters<ReturnType<typeof getResend>["emails"]["send"]>[0],
-  contexte: { pi: string; quoi: string },
+  contexte: { pi: string; quoi: string; kind: EmailKind; supabase: SupabaseClient },
 ): Promise<void> {
-  const destinataire = Array.isArray(message.to) ? message.to.join(", ") : message.to;
+  const destinataire = Array.isArray(message.to) ? message.to.join(", ") : String(message.to);
+  const journal = { pi: contexte.pi, quoi: contexte.quoi, destinataire };
+  const trace = await ouvrirEnvoi(contexte.supabase, {
+    paymentIntentId: contexte.pi, kind: contexte.kind, toEmail: destinataire,
+  });
   try {
     const { data, error } = await resend.emails.send(message);
     if (error) {
-      console.error("[email] ENVOI REFUSÉ", { ...contexte, destinataire, error });
+      console.error("[email] ENVOI REFUSÉ", { ...journal, error });
+      await fermerEnvoi(contexte.supabase, trace, { erreur: `${error.name}: ${error.message}` });
       return;
     }
-    console.log("[email] envoyé", { ...contexte, destinataire, id: data?.id ?? null });
+    console.log("[email] envoyé", { ...journal, id: data?.id ?? null });
+    await fermerEnvoi(contexte.supabase, trace, { providerId: data?.id ?? null });
   } catch (error) {
     // Le SDK ne lève pas, mais le rendu d'une pièce jointe ou une panne inattendue le peuvent.
-    console.error("[email] ENVOI EN ÉCHEC", { ...contexte, destinataire, error });
+    console.error("[email] ENVOI EN ÉCHEC", { ...journal, error });
+    await fermerEnvoi(contexte.supabase, trace, {
+      erreur: error instanceof Error ? error.message : "échec inattendu",
+    });
   }
 }
 
@@ -376,7 +392,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
           <p>futur•e</p>
         `,
         attachments,
-      }, { pi: paymentIntent.id, quoi: "dossier d'adresse" });
+      }, { pi: paymentIntent.id, quoi: "dossier d'adresse", kind: "dossier", supabase: supabaseAdmin });
     }
 
     // ÉMIS À LA CRÉATION SEULEMENT. Un rejeu compterait un second achat, et son
@@ -433,7 +449,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
           <p>futur•e</p>
         `,
         attachments,
-      }, { pi: paymentIntent.id, quoi: "pack décision" });
+      }, { pi: paymentIntent.id, quoi: "pack décision", kind: "pack", supabase: supabaseAdmin });
     }
     const posthog = getPostHogClient();
     posthog.capture({
@@ -531,7 +547,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
           <p>futur•e</p>
       `,
       attachments,
-    }, { pi: paymentIntent.id, quoi: `territoire ${commune || insee || "?"}` });
+    }, { pi: paymentIntent.id, quoi: `territoire ${commune || insee || "?"}`, kind: "territoire", supabase: supabaseAdmin });
   }
 
   const posthog = getPostHogClient();
