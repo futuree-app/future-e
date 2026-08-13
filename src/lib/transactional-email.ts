@@ -17,6 +17,8 @@ type TransactionalEmailInput = {
   title: string;
   paragraphs: readonly string[];
   cta?: { label: string; href: string };
+  /** Information utile mais secondaire, par exemple la disponibilite de la facture. */
+  supportingText?: string;
   notice?: string;
 };
 
@@ -62,6 +64,10 @@ export function renderTransactionalEmail(input: TransactionalEmailInput): {
       `line-height:1.2;text-decoration:none;">${escapeHtml(input.cta.label)}</a>` +
       `</td></tr></table>`
     : "";
+  const supportingText = input.supportingText
+    ? `<p style="margin:18px 0 0;color:#686b76;font-family:Arial,Helvetica,sans-serif;` +
+      `font-size:13px;line-height:1.55;">${escapeHtml(input.supportingText)}</p>`
+    : "";
   const notice = input.notice
     ? `<tr><td style="padding:0 34px 30px;">` +
       `<div style="border-top:1px solid #dedfe4;padding-top:20px;color:#686b76;` +
@@ -101,6 +107,7 @@ export function renderTransactionalEmail(input: TransactionalEmailInput): {
                   `font-size:28px;font-weight:700;line-height:1.2;">${title}</h1>
                 ${paragraphs}
                 ${cta}
+                ${supportingText}
               </td>
             </tr>
             ${notice}
@@ -127,6 +134,7 @@ export function renderTransactionalEmail(input: TransactionalEmailInput): {
     "",
     ...input.paragraphs.flatMap((paragraph) => [paragraph, ""]),
     ...(input.cta ? [`${input.cta.label} : ${input.cta.href}`, ""] : []),
+    ...(input.supportingText ? [input.supportingText, ""] : []),
     ...(input.notice ? [input.notice, ""] : []),
     `futur•e - ${SITE_URL} - ${TRANSACTIONAL_EMAIL_REPLY_TO}`,
   ].join("\n");
@@ -134,21 +142,63 @@ export function renderTransactionalEmail(input: TransactionalEmailInput): {
   return { html, text };
 }
 
+type PurchaseConfirmationInput =
+  | { kind: "address"; addressLabel: string; invoiceAttached: boolean }
+  | { kind: "pack"; invoiceAttached: boolean }
+  | { kind: "territory"; commune: string | null; invoiceAttached: boolean };
+
 /**
- * LA MENTION DE RENONCEMENT N'ENTRE DANS L'E-MAIL QUE SI LA FACTURE MANQUE (13/08/2026).
- *
- * La troisième condition de l'article L221-28 13° est la CONFIRMATION de l'accord sur un support
- * durable. La facture la porte, et c'est sa place : un document conservé, classé, opposable. La
- * répéter dans le corps du message n'apprenait rien à qui reçoit les deux, et alourdissait de
- * quatre lignes juridiques un message de bienvenue.
- *
- * MAIS ELLE NE PEUT PAS DISPARAÎTRE TOUT À FAIT. `buildInvoiceAttachment` rend un tableau VIDE
- * quand la facture ne peut pas être émise (nom de facturation absent sur un compte ancien, ou
- * n'importe quelle erreur, qu'il avale volontairement pour ne jamais faire échouer un webhook).
- * L'e-mail part quand même. Dans ce cas précis, il devient le seul support durable disponible :
- * sans la mention, la troisième condition manquerait, et l'exception ne jouerait pas alors même que
- * l'acheteur a coché la case.
+ * LE MESSAGE POST-ACHAT EST UN MODELE, pas trois textes libres disperses dans le webhook.
+ * Le produit achete change la phrase d'ouverture et le CTA ; le remerciement, la promesse d'aide
+ * a la decision, l'invitation a repondre et la place secondaire de la facture restent identiques.
  */
-export function mentionSiFactureAbsente(attachments: { filename: string }[]): string | undefined {
-  return attachments.length ? undefined : DIGITAL_CONTENT_WITHDRAWAL_NOTICE;
+export function renderPurchaseConfirmationEmail(input: PurchaseConfirmationInput): {
+  html: string;
+  text: string;
+} {
+  let preheader: string;
+  let opening: string;
+  let decisionHelp: string;
+  let cta: { label: string; href: string };
+
+  if (input.kind === "address") {
+    preheader = `Merci pour votre commande. Le dossier de ${input.addressLabel} vous attend.`;
+    opening = `Votre dossier de ${input.addressLabel} est maintenant ouvert.`;
+    decisionHelp =
+      "Nous espérons que futur•e vous aidera à regarder ce lieu avec plus de recul, à repérer " +
+      "ce qui mérite une vérification et à avancer dans votre décision.";
+    cta = { label: "Ouvrir mon dossier", href: "https://futur-e.fr/rapport" };
+  } else if (input.kind === "pack") {
+    preheader = "Merci pour votre commande. Votre comparaison et vos rapports vous attendent.";
+    opening = "Votre comparaison complète et vos trois rapports sont maintenant ouverts.";
+    decisionHelp =
+      "Nous espérons que futur•e vous aidera à comparer les lieux avec plus de recul, à " +
+      "conserver leurs différences et à avancer dans votre décision.";
+    cta = { label: "Ouvrir ma comparaison", href: "https://futur-e.fr/rapport" };
+  } else {
+    const lieu = input.commune ? ` de ${input.commune}` : "";
+    preheader = `Merci pour votre commande. Votre rapport${lieu} vous attend.`;
+    opening = `Votre rapport${lieu} est maintenant ouvert.`;
+    decisionHelp =
+      "Nous espérons que futur•e vous aidera à mieux comprendre ce territoire, à repérer les " +
+      "points qui comptent pour votre projet et à avancer dans votre décision.";
+    cta = { label: "Ouvrir mon rapport", href: "https://futur-e.fr/rapport" };
+  }
+
+  return renderTransactionalEmail({
+    preheader,
+    eyebrow: "Votre commande",
+    title: "Merci beaucoup pour votre commande",
+    paragraphs: [
+      opening,
+      decisionHelp,
+      "Si quelque chose n'est pas clair ou si vous avez une question, nous restons disponibles. " +
+        "Répondez simplement à cet e-mail.",
+    ],
+    cta,
+    supportingText: input.invoiceAttached
+      ? "Pour vos archives, votre facture est jointe à ce message et reste disponible dans votre compte."
+      : undefined,
+    notice: input.invoiceAttached ? undefined : DIGITAL_CONTENT_WITHDRAWAL_NOTICE,
+  });
 }
