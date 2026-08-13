@@ -7,6 +7,11 @@ import { getInvoice } from "@/lib/server/invoice-store";
 import { renderInvoicePdf } from "@/lib/server/invoice-pdf";
 import { invoiceFileName } from "@/lib/invoice";
 import { ouvrirEnvoi, fermerEnvoi } from "@/lib/server/email-log";
+import {
+  renderTransactionalEmail,
+  TRANSACTIONAL_EMAIL_FROM,
+  TRANSACTIONAL_EMAIL_REPLY_TO,
+} from "@/lib/transactional-email";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -81,18 +86,25 @@ export async function POST(req: Request) {
 
   try {
     const pdf = await renderInvoicePdf(invoice);
+    const email = renderTransactionalEmail({
+      preheader: `La facture ${invoice.number} est jointe à ce message.`,
+      eyebrow: `Facture ${invoice.number}`,
+      title: "Votre facture est jointe",
+      paragraphs: [
+        "Bonjour,",
+        `Voici, en pièce jointe, votre facture ${invoice.number} pour ${invoice.designation}.`,
+        "Elle reste également disponible dans votre compte, à la rubrique Vos factures.",
+      ],
+      cta: { label: "Ouvrir mon compte", href: "https://futur-e.fr/compte" },
+    });
     const { data, error } = await getResend().emails.send({
-      from: "futur•e <hello@futur-e.fr>",
+      from: TRANSACTIONAL_EMAIL_FROM,
+      replyTo: TRANSACTIONAL_EMAIL_REPLY_TO,
       to: destinataire,
       subject: `Votre facture futur•e ${invoice.number}`,
       // Le message dit ce qu'il est : un RENVOI. Prétendre à une première émission ferait douter
       // quelqu'un qui aurait finalement reçu les deux.
-      html: `
-        <p>Bonjour,</p>
-        <p>Voici, en pièce jointe, votre facture ${invoice.number} pour ${invoice.designation}.</p>
-        <p>Elle est également disponible à tout moment dans votre espace, à la rubrique « Vos factures ».</p>
-        <p>futur•e</p>
-      `,
+      ...email,
       attachments: [{ filename: invoiceFileName(invoice.number), content: pdf }],
     });
 

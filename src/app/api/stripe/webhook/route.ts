@@ -16,6 +16,12 @@ import { invoiceFileName, type InvoiceProductType } from "@/lib/invoice";
 import { after } from "next/server";
 import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
 import { normalizeUserProject } from "@/lib/user-project";
+import {
+  DIGITAL_CONTENT_WITHDRAWAL_NOTICE,
+  renderTransactionalEmail,
+  TRANSACTIONAL_EMAIL_FROM,
+  TRANSACTIONAL_EMAIL_REPLY_TO,
+} from "@/lib/transactional-email";
 
 export const runtime = "nodejs";
 
@@ -104,13 +110,6 @@ function getEntitlements() {
  * L'e-mail, lui, part dans tous les cas, et il qualifie comme support durable : le client peut le
  * stocker, s'y reporter et le reproduire à l'identique. La mention vit donc aux deux endroits.
  */
-const MENTION_RENONCEMENT =
-  "<p style=\"color:#555;font-size:13px\">Vous avez demandé la mise à disposition immédiate de " +
-  "votre dossier et reconnu perdre votre droit de rétractation de quatorze jours dès cette mise à " +
-  "disposition, comme le prévoit l'article L221-28 du code de la consommation. Ce message vaut " +
-  "confirmation de cet accord sur support durable. Si le dossier ne contient pas ce qui était " +
-  "annoncé, écrivez-nous : le remboursement est accordé.</p>";
-
 // ════════════════════════════════════════════════════════════════════════════
 // LA FACTURE, ÉMISE À L'ENCAISSEMENT ET JOINTE À L'E-MAIL DE CONFIRMATION.
 //
@@ -380,17 +379,27 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
       const attachments = await buildInvoiceAttachment(
         paymentIntent, "address-dossier", intent.address_label,
       );
+      const email = renderTransactionalEmail({
+        preheader: `Le dossier de ${intent.address_label} est disponible dans votre espace.`,
+        eyebrow: "Dossier d'adresse",
+        title: "Votre dossier est ouvert",
+        paragraphs: [
+          "Merci pour votre confiance.",
+          `Le dossier de ${intent.address_label} est ouvert. Vous y retrouverez le territoire, ` +
+            "ce qui entoure l'adresse et ce que dit le logement.",
+          ...(attachments.length
+            ? ["Votre facture est jointe à ce message et reste disponible dans votre compte."]
+            : []),
+        ],
+        cta: { label: "Ouvrir mon dossier", href: "https://futur-e.fr/rapport" },
+        notice: DIGITAL_CONTENT_WITHDRAWAL_NOTICE,
+      });
       await envoyerEmail(resend, {
-        from: "futur•e <hello@futur-e.fr>",
+        from: TRANSACTIONAL_EMAIL_FROM,
+        replyTo: TRANSACTIONAL_EMAIL_REPLY_TO,
         to: userEmail,
         subject: "Votre dossier futur•e est ouvert",
-        html: `
-          <p>Merci pour votre confiance.</p>
-          <p>Le dossier de ${intent.address_label} est ouvert : vous le retrouverez dans votre espace, avec la commune, ce qui entoure l'adresse et ce que dit le logement.</p>
-          ${attachments.length ? "<p>Votre facture est jointe à ce message. Vous la retrouverez aussi dans votre compte.</p>" : ""}
-          ${MENTION_RENONCEMENT}
-          <p>futur•e</p>
-        `,
+        ...email,
         attachments,
       }, { pi: paymentIntent.id, quoi: "dossier d'adresse", kind: "dossier", supabase: supabaseAdmin });
     }
@@ -437,17 +446,26 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     );
     if (userEmail) {
       const attachments = await buildInvoiceAttachment(paymentIntent, "pack-decision", null);
+      const email = renderTransactionalEmail({
+        preheader: "Votre comparaison et vos trois rapports sont disponibles.",
+        eyebrow: "Pack Décision",
+        title: "Votre comparaison est ouverte",
+        paragraphs: [
+          "Merci pour votre confiance.",
+          "Votre comparaison complète et vos trois rapports sont accessibles depuis votre espace.",
+          ...(attachments.length
+            ? ["Votre facture est jointe à ce message et reste disponible dans votre compte."]
+            : []),
+        ],
+        cta: { label: "Ouvrir ma comparaison", href: "https://futur-e.fr/rapport" },
+        notice: DIGITAL_CONTENT_WITHDRAWAL_NOTICE,
+      });
       await envoyerEmail(resend, {
-        from: "futur•e <hello@futur-e.fr>",
+        from: TRANSACTIONAL_EMAIL_FROM,
+        replyTo: TRANSACTIONAL_EMAIL_REPLY_TO,
         to: userEmail,
         subject: "Votre Pack Décision futur•e est débloqué",
-        html: `
-          <p>Merci pour votre confiance.</p>
-          <p>Votre comparaison complète et vos trois rapports sont accessibles depuis votre espace.</p>
-          ${attachments.length ? "<p>Votre facture est jointe à ce message. Vous la retrouverez aussi dans votre compte.</p>" : ""}
-          ${MENTION_RENONCEMENT}
-          <p>futur•e</p>
-        `,
+        ...email,
         attachments,
       }, { pi: paymentIntent.id, quoi: "pack décision", kind: "pack", supabase: supabaseAdmin });
     }
@@ -535,17 +553,26 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
       paymentIntent, "one-shot", commune || null,
     );
     const lieu = commune ? ` de ${commune}` : "";
+    const email = renderTransactionalEmail({
+      preheader: `Votre rapport${lieu} est disponible dans votre espace.`,
+      eyebrow: "Rapport Territoire",
+      title: "Votre rapport est ouvert",
+      paragraphs: [
+        "Merci pour votre confiance.",
+        `Votre rapport${lieu} est ouvert dès maintenant dans votre espace.`,
+        ...(attachments.length
+          ? ["Votre facture est jointe à ce message et reste disponible dans votre compte."]
+          : []),
+      ],
+      cta: { label: "Ouvrir mon rapport", href: "https://futur-e.fr/rapport" },
+      notice: DIGITAL_CONTENT_WITHDRAWAL_NOTICE,
+    });
     await envoyerEmail(resend, {
-      from: "futur•e <hello@futur-e.fr>",
+      from: TRANSACTIONAL_EMAIL_FROM,
+      replyTo: TRANSACTIONAL_EMAIL_REPLY_TO,
       to: userEmail,
       subject: "Votre rapport futur•e est ouvert",
-      html: `
-        <p>Merci pour votre confiance.</p>
-        <p>Votre rapport${lieu} est ouvert dès maintenant : il se lit dans votre espace, sur futur-e.fr.</p>
-        ${attachments.length ? "<p>Votre facture est jointe à ce message. Vous la retrouverez aussi dans votre compte.</p>" : ""}
-        ${MENTION_RENONCEMENT}
-          <p>futur•e</p>
-      `,
+      ...email,
       attachments,
     }, { pi: paymentIntent.id, quoi: `territoire ${commune || insee || "?"}`, kind: "territoire", supabase: supabaseAdmin });
   }
