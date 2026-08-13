@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const STORAGE_KEY = "futuree-consent";
 
@@ -18,6 +18,7 @@ function updateGoogleConsent(value: ConsentValue) {
 
 export function ConsentBanner() {
   const [visible, setVisible] = useState(false);
+  const banniere = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     try {
@@ -39,6 +40,35 @@ export function ConsentBanner() {
     return () => window.removeEventListener("futuree:show-consent", handler);
   }, []);
 
+  // ════════════════════════════════════════════════════════════════════════════════════════════
+  // LE BANDEAU DIT SA HAUTEUR AU RESTE DE LA PAGE (13/08/2026).
+  //
+  // Il est fixé en bas, pleine largeur, en `z-index: 9999`. Tout ce qui flotte au-dessus du contenu
+  // passait donc dessous : le panneau d'AskFuture ouvert (`z-index: 100`) devenait illisible tant
+  // que le consentement n'avait pas été donné, c'est-à-dire exactement à la PREMIÈRE visite.
+  //
+  // La correction ne touche à aucun `z-index` : le consentement doit rester au-dessus, on ne le
+  // recouvre pas pour faire de la place. Le bandeau publie sa hauteur, et ce qui flotte s'en
+  // écarte. La mesure est observée, parce que la hauteur change au retour à la ligne des boutons
+  // sur un écran étroit.
+  useEffect(() => {
+    const racine = document.documentElement;
+    if (!visible || !banniere.current) {
+      racine.style.setProperty("--consent-h", "0px");
+      return;
+    }
+    const el = banniere.current;
+    const mesurer = () => racine.style.setProperty("--consent-h", `${Math.round(el.getBoundingClientRect().height)}px`);
+    mesurer();
+    const ro = new ResizeObserver(mesurer);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      // Au démontage comme au consentement : ce qui flotte reprend sa place basse.
+      racine.style.setProperty("--consent-h", "0px");
+    };
+  }, [visible]);
+
   function handleConsent(value: ConsentValue) {
     try {
       localStorage.setItem(STORAGE_KEY, value);
@@ -51,6 +81,7 @@ export function ConsentBanner() {
 
   return (
     <div
+      ref={banniere}
       style={{
         position: "fixed",
         bottom: 0,

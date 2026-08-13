@@ -66,13 +66,25 @@ function ProjectEyebrow({ label }: { label: string }) {
 }
 
 export function ProjectSummaryCard({
-  initial, relation = null,
+  initial, relation = null, ouvertDemblee = false,
 }: {
   initial: UserProject | null;
   relation?: RelationCommune | null;
+  /**
+   * L'ÉDITEUR EST DÉJÀ OUVERT À L'ARRIVÉE (13/08/2026).
+   *
+   * Dans l'état « payant, aucun projet », le haut de page portait déjà un bouton « Décrire mon
+   * projet » sous son titre, et cette carte en affichait un SECOND, identique, quelques
+   * centimètres plus bas : le lecteur voyait deux fois le même appel, et le premier ne menait qu'au
+   * second. Le geste du hero dépose maintenant sur un formulaire ouvert, prêt à recevoir le texte.
+   *
+   * `initial` doit être nul pour que cela s'applique : rouvrir d'office l'éditeur d'un projet DÉJÀ
+   * décrit remplacerait sa lecture par un formulaire, et ferait perdre la reformulation de vue.
+   */
+  ouvertDemblee?: boolean;
 }) {
   const [project, setProject] = useState<UserProject | null>(initial);
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(ouvertDemblee && !initial);
   const [text, setText] = useState(initial?.rawText ?? "");
   const [posture, setPosture] = useState<ProjectPosture | null>(initial?.posture ?? null);
   const [intent, setIntent] = useState<ProjectIntent | null>(initial?.intent ?? null);

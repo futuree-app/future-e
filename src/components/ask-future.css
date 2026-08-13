@@ -6,7 +6,11 @@
 
 .ask-future-container {
   position: fixed;
-  bottom: 24px;
+  /* AU-DESSUS DU BANDEAU COOKIES, JAMAIS DESSOUS (13/08/2026). Le consentement est fixé en bas en
+     `z-index: 9999` : le panneau ouvert, en 100, passait dessous et devenait illisible à la
+     PREMIÈRE visite, la seule où le bandeau s'affiche. On ne recouvre pas le consentement, on
+     s'en écarte : `--consent-h` est publiée par le bandeau lui-même, et vaut 0 sans lui. */
+  bottom: calc(24px + var(--consent-h, 0px));
   right: 24px;
   z-index: 100;
   font-family: var(--font-sans);
@@ -444,7 +448,7 @@ body[data-drawer-open] .ask-future-container:not(.ask-future-container--inline) 
 /* ── Mobile ──────────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
   .ask-future-container {
-    bottom: 16px;
+    bottom: calc(16px + var(--consent-h, 0px));
     right: 16px;
     /* PLUS DE `left` EN ÉTAT FERMÉ (12/08/2026) : la barre traversait l'écran et recouvrait
        l'entrée du verdict, en concurrence avec le bandeau cookies. Fermé, AskFuture redevient une
