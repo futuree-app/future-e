@@ -25,18 +25,22 @@ import type { UserProject } from "@/lib/user-project";
 import type { PermisSnapshot } from "@/lib/logement-autour-types";
 
 export async function DossierAvecLogement({
-  project, address, savedDpe, dpeChoisiLe, permis, communeFacts, communeDossier, logementLink, insee,
+  project, address, savedDpe, selectionDpeChangeeLe, permis, communeFacts, communeDossier, logementLink, insee,
   scopeKey, hard, userId, espacement, titre,
 }: {
   project: UserProject;
   address: ResolvedAddress;
   savedDpe: DpeRecord | null;
   /**
-   * QUAND le diagnostic a été choisi (`selected_dpe_at`), ou `null` si aucun ne l'a été. C'est ce
-   * qui permet de savoir si l'artefact figé a pu le voir : il est figé au webhook, où le choix
-   * n'existe pas encore. Voir `artefactPerimeParLeDpe`.
+   * QUAND LA SÉLECTION DE DIAGNOSTIC A CHANGÉ pour la dernière fois (`dpe_selection_at`), ou `null`
+   * si elle n'a jamais bougé. C'est ce qui permet de savoir si l'artefact figé a pu voir l'état
+   * courant : il est figé au webhook, où aucun choix n'existe encore.
+   *
+   * C'est la date du GESTE, et non `selected_dpe_at`, qui date le diagnostic figé et s'efface avec
+   * lui : sinon, RETIRER un diagnostic mal désigné laisserait servir la conclusion écrite avec lui.
+   * Voir `artefactPerimeParLeDpe`.
    */
-  dpeChoisiLe: string | null;
+  selectionDpeChangeeLe: string | null;
   /**
    * LE REGISTRE DES AUTORISATIONS, gelé à l'analyse. `null` veut dire NON CONSULTÉ (dossier
    * antérieur au 01/08/2026, ou API muette), et la règle rend alors `uncertain` : jamais une
@@ -82,7 +86,7 @@ export async function DossierAvecLogement({
   // LA SEULE PIÈCE QUI PÉRIME UNE VERSION VENDUE : le diagnostic, parce qu'il arrive APRÈS elle.
   // L'artefact est figé au webhook, quand le client n'a pas encore pu le choisir. Sans cette
   // vérification, la carte de l'étiquette énergétique n'entrait dans AUCUN dossier vendu.
-  const perime = artefactPerimeParLeDpe(stocke, dpeChoisiLe);
+  const perime = artefactPerimeParLeDpe(stocke, selectionDpeChangeeLe);
 
   // L'ASSEMBLAGE N'EST DEMANDÉ QUE S'IL SERVIRA. Un artefact prêt évite les huit lectures externes
   // et le moteur entier : c'est ce qui rend la relecture reproductible, et accessoirement immédiate.

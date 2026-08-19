@@ -104,6 +104,11 @@ export default function LogementModule({
   >("loading");
   const [selectedDpe, setSelectedDpe] = useState<DpeRecord | null>(null);
   const [dpeCandidates, setDpeCandidates] = useState<DpeRecord[]>([]);
+  // L'ÉCHEC D'UN GESTE DU LECTEUR SE VOIT. La sélection partait en `void persistDpe(...)`, sans
+  // attente et sans lecture du résultat : l'écran affichait un diagnostic attribué que la base
+  // n'avait pas reçu, et le rechargement suivant rendait l'ancien état sans explication.
+  const [dpeBusy, setDpeBusy] = useState(false);
+  const [dpeError, setDpeError] = useState<string | null>(null);
   // `logement_same_commune_multi` VIVAIT ICI, et il a été retiré. Il comptait les adresses
   // distinctes via un useRef (donc par SESSION) et une Map par INSEE (donc par COMMUNE) : il
   // ratait exactement les deux façons dont un projet réel compare des adresses, le multi-session
@@ -143,12 +148,20 @@ export default function LogementModule({
       const candidates = payload.dpeCandidates ?? [];
       setDpeCandidates(candidates);
 
-      // Un dossier dont le diagnostic est déjà attribué le RESTAURE. Un dossier neuf (statut
-      // `pending`) dérive l'attribution pour la première fois, ce qui est le seul moment où elle
-      // se calcule.
-      if (row.dpe_selection_status !== "pending") {
+      // Un dossier dont le diagnostic est déjà attribué le RESTAURE. Un dossier neuf dérive
+      // l'attribution pour la première fois, ce qui est le seul moment où elle se calcule.
+      //
+      // « NEUF » SE LIT SUR `dpe_selection_at`, JAMAIS SUR LE SEUL STATUT `pending` (19/08/2026).
+      // Le retour arrière ramène la ligne à `pending`, qui est bien l'état « rien n'est attribué ».
+      // Mais `dpeAttributionStatus` rend `auto_confirmed` pour une maison à candidat unique : sans
+      // cette condition, quelqu'un qui vient de dire « ce n'est pas le bon diagnostic » se voyait
+      // réattribuer le même au rechargement suivant, sans un mot. Le geste du lecteur n'est pas
+      // une absence de donnée à combler, et la date du geste est ce qui les distingue.
+      if (row.dpe_selection_status !== "pending" || row.dpe_selection_at != null) {
         setSelectedDpe(row.selected_dpe_snapshot);
         setDpeStatus(RUNTIME_DPE_STATUS[row.dpe_selection_status] ?? "not_found");
+        // `pending` restauré (donc un retrait volontaire) rouvre la sélection sans rien attribuer :
+        // `RUNTIME_DPE_STATUS` le rend déjà en `selection_required`.
       } else {
         const attribution = dpeAttributionStatus(candidates, payload.banFeatureType ?? null);
         if (attribution.status === "not_found") {
@@ -194,20 +207,55 @@ export default function LogementModule({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Persiste le choix DPE dans le dossier (échec silencieux à l'UI ; cohérence rétablie au
-  // prochain chargement). Le serveur vérifie que le diagnostic appartient bien à cette adresse.
+  /**
+   * Persiste une sélection de diagnostic. Le corps ne porte QUE le numéro : le serveur relit la
+   * fiche à la source et fige la sienne, si bien qu'aucune valeur venue du navigateur n'entre dans
+   * un dossier payant.
+   *
+   * Rend `true` seulement sur confirmation du serveur.
+   */
   async function persistDpe(
-    status: "auto_confirmed" | "user_confirmed" | "not_in_list",
+    status: "auto_confirmed" | "user_confirmed" | "not_in_list" | "pending",
     dpe: DpeRecord | null,
-  ) {
-    if (!dossier) return;
+  ): Promise<boolean> {
+    if (!dossier) return false;
     try {
-      await fetch("/api/logement-dpe", {
+      const res = await fetch("/api/logement-dpe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dossierId: dossier.id, status, dpe }),
+        body: JSON.stringify({ dossierId: dossier.id, status, dpeId: dpe?.id_dpe ?? null }),
       });
-    } catch { /* échec silencieux */ }
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * LE GESTE DU LECTEUR SUR SON DIAGNOSTIC, dans les deux sens : désigner, corriger, retirer.
+   *
+   * Optimiste à l'affichage, honnête à l'échec. L'état antérieur est gardé et rétabli si le serveur
+   * refuse, avec un message : le diagnostic gouverne l'étiquette, les coûts et les échéances d'un
+   * rapport acheté, et laisser croire qu'il est enregistré quand il ne l'est pas est le seul défaut
+   * qu'on ne peut pas rattraper au chargement suivant.
+   */
+  async function appliquerSelection(
+    status: "user_confirmed" | "not_in_list" | "pending",
+    dpe: DpeRecord | null,
+  ) {
+    const statutAvant = dpeStatus;
+    const dpeAvant = selectedDpe;
+    setDpeBusy(true);
+    setDpeError(null);
+    setSelectedDpe(dpe);
+    setDpeStatus(RUNTIME_DPE_STATUS[status]);
+    const ok = await persistDpe(status, dpe);
+    if (!ok) {
+      setSelectedDpe(dpeAvant);
+      setDpeStatus(statutAvant);
+      setDpeError("Ce choix n'a pas pu être enregistré. Vérifiez votre connexion et réessayez.");
+    }
+    setDpeBusy(false);
   }
 
   // Le DPE « du logement » = uniquement le choix attribué (jamais un candidat non confirmé).
@@ -426,9 +474,14 @@ export default function LogementModule({
               dpe={dpe}
               audit={result.audit}
               candidates={dpeCandidates}
-              onPick={(d) => { setSelectedDpe(d); setDpeStatus("confirmed"); void persistDpe("user_confirmed", d); }}
-              onNotInList={() => { setSelectedDpe(null); setDpeStatus("rejected"); void persistDpe("not_in_list", null); }}
-              onReselect={() => setDpeStatus("selection_required")}
+              busy={dpeBusy}
+              erreur={dpeError}
+              onPick={(d) => { void appliquerSelection("user_confirmed", d); }}
+              onNotInList={() => { void appliquerSelection("not_in_list", null); }}
+              // LE RETOUR EN ARRIÈRE S'ÉCRIT, LUI AUSSI. Il ne faisait que remettre l'état local :
+              // la ligne gardait son ancien statut, et le diagnostic corrigé revenait au
+              // rechargement. `pending` est le seul statut qui rouvre vraiment la sélection.
+              onReselect={() => { void appliquerSelection("pending", null); }}
             />
             </div>
 

@@ -23,6 +23,7 @@ export type AddressDossierPatch = Partial<
     | "selected_dpe_id"
     | "selected_dpe_snapshot"
     | "selected_dpe_at"
+    | "dpe_selection_at"
     | "synthesis_text"
     | "synthesis_fact_hash"
     | "synthesis_generated_at"

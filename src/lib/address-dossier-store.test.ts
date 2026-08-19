@@ -133,3 +133,22 @@ test("buildDpeSelectionFields: not_in_list -> aucun DPE figé", () => {
   assert.equal(out.selected_dpe_snapshot, null);
   assert.equal(out.selected_dpe_at, null);
 });
+
+// ── LA DATE DU CHANGEMENT SURVIT AU RETRAIT ──────────────────────────────────────────────────
+// `selected_dpe_at` date le diagnostic FIGÉ : il s'efface avec lui, et c'est juste. Mais c'est
+// cette colonne que lisait la péremption des artefacts, si bien que retirer un mauvais diagnostic
+// remettait la date à null et laissait servir une conclusion écrite AVEC lui. Un retrait est un
+// changement matériel de la matière lue ; il se date comme les autres.
+test("buildDpeSelectionFields: tout changement de sélection est daté, retrait compris", () => {
+  const t = "2026-07-03T10:00:00.000Z";
+  assert.equal(buildDpeSelectionFields("user_confirmed", dpe, t).dpe_selection_at, t);
+  assert.equal(buildDpeSelectionFields("auto_confirmed", dpe, t).dpe_selection_at, t);
+  assert.equal(buildDpeSelectionFields("not_in_list", null, t).dpe_selection_at, t);
+  assert.equal(buildDpeSelectionFields("not_found", null, t).dpe_selection_at, t);
+  // Le retour à l'état non attribué EST le cas qui manquait : plus aucun diagnostic figé, et
+  // pourtant l'artefact généré avec l'ancien doit se périmer.
+  const retrait = buildDpeSelectionFields("pending", null, t);
+  assert.equal(retrait.selected_dpe_snapshot, null);
+  assert.equal(retrait.selected_dpe_at, null);
+  assert.equal(retrait.dpe_selection_at, t);
+});

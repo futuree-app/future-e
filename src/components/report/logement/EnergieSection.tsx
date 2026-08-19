@@ -10,14 +10,37 @@ import { DpeBadge, Block, DPE_LABELS } from "./kit";
 export type DpeUiStatus =
   | "loading" | "not_found" | "selection_required" | "auto_confirmed" | "confirmed" | "rejected" | "error";
 
+/** Le lien discret qui rouvre la sélection. Le libellé suit QUI a attribué le diagnostic. */
+function LienReprise({ label, busy, onClick }: { label: string; busy: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={busy}
+      style={{
+        color: "var(--accent-dim, #7a6e60)", textDecoration: "underline", background: "none",
+        border: "none", cursor: busy ? "default" : "pointer", padding: 0, font: "inherit",
+        opacity: busy ? 0.5 : 1,
+      }}
+    >
+      {busy ? "Enregistrement…" : label}
+    </button>
+  );
+}
+
 export function EnergieSection({
-  dpeStatus, dpe, audit, candidates, onPick, onNotInList, onReselect,
+  dpeStatus, dpe, audit, candidates, busy = false, erreur = null,
+  onPick, onNotInList, onReselect,
 }: {
   dpeStatus: DpeUiStatus;
   dpe: DpeRecord | null;
   audit: LogementReport["audit"];
   /** Tous les diagnostics rattachés à l'adresse, attribués ou non. */
   candidates: DpeRecord[];
+  /** Une écriture de sélection est en cours : les gestes attendent sa réponse. */
+  busy?: boolean;
+  /** Le serveur a refusé le dernier geste, et l'écran est revenu à l'état d'avant. */
+  erreur?: string | null;
   onPick: (d: DpeRecord) => void;
   onNotInList: () => void;
   onReselect: () => void;
@@ -38,6 +61,7 @@ export function EnergieSection({
     return (
       <ReportSection eyebrow="Diagnostics à cette adresse" tone="orange">
         <GlassCard>
+          {erreur ? <p style={{ fontSize: 13.5, color: "var(--danger, #c0563a)", lineHeight: 1.6, margin: "0 0 14px" }}>{erreur}</p> : null}
           {candidates.length > 0 ? (
             <AddressDiagnosticsBlock
               candidates={candidates}
@@ -70,12 +94,22 @@ export function EnergieSection({
             </div>
           </div>
         </div>
-        {dpeStatus === "auto_confirmed" && (
-          <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>
-            Un DPE a été retrouvé pour cette adresse.{" "}
-            <button type="button" onClick={onReselect} style={{ color: "var(--accent-dim, #7a6e60)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0, font: "inherit" }}>Ce n&apos;est pas le bon diagnostic</button>.
-          </p>
-        )}
+        {/* LA REPRISE EXISTE DANS TOUS LES ÉTATS ATTRIBUÉS (19/08/2026). Elle n'était offerte que
+            pour une attribution AUTOMATIQUE : dès que le lecteur avait désigné lui-même son
+            diagnostic, l'écran ne rendait plus aucune sortie, comme si un choix humain ne pouvait
+            pas être une erreur de clic. C'est pourtant le seul geste de cet écran qui en produise,
+            puisque les lignes d'un immeuble se ressemblent. */}
+        <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>
+          {dpeStatus === "auto_confirmed"
+            ? "Un DPE a été retrouvé pour cette adresse. "
+            : "Vous avez désigné ce diagnostic parmi ceux de cette adresse. "}
+          <LienReprise
+            busy={busy}
+            onClick={onReselect}
+            label={dpeStatus === "auto_confirmed" ? "Ce n'est pas le bon diagnostic" : "Changer de diagnostic"}
+          />.
+        </p>
+        {erreur ? <p style={{ fontSize: 13, color: "var(--danger, #c0563a)", lineHeight: 1.55, margin: 0 }}>{erreur}</p> : null}
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px,1fr))", gap: 14 }}>
           {dpe.conso_ep_m2 != null && <Block label="Consommation" value={`${dpe.conso_ep_m2} kWh EP/m²/an`} />}

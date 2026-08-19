@@ -38,6 +38,11 @@ export type AddressDossierRow = {
   selected_dpe_id: string | null;
   selected_dpe_snapshot: DpeRecord | null;
   selected_dpe_at: string | null;
+  // QUAND LA SÉLECTION A CHANGÉ, quelle que soit sa direction. Distincte de `selected_dpe_at`,
+  // qui date le diagnostic FIGÉ et s'efface avec lui. Cette colonne-ci ne s'efface jamais : elle
+  // est ce que lit la péremption des artefacts, et un RETRAIT de diagnostic doit périmer une
+  // conclusion écrite avec lui, exactement comme un remplacement.
+  dpe_selection_at: string | null;
   // Date de NAISSANCE du dossier, ce que le sélecteur affiche pour distinguer deux biens d'un même
   // immeuble. updated_at bouge à chaque écriture technique (synthèse, posture, rehydratation) et
   // purchased_at est nul pour un dossier administratif : ni l'un ni l'autre ne répond à « lequel
@@ -68,13 +73,17 @@ export function buildDpeSelectionFields(
   status: DpeSelectionStatus,
   dpe: DpeRecord | null,
   nowIso: string,
-): Pick<AddressDossierRow, "dpe_selection_status" | "selected_dpe_id" | "selected_dpe_snapshot" | "selected_dpe_at"> {
+): Pick<AddressDossierRow, "dpe_selection_status" | "selected_dpe_id" | "selected_dpe_snapshot" | "selected_dpe_at" | "dpe_selection_at"> {
   const keep = status === "auto_confirmed" || status === "user_confirmed";
   return {
     dpe_selection_status: status,
     selected_dpe_id: keep ? (dpe?.id_dpe ?? null) : null,
     selected_dpe_snapshot: keep ? dpe : null,
     selected_dpe_at: keep ? nowIso : null,
+    // DATÉ DANS TOUS LES CAS, y compris `pending` et `not_in_list`. La date du diagnostic figé
+    // s'efface avec lui ; la date du GESTE, non. Sans cette distinction, corriger une erreur en
+    // retirant le diagnostic laissait servir l'artefact rédigé avec le mauvais.
+    dpe_selection_at: nowIso,
   };
 }
 

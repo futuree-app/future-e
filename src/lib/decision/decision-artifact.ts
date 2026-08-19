@@ -385,19 +385,27 @@ export function dossierAServir<D>(
  * artefact ne peut pas avoir vu une pièce déposée après lui. La règle couvre du même coup la
  * CORRECTION d'un diagnostic, qui repose une date plus récente.
  *
- * Les statuts sans diagnostic (`not_in_list`, `not_found`) ne posent pas de date : ils ne changent
- * pas la matière (`savedDpe` reste nul) et ne périment donc rien.
+ * ── LA DATE LUE EST CELLE DU GESTE, JAMAIS CELLE DU DIAGNOSTIC (19/08/2026) ──────────────────
+ * Cette fonction lisait `selected_dpe_at`, la date du diagnostic FIGÉ, et son commentaire affirmait
+ * que les statuts sans diagnostic « ne changent pas la matière et ne périment donc rien ». C'était
+ * vrai tant qu'on ne pouvait aller que de « rien » vers « un diagnostic ». Depuis que le lecteur
+ * peut RETIRER un diagnostic mal désigné, ça ne l'est plus : `selected_dpe_at` repasse à null, plus
+ * rien ne se périme, et le dossier continue de servir une conclusion écrite à partir du diagnostic
+ * qu'il vient de retirer. Exactement l'erreur qu'il cherchait à corriger, rendue invisible.
+ *
+ * Elle lit donc `dpe_selection_at`, que `buildDpeSelectionFields` pose à CHAQUE changement de
+ * sélection, dans quelque direction que ce soit : ajout, remplacement, retrait.
  *
  * ── UNE DATE ILLISIBLE NE PÉRIME JAMAIS ──────────────────────────────────────────────────────
  * L'inverse ferait régénérer à chaque ouverture, sans fin et sans trace, un dossier dont une date
  * est corrompue.
  */
 export function artefactPerimeParLeDpe(
-  stocke: StoredArtifact | null, dpeChoisiLe: string | null,
+  stocke: StoredArtifact | null, selectionChangeeLe: string | null,
 ): boolean {
-  if (!stocke?.artifact || !dpeChoisiLe) return false;
+  if (!stocke?.artifact || !selectionChangeeLe) return false;
   const fige = Date.parse(stocke.artifact.generatedAt);
-  const choisi = Date.parse(dpeChoisiLe);
-  if (Number.isNaN(fige) || Number.isNaN(choisi)) return false;
-  return choisi > fige;
+  const change = Date.parse(selectionChangeeLe);
+  if (Number.isNaN(fige) || Number.isNaN(change)) return false;
+  return change > fige;
 }

@@ -179,6 +179,20 @@ test("le DPE choisi APRÈS le figement périme l'artefact", () => {
   assert.equal(artefactPerimeParLeDpe(fige, "2026-08-06T11:00:00.000Z"), true);
 });
 
+// Le cas qui manquait, et il vient d'un usage réel : quelqu'un désigne le mauvais diagnostic, s'en
+// aperçoit, et le retire. La sélection ne porte alors plus AUCUN diagnostic, et c'est précisément
+// pour ça que la règle a failli le rater : elle lisait la date du diagnostic figé, qui s'efface avec
+// lui. La conclusion vendue, elle, a bien été rédigée avec le mauvais.
+test("le RETRAIT d'un diagnostic périme l'artefact rédigé avec lui", () => {
+  const fige = {
+    servedVersion: 1, headVersion: 1, headStatus: "ready" as const, headCreatedAt: null,
+    generatedAt: "2026-08-05T09:30:00.000Z",
+    artifact: { generatedAt: "2026-08-05T09:30:00.000Z" },
+  };
+  // `dpe_selection_at` du dossier après le retrait : le geste est daté, le diagnostic n'existe plus.
+  assert.equal(artefactPerimeParLeDpe(fige, "2026-08-07T14:00:00.000Z"), true);
+});
+
 test("le DPE choisi AVANT le figement n'y change rien", () => {
   const fige = {
     servedVersion: 1, headVersion: 1, headStatus: "ready" as const, headCreatedAt: null,
