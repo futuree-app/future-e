@@ -141,3 +141,35 @@ test("plusieurs phrases honnêtes d'affilée passent, quel que soit leur ordre",
     true,
   );
 });
+
+// ── L'ABSENCE DE SINISTRE INDEMNISÉ (17/08/2026, JL-13) ──────────────────────────────────────
+
+test("raconter une absence de sinistre est refusé, y compris sous ses formes tranquilles", () => {
+  for (const texte of [
+    "Aucun sinistre d'inondation n'a été indemnisé dans cette commune.",
+    "La commune n'a jamais été inondée sur la période couverte.",
+    "Pas de sinistre recensé : le secteur est resté épargné par les inondations.",
+    "Aucun arrêté de catastrophe naturelle n'a concerné la commune.",
+  ]) {
+    const v = validateAssertions(texte);
+    assert.equal(v.ok, false, `devrait être refusé : ${texte}`);
+    assert.equal(v.ok === false && v.famille, "absence_sinistre_conclue");
+  }
+});
+
+test("une lacune assumée sur la sinistralité passe", () => {
+  // Le désamorçage reste borné à la phrase, comme pour les autres familles.
+  assert.equal(
+    validateAssertions("La fréquence des sinistres indemnisés n'a pas pu être établie dans cette commune.").ok,
+    true,
+  );
+});
+
+test("la correction envoyée au modèle nomme la période et l'échantillon", () => {
+  const v = validateAssertions("Aucun sinistre n'a été indemnisé ici.");
+  assert.equal(v.ok, false);
+  const c = correctionPourAssertions(v as Extract<typeof v, { ok: false }>);
+  assert.match(c, /1995-2021/);
+  assert.match(c, /échantillon/);
+  assert.match(c, /catastrophe naturelle/);
+});

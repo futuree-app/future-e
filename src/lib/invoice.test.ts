@@ -2,7 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   designationFor, formatEuro, formatDateFr, normalizeBuyerName,
-  invoiceFileName, sellerSnapshot,
+  invoiceCorrectionNotice, invoiceDocumentTitle, invoiceFileName, invoiceSettlementNotice,
+  sellerSnapshot, type Invoice,
 } from "./invoice.ts";
 
 // ── Désignation ────────────────────────────────────────────────────────────────────────────
@@ -147,4 +148,47 @@ test("fichier : porte le numéro et aucune espace", () => {
   const f = invoiceFileName("FE-2026-0001");
   assert.equal(f, "futur-e-facture-FE-2026-0001.pdf");
   assert.equal(/\s/.test(f), false);
+});
+
+// ── Facture rectificative ─────────────────────────────────────────────────────────────────
+
+const FACTURE_RECTIFICATIVE: Invoice = {
+  number: "FE-2026-0006",
+  issuedAt: "2026-08-18T08:00:00.000Z",
+  paymentReceivedAt: "2026-08-17T15:23:48.000Z",
+  buyerName: "Brache Dominique",
+  buyerEmail: "client@example.test",
+  seller: sellerSnapshot(),
+  designation: "Dossier d'analyse d'une adresse — 204 Route de Catussou 47300 Villeneuve-sur-Lot (Tarif de lancement)",
+  amountCents: 1900,
+  vatMention: "TVA non applicable, art. 293 B du CGI",
+  correction: {
+    correctsNumber: "FE-2026-0005",
+    correctsIssuedAt: "2026-08-17T15:24:00.000Z",
+    reason: "Échange d'adresse demandé par le client",
+  },
+};
+
+test("rectificative : le document dit quelle facture il annule et remplace", () => {
+  assert.equal(invoiceDocumentTitle(FACTURE_RECTIFICATIVE), "FACTURE RECTIFICATIVE");
+  assert.equal(
+    invoiceCorrectionNotice(FACTURE_RECTIFICATIVE),
+    "Cette facture annule et remplace la facture FE-2026-0005 du 17 août 2026.",
+  );
+});
+
+test("rectificative : la date du paiement reste celle du débit initial, pas celle de la correction", () => {
+  const notice = invoiceSettlementNotice(FACTURE_RECTIFICATIVE);
+  assert.match(notice, /Paiement reçu le 17 août 2026/);
+  assert.match(notice, /Prestation de remplacement exécutée le 18 août 2026/);
+  assert.doesNotMatch(notice, /Paiement reçu le 18 août 2026/);
+  assert.match(notice, /FE-2026-0005/);
+});
+
+test("facture d'origine : aucune mention de correction n'est inventée", () => {
+  const originale = { ...FACTURE_RECTIFICATIVE, correction: null };
+  assert.equal(invoiceDocumentTitle(originale), "FACTURE");
+  assert.equal(invoiceCorrectionNotice(originale), null);
+  assert.match(invoiceSettlementNotice(originale), /paiement reçu le 17 août 2026/i);
+  assert.doesNotMatch(invoiceSettlementNotice(originale), /remplacement|FE-2026-0005/i);
 });

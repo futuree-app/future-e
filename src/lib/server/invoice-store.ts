@@ -96,45 +96,82 @@ export async function issueInvoice(
     invoice: {
       number: row.number,
       issuedAt: row.issued_at,
+      paymentReceivedAt: row.issued_at,
       buyerName,
       buyerEmail: input.buyerEmail,
       seller,
       designation,
       amountCents: input.amountCents,
       vatMention: LEGAL_ENTITY.vatMention,
+      correction: null,
     },
   };
 }
 
 type InvoiceRow = {
-  number: string; issued_at: string; buyer_name: string; buyer_email: string;
+  id: string; number: string; issued_at: string; payment_received_at: string;
+  buyer_name: string; buyer_email: string;
   seller: SellerSnapshot; designation: string; amount_cents: number; vat_mention: string;
+  document_kind: "original" | "correction";
+  corrects_invoice_id: string | null;
+  corrected_designation: string | null;
+  correction_reason: string | null;
 };
 
-function toInvoice(r: InvoiceRow): Invoice {
+function toInvoice(r: InvoiceRow, byId: ReadonlyMap<string, InvoiceRow>): Invoice {
+  const corrected = r.document_kind === "correction";
+  const source = r.corrects_invoice_id ? byId.get(r.corrects_invoice_id) : null;
+  // Une rectificative sans sa pièce source est une base incohérente, pas une facture ordinaire.
+  if (corrected && (!source || !r.corrected_designation || !r.correction_reason)) {
+    throw new Error(`Facture rectificative ${r.number} incomplète`);
+  }
   return {
     number: r.number,
     issuedAt: r.issued_at,
+    paymentReceivedAt: r.payment_received_at,
     buyerName: r.buyer_name,
     buyerEmail: r.buyer_email,
     // L'identité du vendeur vient de la LIGNE, jamais de `legal-entity.ts` : une facture doit
     // rester lisible telle qu'elle a été remise, même après un déménagement ou un changement de
     // forme juridique.
     seller: r.seller,
-    designation: r.designation,
+    // `designation` porte un libellé autonome pour les anciennes versions du site. Le nouveau
+    // rendu sépare la mention rectificative de la désignation propre, afin que la prestation ne
+    // devienne pas un paragraphe comptable dans la liste du compte.
+    designation: corrected ? r.corrected_designation! : r.designation,
     amountCents: r.amount_cents,
     vatMention: r.vat_mention,
+    correction: corrected
+      ? {
+          correctsNumber: source!.number,
+          correctsIssuedAt: source!.issued_at,
+          reason: r.correction_reason!,
+        }
+      : null,
   };
 }
 
-const SELECT = "number, issued_at, buyer_name, buyer_email, seller, designation, amount_cents, vat_mention";
+const SELECT = [
+  "id", "number", "issued_at", "payment_received_at", "buyer_name", "buyer_email", "seller",
+  "designation", "amount_cents", "vat_mention", "document_kind", "corrects_invoice_id",
+  "corrected_designation", "correction_reason",
+].join(", ");
 
-/** Les factures d'un compte, la plus récente d'abord. */
-export async function listInvoices(userId: string): Promise<Invoice[]> {
+async function listInvoiceDocuments(userId: string): Promise<InvoiceRow[]> {
   const { data, error } = await admin()
     .from("invoices").select(SELECT).eq("user_id", userId).order("issued_at", { ascending: false });
   if (error) throw new Error(`Lecture des factures impossible : ${error.message}`);
-  return (data ?? []).map((r) => toInvoice(r as unknown as InvoiceRow));
+  return (data ?? []) as unknown as InvoiceRow[];
+}
+
+/** Les factures d'un compte, la plus récente d'abord. */
+export async function listInvoices(userId: string): Promise<Invoice[]> {
+  const rows = await listInvoiceDocuments(userId);
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  const correctedIds = new Set(rows.flatMap((r) => r.corrects_invoice_id ? [r.corrects_invoice_id] : []));
+  // Le compte montre la pièce EN VIGUEUR. Les pièces remplacées restent conservées et accessibles
+  // par leur URL exacte, mais les afficher côte à côte sans hiérarchie ferait croire à deux achats.
+  return rows.filter((r) => !correctedIds.has(r.id)).map((r) => toInvoice(r, byId));
 }
 
 /**
@@ -145,8 +182,9 @@ export async function listInvoices(userId: string): Promise<Invoice[]> {
 export async function getInvoice(
   userId: string, number: string,
 ): Promise<Invoice | null> {
-  const { data, error } = await admin()
-    .from("invoices").select(SELECT).eq("user_id", userId).eq("number", number).maybeSingle();
-  if (error) throw new Error(`Lecture de la facture impossible : ${error.message}`);
-  return data ? toInvoice(data as unknown as InvoiceRow) : null;
+  // On charge la petite série du compte pour résoudre localement la pièce corrigée. Une jointure
+  // auto-référente PostgREST rendrait le nom de contrainte partie prenante du contrat applicatif.
+  const rows = await listInvoiceDocuments(userId);
+  const row = rows.find((r) => r.number === number);
+  return row ? toInvoice(row, new Map(rows.map((r) => [r.id, r]))) : null;
 }

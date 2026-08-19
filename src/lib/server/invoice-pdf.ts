@@ -1,6 +1,13 @@
 import "server-only";
 import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
-import { formatEuro, formatDateFr, type Invoice } from "@/lib/invoice";
+import {
+  formatEuro,
+  formatDateFr,
+  invoiceCorrectionNotice,
+  invoiceDocumentTitle,
+  invoiceSettlementNotice,
+  type Invoice,
+} from "@/lib/invoice";
 import { MOT, POINT, HAUTEUR_MOT_IMPRIME_PT } from "@/lib/brand-mark";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
@@ -83,7 +90,7 @@ export function renderInvoicePdf(invoice: Invoice): Promise<Buffer> {
       size: "A4",
       margin: MARGIN,
       info: {
-        Title: `Facture ${invoice.number}`,
+        Title: `${invoiceDocumentTitle(invoice)} ${invoice.number}`,
         Author: invoice.seller.legalName,
         Subject: invoice.designation,
       },
@@ -118,7 +125,7 @@ export function renderInvoicePdf(invoice: Invoice): Promise<Buffer> {
 
     // Le titre et le numéro, alignés à droite sur la même bande que l'en-tête vendeur.
     doc.font("Helvetica-Bold").fontSize(16).fillColor(INK)
-      .text("FACTURE", MARGIN, MARGIN, { width: W, align: "right" });
+      .text(invoiceDocumentTitle(invoice), MARGIN, MARGIN, { width: W, align: "right" });
     doc.font("Helvetica").fontSize(10).fillColor(GREY)
       .text(t(`N\u00b0 ${invoice.number}`), MARGIN, MARGIN + 22, { width: W, align: "right" })
       .text(t(`Émise le ${formatDateFr(invoice.issuedAt)}`), MARGIN, MARGIN + 36, { width: W, align: "right" });
@@ -132,7 +139,18 @@ export function renderInvoicePdf(invoice: Invoice): Promise<Buffer> {
     doc.font("Helvetica").fontSize(9.5).fillColor(GREY).text(t(invoice.buyerEmail), MARGIN, y);
 
     // ── La prestation ─────────────────────────────────────────────────────────────────────
-    y += 44;
+    // Une rectificative CITE la pièce qu'elle remplace avant la nouvelle désignation. Le lecteur
+    // n'a pas à déduire la correction de deux adresses différentes dans son historique.
+    y += 34;
+    const correctionNotice = invoiceCorrectionNotice(invoice);
+    if (correctionNotice) {
+      doc.font("Helvetica-Bold").fontSize(9.5).fillColor(INK);
+      const correctionHeight = doc.heightOfString(t(correctionNotice), { width: W });
+      doc.text(t(correctionNotice), MARGIN, y, { width: W });
+      y += correctionHeight + 18;
+    } else {
+      y += 10;
+    }
     doc.moveTo(MARGIN, y).lineTo(MARGIN + W, y).strokeColor(RULE).lineWidth(0.75).stroke();
     y += 12;
     doc.font("Helvetica").fontSize(8).fillColor(GREY);
@@ -172,14 +190,10 @@ export function renderInvoicePdf(invoice: Invoice): Promise<Buffer> {
     doc.font("Helvetica").fontSize(8).fillColor(GREY);
     const piedBlocs = [
       // La DATE D'EXÉCUTION doit figurer sur une note de prestation de service (arrêté du 3 octobre
-      // 1983). Elle se confond ici avec la date de paiement : l'accès au rapport est ouvert par le
-      // webhook, dans la seconde qui suit l'encaissement. Le jour où une prestation s'étalerait
-      // dans le temps, cette ligne devrait porter deux dates distinctes.
-      t(
-        `Facture acquittée. Paiement reçu le ${formatDateFr(invoice.issuedAt)} par carte bancaire. ` +
-        `Prestation exécutée le ${formatDateFr(invoice.issuedAt)}, accès ouvert au client à cette date. ` +
-        `${invoice.vatMention}.`,
-      ),
+      // 1983). Sur une facture d'origine elle se confond avec la date de paiement ; sur une
+      // rectificative les deux sont délibérément distinctes, puisque le dossier de remplacement
+      // est ouvert plus tard sans nouvel encaissement.
+      t(`${invoiceSettlementNotice(invoice)} ${invoice.vatMention}.`),
       // LA TROISIÈME CONDITION DE L'ARTICLE L221-28 13°.
       // ════════════════════════════════════════════════════════════════════════════════════════
       // L'exception au droit de rétractation pour un contenu numérique fourni immédiatement demande

@@ -257,6 +257,13 @@ RÈGLES DE FOND
   dans un secteur fortement exposé au retrait-gonflement »), jamais « le sol sous cet
   appartement » : on connaît l'exposition du secteur, pas la nature du terrain sous une unité
   précise.
+- Une absence de sinistre indemnisé ne se raconte pas comme une tranquillité. Ces indemnisations
+  proviennent d'un échantillon de contrats assurés sur 1995-2021 : leur absence n'établit ni
+  l'absence d'événement, ni l'absence de risque, et la commune peut avoir été reconnue en état de
+  catastrophe naturelle sur la même période. N'écrivez jamais « aucun sinistre », « jamais
+  inondée », « épargnée ». Quand le payload porte à la fois une absence d'indemnisation et un
+  nombre d'arrêtés de catastrophe naturelle, ces deux faits ne se résument pas l'un l'autre :
+  citez le nombre d'arrêtés ou ne dites rien des deux.
 - Ni exhaustivité, ni équilibre artificiel. Pas de contrepoids fabriqués (« Malgré ces points… »,
   « En contrepartie… », « À l'inverse… ») quand les données ne les portent pas.
 - Trois phénomènes structurants au maximum sur l'ensemble du texte. Une donnée qui n'en sert

@@ -35,6 +35,12 @@ const nextConfig: NextConfig = {
       "./data/onrn-secheresse.json",
       "./data/onrn-inondation.json",
     ],
+    // La PAGE du module Logement lit l'index pour le compte d'arrêtés inondation, qui réconcilie
+    // les trois sources de la carte « Ce que disent les sources sur l'inondation ». Il est lu ICI
+    // et pas dans `/api/georisques-logement` : cette route fait déjà un fan-out d'une dizaine
+    // d'API externes, et le compte doit venir de l'artefact du dossier d'abord, que seule la page
+    // sait lire.
+    "/rapport/logement": ["./data/comparateur-index.json.gz"],
     // Face 3 « autour de cette adresse » : la lib logement-bpe.ts lit les shards
     // de points BPE par cellule ; la lib icu.ts lit l'index îlot de chaleur (grand-IRIS).
     "/api/logement-autour": [

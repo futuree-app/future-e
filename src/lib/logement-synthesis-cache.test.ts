@@ -271,3 +271,48 @@ test("diagnostics de l'adresse : un diagnostic d'IMMEUBLE est signalé comme tel
   assert.equal(p.diagnostics_adresse.immeuble_entier, true);
   assert.equal(p.diagnostics_adresse.total, 4);
 });
+
+// ── UNE ABSENCE DE SINISTRE NE PART PAS AU MODÈLE SANS DE QUOI LA SITUER (17/08/2026, JL-13) ──
+
+test("péril « aucun » sans compte d'arrêtés : il quitte le payload narratif", () => {
+  const p = buildSynthesisPayload(fullData({
+    sinistralite: { secheresse: { kind: "aucun" }, inondation: { kind: "aucun" } },
+  }) as Parameters<typeof buildSynthesisPayload>[0]);
+  assert.deepEqual(p.sinistralite, {});
+});
+
+test("cas Ciré-d'Aunis : l'absence d'inondation reste, accompagnée des arrêtés comptés", () => {
+  const p = buildSynthesisPayload(fullData({
+    sinistralite: { secheresse: { kind: "aucun" }, inondation: { kind: "aucun" } },
+    catnatInondationCount: 5,
+  }) as Parameters<typeof buildSynthesisPayload>[0]);
+  assert.deepEqual(p.sinistralite, {
+    inondation: {
+      kind: "aucun_sinistre_indemnise",
+      periode: "1995-2021",
+      echantillon: "CCR, contrats assurés de la commune",
+      arretes_catnat_inondation_depuis_1982: 5,
+    },
+  });
+  // La sécheresse, elle, n'a pas d'historique administratif à lui opposer : elle sort.
+  assert.equal("secheresse" in (p.sinistralite as object), false);
+});
+
+test("les états mesurés passent inchangés, et le hash des dossiers existants ne bouge pas", () => {
+  // INVARIANT DE CACHE : sans péril en « aucun », le compte d'arrêtés n'entre pas dans le payload.
+  // Sans quoi cette passe régénérerait toutes les synthèses déjà vendues, pour rien.
+  const mesure = { secheresse: { kind: "lecture", cout: "Plus de 20 k€", frequence: "Entre 2 et 5 ‰", representativite: "> 50%" } };
+  const sans = buildSynthesisPayload(fullData({ sinistralite: mesure }) as Parameters<typeof buildSynthesisPayload>[0]);
+  const avec = buildSynthesisPayload(fullData({ sinistralite: mesure, catnatInondationCount: 5 }) as Parameters<typeof buildSynthesisPayload>[0]);
+  assert.deepEqual(sans.sinistralite, mesure);
+  assert.deepEqual(sans, avec);
+  assert.equal(
+    buildFactHash(fullData({ sinistralite: mesure }) as Parameters<typeof buildFactHash>[0]),
+    buildFactHash(fullData({ sinistralite: mesure, catnatInondationCount: 5 }) as Parameters<typeof buildFactHash>[0]),
+  );
+});
+
+test("la couverture reste « examinée » : on a bien regardé, on ne raconte pas", () => {
+  const c = buildCoverage(fullData({ sinistralite: { inondation: { kind: "aucun" } } }) as Parameters<typeof buildCoverage>[0]);
+  assert.equal(c.sinistralite_communale, "examined");
+});

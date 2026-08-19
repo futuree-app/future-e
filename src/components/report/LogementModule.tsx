@@ -18,7 +18,10 @@ import { IconSeismic, IconStrata, IconCavity, IconLandslide } from "@/components
 import { PropertyPassport } from "@/components/report/logement/PropertyPassport";
 import { EnergieSection } from "@/components/report/logement/EnergieSection";
 import { SinistraliteBlock } from "@/components/report/logement/SinistraliteSection";
+import { InondationLectureBlock } from "@/components/report/logement/InondationSection";
 import { RegulatoryStatusBlock } from "@/components/report/logement/RegulatorySection";
+import { construireLectureInondation, zonageInondationDepuisPlans } from "@/lib/decision/inondation-lecture";
+import type { CatnatInondation } from "@/lib/decision/catnat-evidence";
 import { DecisionChecklist } from "@/components/report/logement/DecisionChecklist";
 import type { UserProject } from "@/lib/user-project";
 import { energyState, expositionArgileNotable } from "@/lib/decision/logement-coverage";
@@ -70,10 +73,19 @@ export default function LogementModule({
   dossier,
   rehydrateSource = "auto",
   project,
+  catnatInondation = null,
 }: {
   defaultCommune?: string | null;
   dossier: AddressDossierRow | null;
   rehydrateSource?: "auto" | "deeplink";
+  /**
+   * LE COMPTE D'ARRÊTÉS INONDATION DE LA COMMUNE, résolu par la page (artefact figé du dossier
+   * d'abord, index courant en repli). Il n'est pas fetché ici et ne transite pas par
+   * `/api/georisques-logement` : la route la plus coûteuse du produit n'a pas à embarquer l'index
+   * national pour un entier, et surtout ce compte doit être CELUI QUI A ÉTÉ VENDU, donc celui de
+   * l'artefact. `null` = non résolu ; la carte de réconciliation se replie alors sur deux lectures.
+   */
+  catnatInondation?: CatnatInondation | null;
   /**
    * LE PROJET DU COMPTE, transmis sans conversion (12/08/2026). Le module posait sa propre sonde
    * (« Que comptez-vous faire de ce logement ? ») à chaque visite, sans jamais persister la réponse,
@@ -226,6 +238,9 @@ export default function LogementModule({
     selectedDpe: dpe,
     georisques: result?.georisques,
     sinistralite: result?.sinistralite,
+    // Ne sert qu'à SITUER une absence de sinistre indemnisé (cf. `sinistralitePourRecit`) : sans
+    // absence, il n'entre pas dans le payload et ne change donc aucun cache existant.
+    catnatInondationCount: catnatInondation?.count ?? null,
     communeData: result?.communeData,
     // Le payload ne les retient QUE si rien n'est attribué (cf. `buildSynthesisPayload`) : dès
     // qu'un diagnostic est confirmé, il devient le sujet et les autres n'ont plus rien à dire.
@@ -246,6 +261,19 @@ export default function LogementModule({
   //
   // Ce qui reste calculé ici est ce que le serveur ne peut pas savoir : le DPE ATTRIBUÉ (le choix
   // du lecteur, persisté sur le dossier) et ce qui s'en déduit.
+  // LA LECTURE DE L'INONDATION, composée des trois sources DÉJÀ présentes à l'écran.
+  //
+  // Le zonage est lu sur `regulatoryPlans`, c'est-à-dire sur la MÊME liste que le bloc « Statut
+  // réglementaire à cette adresse » juste au-dessus : les deux ne peuvent pas dire deux choses
+  // différentes du même point. `undefined` (route en erreur, ou champ absent d'une réponse
+  // ancienne) devient « indisponible », jamais « aucun zonage ».
+  const lectureInondation = result?.sinistralite
+    ? construireLectureInondation({
+        zonage: zonageInondationDepuisPlans(georisques ? (georisques.regulatoryPlans ?? []) : null),
+        catnat: catnatInondation,
+        onrn: result.sinistralite.inondation,
+      })
+    : null;
   const coverage = result?.decision ?? null;
   const logementFacts: LogementFacts | null = coverage
     ? {
@@ -453,7 +481,19 @@ export default function LogementModule({
               </div>
             )}
 
-            {result.sinistralite && <SinistraliteBlock sinistralite={result.sinistralite} commune={result.address?.city ?? null} />}
+            {/* LA RÉCONCILIATION SE LIT ENTRE LES DEUX BLOCS QUI LA RENDAIENT NÉCESSAIRE : le
+                statut réglementaire au point vient d'être lu, les sinistres indemnisés viennent
+                juste après. C'est à cet endroit précis que le lecteur fabriquait la contradiction
+                (premier test réel, 16/08/2026, JL-13). */}
+            {lectureInondation && <InondationLectureBlock lecture={lectureInondation} />}
+
+            {result.sinistralite && (
+              <SinistraliteBlock
+                sinistralite={result.sinistralite}
+                commune={result.address?.city ?? null}
+                lectureInondationRendue={Boolean(lectureInondation)}
+              />
+            )}
           </div>
 
           {/* Beat 4 — Le relais vers l'échelle du dessus. L'entourage de l'adresse était rendu ici

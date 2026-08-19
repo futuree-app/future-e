@@ -29,7 +29,7 @@ export type AssertionVerdict =
   | { ok: true }
   | { ok: false; motif: string; famille: Famille; extrait: string };
 
-type Famille = "altitude" | "absence_conclue" | "protection_supposee";
+type Famille = "altitude" | "absence_conclue" | "protection_supposee" | "absence_sinistre_conclue";
 
 /** Normalisation partagée avec `coverage-closure` : diacritiques et apostrophes typographiques. */
 function fold(s: string): string {
@@ -60,6 +60,27 @@ const REGLES: Regle[] = [
       "aucune exposition", "aucun risque", "sans risque particulier", "aucun zonage",
       "pas de plan de prevention", "aucun plan de prevention", "n'est pas expose",
       "n'est pas exposee", "aucun risque signale", "rien a signaler",
+    ],
+    desamorcable: true,
+  },
+  {
+    // ── L'ABSENCE DE SINISTRE INDEMNISÉ, RACONTÉE (17/08/2026, premier test réel) ────────────
+    //
+    // Le jeu ONRN/CCR couvre 1995-2021 et un ÉCHANTILLON de contrats. Y lire « la commune n'a
+    // jamais été inondée » est un saut que rien n'autorise, et c'est le saut que le lecteur a fait
+    // tout seul le 16/08 en juxtaposant deux cartes. Le premier verrou est en amont : une absence
+    // sans son contexte administratif ne franchit plus la frontière du modèle
+    // (`sinistralitePourRecit`). Ce motif-ci est le filet, pour le cas où le compte d'arrêtés est
+    // fourni et où le modèle en tirerait quand même une tranquillité.
+    //
+    // DÉSAMORÇABLE : « la fréquence n'a pas pu être établie » décrit une lacune et doit passer.
+    // La carte déterministe porte le fait de toute façon : refuser à tort ne coûte qu'une phrase.
+    famille: "absence_sinistre_conclue",
+    motifs: [
+      "aucun sinistre", "aucun degat", "aucun dommage", "pas de sinistre",
+      "jamais ete inonde", "jamais ete inondee", "jamais connu d'inondation",
+      "aucune inondation", "aucune indemnisation", "aucun arrete de catastrophe",
+      "n'a pas ete inondee", "epargnee par les inondations",
     ],
     desamorcable: true,
   },
@@ -151,6 +172,8 @@ export function correctionPourAssertions(v: Extract<AssertionVerdict, { ok: fals
       "Vous avez conclu l'absence d'une exposition ou d'un risque. Vous ne pouvez nommer qu'un zonage qui EXISTE. Une absence de plan ou de zonage ne se raconte pas : retirez la phrase, ou dites seulement que la dimension n'a pas pu être établie.",
     protection_supposee:
       "Vous avez suggéré une protection ou un mécanisme dont aucune donnée ne vous est fournie. Retirez-le : vous n'avez que ce qui est écrit dans le payload.",
+    absence_sinistre_conclue:
+      "Vous avez raconté une absence de sinistre. Les indemnisations dont vous disposez proviennent d'un échantillon de contrats assurés sur 1995-2021 : leur absence n'établit ni l'absence d'événement, ni l'absence de risque, et la commune peut avoir été reconnue en état de catastrophe naturelle sur la même période. Retirez la phrase : ce fait est déjà porté, avec sa période et ses limites, par les cartes du dossier.",
   };
   return `Votre texte précédent a été refusé. ${consigne[v.famille]}\n\nPassage en cause : « ${v.extrait} »\n\nRéécrivez la lecture entière en respectant toutes vos règles.`;
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import type { OnrnSinistralite, PerilState } from "@/lib/onrn-sinistralite";
+import { ligneOnrnInondation, lignePerilSansSinistre } from "@/lib/decision/inondation-lecture";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { MetricTooltip } from "@/components/MetricTooltip";
 import { Disclosure } from "./kit";
@@ -44,7 +45,27 @@ const ONRN_REPR_LABEL: Record<string, string> = {
 const onrnLabel = (map: Record<string, string>, v: string) => map[v] ?? v; // repli = verbatim
 const SINI_EYEBROW: React.CSSProperties = { fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-4)" };
 
-function PerilLine({ peril, word, color, state, tip }: { peril: string; word: string; color: string; state: PerilState; tip: string }) {
+// LA PHRASE ABSOLUE A DISPARU D'ICI (17/08/2026, premier test réel).
+//
+// Elle disait : « Aucun sinistre {de sécheresse|d'inondation} n'a été remboursé dans cette commune
+// sur la période connue. » Trois défauts dans une seule ligne : « la période connue » ne nomme pas
+// la période, « remboursé dans cette commune » laisse croire à un relevé exhaustif des contrats
+// alors que le jeu est un ÉCHANTILLON, et le mot « Aucun » domine la réserve qui suit. À
+// Ciré-d'Aunis, cette ligne se lisait « pas d'inondation ici » à côté de cinq arrêtés comptés
+// depuis 1982 dans le module Territoire.
+//
+// Les deux formes de remplacement vivent dans `decision/inondation-lecture.ts`, avec la carte de
+// réconciliation qui les borne : elles ne peuvent plus dériver l'une de l'autre.
+function LigneSansSinistre({ valeur, precision }: { valeur: string; precision: string }) {
+  return (
+    <div style={{ display: "grid", gap: 2 }}>
+      <span style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.5 }}>{valeur}</span>
+      <span style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>{precision}</span>
+    </div>
+  );
+}
+
+function PerilLine({ peril, word, color, state, tip, ligneAucun }: { peril: string; word: string; color: string; state: PerilState; tip: string; ligneAucun: { valeur: string; precision: string } }) {
   if (state.kind === "indispo") return null;
   return (
     <div style={{ display: "grid", gap: 6 }}>
@@ -65,11 +86,7 @@ function PerilLine({ peril, word, color, state, tip }: { peril: string; word: st
           </span>
         </div>
       )}
-      {state.kind === "aucun" && (
-        <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65 }}>
-          Aucun sinistre {word} n&apos;a été remboursé dans cette commune sur la période connue. Un passé sans dégât ne garantit pas l&apos;avenir.
-        </div>
-      )}
+      {state.kind === "aucun" && <LigneSansSinistre valeur={ligneAucun.valeur} precision={ligneAucun.precision} />}
       {state.kind === "faible_repr" && (
         <div style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65 }}>
           Des sinistres {word} ont été remboursés ici, mais trop peu de logements sont assurés dans la commune pour en tirer une lecture fiable.
@@ -79,7 +96,18 @@ function PerilLine({ peril, word, color, state, tip }: { peril: string; word: st
   );
 }
 
-export function SinistraliteBlock({ sinistralite, commune }: { sinistralite: OnrnSinistralite; commune?: string | null }) {
+export function SinistraliteBlock({ sinistralite, commune, lectureInondationRendue = false }: {
+  sinistralite: OnrnSinistralite;
+  commune?: string | null;
+  /**
+   * La carte « Ce que disent les sources sur l'inondation » est-elle rendue au-dessus ?
+   *
+   * Elle porte alors la réconciliation (période, échantillon, arrêtés comptés) : la répéter ici,
+   * à trente centimètres, donnerait deux fois la même phrase. Sans elle, la ligne porte sa propre
+   * borne, parce qu'elle est seule à l'écran.
+   */
+  lectureInondationRendue?: boolean;
+}) {
   const { secheresse, inondation } = sinistralite;
   if (secheresse.kind === "indispo" && inondation.kind === "indispo") return null;
   const reprLine = [
@@ -119,15 +147,22 @@ export function SinistraliteBlock({ sinistralite, commune }: { sinistralite: Onr
                 {commune ? `À ${commune}, ` : "Dans la commune, "}les sinistres indemnisés liés {freqCompare.more} ont été plus fréquents que ceux liés {freqCompare.less}.
               </p>
             )}
-            <PerilLine peril="Sécheresse (retrait-gonflement des argiles)" word="de sécheresse" color="var(--orange, #E8823A)" state={secheresse} tip="Le sol argileux gonfle avec l’humidité puis se rétracte en période sèche. Ces mouvements peuvent fissurer les murs et les fondations d’un logement." />
-            <PerilLine peril="Inondation (tous types)" word="d’inondation" color="var(--blue, #60a5fa)" state={inondation} tip="Regroupe tous les types : débordement de cours d’eau, ruissellement de pluie, remontée de nappe et submersion marine." />
+            <PerilLine peril="Sécheresse (retrait-gonflement des argiles)" word="de sécheresse" color="var(--orange, #E8823A)" state={secheresse} ligneAucun={lignePerilSansSinistre()} tip="Le sol argileux gonfle avec l’humidité puis se rétracte en période sèche. Ces mouvements peuvent fissurer les murs et les fondations d’un logement." />
+            <PerilLine peril="Inondation (tous types)" word="d’inondation" color="var(--blue, #60a5fa)" state={inondation} ligneAucun={ligneOnrnInondation(inondation, lectureInondationRendue) ?? lignePerilSansSinistre()} tip="Regroupe tous les types : débordement de cours d’eau, ruissellement de pluie, remontée de nappe et submersion marine." />
             {/* Rappel court sur l'assurance ; le détail va dans le repli */}
             <p style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
               Ces chiffres ne permettent pas de deviner le prix de votre assurance : la part qui couvre les catastrophes naturelles (la « surprime CatNat ») est la même partout en France.
             </p>
             {/* Niveau 3 — méthode et sources, repliées */}
             <Disclosure summary="Comprendre les chiffres et leurs limites">
-              {reprLine && <div>Données 1995-2021, établies sur un échantillon CCR. Couverture du marché local : {reprLine}.</div>}
+              {/* LA PÉRIODE ET L'ÉCHANTILLON SE DISENT TOUJOURS, pas seulement quand une classe est
+                  lisible. Cette ligne était conditionnée à `reprLine`, donc au seul état « lecture » :
+                  une commune sans sinistre recensé n'affichait nulle part sur quoi ni sur quand
+                  portait ce « aucun ». */}
+              <div>
+                Données 1995-2021, établies sur un échantillon de contrats assurés (CCR).
+                {reprLine ? ` Couverture du marché local : ${reprLine}.` : ""}
+              </div>
               <div>La fréquence rapporte les sinistres indemnisés aux biens assurés, exprimée pour mille (‰).</div>
               <div>La surprime légale CatNat est fixée à 20 % de la prime dommages depuis le 1ᵉʳ janvier 2025. Une modulation selon l&apos;exposition locale est débattue : si elle advenait, le passé local mesuré ici compterait davantage.</div>
               <div>ONRN (État / CCR / Mission Risques Naturels), via Géorisques. Biens assurés particuliers et professionnels.</div>

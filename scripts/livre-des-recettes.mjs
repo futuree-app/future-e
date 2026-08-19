@@ -47,7 +47,10 @@ const supabase = createClient(url, key);
 
 const { data, error } = await supabase
   .from("invoices")
-  .select("number, seq, issued_at, buyer_name, designation, amount_cents, currency")
+  .select(
+    "id, number, seq, issued_at, payment_received_at, buyer_name, designation, " +
+    "corrected_designation, amount_cents, currency, document_kind, corrects_invoice_id",
+  )
   .eq("year", year)
   .order("seq", { ascending: true });
 
@@ -69,16 +72,23 @@ const lignes = [
 let total = 0;
 let attendu = 1;
 const trous = [];
+const correctedIds = new Set(
+  (data ?? []).flatMap((r) => r.corrects_invoice_id ? [r.corrects_invoice_id] : []),
+);
 
+// La continuité porte sur TOUTES les pièces numérotées, y compris une rectificative. Le livre des
+// recettes, lui, ne garde que la dernière pièce en vigueur de chaque chaîne : compter l'originale
+// et sa rectificative créerait un second encaissement qui n'a jamais existé.
 for (const r of data ?? []) {
   if (r.seq !== attendu) trous.push(`${attendu} -> ${r.seq}`);
   attendu = r.seq + 1;
+  if (correctedIds.has(r.id)) continue;
   total += r.amount_cents;
   lignes.push([
-    r.issued_at.slice(0, 10),
+    (r.payment_received_at ?? r.issued_at).slice(0, 10),
     r.number,
     r.buyer_name,
-    r.designation,
+    r.document_kind === "correction" ? r.corrected_designation : r.designation,
     euros(r.amount_cents),
     "Carte bancaire",
   ].map(q).join(","));
@@ -88,7 +98,11 @@ lignes.push(["", "", "", "TOTAL", euros(total), ""].map(q).join(","));
 console.log(lignes.join("\n"));
 
 // Sur stderr : ne pollue pas le CSV redirigé dans un fichier, et se voit quand même.
-console.error(`\n${(data ?? []).length} encaissement(s) en ${year}, total ${euros(total)} EUR.`);
+const encaissements = (data ?? []).filter((r) => !correctedIds.has(r.id)).length;
+console.error(
+  `\n${encaissements} encaissement(s), ${(data ?? []).length} pièce(s) numérotée(s) en ${year}, ` +
+  `total ${euros(total)} EUR.`,
+);
 if (trous.length) {
   console.error(`ATTENTION, la numerotation saute : ${trous.join(", ")}.`);
   console.error("Un trou dans une numerotation de facture est une non-conformite. A investiguer.");

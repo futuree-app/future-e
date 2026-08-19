@@ -61,6 +61,15 @@ export type SynthesisData = {
   selectedDpe?: DpeRecord | null;
   georisques?: { parcel?: { risks?: { labels?: string[] }; pprn?: { labels?: string[] }; seismic?: { label?: string | null } | null; rga?: { label?: string | null } | null } | null } | null;
   sinistralite?: unknown;
+  /**
+   * LE COMPTE D'ARRÊTÉS INONDATION DE LA COMMUNE, quand la page a pu le résoudre.
+   *
+   * Il n'entre dans le payload que pour CONTEXTUALISER une absence de sinistre indemnisé (cf.
+   * `sinistralitePourRecit`). Sans absence à contextualiser, il n'y entre pas : il n'a rien à
+   * apporter au récit, et l'ajouter partout invaliderait le cache de toutes les synthèses
+   * existantes pour un fait qu'aucune d'elles n'utilise.
+   */
+  catnatInondationCount?: number | null;
   communeData?: { commune?: { nom?: string | null; population?: number | null } } | null;
   // Injecté serveur-only avant le hash (jamais posé par le client, qui ne peut pas lire le JSON
   // DRIAS). Conséquence : le hash client (sans climat) et le hash serveur (avec) DIVERGENT, mais
@@ -154,6 +163,49 @@ export function buildCoverage(data: SynthesisData): SynthesisCoverage {
   return c;
 }
 
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// UNE ABSENCE DE SINISTRE NE SE DONNE PAS AU MODÈLE SANS DE QUOI LA SITUER (17/08/2026).
+//
+// Le payload transmettait l'objet ONRN brut, `{ kind: "aucun" }` compris. Le modèle pouvait donc
+// écrire « aucun sinistre d'inondation n'a été indemnisé dans la commune » pendant que le module
+// Territoire comptait cinq arrêtés depuis 1982 : la contradiction du premier test réel, rejouée en
+// prose, sur une surface où aucune carte ne vient la borner.
+//
+// La leçon du vault s'applique telle quelle : un prompt n'est pas une frontière de sûreté, la
+// frontière est de NE PAS FOURNIR LA DONNÉE. Une absence sans son contexte administratif sort donc
+// du payload. Le lecteur ne perd rien : la carte déterministe la porte, bornée par sa période et
+// son échantillon, et la carte de réconciliation la met en regard des arrêtés.
+//
+// Quand le compte d'arrêtés EST connu, l'absence reste, accompagnée de lui : le modèle a alors de
+// quoi ne pas se tromper, et l'écart fait partie de ce qu'il peut avoir à dire.
+//
+// ── INVARIANT DE CACHE ───────────────────────────────────────────────────────────────────────
+// Sans aucun péril en `aucun`, la sortie est structurellement identique à l'entrée : le hash ne
+// bouge pas, et aucune synthèse existante n'est régénérée pour rien.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+export function sinistralitePourRecit(
+  sinistralite: unknown,
+  catnatInondationCount: number | null | undefined,
+): unknown {
+  if (sinistralite == null || typeof sinistralite !== "object") return sinistralite ?? null;
+  const src = sinistralite as Record<string, { kind?: string } | null | undefined>;
+  const out: Record<string, unknown> = {};
+  for (const [peril, etat] of Object.entries(src)) {
+    if (etat?.kind !== "aucun") { out[peril] = etat; continue; }
+    if (peril === "inondation" && typeof catnatInondationCount === "number") {
+      out[peril] = {
+        kind: "aucun_sinistre_indemnise",
+        periode: "1995-2021",
+        echantillon: "CCR, contrats assurés de la commune",
+        arretes_catnat_inondation_depuis_1982: catnatInondationCount,
+      };
+      continue;
+    }
+    // Omis : une absence que le modèle ne peut pas situer n'a pas à être racontée.
+  }
+  return out;
+}
+
 export function buildSynthesisPayload(data: SynthesisData): Record<string, unknown> {
   const dpe = DPE_CONFIRMED(data.dpeSelectionStatus) && data.selectedDpe;
   const parcel = data.georisques?.parcel;
@@ -189,7 +241,7 @@ export function buildSynthesisPayload(data: SynthesisData): Record<string, unkno
     risks: [...(parcel?.risks?.labels ?? []), ...(parcel?.pprn?.labels ?? [])],
     seismic: parcel?.seismic?.label ?? null,
     rga: parcel?.rga?.label ?? null,
-    sinistralite: data.sinistralite ?? null,
+    sinistralite: sinistralitePourRecit(data.sinistralite, data.catnatInondationCount),
     commune: data.communeData?.commune
       ? {
           name: data.communeData.commune.nom ?? null,

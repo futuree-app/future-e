@@ -287,7 +287,14 @@ export default async function ComptePage() {
                   rel="noopener"
                   className={`flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-5 py-4 no-underline hover:bg-[var(--bg-elev)] transition-colors ${i > 0 ? "border-t border-[var(--border-1)]" : ""}`}
                 >
-                  <span className="text-[length:var(--text-dense)] text-label">{f.designation}</span>
+                  <span className="text-[length:var(--text-dense)] text-label">
+                    {f.correction && (
+                      <span className="block font-mono text-[10px] tracking-[0.08em] uppercase text-ghost mb-1">
+                        Facture rectificative · remplace {f.correction.correctsNumber}
+                      </span>
+                    )}
+                    {f.designation}
+                  </span>
                   <span className="flex items-baseline gap-5 shrink-0">
                     <span className="font-mono text-[11px] tracking-[0.06em] uppercase text-ghost">
                       {f.number} &middot; {formatDateFr(f.issuedAt)}

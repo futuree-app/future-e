@@ -52,6 +52,11 @@ export type AddressDossierRow = {
   stripe_payment_intent_id: string | null;
   amount_paid_cents: number | null;
   purchased_at: string | null;
+  // Un échange commercial n'invente pas un second paiement : le nouveau droit porte un triplet
+  // Stripe nul, comme un dossier administratif, mais ce lien désigne explicitement le dossier payé
+  // qu'il remplace. L'ancien reste archivé et access_revoked_at lui retire seulement la lecture.
+  replacement_for_dossier_id: string | null;
+  replacement_reason: string | null;
   // Retire l'accès SANS détruire l'artefact ni la trace de la transaction. La policy SELECT porte
   // la même condition : sans elle, ce ne serait qu'une révocation d'interface.
   access_revoked_at: string | null;

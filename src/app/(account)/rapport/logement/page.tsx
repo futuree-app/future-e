@@ -10,6 +10,10 @@ import { MarquerBienActif } from "@/components/report/MarquerBienActif";
 import { communeParent } from "@/lib/plm";
 import { ModuleTracker } from "@/components/ModuleTracker";
 import { normalizeUserProject } from "@/lib/user-project";
+import { readLatestDataSnapshot } from "@/lib/server/decision-artifact-store";
+import { artifactScopeKey } from "@/lib/decision/decision-artifact";
+import { catnatInondationDepuisIndex } from "@/lib/decision/catnat-evidence";
+import { getCommuneEntry } from "@/lib/comparateur-vie";
 
 export default async function RapportLogementPage({
   searchParams,
@@ -87,6 +91,30 @@ export default async function RapportLogementPage({
     communeName: dossier.city ?? territory.communeName,
   };
 
+  // ── LE COMPTE D'ARRÊTÉS INONDATION, POUR RÉCONCILIER LES TROIS SOURCES (17/08/2026) ─────────
+  //
+  // Le module Logement lit l'inondation par deux portes (zonage au point, sinistres indemnisés) et
+  // ignorait la troisième, l'historique administratif, qui vit dans le module Territoire. D'où la
+  // contradiction de lecture du premier test réel : « aucune règle ici » + « aucun sinistre
+  // remboursé », face à cinq arrêtés comptés ailleurs (JL-13).
+  //
+  // MÊME ORDRE DE PRÉFÉRENCE QUE `/rapport/quartier`, et pour la même raison : l'artefact du
+  // dossier porte le compte TEL QU'IL A ÉTÉ VENDU, l'index courant n'est qu'un repli. Les prendre
+  // dans l'ordre inverse ferait dire 6 à cette page quand la preuve du dossier annonce 5.
+  //
+  // Le scope est celui de CE dossier : sans lui, un compte figé pour un autre bien de la même
+  // commune pourrait remonter ici.
+  const snapshotFige = await readLatestDataSnapshot(
+    supabase, user.id, contexte.inseeCode, artifactScopeKey(dossier.id),
+  ).catch(() => null);
+  // L'index est indexé PAR ARRONDISSEMENT pour Paris, Lyon et Marseille : on l'interroge donc
+  // d'abord avec le code local de l'adresse, et seulement ensuite avec la commune parente. Les
+  // deux valent pour toutes les autres communes, où ils sont égaux.
+  const entreeIndex =
+    (await getCommuneEntry(dossier.insee).catch(() => null))
+    ?? (await getCommuneEntry(contexte.inseeCode).catch(() => null));
+  const catnatInondation = snapshotFige?.catnatInondation ?? catnatInondationDepuisIndex(entreeIndex);
+
   return (
     <>
       <ModuleTracker moduleId="logement" commune={contexte.communeName} inseeCode={contexte.inseeCode} source="page" />
@@ -100,6 +128,7 @@ export default async function RapportLogementPage({
         dossier={loadable ? dossier : null}
         rehydrateSource={targetId ? "deeplink" : "auto"}
         project={userProject}
+        catnatInondation={catnatInondation}
       />
     </>
   );

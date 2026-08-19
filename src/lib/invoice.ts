@@ -102,13 +102,59 @@ export type SellerSnapshot = ReturnType<typeof sellerSnapshot>;
 export type Invoice = {
   number: string;
   issuedAt: string;
+  /** Date de l'unique encaissement. Diffère de issuedAt sur une rectificative. */
+  paymentReceivedAt: string;
   buyerName: string;
   buyerEmail: string;
   seller: SellerSnapshot;
   designation: string;
   amountCents: number;
   vatMention: string;
+  correction: {
+    correctsNumber: string;
+    correctsIssuedAt: string;
+    reason: string;
+  } | null;
 };
+
+/** Le type de pièce doit être lisible indépendamment de sa désignation. */
+export function invoiceDocumentTitle(invoice: Pick<Invoice, "correction">): string {
+  return invoice.correction ? "FACTURE RECTIFICATIVE" : "FACTURE";
+}
+
+/**
+ * La rectificative nomme sans ambiguïté la pièce qu'elle remplace. Cette phrase est rendue dans
+ * le PDF ; la tester séparément évite un test faible qui vérifierait seulement que le document
+ * peut être généré sans vérifier ce qu'il raconte.
+ */
+export function invoiceCorrectionNotice(
+  invoice: Pick<Invoice, "correction">,
+): string | null {
+  if (!invoice.correction) return null;
+  return (
+    `Cette facture annule et remplace la facture ${invoice.correction.correctsNumber} ` +
+    `du ${formatDateFr(invoice.correction.correctsIssuedAt)}.`
+  );
+}
+
+/** Le paiement d'une rectificative reste celui de la facture initiale : jamais un second débit. */
+export function invoiceSettlementNotice(
+  invoice: Pick<Invoice, "issuedAt" | "paymentReceivedAt" | "correction">,
+): string {
+  const paiement = formatDateFr(invoice.paymentReceivedAt);
+  const execution = formatDateFr(invoice.issuedAt);
+  if (invoice.correction) {
+    return (
+      `Facture rectificative acquittée. Paiement reçu le ${paiement} au titre de la facture ` +
+      `${invoice.correction.correctsNumber}. Prestation de remplacement exécutée le ${execution}, ` +
+      "accès au dossier corrigé ouvert au client à cette date."
+    );
+  }
+  return (
+    `Facture acquittée. Paiement reçu le ${paiement} par carte bancaire. ` +
+    `Prestation exécutée le ${execution}, accès ouvert au client à cette date.`
+  );
+}
 
 /**
  * NOM DE FACTURATION. Le nom déclaré par le client sur son compte. Vide chez les comptes créés
