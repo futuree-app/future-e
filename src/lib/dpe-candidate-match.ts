@@ -51,6 +51,21 @@ export function meaningfulFloor(raw: string | number | null | undefined): string
   return s;
 }
 
+/**
+ * AU-DELÀ DE CE NOMBRE, LA LISTE NE SE PARCOURT PLUS DU REGARD.
+ *
+ * Un seul seuil pour trois décisions du même écran, et c'est délibéré : offrir un champ de
+ * recherche, décrire l'adresse par la dispersion de ses diagnostics, et dire au lecteur qu'il peut
+ * chercher par le numéro du document. Trois seuils voisins écrits à trois endroits finiraient par
+ * diverger, et l'écran promettrait un champ absent ou décrirait une dispersion d'un seul élément.
+ */
+export const LISTE_A_PARCOURIR = 3;
+
+/** L'adresse porte-t-elle assez de diagnostics pour qu'on aide à s'y retrouver ? */
+export function listeLongue(total: number): boolean {
+  return total > LISTE_A_PARCOURIR;
+}
+
 /** L'identifiant de logement saisi par le diagnostiqueur, nettoyé de ses espaces multiples. */
 export function candidateIdentifier(c: DpeRecord): string | null {
   const s = asText(c.complement).replace(/\s+/g, " ");

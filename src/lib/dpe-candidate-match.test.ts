@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  listeLongue,
   meaningfulFloor, candidateIdentifier, isUnidentifiable, matchesQuery, sortCandidates,
 } from "./dpe-candidate-match.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
@@ -167,3 +168,15 @@ test("le tri ne mute pas le tableau d'origine", () => {
   sortCandidates(src);
   assert.deepEqual(src.map((c) => c.surface_m2), avant);
 });
+
+// ── LE SEUIL PARTAGÉ ─────────────────────────────────────────────────────────────────────────
+// Trois décisions du même écran le lisent : offrir un champ de recherche, décrire l'adresse par la
+// dispersion de ses diagnostics, et dire au lecteur qu'un champ retrouvera son numéro. Écrits
+// séparément, ces trois seuils finiraient par diverger, et l'écran promettrait un champ absent.
+test("listeLongue : trois diagnostics se parcourent du regard, quatre non", () => {
+  assert.equal(listeLongue(1), false);
+  assert.equal(listeLongue(3), false);
+  assert.equal(listeLongue(4), true);
+  assert.equal(listeLongue(24), true);
+});
+

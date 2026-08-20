@@ -123,10 +123,21 @@ export function buildAddressDpeContext(candidates: DpeRecord[]): AddressDpeConte
  * Elle dit d'abord COMBIEN, puis qu'aucun n'est attribuable. L'ordre compte : commencer par
  * l'absence d'attribution ferait lire « on n'a rien », alors que la matière existe et qu'elle a
  * une valeur, celle de savoir quoi demander au vendeur.
+ *
+ * ── ELLE POSE LA QUESTION AU LIEU DE DÉCRIRE UN ÉTAT DE LA BASE (20/08/2026) ──────────────────
+ * Elle disait « Un diagnostic est rattaché à cette adresse, sans qu'on puisse établir qu'il porte
+ * sur ce logement ». Deux défauts. La phrase décrit une jointure de données là où le lecteur
+ * attend qu'on s'adresse à lui, et la seule chose qu'il ait à faire, répondre, n'y apparaît pas.
+ * Elle était de surcroît la première de TROIS formulations du même fait sur le même écran, les
+ * deux autres étant le titre du tiroir et l'introduction du sélecteur ; c'est celle-ci qui reste.
+ *
+ * « Reconnaissez-vous » plutôt que « lequel est le vôtre » : la seconde présuppose que l'un d'eux
+ * est le bon. Le logement peut n'avoir aucun diagnostic versé dans la base ouverte, et le refus
+ * offert sous la liste existe pour cette réponse-là.
  */
 export function addressContextLead(ctx: AddressDpeContext): string {
   if (ctx.total === 1) {
-    return "Un diagnostic est rattaché à cette adresse, sans qu'on puisse établir qu'il porte sur ce logement.";
+    return "Un diagnostic est enregistré à cette adresse. Est-ce celui de ce logement ?";
   }
-  return `${ctx.total} diagnostics sont rattachés à cette adresse. Aucun ne peut être attribué avec certitude au logement examiné.`;
+  return `${ctx.total} diagnostics sont enregistrés à cette adresse. Reconnaissez-vous celui de ce logement ?`;
 }

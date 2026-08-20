@@ -109,17 +109,28 @@ test("les types de bâtiment sont dédupliqués", () => {
 // Elle dit COMBIEN avant de dire qu'aucun n'est attribuable : commencer par l'absence ferait lire
 // « on n'a rien », alors que la matière existe et qu'elle dit quoi demander au vendeur.
 
-test("l'ouverture nomme le nombre, puis l'absence d'attribution", () => {
+test("l'ouverture nomme le nombre, puis pose la question au lecteur", () => {
   const c = buildAddressDpeContext(Array.from({ length: 24 }, () => dpe()))!;
   const s = addressContextLead(c);
   assert.ok(s.startsWith("24 diagnostics"), s);
-  assert.ok(s.includes("Aucun ne peut être attribué"), s);
+  // Le geste attendu est DANS la phrase. Elle décrivait un état de la base sans jamais dire au
+  // lecteur qu'il avait quelque chose à faire, et le seul geste de l'écran vivait dans un tiroir.
+  assert.ok(s.trimEnd().endsWith("?"), s);
+});
+
+test("l'ouverture ne présuppose jamais que l'un des diagnostics est le bon", () => {
+  // « Lequel est le vôtre ? » pose une question dont aucune réponse honnête n'existe quand le
+  // logement n'a pas de diagnostic versé. Le refus offert sous la liste répond à ce cas-là.
+  for (const n of [1, 2, 24]) {
+    const s = addressContextLead(buildAddressDpeContext(Array.from({ length: n }, () => dpe()))!);
+    assert.equal(/lequel/i.test(s), false, s);
+  }
 });
 
 test("l'ouverture s'accorde au singulier", () => {
   const c = buildAddressDpeContext([dpe()])!;
   const s = addressContextLead(c);
-  assert.ok(s.startsWith("Un diagnostic est rattaché"), s);
+  assert.ok(s.startsWith("Un diagnostic est enregistré"), s);
   assert.equal(s.includes("diagnostics"), false, "aucun pluriel parasite");
 });
 

@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import type { DpeRecord } from "@/lib/dpe-attribution";
 import {
-  candidateIdentifier, isUnidentifiable, matchesQuery, meaningfulFloor, sortCandidates,
+  candidateIdentifier, isUnidentifiable, listeLongue, matchesQuery, meaningfulFloor, sortCandidates,
 } from "@/lib/dpe-candidate-match";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
@@ -55,16 +55,16 @@ export function DpeSelector({
   const ordered = useMemo(() => sortCandidates(candidates), [candidates]);
   const shown = useMemo(() => ordered.filter((c) => matchesQuery(c, q)), [ordered, q]);
   const identifiables = useMemo(() => ordered.filter((c) => !isUnidentifiable(c)).length, [ordered]);
-  const many = candidates.length > 3;
+  // Le même seuil que le bloc qui monte ce sélecteur : au-delà, on aide à chercher, et l'adresse
+  // se décrit par la dispersion de ses diagnostics.
+  const many = listeLongue(candidates.length);
 
   return (
     <div style={{ display: "grid", gap: 12 }}>
-      <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
-        {candidates.length > 1
-          ? "Si vous savez lequel est le vôtre, désignez-le : le dossier lira alors son diagnostic."
-          : "Un diagnostic a été retrouvé à cette adresse. Est-ce celui de ce logement ?"}
-      </p>
-
+      {/* L'INTRODUCTION A DISPARU (20/08/2026). Elle disait « Un diagnostic a été retrouvé à cette
+          adresse. Est-ce celui de ce logement ? », soit très exactement ce que porte maintenant la
+          phrase d'ouverture du bloc, deux centimètres plus haut. Trois formulations du même fait se
+          succédaient sur cet écran ; il en reste une, et c'est celle qui pose la question. */}
       {many && (
         <div>
           <input
@@ -115,12 +115,18 @@ export function DpeSelector({
         )}
       </div>
 
+      {/* LE REFUS S'ACCORDE (20/08/2026). Il était écrit en dur au pluriel, et une adresse à
+          diagnostic unique proposait « aucun de ces diagnostics », au sujet d'une seule ligne.
+          Le libellé suit le TOTAL de l'adresse, jamais le nombre de lignes filtrées : refuser porte
+          sur ce que l'adresse contient, pas sur ce qu'une recherche laisse voir. */}
       <button
         type="button"
         onClick={onNotInList}
         style={{ justifySelf: "start", fontSize: 12.5, color: "var(--accent-dim, #7a6e60)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0 }}
       >
-        Aucun de ces diagnostics n&apos;est celui de ce logement
+        {candidates.length === 1
+          ? "Ce diagnostic n'est pas celui de ce logement"
+          : "Aucun de ces diagnostics n'est celui de ce logement"}
       </button>
     </div>
   );
