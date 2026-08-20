@@ -8,11 +8,14 @@ import { createClient } from '@supabase/supabase-js';
 
 export const revalidate = 86400;
 
-import top1000 from '@/data/top1000-communes.json';
+// Les communes prêtes AVANT la première visite. Le reste est généré à la demande via ISR
+// (revalidate 24h), donc aucune commune ne manque : seule change celle qui attend déjà.
+// Liste figée dans src/data/top1000-communes.json, régénérer avec scripts/update-top-communes.sh
+import { communesAPregenerer } from '@/lib/communes-pregenerees';
 import Navbar from '@/components/Navbar';
 
 export function generateStaticParams() {
-  return (top1000 as string[]).map((code) => ({ insee_code: code }));
+  return communesAPregenerer().map((code) => ({ insee_code: code }));
 }
 
 const ACCENT = '#60a5fa';
