@@ -44,3 +44,19 @@ test("texte modifié et parseur indisponible : on n'attache PAS les anciennes pr
 test("premier projet, aucun texte antérieur : on reparse", () => {
   assert.equal(doitReparser("au calme", null), true);
 });
+
+// ── LE TEXTE EST FACULTATIF, ET LE RETIRER EST UN CHOIX ──────────────────────────────────────
+// Depuis le 20/08/2026, quelqu'un peut déclarer son objectif et son intention sans écrire de
+// priorités. Deux façons de se tromper étaient ouvertes : présenter ce retrait comme un échec du
+// parseur, ou garder les anciennes priorités sur un projet qui vient de les abandonner.
+test("texte vide : aucune priorité gardée, et aucun avertissement", () => {
+  const projet = {
+    posture: "recherche", intent: "achat", rawText: "au calme",
+    parsed: { reformulation: "Un lieu calme.", hardConstraints: {}, preferences: [] },
+  } as unknown as UserProject;
+
+  const out = parsedASauvegarder({ reparse: true, parsedRecu: null, projet, texteVide: true });
+  assert.equal(out.parsed, null, "les priorités de l'ancien texte ne survivent pas à son effacement");
+  assert.equal(out.avertir, false, "un retrait volontaire n'est pas un échec d'analyse");
+});
+

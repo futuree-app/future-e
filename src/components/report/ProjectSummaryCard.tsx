@@ -52,6 +52,26 @@ const INTENT_OPTIONS: { value: ProjectIntent | null; label: string }[] = [
   { value: null, label: "Ni l'un ni l'autre" },
 ];
 
+/**
+ * CE QUI EST DÉCLARÉ, DIT EN UNE PHRASE, quand le lecteur n'a pas écrit de priorités.
+ *
+ * Depuis que le texte est facultatif, un projet peut exister sans reformulation. La carte tombait
+ * alors dans son état « aucun projet », donc rouvrait un formulaire par-dessus des réponses déjà
+ * données : l'écran ne montrait nulle part ce qu'il venait d'enregistrer.
+ */
+const POSTURE_DITE: Record<ProjectPosture, string> = {
+  recherche: "Vous cherchez où vivre",
+  recherche_quartier: "Vous cherchez un quartier",
+  adresse: "Vous étudiez ce lieu",
+  habitant: "Vous habitez déjà ici",
+};
+
+const INTENT_DIT: Record<string, string> = { achat: ", pour acheter", location: ", pour louer" };
+
+function cadrageDit(p: UserProject): string {
+  return `${POSTURE_DITE[p.posture] ?? "Votre projet est enregistré"}${INTENT_DIT[p.intent ?? ""] ?? ""}.`;
+}
+
 // Carte « Votre projet » en tête du hub, dans le langage visuel de futur•e (glass, eyebrow mono,
 // Instrument Serif, accent orange). Trois états : projet présent, absent (invitation), édition. La
 // sauvegarde explicite ne prétend JAMAIS avoir réussi sans confirmation serveur : en cas d'échec
@@ -135,7 +155,13 @@ export function ProjectSummaryCard({
 
   async function save() {
     const raw = text.trim();
-    if (!raw || !posture) return;
+    // LE TEXTE EST FACULTATIF (20/08/2026). Le contrat serveur accepte `rawText` absent depuis
+    // toujours (`normalizeUserProjectInput`) : c'est cet écran, et lui seul, qui l'exigeait, avec un
+    // bouton grisé qui ne disait pas pourquoi. Or l'objectif et l'intention ont une valeur propre :
+    // ils décident du vocabulaire, des gestes proposés et de la lecture du dossier.
+    //
+    // Ce qui manque alors sont les PRIORITÉS, et l'écran le dit à sa place, au lieu de bloquer.
+    if (!posture) return;
     setBusy(true);
     setError(null);
     setAvertissement(null);
@@ -144,7 +170,9 @@ export function ProjectSummaryCard({
     // testée. Sans elle, changer la seule intention un jour de panne du parseur enregistrait le
     // projet sans ses priorités : le dossier retombait en « projet non structuré » alors que le
     // lecteur n'avait pas touché à son texte.
-    const reparse = doitReparser(raw, project);
+    // Un texte vide n'a rien à faire parser : on épargne l'appel, et surtout on ne présente pas un
+    // retrait volontaire comme un échec d'analyse.
+    const reparse = raw.length > 0 && doitReparser(raw, project);
     let parsedRecu: UserProject["parsed"] | null = null;
     if (reparse) {
       try {
@@ -161,14 +189,16 @@ export function ProjectSummaryCard({
         parsedRecu = null;
       }
     }
-    const { parsed, avertir } = parsedASauvegarder({ reparse, parsedRecu, projet: project });
+    const { parsed, avertir } = parsedASauvegarder({
+      reparse, parsedRecu, projet: project, texteVide: raw.length === 0,
+    });
     try {
       const res = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           field: "user_project",
-          value: { posture, intent, rawText: raw, parsed },
+          value: { posture, intent, rawText: raw.length > 0 ? raw : null, parsed },
         }),
       });
       if (!res.ok) {
@@ -284,6 +314,32 @@ export function ProjectSummaryCard({
     );
   }
 
+  // ── Déclaré, sans priorités écrites ──
+  if (!editing && project) {
+    return (
+      <div className="glass rounded-2xl p-7">
+        <ProjectEyebrow label={eyebrowLabel} />
+        <p className="text-[17px] leading-[1.65] text-label">{cadrageDit(project)}</p>
+        <p className="text-[14px] leading-[1.6] text-muted mt-3">
+          Vos priorités ne sont pas encore écrites. Le dossier lit ce lieu, sans pouvoir le mettre
+          en regard de ce qui compte pour vous.
+        </p>
+        {avertissement ? (
+          <p className="text-[13px] leading-[1.55] mt-3" style={{ color: "var(--reg-non-su)" }}>{avertissement}</p>
+        ) : null}
+        <button
+          type="button"
+          onClick={() => { setText(project.rawText ?? ""); setPosture(project.posture); setIntent(project.intent ?? null); setError(null); setEditing(true); }}
+          className="mt-4 inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.08em] uppercase text-accent hover:text-label transition-colors"
+        >
+          Ajouter mes priorités
+          <span aria-hidden className="text-[13px] leading-none">→</span>
+        </button>
+        {blocRelation()}
+      </div>
+    );
+  }
+
   // ── Aucun projet ──
   if (!editing && !project) {
     return (
@@ -358,6 +414,9 @@ export function ProjectSummaryCard({
         })}
       </div>
 
+      <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-ghost mb-2.5">
+        Vos priorités <span className="text-ghost/70">— facultatif</span>
+      </p>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -373,7 +432,7 @@ export function ProjectSummaryCard({
         <button
           type="button"
           onClick={save}
-          disabled={busy || !text.trim() || !posture}
+          disabled={busy || !posture}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[14px] transition-opacity disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90"
         >
           {busy ? "Enregistrement…" : "Enregistrer"}

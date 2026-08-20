@@ -28,6 +28,18 @@ export type ContenuHero =
 
 const DECRIRE: Geste = { label: "Décrire mon projet", href: `/rapport#${ANCRE_PROJET}` };
 
+/**
+ * LE GESTE NOMME CE QUI MANQUE, ET RIEN D'AUTRE (20/08/2026).
+ *
+ * Les deux états sans structure recevaient le même « Décrire mon projet ». Il est juste quand rien
+ * n'est déclaré. Il devient absurde dès que le texte libre est facultatif : quelqu'un qui vient de
+ * choisir son objectif et son intention se verrait redemander de décrire un projet qu'il a décrit,
+ * et le hub tournerait en boucle sur une invitation à laquelle il a déjà répondu.
+ *
+ * Ce qui manque alors, ce sont ses PRIORITÉS, la matière que le moteur confronte au territoire.
+ */
+const PRIORITES: Geste = { label: "Ajouter mes priorités", href: `/rapport#${ANCRE_PROJET}` };
+
 export function contenuDuHero(input: {
   fullReport: boolean;
   project: UserProject | null;
@@ -48,5 +60,5 @@ export function contenuDuHero(input: {
   }
   // `parsed` nul est exactement ce que lit `isStructured`, donc ce qui produit
   // `project_not_structured` dans le plan. On ne recalcule pas l'état, on lit la même chose.
-  return { kind: "verdict", geste: input.project.parsed == null ? DECRIRE : null };
+  return { kind: "verdict", geste: input.project.parsed == null ? PRIORITES : null };
 }

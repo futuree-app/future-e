@@ -644,12 +644,22 @@ function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreCon
   const voc = vocabulaire(input.posture);
 
   if (input.conclusionState === "project_not_structured") {
+    // DEUX DÉFAUTS TOMBENT ENSEMBLE ICI (20/08/2026).
+    //
+    // « se lira à cette aune » avait déjà été retiré du titre du hub le 19/08 : personne n'emploie
+    // ce registre en parlant, et une phrase que personne ne dit n'appelle aucune réponse. La même
+    // formule survivait dans ce verdict, qui est le titre de l'écran dans cet état-là.
+    //
+    // « Décrivez votre projet » devient de surcroît faux dès que le texte libre est facultatif :
+    // quelqu'un qui a déclaré son objectif et son intention A décrit son projet ; ce qui manque
+    // sont ses priorités. La phrase pose donc une conséquence, et le geste sous le bloc dit quoi
+    // faire.
     return {
       label: "À préciser", tone: "neutral",
       headline: POSTURE(
         input.posture === "habitant"
-          ? `Dites ce qui compte pour vous, et ${nom} se lira à cette aune.`
-          : `Décrivez votre projet pour mettre ${nom} en regard de ce qui compte pour vous.`,
+          ? `${nom} ne se lit pas pareil selon ce qui compte pour vous.`
+          : `${nom} ne se lit pas pareil selon ce que vous cherchez.`,
       ),
       detail: "",
     };

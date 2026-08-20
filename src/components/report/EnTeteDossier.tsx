@@ -111,24 +111,24 @@ export function EnTeteDossier({
           structuré », le titre est porté par le bloc verdict, qui est rendu PLUS BAS par le
           composant streamé : son bouton doit donc le suivre, pas le précéder. La page s'en charge
           (cf. `heroContenu.kind === "verdict" && heroContenu.geste`). */}
+      {/* LE TITRE SEUL, SANS SON BOUTON (20/08/2026). Le geste vivait ici, et il menait à l'ancre
+          `#projet`, quelques centimètres plus bas, où le formulaire est DÉJÀ OUVERT (la page passe
+          `ouvertDemblee` dans cet état précis). Le lecteur voyait donc un appel à décrire son projet
+          au-dessus du formulaire qui le lui demandait, et cliquer ne faisait que défiler jusqu'à ce
+          qu'il avait sous les yeux.
+
+          La correction du 13/08 avait retiré le SECOND bouton, celui de la carte, en ouvrant son
+          formulaire d'emblée. Elle avait laissé le premier, devenu sans objet le jour même. */}
       {contenu.kind === "invite" ? (
-        <>
-          {/* MÊME ÉCHELLE QUE LE VERDICT (cf. `TITRE_VERDICT` dans `rapport/page.tsx`) : dans cet
-              état, cette phrase EST le titre de l'écran, et deux titres de page à deux tailles
-              selon l'état du projet donneraient deux hiérarchies pour un même rôle. */}
-          <h1
-            className="mt-6 font-[var(--weight-display)] text-[length:clamp(23px,2.9vw,36px)] leading-[1.12] tracking-[-0.8px] text-label max-w-[540px]"
-            style={{ fontFamily: "var(--font-serif)" }}
-          >
-            {contenu.titre}
-          </h1>
-          <Link
-            href={contenu.geste.href}
-            className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline"
-          >
-            {contenu.geste.label}
-          </Link>
-        </>
+        /* MÊME ÉCHELLE QUE LE VERDICT (cf. `TITRE_VERDICT` dans `rapport/page.tsx`) : dans cet
+           état, cette phrase EST le titre de l'écran, et deux titres de page à deux tailles selon
+           l'état du projet donneraient deux hiérarchies pour un même rôle. */
+        <h1
+          className="mt-6 font-[var(--weight-display)] text-[length:clamp(23px,2.9vw,36px)] leading-[1.12] tracking-[-0.8px] text-label max-w-[540px]"
+          style={{ fontFamily: "var(--font-serif)" }}
+        >
+          {contenu.titre}
+        </h1>
       ) : null}
     </div>
   );

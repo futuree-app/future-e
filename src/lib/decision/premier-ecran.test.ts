@@ -20,13 +20,16 @@ test("payant, projet structuré : le bloc verdict porte le titre, aucun geste aj
   assert.equal(c.kind === "verdict" ? c.geste : "absent", null);
 });
 
-test("payant, projet présent mais non structuré : le plan porte le titre, la page ajoute le geste", () => {
+test("payant, projet présent mais non structuré : le geste demande les priorités, jamais le projet", () => {
   // `conclusion-plan.ts` produit déjà le label « À préciser » et un headline qui invite. Il ne
   // manquait que le geste : sans lui, l'écran dit quoi faire sans donner par où.
+  //
+  // Et il demande ce qui MANQUE. Redemander « décrivez votre projet » à quelqu'un qui a déclaré son
+  // objectif et son intention le renverrait vers un formulaire qu'il a déjà rempli.
   const c = contenuDuHero({ fullReport: true, project: projetSansStructure, commune: "La Rochelle" });
   assert.equal(c.kind, "verdict");
   assert.deepEqual(c.kind === "verdict" ? c.geste : null, {
-    label: "Décrire mon projet", href: `/rapport#${ANCRE_PROJET}`,
+    label: "Ajouter mes priorités", href: `/rapport#${ANCRE_PROJET}`,
   });
 });
 

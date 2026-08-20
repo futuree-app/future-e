@@ -30,7 +30,18 @@ export function parsedASauvegarder(input: {
   reparse: boolean;
   parsedRecu: UserProject["parsed"] | null;
   projet: UserProject | null;
+  /**
+   * Le lecteur n'a rien écrit, ou vient d'effacer ce qu'il avait écrit. C'est un CHOIX, jamais un
+   * échec : depuis que le texte est facultatif (20/08/2026), quelqu'un peut déclarer son objectif
+   * et son intention sans détailler ses priorités.
+   *
+   * Sans ce cas, effacer son texte produisait « nous n'avons pas pu extraire vos priorités », qui
+   * accuse le parseur d'un retrait volontaire ; et garder l'ancien `parsed` attacherait au projet
+   * des priorités que le lecteur vient précisément de retirer.
+   */
+  texteVide?: boolean;
 }): { parsed: UserProject["parsed"] | null; avertir: boolean } {
+  if (input.texteVide) return { parsed: null, avertir: false };
   if (!input.reparse) return { parsed: input.projet?.parsed ?? null, avertir: false };
   return { parsed: input.parsedRecu, avertir: input.parsedRecu == null };
 }
