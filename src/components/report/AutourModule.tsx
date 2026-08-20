@@ -30,6 +30,8 @@ import { IcuExposure } from "@/components/report/logement/IcuExposure";
 import { buildAutourConclusion } from "@/lib/decision/autour-conclusion";
 import { buildInfraLecture } from "@/lib/decision/autour-infrastructures";
 import { buildPermisLecture } from "@/lib/decision/autour-permis";
+import { EchelleVisual } from "@/components/report/EchelleVisual";
+import { bindOrphans } from "@/lib/typography";
 
 // Jeton d'adresse non réversible pour l'analytics : distingue deux adresses sans stocker
 // l'adresse (djb2 -> base36). Même fonction que dans LogementModule, volontairement dupliquée :
@@ -177,8 +179,8 @@ export default function AutourModule({
       <Navbar ctas={{ secondary: { href: "/rapport", label: "Mon rapport" }, primary: { href: "/dossier", label: "Analyser une adresse" } }} />
 
       <div className="relative z-[2] max-w-[1100px] mx-auto px-5 sm:px-7 pb-24">
-        <section className="py-20">
-          <div className="max-w-[720px]">
+        <section className="py-20 grid lg:grid-cols-[minmax(0,1fr)_280px] lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:items-start">
+          <div className="lg:col-start-1 lg:row-start-1">
             <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase mb-5" style={{ color: "var(--green)" }}>
               <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--green)" }} />
               Module 02 · Autour de l&apos;adresse
@@ -187,11 +189,15 @@ export default function AutourModule({
               Ce qu&apos;il y a autour.<br />
               <span className="italic" style={{ color: "var(--green)" }}>Services, nature, chaleur.</span>
             </h1>
-            <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[560px]">
-              Entre la commune et les murs, il y a le secteur. Ce que vous avez réellement à portée
-              de pas, ce que vous n&apos;avez pas, et ce que l&apos;environnement proche fait à la
-              chaleur de l&apos;été.
+            <p className="text-[17px] leading-[1.72] text-muted mb-0">
+              {bindOrphans("Entre la commune et les murs, il y a le secteur. Ce que vous avez réellement à portée de pas, ce que vous n'avez pas, et ce que l'environnement proche fait à la chaleur de l'été.")}
             </p>
+          </div>
+          <EchelleVisual
+            active="autour"
+            className="hidden lg:block lg:w-full lg:mt-7 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:justify-self-end"
+          />
+          <div className="mt-8 lg:col-start-1 lg:row-start-2">
             <div className="flex gap-3 flex-wrap">
               <Link href="/rapport" prefetch={false} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">
                 Retour au hub

@@ -32,6 +32,8 @@ import { normalizeUserProject } from "@/lib/user-project";
 import { listDossiers } from "@/lib/address-dossier-store";
 import { communeParent } from "@/lib/plm";
 import { registersByTarget } from "@/lib/decision/evidence-registers";
+import { EchelleVisual } from "@/components/report/EchelleVisual";
+import { bindOrphans } from "@/lib/typography";
 
 export default async function RapportQuartierPage(
   { searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> },
@@ -147,9 +149,10 @@ export default async function RapportQuartierPage(
     (profile as { user_project?: unknown } | null)?.user_project ?? null,
   );
   const dossiersDuCompte = inseeCode ? await listDossiers(supabase, user.id) : [];
-  const aUneAdresseIci = inseeCode
-    ? dossiersDuCompte.some((d) => communeParent(d.insee) === communeParent(inseeCode))
-    : false;
+  const dossierIci = inseeCode
+    ? dossiersDuCompte.find((d) => communeParent(d.insee) === communeParent(inseeCode)) ?? null
+    : null;
+  const aUneAdresseIci = dossierIci != null;
   const communeDossier = inseeCode && userProject
     ? await buildCommuneDossier(inseeCode, userProject, { hasAddress: aUneAdresseIci }).catch(() => null)
     : null;
@@ -191,24 +194,47 @@ export default async function RapportQuartierPage(
         )}
 
         {/* Hero */}
-        <section className="pt-20 pb-6">
-          <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-info mb-5">
-            <span className="w-1.5 h-1.5 rounded-full bg-info shrink-0" />
-            Module 01 · Territoire
+        <section className="pt-20 pb-6 grid lg:grid-cols-[minmax(0,1fr)_280px] lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:items-start">
+          <div className="lg:col-start-1 lg:row-start-1">
+            <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-info mb-5">
+              <span className="w-1.5 h-1.5 rounded-full bg-info shrink-0" />
+              Module 01 · Territoire
+            </div>
+            <h1
+              className="font-[var(--weight-display)] text-[length:var(--text-display)] leading-[1.08] tracking-[-1.2px] mb-4 text-label"
+              style={{ fontFamily: "var(--font-serif)" }}
+            >
+              Ce que {displayName} devient.<br />
+              <span className="italic text-info">Territoire, climat, risques.</span>
+            </h1>
+            {/* La branche « pas d'accès » qui vivait ici était morte : la garde du haut redirige
+                avant d'atteindre le rendu. Un compte sans droit sur cette commune ne voit pas cette
+                page du tout, il voit le hub, qui porte l'offre. */}
+            <p className="text-[17px] leading-[1.72] text-muted mb-0">
+              {bindOrphans("Une lecture d'ensemble de la commune : ce qu'elle est, ce qui la transforme et les grands phénomènes auxquels elle est exposée.")}
+            </p>
           </div>
-          <h1
-            className="font-[var(--weight-display)] text-[length:var(--text-display)] leading-[1.08] tracking-[-1.2px] mb-4 text-label"
-            style={{ fontFamily: "var(--font-serif)" }}
-          >
-            Ce que {displayName} devient.<br />
-            <span className="italic text-info">Territoire, climat, risques.</span>
-          </h1>
-          {/* La branche « pas d'accès » qui vivait ici était morte : la garde du haut redirige
-              avant d'atteindre le rendu. Un compte sans droit sur cette commune ne voit pas cette
-              page du tout, il voit le hub, qui porte l'offre. */}
-          <p className="text-[17px] leading-[1.72] text-muted mb-0">
-            Une lecture d&apos;ensemble de la commune : ce qu&apos;elle est, ce qui la transforme et les grands phénomènes auxquels elle est exposée.
-          </p>
+          <EchelleVisual
+            active="territoire"
+            className="hidden lg:block lg:w-full lg:mt-7 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:justify-self-end"
+          />
+          <div className="mt-8 lg:col-start-1 lg:row-start-2">
+            <div className="flex gap-3 flex-wrap">
+              <Link
+                href="/rapport"
+                prefetch={false}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]"
+              >
+                Retour au hub
+              </Link>
+              <Link
+                href={dossierIci ? `/rapport/autour?dossierId=${encodeURIComponent(dossierIci.id)}` : "/dossier"}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]"
+              >
+                {dossierIci ? "Voir Autour de l'adresse" : "Analyser une adresse"}
+              </Link>
+            </div>
+          </div>
         </section>
 
         {/* Passeport territorial : la carte d'identité ouvre le rapport. */}

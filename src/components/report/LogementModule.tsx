@@ -27,6 +27,8 @@ import type { UserProject } from "@/lib/user-project";
 import { energyState, expositionArgileNotable } from "@/lib/decision/logement-coverage";
 import type { LogementFacts } from "@/lib/decision/decision-fact";
 import { evidenceAnchorId } from "@/lib/decision/evidence-targets";
+import { EchelleVisual } from "@/components/report/EchelleVisual";
+import { bindOrphans } from "@/lib/typography";
 
 // Le contrat de réponse (ApiResponse) vit dans @/lib/logement-report-types (LogementReport),
 // partagé avec la route qui le produit. Importé en alias ci-dessus.
@@ -356,8 +358,8 @@ export default function LogementModule({
       <Navbar ctas={{ secondary: { href: "/rapport", label: "Mon rapport" }, primary: { href: "/dossier", label: "Analyser une adresse" } }} />
 
       <div className="relative z-[2] max-w-[1100px] mx-auto px-5 sm:px-7 pb-24">
-        <section className="py-20">
-          <div className="max-w-[720px]">
+        <section className="py-20 grid lg:grid-cols-[minmax(0,1fr)_280px] lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:items-start">
+          <div className="lg:col-start-1 lg:row-start-1">
             <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-accent mb-5">
               <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
               {/* RANG 03, ET NON 02 (12/08/2026) : « Autour de l'adresse » porte le 02, et les deux
@@ -373,11 +375,15 @@ export default function LogementModule({
                   hero promettait donc ce que la page déclare ensuite ne pas faire. */}
               <span className="italic text-accent">Énergie, risques, bâti.</span>
             </h1>
-            <p className="text-[17px] leading-[1.72] text-muted mb-9 max-w-[560px]">
-              Une adresse suffit. Vous lisez ce qui pèse vraiment sur ce logement : sa performance
-              énergétique, ce à quoi son adresse l&apos;expose, et ce qu&apos;il reste à demander
-              avant de décider. Le secteur autour de l&apos;adresse a son propre module.
+            <p className="text-[17px] leading-[1.72] text-muted mb-0">
+              {bindOrphans("Une adresse suffit. Vous lisez ce qui pèse vraiment sur ce logement : sa performance énergétique, ce à quoi son adresse l'expose, et ce qu'il reste à demander avant de décider. Le secteur autour de l'adresse a son propre module.")}
             </p>
+          </div>
+          <EchelleVisual
+            active="logement"
+            className="hidden lg:block lg:w-full lg:mt-7 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:justify-self-end"
+          />
+          <div className="mt-8 lg:col-start-1 lg:row-start-2">
             <div className="flex gap-3 flex-wrap">
               <Link href="/rapport" prefetch={false} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">
                 Retour au hub
