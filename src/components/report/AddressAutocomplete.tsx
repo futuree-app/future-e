@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { autocompleteBanAddress, type BanAddressResult } from "@/lib/ban";
+import { placementDuMenu, vueCourante } from "@/lib/menu-placement";
 
 // Autocomplétion d'adresse : SEULE la sélection d'une suggestion (clic ou Entrée) déclenche
 // l'analyse en amont. Le texte libre n'est jamais pris pour une adresse validée. Requête
@@ -19,29 +20,35 @@ export function AddressAutocomplete({
   const abortRef = useRef<AbortController | null>(null);
   const listId = useId();
   const wrapRef = useRef<HTMLDivElement>(null);
-  // Placement du menu : par défaut sous le champ ; s'il n'y a pas la place en bas de fenêtre
-  // (champ en bas de page), il bascule au-dessus. La hauteur est bornée à l'espace réel pour que
-  // TOUTES les suggestions restent atteignables au scroll interne (jamais coupées hors écran).
+  // Placement du menu : par défaut sous le champ ; s'il n'y a pas la place en bas, il bascule
+  // au-dessus. La règle et ses cas limites vivent dans `menu-placement.ts`, où ils sont testés.
   const [place, setPlace] = useState<{ up: boolean; maxH: number }>({ up: false, maxH: 280 });
 
+  // LA MESURE SUIT LE CLAVIER (20/08/2026). Elle se prenait sur `window.innerHeight`, le viewport
+  // de MISE EN PAGE, qui ne rétrécit pas quand un clavier mobile s'ouvre : la place sous le champ
+  // était surestimée de toute la hauteur du clavier, la bascule ne se déclenchait jamais, et la
+  // liste s'ouvrait DERRIÈRE le clavier. Sur `/dossier`, la porte d'entrée payante, personne ne
+  // pouvait alors désigner son adresse depuis un téléphone.
   useEffect(() => {
     if (!open || items.length === 0) return;
     const compute = () => {
       const el = wrapRef.current;
       if (!el) return;
-      const r = el.getBoundingClientRect();
-      const below = window.innerHeight - r.bottom - 12;
-      const above = r.top - 12;
-      const up = below < 240 && above > below;
-      const maxH = Math.max(120, Math.min(280, Math.floor(up ? above : below)));
-      setPlace({ up, maxH });
+      setPlace(placementDuMenu(el.getBoundingClientRect(), vueCourante(window)));
     };
     compute();
     window.addEventListener("scroll", compute, true);
     window.addEventListener("resize", compute);
+    // Le viewport visuel a ses propres événements : sur mobile, l'ouverture du clavier ne produit
+    // pas toujours un `resize` de fenêtre, et c'est précisément l'instant qu'il faut voir.
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", compute);
+    vv?.addEventListener("scroll", compute);
     return () => {
       window.removeEventListener("scroll", compute, true);
       window.removeEventListener("resize", compute);
+      vv?.removeEventListener("resize", compute);
+      vv?.removeEventListener("scroll", compute);
     };
   }, [open, items.length]);
 
@@ -100,6 +107,12 @@ export function AddressAutocomplete({
         onChange={(e) => setQ(e.target.value)}
         placeholder={placeholder ?? "Entrez une adresse"}
         role="combobox" aria-expanded={open} aria-controls={listId} aria-autocomplete="list"
+        // LE TÉLÉPHONE NE DOIT NI COMPLÉTER NI CORRIGER CE CHAMP. Sans ces attributs, un navigateur
+        // mobile reconnaît un champ d'adresse et pose SA propre liste d'adresses enregistrées à
+        // l'endroit exact de la nôtre, et l'autocorrection retouche la saisie pendant la frappe :
+        // un nom de voie devenu mot du dictionnaire ne trouve plus rien dans la base d'adresses.
+        autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false}
+        enterKeyHint="search"
         onKeyDown={(e) => {
           if (!open || items.length === 0) return;
           if (e.key === "ArrowDown") { e.preventDefault(); setActive((i) => Math.min(i + 1, items.length - 1)); }
@@ -116,7 +129,11 @@ export function AddressAutocomplete({
         <ul role="listbox" id={listId} style={{ position: "absolute", zIndex: 50, left: 0, right: 0, ...(place.up ? { bottom: "calc(100% + 6px)" } : { top: "calc(100% + 6px)" }), padding: 4, listStyle: "none", background: "var(--bg-deep)", border: "1px solid var(--border-2)", borderRadius: 10, maxHeight: place.maxH, overflowY: "auto", boxShadow: "0 16px 40px rgba(0,0,0,0.55)" }}>
           {items.map((a, i) => (
             <li key={a.id ?? i} role="option" aria-selected={i === active}
-              onMouseDown={(e) => { e.preventDefault(); choose(a); }}
+              // `onPointerDown` PLUTÔT QUE `onMouseDown` : un seul geste couvre la souris, le doigt
+              // et le stylet, sans dépendre des événements de souris que les navigateurs mobiles
+              // simulent après un appui, et qu'ils ne simulent pas toujours. Un seul des deux, sinon
+              // le choix partirait deux fois, donc la qualification aussi.
+              onPointerDown={(e) => { e.preventDefault(); choose(a); }}
               onMouseEnter={() => setActive(i)}
               style={{ padding: "10px 12px", borderRadius: 8, cursor: "pointer", fontSize: 14, color: "var(--fg-1)", background: i === active ? "var(--bg-card, var(--bg-elev-2))" : "transparent" }}>
               {a.label}
