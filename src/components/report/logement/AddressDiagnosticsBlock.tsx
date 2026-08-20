@@ -6,6 +6,7 @@ import {
 } from "@/lib/dpe-address-context";
 import { DpeSelector } from "@/components/report/DpeSelector";
 import { listeLongue } from "@/lib/dpe-candidate-match";
+import { SaisieNumeroDpe } from "./SaisieNumeroDpe";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // « DIAGNOSTICS TROUVÉS À CETTE ADRESSE » — la matière NON ATTRIBUÉE.
@@ -75,11 +76,14 @@ function Repartition({ ctx }: { ctx: AddressDpeContext }) {
 }
 
 export function AddressDiagnosticsBlock({
-  candidates, onPick, onNotInList,
+  candidates, dossierId, busy = false, onPick, onNotInList, onPickParNumero,
 }: {
   candidates: DpeRecord[];
+  dossierId: string;
+  busy?: boolean;
   onPick: (d: DpeRecord) => void;
   onNotInList: () => void;
+  onPickParNumero: (d: DpeRecord) => void;
 }) {
   const ctx = buildAddressDpeContext(candidates);
   if (!ctx) return null;
@@ -104,11 +108,13 @@ export function AddressDiagnosticsBlock({
           « vous pouvez le coller ci-dessous » DÉSIGNAIT UN CHAMP QUI N'EXISTAIT PAS, le sélecteur
           n'affichant sa recherche qu'au-delà de trois diagnostics. Elle ne renvoie plus à un champ
           que lorsqu'il est là. */}
-      <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)" }}>
+      <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", display: "grid", gap: 12 }}>
         <p style={{ fontSize: 13.5, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
-          Si vous avez le document du diagnostic, il porte un numéro à treize caractères qui lève le
-          doute.{dense ? " Le champ de recherche ci-dessus le retrouve." : ""}
+          Si vous avez le document du diagnostic, il porte un numéro qui lève le doute. Il retrouve
+          aussi les diagnostics enregistrés à une entrée voisine de la vôtre, que la liste ci-dessus
+          ne montre pas.
         </p>
+        <SaisieNumeroDpe dossierId={dossierId} busy={busy} onConfirm={onPickParNumero} />
       </div>
 
       {ctx.hasCollective && (

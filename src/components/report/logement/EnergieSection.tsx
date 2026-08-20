@@ -2,6 +2,7 @@ import type { LogementReport } from "@/lib/logement-report-types";
 import type { DpeRecord } from "@/lib/dpe-attribution";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { AddressDiagnosticsBlock } from "./AddressDiagnosticsBlock";
+import { SaisieNumeroDpe } from "./SaisieNumeroDpe";
 import { DpeBadge, Block, DPE_LABELS } from "./kit";
 
 // Face 1 — Énergie & rénovation : attribution du DPE au logement (sélecteur / absence / rejet /
@@ -29,14 +30,16 @@ function LienReprise({ label, busy, onClick }: { label: string; busy: boolean; o
 }
 
 export function EnergieSection({
-  dpeStatus, dpe, audit, candidates, busy = false, erreur = null,
-  onPick, onNotInList, onReselect,
+  dpeStatus, dpe, audit, candidates, dossierId, busy = false, erreur = null,
+  onPick, onNotInList, onReselect, onPickParNumero,
 }: {
   dpeStatus: DpeUiStatus;
   dpe: DpeRecord | null;
   audit: LogementReport["audit"];
   /** Tous les diagnostics rattachés à l'adresse, attribués ou non. */
   candidates: DpeRecord[];
+  /** Le dossier lu, dont la saisie par numéro a besoin pour rapprocher l'adresse trouvée. */
+  dossierId: string;
   /** Une écriture de sélection est en cours : les gestes attendent sa réponse. */
   busy?: boolean;
   /** Le serveur a refusé le dernier geste, et l'écran est revenu à l'état d'avant. */
@@ -44,6 +47,8 @@ export function EnergieSection({
   onPick: (d: DpeRecord) => void;
   onNotInList: () => void;
   onReselect: () => void;
+  /** Rattache un diagnostic trouvé par son numéro, y compris hors de la liste de l'adresse. */
+  onPickParNumero: (d: DpeRecord) => void;
 }) {
   // LA SÉLECTION NE BLOQUE PLUS LE RAPPORT (31/07/2026). Elle se faisait avant lui, dans un écran
   // `PreciseLogementStep` qui masquait tout le module tant que le lecteur n'avait pas désigné son
@@ -58,22 +63,75 @@ export function EnergieSection({
   const nonAttribue = dpeStatus === "selection_required" || dpeStatus === "rejected" || !dpe;
 
   if (nonAttribue) {
+    const saisie = (
+      <SaisieNumeroDpe dossierId={dossierId} busy={busy} onConfirm={onPickParNumero} />
+    );
     return (
       <ReportSection eyebrow="Diagnostics à cette adresse" tone="orange">
         <GlassCard>
           {erreur ? <p style={{ fontSize: 13.5, color: "var(--danger, #c0563a)", lineHeight: 1.6, margin: "0 0 14px" }}>{erreur}</p> : null}
-          {candidates.length > 0 ? (
+
+          {/* LE REFUS EST UNE RÉPONSE, ET ELLE SE VOIT (20/08/2026). « Aucun de ces diagnostics
+              n'est celui de ce logement » écrivait bien `not_in_list` en base, mais l'écran rendait
+              exactement la même chose qu'avant le clic : même liste, même phrase, rien qui accuse
+              réception. Le bouton passait pour mort, et c'est ce qui a été remonté du premier test
+              avec un compte tiers.
+
+              L'état porte donc maintenant sa propre réponse, un recours, et une sortie. */}
+          {dpeStatus === "rejected" ? (
+            <div style={{ display: "grid", gap: 16 }}>
+              <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.6, margin: 0 }}>
+                {candidates.length === 1
+                  ? "C'est noté : le diagnostic de cette adresse ne décrit pas ce logement."
+                  : "C'est noté : aucun diagnostic de cette adresse ne décrit ce logement."}
+              </p>
+              <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
+                Le dossier n&apos;attribue donc aucune étiquette énergétique à ce logement, et ne
+                prête à ce bien aucune des valeurs mesurées à cette adresse.
+              </p>
+              <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", display: "grid", gap: 12 }}>
+                <p style={{ fontSize: 13.5, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+                  Si vous avez le document du diagnostic, son numéro le retrouve, même
+                  lorsqu&apos;il est enregistré à une entrée voisine de la vôtre.
+                </p>
+                {saisie}
+              </div>
+              <button
+                type="button"
+                onClick={onReselect}
+                disabled={busy}
+                style={{ justifySelf: "start", fontSize: 12.5, color: "var(--accent-dim, #7a6e60)", textDecoration: "underline", background: "none", border: "none", cursor: busy ? "default" : "pointer", padding: 0, opacity: busy ? 0.5 : 1 }}
+              >
+                {candidates.length > 0 ? "Revoir les diagnostics de cette adresse" : "Revenir sur cette réponse"}
+              </button>
+            </div>
+          ) : candidates.length > 0 ? (
             <AddressDiagnosticsBlock
               candidates={candidates}
+              dossierId={dossierId}
+              busy={busy}
               onPick={onPick}
               onNotInList={onNotInList}
+              onPickParNumero={onPickParNumero}
             />
           ) : (
-            <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
-              Aucun diagnostic de performance énergétique n&apos;est rattaché à cette adresse dans
-              la base ouverte. Cela ne veut pas dire qu&apos;aucun n&apos;existe : il peut ne pas y
-              avoir été versé.
-            </p>
+            /* AUCUN CANDIDAT : LE NUMÉRO EST LE SEUL RECOURS, et il n'y a ici aucun bouton
+               « aucun de ces diagnostics » à cliquer pour l'atteindre. C'est l'état où la saisie
+               compte le plus, et c'était celui d'où elle était absente. */
+            <div style={{ display: "grid", gap: 16 }}>
+              <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+                Aucun diagnostic de performance énergétique n&apos;est rattaché à cette adresse dans
+                la base ouverte. Cela ne veut pas dire qu&apos;aucun n&apos;existe : il peut ne pas y
+                avoir été versé, ou y être enregistré à une entrée voisine.
+              </p>
+              <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", display: "grid", gap: 12 }}>
+                <p style={{ fontSize: 13.5, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+                  Si vous avez le document du diagnostic, son numéro le retrouve où qu&apos;il soit
+                  enregistré.
+                </p>
+                {saisie}
+              </div>
+            </div>
           )}
         </GlassCard>
       </ReportSection>

@@ -5,7 +5,8 @@ import {
   type DpeSelectionStatus,
 } from "@/lib/address-dossier-store";
 import { updateOwnedAddressDossier } from "@/lib/server/address-dossier-write";
-import { getDpeCandidatesByBanId } from "@/lib/dpe";
+import { findDpeByNumero, getDpeCandidatesByBanId } from "@/lib/dpe";
+import { normaliserNumeroDpe, rapprocher } from "@/lib/dpe-rapprochement";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,20 @@ export const dynamic = "force-dynamic";
  * payant dont la classe, les coûts et les échéances découlent. Le client envoie désormais le seul
  * numéro ; la fiche est relue à la source et figée telle que l'ADEME la rend.
  */
-type Body = { dossierId: string; status: DpeSelectionStatus; dpeId?: string | null };
+type Body = {
+  dossierId: string;
+  status: DpeSelectionStatus;
+  dpeId?: string | null;
+  /**
+   * D'OÙ VIENT LE DIAGNOSTIC DÉSIGNÉ, et donc comment le vérifier.
+   *
+   * `liste` (le défaut) : une ligne de la liste de l'adresse, vérifiée par appartenance.
+   * `numero` : un numéro lu sur un document, vérifié par `rapprocher`, qui autorise l'entrée
+   * voisine du même bâtiment et refuse tout le reste. Sans cette distinction, la vérification par
+   * appartenance rejetterait le seul cas que la saisie du numéro existe pour servir.
+   */
+  source?: "liste" | "numero";
+};
 
 /**
  * `pending` EST UN STATUT QU'ON PEUT ÉCRIRE, et c'est ce qui rend un choix réversible. Il manquait :
@@ -67,7 +81,30 @@ export async function POST(req: Request) {
   //
   // C'est la fiche RENDUE PAR L'ADEME qui est figée, jamais celle que le navigateur a envoyée.
   let dpe = null;
-  if (porteUnDpe) {
+  if (porteUnDpe && body.source === "numero") {
+    // LA RECHERCHE EST REFAITE ICI. Le navigateur a déjà interrogé `/numero` pour montrer la fiche
+    // au lecteur, mais ce qu'il a vu ne prouve rien de ce qu'il envoie : la seule fiche qui entre
+    // dans le dossier est celle que ce serveur vient de lire.
+    const numero = normaliserNumeroDpe(dpeId);
+    const trouve = numero ? await findDpeByNumero(numero) : { status: "introuvable" as const };
+    if (trouve.status === "indisponible") {
+      return Response.json({ error: "SOURCE_INDISPONIBLE" }, { status: 503 });
+    }
+    if (trouve.status !== "trouve") {
+      return Response.json({ error: "DPE_INTROUVABLE" }, { status: 422 });
+    }
+    const rapprochement = rapprocher(
+      { id_ban: trouve.dpe.id_ban, adresse: trouve.dpe.adresse },
+      { ban_id: dossier.ban_id, address_label: dossier.address_label, insee: dossier.insee },
+    );
+    if (!rapprochement.attachable) {
+      return Response.json(
+        { error: "DPE_NOT_AT_ADDRESS", niveau: rapprochement.niveau },
+        { status: 422 },
+      );
+    }
+    dpe = trouve.dpe;
+  } else if (porteUnDpe) {
     const candidates = await getDpeCandidatesByBanId(dossier.ban_id);
     dpe = candidates.find((c) => c.id_dpe === dpeId) ?? null;
     if (!dpe) {

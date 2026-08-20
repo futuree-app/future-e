@@ -217,13 +217,17 @@ export default function LogementModule({
   async function persistDpe(
     status: "auto_confirmed" | "user_confirmed" | "not_in_list" | "pending",
     dpe: DpeRecord | null,
+    source: "liste" | "numero" = "liste",
   ): Promise<boolean> {
     if (!dossier) return false;
     try {
       const res = await fetch("/api/logement-dpe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dossierId: dossier.id, status, dpeId: dpe?.id_dpe ?? null }),
+        // LA PROVENANCE VOYAGE AVEC LE NUMÉRO, parce qu'elle décide de la VÉRIFICATION que le
+        // serveur applique : appartenance à la liste de l'adresse, ou rapprochement d'adresse pour
+        // un diagnostic apporté par son numéro. Elle n'assouplit rien, elle dit quoi contrôler.
+        body: JSON.stringify({ dossierId: dossier.id, status, dpeId: dpe?.id_dpe ?? null, source }),
       });
       return res.ok;
     } catch {
@@ -242,6 +246,7 @@ export default function LogementModule({
   async function appliquerSelection(
     status: "user_confirmed" | "not_in_list" | "pending",
     dpe: DpeRecord | null,
+    source: "liste" | "numero" = "liste",
   ) {
     const statutAvant = dpeStatus;
     const dpeAvant = selectedDpe;
@@ -249,7 +254,7 @@ export default function LogementModule({
     setDpeError(null);
     setSelectedDpe(dpe);
     setDpeStatus(RUNTIME_DPE_STATUS[status]);
-    const ok = await persistDpe(status, dpe);
+    const ok = await persistDpe(status, dpe, source);
     if (!ok) {
       setSelectedDpe(dpeAvant);
       setDpeStatus(statutAvant);
@@ -474,9 +479,11 @@ export default function LogementModule({
               dpe={dpe}
               audit={result.audit}
               candidates={dpeCandidates}
+              dossierId={dossier?.id ?? ""}
               busy={dpeBusy}
               erreur={dpeError}
               onPick={(d) => { void appliquerSelection("user_confirmed", d); }}
+              onPickParNumero={(d) => { void appliquerSelection("user_confirmed", d, "numero"); }}
               onNotInList={() => { void appliquerSelection("not_in_list", null); }}
               // LE RETOUR EN ARRIÈRE S'ÉCRIT, LUI AUSSI. Il ne faisait que remettre l'état local :
               // la ligne gardait son ancien statut, et le diagnostic corrigé revenait au

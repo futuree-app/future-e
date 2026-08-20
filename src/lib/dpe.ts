@@ -281,6 +281,73 @@ export async function getDpeByBanId(banId: string): Promise<DpeRecord | null> {
   // Note: dpe-france (pre-2021) n'a généralement pas d'identifiant_ban fiable
 }
 
+/**
+ * ════════════════════════════════════════════════════════════════════════════════════════════
+ * CHERCHER UN DIAGNOSTIC PAR SON NUMÉRO, celui que porte le document remis au lecteur.
+ *
+ * C'est la seule question dont la réponse ne dépend pas de ce que le lecteur devine. Reconnaître
+ * son logement dans une liste suppose qu'il connaisse un étage, une porte ou une surface ; quelqu'un
+ * qui ENVISAGE d'acheter ne les connaît pas, et quelqu'un qui vient d'emménager a le document sous
+ * les yeux. Le numéro identifie un diagnostic sans ambiguïté.
+ *
+ * LE JEU D'AVANT JUILLET 2021 EST INTERROGÉ, ET SON RÉSULTAT N'EST JAMAIS ATTRIBUABLE. Tous ces
+ * diagnostics ont expiré au plus tard le 31/12/2024 (le détail est dans l'en-tête de
+ * `getDpeByCoordinates`). Les chercher sert uniquement à répondre « ce diagnostic n'est plus
+ * valide » à quelqu'un qui tient un vieux document, au lieu de « ce numéro n'existe pas », qui
+ * serait faux et l'enverrait chercher une faute de frappe inexistante.
+ *
+ * UNE PANNE NE SE PRÉSENTE JAMAIS COMME UNE ABSENCE. `fetchLines` rend `[]` dans les deux cas ;
+ * ici, un jeu qui n'a pas répondu rend `indisponible`, jamais `introuvable`.
+ * ════════════════════════════════════════════════════════════════════════════════════════════
+ */
+export type RechercheParNumero =
+  | { status: "trouve"; dpe: DpeRecord }
+  | { status: "expire"; date: string | null; adresse: string | null }
+  | { status: "introuvable" }
+  | { status: "indisponible" };
+
+export async function findDpeByNumero(numero: string): Promise<RechercheParNumero> {
+  let sawFailure = false;
+
+  const chercher = async (dataset: string, select: string) => {
+    const url = new URL(`${dataset}/lines`);
+    url.searchParams.set("qs", `numero_dpe:"${numero}"`);
+    url.searchParams.set("size", "1");
+    url.searchParams.set("select", select);
+    try {
+      const res = await fetch(url.toString(), {
+        next: { revalidate: 86400 },
+        // Le lecteur attend devant son écran, un champ de saisie à la main : une ADEME lente ne
+        // doit pas transformer sa réponse en page blanche.
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) { sawFailure = true; return null; }
+      const json = (await res.json()) as { results?: unknown[] };
+      return (json.results?.[0] ?? null) as ApiRecord | LegacyApiRecord | null;
+    } catch {
+      sawFailure = true;
+      return null;
+    }
+  };
+
+  for (const dataset of [DS.existant, DS.neuf]) {
+    const found = await chercher(dataset, SELECT_LOGEMENT);
+    if (found) return { status: "trouve", dpe: toRecord(found as ApiRecord) };
+  }
+
+  // Le jeu expiré, pour nommer ce que la personne tient en main.
+  const ancien = (await chercher(DS.legacy, SELECT_LEGACY)) as LegacyApiRecord | null;
+  if (ancien) {
+    return {
+      status: "expire",
+      date: ancien.date_etablissement_dpe ?? null,
+      adresse: ancien.geo_adresse ?? null,
+    };
+  }
+
+  return sawFailure ? { status: "indisponible" } : { status: "introuvable" };
+}
+
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // ATTENTION : CETTE FONCTION ATTRIBUE PAR COORDONNÉES, ET ELLE LIT UN JEU EXPIRÉ.
 //
