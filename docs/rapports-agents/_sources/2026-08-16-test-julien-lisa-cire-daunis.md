@@ -720,3 +720,74 @@ code INSEE, les codes SIRET publics et les valeurs publiques de la commune.
 - **Aucun élément de JL-01 à JL-12 hors JL-11 n'a été traité** : ordre du funnel, champ d'identité,
   attente générative, horizon « aujourd'hui », densité des dossiers ruraux, offre à deux adresses et
   comparaison de deux biens restent à l'état où ce journal les a consignés.
+
+---
+
+## Implémentation — passe du 19-20/08/2026 (consolidation du moteur de décision)
+
+> **Nature** : second champ « Implémentation », distinct du précédent et distinct des verbatims. Il
+> rend compte de ce qui a été CODÉ dans une passe dont l'origine n'est que partiellement ce journal
+> (elle vient aussi d'une analyse comparative externe). Aucun verbatim, aucune hypothèse et aucune
+> priorité provisoire ci-dessus n'est modifié. Aucune donnée de production n'a été touchée, aucun
+> dossier vendu n'a été régénéré, rien n'a été committé.
+
+### JL-10 — comparer deux biens : le moteur existe, la surface est arrêtée
+
+- **Décision** : la comparaison se fait entre deux **analyses figées** déjà vendues, sur l'axe des
+  **critères déclarés** et de leur issue, jamais sur des valeurs mesurées (grains, millésimes et
+  périmètres ne sont pas garantis compatibles).
+- **Implémentation** : `src/lib/decision/comparaison-candidats.ts`, pur, 13 tests. Sortie sans note,
+  sans gagnant, sans moyenne : ce qui correspond, ce qui contredit, les compromis, les inconnues, les
+  contrôles prioritaires (repris mot pour mot), la couverture, la version et la date de chaque
+  analyse. Un écart d'issue produit par deux moteurs, deux conventions, deux projets ou deux échelles
+  différents est marqué `difference_non_attribuable` et porte sa réserve rédigée : l'écart n'est
+  jamais masqué, il n'est simplement pas imputé au lieu.
+- **Statut** : moteur livré ; **page utilisateur non construite**. Deux décisions produit manquent
+  (la comparaison est-elle incluse dans la possession de deux dossiers ou vendue ? est-elle ouverte à
+  deux dossiers quelconques ou réservée à des finalistes d'un même projet ?). Conception, blocage et
+  tranche suivante : `docs/superpowers/specs/2026-08-19-comparaison-deux-candidats-design.md`.
+  Aucune migration n'est nécessaire pour la suite.
+
+### JL-03 / JL-06 — la promesse ne s'arrêtait plus à l'écran précédent
+
+- **Constat vérifié** : l'écran de qualification `/dossier` dit tout (les trois échelles, la matière
+  trouvée, ce qui manquera). L'écran où l'on **paie** (`/checkout/dossier`) ne portait que l'adresse
+  et un montant. Or on y arrive aussi par un lien partagé, et le parcours de création de compte y
+  ramène après un détour par `/connexion` : quelqu'un pouvait payer devant un prix nu.
+- **Implémentation** : les trois échelles deviennent une source unique
+  (`src/lib/dossier-echelles.ts`), lue par les deux écrans, et la page de paiement les affiche avec
+  la phrase de structure (« chaque constat porte sa source et sa limite, et nomme, quand il en
+  appelle un, le contrôle à mener avant de vous engager »). La **couverture propre à l'adresse n'est
+  pas répétée** : cette page ne l'a pas mesurée, elle ne peut pas la promettre.
+- **Ce qui n'a pas changé** : l'ordre du parcours (paiement puis projet) reste celui qu'a arbitré
+  `docs/superpowers/specs/2026-07-30-qualification-checkout-dossier-design.md`. Un signal unique ne
+  renverse pas un arbitrage.
+
+### Le contrôle prioritaire est désormais observable
+
+- **Vérifié dans le code** : le contrôle prioritaire reprend l'action **mot pour mot** de la carte,
+  ne renvoie qu'aux cartes réellement rendues, et une **égalité n'invente aucun gagnant** (tous les
+  candidats de tête sont parcourus dans l'ordre éditorial, dédoublonnés, plafonnés à deux). La
+  posture gouverne bien l'action, par la table partagée des gestes.
+- **Implémentation** : deux événements, `priority_control_shown` et `priority_control_activated`,
+  réduits par une lib pure et testée (`priority-control-telemetry.ts`) : ni adresse, ni libellé
+  rédigé, ni code INSEE. Le protocole qualitatif qu'ils cadrent, et qu'ils ne remplacent pas, est
+  écrit dans `docs/protocoles/2026-08-19-premier-controle-entretien.md`. Aucune réponse libre n'est
+  stockée : le dépôt n'a pas de convention pour cela.
+
+### Correction hors journal : les gestes `location` supposaient un bail en cours
+
+Non issue de ce test, consignée ici parce qu'elle touche le même moteur. Trois variantes s'adressaient
+à un locataire **déjà en place** (« Signalez les fissures apparentes au bailleur », « Signalez tout
+affaissement au bailleur », un détail mêlant « remis à la signature » et « sinistre survenu pendant le
+bail »), alors que la posture `location` est celle de quelqu'un qui **envisage** de louer — l'occupant
+relève de `reside`. Elles étaient donc muettes pour la seule personne qui pouvait encore renoncer.
+Réécrites en gestes faisables avant l'engagement (regarder pendant la visite, demander à qui détient
+l'information), sans attribuer de cause aux fissures, sans promettre qu'un document lève le doute et
+sans énoncer de droit ou de délai. Invariant tenu par `src/lib/decision/logement-gestes.test.ts`,
+famille par famille.
+
+### Statut
+
+Livré dans le worktree, **non committé**. Reste ouvert : la page de comparaison (deux décisions
+produit), et tout ce que le champ « Implémentation » précédent listait déjà comme non traité.

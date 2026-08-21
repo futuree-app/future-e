@@ -10,6 +10,7 @@ import { quoteForDossier } from "@/lib/dossier-pricing";
 import { resolvePromo, promoExists } from "@/lib/promo-code";
 import { hasPaidTerritory } from "@/lib/active-territory";
 import { communeParent } from "@/lib/plm";
+import { CeQueLeDossierExamine } from "@/components/CeQueLeDossierExamine";
 import { DossierCheckoutPanel } from "./DossierCheckoutPanel";
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -95,6 +96,8 @@ export default async function DossierCheckoutPage({
         >
           {canonical.label}
         </h1>
+
+        <CeQueLeDossierExamine city={canonical.city} />
 
         <DossierCheckoutPanel
           address={{

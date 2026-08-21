@@ -123,3 +123,7 @@ Futur.e Design System.zip
 
 # État local de l'outil « impeccable » (config de poste, cache de hook, captures de travail).
 .impeccable/
+
+# Dossier de preuve « activité conservée » (France Travail) : journal commercial, chronologie et
+# pièces. Document administratif personnel, tenu sur le drive du porteur, hors du dépôt de code.
+docs/france-travail-activite-conservee/

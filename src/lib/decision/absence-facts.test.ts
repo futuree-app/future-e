@@ -27,7 +27,7 @@ test("études : non mesuré / valeurs corrompues -> uncertain", () => {
   assert.equal(classifyHigherEdAbsence({ measured: true, weightedAccess: 1, radiusKm: 25, establishmentCount: -1 }), "uncertain");
 });
 test("le contexte national est daté et dissocié des conventions", () => {
-  assert.equal(ABSENCE_NATIONAL_CONTEXT.network!.distributionVersion, "absence-dist-2026-07-15");
+  assert.equal(ABSENCE_NATIONAL_CONTEXT.network!.distributionVersion, "absence-dist-2026-08-19");
   assert.ok(ABSENCE_NATIONAL_CONTEXT.higherEd!.prevalence > 0.3 && ABSENCE_NATIONAL_CONTEXT.higherEd!.prevalence < 0.5);
 });
 

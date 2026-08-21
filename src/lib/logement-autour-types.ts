@@ -5,7 +5,35 @@ import type { PermisRetenu } from "./sitadel-selection.ts";
 
 export type Face3Cat = "sante" | "alimentation" | "education" | "transports" | "services";
 export type Posture = "residence" | "prospection";
-export type BpePoint = { c: Face3Cat; t: string; lat: number; lon: number };
+
+/**
+ * UN LIEU RECENSÉ PAR LA BPE, pas un établissement.
+ *
+ * ── POURQUOI LA DISTINCTION (premier test réel, 16/08/2026) ──────────────────────────────────
+ * La BPE recense des établissements : au 6 Grande Rue à Ciré-d'Aunis, elle en porte DEUX pour la
+ * même boulangerie physique, l'ancienne enseigne et la nouvelle, au même point, dans le millésime
+ * 2024 comme dans le 2025. Les shards regroupent donc les enregistrements en LIEUX
+ * (`grouper_lieux`, scripts/populate-bpe.py) : c'est ce qui empêche l'ordre des lignes du parquet
+ * de décider quelle enseigne s'affiche, et le comptage « à portée de pas » d'annoncer un choix qui
+ * n'existe pas.
+ *
+ * ── TOUS LES CHAMPS D'IDENTITÉ SONT OPTIONNELS, ET ILS DOIVENT LE RESTER ─────────────────────
+ * Les shards d'avant le 17/08/2026 ne portent que `c`, `t`, `lat`, `lon`. Absent veut dire « ce
+ * millésime ne le disait pas », jamais « cet équipement n'a pas de nom ».
+ */
+export type BpePoint = {
+  c: Face3Cat; t: string; lat: number; lon: number;
+  /** Nom de l'établissement, SEULEMENT quand un seul est recensé sur ce lieu. */
+  n?: string;
+  /** Adresse postale telle que la BPE la porte (capitales d'origine). */
+  a?: string;
+  /** SIRET : l'identifiant source stable, quand il existe et qu'un seul établissement est recensé. */
+  i?: string;
+  /** Nombre d'enregistrements sur ce lieu, écrit SEULEMENT s'il est supérieur à 1. */
+  x?: number;
+  /** Les enregistrements sources, conservés POUR L'AUDIT. Jamais affichés, jamais transportés. */
+  s?: { n?: string; i?: string }[];
+};
 /**
  * LE RAYON « À PORTÉE DE PAS » : 500 m à vol d'oiseau, six à sept minutes de marche.
  *
@@ -16,12 +44,35 @@ export type BpePoint = { c: Face3Cat; t: string; lat: number; lon: number };
  */
 export const BPE_WALK_RADIUS_M = 500;
 
+/**
+ * L'IDENTITÉ DU LIEU LE PLUS PROCHE, telle que le snapshot la fige.
+ *
+ * `nom` absent + `exploitants` > 1 = plusieurs établissements recensés sur ce lieu : le produit ne
+ * choisit pas, il le dit. `nom` et `exploitants` tous deux absents = snapshot antérieur au
+ * 17/08/2026, qui ne portait que le type et la distance.
+ *
+ * La liste des exploitants ne descend PAS jusqu'ici : elle vit dans `data/bpe-points`, où un audit
+ * la trouve. L'écran n'en a pas l'usage, et le nom d'un professionnel de santé n'a pas à voyager
+ * dans un dossier pour n'être jamais affiché.
+ */
+export type BpeNearestIdentity = {
+  nom?: string;
+  adresse?: string;
+  identifiant?: string;
+  exploitants?: number;
+};
+
 export type BpeNearest = {
   category: Face3Cat;
-  nearest: { distanceMeters: number; typeLabel: string | null } | null;
+  nearest: ({ distanceMeters: number; typeLabel: string | null } & BpeNearestIdentity) | null;
   searchCapMeters: number;
   /**
-   * Combien d'équipements de cette catégorie dans `BPE_WALK_RADIUS_M`.
+   * Combien de LIEUX de cette catégorie dans `BPE_WALK_RADIUS_M`.
+   *
+   * DES LIEUX, PAS DES ÉTABLISSEMENTS (17/08/2026). Deux enseignes successives au même point ne
+   * font pas deux boulangeries, et quatre médecins dans un même cabinet ne font pas quatre
+   * endroits où aller. Ce compte dit « avoir le choix » : il ne le dirait plus s'il additionnait
+   * des enregistrements administratifs.
    *
    * OPTIONNEL, ET IL DOIT LE RESTER. Les snapshots sont figés à leur création : ceux d'avant le
    * 01/08/2026 ne portent pas ce champ, et un dossier ancien ne doit pas afficher « 0 à moins de
@@ -31,8 +82,9 @@ export type BpeNearest = {
   withinWalkCount?: number;
 };
 
-// Libellé FR précis par code TYPEQU (BPE24). Nature de chaque code confirmée sur les
-// noms d'établissement réels (NOMRS) le 2026-07-03. Le rapport affiche ce type précis
+// Libellé FR précis par code TYPEQU. Nature de chaque code confirmée sur les noms d'établissement
+// réels (NOMRS) le 2026-07-03 (BPE24) ; les seize codes existent à l'identique dans la BPE 2025,
+// vérifié le 17/08/2026 avant la bascule des shards. Le rapport affiche ce type précis
 // (« Pharmacie », « Boulangerie ») plutôt que la seule famille abstraite. Modifier le
 // libellé ici ne demande PAS de régénérer les shards (les shards ne portent que le code).
 export const TYPEQU_LABEL: Record<string, string> = {
@@ -115,7 +167,16 @@ export type Face3Snapshot = {
     osmInfrastructure: "complete" | "pending" | "failed";
     osmGreenSpaces: "complete" | "pending" | "failed";
   };
-  sources: { bpeVersion: string; osmFetchedAt: string | null; osmQueryVersion: string };
+  /**
+   * `bpeVersion` porte la version du SNAPSHOT (`SOURCES_VERSION`), pas le millésime de la BPE :
+   * le nom est trompeur, il est conservé pour ne pas invalider les snapshots figés.
+   *
+   * `bpeMillesime` est le millésime réel, lu dans les shards eux-mêmes. Il est OPTIONNEL : les
+   * snapshots figés avant le 17/08/2026 ne le portent pas, et l'écran affichait alors « BPE 2024 »
+   * écrit en dur dans le composant, ce qui était précisément la dette de fraîcheur relevée le
+   * 16/08 (JL-11). Absent = millésime non su, jamais un millésime supposé.
+   */
+  sources: { bpeVersion: string; osmFetchedAt: string | null; osmQueryVersion: string; bpeMillesime?: string };
   sourcesVersion: string;
   computedAt: string;
 };

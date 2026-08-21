@@ -2,6 +2,7 @@ import React from "react";
 import { BPE_WALK_RADIUS_M, type Face3Snapshot, type GreenKind } from "@/lib/logement-autour-types";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { lireChaleurEtVegetal } from "@/lib/logement-autour-chaleur";
+import { preuveEquipement, sourceBpe, LIMITE_BPE } from "@/lib/logement-bpe-lisible";
 import { ecartAuCommune, partSansVoiture, type CarOwnership } from "@/lib/iris-logement";
 
 // « Autour de cette adresse » (buffer local au point géocodé) — le corps du module 02 depuis le
@@ -147,8 +148,13 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
               information principale, distance alignée sur la ligne de base du type. */}
           <div style={{ display: "grid", gap: 12 }}>
             <div style={FACE3_SUBHEAD}>Vie quotidienne</div>
-            <div style={{ display: "grid", gap: 10 }}>
-              {s.bpe.categories.map((c) => (
+            <div style={{ display: "grid", gap: 14 }}>
+              {s.bpe.categories.map((c) => {
+                // CE QUI PERMET DE RECONNAÎTRE LE LIEU COMPTÉ (17/08/2026, JL-11). Un nom seulement
+                // quand un seul établissement y est recensé ; sinon l'adresse et la réserve. La
+                // règle vit dans `logement-bpe-lisible.ts`, testée : ce composant ne décide rien.
+                const preuve = preuveEquipement(c.nearest, s.sources.bpeMillesime);
+                return (
                 <div key={c.category} style={{ display: "grid", gap: 2 }}>
                   <span style={FACE3_FAMILY}>{FACE3_CAT_LABEL[c.category]}</span>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
@@ -159,6 +165,18 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
                       {c.nearest ? `env. ${fmtDist(c.nearest.distanceMeters)}` : `dans les ${c.searchCapMeters / 1000} km analysés`}
                     </span>
                   </div>
+                  {/* Le nom en évidence, l'adresse juste dessous : de quoi reconnaître le lieu, ou
+                      aller le vérifier. Absents des snapshots figés avant le 17/08/2026, qui
+                      restent lisibles sans eux. */}
+                  {preuve.nom && (
+                    <span style={{ fontSize: 14, color: "var(--fg-hi)", lineHeight: 1.5 }}>{preuve.nom}</span>
+                  )}
+                  {preuve.adresse && (
+                    <span style={{ fontSize: 12.5, color: "var(--fg-3)", lineHeight: 1.5 }}>{preuve.adresse}</span>
+                  )}
+                  {preuve.reserve && (
+                    <span style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>{preuve.reserve}</span>
+                  )}
                   {/* LE COMPTE, SEULEMENT QUAND IL APPREND QUELQUE CHOSE. « 1 à moins de 500 m »
                       ne dit rien de plus que la ligne au-dessus, qui donne déjà la distance du
                       plus proche. À partir de deux, il dit autre chose : la différence entre
@@ -168,11 +186,12 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
                       pas afficher un zéro qui serait faux. */}
                   {typeof c.withinWalkCount === "number" && c.withinWalkCount > 1 && (
                     <span style={{ fontSize: 12.5, color: "var(--fg-4)" }}>
-                      {c.withinWalkCount} à moins de {BPE_WALK_RADIUS_M} m
+                      {c.withinWalkCount} lieux à moins de {BPE_WALK_RADIUS_M} m
                     </span>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -223,8 +242,15 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
               mêler ce qui rend un lieu agréable et ce qui l'expose ; il est resté hors du module
               Logement parce qu'il décrit un quartier, pas des murs. */}
 
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.85 }}>
-            Sources : INSEE, BPE 2024 · © les contributeurs OpenStreetMap (ODbL) · distances approximatives à vol d’oiseau
+          {/* LE MILLÉSIME VIENT DU SNAPSHOT, PLUS DU JSX (17/08/2026). Écrit en dur, il annonçait
+              « BPE 2024 » douze jours après la publication de la BPE 2025 : une année ne se met à
+              jour que si quelqu'un pense à éditer un composant, une donnée se met à jour avec la
+              donnée. */}
+          <div style={{ display: "grid", gap: 6 }}>
+            <div style={{ fontSize: 12, color: "var(--fg-4)", lineHeight: 1.55 }}>{LIMITE_BPE}</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em", color: "var(--fg-4)", opacity: 0.85 }}>
+              {sourceBpe(s.sources.bpeMillesime)} · © les contributeurs OpenStreetMap (ODbL)
+            </div>
           </div>
         </div>
       </GlassCard>

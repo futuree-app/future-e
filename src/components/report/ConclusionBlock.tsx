@@ -164,7 +164,11 @@ export function ConclusionBlock({
       {showControl ? (
         <div className="mt-7 space-y-1">
           <Eyebrow color="var(--info)">{controlLabel}</Eyebrow>
-          <PriorityControlActions actions={control!.actions} renderedIds={renderedIds} />
+          <PriorityControlActions
+            actions={control!.actions}
+            renderedIds={renderedIds}
+            ordre={suiteDuHeros ? "ensuite" : "priorite"}
+          />
         </div>
       ) : null}
 

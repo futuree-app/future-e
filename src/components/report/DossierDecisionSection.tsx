@@ -3,7 +3,7 @@
 // calme coloré par l'état, preuves en chips. Présentationnel : reçoit un Dossier déjà assemblé,
 // aucun LLM. Ouvert à tous les payants : le cas creux reste digne.
 import Link from "next/link";
-import { Fragment, Suspense } from "react";
+import { Fragment, Suspense, type ReactNode } from "react";
 import type { Dossier, DecisionFact, DossierCard } from "@/lib/decision/decision-fact";
 import { ConclusionBlock, planToBlocks, type NiveauTitre } from "@/components/report/ConclusionBlock";
 import { conditionPorteeParLeBloc, sectionsDeLaMinute, ancresRendues, sectionHorsPriorites, sectionMixte, carteHorsPriorites } from "@/lib/decision/dossier-view";
@@ -94,6 +94,7 @@ export function DossierDecisionSection({
   generatedAt,
   espacement = "mt-14",
   titre,
+  supportingPane,
 }: {
   dossier: Dossier;
   /**
@@ -137,6 +138,12 @@ export function DossierDecisionSection({
    * moment où le streaming se résout.
    */
   titre?: NiveauTitre;
+  /**
+   * Repère secondaire du haut de dossier. Quand il existe, le verdict et les constats qui le
+   * fondent occupent la colonne principale ; ce repère occupe une vraie colonne d'appui, jamais un
+   * calque positionné au-dessus du contenu. Sur mobile, il se place entre le verdict et ses détails.
+   */
+  supportingPane?: ReactNode;
 }) {
   const structured = dossier.conclusionState !== "project_not_structured";
 
@@ -182,222 +189,243 @@ export function DossierDecisionSection({
 
           Elle ne s'affiche que quand un artefact existe : l'inventer pour un dossier réassemblé à
           l'instant daterait d'aujourd'hui une lecture qui n'a pas d'âge. */}
-      {generatedAt && dateFr(generatedAt) ? (
-        <p className="mb-5 font-mono text-[11px] text-ghost">
-          Analyse générée le {dateFr(generatedAt)}
-        </p>
-      ) : null}
+      {/* SUR DESKTOP, DEUX COLONNES QUI ONT UNE HIÉRARCHIE, PAS UN CALQUE (21/08/2026).
+          Le verdict et les constats retenus sont la lecture principale. `supportingPane` est un
+          repère secondaire : il occupe la colonne droite sur les deux rangées. Sur mobile, l'ordre
+          devient verdict, repère, constats. Aucun positionnement absolu, aucune marge compensatoire. */}
+      <div className={supportingPane
+        ? "lg:grid lg:grid-cols-[minmax(0,1fr)_280px] lg:grid-rows-[auto_1fr] lg:gap-x-10 lg:items-start"
+        : ""}
+      >
+        <div className={supportingPane ? "lg:col-start-1 lg:row-start-1" : ""}>
+          {generatedAt && dateFr(generatedAt) ? (
+            <p className="mb-5 font-mono text-[11px] text-ghost">
+              Analyse générée le {dateFr(generatedAt)}
+            </p>
+          ) : null}
 
-      {/* L'ANALYSE RÉPOND À UN PROJET QUI N'EST PLUS CELUI DU LECTEUR. Dire avant de montrer : la
-          suite de l'écran s'interprète autrement selon qu'on lit une réponse actuelle ou une
-          réponse d'alors. */}
-      {projetAChange && insee ? (
-        <AnalyseAncienProjet insee={insee} scopeKey={scopeKey} />
-      ) : null}
+          {/* L'ANALYSE RÉPOND À UN PROJET QUI N'EST PLUS CELUI DU LECTEUR. Dire avant de montrer : la
+              suite de l'écran s'interprète autrement selon qu'on lit une réponse actuelle ou une
+              réponse d'alors. */}
+          {projetAChange && insee ? (
+            <AnalyseAncienProjet insee={insee} scopeKey={scopeKey} />
+          ) : null}
 
-      {logementStatus === "pending" ? (
-        <div className="glass rounded-xl p-4 mb-3.5 flex items-center gap-3" style={{ borderLeft: "2px solid var(--info)" }}>
-          <span className="w-1.5 h-1.5 rounded-full bg-info shrink-0 animate-pulse" />
-          <p className="text-[13px] text-muted">Première lecture à l&apos;échelle de la commune. L&apos;analyse du logement et de son environnement immédiat est en cours.</p>
-        </div>
-      ) : null}
-      {logementStatus === "unavailable" ? (
-        <div className="glass rounded-xl p-4 mb-3.5" style={{ borderLeft: "2px solid var(--ghost)" }}>
-          <p className="text-[13px] text-muted">L&apos;analyse réglementaire de cette adresse n&apos;a pas pu être actualisée. La conclusion ci-dessous reste limitée à la commune.</p>
-        </div>
-      ) : null}
-
-      {/* Le verdict. En « pending », le dossier n'est PAS final (l'augmentation adresse arrive) :
-          générer ici coûterait un second appel Sonnet, jeté quelques secondes plus tard. */}
-      {logementStatus === "pending" ? (
-        <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} />
-      ) : (
-        <Suspense
-          fallback={
-            <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} />
-          }
-        >
-          <ConclusionRedigee plan={dossier.narrativePlan} insee={insee} scopeKey={scopeKey} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} />
-        </Suspense>
-      )}
-
-      {/* Les raisons : des pièces à examiner, dans un verre neutre. Leur couleur de section vit dans
-          la pastille du titre, plus dans un filet qui rivalisait avec la réponse. */}
-      <div className="grid gap-3.5">
-        {sections.map((s) => {
-          // Le repli est le registre du NON SU, jamais une teinte de constat : une section dont la
-          // clé n'est pas connue de cette table est, par définition, quelque chose qu'on ne sait pas
-          // qualifier. C'est exactement ce que le gris neutre dit.
-          const col = SECTION_ACCENT[s.key] ?? "var(--reg-non-su)";
-          const ink = SECTION_INK[s.key] ?? "var(--reg-non-su)";
-
-          // CE QUI CORRESPOND (alignments) : une carte GROUPÉE, courte. Un point fort n'appelle aucune
-          // action, donc pas la structure complète d'une carte de problème — deux lignes suffisent :
-          // le TITRE (la priorité, en mini-titre) puis la PHRASE DE RANG. Le grain n'est montré qu'UNE
-          // fois, en intertitre, et SEULEMENT si toutes les lignes le partagent (sinon omis) : à ce
-          // grain unique répond un sous-titre unique, pas une répétition par ligne.
-          if (s.key === "alignments") {
-            const grains = s.cards.map((c) => (c.kind === "fact" ? factGrain(c.fact) : null));
-            const partages = new Set(grains.filter(Boolean));
-            const grainCommun = partages.size === 1 ? [...partages][0]! : null;
-            return (
-              <div key={s.key} className="glass rounded-xl p-5 sm:p-6">
-                <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mb-2" style={{ color: ink }}>
-                  <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
-                  {s.title}
-                </div>
-                {grainCommun ? (
-                  <p className="text-[13px] leading-[1.5] text-ghost mb-4">{grainCommun}</p>
-                ) : (
-                  <div className="mb-2" />
-                )}
-                <ul className="flex flex-col gap-5">
-                  {s.cards.map((card) => {
-                    if (card.kind !== "fact" || card.fact.role !== "alignment") return null;
-                    const f = card.fact;
-                    // Deux champs (décision D1) : le TITRE (headlineSubject, rendu CAPITALISÉ via CSS) puis
-                    // `faceStatement`, le fragment scannable que la RÈGLE a déjà produit (rang, catégorie de
-                    // taille, distance mer). Le composant ne recalcule rien ; la phrase autonome du fait
-                    // (statement) vit ailleurs (conclusion / export).
-                    return (
-                      <li key={f.id}>
-                        <p className="font-mono text-[11px] tracking-[0.08em] uppercase text-label mb-1">{cap(f.headlineSubject)}</p>
-                        <p className="text-[15px] leading-[1.55] text-muted">{f.faceStatement}</p>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            );
-          }
-
-          return (
-            /* LE LISERÉ COLORÉ DE 2 px A ÉTÉ RENDU AU VERDICT. Il courait en tête de CHAQUE section :
-               quatre traits vifs sous un bloc de réponse qui, lui, porte souvent un ton neutre (gris).
-               L'œil allait aux pièces à examiner plutôt qu'à la réponse. La couleur de section
-               survit là où elle suffit : la pastille en tête de titre, qui la porte déjà. */
-            <div key={s.key} className="glass rounded-xl p-5 sm:p-6">
-              <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mb-2" style={{ color: ink }}>
-                <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
-                {s.title}
-              </div>
-              {/* L'intro « Au-delà de vos priorités » ne s'affiche que si la section n'en porte
-                  aucune : plusieurs règles y déposent des constats rattachés à une priorité déclarée
-                  (inondation, air, bruit, industrie). Cf. sectionHorsPriorites. */}
-              {SECTION_INTRO[s.key] && sectionHorsPriorites(dossier, s) ? (
-                <p className="text-[13px] leading-[1.5] text-ghost mb-4">{SECTION_INTRO[s.key]}</p>
-              ) : (
-                <div className="mb-2" />
-              )}
-              {/* UN FILET ENTRE LES CONSTATS. Quatre constats s'enchaînaient dans la même carte,
-                  séparés par un seul intertitre gris : on ne voyait pas où l'un finissait. Le filet
-                  et l'air le disent, sans ajouter ni bordure ni fond (ce serait des cartes dans des
-                  cartes). Il ne s'applique pas au premier élément ni aux intertitres de grain, qui
-                  ouvrent un groupe au lieu de clore le précédent. */}
-              <ul className="flex flex-col gap-6 [&>li:not(:first-child):not(.grain-header)]:border-t [&>li:not(:first-child):not(.grain-header)]:border-[var(--border-1)] [&>li:not(:first-child):not(.grain-header)]:pt-6">
-                {(() => {
-                  // Le grain (« À cette adresse » / « À l'échelle de la commune ») ne se répète plus sur
-                  // chaque carte : il ne s'affiche QUE si la section MÉLANGE des grains, et alors comme un
-                  // intertitre de groupe posé UNE fois, quand le grain change d'une carte à la suivante.
-                  // Déterministe : aucun tri, l'ordre des cartes est préservé. Les compositions ont
-                  // désormais un grain (cardGrain) et interrompent le suivi comme les autres cartes.
-                  const absorbedOf = (c: DossierCard) =>
-                    c.kind === "composition"
-                      ? dossier.absorbedFacts.filter((f) => c.composition.absorbedFactIds.includes(f.id))
-                      : [];
-                  const grains = s.cards.map((c) => cardGrain(c, absorbedOf));
-                  const showGrain = new Set(grains.filter(Boolean)).size > 1;
-                  let prevGrain: string | null = null;
-                  // DANS UNE SECTION MIXTE, chaque constat AMBIANT se signale lui-même. L'intro de
-                  // section est tombée (elle mentirait pour la priorité qui cohabite ici), et sans elle
-                  // rien n'explique pourquoi ce constat apparaît alors que le lecteur ne l'a pas demandé.
-                  // Hors section mixte, l'intro suffit : pas d'étiquette redondante.
-                  const marquerAmbiant = sectionMixte(dossier, s) ? carteHorsPriorites(dossier) : () => false;
-                  return s.cards.map((card, i) => {
-                    const grain = grains[i]!;
-                    const grainHeader = showGrain && grain && grain !== prevGrain ? grain : null;
-                    prevGrain = grain;
-                    const grainLi = grainHeader ? (
-                      <li className="grain-header list-none flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-muted -mb-3 pt-2 first:pt-0">
-                        <span aria-hidden className="h-px w-4 bg-white/25 shrink-0" />
-                        {grainHeader}
-                      </li>
-                    ) : null;
-                    if (card.kind === "composition") {
-                      return (
-                        <Fragment key={card.composition.id}>
-                          {grainLi}
-                          <FactCompositionCard
-                            provenance={provenance}
-                            composition={card.composition}
-                            color={col}
-                            absorbedFacts={absorbedOf(card)}
-                          />
-                        </Fragment>
-                      );
-                    }
-                    const f = card.fact;
-                    // La convention de signalement ET la provenance descendent au même endroit : ce
-                    // sont les deux choses qu'on veut pouvoir vérifier sans les lire à chaque carte.
-                    const conventions = [
-                      ...(f.role === "verification" && f.signalConvention ? [f.signalConvention] : []),
-                      ...factSources(f),
-                    ];
-                    return (
-                      <Fragment key={f.id}>
-                        {grainLi}
-                        {/* Même ancre que les compositions (cf. FactCompositionCard) : la ligne
-                            « À contrôler en priorité » vise la carte qui porte l'action citée. */}
-                        <li id={dossierAnchorId(f.id)} tabIndex={-1} className="scroll-mt-24 focus:outline-none">
-                          {marquerAmbiant(card) ? (
-                            <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-ghost mb-1.5">
-                              Au-delà de vos priorités
-                            </p>
-                          ) : null}
-                          <FactBody fact={f} color={col} />
-                          <EvidenceRow fact={f} color={col} provenance={provenance} />
-                          <MethodDetails conventions={conventions} checks={factChecks(f)} />
-                        </li>
-                      </Fragment>
-                    );
-                  });
-                })()}
-              </ul>
+          {logementStatus === "pending" ? (
+            <div className="glass rounded-xl p-4 mb-3.5 flex items-center gap-3" style={{ borderLeft: "2px solid var(--info)" }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-info shrink-0 animate-pulse" />
+              <p className="text-[13px] text-muted">Première lecture à l&apos;échelle de la commune. L&apos;analyse du logement et de son environnement immédiat est en cours.</p>
             </div>
-          );
-        })}
+          ) : null}
+          {logementStatus === "unavailable" ? (
+            <div className="glass rounded-xl p-4 mb-3.5" style={{ borderLeft: "2px solid var(--ghost)" }}>
+              <p className="text-[13px] text-muted">L&apos;analyse réglementaire de cette adresse n&apos;a pas pu être actualisée. La conclusion ci-dessous reste limitée à la commune.</p>
+            </div>
+          ) : null}
+
+          {/* Le verdict. En « pending », le dossier n'est PAS final (l'augmentation adresse arrive) :
+              générer ici coûterait un second appel Sonnet, jeté quelques secondes plus tard. */}
+          {logementStatus === "pending" ? (
+            <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} />
+          ) : (
+            <Suspense
+              fallback={
+                <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} />
+              }
+            >
+              <ConclusionRedigee plan={dossier.narrativePlan} insee={insee} scopeKey={scopeKey} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} />
+            </Suspense>
+          )}
+        </div>
+
+        {supportingPane ? (
+          <div className="mb-5 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:mb-0">
+            {supportingPane}
+          </div>
+        ) : null}
+
+        {/* Les raisons : des pièces à examiner, dans un verre neutre. Leur couleur de section vit dans
+            la pastille du titre, plus dans un filet qui rivalisait avec la réponse. */}
+        <div className={supportingPane ? "lg:col-start-1 lg:row-start-2" : ""}>
+          <div className="grid gap-3.5">
+            {sections.map((s) => {
+              // Le repli est le registre du NON SU, jamais une teinte de constat : une section dont la
+              // clé n'est pas connue de cette table est, par définition, quelque chose qu'on ne sait pas
+              // qualifier. C'est exactement ce que le gris neutre dit.
+              const col = SECTION_ACCENT[s.key] ?? "var(--reg-non-su)";
+              const ink = SECTION_INK[s.key] ?? "var(--reg-non-su)";
+
+              // CE QUI CORRESPOND (alignments) : une carte GROUPÉE, courte. Un point fort n'appelle aucune
+              // action, donc pas la structure complète d'une carte de problème — deux lignes suffisent :
+              // le TITRE (la priorité, en mini-titre) puis la PHRASE DE RANG. Le grain n'est montré qu'UNE
+              // fois, en intertitre, et SEULEMENT si toutes les lignes le partagent (sinon omis) : à ce
+              // grain unique répond un sous-titre unique, pas une répétition par ligne.
+              if (s.key === "alignments") {
+                const grains = s.cards.map((c) => (c.kind === "fact" ? factGrain(c.fact) : null));
+                const partages = new Set(grains.filter(Boolean));
+                const grainCommun = partages.size === 1 ? [...partages][0]! : null;
+                return (
+                  <div key={s.key} className="glass rounded-xl p-5 sm:p-6">
+                    <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mb-2" style={{ color: ink }}>
+                      <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
+                      {s.title}
+                    </div>
+                    {grainCommun ? (
+                      <p className="text-[13px] leading-[1.5] text-ghost mb-4">{grainCommun}</p>
+                    ) : (
+                      <div className="mb-2" />
+                    )}
+                    <ul className="flex flex-col gap-5">
+                      {s.cards.map((card) => {
+                        if (card.kind !== "fact" || card.fact.role !== "alignment") return null;
+                        const f = card.fact;
+                        // Deux champs (décision D1) : le TITRE (headlineSubject, rendu CAPITALISÉ via CSS) puis
+                        // `faceStatement`, le fragment scannable que la RÈGLE a déjà produit (rang, catégorie de
+                        // taille, distance mer). Le composant ne recalcule rien ; la phrase autonome du fait
+                        // (statement) vit ailleurs (conclusion / export).
+                        return (
+                          <li key={f.id}>
+                            <p className="font-mono text-[11px] tracking-[0.08em] uppercase text-label mb-1">{cap(f.headlineSubject)}</p>
+                            <p className="text-[15px] leading-[1.55] text-muted">{f.faceStatement}</p>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                );
+              }
+
+              return (
+                /* LE LISERÉ COLORÉ DE 2 px A ÉTÉ RENDU AU VERDICT. Il courait en tête de CHAQUE section :
+                   quatre traits vifs sous un bloc de réponse qui, lui, porte souvent un ton neutre (gris).
+                   L'œil allait aux pièces à examiner plutôt qu'à la réponse. La couleur de section
+                   survit là où elle suffit : la pastille en tête de titre, qui la porte déjà. */
+                <div key={s.key} className="glass rounded-xl p-5 sm:p-6">
+                  <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mb-2" style={{ color: ink }}>
+                    <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: col, boxShadow: `0 0 6px ${col}` }} />
+                    {s.title}
+                  </div>
+                  {/* L'intro « Au-delà de vos priorités » ne s'affiche que si la section n'en porte
+                      aucune : plusieurs règles y déposent des constats rattachés à une priorité déclarée
+                      (inondation, air, bruit, industrie). Cf. sectionHorsPriorites. */}
+                  {SECTION_INTRO[s.key] && sectionHorsPriorites(dossier, s) ? (
+                    <p className="text-[13px] leading-[1.5] text-ghost mb-4">{SECTION_INTRO[s.key]}</p>
+                  ) : (
+                    <div className="mb-2" />
+                  )}
+                  {/* UN FILET ENTRE LES CONSTATS. Quatre constats s'enchaînaient dans la même carte,
+                      séparés par un seul intertitre gris : on ne voyait pas où l'un finissait. Le filet
+                      et l'air le disent, sans ajouter ni bordure ni fond (ce serait des cartes dans des
+                      cartes). Il ne s'applique pas au premier élément ni aux intertitres de grain, qui
+                      ouvrent un groupe au lieu de clore le précédent. */}
+                  <ul className="flex flex-col gap-6 [&>li:not(:first-child):not(.grain-header)]:border-t [&>li:not(:first-child):not(.grain-header)]:border-[var(--border-1)] [&>li:not(:first-child):not(.grain-header)]:pt-6">
+                    {(() => {
+                      // Le grain (« À cette adresse » / « À l'échelle de la commune ») ne se répète plus sur
+                      // chaque carte : il ne s'affiche QUE si la section MÉLANGE des grains, et alors comme un
+                      // intertitre de groupe posé UNE fois, quand le grain change d'une carte à la suivante.
+                      // Déterministe : aucun tri, l'ordre des cartes est préservé. Les compositions ont
+                      // désormais un grain (cardGrain) et interrompent le suivi comme les autres cartes.
+                      const absorbedOf = (c: DossierCard) =>
+                        c.kind === "composition"
+                          ? dossier.absorbedFacts.filter((f) => c.composition.absorbedFactIds.includes(f.id))
+                          : [];
+                      const grains = s.cards.map((c) => cardGrain(c, absorbedOf));
+                      const showGrain = new Set(grains.filter(Boolean)).size > 1;
+                      let prevGrain: string | null = null;
+                      // DANS UNE SECTION MIXTE, chaque constat AMBIANT se signale lui-même. L'intro de
+                      // section est tombée (elle mentirait pour la priorité qui cohabite ici), et sans elle
+                      // rien n'explique pourquoi ce constat apparaît alors que le lecteur ne l'a pas demandé.
+                      // Hors section mixte, l'intro suffit : pas d'étiquette redondante.
+                      const marquerAmbiant = sectionMixte(dossier, s) ? carteHorsPriorites(dossier) : () => false;
+                      return s.cards.map((card, i) => {
+                        const grain = grains[i]!;
+                        const grainHeader = showGrain && grain && grain !== prevGrain ? grain : null;
+                        prevGrain = grain;
+                        const grainLi = grainHeader ? (
+                          <li className="grain-header list-none flex items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] uppercase text-muted -mb-3 pt-2 first:pt-0">
+                            <span aria-hidden className="h-px w-4 bg-white/25 shrink-0" />
+                            {grainHeader}
+                          </li>
+                        ) : null;
+                        if (card.kind === "composition") {
+                          return (
+                            <Fragment key={card.composition.id}>
+                              {grainLi}
+                              <FactCompositionCard
+                                provenance={provenance}
+                                composition={card.composition}
+                                color={col}
+                                absorbedFacts={absorbedOf(card)}
+                              />
+                            </Fragment>
+                          );
+                        }
+                        const f = card.fact;
+                        // La convention de signalement ET la provenance descendent au même endroit : ce
+                        // sont les deux choses qu'on veut pouvoir vérifier sans les lire à chaque carte.
+                        const conventions = [
+                          ...(f.role === "verification" && f.signalConvention ? [f.signalConvention] : []),
+                          ...factSources(f),
+                        ];
+                        return (
+                          <Fragment key={f.id}>
+                            {grainLi}
+                            {/* Même ancre que les compositions (cf. FactCompositionCard) : la ligne
+                                « À contrôler en priorité » vise la carte qui porte l'action citée. */}
+                            <li id={dossierAnchorId(f.id)} tabIndex={-1} className="scroll-mt-24 focus:outline-none">
+                              {marquerAmbiant(card) ? (
+                                <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-ghost mb-1.5">
+                                  Au-delà de vos priorités
+                                </p>
+                              ) : null}
+                              <FactBody fact={f} color={col} />
+                              <EvidenceRow fact={f} color={col} provenance={provenance} />
+                              <MethodDetails conventions={conventions} checks={factChecks(f)} />
+                            </li>
+                          </Fragment>
+                        );
+                      });
+                    })()}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* La note « Non encore examiné » vivait ici, et disait une SECONDE fois ce que la conclusion
+              dit déjà. Deux emplacements laissaient croire à deux niveaux de réserve distincts. Une
+              contrainte dure non testée réduit la portée du verdict : elle se lit sous lui, dans « Limite
+              de ce constat », pas trente centimètres plus bas. */}
+
+          {/* La colonne d'appui porte déjà ces destinations. Sans elle, ce lien reste le repli
+              autonome de la section et l'ajout d'adresse passe par la vraie porte d'entrée. */}
+          {!supportingPane && structured ? (
+            logement ? (
+              <Link
+                href={logement.href}
+                className="mt-5 group flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-4 rounded-xl no-underline border border-[var(--border-2)] bg-[var(--bg-elev)] hover:border-accent/40 hover:bg-[var(--bg-elev-2)] transition-colors"
+              >
+                <span className="flex flex-col gap-1">
+                  <span className="text-[14px] font-semibold text-label">Voir l&apos;analyse du logement</span>
+                  <span className="text-[13px] text-muted">{logement.label}</span>
+                </span>
+                <span aria-hidden className="font-mono text-[13px] text-accent transition-transform group-hover:translate-x-0.5">→</span>
+              </Link>
+            ) : (
+              <Link
+                href="/dossier"
+                className="mt-5 group flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-4 rounded-xl no-underline border border-[var(--border-2)] bg-[var(--bg-elev)] hover:border-accent/40 hover:bg-[var(--bg-elev-2)] transition-colors"
+              >
+                <span className="flex flex-col gap-1">
+                  <span className="text-[14px] font-semibold text-label">Affiner avec une adresse</span>
+                  <span className="text-[13px] text-muted">Le bâtiment, les risques localisés, les contraintes réglementaires et l&apos;environnement immédiat.</span>
+                </span>
+                <span aria-hidden className="font-mono text-[13px] text-accent transition-transform group-hover:translate-x-0.5">→</span>
+              </Link>
+            )
+          ) : null}
+        </div>
       </div>
-
-      {/* La note « Non encore examiné » vivait ici, et disait une SECONDE fois ce que la conclusion
-          dit déjà. Deux emplacements laissaient croire à deux niveaux de réserve distincts. Une
-          contrainte dure non testée réduit la portée du verdict : elle se lit sous lui, dans « Limite
-          de ce constat », pas trente centimètres plus bas. */}
-
-      {structured ? (
-        logement ? (
-          <Link
-            href={logement.href}
-            className="mt-5 group flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-4 rounded-xl no-underline border border-[var(--border-2)] bg-[var(--bg-elev)] hover:border-accent/40 hover:bg-[var(--bg-elev-2)] transition-colors"
-          >
-            <span className="flex flex-col gap-1">
-              <span className="text-[14px] font-semibold text-label">Voir l&apos;analyse du logement</span>
-              <span className="text-[13px] text-muted">{logement.label}</span>
-            </span>
-            <span aria-hidden className="font-mono text-[13px] text-accent transition-transform group-hover:translate-x-0.5">→</span>
-          </Link>
-        ) : (
-          <Link
-            href="/rapport/logement"
-            className="mt-5 group flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-4 rounded-xl no-underline border border-[var(--border-2)] bg-[var(--bg-elev)] hover:border-accent/40 hover:bg-[var(--bg-elev-2)] transition-colors"
-          >
-            <span className="flex flex-col gap-1">
-              <span className="text-[14px] font-semibold text-label">Affiner avec une adresse</span>
-              <span className="text-[13px] text-muted">Le bâtiment, les risques localisés, les contraintes réglementaires et l&apos;environnement immédiat.</span>
-            </span>
-            <span aria-hidden className="font-mono text-[13px] text-accent transition-transform group-hover:translate-x-0.5">→</span>
-          </Link>
-        )
-      ) : null}
     </section>
   );
 }

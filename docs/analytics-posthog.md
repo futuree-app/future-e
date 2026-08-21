@@ -1,6 +1,6 @@
 # Analytics PostHog — futur•e
 
-> Dernière mise à jour : 2026-05-28
+> Dernière mise à jour : 2026-08-21
 
 ---
 
@@ -66,10 +66,11 @@ Déclenché à deux moments distincts — différencier via `source`.
 
 | Propriété | Valeurs |
 |---|---|
-| `module_id` | `quartier`, `logement`, `metier`, `sante`, `mobilite`, `projets` |
+| `module_id` | `quartier`, `autour`, `logement` |
 | `source` | `hub` (clic depuis `/rapport`) · `page` (arrivée sur la page module) |
+| `surface` | `echelle_navigator` pour le repère supérieur de `/rapport` · absent sur la page module |
 | `risk_category` | cf. `buildModuleProps` |
-| `module_index` | 1–6 |
+| `module_index` | 1–3 |
 | `commune`, `insee_code`, `department`, `region`, `report_id` | geo |
 
 **Filtre recommandé pour compter les ouvertures uniques :**
@@ -77,7 +78,25 @@ Déclenché à deux moments distincts — différencier via `source`.
 event = report_module_opened AND source = "page"
 ```
 
-**Source :** client · `src/components/ModuleTracker.tsx` + `RapportTrackedLinks.tsx`
+**Source :** client · `src/hooks/useModuleTracking.ts` + `src/components/report/EchelleNavigator.tsx`
+
+#### `report_scale_address_required`
+Déclenché quand le dossier ne couvre que Territoire et que le lecteur choisit le geste distinct
+« Analyser une adresse ». Les deux niveaux fermés ne sont jamais rendus comme des liens accessibles.
+
+| Propriété | Valeurs |
+|---|---|
+| `requested_modules` | `["autour", "logement"]` |
+| `source` | `hub` |
+| `surface` | `echelle_navigator` (le repère, AVANT la lecture) · `fin_de_dossier` (la carte qui suit les contrôles, APRÈS la lecture) |
+| `commune`, `insee_code`, `department`, `region`, `report_id` | geo |
+
+Les deux emplacements portent la même destination et le même événement, et se distinguent par
+`surface` : c'est ce qui permettra d'en retirer un. La question posée est « quel moment déclenche le
+geste », pas « combien de clics au total » — grouper sans `surface` répond à côté.
+
+**Source :** client · `src/components/report/EchelleNavigator.tsx` et
+`src/app/(account)/rapport/RapportTrackedLinks.tsx`
 
 #### `report_module_scroll`
 Déclenché aux seuils 25 / 50 / 75 / 90 %.
@@ -194,6 +213,43 @@ event = ai_feedback_submitted GROUP BY feedback
 ```
 { source: string }
 ```
+
+---
+
+### Contrôle prioritaire du dossier
+
+> Ajoutés le 19/08/2026. Ils ne mesurent pas une « performance » de la ligne : ils cadrent la question
+> qualitative posée en entretien (`docs/protocoles/2026-08-19-premier-controle-entretien.md`) —
+> sur quels sujets le contrôle prioritaire tombe, et est-il utilisé pour aller voir la carte.
+
+#### `priority_control_shown`
+Déclenché une fois par montage du bloc de verdict qui porte une démarche. Jamais sur `/dev/*`.
+
+| Propriété | Valeurs |
+|---|---|
+| `ordre` | `priorite` (« À contrôler en priorité ») ou `ensuite` (le héros a déjà nommé le contrôle) |
+| `actions_count` | 1 ou 2 (plafond du moteur) |
+| `actions_liees` | Combien de démarches mènent réellement à une carte rendue. Un écart avec `actions_count` est un défaut à voir |
+| `sujets` | Identifiants de carte, code INSEE retiré (`composition-argiles-ppr`) |
+| `types` | `demander` \| `regarder` \| `consulter` \| `faire_faire` \| `autre`, dérivés du verbe |
+
+**Source :** client · `src/components/report/PriorityControlActions.tsx`
+
+#### `priority_control_activated`
+Déclenché au clic sur une démarche, juste avant le déplacement vers sa carte.
+
+| Propriété | Valeurs |
+|---|---|
+| `ordre` | idem ci-dessus |
+| `position` | 0 pour la première démarche, 1 pour la seconde |
+| `sujet`, `type` | idem, au singulier |
+
+**Source :** client · `src/components/report/PriorityControlActions.tsx`
+
+**Ce qui ne part pas** : aucune adresse, aucun libellé de geste mot pour mot, aucun code INSEE, aucune
+réponse libre. La réduction est faite par la lib pure `src/lib/decision/priority-control-telemetry.ts`,
+testée. Une réponse libre à la question d'entretien **ne doit pas** être envoyée à PostHog : le dépôt
+n'a aucune convention pour y stocker du verbatim.
 
 ---
 

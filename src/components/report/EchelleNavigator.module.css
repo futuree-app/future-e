@@ -1,0 +1,98 @@
+.visual {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+.shapeLink {
+  cursor: pointer;
+}
+
+/* AUCUN `transform` CSS SUR CES FORMES. Le losange porte sa rotation dans son attribut `transform`,
+   et une transformation CSS ne s'ajoute pas à l'attribut, elle le REMPLACE : un agrandissement au
+   survol remettait le losange à plat. L'état actif passe par le contraste et l'épaisseur, ce qui est
+   de toute façon la règle ; le micro-zoom n'apportait rien qu'elle ne dise déjà. */
+.shape {
+  pointer-events: all;
+  transition:
+    fill 180ms ease,
+    stroke 180ms ease,
+    stroke-width 180ms ease;
+}
+
+/* LA TRAME NE SURVIT PAS À LA RÉDUCTION. Sous 1024 px, le repère tient dans 112 ou 156 px : la
+   trame n'y est pas rendue du tout, plutôt que rapetissée en une masse grise. Le seuil est le même
+   que celui qui donne au dessin sa largeur de 224 px, plus bas dans ce fichier : les deux règles
+   décrivent le même changement de gabarit et doivent bouger ensemble. */
+.trame {
+  display: none;
+}
+
+.trameGroupe {
+  transition: opacity 180ms ease;
+}
+
+.gridLine,
+.gridMark,
+.rimTick {
+  fill: none;
+  stroke: var(--fg-3);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.gridLine {
+  stroke-linecap: butt;
+}
+
+.gridMark,
+.rimTick {
+  stroke-linecap: round;
+}
+
+/* Le point de mesure est plein : c'est la seule matière du dessin qui ne soit pas un trait, et c'est
+   ce qui sépare le vocabulaire de la commune de celui du voisinage. */
+.gridDot {
+  fill: var(--fg-3);
+  stroke: none;
+  pointer-events: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 0;
+  border-top: 1px solid var(--border-1);
+  text-decoration: none;
+}
+
+.row:hover,
+.rowActive {
+  background: var(--bg-elev);
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--fg-hi);
+  outline-offset: 3px;
+}
+
+@media (min-width: 1024px) {
+  .visual {
+    width: 224px;
+    margin-inline: auto;
+  }
+
+  .trame {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shape,
+  .trameGroupe {
+    transition: none;
+  }
+}

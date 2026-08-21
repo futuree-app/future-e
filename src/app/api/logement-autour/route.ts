@@ -106,8 +106,10 @@ export async function POST(req: Request) {
   // la BPE et la tuile OSM. Ne lèvent jamais ; `null` laisse le champ absent, donc pas de bloc.
   const permisPromise = fetchPermisAutour(center.lat, center.lon, existing.insee);
 
-  // BPE : local, immédiat.
-  const bpe = nearestByCategory(center, await loadBpePointsAround(center));
+  // BPE : local, immédiat. Le millésime voyage avec les points : il vient des shards, jamais d'une
+  // constante du code (cf. `loadBpePointsAround`).
+  const { points: bpePoints, millesime: bpeMillesime } = await loadBpePointsAround(center);
+  const bpe = nearestByCategory(center, bpePoints);
 
   // OSM : cache de cellule (service-role) ; si froid, tentative inline sous timeout court.
   let osm = null;
@@ -134,7 +136,7 @@ export async function POST(req: Request) {
     osmStatus = "failed";
   }
 
-  const snapshot = assembleSnapshot(center, bpe, osm, osmStatus, await icuPromise, await permisPromise);
+  const snapshot = assembleSnapshot(center, bpe, osm, osmStatus, await icuPromise, await permisPromise, bpeMillesime);
 
   // Le patch ne porte QUE ce que ce module produit. L'identité de l'adresse et la parcelle ne
   // sont plus dans la portée d'écriture : la question « ne jamais dégrader la parcelle », qui

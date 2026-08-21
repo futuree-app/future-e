@@ -1,0 +1,557 @@
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--fg-1);
+}
+
+.shell {
+  width: min(calc(100% - 40px), 1100px);
+  margin-inline: auto;
+  padding: 56px 0 88px;
+}
+
+.pageHeader {
+  padding-bottom: 48px;
+}
+
+.pageKicker,
+.prototypeRank,
+.navigatorKicker,
+.stateButton,
+.scaleRank,
+.mobileCheckTitle {
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pageKicker {
+  margin: 0 0 14px;
+  color: var(--fg-3);
+  font-size: 11px;
+}
+
+.pageHeader h1 {
+  margin: 0;
+  max-width: 840px;
+  font-family: var(--font-display);
+  font-size: clamp(34px, 5.2vw, 62px);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+}
+
+.pageHeader > p:last-child {
+  max-width: 760px;
+  margin: 24px 0 0;
+  color: var(--fg-2);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.prototypeList {
+  display: flex;
+  flex-direction: column;
+}
+
+.prototypeCard {
+  display: grid;
+  gap: 44px;
+  padding: 64px 0;
+  border-top: 1px solid var(--border-2);
+}
+
+.prototypeNotes {
+  min-width: 0;
+}
+
+.prototypeRank {
+  margin: 0 0 12px;
+  color: var(--fg-3);
+  font-size: 10px;
+}
+
+.prototypeTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(27px, 3.6vw, 42px);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+}
+
+.prototypeSubtitle {
+  margin: 10px 0 0;
+  color: var(--fg-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.prototypeDescription {
+  margin: 24px 0 0;
+  color: var(--fg-2);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.assessment {
+  display: grid;
+  gap: 1px;
+  margin-top: 26px;
+  overflow: hidden;
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  background: var(--border-2);
+}
+
+.assessment > div {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 16px;
+  padding: 13px 14px;
+  background: var(--bg);
+}
+
+.assessment dt,
+.assessment dd {
+  margin: 0;
+}
+
+.assessment dt {
+  color: var(--fg-3);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.assessment dd {
+  color: var(--fg-2);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.stateControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 28px;
+}
+
+.stateButton {
+  min-height: 34px;
+  padding: 7px 11px;
+  border: 1px solid var(--border-2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg-3);
+  cursor: pointer;
+  font-size: 9px;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.stateButton:hover,
+.stateButton:focus-visible,
+.stateButtonActive {
+  border-color: var(--fg-2);
+  background: var(--bg-card);
+  color: var(--fg-hi);
+}
+
+.stateButton:focus-visible,
+.scaleRow:focus-visible,
+.shapeLink:focus-visible {
+  outline: 2px solid var(--fg-hi);
+  outline-offset: 3px;
+}
+
+.navigator {
+  width: 280px;
+  align-self: start;
+  padding-left: 24px;
+  border-left: 1px solid var(--border-2);
+}
+
+.navigatorKicker {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: 9px;
+}
+
+.navigatorTitle {
+  margin: 7px 0 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.graphic {
+  width: var(--prototype-size);
+  height: var(--prototype-size);
+  margin: 18px auto 0;
+}
+
+.graphic svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.texture,
+.territoryLine,
+.territoryFine,
+.neighborhoodRoad,
+.neighborhoodFine,
+.footprint,
+.parcelLine,
+.buildingLine,
+.registrationPoint {
+  pointer-events: none;
+}
+
+.texture {
+  opacity: 0.68;
+  transition: opacity 180ms ease;
+}
+
+.territoryLine,
+.territoryFine,
+.neighborhoodRoad,
+.neighborhoodFine,
+.footprint,
+.parcelLine,
+.buildingLine,
+.hitFrame {
+  vector-effect: non-scaling-stroke;
+}
+
+.territoryLine,
+.territoryFine,
+.neighborhoodRoad,
+.neighborhoodFine,
+.parcelLine,
+.buildingLine {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.territoryLine {
+  stroke: var(--fg-3);
+  stroke-width: 1.15;
+}
+
+.territoryFine {
+  stroke: var(--border-3);
+  stroke-width: 0.65;
+}
+
+.neighborhoodRoad {
+  stroke: var(--fg-2);
+  stroke-width: 1.1;
+}
+
+.neighborhoodFine {
+  stroke: var(--border-3);
+  stroke-width: 0.65;
+}
+
+.footprint {
+  fill: color-mix(in srgb, var(--fg-3) 12%, transparent);
+  stroke: var(--fg-3);
+  stroke-width: 0.65;
+  vector-effect: non-scaling-stroke;
+}
+
+.parcelLine {
+  stroke: var(--border-3);
+  stroke-width: 0.75;
+  stroke-dasharray: 2 2;
+}
+
+.buildingLine {
+  stroke: var(--fg-2);
+  stroke-width: 0.95;
+}
+
+/* A2 · LA TRAME DE MESURE. Un seul trait, une seule épaisseur : la hiérarchie des trois échelles
+   passe par le PAS de la trame et par l'opacité du groupe, jamais par la couleur ni par des
+   demi-pixels. Un trait de 0,65 px, comme en A et en B, devient une bouillie grise sur un écran
+   non-retina : ici tout est à 1 px, en `non-scaling-stroke`. */
+.gridLine,
+.gridMark,
+.rimTick {
+  fill: none;
+  stroke: var(--fg-3);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.gridLine {
+  stroke-linecap: butt;
+}
+
+.gridMark {
+  stroke-linecap: round;
+}
+
+/* Le point de mesure est plein : c'est la seule matière du dessin qui ne soit pas un trait, et c'est
+   ce qui distingue le vocabulaire de la commune de celui du voisinage. */
+.gridDot {
+  fill: var(--fg-3);
+  stroke: none;
+  pointer-events: none;
+}
+
+.rimTick {
+  stroke-linecap: round;
+}
+
+.shapeLink {
+  cursor: pointer;
+}
+
+.hitFrame {
+  fill: transparent;
+  stroke: var(--fg-3);
+  stroke-width: 1.6;
+  pointer-events: all;
+  transition:
+    fill 180ms ease,
+    stroke 180ms ease,
+    stroke-width 180ms ease,
+    filter 180ms ease;
+}
+
+.shapeLink:hover .hitFrame,
+.shapeLink:focus-visible .hitFrame {
+  fill: color-mix(in srgb, var(--fg-hi) 3%, transparent);
+  stroke: var(--fg-hi);
+  stroke-width: 2.8;
+}
+
+.registrationPoint {
+  fill: var(--fg-3);
+  transition: fill 180ms ease;
+}
+
+.plane {
+  transform-box: view-box;
+  transform-origin: center;
+  transition:
+    transform 180ms ease,
+    opacity 180ms ease,
+    filter 180ms ease;
+}
+
+.navigatorNav {
+  margin-top: 18px;
+}
+
+.scaleList {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.scaleRow {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 14px;
+  gap: 9px;
+  align-items: baseline;
+  min-height: 43px;
+  padding: 9px 8px;
+  border-radius: 7px;
+  color: var(--fg-2);
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.scaleRow:hover,
+.scaleRowActive {
+  background: var(--bg-card);
+  color: var(--fg-hi);
+}
+
+.scaleRank {
+  color: var(--fg-3);
+  font-size: 9px;
+}
+
+.scaleIdentity {
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.scaleIdentity strong {
+  color: inherit;
+  font-weight: 600;
+}
+
+.scaleIdentity span,
+.scaleIdentity small {
+  color: var(--fg-3);
+  font-size: inherit;
+}
+
+.scaleIdentity small::before {
+  content: " · ";
+}
+
+.scaleArrow {
+  justify-self: end;
+  color: var(--fg-3);
+  font-size: 11px;
+  transition: transform 160ms ease;
+}
+
+.scaleRow:hover .scaleArrow,
+.scaleRowActive .scaleArrow {
+  transform: translateX(2px);
+}
+
+.hint {
+  min-height: 2.8em;
+  margin: 13px 8px 0;
+  color: var(--fg-3);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.mobileCheck {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 36px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-2);
+}
+
+.mobileCheckTitle {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: 9px;
+}
+
+.mobileCheckText {
+  margin: 7px 0 0;
+  color: var(--fg-2);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.pageFooter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 28px;
+  border-top: 1px solid var(--border-2);
+  color: var(--fg-3);
+  font-size: 12px;
+}
+
+.pageFooter p {
+  margin: 0;
+}
+
+.pageFooter a {
+  color: var(--fg-2);
+  text-decoration: none;
+}
+
+.pageFooter a:hover {
+  color: var(--fg-hi);
+}
+
+@media (min-width: 900px) {
+  .prototypeCard {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 64px;
+  }
+}
+
+@media (max-width: 899px) {
+  .navigator {
+    width: 100%;
+    padding: 28px 0 0;
+    border-top: 1px solid var(--border-2);
+    border-left: 0;
+  }
+
+  .graphic {
+    margin-inline: 0;
+  }
+
+  .navigatorNav {
+    max-width: 420px;
+  }
+}
+
+@media (max-width: 560px) {
+  .shell {
+    width: min(calc(100% - 32px), 1100px);
+    padding-top: 38px;
+  }
+
+  .pageHeader {
+    padding-bottom: 36px;
+  }
+
+  .prototypeCard {
+    gap: 34px;
+    padding: 48px 0;
+  }
+
+  .assessment > div {
+    grid-template-columns: 70px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .stateControls {
+    gap: 6px;
+  }
+
+  .stateButton {
+    padding-inline: 9px;
+  }
+
+  .mobileCheck {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 112px;
+    gap: 16px;
+  }
+
+  .mobileCheck > div {
+    min-width: 0;
+  }
+
+  .mobileCheck > div:last-child {
+    width: 112px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .texture,
+  .stateButton,
+  .hitFrame,
+  .registrationPoint,
+  .plane,
+  .scaleRow,
+  .scaleArrow {
+    transition: none;
+  }
+}

@@ -5,6 +5,8 @@ import posthog from "posthog-js";
 import { AddressAutocomplete } from "@/components/report/AddressAutocomplete";
 import type { BanAddressResult } from "@/lib/ban";
 import { expectedCoverage } from "@/lib/dossier-couverture-attendue";
+// Les trois échelles sont partagées avec la page de paiement : cf. `dossier-echelles.ts`.
+import { ECHELLES_DU_DOSSIER, libelleEchelle } from "@/lib/dossier-echelles";
 
 type Candidate = {
   banId: string;
@@ -46,26 +48,6 @@ type Outcome =
 // ════════════════════════════════════════════════════════════════════════════
 
 const EUR = (cents: number) => `${Math.round(cents / 100)} €`;
-
-// Les trois échelles du dossier. Elles décrivent ce que le lecteur obtient, dans son ordre de
-// lecture : le territoire d'abord, puis ce qui l'entoure, puis le bâtiment.
-const SCALES = [
-  {
-    key: "commune",
-    title: "La commune",
-    body: "Ce qu'elle devient face au climat, ce à quoi elle est exposée, ce qui la transforme.",
-  },
-  {
-    key: "autour",
-    title: "Autour de l'adresse",
-    body: "Ce qui l'entoure à quelques centaines de mètres, et ce que ce voisinage change au quotidien.",
-  },
-  {
-    key: "logement",
-    title: "Le logement",
-    body: "Ce que le bâtiment et sa parcelle révèlent de leur exposition.",
-  },
-] as const;
 
 const MATTER_LABEL: Record<MatterState, { text: string; tone: "found" | "absent" | "unknown" }> = {
   found: { text: "disponible", tone: "found" },
@@ -206,10 +188,10 @@ export function DossierQualificationClient() {
           </p>
 
           <div style={{ display: "grid", gap: 26 }}>
-            {SCALES.map((scale) => (
+            {ECHELLES_DU_DOSSIER.map((scale) => (
               <div key={scale.key}>
                 <p className="text-[16px] text-label leading-snug mb-1.5">
-                  {scale.key === "commune" && address.city ? `${scale.title} : ${address.city}` : scale.title}
+                  {libelleEchelle(scale, address.city)}
                 </p>
                 <p className="text-[14px] text-muted leading-relaxed">{scale.body}</p>
 

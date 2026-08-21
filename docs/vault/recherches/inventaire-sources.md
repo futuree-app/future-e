@@ -146,7 +146,7 @@ Licence Ouverte / Etalab ; **OSM = ODbL**.
 |---|---|---|---|---|
 | **OSM / Overpass** | OpenStreetMap (ODbL) | Scoring `mobilite_quotidienne`, `calme_sonore`, `vie_locale` | `populate-reseau-local.py`, `populate-calme-sonore.py`, `populate-vie-locale.py` | point |
 | **SNCF Open Data** | SNCF | Scoring `acces_transports` | `populate-transports.py` | point gare |
-| **BPE24** | INSEE | Scoring services/écoles/culture/santé + `vie_etudiante` | `populate-bpe.py` | équipement |
+| **BPE25** | INSEE | Scoring écoles/culture/`vie_etudiante` **et** lieux du module « Autour de l'adresse » (une seule source, arbitrage 19/08/2026) ; millésime porté par la donnée (`index.meta.bpeMillesime`, `millesime` des shards) | `populate-bpe.py`, `populate-bpe.py --face3-shards` | commune + lieu |
 | **INSEE** (recensement, MOBPRO, FLORES, ZE2020, logement) | INSEE | Scoring démo, dépendance auto, emploi, UU | `populate-demographie.py`, `populate-dependance-auto.js`, `populate-communes-emploi.js`, `populate-unite-urbaine.py` | commune/ZE/UU |
 | **MESR** | Enseignement sup. | Scoring `vie_etudiante` | `populate-etudiants.py` | unité urbaine |
 | **OSO 2023** (raster 10 m) | CESBIO / Théia | Scoring `nature` | `populate-nature.py` | raster 10 m |

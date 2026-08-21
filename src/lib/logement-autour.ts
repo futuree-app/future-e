@@ -16,6 +16,9 @@ export function assembleSnapshot(
   // Le registre des autorisations d'urbanisme, quand il a répondu. `null` laisse le champ ABSENT
   // du snapshot : le bloc disparaît, au lieu d'annoncer une absence de permis jamais établie.
   permis: PermisSnapshot | null = null,
+  // Le millésime BPE, lu dans les shards. `null` laisse le champ ABSENT : l'écran dit alors le
+  // recensement sans son année, plutôt que d'en supposer une.
+  bpeMillesime: string | null = null,
 ): Face3Snapshot {
   const now = new Date().toISOString();
   return {
@@ -31,6 +34,7 @@ export function assembleSnapshot(
     sourceStatus: { bpe: "complete", osmInfrastructure: osmStatus, osmGreenSpaces: osmStatus },
     sources: {
       bpeVersion: SOURCES_VERSION,
+      ...(bpeMillesime ? { bpeMillesime } : {}),
       osmFetchedAt: osmStatus === "complete" ? now : null,
       osmQueryVersion: OSM_QUERY_VERSION,
     },

@@ -13,8 +13,17 @@
 // LES TEXTES ONT ÉTÉ UNIFIÉS ICI LE 29/07/2026 ; L'ACTIVATION L'A ÉTÉ LE 01/08. Entre les deux, il
 // restait deux moteurs pour décider QUELS gestes apparaissent, sur les mêmes faits.
 //
-// LE VERBE NOMME LE GESTE RÉEL : Regardez / Demandez / Consultez / Signalez / Suivez / Faites
+// LE VERBE NOMME LE GESTE RÉEL : Regardez / Demandez / Consultez / Suivez / Surveillez / Faites
 // chiffrer. Chacun dit ce que la personne va effectivement faire.
+//
+// `location` DÉCRIT UNE DÉMARCHE AVANT ENGAGEMENT (19/08/2026). Une posture `location` est celle de
+// quelqu'un qui envisage de louer, pas de quelqu'un qui loue déjà : ce cas-là est `reside`. Trois
+// variantes supposaient pourtant un bail en cours — « Signalez les fissures apparentes au
+// bailleur », « Signalez tout affaissement au bailleur », et un détail qui mélangeait le document
+// « remis à la signature » et le sinistre « survenu pendant le bail ». Elles étaient donc muettes
+// pour la seule personne qui pouvait encore renoncer. Les gestes qu'un candidat locataire peut
+// réellement faire sont : REGARDER pendant la visite, et DEMANDER à celui qui détient l'information.
+// L'invariant est tenu par `logement-gestes.test.ts`, famille par famille.
 //
 // TROIS PRÉCAUTIONS TENUES DANS TOUTE LA TABLE :
 //   - aucun `detail` n'affirme un droit ni un délai (« le diagnostic vaut dix ans ») : ce sont des
@@ -80,19 +89,19 @@ export const GESTES: Record<GesteKey, Record<Bucket, ActionCopy>> = {
   },
   bati: {
     achat: { label: "Demandez l'historique des fissures et des sinistres", detail: "Faites contrôler les fondations si un doute subsiste." },
-    location: { label: "Signalez les fissures apparentes au bailleur", detail: "Photographiez ce qui est visible et signalez-le par écrit." },
+    location: { label: "Demandez au bailleur l'historique des fissures visibles", detail: "Regardez les façades et les ouvertures pendant la visite, puis demandez si leur origine ou leur évolution a été documentée." },
     reside: { label: "Suivez les fissures dans le temps", detail: "Photographiez-les avec une date, et comparez d'une saison à l'autre." },
     neutre: { label: "Regardez les signes visibles sur le bâti", detail: "Fissures en escalier sur les façades, portes ou fenêtres qui coincent, sol qui se déforme." },
   },
   reglementaire: {
     achat: { label: "Consultez le règlement de la zone en mairie", detail: "Il fixe ce qui est autorisé en cas de travaux ou d'extension, et ce qu'il impose au bâti existant." },
-    location: { label: "Demandez au bailleur les prescriptions qui s'appliquent", detail: "L'état des risques remis à la signature indique le zonage et ce qu'il impose au logement." },
+    location: { label: "Demandez au bailleur les prescriptions qui s'appliquent", detail: "L'état des risques, demandé avant de signer, indique le zonage et ce qu'il impose au logement." },
     reside: { label: "Lisez le règlement avant une extension", detail: "Une rénovation lourde peut être conditionnée par le zonage." },
     neutre: { label: "Lisez le règlement de la zone en mairie", detail: "Il dit ce que le zonage autorise, interdit ou impose à cette adresse." },
   },
   cavite: {
     achat: { label: "Faites examiner la stabilité du sol avant de vous engager", detail: "Le recensement porte sur des ouvrages connus alentour, pas sous ce logement : seul un avis technique tranche." },
-    location: { label: "Signalez tout affaissement au bailleur", detail: "Un affaissement du terrain ou une fissure nouvelle se signale par écrit." },
+    location: { label: "Demandez au bailleur ce qui est connu du sol sous le bâti", detail: "Terrain qui s'affaisse, fissures, portes qui se bloquent : regardez pendant la visite, et demandez si des désordres ou des études du sol ont déjà été documentés." },
     reside: { label: "Surveillez les signes d'affaissement", detail: "Affaissement du terrain, fissures nouvelles, portes qui se bloquent : notez la date." },
     neutre: { label: "Renseignez-vous sur les cavités recensées", detail: "La mairie et Géorisques indiquent les cavités connues et le suivi dont elles font l'objet." },
   },
@@ -118,7 +127,7 @@ export const GESTES: Record<GesteKey, Record<Bucket, ActionCopy>> = {
   },
   sinistralite: {
     achat: { label: "Demandez l'état des risques et les sinistres indemnisés", detail: "Le vendeur indique les sinistres indemnisés au titre d'une catastrophe naturelle pendant qu'il occupait le bien." },
-    location: { label: "Demandez au bailleur l'état des risques", detail: "Il est remis à la signature. Signalez sans tarder tout sinistre survenu pendant le bail." },
+    location: { label: "Demandez au bailleur l'état des risques", detail: "Demandez-le avant de vous engager, avec ce que le bailleur sait des sinistres déjà survenus dans le logement." },
     reside: { label: "Renseignez-vous sur les indemnisations déjà versées", detail: "Les arrêtés de catastrophe naturelle pris sur la commune disent quels épisodes ont donné lieu à indemnisation." },
     neutre: { label: "Consultez l'état des risques de la commune", detail: "Il récapitule les arrêtés de catastrophe naturelle et les zonages qui s'appliquent." },
   },

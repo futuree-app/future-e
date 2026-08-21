@@ -128,7 +128,7 @@ function absence(id: string, tier: MaterialityTier, topic: string, statement: st
       kind: "named_absence",
       observedStateId: id === "vie_etudiante" ? "no_higher_education_establishment_in_radius" : "network_below_daily_credibility_floor",
       conventionId: id === "vie_etudiante" ? "higher-education-radius-adaptive-v1" : "daily-transit-access-v1",
-      nationalContext: { prevalence: id === "vie_etudiante" ? 0.404 : 0.828, validCount: 34788, totalCount: 34788, universe: "communes_france", distributionVersion: "absence-dist-2026-07-15" },
+      nationalContext: { prevalence: id === "vie_etudiante" ? 0.406 : 0.828, validCount: 34788, totalCount: 34788, universe: "communes_france", distributionVersion: "absence-dist-2026-08-19" },
     },
     evidence: [{ factId: `absenceAttestation.${id}`, module: "territoire", label: "Territoire", grain: "commune" }],
   } as DecisionFact;

@@ -2,11 +2,11 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { PRODUCT_MODULES, MODULE_HREF } from "@/lib/product";
-import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
+import { MODULE_HREF } from "@/lib/product";
+import { requireCurrentUser } from "@/lib/user-account";
 import { resolveReadableTerritory, TERRITORY_SELECT, loadTerritoryClaims } from "@/lib/active-territory";
 import { decideTerritoryAccess, codeDeLectureLocal } from "@/lib/territory-claims";
-import { TrackedModuleLink, TrackedUpgradeLink } from "./RapportTrackedLinks";
+import { TrackedAddressCta, TrackedUpgradeLink } from "./RapportTrackedLinks";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
 import { RapportPremiereLecture } from "@/components/wizard/RapportPremiereLecture";
 import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
@@ -35,27 +35,7 @@ import { projetAChangeMateriellement } from "@/lib/decision/projet-materiel";
 import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 import { Logo } from "@/components/Logo";
-
-// L'IDENTITÉ D'UNE ÉCHELLE EST SON RANG, SON NOM ET SON GRAIN. Ni couleur, ni icône.
-//
-// `MODULE_COLORS` (bleu Territoire, vert Autour, orange Logement) a été retiré le 30/07/2026. Le
-// produit portait DEUX systèmes chromatiques incompatibles qui se croisaient sur cette page même :
-// les cinq registres du dossier de décision rendus plus bas (rouge incompatibilité, vert alignement,
-// orange compromis, améthyste non su, bleu contrôle) et ces trois échelles. Le vert disait « ce lieu
-// tient bien ce point » dans le dossier et « ceci appartient à Autour » dans la grille, à quelques
-// centaines de pixels. Une teinte est une affirmation vérifiable (DESIGN.md § 5.3) : elle ne peut
-// pas dire à la fois OÙ est la donnée et CE QU'ELLE SIGNIFIE pour la décision. Les registres gardent
-// la couleur, les échelles la perdent.
-//
-// `MODULE_ICONS` (🏘 🚶 🏠) a été retiré au même moment, sans substitution : les emoji sont interdits
-// (doctrine/editoriale.md) et un jeu d'icônes dessiné serait un vocabulaire de plus à faire
-// comprendre, alors que « Territoire », « Autour de l'adresse » et « Logement » sont déjà plus
-// précis que n'importe quelle maison ou silhouette.
-const MODULE_GRAIN: Record<string, string> = {
-  quartier: "La commune",
-  autour: "Le secteur autour de l'adresse",
-  logement: "Le bâtiment",
-};
+import { EchelleNavigator } from "@/components/report/EchelleNavigator";
 
 // LE VERDICT EST LE TITRE DE CET ÉCRAN (12/08/2026), aux TROIS points de montage : le repli
 // communal du Suspense, le chemin adresse et le chemin commune seule. En oublier un ferait changer
@@ -77,14 +57,7 @@ const TITRE_VERDICT = {
   classe: "text-[length:clamp(23px,2.9vw,36px)] font-[var(--weight-display)] tracking-[-0.8px]",
 };
 
-const MODULE_BENEFIT: Record<string, string> = {
-  autour: "Commerces, école, gare, espace vert, chaleur du quartier, place de la voiture. Ce qui se mesure autour du point, et pas à l'échelle de la commune.",
-  logement: "Diagnostic, confort d'été, sol de la parcelle, sinistres indemnisés. Et, pour finir, ce qu'il reste à demander avant de décider.",
-};
-
 export default async function RapportPage() {
-  const account = await getCurrentUserAccount();
-
   const { supabase, user } = await requireCurrentUser();
   const { data: profile, error: profileError } = await supabase
     .from("user_profiles")
@@ -143,7 +116,6 @@ export default async function RapportPage() {
   const claims = inseeCode ? await loadTerritoryClaims(supabase, user.id) : [];
   const fullReport = Boolean(inseeCode) && decideTerritoryAccess(claims, inseeCode!);
 
-  const allModules = PRODUCT_MODULES;
   // Première lecture du compte gratuit : réponses du wizard persistées (point 2).
   const serverWizardAnswers = (profile?.wizard_answers ?? null) as WizardAnswers | null;
   const userProject = normalizeUserProject((profile as { user_project?: unknown } | null)?.user_project ?? null);
@@ -277,19 +249,20 @@ export default async function RapportPage() {
     ? { id: logementForCommune.ban_id, label: logementForCommune.address_label, city: logementForCommune.city, citycode: logementForCommune.insee, postcode: logementForCommune.postcode, latitude: logementForCommune.latitude, longitude: logementForCommune.longitude }
     : null;
 
-  // COMBIEN D'ÉCHELLES SONT RÉELLEMENT OUVERTES, SUR LA COMMUNE LUE.
-  //
-  // Le hub annonçait « trois échelles » à tout compte payant, avec trois cartes marquées
-  // « Accessible ». C'était faux : `/rapport/autour` et `/rapport/logement` exigent un dossier
-  // d'adresse et redirigent vers `/rapport/dossiers` sans lui. Un lecteur qui a payé 14 € voyait
-  // donc son produit décrit comme deux tiers manquant.
-  //
-  // Le calcul se fait sur `logementForCommune`, donc sur LA COMMUNE LUE, jamais sur le compte :
-  // posséder un bien à Nantes n'ouvre pas Autour et Logement à La Rochelle. C'est la même règle que
-  // le bandeau `communesAilleurs` plus bas.
-  const openModules = fullReport
-    ? allModules.filter((m) => m.id === "quartier" || Boolean(logementForCommune))
-    : [];
+  // UN SEUL REPÈRE, AUX TROIS POINTS DU STREAMING. Le fallback communal, le dossier augmenté et le
+  // dossier de commune seule doivent rendre exactement la même navigation, à la même place. Une
+  // fabrique évite qu'une branche oublie un href ou une donnée de suivi en évoluant.
+  const renderEchelleNavigator = () => (
+    <EchelleNavigator
+      territoireHref={hrefModule("quartier")}
+      autourHref={hrefModule("autour")}
+      logementHref={hrefModule("logement")}
+      addressAvailable={Boolean(logementForCommune)}
+      commune={displayName}
+      inseeCode={inseeCode}
+      className="lg:w-[280px]"
+    />
+  );
 
   // LA RELATION AU LIEU SE LIT ICI DEPUIS LE 12/08/2026, parce que c'est ici qu'on la modifie
   // désormais. Elle reste attachée à la COMMUNE (table `report_context`), et non au projet :
@@ -411,82 +384,99 @@ export default async function RapportPage() {
             bien, projet du jour), le bloc du dossier porte la réponse et les métadonnées de la
             version qu'il sert. */}
         {fullReport ? (
-          <EnTeteDossier
-            lieu={displayName}
-            bienLabel={logementForCommune?.address_label ?? null}
-            bienAlternatif={choixDossier.autres.length > 0}
-            choixParDefaut={choixDossier.raison === "repli_plus_recent"}
-            intent={userProject?.intent ?? null}
-            nbPriorites={userProject?.parsed?.preferences?.length ?? null}
-            projetRenseigne={Boolean(userProject?.parsed?.reformulation ?? userProject?.rawText)}
-            contenu={heroContenu}
-          />
+          <div className={dossier && communeResult && inseeCode
+            ? ""
+            : "lg:grid lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-x-10 lg:items-start"}
+          >
+            <div>
+              <EnTeteDossier
+                lieu={displayName}
+                bienLabel={logementForCommune?.address_label ?? null}
+                bienAlternatif={choixDossier.autres.length > 0}
+                choixParDefaut={choixDossier.raison === "repli_plus_recent"}
+                intent={userProject?.intent ?? null}
+                nbPriorites={userProject?.parsed?.preferences?.length ?? null}
+                projetRenseigne={Boolean(userProject?.parsed?.reformulation ?? userProject?.rawText)}
+                contenu={heroContenu}
+              />
+            </div>
+            {/* Quand aucun verdict ne peut recevoir la colonne d'appui, le repère reste associé à
+                l'en-tête. Dans le chemin normal, `DossierDecisionSection` le place à côté de la
+                synthèse : une grille réelle remplace l'ancien calque absolu. */}
+            {!(dossier && communeResult && inseeCode) ? renderEchelleNavigator() : null}
+          </div>
         ) : null}
 
         {/* ── Le dossier de décision (payant, grain commune) ── */}
         {dossier && communeResult && inseeCode ? (
           dossierAddress && logementForCommune ? (
-            <Suspense
-              fallback={
-                // Le repli porte la liste lui aussi : son verdict annonce déjà des constats
-                // « plus bas », et une promesse tenue seulement après l'augmentation serait fausse
-                // pendant tout le temps d'attente.
-                <>
-                  <DossierDecisionSection
-                    dossier={dossier}
-                    logement={dossierLogementLink}
-                    logementStatus="pending"
-                    insee={inseeCode}
-                    scopeKey="commune"
-                    generatedAt={dossierGenereLe}
-                    provenance={provenanceCommune}
-                    projetAChange={projetCommuneAChange}
-                    espacement="mt-6"
-                    titre={TITRE_VERDICT}
-                  />
-                  <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
-                </>
-              }
-            >
-              <DossierAvecLogement
-                project={userProject!}
-                address={dossierAddress}
-                savedDpe={logementForCommune.selected_dpe_snapshot}
-                selectionDpeChangeeLe={logementForCommune.dpe_selection_at}
-                permis={logementForCommune.snapshot?.permis ?? null}
-                communeFacts={communeResult.moduleFacts}
-                communeDossier={dossier}
-                logementLink={dossierLogementLink}
-                insee={inseeCode}
-                scopeKey={`logement:${logementForCommune.id}`}
-                // Les contraintes dures, hydratées UNE fois : la section n'en change que le point
-                // d'évaluation (l'adresse), elle ne re-résout aucune référence.
-                hard={communeResult.hard}
-                userId={user.id}
-                espacement="mt-6"
-                titre={TITRE_VERDICT}
-              />
-            </Suspense>
-          ) : (
-            // Dossier de commune seule : la liste complète des contrôles se rend ici aussi, avec
-            // son seul groupe « Territoire ». Le verdict y annonce déjà des constats « plus bas »,
-            // et cette promesse ne dépend pas de la présence d'une adresse.
-            <>
-              <DossierDecisionSection
-                dossier={dossier}
-                logement={dossierLogementLink}
-                logementStatus="none"
-                insee={inseeCode}
-                scopeKey="commune"
-                generatedAt={dossierGenereLe}
-                provenance={provenanceCommune}
-                projetAChange={projetCommuneAChange}
-                espacement="mt-6"
-                titre={TITRE_VERDICT}
-              />
-              <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
-            </>
-          )
+              <Suspense
+                fallback={
+                  // Le repli porte la liste lui aussi : son verdict annonce déjà des constats
+                  // « plus bas », et une promesse tenue seulement après l'augmentation serait fausse
+                  // pendant tout le temps d'attente.
+                  <>
+                    <DossierDecisionSection
+                      dossier={dossier}
+                      logement={dossierLogementLink}
+                      logementStatus="pending"
+                      insee={inseeCode}
+                      scopeKey="commune"
+                      generatedAt={dossierGenereLe}
+                      provenance={provenanceCommune}
+                      projetAChange={projetCommuneAChange}
+                      espacement="mt-6"
+                      titre={TITRE_VERDICT}
+                      supportingPane={renderEchelleNavigator()}
+                    />
+                    <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
+                  </>
+                }
+              >
+                <DossierAvecLogement
+                  project={userProject!}
+                  address={dossierAddress}
+                  savedDpe={logementForCommune.selected_dpe_snapshot}
+                  selectionDpeChangeeLe={logementForCommune.dpe_selection_at}
+                  permis={logementForCommune.snapshot?.permis ?? null}
+                  communeFacts={communeResult.moduleFacts}
+                  communeDossier={dossier}
+                  logementLink={dossierLogementLink}
+                  insee={inseeCode}
+                  scopeKey={`logement:${logementForCommune.id}`}
+                  // Les contraintes dures, hydratées UNE fois : la section n'en change que le point
+                  // d'évaluation (l'adresse), elle ne re-résout aucune référence.
+                  hard={communeResult.hard}
+                  userId={user.id}
+                  espacement="mt-6"
+                  titre={TITRE_VERDICT}
+                  supportingPane={renderEchelleNavigator()}
+                />
+              </Suspense>
+            ) : (
+              // Dossier de commune seule : la liste complète des contrôles se rend ici aussi, avec
+              // son seul groupe « Territoire ». Le verdict y annonce déjà des constats « plus bas »,
+              // et cette promesse ne dépend pas de la présence d'une adresse.
+              <>
+                <DossierDecisionSection
+                  dossier={dossier}
+                  logement={dossierLogementLink}
+                  logementStatus="none"
+                  insee={inseeCode}
+                  scopeKey="commune"
+                  generatedAt={dossierGenereLe}
+                  provenance={provenanceCommune}
+                  projetAChange={projetCommuneAChange}
+                  espacement="mt-6"
+                  titre={TITRE_VERDICT}
+                  supportingPane={renderEchelleNavigator()}
+                />
+                <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
+                {/* La lecture s'est arrêtée à la commune, et elle vient de finir. Le repère du haut
+                    porte la même destination, mais il précède la lecture : celui-ci la suit. */}
+                <TrackedAddressCta commune={displayName} inseeCode={inseeCode} />
+              </>
+            )
         ) : null}
 
         {/* LA LECTURE MANQUE, ET L'ÉCRAN LE DIT (13/08/2026).
@@ -532,9 +522,9 @@ export default async function RapportPage() {
 
         {/* ── CADRAGE CLIMAT, EN TÊTE UNIQUEMENT QUAND RIEN NE LE PRÉCÈDE ─────────────────
             En NON payant, cette promesse EST le haut de page : elle garde son <h1> et son CTA
-            d'achat, et rien ne la double, puisqu'il n'y a ni en-tête de dossier ni section de
-            modules ouverte. En payant, elle descend au niveau des modules dont elle est le sujet
-            (plus bas), sous la réponse achetée.
+            d'achat, et rien ne la double, puisqu'il n'y a ni en-tête de dossier ni navigation
+            d'échelles. En payant, le repère supérieur mène directement au module Territoire : cette
+            promesse commerciale n'est pas rejouée en bas de page.
 
             LA BARRE D'HORIZON A QUITTÉ LE HUB (12/08/2026). `useHorizon` n'est consommé que par
             `QuartierSynthesis` et `QuartierClimatData`, donc par le module Territoire. Le clic
@@ -601,32 +591,6 @@ export default async function RapportPage() {
           />
         </div>
 
-        {/* ── CADRAGE CLIMAT, DESCENDU AU NIVEAU DES MODULES DONT IL EST LE SUJET ────────────
-            Il était le plus grand texte de l'écran, au-dessus de la réponse achetée : un cadrage
-            sans réponse en tête d'un dossier payé. En <h2>, il ouvre la section des échelles, qu'il
-            introduit réellement.
-
-            LE PANNEAU COMPACT DES ÉCHELLES A DISPARU : il répétait le mot « Dossier » que l'en-tête
-            porte désormais, et listait les modules quelques centimètres au-dessus de la section
-            `#modules`, qui les liste avec plus de contexte. */}
-        {heroContenu.kind !== "commercial" ? (
-          <section className="mt-14 pt-14 border-t border-[var(--border-1)]">
-            <h2 className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.18] tracking-[-0.5px] mb-6 text-label" style={{ fontFamily: "var(--font-serif)" }}>
-              {displayName} en 2030, 2050, 2100.<br />
-              <span className="italic text-accent">Ce que ça change pour vous.</span>
-            </h2>
-            {/* Le CTA « Voir mes trois échelles » est tombé avec le déplacement : il pointait vers
-                `#modules`, qui commence maintenant quelques lignes plus bas. Un bouton d'ancre vers
-                le bloc immédiatement suivant ne fait rien avancer. */}
-            <p className="text-[17px] leading-[1.72] text-muted">
-              Ce que le changement climatique fait concrètement à votre quotidien ici, à trois
-              horizons. Les données s&apos;adaptent quand c&apos;est possible.
-            </p>
-          </section>
-        ) : (
-          <div className="border-t border-[var(--border-1)] mt-14" />
-        )}
-
         {/* ── Vue gratuite : la première lecture post-wizard ── */}
         {!fullReport && (
           <section className="pt-14" id="quartier">
@@ -637,77 +601,6 @@ export default async function RapportPage() {
               </h2>
             </div>
             <RapportPremiereLecture serverAnswers={serverWizardAnswers} inseeCode={inseeCode} />
-          </section>
-        )}
-
-        {/* ── Vue payant ── */}
-        {fullReport && (
-          <section className="pt-14" id="modules">
-            <div className="mb-8">
-              <h2 className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.18] tracking-[-0.5px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
-                {openModules.length === 1
-                  ? `Ce que ${displayName} devient.`
-                  : "Trois échelles, de la commune à vos murs."}
-              </h2>
-              <p className="text-[15px] text-muted leading-[1.7] mt-3">
-                {openModules.length === 1
-                  ? "La commune en entier : son climat, ses risques, son cadre de vie et ce qui la transforme."
-                  : "Elles se lisent dans cet ordre, et chacune peut contredire la précédente : une commune qui tient bien peut abriter un secteur mal desservi, et un secteur agréable un logement qui souffrira de l'été."}
-              </p>
-            </div>
-
-            {/* LIGNES, PAS CARTES. Trois cartes de verre colorées pour trois liens donnaient au
-                sommaire plus de poids visuel qu'au verdict. Le rang porte l'identité, un filet
-                sépare, et le badge « Accessible » a disparu : il était identique sur les trois, donc
-                il ne distinguait rien (DESIGN.md § 6.3). Ce qui varie réellement, c'est le NOMBRE de
-                lignes, et il suit maintenant les droits sur la commune lue. */}
-            <div className="flex flex-col">
-              {openModules.map((module, i) => {
-                const benefit = module.id === "quartier"
-                  ? `Chaleur, inondations, érosion côtière. Ce que ${displayName} devient selon l'horizon choisi, données climatiques publiques à l'appui.`
-                  : MODULE_BENEFIT[module.id] ?? module.summary;
-                const href = hrefModule(module.id);
-                return (
-                  <article
-                    key={module.id}
-                    className="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto] gap-x-5 gap-y-2 items-baseline py-6 border-t border-[var(--border-1)] first:border-t-0"
-                  >
-                    <span className="font-mono text-[13px] text-ghost tabular-nums">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    {/* UN SEUL EMPLOI DU MONO PAR LIGNE, le rang. Le grain était en mono capitales
-                        espacées et le bouton aussi : trois voix machine par ligne pour un sommaire de
-                        trois liens, ce qui donnait un écran plus froid que dense. Le mono dit une
-                        valeur ou un repère de comptage, jamais une phrase. */}
-                    <div>
-                      <h3 className="font-normal text-[20px] text-label" style={{ fontFamily: "var(--font-serif)" }}>
-                        {module.name}
-                        <span className="text-muted text-[15px]"> · {MODULE_GRAIN[module.id] ?? module.summary}</span>
-                      </h3>
-                      <p className="text-[13px] text-muted leading-[1.65] mt-2.5">{benefit}</p>
-                    </div>
-                    <div className="col-start-2 sm:col-start-3 sm:row-start-1">
-                      <TrackedModuleLink
-                        href={href}
-                        moduleId={module.id}
-                        commune={displayName}
-                        inseeCode={inseeCode}
-                        className="inline-flex items-center gap-2 text-[14px] text-muted hover:text-label no-underline whitespace-nowrap transition-colors"
-                      >
-                        Ouvrir <span aria-hidden>→</span>
-                      </TrackedModuleLink>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-
-            {openModules.length === 1 && (
-              <p className="text-[14px] leading-[1.7] text-muted mt-8 pt-6 border-t border-[var(--border-1)]">
-                Le secteur autour d&apos;une adresse et le logement lui-même se lisent au grain de
-                l&apos;adresse. Ils demandent l&apos;analyse d&apos;un bien précis.
-              </p>
-            )}
           </section>
         )}
 

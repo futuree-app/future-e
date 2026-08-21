@@ -15,7 +15,12 @@
 //
 // Ce n'est PAS une ancre `<a href="#…">` : le hash resterait dans l'URL d'une page qu'on ne partage pas
 // par section, et le bouton dit mieux ce qui se passe (on déplace la lecture, on ne navigue pas).
+import { useEffect, useRef } from "react";
+import posthog from "posthog-js";
 import { dossierAnchorId } from "@/lib/decision/dossier-anchors";
+import {
+  proprietesActivation, proprietesAffichage, type ControlOrdre,
+} from "@/lib/decision/priority-control-telemetry";
 
 function lowerFirst(s: string): string {
   return s.length === 0 ? s : s[0]!.toLowerCase() + s.slice(1);
@@ -42,15 +47,42 @@ function goToCard(rawId: string) {
   window.setTimeout(() => cible.removeAttribute("data-visee"), 1600);
 }
 
+// LA MESURE, ET SA SEULE QUESTION. On ne cherche pas à savoir si la ligne « performe » : on cherche à
+// savoir SUR QUOI le contrôle prioritaire tombe réellement, et si quelqu'un s'en sert pour aller voir la
+// carte. La validation reste qualitative (protocole d'entretien :
+// `docs/protocoles/2026-08-19-premier-controle-entretien.md`) ; ces deux événements ne font que la cadrer.
+//
+// Rien de rédigé ni d'identifiant de lieu ne part : `priority-control-telemetry.ts` réduit le geste à
+// son type et retire le code INSEE des sujets. Aucune réponse libre n'est stockée.
+//
+// La galerie de développement `/dev/conclusion` rend une dizaine de ces blocs d'un coup : elle ne
+// mesure rien, sinon un après-midi de mise au point vaudrait dix dossiers lus.
+function mesurable(): boolean {
+  return typeof window !== "undefined" && !window.location.pathname.startsWith("/dev/");
+}
+
 export function PriorityControlActions({
-  actions, renderedIds = [],
+  actions, renderedIds = [], ordre = "priorite",
 }: {
   actions: { label: string; anchorId: string }[];
   // Les identifiants des cartes RÉELLEMENT rendues sous le verdict. Vide par défaut : un appelant qui
   // ne rend pas les cartes (export, aperçu) n'obtient aucun lien, jamais un lien mort.
   renderedIds?: string[];
+  // « en priorité » ou « ensuite » : l'étiquette que le lecteur a réellement lue au-dessus. Elle est
+  // décidée par le plan (le héros a-t-il déjà nommé le principal contrôle ?), pas ici.
+  ordre?: ControlOrdre;
 }) {
   const rendues = new Set(renderedIds);
+  const vuRef = useRef(false);
+  useEffect(() => {
+    if (vuRef.current || actions.length === 0 || !mesurable()) return;
+    vuRef.current = true;
+    const cliquables = actions.filter((a) => rendues.has(a.anchorId)).length;
+    posthog.capture("priority_control_shown", proprietesAffichage(actions, ordre, cliquables));
+    // `actions` est reconstruit à chaque rendu du serveur : le garde de première fois vit dans la ref,
+    // pas dans la liste de dépendances.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <>
       {actions.map((a, i) => {
@@ -62,7 +94,12 @@ export function PriorityControlActions({
                 pas un appel à cliquer. L'affordance suffit à dire qu'on peut aller voir. */}
             <button
               type="button"
-              onClick={() => goToCard(a.anchorId)}
+              onClick={() => {
+                if (mesurable()) {
+                  posthog.capture("priority_control_activated", proprietesActivation(a, i, ordre));
+                }
+                goToCard(a.anchorId);
+              }}
               className="text-left underline decoration-white/25 underline-offset-[3px] hover:decoration-white/60 focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors"
               style={{ outlineColor: "var(--info)" }}
             >

@@ -23,10 +23,11 @@ import type { EvaluationContext } from "@/lib/hard-constraints";
 import type { DpeRecord } from "@/lib/dpe";
 import type { UserProject } from "@/lib/user-project";
 import type { PermisSnapshot } from "@/lib/logement-autour-types";
+import type { ReactNode } from "react";
 
 export async function DossierAvecLogement({
   project, address, savedDpe, selectionDpeChangeeLe, permis, communeFacts, communeDossier, logementLink, insee,
-  scopeKey, hard, userId, espacement, titre,
+  scopeKey, hard, userId, espacement, titre, supportingPane,
 }: {
   project: UserProject;
   address: ResolvedAddress;
@@ -70,6 +71,8 @@ export async function DossierAvecLogement({
    * celui qui a été payé, reviendrait en petit au moment où le streaming se résout.
    */
   titre?: NiveauTitre;
+  /** Navigation secondaire rendue à droite du dossier sur desktop. */
+  supportingPane?: ReactNode;
 }) {
   // L'ARTEFACT PASSE AVANT L'ASSEMBLAGE (05/08/2026).
   // ══════════════════════════════════════════════════════════════════════════════════════════
@@ -148,6 +151,7 @@ export async function DossierAvecLogement({
       <DossierDecisionSection
         dossier={vue.dossier} logement={logementLink} logementStatus={vue.status}
         insee={insee} scopeKey={vue.scope} generatedAt={servi.generatedAt} espacement={espacement} titre={titre}
+        supportingPane={supportingPane}
         projetAChange={projetAChangeMateriellement(stocke?.artifact?.projectSnapshot ?? null, project)}
         // LA PROVENANCE N'EXISTE QUE S'IL Y A UNE VERSION FIGÉE. Sur un dossier assemblé à
         // l'instant, un lien qui désignerait un artefact enverrait la surface d'arrivée chercher
