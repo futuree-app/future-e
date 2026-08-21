@@ -86,9 +86,11 @@ data/cache-nature/
 # vit dans data/residences-secondaires.json
 data/cache-saisonnalite/
 
-# BPE : venv dédié + source parquet locale (non versionnés)
+# BPE : venv dédié + sources parquet locales (non versionnées ; cf. l'en-tête de
+# scripts/populate-bpe.py pour la commande de téléchargement Insee)
 .venv-bpe/
 data/bpe24.parquet
+data/bpe25.parquet
 data/.cache/
 
 # Table d appartenance UU2020 (source locale, non versionnée)
@@ -112,3 +114,12 @@ data/rp-mobpro-2022.parquet
 # vérification). Elles portent des données personnelles et ne doivent jamais entrer au dépôt, mais
 # elles valent mieux que /tmp : ce sont les seules fixtures d'une migration future.
 .prive/
+
+# Pack charte livré par la designer : 92 Mo de PDF et de zips, dont un zip de 33 Mo. Ce que le CODE
+# consomme (SVG du logo, tokens, polices) est versionné ailleurs ; les livrables sources restent
+# hors du dépôt, parce qu'un binaire poussé une fois ne quitte plus jamais l'historique.
+CHARTE/
+Futur.e Design System.zip
+
+# État local de l'outil « impeccable » (config de poste, cache de hook, captures de travail).
+.impeccable/
