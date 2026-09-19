@@ -123,22 +123,66 @@ const HORS_MESURE_PHRASES: Record<string, string> = {
     "L'animation culturelle, la programmation et la vie associative locale ne sont pas mesurées par futur•e ; seul l'accès aux équipements culturels l'est.",
   affectif:
     "Le caractère d'un lieu (authentique, chaleureux, vivant) relève d'une expérience personnelle, pas d'une donnée territoriale.",
+  // ── LE TIROIR QUI MANQUAIT (19/09/2026) ───────────────────────────────────────────────────
+  //
+  // L'énumération s'arrêtait aux trois familles ci-dessus. Le modèle, tenu par un enum fermé,
+  // rangeait donc en « affectif » tout sujet réellement exprimé qui n'était ni une école ni de la
+  // culture. Mesuré sur le parse réel : « l'eau du robinet est-elle potable » (3 essais sur 3) et
+  // « j'ai peur des moustiques tigres et des tiques » (5 sur 5) recevaient la phrase sur le
+  // caractère du lieu.
+  //
+  // Cette phrase-ci ne nomme pas le sujet : c'est la LIGNE qui le nomme, en tête, sur le patron
+  // des ambiguïtés (« Votre situation professionnelle : … »). Interpoler le mot brut dans une
+  // phrase produit des accords bancals, le mettre devant deux points n'en produit aucun.
+  autre:
+    "futur•e ne mesure pas ce sujet : il n'entre dans aucun critère et n'a pas pesé dans le classement.",
 };
 
-// Convertit les notions hors-mesure en phrases à afficher, sans doublon de phrase
-// (deux termes d'un même kind se replient sur une seule phrase). Ignore les kinds inconnus.
-export function horsMesureToPhrases(
+/** Borne d'affichage du terme repris à l'utilisateur, coupure comprise. */
+const TERME_MAX = 60;
+
+function termeAffichable(brut: string): string | null {
+  const t = brut.replace(/\s+/g, " ").trim();
+  if (!t) return null;
+  const coupe = t.length > TERME_MAX ? `${t.slice(0, TERME_MAX).trimEnd()}…` : t;
+  return coupe.charAt(0).toUpperCase() + coupe.slice(1);
+}
+
+/** Une ligne de « ce qui reste ouvert » : un sujet nommé quand la phrase ne le nomme pas elle-même. */
+export type HorsMesureLigne = { terme: string | null; phrase: string };
+
+/**
+ * Convertit les notions hors-mesure en lignes à afficher. Ignore les familles inconnues.
+ *
+ * DEUX RÈGLES DE DÉDUPLICATION, ET ELLES DIFFÈRENT. Pour les familles nommées (écoles, culture,
+ * affectif), la phrase EST le message : deux termes d'une même famille se replient sur une seule
+ * ligne, et le terme n'est pas repris. Pour « autre », la phrase est générique et c'est le terme
+ * qui porte le sens : replier deux sujets sur une phrase commune ferait disparaître l'un des deux
+ * (l'eau du robinet avalée par les moustiques). On dédoublonne donc par terme.
+ */
+export function horsMesureToLignes(
   items: { term: string; kind: string }[] | null | undefined,
-): string[] {
+): HorsMesureLigne[] {
   if (!items) return [];
-  const seen = new Set<string>();
-  const out: string[] = [];
+  const phrasesVues = new Set<string>();
+  const termesVus = new Set<string>();
+  const out: HorsMesureLigne[] = [];
   for (const it of items) {
     const phrase = HORS_MESURE_PHRASES[it.kind];
-    if (phrase && !seen.has(phrase)) {
-      seen.add(phrase);
-      out.push(phrase);
+    if (!phrase) continue;
+    if (it.kind !== "autre") {
+      if (phrasesVues.has(phrase)) continue;
+      phrasesVues.add(phrase);
+      out.push({ terme: null, phrase });
+      continue;
     }
+    const terme = termeAffichable(it.term ?? "");
+    // Sans terme lisible, la ligne ne dirait rien : la phrase générique seule n'informe de rien.
+    if (!terme) continue;
+    const cle = terme.toLowerCase();
+    if (termesVus.has(cle)) continue;
+    termesVus.add(cle);
+    out.push({ terme, phrase });
   }
   return out;
 }

@@ -6,7 +6,7 @@ import type { ParsedProject, MatchOutcome, MatchResult } from "@/lib/comparateur
 import {
   preferencesToLabels,
   preferencesToInterpreted,
-  horsMesureToPhrases,
+  horsMesureToLignes,
 } from "@/lib/comparateur-labels";
 import { anchorsToLabeled, exclusionsToLabels } from "@/lib/geo-zones";
 import { ChipTooltip } from "@/components/ChipTooltip";
@@ -233,7 +233,7 @@ function InterpretationPanel({
   inspZoneLabels,
   exclLabels,
   reliefLabel,
-  horsMesurePhrases,
+  horsMesureLignes,
   ambiguities,
   onRefine,
 }: {
@@ -244,7 +244,7 @@ function InterpretationPanel({
   inspZoneLabels: string[];
   exclLabels: string[];
   reliefLabel: string | null;
-  horsMesurePhrases: string[];
+  horsMesureLignes: { terme: string | null; phrase: string }[];
   ambiguities?: { topic: string }[];
   onRefine: () => void;
 }) {
@@ -258,7 +258,7 @@ function InterpretationPanel({
     inspZoneLabels.length > 0 ||
     exclLabels.length > 0 ||
     !!reliefLabel;
-  const hasOuvert = (ambiguities && ambiguities.length > 0) || horsMesurePhrases.length > 0;
+  const hasOuvert = (ambiguities && ambiguities.length > 0) || horsMesureLignes.length > 0;
   const hasMore = hasPerimetre || hasOuvert; // ce qui vit derrière « Voir le détail »
 
   return (
@@ -389,12 +389,16 @@ function InterpretationPanel({
                 <span className="text-amber-400">⚠</span> Ce qui reste ouvert
               </p>
               <ul className="flex flex-col gap-2">
-                {horsMesurePhrases.map((phrase, i) => (
+                {horsMesureLignes.map((l, i) => (
                   <li
                     key={`hm-${i}`}
                     className="text-[13px] leading-[1.6] text-muted border-l-2 border-amber-400/30 pl-3"
                   >
-                    {phrase}
+                    {/* Le sujet en tête quand la phrase ne le nomme pas elle-même : même patron
+                        que les ambiguïtés juste dessous, et aucun accord à faire avec le mot brut. */}
+                    {l.terme && <span className="text-label">{l.terme}</span>}
+                    {l.terme ? " : " : null}
+                    {l.phrase}
                   </li>
                 ))}
                 {ambiguities?.map((a, i) => (
@@ -689,7 +693,7 @@ export function OuVivreClient() {
   // Critères humains détectés (jamais les clés techniques), affichés au gate, avec
   // leur interprétation visible (glose) pour les faux amis / la polysémie.
   const criteres = parsed ? preferencesToInterpreted(parsed.preferences) : [];
-  const horsMesurePhrases = parsed ? horsMesureToPhrases(parsed.horsMesure) : [];
+  const horsMesureLignes = parsed ? horsMesureToLignes(parsed.horsMesure) : [];
 
   // Ancres géographiques détectées (périmètre, distinct des préférences), avec leur
   // force. Au gate, on n'a que les jetons du parse : on les traduit en libellés. Le
@@ -1105,7 +1109,7 @@ export function OuVivreClient() {
             inspZoneLabels={inspZoneLabels}
             exclLabels={exclLabels}
             reliefLabel={reliefLabel}
-            horsMesurePhrases={horsMesurePhrases}
+            horsMesureLignes={horsMesureLignes}
             ambiguities={parsed.ambiguities}
             onRefine={refine}
           />
@@ -1132,7 +1136,7 @@ export function OuVivreClient() {
             inspZoneLabels={inspZoneLabels}
             exclLabels={exclLabels}
             reliefLabel={reliefLabel}
-            horsMesurePhrases={horsMesurePhrases}
+            horsMesureLignes={horsMesureLignes}
             ambiguities={parsed.ambiguities}
             onRefine={refine}
           />

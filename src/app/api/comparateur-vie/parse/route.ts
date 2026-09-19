@@ -155,12 +155,17 @@ const TOOL_INPUT_SCHEMA = {
     horsMesure: {
       type: "array",
       description:
-        "Notions exprimées par l'utilisateur qui n'ont AUCUN critère dans le moteur. Ne JAMAIS fabriquer de proxy. Maximum 3. Vide si aucune.",
+        "Notions exprimées par l'utilisateur qui n'ont AUCUN critère dans le moteur. Ne JAMAIS fabriquer de proxy, NI de préférence approchante. Maximum 3. Vide si aucune.",
       items: {
         type: "object",
         properties: {
           term: { type: "string", description: "le mot tel que l'utilisateur l'a dit" },
-          kind: { type: "string", enum: ["ecoles", "culture", "affectif"] },
+          kind: {
+            type: "string",
+            enum: ["ecoles", "culture", "affectif", "autre"],
+            description:
+              "ecoles = qualité/réputation des établissements. culture = vitalité, programmation, scène locale. affectif = caractère du lieu (authentique, chaleureux, de l'âme). autre = TOUT AUTRE sujet réellement exprimé et non mesuré : eau du robinet, moustiques et tiques, pollens, ondes, qualité des commerces… Sans cette valeur, ces sujets tombaient en « affectif » et recevaient une phrase sur le caractère du lieu.",
+          },
         },
         required: ["term", "kind"],
       },
@@ -298,6 +303,8 @@ HORS-MESURE (notions sans critère dans le moteur) : remplissez horsMesure, ne f
   • "vie culturelle animée", "ambiance", "scène locale", "vie associative", "ça bouge culturellement" (vitalité) → AJOUTER { term, kind: "culture" } (hors-mesure). NE rabattez PAS sur eviter_isolement ni sur une grande ville.
   • Dites toujours "accès à une offre culturelle", JAMAIS "vie culturelle", dans la reformulation.
 - "authentique", "chaleureux", "accueillant", "convivial", "esprit de village", "du caractère", "de l'âme", "qui bouge", "vivante" → { term, kind: "affectif" }.
+- TOUT AUTRE SUJET exprimé et non mesuré → { term, kind: "autre" }, avec le mot de l'utilisateur. Exemples réels : "l'eau du robinet est-elle potable", "j'ai peur des moustiques tigres et des tiques", les pollens, les ondes, la qualité des commerces. RÉSERVEZ "affectif" au CARACTÈRE du lieu : une question sanitaire ou matérielle n'est pas une impression personnelle, et la ranger là fait répondre au lecteur que « le caractère d'un lieu relève d'une expérience personnelle » quand il demandait si l'eau est potable.
+- ET SURTOUT, N'INVENTEZ AUCUNE PRÉFÉRENCE POUR COMPENSER. Un sujet non mesuré se dit non mesuré, il ne se rabat sur aucun critère approchant. Vu en production : "j'ai peur des moustiques tigres et des tiques" a produit faible_chaleur et faible_pression_agricole, qui ne figuraient nulle part dans la demande et qui ont changé les communes proposées. Aucune préférence ne sort d'une notion que l'utilisateur n'a pas exprimée, même si elle vous paraît corrélée.
 - Ne remplissez horsMesure QUE si la notion est réellement exprimée ; ces notions n'ajoutent AUCUNE préférence. La nature, le calme, les services et les soins SONT mesurés : ne les mettez jamais en horsMesure.
 - HÉRITAGE INDUSTRIEL. Si la demande évoque "sols pollués", "terrain pollué", "ancienne usine", "anciens sites industriels", "passé industriel", "héritage industriel", "pollution historique" → heritageIntent:true. C'est un signal narratif NON scoré : n'ajoutez AUCUNE préférence (surtout PAS faible_exposition_industrielle, qui ne couvre QUE l'industrie EN ACTIVITÉ : Seveso/ICPE actifs, pas le passé pollué). Distinguez bien "près d'usines / zones industrielles" (industrie active → faible_exposition_industrielle) de "ancien site pollué / passé industriel" (héritage → heritageIntent).
 
