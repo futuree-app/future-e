@@ -1,0 +1,945 @@
+VEILLE STRATÉGIQUE &amp; PRODUIT
+
+futur•e — environnement, cadre de vie, climat et logement
+
+Synthèse croisée de la veille initiale, du complément Claude et d’une vérification des sources publiques et des réutilisations data.gouv.fr.
+
+Version 6 — finale consolidée — 19 septembre 2026
+
+CONCLUSION EN UNE PHRASE  —  Les données publiques à l’adresse se banalisent ; le moat de futur•e doit combiner un socle bâti robuste, des croisements bornés et auditables, des actions concrètes, et une preuve de cette différence visible avant l’achat.
+
+# Ce que la veille consolidée change pour futur•e
+
+Le socle technique doit être sécurisé avant d’ajouter des fonctionnalités : migration du géocodeur BAN, préparation de Géorisques v2, changement de schéma BDNB 2026 et versionnement RGA/DPE.
+
+L’ID-RNB doit devenir la clé bâtiment interne : l’adresse seule ne suffit pas pour rattacher proprement DPE, BDNB, copropriété, permis et autres données logement.
+
+Tuveuxvivreou occupe désormais un terrain très proche de /ou-vivre ; EcoBuilding montre en parallèle que la simple fiche bâtiment multi-sources devient rapidement une commodité.
+
+Les meilleures différenciations apparaissent dans le croisement multi-échelle : relier des faits déjà établis sans créer une nouvelle vérité, puis produire avec parcimonie des faits dérivés propres à futur•e lorsque la méthode est déterministe, versionnée et auditable.
+
+Priorité finale : 1) sécuriser les dépendances et identifiants structurants ; 2) corriger les données réglementaires sensibles ; 3) formaliser les croisements et leur reproductibilité ; 4) rendre la différence visible avant paiement ; 5) éprouver une composition chaleur de bout en bout ; 6) seulement ensuite produire des faits dérivés géospatiaux.
+
+# 1. Priorités révisées
+
+Niv.
+
+Sujet
+
+Pourquoi maintenant
+
+Décision
+
+P0
+
+API Adresse / Géoplateforme
+
+L’ancien endpoint BAN est déprécié ; le géocodeur Géoplateforme est la cible officielle et limite les appels à 50 req/s/IP.
+
+Audit code + migration
+
+P0
+
+Géorisques v2
+
+Les nouveaux endpoints apportent parcelle, rayon, WKT et filtres métier mais utilisent un jeton annuel.
+
+Préparer migration
+
+P0
+
+ID-RNB
+
+Clé pérenne pour relier bâtiment, adresses et futures sources ; près de 8 M de DPE étaient déjà enrichis en mars 2026.
+
+Clé bâtiment interne
+
+P0
+
+BDNB 2026-02.a
+
+Suppression des tables argiles/radon au profit de batiment_groupe_risques ; risque de pipeline cassé.
+
+Tests import + schéma
+
+P0
+
+RGA 2026
+
+Couche réglementaire modifiée depuis juillet ; risque d’information obsolète en production.
+
+Audit couche + tests
+
+P0
+
+DPE 2027
+
+La lettre dépend du régime de calcul et de la date ; risque de confusion « amélioration sans travaux ».
+
+Versionner la méthode
+
+P0
+
+PFAS
+
+Nouvelle source nationale massive et exploitable, mais précision spatiale variable.
+
+Spike données
+
+P0
+
+Tuveuxvivreou
+
+Concurrent très proche de /ou-vivre et de la logique SEO communale.
+
+Audit concurrentiel
+
+P0
+
+Doctrine des croisements
+
+Les croisements deviennent un moat seulement si la frontière composition / fait dérivé est mécanique, auditable et reproductible.
+
+Formaliser + tests de garde
+
+P0
+
+Preuve avant paiement
+
+La commoditisation de la fiche adresse déplace le risque vers l’acquisition : une lecture différenciante invisible avant achat ne prouve pas sa valeur au prospect.
+
+Concevoir une preuve gratuite du moteur
+
+P1
+
+Sitadel autour du bien
+
+La chaîne existe déjà dans le code : snapshot permis gelé, règle, preuve datée, limitation et action. La priorité est désormais de vérifier le rendu et l’usage.
+
+Audit E2E + UX, pas prototype
+
+P1
+
+ISB-DH + LCZ + TRACC
+
+Premier cas idéal pour éprouver une composition multi-source sans transformer le contexte climatique en diagnostic du logement.
+
+Composition V1 chaleur + gates
+
+P1
+
+LiDAR HD / ruissellement
+
+Permet une sensibilité topographique locale ; pas une hauteur d’eau prédite sans modèle hydraulique.
+
+Spike géospatial
+
+P1
+
+DRIAS-Eau + SISPEA + historique
+
+Le croisement peut distinguer pression climatique, ressource et robustesse du service. SISPEA apporte en plus un avis de vérification par indicateur, mais avec environ deux ans de décalage.
+
+Prototype « robustesse de l’eau »
+
+P1
+
+Trait de côte / CoCliCo
+
+Information très décisionnelle sur le littoral, avec complément prospectif européen.
+
+Audit couverture
+
+P1
+
+BatEnR + solaire
+
+Conseils logement étayés à l’échelle bâtiment plutôt que recommandations génériques.
+
+Évaluer intégration
+
+P1
+
+OLD / débroussaillement
+
+Signal réglementaire concret et rapide, mais la cartographie ouverte est en retard sur le périmètre réglementaire et l’information figure déjà dans l’état des risques.
+
+Signalement amont + renvoi préfectoral
+
+P1
+
+EGMS
+
+Observation de mouvements du sol à proximité ; forte valeur mais cause non déterminée.
+
+Spike R&amp;D
+
+P2
+
+Urbanisme GPU
+
+Zonage et servitudes utiles à la parcelle ; privilégier API Carto/exports pour les usages massifs.
+
+Cache + POC
+
+P2
+
+Copropriété
+
+RNIC déjà exploitable ; préparer les enrichissements réglementaires attendus en 2028.
+
+Préparer schéma
+
+P2
+
+Copernicus quartier
+
+Imperméabilisation, arbres et morphologie enrichissent Autour et le croisement chaleur.
+
+POC Autour
+
+P2
+
+Bruit CBS / ondes / eau UDI
+
+Les CBS nationales existent pour les grands réseaux non concédés, mais avec seuils et trous de couverture ; ondes et eau UDI gardent aussi des limites de maille.
+
+États explicites + POC prudent
+
+P2
+
+Éclairage / cours d’eau / air
+
+Bon enrichissement de cadre de vie, moins prioritaire que les briques décisionnelles.
+
+Tester utilité
+
+P3
+
+ZFE, ZAN, sols UE
+
+Cadres mouvants ou futurs ; intérêt éditorial et de veille avant logique métier stable.
+
+Surveillance
+
+# 2. Concurrence : le nouveau signal stratégique
+
+## 2.1 Tuveuxvivreou — concurrent direct sur le terrain « où vivre »
+
+Vérifié. La réutilisation publiée le 16 août 2026 projette l’exposition climatique des 34 740 communes métropolitaines à 2050 à partir d’ALADIN-Climat, scénario RCP 4.5. Elle sépare un indice d’exposition climatique d’une « capacité d’encaissement » construite notamment avec restrictions d’eau, CatNat et RGA. Le site documente ses limites de maille et de scénario.
+
+Le produit va plus loin qu’une simple carte climat : certaines fiches communales affichent déjà nitrates, jours de restriction d’eau, artificialisation, ensoleillement et autres indicateurs locaux.
+
+Sa faiblesse méthodologique relative est claire : un modèle climatique ALADIN et une trajectoire RCP 4.5, là où futur•e a construit une logique multi-modèles/TRACC. Cette différence n’a de valeur que si elle est expliquée simplement et visible dans le produit.
+
+Le signal SEO est important : les pages communales détaillées deviennent un canal d’acquisition évident pour ce type de produit.
+
+P0 — cette semaine
+
+Faire un audit concurrentiel dédié cette semaine : 10 communes contrastées, comparaison écran par écran avec /ou-vivre, sources, profondeur, wording, SEO, limites affichées, vitesse, gratuit/payant et capacité à répondre à une vraie décision résidentielle.
+
+Source : data.gouv.fr — Projeter le climat de 2050 à l’échelle de la commune
+
+Source : tuveuxvivreou — Méthodologie
+
+## 2.2 EcoBuilding — la fiche bâtiment devient une commodité
+
+Vérifié. EcoBuilding propose une carte 3D des bâtiments colorés par classe énergétique et, depuis août 2026, une fiche par logement diagnostiqué. Les sources annoncées incluent BDNB, DPE ADEME, DVF, BAN, Géorisques, ADES et d’autres couches, avec une API publique.
+
+Ce n’est pas encore le même produit que futur•e, mais cela réduit fortement la valeur différenciante d’une simple agrégation de données logement.
+
+Les retours production publiés sont directement utiles : limites de débit BDNB, DPE remplacés, ventes groupées DVF, faible renseignement de l’étage dans les DPE.
+
+P0/P1
+
+Ne pas chercher à gagner par le nombre de champs affichés. Utiliser EcoBuilding comme benchmark technique de robustesse et concentrer futur•e sur l’interprétation, les risques décisionnels, la preuve et les interactions entre échelles.
+
+Source : data.gouv.fr — EcoBuilding
+
+## 2.3 OneDPE — preuve que le DPE ne suffit pas pour la chaleur
+
+Vérifié. Le baromètre analyse 11 183 219 DPE : 40,2 % sont déclarés « insuffisants » en confort d’été. L’indicateur réglementaire repose sur des caractéristiques du bâtiment et non sur le climat local ; l’étude montre des écarts contre-intuitifs lorsqu’on le confronte aux nuits tropicales projetées.
+
+Conséquence : le champ « confort d’été » du DPE doit rester une propriété du bâtiment, pas devenir à lui seul un indicateur de confort futur.
+
+La bonne direction pour futur•e est un croisement explicite : caractéristiques DPE × nuits tropicales DRIAS/TRACC × contexte urbain LCZ quand disponible.
+
+P1
+
+Créer une règle de présentation distincte « capacité passive du logement » / « exposition climatique locale » / « effet urbain du quartier » au lieu d’un score chaleur opaque.
+
+Source : data.gouv.fr — Baromètre du confort d’été 2026
+
+## 2.4 Signaux secondaires : Choisir sa ville et Indice Fissure IDF
+
+Vérifié. Choisir sa ville publie 17 indicateurs par commune et documente les millésimes hétérogènes ainsi qu’une maille climatique SAFRAN d’environ 8 km. L’Indice Fissure IDF attribue un score communal de 0 à 100 à 1 266 communes franciliennes en croisant RGA, CatNat et vulnérabilité du bâti, tout en permettant une requête d’adresse pour l’aléa au point.
+
+Le marché voit se multiplier les scores communaux construits sur des données publiques : un score seul devient facile à copier et difficile à défendre.
+
+La différenciation de futur•e doit donc rester explicable et liée à la décision : pourquoi cette donnée compte pour ce projet, à quelle maille, avec quelle certitude et quelle conséquence concrète.
+
+Source : data.gouv.fr — Choisir sa ville
+
+Source : data.gouv.fr — Indice Fissure IDF
+
+## 2.5 Parcelle Info, Aucadastre, Avertine, ImmoClimat et TOISE — la fiche adresse se commoditise
+
+L’ultime veille renforce fortement le diagnostic concurrentiel : plusieurs services récents couvrent désormais, chacun à leur manière, l’adresse ou la parcelle avec DPE, bâtiment, urbanisme, risques, eau, services, relief ou climat. Certains documentent déjà la source, la date et la maille de jointure ; d’autres exposent une API ou distinguent explicitement données sourcées et hypothèses. La qualité de traçabilité n’est donc plus, à elle seule, une différenciation suffisante.
+
+Parcelle Info et Aucadastre montrent qu’une fiche technique riche et structurée peut devenir un bien quasi standard ; Avertine positionne un rapport d’information avant achat à un prix inférieur au Dossier Adresse ; ImmoClimat attaque l’analyse bioclimatique ; TOISE illustre une autre direction : partir des sources pour produire des calculs et scénarios dérivés en séparant clairement source, observation et hypothèse.
+
+Conséquence stratégique : futur•e doit démontrer avant paiement ce que son moteur ajoute à la donnée brute. Une composition ou une action excellente, visible seulement après achat, améliore le produit mais ne prouve pas la différence au moment de convertir.
+
+Sources : data.gouv.fr — Parcelle Info, Aucadastre, Avertine, ImmoClimat, TOISE.
+
+# 3. P0 — intégrité produit et données à traiter maintenant
+
+## 3.1 RGA 2026 — vérifier la couche réellement utilisée
+
+Priorité inchangée. Le zonage 2026 est désormais une référence opérationnelle ; toute couche 2020 encore en cache ou répliquée ailleurs peut produire une information fausse ou obsolète. Un jeu PMTiles dérivé peut être pratique pour le rendu web, mais il ne doit pas remplacer la source officielle dans la chaîne de preuve.
+
+Tester des adresses situées dans des communes reclassées entre l’ancien et le nouveau zonage.
+
+Afficher version/date/producteur de la couche dans la preuve.
+
+Séparer la donnée officielle de toute couche transformée pour la cartographie.
+
+P0
+
+Audit code + données + cache + tests de non-régression sur le RGA avant tout nouvel enrichissement.
+
+## 3.2 DPE — date, régime de calcul et versionnement
+
+Priorité inchangée. À partir du 1er janvier 2027, le coefficient de conversion de l’électricité passe de 1,9 à 1,7. Le produit doit conserver la valeur source, la date du diagnostic et le régime de calcul, et expliquer qu’un reclassement réglementaire n’est pas une rénovation physique.
+
+Rendre la date visible dans la fiche Logement et dans les synthèses IA.
+
+Versionner la méthode au lieu de déduire une vérité intemporelle à partir de la seule lettre A–G.
+
+Vérifier séparément toute mention « A0 » avant implémentation : ne pas la considérer acquise sans texte primaire consolidé.
+
+P0
+
+Audit du schéma ADEME et de tous les textes qui interprètent la lettre DPE.
+
+## 3.3 PFAS — nouvelle source nationale, granularité à maîtriser
+
+Priorité inchangée. La carte nationale et l’export des analyses ouvrent une vraie nouvelle brique santé environnementale. La difficulté principale n’est pas le volume mais la géographie : selon l’origine, la position peut être exacte, rattachée à un site ou volontairement dégradée jusqu’au chef-lieu communal.
+
+Stocker une notion explicite de précision spatiale et de provenance pour chaque observation.
+
+Ne jamais convertir une mesure communale/réseau en information parcellaire.
+
+Distinguer mesure, non-détection, seuil réglementaire et commentaire sanitaire.
+
+P0
+
+Spike import + schéma de preuve + règles de rattachement réseau/commune avant interface.
+
+# 4. P1 — nouvelles données qui renforcent réellement le produit
+
+## 4.1 LCZ Cerema — probablement la meilleure nouvelle couche pour la chaleur urbaine
+
+Vérifié. La cartographie des Local Climate Zones couvre 93 territoires de plus de 50 000 habitants et a été mise à jour le 17 juillet 2026 avec les DROM. Elle est disponible en vecteur et raster fin et sert de pré-diagnostic de la sensibilité aux îlots de chaleur urbains.
+
+Valeur forte pour Autour : la donnée est infra-communale et décrit la morphologie urbaine, là où DRIAS décrit le climat à une maille plus large.
+
+Ne pas la présenter comme une température mesurée ou une projection climatique : c’est une typologie de contexte urbain liée au potentiel de surchauffe.
+
+Prévoir un état « non couvert » hors des aires disponibles, sans pénalité implicite.
+
+P1 — fort
+
+Prototype chaleur sur 5 villes : DPE confort d’été + nuits tropicales TRACC + LCZ autour de l’adresse. C’est une différenciation crédible et directement compréhensible.
+
+Source : data.gouv.fr — Zones climatiques locales LCZ
+
+## 4.2 DRIAS-Eau / Explore2 + SISPEA — vers une lecture de robustesse de l’eau
+
+Vérifié. DRIAS-Eau s’appuie sur Explore2, jusqu’à 9 modèles hydrologiques et 17 projections climatiques sur plus de 2 500 points de simulation. SISPEA apporte une dimension complémentaire : la performance du service de distribution (rendement, pertes, interruptions, connaissance patrimoniale, conformité) et la composition communale des services. Le panorama publié en juin 2026 porte sur les données 2024 : 90 % des services d’eau potable du référentiel, couvrant 99 % de la population.
+
+Construire le croisement en trois familles séparées : ressource et hydrologie ; pression climatique et historique des restrictions ; infrastructure/service de distribution. Ne pas les écraser dans un score unique.
+
+SISPEA fournit pour chaque indicateur un avis de vérification (« sans anomalie apparente », « présomption d’anomalie », « anomalie »). Utiliser ce drapeau comme gate natif : une valeur signalée ne doit pas alimenter une lecture sans avertissement ou exclusion explicite.
+
+Limite temporelle : ces données sont déclarées par les collectivités puis vérifiées par les services de l’État, mais le millésime disponible accuse environ deux ans de décalage. Un rendement 2024 n’est jamais un constat sur le réseau en septembre 2026.
+
+Sources : Météo-France — DRIAS-Eau / Explore2 ; OFB/SISPEA — données service par service et Panorama national édition juin 2026.
+
+P1 — fort
+
+Prototype « fragilité de la ressource en eau » séparant passé observé, projection et capacité locale d’alimentation.
+
+## 4.3 BatEnR — transformer les conseils logement en pistes sourcées
+
+Vérifié. Le jeu BatEnR du Cerema caractérise à l’échelle de chaque bâtiment métropolitain le potentiel de plusieurs solutions thermiques : réseaux de chaleur/froid, géothermie, solaire thermique, bois-énergie et aérothermie.
+
+Très pertinent pour une section « pistes d’amélioration » du module Logement : la recommandation peut être reliée à un potentiel territorial/bâtiment plutôt qu’à une liste générique.
+
+Attention : potentiel technique ≠ faisabilité, coût, autorisation ou recommandation finale pour un ménage.
+
+P1
+
+Évaluer d’abord si les identifiants bâtiment et les licences s’intègrent proprement à la chaîne actuelle BDNB/adresse.
+
+Source : data.gouv.fr — BatEnR
+
+## 4.4 Recul du trait de côte — garder la priorité haute sur le littoral
+
+Toujours P1. L’intérêt vient de la portée directement décisionnelle à l’adresse : exposition à 30 ans / 30–100 ans, contraintes d’urbanisme et mécanismes de consignation lorsqu’ils sont applicables. C’est particulièrement cohérent avec le module Logement et les façades atlantique et méditerranéenne.
+
+P1
+
+Auditer la couverture et les cas sans donnée locale ; ne jamais inférer une obligation individuelle à partir d’un zonage générique.
+
+# 5. P2 — différenciation « Autour » et cadre de vie
+
+## 5.1 Éclairage nocturne — donnée rare et désormais infra-communale
+
+Vérifié. Le Cerema a mis à jour en juin 2026 les pratiques d’extinction nocturne sur 2024–2025 et descend désormais jusqu’à l’IRIS ou à des zones urbanisées infra-communales. 73 % des collectivités étudiées appliquent une extinction totale ou partielle en cœur de nuit.
+
+C’est une vraie donnée de cadre de vie : ciel nocturne, ambiance nocturne, biodiversité et sobriété lumineuse.
+
+Limite essentielle : le satellite passe entre environ 2 h et 4 h ; la donnée décrit le cœur de nuit, pas toute la soirée.
+
+P2
+
+POC dans Autour, sans score normatif : montrer la pratique locale et son évolution, avec explication de la limite temporelle.
+
+Source : Cerema — nouvelles données éclairage public 2024–2025
+
+## 5.2 État écologique des cours d’eau — utile, mais source dérivée
+
+Vérifié. Le jeu publié sur data.gouv.fr comporte 56 719 couples commune × cours d’eau et couvre 29 102 communes. Il reprend l’état écologique DCE en cinq classes et indique explicitement qu’un bon état écologique ne signifie pas que l’eau est adaptée à la baignade.
+
+Pertinent pour Autour sous forme de contexte environnemental local, notamment lorsque l’adresse est proche d’un cours d’eau.
+
+Le producteur du jeu consolidé est TACCT et non directement une agence de l’eau : pour une intégration cœur de produit, garder la possibilité de remonter vers les sources de bassin.
+
+P2
+
+Tester l’utilité utilisateur avant industrialisation : proximité du cours d’eau + état + date du cycle DCE, sans promettre de qualité sanitaire.
+
+Source : data.gouv.fr — État écologique des cours d’eau par commune
+
+## 5.3 Consommation foncière — afficher le millésime et le caractère provisoire
+
+Vérifié. En 2026, le Cerema a renforcé sa méthode de mesure et révisé l’ensemble de la série 2011–2024 pour homogénéité. Il précise que le millésime le plus récent reste provisoire et peut être révisé.
+
+Si futur•e utilise l’artificialisation comme caractéristique d’une commune, la version de la série est une donnée métier, pas une note technique invisible.
+
+P2
+
+Ajouter millésime + caractère provisoire dans les métadonnées et éviter les comparaisons entre versions de méthode non harmonisées.
+
+Source : Cerema — Consommation foncière 2026
+
+## 5.4 Qualité de l’air — regarder au-delà de la moyenne ATMO
+
+Vérifié. L’AEE indique qu’en 2026 jusqu’à 20 % des stations européennes dépassent encore les normes actuelles de l’UE, surtout pour PM10, ozone et benzo(a)pyrène. Ce dernier polluant n’est pas toujours visible dans les indicateurs grand public.
+
+Avant d’ajouter un polluant, vérifier disponibilité et densité de mesure en France : une donnée rare ne doit pas produire une fausse précision communale.
+
+Pour l’ozone, privilégier un indicateur saisonnier ou d’épisodes plutôt qu’une seule moyenne annuelle.
+
+P2
+
+Faire l’inventaire des polluants et métriques réellement disponibles via les AASQA / Geod’air pour les communes ciblées.
+
+Source : AEE — Air quality status in Europe 2026
+
+# 6. Éditorial / Pages Savoir — importants, mais pas des scores
+
+## Canicules 2026 et impacts sanitaires
+
+Santé publique France a estimé au moins 5 764 décès toutes causes en excès (+36,2 %) pendant l’épisode du 17 juin au 2 juillet, dans 92 départements ; il s’agit de données provisoires et non consolidées. Un autre épisode fin juillet–août a fait l’objet d’une première estimation distincte.
+
+Très utile pour expliquer pourquoi la chaleur est un enjeu résidentiel concret, mais trop agrégé et trop sensible pour devenir un score local de commune.
+
+À utiliser dans une Page Savoir « chaleur et logement » ou pour contextualiser les projections, en conservant les réserves statistiques de Santé publique France.
+
+Source : Santé publique France — canicule 17 juin–2 juillet 2026
+
+## Été 2026 comme repère climatique vécu
+
+Garder l’idée éditoriale : utiliser l’été 2026 comme pont pédagogique entre événements vécus et projections futures, sans assimiler un événement national à la situation précise d’une commune. C’est particulièrement efficace pour expliquer la différence entre météo, climat et trajectoire d’adaptation.
+
+## ZFE / ZAN / cadre européen de résilience
+
+Rester en veille. Ces sujets ont une valeur réelle pour la décision résidentielle, mais leurs cadres sont encore mouvants. La bonne doctrine est de dater, sourcer et éviter d’en faire une règle prédictive durable tant que les textes et méthodes ne sont pas stabilisés.
+
+# 7. Ce que cette veille dit du moat de futur•e
+
+LE SIGNAL DE MARCHÉ  —  Plusieurs acteurs sont capables, en quelques semaines, de croiser les mêmes jeux ouverts et de publier des scores communaux ou des fiches bâtiment. « Nous agrégeons beaucoup de données publiques » n’est donc plus une différenciation suffisante.
+
+1. Multi-échelle native : Territoire → Autour → Logement, avec des règles différentes de granularité et de preuve.
+
+2. Lecture à l’adresse/parcelle quand la source le permet, et refus explicite de la fausse précision quand elle ne le permet pas.
+
+3. Versionnement des données et règles : DPE, RGA, millésimes, méthodes, données provisoires.
+
+4. Croisement plutôt que juxtaposition : exemple chaleur = climat futur × morphologie urbaine × caractéristiques du bâtiment.
+
+5. Certitude graduée visible : ce qui est observé, projeté, modélisé, dérivé ou simplement contextuel.
+
+6. Traduction en décision : conséquences pour ce projet résidentiel précis, et non accumulation de graphiques.
+
+7. Historique et traçabilité : expliquer pourquoi une conclusion a changé lorsque la donnée ou la réglementation évolue.
+
+La vraie menace concurrentielle n’est donc pas qu’un acteur « copie les sources ». C’est qu’il rende une partie de l’information de base gratuite, simple et bien référencée. futur•e doit faire en sorte que la valeur payante commence là où ces fiches s’arrêtent : interprétation multi-source, adresse, contradictions entre données, projection, preuve et arbitrage.
+
+## 7.1 Le nouveau risque principal : la différence doit être visible avant paiement
+
+La commoditisation ne valide pas seulement la stratégie des croisements ; elle déplace le risque du technique vers le marché. La question prioritaire devient : un ménage paie-t-il pour une lecture qu’il ne peut pas obtenir ailleurs, et comprend-il cette différence avant de payer ?
+
+Conséquence acquisition : prévoir une preuve gratuite du moteur, courte mais réelle — par exemple une composition ou un raisonnement démonstrateur sur un fait disponible — sans donner gratuitement tout le Dossier Adresse. Le gratuit doit montrer la nature de la lecture, pas seulement énumérer les bases mobilisées.
+
+Critère à tester : la démonstration pré-achat augmente-t-elle la compréhension de la valeur et l’intention de poursuivre ? Après achat, le niveau 4 se juge séparément : la lecture a-t-elle changé une question posée, un document demandé ou la manière de visiter ?
+
+# 8. Données d’avance — renforcer le moat parcellaire et infra-communal
+
+## 8.1 EGMS — très fort potentiel, mais à traiter comme une donnée d’observation experte
+
+Vérifié. Le European Ground Motion Service (Copernicus) couvre actuellement 2020–2024, est mis à jour annuellement et repose sur l’InSAR Sentinel-1. L’API de téléchargement machine-à-machine est disponible. Les produits Basic/Calibrated reposent sur des points radar de mesure ; en ville, leur densité peut atteindre des milliers de points par km². Le produit Ortho, plus facile à interpréter, est en revanche rééchantillonné sur une grille de 100 m.
+
+Correction importante par rapport à la formulation initiale : EGMS ne garantit pas une mesure pour chaque bâtiment. La précision « millimétrique » concerne le mouvement mesuré, pas une résolution spatiale millimétrique. Surtout, un mouvement observé ne prouve pas à lui seul un retrait-gonflement des argiles : subsidence, extraction d’eau, travaux, instabilité locale ou autres causes peuvent intervenir.
+
+Usage futur•e recommandé : ne pas en faire un score automatique immédiatement. Lancer un spike R&amp;D sur une vingtaine d’adresses à contexte connu, comparer EGMS avec RGA, bâtiments fissurés / CatNat quand documentés, et produire une sortie du type « mouvement du sol observé à proximité — cause non déterminée » avec niveau de confiance.
+
+La cartographie BRGM fondée sur EGMS confirme l’intérêt côtier : les zones portuaires étudiées présentent en moyenne environ 1,5 mm/an de subsidence et certains secteurs européens dépassent 5 mm/an. Cela ouvre un croisement particulièrement intéressant avec submersion et élévation relative du niveau marin.
+
+## 8.2 LiDAR HD IGN — probablement la meilleure base technique pour gagner en finesse locale
+
+Vérifié. Les MNT, MNS et MNH issus du LiDAR HD doivent couvrir la France métropolitaine et les DROM hors Guyane. Ils sont disponibles en open data. Les modèles sont proposés notamment au pas de 50 cm ; les acquisitions imposent une précision altimétrique meilleure que 10 cm et planimétrique meilleure que 50 cm pour le nuage de points.
+
+Pour futur•e, deux usages sont particulièrement crédibles : (1) améliorer la microtopographie utilisée dans les analyses locales de ruissellement / dépression topographique ; (2) exploiter le MNH pour caractériser la hauteur du sursol, notamment la végétation et les bâtiments, afin d’estimer plus finement l’environnement d’ombre et de fraîcheur.
+
+Prudence méthodologique : un MNT très précis ne donne pas à lui seul un risque de ruissellement ou de submersion. Il faut encore modéliser l’écoulement, les obstacles, le réseau pluvial, les ouvrages et les scénarios hydrologiques. De même, hauteur de végétation ≠ ombre garantie : l’ombre dépend de la géométrie solaire, de la forme du houppier et de la saison.
+
+Gate LiDAR : la couverture ne doit pas être décidée au niveau de la commune. Pour un calcul de ruissellement, il faut vérifier la disponibilité et la date du vol sur toute l’emprise nécessaire au calcul, y compris l’amont topographique. Une parcelle couverte mais un bassin contributif incomplet doit rendre le calcul non conclusif.
+
+Conserver la date de vol dans la preuve : un nuage de 2022 peut ne plus décrire fidèlement la végétation, des terrassements ou certains objets du paysage en 2026.
+
+Plan IGN HD : au 19 septembre 2026, j’ai retrouvé l’annonce IGN de test estival mais pas de confirmation primaire claire d’un passage définitif en licence ouverte en septembre. À garder en watchlist, pas comme dépendance produit acquise.
+
+## 8.3 Copernicus — imperméabilisation, arbres et morphologie du quartier
+
+Vérifié. La couche Imperviousness 2024 fournit une densité d’imperméabilisation à 10 m sur l’Europe. La couverture arborée est disponible annuellement à 10 m depuis 2018. L’Urban Atlas 2021 ajoute notamment hauteur des bâtiments et arbres d’alignement dans les Functional Urban Areas.
+
+C’est une très bonne extension d’Autour : pourcentage de surfaces imperméabilisées dans un rayon, densité arborée, évolution du couvert, morphologie urbaine. Ces variables complètent les LCZ et permettent de distinguer deux quartiers d’une même commune.
+
+Doctrine : présenter ces couches comme observation spatiale / occupation du sol, pas comme mesure directe de confort thermique. Elles peuvent alimenter un indice explicable, surtout lorsqu’elles sont croisées avec DRIAS/TRACC et LCZ.
+
+## 8.4 CoCliCo — couche européenne très intéressante pour le littoral
+
+Vérifié. CoCliCo, coordonné par le BRGM, met à disposition une plateforme ouverte avec projections haute résolution de montée du niveau marin, aléas d’inondation côtière, exposition et comparaison coûts-bénéfices de stratégies d’adaptation. Les données sont téléchargeables via un catalogue STAC.
+
+Pour futur•e : source complémentaire forte pour les communes littorales, à confronter aux données françaises réglementaires (trait de côte, PPRL, Géorisques) plutôt qu’à les remplacer. L’intérêt est surtout la projection et le contexte d’adaptation européen.
+
+## 8.5 Température de surface — prometteuse, mais ne pas confondre avec température de l’air
+
+Les approches satellitaires qui raffinent la température de surface peuvent devenir utiles pour comparer des quartiers et objectiver la surchauffe du sol et des toitures. Mais elles mesurent une température radiative de surface, dépendante de l’heure de passage, des matériaux et de l’ensoleillement ; ce n’est pas la température de l’air ressentie par l’habitant.
+
+Décision : veille technologique / prototype ponctuel, pas critère de score national tant que couverture, fréquence et méthode ne sont pas suffisamment homogènes.
+
+## 8.6 PhytAtmo — utile comme contexte, insuffisant pour une note locale
+
+Vérifié. La base PhytAtmo centralise plus de 10 000 prélèvements sur 176 sites et 321 substances actives recherchées. Atmo France insiste sur le fait que l’outil améliore la connaissance sans se substituer aux organismes d’évaluation sanitaire.
+
+Le maillage est trop faible et les substances recherchées trop hétérogènes pour extrapoler proprement à chaque commune ou adresse. À utiliser comme contexte territorial quand un site pertinent existe à proximité, avec date, substance et distance, sans conclusion sanitaire automatisée.
+
+## 8.7 Moustique tigre, pollens et ambroisie — petits signaux de cadre de vie à forte compréhension utilisateur
+
+Vérifié pour le moustique tigre : l’ANSES maintient une carte communale actualisée et précise que l’état de colonisation peut évoluer après la date de mise à jour. C’est compatible avec un indicateur simple « commune colonisée / partiellement colonisée — donnée datée », sans transformer la présence en évaluation individuelle de risque sanitaire.
+
+Pour les pollens, l’intérêt produit est réel mais les projections de sensibilité future et les cartes de recherche doivent rester séparées de l’indice opérationnel. À court terme : privilégier les indices officiels / Atmo et garder la projection ambroisie en Page Savoir ou expérimentation.
+
+## 8.8 Directive européenne sur les sols — préparer le futur module plutôt que coder trop tôt
+
+Vérifié. La directive (UE) 2025/2360 doit être transposée avant le 17 décembre 2028. La Commission et l’AEE doivent créer un portail numérique de données sur la santé des sols au plus tard le 17 décembre 2027, et les États membres un registre public géoréférencé des sites potentiellement contaminés et contaminés au plus tard le 17 décembre 2029.
+
+Conséquence : ne pas investir trop fortement aujourd’hui dans un modèle propriétaire fragile de consolidation des sols pollués si les sources européennes/nationales vont être restructurées. Concevoir plutôt le schéma futur•e pour pouvoir brancher ces nouveaux registres quand ils apparaîtront.
+
+## 8.9 Hiérarchie de ce bloc “données d’avance”
+
+1 — LiDAR HD : potentiel technique le plus directement exploitable pour la finesse locale ; lancer un prototype ciblé.
+
+2 — EGMS : potentiel différenciant exceptionnel, mais nécessite une vraie doctrine d’interprétation et ne doit jamais être présenté comme une preuve de RGA.
+
+3 — Copernicus imperméabilisation / arbres : intégration plus simple, forte valeur pour Autour et pour le croisement chaleur.
+
+4 — CoCliCo : forte valeur sur le littoral, surtout comme complément prospectif aux couches réglementaires françaises.
+
+5 — Moustique / pollens / PhytAtmo : bonnes briques de cadre de vie, mais secondaires et très dépendantes de la maille.
+
+6 — Sols UE : watchlist structurante 2027–2029.
+
+# 9. Adresse, Autour et Logement — socle technique et features prioritaires
+
+## 9.1 Géocodage et Géorisques — deux dépendances à auditer avant le reste
+
+Vérifié. L’API Adresse BAN historique est dépréciée au profit du service de géocodage Géoplateforme. La documentation officielle annonce le décommissionnement de api-adresse.data.gouv.fr fin janvier 2026 ; le nouveau service fait géocodage direct et inverse sur adresses, parcelles et unités administratives, avec une limite de 50 appels par IP et par seconde.
+
+Géorisques v2 apporte des filtres métier et des recherches par coordonnées, parcelle, rayon, géométrie WKT, commune, département ou région. Les endpoints v2 utilisent un jeton valable un an ; la v1 reste accessible sans jeton.
+
+Action : audit immédiat de tous les appels réseau, variables d’environnement, limites de débit, cache et tests de repli. Ces migrations doivent être traitées comme dette d’infrastructure et non comme une nouvelle feature.
+
+Sources : https://adresse.data.gouv.fr/outils/api-doc/adresse ; https://www.georisques.gouv.fr/inscription
+
+## 9.2 ID-RNB — faire du bâtiment une entité stable
+
+Vérifié. Le RNB permet de consulter environ 43 millions de bâtiments et fournit API et tuiles vectorielles en accès libre. Une adresse peut correspondre à plusieurs bâtiments et un bâtiment à plusieurs adresses ; l’adresse n’est donc pas une clé bâtiment suffisante. Les ID-RNB sont conçus comme pérennes et traçables, y compris lors des fusions et scissions.
+
+En mars 2026, près de 8 millions de DPE ouverts ADEME disposaient déjà d’un ID-RNB. Pour futur•e, le schéma cible devrait être : adresse/parcelle → ID-RNB → données bâtiment (DPE, BDNB, risques, potentiels, copropriété, permis quand le rattachement est possible).
+
+Décision : faire de l’ID-RNB la clé bâtiment interne, tout en conservant les identifiants source et l’historique des rattachements. C’est probablement la décision d’architecture la plus rentable de cette veille.
+
+Sources : https://rnb.beta.gouv.fr/outils-services ; https://rnb.beta.gouv.fr/faq ; https://rnb.beta.gouv.fr/blog/dpe-pres-de-8-millions-de-dpe-avec-des-id-rnb
+
+## 9.3 BDNB 2026-02.a — changement cassant et nouveaux potentiels
+
+Vérifié. Le millésime 2026-02.a supprime définitivement les tables batiment_groupe_argiles et batiment_groupe_radon, remplacées par batiment_groupe_risques. Toute requête ou import fondé sur les anciennes tables doit être corrigé avant le prochain rafraîchissement.
+
+Le même millésime enrichit aussi la partie ouverte, notamment avec de nouvelles certifications bâtiment et des potentiels énergétiques. Cette évolution renforce l’intérêt de dissocier le schéma interne futur•e du schéma physique d’une version donnée de la BDNB.
+
+Action : tests d’import sur un snapshot 2026-02.a, couche d’adaptation/version de schéma et tests de non-régression sur les champs critiques.
+
+Sources : https://www.bdnb.io/archives_data/bdnb_millesime_2026_02_a/ ; https://www.bdnb.io/blog/17/05/2026/new_millesime_2026_02.a/
+
+## 9.4 ISB-DH — la meilleure piste actuelle pour le confort d’été du logement
+
+Vérifié. L’ISB-DH de la BDNB Expert estime la durée et l’intensité de la surchauffe intérieure en degrés-heures. Il est calculé à l’échelle logement, prend en compte la performance thermique, le caractère traversant, le dernier étage et l’effet d’îlot de chaleur urbain, et publie un indicateur de fiabilité.
+
+Pour chaque bâtiment, le calcul d’incertitude est répété 100 fois. Le passage à l’échelle repose sur des métamodèles entraînés sur 350 000 simulations physiques réalisées avec le moteur Cometh de la RE2020. Hypothèse à expliciter : occupants fermant les volets le jour et ouvrant la nuit ; climatisation et brasseurs d’air non pris en compte.
+
+Usage futur•e : ne pas créer un score chaleur unique. Distinguer 1) ce que le diagnostic ou le modèle bâtiment établit, 2) le contexte urbain autour de l’adresse, 3) l’exposition climatique future. Pour une V1 prudente, un confort d’été DPE « insuffisant » peut déclencher une lecture renforcée ; un indicateur « bon » ne doit jamais, à lui seul, produire une rassurance sur le confort futur.
+
+Garde-fou confirmé par le code actuel : futur•e ne retient déjà le confort d’été DPE que lorsqu’un diagnostic attribué décrit bien ce logement. Cette asymétrie doit être conservée dans les futurs croisements : un signal défavorable peut ouvrir une vérification ; l’absence de signal ne vaut pas preuve favorable.
+
+Source : https://www.bdnb.io/documentation/predictions_isb_dh/
+
+### OPEE / RE2020 : bon jeu de calibration, pas une entrée adresse prioritaire
+
+Les données ouvertes de l’Observatoire des performances énergétiques et environnementales des bâtiments neufs, ainsi que les fichiers climatiques horaires prospectifs utilisés pour l’adaptation des bâtiments, sont intéressants pour la recherche et la calibration du futur moteur chaleur. En revanche, leur géolocalisation n’est pas suffisamment robuste pour en faire aujourd’hui une source simple rattachée à une adresse futur•e.
+
+Décision : conserver OPEE comme corpus de validation méthodologique et non comme feature à intégrer immédiatement. Ce choix illustre la discipline à maintenir : une source peut être excellente pour tester un modèle tout en étant inadaptée comme preuve utilisateur.
+
+## 9.5 Sitadel — déjà intégré ; désormais auditer la chaîne complète
+
+Côté source, le SDES publie chaque mois les autorisations d’urbanisme depuis 2013. Côté produit, le repo actuel va déjà beaucoup plus loin qu’un simple prototype : `PermisSnapshot` gèle les autorisations retenues avec leur date de consultation et leur périmètre ; `PERMIS_RULES` produit un `VerificationFact` avec état, limitation, preuve datée et `DecisionAction`. Des tests E2E existent également.
+
+La feature est donc déjà dans la chaîne décisionnelle. Ce qu’il reste à valider est son exposition réelle dans les écrans et son effet utilisateur : comprend-on immédiatement ce qui est connu, ce qui ne l’est pas et le geste concret à faire pour qualifier l’opération ?
+
+Action : audit bout en bout sur plusieurs dossiers réels. Vérifier que la preuve renvoie au bon bien, que l’absence de permis consulté n’est jamais confondue avec une donnée non chargée, et tester si l’action « consulter le dossier en mairie » change effectivement la préparation d’une visite. Ne pas ajouter de composition spécifique tant que le fait + l’action suffisent.
+
+Source : https://www.statistiques.developpement-durable.gouv.fr/donnees-des-permis-de-construire-et-autres-autorisations-durbanisme
+
+## 9.6 Ensoleillement, végétation et urbanisme de la parcelle
+
+Le cadastre solaire détaillé et les couches LiDAR/Copernicus peuvent améliorer la lecture d’ensoleillement et d’ombrage d’un bâtiment. Cette donnée est prometteuse pour Logement, mais il faut distinguer potentiel solaire de toiture, durée d’ensoleillement des façades et confort réel intérieur.
+
+Pour l’urbanisme, l’API du Géoportail de l’Urbanisme sait interroger des informations au point ou à la parcelle. Sa documentation précise toutefois qu’elle répond d’abord aux besoins internes du GPU et recommande l’API Carto pour l’interrogation géographique avancée et les exports pour le téléchargement massif.
+
+Décision : construire un cache/ETL des documents utiles plutôt que dépendre d’appels synchrones massifs au GPU. Pour les arbres et l’ombre, privilégier d’abord MNH LiDAR + Copernicus/LCZ avant de promettre une simulation solaire complète.
+
+Source : https://www.geoportail-urbanisme.gouv.fr/api/
+
+## 9.7 Ruissellement LiDAR — oui, mais sous la forme d’une sensibilité topographique
+
+C’est techniquement faisable et cohérent avec futur•e. À partir du MNT LiDAR HD, on peut dériver pente, directions d’écoulement, accumulation, dépressions locales, bassins contributifs et axes topographiques probables. Cela permet de qualifier la position du bâtiment par rapport aux chemins naturels de concentration de l’eau.
+
+Niveau 1 — recommandé : « sensibilité topographique au ruissellement ». Entrées principales : MNT LiDAR HD + emprise du bâtiment/parcelle. Sorties : contrebas/point haut, cuvette, surface contributive, distance à un axe d’écoulement, pente vers le bâtiment. C’est reproductible nationalement et explicable.
+
+Niveau 2 — sweet spot : contextualiser avec imperméabilisation, occupation du sol, végétation, pédologie/infiltration et objets connus (fossés, cours d’eau, certains ouvrages). On obtient une sensibilité plus crédible, toujours sans annoncer de hauteur d’eau.
+
+Niveau 3 — hors scope actuel : prédire hauteurs, vitesses ou débits pour une pluie de période de retour donnée. Cela demande pluie de projet, infiltration, ouvrages, réseau pluvial et modélisation hydraulique 2D ; ce n’est plus une simple analyse de données.
+
+Wording recommandé : « le relief local favorise / ne favorise pas la concentration des écoulements vers cette zone », avec niveau de confiance. Interdire les formulations du type « 30 cm d’eau lors d’une pluie centennale » sans étude hydraulique.
+
+Décision : lancer un spike sur 20 à 50 adresses connues, comparer les cartes dérivées aux PPRI/PPRi, historiques locaux et observations terrain, puis évaluer le taux de faux positifs avant industrialisation.
+
+## 9.8 Eau du robinet, ondes, bruit et socio-économie : utiles mais à maille contrôlée
+
+Eau potable : Hub’Eau permet de rattacher les communes aux unités de distribution et à leurs résultats, mais futur•e ne doit pas inventer le contour exact d’un réseau ni affirmer l’eau reçue par une parcelle quand la source ne le permet pas. Afficher le niveau de rattachement réel : commune, réseau ou quartier quand disponible.
+
+Ondes : l’ANFR publie désormais une simulation nationale actualisée mensuellement. Elle est indicative ; seule une mesure sur place reflète l’exposition réelle. Le seuil de « point atypique » est de 9 V/m depuis le 1er janvier 2026, mais une simulation au-dessus de 9 V/m ne suffit pas à qualifier un point atypique.
+
+Bruit : correction importante. Il existe un jeu national harmonisé des cartes stratégiques de bruit des grandes infrastructures routières et ferroviaires non concédées, modélisé par le Cerema avec l’Université Gustave Eiffel pour la 4e échéance, avec types A et C, indices Lden/Lnight et diffusion départementale en Shapefile. Il reste indicatif : modélisation et résolution 1:25 000, pas mesure dans le logement.
+
+Deux trous doivent être traités explicitement. Le jeu national « non concédé » ne couvre pas les autoroutes concédées, souvent très structurantes acoustiquement. Et une carte de type A commence à 55 dB Lden (50 dB la nuit) : l’absence de polygone ne signifie donc pas silence.
+
+Règle d’affichage à concevoir en trois états, si la couverture amont peut être établie : « exposition modélisée dans une zone CBS », « infrastructure couverte mais adresse sous le seuil cartographié », « source nationale non couvrante / couverture indéterminée ». Ne jamais convertir l’absence de polygone en signal favorable.
+
+Source : data.gouv.fr — Cartes de bruit stratégiques des réseaux routiers et ferroviaires non concédés, Directive 2002/49/CE.
+
+Sources ANFR : https://www.anfr.fr/maitriser/information-du-public/cartoradio/simulation ; https://www.anfr.fr/maitriser/les-installations-radioelectriques/recensement-des-points-atypiques
+
+## 9.9 OLD / débroussaillement — bon P1, mais couverture cartographique incomplète
+
+Le jeu IGN DÉBROUSSAILLEMENT permet de signaler en amont une adresse située dans un zonage informatif lié aux obligations légales de débroussaillement. Il renvoie vers l’information préfectorale et porte notamment la date d’intégration et celle de l’arrêté.
+
+Garde-fou majeur : au 19 septembre 2026, les sources officielles ne sont pas parfaitement alignées. La fiche du jeu IGN sur data.gouv.fr indique 45 départements couverts ; Géorisques évoque 48 départements dans sa base ; le cadre réglementaire est passé à 52 départements comportant des massifs classés depuis l’arrêté du 13 avril 2026. Une absence dans la couche ne peut donc jamais être interprétée comme absence d’obligation.
+
+Le décret du 29 avril 2024 a déjà intégré cette information dans l’état des risques pour les biens concernés. futur•e ne « révèle » donc pas une obligation inconnue : sa valeur est de la signaler plus tôt dans le parcours et de relier le lecteur à l’arrêté préfectoral applicable.
+
+Wording : « cette adresse apparaît dans le zonage informatif OLD disponible ; consultez l’arrêté préfectoral pour les règles applicables ». Hors zone cartographiée : « couverture insuffisante pour conclure », jamais « non concerné ».
+
+Sources : data.gouv.fr — DÉBROUSSAILLEMENT ; Géorisques — Obligations légales de débroussaillement ; Légifrance — décret n° 2024-405 du 29 avril 2024.
+
+## 9.10 Copropriété — préparer une vraie brique « santé de la copro »
+
+Le RNIC est déjà exploitable en open data et est mis à jour automatiquement chaque jour depuis avril 2026. Il décrit notamment identité, localisation, lots, syndic et certaines procédures. Il constitue donc déjà une source utile pour les appartements, indépendamment des enrichissements réglementaires annoncés pour 2028.
+
+Architecture recommandée : rattacher la copropriété au bâtiment via ID-RNB dès que possible, conserver l’identifiant RNIC et prévoir un sous-modèle capable d’accueillir DPE collectif, travaux, équipements et diagnostics futurs sans casser le schéma.
+
+Source : https://www.data.gouv.fr/datasets/registre-national-dimmatriculation-des-coproprietes
+
+## 9.11 Positionnement juridique — informer sans se présenter comme un ERP
+
+Le dossier futur•e doit rester un outil d’information et d’aide à la décision, distinct des documents réglementaires opposables ou obligatoires. Cette séparation doit être visible dans le wording, les preuves et l’interface : source, date, granularité, limites et renvoi vers le document officiel lorsqu’il existe.
+
+Règle produit : ne jamais reprendre la forme, le vocabulaire de conformité ou la promesse juridique d’un ERP. Plus futur•e gagne en précision à l’adresse, plus cette distinction doit être nette.
+
+# 10. Doctrine des croisements futur•e — créer de la valeur sans fabriquer de certitude
+
+Le croisement de données reste une direction centrale de futur•e. La distinction à figer dans le produit est technique : une composition rapproche des faits établis ; un fait dérivé produit une nouvelle mesure par une méthode futur•e. Les deux ne portent pas le même niveau de responsabilité ni les mêmes exigences de preuve.
+
+## 10.1 Composition : relier sans créer une nouvelle vérité
+
+Une `FactComposition` ne doit jamais augmenter la force probante de ses entrées. Elle peut expliquer pourquoi deux ou trois faits comptent ensemble pour la décision, conserver leurs preuves, leurs limites et leurs actions, mais elle ne doit pas transformer une corrélation ou un contexte en nouveau diagnostic.
+
+Exemple chaleur : « le DPE attribué signale un confort d’été insuffisant ; cette faiblesse mérite davantage d’attention ici compte tenu de la trajectoire de chaleur et, lorsqu’il existe, du signal d’îlot de chaleur du secteur ». Interdit : « ce logement sera invivable en 2050 » ou toute température intérieure future non calculée.
+
+Le code actuel fournit déjà le bon emplacement conceptuel : `FactComposition` est explicitement un plan de présentation, jamais un fait. En revanche, `assertCompositionsValid` contrôle aujourd’hui surtout la cohérence structurelle (faits absorbés existants, ruleIds, section, cardinalité, forme du headline) ; il ne peut pas prouver à lui seul que la prose d’un résumé est entièrement contenue dans les faits sources.
+
+Garde à ajouter avant de multiplier les compositions : patrons déterministes et structurés, vocabulaire borné, tests exacts sur les sorties importantes, tests négatifs sur les inférences interdites, et aucun LLM libre pour produire l’assertion centrale d’une composition. L’architecture existe ; le risque sémantique doit encore être rendu mécaniquement difficile.
+
+## 10.2 Fait dérivé canonique : quand futur•e calcule réellement quelque chose de nouveau
+
+Un fait dérivé est une mesure qui n’existe dans aucune source telle quelle : surface contributive calculée depuis un MNT LiDAR, distance à un axe topographique d’écoulement, part d’imperméabilisation dans un buffer défini, etc. Il doit entrer dans le moteur comme donnée canonique, pas comme phrase de synthèse.
+
+Contrat minimal : méthode déterministe versionnée ; liste des entrées critiques ; valeurs normalisées réellement utilisées ; date et version des sources ; sortie brute ; seuil/convention éventuel ; limitation ; tests. Une méthode qui change doit pouvoir produire une nouvelle version sans réécrire l’ancienne.
+
+## 10.3 Reproductibilité : figer les valeurs, pas seulement les URLs ou les millésimes
+
+`DecisionArtifactV1` fige déjà la décision vendue avec sa date, la version du moteur, les conventions, le snapshot du projet et le dossier. C’est un socle très fort pour répondre à « qu’a dit futur•e ce jour-là ? ». Pour les futurs faits dérivés, il faut aller un cran plus loin afin de répondre aussi à « avec quelles valeurs exactes ce calcul a-t-il été produit ? ».
+
+Une référence de source ne suffit pas : une base peut être corrigée rétroactivement, un DPE peut être réédité, une table BDNB supprimée, un zonage remplacé. Les entrées normalisées indispensables au calcul doivent donc être gelées dans l’artefact ou dans un snapshot immuable rattaché à sa version.
+
+## 10.4 Conditions d’admission : pas de faux silence rassurant
+
+Chaque croisement doit définir ses entrées critiques. Si l’une manque, est trop ancienne, mal attribuée ou incompatible de grain, la conclusion ne s’affiche pas. Mais cette absence doit rester visible comme « lecture non concluante » lorsque la question compte pour l’utilisateur. Le modèle d’affichage doit distinguer au minimum : fait défavorable établi, donnée présente mais sous le seuil/convention, et source non couvrante ou non concluante. Silence ne doit jamais être interprété comme absence de problème.
+
+Pour la chaleur V1 : DPE attribué au logement + trajectoire climatique exploitable sont des prérequis. L’ICU/LCZ peut enrichir le contexte quand disponible. Le DPE « insuffisant » peut déclencher la composition ; un DPE « bon » ne produit pas de rassurance positive.
+
+## 10.5 Premier test bout en bout : « confort d’été à examiner »
+
+Le premier croisement à éprouver doit être une seule composition complète, pas trois chantiers parallèles. Le cas chaleur est le meilleur candidat car le repo possède déjà le DPE attribué, un fondement climatique multivarié, un signal ICU pour les secteurs couverts, une composition climatique et une action utilisateur.
+
+Objectif de la V1 : une carte qui dit ce que les sources établissent, pourquoi leur combinaison mérite une attention supplémentaire, ce qu’elles ne permettent pas d’affirmer, et ce que la personne peut regarder ou demander pendant une visite.
+
+Critère de validation : ne pas demander seulement si la carte est « intéressante ». Vérifier si elle conduit l’utilisateur à préparer ou mener la visite différemment : seconde visite en fin d’après-midi, question sur les protections solaires, vérification de la ventilation nocturne, demande d’un document ou d’une information précise.
+
+Si cette chaîne est comprise et utile, le deuxième chantier devient le LiDAR : non plus une composition de faits existants, mais un premier fait dérivé géospatial propre à futur•e.
+
+# 11. Ordre de travail recommandé
+
+1 — Socle réseau — Vérifier immédiatement api-adresse.data.gouv.fr, préparer Géoplateforme et Géorisques v2, quotas, jetons, cache et tests de repli.
+
+2 — Identité bâtiment — Introduire ID-RNB comme clé interne et cartographier les rattachements actuels adresse/parcelle/DPE/BDNB.
+
+3 — BDNB — Tester le millésime 2026-02.a et supprimer toute dépendance aux anciennes tables argiles/radon.
+
+4 — RGA — Vérifier la couche 2026, les caches, les cas de reclassement et afficher version/producteur dans la preuve.
+
+5 — DPE — Auditer date, régime de calcul, conservation de la valeur source et textes générés ; préparer le coefficient 2027.
+
+6 — Croisements — Écrire la doctrine composition / fait dérivé, puis compléter les validateurs et tests pour empêcher les inférences interdites à mesure que les patrons se multiplient.
+
+7 — Reproductibilité — Définir ce que chaque futur fait dérivé doit figer : valeurs normalisées, versions sources, version de méthode, sortie brute et limites.
+
+8 — PFAS — Tester l’export national, la précision spatiale et le rattachement réseau/commune avant interface.
+
+9 — Marché / preuve avant paiement — À partir de l’audit des concurrents, concevoir une démonstration gratuite de la lecture futur•e et tester si elle améliore la compréhension de la valeur avant achat.
+
+10 — Sitadel — Auditer la chaîne déjà implémentée sur des dossiers réels et tester si l’action proposée modifie la préparation de visite.
+
+11 — Chaleur — Construire une seule composition V1 « confort d’été à examiner » : DPE insuffisant attribué + DRIAS/TRACC + ICU si disponible, avec gates et état non concluant visible.
+
+12 — Test utilisateur — Mesurer deux choses séparément : avant paiement, compréhension de la différence ; après lecture, action concrète modifiée pendant la préparation ou la visite.
+
+13 — R&amp;D parcelle — Tester LiDAR « sensibilité topographique au ruissellement » sur 20–50 adresses, avec gate sur l’emprise de calcul et date de vol ; en faire le premier candidat de fait dérivé canonique.
+
+14 — Eau — Prototyper DRIAS-Eau × historique des restrictions × SISPEA en utilisant le drapeau qualité source et en affichant le millésime 2024.
+
+15 — OLD / bruit — Ajouter d’abord les contrats de couverture : OLD avec renvoi préfectoral et absence non concluante ; CBS avec états exposé / sous seuil couvert / non couvert.
+
+16 — Littoral — Prototyper CoCliCo / trait de côte / submersion en séparant strictement observation, réglementation et projection.
+
+17 — Enrichissements — Évaluer BatEnR, solaire, RNIC/copropriété, EGMS, Copernicus quartier et urbanisme parcellaire selon leur capacité à produire une action utilisateur réelle.
+
+18 — Calibration — Utiliser OPEE/RE2020 et les fichiers climatiques prospectifs comme corpus de test du moteur chaleur avant d’envisager tout rattachement produit.
+
+## Décision de clôture de la veille
+
+La veille peut s’arrêter ici. Le stock d’opportunités dépasse désormais la capacité d’exécution à court terme. Le risque principal n’est plus de manquer une base de données : c’est de disperser l’effort avant d’avoir prouvé qu’une lecture futur•e, visible avant l’achat puis actionnable après, crée une valeur perçue supérieure à l’agrégation.
+
+# 12. Watchlist data à maintenir
+
+Cadre européen de résilience climatique — À examiner dès publication : liste des territoires, méthode et granularité.
+
+Restauration de la nature / espaces verts urbains — Peut devenir une couche de trajectoire urbaine : végétalisation, couvert arboré, imperméabilisation.
+
+Sols / SoilHarmony — Surveiller l’harmonisation européenne des indicateurs de contamination, compaction et santé des sols.
+
+Qualité de l’air 2030 — Préparer la distinction norme actuelle / future norme / recommandation OMS.
+
+PFAS — Suivre l’extension des substances surveillées et la disponibilité de séries suffisamment comparables.
+
+DPE — Surveiller les textes 2027, corrections ADEME et tout nouveau champ réglementaire.
+
+EGMS — Suivre l’arrivée/confirmation des services de diffusion supplémentaires et les prochains millésimes ; documenter précisément Basic / Calibrated / Ortho.
+
+LiDAR HD — Suivre l’achèvement de la couverture nationale et les évolutions des produits MNT/MNS/MNH et services d’altimétrie.
+
+Plan IGN HD — Vérifier la décision post-test et la licence avant toute dépendance produit.
+
+Copernicus — Suivre validation de l’Imperviousness 2024 et prochaines mises à jour Urban Atlas / Tree Cover Density.
+
+CoCliCo — Surveiller la pérennisation annoncée dans l’écosystème Copernicus Marine.
+
+RNB — Suivre couverture, qualité des rapprochements adresse/parcelle et enrichissements des jeux sectoriels en ID-RNB.
+
+Géocodage / Géorisques — Surveiller extinction effective des anciennes routes, changements de quotas, authentification et contrats d’usage.
+
+Sitadel3 — Suivre l’arrivée des nouvelles variables Cerfa et des 15 parcelles annoncées.
+
+RNIC 2028 — Suivre le calendrier et la disponibilité open data des nouveaux champs copropriété.
+
+ISB-DH — Suivre accès/licence de la BDNB Expert, évolutions méthodologiques et possibilités de projection climatique.
+
+Ruissellement — Surveiller les données nationales sur réseaux pluviaux/ouvrages et les produits dérivés LiDAR qui pourraient réduire le coût de calcul.
+
+Bruit CBS — Suivre les mises à jour de la 4e échéance, la disponibilité des réseaux concédés et les jeux locaux permettant de combler les trous du national.
+
+OLD — Suivre l’alignement entre périmètre réglementaire (52 départements) et couverture cartographique IGN/Géorisques ; ne jamais traiter le hors-couche comme « non concerné ».
+
+SISPEA — Suivre le millésime 2025 puis 2026, les changements de services et les avis de vérification par indicateur.
+
+OPEE / RE2020 — À conserver comme source de calibration du moteur chaleur ; surveiller l’amélioration du rattachement géographique et les nouveaux fichiers climatiques prospectifs.
+
+# 13. Sources vérifiées pour cette mise à jour
+
+data.gouv.fr — Tuveuxvivreou / climat 2050
+
+Tuveuxvivreou — Méthodologie
+
+data.gouv.fr — EcoBuilding
+
+data.gouv.fr — Baromètre confort d’été
+
+data.gouv.fr — Choisir sa ville
+
+data.gouv.fr — Indice Fissure IDF
+
+data.gouv.fr — LCZ Cerema
+
+Cerema — Éclairage nocturne 2024–2025
+
+data.gouv.fr — État écologique des cours d’eau
+
+Météo-France — DRIAS-Eau / Explore2
+
+data.gouv.fr — BatEnR
+
+Cerema — Consommation foncière 2026
+
+Santé publique France — canicule 17 juin–2 juillet
+
+AEE — Air quality status in Europe 2026
+
+Copernicus Land — EGMS annual update 2020–2024 — ouvrir la source
+
+Copernicus Land — EGMS technical summary — ouvrir la source
+
+BRGM — Première évaluation de la subsidence côtière européenne — ouvrir la source
+
+IGN / cartes.gouv.fr — MNT LiDAR HD — ouvrir la source
+
+IGN — Programme LiDAR HD — ouvrir la source
+
+Copernicus Land — Imperviousness 2024 — ouvrir la source
+
+Copernicus Land — Tree Cover Density — ouvrir la source
+
+BRGM — CoCliCo — ouvrir la source
+
+Atmo France — PhytAtmo — ouvrir la source
+
+ANSES — Communes colonisées par le moustique tigre — ouvrir la source
+
+EUR-Lex — Directive (UE) 2025/2360 sur les sols — ouvrir la source
+
+BAN / Géoplateforme — Géocodage : https://adresse.data.gouv.fr/outils/api-doc/adresse
+
+Géorisques — APIs v2 / jeton : https://www.georisques.gouv.fr/inscription
+
+RNB — Outils &amp; services : https://rnb.beta.gouv.fr/outils-services
+
+RNB — FAQ / pérennité des ID : https://rnb.beta.gouv.fr/faq
+
+RNB — DPE enrichis en ID-RNB : https://rnb.beta.gouv.fr/blog/dpe-pres-de-8-millions-de-dpe-avec-des-id-rnb
+
+BDNB — Millésime 2026-02.a : https://www.bdnb.io/archives_data/bdnb_millesime_2026_02_a/
+
+BDNB — ISB-DH : https://www.bdnb.io/documentation/predictions_isb_dh/
+
+SDES — Sitadel : https://www.statistiques.developpement-durable.gouv.fr/donnees-des-permis-de-construire-et-autres-autorisations-durbanisme
+
+Géoportail de l’Urbanisme — API : https://www.geoportail-urbanisme.gouv.fr/api/
+
+ANAH / data.gouv.fr — RNIC : https://www.data.gouv.fr/datasets/registre-national-dimmatriculation-des-coproprietes
+
+ANFR — Simulation nationale d’exposition : https://www.anfr.fr/maitriser/information-du-public/cartoradio/simulation
+
+ANFR — Points atypiques : https://www.anfr.fr/maitriser/les-installations-radioelectriques/recensement-des-points-atypiques
+
+data.gouv.fr — Parcelle Info : https://www.data.gouv.fr/reuses/parcelle-info
+
+Aucadastre — documentation/API : https://aucadastre.fr/api
+
+data.gouv.fr — Avertine : https://www.data.gouv.fr/reuses/rapport-dinformation-avant-achat-immobilier-avertine
+
+data.gouv.fr — ImmoClimat : https://www.data.gouv.fr/reuses/immoclimat-analyse-bioclimatique-risques-climat-dun-bien-immobilier
+
+data.gouv.fr — TOISE : https://www.data.gouv.fr/reuses/toise-que-peut-on-construire-sur-une-parcelle-zonage-du-plu-servitudes-risques-et-capacite-constructible
+
+data.gouv.fr — Cartes de bruit stratégiques nationales : https://www.data.gouv.fr/datasets/cartes-de-bruit-strategiques-des-reseaux-routiers-et-ferroviaires-non-concedes-directive-europeenne-2002-49-ce
+
+data.gouv.fr — DÉBROUSSAILLEMENT : https://www.data.gouv.fr/datasets/debroussaillement
+
+Géorisques — OLD : https://www.georisques.gouv.fr/donnees/bases-de-donnees/obligations-legales-de-debroussaillement
+
+Légifrance — décret n° 2024-405 du 29 avril 2024 : https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000049491011
+
+OFB/SISPEA — données eau potable : https://www.data.gouv.fr/datasets/services-publics-deau-potable-description-et-indicateurs-de-performance-2
+
+OFB/SISPEA — Panorama national édition juin 2026 : https://www.services.eaufrance.fr/rapport-national
+
+data.gouv.fr — OPEE / bâtiments neufs : https://www.data.gouv.fr/datasets/opee-observatoire-des-performances-energetiques-et-environnementales-des-batiments-neufs
+
+Note de méthode. Les réutilisations data.gouv.fr sont des signaux de marché utiles, mais ne remplacent pas automatiquement la source publique primaire. Pour toute donnée dérivée par futur•e (ex. ruissellement LiDAR), conserver séparément les entrées, la méthode, le millésime, les hypothèses, le niveau de confiance et la sortie calculée. À l’adresse, l’absence de donnée ne doit jamais être transformée en absence de risque.
+
+## Code futur•e vérifié pour la doctrine des croisements
+
+src/lib/decision/fact-composition.ts — distinction composition / fait ; compositions = plans de présentation.
+
+src/lib/decision/fact-compositions.ts — patrons déterministes et validateur structurel `assertCompositionsValid`.
+
+src/lib/decision/decision-fact.ts — `EvidenceRef`, `DecisionFact`, couverture, limitations, actions et granularité.
+
+src/lib/decision/decision-artifact.ts — artefact vendu, daté et versionné (`engineVersion`, `conventionsVersion`, `projectSnapshot`, `dossier`).
+
+src/lib/decision/permis-rules.ts — Sitadel déjà projeté en `VerificationFact` avec preuve datée, limite et action.
+
+src/lib/address-dossier-store.ts — snapshots d’adresse et logique d’invalidation par version de sources.
