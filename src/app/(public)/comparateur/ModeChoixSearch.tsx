@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
+import { urlRechercheCommunes } from "@/lib/geocodeur-ban";
 
 // Saisie « mode choix » : le lecteur NOMME 2 à 3 communes qu'il veut départager.
 // Distincte du parcours /ou-vivre (qui PROPOSE un trio) : ici il n'y a pas de
@@ -46,7 +47,7 @@ const MAX_SLOTS = 3;
 
 async function banSearch(query: string, limit: number): Promise<CommuneHit[]> {
   const res = await fetch(
-    `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=${limit}&type=municipality`,
+    urlRechercheCommunes(query, limit),
   );
   const payload = await res.json();
   return Array.isArray(payload?.features)

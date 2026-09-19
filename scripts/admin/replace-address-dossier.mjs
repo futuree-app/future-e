@@ -45,7 +45,11 @@ if (!url || !key) {
   process.exit(2);
 }
 
-const banUrl = new URL("https://api-adresse.data.gouv.fr/search/");
+// L'ADRESSE DU GÉOCODEUR EST CELLE DE `src/lib/geocodeur-ban.ts`, recopiée ici et nulle part
+// ailleurs : ce script tourne hors du build Next (pas d'alias `@/`, pas de résolution .ts). Le
+// test `geocodeur-ban.test.ts` connaît cette exception et vérifie que les deux restent alignées.
+const GEOCODEUR_BAN = "https://data.geopf.fr/geocodage";
+const banUrl = new URL(`${GEOCODEUR_BAN}/search`);
 banUrl.searchParams.set("q", addressQuery);
 banUrl.searchParams.set("limit", "5");
 const banResponse = await fetch(banUrl, { headers: { accept: "application/json" } });

@@ -16,6 +16,7 @@ import posthog from 'posthog-js';
 import { HorizonSwitch, type Horizon } from '@/components/HorizonSwitch';
 import HeroProjetTerritoires from '@/components/HeroProjetTerritoires';
 import { Logo } from "@/components/Logo";
+import { urlRechercheCommunes } from "@/lib/geocodeur-ban";
 
 const C = {
   bg: 'var(--bg)',
@@ -1147,9 +1148,7 @@ export default function FutureELanding() {
 
       try {
         const response = await fetch(
-          `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(
-            inputValue.trim(),
-          )}&type=municipality&limit=6`,
+          urlRechercheCommunes(inputValue.trim(), 6),
           { signal: controller.signal },
         );
 

@@ -1,6 +1,7 @@
 // Pas de `server-only` : autocompleteBanAddress est appelée côté client (l'API BAN est
 // publique, CORS ouvert). geocodeBanAddress reste utilisable côté serveur.
 
+import { urlRechercheBan, urlReverseBan } from "./geocodeur-ban.ts";
 import type { ReverseHit } from "./dossier-qualification.ts";
 
 export type BanAddressResult = {
@@ -32,7 +33,10 @@ type BanResponse = {
   features?: BanFeature[];
 };
 
-const BAN_SEARCH_URL = "https://api-adresse.data.gouv.fr/search/";
+// L'adresse du service vit dans `geocodeur-ban.ts` (migration Géoplateforme du 19/09/2026) : ces
+// deux constantes en dérivent, et les quatre appels ci-dessous n'ont pas eu à changer.
+const BAN_SEARCH_URL = urlRechercheBan({});
+const BAN_REVERSE_URL = urlReverseBan({});
 const REQUEST_TIMEOUT_MS = 8000;
 
 export async function geocodeBanAddress(query: string): Promise<BanAddressResult | null> {
@@ -124,7 +128,7 @@ export async function autocompleteBanAddress(
   return parseBanAutocomplete(payload.features ?? []);
 }
 
-const BAN_REVERSE_URL = "https://api-adresse.data.gouv.fr/reverse/";
+
 
 // Les numéros d'adresse autour d'un point.
 //

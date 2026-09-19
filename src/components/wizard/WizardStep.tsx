@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { LogementAge, WizardAnswers } from "./types";
+import { urlRechercheCommunes } from "@/lib/geocodeur-ban";
 
 type StepConfig =
   | { key: "quartier"; module: string; step: string; question: string; type: "text"; placeholder: string }
@@ -165,7 +166,7 @@ export function WizardStep({
     const timer = setTimeout(async () => {
       try {
         const res = await fetch(
-          `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&type=municipality&limit=6`,
+          urlRechercheCommunes(query, 6),
           { signal: controller.signal },
         );
         if (!res.ok) return;

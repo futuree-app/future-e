@@ -1,9 +1,10 @@
 // LE GÉOCODAGE D'UN LIEU NOMMÉ. Le réseau vit ici, et NULLE PART ailleurs dans la chaîne : le parsing
 // (pur, ci-dessous) et les contrôles (place-screening.ts, pur) sont testables sans lui.
 //
-// DEUX SOURCES, ET IL EN FAUT DEUX. La BAN (api-adresse) ne connaît que des adresses : interrogée sur
-// « gare Matabiau », elle rend « Rue Matabiau ». La Géoplateforme (index=poi, BDTOPO) connaît les
-// équipements : gares, hôpitaux, universités. On interroge les deux et on FUSIONNE leurs candidats : ce
+// DEUX INDEX, ET IL EN FAUT DEUX. L'index adresse (la BAN) ne connaît que des adresses : interrogé sur
+// « gare Matabiau », il rend « Rue Matabiau ». L'index poi (BDTOPO) connaît les équipements : gares,
+// hôpitaux, universités. Depuis la migration du 19/09/2026 les deux vivent sur le même service, d'où
+// l'index ÉCRIT EXPLICITEMENT des deux côtés : c'est lui qui porte la distinction, plus l'hôte. On interroge les deux et on FUSIONNE leurs candidats : ce
 // sont les contrôles qui trient, pas l'ordre des appels. Un lecteur qui donne une vraie adresse doit
 // obtenir son adresse ; un lecteur qui donne une gare ne doit pas obtenir une rue.
 //
@@ -13,10 +14,9 @@
 //
 // Pas de `server-only` : ce module ne lit aucun secret, et un test node --test doit pouvoir l'importer.
 import { departementFromInsee } from "./insee-departement.ts";
+import { urlRechercheBan } from "./geocodeur-ban.ts";
 import type { GeocodeCandidate } from "./place-screening.ts";
 
-const POI_URL = "https://data.geopf.fr/geocodage/search";
-const BAN_URL = "https://api-adresse.data.gouv.fr/search/";
 const TIMEOUT_MS = 6000;
 
 export type GeocodeOutcome = { candidates: GeocodeCandidate[]; degraded: boolean };
@@ -140,8 +140,8 @@ export async function geocodePlace(label: string): Promise<GeocodeOutcome> {
   const q = label.trim();
   if (q.length < 3) return { candidates: [], degraded: false };
   const [poi, ban] = await Promise.all([
-    get(`${POI_URL}?${new URLSearchParams({ q, index: "poi", limit: "5" })}`),
-    get(`${BAN_URL}?${new URLSearchParams({ q, limit: "5" })}`),
+    get(urlRechercheBan({ q, index: "poi", limit: 5 })),
+    get(urlRechercheBan({ q, index: "address", limit: 5 })),
   ]);
   return {
     candidates: [...parsePoiFeatures(poi), ...parseBanFeatures(ban)],

@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import posthog from 'posthog-js';
+import { urlRechercheCommunes } from "@/lib/geocodeur-ban";
 
 type CommuneResult = {
   code: string;
@@ -99,7 +100,7 @@ export function ComparatorSearch({
 
       try {
         const res = await fetch(
-          `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=8&type=municipality`,
+          urlRechercheCommunes(query, 8),
         );
         const payload = await res.json();
         const data: CommuneResult[] = Array.isArray(payload?.features)
@@ -150,7 +151,7 @@ export function ComparatorSearch({
 
       try {
         const res = await fetch(
-          `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(state.value)}&limit=1&type=municipality`,
+          urlRechercheCommunes(state.value, 1),
         );
         const payload = await res.json();
         const first = Array.isArray(payload?.features) ? payload.features[0] : null;
