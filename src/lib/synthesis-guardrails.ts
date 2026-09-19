@@ -29,7 +29,9 @@ export type AssertionVerdict =
   | { ok: true }
   | { ok: false; motif: string; famille: Famille; extrait: string };
 
-type Famille = "altitude" | "absence_conclue" | "protection_supposee" | "absence_sinistre_conclue";
+type Famille =
+  | "altitude" | "absence_conclue" | "protection_supposee" | "absence_sinistre_conclue"
+  | "detenteur_suppose";
 
 /** Normalisation partagée avec `coverage-closure` : diacritiques et apostrophes typographiques. */
 function fold(s: string): string {
@@ -83,6 +85,35 @@ const REGLES: Regle[] = [
       "n'a pas ete inondee", "epargnee par les inondations",
     ],
     desamorcable: true,
+  },
+  {
+    // ── LE DÉTENTEUR SUPPOSÉ DU DIAGNOSTIC (19/09/2026) ─────────────────────────────────────
+    //
+    // Trois sorties réelles sur les six dossiers PAYÉS sans diagnostic attribué portaient une
+    // variante de « celui de ce logement précis existe, et le vendeur le détient ». Elles ne
+    // venaient pas d'un débordement du modèle : le PROMPT la donnait en exemple, et le modèle
+    // l'a recopiée. Le prompt a été corrigé le même jour ; ce motif est le filet.
+    //
+    // Deux affirmations qu'aucune donnée n'établit :
+    //   — qu'un diagnostic de CE logement existe. Il n'est obligatoire qu'à l'occasion d'une
+    //     vente ou d'une location : un logement occupé depuis vingt ans peut n'en avoir aucun.
+    //   — qu'un vendeur le détient. La situation du lecteur n'est pas connue du produit, et la
+    //     posture du dossier vaut « residence » par défaut sans que personne ne l'ait écrite.
+    //
+    // NON DÉSAMORÇABLE, contrairement aux familles d'absence : « on ne sait pas si » suivi d'une
+    // désignation de détenteur reste une désignation. Et refuser ne prive d'aucune action, le
+    // geste étant porté par la carte déterministe en quatre variantes (`GESTES.diagnostic_adresse`).
+    //
+    // CE QUI DOIT PASSER, et que ces motifs laissent passer volontairement : « deux diagnostics
+    // existent à cette adresse », « huit diagnostics portent cette adresse sans qu'aucun n'ait pu
+    // être rattaché ». Le pluriel et l'adresse sont établis ; c'est le singulier rapporté à CE
+    // logement, et le nom d'un détenteur, qui ne le sont pas.
+    famille: "detenteur_suppose",
+    motifs: [
+      "detient", "detenteur", "en sa possession",
+      "de ce logement existe", "de ce logement precis existe", "existe un diagnostic",
+    ],
+    desamorcable: false,
   },
   {
     // Un mécanisme ou une protection dont la donnée n'existe pas.
@@ -172,6 +203,8 @@ export function correctionPourAssertions(v: Extract<AssertionVerdict, { ok: fals
       "Vous avez conclu l'absence d'une exposition ou d'un risque. Vous ne pouvez nommer qu'un zonage qui EXISTE. Une absence de plan ou de zonage ne se raconte pas : retirez la phrase, ou dites seulement que la dimension n'a pas pu être établie.",
     protection_supposee:
       "Vous avez suggéré une protection ou un mécanisme dont aucune donnée ne vous est fournie. Retirez-le : vous n'avez que ce qui est écrit dans le payload.",
+    detenteur_suppose:
+      "Vous avez affirmé qu'un diagnostic de ce logement existe, ou désigné qui le détient. Aucune donnée ne l'établit : ce document n'est obligatoire qu'à l'occasion d'une vente ou d'une location, donc ce logement peut n'en avoir aucun, et vous ne savez pas si le lecteur achète, loue ou habite déjà. Dites seulement combien de diagnostics portent cette adresse et qu'aucun n'a pu être rattaché à ce logement. Le geste à faire est porté par la carte du dossier, pas par vous.",
     absence_sinistre_conclue:
       "Vous avez raconté une absence de sinistre. Les indemnisations dont vous disposez proviennent d'un échantillon de contrats assurés sur 1995-2021 : leur absence n'établit ni l'absence d'événement, ni l'absence de risque, et la commune peut avoir été reconnue en état de catastrophe naturelle sur la même période. Retirez la phrase : ce fait est déjà porté, avec sa période et ses limites, par les cartes du dossier.",
   };

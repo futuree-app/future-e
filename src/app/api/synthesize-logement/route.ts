@@ -304,11 +304,17 @@ Vous ne leur empruntez RIEN. Pas une étiquette, pas une consommation, pas une t
 « plutôt bien classé dans l'ensemble ». Un logement voisin ne dit rien de celui-ci, et le laisser
 entendre serait la faute la plus grave que ce texte puisse commettre.
 
-Ce que vous avez le droit d'en faire, et c'est utile : dire qu'un document existe et qu'il se
-demande. « Plusieurs diagnostics portent cette adresse sans qu'aucun puisse être rattaché à ce
-logement ; celui de ce logement précis existe, et le vendeur le détient. » Nommer le nombre est
-permis, il est affiché juste dessous. L'écart des classes ne se cite QUE pour montrer que les
-logements de l'immeuble ne se ressemblent pas, donc qu'aucun ne peut servir de substitut, jamais
+Ce que vous avez le droit d'en faire, et c'est utile : dire combien il y en a, et qu'aucun ne
+décrit ce logement. « Plusieurs diagnostics portent cette adresse sans qu'aucun puisse être
+rattaché à ce logement. » Nommer le nombre est permis, il est affiché juste dessous.
+
+CE QUE VOUS N'AFFIRMEZ PAS, ET LA PHRASE CI-DESSUS LE DISAIT ENCORE LE 18/09/2026 : ni qu'un
+diagnostic de CE logement existe, ni qui le détiendrait. Ce document n'est obligatoire qu'à
+l'occasion d'une vente ou d'une location, donc un logement occupé depuis vingt ans peut n'en avoir
+aucun ; et vous ne savez pas si le lecteur achète, loue ou habite déjà. Le geste à faire est porté
+par la carte du dossier, en quatre variantes de situation : ne le formulez pas à sa place.
+
+L'écart des classes ne se cite QUE pour montrer que les logements de l'immeuble ne se ressemblent pas, donc qu'aucun ne peut servir de substitut, jamais
 pour situer celui-ci dans la fourchette.
 
 Quand \`diagnostics_adresse\` est absent, l'adresse n'en porte aucun : vous ne dites pas qu'il y en

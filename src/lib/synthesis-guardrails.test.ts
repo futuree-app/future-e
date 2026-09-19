@@ -173,3 +173,73 @@ test("la correction envoyée au modèle nomme la période et l'échantillon", ()
   assert.match(c, /échantillon/);
   assert.match(c, /catastrophe naturelle/);
 });
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LE DÉTENTEUR SUPPOSÉ (19/09/2026). Trois sorties réelles, mot pour mot.
+//
+// Relevées dans `address_dossiers.synthesis_text` le 18/09/2026, sur 3 des 6 dossiers PAYÉS dont
+// aucun diagnostic n'avait pu être attribué. Aucune ne porte de donnée personnelle : c'est la
+// phrase elle-même qui est fautive, et elle venait du PROMPT, qui la donnait en exemple.
+//
+// Deux affirmations qu'aucune donnée n'établit :
+//   — qu'un diagnostic de CE logement existe. Il n'est obligatoire qu'à l'occasion d'une vente ou
+//     d'une location : un logement occupé depuis vingt ans peut n'en avoir aucun.
+//   — qu'un VENDEUR le détient. Le produit ne sait pas si le lecteur achète, loue ou habite déjà,
+//     et la posture du dossier vaut « residence » par défaut sans que personne ne l'ait écrite.
+//
+// NON DÉSAMORÇABLE : aucune formulation d'incertitude ne rend vraie une phrase qui nomme un
+// détenteur. Le geste utile est porté par la carte déterministe, en quatre variantes de situation
+// (`GESTES.diagnostic_adresse`), donc refuser cette prose ne prive le lecteur d'aucune action.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+
+const DETENTEUR_1 = `Le vendeur détient le diagnostic de ce logement.`;
+const DETENTEUR_2 = `Le diagnostic de ce logement existe, et le vendeur le détient.`;
+const DETENTEUR_3 = `Un seul diagnostic existe à cette adresse, sans qu'il ait pu être rattaché à ce logement précis ; le vendeur en est le détenteur.`;
+
+test("nommer un détenteur du diagnostic est refusé (trois sorties réelles du 18/09)", () => {
+  for (const t of [DETENTEUR_1, DETENTEUR_2, DETENTEUR_3]) {
+    const v = validateAssertions(t);
+    assert.equal(v.ok, false, `passé à tort : ${t}`);
+    assert.equal(v.ok === false && v.famille, "detenteur_suppose");
+  }
+});
+
+test("affirmer qu'un diagnostic de CE logement existe est refusé", () => {
+  for (const t of [
+    "Le diagnostic de ce logement existe.",
+    "Celui de ce logement précis existe.",
+    "Il existe un diagnostic pour ce logement, ailleurs que dans la base ouverte.",
+  ]) {
+    assert.equal(validateAssertions(t).ok, false, `passé à tort : ${t}`);
+  }
+});
+
+test("une incertitude ne rattrape pas un détenteur nommé", () => {
+  // Non désamorçable : « on ne sait pas si » suivi du même verbe reste une désignation.
+  const v = validateAssertions(
+    "La performance n'a pas pu être établie, faute de diagnostic attribuable, mais le vendeur le détient.",
+  );
+  assert.equal(v.ok, false);
+  assert.equal(v.ok === false && v.famille, "detenteur_suppose");
+});
+
+test("dire combien de diagnostics portent l'adresse, et qu'aucun ne décrit ce logement, passe", () => {
+  // Les phrases JUSTES des mêmes synthèses. Ce sont elles que le prompt doit produire, et un
+  // faux positif ici coûterait la seule chose utile que le texte sait dire dans ce cas.
+  for (const t of [
+    "Deux diagnostics énergétiques existent à cette adresse sans qu'aucun n'ait pu être rattaché à ce logement.",
+    "Huit diagnostics portent cette adresse sans qu'aucun n'ait pu être rattaché à ce logement précis.",
+    "Cinq diagnostics portent cette adresse, avec des résultats qui vont d'une classe C à une classe F selon les logements concernés : un écart suffisant pour qu'aucun d'eux ne puisse renseigner utilement celui-ci.",
+    "La performance énergétique de ce logement et son comportement en été n'ont pas pu être qualifiés, faute de diagnostic attribuable à cette adresse.",
+  ]) {
+    assert.equal(validateAssertions(t).ok, true, `refusé à tort : ${t}`);
+  }
+});
+
+test("la correction envoyée au modèle dit ce qui n'est pas établi", () => {
+  const v = validateAssertions(DETENTEUR_2);
+  assert.equal(v.ok, false);
+  const c = correctionPourAssertions(v as Extract<typeof v, { ok: false }>);
+  assert.match(c, /vente ou.*location|location ou.*vente/i);
+  assert.match(c, /détenteur|détient/i);
+});

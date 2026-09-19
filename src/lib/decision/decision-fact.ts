@@ -278,8 +278,16 @@ export type LogementFacts = {
    * L'ADRESSE PORTE DES DIAGNOSTICS, ET AUCUN NE DÉCRIT CE LOGEMENT.
    *
    * Le cas ordinaire d'un immeuble, où la base en contient parfois plus de vingt. Distinct de
-   * `dpe: "absent"`, qui couvre aussi l'adresse qui n'en porte aucun : là il n'y a rien à
-   * réclamer, ici le document existe et le vendeur ou le bailleur le détient.
+   * `dpe: "absent"`, qui couvre aussi l'adresse qui n'en porte aucun : là la base ouverte ne
+   * montre rien du tout, ici elle montre des documents dont aucun ne décrit ce logement.
+   *
+   * CE QUE CE CHAMP N'AFFIRME PAS (correction du 19/09/2026). La version précédente de ce
+   * commentaire disait « ici le document existe et le vendeur ou le bailleur le détient ». Les
+   * deux moitiés sont fausses. Un diagnostic n'est obligatoire qu'à l'occasion d'une vente ou
+   * d'une location : un logement occupé depuis vingt ans peut n'en avoir aucun. Et la situation
+   * du lecteur n'est pas connue ici, la posture du dossier valant `residence` par défaut sans que
+   * le parcours ne l'écrive jamais. La règle et les gestes, eux, étaient déjà justes ; c'est le
+   * prompt de la synthèse qui a recopié cette phrase dans trois dossiers payés.
    *
    * OPTIONNEL, ET C'EST UN TROISIÈME ÉTAT. `undefined` veut dire que la liste des diagnostics de
    * l'adresse n'a pas été établie : le chemin du dossier de décision ne la demande pas, et
