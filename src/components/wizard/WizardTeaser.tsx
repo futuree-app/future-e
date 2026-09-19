@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { deCommune } from "@/lib/typography";
 import { useEffect, useState } from "react";
-import type { LogementAge, WizardAnswers } from "./types";
+import type { WizardAnswers } from "./types";
 import type { WizardPreviewData } from "@/app/api/wizard-preview/route";
 import type { Era5Trend } from "@/lib/era5-trend";
 
@@ -51,36 +51,6 @@ function Era5AnchorCard({ era5, ville }: { era5: Era5Trend; ville: string }) {
       </div>
     </div>
   );
-}
-
-/* ── Estimation DPE par tranche d'âge ── */
-function dpeFromAge(age: LogementAge | null): { headline: string; classe: string; ageLabel: string } {
-  switch (age) {
-    case "recent":
-      return {
-        headline: "Votre logement est probablement bien isolé selon les normes récentes.",
-        classe: "A–B",
-        ageLabel: "construit après 2016",
-      };
-    case "middle":
-      return {
-        headline: "Votre logement a une performance énergétique moyenne, des travaux peuvent être utiles.",
-        classe: "C–D",
-        ageLabel: "âge entre 10 et 50 ans",
-      };
-    case "old":
-      return {
-        headline: "Votre logement est probablement énergivore et difficile à chauffer ou rafraîchir.",
-        classe: "E–G",
-        ageLabel: "construit avant 1976",
-      };
-    default:
-      return {
-        headline: "Sans l'âge de votre logement, on s'appuie sur la moyenne du parc français.",
-        classe: "D–E",
-        ageLabel: "âge non renseigné",
-      };
-  }
 }
 
 const SLUG_LABELS: Record<string, string> = {
@@ -218,21 +188,22 @@ function computeSignals(
     }
   }
 
-  /* Logement / DPE */
+  /* Logement — CE QUE LE DOSSIER POURRA ÉTABLIR, JAMAIS UNE CLASSE DÉDUITE (19/09/2026).
+     Ce bloc affichait « DPE estimé A–B » à partir du seul âge déclaré, sous une source ADEME.
+     Le module Logement refuse cette déduction depuis toujours : sans diagnostic ATTRIBUÉ, il ne
+     qualifie ni la performance ni le confort d'été. L'accueil offrait donc gratuitement ce que le
+     produit payé s'interdit, et sur un logement que personne n'avait examiné. */
   if (answers.logement) {
-    const dpe = dpeFromAge(answers.logement.age);
     const typeLabel =
       answers.logement.type === "maison" ? "Maison"
       : answers.logement.type === "appartement" ? "Appartement"
       : "Logement atypique";
     signals.push({
       icon: "🏠",
-      headline: dpe.headline,
-      stat: `DPE estimé ${dpe.classe}`,
-      precision: `${typeLabel} · ${dpe.ageLabel}`,
-      source: answers.logement.age === "old"
-        ? "Estimation issue du parc français · Loi Climat 2034"
-        : "Estimation issue du parc français (ADEME)",
+      headline: "La performance de ce logement se lit sur son diagnostic, pas sur son âge.",
+      stat: "À établir sur le document",
+      precision: `${typeLabel} · votre dossier cherchera le diagnostic rattaché à cette adresse, et dira ce qu'il permet ou non de conclure.`,
+      source: "Diagnostics de performance énergétique (ADEME)",
     });
   }
 
@@ -240,10 +211,10 @@ function computeSignals(
   if (answers.mobilite === "voiture") {
     signals.push({
       icon: "🚗",
-      headline: "Votre dépendance à la voiture pèsera de plus en plus dans votre budget.",
-      stat: "Forte exposition aux coûts du carburant et au carbone",
-      precision: "ZFE, malus écologique et tarification carbone à anticiper.",
-      source: "Méthode futur•e · données ADEME",
+      headline: "Vos trajets dépendent de la voiture : reste à savoir ce que ce territoire permet.",
+      stat: "À mesurer sur la commune",
+      precision: "Votre dossier lit la part des trajets faits autrement, la desserte en transports et l'accès aux gares.",
+      source: "Mobilités INSEE, arrêts et gares recensés",
     });
   } else if (answers.sante.length > 0 && !answers.sante.includes("Aucune sensibilité particulière")) {
     const filtered = answers.sante.filter((s) => s !== "Aucune sensibilité particulière");
@@ -257,10 +228,10 @@ function computeSignals(
   } else if (answers.projets === "achat") {
     signals.push({
       icon: "🏗",
-      headline: "Acheter aujourd'hui demande d'anticiper le climat pour ne pas se tromper.",
-      stat: "Achat à risque climatique",
-      precision: "Assurabilité, décote DPE, exposition territoriale à évaluer avant signature.",
-      source: "Méthode futur•e",
+      headline: "Avant de signer, plusieurs points se vérifient et personne ne les rassemble pour vous.",
+      stat: "Ce que votre dossier examinera",
+      precision: "Exposition du sol au point précis, zonages applicables, diagnostics rattachés à l'adresse, trajectoire du climat.",
+      source: "Géorisques, BRGM, ADEME, Météo-France",
     });
   }
 
@@ -268,10 +239,13 @@ function computeSignals(
   if (signals.length === 0) {
     signals.push({
       icon: "📊",
-      headline: `Pour activer vos signaux locaux, renseignez votre commune dans la liste de l'étape 1.`,
-      stat: `Profil ${deCommune(ville)} en attente`,
-      precision: "Données DRIAS, risques officiels et qualité de l'air seront chargés automatiquement.",
-      source: "Sources publiques françaises",
+      // LE REPLI NE DIT PLUS « renseignez votre commune » : il se déclenche aussi, et surtout,
+      // quand la commune EST renseignée et qu'aucune exposition n'atteint le seuil d'affichage.
+      // Accuser le lecteur d'une saisie manquante était faux dans ce cas, le plus fréquent.
+      headline: `Aucune exposition majeure n'est ressortie ${deCommune(ville)} à ce premier examen.`,
+      stat: "Ce que votre dossier examinera",
+      precision: "La trajectoire du climat à 2050 et 2100, les risques recensés, la qualité de l'air, et ce que ces sources ne permettent pas d'établir.",
+      source: "Météo-France, Géorisques, sources publiques",
     });
   }
 

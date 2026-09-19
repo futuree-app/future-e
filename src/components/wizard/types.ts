@@ -26,13 +26,16 @@ export const WIZARD_INITIAL_ANSWERS: WizardAnswers = {
   projets: null,
 };
 
-export const WIZARD_SKIP_DEFAULTS: Partial<WizardAnswers> = {
-  logement: { type: "appartement", age: "middle" },
-  metier: "Services / Numérique",
-  sante: [],
-  mobilite: "mixte",
-  projets: "autre",
-};
+// UNE ABSENCE DE RÉPONSE RESTE UNE ABSENCE DE RÉPONSE (19/09/2026).
+//
+// Cette table remplissait les questions passées : « je ne sais pas » sur le logement devenait un
+// appartement d'âge moyen, le métier devenait « Services / Numérique », la mobilité « mixte ».
+// Ces valeurs inventées alimentaient ensuite les signaux affichés, et la trace de ce qui avait été
+// sauté (`unknownAnswers`) n'était jamais persistée avec elles : une fois en base, rien ne
+// distinguait plus une réponse d'une supposition.
+//
+// Vide, et la structure reste pour que le contrat du reducer ne change pas.
+export const WIZARD_SKIP_DEFAULTS: Partial<WizardAnswers> = {};
 
 export const WIZARD_STORAGE_KEY = "futur-e:wizard";
 
