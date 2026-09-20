@@ -94,10 +94,38 @@ test("prompt: l'agriculture reste activée par ce que la personne EXPRIME", () =
   );
 });
 
-test("prompt: la déduction d'isolement subsiste, et reste à instruire", () => {
-  // NON TRANCHÉE AU 20/09/2026. Elle mérite le même examen : le moteur pose DÉJÀ un plancher
-  // d'isolement de son côté (`VIABILITY_BASELINE_SPLIT`, poids 0,5), et la déduction « famille »
-  // le remplace par un poids 2, soit quatre fois plus, tout en supprimant le plancher partagé avec
-  // le bassin d'emploi. Une famille peut précisément chercher une maison isolée.
-  assert.ok(ligneFamille!.includes("eviter_isolement"), "eviter_isolement retiré sans décision");
+test("prompt: « famille » n'active plus l'isolement non plus", () => {
+  // INSTRUITE ET RETIRÉE LE 20/09/2026, après l'agriculture. Le moteur pose DÉJÀ son propre
+  // plancher d'isolement (`VIABILITY_BASELINE_SPLIT`, poids 0,5, partagé avec le bassin d'emploi)
+  // pour ne pas proposer un hameau à qui n'a rien demandé. La déduction « famille » ne s'ajoutait
+  // pas à ce plancher : elle le REMPLAÇAIT par un poids 2, soit quatre fois plus, et faisait
+  // disparaître la demi-part du bassin d'emploi. Un mot changeait donc lourdement le classement.
+  //
+  // Et le fond ne tenait pas : une famille peut précisément chercher une maison isolée.
+  //
+  // Retirer la déduction ne retire pas la protection : le plancher reprend son travail à 0,5.
+  assert.ok(
+    !ligneFamille!.includes("eviter_isolement"),
+    "« famille » déduit de nouveau l'isolement",
+  );
+});
+
+test("prompt: l'interdiction sur l'isolement est écrite, pas seulement l'omission", () => {
+  const interdiction = src
+    .split("\n")
+    .find((l) => l.includes("INTERDIT") && l.includes("eviter_isolement"));
+  assert.ok(interdiction, "aucune règle négative « famille n'active jamais eviter_isolement »");
+  for (const mot of ["famille", "enfant", "grandir"]) {
+    assert.ok(interdiction!.includes(mot), `la règle négative ne couvre pas « ${mot} »`);
+  }
+});
+
+test("prompt: l'accès aux écoles reste la seule déduction d'un projet familial", () => {
+  // Elle est d'un autre ordre : des enfants à scolariser ont besoin d'un collège, et le prompt
+  // exige qu'elle se présente comme NOTRE lecture, jamais comme la demande du lecteur.
+  const ligneEcoles = src
+    .split("\n")
+    .find((l) => l.includes("acces_ecoles poids 1"));
+  assert.ok(ligneEcoles, "la déduction d'accès aux écoles a disparu");
+  assert.match(ligneEcoles!, /votre lecture/, "la déduction ne se présente plus comme notre lecture");
 });
