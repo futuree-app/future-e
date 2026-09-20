@@ -113,11 +113,20 @@ export const TYPEQU_LABEL: Record<string, string> = {
 
 // Nature de l'espace vert cartographié (tag OSM conservé pour préciser « parc / bois / … »
 // plutôt qu'un « espace vert » générique). Optionnel : les snapshots antérieurs ne l'ont pas.
+// `recreation_ground` N'EST PLUS COLLECTÉ depuis le 20/09/2026 : un terrain de loisirs peut être
+// entièrement minéral (city-stade, boulodrome), et il répondait « espace vert le plus proche ».
+// La valeur RESTE dans ce type : les snapshots figés avant cette date la portent encore, et un
+// libellé manquant afficherait un vide à leur place.
 export type GreenKind = "park" | "wood" | "forest" | "grass" | "recreation_ground";
 
 export type OsmProximity = {
   potentiallyNoisyInfrastructure: { type: "motorway" | "trunk" | "railway"; distanceMeters: number }[];
-  nearestMappedGreenSpace: { distanceMeters: number; kind?: GreenKind } | null;
+  /**
+   * `areaM2` est OPTIONNEL, et son absence a un sens : la géométrie n'était pas fermée, donc sa
+   * surface n'a pas pu être mesurée. Les snapshots figés avant le 20/09/2026 ne la portent pas
+   * non plus. Dans les deux cas l'écran affiche la distance seule, jamais une surface supposée.
+   */
+  nearestMappedGreenSpace: { distanceMeters: number; kind?: GreenKind; areaM2?: number } | null;
   bboxRadiusMeters: number;
 };
 

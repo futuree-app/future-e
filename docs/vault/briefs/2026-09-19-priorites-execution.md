@@ -86,6 +86,24 @@ La chaleur reste le meilleur laboratoire. Elle doit fonctionner **sans** la morp
 (couverte sur 93 territoires de plus de 50 000 habitants, muette ailleurs), celle-ci venant en
 enrichissement.
 
+## PROXIMITÉ ≠ PERTINENCE (relevé le 20/09/2026, à traiter plus tard)
+
+Au 5 rue du Palais à La Rochelle, l'espace vert retenu est un square anonyme de 900 m² à 35 m.
+Le **parc Charruyer**, vingt-cinq hectares, est à 222 m, et c'est lui que n'importe quel habitant
+citerait. La règle « le plus proche gagne » choisit donc la mauvaise réponse dès qu'une petite
+surface recevable se trouve devant une grande.
+
+Le seuil de surface ne corrige pas cela, il ne fait qu'écarter l'absurde. La surface affichée sous
+la ligne (« 900 m² ») atténue en donnant au lecteur de quoi juger, sans résoudre.
+
+Direction envisagée, à arbitrer : montrer DEUX notions au lieu d'une.
+
+    Le plus proche          Square · 35 m · 900 m²
+    Le grand espace proche  Parc Charruyer · 222 m · 25 ha
+
+Vaut probablement pour d'autres blocs d'Autour : le plus proche n'est jamais le plus pertinent par
+construction, c'est une convention qu'on n'avait jamais nommée.
+
 ## Ce qui attend dans le registre
 
 PFAS, LCZ, DRIAS-Eau, SISPEA, BatEnR, LiDAR, EGMS, Copernicus, éclairage nocturne, cours d'eau,

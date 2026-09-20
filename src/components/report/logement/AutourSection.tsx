@@ -26,9 +26,25 @@ const GREEN_LABEL: Record<GreenKind, string> = {
   park: "Parc",
   wood: "Bois",
   forest: "Forêt",
-  grass: "Pelouse",
+  // « SURFACE ENHERBÉE » ET NON « PELOUSE » (20/09/2026) : le mot pelouse promet un lieu où l'on
+  // s'installe, quand le tag OSM décrit une occupation du sol. Un grand terrain enherbé compte
+  // pour le cadre de vie sans être un parc, et le dire ainsi évite de promettre l'un pour l'autre.
+  grass: "Surface enherbée",
+  // Plus collecté depuis le 20/09/2026 (souvent minéral), conservé pour les snapshots figés avant.
   recreation_ground: "Terrain de plein air",
 };
+
+/**
+ * La surface, dite dans l'unité qui se lit. Sous l'hectare on parle en mètres carrés, au-dessus en
+ * hectares : « 12 000 m² » demande un effort que « 1,2 ha » n'exige pas.
+ */
+function fmtSurface(m2: number): string {
+  if (m2 >= 10_000) {
+    const ha = m2 / 10_000;
+    return `${ha >= 10 ? Math.round(ha) : ha.toFixed(1).replace(".", ",")} ha`;
+  }
+  return `${Math.round(m2 / 10) * 10} m²`;
+}
 function greenSpaceLabel(kind: GreenKind | undefined): string {
   return kind ? GREEN_LABEL[kind] : "Espace vert";
 }
@@ -54,11 +70,19 @@ function fmtDist(m: number): string {
 }
 // Une ligne « type précis — env. distance ». Le type est en évidence, la distance à droite,
 // alignée sur la même ligne de base que le type (chiffres tabulaires pour l'alignement).
-function Face3Line({ label, meters }: { label: string; meters: number }) {
+function Face3Line({ label, meters, sousLigne }: { label: string; meters: number; sousLigne?: string }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
-      <span style={{ fontSize: 15, color: "var(--fg-1)", fontWeight: 500 }}>{label}</span>
-      <span style={{ fontSize: 15, color: "var(--fg-hi)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>env. {fmtDist(meters)}</span>
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
+        <span style={{ fontSize: 15, color: "var(--fg-1)", fontWeight: 500 }}>{label}</span>
+        <span style={{ fontSize: 15, color: "var(--fg-hi)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>env. {fmtDist(meters)}</span>
+      </div>
+      {/* LA SURFACE SOUS LA LIGNE, jamais à côté de la distance : deux nombres sur la même ligne se
+          confondent, et le lecteur hésite entre « 350 m » et « 1,2 ha ». Elle reste discrète, son
+          rôle est de distinguer un square d'un grand parc sans occuper le premier regard. */}
+      {sousLigne && (
+        <div style={{ fontSize: 13, color: "var(--fg-4)", marginTop: 2 }}>{sousLigne}</div>
+      )}
     </div>
   );
 }
@@ -226,7 +250,17 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
                   ) : s.sourceStatus.osmGreenSpaces === "failed" ? (
                     <span style={{ color: "var(--fg-4)", fontSize: 14 }}>Espaces verts : donnée momentanément indisponible.</span>
                   ) : s.osm.nearestMappedGreenSpace ? (
-                    <Face3Line label={greenSpaceLabel(s.osm.nearestMappedGreenSpace.kind)} meters={s.osm.nearestMappedGreenSpace.distanceMeters} />
+                    <Face3Line
+                      label={greenSpaceLabel(s.osm.nearestMappedGreenSpace.kind)}
+                      meters={s.osm.nearestMappedGreenSpace.distanceMeters}
+                      // Absente sur les snapshots figés avant le 20/09/2026 et quand la géométrie
+                      // n'est pas fermée : on affiche alors la distance seule.
+                      sousLigne={
+                        s.osm.nearestMappedGreenSpace.areaM2
+                          ? fmtSurface(s.osm.nearestMappedGreenSpace.areaM2)
+                          : undefined
+                      }
+                    />
                   ) : (
                     <span style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
                       Aucun espace vert correspondant aux catégories recherchées dans l’emprise cartographiée.

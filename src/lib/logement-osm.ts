@@ -32,7 +32,7 @@ function overpassQuery(s: number, w: number, n: number, e: number): string {
     `way["highway"~"^(motorway|trunk|motorway_link|trunk_link)$"]${bb};` +
     `way["railway"="rail"]${bb};` +
     `way["leisure"="park"]${bb};` +
-    `way["landuse"~"^(forest|grass|recreation_ground)$"]${bb};` +
+    `way["landuse"~"^(forest|grass)$"]${bb};` +
     `way["natural"="wood"]${bb};` +
     ");out geom;"
   );
@@ -59,8 +59,7 @@ export function parseOverpass(elements: unknown[]): OsmGeom[] {
         : t.natural === "wood" ? "wood"
         : t.landuse === "forest" ? "forest"
         : t.landuse === "grass" ? "grass"
-        : t.landuse === "recreation_ground" ? "recreation_ground"
-        : null;
+        : null; // `recreation_ground` n'est plus collecté : souvent minéral, cf. GreenKind
       if (greenKind) {
         out.push({ kind: closed ? "polygon" : "line", role: "green", subtype: "green", greenKind, pts });
       }
@@ -70,38 +69,45 @@ export function parseOverpass(elements: unknown[]): OsmGeom[] {
 }
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
-// LA TAILLE À PARTIR DE LAQUELLE UN ESPACE VERT MÉRITE D'ÊTRE NOMMÉ (20/09/2026).
+// LA TAILLE À PARTIR DE LAQUELLE UNE SURFACE VERTE MÉRITE D'ÊTRE NOMMÉE (20/09/2026).
 //
 // Le module Autour annonçait « Espace vert · Pelouse · env. 19 m » sur une maison de
-// Châtelaillon : un gazon de voisinage, pas un lieu où l'on va. Aucun seuil n'existait, donc
+// Châtelaillon : un gazon de 339 m², pas un lieu où l'on va. Aucun seuil n'existait, donc
 // n'importe quel polygone cartographié comptait.
 //
-// DEUX SEUILS, PARCE QUE LE TAG PORTE UNE INTENTION. `leisure=park` et `recreation_ground` ont
-// été DÉCLARÉS comme des lieux par un contributeur : un square de quartier est petit et compte
-// vraiment, on n'écarte donc que les artefacts de saisie. `landuse=grass` décrit une surface sans
-// dire que quiconque y va : il lui faut une taille avant de mériter le nom d'espace vert. Bois et
-// forêts gardent le seuil bas, un bosquet de cinq cents mètres carrés reste un bois.
+// CE SONT DES SEUILS ÉDITORIAUX, pas des mesures officielles, et ils ne prétendent correspondre à
+// aucune définition d'urbanisme. Leur seul rôle est d'éviter qu'une petite surface engazonnée soit
+// présentée comme un espace vert pertinent.
 //
-// CES SEUILS SONT UNE CONVENTION, pas une mesure officielle. Ils sont donc écrits ici, en un seul
-// endroit, avec leur raison : 400 m² est la taille d'un gazon résidentiel, 2 000 m² celle d'un
-// jardin public de quartier.
+// DEUX NIVEAUX, PARCE QUE LE TAG PORTE UNE INTENTION. `leisure=park` a été DÉCLARÉ comme un lieu
+// par un contributeur, et un square de poche est une vraie ressource urbaine : le seuil n'y sert
+// qu'à écarter les aberrations de saisie. `landuse=grass` décrit une occupation du sol sans dire
+// que quiconque y va : il lui faut une taille avant de mériter d'être nommé.
+//
+// CALIBRÉ SUR QUATRE ADRESSES RÉELLES le 20/09/2026 (Châtelaillon, La Rochelle, Nantes, Aulnay).
+// Les trois pelouses aberrantes rencontrées faisaient 315, 339 et 519 m² : le cas absurde tombe
+// dès 500 m². Entre 500 et 2 000 on ne gagne plus en justesse, on change la NATURE de la réponse :
+// à Châtelaillon, 500 m² rend une pelouse de 519 m² à 312 m qui n'apprend rien, quand 2 000 m²
+// rend un bois de 5 685 m² à 343 m. En rural, aucun effet : les pelouses y font deux hectares.
 const AIRE_MIN_M2: Record<GreenKind, number> = {
   park: 200,
-  recreation_ground: 200,
   wood: 200,
   forest: 200,
   grass: 2000,
+  recreation_ground: Number.POSITIVE_INFINITY, // plus collecté ; jamais retenu s'il resurgit
 };
 
 /**
  * Cette surface est-elle assez grande pour être annoncée comme l'espace vert le plus proche ?
  *
- * UNE GÉOMÉTRIE NON FERMÉE PASSE. OSM ne rend parfois qu'un contour partiel, et une ligne n'a pas
- * d'aire : l'écarter supprimerait des bois réels. Le faux positif qu'on éviterait ainsi coûte
- * moins que les vrais espaces verts qu'on perdrait.
+ * SURFACE INCONNUE : le cas d'une géométrie non fermée, dont OSM ne rend qu'un contour partiel.
+ * Un bois ou un parc passent quand même, parce que leur tag porte déjà une intention forte et que
+ * les écarter supprimerait des espaces réels. Une PELOUSE, non : son seul argument est sa taille,
+ * et sans surface mesurable cet argument n'existe pas.
  */
 function estUnVraiEspaceVert(g: OsmGeom): boolean {
-  if (g.kind !== "polygon" || !g.greenKind) return true;
+  if (!g.greenKind) return true;
+  if (g.kind !== "polygon") return g.greenKind !== "grass";
   return ringAreaM2(g.pts) >= AIRE_MIN_M2[g.greenKind];
 }
 
@@ -115,6 +121,7 @@ export function computeOsmProximity(center: LngLat, geoms: OsmGeom[], bboxRadius
   const noisy = new Map<"motorway" | "trunk" | "railway", number>();
   let green: number | null = null;
   let greenKind: GreenKind | undefined;
+  let greenArea: number | undefined;
   for (const g of geoms) {
     const d = distTo(g);
     if (d > bboxRadiusM) continue;
@@ -125,6 +132,7 @@ export function computeOsmProximity(center: LngLat, geoms: OsmGeom[], bboxRadius
     } else if (estUnVraiEspaceVert(g) && (green === null || d < green)) {
       green = d;
       greenKind = g.greenKind;
+      greenArea = g.kind === "polygon" ? Math.round(ringAreaM2(g.pts)) : undefined;
     }
   }
   return {
@@ -132,7 +140,13 @@ export function computeOsmProximity(center: LngLat, geoms: OsmGeom[], bboxRadius
       .map(([type, d]) => ({ type, distanceMeters: Math.round(d) }))
       .sort((a, b) => a.distanceMeters - b.distanceMeters),
     nearestMappedGreenSpace:
-      green === null ? null : { distanceMeters: Math.round(green), ...(greenKind ? { kind: greenKind } : {}) },
+      green === null
+        ? null
+        : {
+            distanceMeters: Math.round(green),
+            ...(greenKind ? { kind: greenKind } : {}),
+            ...(greenArea !== undefined ? { areaM2: greenArea } : {}),
+          },
     bboxRadiusMeters: bboxRadiusM,
   };
 }

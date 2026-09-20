@@ -119,13 +119,59 @@ test("emprise: la marge est/ouest couvre bien le rayon demandé, en mètres (Lil
   );
 });
 
-test("greenKind conservé selon le tag OSM (bois, forêt, pelouse, terrain)", () => {
+test("greenKind conservé selon le tag OSM (bois, forêt, pelouse)", () => {
   const geom = (tags: Record<string, string>) =>
     ({ type: "way", tags, geometry: [{ lat: 48.85, lon: 2.35 }, { lat: 48.85, lon: 2.36 }] });
   assert.equal(parseOverpass([geom({ natural: "wood" })])[0].greenKind, "wood");
   assert.equal(parseOverpass([geom({ landuse: "forest" })])[0].greenKind, "forest");
   assert.equal(parseOverpass([geom({ landuse: "grass" })])[0].greenKind, "grass");
-  assert.equal(parseOverpass([geom({ landuse: "recreation_ground" })])[0].greenKind, "recreation_ground");
+});
+
+test("un terrain de loisirs n'est plus un espace vert (20/09/2026)", () => {
+  // Un `recreation_ground` peut être entièrement minéral : city-stade, boulodrome, aire de jeux
+  // bitumée. Il répondait « espace vert le plus proche », ce qu'il n'est pas. Il n'est plus
+  // collecté du tout, donc plus proposé, quelle que soit sa taille.
+  const terrain = {
+    type: "way",
+    tags: { landuse: "recreation_ground" },
+    geometry: [{ lat: 48.85, lon: 2.35 }, { lat: 48.85, lon: 2.36 }],
+  };
+  assert.equal(parseOverpass([terrain]).length, 0);
+});
+
+test("une pelouse dont la surface est inconnue est écartée", () => {
+  // Géométrie non fermée : OSM n'en rend qu'un contour partiel, la surface n'est pas mesurable.
+  // Le seul argument d'une pelouse est sa taille : sans elle, cet argument n'existe pas.
+  const ligne = {
+    type: "way",
+    tags: { landuse: "grass" },
+    geometry: [{ lat: 48.851, lon: 2.351 }, { lat: 48.852, lon: 2.352 }],
+  };
+  const prox = computeOsmProximity({ lat: 48.85, lon: 2.35 }, parseOverpass([ligne]), 1500);
+  assert.equal(prox.nearestMappedGreenSpace, null);
+});
+
+test("la surface est transmise quand elle est mesurable, absente sinon", () => {
+  // Elle sert l'écran : « Parc · env. 30 m » puis « 1,2 ha » dessous. Une surface absente est un
+  // fait (contour partiel), jamais un zéro à afficher.
+  const avec = computeOsmProximity(
+    { lat: 48.85, lon: 2.35 },
+    parseOverpass([carreVert({ leisure: "park" }, 100, 30)]),
+    1500,
+  );
+  assert.ok(avec.nearestMappedGreenSpace?.areaM2 && avec.nearestMappedGreenSpace.areaM2 > 9000);
+  assert.ok(avec.nearestMappedGreenSpace!.areaM2! < 11000, "aire hors tolérance de projection");
+
+  const sans = computeOsmProximity(
+    { lat: 48.85, lon: 2.35 },
+    parseOverpass([{
+      type: "way",
+      tags: { natural: "wood" },
+      geometry: [{ lat: 48.851, lon: 2.351 }, { lat: 48.852, lon: 2.352 }],
+    }]),
+    1500,
+  );
+  assert.equal(sans.nearestMappedGreenSpace?.areaM2, undefined);
 });
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
