@@ -1,4 +1,4 @@
-# Feuille d'exécution, 19 septembre 2026
+# Feuille d'exécution, 19 septembre 2026 (état au 20/09 au soir)
 
 Une page. Elle remplace la liste de 25 chantiers de la veille
 (`recherches/2026-09-19-veille-strategique.md`), qui reste un registre d'opportunités.
@@ -6,7 +6,20 @@ Une page. Elle remplace la liste de 25 chantiers de la veille
 **Le critère qui classe :** une affirmation fausse dans un produit vendu passe avant une panne
 possible, qui passe avant une donnée manquante, qui passe avant une source nouvelle.
 
-## 1. Intégrité de ce qui est affirmé — EN COURS
+## 1. Intégrité de ce qui est affirmé — FAIT, sauf un point
+
+Corrigés et déployés le 20/09 : le détenteur du diagnostic inventé, les priorités ajoutées sans
+demande, le tiroir fourre-tout, l'accueil qui estimait une classe énergétique depuis l'âge coché
+et inventait les réponses passées. Corrigé et non encore déployé : **l'érosion côtière présentée
+comme couverte par un arrêté de catastrophe naturelle**, alors que le régime l'exclut (notre
+propre traduction de « chocs mécaniques liés à l'action des vagues »).
+
+**RESTE LE SEUL BLOQUANT :** la déduction invisible. Écrire « famille avec deux enfants » ajoute
+en silence « ne pas être isolé » et « peu d'agriculture intensive », affichées ensuite comme
+« votre priorité », puis suivies d'un aveu de ne pas savoir les traiter. Vu à l'écran le 20/09 sur
+un projet de trois priorités devenu six.
+
+### Ce qui avait été listé ici le 19 (historique)
 
 Ce que le produit dit aujourd'hui et qui n'est pas établi. Touche le gratuit et le payé.
 
@@ -26,7 +39,7 @@ Ce que le produit dit aujourd'hui et qui n'est pas établi. Touche le gratuit et
 - **La posture inscrite d'office.** `posture` vaut `residence` par défaut et n'est jamais écrite
   par le parcours. Cf. `/memory/project_usage_reel_septembre.md`.
 
-## 2. Migration du géocodeur
+## 2. Migration du géocodeur — FAIT (déployé le 20/09)
 
 L'ancien point d'entrée (`api-adresse.data.gouv.fr`, déprécié) sert encore 8 fichiers, dont
 `src/lib/ban.ts` et le parcours d'achat. S'il ferme, personne ne peut plus acheter.
@@ -36,7 +49,12 @@ deux services délibérément, parce que l'ancien ne connaît que des adresses q
 sait trouver une gare ou un hôpital. Fusionner les deux casserait les contraintes « à 30 minutes
 de la gare Matabiau ».
 
-## 3. Comprendre le lecteur
+## 3. Comprendre le lecteur — LE CHANTIER DE FOND SUIVANT
+
+Quatre surfaces demandent aujourd'hui ce que cherche la personne, et elles ne se parlent pas : le
+wizard de l'accueil (`wizard_answers`, jamais lu par le moteur), le texte libre de `/ou-vivre`, le
+projet en bas de `/rapport`, et le bandeau « Vos priorités pour cette commune » du module
+Territoire. Un seul objet doit rester, `user_project`, les autres devenant des surfaces d'édition.
 
 6 dossiers payés sur 14 n'ont ni projet ni situation déclarée. La chaîne du moat commence par le
 projet : sans lui, le premier maillon manque. Demander la situation dans le parcours d'achat,
