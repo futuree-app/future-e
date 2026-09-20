@@ -53,7 +53,7 @@ export const GASPAR_CATNAT_LABELS = [
 // c'est-à-dire en jargon administratif — le repli de `simplifyCatnatRisk`. C'est acceptable pour une
 // forme rare et inconnue, jamais pour une forme courante : d'où le test de couverture.
 export const CATNAT_FAMILLES_ATTENDUES = [
-  "Inondations", "Sécheresse des sols", "Érosion et impact des vagues", "Mouvements de terrain",
+  "Inondations", "Sécheresse des sols", "Chocs liés aux vagues", "Mouvements de terrain",
   "Tempête", "Cyclone", "Grêle", "Séisme", "Avalanche", "Neige", "Submersion marine",
 ] as const;
 

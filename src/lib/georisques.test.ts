@@ -108,7 +108,16 @@ test("CONTRAT — les libellés CatNat voisins ne se confondent pas", () => {
   assert.equal(simplifyCatnatRisk("Glissement de Terrain"), "Mouvements de terrain");
   assert.equal(simplifyCatnatRisk("Eboulement et/ou Chute de Blocs"), "Mouvements de terrain");
   assert.equal(simplifyCatnatRisk("Sécheresse"), "Sécheresse des sols");
-  assert.equal(simplifyCatnatRisk("Chocs Mécaniques liés à l'action des Vagues"), "Érosion et impact des vagues");
+  // JAMAIS LE MOT « ÉROSION » ICI (20/09/2026). Le régime de catastrophe naturelle exclut l'érosion
+  // côtière : un arrêté « chocs mécaniques liés à l'action des vagues » indemnise les dégâts d'une
+  // tempête, pas le recul du trait de côte. Le libellé précédent faisait dire à une reconnaissance
+  // l'inverse de ce qu'elle couvre, et la synthèse du Territoire le recopiait fidèlement.
+  assert.equal(simplifyCatnatRisk("Chocs Mécaniques liés à l'action des Vagues"), "Chocs liés aux vagues");
+  assert.doesNotMatch(
+    simplifyCatnatRisk("Chocs Mécaniques liés à l'action des Vagues"),
+    /rosion/,
+    "un aléa CatNat ne se nomme jamais érosion : le régime l'exclut",
+  );
 });
 
 test("CONTRAT — un libellé INCONNU est rendu tel quel, sans planter ni inventer de famille", () => {

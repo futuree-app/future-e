@@ -42,7 +42,20 @@ export function normalizeLabel(value: string) {
 export function simplifyCatnatRisk(raw: string): string {
   const n = normalizeLabel(raw);
   if (n.includes("submersion")) return "Submersion marine";
-  if (n.includes("vague") || n.includes("chocs mecaniques")) return "Érosion et impact des vagues";
+  // « ÉROSION » A ÉTÉ RETIRÉ DE CE LIBELLÉ (20/09/2026), et le mot était une faute de fond.
+  //
+  // L'arrêté officiel dit « Chocs Mécaniques liés à l'action des Vagues » : il indemnise les dégâts
+  // causés par l'action mécanique des vagues pendant une tempête. Le régime de catastrophe
+  // naturelle EXCLUT l'érosion côtière, et c'est précisément pour cela qu'un dispositif séparé
+  // existe pour le recul du trait de côte.
+  //
+  // Traduire cet aléa par « Érosion » faisait donc dire à une reconnaissance CatNat l'inverse de ce
+  // qu'elle couvre, sur le sujet le plus sensible du littoral pour un acheteur. La synthèse du
+  // Territoire de Châtelaillon-Plage écrivait, en reprenant fidèlement ce libellé : « des
+  // reconnaissances en état de catastrophe naturelle liées à […] l'érosion côtière ». Faux.
+  //
+  // L'érosion reste nommée ailleurs, à sa vraie source : l'indicateur Cerema du trait de côte.
+  if (n.includes("vague") || n.includes("chocs mecaniques")) return "Chocs liés aux vagues";
   if (
     n.includes("inondation") ||
     n.includes("coulee") ||
