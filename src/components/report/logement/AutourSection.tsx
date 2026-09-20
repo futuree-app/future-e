@@ -1,5 +1,5 @@
 import React from "react";
-import { BPE_WALK_RADIUS_M, type Face3Snapshot, type GreenKind } from "@/lib/logement-autour-types";
+import { BPE_WALK_RADIUS_M, type EspaceVert, type Face3Snapshot, type GreenKind } from "@/lib/logement-autour-types";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { lireChaleurEtVegetal } from "@/lib/logement-autour-chaleur";
 import { preuveEquipement, sourceBpe, LIMITE_BPE } from "@/lib/logement-bpe-lisible";
@@ -48,6 +48,35 @@ function fmtSurface(m2: number): string {
 function greenSpaceLabel(kind: GreenKind | undefined): string {
   return kind ? GREEN_LABEL[kind] : "Espace vert";
 }
+
+/**
+ * UNE LIGNE D'ESPACE VERT, où le NOM prend la vedette quand la carte en porte un.
+ *
+ * « Parc Adèle Charruyer » situe immédiatement quelqu'un qui connaît La Rochelle ; « Parc » ne dit
+ * rien à personne. Même logique que pour les commerces, où l'on affiche « Les Moineaux Gourmands »
+ * plutôt que « boulangerie ». Le type redescend alors en métadonnée, avec la distance et la
+ * surface, parce qu'il reste utile (un bois ne se visite pas comme un square).
+ *
+ * Sans nom, le type reprend la vedette et la ligne du dessous porte distance et surface.
+ */
+function LigneEspaceVert({ espace, role }: { espace: EspaceVert; role: string }) {
+  const type = greenSpaceLabel(espace.kind);
+  const surface = espace.areaM2 ? fmtSurface(espace.areaM2) : null;
+  const distance = `env. ${fmtDist(espace.distanceMeters)}`;
+  return (
+    <div>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fg-4)", marginBottom: 2 }}>
+        {role}
+      </div>
+      <div style={{ fontSize: 15, color: "var(--fg-1)", fontWeight: 500 }}>
+        {espace.name ?? type}
+      </div>
+      <div style={{ fontSize: 13, color: "var(--fg-4)", marginTop: 2 }}>
+        {[espace.name ? type : null, distance, surface].filter(Boolean).join(" · ")}
+      </div>
+    </div>
+  );
+}
 // Sous-titre de brique (vie quotidienne / repère) et libellé de famille (métadonnée secondaire
 // au-dessus du type précis). Rendent visible la hiérarchie éditoriale.
 const FACE3_SUBHEAD: React.CSSProperties = {
@@ -70,22 +99,6 @@ function fmtDist(m: number): string {
 }
 // Une ligne « type précis — env. distance ». Le type est en évidence, la distance à droite,
 // alignée sur la même ligne de base que le type (chiffres tabulaires pour l'alignement).
-function Face3Line({ label, meters, sousLigne }: { label: string; meters: number; sousLigne?: string }) {
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
-        <span style={{ fontSize: 15, color: "var(--fg-1)", fontWeight: 500 }}>{label}</span>
-        <span style={{ fontSize: 15, color: "var(--fg-hi)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>env. {fmtDist(meters)}</span>
-      </div>
-      {/* LA SURFACE SOUS LA LIGNE, jamais à côté de la distance : deux nombres sur la même ligne se
-          confondent, et le lecteur hésite entre « 350 m » et « 1,2 ha ». Elle reste discrète, son
-          rôle est de distinguer un square d'un grand parc sans occuper le premier regard. */}
-      {sousLigne && (
-        <div style={{ fontSize: 13, color: "var(--fg-4)", marginTop: 2 }}>{sousLigne}</div>
-      )}
-    </div>
-  );
-}
 
 // ── Équipement automobile des ménages (INSEE, recensement 2022, au secteur de l'adresse) ─────────
 //
@@ -250,17 +263,18 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
                   ) : s.sourceStatus.osmGreenSpaces === "failed" ? (
                     <span style={{ color: "var(--fg-4)", fontSize: 14 }}>Espaces verts : donnée momentanément indisponible.</span>
                   ) : s.osm.nearestMappedGreenSpace ? (
-                    <Face3Line
-                      label={greenSpaceLabel(s.osm.nearestMappedGreenSpace.kind)}
-                      meters={s.osm.nearestMappedGreenSpace.distanceMeters}
-                      // Absente sur les snapshots figés avant le 20/09/2026 et quand la géométrie
-                      // n'est pas fermée : on affiche alors la distance seule.
-                      sousLigne={
-                        s.osm.nearestMappedGreenSpace.areaM2
-                          ? fmtSurface(s.osm.nearestMappedGreenSpace.areaM2)
-                          : undefined
-                      }
-                    />
+                    <div style={{ display: "grid", gap: 12 }}>
+                      <LigneEspaceVert espace={s.osm.nearestMappedGreenSpace} role="Le plus proche" />
+                      {/* LA SECONDE LIGNE N'APPARAÎT QUE QUAND ELLE APPREND QUELQUE CHOSE : trois
+                          adresses sur quatre n'en ont pas, et c'est le comportement voulu. Absente
+                          aussi des snapshots figés avant le 20/09/2026. */}
+                      {s.osm.largerGreenSpaceNearby && (
+                        <LigneEspaceVert
+                          espace={s.osm.largerGreenSpaceNearby}
+                          role="Un grand espace vert à proximité"
+                        />
+                      )}
+                    </div>
                   ) : (
                     <span style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
                       Aucun espace vert correspondant aux catégories recherchées dans l’emprise cartographiée.

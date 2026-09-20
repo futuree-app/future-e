@@ -117,6 +117,15 @@ export const TYPEQU_LABEL: Record<string, string> = {
 // entièrement minéral (city-stade, boulodrome), et il répondait « espace vert le plus proche ».
 // La valeur RESTE dans ce type : les snapshots figés avant cette date la portent encore, et un
 // libellé manquant afficherait un vide à leur place.
+/** Un espace vert cartographié : ce qu'il est, où il est, et sa taille quand elle est mesurable. */
+export type EspaceVert = {
+  distanceMeters: number;
+  kind?: GreenKind;
+  areaM2?: number;
+  /** Le nom cartographié. Absent sur la plupart des petites surfaces, présent sur les grandes. */
+  name?: string;
+};
+
 export type GreenKind = "park" | "wood" | "forest" | "grass" | "recreation_ground";
 
 export type OsmProximity = {
@@ -126,7 +135,19 @@ export type OsmProximity = {
    * surface n'a pas pu être mesurée. Les snapshots figés avant le 20/09/2026 ne la portent pas
    * non plus. Dans les deux cas l'écran affiche la distance seule, jamais une surface supposée.
    */
-  nearestMappedGreenSpace: { distanceMeters: number; kind?: GreenKind; areaM2?: number } | null;
+  nearestMappedGreenSpace: EspaceVert | null;
+  /**
+   * LE GRAND ESPACE QUI VAUT LE DÉPLACEMENT (20/09/2026), quand il en existe un.
+   *
+   * « Le plus proche » répond au besoin de sortir cinq minutes ; celui-ci à celui d'aller passer
+   * un dimanche. Un square de 900 m² à 35 m masquait le parc Charruyer, 25 ha à 222 m, que
+   * n'importe quel Rochelais citerait en premier.
+   *
+   * `null` quand aucun candidat n'apprend rien de plus, ce qui est le cas le plus fréquent : trois
+   * adresses sur quatre dans la calibration. Absent des snapshots figés avant cette date, d'où
+   * l'optionnalité.
+   */
+  largerGreenSpaceNearby?: EspaceVert | null;
   bboxRadiusMeters: number;
 };
 

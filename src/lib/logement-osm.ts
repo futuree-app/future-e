@@ -22,6 +22,10 @@ export type OsmGeom = {
   role: "noisy" | "green";
   subtype: "motorway" | "trunk" | "railway" | "green";
   greenKind?: GreenKind; // renseigné seulement pour role === "green"
+  /** L'identité OSM de l'objet. Sert à ne pas proposer deux fois le même lieu. */
+  osmId?: number;
+  /** Le nom cartographié, quand il existe. « Parc Adèle Charruyer » vaut mieux que « Parc ». */
+  name?: string;
   pts: LngLat[];
 };
 
@@ -40,7 +44,9 @@ function overpassQuery(s: number, w: number, n: number, e: number): string {
 
 export function parseOverpass(elements: unknown[]): OsmGeom[] {
   const out: OsmGeom[] = [];
-  for (const el of elements as Array<{ type: string; tags?: Record<string, string>; geometry?: LngLat[] }>) {
+  for (const el of elements as Array<{
+    type: string; id?: number; tags?: Record<string, string>; geometry?: LngLat[];
+  }>) {
     if (el.type !== "way" || !el.geometry || el.geometry.length === 0) continue;
     const t = el.tags ?? {};
     const pts = el.geometry.map((p) => ({ lat: p.lat, lon: p.lon }));
@@ -61,7 +67,12 @@ export function parseOverpass(elements: unknown[]): OsmGeom[] {
         : t.landuse === "grass" ? "grass"
         : null; // `recreation_ground` n'est plus collecté : souvent minéral, cf. GreenKind
       if (greenKind) {
-        out.push({ kind: closed ? "polygon" : "line", role: "green", subtype: "green", greenKind, pts });
+        const nom = (t.name ?? "").trim();
+        out.push({
+          kind: closed ? "polygon" : "line", role: "green", subtype: "green", greenKind, pts,
+          ...(typeof el.id === "number" ? { osmId: el.id } : {}),
+          ...(nom ? { name: nom } : {}),
+        });
       }
     }
   }
@@ -111,6 +122,75 @@ function estUnVraiEspaceVert(g: OsmGeom): boolean {
   return ringAreaM2(g.pts) >= AIRE_MIN_M2[g.greenKind];
 }
 
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// PROXIMITÉ N'EST PAS PERTINENCE (20/09/2026).
+//
+// Au 5 rue du Palais à La Rochelle, l'espace vert retenu était un square anonyme de 900 m² à
+// 35 m. Le parc Adèle Charruyer, vingt-cinq hectares, est à 222 m, et c'est lui que n'importe quel
+// Rochelais citerait. La règle « le plus proche gagne » choisissait donc la mauvaise réponse dès
+// qu'une petite surface recevable se trouvait devant une grande.
+//
+// On garde le plus proche, qui répond à un vrai besoin (sortir cinq minutes), et on ajoute une
+// SECONDE lecture quand elle apprend quelque chose : la destination du dimanche.
+//
+// TROIS CONDITIONS, ET CHACUNE ÉCARTE UN FAUX POSITIF RENCONTRÉ DANS LA CALIBRATION :
+//   — moins de 800 m : à Châtelaillon, le grand bois est à 1 445 m, hors de l'environnement de
+//     l'adresse. On ne fait pas marcher un quart d'heure pour une seconde ligne ;
+//   — au moins 1 ha : en dessous, ce n'est pas une destination, c'est un autre square ;
+//   — au moins dix fois le premier : à Aulnay, le plus grand fait 7,5 ha contre 2 ha pour le plus
+//     proche. Trois fois plus n'est pas d'une autre nature, et la seconde ligne n'apprend rien.
+//
+// Conventions produit, pas mesures officielles. Elles tiennent jusqu'à ce qu'un cas réel les
+// prenne en défaut.
+const GRAND_ESPACE_RAYON_M = 800;
+const GRAND_ESPACE_AIRE_MIN_M2 = 10_000;
+const GRAND_ESPACE_FACTEUR = 10;
+
+/**
+ * Le second candidat désigne-t-il un AUTRE lieu que le premier ?
+ *
+ * Un grand parc est souvent découpé en plusieurs polygones dans OSM. Proposer « Parc Charruyer »
+ * deux fois, à 35 m puis à 222 m, ferait passer un découpage de cartographie pour deux
+ * destinations. On écarte donc le même objet, et le même nom.
+ *
+ * CE QUE CE CONTRÔLE NE VOIT PAS : deux morceaux adjacents et tous deux anonymes du même parc.
+ * Il faudrait calculer leur contiguïté, pour un gain que la calibration n'a pas montré.
+ */
+function estUnAutreLieu(candidat: OsmGeom, proche: OsmGeom): boolean {
+  if (candidat === proche) return false;
+  if (candidat.osmId !== undefined && candidat.osmId === proche.osmId) return false;
+  if (candidat.name && proche.name && candidat.name === proche.name) return false;
+  return true;
+}
+
+function decrire(g: OsmGeom, d: number, aire: number | undefined) {
+  return {
+    distanceMeters: Math.round(d),
+    ...(g.greenKind ? { kind: g.greenKind } : {}),
+    ...(aire !== undefined ? { areaM2: aire } : {}),
+    ...(g.name ? { name: g.name } : {}),
+  };
+}
+
+/** Le grand espace qui vaut le déplacement, ou `null` si aucun n'apprend rien de plus. */
+function grandEspace(
+  proche: { g: OsmGeom; d: number; aire?: number } | null,
+  recevables: { g: OsmGeom; d: number; aire: number }[],
+) {
+  if (!proche) return null;
+  const candidats = recevables.filter(
+    (c) =>
+      estUnAutreLieu(c.g, proche.g) &&
+      c.aire >= GRAND_ESPACE_AIRE_MIN_M2 &&
+      // Une surface non mesurée pour le plus proche ne bloque pas : le candidat doit simplement
+      // franchir le plancher absolu, faute de pouvoir être comparé.
+      (proche.aire === undefined || c.aire >= GRAND_ESPACE_FACTEUR * proche.aire),
+  );
+  if (candidats.length === 0) return null;
+  const meilleur = candidats.reduce((a, b) => (b.aire > a.aire ? b : a));
+  return decrire(meilleur.g, meilleur.d, meilleur.aire);
+}
+
 export function computeOsmProximity(center: LngLat, geoms: OsmGeom[], bboxRadiusM: number): OsmProximity {
   const distTo = (g: OsmGeom): number =>
     g.kind === "polygon"
@@ -119,9 +199,8 @@ export function computeOsmProximity(center: LngLat, geoms: OsmGeom[], bboxRadius
         ? distancePointToPolylineM(center, g.pts)
         : haversineM(center, g.pts[0]);
   const noisy = new Map<"motorway" | "trunk" | "railway", number>();
-  let green: number | null = null;
-  let greenKind: GreenKind | undefined;
-  let greenArea: number | undefined;
+  let proche: { g: OsmGeom; d: number; aire?: number } | null = null;
+  const recevables: { g: OsmGeom; d: number; aire: number }[] = [];
   for (const g of geoms) {
     const d = distTo(g);
     if (d > bboxRadiusM) continue;
@@ -129,24 +208,18 @@ export function computeOsmProximity(center: LngLat, geoms: OsmGeom[], bboxRadius
       const st = g.subtype as "motorway" | "trunk" | "railway";
       const cur = noisy.get(st);
       if (cur === undefined || d < cur) noisy.set(st, d);
-    } else if (estUnVraiEspaceVert(g) && (green === null || d < green)) {
-      green = d;
-      greenKind = g.greenKind;
-      greenArea = g.kind === "polygon" ? Math.round(ringAreaM2(g.pts)) : undefined;
+    } else if (estUnVraiEspaceVert(g)) {
+      const aire = g.kind === "polygon" ? Math.round(ringAreaM2(g.pts)) : undefined;
+      if (proche === null || d < proche.d) proche = { g, d, aire };
+      if (aire !== undefined && d <= GRAND_ESPACE_RAYON_M) recevables.push({ g, d, aire });
     }
   }
   return {
     potentiallyNoisyInfrastructure: [...noisy.entries()]
       .map(([type, d]) => ({ type, distanceMeters: Math.round(d) }))
       .sort((a, b) => a.distanceMeters - b.distanceMeters),
-    nearestMappedGreenSpace:
-      green === null
-        ? null
-        : {
-            distanceMeters: Math.round(green),
-            ...(greenKind ? { kind: greenKind } : {}),
-            ...(greenArea !== undefined ? { areaM2: greenArea } : {}),
-          },
+    nearestMappedGreenSpace: proche === null ? null : decrire(proche.g, proche.d, proche.aire),
+    largerGreenSpaceNearby: grandEspace(proche, recevables),
     bboxRadiusMeters: bboxRadiusM,
   };
 }

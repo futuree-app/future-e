@@ -86,7 +86,7 @@ La chaleur reste le meilleur laboratoire. Elle doit fonctionner **sans** la morp
 (couverte sur 93 territoires de plus de 50 000 habitants, muette ailleurs), celle-ci venant en
 enrichissement.
 
-## PROXIMITÉ ≠ PERTINENCE (relevé le 20/09/2026, à traiter plus tard)
+## PROXIMITÉ ≠ PERTINENCE — TRAITÉ le 20/09/2026 pour les espaces verts
 
 Au 5 rue du Palais à La Rochelle, l'espace vert retenu est un square anonyme de 900 m² à 35 m.
 Le **parc Charruyer**, vingt-cinq hectares, est à 222 m, et c'est lui que n'importe quel habitant
@@ -96,13 +96,15 @@ surface recevable se trouve devant une grande.
 Le seuil de surface ne corrige pas cela, il ne fait qu'écarter l'absurde. La surface affichée sous
 la ligne (« 900 m² ») atténue en donnant au lecteur de quoi juger, sans résoudre.
 
-Direction envisagée, à arbitrer : montrer DEUX notions au lieu d'une.
+**Résolu pour les espaces verts** : deux lectures, la seconde n'apparaissant que si elle apprend
+quelque chose (moins de 800 m, au moins 1 ha, au moins dix fois le premier). Chaque condition
+écarte un faux positif mesuré. Les noms cartographiés sont désormais affichés.
 
-    Le plus proche          Square · 35 m · 900 m²
-    Le grand espace proche  Parc Charruyer · 222 m · 25 ha
-
-Vaut probablement pour d'autres blocs d'Autour : le plus proche n'est jamais le plus pertinent par
-construction, c'est une convention qu'on n'avait jamais nommée.
+**RESTE À FAIRE, et c'est la même idée** : le plus proche n'est jamais le plus pertinent par
+construction, et cette convention n'avait jamais été nommée. Elle gouverne encore les autres blocs
+d'Autour : le médecin le plus proche n'est pas celui qui prend des patients, la halte ferroviaire
+la plus proche n'est pas celle qui mène quelque part, l'école la plus proche n'est pas celle du
+secteur de carte scolaire. À instruire bloc par bloc, sans supposer que la réponse sera la même.
 
 ## Ce qui attend dans le registre
 

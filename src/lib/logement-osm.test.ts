@@ -278,3 +278,95 @@ test("un espace vert non fermé reste accepté : on ne sait pas mesurer sa surfa
   const prox = computeOsmProximity({ lat: 48.85, lon: 2.35 }, parseOverpass([ligne]), 1500);
   assert.equal(prox.nearestMappedGreenSpace?.kind, "wood");
 });
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LE GRAND ESPACE QUI VAUT LE DÉPLACEMENT (20/09/2026).
+//
+// Les quatre situations ci-dessous sont les MESURES RÉELLES de la calibration du 20/09, rejouées
+// en géométries synthétiques pour ne pas dépendre d'Overpass. Chacune a décidé d'une des trois
+// conditions, et les retirer ferait réapparaître le faux positif correspondant.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+
+/** Un carré de surface `m2` (approximative), posé à `distanceM` mètres à l'est du point. */
+function espace(tags: Record<string, string>, m2: number, distanceM: number, id?: number) {
+  const cote = Math.sqrt(m2);
+  const mParDegLat = 111_320;
+  const mParDegLon = 111_320 * Math.cos((48.85 * Math.PI) / 180);
+  const lon0 = 2.35 + distanceM / mParDegLon;
+  const lon1 = lon0 + cote / mParDegLon;
+  const lat0 = 48.85;
+  const lat1 = lat0 + cote / mParDegLat;
+  return {
+    type: "way",
+    ...(id !== undefined ? { id } : {}),
+    tags,
+    geometry: [
+      { lat: lat0, lon: lon0 }, { lat: lat1, lon: lon0 },
+      { lat: lat1, lon: lon1 }, { lat: lat0, lon: lon1 }, { lat: lat0, lon: lon0 },
+    ],
+  };
+}
+const CENTRE = { lat: 48.85, lon: 2.35 };
+
+test("La Rochelle : un square de 900 m² ne masque plus le parc Charruyer", () => {
+  // Mesure réelle du 5 rue du Palais : parc anonyme 900 m² à 35 m, parc Adèle Charruyer 25 ha
+  // à 222 m. C'est le cas qui a motivé tout ce lot.
+  const prox = computeOsmProximity(CENTRE, parseOverpass([
+    espace({ leisure: "park" }, 900, 35, 1),
+    espace({ leisure: "park", name: "Parc Adèle Charruyer" }, 250_000, 222, 2),
+  ]), 1500);
+  assert.equal(prox.nearestMappedGreenSpace?.areaM2 && prox.nearestMappedGreenSpace.areaM2 < 1200, true);
+  assert.equal(prox.largerGreenSpaceNearby?.name, "Parc Adèle Charruyer");
+  assert.ok((prox.largerGreenSpaceNearby?.areaM2 ?? 0) > 200_000);
+});
+
+test("Châtelaillon : un grand bois à 1,4 km reste hors de l'environnement de l'adresse", () => {
+  // Mesure réelle : forêt 5 690 m² à 343 m, forêt 9,5 ha à 1 445 m. Trop loin pour une seconde
+  // ligne, et de toute façon pas dix fois plus grande.
+  const prox = computeOsmProximity(CENTRE, parseOverpass([
+    espace({ landuse: "forest" }, 5_690, 343, 1),
+    espace({ landuse: "forest" }, 95_000, 1_445, 2),
+  ]), 1500);
+  assert.ok(prox.nearestMappedGreenSpace);
+  assert.equal(prox.largerGreenSpaceNearby, null, "un espace à 1,4 km ne vaut pas une seconde ligne");
+});
+
+test("Aulnay : trois fois plus grand n'est pas d'une autre nature", () => {
+  // Mesure réelle : surface enherbée 2 ha à 77 m, et 7,5 ha à 631 m. Assez proche, assez grand en
+  // absolu, mais le rapport reste faible : la seconde ligne n'apprendrait rien.
+  const prox = computeOsmProximity(CENTRE, parseOverpass([
+    espace({ landuse: "grass" }, 20_000, 77, 1),
+    espace({ landuse: "grass" }, 75_000, 631, 2),
+  ]), 1500);
+  assert.ok(prox.nearestMappedGreenSpace);
+  assert.equal(prox.largerGreenSpaceNearby, null, "3,75x ne justifie pas une seconde ligne");
+});
+
+test("un parc découpé en deux polygones ne s'annonce pas deux fois", () => {
+  // OSM représente souvent un grand parc par plusieurs objets. Sans déduplication, « Parc
+  // Charruyer » apparaîtrait à 35 m PUIS à 222 m, faisant passer un découpage de cartographie
+  // pour deux destinations.
+  const prox = computeOsmProximity(CENTRE, parseOverpass([
+    espace({ leisure: "park", name: "Parc Charruyer" }, 900, 35, 1),
+    espace({ leisure: "park", name: "Parc Charruyer" }, 250_000, 222, 2),
+  ]), 1500);
+  assert.equal(prox.nearestMappedGreenSpace?.name, "Parc Charruyer");
+  assert.equal(prox.largerGreenSpaceNearby, null, "le même nom désigne le même lieu");
+});
+
+test("le nom est transmis quand la carte en porte un", () => {
+  const prox = computeOsmProximity(CENTRE, parseOverpass([
+    espace({ leisure: "park", name: "Square Valin" }, 3_000, 40, 1),
+  ]), 1500);
+  assert.equal(prox.nearestMappedGreenSpace?.name, "Square Valin");
+  assert.equal(prox.nearestMappedGreenSpace?.kind, "park", "le type reste, en métadonnée");
+});
+
+test("le plus grand candidat est retenu, pas le premier venu", () => {
+  const prox = computeOsmProximity(CENTRE, parseOverpass([
+    espace({ leisure: "park" }, 500, 20, 1),
+    espace({ leisure: "park", name: "Jardin des Plantes" }, 40_000, 400, 2),
+    espace({ leisure: "park", name: "Grand Parc" }, 120_000, 700, 3),
+  ]), 1500);
+  assert.equal(prox.largerGreenSpaceNearby?.name, "Grand Parc");
+});
