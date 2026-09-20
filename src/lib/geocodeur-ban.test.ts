@@ -53,30 +53,36 @@ test("AUCUN appel au géocodeur déprécié ne subsiste dans le produit", () => 
   assert.deepEqual(fautifs, [], `Appels au géocodeur déprécié :\n${fautifs.join("\n")}`);
 });
 
-// La SEULE copie tolérée. `scripts/admin/` tourne hors du build Next : pas d'alias `@/`, pas de
-// résolution des `.ts`. Elle est donc recopiée, et ce test vérifie qu'elle reste alignée.
-const SCRIPT_HORS_BUILD = "scripts/admin/replace-address-dossier.mjs";
+// LES SEULES COPIES TOLÉRÉES. `scripts/admin/` tourne hors du build Next : pas d'alias `@/`, pas
+// de résolution des `.ts`. L'adresse y est donc recopiée, et ce test vérifie que chaque copie
+// reste alignée sur le module canonique.
+const SCRIPTS_HORS_BUILD = [
+  "scripts/admin/replace-address-dossier.mjs",
+  "scripts/admin/creer-dossier-demonstration.mjs",
+];
 
 test("l'adresse du géocodeur n'est écrite qu'une fois", () => {
   const porteurs: string[] = [];
   for (const racine of ["src", "scripts"]) {
     for (const { chemin, src } of sources(racine)) {
       // Ce fichier de test cite l'adresse pour vérifier qu'on n'est pas revenu en arrière.
-      if (EXEMPTIONS.has(chemin) || chemin === SCRIPT_HORS_BUILD) continue;
+      if (EXEMPTIONS.has(chemin) || SCRIPTS_HORS_BUILD.includes(chemin)) continue;
       if (src.includes("data.geopf.fr/geocodage")) porteurs.push(chemin);
     }
   }
   assert.deepEqual(porteurs, [], `L'adresse du géocodeur est recopiée dans :\n${porteurs.join("\n")}`);
 });
 
-test("la copie du script d'administration reste alignée sur le module canonique", () => {
+test("les copies des scripts d'administration restent alignées sur le module canonique", () => {
   // Une copie qui dérive est pire qu'une copie : le script viserait un service mort pendant que
-  // le produit tourne, et le remplacement d'un dossier échouerait le jour où on en a besoin.
-  const src = readFileSync(SCRIPT_HORS_BUILD, "utf8");
-  assert.ok(
-    src.includes(`const GEOCODEUR_BAN = "${GEOCODEUR_BAN}";`),
-    `${SCRIPT_HORS_BUILD} ne porte plus la même adresse que geocodeur-ban.ts (${GEOCODEUR_BAN})`,
-  );
+  // le produit tourne, et il échouerait le jour où on en a besoin.
+  for (const chemin of SCRIPTS_HORS_BUILD) {
+    const src = readFileSync(chemin, "utf8");
+    assert.ok(
+      src.includes(`const GEOCODEUR_BAN = "${GEOCODEUR_BAN}";`),
+      `${chemin} ne porte plus la même adresse que geocodeur-ban.ts (${GEOCODEUR_BAN})`,
+    );
+  }
 });
 
 test("les URL construites visent le bon service et portent leurs paramètres", () => {
