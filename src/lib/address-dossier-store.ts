@@ -3,7 +3,13 @@ import { haversineM, type LngLat } from "./geo-distance.ts";
 import type { Posture, Face3Snapshot } from "./logement-autour-types.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 
-export const SOURCES_VERSION = "face3-2026-07-08d"; // bump = invalidation de tous les snapshots (d : ajout du signal îlot de chaleur urbain / icu au snapshot)
+// bump = invalidation de tous les snapshots Autour.
+//   d : ajout du signal îlot de chaleur urbain (icu) au snapshot.
+//   e : seuil de surface sur les espaces verts (20/09/2026). SANS CE BUMP, la correction n'aurait
+//       atteint aucun dossier existant : le snapshot figé aurait continué d'annoncer « Espace
+//       vert · Pelouse · env. 19 m » sur une pelouse de 400 m², puisque `needsRecompute` ne
+//       compare que cette version.
+export const SOURCES_VERSION = "face3-2026-07-08e";
 
 // Projection persistée de l'état runtime du choix DPE (cf. spec §6). `pending` tant que rien
 // de définitif ; les deux statuts « confirmés » figent un DPE daté.

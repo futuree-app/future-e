@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { haversineM, distancePointToPolylineM, distancePointToPolygonM, expandBBoxM, type LngLat } from "./geo-distance.ts";
+import { haversineM, distancePointToPolylineM, distancePointToPolygonM, expandBBoxM, type LngLat, ringAreaM2 } from "./geo-distance.ts";
 import { cellKey, cellBBox } from "./geo-grid.ts";
 import type { OsmProximity, GreenKind } from "./logement-autour-types.ts";
 
@@ -69,6 +69,42 @@ export function parseOverpass(elements: unknown[]): OsmGeom[] {
   return out;
 }
 
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LA TAILLE À PARTIR DE LAQUELLE UN ESPACE VERT MÉRITE D'ÊTRE NOMMÉ (20/09/2026).
+//
+// Le module Autour annonçait « Espace vert · Pelouse · env. 19 m » sur une maison de
+// Châtelaillon : un gazon de voisinage, pas un lieu où l'on va. Aucun seuil n'existait, donc
+// n'importe quel polygone cartographié comptait.
+//
+// DEUX SEUILS, PARCE QUE LE TAG PORTE UNE INTENTION. `leisure=park` et `recreation_ground` ont
+// été DÉCLARÉS comme des lieux par un contributeur : un square de quartier est petit et compte
+// vraiment, on n'écarte donc que les artefacts de saisie. `landuse=grass` décrit une surface sans
+// dire que quiconque y va : il lui faut une taille avant de mériter le nom d'espace vert. Bois et
+// forêts gardent le seuil bas, un bosquet de cinq cents mètres carrés reste un bois.
+//
+// CES SEUILS SONT UNE CONVENTION, pas une mesure officielle. Ils sont donc écrits ici, en un seul
+// endroit, avec leur raison : 400 m² est la taille d'un gazon résidentiel, 2 000 m² celle d'un
+// jardin public de quartier.
+const AIRE_MIN_M2: Record<GreenKind, number> = {
+  park: 200,
+  recreation_ground: 200,
+  wood: 200,
+  forest: 200,
+  grass: 2000,
+};
+
+/**
+ * Cette surface est-elle assez grande pour être annoncée comme l'espace vert le plus proche ?
+ *
+ * UNE GÉOMÉTRIE NON FERMÉE PASSE. OSM ne rend parfois qu'un contour partiel, et une ligne n'a pas
+ * d'aire : l'écarter supprimerait des bois réels. Le faux positif qu'on éviterait ainsi coûte
+ * moins que les vrais espaces verts qu'on perdrait.
+ */
+function estUnVraiEspaceVert(g: OsmGeom): boolean {
+  if (g.kind !== "polygon" || !g.greenKind) return true;
+  return ringAreaM2(g.pts) >= AIRE_MIN_M2[g.greenKind];
+}
+
 export function computeOsmProximity(center: LngLat, geoms: OsmGeom[], bboxRadiusM: number): OsmProximity {
   const distTo = (g: OsmGeom): number =>
     g.kind === "polygon"
@@ -86,7 +122,7 @@ export function computeOsmProximity(center: LngLat, geoms: OsmGeom[], bboxRadius
       const st = g.subtype as "motorway" | "trunk" | "railway";
       const cur = noisy.get(st);
       if (cur === undefined || d < cur) noisy.set(st, d);
-    } else if (green === null || d < green) {
+    } else if (estUnVraiEspaceVert(g) && (green === null || d < green)) {
       green = d;
       greenKind = g.greenKind;
     }

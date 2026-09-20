@@ -56,6 +56,27 @@ function pointInRing(p: LngLat, ring: LngLat[]): boolean {
   return inside;
 }
 
+/**
+ * L'AIRE D'UN ANNEAU, EN MÈTRES CARRÉS (formule du lacet, sur la projection locale).
+ *
+ * Exacte à quelques pour mille sur les tailles qui nous intéressent (un parc, un bois de
+ * quartier), ce qui suffit très largement à séparer un gazon de quatre cents mètres carrés d'un
+ * jardin public. Rend 0 pour moins de trois points : une ligne n'a pas d'aire, et l'appelant doit
+ * traiter ce cas plutôt que de lire un zéro comme une petite surface.
+ */
+export function ringAreaM2(ring: LngLat[]): number {
+  if (ring.length < 3) return 0;
+  const origin = ring[0];
+  const pts = ring.map((q) => toXY(origin, q));
+  let somme = 0;
+  for (let i = 0; i < pts.length; i += 1) {
+    const a = pts[i];
+    const b = pts[(i + 1) % pts.length];
+    somme += a.x * b.y - b.x * a.y;
+  }
+  return Math.abs(somme) / 2;
+}
+
 export function distancePointToPolygonM(p: LngLat, ring: LngLat[]): number {
   if (ring.length < 3) return distancePointToPolylineM(p, ring);
   if (pointInRing(p, ring)) return 0;
