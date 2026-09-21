@@ -111,13 +111,13 @@ async function budgetEpuise(type: TypeAppel): Promise<boolean> {
 }
 
 /**
- * LE GARDE, à appeler en tête de route AVANT tout appel au modèle.
+ * LA LIMITE PAR ADRESSE, en TÊTE de route. Elle ne consomme aucun budget : elle ne fait que
+ * refuser un débit anormal, et elle doit donc s'exécuter avant tout travail.
  *
- * Rend `null` quand la voie est libre, ou la réponse à renvoyer telle quelle. Deux codes
- * distincts, parce que les deux situations ne se corrigent pas de la même façon : 429 dit à la
- * personne d'attendre une minute, 503 dit que le service est momentanément fermé.
+ * Rend `null` quand la voie est libre, ou la réponse à renvoyer telle quelle. 429 dit à la
+ * personne d'attendre : c'est une gêne passagère, pas une fermeture.
  */
-export async function gardeAppelModele(request: Request, type: TypeAppel): Promise<Response | null> {
+export function limiteParAdresse(request: Request): Response | null {
   const ip = adresseAppelante(request);
   if (depasse(MINUTE, `${ip}:m`, PAR_MINUTE, 60_000)) {
     return Response.json(
@@ -131,6 +131,21 @@ export async function gardeAppelModele(request: Request, type: TypeAppel): Promi
       { status: 429, headers: { "retry-after": "600" } },
     );
   }
+  return null;
+}
+
+/**
+ * LA RÉSERVATION DU BUDGET, JUSTE AVANT L'APPEL PAYANT — et jamais plus tôt (21/09/2026).
+ *
+ * Elle l'était, en tête de route, et c'était un défaut de conception à deux effets. Une réponse
+ * servie depuis un cache, qui ne coûte rien, consommait quand même du budget. Pire : des requêtes
+ * volontairement invalides, gratuites chez le fournisseur, suffisaient à vider le quota du jour et
+ * à couper la prose pour tout le monde. Le dispositif anti-facture devenait un moyen de nuire.
+ *
+ * À placer donc APRÈS la validation, l'authentification et les caches, et immédiatement avant la
+ * requête au modèle. Le compteur compte alors ce qu'il prétend compter : des appels payants.
+ */
+export async function reserverBudgetModele(type: TypeAppel): Promise<Response | null> {
   if (await budgetEpuise(type)) {
     console.error("[budget-llm] plafond journalier atteint", { type, budget: BUDGET_JOUR });
     return Response.json(

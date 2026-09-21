@@ -29,7 +29,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse, type NextRequest } from "next/server";
 import { getPostHogClient } from "@/lib/posthog-server";
-import { gardeAppelModele } from "@/lib/server/garde-appels-modele";
+import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
 
 export const runtime = "nodejs";
 
@@ -275,11 +275,10 @@ ${JSON.stringify(payload, null, 2)}`;
 }
 
 export async function POST(request: NextRequest) {
-  // LE GARDE AVANT TOUT APPEL PAYANT (21/09/2026). Cette route était publique, sans
-  // authentification ni limite : une boucle depuis une seule machine suffisait à produire des
-  // milliers d'appels facturés. Rien de déterministe n'est dégradé par un refus, seule la prose.
-  const refus = await gardeAppelModele(request, "ask_comparateur");
-  if (refus) return refus;
+  // LA LIMITE PAR ADRESSE, EN TÊTE : elle ne consomme aucun budget, elle refuse un débit
+  // anormal avant tout travail. Le budget, lui, se réserve juste avant l'appel payant.
+  const tropVite = limiteParAdresse(request);
+  if (tropVite) return tropVite;
 
   let body: Body;
   try {
@@ -352,6 +351,11 @@ export async function POST(request: NextRequest) {
   try {
     // Gratuit / réponse courte : on privilégie la vitesse. Sonnet 4.6 + effort
     // low + thinking coupé (cf. /qna, parse), pour ne pas subir le défaut "high".
+    // LE BUDGET SE RÉSERVE ICI, et jamais en tête de route : une réponse de cache ne coûte
+    // rien, et une requête invalide ne doit pas pouvoir vider le quota du jour.
+    const budget = await reserverBudgetModele("ask_comparateur");
+    if (budget) return budget;
+
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 600,

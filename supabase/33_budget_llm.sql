@@ -55,5 +55,10 @@ end;
 $$;
 
 revoke all on function public.consommer_budget_llm(date, integer, integer) from public, anon, authenticated;
+-- DROIT EXPLICITE PLUTÔT QU'IMPLICITE. `service_role` l'obtient en général par les privilèges par
+-- défaut du projet, mais ces défauts évoluent : un disjoncteur de facturation ne dépend pas d'un
+-- comportement hérité. S'il perdait ce droit en silence, l'appel échouerait, le compteur se
+-- tairait, et la protection disparaîtrait sans que rien ne le dise.
+grant execute on function public.consommer_budget_llm(date, integer, integer) to service_role;
 
 commit;

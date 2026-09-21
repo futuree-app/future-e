@@ -25,7 +25,7 @@ import {
   type ClimatData,
   type EnrichmentResult,
 } from "@/lib/commune-enrichment";
-import { gardeAppelModele } from "@/lib/server/garde-appels-modele";
+import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -523,11 +523,10 @@ function buildUserProfileText(profile: ProfileRow): string {
 
 // ─── POST : génération d'une réponse ───────────────────────────────────────
 export async function POST(request: NextRequest) {
-  // LE GARDE AVANT TOUT APPEL PAYANT (21/09/2026). Cette route était publique, sans
-  // authentification ni limite : une boucle depuis une seule machine suffisait à produire des
-  // milliers d'appels facturés. Rien de déterministe n'est dégradé par un refus, seule la prose.
-  const refus = await gardeAppelModele(request, "assistant");
-  if (refus) return refus;
+  // LA LIMITE PAR ADRESSE, EN TÊTE : elle ne consomme aucun budget, elle refuse un débit
+  // anormal avant tout travail. Le budget, lui, se réserve juste avant l'appel payant.
+  const tropVite = limiteParAdresse(request);
+  if (tropVite) return tropVite;
 
   try {
     const body = await request.json();
@@ -666,6 +665,11 @@ ${
 
 PROFIL UTILISATEUR CONNU
 ${profileText}`;
+
+    // LE BUDGET SE RÉSERVE ICI, et jamais en tête de route : une réponse de cache ne coûte
+    // rien, et une requête invalide ne doit pas pouvoir vider le quota du jour.
+    const budget = await reserverBudgetModele("assistant");
+    if (budget) return budget;
 
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-6",

@@ -27,16 +27,24 @@ const ROUTES_PAYANTES: { chemin: string; type: TypeAppel }[] = [
   { chemin: "src/app/api/ask/route.ts", type: "assistant" },
 ];
 
-test("chaque route payante appelle le garde, avec son type", () => {
+test("chaque route payante porte les deux gardes, avec le bon type", () => {
   for (const { chemin, type } of ROUTES_PAYANTES) {
     const src = readFileSync(chemin, "utf8");
-    assert.match(src, /gardeAppelModele\(request, "/, `${chemin} : aucun garde`);
-    assert.ok(src.includes(`gardeAppelModele(request, "${type}")`), `${chemin} : mauvais type d'appel`);
+    assert.match(src, /limiteParAdresse\(/, `${chemin} : aucune limite par adresse`);
+    assert.ok(src.includes(`reserverBudgetModele("${type}")`), `${chemin} : budget absent ou mauvais type`);
   }
 });
 
-test("le garde s'exécute AVANT l'appel au modèle, jamais après", () => {
-  // Un garde placé après la requête payante coûterait exactement ce qu'il prétend éviter.
+test("la limite par adresse précède le budget, qui précède l'appel", () => {
+  // DEUX EXIGENCES D'ORDRE, ET ELLES DISENT DEUX CHOSES DIFFÉRENTES (21/09/2026).
+  //
+  // La limite par adresse doit venir EN PREMIER : elle ne coûte rien, et refuser un débit anormal
+  // avant tout travail est sa seule raison d'être.
+  //
+  // Le budget doit venir JUSTE AVANT l'appel payant, et surtout pas en tête. Réservé trop tôt, il
+  // était consommé par des réponses de cache qui ne coûtent rien, et une rafale de requêtes
+  // invalides — gratuites chez le fournisseur — suffisait à vider le quota du jour et à couper la
+  // prose pour tout le monde. Le dispositif anti-facture devenait un moyen de nuire.
   for (const { chemin } of ROUTES_PAYANTES) {
     // IMPORTER `streamText` N'EST PAS L'APPELER, et l'import est en tête de fichier : comparer les
     // positions sans l'écarter ferait échouer toute route qui importe sa fonction de génération.
@@ -44,21 +52,24 @@ test("le garde s'exécute AVANT l'appel au modèle, jamais après", () => {
       .split("\n")
       .filter((l) => !l.trimStart().startsWith("import "))
       .join("\n");
-    const garde = src.indexOf("gardeAppelModele(request");
+    const limite = src.indexOf("limiteParAdresse(");
+    const budget = src.indexOf("reserverBudgetModele(");
     const appel = Math.min(
       ...[src.indexOf("messages.create"), src.indexOf("generateText"), src.indexOf("streamText")]
         .filter((i) => i >= 0),
     );
-    assert.ok(garde >= 0, `${chemin} : garde absent`);
-    assert.ok(garde < appel, `${chemin} : le garde est posé APRÈS l'appel au modèle`);
+    assert.ok(limite >= 0 && budget >= 0, `${chemin} : un garde manque`);
+    assert.ok(limite < budget, `${chemin} : la limite par adresse ne précède pas le budget`);
+    assert.ok(budget < appel, `${chemin} : le budget est réservé APRÈS l'appel au modèle`);
   }
 });
 
-test("son refus est renvoyé immédiatement, il n'est pas seulement calculé", () => {
+test("les deux refus sont renvoyés, ils ne sont pas seulement calculés", () => {
   // Une garde dont on ignore le résultat est une garde décorative.
   for (const { chemin } of ROUTES_PAYANTES) {
     const src = readFileSync(chemin, "utf8");
-    assert.match(src, /if \(refus\) return refus;/, `${chemin} : le refus n'est pas renvoyé`);
+    assert.match(src, /if \(tropVite\) return tropVite;/, `${chemin} : la limite ne refuse rien`);
+    assert.match(src, /if \(budget\) return budget;/, `${chemin} : le budget ne refuse rien`);
   }
 });
 
@@ -81,7 +92,7 @@ test("AUCUNE autre route publique n'appelle un modèle sans garde", () => {
     if (!appelle) continue;
     // Une route AUTHENTIFIÉE est déjà bornée : il faut un compte, et le droit d'accès au dossier.
     const authentifiee = /requireCurrentUser|getCurrentSessionUser/.test(src);
-    if (authentifiee || src.includes("gardeAppelModele")) continue;
+    if (authentifiee || src.includes("reserverBudgetModele")) continue;
     fautives.push(chemin);
   }
   assert.deepEqual(fautives, [], `Routes publiques appelant un modèle sans garde :\n${fautives.join("\n")}`);

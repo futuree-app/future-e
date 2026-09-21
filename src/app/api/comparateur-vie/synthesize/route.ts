@@ -20,7 +20,7 @@
 import { NextRequest } from "next/server";
 import { streamText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
-import { gardeAppelModele } from "@/lib/server/garde-appels-modele";
+import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -265,11 +265,10 @@ type Body = {
 };
 
 export async function POST(request: NextRequest) {
-  // LE GARDE AVANT TOUT APPEL PAYANT (21/09/2026). Cette route était publique, sans
-  // authentification ni limite : une boucle depuis une seule machine suffisait à produire des
-  // milliers d'appels facturés. Rien de déterministe n'est dégradé par un refus, seule la prose.
-  const refus = await gardeAppelModele(request, "synthese");
-  if (refus) return refus;
+  // LA LIMITE PAR ADRESSE, EN TÊTE : elle ne consomme aucun budget, elle refuse un débit
+  // anormal avant tout travail. Le budget, lui, se réserve juste avant l'appel payant.
+  const tropVite = limiteParAdresse(request);
+  if (tropVite) return tropVite;
 
   let body: Body;
   try {
@@ -338,6 +337,11 @@ export async function POST(request: NextRequest) {
 
 DONNÉES :
 ${JSON.stringify(payload, null, 2)}`;
+
+  // LE BUDGET SE RÉSERVE ICI, et jamais en tête de route : une réponse de cache ne coûte
+  // rien, et une requête invalide ne doit pas pouvoir vider le quota du jour.
+  const budget = await reserverBudgetModele("synthese");
+  if (budget) return budget;
 
   const result = streamText({
     // Synthèse payante (comparateur / Pack Décision) : Sonnet 4.6 pour la

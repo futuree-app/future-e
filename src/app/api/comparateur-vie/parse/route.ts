@@ -19,7 +19,7 @@ import {
   type IndexCommune,
 } from "@/lib/comparateur-vie";
 import { ANCHOR_ZONE_TOKENS, EXCLUSION_ZONE_TOKENS } from "@/lib/geo-zones";
-import { gardeAppelModele } from "@/lib/server/garde-appels-modele";
+import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
 
 export const runtime = "nodejs";
 
@@ -314,11 +314,10 @@ HORS-MESURE (notions sans critère dans le moteur) : remplissez horsMesure, ne f
 Dans la reformulation, restez en langage humain (ex. « un environnement peu marqué par l'agriculture intensive »), n'employez jamais les termes "IFT", "pression agricole" ni "exposition aux pesticides".`;
 
 export async function POST(request: NextRequest) {
-  // LE GARDE AVANT TOUT APPEL PAYANT (21/09/2026). Cette route était publique, sans
-  // authentification ni limite : une boucle depuis une seule machine suffisait à produire des
-  // milliers d'appels facturés. Rien de déterministe n'est dégradé par un refus, seule la prose.
-  const refus = await gardeAppelModele(request, "parse");
-  if (refus) return refus;
+  // LA LIMITE PAR ADRESSE, EN TÊTE : elle ne consomme aucun budget, elle refuse un débit
+  // anormal avant tout travail. Le budget, lui, se réserve juste avant l'appel payant.
+  const tropVite = limiteParAdresse(request);
+  if (tropVite) return tropVite;
 
   let text: string;
   try {
@@ -332,6 +331,11 @@ export async function POST(request: NextRequest) {
   if (text.length > 2000) text = text.slice(0, 2000);
 
   try {
+    // LE BUDGET SE RÉSERVE ICI, et jamais en tête de route : une réponse de cache ne coûte
+    // rien, et une requête invalide ne doit pas pouvoir vider le quota du jour.
+    const budget = await reserverBudgetModele("parse");
+    if (budget) return budget;
+
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 800,
