@@ -45,11 +45,22 @@ export const POIDS_APPEL = {
 export type TypeAppel = keyof typeof POIDS_APPEL;
 
 /**
- * LE BUDGET DU JOUR, EN POIDS. Volontairement bas : l'usage réel au 21/09/2026 est de quelques
- * dizaines d'appels par semaine, et une journée à 300 mériterait déjà un coup d'œil. Il remontera
- * quand il y aura un vrai volume, pas avant. Réglable sans déploiement.
+ * LE BUDGET DU JOUR, EN POIDS (1000 au 21/09/2026, relevé depuis 300).
+ *
+ * POURQUOI CE CHIFFRE-LÀ. Mille points, ce sont environ quatre à six cents appels selon les
+ * routes empruntées : de quoi tenir une journée de mise au point ou une démonstration sans
+ * rencontrer le mur, ce que 300 ne permettait pas. L'usage ordinaire reste deux ordres de
+ * grandeur en dessous.
+ *
+ * CE QU'IL LAISSE PASSER, ET C'EST ASSUMÉ. Une attaque soutenue consommerait ce budget chaque
+ * jour. Le plafond de dépense posé chez le fournisseur (100 € au 21/09/2026) est ce qui borne
+ * alors la perte : sans lui, ce chiffre serait imprudent. Les deux se règlent ensemble, et
+ * relever l'un sans l'autre défait la protection.
+ *
+ * Réglable sans déploiement, pour desserrer le temps d'une démonstration ou resserrer pendant
+ * une attaque.
  */
-const BUDGET_JOUR = Number(process.env.LLM_BUDGET_JOUR ?? 300);
+const BUDGET_JOUR = Number(process.env.LLM_BUDGET_JOUR ?? 1000);
 
 /** Par adresse réseau. Un humain qui affine sa recherche en fait trois ou quatre ; un script mille. */
 const PAR_MINUTE = Number(process.env.LLM_MAX_PAR_MINUTE ?? 5);
