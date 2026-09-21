@@ -29,6 +29,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse, type NextRequest } from "next/server";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { gardeAppelModele } from "@/lib/server/garde-appels-modele";
 
 export const runtime = "nodejs";
 
@@ -274,6 +275,12 @@ ${JSON.stringify(payload, null, 2)}`;
 }
 
 export async function POST(request: NextRequest) {
+  // LE GARDE AVANT TOUT APPEL PAYANT (21/09/2026). Cette route était publique, sans
+  // authentification ni limite : une boucle depuis une seule machine suffisait à produire des
+  // milliers d'appels facturés. Rien de déterministe n'est dégradé par un refus, seule la prose.
+  const refus = await gardeAppelModele(request, "ask_comparateur");
+  if (refus) return refus;
+
   let body: Body;
   try {
     body = (await request.json()) as Body;

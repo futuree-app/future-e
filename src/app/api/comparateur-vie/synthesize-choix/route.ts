@@ -10,6 +10,7 @@
 import { NextRequest } from "next/server";
 import { streamText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
+import { gardeAppelModele } from "@/lib/server/garde-appels-modele";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -82,6 +83,11 @@ type Body = {
 };
 
 export async function POST(request: NextRequest) {
+  // LE GARDE AVANT TOUT APPEL PAYANT (21/09/2026). Trouvée par le test structurel, qui cherche
+  // les routes appelant un modèle sans protection.
+  const refus = await gardeAppelModele(request, "synthese");
+  if (refus) return refus;
+
   let body: Body;
   try {
     body = await request.json();

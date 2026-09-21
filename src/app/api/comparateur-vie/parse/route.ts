@@ -19,6 +19,7 @@ import {
   type IndexCommune,
 } from "@/lib/comparateur-vie";
 import { ANCHOR_ZONE_TOKENS, EXCLUSION_ZONE_TOKENS } from "@/lib/geo-zones";
+import { gardeAppelModele } from "@/lib/server/garde-appels-modele";
 
 export const runtime = "nodejs";
 
@@ -313,6 +314,12 @@ HORS-MESURE (notions sans critère dans le moteur) : remplissez horsMesure, ne f
 Dans la reformulation, restez en langage humain (ex. « un environnement peu marqué par l'agriculture intensive »), n'employez jamais les termes "IFT", "pression agricole" ni "exposition aux pesticides".`;
 
 export async function POST(request: NextRequest) {
+  // LE GARDE AVANT TOUT APPEL PAYANT (21/09/2026). Cette route était publique, sans
+  // authentification ni limite : une boucle depuis une seule machine suffisait à produire des
+  // milliers d'appels facturés. Rien de déterministe n'est dégradé par un refus, seule la prose.
+  const refus = await gardeAppelModele(request, "parse");
+  if (refus) return refus;
+
   let text: string;
   try {
     ({ text } = await request.json());

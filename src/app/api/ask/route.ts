@@ -25,6 +25,7 @@ import {
   type ClimatData,
   type EnrichmentResult,
 } from "@/lib/commune-enrichment";
+import { gardeAppelModele } from "@/lib/server/garde-appels-modele";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -522,6 +523,12 @@ function buildUserProfileText(profile: ProfileRow): string {
 
 // ─── POST : génération d'une réponse ───────────────────────────────────────
 export async function POST(request: NextRequest) {
+  // LE GARDE AVANT TOUT APPEL PAYANT (21/09/2026). Cette route était publique, sans
+  // authentification ni limite : une boucle depuis une seule machine suffisait à produire des
+  // milliers d'appels facturés. Rien de déterministe n'est dégradé par un refus, seule la prose.
+  const refus = await gardeAppelModele(request, "assistant");
+  if (refus) return refus;
+
   try {
     const body = await request.json();
     const {

@@ -22,6 +22,7 @@ import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
 import { getTerritoryContext, getCommuneDistinctive, RECIT_DEMOGRAPHIE } from "@/lib/comparateur-vie";
 import { deriveTerritoryMood } from "@/lib/territory-mood";
 import { getResidencesSecondairesPct } from "@/lib/saisonnalite";
+import { gardeAppelModele } from "@/lib/server/garde-appels-modele";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -216,6 +217,11 @@ function shapeWorkbook(wb: WorkbookInput | undefined) {
 }
 
 export async function POST(req: NextRequest) {
+  // LE GARDE AVANT TOUT APPEL PAYANT (21/09/2026). Trouvée par le test structurel, qui cherche
+  // les routes appelant un modèle sans protection.
+  const refus = await gardeAppelModele(req, "synthese");
+  if (refus) return refus;
+
   // Route coûteuse (fan-out enrichissement commune + Sonnet 4.6). Le contrôle est plus bas, APRÈS
   // la lecture du corps : `inseeCode` vient du client, donc la seule garde qui protège vraiment est
   // celle qui porte sur la commune DEMANDÉE. `canAccessCompleteReport` était global et ne la
