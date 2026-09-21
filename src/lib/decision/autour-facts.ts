@@ -43,6 +43,12 @@ export type EquipementProche = {
   typeLabel: string | null;
   nom?: string;
   adresse?: string;
+  /**
+   * Combien d'établissements sont recensés SUR CE POINT. Cinq médecins à la même adresse peuvent
+   * être une maison de santé comme cinq cabinets voisins : la BPE ne le dit pas, donc le texte ne
+   * parle jamais « du cabinet ». Absent quand un seul est recensé.
+   */
+  exploitants?: number;
   /** Nombre de LIEUX de cette catégorie à portée de pas. « Avoir le choix », pas un dénombrement. */
   lieuxAPortee: number;
   /** Le rayon dans lequel `lieuxAPortee` a été compté, pour que le texte puisse le nommer. */
@@ -88,6 +94,9 @@ export function buildAutourFacts(snapshot: Face3Snapshot | null | undefined): Au
       typeLabel: bloc.nearest.typeLabel,
       ...(bloc.nearest.nom ? { nom: bloc.nearest.nom } : {}),
       ...(bloc.nearest.adresse ? { adresse: bloc.nearest.adresse } : {}),
+      ...(bloc.nearest.exploitants && bloc.nearest.exploitants > 1
+        ? { exploitants: bloc.nearest.exploitants }
+        : {}),
       lieuxAPortee: bloc.withinWalkCount ?? 0,
       rayonPasMeters: BPE_WALK_RADIUS_M,
     };

@@ -135,3 +135,33 @@ test("le choix se dit quand plusieurs lieux sont à portée de pas", () => {
   assert.match(f.statement, /5 lieux/);
   assert.match(f.statement, /500 m/, "le rayon du comptage est nommé, sinon le nombre ne veut rien dire");
 });
+
+test("aucun texte affiché ne parle « du cabinet »", () => {
+  // La BPE recense un LIEU et le nombre d'établissements qui s'y trouvent. Cinq médecins à la même
+  // adresse peuvent être une maison de santé comme cinq praticiens indépendants : nommer un
+  // cabinet trancherait une question que la source ne tranche pas. Vu sur l'adresse réelle de
+  // Châtelaillon, où cinq professionnels partagent le point.
+  const cas = [
+    regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3, "achat")),
+    regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3, "location")),
+    regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3, null, "habitant")),
+    regle.evaluate(faits(snapshot(null)), projet(SOINS_3)),
+  ];
+  for (const r of cas) {
+    for (const f of r.facts) {
+      const textes = [f.statement, f.limitation ?? "", f.action?.label ?? "", f.action?.detail ?? ""];
+      for (const texte of textes) {
+        assert.doesNotMatch(texte, /cabinet/i, `« cabinet » réapparu : ${texte}`);
+      }
+    }
+  }
+});
+
+test("plusieurs praticiens au même point se disent, sans les confondre avec un choix de lieux", () => {
+  // Cinq professionnels à la même adresse, c'est ne pas dépendre d'une seule personne. Cinq LIEUX
+  // à portée de pas, c'est avoir le choix. Deux informations différentes, jamais mélangées.
+  const snap = snapshot({ ...MEDECIN, exploitants: 5 });
+  const f = regle.evaluate(faits(snap), projet(SOINS_3)).facts[0]!;
+  assert.match(f.statement, /5 professionnels y sont recensés/);
+  assert.doesNotMatch(f.statement, /lieux de santé/);
+});
