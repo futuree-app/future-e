@@ -20,6 +20,7 @@ import { declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } 
 import { LOGEMENT_RULES } from "./logement-rules.ts";
 import { SECTEUR_RULES } from "./secteur-rules.ts";
 import { PERMIS_RULES } from "./permis-rules.ts";
+import { AUTOUR_RULES } from "./autour-rules.ts";
 import {
   catnatInondationDepuisCompte, libelleCatnatInondation, sourceCatnatInondation,
   phraseConstatCatnatInondation,
@@ -883,6 +884,7 @@ export const REGISTRY: DecisionRule[] = [
   ...LOGEMENT_RULES,
   ...SECTEUR_RULES,
   ...PERMIS_RULES,
+  ...AUTOUR_RULES,
   ...RADON_RULES,
 ];
 

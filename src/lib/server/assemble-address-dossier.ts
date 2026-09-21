@@ -13,7 +13,8 @@ import type { Dossier, ModuleFacts } from "@/lib/decision/decision-fact";
 import type { EvaluationContext } from "@/lib/hard-constraints";
 import type { DpeRecord } from "@/lib/dpe";
 import type { UserProject } from "@/lib/user-project";
-import type { PermisSnapshot } from "@/lib/logement-autour-types";
+import type { Face3Snapshot, PermisSnapshot } from "@/lib/logement-autour-types";
+import { buildAutourFacts } from "@/lib/decision/autour-facts";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // L'ASSEMBLAGE DU DOSSIER AU GRAIN ADRESSE.
@@ -50,11 +51,18 @@ export async function assembleAddressDossier(input: {
    * été établie. Aucune I/O ici, la donnée arrive déjà figée dans le snapshot du dossier.
    */
   permis?: PermisSnapshot | null;
+  /**
+   * LE SNAPSHOT DU VOISINAGE, tel qu'il est gelé dans le dossier. Projeté en faits canoniques par
+   * `buildAutourFacts` : aucune I/O ici, la donnée est déjà là. Absent sur un dossier dont
+   * l'entourage n'a pas encore été calculé, et les règles se taisent alors.
+   */
+  snapshotAutour?: Face3Snapshot | null;
 }): Promise<AddressDossierResult> {
-  const { project, address, savedDpe, communeFacts, communeDossier, hard, scopeKey, permis } = input;
+  const { project, address, savedDpe, communeFacts, communeDossier, hard, scopeKey, permis, snapshotAutour } = input;
   try {
     const data = await fetchLogementDecisionDataWithTimeout(address);
     const logement = buildLogementFacts(data, savedDpe, address.label);
+    const autour = buildAutourFacts(snapshotAutour);
     // LE SECTEUR ENTRE DANS LE MOTEUR. Lecture locale (artefact INSEE + résolution IRIS au point) :
     // en panne, elle rend `unknown` et la règle se tait — jamais d'erreur qui coûterait le dossier.
     const car = await getCarOwnershipAtPoint(address.latitude, address.longitude, address.citycode)
@@ -65,6 +73,10 @@ export async function assembleAddressDossier(input: {
       // dossier. `undefined` quand elle est absente, pour que la règle distingue « non consulté »
       // de « rien trouvé ».
       ...(permis ? { permis } : {}),
+      // LE VOISINAGE ENTRE DANS LE MOTEUR (21/09/2026). Même patron que le registre des permis :
+      // aucune I/O, la donnée est gelée dans le snapshot du dossier. Sans cette ligne, le produit
+      // mesurait à l'adresse et concluait à la commune.
+      ...(autour ? { autour } : {}),
     };
     // LE GRAIN CHANGE. Une commune peut passer sur son point de référence et échouer pour une adresse
     // située à son extrémité : ce n'est pas une divergence de moteur, c'est une lecture plus fine, et la

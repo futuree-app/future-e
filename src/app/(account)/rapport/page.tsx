@@ -439,6 +439,7 @@ export default async function RapportPage() {
                   savedDpe={logementForCommune.selected_dpe_snapshot}
                   selectionDpeChangeeLe={logementForCommune.dpe_selection_at}
                   permis={logementForCommune.snapshot?.permis ?? null}
+                  snapshotAutour={logementForCommune.snapshot ?? null}
                   communeFacts={communeResult.moduleFacts}
                   communeDossier={dossier}
                   logementLink={dossierLogementLink}

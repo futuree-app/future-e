@@ -22,11 +22,11 @@ import type { Dossier, ModuleFacts } from "@/lib/decision/decision-fact";
 import type { EvaluationContext } from "@/lib/hard-constraints";
 import type { DpeRecord } from "@/lib/dpe";
 import type { UserProject } from "@/lib/user-project";
-import type { PermisSnapshot } from "@/lib/logement-autour-types";
+import type { Face3Snapshot, PermisSnapshot } from "@/lib/logement-autour-types";
 import type { ReactNode } from "react";
 
 export async function DossierAvecLogement({
-  project, address, savedDpe, selectionDpeChangeeLe, permis, communeFacts, communeDossier, logementLink, insee,
+  project, address, savedDpe, selectionDpeChangeeLe, permis, snapshotAutour, communeFacts, communeDossier, logementLink, insee,
   scopeKey, hard, userId, espacement, titre, supportingPane,
 }: {
   project: UserProject;
@@ -48,6 +48,8 @@ export async function DossierAvecLogement({
    * absence d'autorisation qui n'a pas été établie.
    */
   permis: PermisSnapshot | null;
+  /** Le voisinage gelé du dossier, projeté en faits par l'assemblage (cf. `autour-facts.ts`). */
+  snapshotAutour: Face3Snapshot | null;
   communeFacts: ModuleFacts;
   communeDossier: Dossier;
   logementLink: { href: string; label: string } | null;
@@ -96,7 +98,7 @@ export async function DossierAvecLogement({
   const assemble = stocke?.artifact && !perime
     ? null
     : await assembleAddressDossier({
-        project, address, savedDpe, communeFacts, communeDossier, hard, scopeKey, permis,
+        project, address, savedDpe, communeFacts, communeDossier, hard, scopeKey, permis, snapshotAutour,
       });
   // LE RATTRAPAGE, comme pour le territoire : un dossier d'adresse acheté avant ce lot n'aurait
   // jamais d'artefact. Il n'est tenté que si l'assemblage a ABOUTI : figer un repli communal comme

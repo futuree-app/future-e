@@ -9,6 +9,7 @@ import type { RadonFacts } from "./radon-facts.ts";
 import type { RankBand } from "./mismatch-facts.ts";
 import type { NamedAbsenceBasis, LocalNetworkAttestation, HigherEdAttestation } from "./absence-facts.ts";
 import type { FactComposition } from "./fact-composition.ts";
+import type { AutourFacts } from "./autour-facts.ts";
 import type { AgglomerationCategory } from "./agglomeration-facts.ts";
 import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
 import type { CriteriaSummary } from "./criteria-registry.ts";
@@ -360,6 +361,14 @@ export type ModuleFacts = CommuneAttributes & {
    * dirait que la question ne se pose pas pour cette adresse.
    */
   permis?: PermisSnapshot;
+  /**
+   * CE QUE LE VOISINAGE ÉTABLIT, projeté du snapshot Autour (cf. `autour-facts.ts`).
+   *
+   * OPTIONNEL POUR LA MÊME RAISON QUE `permis` : absent veut dire que le voisinage n'a pas été
+   * analysé, ou que la source n'a pas répondu, jamais qu'il n'y a rien autour. Les règles se
+   * taisent alors, au lieu d'affirmer une absence que personne n'a constatée.
+   */
+  autour?: AutourFacts;
 };
 
 /**
