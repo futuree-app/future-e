@@ -176,17 +176,40 @@ const accesSoinsRule: DecisionRule = {
     }
 
     const e = equipements.sante;
+    // LA PASTILLE PORTE LA MESURE, PAS LA PHRASE (22/09/2026).
+    // ════════════════════════════════════════════════════════════════════════════════════════
+    // Elle disait « Preuve · Médecin généraliste à 550 m » sous une phrase qui venait de dire la
+    // même chose en toutes lettres. La doctrine de la pastille (lot A, `DecisionFactRenderParts`)
+    // la réserve à une preuve ÉTABLIE, CHIFFRÉE : ce qu'elle apporte est la valeur mesurée et le
+    // lien vers la démonstration, jamais un résumé du constat.
+    //
+    // Le type de l'équipement reste dans la phrase, où il se lit ; la pastille garde la distance,
+    // qui est ce que la source mesure.
     const evidence: EvidenceRef = {
       factId: "autour.sante",
       module: "logement",
       label: "Équipements de santé · autour de l'adresse",
-      observedValue: `${e.typeLabel ?? "équipement de santé"} à ${distanceArrondie(e.distanceMeters)}`,
+      observedValue: distanceArrondie(e.distanceMeters),
       // ANCRE `adresse`, RELATION `proximite` : la mesure est une distance DEPUIS le point, à vol
       // d'oiseau. Ni un attribut de l'adresse, ni une donnée de secteur.
       grain: "adresse",
       relation: "proximite",
       href: autourHref,
     };
+
+    // LA SOURCE ET SON MILLÉSIME, SANS VALEUR MESURÉE : cette référence ne prétend rien établir,
+    // elle dit d'où vient la donnée. Le rendu la range donc sous « Données et limites » plutôt que
+    // d'en faire une seconde pastille (cf. `factSources`). Le millésime vient de la donnée elle-même,
+    // jamais d'une constante : un dossier figé il y a six mois porte le sien.
+    const source: EvidenceRef | null = f.autour?.bpeMillesime
+      ? {
+          factId: "autour.sante.source",
+          module: "logement",
+          label: `Base permanente des équipements (INSEE), millésime ${f.autour.bpeMillesime}`,
+          grain: "adresse",
+          relation: "proximite",
+        }
+      : null;
 
     const geste = GESTE_SOINS[bucketDuProjet(p)];
     const fact: VerificationFact = {
@@ -203,7 +226,7 @@ const accesSoinsRule: DecisionRule = {
       status: "À proximité",
       limitation:
         "Cette présence ne dit ni la disponibilité du praticien, ni ses délais de rendez-vous, ni s'il accepte de nouveaux patients. La distance est à vol d'oiseau.",
-      evidence: [evidence],
+      evidence: source ? [evidence, source] : [evidence],
       action: { type: "verifier_sur_place", label: geste.label, detail: geste.detail },
     };
     return ret("verification", [fact], "équipement de santé recensé à proximité");

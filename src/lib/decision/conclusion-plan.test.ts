@@ -938,7 +938,7 @@ test("arbitrage : une composition shared_evidence est candidate au headline", ()
   const comp = {
     id: "comp-taille", kind: "shared_evidence", title: "Une même petite taille touche plusieurs dimensions de votre projet",
     summary: "résumé", headlineCause: "sa petite taille", materialityTier: "structuring",
-    absorbedFactIds: ["m1", "m2"], displaySection: "mismatches",
+    absorbedFactIds: ["m1", "m2"], displaySection: "mismatches", referencedRuleIds: [],
   } as unknown as FactComposition;
   const plan = buildConclusionPlan(baseInput({
     orientation: "arbitration", shownFacts: [], shownCompositions: [comp],
@@ -960,7 +960,7 @@ test("arbitrage : une cause commune ne s'énumère jamais avec des priorités", 
   const comp = {
     id: "comp-taille", kind: "shared_evidence", title: "Une même petite taille joue sur plusieurs de vos priorités",
     summary: "résumé", headlineCause: "sa petite taille", materialityTier: "structuring",
-    absorbedFactIds: ["m2", "m3"], displaySection: "mismatches",
+    absorbedFactIds: ["m2", "m3"], displaySection: "mismatches", referencedRuleIds: [],
   } as unknown as FactComposition;
   const plan = buildConclusionPlan(baseInput({
     orientation: "arbitration",
@@ -1270,7 +1270,7 @@ test("le compte vient des mismatchs ÉMIS, jamais du nombre de cartes", () => {
   const comp = {
     id: "comp-taille", kind: "shared_evidence", title: "titre long du patron",
     summary: "résumé", headlineCause: "sa petite taille", materialityTier: "structuring",
-    absorbedFactIds: ["m2", "m3"], displaySection: "mismatches",
+    absorbedFactIds: ["m2", "m3"], displaySection: "mismatches", referencedRuleIds: [],
   } as unknown as FactComposition;
   const plan = buildConclusionPlan(baseInput({
     orientation: "arbitration",
@@ -1623,4 +1623,54 @@ test("un compte supérieur aux sujets nommés n'est jamais rabaissé", () => {
     ],
   }));
   assert.match(p.verdict.headline.text, /^Toulouse répond à trois de vos priorités, dont l'accès aux soins et la vie locale\.$/);
+});
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// « À CONTRÔLER EN PRIORITÉ » COMMENCE PAR CE QUE LE LECTEUR A DEMANDÉ (22/09/2026).
+//
+// Vu à l'écran sur un dossier dont la seule priorité déclarée était l'accès aux soins : la ligne
+// ne proposait que « Demandez l'historique des fissures et des sinistres », rattaché au sol
+// argileux, un constat que le lecteur n'avait pas demandé. Le geste de sa priorité n'apparaissait
+// nulle part en tête.
+//
+// Le vivier était le LEAD seul, donc le classement par gravité seul. La gravité garde sa place,
+// elle ne la garde plus toute seule : le bloc s'intitule « au regard de votre projet ».
+// ════════════════════════════════════════════════════════════════════════════════════════════
+
+function verificationFact(id: string, ruleId: string, tier: MaterialityTier, geste: string): DecisionFact {
+  return {
+    id, ruleId, sourceFactIds: [], module: "logement", role: "verification",
+    materialityTier: tier, topic: `sujet ${id}`, statement: `constat ${id}`,
+    evidence: [{ factId: id, module: "logement", label: "Source", grain: "adresse" }],
+    action: { type: "verifier_sur_place", label: geste },
+  } as unknown as DecisionFact;
+}
+
+test("le geste d'une priorité déclarée passe devant celui d'un constat non demandé", () => {
+  const p = buildConclusionPlan(baseInput({
+    orientation: "minor_reserves", favorableCount: 1, reservesShown: 2,
+    shownFacts: [
+      // Le plus GRAVE, mais hors priorités : c'est lui qui menait la ligne.
+      verificationFact("rga", "logement.argile", "structuring", "Demandez l'historique des fissures"),
+      // Moins grave, et rattaché à la seule priorité du lecteur.
+      verificationFact("soins", "autour.acces-soins", "secondary", "Vérifiez la disponibilité"),
+    ],
+    reglesDeclarees: ["autour.acces-soins"],
+  }));
+  const gestes = p.priorityControl?.actions.map((a) => a.label) ?? [];
+  assert.equal(gestes[0], "Vérifiez la disponibilité", `ordre obtenu : ${gestes.join(" | ")}`);
+  // LA GRAVITÉ N'EST PAS ÉVINCÉE, elle descend d'un rang : le plafond de deux démarches tient.
+  assert.equal(gestes[1], "Demandez l'historique des fissures");
+});
+
+test("sans priorité déclarée rattachée, la gravité mène comme avant", () => {
+  const p = buildConclusionPlan(baseInput({
+    orientation: "minor_reserves", favorableCount: 1, reservesShown: 2,
+    shownFacts: [
+      verificationFact("rga", "logement.argile", "structuring", "Demandez l'historique des fissures"),
+      verificationFact("autre", "logement.autre", "secondary", "Vérifiez autre chose"),
+    ],
+    reglesDeclarees: [],
+  }));
+  assert.equal(p.priorityControl?.actions[0]?.label, "Demandez l'historique des fissures");
 });

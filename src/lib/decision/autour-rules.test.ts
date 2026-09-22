@@ -86,7 +86,21 @@ test("la preuve porte son grain et sa relation", () => {
   const e = f.evidence[0]!;
   assert.equal(e.grain, "adresse", "une distance depuis le point n'est ni communale ni sectorielle");
   assert.equal(e.relation, "proximite", "c'est une distance, pas un attribut de l'adresse");
-  assert.match(e.observedValue!, /550 m/);
+  assert.equal(e.observedValue, "550 m", "la pastille porte la mesure, jamais un résumé du constat");
+  // Elle ne redit pas la phrase : « Preuve · Médecin généraliste à 550 m » sous « Un médecin
+  // généraliste se trouve à environ 550 m » donnait deux fois la même chose, à dix centimètres.
+  assert.doesNotMatch(e.observedValue!, /médecin/i);
+});
+
+test("la source et son millésime descendent dans « Données et limites »", () => {
+  // Une référence SANS valeur mesurée n'établit rien : le rendu la range sous les sources plutôt
+  // que d'en faire une pastille (doctrine du lot A). Le millésime vient du snapshot, donc un
+  // dossier figé il y a six mois porte le sien.
+  const f = regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3)).facts[0]!;
+  const source = f.evidence.find((e) => !e.observedValue);
+  assert.ok(source, "aucune source nommée");
+  assert.match(source!.label, /Base permanente des équipements/);
+  assert.match(source!.label, /2025/);
 });
 
 test("l'action dépend de la situation, elle n'est pas gravée dans la règle", () => {
