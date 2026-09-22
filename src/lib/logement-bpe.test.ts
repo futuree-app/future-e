@@ -66,3 +66,46 @@ test("chaque catégorie compte la sienne, sans contamination", () => {
   assert.equal(r.find((x) => x.category === "alimentation")!.withinWalkCount, 2);
   assert.equal(r.find((x) => x.category === "education")!.withinWalkCount, 0);
 });
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LE PLUS PROCHE DE CHAQUE TYPE (22/09/2026)
+//
+// `nearest` seul gardait le plus proche de la CATÉGORIE, et une catégorie mélange des types qui
+// ne répondent pas au même besoin. Une pharmacie à 55 m masquait un médecin à 5 km : le dossier
+// de quelqu'un qui avait déclaré l'accès aux soins racontait l'officine et taisait le médecin.
+// Même effacement sur les écoles (maternelle contre élémentaire) et les transports (halte contre
+// gare).
+// ════════════════════════════════════════════════════════════════════════════════════════════
+
+test("la ventilation garde le médecin que la pharmacie masquait", () => {
+  const pts: BpePoint[] = [
+    { c: "sante", t: "D307", lat: 48.8505, lon: 2.350 }, // pharmacie ~55 m
+    { c: "sante", t: "D265", lat: 48.860, lon: 2.350 }, // médecin ~1,1 km
+  ];
+  const sante = nearestByCategory(C, pts, 3000).find((r) => r.category === "sante")!;
+  // Le plus proche de la catégorie ne change pas : c'est ce que la source dit.
+  assert.equal(sante.nearest!.typeLabel, "Pharmacie");
+  // Et le médecin n'est plus perdu.
+  assert.ok(sante.nearestByType!.D265, "le médecin a disparu de la ventilation");
+  assert.ok(sante.nearestByType!.D265!.distanceMeters > 1000);
+  assert.equal(sante.nearestByType!.D307!.typeLabel, "Pharmacie");
+});
+
+test("la ventilation ne mélange pas les catégories", () => {
+  const pts: BpePoint[] = [
+    { c: "sante", t: "D307", lat: 48.8505, lon: 2.350 },
+    { c: "education", t: "C107", lat: 48.8506, lon: 2.350 },
+  ];
+  const res = nearestByCategory(C, pts, 3000);
+  const sante = res.find((r) => r.category === "sante")!;
+  const edu = res.find((r) => r.category === "education")!;
+  assert.deepEqual(Object.keys(sante.nearestByType!), ["D307"]);
+  assert.deepEqual(Object.keys(edu.nearestByType!), ["C107"]);
+});
+
+test("une catégorie vide n'est pas ventilée du tout", () => {
+  // Omis plutôt que vide : un objet vide se lirait comme « ventilé, et rien dedans », et une règle
+  // en conclurait une absence que personne n'a établie.
+  const res = nearestByCategory(C, [], 3000);
+  assert.ok(res.every((r) => r.nearestByType === undefined));
+});

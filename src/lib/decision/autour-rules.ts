@@ -27,7 +27,8 @@ import type { DecisionRule, EvidenceRef, RuleEvaluation, VerificationFact } from
 import { preferenceWeight } from "./project-view.ts";
 import { bucketDuProjet, type Bucket } from "./logement-gestes.ts";
 import type { EquipementProche } from "./autour-facts.ts";
-import { avecArticle } from "../logement-autour-types.ts";
+import { TYPE_GENERALISTE, TYPE_PHARMACIE } from "./autour-facts.ts";
+import { avecArticle, TYPEQU_LABEL } from "../logement-autour-types.ts";
 
 const RULE_SANTE = "autour.acces-soins";
 const autourHref = "/rapport/autour";
@@ -50,35 +51,75 @@ const autourHref = "/rapport/autour";
  * zone en mairie »). Elle vaut pour tout geste cloné sur ce patron : un libellé d'action nomme ce
  * sur quoi il porte, parce qu'il voyagera hors de son contexte.
  *
- * « Professionnels de santé » plutôt que « médecins » : la catégorie recouvre aussi les
- * pharmacies, et le geste ne sait pas lequel des deux a été trouvé.
+ * ── LE GESTE SUIT LE TYPE TROUVÉ, PAS LA CATÉGORIE (22/09/2026) ─────────────────────────────
+ * Ils parlaient de « professionnels de santé » parce que la catégorie mélange les généralistes et
+ * les pharmacies. Le résultat était absurde dès que le lieu trouvé était une pharmacie :
+ * « vérifiez que les professionnels de santé proches prennent de nouveaux patients » ne veut rien
+ * dire d'une officine, et la limitation parlait de délais de rendez-vous.
+ *
+ * Il y a donc DEUX jeux de gestes, choisis sur le code du type. Une pharmacie ne se vérifie pas
+ * comme un médecin : ce qui manque alors au lecteur n'est pas une disponibilité, c'est un endroit
+ * où consulter.
  */
 // JAMAIS LE MOT « CABINET » (21/09/2026). La BPE recense un LIEU et le nombre d'établissements qui
 // s'y trouvent. Cinq médecins à la même adresse peuvent être une maison de santé comme cinq
 // praticiens indépendants dans le même immeuble : « ce cabinet » trancherait une question que la
 // source ne tranche pas. On parle donc du lieu, ou des professionnels qui y sont recensés.
-const GESTE_SOINS: Record<Bucket, { label: string; detail: string }> = {
+const GESTE_MEDECIN: Record<Bucket, { label: string; detail: string }> = {
   achat: {
-    label: "Vérifiez la disponibilité des professionnels de santé avant de vous engager",
+    label: "Vérifiez qu'un médecin accepte de nouveaux patients avant de vous engager",
     detail:
       "La saturation locale ne se lit dans aucune base : un lieu recensé peut être fermé aux nouveaux patients depuis des années.",
   },
   location: {
-    label: "Vérifiez la disponibilité des professionnels de santé avant de signer",
+    label: "Vérifiez qu'un médecin accepte de nouveaux patients avant de signer",
     detail:
-      "La présence d'un lieu de santé ne dit rien de sa disponibilité. Un appel suffit à le savoir.",
+      "La présence d'un médecin ne dit rien de sa disponibilité. Un appel suffit à le savoir.",
   },
   reside: {
-    label: "Vérifiez que les professionnels de santé proches prennent de nouveaux patients",
+    label: "Vérifiez que le médecin le plus proche prend de nouveaux patients",
     detail:
       "Utile avant d'en avoir besoin : la disponibilité change, et elle ne se lit dans aucune base.",
   },
   neutre: {
-    label: "Renseignez-vous sur la disponibilité des professionnels de santé",
+    label: "Renseignez-vous sur les délais de rendez-vous des médecins du secteur",
     detail:
       "La BPE recense les lieux, jamais leurs délais de rendez-vous ni leur ouverture aux nouveaux patients.",
   },
 };
+
+// CE QUI MANQUE QUAND SEULE UNE PHARMACIE EST LÀ n'est pas une disponibilité : c'est un endroit où
+// consulter. Le geste porte donc sur le médecin absent du périmètre, jamais sur l'officine, dont
+// ni les horaires ni les services ne sont dans cette base.
+const GESTE_PHARMACIE: Record<Bucket, { label: string; detail: string }> = {
+  achat: {
+    label: "Repérez où consulter un médecin avant de vous engager",
+    detail:
+      "Une pharmacie dépanne, elle ne remplace pas un médecin traitant : la recherche d'un généraliste se fait avant d'en avoir besoin.",
+  },
+  location: {
+    label: "Repérez où consulter un médecin avant de signer",
+    detail:
+      "Une pharmacie dépanne, elle ne remplace pas un médecin traitant.",
+  },
+  reside: {
+    label: "Repérez le médecin généraliste le plus proche",
+    detail:
+      "Une pharmacie ne remplace pas un médecin traitant, et trouver un généraliste qui prend de nouveaux patients demande parfois du temps.",
+  },
+  neutre: {
+    label: "Repérez où consulter un médecin dans le secteur",
+    detail:
+      "La BPE recense les officines et les cabinets, jamais leurs horaires ni leur ouverture aux nouveaux patients.",
+  },
+};
+
+// CE QUE LA PRÉSENCE N'ÉTABLIT PAS, et ce n'est pas la même chose selon le type. Un médecin pose
+// la question de sa disponibilité ; une pharmacie, celle de ce qu'elle ne remplace pas.
+const LIMITE_MEDECIN =
+  "Cette présence ne dit ni la disponibilité du praticien, ni ses délais de rendez-vous, ni s'il accepte de nouveaux patients. La distance est à vol d'oiseau.";
+const LIMITE_PHARMACIE =
+  "Une pharmacie ne remplace pas un médecin traitant, et ses horaires ne figurent pas dans cette base. La distance est à vol d'oiseau.";
 
 /** « à 550 m » plutôt que « à 553 m » : la précision au mètre serait un faux témoignage. */
 function distanceArrondie(m: number): string {
@@ -107,7 +148,10 @@ function nombre(n: number): string {
  * une précaution utile, sur le DÉNOMBREMENT, qui est ce que la base établit vraiment. La première
  * phrase, elle, constate simplement une présence.
  */
-function constatSante(e: EquipementProche): string {
+function constatSante(
+  e: EquipementProche,
+  contexte: { pharmacieEnPlus?: EquipementProche; aucunMedecinEtabli?: boolean } = {},
+): string {
   const quoi = e.typeLabel ? avecArticle(e.typeLabel) : "un équipement de santé";
   const ou = `à environ ${distanceArrondie(e.distanceMeters)} de cette adresse`;
   const nomme = e.nom ? ` (${e.nom})` : "";
@@ -120,7 +164,17 @@ function constatSante(e: EquipementProche): string {
       : e.lieuxAPortee > 1
         ? ` ${capitale(nombre(e.lieuxAPortee))} lieux de santé sont recensés à moins de ${e.rayonPasMeters} m.`
         : "";
-  return `${capitale(quoi)}${nomme} se trouve ${ou}.${suite}`;
+  // LA PHARMACIE EN COMPLÉMENT, jamais à la place : le lecteur qui déclare l'accès aux soins pense
+  // d'abord au médecin, et savoir où est l'officine complète la réponse sans la remplacer.
+  const appoint = contexte.pharmacieEnPlus
+    ? ` La pharmacie la plus proche est à environ ${distanceArrondie(contexte.pharmacieEnPlus.distanceMeters)}.`
+    : "";
+  // L'ABSENCE DE MÉDECIN SE DIT quand elle a été CHERCHÉE, et alors elle est le vrai sujet : une
+  // officine à 200 m ne dit rien de l'endroit où consulter.
+  const manque = contexte.aucunMedecinEtabli
+    ? " Aucun médecin généraliste n'apparaît dans le périmètre cherché."
+    : "";
+  return `${capitale(quoi)}${nomme} se trouve ${ou}.${suite}${appoint}${manque}`;
 }
 
 function capitale(s: string): string {
@@ -189,7 +243,30 @@ const accesSoinsRule: DecisionRule = {
       return ret("verification", [fact], "aucun équipement de santé dans le périmètre");
     }
 
-    const e = equipements.sante;
+    // QUEL LIEU RACONTER : LE TYPE, PAS LA CATÉGORIE (22/09/2026).
+    // ════════════════════════════════════════════════════════════════════════════════════════
+    // La catégorie « santé » mélange les généralistes et les pharmacies, et ne gardait que le plus
+    // proche des deux. Une pharmacie à 150 m masquait donc un médecin à 900 m : le dossier de
+    // quelqu'un qui avait déclaré l'accès aux soins racontait l'officine et taisait le médecin.
+    //
+    // Quand le snapshot porte la ventilation, le MÉDECIN mène le constat : c'est lui qui répond à
+    // la priorité déclarée, la pharmacie ne le remplace pas. Elle est nommée en complément quand
+    // elle existe, et elle prend le constat seulement quand aucun médecin n'est recensé.
+    //
+    // Sur un dossier figé AVANT la ventilation, on retombe sur le plus proche de la catégorie et
+    // la formulation suit son `typeLabel` : moins fin, jamais faux.
+    const ventile = f.autour?.ventileParType === true;
+    const medecin = ventile ? f.autour?.parType?.[TYPE_GENERALISTE] : undefined;
+    const pharmacie = ventile ? f.autour?.parType?.[TYPE_PHARMACIE] : undefined;
+    const e = medecin ?? pharmacie ?? equipements.sante;
+    // UN MÉDECIN, au sens de cette règle : celui que la ventilation désigne, ou, sur un dossier
+    // ancien, le plus proche de la catégorie quand son libellé dit qu'il en est un.
+    const estMedecin = medecin !== undefined
+      || (!ventile && e.typeLabel === TYPEQU_LABEL[TYPE_GENERALISTE]);
+    // L'ABSENCE DE MÉDECIN NE SE DIT QUE SI ELLE A ÉTÉ CHERCHÉE. Sur un dossier non ventilé, on ne
+    // sait pas si un généraliste existe dans le périmètre : le taire est la seule honnêteté.
+    const aucunMedecinEtabli = ventile && medecin === undefined;
+
     // LA PASTILLE PORTE LA MESURE, PAS LA PHRASE (22/09/2026).
     // ════════════════════════════════════════════════════════════════════════════════════════
     // Elle disait « Preuve · Médecin généraliste à 550 m » sous une phrase qui venait de dire la
@@ -225,7 +302,7 @@ const accesSoinsRule: DecisionRule = {
         }
       : null;
 
-    const geste = GESTE_SOINS[bucketDuProjet(p)];
+    const geste = (estMedecin ? GESTE_MEDECIN : GESTE_PHARMACIE)[bucketDuProjet(p)];
     const fact: VerificationFact = {
       id: `${f.insee}:autour-acces-soins`,
       ruleId: RULE_SANTE,
@@ -236,10 +313,12 @@ const accesSoinsRule: DecisionRule = {
       // seule. C'est la même règle que pour l'équipement automobile du secteur.
       materialityTier: "secondary",
       topic: "les soins autour de cette adresse",
-      statement: constatSante(e),
+      statement: constatSante(e, {
+        ...(estMedecin && pharmacie ? { pharmacieEnPlus: pharmacie } : {}),
+        aucunMedecinEtabli: !estMedecin && aucunMedecinEtabli,
+      }),
       status: "À proximité",
-      limitation:
-        "Cette présence ne dit ni la disponibilité du praticien, ni ses délais de rendez-vous, ni s'il accepte de nouveaux patients. La distance est à vol d'oiseau.",
+      limitation: estMedecin ? LIMITE_MEDECIN : LIMITE_PHARMACIE,
       evidence: source ? [evidence, source] : [evidence],
       action: { type: "verifier_sur_place", label: geste.label, detail: geste.detail },
     };

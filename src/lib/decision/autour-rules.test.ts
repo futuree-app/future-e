@@ -45,7 +45,22 @@ function faits(snap: Face3Snapshot | null): ModuleFacts {
 }
 
 const MEDECIN = { distanceMeters: 553, typeLabel: "Médecin généraliste" };
+const PHARMACIE = { distanceMeters: 261, typeLabel: "Pharmacie" };
 const SOINS_3 = [{ key: "acces_soins", weight: 3 }];
+
+/**
+ * UN SNAPSHOT VENTILÉ PAR TYPE, tel que les dossiers ouverts depuis le 22/09/2026 le portent.
+ * `nearest` reste le plus proche de la catégorie, tous types confondus, comme la source le produit.
+ */
+function snapshotVentile(types: Record<string, unknown>): Face3Snapshot {
+  const entries = Object.entries(types);
+  const plusProche = entries
+    .map(([, v]) => v as { distanceMeters: number })
+    .sort((a, b) => a.distanceMeters - b.distanceMeters)[0]!;
+  const snap = snapshot(plusProche);
+  snap.bpe.categories[0]!.nearestByType = types as never;
+  return snap;
+}
 
 test("le constat remonte quand la priorité est déclarée", () => {
   const r = regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3));
@@ -107,7 +122,7 @@ test("l'action dépend de la situation, elle n'est pas gravée dans la règle", 
   const achat = regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3, "achat")).facts[0]!;
   const habite = regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3, null, "habitant")).facts[0]!;
   assert.match(achat.action!.label, /avant de vous engager/i);
-  assert.match(achat.action!.label, /professionnels de santé/i, "le geste nomme son objet");
+  assert.match(achat.action!.label, /médecin/i, "le geste nomme son objet");
   assert.notEqual(habite.action!.label, achat.action!.label);
   // Quelqu'un qui habite déjà là ne « s'engage » pas : lui dire de vérifier avant de s'engager
   // serait le même défaut que la posture « habitant » inscrite d'office.
@@ -228,4 +243,61 @@ test("plusieurs praticiens au même point se disent, sans les confondre avec un 
   const f = regle.evaluate(faits(snap), projet(SOINS_3)).facts[0]!;
   assert.match(f.statement, /Cinq professionnels y sont recensés/);
   assert.doesNotMatch(f.statement, /lieux de santé/);
+});
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// UNE PHARMACIE N'EST PAS UN MÉDECIN (22/09/2026).
+//
+// ── LE DÉFAUT DU PATRON, TROUVÉ AVANT DE LE CLONER ───────────────────────────────────────────
+// La catégorie « santé » mélange les généralistes et les pharmacies, et le snapshot ne gardait
+// que le plus proche des deux. Deux conséquences, toutes deux visibles à l'écran.
+//
+// L'EFFACEMENT : une pharmacie à 150 m masquait un médecin à 900 m. Le dossier de quelqu'un qui
+// avait déclaré l'accès aux soins racontait l'officine et taisait le médecin.
+//
+// L'ABSURDITÉ : les textes étaient écrits pour un praticien. « Vérifiez que les professionnels de
+// santé proches prennent de nouveaux patients » ne veut rien dire d'une officine, et la limitation
+// parlait de délais de rendez-vous.
+//
+// Le même défaut attend les écoles (une maternelle cache un élémentaire) et les transports (une
+// halte cache une gare) : c'est la raison d'être de la tranche verticale.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+
+test("un médecin plus loin qu'une pharmacie mène quand même le constat", () => {
+  const snap = snapshotVentile({ D307: PHARMACIE, D265: MEDECIN });
+  const f = regle.evaluate(faits(snap), projet(SOINS_3, "achat")).facts[0]!;
+  assert.match(f.statement, /^Un médecin généraliste /, `constat obtenu : ${f.statement}`);
+  // La pharmacie n'est pas perdue pour autant : elle complète, elle ne remplace pas.
+  assert.match(f.statement, /pharmacie la plus proche est à environ 250 m/);
+  assert.match(f.limitation!, /nouveaux patients/);
+  assert.match(f.action!.label, /médecin/i);
+});
+
+test("une pharmacie seule ne se vérifie pas comme un médecin", () => {
+  const f = regle.evaluate(faits(snapshotVentile({ D307: PHARMACIE })), projet(SOINS_3, "achat")).facts[0]!;
+  assert.match(f.statement, /^Une pharmacie /);
+  // L'absence de médecin est le vrai sujet, et elle a été cherchée : elle se dit.
+  assert.match(f.statement, /Aucun médecin généraliste n'apparaît dans le périmètre/);
+  // La limitation ne parle plus ni de praticien ni de rendez-vous.
+  assert.doesNotMatch(f.limitation!, /délais de rendez-vous|nouveaux patients/);
+  assert.match(f.limitation!, /ne remplace pas un médecin traitant/);
+  // Ce qui manque au lecteur n'est pas une disponibilité, c'est un endroit où consulter.
+  assert.match(f.action!.label, /Repérez où consulter un médecin/);
+});
+
+test("un dossier NON ventilé ne prétend pas qu'il manque un médecin", () => {
+  // La faute symétrique : sur un dossier figé avant la ventilation, on ne sait pas si un
+  // généraliste existe dans le périmètre. Le taire est la seule honnêteté.
+  const f = regle.evaluate(faits(snapshot(PHARMACIE)), projet(SOINS_3, "achat")).facts[0]!;
+  assert.match(f.statement, /^Une pharmacie /);
+  assert.doesNotMatch(f.statement, /Aucun médecin/);
+  // La formulation suit quand même le type lu : moins fin que la ventilation, jamais faux.
+  assert.match(f.limitation!, /ne remplace pas un médecin traitant/);
+});
+
+test("un dossier NON ventilé sur un médecin garde le texte du praticien", () => {
+  const f = regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3, "achat")).facts[0]!;
+  assert.match(f.limitation!, /nouveaux patients/);
+  assert.match(f.action!.label, /médecin/i);
+  assert.doesNotMatch(f.statement, /pharmacie/i);
 });

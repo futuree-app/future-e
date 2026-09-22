@@ -28,7 +28,20 @@
 // Les deux premiers se taisent, le troisième se dit.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 import type { Face3Cat, Face3Snapshot } from "../logement-autour-types.ts";
-import { BPE_WALK_RADIUS_M } from "../logement-autour-types.ts";
+import { BPE_WALK_RADIUS_M, TYPEQU_LABEL } from "../logement-autour-types.ts";
+
+/**
+ * LES CODES QU'UNE RÈGLE PEUT DEMANDER NOMMÉMENT.
+ *
+ * Une catégorie mélange des types qui ne répondent pas au même besoin : un généraliste et une
+ * pharmacie ne se remplacent pas, une maternelle et un élémentaire non plus. Une règle qui parle
+ * d'un besoin précis demande donc son TYPE, jamais la catégorie.
+ *
+ * Le code TYPEQU est la clé, jamais le libellé : les libellés sont réécrits sans régénérer les
+ * snapshots, et deux codes partagent « Gare ».
+ */
+export const TYPE_GENERALISTE = "D265";
+export const TYPE_PHARMACIE = "D307";
 
 /**
  * UN ÉQUIPEMENT RECENSÉ AUTOUR DE L'ADRESSE, au grain du point.
@@ -63,6 +76,21 @@ export type EquipementProche = {
  * gouverne la règle : la première se tait, la seconde peut se dire.
  */
 export type AutourFacts = {
+  /**
+   * LE PLUS PROCHE DE CHAQUE TYPE, quand le snapshot le porte.
+   *
+   * `undefined` sur un type veut dire « pas ventilé ou pas trouvé » : un dossier figé avant le
+   * 22/09/2026 ne porte pas la ventilation, et la règle retombe alors sur `equipements`. La
+   * distinction entre les deux se lit sur `ventileParType`.
+   */
+  parType?: Partial<Record<string, EquipementProche>>;
+  /**
+   * Le snapshot porte-t-il la ventilation par type ? Sans ce drapeau, une règle ne pourrait pas
+   * distinguer « aucun généraliste dans le périmètre », qui est une information, de « ce dossier
+   * est antérieur à la ventilation », qui n'en est pas une. Dire la première à la place de la
+   * seconde serait affirmer une absence que personne n'a établie.
+   */
+  ventileParType?: boolean;
   /** Le millésime de la source, tel que le snapshot le porte. Affiché avec le fait. */
   bpeMillesime?: string;
   /** La date de calcul du snapshot : un voisinage figé il y a six mois se dit comme tel. */
@@ -103,7 +131,34 @@ export function buildAutourFacts(snapshot: Face3Snapshot | null | undefined): Au
   }
   if (Object.keys(equipements).length === 0) return undefined;
 
+  // LA VENTILATION PAR TYPE, quand le snapshot la porte. Un dossier figé avant le 22/09/2026 ne
+  // l'a pas : `ventileParType` reste faux, et les règles qui demandent un type nommé se taisent
+  // plutôt que d'affirmer une absence que personne n'a établie.
+  const parType: Partial<Record<string, EquipementProche>> = {};
+  let ventileParType = false;
+  for (const bloc of snapshot.bpe?.categories ?? []) {
+    if (!bloc.nearestByType) continue;
+    ventileParType = true;
+    for (const [code, plusProche] of Object.entries(bloc.nearestByType)) {
+      parType[code] = {
+        category: bloc.category,
+        distanceMeters: plusProche.distanceMeters,
+        typeLabel: plusProche.typeLabel ?? TYPEQU_LABEL[code] ?? null,
+        ...(plusProche.nom ? { nom: plusProche.nom } : {}),
+        ...(plusProche.adresse ? { adresse: plusProche.adresse } : {}),
+        ...(plusProche.exploitants && plusProche.exploitants > 1
+          ? { exploitants: plusProche.exploitants }
+          : {}),
+        // LE COMPTAGE RESTE CELUI DE LA CATÉGORIE : la BPE n'a pas été comptée par type à portée
+        // de pas, et prêter à un type le compte de sa catégorie dirait un nombre faux.
+        lieuxAPortee: 0,
+        rayonPasMeters: BPE_WALK_RADIUS_M,
+      };
+    }
+  }
+
   return {
+    ...(ventileParType ? { ventileParType, parType } : {}),
     ...(snapshot.sources?.bpeMillesime ? { bpeMillesime: snapshot.sources.bpeMillesime } : {}),
     ...(snapshot.computedAt ? { calculeLe: snapshot.computedAt } : {}),
     equipements,

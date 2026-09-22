@@ -36,22 +36,38 @@ export function nearestByCategory(center: LngLat, points: BpePoint[], capM: numb
   // avoir un commerce et avoir le choix. Il compte des LIEUX : les shards ont déjà regroupé les
   // établissements successifs ou partagés d'un même point.
   const proches = new Map<Face3Cat, number>();
+  // LE PLUS PROCHE DE CHAQUE TYPE, en plus du plus proche de la catégorie (22/09/2026).
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  // `best` seul effaçait une distinction que le lecteur fait : une pharmacie à 150 m masquait un
+  // médecin généraliste à 900 m, et le dossier de quelqu'un qui avait déclaré l'accès aux soins
+  // racontait la pharmacie. Même effacement sur les écoles et les transports, où une maternelle
+  // cache un élémentaire et une halte cache une gare.
+  //
+  // Gratuit : la boucle parcourt déjà chaque point et calcule sa distance.
+  const parType = new Map<string, { d: number; p: BpePoint }>();
   for (const p of points) {
     const d = haversineM(center, { lat: p.lat, lon: p.lon });
     if (d > capM) continue;
     const cur = best.get(p.c);
     if (cur === undefined || d < cur.d) best.set(p.c, { d, p });
+    const curType = parType.get(p.t);
+    if (curType === undefined || d < curType.d) parType.set(p.t, { d, p });
     if (d <= BPE_WALK_RADIUS_M) proches.set(p.c, (proches.get(p.c) ?? 0) + 1);
   }
+  const lisible = (b: { d: number; p: BpePoint }) =>
+    ({ distanceMeters: Math.round(b.d), typeLabel: TYPEQU_LABEL[b.p.t] ?? null, ...identiteDe(b.p) });
   return FACE3_CATS.map((category) => {
     const b = best.get(category);
+    const types = Object.fromEntries(
+      [...parType.entries()].filter(([, v]) => v.p.c === category).map(([t, v]) => [t, lisible(v)]),
+    );
     return {
       category,
-      nearest: b === undefined
-        ? null
-        : { distanceMeters: Math.round(b.d), typeLabel: TYPEQU_LABEL[b.p.t] ?? null, ...identiteDe(b.p) },
+      nearest: b === undefined ? null : lisible(b),
       searchCapMeters: capM,
       withinWalkCount: proches.get(category) ?? 0,
+      // Omis plutôt que vide : un objet vide se lirait comme « ventilé, et rien dedans ».
+      ...(Object.keys(types).length > 0 ? { nearestByType: types } : {}),
     };
   });
 }

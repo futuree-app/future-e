@@ -80,6 +80,23 @@ export type BpeNearest = {
    * jamais « aucun ».
    */
   withinWalkCount?: number;
+  /**
+   * LE PLUS PROCHE DE CHAQUE TYPE, et non plus seulement de la catégorie (22/09/2026).
+   *
+   * ── CE QUE `nearest` SEUL EFFAÇAIT ─────────────────────────────────────────────────────────
+   * Une catégorie mélange des types qui ne répondent pas au même besoin. Une pharmacie à 150 m
+   * masquait un médecin généraliste à 900 m : le dossier d'un lecteur qui a déclaré l'accès aux
+   * soins racontait la pharmacie et taisait le médecin. Même effacement sur les écoles (une
+   * maternelle cache un élémentaire) et sur les transports (une halte cache une gare).
+   *
+   * La clé est le CODE TYPEQU (`D265`), jamais son libellé : le libellé peut être réécrit sans
+   * régénérer les snapshots, et deux codes partagent « Gare ».
+   *
+   * OPTIONNEL, ET IL DOIT LE RESTER, pour la même raison que `withinWalkCount` : les snapshots
+   * sont figés à leur création. Un dossier ouvert avant cette date ne le porte pas, et la lecture
+   * retombe alors sur `nearest` seul. Absent veut dire « non ventilé », jamais « aucun ».
+   */
+  nearestByType?: Record<string, { distanceMeters: number; typeLabel: string | null } & BpeNearestIdentity>;
 };
 
 // Libellé FR précis par code TYPEQU. Nature de chaque code confirmée sur les noms d'établissement
